@@ -1,0 +1,25 @@
+neogfx is still a work in progress so is not yet suitable for making GUI apps.
+
+Feature                     % done       TODO
+----------------------------------------------------------------------------------------------
+Window                      90           Icon
+Menu                        0
+MDI                         0
+Tabs                        0
+Tool Bar                    0 
+Layout Managers             80           Grid Layout needs span support
+Label                       80           Icon
+Button                      90           "Flat" style
+Table View                  75           Selection, Navigation
+Tree View                   0
+List View                   0
+Line Edit                   0
+Text Edit                   0
+Check Box                   0
+Radio Button                0
+Combo Box                   0
+Colour Picker               0
+File Browsers (Native)      0
+XML Resource Description    0
+
+Last updated: 18/01/16
