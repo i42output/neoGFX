@@ -19,7 +19,7 @@
 
 #include "neogfx.hpp"
 #include <map>
-#include <neolib/algorithm.hpp>
+#include <neolib/bresenham_counter.hpp>
 #include "grid_layout.hpp"
 #include "i_widget.hpp"
 #include "spacer.hpp"

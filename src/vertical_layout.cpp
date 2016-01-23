@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <boost/pool/pool_alloc.hpp>
-#include <neolib/algorithm.hpp>
+#include <neolib/bresenham_counter.hpp>
 #include "vertical_layout.hpp"
 #include "i_widget.hpp"
 #include "spacer.hpp"
