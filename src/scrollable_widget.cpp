@@ -311,7 +311,7 @@ namespace neogfx
 		}
 	}
 
-	void scrollable_widget::scrollbar_updated(const i_scrollbar& aScrollbar)
+	void scrollable_widget::scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason)
 	{
 		if (iIgnoreScrollbarUpdates)
 			return;
@@ -328,9 +328,13 @@ namespace neogfx
 				c->move(c->position() + delta);
 			}
 			if (aScrollbar.type() == i_scrollbar::Vertical)
+			{
 				iOldScrollPosition.y = scrollPosition.y;
+			}
 			else if (aScrollbar.type() == i_scrollbar::Horizontal)
+			{
 				iOldScrollPosition.x = scrollPosition.x;
+			}
 		}
 		update();
 	}

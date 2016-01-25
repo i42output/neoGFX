@@ -65,6 +65,11 @@ namespace neogfx
 		return aLhs.row() == aRhs.row() && aLhs.column() == aRhs.column();
 	}
 
+	inline bool operator!=(const item_model_index& aLhs, const item_model_index& aRhs)
+	{
+		return !(aLhs == aRhs);
+	}
+
 	inline bool operator<(const item_model_index& aLhs, const item_model_index& aRhs)
 	{
 		return std::forward_as_tuple(aLhs.row(), aLhs.column()) < std::forward_as_tuple(aRhs.row(), aRhs.column());

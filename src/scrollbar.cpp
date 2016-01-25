@@ -49,7 +49,7 @@ namespace neogfx
 		if (!iVisible)
 		{
 			iVisible = true;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, Shown);
 		}
 	}
 
@@ -58,7 +58,7 @@ namespace neogfx
 		if (iVisible)
 		{
 			iVisible = false;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, Hidden);
 		}
 	}
 
@@ -81,8 +81,9 @@ namespace neogfx
 		if (iPosition != aPosition)
 		{
 			changed = true;
+			update_reason_e updateReason = (iPosition < aPosition ? ScrolledDown : ScrolledUp);
 			iPosition = aPosition;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, updateReason);
 		}
 		return changed;
 	}
@@ -97,7 +98,7 @@ namespace neogfx
 		if (iMinimum != aMinimum)
 		{
 			iMinimum = aMinimum;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, AttributeChanged);
 		}
 	}
 
@@ -111,7 +112,7 @@ namespace neogfx
 		if (iMaximum != aMaximum)
 		{
 			iMaximum = aMaximum;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, AttributeChanged);
 		}
 	}
 
@@ -125,7 +126,7 @@ namespace neogfx
 		if (iStep != aStep)
 		{
 			iStep = aStep;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, AttributeChanged);
 		}
 	}
 
@@ -139,7 +140,7 @@ namespace neogfx
 		if (iPage != aPage)
 		{
 			iPage = aPage;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, AttributeChanged);
 		}
 	}
 
@@ -354,7 +355,7 @@ namespace neogfx
 			hover_element(element_at(aContext, iContainer.surface().mouse_position()));
 		else
 			unhover_element();
-		iContainer.scrollbar_updated(*this);
+		iContainer.scrollbar_updated(*this, Updated);
 	}
 
 	scrollbar::element_e scrollbar::clicked_element() const
@@ -432,7 +433,7 @@ namespace neogfx
 		if (iHoverElement != aElement)
 		{
 			iHoverElement = aElement;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, Updated);
 		}
 	}
 
@@ -441,7 +442,7 @@ namespace neogfx
 		if (iHoverElement != ElementNone)
 		{
 			iHoverElement = ElementNone;
-			iContainer.scrollbar_updated(*this);
+			iContainer.scrollbar_updated(*this, Updated);
 		}
 	}
 

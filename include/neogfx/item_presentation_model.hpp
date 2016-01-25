@@ -99,6 +99,33 @@ namespace neogfx
 			iTotalHeight = height;
 			return *iTotalHeight;
 		}
+		virtual double item_position(const item_model_index& aIndex, const graphics_context& aGraphicsContext) const
+		{
+			if (iPositions[aIndex.row()] == boost::none)
+			{
+				auto pred = [](const optional_position& lhs, const optional_position& rhs) -> bool
+				{
+					if (lhs == boost::none && rhs == boost::none)
+						return false;
+					else if (lhs != boost::none && rhs == boost::none)
+						return true;
+					else if (lhs == boost::none && rhs != boost::none)
+						return false;
+					else
+						return *lhs < *rhs;
+				};
+				auto i = std::lower_bound(iPositions.begin(), iPositions.end(), optional_position(), pred);
+				uint32_t row = std::distance(iPositions.begin(), i);
+				double position = (row == 0 ? 0.0 : **(std::prev(i)) + item_height(item_model_index(row - 1), aGraphicsContext));
+				while (row <= aIndex.row())
+				{
+					iPositions[row] = position;
+					position += item_height(item_model_index(row), aGraphicsContext);
+					++row;
+				}
+			}
+			return *iPositions[aIndex.row()];
+		}
 		virtual std::pair<item_model_index::value_type, coordinate> item_at(double aPosition, const graphics_context& aGraphicsContext) const
 		{
 			if (item_model().rows() == 0)

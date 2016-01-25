@@ -61,6 +61,7 @@ namespace neogfx
 	public:
 		virtual dimension item_height(const item_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
 		virtual double total_height(const graphics_context& aGraphicsContext) const = 0;
+		virtual double item_position(const item_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
 		virtual std::pair<item_model_index::value_type, coordinate> item_at(double aPosition, const graphics_context& aGraphicsContext) const = 0;
 	public:
 		virtual std::string cell_to_string(const item_model_index& aIndex) const = 0;

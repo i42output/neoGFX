@@ -64,8 +64,14 @@ namespace neogfx
 		virtual size cell_spacing() const = 0;
 		virtual dimension column_width(uint32_t aColumn) const = 0;
 		std::pair<item_model_index::value_type, coordinate> first_visible_item(graphics_context& aGraphicsContext) const;
+		std::pair<item_model_index::value_type, coordinate> last_visible_item(graphics_context& aGraphicsContext) const;
 	protected:
 		virtual void paint(graphics_context& aGraphicsContext) const;
+	protected:
+		virtual void focus_gained();
+	protected:
+		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+	protected:
 		using scrollable_widget::scrolling_disposition;
 		virtual child_widget_scrolling_disposition_e scrolling_disposition() const;
 		using scrollable_widget::update_scrollbar_visibility;
@@ -77,6 +83,8 @@ namespace neogfx
 		virtual void item_removed(const i_item_model& aModel, const item_model_index& aItemIndex);
 		virtual void items_sorted(const i_item_model& aModel);
 		virtual void model_destroyed(const i_item_model& aModel);
+	private:
+		void make_visible(const item_model_index& aItemIndex);
 	private:
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;

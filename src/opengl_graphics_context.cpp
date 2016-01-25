@@ -197,6 +197,48 @@ namespace neogfx
 		return oldSmoothingMode;
 	}
 
+	void opengl_graphics_context::push_logical_operation(logical_operation_e aLogicalOperation)
+	{
+		iLogicalOperationStack.push_back(aLogicalOperation);
+		apply_logical_operation();
+	}
+
+	void opengl_graphics_context::pop_logical_operation()
+	{
+		if (!iLogicalOperationStack.empty())
+			iLogicalOperationStack.pop_back();
+		apply_logical_operation();
+	}
+
+	void opengl_graphics_context::apply_logical_operation()
+	{
+		if (iLogicalOperationStack.empty() || iLogicalOperationStack.back() == LogicalNone)
+		{
+			glCheck(glDisable(GL_LOGIC_OP));
+		}
+		else
+		{
+			glCheck(glEnable(GL_LOGIC_OP));
+			switch (iLogicalOperationStack.back())
+			{
+			case LogicalXor:
+				glCheck(glLogicOp(GL_XOR));
+				break;
+			}
+		}	
+	}
+
+	void opengl_graphics_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
+	{
+		glCheck(glEnable(GL_LINE_STIPPLE));
+		glCheck(glLineStipple(static_cast<GLint>(aFactor), static_cast<GLushort>(aPattern)));
+	}
+
+	void opengl_graphics_context::line_stipple_off()
+	{
+		glCheck(glDisable(GL_LINE_STIPPLE));
+	}
+
 	void opengl_graphics_context::clear(const colour& aColour)
 	{
 		disable_anti_alias daa(*this);
@@ -237,10 +279,11 @@ namespace neogfx
 			{
 				clip_to(aPath, aPen.width());
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
+				std::vector<double> texCoords(vertices.size(), 0.0);
 				std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 				glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-				std::vector<double> texCoords(vertices.size(), 0.0);
+				glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 				glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
 				reset_clip();
 			}

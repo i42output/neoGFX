@@ -78,7 +78,7 @@ namespace neogfx
 		virtual child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const;
 	private:
 		virtual rect scrollbar_geometry(const i_units_context& aContext, const i_scrollbar& aScrollbar) const;
-		virtual void scrollbar_updated(const i_scrollbar& aScrollbar);
+		virtual void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason);
 		virtual colour scrollbar_colour(const i_scrollbar& aScrollbar) const;
 	protected:
 		virtual void update_scrollbar_visibility();

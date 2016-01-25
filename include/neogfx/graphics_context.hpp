@@ -35,6 +35,12 @@ namespace neogfx
 		SmoothingModeAntiAlias
 	};
 
+	enum logical_operation_e
+	{
+		LogicalNone,
+		LogicalXor
+	};
+
 	class i_surface;
 	class i_widget;
 	class i_native_graphics_context;
@@ -76,11 +82,16 @@ namespace neogfx
 		void reset_clip() const;
 		smoothing_mode_e smoothing_mode() const;
 		smoothing_mode_e set_smoothing_mode(smoothing_mode_e aSmoothingMode) const;
+		void push_logical_operation(logical_operation_e aLogicalOperation) const;
+		void pop_logical_operation() const;
+		void line_stipple_on(uint32_t aFactor, uint16_t aPattern) const;
+		void line_stipple_off() const;
 		void clear(const colour& aColour) const;
 		void set_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const;
 		void draw_rect(const rect& aRect, const pen& aPen) const;
+		void draw_focus_rect(const rect& aRect, const pen& aPen) const;
 		void draw_path(const path& aPath, const pen& aPen) const;
 		void fill_solid_rect(const rect& aRect, const colour& aColour) const;
 		void fill_gradient_rect(const rect& aRect, const gradient& aGradient) const;

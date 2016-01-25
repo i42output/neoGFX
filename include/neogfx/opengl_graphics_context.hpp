@@ -80,6 +80,10 @@ namespace neogfx
 		virtual void reset_clip();
 		virtual smoothing_mode_e smoothing_mode() const;
 		virtual smoothing_mode_e set_smoothing_mode(smoothing_mode_e aSmoothingMode);
+		virtual void push_logical_operation(logical_operation_e aLogicalOperation);
+		virtual void pop_logical_operation();
+		virtual void line_stipple_on(uint32_t aFactor, uint16_t aPattern);
+		virtual void line_stipple_off();
 		virtual void clear(const colour& aColour);
 		virtual void set_pixel(const point& aPoint, const colour& aColour);
 		virtual void draw_pixel(const point& aPoint, const colour& aColour);
@@ -95,11 +99,13 @@ namespace neogfx
 		virtual void end_drawing_glyphs();
 	private:
 		void apply_scissor();
+		void apply_logical_operation();
 		vertex to_shader_vertex(const point& aPoint) const;
 		glyph_text::container to_glyph_text_impl(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont, bool& aFallbackFontNeeded) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		smoothing_mode_e iSmoothingMode; 
+		std::vector<logical_operation_e> iLogicalOperationStack;
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;
 		mutable std::vector<vertex> iVertices;

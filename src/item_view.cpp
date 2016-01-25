@@ -23,6 +23,16 @@
 
 namespace neogfx
 {
+	namespace
+	{
+		struct scoped_counter
+		{
+			uint32_t& iCounter;
+			scoped_counter(uint32_t& aCounter) : iCounter(aCounter) { ++iCounter; }
+			~scoped_counter() { --iCounter; }
+		};
+	}
+
 	item_view::item_view() :
 		scrollable_widget(),
 		iBatchUpdatesInProgress(0)
@@ -203,6 +213,11 @@ namespace neogfx
 		return presentation_model().item_at(vertical_scrollbar().position(), aGraphicsContext);
 	}
 
+	std::pair<item_model_index::value_type, coordinate> item_view::last_visible_item(graphics_context& aGraphicsContext) const
+	{
+		return presentation_model().item_at(vertical_scrollbar().position() + item_display_rect().height(), aGraphicsContext);
+	}
+
 	void item_view::paint(graphics_context& aGraphicsContext) const
 	{
 		scrollable_widget::paint(aGraphicsContext);
@@ -226,8 +241,11 @@ namespace neogfx
 					x += cell_spacing().cx;
 				size e = presentation_model().cell_extents(item_model_index(row, col), aGraphicsContext);
 				dimension cw = column_width(col);
-				aGraphicsContext.scissor_on(default_clip_rect().intersection(rect(point(x, y), size(cw, e.cy))));
+				rect cellRect(point(x, y), size(cw, e.cy));
+				aGraphicsContext.scissor_on(default_clip_rect().intersection(cellRect));
 				aGraphicsContext.draw_glyph_text(point(x, y), presentation_model().cell_glyph_text(item_model_index(row, col), aGraphicsContext), f, *textColour);
+				if (iSelectionModel->has_current_index() && iSelectionModel->current_index() == item_model_index(row, col) && has_focus())
+					aGraphicsContext.draw_focus_rect(cellRect, pen(background_colour().light() ? colour::Black : colour::White, 1));
 				aGraphicsContext.scissor_off();
 				x += cw;
 				x += margin;
@@ -235,6 +253,84 @@ namespace neogfx
 			}
 			y += h;
 			++row;
+		}
+	}
+
+	void item_view::focus_gained()
+	{
+		scrollable_widget::focus_gained();
+		if (iModel->rows() > 0 && !iSelectionModel->has_current_index())
+			iSelectionModel->set_current_index(item_model_index(0, 0));
+	}
+
+	void item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	{
+		if (iModel->rows() == 0)
+		{
+			scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			return;
+		}
+		if (iSelectionModel->has_current_index())
+		{
+			item_model_index currentIndex = iSelectionModel->current_index();
+			item_model_index newIndex = currentIndex;
+			switch (aScanCode)
+			{
+			case ScanCode_LEFT:
+				if (currentIndex.column() > 0)
+					newIndex.set_column(currentIndex.column() - 1);
+				break;
+			case ScanCode_RIGHT:
+				if (currentIndex.column() < iModel->columns(currentIndex) - 1)
+					newIndex.set_column(currentIndex.column() + 1);
+				break;
+			case ScanCode_UP:
+				if (currentIndex.row() > 0)
+					newIndex.set_row(currentIndex.row() - 1);
+				break;
+			case ScanCode_DOWN:
+				if (currentIndex.row() < iModel->rows() - 1)
+					newIndex.set_row(currentIndex.row() + 1);
+				break;
+			case ScanCode_PAGEUP:
+				break;
+			case ScanCode_PAGEDOWN:
+				break;
+			case ScanCode_HOME:
+				break;
+			case ScanCode_END:
+				break;
+			default:
+				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+				break;
+			}
+			if (newIndex != currentIndex)
+			{
+				iSelectionModel->set_current_index(newIndex);
+				make_visible(iSelectionModel->current_index());
+				update();
+			}
+		}
+		else
+		{
+			switch (aScanCode)
+			{
+			case ScanCode_LEFT:
+			case ScanCode_RIGHT:
+			case ScanCode_UP:
+			case ScanCode_DOWN:
+			case ScanCode_PAGEUP:
+			case ScanCode_PAGEDOWN:
+			case ScanCode_HOME:
+			case ScanCode_END:
+				iSelectionModel->set_current_index(item_model_index(0, 0));
+				make_visible(iSelectionModel->current_index());
+				update();
+				break;
+			default:
+				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+				break;
+			}
 		}
 	}
 
@@ -327,5 +423,19 @@ namespace neogfx
 	void item_view::model_destroyed(const i_item_model& aModel)
 	{
 		iModel.reset();
+	}
+
+	void item_view::make_visible(const item_model_index& aItemIndex)
+	{
+		graphics_context gc(*this);
+		double itemHeight = presentation_model().item_height(aItemIndex, gc);
+		if (itemHeight < item_display_rect().height())
+		{
+			double itemPosition = presentation_model().item_position(aItemIndex, gc);
+			if (itemPosition < vertical_scrollbar().position())
+				vertical_scrollbar().set_position(itemPosition);
+			else if (itemPosition + itemHeight > vertical_scrollbar().position() + item_display_rect().height())
+				vertical_scrollbar().set_position(itemPosition - item_display_rect().height() + itemHeight);
+		}
 	}
 }

@@ -185,6 +185,15 @@ namespace neogfx
 		iNativeGraphicsContext->draw_rect(to_device_units(aRect) + iOrigin, aPen);
 	}
 
+	void graphics_context::draw_focus_rect(const rect& aRect, const pen& aPen) const
+	{
+		push_logical_operation(LogicalXor);
+		line_stipple_on(1, 0xAAAA);
+		draw_rect(aRect, aPen);
+		line_stipple_off();
+		pop_logical_operation();
+	}
+	
 	void graphics_context::draw_path(const path& aPath, const pen& aPen) const
 	{
 		path path = to_device_units(aPath);
@@ -502,6 +511,26 @@ namespace neogfx
 	smoothing_mode_e graphics_context::set_smoothing_mode(smoothing_mode_e aSmoothingMode) const
 	{
 		return iNativeGraphicsContext->set_smoothing_mode(aSmoothingMode);
+	}
+
+	void graphics_context::push_logical_operation(logical_operation_e aLogicalOperation) const
+	{
+		iNativeGraphicsContext->push_logical_operation(aLogicalOperation);
+	}
+
+	void graphics_context::pop_logical_operation() const
+	{
+		iNativeGraphicsContext->pop_logical_operation();
+	}
+
+	void graphics_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern) const
+	{
+		iNativeGraphicsContext->line_stipple_on(aFactor, aPattern);
+	}
+
+	void graphics_context::line_stipple_off() const
+	{
+		iNativeGraphicsContext->line_stipple_off();
 	}
 
 	void graphics_context::clear(const colour& aColour) const

@@ -41,6 +41,10 @@ namespace neogfx
 		virtual void reset_clip() = 0;
 		virtual smoothing_mode_e smoothing_mode() const = 0;
 		virtual smoothing_mode_e set_smoothing_mode(smoothing_mode_e aSmoothingMode) = 0;
+		virtual void push_logical_operation(logical_operation_e aLogicalOperation) = 0;
+		virtual void pop_logical_operation() = 0;
+		virtual void line_stipple_on(uint32_t aFactor, uint16_t aPattern) = 0;
+		virtual void line_stipple_off() = 0;
 		virtual void clear(const colour& aColour) = 0;
 		virtual void set_pixel(const point& aPoint, const colour& aColour) = 0;
 		virtual void draw_pixel(const point& aPoint, const colour& aColour) = 0;

@@ -31,22 +31,33 @@ namespace neogfx
 	public:
 		enum type_e
 		{
-			Vertical = 0x01,
-			Horizontal = 0x02
+			Vertical	= 0x01,
+			Horizontal	= 0x02
 		};
 		typedef double value_type;
 		enum element_e
 		{
-			ElementNone = 0x00,
-			ElementUpButton = 0x01,
-			ElementLeftButton = ElementUpButton,
-			ElementDownButton = 0x02,
-			ElementRightButton = ElementDownButton,
-			ElementPageUpArea = 0x03,
-			ElementPageLeftArea = ElementPageUpArea,
-			ElementPageDownArea = 0x04,
-			ElementPageRightArea = ElementPageDownArea,
-			ElementThumb = 0x05
+			ElementNone				= 0x00,
+			ElementUpButton			= 0x01,
+			ElementLeftButton		= ElementUpButton,
+			ElementDownButton		= 0x02,
+			ElementRightButton		= ElementDownButton,
+			ElementPageUpArea		= 0x03,
+			ElementPageLeftArea		= ElementPageUpArea,
+			ElementPageDownArea		= 0x04,
+			ElementPageRightArea	= ElementPageDownArea,
+			ElementThumb			= 0x05
+		};
+		enum update_reason_e
+		{
+			Updated				= 0x00,
+			Shown				= 0x01,
+			Hidden				= 0x02,
+			AttributeChanged	= 0x03,
+			ScrolledUp			= 0x04,
+			ScrolledLeft		= ScrolledUp,
+			ScrolledDown		= 0x05,
+			ScrolledRight		= ScrolledDown
 		};
 		typedef neolib::variant<point> update_params_t;
 	public:
@@ -90,7 +101,7 @@ namespace neogfx
 	{
 	public:
 		virtual rect scrollbar_geometry(const i_units_context& aContext, const i_scrollbar& aScrollbar) const = 0;
-		virtual void scrollbar_updated(const i_scrollbar& aScrollbar) = 0;
+		virtual void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) = 0;
 		virtual colour scrollbar_colour(const i_scrollbar& aScrollbar) const = 0;
 		virtual const i_surface& surface() const = 0;
 	};
