@@ -313,13 +313,13 @@ namespace neogfx
 				break;
 			case ScanCode_HOME:
 				if ((aKeyModifiers & KeyModifier_CTRL) == 0)
-					newIndex.set_row(0);
+					newIndex.set_column(0);
 				else
 					newIndex = item_model_index(0, 0);
 				break;
 			case ScanCode_END:
 				if ((aKeyModifiers & KeyModifier_CTRL) == 0)
-					newIndex.set_row(iModel->rows() - 1);
+					newIndex.set_column(iModel->columns() - 1);
 				else
 					newIndex = item_model_index(iModel->rows() - 1, iModel->columns() - 1);
 				break;
