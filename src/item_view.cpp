@@ -293,8 +293,23 @@ namespace neogfx
 					newIndex.set_row(currentIndex.row() + 1);
 				break;
 			case ScanCode_PAGEUP:
+				{
+					graphics_context gc(*this);
+					newIndex.set_row(
+						iPresentationModel->item_at(
+							iPresentationModel->item_position(currentIndex, gc) - 
+							item_display_rect().height() + 
+							iPresentationModel->item_height(currentIndex, gc), gc).first);
+				}
 				break;
 			case ScanCode_PAGEDOWN:
+				{
+					graphics_context gc(*this);
+					newIndex.set_row(
+						iPresentationModel->item_at(
+							iPresentationModel->item_position(currentIndex, gc) + 
+							item_display_rect().height(), gc).first);
+				}
 				break;
 			case ScanCode_HOME:
 				if ((aKeyModifiers & KeyModifier_CTRL) == 0)
