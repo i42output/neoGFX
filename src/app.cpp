@@ -173,7 +173,7 @@ namespace neogfx
 	bool app::process_events()
 	{
 		bool didSome = false;
-		didSome = (do_io(true) || didSome);
+		didSome = (do_io(neolib::yield_type::Sleep) || didSome);
 		didSome = (do_process_events() || didSome);
 		return didSome;
 	}
