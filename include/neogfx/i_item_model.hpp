@@ -89,6 +89,7 @@ namespace neogfx
 		virtual const_iterator sibling_end(const_iterator aParent) const = 0;
 	public:
 		virtual void reserve(uint32_t aItemCount) = 0;
+		virtual uint32_t capacity() const = 0;
 		virtual iterator insert_item(const_iterator aPosition, const cell_data_type& aCellData) = 0;
 		virtual iterator insert_item(const item_model_index& aIndex, const cell_data_type& aCellData) = 0;
 		virtual iterator append_item(const_iterator aParent, const cell_data_type& aCellData) = 0;

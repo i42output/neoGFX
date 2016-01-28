@@ -93,7 +93,7 @@ namespace neogfx
 		{
 			return iCurrentIndex != boost::none;
 		}
-		virtual const item_model_index& current_index()
+		virtual const item_model_index& current_index() const
 		{
 			if (iCurrentIndex == boost::none)
 				throw no_current_index();

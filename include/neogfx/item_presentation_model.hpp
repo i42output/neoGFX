@@ -155,7 +155,7 @@ namespace neogfx
 				}
 			}
 			i = std::lower_bound(iPositions.begin(), iPositions.end(), aPosition, pred);
-			if (*i > aPosition && i != iPositions.begin())
+			if (i == iPositions.end() || *i > aPosition && i != iPositions.begin())
 				--i;
 			return std::pair<item_model_index::value_type, coordinate>(std::distance(iPositions.begin(), i), static_cast<coordinate>(**i - aPosition));
 		}

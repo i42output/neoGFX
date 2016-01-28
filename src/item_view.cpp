@@ -59,6 +59,8 @@ namespace neogfx
 
 	item_view::~item_view()
 	{
+		if (has_selection_model())
+			selection_model().unsubscribe(*this);
 		if (has_model())
 			model().unsubscribe(*this);
 	}
@@ -175,7 +177,10 @@ namespace neogfx
 
 	void item_view::set_selection_model(i_item_selection_model& aSelectionModel)
 	{
+		if (has_selection_model())
+			selection_model().unsubscribe(*this);
 		iSelectionModel = std::shared_ptr<i_item_selection_model>(std::shared_ptr<i_item_selection_model>(), &aSelectionModel);
+		selection_model().subscribe(*this);
 		if (has_model())
 			selection_model().set_item_model(model());
 		selection_model_changed();
@@ -185,7 +190,10 @@ namespace neogfx
 
 	void item_view::set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel)
 	{
+		if (has_selection_model())
+			selection_model().unsubscribe(*this);
 		iSelectionModel = aSelectionModel;
+		selection_model().subscribe(*this);
 		if (has_selection_model() && has_model())
 			selection_model().set_item_model(model());
 		selection_model_changed();
@@ -222,57 +230,70 @@ namespace neogfx
 	{
 		scrollable_widget::paint(aGraphicsContext);
 		auto first = first_visible_item(aGraphicsContext);
-		coordinate y = item_display_rect().top() + first.second;
-		item_model_index::value_type row = first.first;
-		while (y < client_rect().bottom() && row < model().rows())
+		bool finished = false;
+		for (item_model_index::value_type row = first.first; row < model().rows() && !finished; ++row)
 		{
 			optional_font of = presentation_model().cell_font(item_model_index(row));
 			const neogfx::font& f = (of != boost::none ? *of : app::instance().current_style().default_font());
 			optional_colour textColour = presentation_model().cell_colour(item_model_index(row), i_item_presentation_model::ForegroundColour);
 			if (textColour == boost::none)
 				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().default_text_colour();
-			coordinate x = -static_cast<coordinate>(horizontal_scrollbar().position());
-			dimension h = 0.0;
+			finished = true;
 			for (uint32_t col = 0; col < model().columns(row); ++col)
 			{
-				dimension margin = units_converter(*this).from_device_units(1.0);
-				x += margin;
-				if (col != 0)
-					x += cell_spacing().cx;
-				size e = presentation_model().cell_extents(item_model_index(row, col), aGraphicsContext);
-				dimension cw = column_width(col);
-				rect cellRect(point(x, y), size(cw, e.cy));
+				rect cellRect = cell_rect(item_model_index(row, col));
+				if (cellRect.y > item_display_rect().bottom())
+					continue;
+				finished = false;
 				aGraphicsContext.scissor_on(default_clip_rect().intersection(cellRect));
-				aGraphicsContext.draw_glyph_text(point(x, y), presentation_model().cell_glyph_text(item_model_index(row, col), aGraphicsContext), f, *textColour);
-				if (iSelectionModel->has_current_index() && iSelectionModel->current_index() == item_model_index(row, col) && has_focus())
+				aGraphicsContext.draw_glyph_text(cellRect.top_left(), presentation_model().cell_glyph_text(item_model_index(row, col), aGraphicsContext), f, *textColour);
+				if (selection_model().has_current_index() && selection_model().current_index() == item_model_index(row, col) && has_focus())
 					aGraphicsContext.draw_focus_rect(cellRect, pen(background_colour().light() ? colour::Black : colour::White, 1));
 				aGraphicsContext.scissor_off();
-				x += cw;
-				x += margin;
-				h = std::max(h, e.cy);
 			}
-			y += h;
-			++row;
 		}
+	}
+
+	void item_view::released()
+	{
+		iMouseTracker = boost::none;
 	}
 
 	void item_view::focus_gained()
 	{
 		scrollable_widget::focus_gained();
-		if (iModel->rows() > 0 && !iSelectionModel->has_current_index())
-			iSelectionModel->set_current_index(item_model_index(0, 0));
+		if (model().rows() > 0 && !selection_model().has_current_index())
+			selection_model().set_current_index(item_model_index(0, 0));
+	}
+
+	void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	{
+		scrollable_widget::mouse_button_pressed(aButton, aPosition);
+		if (capturing())
+		{
+			auto item = item_at(aPosition);
+			if (item != boost::none)
+				selection_model().set_current_index(*item);
+			iMouseTracker = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			{
+				aTimer.again();
+				auto item = item_at(surface().mouse_position() - origin());
+				if (item != boost::none)
+					selection_model().set_current_index(*item);
+			}, 100);
+		}
 	}
 
 	void item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
-		if (iModel->rows() == 0)
+		if (model().rows() == 0)
 		{
 			scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			return;
 		}
-		if (iSelectionModel->has_current_index())
+		if (selection_model().has_current_index())
 		{
-			item_model_index currentIndex = iSelectionModel->current_index();
+			item_model_index currentIndex = selection_model().current_index();
 			item_model_index newIndex = currentIndex;
 			switch (aScanCode)
 			{
@@ -281,7 +302,7 @@ namespace neogfx
 					newIndex.set_column(currentIndex.column() - 1);
 				break;
 			case ScanCode_RIGHT:
-				if (currentIndex.column() < iModel->columns(currentIndex) - 1)
+				if (currentIndex.column() < model().columns(currentIndex) - 1)
 					newIndex.set_column(currentIndex.column() + 1);
 				break;
 			case ScanCode_UP:
@@ -289,7 +310,7 @@ namespace neogfx
 					newIndex.set_row(currentIndex.row() - 1);
 				break;
 			case ScanCode_DOWN:
-				if (currentIndex.row() < iModel->rows() - 1)
+				if (currentIndex.row() < model().rows() - 1)
 					newIndex.set_row(currentIndex.row() + 1);
 				break;
 			case ScanCode_PAGEUP:
@@ -319,20 +340,15 @@ namespace neogfx
 				break;
 			case ScanCode_END:
 				if ((aKeyModifiers & KeyModifier_CTRL) == 0)
-					newIndex.set_column(iModel->columns() - 1);
+					newIndex.set_column(model().columns() - 1);
 				else
-					newIndex = item_model_index(iModel->rows() - 1, iModel->columns() - 1);
+					newIndex = item_model_index(model().rows() - 1, model().columns() - 1);
 				break;
 			default:
 				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 				break;
 			}
-			if (newIndex != currentIndex)
-			{
-				iSelectionModel->set_current_index(newIndex);
-				make_visible(iSelectionModel->current_index());
-				update();
-			}
+			selection_model().set_current_index(newIndex);
 		}
 		else
 		{
@@ -346,9 +362,7 @@ namespace neogfx
 			case ScanCode_PAGEDOWN:
 			case ScanCode_HOME:
 			case ScanCode_END:
-				iSelectionModel->set_current_index(item_model_index(0, 0));
-				make_visible(iSelectionModel->current_index());
-				update();
+				selection_model().set_current_index(item_model_index(0, 0));
 				break;
 			default:
 				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -448,17 +462,85 @@ namespace neogfx
 		iModel.reset();
 	}
 
+	void item_view::current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex)
+	{
+		if (aCurrentIndex != boost::none)
+			make_visible(*aCurrentIndex);
+		update();
+	}
+
 	void item_view::make_visible(const item_model_index& aItemIndex)
 	{
 		graphics_context gc(*this);
-		double itemHeight = presentation_model().item_height(aItemIndex, gc);
-		if (itemHeight < item_display_rect().height())
+		rect cellRect = cell_rect(aItemIndex, true);
+		if (cellRect.height() < item_display_rect().height() || cellRect.intersection(item_display_rect()).height() == 0.0)
 		{
-			double itemPosition = presentation_model().item_position(aItemIndex, gc);
-			if (itemPosition < vertical_scrollbar().position())
-				vertical_scrollbar().set_position(itemPosition);
-			else if (itemPosition + itemHeight > vertical_scrollbar().position() + item_display_rect().height())
-				vertical_scrollbar().set_position(itemPosition - item_display_rect().height() + itemHeight);
+			if (cellRect.top() < item_display_rect().top())
+				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - item_display_rect().top()));
+			else if (cellRect.bottom() > item_display_rect().bottom())
+				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - item_display_rect().bottom()));
 		}
+		if (cellRect.width() < item_display_rect().width() || cellRect.intersection(item_display_rect()).width() == 0.0)
+		{
+			if (cellRect.left() < item_display_rect().left())
+				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - item_display_rect().left()));
+			else if (cellRect.right() > item_display_rect().right())
+				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - item_display_rect().right()));
+		}
+	}
+
+	rect item_view::cell_rect(const item_model_index& aItemIndex, bool aIncludeMargins) const
+	{
+		graphics_context gc(*this);
+		coordinate y = presentation_model().item_position(aItemIndex, gc);
+		dimension h = presentation_model().item_height(aItemIndex, gc);
+		coordinate x = 0.0;
+		for (uint32_t col = 0; col < model().columns(aItemIndex.row()); ++col)
+		{
+			if (col != 0)
+				x += cell_spacing().cx;
+			dimension margin = units_converter(*this).from_device_units(1.0);
+			x += margin;
+			if (col == aItemIndex.column())
+			{
+				if (!aIncludeMargins)
+					return rect(point(x - horizontal_scrollbar().position(), y - vertical_scrollbar().position() + item_display_rect().top()), size(column_width(col), h));
+				else
+					return rect(point(x - margin - horizontal_scrollbar().position(), y - vertical_scrollbar().position() + item_display_rect().top()), size(column_width(col) + margin * 2.0, h));
+			}
+			x += column_width(col);
+			x += margin;
+		}
+		return rect{};
+	}
+
+	optional_item_model_index item_view::item_at(const point& aPosition) const
+	{
+		if (model().rows() == 0)
+			return optional_item_model_index();
+		graphics_context gc(*this);
+		point adjustedPos(
+			std::min(std::max(aPosition.x, item_display_rect().left()), item_display_rect().right()),
+			std::min(std::max(aPosition.y, item_display_rect().top()), item_display_rect().bottom()));
+		item_model_index index = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), gc).first;
+		for (uint32_t col = 0; col < model().columns(index.row()); ++col)
+		{
+			index.set_column(col);
+			rect cellRect = cell_rect(index, true);
+			cellRect.extents() += cell_spacing();
+			if (cellRect.contains(adjustedPos))
+			{
+				if (adjustedPos.y > aPosition.y && index.row() > 0)
+					index.set_row(index.row() - 1);
+				else if (adjustedPos.y < aPosition.y && index.row() < model().rows() - 1)
+					index.set_row(index.row() + 1);
+				if (adjustedPos.x > aPosition.x && index.column() > 0)
+					index.set_column(index.column() - 1);
+				else if (adjustedPos.x < aPosition.x && index.column() < model().columns(index.row()) - 1)
+					index.set_column(index.column() + 1);
+				return index;
+			}
+		}
+		return optional_item_model_index();
 	}
 }

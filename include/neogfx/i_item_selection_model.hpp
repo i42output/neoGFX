@@ -91,7 +91,7 @@ namespace neogfx
 		virtual void set_mode(item_selection_mode aType) = 0;
 	public:
 		virtual bool has_current_index() const = 0;
-		virtual const item_model_index& current_index() = 0;
+		virtual const item_model_index& current_index() const = 0;
 		virtual void set_current_index(const item_model_index& aIndex) = 0;
 		virtual void unset_current_index() = 0;
 	public:

@@ -507,6 +507,8 @@ namespace neogfx
 
 	void widget::update(bool aIncludeNonClient)
 	{
+		if (surface().destroyed())
+			return;
 		update(aIncludeNonClient ? window_rect() - origin() - client_rect().top_left() : client_rect());
 	}
 

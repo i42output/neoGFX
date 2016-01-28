@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-	class item_view : public scrollable_widget, private i_item_model_subscriber 
+	class item_view : public scrollable_widget, private i_item_model_subscriber, private i_item_selection_model_subscriber
 	{
 	public:
 		item_view();
@@ -52,6 +52,8 @@ namespace neogfx
 		void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
 		void start_batch_update();
 		void end_batch_update();
+	public:
+		void make_visible(const item_model_index& aItemIndex);
 	protected:
 		virtual void model_changed() = 0;
 		virtual void presentation_model_changed() = 0;
@@ -68,7 +70,10 @@ namespace neogfx
 	protected:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	protected:
+		virtual void released();
 		virtual void focus_gained();
+	protected:
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
 	protected:
 		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	protected:
@@ -83,12 +88,22 @@ namespace neogfx
 		virtual void item_removed(const i_item_model& aModel, const item_model_index& aItemIndex);
 		virtual void items_sorted(const i_item_model& aModel);
 		virtual void model_destroyed(const i_item_model& aModel);
-	private:
-		void make_visible(const item_model_index& aItemIndex);
+	protected:
+		virtual void item_model_added(const i_item_selection_model& aSelectionModel, i_item_model& aNewItemModel) {}
+		virtual void item_model_changed(const i_item_selection_model& aSelectionModel, i_item_model& aNewItemModel, i_item_model& aOldItemModel) {}
+		virtual void item_model_removed(const i_item_selection_model& aSelectionModel, i_item_model& aOldItemModel) {}
+		virtual void selection_mode_changed(const i_item_selection_model& aSelectionModel, item_selection_mode aNewMode) {}
+		virtual void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex);
+		virtual void selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) {}
+		virtual void selection_model_destroyed(const i_item_selection_model& aSelectionModel) {}
+	public:
+		rect cell_rect(const item_model_index& aItemIndex, bool aIncludeMargins = false) const;
+		optional_item_model_index item_at(const point& aPosition) const;
 	private:
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
 		std::shared_ptr<i_item_selection_model> iSelectionModel;
 		uint32_t iBatchUpdatesInProgress;
+		boost::optional<std::shared_ptr<neolib::callback_timer>> iMouseTracker;
 	};
 }

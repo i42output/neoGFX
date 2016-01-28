@@ -277,6 +277,10 @@ namespace neogfx
 		{
 			iItems.reserve(aItemCount);
 		}
+		virtual uint32_t capacity() const
+		{
+			return iItems.capacity();
+		}
 		virtual i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue)
 		{
 			base_iterator i = iItems.insert(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type(aValue, row_container_type()));

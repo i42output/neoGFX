@@ -127,8 +127,12 @@ int main(int argc, char* argv[])
 	app.surface_manager().surface(0).set_mouse_cursor(ng::mouse_system_cursor::Wait);
 
 	my_item_model itemModel;
+	#ifdef NDEBUG
 	itemModel.reserve(10000);
-	for (uint32_t row = 0; row < 10000; ++row)
+	#else
+	itemModel.reserve(100);
+	#endif
+	for (uint32_t row = 0; row < itemModel.capacity(); ++row)
 	{
 		if (row % 1000 == 0)
 			app.process_events();
