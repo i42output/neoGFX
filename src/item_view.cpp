@@ -528,15 +528,15 @@ namespace neogfx
 			index.set_column(col);
 			rect cellRect = cell_rect(index, true);
 			cellRect.extents() += cell_spacing();
-			if (cellRect.contains(adjustedPos))
+			if (cellRect.contains_x(adjustedPos))
 			{
-				if (adjustedPos.y > aPosition.y && index.row() > 0)
+				if (aPosition.y < item_display_rect().top() && index.row() > 0)
 					index.set_row(index.row() - 1);
-				else if (adjustedPos.y < aPosition.y && index.row() < model().rows() - 1)
+				else if (aPosition.y >= item_display_rect().bottom() && index.row() < model().rows() - 1)
 					index.set_row(index.row() + 1);
-				if (adjustedPos.x > aPosition.x && index.column() > 0)
+				if (aPosition.x < item_display_rect().left() && index.column() > 0)
 					index.set_column(index.column() - 1);
-				else if (adjustedPos.x < aPosition.x && index.column() < model().columns(index.row()) - 1)
+				else if (aPosition.x >= item_display_rect().right() && index.column() < model().columns(index.row()) - 1)
 					index.set_column(index.column() + 1);
 				return index;
 			}
