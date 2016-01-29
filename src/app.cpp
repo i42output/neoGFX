@@ -42,8 +42,7 @@ namespace neogfx
 	{
 		app* np = nullptr;
 		sFirstInstance.compare_exchange_strong(np, this);
-		create_message_queue();
-		set_event_processor([this]() -> bool { return do_process_events(); });
+		create_message_queue([this]() -> bool { return process_events(); });
 		style whiteStyle("Default");
 		register_style(whiteStyle);
 		style slateStyle("Slate");
@@ -170,7 +169,7 @@ namespace neogfx
 
 	bool app::process_events()
 	{
-		bool didSome = false;
+		bool didSome = pump_messages();
 		didSome = (do_io(neolib::yield_type::Sleep) || didSome);
 		didSome = (do_process_events() || didSome);
 		return didSome;
