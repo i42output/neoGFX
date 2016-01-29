@@ -21,13 +21,14 @@
 
 #include "neogfx.hpp"
 #include "scrollable_widget.hpp"
+#include "header_view.hpp"
 #include "i_item_model.hpp"
 #include "i_item_presentation_model.hpp"
 #include "i_item_selection_model.hpp"
 
 namespace neogfx
 {
-	class item_view : public scrollable_widget, private i_item_model_subscriber, private i_item_selection_model_subscriber
+	class item_view : public scrollable_widget, protected header_view::i_owner, private i_item_model_subscriber, private i_item_selection_model_subscriber
 	{
 	public:
 		item_view();
@@ -54,6 +55,9 @@ namespace neogfx
 		void end_batch_update();
 	public:
 		void make_visible(const item_model_index& aItemIndex);
+	protected:
+		virtual void header_view_updated(header_view& aHeaderView);
+		virtual neogfx::margins cell_margins() const;
 	protected:
 		virtual void model_changed() = 0;
 		virtual void presentation_model_changed() = 0;
@@ -98,7 +102,6 @@ namespace neogfx
 		virtual void selection_model_destroyed(const i_item_selection_model& aSelectionModel) {}
 	public:
 		rect cell_rect(const item_model_index& aItemIndex) const;
-		neogfx::margins cell_margins() const;
 		optional_item_model_index item_at(const point& aPosition) const;
 	private:
 		std::shared_ptr<i_item_model> iModel;

@@ -489,6 +489,17 @@ namespace neogfx
 		}
 	}
 
+	void item_view::header_view_updated(header_view& aHeaderView)
+	{
+		update_scrollbar_visibility();
+		update();
+	}
+
+	neogfx::margins item_view::cell_margins() const
+	{
+		return units_converter(*this).from_device_units(neogfx::margins(1.0, 0.0, 1.0, 0.0));
+	}
+
 	rect item_view::cell_rect(const item_model_index& aItemIndex) const
 	{
 		graphics_context gc(*this);
@@ -504,11 +515,6 @@ namespace neogfx
 			x += column_width(col);
 		}
 		return rect{};
-	}
-
-	neogfx::margins item_view::cell_margins() const
-	{
-		return units_converter(*this).from_device_units(neogfx::margins(1.0, 0.0, 1.0, 0.0));
 	}
 
 	optional_item_model_index item_view::item_at(const point& aPosition) const

@@ -22,12 +22,11 @@
 #include "neogfx.hpp"
 #include "item_view.hpp"
 #include "vertical_layout.hpp"
-#include "header_view.hpp"
 #include "spacer.hpp"
 
 namespace neogfx
 {
-	class table_view : public item_view, private header_view::i_owner
+	class table_view : public item_view
 	{
 	public:
 		table_view();
@@ -50,9 +49,6 @@ namespace neogfx
 		virtual dimension column_width(uint32_t aColumn) const;
 	protected:
 		virtual child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const;
-	protected:
-		virtual void header_view_updated(header_view& aHeaderView);
-		virtual neogfx::margins cell_margins() const;
 	protected:
 		dimension column_separator_width() const;
 	private:

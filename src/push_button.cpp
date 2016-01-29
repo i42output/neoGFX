@@ -149,9 +149,9 @@ namespace neogfx
 			break;
 		case ButtonStyleItemViewHeader:
 			ret.move_to(0, 0, 4);
-			ret.line_to(currentSize.cx - pixel.cx, 0);
-			ret.line_to(currentSize.cx - pixel.cx, currentSize.cy - pixel.cy);
-			ret.line_to(0, currentSize.cy - pixel.cy);
+			ret.line_to(currentSize.cx, 0);
+			ret.line_to(currentSize.cx, currentSize.cy);
+			ret.line_to(0, currentSize.cy);
 			ret.line_to(0, 0);
 			break;
 		}

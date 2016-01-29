@@ -129,17 +129,6 @@ namespace neogfx
 			return item_view::scrolling_disposition(aChildWidget);
 	}
 
-	void table_view::header_view_updated(header_view& aHeaderView)
-	{
-		update_scrollbar_visibility();
-		update();
-	}
-
-	neogfx::margins table_view::cell_margins() const
-	{
-		return item_view::cell_margins();
-	}
-
 	dimension table_view::column_separator_width() const
 	{
 		return iColumnHeader.separator_width();
