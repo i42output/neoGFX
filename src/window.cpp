@@ -204,6 +204,14 @@ namespace neogfx
 		iUnits = aUnits;
 		return oldUnits;
 	}
+
+	colour window::background_colour() const
+	{
+		if (scrollable_widget::has_background_colour())
+			return scrollable_widget::background_colour();
+		else
+			return app::instance().current_style().default_colour();
+	}
 	
 	window::surface_type_e window::surface_type() const
 	{

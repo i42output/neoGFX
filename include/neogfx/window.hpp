@@ -69,6 +69,8 @@ namespace neogfx
 		virtual units_e units() const;
 		virtual units_e set_units(units_e aUnits) const;
 	public:
+		virtual colour background_colour() const;
+	public:
 		virtual surface_type_e surface_type() const;
 		virtual void layout_surface();
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true);

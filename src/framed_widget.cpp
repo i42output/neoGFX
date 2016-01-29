@@ -60,6 +60,11 @@ namespace neogfx
 		return cr;
 	}
 
+	bool framed_widget::transparent_background() const
+	{
+		return false;
+	}
+
 	void framed_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
 		colour frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));

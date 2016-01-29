@@ -108,6 +108,7 @@ namespace neogfx
 		virtual rect update_rect() const;
 		virtual rect default_clip_rect(bool aIncludeNonClient = false) const;
 		virtual void render(graphics_context& aGraphicsContext) const;
+		virtual bool transparent_background() const;
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:

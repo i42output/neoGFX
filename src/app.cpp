@@ -44,13 +44,11 @@ namespace neogfx
 		sFirstInstance.compare_exchange_strong(np, this);
 		create_message_queue();
 		set_event_processor([this]() -> bool { return do_process_events(); });
-		style whiteStyle("White");
+		style whiteStyle("Default");
 		register_style(whiteStyle);
-		style blackStyle("Black");
-		blackStyle.set_default_background_colour(colour::Black);
-		blackStyle.set_default_foreground_colour(colour::Black);
-		blackStyle.set_default_text_colour(colour::White);
-		register_style(blackStyle);
+		style slateStyle("Slate");
+		slateStyle.set_default_colour(colour::Grey21);
+		register_style(slateStyle);
 	}
 
 	app::~app()

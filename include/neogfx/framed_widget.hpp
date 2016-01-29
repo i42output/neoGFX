@@ -50,6 +50,7 @@ namespace neogfx
 		virtual point origin(bool aNonClient = false) const;
 		virtual rect client_rect(bool aIncludeMargins = true) const;
 	public:
+		virtual bool transparent_background() const;
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	protected:

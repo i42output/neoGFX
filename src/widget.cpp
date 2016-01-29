@@ -596,9 +596,14 @@ namespace neogfx
 		}
 	}
 
+	bool widget::transparent_background() const
+	{
+		return !is_root();
+	}
+
 	void widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
-		if (has_background_colour() || is_root())
+		if (has_background_colour() || !transparent_background())
 		{
 			if (surface().native_surface().using_frame_buffer())
 				for (const auto& ur : iUpdateRects)

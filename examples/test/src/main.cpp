@@ -39,11 +39,26 @@ public:
 	}
 };
 
+class keypad_button : public ng::push_button
+{
+public:
+	keypad_button(uint32_t aNumber) : 
+		ng::push_button(boost::lexical_cast<std::string>(aNumber))
+	{
+		pressed.subscribe([aNumber]()
+		{
+			ng::app::instance().change_style("Keypad").set_default_colour(ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0));
+		});
+	}
+};
+
 int main(int argc, char* argv[])
 {
 	ng::app app("neoGFX Test App");
-	app.change_style("Black").set_default_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
-	app.change_style("White").set_default_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+	app.change_style("Default").set_default_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+	app.change_style("Slate").set_default_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+	app.register_style(ng::style("Keypad")).set_default_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+	app.change_style("Default");
 	ng::window window(800, 800);
 	ng::vertical_layout layout1(window); 
 	layout1.set_margins(ng::margins(8));
@@ -82,13 +97,13 @@ int main(int argc, char* argv[])
 		layout3.get_widget(i).set_foreground_colour(randomColour);
 	}
 	ng::vertical_layout layout4(layout2);
-	ng::push_button button9(layout4, "Change Style");
+	ng::push_button button9(layout4, "Default/Slate\nStyle");
 	button9.pressed.subscribe([&app]()
 	{
-		if (app.current_style().name() == "White")
-			app.change_style("Black");
+		if (app.current_style().name() == "Default")
+			app.change_style("Slate");
 		else
-			app.change_style("White");
+			app.change_style("Default");
 	});
 	button9.set_foreground_colour(ng::colour::Aquamarine);
 	ng::push_button button10(layout4, "Toggle List\nHeader View");
@@ -116,12 +131,8 @@ int main(int argc, char* argv[])
 	keypad.set_spacing(0.0);
 	for (uint32_t row = 0; row < 3; ++row)
 		for (uint32_t col = 0; col < 3; ++col)
-		{
-			keypad.add_widget(row, col, std::make_shared<ng::push_button>(boost::lexical_cast<std::string>(row * 3 + col + 1)));
-			keypad.get_widget(row, col).set_foreground_colour(ng::colour::Black);
-		}
-	keypad.add_widget(3, 1, std::make_shared<ng::push_button>("0"));
-	keypad.get_widget(3, 1).set_foreground_colour(ng::colour::Black);
+			keypad.add_widget(row, col, std::make_shared<keypad_button>(row * 3 + col + 1));
+	keypad.add_widget(3, 1, std::make_shared<keypad_button>(0));
 
 	app.surface_manager().surface(0).save_mouse_cursor();
 	app.surface_manager().surface(0).set_mouse_cursor(ng::mouse_system_cursor::Wait);

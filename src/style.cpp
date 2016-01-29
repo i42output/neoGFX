@@ -27,11 +27,6 @@ namespace neogfx
 		iName(aName),
 		iDefaultMargins(2.0),
 		iDefaultSpacing(2.0, 2.0),
-		iDefaultBackgroundColour(colour::White),
-		iDefaultForegroundColour(colour::LightGray),
-		iDefaultTextColour(colour::Black),
-		iDefaultSelectionColour(51, 153, 255),
-		iDefaultHoverColour(iDefaultSelectionColour.lighter(0x40)),
 		iDefaultFontInfo(app::instance().rendering_engine().font_manager().default_system_font_info()),
 		iFallbackFontInfo(app::instance().rendering_engine().font_manager().default_fallback_font_info())
 	{
@@ -41,11 +36,12 @@ namespace neogfx
 		iName(aName),
 		iDefaultMargins(aOther.default_margins()),
 		iDefaultSpacing(aOther.default_spacing()),
-		iDefaultBackgroundColour(aOther.default_background_colour()),
-		iDefaultForegroundColour(aOther.default_foreground_colour()),
-		iDefaultTextColour(aOther.default_text_colour()),
-		iDefaultSelectionColour(aOther.default_selection_colour()),
-		iDefaultHoverColour(aOther.default_hover_colour()),
+		iDefaultColour(aOther.has_default_colour() ? aOther.default_colour() : optional_colour()),
+		iDefaultBackgroundColour(aOther.has_default_background_colour() ? aOther.default_background_colour() : optional_colour()),
+		iDefaultForegroundColour(aOther.has_default_foreground_colour() ? aOther.default_foreground_colour() : optional_colour()),
+		iDefaultTextColour(aOther.has_default_text_colour() ? aOther.default_text_colour() : optional_colour()),
+		iDefaultSelectionColour(aOther.has_default_selection_colour() ? aOther.default_selection_colour() : optional_colour()),
+		iDefaultHoverColour(aOther.has_default_hover_colour() ? aOther.default_hover_colour() : optional_colour()),
 		iDefaultFontInfo(aOther.default_font_info()),
 		iFallbackFontInfo(aOther.fallback_font_info())
 	{
@@ -90,12 +86,42 @@ namespace neogfx
 		}
 	}
 
-	const colour& style::default_background_colour() const
+	bool style::has_default_colour() const
 	{
-		return iDefaultBackgroundColour;
+		return iDefaultColour != boost::none;
 	}
 
-	void style::set_default_background_colour(const colour& aBackgroundColour)
+	colour style::default_colour() const
+	{
+		if (has_default_colour())
+			return *iDefaultColour;
+		return colour(0xEF, 0xEB, 0xE7);
+	}
+
+	void style::set_default_colour(const optional_colour& aDefaultColour)
+	{
+		if (iDefaultColour != aDefaultColour)
+		{
+			iDefaultColour = aDefaultColour;
+			if (&app::instance().current_style() == this)
+				app::instance().surface_manager().invalidate_surfaces();
+		}
+	}
+
+	bool style::has_default_background_colour() const
+	{
+		return iDefaultBackgroundColour != boost::none;
+	}
+
+	colour style::default_background_colour() const
+	{
+		if (has_default_background_colour())
+			return *iDefaultBackgroundColour;
+		else
+			return default_colour().light() ? default_colour().lighter(0x20) : default_colour().darker(0x20);
+	}
+
+	void style::set_default_background_colour(const optional_colour& aBackgroundColour)
 	{
 		if (iDefaultBackgroundColour != aBackgroundColour)
 		{
@@ -105,12 +131,20 @@ namespace neogfx
 		}
 	}
 
-	const colour& style::default_foreground_colour() const
+	bool style::has_default_foreground_colour() const
 	{
-		return iDefaultForegroundColour;
+		return iDefaultForegroundColour != boost::none;
 	}
 
-	void style::set_default_foreground_colour(const colour& aForegroundColour)
+	colour style::default_foreground_colour() const
+	{
+		if (has_default_foreground_colour())
+			return *iDefaultForegroundColour;
+		else
+			return default_colour().light() ? default_colour().darker(0x20) : default_colour().lighter(0x20);
+	}
+
+	void style::set_default_foreground_colour(const optional_colour& aForegroundColour)
 	{
 		if (iDefaultForegroundColour != aForegroundColour)
 		{
@@ -120,12 +154,20 @@ namespace neogfx
 		}
 	}
 
-	const colour& style::default_text_colour() const
+	bool style::has_default_text_colour() const
 	{
-		return iDefaultTextColour;
+		return iDefaultTextColour != boost::none;
 	}
 
-	void style::set_default_text_colour(const colour& aTextColour)
+	colour style::default_text_colour() const
+	{
+		if (has_default_text_colour())
+			return *iDefaultTextColour;
+		else
+			return default_colour().dark() ? colour::White : colour::Black;
+	}
+
+	void style::set_default_text_colour(const optional_colour& aTextColour)
 	{
 		if (iDefaultTextColour != aTextColour)
 		{
@@ -135,12 +177,20 @@ namespace neogfx
 		}
 	}
 
-	const colour& style::default_selection_colour() const
+	bool style::has_default_selection_colour() const
 	{
-		return iDefaultSelectionColour;
+		return iDefaultTextColour != boost::none;
 	}
 
-	void style::set_default_selection_colour(const colour& aSelectionColour)
+	colour style::default_selection_colour() const
+	{
+		if (has_default_selection_colour())
+			return *iDefaultTextColour;
+		else
+			return colour(0x2A, 0x82, 0xDA);
+	}
+
+	void style::set_default_selection_colour(const optional_colour& aSelectionColour)
 	{
 		if (iDefaultSelectionColour != aSelectionColour)
 		{
@@ -150,12 +200,20 @@ namespace neogfx
 		}
 	}
 
-	const colour& style::default_hover_colour() const
+	bool style::has_default_hover_colour() const
 	{
-		return iDefaultHoverColour;
+		return iDefaultHoverColour != boost::none;
 	}
 
-	void style::set_default_hover_colour(const colour& aHoverColour)
+	colour style::default_hover_colour() const
+	{
+		if (has_default_hover_colour())
+			return *iDefaultHoverColour;
+		else
+			return default_selection_colour().lighter(0x40);
+	}
+
+	void style::set_default_hover_colour(const optional_colour& aHoverColour)
 	{
 		if (iDefaultHoverColour != aHoverColour)
 		{
