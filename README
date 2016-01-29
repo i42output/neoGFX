@@ -10,7 +10,7 @@ Tool Bar                    0
 Layout Managers             80           Grid Layout needs span support
 Label                       80           Icon
 Button                      90           "Flat" style
-Table View                  75           Selection, Navigation
+Table View                  85           Selection, Icon
 Tree View                   0
 List View                   0
 Line Edit                   0
