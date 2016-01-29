@@ -269,7 +269,7 @@ namespace neogfx
 	void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition)
 	{
 		scrollable_widget::mouse_button_pressed(aButton, aPosition);
-		if (capturing())
+		if (capturing() && aButton == mouse_button::Left && item_display_rect().contains(aPosition))
 		{
 			auto item = item_at(aPosition);
 			if (item != boost::none)
