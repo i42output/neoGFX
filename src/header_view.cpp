@@ -310,8 +310,6 @@ namespace neogfx
 			if (col != 0)
 				result += separator_width();
 			result += section_width(col);
-			dimension margin = units_converter(*this).from_device_units(1.0);
-			result += margin * 2.0;
 		}
 		return result;
 	}
@@ -331,8 +329,7 @@ namespace neogfx
 		for (uint32_t col = 0; col < model().columns(); ++col)
 		{
 			dimension oldSectionWidth = section_width(col);
-			dimension margin = units_converter(*this).from_device_units(1.0);
-			dimension newSectionWidth = layout().get_widget(col).extents().cx - margin * 2.0;
+			dimension newSectionWidth = layout().get_widget(col).extents().cx;
 			if (newSectionWidth != oldSectionWidth)
 				iSectionWidths[col].first = newSectionWidth;
 		}
@@ -346,8 +343,7 @@ namespace neogfx
 			if (aPane != boost::none && *aPane != col)
 				continue;
 			iSectionWidths[col].first = boost::none;
-			dimension margin = units_converter(*this).from_device_units(1.0);
-			layout().get_widget(col).set_fixed_size(size(std::max(section_width(col) + margin * 2.0, layout().spacing().cx * 3.0), layout().get_widget(col).minimum_size().cy), false);
+			layout().get_widget(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget(col).minimum_size().cy), false);
 		}
 		layout_items();
 		iOwner.header_view_updated(*this);
@@ -360,14 +356,13 @@ namespace neogfx
 		bool updated = false;
 		for (uint32_t col = 0; col < model().columns(item_model_index(aRow)); ++col)
 		{
-			dimension headingWidth = model().column_heading_extents(col, gc).cx;
-			dimension cellWidth = presentation_model().cell_extents(item_model_index(aRow, col), gc).cx;
+			dimension headingWidth = model().column_heading_extents(col, gc).cx + iOwner.cell_margins().size().cx * 2.0;
+			dimension cellWidth = presentation_model().cell_extents(item_model_index(aRow, col), gc).cx + iOwner.cell_margins().size().cx * 2.0;
 			dimension oldSectionWidth = iSectionWidths[col].second;
 			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
-			dimension margin = units_converter(*this).from_device_units(1.0);
-			if (section_width(col) != oldSectionWidth || layout().get_widget(col).minimum_size().cx != section_width(col) + margin * 2.0)
+			if (section_width(col) != oldSectionWidth || layout().get_widget(col).minimum_size().cx != section_width(col))
 			{
-				layout().get_widget(col).set_fixed_size(size(std::max(section_width(col) + margin * 2.0, layout().spacing().cx * 3.0), layout().get_widget(col).minimum_size().cy));
+				layout().get_widget(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget(col).minimum_size().cy));
 				updated = true;
 			}
 		}

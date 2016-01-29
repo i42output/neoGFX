@@ -52,6 +52,7 @@ namespace neogfx
 		virtual child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const;
 	protected:
 		virtual void header_view_updated(header_view& aHeaderView);
+		virtual neogfx::margins cell_margins() const;
 	protected:
 		dimension column_separator_width() const;
 	private:

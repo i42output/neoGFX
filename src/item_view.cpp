@@ -246,7 +246,7 @@ namespace neogfx
 					continue;
 				finished = false;
 				aGraphicsContext.scissor_on(default_clip_rect().intersection(cellRect));
-				aGraphicsContext.draw_glyph_text(cellRect.top_left(), presentation_model().cell_glyph_text(item_model_index(row, col), aGraphicsContext), f, *textColour);
+				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_model_index(row, col), aGraphicsContext), f, *textColour);
 				if (selection_model().has_current_index() && selection_model().current_index() == item_model_index(row, col) && has_focus())
 					aGraphicsContext.draw_focus_rect(cellRect, pen(background_colour().light() ? colour::Black : colour::White, 1));
 				aGraphicsContext.scissor_off();
@@ -472,7 +472,7 @@ namespace neogfx
 	void item_view::make_visible(const item_model_index& aItemIndex)
 	{
 		graphics_context gc(*this);
-		rect cellRect = cell_rect(aItemIndex, true);
+		rect cellRect = cell_rect(aItemIndex);
 		if (cellRect.height() < item_display_rect().height() || cellRect.intersection(item_display_rect()).height() == 0.0)
 		{
 			if (cellRect.top() < item_display_rect().top())
@@ -489,7 +489,7 @@ namespace neogfx
 		}
 	}
 
-	rect item_view::cell_rect(const item_model_index& aItemIndex, bool aIncludeMargins) const
+	rect item_view::cell_rect(const item_model_index& aItemIndex) const
 	{
 		graphics_context gc(*this);
 		coordinate y = presentation_model().item_position(aItemIndex, gc);
@@ -499,19 +499,16 @@ namespace neogfx
 		{
 			if (col != 0)
 				x += cell_spacing().cx;
-			dimension margin = units_converter(*this).from_device_units(1.0);
-			x += margin;
 			if (col == aItemIndex.column())
-			{
-				if (!aIncludeMargins)
-					return rect(point(x - horizontal_scrollbar().position(), y - vertical_scrollbar().position() + item_display_rect().top()), size(column_width(col), h));
-				else
-					return rect(point(x - margin - horizontal_scrollbar().position(), y - vertical_scrollbar().position() + item_display_rect().top()), size(column_width(col) + margin * 2.0, h));
-			}
+				return rect(point(x - horizontal_scrollbar().position(), y - vertical_scrollbar().position() + item_display_rect().top()), size(column_width(col), h));
 			x += column_width(col);
-			x += margin;
 		}
 		return rect{};
+	}
+
+	neogfx::margins item_view::cell_margins() const
+	{
+		return units_converter(*this).from_device_units(neogfx::margins(1.0, 0.0, 1.0, 0.0));
 	}
 
 	optional_item_model_index item_view::item_at(const point& aPosition) const
@@ -526,7 +523,7 @@ namespace neogfx
 		for (uint32_t col = 0; col < model().columns(index.row()); ++col)
 		{
 			index.set_column(col);
-			rect cellRect = cell_rect(index, true);
+			rect cellRect = cell_rect(index);
 			cellRect.extents() += cell_spacing();
 			if (cellRect.contains_x(adjustedPos))
 			{

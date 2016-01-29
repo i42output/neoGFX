@@ -97,7 +97,8 @@ namespace neogfx
 		virtual void selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) {}
 		virtual void selection_model_destroyed(const i_item_selection_model& aSelectionModel) {}
 	public:
-		rect cell_rect(const item_model_index& aItemIndex, bool aIncludeMargins = false) const;
+		rect cell_rect(const item_model_index& aItemIndex) const;
+		neogfx::margins cell_margins() const;
 		optional_item_model_index item_at(const point& aPosition) const;
 	private:
 		std::shared_ptr<i_item_model> iModel;
