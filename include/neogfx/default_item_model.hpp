@@ -138,6 +138,10 @@ namespace neogfx
 			mutable optional_size extents;
 		};
 	public:
+		basic_default_item_model()
+		{
+			reset_sort();
+		}
 		~basic_default_item_model()
 		{
 			notify_observers(i_item_model_subscriber::NotifyModelDestroyed);
@@ -364,8 +368,13 @@ namespace neogfx
 			{
 				if (i->first == aColumnIndex)
 				{
-					if (aSortDirection == boost::none && i == std::next(iSortOrder.begin()))
-						iSortOrder.front().second = (i->second == SortAscending ? SortDescending : SortAscending);
+					if (aSortDirection == boost::none)
+					{
+						if (i == std::next(iSortOrder.begin()))
+							iSortOrder.front().second = (i->second == SortAscending ? SortDescending : SortAscending);
+						else
+							iSortOrder.front().second = i->second;
+					}
 					iSortOrder.erase(i);
 					break;
 				}
@@ -375,10 +384,13 @@ namespace neogfx
 		virtual void reset_sort()
 		{
 			iSortOrder.clear();
+			sort_by(0, SortAscending);
 		}
 	private:
 		void sort()
 		{
+			if (iSortOrder.empty())
+				return;
 			std::sort(iItems.begin(), iItems.end(), [&](const container_type::value_type& aLhs, const container_type::value_type& aRhs) -> bool
 			{
 				for (std::size_t i = 0; i < iSortOrder.size(); ++i)
