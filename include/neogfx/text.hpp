@@ -49,10 +49,10 @@ namespace neogfx
 		typedef uint32_t value_type;
 		typedef std::pair<text::size_type, text::size_type> source_type;
 	public:
-		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aExtents) :
-			iDirection(aDirection), iValue(aValue), iUseFallback(false), iSource(aSource), iExtents(aExtents) {}
+		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aExtents, size aOffset) :
+			iDirection(aDirection), iValue(aValue), iUseFallback(false), iSource(aSource), iExtents(aExtents), iOffset(aOffset) {}
 		glyph(text_direction aDirection, value_type aValue) :
-			iDirection(aDirection), iValue(aValue), iUseFallback(), iSource(), iExtents() {}
+			iDirection(aDirection), iValue(aValue), iUseFallback(), iSource(), iExtents(), iOffset() {}
 	public:
 		bool operator==(const glyph& aRhs) const { return iDirection == aRhs.iDirection && iValue == aRhs.iValue; }
 	public:
@@ -68,6 +68,8 @@ namespace neogfx
 		void set_source(const source_type aSource) { iSource = aSource; }
 		size extents() const { return iExtents; }
 		void set_extents(const size& aExtents) { iExtents = aExtents; }
+		size offset() const { return iOffset; }
+		void set_offset(const size& aOffset) { iOffset = aOffset; }
 		bool use_fallback() const { return iUseFallback; }
 		void set_use_fallback(bool aUseFallback) { iUseFallback = aUseFallback; }
 	private:
@@ -76,6 +78,7 @@ namespace neogfx
 		bool iUseFallback;
 		source_type iSource;
 		size iExtents;
+		size iOffset;
 	};
 
 	class glyph_text : private std::vector<glyph>

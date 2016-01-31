@@ -426,7 +426,7 @@ namespace neogfx
 		point pos = aPoint;
 		for (glyph_text::const_iterator i = aTextBegin; i != aTextEnd; ++i)
 		{
-			draw_glyph(pos, *i, aFont, aColour);
+			draw_glyph(pos + i->offset(), *i, aFont, aColour);
 			pos.x += i->extents().cx;
 		}
 	}

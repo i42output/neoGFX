@@ -113,10 +113,10 @@ namespace neogfx
 	colour colour::mid(const colour& aOther) const
 	{
 		return colour(
-			(red<double>() + aOther.red<double>()) / 2.0 * 0xFF,
-			(green<double>() + aOther.green<double>()) / 2.0 * 0xFF,
-			(blue<double>() + aOther.blue<double>()) / 2.0 * 0xFF,
-			(alpha<double>() + aOther.alpha<double>()) / 2.0 * 0xFF);
+			static_cast<component>((red<double>() + aOther.red<double>()) / 2.0 * 0xFF),
+			static_cast<component>((green<double>() + aOther.green<double>()) / 2.0 * 0xFF),
+			static_cast<component>((blue<double>() + aOther.blue<double>()) / 2.0 * 0xFF),
+			static_cast<component>((alpha<double>() + aOther.alpha<double>()) / 2.0 * 0xFF));
 	}
 
 	bool colour::light(component aLightIntensity) const 
