@@ -84,10 +84,14 @@ namespace neogfx
 		if (wasCapturing && client_rect().contains(aPosition))
 		{
 			if (aButton == mouse_button::Left)
-				pressed.trigger();
-			else if (aButton == mouse_button::Right)
-				hide();
+				handle_pressed();
 		}
 	}
+
+	void button::handle_pressed()
+	{
+		pressed.trigger();
+	}
 }
+
 

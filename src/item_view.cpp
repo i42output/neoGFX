@@ -234,10 +234,10 @@ namespace neogfx
 		for (item_model_index::value_type row = first.first; row < model().rows() && !finished; ++row)
 		{
 			optional_font of = presentation_model().cell_font(item_model_index(row));
-			const neogfx::font& f = (of != boost::none ? *of : app::instance().current_style().default_font());
+			const neogfx::font& f = (of != boost::none ? *of : app::instance().current_style().font());
 			optional_colour textColour = presentation_model().cell_colour(item_model_index(row), i_item_presentation_model::ForegroundColour);
 			if (textColour == boost::none)
-				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().default_text_colour();
+				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().text_colour();
 			finished = true;
 			for (uint32_t col = 0; col < model().columns(row); ++col)
 			{

@@ -494,7 +494,7 @@ namespace neogfx
 
 	margins widget::margins() const
 	{
-		return units_converter(*this).from_device_units(has_margins() ? *iMargins : app::instance().current_style().default_margins());
+		return units_converter(*this).from_device_units(has_margins() ? *iMargins : app::instance().current_style().margins());
 	}
 
 	void widget::set_margins(const optional_margins& aMargins)
@@ -627,7 +627,7 @@ namespace neogfx
 		if (has_foreground_colour())
 			return *iForegroundColour;
 		else
-			return app::instance().current_style().default_foreground_colour();
+			return app::instance().current_style().foreground_colour();
 	}
 
 	void widget::set_foreground_colour(const optional_colour& aForegroundColour)
@@ -646,13 +646,24 @@ namespace neogfx
 		if (has_background_colour())
 			return *iBackgroundColour;
 		else
-			return app::instance().current_style().default_background_colour();
+			return app::instance().current_style().background_colour();
 	}
 
 	void widget::set_background_colour(const optional_colour& aBackgroundColour)
 	{
 		iBackgroundColour = aBackgroundColour;
 		update();
+	}
+
+	colour widget::container_background_colour() const
+	{
+		const i_widget* w = this;
+		while (w->transparent_background() && w->has_parent())
+			w = &w->parent();
+		if (!w->transparent_background() && w->has_background_colour())
+			return w->background_colour();
+		else
+			return app::instance().current_style().colour();
 	}
 
 	bool widget::has_font() const
@@ -665,7 +676,7 @@ namespace neogfx
 		if (has_font())
 			return *iFont;
 		else
-			return app::instance().current_style().default_font();
+			return app::instance().current_style().font();
 	}
 
 	void widget::set_font(const optional_font& aFont)

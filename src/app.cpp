@@ -46,7 +46,7 @@ namespace neogfx
 		style whiteStyle("Default");
 		register_style(whiteStyle);
 		style slateStyle("Slate");
-		slateStyle.set_default_colour(colour::Grey21);
+		slateStyle.set_colour(colour::Grey25);
 		register_style(slateStyle);
 	}
 

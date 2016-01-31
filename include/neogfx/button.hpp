@@ -30,8 +30,7 @@ namespace neogfx
 	class button : public widget
 	{
 	public:
-		typedef event<> pressed_event;
-		pressed_event pressed;
+		event<> pressed;
 	private:
 		class our_layout : public horizontal_layout
 		{
@@ -51,6 +50,8 @@ namespace neogfx
 		text_widget& text();
 	public:
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+	protected:
+		virtual void handle_pressed();
 	private:
 		our_layout iLayout;
 		std::shared_ptr<i_widget> iLabel;

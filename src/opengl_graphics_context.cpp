@@ -255,13 +255,22 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
 	{
+		std::vector<double> vertices{aFrom.x, aFrom.y, aTo.x, aTo.y};
+		std::vector<double> texCoords(vertices.size(), 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_LINES, 0, vertices.size() / 2));
+		glCheck(glLineWidth(1.0f));
 	}
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
 		path rectPath(aRect);
 		auto vertices = rectPath.to_vertices(rectPath.paths()[0], path::LineLoop);
-		std::vector<double> texCoords(vertices.size() * 2, 0.0);
+		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
@@ -294,7 +303,7 @@ namespace neogfx
 	{
 		path rectPath(aRect);
 		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
-		std::vector<double> texCoords(vertices.size() * 2, 0.0);
+		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
@@ -331,7 +340,7 @@ namespace neogfx
 				}
 			}
 		}
-		std::vector<double> texCoords(vertices.size() * 2, 0.0);
+		std::vector<double> texCoords(vertices.size(), 0.0);
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));

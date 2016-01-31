@@ -178,6 +178,7 @@ namespace neogfx
 
 	void graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen) const
 	{
+		iNativeGraphicsContext->draw_line(to_device_units(aFrom) + iOrigin, to_device_units(aTo) + iOrigin, aPen);
 	}
 
 	void graphics_context::draw_rect(const rect& aRect, const pen& aPen) const

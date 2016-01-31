@@ -118,6 +118,7 @@ namespace neogfx
 		virtual bool has_background_colour() const;
 		virtual colour background_colour() const;
 		virtual void set_background_colour(const optional_colour& aBackgroundColour = optional_colour());
+		virtual colour container_background_colour() const;
 		virtual bool has_font() const;
 		virtual const neogfx::font& font() const;
 		virtual void set_font(const optional_font& aFont);

@@ -86,6 +86,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\neogfx\app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\default_item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\event.hpp" />
@@ -170,6 +171,7 @@
     <None Include="..\..\..\src\subpixel_rgb_horizontal.frag" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\include\neogfx\check_box.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
     <ClCompile Include="..\..\..\src\button.cpp" />
     <ClCompile Include="..\..\..\src\colour.cpp" />

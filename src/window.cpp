@@ -207,12 +207,12 @@ namespace neogfx
 
 	colour window::background_colour() const
 	{
-		if (scrollable_widget::has_background_colour())
+		if (has_background_colour())
 			return scrollable_widget::background_colour();
 		else
-			return app::instance().current_style().default_colour();
+			return container_background_colour();
 	}
-	
+
 	window::surface_type_e window::surface_type() const
 	{
 		return SurfaceTypeWindow;

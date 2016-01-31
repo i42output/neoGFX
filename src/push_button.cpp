@@ -165,7 +165,7 @@ namespace neogfx
 
 	colour push_button::hover_colour() const
 	{
-		colour hoverColour = (has_hover_colour() ? *iHoverColour : app::instance().current_style().default_hover_colour());
+		colour hoverColour = (has_hover_colour() ? *iHoverColour : app::instance().current_style().hover_colour());
 		if (capturing())
 			return hoverColour.light(0x40) ? hoverColour.darker(0x40) : hoverColour.lighter(0x40);
 		else 

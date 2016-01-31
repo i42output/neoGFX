@@ -162,7 +162,7 @@ namespace neogfx
 
 	std::unique_ptr<i_native_font_face> font_manager::create_default_font(const i_device_resolution& aDevice)
 	{
-		return create_font(app::instance().current_style().default_font_info(), aDevice);
+		return create_font(app::instance().current_style().font_info(), aDevice);
 	}
 
 	std::unique_ptr<i_native_font_face> font_manager::create_fallback_font(const i_native_font_face& aExistingFont)

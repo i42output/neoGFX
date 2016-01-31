@@ -8,6 +8,7 @@
 #include <neogfx/grid_layout.hpp>
 #include <neogfx/spacer.hpp>
 #include <neogfx/table_view.hpp>
+#include <neogfx/check_box.hpp>
 #include <neogfx/default_item_model.hpp>
 #include <neogfx/item_presentation_model.hpp>
 #include <neogfx/i_surface.hpp>
@@ -47,7 +48,7 @@ public:
 	{
 		pressed.subscribe([aNumber]()
 		{
-			ng::app::instance().change_style("Keypad").set_default_colour(ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0));
+			ng::app::instance().change_style("Keypad").set_colour(ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0));
 		});
 	}
 };
@@ -55,9 +56,9 @@ public:
 int main(int argc, char* argv[])
 {
 	ng::app app("neoGFX Test App");
-	app.change_style("Default").set_default_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
-	app.change_style("Slate").set_default_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
-	app.register_style(ng::style("Keypad")).set_default_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+	app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+	app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+	app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 	app.change_style("Default");
 	ng::window window(800, 800);
 	ng::vertical_layout layout1(window); 
@@ -96,6 +97,19 @@ int main(int argc, char* argv[])
 		ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
 		layout3.get_widget(i).set_foreground_colour(randomColour);
 	}
+	ng::vertical_layout layoutCheckboxes(layout2);
+	ng::check_box noSelection(layoutCheckboxes, "No selection");
+	ng::check_box singleSelection(layoutCheckboxes, "Single selection");
+	ng::check_box multipleSelection(layoutCheckboxes, "Multiple selection");
+	ng::check_box extendedSelection(layoutCheckboxes, "Extended selection");
+	ng::check_box triState(layoutCheckboxes, "Tristate checkbox", ng::check_box::TriState);
+	triState.checked.subscribe([&triState]()
+	{
+		static uint32_t n;
+		if ((n++)%2 == 1)
+			triState.set_tristate();
+	});
+	ng::vertical_spacer spacerCheckboxes(layoutCheckboxes);
 	ng::vertical_layout layout4(layout2);
 	ng::push_button button9(layout4, "Default/Slate\nStyle");
 	button9.pressed.subscribe([&app]()
@@ -119,11 +133,11 @@ int main(int argc, char* argv[])
 	ng::push_button buttonPlus(layout5, "+");
 	buttonMinus.pressed.subscribe([&app]()
 	{
-		app.current_style().set_default_font_info(app.current_style().default_font_info().with_size(app.current_style().default_font_info().size() - 0.1f));
+		app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() - 0.1f));
 	});
 	buttonPlus.pressed.subscribe([&app]()
 	{
-		app.current_style().set_default_font_info(app.current_style().default_font_info().with_size(app.current_style().default_font_info().size() + 0.1f));
+		app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() + 0.1f));
 	});
 	ng::vertical_spacer spacer1(layout4);
 	ng::grid_layout keypad(4, 3, layout2);

@@ -38,9 +38,13 @@ namespace neogfx
 		virtual i_widget* owner() const = 0;
 		virtual void set_owner(i_widget* aOwner) = 0;
 		virtual void add_widget(i_widget& aWidget) = 0;
+		virtual void add_widget(uint32_t aPosition, i_widget& aWidget) = 0;
 		virtual void add_widget(std::shared_ptr<i_widget> aWidget) = 0;
+		virtual void add_widget(uint32_t aPosition, std::shared_ptr<i_widget> aWidget) = 0;
 		virtual void add_layout(i_layout& aLayout) = 0;
+		virtual void add_layout(uint32_t aPosition, i_layout& aLayout) = 0;
 		virtual void add_layout(std::shared_ptr<i_layout> aLayout) = 0;
+		virtual void add_layout(uint32_t aPosition, std::shared_ptr<i_layout> aLayout) = 0;
 		virtual i_spacer& add_spacer() = 0;
 		virtual i_spacer& add_spacer(uint32_t aPosition) = 0;
 		virtual void add_spacer(i_spacer& aSpacer) = 0;

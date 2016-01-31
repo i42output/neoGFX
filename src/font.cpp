@@ -120,7 +120,7 @@ namespace neogfx
 	}
 
 	font::font() :
-		font_info(app::instance().current_style().default_font_info()), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(static_cast<font_info>(*this), app::instance().rendering_engine().screen_metrics()))
+		font_info(app::instance().current_style().font_info()), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(static_cast<font_info>(*this), app::instance().rendering_engine().screen_metrics()))
 	{
 	}
 

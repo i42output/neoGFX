@@ -110,6 +110,15 @@ namespace neogfx
 		return std::abs(intensity() - aOther.intensity()) <= aThreshold;
 	}
 
+	colour colour::mid(const colour& aOther) const
+	{
+		return colour(
+			(red<double>() + aOther.red<double>()) / 2.0 * 0xFF,
+			(green<double>() + aOther.green<double>()) / 2.0 * 0xFF,
+			(blue<double>() + aOther.blue<double>()) / 2.0 * 0xFF,
+			(alpha<double>() + aOther.alpha<double>()) / 2.0 * 0xFF);
+	}
+
 	bool colour::light(component aLightIntensity) const 
 	{ 
 		return intensity() >= (aLightIntensity / 255.0); 

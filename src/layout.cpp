@@ -224,7 +224,7 @@ namespace neogfx
 	layout::layout(i_widget& aParent) :
 		iOwner(&aParent),
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
-		iSpacing(app::instance().current_style().default_spacing()),
+		iSpacing(app::instance().current_style().spacing()),
 		iEnabled(true),
 		iMinimumSize{},
 		iMaximumSize{},
@@ -237,7 +237,7 @@ namespace neogfx
 		iOwner(aParent.owner()), 
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
 		iMargins(neogfx::margins(0)),
-		iSpacing(app::instance().current_style().default_spacing()),
+		iSpacing(app::instance().current_style().spacing()),
 		iEnabled(true),
 		iMinimumSize{},
 		iMaximumSize{},
@@ -265,6 +265,15 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
+	void layout::add_widget(uint32_t aPosition, i_widget& aWidget)
+	{
+		if (aWidget.has_layout() && &aWidget.layout() == this)
+			throw widget_already_added();
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aWidget));
+		if (iOwner != 0)
+			i->set_owner(iOwner);
+	}
+
 	void layout::add_widget(std::shared_ptr<i_widget> aWidget)
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
@@ -274,6 +283,15 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
+	void layout::add_widget(uint32_t aPosition, std::shared_ptr<i_widget> aWidget)
+	{
+		if (aWidget->has_layout() && &aWidget->layout() == this)
+			throw widget_already_added();
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aWidget));
+		if (iOwner != 0)
+			i->set_owner(iOwner);
+	}
+
 	void layout::add_layout(i_layout& aLayout)
 	{
 		iItems.push_back(item(aLayout));
@@ -281,11 +299,25 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
+	void layout::add_layout(uint32_t aPosition, i_layout& aLayout)
+	{
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aLayout));
+		if (iOwner != 0)
+			i->set_owner(iOwner);
+	}
+
 	void layout::add_layout(std::shared_ptr<i_layout> aLayout)
 	{
 		iItems.push_back(item(aLayout));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
+	}
+
+	void layout::add_layout(uint32_t aPosition, std::shared_ptr<i_layout> aLayout)
+	{
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aLayout));
+		if (iOwner != 0)
+			i->set_owner(iOwner);
 	}
 
 	void layout::add_spacer(i_spacer& aSpacer)
@@ -368,7 +400,7 @@ namespace neogfx
 
 	margins layout::margins() const
 	{
-		return units_converter(*this).from_device_units(has_margins() ? *iMargins : app::instance().current_style().default_margins());
+		return units_converter(*this).from_device_units(has_margins() ? *iMargins : app::instance().current_style().margins());
 	}
 
 	void layout::set_margins(const optional_margins& aMargins)
