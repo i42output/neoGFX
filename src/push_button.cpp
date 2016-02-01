@@ -102,6 +102,12 @@ namespace neogfx
 			aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
 		}
 		aGraphicsContext.reset_clip();
+		if (has_focus())
+		{
+			rect focusRect = outline.bounding_rect();
+			focusRect.deflate(1.0, 1.0);
+			aGraphicsContext.draw_focus_rect(focusRect, pen(foreground_colour().light() ? colour::Black : colour::White, 1.0));
+		}
 		if (iStyle == ButtonStyleNormal)
 		{
 			outline.inflate(penWidth, penWidth);

@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 	{
 		static uint32_t n;
 		if ((n++)%2 == 1)
-			triState.set_tristate();
+			triState.set_indeterminate();
 	});
 	ng::vertical_spacer spacerCheckboxes(layoutCheckboxes);
 	ng::vertical_layout layout4(layout2);

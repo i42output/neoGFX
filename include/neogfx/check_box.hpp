@@ -30,7 +30,7 @@ namespace neogfx
 	public:
 		event<> checked;
 		event<> unchecked;
-		event<> tristate;
+		event<> indeterminate;
 	public:
 		enum style_e
 		{
@@ -38,7 +38,7 @@ namespace neogfx
 			TriState
 		};
 	public:
-		struct not_tri_state : public std::logic_error { not_tri_state() : std::logic_error("neogfx::check_box::not_tri_state") {} };
+		struct not_tri_state_check_box : public std::logic_error { not_tri_state_check_box() : std::logic_error("neogfx::check_box::not_tri_state_check_box") {} };
 	private:
 		class box : public widget
 		{
@@ -56,11 +56,15 @@ namespace neogfx
 		check_box(i_layout& aLayout, const std::string& aText = std::string(), style_e aStyle = BiState);
 	public:
 		bool is_checked() const;
+		bool is_unchecked() const;
+		bool is_indeterminate() const;
+		void set_checked();
+		void set_unchecked();
+		void set_indeterminate();
 		void set_checked(bool aChecked);
-		bool is_tristate() const;
-		void set_tristate();
 		void toggle();
 	protected:
+		void set_checked_state(const boost::optional<bool>& aState);
 		virtual void handle_pressed();
 	private:
 		style_e iStyle;

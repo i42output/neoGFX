@@ -63,7 +63,7 @@ namespace neogfx
 			aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(app::instance().current_style().widget_detail_primary_colour(), 2.0));
 			aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(app::instance().current_style().widget_detail_primary_colour(), 2.0));
 		}
-		else if (static_cast<const check_box&>(parent()).is_tristate())
+		else if (static_cast<const check_box&>(parent()).is_indeterminate())
 		{
 			aGraphicsContext.fill_solid_rect(boxRect, app::instance().current_style().widget_detail_primary_colour());
 		}
@@ -72,6 +72,7 @@ namespace neogfx
 	check_box::check_box(const std::string& aText, style_e aStyle) :
 		button(aText), iStyle(aStyle), iBox(*this), iChecked(false)
 	{
+		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
 		layout().add_spacer();
 	}
@@ -79,6 +80,7 @@ namespace neogfx
 	check_box::check_box(i_widget& aParent, const std::string& aText, style_e aStyle) :
 		button(aParent, aText), iStyle(aStyle), iBox(*this), iChecked(false)
 	{
+		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
 		layout().add_spacer();
 	}
@@ -86,6 +88,7 @@ namespace neogfx
 	check_box::check_box(i_layout& aLayout, const std::string& aText, style_e aStyle) :
 		button(aLayout, aText), iStyle(aStyle), iBox(*this), iChecked(false)
 	{
+		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
 		layout().add_spacer();
 	}
@@ -95,42 +98,59 @@ namespace neogfx
 		return iChecked != boost::none && *iChecked == true;
 	}
 
-	void check_box::set_checked(bool aChecked)
+	bool check_box::is_unchecked() const
 	{
-		if (iChecked == boost::none || *iChecked != aChecked)
-		{
-			iChecked = aChecked;
-			update();
-			if (*iChecked)
-				checked.trigger();
-			else
-				unchecked.trigger();
-		}
+		return iChecked != boost::none && *iChecked == false;
 	}
 
-	bool check_box::is_tristate() const
+	bool check_box::is_indeterminate() const
 	{
 		return iChecked == boost::none;
 	}
 
-	void check_box::set_tristate()
+	void check_box::set_checked()
 	{
-		if (iStyle != TriState)
-			throw not_tri_state();
-		if (iChecked != boost::none)
-		{
-			iChecked = boost::none;
-			update();
-			tristate.trigger();
-		}
+		set_checked_state(true);
+	}
+
+	void check_box::set_unchecked()
+	{
+		set_checked_state(false);
+	}
+
+	void check_box::set_indeterminate()
+	{
+		set_checked_state(boost::none);
+	}
+
+	void check_box::set_checked(bool aChecked)
+	{
+		set_checked_state(aChecked);
 	}
 
 	void check_box::toggle()
 	{
-		if (is_checked())
+		if (is_checked() || is_indeterminate())
 			set_checked(false);
 		else
 			set_checked(true);
+	}
+
+	void check_box::set_checked_state(const boost::optional<bool>& aState)
+	{
+		if (iChecked != aState)
+		{
+			if (aState == boost::none && iStyle != TriState)
+				throw not_tri_state_check_box();
+			iChecked = aState;
+			update();
+			if (is_checked())
+				checked.trigger();
+			else if (is_unchecked())
+				unchecked.trigger();
+			else if (is_indeterminate())
+				indeterminate.trigger();
+		}
 	}
 
 	void check_box::handle_pressed()
