@@ -70,7 +70,7 @@ namespace neogfx
 	}
 
 	check_box::check_box(const std::string& aText, style_e aStyle) :
-		button(aText), iStyle(aStyle), iBox(*this), iChecked(false)
+		button(aText), iStyle(aStyle), iBox(*this), iCheckedState(false)
 	{
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
@@ -78,7 +78,7 @@ namespace neogfx
 	}
 
 	check_box::check_box(i_widget& aParent, const std::string& aText, style_e aStyle) :
-		button(aParent, aText), iStyle(aStyle), iBox(*this), iChecked(false)
+		button(aParent, aText), iStyle(aStyle), iBox(*this), iCheckedState(false)
 	{
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
@@ -86,7 +86,7 @@ namespace neogfx
 	}
 
 	check_box::check_box(i_layout& aLayout, const std::string& aText, style_e aStyle) :
-		button(aLayout, aText), iStyle(aStyle), iBox(*this), iChecked(false)
+		button(aLayout, aText), iStyle(aStyle), iBox(*this), iCheckedState(false)
 	{
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
@@ -95,17 +95,17 @@ namespace neogfx
 
 	bool check_box::is_checked() const
 	{
-		return iChecked != boost::none && *iChecked == true;
+		return iCheckedState != boost::none && *iCheckedState == true;
 	}
 
 	bool check_box::is_unchecked() const
 	{
-		return iChecked != boost::none && *iChecked == false;
+		return iCheckedState != boost::none && *iCheckedState == false;
 	}
 
 	bool check_box::is_indeterminate() const
 	{
-		return iChecked == boost::none;
+		return iCheckedState == boost::none;
 	}
 
 	void check_box::set_checked()
@@ -136,13 +136,28 @@ namespace neogfx
 			set_checked(true);
 	}
 
-	void check_box::set_checked_state(const boost::optional<bool>& aState)
+	void check_box::paint(graphics_context& aGraphicsContext) const
 	{
-		if (iChecked != aState)
+		if (has_focus())
 		{
-			if (aState == boost::none && iStyle != TriState)
+			rect focusRect = label().client_rect() + label().position();
+			aGraphicsContext.draw_focus_rect(focusRect);
+		}
+	}
+
+	void check_box::handle_pressed()
+	{
+		button::handle_pressed();
+		toggle();
+	}
+
+	void check_box::set_checked_state(const boost::optional<bool>& aCheckedState)
+	{
+		if (iCheckedState != aCheckedState)
+		{
+			if (aCheckedState == boost::none && iStyle != TriState)
 				throw not_tri_state_check_box();
-			iChecked = aState;
+			iCheckedState = aCheckedState;
 			update();
 			if (is_checked())
 				checked.trigger();
@@ -151,11 +166,5 @@ namespace neogfx
 			else if (is_indeterminate())
 				indeterminate.trigger();
 		}
-	}
-
-	void check_box::handle_pressed()
-	{
-		button::handle_pressed();
-		toggle();
 	}
 }

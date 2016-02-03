@@ -32,14 +32,16 @@ namespace neogfx
 
 	enum class focus_policy : uint32_t
 	{
-		NoFocus			= 0x00,
-		ClickFocus		= 0x01,
-		TabFocus		= 0x02,
-		ClickTabFocus	= ClickFocus | TabFocus,
-		StrongFocus		= ClickTabFocus,
-		WheelFocus		= 0x04,
-		PointerFocus	= 0x08,
-		SloppyFocus		= 0x10
+		NoFocus				= 0x00000000,
+		ClickFocus			= 0x00000001,
+		TabFocus			= 0x00000002,
+		ClickTabFocus		= ClickFocus | TabFocus,
+		StrongFocus			= ClickTabFocus,
+		WheelFocus			= 0x00000004,
+		PointerFocus		= 0x00000008,
+		SloppyFocus			= 0x00000010,
+		ConsumeTabKey		= 0x10000000,
+		ConsumeReturnKey	= 0x20000000
 	};
 
 	class i_widget : public i_geometry, public i_units_context
@@ -66,6 +68,13 @@ namespace neogfx
 		virtual const i_widget& ultimate_ancestor() const = 0;
 		virtual i_widget& ultimate_ancestor() = 0;
 		virtual bool is_ancestor(const i_widget& aWidget) const = 0;
+		virtual i_widget& link_before() const = 0;
+		virtual void set_link_before(i_widget& aWidget) = 0;
+		virtual void set_link_before_ptr(i_widget& aWidget) = 0;
+		virtual i_widget& link_after() const = 0;
+		virtual void set_link_after(i_widget& aWidget) = 0;
+		virtual void set_link_after_ptr(i_widget& aWidget) = 0;
+		virtual void unlink() = 0;
 		virtual void add_widget(i_widget& aWidget) = 0;
 		virtual void add_widget(std::shared_ptr<i_widget> aWidget) = 0;
 		virtual void remove_widget(i_widget& aWidget) = 0;
@@ -141,14 +150,6 @@ namespace neogfx
 		virtual void release_focus() = 0;
 		virtual void focus_gained() = 0;
 		virtual void focus_lost() = 0;
-		virtual bool has_tab_before() const = 0;
-		virtual i_widget& tab_before() = 0;
-		virtual void set_tab_before(i_widget& aWidget) = 0;
-		virtual void unset_tab_before() = 0;
-		virtual bool has_tab_after() const = 0;
-		virtual i_widget& tab_after() = 0;
-		virtual void set_tab_after(i_widget& aWidget) = 0;
-		virtual void unset_tab_after() = 0;
 	public:
 		virtual bool ignore_mouse_events() const = 0;
 		virtual void set_ignore_mouse_events(bool aIgnoreMouseEvents) = 0;

@@ -186,11 +186,11 @@ namespace neogfx
 		iNativeGraphicsContext->draw_rect(to_device_units(aRect) + iOrigin, aPen);
 	}
 
-	void graphics_context::draw_focus_rect(const rect& aRect, const pen& aPen) const
+	void graphics_context::draw_focus_rect(const rect& aRect) const
 	{
 		push_logical_operation(LogicalXor);
 		line_stipple_on(1, 0xAAAA);
-		draw_rect(aRect, aPen);
+		draw_rect(aRect, pen(colour::White, 1.0));
 		line_stipple_off();
 		pop_logical_operation();
 	}
@@ -322,11 +322,13 @@ namespace neogfx
 
 	void graphics_context::draw_text(const point& aPoint, const text& aText, const font& aFont, const colour& aColour, bool aUseCache) const
 	{
+		glyph_drawing gd(*this);
 		draw_text(aPoint, aText.begin(), aText.end(), aFont, aColour, aUseCache);
 	}
 
 	void graphics_context::draw_text(const point& aPoint, text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont, const colour& aColour, bool aUseCache) const
 	{
+		glyph_drawing gd(*this);
 		const auto& glyphText = aUseCache && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aTextBegin, aTextEnd, aFont);
 		if (aUseCache && iGlyphTextCache->empty())
 			*iGlyphTextCache = glyphText;
@@ -340,11 +342,13 @@ namespace neogfx
 
 	void graphics_context::draw_multiline_text(const point& aPoint, const text& aText, const font& aFont, const colour& aColour, alignment aAlignment, bool aUseCache) const
 	{
+		glyph_drawing gd(*this);
 		draw_multiline_text(aPoint, aText, aFont, 0, aColour, aAlignment, aUseCache);
 	}
 
 	void graphics_context::draw_multiline_text(const point& aPoint, const text& aText, const font& aFont, dimension aMaxWidth, const colour& aColour, alignment aAlignment, bool aUseCache) const
 	{
+		glyph_drawing gd(*this);
 		const auto& glyphText = aUseCache && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aText.begin(), aText.end(), aFont);
 		if (aUseCache && iGlyphTextCache->empty())
 			*iGlyphTextCache = glyphText;
@@ -417,6 +421,7 @@ namespace neogfx
 
 	void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, const font& aFont, const colour& aColour) const
 	{
+		glyph_drawing gd(*this);
 		draw_glyph_text(aPoint, aText.cbegin(), aText.cend(), aFont, aColour);
 	}
 

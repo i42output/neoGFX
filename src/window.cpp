@@ -528,10 +528,36 @@ namespace neogfx
 
 	void window::native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
+		i_widget* start = this;
 		if (has_focused_widget())
-			focused_widget().key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			start = &focused_widget();
+		if (aScanCode == ScanCode_TAB && (start->focus_policy() & focus_policy::ConsumeTabKey) != focus_policy::ConsumeTabKey)
+		{
+			i_widget* w = start;
+			if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
+			{
+				for (w = &w->link_after(); 
+					w != start && (w->hidden() || w->disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus); 
+					w = &w->link_after())
+					;
+			}
+			else
+			{
+				for (w = &w->link_before();
+					w != start && (w->hidden() || w->disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus);
+					w = &w->link_before())
+					;
+			}
+			if ((w->focus_policy() & focus_policy::TabFocus) == focus_policy::TabFocus)
+				w->set_focus();
+		}
 		else
-			key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+		{
+			if (has_focused_widget())
+				focused_widget().key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			else
+				key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+		}
 	}
 
 	void window::native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)

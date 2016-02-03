@@ -214,11 +214,11 @@ namespace neogfx
 	{
 		if (iLogicalOperationStack.empty() || iLogicalOperationStack.back() == LogicalNone)
 		{
-			glCheck(glDisable(GL_LOGIC_OP));
+			glCheck(glDisable(GL_COLOR_LOGIC_OP));
 		}
 		else
 		{
-			glCheck(glEnable(GL_LOGIC_OP));
+			glCheck(glEnable(GL_COLOR_LOGIC_OP));
 			switch (iLogicalOperationStack.back())
 			{
 			case LogicalXor:

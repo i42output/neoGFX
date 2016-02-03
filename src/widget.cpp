@@ -58,8 +58,8 @@ namespace neogfx
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
-		iTabBefore(0),
-		iTabAfter(0),
+		iLinkBefore(this),
+		iLinkAfter(this),
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents(false)
@@ -75,8 +75,8 @@ namespace neogfx
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
-		iTabBefore(0),
-		iTabAfter(0),
+		iLinkBefore(this),
+		iLinkAfter(this),
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents(false)
@@ -93,8 +93,8 @@ namespace neogfx
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
-		iTabBefore(0),
-		iTabAfter(0),
+		iLinkBefore(this),
+		iLinkAfter(this),
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents(false)
@@ -188,24 +188,83 @@ namespace neogfx
 		return false;
 	}
 
+	i_widget& widget::link_before() const
+	{
+		return *iLinkBefore;
+	}
+
+	void widget::set_link_before(i_widget& aWidget)
+	{
+		if (iLinkBefore != &aWidget)
+		{
+			aWidget.set_link_before_ptr(link_before());
+			link_before().set_link_after_ptr(aWidget);
+			set_link_before_ptr(aWidget);
+			link_before().set_link_after_ptr(*this);
+		}
+	}
+
+	void widget::set_link_before_ptr(i_widget& aWidget)
+	{
+		iLinkBefore = &aWidget;
+	}
+
+	i_widget& widget::link_after() const
+	{
+		return *iLinkAfter;
+	}
+
+	void widget::set_link_after(i_widget& aWidget)
+	{
+		if (iLinkAfter != &aWidget)
+		{
+			aWidget.set_link_after_ptr(link_after());
+			link_after().set_link_before_ptr(aWidget);
+			set_link_after_ptr(aWidget);
+			link_after().set_link_before_ptr(*this);
+		}
+	}
+
+	void widget::set_link_after_ptr(i_widget& aWidget)
+	{
+		iLinkAfter = &aWidget;
+	}
+
+	void widget::unlink()
+	{
+		link_before().set_link_after_ptr(link_after());
+		link_after().set_link_before_ptr(link_before());
+		iLinkBefore = this;
+		iLinkAfter = this;
+	}
+
 	void widget::add_widget(i_widget& aWidget)
 	{
-		iChildren.push_back(std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aWidget));
 		aWidget.set_parent(*this);
+		if (iChildren.empty())
+			set_link_after(aWidget);
+		else
+			iChildren.back()->set_link_after(aWidget);
+		iChildren.push_back(std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aWidget));
 		if (has_surface())
 			surface().widget_added(aWidget);
 	}
 
 	void widget::add_widget(std::shared_ptr<i_widget> aWidget)
 	{
-		iChildren.push_back(aWidget);
 		aWidget->set_parent(*this);
+		if (iChildren.empty())
+			set_link_after(*aWidget);
+		else 
+			iChildren.back()->set_link_after(*aWidget);
+		iChildren.push_back(aWidget);
 		if (has_surface())
 			surface().widget_added(*aWidget);
 	}
 
 	void widget::remove_widget(i_widget& aWidget)
 	{
+		aWidget.unlink();
 		for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
 			if (&**i == &aWidget)
 			{
@@ -804,46 +863,6 @@ namespace neogfx
 	void widget::focus_lost()
 	{
 		update();
-	}
-
-	bool widget::has_tab_before() const
-	{
-		return iTabBefore != 0;
-	}
-
-	i_widget& widget::tab_before()
-	{
-		return *iTabBefore;
-	}
-
-	void widget::set_tab_before(i_widget& aWidget)
-	{
-		iTabBefore = &aWidget;
-	}
-
-	void widget::unset_tab_before()
-	{
-		iTabBefore = 0;
-	}
-
-	bool widget::has_tab_after() const
-	{
-		return iTabAfter != 0;
-	}
-
-	i_widget& widget::tab_after()
-	{
-		return *iTabAfter;
-	}
-
-	void widget::set_tab_after(i_widget& aWidget)
-	{
-		iTabAfter = &aWidget;
-	}
-
-	void widget::unset_tab_after()
-	{
-		iTabAfter = 0;
 	}
 
 	bool widget::ignore_mouse_events() const

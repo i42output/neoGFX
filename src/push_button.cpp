@@ -105,8 +105,8 @@ namespace neogfx
 		if (has_focus())
 		{
 			rect focusRect = outline.bounding_rect();
-			focusRect.deflate(1.0, 1.0);
-			aGraphicsContext.draw_focus_rect(focusRect, pen(foreground_colour().light() ? colour::Black : colour::White, 1.0));
+			focusRect.deflate(2.0, 2.0);
+			aGraphicsContext.draw_focus_rect(focusRect);
 		}
 		if (iStyle == ButtonStyleNormal)
 		{

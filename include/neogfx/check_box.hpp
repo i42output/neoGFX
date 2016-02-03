@@ -64,11 +64,13 @@ namespace neogfx
 		void set_checked(bool aChecked);
 		void toggle();
 	protected:
-		void set_checked_state(const boost::optional<bool>& aState);
+		virtual void paint(graphics_context& aGraphicsContext) const;
 		virtual void handle_pressed();
+	protected:
+		void set_checked_state(const boost::optional<bool>& aCheckedState);
 	private:
 		style_e iStyle;
 		box iBox;
-		boost::optional<bool> iChecked;
+		boost::optional<bool> iCheckedState;
 	};
 }

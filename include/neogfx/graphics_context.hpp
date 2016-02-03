@@ -91,7 +91,7 @@ namespace neogfx
 		void draw_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const;
 		void draw_rect(const rect& aRect, const pen& aPen) const;
-		void draw_focus_rect(const rect& aRect, const pen& aPen) const;
+		void draw_focus_rect(const rect& aRect) const;
 		void draw_path(const path& aPath, const pen& aPen) const;
 		void fill_solid_rect(const rect& aRect, const colour& aColour) const;
 		void fill_gradient_rect(const rect& aRect, const gradient& aGradient) const;

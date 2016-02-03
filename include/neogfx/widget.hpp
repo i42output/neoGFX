@@ -59,6 +59,13 @@ namespace neogfx
 		virtual const i_widget& ultimate_ancestor() const;
 		virtual i_widget& ultimate_ancestor();
 		virtual bool is_ancestor(const i_widget& aWidget) const;
+		virtual i_widget& link_before() const;
+		virtual void set_link_before(i_widget& aWidget);
+		virtual void set_link_before_ptr(i_widget& aWidget);
+		virtual i_widget& link_after() const;
+		virtual void set_link_after(i_widget& aWidget);
+		virtual void set_link_after_ptr(i_widget& aWidget);
+		virtual void unlink();
 		virtual void add_widget(i_widget& aWidget);
 		virtual void add_widget(std::shared_ptr<i_widget> aWidget);
 		virtual void remove_widget(i_widget& aWidget);
@@ -146,14 +153,6 @@ namespace neogfx
 		virtual void release_focus();
 		virtual void focus_gained();
 		virtual void focus_lost();
-		virtual bool has_tab_before() const;
-		virtual i_widget& tab_before();
-		virtual void set_tab_before(i_widget& aWidget);
-		virtual void unset_tab_before();
-		virtual bool has_tab_after() const;
-		virtual i_widget& tab_after();
-		virtual void set_tab_after(i_widget& aWidget);
-		virtual void unset_tab_after();
 	public:
 		virtual bool ignore_mouse_events() const;
 		virtual void set_ignore_mouse_events(bool aIgnoreMouseEvents);
@@ -188,8 +187,8 @@ namespace neogfx
 		bool iVisible;
 		bool iEnabled;
 		neogfx::focus_policy iFocusPolicy;
-		i_widget* iTabBefore;
-		i_widget* iTabAfter;
+		i_widget* iLinkBefore;
+		i_widget* iLinkAfter;
 		optional_colour iForegroundColour;
 		optional_colour iBackgroundColour;
 		optional_font iFont;

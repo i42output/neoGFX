@@ -48,8 +48,10 @@ namespace neogfx
 		neogfx::label& label();
 		const text_widget& text() const;
 		text_widget& text();
-	public:
+	protected:
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+	protected:
+		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	protected:
 		virtual void handle_pressed();
 	private:

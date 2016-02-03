@@ -248,7 +248,7 @@ namespace neogfx
 				aGraphicsContext.scissor_on(default_clip_rect().intersection(cellRect));
 				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_model_index(row, col), aGraphicsContext), f, *textColour);
 				if (selection_model().has_current_index() && selection_model().current_index() == item_model_index(row, col) && has_focus())
-					aGraphicsContext.draw_focus_rect(cellRect, pen(background_colour().light() ? colour::Black : colour::White, 1));
+					aGraphicsContext.draw_focus_rect(cellRect);
 				aGraphicsContext.scissor_off();
 			}
 		}
