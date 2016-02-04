@@ -188,6 +188,11 @@ namespace neogfx
 		return false;
 	}
 
+	bool widget::is_sibling(const i_widget& aWidget) const
+	{
+		return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
+	}
+
 	i_widget& widget::link_before() const
 	{
 		return *iLinkBefore;

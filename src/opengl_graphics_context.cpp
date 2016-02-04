@@ -18,7 +18,7 @@
 */
 
 #include "neogfx.hpp"
-#include "neogfx.hpp"
+#include <boost/math/constants/constants.hpp>
 #include "text.hpp"
 #include "i_rendering_engine.hpp"
 #include "opengl_graphics_context.hpp"
@@ -280,6 +280,51 @@ namespace neogfx
 		glCheck(glLineWidth(1.0f));
 	}
 
+	namespace
+	{
+		std::vector<GLdouble> circle_vertices(const point& aCentre, dimension aRadius, bool aIncludeCentre)
+		{
+			std::vector<GLdouble> result;
+			uint32_t segments = static_cast<uint32_t>(20 * std::sqrt(aRadius));
+			result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
+			if (aIncludeCentre)
+			{
+				result.push_back(aCentre.x);
+				result.push_back(aCentre.y);
+			}
+			coordinate theta = boost::math::constants::two_pi<coordinate>() / static_cast<coordinate>(segments);
+			coordinate c = std::cos(theta);
+			coordinate s = std::sin(theta);
+			coordinate t;
+			coordinate x = aRadius;
+			coordinate y = 0.0;
+			for (uint32_t i = 0; i < segments; ++i)
+			{
+				result.push_back(x + aCentre.x);
+				result.push_back(y + aCentre.y);
+				t = x;
+				x = c * x - s * y;
+				y = s * t + c * y;
+			}
+			result.push_back(result[aIncludeCentre ? 2 : 0]);
+			result.push_back(result[aIncludeCentre ? 3 : 1]);
+			return result;
+		}
+	}
+
+	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen)
+	{
+		auto vertices = circle_vertices(aCentre, aRadius, false);
+		std::vector<double> texCoords(vertices.size(), 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size() / 2));
+		glCheck(glLineWidth(1.0f));
+	}
+
 	void opengl_graphics_context::draw_path(const path& aPath, const pen& aPen)
 	{
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
@@ -341,6 +386,17 @@ namespace neogfx
 			}
 		}
 		std::vector<double> texCoords(vertices.size(), 0.0);
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+	}
+
+	void opengl_graphics_context::fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour)
+	{
+		auto vertices = circle_vertices(aCentre, aRadius, true);
+		std::vector<double> texCoords(vertices.size(), 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));

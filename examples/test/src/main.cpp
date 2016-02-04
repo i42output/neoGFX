@@ -8,6 +8,7 @@
 #include <neogfx/grid_layout.hpp>
 #include <neogfx/spacer.hpp>
 #include <neogfx/table_view.hpp>
+#include <neogfx/radio_button.hpp>
 #include <neogfx/check_box.hpp>
 #include <neogfx/default_item_model.hpp>
 #include <neogfx/item_presentation_model.hpp>
@@ -48,7 +49,8 @@ public:
 	{
 		pressed.subscribe([aNumber]()
 		{
-			ng::app::instance().change_style("Keypad").set_colour(ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0));
+			ng::app::instance().change_style("Keypad").
+				set_colour(aNumber != 9 ? ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0) : ng::colour::LightGoldenrod);
 		});
 	}
 };
@@ -97,19 +99,19 @@ int main(int argc, char* argv[])
 		ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
 		layout3.get_widget(i).set_foreground_colour(randomColour);
 	}
-	ng::vertical_layout layoutCheckboxes(layout2);
-	ng::check_box noSelection(layoutCheckboxes, "No selection");
-	ng::check_box singleSelection(layoutCheckboxes, "Single selection");
-	ng::check_box multipleSelection(layoutCheckboxes, "Multiple selection");
-	ng::check_box extendedSelection(layoutCheckboxes, "Extended selection");
-	ng::check_box triState(layoutCheckboxes, "Tristate checkbox", ng::check_box::TriState);
+	ng::vertical_layout layoutRadiosAndChecks(layout2);
+	ng::radio_button noSelection(layoutRadiosAndChecks, "No selection");
+	ng::radio_button singleSelection(layoutRadiosAndChecks, "Single selection");
+	ng::radio_button multipleSelection(layoutRadiosAndChecks, "Multiple selection");
+	ng::radio_button extendedSelection(layoutRadiosAndChecks, "Extended selection");
+	ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbox", ng::check_box::TriState);
 	triState.checked.subscribe([&triState]()
 	{
 		static uint32_t n;
 		if ((n++)%2 == 1)
 			triState.set_indeterminate();
 	});
-	ng::vertical_spacer spacerCheckboxes(layoutCheckboxes);
+	ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
 	ng::vertical_layout layout4(layout2);
 	ng::push_button button9(layout4, "Default/Slate\nStyle");
 	button9.pressed.subscribe([&app]()

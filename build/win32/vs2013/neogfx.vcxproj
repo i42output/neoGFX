@@ -145,6 +145,7 @@
     <ClInclude Include="..\..\..\include\neogfx\pen.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\push_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\radio_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\scrollable_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\scrollbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sdl_graphics_context.hpp" />
@@ -172,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\neogfx\check_box.cpp" />
+    <ClCompile Include="..\..\..\include\neogfx\radio_button.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
     <ClCompile Include="..\..\..\src\button.cpp" />
     <ClCompile Include="..\..\..\src\colour.cpp" />

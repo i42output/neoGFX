@@ -186,6 +186,18 @@ namespace neogfx
 		iNativeGraphicsContext->draw_rect(to_device_units(aRect) + iOrigin, aPen);
 	}
 
+	void graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen) const
+	{
+		iNativeGraphicsContext->draw_circle(to_device_units(aCentre) + iOrigin, aRadius, aPen);
+	}
+
+	void graphics_context::draw_path(const path& aPath, const pen& aPen) const
+	{
+		path path = to_device_units(aPath);
+		path.set_position(path.position() + iOrigin);
+		iNativeGraphicsContext->draw_path(path, aPen);
+	}
+
 	void graphics_context::draw_focus_rect(const rect& aRect) const
 	{
 		push_logical_operation(LogicalXor);
@@ -193,13 +205,6 @@ namespace neogfx
 		draw_rect(aRect, pen(colour::White, 1.0));
 		line_stipple_off();
 		pop_logical_operation();
-	}
-	
-	void graphics_context::draw_path(const path& aPath, const pen& aPen) const
-	{
-		path path = to_device_units(aPath);
-		path.set_position(path.position() + iOrigin);
-		iNativeGraphicsContext->draw_path(path, aPen);
 	}
 
 	void graphics_context::fill_solid_rect(const rect& aRect, const colour& aColour) const
@@ -210,6 +215,11 @@ namespace neogfx
 	void graphics_context::fill_gradient_rect(const rect& aRect, const gradient& aGradient) const
 	{
 		iNativeGraphicsContext->fill_gradient_rect(to_device_units(aRect) + iOrigin, aGradient);
+	}
+
+	void graphics_context::fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour) const
+	{
+		iNativeGraphicsContext->fill_solid_circle(to_device_units(aCentre) + iOrigin, aRadius, aColour);
 	}
 
 	void graphics_context::fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aOutlinePen) const
