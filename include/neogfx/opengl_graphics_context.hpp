@@ -89,9 +89,11 @@ namespace neogfx
 		virtual void draw_pixel(const point& aPoint, const colour& aColour);
 		virtual void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
 		virtual void draw_rect(const rect& aRect, const pen& aPen);
+		virtual void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen);
 		virtual void draw_path(const path& aPath, const pen& aPen);
 		virtual void fill_solid_rect(const rect& aRect, const colour& aColour);
 		virtual void fill_gradient_rect(const rect& aRect, const gradient& aGradient);	
+		virtual void fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour);
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen);
 		virtual glyph_text to_glyph_text(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont) const;
 		virtual void begin_drawing_glyphs();
