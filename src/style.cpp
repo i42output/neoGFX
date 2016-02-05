@@ -67,7 +67,7 @@ namespace neogfx
 		{
 			iMargins = aMargins;
 			if (&app::instance().current_style() == this)
-				app::instance().surface_manager().invalidate_surfaces();
+				app::instance().surface_manager().layout_surfaces();
 		}
 	}
 
@@ -82,7 +82,7 @@ namespace neogfx
 		{
 			iSpacing = aSpacing;
 			if (&app::instance().current_style() == this)
-				app::instance().surface_manager().invalidate_surfaces();
+				app::instance().surface_manager().layout_surfaces();
 		}
 	}
 
@@ -281,7 +281,7 @@ namespace neogfx
 			iFontInfo = aFontInfo;
 			iFont.reset();
 			if (&app::instance().current_style() == this)
-				app::instance().surface_manager().invalidate_surfaces();
+				app::instance().surface_manager().layout_surfaces();
 		}
 	}
 
@@ -306,7 +306,7 @@ namespace neogfx
 			iFallbackFontInfo = aFontInfo;
 			iFallbackFont.reset();
 			if (&app::instance().current_style() == this)
-				app::instance().surface_manager().invalidate_surfaces();
+				app::instance().surface_manager().layout_surfaces();
 		}
 	}
 

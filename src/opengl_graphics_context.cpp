@@ -295,14 +295,13 @@ namespace neogfx
 			coordinate theta = boost::math::constants::two_pi<coordinate>() / static_cast<coordinate>(segments);
 			coordinate c = std::cos(theta);
 			coordinate s = std::sin(theta);
-			coordinate t;
 			coordinate x = aRadius;
 			coordinate y = 0.0;
 			for (uint32_t i = 0; i < segments; ++i)
 			{
 				result.push_back(x + aCentre.x);
 				result.push_back(y + aCentre.y);
-				t = x;
+				coordinate t = x;
 				x = c * x - s * y;
 				y = s * t + c * y;
 			}
