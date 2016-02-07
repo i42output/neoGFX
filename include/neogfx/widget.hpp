@@ -97,6 +97,13 @@ namespace neogfx
 		virtual rect window_rect() const;
 		virtual rect client_rect(bool aIncludeMargins = true) const;
 		virtual i_widget& widget_at(const point& aPosition);
+	public:
+		virtual bool has_size_policy() const;
+		virtual neogfx::size_policy size_policy() const;
+		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
+		virtual bool has_weight() const;
+		virtual size weight() const;
+		virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true);
 		virtual bool has_minimum_size() const;
 		virtual size minimum_size() const;
 		virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true);
@@ -107,8 +114,7 @@ namespace neogfx
 		virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true);
 		virtual bool has_margins() const;
 		virtual neogfx::margins margins() const;
-		virtual void set_margins(const optional_margins& aMargins);
-		virtual size size_hint() const;
+		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
 	public:
 		virtual void update(bool aIncludeNonClient = false);
 		virtual void update(const rect& aUpdateRect);
@@ -174,6 +180,8 @@ namespace neogfx
 		virtual i_widget& widget_for_mouse_event(const point& aPosition);
 	private:
 		i_widget* iParent;
+		i_widget* iLinkBefore;
+		i_widget* iLinkAfter;
 		widget_list iChildren;
 		std::shared_ptr<i_layout> iLayout;
 		std::unique_ptr<neolib::callback_timer> iLayoutTimer;
@@ -182,14 +190,14 @@ namespace neogfx
 		point iPosition;
 		size iSize;
 		optional_margins iMargins;
+		optional_size_policy iSizePolicy;
+		optional_size iWeight;
 		optional_size iMinimumSize;
 		optional_size iMaximumSize;
 		mutable std::vector<rect> iUpdateRects;
 		bool iVisible;
 		bool iEnabled;
 		neogfx::focus_policy iFocusPolicy;
-		i_widget* iLinkBefore;
-		i_widget* iLinkAfter;
 		optional_colour iForegroundColour;
 		optional_colour iBackgroundColour;
 		optional_font iFont;

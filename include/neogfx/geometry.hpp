@@ -120,6 +120,7 @@ namespace neogfx
 		basic_size& operator-=(const basic_delta<CoordinateType>& other) { cx -= other.dx; cy -= other.dy; return *this; }
 		basic_size& operator*=(const basic_size& other) { cx *= other.cx; cy *= other.cy; return *this; }
 		basic_size& operator/=(const basic_size& other) { cx /= other.cx; cy /= other.cy; return *this; }
+		basic_size ceil() const { return basic_size(std::ceil(cx), std::ceil(cy)); }
 		// attributes
 	public:
 		dimension_type cx;

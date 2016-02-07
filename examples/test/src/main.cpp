@@ -12,6 +12,7 @@
 #include <neogfx/check_box.hpp>
 #include <neogfx/default_item_model.hpp>
 #include <neogfx/item_presentation_model.hpp>
+#include <neogfx/tab_page_container.hpp>
 #include <neogfx/i_surface.hpp>
 
 namespace ng = neogfx;
@@ -63,24 +64,29 @@ int main(int argc, char* argv[])
 	app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 	app.change_style("Default");
 	ng::window window(800, 800);
-	ng::vertical_layout layout1(window); 
-	layout1.set_margins(ng::margins(8));
-	ng::push_button button0(layout1, "This is the neoGFX test application.");
+	ng::vertical_layout layout0(window);
+
+	ng::tab_page_container tabContainer(layout0);
+
+	// Buttons
+
+	ng::i_widget& buttonsPage = tabContainer.add_tab_page("Buttons").widget();
+	ng::vertical_layout layoutButtons(buttonsPage);
+	layoutButtons.set_margins(ng::margins(8));
+	ng::push_button button0(layoutButtons, "This is the neoGFX test application.");
 	button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
-	ng::push_button button1(layout1, "the,,, quick brown fox jumps over the lazy dog");
+	ng::push_button button1(layoutButtons, "the,,, quick brown fox jumps over the lazy dog");
 	button1.set_foreground_colour(ng::colour::LightGoldenrod);
-	ng::push_button button2(layout1, u8"ويقفز الثعلب البني السريع فوق الكلب الكسول");
+	ng::push_button button2(layoutButtons, u8"ويقفز الثعلب البني السريع فوق الكلب الكسول");
 	button2.set_foreground_colour(ng::colour::Goldenrod);
-	ng::push_button button3(layout1, u8"שועל חום קפיצות מעל הכלב העצלן");
+	ng::push_button button3(layoutButtons, u8"שועל חום קפיצות מעל הכלב העצלן");
 	button3.set_foreground_colour(ng::colour::DarkGoldenrod);
 	button3.set_minimum_size(ng::size(128, 64));
-	ng::push_button button4(layout1, u8"请停止食用犬");
+	ng::push_button button4(layoutButtons, u8"请停止食用犬");
 	button4.set_foreground_colour(ng::colour::CadetBlue);
 	button4.set_maximum_size(ng::size(128, 64));
-	ng::push_button button5(layout1, u8"sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text");
-	ng::table_view tableView(layout1);
-	tableView.set_minimum_size(ng::size(128, 128));
-	ng::horizontal_layout layout2(layout1);
+	ng::push_button button5(layoutButtons, u8"sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text");
+	ng::horizontal_layout layout2(layoutButtons);
 	ng::label label1(layout2, "Label 1:");
 	ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");
 	button6.set_minimum_size(ng::size(128, 64));
@@ -91,7 +97,7 @@ int main(int argc, char* argv[])
 	layout2.add_spacer().set_weight(ng::size(1.0));
 	ng::push_button button8(layout2, "Multi-line\ntext.");
 	button8.set_foreground_colour(ng::colour(255, 235, 160));
-	ng::horizontal_layout layout3(layout1);
+	ng::horizontal_layout layout3(layoutButtons);
 	std::srand(4242);
 	for (uint32_t i = 0; i < 10; ++i)
 	{
@@ -100,10 +106,6 @@ int main(int argc, char* argv[])
 		layout3.get_widget(i).set_foreground_colour(randomColour);
 	}
 	ng::vertical_layout layoutRadiosAndChecks(layout2);
-	ng::radio_button noSelection(layoutRadiosAndChecks, "No selection");
-	ng::radio_button singleSelection(layoutRadiosAndChecks, "Single selection");
-	ng::radio_button multipleSelection(layoutRadiosAndChecks, "Multiple selection");
-	ng::radio_button extendedSelection(layoutRadiosAndChecks, "Extended selection");
 	ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbox", ng::check_box::TriState);
 	triState.checked.subscribe([&triState]()
 	{
@@ -122,14 +124,6 @@ int main(int argc, char* argv[])
 			app.change_style("Default");
 	});
 	button9.set_foreground_colour(ng::colour::Aquamarine);
-	ng::push_button button10(layout4, "Toggle List\nHeader View");
-	button10.pressed.subscribe([&tableView]()
-	{
-		if (tableView.column_header().visible())
-			tableView.column_header().hide();
-		else
-			tableView.column_header().show();
-	});
 	ng::horizontal_layout layout5(layout4);
 	ng::push_button buttonMinus(layout5, "-");
 	ng::push_button buttonPlus(layout5, "+");
@@ -150,8 +144,38 @@ int main(int argc, char* argv[])
 			keypad.add_widget(row, col, std::make_shared<keypad_button>(row * 3 + col + 1));
 	keypad.add_widget(3, 1, std::make_shared<keypad_button>(0));
 
+	neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
+	{
+		aTimer.again();
+		std::srand(static_cast<unsigned int>(app.program_elapsed_ms() / 5000));
+		const double PI = 2.0 * std::acos(0.0);
+		double lightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
+		ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
+		randomColour = randomColour.to_hsl().with_lightness(lightness).to_rgb();
+		button6.set_foreground_colour(randomColour);
+	}, 16);
+
+	// Item Views
+
 	app.surface_manager().surface(0).save_mouse_cursor();
 	app.surface_manager().surface(0).set_mouse_cursor(ng::mouse_system_cursor::Wait);
+
+	ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").widget();
+	ng::vertical_layout layoutItemViews(itemViewsPage);
+	ng::table_view tableView(layoutItemViews);
+	tableView.set_minimum_size(ng::size(128, 128));
+	ng::push_button button10(layoutItemViews, "Toggle List\nHeader View");
+	button10.pressed.subscribe([&tableView]()
+	{
+		if (tableView.column_header().visible())
+			tableView.column_header().hide();
+		else
+			tableView.column_header().show();
+	});
+	ng::radio_button noSelection(layoutItemViews, "No selection");
+	ng::radio_button singleSelection(layoutItemViews, "Single selection");
+	ng::radio_button multipleSelection(layoutItemViews, "Multiple selection");
+	ng::radio_button extendedSelection(layoutItemViews, "Extended selection");
 
 	my_item_model itemModel;
 	#ifdef NDEBUG
@@ -181,17 +205,6 @@ int main(int argc, char* argv[])
 	tableView.set_presentation_model(itemModel);
 
 	app.surface_manager().surface(0).restore_mouse_cursor();
-
-	neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
-	{
-		aTimer.again();
-		std::srand(static_cast<unsigned int>(app.program_elapsed_ms() / 5000));
-		const double PI = 2.0 * std::acos(0.0);
-		double lightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
-		ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
-		randomColour = randomColour.to_hsl().with_lightness(lightness).to_rgb();
-		button6.set_foreground_colour(randomColour);
-	}, 16);
 
 	return app.exec();
 }

@@ -226,6 +226,13 @@ namespace neogfx
 		return presentation_model().item_at(vertical_scrollbar().position() + item_display_rect().height(), aGraphicsContext);
 	}
 
+	size_policy item_view::size_policy() const
+	{
+		if (has_size_policy())
+			return scrollable_widget::size_policy();
+		return size_policy::Expanding;
+	}
+
 	void item_view::paint(graphics_context& aGraphicsContext) const
 	{
 		scrollable_widget::paint(aGraphicsContext);

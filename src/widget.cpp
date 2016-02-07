@@ -51,6 +51,8 @@ namespace neogfx
 
 	widget::widget() :
 		iParent(0),
+		iLinkBefore(this),
+		iLinkAfter(this),
 		iDeviceMetricsForwarder(*this),
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
@@ -58,8 +60,6 @@ namespace neogfx
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
-		iLinkBefore(this),
-		iLinkAfter(this),
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents(false)
@@ -67,7 +67,9 @@ namespace neogfx
 	}
 	
 	widget::widget(i_widget& aParent) :
-		iParent(&aParent),
+		iParent(0),
+		iLinkBefore(this),
+		iLinkAfter(this),
 		iDeviceMetricsForwarder(*this),
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
@@ -75,8 +77,6 @@ namespace neogfx
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
-		iLinkBefore(this),
-		iLinkAfter(this),
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents(false)
@@ -86,6 +86,8 @@ namespace neogfx
 
 	widget::widget(i_layout& aLayout) :
 		iParent(0),
+		iLinkBefore(this),
+		iLinkAfter(this),
 		iDeviceMetricsForwarder(*this),
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
@@ -93,8 +95,6 @@ namespace neogfx
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
-		iLinkBefore(this),
-		iLinkAfter(this),
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents(false)
@@ -104,8 +104,16 @@ namespace neogfx
 
 	widget::~widget()
 	{
+		{
+			widget_list children;
+			children.swap(iChildren);
+			auto layout = iLayout;
+			iLayout.reset();
+		}
 		if (has_parent())
 			parent().remove_widget(*this);
+		else
+			unlink();
 	}
 
 	const i_device_metrics& widget::device_metrics() const
@@ -245,6 +253,8 @@ namespace neogfx
 
 	void widget::add_widget(i_widget& aWidget)
 	{
+		if (aWidget.has_parent() && &aWidget.parent() == this)
+			return;
 		aWidget.set_parent(*this);
 		if (iChildren.empty())
 			set_link_after(aWidget);
@@ -257,6 +267,8 @@ namespace neogfx
 
 	void widget::add_widget(std::shared_ptr<i_widget> aWidget)
 	{
+		if (aWidget->has_parent() && &aWidget->parent() == this)
+			return;
 		aWidget->set_parent(*this);
 		if (iChildren.empty())
 			set_link_after(*aWidget);
@@ -269,6 +281,8 @@ namespace neogfx
 
 	void widget::remove_widget(i_widget& aWidget)
 	{
+		if (!aWidget.has_parent() && &aWidget.parent() != this)
+			throw not_child();
 		aWidget.unlink();
 		for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
 			if (&**i == &aWidget)
@@ -435,7 +449,6 @@ namespace neogfx
 
 	void widget::moved()
 	{
-		layout_items();
 	}
 	
 	size widget::extents() const
@@ -483,6 +496,51 @@ namespace neogfx
 		return *this;
 	}
 
+	bool widget::has_size_policy() const
+	{
+		return iSizePolicy != boost::none;
+	}
+
+	size_policy widget::size_policy() const
+	{
+		if (has_size_policy())
+			return *iSizePolicy;
+		else
+			return size_policy::Minimum;
+	}
+
+	void widget::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
+	{
+		if (iSizePolicy != aSizePolicy)
+		{
+			iSizePolicy = aSizePolicy;
+			if (aUpdateLayout && has_managing_layout())
+				managing_layout().layout_items(true);
+		}
+	}
+
+	bool widget::has_weight() const
+	{
+		return iWeight != boost::none;
+	}
+
+	size widget::weight() const
+	{
+		if (has_weight())
+			return *iWeight;
+		return 1.0;
+	}
+
+	void widget::set_weight(const optional_size& aWeight, bool aUpdateLayout)
+	{
+		if (iWeight != aWeight)
+		{
+			iWeight = aWeight;
+			if (aUpdateLayout && has_managing_layout())
+				managing_layout().layout_items(true);
+		}
+	}
+
 	bool widget::has_minimum_size() const
 	{
 		return iMinimumSize != boost::none;
@@ -499,11 +557,10 @@ namespace neogfx
 
 	void widget::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
-		if ((iMinimumSize == boost::none && aMinimumSize != boost::none) || 
-			(iMinimumSize != boost::none && aMinimumSize == boost::none) ||
-			(iMinimumSize != boost::none && *iMinimumSize != units_converter(*this).to_device_units(*aMinimumSize)))
+		optional_size newMinimumSize = (aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
+		if (iMinimumSize != newMinimumSize)
 		{
-			iMinimumSize = aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size();
+			iMinimumSize = newMinimumSize;
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
@@ -525,11 +582,10 @@ namespace neogfx
 
 	void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
-		if ((iMaximumSize == boost::none && aMaximumSize != boost::none) ||
-			(iMaximumSize != boost::none && aMaximumSize == boost::none) ||
-			(iMaximumSize != boost::none && *iMaximumSize != units_converter(*this).to_device_units(*aMaximumSize)))
+		optional_size newMaximumSize = (aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
+		if (iMaximumSize != newMaximumSize)
 		{
-			iMaximumSize = aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size();
+			iMaximumSize = newMaximumSize;
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
@@ -546,11 +602,6 @@ namespace neogfx
 		set_maximum_size(aFixedSize, aUpdateLayout);
 	}
 
-	size widget::size_hint() const
-	{
-		return size{};
-	}
-
 	bool widget::has_margins() const
 	{
 		return iMargins != boost::none;
@@ -561,12 +612,15 @@ namespace neogfx
 		return units_converter(*this).from_device_units(has_margins() ? *iMargins : app::instance().current_style().margins());
 	}
 
-	void widget::set_margins(const optional_margins& aMargins)
+	void widget::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
 	{
-		optional_margins oldMargins = iMargins;
-		iMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins());
-		if (iMargins != oldMargins && has_managing_layout())
-			managing_layout().layout_items(true);
+		optional_margins newMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins());
+		if (iMargins != newMargins)
+		{
+			iMargins = newMargins;
+			if (aUpdateLayout && has_managing_layout())
+				managing_layout().layout_items(true);
+		}
 	}
 
 	void widget::update(bool aIncludeNonClient)

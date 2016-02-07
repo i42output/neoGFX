@@ -127,6 +127,10 @@
     <ClInclude Include="..\..\..\include\neogfx\i_style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_surface.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_surface_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_tab.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_tab_container.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_tab_page.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_tab_page_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\keyboard.hpp" />
@@ -155,10 +159,14 @@
     <ClInclude Include="..\..\..\include\neogfx\skyline_bin_pack.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\splitter.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\stack_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\subpixel_rgb_horizontal.frag.glsl.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\surface_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\table_view.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\tab_bar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\tab_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\tab_page_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text_direction_map.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text_widget.hpp" />
@@ -174,6 +182,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\include\neogfx\check_box.cpp" />
     <ClCompile Include="..\..\..\include\neogfx\radio_button.cpp" />
+    <ClCompile Include="..\..\..\include\neogfx\tab_bar.cpp" />
+    <ClCompile Include="..\..\..\include\neogfx\tab_button.cpp" />
+    <ClCompile Include="..\..\..\include\neogfx\tab_page_container.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
     <ClCompile Include="..\..\..\src\button.cpp" />
     <ClCompile Include="..\..\..\src\colour.cpp" />
@@ -207,6 +218,7 @@
     <ClCompile Include="..\..\..\src\skyline_bin_pack.cpp" />
     <ClCompile Include="..\..\..\src\spacer.cpp" />
     <ClCompile Include="..\..\..\src\splitter.cpp" />
+    <ClCompile Include="..\..\..\src\stack_layout.cpp" />
     <ClCompile Include="..\..\..\src\style.cpp" />
     <ClCompile Include="..\..\..\src\surface_manager.cpp" />
     <ClCompile Include="..\..\..\src\table_view.cpp" />

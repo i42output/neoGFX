@@ -1,4 +1,4 @@
-// label.hpp
+// stack_layout.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -16,29 +16,25 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #pragma once
 
 #include "neogfx.hpp"
-#include "horizontal_layout.hpp"
-#include "text_widget.hpp"
+#include "layout.hpp"
 
 namespace neogfx
 {
-	class label : public widget
+	class stack_layout : public layout
 	{
 	public:
-		label(const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre);
-		label(i_widget& aParent, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre);
-		label(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre);
+		stack_layout(i_widget& aParent);
+		stack_layout(i_layout& aParent);
 	public:
-		const text_widget& text() const;
-		text_widget& text();
-	private:
-		void handle_alignment();
-	private:
-		alignment iAlignment;
-		horizontal_layout iLayout;
-		text_widget iText;
+		using layout::add_spacer;
+		virtual i_spacer& add_spacer();
+		virtual i_spacer& add_spacer(uint32_t aPosition);
+	public:
+		virtual size minimum_size() const;
+		virtual size maximum_size() const;
+		virtual void layout_items(const point& aPosition, const size& aSize);
 	};
 }

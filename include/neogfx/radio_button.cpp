@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "neogfx.hpp"
 #include "app.hpp"
+#include "spacer.hpp"
 #include "radio_button.hpp"
 
 namespace neogfx

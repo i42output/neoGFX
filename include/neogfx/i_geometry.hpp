@@ -24,9 +24,24 @@
 
 namespace neogfx
 {
+	enum class size_policy
+	{
+		Minimum,
+		Maximum,
+		Expanding
+	};
+
+	typedef boost::optional<size_policy> optional_size_policy;
+
 	class i_geometry
 	{
 	public:
+		virtual bool has_size_policy() const = 0;
+		virtual neogfx::size_policy size_policy() const = 0;
+		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) = 0;
+		virtual bool has_weight() const = 0;
+		virtual size weight() const = 0;
+		virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) = 0;
 		virtual bool has_minimum_size() const = 0;
 		virtual size minimum_size() const = 0;
 		virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) = 0;
@@ -38,6 +53,6 @@ namespace neogfx
 	public:
 		virtual bool has_margins() const = 0;
 		virtual neogfx::margins margins() const = 0;
-		virtual void set_margins(const optional_margins& aMargins) = 0;
+		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) = 0;
 	};
 }

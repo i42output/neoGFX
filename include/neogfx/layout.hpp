@@ -50,9 +50,17 @@ namespace neogfx
 		public:
 			const pointer_wrapper& get() const;
 			pointer_wrapper& get();
+			const i_geometry& wrapped_geometry() const;
+			i_geometry& wrapped_geometry();
 			void set_owner(i_widget* aOwner);
 			void layout(const point& aPosition, const size& aSize);
 		public:
+			virtual bool has_size_policy() const;
+			virtual neogfx::size_policy size_policy() const;
+			virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
+			virtual bool has_weight() const;
+			virtual size weight() const;
+			virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true);
 			virtual bool has_minimum_size() const;
 			virtual size minimum_size() const;
 			virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true);
@@ -64,7 +72,7 @@ namespace neogfx
 		public:
 			virtual bool has_margins() const;
 			virtual neogfx::margins margins() const;
-			virtual void set_margins(const optional_margins& aMargins);
+			virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
 		public:
 			bool visible() const;
 		private:
@@ -74,6 +82,7 @@ namespace neogfx
 		typedef std::list<item> item_list;
 		enum item_type_e
 		{
+			ItemTypeNone = 0x00,
 			ItemTypeWidget = 0x01,
 			ItemTypeLayout = 0x02,
 			ItemTypeSpacer = 0x04
@@ -118,7 +127,7 @@ namespace neogfx
 	public:
 		virtual bool has_margins() const;
 		virtual neogfx::margins margins() const;
-		virtual void set_margins(const optional_margins& aMargins);
+		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
 	public:
 		virtual size spacing() const;
 		virtual void set_spacing(dimension aSpacing);
@@ -128,6 +137,12 @@ namespace neogfx
 		virtual void disable();
 		virtual bool enabled() const;
 	public:
+		virtual bool has_size_policy() const;
+		virtual neogfx::size_policy size_policy() const;
+		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
+		virtual bool has_weight() const;
+		virtual size weight() const;
+		virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true);
 		virtual bool has_minimum_size() const;
 		virtual size minimum_size() const;
 		virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true);
@@ -153,6 +168,8 @@ namespace neogfx
 		optional_margins iMargins;
 		size iSpacing;
 		bool iEnabled;
+		optional_size_policy iSizePolicy;
+		optional_size iWeight;
 		optional_size iMinimumSize;
 		optional_size iMaximumSize;
 		item_list iItems;

@@ -43,8 +43,5 @@ namespace neogfx
 		virtual void set_parent(i_layout& aParent) = 0;
 		virtual expansion_policy_e expansion_policy() const = 0;
 		virtual void set_expansion_policy(expansion_policy_e aExpansionPolicy) = 0;
-		virtual bool has_weight() const = 0;
-		virtual size weight() const = 0;
-		virtual void set_weight(const optional_size& aWeight) = 0;
 	};
 }

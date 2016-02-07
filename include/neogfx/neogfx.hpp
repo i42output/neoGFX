@@ -20,3 +20,23 @@
 #pragma once
 
 #include <neolib/neolib.hpp>
+
+namespace neogfx
+{
+	inline const void*& debug()
+	{
+		static const void* sObject;
+		return sObject;
+	}
+
+	inline void set_debug(const void* aObject)
+	{
+		debug() = aObject;
+	}
+
+	template <typename T>
+	inline void set_debug(const T& aObject)
+	{
+		debug() = &aObject;
+	}
+}

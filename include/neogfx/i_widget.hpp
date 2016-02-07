@@ -50,6 +50,7 @@ namespace neogfx
 		typedef std::vector<std::shared_ptr<i_widget>> widget_list;
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_widget::no_parent") {} };
+		struct not_child : std::logic_error { not_child() : std::logic_error("neogfx::i_widget::not_child") {} };
 		struct no_update_rect : std::logic_error { no_update_rect() : std::logic_error("neogfx::i_widget::no_update_rect") {} };
 		struct widget_not_entered : std::logic_error { widget_not_entered() : std::logic_error("neogfx::i_widget::widget_not_entered") {} };
 		struct widget_not_capturing : std::logic_error { widget_not_capturing() : std::logic_error("neogfx::i_widget::widget_not_capturing") {} };
@@ -106,7 +107,6 @@ namespace neogfx
 		virtual rect window_rect() const = 0;
 		virtual rect client_rect(bool aIncludeMargins = true) const = 0;
 		virtual i_widget& widget_at(const point& aPosition) = 0;
-		virtual size size_hint() const = 0;
 	public:
 		virtual void update(bool aIncludeNonClient = false) = 0;
 		virtual void update(const rect& aUpdateRect) = 0;

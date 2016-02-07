@@ -25,43 +25,46 @@
 namespace neogfx
 {
 	label::label(const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(), iAlignment(aAlignment), iLayout(*this), iText(new text_widget(iLayout, aText, aMultiLine))
+		widget(), iAlignment(aAlignment), iLayout(*this), iText(iLayout, aText, aMultiLine)
 	{
 		handle_alignment();
+		iLayout.set_size_policy(neogfx::size_policy::Minimum);
 		iLayout.set_margins(neogfx::margins(0.0));
-		iText->set_margins(neogfx::margins(0.0));
+		iText.set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
-		iText->set_ignore_mouse_events(true);
+		iText.set_ignore_mouse_events(true);
 	}
 
 	label::label(i_widget& aParent, const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(aParent), iAlignment(aAlignment), iLayout(*this), iText(new text_widget(iLayout, aText, aMultiLine))
+		widget(aParent), iAlignment(aAlignment), iLayout(*this), iText(iLayout, aText, aMultiLine)
 	{
 		handle_alignment();
+		iLayout.set_size_policy(neogfx::size_policy::Minimum);
 		iLayout.set_margins(neogfx::margins(0.0));
-		iText->set_margins(neogfx::margins(0.0));
+		iText.set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
-		iText->set_ignore_mouse_events(true);
+		iText.set_ignore_mouse_events(true);
 	}
 
 	label::label(i_layout& aLayout, const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(aLayout), iAlignment(aAlignment), iLayout(*this), iText(new text_widget(iLayout, aText, aMultiLine))
+		widget(aLayout), iAlignment(aAlignment), iLayout(*this), iText(iLayout, aText, aMultiLine)
 	{
 		handle_alignment();
+		iLayout.set_size_policy(neogfx::size_policy::Minimum);
 		iLayout.set_margins(neogfx::margins(0.0));
-		iText->set_margins(neogfx::margins(0.0));
+		iText.set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
-		iText->set_ignore_mouse_events(true);
+		iText.set_ignore_mouse_events(true);
 	}
 
 	const text_widget& label::text() const
 	{
-		return static_cast<const text_widget&>(*iText);
+		return iText;
 	}
 
 	text_widget& label::text()
 	{
-		return static_cast<text_widget&>(*iText);
+		return iText;
 	}
 
 	void label::handle_alignment()

@@ -65,6 +65,20 @@ namespace neogfx
 		return iPointerWrapper;
 	}
 
+	const i_geometry& layout::item::wrapped_geometry() const
+	{
+		return iPointerWrapper.is<widget_pointer>() ?
+			static_cast<const i_geometry&>(*static_variant_cast<const widget_pointer&>(iPointerWrapper)) :
+			iPointerWrapper.is<layout_pointer>() ?
+				static_cast<const i_geometry&>(*static_variant_cast<const layout_pointer&>(iPointerWrapper)) :
+				static_cast<const i_geometry&>(*static_variant_cast<const spacer_pointer&>(iPointerWrapper));
+	}
+
+	i_geometry& layout::item::wrapped_geometry()
+	{
+		return const_cast<i_geometry&>(const_cast<const item*>(this)->wrapped_geometry());
+	}
+
 	void layout::item::set_owner(i_widget* aOwner)
 	{
 		iOwner = aOwner;
@@ -85,62 +99,68 @@ namespace neogfx
 		}
 	}
 
+	bool layout::item::has_size_policy() const
+	{
+		return wrapped_geometry().has_size_policy();
+	}
+
+	size_policy layout::item::size_policy() const
+	{
+		return wrapped_geometry().size_policy();
+	}
+
+	void layout::item::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
+	{
+		wrapped_geometry().set_size_policy(aSizePolicy, aUpdateLayout);
+	}
+
+	bool layout::item::has_weight() const
+	{
+		return wrapped_geometry().has_weight();
+	}
+
+	size layout::item::weight() const
+	{
+		return wrapped_geometry().weight();
+	}
+
+	void layout::item::set_weight(const optional_size& aWeight, bool aUpdateLayout)
+	{
+		wrapped_geometry().set_weight(aWeight, aUpdateLayout);
+	}
+
 	bool layout::item::has_minimum_size() const
 	{
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->has_minimum_size() :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_variant_cast<const layout_pointer&>(iPointerWrapper)->has_minimum_size() : 
-				static_variant_cast<const spacer_pointer&>(iPointerWrapper)->has_minimum_size();
+		return wrapped_geometry().has_minimum_size();
 	}
 
 	size layout::item::minimum_size() const
 	{
 		if (!visible())
 			return size{};
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->minimum_size() :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_variant_cast<const layout_pointer&>(iPointerWrapper)->minimum_size() : 
-				static_variant_cast<const spacer_pointer&>(iPointerWrapper)->minimum_size();
+		return wrapped_geometry().minimum_size();
 	}
 
 	void layout::item::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->set_minimum_size(aMinimumSize, aUpdateLayout) :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_variant_cast<const layout_pointer&>(iPointerWrapper)->set_minimum_size(aMinimumSize, aUpdateLayout) :
-				static_variant_cast<const spacer_pointer&>(iPointerWrapper)->set_minimum_size(aMinimumSize, aUpdateLayout);
+		wrapped_geometry().set_minimum_size(aMinimumSize, aUpdateLayout);
 	}
 
 	bool layout::item::has_maximum_size() const
 	{
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->has_maximum_size() :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_variant_cast<const layout_pointer&>(iPointerWrapper)->has_maximum_size() : 
-				static_variant_cast<const spacer_pointer&>(iPointerWrapper)->has_maximum_size();
+		return wrapped_geometry().has_maximum_size();
 	}
 
 	size layout::item::maximum_size() const
 	{
 		if (!visible())
-			return size{};
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->maximum_size() :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_variant_cast<const layout_pointer&>(iPointerWrapper)->maximum_size() : 
-				static_variant_cast<const spacer_pointer&>(iPointerWrapper)->maximum_size();
+			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+		return wrapped_geometry().maximum_size();
 	}
 
 	void layout::item::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->set_maximum_size(aMaximumSize, aUpdateLayout) :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_variant_cast<const layout_pointer&>(iPointerWrapper)->set_maximum_size(aMaximumSize, aUpdateLayout) : 
-				static_variant_cast<const spacer_pointer&>(iPointerWrapper)->set_maximum_size(aMaximumSize, aUpdateLayout);
+		wrapped_geometry().set_maximum_size(aMaximumSize, aUpdateLayout);
 	}
 
 	bool layout::item::is_fixed_size() const
@@ -156,28 +176,17 @@ namespace neogfx
 
 	bool layout::item::has_margins() const
 	{
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->has_margins() :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_variant_cast<const layout_pointer&>(iPointerWrapper)->has_margins() : 
-				false;
+		return wrapped_geometry().has_margins();
 	}
 
 	margins layout::item::margins() const
 	{
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->margins() :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_variant_cast<const layout_pointer&>(iPointerWrapper)->margins() : 
-				neogfx::margins{};
+		return wrapped_geometry().margins();
 	}
 
-	void layout::item::set_margins(const optional_margins& aMargins)
+	void layout::item::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
 	{
-		if (iPointerWrapper.is<widget_pointer>())
-			static_variant_cast<const widget_pointer&>(iPointerWrapper)->set_margins(aMargins);
-		else if (iPointerWrapper.is<layout_pointer>())
-			static_variant_cast<const layout_pointer&>(iPointerWrapper)->set_margins(aMargins);
+		wrapped_geometry().set_margins(aMargins, aUpdateLayout);
 	}
 
 	bool layout::item::visible() const
@@ -403,12 +412,15 @@ namespace neogfx
 		return units_converter(*this).from_device_units(has_margins() ? *iMargins : app::instance().current_style().margins());
 	}
 
-	void layout::set_margins(const optional_margins& aMargins)
+	void layout::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
 	{
-		optional_margins oldMargins = iMargins;
-		iMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins());
-		if (iMargins != oldMargins && iOwner != 0)
-			iOwner->ultimate_ancestor().layout_items(true);
+		optional_margins newMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins());
+		if (iMargins != newMargins)
+		{
+			iMargins = newMargins;
+			if (iOwner != 0 && aUpdateLayout)
+				iOwner->ultimate_ancestor().layout_items(true);
+		}
 	}
 
 	size layout::spacing() const
@@ -453,6 +465,52 @@ namespace neogfx
 		return iEnabled;
 	}
 
+	bool layout::has_size_policy() const
+	{
+		return iSizePolicy != boost::none;
+	}
+
+	size_policy layout::size_policy() const
+	{
+		if (has_size_policy())
+			return *iSizePolicy;
+		else
+			return size_policy::Minimum;
+	}
+
+	void layout::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
+	{
+		if (iSizePolicy != aSizePolicy)
+		{
+			iSizePolicy = aSizePolicy;
+			if (iOwner != 0 && aUpdateLayout)
+				iOwner->ultimate_ancestor().layout_items(true);
+		}
+	}
+
+	bool layout::has_weight() const
+	{
+		return iWeight != boost::none;
+	}
+
+	size layout::weight() const
+	{
+		if (has_weight())
+			return *iWeight;
+		else
+			return 1.0;
+	}
+
+	void layout::set_weight(const optional_size& aWeight, bool aUpdateLayout)
+	{
+		if (iWeight != aWeight)
+		{
+			iWeight = aWeight;
+			if (iOwner != 0 && aUpdateLayout)
+				iOwner->ultimate_ancestor().layout_items(true);
+		}
+	}
+
 	bool layout::has_minimum_size() const
 	{
 		return iMinimumSize != boost::none;
@@ -467,11 +525,10 @@ namespace neogfx
 
 	void layout::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
-		if ((iMinimumSize == boost::none && aMinimumSize != boost::none) ||
-			(iMinimumSize != boost::none && aMinimumSize == boost::none) ||
-			(iMinimumSize != boost::none && *iMinimumSize != units_converter(*this).to_device_units(*aMinimumSize)))
+		optional_size newMinimumSize = (aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
+		if (iMinimumSize != newMinimumSize)
 		{
-			iMinimumSize = aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size();
+			iMinimumSize = newMinimumSize;
 			if (iOwner != 0 && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
@@ -491,11 +548,10 @@ namespace neogfx
 
 	void layout::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
-		if ((iMaximumSize == boost::none && aMaximumSize != boost::none) ||
-			(iMaximumSize != boost::none && aMaximumSize == boost::none) ||
-			(iMaximumSize != boost::none && *iMaximumSize != units_converter(*this).to_device_units(*aMaximumSize)))
+		optional_size newMaximumSize = (aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
+		if (iMaximumSize != newMaximumSize)
 		{
-			iMaximumSize = aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size();
+			iMaximumSize = newMaximumSize;
 			if (iOwner != 0 && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}

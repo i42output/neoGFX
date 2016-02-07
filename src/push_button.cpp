@@ -74,7 +74,7 @@ namespace neogfx
 		scoped_units su(*this, UnitsPixels);
 		path outline = get_path();
 		dimension penWidth = device_metrics().horizontal_dpi() / 96;
-		if (iStyle == ButtonStyleNormal)
+		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleTab)
 			outline.deflate(penWidth * 2.0, penWidth * 2.0);
 		aGraphicsContext.clip_to(outline);
 		colour topHalfFrom = faceColour.same_lightness_as(colour::White);
@@ -108,7 +108,7 @@ namespace neogfx
 			focusRect.deflate(2.0, 2.0);
 			aGraphicsContext.draw_focus_rect(focusRect);
 		}
-		if (iStyle == ButtonStyleNormal)
+		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleTab)
 		{
 			outline.inflate(penWidth, penWidth);
 			aGraphicsContext.draw_path(outline, pen(innerBorderColour, penWidth));
@@ -135,10 +135,11 @@ namespace neogfx
 	{
 		path ret;
 		size pixel = units_converter(*this).from_device_units(size(1.0, 1.0));
-		const neogfx::size& currentSize = client_rect().extents();
+		size currentSize = client_rect().extents();
 		switch (iStyle)
 		{
 		case ButtonStyleNormal:
+		case ButtonStyleTab:
 			ret.move_to(pixel.cx, 0, 12);
 			ret.line_to(currentSize.cx - pixel.cx, 0);
 			ret.line_to(currentSize.cx - pixel.cx, pixel.cy);

@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "neogfx.hpp"
 #include "button.hpp"
-#include "spacer.hpp"
 
 namespace neogfx
 {

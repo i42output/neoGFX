@@ -62,9 +62,6 @@ namespace neogfx
 		}
 		virtual i_layout& get_layout(std::size_t aIndex) = 0;
 	public:
-		virtual neogfx::margins margins() const = 0;
-		virtual void set_margins(const optional_margins& aMargins) = 0;
-	public:
 		virtual size spacing() const = 0;
 		virtual void set_spacing(dimension sSpacing) = 0;
 		virtual void set_spacing(size aSpacing) = 0;

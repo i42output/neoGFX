@@ -72,6 +72,8 @@ namespace neogfx
 		std::pair<item_model_index::value_type, coordinate> first_visible_item(graphics_context& aGraphicsContext) const;
 		std::pair<item_model_index::value_type, coordinate> last_visible_item(graphics_context& aGraphicsContext) const;
 	protected:
+		virtual neogfx::size_policy size_policy() const;
+	protected:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	protected:
 		virtual void released();

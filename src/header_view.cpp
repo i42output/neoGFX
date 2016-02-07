@@ -42,11 +42,11 @@ namespace neogfx
 					iParent.layout().add_widget(std::make_shared<push_button>("", push_button::ButtonStyleItemViewHeader));
 				for (std::size_t i = 0; i < iParent.layout().item_count(); ++i)
 				{
+					push_button& button = iParent.layout().get_widget<push_button>(i);
 					if (i < iParent.model().columns())
 					{
-						push_button& button = iParent.layout().get_widget<push_button>(i);
 						button.text().set_text(iParent.model().column_heading_text(i));
-						iParent.layout().get_widget<push_button>(i).set_minimum_size(optional_size{});
+						button.set_minimum_size(optional_size{});
 						button.enable(true);
 						button.pressed.subscribe([&, i]()
 						{
@@ -58,8 +58,9 @@ namespace neogfx
 					}
 					else
 					{
-						iParent.layout().get_widget<push_button>(i).set_minimum_size(size{});
-						iParent.layout().get_widget(i).enable(false);
+						button.text().set_text(std::string());
+						button.set_minimum_size(size{});
+						button.enable(false);
 					}
 				}
 				uint64_t since = app::instance().program_elapsed_ms();
@@ -104,6 +105,7 @@ namespace neogfx
 		iType(aType),
 		iBatchUpdatesInProgress(0)
 	{
+		set_debug(layout());
 	}
 
 	header_view::header_view(i_widget& aParent, i_owner& aOwner, type_e aType) :
@@ -112,6 +114,7 @@ namespace neogfx
 		iType(aType),
 		iBatchUpdatesInProgress(0)
 	{
+		set_debug(layout());
 	}
 
 	header_view::header_view(i_layout& aLayout, i_owner& aOwner, type_e aType) :
@@ -120,6 +123,7 @@ namespace neogfx
 		iType(aType),
 		iBatchUpdatesInProgress(0)
 	{
+		set_debug(layout());
 	}
 
 	header_view::~header_view()
@@ -297,9 +301,9 @@ namespace neogfx
 
 	dimension header_view::section_width(uint32_t aSectionIndex) const
 	{
-		if (aSectionIndex >= iSectionWidths.size())
-			_asm int 3;
-		return units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].first != boost::none ? *iSectionWidths[aSectionIndex].first : iSectionWidths[aSectionIndex].second);
+		return units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].first != boost::none ? 
+			*iSectionWidths[aSectionIndex].first : 
+			iSectionWidths[aSectionIndex].second);
 	}
 
 	dimension header_view::total_width() const

@@ -82,7 +82,7 @@ namespace neogfx
 	size vertical_layout::maximum_size() const
 	{
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
-			return size{};
+			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
 		size result{ 0.0, std::numeric_limits<size::dimension_type>::max() };
 		for (const auto& item : items())
 		{
@@ -132,15 +132,15 @@ namespace neogfx
 			availableSize.cy -= (spacing().cy * (items_visible() - itemsZeroSized - 1));
 		size::dimension_type leftover = availableSize.cy;
 		size::dimension_type eachLeftover = std::floor(leftover / items_visible());
-		size totalSpacerWeight;
-		enum disposition_e { Unknown, Normal, TooSmall, TooBig };
+		size totalExpanderWeight;
+		enum disposition_e { Unknown, Normal, TooSmall, TooBig, FixedSize };
 		std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<std::pair<const item*, disposition_e>>> itemDispositions;
-		std::unordered_set<const item*, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<const item*>> spacersUsingLeftover;
+		std::unordered_set<const item*, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<const item*>> expandersUsingLeftover;
 		auto items_not_using_leftover = [&itemDispositions]() -> std::size_t 
 		{ 
 			std::size_t result = 0;
 			for (auto& i : itemDispositions)
-				if (i.second == TooSmall || i.second == TooBig)
+				if (i.second == TooSmall || i.second == TooBig || i.second == FixedSize)
 					++result;
 			return result;
 		};
@@ -152,23 +152,23 @@ namespace neogfx
 			{
 				if (!item.visible())
 					continue;
-				if (spacersUsingLeftover.find(&item) != spacersUsingLeftover.end())
+				if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
 					continue;
-				if (item.get().is<item::spacer_pointer>() && item.maximum_size().cy >= leftover)
+				if (item.size_policy() == size_policy::Expanding && item.maximum_size().cy >= leftover)
 				{
-					if (spacersUsingLeftover.empty())
+					if (expandersUsingLeftover.empty())
 					{
 						itemDispositions.clear();
 						leftover = availableSize.cy;
-						totalSpacerWeight = size{};
+						totalExpanderWeight = size{};
 						eachLeftover = 0.0;
 					}
-					spacersUsingLeftover.insert(&item);
-					totalSpacerWeight += static_variant_cast<item::spacer_pointer>(item.get())->weight();
+					expandersUsingLeftover.insert(&item);
+					totalExpanderWeight += item.weight();
 					done = false;
 					break;
 				}
-				else if (!item.get().is<item::spacer_pointer>() && !spacersUsingLeftover.empty())
+				else if (item.size_policy() != size_policy::Expanding && !expandersUsingLeftover.empty())
 				{
 					if (itemDispositions[&item] != TooBig)
 					{
@@ -181,42 +181,42 @@ namespace neogfx
 				}
 				else if (item.maximum_size().cy < eachLeftover)
 				{
-					if (itemDispositions[&item] != TooSmall && itemDispositions[&item] != Normal)
+					if (itemDispositions[&item] != TooSmall && itemDispositions[&item] != Normal && itemDispositions[&item] != FixedSize)
 					{
 						if (itemDispositions[&item] == TooBig)
 							leftover += item.minimum_size().cy;
-						itemDispositions[&item] = TooSmall;
+						itemDispositions[&item] = item.is_fixed_size() ? FixedSize : TooSmall;
 						leftover -= item.maximum_size().cy;
-						if (spacersUsingLeftover.empty())
+						if (expandersUsingLeftover.empty())
 							eachLeftover = std::floor(leftover / (items_visible() - items_not_using_leftover()));
 						done = false;
 					}
 				}
 				else if (item.minimum_size().cy > eachLeftover)
 				{
-					if (itemDispositions[&item] != TooBig)
+					if (itemDispositions[&item] != TooBig && itemDispositions[&item] != FixedSize)
 					{
 						if (itemDispositions[&item] == TooSmall)
 							leftover += item.maximum_size().cy;
-						itemDispositions[&item] = TooBig;
+						itemDispositions[&item] = item.is_fixed_size() ? FixedSize : TooBig;
 						leftover -= item.minimum_size().cy;
-						if (spacersUsingLeftover.empty())
+						if (expandersUsingLeftover.empty())
 							eachLeftover = std::floor(leftover / (items_visible() - items_not_using_leftover()));
 						done = false;
 					}
 				}
-				else if (itemDispositions[&item] != Normal)
+				else if (itemDispositions[&item] != Normal && itemDispositions[&item] != FixedSize)
 				{
 					if (itemDispositions[&item] == TooSmall)
 						leftover += item.maximum_size().cy;
 					else if (itemDispositions[&item] == TooBig)
 						leftover += item.minimum_size().cy;
-					itemDispositions[&item] = Normal;
-					if (spacersUsingLeftover.empty())
+					itemDispositions[&item] = item.is_fixed_size() ? FixedSize : Normal;
+					if (expandersUsingLeftover.empty())
 						eachLeftover = std::floor(leftover / (items_visible() - items_not_using_leftover()));
 					done = false;
 				}
-			}
+			}	
 		}
 		if (leftover < 0.0)
 		{
@@ -225,11 +225,11 @@ namespace neogfx
 		}
 		uint32_t numberUsingLeftover = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) - items_not_using_leftover();
 		uint32_t bitsLeft = static_cast<int32_t>(leftover - (eachLeftover * numberUsingLeftover));
-		if (!spacersUsingLeftover.empty())
+		if (!expandersUsingLeftover.empty())
 		{
 			size::dimension_type totalIntegralAmount = 0.0;
-			for (const auto& s : spacersUsingLeftover)
-				totalIntegralAmount += std::floor(static_variant_cast<const item::spacer_pointer&>(s->get())->weight().cy / totalSpacerWeight.cy * leftover);
+			for (const auto& s : expandersUsingLeftover)
+				totalIntegralAmount += std::floor(s->weight().cy / totalExpanderWeight.cy * leftover);
 			bitsLeft = static_cast<int32_t>(leftover - totalIntegralAmount);
 		}
 		neolib::bresenham_counter<int32_t> bits(bitsLeft, numberUsingLeftover);
@@ -256,14 +256,14 @@ namespace neogfx
 				alignmentAdjust.x = std::ceil((availableSize.cx - s.cx) / 2.0);
 				break;
 			}
-			if (itemDispositions[&item] == TooBig)
+			if (itemDispositions[&item] == TooBig || itemDispositions[&item] == FixedSize)
 				s.cy = item.minimum_size().cy;
 			else if (itemDispositions[&item] == TooSmall)
 				s.cy = item.maximum_size().cy;
-			else if (spacersUsingLeftover.find(&item) != spacersUsingLeftover.end())
+			else if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
 			{
 				uint32_t bit = bitsLeft != 0 ? bits() : 0;
-				s.cy = std::floor(static_variant_cast<const item::spacer_pointer&>(item.get())->weight().cy / totalSpacerWeight.cy * leftover) + static_cast<size::dimension_type>(bit - previousBit);
+				s.cy = std::floor(item.weight().cy / totalExpanderWeight.cy * leftover) + static_cast<size::dimension_type>(bit - previousBit);
 				previousBit = bit;
 			}
 			else

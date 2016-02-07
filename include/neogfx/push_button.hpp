@@ -31,7 +31,8 @@ namespace neogfx
 		enum style_e
 		{
 			ButtonStyleNormal,
-			ButtonStyleItemViewHeader
+			ButtonStyleItemViewHeader,
+			ButtonStyleTab
 		};
 		static const uint32_t kMaxAnimationFrame = 20;
 	public:
@@ -44,7 +45,7 @@ namespace neogfx
 		virtual void mouse_entered();
 		virtual void mouse_left();
 	private:
-		path get_path() const;
+		virtual path get_path() const;
 		bool has_hover_colour() const;
 		colour hover_colour() const;
 		void set_hover_colour(const optional_colour& aHoverColour = optional_colour());

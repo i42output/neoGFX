@@ -29,6 +29,13 @@ namespace neogfx
 	{
 	}
 
+	neogfx::size_policy button::our_layout::size_policy() const
+	{
+		if (has_size_policy())
+			return horizontal_layout::size_policy();
+		return size_policy::Minimum;
+	}
+
 	neogfx::margins button::our_layout::margins() const
 	{
 		return has_margins() ? 
@@ -39,32 +46,36 @@ namespace neogfx
 	}
 
 	button::button(const std::string& aText, alignment aAlignment) :
-		widget(), iLayout(*this), iLabel(new neogfx::label(iLayout, aText, true, aAlignment))
+		widget(), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		set_focus_policy(focus_policy::TabFocus);
 	}
 	
 	button::button(i_widget& aParent, const std::string& aText, alignment aAlignment) :
-		widget(aParent), iLayout(*this), iLabel(new neogfx::label(iLayout, aText, true, aAlignment))
+		widget(aParent), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		set_focus_policy(focus_policy::TabFocus);
 	}
 
 
 	button::button(i_layout& aLayout, const std::string& aText, alignment aAlignment) :
-		widget(aLayout), iLayout(*this), iLabel(new neogfx::label(iLayout, aText, true, aAlignment))
+		widget(aLayout), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		set_focus_policy(focus_policy::TabFocus);
 	}
 
+	button::~button()
+	{
+	}
+	
 	const neogfx::label& button::label() const
 	{
-		return static_cast<const neogfx::label&>(*iLabel);
+		return iLabel;
 	}
 
 	neogfx::label& button::label()
 	{
-		return static_cast<neogfx::label&>(*iLabel);
+		return iLabel;
 	}
 
 	const text_widget& button::text() const
