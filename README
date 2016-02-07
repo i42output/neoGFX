@@ -5,7 +5,7 @@ Feature                     % done       TODO
 Window                      90           Icon
 Menu                        0
 MDI                         0
-Tabs                        0
+Tabs                        80
 Tool Bar                    0 
 Layout Managers             80           Grid Layout needs span support
 Label                       80           Icon
@@ -22,4 +22,4 @@ Colour Picker               0
 File Browsers (Native)      0
 XML Resource Description    0
 
-Last updated: 04/02/16
+Last updated: 07/02/16
