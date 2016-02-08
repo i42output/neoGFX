@@ -114,8 +114,6 @@ namespace neogfx
 			return;
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return;
-		if (debug() == this)
-			std::cerr << "debug" << std::endl;
 		size availableSize = aSize;
 		availableSize.cx -= (margins().left + margins().right);
 		availableSize.cy -= (margins().top + margins().bottom);
