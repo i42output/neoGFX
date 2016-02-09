@@ -537,14 +537,14 @@ namespace neogfx
 			if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
 			{
 				for (w = &w->link_after(); 
-					w != start && (w->hidden() || w->disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus); 
+					w != start && (w->effectively_hidden() || w->effectively_disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus); 
 					w = &w->link_after())
 					;
 			}
 			else
 			{
 				for (w = &w->link_before();
-					w != start && (w->hidden() || w->disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus);
+					w != start && (w->effectively_hidden() || w->effectively_disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus);
 					w = &w->link_before())
 					;
 			}

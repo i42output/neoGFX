@@ -810,9 +810,19 @@ namespace neogfx
 		return iVisible;
 	}
 
+	bool widget::effectively_visible() const
+	{
+		return visible() && (is_root() || !has_parent() || parent().effectively_visible());
+	}
+
 	bool widget::hidden() const
 	{
 		return !visible();
+	}
+
+	bool widget::effectively_hidden() const
+	{
+		return !effectively_visible();
 	}
 
 	void widget::show(bool aVisible)
@@ -838,10 +848,20 @@ namespace neogfx
 	{
 		return iEnabled;
 	}
+
+	bool widget::effectively_enabled() const
+	{
+		return enabled() && (is_root() || !has_parent() || parent().effectively_enabled());
+	}
 	
 	bool widget::disabled() const
 	{
 		return !enabled();
+	}
+
+	bool widget::effectively_disabled() const
+	{
+		return !effectively_enabled();
 	}
 
 	void widget::enable(bool aEnable)

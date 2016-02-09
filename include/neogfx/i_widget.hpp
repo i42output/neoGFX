@@ -129,12 +129,16 @@ namespace neogfx
 		virtual void set_font(const optional_font& aFont) = 0;
 	public:
 		virtual bool visible() const = 0;
+		virtual bool effectively_visible() const = 0;
 		virtual bool hidden() const = 0;
+		virtual bool effectively_hidden() const = 0;
 		virtual void show(bool aVisible) = 0;
 		virtual void show() = 0;
 		virtual void hide() = 0;
 		virtual bool enabled() const = 0;
+		virtual bool effectively_enabled() const = 0;
 		virtual bool disabled() const = 0;
+		virtual bool effectively_disabled() const = 0;
 		virtual void enable(bool aEnable) = 0;
 		virtual void enable() = 0;
 		virtual void disable() = 0;
