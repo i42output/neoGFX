@@ -198,7 +198,10 @@ namespace neogfx
 			throw tab_not_found();
 		existingTab->second = tab_page_pointer(new default_tab_page(iPageLayout, aTab));
 		if (aTab.is_selected())
+		{
 			existingTab->second->widget().show();
+			layout_items();
+		}
 		else
 			existingTab->second->widget().hide();
 		return *existingTab->second;
@@ -211,7 +214,10 @@ namespace neogfx
 			throw tab_not_found();
 		existingTab->second = tab_page_pointer(tab_page_pointer(), &aWidget);
 		if (aTab.is_selected())
+		{
 			existingTab->second->widget().show();
+			layout_items();
+		}
 		else
 			existingTab->second->widget().hide();
 		return *existingTab->second;
@@ -224,7 +230,10 @@ namespace neogfx
 			throw tab_not_found();
 		existingTab->second = aWidget;
 		if (aTab.is_selected())
+		{
 			existingTab->second->widget().show();
+			layout_items();
+		}
 		else
 			existingTab->second->widget().hide();
 		return *existingTab->second;
@@ -247,6 +256,7 @@ namespace neogfx
 				else
 					tab.second->widget().hide();
 			}
+		layout_items();
 	}
 
 	void tab_page_container::removing_tab(i_tab& aTab)

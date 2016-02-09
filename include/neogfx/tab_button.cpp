@@ -87,14 +87,23 @@ namespace neogfx
 		push_button::text().set_text(aText);
 	}
 
+	rect tab_button::path_bounding_rect() const
+	{
+		scoped_units su(*this, UnitsPixels);
+		rect result = push_button::path_bounding_rect();
+		if (is_deselected())
+			result.deflate(as_units(*this, UnitsMillimetres, delta(0.0, 25.4/96.0)).ceil() * delta(0.0, 2.0));
+		else
+			result.extents() += size(0.0, 3.0);
+		return convert_units(*this, su.saved_units(), result);
+	}
+
 	size tab_button::minimum_size() const
 	{
-		if (is_selected())
-		{
-			scoped_units su(*this, UnitsPixels);
-			return convert_units(*this, su.saved_units(), push_button::minimum_size() + as_units(*this, UnitsMillimetres, size(1.0, 1.0)).ceil());
-		}
-		return push_button::minimum_size();
+		if (has_minimum_size())
+			return push_button::minimum_size();
+		scoped_units su(*this, UnitsPixels);
+		return convert_units(*this, su.saved_units(), push_button::minimum_size() + as_units(*this, UnitsMillimetres, size(25.4/96.0, 25.4/96.0)).ceil() * size(4.0, 4.0));
 	}
 
 	void tab_button::handle_pressed()

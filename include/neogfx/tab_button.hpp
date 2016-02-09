@@ -44,6 +44,8 @@ namespace neogfx
 		virtual const std::string& text() const;
 		virtual void set_text(const std::string& aText);
 	protected:
+		virtual rect path_bounding_rect() const;
+	protected:
 		virtual size minimum_size() const;
 		virtual void handle_pressed();
 	protected:

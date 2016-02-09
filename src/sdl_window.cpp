@@ -95,17 +95,19 @@ namespace neogfx
 
 	sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
-		iHandle(SDL_CreateWindow(
-			aWindowTitle.c_str(), 
-			SDL_WINDOWPOS_UNDEFINED, 
-			SDL_WINDOWPOS_UNDEFINED, 
-			aVideoMode.width(), 
-			aVideoMode.height(), 
-			SDL_WINDOW_OPENGL | convert_style(aStyle))),
+		iHandle(NULL),
 		iContext(NULL),
 		iProcessingEvent(false),
 		iCapturingMouse(false)
 	{
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		iHandle = SDL_CreateWindow(
+			aWindowTitle.c_str(),
+			SDL_WINDOWPOS_UNDEFINED,
+			SDL_WINDOWPOS_UNDEFINED,
+			aVideoMode.width(),
+			aVideoMode.height(),
+			SDL_WINDOW_OPENGL | convert_style(aStyle));
 		if (iHandle == NULL)
 			throw failed_to_create_window(SDL_GetError());
 		iContext = SDL_GL_CreateContext(iHandle);
@@ -121,17 +123,19 @@ namespace neogfx
 
 	sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
-		iHandle(SDL_CreateWindow(
-			aWindowTitle.c_str(), 
-			SDL_WINDOWPOS_UNDEFINED, 
-			SDL_WINDOWPOS_UNDEFINED, 
-			aVideoMode.width(), 
-			aVideoMode.height(), 
-			SDL_WINDOW_OPENGL | convert_style(aStyle))),
+		iHandle(NULL),
 		iContext(NULL),
 		iProcessingEvent(false),
 		iCapturingMouse(false)
 	{
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		iHandle = SDL_CreateWindow(
+			aWindowTitle.c_str(),
+			SDL_WINDOWPOS_UNDEFINED,
+			SDL_WINDOWPOS_UNDEFINED,
+			aVideoMode.width(),
+			aVideoMode.height(),
+			SDL_WINDOW_OPENGL | convert_style(aStyle));
 		if (iHandle == NULL)
 			throw failed_to_create_window(SDL_GetError());
 		iContext = SDL_GL_CreateContext(iHandle);

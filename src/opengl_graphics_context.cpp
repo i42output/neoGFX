@@ -29,6 +29,32 @@
 
 namespace neogfx
 {
+	namespace
+	{
+		inline GLenum path_shape_to_gl_mode(path::shape_type_e aShape)
+		{
+			switch (aShape)
+			{
+			case path::Quads:
+				return GL_QUADS;
+			case path::Lines:
+				return GL_LINES;
+			case path::LineLoop:
+				return GL_LINE_LOOP;
+			case path::LineStrip:
+				return GL_LINE_STRIP;
+			case path::ConvexPolygon:
+				return GL_TRIANGLE_FAN;
+			default:
+				return GL_POINTS;
+			}
+		}
+		inline GLenum path_shape_to_gl_mode(const path& aPath)
+		{
+			return path_shape_to_gl_mode(aPath.shape());
+		}
+	}
+
 	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine) :
 		iRenderingEngine(aRenderingEngine), iSmoothingMode(SmoothingModeNone), iClipCounter(0)
 	{
@@ -135,7 +161,7 @@ namespace neogfx
 				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 				std::vector<double> texCoords(vertices.size(), 0.0);
 				glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-				glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath), 0, vertices.size() / 2));
 			}
 		}
 		if (aPathOutline != 0)
@@ -153,7 +179,7 @@ namespace neogfx
 					glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 					std::vector<double> texCoords(vertices.size(), 0.0);
 					glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-					glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+					glCheck(glDrawArrays(path_shape_to_gl_mode(innerPath), 0, vertices.size() / 2));
 				}
 			}
 		} 
@@ -268,15 +294,15 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
-		path rectPath(aRect);
-		auto vertices = rectPath.to_vertices(rectPath.paths()[0], path::LineLoop);
+		path rectPath(aRect, path::LineLoop);
+		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath), 0, vertices.size() / 2));
 		glCheck(glLineWidth(1.0f));
 	}
 
@@ -337,7 +363,7 @@ namespace neogfx
 				glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 				glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-				glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size() / 2));
 				reset_clip();
 			}
 		}
@@ -352,7 +378,7 @@ namespace neogfx
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath.shape()), 0, vertices.size() / 2));
 	}
 
 	void opengl_graphics_context::fill_gradient_rect(const rect& aRect, const gradient& aGradient)
@@ -388,7 +414,7 @@ namespace neogfx
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath.shape()), 0, vertices.size() / 2));
 	}
 
 	void opengl_graphics_context::fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour)
@@ -414,7 +440,7 @@ namespace neogfx
 				glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 				std::vector<double> texCoords(vertices.size(), 0.0);
-				glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size() / 2));
 				reset_clip();
 			}
 		}

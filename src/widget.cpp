@@ -399,7 +399,9 @@ namespace neogfx
 		if (!aDefer)
 		{
 			if (has_layout())
+			{
 				layout().layout_items(client_rect(false).top_left(), client_rect(false).extents());
+			}
 		}
 		else if (can_defer_layout())
 		{

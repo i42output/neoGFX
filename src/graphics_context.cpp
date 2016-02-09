@@ -510,6 +510,7 @@ namespace neogfx
 	void graphics_context::clip_to(const path& aPath, dimension aPathOutline) const
 	{
 		path path = to_device_units(aPath);
+		path.set_shape(path::ConvexPolygon);
 		path.set_position(path.position() + iOrigin);
 		iNativeGraphicsContext->clip_to(path, aPathOutline);
 	}

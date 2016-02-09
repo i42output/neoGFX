@@ -81,25 +81,32 @@ namespace neogfx
 		colour topHalfTo = faceColour;
 		colour bottomHalfFrom = faceColour.to_hsl().lighter(-0.125f).to_rgb(faceColour.alpha() / 255.0);
 		colour bottomHalfTo = faceColour;
-		if (!capturing())
+		if (iStyle != ButtonStyleTab)
 		{
-			rect topHalf = outline.bounding_rect();
-			rect bottomHalf = topHalf;
-			topHalf.cy = std::floor(topHalf.cy * 0.5f);
-			bottomHalf.y = topHalf.bottom();
-			bottomHalf.cy -= topHalf.height();
-			aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
-			aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+			if (!capturing())
+			{
+				rect topHalf = outline.bounding_rect();
+				rect bottomHalf = topHalf;
+				topHalf.cy = std::floor(topHalf.cy * 0.5f);
+				bottomHalf.y = topHalf.bottom();
+				bottomHalf.cy -= topHalf.height();
+				aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
+				aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+			}
+			else 
+			{
+				rect topHalf = outline.bounding_rect();
+				rect bottomHalf = topHalf;
+				topHalf.cy = std::floor(topHalf.cy * 0.5f) + as_units(*this, UnitsMillimetres, 1.0);
+				bottomHalf.y = topHalf.bottom();
+				bottomHalf.cy -= topHalf.height();
+				aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
+				aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+			}
 		}
 		else
 		{
-			rect topHalf = outline.bounding_rect();
-			rect bottomHalf = topHalf;
-			topHalf.cy = std::floor(topHalf.cy * 0.5f) + as_units(*this, UnitsMillimetres, 1.0);
-			bottomHalf.y = topHalf.bottom();
-			bottomHalf.cy -= topHalf.height();
-			aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
-			aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+			aGraphicsContext.fill_gradient_rect(outline.bounding_rect(), gradient(topHalfTo, bottomHalfFrom));
 		}
 		aGraphicsContext.reset_clip();
 		if (has_focus())
@@ -131,11 +138,16 @@ namespace neogfx
 		update();
 	}
 
+	rect push_button::path_bounding_rect() const
+	{
+		return client_rect();
+	}
+
 	path push_button::get_path() const
 	{
 		path ret;
 		size pixel = units_converter(*this).from_device_units(size(1.0, 1.0));
-		size currentSize = client_rect().extents();
+		size currentSize = path_bounding_rect().extents();
 		switch (iStyle)
 		{
 		case ButtonStyleNormal:
@@ -162,6 +174,7 @@ namespace neogfx
 			ret.line_to(0, 0);
 			break;
 		}
+		ret.set_position(path_bounding_rect().top_left());
 		return ret;
 	}
 

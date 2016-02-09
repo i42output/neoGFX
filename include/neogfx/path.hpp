@@ -31,6 +31,14 @@ namespace neogfx
 	{
 		// types
 	public:
+		enum shape_type_e
+		{
+			Quads,
+			Lines,
+			LineLoop,
+			LineStrip,
+			ConvexPolygon,
+		};
 		typedef PointType point_type;
 		typedef typename point_type::coordinate_type coordinate_type;
 		typedef typename point_type::coordinate_type coordinate_delta_type;
@@ -75,11 +83,11 @@ namespace neogfx
 		typedef std::vector<intersect> intersect_list;
 		// construction
 	public:
-		basic_path(paths_size_type aPathCountHint = 0)
+		basic_path(shape_type_e aShape = ConvexPolygon, paths_size_type aPathCountHint = 0) : iShape(aShape)
 		{
 			iPaths.reserve(aPathCountHint);
 		}
-		basic_path(const rect_type& aRect)
+		basic_path(const rect_type& aRect, shape_type_e aShape = ConvexPolygon) : iShape(aShape)
 		{
 			iPaths.reserve(5);
 			move_to(aRect.top_left());
@@ -90,30 +98,26 @@ namespace neogfx
 		}
 		// operations
 	public:
+		shape_type_e shape() const { return iShape; }
+		void set_shape(shape_type_e aShape) { iShape = aShape; }
 		point_type position() const { return iPosition; }
 		void set_position(point_type aPosition) { iPosition = aPosition; }
 		const paths_type& paths() const { return iPaths; }
 		paths_type& paths() { return iPaths; }
-		enum shape_type_e
-		{
-			Quads,
-			LineLoop,
-			ConvexPolygon,
-		};
-		std::vector<coordinate_type> to_vertices(const typename paths_type::value_type& aPath, shape_type_e aShape = ConvexPolygon) const
+		std::vector<coordinate_type> to_vertices(const typename paths_type::value_type& aPath) const
 		{
 			std::vector<coordinate_type> result;
-			result.reserve((aPath.size() + 1) * (aShape == Quads ? 6 : 1) * 2);
+			result.reserve((aPath.size() + 1) * (iShape == Quads ? 6 : 1) * 2);
 			if (aPath.size() > 2)
 			{
-				if (aShape == ConvexPolygon)
+				if (iShape == ConvexPolygon)
 				{
 					result.push_back(bounding_rect().centre().x + position().x);
 					result.push_back(bounding_rect().centre().y + position().y);
 				}
 				for (auto vi = aPath.begin(); vi != aPath.end(); ++vi)
 				{
-					switch (aShape)
+					switch (iShape)
 					{
 					case Quads:
 						if (vi + 1 != aPath.end())
@@ -136,10 +140,15 @@ namespace neogfx
 						break;
 					}
 				}
-				if (aShape == LineLoop && aPath[0] == aPath[aPath.size() - 1])
+				if (iShape == LineLoop && aPath[0] == aPath[aPath.size() - 1])
 				{
 					result.pop_back();
 					result.pop_back();
+				}
+				else if (iShape == ConvexPolygon && aPath[0] != aPath[aPath.size() - 1])
+				{
+					result.push_back(aPath[0].x);
+					result.push_back(aPath[0].y);
 				}
 			}
 			return result;
@@ -212,6 +221,7 @@ namespace neogfx
 		clip_rect_list clip_rects(const point& aOrigin) const;
 		// attributes
 	private:
+		shape_type_e iShape;
 		point_type iPosition;
 		boost::optional<point_type> iPointFrom;
 		paths_type iPaths;

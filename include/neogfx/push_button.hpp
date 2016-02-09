@@ -44,7 +44,8 @@ namespace neogfx
 	public:
 		virtual void mouse_entered();
 		virtual void mouse_left();
-	private:
+	protected:
+		virtual rect path_bounding_rect() const;
 		virtual path get_path() const;
 		bool has_hover_colour() const;
 		colour hover_colour() const;
