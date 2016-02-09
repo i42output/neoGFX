@@ -24,36 +24,17 @@
 
 namespace neogfx
 {
-	button::our_layout::our_layout(button& aParent) :
-		horizontal_layout(aParent)
-	{
-	}
-
-	neogfx::size_policy button::our_layout::size_policy() const
-	{
-		if (has_size_policy())
-			return horizontal_layout::size_policy();
-		return size_policy::Minimum;
-	}
-
-	neogfx::margins button::our_layout::margins() const
-	{
-		return has_margins() ? 
-			horizontal_layout::margins() :
-			owner()->has_margins() ?
-				owner()->margins() :
-				neogfx::margins(owner()->margins().left * 2.0, owner()->margins().top, owner()->margins().right * 2.0, owner()->margins().bottom);
-	}
-
 	button::button(const std::string& aText, alignment aAlignment) :
 		widget(), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
+		layout().set_margins(neogfx::margins(0.0));
 		set_focus_policy(focus_policy::TabFocus);
 	}
 	
 	button::button(i_widget& aParent, const std::string& aText, alignment aAlignment) :
 		widget(aParent), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
+		layout().set_margins(neogfx::margins(0.0));
 		set_focus_policy(focus_policy::TabFocus);
 	}
 
@@ -61,6 +42,7 @@ namespace neogfx
 	button::button(i_layout& aLayout, const std::string& aText, alignment aAlignment) :
 		widget(aLayout), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
+		layout().set_margins(neogfx::margins(0.0));
 		set_focus_policy(focus_policy::TabFocus);
 	}
 
@@ -86,6 +68,17 @@ namespace neogfx
 	text_widget& button::text()
 	{
 		return label().text();
+	}
+
+	margins button::margins() const
+	{
+		neogfx::margins result = widget::margins();
+		if (!has_margins())
+		{
+			result.left *= 2.0;
+			result.right *= 2.0;
+		}
+		return result;
 	}
 
 	void button::mouse_button_released(mouse_button aButton, const point& aPosition)

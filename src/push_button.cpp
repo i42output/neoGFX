@@ -97,7 +97,7 @@ namespace neogfx
 			{
 				rect topHalf = outline.bounding_rect();
 				rect bottomHalf = topHalf;
-				topHalf.cy = std::floor(topHalf.cy * 0.5f) + as_units(*this, UnitsMillimetres, 1.0);
+				topHalf.cy = std::floor(topHalf.cy * 0.5f + as_units(*this, UnitsMillimetres, 1.0));
 				bottomHalf.y = topHalf.bottom();
 				bottomHalf.cy -= topHalf.height();
 				aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));

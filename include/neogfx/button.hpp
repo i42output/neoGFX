@@ -31,16 +31,6 @@ namespace neogfx
 	{
 	public:
 		event<> pressed;
-	private:
-		class our_layout : public horizontal_layout
-		{
-		public:
-			our_layout(button& aParent);
-		protected:
-			virtual neogfx::size_policy size_policy() const;
-		protected:
-			virtual neogfx::margins margins() const;
-		};
 	public:
 		button(const std::string& aText = std::string(), alignment aAlignment = alignment::Left | alignment::VCentre);
 		button(i_widget& aParent, const std::string& aText = std::string(), alignment aAlignment = alignment::Left | alignment::VCentre);
@@ -52,13 +42,15 @@ namespace neogfx
 		const text_widget& text() const;
 		text_widget& text();
 	protected:
+		virtual neogfx::margins margins() const;
+	protected:
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 	protected:
 		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	protected:
 		virtual void handle_pressed();
 	private:
-		our_layout iLayout;
+		horizontal_layout iLayout;
 		neogfx::label iLabel;
 	};
 }
