@@ -356,7 +356,8 @@ namespace neogfx
 		{
 			if (aPath.paths()[i].size() > 2)
 			{
-				clip_to(aPath, aPen.width());
+				if (aPath.shape() == path::ConvexPolygon)
+					clip_to(aPath, aPen.width());
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
 				std::vector<double> texCoords(vertices.size(), 0.0);
 				std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
@@ -364,7 +365,8 @@ namespace neogfx
 				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 				glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size() / 2));
-				reset_clip();
+				if (aPath.shape() == path::ConvexPolygon)
+					reset_clip();
 			}
 		}
 	}
