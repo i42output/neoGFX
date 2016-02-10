@@ -48,20 +48,27 @@ namespace neogfx
 	class opengl_graphics_context : public i_native_graphics_context
 	{
 	private:
-		class disable_anti_alias
+		class scoped_anti_alias
 		{
 		public:
-			disable_anti_alias(opengl_graphics_context& aParent) : iParent(aParent), iOldSmoothingMode(aParent.smoothing_mode())
+			scoped_anti_alias(opengl_graphics_context& aParent, smoothing_mode_e aNewSmoothingMode) : iParent(aParent), iOldSmoothingMode(aParent.smoothing_mode())
 			{
-				iParent.set_smoothing_mode(SmoothingModeNone);
+				iParent.set_smoothing_mode(aNewSmoothingMode);
 			}
-			~disable_anti_alias()
+			~scoped_anti_alias()
 			{
 				iParent.set_smoothing_mode(iOldSmoothingMode);
 			}
 		private:
 			opengl_graphics_context& iParent;
 			smoothing_mode_e iOldSmoothingMode;
+		};
+		class disable_anti_alias : public scoped_anti_alias
+		{
+		public:
+			disable_anti_alias(opengl_graphics_context& aParent) : scoped_anti_alias(aParent, SmoothingModeNone)
+			{
+			}
 		};
 		typedef std::array<double, 3> vertex;
 	public:

@@ -87,8 +87,6 @@ namespace neogfx
 	protected:
 		virtual bool can_defer_layout() const;
 		virtual bool is_managing_layout() const;
-	protected:
-		virtual void paint(graphics_context& aGraphicsContext) const;
 	private:
 		vertical_layout iContainerLayout;
 		tab_bar iTabBar;

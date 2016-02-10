@@ -25,12 +25,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	tab_page_container::default_tab_page::default_tab_page(i_widget& aParent, i_tab& aTab) : 
-		scrollable_widget(aParent), iTab(aTab)
+		scrollable_widget(aParent, framed_widget::ContainerFrame), iTab(aTab)
 	{
 	}
 
 	tab_page_container::default_tab_page::default_tab_page(i_layout& aLayout, i_tab& aTab) :
-		scrollable_widget(aLayout), iTab(aTab)
+		scrollable_widget(aLayout, framed_widget::ContainerFrame), iTab(aTab)
 	{
 	}
 
@@ -283,9 +283,5 @@ namespace neogfx
 	bool tab_page_container::is_managing_layout() const
 	{
 		return true;
-	}
-
-	void tab_page_container::paint(graphics_context& aGraphicsContext) const
-	{
 	}
 }

@@ -69,8 +69,8 @@ namespace neogfx
 	void push_button::paint(graphics_context& aGraphicsContext) const
 	{
 		colour faceColour = animation_colour();
-		colour borderColour = faceColour.darker(0x40);
-		colour innerBorderColour = faceColour.lighter(capturing() ? 0x20 : 0x40);
+		colour borderColour = border_mid_colour().darker(0x40);
+		colour innerBorderColour = border_mid_colour().lighter(capturing() ? 0x20 : 0x40);
 		scoped_units su(*this, UnitsPixels);
 		path outline = get_path();
 		dimension penWidth = device_metrics().horizontal_dpi() / 96;
@@ -202,6 +202,11 @@ namespace neogfx
 	bool push_button::spot_colour() const
 	{
 		return false;
+	}
+
+	colour push_button::border_mid_colour() const
+	{
+		return animation_colour();
 	}
 
 	bool push_button::has_hover_colour() const

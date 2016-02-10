@@ -82,6 +82,18 @@ namespace neogfx
 		case SolidFrame:
 			aGraphicsContext.draw_rect(rect(point(0.0, 0.0), window_rect().extents()), pen(frameColour, effective_frame_width()));
 			break;
+		case ContainerFrame:
+			{
+				colour midColour = (has_foreground_colour() ? foreground_colour() : container_background_colour());
+				colour borderColour = midColour.darker(0x40);
+				colour innerBorderColour = midColour.lighter(0x40);
+				rect rectBorder = rect(point(0.0, 0.0), window_rect().extents());
+				rectBorder.deflate(line_width(), line_width());
+				aGraphicsContext.draw_rect(rectBorder, pen(innerBorderColour, line_width()));
+				rectBorder.inflate(line_width(), line_width());
+				aGraphicsContext.draw_rect(rectBorder, pen(borderColour, line_width()));
+			}
+			break;
 		case DoubleFrame:
 			break;
 		case GrooveFrame:
@@ -100,6 +112,11 @@ namespace neogfx
 		widget::paint(aGraphicsContext);
 	}
 
+	dimension framed_widget::line_width() const
+	{
+		return units_converter(*this).from_device_units(iLineWidth);
+	}
+
 	dimension framed_widget::effective_frame_width() const
 	{
 		switch (iStyle)
@@ -110,15 +127,17 @@ namespace neogfx
 		case DottedFrame:
 		case DashedFrame:
 		case SolidFrame:
-			return units_converter(*this).from_device_units(iLineWidth);
+			return line_width();
+		case ContainerFrame:
+			return line_width() * 2.0;
 		case DoubleFrame:
 		case GrooveFrame:
 		case RidgeFrame:
-			return units_converter(*this).from_device_units(iLineWidth) * 3.0;
+			return line_width() * 3.0;
 		case InsetFrame:
 		case OutsetFrame:
 		case HiddenFrame:
-			return units_converter(*this).from_device_units(iLineWidth);
+			return line_width();
 		}
 	}
 }

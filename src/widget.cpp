@@ -688,7 +688,7 @@ namespace neogfx
 
 	void widget::render(graphics_context& aGraphicsContext) const
 	{
-		if (hidden())
+		if (effectively_hidden())
 		{
 			iUpdateRects.clear();
 			return;

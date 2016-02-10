@@ -212,13 +212,11 @@ namespace neogfx
 		{
 			glCheck(glEnable(GL_LINE_SMOOTH));
 			glCheck(glEnable(GL_POLYGON_SMOOTH));
-			glCheck(glEnable(GL_MULTISAMPLE));
 		}
 		else
 		{
 			glCheck(glDisable(GL_LINE_SMOOTH));
 			glCheck(glDisable(GL_POLYGON_SMOOTH));
-			glCheck(glDisable(GL_MULTISAMPLE));
 		}
 		return oldSmoothingMode;
 	}
@@ -294,16 +292,18 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
-		path rectPath(aRect, path::LineLoop);
+		path rectPath(aRect);
+		clip_to(rectPath, aPen.width());
 		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath), 0, vertices.size() / 2));
 		glCheck(glLineWidth(1.0f));
+		reset_clip();
 	}
 
 	namespace

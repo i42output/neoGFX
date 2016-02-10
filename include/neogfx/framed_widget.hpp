@@ -33,6 +33,7 @@ namespace neogfx
 			DottedFrame,
 			DashedFrame,
 			SolidFrame,
+			ContainerFrame,
 			DoubleFrame,
 			GrooveFrame,
 			RidgeFrame,
@@ -54,6 +55,7 @@ namespace neogfx
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	protected:
+		dimension line_width() const;
 		dimension effective_frame_width() const;
 	private:
 		style_e iStyle;

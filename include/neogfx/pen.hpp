@@ -26,11 +26,12 @@ namespace neogfx
 {
 	class pen
 	{
+	public:
 		// construction
 	public:
 		pen() : iWidth(0) {}
-		pen(const neogfx::colour& aColour) : iColour(aColour), iWidth(1) {}
-		pen(const neogfx::colour& aColour, dimension aWidth) : iColour(aColour), iWidth(aWidth) {}
+		pen(const neogfx::colour& aColour, bool aAntiAliased = true) : iColour(aColour), iWidth(1) {}
+		pen(const neogfx::colour& aColour, dimension aWidth, bool aAntiAliased = true) : iColour(aColour), iWidth(aWidth) {}
 		// operations
 	public:
 		neogfx::colour colour() const { return iColour; }

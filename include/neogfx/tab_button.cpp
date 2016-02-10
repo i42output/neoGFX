@@ -88,7 +88,7 @@ namespace neogfx
 		if (is_deselected())
 			result.deflate(as_units(*this, UnitsMillimetres, delta(0.0, 25.4/96.0)).ceil() * delta(0.0, 2.0));
 		else
-			result.extents() += size(0.0, 4.0);
+			result.extents() += size(0.0, 5.0);
 		return convert_units(*this, su.saved_units(), result);
 	}
 
@@ -125,8 +125,8 @@ namespace neogfx
 			scoped_units su1(*this, UnitsPixels);
 			scoped_units su2(aGraphicsContext, UnitsPixels);
 			rect clipRect = default_clip_rect();
-			++clipRect.cy;
-			++clipRect.x;
+			clipRect.cy += 2.0;
+			clipRect.x += 1.0;
 			clipRect.cx -= 2.0;
 			aGraphicsContext.scissor_off();
 			aGraphicsContext.scissor_on(clipRect);
