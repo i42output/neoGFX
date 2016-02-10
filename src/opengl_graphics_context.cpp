@@ -56,12 +56,12 @@ namespace neogfx
 	}
 
 	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine) :
-		iRenderingEngine(aRenderingEngine), iSmoothingMode(SmoothingModeNone), iClipCounter(0)
+		iRenderingEngine(aRenderingEngine), iSmoothingMode(SmoothingModeNone), iClipCounter(0), iLineStippleActive(false)
 	{
 		set_smoothing_mode(SmoothingModeAntiAlias);
 	}
 	opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
-		iRenderingEngine(aOther.iRenderingEngine), iSmoothingMode(aOther.iSmoothingMode), iClipCounter(0)
+		iRenderingEngine(aOther.iRenderingEngine), iSmoothingMode(aOther.iSmoothingMode), iClipCounter(0), iLineStippleActive(false)
 	{
 		set_smoothing_mode(iSmoothingMode);
 	}
@@ -256,11 +256,13 @@ namespace neogfx
 	{
 		glCheck(glEnable(GL_LINE_STIPPLE));
 		glCheck(glLineStipple(static_cast<GLint>(aFactor), static_cast<GLushort>(aPattern)));
+		iLineStippleActive = true;
 	}
 
 	void opengl_graphics_context::line_stipple_off()
 	{
 		glCheck(glDisable(GL_LINE_STIPPLE));
+		iLineStippleActive = false;
 	}
 
 	void opengl_graphics_context::clear(const colour& aColour)
@@ -292,8 +294,9 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
-		path rectPath(aRect);
-		clip_to(rectPath, aPen.width());
+		path rectPath(aRect, iLineStippleActive ? path::LineLoop : path::ConvexPolygon);
+		if (!iLineStippleActive)
+			clip_to(rectPath, aPen.width());
 		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
@@ -303,7 +306,8 @@ namespace neogfx
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath), 0, vertices.size() / 2));
 		glCheck(glLineWidth(1.0f));
-		reset_clip();
+		if (!iLineStippleActive)
+			reset_clip();
 	}
 
 	namespace

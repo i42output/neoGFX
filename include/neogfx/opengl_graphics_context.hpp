@@ -128,5 +128,6 @@ namespace neogfx
 		mutable std::vector<std::tuple<uint32_t*, uint32_t*, text_direction, hb_script_t>> iRuns;
 		GLint iPreviousTexture;
 		GLuint iActiveGlyphTexture;
+		bool iLineStippleActive;
 	};
 }
