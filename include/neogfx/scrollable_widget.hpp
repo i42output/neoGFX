@@ -44,10 +44,10 @@ namespace neogfx
 			UsvStageDone
 		};
 	public:
-		scrollable_widget(bool aHasFrame = true);
+		scrollable_widget(framed_widget::style_e aFrameStyle = framed_widget::SolidFrame);
 		scrollable_widget(const scrollable_widget&) = delete;
-		scrollable_widget(i_widget& aParent, bool aHasFrame = true);
-		scrollable_widget(i_layout& aLayout, bool aHasFrame = true);
+		scrollable_widget(i_widget& aParent, framed_widget::style_e aFrameStyle = framed_widget::SolidFrame);
+		scrollable_widget(i_layout& aLayout, framed_widget::style_e aFrameStyle = framed_widget::SolidFrame);
 		~scrollable_widget();
 	public:
 		virtual const i_surface& surface() const;

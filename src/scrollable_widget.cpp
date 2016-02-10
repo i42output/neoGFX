@@ -24,24 +24,24 @@
 
 namespace neogfx
 {
-	scrollable_widget::scrollable_widget(bool aHasFrame) :
-		framed_widget(aHasFrame ? framed_widget::SolidFrame : framed_widget::NoFrame),
+	scrollable_widget::scrollable_widget(framed_widget::style_e aFrameStyle) :
+		framed_widget(aFrameStyle),
 		iVerticalScrollbar(*this, i_scrollbar::Vertical), 
 		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
 		iIgnoreScrollbarUpdates(0)
 	{
 	}
 	
-	scrollable_widget::scrollable_widget(i_widget& aParent, bool aHasFrame) :
-		framed_widget(aParent, aHasFrame ? framed_widget::SolidFrame : framed_widget::NoFrame),
+	scrollable_widget::scrollable_widget(i_widget& aParent, framed_widget::style_e aFrameStyle) :
+		framed_widget(aParent, aFrameStyle),
 		iVerticalScrollbar(*this, i_scrollbar::Vertical), 
 		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
 		iIgnoreScrollbarUpdates(0)
 	{
 	}
 	
-	scrollable_widget::scrollable_widget(i_layout& aLayout, bool aHasFrame) :
-		framed_widget(aLayout, aHasFrame ? framed_widget::SolidFrame : framed_widget::NoFrame),
+	scrollable_widget::scrollable_widget(i_layout& aLayout, framed_widget::style_e aFrameStyle) :
+		framed_widget(aLayout, aFrameStyle),
 		iVerticalScrollbar(*this, i_scrollbar::Vertical), 
 		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
 		iIgnoreScrollbarUpdates(0)

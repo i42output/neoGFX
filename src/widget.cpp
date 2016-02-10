@@ -707,8 +707,9 @@ namespace neogfx
 			aGraphicsContext.scissor_off();
 		}
 		iUpdateRects.clear();
-		for (auto& c : iChildren)
+		for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
 		{
+			const auto& c = *i;
 			rect rectChild(c->position(), c->extents());
 			rect intersection = client_rect().intersection(rectChild);
 			if (!intersection.empty())

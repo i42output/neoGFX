@@ -47,6 +47,7 @@ namespace neogfx
 	protected:
 		virtual rect path_bounding_rect() const;
 		virtual path get_path() const;
+		virtual bool spot_colour() const;
 		bool has_hover_colour() const;
 		colour hover_colour() const;
 		void set_hover_colour(const optional_colour& aHoverColour = optional_colour());

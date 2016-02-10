@@ -45,9 +45,14 @@ namespace neogfx
 		virtual void set_text(const std::string& aText);
 	protected:
 		virtual rect path_bounding_rect() const;
+		virtual bool spot_colour() const;
 	protected:
 		virtual size minimum_size() const;
 		virtual void handle_pressed();
+	protected:
+		virtual colour foreground_colour() const;
+	protected:
+		virtual void paint(graphics_context& aGraphicsContext) const;
 	protected:
 		void set_selected_state(bool aSelectedState);
 	private:

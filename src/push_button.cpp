@@ -85,28 +85,49 @@ namespace neogfx
 		{
 			if (!capturing())
 			{
-				rect topHalf = outline.bounding_rect();
-				rect bottomHalf = topHalf;
-				topHalf.cy = std::floor(topHalf.cy * 0.5f);
-				bottomHalf.y = topHalf.bottom();
-				bottomHalf.cy -= topHalf.height();
-				aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
-				aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+				if (!spot_colour())
+				{
+					rect topHalf = outline.bounding_rect();
+					rect bottomHalf = topHalf;
+					topHalf.cy = std::floor(topHalf.cy * 0.5f);
+					bottomHalf.y = topHalf.bottom();
+					bottomHalf.cy -= topHalf.height();
+					aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
+					aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+				}
+				else
+				{
+					aGraphicsContext.fill_solid_rect(outline.bounding_rect(), faceColour);
+				}
 			}
 			else 
 			{
-				rect topHalf = outline.bounding_rect();
-				rect bottomHalf = topHalf;
-				topHalf.cy = std::floor(topHalf.cy * 0.5f + as_units(*this, UnitsMillimetres, 1.0));
-				bottomHalf.y = topHalf.bottom();
-				bottomHalf.cy -= topHalf.height();
-				aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
-				aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+				if (!spot_colour())
+				{
+					rect topHalf = outline.bounding_rect();
+					rect bottomHalf = topHalf;
+					topHalf.cy = std::floor(topHalf.cy * 0.5f + as_units(*this, UnitsMillimetres, 1.0));
+					bottomHalf.y = topHalf.bottom();
+					bottomHalf.cy -= topHalf.height();
+					aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
+					aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+				}
+				else
+				{
+					aGraphicsContext.fill_solid_rect(outline.bounding_rect(), faceColour);
+				}
 			}
 		}
 		else
 		{
-			aGraphicsContext.fill_gradient_rect(outline.bounding_rect(), gradient(topHalfTo, bottomHalfFrom));
+			if (!spot_colour())
+			{
+				aGraphicsContext.fill_gradient_rect(outline.bounding_rect(), gradient(topHalfTo, bottomHalfFrom));
+			}
+			else
+			{
+				aGraphicsContext.fill_solid_rect(outline.bounding_rect(), faceColour);
+			}
 		}
 		aGraphicsContext.reset_clip();
 		if (has_focus())
@@ -176,6 +197,11 @@ namespace neogfx
 		}
 		ret.set_position(path_bounding_rect().top_left());
 		return ret;
+	}
+
+	bool push_button::spot_colour() const
+	{
+		return false;
 	}
 
 	bool push_button::has_hover_colour() const

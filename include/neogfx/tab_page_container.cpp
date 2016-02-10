@@ -47,6 +47,14 @@ namespace neogfx
 		return false;
 	}
 
+	colour tab_page_container::default_tab_page::background_colour() const
+	{
+		if (has_background_colour())
+			return scrollable_widget::background_colour();
+		else
+			return container_background_colour();
+	}
+
 	const i_tab& tab_page_container::default_tab_page::tab() const
 	{
 		return iTab;

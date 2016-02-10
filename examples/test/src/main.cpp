@@ -206,6 +206,13 @@ int main(int argc, char* argv[])
 
 	app.surface_manager().surface(0).restore_mouse_cursor();
 
+	tabContainer.add_tab_page("Foo");
+	tabContainer.add_tab_page("Bar");
+	tabContainer.add_tab_page("Baz");
+	tabContainer.add_tab_page("Wibble");
+	tabContainer.add_tab_page("Bibble");
+	tabContainer.add_tab_page("XYZZY");
+
 	return app.exec();
 }
 

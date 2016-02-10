@@ -27,7 +27,7 @@
 namespace neogfx
 {
 	window::window(const video_mode& aVideoMode, uint32_t aStyle) :
-		scrollable_widget(false),
+		scrollable_widget(framed_widget::NoFrame),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aVideoMode, app::instance().name(), aStyle)), 
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
@@ -41,7 +41,7 @@ namespace neogfx
 	}
 
 	window::window(const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
-		scrollable_widget(false),
+		scrollable_widget(framed_widget::NoFrame),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aVideoMode, aWindowTitle, aStyle)), 
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
@@ -55,7 +55,7 @@ namespace neogfx
 	}
 
 	window::window(dimension aWidth, dimension aHeight, uint32_t aStyle) :
-		scrollable_widget(false),
+		scrollable_widget(framed_widget::NoFrame),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, video_mode(static_cast<uint32_t>(aWidth), static_cast<uint32_t>(aHeight)), app::instance().name(), aStyle)), 
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
@@ -69,7 +69,7 @@ namespace neogfx
 	}
 
 	window::window(dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle) :
-		scrollable_widget(false),
+		scrollable_widget(framed_widget::NoFrame),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, video_mode(static_cast<uint32_t>(aWidth), static_cast<uint32_t>(aHeight)), aWindowTitle, aStyle)), 
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
@@ -83,7 +83,7 @@ namespace neogfx
 	}
 
 	window::window(window& aParent, const video_mode& aVideoMode, uint32_t aStyle) :
-		scrollable_widget(static_cast<i_widget&>(aParent), false),
+		scrollable_widget(static_cast<i_widget&>(aParent), framed_widget::NoFrame),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, *aParent.iNativeWindow, aVideoMode, app::instance().name(), aStyle)), 
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
@@ -97,7 +97,7 @@ namespace neogfx
 	}
 
 	window::window(window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
-		scrollable_widget(static_cast<i_widget&>(aParent), false),
+		scrollable_widget(static_cast<i_widget&>(aParent), framed_widget::NoFrame),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, *aParent.iNativeWindow, aVideoMode, aWindowTitle, aStyle)), 
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
@@ -111,7 +111,7 @@ namespace neogfx
 	}
 
 	window::window(window& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle) :
-		scrollable_widget(static_cast<i_widget&>(aParent), false),
+		scrollable_widget(static_cast<i_widget&>(aParent), framed_widget::NoFrame),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, *aParent.iNativeWindow, video_mode(static_cast<uint32_t>(aWidth), static_cast<uint32_t>(aHeight)), app::instance().name(), aStyle)), 
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
@@ -125,7 +125,7 @@ namespace neogfx
 	}
 
 	window::window(window& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle) :
-		scrollable_widget(static_cast<i_widget&>(aParent), false),
+		scrollable_widget(static_cast<i_widget&>(aParent), framed_widget::NoFrame),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, *aParent.iNativeWindow, video_mode(static_cast<uint32_t>(aWidth), static_cast<uint32_t>(aHeight)), aWindowTitle, aStyle)), 
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 

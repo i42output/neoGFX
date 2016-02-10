@@ -43,6 +43,8 @@ namespace neogfx
 		public:
 			virtual bool transparent_background() const;
 		public:
+			virtual colour background_colour() const;
+		public:
 			virtual const i_tab& tab() const;
 			virtual i_tab& tab();
 			virtual const i_widget& widget() const;

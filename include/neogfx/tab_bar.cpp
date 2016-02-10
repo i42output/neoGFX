@@ -29,7 +29,7 @@ namespace neogfx
 	tab_bar::tab_bar(i_tab_page_container& aContainer) :
 		iContainer(aContainer)
 	{
-		set_margins(neogfx::margins(0.0, 0.0));
+		set_margins(neogfx::margins(4.0, 0.0));
 		set_layout(std::make_shared<horizontal_layout>(*this));
 		layout().set_margins(neogfx::margins(0.0, 0.0));
 		layout().set_spacing(size(0.0, 0.0));
@@ -38,7 +38,7 @@ namespace neogfx
 	tab_bar::tab_bar(i_widget& aParent, i_tab_page_container& aContainer) :
 		widget(aParent), iContainer(aContainer)
 	{
-		set_margins(neogfx::margins(0.0, 0.0));
+		set_margins(neogfx::margins(4.0, 0.0));
 		set_layout(std::make_shared<horizontal_layout>(*this));
 		layout().set_margins(neogfx::margins(0.0, 0.0));
 		layout().set_spacing(size(0.0, 0.0));
@@ -47,7 +47,7 @@ namespace neogfx
 	tab_bar::tab_bar(i_layout& aLayout, i_tab_page_container& aContainer) :
 		widget(aLayout), iContainer(aContainer)
 	{
-		set_margins(neogfx::margins(0.0, 0.0));
+		set_margins(neogfx::margins(4.0, 0.0));
 		set_layout(std::make_shared<horizontal_layout>(*this));
 		layout().set_margins(neogfx::margins(0.0, 0.0));
 		layout().set_spacing(size(0.0, 0.0));

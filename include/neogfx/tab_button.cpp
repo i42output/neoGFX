@@ -88,8 +88,13 @@ namespace neogfx
 		if (is_deselected())
 			result.deflate(as_units(*this, UnitsMillimetres, delta(0.0, 25.4/96.0)).ceil() * delta(0.0, 2.0));
 		else
-			result.extents() += size(0.0, 3.0);
+			result.extents() += size(0.0, 4.0);
 		return convert_units(*this, su.saved_units(), result);
+	}
+
+	bool tab_button::spot_colour() const
+	{
+		return is_selected();
 	}
 
 	size tab_button::minimum_size() const
@@ -104,6 +109,29 @@ namespace neogfx
 	{
 		push_button::handle_pressed();
 		select();
+	}
+
+	colour tab_button::foreground_colour() const
+	{
+		if (has_foreground_colour() || is_deselected())
+			return push_button::foreground_colour();
+		return container_background_colour();
+	}
+
+	void tab_button::paint(graphics_context& aGraphicsContext) const
+	{
+		push_button::paint(aGraphicsContext);
+		{
+			scoped_units su1(*this, UnitsPixels);
+			scoped_units su2(aGraphicsContext, UnitsPixels);
+			rect clipRect = default_clip_rect();
+			++clipRect.cy;
+			++clipRect.x;
+			clipRect.cx -= 2.0;
+			aGraphicsContext.scissor_off();
+			aGraphicsContext.scissor_on(clipRect);
+			push_button::paint(aGraphicsContext);
+		}
 	}
 
 	void tab_button::set_selected_state(bool aSelectedState)
