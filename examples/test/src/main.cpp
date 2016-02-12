@@ -48,7 +48,7 @@ public:
 	keypad_button(uint32_t aNumber) : 
 		ng::push_button(boost::lexical_cast<std::string>(aNumber))
 	{
-		pressed.subscribe([aNumber]()
+		pressed([aNumber]()
 		{
 			ng::app::instance().change_style("Keypad").
 				set_colour(aNumber != 9 ? ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0) : ng::colour::LightGoldenrod);
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 	}
 	ng::vertical_layout layoutRadiosAndChecks(layout2);
 	ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbox", ng::check_box::TriState);
-	triState.checked.subscribe([&triState]()
+	triState.checked([&triState]()
 	{
 		static uint32_t n;
 		if ((n++)%2 == 1)
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 	ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
 	ng::vertical_layout layout4(layout2);
 	ng::push_button button9(layout4, "Default/Slate\nStyle");
-	button9.pressed.subscribe([&app]()
+	button9.pressed([&app]()
 	{
 		if (app.current_style().name() == "Default")
 			app.change_style("Slate");
@@ -127,11 +127,11 @@ int main(int argc, char* argv[])
 	ng::horizontal_layout layout5(layout4);
 	ng::push_button buttonMinus(layout5, "-");
 	ng::push_button buttonPlus(layout5, "+");
-	buttonMinus.pressed.subscribe([&app]()
+	buttonMinus.pressed([&app]()
 	{
 		app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() - 0.1f));
 	});
-	buttonPlus.pressed.subscribe([&app]()
+	buttonPlus.pressed([&app]()
 	{
 		app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() + 0.1f));
 	});
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
 	ng::table_view tableView(layoutItemViews);
 	tableView.set_minimum_size(ng::size(128, 128));
 	ng::push_button button10(layoutItemViews, "Toggle List\nHeader View");
-	button10.pressed.subscribe([&tableView]()
+	button10.pressed([&tableView]()
 	{
 		if (tableView.column_header().visible())
 			tableView.column_header().hide();

@@ -30,8 +30,8 @@ namespace neogfx
 	class event : private neolib::destroyable
 	{
 	public:
-		typedef std::function<void(Arguments...)> sink_type;
-		typedef std::list<std::pair<sink_type, const void*>> sink_list;
+		typedef std::function<void(Arguments...)> sink_callback;
+		typedef std::list<std::pair<sink_callback, const void*>> sink_list;
 		typedef typename sink_list::const_iterator handle;
 	private:
 		typedef std::deque<typename sink_list::const_iterator> notification_list;
@@ -70,14 +70,22 @@ namespace neogfx
 			iAccepted = false;
 		}
 	public:
-		handle subscribe(const sink_type& aType)
+		handle subscribe(const sink_callback& aSinkCallback)
 		{
-			return iSinks.insert(iSinks.end(), std::make_pair(aType, nullptr));
+			return iSinks.insert(iSinks.end(), std::make_pair(aSinkCallback, nullptr));
 		}
-		handle subscribe(const sink_type& aType, const void* aSinkObject)
+		handle subscribe(const sink_callback& aSinkCallback, const void* aSinkObject)
 		{
 			unsubscribe(aSinkObject);
-			return iSinks.insert(iSinks.end(), std::make_pair(aType, aSinkObject));
+			return iSinks.insert(iSinks.end(), std::make_pair(aSinkCallback, aSinkObject));
+		}
+		handle operator()(const sink_callback& aSinkCallback)
+		{
+			return subscribe(aSinkCallback);
+		}
+		handle operator()(const sink_callback& aSinkCallback, const void* aSinkObject)
+		{
+			return subscribe(aSinkCallback);
 		}
 		void unsubscribe(handle aHandle)
 		{
