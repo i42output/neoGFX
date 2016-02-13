@@ -79,7 +79,7 @@ namespace neogfx
 		aGraphicsContext.clip_to(outline);
 		colour topHalfFrom = faceColour.same_lightness_as(colour::White);
 		colour topHalfTo = faceColour;
-		colour bottomHalfFrom = faceColour.to_hsl().lighter(-0.125f).to_rgb(faceColour.alpha() / 255.0);
+		colour bottomHalfFrom = faceColour.to_hsl().lighter(-0.125).to_rgb(faceColour.alpha() / 255.0);
 		colour bottomHalfTo = faceColour;
 		if (iStyle != ButtonStyleTab)
 		{
@@ -89,7 +89,7 @@ namespace neogfx
 				{
 					rect topHalf = outline.bounding_rect();
 					rect bottomHalf = topHalf;
-					topHalf.cy = std::floor(topHalf.cy * 0.5f);
+					topHalf.cy = std::floor(topHalf.cy * 0.5);
 					bottomHalf.y = topHalf.bottom();
 					bottomHalf.cy -= topHalf.height();
 					aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
@@ -106,7 +106,7 @@ namespace neogfx
 				{
 					rect topHalf = outline.bounding_rect();
 					rect bottomHalf = topHalf;
-					topHalf.cy = std::floor(topHalf.cy * 0.5f + as_units(*this, UnitsMillimetres, 1.0));
+					topHalf.cy = std::floor(topHalf.cy * 0.5 + as_units(*this, UnitsMillimetres, 1.0));
 					bottomHalf.y = topHalf.bottom();
 					bottomHalf.cy -= topHalf.height();
 					aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));

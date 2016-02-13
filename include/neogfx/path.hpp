@@ -98,12 +98,31 @@ namespace neogfx
 		}
 		// operations
 	public:
-		shape_type_e shape() const { return iShape; }
-		void set_shape(shape_type_e aShape) { iShape = aShape; }
-		point_type position() const { return iPosition; }
-		void set_position(point_type aPosition) { iPosition = aPosition; }
-		const paths_type& paths() const { return iPaths; }
-		paths_type& paths() { return iPaths; }
+		shape_type_e shape() const 
+		{		
+			return iShape; 
+		}
+		void set_shape(shape_type_e aShape) 
+		{ 
+			iShape = aShape; 
+		}
+		point_type position() const 
+		{ 
+			return iPosition; 
+		}
+		void set_position(point_type aPosition) 
+		{ 
+			iPosition = aPosition; 
+			iBoundingRect.reset();
+		}
+		const paths_type& paths() const 
+		{ 
+			return iPaths; 
+		}
+		paths_type& paths() 
+		{ 
+			return iPaths; 
+		}
 		std::vector<coordinate_type> to_vertices(const typename paths_type::value_type& aPath) const
 		{
 			std::vector<coordinate_type> result;
@@ -112,8 +131,8 @@ namespace neogfx
 			{
 				if (iShape == ConvexPolygon)
 				{
-					result.push_back(bounding_rect().centre().x + position().x);
-					result.push_back(bounding_rect().centre().y + position().y);
+					result.push_back(bounding_rect(false).centre().x + position().x);
+					result.push_back(bounding_rect(false).centre().y + position().y);
 				}
 				for (auto vi = aPath.begin(); vi != aPath.end(); ++vi)
 				{
@@ -188,20 +207,20 @@ namespace neogfx
 			line_to(point_type(aX, aY));
 		}
 		void add_rect(const rect_type& aRectangle);
-		void inflate(const delta_type& aDeltas)
+		void inflate(const delta_type& aDelta)
 		{
-			rect_type boundingRect = bounding_rect();
+			rect_type boundingRect = bounding_rect(false);
 			for (paths_type::iterator i = iPaths.begin(); i != iPaths.end(); ++i)
 				for (path_type::iterator j = i->begin(); j != i->end(); ++j)
 				{
 					if (j->x < boundingRect.x + static_cast<coordinate_type>(boundingRect.cx / 2))
-						j->x -= aDeltas.dx;
+						j->x -= aDelta.dx;
 					else
-						j->x += aDeltas.dx;
+						j->x += aDelta.dx;
 					if (j->y < boundingRect.y + static_cast<coordinate_type>(boundingRect.cy / 2))
-						j->y -= aDeltas.dy;
+						j->y -= aDelta.dy;
 					else
-						j->y += aDeltas.dy;
+						j->y += aDelta.dy;
 				}
 			iBoundingRect.reset();
 		}
@@ -217,7 +236,7 @@ namespace neogfx
 		{
 			inflate(delta_type(-aDeltaX, -aDeltaY));
 		}
-		const rect_type& bounding_rect(size_type aPixelWidthAdjustment = size_type(1.0, 1.0)) const;
+		const rect_type& bounding_rect(bool aOffsetPosition = true, size_type aPixelWidthAdjustment = size_type(1.0, 1.0)) const;
 		clip_rect_list clip_rects(const point& aOrigin) const;
 		// attributes
 	private:

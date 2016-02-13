@@ -31,7 +31,7 @@ namespace neogfx
 	}
 
 	template <typename PointType>
-	inline const typename basic_path<PointType>::rect_type& basic_path<PointType>::bounding_rect(size_type aPixelWidthAdjustment) const
+	inline const typename basic_path<PointType>::rect_type& basic_path<PointType>::bounding_rect(bool aOffsetPosition, size_type aPixelWidthAdjustment) const
 	{
 		if (iBoundingRect)
 			return *iBoundingRect;
@@ -47,7 +47,7 @@ namespace neogfx
 				maxX = std::max(maxX, j->x);
 				maxY = std::max(maxY, j->y);
 			}
-		iBoundingRect = rect_type(point_type(minX, minY), size_type(maxX - minX + aPixelWidthAdjustment.cx, maxY - minY + aPixelWidthAdjustment.cy));
+		iBoundingRect = rect_type(point_type(minX, minY) + (aOffsetPosition ? iPosition : point(0.0, 0.0)), size_type(maxX - minX + aPixelWidthAdjustment.cx, maxY - minY + aPixelWidthAdjustment.cy));
 		return *iBoundingRect;
 	}
 
