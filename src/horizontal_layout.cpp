@@ -54,7 +54,8 @@ namespace neogfx
 
 	size horizontal_layout::minimum_size() const
 	{
-		if (items_visible() == 0)
+		uint32_t itemsVisible = items_visible();
+		if (itemsVisible == 0)
 			return size{};
 		size result;
 		uint32_t itemsZeroSized = 0;
@@ -72,8 +73,8 @@ namespace neogfx
 		}
 		result.cx += (margins().left + margins().right);
 		result.cy += (margins().top + margins().bottom);
-		if (result.cx != std::numeric_limits<size::dimension_type>::max() && (items_visible() - itemsZeroSized) > 0)
-			result.cx += (spacing().cx * (items_visible() - itemsZeroSized - 1));
+		if (result.cx != std::numeric_limits<size::dimension_type>::max() && (itemsVisible - itemsZeroSized) > 0)
+			result.cx += (spacing().cx * (itemsVisible - itemsZeroSized - 1));
 		result.cx = std::max(result.cx, layout::minimum_size().cx);
 		result.cy = std::max(result.cy, layout::minimum_size().cy);
 		return result;
@@ -83,6 +84,7 @@ namespace neogfx
 	{
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+		uint32_t itemsVisible = items_visible();
 		size result{ std::numeric_limits<size::dimension_type>::max(), 0.0 };
 		for (const auto& item : items())
 		{
@@ -99,8 +101,8 @@ namespace neogfx
 			result.cx += (margins().left + margins().right);
 		if (result.cy != std::numeric_limits<size::dimension_type>::max())
 			result.cy += (margins().top + margins().bottom);
-		if (result.cx != std::numeric_limits<size::dimension_type>::max() && items_visible() > 0)
-			result.cx += (spacing().cx * (items_visible() - 1 - spacer_count()));
+		if (result.cx != std::numeric_limits<size::dimension_type>::max() && itemsVisible > 0)
+			result.cx += (spacing().cx * (itemsVisible - 1 - spacer_count()));
 		if (result.cx != std::numeric_limits<size::dimension_type>::max())
 			result.cx = std::min(result.cx, layout::maximum_size().cx);
 		if (result.cy != std::numeric_limits<size::dimension_type>::max())
@@ -114,6 +116,7 @@ namespace neogfx
 			return;
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return;
+		uint32_t itemsVisible = items_visible();
 		owner()->layout_items_started();
 		size availableSize = aSize;
 		availableSize.cx -= (margins().left + margins().right);
@@ -129,10 +132,10 @@ namespace neogfx
 					++itemsZeroSized;
 			}
 		}
-		if (items_visible() - itemsZeroSized > 0)
-			availableSize.cx -= (spacing().cx * (items_visible() - itemsZeroSized - 1));
+		if (itemsVisible - itemsZeroSized > 0)
+			availableSize.cx -= (spacing().cx * (itemsVisible - itemsZeroSized - 1));
 		size::dimension_type leftover = availableSize.cx;
-		size::dimension_type eachLeftover = std::floor(leftover / items_visible());
+		size::dimension_type eachLeftover = std::floor(leftover / itemsVisible);
 		size totalExpanderWeight;
 		enum disposition_e { Unknown, Normal, TooSmall, TooBig, FixedSize };
 		std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<std::pair<const item*, disposition_e>>> itemDispositions;
@@ -189,7 +192,7 @@ namespace neogfx
 						itemDispositions[&item] = item.is_fixed_size() ? FixedSize : TooSmall;
 						leftover -= item.maximum_size().cx;
 						if (expandersUsingLeftover.empty())
-							eachLeftover = std::floor(leftover / (items_visible() - items_not_using_leftover()));
+							eachLeftover = std::floor(leftover / (itemsVisible - items_not_using_leftover()));
 						done = false;
 					}
 				}
@@ -202,7 +205,7 @@ namespace neogfx
 						itemDispositions[&item] = item.is_fixed_size() ? FixedSize : TooBig;
 						leftover -= item.minimum_size().cx;
 						if (expandersUsingLeftover.empty())
-							eachLeftover = std::floor(leftover / (items_visible() - items_not_using_leftover()));
+							eachLeftover = std::floor(leftover / (itemsVisible - items_not_using_leftover()));
 						done = false;
 					}
 				}
@@ -214,7 +217,7 @@ namespace neogfx
 						leftover += item.minimum_size().cx;
 					itemDispositions[&item] = item.is_fixed_size() ? FixedSize : Normal;
 					if (expandersUsingLeftover.empty())
-						eachLeftover = std::floor(leftover / (items_visible() - items_not_using_leftover()));
+						eachLeftover = std::floor(leftover / (itemsVisible - items_not_using_leftover()));
 					done = false;
 				}
 			}
