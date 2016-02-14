@@ -59,7 +59,6 @@ namespace neogfx
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutInProgress(false),
-		iUpdatingChildren(false),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -78,7 +77,6 @@ namespace neogfx
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutInProgress(false),
-		iUpdatingChildren(false),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -98,7 +96,6 @@ namespace neogfx
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutInProgress(false),
-		iUpdatingChildren(false),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -661,18 +658,14 @@ namespace neogfx
 				parent().update(rect(aUpdateRect.position() + position() + (origin() - origin(true)), aUpdateRect.extents()));
 			else if (is_root())
 				surface().invalidate_surface(aUpdateRect);
-			if (!iUpdatingChildren)
+			for (auto& c : iChildren)
 			{
-				neolib::scoped_flag sf(iUpdatingChildren);
-				for (auto& c : iChildren)
-				{
-					if (c->hidden())
-						continue;
-					rect rectChild(c->position(), c->extents());
-					rect intersection = aUpdateRect.intersection(rectChild);
-					if (!intersection.empty())
-						c->update();
-				}
+				if (c->hidden())
+					continue;
+				rect rectChild(c->position(), c->extents());
+				rect intersection = aUpdateRect.intersection(rectChild);
+				if (!intersection.empty())
+					c->update();
 			}
 		}
 	}

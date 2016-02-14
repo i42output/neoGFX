@@ -203,7 +203,6 @@ namespace neogfx
 		optional_size iMaximumSize;
 		bool iLayoutInProgress;
 		mutable std::unordered_set<rect> iUpdateRects;
-		bool iUpdatingChildren;
 		bool iVisible;
 		bool iEnabled;
 		neogfx::focus_policy iFocusPolicy;
