@@ -165,21 +165,21 @@ namespace neogfx
 			{
 			case 0:
 				return "";
-			case neolib::variant_type_id<i_item_model::cell_data_type, bool>::value:
+			case i_item_model::cell_data_type::type_id<bool>::value:
 				return (cell_format(aIndex) % static_variant_cast<bool>(item_model().cell_data(aIndex))).str();
-			case neolib::variant_type_id<i_item_model::cell_data_type, int32_t>::value:
+			case i_item_model::cell_data_type::type_id<int32_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<int32_t>(item_model().cell_data(aIndex))).str();
-			case neolib::variant_type_id<i_item_model::cell_data_type, uint32_t>::value:
+			case i_item_model::cell_data_type::type_id<uint32_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<uint32_t>(item_model().cell_data(aIndex))).str();
-			case neolib::variant_type_id<i_item_model::cell_data_type, int64_t>::value:
+			case i_item_model::cell_data_type::type_id<int64_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<int64_t>(item_model().cell_data(aIndex))).str();
-			case neolib::variant_type_id<i_item_model::cell_data_type, uint64_t>::value:
+			case i_item_model::cell_data_type::type_id<uint64_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<uint64_t>(item_model().cell_data(aIndex))).str();
-			case neolib::variant_type_id<i_item_model::cell_data_type, float>::value:
+			case i_item_model::cell_data_type::type_id<float>::value:
 				return (cell_format(aIndex) % static_variant_cast<float>(item_model().cell_data(aIndex))).str();
-			case neolib::variant_type_id<i_item_model::cell_data_type, double>::value:
+			case i_item_model::cell_data_type::type_id<double>::value:
 				return (cell_format(aIndex) % static_variant_cast<double>(item_model().cell_data(aIndex))).str();
-			case neolib::variant_type_id<i_item_model::cell_data_type, std::string>::value:
+			case i_item_model::cell_data_type::type_id<std::string>::value:
 				return (cell_format(aIndex) % static_variant_cast<const std::string&>(item_model().cell_data(aIndex))).str();
 			default:
 				return "";

@@ -67,8 +67,8 @@ namespace neogfx
 
 	void opengl_window::invalidate_surface(const rect& aInvalidatedRect)
 	{
-		if (std::find(iInvalidatedRects.begin(), iInvalidatedRects.end(), aInvalidatedRect) == iInvalidatedRects.end())
-			iInvalidatedRects.push_back(aInvalidatedRect);
+		if (iInvalidatedRects.find(aInvalidatedRect) == iInvalidatedRects.end())
+			iInvalidatedRects.insert(aInvalidatedRect);
 	}
 
 	size opengl_window::extents() const
@@ -104,7 +104,7 @@ namespace neogfx
 		iRendering = true;
 		iLastFrameTime = now;
 		
-		rect invalidatedRect = iInvalidatedRects[0];
+		rect invalidatedRect = *iInvalidatedRects.begin();
 		for (const auto& ir : iInvalidatedRects)
 		{
 			invalidatedRect = invalidatedRect.combine(ir);

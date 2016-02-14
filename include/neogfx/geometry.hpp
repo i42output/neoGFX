@@ -746,3 +746,17 @@ namespace neogfx
 		return static_cast<alignment>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}
 }
+
+namespace std 
+{
+	template <> struct hash<neogfx::rect>
+	{
+		size_t operator()(const neogfx::rect& aRect) const
+		{
+			return std::hash<neogfx::rect::coordinate_type>()(aRect.x) ^ 
+				std::hash<neogfx::rect::coordinate_type>()(aRect.y) ^
+				std::hash<neogfx::rect::coordinate_type>()(aRect.cx) ^
+				std::hash<neogfx::rect::coordinate_type>()(aRect.cy);
+		}
+	};
+}

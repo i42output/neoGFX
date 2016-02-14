@@ -18,6 +18,7 @@
 */
 
 #include "neogfx.hpp"
+#include <neolib/raii.hpp>
 #include "app.hpp"
 #include "widget.hpp"
 #include "i_layout.hpp"
@@ -57,6 +58,8 @@ namespace neogfx
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
 		iMaximumSize{},
+		iLayoutInProgress(false),
+		iUpdatingChildren(false),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -74,6 +77,8 @@ namespace neogfx
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
 		iMaximumSize{},
+		iLayoutInProgress(false),
+		iUpdatingChildren(false),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -92,6 +97,8 @@ namespace neogfx
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
 		iMaximumSize{},
+		iLayoutInProgress(false),
+		iUpdatingChildren(false),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -420,8 +427,19 @@ namespace neogfx
 		}
 	}
 
+	void widget::layout_items_started()
+	{
+		iLayoutInProgress = true;
+	}
+
+	bool widget::layout_items_in_progress() const
+	{
+		return iLayoutInProgress;
+	}
+
 	void widget::layout_items_completed()
 	{
+		iLayoutInProgress = false;
 		update();
 	}
 
@@ -634,25 +652,27 @@ namespace neogfx
 
 	void widget::update(const rect& aUpdateRect)
 	{
-		if (surface().destroyed()) 
+		if (surface().destroyed() || hidden() || layout_items_in_progress())
 			return;
-		if (!visible())
-			return;
-		if (std::find(iUpdateRects.begin(), iUpdateRects.end(), aUpdateRect) == iUpdateRects.end())
+		if (iUpdateRects.find(aUpdateRect) == iUpdateRects.end())
 		{
-			iUpdateRects.push_back(aUpdateRect);
+			iUpdateRects.insert(aUpdateRect);
 			if ((iBackgroundColour == boost::none || iBackgroundColour->alpha() != 0xFF) && has_parent() && has_surface() && &parent().surface() == &surface())
 				parent().update(rect(aUpdateRect.position() + position() + (origin() - origin(true)), aUpdateRect.extents()));
 			else if (is_root())
 				surface().invalidate_surface(aUpdateRect);
-			for (auto& c : iChildren)
+			if (!iUpdatingChildren)
 			{
-				if (!c->visible())
-					continue;
-				rect rectChild(c->position(), c->extents());
-				rect intersection = aUpdateRect.intersection(rectChild);
-				if (!intersection.empty())
-					c->update();
+				neolib::scoped_flag sf(iUpdatingChildren);
+				for (auto& c : iChildren)
+				{
+					if (c->hidden())
+						continue;
+					rect rectChild(c->position(), c->extents());
+					rect intersection = aUpdateRect.intersection(rectChild);
+					if (!intersection.empty())
+						c->update();
+				}
 			}
 		}
 	}
@@ -669,7 +689,7 @@ namespace neogfx
 	{
 		if (iUpdateRects.empty())
 			throw no_update_rect();
-		rect result = iUpdateRects[0];
+		rect result = *(iUpdateRects.begin());
 		for (const auto& ur : iUpdateRects)
 			result = result.combine(ur);
 		return result;

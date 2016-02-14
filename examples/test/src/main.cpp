@@ -206,6 +206,10 @@ int main(int argc, char* argv[])
 
 	app.surface_manager().surface(0).restore_mouse_cursor();
 
+	auto& w = tabContainer.add_tab_page("Lots").widget();
+	ng::vertical_layout l(w);
+	for (int i = 0; i < 10000; ++i)
+		l.add_widget(std::make_shared<ng::push_button>(boost::lexical_cast<std::string>(i)));
 	tabContainer.add_tab_page("Foo");
 	tabContainer.add_tab_page("Bar");
 	tabContainer.add_tab_page("Baz");

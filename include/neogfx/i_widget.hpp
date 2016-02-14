@@ -95,6 +95,8 @@ namespace neogfx
 		virtual i_widget& managing_layout() = 0;
 		virtual bool is_managing_layout() const = 0;
 		virtual void layout_items(bool aDefer = false) = 0;
+		virtual void layout_items_started() = 0;
+		virtual bool layout_items_in_progress() const = 0;
 		virtual void layout_items_completed() = 0;
 	public:
 		virtual point position() const = 0;

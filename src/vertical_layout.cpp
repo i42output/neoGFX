@@ -114,6 +114,7 @@ namespace neogfx
 			return;
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return;
+		owner()->layout_items_started();
 		size availableSize = aSize;
 		availableSize.cx -= (margins().left + margins().right);
 		availableSize.cy -= (margins().top + margins().bottom);

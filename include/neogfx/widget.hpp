@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <unordered_set>
 #include <neolib/timer.hpp>
 #include "i_widget.hpp"
 
@@ -85,6 +86,8 @@ namespace neogfx
 		virtual i_widget& managing_layout();
 		virtual bool is_managing_layout() const;
 		virtual void layout_items(bool aDefer = false);
+		virtual void layout_items_started();
+		virtual bool layout_items_in_progress() const;
 		virtual void layout_items_completed();
 	public:
 		virtual point position() const;
@@ -198,7 +201,9 @@ namespace neogfx
 		optional_size iWeight;
 		optional_size iMinimumSize;
 		optional_size iMaximumSize;
-		mutable std::vector<rect> iUpdateRects;
+		bool iLayoutInProgress;
+		mutable std::unordered_set<rect> iUpdateRects;
+		bool iUpdatingChildren;
 		bool iVisible;
 		bool iEnabled;
 		neogfx::focus_policy iFocusPolicy;

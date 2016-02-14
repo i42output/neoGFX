@@ -18,6 +18,7 @@
 */
 
 #include "neogfx.hpp"
+#include <neolib/raii.hpp>
 #include "app.hpp"
 #include "i_layout.hpp"
 #include "scrollable_widget.hpp"
@@ -50,16 +51,6 @@ namespace neogfx
 	
 	scrollable_widget::~scrollable_widget()
 	{
-	}
-
-	namespace
-	{
-		struct scoped_counter
-		{
-			uint32_t& iCounter;
-			scoped_counter(uint32_t& aCounter) : iCounter(aCounter) { ++iCounter; }
-			~scoped_counter() { --iCounter; }
-		};
 	}
 
 	const i_surface& scrollable_widget::surface() const
@@ -347,7 +338,7 @@ namespace neogfx
 	void scrollable_widget::update_scrollbar_visibility()
 	{
 		{
-			scoped_counter sc(iIgnoreScrollbarUpdates);
+			neolib::scoped_counter sc(iIgnoreScrollbarUpdates);
 			update_scrollbar_visibility(UsvStageInit);
 			update_scrollbar_visibility(UsvStageCheckVertical1);
 			update_scrollbar_visibility(UsvStageCheckHorizontal);

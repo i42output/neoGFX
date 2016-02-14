@@ -1,0 +1,8 @@
+<nrc>
+	<resource prefix="test">
+		<file>resources/channel.png</file>
+		<file>resources/channel_32.png</file>
+		<file>resources/channel_128.png</file>
+		<file>resources/channel_256.png</file>	
+	</resource>
+</nrc>

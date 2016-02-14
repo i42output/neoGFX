@@ -11,3 +11,4 @@
 /tools/bin
 /lib
 /examples/test/build/win32/vs2013/test.opensdf
+/tools/nrc2cpp/build/win32/vs2013/Release

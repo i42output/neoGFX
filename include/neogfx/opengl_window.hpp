@@ -20,8 +20,9 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <neolib/string_utils.hpp>
+#include <unordered_set>
 #include <boost/lexical_cast.hpp>
+#include <neolib/string_utils.hpp>
 #include "neogfx.hpp"
 #include <GL/glew.h>
 #include <GL/GL.h>
@@ -69,7 +70,7 @@ namespace neogfx
 		GLuint iFrameBufferTexture;
 		GLuint iDepthStencilBuffer;
 		size iFrameBufferSize;
-		std::vector<rect> iInvalidatedRects;
+		std::unordered_set<rect> iInvalidatedRects;
 		neolib::callback_timer iRenderer;
 		boost::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;

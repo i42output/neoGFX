@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{EA135436-DFC4-4277-A66A-BCDE83D37104}</ProjectGuid>
+    <ProjectGuid>{7860B48A-5793-4F62-BBA3-A4E63F74339C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>test</RootNamespace>
+    <RootNamespace>nrc2cpp</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,9 +41,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)\..\..\..\..\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)\..\..\..\..\bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -51,15 +53,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\..\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(DevDirNeolib)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\..\..\..\lib;$(DevDirGlew)\lib\Debug;$(DevDirSDL)\lib\Debug;$(DevDirBoost)\lib;$(DevDirFreetype)\lib\Debug;$(DevDirHarfBuzz)\lib;$(DevDirNeolib)\lib;$(DevDirNeogfx)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>neolibd.lib;neogfxd.lib;opengl32.lib;SDL2.lib;Imm32.lib;version.lib;libglew32d.lib;freetype.lib;harfbuzz-d.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -70,35 +69,21 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\..\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(DevDirNeolib)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\..\..\..\..\lib;$(DevDirGlew)\lib\Release;$(DevDirSDL)\lib\Release;$(DevDirBoost)\lib;$(DevDirFreetype)\lib\Release;$(DevDirHarfBuzz)\lib;$(DevDirNeolib)\lib;$(DevDirNeogfx)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>neolib.lib;neogfx.lib;opengl32.lib;SDL2.lib;Imm32.lib;version.lib;libglew32.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\..\src\test.nrc">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)/tools/bin/nrc2cpp %(Identity) $(IntDir)/GeneratedFiles/test.nrc.cpp</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)/tools/bin/nrc2cpp %(Identity) $(IntDir)/GeneratedFiles/test.nrc.cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/test.nrc.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/test.nrc.cpp</Outputs>
-      <SubType>Designer</SubType>
-    </CustomBuild>
+    <ClCompile Include="..\..\..\src\nrc2cpp.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

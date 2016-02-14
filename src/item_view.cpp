@@ -23,16 +23,6 @@
 
 namespace neogfx
 {
-	namespace
-	{
-		struct scoped_counter
-		{
-			uint32_t& iCounter;
-			scoped_counter(uint32_t& aCounter) : iCounter(aCounter) { ++iCounter; }
-			~scoped_counter() { --iCounter; }
-		};
-	}
-
 	item_view::item_view() :
 		scrollable_widget(),
 		iBatchUpdatesInProgress(0)

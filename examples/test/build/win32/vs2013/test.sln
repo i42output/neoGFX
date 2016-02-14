@@ -5,19 +5,24 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test.vcxproj", "{EA135436-DFC4-4277-A66A-BCDE83D37104}"
 	ProjectSection(ProjectDependencies) = postProject
+		{16B2402F-6B03-4852-84B1-067F1E5148FD} = {16B2402F-6B03-4852-84B1-067F1E5148FD}
 		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
+		{7860B48A-5793-4F62-BBA3-A4E63F74339C} = {7860B48A-5793-4F62-BBA3-A4E63F74339C}
 		{5BE004BF-A083-422F-8287-E7238B633466} = {5BE004BF-A083-422F-8287-E7238B633466}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neogfx", "..\..\..\..\..\build\win32\vs2013\neogfx.vcxproj", "{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{16B2402F-6B03-4852-84B1-067F1E5148FD} = {16B2402F-6B03-4852-84B1-067F1E5148FD}
+		{7860B48A-5793-4F62-BBA3-A4E63F74339C} = {7860B48A-5793-4F62-BBA3-A4E63F74339C}
 		{5BE004BF-A083-422F-8287-E7238B633466} = {5BE004BF-A083-422F-8287-E7238B633466}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neolib", "..\..\..\..\..\..\neolib\build\win32\vs2013\neolib.vcxproj", "{5BE004BF-A083-422F-8287-E7238B633466}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glsl2hpp", "..\..\..\..\..\tools\glsl2hpp\build\win32\vs2013\glsl2hpp.vcxproj", "{16B2402F-6B03-4852-84B1-067F1E5148FD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nrc2cpp", "..\..\..\..\..\tools\nrc2cpp\build\win32\vs2013\nrc2cpp.vcxproj", "{7860B48A-5793-4F62-BBA3-A4E63F74339C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +46,10 @@ Global
 		{16B2402F-6B03-4852-84B1-067F1E5148FD}.Debug|Win32.Build.0 = Debug|Win32
 		{16B2402F-6B03-4852-84B1-067F1E5148FD}.Release|Win32.ActiveCfg = Release|Win32
 		{16B2402F-6B03-4852-84B1-067F1E5148FD}.Release|Win32.Build.0 = Release|Win32
+		{7860B48A-5793-4F62-BBA3-A4E63F74339C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7860B48A-5793-4F62-BBA3-A4E63F74339C}.Debug|Win32.Build.0 = Debug|Win32
+		{7860B48A-5793-4F62-BBA3-A4E63F74339C}.Release|Win32.ActiveCfg = Release|Win32
+		{7860B48A-5793-4F62-BBA3-A4E63F74339C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
