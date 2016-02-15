@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <fstream>
 #include <iostream>
+#include <boost/filesystem.hpp>
 #include <neolib/xml.hpp>
 
 struct invalid_file : std::runtime_error 
@@ -43,19 +44,6 @@ int main(int argc, char* argv[])
 		neolib::xml input(inputFileName);
 		if (!input.got_root() || input.root().name() != "nrc")
 			throw invalid_file("bad root node");
-		for (const auto& resource : input.root())
-		{
-			if (resource.name() == "resource")
-			{
-				for (const auto& file : resource)
-				{
-					if (file.name() == "file")
-					{
-						std::cout << "Processing " << std::string(file.text()) << "..." << std::endl;
-					}
-				}
-			}
-		}
 		std::string outputFileName;
 		if (argc == 3)
 			outputFileName = argv[2];
@@ -69,6 +57,71 @@ int main(int argc, char* argv[])
 				outputFileName = outputFileName.substr(0, dot) + ".cpp";
 		}
 		std::ofstream output(outputFileName);
+		output << "// This is a automatically generated file, do not edit!" << std::endl;
+		output << "#include <neogfx/resource_manager.hpp>" << std::endl << std::endl;
+		output << "namespace nrc" << std::endl << "{" << std::endl;
+		output << "namespace" << std::endl << "{" << std::endl;
+		std::vector<std::string> resourcePaths;
+		uint32_t resourceIndex = 0;
+		for (const auto& resource : input.root())
+		{
+			if (resource.name() == "resource")
+			{
+				for (const auto& file : resource)
+				{
+					if (file.name() == "file")
+					{
+						std::cout << "Processing " << std::string(file.text()) << "..." << std::endl;
+						resourcePaths.push_back((resource.has_attribute("prefix") ? std::string(resource.attribute_value("prefix")) + "/" : "") + std::string(file.text()));
+						std::ifstream resourceFile(boost::filesystem::path(inputFileName).parent_path().string() + "/" + std::string(file.text()), std::ios_base::in | std::ios_base::binary);
+						output << "\tconst unsigned char resource_" << resourceIndex << "_data[] =" << std::endl << "\t{" << std::endl;
+						const std::size_t kBufferSize = 32;
+						bool doneSome = false;
+						for (;;)
+						{
+							unsigned char buffer[kBufferSize];
+							resourceFile.read(reinterpret_cast<char*>(buffer), kBufferSize);
+							std::streamsize amount = resourceFile.gcount();
+							if (amount != 0)
+							{
+								if (doneSome)
+									output << ", " << std::endl;
+								output << "\t\t";
+								for (std::size_t j = 0; j != amount;)
+								{
+									output << "0x";
+									output.width(2);
+									output.fill('0');
+									output << std::hex << std::uppercase << static_cast<unsigned int>(buffer[j]);
+									if (++j != amount)
+										output << ", ";
+								}
+								doneSome = true;
+							}
+							else
+							{
+								output << std::endl;
+								break;
+							}
+						}
+						output << "\t};" << std::endl;
+						++resourceIndex;
+					}
+				}
+			}
+		}
+		output << "\tstruct register_data" << std::endl << "\t{" << std::endl;
+		output << "\t\tregister_data()" << std::endl << "\t\t{" << std::endl;
+		for (std::size_t i = 0; i < resourcePaths.size(); ++i)
+		{
+			output << "\t\t\tneogfx::resource_manager::instance().add_resource("
+				<< "\":/" << resourcePaths[i] << "\", " << "resource_" << i << "_data, " << "sizeof(resource_" << i << "_data)"
+				<< ");" << std::endl;
+		}
+		output << "\t\t}" << std::endl;
+		output << "\t} sData;" << std::endl;
+		output << "}" << std::endl;
+		output << "}" << std::endl;
 	}
 	catch (const std::exception& e)
 	{

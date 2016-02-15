@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="Release\GeneratedFiles\test.nrc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\test.nrc">

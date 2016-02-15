@@ -122,6 +122,7 @@
     <ClInclude Include="..\..\..\include\neogfx\i_native_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_native_window_event_handler.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_rendering_engine.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_scrollbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_style.hpp" />
@@ -136,6 +137,7 @@
     <ClInclude Include="..\..\..\include\neogfx\keyboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\label.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\module_resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\mouse.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\native_font.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\native_font_face.hpp" />
@@ -150,6 +152,7 @@
     <ClInclude Include="..\..\..\include\neogfx\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\radio_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\resource_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\scrollable_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\scrollbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sdl_graphics_context.hpp" />
@@ -201,6 +204,7 @@
     <ClCompile Include="..\..\..\src\item_view.cpp" />
     <ClCompile Include="..\..\..\src\label.cpp" />
     <ClCompile Include="..\..\..\src\layout.cpp" />
+    <ClCompile Include="..\..\..\src\module_resource.cpp" />
     <ClCompile Include="..\..\..\src\native_font.cpp" />
     <ClCompile Include="..\..\..\src\native_font_face.cpp" />
     <ClCompile Include="..\..\..\src\native_window.cpp" />
@@ -210,6 +214,7 @@
     <ClCompile Include="..\..\..\src\opengl_renderer.cpp" />
     <ClCompile Include="..\..\..\src\opengl_window.cpp" />
     <ClCompile Include="..\..\..\src\push_button.cpp" />
+    <ClCompile Include="..\..\..\src\resource_manager.cpp" />
     <ClCompile Include="..\..\..\src\scrollable_widget.cpp" />
     <ClCompile Include="..\..\..\src\scrollbar.cpp" />
     <ClCompile Include="..\..\..\src\sdl_graphics_context.cpp" />
