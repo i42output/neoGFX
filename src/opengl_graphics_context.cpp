@@ -624,7 +624,7 @@ namespace neogfx
 		std::vector<double> texCoords = texture_vertices(aTexture.extents(), aTextureRect);
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{colour::White.red(), colour::White.green(), colour::White.blue(), colour::White.alpha()}});
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glDrawArrays(GL_QUADS, 0, vertices.size() / 2));
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
