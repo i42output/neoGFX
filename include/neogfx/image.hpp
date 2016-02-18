@@ -1,4 +1,4 @@
-// module_resource.hpp
+// image.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -20,14 +20,25 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include "i_resource.hpp"
+#include <boost/optional.hpp>
+#include "i_image.hpp"
 
 namespace neogfx
 {
-	class module_resource : public i_resource
+	class image : public i_image
 	{
 	public:
-		module_resource(const std::string& aPath, const void* aData, std::size_t aSize);
+		enum image_type_e
+		{
+			UnknownImage,
+			PngImage
+		};
+	private:
+		struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
+	public:
+		image();
+		image(const std::string& aPath);
+		~image();
 	public:
 		virtual bool available() const;
 		virtual std::pair<bool, double> downloading() const;
@@ -38,9 +49,24 @@ namespace neogfx
 		virtual const void* data() const;
 		virtual void* data();
 		virtual std::size_t size() const;
+	public:
+		virtual colour_format_e colour_format() const;
+		virtual const neogfx::size& extents() const;
+		virtual void resize(const neogfx::size& aNewSize);
+		virtual colour get_pixel(const point& aPoint) const;
+		virtual void set_pixel(const point& aPoint, const colour& aColour);
 	private:
+		bool has_resource() const;
+		const i_resource& resource() const;
+		image_type_e recognize() const;
+		bool load();
+		bool load_png();
+	private:
+		i_resource::pointer iResource;
 		std::string iPath;
-		const void* iData;
-		std::size_t iSize;
+		boost::optional<std::string> iError;
+		colour_format_e iColourFormat;
+		std::vector<uint8_t> iData;
+		neogfx::size iSize;
 	};
 }

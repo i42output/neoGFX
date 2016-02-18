@@ -26,9 +26,15 @@
 #include "path.hpp"
 #include "pen.hpp"
 #include "font.hpp"
+#include "i_texture.hpp"
 
 namespace neogfx
 {
+	enum colour_format_e
+	{
+		ColourFormatRGBA8
+	};
+
 	enum smoothing_mode_e
 	{
 		SmoothingModeNone,
@@ -115,6 +121,8 @@ namespace neogfx
 		void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const;
 		void set_glyph_text_cache(glyph_text& aGlyphTextCache) const;
 		void reset_glyph_text_cache() const;
+		void draw_texture(const point& aPoint, const i_texture& aTexture) const;
+		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) const;
 		// implementation
 		// from i_device_metrics
 	public:

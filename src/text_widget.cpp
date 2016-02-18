@@ -82,9 +82,12 @@ namespace neogfx
 
 	void text_widget::set_text(const std::string& aText)
 	{
+		size oldSize = minimum_size();
 		iText = aText;
 		iTextExtent = boost::none;
 		iGlyphTextCache = glyph_text(font());
+		if (oldSize != minimum_size() && has_managing_layout())
+			managing_layout().layout_items(true);
 		update();
 	}
 

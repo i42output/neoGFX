@@ -1,4 +1,4 @@
-// resource_manager.hpp
+// image_widget.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -16,26 +16,32 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #pragma once
 
 #include "neogfx.hpp"
-#include <neolib/variant.hpp>
-#include "i_resource_manager.hpp"
+#include "widget.hpp"
+#include "image.hpp"
+#include "texture.hpp"
 
 namespace neogfx
 {
-	class resource_manager : public i_resource_manager
+	class image_widget : public widget
 	{
 	public:
-		resource_manager();
-		static resource_manager& instance();
+		image_widget(const i_texture& aTexture);
+		image_widget(const i_image& aImage);
+		image_widget(i_widget& aParent, const i_texture& aTexture);
+		image_widget(i_widget& aParent, const i_image& aImage);
+		image_widget(i_layout& aLayout, const i_texture& aTexture);
+		image_widget(i_layout& aLayout, const i_image& aImage);
 	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
+		virtual size minimum_size() const;
 	public:
-		virtual void cleanup();
+		virtual void paint(graphics_context& aGraphicsContext) const;
+	public:
+		void set_image(const i_texture& aTexture);
+		void set_image(const i_image& aText);
 	private:
-		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
+		texture iTexture;
 	};
 }

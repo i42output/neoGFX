@@ -14,6 +14,7 @@
 #include <neogfx/item_presentation_model.hpp>
 #include <neogfx/tab_page_container.hpp>
 #include <neogfx/i_surface.hpp>
+#include <neogfx/image_widget.hpp>
 
 namespace ng = neogfx;
 
@@ -210,6 +211,9 @@ int main(int argc, char* argv[])
 	ng::vertical_layout l(w);
 	for (int i = 0; i < 10000; ++i)
 		l.add_widget(std::make_shared<ng::push_button>(boost::lexical_cast<std::string>(i)));
+	auto& w2 = tabContainer.add_tab_page("Images").widget();
+	ng::vertical_layout l2(w2);
+	ng::image_widget iw(l2, ng::image(":/test/resources/orca.png"));
 	tabContainer.add_tab_page("Foo");
 	tabContainer.add_tab_page("Bar");
 	tabContainer.add_tab_page("Baz");

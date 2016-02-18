@@ -1,4 +1,4 @@
-// resource_manager.hpp
+// resource.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -20,22 +20,33 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <neolib/variant.hpp>
+#include <boost/optional.hpp>
+#include "i_resource.hpp"
 #include "i_resource_manager.hpp"
 
 namespace neogfx
 {
-	class resource_manager : public i_resource_manager
+	class resource : public i_resource
 	{
 	public:
-		resource_manager();
-		static resource_manager& instance();
+		resource() = delete;
+		resource(i_resource_manager& aManager, const std::string& aPath);
+		~resource();
 	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
+		virtual bool available() const;
+		virtual std::pair<bool, double> downloading() const;
+		virtual bool error() const;
+		virtual const std::string& error_string() const;
 	public:
-		virtual void cleanup();
+		virtual const std::string& path() const;
+		virtual const void* data() const;
+		virtual void* data();
+		virtual std::size_t size() const;
 	private:
-		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
+		i_resource_manager& iManager;
+		std::string iPath;
+		boost::optional<std::string> iError;
+		std::size_t iSize;
+		std::vector<uint8_t> iData;
 	};
 }

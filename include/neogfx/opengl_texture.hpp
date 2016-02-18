@@ -1,4 +1,4 @@
-// resource_manager.hpp
+// opengl_texture.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -20,22 +20,27 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <neolib/variant.hpp>
-#include "i_resource_manager.hpp"
+#include <GL/glew.h>
+#include <GL/GL.h>
+#include "geometry.hpp"
+#include "i_native_texture.hpp"
+#include "i_image.hpp"
 
 namespace neogfx
 {
-	class resource_manager : public i_resource_manager
+	class opengl_texture : public i_native_texture
 	{
 	public:
-		resource_manager();
-		static resource_manager& instance();
+		struct unsupported_colour_format : std::runtime_error { unsupported_colour_format() : std::runtime_error("neogfx::opengl_texture::unsupported_colour_format") {} };
 	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
+		opengl_texture(const i_image& aImage);
+		~opengl_texture();
 	public:
-		virtual void cleanup();
+		virtual const size& extents() const;
+	public:
+		virtual void* handle() const;
 	private:
-		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
+		size iSize;
+		GLuint iHandle;
 	};
 }

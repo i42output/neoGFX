@@ -578,4 +578,14 @@ namespace neogfx
 	{
 		iGlyphTextCache = 0;
 	}
+
+	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture) const
+	{
+		iNativeGraphicsContext->draw_texture(to_device_units(aPoint) + iOrigin, aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+	}
+
+	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) const
+	{
+		iNativeGraphicsContext->draw_texture(to_device_units(aPoint) + iOrigin, aTexture, aTextureRect);
+	}
 }

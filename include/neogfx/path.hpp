@@ -33,6 +33,7 @@ namespace neogfx
 	public:
 		enum shape_type_e
 		{
+			Vertices,
 			Quads,
 			Lines,
 			LineLoop,

@@ -1,4 +1,4 @@
-// resource_manager.hpp
+// i_image.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -20,22 +20,24 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <neolib/variant.hpp>
-#include "i_resource_manager.hpp"
+#include "geometry.hpp"
+#include "colour.hpp"
+#include "graphics_context.hpp"
+#include "i_resource.hpp"
 
 namespace neogfx
 {
-	class resource_manager : public i_resource_manager
+	class i_image : public i_resource
 	{
 	public:
-		resource_manager();
-		static resource_manager& instance();
+		struct unknown_image_format : std::runtime_error { unknown_image_format() : std::runtime_error("neogfx::i_image::unknown_image_format") {} };
 	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
+		virtual ~i_image() {}
 	public:
-		virtual void cleanup();
-	private:
-		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
+		virtual colour_format_e colour_format() const = 0;
+		virtual const neogfx::size& extents() const = 0;
+		virtual void resize(const neogfx::size& aNewSize) = 0;
+		virtual colour get_pixel(const point& aPoint) const = 0;
+		virtual void set_pixel(const point& aPoint, const colour& aColour) = 0;
 	};
 }

@@ -594,6 +594,42 @@ namespace neogfx
 		iRenderingEngine.deactivate_shader_program();
 	}
 
+	namespace
+	{
+		std::vector<double> texture_vertices(const size& aTextureSize, const rect& aTextureRect)
+		{
+			std::vector<double> result;
+			rect normalizedRect = aTextureRect / aTextureSize;
+			result.push_back(normalizedRect.top_left().x);
+			result.push_back(normalizedRect.top_left().y);
+			result.push_back(normalizedRect.top_right().x);
+			result.push_back(normalizedRect.top_right().y);
+			result.push_back(normalizedRect.bottom_right().x);
+			result.push_back(normalizedRect.bottom_right().y);
+			result.push_back(normalizedRect.bottom_left().x);
+			result.push_back(normalizedRect.bottom_left().y);
+			return result;
+		}
+	}
+
+	void opengl_graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect)
+	{	
+		glCheck(glEnable(GL_BLEND));
+		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+		GLint previousTexture;
+		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
+		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture().handle())));
+		path rectPath(rect(aPoint, aTextureRect.extents()), path::LineLoop);
+		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
+		std::vector<double> texCoords = texture_vertices(aTexture.extents(), aTextureRect);
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{colour::White.red(), colour::White.green(), colour::White.blue(), colour::White.alpha()}});
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glDrawArrays(GL_QUADS, 0, vertices.size() / 2));
+		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+	}
+
 	opengl_graphics_context::vertex opengl_graphics_context::to_shader_vertex(const point& aPoint) const
 	{
 		return vertex{{aPoint.x, aPoint.y, 0.0}};

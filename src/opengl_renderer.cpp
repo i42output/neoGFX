@@ -240,6 +240,11 @@ namespace neogfx
 		return iFontManager;
 	}
 
+	i_texture_manager& opengl_renderer::texture_manager()
+	{
+		return iTextureManager;
+	}
+
 	void opengl_renderer::activate_shader_program(i_shader_program& aProgram)
 	{
 		for (auto i = iShaderPrograms.begin(); i != iShaderPrograms.end(); ++i)

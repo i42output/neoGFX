@@ -20,16 +20,33 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include "event.hpp"
 
 namespace neogfx
 {
 	class i_resource
 	{
 	public:
+		event<> downloaded;
+		event<> failed_to_download;
+	public:
+		typedef std::shared_ptr<i_resource> pointer;
+		typedef std::weak_ptr<i_resource> weak_pointer;
+	public:
+		struct not_available : std::logic_error { not_available() : std::logic_error("neogfx::i_resource::not_available") {} };
+		struct no_data : std::logic_error { no_data() : std::logic_error("neogfx::i_resource::no_data") {} };
+		struct const_data : std::logic_error { const_data() : std::logic_error("neogfx::i_resource::const_data") {} };
+	public:
 		virtual ~i_resource() {}
+	public:
+		virtual bool available() const = 0;
+		virtual std::pair<bool, double> downloading() const = 0;
+		virtual bool error() const = 0;
+		virtual const std::string& error_string() const = 0;
 	public:
 		virtual const std::string& path() const = 0;
 		virtual const void* data() const = 0;
+		virtual void* data() = 0;
 		virtual std::size_t size() const = 0;
 	};
 }

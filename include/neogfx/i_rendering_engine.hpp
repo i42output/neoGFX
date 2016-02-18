@@ -24,6 +24,7 @@
 #include "window.hpp"
 #include "i_native_window.hpp"
 #include "i_font_manager.hpp"
+#include "i_texture_manager.hpp"
 
 namespace neogfx
 {
@@ -73,6 +74,7 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = window::Default) = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = window::Default) = 0;
 		virtual i_font_manager& font_manager() = 0;
+		virtual i_texture_manager& texture_manager() = 0;
 		virtual void activate_shader_program(i_shader_program& aProgram) = 0;
 		virtual void deactivate_shader_program() = 0;
 		virtual const i_shader_program& active_shader_program() const = 0;

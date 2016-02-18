@@ -1,4 +1,4 @@
-// resource_manager.hpp
+// texture_manager.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -20,22 +20,22 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <neolib/variant.hpp>
-#include "i_resource_manager.hpp"
+#include "i_texture_manager.hpp"
 
 namespace neogfx
 {
-	class resource_manager : public i_resource_manager
+	class texture_manager : public i_texture_manager
 	{
-	public:
-		resource_manager();
-		static resource_manager& instance();
-	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
-	public:
-		virtual void cleanup();
+		friend class texture_wrapper;
 	private:
-		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
+		typedef std::list<std::weak_ptr<i_native_texture>> texture_list;
+	public:
+		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture);
+	protected:
+		std::unique_ptr<i_native_texture> add_texture(std::shared_ptr<i_native_texture> aTexture);
+	private:
+		void cleanup(texture_list::iterator aTexture);
+	private:
+		texture_list iTextures;
 	};
 }

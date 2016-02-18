@@ -1,4 +1,4 @@
-// resource_manager.hpp
+// i_resource_manager.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -20,22 +20,16 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <neolib/variant.hpp>
-#include "i_resource_manager.hpp"
+#include "i_resource.hpp"
 
 namespace neogfx
 {
-	class resource_manager : public i_resource_manager
+	class i_resource_manager
 	{
 	public:
-		resource_manager();
-		static resource_manager& instance();
+		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize) = 0;
+		virtual i_resource::pointer load_resource(const std::string aResourcePath) = 0;
 	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
-	public:
-		virtual void cleanup();
-	private:
-		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
+		virtual void cleanup() = 0;
 	};
 }

@@ -20,6 +20,7 @@
 #include "neogfx.hpp"
 #include "resource_manager.hpp"
 #include "module_resource.hpp"
+#include "resource.hpp"
 
 namespace neogfx
 {	
@@ -35,6 +36,33 @@ namespace neogfx
 
 	void resource_manager::add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize)
 	{
-		iResources[aResourcePath] = std::make_unique<module_resource>(aResourcePath, aResourceData, aResourceSize);
+		iResources[aResourcePath] = i_resource::pointer(std::make_shared<module_resource>(aResourcePath, aResourceData, aResourceSize));
+	}
+
+	i_resource::pointer resource_manager::load_resource(const std::string aResourcePath)
+	{
+		auto existing = iResources.find(aResourcePath);
+		if (existing != iResources.end())
+		{
+			if (existing->second.is<i_resource::pointer>())
+				return static_variant_cast<i_resource::pointer>(existing->second);
+			i_resource::weak_pointer ptr = static_variant_cast<i_resource::weak_pointer>(existing->second);
+			if (!ptr.expired())
+				return ptr.lock();
+		}
+		i_resource::pointer newResource = std::make_shared<resource>(*this, aResourcePath);
+		iResources[aResourcePath] = i_resource::weak_pointer(newResource);
+		return newResource;
+	}
+
+	void resource_manager::cleanup()
+	{
+		for (auto i = iResources.begin(); i != iResources.end();)
+		{
+			if (i->second.is<i_resource::weak_pointer>() && static_variant_cast<i_resource::weak_pointer&>(i->second).expired())
+				i = iResources.erase(i);
+			else
+				++i;
+		}
 	}
 }

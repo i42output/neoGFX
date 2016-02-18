@@ -1,4 +1,4 @@
-// resource_manager.hpp
+// texture.cpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -17,25 +17,40 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "neogfx.hpp"
-#include <neolib/variant.hpp>
-#include "i_resource_manager.hpp"
+#include "app.hpp"
+#include "texture.hpp"
+#include "texture_manager.hpp"
+#include "i_native_texture.hpp"
 
 namespace neogfx
 {
-	class resource_manager : public i_resource_manager
+	texture::texture(const i_texture& aTexture) :
+		iNativeTexture(app::instance().rendering_engine().texture_manager().join_texture(aTexture))
 	{
-	public:
-		resource_manager();
-		static resource_manager& instance();
-	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
-	public:
-		virtual void cleanup();
-	private:
-		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
-	};
+	}
+
+	texture::texture(const i_image& aImage) :
+		iNativeTexture(app::instance().rendering_engine().texture_manager().create_texture(aImage))
+	{
+	}
+
+	texture::texture(const texture& aOther) :
+		iNativeTexture(aOther.iNativeTexture)
+	{
+	}
+
+	texture::~texture()
+	{
+	}
+
+	const size& texture::extents() const
+	{
+		return native_texture().extents();
+	}
+
+	i_native_texture& texture::native_texture() const
+	{
+		return *iNativeTexture;
+	}
 }

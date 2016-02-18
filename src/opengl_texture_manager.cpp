@@ -1,4 +1,4 @@
-// resource_manager.hpp
+// opengl_texture_manager.cpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -17,25 +17,14 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "neogfx.hpp"
-#include <neolib/variant.hpp>
-#include "i_resource_manager.hpp"
+#include "opengl_texture_manager.hpp"
+#include "opengl_texture.hpp"
 
 namespace neogfx
 {
-	class resource_manager : public i_resource_manager
+	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const i_image& aImage)
 	{
-	public:
-		resource_manager();
-		static resource_manager& instance();
-	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
-	public:
-		virtual void cleanup();
-	private:
-		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
-	};
+		return add_texture(std::make_shared<opengl_texture>(aImage));
+	}
 }

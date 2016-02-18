@@ -12,3 +12,12 @@
 /lib
 /examples/test/build/win32/vs2013/test.opensdf
 /tools/nrc2cpp/build/win32/vs2013/Release
+/3rdparty/zlib/zlib-1.2.8/build
+/3rdparty/zlib/zlib-1.2.8/lib/zlibstatic.lib
+/3rdparty/zlib/zlib-1.2.8/lib/zlibstaticd.lib
+/3rdparty/zlib/zlib-1.2.8/zconf.h.included
+/3rdparty/libpng/libpng-1.6.21/build
+/3rdparty/libpng/libpng-1.6.21/lib/libpng16_static.lib
+/3rdparty/libpng/libpng-1.6.21/lib/libpng16_staticd.lib
+/tools/nrc/build/win32/vs2013/Debug
+/tools/nrc/build/win32/vs2013/Release

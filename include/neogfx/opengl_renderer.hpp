@@ -27,6 +27,7 @@
 #include "i_native_window.hpp"
 #include "i_rendering_engine.hpp"
 #include "font_manager.hpp"
+#include "opengl_texture_manager.hpp"
 
 std::string glErrorString(GLenum aErrorCode);
 GLenum glCheckError(const char* file, unsigned int line);
@@ -92,6 +93,7 @@ namespace neogfx
 		virtual void initialize();
 		virtual const i_screen_metrics& screen_metrics() const;
 		virtual i_font_manager& font_manager();
+		virtual i_texture_manager& texture_manager();
 		virtual void activate_shader_program(i_shader_program& aProgram);
 		virtual void deactivate_shader_program();
 		virtual const i_shader_program& active_shader_program() const;
@@ -103,6 +105,7 @@ namespace neogfx
 	private:
 		detail::screen_metrics iScreenMetrics;		
 		neogfx::font_manager iFontManager;
+		opengl_texture_manager iTextureManager;
 		shader_programs iShaderPrograms;
 		shader_programs::iterator iActiveProgram;
 		shader_programs::iterator iSubpixelProgram;

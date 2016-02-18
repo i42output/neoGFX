@@ -347,7 +347,9 @@ namespace neogfx
 		bool operator==(const basic_rect& other) const { return x == other.x && y == other.y && cx == other.cx && cy == other.cy; }
 		bool operator!=(const basic_rect& other) const { return !operator==(other); }
 		basic_rect& operator*=(const basic_rect& other) { position() *= other.position(); extents() *= other.extents(); return *this; }
+		basic_rect& operator*=(const size_type& size) { position() *= size; extents() *= size; return *this; }
 		basic_rect& operator/=(const basic_rect& other) { position() /= other.position(); extents() /= other.extents(); return *this; }
+		basic_rect& operator/=(const size_type& size) { position() /= size; extents() /= size; return *this; }
 		bool contains(const point_type& point) const { return point.x >= left() && point.y >= top() && point.x < right() && point.y < bottom(); }
 		bool contains_x(const point_type& point) const { return point.x >= left() && point.x < right(); }
 		bool contains_y(const point_type& point) const { return point.y >= top() && point.y < bottom(); }
@@ -388,7 +390,23 @@ namespace neogfx
 	}
 
 	template <typename CoordinateType>
+	inline basic_rect<CoordinateType> operator*(const basic_rect<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		basic_rect<CoordinateType> ret = left;
+		ret *= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
 	inline basic_rect<CoordinateType> operator/(const basic_rect<CoordinateType>& left, const basic_rect<CoordinateType>& right)
+	{
+		basic_rect<CoordinateType> ret = left;
+		ret /= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_rect<CoordinateType> operator/(const basic_rect<CoordinateType>& left, const basic_size<CoordinateType>& right)
 	{
 		basic_rect<CoordinateType> ret = left;
 		ret /= right;

@@ -816,6 +816,8 @@ namespace neogfx
 	void widget::set_font(const optional_font& aFont)
 	{
 		iFont = aFont;
+		if (has_managing_layout())
+			managing_layout().layout_items(true);
 		update();
 	}
 
@@ -844,7 +846,8 @@ namespace neogfx
 		if (iVisible != aVisible)
 		{
 			iVisible = aVisible;
-			managing_layout().layout_items(true);
+			if (has_managing_layout())
+				managing_layout().layout_items(true);
 		}
 	}
 

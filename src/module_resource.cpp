@@ -27,6 +27,27 @@ namespace neogfx
 	{
 	}
 
+	bool module_resource::available() const
+	{
+		return true;
+	}
+
+	std::pair<bool, double> module_resource::downloading() const
+	{
+		return std::make_pair(false, 100.0);
+	}
+
+	bool module_resource::error() const
+	{
+		return false;
+	}
+
+	const std::string& module_resource::error_string() const
+	{
+		static const std::string sNoError;
+		return sNoError;
+	}
+
 	const std::string& module_resource::path() const
 	{
 		return iPath;
@@ -35,6 +56,11 @@ namespace neogfx
 	const void* module_resource::data() const
 	{
 		return iData;
+	}
+
+	void* module_resource::data()
+	{
+		throw const_data();
 	}
 
 	std::size_t module_resource::size() const
