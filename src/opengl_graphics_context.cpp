@@ -612,14 +612,14 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect)
+	void opengl_graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect)
 	{	
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		GLint previousTexture;
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture().handle())));
-		path rectPath(rect(aPoint, aTextureRect.extents()), path::LineLoop);
+		path rectPath(aRect, path::LineLoop);
 		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
 		std::vector<double> texCoords = texture_vertices(aTexture.extents(), aTextureRect);
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));

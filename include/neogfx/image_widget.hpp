@@ -28,6 +28,7 @@ namespace neogfx
 	enum class aspect_ratio
 	{
 		Ignore,
+		Stretch,
 		Keep,
 		KeepExpanding
 	};

@@ -581,11 +581,21 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture) const
 	{
-		iNativeGraphicsContext->draw_texture(to_device_units(aPoint) + iOrigin, aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}, aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+	}
+
+	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture) const
+	{
+		iNativeGraphicsContext->draw_texture(to_device_units(aRect) + iOrigin, aTexture, rect(point(0.0, 0.0), aTexture.extents()));
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) const
 	{
-		iNativeGraphicsContext->draw_texture(to_device_units(aPoint) + iOrigin, aTexture, aTextureRect);
+		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}, aTexture, aTextureRect);
+	}
+
+	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect) const
+	{
+		iNativeGraphicsContext->draw_texture(to_device_units(aRect) + iOrigin, aTexture, aTextureRect);
 	}
 }

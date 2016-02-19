@@ -70,8 +70,105 @@ namespace neogfx
 	void image_widget::paint(graphics_context& aGraphicsContext) const
 	{
 		scoped_units su(*this, UnitsPixels);
-		point imagePosition(std::floor((client_rect().width() - iTexture.extents().cx) / 2.0), std::floor((client_rect().height() - iTexture.extents().cy) / 2.0));
-		aGraphicsContext.draw_texture(imagePosition, iTexture);
+		rect placementRect(point{}, iTexture.extents());
+		if (iAspectRatio == aspect_ratio::Stretch)
+		{
+			placementRect.cx = client_rect().width();
+			placementRect.cy = client_rect().height();
+		}
+		else if (placementRect.width() >= placementRect.height())
+		{
+			switch (iAspectRatio)
+			{
+			case aspect_ratio::Ignore:
+				if (placementRect.width() > client_rect().width())
+					placementRect.cx = client_rect().width();
+				if (placementRect.height() > client_rect().height())
+					placementRect.cy = client_rect().height();
+				break;
+			case aspect_ratio::Keep:
+				if (placementRect.width() > client_rect().width())
+				{
+					placementRect.cx = client_rect().width();
+					placementRect.cy = placementRect.cx * iTexture.extents().cy / iTexture.extents().cx;
+				}
+				if (placementRect.height() > client_rect().height())
+				{
+					placementRect.cy = client_rect().height();
+					placementRect.cx = placementRect.cy * iTexture.extents().cx / iTexture.extents().cy;
+				}
+				break;
+			case aspect_ratio::KeepExpanding:
+				if (placementRect.height() > client_rect().height())
+				{
+					placementRect.cy = client_rect().height();
+					placementRect.cx = placementRect.cy * iTexture.extents().cx / iTexture.extents().cy;
+				}
+				break;
+			}
+		}
+		else
+		{
+			switch (iAspectRatio)
+			{
+			case aspect_ratio::Ignore:
+				if (placementRect.width() > client_rect().width())
+					placementRect.cx = client_rect().width();
+				if (placementRect.height() > client_rect().height())
+					placementRect.cy = client_rect().height();
+				break;
+			case aspect_ratio::Keep:
+				if (placementRect.height() > client_rect().height())
+				{
+					placementRect.cy = client_rect().height();
+					placementRect.cx = placementRect.cy * iTexture.extents().cx / iTexture.extents().cy;
+				}
+				if (placementRect.width() > client_rect().width())
+				{
+					placementRect.cx = client_rect().width();
+					placementRect.cy = placementRect.cx * iTexture.extents().cy / iTexture.extents().cx;
+				}
+				break;
+			case aspect_ratio::KeepExpanding:
+				if (placementRect.width() > client_rect().width())
+				{
+					placementRect.cx = client_rect().width();
+					placementRect.cy = placementRect.cx * iTexture.extents().cy / iTexture.extents().cx;
+				}
+				break;
+			}
+		}
+		switch (iPlacement)
+		{
+		case cardinal_placement::NorthWest:
+			placementRect.position() = point{};
+			break;
+		case cardinal_placement::North:
+			placementRect.position() = point{ std::floor((client_rect().width() - placementRect.cx) / 2.0), 0.0 };
+			break;
+		case cardinal_placement::NorthEast:
+			placementRect.position() = point{ client_rect().width() - placementRect.width(), 0.0 };
+			break;
+		case cardinal_placement::West:
+			placementRect.position() = point{ 0.0, std::floor((client_rect().height() - placementRect.cy) / 2.0) };
+			break;
+		case cardinal_placement::Centre:
+			placementRect.position() = point{ std::floor((client_rect().width() - placementRect.cx) / 2.0), std::floor((client_rect().height() - placementRect.cy) / 2.0) };
+			break;
+		case cardinal_placement::East:
+			placementRect.position() = point{ client_rect().width() - placementRect.width(), std::floor((client_rect().height() - placementRect.cy) / 2.0) };
+			break;
+		case cardinal_placement::SouthWest:
+			placementRect.position() = point{ 0.0, client_rect().height() - placementRect.height() };
+			break;
+		case cardinal_placement::South:
+			placementRect.position() = point{ std::floor((client_rect().width() - placementRect.cx) / 2.0), client_rect().height() - placementRect.height() };
+			break;
+		case cardinal_placement::SouthEast:
+			placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
+			break;
+		}
+		aGraphicsContext.draw_texture(placementRect, iTexture);
 	}
 
 	void image_widget::set_image(const i_texture& aTexture)

@@ -122,7 +122,9 @@ namespace neogfx
 		void set_glyph_text_cache(glyph_text& aGlyphTextCache) const;
 		void reset_glyph_text_cache() const;
 		void draw_texture(const point& aPoint, const i_texture& aTexture) const;
+		void draw_texture(const rect& aRect, const i_texture& aTexture) const;
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) const;
+		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect) const;
 		// implementation
 		// from i_device_metrics
 	public:

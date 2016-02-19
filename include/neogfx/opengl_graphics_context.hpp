@@ -106,7 +106,7 @@ namespace neogfx
 		virtual void begin_drawing_glyphs();
 		virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour);
 		virtual void end_drawing_glyphs();
-		virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect);
+		virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect);
 	private:
 		void apply_scissor();
 		void apply_logical_operation();

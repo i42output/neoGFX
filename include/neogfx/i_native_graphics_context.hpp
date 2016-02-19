@@ -60,6 +60,6 @@ namespace neogfx
 		virtual void begin_drawing_glyphs() = 0;
 		virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) = 0;
 		virtual void end_drawing_glyphs() = 0;
-		virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) = 0;
+		virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect) = 0;
 	};
 }
