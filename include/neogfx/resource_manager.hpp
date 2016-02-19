@@ -31,8 +31,8 @@ namespace neogfx
 		resource_manager();
 		static resource_manager& instance();
 	public:
-		virtual void add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize);
-		virtual i_resource::pointer load_resource(const std::string aResourcePath);
+		virtual void add_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize);
+		virtual i_resource::pointer load_resource(const std::string& aUri);
 	public:
 		virtual void cleanup();
 	private:

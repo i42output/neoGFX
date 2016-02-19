@@ -22,8 +22,8 @@
 
 namespace neogfx
 {
-	module_resource::module_resource(const std::string& aPath, const void* aData, std::size_t aSize) : 
-		iPath(aPath), iData(aData), iSize(aSize)
+	module_resource::module_resource(const std::string& aUri, const void* aData, std::size_t aSize) : 
+		iUri(aUri), iData(aData), iSize(aSize)
 	{
 	}
 
@@ -48,9 +48,9 @@ namespace neogfx
 		return sNoError;
 	}
 
-	const std::string& module_resource::path() const
+	const std::string& module_resource::uri() const
 	{
-		return iPath;
+		return iUri;
 	}
 
 	const void* module_resource::data() const

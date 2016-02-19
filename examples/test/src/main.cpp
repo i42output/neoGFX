@@ -212,8 +212,17 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < 10000; ++i)
 		l.add_widget(std::make_shared<ng::push_button>(boost::lexical_cast<std::string>(i)));
 	auto& w2 = tabContainer.add_tab_page("Images").widget();
-	ng::vertical_layout l2(w2);
+	ng::horizontal_layout l2(w2);
 	ng::image_widget iw(l2, ng::image(":/test/resources/orca.png"));
+	ng::grid_layout l3(l2);
+	l3.set_spacing(ng::size{});
+	ng::image hash(":/test/resources/channel_32.png");
+	for (uint32_t i = 0; i < 9; ++i)
+	{
+		auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal_placement>(i));
+		hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
+		l3.add_widget(i / 3, i % 3, hashWidget);
+	}
 	tabContainer.add_tab_page("Foo");
 	tabContainer.add_tab_page("Bar");
 	tabContainer.add_tab_page("Baz");

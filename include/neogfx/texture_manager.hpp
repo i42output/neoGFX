@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include "i_image.hpp"
 #include "i_texture_manager.hpp"
 
 namespace neogfx
@@ -27,11 +28,16 @@ namespace neogfx
 	class texture_manager : public i_texture_manager
 	{
 		friend class texture_wrapper;
-	private:
+	protected:
 		typedef std::list<std::weak_ptr<i_native_texture>> texture_list;
 	public:
+		virtual std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture);
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture);
 	protected:
+		const texture_list& textures() const;
+		texture_list& textures();
+		texture_list::const_iterator find_texture(const i_image& aImage) const;
+		texture_list::iterator find_texture(const i_image& aImage);
 		std::unique_ptr<i_native_texture> add_texture(std::shared_ptr<i_native_texture> aTexture);
 	private:
 		void cleanup(texture_list::iterator aTexture);

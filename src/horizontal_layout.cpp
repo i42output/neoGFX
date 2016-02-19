@@ -255,7 +255,7 @@ namespace neogfx
 			switch (iVerticalAlignment)
 			{
 			case alignment::Top:
-				alignmentAdjust.y = 0;
+				alignmentAdjust.y = 0.0;
 				break;
 			case alignment::Bottom:
 				alignmentAdjust.y = availableSize.cy - s.cy;
@@ -265,6 +265,8 @@ namespace neogfx
 				alignmentAdjust.y = std::ceil((availableSize.cy - s.cy) / 2.0);
 				break;
 			}
+			if (alignmentAdjust.y < 0.0)
+				alignmentAdjust.y = 0.0;
 			if (itemDispositions[&item] == TooBig || itemDispositions[&item] == FixedSize)
 				s.cx = item.minimum_size().cx;
 			else if (itemDispositions[&item] == TooSmall)

@@ -77,26 +77,26 @@ namespace neogfx
 
 	void grid_layout::add_widget(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget)
 	{
-		if (&aWidget.layout() == this)
+		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
 		if (iCells.find(cell_coordinates(aRow, aColumn)) != iCells.end())
 			throw cell_occupied();
 		iCells[cell_coordinates(aRow, aColumn)] = items().insert(items().end(), item(aWidget));
-		iDimensions.first = std::max(iDimensions.first, aRow);
-		iDimensions.second = std::max(iDimensions.second, aColumn);
+		iDimensions.first = std::max(iDimensions.first, aRow + 1);
+		iDimensions.second = std::max(iDimensions.second, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
 	}
 
 	void grid_layout::add_widget(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget)
 	{
-		if (&aWidget->layout() == this)
+		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
 		if (iCells.find(cell_coordinates(aRow, aColumn)) != iCells.end())
 			throw cell_occupied();
 		iCells[cell_coordinates(aRow, aColumn)] = items().insert(items().end(), item(aWidget));
-		iDimensions.first = std::max(iDimensions.first, aRow);
-		iDimensions.second = std::max(iDimensions.second, aColumn);
+		iDimensions.first = std::max(iDimensions.first, aRow + 1);
+		iDimensions.second = std::max(iDimensions.second, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
 	}
@@ -106,8 +106,8 @@ namespace neogfx
 		if (iCells.find(cell_coordinates(aRow, aColumn)) != iCells.end())
 			throw cell_occupied();
 		iCells[cell_coordinates(aRow, aColumn)] = items().insert(items().end(), item(aLayout));
-		iDimensions.first = std::max(iDimensions.first, aRow);
-		iDimensions.second = std::max(iDimensions.second, aColumn);
+		iDimensions.first = std::max(iDimensions.first, aRow + 1);
+		iDimensions.second = std::max(iDimensions.second, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
 	}
@@ -117,8 +117,8 @@ namespace neogfx
 		if (iCells.find(cell_coordinates(aRow, aColumn)) != iCells.end())
 			throw cell_occupied();
 		iCells[cell_coordinates(aRow, aColumn)] = items().insert(items().end(), item(aLayout));
-		iDimensions.first = std::max(iDimensions.first, aRow);
-		iDimensions.second = std::max(iDimensions.second, aColumn);
+		iDimensions.first = std::max(iDimensions.first, aRow + 1);
+		iDimensions.second = std::max(iDimensions.second, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
 	}
@@ -158,8 +158,8 @@ namespace neogfx
 		if (iCells.find(cell_coordinates(aRow, aColumn)) != iCells.end())
 			throw cell_occupied();
 		iCells[cell_coordinates(aRow, aColumn)] = items().insert(items().end(), item(aSpacer));
-		iDimensions.first = std::max(iDimensions.first, aRow);
-		iDimensions.second = std::max(iDimensions.second, aColumn);
+		iDimensions.first = std::max(iDimensions.first, aRow + 1);
+		iDimensions.second = std::max(iDimensions.second, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
 		aSpacer.set_parent(*this);
@@ -170,8 +170,8 @@ namespace neogfx
 		if (iCells.find(cell_coordinates(aRow, aColumn)) != iCells.end())
 			throw cell_occupied();
 		iCells[cell_coordinates(aRow, aColumn)] = items().insert(items().end(), item(aSpacer));
-		iDimensions.first = std::max(iDimensions.first, aRow);
-		iDimensions.second = std::max(iDimensions.second, aColumn);
+		iDimensions.first = std::max(iDimensions.first, aRow + 1);
+		iDimensions.second = std::max(iDimensions.second, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
 		aSpacer->set_parent(*this);

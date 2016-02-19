@@ -22,7 +22,7 @@
 
 namespace neogfx
 {
-	resource::resource(i_resource_manager& aManager, const std::string& aPath) : iManager(aManager), iPath(aPath), iSize(0)
+	resource::resource(i_resource_manager& aManager, const std::string& aUri) : iManager(aManager), iUri(aUri), iSize(0)
 	{
 	}
 
@@ -59,9 +59,9 @@ namespace neogfx
 		return sNoError;
 	}
 
-	const std::string& resource::path() const
+	const std::string& resource::uri() const
 	{
-		return iPath;
+		return iUri;
 	}
 	
 	const void* resource::data() const

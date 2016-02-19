@@ -37,7 +37,7 @@ namespace neogfx
 		struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
 	public:
 		image();
-		image(const std::string& aPath);
+		image(const std::string& aUri);
 		~image();
 	public:
 		virtual bool available() const;
@@ -45,7 +45,7 @@ namespace neogfx
 		virtual bool error() const;
 		virtual const std::string& error_string() const;
 	public:
-		virtual const std::string& path() const;
+		virtual const std::string& uri() const;
 		virtual const void* data() const;
 		virtual void* data();
 		virtual std::size_t size() const;
@@ -63,7 +63,7 @@ namespace neogfx
 		bool load_png();
 	private:
 		i_resource::pointer iResource;
-		std::string iPath;
+		std::string iUri;
 		boost::optional<std::string> iError;
 		colour_format_e iColourFormat;
 		std::vector<uint8_t> iData;

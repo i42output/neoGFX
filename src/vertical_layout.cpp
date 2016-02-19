@@ -255,7 +255,7 @@ namespace neogfx
 			switch (iHorizontalAlignment)
 			{
 			case alignment::Left:
-				alignmentAdjust.x = 0;
+				alignmentAdjust.x = 0.0;
 				break;
 			case alignment::Right:
 				alignmentAdjust.x = availableSize.cx - s.cx;
@@ -265,6 +265,8 @@ namespace neogfx
 				alignmentAdjust.x = std::ceil((availableSize.cx - s.cx) / 2.0);
 				break;
 			}
+			if (alignmentAdjust.x < 0.0)
+				alignmentAdjust.x = 0.0;
 			if (itemDispositions[&item] == TooBig || itemDispositions[&item] == FixedSize)
 				s.cy = item.minimum_size().cy;
 			else if (itemDispositions[&item] == TooSmall)

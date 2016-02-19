@@ -25,6 +25,9 @@ namespace neogfx
 {
 	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const i_image& aImage)
 	{
+		auto existing = find_texture(aImage);
+		if (existing != textures().end())
+			return join_texture(*existing->lock());
 		return add_texture(std::make_shared<opengl_texture>(aImage));
 	}
 }

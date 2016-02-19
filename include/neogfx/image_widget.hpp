@@ -25,15 +25,35 @@
 
 namespace neogfx
 {
+	enum class aspect_ratio
+	{
+		Ignore,
+		Keep,
+		KeepExpanding
+	};
+
+	enum class cardinal_placement
+	{
+		NorthWest,
+		North,
+		NorthEast,
+		West,
+		Centre,
+		East,
+		SouthWest,
+		South,
+		SouthEast
+	};
+
 	class image_widget : public widget
 	{
 	public:
-		image_widget(const i_texture& aTexture);
-		image_widget(const i_image& aImage);
-		image_widget(i_widget& aParent, const i_texture& aTexture);
-		image_widget(i_widget& aParent, const i_image& aImage);
-		image_widget(i_layout& aLayout, const i_texture& aTexture);
-		image_widget(i_layout& aLayout, const i_image& aImage);
+		image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+		image_widget(const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+		image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+		image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+		image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+		image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
 	public:
 		virtual size minimum_size() const;
 	public:
@@ -41,7 +61,11 @@ namespace neogfx
 	public:
 		void set_image(const i_texture& aTexture);
 		void set_image(const i_image& aText);
+		void set_aspect_ratio(aspect_ratio aAspectRatio);
+		void set_placement(cardinal_placement aPlacement);
 	private:
 		texture iTexture;
+		aspect_ratio iAspectRatio;
+		cardinal_placement iPlacement;
 	};
 }

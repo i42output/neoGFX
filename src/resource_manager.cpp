@@ -34,14 +34,14 @@ namespace neogfx
 		return sInstance;
 	}
 
-	void resource_manager::add_resource(const std::string aResourcePath, const void* aResourceData, std::size_t aResourceSize)
+	void resource_manager::add_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize)
 	{
-		iResources[aResourcePath] = i_resource::pointer(std::make_shared<module_resource>(aResourcePath, aResourceData, aResourceSize));
+		iResources[aUri] = i_resource::pointer(std::make_shared<module_resource>(aUri, aResourceData, aResourceSize));
 	}
 
-	i_resource::pointer resource_manager::load_resource(const std::string aResourcePath)
+	i_resource::pointer resource_manager::load_resource(const std::string& aUri)
 	{
-		auto existing = iResources.find(aResourcePath);
+		auto existing = iResources.find(aUri);
 		if (existing != iResources.end())
 		{
 			if (existing->second.is<i_resource::pointer>())
@@ -50,8 +50,8 @@ namespace neogfx
 			if (!ptr.expired())
 				return ptr.lock();
 		}
-		i_resource::pointer newResource = std::make_shared<resource>(*this, aResourcePath);
-		iResources[aResourcePath] = i_resource::weak_pointer(newResource);
+		i_resource::pointer newResource = std::make_shared<resource>(*this, aUri);
+		iResources[aUri] = i_resource::weak_pointer(newResource);
 		return newResource;
 	}
 

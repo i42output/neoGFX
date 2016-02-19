@@ -72,9 +72,9 @@ namespace neogfx
 		return sNoError;
 	}
 
-	const std::string& image::path() const
+	const std::string& image::uri() const
 	{
-		return iPath;
+		return iUri;
 	}
 
 	const void* image::data() const

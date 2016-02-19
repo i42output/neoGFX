@@ -39,8 +39,10 @@ namespace neogfx
 		virtual const size& extents() const;
 	public:
 		virtual void* handle() const;
+		virtual const std::string& uri() const;
 	private:
 		size iSize;
 		GLuint iHandle;
+		std::string iUri;
 	};
 }

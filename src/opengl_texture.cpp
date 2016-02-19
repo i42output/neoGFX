@@ -24,7 +24,7 @@
 namespace neogfx
 {
 	opengl_texture::opengl_texture(const i_image& aImage) :
-		iSize(aImage.extents()), iHandle(0)
+		iSize(aImage.extents()), iHandle(0), iUri(aImage.uri())
 	{
 		GLint previousTexture;
 		try
@@ -65,5 +65,10 @@ namespace neogfx
 	void* opengl_texture::handle() const
 	{
 		return reinterpret_cast<void*>(iHandle);
+	}
+
+	const std::string& opengl_texture::uri() const
+	{
+		return iUri;
 	}
 }

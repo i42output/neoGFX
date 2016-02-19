@@ -22,34 +22,40 @@
 
 namespace neogfx
 {
-	image_widget::image_widget(const i_texture& aTexture) :
-		iTexture(aTexture)
+	image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+		iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
+		set_margins(neogfx::margins{});
 	}
 
-	image_widget::image_widget(const i_image& aImage) :
-		iTexture(aImage)
+	image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+		iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
+		set_margins(neogfx::margins{});
 	}
 
-	image_widget::image_widget(i_widget& aParent, const i_texture& aTexture) : 
-		widget(aParent), iTexture(aTexture)
+	image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+		widget(aParent), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
+		set_margins(neogfx::margins{});
 	}
 
-	image_widget::image_widget(i_widget& aParent, const i_image& aImage) :
-		widget(aParent), iTexture(aImage)
+	image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+		widget(aParent), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
+		set_margins(neogfx::margins{});
 	}
 
-	image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture) :
-		widget(aLayout), iTexture(aTexture)
+	image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+		widget(aLayout), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
+		set_margins(neogfx::margins{});
 	}
 
-	image_widget::image_widget(i_layout& aLayout, const i_image& aImage) :
-		widget(aLayout), iTexture(aImage)
+	image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
+		widget(aLayout), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
+		set_margins(neogfx::margins{});
 	}
 
 	size image_widget::minimum_size() const
@@ -84,5 +90,23 @@ namespace neogfx
 		if (oldSize != minimum_size() && has_managing_layout())
 			managing_layout().layout_items(true);
 		update();
+	}
+
+	void image_widget::set_aspect_ratio(aspect_ratio aAspectRatio)
+	{
+		if (iAspectRatio != aAspectRatio)
+		{
+			iAspectRatio = aAspectRatio;
+			update();
+		}
+	}
+
+	void image_widget::set_placement(cardinal_placement aPlacement)
+	{
+		if (iPlacement != aPlacement)
+		{
+			iPlacement = aPlacement;
+			update();
+		}
 	}
 }

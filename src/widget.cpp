@@ -642,14 +642,14 @@ namespace neogfx
 
 	void widget::update(bool aIncludeNonClient)
 	{
-		if (surface().destroyed())
+		if ((!is_root() && !has_parent()) || surface().destroyed() || hidden() || layout_items_in_progress())
 			return;
 		update(aIncludeNonClient ? window_rect() - origin() - client_rect().top_left() : client_rect());
 	}
 
 	void widget::update(const rect& aUpdateRect)
 	{
-		if (surface().destroyed() || hidden() || layout_items_in_progress())
+		if ((!is_root() && !has_parent()) || surface().destroyed() || hidden() || layout_items_in_progress())
 			return;
 		if (iUpdateRects.find(aUpdateRect) == iUpdateRects.end())
 		{

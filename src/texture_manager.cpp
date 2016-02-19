@@ -44,21 +44,62 @@ namespace neogfx
 		{
 			return iTextureReference->handle();
 		}
+		virtual const std::string& uri() const
+		{
+			return iTextureReference->uri();
+		}
 	private:
 		texture_manager& iParent;
 		texture_manager::texture_list::iterator iTexture;
 		std::shared_ptr<i_native_texture> iTextureReference;
 	};
 
-	std::unique_ptr<i_native_texture> texture_manager::join_texture(const i_texture& aTexture)
+	std::unique_ptr<i_native_texture> texture_manager::join_texture(const i_native_texture& aTexture)
 	{
 		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
 		{
 			auto p = i->lock();
-			if (aTexture.native_texture().handle() == p->handle())
+			if (aTexture.handle() == p->handle())
 				return std::make_unique<texture_wrapper>(*this, i);
 		}
 		throw texture_not_found();
+	}
+
+	std::unique_ptr<i_native_texture> texture_manager::join_texture(const i_texture& aTexture)
+	{
+		return join_texture(aTexture.native_texture());
+	}
+
+	const texture_manager::texture_list& texture_manager::textures() const
+	{
+		return iTextures;
+	}
+
+	texture_manager::texture_list& texture_manager::textures()
+	{
+		return iTextures;
+	}
+
+	texture_manager::texture_list::const_iterator texture_manager::find_texture(const i_image& aImage) const
+	{
+		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
+		{
+			auto p = i->lock();
+			if (!aImage.uri().empty() && aImage.uri() == p->uri())
+				return i;
+		}
+		return iTextures.end();
+	}
+
+	texture_manager::texture_list::iterator texture_manager::find_texture(const i_image& aImage)
+	{
+		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
+		{
+			auto p = i->lock();
+			if (!aImage.uri().empty() && aImage.uri() == p->uri())
+				return i;
+		}
+		return iTextures.end();
 	}
 
 	std::unique_ptr<i_native_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)

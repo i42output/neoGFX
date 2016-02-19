@@ -30,7 +30,7 @@ namespace neogfx
 	{
 	public:
 		resource() = delete;
-		resource(i_resource_manager& aManager, const std::string& aPath);
+		resource(i_resource_manager& aManager, const std::string& aUri);
 		~resource();
 	public:
 		virtual bool available() const;
@@ -38,13 +38,13 @@ namespace neogfx
 		virtual bool error() const;
 		virtual const std::string& error_string() const;
 	public:
-		virtual const std::string& path() const;
+		virtual const std::string& uri() const;
 		virtual const void* data() const;
 		virtual void* data();
 		virtual std::size_t size() const;
 	private:
 		i_resource_manager& iManager;
-		std::string iPath;
+		std::string iUri;
 		boost::optional<std::string> iError;
 		std::size_t iSize;
 		std::vector<uint8_t> iData;

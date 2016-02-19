@@ -32,5 +32,6 @@ namespace neogfx
 		virtual const size& extents() const = 0;
 	public:
 		virtual void* handle() const = 0;
+		virtual const std::string& uri() const = 0;
 	};
 }
