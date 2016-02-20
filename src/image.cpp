@@ -28,7 +28,7 @@ namespace neogfx
 	{
 	}
 
-	image::image(const std::string& aPath) : iResource(resource_manager::instance().load_resource(aPath)), iColourFormat(ColourFormatRGBA8)
+	image::image(const std::string& aUri) : iResource(resource_manager::instance().load_resource(aUri)), iUri(aUri), iColourFormat(ColourFormatRGBA8)
 	{
 		if (available())
 			load();
