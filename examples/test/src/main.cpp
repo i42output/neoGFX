@@ -238,12 +238,13 @@ int main(int argc, char* argv[])
 			hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
 			l4.add_widget(i / 3, i % 3, hashWidget);
 		}
-		tabContainer.add_tab_page("Foo");
-		tabContainer.add_tab_page("Bar");
-		tabContainer.add_tab_page("Baz");
-		tabContainer.add_tab_page("Wibble");
-		tabContainer.add_tab_page("Bibble");
-		tabContainer.add_tab_page("XYZZY");
+		ng::image smallHash(":/test/resources/channel.png");
+		tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
+		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
+		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
+		tabContainer.add_tab_page("Wibble").tab().set_image(smallHash);
+		tabContainer.add_tab_page("Bibble").tab().set_image(smallHash);
+		tabContainer.add_tab_page("XYZZY").tab().set_image(smallHash);
 		return app.exec();
 	}
 	catch (std::exception& e)

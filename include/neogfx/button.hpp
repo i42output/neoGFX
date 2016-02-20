@@ -39,6 +39,8 @@ namespace neogfx
 	public:
 		const neogfx::label& label() const;
 		neogfx::label& label();
+		const image_widget& image() const;
+		image_widget& image();
 		const text_widget& text() const;
 		text_widget& text();
 	protected:

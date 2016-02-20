@@ -614,6 +614,8 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect)
 	{	
+		if (aTexture.is_empty())
+			return;
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		GLint previousTexture;

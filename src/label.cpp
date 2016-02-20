@@ -25,7 +25,7 @@
 namespace neogfx
 {
 	label::label(const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(), iAlignment(aAlignment), iLayout(*this), iText(iLayout, aText, aMultiLine)
+		widget(), iAlignment(aAlignment), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
 		handle_alignment();
 		iLayout.set_size_policy(neogfx::size_policy::Minimum);
@@ -36,25 +36,31 @@ namespace neogfx
 	}
 
 	label::label(i_widget& aParent, const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(aParent), iAlignment(aAlignment), iLayout(*this), iText(iLayout, aText, aMultiLine)
+		widget(aParent), iAlignment(aAlignment), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
 		handle_alignment();
 		iLayout.set_size_policy(neogfx::size_policy::Minimum);
 		iLayout.set_margins(neogfx::margins(0.0));
-		iText.set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
-		iText.set_ignore_mouse_events(true);
 	}
 
 	label::label(i_layout& aLayout, const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(aLayout), iAlignment(aAlignment), iLayout(*this), iText(iLayout, aText, aMultiLine)
+		widget(aLayout), iAlignment(aAlignment), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
 		handle_alignment();
 		iLayout.set_size_policy(neogfx::size_policy::Minimum);
 		iLayout.set_margins(neogfx::margins(0.0));
-		iText.set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
-		iText.set_ignore_mouse_events(true);
+	}
+
+	const image_widget& label::image() const
+	{
+		return iImage;
+	}
+
+	image_widget& label::image()
+	{
+		return iImage;
 	}
 
 	const text_widget& label::text() const

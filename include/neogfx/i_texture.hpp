@@ -29,8 +29,11 @@ namespace neogfx
 	class i_texture
 	{
 	public:
+		struct texture_empty : std::logic_error { texture_empty() : std::logic_error("neogfx::i_texture::texture_empty") {} };
+	public:
 		virtual ~i_texture() {}
 	public:
+		virtual bool is_empty() const = 0;
 		virtual const size& extents() const = 0;
 	public:
 		virtual i_native_texture& native_texture() const = 0;

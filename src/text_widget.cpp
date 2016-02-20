@@ -27,16 +27,22 @@ namespace neogfx
 	text_widget::text_widget(const std::string& aText, bool aMultiLine) : 
 		widget(), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine)
 	{
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	text_widget::text_widget(i_widget& aParent, const std::string& aText, bool aMultiLine) :
 		widget(aParent), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine)
 	{
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	text_widget::text_widget(i_layout& aLayout, const std::string& aText, bool aMultiLine) :
 		widget(aLayout), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine)
 	{
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	size text_widget::minimum_size() const

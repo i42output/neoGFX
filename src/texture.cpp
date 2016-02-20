@@ -25,8 +25,12 @@
 
 namespace neogfx
 {
+	texture::texture()
+	{
+	}
+
 	texture::texture(const i_texture& aTexture) :
-		iNativeTexture(app::instance().rendering_engine().texture_manager().join_texture(aTexture))
+		iNativeTexture(!aTexture.is_empty() ? app::instance().rendering_engine().texture_manager().join_texture(aTexture) : std::shared_ptr<i_native_texture>())
 	{
 	}
 
@@ -44,13 +48,25 @@ namespace neogfx
 	{
 	}
 
+	bool texture::is_empty() const
+	{
+		return iNativeTexture.get() == 0;
+	}
+
 	const size& texture::extents() const
 	{
+		if (is_empty())
+		{
+			static const size sEmptySize;
+			return sEmptySize;
+		}
 		return native_texture().extents();
 	}
 
 	i_native_texture& texture::native_texture() const
 	{
+		if (is_empty())
+			throw texture_empty();
 		return *iNativeTexture;
 	}
 }

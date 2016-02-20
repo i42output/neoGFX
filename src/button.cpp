@@ -60,6 +60,16 @@ namespace neogfx
 		return iLabel;
 	}
 
+	const image_widget& button::image() const
+	{
+		return label().image();
+	}
+
+	image_widget& button::image()
+	{
+		return label().image();
+	}
+
 	const text_widget& button::text() const
 	{
 		return label().text();

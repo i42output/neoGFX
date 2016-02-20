@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "neogfx.hpp"
 #include "event.hpp"
 #include "i_widget.hpp"
+#include "i_image.hpp"
 
 namespace neogfx
 {
@@ -43,5 +44,7 @@ namespace neogfx
 	public:
 		virtual const std::string& text() const = 0;
 		virtual void set_text(const std::string& aText) = 0;
+		virtual void set_image(const i_texture& aTexture) = 0;
+		virtual void set_image(const i_image& aImage) = 0;
 	};
 }

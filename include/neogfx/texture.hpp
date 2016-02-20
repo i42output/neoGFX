@@ -31,12 +31,14 @@ namespace neogfx
 	{
 		// construction
 	public:
+		texture();
 		texture(const i_texture& aTexture);
 		texture(const i_image& aImage);
 		texture(const texture& aOther);
 		~texture();
 		// operations
 	public:
+		virtual bool is_empty() const;
 		virtual const size& extents() const;
 	public:
 		virtual i_native_texture& native_texture() const;

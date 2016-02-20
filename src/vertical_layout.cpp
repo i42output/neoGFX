@@ -63,7 +63,7 @@ namespace neogfx
 		{
 			if (!item.visible())
 				continue;
-			if (item.get().is<item::widget_pointer>() && (item.minimum_size().cx == 0.0 || item.minimum_size().cy == 0.0))
+			if (!item.get().is<item::spacer_pointer>() && (item.minimum_size().cx == 0.0 || item.minimum_size().cy == 0.0))
 			{
 				++itemsZeroSized;
 				continue;
@@ -122,13 +122,13 @@ namespace neogfx
 		availableSize.cx -= (margins().left + margins().right);
 		availableSize.cy -= (margins().top + margins().bottom);
 		uint32_t itemsZeroSized = 0;
-		if (aSize.cy <= minimum_size().cy)
+		if (aSize.cy <= minimum_size().cy || size_policy() == neogfx::size_policy::Minimum)
 		{
 			for (const auto& item : items())
 			{
 				if (!item.visible())
 					continue;
-				if (item.get().is<item::widget_pointer>() && (item.minimum_size().cx == 0.0 || item.minimum_size().cy == 0.0))
+				if (!item.get().is<item::spacer_pointer>() && (item.minimum_size().cx == 0.0 || item.minimum_size().cy == 0.0))
 					++itemsZeroSized;
 			}
 		}

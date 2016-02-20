@@ -25,37 +25,43 @@ namespace neogfx
 	image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
 		iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
-		set_margins(neogfx::margins{});
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
 		iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
-		set_margins(neogfx::margins{});
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
 		widget(aParent), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
-		set_margins(neogfx::margins{});
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
 		widget(aParent), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
-		set_margins(neogfx::margins{});
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
 		widget(aLayout), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
-		set_margins(neogfx::margins{});
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
 		widget(aLayout), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
 	{
-		set_margins(neogfx::margins{});
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
 	}
 
 	size image_widget::minimum_size() const
@@ -69,6 +75,8 @@ namespace neogfx
 
 	void image_widget::paint(graphics_context& aGraphicsContext) const
 	{
+		if (iTexture.is_empty())
+			return;
 		scoped_units su(*this, UnitsPixels);
 		rect placementRect(point{}, iTexture.extents());
 		if (iAspectRatio == aspect_ratio::Stretch)

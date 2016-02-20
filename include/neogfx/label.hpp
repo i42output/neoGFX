@@ -22,6 +22,7 @@
 #include "neogfx.hpp"
 #include "horizontal_layout.hpp"
 #include "text_widget.hpp"
+#include "image_widget.hpp"
 
 namespace neogfx
 {
@@ -32,6 +33,8 @@ namespace neogfx
 		label(i_widget& aParent, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre);
 		label(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre);
 	public:
+		const image_widget& image() const;
+		image_widget& image();
 		const text_widget& text() const;
 		text_widget& text();
 	private:
@@ -39,6 +42,7 @@ namespace neogfx
 	private:
 		alignment iAlignment;
 		horizontal_layout iLayout;
+		image_widget iImage;
 		text_widget iText;
 	};
 }

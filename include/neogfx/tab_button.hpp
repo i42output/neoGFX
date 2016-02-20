@@ -43,6 +43,8 @@ namespace neogfx
 	public:
 		virtual const std::string& text() const;
 		virtual void set_text(const std::string& aText);
+		virtual void set_image(const i_texture& aTexture);
+		virtual void set_image(const i_image& aImage);
 	protected:
 		virtual rect path_bounding_rect() const;
 		virtual bool spot_colour() const;

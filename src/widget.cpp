@@ -651,6 +651,8 @@ namespace neogfx
 	{
 		if ((!is_root() && !has_parent()) || surface().destroyed() || hidden() || layout_items_in_progress())
 			return;
+		if (aUpdateRect.empty())
+			return;
 		if (iUpdateRects.find(aUpdateRect) == iUpdateRects.end())
 		{
 			iUpdateRects.insert(aUpdateRect);

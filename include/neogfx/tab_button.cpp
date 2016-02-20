@@ -81,6 +81,16 @@ namespace neogfx
 		push_button::text().set_text(aText);
 	}
 
+	void tab_button::set_image(const i_texture& aTexture)
+	{
+		push_button::image().set_image(aTexture);
+	}
+
+	void tab_button::set_image(const i_image& aImage)
+	{
+		push_button::image().set_image(aImage);
+	}
+
 	rect tab_button::path_bounding_rect() const
 	{
 		scoped_units su(*this, UnitsPixels);
