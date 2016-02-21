@@ -73,7 +73,7 @@ namespace neogfx
 		}
 		result.cx += (margins().left + margins().right);
 		result.cy += (margins().top + margins().bottom);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max() && (itemsVisible - itemsZeroSized) > 0)
+		if (result.cy != std::numeric_limits<size::dimension_type>::max() && (itemsVisible - itemsZeroSized) > 1)
 			result.cy += (spacing().cy * (itemsVisible - itemsZeroSized - 1));
 		result.cx = std::max(result.cx, layout::minimum_size().cx);
 		result.cy = std::max(result.cy, layout::minimum_size().cy);
@@ -114,7 +114,8 @@ namespace neogfx
 	{
 		if (!enabled())
 			return;
-		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
+		uint32_t itemsVisibleIncludingSpacers = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
+		if (itemsVisibleIncludingSpacers == 0)
 			return;
 		uint32_t itemsVisible = items_visible();
 		owner()->layout_items_started();
@@ -122,7 +123,7 @@ namespace neogfx
 		availableSize.cx -= (margins().left + margins().right);
 		availableSize.cy -= (margins().top + margins().bottom);
 		uint32_t itemsZeroSized = 0;
-		if (aSize.cy <= minimum_size().cy || size_policy() == neogfx::size_policy::Minimum)
+		if (aSize.cy <= minimum_size().cy || items_visible(ItemTypeSpacer))
 		{
 			for (const auto& item : items())
 			{
@@ -132,7 +133,7 @@ namespace neogfx
 					++itemsZeroSized;
 			}
 		}
-		if (itemsVisible - itemsZeroSized > 0)
+		if (itemsVisible - itemsZeroSized > 1)
 			availableSize.cy -= (spacing().cy * (itemsVisible - itemsZeroSized - 1));
 		size::dimension_type leftover = availableSize.cy;
 		size::dimension_type eachLeftover = std::floor(leftover / itemsVisible);
@@ -232,7 +233,7 @@ namespace neogfx
 			leftover = 0.0;
 			eachLeftover = 0.0;
 		}
-		uint32_t numberUsingLeftover = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) - itemsNotUsingLeftover;
+		uint32_t numberUsingLeftover = itemsVisibleIncludingSpacers - itemsNotUsingLeftover;
 		uint32_t bitsLeft = static_cast<int32_t>(leftover - (eachLeftover * numberUsingLeftover));
 		if (!expandersUsingLeftover.empty())
 		{
