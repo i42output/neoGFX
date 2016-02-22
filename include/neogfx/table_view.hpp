@@ -34,6 +34,9 @@ namespace neogfx
 		table_view(i_layout& aLayout);
 		~table_view();
 	public:
+		bool can_defer_layout() const;
+		bool is_managing_layout() const;
+	public:
 		const header_view& column_header() const;
 		header_view& column_header();
 	protected:
