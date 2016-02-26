@@ -108,6 +108,11 @@ namespace neogfx
 		return units_converter(*this).to_device_units(aValue);
 	}
 
+	texture_map graphics_context::to_device_units(const texture_map& aValue) const
+	{
+		return units_converter(*this).to_device_units(aValue);
+	}
+
 	path graphics_context::to_device_units(const path& aValue) const
 	{
 		path result = aValue;
@@ -134,6 +139,11 @@ namespace neogfx
 	}
 
 	rect graphics_context::from_device_units(const rect& aValue) const
+	{
+		return units_converter(*this).from_device_units(aValue);
+	}
+
+	texture_map graphics_context::from_device_units(const texture_map& aValue) const
 	{
 		return units_converter(*this).from_device_units(aValue);
 	}
@@ -581,21 +591,31 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture) const
 	{
-		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}, aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()));
 	}
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture) const
 	{
-		iNativeGraphicsContext->draw_texture(to_device_units(aRect) + iOrigin, aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+	}
+
+	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture) const
+	{
+		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()));
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) const
 	{
-		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}, aTexture, aTextureRect);
+		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, aTextureRect);
 	}
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect) const
 	{
-		iNativeGraphicsContext->draw_texture(to_device_units(aRect) + iOrigin, aTexture, aTextureRect);
+		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, aTextureRect);
+	}
+
+	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect) const
+	{
+		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, aTextureRect);
 	}
 }

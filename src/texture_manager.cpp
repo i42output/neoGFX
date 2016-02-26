@@ -67,7 +67,7 @@ namespace neogfx
 
 	std::unique_ptr<i_native_texture> texture_manager::join_texture(const i_texture& aTexture)
 	{
-		return join_texture(aTexture.native_texture());
+		return join_texture(*aTexture.native_texture());
 	}
 
 	const texture_manager::texture_list& texture_manager::textures() const

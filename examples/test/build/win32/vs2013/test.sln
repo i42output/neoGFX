@@ -24,6 +24,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glsl2hpp", "..\..\..\..\..\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nrc", "..\..\..\..\..\tools\nrc\build\win32\vs2013\nrc.vcxproj", "{7860B48A-5793-4F62-BBA3-A4E63F74339C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neopede", "..\..\..\..\neopede\build\win32\vs2013\neopede.vcxproj", "{F2119545-EC33-45E8-A045-FD6E48BCAEB4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
+		{5BE004BF-A083-422F-8287-E7238B633466} = {5BE004BF-A083-422F-8287-E7238B633466}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -50,6 +56,10 @@ Global
 		{7860B48A-5793-4F62-BBA3-A4E63F74339C}.Debug|Win32.Build.0 = Debug|Win32
 		{7860B48A-5793-4F62-BBA3-A4E63F74339C}.Release|Win32.ActiveCfg = Release|Win32
 		{7860B48A-5793-4F62-BBA3-A4E63F74339C}.Release|Win32.Build.0 = Release|Win32
+		{F2119545-EC33-45E8-A045-FD6E48BCAEB4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F2119545-EC33-45E8-A045-FD6E48BCAEB4}.Debug|Win32.Build.0 = Debug|Win32
+		{F2119545-EC33-45E8-A045-FD6E48BCAEB4}.Release|Win32.ActiveCfg = Release|Win32
+		{F2119545-EC33-45E8-A045-FD6E48BCAEB4}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

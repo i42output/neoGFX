@@ -21,3 +21,5 @@
 /3rdparty/libpng/libpng-1.6.21/lib/libpng16_staticd.lib
 /tools/nrc/build/win32/vs2013/Debug
 /tools/nrc/build/win32/vs2013/Release
+/examples/neopede/build/win32/vs2013/Release
+/examples/neopede/build/win32/vs2013/neopede.sdf

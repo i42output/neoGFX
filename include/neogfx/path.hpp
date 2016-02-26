@@ -255,5 +255,5 @@ namespace neogfx
 namespace neogfx
 {
 	typedef basic_path<point> path;
-	typedef basic_path<point> path;
+	typedef boost::optional<path> optional_path;
 }

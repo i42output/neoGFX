@@ -47,6 +47,8 @@ namespace neogfx
 		LogicalXor
 	};
 
+	typedef basic_vector<vector2, 4> texture_map;
+
 	class i_surface;
 	class i_widget;
 	class i_native_graphics_context;
@@ -70,11 +72,13 @@ namespace neogfx
 		size to_device_units(const size& aValue) const;
 		point to_device_units(const point& aValue) const;
 		rect to_device_units(const rect& aValue) const;
+		texture_map to_device_units(const texture_map& aValue) const;
 		path to_device_units(const path& aValue) const;
 		delta from_device_units(const delta& aValue) const;
 		size from_device_units(const size& aValue) const;
 		point from_device_units(const point& aValue) const;
 		rect from_device_units(const rect& aValue) const;
+		texture_map from_device_units(const texture_map& aValue) const;
 		path from_device_units(const path& aValue) const;
 		void set_default_font(const font& aDefaultFont) const;
 		void set_extents(const size& aExtents) const;
@@ -123,8 +127,10 @@ namespace neogfx
 		void reset_glyph_text_cache() const;
 		void draw_texture(const point& aPoint, const i_texture& aTexture) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture) const;
+		void draw_texture(const texture_map& aMap, const i_texture& aTexture) const;
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect) const;
+		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const rect& aTextureRect) const;
 		// implementation
 		// from i_device_metrics
 	public:

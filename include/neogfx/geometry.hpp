@@ -20,10 +20,159 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <type_traits>
 #include <boost/optional.hpp>
 
 namespace neogfx
 { 
+	typedef double scalar;
+
+	template <typename T, uint32_t D>
+	class basic_vector
+	{
+	public:
+		typedef T value_type;
+	public:
+		basic_vector() : iContents{} {}
+		template <typename T2, typename... Arguments>
+		explicit basic_vector(T2&& aValue, Arguments&&... aArguments) { static_assert(sizeof...(Arguments) <= D - 1, "Invalid number of arguments"); unpack_assign(0, std::forward<T2>(aValue), std::forward<Arguments>(aArguments)...); }
+		basic_vector(const basic_vector& aOther) { std::copy(std::begin(aOther.iContents), std::end(aOther.iContents), std::begin(iContents)); }
+		basic_vector(basic_vector&& aOther) { std::move(std::begin(aOther.iContents), std::end(aOther.iContents), std::begin(iContents)); }
+	public:
+		uint32_t size() const { return D; }
+		const value_type& operator[](uint32_t aIndex) const { return iContents[aIndex]; }
+		value_type& operator[](uint32_t aIndex) { return iContents[aIndex]; }
+	public:
+		basic_vector& operator+=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) iContents[i] += aValue; return *this; }
+		basic_vector& operator-=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) iContents[i] -= aValue; return *this; }
+		basic_vector& operator*=(scalar aValue)	{ for (std::size_t i = 0; i < size(); ++i) iContents[i] *= aValue; return *this; }
+		basic_vector& operator/=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) iContents[i] /= aValue; return *this; }
+		basic_vector& operator+=(const basic_vector& other) { for (std::size_t i = 0; i < size(); ++i) iContents[i] += other[i]; return *this; }
+		basic_vector& operator-=(const basic_vector& other) { for (std::size_t i = 0; i < size(); ++i) iContents[i] -= other[i]; return *this; }
+		basic_vector& operator*=(const basic_vector& other)	{ for (std::size_t i = 0; i < size(); ++i) iContents[i] *= other[i]; return *this; }
+		basic_vector& operator/=(const basic_vector& other) { for (std::size_t i = 0; i < size(); ++i) iContents[i] /= other[i]; return *this; }
+	private:
+		template <typename T2, typename... Arguments>
+		void unpack_assign(std::size_t aIndex, T2&& aValue, Arguments&&... aArguments) { iContents[aIndex] = aValue; unpack_assign(aIndex + 1, std::forward<Arguments>(aArguments)...); }
+		template <typename Xyzzy = value_type>
+		typename std::enable_if<std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) { std::uninitialized_fill_n(&iContents[aIndex], size() - aIndex, value_type()); }
+		template <typename Xyzzy = value_type>
+		typename std::enable_if<!std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) {}
+	private:
+		value_type iContents[D];
+	};
+
+	typedef basic_vector<double, 1> vector1;
+	typedef basic_vector<double, 2> vector2;
+	typedef basic_vector<double, 3> vector3;
+	typedef basic_vector<double, 4> vector4;
+
+	template <typename T, uint32_t D>
+	inline basic_vector<T, D> operator+(const basic_vector<T, D>& left, const basic_vector<T, D>& right)
+	{
+		basic_vector<T, D> result = left;
+		result += right;
+		return result;
+	}
+
+	template <typename T, uint32_t D>
+	inline basic_vector<T, D> operator-(const basic_vector<T, D>& left, const basic_vector<T, D>& right)
+	{
+		basic_vector<T, D> result = left;
+		result -= right;
+		return result;
+	}
+
+	template <typename T, uint32_t D>
+	inline basic_vector<T, D> operator*(const basic_vector<T, D>& left, const basic_vector<T, D>& right)
+	{
+		basic_vector<T, D> result = left;
+		result *= right;
+		return result;
+	}
+
+	template <typename T, uint32_t D>
+	inline basic_vector<T, D> operator/(const basic_vector<T, D>& left, const basic_vector<T, D>& right)
+	{
+		basic_vector<T, D> result = left;
+		result /= right;
+		return result;
+	}
+
+	template <typename T, uint32_t D>
+	inline basic_vector<T, D> operator+(const basic_vector<T, D>& left, const T& right)
+	{
+		basic_vector<T, D> result = left;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] += right;
+		return result;
+	}
+
+	template <typename T, uint32_t D>
+	inline basic_vector<T, D> operator-(const basic_vector<T, D>& left, const T& right)
+	{
+		basic_vector<T, D> result = left;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] -= right;
+		return result;
+	}
+
+	template <typename T, uint32_t D>
+	inline basic_vector<T, D> operator*(const basic_vector<T, D>& left, const T& right)
+	{
+		basic_vector<T, D> result = left;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] *= right;
+		return result;
+	}
+
+	template <typename T, uint32_t D>
+	inline basic_vector<T, D> operator/(const basic_vector<T, D>& left, const T& right)
+	{
+		basic_vector<T, D> result = left;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] /= right;
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	class basic_matrix
+	{
+	public:
+		typedef T value_type;
+		typedef basic_vector<T, Columns> row_type;
+		typedef basic_vector<T, Rows> column_type;
+	public:
+		basic_matrix() : iContents{} {}
+		template <typename T2, typename... Arguments>
+		explicit basic_matrix(T2&& aValue, Arguments&&... aArguments) { static_assert(sizeof...(Arguments) <= Columns - 1, "Invalid number of arguments"); unpack_assign(0, std::forward<T2>(aValue), std::forward<Arguments>(aArguments)...); }
+		basic_matrix(const basic_matrix& aOther) { std::copy(std::begin(aOther.iContents), std::end(aOther.iContents), std::begin(iContents)); }
+		basic_matrix(basic_matrix&& aOther) { std::move(std::begin(aOther.iContents), std::end(aOther.iContents), std::begin(iContents)); }
+	public:
+		std::pair<uint32_t, uint32_t> size() const { return std::make_pair(Rows, Columns); }
+		const column_type& operator[](uint32_t aColumn) const { return iContents[aColumn]; }
+		column_type& operator[](uint32_t aColumn) { return iContents[aColumn]; }
+	public:
+		basic_matrix& operator+=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) iContents[i] += aValue; return *this; }
+		basic_matrix& operator-=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) iContents[i] -= aValue; return *this; }
+		basic_matrix& operator*=(scalar aValue)	{ for (std::size_t i = 0; i < size(); ++i) iContents[i] *= aValue; return *this; }
+		basic_matrix& operator/=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) iContents[i] /= aValue; return *this; }
+	private:
+		template <typename T2, typename... Arguments>
+		void unpack_assign(std::size_t aIndex, T2&& aValue, Arguments&&... aArguments) { iContents[aIndex] = aValue; unpack_assign(aIndex + 1, std::forward<Arguments>(aArguments)...); }
+		template <typename Xyzzy = value_type>
+		typename std::enable_if<std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) { std::uninitialized_fill_n(&iContents[aIndex], size() - aIndex, value_type()); }
+		template <typename Xyzzy = value_type>
+		typename std::enable_if<!std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) {}
+	private:
+		column_type iContents[Columns];
+	};
+
+	typedef basic_matrix<double, 1, 1> matrix11;
+	typedef basic_matrix<double, 2, 2> matrix22;
+	typedef basic_matrix<double, 3, 3> matrix33;
+	typedef basic_matrix<double, 4, 4> matrix44;
+
 	typedef double coordinate_value_type;
 	typedef coordinate_value_type coordinate;
 	typedef coordinate_value_type dimension;
@@ -177,6 +326,8 @@ namespace neogfx
 		// construction
 	public:
 		basic_point() : x(0), y(0) {}
+		template <typename Scalar>
+		basic_point(const basic_vector<Scalar, 2>& other) : x(static_cast<coordinate_type>(other[0])), y(static_cast<coordinate_type>(other[1])) {}
 		basic_point(CoordinateType x, CoordinateType y) : x(x), y(y) {}
 		template <typename CoordinateType2>
 		basic_point(const basic_point<CoordinateType2>& other) :
@@ -185,6 +336,7 @@ namespace neogfx
 		basic_point(const basic_size<CoordinateType>& other) : x(other.cx), y(other.cy) {}
 		// operations
 	public:
+		basic_vector<coordinate_type, 2> to_vector() const { return basic_vector<coordinate_type, 2>(x, y); }
 		bool operator==(const basic_point& other) const { return x == other.x && y == other.y; }
 		bool operator!=(const basic_point& other) const { return !operator==(other); }
 		basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; return *this; }
@@ -330,6 +482,7 @@ namespace neogfx
 		basic_rect& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
 		// operations
 	public:
+		basic_vector<basic_vector<coordinate_type, 2>, 4> to_vector() const { return basic_vector<basic_vector<coordinate_type, 2>, 4>(top_left().to_vector(), top_right().to_vector(), bottom_right().to_vector(), bottom_left().to_vector()); }
 		const point_type& position() const { return *this; }
 		point_type& position() { return *this; }
 		const size_type& extents() const { return *this; }
@@ -574,6 +727,10 @@ namespace neogfx
 	typedef boost::optional<size> optional_size;
 	typedef boost::optional<rect> optional_rect;
 	typedef boost::optional<margins> optional_margins;
+	typedef boost::optional<vector1> optional_vector1;
+	typedef boost::optional<vector2> optional_vector2;
+	typedef boost::optional<vector3> optional_vector3;
+	typedef boost::optional<vector4> optional_vector4;
 
 	enum units_e
 	{
@@ -639,28 +796,65 @@ namespace neogfx
 		units_e units() const;
 		units_e set_units(units_e aUnits) const;
 	public:
+		vector2 to_device_units(const vector2& aValue) const;
 		dimension to_device_units(dimension aValue) const;
 		delta to_device_units(const delta& aValue) const;
 		size to_device_units(const size& aValue) const;
 		point to_device_units(const point& aValue) const;
 		rect to_device_units(const rect& aValue) const;
 		margins to_device_units(const margins& aValue) const;
+		vector2 to_device_units(const size& aExtents, const vector2& aValue) const;
 		dimension to_device_units(const size& aExtents, dimension aValue) const;
 		delta to_device_units(const size& aExtents, const delta& aValue) const;
 		size to_device_units(const size& aExtents, const size& aValue) const;
 		point to_device_units(const size& aExtents, const point& aValue) const;
 		rect to_device_units(const size& aExtents, const rect& aValue) const;
+		vector2 from_device_units(const vector2& aValue) const;
 		dimension from_device_units(dimension aValue) const;
 		delta from_device_units(const delta& aValue) const;
 		size from_device_units(const size& aValue) const;
 		point from_device_units(const point& aValue) const;
 		rect from_device_units(const rect& aValue) const;		
 		margins from_device_units(const margins& aValue) const;
+		vector2 from_device_units(const size& aExtents, const vector2& aValue) const;
 		dimension from_device_units(const size& aExtents, dimension aValue) const;
 		delta from_device_units(const size& aExtents, const delta& aValue) const;
 		size from_device_units(const size& aExtents, const size& aValue) const;
 		point from_device_units(const size& aExtents, const point& aValue) const;
 		rect from_device_units(const size& aExtents, const rect& aValue) const;		
+	public:
+		template <typename T, uint32_t D>
+		basic_vector<T, D> to_device_units(const basic_vector<T, D>& aValue)
+		{
+			basic_vector<T, D> result;
+			for (uint32_t i = 0; i < D; ++i)
+				result[i] = to_device_units(aValue[i]);
+			return result;
+		}
+		template <typename T, uint32_t D>
+		basic_vector<T, D> to_device_units(const size& aExtents, const basic_vector<T, D>& aValue)
+		{
+			basic_vector<T, D> result;
+			for (uint32_t i = 0; i < D; ++i)
+				result[i] = to_device_units(aExtents, aValue[i]);
+			return result;
+		}
+		template <typename T, uint32_t D>
+		basic_vector<T, D> from_device_units(const basic_vector<T, D>& aValue)
+		{
+			basic_vector<T, D> result;
+			for (uint32_t i = 0; i < D; ++i)
+				result[i] = from_device_units(aValue[i]);
+			return result;
+		}
+		template <typename T, uint32_t D>
+		basic_vector<T, D> from_device_units(const size& aExtents, const basic_vector<T, D>& aValue)
+		{
+			basic_vector<T, D> result;
+			for (uint32_t i = 0; i < D; ++i)
+				result[i] = from_device_units(aExtents, aValue[i]);
+			return result;
+		}
 		// attributes
 	private:
 		const i_units_context& iContext;

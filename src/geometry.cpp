@@ -69,6 +69,11 @@ namespace neogfx
 		return iContext.set_units(aUnits);
 	}
 
+	vector2 units_converter::to_device_units(const vector2& aValue) const
+	{
+		return to_device_units(iContext.device_metrics().extents(), aValue);
+	}
+
 	dimension units_converter::to_device_units(dimension aValue) const
 	{
 		return to_device_units(iContext.device_metrics().extents(), size{ aValue, 0 }).cx;
@@ -101,6 +106,35 @@ namespace neogfx
 			to_device_units(iContext.device_metrics().extents(), size{ 0, aValue.top }).cy,
 			to_device_units(iContext.device_metrics().extents(), size{ aValue.right, 0 }).cx,
 			to_device_units(iContext.device_metrics().extents(), size{ 0, aValue.bottom }).cy };
+	}
+
+	vector2 units_converter::to_device_units(const size& aExtents, const vector2& aValue) const
+	{
+		switch (units())
+		{
+		default:
+		case UnitsPixels:
+			return aValue;
+		case UnitsPoints:
+			return aValue * vector2((1.0 / 72.0) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 72.0) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()));
+		case UnitsPicas:
+			return aValue * vector2((1.0 / 6.0) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 6.0) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()));
+		case UnitsEms:
+			return aValue * vector2(1.0 * static_cast<dimension>(iContext.device_metrics().em_size()) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), 1.0 * static_cast<dimension>(iContext.device_metrics().em_size()) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()));
+		case UnitsMillimetres:
+			return aValue * vector2((1.0 / 25.4) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 25.4) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()));
+		case UnitsCentimetres:
+			return aValue * vector2((1.0 / 2.54) * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), (1.0 / 2.54) * static_cast<dimension>(iContext.device_metrics().vertical_dpi()));
+		case UnitsInches:
+			return aValue * vector2(1.0 * static_cast<dimension>(iContext.device_metrics().horizontal_dpi()), 1.0 * static_cast<dimension>(iContext.device_metrics().vertical_dpi()));
+		case UnitsPercentage:
+			return vector2(aExtents.cx, aExtents.cy) * vector2(aValue[0] / 100.0, aValue[1] / 100.0);
+		}
+	}
+
+	dimension units_converter::to_device_units(const size& aExtents, dimension aValue) const
+	{
+		return to_device_units(iContext.device_metrics().extents(), size{ aValue, 0 }).cx;
 	}
 
 	delta units_converter::to_device_units(const size& aExtents, const delta& aValue) const
@@ -180,6 +214,11 @@ namespace neogfx
 		return rect(to_device_units(aExtents, aValue.position()), to_device_units(aExtents, aValue.extents()));
 	}
 
+	vector2 units_converter::from_device_units(const vector2& aValue) const
+	{
+		return from_device_units(iContext.device_metrics().extents(), aValue);
+	}
+
 	dimension units_converter::from_device_units(dimension aValue) const
 	{
 		return from_device_units(iContext.device_metrics().extents(), size{ aValue, 0 }).cx;
@@ -212,6 +251,35 @@ namespace neogfx
 			from_device_units(iContext.device_metrics().extents(), size{ 0, aValue.top }).cy,
 			from_device_units(iContext.device_metrics().extents(), size{ aValue.right, 0 }).cx,
 			from_device_units(iContext.device_metrics().extents(), size{ 0, aValue.bottom }).cy };
+	}
+
+	vector2 units_converter::from_device_units(const size& aExtents, const vector2& aValue) const
+	{
+		switch (units())
+		{
+		default:
+		case UnitsPixels:
+			return aValue;
+		case UnitsPoints:
+			return vector2(aValue) * vector2(72.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 72.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()));
+		case UnitsPicas:
+			return vector2(aValue) * vector2(6.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 6.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()));
+		case UnitsEms:
+			return vector2(aValue) * vector2((1.0 / static_cast<scalar>(iContext.device_metrics().em_size())) / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), (1.0 / static_cast<dimension>(iContext.device_metrics().em_size())) / static_cast<dimension>(iContext.device_metrics().vertical_dpi()));
+		case UnitsMillimetres:
+			return vector2(aValue) * vector2(25.4 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 25.4 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()));
+		case UnitsCentimetres:
+			return vector2(aValue) * vector2(2.54 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 2.54 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()));
+		case UnitsInches:
+			return vector2(aValue) * vector2(1.0 / static_cast<scalar>(iContext.device_metrics().horizontal_dpi()), 1.0 / static_cast<scalar>(iContext.device_metrics().vertical_dpi()));
+		case UnitsPercentage:
+			return vector2(aValue) / vector2(aExtents.cx, aExtents.cy) * vector2(100.0, 100.0);
+		}
+	}
+
+	dimension units_converter::from_device_units(const size& aExtents, dimension aValue) const
+	{
+		return from_device_units(aExtents, size{aValue, 0.0}).cx;
 	}
 
 	delta units_converter::from_device_units(const size& aExtents, const delta& aValue) const

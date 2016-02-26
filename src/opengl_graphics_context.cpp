@@ -612,7 +612,7 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect)
+	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect)
 	{	
 		if (aTexture.is_empty())
 			return;
@@ -620,15 +620,13 @@ namespace neogfx
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		GLint previousTexture;
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
-		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture().handle())));
-		path rectPath(aRect, path::LineLoop);
-		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
+		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture()->handle())));
 		std::vector<double> texCoords = texture_vertices(aTexture.extents(), aTextureRect);
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &aTextureMap[0][0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
+		std::vector<std::array<uint8_t, 4>> colours(4, std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glDrawArrays(GL_QUADS, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_QUADS, 0, 4));
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 

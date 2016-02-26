@@ -130,6 +130,7 @@
     <ClInclude Include="..\..\..\include\neogfx\i_resource_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_scrollbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_spacer.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_surface.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_surface_manager.hpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="..\..\..\include\neogfx\i_texture_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\resource.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_window.hpp" />
@@ -239,6 +241,7 @@
     <ClCompile Include="..\..\..\src\skyline_bin_pack.cpp" />
     <ClCompile Include="..\..\..\src\spacer.cpp" />
     <ClCompile Include="..\..\..\src\splitter.cpp" />
+    <ClCompile Include="..\..\..\src\sprite.cpp" />
     <ClCompile Include="..\..\..\src\stack_layout.cpp" />
     <ClCompile Include="..\..\..\src\style.cpp" />
     <ClCompile Include="..\..\..\src\surface_manager.cpp" />
