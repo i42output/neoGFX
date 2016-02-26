@@ -140,6 +140,7 @@
     <ClInclude Include="..\..\..\include\neogfx\i_tab_page_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\numerical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
