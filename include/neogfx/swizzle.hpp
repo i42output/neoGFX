@@ -77,6 +77,6 @@ namespace neogfx
 			/* finished */
 		}
 	private:
-		typename value_type iContents[vector_type::vector_size];
+		value_type iContents[vector_type::vector_size];
 	};
 }
