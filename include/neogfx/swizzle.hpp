@@ -20,9 +20,27 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <type_traits>
 
 namespace neogfx
 { 
+	namespace detail
+	{
+		template<uint32_t... Rest>
+		struct greater_than
+		{
+			// Will replace this enum hack with constexpr when I upgrade my compiler from VS2013 :/
+			enum { result = true };
+		};
+
+		template<uint32_t Lhs, uint32_t Rhs, uint32_t... Rest>
+		struct greater_than<Lhs, Rhs, Rest...>
+		{
+			// Will replace this enum hack with constexpr when I upgrade my compiler from VS2013 :/
+			enum { result = Lhs > Rhs && greater_than<Lhs, Rest...>::result };
+		};
+	}
+
 	template <typename V, uint32_t S, uint32_t... Indexes>
 	class swizzle
 	{
@@ -30,52 +48,32 @@ namespace neogfx
 		typedef V vector_type;
 		typedef typename vector_type::template rebind<S>::type sizzled_vector_type;
 		typedef typename vector_type::value_type value_type;
+		typedef value_type array_type[vector_type::vector_size];
 	public:
 		swizzle& operator=(const sizzled_vector_type& aRhs)
 		{
-			unpack_assign<0, Indexes...>(*this, aRhs);
+			static_assert(detail::greater_than<vector_type::vector_size, Indexes...>::result, "Swizzle too big");
+			assign(std::begin(aRhs.v), std::end(aRhs.v), &iContents[Indexes]...);
 			return *this;
 		}
 		operator sizzled_vector_type() const 
 		{ 
-			sizzled_vector_type result; 
-			unpack_assign<0, Indexes...>(result, *this);
-			return result;
-		}
-		const value_type& operator[](uint32_t aIndex) const
-		{
-			return iContents[aIndex];
-		}
-		value_type& operator[](uint32_t aIndex)
-		{
-			return iContents[aIndex];
+			static_assert(detail::greater_than<vector_type::vector_size, Indexes...>::result, "Swizzle too big");
+			return sizzled_vector_type(iContents[Indexes]...);
 		}
 	private:
-		template <uint32_t UnswizzledIndex, uint32_t SwizzledIndex, uint32_t... Rest> 
-		void unpack_assign(sizzled_vector_type& aDestination, const swizzle& aSource) const
+		template <typename SourceIter, typename Next, typename... Rest>
+		void assign(SourceIter aFirst, SourceIter aLast, Next aNext, Rest... aRest)
 		{
-			static_assert(UnswizzledIndex < S && SwizzledIndex < vector_type::vector_size, "Swizzle too big");
-			aDestination[UnswizzledIndex] = aSource[SwizzledIndex];
-			unpack_assign<UnswizzledIndex + 1, Rest...>(aDestination, aSource);
+			*aNext = *aFirst++;
+			assign(aFirst, aLast, aRest...);
 		}
-		template <uint32_t>
-		void unpack_assign(sizzled_vector_type&, const swizzle&) const
-		{
-			/* finished */
-		}
-		template <uint32_t UnswizzledIndex, uint32_t SwizzledIndex, uint32_t... Rest> 
-		void unpack_assign(swizzle& aDestination, const sizzled_vector_type& aSource) const
-		{
-			static_assert(UnswizzledIndex < S && SwizzledIndex < vector_type::vector_size, "Swizzle too big");
-			aDestination[SwizzledIndex] = aSource[UnswizzledIndex];
-			unpack_assign<UnswizzledIndex + 1, Rest...>(aDestination, aSource);
-		}
-		template <uint32_t>
-		void unpack_assign(swizzle&, const sizzled_vector_type&) const
+		template <typename SourceIter, typename... Rest>
+		void assign(SourceIter aFirst, SourceIter aLast, Rest... aRest)
 		{
 			/* finished */
 		}
 	private:
-		value_type iContents[vector_type::vector_size];
+		array_type iContents;
 	};
 }

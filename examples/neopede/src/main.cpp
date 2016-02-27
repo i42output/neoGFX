@@ -29,6 +29,7 @@ int main()
 	ng::vector3 v1(1.0, 2.0, 3.0);
 	ng::vector3 v2 = v1.yzy;
 	ng::vector2 v3 = v2.xx;
+	v2.yz = ng::vector2(42.0, 43.0);
 
 	return app.exec();
 }

@@ -74,10 +74,17 @@ namespace neogfx
 			value_type v[Size];
 
 			swizzle<vector_type, 1, 0> x;
+			swizzle<vector_type, 1, 1> y;
+			swizzle<vector_type, 1, 2> z;
 			swizzle<vector_type, 2, 0, 0> xx;
 			swizzle<vector_type, 2, 0, 1> xy;
+			swizzle<vector_type, 2, 0, 2> xz;
 			swizzle<vector_type, 2, 1, 0> yx;
 			swizzle<vector_type, 2, 1, 1> yy;
+			swizzle<vector_type, 2, 1, 2> yz;
+			swizzle<vector_type, 2, 2, 0> zx;
+			swizzle<vector_type, 2, 2, 1> zy;
+			swizzle<vector_type, 2, 2, 2> zz;
 			swizzle<vector_type, 3, 0, 0, 0> xxx;
 			swizzle<vector_type, 3, 0, 0, 1> xxy;
 			swizzle<vector_type, 3, 0, 0, 2> xxz;
