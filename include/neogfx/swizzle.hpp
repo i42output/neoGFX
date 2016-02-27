@@ -20,7 +20,6 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <type_traits>
 
 namespace neogfx
 { 
@@ -53,7 +52,7 @@ namespace neogfx
 		swizzle& operator=(const sizzled_vector_type& aRhs)
 		{
 			static_assert(detail::greater_than<vector_type::vector_size, Indexes...>::result, "Swizzle too big");
-			assign(std::begin(aRhs.v), std::end(aRhs.v), &iContents[Indexes]...);
+			assign(std::begin(aRhs.v), &iContents[Indexes]...);
 			return *this;
 		}
 		operator sizzled_vector_type() const 
@@ -63,13 +62,13 @@ namespace neogfx
 		}
 	private:
 		template <typename SourceIter, typename Next, typename... Rest>
-		void assign(SourceIter aFirst, SourceIter aLast, Next aNext, Rest... aRest)
+		void assign(SourceIter aSource, Next aNext, Rest... aRest)
 		{
-			*aNext = *aFirst++;
-			assign(aFirst, aLast, aRest...);
+			*aNext = *aSource++;
+			assign(aSource, aRest...);
 		}
 		template <typename SourceIter, typename... Rest>
-		void assign(SourceIter aFirst, SourceIter aLast, Rest... aRest)
+		void assign(SourceIter aFirst, Rest... aRest)
 		{
 			/* finished */
 		}
