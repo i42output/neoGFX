@@ -1,4 +1,4 @@
-// numerical.hpp
+// swizzle.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -20,7 +20,6 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <type_traits>
 
 namespace neogfx
 { 
