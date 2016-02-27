@@ -144,6 +144,7 @@
     <ClInclude Include="..\..\..\include\neogfx\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_window.hpp" />

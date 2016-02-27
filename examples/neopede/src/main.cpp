@@ -23,5 +23,10 @@ int main()
 	ng::app app("neopede - neoGFX Sample Application");
 	ng::window window(800, 800);
 	ng::vertical_layout layout0(window);
+
+	ng::vector3 v1(1.0, 2.0, 3.0);
+	ng::vector3 v2 = v1.yzy;
+	ng::vector2 v3 = v2.xx;
+
 	return app.exec();
 }
