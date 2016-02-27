@@ -18,6 +18,8 @@ const uint8_t sSpaceShip[8][8]
 	{ 0, 1, 0, 0, 0, 0, 1, 0 },
 };
 
+template class ng::basic_vector<double, 3>;
+
 int main()
 {
 	ng::app app("neopede - neoGFX Sample Application");
