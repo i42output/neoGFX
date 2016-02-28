@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>neogfx</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>CTP_Nov2013</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>CTP_Nov2013</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>SFML_STATIC;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\neogfx;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>SFML_STATIC;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\neogfx;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\neogfx\app.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\check_box.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\colour.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\default_item_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\event.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\font.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\font_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\font_texture.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\framed_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\generic_cursor.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\geometry.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\graphics_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\grid_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\header_view.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\horizontal_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hsl_colour.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\image.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\image_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\item_model_index.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\item_presentation_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\item_selection.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\item_selection_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\item_view.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_app.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_basic_item_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_font_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_font_texture.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_geometry.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_image.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_item_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_item_presentation_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_item_selection_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_native_font.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_native_font_face.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_native_graphics_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_native_surface.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_native_texture.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_native_window.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_native_window_event_handler.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_rendering_engine.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_resource.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_resource_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_scrollbar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_spacer.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_sprite.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_style.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_surface.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_surface_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_tab.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_tab_container.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_tab_page.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_tab_page_container.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_texture.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\numerical.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\opengl_texture.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\resource.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sprite_plane.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\swizzle.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\texture.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_window.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\keyboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\label.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\module_resource.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\mouse.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\native_font.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\native_font_face.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\native_window.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\neogfx.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\opengl_error.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\opengl_graphics_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\opengl_renderer.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\opengl_window.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\path.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\pen.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\primitives.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\push_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\radio_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\resource_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\scrollable_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\scrollbar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sdl_graphics_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sdl_keyboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sdl_renderer.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sdl_window.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\skyline_bin_pack.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\spacer.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\splitter.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\stack_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\style.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\subpixel_rgb_horizontal.frag.glsl.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\surface_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\table_view.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\tab_bar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\tab_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\tab_page_container.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\text.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\texture_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\text_direction_map.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\text_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\vertical_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\video_mode.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\neogfx\path.inl" />
+    <None Include="..\..\..\src\subpixel_rgb_horizontal.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\app.cpp" />
+    <ClCompile Include="..\..\..\src\button.cpp" />
+    <ClCompile Include="..\..\..\src\check_box.cpp" />
+    <ClCompile Include="..\..\..\src\colour.cpp" />
+    <ClCompile Include="..\..\..\src\font.cpp" />
+    <ClCompile Include="..\..\..\src\font_manager.cpp" />
+    <ClCompile Include="..\..\..\src\font_texture.cpp" />
+    <ClCompile Include="..\..\..\src\framed_widget.cpp" />
+    <ClCompile Include="..\..\..\src\geometry.cpp" />
+    <ClCompile Include="..\..\..\src\graphics_context.cpp" />
+    <ClCompile Include="..\..\..\src\grid_layout.cpp" />
+    <ClCompile Include="..\..\..\src\header_view.cpp" />
+    <ClCompile Include="..\..\..\src\horizontal_layout.cpp" />
+    <ClCompile Include="..\..\..\src\hsl_colour.cpp" />
+    <ClCompile Include="..\..\..\src\image.cpp" />
+    <ClCompile Include="..\..\..\src\image_widget.cpp" />
+    <ClCompile Include="..\..\..\src\item_view.cpp" />
+    <ClCompile Include="..\..\..\src\label.cpp" />
+    <ClCompile Include="..\..\..\src\layout.cpp" />
+    <ClCompile Include="..\..\..\src\module_resource.cpp" />
+    <ClCompile Include="..\..\..\src\native_font.cpp" />
+    <ClCompile Include="..\..\..\src\native_font_face.cpp" />
+    <ClCompile Include="..\..\..\src\native_window.cpp" />
+    <ClCompile Include="..\..\..\src\neogfx.cpp" />
+    <ClCompile Include="..\..\..\src\opengl_error.cpp" />
+    <ClCompile Include="..\..\..\src\opengl_graphics_context.cpp" />
+    <ClCompile Include="..\..\..\src\opengl_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\opengl_texture.cpp" />
+    <ClCompile Include="..\..\..\src\opengl_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\opengl_window.cpp" />
+    <ClCompile Include="..\..\..\src\push_button.cpp" />
+    <ClCompile Include="..\..\..\src\radio_button.cpp" />
+    <ClCompile Include="..\..\..\src\resource.cpp" />
+    <ClCompile Include="..\..\..\src\resource_manager.cpp" />
+    <ClCompile Include="..\..\..\src\scrollable_widget.cpp" />
+    <ClCompile Include="..\..\..\src\scrollbar.cpp" />
+    <ClCompile Include="..\..\..\src\sdl_graphics_context.cpp" />
+    <ClCompile Include="..\..\..\src\sdl_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\sdl_window.cpp" />
+    <ClCompile Include="..\..\..\src\skyline_bin_pack.cpp" />
+    <ClCompile Include="..\..\..\src\spacer.cpp" />
+    <ClCompile Include="..\..\..\src\splitter.cpp" />
+    <ClCompile Include="..\..\..\src\sprite.cpp" />
+    <ClCompile Include="..\..\..\src\sprite_plane.cpp" />
+    <ClCompile Include="..\..\..\src\stack_layout.cpp" />
+    <ClCompile Include="..\..\..\src\style.cpp" />
+    <ClCompile Include="..\..\..\src\surface_manager.cpp" />
+    <ClCompile Include="..\..\..\src\table_view.cpp" />
+    <ClCompile Include="..\..\..\src\tab_bar.cpp" />
+    <ClCompile Include="..\..\..\src\tab_button.cpp" />
+    <ClCompile Include="..\..\..\src\tab_page_container.cpp" />
+    <ClCompile Include="..\..\..\src\texture.cpp" />
+    <ClCompile Include="..\..\..\src\texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\text_widget.cpp" />
+    <ClCompile Include="..\..\..\src\vertical_layout.cpp" />
+    <ClCompile Include="..\..\..\src\widget.cpp" />
+    <ClCompile Include="..\..\..\src\window.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

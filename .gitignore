@@ -24,3 +24,8 @@
 /examples/neopede/build/win32/vs2013/Release
 /examples/neopede/build/win32/vs2013/neopede.sdf
 /examples/neopede/build/win32/vs2013/Debug
+/build/win32/vs2015/Release
+/examples/neopede/build/win32/vs2015/neopede.sdf
+/examples/test/build/win32/vs2015/.vs/test/v14/.suo
+/examples/test/build/win32/vs2015/test.v12.suo
+/examples/test/build/win32/vs2015/test.sdf
