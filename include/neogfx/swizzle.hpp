@@ -47,18 +47,18 @@ namespace neogfx
 		typedef V vector_type;
 		typedef typename vector_type::template rebind<S>::type sizzled_vector_type;
 		typedef typename vector_type::value_type value_type;
-		typedef value_type array_type[vector_type::vector_size];
+		typedef typename vector_type::array_type array_type;
 	public:
 		swizzle& operator=(const sizzled_vector_type& aRhs)
 		{
-			static_assert(detail::greater_than<vector_type::vector_size, Indexes...>::result, "Swizzle too big");
-			assign(std::begin(aRhs.v), &iContents[Indexes]...);
+			static_assert(detail::greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
+			assign(std::begin(aRhs.v), &v[Indexes]...);
 			return *this;
 		}
 		operator sizzled_vector_type() const 
 		{ 
-			static_assert(detail::greater_than<vector_type::vector_size, Indexes...>::result, "Swizzle too big");
-			return sizzled_vector_type(iContents[Indexes]...);
+			static_assert(detail::greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
+			return sizzled_vector_type(v[Indexes]...);
 		}
 	private:
 		template <typename SourceIter, typename Next, typename... Rest>
@@ -73,6 +73,6 @@ namespace neogfx
 			/* finished */
 		}
 	private:
-		array_type iContents;
+		array_type v;
 	};
 }

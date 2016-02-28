@@ -31,47 +31,45 @@ namespace neogfx
 	template <typename T, uint32_t Size, bool IsScalar=std::is_scalar<T>::value>
 	class basic_vector;
 
-	template <typename T, uint32_t Size>
-	class basic_vector<T, Size, true>
+	template <typename T, uint32_t _Size>
+	class basic_vector<T, _Size, true>
 	{
 	public:
+		enum : uint32_t { Size = _Size };
+	public:
 		typedef T value_type;
-		static const uint32_t vector_size = Size;
-		typedef basic_vector<value_type, vector_size> vector_type;
+		typedef basic_vector<value_type, Size> vector_type;
 		typedef uint32_t size_type;
+		typedef std::array<value_type, Size> array_type;
+	public:
 		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2> type; };
 	public:
 		basic_vector() : v{} {}
-		template <typename T2, typename... Arguments>
-		explicit basic_vector(T2&& aValue, Arguments&&... aArguments) { static_assert(sizeof...(Arguments) <= Size - 1, "Invalid number of arguments"); unpack_assign(0, std::forward<T2>(aValue), std::forward<Arguments>(aArguments)...); }
-		basic_vector(const basic_vector& aOther) { std::copy(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); }
-		basic_vector(basic_vector&& aOther) { std::move(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); }
-		basic_vector& operator=(const basic_vector& aOther) { std::copy(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); return *this; }
-		basic_vector& operator=(basic_vector&& aOther) { std::move(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); return * this; }
+		explicit basic_vector(value_type aValue) : v{{aValue}} {}
+		template <typename... Arguments>
+		explicit basic_vector(value_type aValue, Arguments... aArguments) : v{{aValue, aArguments...}} {}
+		basic_vector(std::initializer_list<value_type> aValues) { std::copy(aValues.begin(), aValues.end(), v.begin()); }
+		basic_vector(const basic_vector& aOther) : v{aOther.v} {}
+		basic_vector(basic_vector&& aOther) : v{std::move(aOther.v)} {}
+		basic_vector& operator=(const basic_vector& aOther) { v = aOther.v; return *this; }
+		basic_vector& operator=(basic_vector&& aOther) { v = std::move(aOther.v); return *this; }
 	public:
 		static uint32_t size() { return Size; }
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
 	public:
-		basic_vector& operator+=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement + aValue; }); return *this; }
-		basic_vector& operator-=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement - aValue; }); return *this; }
-		basic_vector& operator*=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement * aValue; }); return *this; }
-		basic_vector& operator/=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement / aValue; }); return *this; }
-		basic_vector& operator+=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs + aRhs; }); return *this; }
-		basic_vector& operator-=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs - aRhs; }); return *this; }
-		basic_vector& operator*=(const basic_vector& other)	{ std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs * aRhs; }); return *this; }
-		basic_vector& operator/=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs / aRhs; }); return *this; }
-	private:
-		template <typename T2, typename... Arguments>
-		void unpack_assign(std::size_t aIndex, T2&& aValue, Arguments&&... aArguments) { v[aIndex] = aValue; unpack_assign(aIndex + 1, std::forward<Arguments>(aArguments)...); }
-		template <typename Xyzzy = value_type>
-		typename std::enable_if<std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) { std::uninitialized_fill_n(&v[aIndex], size() - aIndex, value_type()); }
-		template <typename Xyzzy = value_type>
-		typename std::enable_if<!std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) {}
+		basic_vector& operator+=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement + aValue; }); return *this; }
+		basic_vector& operator-=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement - aValue; }); return *this; }
+		basic_vector& operator*=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement * aValue; }); return *this; }
+		basic_vector& operator/=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement / aValue; }); return *this; }
+		basic_vector& operator+=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](value_type aLhs, value_type aRhs) { return aLhs + aRhs; }); return *this; }
+		basic_vector& operator-=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](value_type aLhs, value_type aRhs) { return aLhs - aRhs; }); return *this; }
+		basic_vector& operator*=(const basic_vector& other)	{ std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](value_type aLhs, value_type aRhs) { return aLhs * aRhs; }); return *this; }
+		basic_vector& operator/=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](value_type aLhs, value_type aRhs) { return aLhs / aRhs; }); return *this; }
 	public:
 		union
 		{
-			value_type v[Size];
+			array_type v;
 
 			swizzle<vector_type, 1, 0> x;
 			swizzle<vector_type, 1, 1> y;
@@ -112,45 +110,45 @@ namespace neogfx
 		};
 	};
 
-	template <typename T, uint32_t Size>
-	class basic_vector<T, Size, false>
+	template <typename T, uint32_t _Size>
+	class basic_vector<T, _Size, false>
 	{
 	public:
+		enum : uint32_t { Size = _Size };
+	public:
 		typedef T value_type;
-		static const uint32_t vector_size = Size;
-		typedef basic_vector<value_type, vector_size> vector_type;
+		typedef basic_vector<value_type, Size> vector_type;
 		typedef uint32_t size_type;
+		typedef std::array<value_type, Size> array_type;
+	public:
 		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2> type; };
 	public:
 		basic_vector() : v{} {}
-		template <typename T2, typename... Arguments>
-		explicit basic_vector(T2&& aValue, Arguments&&... aArguments) { static_assert(sizeof...(Arguments) <= Size - 1, "Invalid number of arguments"); unpack_assign(0, std::forward<T2>(aValue), std::forward<Arguments>(aArguments)...); }
-		basic_vector(const basic_vector& aOther) { std::copy(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); }
-		basic_vector(basic_vector&& aOther) { std::move(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); }
-		basic_vector& operator=(const basic_vector& aOther) { std::copy(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); return *this; }
-		basic_vector& operator=(basic_vector&& aOther) { std::move(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); return *this; }
+		explicit basic_vector(value_type aValue) : v{{aValue}} {}
+		template <typename... Arguments>
+		explicit basic_vector(const value_type& aValue, Arguments&&... aArguments) : v{{aValue, std::forward<Arguments>(aArguments)...}} {}
+		template <typename... Arguments>
+		explicit basic_vector(value_type&& aValue, Arguments&&... aArguments) : v{{std::move(aValue), std::forward<Arguments>(aArguments)...}} {}
+		basic_vector(std::initializer_list<value_type> aValues) { std::copy(aValues.begin(), aValues.end(), v.begin()); }
+		basic_vector(const basic_vector& aOther) : v{aOther.v} {}
+		basic_vector(basic_vector&& aOther) : v{std::move(aOther.v)} {}
+		basic_vector& operator=(const basic_vector& aOther) { v = aOther.v; return *this; }
+		basic_vector& operator=(basic_vector&& aOther) { v = std::move(aOther.v); return *this; }
 	public:
 		static uint32_t size() { return Size; }
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
 	public:
-		basic_vector& operator+=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) v[i] += aValue; return *this; }
-		basic_vector& operator-=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) v[i] -= aValue; return *this; }
-		basic_vector& operator*=(scalar aValue)	{ for (std::size_t i = 0; i < size(); ++i) v[i] *= aValue; return *this; }
-		basic_vector& operator/=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) v[i] /= aValue; return *this; }
-		basic_vector& operator+=(const basic_vector& other) { for (std::size_t i = 0; i < size(); ++i) v[i] += other[i]; return *this; }
-		basic_vector& operator-=(const basic_vector& other) { for (std::size_t i = 0; i < size(); ++i) v[i] -= other[i]; return *this; }
-		basic_vector& operator*=(const basic_vector& other)	{ for (std::size_t i = 0; i < size(); ++i) v[i] *= other[i]; return *this; }
-		basic_vector& operator/=(const basic_vector& other) { for (std::size_t i = 0; i < size(); ++i) v[i] /= other[i]; return *this; }
-	private:
-		template <typename T2, typename... Arguments>
-		void unpack_assign(std::size_t aIndex, T2&& aValue, Arguments&&... aArguments) { v[aIndex] = aValue; unpack_assign(aIndex + 1, std::forward<Arguments>(aArguments)...); }
-		template <typename Xyzzy = value_type>
-		typename std::enable_if<std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) { std::uninitialized_fill_n(&v[aIndex], size() - aIndex, value_type()); }
-		template <typename Xyzzy = value_type>
-		typename std::enable_if<!std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) {}
+		basic_vector& operator+=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement + aValue; }); return *this; }
+		basic_vector& operator-=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement - aValue; }); return *this; }
+		basic_vector& operator*=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement * aValue; }); return *this; }
+		basic_vector& operator/=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement / aValue; }); return *this; }
+		basic_vector& operator+=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs + aRhs; }); return *this; }
+		basic_vector& operator-=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs - aRhs; }); return *this; }
+		basic_vector& operator*=(const basic_vector& other)	{ std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs * aRhs; }); return *this; }
+		basic_vector& operator/=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs / aRhs; }); return *this; }
 	public:
-		value_type v[Size];
+		array_type v;
 	};
 
 	typedef basic_vector<double, 1> vector1;
@@ -245,30 +243,25 @@ namespace neogfx
 		typedef T value_type;
 		typedef basic_vector<T, Columns> row_type;
 		typedef basic_vector<T, Rows> column_type;
+		typedef std::array<column_type, Columns> array_type;
 	public:
-		basic_matrix() : v{} {}
-		template <typename T2, typename... Arguments>
-		explicit basic_matrix(T2&& aValue, Arguments&&... aArguments) { static_assert(sizeof...(Arguments) <= Columns - 1, "Invalid number of arguments"); unpack_assign(0, std::forward<T2>(aValue), std::forward<Arguments>(aArguments)...); }
-		basic_matrix(const basic_matrix& aOther) { std::copy(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); }
-		basic_matrix(basic_matrix&& aOther) { std::move(std::begin(aOther.v), std::end(aOther.v), std::begin(v)); }
+		basic_matrix() : m{{}} {}
+		basic_matrix(std::initializer_list<column_type> aColumns) : { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
+		basic_matrix(const basic_matrix& aOther) : m{aOther.m} {}
+		basic_matrix(basic_matrix&& aOther) : m{std::move(aOther.m)} {}
+		basic_matrix& operator=(const basic_matrix& aOther) { m = aOther.m; return *this; }
+		basic_matrix& operator=(basic_matrix&& aOther) { m = std::move(aOther.m); return *this; }
 	public:
 		std::pair<uint32_t, uint32_t> size() const { return std::make_pair(Rows, Columns); }
-		const column_type& operator[](uint32_t aColumn) const { return v[aColumn]; }
-		column_type& operator[](uint32_t aColumn) { return v[aColumn]; }
+		const column_type& operator[](uint32_t aColumn) const { return m[aColumn]; }
+		column_type& operator[](uint32_t aColumn) { return m[aColumn]; }
 	public:
-		basic_matrix& operator+=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) v[i] += aValue; return *this; }
-		basic_matrix& operator-=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) v[i] -= aValue; return *this; }
-		basic_matrix& operator*=(scalar aValue)	{ for (std::size_t i = 0; i < size(); ++i) v[i] *= aValue; return *this; }
-		basic_matrix& operator/=(scalar aValue) { for (std::size_t i = 0; i < size(); ++i) v[i] /= aValue; return *this; }
+		basic_matrix& operator+=(scalar aValue) { std::transform(std::begin(m), std::end(m), std::begin(m), [aValue](const column_type& aElement) { return aElement + aValue; }); return *this; }
+		basic_matrix& operator-=(scalar aValue) { std::transform(std::begin(m), std::end(m), std::begin(m), [aValue](const column_type& aElement) { return aElement - aValue; }); return *this; }
+		basic_matrix& operator*=(scalar aValue) { std::transform(std::begin(m), std::end(m), std::begin(m), [aValue](const column_type& aElement) { return aElement * aValue; }); return *this; }
+		basic_matrix& operator/=(scalar aValue) { std::transform(std::begin(m), std::end(m), std::begin(m), [aValue](const column_type& aElement) { return aElement / aValue; }); return *this; }
 	private:
-		template <typename T2, typename... Arguments>
-		void unpack_assign(std::size_t aIndex, T2&& aValue, Arguments&&... aArguments) { v[aIndex] = aValue; unpack_assign(aIndex + 1, std::forward<Arguments>(aArguments)...); }
-		template <typename Xyzzy = value_type>
-		typename std::enable_if<std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) { std::uninitialized_fill_n(&v[aIndex], size() - aIndex, value_type()); }
-		template <typename Xyzzy = value_type>
-		typename std::enable_if<!std::is_scalar<Xyzzy>::value, void>::type unpack_assign(std::size_t aIndex) {}
-	private:
-		column_type v[Columns];
+		array_type m;
 	};
 
 	typedef basic_matrix<double, 1, 1> matrix11;

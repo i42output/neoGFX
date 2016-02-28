@@ -31,6 +31,7 @@ namespace neogfx
 	public:
 		sprite(time_unit_e aTimeUnit = TimeUnitSecond);
 		sprite(const i_texture& aTexture, const optional_rect& aTextureRect, time_unit_e aTimeUnit = TimeUnitSecond);
+		sprite(const sprite& aOther);
 	public:
 		virtual void add_frame(const i_texture& aTexture, const optional_rect& aTextureRect);
 		virtual void replace_frame(frame_index aFrameIndex, const i_texture& aTexture, const optional_rect& aTextureRect);

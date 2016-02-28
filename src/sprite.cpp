@@ -23,13 +23,38 @@
 
 namespace neogfx
 {
-	sprite::sprite(time_unit_e aTimeUnit) : iTimeUnit{ aTimeUnit }, iScale{1.0, 1.0}, iAngle{}, iSpin{}
+	sprite::sprite(time_unit_e aTimeUnit) : 
+		iTimeUnit{ aTimeUnit }, 
+		iScale(1.0, 1.0), 
+		iAngle{}, 
+		iSpin{}
 	{
 	}
 
-	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect, time_unit_e aTimeUnit) : iTimeUnit{ aTimeUnit }, iScale{1.0, 1.0}, iAngle{}, iSpin{}
+	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect, time_unit_e aTimeUnit) : 
+		iTimeUnit{ aTimeUnit }, 
+		iScale{1.0, 1.0}, 
+		iAngle{}, 
+		iSpin{}
 	{
 		iTextures.emplace_back(aTexture, aTextureRect);
+	}
+
+	sprite::sprite(const sprite& aOther) : 
+		iTimeUnit(aOther.iTimeUnit),
+		iTextures(aOther.iTextures),
+		iAnimation(aOther.iAnimation),
+		iOrigin(aOther.iOrigin),
+		iPosition(aOther.iPosition),
+		iSize(aOther.iSize),
+		iScale(aOther.iScale),
+		iAngle(aOther.iAngle),
+		iVelocity(aOther.iVelocity),
+		iAcceleration(aOther.iAcceleration),
+		iSpin(aOther.iSpin),
+		iPath(aOther.iPath),
+		iTransformation(aOther.iTransformation)
+	{
 	}
 
 	void sprite::add_frame(const i_texture& aTexture, const optional_rect& aTextureRect)

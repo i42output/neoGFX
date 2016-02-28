@@ -63,7 +63,7 @@ namespace neogfx
 		virtual const matrix33& transformation() const = 0;
 		virtual void set_time_unit(time_unit_e aTimeUnit) = 0;
 		virtual void set_animation(const frame_list& aAnimation) = 0;
-		virtual void set_origin(const point& aOrigin) const = 0;
+		virtual void set_origin(const point& aOrigin) = 0;
 		virtual void set_position(const point& aPosition) = 0;
 		virtual void set_size(const optional_size& aSize) = 0;
 		virtual void set_scale(const vector2& aScale) = 0;

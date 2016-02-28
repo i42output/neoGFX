@@ -30,7 +30,7 @@ namespace neogfx
 	}
 
 	texture::texture(const i_texture& aTexture) :
-		iNativeTexture(aTexture.native_texture())
+		iNativeTexture(!aTexture.is_empty() ? aTexture.native_texture() : std::shared_ptr<i_native_texture>())
 	{
 	}
 

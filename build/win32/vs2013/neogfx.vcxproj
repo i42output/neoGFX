@@ -19,13 +19,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -144,6 +144,7 @@
     <ClInclude Include="..\..\..\include\neogfx\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sprite_plane.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_widget.hpp" />
@@ -198,13 +199,9 @@
     <None Include="..\..\..\src\subpixel_rgb_horizontal.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\include\neogfx\check_box.cpp" />
-    <ClCompile Include="..\..\..\include\neogfx\radio_button.cpp" />
-    <ClCompile Include="..\..\..\include\neogfx\tab_bar.cpp" />
-    <ClCompile Include="..\..\..\include\neogfx\tab_button.cpp" />
-    <ClCompile Include="..\..\..\include\neogfx\tab_page_container.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
     <ClCompile Include="..\..\..\src\button.cpp" />
+    <ClCompile Include="..\..\..\src\check_box.cpp" />
     <ClCompile Include="..\..\..\src\colour.cpp" />
     <ClCompile Include="..\..\..\src\font.cpp" />
     <ClCompile Include="..\..\..\src\font_manager.cpp" />
@@ -233,6 +230,7 @@
     <ClCompile Include="..\..\..\src\opengl_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\opengl_window.cpp" />
     <ClCompile Include="..\..\..\src\push_button.cpp" />
+    <ClCompile Include="..\..\..\src\radio_button.cpp" />
     <ClCompile Include="..\..\..\src\resource.cpp" />
     <ClCompile Include="..\..\..\src\resource_manager.cpp" />
     <ClCompile Include="..\..\..\src\scrollable_widget.cpp" />
@@ -244,10 +242,14 @@
     <ClCompile Include="..\..\..\src\spacer.cpp" />
     <ClCompile Include="..\..\..\src\splitter.cpp" />
     <ClCompile Include="..\..\..\src\sprite.cpp" />
+    <ClCompile Include="..\..\..\src\sprite_plane.cpp" />
     <ClCompile Include="..\..\..\src\stack_layout.cpp" />
     <ClCompile Include="..\..\..\src\style.cpp" />
     <ClCompile Include="..\..\..\src\surface_manager.cpp" />
     <ClCompile Include="..\..\..\src\table_view.cpp" />
+    <ClCompile Include="..\..\..\src\tab_bar.cpp" />
+    <ClCompile Include="..\..\..\src\tab_button.cpp" />
+    <ClCompile Include="..\..\..\src\tab_page_container.cpp" />
     <ClCompile Include="..\..\..\src\texture.cpp" />
     <ClCompile Include="..\..\..\src\texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\text_widget.cpp" />
