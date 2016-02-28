@@ -21,6 +21,8 @@
 
 #include "neogfx.hpp"
 #include <type_traits>
+#include <array>
+#include <algorithm>
 #include <ostream>
 #include "swizzle.hpp"
 
@@ -49,8 +51,8 @@ namespace neogfx
 		template <typename... Arguments>
 		explicit basic_vector(value_type aValue, Arguments... aArguments) : v{{aValue, aArguments...}} {}
 		basic_vector(std::initializer_list<value_type> aValues) { std::copy(aValues.begin(), aValues.end(), v.begin()); }
-		basic_vector(const basic_vector& aOther) : v{aOther.v} {}
-		basic_vector(basic_vector&& aOther) : v{std::move(aOther.v)} {}
+		basic_vector(const basic_vector& aOther) : v(aOther.v) {}
+		basic_vector(basic_vector&& aOther) : v(std::move(aOther.v)) {}
 		basic_vector& operator=(const basic_vector& aOther) { v = aOther.v; return *this; }
 		basic_vector& operator=(basic_vector&& aOther) { v = std::move(aOther.v); return *this; }
 	public:
@@ -130,8 +132,8 @@ namespace neogfx
 		template <typename... Arguments>
 		explicit basic_vector(value_type&& aValue, Arguments&&... aArguments) : v{{std::move(aValue), std::forward<Arguments>(aArguments)...}} {}
 		basic_vector(std::initializer_list<value_type> aValues) { std::copy(aValues.begin(), aValues.end(), v.begin()); }
-		basic_vector(const basic_vector& aOther) : v{aOther.v} {}
-		basic_vector(basic_vector&& aOther) : v{std::move(aOther.v)} {}
+		basic_vector(const basic_vector& aOther) : v(aOther.v) {}
+		basic_vector(basic_vector&& aOther) : v(std::move(aOther.v)) {}
 		basic_vector& operator=(const basic_vector& aOther) { v = aOther.v; return *this; }
 		basic_vector& operator=(basic_vector&& aOther) { v = std::move(aOther.v); return *this; }
 	public:
@@ -224,15 +226,17 @@ namespace neogfx
 		return result;
 	}
 
-	template <typename Elem, typename Traits, typename T, uint32_t D>
-	std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_vector<T, D>& aVector)
+	template <typename Elem, typename Traits, typename T, uint32_t Size>
+	std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_vector<T, Size>& aVector)
 	{
-		for (uint32_t i = 0; i << D; ++i)
+		aStream << "[";
+		for (uint32_t i = 0; i < Size; ++i)
 		{
 			if (i != 0)
 				aStream << ", ";
 			aStream << aVector[i];
 		}
+		aStream << "]";
 		return aStream;
 	}
 
@@ -246,7 +250,7 @@ namespace neogfx
 		typedef std::array<column_type, Columns> array_type;
 	public:
 		basic_matrix() : m{{}} {}
-		basic_matrix(std::initializer_list<column_type> aColumns) : { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
+		basic_matrix(std::initializer_list<column_type> aColumns) { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
 		basic_matrix(const basic_matrix& aOther) : m{aOther.m} {}
 		basic_matrix(basic_matrix&& aOther) : m{std::move(aOther.m)} {}
 		basic_matrix& operator=(const basic_matrix& aOther) { m = aOther.m; return *this; }
