@@ -25,7 +25,7 @@ namespace neogfx
 {
 	sprite::sprite(time_unit_e aTimeUnit) : 
 		iTimeUnit{ aTimeUnit }, 
-		iScale(1.0, 1.0), 
+		iScale{1.0, 1.0}, 
 		iAngle{}, 
 		iSpin{}
 	{
