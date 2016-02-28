@@ -21,6 +21,7 @@
 
 #include "neogfx.hpp"
 #include <type_traits>
+#include <stdexcept>
 #include <array>
 #include <algorithm>
 #include <ostream>
@@ -50,7 +51,7 @@ namespace neogfx
 		explicit basic_vector(value_type aValue) : v{{aValue}} {}
 		template <typename... Arguments>
 		explicit basic_vector(value_type aValue, Arguments... aArguments) : v{{aValue, aArguments...}} {}
-		basic_vector(std::initializer_list<value_type> aValues) { std::copy(aValues.begin(), aValues.end(), v.begin()); }
+		basic_vector(std::initializer_list<value_type> aValues) { if (aValues.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(aValues.begin(), aValues.end(), v.begin()); std::uninitialized_fill(v.begin() + (aValues.end() - aValues.begin()), v.end(), value_type()); }
 		basic_vector(const basic_vector& aOther) : v(aOther.v) {}
 		basic_vector(basic_vector&& aOther) : v(std::move(aOther.v)) {}
 		basic_vector& operator=(const basic_vector& aOther) { v = aOther.v; return *this; }
@@ -131,7 +132,7 @@ namespace neogfx
 		explicit basic_vector(const value_type& aValue, Arguments&&... aArguments) : v{{aValue, std::forward<Arguments>(aArguments)...}} {}
 		template <typename... Arguments>
 		explicit basic_vector(value_type&& aValue, Arguments&&... aArguments) : v{{std::move(aValue), std::forward<Arguments>(aArguments)...}} {}
-		basic_vector(std::initializer_list<value_type> aValues) { std::copy(aValues.begin(), aValues.end(), v.begin()); }
+		basic_vector(std::initializer_list<value_type> aValues) { if (aValues.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(aValues.begin(), aValues.end(), v.begin()); std::fill(v.begin() + (aValues.end() - aValues.begin()), v.end(), value_type()); }
 		basic_vector(const basic_vector& aOther) : v(aOther.v) {}
 		basic_vector(basic_vector&& aOther) : v(std::move(aOther.v)) {}
 		basic_vector& operator=(const basic_vector& aOther) { v = aOther.v; return *this; }
