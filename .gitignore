@@ -31,3 +31,16 @@
 /examples/test/build/win32/vs2015/test.sdf
 /examples/neopede/build/win32/vs2015/Debug
 /examples/test/build/win32/vs2015/test.VC.opendb
+/3rdparty/freetype/freetype-2.6/build
+/3rdparty/SDL/SDL2-2.0.4/build
+/3rdparty/SDL/SDL2-2.0.4/lib/SDL2.lib
+/3rdparty/SDL/SDL2-2.0.4/lib/SDL2d.lib
+/3rdparty/freetype/freetype-2.6/lib/freetype.lib
+/3rdparty/freetype/freetype-2.6/lib/freetyped.lib
+/examples/neopede/build/win32/vs2015/Release
+/examples/test/build/win32/vs2015/Debug
+/examples/test/build/win32/vs2015/Release
+/tools/glsl2hpp/build/win32/vs2015/Debug
+/tools/glsl2hpp/build/win32/vs2015/Release
+/tools/nrc/build/win32/vs2015/Debug
+/tools/nrc/build/win32/vs2015/Release
