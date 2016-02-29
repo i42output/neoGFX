@@ -44,3 +44,6 @@
 /tools/glsl2hpp/build/win32/vs2015/Release
 /tools/nrc/build/win32/vs2015/Debug
 /tools/nrc/build/win32/vs2015/Release
+/3rdparty/harfbuzz/harfbuzz-1.2.3/build
+/3rdparty/harfbuzz/harfbuzz-1.2.3/lib/harfbuzz.lib
+/3rdparty/harfbuzz/harfbuzz-1.2.3/lib/harfbuzzd.lib
