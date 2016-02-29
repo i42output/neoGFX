@@ -31,7 +31,7 @@
 #else
 #include <hb.h>
 #include <hb-ft.h>
-#include <hb-unicode.h>
+#include <hb-ucdn\ucdn.h>
 #endif
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -126,7 +126,7 @@ namespace neogfx
 		typedef std::vector<std::pair<std::string::size_type, std::u32string::size_type>> cluster_map_t;
 		mutable cluster_map_t iClusterMap;
 		mutable std::vector<text_direction> iTextDirections;
-		mutable std::vector<std::tuple<uint32_t*, uint32_t*, text_direction, hb_script_t>> iRuns;
+		mutable std::vector<std::tuple<const char32_t*, const char32_t*, text_direction, hb_script_t>> iRuns;
 		GLint iPreviousTexture;
 		GLuint iActiveGlyphTexture;
 		bool iLineStippleActive;

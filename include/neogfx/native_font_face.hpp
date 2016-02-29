@@ -31,7 +31,7 @@
 #else
 #include <hb.h>
 #include <hb-ft.h>
-#include <hb-unicode.h>
+#include <hb-ucdn\ucdn.h>
 #endif
 #include "geometry.hpp"
 #include "i_surface.hpp"

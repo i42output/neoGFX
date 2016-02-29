@@ -662,7 +662,7 @@ namespace neogfx
 		runs.clear();
 		text_direction previousDirection = get_text_direction(codePoints[0]);
 		hb_script_t previousScript = hb_unicode_script(unicodeFuncs, codePoints[0]);
-		uint32_t* runStart = &codePoints[0];
+		char32_t* runStart = &codePoints[0];
 		std::size_t lastCodePointIndex = codePoints.size() - 1;
 		for (std::size_t i = 0; i <= lastCodePointIndex; ++i)
 		{
@@ -704,7 +704,7 @@ namespace neogfx
 		{
 			hb_buffer_set_direction(buf, std::get<2>(runs[i]) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 			hb_buffer_set_script(buf, std::get<3>(runs[i]));
-			hb_buffer_add_utf32(buf, std::get<0>(runs[i]), std::get<1>(runs[i]) - std::get<0>(runs[i]), 0, std::get<1>(runs[i]) - std::get<0>(runs[i]));
+			hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(std::get<0>(runs[i])), std::get<1>(runs[i]) - std::get<0>(runs[i]), 0, std::get<1>(runs[i]) - std::get<0>(runs[i]));
 			hb_shape(hbFont, buf, NULL, 0);
 			unsigned int glyphCount;
 			hb_glyph_info_t* glyphInfo = hb_buffer_get_glyph_infos(buf, &glyphCount);
