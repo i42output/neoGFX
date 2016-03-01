@@ -35,9 +35,9 @@ namespace neogfx
 		iName(aName),
 		iQuitWhenLastWindowClosed(true),
 		neolib::io_thread("neogfx::app", true),
-		iRenderingEngine(new neogfx::sdl_renderer()),
-		iSurfaceManager(new neogfx::surface_manager(*iRenderingEngine)),
 		iKeyboard(new neogfx::sdl_keyboard()),
+		iRenderingEngine(new neogfx::sdl_renderer(*iKeyboard)),
+		iSurfaceManager(new neogfx::surface_manager(*iRenderingEngine)),
 		iCurrentStyle(iStyles.begin())
 	{
 		app* np = nullptr;

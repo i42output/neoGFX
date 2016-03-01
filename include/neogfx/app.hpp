@@ -64,9 +64,9 @@ namespace neogfx
 	private:
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;
+		std::unique_ptr<i_keyboard> iKeyboard;
 		std::unique_ptr<i_rendering_engine> iRenderingEngine;
 		std::unique_ptr<i_surface_manager> iSurfaceManager;
-		std::unique_ptr<i_keyboard> iKeyboard;
 		boost::optional<int> iQuitResultCode;
 		style_list iStyles;
 		style_list::iterator iCurrentStyle;

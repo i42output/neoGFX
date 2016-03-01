@@ -42,7 +42,8 @@ namespace neogfx
 		void add_sprite(i_sprite& aSprite);
 		void add_sprite(std::shared_ptr<i_sprite> aSprite);
 		i_sprite& create_sprite();
-		i_sprite& create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect);
+		i_sprite& create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
+		i_sprite& create_sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 	public:
 		const sprite_list& sprites() const;
 		sprite_list& sprites();

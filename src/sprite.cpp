@@ -25,7 +25,8 @@ namespace neogfx
 {
 	sprite::sprite(time_unit_e aTimeUnit) : 
 		iTimeUnit{ aTimeUnit }, 
-		iScale{1.0, 1.0}, 
+		iCurrentFrame(0),
+		iScale{1.0, 1.0},
 		iAngle{}, 
 		iSpin{}
 	{
@@ -33,17 +34,29 @@ namespace neogfx
 
 	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect, time_unit_e aTimeUnit) : 
 		iTimeUnit{ aTimeUnit }, 
-		iScale{1.0, 1.0}, 
+		iCurrentFrame(0),
+		iScale{1.0, 1.0},
 		iAngle{}, 
 		iSpin{}
 	{
 		iTextures.emplace_back(aTexture, aTextureRect);
 	}
 
-	sprite::sprite(const sprite& aOther) : 
+	sprite::sprite(const i_image& aImage, const optional_rect& aTextureRect, time_unit_e aTimeUnit) :
+		iTimeUnit{ aTimeUnit },
+		iCurrentFrame(0),
+		iScale{ 1.0, 1.0 },
+		iAngle{},
+		iSpin{}
+	{
+		iTextures.emplace_back(aImage, aTextureRect);
+	}
+
+	sprite::sprite(const sprite& aOther) :
 		iTimeUnit(aOther.iTimeUnit),
 		iTextures(aOther.iTextures),
 		iAnimation(aOther.iAnimation),
+		iCurrentFrame(aOther.iCurrentFrame),
 		iOrigin(aOther.iOrigin),
 		iPosition(aOther.iPosition),
 		iSize(aOther.iSize),
@@ -98,6 +111,11 @@ namespace neogfx
 	const i_sprite::frame_list& sprite::animation() const
 	{
 		return iAnimation;
+	}
+
+	i_sprite::frame_index sprite::current_frame() const
+	{
+		return iCurrentFrame;
 	}
 
 	const point& sprite::origin() const
@@ -170,6 +188,13 @@ namespace neogfx
 		iAnimation = aAnimation;
 	}
 
+	void sprite::set_current_frame(frame_index aFrameIndex)
+	{
+		if (aFrameIndex >= iTextures.size())
+			throw bad_frame_index();
+		iCurrentFrame = aFrameIndex;
+	}
+
 	void sprite::set_origin(const point& aOrigin)
 	{
 		iOrigin = aOrigin;
@@ -232,6 +257,19 @@ namespace neogfx
 
 	void sprite::paint(graphics_context& aGraphicsContext) const
 	{
-		/* todo */
+		if (iSize != boost::none)
+		{
+			if (iTextures[iCurrentFrame].second == boost::none)
+				aGraphicsContext.draw_texture(rect(iPosition, *iSize), iTextures[iCurrentFrame].first);
+			else
+				aGraphicsContext.draw_texture(rect(iPosition, *iSize), iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
+		}
+		else
+		{
+			if (iTextures[iCurrentFrame].second == boost::none)
+				aGraphicsContext.draw_texture(iPosition, iTextures[iCurrentFrame].first);
+			else
+				aGraphicsContext.draw_texture(iPosition, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
+		}
 	}
 }

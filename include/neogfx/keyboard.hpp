@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include "event.hpp"
 
 namespace neogfx
 {
@@ -573,6 +574,9 @@ namespace neogfx
 
 	class i_keyboard
 	{
+	public:
+		event<scan_code_e, key_code_e, key_modifiers_e> key_pressed;
+		event<scan_code_e, key_code_e, key_modifiers_e> key_released;
 	public:
 		virtual bool is_key_pressed(scan_code_e aScanCode) const = 0;
 	};

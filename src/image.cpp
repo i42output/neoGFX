@@ -107,7 +107,7 @@ namespace neogfx
 	void image::resize(const neogfx::size& aNewSize)
 	{
 		iSize = aNewSize;
-		iData.resize(static_cast<std::size_t>(iSize.cx * iSize.cy));
+		iData.resize(static_cast<std::size_t>(iSize.cx * iSize.cy * 4));
 	}
 
 	colour image::get_pixel(const point& aPoint) const

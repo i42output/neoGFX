@@ -38,7 +38,8 @@ namespace neogfx
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
 	{
-		/* todo */
+		for (const auto& s : iSprites)
+			s->paint(aGraphicsContext);
 	}
 
 	void sprite_plane::add_sprite(i_sprite& aSprite)
@@ -61,6 +62,13 @@ namespace neogfx
 	i_sprite& sprite_plane::create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect)
 	{
 		iSimpleSprites.emplace_back(aTexture, aTextureRect);
+		add_sprite(iSimpleSprites.back());
+		return iSimpleSprites.back();
+	}
+
+	i_sprite& sprite_plane::create_sprite(const i_image& aImage, const optional_rect& aTextureRect)
+	{
+		iSimpleSprites.emplace_back(aImage, aTextureRect);
 		add_sprite(iSimpleSprites.back());
 		return iSimpleSprites.back();
 	}

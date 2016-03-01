@@ -49,6 +49,7 @@ namespace neogfx
 	public:
 		virtual time_unit_e time_unit() const = 0;
 		virtual const frame_list& animation() const = 0;
+		virtual frame_index current_frame() const = 0;
 		virtual const point& origin() const = 0;
 		virtual const point& position() const = 0;
 		virtual const optional_size& size() const = 0;
@@ -63,6 +64,7 @@ namespace neogfx
 		virtual const matrix33& transformation() const = 0;
 		virtual void set_time_unit(time_unit_e aTimeUnit) = 0;
 		virtual void set_animation(const frame_list& aAnimation) = 0;
+		virtual void set_current_frame(frame_index aFrameIndex) = 0;
 		virtual void set_origin(const point& aOrigin) = 0;
 		virtual void set_position(const point& aPosition) = 0;
 		virtual void set_size(const optional_size& aSize) = 0;

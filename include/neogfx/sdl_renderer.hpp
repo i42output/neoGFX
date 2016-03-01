@@ -23,18 +23,21 @@
 #include <set>
 #include <map>
 #include "opengl_renderer.hpp"
+#include "keyboard.hpp"
 
 namespace neogfx
 {
 	class sdl_renderer : public opengl_renderer
 	{
 	public:
-		sdl_renderer();
+		sdl_renderer(i_keyboard& aKeyboard);
 		~sdl_renderer();
 	public:
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle);
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle);
 	public:
 		virtual bool process_events();
+	private:
+		i_keyboard& iKeyboard;
 	};
 }

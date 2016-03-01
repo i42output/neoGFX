@@ -20,6 +20,7 @@
 
 #include "neogfx.hpp"
 #include "texture.hpp"
+#include "i_image.hpp"
 #include "i_sprite.hpp"
 
 namespace neogfx
@@ -31,6 +32,7 @@ namespace neogfx
 	public:
 		sprite(time_unit_e aTimeUnit = TimeUnitSecond);
 		sprite(const i_texture& aTexture, const optional_rect& aTextureRect, time_unit_e aTimeUnit = TimeUnitSecond);
+		sprite(const i_image& aImage, const optional_rect& aTextureRect, time_unit_e aTimeUnit = TimeUnitSecond);
 		sprite(const sprite& aOther);
 	public:
 		virtual void add_frame(const i_texture& aTexture, const optional_rect& aTextureRect);
@@ -41,6 +43,7 @@ namespace neogfx
 	public:
 		virtual time_unit_e time_unit() const;
 		virtual const frame_list& animation() const;
+		virtual frame_index current_frame() const;
 		virtual const point& origin() const;
 		virtual const point& position() const;
 		virtual const optional_size& size() const;
@@ -55,6 +58,7 @@ namespace neogfx
 		virtual const matrix33& transformation() const;
 		virtual void set_time_unit(time_unit_e aTimeUnit);
 		virtual void set_animation(const frame_list& aAnimation);
+		virtual void set_current_frame(frame_index aFrameIndex);
 		virtual void set_origin(const point& aOrigin);
 		virtual void set_position(const point& aPosition);
 		virtual void set_size(const optional_size& aSize);
@@ -74,6 +78,7 @@ namespace neogfx
 		time_unit_e iTimeUnit;
 		texture_list iTextures;
 		frame_list iAnimation;
+		frame_index iCurrentFrame;
 		point iOrigin;
 		point iPosition;
 		optional_size iSize;
