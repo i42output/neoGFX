@@ -1,7 +1,7 @@
 Introduction
 ------------
-neogfx is a cross-platform C++ GUI library.  
-neogfx is still a work in progress (incomplete) so is not yet suitable for making GUI apps.
+neogfx is a cross-platform C++ GUI/game library.  
+neogfx is still a work in progress (incomplete) so is not yet suitable for making GUI apps or games.
 Currently neogfx has only been built for and tested on Windows.
 
 Known Problems
