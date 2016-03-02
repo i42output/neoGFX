@@ -225,9 +225,14 @@ namespace neogfx
 
 	void window::invalidate_surface(const rect& aInvalidatedRect, bool aInternal)
 	{
-		iNativeWindow->invalidate_surface(aInvalidatedRect);
+		iNativeWindow->invalidate(aInvalidatedRect);
 		if (!aInternal)
 			update(aInvalidatedRect);
+	}
+
+	void window::render_surface()
+	{
+		iNativeWindow->render();
 	}
 	
 	graphics_context window::create_graphics_context() const

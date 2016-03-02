@@ -74,6 +74,7 @@ namespace neogfx
 		virtual surface_type_e surface_type() const;
 		virtual void layout_surface();
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true);
+		virtual void render_surface();
 		virtual graphics_context create_graphics_context() const;
 		virtual const i_native_surface& native_surface() const;
 		virtual i_native_surface& native_surface();

@@ -36,9 +36,9 @@ namespace neogfx
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 	public:
-		sprite_plane(double aUpdateRate_s = 0.02);
-		sprite_plane(i_widget& aParent, double aUpdateRate_s = 0.02);
-		sprite_plane(i_layout& aLayout, double aUpdateRate_s = 0.02);
+		sprite_plane(double aUpdateRate_s = 0.0166);
+		sprite_plane(i_widget& aParent, double aUpdateRate_s = 0.0166);
+		sprite_plane(i_layout& aLayout, double aUpdateRate_s = 0.0166);
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:

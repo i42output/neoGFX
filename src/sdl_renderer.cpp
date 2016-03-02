@@ -46,6 +46,11 @@ namespace neogfx
 		return std::unique_ptr<i_native_window>(new sdl_window(*this, aSurfaceManager, aEventHandler, static_cast<sdl_window&>(aParent), aVideoMode, aWindowTitle, aStyle));
 	}
 
+	void sdl_renderer::render_now()
+	{
+		app::instance().surface_manager().render_surfaces();
+	}
+
 	bool sdl_renderer::process_events()
 	{
 		bool handledEvents = false;
@@ -129,6 +134,7 @@ namespace neogfx
 			default:
 				break;
 			}
+			render_now();
 		}
 		return handledEvents;
 	}

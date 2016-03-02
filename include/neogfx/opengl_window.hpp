@@ -47,16 +47,14 @@ namespace neogfx
 	public:
 		virtual bool using_frame_buffer() const;
 		virtual void limit_frame_rate(uint32_t aFps);
-		virtual void clear_rendering_flag();
 	public:
-		virtual void invalidate_surface(const rect& aInvalidatedRect);
+		virtual void invalidate(const rect& aInvalidatedRect);
+		virtual void render();
 	public:
 		virtual size extents() const;
 		virtual dimension horizontal_dpi() const;
 		virtual dimension vertical_dpi() const;
 		virtual dimension em_size() const;
-		void render();
-		bool rendered() const;
 	protected:
 		i_native_window_event_handler& event_handler() const;
 	private:
@@ -72,10 +70,8 @@ namespace neogfx
 		GLuint iDepthStencilBuffer;
 		size iFrameBufferSize;
 		std::unordered_set<rect> iInvalidatedRects;
-		neolib::callback_timer iRenderer;
 		boost::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
-		bool iRendered;
 		bool iRendering;
 	};
 }

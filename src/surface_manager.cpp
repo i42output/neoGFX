@@ -65,7 +65,6 @@ namespace neogfx
 		bool handledEvents = iRenderingEngine.process_events();
 		if (hadWindows && iSurfaces.empty())
 			aLastWindowClosed = true;
-		clear_rendering_flags();
 		return handledEvents;
 	}
 
@@ -77,15 +76,14 @@ namespace neogfx
 
 	void surface_manager::invalidate_surfaces()
 	{
-		for (auto i = iSurfaces.begin(); i != iSurfaces.end(); ++i)
-			(*i)->invalidate_surface(rect(point{}, (*i)->surface_size()), false);
+		for (auto& s : iSurfaces)
+			s->invalidate_surface(rect(point{}, s->surface_size()), false);
 	}
 
-	void surface_manager::clear_rendering_flags()
+	void surface_manager::render_surfaces()
 	{
 		for (auto& s : iSurfaces)
-			if (!s->destroyed())
-				s->native_surface().clear_rendering_flag();
+			s->render_surface();
 	}
 
 	void surface_manager::display_error_message(const std::string& aTitle, const std::string& aMessage) const

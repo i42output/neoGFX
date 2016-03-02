@@ -27,23 +27,30 @@ int main()
 	ng::vertical_layout layout0(window);
 	ng::sprite_plane spritePlane(layout0);
 	spritePlane.set_background_colour(ng::colour::Black);
-	auto& spaceshipSprite = spritePlane.create_sprite(ng::image(sSpaceshipImagePattern, {{0, ng::colour()}, {1, ng::colour::Goldenrod}}));
-	spaceshipSprite.set_size(ng::size(32.0, 32.0));
-	neolib::callback_timer timer(app, [&app, &spaceshipSprite](neolib::callback_timer& aTimer)
+	for (uint32_t i = 0; i < 10000; ++i)
+	{
+		auto& spaceshipSprite = spritePlane.create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::Goldenrod} }));
+		spaceshipSprite.set_size(ng::size(32.0, 32.0));
+		spaceshipSprite.set_position(ng::size(rand() % 800, rand() % 800));
+	}
+	neolib::callback_timer timer(app, [&app, &spritePlane](neolib::callback_timer& aTimer)
 	{
 		aTimer.again();
-		if (app.keyboard().is_key_pressed(ng::ScanCode_UP))
-			spaceshipSprite.set_acceleration({0.0, 1.0});
-		else if (app.keyboard().is_key_pressed(ng::ScanCode_DOWN))
-			spaceshipSprite.set_acceleration({0.0, -1.0});
-		else
-			spaceshipSprite.set_acceleration({0.0, 0.0});
-		if (app.keyboard().is_key_pressed(ng::ScanCode_RIGHT))
-			spaceshipSprite.set_spin_degrees(10.0);
-		else if (app.keyboard().is_key_pressed(ng::ScanCode_LEFT))
-			spaceshipSprite.set_spin_degrees(-10.0);
-		else
-			spaceshipSprite.set_spin_degrees(0.0);
+		for (auto& s : spritePlane.sprites())
+		{
+			if (app.keyboard().is_key_pressed(ng::ScanCode_UP))
+				s->set_acceleration({0.0, 1.0});
+			else if (app.keyboard().is_key_pressed(ng::ScanCode_DOWN))
+				s->set_acceleration({0.0, -1.0});
+			else
+				s->set_acceleration({0.0, 0.0});
+			if (app.keyboard().is_key_pressed(ng::ScanCode_RIGHT))
+				s->set_spin_degrees(10.0);
+			else if (app.keyboard().is_key_pressed(ng::ScanCode_LEFT))
+				s->set_spin_degrees(-10.0);
+			else
+				s->set_spin_degrees(0.0);
+		}
 	}, 250);
 	return app.exec();
 }

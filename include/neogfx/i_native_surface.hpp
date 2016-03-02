@@ -47,9 +47,9 @@ namespace neogfx
 	public:
 		virtual bool using_frame_buffer() const = 0;
 		virtual void limit_frame_rate(uint32_t aFps) = 0;
-		virtual void clear_rendering_flag() = 0;
 	public:
-		virtual void invalidate_surface(const rect& aInvalidatedRect) = 0;
+		virtual void invalidate(const rect& aInvalidatedRect) = 0;
+		virtual void render() = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
 	};
 }

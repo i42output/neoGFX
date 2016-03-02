@@ -41,7 +41,7 @@ namespace neogfx
 		virtual bool process_events(bool& aLastWindowClosed);
 		virtual void layout_surfaces();
 		virtual void invalidate_surfaces();
-		virtual void clear_rendering_flags();
+		virtual void render_surfaces();
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const;
 		virtual void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const;
 	private:

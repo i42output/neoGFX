@@ -42,7 +42,12 @@ namespace neogfx
 	{
 		app* np = nullptr;
 		sFirstInstance.compare_exchange_strong(np, this);
-		create_message_queue([this]() -> bool { return process_events(); });
+		create_message_queue([this]() -> bool 
+		{ 
+			bool result = process_events(); 
+			rendering_engine().render_now();
+			return result;
+		});
 		style whiteStyle("Default");
 		register_style(whiteStyle);
 		style slateStyle("Slate");
@@ -78,6 +83,7 @@ namespace neogfx
 			while (!iQuitResultCode.is_initialized())
 			{
 				process_events();
+				rendering_engine().render_now();
 			}
 			return *iQuitResultCode;
 		}

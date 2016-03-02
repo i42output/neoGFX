@@ -340,7 +340,6 @@ namespace neogfx
 	void sdl_window::process_event(const SDL_Event& aEvent)
 	{
 		iProcessingEvent = true;
-		bool renderNow = false;
 		switch (aEvent.type)
 		{
 		case SDL_WINDOWEVENT:
@@ -353,7 +352,6 @@ namespace neogfx
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
 				event_handler().native_window_resized();
-				renderNow = true;
 				break;
 			case SDL_WINDOWEVENT_ENTER:
 				event_handler().native_window_mouse_entered();
@@ -403,8 +401,6 @@ namespace neogfx
 			break;
 		}
 		iProcessingEvent = false;
-		if (renderNow)
-			render();
 	}
 
 	void sdl_window::activate_context()

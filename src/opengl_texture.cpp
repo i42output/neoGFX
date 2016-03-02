@@ -32,8 +32,8 @@ namespace neogfx
 			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 			glCheck(glGenTextures(1, &iHandle));
 			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
-			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 			switch (aImage.colour_format())
 			{
 			case ColourFormatRGBA8:

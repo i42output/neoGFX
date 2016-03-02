@@ -31,10 +31,8 @@ namespace neogfx
 	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler) :
 		native_window(aRenderingEngine, aSurfaceManager),
 		iEventHandler(aEventHandler),
-		iRenderer(app::instance(), [this](neolib::callback_timer&){ render(); }, 1000 / 60, true),
 		iFrameRate(50),
 		iLastFrameTime(0),
-		iRendered(false),
 		iRendering(false)
 	{
 #ifdef _WIN32
@@ -60,12 +58,7 @@ namespace neogfx
 		iFrameRate = aFps;
 	}
 
-	void opengl_window::clear_rendering_flag()
-	{
-		iRendered = false;
-	}
-
-	void opengl_window::invalidate_surface(const rect& aInvalidatedRect)
+	void opengl_window::invalidate(const rect& aInvalidatedRect)
 	{
 		if (iRendering)
 			throw busy_rendering();
@@ -73,39 +66,17 @@ namespace neogfx
 			iInvalidatedRects.insert(aInvalidatedRect);
 	}
 
-	size opengl_window::extents() const
-	{
-		return surface_size();
-	}
-	
-	dimension opengl_window::horizontal_dpi() const
-	{
-		return iPixelDensityDpi.cx;
-	}
-	
-	dimension opengl_window::vertical_dpi() const
-	{
-		return iPixelDensityDpi.cy;
-	}
-
-	dimension opengl_window::em_size() const
-	{
-		return 0;
-	}
-
 	void opengl_window::render()
 	{
-		if (!iRenderer.waiting())
-			iRenderer.again();
-		if (iRendered || iRendering || processing_event() || iInvalidatedRects.empty())
+		if (iRendering || processing_event() || iInvalidatedRects.empty())
 			return;
 		uint64_t now = app::instance().program_elapsed_ms();
 		if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / *iFrameRate)
 			return;
-		
+
 		iRendering = true;
 		iLastFrameTime = now;
-		
+
 		rect invalidatedRect = *iInvalidatedRects.begin();
 		for (const auto& ir : iInvalidatedRects)
 		{
@@ -114,7 +85,7 @@ namespace neogfx
 		iInvalidatedRects.clear();
 		invalidatedRect.cx = std::min(invalidatedRect.cx, surface_size().cx - invalidatedRect.x);
 		invalidatedRect.cy = std::min(invalidatedRect.cy, surface_size().cy - invalidatedRect.y);
-		
+
 		static bool initialized = false;
 		if (!initialized)
 		{
@@ -181,14 +152,28 @@ namespace neogfx
 
 		display();
 		deactivate_context();
-		
+
 		iRendering = false;
-		iRendered = true;
 	}
 
-	bool opengl_window::rendered() const
+	size opengl_window::extents() const
 	{
-		return iRendered;
+		return surface_size();
+	}
+	
+	dimension opengl_window::horizontal_dpi() const
+	{
+		return iPixelDensityDpi.cx;
+	}
+	
+	dimension opengl_window::vertical_dpi() const
+	{
+		return iPixelDensityDpi.cy;
+	}
+
+	dimension opengl_window::em_size() const
+	{
+		return 0;
 	}
 
 	i_native_window_event_handler& opengl_window::event_handler() const
