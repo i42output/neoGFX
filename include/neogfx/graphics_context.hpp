@@ -83,7 +83,7 @@ namespace neogfx
 		void set_default_font(const font& aDefaultFont) const;
 		void set_extents(const size& aExtents) const;
 		void set_origin(const point& aOrigin) const;
-		const point& origin() const;
+		point origin() const;
 		void flush() const;
 		void scissor_on(const rect& aRect) const;
 		void scissor_off() const;

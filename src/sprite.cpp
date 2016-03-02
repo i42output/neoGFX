@@ -23,37 +23,30 @@
 
 namespace neogfx
 {
-	sprite::sprite(time_unit_e aTimeUnit) : 
-		iTimeUnit{ aTimeUnit }, 
+	sprite::sprite() :
 		iCurrentFrame(0),
 		iScale{1.0, 1.0},
-		iAngle{}, 
-		iSpin{}
+		iAngle{}
 	{
 	}
 
-	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect, time_unit_e aTimeUnit) : 
-		iTimeUnit{ aTimeUnit }, 
+	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect) : 
 		iCurrentFrame(0),
 		iScale{1.0, 1.0},
-		iAngle{}, 
-		iSpin{}
+		iAngle{}
 	{
 		iTextures.emplace_back(aTexture, aTextureRect);
 	}
 
-	sprite::sprite(const i_image& aImage, const optional_rect& aTextureRect, time_unit_e aTimeUnit) :
-		iTimeUnit{ aTimeUnit },
+	sprite::sprite(const i_image& aImage, const optional_rect& aTextureRect) :
 		iCurrentFrame(0),
-		iScale{ 1.0, 1.0 },
-		iAngle{},
-		iSpin{}
+		iScale{1.0, 1.0},
+		iAngle{}
 	{
 		iTextures.emplace_back(aImage, aTextureRect);
 	}
 
 	sprite::sprite(const sprite& aOther) :
-		iTimeUnit(aOther.iTimeUnit),
 		iTextures(aOther.iTextures),
 		iAnimation(aOther.iAnimation),
 		iCurrentFrame(aOther.iCurrentFrame),
@@ -62,9 +55,8 @@ namespace neogfx
 		iSize(aOther.iSize),
 		iScale(aOther.iScale),
 		iAngle(aOther.iAngle),
-		iVelocity(aOther.iVelocity),
-		iAcceleration(aOther.iAcceleration),
-		iSpin(aOther.iSpin),
+		iCurrentPhysics(aOther.iCurrentPhysics),
+		iNextPhysics(aOther.iNextPhysics),
 		iPath(aOther.iPath),
 		iTransformation(aOther.iTransformation)
 	{
@@ -101,11 +93,6 @@ namespace neogfx
 	{
 		for (auto& t : iTextures)
 			t.second = aTextureRect;
-	}
-
-	i_sprite::time_unit_e sprite::time_unit() const
-	{
-		return iTimeUnit;
 	}
 
 	const i_sprite::frame_list& sprite::animation() const
@@ -150,22 +137,22 @@ namespace neogfx
 
 	const vector2& sprite::velocity() const
 	{
-		return iVelocity;
+		return next_physics().iVelocity;
 	}
 
 	const vector2& sprite::acceleration() const
 	{
-		return iAcceleration;
+		return next_physics().iAcceleration;
 	}
 
 	scalar sprite::spin_radians() const
 	{
-		return iSpin;
+		return next_physics().iSpin;
 	}
 
 	scalar sprite::spin_degrees() const
 	{
-		return iSpin * 180.0 / boost::math::constants::pi<scalar>();
+		return next_physics().iSpin * 180.0 / boost::math::constants::pi<scalar>();
 	}
 
 	const optional_path& sprite::path() const
@@ -176,11 +163,6 @@ namespace neogfx
 	const matrix33& sprite::transformation() const
 	{
 		return iTransformation;
-	}
-
-	void sprite::set_time_unit(time_unit_e aTimeUnit)
-	{
-		iTimeUnit = aTimeUnit;
 	}
 
 	void sprite::set_animation(const frame_list& aAnimation)
@@ -227,22 +209,22 @@ namespace neogfx
 
 	void sprite::set_velocity(const vector2& aVelocity)
 	{
-		iVelocity = aVelocity;
+		next_physics().iVelocity = aVelocity;
 	}
 
 	void sprite::set_acceleration(const vector2& aAcceleration)
 	{
-		iAcceleration = aAcceleration;
+		next_physics().iAcceleration = aAcceleration;
 	}
 
 	void sprite::set_spin_radians(scalar aSpin)
 	{
-		iSpin = aSpin;
+		next_physics().iSpin = aSpin;
 	}
 
 	void sprite::set_spin_degrees(scalar aSpin)
 	{
-		iSpin = aSpin * boost::math::constants::pi<scalar>() / 180.0;
+		next_physics().iSpin = aSpin * boost::math::constants::pi<scalar>() / 180.0;
 	}
 
 	void sprite::set_path(const optional_path& aPath)
@@ -250,9 +232,16 @@ namespace neogfx
 		iPath = aPath;
 	}
 
-	void sprite::update()
+	void sprite::update(const optional_time_point& aNow)
 	{
-		/* todo */
+		if (iTimeOfLastUpdate == boost::none)
+			iTimeOfLastUpdate = aNow;
+		if (iTimeOfLastUpdate != boost::none && aNow != boost::none)
+			apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den));
+		else
+			apply_physics(1.0);
+		iTimeOfLastUpdate = aNow;
+		current_physics() = next_physics();
 	}
 
 	void sprite::paint(graphics_context& aGraphicsContext) const
@@ -271,5 +260,41 @@ namespace neogfx
 			else
 				aGraphicsContext.draw_texture(iPosition, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
 		}
+	}
+
+	const sprite::physics& sprite::current_physics() const
+	{
+		if (iCurrentPhysics == boost::none)
+		{
+			if (iNextPhysics != boost::none)
+				iCurrentPhysics = iNextPhysics;
+			else
+				iCurrentPhysics = physics{};
+		}
+		return *iCurrentPhysics;
+	}
+
+	sprite::physics& sprite::current_physics()
+	{
+		return const_cast<physics&>(const_cast<const sprite*>(this)->current_physics());
+	}
+
+	const sprite::physics& sprite::next_physics() const
+	{
+		if (iNextPhysics == boost::none)
+			iNextPhysics = physics{};
+		return *iNextPhysics;
+	}
+
+	sprite::physics& sprite::next_physics()
+	{
+		return const_cast<physics&>(const_cast<const sprite*>(this)->next_physics());
+	}
+
+	void sprite::apply_physics(double aElapsedTime)
+	{
+		vector2 velocityAtUpdate = (current_physics().iVelocity + current_physics().iAcceleration * vector2(aElapsedTime, aElapsedTime)); // v = u + at
+		iPosition += vector2(1.0, 1.0) * velocityAtUpdate;
+		next_physics().iVelocity = velocityAtUpdate;
 	}
 }

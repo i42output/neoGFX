@@ -173,7 +173,7 @@ namespace neogfx
 		iOrigin = to_device_units(aOrigin);
 	}
 
-	const point& graphics_context::origin() const
+	point graphics_context::origin() const
 	{
 		return from_device_units(iOrigin);
 	}

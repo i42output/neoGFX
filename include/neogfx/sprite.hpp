@@ -29,10 +29,17 @@ namespace neogfx
 	{
 	private:
 		typedef std::vector<std::pair<texture, optional_rect>> texture_list;
+		struct physics
+		{
+			vector2 iVelocity;
+			vector2 iAcceleration;
+			scalar iSpin;
+		};
+		typedef boost::optional<physics> optional_physics;
 	public:
-		sprite(time_unit_e aTimeUnit = TimeUnitSecond);
-		sprite(const i_texture& aTexture, const optional_rect& aTextureRect, time_unit_e aTimeUnit = TimeUnitSecond);
-		sprite(const i_image& aImage, const optional_rect& aTextureRect, time_unit_e aTimeUnit = TimeUnitSecond);
+		sprite();
+		sprite(const i_texture& aTexture, const optional_rect& aTextureRect);
+		sprite(const i_image& aImage, const optional_rect& aTextureRect);
 		sprite(const sprite& aOther);
 	public:
 		virtual void add_frame(const i_texture& aTexture, const optional_rect& aTextureRect);
@@ -41,7 +48,6 @@ namespace neogfx
 		virtual void set_texture_rect(frame_index aFrameIndex, const optional_rect& aTextureRect);
 		virtual void set_texture_rect_for_all_frames(const optional_rect& aTextureRect);
 	public:
-		virtual time_unit_e time_unit() const;
 		virtual const frame_list& animation() const;
 		virtual frame_index current_frame() const;
 		virtual const point& origin() const;
@@ -56,7 +62,6 @@ namespace neogfx
 		virtual scalar spin_degrees() const;
 		virtual const optional_path& path() const;
 		virtual const matrix33& transformation() const;
-		virtual void set_time_unit(time_unit_e aTimeUnit);
 		virtual void set_animation(const frame_list& aAnimation);
 		virtual void set_current_frame(frame_index aFrameIndex);
 		virtual void set_origin(const point& aOrigin);
@@ -71,11 +76,16 @@ namespace neogfx
 		virtual void set_spin_degrees(scalar aSpin);
 		virtual void set_path(const optional_path& aPath);
 	public:
-		virtual void update();
+		virtual void update(const optional_time_point& aNow = optional_time_point());
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	private:
-		time_unit_e iTimeUnit;
+		const physics& current_physics() const;
+		physics& current_physics();
+		const physics& next_physics() const;
+		physics& next_physics();
+		void apply_physics(double aElapsedTime);
+	private:
 		texture_list iTextures;
 		frame_list iAnimation;
 		frame_index iCurrentFrame;
@@ -84,9 +94,9 @@ namespace neogfx
 		optional_size iSize;
 		vector2 iScale;
 		scalar iAngle;
-		vector2 iVelocity;
-		vector2 iAcceleration;
-		scalar iSpin;
+		optional_time_point iTimeOfLastUpdate;
+		mutable optional_physics iCurrentPhysics;
+		mutable optional_physics iNextPhysics;
 		optional_path iPath;
 		mutable matrix33 iTransformation;
 	};

@@ -41,12 +41,12 @@ namespace neogfx
 		image();
 		image(const std::string& aUri);
 		template <typename T, std::size_t Width, std::size_t Height>
-		image(const T(&aArray)[Height][Width], const std::unordered_map<T, colour>& aColourMap) : iColourFormat(ColourFormatRGBA8)
+		image(const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap) : iColourFormat(ColourFormatRGBA8)
 		{
 			resize(neogfx::size(Width, Height));
 			for (std::size_t y = 0; y < Height; ++y)
 				for (std::size_t x = 0; x < Width; ++x)
-					set_pixel(point(x, y), aColourMap.find(aArray[y][x])->second);
+					set_pixel(point(x, y), aColourMap.find(aImagePattern[y][x])->second);
 		}
 		~image();
 	public:

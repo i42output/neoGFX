@@ -20,7 +20,7 @@
 
 #include "neogfx.hpp"
 #include <boost/pool/pool_alloc.hpp>
-#include <neolib/variant.hpp>
+#include <neolib/timer.hpp>
 #include "widget.hpp"
 #include "sprite.hpp"
 
@@ -29,13 +29,16 @@ namespace neogfx
 	class sprite_plane : public widget
 	{
 	public:
+		event<> sprites_updating;
+		event<> sprites_updated;
+	public:
 		typedef std::vector<std::shared_ptr<i_sprite>> sprite_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 	public:
-		sprite_plane();
-		sprite_plane(i_widget& aParent);
-		sprite_plane(i_layout& aLayout);
+		sprite_plane(double aUpdateRate_s = 0.02);
+		sprite_plane(i_widget& aParent, double aUpdateRate_s = 0.02);
+		sprite_plane(i_layout& aLayout, double aUpdateRate_s = 0.02);
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
@@ -48,6 +51,9 @@ namespace neogfx
 		const sprite_list& sprites() const;
 		sprite_list& sprites();
 	private:
+		void update_sprites();
+	private:
+		neolib::callback_timer iUpdateTimer;
 		sprite_list iSprites;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 	};

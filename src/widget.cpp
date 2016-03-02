@@ -658,8 +658,8 @@ namespace neogfx
 			iUpdateRects.insert(aUpdateRect);
 			if ((iBackgroundColour == boost::none || iBackgroundColour->alpha() != 0xFF) && has_parent() && has_surface() && &parent().surface() == &surface())
 				parent().update(rect(aUpdateRect.position() + position() + (origin() - origin(true)), aUpdateRect.extents()));
-			else if (is_root())
-				surface().invalidate_surface(aUpdateRect);
+			else
+				surface().invalidate_surface(aUpdateRect + origin());
 			for (auto& c : iChildren)
 			{
 				if (c->hidden())

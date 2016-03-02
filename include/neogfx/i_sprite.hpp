@@ -19,6 +19,8 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <chrono>
+#include <boost/optional.hpp>
 #include "geometry.hpp"
 #include "graphics_context.hpp"
 #include "i_texture.hpp"
@@ -28,14 +30,11 @@ namespace neogfx
 	class i_sprite
 	{
 	public:
-		enum time_unit_e
-		{
-			TimeUnitSecond,
-			TimeUnitFrame
-		};
 		typedef std::size_t frame_index;
 		typedef scalar time_interval;
 		typedef std::vector<std::pair<frame_index, time_interval>> frame_list;
+		typedef std::chrono::time_point<std::chrono::steady_clock> time_point;
+		typedef boost::optional<time_point> optional_time_point;
 	public:
 		struct bad_frame_index : std::logic_error { bad_frame_index() : std::logic_error("neogfx::i_sprite::bad_frame_index") {} };
 	public:
@@ -47,7 +46,6 @@ namespace neogfx
 		virtual void set_texture_rect(frame_index aFrameIndex, const optional_rect& aTextureRect) = 0;
 		virtual void set_texture_rect_for_all_frames(const optional_rect& aTextureRect) = 0;
 	public:
-		virtual time_unit_e time_unit() const = 0;
 		virtual const frame_list& animation() const = 0;
 		virtual frame_index current_frame() const = 0;
 		virtual const point& origin() const = 0;
@@ -62,7 +60,6 @@ namespace neogfx
 		virtual scalar spin_degrees() const = 0;
 		virtual const optional_path& path() const = 0;
 		virtual const matrix33& transformation() const = 0;
-		virtual void set_time_unit(time_unit_e aTimeUnit) = 0;
 		virtual void set_animation(const frame_list& aAnimation) = 0;
 		virtual void set_current_frame(frame_index aFrameIndex) = 0;
 		virtual void set_origin(const point& aOrigin) = 0;
@@ -77,7 +74,7 @@ namespace neogfx
 		virtual void set_spin_degrees(scalar aSpin) = 0;
 		virtual void set_path(const optional_path& aPath) = 0;
 	public:
-		virtual void update() = 0;
+		virtual void update(const optional_time_point& aNow = optional_time_point()) = 0;
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 	};

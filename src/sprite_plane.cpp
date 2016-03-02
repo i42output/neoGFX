@@ -18,21 +18,39 @@
 */
 
 #include "neogfx.hpp"
+#include <chrono>
+#include "app.hpp"
 #include "sprite_plane.hpp"
 
 namespace neogfx
 {
-	sprite_plane::sprite_plane()
+	sprite_plane::sprite_plane(double aUpdateRate_s) : 
+		iUpdateTimer(app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			update_sprites();
+			update();
+		}, static_cast<uint32_t>(aUpdateRate_s * 1000.0), true)
 	{
 	}
 
-	sprite_plane::sprite_plane(i_widget& aParent) :
-		widget(aParent)
+	sprite_plane::sprite_plane(i_widget& aParent, double aUpdateRate_s) :
+		widget(aParent), iUpdateTimer(app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			update_sprites();
+			update();
+		}, static_cast<uint32_t>(aUpdateRate_s * 1000.0), true)
 	{
 	}
 
-	sprite_plane::sprite_plane(i_layout& aLayout) : 
-		widget(aLayout)
+	sprite_plane::sprite_plane(i_layout& aLayout, double aUpdateRate_s) :
+		widget(aLayout), iUpdateTimer(app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			update_sprites();
+			update();
+		}, static_cast<uint32_t>(aUpdateRate_s * 1000.0), true)
 	{
 	}
 
@@ -81,5 +99,14 @@ namespace neogfx
 	sprite_plane::sprite_list& sprite_plane::sprites()
 	{
 		return iSprites;
+	}
+
+	void sprite_plane::update_sprites()
+	{
+		sprites_updating.trigger();
+		auto now = std::chrono::steady_clock::now();
+		for (auto& s : iSprites)
+			s->update(now);
+		sprites_updated.trigger();
 	}
 }
