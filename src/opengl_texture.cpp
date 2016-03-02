@@ -25,7 +25,7 @@ namespace neogfx
 {
 	opengl_texture::opengl_texture(const i_image& aImage) :
 		iSize(aImage.extents()), 
-		iStorageSize{size{std::max(std::ceil(std::log2(iSize.cx + 2)), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}}, 
+		iStorageSize{size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}},
 		iHandle(0), 
 		iUri(aImage.uri())
 	{
