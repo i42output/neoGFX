@@ -48,14 +48,18 @@ namespace neogfx
 		return iNativeTexture.get() == 0;
 	}
 
-	const size& texture::extents() const
+	size texture::extents() const
 	{
 		if (is_empty())
-		{
-			static const size sEmptySize;
-			return sEmptySize;
-		}
+			return size{};
 		return native_texture()->extents();
+	}
+
+	size texture::storage_extents() const
+	{
+		if (is_empty())
+			return size{};
+		return native_texture()->storage_extents();
 	}
 
 	std::shared_ptr<i_native_texture> texture::native_texture() const

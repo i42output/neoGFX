@@ -35,9 +35,13 @@ namespace neogfx
 			iParent.cleanup(iTexture);
 		}
 	public:
-		virtual const size& extents() const
+		virtual size extents() const
 		{
 			return iTextureReference->extents();
+		}
+		virtual size storage_extents() const
+		{
+			return iTextureReference->storage_extents();
 		}
 	public:
 		virtual void* handle() const

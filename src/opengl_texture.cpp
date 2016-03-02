@@ -24,7 +24,10 @@
 namespace neogfx
 {
 	opengl_texture::opengl_texture(const i_image& aImage) :
-		iSize(aImage.extents()), iHandle(0), iUri(aImage.uri())
+		iSize(aImage.extents()), 
+		iStorageSize{size{std::max(std::ceil(std::log2(iSize.cx + 2)), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}}, 
+		iHandle(0), 
+		iUri(aImage.uri())
 	{
 		GLint previousTexture;
 		try
@@ -37,7 +40,15 @@ namespace neogfx
 			switch (aImage.colour_format())
 			{
 			case ColourFormatRGBA8:
-				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, aImage.data()));
+				{
+					const uint8_t* imageData = static_cast<const uint8_t*>(aImage.data());
+					std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
+					for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+						for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+							for (std::size_t c = 0; c < 4; ++c)
+								data[y * iStorageSize.cx * 4 + x * 4 + c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
+					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
+				}
 				break;
 			default:
 				throw unsupported_colour_format();
@@ -57,9 +68,14 @@ namespace neogfx
 		glCheck(glDeleteTextures(1, &iHandle));
 	}
 
-	const size& opengl_texture::extents() const
+	size opengl_texture::extents() const
 	{
 		return iSize;
+	}
+
+	size opengl_texture::storage_extents() const
+	{
+		return iStorageSize;
 	}
 
 	void* opengl_texture::handle() const

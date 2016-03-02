@@ -24,34 +24,38 @@
 
 namespace neogfx
 {
-	sprite_plane::sprite_plane(double aUpdateRate_s) : 
-		iUpdateTimer(app::instance(), [this](neolib::callback_timer& aTimer)
-		{
-			aTimer.again();
-			update_sprites();
-			update();
-		}, static_cast<uint32_t>(aUpdateRate_s * 1000.0), true)
+	sprite_plane::sprite_plane()
 	{
+		surface().native_surface().rendering_check([this]()
+		{
+			if (update_sprites())
+				update();
+		}, this);
 	}
 
-	sprite_plane::sprite_plane(i_widget& aParent, double aUpdateRate_s) :
-		widget(aParent), iUpdateTimer(app::instance(), [this](neolib::callback_timer& aTimer)
-		{
-			aTimer.again();
-			update_sprites();
-			update();
-		}, static_cast<uint32_t>(aUpdateRate_s * 1000.0), true)
+	sprite_plane::sprite_plane(i_widget& aParent) :
+		widget(aParent)
 	{
+		surface().native_surface().rendering_check([this]()
+		{
+			if (update_sprites())
+				update();
+		}, this);
 	}
 
-	sprite_plane::sprite_plane(i_layout& aLayout, double aUpdateRate_s) :
-		widget(aLayout), iUpdateTimer(app::instance(), [this](neolib::callback_timer& aTimer)
-		{
-			aTimer.again();
-			update_sprites();
-			update();
-		}, static_cast<uint32_t>(aUpdateRate_s * 1000.0), true)
+	sprite_plane::sprite_plane(i_layout& aLayout) :
+		widget(aLayout)
 	{
+		surface().native_surface().rendering_check([this]()
+		{
+			if (update_sprites())
+				update();
+		}, this);
+	}
+
+	sprite_plane::~sprite_plane()
+	{
+		surface().native_surface().rendering_check.unsubscribe(this);
 	}
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
@@ -101,12 +105,14 @@ namespace neogfx
 		return iSprites;
 	}
 
-	void sprite_plane::update_sprites()
+	bool sprite_plane::update_sprites()
 	{
 		sprites_updating.trigger();
 		auto now = std::chrono::steady_clock::now();
+		bool updated = false;
 		for (auto& s : iSprites)
-			s->update(now);
+			updated = (s->update(now) || updated);
 		sprites_updated.trigger();
+		return updated;
 	}
 }

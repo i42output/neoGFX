@@ -31,7 +31,7 @@ namespace neogfx
 	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler) :
 		native_window(aRenderingEngine, aSurfaceManager),
 		iEventHandler(aEventHandler),
-		iFrameRate(50),
+		iFrameRate(60),
 		iLastFrameTime(0),
 		iRendering(false)
 	{
@@ -68,14 +68,22 @@ namespace neogfx
 
 	void opengl_window::render()
 	{
-		if (iRendering || processing_event() || iInvalidatedRects.empty())
+		if (iRendering || processing_event())
 			return;
+
 		uint64_t now = app::instance().program_elapsed_ms();
 		if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / *iFrameRate)
 			return;
 
+		rendering_check.trigger();
+			
+		if (iInvalidatedRects.empty())
+			return;
+
 		iRendering = true;
 		iLastFrameTime = now;
+
+		rendering.trigger();
 
 		rect invalidatedRect = *iInvalidatedRects.begin();
 		for (const auto& ir : iInvalidatedRects)

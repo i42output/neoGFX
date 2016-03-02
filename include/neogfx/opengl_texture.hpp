@@ -36,12 +36,14 @@ namespace neogfx
 		opengl_texture(const i_image& aImage);
 		~opengl_texture();
 	public:
-		virtual const size& extents() const;
+		virtual size extents() const;
+		virtual size storage_extents() const;
 	public:
 		virtual void* handle() const;
 		virtual const std::string& uri() const;
 	private:
-		size iSize;
+		basic_size<uint32_t> iSize;
+		basic_size<uint32_t> iStorageSize;
 		GLuint iHandle;
 		std::string iUri;
 	};

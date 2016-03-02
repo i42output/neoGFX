@@ -74,7 +74,7 @@ namespace neogfx
 		virtual void set_spin_degrees(scalar aSpin) = 0;
 		virtual void set_path(const optional_path& aPath) = 0;
 	public:
-		virtual void update(const optional_time_point& aNow = optional_time_point()) = 0;
+		virtual bool update(const optional_time_point& aNow = optional_time_point()) = 0;
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 	};

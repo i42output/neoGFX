@@ -36,9 +36,10 @@ namespace neogfx
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 	public:
-		sprite_plane(double aUpdateRate_s = 0.0166);
-		sprite_plane(i_widget& aParent, double aUpdateRate_s = 0.0166);
-		sprite_plane(i_layout& aLayout, double aUpdateRate_s = 0.0166);
+		sprite_plane();
+		sprite_plane(i_widget& aParent);
+		sprite_plane(i_layout& aLayout);
+		~sprite_plane();
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
@@ -51,9 +52,8 @@ namespace neogfx
 		const sprite_list& sprites() const;
 		sprite_list& sprites();
 	private:
-		void update_sprites();
+		bool update_sprites();
 	private:
-		neolib::callback_timer iUpdateTimer;
 		sprite_list iSprites;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 	};

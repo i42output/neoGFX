@@ -232,16 +232,18 @@ namespace neogfx
 		iPath = aPath;
 	}
 
-	void sprite::update(const optional_time_point& aNow)
+	bool sprite::update(const optional_time_point& aNow)
 	{
 		if (iTimeOfLastUpdate == boost::none)
 			iTimeOfLastUpdate = aNow;
+		bool updated = false;
 		if (iTimeOfLastUpdate != boost::none && aNow != boost::none)
-			apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den));
+			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den));
 		else
-			apply_physics(1.0);
+			updated = apply_physics(1.0);
 		iTimeOfLastUpdate = aNow;
 		current_physics() = next_physics();
+		return updated;
 	}
 
 	void sprite::paint(graphics_context& aGraphicsContext) const
@@ -291,10 +293,12 @@ namespace neogfx
 		return const_cast<physics&>(const_cast<const sprite*>(this)->next_physics());
 	}
 
-	void sprite::apply_physics(double aElapsedTime)
+	bool sprite::apply_physics(double aElapsedTime)
 	{
 		vector2 velocityAtUpdate = (current_physics().iVelocity + current_physics().iAcceleration * vector2(aElapsedTime, aElapsedTime)); // v = u + at
+		point oldPosition = iPosition;
 		iPosition += vector2(1.0, 1.0) * velocityAtUpdate;
 		next_physics().iVelocity = velocityAtUpdate;
+		return iPosition != oldPosition;
 	}
 }

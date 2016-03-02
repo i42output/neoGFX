@@ -30,6 +30,9 @@ namespace neogfx
 	class i_native_surface
 	{
 	public:
+		event<> rendering_check;
+		event<> rendering;
+	public:
 		virtual ~i_native_surface() {}
 	public:
 		virtual void* handle() const = 0;

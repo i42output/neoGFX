@@ -596,10 +596,11 @@ namespace neogfx
 
 	namespace
 	{
-		std::vector<double> texture_vertices(const size& aTextureSize, const rect& aTextureRect)
+		std::vector<double> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect)
 		{
 			std::vector<double> result;
-			rect normalizedRect = aTextureRect / aTextureSize;
+			rect actualRect = aTextureRect + point(1.0, 1.0);
+			rect normalizedRect = actualRect / aTextureStorageSize;
 			result.push_back(normalizedRect.top_left().x);
 			result.push_back(normalizedRect.top_left().y);
 			result.push_back(normalizedRect.top_right().x);
@@ -621,7 +622,7 @@ namespace neogfx
 		GLint previousTexture;
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture()->handle())));
-		std::vector<double> texCoords = texture_vertices(aTexture.extents(), aTextureRect);
+		std::vector<double> texCoords = texture_vertices(aTexture.storage_extents(), aTextureRect);
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &aTextureMap[0][0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		std::vector<std::array<uint8_t, 4>> colours(4, std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});

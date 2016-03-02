@@ -76,7 +76,7 @@ namespace neogfx
 		virtual void set_spin_degrees(scalar aSpin);
 		virtual void set_path(const optional_path& aPath);
 	public:
-		virtual void update(const optional_time_point& aNow = optional_time_point());
+		virtual bool update(const optional_time_point& aNow = optional_time_point());
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	private:
@@ -84,7 +84,7 @@ namespace neogfx
 		physics& current_physics();
 		const physics& next_physics() const;
 		physics& next_physics();
-		void apply_physics(double aElapsedTime);
+		bool apply_physics(double aElapsedTime);
 	private:
 		texture_list iTextures;
 		frame_list iAnimation;

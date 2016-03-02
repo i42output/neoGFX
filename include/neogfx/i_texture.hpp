@@ -34,7 +34,8 @@ namespace neogfx
 		virtual ~i_texture() {}
 	public:
 		virtual bool is_empty() const = 0;
-		virtual const size& extents() const = 0;
+		virtual size extents() const = 0;
+		virtual size storage_extents() const = 0;
 	public:
 		virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
 	};

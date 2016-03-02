@@ -29,7 +29,8 @@ namespace neogfx
 	public:
 		virtual ~i_native_texture() {}
 	public:
-		virtual const size& extents() const = 0;
+		virtual size extents() const = 0;
+		virtual size storage_extents() const = 0;
 	public:
 		virtual void* handle() const = 0;
 		virtual const std::string& uri() const = 0;
