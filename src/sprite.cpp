@@ -295,10 +295,9 @@ namespace neogfx
 
 	bool sprite::apply_physics(double aElapsedTime)
 	{
-		vector2 velocityAtUpdate = (current_physics().iVelocity + current_physics().iAcceleration * vector2(aElapsedTime, aElapsedTime)); // v = u + at
+		next_physics().iVelocity = (current_physics().iVelocity + current_physics().iAcceleration * vector2(aElapsedTime, aElapsedTime)); // v = u + at
 		point oldPosition = iPosition;
-		iPosition += vector2(1.0, 1.0) * velocityAtUpdate;
-		next_physics().iVelocity = velocityAtUpdate;
+		iPosition += vector2(1.0, 1.0) * (current_physics().iVelocity * aElapsedTime + ((next_physics().iVelocity - current_physics().iVelocity) * aElapsedTime / 2.0));
 		return iPosition != oldPosition;
 	}
 }

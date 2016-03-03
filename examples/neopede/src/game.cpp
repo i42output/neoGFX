@@ -31,9 +31,9 @@ void create_game(ng::i_layout& aLayout)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		if (keyboard.is_key_pressed(ng::ScanCode_UP))
-			spaceshipSprite.set_acceleration({0.0, 1.0});
+			spaceshipSprite.set_acceleration({0.0, 16.0});
 		else if (keyboard.is_key_pressed(ng::ScanCode_DOWN))
-			spaceshipSprite.set_acceleration({0.0, -1.0});
+			spaceshipSprite.set_acceleration({0.0, -16.0});
 		else
 			spaceshipSprite.set_acceleration({0.0, 0.0});
 		if (keyboard.is_key_pressed(ng::ScanCode_RIGHT))
