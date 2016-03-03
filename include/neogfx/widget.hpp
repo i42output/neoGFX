@@ -54,9 +54,10 @@ namespace neogfx
 	public:
 		virtual bool is_root() const;
 		virtual bool has_parent() const;
-		virtual void set_parent(i_widget& aParent);
 		virtual const i_widget& parent() const;
 		virtual i_widget& parent();
+		virtual void set_parent(i_widget& aParent);
+		virtual void parent_changed();
 		virtual const i_widget& ultimate_ancestor() const;
 		virtual i_widget& ultimate_ancestor();
 		virtual bool is_ancestor(const i_widget& aWidget) const;

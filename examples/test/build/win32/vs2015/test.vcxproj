@@ -88,6 +88,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\neopede\src\game.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="Release\GeneratedFiles\test.nrc.cpp" />
   </ItemGroup>

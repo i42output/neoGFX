@@ -140,19 +140,6 @@ namespace neogfx
 		return false;
 	}
 
-	void widget::set_parent(i_widget& aParent)
-	{
-		bool onSurface = has_surface();
-		if (onSurface && &surface() != &aParent.surface())
-		{
-			surface().widget_removed(*this);
-			onSurface = false;
-		}
-		iParent = &aParent;
-		if (!onSurface && has_surface())
-			surface().widget_added(*this);
-	}
-	
 	bool widget::has_parent() const
 	{
 		return iParent != 0;
@@ -170,6 +157,24 @@ namespace neogfx
 		if (!has_parent())
 			throw no_parent();
 		return *iParent;
+	}
+
+	void widget::set_parent(i_widget& aParent)
+	{
+		bool onSurface = has_surface();
+		if (onSurface && &surface() != &aParent.surface())
+		{
+			surface().widget_removed(*this);
+			onSurface = false;
+		}
+		iParent = &aParent;
+		if (!onSurface && has_surface())
+			surface().widget_added(*this);
+		parent_changed();
+	}
+
+	void widget::parent_changed()
+	{
 	}
 
 	const i_widget& widget::ultimate_ancestor() const

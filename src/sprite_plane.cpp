@@ -26,11 +26,6 @@ namespace neogfx
 {
 	sprite_plane::sprite_plane()
 	{
-		surface().native_surface().rendering_check([this]()
-		{
-			if (update_sprites())
-				update();
-		}, this);
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
@@ -56,6 +51,15 @@ namespace neogfx
 	sprite_plane::~sprite_plane()
 	{
 		surface().native_surface().rendering_check.unsubscribe(this);
+	}
+
+	void sprite_plane::parent_changed()
+	{
+		surface().native_surface().rendering_check([this]()
+		{
+			if (update_sprites())
+				update();
+		}, this);
 	}
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const

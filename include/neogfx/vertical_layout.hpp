@@ -26,6 +26,7 @@ namespace neogfx
 	class vertical_layout : public layout
 	{
 	public:
+		vertical_layout(alignment aHorizontalAlignment = alignment::Left);
 		vertical_layout(i_widget& aParent, alignment aHorizontalAlignment = alignment::Left);
 		vertical_layout(i_layout& aParent, alignment aHorizontalAlignment = alignment::Left);
 	public:

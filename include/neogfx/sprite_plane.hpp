@@ -41,6 +41,7 @@ namespace neogfx
 		sprite_plane(i_layout& aLayout);
 		~sprite_plane();
 	public:
+		virtual void parent_changed();
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
 		void add_sprite(i_sprite& aSprite);

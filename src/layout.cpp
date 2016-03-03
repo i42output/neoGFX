@@ -230,6 +230,17 @@ namespace neogfx
 		return iOwner.owner()->device_metrics().em_size();
 	}
 
+	layout::layout() :
+		iOwner(0),
+		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
+		iSpacing(app::instance().current_style().spacing()),
+		iEnabled(true),
+		iMinimumSize{},
+		iMaximumSize{},
+		iLayoutStarted(false)
+	{
+	}
+
 	layout::layout(i_widget& aParent) :
 		iOwner(&aParent),
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),

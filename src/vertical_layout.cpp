@@ -28,6 +28,11 @@
 
 namespace neogfx
 {
+	vertical_layout::vertical_layout(alignment aHorizontalAlignment) :
+		iHorizontalAlignment(aHorizontalAlignment)
+	{
+	}
+
 	vertical_layout::vertical_layout(i_widget& aParent, alignment aHorizontalAlignment) :
 		layout(aParent), iHorizontalAlignment(aHorizontalAlignment)
 	{

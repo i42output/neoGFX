@@ -27,6 +27,7 @@ namespace neogfx
 	class horizontal_layout : public layout
 	{
 	public:
+		horizontal_layout(alignment aVerticalAlignment = alignment::VCentre);
 		horizontal_layout(i_widget& aParent, alignment aVerticalAlignment = alignment::VCentre);
 		horizontal_layout(i_layout& aParent, alignment aVerticalAlignment = alignment::VCentre);
 	public:

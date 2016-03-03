@@ -101,6 +101,7 @@ namespace neogfx
 			i_layout& iOwner;
 		};
 	public:
+		layout();
 		layout(i_widget& aParent);
 		layout(i_layout& aParent);
 	public:
