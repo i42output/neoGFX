@@ -50,16 +50,23 @@ namespace neogfx
 
 	sprite_plane::~sprite_plane()
 	{
-		surface().native_surface().rendering_check.unsubscribe(this);
+		if (has_surface() && !surface().destroyed())
+			surface().native_surface().rendering_check.unsubscribe(this);
 	}
 
 	void sprite_plane::parent_changed()
 	{
+		widget::parent_changed();
 		surface().native_surface().rendering_check([this]()
 		{
 			if (update_sprites())
 				update();
 		}, this);
+	}
+
+	logical_coordinate_system sprite_plane::logical_coordinate_system() const
+	{
+		return neogfx::logical_coordinate_system::AutomaticGame;
 	}
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const

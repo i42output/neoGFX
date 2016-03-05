@@ -38,6 +38,7 @@ namespace neogfx
 		virtual void* handle() const;
 	private:
 		size iExtents;
+		bool iSubPixelRendering;
 		GLuint iHandle;
 		skyline_bin_pack iBinPack;
 	};

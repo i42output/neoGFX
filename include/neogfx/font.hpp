@@ -109,6 +109,7 @@ namespace neogfx
 		virtual const std::string& style_name() const;
 		virtual point_size size() const;
 		dimension height() const;
+		dimension descender() const;
 		dimension line_spacing() const;
 		dimension kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const;
 	public:

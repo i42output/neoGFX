@@ -45,11 +45,17 @@ namespace neogfx
 		opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler);
 		~opengl_window();
 	public:
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
+		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
+		virtual const vector4& logical_coordinates() const;
+		virtual void set_logical_coordinates(const vector4& aCoordinates);
+	public:
 		virtual bool using_frame_buffer() const;
 		virtual void limit_frame_rate(uint32_t aFps);
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect);
 		virtual void render();
+		virtual bool is_rendering() const;
 	public:
 		virtual size extents() const;
 		virtual dimension horizontal_dpi() const;
@@ -65,6 +71,8 @@ namespace neogfx
 	private:
 		i_native_window_event_handler& iEventHandler;
 		size iPixelDensityDpi;
+		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
+		mutable vector4 iLogicalCoordinates;
 		GLuint iFrameBuffer;
 		GLuint iFrameBufferTexture;
 		GLuint iDepthStencilBuffer;

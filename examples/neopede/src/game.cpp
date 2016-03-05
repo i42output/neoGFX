@@ -9,33 +9,35 @@ namespace ng = neogfx;
 
 const uint8_t sSpaceshipImagePattern[8][8]
 {
-	{ 0, 0, 0, 1, 1, 0, 0, 0 },
-	{ 0, 0, 0, 1, 1, 0, 0, 0 },
-	{ 0, 0, 0, 1, 1, 0, 0, 0 },
-	{ 0, 0, 1, 0, 0, 1, 0, 0 },
-	{ 0, 0, 1, 0, 0, 1, 0, 0 },
-	{ 0, 1, 1, 0, 0, 1, 1, 0 },
-	{ 0, 1, 0, 1, 1, 0, 1, 0 },
-	{ 0, 1, 0, 0, 0, 0, 1, 0 },
+	{ 0, 0, 0, 0, 1, 0, 0, 0 },
+	{ 0, 0, 0, 1, 2, 1, 0, 0 },
+	{ 0, 0, 0, 1, 2, 1, 0, 0 },
+	{ 0, 0, 1, 2, 2, 2, 1, 0 },
+	{ 0, 0, 1, 2, 2, 2, 1, 0 },
+	{ 0, 1, 1, 2, 2, 2, 1, 1 },
+	{ 0, 1, 0, 1, 1, 1, 0, 1 },
+	{ 0, 1, 0, 0, 0, 0, 0, 1 },
 };
 
 void create_game(ng::i_layout& aLayout)
 {
 	auto spritePlane = std::make_shared<ng::sprite_plane>();
 	aLayout.add_widget(spritePlane);
+	spritePlane->set_font(ng::font(spritePlane->font(), ng::font::Bold, 28));
 	spritePlane->set_background_colour(ng::colour::Black);
-	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::Goldenrod} }));
+	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::LightGoldenrod}, {2, ng::colour::DarkGoldenrod4} }));
 	spaceshipSprite.set_size(ng::size(32.0, 32.0));
-	spaceshipSprite.set_position(ng::size(rand() % 800, rand() % 800));
+	spaceshipSprite.set_position(ng::point(400.0 - 16.0, 0.0));
+	spritePlane->painting([spritePlane](ng::graphics_context& aGraphicsContext)
+	{
+		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
+	});
 	spritePlane->sprites_updating([&spaceshipSprite]()
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
-		if (keyboard.is_key_pressed(ng::ScanCode_UP))
-			spaceshipSprite.set_acceleration({0.0, 16.0});
-		else if (keyboard.is_key_pressed(ng::ScanCode_DOWN))
-			spaceshipSprite.set_acceleration({0.0, -16.0});
-		else
-			spaceshipSprite.set_acceleration({0.0, 0.0});
+		spaceshipSprite.set_acceleration({  
+			keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
+			keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0});
 		if (keyboard.is_key_pressed(ng::ScanCode_RIGHT))
 			spaceshipSprite.set_spin_degrees(10.0);
 		else if (keyboard.is_key_pressed(ng::ScanCode_LEFT))

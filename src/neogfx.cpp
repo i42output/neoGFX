@@ -18,4 +18,3 @@
 */
 
 #include "neogfx.hpp"
-#include "neogfx.hpp"

@@ -91,6 +91,7 @@ namespace neogfx
 		virtual bool layout_items_in_progress() const;
 		virtual void layout_items_completed();
 	public:
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual point position() const;
 		virtual point origin(bool aNonClient = false) const;
 		virtual void move(const point& aPosition);

@@ -43,6 +43,7 @@ namespace neogfx
 		virtual dimension horizontal_dpi() const = 0;
 		virtual dimension vertical_dpi() const = 0;
 		virtual dimension height() const = 0;
+		virtual dimension descender() const = 0;
 		virtual dimension line_spacing() const = 0;
 		virtual dimension kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const = 0;
 		virtual i_native_font_face& fallback() const = 0;

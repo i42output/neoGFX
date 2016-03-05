@@ -42,6 +42,7 @@ namespace neogfx
 		~sprite_plane();
 	public:
 		virtual void parent_changed();
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
 		void add_sprite(i_sprite& aSprite);

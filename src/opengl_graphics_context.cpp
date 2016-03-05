@@ -55,19 +55,68 @@ namespace neogfx
 		}
 	}
 
-	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine) :
-		iRenderingEngine(aRenderingEngine), iSmoothingMode(SmoothingModeNone), iClipCounter(0), iLineStippleActive(false)
+	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface) :
+		iRenderingEngine(aRenderingEngine), iSurface(aSurface), iLogicalCoordinateSystem(aSurface.logical_coordinate_system()), iLogicalCoordinates(aSurface.logical_coordinates()), iSmoothingMode(SmoothingModeNone), iClipCounter(0), iLineStippleActive(false)
 	{
 		set_smoothing_mode(SmoothingModeAntiAlias);
 	}
 	opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
-		iRenderingEngine(aOther.iRenderingEngine), iSmoothingMode(aOther.iSmoothingMode), iClipCounter(0), iLineStippleActive(false)
+		iRenderingEngine(aOther.iRenderingEngine), iSurface(aOther.iSurface), iLogicalCoordinateSystem(aOther.iLogicalCoordinateSystem), iLogicalCoordinates(aOther.iLogicalCoordinates), iSmoothingMode(aOther.iSmoothingMode), iClipCounter(0), iLineStippleActive(false)
 	{
 		set_smoothing_mode(iSmoothingMode);
 	}
 
 	opengl_graphics_context::~opengl_graphics_context()
 	{
+		const auto& logicalCoordinates = surface().logical_coordinates();
+		glCheck(glLoadIdentity());
+		glCheck(glOrtho(logicalCoordinates[0], logicalCoordinates[2], logicalCoordinates[1], logicalCoordinates[3], -1.0, 1.0));
+	}
+
+	const i_native_surface& opengl_graphics_context::surface() const
+	{
+		return iSurface;
+	}
+
+	neogfx::logical_coordinate_system opengl_graphics_context::logical_coordinate_system() const
+	{
+		return iLogicalCoordinateSystem;
+	}
+
+	void opengl_graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+	{
+		if (iLogicalCoordinateSystem != aSystem)
+		{
+			iLogicalCoordinateSystem = aSystem;
+			const auto& logicalCoordinates = logical_coordinates();
+			glCheck(glLoadIdentity());
+			glCheck(glOrtho(logicalCoordinates[0], logicalCoordinates[2], logicalCoordinates[1], logicalCoordinates[3], -1.0, 1.0));
+		}
+	}
+
+	const vector4& opengl_graphics_context::logical_coordinates() const
+	{
+		switch (iLogicalCoordinateSystem)
+		{
+		case neogfx::logical_coordinate_system::Specified:
+			return iLogicalCoordinates;
+		case neogfx::logical_coordinate_system::AutomaticGui:
+			return iLogicalCoordinates = vector4{ 0.0, surface().surface_size().cy, surface().surface_size().cx, 0.0 };
+		case neogfx::logical_coordinate_system::AutomaticGame:
+			return iLogicalCoordinates = vector4{ 0.0, 0.0, surface().surface_size().cx, surface().surface_size().cy };
+		}
+		return iLogicalCoordinates;
+	}
+
+	void opengl_graphics_context::set_logical_coordinates(const vector4& aCoordinates) const
+	{
+		if (iLogicalCoordinates != aCoordinates)
+		{
+			iLogicalCoordinates = aCoordinates;
+			const auto& logicalCoordinates = logical_coordinates();
+			glCheck(glLoadIdentity());
+			glCheck(glOrtho(logicalCoordinates[0], logicalCoordinates[2], logicalCoordinates[1], logicalCoordinates[3], -1.0, 1.0));
+		}
 	}
 
 	void opengl_graphics_context::flush()
@@ -484,6 +533,25 @@ namespace neogfx
 		iActiveGlyphTexture = static_cast<GLuint>(iPreviousTexture);
 	}
 
+	namespace
+	{
+		std::vector<double> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect)
+		{
+			std::vector<double> result;
+			rect actualRect = aTextureRect + point(1.0, 1.0);
+			rect normalizedRect = actualRect / aTextureStorageSize;
+			result.push_back(normalizedRect.top_left().x);
+			result.push_back(normalizedRect.top_left().y);
+			result.push_back(normalizedRect.top_right().x);
+			result.push_back(normalizedRect.top_right().y);
+			result.push_back(normalizedRect.bottom_right().x);
+			result.push_back(normalizedRect.bottom_right().y);
+			result.push_back(normalizedRect.bottom_left().x);
+			result.push_back(normalizedRect.bottom_left().y);
+			return result;
+		}
+	}
+
 	void opengl_graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour)
 	{
 		if (aGlyph.is_whitespace())
@@ -499,7 +567,10 @@ namespace neogfx
 		shifts.clear();
 		shifts.resize(4, std::array<GLdouble, 2>{{aPoint.x - std::floor(aPoint.x), aPoint.y - std::floor(aPoint.y)}});
 
-		point glyphOrigin(aPoint.x + glyphTexture.placement().x, aPoint.y + glyphTexture.placement().y);
+		point glyphOrigin(aPoint.x + glyphTexture.placement().x, 
+			logical_coordinates()[1] < logical_coordinates()[3] ? 
+				aPoint.y + (glyphTexture.placement().y + -aFont.descender()) :
+				aPoint.y + aFont.height() - (glyphTexture.placement().y + -aFont.descender()) - glyphTexture.extents().cy);
 		vertices.clear();
 		vertices.insert(vertices.begin(),
 		{
@@ -524,8 +595,15 @@ namespace neogfx
 		textureCoords[6] = (glyphTexture.font_texture_location().x + glyphTexture.extents().cx * (lcdMode ? 3.0 : 1.0)) / glyphTexture.font_texture().extents().cx;
 		textureCoords[7] = glyphTexture.font_texture_location().y / glyphTexture.font_texture().extents().cy;
 
+		if (logical_coordinates()[1] < logical_coordinates()[3])
+		{
+			std::swap(textureCoords[1], textureCoords[5]);
+			std::swap(textureCoords[3], textureCoords[7]);
+		}
+
 		GLuint boHandles[3];
 		glCheck(glGenBuffers(3, boHandles));
+
 		GLuint positionBufferHandle = boHandles[0];
 		GLuint colourBufferHandle = boHandles[1];
 		GLuint textureCoordBufferHandle = boHandles[2];
@@ -594,35 +672,24 @@ namespace neogfx
 		iRenderingEngine.deactivate_shader_program();
 	}
 
-	namespace
-	{
-		std::vector<double> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect)
-		{
-			std::vector<double> result;
-			rect actualRect = aTextureRect + point(1.0, 1.0);
-			rect normalizedRect = actualRect / aTextureStorageSize;
-			result.push_back(normalizedRect.top_left().x);
-			result.push_back(normalizedRect.top_left().y);
-			result.push_back(normalizedRect.top_right().x);
-			result.push_back(normalizedRect.top_right().y);
-			result.push_back(normalizedRect.bottom_right().x);
-			result.push_back(normalizedRect.bottom_right().y);
-			result.push_back(normalizedRect.bottom_left().x);
-			result.push_back(normalizedRect.bottom_left().y);
-			return result;
-		}
-	}
-
 	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect)
 	{	
 		if (aTexture.is_empty())
 			return;
+		glCheck(glActiveTexture(GL_TEXTURE1));
+		glCheck(glClientActiveTexture(GL_TEXTURE1));
+		glCheck(glEnable(GL_TEXTURE_2D));
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		GLint previousTexture;
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture()->handle())));
-		std::vector<double> texCoords = texture_vertices(aTexture.storage_extents(), aTextureRect);
+		auto texCoords = texture_vertices(aTexture.storage_extents(), aTextureRect);
+		if (logical_coordinates()[1] < logical_coordinates()[3])
+		{
+			std::swap(texCoords[1], texCoords[5]);
+			std::swap(texCoords[3], texCoords[7]);
+		}
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &aTextureMap[0][0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		std::vector<std::array<uint8_t, 4>> colours(4, std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});

@@ -26,10 +26,16 @@
 #include "path.hpp"
 #include "pen.hpp"
 #include "font.hpp"
-#include "i_texture.hpp"
 
 namespace neogfx
 {
+	enum class logical_coordinate_system
+	{
+		Specified,
+		AutomaticGui,
+		AutomaticGame
+	};
+
 	enum colour_format_e
 	{
 		ColourFormatRGBA8
@@ -50,6 +56,7 @@ namespace neogfx
 	typedef basic_vector<vector2, 4> texture_map;
 
 	class i_surface;
+	class i_texture;
 	class i_widget;
 	class i_native_graphics_context;
 
@@ -80,6 +87,10 @@ namespace neogfx
 		rect from_device_units(const rect& aValue) const;
 		texture_map from_device_units(const texture_map& aValue) const;
 		path from_device_units(const path& aValue) const;
+		neogfx::logical_coordinate_system logical_coordinate_system() const;
+		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const;
+		const vector4& logical_coordinates() const;
+		void set_logical_coordinates(const vector4& aCoordinates) const;
 		void set_default_font(const font& aDefaultFont) const;
 		void set_extents(const size& aExtents) const;
 		void set_origin(const point& aOrigin) const;

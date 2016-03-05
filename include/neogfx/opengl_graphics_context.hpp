@@ -72,12 +72,17 @@ namespace neogfx
 		};
 		typedef std::array<double, 3> vertex;
 	public:
-		opengl_graphics_context(i_rendering_engine& aRenderingEngine);
+		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface);
 		opengl_graphics_context(const opengl_graphics_context& aOther);
 		~opengl_graphics_context();
 	public:
+		virtual const i_native_surface& surface() const;
 		virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
 	public:
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
+		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
+		virtual const vector4& logical_coordinates() const;
+		virtual void set_logical_coordinates(const vector4& aCoordinates) const;
 		virtual void flush();
 		virtual void scissor_on(const rect& aRect);
 		virtual void scissor_off();
@@ -114,6 +119,9 @@ namespace neogfx
 		glyph_text::container to_glyph_text_impl(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont, bool& aFallbackFontNeeded) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
+		const i_native_surface& iSurface;
+		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
+		mutable vector4 iLogicalCoordinates;
 		smoothing_mode_e iSmoothingMode; 
 		std::vector<logical_operation_e> iLogicalOperationStack;
 		uint32_t iClipCounter;

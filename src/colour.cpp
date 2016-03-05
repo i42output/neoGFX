@@ -22,7 +22,7 @@
 
 namespace neogfx
 {
-	colour::colour() : iValue(Black.value())
+	colour::colour() : iValue{}
 	{
 	}
 

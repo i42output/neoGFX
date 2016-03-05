@@ -21,6 +21,7 @@
 #include "i_surface.hpp"
 #include "i_native_surface.hpp"
 #include "i_native_graphics_context.hpp"
+#include "i_texture.hpp"
 #include "i_widget.hpp"
 
 namespace neogfx
@@ -156,6 +157,26 @@ namespace neogfx
 			for (std::size_t j = 0; j < result.paths()[i].size(); ++j)
 				result.paths()[i][j] = from_device_units(result.paths()[i][j]);
 		return result;
+	}
+
+	neogfx::logical_coordinate_system graphics_context::logical_coordinate_system() const
+	{
+		return iNativeGraphicsContext->logical_coordinate_system();
+	}
+
+	void graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
+	{
+		iNativeGraphicsContext->set_logical_coordinate_system(aSystem);
+	}
+
+	const vector4& graphics_context::logical_coordinates() const
+	{
+		return iNativeGraphicsContext->logical_coordinates();
+	}
+
+	void graphics_context::set_logical_coordinates(const vector4& aCoordinates) const
+	{
+		iNativeGraphicsContext->set_logical_coordinates(aCoordinates);
 	}
 
 	void graphics_context::set_default_font(const font& aDefaultFont) const

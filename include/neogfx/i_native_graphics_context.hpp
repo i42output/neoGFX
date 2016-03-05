@@ -23,6 +23,7 @@
 #include "geometry.hpp"
 #include "path.hpp"
 #include "graphics_context.hpp"
+#include "i_native_surface.hpp"
 
 namespace neogfx
 {
@@ -32,6 +33,11 @@ namespace neogfx
 		virtual ~i_native_graphics_context() {}
 		virtual std::unique_ptr<i_native_graphics_context> clone() const = 0;
 	public:
+		virtual const i_native_surface& surface() const = 0;
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
+		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
+		virtual const vector4& logical_coordinates() const = 0;
+		virtual void set_logical_coordinates(const vector4& aCoordinates) const = 0;
 		virtual void flush() = 0;
 		virtual void scissor_on(const rect& aRect) = 0;
 		virtual void scissor_off() = 0;

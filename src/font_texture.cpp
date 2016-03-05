@@ -23,7 +23,7 @@
 namespace neogfx
 {
 	font_texture::font_texture(const size& aExtents, bool aSubPixelRendering) :
-		iExtents(aExtents), iBinPack(aExtents, false)
+		iExtents(aExtents), iSubPixelRendering(aSubPixelRendering), iBinPack(aExtents, false)
 	{
 		GLint previousTexture;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture);
@@ -43,12 +43,13 @@ namespace neogfx
 
 	const size& font_texture::extents() const
 	{
-		return iExtents;
+		return iExtents;													
 	}
 
 	bool font_texture::allocate_glyph_space(const size& aSize, rect& aResult)
 	{
-		return iBinPack.insert(size(std::max(std::pow(2.0, std::ceil(std::log2(aSize.cx + 3))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(aSize.cy + 1))), 16.0)), aResult);
+		bool ok = iBinPack.insert(size(std::max(std::pow(2.0, std::ceil(std::log2(aSize.cx + (iSubPixelRendering ? 6 : 2)))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(aSize.cy + 2))), 16.0)), aResult);
+		return ok;
 	}
 
 	void* font_texture::handle() const

@@ -175,6 +175,8 @@ namespace neogfx
 
 	void widget::parent_changed()
 	{
+		if (has_managing_layout())
+			managing_layout().layout_items(true);
 	}
 
 	const i_widget& widget::ultimate_ancestor() const
@@ -443,6 +445,11 @@ namespace neogfx
 	{
 		iLayoutInProgress = false;
 		update();
+	}
+
+	logical_coordinate_system widget::logical_coordinate_system() const
+	{
+		return neogfx::logical_coordinate_system::AutomaticGui;
 	}
 
 	point widget::position() const
@@ -723,7 +730,21 @@ namespace neogfx
 			aGraphicsContext.set_extents(client_rect().extents());
 			aGraphicsContext.set_origin(origin() + client_rect().position());
 			aGraphicsContext.scissor_on(default_clip_rect());
+			auto savedCoordinateSystem = aGraphicsContext.logical_coordinate_system();
+			if (savedCoordinateSystem != logical_coordinate_system())
+			{
+				aGraphicsContext.set_logical_coordinate_system(logical_coordinate_system());
+				if (logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
+					aGraphicsContext.set_origin(origin() + client_rect().position());
+				else if (logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
+					aGraphicsContext.set_origin(point{
+						(origin() + client_rect().bottom_left()).x,
+						surface().extents().cy - (origin() + client_rect().bottom_left()).y });
+			}
+			painting.trigger(aGraphicsContext);
 			paint(aGraphicsContext);
+			if (savedCoordinateSystem != aGraphicsContext.logical_coordinate_system())
+				aGraphicsContext.set_logical_coordinate_system(savedCoordinateSystem);
 			aGraphicsContext.scissor_off();
 		}
 		iUpdateRects.clear();

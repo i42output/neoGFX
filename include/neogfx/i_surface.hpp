@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <neolib/variant.hpp>
 #include "geometry.hpp"
 #include "graphics_context.hpp"
 #include "mouse.hpp"
@@ -29,19 +30,23 @@ namespace neogfx
 	class i_native_surface;
 	class i_widget;
 
+	enum class surface_type
+	{
+		Window,
+		Touchscreen,
+		Paper		// Printing support
+	};
+
 	class i_surface : public i_device_metrics, public i_units_context
 	{
 	public:
-		enum surface_type_e
-		{
-			SurfaceTypeWindow,
-			SurfaceTypeTouchscreen,
-			SurfaceTypePaper		// Printing support
-		};
-	public:
 		virtual ~i_surface() {}
 	public:
-		virtual surface_type_e surface_type() const = 0;
+		virtual neogfx::surface_type surface_type() const = 0;
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
+		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
+		virtual const vector4& logical_coordinates() const = 0;
+		virtual void set_logical_coordinates(const vector4& aCoordinates) = 0;
 		virtual void layout_surface() = 0;
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) = 0;
 		virtual void render_surface() = 0;

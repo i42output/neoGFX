@@ -21,6 +21,7 @@
 
 #include "neogfx.hpp"
 #include "i_widget.hpp"
+#include "i_surface.hpp"
 #include "mouse.hpp"
 
 namespace neogfx
@@ -34,6 +35,11 @@ namespace neogfx
 		event<> rendering;
 	public:
 		virtual ~i_native_surface() {}
+	public:
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
+		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
+		virtual const vector4& logical_coordinates() const = 0;
+		virtual void set_logical_coordinates(const vector4& aCoordinates) = 0;
 	public:
 		virtual void* handle() const = 0;
 		virtual void* native_handle() const = 0;
@@ -53,6 +59,7 @@ namespace neogfx
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect) = 0;
 		virtual void render() = 0;
+		virtual bool is_rendering() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
 	};
 }

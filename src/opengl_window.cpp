@@ -31,6 +31,7 @@ namespace neogfx
 	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler) :
 		native_window(aRenderingEngine, aSurfaceManager),
 		iEventHandler(aEventHandler),
+		iLogicalCoordinateSystem(neogfx::logical_coordinate_system::AutomaticGui),
 		iFrameRate(60),
 		iLastFrameTime(0),
 		iRendering(false)
@@ -48,6 +49,35 @@ namespace neogfx
 	{
 	}
 
+	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const 
+	{
+		return iLogicalCoordinateSystem;
+	}
+
+	void opengl_window::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+	{
+		iLogicalCoordinateSystem = aSystem;
+	}
+
+	const vector4& opengl_window::logical_coordinates() const
+	{
+		switch (iLogicalCoordinateSystem)
+		{
+		case neogfx::logical_coordinate_system::Specified:
+			return iLogicalCoordinates;
+		case neogfx::logical_coordinate_system::AutomaticGui:
+			return iLogicalCoordinates = vector4{0.0, extents().cy, extents().cx, 0.0};
+		case neogfx::logical_coordinate_system::AutomaticGame:
+			return iLogicalCoordinates = vector4{0.0, 0.0, extents().cx, extents().cy};
+		}
+		return iLogicalCoordinates;
+	}
+
+	void opengl_window::set_logical_coordinates(const vector4& aCoordinates)
+	{
+		iLogicalCoordinates = aCoordinates;
+	}
+
 	bool opengl_window::using_frame_buffer() const
 	{
 		return true;
@@ -60,8 +90,8 @@ namespace neogfx
 
 	void opengl_window::invalidate(const rect& aInvalidatedRect)
 	{
-		if (iRendering)
-			throw busy_rendering();
+//		if (iRendering)
+//			throw busy_rendering();
 		if (iInvalidatedRects.find(aInvalidatedRect) == iInvalidatedRects.end())
 			iInvalidatedRects.insert(aInvalidatedRect);
 	}
@@ -106,10 +136,11 @@ namespace neogfx
 		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
 		glCheck(glMatrixMode(GL_PROJECTION));
 		glCheck(glLoadIdentity());
-		glCheck(glScalef(1.0, -1.0, 1.0));
+		glCheck(glScalef(1.0, 1.0, 1.0));
 		glCheck(glMatrixMode(GL_MODELVIEW));
 		glCheck(glLoadIdentity());
-		glCheck(glOrtho(0.0, extents().cx, 0.0, extents().cy, -1.0, 1.0));
+		const auto& logicalCoordinates = logical_coordinates();
+		glCheck(glOrtho(logicalCoordinates[0], logicalCoordinates[2], logicalCoordinates[1], logicalCoordinates[3], -1.0, 1.0));
 		glCheck(glEnableClientState(GL_VERTEX_ARRAY));
 		glCheck(glEnableClientState(GL_COLOR_ARRAY));
 		glCheck(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
@@ -162,6 +193,11 @@ namespace neogfx
 		deactivate_context();
 
 		iRendering = false;
+	}
+
+	bool opengl_window::is_rendering() const
+	{
+		return iRendering;
 	}
 
 	size opengl_window::extents() const

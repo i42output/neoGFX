@@ -14,7 +14,9 @@ int main()
 {
 	ng::app app("neopede - neoGFX Sample Game");
 	ng::window window(800, 800);
+	window.set_margins(ng::margins{});
 	ng::vertical_layout layout0(window);
+	layout0.set_margins(ng::margins{});
 	create_game(layout0);
 	return app.exec();
 }

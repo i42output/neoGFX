@@ -213,9 +213,29 @@ namespace neogfx
 			return container_background_colour();
 	}
 
-	window::surface_type_e window::surface_type() const
+	surface_type window::surface_type() const
 	{
-		return SurfaceTypeWindow;
+		return neogfx::surface_type::Window;
+	}
+
+	neogfx::logical_coordinate_system window::logical_coordinate_system() const
+	{
+		return native_surface().logical_coordinate_system();
+	}
+
+	void window::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+	{
+		native_surface().set_logical_coordinate_system(aSystem);
+	}
+
+	const vector4& window::logical_coordinates() const
+	{
+		return native_surface().logical_coordinates();
+	}
+
+	void window::set_logical_coordinates(const vector4& aCoordinates)
+	{
+		native_surface().set_logical_coordinates(aCoordinates);
 	}
 
 	void window::layout_surface()
@@ -594,7 +614,7 @@ namespace neogfx
 		for (std::size_t i = 0; i < app::instance().surface_manager().surface_count(); ++i)
 		{
 			i_surface& surface = app::instance().surface_manager().surface(i);
-			if (surface.surface_type() == i_surface::SurfaceTypeWindow && &surface != this)
+			if (surface.surface_type() == surface_type::Window && &surface != this)
 			{
 				window& windowSurface = static_cast<window&>(surface);
 				if (iStyle & ApplicationModal)

@@ -61,6 +61,8 @@ namespace neogfx
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
 	public:
+		bool operator==(const basic_vector& aRhs) const { return v == aRhs.v; }
+		bool operator!=(const basic_vector& aRhs) const { return v != aRhs.v; }
 		basic_vector& operator+=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement + aValue; }); return *this; }
 		basic_vector& operator-=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement - aValue; }); return *this; }
 		basic_vector& operator*=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement * aValue; }); return *this; }
@@ -142,6 +144,8 @@ namespace neogfx
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
 	public:
+		bool operator==(const basic_vector& aRhs) const { return v == aRhs.v; }
+		bool operator!=(const basic_vector& aRhs) const { return v != aRhs.v; }
 		basic_vector& operator+=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement + aValue; }); return *this; }
 		basic_vector& operator-=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement - aValue; }); return *this; }
 		basic_vector& operator*=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement * aValue; }); return *this; }

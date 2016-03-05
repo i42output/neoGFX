@@ -71,7 +71,11 @@ namespace neogfx
 	public:
 		virtual colour background_colour() const;
 	public:
-		virtual surface_type_e surface_type() const;
+		virtual neogfx::surface_type surface_type() const;
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
+		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
+		virtual const vector4& logical_coordinates() const;
+		virtual void set_logical_coordinates(const vector4& aCoordinates);
 		virtual void layout_surface();
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true);
 		virtual void render_surface();

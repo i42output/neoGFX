@@ -48,3 +48,4 @@
 /3rdparty/harfbuzz/harfbuzz-1.2.3/lib/harfbuzz.lib
 /3rdparty/harfbuzz/harfbuzz-1.2.3/lib/harfbuzzd.lib
 /build/win32/vs2015/Debug
+/examples/test/build/win32/vs2015/test.vcxproj.user

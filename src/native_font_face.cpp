@@ -23,6 +23,7 @@
 #include FT_GLYPH_H
 #include FT_OUTLINE_H
 #include FT_BITMAP_H
+#include "opengl_error.hpp"
 #include "native_font_face.hpp"
 #include "text.hpp"
 #include "i_rendering_engine.hpp"
@@ -90,6 +91,11 @@ namespace neogfx
 		return iHandle->size->metrics.height / 64.0;
 	}
 
+	dimension native_font_face::descender() const
+	{
+		return iHandle->size->metrics.descender / 64.0;
+	}
+
 	dimension native_font_face::line_spacing() const
 	{
 		/* todo */
@@ -139,47 +145,45 @@ namespace neogfx
 		i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(aGlyph.value(),
 			neogfx::glyph_texture(
 				fontTexture,
-				glyphRect,
+				glyphRect + point(1.0, 1.0) - delta(2.0, 2.0),
 				neogfx::size(static_cast<dimension>(bitmap.width / (lcdMode ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows)),
 				neogfx::point(
 					iHandle->glyph->metrics.horiBearingX / 64.0,
-					(iHandle->size->metrics.height - (iHandle->glyph->metrics.horiBearingY - iHandle->size->metrics.descender)) / 64.0)))).first->second;
+					(iHandle->glyph->metrics.horiBearingY - iHandle->glyph->metrics.height) / 64.0)))).first->second;
 
 		iGlyphTextureData.clear();
 		iGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
+		iSubpixelGlyphTextureData.clear();
+		iSubpixelGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
 
 		const GLubyte* textureData = 0;
 
 		if (lcdMode)
 		{
-			for (uint32_t y = 0; y < bitmap.rows; y++) {
-				for (uint32_t x = 0; x < bitmap.width; x++) {
-					iSubpixelGlyphTextureData[(x)+ (y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] =
+			for (uint32_t y = 0; y < bitmap.rows; y++)
+				for (uint32_t x = 0; x < bitmap.width; x++)
+					iSubpixelGlyphTextureData[(x + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] =
 						(x >= bitmap.width || y >= bitmap.rows) ? 0 : bitmap.buffer[x + bitmap.pitch * y];
-				}
-			}
 			textureData = &iSubpixelGlyphTextureData[0][0];
 		}
 		else
 		{
-			for (uint32_t y = 0; y < bitmap.rows; y++) {
-				for (uint32_t x = 0; x < bitmap.width; x++) {
-					iGlyphTextureData[(x) + (y) * static_cast<std::size_t>(glyphRect.cx)] =
+			for (uint32_t y = 0; y < bitmap.rows; y++)
+				for (uint32_t x = 0; x < bitmap.width; x++)
+					iGlyphTextureData[(x + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)] =
 						(x >= bitmap.width || y >= bitmap.rows) ? 0 : bitmap.buffer[x + bitmap.pitch * y];
-				}
-			}
 			textureData = &iGlyphTextureData[0];
 		}
 
 		GLint previousTexture;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture);
-		glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(glyphTexture.font_texture().handle()));
+		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
+		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(glyphTexture.font_texture().handle())));
 
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
+		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
 			static_cast<GLint>(glyphRect.x), static_cast<GLint>(glyphRect.y), static_cast<GLsizei>(glyphRect.cx), static_cast<GLsizei>(glyphRect.cy), 
-			lcdMode ? GL_RGB : GL_ALPHA, GL_UNSIGNED_BYTE, &textureData[0]);
+			lcdMode ? GL_RGB : GL_ALPHA, GL_UNSIGNED_BYTE, &textureData[0]));
 
-		glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture));
+		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 
 		return glyphTexture;
 	}

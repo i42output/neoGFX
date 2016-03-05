@@ -47,6 +47,8 @@ namespace neogfx
 	class i_widget : public i_geometry, public i_units_context
 	{
 	public:
+		event<graphics_context&> painting;
+	public:
 		typedef std::vector<std::shared_ptr<i_widget>> widget_list;
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_widget::no_parent") {} };
@@ -100,6 +102,7 @@ namespace neogfx
 		virtual bool layout_items_in_progress() const = 0;
 		virtual void layout_items_completed() = 0;
 	public:
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
 		virtual point position() const = 0;
 		virtual point origin(bool aNonClient = false) const = 0;
 		virtual void move(const point& aPosition) = 0;

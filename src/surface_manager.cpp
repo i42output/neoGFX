@@ -92,7 +92,7 @@ namespace neogfx
 		{
 			if ((*i)->destroyed())
 				continue;
-			if ((*i)->surface_type() == i_surface::SurfaceTypeWindow && static_cast<i_native_window&>((*i)->native_surface()).is_active())
+			if ((*i)->surface_type() == surface_type::Window && static_cast<i_native_window&>((*i)->native_surface()).is_active())
 			{
 				display_error_message((*i)->native_surface(), aTitle, aMessage);
 				return;

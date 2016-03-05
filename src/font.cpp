@@ -145,12 +145,12 @@ namespace neogfx
 	}
 	
 	font::font(const font& aOther, style_e aStyle, point_size aSize) :
-		font_info(iNativeFontFace->family_name(), aStyle, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aOther.iNativeFontFace->native_font(), aStyle, aSize, app::instance().rendering_engine().screen_metrics()))
+		font_info(aOther.native_font_face().family_name(), aStyle, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aOther.iNativeFontFace->native_font(), aStyle, aSize, app::instance().rendering_engine().screen_metrics()))
 	{
 	}
 
 	font::font(const font& aOther, const std::string& aStyleName, point_size aSize) :
-		font_info(iNativeFontFace->family_name(), aStyleName, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aOther.iNativeFontFace->native_font(), aStyleName, aSize, app::instance().rendering_engine().screen_metrics()))
+		font_info(aOther.native_font_face().family_name(), aStyleName, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aOther.iNativeFontFace->native_font(), aStyleName, aSize, app::instance().rendering_engine().screen_metrics()))
 	{
 	}
 
@@ -228,6 +228,11 @@ namespace neogfx
 	dimension font::height() const
 	{
 		return iNativeFontFace->height();
+	}
+
+	dimension font::descender() const
+	{
+		return iNativeFontFace->descender();
 	}
 
 	dimension font::line_spacing() const

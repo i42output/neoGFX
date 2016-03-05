@@ -234,13 +234,16 @@ namespace neogfx
 
 	bool sprite::update(const optional_time_point& aNow)
 	{
-		if (iTimeOfLastUpdate == boost::none)
-			iTimeOfLastUpdate = aNow;
 		bool updated = false;
+		if (iTimeOfLastUpdate == boost::none)
+		{
+			iTimeOfLastUpdate = aNow;
+			updated = true;
+		}
 		if (iTimeOfLastUpdate != boost::none && aNow != boost::none)
-			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den));
+			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den)) || updated;
 		else
-			updated = apply_physics(1.0);
+			updated = apply_physics(1.0) || updated;
 		iTimeOfLastUpdate = aNow;
 		current_physics() = next_physics();
 		return updated;
