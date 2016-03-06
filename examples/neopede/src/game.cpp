@@ -38,10 +38,10 @@ void create_game(ng::i_layout& aLayout)
 		spaceshipSprite.set_acceleration({  
 			keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
 			keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0});
-		if (keyboard.is_key_pressed(ng::ScanCode_RIGHT))
-			spaceshipSprite.set_spin_degrees(10.0);
-		else if (keyboard.is_key_pressed(ng::ScanCode_LEFT))
-			spaceshipSprite.set_spin_degrees(-10.0);
+		if (keyboard.is_key_pressed(ng::ScanCode_X))
+			spaceshipSprite.set_spin_degrees(30.0);
+		else if (keyboard.is_key_pressed(ng::ScanCode_Z))
+			spaceshipSprite.set_spin_degrees(-30.0);
 		else
 			spaceshipSprite.set_spin_degrees(0.0);
 	});

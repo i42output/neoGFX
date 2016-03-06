@@ -93,7 +93,7 @@ namespace neogfx
 		font::point_size iSize;
 		neogfx::size iPixelDensityDpi;
 		FT_Face iHandle;
-		mutable hb_handle* iAuxHandle;
+		mutable std::unique_ptr<hb_handle> iAuxHandle;
 		mutable std::unique_ptr<i_native_font_face> iFallbackFont;
 		mutable glyph_map iGlyphs;
 		mutable std::vector<GLubyte> iGlyphTextureData;

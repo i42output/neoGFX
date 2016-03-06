@@ -251,19 +251,35 @@ namespace neogfx
 
 	void sprite::paint(graphics_context& aGraphicsContext) const
 	{
+		mat22 rotationMatrix = { { std::cos(iAngle), -std::sin(iAngle) }, { std::sin(iAngle), std::cos(iAngle) } };
 		if (iSize != boost::none)
 		{
+			rect r(point{-iSize->cx / 2.0, -iSize->cy / 2.0}, *iSize);
+			texture_map map = { r.top_left().to_vector(), r.top_right().to_vector(), r.bottom_right().to_vector(), r.bottom_left().to_vector() };
+			for (auto& vertex : map)
+			{
+				vertex = rotationMatrix * vertex;
+				vertex += iPosition.to_vector() + vec2{iSize->cx / 2.0, iSize->cy / 2.0};
+			}
 			if (iTextures[iCurrentFrame].second == boost::none)
-				aGraphicsContext.draw_texture(rect(iPosition, *iSize), iTextures[iCurrentFrame].first);
+				aGraphicsContext.draw_texture(map, iTextures[iCurrentFrame].first);
 			else
-				aGraphicsContext.draw_texture(rect(iPosition, *iSize), iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
+				aGraphicsContext.draw_texture(map, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
 		}
 		else
 		{
+			rect r(point{-iTextures[iCurrentFrame].first.extents().cx / 2.0, -iTextures[iCurrentFrame].first.extents().cy / 2.0}, iTextures[iCurrentFrame].first.extents());
+			texture_map map = { r.top_left().to_vector(), r.top_right().to_vector(), r.bottom_right().to_vector(), r.bottom_left().to_vector() };
+			for (auto& vertex : map)
+			{
+				vertex = rotationMatrix * vertex;
+				vertex += iPosition.to_vector();
+				vertex += iPosition.to_vector() + vec2{ iTextures[iCurrentFrame].first.extents().cx / 2.0, iTextures[iCurrentFrame].first.extents().cy / 2.0 };
+			}
 			if (iTextures[iCurrentFrame].second == boost::none)
-				aGraphicsContext.draw_texture(iPosition, iTextures[iCurrentFrame].first);
+				aGraphicsContext.draw_texture(map, iTextures[iCurrentFrame].first);
 			else
-				aGraphicsContext.draw_texture(iPosition, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
+				aGraphicsContext.draw_texture(map, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
 		}
 	}
 
@@ -299,8 +315,10 @@ namespace neogfx
 	bool sprite::apply_physics(double aElapsedTime)
 	{
 		next_physics().iVelocity = (current_physics().iVelocity + current_physics().iAcceleration * vector2(aElapsedTime, aElapsedTime)); // v = u + at
-		point oldPosition = iPosition;
+		auto oldPosition = iPosition;
 		iPosition += vector2(1.0, 1.0) * (current_physics().iVelocity * aElapsedTime + ((next_physics().iVelocity - current_physics().iVelocity) * aElapsedTime / 2.0));
-		return iPosition != oldPosition;
+		auto oldAngle = iAngle;
+		iAngle = std::fmod(iAngle + current_physics().iSpin * aElapsedTime, 2.0 * boost::math::constants::pi<scalar>());
+		return iPosition != oldPosition || iAngle != oldAngle;
 	}
 }

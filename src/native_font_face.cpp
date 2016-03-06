@@ -31,7 +31,7 @@
 namespace neogfx
 {
 	native_font_face::native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
-		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle), iAuxHandle(0)
+		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle)
 	{
 		FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(aSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy));
 		// Force UCS-2 charmap
@@ -46,8 +46,6 @@ namespace neogfx
 
 	native_font_face::~native_font_face()
 	{
-		if (iAuxHandle != 0)
-			delete iAuxHandle;
 		FT_Done_Face(iHandle);
 	}
 
@@ -122,9 +120,9 @@ namespace neogfx
 
 	void* native_font_face::aux_handle() const
 	{
-		if (iAuxHandle == 0)
-			iAuxHandle = new hb_handle(iHandle);
-		return iAuxHandle;
+		if (iAuxHandle.get() == 0)
+			iAuxHandle = std::make_unique<hb_handle>(iHandle);
+		return &*iAuxHandle;
 	}
 
 	i_glyph_texture& native_font_face::glyph_texture(const glyph& aGlyph) const

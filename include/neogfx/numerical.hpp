@@ -51,6 +51,8 @@ namespace neogfx
 		typedef basic_vector<value_type, Size, Type> vector_type;
 		typedef uint32_t size_type;
 		typedef std::array<value_type, Size> array_type;
+		typedef typename array_type::const_iterator const_iterator;
+		typedef typename array_type::iterator iterator;
 	public:
 		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2, Type> type; };
 	public:
@@ -67,6 +69,10 @@ namespace neogfx
 		static uint32_t size() { return Size; }
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
+		const_iterator begin() const { return v.begin(); }
+		const_iterator end() const { return v.end(); }
+		iterator begin() { return v.begin(); }
+		iterator end() { return v.end(); }
 	public:
 		bool operator==(const basic_vector& right) const { return v == right.v; }
 		bool operator!=(const basic_vector& right) const { return v != right.v; }
@@ -134,6 +140,8 @@ namespace neogfx
 		typedef basic_vector<value_type, Size, Type> vector_type;
 		typedef uint32_t size_type;
 		typedef std::array<value_type, Size> array_type;
+		typedef typename array_type::const_iterator const_iterator;
+		typedef typename array_type::iterator iterator;
 	public:
 		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2, Type> type; };
 	public:
@@ -152,6 +160,10 @@ namespace neogfx
 		static uint32_t size() { return Size; }
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
+		const_iterator begin() const { return v.begin(); }
+		const_iterator end() const { return v.end(); }
+		iterator begin() { return v.begin(); }
+		iterator end() { return v.end(); }
 	public:
 		bool operator==(const basic_vector& right) const { return v == right.v; }
 		bool operator!=(const basic_vector& right) const { return v != right.v; }
@@ -181,15 +193,15 @@ namespace neogfx
 	typedef vector3 vec3;
 	typedef vector4 vec4;
 
-	typedef vec1 col_vect1;
-	typedef vec2 col_vect2;
-	typedef vec3 col_vect3;
-	typedef vec4 col_vect4;
+	typedef vec1 col_vec1;
+	typedef vec2 col_vec2;
+	typedef vec3 col_vec3;
+	typedef vec4 col_vec4;
 
-	typedef basic_vector<double, 1, row_vector> row_vect1;
-	typedef basic_vector<double, 2, row_vector> row_vect2;
-	typedef basic_vector<double, 3, row_vector> row_vect3;
-	typedef basic_vector<double, 4, row_vector> row_vect4;
+	typedef basic_vector<double, 1, row_vector> row_vec1;
+	typedef basic_vector<double, 2, row_vector> row_vec2;
+	typedef basic_vector<double, 3, row_vector> row_vec3;
+	typedef basic_vector<double, 4, row_vector> row_vec4;
 
 	template <typename T, uint32_t D, typename Type, bool IsScalar>
 	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
@@ -449,23 +461,23 @@ namespace neogfx
 		return result;
 	}
 
-	template <typename T, uint32_t Rows, uint32_t Columns, bool IsScalar>
-	inline basic_vector<T, Rows, column_vector, IsScalar> operator*(const basic_matrix<T, Rows, Columns>& left, const basic_vector<T, Rows, column_vector, IsScalar>& right)
+	template <typename T, uint32_t D, bool IsScalar>
+	inline basic_vector<T, D, column_vector, IsScalar> operator*(const basic_matrix<T, D, D>& left, const basic_vector<T, D, column_vector, IsScalar>& right)
 	{
-		basic_vector<T, Rows, column_vector, IsScalar> result;
-		for (uint32_t column = 0; column < Columns; ++Column)
-			for (uint32_t row = 0; row < Rows; ++row)
-				result[row] += (left[column][row] * right[row]);
+		basic_vector<T, D, column_vector, IsScalar> result;
+		for (uint32_t row = 0; row < D; ++row)
+			for (uint32_t index = 0; index < D; ++index)
+				result[row] += (left[index][row] * right[index]);
 		return result;
 	}
 
-	template <typename T, uint32_t Rows, uint32_t Columns, bool IsScalar>
-	inline basic_vector<T, Columns, column_vector, IsScalar> operator*(const basic_vector<T, Columns, row_vector, IsScalar>& left , const basic_matrix<T, Rows, Columns>& right)
+	template <typename T, uint32_t D, bool IsScalar>
+	inline basic_vector<T, D, row_vector, IsScalar> operator*(const basic_vector<T, D, row_vector, IsScalar>& left , const basic_matrix<T, D, D>& right)
 	{
-		basic_vector<T, Columns, row_vector, IsScalar> result;
-		for (uint32_t column = 0; column < Columns; ++Column)
-			for (uint32_t row = 0; row < Rows; ++row)
-				result[column] += (left[column] * right[column][row]);
+		basic_vector<T, D, row_vector, IsScalar> result;
+		for (uint32_t column = 0; column < D; ++column)
+			for (uint32_t index = 0; index < D; ++index)
+				result[column] += (left[index] * right[column][index]);
 		return result;
 	}
 
@@ -475,7 +487,7 @@ namespace neogfx
 		basic_matrix<T, D, D> result;
 		for (uint32_t column = 0; column < D; ++column)
 			for (uint32_t row = 0; row < D; ++row)
-				result[column][row] = left[row] * right[column];
+				result[column][row] = (left[row] * right[column]);
 		return result;
 	}
 
