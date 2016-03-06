@@ -22,6 +22,7 @@
 #include "neogfx.hpp"
 #include <type_traits>
 #include <stdexcept>
+#include <boost/iterator/zip_iterator.hpp>
 #include <array>
 #include <algorithm>
 #include <ostream>
@@ -31,46 +32,52 @@ namespace neogfx
 { 
 	typedef double scalar;
 
-	template <typename T, uint32_t Size, bool IsScalar=std::is_scalar<T>::value>
+	struct column_vector {};
+	struct row_vector {};
+
+	template <typename T, uint32_t Size, typename Type = column_vector, bool IsScalar=std::is_scalar<T>::value>
 	class basic_vector;
 
-	template <typename T, uint32_t _Size>
-	class basic_vector<T, _Size, true>
+	/* todo: specializations that use SIMD intrinsics. */
+	template <typename T, uint32_t _Size, typename Type>
+	class basic_vector<T, _Size, Type, true>
 	{
 	public:
 		enum : uint32_t { Size = _Size };
+		typedef Type type;
 	public:
 		typedef T value_type;
-		typedef basic_vector<value_type, Size> vector_type;
+		typedef value_type input_reference_type;
+		typedef basic_vector<value_type, Size, Type> vector_type;
 		typedef uint32_t size_type;
 		typedef std::array<value_type, Size> array_type;
 	public:
-		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2> type; };
+		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2, Type> type; };
 	public:
 		basic_vector() : v{} {}
-		explicit basic_vector(value_type aValue) : v{{aValue}} {}
+		explicit basic_vector(value_type value) : v{{value}} {}
 		template <typename... Arguments>
-		explicit basic_vector(value_type aValue, Arguments... aArguments) : v{{aValue, aArguments...}} {}
-		basic_vector(std::initializer_list<value_type> aValues) { if (aValues.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(aValues.begin(), aValues.end(), v.begin()); std::uninitialized_fill(v.begin() + (aValues.end() - aValues.begin()), v.end(), value_type()); }
-		basic_vector(const basic_vector& aOther) : v(aOther.v) {}
-		basic_vector(basic_vector&& aOther) : v(std::move(aOther.v)) {}
-		basic_vector& operator=(const basic_vector& aOther) { v = aOther.v; return *this; }
-		basic_vector& operator=(basic_vector&& aOther) { v = std::move(aOther.v); return *this; }
+		explicit basic_vector(value_type value, Arguments... aArguments) : v{{value, aArguments...}} {}
+		basic_vector(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type()); }
+		basic_vector(const basic_vector& other) : v(other.v) {}
+		basic_vector(basic_vector&& other) : v(std::move(other.v)) {}
+		basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
+		basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
 	public:
 		static uint32_t size() { return Size; }
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
 	public:
-		bool operator==(const basic_vector& aRhs) const { return v == aRhs.v; }
-		bool operator!=(const basic_vector& aRhs) const { return v != aRhs.v; }
-		basic_vector& operator+=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement + aValue; }); return *this; }
-		basic_vector& operator-=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement - aValue; }); return *this; }
-		basic_vector& operator*=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement * aValue; }); return *this; }
-		basic_vector& operator/=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](value_type aElement) { return aElement / aValue; }); return *this; }
-		basic_vector& operator+=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](value_type aLhs, value_type aRhs) { return aLhs + aRhs; }); return *this; }
-		basic_vector& operator-=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](value_type aLhs, value_type aRhs) { return aLhs - aRhs; }); return *this; }
-		basic_vector& operator*=(const basic_vector& other)	{ std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](value_type aLhs, value_type aRhs) { return aLhs * aRhs; }); return *this; }
-		basic_vector& operator/=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](value_type aLhs, value_type aRhs) { return aLhs / aRhs; }); return *this; }
+		bool operator==(const basic_vector& right) const { return v == right.v; }
+		bool operator!=(const basic_vector& right) const { return v != right.v; }
+		basic_vector& operator+=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
+		basic_vector& operator-=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
+		basic_vector& operator*=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
+		basic_vector& operator/=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
+		basic_vector& operator+=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] += right.v[index]; return *this; }
+		basic_vector& operator-=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
+		basic_vector& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
+		basic_vector& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
 	public:
 		union
 		{
@@ -115,45 +122,51 @@ namespace neogfx
 		};
 	};
 
-	template <typename T, uint32_t _Size>
-	class basic_vector<T, _Size, false>
+	template <typename T, uint32_t _Size, typename Type>
+	class basic_vector<T, _Size, Type, false>
 	{
 	public:
 		enum : uint32_t { Size = _Size };
+		typedef Type type;
 	public:
 		typedef T value_type;
-		typedef basic_vector<value_type, Size> vector_type;
+		typedef const value_type& input_reference_type;
+		typedef basic_vector<value_type, Size, Type> vector_type;
 		typedef uint32_t size_type;
 		typedef std::array<value_type, Size> array_type;
 	public:
-		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2> type; };
+		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2, Type> type; };
 	public:
 		basic_vector() : v{} {}
-		explicit basic_vector(value_type aValue) : v{{aValue}} {}
+		explicit basic_vector(value_type value) : v{{value}} {}
 		template <typename... Arguments>
-		explicit basic_vector(const value_type& aValue, Arguments&&... aArguments) : v{{aValue, std::forward<Arguments>(aArguments)...}} {}
+		explicit basic_vector(const value_type& value, Arguments&&... aArguments) : v{{value, std::forward<Arguments>(aArguments)...}} {}
 		template <typename... Arguments>
-		explicit basic_vector(value_type&& aValue, Arguments&&... aArguments) : v{{std::move(aValue), std::forward<Arguments>(aArguments)...}} {}
-		basic_vector(std::initializer_list<value_type> aValues) { if (aValues.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(aValues.begin(), aValues.end(), v.begin()); std::fill(v.begin() + (aValues.end() - aValues.begin()), v.end(), value_type()); }
-		basic_vector(const basic_vector& aOther) : v(aOther.v) {}
-		basic_vector(basic_vector&& aOther) : v(std::move(aOther.v)) {}
-		basic_vector& operator=(const basic_vector& aOther) { v = aOther.v; return *this; }
-		basic_vector& operator=(basic_vector&& aOther) { v = std::move(aOther.v); return *this; }
+		explicit basic_vector(value_type&& value, Arguments&&... aArguments) : v{{std::move(value), std::forward<Arguments>(aArguments)...}} {}
+		basic_vector(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::fill(v.begin() + (values.end() - values.begin()), v.end(), value_type()); }
+		basic_vector(const basic_vector& other) : v(other.v) {}
+		basic_vector(basic_vector&& other) : v(std::move(other.v)) {}
+		basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
+		basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
 	public:
 		static uint32_t size() { return Size; }
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
 	public:
-		bool operator==(const basic_vector& aRhs) const { return v == aRhs.v; }
-		bool operator!=(const basic_vector& aRhs) const { return v != aRhs.v; }
-		basic_vector& operator+=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement + aValue; }); return *this; }
-		basic_vector& operator-=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement - aValue; }); return *this; }
-		basic_vector& operator*=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement * aValue; }); return *this; }
-		basic_vector& operator/=(scalar aValue) { std::transform(std::begin(v), std::end(v), std::begin(v), [aValue](const value_type& aElement) { return aElement / aValue; }); return *this; }
-		basic_vector& operator+=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs + aRhs; }); return *this; }
-		basic_vector& operator-=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs - aRhs; }); return *this; }
-		basic_vector& operator*=(const basic_vector& other)	{ std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs * aRhs; }); return *this; }
-		basic_vector& operator/=(const basic_vector& other) { std::transform(std::begin(v), std::end(v), std::begin(other.v), std::begin(v), [](const value_type& aLhs, const value_type& aRhs) { return aLhs / aRhs; }); return *this; }
+		bool operator==(const basic_vector& right) const { return v == right.v; }
+		bool operator!=(const basic_vector& right) const { return v != right.v; }
+		basic_vector& operator+=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
+		basic_vector& operator-=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
+		basic_vector& operator*=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
+		basic_vector& operator/=(scalar value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
+		basic_vector& operator+=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] += value; return *this; }
+		basic_vector& operator-=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] -= value; return *this; }
+		basic_vector& operator*=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] *= value; return *this; }
+		basic_vector& operator/=(input_reference_type value) { for (uint32_t index = 0; index < Size; ++index) v[index] /= value; return *this; }
+		basic_vector& operator+=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] += right.v[index]; return *this; }
+		basic_vector& operator-=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
+		basic_vector& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
+		basic_vector& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
 	public:
 		array_type v;
 	};
@@ -163,76 +176,311 @@ namespace neogfx
 	typedef basic_vector<double, 3> vector3;
 	typedef basic_vector<double, 4> vector4;
 
-	template <typename T, uint32_t D>
-	inline basic_vector<T, D> operator+(const basic_vector<T, D>& left, const basic_vector<T, D>& right)
+	typedef vector1 vec1;
+	typedef vector2 vec2;
+	typedef vector3 vec3;
+	typedef vector4 vec4;
+
+	typedef vec1 col_vect1;
+	typedef vec2 col_vect2;
+	typedef vec3 col_vect3;
+	typedef vec4 col_vect4;
+
+	typedef basic_vector<double, 1, row_vector> row_vect1;
+	typedef basic_vector<double, 2, row_vector> row_vect2;
+	typedef basic_vector<double, 3, row_vector> row_vect3;
+	typedef basic_vector<double, 4, row_vector> row_vect4;
+
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
-		basic_vector<T, D> result = left;
+		basic_vector<T, D, Type, IsScalar> result = left;
 		result += right;
 		return result;
 	}
 
-	template <typename T, uint32_t D>
-	inline basic_vector<T, D> operator-(const basic_vector<T, D>& left, const basic_vector<T, D>& right)
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator-(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
-		basic_vector<T, D> result = left;
+		basic_vector<T, D, Type, IsScalar> result = left;
 		result -= right;
 		return result;
 	}
 
-	template <typename T, uint32_t D>
-	inline basic_vector<T, D> operator*(const basic_vector<T, D>& left, const basic_vector<T, D>& right)
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator*(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
-		basic_vector<T, D> result = left;
+		basic_vector<T, D, Type, IsScalar> result = left;
 		result *= right;
 		return result;
 	}
 
-	template <typename T, uint32_t D>
-	inline basic_vector<T, D> operator/(const basic_vector<T, D>& left, const basic_vector<T, D>& right)
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator/(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
-		basic_vector<T, D> result = left;
+		basic_vector<T, D, Type, IsScalar> result = left;
 		result /= right;
 		return result;
 	}
 
-	template <typename T, uint32_t D>
-	inline basic_vector<T, D> operator+(const basic_vector<T, D>& left, const T& right)
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const T& right)
 	{
-		basic_vector<T, D> result = left;
+		basic_vector<T, D, Type, IsScalar> result = left;
 		for (uint32_t i = 0; i < D; ++i)
 			result[i] += right;
 		return result;
 	}
 
-	template <typename T, uint32_t D>
-	inline basic_vector<T, D> operator-(const basic_vector<T, D>& left, const T& right)
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator+(const T& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
-		basic_vector<T, D> result = left;
+		basic_vector<T, D, Type, IsScalar> result = right;
 		for (uint32_t i = 0; i < D; ++i)
-			result[i] -= right;
+			result[i] += left;
 		return result;
 	}
 
-	template <typename T, uint32_t D>
-	inline basic_vector<T, D> operator*(const basic_vector<T, D>& left, const T& right)
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator-(const T& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
-		basic_vector<T, D> result = left;
+		basic_vector<T, D, Type, IsScalar> result;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] = left - right[i];
+		return result;
+	}
+
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator*(const basic_vector<T, D, Type, IsScalar>& left, const T& right)
+	{
+		basic_vector<T, D, Type, IsScalar> result = left;
 		for (uint32_t i = 0; i < D; ++i)
 			result[i] *= right;
 		return result;
 	}
 
-	template <typename T, uint32_t D>
-	inline basic_vector<T, D> operator/(const basic_vector<T, D>& left, const T& right)
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator*(const T& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
-		basic_vector<T, D> result = left;
+		basic_vector<T, D, Type, IsScalar> result = right;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] *= left;
+		return result;
+	}
+
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator/(const basic_vector<T, D, Type, IsScalar>& left, const T& right)
+	{
+		basic_vector<T, D, Type, IsScalar> result = left;
 		for (uint32_t i = 0; i < D; ++i)
 			result[i] /= right;
 		return result;
 	}
 
-	template <typename Elem, typename Traits, typename T, uint32_t Size>
-	std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_vector<T, Size>& aVector)
+	template <typename T, uint32_t D, bool IsScalar>
+	inline T operator*(const basic_vector<T, D, row_vector, IsScalar>& left, const basic_vector<T, D, column_vector, IsScalar>& right)
+	{
+		T result = {};
+		for (uitn32_t index = 0; index < D; ++index)
+			result += (left[index] * right[index]);
+		return result;
+	}
+
+	/* todo: specializations that use SIMD intrinsics. */
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	class basic_matrix
+	{
+	public:
+		typedef T value_type;
+		typedef basic_vector<T, Columns, row_vector> row_type;
+		typedef basic_vector<T, Rows, column_vector> column_type;
+		typedef std::array<column_type, Columns> array_type;
+		typedef typename basic_vector<T, Columns>::input_reference_type input_reference_type;
+	public:
+		basic_matrix() : m{{}} {}
+		basic_matrix(std::initializer_list<column_type> aColumns) { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
+		basic_matrix(const basic_matrix& other) : m{other.m} {}
+		basic_matrix(basic_matrix&& other) : m{std::move(other.m)} {}
+		basic_matrix& operator=(const basic_matrix& other) { m = other.m; return *this; }
+		basic_matrix& operator=(basic_matrix&& other) { m = std::move(other.m); return *this; }
+	public:
+		std::pair<uint32_t, uint32_t> size() const { return std::make_pair(Rows, Columns); }
+		const column_type& operator[](uint32_t aColumn) const { return m[aColumn]; }
+		column_type& operator[](uint32_t aColumn) { return m[aColumn]; }
+	public:
+		basic_matrix& operator+=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] += value; return *this; }
+		basic_matrix& operator-=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] -= value; return *this; }
+		basic_matrix& operator*=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] *= value; return *this; }
+		basic_matrix& operator/=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] /= value; return *this; }
+		basic_matrix& operator+=(const basic_matrix& right) { for (uint32_t column = 0; column < Columns; ++column) m[column] += right.m[column]; return *this; }
+		basic_matrix& operator-=(const basic_matrix& right) { for (uint32_t column = 0; column < Columns; ++column) m[column] -= right.m[column]; return *this; }
+		basic_matrix& operator*=(const basic_matrix& right) 
+		{ 
+			basic_matrix result;
+			for (uint32_t column = 0; column < Columns; ++column)
+				for (uint32_t row = 0; row < Rows; ++row)
+					for (uint32_t index = 0; index < Columns; ++index)
+						result[column][row] += (m[index][row] * right[column][index]);
+			*this = result;
+			return *this;
+		}
+
+	private:
+		array_type m;
+	};
+
+	typedef basic_matrix<double, 1, 1> matrix11;
+	typedef basic_matrix<double, 2, 2> matrix22;
+	typedef basic_matrix<double, 2, 1> matrix21;
+	typedef basic_matrix<double, 1, 2> matrix12;
+	typedef basic_matrix<double, 3, 3> matrix33;
+	typedef basic_matrix<double, 3, 1> matrix31;
+	typedef basic_matrix<double, 3, 2> matrix32;
+	typedef basic_matrix<double, 1, 3> matrix13;
+	typedef basic_matrix<double, 2, 3> matrix23;
+	typedef basic_matrix<double, 4, 4> matrix44;
+	typedef basic_matrix<double, 4, 1> matrix41;
+	typedef basic_matrix<double, 4, 2> matrix42;
+	typedef basic_matrix<double, 4, 3> matrix43;
+	typedef basic_matrix<double, 1, 4> matrix14;
+	typedef basic_matrix<double, 2, 4> matrix24;
+	typedef basic_matrix<double, 3, 4> matrix34;
+
+	typedef matrix11 mat11;
+	typedef matrix22 mat22;
+	typedef matrix21 mat21;
+	typedef matrix12 mat12;
+	typedef matrix33 mat33;
+	typedef matrix31 mat31;
+	typedef matrix32 mat32;
+	typedef matrix13 mat13;
+	typedef matrix23 mat23;
+	typedef matrix44 mat44;
+	typedef matrix41 mat41;
+	typedef matrix42 mat42;
+	typedef matrix43 mat43;
+	typedef matrix14 mat14;
+	typedef matrix24 mat24;
+	typedef matrix34 mat34;
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator+(const basic_matrix<T, Rows, Columns>& left, scalar right)
+	{
+		basic_matrix<T, Rows, Columns> result = left;
+		result += right;
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator-(const basic_matrix<T, Rows, Columns>& left, scalar right)
+	{
+		basic_matrix<T, Rows, Columns> result = left;
+		result -= right;
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator*(const basic_matrix<T, Rows, Columns>& left, scalar right)
+	{
+		basic_matrix<T, Rows, Columns> result = left;
+		result *= right;
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator/(const basic_matrix<T, Rows, Columns>& left, scalar right)
+	{
+		basic_matrix<T, Rows, Columns> result = left;
+		result /= right;
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator+(scalar left, const basic_matrix<T, Rows, Columns>& right)
+	{
+		basic_vector<T, D, Type, IsScalar> result = right;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] += left;
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator-(scalar left, const basic_matrix<T, Rows, Columns>& right)
+	{
+		basic_vector<T, D, Type, IsScalar> result;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] = left - right[i];
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator*(scalar left, const basic_matrix<T, Rows, Columns>& right)
+	{
+		basic_vector<T, D, Type, IsScalar> result = right;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] *= left;
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator+(const basic_matrix<T, Rows, Columns>& left, const basic_matrix<T, Rows, Columns>& right)
+	{
+		basic_matrix<T, Rows, Columns> result = left;
+		result += right;
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns>
+	inline basic_matrix<T, Rows, Columns> operator-(const basic_matrix<T, Rows, Columns>& left, const basic_matrix<T, Rows, Columns>& right)
+	{
+		basic_matrix<T, Rows, Columns> result = left;
+		result -= right;
+		return result;
+	}
+
+	template <typename T, uint32_t D1, uint32_t D2>
+	inline basic_matrix<T, D1, D1> operator*(const basic_matrix<T, D1, D2>& left, const basic_matrix<T, D2, D1>& right)
+	{
+		basic_matrix<T, D1, D1> result;
+		for (uint32_t column = 0; column < D1; ++column)
+			for (uint32_t row = 0; row < D1; ++row)
+				for (uint32_t index = 0; index < D2; ++index)
+					result[column][row] += (left[index][row] * right[column][index]);
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns, bool IsScalar>
+	inline basic_vector<T, Rows, column_vector, IsScalar> operator*(const basic_matrix<T, Rows, Columns>& left, const basic_vector<T, Rows, column_vector, IsScalar>& right)
+	{
+		basic_vector<T, Rows, column_vector, IsScalar> result;
+		for (uint32_t column = 0; column < Columns; ++Column)
+			for (uint32_t row = 0; row < Rows; ++row)
+				result[row] += (left[column][row] * right[row]);
+		return result;
+	}
+
+	template <typename T, uint32_t Rows, uint32_t Columns, bool IsScalar>
+	inline basic_vector<T, Columns, column_vector, IsScalar> operator*(const basic_vector<T, Columns, row_vector, IsScalar>& left , const basic_matrix<T, Rows, Columns>& right)
+	{
+		basic_vector<T, Columns, row_vector, IsScalar> result;
+		for (uint32_t column = 0; column < Columns; ++Column)
+			for (uint32_t row = 0; row < Rows; ++row)
+				result[column] += (left[column] * right[column][row]);
+		return result;
+	}
+
+	template <typename T, uint32_t D, bool IsScalar>
+	inline basic_matrix<T, D, D> operator*(const basic_vector<T, D, column_vector, IsScalar>& left, const basic_vector<T, D, row_vector, IsScalar>& right)
+	{
+		basic_matrix<T, D, D> result;
+		for (uint32_t column = 0; column < D; ++column)
+			for (uint32_t row = 0; row < D; ++row)
+				result[column][row] = left[row] * right[column];
+		return result;
+	}
+
+	template <typename Elem, typename Traits, typename T, uint32_t Size, typename Type, bool IsScalar>
+	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_vector<T, Size, Type, IsScalar>& aVector)
 	{
 		aStream << "[";
 		for (uint32_t i = 0; i < Size; ++i)
@@ -245,36 +493,24 @@ namespace neogfx
 		return aStream;
 	}
 
-	template <typename T, uint32_t Rows, uint32_t Columns>
-	class basic_matrix
+	template <typename Elem, typename Traits, typename T, uint32_t Rows, uint32_t Columns>
+	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_matrix<T, Rows, Columns>& aMatrix)
 	{
-	public:
-		typedef T value_type;
-		typedef basic_vector<T, Columns> row_type;
-		typedef basic_vector<T, Rows> column_type;
-		typedef std::array<column_type, Columns> array_type;
-	public:
-		basic_matrix() : m{{}} {}
-		basic_matrix(std::initializer_list<column_type> aColumns) { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
-		basic_matrix(const basic_matrix& aOther) : m{aOther.m} {}
-		basic_matrix(basic_matrix&& aOther) : m{std::move(aOther.m)} {}
-		basic_matrix& operator=(const basic_matrix& aOther) { m = aOther.m; return *this; }
-		basic_matrix& operator=(basic_matrix&& aOther) { m = std::move(aOther.m); return *this; }
-	public:
-		std::pair<uint32_t, uint32_t> size() const { return std::make_pair(Rows, Columns); }
-		const column_type& operator[](uint32_t aColumn) const { return m[aColumn]; }
-		column_type& operator[](uint32_t aColumn) { return m[aColumn]; }
-	public:
-		basic_matrix& operator+=(scalar aValue) { std::transform(std::begin(m), std::end(m), std::begin(m), [aValue](const column_type& aElement) { return aElement + aValue; }); return *this; }
-		basic_matrix& operator-=(scalar aValue) { std::transform(std::begin(m), std::end(m), std::begin(m), [aValue](const column_type& aElement) { return aElement - aValue; }); return *this; }
-		basic_matrix& operator*=(scalar aValue) { std::transform(std::begin(m), std::end(m), std::begin(m), [aValue](const column_type& aElement) { return aElement * aValue; }); return *this; }
-		basic_matrix& operator/=(scalar aValue) { std::transform(std::begin(m), std::end(m), std::begin(m), [aValue](const column_type& aElement) { return aElement / aValue; }); return *this; }
-	private:
-		array_type m;
-	};
-
-	typedef basic_matrix<double, 1, 1> matrix11;
-	typedef basic_matrix<double, 2, 2> matrix22;
-	typedef basic_matrix<double, 3, 3> matrix33;
-	typedef basic_matrix<double, 4, 4> matrix44;
+		aStream << "[";
+		for (uint32_t row = 0; row < Rows; ++row)
+		{
+			if (row != 0)
+				aStream << ", ";
+			aStream << "[";
+			for (uint32_t column = 0; column < Columns; ++column)
+			{
+				if (column != 0)
+					aStream << ", ";
+				aStream << aMatrix[column][row];
+			}
+			aStream << "]";
+		}
+		aStream << "]";
+		return aStream;
+	}
 }
