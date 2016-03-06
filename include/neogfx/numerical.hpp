@@ -22,10 +22,10 @@
 #include "neogfx.hpp"
 #include <type_traits>
 #include <stdexcept>
-#include <boost/iterator/zip_iterator.hpp>
 #include <array>
 #include <algorithm>
 #include <ostream>
+#include <boost/optional.hpp>
 #include "swizzle.hpp"
 
 namespace neogfx
@@ -203,6 +203,26 @@ namespace neogfx
 	typedef basic_vector<double, 3, row_vector> row_vec3;
 	typedef basic_vector<double, 4, row_vector> row_vec4;
 
+	typedef boost::optional<vector1> optional_vector1;
+	typedef boost::optional<vector2> optional_vector2;
+	typedef boost::optional<vector3> optional_vector3;
+	typedef boost::optional<vector4> optional_vector4;
+
+	typedef boost::optional<vec1> optional_vec1;
+	typedef boost::optional<vec2> optional_vec2;
+	typedef boost::optional<vec3> optional_vec3;
+	typedef boost::optional<vec4> optional_vec4;
+
+	typedef boost::optional<col_vec1> optional_col_vec1;
+	typedef boost::optional<col_vec2> optional_col_vec2;
+	typedef boost::optional<col_vec3> optional_col_vec3;
+	typedef boost::optional<col_vec4> optional_col_vec4;
+
+	typedef boost::optional<row_vec1> optional_row_vec1;
+	typedef boost::optional<row_vec2> optional_row_vec2;
+	typedef boost::optional<row_vec3> optional_row_vec3;
+	typedef boost::optional<row_vec4> optional_row_vec4;
+
 	template <typename T, uint32_t D, typename Type, bool IsScalar>
 	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
@@ -374,6 +394,40 @@ namespace neogfx
 	typedef matrix14 mat14;
 	typedef matrix24 mat24;
 	typedef matrix34 mat34;
+
+	typedef boost::optional<matrix11> optional_matrix11;
+	typedef boost::optional<matrix22> optional_matrix22;
+	typedef boost::optional<matrix21> optional_matrix21;
+	typedef boost::optional<matrix12> optional_matrix12;
+	typedef boost::optional<matrix33> optional_matrix33;
+	typedef boost::optional<matrix31> optional_matrix31;
+	typedef boost::optional<matrix32> optional_matrix32;
+	typedef boost::optional<matrix13> optional_matrix13;
+	typedef boost::optional<matrix23> optional_matrix23;
+	typedef boost::optional<matrix44> optional_matrix44;
+	typedef boost::optional<matrix41> optional_matrix41;
+	typedef boost::optional<matrix42> optional_matrix42;
+	typedef boost::optional<matrix43> optional_matrix43;
+	typedef boost::optional<matrix14> optional_matrix14;
+	typedef boost::optional<matrix24> optional_matrix24;
+	typedef boost::optional<matrix34> optional_matrix34;
+
+	typedef boost::optional<mat11> optional_mat11;
+	typedef boost::optional<mat22> optional_mat22;
+	typedef boost::optional<mat21> optional_mat21;
+	typedef boost::optional<mat12> optional_mat12;
+	typedef boost::optional<mat33> optional_mat33;
+	typedef boost::optional<mat31> optional_mat31;
+	typedef boost::optional<mat32> optional_mat32;
+	typedef boost::optional<mat13> optional_mat13;
+	typedef boost::optional<mat23> optional_mat23;
+	typedef boost::optional<mat44> optional_mat44;
+	typedef boost::optional<mat41> optional_mat41;
+	typedef boost::optional<mat42> optional_mat42;
+	typedef boost::optional<mat43> optional_mat43;
+	typedef boost::optional<mat14> optional_mat14;
+	typedef boost::optional<mat24> optional_mat24;
+	typedef boost::optional<mat34> optional_mat34;
 
 	template <typename T, uint32_t Rows, uint32_t Columns>
 	inline basic_matrix<T, Rows, Columns> operator+(const basic_matrix<T, Rows, Columns>& left, scalar right)

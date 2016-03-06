@@ -50,9 +50,9 @@ namespace neogfx
 	public:
 		virtual const frame_list& animation() const;
 		virtual frame_index current_frame() const;
-		virtual const point& origin() const;
+		virtual point origin() const;
 		virtual const point& position() const;
-		virtual const optional_size& size() const;
+		virtual neogfx::size size() const;
 		virtual const vector2& scale() const;
 		virtual scalar angle_radians() const;
 		virtual scalar angle_degrees() const;
@@ -61,10 +61,10 @@ namespace neogfx
 		virtual scalar spin_radians() const;
 		virtual scalar spin_degrees() const;
 		virtual const optional_path& path() const;
-		virtual const matrix33& transformation() const;
+		virtual matrix33 transformation() const;
 		virtual void set_animation(const frame_list& aAnimation);
 		virtual void set_current_frame(frame_index aFrameIndex);
-		virtual void set_origin(const point& aOrigin);
+		virtual void set_origin(const optional_point& aOrigin);
 		virtual void set_position(const point& aPosition);
 		virtual void set_size(const optional_size& aSize);
 		virtual void set_scale(const vector2& aScale);
@@ -75,6 +75,7 @@ namespace neogfx
 		virtual void set_spin_radians(scalar aSpin);
 		virtual void set_spin_degrees(scalar aSpin);
 		virtual void set_path(const optional_path& aPath);
+		virtual void set_transformation(const optional_matrix33& aTransformation);
 	public:
 		virtual bool update(const optional_time_point& aNow = optional_time_point());
 	public:
@@ -89,7 +90,7 @@ namespace neogfx
 		texture_list iTextures;
 		frame_list iAnimation;
 		frame_index iCurrentFrame;
-		point iOrigin;
+		optional_point iOrigin;
 		point iPosition;
 		optional_size iSize;
 		vector2 iScale;
@@ -98,6 +99,6 @@ namespace neogfx
 		mutable optional_physics iCurrentPhysics;
 		mutable optional_physics iNextPhysics;
 		optional_path iPath;
-		mutable matrix33 iTransformation;
+		mutable optional_matrix33 iTransformation;
 	};
 }

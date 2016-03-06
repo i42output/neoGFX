@@ -190,6 +190,7 @@ namespace neogfx
 		// operations
 	public:
 		basic_vector<coordinate_type, 2> to_vector() const { return basic_vector<coordinate_type, 2>(x, y); }
+		basic_vector<coordinate_type, 3> to_vector3(coordinate_type fill = 1.0) const { return basic_vector<coordinate_type, 3>(x, y, fill); }
 		bool operator==(const basic_point& other) const { return x == other.x && y == other.y; }
 		bool operator!=(const basic_point& other) const { return !operator==(other); }
 		basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; return *this; }

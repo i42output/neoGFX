@@ -53,7 +53,10 @@ namespace neogfx
 		LogicalXor
 	};
 
-	typedef basic_vector<vector2, 4> texture_map;
+	typedef basic_vector<vector2, 4> texture_map2;
+	typedef basic_vector<vector3, 4> texture_map3;
+
+	typedef texture_map2 texture_map;
 
 	class i_surface;
 	class i_texture;

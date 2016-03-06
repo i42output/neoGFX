@@ -105,9 +105,15 @@ namespace neogfx
 		return iCurrentFrame;
 	}
 
-	const point& sprite::origin() const
+	point sprite::origin() const
 	{
-		return iOrigin;
+		if (iOrigin != boost::none)
+			return *iOrigin;
+		else
+		{
+			auto s = size();
+			return point{s.cx / 2.0, s.cy / 2.0};
+		}
 	}
 
 	const point& sprite::position() const
@@ -115,9 +121,12 @@ namespace neogfx
 		return iPosition;
 	}
 
-	const optional_size& sprite::size() const
+	size sprite::size() const
 	{
-		return iSize;
+		if (iSize != boost::none)
+			return *iSize;
+		else
+			return iTextures[iCurrentFrame].first.extents();
 	}
 
 	const vector2& sprite::scale() const
@@ -160,9 +169,11 @@ namespace neogfx
 		return iPath;
 	}
 
-	const matrix33& sprite::transformation() const
+	matrix33 sprite::transformation() const
 	{
-		return iTransformation;
+		if (iTransformation != boost::none)
+			return *iTransformation;
+		return matrix33{ { std::cos(iAngle), -std::sin(iAngle), 0.0 }, { std::sin(iAngle), std::cos(iAngle), 0.0 }, { iPosition.x, iPosition.y, 1.0 } };
 	}
 
 	void sprite::set_animation(const frame_list& aAnimation)
@@ -177,7 +188,7 @@ namespace neogfx
 		iCurrentFrame = aFrameIndex;
 	}
 
-	void sprite::set_origin(const point& aOrigin)
+	void sprite::set_origin(const optional_point& aOrigin)
 	{
 		iOrigin = aOrigin;
 	}
@@ -232,6 +243,11 @@ namespace neogfx
 		iPath = aPath;
 	}
 
+	void sprite::set_transformation(const optional_matrix33& aTransformation)
+	{
+		iTransformation = aTransformation;
+	}
+
 	bool sprite::update(const optional_time_point& aNow)
 	{
 		bool updated = false;
@@ -251,35 +267,28 @@ namespace neogfx
 
 	void sprite::paint(graphics_context& aGraphicsContext) const
 	{
-		mat22 rotationMatrix = { { std::cos(iAngle), -std::sin(iAngle) }, { std::sin(iAngle), std::cos(iAngle) } };
+		auto tm = transformation();
 		if (iSize != boost::none)
 		{
-			rect r(point{-iSize->cx / 2.0, -iSize->cy / 2.0}, *iSize);
-			texture_map map = { r.top_left().to_vector(), r.top_right().to_vector(), r.bottom_right().to_vector(), r.bottom_left().to_vector() };
+			rect r{ -origin(), size() };
+			texture_map3 map = { r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
 			for (auto& vertex : map)
-			{
-				vertex = rotationMatrix * vertex;
-				vertex += iPosition.to_vector() + vec2{iSize->cx / 2.0, iSize->cy / 2.0};
-			}
+				vertex = tm * vertex;
 			if (iTextures[iCurrentFrame].second == boost::none)
-				aGraphicsContext.draw_texture(map, iTextures[iCurrentFrame].first);
+				aGraphicsContext.draw_texture(texture_map{ {map[0][0], map[0][1]}, {map[1][0], map[1][1]}, {map[2][0], map[2][1]}, {map[3][0], map[3][1]} }, iTextures[iCurrentFrame].first);
 			else
-				aGraphicsContext.draw_texture(map, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
+				aGraphicsContext.draw_texture(texture_map{ {map[0][0], map[0][1]}, {map[1][0], map[1][1]}, {map[2][0], map[2][1]}, {map[3][0], map[3][1]} }, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
 		}
 		else
 		{
-			rect r(point{-iTextures[iCurrentFrame].first.extents().cx / 2.0, -iTextures[iCurrentFrame].first.extents().cy / 2.0}, iTextures[iCurrentFrame].first.extents());
-			texture_map map = { r.top_left().to_vector(), r.top_right().to_vector(), r.bottom_right().to_vector(), r.bottom_left().to_vector() };
+			rect r{ -origin(), size() };
+			texture_map3 map = { r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
 			for (auto& vertex : map)
-			{
-				vertex = rotationMatrix * vertex;
-				vertex += iPosition.to_vector();
-				vertex += iPosition.to_vector() + vec2{ iTextures[iCurrentFrame].first.extents().cx / 2.0, iTextures[iCurrentFrame].first.extents().cy / 2.0 };
-			}
+				vertex = tm * vertex;
 			if (iTextures[iCurrentFrame].second == boost::none)
-				aGraphicsContext.draw_texture(map, iTextures[iCurrentFrame].first);
+				aGraphicsContext.draw_texture(texture_map{ {map[0][0], map[0][1]}, {map[1][0], map[1][1]}, {map[2][0], map[2][1]}, {map[3][0], map[3][1]} }, iTextures[iCurrentFrame].first);
 			else
-				aGraphicsContext.draw_texture(map, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
+				aGraphicsContext.draw_texture(texture_map{ {map[0][0], map[0][1]}, {map[1][0], map[1][1]}, {map[2][0], map[2][1]}, {map[3][0], map[3][1]} }, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
 		}
 	}
 

@@ -48,9 +48,9 @@ namespace neogfx
 	public:
 		virtual const frame_list& animation() const = 0;
 		virtual frame_index current_frame() const = 0;
-		virtual const point& origin() const = 0;
+		virtual point origin() const = 0;
 		virtual const point& position() const = 0;
-		virtual const optional_size& size() const = 0;
+		virtual neogfx::size size() const = 0;
 		virtual const vector2& scale() const = 0;
 		virtual scalar angle_radians() const = 0;
 		virtual scalar angle_degrees() const = 0;
@@ -59,10 +59,10 @@ namespace neogfx
 		virtual scalar spin_radians() const = 0;
 		virtual scalar spin_degrees() const = 0;
 		virtual const optional_path& path() const = 0;
-		virtual const matrix33& transformation() const = 0;
+		virtual matrix33 transformation() const = 0;
 		virtual void set_animation(const frame_list& aAnimation) = 0;
 		virtual void set_current_frame(frame_index aFrameIndex) = 0;
-		virtual void set_origin(const point& aOrigin) = 0;
+		virtual void set_origin(const optional_point& aOrigin) = 0;
 		virtual void set_position(const point& aPosition) = 0;
 		virtual void set_size(const optional_size& aSize) = 0;
 		virtual void set_scale(const vector2& aScale) = 0;
@@ -73,6 +73,7 @@ namespace neogfx
 		virtual void set_spin_radians(scalar aSpin) = 0;
 		virtual void set_spin_degrees(scalar aSpin) = 0;
 		virtual void set_path(const optional_path& aPath) = 0;
+		virtual void set_transformation(const optional_matrix33& aTransformation) = 0;
 	public:
 		virtual bool update(const optional_time_point& aNow = optional_time_point()) = 0;
 	public:
