@@ -323,7 +323,8 @@ namespace neogfx
 
 	bool sprite::apply_physics(double aElapsedTime)
 	{
-		next_physics().iVelocity = (current_physics().iVelocity + current_physics().iAcceleration * vector2(aElapsedTime, aElapsedTime)); // v = u + at
+		matrix22 rotation{ { std::cos(iAngle), -std::sin(iAngle)}, { std::sin(iAngle), std::cos(iAngle) } };
+		next_physics().iVelocity = (current_physics().iVelocity + rotation * current_physics().iAcceleration * vector2(aElapsedTime, aElapsedTime)); // v = u + at
 		auto oldPosition = iPosition;
 		iPosition += vector2(1.0, 1.0) * (current_physics().iVelocity * aElapsedTime + ((next_physics().iVelocity - current_physics().iVelocity) * aElapsedTime / 2.0));
 		auto oldAngle = iAngle;
