@@ -125,6 +125,7 @@
     <ClInclude Include="..\..\..\include\neogfx\i_native_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_native_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_native_window_event_handler.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_physical_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_rendering_engine.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_resource_manager.hpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="..\..\..\include\neogfx\i_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_texture_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\numerical.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\physical_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
@@ -223,6 +225,7 @@
     <ClCompile Include="..\..\..\src\native_font_face.cpp" />
     <ClCompile Include="..\..\..\src\native_window.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
+    <ClCompile Include="..\..\..\src\physical_object.cpp" />
     <ClCompile Include="..\..\..\src\opengl_error.cpp" />
     <ClCompile Include="..\..\..\src\opengl_graphics_context.cpp" />
     <ClCompile Include="..\..\..\src\opengl_renderer.cpp" />

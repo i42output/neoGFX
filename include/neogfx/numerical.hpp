@@ -84,6 +84,7 @@ namespace neogfx
 		basic_vector& operator-=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
 		basic_vector& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
 		basic_vector& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
+		basic_vector operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
 	public:
 		union
 		{
@@ -179,6 +180,7 @@ namespace neogfx
 		basic_vector& operator-=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] -= right.v[index]; return *this; }
 		basic_vector& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
 		basic_vector& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
+		basic_vector operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
 	public:
 		array_type v;
 	};
@@ -306,6 +308,15 @@ namespace neogfx
 		basic_vector<T, D, Type, IsScalar> result = left;
 		for (uint32_t i = 0; i < D; ++i)
 			result[i] /= right;
+		return result;
+	}
+
+	template <typename T, uint32_t D, typename Type, bool IsScalar>
+	inline basic_vector<T, D, Type, IsScalar> operator%(const basic_vector<T, D, Type, IsScalar>& left, const T& right)
+	{
+		basic_vector<T, D, Type, IsScalar> result;
+		for (uint32_t i = 0; i < D; ++i)
+			result[i] = std::fmod(left[i], right);
 		return result;
 	}
 

@@ -25,23 +25,20 @@ namespace neogfx
 {
 	sprite::sprite() :
 		iCurrentFrame(0),
-		iScale{1.0, 1.0},
-		iAngle{}
+		iScale{1.0, 1.0}
 	{
 	}
 
 	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect) : 
 		iCurrentFrame(0),
-		iScale{1.0, 1.0},
-		iAngle{}
+		iScale{1.0, 1.0}
 	{
 		iTextures.emplace_back(aTexture, aTextureRect);
 	}
 
 	sprite::sprite(const i_image& aImage, const optional_rect& aTextureRect) :
 		iCurrentFrame(0),
-		iScale{1.0, 1.0},
-		iAngle{}
+		iScale{1.0, 1.0}
 	{
 		iTextures.emplace_back(aImage, aTextureRect);
 	}
@@ -50,15 +47,11 @@ namespace neogfx
 		iTextures(aOther.iTextures),
 		iAnimation(aOther.iAnimation),
 		iCurrentFrame(aOther.iCurrentFrame),
-		iOrigin(aOther.iOrigin),
-		iPosition(aOther.iPosition),
 		iSize(aOther.iSize),
 		iScale(aOther.iScale),
-		iAngle(aOther.iAngle),
-		iCurrentPhysics(aOther.iCurrentPhysics),
-		iNextPhysics(aOther.iNextPhysics),
 		iPath(aOther.iPath),
-		iTransformation(aOther.iTransformation)
+		iTransformation(aOther.iTransformation),
+		iObject(aOther.iObject)
 	{
 	}
 
@@ -105,20 +98,9 @@ namespace neogfx
 		return iCurrentFrame;
 	}
 
-	point sprite::origin() const
+	point sprite::position() const
 	{
-		if (iOrigin != boost::none)
-			return *iOrigin;
-		else
-		{
-			auto s = size();
-			return point{s.cx / 2.0, s.cy / 2.0};
-		}
-	}
-
-	const point& sprite::position() const
-	{
-		return iPosition;
+		return point{ physics().position()[0], physics().position()[1] };
 	}
 
 	size sprite::size() const
@@ -129,39 +111,9 @@ namespace neogfx
 			return iTextures[iCurrentFrame].first.extents();
 	}
 
-	const vector2& sprite::scale() const
+	const vec2& sprite::scale() const
 	{
 		return iScale;
-	}
-
-	scalar sprite::angle_radians() const
-	{
-		return iAngle;
-	}
-
-	scalar sprite::angle_degrees() const
-	{
-		return iAngle * 180.0 / boost::math::constants::pi<double>();
-	}
-
-	const vector2& sprite::velocity() const
-	{
-		return next_physics().iVelocity;
-	}
-
-	const vector2& sprite::acceleration() const
-	{
-		return next_physics().iAcceleration;
-	}
-
-	scalar sprite::spin_radians() const
-	{
-		return next_physics().iSpin;
-	}
-
-	scalar sprite::spin_degrees() const
-	{
-		return next_physics().iSpin * 180.0 / boost::math::constants::pi<scalar>();
 	}
 
 	const optional_path& sprite::path() const
@@ -169,11 +121,13 @@ namespace neogfx
 		return iPath;
 	}
 
-	matrix33 sprite::transformation() const
+	mat33 sprite::transformation() const
 	{
 		if (iTransformation != boost::none)
 			return *iTransformation;
-		return matrix33{ { std::cos(iAngle), -std::sin(iAngle), 0.0 }, { std::sin(iAngle), std::cos(iAngle), 0.0 }, { iPosition.x, iPosition.y, 1.0 } };
+		auto az = physics().angle_radians()[2];
+		auto pos = physics().position();
+		return mat33{ { std::cos(az), -std::sin(az), 0.0 }, { std::sin(az), std::cos(az), 0.0 }, { pos[0], pos[1], 1.0 } };
 	}
 
 	void sprite::set_animation(const frame_list& aAnimation)
@@ -188,54 +142,23 @@ namespace neogfx
 		iCurrentFrame = aFrameIndex;
 	}
 
-	void sprite::set_origin(const optional_point& aOrigin)
-	{
-		iOrigin = aOrigin;
-	}
-
 	void sprite::set_position(const point& aPosition)
 	{
-		iPosition = aPosition;
+		physics().set_position(aPosition.to_vector3());
 	}
 
-	void sprite::set_size(const optional_size& aSize)
+	void sprite::set_size(const optional_size& aSize, bool aCentreOrigin)
 	{
 		iSize = aSize;
+		if (iSize != boost::none)
+			physics().set_origin(vec3{ iSize->cx / 2.0, iSize->cy / 2.0, 0.0 });
+		else
+			physics().set_origin(vec3{});
 	}
 
-	void sprite::set_scale(const vector2& aScale)
+	void sprite::set_scale(const vec2& aScale)
 	{
 		iScale = aScale;
-	}
-
-	void sprite::set_angle_radians(scalar aAngle)
-	{
-		iAngle = aAngle;
-	}
-
-	void sprite::set_angle_degrees(scalar aAngle)
-	{
-		iAngle = aAngle * boost::math::constants::pi<scalar>() / 180.0;
-	}
-
-	void sprite::set_velocity(const vector2& aVelocity)
-	{
-		next_physics().iVelocity = aVelocity;
-	}
-
-	void sprite::set_acceleration(const vector2& aAcceleration)
-	{
-		next_physics().iAcceleration = aAcceleration;
-	}
-
-	void sprite::set_spin_radians(scalar aSpin)
-	{
-		next_physics().iSpin = aSpin;
-	}
-
-	void sprite::set_spin_degrees(scalar aSpin)
-	{
-		next_physics().iSpin = aSpin * boost::math::constants::pi<scalar>() / 180.0;
 	}
 
 	void sprite::set_path(const optional_path& aPath)
@@ -248,21 +171,19 @@ namespace neogfx
 		iTransformation = aTransformation;
 	}
 
+	const i_physical_object& sprite::physics() const
+	{
+		return iObject;
+	}
+
+	i_physical_object& sprite::physics()
+	{
+		return iObject;
+	}
+
 	bool sprite::update(const optional_time_point& aNow)
 	{
-		bool updated = false;
-		if (iTimeOfLastUpdate == boost::none)
-		{
-			iTimeOfLastUpdate = aNow;
-			updated = true;
-		}
-		if (iTimeOfLastUpdate != boost::none && aNow != boost::none)
-			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den)) || updated;
-		else
-			updated = apply_physics(1.0) || updated;
-		iTimeOfLastUpdate = aNow;
-		current_physics() = next_physics();
-		return updated;
+		return physics().update(aNow);
 	}
 
 	void sprite::paint(graphics_context& aGraphicsContext) const
@@ -270,7 +191,7 @@ namespace neogfx
 		auto tm = transformation();
 		if (iSize != boost::none)
 		{
-			rect r{ -origin(), size() };
+			rect r{ -vec2{physics().origin().xy}, size() };
 			texture_map3 map = { r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
 			for (auto& vertex : map)
 				vertex = tm * vertex;
@@ -281,7 +202,7 @@ namespace neogfx
 		}
 		else
 		{
-			rect r{ -origin(), size() };
+			rect r{ -vec2{ physics().origin().xy }, size() };
 			texture_map3 map = { r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
 			for (auto& vertex : map)
 				vertex = tm * vertex;
@@ -290,45 +211,5 @@ namespace neogfx
 			else
 				aGraphicsContext.draw_texture(texture_map{ {map[0][0], map[0][1]}, {map[1][0], map[1][1]}, {map[2][0], map[2][1]}, {map[3][0], map[3][1]} }, iTextures[iCurrentFrame].first, *iTextures[iCurrentFrame].second);
 		}
-	}
-
-	const sprite::physics& sprite::current_physics() const
-	{
-		if (iCurrentPhysics == boost::none)
-		{
-			if (iNextPhysics != boost::none)
-				iCurrentPhysics = iNextPhysics;
-			else
-				iCurrentPhysics = physics{};
-		}
-		return *iCurrentPhysics;
-	}
-
-	sprite::physics& sprite::current_physics()
-	{
-		return const_cast<physics&>(const_cast<const sprite*>(this)->current_physics());
-	}
-
-	const sprite::physics& sprite::next_physics() const
-	{
-		if (iNextPhysics == boost::none)
-			iNextPhysics = physics{};
-		return *iNextPhysics;
-	}
-
-	sprite::physics& sprite::next_physics()
-	{
-		return const_cast<physics&>(const_cast<const sprite*>(this)->next_physics());
-	}
-
-	bool sprite::apply_physics(double aElapsedTime)
-	{
-		matrix22 rotation{ { std::cos(iAngle), -std::sin(iAngle)}, { std::sin(iAngle), std::cos(iAngle) } };
-		next_physics().iVelocity = (current_physics().iVelocity + rotation * current_physics().iAcceleration * vector2(aElapsedTime, aElapsedTime)); // v = u + at
-		auto oldPosition = iPosition;
-		iPosition += vector2(1.0, 1.0) * (current_physics().iVelocity * aElapsedTime + ((next_physics().iVelocity - current_physics().iVelocity) * aElapsedTime / 2.0));
-		auto oldAngle = iAngle;
-		iAngle = std::fmod(iAngle + current_physics().iSpin * aElapsedTime, 2.0 * boost::math::constants::pi<scalar>());
-		return iPosition != oldPosition || iAngle != oldAngle;
 	}
 }
