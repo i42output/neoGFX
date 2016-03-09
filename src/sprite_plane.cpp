@@ -33,7 +33,7 @@ namespace neogfx
 	{
 		surface().native_surface().rendering_check([this]()
 		{
-			if (update_sprites())
+			if (update_objects())
 				update();
 		}, this);
 	}
@@ -43,7 +43,7 @@ namespace neogfx
 	{
 		surface().native_surface().rendering_check([this]()
 		{
-			if (update_sprites())
+			if (update_objects())
 				update();
 		}, this);
 	}
@@ -59,7 +59,7 @@ namespace neogfx
 		widget::parent_changed();
 		surface().native_surface().rendering_check([this]()
 		{
-			if (update_sprites())
+			if (update_objects())
 				update();
 		}, this);
 	}
@@ -140,16 +140,16 @@ namespace neogfx
 		return iSprites;
 	}
 
-	bool sprite_plane::update_sprites()
+	bool sprite_plane::update_objects()
 	{
-		sprites_updating.trigger();
+		applying_physics.trigger();
 		auto now = std::chrono::steady_clock::now();
 		bool updated = false;
 		for (auto& s : iSprites)
 			updated = (s->update(now) || updated);
 		for (auto& o : iObjects)
 			updated = (o->update(now) || updated);
-		sprites_updated.trigger();
+		physics_applied.trigger();
 		return updated;
 	}
 }

@@ -32,7 +32,7 @@ void create_game(ng::i_layout& aLayout)
 	{
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});
-	spritePlane->sprites_updating([&spaceshipSprite]()
+	spritePlane->physics_applied([&spaceshipSprite]()
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		spaceshipSprite.physics().set_acceleration({  

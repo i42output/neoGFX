@@ -29,8 +29,8 @@ namespace neogfx
 	class sprite_plane : public widget
 	{
 	public:
-		event<> sprites_updating;
-		event<> sprites_updated;
+		event<> applying_physics;
+		event<> physics_applied;
 	public:
 		typedef std::vector<std::shared_ptr<i_sprite>> sprite_list;
 		typedef std::vector<std::shared_ptr<i_physical_object>> object_list;
@@ -61,7 +61,7 @@ namespace neogfx
 		const sprite_list& sprites() const;
 		sprite_list& sprites();
 	private:
-		bool update_sprites();
+		bool update_objects();
 	private:
 		sprite_list iSprites;
 		object_list iObjects;
