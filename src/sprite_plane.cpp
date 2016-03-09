@@ -106,6 +106,30 @@ namespace neogfx
 		return iSimpleSprites.back();
 	}
 
+	void sprite_plane::add_object(i_physical_object& aObject)
+	{
+		iObjects.push_back(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
+	}
+
+	void sprite_plane::add_object(std::shared_ptr<i_physical_object> aObject)
+	{
+		iObjects.push_back(aObject);
+	}
+
+	void sprite_plane::add_earth()
+	{
+		auto& earth = create_object();
+		earth.set_origin({0.0, 6371000.0, 0.0});
+		earth.set_mass(5.972e24);
+	}
+
+	i_physical_object& sprite_plane::create_object()
+	{
+		iSimpleObjects.push_back(physical_object());
+		add_object(iSimpleObjects.back());
+		return iSimpleObjects.back();
+	}
+
 	const sprite_plane::sprite_list& sprite_plane::sprites() const
 	{
 		return iSprites;
@@ -123,6 +147,8 @@ namespace neogfx
 		bool updated = false;
 		for (auto& s : iSprites)
 			updated = (s->update(now) || updated);
+		for (auto& o : iObjects)
+			updated = (o->update(now) || updated);
 		sprites_updated.trigger();
 		return updated;
 	}

@@ -76,6 +76,11 @@ namespace neogfx
 		return next_physics().iSpin * 180.0 / boost::math::constants::pi<scalar>();
 	}
 
+	scalar physical_object::mass() const
+	{
+		return next_physics().iMass;
+	}
+
 	void physical_object::set_origin(const vec3& aOrigin)
 	{
 		iOrigin = aOrigin;
@@ -83,37 +88,42 @@ namespace neogfx
 
 	void physical_object::set_position(const vec3& aPosition)
 	{
-		next_physics().iPosition = aPosition;
+		current_physics().iPosition = aPosition;
 	}
 
 	void physical_object::set_angle_radians(const vec3& aAngle)
 	{
-		next_physics().iAngle = aAngle;
+		current_physics().iAngle = aAngle;
 	}
 
 	void physical_object::set_angle_degrees(const vec3& aAngle)
 	{
-		next_physics().iAngle = aAngle * boost::math::constants::pi<scalar>() / 180.0;
+		current_physics().iAngle = aAngle * boost::math::constants::pi<scalar>() / 180.0;
 	}
 
 	void physical_object::set_velocity(const vec3& aVelocity)
 	{
-		next_physics().iVelocity = aVelocity;
+		current_physics().iVelocity = aVelocity;
 	}
 
 	void physical_object::set_acceleration(const vec3& aAcceleration)
 	{
-		next_physics().iAcceleration = aAcceleration;
+		current_physics().iAcceleration = aAcceleration;
 	}
 
 	void physical_object::set_spin_radians(const vec3& aSpin)
 	{
-		next_physics().iSpin = aSpin;
+		current_physics().iSpin = aSpin;
 	}
 
 	void physical_object::set_spin_degrees(const vec3& aSpin)
 	{
-		next_physics().iSpin = aSpin * boost::math::constants::pi<scalar>() / 180.0;
+		current_physics().iSpin = aSpin * boost::math::constants::pi<scalar>() / 180.0;
+	}
+
+	void physical_object::set_mass(scalar aMass) 
+	{
+		current_physics().iMass = aMass;
 	}
 
 	bool physical_object::update(const optional_time_point& aNow)

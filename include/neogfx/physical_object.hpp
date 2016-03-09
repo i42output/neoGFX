@@ -48,6 +48,7 @@ namespace neogfx
 		virtual const vec3& acceleration() const;
 		virtual const vec3& spin_radians() const;
 		virtual vec3 spin_degrees() const;
+		virtual scalar mass() const;
 		virtual void set_origin(const vec3& aOrigin);
 		virtual void set_position(const vec3& aPosition);
 		virtual void set_angle_radians(const vec3& aAngle);
@@ -56,6 +57,7 @@ namespace neogfx
 		virtual void set_acceleration(const vec3& aAcceleration);
 		virtual void set_spin_radians(const vec3& aSpin);
 		virtual void set_spin_degrees(const vec3& aSpin);
+		virtual void set_mass(scalar aMass);
 	public:
 		virtual bool update(const optional_time_point& aNow = optional_time_point());
 	private:

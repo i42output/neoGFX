@@ -33,8 +33,10 @@ namespace neogfx
 		event<> sprites_updated;
 	public:
 		typedef std::vector<std::shared_ptr<i_sprite>> sprite_list;
+		typedef std::vector<std::shared_ptr<i_physical_object>> object_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
+		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
 	public:
 		sprite_plane();
 		sprite_plane(i_widget& aParent);
@@ -51,12 +53,19 @@ namespace neogfx
 		i_sprite& create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
 		i_sprite& create_sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 	public:
+		void add_object(i_physical_object& aObject);
+		void add_object(std::shared_ptr<i_physical_object> aObject);
+		void add_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
+		i_physical_object& create_object();
+	public:
 		const sprite_list& sprites() const;
 		sprite_list& sprites();
 	private:
 		bool update_sprites();
 	private:
 		sprite_list iSprites;
+		object_list iObjects;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
+		simple_object_list iSimpleObjects;
 	};
 }

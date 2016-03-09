@@ -42,6 +42,7 @@ namespace neogfx
 		virtual const vec3& acceleration() const = 0;
 		virtual const vec3& spin_radians() const = 0;
 		virtual vec3 spin_degrees() const = 0;
+		virtual scalar mass() const = 0;
 		virtual void set_origin(const vec3& aOrigin) = 0;
 		virtual void set_position(const vec3& aPosition) = 0;
 		virtual void set_angle_radians(const vec3& aAngle) = 0;
@@ -50,6 +51,7 @@ namespace neogfx
 		virtual void set_acceleration(const vec3& aAcceleration) = 0;
 		virtual void set_spin_radians(const vec3& aSpin) = 0;
 		virtual void set_spin_degrees(const vec3& aSpin) = 0;
+		virtual void set_mass(scalar aMass) = 0;
 	public:
 		void set_angle_radians(scalar aAngle)
 		{
