@@ -43,42 +43,42 @@ namespace neogfx
 
 	const vec3& physical_object::position() const
 	{
-		return next_physics().iPosition;
+		return current_physics().iPosition;
 	}
 
 	const vec3& physical_object::angle_radians() const
 	{
-		return next_physics().iAngle;
+		return current_physics().iAngle;
 	}
 
 	vec3 physical_object::angle_degrees() const
 	{
-		return next_physics().iAngle * 180.0 / boost::math::constants::pi<double>();
+		return current_physics().iAngle * 180.0 / boost::math::constants::pi<double>();
 	}
 
 	const vec3& physical_object::velocity() const
 	{
-		return next_physics().iVelocity;
+		return current_physics().iVelocity;
 	}
 
 	const vec3& physical_object::acceleration() const
 	{
-		return next_physics().iAcceleration;
+		return current_physics().iAcceleration;
 	}
 
 	const vec3& physical_object::spin_radians() const
 	{
-		return next_physics().iSpin;
+		return current_physics().iSpin;
 	}
 
 	vec3 physical_object::spin_degrees() const
 	{
-		return next_physics().iSpin * 180.0 / boost::math::constants::pi<scalar>();
+		return current_physics().iSpin * 180.0 / boost::math::constants::pi<scalar>();
 	}
 
 	scalar physical_object::mass() const
 	{
-		return next_physics().iMass;
+		return current_physics().iMass;
 	}
 
 	void physical_object::set_origin(const vec3& aOrigin)
@@ -134,6 +134,7 @@ namespace neogfx
 			iTimeOfLastUpdate = aNow;
 			updated = true;
 		}
+		next_physics() = current_physics();
 		if (iTimeOfLastUpdate != boost::none && aNow != boost::none)
 			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den)) || updated;
 		else
