@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <boost/optional.hpp>
 #include "i_texture.hpp"
 
 namespace neogfx
@@ -46,4 +47,6 @@ namespace neogfx
 	private:
 		std::shared_ptr<i_native_texture> iNativeTexture;
 	};
+
+	typedef boost::optional<texture> optional_texture;
 }

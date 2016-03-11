@@ -28,7 +28,6 @@ namespace neogfx
 	class i_physical_object
 	{
 	public:
-		typedef scalar time_interval;
 		typedef std::chrono::time_point<std::chrono::steady_clock> time_point;
 		typedef boost::optional<time_point> optional_time_point;
 	public:
