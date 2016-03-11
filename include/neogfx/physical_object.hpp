@@ -59,13 +59,13 @@ namespace neogfx
 		virtual void set_spin_degrees(const vec3& aSpin);
 		virtual void set_mass(scalar aMass);
 	public:
-		virtual bool update(const optional_time_point& aNow = optional_time_point());
+		virtual bool update(const optional_time_point& aNow = optional_time_point(), const vec3& aForce = vec3{});
 	private:
 		const physics& current_physics() const;
 		physics& current_physics();
 		const physics& next_physics() const;
 		physics& next_physics();
-		bool apply_physics(double aElapsedTime);
+		bool apply_physics(double aElapsedTime, const vec3& aForce);
 	private:
 		vec3 iOrigin;
 		optional_time_point iTimeOfLastUpdate;

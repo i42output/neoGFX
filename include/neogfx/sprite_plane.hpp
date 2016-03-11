@@ -55,7 +55,7 @@ namespace neogfx
 	public:
 		void add_object(i_physical_object& aObject);
 		void add_object(std::shared_ptr<i_physical_object> aObject);
-		void add_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
+		i_physical_object& create_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
 		i_physical_object& create_object();
 	public:
 		const sprite_list& sprites() const;

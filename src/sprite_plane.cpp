@@ -18,6 +18,7 @@
 */
 
 #include "neogfx.hpp"
+#include <numeric>
 #include <chrono>
 #include "app.hpp"
 #include "sprite_plane.hpp"
@@ -116,18 +117,19 @@ namespace neogfx
 		iObjects.push_back(aObject);
 	}
 
-	void sprite_plane::add_earth()
-	{
-		auto& earth = create_object();
-		earth.set_origin({0.0, 6371000.0, 0.0});
-		earth.set_mass(5.972e24);
-	}
-
 	i_physical_object& sprite_plane::create_object()
 	{
 		iSimpleObjects.push_back(physical_object());
 		add_object(iSimpleObjects.back());
 		return iSimpleObjects.back();
+	}
+
+	i_physical_object& sprite_plane::create_earth()
+	{
+		auto& earth = create_object();
+		earth.set_position({ 0.0, -6371000.0, 0.0 });
+		earth.set_mass(5.972e24);
+		return earth;
 	}
 
 	const sprite_plane::sprite_list& sprite_plane::sprites() const
@@ -145,10 +147,41 @@ namespace neogfx
 		applying_physics.trigger();
 		auto now = std::chrono::steady_clock::now();
 		bool updated = false;
-		for (auto& s : iSprites)
-			updated = (s->update(now) || updated);
-		for (auto& o : iObjects)
-			updated = (o->update(now) || updated);
+		const scalar G = 6.67408e-11;
+		for (auto& o2 : iSprites)
+		{
+			vec3 force;
+			for (auto& o1 : iSprites)
+			{
+				if (&*o1 == &*o2)
+					continue;
+				vec3 r12 = o2->physics().position() - o1->physics().position();
+				force += -G * o1->physics().mass() * o2->physics().mass() * r12 / std::pow(r12.magnitude(), 3.0);
+			}
+			for (auto& o1 : iObjects)
+			{
+				vec3 r12 = o2->physics().position() - o1->position();
+				force += -G * o1->mass() * o2->physics().mass() * r12 / std::pow(r12.magnitude(), 3.0);
+			}
+			updated = (o2->update(now, force) || updated);
+		}
+		for (auto& o2 : iObjects)
+		{
+			vec3 force;
+			for (auto& o1 : iSprites)
+			{
+				vec3 r12 = o2->position() - o1->physics().position();
+				force += -G * o1->physics().mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
+			}
+			for (auto& o1 : iObjects)
+			{
+				if (&*o1 == &*o2)
+					continue;
+				vec3 r12 = o2->position() - o1->position();
+				force += -G * o1->mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
+			}
+			updated = (o2->update(now, force) || updated);
+		}
 		physics_applied.trigger();
 		return updated;
 	}

@@ -27,7 +27,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->set_background_colour(ng::colour::Black);
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::LightGoldenrod}, {2, ng::colour::DarkGoldenrod4} }));
 	spaceshipSprite.set_size(ng::size(32.0, 32.0));
-	spaceshipSprite.set_position(ng::point(400.0 - 16.0, 16.0));
+	spaceshipSprite.set_position(ng::point(400.0, 16.0));
 	spritePlane->painting([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);

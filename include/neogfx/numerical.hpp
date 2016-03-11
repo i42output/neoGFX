@@ -85,6 +85,7 @@ namespace neogfx
 		basic_vector& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
 		basic_vector& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
 		basic_vector operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
+		scalar magnitude() const { scalar ss = 0; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
 	public:
 		union
 		{
@@ -181,6 +182,7 @@ namespace neogfx
 		basic_vector& operator*=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] *= right.v[index]; return *this; }
 		basic_vector& operator/=(const basic_vector& right) { for (uint32_t index = 0; index < Size; ++index) v[index] /= right.v[index]; return *this; }
 		basic_vector operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
+		scalar magnitude() const { scalar ss = 0; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
 	public:
 		array_type v;
 	};

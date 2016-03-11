@@ -150,10 +150,6 @@ namespace neogfx
 	void sprite::set_size(const optional_size& aSize, bool aCentreOrigin)
 	{
 		iSize = aSize;
-		if (iSize != boost::none)
-			physics().set_origin(vec3{ iSize->cx / 2.0, iSize->cy / 2.0, 0.0 });
-		else
-			physics().set_origin(vec3{});
 	}
 
 	void sprite::set_scale(const vec2& aScale)
@@ -181,9 +177,9 @@ namespace neogfx
 		return iObject;
 	}
 
-	bool sprite::update(const optional_time_point& aNow)
+	bool sprite::update(const optional_time_point& aNow, const vec3& aForce)
 	{
-		return physics().update(aNow);
+		return physics().update(aNow, aForce);
 	}
 
 	void sprite::paint(graphics_context& aGraphicsContext) const
@@ -191,7 +187,7 @@ namespace neogfx
 		auto tm = transformation();
 		if (iSize != boost::none)
 		{
-			rect r{ -vec2{physics().origin().xy}, size() };
+			rect r{ vec2{-size().cx / 2.0, -size().cy / 2.0} + vec2{physics().origin().xy}, size() };
 			texture_map3 map = { r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
 			for (auto& vertex : map)
 				vertex = tm * vertex;
@@ -202,7 +198,7 @@ namespace neogfx
 		}
 		else
 		{
-			rect r{ -vec2{ physics().origin().xy }, size() };
+			rect r{ vec2{-size().cx / 2.0, -size().cy / 2.0} + vec2{physics().origin().xy}, size() };
 			texture_map3 map = { r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
 			for (auto& vertex : map)
 				vertex = tm * vertex;

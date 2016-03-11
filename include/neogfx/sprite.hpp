@@ -63,7 +63,7 @@ namespace neogfx
 		virtual const i_physical_object& physics() const;
 		virtual i_physical_object& physics();
 	public:
-		virtual bool update(const optional_time_point& aNow = optional_time_point());
+		virtual bool update(const optional_time_point& aNow = optional_time_point(), const vec3& aForce = vec3{});
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	private:

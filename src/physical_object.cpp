@@ -126,7 +126,7 @@ namespace neogfx
 		current_physics().iMass = aMass;
 	}
 
-	bool physical_object::update(const optional_time_point& aNow)
+	bool physical_object::update(const optional_time_point& aNow, const vec3& aForce)
 	{
 		bool updated = false;
 		if (iTimeOfLastUpdate == boost::none)
@@ -136,9 +136,9 @@ namespace neogfx
 		}
 		next_physics() = current_physics();
 		if (iTimeOfLastUpdate != boost::none && aNow != boost::none)
-			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den)) || updated;
+			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den), aForce) || updated;
 		else
-			updated = apply_physics(1.0) || updated;
+			updated = apply_physics(1.0, aForce) || updated;
 		iTimeOfLastUpdate = aNow;
 		current_physics() = next_physics();
 		return updated;
@@ -147,12 +147,7 @@ namespace neogfx
 	const physical_object::physics& physical_object::current_physics() const
 	{
 		if (iCurrentPhysics == boost::none)
-		{
-			if (iNextPhysics != boost::none)
-				iCurrentPhysics = iNextPhysics;
-			else
-				iCurrentPhysics = physics{};
-		}
+			iCurrentPhysics = physics{};
 		return *iCurrentPhysics;
 	}
 
@@ -173,7 +168,7 @@ namespace neogfx
 		return const_cast<physics&>(const_cast<const physical_object*>(this)->next_physics());
 	}
 
-	bool physical_object::apply_physics(double aElapsedTime)
+	bool physical_object::apply_physics(double aElapsedTime, const vec3& aForce)
 	{
 		auto ax = angle_radians()[0];
 		auto ay = angle_radians()[1];
@@ -192,7 +187,7 @@ namespace neogfx
 				return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
 			}
 		}();
-		next_physics().iVelocity = current_physics().iVelocity + rotation * current_physics().iAcceleration * vec3(aElapsedTime, aElapsedTime, aElapsedTime); // v = u + at
+		next_physics().iVelocity = current_physics().iVelocity + ((current_physics().iMass == 0 ? vec3{} : aForce / current_physics().iMass) + (rotation * current_physics().iAcceleration)) * vec3(aElapsedTime, aElapsedTime, aElapsedTime); // v = u + at
 		next_physics().iPosition = current_physics().iPosition + vec3(1.0, 1.0, 1.0) * (current_physics().iVelocity * aElapsedTime + ((next_physics().iVelocity - current_physics().iVelocity) * aElapsedTime / 2.0));
 		next_physics().iAngle = (current_physics().iAngle + current_physics().iSpin * aElapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 		return next_physics().iPosition != current_physics().iPosition || next_physics().iAngle != current_physics().iAngle;
