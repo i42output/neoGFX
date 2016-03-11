@@ -37,12 +37,29 @@ namespace neogfx
 		sprite(const i_texture& aTexture, const optional_rect& aTextureRect);
 		sprite(const i_image& aImage, const optional_rect& aTextureRect);
 		sprite(const sprite& aOther);
+		// animation
+	public:
+		virtual frame_index frame_count() const;
+		virtual const i_frame& frame(frame_index aFrameIndex) const;
+		virtual i_frame& frame(frame_index aFrameIndex);
+		virtual void add_frame(i_frame& aFrame);
+		virtual void add_frame(std::shared_ptr<i_frame> aFrame);
+		virtual void replace_frame(frame_index aFrameIndex, i_frame& aFrame);
+		virtual void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame);
+		virtual void remove_frame(frame_index aFrameIndex);
+		virtual void set_texture_rect_for_all_frames(const optional_rect& aTextureRect);
 		// geometry
 	public:
+		virtual const animation_frames& animation() const;
+		virtual const i_frame& current_frame() const;
+		virtual i_frame& current_frame();
 		virtual point origin() const;
 		virtual point position() const;
-		virtual const optional_path& path() const;
+		virtual rect bounding_box() const;
+		virtual const vec2& scale() const;
+		virtual bool has_transformation_matrix() const;
 		virtual mat33 transformation_matrix() const;
+		virtual const optional_path& path() const;
 		virtual void set_animation(const animation_frames& aAnimation);
 		virtual void set_current_frame(frame_index aFrameIndex);
 		virtual void set_origin(const point& aOrigin);
@@ -51,17 +68,14 @@ namespace neogfx
 		virtual void set_scale(const vec2& aScale);
 		virtual void set_transformation_matrix(const optional_mat33& aTransformationMatrix);
 		virtual void set_path(const optional_path& aPath);
-		// geometry/rendering
-	public:
-		virtual const i_shape& as_shape() const;
-		virtual i_shape& as_shape();
 		// physics
 	public:
 		virtual const i_physical_object& physics() const;
 		virtual i_physical_object& physics();
-		virtual bool update(const optional_time_point& aNow = optional_time_point(), const vec3& aForce = vec3{});
+		virtual bool update(const optional_time_point& aNow, const vec3& aForce);
 		// rendering
 	public:
+		virtual bool update(const optional_time_point& aNow);
 		virtual void paint(graphics_context& aGraphicsContext) const;
 		// attributes
 	private:

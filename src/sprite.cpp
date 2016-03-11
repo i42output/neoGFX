@@ -44,6 +44,66 @@ namespace neogfx
 	{
 	}
 
+	sprite::frame_index sprite::frame_count() const
+	{
+		return shape::frame_count();
+	}
+
+	const i_frame& sprite::frame(frame_index aFrameIndex) const
+	{
+		return shape::frame(aFrameIndex);
+	}
+
+	i_frame& sprite::frame(frame_index aFrameIndex)
+	{
+		return shape::frame(aFrameIndex);
+	}
+
+	void sprite::add_frame(i_frame& aFrame)
+	{
+		shape::add_frame(aFrame);
+	}
+
+	void sprite::add_frame(std::shared_ptr<i_frame> aFrame)
+	{
+		shape::add_frame(aFrame);
+	}
+
+	void sprite::replace_frame(frame_index aFrameIndex, i_frame& aFrame)
+	{
+		shape::replace_frame(aFrameIndex, aFrame);
+	}
+
+	void sprite::replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame)
+	{
+		shape::replace_frame(aFrameIndex, aFrame);
+	}
+
+	void sprite::remove_frame(frame_index aFrameIndex)
+	{
+		shape::remove_frame(aFrameIndex);
+	}
+
+	void sprite::set_texture_rect_for_all_frames(const optional_rect& aTextureRect)
+	{
+		shape::set_texture_rect_for_all_frames(aTextureRect);
+	}
+
+	const sprite::animation_frames& sprite::animation() const
+	{
+		return shape::animation();
+	}
+
+	const i_frame& sprite::current_frame() const
+	{
+		return shape::current_frame();
+	}
+
+	i_frame& sprite::current_frame()
+	{
+		return shape::current_frame();
+	}
+
 	point sprite::origin() const
 	{
 		return point{ physics().origin()[0], physics().origin()[1] };
@@ -54,9 +114,19 @@ namespace neogfx
 		return point{ physics().position()[0], physics().position()[1] };
 	}
 
-	const optional_path& sprite::path() const
+	rect sprite::bounding_box() const
 	{
-		return iPath;
+		return shape::bounding_box();
+	}
+
+	const vec2& sprite::scale() const
+	{
+		return shape::scale();
+	}
+
+	bool sprite::has_transformation_matrix() const
+	{
+		return shape::has_transformation_matrix();
 	}
 
 	mat33 sprite::transformation_matrix() const
@@ -68,6 +138,11 @@ namespace neogfx
 		return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ pos[0], pos[1], 1.0 } };
 	}
 
+	const optional_path& sprite::path() const
+	{
+		return iPath;
+	}
+	
 	void sprite::set_animation(const animation_frames& aAnimation)
 	{
 		shape::set_animation(aAnimation);
@@ -110,16 +185,6 @@ namespace neogfx
 		iPath = aPath;
 	}
 
-	const i_shape& sprite::as_shape() const
-	{
-		return *this;
-	}
-
-	i_shape& sprite::as_shape()
-	{
-		return *this;
-	}
-
 	const i_physical_object& sprite::physics() const
 	{
 		return iObject;
@@ -132,8 +197,13 @@ namespace neogfx
 
 	bool sprite::update(const optional_time_point& aNow, const vec3& aForce)
 	{
-		shape::update(aNow);
-		return physics().update(aNow, aForce);
+		bool updated = shape::update(aNow);
+		return physics().update(aNow, aForce) || updated;
+	}
+
+	bool sprite::update(const optional_time_point& aNow)
+	{
+		return update(aNow, vec3{});
 	}
 
 	void sprite::paint(graphics_context& aGraphicsContext) const
