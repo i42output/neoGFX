@@ -55,6 +55,8 @@ namespace neogfx
 	public:
 		scalar gravitational_constant() const;
 		void set_gravitational_constant(scalar aG);
+		optional_vec3 uniform_gravity() const;
+		void set_uniform_gravity(const optional_vec3& aUniformGravity = vec3{ 0.0, -9.80665, 0.0});
 		void add_object(i_physical_object& aObject);
 		void add_object(std::shared_ptr<i_physical_object> aObject);
 		i_physical_object& create_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
@@ -66,6 +68,7 @@ namespace neogfx
 		bool update_objects();
 	private:
 		scalar iG;
+		optional_vec3 iUniformGravity;
 		sprite_list iSprites;
 		object_list iObjects;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)

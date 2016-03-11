@@ -118,6 +118,16 @@ namespace neogfx
 		iG = aG;
 	}
 
+	optional_vec3 sprite_plane::uniform_gravity() const
+	{
+		return iUniformGravity;
+	}
+
+	void sprite_plane::set_uniform_gravity(const optional_vec3& aUniformGravity)
+	{
+		iUniformGravity = aUniformGravity;
+	}
+
 	void sprite_plane::add_object(i_physical_object& aObject)
 	{
 		iObjects.push_back(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
@@ -161,7 +171,11 @@ namespace neogfx
 		for (auto& o2 : iSprites)
 		{
 			vec3 force;
-			if (iG != 0.0)
+			if (iUniformGravity != boost::none)
+			{
+				force = *iUniformGravity * o2->physics().mass();
+			}
+			else if (iG != 0.0)
 			{
 				for (auto& o1 : iSprites)
 				{
@@ -185,7 +199,11 @@ namespace neogfx
 		for (auto& o2 : iObjects)
 		{
 			vec3 force;
-			if (iG != 0.0)
+			if (iUniformGravity != boost::none)
+			{
+				force = *iUniformGravity * o2->mass();
+			}
+			else if (iG != 0.0)
 			{
 				for (auto& o1 : iSprites)
 				{
