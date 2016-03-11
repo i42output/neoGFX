@@ -25,12 +25,13 @@
 
 namespace neogfx
 {
-	sprite_plane::sprite_plane()
+	sprite_plane::sprite_plane() : 
+		iG(6.67408e-11)
 	{
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
-		widget(aParent)
+		widget(aParent), iG(6.67408e-11)
 	{
 		surface().native_surface().rendering_check([this]()
 		{
@@ -40,7 +41,7 @@ namespace neogfx
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
-		widget(aLayout)
+		widget(aLayout), iG(6.67408e-11)
 	{
 		surface().native_surface().rendering_check([this]()
 		{
@@ -107,6 +108,16 @@ namespace neogfx
 		return iSimpleSprites.back();
 	}
 
+	scalar sprite_plane::gravitational_constant() const
+	{
+		return iG;
+	}
+
+	void sprite_plane::set_gravitational_constant(scalar aG)
+	{
+		iG = aG;
+	}
+
 	void sprite_plane::add_object(i_physical_object& aObject)
 	{
 		iObjects.push_back(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
@@ -147,38 +158,51 @@ namespace neogfx
 		applying_physics.trigger();
 		auto now = std::chrono::steady_clock::now();
 		bool updated = false;
-		const scalar G = 6.67408e-11;
 		for (auto& o2 : iSprites)
 		{
 			vec3 force;
-			for (auto& o1 : iSprites)
+			if (iG != 0.0)
 			{
-				if (&*o1 == &*o2)
-					continue;
-				vec3 r12 = o2->physics().position() - o1->physics().position();
-				force += -G * o1->physics().mass() * o2->physics().mass() * r12 / std::pow(r12.magnitude(), 3.0);
-			}
-			for (auto& o1 : iObjects)
-			{
-				vec3 r12 = o2->physics().position() - o1->position();
-				force += -G * o1->mass() * o2->physics().mass() * r12 / std::pow(r12.magnitude(), 3.0);
+				for (auto& o1 : iSprites)
+				{
+					if (o1->physics().mass() == 0.0)
+						continue;
+					if (&*o1 == &*o2)
+						continue;
+					vec3 r12 = o2->physics().position() - o1->physics().position();
+					force += -iG * o1->physics().mass() * o2->physics().mass() * r12 / std::pow(r12.magnitude(), 3.0);
+				}
+				for (auto& o1 : iObjects)
+				{
+					if (o1->mass() == 0.0)
+						continue;
+					vec3 r12 = o2->physics().position() - o1->position();
+					force += -iG * o1->mass() * o2->physics().mass() * r12 / std::pow(r12.magnitude(), 3.0);
+				}
 			}
 			updated = (o2->update(now, force) || updated);
 		}
 		for (auto& o2 : iObjects)
 		{
 			vec3 force;
-			for (auto& o1 : iSprites)
+			if (iG != 0.0)
 			{
-				vec3 r12 = o2->position() - o1->physics().position();
-				force += -G * o1->physics().mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
-			}
-			for (auto& o1 : iObjects)
-			{
-				if (&*o1 == &*o2)
-					continue;
-				vec3 r12 = o2->position() - o1->position();
-				force += -G * o1->mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
+				for (auto& o1 : iSprites)
+				{
+					if (o1->physics().mass() == 0.0)
+						continue;
+					vec3 r12 = o2->position() - o1->physics().position();
+					force += -iG * o1->physics().mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
+				}
+				for (auto& o1 : iObjects)
+				{
+					if (o1->mass() == 0.0)
+						continue;
+					if (&*o1 == &*o2)
+						continue;
+					vec3 r12 = o2->position() - o1->position();
+					force += -iG * o1->mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
+				}
 			}
 			updated = (o2->update(now, force) || updated);
 		}
