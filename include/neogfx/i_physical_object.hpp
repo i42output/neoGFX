@@ -69,6 +69,6 @@ namespace neogfx
 			set_spin_degrees(vec3{ 0.0, 0.0, aSpin });
 		}
 	public:
-		virtual bool update(const optional_time_point& aNow = optional_time_point(), const vec3& aForce = vec3{}) = 0;
+		virtual bool update(const optional_time_point& aNow, const vec3& aForce) = 0;
 	};
 }

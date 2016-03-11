@@ -89,7 +89,7 @@ namespace neogfx
 		virtual void set_transformation_matrix(const optional_mat33& aTransformationMatrix) = 0;
 		// rendering
 	public:
-		virtual bool update(const optional_time_point& aNow = optional_time_point()) = 0;
+		virtual bool update(const optional_time_point& aNow) = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 		// helpers
 	public:

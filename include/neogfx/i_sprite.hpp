@@ -38,7 +38,7 @@ namespace neogfx
 	public:
 		virtual const i_physical_object& physics() const = 0;
 		virtual i_physical_object& physics() = 0;
-		virtual bool update(const optional_time_point& aNow = optional_time_point(), const vec3& aForce = vec3{}) = 0;
+		virtual bool update(const optional_time_point& aNow, const vec3& aForce) = 0;
 		// geometry
 	public:
 		virtual const optional_path& path() const = 0;
