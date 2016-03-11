@@ -43,7 +43,7 @@ namespace neogfx
 		iObject(aOther.iObject)
 	{
 	}
-	
+
 	point sprite::origin() const
 	{
 		return point{ physics().origin()[0], physics().origin()[1] };
@@ -65,7 +65,17 @@ namespace neogfx
 			return shape::transformation_matrix();
 		auto az = physics().angle_radians()[2];
 		auto pos = physics().position();
-		return mat33{ { std::cos(az), -std::sin(az), 0.0 }, { std::sin(az), std::cos(az), 0.0 }, { pos[0], pos[1], 1.0 } };
+		return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ pos[0], pos[1], 1.0 } };
+	}
+
+	void sprite::set_animation(const animation_frames& aAnimation)
+	{
+		shape::set_animation(aAnimation);
+	}
+
+	void sprite::set_current_frame(frame_index aFrameIndex)
+	{
+		shape::set_current_frame(aFrameIndex);
 	}
 
 	void sprite::set_origin(const point& aOrigin)
@@ -73,11 +83,26 @@ namespace neogfx
 		shape::set_origin(aOrigin);
 		physics().set_origin(aOrigin.to_vector3());
 	}
-
+	
 	void sprite::set_position(const point& aPosition)
 	{
 		shape::set_position(aPosition);
 		physics().set_position(aPosition.to_vector3());
+	}
+	
+	void sprite::set_bounding_box(const optional_rect& aBoundingBox)
+	{
+		shape::set_bounding_box(aBoundingBox);
+	}
+
+	void sprite::set_scale(const vec2& aScale)
+	{
+		shape::set_scale(aScale);
+	}
+
+	void sprite::set_transformation_matrix(const optional_mat33& aTransformationMatrix)
+	{
+		shape::set_transformation_matrix(aTransformationMatrix);
 	}
 
 	void sprite::set_path(const optional_path& aPath)

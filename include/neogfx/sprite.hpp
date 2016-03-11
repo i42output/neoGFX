@@ -27,32 +27,43 @@ namespace neogfx
 {
 	class sprite : public shape, public i_sprite
 	{
+		// types
 	public:
-		typedef i_physical_object::time_point time_point;
-		typedef i_physical_object::optional_time_point optional_time_point;
+		using i_sprite::time_point;
+		using i_sprite::optional_time_point;
+		// construction
 	public:
 		sprite();
 		sprite(const i_texture& aTexture, const optional_rect& aTextureRect);
 		sprite(const i_image& aImage, const optional_rect& aTextureRect);
 		sprite(const sprite& aOther);
+		// geometry
 	public:
 		virtual point origin() const;
 		virtual point position() const;
 		virtual const optional_path& path() const;
 		virtual mat33 transformation_matrix() const;
+		virtual void set_animation(const animation_frames& aAnimation);
+		virtual void set_current_frame(frame_index aFrameIndex);
 		virtual void set_origin(const point& aOrigin);
 		virtual void set_position(const point& aPosition);
+		virtual void set_bounding_box(const optional_rect& aBoundingBox);
+		virtual void set_scale(const vec2& aScale);
+		virtual void set_transformation_matrix(const optional_mat33& aTransformationMatrix);
 		virtual void set_path(const optional_path& aPath);
+		// geometry/rendering
 	public:
 		virtual const i_shape& as_shape() const;
 		virtual i_shape& as_shape();
+		// physics
 	public:
 		virtual const i_physical_object& physics() const;
 		virtual i_physical_object& physics();
-	public:
 		virtual bool update(const optional_time_point& aNow = optional_time_point(), const vec3& aForce = vec3{});
+		// rendering
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
+		// attributes
 	private:
 		optional_path iPath;
 		physical_object iObject;
