@@ -118,7 +118,7 @@ namespace neogfx
 		iG = aG;
 	}
 
-	optional_vec3 sprite_plane::uniform_gravity() const
+	const optional_vec3& sprite_plane::uniform_gravity() const
 	{
 		return iUniformGravity;
 	}

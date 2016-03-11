@@ -25,8 +25,8 @@ void create_game(ng::i_layout& aLayout)
 	aLayout.add_widget(spritePlane);
 	spritePlane->set_font(ng::font(spritePlane->font(), ng::font::Bold, 28));
 	spritePlane->set_background_colour(ng::colour::Black);
-//	spritePlane->create_earth();
-	spritePlane->set_uniform_gravity();
+	//spritePlane->set_uniform_gravity();
+	spritePlane->create_earth();
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::LightGoldenrod}, {2, ng::colour::DarkGoldenrod4} }));
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_size(ng::size(32.0, 32.0));

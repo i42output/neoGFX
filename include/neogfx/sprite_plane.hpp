@@ -55,7 +55,7 @@ namespace neogfx
 	public:
 		scalar gravitational_constant() const;
 		void set_gravitational_constant(scalar aG);
-		optional_vec3 uniform_gravity() const;
+		const optional_vec3& uniform_gravity() const;
 		void set_uniform_gravity(const optional_vec3& aUniformGravity = vec3{ 0.0, -9.80665, 0.0});
 		void add_object(i_physical_object& aObject);
 		void add_object(std::shared_ptr<i_physical_object> aObject);
