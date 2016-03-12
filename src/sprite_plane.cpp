@@ -26,12 +26,13 @@
 namespace neogfx
 {
 	sprite_plane::sprite_plane() : 
+		iEnableZSorting(false),
 		iG(6.67408e-11)
 	{
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
-		widget(aParent), iG(6.67408e-11)
+		widget(aParent), iEnableZSorting(false), iG(6.67408e-11)
 	{
 		surface().native_surface().rendering_check([this]()
 		{
@@ -41,7 +42,7 @@ namespace neogfx
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
-		widget(aLayout), iG(6.67408e-11)
+		widget(aLayout), iEnableZSorting(false), iG(6.67408e-11)
 	{
 		surface().native_surface().rendering_check([this]()
 		{
@@ -72,9 +73,44 @@ namespace neogfx
 	}
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
+	{	
+		if (iEnableZSorting)
+		{
+			iRenderBuffer.reserve(iShapes.size() + iSprites.size());
+			iRenderBuffer.clear();
+			for (const auto& s : iShapes)
+				iRenderBuffer.push_back(&*s);
+			for (const auto& s : iSprites)
+				iRenderBuffer.push_back(&*s);
+			std::sort(iRenderBuffer.begin(), iRenderBuffer.end(), [](i_shape* left, i_shape* right) ->bool
+			{
+				return left->position_3D()[2] < right->position_3D()[2];
+			});
+			for (auto s : iRenderBuffer)
+				s->paint(aGraphicsContext);
+		}
+		else
+		{
+			for (const auto& s : iShapes)
+				s->paint(aGraphicsContext);
+			for (const auto& s : iSprites)
+				s->paint(aGraphicsContext);
+		}
+	}
+
+	void sprite_plane::enable_z_sorting(bool aEnableZSorting)
 	{
-		for (const auto& s : iSprites)
-			s->paint(aGraphicsContext);
+		iEnableZSorting = aEnableZSorting;
+	}
+
+	void sprite_plane::add_shape(i_shape& aShape)
+	{
+		iShapes.push_back(std::shared_ptr<i_shape>(std::shared_ptr<i_shape>(), &aShape));
+	}
+
+	void sprite_plane::add_shape(std::shared_ptr<i_shape> aShape)
+	{
+		iShapes.push_back(aShape);
 	}
 
 	void sprite_plane::add_sprite(i_sprite& aSprite)
@@ -153,6 +189,16 @@ namespace neogfx
 		return earth;
 	}
 
+	const sprite_plane::shape_list& sprite_plane::shapes() const
+	{
+		return iShapes;
+	}
+
+	sprite_plane::shape_list& sprite_plane::shapes()
+	{
+		return iShapes;
+	}
+
 	const sprite_plane::sprite_list& sprite_plane::sprites() const
 	{
 		return iSprites;
@@ -161,6 +207,16 @@ namespace neogfx
 	sprite_plane::sprite_list& sprite_plane::sprites()
 	{
 		return iSprites;
+	}
+
+	const sprite_plane::object_list& sprite_plane::objects() const
+	{
+		return iObjects;
+	}
+
+	sprite_plane::object_list& sprite_plane::objects()
+	{
+		return iObjects;
 	}
 
 	bool sprite_plane::update_objects()

@@ -104,6 +104,11 @@ namespace neogfx
 		return units_converter(*this).to_device_units(aValue);
 	}
 
+	vec2 graphics_context::to_device_units(const vec2& aValue) const
+	{
+		return units_converter(*this).to_device_units(aValue);
+	}
+
 	rect graphics_context::to_device_units(const rect& aValue) const
 	{
 		return units_converter(*this).to_device_units(aValue);
@@ -251,6 +256,24 @@ namespace neogfx
 	void graphics_context::fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour) const
 	{
 		iNativeGraphicsContext->fill_solid_circle(to_device_units(aCentre) + iOrigin, aRadius, aColour);
+	}
+
+	void graphics_context::fill_solid_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) const
+	{
+		vertex_list2 vertices;
+		vertices.reserve(aVertices.size());
+		for (const auto& v : aVertices)
+			vertices.push_back(to_device_units(v) + iOrigin.to_vector());
+		iNativeGraphicsContext->fill_solid_shape(to_device_units(aCentre) + iOrigin, vertices, aColour);
+	}
+
+	void graphics_context::fill_solid_shape(const point& aCentre, const vertex_list3& aVertices, const colour& aColour) const
+	{
+		vertex_list2 vertices;
+		vertices.reserve(aVertices.size());
+		for (const auto& v : aVertices)
+			vertices.push_back(to_device_units(v.xy) + iOrigin.to_vector());
+		iNativeGraphicsContext->fill_solid_shape(to_device_units(aCentre) + iOrigin, vertices, aColour);
 	}
 
 	void graphics_context::fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aOutlinePen) const

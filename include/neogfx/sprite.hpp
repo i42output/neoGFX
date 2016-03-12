@@ -34,8 +34,8 @@ namespace neogfx
 		// construction
 	public:
 		sprite();
-		sprite(const i_texture& aTexture, const optional_rect& aTextureRect);
-		sprite(const i_image& aImage, const optional_rect& aTextureRect);
+		sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
+		sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		sprite(const sprite& aOther);
 		// animation
 	public:
@@ -55,6 +55,7 @@ namespace neogfx
 		virtual i_frame& current_frame();
 		virtual point origin() const;
 		virtual point position() const;
+		virtual vec3 position_3D() const;
 		virtual rect bounding_box() const;
 		virtual const vec2& scale() const;
 		virtual bool has_transformation_matrix() const;
@@ -64,6 +65,7 @@ namespace neogfx
 		virtual void set_current_frame(frame_index aFrameIndex);
 		virtual void set_origin(const point& aOrigin);
 		virtual void set_position(const point& aPosition);
+		virtual void set_position_3D(const vec3& aPosition3D);
 		virtual void set_bounding_box(const optional_rect& aBoundingBox);
 		virtual void set_scale(const vec2& aScale);
 		virtual void set_transformation_matrix(const optional_mat33& aTransformationMatrix);
@@ -76,6 +78,7 @@ namespace neogfx
 		// rendering
 	public:
 		virtual bool update(const optional_time_point& aNow);
+		virtual vertex_list3 map() const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 		// attributes
 	private:

@@ -53,6 +53,11 @@ namespace neogfx
 		LogicalXor
 	};
 
+	typedef std::vector<vec2> vertex_list2;
+	typedef std::vector<vec3> vertex_list3;
+
+	typedef vertex_list2 vertex_list;
+
 	typedef basic_vector<vector2, 4> texture_map2;
 	typedef basic_vector<vector3, 4> texture_map3;
 
@@ -81,6 +86,7 @@ namespace neogfx
 		delta to_device_units(const delta& aValue) const;
 		size to_device_units(const size& aValue) const;
 		point to_device_units(const point& aValue) const;
+		vec2 to_device_units(const vec2& aValue) const;
 		rect to_device_units(const rect& aValue) const;
 		texture_map to_device_units(const texture_map& aValue) const;
 		path to_device_units(const path& aValue) const;
@@ -121,6 +127,8 @@ namespace neogfx
 		void fill_solid_rect(const rect& aRect, const colour& aColour) const;
 		void fill_gradient_rect(const rect& aRect, const gradient& aGradient) const;
 		void fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour) const;
+		void fill_solid_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) const;
+		void fill_solid_shape(const point& aCentre, const vertex_list3& aVertices, const colour& aColour) const;
 		void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aOutlinePen) const;
 		size text_extent(const text& aText, const font& aFont, bool aUseCache = false) const;
 		size text_extent(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont, bool aUseCache = false) const;

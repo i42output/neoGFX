@@ -483,6 +483,21 @@ namespace neogfx
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
 	}
 
+	void opengl_graphics_context::fill_solid_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour)
+	{
+		vertex_list2 vertices;
+		vertices.reserve(aVertices.size() + 2);
+		vertices.push_back(aCentre.to_vector());
+		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
+		vertices.push_back(vertices[1]);
+		std::vector<double> texCoords(vertices.size() * 2, 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size(), std::array <uint8_t, 4>{ {aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
+	}
+
 	void opengl_graphics_context::fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen)
 	{
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)

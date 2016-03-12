@@ -114,6 +114,11 @@ namespace neogfx
 		return point{ physics().position()[0], physics().position()[1] };
 	}
 
+	vec3 sprite::position_3D() const
+	{
+		return physics().position();
+	}
+
 	rect sprite::bounding_box() const
 	{
 		return shape::bounding_box();
@@ -165,6 +170,12 @@ namespace neogfx
 		physics().set_position(aPosition.to_vector3());
 	}
 	
+	void sprite::set_position_3D(const vec3& aPosition3D)
+	{
+		shape::set_position_3D(aPosition3D);
+		physics().set_position(aPosition3D);
+	}
+
 	void sprite::set_bounding_box(const optional_rect& aBoundingBox)
 	{
 		shape::set_bounding_box(aBoundingBox);
@@ -204,6 +215,12 @@ namespace neogfx
 	bool sprite::update(const optional_time_point& aNow)
 	{
 		return update(aNow, vec3{});
+	}
+
+	vertex_list3 sprite::map() const
+	{
+		auto r = bounding_box();
+		return vertex_list3{{ r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() }};
 	}
 
 	void sprite::paint(graphics_context& aGraphicsContext) const

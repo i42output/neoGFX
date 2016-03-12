@@ -60,8 +60,8 @@ namespace neogfx
 	public:
 		shape();
 		shape(const colour& aColour);
-		shape(const i_texture& aTexture, const optional_rect& aTextureRect);
-		shape(const i_image& aImage, const optional_rect& aTextureRect);
+		shape(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
+		shape(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		shape(const shape& aOther);
 	public:
 		virtual frame_index frame_count() const;
@@ -79,6 +79,7 @@ namespace neogfx
 		virtual i_frame& current_frame();
 		virtual point origin() const;
 		virtual point position() const;
+		virtual vec3 position_3D() const;
 		virtual rect bounding_box() const;
 		virtual const vec2& scale() const;
 		virtual bool has_transformation_matrix() const;
@@ -87,6 +88,7 @@ namespace neogfx
 		virtual void set_current_frame(frame_index aFrameIndex);
 		virtual void set_origin(const point& aOrigin);
 		virtual void set_position(const point& aPosition);
+		virtual void set_position_3D(const vec3& aPosition3D);
 		virtual void set_bounding_box(const optional_rect& aBoundingBox);
 		virtual void set_scale(const vec2& aScale);
 		virtual void set_transformation_matrix(const optional_matrix33& aTransformationMatrix);
@@ -100,8 +102,11 @@ namespace neogfx
 		optional_time_point iTimeOfLastUpdate;
 		point iOrigin;
 		point iPosition;
+		coordinate iZPos;
 		optional_rect iBoundingBox;
 		vec2 iScale;
 		mutable optional_mat33 iTransformationMatrix;
 	};
 }
+
+#include "rectangle.hpp"

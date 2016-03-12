@@ -76,6 +76,7 @@ namespace neogfx
 		virtual i_frame& current_frame() = 0;
 		virtual point origin() const = 0;
 		virtual point position() const = 0;
+		virtual vec3 position_3D() const = 0;
 		virtual rect bounding_box() const = 0;
 		virtual const vec2& scale() const = 0;
 		virtual bool has_transformation_matrix() const = 0;
@@ -84,12 +85,14 @@ namespace neogfx
 		virtual void set_current_frame(frame_index aFrameIndex) = 0;
 		virtual void set_origin(const point& aOrigin) = 0;
 		virtual void set_position(const point& aPosition) = 0;
+		virtual void set_position_3D(const vec3& aPosition3D) = 0;
 		virtual void set_bounding_box(const optional_rect& aBoundingBox) = 0;
 		virtual void set_scale(const vec2& aScale) = 0;
 		virtual void set_transformation_matrix(const optional_mat33& aTransformationMatrix) = 0;
 		// rendering
 	public:
 		virtual bool update(const optional_time_point& aNow) = 0;
+		virtual vertex_list3 map() const = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 		// helpers
 	public:

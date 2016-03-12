@@ -23,40 +23,45 @@
 namespace neogfx
 {
 	shape::shape() :
-		iCurrentFrame(0),
-		iScale{ 1.0, 1.0 }
+		iCurrentFrame{0},
+		iZPos{0.0},
+		iScale{1.0, 1.0}
 	{
 	}
 
 	shape::shape(const colour& aColour) :
-		iCurrentFrame(0),
+		iCurrentFrame{0},
+		iZPos{0.0},
 		iScale{1.0, 1.0}
 	{
 		iFrames.push_back(std::make_shared<neogfx::frame>(aColour));
 	}
 
 	shape::shape(const i_texture& aTexture, const optional_rect& aTextureRect) : 
-		iCurrentFrame(0),
+		iCurrentFrame{0},
+		iZPos{0.0},
 		iScale{1.0, 1.0}
 	{
 		iFrames.push_back(std::make_shared<neogfx::frame>(aTexture, aTextureRect));
 	}
 
 	shape::shape(const i_image& aImage, const optional_rect& aTextureRect) :
-		iCurrentFrame(0),
+		iCurrentFrame{0},
+		iZPos{0.0},
 		iScale{1.0, 1.0}
 	{
 		iFrames.push_back(std::make_shared<neogfx::frame>(texture(aImage), aTextureRect));
 	}
 
 	shape::shape(const shape& aOther) :
-		iFrames(aOther.iFrames),
-		iAnimation(aOther.iAnimation),
-		iCurrentFrame(aOther.iCurrentFrame),
-		iTimeOfLastUpdate(aOther.iTimeOfLastUpdate),
-		iBoundingBox(aOther.iBoundingBox),
-		iScale(aOther.iScale),
-		iTransformationMatrix(aOther.iTransformationMatrix)
+		iFrames{aOther.iFrames},
+		iAnimation{aOther.iAnimation},
+		iCurrentFrame{aOther.iCurrentFrame},
+		iTimeOfLastUpdate{aOther.iTimeOfLastUpdate},
+		iBoundingBox{aOther.iBoundingBox},
+		iZPos{aOther.iZPos},
+		iScale{aOther.iScale},
+		iTransformationMatrix{aOther.iTransformationMatrix}
 	{
 	}
 
@@ -143,6 +148,11 @@ namespace neogfx
 		return iPosition;
 	}
 
+	vec3 shape::position_3D() const
+	{
+		return vec3{iPosition.x, iPosition.y, iZPos};
+	}
+
 	rect shape::bounding_box() const
 	{
 		if (iBoundingBox != boost::none)
@@ -167,7 +177,7 @@ namespace neogfx
 	{
 		if (iTransformationMatrix != boost::none)
 			return *iTransformationMatrix;
-		return mat33{};
+		return mat33{ { 1.0, 0.0, 0.0 },{ 0.0, 1.0, 0.0 },{ position().x, position().y, 1.0 } };
 	}
 
 	void shape::set_animation(const animation_frames& aAnimation)
@@ -190,6 +200,13 @@ namespace neogfx
 	void shape::set_position(const point& aPosition)
 	{
 		iPosition = aPosition;
+	}
+
+	void shape::set_position_3D(const vec3& aPosition3D)
+	{
+		iPosition.x = aPosition3D[0];
+		iPosition.y = aPosition3D[1];
+		iZPos = aPosition3D[2];
 	}
 
 	void shape::set_bounding_box(const optional_rect& aBoundingBox)
@@ -218,16 +235,19 @@ namespace neogfx
 		if (frame_count() == 0)
 			return;
 		auto tm = transformation_matrix();
-		rect r = bounding_box();
-		texture_map3 map = { r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
-		for (auto& vertex : map)
+		auto m = map();
+		for (auto& vertex : m)
 			vertex = tm * vertex;
 		if (current_frame().texture() != boost::none)
 		{
 			if (current_frame().texture_rect() == boost::none)
-				aGraphicsContext.draw_texture(texture_map{ {map[0][0], map[0][1]}, {map[1][0], map[1][1]}, {map[2][0], map[2][1]}, {map[3][0], map[3][1]} }, *current_frame().texture());
+				aGraphicsContext.draw_texture(texture_map{ {m[0][0], m[0][1]}, {m[1][0], m[1][1]}, {m[2][0], m[2][1]}, {m[3][0], m[3][1]} }, *current_frame().texture());
 			else
-				aGraphicsContext.draw_texture(texture_map{ {map[0][0], map[0][1]}, {map[1][0], map[1][1]}, {map[2][0], map[2][1]}, {map[3][0], map[3][1]} }, *current_frame().texture(), *current_frame().texture_rect());
+				aGraphicsContext.draw_texture(texture_map{ {m[0][0], m[0][1]}, {m[1][0], m[1][1]}, {m[2][0], m[2][1]}, {m[3][0], m[3][1]} }, *current_frame().texture(), *current_frame().texture_rect());
+		}
+		else if (current_frame().colour() != boost::none)
+		{
+			aGraphicsContext.fill_solid_shape(position() - origin(), m, *current_frame().colour());
 		}
 	}
 }

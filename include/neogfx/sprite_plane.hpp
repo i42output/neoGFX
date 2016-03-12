@@ -32,6 +32,7 @@ namespace neogfx
 		event<> applying_physics;
 		event<> physics_applied;
 	public:
+		typedef std::vector<std::shared_ptr<i_shape>> shape_list;
 		typedef std::vector<std::shared_ptr<i_sprite>> sprite_list;
 		typedef std::vector<std::shared_ptr<i_physical_object>> object_list;
 	private:
@@ -46,6 +47,11 @@ namespace neogfx
 		virtual void parent_changed();
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
+	public:
+		void enable_z_sorting(bool aEnableZSorting);
+	public:
+		void add_shape(i_shape& aShape);
+		void add_shape(std::shared_ptr<i_shape> aShape);
 	public:
 		void add_sprite(i_sprite& aSprite);
 		void add_sprite(std::shared_ptr<i_sprite> aSprite);
@@ -62,16 +68,23 @@ namespace neogfx
 		i_physical_object& create_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
 		i_physical_object& create_object();
 	public:
+		const shape_list& shapes() const;
+		shape_list& shapes();
 		const sprite_list& sprites() const;
 		sprite_list& sprites();
+		const object_list& objects() const;
+		object_list& objects();
 	private:
 		bool update_objects();
 	private:
+		bool iEnableZSorting;
 		scalar iG;
 		optional_vec3 iUniformGravity;
+		shape_list iShapes;
 		sprite_list iSprites;
 		object_list iObjects;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
+		mutable std::vector<i_shape*> iRenderBuffer;
 	};
 }
