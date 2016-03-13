@@ -22,14 +22,16 @@
 
 namespace neogfx
 {
-	shape::shape() :
+	shape::shape(i_shape_container& aContainer) :
+		iContainer{aContainer},
 		iCurrentFrame{0},
 		iZPos{0.0},
 		iScale{1.0, 1.0}
 	{
 	}
 
-	shape::shape(const colour& aColour) :
+	shape::shape(i_shape_container& aContainer, const colour& aColour) :
+		iContainer{aContainer},
 		iCurrentFrame{0},
 		iZPos{0.0},
 		iScale{1.0, 1.0}
@@ -37,7 +39,8 @@ namespace neogfx
 		iFrames.push_back(std::make_shared<neogfx::frame>(aColour));
 	}
 
-	shape::shape(const i_texture& aTexture, const optional_rect& aTextureRect) : 
+	shape::shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect) :
+		iContainer{aContainer},
 		iCurrentFrame{0},
 		iZPos{0.0},
 		iScale{1.0, 1.0}
@@ -45,7 +48,8 @@ namespace neogfx
 		iFrames.push_back(std::make_shared<neogfx::frame>(aTexture, aTextureRect));
 	}
 
-	shape::shape(const i_image& aImage, const optional_rect& aTextureRect) :
+	shape::shape(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect) :
+		iContainer{aContainer},
 		iCurrentFrame{0},
 		iZPos{0.0},
 		iScale{1.0, 1.0}
@@ -54,6 +58,7 @@ namespace neogfx
 	}
 
 	shape::shape(const shape& aOther) :
+		iContainer{aOther.iContainer},
 		iFrames{aOther.iFrames},
 		iAnimation{aOther.iAnimation},
 		iCurrentFrame{aOther.iCurrentFrame},
@@ -63,6 +68,43 @@ namespace neogfx
 		iScale{aOther.iScale},
 		iTransformationMatrix{aOther.iTransformationMatrix}
 	{
+	}
+
+	i_shape_container& shape::container() const
+	{
+		return iContainer;
+	}
+
+	bool shape::has_buddy() const
+	{
+		return container().has_buddy(*this);
+	}
+
+	i_shape& shape::buddy() const
+	{
+		if (!has_buddy())
+			throw no_buddy();
+		return container().buddy(*this);
+	}
+
+	void shape::set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset)
+	{
+		container().set_buddy(*this, aBuddy, aBuddyOffset);
+	}
+
+	const vec3& shape::buddy_offset() const
+	{
+		return container().buddy_offset(*this);
+	}
+
+	void shape::set_buddy_offset(const vec3& aBuddyOffset)
+	{
+		container().set_buddy_offset(*this, aBuddyOffset);
+	}
+
+	void shape::unset_buddy()
+	{
+		container().unset_buddy(*this);
 	}
 
 	shape::frame_index shape::frame_count() const
@@ -150,7 +192,8 @@ namespace neogfx
 
 	vec3 shape::position_3D() const
 	{
-		return vec3{iPosition.x, iPosition.y, iZPos};
+		auto xy = position();
+		return vec3{xy.x, xy.y, iZPos};
 	}
 
 	rect shape::bounding_box() const

@@ -151,6 +151,7 @@
     <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite_plane.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\swizzle.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\text.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_window.hpp" />
@@ -190,7 +191,7 @@
     <ClInclude Include="..\..\..\include\neogfx\tab_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\tab_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\tab_page_container.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\text.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\glyph.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\texture_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text_direction_map.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text_widget.hpp" />
@@ -258,6 +259,7 @@
     <ClCompile Include="..\..\..\src\tab_bar.cpp" />
     <ClCompile Include="..\..\..\src\tab_button.cpp" />
     <ClCompile Include="..\..\..\src\tab_page_container.cpp" />
+    <ClCompile Include="..\..\..\src\text.cpp" />
     <ClCompile Include="..\..\..\src\texture.cpp" />
     <ClCompile Include="..\..\..\src\texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\text_widget.cpp" />

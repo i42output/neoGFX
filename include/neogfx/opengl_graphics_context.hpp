@@ -73,6 +73,7 @@ namespace neogfx
 		typedef std::array<double, 3> vertex;
 	public:
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface);
+		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget);
 		opengl_graphics_context(const opengl_graphics_context& aOther);
 		~opengl_graphics_context();
 	public:
@@ -108,7 +109,7 @@ namespace neogfx
 		virtual void fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour);
 		virtual void fill_solid_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour);
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen);
-		virtual glyph_text to_glyph_text(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont) const;
+		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
 		virtual void begin_drawing_glyphs();
 		virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour);
 		virtual void end_drawing_glyphs();
@@ -117,10 +118,11 @@ namespace neogfx
 		void apply_scissor();
 		void apply_logical_operation();
 		vertex to_shader_vertex(const point& aPoint) const;
-		glyph_text::container to_glyph_text_impl(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont, bool& aFallbackFontNeeded) const;
+		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, bool& aFallbackFontNeeded) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		const i_native_surface& iSurface;
+		neogfx::logical_coordinate_system iSavedCoordinateSystem;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable vector4 iLogicalCoordinates;
 		smoothing_mode_e iSmoothingMode; 

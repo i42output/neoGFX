@@ -16,182 +16,51 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #pragma once
 
 #include "neogfx.hpp"
-#include <boost/optional.hpp>
-#include <neolib/string_utils.hpp>
-#include "geometry.hpp"
-#include "i_font_texture.hpp"
+#include "i_widget.hpp"
 #include "font.hpp"
+#include "shape.hpp"
 
 namespace neogfx
 {
-	typedef std::string text;
-	typedef text::value_type character;
-
-	// case insensitive text
-	typedef std::basic_string<character, neolib::ci_char_traits<std::char_traits<character> > > ci_text;
-
-	enum class text_direction
-	{
-		Unknown,
-		None,
-		Whitespace,
-		LTR,
-		RTL
-	};
-
-	class glyph
+	class text : public shape
 	{
 	public:
-		typedef uint32_t value_type;
-		typedef std::pair<text::size_type, text::size_type> source_type;
+		text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const colour& aTextColour, neogfx::alignment aAlignment = alignment::Left, const optional_colour& aBackgroundColour = optional_colour());
 	public:
-		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aExtents, size aOffset) :
-			iDirection(aDirection), iValue(aValue), iUseFallback(false), iSource(aSource), iExtents(aExtents), iOffset(aOffset) {}
-		glyph(text_direction aDirection, value_type aValue) :
-			iDirection(aDirection), iValue(aValue), iUseFallback(), iSource(), iExtents(), iOffset() {}
+		const colour& text_colour() const;
+		void set_text_colour(const colour& aTextColour);
+		const std::string& value() const;
+		void set_value(const std::string& aText);
+		const neogfx::font& font() const;
+		void set_font(const neogfx::font& aFont);
+		neogfx::alignment alignment() const;
+		void set_alignment(neogfx::alignment aAlignment);
+		const optional_colour& background_colour() const;
+		void set_background_colour(const optional_colour& aBackgroundColour);
+		const optional_dimension& border() const;
+		void set_border(const optional_dimension& aBorder);
+		const optional_margins& margins() const;
+		void set_margins(const optional_margins& aMargins);
 	public:
-		bool operator==(const glyph& aRhs) const { return iDirection == aRhs.iDirection && iValue == aRhs.iValue; }
+		virtual point position() const;
+		virtual rect bounding_box() const;
 	public:
-		bool is_whitespace() const { return iDirection == text_direction::Whitespace; }
-		text_direction direction() const { return iDirection; }
-		bool no_direction() const { return iDirection != text_direction::LTR && iDirection != text_direction::RTL; }
-		bool left_to_right() const { return iDirection == text_direction::LTR; }
-		bool right_to_left() const { return iDirection == text_direction::RTL; }
-		void set_direction(text_direction aDirection) { iDirection = aDirection; }
-		value_type value() const { return iValue; }
-		void set_value(value_type aValue) { iValue = aValue; }
-		const source_type& source() const { return iSource; }
-		void set_source(const source_type aSource) { iSource = aSource; }
-		size extents() const { return iExtents; }
-		void set_extents(const size& aExtents) { iExtents = aExtents; }
-		size offset() const { return iOffset; }
-		void set_offset(const size& aOffset) { iOffset = aOffset; }
-		bool use_fallback() const { return iUseFallback; }
-		void set_use_fallback(bool aUseFallback) { iUseFallback = aUseFallback; }
+		virtual vertex_list3 map() const;
+		virtual void paint(graphics_context& aGraphicsContext) const;	
 	private:
-		text_direction iDirection;
-		value_type iValue;
-		bool iUseFallback;
-		source_type iSource;
-		size iExtents;
-		size iOffset;
-	};
-
-	class glyph_text : private std::vector<glyph>
-	{
-	public:
-		typedef std::vector<glyph> container;
-		using container::const_iterator;
-	public:
-		glyph_text(const font& aFont) : 
-			iFont(aFont)
-		{
-		}
-		template <typename Iter>
-		glyph_text(const font& aFont, Iter aBegin, Iter aEnd) : 
-			container(aBegin, aEnd),
-			iFont(aFont),
-			iExtents(extents(iFont, begin(), end()))
-		{
-		}
-		glyph_text(const font& aFont, container&& aGlyphs) :
-			container(aGlyphs),
-			iFont(aFont),
-			iExtents(extents(iFont, begin(), end()))
-		{
-		}
-	public:
-		using container::cbegin;
-		using container::cend;
-		using container::empty;
-	public:
-		bool operator==(const glyph_text& aOther) const
-		{
-			return font() == aOther.font() && static_cast<const container&>(*this) == static_cast<const container&>(aOther);
-		}
-	public:
-		static neogfx::size extents(const font& aFont, const_iterator aBegin, const_iterator aEnd)
-		{
-			neogfx::size result;
-			bool usingNormal = false;
-			bool usingFallback = false;
-			for (glyph_text::const_iterator i = aBegin; i != aEnd; ++i)
-			{
-				result.cx += i->extents().cx;
-				if (!i->use_fallback())
-					usingNormal = true;
-				else
-					usingFallback = true;
-			}
-			if (usingNormal || !usingFallback)
-				result.cy = aFont.height();
-			if (usingFallback)
-				result.cy = std::max(result.cy, aFont.fallback().height());
-			return neogfx::size(std::ceil(result.cx), std::ceil(result.cy));
-		}
-	public:
-		const neogfx::font& font() const
-		{
-			return iFont;
-		}
-		const neogfx::size& extents() const
-		{
-			return iExtents;
-		}
-		std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const
-		{
-			std::pair<const_iterator, const_iterator> result(aFrom, aFrom);
-			if (!aFrom->is_whitespace())
-			{
-				while(result.first != aBegin && !result.first->is_whitespace())
-					--result.first;
-				if (!result.first->is_whitespace())
-				{
-					result.first = aFrom;
-					while(result.first != aBegin && (result.first - 1)->source() == aFrom->source())
-						--result.first;
-					result.second = result.first;
-					return result;
-				}
-				result.second = result.first;
-			}
-			while(result.first != aBegin && (result.first - 1)->is_whitespace())
-				--result.first;
-			while(result.second->is_whitespace() && result.second != end())
-				++result.second;
-			return result;
-		}
+		size text_extent() const;
 	private:
+		vec3 iBuddyOffset;
+		std::string iText;
 		neogfx::font iFont;
-		neogfx::size iExtents;
+		neogfx::alignment iAlignment;
+		mutable optional_size iTextExtent;
+		mutable glyph_text iGlyphTextCache;
+		optional_colour iBackgroundColour;
+		optional_dimension iBorder;
+		optional_margins iMargins;
 	};
-
-	inline text_direction glyph_text_direction(glyph_text::const_iterator aBegin, glyph_text::const_iterator aEnd)
-	{
-		text_direction result = text_direction::LTR;
-		bool gotOne = false;
-		for (glyph_text::const_iterator i = aBegin; i != aEnd; ++i)
-		{
-			if (!i->is_whitespace() && !i->no_direction())
-			{
-				if (!gotOne)
-				{
-					gotOne = true;
-					result = i->direction();
-				}
-				else
-				{
-					if (result != i->direction())
-						result = text_direction::LTR;
-				}
-			}
-		}
-		return result;
-	}
-
-	typedef boost::optional<glyph_text> optional_glyph_text;
 }

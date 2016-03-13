@@ -26,11 +26,11 @@ namespace neogfx
 	class rectangle : public shape
 	{
 	public:
-		rectangle(const vec3& aPosition, const size& aSize);
-		rectangle(const vec3& aPosition, const size& aSize, const colour& aColour);
-		rectangle(const vec3& aPosition, const size& aSize, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		rectangle(const vec3& aPosition, const size& aSize, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
-		rectangle(const vec3& aPosition, const size& aSize, const rectangle& aOther);
+		rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize);
+		rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const colour& aColour);
+		rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
+		rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		rectangle(const rectangle& aOther);
 	public:
 		virtual vertex_list3 map() const;
 	};

@@ -260,6 +260,11 @@ namespace neogfx
 		return graphics_context(static_cast<const i_widget&>(*this));
 	}
 
+	graphics_context window::create_graphics_context(const i_widget& aWidget) const
+	{
+		return graphics_context(aWidget);
+	}
+
 	const i_native_surface& window::native_surface() const
 	{
 		return *iNativeWindow;

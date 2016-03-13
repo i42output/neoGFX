@@ -19,7 +19,7 @@
 
 #include "neogfx.hpp"
 #include <boost/math/constants/constants.hpp>
-#include "text.hpp"
+#include "glyph.hpp"
 #include "i_rendering_engine.hpp"
 #include "opengl_graphics_context.hpp"
 #include "text_direction_map.hpp"
@@ -56,21 +56,46 @@ namespace neogfx
 	}
 
 	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface) :
-		iRenderingEngine(aRenderingEngine), iSurface(aSurface), iLogicalCoordinateSystem(aSurface.logical_coordinate_system()), iLogicalCoordinates(aSurface.logical_coordinates()), iSmoothingMode(SmoothingModeNone), iClipCounter(0), iLineStippleActive(false)
+		iRenderingEngine(aRenderingEngine), 
+		iSurface(aSurface), 
+		iSavedCoordinateSystem(aSurface.logical_coordinate_system()), 
+		iLogicalCoordinateSystem(iSavedCoordinateSystem), 
+		iLogicalCoordinates(aSurface.logical_coordinates()), 
+		iSmoothingMode(SmoothingModeNone), iClipCounter(0), 
+		iLineStippleActive(false)
 	{
 		set_smoothing_mode(SmoothingModeAntiAlias);
 	}
+
+	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget) :
+		iRenderingEngine(aRenderingEngine), 
+		iSurface(aSurface), 
+		iSavedCoordinateSystem(aWidget.logical_coordinate_system()),
+		iLogicalCoordinateSystem(iSavedCoordinateSystem),
+		iLogicalCoordinates(aSurface.logical_coordinates()),
+		iSmoothingMode(SmoothingModeNone), 
+		iClipCounter(0), 
+		iLineStippleActive(false)
+	{
+		set_smoothing_mode(SmoothingModeAntiAlias);
+	}
+
 	opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
-		iRenderingEngine(aOther.iRenderingEngine), iSurface(aOther.iSurface), iLogicalCoordinateSystem(aOther.iLogicalCoordinateSystem), iLogicalCoordinates(aOther.iLogicalCoordinates), iSmoothingMode(aOther.iSmoothingMode), iClipCounter(0), iLineStippleActive(false)
+		iRenderingEngine(aOther.iRenderingEngine), 
+		iSurface(aOther.iSurface), 
+		iSavedCoordinateSystem(aOther.iSavedCoordinateSystem),
+		iLogicalCoordinateSystem(aOther.iLogicalCoordinateSystem),
+		iLogicalCoordinates(aOther.iLogicalCoordinates),
+		iSmoothingMode(aOther.iSmoothingMode), 
+		iClipCounter(0), 
+		iLineStippleActive(false)
 	{
 		set_smoothing_mode(iSmoothingMode);
 	}
 
 	opengl_graphics_context::~opengl_graphics_context()
 	{
-		const auto& logicalCoordinates = surface().logical_coordinates();
-		glCheck(glLoadIdentity());
-		glCheck(glOrtho(logicalCoordinates[0], logicalCoordinates[2], logicalCoordinates[1], logicalCoordinates[3], -1.0, 1.0));
+		set_logical_coordinate_system(iSavedCoordinateSystem);
 	}
 
 	const i_native_surface& opengl_graphics_context::surface() const
@@ -518,7 +543,7 @@ namespace neogfx
 			draw_path(aPath, aPen);
 	}
 
-	glyph_text opengl_graphics_context::to_glyph_text(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont) const
+	glyph_text opengl_graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const
 	{
 		bool fallbackNeeded = false;
 		glyph_text::container result = to_glyph_text_impl(aTextBegin, aTextEnd, aFont, fallbackNeeded);
@@ -718,7 +743,7 @@ namespace neogfx
 		return vertex{{aPoint.x, aPoint.y, 0.0}};
 	}
 
-	glyph_text::container opengl_graphics_context::to_glyph_text_impl(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont, bool& aFallbackFontNeeded) const
+	glyph_text::container opengl_graphics_context::to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, bool& aFallbackFontNeeded) const
 	{
 		glyph_text::container result;
 		aFallbackFontNeeded = false;

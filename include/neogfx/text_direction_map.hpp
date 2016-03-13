@@ -20,7 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include "text.hpp"
+#include "glyph.hpp"
 
 namespace neogfx
 {

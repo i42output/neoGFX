@@ -27,6 +27,12 @@ namespace neogfx
 		opengl_graphics_context(aRenderingEngine, aRenderTarget), iRenderTarget(aRenderTarget)
 	{
 	}
+
+	sdl_graphics_context::sdl_graphics_context(i_rendering_engine& aRenderingEngine, const sdl_window& aRenderTarget, const i_widget& aWidget) :
+		opengl_graphics_context(aRenderingEngine, aRenderTarget, aWidget), iRenderTarget(aRenderTarget)
+	{
+	}
+
 	sdl_graphics_context::sdl_graphics_context(const sdl_graphics_context& aOther) :
 		opengl_graphics_context(aOther), iRenderTarget(aOther.iRenderTarget)
 	{

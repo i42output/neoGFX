@@ -23,38 +23,37 @@
 
 namespace neogfx
 {
-	rectangle::rectangle(const vec3& aPosition, const size& aSize)
+	rectangle::rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize) : 
+		shape(aContainer)
 	{
 		set_position_3D(aPosition);
 		set_size(aSize);
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const size& aSize, const colour& aColour) :
-		shape(aColour)
+	rectangle::rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const colour& aColour) :
+		shape(aContainer, aColour)
 	{
 		set_position_3D(aPosition);
 		set_size(aSize);
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const size& aSize, const i_texture& aTexture, const optional_rect& aTextureRect) :
-		shape(aTexture, aTextureRect)
+	rectangle::rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const i_texture& aTexture, const optional_rect& aTextureRect) :
+		shape(aContainer, aTexture, aTextureRect)
 	{
 		set_position_3D(aPosition);
 		set_size(aSize);
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const size& aSize, const i_image& aImage, const optional_rect& aTextureRect) :
-		shape(aImage, aTextureRect)
+	rectangle::rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const i_image& aImage, const optional_rect& aTextureRect) :
+		shape(aContainer, aImage, aTextureRect)
 	{
 		set_position_3D(aPosition);
 		set_size(aSize);
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const size& aSize, const rectangle& aOther) :
+	rectangle::rectangle(const rectangle& aOther) :
 		shape(aOther)
 	{
-		set_position_3D(aPosition);
-		set_size(aSize);
 	}
 
 	vertex_list3 rectangle::map() const

@@ -33,10 +33,20 @@ namespace neogfx
 		using i_sprite::optional_time_point;
 		// construction
 	public:
-		sprite();
-		sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		sprite(i_shape_container& aContainer);
+		sprite(i_shape_container& aContainer, const colour& aColour);
+		sprite(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
+		sprite(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		sprite(const sprite& aOther);
+		// container/buddy
+	public:
+		virtual i_shape_container& container() const;
+		virtual bool has_buddy() const;
+		virtual i_shape& buddy() const;
+		virtual void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{});
+		virtual const vec3& buddy_offset() const;
+		virtual void set_buddy_offset(const vec3& aBuddyOffset);
+		virtual void unset_buddy();
 		// animation
 	public:
 		virtual frame_index frame_count() const;

@@ -59,6 +59,8 @@ namespace neogfx
 		virtual void set_spin_degrees(const vec3& aSpin);
 		virtual void set_mass(scalar aMass);
 	public:
+		virtual const aabb_type& aabb() const;
+		virtual bool collided(const i_physical_object& aOther) const;
 		virtual bool update(const optional_time_point& aNow, const vec3& aForce);
 	private:
 		const physics& current_physics() const;
@@ -68,6 +70,7 @@ namespace neogfx
 		bool apply_physics(double aElapsedTime, const vec3& aForce);
 	private:
 		vec3 iOrigin;
+		mutable aabb_type iAxisAlignedBoundingBox;
 		optional_time_point iTimeOfLastUpdate;
 		mutable optional_physics iCurrentPhysics;
 		mutable optional_physics iNextPhysics;

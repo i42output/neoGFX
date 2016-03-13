@@ -77,6 +77,7 @@ namespace neogfx
 		virtual void restore_mouse_cursor();
 	public:
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const;
+		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const;
 	public:
 		virtual void close();
 		virtual bool is_active() const;

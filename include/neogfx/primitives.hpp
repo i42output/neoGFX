@@ -21,8 +21,9 @@
 
 #include "neogfx.hpp"
 #include "geometry.hpp"
+#include "numerical.hpp"
 #include "colour.hpp"
-#include "text.hpp"
+#include "glyph.hpp"
 
 namespace neogfx
 {

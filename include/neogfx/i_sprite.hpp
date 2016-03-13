@@ -46,8 +46,5 @@ namespace neogfx
 		// rendering
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
-		// helpers
-	public:
-		void set_size(const size& aSize) { set_bounding_box(rect{ origin() - (aSize / size{ 2.0 }), aSize }); }
 	};
 }

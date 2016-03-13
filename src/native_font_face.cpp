@@ -25,7 +25,7 @@
 #include FT_BITMAP_H
 #include "opengl_error.hpp"
 #include "native_font_face.hpp"
-#include "text.hpp"
+#include "glyph.hpp"
 #include "i_rendering_engine.hpp"
 
 namespace neogfx

@@ -80,6 +80,7 @@ namespace neogfx
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true);
 		virtual void render_surface();
 		virtual graphics_context create_graphics_context() const;
+		virtual graphics_context create_graphics_context(const i_widget& aWidget) const;
 		virtual const i_native_surface& native_surface() const;
 		virtual i_native_surface& native_surface();
 		virtual bool destroyed() const;

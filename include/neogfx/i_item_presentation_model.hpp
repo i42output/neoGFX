@@ -23,7 +23,7 @@
 #include <boost/format.hpp>
 #include "colour.hpp"
 #include "font.hpp"
-#include "text.hpp"
+#include "glyph.hpp"
 #include "item_model_index.hpp"
 
 namespace neogfx

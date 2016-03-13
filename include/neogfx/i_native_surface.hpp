@@ -61,5 +61,6 @@ namespace neogfx
 		virtual void render() = 0;
 		virtual bool is_rendering() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
+		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
 	};
 }

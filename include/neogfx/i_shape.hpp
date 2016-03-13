@@ -43,6 +43,22 @@ namespace neogfx
 		virtual void set_transformation(const optional_mat33& aTransformation) = 0;
 	};
 
+	class i_shape;
+
+	class i_shape_container
+	{
+	public:
+		virtual const i_widget& as_widget() const = 0;
+		virtual i_widget& as_widget() = 0;
+	public:
+		virtual bool has_buddy(const i_shape& aShape) const = 0;
+		virtual i_shape& buddy(const i_shape& aShape) const = 0;
+		virtual void set_buddy(const i_shape& aShape, i_shape& aBuddy, const vec3& aBuddyOffset = vec3{}) = 0;
+		virtual const vec3& buddy_offset(const i_shape& aShape) const = 0;
+		virtual void set_buddy_offset(const i_shape& aShape, const vec3& aBuddyOffset) = 0;
+		virtual void unset_buddy(const i_shape& aShape) = 0;
+	};
+
 	class i_shape
 	{
 		// types
@@ -54,10 +70,20 @@ namespace neogfx
 		typedef boost::optional<time_point> optional_time_point;
 		// exceptions
 	public:
+		struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::i_shape::no_buddy") {} };
 		struct bad_frame_index : std::logic_error { bad_frame_index() : std::logic_error("neogfx::i_shape::bad_frame_index") {} };
 		// construction
 	public:
 		virtual ~i_shape() {}
+		// container/buddy
+	public:
+		virtual i_shape_container& container() const = 0;
+		virtual bool has_buddy() const = 0;
+		virtual i_shape& buddy() const = 0;
+		virtual void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{}) = 0;
+		virtual const vec3& buddy_offset() const = 0;
+		virtual void set_buddy_offset(const vec3& aBuddyOffset) = 0;
+		virtual void unset_buddy() = 0;
 		// animation
 	public:
 		virtual frame_index frame_count() const = 0;

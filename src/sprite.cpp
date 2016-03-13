@@ -23,17 +23,23 @@
 
 namespace neogfx
 {
-	sprite::sprite()
+	sprite::sprite(i_shape_container& aContainer) :
+		shape(aContainer)
 	{
 	}
 
-	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect) : 
-		shape(aTexture, aTextureRect)
+	sprite::sprite(i_shape_container& aContainer, const colour& aColour) :
+		shape(aContainer, aColour)
 	{
 	}
 
-	sprite::sprite(const i_image& aImage, const optional_rect& aTextureRect) :
-		shape(aImage, aTextureRect)
+	sprite::sprite(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect) :
+		shape(aContainer, aTexture, aTextureRect)
+	{
+	}
+
+	sprite::sprite(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect) :
+		shape(aContainer, aImage, aTextureRect)
 	{
 	}
 
@@ -42,6 +48,41 @@ namespace neogfx
 		iPath(aOther.iPath),
 		iObject(aOther.iObject)
 	{
+	}
+
+	i_shape_container& sprite::container() const
+	{
+		return shape::container();
+	}
+
+	bool sprite::has_buddy() const
+	{
+		return shape::has_buddy();
+	}
+
+	i_shape& sprite::buddy() const
+	{
+		return shape::buddy();
+	}
+
+	void sprite::set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset)
+	{
+		shape::set_buddy(aBuddy, aBuddyOffset);
+	}
+
+	const vec3& sprite::buddy_offset() const
+	{
+		return shape::buddy_offset();
+	}
+
+	void sprite::set_buddy_offset(const vec3& aBuddyOffset)
+	{
+		shape::set_buddy_offset(aBuddyOffset);
+	}
+
+	void sprite::unset_buddy()
+	{
+		shape::unset_buddy();
 	}
 
 	sprite::frame_index sprite::frame_count() const

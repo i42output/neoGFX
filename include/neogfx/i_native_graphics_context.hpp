@@ -63,7 +63,7 @@ namespace neogfx
 		virtual void fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour) = 0;
 		virtual void fill_solid_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) = 0;
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen) = 0;
-		virtual glyph_text to_glyph_text(text::const_iterator aTextBegin, text::const_iterator aTextEnd, const font& aFont) const = 0;
+		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const = 0;
 		virtual void begin_drawing_glyphs() = 0;
 		virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) = 0;
 		virtual void end_drawing_glyphs() = 0;

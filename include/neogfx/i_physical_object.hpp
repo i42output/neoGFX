@@ -28,6 +28,7 @@ namespace neogfx
 	class i_physical_object
 	{
 	public:
+		typedef std::array<vec3, 6> aabb_type;
 		typedef std::chrono::time_point<std::chrono::steady_clock> time_point;
 		typedef boost::optional<time_point> optional_time_point;
 	public:
@@ -69,6 +70,8 @@ namespace neogfx
 			set_spin_degrees(vec3{ 0.0, 0.0, aSpin });
 		}
 	public:
+		virtual const aabb_type& aabb() const = 0;
+		virtual bool collided(const i_physical_object& aOther) const = 0;
 		virtual bool update(const optional_time_point& aNow, const vec3& aForce) = 0;
 	};
 }

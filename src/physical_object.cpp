@@ -126,6 +126,17 @@ namespace neogfx
 		current_physics().iMass = aMass;
 	}
 
+	const physical_object::aabb_type& physical_object::aabb() const
+	{
+		return iAxisAlignedBoundingBox;
+	}
+
+	bool physical_object::collided(const i_physical_object& aOther) const
+	{
+		/* todo */
+		return false;
+	}
+
 	bool physical_object::update(const optional_time_point& aNow, const vec3& aForce)
 	{
 		bool updated = false;

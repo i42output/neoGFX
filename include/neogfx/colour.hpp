@@ -21,7 +21,6 @@
 
 #include "neogfx.hpp"
 #include "geometry.hpp"
-#include "text.hpp"
 #include "hsl_colour.hpp"
 
 namespace neogfx
@@ -713,10 +712,10 @@ namespace neogfx
 		colour();
 		explicit colour(argb aValue);
 		colour(component aRed, component aGreen, component aBlue, component aAlpha = 0xFF);
-		colour(const text& aTextValue);
+		colour(const std::string& aTextValue);
 		// operations
 	public:
-		static colour from_name(const text& aName);
+		static colour from_name(const std::string& aName);
 		argb value() const;
 		component alpha() const;
 		component red() const;

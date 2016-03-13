@@ -38,7 +38,7 @@ namespace neogfx
 	{
 	}
 
-	colour::colour(const text& aTextValue) : iValue()
+	colour::colour(const std::string& aTextValue) : iValue()
 	{
 		if (aTextValue[0] == L'#')
 		{
@@ -915,11 +915,11 @@ namespace neogfx
 	const colour colour::Yellow4 = colour(0x8B, 0x8B, 0x00);
 	const colour colour::YellowGreen = colour(0x9A, 0xCD, 0x32);
 
-	colour colour::from_name(const text& aName)
+	colour colour::from_name(const std::string& aName)
 	{
-		struct named_colours : public std::map<ci_text, colour>
+		struct named_colours : public std::map<neolib::ci_string, colour>
 		{
-			named_colours() : std::map<ci_text, colour>
+			named_colours() : std::map<neolib::ci_string, colour>
 			({
 				{ "alice blue", AliceBlue },
 				{ "AliceBlue", AliceBlue },

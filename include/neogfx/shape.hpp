@@ -58,11 +58,21 @@ namespace neogfx
 	private:
 		typedef std::vector<std::shared_ptr<i_frame>> frame_list;
 	public:
-		shape();
-		shape(const colour& aColour);
-		shape(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		shape(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		shape(i_shape_container& aContainer);
+		shape(i_shape_container& aContainer, const colour& aColour);
+		shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
+		shape(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		shape(const shape& aOther);
+		// container/buddy
+	public:
+		virtual i_shape_container& container() const;
+		virtual bool has_buddy() const;
+		virtual i_shape& buddy() const;
+		virtual void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{});
+		virtual const vec3& buddy_offset() const;
+		virtual void set_buddy_offset(const vec3& aBuddyOffset);
+		virtual void unset_buddy();
+		// animation
 	public:
 		virtual frame_index frame_count() const;
 		virtual const i_frame& frame(frame_index aFrameIndex) const;
@@ -73,6 +83,7 @@ namespace neogfx
 		virtual void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame);
 		virtual void remove_frame(frame_index aFrameIndex);
 		virtual void set_texture_rect_for_all_frames(const optional_rect& aTextureRect);
+		// geometry
 	public:
 		virtual const animation_frames& animation() const;
 		virtual const i_frame& current_frame() const;
@@ -92,10 +103,13 @@ namespace neogfx
 		virtual void set_bounding_box(const optional_rect& aBoundingBox);
 		virtual void set_scale(const vec2& aScale);
 		virtual void set_transformation_matrix(const optional_matrix33& aTransformationMatrix);
+		// rendering
 	public:
 		virtual bool update(const optional_time_point& aNow = optional_time_point());
 		virtual void paint(graphics_context& aGraphicsContext) const;
+		// attributes
 	private:
+		i_shape_container& iContainer;
 		frame_list iFrames;
 		animation_frames iAnimation;
 		frame_index iCurrentFrame;
