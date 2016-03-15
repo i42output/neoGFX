@@ -65,8 +65,9 @@ namespace neogfx
 	}
 
 	radio_button::radio_button(const std::string& aText) :
-		button(aText), iDisc(*this), iOnState(false)
+		button(aText), iDisc(*this)
 	{
+		set_checkable(BiState);
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
 		layout().add_spacer();
@@ -75,7 +76,7 @@ namespace neogfx
 	}
 
 	radio_button::radio_button(i_widget& aParent, const std::string& aText) :
-		button(aParent, aText), iDisc(*this), iOnState(false)
+		button(aParent, aText), iDisc(*this)
 	{
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
@@ -85,7 +86,7 @@ namespace neogfx
 	}
 
 	radio_button::radio_button(i_layout& aLayout, const std::string& aText) :
-		button(aLayout, aText), iDisc(*this), iOnState(false)
+		button(aLayout, aText), iDisc(*this)
 	{
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
@@ -96,17 +97,17 @@ namespace neogfx
 
 	bool radio_button::is_on() const
 	{
-		return iOnState == true;
+		return is_checked();
 	}
 
 	bool radio_button::is_off() const
 	{
-		return iOnState == false;
+		return !is_checked();
 	}
 
 	void radio_button::set_on()
 	{
-		set_on_state(true);
+		set_checked();
 	}
 
 	void radio_button::paint(graphics_context& aGraphicsContext) const
@@ -146,20 +147,19 @@ namespace neogfx
 		return const_cast<radio_button*>(const_cast<const radio_button*>(this)->next_radio_button());
 	}
 
-	void radio_button::set_on_state(bool aOnState)
+	bool radio_button::set_checked_state(const boost::optional<bool>& aCheckedState)
 	{
-		if (iOnState != aOnState)
-		{
-			if (aOnState)
-				for (radio_button* nextRadioButton = next_radio_button(); nextRadioButton != this; nextRadioButton = nextRadioButton->next_radio_button())
-					nextRadioButton->set_on_state(false);
-			iOnState = aOnState;
-			update();
-			if (is_on())
-				on.trigger();
-			else if (is_off())
-				off.trigger();
-		}
+		if (checked_state() == aCheckedState)
+			return false;
+		if (aCheckedState != boost::none && *aCheckedState)
+			for (radio_button* nextRadioButton = next_radio_button(); nextRadioButton != this; nextRadioButton = nextRadioButton->next_radio_button())
+				nextRadioButton->set_unchecked();
+		button::set_checked_state(aCheckedState);
+		if (is_on())
+			on.trigger();
+		else if (is_off())
+			off.trigger();
+		return true;
 	}
 
 	bool radio_button::any_siblings_on() const

@@ -27,18 +27,6 @@ namespace neogfx
 {
 	class check_box : public button
 	{
-	public:
-		event<> checked;
-		event<> unchecked;
-		event<> indeterminate;
-	public:
-		enum style_e
-		{
-			BiState,
-			TriState
-		};
-	public:
-		struct not_tri_state_check_box : public std::logic_error { not_tri_state_check_box() : std::logic_error("neogfx::check_box::not_tri_state_check_box") {} };
 	private:
 		class box : public widget
 		{
@@ -51,26 +39,12 @@ namespace neogfx
 			virtual void paint(graphics_context& aGraphicsContext) const;
 		};
 	public:
-		check_box(const std::string& aText = std::string(), style_e aStyle = BiState);
-		check_box(i_widget& aParent, const std::string& aText = std::string(), style_e aStyle = BiState);
-		check_box(i_layout& aLayout, const std::string& aText = std::string(), style_e aStyle = BiState);
-	public:
-		bool is_checked() const;
-		bool is_unchecked() const;
-		bool is_indeterminate() const;
-		void set_checked();
-		void set_unchecked();
-		void set_indeterminate();
-		void set_checked(bool aChecked);
-		void toggle();
+		check_box(const std::string& aText = std::string(), checkable_e aCheckable = BiState);
+		check_box(i_widget& aParent, const std::string& aText = std::string(), checkable_e aCheckable = BiState);
+		check_box(i_layout& aLayout, const std::string& aText = std::string(), checkable_e aCheckable = BiState);
 	protected:
 		virtual void paint(graphics_context& aGraphicsContext) const;
-		virtual void handle_pressed();
-	protected:
-		void set_checked_state(const boost::optional<bool>& aCheckedState);
 	private:
-		style_e iStyle;
 		box iBox;
-		boost::optional<bool> iCheckedState;
 	};
 }

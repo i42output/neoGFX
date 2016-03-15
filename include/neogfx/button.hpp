@@ -32,10 +32,34 @@ namespace neogfx
 	public:
 		event<> pressed;
 	public:
+		event<> checked;
+		event<> unchecked;
+		event<> indeterminate;
+	public:
+		enum checkable_e
+		{
+			NotCheckable,
+			BiState,
+			TriState
+		};
+	public:
+		struct not_tri_state_checkable : public std::logic_error { not_tri_state_checkable() : std::logic_error("neogfx::button::not_tri_state_checkable") {} };
+	public:
 		button(const std::string& aText = std::string(), alignment aAlignment = alignment::Left | alignment::VCentre);
 		button(i_widget& aParent, const std::string& aText = std::string(), alignment aAlignment = alignment::Left | alignment::VCentre);
 		button(i_layout& aLayout, const std::string& aText = std::string(), alignment aAlignment = alignment::Left | alignment::VCentre);
 		~button();
+	public:
+		checkable_e checkable() const;
+		void set_checkable(checkable_e aCheckable = BiState);
+		bool is_checked() const;
+		bool is_unchecked() const;
+		bool is_indeterminate() const;
+		void set_checked();
+		void set_unchecked();
+		void set_indeterminate();
+		void set_checked(bool aChecked);
+		void toggle();
 	public:
 		const neogfx::label& label() const;
 		neogfx::label& label();
@@ -51,7 +75,12 @@ namespace neogfx
 		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	protected:
 		virtual void handle_pressed();
+	protected:
+		virtual const boost::optional<bool>& checked_state() const;
+		virtual bool set_checked_state(const boost::optional<bool>& aCheckedState);
 	private:
+		checkable_e iCheckable;
+		boost::optional<bool> iCheckedState;
 		horizontal_layout iLayout;
 		neogfx::label iLabel;
 	};

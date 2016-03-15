@@ -25,14 +25,14 @@
 namespace neogfx
 {
 	button::button(const std::string& aText, alignment aAlignment) :
-		widget(), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
+		widget(), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		layout().set_margins(neogfx::margins(0.0));
 		set_focus_policy(focus_policy::TabFocus);
 	}
 	
 	button::button(i_widget& aParent, const std::string& aText, alignment aAlignment) :
-		widget(aParent), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
+		widget(aParent), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		layout().set_margins(neogfx::margins(0.0));
 		set_focus_policy(focus_policy::TabFocus);
@@ -40,7 +40,7 @@ namespace neogfx
 
 
 	button::button(i_layout& aLayout, const std::string& aText, alignment aAlignment) :
-		widget(aLayout), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
+		widget(aLayout), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		layout().set_margins(neogfx::margins(0.0));
 		set_focus_policy(focus_policy::TabFocus);
@@ -49,7 +49,60 @@ namespace neogfx
 	button::~button()
 	{
 	}
-	
+
+	button::checkable_e button::checkable() const
+	{
+		return iCheckable;
+	}
+
+	void button::set_checkable(checkable_e aCheckable)
+	{
+		iCheckable = aCheckable;
+	}
+
+	bool button::is_checked() const
+	{
+		return iCheckedState != boost::none && *iCheckedState == true;
+	}
+
+	bool button::is_unchecked() const
+	{
+		return iCheckedState != boost::none && *iCheckedState == false;
+	}
+
+	bool button::is_indeterminate() const
+	{
+		return iCheckedState == boost::none;
+	}
+
+	void button::set_checked()
+	{
+		set_checked_state(true);
+	}
+
+	void button::set_unchecked()
+	{
+		set_checked_state(false);
+	}
+
+	void button::set_indeterminate()
+	{
+		set_checked_state(boost::none);
+	}
+
+	void button::set_checked(bool aChecked)
+	{
+		set_checked_state(aChecked);
+	}
+
+	void button::toggle()
+	{
+		if (is_checked() || is_indeterminate())
+			set_checked(false);
+		else
+			set_checked(true);
+	}
+
 	const neogfx::label& button::label() const
 	{
 		return iLabel;
@@ -111,6 +164,30 @@ namespace neogfx
 	void button::handle_pressed()
 	{
 		pressed.trigger();
+		if (iCheckable != NotCheckable)
+			toggle();
+	}
+
+	const boost::optional<bool>& button::checked_state() const
+	{
+		return iCheckedState;
+	}
+
+	bool button::set_checked_state(const boost::optional<bool>& aCheckedState)
+	{
+		if (iCheckedState == aCheckedState)
+			return false;
+		if (aCheckedState == boost::none && iCheckable != TriState)
+			throw not_tri_state_checkable();
+		iCheckedState = aCheckedState;
+		update();
+		if (is_checked())
+			checked.trigger();
+		else if (is_unchecked())
+			unchecked.trigger();
+		else if (is_indeterminate())
+			indeterminate.trigger();
+		return true;
 	}
 }
 

@@ -52,12 +52,11 @@ namespace neogfx
 		virtual void paint(graphics_context& aGraphicsContext) const;
 		virtual void handle_pressed();
 	protected:
-		const radio_button* next_radio_button() const;
-		radio_button* next_radio_button();
-		void set_on_state(bool aOnState);
-		bool any_siblings_on() const;
+		virtual const radio_button* next_radio_button() const;
+		virtual radio_button* next_radio_button();
+		virtual bool any_siblings_on() const;
+		virtual bool set_checked_state(const boost::optional<bool>& aCheckedState);
 	private:
 		disc iDisc;
-		bool iOnState;
 	};
 }
