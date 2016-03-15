@@ -36,6 +36,11 @@ namespace neogfx
 
 	void resource_manager::add_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize)
 	{
+		iResources[aUri] = i_resource::pointer(std::make_shared<resource>(*this, aUri, aResourceData, aResourceSize));
+	}
+
+	void resource_manager::add_module_resource(const std::string& aUri, const void* aResourceData, std::size_t aResourceSize)
+	{
 		iResources[aUri] = i_resource::pointer(std::make_shared<module_resource>(aUri, aResourceData, aResourceSize));
 	}
 

@@ -18,11 +18,54 @@
 */
 
 #include "neogfx.hpp"
+#include <sstream>
+#include <boost/filesystem.hpp>
+#include <neolib/uri.hpp>
+#include <neolib/zip.hpp>
 #include "resource.hpp"
 
 namespace neogfx
 {
-	resource::resource(i_resource_manager& aManager, const std::string& aUri) : iManager(aManager), iUri(aUri), iSize(0)
+	resource::resource(i_resource_manager& aManager, const std::string& aUri) : 
+		iManager(aManager), iUri(aUri), iSize(0)
+	{
+		neolib::uri uri(aUri);
+		if (uri.scheme() == "file")
+		{
+			if (uri.fragment().empty()) // individual asset file
+			{ 
+				iData.resize(static_cast<std::size_t>(boost::filesystem::file_size(uri.path())));
+				std::ifstream input(uri.path(), std::ios::binary | std::ios::in);
+				input.read(reinterpret_cast<char*>(data()), iData.size());
+				iSize = iData.size();
+			}
+			else // asset archive
+			{
+				neolib::zip archive(uri.path());
+				for (std::size_t i = 0; i < archive.file_count(); ++i)
+				{
+					if (archive.file_path(i) == uri.fragment())
+					{
+						archive.extract_to(i, iData);
+						iSize = iData.size();
+					}
+					else
+					{
+						neolib::uri otherResource(uri);
+						otherResource.set_fragment(archive.file_path(i));
+						std::ostringstream oss;
+						oss << otherResource;
+						neolib::zip::buffer_type buffer;
+						archive.extract_to(i, buffer);
+						aManager.add_resource(oss.str(), &buffer[0], buffer.size());
+					}
+				}
+			}
+		}
+	}
+
+	resource::resource(i_resource_manager& aManager, const std::string& aUri, const void* aData, std::size_t aSize) : 
+		iManager(aManager), iUri(aUri), iSize(aSize), iData(reinterpret_cast<const uint8_t*>(aData), reinterpret_cast<const uint8_t*>(aData) + aSize)
 	{
 	}
 

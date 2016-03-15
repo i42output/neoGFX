@@ -1,4 +1,5 @@
 ﻿#include <neolib/neolib.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <neogfx/app.hpp>
 #include <neogfx/window.hpp>

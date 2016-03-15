@@ -31,6 +31,7 @@ namespace neogfx
 	public:
 		resource() = delete;
 		resource(i_resource_manager& aManager, const std::string& aUri);
+		resource(i_resource_manager& aManager, const std::string& aUri, const void* aData, std::size_t aSize);
 		~resource();
 	public:
 		virtual bool available() const;

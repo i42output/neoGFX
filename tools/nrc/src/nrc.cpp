@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 			output << "\t\tregister_data()" << std::endl << "\t\t{" << std::endl;
 			for (std::size_t i = 0; i < resourcePaths.size(); ++i)
 			{
-				output << "\t\t\tneogfx::resource_manager::instance().add_resource("
+				output << "\t\t\tneogfx::resource_manager::instance().add_module_resource("
 					<< "\":/" << resourcePaths[i] << "\", " << "resource_" << i << "_data, " << "sizeof(resource_" << i << "_data)"
 					<< ");" << std::endl;
 			}
