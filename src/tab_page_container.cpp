@@ -78,28 +78,28 @@ namespace neogfx
 	tab_page_container::tab_page_container() : 
 		widget(), iContainerLayout(*this), iTabBar(iContainerLayout, *this), iPageLayout(iContainerLayout)
 	{
-		set_margins(neogfx::margins(0.0, 0.0));
-		iContainerLayout.set_margins(neogfx::margins(0.0, 0.0));
-		iContainerLayout.set_spacing(size(0.0, 0.0));
-		iPageLayout.set_margins(neogfx::margins(0.0, 0.0));
+		set_margins(neogfx::margins{});
+		iContainerLayout.set_margins(neogfx::margins{});
+		iContainerLayout.set_spacing(size{});
+		iPageLayout.set_margins(neogfx::margins{});
 	}
 
 	tab_page_container::tab_page_container(i_widget& aParent) :
 		widget(aParent), iContainerLayout(*this), iTabBar(iContainerLayout, *this), iPageLayout(iContainerLayout)
 	{
-		set_margins(neogfx::margins(0.0, 0.0));
-		iContainerLayout.set_margins(neogfx::margins(0.0, 0.0));
-		iContainerLayout.set_spacing(size(0.0, 0.0));
-		iPageLayout.set_margins(neogfx::margins(0.0, 0.0));
+		set_margins(neogfx::margins{});
+		iContainerLayout.set_margins(neogfx::margins{});
+		iContainerLayout.set_spacing(size{});
+		iPageLayout.set_margins(neogfx::margins{});
 	}
 
 	tab_page_container::tab_page_container(i_layout& aLayout) :
 		widget(aLayout), iContainerLayout(*this), iTabBar(iContainerLayout, *this), iPageLayout(iContainerLayout)
 	{
-		set_margins(neogfx::margins(0.0, 0.0));
-		iContainerLayout.set_margins(neogfx::margins(0.0, 0.0));
-		iContainerLayout.set_spacing(size(0.0, 0.0));
-		iPageLayout.set_margins(neogfx::margins(0.0, 0.0));
+		set_margins(neogfx::margins{});
+		iContainerLayout.set_margins(neogfx::margins{});
+		iContainerLayout.set_spacing(size{});
+		iPageLayout.set_margins(neogfx::margins{});
 	}
 
 	stack_layout& tab_page_container::page_layout()

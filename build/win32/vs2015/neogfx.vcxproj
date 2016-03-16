@@ -201,6 +201,7 @@
     <ClInclude Include="..\..\..\include\neogfx\window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\include\neogfx\layout.inl" />
     <None Include="..\..\..\include\neogfx\path.inl" />
     <None Include="..\..\..\src\subpixel_rgb_horizontal.frag" />
   </ItemGroup>

@@ -203,7 +203,7 @@ namespace neogfx
 		optional_size iWeight;
 		optional_size iMinimumSize;
 		optional_size iMaximumSize;
-		bool iLayoutInProgress;
+		uint32_t iLayoutInProgress;
 		mutable std::unordered_set<rect> iUpdateRects;
 		bool iVisible;
 		bool iEnabled;

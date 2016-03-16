@@ -28,32 +28,32 @@
 
 namespace neogfx
 {
-	vertical_layout::vertical_layout(alignment aHorizontalAlignment) :
-		iHorizontalAlignment(aHorizontalAlignment)
+	vertical_layout::vertical_layout(neogfx::alignment aAlignment) :
+		layout(aAlignment)
 	{
 	}
 
-	vertical_layout::vertical_layout(i_widget& aParent, alignment aHorizontalAlignment) :
-		layout(aParent), iHorizontalAlignment(aHorizontalAlignment)
+	vertical_layout::vertical_layout(i_widget& aParent, neogfx::alignment aAlignment) :
+		layout(aParent, aAlignment)
 	{
 	}
 
-	vertical_layout::vertical_layout(i_layout& aParent, alignment aHorizontalAlignment) :
-		layout(aParent), iHorizontalAlignment(aHorizontalAlignment)
+	vertical_layout::vertical_layout(i_layout& aParent, neogfx::alignment aAlignment) :
+		layout(aParent, aAlignment)
 	{
 	}
 
 	i_spacer& vertical_layout::add_spacer()
 	{
 		auto s = std::make_shared<vertical_spacer>();
-		add_spacer(s);
+		add_item(s);
 		return *s;
 	}
 
 	i_spacer& vertical_layout::add_spacer(uint32_t aPosition)
 	{
 		auto s = std::make_shared<vertical_spacer>();
-		add_spacer(aPosition, s);
+		add_item(aPosition, s);
 		return *s;
 	}
 
@@ -119,183 +119,8 @@ namespace neogfx
 	{
 		if (!enabled())
 			return;
-		uint32_t itemsVisibleIncludingSpacers = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
-		if (itemsVisibleIncludingSpacers == 0)
-			return;
-		uint32_t itemsVisible = items_visible();
 		owner()->layout_items_started();
-		size availableSize = aSize;
-		availableSize.cx -= (margins().left + margins().right);
-		availableSize.cy -= (margins().top + margins().bottom);
-		uint32_t itemsZeroSized = 0;
-		if (aSize.cy <= minimum_size().cy || items_visible(ItemTypeSpacer))
-		{
-			for (const auto& item : items())
-			{
-				if (!item.visible())
-					continue;
-				if (!item.get().is<item::spacer_pointer>() && (item.minimum_size().cx == 0.0 || item.minimum_size().cy == 0.0))
-					++itemsZeroSized;
-			}
-		}
-		if (itemsVisible - itemsZeroSized > 1)
-			availableSize.cy -= (spacing().cy * (itemsVisible - itemsZeroSized - 1));
-		size::dimension_type leftover = availableSize.cy;
-		size::dimension_type eachLeftover = std::floor(leftover / itemsVisible);
-		size totalExpanderWeight;
-		enum disposition_e { Unknown, Normal, TooSmall, TooBig, FixedSize };
-		std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<std::pair<const item*, disposition_e>>> itemDispositions;
-		std::unordered_set<const item*, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<const item*>> expandersUsingLeftover;
-		std::size_t itemsNotUsingLeftover = 0;
-		bool done = false;
-		while (!done)
-		{
-			done = true;
-			for (const auto& item : items())
-			{
-				if (!item.visible())
-					continue;
-				if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
-					continue;
-				bool wasItemUsingLeftOver = (itemDispositions[&item] == Unknown || itemDispositions[&item] == Normal);
-				if (item.size_policy() == size_policy::Expanding && item.maximum_size().cy >= leftover)
-				{
-					if (expandersUsingLeftover.empty())
-					{
-						itemDispositions.clear();
-						itemsNotUsingLeftover = 0;
-						leftover = availableSize.cy;
-						totalExpanderWeight = size{};
-						eachLeftover = 0.0;
-					}
-					expandersUsingLeftover.insert(&item);
-					totalExpanderWeight += item.weight();
-					done = false;
-					break;
-				}
-				else if (item.size_policy() != size_policy::Expanding && !expandersUsingLeftover.empty())
-				{
-					if (itemDispositions[&item] != TooBig)
-					{
-						if (itemDispositions[&item] == TooSmall)
-							leftover += item.maximum_size().cy;
-						itemDispositions[&item] = TooBig;
-						if (wasItemUsingLeftOver)
-							++itemsNotUsingLeftover;
-						leftover -= item.minimum_size().cy;
-						done = false;
-					}
-				}
-				else if (item.maximum_size().cy < eachLeftover)
-				{
-					if (itemDispositions[&item] != TooSmall && itemDispositions[&item] != Normal && itemDispositions[&item] != FixedSize)
-					{
-						if (itemDispositions[&item] == TooBig)
-							leftover += item.minimum_size().cy;
-						itemDispositions[&item] = item.is_fixed_size() ? FixedSize : TooSmall;
-						if (wasItemUsingLeftOver)
-							++itemsNotUsingLeftover;
-						leftover -= item.maximum_size().cy;
-						if (expandersUsingLeftover.empty())
-							eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
-						done = false;
-					}
-				}
-				else if (item.minimum_size().cy > eachLeftover)
-				{
-					if (itemDispositions[&item] != TooBig && itemDispositions[&item] != FixedSize)
-					{
-						if (itemDispositions[&item] == TooSmall)
-							leftover += item.maximum_size().cy;
-						itemDispositions[&item] = item.is_fixed_size() ? FixedSize : TooBig;
-						if (wasItemUsingLeftOver)
-							++itemsNotUsingLeftover;
-						leftover -= item.minimum_size().cy;
-						if (expandersUsingLeftover.empty())
-							eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
-						done = false;
-					}
-				}
-				else if (itemDispositions[&item] != Normal && itemDispositions[&item] != FixedSize)
-				{
-					if (itemDispositions[&item] == TooSmall)
-						leftover += item.maximum_size().cy;
-					else if (itemDispositions[&item] == TooBig)
-						leftover += item.minimum_size().cy;
-					itemDispositions[&item] = item.is_fixed_size() ? FixedSize : Normal;
-					if (wasItemUsingLeftOver && item.is_fixed_size())
-						++itemsNotUsingLeftover;
-					else if (!wasItemUsingLeftOver && !item.is_fixed_size())
-						--itemsNotUsingLeftover;
-					if (expandersUsingLeftover.empty())
-						eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
-					done = false;
-				}
-			}	
-		}
-		if (leftover < 0.0)
-		{
-			leftover = 0.0;
-			eachLeftover = 0.0;
-		}
-		uint32_t numberUsingLeftover = itemsVisibleIncludingSpacers - itemsNotUsingLeftover;
-		uint32_t bitsLeft = static_cast<int32_t>(leftover - (eachLeftover * numberUsingLeftover));
-		if (!expandersUsingLeftover.empty())
-		{
-			size::dimension_type totalIntegralAmount = 0.0;
-			for (const auto& s : expandersUsingLeftover)
-				totalIntegralAmount += std::floor(s->weight().cy / totalExpanderWeight.cy * leftover);
-			bitsLeft = static_cast<int32_t>(leftover - totalIntegralAmount);
-		}
-		neolib::bresenham_counter<int32_t> bits(bitsLeft, numberUsingLeftover);
-		uint32_t previousBit = 0;
-		point nextPos = aPosition;
-		nextPos.x += margins().left;
-		nextPos.y += margins().top;
-		for (auto& item : items())
-		{
-			if (!item.visible())
-				continue;
-			size s{ std::min(std::max(item.minimum_size().cx, availableSize.cx), item.maximum_size().cx), 0 };
-			point alignmentAdjust;
-			switch (iHorizontalAlignment)
-			{
-			case alignment::Left:
-				alignmentAdjust.x = 0.0;
-				break;
-			case alignment::Right:
-				alignmentAdjust.x = availableSize.cx - s.cx;
-				break;
-			case alignment::Centre:
-			default:
-				alignmentAdjust.x = std::ceil((availableSize.cx - s.cx) / 2.0);
-				break;
-			}
-			if (alignmentAdjust.x < 0.0)
-				alignmentAdjust.x = 0.0;
-			if (itemDispositions[&item] == TooBig || itemDispositions[&item] == FixedSize)
-				s.cy = item.minimum_size().cy;
-			else if (itemDispositions[&item] == TooSmall)
-				s.cy = item.maximum_size().cy;
-			else if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
-			{
-				uint32_t bit = bitsLeft != 0 ? bits() : 0;
-				s.cy = std::floor(item.weight().cy / totalExpanderWeight.cy * leftover) + static_cast<size::dimension_type>(bit - previousBit);
-				previousBit = bit;
-			}
-			else
-			{
-				uint32_t bit = bitsLeft != 0 ? bits() : 0;
-				s.cy = eachLeftover + static_cast<size::dimension_type>(bit - previousBit);
-				previousBit = bit;
-			}
-			item.layout(nextPos + alignmentAdjust, s);
-			if (!item.get().is<item::spacer_pointer>() && (s.cx == 0.0 || s.cy == 0.0))
-				continue;
-			nextPos.y += s.cy;
-			if (!item.get().is<item::spacer_pointer>())
-				nextPos.y += spacing().cy;
-		}
+		layout::do_layout_items<layout::row_major<vertical_layout>>(aPosition, aSize);
 		owner()->layout_items_completed();
 	}
 }

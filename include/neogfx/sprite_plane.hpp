@@ -105,5 +105,6 @@ namespace neogfx
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
 		mutable std::vector<i_shape*> iRenderBuffer;
+		mutable std::vector<i_physical_object*> iUpdateBuffer;
 	};
 }

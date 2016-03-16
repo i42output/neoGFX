@@ -24,35 +24,57 @@
 
 namespace neogfx
 {
-	label::label(const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(), iAlignment(aAlignment), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
+	label::label(const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
+		widget(), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
-		handle_alignment();
 		iLayout.set_size_policy(neogfx::size_policy::Minimum);
-		iLayout.set_margins(neogfx::margins(0.0));
-		iText.set_margins(neogfx::margins(0.0));
+		iLayout.set_margins(neogfx::margins{});
+		iText.set_margins(neogfx::margins{});
+		iImage.set_margins(neogfx::margins{});
+		handle_placement_change();
 		set_ignore_mouse_events(true);
 		iText.set_ignore_mouse_events(true);
+		iImage.set_ignore_mouse_events(true);
 	}
 
-	label::label(i_widget& aParent, const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(aParent), iAlignment(aAlignment), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
+	label::label(i_widget& aParent, const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
+		widget(aParent), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
-		handle_alignment();
 		iLayout.set_size_policy(neogfx::size_policy::Minimum);
-		iLayout.set_margins(neogfx::margins(0.0));
+		iLayout.set_margins(neogfx::margins{});
+		iText.set_margins(neogfx::margins{});
+		iImage.set_margins(neogfx::margins{});
+		handle_placement_change();
 		set_ignore_mouse_events(true);
+		iText.set_ignore_mouse_events(true);
+		iImage.set_ignore_mouse_events(true);
 	}
 
-	label::label(i_layout& aLayout, const std::string& aText, bool aMultiLine, alignment aAlignment) :
-		widget(aLayout), iAlignment(aAlignment), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
+	label::label(i_layout& aLayout, const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
+		widget(aLayout), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
-		handle_alignment();
 		iLayout.set_size_policy(neogfx::size_policy::Minimum);
-		iLayout.set_margins(neogfx::margins(0.0));
+		iLayout.set_margins(neogfx::margins{});
+		iText.set_margins(neogfx::margins{});
+		iImage.set_margins(neogfx::margins{});
+		handle_placement_change();
 		set_ignore_mouse_events(true);
+		iText.set_ignore_mouse_events(true);
+		iImage.set_ignore_mouse_events(true);
 	}
 
+	label_placement label::placement() const
+	{
+		return iPlacement;
+	}
+
+	void label::set_placement(label_placement aPlacement)
+	{
+		if (iPlacement == aPlacement)
+			return;
+		iPlacement = aPlacement;
+		handle_placement_change();
+	}
 	const image_widget& label::image() const
 	{
 		return iImage;
@@ -73,16 +95,48 @@ namespace neogfx
 		return iText;
 	}
 
-	void label::handle_alignment()
+	void label::handle_placement_change()
 	{
-		if ((iAlignment & alignment::Left) == alignment::Left)
-			iLayout.add_spacer(iLayout.item_count());
-		else if ((iAlignment & alignment::Right) == alignment::Right)
-			iLayout.add_spacer(0);
-		else if (((iAlignment & alignment::Centre) == alignment::Centre) || ((iAlignment & alignment::Justify) == alignment::Justify))
+		iLayout.remove_items();
+
+		grid_layout::cell_coordinates start{};
+
+		bool padLeft = ((iAlignment & alignment::Left) != alignment::Left);
+		bool padTop = ((iAlignment & alignment::Top) != alignment::Top);
+		if (padLeft || padTop)
 		{
-			iLayout.add_spacer(0);
-			iLayout.add_spacer(iLayout.item_count());
+			iLayout.add_spacer(0, 0);
+			if (padLeft)
+				start.x = 1;
+			if (padTop)
+				start.y = 1;
+		}
+
+		switch (iPlacement)
+		{
+		case label_placement::ImageTextHorizontal:
+			iLayout.add_item(start.y + 0, start.x + 0, iImage);
+			iLayout.add_item(start.y + 0, start.x + 1, iText);
+			break;
+		case label_placement::ImageTextVertical:
+			iLayout.add_item(start.y + 0, start.x + 0, iImage);
+			iLayout.add_item(start.y + 1, start.x + 0, iText);
+			break;
+		case label_placement::TextImageHorizontal:
+			iLayout.add_item(start.y + 0, start.x + 0, iText);
+			iLayout.add_item(start.y + 0, start.x + 1, iImage);
+			break;
+		case label_placement::TextImageVertical:
+			iLayout.add_item(start.y + 0, start.x + 0, iText);
+			iLayout.add_item(start.y + 1, start.x + 0, iImage);
+			break;
+		}
+
+		bool padRight = ((iAlignment & alignment::Right) != alignment::Right);
+		bool padBottom = ((iAlignment & alignment::Bottom) != alignment::Bottom);
+		if (padRight || padBottom)
+		{
+			iLayout.add_spacer(padBottom ? iLayout.rows() : iLayout.rows() - 1, padRight ? iLayout.columns() : iLayout.columns() - 1);
 		}
 	}
 }

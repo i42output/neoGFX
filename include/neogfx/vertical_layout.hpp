@@ -25,10 +25,12 @@ namespace neogfx
 {
 	class vertical_layout : public layout
 	{
+	private:
+		struct row_major;
 	public:
-		vertical_layout(alignment aHorizontalAlignment = alignment::Left);
-		vertical_layout(i_widget& aParent, alignment aHorizontalAlignment = alignment::Left);
-		vertical_layout(i_layout& aParent, alignment aHorizontalAlignment = alignment::Left);
+		vertical_layout(neogfx::alignment aAlignment = neogfx::alignment::Left);
+		vertical_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
+		vertical_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
 	public:
 		using layout::add_spacer;
 		virtual i_spacer& add_spacer();
@@ -36,8 +38,9 @@ namespace neogfx
 	public:
 		virtual size minimum_size() const;
 		virtual size maximum_size() const;
+	public:
 		virtual void layout_items(const point& aPosition, const size& aSize);
-	private:
-		alignment iHorizontalAlignment;
+	protected:
+		using layout::items_visible;
 	};
 }

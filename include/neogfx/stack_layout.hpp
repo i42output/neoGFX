@@ -35,6 +35,7 @@ namespace neogfx
 	public:
 		virtual size minimum_size() const;
 		virtual size maximum_size() const;
+	public:
 		virtual void layout_items(const point& aPosition, const size& aSize);
 	};
 }

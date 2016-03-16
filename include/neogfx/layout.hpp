@@ -21,6 +21,7 @@
 
 #include "neogfx.hpp"
 #include <list>
+#include <boost/pool/pool_alloc.hpp>
 #include <neolib/variant.hpp>
 #include "i_layout.hpp"
 
@@ -79,7 +80,7 @@ namespace neogfx
 			pointer_wrapper iPointerWrapper;
 			i_widget* iOwner;
 		};
-		typedef std::list<item> item_list;
+		typedef std::list<item, boost::pool_allocator<item>> item_list;
 		enum item_type_e
 		{
 			ItemTypeNone = 0x00,
@@ -100,26 +101,35 @@ namespace neogfx
 		private:
 			i_layout& iOwner;
 		};
+	protected:
+		template <typename SpecializedPolicy>
+		struct common_axis_policy;
+		template <typename Layout>
+		struct column_major;
+		template <typename Layout>
+		struct row_major;
 	public:
-		layout();
-		layout(i_widget& aParent);
-		layout(i_layout& aParent);
+		layout(neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+		layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+		layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+		layout(const layout&) = delete;
 	public:
 		virtual i_widget* owner() const;
 		virtual void set_owner(i_widget* aOwner);
-		virtual void add_widget(i_widget& aWidget);
-		virtual void add_widget(uint32_t aPosition, i_widget& aWidget);
-		virtual void add_widget(std::shared_ptr<i_widget> aWidget);
-		virtual void add_widget(uint32_t aPosition, std::shared_ptr<i_widget> aWidget);
-		virtual void add_layout(i_layout& aLayout);
-		virtual void add_layout(uint32_t aPosition, i_layout& aLayout);
-		virtual void add_layout(std::shared_ptr<i_layout> aLayout);
-		virtual void add_layout(uint32_t aPosition, std::shared_ptr<i_layout> aLayout);
-		virtual void add_spacer(i_spacer& aSpacer);
-		virtual void add_spacer(uint32_t aPosition, i_spacer& aSpacer);
-		virtual void add_spacer(std::shared_ptr<i_spacer> aSpacer);
-		virtual void add_spacer(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer);
+		virtual void add_item(i_widget& aWidget);
+		virtual void add_item(uint32_t aPosition, i_widget& aWidget);
+		virtual void add_item(std::shared_ptr<i_widget> aWidget);
+		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_widget> aWidget);
+		virtual void add_item(i_layout& aLayout);
+		virtual void add_item(uint32_t aPosition, i_layout& aLayout);
+		virtual void add_item(std::shared_ptr<i_layout> aLayout);
+		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_layout> aLayout);
+		virtual void add_item(i_spacer& aSpacer);
+		virtual void add_item(uint32_t aPosition, i_spacer& aSpacer);
+		virtual void add_item(std::shared_ptr<i_spacer> aSpacer);
+		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer);
 		virtual void remove_item(std::size_t aIndex);
+		virtual void remove_items();
 		virtual std::size_t item_count() const;
 		virtual i_geometry& get_item(std::size_t aIndex);
 		using i_layout::get_widget;
@@ -131,8 +141,9 @@ namespace neogfx
 		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
 	public:
 		virtual size spacing() const;
-		virtual void set_spacing(dimension aSpacing);
-		virtual void set_spacing(size aSpacing);
+		virtual void set_spacing(const size& aSpacing);
+		virtual neogfx::alignment alignment() const;
+		virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true);
 	public:
 		virtual void enable();
 		virtual void disable();
@@ -162,12 +173,15 @@ namespace neogfx
 		const i_geometry& item_geometry(item_list::size_type aItem) const;
 		uint32_t spacer_count() const;
 		uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
+		template <typename AxisPolicy>
+		void do_layout_items(const point& aPosition, const size& aSize);
 	private:
 		i_widget* iOwner;
 		device_metrics_forwarder iDeviceMetricsForwarder;
 		units_context iUnitsContext;
 		optional_margins iMargins;
 		size iSpacing;
+		neogfx::alignment iAlignment;
 		bool iEnabled;
 		optional_size_policy iSizePolicy;
 		optional_size iWeight;
@@ -177,3 +191,5 @@ namespace neogfx
 		bool iLayoutStarted;
 	};
 }
+
+#include "layout.inl"

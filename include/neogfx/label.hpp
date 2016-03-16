@@ -20,28 +20,39 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include "horizontal_layout.hpp"
+#include "grid_layout.hpp"
 #include "text_widget.hpp"
 #include "image_widget.hpp"
 
 namespace neogfx
 {
+	enum class label_placement
+	{
+		ImageTextHorizontal,
+		ImageTextVertical,
+		TextImageHorizontal,
+		TextImageVertical
+	};
+
 	class label : public widget
 	{
 	public:
-		label(const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre);
-		label(i_widget& aParent, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre);
-		label(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre);
+		label(const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
+		label(i_widget& aParent, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
+		label(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
 	public:
+		label_placement placement() const;
+		void set_placement(label_placement aPlacement);
 		const image_widget& image() const;
 		image_widget& image();
 		const text_widget& text() const;
 		text_widget& text();
 	private:
-		void handle_alignment();
+		void handle_placement_change();
 	private:
 		alignment iAlignment;
-		horizontal_layout iLayout;
+		label_placement iPlacement;
+		grid_layout iLayout;
 		image_widget iImage;
 		text_widget iText;
 	};

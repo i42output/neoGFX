@@ -142,6 +142,7 @@ namespace neogfx
 	{
 		if (iNativeWindow)
 			iNativeWindow->close();
+		app::instance().surface_manager().remove_surface(*this);
 	}
 
 	bool window::is_root() const

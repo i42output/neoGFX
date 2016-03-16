@@ -58,7 +58,7 @@ namespace neogfx
 	spacer::spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy) :
 		iParent(&aParent), iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder), iExpansionPolicy(aExpansionPolicy)
 	{
-		aParent.add_spacer(*this);
+		aParent.add_item(*this);
 	}
 
 	const i_layout& spacer::parent() const

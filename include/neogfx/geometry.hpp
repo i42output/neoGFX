@@ -124,6 +124,7 @@ namespace neogfx
 		basic_size& operator*=(const basic_size& other) { cx *= other.cx; cy *= other.cy; return *this; }
 		basic_size& operator/=(const basic_size& other) { cx /= other.cx; cy /= other.cy; return *this; }
 		basic_size ceil() const { return basic_size(std::ceil(cx), std::ceil(cy)); }
+		basic_size floor() const { return basic_size(std::floor(cx), std::floor(cy)); }
 		// attributes
 	public:
 		dimension_type cx;
@@ -278,7 +279,7 @@ namespace neogfx
 	template <typename CoordinateType>
 	inline bool operator<(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
 	{
-		return left.x < right.x && left.y < right.y;
+		return std::tie(left.x, left.y) < std::tie(right.x, right.y);
 	}
 
 	template <typename CoordinateType>
@@ -802,12 +803,12 @@ namespace neogfx
 		Bottom = 0x0040
 	};
 
-	inline alignment operator|(alignment aLhs, alignment aRhs)
+	inline constexpr alignment operator|(alignment aLhs, alignment aRhs)
 	{
 		return static_cast<alignment>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
 	}
 
-	inline alignment operator&(alignment aLhs, alignment aRhs)
+	inline constexpr alignment operator&(alignment aLhs, alignment aRhs)
 	{
 		return static_cast<alignment>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}

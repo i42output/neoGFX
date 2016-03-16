@@ -58,7 +58,7 @@ namespace neogfx
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress(false),
+		iLayoutInProgress(0),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -76,7 +76,7 @@ namespace neogfx
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress(false),
+		iLayoutInProgress(0),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -95,7 +95,7 @@ namespace neogfx
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress(false),
+		iLayoutInProgress(0),
 		iVisible(true),
 		iEnabled(true),
 		iFocusPolicy(focus_policy::NoFocus),
@@ -103,7 +103,7 @@ namespace neogfx
 		iBackgroundColour{},
 		iIgnoreMouseEvents(false)
 	{
-		aLayout.add_widget(*this);
+		aLayout.add_item(*this);
 	}
 
 	widget::~widget()
@@ -341,7 +341,7 @@ namespace neogfx
 		iLayout = std::shared_ptr<i_layout>(std::shared_ptr<i_layout>(), &aLayout);
 		iLayout->set_owner(this);
 		for (auto& c : iChildren)
-			iLayout->add_widget(c);
+			iLayout->add_item(c);
 	}
 
 	void widget::set_layout(std::shared_ptr<i_layout> aLayout)
@@ -349,7 +349,7 @@ namespace neogfx
 		iLayout = aLayout;
 		iLayout->set_owner(this);
 		for (auto& c : iChildren)
-			iLayout->add_widget(c);
+			iLayout->add_item(c);
 	}
 
 	const i_layout& widget::layout() const
@@ -433,18 +433,18 @@ namespace neogfx
 
 	void widget::layout_items_started()
 	{
-		iLayoutInProgress = true;
+		++iLayoutInProgress;
 	}
 
 	bool widget::layout_items_in_progress() const
 	{
-		return iLayoutInProgress;
+		return iLayoutInProgress != 0;
 	}
 
 	void widget::layout_items_completed()
 	{
-		iLayoutInProgress = false;
-		update();
+		if (--iLayoutInProgress == 0)
+			update();
 	}
 
 	logical_coordinate_system widget::logical_coordinate_system() const

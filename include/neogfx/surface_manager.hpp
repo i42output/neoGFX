@@ -28,6 +28,8 @@ namespace neogfx
 {
 	class surface_manager : public i_surface_manager
 	{
+	public:
+		struct already_rendering_surfaces : std::logic_error { already_rendering_surfaces() : std::logic_error("neogfx::surface_manager::already_rendering_surfaces") {} };
 	private:
 		typedef std::set<i_surface*> surface_list;
 	public:
@@ -47,5 +49,6 @@ namespace neogfx
 	private:
 		i_rendering_engine& iRenderingEngine;
 		surface_list iSurfaces;
+		bool iRenderingSurfaces;
 	};
 }

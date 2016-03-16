@@ -80,9 +80,17 @@ namespace neogfx
 			iRenderBuffer.reserve(iShapes.size() + iSprites.size());
 			iRenderBuffer.clear();
 			for (const auto& s : iShapes)
+			{
+				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
+					continue;
 				iRenderBuffer.push_back(&*s);
+			}
 			for (const auto& s : iSprites)
+			{
+				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
+					continue;
 				iRenderBuffer.push_back(&*s);
+			}
 			std::stable_sort(iRenderBuffer.begin(), iRenderBuffer.end(), [](i_shape* left, i_shape* right) ->bool
 			{
 				return left->position_3D()[2] < right->position_3D()[2];
@@ -93,9 +101,17 @@ namespace neogfx
 		else
 		{
 			for (const auto& s : iShapes)
+			{
+				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
+					continue;
 				s->paint(aGraphicsContext);
+			}
 			for (const auto& s : iSprites)
+			{
+				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
+					continue;
 				s->paint(aGraphicsContext);
+			}
 		}
 		sprites_painted.trigger(aGraphicsContext);
 	}
@@ -290,69 +306,41 @@ namespace neogfx
 		applying_physics.trigger();
 		auto now = std::chrono::steady_clock::now();
 		bool updated = false;
-		for (auto& o2 : iSprites)
+		iUpdateBuffer.reserve(iSprites.size() + iObjects.size());
+		iUpdateBuffer.clear();
+		for (const auto& s : iSprites)
+			iUpdateBuffer.push_back(&s->physics());
+		for (const auto& s : iObjects)
+			iUpdateBuffer.push_back(&*s);
+		std::stable_sort(iUpdateBuffer.begin(), iUpdateBuffer.end(), [](i_physical_object* left, i_physical_object* right) ->bool
 		{
-			vec3 force;
+			return left->mass() > right->mass();
+		});
+		for (auto& o2 : iUpdateBuffer)
+		{
+			vec3 totalForce;
+			if (o2->mass() == 0.0)
+				continue;
 			if (iUniformGravity != boost::none)
-			{
-				force = *iUniformGravity * o2->physics().mass();
-			}
+				totalForce = *iUniformGravity * o2->mass();
 			else if (iG != 0.0)
 			{
-				for (auto& o1 : iSprites)
+				for (auto& o1 : iUpdateBuffer)
 				{
-					if (o1->physics().mass() == 0.0)
-						continue;
-					if (&*o1 == &*o2)
-						continue;
-					if (o1->physics().collided(o2->physics()))
-						continue;
-					vec3 r12 = o2->physics().position() - o1->physics().position();
-					force += -iG * o1->physics().mass() * o2->physics().mass() * r12 / std::pow(r12.magnitude(), 3.0);
-				}
-				for (auto& o1 : iObjects)
-				{
-					if (o1->mass() == 0.0)
-						continue;
-					if (o1->collided(o2->physics()))
-						continue;
-					vec3 r12 = o2->physics().position() - o1->position();
-					force += -iG * o1->mass() * o2->physics().mass() * r12 / std::pow(r12.magnitude(), 3.0);
-				}
-			}
-			updated = (o2->update(now, force) || updated);
-		}
-		for (auto& o2 : iObjects)
-		{
-			vec3 force;
-			if (iUniformGravity != boost::none)
-			{
-				force = *iUniformGravity * o2->mass();
-			}
-			else if (iG != 0.0)
-			{
-				for (auto& o1 : iSprites)
-				{
-					if (o1->physics().mass() == 0.0)
-						continue;
-					if (o1->physics().collided(*o2))
-						continue;
-					vec3 r12 = o2->position() - o1->physics().position();
-					force += -iG * o1->physics().mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
-				}
-				for (auto& o1 : iObjects)
-				{
-					if (o1->mass() == 0.0)
-						continue;
-					if (&*o1 == &*o2)
+					if (o1 == o2)
 						continue;
 					if (o1->collided(*o2))
 						continue;
+					vec3 force;
 					vec3 r12 = o2->position() - o1->position();
-					force += -iG * o1->mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
+					if (r12.magnitude() > 0.0)
+						force = -iG * o1->mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
+					if (force.magnitude() < 1.0e-6)
+						break;
+					totalForce += force;
 				}
 			}
-			updated = (o2->update(now, force) || updated);
+			updated = (o2->update(now, totalForce) || updated);
 		}
 		physics_applied.trigger();
 		return updated;

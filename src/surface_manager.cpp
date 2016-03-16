@@ -27,7 +27,7 @@
 namespace neogfx
 {
 	surface_manager::surface_manager(i_rendering_engine& aRenderingEngine) :
-		iRenderingEngine(aRenderingEngine)
+		iRenderingEngine(aRenderingEngine), iRenderingSurfaces(false)
 	{
 	}
 
@@ -38,7 +38,9 @@ namespace neogfx
 	
 	void surface_manager::remove_surface(i_surface& aSurface)
 	{
-		iSurfaces.erase(iSurfaces.find(&aSurface));
+		auto existingSurface = iSurfaces.find(&aSurface);
+		if (existingSurface != iSurfaces.end())
+			iSurfaces.erase(existingSurface);
 	}
 
 	i_surface& surface_manager::surface_from_handle(void* aHandle)
@@ -82,8 +84,12 @@ namespace neogfx
 
 	void surface_manager::render_surfaces()
 	{
+		if (iRenderingSurfaces)
+			throw already_rendering_surfaces();
+		iRenderingSurfaces = true;
 		for (auto& s : iSurfaces)
 			s->render_surface();
+		iRenderingSurfaces = false;
 	}
 
 	void surface_manager::display_error_message(const std::string& aTitle, const std::string& aMessage) const

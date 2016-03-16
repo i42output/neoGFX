@@ -20,16 +20,19 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include "geometry.hpp"
 #include "layout.hpp"
 
 namespace neogfx
 {
 	class horizontal_layout : public layout
 	{
+	private:
+		struct column_major;
 	public:
-		horizontal_layout(alignment aVerticalAlignment = alignment::VCentre);
-		horizontal_layout(i_widget& aParent, alignment aVerticalAlignment = alignment::VCentre);
-		horizontal_layout(i_layout& aParent, alignment aVerticalAlignment = alignment::VCentre);
+		horizontal_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+		horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+		horizontal_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
 	public:
 		using layout::add_spacer;
 		virtual i_spacer& add_spacer();
@@ -37,8 +40,9 @@ namespace neogfx
 	public:
 		virtual size minimum_size() const;
 		virtual size maximum_size() const;
+	public:
 		virtual void layout_items(const point& aPosition, const size& aSize);
-	private:
-		alignment iVerticalAlignment;
+	protected:
+		using layout::items_visible;
 	};
 }

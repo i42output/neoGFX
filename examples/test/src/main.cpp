@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 		std::srand(4242);
 		for (uint32_t i = 0; i < 10; ++i)
 		{
-			layout3.add_widget(std::make_shared<ng::push_button>(std::string(1, 'A' + i)));
+			layout3.add_item(std::make_shared<ng::push_button>(std::string(1, 'A' + i)));
 			ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
 			layout3.get_widget(i).set_foreground_colour(randomColour);
 		}
@@ -148,8 +148,8 @@ int main(int argc, char* argv[])
 		keypad.set_spacing(0.0);
 		for (uint32_t row = 0; row < 3; ++row)
 			for (uint32_t col = 0; col < 3; ++col)
-				keypad.add_widget(row, col, std::make_shared<keypad_button>(row * 3 + col + 1));
-		keypad.add_widget(3, 1, std::make_shared<keypad_button>(0));
+				keypad.add_item(row, col, std::make_shared<keypad_button>(row * 3 + col + 1));
+		keypad.add_item(3, 1, std::make_shared<keypad_button>(0));
 
 		neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
 		{
@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 		auto& w = tabContainer.add_tab_page("Lots").widget();
 		ng::vertical_layout l(w);
 		for (int i = 0; i < 10000; ++i)
-			l.add_widget(std::make_shared<ng::push_button>(boost::lexical_cast<std::string>(i)));
+			l.add_item(std::make_shared<ng::push_button>(boost::lexical_cast<std::string>(i)));
 		auto& w2 = tabContainer.add_tab_page("Images").widget();
 		ng::horizontal_layout l2(w2);
 		ng::vertical_layout l3(l2);
@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
 		{
 			auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal_placement>(i));
 			hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
-			l4.add_widget(i / 3, i % 3, hashWidget);
+			l4.add_item(i / 3, i % 3, hashWidget);
 		}
 		ng::image smallHash(":/test/resources/channel.png");
 
