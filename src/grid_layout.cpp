@@ -367,6 +367,18 @@ namespace neogfx
 			r->set_spacing(aSpacing);
 	}
 
+	void grid_layout::add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns)
+	{
+		add_span({ aColumnFrom, aRowFrom }, { aColumnFrom + aColumns - 1, aRowFrom + aRows - 1});
+	}
+
+	void grid_layout::add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo)
+	{
+		iSpans.push_back(std::make_pair(aFrom, aTo));
+		if (owner() != 0)
+			owner()->ultimate_ancestor().layout_items(true);
+	}
+
 	void grid_layout::layout_items(const point& aPosition, const size& aSize)
 	{
 		if (!enabled())
@@ -410,7 +422,40 @@ namespace neogfx
 					continue;
 				auto i = iCells.find(cell_coordinates{ col, row });
 				if (i != iCells.end())
-					i->second->layout(colPos, size{maxColWidth[col], maxRowHeight[row]});
+				{
+					bool foundSpan = false;
+					for (auto& s : iSpans)
+					{
+						if (col >= s.first.x && col <= s.second.x &&
+							row >= s.first.y && row <= s.second.y)
+						{
+							point fromPos;
+							point toPos;
+							point rowPos = availablePos;
+							for (cell_coordinate row2 = 0; !foundSpan && row2 <= s.second.y; ++row2)
+							{
+								point colPos = rowPos;
+								for (cell_coordinate col2 = 0; !foundSpan && col2 <= s.second.x; ++col2)
+								{
+									if (row2 == s.first.y && col2 == s.first.x)
+										fromPos = colPos;
+									if (row2 == s.second.y && col2 == s.second.x)
+									{
+										toPos = colPos + size{ maxColWidth[col2], maxRowHeight[row2] };
+										i->second->layout(fromPos, toPos - fromPos);
+										foundSpan = true;
+									}
+									colPos.x += maxColWidth[col2];
+									colPos.x += spacing().cx;
+								}
+								rowPos.y += maxRowHeight[row2];
+								rowPos.y += spacing().cy;
+							}
+						}
+					}
+					if (!foundSpan)
+						i->second->layout(colPos, size{maxColWidth[col], maxRowHeight[row]});
+				}
 				colPos.x += maxColWidth[col];
 				colPos.x += spacing().cx;
 			}

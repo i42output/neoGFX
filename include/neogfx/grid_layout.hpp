@@ -40,6 +40,7 @@ namespace neogfx
 		struct row_major;
 		struct column_major;
 		typedef std::map<cell_coordinates, item_list::iterator, std::less<cell_coordinates>, boost::pool_allocator<std::pair<cell_coordinates, item_list::iterator>>> cell_list;
+		typedef std::vector<std::pair<cell_coordinates, cell_coordinates>> span_list;
 	public:
 		grid_layout(i_widget& aParent);
 		grid_layout(i_layout& aParent);
@@ -81,6 +82,8 @@ namespace neogfx
 		virtual size maximum_size() const;
 	public:
 		virtual void set_spacing(const size& aSpacing);
+		void add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
+		void add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
 	public:
 		virtual void layout_items(const point& aPosition, const size& aSize);
 	private:
@@ -101,5 +104,6 @@ namespace neogfx
 		cell_list iCells;
 		cell_dimensions iDimensions;
 		cell_coordinates iCursor;
+		span_list iSpans;
 	};
 }

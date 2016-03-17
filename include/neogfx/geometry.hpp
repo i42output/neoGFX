@@ -111,6 +111,7 @@ namespace neogfx
 		template <typename CoordinateType2>
 		basic_size(const basic_size<CoordinateType2>& other) :
 			cx(static_cast<CoordinateType>(other.cx)), cy(static_cast<CoordinateType>(other.cy)) {}
+		basic_size(const basic_delta<CoordinateType>& other) : cx(other.dx), cy(other.dy) {}
 		// operations
 	public:
 		delta_type to_delta() const { return delta_type(cx, cy); }

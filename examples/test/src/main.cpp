@@ -150,6 +150,7 @@ int main(int argc, char* argv[])
 			for (uint32_t col = 0; col < 3; ++col)
 				keypad.add_item(row, col, std::make_shared<keypad_button>(row * 3 + col + 1));
 		keypad.add_item(3, 1, std::make_shared<keypad_button>(0));
+		keypad.add_span(3, 1, 1, 2);
 
 		neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
 		{
