@@ -15,7 +15,7 @@ Menu                        0
 MDI                         0
 Tabs                        80
 Tool Bar                    0 
-Layout Managers             80           Need to fully support size policies; grid Layout needs span support.
+Layout Managers             90           Need to fully support size policies
 Label                       80           Icon
 Button                      90           "Flat" style
 Table View                  85           Selection, Icon
