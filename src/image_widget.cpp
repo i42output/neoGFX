@@ -179,10 +179,16 @@ namespace neogfx
 		aGraphicsContext.draw_texture(placementRect, iTexture);
 	}
 
+	const texture& image_widget::image() const
+	{
+		return iTexture;
+	}
+
 	void image_widget::set_image(const i_texture& aTexture)
 	{
 		size oldSize = minimum_size();
 		iTexture = aTexture;
+		image_changed.trigger();
 		if (oldSize != minimum_size() && has_managing_layout())
 			managing_layout().layout_items(true);
 		update();
@@ -192,6 +198,7 @@ namespace neogfx
 	{
 		size oldSize = minimum_size();
 		iTexture = aImage;
+		image_changed.trigger();
 		if (oldSize != minimum_size() && has_managing_layout())
 			managing_layout().layout_items(true);
 		update();

@@ -800,7 +800,9 @@ namespace neogfx
 		Top = 0x0010,
 		VCentre = 0x0020,
 		VCenter = alignment::VCentre,
-		Bottom = 0x0040
+		Bottom = 0x0040,
+		Horizontal = Left | Centre | Right | Justify,
+		Vertical = Top | VCentre | Bottom
 	};
 
 	inline constexpr alignment operator|(alignment aLhs, alignment aRhs)

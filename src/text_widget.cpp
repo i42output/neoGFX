@@ -25,21 +25,21 @@
 namespace neogfx
 {
 	text_widget::text_widget(const std::string& aText, bool aMultiLine) : 
-		widget(), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine)
+		widget(), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	text_widget::text_widget(i_widget& aParent, const std::string& aText, bool aMultiLine) :
-		widget(aParent), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine)
+		widget(aParent), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	text_widget::text_widget(i_layout& aLayout, const std::string& aText, bool aMultiLine) :
-		widget(aLayout), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine)
+		widget(aLayout), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
@@ -67,7 +67,32 @@ namespace neogfx
 		}
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
 		size textSize = text_extent();
-		point textPosition(std::floor((client_rect().width() - textSize.cx) / 2.0), std::floor((client_rect().height() - textSize.cy) / 2.0));
+		point textPosition;
+		switch (iAlignment & neogfx::alignment::Horizontal)
+		{
+		case neogfx::alignment::Left:
+		case neogfx::alignment::Justify:
+			textPosition.x = 0.0;
+			break;
+		case neogfx::alignment::Centre:
+			textPosition.x = std::floor((client_rect().width() - textSize.cx) / 2.0);
+			break;
+		case neogfx::alignment::Right:
+			textPosition.x = std::floor((client_rect().width() - textSize.cx));
+			break;
+		}
+		switch (iAlignment & neogfx::alignment::Vertical)
+		{
+		case neogfx::alignment::Top:
+			textPosition.y = 0.0;
+			break;
+		case neogfx::alignment::VCentre:
+			textPosition.y = std::floor((client_rect().height() - textSize.cy) / 2.0);
+			break;
+		case neogfx::alignment::Bottom:
+			textPosition.x = std::floor((client_rect().height() - textSize.cy));
+			break;
+		}
 		if (multi_line())
 			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, text_colour(), alignment::Centre, true);
 		else
@@ -88,18 +113,37 @@ namespace neogfx
 
 	void text_widget::set_text(const std::string& aText)
 	{
-		size oldSize = minimum_size();
-		iText = aText;
-		iTextExtent = boost::none;
-		iGlyphTextCache = glyph_text(font());
-		if (oldSize != minimum_size() && has_managing_layout())
-			managing_layout().layout_items(true);
-		update();
+		if (iText != aText)
+		{
+			size oldSize = minimum_size();
+			iText = aText;
+			iTextExtent = boost::none;
+			iGlyphTextCache = glyph_text(font());
+			text_changed.trigger();
+			if (oldSize != minimum_size() && has_managing_layout())
+				managing_layout().layout_items(true);
+			update();
+		}
 	}
 
 	bool text_widget::multi_line() const
 	{
 		return iMultiLine;
+	}
+
+	neogfx::alignment text_widget::alignment() const
+	{
+		return iAlignment;
+	}
+
+	void text_widget::set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout)
+	{
+		if (iAlignment != aAlignment)
+		{
+			iAlignment = aAlignment;
+			if (aUpdateLayout)
+				ultimate_ancestor().layout_items(true);
+		}
 	}
 
 	bool text_widget::has_text_colour() const

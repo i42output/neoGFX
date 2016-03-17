@@ -97,6 +97,30 @@ namespace neogfx
 		{
 			static_variant_cast<layout_pointer&>(iPointerWrapper)->layout_items(aPosition, aSize);
 		}
+		else if (iPointerWrapper.is<spacer_pointer>())
+		{
+			static_variant_cast<spacer_pointer&>(iPointerWrapper)->set_extents(aSize);
+		}
+	}
+
+	point layout::item::position() const
+	{
+		return wrapped_geometry().position();
+	}
+
+	void layout::item::set_position(const point& aPosition)
+	{
+		wrapped_geometry().set_position(aPosition);
+	}
+
+	size layout::item::extents() const
+	{
+		return wrapped_geometry().extents();
+	}
+
+	void layout::item::set_extents(const size& aExtents)
+	{
+		wrapped_geometry().set_extents(aExtents);
 	}
 
 	bool layout::item::has_size_policy() const
@@ -234,6 +258,7 @@ namespace neogfx
 		iOwner(0),
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
 		iSpacing(app::instance().current_style().spacing()),
+		iAlwaysUseSpacing(false),
 		iAlignment(aAlignment),
 		iEnabled(true),
 		iMinimumSize{},
@@ -246,6 +271,7 @@ namespace neogfx
 		iOwner(&aParent),
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
 		iSpacing(app::instance().current_style().spacing()),
+		iAlwaysUseSpacing(false),
 		iAlignment(aAlignment),
 		iEnabled(true),
 		iMinimumSize{},
@@ -260,6 +286,7 @@ namespace neogfx
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
 		iMargins(neogfx::margins(0)),
 		iSpacing(app::instance().current_style().spacing()),
+		iAlwaysUseSpacing(false),
 		iAlignment(aAlignment),
 		iEnabled(true),
 		iMinimumSize{},
@@ -389,9 +416,7 @@ namespace neogfx
 
 	void layout::remove_item(std::size_t aIndex)
 	{
-		iItems.erase(std::next(iItems.begin(), aIndex));
-		if (iOwner != 0)
-			iOwner->ultimate_ancestor().layout_items(true);
+		remove_item(std::next(iItems.begin(), aIndex));
 	}
 
 	void layout::remove_items()
@@ -471,6 +496,16 @@ namespace neogfx
 		}
 	}
 
+	bool layout::always_use_spacing() const
+	{
+		return iAlwaysUseSpacing;
+	}
+
+	void layout::set_always_use_spacing(bool aAlwaysUseSpacing)
+	{
+		iAlwaysUseSpacing = aAlwaysUseSpacing;
+	}
+
 	neogfx::alignment layout::alignment() const
 	{
 		return iAlignment;
@@ -481,6 +516,7 @@ namespace neogfx
 		if (iAlignment != aAlignment)
 		{
 			iAlignment = aAlignment;
+			alignment_changed.trigger();
 			if (iOwner != 0 && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
@@ -506,6 +542,26 @@ namespace neogfx
 	bool layout::enabled() const
 	{
 		return iEnabled;
+	}
+
+	point layout::position() const
+	{
+		return units_converter(*this).from_device_units(iPosition);
+	}
+	
+	void layout::set_position(const point& aPosition)
+	{
+		iPosition = units_converter(*this).to_device_units(aPosition);
+	}
+
+	size layout::extents() const
+	{
+		return units_converter(*this).from_device_units(iExtents);
+	}
+
+	void layout::set_extents(const size& aExtents)
+	{
+		iExtents = units_converter(*this).to_device_units(aExtents);
 	}
 
 	bool layout::has_size_policy() const
@@ -643,6 +699,13 @@ namespace neogfx
 			if (i.get().is<item::spacer_pointer>())
 				++count;
 		return count;
+	}
+
+	void layout::remove_item(item_list::const_iterator aItem)
+	{
+		iItems.erase(aItem);
+		if (iOwner != 0)
+			iOwner->ultimate_ancestor().layout_items(true);
 	}
 
 	uint32_t layout::items_visible(item_type_e aItemType) const

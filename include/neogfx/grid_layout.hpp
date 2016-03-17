@@ -31,7 +31,6 @@ namespace neogfx
 	class grid_layout : public layout
 	{
 	public:
-		struct cell_occupied : std::logic_error { cell_occupied() : std::logic_error("neogfx::grid_layout::cell_occupied") {} };
 		struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };
 	public:
 		typedef uint32_t cell_coordinate;
@@ -66,6 +65,7 @@ namespace neogfx
 		virtual i_spacer& add_spacer(uint32_t aPosition);
 		virtual i_spacer& add_spacer(cell_coordinate aRow, cell_coordinate aColumn);
 		virtual void remove_item(std::size_t aIndex);
+		virtual void remove_item(cell_coordinate aRow, cell_coordinate aColumn);
 		virtual void remove_items();
 		using layout::get_widget;
 		i_widget& get_widget(cell_coordinate aRow, cell_coordinate aColumn);

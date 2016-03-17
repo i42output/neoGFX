@@ -95,6 +95,26 @@ namespace neogfx
 		}
 	}
 
+	size spacer::extents() const
+	{
+		return units_converter(*this).from_device_units(iExtents);
+	}
+
+	point spacer::position() const
+	{
+		return units_converter(*this).from_device_units(iPosition);
+	}
+
+	void spacer::set_position(const point& aPosition)
+	{
+		iPosition = units_converter(*this).to_device_units(aPosition);
+	}
+
+	void spacer::set_extents(const size& aExtents)
+	{
+		iExtents = units_converter(*this).to_device_units(aExtents);
+	}
+
 	bool spacer::has_size_policy() const
 	{
 		return iSizePolicy != boost::none;

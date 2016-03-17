@@ -47,6 +47,7 @@ namespace neogfx
 	class i_widget : public i_geometry, public i_units_context
 	{
 	public:
+		event<> visibility_changed;
 		event<graphics_context&> painting;
 	public:
 		typedef std::vector<std::shared_ptr<i_widget>> widget_list;

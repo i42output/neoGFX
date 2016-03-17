@@ -21,6 +21,7 @@
 
 #include "neogfx.hpp"
 #include "i_geometry.hpp"
+#include "event.hpp"
 
 namespace neogfx
 {
@@ -29,6 +30,8 @@ namespace neogfx
 
 	class i_layout : public i_geometry, public i_units_context
 	{
+	public:
+		event<> alignment_changed;
 	public:
 		struct no_widget : std::logic_error { no_widget() : std::logic_error("neogfx::i_layout::no_widget") {} };
 		struct wrong_item_type : std::logic_error { wrong_item_type() : std::logic_error("neogfx::i_layout::wrong_item_type") {} };
@@ -60,6 +63,8 @@ namespace neogfx
 	public:
 		virtual size spacing() const = 0;
 		virtual void set_spacing(const size& sSpacing) = 0;
+		virtual bool always_use_spacing() const = 0;
+		virtual void set_always_use_spacing(bool aAlwaysUseSpacing) = 0;
 		virtual neogfx::alignment alignment() const = 0;
 		virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) = 0;
 	public:

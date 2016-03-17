@@ -27,40 +27,22 @@ namespace neogfx
 	label::label(const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
 		widget(), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
-		iLayout.set_size_policy(neogfx::size_policy::Minimum);
-		iLayout.set_margins(neogfx::margins{});
-		iText.set_margins(neogfx::margins{});
-		iImage.set_margins(neogfx::margins{});
-		handle_placement_change();
-		set_ignore_mouse_events(true);
-		iText.set_ignore_mouse_events(true);
-		iImage.set_ignore_mouse_events(true);
+		iLayout.set_alignment(aAlignment);
+		init();
 	}
 
 	label::label(i_widget& aParent, const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
 		widget(aParent), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
-		iLayout.set_size_policy(neogfx::size_policy::Minimum);
-		iLayout.set_margins(neogfx::margins{});
-		iText.set_margins(neogfx::margins{});
-		iImage.set_margins(neogfx::margins{});
-		handle_placement_change();
-		set_ignore_mouse_events(true);
-		iText.set_ignore_mouse_events(true);
-		iImage.set_ignore_mouse_events(true);
+		iLayout.set_alignment(aAlignment);
+		init();
 	}
 
 	label::label(i_layout& aLayout, const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
 		widget(aLayout), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
 	{
-		iLayout.set_size_policy(neogfx::size_policy::Minimum);
-		iLayout.set_margins(neogfx::margins{});
-		iText.set_margins(neogfx::margins{});
-		iImage.set_margins(neogfx::margins{});
-		handle_placement_change();
-		set_ignore_mouse_events(true);
-		iText.set_ignore_mouse_events(true);
-		iImage.set_ignore_mouse_events(true);
+		iLayout.set_alignment(aAlignment);
+		init();
 	}
 
 	label_placement label::placement() const
@@ -95,48 +77,161 @@ namespace neogfx
 		return iText;
 	}
 
+	void label::init()
+	{
+		iLayout.set_size_policy(neogfx::size_policy::Minimum);
+		iLayout.set_margins(neogfx::margins{});
+		iText.set_margins(neogfx::margins{});
+		iImage.set_margins(neogfx::margins{});
+		set_ignore_mouse_events(true);
+		iText.set_ignore_mouse_events(true);
+		iImage.set_ignore_mouse_events(true);
+		handle_placement_change();
+		iLayout.alignment_changed([this]() { handle_placement_change(); });
+		iText.visibility_changed([this](){ handle_placement_change(); });
+		iText.text_changed([this]() { handle_placement_change(); });
+		iImage.visibility_changed([this]() { handle_placement_change(); });
+		iImage.image_changed([this]() { handle_placement_change(); });
+	}
+
+	label_placement label::effective_placement() const
+	{
+		switch (iPlacement)
+		{
+		case label_placement::TextImageHorizontal:
+			if (iImage.image().is_empty() || iImage.hidden())
+				return label_placement::TextHorizontal;
+			else if (iText.text().empty() || iText.hidden())
+				return label_placement::ImageHorizontal;
+			break;
+		case label_placement::TextImageVertical:
+			if (iImage.image().is_empty() || iImage.hidden())
+				return label_placement::TextVertical;
+			else if (iText.text().empty() || iText.hidden())
+				return label_placement::ImageVertical;
+			break;
+		case label_placement::ImageTextHorizontal:
+			if (iImage.image().is_empty() || iImage.hidden())
+				return label_placement::TextHorizontal;
+			else if (iText.text().empty() || iText.hidden())
+				return label_placement::ImageHorizontal;
+			break;
+		case label_placement::ImageTextVertical:
+			if (iImage.image().is_empty() || iImage.hidden())
+				return label_placement::TextVertical;
+			else if (iText.text().empty() || iText.hidden())
+				return label_placement::ImageVertical;
+			break;
+		default:
+			break;
+		}
+		return iPlacement;
+	}
+
 	void label::handle_placement_change()
 	{
 		iLayout.remove_items();
 
 		grid_layout::cell_coordinates start{};
 
-		bool padLeft = ((iAlignment & alignment::Left) != alignment::Left);
-		bool padTop = ((iAlignment & alignment::Top) != alignment::Top);
-		if (padLeft || padTop)
+		switch (effective_placement())
 		{
-			iLayout.add_spacer(0, 0);
-			if (padLeft)
-				start.x = 1;
-			if (padTop)
-				start.y = 1;
-		}
-
-		switch (iPlacement)
-		{
-		case label_placement::ImageTextHorizontal:
-			iLayout.add_item(start.y + 0, start.x + 0, iImage);
-			iLayout.add_item(start.y + 0, start.x + 1, iText);
+		case label_placement::TextHorizontal:
+			iLayout.add_item(0, 0, iText);
 			break;
-		case label_placement::ImageTextVertical:
-			iLayout.add_item(start.y + 0, start.x + 0, iImage);
-			iLayout.add_item(start.y + 1, start.x + 0, iText);
+		case label_placement::TextVertical:
+			iLayout.add_item(0, 0, iText);
+			break;
+		case label_placement::ImageHorizontal:
+			iLayout.add_item(0, 0, iImage);
+			break;
+		case label_placement::ImageVertical:
+			iLayout.add_item(0, 0, iImage);
 			break;
 		case label_placement::TextImageHorizontal:
-			iLayout.add_item(start.y + 0, start.x + 0, iText);
-			iLayout.add_item(start.y + 0, start.x + 1, iImage);
+			switch (iLayout.alignment() & neogfx::alignment::Horizontal)
+			{
+			case neogfx::alignment::Left:
+				iLayout.add_item(0, 0, iText);
+				iLayout.add_item(0, 1, iImage);
+				iLayout.add_spacer(0, 2);
+				break;
+			case neogfx::alignment::Centre:
+				iLayout.add_spacer(0, 0);
+				iLayout.add_item(0, 1, iText);
+				iLayout.add_item(0, 2, iImage);
+				iLayout.add_spacer(0, 3);
+				break;
+			case neogfx::alignment::Right:
+				iLayout.add_spacer(0, 0);
+				iLayout.add_item(0, 1, iText);
+				iLayout.add_item(0, 2, iImage);
+				break;
+			}
 			break;
 		case label_placement::TextImageVertical:
-			iLayout.add_item(start.y + 0, start.x + 0, iText);
-			iLayout.add_item(start.y + 1, start.x + 0, iImage);
+			switch (iLayout.alignment() & neogfx::alignment::Vertical)
+			{
+			case neogfx::alignment::Top:
+				iLayout.add_item(0, 0, iText);
+				iLayout.add_item(1, 0, iImage);
+				iLayout.add_spacer(2, 0);
+				break;
+			case neogfx::alignment::VCentre:
+				iLayout.add_spacer(0, 0);
+				iLayout.add_item(1, 0, iText);
+				iLayout.add_item(2, 0, iImage);
+				iLayout.add_spacer(3, 0);
+				break;
+			case neogfx::alignment::Bottom:
+				iLayout.add_spacer(0, 0);
+				iLayout.add_item(1, 0, iText);
+				iLayout.add_item(2, 0, iImage);
+				break;
+			}
 			break;
-		}
-
-		bool padRight = ((iAlignment & alignment::Right) != alignment::Right);
-		bool padBottom = ((iAlignment & alignment::Bottom) != alignment::Bottom);
-		if (padRight || padBottom)
-		{
-			iLayout.add_spacer(padBottom ? iLayout.rows() : iLayout.rows() - 1, padRight ? iLayout.columns() : iLayout.columns() - 1);
+		case label_placement::ImageTextHorizontal:
+			switch (iLayout.alignment() & neogfx::alignment::Horizontal)
+			{
+			case neogfx::alignment::Left:
+				iLayout.add_item(0, 0, iImage);
+				iLayout.add_item(0, 1, iText);
+				iLayout.add_spacer(0, 2);
+				break;
+			case neogfx::alignment::Centre:
+				iLayout.add_spacer(0, 0);
+				iLayout.add_item(0, 1, iImage);
+				iLayout.add_item(0, 2, iText);
+				iLayout.add_spacer(0, 3);
+				break;
+			case neogfx::alignment::Right:
+				iLayout.add_spacer(0, 0);
+				iLayout.add_item(0, 1, iImage);
+				iLayout.add_item(0, 2, iText);
+				break;
+			}
+			break;
+		case label_placement::ImageTextVertical:
+			switch (iLayout.alignment() & neogfx::alignment::Vertical)
+			{
+			case neogfx::alignment::Top:
+				iLayout.add_item(0, 0, iImage);
+				iLayout.add_item(1, 0, iText);
+				iLayout.add_spacer(2, 0);
+				break;
+			case neogfx::alignment::VCentre:
+				iLayout.add_spacer(0, 0);
+				iLayout.add_item(1, 0, iImage);
+				iLayout.add_item(2, 0, iText);
+				iLayout.add_spacer(3, 0);
+				break;
+			case neogfx::alignment::Bottom:
+				iLayout.add_spacer(0, 0);
+				iLayout.add_item(1, 0, iImage);
+				iLayout.add_item(2, 0, iText);
+				break;
+			}
+			break;
 		}
 	}
 }

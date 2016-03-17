@@ -49,6 +49,8 @@ namespace neogfx
 	class image_widget : public widget
 	{
 	public:
+		event<> image_changed;
+	public:
 		image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
 		image_widget(const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
 		image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
@@ -60,6 +62,7 @@ namespace neogfx
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
+		const texture& image() const;
 		void set_image(const i_texture& aTexture);
 		void set_image(const i_image& aText);
 		void set_aspect_ratio(aspect_ratio aAspectRatio);

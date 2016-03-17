@@ -35,6 +35,7 @@ namespace neogfx
 			set_margins(neogfx::margins(1.0, 2.0));
 			layout().set_margins(neogfx::margins(0.0));
 			label().set_margins(neogfx::margins(0.0));
+			label().text().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
 		}
 	}
 	
@@ -49,6 +50,7 @@ namespace neogfx
 			set_margins(neogfx::margins(1.0, 2.0));
 			layout().set_margins(neogfx::margins(0.0));
 			label().set_margins(neogfx::margins(0.0));
+			label().text().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
 		}
 	}
 
@@ -63,6 +65,7 @@ namespace neogfx
 			set_margins(neogfx::margins(1.0, 2.0));
 			layout().set_margins(neogfx::margins(0.0));
 			label().set_margins(neogfx::margins(0.0));
+			label().text().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
 		}
 	}
 

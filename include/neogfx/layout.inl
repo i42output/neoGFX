@@ -79,6 +79,8 @@ namespace neogfx
 	template <typename AxisPolicy>
 	void layout::do_layout_items(const point& aPosition, const size& aSize)
 	{
+		set_position(aPosition);
+		set_extents(aSize);
 		auto itemsVisibleIncludingSpacers = AxisPolicy::items_visible(static_cast<typename AxisPolicy::layout_type&>(*this), static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
 		if (itemsVisibleIncludingSpacers == 0)
 			return;
@@ -88,7 +90,7 @@ namespace neogfx
 		availableSize.cy -= (margins().top + margins().bottom);
 		auto itemsZeroSized = AxisPolicy::items_zero_sized(static_cast<typename AxisPolicy::layout_type&>(*this), aSize);
 		if (itemsVisible - itemsZeroSized > 1)
-			AxisPolicy::cx(availableSize) -= (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
+			AxisPolicy::cx(availableSize) -= (AxisPolicy::cx(spacing()) * ((iAlwaysUseSpacing ? itemsVisibleIncludingSpacers : itemsVisible) - itemsZeroSized - 1));
 		size::dimension_type leftover = AxisPolicy::cx(availableSize);
 		size::dimension_type eachLeftover = std::floor(leftover / itemsVisible);
 		size totalExpanderWeight;
@@ -246,7 +248,7 @@ namespace neogfx
 			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(s) == 0.0 || AxisPolicy::cy(s) == 0.0))
 				continue;
 			AxisPolicy::x(nextPos) += AxisPolicy::cx(s);
-			if (!item.get().is<item::spacer_pointer>())
+			if (!item.get().is<item::spacer_pointer>() || iAlwaysUseSpacing)
 				AxisPolicy::x(nextPos) += AxisPolicy::cx(spacing());
 		}
 	}

@@ -59,7 +59,7 @@ namespace neogfx
 
 	size horizontal_layout::minimum_size() const
 	{
-		uint32_t itemsVisible = items_visible();
+		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
 		if (itemsVisible == 0)
 			return size{};
 		size result;
@@ -89,7 +89,7 @@ namespace neogfx
 	{
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
-		uint32_t itemsVisible = items_visible();
+		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
 		size result{ std::numeric_limits<size::dimension_type>::max(), 0.0 };
 		for (const auto& item : items())
 		{
@@ -107,7 +107,7 @@ namespace neogfx
 		if (result.cy != std::numeric_limits<size::dimension_type>::max())
 			result.cy += (margins().top + margins().bottom);
 		if (result.cx != std::numeric_limits<size::dimension_type>::max() && itemsVisible > 1)
-			result.cx += (spacing().cx * (itemsVisible - 1 - spacer_count()));
+			result.cx += (spacing().cx * (itemsVisible - 1));
 		if (result.cx != std::numeric_limits<size::dimension_type>::max())
 			result.cx = std::min(result.cx, layout::maximum_size().cx);
 		if (result.cy != std::numeric_limits<size::dimension_type>::max())

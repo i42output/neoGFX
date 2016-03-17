@@ -36,6 +36,10 @@ namespace neogfx
 	class i_geometry
 	{
 	public:
+		virtual point position() const = 0;
+		virtual void set_position(const point& aPosition) = 0;
+		virtual size extents() const = 0;
+		virtual void set_extents(const size& aExtents) = 0;
 		virtual bool has_size_policy() const = 0;
 		virtual neogfx::size_policy size_policy() const = 0;
 		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) = 0;

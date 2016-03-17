@@ -54,6 +54,10 @@ namespace neogfx
 		virtual expansion_policy_e expansion_policy() const;
 		virtual void set_expansion_policy(expansion_policy_e aExpansionPolicy);
 	public:
+		virtual point position() const;
+		virtual void set_position(const point& aPosition);
+		virtual size extents() const;
+		virtual void set_extents(const size& aExtents);
 		virtual bool has_size_policy() const;
 		virtual neogfx::size_policy size_policy() const;
 		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
@@ -80,6 +84,8 @@ namespace neogfx
 		i_layout* iParent;
 		device_metrics_forwarder iDeviceMetricsForwarder;
 		units_context iUnitsContext;
+		point iPosition;
+		size iExtents;
 		optional_size_policy iSizePolicy;
 		optional_size iMinimumSize;
 		optional_size iMaximumSize;

@@ -28,10 +28,14 @@ namespace neogfx
 {
 	enum class label_placement
 	{
+		TextHorizontal,
+		TextVertical,
+		ImageHorizontal,
+		ImageVertical,
+		TextImageHorizontal,
+		TextImageVertical,
 		ImageTextHorizontal,
 		ImageTextVertical,
-		TextImageHorizontal,
-		TextImageVertical
 	};
 
 	class label : public widget
@@ -48,6 +52,8 @@ namespace neogfx
 		const text_widget& text() const;
 		text_widget& text();
 	private:
+		void init();
+		label_placement effective_placement() const;
 		void handle_placement_change();
 	private:
 		alignment iAlignment;

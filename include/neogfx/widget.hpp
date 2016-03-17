@@ -93,10 +93,12 @@ namespace neogfx
 	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual point position() const;
+		virtual void set_position(const point& aPosition);
 		virtual point origin(bool aNonClient = false) const;
 		virtual void move(const point& aPosition);
 		virtual void moved();
 		virtual size extents() const;
+		virtual void set_extents(const size& aSize);
 		virtual void resize(const size& aSize);
 		virtual void resized();
 		virtual rect window_rect() const;

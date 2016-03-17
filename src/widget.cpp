@@ -457,6 +457,11 @@ namespace neogfx
 		return units_converter(*this).from_device_units(iPosition);
 	}
 
+	void widget::set_position(const point& aPosition)
+	{
+		move(aPosition);
+	}
+
 	point widget::origin(bool aNonClient) const
 	{
 		if (has_parent())
@@ -483,6 +488,11 @@ namespace neogfx
 	size widget::extents() const
 	{
 		return units_converter(*this).from_device_units(iSize);
+	}
+
+	void widget::set_extents(const size& aSize)
+	{
+		resize(aSize);
 	}
 
 	void widget::resize(const size& aSize)
@@ -874,6 +884,7 @@ namespace neogfx
 		if (iVisible != aVisible)
 		{
 			iVisible = aVisible;
+			visibility_changed.trigger();
 			if (has_managing_layout())
 				managing_layout().layout_items(true);
 		}

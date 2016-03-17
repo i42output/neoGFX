@@ -56,6 +56,10 @@ namespace neogfx
 			void set_owner(i_widget* aOwner);
 			void layout(const point& aPosition, const size& aSize);
 		public:
+			virtual point position() const;
+			virtual void set_position(const point& aPosition);
+			virtual size extents() const;
+			virtual void set_extents(const size& aExtents);
 			virtual bool has_size_policy() const;
 			virtual neogfx::size_policy size_policy() const;
 			virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
@@ -142,6 +146,8 @@ namespace neogfx
 	public:
 		virtual size spacing() const;
 		virtual void set_spacing(const size& aSpacing);
+		virtual bool always_use_spacing() const;
+		virtual void set_always_use_spacing(bool aAlwaysUseSpacing);
 		virtual neogfx::alignment alignment() const;
 		virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true);
 	public:
@@ -149,6 +155,10 @@ namespace neogfx
 		virtual void disable();
 		virtual bool enabled() const;
 	public:
+		virtual point position() const;
+		virtual void set_position(const point& aPosition);
+		virtual size extents() const;
+		virtual void set_extents(const size& aExtents);
 		virtual bool has_size_policy() const;
 		virtual neogfx::size_policy size_policy() const;
 		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
@@ -170,6 +180,7 @@ namespace neogfx
 	protected:
 		const item_list& items() const;
 		item_list& items();
+		void remove_item(item_list::const_iterator aItem);
 		const i_geometry& item_geometry(item_list::size_type aItem) const;
 		uint32_t spacer_count() const;
 		uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
@@ -181,8 +192,11 @@ namespace neogfx
 		units_context iUnitsContext;
 		optional_margins iMargins;
 		size iSpacing;
+		bool iAlwaysUseSpacing;
 		neogfx::alignment iAlignment;
 		bool iEnabled;
+		point iPosition;
+		size iExtents;
 		optional_size_policy iSizePolicy;
 		optional_size iWeight;
 		optional_size iMinimumSize;
