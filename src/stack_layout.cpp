@@ -89,6 +89,7 @@ namespace neogfx
 		if (!enabled())
 			return;
 		owner()->layout_items_started();
+		next_layout_id();
 		for (auto& item : items())
 		{
 			if (!item.visible())

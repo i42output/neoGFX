@@ -111,7 +111,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{col, aRow}) == iCells.end())
 				add_spacer(aRow, col);
-		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(aWidget));
+		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aWidget));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -128,7 +128,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer(aRow, col);
-		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(aWidget));
+		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aWidget));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -149,7 +149,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer(aRow, col);
-		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(aLayout));
+		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aLayout));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -164,7 +164,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer(aRow, col);
-		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(aLayout));
+		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aLayout));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -179,7 +179,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer(aRow, col);
-		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item(aSpacer));
+		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item(*this, aSpacer));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -195,7 +195,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer(aRow, col);
-		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item(aSpacer));
+		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item(*this, aSpacer));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -384,6 +384,7 @@ namespace neogfx
 		if (!enabled())
 			return;
 		owner()->layout_items_started();
+		next_layout_id();
 		set_position(aPosition);
 		set_extents(aSize);
 		for (auto& r : iRows)

@@ -120,6 +120,7 @@ namespace neogfx
 		if (!enabled())
 			return;
 		owner()->layout_items_started();
+		next_layout_id();
 		layout::do_layout_items<layout::row_major<vertical_layout>>(aPosition, aSize);
 		owner()->layout_items_completed();
 	}

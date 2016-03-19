@@ -25,33 +25,33 @@
 
 namespace neogfx
 {
-	layout::item::item(i_widget& aWidget) :
-		iPointerWrapper(widget_pointer(widget_pointer(), &aWidget))
+	layout::item::item(i_layout& aParent, i_widget& aWidget) :
+		iParent(aParent), iPointerWrapper(widget_pointer(widget_pointer(), &aWidget)), iLayoutId(-1)
 	{
 	}
 
-	layout::item::item(std::shared_ptr<i_widget> aWidget) :
-		iPointerWrapper(aWidget)
+	layout::item::item(i_layout& aParent, std::shared_ptr<i_widget> aWidget) :
+		iParent(aParent), iPointerWrapper(aWidget), iLayoutId(-1)
 	{
 	}
 
-	layout::item::item(i_layout& aLayout) :
-		iPointerWrapper(layout_pointer(layout_pointer(), &aLayout))
+	layout::item::item(i_layout& aParent, i_layout& aLayout) :
+		iParent(aParent), iPointerWrapper(layout_pointer(layout_pointer(), &aLayout)), iLayoutId(-1)
 	{
 	}
 
-	layout::item::item(std::shared_ptr<i_layout> aLayout) :
-		iPointerWrapper(aLayout)
+	layout::item::item(i_layout& aParent, std::shared_ptr<i_layout> aLayout) :
+		iParent(aParent), iPointerWrapper(aLayout), iLayoutId(-1)
 	{
 	}
 
-	layout::item::item(i_spacer& aSpacer) :
-		iPointerWrapper(spacer_pointer(spacer_pointer(), &aSpacer))
+	layout::item::item(i_layout& aParent, i_spacer& aSpacer) :
+		iParent(aParent), iPointerWrapper(spacer_pointer(spacer_pointer(), &aSpacer)), iLayoutId(-1)
 	{
 	}
 
-	layout::item::item(std::shared_ptr<i_spacer> aSpacer) :
-		iPointerWrapper(aSpacer)
+	layout::item::item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer) :
+		iParent(aParent), iPointerWrapper(aSpacer), iLayoutId(-1)
 	{
 	}
 
@@ -162,12 +162,22 @@ namespace neogfx
 	{
 		if (!visible())
 			return size{};
-		return wrapped_geometry().minimum_size();
+		if (iLayoutId == iParent.layout_id())
+			return iMinimumSize;
+		else
+		{
+			iLayoutId = iParent.layout_id();
+			iMinimumSize = wrapped_geometry().minimum_size();
+			iMaximumSize = wrapped_geometry().maximum_size();
+			return iMinimumSize;
+		}
 	}
 
 	void layout::item::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
 		wrapped_geometry().set_minimum_size(aMinimumSize, aUpdateLayout);
+		if (aMinimumSize != boost::none)
+			iMinimumSize = *aMinimumSize;
 	}
 
 	bool layout::item::has_maximum_size() const
@@ -179,12 +189,22 @@ namespace neogfx
 	{
 		if (!visible())
 			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
-		return wrapped_geometry().maximum_size();
+		if (iLayoutId == iParent.layout_id())
+			return iMaximumSize;
+		else
+		{
+			iLayoutId = iParent.layout_id();
+			iMinimumSize = wrapped_geometry().minimum_size();
+			iMaximumSize = wrapped_geometry().maximum_size();
+			return iMaximumSize;
+		}
 	}
 
 	void layout::item::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
 		wrapped_geometry().set_maximum_size(aMaximumSize, aUpdateLayout);
+		if (aMaximumSize != boost::none)
+			iMaximumSize = *aMaximumSize;
 	}
 
 	bool layout::item::is_fixed_size() const
@@ -263,7 +283,8 @@ namespace neogfx
 		iEnabled(true),
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutStarted(false)
+		iLayoutStarted(false),
+		iLayoutId(0)
 	{
 	}
 
@@ -276,7 +297,8 @@ namespace neogfx
 		iEnabled(true),
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutStarted(false)
+		iLayoutStarted(false),
+		iLayoutId(0)
 	{
 		aParent.set_layout(*this);
 	}
@@ -291,7 +313,8 @@ namespace neogfx
 		iEnabled(true),
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutStarted(false)
+		iLayoutStarted(false),
+		iLayoutId(0)
 	{
 		aParent.add_item(*this);
 	}
@@ -310,7 +333,7 @@ namespace neogfx
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
-		iItems.push_back(item(aWidget));
+		iItems.push_back(item(*this, aWidget));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
 	}
@@ -321,7 +344,7 @@ namespace neogfx
 			throw widget_already_added();
 		while (aPosition > iItems.size())
 			add_spacer(0);
-		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aWidget));
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aWidget));
 		if (iOwner != 0)
 			i->set_owner(iOwner);
 	}
@@ -330,7 +353,7 @@ namespace neogfx
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
-		iItems.push_back(item(aWidget));
+		iItems.push_back(item(*this, aWidget));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
 	}
@@ -341,14 +364,14 @@ namespace neogfx
 			throw widget_already_added();
 		while (aPosition > iItems.size())
 			add_spacer(0);
-		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aWidget));
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aWidget));
 		if (iOwner != 0)
 			i->set_owner(iOwner);
 	}
 
 	void layout::add_item(i_layout& aLayout)
 	{
-		iItems.push_back(item(aLayout));
+		iItems.push_back(item(*this, aLayout));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
 	}
@@ -357,14 +380,14 @@ namespace neogfx
 	{
 		while (aPosition > iItems.size())
 			add_spacer(0);
-		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aLayout));
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aLayout));
 		if (iOwner != 0)
 			i->set_owner(iOwner);
 	}
 
 	void layout::add_item(std::shared_ptr<i_layout> aLayout)
 	{
-		iItems.push_back(item(aLayout));
+		iItems.push_back(item(*this, aLayout));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
 	}
@@ -373,14 +396,14 @@ namespace neogfx
 	{
 		while (aPosition > iItems.size())
 			add_spacer(0);
-		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aLayout));
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aLayout));
 		if (iOwner != 0)
 			i->set_owner(iOwner);
 	}
 
 	void layout::add_item(i_spacer& aSpacer)
 	{
-		iItems.push_back(item(aSpacer));
+		iItems.push_back(item(*this, aSpacer));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
 		aSpacer.set_parent(*this);
@@ -390,7 +413,7 @@ namespace neogfx
 	{
 		while (aPosition > iItems.size())
 			add_spacer(0);
-		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aSpacer));
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aSpacer));
 		if (iOwner != 0)
 			i->set_owner(iOwner);
 		aSpacer.set_parent(*this);
@@ -398,7 +421,7 @@ namespace neogfx
 
 	void layout::add_item(std::shared_ptr<i_spacer> aSpacer)
 	{
-		iItems.push_back(item(aSpacer));
+		iItems.push_back(item(*this, aSpacer));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
 		aSpacer->set_parent(*this);
@@ -408,7 +431,7 @@ namespace neogfx
 	{
 		while (aPosition > iItems.size())
 			add_spacer(0);
-		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(aSpacer));
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aSpacer));
 		if (iOwner != 0)
 			i->set_owner(iOwner);
 		aSpacer->set_parent(*this);
@@ -542,6 +565,26 @@ namespace neogfx
 	bool layout::enabled() const
 	{
 		return iEnabled;
+	}
+
+	uint32_t layout::layout_id() const
+	{
+		return iLayoutId;
+	}
+
+	void layout::next_layout_id()
+	{
+		if (++iLayoutId == static_cast<uint32_t>(-1))
+			iLayoutId = 0;
+		for (auto& item : items())
+			if (item.get().is<item::widget_pointer>())
+			{
+				auto& widget = *static_variant_cast<item::widget_pointer&>(item.get());
+				if (widget.has_layout())
+					widget.layout().next_layout_id();
+			}
+			else if (item.get().is<item::layout_pointer>())
+				static_variant_cast<item::layout_pointer&>(item.get())->next_layout_id();
 	}
 
 	point layout::position() const

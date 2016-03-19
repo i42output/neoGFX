@@ -72,6 +72,8 @@ namespace neogfx
 		virtual void disable() = 0;
 		virtual bool enabled() const = 0;
 		virtual void layout_items(const point& aPosition, const size& aSize) = 0;
+		virtual uint32_t layout_id() const = 0;
+		virtual void next_layout_id() = 0;
 		// helpers
 	public:
 		template <typename ItemType>

@@ -42,12 +42,12 @@ namespace neogfx
 			typedef std::shared_ptr<i_spacer> spacer_pointer;
 			typedef neolib::variant<widget_pointer, layout_pointer, spacer_pointer> pointer_wrapper;
 		public:
-			item(i_widget& aWidget);
-			item(std::shared_ptr<i_widget> aWidget);
-			item(i_layout& aLayout);
-			item(std::shared_ptr<i_layout> aLayout);
-			item(i_spacer& aSpacer);
-			item(std::shared_ptr<i_spacer> aSpacer);
+			item(i_layout& aParent, i_widget& aWidget);
+			item(i_layout& aParent, std::shared_ptr<i_widget> aWidget);
+			item(i_layout& aParent, i_layout& aLayout);
+			item(i_layout& aParent, std::shared_ptr<i_layout> aLayout);
+			item(i_layout& aParent, i_spacer& aSpacer);
+			item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer);
 		public:
 			const pointer_wrapper& get() const;
 			pointer_wrapper& get();
@@ -81,8 +81,12 @@ namespace neogfx
 		public:
 			bool visible() const;
 		private:
+			i_layout& iParent;
 			pointer_wrapper iPointerWrapper;
 			i_widget* iOwner;
+			mutable uint32_t iLayoutId;
+			mutable size iMinimumSize;
+			mutable size iMaximumSize;
 		};
 		typedef std::list<item, boost::pool_allocator<item>> item_list;
 		enum item_type_e
@@ -154,6 +158,8 @@ namespace neogfx
 		virtual void enable();
 		virtual void disable();
 		virtual bool enabled() const;
+		virtual uint32_t layout_id() const;
+		virtual void next_layout_id();
 	public:
 		virtual point position() const;
 		virtual void set_position(const point& aPosition);
@@ -203,6 +209,7 @@ namespace neogfx
 		optional_size iMaximumSize;
 		item_list iItems;
 		bool iLayoutStarted;
+		uint32_t iLayoutId;
 	};
 }
 
