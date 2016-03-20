@@ -227,13 +227,11 @@ namespace neogfx
 
 	void sdl_window::save_mouse_cursor()
 	{
-		std::cout << "sdl_window::save_mouse_cursor" << std::endl;
 		iSavedCursors.push_back(cursor_pointer(cursor_pointer(), SDL_GetCursor()));
 	}
 
 	void sdl_window::set_mouse_cursor(mouse_system_cursor aSystemCursor)
 	{
-		std::cout << "sdl_window::set_mouse_cursor" << std::endl;
 		SDL_SystemCursor sdlCursor = SDL_SYSTEM_CURSOR_ARROW;
 		switch (aSystemCursor)
 		{
@@ -280,7 +278,6 @@ namespace neogfx
 
 	void sdl_window::restore_mouse_cursor()
 	{
-		std::cout << "sdl_window::restore_mouse_cursor" << std::endl;
 		if (iSavedCursors.empty())
 			throw no_cursors_saved();
 		iCurrentCursor = iSavedCursors.back();
