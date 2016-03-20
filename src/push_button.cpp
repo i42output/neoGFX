@@ -75,7 +75,7 @@ namespace neogfx
 		colour borderColour = border_mid_colour().darker(0x40);
 		colour innerBorderColour = border_mid_colour().lighter(capturing() ? 0x20 : 0x40);
 		scoped_units su(*this, UnitsPixels);
-		path outline = get_path();
+		neogfx::path outline = path();
 		dimension penWidth = device_metrics().horizontal_dpi() / 96;
 		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleTab)
 			outline.deflate(penWidth * 2.0, penWidth * 2.0);
@@ -167,9 +167,9 @@ namespace neogfx
 		return client_rect();
 	}
 
-	path push_button::get_path() const
+	path push_button::path() const
 	{
-		path ret;
+		neogfx::path ret;
 		size pixel = units_converter(*this).from_device_units(size(1.0, 1.0));
 		size currentSize = path_bounding_rect().extents();
 		switch (iStyle)

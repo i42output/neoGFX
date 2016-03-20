@@ -46,7 +46,7 @@ namespace neogfx
 		virtual void mouse_left();
 	protected:
 		virtual rect path_bounding_rect() const;
-		virtual path get_path() const;
+		virtual neogfx::path path() const;
 		virtual bool spot_colour() const;
 		virtual colour border_mid_colour() const;
 		bool has_hover_colour() const;

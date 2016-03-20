@@ -76,10 +76,8 @@ namespace neogfx
 		virtual bool is_sibling(const i_widget& aWidget) const = 0;
 		virtual i_widget& link_before() const = 0;
 		virtual void set_link_before(i_widget& aWidget) = 0;
-		virtual void set_link_before_ptr(i_widget& aWidget) = 0;
 		virtual i_widget& link_after() const = 0;
 		virtual void set_link_after(i_widget& aWidget) = 0;
-		virtual void set_link_after_ptr(i_widget& aWidget) = 0;
 		virtual void unlink() = 0;
 		virtual void add_widget(i_widget& aWidget) = 0;
 		virtual void add_widget(std::shared_ptr<i_widget> aWidget) = 0;
@@ -180,6 +178,10 @@ namespace neogfx
 		virtual graphics_context create_graphics_context() const = 0;
 	protected:
 		virtual i_widget& widget_for_mouse_event(const point& aPosition) = 0;
+	private:
+		friend class widget;
+		virtual void set_link_before_ptr(i_widget& aWidget) = 0;
+		virtual void set_link_after_ptr(i_widget& aWidget) = 0;
 	};
 
 	inline focus_policy operator|(focus_policy aLhs, focus_policy aRhs)

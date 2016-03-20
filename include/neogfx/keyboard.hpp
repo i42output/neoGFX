@@ -580,4 +580,8 @@ namespace neogfx
 	public:
 		virtual bool is_key_pressed(scan_code_e aScanCode) const = 0;
 	};
+
+	class key_sequence
+	{
+	};
 }

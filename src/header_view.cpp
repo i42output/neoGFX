@@ -31,7 +31,7 @@ namespace neogfx
 	{
 	public:
 		updater(header_view& aParent) :
-			neolib::callback_timer(app::instance(), [this](neolib::callback_timer&)
+			neolib::callback_timer(app::instance(), [this, &aParent](neolib::callback_timer&)
 			{
 				neolib::destroyable::destroyed_flag destroyed(*this);
 				iParent.layout().set_spacing(iParent.separator_width());
@@ -50,13 +50,13 @@ namespace neogfx
 						button.text().set_text(iParent.model().column_heading_text(i));
 						button.set_minimum_size(optional_size{});
 						button.enable(true);
-						button.pressed.subscribe([&, i]()
+						button.pressed.subscribe([&aParent, i]()
 						{
-							iParent.surface().save_mouse_cursor();
-							iParent.surface().set_mouse_cursor(mouse_system_cursor::Wait);
-							iParent.model().sort_by(i);
-							iParent.surface().restore_mouse_cursor();
-						}, this);
+							aParent.surface().save_mouse_cursor();
+							aParent.surface().set_mouse_cursor(mouse_system_cursor::Wait);
+							aParent.model().sort_by(i);
+							aParent.surface().restore_mouse_cursor();
+						}, &aParent);
 					}
 					else
 					{
@@ -89,11 +89,6 @@ namespace neogfx
 		}
 		~updater()
 		{
-			for (std::size_t i = 0; i < iParent.layout().item_count(); ++i)
-			{
-				push_button& button = iParent.layout().get_widget<push_button>(i);
-				button.pressed.unsubscribe(this);
-			}
 			cancel();
 		}
 	private:
