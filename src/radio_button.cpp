@@ -110,6 +110,13 @@ namespace neogfx
 		set_checked();
 	}
 
+	neogfx::size_policy radio_button::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		return neogfx::size_policy::Minimum;
+	}
+
 	void radio_button::paint(graphics_context& aGraphicsContext) const
 	{
 		if (has_focus())

@@ -197,6 +197,8 @@
     <ClInclude Include="..\..\..\include\neogfx\texture_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text_direction_map.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\toolbar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\toolbar_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\vertical_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\video_mode.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\widget.hpp" />
@@ -267,6 +269,8 @@
     <ClCompile Include="..\..\..\src\texture.cpp" />
     <ClCompile Include="..\..\..\src\texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\text_widget.cpp" />
+    <ClCompile Include="..\..\..\src\toolbar.cpp" />
+    <ClCompile Include="..\..\..\src\toolbar_button.cpp" />
     <ClCompile Include="..\..\..\src\vertical_layout.cpp" />
     <ClCompile Include="..\..\..\src\widget.cpp" />
     <ClCompile Include="..\..\..\src\window.cpp" />

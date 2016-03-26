@@ -17,6 +17,7 @@
 #include <neogfx/i_surface.hpp>
 #include <neogfx/image_widget.hpp>
 #include <neogfx/sprite_plane.hpp>
+#include <neogfx/toolbar.hpp>
 
 namespace ng = neogfx;
 
@@ -73,6 +74,20 @@ int main(int argc, char* argv[])
 		ng::window window(800, 800);
 		ng::vertical_layout layout0(window);
 
+		ng::toolbar toolbar(layout0);
+		toolbar.add_action(app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png"));
+		toolbar.add_action(app.add_action("Add favourite...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#add_favourite.png"));
+		toolbar.add_action(app.add_action("Favourites...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		toolbar.add_action(app.add_action("Keywords...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#keyword.png"));
+		toolbar.add_action(app.add_action("Settings...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#settings.png"));
+		toolbar.add_action(app.add_action("Manage Plugins...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#manage_plugins.png"));
+		toolbar.add_action(app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png"));
+		toolbar.add_separator();
+		toolbar.add_action(app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png"));
+		toolbar.add_action(app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png"));
+		toolbar.add_action(app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png"));
+		toolbar.add_action(app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png"));
+
 		ng::tab_page_container tabContainer(layout0);
 
 		// Buttons
@@ -81,6 +96,7 @@ int main(int argc, char* argv[])
 		ng::vertical_layout layoutButtons(buttonsPage);
 		layoutButtons.set_margins(ng::margins(8));
 		ng::push_button button0(layoutButtons, "This is the neoGFX test application.");
+		button0.set_size_policy(ng::size_policy::Expanding);
 		button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
 		ng::push_button button1(layoutButtons, "the,,, quick brown fox jumps over the lazy dog");
 		button1.set_foreground_colour(ng::colour::LightGoldenrod);
@@ -88,7 +104,7 @@ int main(int argc, char* argv[])
 		button2.set_foreground_colour(ng::colour::Goldenrod);
 		ng::push_button button3(layoutButtons, u8"שועל חום קפיצות מעל הכלב העצלן");
 		button3.set_foreground_colour(ng::colour::DarkGoldenrod);
-		button3.set_minimum_size(ng::size(128, 64));
+		button3.set_minimum_size(ng::size(288, 64));
 		ng::push_button button4(layoutButtons, u8"请停止食用犬");
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
@@ -96,7 +112,6 @@ int main(int argc, char* argv[])
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");
-		button6.set_minimum_size(ng::size(128, 64));
 		layout2.add_spacer().set_weight(ng::size(2.0f));
 		ng::push_button button7(layout2, "button7");
 		button7.set_foreground_colour(ng::colour::LightCoral);
@@ -108,9 +123,11 @@ int main(int argc, char* argv[])
 		std::srand(4242);
 		for (uint32_t i = 0; i < 10; ++i)
 		{
-			layout3.add_item(std::make_shared<ng::push_button>(std::string(1, 'A' + i)));
+			auto button = std::make_shared<ng::push_button>(std::string(1, 'A' + i));
+			layout3.add_item(button);
+			button->set_size_policy(ng::size_policy::Expanding);
 			ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
-			layout3.get_widget(i).set_foreground_colour(randomColour);
+			button->set_foreground_colour(randomColour);
 		}
 		ng::vertical_layout layoutRadiosAndChecks(layout2);
 		ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbox", ng::check_box::TriState);

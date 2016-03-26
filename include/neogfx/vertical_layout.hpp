@@ -36,6 +36,7 @@ namespace neogfx
 		virtual i_spacer& add_spacer();
 		virtual i_spacer& add_spacer(uint32_t aPosition);
 	public:
+		virtual neogfx::size_policy size_policy() const;
 		virtual size minimum_size() const;
 		virtual size maximum_size() const;
 	public:

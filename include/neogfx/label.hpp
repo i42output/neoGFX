@@ -45,6 +45,10 @@ namespace neogfx
 		label(i_widget& aParent, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
 		label(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
 	public:
+		virtual neogfx::size_policy size_policy() const;
+		using widget::set_size_policy;
+		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
+	public:
 		label_placement placement() const;
 		void set_placement(label_placement aPlacement);
 		const image_widget& image() const;

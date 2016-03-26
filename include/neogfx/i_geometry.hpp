@@ -24,11 +24,58 @@
 
 namespace neogfx
 {
-	enum class size_policy
+	class size_policy
 	{
-		Minimum,
-		Maximum,
-		Expanding
+	public:
+		enum size_policy_e
+		{
+			Minimum,
+			Maximum,
+			Expanding
+		};
+	public:
+		size_policy(size_policy_e aSizePolicy) :
+			iHorizontalSizePolicy(aSizePolicy), iVerticalSizePolicy(aSizePolicy)
+		{
+		}
+		size_policy(size_policy_e aHorizontalSizePolicy, size_policy_e aVerticalSizePolicy) :
+			iHorizontalSizePolicy(aHorizontalSizePolicy), iVerticalSizePolicy(aVerticalSizePolicy)
+		{
+		}
+	public:
+		bool operator==(const size_policy& aRhs) const
+		{
+			return iHorizontalSizePolicy == aRhs.iHorizontalSizePolicy && iVerticalSizePolicy == aRhs.iVerticalSizePolicy;
+		}
+		bool operator!=(const size_policy& aRhs) const
+		{
+			return !(*this == aRhs);
+		}
+	public:
+		size_policy_e horizontal_size_policy() const
+		{
+			return iHorizontalSizePolicy;
+		}
+		size_policy_e vertical_size_policy() const
+		{
+			return iVerticalSizePolicy;
+		}
+		void set_size_policy(size_policy_e aSizePolicy)
+		{
+			iHorizontalSizePolicy = aSizePolicy;
+			iVerticalSizePolicy = aSizePolicy;
+		}
+		void set_horizontal_size_policy(size_policy_e aHorizontalSizePolicy)
+		{
+			iHorizontalSizePolicy = aHorizontalSizePolicy;
+		}
+		void set_vertical_size_policy(size_policy_e aVerticalSizePolicy)
+		{
+			iVerticalSizePolicy = aVerticalSizePolicy;
+		}
+	private:
+		size_policy_e iHorizontalSizePolicy;
+		size_policy_e iVerticalSizePolicy;
 	};
 
 	typedef boost::optional<size_policy> optional_size_policy;
@@ -58,5 +105,15 @@ namespace neogfx
 		virtual bool has_margins() const = 0;
 		virtual neogfx::margins margins() const = 0;
 		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) = 0;
+		// helpers
+	public:
+		void set_size_policy(neogfx::size_policy::size_policy_e aSizePolicy, bool aUpdateLayout = true)
+		{
+			set_size_policy(neogfx::size_policy{aSizePolicy}, aUpdateLayout);
+		}
+		void set_size_policy(neogfx::size_policy::size_policy_e aHorizontalSizePolicy, neogfx::size_policy::size_policy_e aVerticalSizePolicy, bool aUpdateLayout = true)
+		{
+			set_size_policy(neogfx::size_policy{aHorizontalSizePolicy, aVerticalSizePolicy}, aUpdateLayout);
+		}
 	};
 }

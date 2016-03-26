@@ -45,6 +45,20 @@ namespace neogfx
 		init();
 	}
 
+	neogfx::size_policy label::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		return neogfx::size_policy::Minimum;
+	}
+
+	void label::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
+	{
+		widget::set_size_policy(aSizePolicy, aUpdateLayout);
+		text().set_size_policy(aSizePolicy, aUpdateLayout);
+		image().set_size_policy(aSizePolicy, aUpdateLayout);
+	}
+
 	label_placement label::placement() const
 	{
 		return iPlacement;
@@ -79,7 +93,6 @@ namespace neogfx
 
 	void label::init()
 	{
-		iLayout.set_size_policy(neogfx::size_policy::Minimum);
 		iLayout.set_margins(neogfx::margins{});
 		iText.set_margins(neogfx::margins{});
 		iImage.set_margins(neogfx::margins{});

@@ -28,6 +28,7 @@ namespace neogfx
 		widget(), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		layout().set_margins(neogfx::margins(0.0));
+		iLabel.set_size_policy(neogfx::size_policy::Expanding);
 		set_focus_policy(focus_policy::TabFocus);
 	}
 	
@@ -35,6 +36,7 @@ namespace neogfx
 		widget(aParent), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		layout().set_margins(neogfx::margins(0.0));
+		iLabel.set_size_policy(neogfx::size_policy::Expanding);
 		set_focus_policy(focus_policy::TabFocus);
 	}
 
@@ -43,11 +45,30 @@ namespace neogfx
 		widget(aLayout), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
 		layout().set_margins(neogfx::margins(0.0));
+		iLabel.set_size_policy(neogfx::size_policy::Expanding);
 		set_focus_policy(focus_policy::TabFocus);
 	}
 
 	button::~button()
 	{
+	}
+
+	neogfx::size_policy button::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		return neogfx::size_policy{neogfx::size_policy::Expanding, neogfx::size_policy::Minimum};
+	}
+
+	margins button::margins() const
+	{
+		neogfx::margins result = widget::margins();
+		if (!has_margins())
+		{
+			result.left *= 2.0;
+			result.right *= 2.0;
+		}
+		return result;
 	}
 
 	button::checkable_e button::checkable() const
@@ -131,17 +152,6 @@ namespace neogfx
 	text_widget& button::text()
 	{
 		return label().text();
-	}
-
-	margins button::margins() const
-	{
-		neogfx::margins result = widget::margins();
-		if (!has_margins())
-		{
-			result.left *= 2.0;
-			result.right *= 2.0;
-		}
-		return result;
 	}
 
 	void button::mouse_button_released(mouse_button aButton, const point& aPosition)

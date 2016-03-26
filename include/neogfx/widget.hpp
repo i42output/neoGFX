@@ -189,6 +189,9 @@ namespace neogfx
 		virtual graphics_context create_graphics_context() const;
 	protected:
 		virtual i_widget& widget_for_mouse_event(const point& aPosition);
+		// helpers
+	public:
+		using i_widget::set_size_policy;
 	private:
 		i_widget* iParent;
 		i_widget* iLinkBefore;

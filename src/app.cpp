@@ -79,6 +79,8 @@ namespace neogfx
 	{
 		try
 		{
+			surface_manager().layout_surfaces();
+			surface_manager().invalidate_surfaces();
 			iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
 			while (!iQuitResultCode.is_initialized())
 			{
@@ -171,6 +173,40 @@ namespace neogfx
 			surface_manager().invalidate_surfaces();
 		}
 		return newStyle->second;
+	}
+
+	i_action& app::add_action(const std::string& aText)
+	{
+		iActions.emplace_back(aText);
+		return iActions.back();
+	}
+
+	i_action& app::add_action(const std::string& aText, const std::string& aImageUri)
+	{
+		iActions.emplace_back(aText, aImageUri);
+		return iActions.back();
+	}
+
+	i_action& app::add_action(const std::string& aText, const i_texture& aImage)
+	{
+		iActions.emplace_back(aText, aImage);
+		return iActions.back();
+	}
+
+	i_action& app::add_action(const std::string& aText, const i_image& aImage)
+	{
+		iActions.emplace_back(aText, aImage);
+		return iActions.back();
+	}
+
+	void app::remove_action(i_action& aAction)
+	{
+		for (auto i = iActions.begin(); i != iActions.end(); ++i)
+			if (&*i == &aAction)
+			{
+				iActions.erase(i);
+				break;
+			}
 	}
 
 	bool app::process_events()

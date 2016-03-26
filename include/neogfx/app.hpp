@@ -21,12 +21,14 @@
 
 #include "neogfx.hpp"
 #include <boost/optional.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #include <neolib/io_thread.hpp>
 #include "i_app.hpp"
 #include "i_rendering_engine.hpp"
 #include "i_surface_manager.hpp"
 #include "keyboard.hpp"
 #include "style.hpp"
+#include "action.hpp"
 
 namespace neogfx
 {
@@ -34,6 +36,7 @@ namespace neogfx
 	{
 	private:
 		typedef std::map<std::string, style> style_list;
+		typedef std::list<action, boost::fast_pool_allocator<action>> action_list;
 	public:
 		struct no_instance : std::logic_error { no_instance() : std::logic_error("neogfx::app::no_instance") {} };
 		struct no_renderer : std::logic_error { no_renderer() : std::logic_error("neogfx::app::no_renderer") {} };
@@ -52,10 +55,17 @@ namespace neogfx
 		virtual i_rendering_engine& rendering_engine() const;
 		virtual i_surface_manager& surface_manager() const;
 		virtual const i_keyboard& keyboard() const;
+	public:
 		virtual const i_style& current_style() const;
 		virtual i_style& current_style();
 		virtual i_style& change_style(const std::string& aStyleName);
 		virtual i_style& register_style(const i_style& aStyle);
+	public:
+		virtual i_action& add_action(const std::string& aText);
+		virtual i_action& add_action(const std::string& aText, const std::string& aImageUri);
+		virtual i_action& add_action(const std::string& aText, const i_texture& aImage);
+		virtual i_action& add_action(const std::string& aText, const i_image& aImage);
+		virtual void remove_action(i_action& aAction);
 	public:
 		virtual bool process_events();
 	private:
@@ -70,5 +80,6 @@ namespace neogfx
 		boost::optional<int> iQuitResultCode;
 		style_list iStyles;
 		style_list::iterator iCurrentStyle;
+		action_list iActions;
 	};
 }

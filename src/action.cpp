@@ -24,7 +24,27 @@
 namespace neogfx
 {
 	action::action() : 
-		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false)
+		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(true)
+	{
+	}
+
+	action::action(const std::string& aText) :
+		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText)
+	{
+	}
+
+	action::action(const std::string& aText, const std::string& aImageUri) :
+		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText), iTexture(neogfx::image(aImageUri))
+	{
+	}
+
+	action::action(const std::string& aText, const i_texture& aImage) :
+		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText), iTexture(aImage)
+	{
+	}
+
+	action::action(const std::string& aText, const i_image& aImage) :
+		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText), iTexture(aImage)
 	{
 	}
 
@@ -134,7 +154,7 @@ namespace neogfx
 		return iTexture;
 	}
 
-	const key_sequence& action::short_cut() const
+	const optional_key_sequence& action::short_cut() const
 	{
 		return iShortCut;
 	}
@@ -188,9 +208,11 @@ namespace neogfx
 
 	void action::set_text(const optional_text& aText)
 	{
-		if (iText!= aText)
+		if (iText != aText)
 		{
 			iText = aText;
+			if (iText != boost::none && iSeparator)
+				iSeparator = false;
 			changed.trigger();
 		}
 	}
@@ -200,6 +222,8 @@ namespace neogfx
 		if (iMenuText != aMenuText)
 		{
 			iMenuText = aMenuText;
+			if (iMenuText != boost::none && iSeparator)
+				iSeparator = false;
 			changed.trigger();
 		}
 	}
@@ -209,6 +233,8 @@ namespace neogfx
 		if (iButtonText != aButtonText)
 		{
 			iButtonText = aButtonText;
+			if (iButtonText != boost::none && iSeparator)
+				iSeparator = false;
 			changed.trigger();
 		}
 	}
@@ -218,6 +244,8 @@ namespace neogfx
 		if (iToolTipText != aToolTipText)
 		{
 			iToolTipText = aToolTipText;
+			if (iToolTipText != boost::none && iSeparator)
+				iSeparator = false;
 			changed.trigger();
 		}
 	}
@@ -227,6 +255,8 @@ namespace neogfx
 		if (iStatusTipText != aStatusTipText)
 		{
 			iStatusTipText = aStatusTipText;
+			if (iStatusTipText != boost::none && iSeparator)
+				iSeparator = false;
 			changed.trigger();
 		}
 	}
@@ -234,21 +264,36 @@ namespace neogfx
 	void action::set_image(const std::string& aUri)
 	{
 		iTexture = neogfx::image(aUri);
+		if (!iTexture.is_empty() && iSeparator)
+			iSeparator = false;
+		changed.trigger();
 	}
 
 	void action::set_image(const i_texture& aTexture)
 	{
 		iTexture = aTexture;
+		if (!iTexture.is_empty() && iSeparator)
+			iSeparator = false;
+		changed.trigger();
 	}
 
 	void action::set_image(const i_image& aImage)
 	{
 		iTexture = aImage;
+		if (!iTexture.is_empty() && iSeparator)
+			iSeparator = false;
+		changed.trigger();
 	}
 
-	void action::set_short_cut(const key_sequence& aShortCut)
+	void action::set_short_cut(const optional_key_sequence& aShortCut)
 	{
-		iShortCut = aShortCut;
+		if (iShortCut != aShortCut)
+		{
+			iShortCut = aShortCut;
+			if (iShortCut != boost::none && iSeparator)
+				iSeparator = false;
+			changed.trigger();
+		}
 	}
 
 	void action::set_enabled(bool aEnabled)

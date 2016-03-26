@@ -96,6 +96,13 @@ namespace neogfx
 		layout().add_spacer();
 	}
 
+	neogfx::size_policy check_box::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		return neogfx::size_policy::Minimum;
+	}
+
 	void check_box::paint(graphics_context& aGraphicsContext) const
 	{
 		if (has_focus())

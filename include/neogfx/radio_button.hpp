@@ -48,6 +48,8 @@ namespace neogfx
 		bool is_on() const;
 		bool is_off() const;
 		void set_on();
+	public:
+		virtual neogfx::size_policy size_policy() const;
 	protected:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 		virtual void handle_pressed();

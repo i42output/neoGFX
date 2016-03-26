@@ -545,7 +545,7 @@ namespace neogfx
 		if (has_size_policy())
 			return *iSizePolicy;
 		else
-			return size_policy::Minimum;
+			return size_policy::Expanding;
 	}
 
 	void widget::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
@@ -612,11 +612,13 @@ namespace neogfx
 
 	size widget::maximum_size() const
 	{
-		return has_maximum_size() ?
-			units_converter(*this).from_device_units(*iMaximumSize) :
-			has_layout() ?
-				layout().maximum_size() : 
-				size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
+		return size_policy() == neogfx::size_policy::Minimum ? 
+			minimum_size() :
+			has_maximum_size() ?
+				units_converter(*this).from_device_units(*iMaximumSize) :
+				has_layout() ?
+					layout().maximum_size() : 
+					size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
 	}
 
 	void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
@@ -632,7 +634,7 @@ namespace neogfx
 
 	bool widget::is_fixed_size() const
 	{
-		return has_minimum_size() && minimum_size() == maximum_size();
+		return has_minimum_size() && has_maximum_size() && minimum_size() == maximum_size();
 	}
 
 	void widget::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)

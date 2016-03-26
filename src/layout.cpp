@@ -616,8 +616,10 @@ namespace neogfx
 	{
 		if (has_size_policy())
 			return *iSizePolicy;
-		else
-			return size_policy::Minimum;
+		for (auto& i : items())
+			if (i.size_policy() == neogfx::size_policy::Expanding)
+				return neogfx::size_policy::Expanding;
+		return size_policy::Minimum;
 	}
 
 	void layout::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)

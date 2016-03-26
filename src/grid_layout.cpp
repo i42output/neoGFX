@@ -207,6 +207,7 @@ namespace neogfx
 	i_spacer& grid_layout::add_spacer()
 	{
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
+		s->set_size_policy(neogfx::size_policy::Minimum);
 		add_item(iCursor.y, iCursor.x, s);
 		increment_cursor();
 		return *s;
@@ -215,6 +216,7 @@ namespace neogfx
 	i_spacer& grid_layout::add_spacer(uint32_t aPosition)
 	{
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
+		s->set_size_policy(neogfx::size_policy::Minimum);
 		cell_coordinates oldCursor = iCursor;
 		iCursor.y = 0;
 		iCursor.x = 0;
@@ -230,6 +232,7 @@ namespace neogfx
 		if (iCells.find(cell_coordinates{ aColumn, aRow }) != iCells.end())
 			remove_item(aRow, aColumn);
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
+		s->set_size_policy(neogfx::size_policy::Minimum);
 		add_item(aRow, aColumn, s);
 		return *s;
 	}

@@ -59,6 +59,8 @@ namespace neogfx
 		static size::dimension_type& cx(size& aSize) { return aSize.cx; }
 		static const size::dimension_type& cy(const size& aSize) { return aSize.cy; }
 		static size::dimension_type& cy(size& aSize) { return aSize.cy; }
+		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.horizontal_size_policy(); }
+		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.vertical_size_policy(); }
 	};
 
 	template <typename Layout>
@@ -74,6 +76,8 @@ namespace neogfx
 		static size::dimension_type& cx(size& aSize) { return aSize.cy; }
 		static const size::dimension_type& cy(const size& aSize) { return aSize.cx; }
 		static size::dimension_type& cy(size& aSize) { return aSize.cx; }
+		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.vertical_size_policy(); }
+		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.horizontal_size_policy(); }
 	};
 
 	template <typename AxisPolicy>
@@ -85,6 +89,7 @@ namespace neogfx
 		if (itemsVisibleIncludingSpacers == 0)
 			return;
 		uint32_t itemsVisible = AxisPolicy::items_visible(static_cast<typename AxisPolicy::layout_type&>(*this));
+		bool haveSpacers = (itemsVisibleIncludingSpacers > itemsVisible);
 		size availableSize = aSize;
 		availableSize.cx -= (margins().left + margins().right);
 		availableSize.cy -= (margins().top + margins().bottom);
@@ -109,7 +114,7 @@ namespace neogfx
 				if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
 					continue;
 				bool wasItemUsingLeftOver = (itemDispositions[&item] == Unknown || itemDispositions[&item] == Normal);
-				if (item.size_policy() == size_policy::Expanding && AxisPolicy::cx(item.maximum_size()) >= leftover)
+				if (AxisPolicy::size_policy_x(item.size_policy()) == size_policy::Expanding && AxisPolicy::cx(item.maximum_size()) >= leftover)
 				{
 					if (expandersUsingLeftover.empty())
 					{
@@ -119,23 +124,21 @@ namespace neogfx
 						totalExpanderWeight = size{};
 						eachLeftover = 0.0;
 					}
+					leftover -= AxisPolicy::cx(item.minimum_size());
 					expandersUsingLeftover.insert(&item);
 					totalExpanderWeight += item.weight();
 					done = false;
 					break;
 				}
-				else if (item.size_policy() != size_policy::Expanding && !expandersUsingLeftover.empty())
+				else if (AxisPolicy::size_policy_x(item.size_policy()) == size_policy::Minimum && itemDispositions[&item] != FixedSize)
 				{
-					if (itemDispositions[&item] != TooBig)
-					{
-						if (itemDispositions[&item] == TooSmall)
-							leftover += AxisPolicy::cx(item.maximum_size());
-						itemDispositions[&item] = TooBig;
-						if (wasItemUsingLeftOver)
-							++itemsNotUsingLeftover;
-						leftover -= AxisPolicy::cx(item.minimum_size());
-						done = false;
-					}
+					if (itemDispositions[&item] == TooSmall)
+						leftover += AxisPolicy::cx(item.maximum_size());
+					itemDispositions[&item] = FixedSize;
+					if (wasItemUsingLeftOver)
+						++itemsNotUsingLeftover;
+					leftover -= AxisPolicy::cx(item.minimum_size());
+					done = false;
 				}
 				else if (AxisPolicy::cx(item.maximum_size()) < eachLeftover)
 				{
@@ -167,7 +170,7 @@ namespace neogfx
 						done = false;
 					}
 				}
-				else if (itemDispositions[&item] != Normal && itemDispositions[&item] != FixedSize)
+				else if (itemDispositions[&item] == TooSmall || itemDispositions[&item] == TooBig)
 				{
 					if (itemDispositions[&item] == TooSmall)
 						leftover += AxisPolicy::cx(item.maximum_size());
@@ -178,6 +181,14 @@ namespace neogfx
 						++itemsNotUsingLeftover;
 					else if (!wasItemUsingLeftOver && !item.is_fixed_size())
 						--itemsNotUsingLeftover;
+					if (expandersUsingLeftover.empty())
+						eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
+					done = false;
+				}
+				else if (itemDispositions[&item] == Unknown)
+				{
+					itemDispositions[&item] = Normal;
+					leftover -= AxisPolicy::cx(item.minimum_size());
 					if (expandersUsingLeftover.empty())
 						eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
 					done = false;
@@ -232,18 +243,24 @@ namespace neogfx
 				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size());
 			else if (itemDispositions[&item] == TooSmall)
 				AxisPolicy::cx(s) = AxisPolicy::cx(item.maximum_size());
-			else if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
+			else if (leftover > 0.0)
 			{
-				uint32_t bit = bitsLeft != 0 ? bits() : 0;
-				AxisPolicy::cx(s) = std::floor(AxisPolicy::cx(item.weight()) / AxisPolicy::cx(totalExpanderWeight) * leftover) + static_cast<size::dimension_type>(bit - previousBit);
-				previousBit = bit;
+				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size());
+				if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
+				{
+					uint32_t bit = bitsLeft != 0 ? bits() : 0;
+					AxisPolicy::cx(s) += std::floor(AxisPolicy::cx(item.weight()) / AxisPolicy::cx(totalExpanderWeight) * leftover) + static_cast<size::dimension_type>(bit - previousBit);
+					previousBit = bit;
+				}
+				else
+				{
+					uint32_t bit = bitsLeft != 0 ? bits() : 0;
+					AxisPolicy::cx(s) += eachLeftover + static_cast<size::dimension_type>(bit - previousBit);
+					previousBit = bit;
+				}
 			}
 			else
-			{
-				uint32_t bit = bitsLeft != 0 ? bits() : 0;
-				AxisPolicy::cx(s) = eachLeftover + static_cast<size::dimension_type>(bit - previousBit);
-				previousBit = bit;
-			}
+				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size());
 			item.layout(nextPos + alignmentAdjust, s);
 			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(s) == 0.0 || AxisPolicy::cy(s) == 0.0))
 				continue;

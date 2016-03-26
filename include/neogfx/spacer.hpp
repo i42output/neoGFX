@@ -60,6 +60,7 @@ namespace neogfx
 		virtual void set_extents(const size& aExtents);
 		virtual bool has_size_policy() const;
 		virtual neogfx::size_policy size_policy() const;
+		using i_geometry::set_size_policy;
 		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
 		virtual bool has_weight() const;
 		virtual size weight() const;

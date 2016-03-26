@@ -73,6 +73,16 @@ namespace neogfx
 		return widget::widget_at(aPosition);
 	}
 
+	neogfx::size_policy splitter::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		if (iType == HorizontalSplitter)
+			return neogfx::size_policy{neogfx::size_policy::Expanding, neogfx::size_policy::Minimum};
+		else
+			return neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Expanding};
+	}
+
 	void splitter::mouse_button_pressed(mouse_button aButton, const point& aPosition)
 	{
 		widget::mouse_button_pressed(aButton, aPosition);

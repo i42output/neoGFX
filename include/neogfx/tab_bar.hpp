@@ -31,6 +31,7 @@ namespace neogfx
 	private:
 		typedef std::unique_ptr<tab_button> tab_pointer;
 		typedef std::vector<tab_pointer> tab_list;
+	public:
 		typedef tab_list::size_type tab_index;
 	public:
 		tab_bar(i_tab_page_container& aContainer);

@@ -50,6 +50,9 @@ namespace neogfx
 		button(i_layout& aLayout, const std::string& aText = std::string(), alignment aAlignment = alignment::Left | alignment::VCentre);
 		~button();
 	public:
+		virtual neogfx::size_policy size_policy() const;
+		virtual neogfx::margins margins() const;
+	public:
 		checkable_e checkable() const;
 		void set_checkable(checkable_e aCheckable = BiState);
 		bool is_checked() const;
@@ -67,8 +70,6 @@ namespace neogfx
 		image_widget& image();
 		const text_widget& text() const;
 		text_widget& text();
-	protected:
-		virtual neogfx::margins margins() const;
 	protected:
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 	protected:

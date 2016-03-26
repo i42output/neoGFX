@@ -583,5 +583,18 @@ namespace neogfx
 
 	class key_sequence
 	{
+		/* todo */
+	public:
+		bool operator==(const key_sequence& aRhs) const
+		{
+			/* todo */
+			return true;
+		}
+		bool operator!=(const key_sequence& aRhs) const
+		{
+			return !(*this == aRhs);
+		}
 	};
+
+	typedef boost::optional<key_sequence> optional_key_sequence;
 }
