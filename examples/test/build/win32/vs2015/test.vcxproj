@@ -90,7 +90,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\neopede\src\game.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
-    <ClCompile Include="Release\GeneratedFiles\test.nrc.cpp" />
+    <ClCompile Include="Debug\GeneratedFiles\test.nrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\GeneratedFiles\test.nrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\test.nrc">

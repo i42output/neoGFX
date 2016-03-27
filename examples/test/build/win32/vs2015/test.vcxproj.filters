@@ -30,6 +30,9 @@
     <ClCompile Include="..\..\..\..\neopede\src\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\GeneratedFiles\test.nrc.cpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\test.nrc">
