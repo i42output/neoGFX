@@ -57,17 +57,6 @@ namespace neogfx
 		return *s;
 	}
 
-	neogfx::size_policy vertical_layout::size_policy() const
-	{
-		if (layout::has_size_policy())
-			return layout::size_policy();
-		neogfx::size_policy result{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
-		for (auto& i : items())
-			if (i.size_policy().vertical_size_policy() == neogfx::size_policy::Expanding)
-				result.set_vertical_size_policy(neogfx::size_policy::Expanding);
-		return result;
-	}
-
 	size vertical_layout::minimum_size() const
 	{
 		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();

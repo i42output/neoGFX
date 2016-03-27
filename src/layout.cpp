@@ -616,10 +616,15 @@ namespace neogfx
 	{
 		if (has_size_policy())
 			return *iSizePolicy;
+		neogfx::size_policy result{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
 		for (auto& i : items())
-			if (i.size_policy() == neogfx::size_policy::Expanding)
-				return neogfx::size_policy::Expanding;
-		return size_policy::Minimum;
+		{
+			if (i.size_policy().horizontal_size_policy() == neogfx::size_policy::Expanding)
+				result.set_horizontal_size_policy(neogfx::size_policy::Expanding);
+			if (i.size_policy().vertical_size_policy() == neogfx::size_policy::Expanding)
+				result.set_vertical_size_policy(neogfx::size_policy::Expanding);
+		}
+		return result;
 	}
 
 	void layout::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)

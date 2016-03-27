@@ -124,8 +124,12 @@ namespace neogfx
 	{
 		if (has_size_policy())
 			return *iSizePolicy;
-		else
-			return size_policy::Expanding;
+		neogfx::size_policy result{neogfx::size_policy::Minimum};
+		if (iExpansionPolicy & ExpandHorizontally)
+			result.set_horizontal_size_policy(neogfx::size_policy::Expanding);
+		if (iExpansionPolicy & ExpandVertically)
+			result.set_vertical_size_policy(neogfx::size_policy::Expanding);
+		return result;
 	}
 
 	void spacer::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
