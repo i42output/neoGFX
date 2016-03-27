@@ -632,17 +632,6 @@ namespace neogfx
 		}
 	}
 
-	bool widget::is_fixed_size() const
-	{
-		return has_minimum_size() && has_maximum_size() && minimum_size() == maximum_size();
-	}
-
-	void widget::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-	{
-		set_minimum_size(aFixedSize, aUpdateLayout);
-		set_maximum_size(aFixedSize, aUpdateLayout);
-	}
-
 	bool widget::has_margins() const
 	{
 		return iMargins != boost::none;
@@ -1052,6 +1041,11 @@ namespace neogfx
 
 	void widget::mouse_left()
 	{
+	}
+
+	void widget::set_default_mouse_cursor()
+	{
+		surface().set_mouse_cursor(mouse_system_cursor::Arrow);
 	}
 
 	void widget::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)

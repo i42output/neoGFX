@@ -136,6 +136,7 @@ namespace neogfx
 		virtual void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual void native_window_text_input(const std::string& aText);
+		virtual void native_window_set_default_mouse_cursor();
 	private:
 		void update_click_focus(i_widget& aCandidateWidget);
 		void update_modality();

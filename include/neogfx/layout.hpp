@@ -72,8 +72,6 @@ namespace neogfx
 			virtual bool has_maximum_size() const;
 			virtual size maximum_size() const;
 			virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
-			virtual bool is_fixed_size() const;
-			virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true);
 		public:
 			virtual bool has_margins() const;
 			virtual neogfx::margins margins() const;
@@ -177,8 +175,6 @@ namespace neogfx
 		virtual bool has_maximum_size() const;
 		virtual size maximum_size() const;
 		virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
-		virtual bool is_fixed_size() const;
-		virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true);
 	public:
 		virtual const i_device_metrics& device_metrics() const;
 		virtual units_e units() const;

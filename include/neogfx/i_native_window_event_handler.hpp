@@ -45,5 +45,6 @@ namespace neogfx
 		virtual void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
 		virtual void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
 		virtual void native_window_text_input(const std::string& aText) = 0;
+		virtual void native_window_set_default_mouse_cursor() = 0;
 	};
 }

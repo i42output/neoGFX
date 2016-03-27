@@ -207,17 +207,6 @@ namespace neogfx
 			iMaximumSize = *aMaximumSize;
 	}
 
-	bool layout::item::is_fixed_size() const
-	{
-		return has_minimum_size() && minimum_size() == maximum_size();
-	}
-
-	void layout::item::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-	{
-		set_minimum_size(aFixedSize, aUpdateLayout);
-		set_maximum_size(aFixedSize, aUpdateLayout);
-	}
-
 	bool layout::item::has_margins() const
 	{
 		return wrapped_geometry().has_margins();
@@ -704,17 +693,6 @@ namespace neogfx
 			if (iOwner != 0 && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
-	}
-
-	bool layout::is_fixed_size() const
-	{
-		return has_minimum_size() && minimum_size() == maximum_size();
-	}
-
-	void layout::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-	{
-		set_minimum_size(aFixedSize, aUpdateLayout);
-		set_maximum_size(aFixedSize, aUpdateLayout);
 	}
 
 	const i_device_metrics& layout::device_metrics() const

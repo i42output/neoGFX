@@ -283,6 +283,8 @@ namespace neogfx
 		iCurrentCursor = iSavedCursors.back();
 		iSavedCursors.pop_back();
 		SDL_SetCursor(&*iCurrentCursor);
+		if (iSavedCursors.empty())
+			event_handler().native_window_set_default_mouse_cursor();
 	}
 
 	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context() const

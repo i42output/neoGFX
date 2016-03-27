@@ -211,17 +211,6 @@ namespace neogfx
 		}
 	}
 
-	bool spacer::is_fixed_size() const
-	{
-		return has_minimum_size() && minimum_size() == maximum_size();
-	}
-
-	void spacer::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-	{
-		set_minimum_size(aFixedSize, aUpdateLayout);
-		set_maximum_size(aFixedSize, aUpdateLayout);
-	}
-
 	bool spacer::has_margins() const
 	{
 		return false;

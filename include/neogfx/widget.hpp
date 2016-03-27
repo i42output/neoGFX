@@ -117,8 +117,6 @@ namespace neogfx
 		virtual bool has_maximum_size() const;
 		virtual size maximum_size() const;
 		virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
-		virtual bool is_fixed_size() const;
-		virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true);
 		virtual bool has_margins() const;
 		virtual neogfx::margins margins() const;
 		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
@@ -181,6 +179,7 @@ namespace neogfx
 		virtual void mouse_moved(const point& aPosition);
 		virtual void mouse_entered();
 		virtual void mouse_left();
+		virtual void set_default_mouse_cursor();
 	public:
 		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual void key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
