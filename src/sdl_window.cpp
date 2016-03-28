@@ -119,6 +119,9 @@ namespace neogfx
 #ifdef WIN32
 		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS);
 #endif
+		int w, h;
+		SDL_GetWindowSize(iHandle, &w, &h);
+		iExtents = basic_size<int>{w, h};
 	}
 
 	sdl_window::sdl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
@@ -148,6 +151,9 @@ namespace neogfx
 		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS);
 		SetParent(static_cast<HWND>(native_handle()), static_cast<HWND>(aParent.native_handle()));
 #endif
+		int w, h;
+		SDL_GetWindowSize(iHandle, &w, &h);
+		iExtents = basic_size<int>{ w, h };
 	}
 
 	sdl_window::~sdl_window()
@@ -192,14 +198,13 @@ namespace neogfx
 
 	size sdl_window::surface_size() const
 	{
-		int w, h;
-		SDL_GetWindowSize(iHandle, &w, &h);
-		return size(static_cast<dimension>(w), static_cast<dimension>(h));
+		return iExtents;
 	}
 
 	void sdl_window::resize_surface(const size& aSize)
 	{
 		SDL_SetWindowSize(iHandle, static_cast<int>(aSize.cx), static_cast<int>(aSize.cy));
+		iExtents = aSize;
 	}
 
 	point sdl_window::mouse_position() const
@@ -358,6 +363,11 @@ namespace neogfx
 				event_handler().native_window_closed();
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
+				iExtents = basic_size<decltype(aEvent.window.data1)>{aEvent.window.data1, aEvent.window.data2};
+				event_handler().native_window_resized();
+				break;
+			case SDL_WINDOWEVENT_SIZE_CHANGED:
+				iExtents = basic_size<decltype(aEvent.window.data1)>{aEvent.window.data1, aEvent.window.data2};
 				event_handler().native_window_resized();
 				break;
 			case SDL_WINDOWEVENT_ENTER:

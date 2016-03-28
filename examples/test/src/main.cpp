@@ -240,15 +240,19 @@ int main(int argc, char* argv[])
 		ng::vertical_layout l3(l2);
 		ng::image_widget iw(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Ignore);
 		iw.set_background_colour(ng::colour::Red.lighter(0x80));
+		iw.set_size_policy(ng::size_policy::Expanding);
 		iw.set_minimum_size(ng::size{});
 		ng::image_widget iw2(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Keep);
 		iw2.set_background_colour(ng::colour::Green.lighter(0x80));
+		iw2.set_size_policy(ng::size_policy::Expanding);
 		iw2.set_minimum_size(ng::size{});
 		ng::image_widget iw3(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::KeepExpanding);
 		iw3.set_background_colour(ng::colour::Blue.lighter(0x80));
+		iw3.set_size_policy(ng::size_policy::Expanding);
 		iw3.set_minimum_size(ng::size{});
 		ng::image_widget iw4(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Stretch);
 		iw4.set_background_colour(ng::colour::Magenta.lighter(0x80));
+		iw4.set_size_policy(ng::size_policy::Expanding);
 		iw4.set_minimum_size(ng::size{});
 		ng::image_widget iw5(l2, ng::image(":/test/resources/orca.png"));
 		ng::grid_layout l4(l2);
@@ -257,6 +261,7 @@ int main(int argc, char* argv[])
 		for (uint32_t i = 0; i < 9; ++i)
 		{
 			auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal_placement>(i));
+			hashWidget->set_size_policy(ng::size_policy::Expanding);
 			hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
 			l4.add_item(i / 3, i % 3, hashWidget);
 		}
