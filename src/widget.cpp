@@ -612,7 +612,7 @@ namespace neogfx
 
 	size widget::maximum_size() const
 	{
-		return size_policy() == neogfx::size_policy::Minimum ? 
+		return size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed ?
 			minimum_size() :
 			has_maximum_size() ?
 				units_converter(*this).from_device_units(*iMaximumSize) :

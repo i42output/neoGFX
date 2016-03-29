@@ -608,6 +608,8 @@ namespace neogfx
 		neogfx::size_policy result{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
 		for (auto& i : items())
 		{
+			if (i.get().is<item::spacer_pointer>())
+				continue;
 			if (i.size_policy().horizontal_size_policy() == neogfx::size_policy::Expanding)
 				result.set_horizontal_size_policy(neogfx::size_policy::Expanding);
 			if (i.size_policy().vertical_size_policy() == neogfx::size_policy::Expanding)
