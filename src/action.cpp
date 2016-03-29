@@ -24,7 +24,7 @@
 namespace neogfx
 {
 	action::action() : 
-		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(true)
+		iEnabled(false), iCheckable(false), iChecked(false), iGroup(0), iSeparator(true)
 	{
 	}
 

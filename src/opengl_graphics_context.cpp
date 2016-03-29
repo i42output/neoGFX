@@ -61,7 +61,9 @@ namespace neogfx
 		iSavedCoordinateSystem(aSurface.logical_coordinate_system()), 
 		iLogicalCoordinateSystem(iSavedCoordinateSystem), 
 		iLogicalCoordinates(aSurface.logical_coordinates()), 
-		iSmoothingMode(SmoothingModeNone), iClipCounter(0), 
+		iSmoothingMode(SmoothingModeNone), 
+		iMonochrome(false), 
+		iClipCounter(0),
 		iLineStippleActive(false)
 	{
 		set_smoothing_mode(SmoothingModeAntiAlias);
@@ -74,6 +76,7 @@ namespace neogfx
 		iLogicalCoordinateSystem(iSavedCoordinateSystem),
 		iLogicalCoordinates(aSurface.logical_coordinates()),
 		iSmoothingMode(SmoothingModeNone), 
+		iMonochrome(false),
 		iClipCounter(0), 
 		iLineStippleActive(false)
 	{
@@ -87,7 +90,8 @@ namespace neogfx
 		iLogicalCoordinateSystem(aOther.iLogicalCoordinateSystem),
 		iLogicalCoordinates(aOther.iLogicalCoordinates),
 		iSmoothingMode(aOther.iSmoothingMode), 
-		iClipCounter(0), 
+		iMonochrome(false),
+		iClipCounter(0),
 		iLineStippleActive(false)
 	{
 		set_smoothing_mode(iSmoothingMode);
@@ -270,6 +274,16 @@ namespace neogfx
 		{
 			glCheck(glDisable(GL_STENCIL_TEST));
 		}
+	}
+
+	bool opengl_graphics_context::monochrome() const
+	{
+		return iMonochrome;
+	}
+
+	void opengl_graphics_context::set_monochrome(bool aMonochrome)
+	{
+		iMonochrome = aMonochrome;
 	}
 
 	smoothing_mode_e opengl_graphics_context::smoothing_mode() const
@@ -712,7 +726,7 @@ namespace neogfx
 		iRenderingEngine.deactivate_shader_program();
 	}
 
-	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect)
+	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour)
 	{	
 		if (aTexture.is_empty())
 			return;
@@ -732,9 +746,16 @@ namespace neogfx
 		}
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &aTextureMap[0][0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		std::vector<std::array<uint8_t, 4>> colours(4, std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
+		colour c{0xFF, 0xFF, 0xFF, 0xFF};
+		if (aColour != boost::none)
+			c = *aColour;
+		std::vector<std::array<uint8_t, 4>> colours(4, std::array <uint8_t, 4>{{c.red(), c.green(), c.blue(), c.alpha()}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		if (iMonochrome)
+			iRenderingEngine.activate_shader_program(iRenderingEngine.monochrome_shader_program());
 		glCheck(glDrawArrays(GL_QUADS, 0, 4));
+		if (iMonochrome)
+			iRenderingEngine.deactivate_shader_program();
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 

@@ -585,6 +585,16 @@ namespace neogfx
 		return iNativeGraphicsContext->set_smoothing_mode(aSmoothingMode);
 	}
 
+	bool graphics_context::monochrome() const
+	{
+		return iNativeGraphicsContext->monochrome();
+	}
+	
+	void graphics_context::set_monochrome(bool aMonochrome)
+	{
+		iNativeGraphicsContext->set_monochrome(aMonochrome);
+	}
+
 	void graphics_context::push_logical_operation(logical_operation_e aLogicalOperation) const
 	{
 		iNativeGraphicsContext->push_logical_operation(aLogicalOperation);
@@ -634,33 +644,33 @@ namespace neogfx
 		iGlyphTextCache = 0;
 	}
 
-	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture) const
+	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour) const
 	{
-		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour);
 	}
 
-	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture) const
+	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour) const
 	{
-		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour);
 	}
 
-	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture) const
+	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const optional_colour& aColour) const
 	{
-		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()));
+		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour);
 	}
 
-	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) const
+	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) const
 	{
-		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, aTextureRect);
+		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, aTextureRect, aColour);
 	}
 
-	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect) const
+	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) const
 	{
-		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, aTextureRect);
+		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, aTextureRect, aColour);
 	}
 
-	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect) const
+	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) const
 	{
-		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, aTextureRect);
+		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, aTextureRect, aColour);
 	}
 }

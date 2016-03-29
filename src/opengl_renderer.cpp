@@ -159,7 +159,21 @@ namespace neogfx
 
 	void opengl_renderer::initialize()
 	{
-		glewInit();
+		glCheck(glewInit());
+		iMonochromeProgram = create_shader_program(
+			shaders
+			{
+				std::make_pair(
+					std::string(
+						"#version 130\n"
+						"uniform sampler2D tex;"
+						"void main()\n"
+						"{\n"
+						"	float gray = dot(gl_Color * texture2D(tex, gl_TexCoord[0].xy), vec3(0.299, 0.587, 0.114);\n"
+						"	gl_FragColor = vec4(gray, gray, gray, gl_FragColor.a);\n"
+						"}\n"),
+					GL_FRAGMENT_SHADER) 
+			}, {});
 		switch (screen_metrics().subpixel_format())
 		{
 		case i_screen_metrics::SubpixelFormatRGBHorizontal:
@@ -279,6 +293,16 @@ namespace neogfx
 		return *iActiveProgram;
 	}
 
+	const opengl_renderer::i_shader_program& opengl_renderer::monochrome_shader_program() const
+	{
+		return *iMonochromeProgram;
+	}
+
+	opengl_renderer::i_shader_program& opengl_renderer::monochrome_shader_program()
+	{
+		return *iMonochromeProgram;
+	}
+
 	const opengl_renderer::i_shader_program& opengl_renderer::subpixel_shader_program() const
 	{
 		return *iSubpixelProgram;
@@ -289,7 +313,7 @@ namespace neogfx
 		return *iSubpixelProgram;
 	}
 
-	opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const std::vector<std::pair<std::string, GLenum>>& aShaders, const std::vector<std::string>& aVariables)
+	opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)
 	{
 		GLuint programHandle = glCheck(glCreateProgram());
 		if (0 == programHandle)

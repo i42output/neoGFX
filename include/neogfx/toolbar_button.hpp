@@ -33,9 +33,16 @@ namespace neogfx
 		toolbar_button(i_layout& aLayout, i_action& aAction);
 		~toolbar_button();
 	protected:
+		virtual void layout_items_completed();
+	protected:
 		virtual colour foreground_colour() const;
 	protected:
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
+		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+	protected:
 		virtual void handle_pressed();
+	private:
+		void init();
 	private:
 		i_action& iAction;
 	};

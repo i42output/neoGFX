@@ -25,34 +25,51 @@ namespace neogfx
 	toolbar_button::toolbar_button(i_action& aAction) : 
 		push_button(aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
 	{
-		label().set_placement(label_placement::ImageVertical);
-		text().set_text(aAction.button_text());
-		image().set_image(aAction.image());
+		init();
 	}
 
 	toolbar_button::toolbar_button(i_widget& aParent, i_action& aAction) :
 		push_button(aParent, aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
 	{
-		label().set_placement(label_placement::ImageVertical);
-		text().set_text(aAction.button_text());
-		image().set_image(aAction.image());
+		init();
 	}
 
 	toolbar_button::toolbar_button(i_layout& aLayout, i_action& aAction) :
 		push_button(aLayout, aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
 	{
-		label().set_placement(label_placement::ImageVertical);
-		text().set_text(aAction.button_text());
-		image().set_image(aAction.image());
+		init();
 	}
 
 	toolbar_button::~toolbar_button()
 	{
 	}
+	
+	void toolbar_button::layout_items_completed()
+	{
+		push_button::layout_items_completed();
+		if (capturing())
+		{
+			point pt = label().position();
+			pt += point{ 1.0, 0.0 };
+			label().move(pt);
+		}
+	}
 
 	colour toolbar_button::foreground_colour() const
 	{
 		return colour{};
+	}
+
+	void toolbar_button::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	{
+		push_button::mouse_button_pressed(aButton, aPosition);
+		layout_items(false);
+	}
+
+	void toolbar_button::mouse_button_released(mouse_button aButton, const point& aPosition)
+	{
+		push_button::mouse_button_released(aButton, aPosition);
+		layout_items(false);
 	}
 
 	void toolbar_button::handle_pressed()
@@ -67,5 +84,19 @@ namespace neogfx
 			else
 				iAction.set_unchecked();
 		}
+	}
+
+	void toolbar_button::init()
+	{
+		label().set_placement(label_placement::ImageVertical);
+		text().set_text(iAction.button_text());
+		image().set_image(iAction.image());
+		auto update_enabled = [this]()
+		{
+			enable(iAction.is_enabled());
+		};
+		iAction.enabled(update_enabled);
+		iAction.disabled(update_enabled);
+		update_enabled();
 	}
 }

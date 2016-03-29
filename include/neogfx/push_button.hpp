@@ -41,6 +41,7 @@ namespace neogfx
 		push_button(i_widget& aParent, const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);
 		push_button(i_layout& aLayout, const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);
 	public:
+		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
 		virtual void mouse_entered();

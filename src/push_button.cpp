@@ -69,6 +69,17 @@ namespace neogfx
 		}
 	}
 
+	void push_button::paint_non_client(graphics_context& aGraphicsContext) const
+	{
+		button::paint_non_client(aGraphicsContext);
+		if (iStyle == ButtonStyleToolbar && capturing())
+		{
+			colour background = app::instance().current_style().selection_colour();
+			background.set_alpha(0x80);
+			aGraphicsContext.fill_solid_rect(client_rect(), background);
+		}
+	}
+
 	void push_button::paint(graphics_context& aGraphicsContext) const
 	{
 		colour faceColour = animation_colour();

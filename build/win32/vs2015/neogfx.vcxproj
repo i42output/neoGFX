@@ -86,6 +86,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\neogfx\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\sdl_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\colour.hpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="..\..\..\include\neogfx\i_action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_basic_item_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_font_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_geometry.hpp" />
@@ -212,6 +214,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\action.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
+    <ClCompile Include="..\..\..\src\sdl_basic_services.cpp" />
     <ClCompile Include="..\..\..\src\button.cpp" />
     <ClCompile Include="..\..\..\src\check_box.cpp" />
     <ClCompile Include="..\..\..\src\colour.cpp" />

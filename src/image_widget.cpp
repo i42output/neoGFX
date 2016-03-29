@@ -183,7 +183,10 @@ namespace neogfx
 			placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
 			break;
 		}
+		if (effectively_disabled())
+			aGraphicsContext.set_monochrome(true);
 		aGraphicsContext.draw_texture(placementRect, iTexture);
+		aGraphicsContext.set_monochrome(false);
 	}
 
 	const texture& image_widget::image() const

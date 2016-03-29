@@ -98,6 +98,8 @@ namespace neogfx
 		virtual void deactivate_shader_program();
 		virtual const i_shader_program& active_shader_program() const;
 		virtual i_shader_program& active_shader_program();
+		virtual const i_shader_program& monochrome_shader_program() const;
+		virtual i_shader_program& monochrome_shader_program();
 		virtual const i_shader_program& subpixel_shader_program() const;
 		virtual i_shader_program& subpixel_shader_program();
 	private:
@@ -108,6 +110,7 @@ namespace neogfx
 		opengl_texture_manager iTextureManager;
 		shader_programs iShaderPrograms;
 		shader_programs::iterator iActiveProgram;
+		shader_programs::iterator iMonochromeProgram;
 		shader_programs::iterator iSubpixelProgram;
 	};
 }

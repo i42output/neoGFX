@@ -112,6 +112,8 @@ namespace neogfx
 		void reset_clip() const;
 		smoothing_mode_e smoothing_mode() const;
 		smoothing_mode_e set_smoothing_mode(smoothing_mode_e aSmoothingMode) const;
+		bool monochrome() const;
+		void set_monochrome(bool aMonochrome);
 		void push_logical_operation(logical_operation_e aLogicalOperation) const;
 		void pop_logical_operation() const;
 		void line_stipple_on(uint32_t aFactor, uint16_t aPattern) const;
@@ -147,12 +149,12 @@ namespace neogfx
 		void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const;
 		void set_glyph_text_cache(glyph_text& aGlyphTextCache) const;
 		void reset_glyph_text_cache() const;
-		void draw_texture(const point& aPoint, const i_texture& aTexture) const;
-		void draw_texture(const rect& aRect, const i_texture& aTexture) const;
-		void draw_texture(const texture_map& aMap, const i_texture& aTexture) const;
-		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect) const;
-		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect) const;
-		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const rect& aTextureRect) const;
+		void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
+		void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
+		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
+		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour()) const;
+		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour()) const;
+		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour()) const;
 		// implementation
 		// from i_device_metrics
 	public:

@@ -83,8 +83,12 @@ int main(int argc, char* argv[])
 		toolbar.add_action(app.add_action("Manage Plugins...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#manage_plugins.png"));
 		toolbar.add_action(app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png"));
 		toolbar.add_separator();
-		toolbar.add_action(app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png"));
-		toolbar.add_action(app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png"));
+		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png");
+		cutAction.set_disabled();
+		toolbar.add_action(cutAction);
+		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png");
+		copyAction.set_disabled();
+		toolbar.add_action(copyAction);
 		toolbar.add_action(app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png"));
 		toolbar.add_action(app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png"));
 
