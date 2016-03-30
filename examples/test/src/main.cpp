@@ -75,7 +75,8 @@ int main(int argc, char* argv[])
 		ng::vertical_layout layout0(window);
 
 		ng::toolbar toolbar(layout0);
-		toolbar.add_action(app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png"));
+		auto& contactsAction = app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png");
+		toolbar.add_action(contactsAction);
 		toolbar.add_action(app.add_action("Add favourite...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#add_favourite.png"));
 		toolbar.add_action(app.add_action("Favourites...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
 		toolbar.add_action(app.add_action("Keywords...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#keyword.png"));
@@ -125,8 +126,9 @@ int main(int argc, char* argv[])
 		button7.set_maximum_size(ng::size(128, 64));
 		button7.pressed([&muteAction]() { muteAction.toggle(); });
 		layout2.add_spacer().set_weight(ng::size(1.0));
-		ng::push_button button8(layout2, "Multi-line\ntext.");
+		ng::push_button button8(layout2, "Enable/disable\ncontacts action.");
 		button8.set_foreground_colour(ng::colour(255, 235, 160));
+		button8.pressed([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.set_disabled(); else contactsAction.set_enabled(); });
 		ng::horizontal_layout layout3(layoutButtons);
 		std::srand(4242);
 		for (uint32_t i = 0; i < 10; ++i)

@@ -317,10 +317,13 @@ namespace neogfx
 
 	void action::set_enabled(bool aEnabled)
 	{
-		if (iEnabled = aEnabled)
+		if (iEnabled != aEnabled)
 		{
 			iEnabled = aEnabled;
-			enabled.trigger();
+			if (is_enabled())
+				enabled.trigger();
+			else
+				disabled.trigger();
 		}
 	}
 

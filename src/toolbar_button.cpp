@@ -43,6 +43,11 @@ namespace neogfx
 
 	toolbar_button::~toolbar_button()
 	{
+		iAction.enabled.unsubscribe(this);
+		iAction.disabled.unsubscribe(this);
+		iAction.checked.unsubscribe(this);
+		iAction.unchecked.unsubscribe(this);
+
 	}
 	
 	void toolbar_button::layout_items_completed()
@@ -139,12 +144,9 @@ namespace neogfx
 		label().set_placement(label_placement::ImageVertical);
 		text().set_text(iAction.button_text());
 		image().set_image(iAction.image());
-		auto update_enabled = [this]()
-		{
-			enable(iAction.is_enabled());
-		};
-		iAction.enabled(update_enabled);
-		iAction.disabled(update_enabled);
+		iAction.enabled([this]() { enable(); }, this);
+		iAction.disabled([this]() { disable(); }, this);
+		enable(iAction.is_enabled());
 		auto update_checked = [this]()
 		{
 			if (is_checked())
@@ -160,12 +162,8 @@ namespace neogfx
 		};
 		checked(update_checked);
 		unchecked(update_checked);
-		iAction.checked([this]() {set_checked(true); });
-		iAction.unchecked([this]() {set_checked(false); });
-		if (is_checked() || iAction.is_checked())
-		{
-			set_checked(true);
-			update_checked();
-		}
+		iAction.checked([this]() {set_checked(true); }, this);
+		iAction.unchecked([this]() {set_checked(false); }, this);
+		set_checked(iAction.is_checked());
 	}
 }
