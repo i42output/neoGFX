@@ -722,9 +722,16 @@ namespace neogfx
 		// construction
 	public:
 		scoped_units(const i_units_context& aUnitsContext, units_e aNewUnits) :
-			iUnitsContext(aUnitsContext), iSavedUnits(aUnitsContext.units())
+			iUnitsContext1(aUnitsContext), iUnitsContext2(aUnitsContext), iSavedUnits1(aUnitsContext.units()), iSavedUnits2(aUnitsContext.units())
 		{
-			iUnitsContext.set_units(aNewUnits);
+			iUnitsContext1.set_units(aNewUnits);
+			iUnitsContext2.set_units(aNewUnits);
+		}
+		scoped_units(const i_units_context& aUnitsContext1, const i_units_context& aUnitsContext2, units_e aNewUnits) :
+			iUnitsContext1(aUnitsContext1), iUnitsContext2(aUnitsContext2), iSavedUnits1(aUnitsContext1.units()), iSavedUnits2(aUnitsContext2.units())
+		{
+			iUnitsContext1.set_units(aNewUnits);
+			iUnitsContext2.set_units(aNewUnits);
 		}
 		~scoped_units()
 		{
@@ -734,16 +741,19 @@ namespace neogfx
 	public:
 		units_e saved_units() const
 		{
-			return iSavedUnits;
+			return iSavedUnits1;
 		}
 		void restore_saved_units()
 		{
-			iUnitsContext.set_units(iSavedUnits);
+			iUnitsContext1.set_units(iSavedUnits1);
+			iUnitsContext2.set_units(iSavedUnits2);
 		}
 		// attributes
 	private:
-		const i_units_context& iUnitsContext;
-		units_e iSavedUnits;	
+		const i_units_context& iUnitsContext1;
+		const i_units_context& iUnitsContext2;
+		units_e iSavedUnits1;
+		units_e iSavedUnits2;
 	};
 
 	template<typename T>

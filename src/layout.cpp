@@ -166,9 +166,9 @@ namespace neogfx
 			return iMinimumSize;
 		else
 		{
-			iLayoutId = iParent.layout_id();
 			iMinimumSize = wrapped_geometry().minimum_size();
 			iMaximumSize = wrapped_geometry().maximum_size();
+			iLayoutId = iParent.layout_id();
 			return iMinimumSize;
 		}
 	}
@@ -193,9 +193,9 @@ namespace neogfx
 			return iMaximumSize;
 		else
 		{
-			iLayoutId = iParent.layout_id();
 			iMinimumSize = wrapped_geometry().minimum_size();
 			iMaximumSize = wrapped_geometry().maximum_size();
+			iLayoutId = iParent.layout_id();
 			return iMaximumSize;
 		}
 	}

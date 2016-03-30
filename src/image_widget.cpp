@@ -185,7 +185,7 @@ namespace neogfx
 		}
 		if (effectively_disabled())
 			aGraphicsContext.set_monochrome(true);
-		aGraphicsContext.draw_texture(placementRect, iTexture);
+		aGraphicsContext.draw_texture(placementRect, iTexture, effectively_disabled() ? colour(0xFF, 0xFF, 0xFF, 0x80) : optional_colour());
 		aGraphicsContext.set_monochrome(false);
 	}
 

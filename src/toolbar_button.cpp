@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "neogfx.hpp"
+#include "app.hpp"
 #include "toolbar_button.hpp"
 
 namespace neogfx
@@ -55,8 +56,48 @@ namespace neogfx
 		}
 	}
 
+	neogfx::size_policy toolbar_button::size_policy() const
+	{
+		if (push_button::has_size_policy() || !iAction.is_separator())
+			return push_button::size_policy();
+		return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+	}
+
+	size toolbar_button::minimum_size() const
+	{
+		if (push_button::has_minimum_size() || !iAction.is_separator())
+			return push_button::minimum_size();
+		return units_converter(*this).from_device_units(size{ 2.0, 2.0 });
+	}	
+
+	size toolbar_button::maximum_size() const
+	{
+		if (push_button::has_maximum_size() || !iAction.is_separator())
+			return push_button::maximum_size();
+		return size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
+	}
+
+	void toolbar_button::paint(graphics_context& aGraphicsContext) const
+	{
+		if (!iAction.is_separator())
+			push_button::paint(aGraphicsContext);
+		else
+		{
+			scoped_units su(*this, aGraphicsContext, UnitsPixels);
+			rect line = client_rect();
+			line.deflate(0, std::floor(client_rect().height() / 6.0));
+			line.cx = 1.0;
+			colour ink = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().foreground_colour());
+			aGraphicsContext.fill_solid_rect(line, ink.darker(0x40));
+			++line.x;
+			aGraphicsContext.fill_solid_rect(line, ink.lighter(0x40));
+		}
+	}
+
 	colour toolbar_button::foreground_colour() const
 	{
+		if (push_button::has_foreground_colour())
+			return push_button::foreground_colour();
 		return colour{};
 	}
 

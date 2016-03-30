@@ -752,7 +752,10 @@ namespace neogfx
 		std::vector<std::array<uint8_t, 4>> colours(4, std::array <uint8_t, 4>{{c.red(), c.green(), c.blue(), c.alpha()}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		if (iMonochrome)
+		{
 			iRenderingEngine.activate_shader_program(iRenderingEngine.monochrome_shader_program());
+			iRenderingEngine.monochrome_shader_program().set_uniform_variable("tex", 1);
+		}
 		glCheck(glDrawArrays(GL_QUADS, 0, 4));
 		if (iMonochrome)
 			iRenderingEngine.deactivate_shader_program();

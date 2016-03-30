@@ -34,9 +34,15 @@ namespace neogfx
 		~toolbar_button();
 	protected:
 		virtual void layout_items_completed();
-	protected:
+	public:
+		virtual neogfx::size_policy size_policy() const;
+		virtual size minimum_size() const;
+		virtual size maximum_size() const;
+	public:
+		virtual void paint(graphics_context& aGraphicsContext) const;
+	public:
 		virtual colour foreground_colour() const;
-	protected:
+	public:
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 	protected:

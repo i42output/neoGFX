@@ -169,8 +169,8 @@ namespace neogfx
 						"uniform sampler2D tex;"
 						"void main()\n"
 						"{\n"
-						"	float gray = dot(gl_Color * texture2D(tex, gl_TexCoord[0].xy), vec3(0.299, 0.587, 0.114);\n"
-						"	gl_FragColor = vec4(gray, gray, gray, gl_FragColor.a);\n"
+						"	float gray = dot(gl_Color.rgb * texture2D(tex, gl_TexCoord[1].xy).rgb, vec3(0.299, 0.587, 0.114));\n"
+						"	gl_FragColor = vec4(gray, gray, gray, gl_Color.a * texture2D(tex, gl_TexCoord[1].xy).a);\n"
 						"}\n"),
 					GL_FRAGMENT_SHADER) 
 			}, {});
