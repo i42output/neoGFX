@@ -43,6 +43,8 @@ namespace neogfx
 	public:
 		virtual colour foreground_colour() const;
 	public:
+		virtual neogfx::focus_policy focus_policy() const;
+	public:
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 	protected:

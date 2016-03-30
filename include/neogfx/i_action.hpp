@@ -75,5 +75,13 @@ namespace neogfx
 		virtual void set_checked_image(const i_image& aImage) = 0;
 		virtual void set_checked_image(const i_texture& aTexture) = 0;
 		virtual void set_short_cut(const optional_key_sequence& aShortCut) = 0;
+	public:
+		void toggle()
+		{
+			if (is_checked())
+				set_unchecked();
+			else
+				set_checked();
+		}
 	};
 }

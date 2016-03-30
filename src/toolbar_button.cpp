@@ -101,6 +101,11 @@ namespace neogfx
 		return colour{};
 	}
 
+	focus_policy toolbar_button::focus_policy() const
+	{
+		return neogfx::focus_policy::NoFocus;
+	}
+
 	void toolbar_button::mouse_button_pressed(mouse_button aButton, const point& aPosition)
 	{
 		push_button::mouse_button_pressed(aButton, aPosition);

@@ -120,9 +120,10 @@ int main(int argc, char* argv[])
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");
 		layout2.add_spacer().set_weight(ng::size(2.0f));
-		ng::push_button button7(layout2, "button7");
+		ng::push_button button7(layout2, "Toggle\nmute.");
 		button7.set_foreground_colour(ng::colour::LightCoral);
 		button7.set_maximum_size(ng::size(128, 64));
+		button7.pressed([&muteAction]() { muteAction.toggle(); });
 		layout2.add_spacer().set_weight(ng::size(1.0));
 		ng::push_button button8(layout2, "Multi-line\ntext.");
 		button8.set_foreground_colour(ng::colour(255, 235, 160));
