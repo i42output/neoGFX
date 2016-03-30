@@ -81,7 +81,10 @@ int main(int argc, char* argv[])
 		toolbar.add_action(app.add_action("Keywords...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#keyword.png"));
 		toolbar.add_action(app.add_action("Settings...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#settings.png"));
 		toolbar.add_action(app.add_action("Manage Plugins...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#manage_plugins.png"));
-		toolbar.add_action(app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png"));
+		auto& muteAction = app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png");
+		muteAction.set_checkable(true);
+		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
+		toolbar.add_action(muteAction);
 		toolbar.add_separator();
 		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png");
 		cutAction.set_disabled();

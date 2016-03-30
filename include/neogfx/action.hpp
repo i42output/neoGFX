@@ -47,6 +47,7 @@ namespace neogfx
 		virtual std::string tool_tip_text() const;
 		virtual std::string statis_tip_text() const;
 		virtual const i_texture& image() const;
+		virtual const i_texture& checked_image() const;
 		virtual const optional_key_sequence& short_cut() const;
 		virtual void set_enabled();
 		virtual void set_disabled();
@@ -61,8 +62,11 @@ namespace neogfx
 		virtual void set_tool_tip_text(const optional_text& aToolTipText = optional_text());
 		virtual void set_statis_tip_text(const optional_text& aStatusTipText = optional_text());
 		virtual void set_image(const std::string& aUri);
-		virtual void set_image(const i_texture& aTexture);
 		virtual void set_image(const i_image& aImage);
+		virtual void set_image(const i_texture& aTexture);
+		virtual void set_checked_image(const std::string& aUri);
+		virtual void set_checked_image(const i_image& aImage);
+		virtual void set_checked_image(const i_texture& aTexture);
 		virtual void set_short_cut(const optional_key_sequence& aShortCut);
 	protected:
 		virtual void set_enabled(bool aEnabled);
@@ -79,6 +83,7 @@ namespace neogfx
 		optional_text iToolTipText;
 		optional_text iStatusTipText;
 		texture iTexture;
+		texture iCheckedTexture;
 		optional_key_sequence iShortCut;
 	};
 }

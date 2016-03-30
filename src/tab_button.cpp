@@ -107,6 +107,14 @@ namespace neogfx
 		return is_selected();
 	}
 
+	colour tab_button::border_mid_colour() const
+	{
+		colour result = push_button::border_mid_colour();
+		if (!is_selected())
+			result.darken(0x20);
+		return result;
+	}
+	
 	size tab_button::minimum_size() const
 	{
 		if (has_minimum_size())

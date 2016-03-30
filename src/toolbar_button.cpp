@@ -129,6 +129,8 @@ namespace neogfx
 
 	void toolbar_button::init()
 	{
+		if (iAction.is_checkable())
+			set_checkable();
 		label().set_placement(label_placement::ImageVertical);
 		text().set_text(iAction.button_text());
 		image().set_image(iAction.image());
@@ -138,6 +140,27 @@ namespace neogfx
 		};
 		iAction.enabled(update_enabled);
 		iAction.disabled(update_enabled);
-		update_enabled();
+		auto update_checked = [this]()
+		{
+			if (is_checked())
+			{
+				iAction.set_checked();
+				image().set_image(iAction.checked_image());
+			}
+			else
+			{
+				iAction.set_unchecked();
+				image().set_image(iAction.image());
+			}
+		};
+		checked(update_checked);
+		unchecked(update_checked);
+		iAction.checked([this]() {set_checked(true); });
+		iAction.unchecked([this]() {set_checked(false); });
+		if (is_checked() || iAction.is_checked())
+		{
+			set_checked(true);
+			update_checked();
+		}
 	}
 }

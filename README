@@ -14,7 +14,7 @@ Window                      90           Icon
 Menu                        0
 MDI                         0
 Tabs                        80
-Toolbars                    85           Drop-down button support, checked button indication 
+Toolbars                    90           Drop-down button support
 Layout Managers             90           Need to fully support size policies
 Label                       80           Icon
 Button                      90           "Flat" style
