@@ -52,10 +52,10 @@ namespace neogfx
 		return neogfx::size_policy::Minimum;
 	}
 
-	size text_widget::minimum_size() const
+	size text_widget::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (widget::has_minimum_size())
-			return widget::minimum_size();
+			return widget::minimum_size(aAvailableSpace);
 		else
 		{
 			size result = units_converter(*this).to_device_units(text_extent() + margins().size());

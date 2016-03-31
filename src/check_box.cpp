@@ -30,19 +30,19 @@ namespace neogfx
 		set_ignore_mouse_events(true);
 	}
 
-	size check_box::box::minimum_size() const
+	size check_box::box::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
-			return widget::minimum_size();
+			return widget::minimum_size(aAvailableSpace);
 		scoped_units su(*this, UnitsPixels);
 		dimension length = std::ceil(units_converter(*this).from_device_units(static_cast<const check_box&>(parent()).text().font().height() * (2.0 / 3.0)));
 		length = std::max(length, std::ceil(as_units(*this, UnitsMillimetres, 3.0)));
 		return convert_units(*this, su.saved_units(), size(length, length));
 	}
 
-	size check_box::box::maximum_size() const
+	size check_box::box::maximum_size(const optional_size& aAvailableSpace) const
 	{
-		return minimum_size();
+		return minimum_size(aAvailableSpace);
 	}
 		
 	void check_box::box::paint(graphics_context& aGraphicsContext) const

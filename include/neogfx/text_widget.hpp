@@ -33,7 +33,7 @@ namespace neogfx
 		text_widget(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false);
 	public:
 		virtual neogfx::size_policy size_policy() const;
-		virtual size minimum_size() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:

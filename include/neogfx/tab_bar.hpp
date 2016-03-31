@@ -52,7 +52,7 @@ namespace neogfx
 		virtual void selecting_tab(i_tab& aTab);
 		virtual void removing_tab(i_tab& aTab);
 	protected:
-		virtual size maximum_size() const;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	private:
 		i_tab_page_container& iContainer;

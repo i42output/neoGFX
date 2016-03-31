@@ -33,8 +33,8 @@ namespace neogfx
 		public:
 			box(check_box& aParent);
 		public:
-			virtual size minimum_size() const;
-			virtual size maximum_size() const;
+			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		public:
 			virtual void paint(graphics_context& aGraphicsContext) const;
 		};

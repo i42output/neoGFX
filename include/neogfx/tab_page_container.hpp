@@ -39,7 +39,7 @@ namespace neogfx
 			default_tab_page(i_widget& aParent, i_tab& aTab);
 			default_tab_page(i_layout& aLayout, i_tab& aTab);
 		public:
-			virtual size minimum_size() const;
+			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		public:
 			virtual bool transparent_background() const;
 		public:

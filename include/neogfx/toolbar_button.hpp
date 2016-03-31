@@ -36,8 +36,8 @@ namespace neogfx
 		virtual void layout_items_completed();
 	public:
 		virtual neogfx::size_policy size_policy() const;
-		virtual size minimum_size() const;
-		virtual size maximum_size() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:

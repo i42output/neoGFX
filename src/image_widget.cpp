@@ -71,10 +71,10 @@ namespace neogfx
 		return neogfx::size_policy::Minimum;
 	}
 
-	size image_widget::minimum_size() const
+	size image_widget::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
-			return widget::minimum_size();
+			return widget::minimum_size(aAvailableSpace);
 		scoped_units su(*this, UnitsPixels);
 		size result = iTexture.extents();
 		return convert_units(*this, su.saved_units(), result);

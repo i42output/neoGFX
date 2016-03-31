@@ -170,7 +170,7 @@ namespace neogfx
 		return iMinimumSize != boost::none;
 	}
 
-	size spacer::minimum_size() const
+	size spacer::minimum_size(const optional_size&) const
 	{
 		return has_minimum_size() ?
 			units_converter(*this).from_device_units(*iMinimumSize) :
@@ -193,7 +193,7 @@ namespace neogfx
 		return iMaximumSize != boost::none;
 	}
 
-	size spacer::maximum_size() const
+	size spacer::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		return has_maximum_size() ?
 			units_converter(*this).from_device_units(*iMaximumSize) :

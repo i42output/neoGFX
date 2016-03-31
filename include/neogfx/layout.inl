@@ -29,16 +29,16 @@ namespace neogfx
 		{
 			return aLayout.items_visible(aItemType);
 		}
-		static uint32_t items_zero_sized(layout& aLayout, const size& aSize)
+		static uint32_t items_zero_sized(layout& aLayout, const size& aSize, const optional_size& aAvailableSpace = optional_size())
 		{
 			uint32_t result = 0;
-			if (SpecializedPolicy::cx(aSize) <= SpecializedPolicy::cx(aLayout.minimum_size()) || SpecializedPolicy::items_visible(aLayout, ItemTypeSpacer))
+			if (SpecializedPolicy::cx(aSize) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || SpecializedPolicy::items_visible(aLayout, ItemTypeSpacer))
 			{
 				for (const auto& item : aLayout.items())
 				{
 					if (!item.visible())
 						continue;
-					if (!item.get().is<item::spacer_pointer>() && (SpecializedPolicy::cx(item.minimum_size()) == 0.0 || SpecializedPolicy::cy(item.minimum_size()) == 0.0))
+					if (!item.get().is<item::spacer_pointer>() && (SpecializedPolicy::cx(item.minimum_size(aAvailableSpace)) == 0.0 || SpecializedPolicy::cy(item.minimum_size(aAvailableSpace)) == 0.0))
 						++result;
 				}
 			}
@@ -109,14 +109,14 @@ namespace neogfx
 			if (AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum)
 			{
 				itemDispositions[&item] = TooSmall;
-				leftover -= AxisPolicy::cx(item.minimum_size());
+				leftover -= AxisPolicy::cx(item.minimum_size(availableSize));
 				if (leftover < 0.0)
 					leftover = 0.0;
 			}
 			else if (AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Fixed)
 			{
 				itemDispositions[&item] = FixedSize;
-				leftover -= AxisPolicy::cx(item.minimum_size());
+				leftover -= AxisPolicy::cx(item.minimum_size(availableSize));
 				if (leftover < 0.0)
 					leftover = 0.0;
 			}
@@ -137,15 +137,15 @@ namespace neogfx
 				auto& disposition = itemDispositions[&item];
 				if (disposition != Unknown && disposition != Weighted)
 					continue;
-				auto minSize = AxisPolicy::cx(item.minimum_size());
-				auto maxSize = AxisPolicy::cx(item.maximum_size());
+				auto minSize = AxisPolicy::cx(item.minimum_size(availableSize));
+				auto maxSize = AxisPolicy::cx(item.maximum_size(availableSize));
 				auto weightedSize = AxisPolicy::cx(item.weight()) / AxisPolicy::cx(totalExpanderWeight) * leftover;
 				if (minSize < weightedSize && maxSize > weightedSize)
 					disposition = Weighted;
 				else
 				{
 					disposition = maxSize <= weightedSize ? TooSmall : Unweighted;
-					leftover -= AxisPolicy::cx(disposition == TooSmall ? item.maximum_size() : item.minimum_size());
+					leftover -= AxisPolicy::cx(disposition == TooSmall ? item.maximum_size(availableSize) : item.minimum_size(availableSize));
 					if (leftover < 0.0)
 						leftover = 0.0;
 					totalExpanderWeight -= item.weight();
@@ -172,7 +172,7 @@ namespace neogfx
 		{
 			if (!item.visible())
 				continue;
-			size s{0.0, std::min(std::max(AxisPolicy::cy(item.minimum_size()), AxisPolicy::cy(availableSize)), AxisPolicy::cy(item.maximum_size()))};
+			size s{0.0, std::min(std::max(AxisPolicy::cy(item.minimum_size(availableSize)), AxisPolicy::cy(availableSize)), AxisPolicy::cy(item.maximum_size(availableSize)))};
 			std::swap(s.cx, AxisPolicy::cx(s));
 			point alignmentAdjust;
 			switch (alignment() & AxisPolicy::AlignmentMask)
@@ -195,9 +195,9 @@ namespace neogfx
 				AxisPolicy::y(alignmentAdjust) = 0.0;
 			auto disposition = itemDispositions[&item];
 			if (disposition == FixedSize)
-				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size());
+				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size(availableSize));
 			else if (disposition == TooSmall)
-				AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum ? item.minimum_size() : item.maximum_size());
+				AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum ? item.minimum_size(availableSize) : item.maximum_size(availableSize));
 			else if (disposition == Weighted && leftover > 0.0)
 			{
 				uint32_t bit = bitsLeft != 0 ? bits() : 0;
@@ -205,7 +205,7 @@ namespace neogfx
 				previousBit = bit;
 			}
 			else
-				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size());
+				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size(availableSize));
 			item.layout(nextPos + alignmentAdjust, s);
 			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(s) == 0.0 || AxisPolicy::cy(s) == 0.0))
 				continue;

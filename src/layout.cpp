@@ -26,32 +26,32 @@
 namespace neogfx
 {
 	layout::item::item(i_layout& aParent, i_widget& aWidget) :
-		iParent(aParent), iPointerWrapper(widget_pointer(widget_pointer(), &aWidget)), iLayoutId(-1)
+		iParent(aParent), iPointerWrapper(widget_pointer(widget_pointer(), &aWidget)), iLayoutId(-1, -1)
 	{
 	}
 
 	layout::item::item(i_layout& aParent, std::shared_ptr<i_widget> aWidget) :
-		iParent(aParent), iPointerWrapper(aWidget), iLayoutId(-1)
+		iParent(aParent), iPointerWrapper(aWidget), iLayoutId(-1, -1)
 	{
 	}
 
 	layout::item::item(i_layout& aParent, i_layout& aLayout) :
-		iParent(aParent), iPointerWrapper(layout_pointer(layout_pointer(), &aLayout)), iLayoutId(-1)
+		iParent(aParent), iPointerWrapper(layout_pointer(layout_pointer(), &aLayout)), iLayoutId(-1, -1)
 	{
 	}
 
 	layout::item::item(i_layout& aParent, std::shared_ptr<i_layout> aLayout) :
-		iParent(aParent), iPointerWrapper(aLayout), iLayoutId(-1)
+		iParent(aParent), iPointerWrapper(aLayout), iLayoutId(-1, -1)
 	{
 	}
 
 	layout::item::item(i_layout& aParent, i_spacer& aSpacer) :
-		iParent(aParent), iPointerWrapper(spacer_pointer(spacer_pointer(), &aSpacer)), iLayoutId(-1)
+		iParent(aParent), iPointerWrapper(spacer_pointer(spacer_pointer(), &aSpacer)), iLayoutId(-1, -1)
 	{
 	}
 
 	layout::item::item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer) :
-		iParent(aParent), iPointerWrapper(aSpacer), iLayoutId(-1)
+		iParent(aParent), iPointerWrapper(aSpacer), iLayoutId(-1, -1)
 	{
 	}
 
@@ -158,17 +158,16 @@ namespace neogfx
 		return wrapped_geometry().has_minimum_size();
 	}
 
-	size layout::item::minimum_size() const
+	size layout::item::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (!visible())
 			return size{};
-		if (iLayoutId == iParent.layout_id())
+		if (iLayoutId.first == iParent.layout_id())
 			return iMinimumSize;
 		else
 		{
-			iMinimumSize = wrapped_geometry().minimum_size();
-			iMaximumSize = wrapped_geometry().maximum_size();
-			iLayoutId = iParent.layout_id();
+			iMinimumSize = wrapped_geometry().minimum_size(aAvailableSpace);
+			iLayoutId.first = iParent.layout_id();
 			return iMinimumSize;
 		}
 	}
@@ -185,17 +184,16 @@ namespace neogfx
 		return wrapped_geometry().has_maximum_size();
 	}
 
-	size layout::item::maximum_size() const
+	size layout::item::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (!visible())
 			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
-		if (iLayoutId == iParent.layout_id())
+		if (iLayoutId.second == iParent.layout_id())
 			return iMaximumSize;
 		else
 		{
-			iMinimumSize = wrapped_geometry().minimum_size();
-			iMaximumSize = wrapped_geometry().maximum_size();
-			iLayoutId = iParent.layout_id();
+			iMaximumSize = wrapped_geometry().maximum_size(aAvailableSpace);
+			iLayoutId.second = iParent.layout_id();
 			return iMaximumSize;
 		}
 	}
@@ -656,7 +654,7 @@ namespace neogfx
 		return iMinimumSize != boost::none;
 	}
 
-	size layout::minimum_size() const
+	size layout::minimum_size(const optional_size&) const
 	{
 		return has_minimum_size() ?
 			units_converter(*this).from_device_units(*iMinimumSize) :
@@ -679,7 +677,7 @@ namespace neogfx
 		return iMaximumSize != boost::none;
 	}
 
-	size layout::maximum_size() const
+	size layout::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		return has_maximum_size() ?
 			units_converter(*this).from_device_units(*iMaximumSize) :

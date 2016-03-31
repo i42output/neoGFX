@@ -78,8 +78,8 @@ namespace neogfx
 		using layout::get_layout;
 		i_layout& get_layout(cell_coordinate aRow, cell_coordinate aColumn);
 	public:
-		virtual size minimum_size() const;
-		virtual size maximum_size() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void set_spacing(const size& aSpacing);
 		void add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
@@ -91,10 +91,10 @@ namespace neogfx
 		bool is_row_visible(uint32_t aRow) const;
 		uint32_t visible_columns() const;
 		bool is_column_visible(uint32_t aColumn) const;
-		size::dimension_type row_minimum_size(cell_coordinate aRow) const;
-		size::dimension_type column_minimum_size(cell_coordinate aColumn) const;
-		size::dimension_type row_maximum_size(cell_coordinate aRow) const;
-		size::dimension_type column_maximum_size(cell_coordinate aColumn) const;
+		size::dimension_type row_minimum_size(cell_coordinate aRow, const optional_size& aAvailableSpace = optional_size()) const;
+		size::dimension_type column_minimum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size()) const;
+		size::dimension_type row_maximum_size(cell_coordinate aRow, const optional_size& aAvailableSpace = optional_size()) const;
+		size::dimension_type column_maximum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size()) const;
 		void increment_cursor();
 		horizontal_layout& row_layout(cell_coordinate aRow);
 		uint32_t row_column(horizontal_layout& aRow, cell_coordinate aColumn) const;

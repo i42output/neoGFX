@@ -115,12 +115,12 @@ namespace neogfx
 		return result;
 	}
 	
-	size tab_button::minimum_size() const
+	size tab_button::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
-			return push_button::minimum_size();
+			return push_button::minimum_size(aAvailableSpace);
 		scoped_units su(*this, UnitsPixels);
-		return convert_units(*this, su.saved_units(), push_button::minimum_size() + as_units(*this, UnitsMillimetres, size(25.4/96.0, 25.4/96.0)).ceil() * size(4.0, 4.0));
+		return convert_units(*this, su.saved_units(), push_button::minimum_size(aAvailableSpace) + as_units(*this, UnitsMillimetres, size(25.4/96.0, 25.4/96.0)).ceil() * size(4.0, 4.0));
 	}
 
 	void tab_button::handle_pressed()

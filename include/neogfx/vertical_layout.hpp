@@ -36,8 +36,8 @@ namespace neogfx
 		virtual i_spacer& add_spacer();
 		virtual i_spacer& add_spacer(uint32_t aPosition);
 	public:
-		virtual size minimum_size() const;
-		virtual size maximum_size() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void layout_items(const point& aPosition, const size& aSize);
 	protected:

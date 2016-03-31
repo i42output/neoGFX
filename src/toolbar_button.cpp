@@ -68,17 +68,17 @@ namespace neogfx
 		return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
 	}
 
-	size toolbar_button::minimum_size() const
+	size toolbar_button::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (push_button::has_minimum_size() || !iAction.is_separator())
-			return push_button::minimum_size();
+			return push_button::minimum_size(aAvailableSpace);
 		return units_converter(*this).from_device_units(size{ 2.0, 2.0 });
 	}	
 
-	size toolbar_button::maximum_size() const
+	size toolbar_button::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (push_button::has_maximum_size() || !iAction.is_separator())
-			return push_button::maximum_size();
+			return push_button::maximum_size(aAvailableSpace);
 		return size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
 	}
 
@@ -128,12 +128,14 @@ namespace neogfx
 		push_button::handle_pressed();
 		if (iAction.is_enabled() && !iAction.is_separator())
 		{
-			if (!iAction.is_checkable())
-				iAction.triggered.trigger();
-			else if (is_checked())
-				iAction.set_checked();
-			else
-				iAction.set_unchecked();
+			iAction.triggered.trigger();
+			if (iAction.is_checkable())
+			{
+				if (is_checked())
+					iAction.set_checked();
+				else
+					iAction.set_unchecked();
+			}
 		}
 	}
 

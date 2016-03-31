@@ -34,10 +34,10 @@ namespace neogfx
 	{
 	}
 
-	size tab_page_container::default_tab_page::minimum_size() const
+	size tab_page_container::default_tab_page::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
-			return scrollable_widget::minimum_size();
+			return scrollable_widget::minimum_size(aAvailableSpace);
 		else
 			return size{};
 	}
