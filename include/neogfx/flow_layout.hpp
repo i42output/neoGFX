@@ -1,4 +1,4 @@
-// vertical_layout.hpp
+// flow_layout.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -16,29 +16,33 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include "neogfx.hpp"
+#include "geometry.hpp"
 #include "layout.hpp"
 
 namespace neogfx
 {
-	class vertical_layout : public layout
+	class flow_layout : public layout
 	{
 	public:
-		vertical_layout(neogfx::alignment aAlignment = neogfx::alignment::Left);
-		vertical_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
-		vertical_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
+		enum flow_direction_e
+		{
+			FlowDirectionHorizontal,
+			FlowDirectionVertical,
+		};
 	public:
-		using layout::add_spacer;
-		virtual i_spacer& add_spacer();
-		virtual i_spacer& add_spacer(uint32_t aPosition);
+		flow_layout(flow_direction_e aFlowDirection = FlowDirectionHorizontal);
+		flow_layout(i_widget& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
+		flow_layout(i_layout& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
 	public:
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void layout_items(const point& aPosition, const size& aSize);
-	protected:
-		using layout::items_visible;
+	private:
+		flow_direction_e iFlowDirection;
 	};
 }

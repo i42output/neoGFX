@@ -59,60 +59,12 @@ namespace neogfx
 
 	size vertical_layout::minimum_size(const optional_size& aAvailableSpace) const
 	{
-		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
-		if (itemsVisible == 0)
-			return size{};
-		size result;
-		uint32_t itemsZeroSized = 0;
-		for (const auto& item : items())
-		{
-			if (!item.visible())
-				continue;
-			if (!item.get().is<item::spacer_pointer>() && (item.minimum_size(aAvailableSpace).cx == 0.0 || item.minimum_size(aAvailableSpace).cy == 0.0))
-			{
-				++itemsZeroSized;
-				continue;
-			}
-			result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
-			result.cy += item.minimum_size(aAvailableSpace).cy;
-		}
-		result.cx += (margins().left + margins().right);
-		result.cy += (margins().top + margins().bottom);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max() && (itemsVisible - itemsZeroSized) > 1)
-			result.cy += (spacing().cy * (itemsVisible - itemsZeroSized - 1));
-		result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
-		result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
-		return result;
+		return layout::do_minimum_size<layout::row_major<vertical_layout>>(aAvailableSpace);
 	}
 
 	size vertical_layout::maximum_size(const optional_size& aAvailableSpace) const
 	{
-		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
-			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
-		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
-		size result{ 0.0, std::numeric_limits<size::dimension_type>::max() };
-		for (const auto& item : items())
-		{
-			if (!item.visible())
-				continue;
-			result.cx = std::max(result.cx, item.maximum_size(aAvailableSpace).cx);
-			auto cy = std::min(result.cy, item.maximum_size(aAvailableSpace).cy);
-			if (cy != std::numeric_limits<size::dimension_type>::max())
-				result.cy += cy;
-			else
-				result.cy = std::numeric_limits<size::dimension_type>::max();
-		}
-		if (result.cx != std::numeric_limits<size::dimension_type>::max())
-			result.cx += (margins().left + margins().right);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max())
-			result.cy += (margins().top + margins().bottom);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max() && itemsVisible > 0)
-			result.cy += (spacing().cy * (itemsVisible - 1));
-		if (result.cx != std::numeric_limits<size::dimension_type>::max())
-			result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max())
-			result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
-		return result;
+		return layout::do_maximum_size<layout::row_major<vertical_layout>>(aAvailableSpace);
 	}
 
 	void vertical_layout::layout_items(const point& aPosition, const size& aSize)

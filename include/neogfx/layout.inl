@@ -25,14 +25,10 @@ namespace neogfx
 	template <typename SpecializedPolicy>
 	struct layout::common_axis_policy
 	{
-		static uint32_t items_visible(layout& aLayout, layout::item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout))
-		{
-			return aLayout.items_visible(aItemType);
-		}
 		static uint32_t items_zero_sized(layout& aLayout, const size& aSize, const optional_size& aAvailableSpace = optional_size())
 		{
 			uint32_t result = 0;
-			if (SpecializedPolicy::cx(aSize) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || SpecializedPolicy::items_visible(aLayout, ItemTypeSpacer))
+			if (SpecializedPolicy::cx(aSize) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer))
 			{
 				for (const auto& item : aLayout.items())
 				{
@@ -59,6 +55,8 @@ namespace neogfx
 		static size::dimension_type& cx(size& aSize) { return aSize.cx; }
 		static const size::dimension_type& cy(const size& aSize) { return aSize.cy; }
 		static size::dimension_type& cy(size& aSize) { return aSize.cy; }
+		static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
+		static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
 		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.horizontal_size_policy(); }
 		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.vertical_size_policy(); }
 	};
@@ -76,19 +74,82 @@ namespace neogfx
 		static size::dimension_type& cx(size& aSize) { return aSize.cy; }
 		static const size::dimension_type& cy(const size& aSize) { return aSize.cx; }
 		static size::dimension_type& cy(size& aSize) { return aSize.cx; }
+		static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
+		static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
 		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.vertical_size_policy(); }
 		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.horizontal_size_policy(); }
 	};
+
+	template <typename AxisPolicy>
+	size layout::do_minimum_size(const optional_size& aAvailableSpace) const
+	{
+		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+		if (itemsVisible == 0)
+			return size{};
+		size result;
+		uint32_t itemsZeroSized = 0;
+		for (const auto& item : items())
+		{
+			if (!item.visible())
+				continue;
+			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(item.minimum_size(aAvailableSpace)) == 0.0 || AxisPolicy::cy(item.minimum_size(aAvailableSpace)) == 0.0))
+			{
+				++itemsZeroSized;
+				continue;
+			}
+			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(item.minimum_size(aAvailableSpace)));
+			AxisPolicy::cx(result) += AxisPolicy::cx(item.minimum_size(aAvailableSpace));
+		}
+		AxisPolicy::cx(result) += AxisPolicy::cx(margins());
+		AxisPolicy::cy(result) += AxisPolicy::cy(margins());
+		if (AxisPolicy::cx(result) != std::numeric_limits<size::dimension_type>::max() && (itemsVisible - itemsZeroSized) > 0)
+			AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
+		AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
+		AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
+		return result;
+	}
+
+	template <typename AxisPolicy>
+	size layout::do_maximum_size(const optional_size& aAvailableSpace) const
+	{
+		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
+			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+		size result{ std::numeric_limits<size::dimension_type>::max(), 0.0 };
+		std::swap(result.cx, AxisPolicy::cx(result));
+		for (const auto& item : items())
+		{
+			if (!item.visible())
+				continue;
+			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(item.maximum_size(aAvailableSpace)));
+			auto cx = std::min(AxisPolicy::cx(result), AxisPolicy::cx(item.maximum_size(aAvailableSpace)));
+			if (cx != std::numeric_limits<size::dimension_type>::max())
+				AxisPolicy::cx(result) += cx;
+			else
+				AxisPolicy::cx(result) = std::numeric_limits<size::dimension_type>::max();
+		}
+		if (AxisPolicy::cx(result) != std::numeric_limits<size::dimension_type>::max())
+			AxisPolicy::cx(result) += AxisPolicy::cx(margins());
+		if (AxisPolicy::cy(result) != std::numeric_limits<size::dimension_type>::max())
+			AxisPolicy::cy(result) += AxisPolicy::cy(margins());
+		if (AxisPolicy::cx(result) != std::numeric_limits<size::dimension_type>::max() && itemsVisible > 1)
+			AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - 1));
+		if (AxisPolicy::cx(result) != std::numeric_limits<size::dimension_type>::max())
+			AxisPolicy::cx(result) = std::min(AxisPolicy::cx(result), AxisPolicy::cx(layout::maximum_size(aAvailableSpace)));
+		if (AxisPolicy::cy(result) != std::numeric_limits<size::dimension_type>::max())
+			AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
+		return result;
+	}
 
 	template <typename AxisPolicy>
 	void layout::do_layout_items(const point& aPosition, const size& aSize)
 	{
 		set_position(aPosition);
 		set_extents(aSize);
-		auto itemsVisibleIncludingSpacers = AxisPolicy::items_visible(static_cast<typename AxisPolicy::layout_type&>(*this), static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
+		auto itemsVisibleIncludingSpacers = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
 		if (itemsVisibleIncludingSpacers == 0)
 			return;
-		uint32_t itemsVisible = AxisPolicy::items_visible(static_cast<typename AxisPolicy::layout_type&>(*this));
+		uint32_t itemsVisible = items_visible();
 		bool haveSpacers = (itemsVisibleIncludingSpacers > itemsVisible);
 		size availableSize = aSize;
 		availableSize.cx -= (margins().left + margins().right);

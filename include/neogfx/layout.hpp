@@ -187,6 +187,10 @@ namespace neogfx
 		uint32_t spacer_count() const;
 		uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
 		template <typename AxisPolicy>
+		size do_minimum_size(const optional_size& aAvailableSpace) const;
+		template <typename AxisPolicy>
+		size do_maximum_size(const optional_size& aAvailableSpace) const;
+		template <typename AxisPolicy>
 		void do_layout_items(const point& aPosition, const size& aSize);
 	private:
 		i_widget* iOwner;

@@ -27,8 +27,6 @@ namespace neogfx
 {
 	class horizontal_layout : public layout
 	{
-	private:
-		struct column_major;
 	public:
 		horizontal_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
 		horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
