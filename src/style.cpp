@@ -289,7 +289,7 @@ namespace neogfx
 	{
 		if (iFont == boost::none)
 		{
-			iFont = neogfx::font();
+			iFont = neogfx::font(iFontInfo);
 		}
 		return *iFont;
 	}
