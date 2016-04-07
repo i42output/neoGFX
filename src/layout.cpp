@@ -19,215 +19,13 @@
 
 #include "neogfx.hpp"
 #include "layout.hpp"
+#include "layout_item.hpp"
 #include "i_widget.hpp"
 #include "i_spacer.hpp"
 #include "app.hpp"
 
 namespace neogfx
 {
-	layout::item::item(i_layout& aParent, i_widget& aWidget) :
-		iParent(aParent), iPointerWrapper(widget_pointer(widget_pointer(), &aWidget)), iLayoutId(-1, -1)
-	{
-	}
-
-	layout::item::item(i_layout& aParent, std::shared_ptr<i_widget> aWidget) :
-		iParent(aParent), iPointerWrapper(aWidget), iLayoutId(-1, -1)
-	{
-	}
-
-	layout::item::item(i_layout& aParent, i_layout& aLayout) :
-		iParent(aParent), iPointerWrapper(layout_pointer(layout_pointer(), &aLayout)), iLayoutId(-1, -1)
-	{
-	}
-
-	layout::item::item(i_layout& aParent, std::shared_ptr<i_layout> aLayout) :
-		iParent(aParent), iPointerWrapper(aLayout), iLayoutId(-1, -1)
-	{
-	}
-
-	layout::item::item(i_layout& aParent, i_spacer& aSpacer) :
-		iParent(aParent), iPointerWrapper(spacer_pointer(spacer_pointer(), &aSpacer)), iLayoutId(-1, -1)
-	{
-	}
-
-	layout::item::item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer) :
-		iParent(aParent), iPointerWrapper(aSpacer), iLayoutId(-1, -1)
-	{
-	}
-
-	const layout::item::pointer_wrapper& layout::item::get() const
-	{
-		return iPointerWrapper;
-	}
-
-	layout::item::pointer_wrapper& layout::item::get()
-	{
-		return iPointerWrapper;
-	}
-
-	const i_geometry& layout::item::wrapped_geometry() const
-	{
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_cast<const i_geometry&>(*static_variant_cast<const widget_pointer&>(iPointerWrapper)) :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_cast<const i_geometry&>(*static_variant_cast<const layout_pointer&>(iPointerWrapper)) :
-				static_cast<const i_geometry&>(*static_variant_cast<const spacer_pointer&>(iPointerWrapper));
-	}
-
-	i_geometry& layout::item::wrapped_geometry()
-	{
-		return const_cast<i_geometry&>(const_cast<const item*>(this)->wrapped_geometry());
-	}
-
-	void layout::item::set_owner(i_widget* aOwner)
-	{
-		iOwner = aOwner;
-		if (iPointerWrapper.is<widget_pointer>())
-			iOwner->add_widget(static_variant_cast<widget_pointer&>(iPointerWrapper));
-	}
-
-	void layout::item::layout(const point& aPosition, const size& aSize)
-	{
-		if (iPointerWrapper.is<widget_pointer>())
-		{
-			static_variant_cast<widget_pointer&>(iPointerWrapper)->move(aPosition);
-			static_variant_cast<widget_pointer&>(iPointerWrapper)->resize(aSize);
-		}
-		else if (iPointerWrapper.is<layout_pointer>())
-		{
-			static_variant_cast<layout_pointer&>(iPointerWrapper)->layout_items(aPosition, aSize);
-		}
-		else if (iPointerWrapper.is<spacer_pointer>())
-		{
-			static_variant_cast<spacer_pointer&>(iPointerWrapper)->set_extents(aSize);
-		}
-	}
-
-	point layout::item::position() const
-	{
-		return wrapped_geometry().position();
-	}
-
-	void layout::item::set_position(const point& aPosition)
-	{
-		wrapped_geometry().set_position(aPosition);
-	}
-
-	size layout::item::extents() const
-	{
-		return wrapped_geometry().extents();
-	}
-
-	void layout::item::set_extents(const size& aExtents)
-	{
-		wrapped_geometry().set_extents(aExtents);
-	}
-
-	bool layout::item::has_size_policy() const
-	{
-		return wrapped_geometry().has_size_policy();
-	}
-
-	size_policy layout::item::size_policy() const
-	{
-		return wrapped_geometry().size_policy();
-	}
-
-	void layout::item::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
-	{
-		wrapped_geometry().set_size_policy(aSizePolicy, aUpdateLayout);
-	}
-
-	bool layout::item::has_weight() const
-	{
-		return wrapped_geometry().has_weight();
-	}
-
-	size layout::item::weight() const
-	{
-		return wrapped_geometry().weight();
-	}
-
-	void layout::item::set_weight(const optional_size& aWeight, bool aUpdateLayout)
-	{
-		wrapped_geometry().set_weight(aWeight, aUpdateLayout);
-	}
-
-	bool layout::item::has_minimum_size() const
-	{
-		return wrapped_geometry().has_minimum_size();
-	}
-
-	size layout::item::minimum_size(const optional_size& aAvailableSpace) const
-	{
-		if (!visible())
-			return size{};
-		if (iLayoutId.first == iParent.layout_id())
-			return iMinimumSize;
-		else
-		{
-			iMinimumSize = wrapped_geometry().minimum_size(aAvailableSpace);
-			iLayoutId.first = iParent.layout_id();
-			return iMinimumSize;
-		}
-	}
-
-	void layout::item::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
-	{
-		wrapped_geometry().set_minimum_size(aMinimumSize, aUpdateLayout);
-		if (aMinimumSize != boost::none)
-			iMinimumSize = *aMinimumSize;
-	}
-
-	bool layout::item::has_maximum_size() const
-	{
-		return wrapped_geometry().has_maximum_size();
-	}
-
-	size layout::item::maximum_size(const optional_size& aAvailableSpace) const
-	{
-		if (!visible())
-			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
-		if (iLayoutId.second == iParent.layout_id())
-			return iMaximumSize;
-		else
-		{
-			iMaximumSize = wrapped_geometry().maximum_size(aAvailableSpace);
-			iLayoutId.second = iParent.layout_id();
-			return iMaximumSize;
-		}
-	}
-
-	void layout::item::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
-	{
-		wrapped_geometry().set_maximum_size(aMaximumSize, aUpdateLayout);
-		if (aMaximumSize != boost::none)
-			iMaximumSize = *aMaximumSize;
-	}
-
-	bool layout::item::has_margins() const
-	{
-		return wrapped_geometry().has_margins();
-	}
-
-	margins layout::item::margins() const
-	{
-		return wrapped_geometry().margins();
-	}
-
-	void layout::item::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
-	{
-		wrapped_geometry().set_margins(aMargins, aUpdateLayout);
-	}
-
-	bool layout::item::visible() const
-	{
-		if (iPointerWrapper.is<widget_pointer>())
-			return static_variant_cast<const widget_pointer&>(iPointerWrapper)->visible();
-		else
-			return true;
-	}
-
 	layout::device_metrics_forwarder::device_metrics_forwarder(i_layout& aOwner) :
 		iOwner(aOwner)
 	{
@@ -422,6 +220,13 @@ namespace neogfx
 		if (iOwner != 0)
 			i->set_owner(iOwner);
 		aSpacer->set_parent(*this);
+	}
+
+	void layout::add_item(const item& aItem)
+	{
+		iItems.push_back(aItem);
+		if (iOwner != 0)
+			iItems.back().set_owner(iOwner);
 	}
 
 	void layout::remove_item(std::size_t aIndex)

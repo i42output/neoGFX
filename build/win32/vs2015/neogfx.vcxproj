@@ -86,6 +86,13 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\neogfx\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\flow_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_menu.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_menu_item.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_shared_menu_bar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\layout_item.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\menu.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sdl_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\check_box.hpp" />
@@ -207,6 +214,7 @@
     <ClInclude Include="..\..\..\include\neogfx\window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\include\neogfx\flow_layout.inl" />
     <None Include="..\..\..\include\neogfx\layout.inl" />
     <None Include="..\..\..\include\neogfx\path.inl" />
     <None Include="..\..\..\src\subpixel_rgb_horizontal.frag" />
@@ -214,6 +222,10 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\action.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
+    <ClCompile Include="..\..\..\src\flow_layout.cpp" />
+    <ClCompile Include="..\..\..\src\layout_item.cpp" />
+    <ClCompile Include="..\..\..\src\menu.cpp" />
+    <ClCompile Include="..\..\..\src\menu_bar.cpp" />
     <ClCompile Include="..\..\..\src\sdl_basic_services.cpp" />
     <ClCompile Include="..\..\..\src\button.cpp" />
     <ClCompile Include="..\..\..\src\check_box.cpp" />

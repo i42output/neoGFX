@@ -28,5 +28,7 @@ namespace neogfx
 	{
 	public:
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const;
+		virtual bool has_shared_menu_bar() const;
+		virtual i_shared_menu_bar& shared_menu_bar();
 	};
 }

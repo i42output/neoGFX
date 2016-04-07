@@ -72,9 +72,11 @@ namespace neogfx
 	void push_button::paint_non_client(graphics_context& aGraphicsContext) const
 	{
 		button::paint_non_client(aGraphicsContext);
-		if (iStyle == ButtonStyleToolbar && capturing())
+		if (iStyle == ButtonStyleToolbar && enabled() && (entered() || capturing()))
 		{
-			colour background = app::instance().current_style().selection_colour();
+			colour background = (capturing() && entered() ? 
+				app::instance().current_style().selection_colour() : 
+				background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40));
 			background.set_alpha(0x80);
 			aGraphicsContext.fill_solid_rect(client_rect(), background);
 		}

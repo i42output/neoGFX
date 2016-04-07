@@ -29,4 +29,14 @@ namespace neogfx
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, aTitle.c_str(), aMessage.c_str(), static_cast<SDL_Window*>(aParentWindowHandle));
 	}
+
+	bool sdl_basic_services::has_shared_menu_bar() const
+	{
+		return false;
+	}
+
+	i_shared_menu_bar& sdl_basic_services::shared_menu_bar()
+	{
+		throw no_shared_menu_bar();
+	}
 }

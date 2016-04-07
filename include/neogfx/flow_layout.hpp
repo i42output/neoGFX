@@ -38,11 +38,23 @@ namespace neogfx
 		flow_layout(i_widget& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
 		flow_layout(i_layout& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
 	public:
+		virtual i_spacer& add_spacer();
+		virtual i_spacer& add_spacer(uint32_t aPosition);
+	public:
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void layout_items(const point& aPosition, const size& aSize);
+	protected:
+		template <typename AxisPolicy>
+		size do_minimum_size(const optional_size& aAvailableSpace) const;
+		template <typename AxisPolicy>
+		size do_maximum_size(const optional_size& aAvailableSpace) const;
+		template <typename AxisPolicy>
+		void do_layout_items(const point& aPosition, const size& aSize);
 	private:
 		flow_direction_e iFlowDirection;
 	};
 }
+
+#include "flow_layout.inl"

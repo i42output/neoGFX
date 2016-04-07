@@ -1,4 +1,4 @@
-// toolbar.hpp
+// menu.hpp
 /*
 neogfx C++ GUI Library
 Copyright(C) 2016 Leigh Johnston
@@ -20,37 +20,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "neogfx.hpp"
-#include "widget.hpp"
 #include "action.hpp"
-#include "toolbar_button.hpp"
+#include "i_menu.hpp"
 
 namespace neogfx
 {
-	class toolbar : public widget
+	class menu : public i_menu
 	{
 	private:
-		typedef std::unique_ptr<toolbar_button> button_pointer;
-		typedef std::vector<button_pointer> button_list;
+		typedef std::unique_ptr<i_menu_item> item_pointer;
+		typedef std::vector<item_pointer> item_list;
 	public:
-		typedef uint32_t button_index;
+		menu();
 	public:
-		struct bad_button_index : std::logic_error { bad_button_index() : std::logic_error("neogfx::toolbar::bad_button_index") {} };
-	public:
-		toolbar();
-		toolbar(i_widget& aParent);
-		toolbar(i_layout& aLayout);
-	public:
-		virtual neogfx::size_policy size_policy() const;
-	public:
-		virtual uint32_t button_count() const;
-		virtual const toolbar_button& button(button_index aButtonIndex) const;
-		virtual toolbar_button& button(button_index aButtonIndex);
+		virtual uint32_t item_count() const;
+		virtual const i_menu_item& item(item_index aItemIndex) const;
+		virtual i_menu_item& item(item_index aItemIndex);
+		virtual i_menu& add_sub_menu(const std::string& aSubMenuText);
 		virtual void add_action(i_action& aAction);
 		virtual void add_separator();
-		virtual void insert_action(button_index aButtonIndex, i_action& aAction);
-		virtual void insert_separator(button_index aButtonIndex);
+		virtual i_menu& insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuText);
+		virtual void insert_action(item_index aItemIndex, i_action& aAction);
+		virtual void insert_separator(item_index aItemIndex);
 	private:
-		button_list iButtons;
+		item_list iItems;
 		action iSeparator;
 	};
 }

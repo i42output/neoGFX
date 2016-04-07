@@ -28,10 +28,14 @@ namespace neogfx
 	class i_widget;
 	class i_spacer;
 
+	class layout_item;
+
 	class i_layout : public i_geometry, public i_units_context
 	{
 	public:
 		event<> alignment_changed;
+	protected:
+		class item;
 	public:
 		struct no_widget : std::logic_error { no_widget() : std::logic_error("neogfx::i_layout::no_widget") {} };
 		struct wrong_item_type : std::logic_error { wrong_item_type() : std::logic_error("neogfx::i_layout::wrong_item_type") {} };
@@ -52,6 +56,7 @@ namespace neogfx
 		virtual void add_item(uint32_t aPosition, i_spacer& aSpacer) = 0;
 		virtual void add_item(std::shared_ptr<i_spacer> aSpacer) = 0;
 		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer) = 0;
+		virtual void add_item(const	layout_item& aItem) = 0;
 		virtual i_spacer& add_spacer() = 0;
 		virtual i_spacer& add_spacer(uint32_t aPosition) = 0;
 		virtual void remove_item(std::size_t aIndex) = 0;

@@ -276,6 +276,6 @@ namespace neogfx
 		i_item_model* iItemModel;
 		mutable font iFont;
 		mutable boost::optional<i_scrollbar::value_type> iTotalHeight;
-		mutable neolib::segmented_array<optional_position> iPositions;
+		mutable neolib::segmented_array<optional_position, 256> iPositions;
 	};
 }

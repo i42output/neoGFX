@@ -20,14 +20,19 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include "i_shared_menu_bar.hpp"
 
 namespace neogfx
 {
 	class i_basic_services
 	{
 	public:
+		struct no_shared_menu_bar : std::logic_error { no_shared_menu_bar() : std::logic_error("neogfx::i_basic_services::no_shared_menu_bar::") {} };
+	public:
 		virtual ~i_basic_services() {}
 	public:
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const = 0;
+		virtual bool has_shared_menu_bar() const = 0;
+		virtual i_shared_menu_bar& shared_menu_bar() = 0;
 	};
 }
