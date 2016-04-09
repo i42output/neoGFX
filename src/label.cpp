@@ -145,33 +145,21 @@ namespace neogfx
 	{
 		iLayout.remove_items();
 
-		grid_layout::cell_coordinates start{};
-
 		switch (effective_placement())
 		{
 		case label_placement::TextHorizontal:
-			iText.show();
-			iImage.hide();
 			iLayout.add_item(0, 0, iText);
 			break;
 		case label_placement::TextVertical:
-			iText.show();
-			iImage.hide();
 			iLayout.add_item(0, 0, iText);
 			break;
 		case label_placement::ImageHorizontal:
-			iText.hide();
-			iImage.show();
 			iLayout.add_item(0, 0, iImage);
 			break;
 		case label_placement::ImageVertical:
-			iText.hide();
-			iImage.show();
 			iLayout.add_item(0, 0, iImage);
 			break;
 		case label_placement::TextImageHorizontal:
-			iText.show();
-			iImage.show();
 			switch (iLayout.alignment() & neogfx::alignment::Horizontal)
 			{
 			case neogfx::alignment::Left:
@@ -193,8 +181,6 @@ namespace neogfx
 			}
 			break;
 		case label_placement::TextImageVertical:
-			iText.show();
-			iImage.show();
 			switch (iLayout.alignment() & neogfx::alignment::Vertical)
 			{
 			case neogfx::alignment::Top:
@@ -216,8 +202,6 @@ namespace neogfx
 			}
 			break;
 		case label_placement::ImageTextHorizontal:
-			iText.show();
-			iImage.show();
 			switch (iLayout.alignment() & neogfx::alignment::Horizontal)
 			{
 			case neogfx::alignment::Left:
@@ -239,8 +223,6 @@ namespace neogfx
 			}
 			break;
 		case label_placement::ImageTextVertical:
-			iText.show();
-			iImage.show();
 			switch (iLayout.alignment() & neogfx::alignment::Vertical)
 			{
 			case neogfx::alignment::Top:
