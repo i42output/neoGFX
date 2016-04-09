@@ -24,7 +24,7 @@
 namespace neogfx
 {
 	action::action() : 
-		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(true)
+		iEnabled(false), iCheckable(false), iChecked(false), iGroup(0), iSeparator(true)
 	{
 	}
 
@@ -154,6 +154,13 @@ namespace neogfx
 		return iTexture;
 	}
 
+	const i_texture& action::checked_image() const
+	{
+		if (!iCheckedTexture.is_empty())
+			return iCheckedTexture;
+		return image();
+	}
+
 	const optional_key_sequence& action::short_cut() const
 	{
 		return iShortCut;
@@ -263,10 +270,12 @@ namespace neogfx
 
 	void action::set_image(const std::string& aUri)
 	{
-		iTexture = neogfx::image(aUri);
-		if (!iTexture.is_empty() && iSeparator)
-			iSeparator = false;
-		changed.trigger();
+		set_image(neogfx::image(aUri));
+	}
+
+	void action::set_image(const i_image& aImage)
+	{
+		set_image(texture(aImage));
 	}
 
 	void action::set_image(const i_texture& aTexture)
@@ -277,10 +286,20 @@ namespace neogfx
 		changed.trigger();
 	}
 
-	void action::set_image(const i_image& aImage)
+	void action::set_checked_image(const std::string& aUri)
 	{
-		iTexture = aImage;
-		if (!iTexture.is_empty() && iSeparator)
+		set_checked_image(neogfx::image(aUri));
+	}
+
+	void action::set_checked_image(const i_image& aImage)
+	{
+		set_checked_image(texture(aImage));
+	}
+
+	void action::set_checked_image(const i_texture& aTexture)
+	{
+		iCheckedTexture = aTexture;
+		if (!iCheckedTexture.is_empty() && iSeparator)
 			iSeparator = false;
 		changed.trigger();
 	}
@@ -298,10 +317,13 @@ namespace neogfx
 
 	void action::set_enabled(bool aEnabled)
 	{
-		if (iEnabled = aEnabled)
+		if (iEnabled != aEnabled)
 		{
 			iEnabled = aEnabled;
-			enabled.trigger();
+			if (is_enabled())
+				enabled.trigger();
+			else
+				disabled.trigger();
 		}
 	}
 

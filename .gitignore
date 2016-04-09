@@ -49,3 +49,12 @@
 /3rdparty/harfbuzz/harfbuzz-1.2.3/lib/harfbuzzd.lib
 /build/win32/vs2015/Debug
 /examples/test/build/win32/vs2015/test.vcxproj.user
+/3rdparty/glew/glew-1.13.0/stage
+/3rdparty/glew/glew-1.13.0/lib/libglew32.lib
+/3rdparty/glew/glew-1.13.0/lib/libglew32d.lib
+/3rdparty/glew/glew-1.13.0/glewmx.pc
+/3rdparty/glew/glew-1.13.0/glew.pc
+/3rdparty/harfbuzz/harfbuzz-1.2.3/stage
+/examples/test/build/win32/vs2015/caw_toolbar.naa
+/build/win32/vs2015/.vs/neogfx/v14/.suo
+/build/win32/vs2015/neogfx.sdf

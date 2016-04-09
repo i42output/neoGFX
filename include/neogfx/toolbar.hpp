@@ -32,7 +32,7 @@ namespace neogfx
 		typedef std::unique_ptr<toolbar_button> button_pointer;
 		typedef std::vector<button_pointer> button_list;
 	public:
-		typedef button_list::size_type button_index;
+		typedef uint32_t button_index;
 	public:
 		struct bad_button_index : std::logic_error { bad_button_index() : std::logic_error("neogfx::toolbar::bad_button_index") {} };
 	public:

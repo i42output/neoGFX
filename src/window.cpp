@@ -607,6 +607,12 @@ namespace neogfx
 			text_input(aText);
 	}
 
+	void window::native_window_set_default_mouse_cursor()
+	{
+		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(iNativeWindow->mouse_position()) : *iCapturingWidget);
+		widgetUnderMouse.set_default_mouse_cursor();
+	}
+
 	void window::update_click_focus(i_widget& aCandidateWidget)
 	{
 		if (aCandidateWidget.enabled() && (aCandidateWidget.focus_policy() & focus_policy::ClickFocus) == focus_policy::ClickFocus)

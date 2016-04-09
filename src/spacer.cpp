@@ -124,8 +124,12 @@ namespace neogfx
 	{
 		if (has_size_policy())
 			return *iSizePolicy;
-		else
-			return size_policy::Expanding;
+		neogfx::size_policy result{neogfx::size_policy::Minimum};
+		if (iExpansionPolicy & ExpandHorizontally)
+			result.set_horizontal_size_policy(neogfx::size_policy::Expanding);
+		if (iExpansionPolicy & ExpandVertically)
+			result.set_vertical_size_policy(neogfx::size_policy::Expanding);
+		return result;
 	}
 
 	void spacer::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
@@ -166,7 +170,7 @@ namespace neogfx
 		return iMinimumSize != boost::none;
 	}
 
-	size spacer::minimum_size() const
+	size spacer::minimum_size(const optional_size&) const
 	{
 		return has_minimum_size() ?
 			units_converter(*this).from_device_units(*iMinimumSize) :
@@ -189,7 +193,7 @@ namespace neogfx
 		return iMaximumSize != boost::none;
 	}
 
-	size spacer::maximum_size() const
+	size spacer::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		return has_maximum_size() ?
 			units_converter(*this).from_device_units(*iMaximumSize) :
@@ -205,17 +209,6 @@ namespace neogfx
 			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
 				iParent->owner()->ultimate_ancestor().layout_items(true);
 		}
-	}
-
-	bool spacer::is_fixed_size() const
-	{
-		return has_minimum_size() && minimum_size() == maximum_size();
-	}
-
-	void spacer::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-	{
-		set_minimum_size(aFixedSize, aUpdateLayout);
-		set_maximum_size(aFixedSize, aUpdateLayout);
 	}
 
 	bool spacer::has_margins() const

@@ -585,12 +585,12 @@ namespace neogfx
 		return iMinimumSize != boost::none;
 	}
 
-	size widget::minimum_size() const
+	size widget::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		return has_minimum_size() ?
 			units_converter(*this).from_device_units(*iMinimumSize) :
 			has_layout() ? 
-				layout().minimum_size() + margins().size() : 
+				layout().minimum_size(aAvailableSpace) + margins().size() :
 				size{};
 	}
 
@@ -610,14 +610,14 @@ namespace neogfx
 		return iMaximumSize != boost::none;
 	}
 
-	size widget::maximum_size() const
+	size widget::maximum_size(const optional_size& aAvailableSpace) const
 	{
-		return size_policy() == neogfx::size_policy::Minimum ? 
-			minimum_size() :
+		return size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed ?
+			minimum_size(aAvailableSpace) :
 			has_maximum_size() ?
 				units_converter(*this).from_device_units(*iMaximumSize) :
 				has_layout() ?
-					layout().maximum_size() : 
+					layout().maximum_size(aAvailableSpace) :
 					size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
 	}
 
@@ -630,17 +630,6 @@ namespace neogfx
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
-	}
-
-	bool widget::is_fixed_size() const
-	{
-		return has_minimum_size() && has_maximum_size() && minimum_size() == maximum_size();
-	}
-
-	void widget::set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout)
-	{
-		set_minimum_size(aFixedSize, aUpdateLayout);
-		set_maximum_size(aFixedSize, aUpdateLayout);
 	}
 
 	bool widget::has_margins() const
@@ -1052,6 +1041,11 @@ namespace neogfx
 
 	void widget::mouse_left()
 	{
+	}
+
+	void widget::set_default_mouse_cursor()
+	{
+		surface().set_mouse_cursor(mouse_system_cursor::Arrow);
 	}
 
 	void widget::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)

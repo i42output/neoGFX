@@ -18,6 +18,7 @@
 #include <neogfx/image_widget.hpp>
 #include <neogfx/sprite_plane.hpp>
 #include <neogfx/toolbar.hpp>
+#include <neogfx/menu_bar.hpp>
 
 namespace ng = neogfx;
 
@@ -74,17 +75,32 @@ int main(int argc, char* argv[])
 		ng::window window(800, 800);
 		ng::vertical_layout layout0(window);
 
+		ng::menu_bar menu(layout0);
+		auto& fileMenu = menu.add_sub_menu("File");
+		auto& editMenu = menu.add_sub_menu("Edit");
+		auto& viewMenu = menu.add_sub_menu("View");
+		auto& windowMenu = menu.add_sub_menu("Window");
+		auto& helpMenu = menu.add_sub_menu("Help");
+
 		ng::toolbar toolbar(layout0);
-		toolbar.add_action(app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png"));
+		auto& contactsAction = app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png");
+		toolbar.add_action(contactsAction);
 		toolbar.add_action(app.add_action("Add favourite...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#add_favourite.png"));
 		toolbar.add_action(app.add_action("Favourites...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
 		toolbar.add_action(app.add_action("Keywords...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#keyword.png"));
 		toolbar.add_action(app.add_action("Settings...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#settings.png"));
 		toolbar.add_action(app.add_action("Manage Plugins...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#manage_plugins.png"));
-		toolbar.add_action(app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png"));
+		auto& muteAction = app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png");
+		muteAction.set_checkable(true);
+		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
+		toolbar.add_action(muteAction);
 		toolbar.add_separator();
-		toolbar.add_action(app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png"));
-		toolbar.add_action(app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png"));
+		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png");
+		cutAction.set_disabled();
+		toolbar.add_action(cutAction);
+		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png");
+		copyAction.set_disabled();
+		toolbar.add_action(copyAction);
 		toolbar.add_action(app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png"));
 		toolbar.add_action(app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png"));
 
@@ -113,12 +129,14 @@ int main(int argc, char* argv[])
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");
 		layout2.add_spacer().set_weight(ng::size(2.0f));
-		ng::push_button button7(layout2, "button7");
+		ng::push_button button7(layout2, "Toggle\nmute.");
 		button7.set_foreground_colour(ng::colour::LightCoral);
 		button7.set_maximum_size(ng::size(128, 64));
+		button7.pressed([&muteAction]() { muteAction.toggle(); });
 		layout2.add_spacer().set_weight(ng::size(1.0));
-		ng::push_button button8(layout2, "Multi-line\ntext.");
+		ng::push_button button8(layout2, "Enable/disable\ncontacts action.");
 		button8.set_foreground_colour(ng::colour(255, 235, 160));
+		button8.pressed([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.set_disabled(); else contactsAction.set_enabled(); });
 		ng::horizontal_layout layout3(layoutButtons);
 		std::srand(4242);
 		for (uint32_t i = 0; i < 10; ++i)
@@ -239,15 +257,19 @@ int main(int argc, char* argv[])
 		ng::vertical_layout l3(l2);
 		ng::image_widget iw(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Ignore);
 		iw.set_background_colour(ng::colour::Red.lighter(0x80));
+		iw.set_size_policy(ng::size_policy::Expanding);
 		iw.set_minimum_size(ng::size{});
 		ng::image_widget iw2(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Keep);
 		iw2.set_background_colour(ng::colour::Green.lighter(0x80));
+		iw2.set_size_policy(ng::size_policy::Expanding);
 		iw2.set_minimum_size(ng::size{});
 		ng::image_widget iw3(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::KeepExpanding);
 		iw3.set_background_colour(ng::colour::Blue.lighter(0x80));
+		iw3.set_size_policy(ng::size_policy::Expanding);
 		iw3.set_minimum_size(ng::size{});
 		ng::image_widget iw4(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Stretch);
 		iw4.set_background_colour(ng::colour::Magenta.lighter(0x80));
+		iw4.set_size_policy(ng::size_policy::Expanding);
 		iw4.set_minimum_size(ng::size{});
 		ng::image_widget iw5(l2, ng::image(":/test/resources/orca.png"));
 		ng::grid_layout l4(l2);
@@ -256,6 +278,7 @@ int main(int argc, char* argv[])
 		for (uint32_t i = 0; i < 9; ++i)
 		{
 			auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal_placement>(i));
+			hashWidget->set_size_policy(ng::size_policy::Expanding);
 			hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
 			l4.add_item(i / 3, i % 3, hashWidget);
 		}
@@ -270,8 +293,8 @@ int main(int argc, char* argv[])
 		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Wibble").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Bibble").tab().set_image(smallHash);
-		tabContainer.add_tab_page("XYZZY").tab().set_image(smallHash);
-
+		tabContainer.add_tab_page("XYZZY").tab().set_image(smallHash); 
+		
 		return app.exec();
 	}
 	catch (std::exception& e)

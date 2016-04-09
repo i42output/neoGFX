@@ -48,39 +48,39 @@ namespace neogfx
 		throw wrong_item_type();
 	}
 
-	size stack_layout::minimum_size() const
+	size stack_layout::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (items_visible() == 0)
 			return size{};
 		size result;
 		for (const auto& item : items())
 		{
-			result.cx = std::max(result.cx, item.minimum_size().cx);
-			result.cy = std::max(result.cy, item.minimum_size().cy);
+			result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
+			result.cy = std::max(result.cy, item.minimum_size(aAvailableSpace).cy);
 		}
 		result.cx += (margins().left + margins().right);
 		result.cy += (margins().top + margins().bottom);
-		result.cx = std::max(result.cx, layout::minimum_size().cx);
-		result.cy = std::max(result.cy, layout::minimum_size().cy);
+		result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
+		result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
 		return result;
 	}
 
-	size stack_layout::maximum_size() const
+	size stack_layout::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		size result{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
 		for (const auto& item : items())
 		{
-			result.cx = std::min(result.cx, item.maximum_size().cx);
-			result.cy = std::min(result.cy, item.maximum_size().cy);
+			result.cx = std::min(result.cx, item.maximum_size(aAvailableSpace).cx);
+			result.cy = std::min(result.cy, item.maximum_size(aAvailableSpace).cy);
 		}
 		if (result.cx != std::numeric_limits<size::dimension_type>::max())
 			result.cx += (margins().left + margins().right);
 		if (result.cy != std::numeric_limits<size::dimension_type>::max())
 			result.cy += (margins().top + margins().bottom);
 		if (result.cx != std::numeric_limits<size::dimension_type>::max())
-			result.cx = std::min(result.cx, layout::maximum_size().cx);
+			result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
 		if (result.cy != std::numeric_limits<size::dimension_type>::max())
-			result.cy = std::min(result.cy, layout::maximum_size().cy);
+			result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
 		return result;
 	}
 

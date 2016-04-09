@@ -24,6 +24,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/variant.hpp>
 #include "i_layout.hpp"
+#include "layout_item.hpp"
 
 namespace neogfx
 {
@@ -34,60 +35,7 @@ namespace neogfx
 	public:
 		struct widget_already_added : std::logic_error { widget_already_added() : std::logic_error("neogfx::layout::widget_already_added") {} };
 	protected:
-		class item : public i_geometry
-		{
-		public:
-			typedef std::shared_ptr<i_widget> widget_pointer;
-			typedef std::shared_ptr<i_layout> layout_pointer;
-			typedef std::shared_ptr<i_spacer> spacer_pointer;
-			typedef neolib::variant<widget_pointer, layout_pointer, spacer_pointer> pointer_wrapper;
-		public:
-			item(i_layout& aParent, i_widget& aWidget);
-			item(i_layout& aParent, std::shared_ptr<i_widget> aWidget);
-			item(i_layout& aParent, i_layout& aLayout);
-			item(i_layout& aParent, std::shared_ptr<i_layout> aLayout);
-			item(i_layout& aParent, i_spacer& aSpacer);
-			item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer);
-		public:
-			const pointer_wrapper& get() const;
-			pointer_wrapper& get();
-			const i_geometry& wrapped_geometry() const;
-			i_geometry& wrapped_geometry();
-			void set_owner(i_widget* aOwner);
-			void layout(const point& aPosition, const size& aSize);
-		public:
-			virtual point position() const;
-			virtual void set_position(const point& aPosition);
-			virtual size extents() const;
-			virtual void set_extents(const size& aExtents);
-			virtual bool has_size_policy() const;
-			virtual neogfx::size_policy size_policy() const;
-			virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
-			virtual bool has_weight() const;
-			virtual size weight() const;
-			virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true);
-			virtual bool has_minimum_size() const;
-			virtual size minimum_size() const;
-			virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true);
-			virtual bool has_maximum_size() const;
-			virtual size maximum_size() const;
-			virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
-			virtual bool is_fixed_size() const;
-			virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true);
-		public:
-			virtual bool has_margins() const;
-			virtual neogfx::margins margins() const;
-			virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
-		public:
-			bool visible() const;
-		private:
-			i_layout& iParent;
-			pointer_wrapper iPointerWrapper;
-			i_widget* iOwner;
-			mutable uint32_t iLayoutId;
-			mutable size iMinimumSize;
-			mutable size iMaximumSize;
-		};
+		typedef layout_item item;
 		typedef std::list<item, boost::pool_allocator<item>> item_list;
 		enum item_type_e
 		{
@@ -136,9 +84,11 @@ namespace neogfx
 		virtual void add_item(uint32_t aPosition, i_spacer& aSpacer);
 		virtual void add_item(std::shared_ptr<i_spacer> aSpacer);
 		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer);
+		virtual void add_item(const item& aItem);
 		virtual void remove_item(std::size_t aIndex);
 		virtual void remove_items();
 		virtual std::size_t item_count() const;
+		virtual bool is_widget(std::size_t aIndex) const;
 		virtual i_geometry& get_item(std::size_t aIndex);
 		using i_layout::get_widget;
 		virtual i_widget& get_widget(std::size_t aIndex);
@@ -172,13 +122,11 @@ namespace neogfx
 		virtual size weight() const;
 		virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true);
 		virtual bool has_minimum_size() const;
-		virtual size minimum_size() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true);
 		virtual bool has_maximum_size() const;
-		virtual size maximum_size() const;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
-		virtual bool is_fixed_size() const;
-		virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true);
 	public:
 		virtual const i_device_metrics& device_metrics() const;
 		virtual units_e units() const;
@@ -190,6 +138,10 @@ namespace neogfx
 		const i_geometry& item_geometry(item_list::size_type aItem) const;
 		uint32_t spacer_count() const;
 		uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
+		template <typename AxisPolicy>
+		size do_minimum_size(const optional_size& aAvailableSpace) const;
+		template <typename AxisPolicy>
+		size do_maximum_size(const optional_size& aAvailableSpace) const;
 		template <typename AxisPolicy>
 		void do_layout_items(const point& aPosition, const size& aSize);
 	private:

@@ -23,6 +23,7 @@
 
 namespace neogfx
 {
+	class i_basic_services;
 	class i_rendering_engine;
 	class i_surface_manager;
 	class i_keyboard;
@@ -37,6 +38,7 @@ namespace neogfx
 		virtual const std::string& name() const = 0;
 		virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
 		virtual void quit(int aResultCode) = 0;
+		virtual i_basic_services& basic_services() const = 0;
 		virtual i_rendering_engine& rendering_engine() const = 0;
 		virtual i_surface_manager& surface_manager() const = 0;
 		virtual const i_keyboard& keyboard() const = 0;

@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "neogfx.hpp"
+#include "app.hpp"
 #include "toolbar_button.hpp"
 
 namespace neogfx
@@ -25,34 +26,101 @@ namespace neogfx
 	toolbar_button::toolbar_button(i_action& aAction) : 
 		push_button(aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
 	{
-		label().set_placement(label_placement::ImageVertical);
-		text().set_text(aAction.button_text());
-		image().set_image(aAction.image());
+		init();
 	}
 
 	toolbar_button::toolbar_button(i_widget& aParent, i_action& aAction) :
 		push_button(aParent, aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
 	{
-		label().set_placement(label_placement::ImageVertical);
-		text().set_text(aAction.button_text());
-		image().set_image(aAction.image());
+		init();
 	}
 
 	toolbar_button::toolbar_button(i_layout& aLayout, i_action& aAction) :
 		push_button(aLayout, aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
 	{
-		label().set_placement(label_placement::ImageVertical);
-		text().set_text(aAction.button_text());
-		image().set_image(aAction.image());
+		init();
 	}
 
 	toolbar_button::~toolbar_button()
 	{
+		iAction.enabled.unsubscribe(this);
+		iAction.disabled.unsubscribe(this);
+		iAction.checked.unsubscribe(this);
+		iAction.unchecked.unsubscribe(this);
+
+	}
+	
+	void toolbar_button::layout_items_completed()
+	{
+		push_button::layout_items_completed();
+		if (capturing())
+		{
+			point pt = label().position();
+			pt += point{ 1.0, 0.0 };
+			label().move(pt);
+		}
+	}
+
+	neogfx::size_policy toolbar_button::size_policy() const
+	{
+		if (push_button::has_size_policy() || !iAction.is_separator())
+			return push_button::size_policy();
+		return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+	}
+
+	size toolbar_button::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		if (push_button::has_minimum_size() || !iAction.is_separator())
+			return push_button::minimum_size(aAvailableSpace);
+		return units_converter(*this).from_device_units(size{ 2.0, 2.0 });
+	}	
+
+	size toolbar_button::maximum_size(const optional_size& aAvailableSpace) const
+	{
+		if (push_button::has_maximum_size() || !iAction.is_separator())
+			return push_button::maximum_size(aAvailableSpace);
+		return size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
+	}
+
+	void toolbar_button::paint(graphics_context& aGraphicsContext) const
+	{
+		if (!iAction.is_separator())
+			push_button::paint(aGraphicsContext);
+		else
+		{
+			scoped_units su(*this, aGraphicsContext, UnitsPixels);
+			rect line = client_rect();
+			line.deflate(0, std::floor(client_rect().height() / 6.0));
+			line.cx = 1.0;
+			colour ink = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().foreground_colour());
+			aGraphicsContext.fill_solid_rect(line, ink.darker(0x40));
+			++line.x;
+			aGraphicsContext.fill_solid_rect(line, ink.lighter(0x40));
+		}
 	}
 
 	colour toolbar_button::foreground_colour() const
 	{
+		if (push_button::has_foreground_colour())
+			return push_button::foreground_colour();
 		return colour{};
+	}
+
+	focus_policy toolbar_button::focus_policy() const
+	{
+		return neogfx::focus_policy::NoFocus;
+	}
+
+	void toolbar_button::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	{
+		push_button::mouse_button_pressed(aButton, aPosition);
+		layout_items(false);
+	}
+
+	void toolbar_button::mouse_button_released(mouse_button aButton, const point& aPosition)
+	{
+		push_button::mouse_button_released(aButton, aPosition);
+		layout_items(false);
 	}
 
 	void toolbar_button::handle_pressed()
@@ -60,12 +128,44 @@ namespace neogfx
 		push_button::handle_pressed();
 		if (iAction.is_enabled() && !iAction.is_separator())
 		{
-			if (!iAction.is_checkable())
-				iAction.triggered.trigger();
-			else if (is_checked())
-				iAction.set_checked();
-			else
-				iAction.set_unchecked();
+			iAction.triggered.trigger();
+			if (iAction.is_checkable())
+			{
+				if (is_checked())
+					iAction.set_checked();
+				else
+					iAction.set_unchecked();
+			}
 		}
+	}
+
+	void toolbar_button::init()
+	{
+		if (iAction.is_checkable())
+			set_checkable();
+		label().set_placement(label_placement::ImageVertical);
+		text().set_text(iAction.button_text());
+		image().set_image(iAction.image());
+		iAction.enabled([this]() { enable(); }, this);
+		iAction.disabled([this]() { disable(); }, this);
+		enable(iAction.is_enabled());
+		auto update_checked = [this]()
+		{
+			if (is_checked())
+			{
+				iAction.set_checked();
+				image().set_image(iAction.checked_image());
+			}
+			else
+			{
+				iAction.set_unchecked();
+				image().set_image(iAction.image());
+			}
+		};
+		checked(update_checked);
+		unchecked(update_checked);
+		iAction.checked([this]() {set_checked(true); }, this);
+		iAction.unchecked([this]() {set_checked(false); }, this);
+		set_checked(iAction.is_checked());
 	}
 }

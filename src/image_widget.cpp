@@ -71,10 +71,10 @@ namespace neogfx
 		return neogfx::size_policy::Minimum;
 	}
 
-	size image_widget::minimum_size() const
+	size image_widget::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
-			return widget::minimum_size();
+			return widget::minimum_size(aAvailableSpace);
 		scoped_units su(*this, UnitsPixels);
 		size result = iTexture.extents();
 		return convert_units(*this, su.saved_units(), result);
@@ -183,7 +183,10 @@ namespace neogfx
 			placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
 			break;
 		}
-		aGraphicsContext.draw_texture(placementRect, iTexture);
+		if (effectively_disabled())
+			aGraphicsContext.set_monochrome(true);
+		aGraphicsContext.draw_texture(placementRect, iTexture, effectively_disabled() ? colour(0xFF, 0xFF, 0xFF, 0x80) : optional_colour());
+		aGraphicsContext.set_monochrome(false);
 	}
 
 	const texture& image_widget::image() const

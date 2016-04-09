@@ -48,6 +48,9 @@ namespace neogfx
 					if (i < iParent.model().columns())
 					{
 						button.text().set_text(iParent.model().column_heading_text(i));
+						button.set_size_policy(iParent.iType == header_view::HorizontalHeader ?
+							neogfx::size_policy{neogfx::size_policy::Fixed, neogfx::size_policy::Minimum} :
+							neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Fixed});
 						button.set_minimum_size(optional_size{});
 						button.enable(true);
 						button.pressed.subscribe([&aParent, i]()
@@ -61,6 +64,9 @@ namespace neogfx
 					else
 					{
 						button.text().set_text(std::string());
+						button.set_size_policy(iParent.iType == header_view::HorizontalHeader ? 
+							neogfx::size_policy{neogfx::size_policy::Expanding, neogfx::size_policy::Minimum} :
+							neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Expanding});
 						button.set_minimum_size(size{});
 						button.enable(false);
 					}

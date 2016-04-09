@@ -93,6 +93,8 @@ namespace neogfx
 		virtual void reset_clip();
 		virtual smoothing_mode_e smoothing_mode() const;
 		virtual smoothing_mode_e set_smoothing_mode(smoothing_mode_e aSmoothingMode);
+		virtual bool monochrome() const;
+		virtual void set_monochrome(bool aMonochrome);
 		virtual void push_logical_operation(logical_operation_e aLogicalOperation);
 		virtual void pop_logical_operation();
 		virtual void line_stipple_on(uint32_t aFactor, uint16_t aPattern);
@@ -113,7 +115,7 @@ namespace neogfx
 		virtual void begin_drawing_glyphs();
 		virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour);
 		virtual void end_drawing_glyphs();
-		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect);
+		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour);
 	private:
 		void apply_scissor();
 		void apply_logical_operation();
@@ -126,6 +128,7 @@ namespace neogfx
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable vector4 iLogicalCoordinates;
 		smoothing_mode_e iSmoothingMode; 
+		bool iMonochrome;
 		std::vector<logical_operation_e> iLogicalOperationStack;
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;

@@ -95,6 +95,7 @@ namespace neogfx
 	private:
 		SDL_Window* iHandle;
 		SDL_GLContext iContext;
+		size iExtents;
 		bool iProcessingEvent;
 		bool iCapturingMouse;
 		cursor_pointer iCurrentCursor;

@@ -21,6 +21,7 @@
 
 #include "neogfx.hpp"
 #include <set>
+#include "i_basic_services.hpp"
 #include "i_rendering_engine.hpp"
 #include "i_surface_manager.hpp"
 
@@ -33,7 +34,7 @@ namespace neogfx
 	private:
 		typedef std::set<i_surface*> surface_list;
 	public:
-		surface_manager(i_rendering_engine& aRenderingEngine);
+		surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine);
 	public:
 		virtual void add_surface(i_surface& aSurface);
 		virtual void remove_surface(i_surface& aSurface);
@@ -47,6 +48,7 @@ namespace neogfx
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const;
 		virtual void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const;
 	private:
+		i_basic_services& iBasicServices;
 		i_rendering_engine& iRenderingEngine;
 		surface_list iSurfaces;
 		bool iRenderingSurfaces;

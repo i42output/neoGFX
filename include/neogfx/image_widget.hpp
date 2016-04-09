@@ -59,7 +59,7 @@ namespace neogfx
 		image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
 	public:
 		virtual neogfx::size_policy size_policy() const;
-		virtual size minimum_size() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:

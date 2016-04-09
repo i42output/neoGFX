@@ -19,26 +19,23 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <neolib/bresenham_counter.hpp>
 
 namespace neogfx
 {
 	template <typename SpecializedPolicy>
 	struct layout::common_axis_policy
 	{
-		static uint32_t items_visible(layout& aLayout, layout::item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout))
-		{
-			return aLayout.items_visible(aItemType);
-		}
-		static uint32_t items_zero_sized(layout& aLayout, const size& aSize)
+		static uint32_t items_zero_sized(layout& aLayout, const size& aSize, const optional_size& aAvailableSpace = optional_size())
 		{
 			uint32_t result = 0;
-			if (SpecializedPolicy::cx(aSize) <= SpecializedPolicy::cx(aLayout.minimum_size()) || SpecializedPolicy::items_visible(aLayout, ItemTypeSpacer))
+			if (SpecializedPolicy::cx(aSize) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer))
 			{
 				for (const auto& item : aLayout.items())
 				{
 					if (!item.visible())
 						continue;
-					if (!item.get().is<item::spacer_pointer>() && (SpecializedPolicy::cx(item.minimum_size()) == 0.0 || SpecializedPolicy::cy(item.minimum_size()) == 0.0))
+					if (!item.get().is<item::spacer_pointer>() && (SpecializedPolicy::cx(item.minimum_size(aAvailableSpace)) == 0.0 || SpecializedPolicy::cy(item.minimum_size(aAvailableSpace)) == 0.0))
 						++result;
 				}
 			}
@@ -46,10 +43,15 @@ namespace neogfx
 		}
 	};
 
+	class horizontal_layout;
+	class vertical_layout;
+
 	template <typename Layout>
 	struct layout::column_major : common_axis_policy<column_major<Layout>>
 	{
 		typedef Layout layout_type;
+		typedef horizontal_layout major_layout;
+		typedef vertical_layout minor_layout;
 		static const neogfx::alignment AlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCentre | neogfx::alignment::Bottom;
 		static const point::coordinate_type& x(const point& aPoint) { return aPoint.x; }
 		static point::coordinate_type& x(point& aPoint) { return aPoint.x; }
@@ -59,6 +61,8 @@ namespace neogfx
 		static size::dimension_type& cx(size& aSize) { return aSize.cx; }
 		static const size::dimension_type& cy(const size& aSize) { return aSize.cy; }
 		static size::dimension_type& cy(size& aSize) { return aSize.cy; }
+		static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
+		static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
 		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.horizontal_size_policy(); }
 		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.vertical_size_policy(); }
 	};
@@ -67,6 +71,8 @@ namespace neogfx
 	struct layout::row_major : common_axis_policy<row_major<Layout>>
 	{
 		typedef Layout layout_type;
+		typedef vertical_layout major_layout;
+		typedef horizontal_layout minor_layout;
 		static const neogfx::alignment AlignmentMask = neogfx::alignment::Left | neogfx::alignment::Centre | neogfx::alignment::Right;
 		static const point::coordinate_type& x(const point& aPoint) { return aPoint.y; }
 		static point::coordinate_type& x(point& aPoint) { return aPoint.y; }
@@ -76,140 +82,165 @@ namespace neogfx
 		static size::dimension_type& cx(size& aSize) { return aSize.cy; }
 		static const size::dimension_type& cy(const size& aSize) { return aSize.cx; }
 		static size::dimension_type& cy(size& aSize) { return aSize.cx; }
+		static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
+		static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
 		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.vertical_size_policy(); }
 		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.horizontal_size_policy(); }
 	};
+
+	template <typename AxisPolicy>
+	size layout::do_minimum_size(const optional_size& aAvailableSpace) const
+	{
+		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+		if (itemsVisible == 0)
+			return size{};
+		size result;
+		uint32_t itemsZeroSized = 0;
+		for (const auto& item : items())
+		{
+			if (!item.visible())
+				continue;
+			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(item.minimum_size(aAvailableSpace)) == 0.0 || AxisPolicy::cy(item.minimum_size(aAvailableSpace)) == 0.0))
+			{
+				++itemsZeroSized;
+				continue;
+			}
+			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(item.minimum_size(aAvailableSpace)));
+			AxisPolicy::cx(result) += AxisPolicy::cx(item.minimum_size(aAvailableSpace));
+		}
+		AxisPolicy::cx(result) += AxisPolicy::cx(margins());
+		AxisPolicy::cy(result) += AxisPolicy::cy(margins());
+		if (itemsVisible - itemsZeroSized > 0)
+			AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
+		AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
+		AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
+		return result;
+	}
+
+	template <typename AxisPolicy>
+	size layout::do_maximum_size(const optional_size& aAvailableSpace) const
+	{
+		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
+			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+		size result;
+		for (const auto& item : items())
+		{
+			if (!item.visible())
+				continue;
+			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(item.maximum_size(aAvailableSpace)));
+			auto cxItem = AxisPolicy::cx(item.maximum_size(aAvailableSpace));
+			if (cxItem != std::numeric_limits<size::dimension_type>::max())
+				AxisPolicy::cx(result) += cxItem;
+			else
+			{
+				AxisPolicy::cx(result) = std::numeric_limits<size::dimension_type>::max();
+				break;
+			}
+		}
+		if (AxisPolicy::cx(result) != std::numeric_limits<size::dimension_type>::max())
+		{
+			AxisPolicy::cx(result) += AxisPolicy::cx(margins());
+			if (itemsVisible > 1)
+				AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - 1));
+			AxisPolicy::cx(result) = std::min(AxisPolicy::cx(result), AxisPolicy::cx(layout::maximum_size(aAvailableSpace)));
+		}
+		if (AxisPolicy::cy(result) != std::numeric_limits<size::dimension_type>::max())
+		{
+			AxisPolicy::cy(result) += AxisPolicy::cy(margins());
+			AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
+		}
+		if (AxisPolicy::cx(result) == 0.0 && AxisPolicy::size_policy_x(size_policy()) == neogfx::size_policy::Expanding)
+			AxisPolicy::cx(result) = std::numeric_limits<size::dimension_type>::max();
+		if (AxisPolicy::cy(result) == 0.0 && AxisPolicy::size_policy_y(size_policy()) == neogfx::size_policy::Expanding)
+			AxisPolicy::cy(result) = std::numeric_limits<size::dimension_type>::max();
+		return result;
+	}
 
 	template <typename AxisPolicy>
 	void layout::do_layout_items(const point& aPosition, const size& aSize)
 	{
 		set_position(aPosition);
 		set_extents(aSize);
-		auto itemsVisibleIncludingSpacers = AxisPolicy::items_visible(static_cast<typename AxisPolicy::layout_type&>(*this), static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
+		auto itemsVisibleIncludingSpacers = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));
 		if (itemsVisibleIncludingSpacers == 0)
 			return;
-		uint32_t itemsVisible = AxisPolicy::items_visible(static_cast<typename AxisPolicy::layout_type&>(*this));
+		uint32_t itemsVisible = items_visible();
 		bool haveSpacers = (itemsVisibleIncludingSpacers > itemsVisible);
 		size availableSize = aSize;
 		availableSize.cx -= (margins().left + margins().right);
 		availableSize.cy -= (margins().top + margins().bottom);
 		auto itemsZeroSized = AxisPolicy::items_zero_sized(static_cast<typename AxisPolicy::layout_type&>(*this), aSize);
-		if (itemsVisible - itemsZeroSized > 1)
-			AxisPolicy::cx(availableSize) -= (AxisPolicy::cx(spacing()) * ((iAlwaysUseSpacing ? itemsVisibleIncludingSpacers : itemsVisible) - itemsZeroSized - 1));
+		auto spaces = (iAlwaysUseSpacing ? itemsVisibleIncludingSpacers : itemsVisible) - itemsZeroSized;
+		if (spaces > 1)
+			AxisPolicy::cx(availableSize) -= (AxisPolicy::cx(spacing()) * (spaces - 1));
 		size::dimension_type leftover = AxisPolicy::cx(availableSize);
-		size::dimension_type eachLeftover = std::floor(leftover / itemsVisible);
+		uint32_t itemsUsingLeftover = 0;
 		size totalExpanderWeight;
-		enum disposition_e { Unknown, Normal, TooSmall, TooBig, FixedSize };
+		enum disposition_e { Unknown, Weighted, Unweighted, TooSmall, FixedSize };
 		std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<std::pair<const item*, disposition_e>>> itemDispositions;
-		std::unordered_set<const item*, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<const item*>> expandersUsingLeftover;
-		std::size_t itemsNotUsingLeftover = 0;
+		for (const auto& item : items())
+		{
+			if (!item.visible())
+				continue;
+			if (AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum)
+			{
+				itemDispositions[&item] = TooSmall;
+				leftover -= AxisPolicy::cx(item.minimum_size(availableSize));
+				if (leftover < 0.0)
+					leftover = 0.0;
+			}
+			else if (AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Fixed)
+			{
+				itemDispositions[&item] = FixedSize;
+				leftover -= AxisPolicy::cx(item.minimum_size(availableSize));
+				if (leftover < 0.0)
+					leftover = 0.0;
+			}
+			else
+			{
+				++itemsUsingLeftover;
+				totalExpanderWeight += item.weight();
+			}
+		}
 		bool done = false;
-		while (!done)
+		while (!done && itemsUsingLeftover > 0)
 		{
 			done = true;
 			for (const auto& item : items())
 			{
 				if (!item.visible())
 					continue;
-				if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
+				auto& disposition = itemDispositions[&item];
+				if (disposition != Unknown && disposition != Weighted)
 					continue;
-				bool wasItemUsingLeftOver = (itemDispositions[&item] == Unknown || itemDispositions[&item] == Normal);
-				if (AxisPolicy::size_policy_x(item.size_policy()) == size_policy::Expanding && AxisPolicy::cx(item.maximum_size()) >= leftover)
+				auto minSize = AxisPolicy::cx(item.minimum_size(availableSize));
+				auto maxSize = AxisPolicy::cx(item.maximum_size(availableSize));
+				auto weightedSize = AxisPolicy::cx(item.weight()) / AxisPolicy::cx(totalExpanderWeight) * leftover;
+				if (minSize < weightedSize && maxSize > weightedSize)
+					disposition = Weighted;
+				else
 				{
-					if (expandersUsingLeftover.empty())
-					{
-						itemDispositions.clear();
-						itemsNotUsingLeftover = 0;
-						leftover = AxisPolicy::cx(availableSize);
-						totalExpanderWeight = size{};
-						eachLeftover = 0.0;
-					}
-					leftover -= AxisPolicy::cx(item.minimum_size());
-					expandersUsingLeftover.insert(&item);
-					totalExpanderWeight += item.weight();
-					done = false;
-					break;
-				}
-				else if (AxisPolicy::size_policy_x(item.size_policy()) == size_policy::Minimum && itemDispositions[&item] != FixedSize)
-				{
-					if (itemDispositions[&item] == TooSmall)
-						leftover += AxisPolicy::cx(item.maximum_size());
-					itemDispositions[&item] = FixedSize;
-					if (wasItemUsingLeftOver)
-						++itemsNotUsingLeftover;
-					leftover -= AxisPolicy::cx(item.minimum_size());
-					done = false;
-				}
-				else if (AxisPolicy::cx(item.maximum_size()) < eachLeftover)
-				{
-					if (itemDispositions[&item] != TooSmall && itemDispositions[&item] != Normal && itemDispositions[&item] != FixedSize)
-					{
-						if (itemDispositions[&item] == TooBig)
-							leftover += AxisPolicy::cx(item.minimum_size());
-						itemDispositions[&item] = item.is_fixed_size() ? FixedSize : TooSmall;
-						if (wasItemUsingLeftOver)
-							++itemsNotUsingLeftover;
-						leftover -= AxisPolicy::cx(item.maximum_size());
-						if (expandersUsingLeftover.empty())
-							eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
-						done = false;
-					}
-				}
-				else if (AxisPolicy::cx(item.minimum_size()) > eachLeftover)
-				{
-					if (itemDispositions[&item] != TooBig && itemDispositions[&item] != FixedSize)
-					{
-						if (itemDispositions[&item] == TooSmall)
-							leftover += AxisPolicy::cx(item.maximum_size());
-						itemDispositions[&item] = item.is_fixed_size() ? FixedSize : TooBig;
-						if (wasItemUsingLeftOver)
-							++itemsNotUsingLeftover;
-						leftover -= AxisPolicy::cx(item.minimum_size());
-						if (expandersUsingLeftover.empty())
-							eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
-						done = false;
-					}
-				}
-				else if (itemDispositions[&item] == TooSmall || itemDispositions[&item] == TooBig)
-				{
-					if (itemDispositions[&item] == TooSmall)
-						leftover += AxisPolicy::cx(item.maximum_size());
-					else if (itemDispositions[&item] == TooBig)
-						leftover += AxisPolicy::cx(item.minimum_size());
-					itemDispositions[&item] = item.is_fixed_size() ? FixedSize : Normal;
-					if (wasItemUsingLeftOver && item.is_fixed_size())
-						++itemsNotUsingLeftover;
-					else if (!wasItemUsingLeftOver && !item.is_fixed_size())
-						--itemsNotUsingLeftover;
-					if (expandersUsingLeftover.empty())
-						eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
-					done = false;
-				}
-				else if (itemDispositions[&item] == Unknown)
-				{
-					itemDispositions[&item] = Normal;
-					leftover -= AxisPolicy::cx(item.minimum_size());
-					if (expandersUsingLeftover.empty())
-						eachLeftover = std::floor(leftover / (itemsVisible - itemsNotUsingLeftover));
+					disposition = maxSize <= weightedSize ? TooSmall : Unweighted;
+					leftover -= AxisPolicy::cx(disposition == TooSmall ? item.maximum_size(availableSize) : item.minimum_size(availableSize));
+					if (leftover < 0.0)
+						leftover = 0.0;
+					totalExpanderWeight -= item.weight();
+					if (--itemsUsingLeftover == 0)
+						break;
 					done = false;
 				}
 			}
 		}
-		if (leftover < 0.0)
-		{
-			leftover = 0.0;
-			eachLeftover = 0.0;
-		}
-		uint32_t numberUsingLeftover = itemsVisibleIncludingSpacers - itemsNotUsingLeftover;
-		uint32_t bitsLeft = static_cast<int32_t>(leftover - (eachLeftover * numberUsingLeftover));
-		if (!expandersUsingLeftover.empty())
-		{
-			size::dimension_type totalIntegralAmount = 0.0;
-			for (const auto& s : expandersUsingLeftover)
-				totalIntegralAmount += std::floor(AxisPolicy::cx(s->weight()) / AxisPolicy::cx(totalExpanderWeight) * leftover);
-			bitsLeft = static_cast<int32_t>(leftover - totalIntegralAmount);
-		}
-		neolib::bresenham_counter<int32_t> bits(bitsLeft, numberUsingLeftover);
+		size::dimension_type weightedAmount = 0.0;
+		if (AxisPolicy::cx(totalExpanderWeight) > 0.0)
+			for (const auto& item : items())
+				if (item.visible() && itemDispositions[&item] == Weighted)
+					weightedAmount += std::floor(AxisPolicy::cx(item.weight()) / AxisPolicy::cx(totalExpanderWeight) * leftover);
+		uint32_t bitsLeft = 0;
+		if (itemsUsingLeftover > 0)
+			bitsLeft = static_cast<int32_t>(leftover - weightedAmount);
+		neolib::bresenham_counter<int32_t> bits(bitsLeft, itemsUsingLeftover);
 		uint32_t previousBit = 0;
 		point nextPos = aPosition;
 		nextPos.x += margins().left;
@@ -218,7 +249,7 @@ namespace neogfx
 		{
 			if (!item.visible())
 				continue;
-			size s{0.0, std::min(std::max(AxisPolicy::cy(item.minimum_size()), AxisPolicy::cy(availableSize)), AxisPolicy::cy(item.maximum_size()))};
+			size s{0.0, std::min(std::max(AxisPolicy::cy(item.minimum_size(availableSize)), AxisPolicy::cy(availableSize)), AxisPolicy::cy(item.maximum_size(availableSize)))};
 			std::swap(s.cx, AxisPolicy::cx(s));
 			point alignmentAdjust;
 			switch (alignment() & AxisPolicy::AlignmentMask)
@@ -239,28 +270,19 @@ namespace neogfx
 			}
 			if (AxisPolicy::y(alignmentAdjust) < 0.0)
 				AxisPolicy::y(alignmentAdjust) = 0.0;
-			if (itemDispositions[&item] == TooBig || itemDispositions[&item] == FixedSize)
-				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size());
-			else if (itemDispositions[&item] == TooSmall)
-				AxisPolicy::cx(s) = AxisPolicy::cx(item.maximum_size());
-			else if (leftover > 0.0)
+			auto disposition = itemDispositions[&item];
+			if (disposition == FixedSize)
+				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size(availableSize));
+			else if (disposition == TooSmall)
+				AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum ? item.minimum_size(availableSize) : item.maximum_size(availableSize));
+			else if (disposition == Weighted && leftover > 0.0)
 			{
-				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size());
-				if (expandersUsingLeftover.find(&item) != expandersUsingLeftover.end())
-				{
-					uint32_t bit = bitsLeft != 0 ? bits() : 0;
-					AxisPolicy::cx(s) += std::floor(AxisPolicy::cx(item.weight()) / AxisPolicy::cx(totalExpanderWeight) * leftover) + static_cast<size::dimension_type>(bit - previousBit);
-					previousBit = bit;
-				}
-				else
-				{
-					uint32_t bit = bitsLeft != 0 ? bits() : 0;
-					AxisPolicy::cx(s) += eachLeftover + static_cast<size::dimension_type>(bit - previousBit);
-					previousBit = bit;
-				}
+				uint32_t bit = bitsLeft != 0 ? bits() : 0;
+				AxisPolicy::cx(s) = std::floor(AxisPolicy::cx(item.weight()) / AxisPolicy::cx(totalExpanderWeight) * leftover) + static_cast<size::dimension_type>(bit - previousBit);
+				previousBit = bit;
 			}
 			else
-				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size());
+				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size(availableSize));
 			item.layout(nextPos + alignmentAdjust, s);
 			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(s) == 0.0 || AxisPolicy::cy(s) == 0.0))
 				continue;

@@ -48,8 +48,9 @@ namespace neogfx
 	protected:
 		virtual rect path_bounding_rect() const;
 		virtual bool spot_colour() const;
+		virtual colour border_mid_colour() const;
 	protected:
-		virtual size minimum_size() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual void handle_pressed();
 	protected:
 		virtual colour foreground_colour() const;

@@ -79,6 +79,8 @@ namespace neogfx
 		virtual void deactivate_shader_program() = 0;
 		virtual const i_shader_program& active_shader_program() const = 0;
 		virtual i_shader_program& active_shader_program() = 0;
+		virtual const i_shader_program& monochrome_shader_program() const = 0;
+		virtual i_shader_program& monochrome_shader_program() = 0;
 		virtual const i_shader_program& subpixel_shader_program() const = 0;
 		virtual i_shader_program& subpixel_shader_program() = 0;
 		virtual void render_now() = 0;

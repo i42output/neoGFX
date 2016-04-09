@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <unordered_map>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #ifdef u8
@@ -47,7 +48,7 @@ namespace neogfx
 	class native_font_face : public i_native_font_face
 	{
 	private:
-		typedef std::map<uint32_t, neogfx::glyph_texture> glyph_map;
+		typedef std::unordered_map<uint32_t, neogfx::glyph_texture> glyph_map;
 	public:
 		struct hb_handle
 		{

@@ -207,7 +207,6 @@ namespace neogfx
 	i_spacer& grid_layout::add_spacer()
 	{
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
-		s->set_size_policy(neogfx::size_policy::Minimum);
 		add_item(iCursor.y, iCursor.x, s);
 		increment_cursor();
 		return *s;
@@ -216,7 +215,6 @@ namespace neogfx
 	i_spacer& grid_layout::add_spacer(uint32_t aPosition)
 	{
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
-		s->set_size_policy(neogfx::size_policy::Minimum);
 		cell_coordinates oldCursor = iCursor;
 		iCursor.y = 0;
 		iCursor.x = 0;
@@ -232,7 +230,6 @@ namespace neogfx
 		if (iCells.find(cell_coordinates{ aColumn, aRow }) != iCells.end())
 			remove_item(aRow, aColumn);
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
-		s->set_size_policy(neogfx::size_policy::Minimum);
 		add_item(aRow, aColumn, s);
 		return *s;
 	}
@@ -296,7 +293,7 @@ namespace neogfx
 			throw wrong_item_type();
 	}
 
-	size grid_layout::minimum_size() const
+	size grid_layout::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (items_visible() == 0)
 			return size{};
@@ -307,13 +304,13 @@ namespace neogfx
 		{
 			if (!is_row_visible(row))
 				continue;
-			result.cy += row_minimum_size(row);
+			result.cy += row_minimum_size(row, aAvailableSpace);
 		}
 		for (cell_coordinate column = 0; column < columns(); ++column)
 		{
 			if (!is_column_visible(column))
 				continue;
-			result.cx += column_minimum_size(column);
+			result.cx += column_minimum_size(column, aAvailableSpace);
 		}
 		result.cx += (margins().left + margins().right);
 		result.cy += (margins().top + margins().bottom);
@@ -321,19 +318,19 @@ namespace neogfx
 			result.cx += (spacing().cx * (visibleColumns - 1));
 		if (result.cy != std::numeric_limits<size::dimension_type>::max() && visibleRows > 0)
 			result.cy += (spacing().cy * (visibleRows - 1));
-		result.cx = std::max(result.cx, layout::minimum_size().cx);
-		result.cy = std::max(result.cy, layout::minimum_size().cy);
+		result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
+		result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
 		return result;
 	}
 
-	size grid_layout::maximum_size() const
+	size grid_layout::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return size{};
 		size result;
 		for (cell_coordinate row = 0; row < visible_rows(); ++row)
 		{
-			size::dimension_type rowMaxSize = row_maximum_size(row);
+			size::dimension_type rowMaxSize = row_maximum_size(row, aAvailableSpace);
 			if (rowMaxSize == std::numeric_limits<size::dimension_type>::max())
 				result.cy = rowMaxSize;
 			else if (result.cy != std::numeric_limits<size::dimension_type>::max())
@@ -341,7 +338,7 @@ namespace neogfx
 		}
 		for (cell_coordinate column = 0; column < visible_columns(); ++column)
 		{
-			size::dimension_type columnMaxSize = column_maximum_size(column);
+			size::dimension_type columnMaxSize = column_maximum_size(column, aAvailableSpace);
 			if (columnMaxSize == std::numeric_limits<size::dimension_type>::max())
 				result.cx = columnMaxSize;
 			else if (result.cx != std::numeric_limits<size::dimension_type>::max())
@@ -356,9 +353,9 @@ namespace neogfx
 		if (result.cy != std::numeric_limits<size::dimension_type>::max() && visible_rows() > 0)
 			result.cy += (spacing().cy * (visible_rows() - 1));
 		if (result.cx != std::numeric_limits<size::dimension_type>::max())
-			result.cx = std::min(result.cx, layout::maximum_size().cx);
+			result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
 		if (result.cy != std::numeric_limits<size::dimension_type>::max())
-			result.cy = std::min(result.cy, layout::maximum_size().cy);
+			result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
 		return result;
 	}
 
@@ -523,39 +520,39 @@ namespace neogfx
 		return false;
 	}
 
-	size::dimension_type grid_layout::row_minimum_size(cell_coordinate aRow) const
+	size::dimension_type grid_layout::row_minimum_size(cell_coordinate aRow, const optional_size& aAvailableSpace) const
 	{
 		size::dimension_type result {};
 		for (const auto& item : iCells)
 			if (item.first.y == aRow)
-				result = std::max(result, item.second->minimum_size().cy);
+				result = std::max(result, item.second->minimum_size(aAvailableSpace).cy);
 		return result;
 	}
 
-	size::dimension_type grid_layout::column_minimum_size(cell_coordinate aColumn) const
+	size::dimension_type grid_layout::column_minimum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace) const
 	{
 		size::dimension_type result {};
 		for (const auto& item : iCells)
 			if (item.first.x == aColumn)
-				result = std::max(result, item.second->minimum_size().cx);
+				result = std::max(result, item.second->minimum_size(aAvailableSpace).cx);
 		return result;
 	}
 
-	size::dimension_type grid_layout::row_maximum_size(cell_coordinate aRow) const
+	size::dimension_type grid_layout::row_maximum_size(cell_coordinate aRow, const optional_size& aAvailableSpace) const
 	{
 		size::dimension_type result {};
 		for (const auto& item : iCells)
 			if (item.first.y == aRow)
-				result = std::max(result, item.second->maximum_size().cy);
+				result = std::max(result, item.second->maximum_size(aAvailableSpace).cy);
 		return result;
 	}
 
-	size::dimension_type grid_layout::column_maximum_size(cell_coordinate aColumn) const
+	size::dimension_type grid_layout::column_maximum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace) const
 	{
 		size::dimension_type result {};
 		for (const auto& item : iCells)
 			if (item.first.x == aColumn)
-				result = std::max(result, item.second->maximum_size().cx);
+				result = std::max(result, item.second->maximum_size(aAvailableSpace).cx);
 		return result;
 	}
 

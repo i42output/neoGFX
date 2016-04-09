@@ -66,13 +66,11 @@ namespace neogfx
 		virtual size weight() const;
 		virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true);
 		virtual bool has_minimum_size() const;
-		virtual size minimum_size() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true);
 		virtual bool has_maximum_size() const;
-		virtual size maximum_size() const;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
-		virtual bool is_fixed_size() const;
-		virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true);
 	public:
 		virtual neogfx::margins margins() const;
 		virtual bool has_margins() const;

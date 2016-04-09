@@ -19,15 +19,14 @@
 
 #include "neogfx.hpp"
 #include "surface_manager.hpp"
-#include <SDL_messagebox.h>
 #include <neolib/string_utils.hpp>
 #include "i_native_surface.hpp"
 #include "i_native_window.hpp"
 
 namespace neogfx
 {
-	surface_manager::surface_manager(i_rendering_engine& aRenderingEngine) :
-		iRenderingEngine(aRenderingEngine), iRenderingSurfaces(false)
+	surface_manager::surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine) :
+		iBasicServices(aBasicServices), iRenderingEngine(aRenderingEngine), iRenderingSurfaces(false)
 	{
 	}
 
@@ -104,11 +103,11 @@ namespace neogfx
 				return;
 			}
 		}
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, aTitle.c_str(), aMessage.c_str(), NULL);
+		iBasicServices.display_error_dialog(aTitle.c_str(), aMessage.c_str(), 0);
 	}
 
 	void surface_manager::display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const
 	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, aTitle.c_str(), aMessage.c_str(), static_cast<SDL_Window*>(aParent.handle()));
+		iBasicServices.display_error_dialog(aTitle.c_str(), aMessage.c_str(), aParent.handle());
 	}
 }

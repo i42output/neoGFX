@@ -128,11 +128,11 @@ namespace neogfx
 		iContainer.removing_tab(aTab);
 	}
 
-	size tab_bar::maximum_size() const
+	size tab_bar::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_maximum_size())
-			return widget::maximum_size();
-		return minimum_size();
+			return widget::maximum_size(aAvailableSpace);
+		return minimum_size(aAvailableSpace);
 	}
 
 	void tab_bar::paint(graphics_context& aGraphicsContext) const

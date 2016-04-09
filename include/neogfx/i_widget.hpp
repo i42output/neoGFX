@@ -170,6 +170,7 @@ namespace neogfx
 		virtual void mouse_moved(const point& aPosition) = 0;
 		virtual void mouse_entered() = 0;
 		virtual void mouse_left() = 0;
+		virtual void set_default_mouse_cursor() = 0;
 	public:
 		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
 		virtual void key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;

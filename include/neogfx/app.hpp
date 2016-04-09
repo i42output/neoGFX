@@ -24,6 +24,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/io_thread.hpp>
 #include "i_app.hpp"
+#include "i_basic_services.hpp"
 #include "i_rendering_engine.hpp"
 #include "i_surface_manager.hpp"
 #include "keyboard.hpp"
@@ -39,6 +40,7 @@ namespace neogfx
 		typedef std::list<action, boost::fast_pool_allocator<action>> action_list;
 	public:
 		struct no_instance : std::logic_error { no_instance() : std::logic_error("neogfx::app::no_instance") {} };
+		struct no_basic_services : std::logic_error { no_basic_services() : std::logic_error("neogfx::app::no_basic_services") {} };
 		struct no_renderer : std::logic_error { no_renderer() : std::logic_error("neogfx::app::no_renderer") {} };
 		struct no_surface_manager : std::logic_error { no_surface_manager() : std::logic_error("neogfx::app::no_surface_manager") {} };
 		struct no_keyboard : std::logic_error { no_keyboard() : std::logic_error("neogfx::app::no_keyboard") {} };
@@ -52,6 +54,7 @@ namespace neogfx
 		virtual const std::string& name() const;
 		virtual int exec(bool aQuitWhenLastWindowClosed = true);
 		virtual void quit(int aResultCode);
+		virtual i_basic_services& basic_services() const;
 		virtual i_rendering_engine& rendering_engine() const;
 		virtual i_surface_manager& surface_manager() const;
 		virtual const i_keyboard& keyboard() const;
@@ -74,6 +77,7 @@ namespace neogfx
 	private:
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;
+		std::unique_ptr<i_basic_services> iBasicServices;
 		std::unique_ptr<i_keyboard> iKeyboard;
 		std::unique_ptr<i_rendering_engine> iRenderingEngine;
 		std::unique_ptr<i_surface_manager> iSurfaceManager;

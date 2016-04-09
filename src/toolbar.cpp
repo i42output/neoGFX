@@ -54,7 +54,7 @@ namespace neogfx
 
 	const toolbar_button& toolbar::button(button_index aButtonIndex) const
 	{
-		if (aButtonIndex >= iButtons.size())
+		if (aButtonIndex >= button_count())
 			throw bad_button_index();
 		return *iButtons[aButtonIndex];
 	}
@@ -66,12 +66,12 @@ namespace neogfx
 
 	void toolbar::add_action(i_action& aAction)
 	{
-		iButtons.push_back(std::make_unique<toolbar_button>(layout(), aAction));
+		insert_action(button_count(), aAction);
 	}
 
 	void toolbar::add_separator()
 	{
-		iButtons.push_back(std::make_unique<toolbar_button>(layout(), iSeparator));
+		insert_separator(button_count());
 	}
 
 	void toolbar::insert_action(button_index aButtonIndex, i_action& aAction)

@@ -29,6 +29,7 @@ namespace neogfx
 	public:
 		enum size_policy_e
 		{
+			Fixed,
 			Minimum,
 			Maximum,
 			Expanding
@@ -94,13 +95,11 @@ namespace neogfx
 		virtual size weight() const = 0;
 		virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) = 0;
 		virtual bool has_minimum_size() const = 0;
-		virtual size minimum_size() const = 0;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const = 0;
 		virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) = 0;
 		virtual bool has_maximum_size() const = 0;
-		virtual size maximum_size() const = 0;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const = 0;
 		virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) = 0;
-		virtual bool is_fixed_size() const = 0;
-		virtual void set_fixed_size(const optional_size& aFixedSize, bool aUpdateLayout = true) = 0;
 	public:
 		virtual bool has_margins() const = 0;
 		virtual neogfx::margins margins() const = 0;
@@ -114,6 +113,11 @@ namespace neogfx
 		void set_size_policy(neogfx::size_policy::size_policy_e aHorizontalSizePolicy, neogfx::size_policy::size_policy_e aVerticalSizePolicy, bool aUpdateLayout = true)
 		{
 			set_size_policy(neogfx::size_policy{aHorizontalSizePolicy, aVerticalSizePolicy}, aUpdateLayout);
+		}
+		void set_fixed_size(const size& aSize, bool aUpdateLayout = true)
+		{
+			set_minimum_size(aSize, aUpdateLayout);
+			set_maximum_size(aSize, aUpdateLayout);
 		}
 	};
 }
