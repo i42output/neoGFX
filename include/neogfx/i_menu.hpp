@@ -39,17 +39,16 @@ namespace neogfx
 		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_menu::bad_item_index") {} };
 	public:
 		virtual type_e type() const = 0;
+		virtual const std::string& title() const = 0;
 		virtual uint32_t item_count() const = 0;
 		virtual const i_menu_item& item(item_index aItemIndex) const = 0;
 		virtual i_menu_item& item(item_index aItemIndex) = 0;
-		virtual i_menu& add_sub_menu(const std::string& aSubMenuText) = 0;
+		virtual i_menu& add_sub_menu(const std::string& aSubMenuTitle) = 0;
 		virtual void add_action(i_action& aAction) = 0;
 		virtual void add_separator() = 0;
-		virtual i_menu& insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuText) = 0;
+		virtual i_menu& insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuTitle) = 0;
 		virtual void insert_action(item_index aItemIndex, i_action& aAction) = 0;
 		virtual void insert_separator(item_index aItemIndex) = 0;
-	public:
-		virtual const i_widget& as_widget() const = 0;
-		virtual i_widget& as_widget() = 0;
+		virtual void remove_item(item_index aItemIndex) = 0;
 	};
 }

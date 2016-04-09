@@ -88,6 +88,7 @@ namespace neogfx
 		virtual void remove_item(std::size_t aIndex);
 		virtual void remove_items();
 		virtual std::size_t item_count() const;
+		virtual bool is_widget(std::size_t aIndex) const;
 		virtual i_geometry& get_item(std::size_t aIndex);
 		using i_layout::get_widget;
 		virtual i_widget& get_widget(std::size_t aIndex);

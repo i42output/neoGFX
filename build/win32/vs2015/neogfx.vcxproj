@@ -161,6 +161,7 @@
     <ClInclude Include="..\..\..\include\neogfx\shape.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite_plane.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\texture.hpp" />
@@ -226,6 +227,7 @@
     <ClCompile Include="..\..\..\src\layout_item.cpp" />
     <ClCompile Include="..\..\..\src\menu.cpp" />
     <ClCompile Include="..\..\..\src\menu_bar.cpp" />
+    <ClCompile Include="..\..\..\src\menu_item.cpp" />
     <ClCompile Include="..\..\..\src\sdl_basic_services.cpp" />
     <ClCompile Include="..\..\..\src\button.cpp" />
     <ClCompile Include="..\..\..\src\check_box.cpp" />

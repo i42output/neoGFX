@@ -18,6 +18,7 @@
 #include <neogfx/image_widget.hpp>
 #include <neogfx/sprite_plane.hpp>
 #include <neogfx/toolbar.hpp>
+#include <neogfx/menu_bar.hpp>
 
 namespace ng = neogfx;
 
@@ -73,6 +74,13 @@ int main(int argc, char* argv[])
 		app.change_style("Default");
 		ng::window window(800, 800);
 		ng::vertical_layout layout0(window);
+
+		ng::menu_bar menu(layout0);
+		auto& fileMenu = menu.add_sub_menu("File");
+		auto& editMenu = menu.add_sub_menu("Edit");
+		auto& viewMenu = menu.add_sub_menu("View");
+		auto& windowMenu = menu.add_sub_menu("Window");
+		auto& helpMenu = menu.add_sub_menu("Help");
 
 		ng::toolbar toolbar(layout0);
 		auto& contactsAction = app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png");

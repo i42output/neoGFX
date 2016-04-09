@@ -1,4 +1,4 @@
-// menu_bar.hpp
+// menu_item.hpp
 /*
 neogfx C++ GUI Library
 Copyright(C) 2016 Leigh Johnston
@@ -20,26 +20,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "neogfx.hpp"
-#include "widget.hpp"
-#include "menu.hpp"
+#include "i_menu_item.hpp"
 
 namespace neogfx
 {
-	class menu_bar : public widget, public menu
+	class i_menu;
+
+	class menu_item : public i_menu_item
 	{
 	private:
-		typedef std::unique_ptr<i_menu_item> item_pointer;
-		typedef std::vector<i_menu_item> item_list;
+		typedef i_action* action_pointer;
+		typedef std::shared_ptr<i_menu> menu_pointer;
+		typedef neolib::variant<action_pointer, menu_pointer> contents;
 	public:
-		menu_bar();
-		menu_bar(i_widget& aParent);
-		menu_bar(i_layout& aLayout);
+		menu_item(i_action& aAction);
+		menu_item(i_menu& aSubMenu);
+		menu_item(std::shared_ptr<i_menu> aSubMenu);
 	public:
-		virtual neogfx::size_policy size_policy() const;	
-	public:
-		virtual bool visible() const;
-	protected:
-		virtual void item_added(item_index aItemIndex);
-		virtual void item_removed(item_index aItemIndex);
+		virtual type_e type() const;
+		virtual const i_action& action() const;
+		virtual i_action& action();
+		virtual const i_menu& sub_menu() const;
+		virtual i_menu& sub_menu();
+	private:
+		contents iContents;
 	};
 }

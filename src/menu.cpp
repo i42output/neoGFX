@@ -18,12 +18,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "neogfx.hpp"
+#include "menu_item.hpp"
 #include "menu.hpp"
 
 namespace neogfx
 {
-	menu::menu()
+	menu::menu(type_e aType, const std::string& aTitle) : iType(aType), iTitle(aTitle)
 	{
+	}
+
+	menu::type_e menu::type() const
+	{
+		return iType;
+	}
+
+	const std::string& menu::title() const
+	{
+		return iTitle;
 	}
 
 	uint32_t menu::item_count() const
@@ -43,9 +54,9 @@ namespace neogfx
 		return const_cast<i_menu_item&>(const_cast<const menu*>(this)->item(aItemIndex));
 	}
 
-	i_menu& menu::add_sub_menu(const std::string& aSubMenuText)
+	i_menu& menu::add_sub_menu(const std::string& aSubMenuTitle)
 	{
-		return insert_sub_menu(item_count(), aSubMenuText);
+		return insert_sub_menu(item_count(), aSubMenuTitle);
 	}
 
 	void menu::add_action(i_action& aAction)
@@ -58,15 +69,27 @@ namespace neogfx
 		insert_separator(item_count());
 	}
 
-	i_menu& menu::insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuText)
+	i_menu& menu::insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuTitle)
 	{
+		auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(Popup, aSubMenuTitle)));
+		item_added.trigger(aItemIndex);
+		return (**newItem).sub_menu();
 	}
 
 	void menu::insert_action(item_index aItemIndex, i_action& aAction)
 	{
+		iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
+		item_added.trigger(aItemIndex);
 	}
 
 	void menu::insert_separator(item_index aItemIndex)
 	{
+		insert_action(aItemIndex, iSeparator);
+	}
+
+	void menu::remove_item(item_index aItemIndex)
+	{
+		iItems.erase(iItems.begin() + aItemIndex);
+		item_removed.trigger(aItemIndex);
 	}
 }

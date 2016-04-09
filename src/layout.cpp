@@ -246,8 +246,18 @@ namespace neogfx
 		return iItems.size();
 	}
 
+	bool layout::is_widget(std::size_t aIndex) const
+	{
+		if (aIndex >= iItems.size())
+			throw bad_item_index();
+		auto item = std::next(iItems.begin(), aIndex);
+		return item->get().is<item::widget_pointer>();
+	}
+
 	i_geometry& layout::get_item(std::size_t aIndex)
 	{
+		if (aIndex >= iItems.size())
+			throw bad_item_index();
 		auto item = std::next(iItems.begin(), aIndex);
 		if (item->get().is<item::widget_pointer>())
 			return *static_variant_cast<item::widget_pointer&>(item->get());
@@ -259,6 +269,8 @@ namespace neogfx
 
 	i_widget& layout::get_widget(std::size_t aIndex)
 	{
+		if (aIndex >= iItems.size())
+			throw bad_item_index();
 		auto item = std::next(iItems.begin(), aIndex);
 		if (item->get().is<item::widget_pointer>())
 			return *static_variant_cast<item::widget_pointer&>(item->get());
@@ -268,6 +280,8 @@ namespace neogfx
 
 	i_layout& layout::get_layout(std::size_t aIndex)
 	{
+		if (aIndex >= iItems.size())
+			throw bad_item_index();
 		auto item = std::next(iItems.begin(), aIndex);
 		if (item->get().is<item::layout_pointer>())
 			return *static_variant_cast<item::layout_pointer&>(item->get());

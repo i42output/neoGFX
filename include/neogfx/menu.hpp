@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "neogfx.hpp"
+#include "event.hpp"
 #include "action.hpp"
 #include "i_menu.hpp"
 
@@ -27,22 +28,30 @@ namespace neogfx
 {
 	class menu : public i_menu
 	{
+	public:
+		event<item_index> item_added;
+		event<item_index> item_removed;
 	private:
 		typedef std::unique_ptr<i_menu_item> item_pointer;
 		typedef std::vector<item_pointer> item_list;
 	public:
-		menu();
+		menu(type_e aType = Popup, const std::string& aTitle = std::string());
 	public:
+		virtual type_e type() const;
+		virtual const std::string& title() const;
 		virtual uint32_t item_count() const;
 		virtual const i_menu_item& item(item_index aItemIndex) const;
 		virtual i_menu_item& item(item_index aItemIndex);
-		virtual i_menu& add_sub_menu(const std::string& aSubMenuText);
+		virtual i_menu& add_sub_menu(const std::string& aSubMenuTitle);
 		virtual void add_action(i_action& aAction);
 		virtual void add_separator();
 		virtual i_menu& insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuText);
 		virtual void insert_action(item_index aItemIndex, i_action& aAction);
 		virtual void insert_separator(item_index aItemIndex);
+		virtual void remove_item(item_index aItemIndex);
 	private:
+		type_e iType;
+		std::string iTitle;
 		item_list iItems;
 		action iSeparator;
 	};

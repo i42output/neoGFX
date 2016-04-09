@@ -37,11 +37,12 @@ namespace neogfx
 	protected:
 		class item;
 	public:
+		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_layout::bad_item_index") {} };
 		struct no_widget : std::logic_error { no_widget() : std::logic_error("neogfx::i_layout::no_widget") {} };
 		struct wrong_item_type : std::logic_error { wrong_item_type() : std::logic_error("neogfx::i_layout::wrong_item_type") {} };
 	public:
 		virtual ~i_layout() {}
-	public:
+	public:	
 		virtual i_widget* owner() const = 0;
 		virtual void set_owner(i_widget* aOwner) = 0;
 		virtual void add_item(i_widget& aWidget) = 0;
@@ -62,6 +63,7 @@ namespace neogfx
 		virtual void remove_item(std::size_t aIndex) = 0;
 		virtual void remove_items() = 0;
 		virtual std::size_t item_count() const = 0;
+		virtual bool is_widget(std::size_t aIndex) const = 0;
 		virtual i_geometry& get_item(std::size_t aIndex) = 0;
 		virtual i_widget& get_widget(std::size_t aIndex) = 0;
 		virtual i_layout& get_layout(std::size_t aIndex) = 0;
