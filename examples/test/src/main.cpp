@@ -125,7 +125,6 @@ int main(int argc, char* argv[])
 		{
 			auto button = std::make_shared<ng::push_button>(std::string(1, 'A' + i));
 			layout3.add_item(button);
-			button->set_size_policy(ng::size_policy::Expanding);
 			ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
 			button->set_foreground_colour(randomColour);
 		}
