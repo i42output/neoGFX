@@ -69,9 +69,12 @@ namespace neogfx
 		layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
 		layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
 		layout(const layout&) = delete;
+		~layout();
 	public:
 		virtual i_widget* owner() const;
 		virtual void set_owner(i_widget* aOwner);
+		virtual i_layout* parent() const;
+		virtual void set_parent(i_layout* aParent);
 		virtual void add_item(i_widget& aWidget);
 		virtual void add_item(uint32_t aPosition, i_widget& aWidget);
 		virtual void add_item(std::shared_ptr<i_widget> aWidget);
@@ -86,6 +89,7 @@ namespace neogfx
 		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer);
 		virtual void add_item(const item& aItem);
 		virtual void remove_item(std::size_t aIndex);
+		virtual void remove_item(i_layout& aItem);
 		virtual void remove_items();
 		virtual std::size_t item_count() const;
 		virtual bool is_widget(std::size_t aIndex) const;
@@ -146,6 +150,7 @@ namespace neogfx
 		void do_layout_items(const point& aPosition, const size& aSize);
 	private:
 		i_widget* iOwner;
+		i_layout* iParent;
 		device_metrics_forwarder iDeviceMetricsForwarder;
 		units_context iUnitsContext;
 		optional_margins iMargins;

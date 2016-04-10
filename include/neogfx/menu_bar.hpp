@@ -34,12 +34,12 @@ namespace neogfx
 		menu_bar();
 		menu_bar(i_widget& aParent);
 		menu_bar(i_layout& aLayout);
+		~menu_bar();
 	public:
 		virtual neogfx::size_policy size_policy() const;	
 	public:
 		virtual bool visible() const;
-	protected:
-		virtual void item_added(item_index aItemIndex);
-		virtual void item_removed(item_index aItemIndex);
+	private:
+		void init();
 	};
 }

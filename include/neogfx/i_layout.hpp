@@ -45,6 +45,8 @@ namespace neogfx
 	public:	
 		virtual i_widget* owner() const = 0;
 		virtual void set_owner(i_widget* aOwner) = 0;
+		virtual i_layout* parent() const = 0;
+		virtual void set_parent(i_layout* aParent) = 0;
 		virtual void add_item(i_widget& aWidget) = 0;
 		virtual void add_item(uint32_t aPosition, i_widget& aWidget) = 0;
 		virtual void add_item(std::shared_ptr<i_widget> aWidget) = 0;
@@ -61,6 +63,7 @@ namespace neogfx
 		virtual i_spacer& add_spacer() = 0;
 		virtual i_spacer& add_spacer(uint32_t aPosition) = 0;
 		virtual void remove_item(std::size_t aIndex) = 0;
+		virtual void remove_item(i_layout& aItem) = 0;
 		virtual void remove_items() = 0;
 		virtual std::size_t item_count() const = 0;
 		virtual bool is_widget(std::size_t aIndex) const = 0;

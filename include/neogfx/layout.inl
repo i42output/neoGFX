@@ -26,10 +26,10 @@ namespace neogfx
 	template <typename SpecializedPolicy>
 	struct layout::common_axis_policy
 	{
-		static uint32_t items_zero_sized(layout& aLayout, const size& aSize, const optional_size& aAvailableSpace = optional_size())
+		static uint32_t items_zero_sized(layout& aLayout, const optional_size& aAvailableSpace = optional_size())
 		{
 			uint32_t result = 0;
-			if (SpecializedPolicy::cx(aSize) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer))
+			if (aAvailableSpace == boost::none || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer))
 			{
 				for (const auto& item : aLayout.items())
 				{
@@ -170,7 +170,7 @@ namespace neogfx
 		size availableSize = aSize;
 		availableSize.cx -= (margins().left + margins().right);
 		availableSize.cy -= (margins().top + margins().bottom);
-		auto itemsZeroSized = AxisPolicy::items_zero_sized(static_cast<typename AxisPolicy::layout_type&>(*this), aSize);
+		auto itemsZeroSized = AxisPolicy::items_zero_sized(static_cast<typename AxisPolicy::layout_type&>(*this), availableSize);
 		auto spaces = (iAlwaysUseSpacing ? itemsVisibleIncludingSpacers : itemsVisible) - itemsZeroSized;
 		if (spaces > 1)
 			AxisPolicy::cx(availableSize) -= (AxisPolicy::cx(spacing()) * (spaces - 1));

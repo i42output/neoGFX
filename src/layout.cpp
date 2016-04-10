@@ -61,6 +61,7 @@ namespace neogfx
 
 	layout::layout(neogfx::alignment aAlignment) :
 		iOwner(0),
+		iParent(0),
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
 		iSpacing(app::instance().current_style().spacing()),
 		iAlwaysUseSpacing(false),
@@ -75,6 +76,7 @@ namespace neogfx
 
 	layout::layout(i_widget& aParent, neogfx::alignment aAlignment) :
 		iOwner(&aParent),
+		iParent(0),
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
 		iSpacing(app::instance().current_style().spacing()),
 		iAlwaysUseSpacing(false),
@@ -90,6 +92,7 @@ namespace neogfx
 
 	layout::layout(i_layout& aParent, neogfx::alignment aAlignment) :
 		iOwner(aParent.owner()), 
+		iParent(&aParent),
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
 		iMargins(neogfx::margins(0)),
 		iSpacing(app::instance().current_style().spacing()),
@@ -104,6 +107,12 @@ namespace neogfx
 		aParent.add_item(*this);
 	}
 
+	layout::~layout()
+	{
+		if (iParent != 0)
+			iParent->remove_item(*this);
+	}
+
 	i_widget* layout::owner() const
 	{
 		return iOwner;
@@ -112,6 +121,16 @@ namespace neogfx
 	void layout::set_owner(i_widget* aOwner)
 	{
 		iOwner = aOwner;
+	}
+
+	i_layout* layout::parent() const
+	{
+		return iParent;
+	}
+	
+	void layout::set_parent(i_layout* aParent)
+	{
+		iParent = aParent;
 	}
 
 	void layout::add_item(i_widget& aWidget)
@@ -159,6 +178,7 @@ namespace neogfx
 		iItems.push_back(item(*this, aLayout));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
+		aLayout.set_parent(this);
 	}
 
 	void layout::add_item(uint32_t aPosition, i_layout& aLayout)
@@ -168,6 +188,7 @@ namespace neogfx
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aLayout));
 		if (iOwner != 0)
 			i->set_owner(iOwner);
+		aLayout.set_parent(this);
 	}
 
 	void layout::add_item(std::shared_ptr<i_layout> aLayout)
@@ -175,6 +196,7 @@ namespace neogfx
 		iItems.push_back(item(*this, aLayout));
 		if (iOwner != 0)
 			iItems.back().set_owner(iOwner);
+		aLayout->set_parent(this);
 	}
 
 	void layout::add_item(uint32_t aPosition, std::shared_ptr<i_layout> aLayout)
@@ -184,6 +206,7 @@ namespace neogfx
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aLayout));
 		if (iOwner != 0)
 			i->set_owner(iOwner);
+		aLayout->set_parent(this);
 	}
 
 	void layout::add_item(i_spacer& aSpacer)
@@ -232,6 +255,16 @@ namespace neogfx
 	void layout::remove_item(std::size_t aIndex)
 	{
 		remove_item(std::next(iItems.begin(), aIndex));
+	}
+
+	void layout::remove_item(i_layout& aItem)
+	{
+		for (auto i = items().begin(); i != items().end(); ++i)
+			if (i->get().is<item::layout_pointer>() && &aItem == &*static_variant_cast<item::layout_pointer&>(i->get()))
+			{
+				items().erase(i);
+				break;
+			}
 	}
 
 	void layout::remove_items()

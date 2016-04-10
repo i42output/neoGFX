@@ -151,6 +151,8 @@ namespace neogfx
 		{
 			if (!item.visible())
 				continue;
+			if (&item == &items().back())
+				continue;
 			auto itemMinimumSize = item.minimum_size(availableSpace);
 			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) >= AxisPolicy::cx(availableSpace))
 			{
