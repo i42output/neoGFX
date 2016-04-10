@@ -109,6 +109,7 @@ namespace neogfx
 
 	layout::~layout()
 	{
+		remove_items();
 		if (iParent != 0)
 			iParent->remove_item(*this);
 	}
@@ -262,14 +263,15 @@ namespace neogfx
 		for (auto i = items().begin(); i != items().end(); ++i)
 			if (i->get().is<item::layout_pointer>() && &aItem == &*static_variant_cast<item::layout_pointer&>(i->get()))
 			{
-				items().erase(i);
+				remove_item(i);
 				break;
 			}
 	}
 
 	void layout::remove_items()
 	{
-		iItems.clear();
+		item_list toRemove;
+		toRemove.splice(toRemove.begin(), items());
 		if (iOwner != 0)
 			iOwner->ultimate_ancestor().layout_items(true);
 	}
@@ -583,7 +585,8 @@ namespace neogfx
 
 	void layout::remove_item(item_list::const_iterator aItem)
 	{
-		iItems.erase(aItem);
+		item_list toRemove;
+		toRemove.splice(toRemove.begin(), items(), aItem);
 		if (iOwner != 0)
 			iOwner->ultimate_ancestor().layout_items(true);
 	}
