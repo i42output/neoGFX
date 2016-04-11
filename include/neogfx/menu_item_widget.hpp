@@ -1,4 +1,4 @@
-// menu_bar.hpp
+// menu_item_widget.hpp
 /*
 neogfx C++ GUI Library
 Copyright(C) 2016 Leigh Johnston
@@ -21,28 +21,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "neogfx.hpp"
 #include "widget.hpp"
-#include "menu.hpp"
-#include "flow_layout.hpp"
+#include "horizontal_layout.hpp"
+#include "text_widget.hpp"
+#include "image_widget.hpp"
+#include "i_menu_item.hpp"
 
 namespace neogfx
 {
-	class menu_bar : public widget, public menu
+	class menu_item_widget : public widget
 	{
-	private:
-		typedef std::unique_ptr<i_menu_item> item_pointer;
-		typedef std::vector<i_menu_item> item_list;
 	public:
-		menu_bar();
-		menu_bar(i_widget& aParent);
-		menu_bar(i_layout& aLayout);
-		~menu_bar();
+		menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);
+		menu_item_widget(i_widget& aParent, i_menu& aMenu, i_menu_item& aMenuItem);
+		menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem);
 	public:
-		virtual neogfx::size_policy size_policy() const;	
+		virtual neogfx::size_policy size_policy() const;
 	public:
-		virtual bool visible() const;
+		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
+		virtual void paint(graphics_context& aGraphicsContext) const;
+	public:
+		virtual void mouse_entered();
+		virtual void mouse_left();	
 	private:
 		void init();
 	private:
-		flow_layout iLayout;
+		i_menu& iMenu;
+		i_menu_item& iMenuItem;
+		horizontal_layout iLayout;
+		image_widget iIcon;
+		text_widget iText;
 	};
 }

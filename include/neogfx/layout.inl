@@ -123,11 +123,14 @@ namespace neogfx
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
 		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+		uint32_t itemsZeroSized = 0;
 		size result;
 		for (const auto& item : items())
 		{
 			if (!item.visible())
 				continue;
+			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(item.maximum_size(aAvailableSpace)) == 0.0 || AxisPolicy::cy(item.maximum_size(aAvailableSpace)) == 0.0))
+				++itemsZeroSized;
 			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(item.maximum_size(aAvailableSpace)));
 			auto cxItem = AxisPolicy::cx(item.maximum_size(aAvailableSpace));
 			if (cxItem != std::numeric_limits<size::dimension_type>::max())
@@ -141,8 +144,8 @@ namespace neogfx
 		if (AxisPolicy::cx(result) != std::numeric_limits<size::dimension_type>::max())
 		{
 			AxisPolicy::cx(result) += AxisPolicy::cx(margins());
-			if (itemsVisible > 1)
-				AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - 1));
+			if (itemsVisible - itemsZeroSized > 1)
+				AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
 			AxisPolicy::cx(result) = std::min(AxisPolicy::cx(result), AxisPolicy::cx(layout::maximum_size(aAvailableSpace)));
 		}
 		if (AxisPolicy::cy(result) != std::numeric_limits<size::dimension_type>::max())

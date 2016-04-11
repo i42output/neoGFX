@@ -203,6 +203,8 @@ namespace neogfx
 		}
 		if (iTextExtent != boost::none)
 			return *iTextExtent;
+		if (!has_surface())
+			return size{};
 		graphics_context gc(*this);
 		gc.set_glyph_text_cache(iGlyphTextCache);
 		if (iMultiLine)

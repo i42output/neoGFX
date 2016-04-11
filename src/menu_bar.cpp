@@ -20,22 +20,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "neogfx.hpp"
 #include "app.hpp"
 #include "menu_bar.hpp"
-#include "flow_layout.hpp"
-#include "text_widget.hpp"
+#include "menu_item_widget.hpp"
 
 namespace neogfx
 {
-	menu_bar::menu_bar() : menu(MenuBar)
+	menu_bar::menu_bar() : menu(MenuBar), iLayout(*this)
 	{
 		init();
 	}
 
-	menu_bar::menu_bar(i_widget& aParent) : widget(aParent), menu(MenuBar)
+	menu_bar::menu_bar(i_widget& aParent) : widget(aParent), menu(MenuBar), iLayout(*this)
 	{
 		init();
 	}
 
-	menu_bar::menu_bar(i_layout& aLayout) : widget(aLayout), menu(MenuBar)
+	menu_bar::menu_bar(i_layout& aLayout) : widget(aLayout), menu(MenuBar), iLayout(*this)
 	{
 		init();
 	}
@@ -63,18 +62,10 @@ namespace neogfx
 	void menu_bar::init()
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<flow_layout>(*this));
+		layout().set_margins(neogfx::margins{});
 		item_added([this](item_index aItemIndex)
 		{
-			switch (item(aItemIndex).type())
-			{
-			case i_menu_item::Action:
-				layout().add_item(aItemIndex, std::make_shared<text_widget>(item(aItemIndex).action().menu_text()));
-				break;
-			case i_menu_item::SubMenu:
-				layout().add_item(aItemIndex, std::make_shared<text_widget>(item(aItemIndex).sub_menu().title()));
-				break;
-			}
+			layout().add_item(aItemIndex, std::make_shared<menu_item_widget>(*this, item(aItemIndex)));
 		}, this);
 		item_removed([this](item_index aItemIndex)
 		{
