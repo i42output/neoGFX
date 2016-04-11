@@ -97,7 +97,7 @@ namespace neogfx
 			textPosition.y = std::floor((client_rect().height() - textSize.cy) / 2.0);
 			break;
 		case neogfx::alignment::Bottom:
-			textPosition.x = std::floor((client_rect().height() - textSize.cy));
+			textPosition.y = std::floor((client_rect().height() - textSize.cy));
 			break;
 		}
 		if (multi_line())
