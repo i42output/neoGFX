@@ -49,18 +49,15 @@ namespace neogfx
 			}
 			if (previousNonZeroSize)
 				AxisPolicy::x(pos) += AxisPolicy::cx(spacing());
-			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) >= AxisPolicy::cx(availableSpace))
+			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) > AxisPolicy::cx(availableSpace))
 			{
 				AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
 				AxisPolicy::y(pos) += (AxisPolicy::cy(extent) + AxisPolicy::cy(spacing()));
-				AxisPolicy::cy(extent) = 0.0;
 			}
 			else
-			{
 				AxisPolicy::x(pos) += AxisPolicy::cx(itemMinimumSize);
-				AxisPolicy::cy(extent) = std::max(AxisPolicy::cy(extent), AxisPolicy::cy(itemMinimumSize));
-			}
 			AxisPolicy::cx(extent) = std::max(AxisPolicy::cx(extent), AxisPolicy::x(pos));
+			AxisPolicy::cy(extent) = std::max(AxisPolicy::cy(extent), AxisPolicy::cy(itemMinimumSize));
 			previousNonZeroSize = true;
 		}
 		AxisPolicy::cx(result) = AxisPolicy::cx(extent);
@@ -91,7 +88,7 @@ namespace neogfx
 			{
 				if (AxisPolicy::x(pos) != std::numeric_limits<size::dimension_type>::max())
 				{
-					if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMaximumSize) >= AxisPolicy::cx(availableSpace))
+					if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMaximumSize) > AxisPolicy::cx(availableSpace))
 					{
 						AxisPolicy::x(pos) = (AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing()));
 						if (AxisPolicy::cy(itemMaximumSize) != std::numeric_limits<size::dimension_type>::max())
@@ -168,7 +165,7 @@ namespace neogfx
 			}
 			if (previousNonZeroSize)
 				AxisPolicy::x(pos) += AxisPolicy::cx(spacing());
-			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) >= AxisPolicy::cx(availableSpace))
+			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) > AxisPolicy::cx(availableSpace))
 			{
 				rows.add_item(std::make_shared<typename AxisPolicy::major_layout>());
 				rows.get_layout(rows.item_count() - 1).add_item(item);
