@@ -34,6 +34,7 @@ namespace neogfx
 		menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);
 		menu_item_widget(i_widget& aParent, i_menu& aMenu, i_menu_item& aMenuItem);
 		menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem);
+		~menu_item_widget();
 	public:
 		virtual neogfx::size_policy size_policy() const;
 	public:
@@ -42,8 +43,11 @@ namespace neogfx
 	public:
 		virtual void mouse_entered();
 		virtual void mouse_left();	
+		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	private:
 		void init();
+		virtual void handle_pressed();
 	private:
 		i_menu& iMenu;
 		i_menu_item& iMenuItem;

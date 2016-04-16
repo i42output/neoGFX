@@ -75,24 +75,27 @@ int main(int argc, char* argv[])
 		ng::window window(800, 800);
 		ng::vertical_layout layout0(window);
 
+		auto& contactsAction = app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png");
+		auto& muteAction = app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png");
+		muteAction.set_checkable(true);
+		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
+
 		ng::menu_bar menu(layout0);
 		auto& fileMenu = menu.add_sub_menu("File");
 		auto& editMenu = menu.add_sub_menu("Edit");
 		auto& viewMenu = menu.add_sub_menu("View");
+		menu.add_action(contactsAction);
+		menu.add_action(muteAction);
 		auto& windowMenu = menu.add_sub_menu("Window");
 		auto& helpMenu = menu.add_sub_menu("Help");
 
 		ng::toolbar toolbar(layout0);
-		auto& contactsAction = app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png");
 		toolbar.add_action(contactsAction);
 		toolbar.add_action(app.add_action("Add favourite...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#add_favourite.png"));
 		toolbar.add_action(app.add_action("Favourites...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
 		toolbar.add_action(app.add_action("Keywords...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#keyword.png"));
 		toolbar.add_action(app.add_action("Settings...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#settings.png"));
 		toolbar.add_action(app.add_action("Manage Plugins...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#manage_plugins.png"));
-		auto& muteAction = app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png");
-		muteAction.set_checkable(true);
-		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
 		toolbar.add_action(muteAction);
 		toolbar.add_separator();
 		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png");

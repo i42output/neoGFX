@@ -41,6 +41,18 @@ namespace neogfx
 		init();
 	}
 
+	menu_item_widget::~menu_item_widget()
+	{
+		if (iMenuItem.type() == i_menu_item::Action)
+		{
+			iMenuItem.action().changed.unsubscribe(this);
+			iMenuItem.action().checked.unsubscribe(this);
+			iMenuItem.action().unchecked.unsubscribe(this);
+			iMenuItem.action().enabled.unsubscribe(this);
+			iMenuItem.action().disabled.unsubscribe(this);
+		}
+	}
+
 	neogfx::size_policy menu_item_widget::size_policy() const
 	{
 		if (widget::has_size_policy())
@@ -75,6 +87,23 @@ namespace neogfx
 		update();
 	}
 
+	void menu_item_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
+	{
+		bool wasCapturing = capturing();
+		widget::mouse_button_released(aButton, aPosition);
+		if (wasCapturing && client_rect().contains(aPosition))
+		{
+			if (aButton == mouse_button::Left)
+				handle_pressed();
+		}
+	}
+
+	void menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	{
+		if (aScanCode == ScanCode_SPACE)
+			handle_pressed();
+	}
+
 	void menu_item_widget::init()
 	{
 		set_margins(neogfx::margins{});
@@ -86,12 +115,37 @@ namespace neogfx
 			iIcon.set_fixed_size(size{});
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
-			iIcon.set_image(iMenuItem.action().image());
-			iText.set_text(iMenuItem.action().menu_text());
+			auto action_changed = [this]()
+			{
+				iIcon.set_image(iMenuItem.action().is_unchecked() ? iMenuItem.action().image() : iMenuItem.action().checked_image());
+				iIcon.enable(iMenuItem.action().is_enabled());
+				if (!iIcon.image().is_empty())
+					iIcon.set_fixed_size(size{ 16.0, 16.0 });
+				else if (iMenu.type() == i_menu::MenuBar)
+					iIcon.set_fixed_size(size{});
+				iText.set_text(iMenuItem.action().menu_text());
+				iText.enable(iMenuItem.action().is_enabled());
+			};
+			iMenuItem.action().changed(action_changed, this);
+			iMenuItem.action().checked(action_changed, this);
+			iMenuItem.action().unchecked(action_changed, this);
+			iMenuItem.action().enabled(action_changed, this);
+			iMenuItem.action().disabled(action_changed, this);
+			action_changed();
 		}
 		else
 		{
 			iText.set_text(iMenuItem.sub_menu().title());
+		}
+	}
+
+	void menu_item_widget::handle_pressed()
+	{
+		if (iMenuItem.type() == i_menu_item::Action)
+		{
+			iMenuItem.action().triggered.trigger();
+			if (iMenuItem.action().is_checkable())
+				iMenuItem.action().toggle();
 		}
 	}
 }
