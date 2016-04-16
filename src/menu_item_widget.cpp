@@ -152,7 +152,7 @@ namespace neogfx
 		}
 		else
 		{
-			auto popupMenu = new popup_menu(*this, iMenuItem.sub_menu());
+			iPopupMenu = std::make_unique<popup_menu>(*this, iMenuItem.sub_menu());
 		}
 	}
 }

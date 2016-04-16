@@ -72,6 +72,7 @@ namespace neogfx
 		virtual void add_widget(i_widget& aWidget);
 		virtual void add_widget(std::shared_ptr<i_widget> aWidget);
 		virtual void remove_widget(i_widget& aWidget);
+		virtual void remove_widgets();
 		virtual const widget_list& children() const;
 		virtual bool has_surface() const;
 		virtual const i_surface& surface() const;

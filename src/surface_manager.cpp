@@ -39,7 +39,20 @@ namespace neogfx
 	{
 		auto existingSurface = iSurfaces.find(&aSurface);
 		if (existingSurface != iSurfaces.end())
+		{
+			for (auto s = iSurfaces.begin(); s != iSurfaces.end();)
+			{
+				if (aSurface.is_owner_of(**s))
+				{
+					auto& childSurface = **s;
+					s = iSurfaces.erase(s);
+					childSurface.close();
+				}
+				else
+					++s;
+			}
 			iSurfaces.erase(existingSurface);
+		}	
 	}
 
 	i_surface& surface_manager::surface_from_handle(void* aHandle)

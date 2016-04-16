@@ -160,7 +160,7 @@ namespace neogfx
 	{
 		release_capture();
 		SDL_GL_DeleteContext(iContext);
-		SDL_DestroyWindow(iHandle);
+		close();
 	}
 
 	void* sdl_window::handle() const
@@ -304,8 +304,10 @@ namespace neogfx
 
 	void sdl_window::close()
 	{
+		event_handler().native_window_closing();
 		SDL_DestroyWindow(iHandle);
 		iHandle = NULL;
+		event_handler().native_window_closed();
 	}
 
 	bool sdl_window::is_active() const
@@ -358,9 +360,7 @@ namespace neogfx
 			switch (aEvent.window.event)
 			{
 			case SDL_WINDOWEVENT_CLOSE:
-				event_handler().native_window_closing();
 				close();
-				event_handler().native_window_closed();
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
 				iExtents = basic_size<decltype(aEvent.window.data1)>{aEvent.window.data1, aEvent.window.data2};

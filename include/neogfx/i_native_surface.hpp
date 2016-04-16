@@ -37,6 +37,8 @@ namespace neogfx
 	public:
 		virtual ~i_native_surface() {}
 	public:
+		virtual void close() = 0;
+	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
 		virtual const vector4& logical_coordinates() const = 0;

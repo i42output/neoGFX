@@ -41,6 +41,12 @@ namespace neogfx
 	public:
 		virtual ~i_surface() {}
 	public:
+		virtual void close() = 0;
+		virtual bool has_parent_surface() const = 0;
+		virtual const i_surface& parent_surface() const = 0;
+		virtual i_surface& parent_surface() = 0;
+		virtual bool is_owner_of(const i_surface& aChildSurface) const = 0;
+	public:
 		virtual neogfx::surface_type surface_type() const = 0;
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;

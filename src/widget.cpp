@@ -108,9 +108,8 @@ namespace neogfx
 
 	widget::~widget()
 	{
+		remove_widgets();
 		{
-			widget_list children;
-			children.swap(iChildren);
 			auto layout = iLayout;
 			iLayout.reset();
 		}
@@ -308,6 +307,17 @@ namespace neogfx
 			}
 		if (has_surface())
 			surface().widget_removed(aWidget);
+	}
+
+	void widget::remove_widgets()
+	{
+		while(!iChildren.empty())
+		{
+			auto child = iChildren.back();
+			iChildren.pop_back();
+			if (has_surface())
+				surface().widget_removed(*child);
+		}
 	}
 
 	const widget::widget_list& widget::children() const

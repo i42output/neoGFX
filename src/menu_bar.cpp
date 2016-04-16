@@ -43,6 +43,7 @@ namespace neogfx
 	{
 		item_added.unsubscribe(this);
 		item_removed.unsubscribe(this);
+		remove_widgets();
 	}
 
 	size_policy menu_bar::size_policy() const

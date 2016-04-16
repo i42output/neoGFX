@@ -28,6 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+	class popup_menu;
+
 	class menu_item_widget : public widget
 	{
 	public:
@@ -54,5 +56,6 @@ namespace neogfx
 		horizontal_layout iLayout;
 		image_widget iIcon;
 		text_widget iText;
+		std::unique_ptr<popup_menu> iPopupMenu;
 	};
 }

@@ -45,14 +45,14 @@ namespace neogfx
 			Default				= Titlebar | Resize | Close
 		};
 	public:
-		window(const video_mode& aVideoMode, uint32_t aStyle = Default);
-		window(const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default);
-		window(dimension aWidth, dimension aHeight, uint32_t aStyle = Default);
-		window(dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default);
-		window(i_widget& aParent, const video_mode& aVideoMode, uint32_t aStyle = Default);
-		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default);
-		window(i_widget& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle = Default);
-		window(i_widget& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default);
+		window(const video_mode& aVideoMode, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(dimension aWidth, dimension aHeight, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const video_mode& aVideoMode, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		~window();
 	public:
 		virtual bool is_root() const;
@@ -70,6 +70,12 @@ namespace neogfx
 		virtual units_e set_units(units_e aUnits) const;
 	public:
 		virtual colour background_colour() const;
+	public:
+		virtual void close();
+		virtual bool has_parent_surface() const;
+		virtual const i_surface& parent_surface() const;
+		virtual i_surface& parent_surface();
+		bool is_owner_of(const i_surface& aChildSurface) const;
 	public:
 		virtual neogfx::surface_type surface_type() const;
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;

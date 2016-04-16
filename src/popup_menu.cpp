@@ -24,12 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(i_menu& aMenu) :
-		window(400, 400, None), iMenu(aMenu)
+		window(400, 400, None, framed_widget::SolidFrame), iMenu(aMenu)
 	{
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, i_menu& aMenu) :
-		window(aParent, 400, 400, None), iMenu(aMenu)
+		window(aParent, 400, 400, None, framed_widget::SolidFrame), iMenu(aMenu)
 	{
 	}
 
