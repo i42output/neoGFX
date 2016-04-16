@@ -64,7 +64,7 @@ namespace neogfx
 		AxisPolicy::cy(result) = AxisPolicy::y(pos) + AxisPolicy::cy(extent);
 		AxisPolicy::cx(result) += AxisPolicy::cx(margins());
 		AxisPolicy::cy(result) += AxisPolicy::cy(margins());
-		AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
+		AxisPolicy::cx(result) = std::max(std::min(AxisPolicy::cx(result), AxisPolicy::cx(*aAvailableSpace)), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
 		AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
 		return result;
 	}
