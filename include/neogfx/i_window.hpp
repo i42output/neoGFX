@@ -21,11 +21,15 @@
 
 #include "neogfx.hpp"
 #include "i_surface.hpp"
+#include "i_native_window.hpp"
 
 namespace neogfx
 {
 	class i_window : public i_surface
 	{
+	public:
+		virtual const i_native_window& native_surface() const = 0;
+		virtual i_native_window& native_surface() = 0;
 	public:
 		virtual void activate() = 0;
 		virtual void counted_enable(bool aEnable) = 0;

@@ -82,9 +82,9 @@ namespace neogfx
 		init();
 	}
 
-	window::window(window& aParent, const video_mode& aVideoMode, uint32_t aStyle) :
-		scrollable_widget(static_cast<i_widget&>(aParent), framed_widget::NoFrame),
-		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, *aParent.iNativeWindow, aVideoMode, app::instance().name(), aStyle)), 
+	window::window(i_widget& aParent, const video_mode& aVideoMode, uint32_t aStyle) :
+		scrollable_widget(framed_widget::NoFrame),
+		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, app::instance().name(), aStyle)),
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
@@ -93,12 +93,13 @@ namespace neogfx
 		iCapturingWidget(0),
 		iFocusedWidget(0)
 	{
+		set_parent(aParent.ultimate_ancestor());
 		init();
 	}
 
-	window::window(window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
-		scrollable_widget(static_cast<i_widget&>(aParent), framed_widget::NoFrame),
-		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, *aParent.iNativeWindow, aVideoMode, aWindowTitle, aStyle)), 
+	window::window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
+		scrollable_widget(framed_widget::NoFrame),
+		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, aWindowTitle, aStyle)),
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
@@ -107,12 +108,13 @@ namespace neogfx
 		iCapturingWidget(0),
 		iFocusedWidget(0)
 	{
+		set_parent(aParent.ultimate_ancestor());
 		init();
 	}
 
-	window::window(window& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle) :
-		scrollable_widget(static_cast<i_widget&>(aParent), framed_widget::NoFrame),
-		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, *aParent.iNativeWindow, video_mode(static_cast<uint32_t>(aWidth), static_cast<uint32_t>(aHeight)), app::instance().name(), aStyle)), 
+	window::window(i_widget& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle) :
+		scrollable_widget(framed_widget::NoFrame),
+		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), video_mode(static_cast<uint32_t>(aWidth), static_cast<uint32_t>(aHeight)), app::instance().name(), aStyle)),
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
@@ -121,12 +123,13 @@ namespace neogfx
 		iCapturingWidget(0),
 		iFocusedWidget(0)
 	{
+		set_parent(aParent.ultimate_ancestor());
 		init();
 	}
 
-	window::window(window& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle) :
-		scrollable_widget(static_cast<i_widget&>(aParent), framed_widget::NoFrame),
-		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, *aParent.iNativeWindow, video_mode(static_cast<uint32_t>(aWidth), static_cast<uint32_t>(aHeight)), aWindowTitle, aStyle)), 
+	window::window(i_widget& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle) :
+		scrollable_widget(framed_widget::NoFrame),
+		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), video_mode(static_cast<uint32_t>(aWidth), static_cast<uint32_t>(aHeight)), aWindowTitle, aStyle)),
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
@@ -135,6 +138,7 @@ namespace neogfx
 		iCapturingWidget(0),
 		iFocusedWidget(0)
 	{
+		set_parent(aParent.ultimate_ancestor());
 		init();
 	}
 
@@ -266,12 +270,12 @@ namespace neogfx
 		return graphics_context(aWidget);
 	}
 
-	const i_native_surface& window::native_surface() const
+	const i_native_window& window::native_surface() const
 	{
 		return *iNativeWindow;
 	}
 
-	i_native_surface& window::native_surface()
+	i_native_window& window::native_surface()
 	{
 		return *iNativeWindow;
 	}

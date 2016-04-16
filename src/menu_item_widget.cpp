@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "neogfx.hpp"
 #include "menu_item_widget.hpp"
 #include "i_menu.hpp"
+#include "popup_menu.hpp"
 
 namespace neogfx
 {
@@ -148,6 +149,10 @@ namespace neogfx
 				if (iMenuItem.action().is_checkable())
 					iMenuItem.action().toggle();
 			}
+		}
+		else
+		{
+			auto popupMenu = new popup_menu(*this, iMenuItem.sub_menu());
 		}
 	}
 }

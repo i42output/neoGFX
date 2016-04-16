@@ -149,7 +149,7 @@ namespace neogfx
 		}
 #ifdef WIN32
 		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS);
-		SetParent(static_cast<HWND>(native_handle()), static_cast<HWND>(aParent.native_handle()));
+		SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(aParent.native_handle()));
 #endif
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);

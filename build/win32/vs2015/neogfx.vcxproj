@@ -94,6 +94,7 @@
     <ClInclude Include="..\..\..\include\neogfx\menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\menu_item_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\popup_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sdl_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\check_box.hpp" />
@@ -230,6 +231,7 @@
     <ClCompile Include="..\..\..\src\menu_bar.cpp" />
     <ClCompile Include="..\..\..\src\menu_item.cpp" />
     <ClCompile Include="..\..\..\src\menu_item_widget.cpp" />
+    <ClCompile Include="..\..\..\src\popup_menu.cpp" />
     <ClCompile Include="..\..\..\src\sdl_basic_services.cpp" />
     <ClCompile Include="..\..\..\src\button.cpp" />
     <ClCompile Include="..\..\..\src\check_box.cpp" />

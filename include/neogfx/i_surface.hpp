@@ -23,11 +23,10 @@
 #include <neolib/variant.hpp>
 #include "geometry.hpp"
 #include "graphics_context.hpp"
-#include "mouse.hpp"
+#include "i_native_surface.hpp"
 
 namespace neogfx
 {
-	class i_native_surface;
 	class i_widget;
 
 	enum class surface_type

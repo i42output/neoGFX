@@ -20,13 +20,14 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include "i_widget.hpp"
-#include "i_surface.hpp"
 #include "mouse.hpp"
+#include "event.hpp"
+#include "graphics_context.hpp"
 
 namespace neogfx
 {
 	class i_native_graphics_context;
+	class i_widget;
 
 	class i_native_surface
 	{

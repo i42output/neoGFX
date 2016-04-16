@@ -49,10 +49,10 @@ namespace neogfx
 		window(const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default);
 		window(dimension aWidth, dimension aHeight, uint32_t aStyle = Default);
 		window(dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default);
-		window(window& aParent, const video_mode& aVideoMode, uint32_t aStyle = Default);
-		window(window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default);
-		window(window& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle = Default);
-		window(window& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default);
+		window(i_widget& aParent, const video_mode& aVideoMode, uint32_t aStyle = Default);
+		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default);
+		window(i_widget& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle = Default);
+		window(i_widget& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default);
 		~window();
 	public:
 		virtual bool is_root() const;
@@ -81,8 +81,8 @@ namespace neogfx
 		virtual void render_surface();
 		virtual graphics_context create_graphics_context() const;
 		virtual graphics_context create_graphics_context(const i_widget& aWidget) const;
-		virtual const i_native_surface& native_surface() const;
-		virtual i_native_surface& native_surface();
+		virtual const i_native_window& native_surface() const;
+		virtual i_native_window& native_surface();
 		virtual bool destroyed() const;
 	public:
 		virtual point surface_position() const;

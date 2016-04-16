@@ -41,9 +41,13 @@ namespace neogfx
 		return std::unique_ptr<i_native_window>(new sdl_window(*this, aSurfaceManager, aEventHandler, aVideoMode, aWindowTitle, aStyle));
 	}
 
-	std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle)
+	std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle)
 	{
-		return std::unique_ptr<i_native_window>(new sdl_window(*this, aSurfaceManager, aEventHandler, static_cast<sdl_window&>(aParent), aVideoMode, aWindowTitle, aStyle));
+		sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
+		if (parent != 0)
+			return std::unique_ptr<i_native_window>(new sdl_window(*this, aSurfaceManager, aEventHandler, *parent, aVideoMode, aWindowTitle, aStyle));
+		else
+			return create_window(aSurfaceManager, aEventHandler, aVideoMode, aWindowTitle, aStyle);
 	}
 
 	void sdl_renderer::render_now()

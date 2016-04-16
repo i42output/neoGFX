@@ -1,4 +1,4 @@
-// menu_bar.hpp
+// popup_menu.hpp
 /*
 neogfx C++ GUI Library
 Copyright(C) 2016 Leigh Johnston
@@ -20,26 +20,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "neogfx.hpp"
-#include "widget.hpp"
-#include "menu.hpp"
-#include "flow_layout.hpp"
+#include "window.hpp"
+#include "i_menu.hpp"
 
 namespace neogfx
 {
-	class menu_bar : public widget, public menu
+	class popup_menu : public window
 	{
 	public:
-		menu_bar();
-		menu_bar(i_widget& aParent);
-		menu_bar(i_layout& aLayout);
-		~menu_bar();
+		popup_menu(i_menu& aMenu);
+		popup_menu(i_widget& aParent, i_menu& aMenu);
+		~popup_menu();
 	public:
 		virtual neogfx::size_policy size_policy() const;	
 	public:
-		virtual bool visible() const;
+		virtual colour background_colour() const;
 	private:
 		void init();
 	private:
-		flow_layout iLayout;
+		i_menu& iMenu;
 	};
 }

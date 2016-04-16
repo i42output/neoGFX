@@ -161,21 +161,26 @@ namespace neogfx
 
 	void widget::set_parent(i_widget& aParent)
 	{
-		bool onSurface = has_surface();
-		if (onSurface && &surface() != &aParent.surface())
+		if (!is_root())
 		{
-			surface().widget_removed(*this);
-			onSurface = false;
+			bool onSurface = has_surface();
+			if (onSurface && &surface() != &aParent.surface())
+			{
+				surface().widget_removed(*this);
+				onSurface = false;
+			}
+			iParent = &aParent;
+			if (!onSurface && has_surface())
+				surface().widget_added(*this);
 		}
-		iParent = &aParent;
-		if (!onSurface && has_surface())
-			surface().widget_added(*this);
+		else
+			iParent = &aParent;
 		parent_changed();
 	}
 
 	void widget::parent_changed()
 	{
-		if (has_managing_layout())
+		if (!is_root() && has_managing_layout())
 			managing_layout().layout_items(true);
 	}
 
