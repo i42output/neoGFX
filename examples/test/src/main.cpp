@@ -76,6 +76,10 @@ int main(int argc, char* argv[])
 		ng::vertical_layout layout0(window);
 
 		auto& contactsAction = app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png");
+		contactsAction.triggered([]()
+		{
+			ng::app::instance().change_style("Keypad").set_colour(ng::colour::White);
+		});
 		auto& muteAction = app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png");
 		muteAction.set_checkable(true);
 		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");

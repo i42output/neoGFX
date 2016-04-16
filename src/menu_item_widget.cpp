@@ -118,13 +118,12 @@ namespace neogfx
 			auto action_changed = [this]()
 			{
 				iIcon.set_image(iMenuItem.action().is_unchecked() ? iMenuItem.action().image() : iMenuItem.action().checked_image());
-				iIcon.enable(iMenuItem.action().is_enabled());
 				if (!iIcon.image().is_empty())
 					iIcon.set_fixed_size(size{ 16.0, 16.0 });
 				else if (iMenu.type() == i_menu::MenuBar)
 					iIcon.set_fixed_size(size{});
 				iText.set_text(iMenuItem.action().menu_text());
-				iText.enable(iMenuItem.action().is_enabled());
+				enable(iMenuItem.action().is_enabled());
 			};
 			iMenuItem.action().changed(action_changed, this);
 			iMenuItem.action().checked(action_changed, this);
@@ -143,9 +142,12 @@ namespace neogfx
 	{
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
-			iMenuItem.action().triggered.trigger();
-			if (iMenuItem.action().is_checkable())
-				iMenuItem.action().toggle();
+			if (iMenuItem.action().is_enabled())
+			{
+				iMenuItem.action().triggered.trigger();
+				if (iMenuItem.action().is_checkable())
+					iMenuItem.action().toggle();
+			}
 		}
 	}
 }
