@@ -49,10 +49,14 @@ namespace neogfx
 		window(const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		window(dimension aWidth, dimension aHeight, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		window(dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const point& aPosition, const size& aDimensions, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		window(i_widget& aParent, const video_mode& aVideoMode, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		window(i_widget& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		window(i_widget& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const point& aPosition, const size& aDimensions, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		~window();
 	public:
 		virtual bool is_root() const;

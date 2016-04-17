@@ -34,6 +34,8 @@ namespace neogfx
 		event<item_index> item_added;
 		event<item_index> item_removed;
 		event<item_index> item_changed;
+		event<> opened;
+		event<> closed;
 		event<i_menu&> open_sub_menu;
 	public:
 		enum type_e
@@ -44,6 +46,7 @@ namespace neogfx
 		typedef uint32_t item_index;
 	public:
 		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_menu::bad_item_index") {} };
+		struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_menu::item_not_found") {} };
 	public:
 		virtual type_e type() const = 0;
 		virtual const std::string& title() const = 0;
@@ -57,5 +60,9 @@ namespace neogfx
 		virtual void insert_action(item_index aItemIndex, i_action& aAction) = 0;
 		virtual void insert_separator(item_index aItemIndex) = 0;
 		virtual void remove_item(item_index aItemIndex) = 0;
+		virtual item_index find_item(const i_menu& aSubMenu) const = 0;
+		virtual bool is_open() const = 0;
+		virtual void open() = 0;
+		virtual void close() = 0;
 	};
 }

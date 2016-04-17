@@ -82,6 +82,34 @@ namespace neogfx
 		init();
 	}
 
+	window::window(const point& aPosition, const size& aDimensions, uint32_t aStyle, framed_widget::style_e aFrameStyle) :
+		scrollable_widget(aFrameStyle),
+		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aPosition, aDimensions, app::instance().name(), aStyle)),
+		iStyle(aStyle),
+		iUnits(UnitsPixels),
+		iCountedEnable(0),
+		iClosing(false),
+		iEnteredWidget(0),
+		iCapturingWidget(0),
+		iFocusedWidget(0)
+	{
+		init();
+	}
+
+	window::window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle, framed_widget::style_e aFrameStyle) :
+		scrollable_widget(aFrameStyle),
+		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aPosition, aDimensions, aWindowTitle, aStyle)),
+		iStyle(aStyle),
+		iUnits(UnitsPixels),
+		iCountedEnable(0),
+		iClosing(false),
+		iEnteredWidget(0),
+		iCapturingWidget(0),
+		iFocusedWidget(0)
+	{
+		init();
+	}
+
 	window::window(i_widget& aParent, const video_mode& aVideoMode, uint32_t aStyle, framed_widget::style_e aFrameStyle) :
 		scrollable_widget(aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, app::instance().name(), aStyle)),
@@ -135,6 +163,36 @@ namespace neogfx
 		iCountedEnable(0), 
 		iClosing(false), 
 		iEnteredWidget(0), 
+		iCapturingWidget(0),
+		iFocusedWidget(0)
+	{
+		set_parent(aParent.ultimate_ancestor());
+		init();
+	}
+
+	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, uint32_t aStyle, framed_widget::style_e aFrameStyle) :
+		scrollable_widget(aFrameStyle),
+		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aPosition, aDimensions, app::instance().name(), aStyle)),
+		iStyle(aStyle),
+		iUnits(UnitsPixels),
+		iCountedEnable(0),
+		iClosing(false),
+		iEnteredWidget(0),
+		iCapturingWidget(0),
+		iFocusedWidget(0)
+	{
+		set_parent(aParent.ultimate_ancestor());
+		init();
+	}
+
+	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle, framed_widget::style_e aFrameStyle) :
+		scrollable_widget(aFrameStyle),
+		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle)),
+		iStyle(aStyle),
+		iUnits(UnitsPixels),
+		iCountedEnable(0),
+		iClosing(false),
+		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0)
 	{

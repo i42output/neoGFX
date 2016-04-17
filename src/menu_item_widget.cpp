@@ -44,6 +44,11 @@ namespace neogfx
 
 	menu_item_widget::~menu_item_widget()
 	{
+		if (iMenuItem.type() == i_menu_item::SubMenu)
+		{
+			iMenuItem.sub_menu().opened.unsubscribe(this);
+			iMenuItem.sub_menu().closed.unsubscribe(this);
+		}
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
 			iMenuItem.action().changed.unsubscribe(this);
@@ -58,13 +63,13 @@ namespace neogfx
 	{
 		if (widget::has_size_policy())
 			return widget::size_policy();
-		return neogfx::size_policy::Minimum;
+		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
 	}
 
 	void menu_item_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
 		widget::paint_non_client(aGraphicsContext);
-		if (enabled() && (entered() || capturing()))
+		if (enabled() && (entered() || capturing()) || (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open()))
 		{
 			colour background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
 			background.set_alpha(0x80);
@@ -105,6 +110,11 @@ namespace neogfx
 			handle_pressed();
 	}
 
+	point menu_item_widget::sub_menu_position() const
+	{
+		return window_rect().bottom_left() + surface().surface_position();
+	}
+
 	void menu_item_widget::init()
 	{
 		set_margins(neogfx::margins{});
@@ -135,6 +145,8 @@ namespace neogfx
 		}
 		else
 		{
+			iMenuItem.sub_menu().opened([this]() {update(); }, this);
+			iMenuItem.sub_menu().closed([this]() {update(); }, this);
 			iText.set_text(iMenuItem.sub_menu().title());
 		}
 	}

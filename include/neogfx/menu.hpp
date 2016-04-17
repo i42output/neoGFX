@@ -46,10 +46,15 @@ namespace neogfx
 		virtual void insert_action(item_index aItemIndex, i_action& aAction);
 		virtual void insert_separator(item_index aItemIndex);
 		virtual void remove_item(item_index aItemIndex);
+		virtual item_index find_item(const i_menu& aSubMenu) const;
+		virtual bool is_open() const;
+		virtual void open();
+		virtual void close();
 	private:
 		type_e iType;
 		std::string iTitle;
 		item_list iItems;
 		action iSeparator;
+		uint32_t iOpenCount;
 	};
 }

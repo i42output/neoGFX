@@ -29,8 +29,8 @@ namespace neogfx
 	class popup_menu : public window
 	{
 	public:
-		popup_menu(i_menu& aMenu);
-		popup_menu(i_widget& aParent, i_menu& aMenu);
+		popup_menu(const point& aPosition, i_menu& aMenu);
+		popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu);
 		~popup_menu();
 	public:
 		virtual neogfx::size_policy size_policy() const;	

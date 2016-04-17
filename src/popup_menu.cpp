@@ -24,14 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	popup_menu::popup_menu(i_menu& aMenu) :
-		window(0, 0, None, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
+	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu) :
+		window(aPosition, size{}, None, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
 
-	popup_menu::popup_menu(i_widget& aParent, i_menu& aMenu) :
-		window(aParent, 0, 0, None, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
+	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu) :
+		window(aParent, aPosition, size{}, None, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
@@ -41,6 +41,7 @@ namespace neogfx
 		iMenu.item_added.unsubscribe(this);
 		iMenu.item_removed.unsubscribe(this);
 		iMenu.item_changed.unsubscribe(this);
+		iMenu.close();
 	}
 
 	size_policy popup_menu::size_policy() const
@@ -61,6 +62,7 @@ namespace neogfx
 
 	void popup_menu::init()
 	{
+		iMenu.open();
 		iMenu.item_added([this](i_menu::item_index aIndex)
 		{
 			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(aIndex)));

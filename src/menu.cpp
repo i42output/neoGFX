@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	menu::menu(type_e aType, const std::string& aTitle) : iType(aType), iTitle(aTitle)
+	menu::menu(type_e aType, const std::string& aTitle) : iType(aType), iTitle(aTitle), iOpenCount(0)
 	{
 	}
 
@@ -100,5 +100,30 @@ namespace neogfx
 	{
 		iItems.erase(iItems.begin() + aItemIndex);
 		item_removed.trigger(aItemIndex);
+	}
+
+	menu::item_index menu::find_item(const i_menu& aSubMenu) const
+	{
+		for (item_index i = 0; i < iItems.size(); ++i)
+			if (iItems[i]->type() == i_menu_item::SubMenu && &iItems[i]->sub_menu() == &aSubMenu)
+				return i;
+		throw item_not_found();
+	}
+
+	bool menu::is_open() const
+	{
+		return iOpenCount != 0;
+	}
+
+	void menu::open()
+	{
+		if (++iOpenCount == 1)
+			opened.trigger();
+	}
+
+	void menu::close()
+	{
+		if (--iOpenCount == 0)
+			closed.trigger();
 	}
 }

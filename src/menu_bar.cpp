@@ -82,7 +82,8 @@ namespace neogfx
 		}, this);
 		open_sub_menu([this](i_menu& aSubMenu)
 		{
-			iOpenSubMenu = std::make_unique<popup_menu>(*this, aSubMenu);
+			auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
+			iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
 		}, this);
 	}
 }
