@@ -27,7 +27,7 @@ class my_item_model : public ng::basic_default_item_model<void*, 5>, public ng::
 public:
 	my_item_model()
 	{
-		set_column_heading_text(0, "One");
+		set_column_heading_text(0, "TOne");
 		set_column_heading_text(1, "Two");
 		set_column_heading_text(2, "Three");
 		set_column_heading_text(3, "Four");

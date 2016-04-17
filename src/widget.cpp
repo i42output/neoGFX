@@ -705,7 +705,7 @@ namespace neogfx
 	{
 		if ((!is_root() && !has_parent()) || !has_surface() || surface().destroyed() || hidden() || layout_items_in_progress())
 			return;
-		update(aIncludeNonClient ? window_rect() - origin() - client_rect().top_left() : client_rect());
+		update(aIncludeNonClient ? rect{ origin(true) - origin(), extents() } : client_rect());
 	}
 
 	void widget::update(const rect& aUpdateRect)
@@ -818,9 +818,9 @@ namespace neogfx
 		{
 			if (surface().native_surface().using_frame_buffer())
 				for (const auto& ur : iUpdateRects)
-					aGraphicsContext.fill_solid_rect(ur, background_colour());
+					aGraphicsContext.fill_solid_rect(ur + (origin() - origin(true)), background_colour());
 			else
-				aGraphicsContext.fill_solid_rect(client_rect(), background_colour());
+				aGraphicsContext.fill_solid_rect(client_rect() + (origin() - origin(true)), background_colour());
 		}
 	}
 
