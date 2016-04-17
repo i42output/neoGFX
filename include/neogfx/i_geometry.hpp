@@ -32,7 +32,8 @@ namespace neogfx
 			Fixed,
 			Minimum,
 			Maximum,
-			Expanding
+			Expanding,
+			Manual
 		};
 	public:
 		size_policy(size_policy_e aSizePolicy) :

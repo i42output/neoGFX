@@ -69,6 +69,10 @@ namespace neogfx
 		virtual units_e units() const;
 		virtual units_e set_units(units_e aUnits) const;
 	public:
+		virtual void resized();
+	public:
+		virtual neogfx::size_policy size_policy() const;
+	public:
 		virtual colour background_colour() const;
 	public:
 		virtual void close();

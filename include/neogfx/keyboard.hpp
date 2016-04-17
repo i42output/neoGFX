@@ -583,7 +583,11 @@ namespace neogfx
 
 	class key_sequence
 	{
-		/* todo */
+	public:
+		key_sequence(const std::string& aSequence)
+		{
+			/* todo */
+		}
 	public:
 		bool operator==(const key_sequence& aRhs) const
 		{

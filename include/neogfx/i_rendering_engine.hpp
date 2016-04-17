@@ -70,6 +70,7 @@ namespace neogfx
 		struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::i_rendering_engine::shader_program_error: " + aError) {} };
 	public:
 		virtual void initialize() = 0;
+		virtual void* create_context(i_native_surface& aSurface) = 0; 
 		virtual const i_screen_metrics& screen_metrics() const = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = window::Default) = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = window::Default) = 0;

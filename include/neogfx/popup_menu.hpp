@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "neogfx.hpp"
 #include "window.hpp"
 #include "i_menu.hpp"
+#include "vertical_layout.hpp"
 
 namespace neogfx
 {
@@ -39,5 +40,6 @@ namespace neogfx
 		void init();
 	private:
 		i_menu& iMenu;
+		vertical_layout iLayout;
 	};
 }

@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+	class popup_menu;
+
 	class menu_bar : public widget, public menu
 	{
 	public:
@@ -41,5 +43,6 @@ namespace neogfx
 		void init();
 	private:
 		flow_layout iLayout;
+		std::unique_ptr<popup_menu> iOpenSubMenu;
 	};
 }

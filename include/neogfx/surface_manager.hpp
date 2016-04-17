@@ -32,7 +32,19 @@ namespace neogfx
 	public:
 		struct already_rendering_surfaces : std::logic_error { already_rendering_surfaces() : std::logic_error("neogfx::surface_manager::already_rendering_surfaces") {} };
 	private:
-		typedef std::set<i_surface*> surface_list;
+		struct surface_sorter
+		{
+			bool operator()(i_surface* left, i_surface* right) const
+			{
+				if (left->is_owner_of(*right))
+					return true;
+				else if (right->is_owner_of(*left))
+					return false;
+				else
+					return left < right;
+			}
+		};
+		typedef std::set<i_surface*, surface_sorter> surface_list;
 	public:
 		surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine);
 	public:

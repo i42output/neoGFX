@@ -56,25 +56,26 @@ namespace neogfx
 		virtual const i_texture& image() const = 0;
 		virtual const i_texture& checked_image() const = 0;
 		virtual const optional_key_sequence& short_cut() const = 0;
-		virtual void set_enabled() = 0;
-		virtual void set_disabled() = 0;
-		virtual void set_checkable(bool aCheckable) = 0;
-		virtual void set_checked() = 0;
-		virtual void set_unchecked() = 0;
-		virtual void set_group(uint32_t aGroup) = 0;
-		virtual void set_separator(bool aIsSeparator) = 0;
-		virtual void set_text(const optional_text& aText = optional_text()) = 0;
-		virtual void set_menu_text(const optional_text& aMenuText = optional_text()) = 0;
-		virtual void set_button_text(const optional_text& aButtonText = optional_text()) = 0;
-		virtual void set_tool_tip_text(const optional_text& aToolTipText = optional_text()) = 0;
-		virtual void set_statis_tip_text(const optional_text& aStatusTipText = optional_text()) = 0;
-		virtual void set_image(const std::string& aUri) = 0;
-		virtual void set_image(const i_image& aImage) = 0;
-		virtual void set_image(const i_texture& aTexture) = 0;
-		virtual void set_checked_image(const std::string& aUri) = 0;
-		virtual void set_checked_image(const i_image& aImage) = 0;
-		virtual void set_checked_image(const i_texture& aTexture) = 0;
-		virtual void set_short_cut(const optional_key_sequence& aShortCut) = 0;
+		virtual i_action& set_enabled() = 0;
+		virtual i_action& set_disabled() = 0;
+		virtual i_action& set_checkable(bool aCheckable) = 0;
+		virtual i_action& set_checked() = 0;
+		virtual i_action& set_unchecked() = 0;
+		virtual i_action& set_group(uint32_t aGroup) = 0;
+		virtual i_action& set_separator(bool aIsSeparator) = 0;
+		virtual i_action& set_text(const optional_text& aText = optional_text()) = 0;
+		virtual i_action& set_menu_text(const optional_text& aMenuText = optional_text()) = 0;
+		virtual i_action& set_button_text(const optional_text& aButtonText = optional_text()) = 0;
+		virtual i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text()) = 0;
+		virtual i_action& set_statis_tip_text(const optional_text& aStatusTipText = optional_text()) = 0;
+		virtual i_action& set_image(const std::string& aUri) = 0;
+		virtual i_action& set_image(const i_image& aImage) = 0;
+		virtual i_action& set_image(const i_texture& aTexture) = 0;
+		virtual i_action& set_checked_image(const std::string& aUri) = 0;
+		virtual i_action& set_checked_image(const i_image& aImage) = 0;
+		virtual i_action& set_checked_image(const i_texture& aTexture) = 0;
+		virtual i_action& set_short_cut(const optional_key_sequence& aShortCut) = 0;
+		virtual i_action& set_short_cut(const std::string& aShortCut) = 0;
 	public:
 		void toggle()
 		{

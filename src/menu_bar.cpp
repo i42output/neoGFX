@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "app.hpp"
 #include "menu_bar.hpp"
 #include "menu_item_widget.hpp"
+#include "popup_menu.hpp"
 
 namespace neogfx
 {
@@ -43,6 +44,7 @@ namespace neogfx
 	{
 		item_added.unsubscribe(this);
 		item_removed.unsubscribe(this);
+		open_sub_menu.unsubscribe(this);
 		remove_widgets();
 	}
 
@@ -77,6 +79,10 @@ namespace neogfx
 				w.parent().remove_widget(w);
 			}
 			layout().remove_item(aItemIndex);
+		}, this);
+		open_sub_menu([this](i_menu& aSubMenu)
+		{
+			iOpenSubMenu = std::make_unique<popup_menu>(*this, aSubMenu);
 		}, this);
 	}
 }

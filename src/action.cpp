@@ -166,54 +166,61 @@ namespace neogfx
 		return iShortCut;
 	}
 
-	void action::set_enabled()
+	i_action& action::set_enabled()
 	{
 		set_enabled(true);
+		return *this;
 	}
 
-	void action::set_disabled()
+	i_action& action::set_disabled()
 	{
 		set_enabled(false);
+		return *this;
 	}
 
-	void action::set_checkable(bool aCheckable)
+	i_action& action::set_checkable(bool aCheckable)
 	{
 		if (iCheckable != aCheckable)
 		{
 			iCheckable = aCheckable;
 			changed.trigger();
 		}
+		return *this;
 	}
 
-	void action::set_checked()
+	i_action& action::set_checked()
 	{
 		set_checked(true);
+		return *this;
 	}
 
-	void action::set_unchecked()
+	i_action& action::set_unchecked()
 	{
 		set_checked(false);
+		return *this;
 	}
 
-	void action::set_group(uint32_t aGroup)
+	i_action& action::set_group(uint32_t aGroup)
 	{
 		if (iGroup != aGroup)
 		{
 			iGroup = aGroup;
 			changed.trigger();
 		}
+		return *this;
 	}
 
-	void action::set_separator(bool aIsSeparator)
+	i_action& action::set_separator(bool aIsSeparator)
 	{
 		if (iSeparator != aIsSeparator)
 		{
 			iSeparator = aIsSeparator;
 			changed.trigger();
 		}
+		return *this;
 	}
 
-	void action::set_text(const optional_text& aText)
+	i_action& action::set_text(const optional_text& aText)
 	{
 		if (iText != aText)
 		{
@@ -222,9 +229,10 @@ namespace neogfx
 				iSeparator = false;
 			changed.trigger();
 		}
+		return *this;
 	}
 
-	void action::set_menu_text(const optional_text& aMenuText)
+	i_action& action::set_menu_text(const optional_text& aMenuText)
 	{
 		if (iMenuText != aMenuText)
 		{
@@ -233,9 +241,10 @@ namespace neogfx
 				iSeparator = false;
 			changed.trigger();
 		}
+		return *this;
 	}
 
-	void action::set_button_text(const optional_text& aButtonText)
+	i_action& action::set_button_text(const optional_text& aButtonText)
 	{
 		if (iButtonText != aButtonText)
 		{
@@ -244,9 +253,10 @@ namespace neogfx
 				iSeparator = false;
 			changed.trigger();
 		}
+		return *this;
 	}
 
-	void action::set_tool_tip_text(const optional_text& aToolTipText)
+	i_action& action::set_tool_tip_text(const optional_text& aToolTipText)
 	{
 		if (iToolTipText != aToolTipText)
 		{
@@ -255,9 +265,10 @@ namespace neogfx
 				iSeparator = false;
 			changed.trigger();
 		}
+		return *this;
 	}
 
-	void action::set_statis_tip_text(const optional_text& aStatusTipText)
+	i_action& action::set_statis_tip_text(const optional_text& aStatusTipText)
 	{
 		if (iStatusTipText != aStatusTipText)
 		{
@@ -266,45 +277,52 @@ namespace neogfx
 				iSeparator = false;
 			changed.trigger();
 		}
+		return *this;
 	}
 
-	void action::set_image(const std::string& aUri)
+	i_action& action::set_image(const std::string& aUri)
 	{
 		set_image(neogfx::image(aUri));
+		return *this;
 	}
 
-	void action::set_image(const i_image& aImage)
+	i_action& action::set_image(const i_image& aImage)
 	{
 		set_image(texture(aImage));
+		return *this;
 	}
 
-	void action::set_image(const i_texture& aTexture)
+	i_action& action::set_image(const i_texture& aTexture)
 	{
 		iTexture = aTexture;
 		if (!iTexture.is_empty() && iSeparator)
 			iSeparator = false;
 		changed.trigger();
+		return *this;
 	}
 
-	void action::set_checked_image(const std::string& aUri)
+	i_action& action::set_checked_image(const std::string& aUri)
 	{
 		set_checked_image(neogfx::image(aUri));
+		return *this;
 	}
 
-	void action::set_checked_image(const i_image& aImage)
+	i_action& action::set_checked_image(const i_image& aImage)
 	{
 		set_checked_image(texture(aImage));
+		return *this;
 	}
 
-	void action::set_checked_image(const i_texture& aTexture)
+	i_action& action::set_checked_image(const i_texture& aTexture)
 	{
 		iCheckedTexture = aTexture;
 		if (!iCheckedTexture.is_empty() && iSeparator)
 			iSeparator = false;
 		changed.trigger();
+		return *this;
 	}
 
-	void action::set_short_cut(const optional_key_sequence& aShortCut)
+	i_action& action::set_short_cut(const optional_key_sequence& aShortCut)
 	{
 		if (iShortCut != aShortCut)
 		{
@@ -313,6 +331,12 @@ namespace neogfx
 				iSeparator = false;
 			changed.trigger();
 		}
+		return *this;
+	}
+
+	i_action& action::set_short_cut(const std::string& aShortCut)
+	{
+		return set_short_cut(key_sequence(aShortCut));
 	}
 
 	void action::set_enabled(bool aEnabled)

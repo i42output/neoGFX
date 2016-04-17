@@ -28,9 +28,6 @@ namespace neogfx
 {
 	class menu : public i_menu
 	{
-	public:
-		event<item_index> item_added;
-		event<item_index> item_removed;
 	private:
 		typedef std::unique_ptr<i_menu_item> item_pointer;
 		typedef std::vector<item_pointer> item_list;

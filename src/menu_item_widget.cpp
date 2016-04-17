@@ -25,19 +25,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	menu_item_widget::menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem) :
-		iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout)
+		iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortCutText(iLayout)
 	{
 		init();
 	}
 
 	menu_item_widget::menu_item_widget(i_widget& aParent, i_menu& aMenu, i_menu_item& aMenuItem) :
-		widget(aParent), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout)
+		widget(aParent), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortCutText(iLayout)
 	{
 		init();
 	}
 
 	menu_item_widget::menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem) :
-		widget(aLayout), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout)
+		widget(aLayout), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortCutText(iLayout)
 	{
 		init();
 	}
@@ -151,8 +151,6 @@ namespace neogfx
 			}
 		}
 		else
-		{
-			iPopupMenu = std::make_unique<popup_menu>(*this, iMenuItem.sub_menu());
-		}
+			iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
 	}
 }

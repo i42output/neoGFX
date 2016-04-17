@@ -210,6 +210,19 @@ namespace neogfx
 		return oldUnits;
 	}
 
+	void window::resized()
+	{
+		resize_surface(widget::extents());
+		scrollable_widget::resized();
+	}
+
+	neogfx::size_policy window::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		return neogfx::size_policy::Manual;
+	}
+
 	colour window::background_colour() const
 	{
 		if (has_background_colour())

@@ -29,6 +29,13 @@ namespace neogfx
 	class i_menu
 	{
 	public:
+		typedef uint32_t item_index;
+	public:
+		event<item_index> item_added;
+		event<item_index> item_removed;
+		event<item_index> item_changed;
+		event<i_menu&> open_sub_menu;
+	public:
 		enum type_e
 		{
 			MenuBar,

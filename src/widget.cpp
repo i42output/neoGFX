@@ -422,11 +422,44 @@ namespace neogfx
 
 	void widget::layout_items(bool aDefer)
 	{
+		if (layout_items_in_progress())
+			return;
 		if (!aDefer)
 		{
 			if (has_layout())
 			{
+				layout_items_started();
+				if (is_root() && size_policy() != neogfx::size_policy::Manual)
+				{
+					size desiredSize = extents();
+					switch (size_policy().horizontal_size_policy())
+					{
+					case neogfx::size_policy::Fixed:
+					case neogfx::size_policy::Minimum:
+						desiredSize.cx = minimum_size(extents()).cx;
+						break;
+					case neogfx::size_policy::Maximum:
+						desiredSize.cx = maximum_size(extents()).cx;
+						break;
+					default:
+						break;
+					}
+					switch (size_policy().vertical_size_policy())
+					{
+					case neogfx::size_policy::Fixed:
+					case neogfx::size_policy::Minimum:
+						desiredSize.cy = minimum_size(extents()).cy;
+						break;
+					case neogfx::size_policy::Maximum:
+						desiredSize.cy = maximum_size(extents()).cy;
+						break;
+					default:
+						break;
+					}
+					resize(desiredSize);
+				}
 				layout().layout_items(client_rect(false).top_left(), client_rect(false).extents());
+				layout_items_completed();
 			}
 		}
 		else if (can_defer_layout())

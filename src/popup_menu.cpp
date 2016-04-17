@@ -19,22 +19,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "neogfx.hpp"
 #include "popup_menu.hpp"
+#include "menu_item_widget.hpp"
 #include "app.hpp"
 
 namespace neogfx
 {
 	popup_menu::popup_menu(i_menu& aMenu) :
-		window(400, 400, None, framed_widget::SolidFrame), iMenu(aMenu)
+		window(0, 0, None, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
 	{
+		init();
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, i_menu& aMenu) :
-		window(aParent, 400, 400, None, framed_widget::SolidFrame), iMenu(aMenu)
+		window(aParent, 0, 0, None, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
 	{
+		init();
 	}
 
 	popup_menu::~popup_menu()
 	{
+		iMenu.item_added.unsubscribe(this);
+		iMenu.item_removed.unsubscribe(this);
+		iMenu.item_changed.unsubscribe(this);
 	}
 
 	size_policy popup_menu::size_policy() const
@@ -55,5 +61,22 @@ namespace neogfx
 
 	void popup_menu::init()
 	{
+		iMenu.item_added([this](i_menu::item_index aIndex)
+		{
+			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(aIndex)));
+			layout_items();
+		}, this);
+		iMenu.item_removed([this](i_menu::item_index aIndex)
+		{
+			iLayout.remove_item(aIndex);
+			layout_items();
+		}, this);
+		iMenu.item_changed([this](i_menu::item_index)
+		{
+			layout_items();
+		}, this);
+		for (i_menu::item_index i = 0; i < iMenu.item_count(); ++i)
+			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(i)));
+		layout_items();
 	}
 }

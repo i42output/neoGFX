@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "horizontal_layout.hpp"
 #include "text_widget.hpp"
 #include "image_widget.hpp"
+#include "spacer.hpp"
 #include "i_menu_item.hpp"
 
 namespace neogfx
@@ -56,6 +57,7 @@ namespace neogfx
 		horizontal_layout iLayout;
 		image_widget iIcon;
 		text_widget iText;
-		std::unique_ptr<popup_menu> iPopupMenu;
+		horizontal_spacer iSpacer;
+		text_widget iShortCutText;
 	};
 }

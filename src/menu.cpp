@@ -80,6 +80,15 @@ namespace neogfx
 	{
 		iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
 		item_added.trigger(aItemIndex);
+		aAction.changed([this, &aAction]()
+		{
+			for (item_index i = 0; i < iItems.size(); ++i)
+				if (&(iItems[i]->action()) == &aAction)
+				{
+					item_changed.trigger(i);
+					return;
+				}
+		});
 	}
 
 	void menu::insert_separator(item_index aItemIndex)

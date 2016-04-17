@@ -65,6 +65,7 @@ namespace neogfx
 	public:
 		virtual void* handle() const;
 		virtual void* native_handle() const;
+		virtual void* native_context() const;
 		virtual point surface_position() const;
 		virtual void move_surface(const point& aPosition);
 		virtual size surface_size() const;

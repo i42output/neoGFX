@@ -84,9 +84,26 @@ int main(int argc, char* argv[])
 		muteAction.set_checkable(true);
 		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
 
+		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png").set_disabled().set_short_cut("Ctrl+X");
+		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png").set_disabled().set_short_cut("Ctrl+C");
+		auto& pasteAction = app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png").set_short_cut("Ctrl+V");
+		auto& pasteAndGoAction = app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png").set_short_cut("Ctrl+Shift+V");
+		auto& deleteAction = app.add_action("Delete").set_short_cut("Del");
+		auto& selectAllAction = app.add_action("Select All").set_short_cut("Ctrl+A");
+
 		ng::menu_bar menu(layout0);
 		auto& fileMenu = menu.add_sub_menu("File");
 		auto& editMenu = menu.add_sub_menu("Edit");
+		editMenu.add_action(app.add_action("Undo").set_short_cut("Ctrl+Z"));
+		editMenu.add_action(app.add_action("Redo").set_short_cut("Ctrl+Y"));
+		editMenu.add_separator();
+		editMenu.add_action(cutAction);
+		editMenu.add_action(copyAction);
+		editMenu.add_action(pasteAction);
+		editMenu.add_action(pasteAndGoAction);
+		editMenu.add_action(deleteAction);
+		editMenu.add_separator();
+		editMenu.add_action(selectAllAction);
 		auto& viewMenu = menu.add_sub_menu("View");
 		menu.add_action(contactsAction);
 		menu.add_action(muteAction);
@@ -102,14 +119,10 @@ int main(int argc, char* argv[])
 		toolbar.add_action(app.add_action("Manage Plugins...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#manage_plugins.png"));
 		toolbar.add_action(muteAction);
 		toolbar.add_separator();
-		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png");
-		cutAction.set_disabled();
 		toolbar.add_action(cutAction);
-		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png");
-		copyAction.set_disabled();
 		toolbar.add_action(copyAction);
-		toolbar.add_action(app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png"));
-		toolbar.add_action(app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png"));
+		toolbar.add_action(pasteAction);
+		toolbar.add_action(pasteAndGoAction);
 
 		ng::tab_page_container tabContainer(layout0);
 

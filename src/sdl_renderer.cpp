@@ -26,14 +26,23 @@
 
 namespace neogfx
 {
-	sdl_renderer::sdl_renderer(i_keyboard& aKeyboard) : iKeyboard(aKeyboard)
+	sdl_renderer::sdl_renderer(i_keyboard& aKeyboard) : iContext(0), iKeyboard(aKeyboard)
 	{
 		SDL_Init(SDL_INIT_VIDEO);
 	}
 
 	sdl_renderer::~sdl_renderer()
 	{
+		if (iContext != 0)
+			SDL_GL_DeleteContext(iContext);
 		SDL_Quit();
+	}
+
+	void* sdl_renderer::create_context(i_native_surface& aSurface)
+	{
+		if (iContext != 0)
+			return iContext;
+		return iContext = SDL_GL_CreateContext(static_cast<SDL_Window*>(aSurface.handle()));
 	}
 
 	std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle)

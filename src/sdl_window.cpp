@@ -110,15 +110,17 @@ namespace neogfx
 			SDL_WINDOW_OPENGL | convert_style(aStyle));
 		if (iHandle == NULL)
 			throw failed_to_create_window(SDL_GetError());
-		iContext = SDL_GL_CreateContext(iHandle);
-		if (iContext == NULL)
+#ifdef WIN32
+		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS);
+		if (aStyle & window::None)
+			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
+#endif
+		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
+		if (iContext == 0)
 		{
 			SDL_DestroyWindow(iHandle);
 			throw failed_to_create_opengl_context(SDL_GetError());
 		}
-#ifdef WIN32
-		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS);
-#endif
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{w, h};
@@ -141,16 +143,19 @@ namespace neogfx
 			SDL_WINDOW_OPENGL | convert_style(aStyle));
 		if (iHandle == NULL)
 			throw failed_to_create_window(SDL_GetError());
-		iContext = SDL_GL_CreateContext(iHandle);
+#ifdef WIN32
+		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS | CS_DROPSHADOW);
+		if (aStyle & window::None)
+			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
+		SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(aParent.native_handle()));
+		SetWindowPos(static_cast<HWND>(native_handle()), NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+#endif
+		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
 		if (iContext == NULL)
 		{
 			SDL_DestroyWindow(iHandle);
 			throw failed_to_create_opengl_context(SDL_GetError());
 		}
-#ifdef WIN32
-		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS);
-		SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(aParent.native_handle()));
-#endif
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
@@ -159,7 +164,6 @@ namespace neogfx
 	sdl_window::~sdl_window()
 	{
 		release_capture();
-		SDL_GL_DeleteContext(iContext);
 		close();
 	}
 
@@ -184,6 +188,11 @@ namespace neogfx
 			throw failed_to_get_window_information(SDL_GetError());
 	}
 
+	void* sdl_window::native_context() const
+	{
+		return iContext;
+	}
+
 	point sdl_window::surface_position() const
 	{
 		int x, y;
@@ -203,8 +212,11 @@ namespace neogfx
 
 	void sdl_window::resize_surface(const size& aSize)
 	{
-		SDL_SetWindowSize(iHandle, static_cast<int>(aSize.cx), static_cast<int>(aSize.cy));
-		iExtents = aSize;
+		if (iExtents != aSize)
+		{
+			SDL_SetWindowSize(iHandle, static_cast<int>(aSize.cx), static_cast<int>(aSize.cy));
+			iExtents = aSize;
+		}
 	}
 
 	point sdl_window::mouse_position() const
