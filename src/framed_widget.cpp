@@ -60,6 +60,15 @@ namespace neogfx
 		return cr;
 	}
 
+	size framed_widget::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		size result = widget::minimum_size(aAvailableSpace);
+		if (!has_minimum_size())
+			result += size{ effective_frame_width() * 2.0 };
+		return result;
+	}
+
+
 	bool framed_widget::transparent_background() const
 	{
 		return false;

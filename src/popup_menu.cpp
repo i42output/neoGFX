@@ -62,6 +62,7 @@ namespace neogfx
 
 	void popup_menu::init()
 	{
+		iLayout.set_margins(neogfx::margins{});
 		iMenu.open();
 		iMenu.item_added([this](i_menu::item_index aIndex)
 		{
