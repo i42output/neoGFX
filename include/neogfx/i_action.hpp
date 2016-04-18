@@ -55,7 +55,7 @@ namespace neogfx
 		virtual std::string statis_tip_text() const = 0;
 		virtual const i_texture& image() const = 0;
 		virtual const i_texture& checked_image() const = 0;
-		virtual const optional_key_sequence& short_cut() const = 0;
+		virtual const optional_key_sequence& shortcut() const = 0;
 		virtual i_action& set_enabled() = 0;
 		virtual i_action& set_disabled() = 0;
 		virtual i_action& set_checkable(bool aCheckable) = 0;
@@ -74,8 +74,8 @@ namespace neogfx
 		virtual i_action& set_checked_image(const std::string& aUri) = 0;
 		virtual i_action& set_checked_image(const i_image& aImage) = 0;
 		virtual i_action& set_checked_image(const i_texture& aTexture) = 0;
-		virtual i_action& set_short_cut(const optional_key_sequence& aShortCut) = 0;
-		virtual i_action& set_short_cut(const std::string& aShortCut) = 0;
+		virtual i_action& set_shortcut(const optional_key_sequence& aShortcut) = 0;
+		virtual i_action& set_shortcut(const std::string& aShortcut) = 0;
 	public:
 		void toggle()
 		{

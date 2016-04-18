@@ -84,18 +84,18 @@ int main(int argc, char* argv[])
 		muteAction.set_checkable(true);
 		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
 
-		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png").set_disabled().set_short_cut("Ctrl+X");
-		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png").set_disabled().set_short_cut("Ctrl+C");
-		auto& pasteAction = app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png").set_short_cut("Ctrl+V");
-		auto& pasteAndGoAction = app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png").set_short_cut("Ctrl+Shift+V");
-		auto& deleteAction = app.add_action("Delete").set_short_cut("Del");
-		auto& selectAllAction = app.add_action("Select All").set_short_cut("Ctrl+A");
+		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png").set_disabled().set_shortcut("Ctrl+X");
+		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png").set_disabled().set_shortcut("Ctrl+C");
+		auto& pasteAction = app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png").set_shortcut("Ctrl+V");
+		auto& pasteAndGoAction = app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
+		auto& deleteAction = app.add_action("Delete").set_shortcut("Del");
+		auto& selectAllAction = app.add_action("Select All").set_shortcut("Ctrl+A");
 
 		ng::menu_bar menu(layout0);
 		auto& fileMenu = menu.add_sub_menu("File");
 		auto& editMenu = menu.add_sub_menu("Edit");
-		editMenu.add_action(app.add_action("Undo").set_short_cut("Ctrl+Z"));
-		editMenu.add_action(app.add_action("Redo").set_short_cut("Ctrl+Y"));
+		editMenu.add_action(app.add_action("Undo").set_shortcut("Ctrl+Z"));
+		editMenu.add_action(app.add_action("Redo").set_shortcut("Ctrl+Y"));
 		editMenu.add_separator();
 		editMenu.add_action(cutAction);
 		editMenu.add_action(copyAction);

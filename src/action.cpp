@@ -161,9 +161,9 @@ namespace neogfx
 		return image();
 	}
 
-	const optional_key_sequence& action::short_cut() const
+	const optional_key_sequence& action::shortcut() const
 	{
-		return iShortCut;
+		return iShortcut;
 	}
 
 	i_action& action::set_enabled()
@@ -322,21 +322,21 @@ namespace neogfx
 		return *this;
 	}
 
-	i_action& action::set_short_cut(const optional_key_sequence& aShortCut)
+	i_action& action::set_shortcut(const optional_key_sequence& aShortcut)
 	{
-		if (iShortCut != aShortCut)
+		if (iShortcut != aShortcut)
 		{
-			iShortCut = aShortCut;
-			if (iShortCut != boost::none && iSeparator)
+			iShortcut = aShortcut;
+			if (iShortcut != boost::none && iSeparator)
 				iSeparator = false;
 			changed.trigger();
 		}
 		return *this;
 	}
 
-	i_action& action::set_short_cut(const std::string& aShortCut)
+	i_action& action::set_shortcut(const std::string& aShortcut)
 	{
-		return set_short_cut(key_sequence(aShortCut));
+		return set_shortcut(key_sequence(aShortcut));
 	}
 
 	void action::set_enabled(bool aEnabled)

@@ -60,6 +60,6 @@ namespace neogfx
 		image_widget iIcon;
 		text_widget iText;
 		horizontal_spacer iSpacer;
-		text_widget iShortCutText;
+		text_widget iShortcutText;
 	};
 }

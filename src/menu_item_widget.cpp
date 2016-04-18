@@ -21,23 +21,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu_item_widget.hpp"
 #include "i_menu.hpp"
 #include "popup_menu.hpp"
+#include "app.hpp"
 
 namespace neogfx
 {
 	menu_item_widget::menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem) :
-		iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortCutText(iLayout)
+		iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortcutText(iLayout)
 	{
 		init();
 	}
 
 	menu_item_widget::menu_item_widget(i_widget& aParent, i_menu& aMenu, i_menu_item& aMenuItem) :
-		widget(aParent), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortCutText(iLayout)
+		widget(aParent), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortcutText(iLayout)
 	{
 		init();
 	}
 
 	menu_item_widget::menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem) :
-		widget(aLayout), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortCutText(iLayout)
+		widget(aLayout), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortcutText(iLayout)
 	{
 		init();
 	}
@@ -69,10 +70,26 @@ namespace neogfx
 	void menu_item_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
 		widget::paint_non_client(aGraphicsContext);
-		if (enabled() && (entered() || capturing()) || (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open()))
+		bool openSubMenu = (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open());
+		if (enabled() && (entered() || capturing()) || openSubMenu)
 		{
-			colour background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
-			background.set_alpha(0x80);
+			colour background;
+			if (openSubMenu)
+			{
+				background = app::instance().current_style().colour().dark() ?
+					app::instance().current_style().colour().darker(0x40) :
+					app::instance().current_style().colour().lighter(0x40);
+				if (background.similar_intensity(app::instance().current_style().colour(), 0.05))
+				{
+					background = app::instance().current_style().selection_colour();
+					background.set_alpha(0x80);
+				}
+			}
+			else
+			{
+				background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
+				background.set_alpha(0x80);
+			}
 			aGraphicsContext.fill_solid_rect(client_rect(), background);
 		}
 	}
@@ -124,6 +141,7 @@ namespace neogfx
 			iIcon.set_fixed_size(size{ 16.0, 16.0 });
 		else
 			iIcon.set_fixed_size(size{});
+		iSpacer.set_minimum_size(size{ 0.0, 0.0 });
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
 			auto action_changed = [this]()
@@ -134,6 +152,8 @@ namespace neogfx
 				else if (iMenu.type() == i_menu::MenuBar)
 					iIcon.set_fixed_size(size{});
 				iText.set_text(iMenuItem.action().menu_text());
+				iShortcutText.set_text(iMenuItem.action().shortcut() != boost::none ? iMenuItem.action().shortcut()->as_text() : std::string());
+				iSpacer.set_minimum_size(size{ iMenuItem.action().shortcut() != boost::none ? 18.0 : 0.0, 0.0 });
 				enable(iMenuItem.action().is_enabled());
 			};
 			iMenuItem.action().changed(action_changed, this);

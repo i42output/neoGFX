@@ -584,7 +584,7 @@ namespace neogfx
 	class key_sequence
 	{
 	public:
-		key_sequence(const std::string& aSequence)
+		key_sequence(const std::string& aSequence) : iText(aSequence)
 		{
 			/* todo */
 		}
@@ -598,6 +598,12 @@ namespace neogfx
 		{
 			return !(*this == aRhs);
 		}
+		const std::string as_text() const
+		{
+			return iText;
+		}
+	private:
+		std::string iText;
 	};
 
 	typedef boost::optional<key_sequence> optional_key_sequence;
