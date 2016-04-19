@@ -41,6 +41,7 @@ namespace neogfx
 		iMenu.item_added.unsubscribe(this);
 		iMenu.item_removed.unsubscribe(this);
 		iMenu.item_changed.unsubscribe(this);
+		iMenu.open_sub_menu.unsubscribe(this);
 		iMenu.close();
 	}
 
@@ -81,5 +82,10 @@ namespace neogfx
 		for (i_menu::item_index i = 0; i < iMenu.item_count(); ++i)
 			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(i)));
 		layout_items();
+		iMenu.open_sub_menu([this](i_menu& aSubMenu)
+		{
+			auto& itemWidget = layout().get_widget<menu_item_widget>(iMenu.find_item(aSubMenu));
+			iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+		}, this);
 	}
 }

@@ -37,9 +37,9 @@ namespace neogfx
 		iName(aName),
 		iQuitWhenLastWindowClosed(true),
 		neolib::io_thread("neogfx::app", true),
-		iBasicServices(new neogfx::sdl_basic_services()),
+		iBasicServices(new neogfx::sdl_basic_services(*this)),
 		iKeyboard(new neogfx::sdl_keyboard()),
-		iRenderingEngine(new neogfx::sdl_renderer(*iKeyboard)),
+		iRenderingEngine(new neogfx::sdl_renderer(*iBasicServices, *iKeyboard)),
 		iSurfaceManager(new neogfx::surface_manager(*iBasicServices, *iRenderingEngine)),
 		iCurrentStyle(iStyles.begin())
 	{
@@ -60,13 +60,13 @@ namespace neogfx
 	catch (std::exception& e)
 	{
 		std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
-		sdl_basic_services().display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, std::string("main: terminating with exception: ") + e.what());
+		sdl_basic_services(*this).display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, std::string("main: terminating with exception: ") + e.what());
 		throw;
 	}
 	catch (...)
 	{
 		std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
-		sdl_basic_services().display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
+		sdl_basic_services(*this).display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
 		throw;
 	}
 

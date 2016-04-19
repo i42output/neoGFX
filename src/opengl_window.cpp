@@ -90,8 +90,6 @@ namespace neogfx
 
 	void opengl_window::invalidate(const rect& aInvalidatedRect)
 	{
-		if (iRendering)
-			throw busy_rendering();
 		if (iInvalidatedRects.find(aInvalidatedRect) == iInvalidatedRects.end())
 			iInvalidatedRects.insert(aInvalidatedRect);
 	}

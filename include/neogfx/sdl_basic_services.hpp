@@ -27,8 +27,13 @@ namespace neogfx
 	class sdl_basic_services : public i_basic_services
 	{
 	public:
+		sdl_basic_services(neolib::io_thread& aAppThread);
+	public:
+		virtual neolib::io_thread& app_thread();
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const;
 		virtual bool has_shared_menu_bar() const;
 		virtual i_shared_menu_bar& shared_menu_bar();
+	private:
+		neolib::io_thread& iAppThread;
 	};
 }

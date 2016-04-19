@@ -96,8 +96,8 @@ namespace neogfx
 
 	void surface_manager::render_surfaces()
 	{
-		if (iRenderingSurfaces)
-			throw already_rendering_surfaces();
+		if (iRenderingSurfaces || iRenderingEngine.creating_window())
+			return;
 		iRenderingSurfaces = true;
 		for (auto& s : iSurfaces)
 			s->render_surface();

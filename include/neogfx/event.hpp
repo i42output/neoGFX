@@ -85,7 +85,7 @@ namespace neogfx
 		}
 		handle operator()(const sink_callback& aSinkCallback, const void* aSinkObject)
 		{
-			return subscribe(aSinkCallback);
+			return subscribe(aSinkCallback, aSinkObject);
 		}
 		void unsubscribe(handle aHandle)
 		{

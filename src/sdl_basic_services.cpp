@@ -25,6 +25,16 @@
 
 namespace neogfx
 {
+	sdl_basic_services::sdl_basic_services(neolib::io_thread& aAppThread) : 
+		iAppThread(aAppThread)
+	{
+	}
+
+	neolib::io_thread& sdl_basic_services::app_thread()
+	{
+		return iAppThread;
+	}
+
 	void sdl_basic_services::display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle) const
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, aTitle.c_str(), aMessage.c_str(), static_cast<SDL_Window*>(aParentWindowHandle));

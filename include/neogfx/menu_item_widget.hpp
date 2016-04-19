@@ -40,6 +40,7 @@ namespace neogfx
 		~menu_item_widget();
 	public:
 		virtual neogfx::size_policy size_policy() const;
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
@@ -54,6 +55,8 @@ namespace neogfx
 		void init();
 		virtual void handle_pressed();
 	private:
+		dimension iGap = 9.0;
+		dimension iIconSize = 16.0;
 		i_menu& iMenu;
 		i_menu_item& iMenuItem;
 		horizontal_layout iLayout;
@@ -61,5 +64,7 @@ namespace neogfx
 		text_widget iText;
 		horizontal_spacer iSpacer;
 		text_widget iShortcutText;
+		boost::optional<std::shared_ptr<neolib::callback_timer>> iSubMenuOpener;
+		mutable boost::optional<std::pair<colour, texture>> iSubMenuArrow;
 	};
 }

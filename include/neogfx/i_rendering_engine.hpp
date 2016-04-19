@@ -76,6 +76,7 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle = window::Default) = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = window::Default) = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_surface& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle = window::Default) = 0;
+		virtual bool creating_window() const = 0;
 		virtual i_font_manager& font_manager() = 0;
 		virtual i_texture_manager& texture_manager() = 0;
 		virtual void activate_shader_program(i_shader_program& aProgram) = 0;

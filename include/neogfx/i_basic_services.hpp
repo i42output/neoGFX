@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <neolib/io_thread.hpp>
 #include "i_shared_menu_bar.hpp"
 
 namespace neogfx
@@ -31,6 +32,7 @@ namespace neogfx
 	public:
 		virtual ~i_basic_services() {}
 	public:
+		virtual neolib::io_thread& app_thread() = 0;
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const = 0;
 		virtual bool has_shared_menu_bar() const = 0;
 		virtual i_shared_menu_bar& shared_menu_bar() = 0;

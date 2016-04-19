@@ -105,6 +105,22 @@ int main(int argc, char* argv[])
 		editMenu.add_separator();
 		editMenu.add_action(selectAllAction);
 		auto& viewMenu = menu.add_sub_menu("View");
+		auto& addFavouriteAction = app.add_action("Add Favourite...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#add_favourite.png");
+		auto& organizeFavouritesAction = app.add_action("Organize Favourites...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#organize_favourites.png");
+		auto& favouritesMenu = menu.add_sub_menu("Favourites");
+		favouritesMenu.add_action(addFavouriteAction);
+		favouritesMenu.add_action(organizeFavouritesAction);
+		favouritesMenu.add_separator();
+		favouritesMenu.add_action(app.add_action("Alice", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		favouritesMenu.add_action(app.add_action("Bob", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		favouritesMenu.add_action(app.add_action("Carlos", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		favouritesMenu.add_action(app.add_action("Dave", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		auto& menuDrones = favouritesMenu.add_sub_menu("Silent Running Drones");
+		menuDrones.add_action(app.add_action("Dewey", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		menuDrones.add_action(app.add_action("Huey", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		menuDrones.add_action(app.add_action("Louie", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		favouritesMenu.add_sub_menu("DC Characters");
+		favouritesMenu.add_sub_menu("Marvel Characters");
 		menu.add_action(contactsAction);
 		menu.add_action(muteAction);
 		auto& windowMenu = menu.add_sub_menu("Window");
@@ -112,8 +128,8 @@ int main(int argc, char* argv[])
 
 		ng::toolbar toolbar(layout0);
 		toolbar.add_action(contactsAction);
-		toolbar.add_action(app.add_action("Add favourite...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#add_favourite.png"));
-		toolbar.add_action(app.add_action("Favourites...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		toolbar.add_action(addFavouriteAction);
+		toolbar.add_action(organizeFavouritesAction);
 		toolbar.add_action(app.add_action("Keywords...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#keyword.png"));
 		toolbar.add_action(app.add_action("Settings...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#settings.png"));
 		toolbar.add_action(app.add_action("Manage Plugins...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#manage_plugins.png"));
@@ -123,6 +139,8 @@ int main(int argc, char* argv[])
 		toolbar.add_action(copyAction);
 		toolbar.add_action(pasteAction);
 		toolbar.add_action(pasteAndGoAction);
+		toolbar.add_separator();
+		toolbar.add_action(app.add_action("Check for Updates...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#setup.png"));
 
 		ng::tab_page_container tabContainer(layout0);
 

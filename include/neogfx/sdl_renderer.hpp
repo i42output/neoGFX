@@ -23,6 +23,7 @@
 #include <set>
 #include <map>
 #include "opengl_renderer.hpp"
+#include "i_basic_services.hpp"
 #include "keyboard.hpp"
 
 namespace neogfx
@@ -32,7 +33,7 @@ namespace neogfx
 	class sdl_renderer : public opengl_renderer
 	{
 	public:
-		sdl_renderer(i_keyboard& aKeyboard);
+		sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard);
 		~sdl_renderer();
 	public:
 		virtual void* create_context(i_native_surface& aSurface);
@@ -40,11 +41,14 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle);
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_surface& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle);
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, i_native_surface& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle);
+		virtual bool creating_window() const;
 		virtual void render_now();
 	public:
 		virtual bool process_events();
 	private:
-		void* iContext;
+		i_basic_services& iBasicServices;
 		i_keyboard& iKeyboard;
+		void* iContext;
+		uint32_t iCreatingWindow;
 	};
 }

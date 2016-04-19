@@ -67,47 +67,111 @@ namespace neogfx
 		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
 	}
 
+	size menu_item_widget::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		size result = widget::minimum_size();
+		if (iMenuItem.type() == i_menu_item::Action && iMenuItem.action().is_separator())
+			result.cy = units_converter(*this).from_device_units(3.0);
+		return result;
+	}
+
 	void menu_item_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
-		widget::paint_non_client(aGraphicsContext);
-		bool openSubMenu = (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open());
-		if (enabled() && (entered() || capturing()) || openSubMenu)
+		if (iMenuItem.type() != i_menu_item::Action || !iMenuItem.action().is_separator())
 		{
-			colour background;
-			if (openSubMenu)
+			bool openSubMenu = (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open());
+			if (enabled() && (entered() || capturing()) || openSubMenu)
 			{
-				background = app::instance().current_style().colour().dark() ?
-					app::instance().current_style().colour().darker(0x40) :
-					app::instance().current_style().colour().lighter(0x40);
-				if (background.similar_intensity(app::instance().current_style().colour(), 0.05))
+				colour background;
+				if (openSubMenu)
 				{
-					background = app::instance().current_style().selection_colour();
+					background = app::instance().current_style().colour().dark() ?
+						app::instance().current_style().colour().darker(0x40) :
+						app::instance().current_style().colour().lighter(0x40);
+					if (background.similar_intensity(app::instance().current_style().colour(), 0.05))
+					{
+						background = app::instance().current_style().selection_colour();
+						background.set_alpha(0x80);
+					}
+				}
+				else
+				{
+					background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
 					background.set_alpha(0x80);
 				}
+				aGraphicsContext.fill_solid_rect(client_rect(), background);
 			}
-			else
-			{
-				background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
-				background.set_alpha(0x80);
-			}
-			aGraphicsContext.fill_solid_rect(client_rect(), background);
 		}
 	}
 
 	void menu_item_widget::paint(graphics_context& aGraphicsContext) const
 	{
+		if (iMenuItem.type() != i_menu_item::Action || !iMenuItem.action().is_separator())
+		{
+			widget::paint(aGraphicsContext);
+			if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
+			{
+				bool openSubMenu = (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open());
+				colour ink = openSubMenu ? app::instance().current_style().selection_colour()
+					: background_colour().light() ? background_colour().darker(0x80) : background_colour().lighter(0x80);
+				if (iSubMenuArrow == boost::none || iSubMenuArrow->first != ink)
+				{
+					const uint8_t sArrowImagePattern[9][6]
+					{
+						{ 0, 0, 0, 0, 0, 0 },
+						{ 0, 1, 0, 0, 0, 0 },
+						{ 0, 1, 1, 0, 0, 0 },
+						{ 0, 1, 1, 1, 0, 0 },
+						{ 0, 1, 1, 1, 1, 0 },
+						{ 0, 1, 1, 1, 0, 0 },
+						{ 0, 1, 1, 0, 0, 0 },
+						{ 0, 1, 0, 0, 0, 0 },
+						{ 0, 0, 0, 0, 0, 0 },
+					};
+					iSubMenuArrow = std::make_pair(ink, image{ sArrowImagePattern, { { 0, colour{} },{ 1, ink } } });
+				}
+				rect rect = client_rect(false);
+				aGraphicsContext.draw_texture(
+					point{ rect.right() - iGap + (iGap - iSubMenuArrow->second.extents().cx) / 2.0, (rect.height() - iSubMenuArrow->second.extents().cy) / 2.0 },
+					iSubMenuArrow->second);
+			}
+		}
+		else
+		{
+			scoped_units su(*this, aGraphicsContext, UnitsPixels);
+			rect line = client_rect(false);
+			++line.y;
+			line.cy = 1.0;
+			line.x += (iIconSize + iGap * 2.0);
+			line.cx -= (iIconSize + iGap * 3.0);
+			colour ink = background_colour().light() ? background_colour().darker(0x60) : background_colour().lighter(0x60);
+			ink.set_alpha(0x80);
+			aGraphicsContext.fill_solid_rect(line, ink);
+		}
 	}
 
 	void menu_item_widget::mouse_entered()
 	{
 		widget::mouse_entered();
 		update();
+		if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
+		{
+			iSubMenuOpener = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			{
+				if (!iMenuItem.sub_menu().is_open())
+				{
+					iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
+					update();
+				}
+			}, 1000);
+		}
 	}
 
 	void menu_item_widget::mouse_left()
 	{
 		widget::mouse_left();
 		update();
+		iSubMenuOpener.reset();
 	}
 
 	void menu_item_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -129,16 +193,19 @@ namespace neogfx
 
 	point menu_item_widget::sub_menu_position() const
 	{
-		return window_rect().bottom_left() + surface().surface_position();
+		if (iMenu.type() == i_menu::MenuBar)
+			return window_rect().bottom_left() + surface().surface_position();
+		else
+			return window_rect().top_right() + surface().surface_position();
 	}
 
 	void menu_item_widget::init()
 	{
 		set_margins(neogfx::margins{});
-		iLayout.set_margins(neogfx::margins{ 9.0, 0.0 });
-		iLayout.set_spacing(size{ 9.0, 0.0 });
+		iLayout.set_margins(neogfx::margins{ iGap, 0.0, iGap * (iMenu.type() == i_menu::Popup ? 2.0 : 1.0), 0.0 });
+		iLayout.set_spacing(size{ iGap, 0.0 });
 		if (iMenu.type() == i_menu::Popup)
-			iIcon.set_fixed_size(size{ 16.0, 16.0 });
+			iIcon.set_fixed_size(size{ iIconSize, iIconSize });
 		else
 			iIcon.set_fixed_size(size{});
 		iSpacer.set_minimum_size(size{ 0.0, 0.0 });
@@ -148,12 +215,12 @@ namespace neogfx
 			{
 				iIcon.set_image(iMenuItem.action().is_unchecked() ? iMenuItem.action().image() : iMenuItem.action().checked_image());
 				if (!iIcon.image().is_empty())
-					iIcon.set_fixed_size(size{ 16.0, 16.0 });
+					iIcon.set_fixed_size(size{ iIconSize, iIconSize });
 				else if (iMenu.type() == i_menu::MenuBar)
 					iIcon.set_fixed_size(size{});
 				iText.set_text(iMenuItem.action().menu_text());
 				iShortcutText.set_text(iMenuItem.action().shortcut() != boost::none ? iMenuItem.action().shortcut()->as_text() : std::string());
-				iSpacer.set_minimum_size(size{ iMenuItem.action().shortcut() != boost::none ? 18.0 : 0.0, 0.0 });
+				iSpacer.set_minimum_size(size{ iMenuItem.action().shortcut() != boost::none ?  iGap * 2.0 : 0.0, 0.0 });
 				enable(iMenuItem.action().is_enabled());
 			};
 			iMenuItem.action().changed(action_changed, this);
@@ -183,6 +250,12 @@ namespace neogfx
 			}
 		}
 		else
-			iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
+		{
+			if (!iMenuItem.sub_menu().is_open())
+			{
+				iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
+				update();
+			}
+		}
 	}
 }
