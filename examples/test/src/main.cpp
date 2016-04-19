@@ -116,11 +116,14 @@ int main(int argc, char* argv[])
 		favouritesMenu.add_action(app.add_action("Carlos", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
 		favouritesMenu.add_action(app.add_action("Dave", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
 		auto& menuDrones = favouritesMenu.add_sub_menu("Silent Running Drones");
+		menuDrones.set_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#folder.png");
 		menuDrones.add_action(app.add_action("Dewey", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
 		menuDrones.add_action(app.add_action("Huey", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
 		menuDrones.add_action(app.add_action("Louie", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
-		favouritesMenu.add_sub_menu("DC Characters");
-		favouritesMenu.add_sub_menu("Marvel Characters");
+		auto& subMenu2 = favouritesMenu.add_sub_menu("DC Characters");
+		subMenu2.set_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#folder.png");
+		auto& subMenu3 = favouritesMenu.add_sub_menu("Marvel Characters");
+		subMenu3.set_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#folder.png");
 		menu.add_action(contactsAction);
 		menu.add_action(muteAction);
 		auto& windowMenu = menu.add_sub_menu("Window");

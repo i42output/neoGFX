@@ -49,6 +49,7 @@ namespace neogfx
 		{
 			iMenuItem.sub_menu().opened.unsubscribe(this);
 			iMenuItem.sub_menu().closed.unsubscribe(this);
+			iMenuItem.sub_menu().menu_changed.unsubscribe(this);
 		}
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
@@ -80,10 +81,10 @@ namespace neogfx
 		if (iMenuItem.type() != i_menu_item::Action || !iMenuItem.action().is_separator())
 		{
 			bool openSubMenu = (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open());
-			if (enabled() && (entered() || capturing()) || openSubMenu)
+			if (enabled() && (entered() || capturing() || openSubMenu))
 			{
 				colour background;
-				if (openSubMenu)
+				if (openSubMenu && iMenu.type() == i_menu::MenuBar)
 				{
 					background = app::instance().current_style().colour().dark() ?
 						app::instance().current_style().colour().darker(0x40) :
@@ -165,6 +166,7 @@ namespace neogfx
 				}
 			}, 1000);
 		}
+		iMenu.item_selected.trigger(iMenuItem);
 	}
 
 	void menu_item_widget::mouse_left()
@@ -234,7 +236,13 @@ namespace neogfx
 		{
 			iMenuItem.sub_menu().opened([this]() {update(); }, this);
 			iMenuItem.sub_menu().closed([this]() {update(); }, this);
-			iText.set_text(iMenuItem.sub_menu().title());
+			auto menu_changed = [this]() 
+			{ 
+				iIcon.set_image(iMenuItem.sub_menu().image());
+				iText.set_text(iMenuItem.sub_menu().title());
+			};
+			iMenuItem.sub_menu().menu_changed(menu_changed, this);
+			menu_changed();
 		}
 	}
 

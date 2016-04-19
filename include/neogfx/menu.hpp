@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "neogfx.hpp"
 #include "event.hpp"
 #include "action.hpp"
+#include "texture.hpp"
 #include "i_menu.hpp"
 
 namespace neogfx
@@ -36,6 +37,11 @@ namespace neogfx
 	public:
 		virtual type_e type() const;
 		virtual const std::string& title() const;
+		virtual void set_title(const std::string& aTitle);
+		virtual const i_texture& image() const;
+		virtual void set_image(const std::string& aUri);
+		virtual void set_image(const i_image& aImage);
+		virtual void set_image(const i_texture& aTexture);
 		virtual uint32_t item_count() const;
 		virtual const i_menu_item& item(item_index aItemIndex) const;
 		virtual i_menu_item& item(item_index aItemIndex);
@@ -53,6 +59,7 @@ namespace neogfx
 	private:
 		type_e iType;
 		std::string iTitle;
+		texture iImage;
 		item_list iItems;
 		action iSeparator;
 		uint32_t iOpenCount;

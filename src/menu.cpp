@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "neogfx.hpp"
+#include "image.hpp"
 #include "menu_item.hpp"
 #include "menu.hpp"
 
@@ -35,6 +36,35 @@ namespace neogfx
 	const std::string& menu::title() const
 	{
 		return iTitle;
+	}
+
+	void menu::set_title(const std::string& aTitle)
+	{
+		iTitle = aTitle;
+		menu_changed.trigger();
+	}
+
+	const i_texture& menu::image() const
+	{
+		return iImage;
+	}
+
+	void menu::set_image(const std::string& aUri)
+	{
+		iImage = neogfx::image{aUri};
+		menu_changed.trigger();
+	}
+
+	void menu::set_image(const i_image& aImage)
+	{
+		iImage = aImage;
+		menu_changed.trigger();
+	}
+
+	void menu::set_image(const i_texture& aTexture)
+	{
+		iImage = aTexture;
+		menu_changed.trigger();
 	}
 
 	uint32_t menu::item_count() const

@@ -83,7 +83,7 @@ namespace neogfx
 		optional_text iButtonText;
 		optional_text iToolTipText;
 		optional_text iStatusTipText;
-		texture iTexture;
+		texture iImage;
 		texture iCheckedTexture;
 		optional_key_sequence iShortcut;
 	};

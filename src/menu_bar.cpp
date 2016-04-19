@@ -44,6 +44,7 @@ namespace neogfx
 	{
 		item_added.unsubscribe(this);
 		item_removed.unsubscribe(this);
+		item_selected.unsubscribe(this);
 		open_sub_menu.unsubscribe(this);
 		remove_widgets();
 	}
@@ -80,10 +81,22 @@ namespace neogfx
 			}
 			layout().remove_item(aItemIndex);
 		}, this);
+		item_selected([this](i_menu_item& aMenuItem)
+		{
+			if (aMenuItem.type() == i_menu_item::Action ||
+				(aMenuItem.type() == i_menu_item::SubMenu && iOpenSubMenu.get() != 0 && iOpenSubMenu.get() != &layout().get_widget<i_widget>(find_item(aMenuItem.sub_menu()))))
+			{
+				iOpenSubMenu.reset();
+			}
+			update();
+		}, this);
 		open_sub_menu([this](i_menu& aSubMenu)
 		{
-			auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
-			iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+			if (aSubMenu.item_count() > 0)
+			{
+				auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
+				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+			}
 		}, this);
 	}
 }

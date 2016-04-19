@@ -31,11 +31,13 @@ namespace neogfx
 	public:
 		typedef uint32_t item_index;
 	public:
+		event<> menu_changed;
 		event<item_index> item_added;
 		event<item_index> item_removed;
 		event<item_index> item_changed;
 		event<> opened;
 		event<> closed;
+		event<i_menu_item&> item_selected;
 		event<i_menu&> open_sub_menu;
 	public:
 		enum type_e
@@ -50,6 +52,11 @@ namespace neogfx
 	public:
 		virtual type_e type() const = 0;
 		virtual const std::string& title() const = 0;
+		virtual void set_title(const std::string& aTitle) = 0;
+		virtual const i_texture& image() const = 0;
+		virtual void set_image(const std::string& aUri) = 0;
+		virtual void set_image(const i_image& aImage) = 0;
+		virtual void set_image(const i_texture& aTexture) = 0;		
 		virtual uint32_t item_count() const = 0;
 		virtual const i_menu_item& item(item_index aItemIndex) const = 0;
 		virtual i_menu_item& item(item_index aItemIndex) = 0;
