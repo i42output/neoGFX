@@ -25,13 +25,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu) :
-		window(aPosition, size{}, None, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
+		window(aPosition, size{}, None | NoActivate, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu) :
-		window(aParent, aPosition, size{}, None, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
+		window(aParent, aPosition, size{}, None | NoActivate, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}

@@ -83,6 +83,8 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const;
 	public:
 		virtual void close();
+		virtual void show(bool aActivate = false);
+		virtual void hide();
 		virtual bool is_active() const;
 		virtual void activate();
 		virtual void enable(bool aEnable);

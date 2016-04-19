@@ -42,6 +42,7 @@ namespace neogfx
 			Fullscreen			= 0x0010,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
 			Modal				= 0x0020,
 			ApplicationModal	= 0x0040,
+			NoActivate			= 0x0080,
 			Default				= Titlebar | Resize | Close
 		};
 	public:

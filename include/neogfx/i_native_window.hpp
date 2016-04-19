@@ -34,6 +34,8 @@ namespace neogfx
 	public:
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
 		virtual void close() = 0;
+		virtual void show(bool aActivate = false) = 0;
+		virtual void hide() = 0;
 		virtual bool is_active() const = 0;
 		virtual void activate() = 0;
 		virtual void enable(bool aEnable) = 0;
