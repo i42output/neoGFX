@@ -39,6 +39,8 @@ namespace neogfx
 	class i_surface : public i_device_metrics, public i_units_context
 	{
 	public:
+		event<> closed;
+	public:
 		virtual ~i_surface() {}
 	public:
 		virtual void close() = 0;
@@ -76,6 +78,7 @@ namespace neogfx
 		virtual void widget_added(i_widget& aWidget) = 0;
 		virtual void widget_removed(i_widget& aWidget) = 0;
 	public:
+		virtual bool requires_owner_focus() const = 0;
 		virtual bool has_entered_widget() const = 0;
 		virtual i_widget& entered_widget() const = 0;
 		virtual bool has_capturing_widget() const = 0;

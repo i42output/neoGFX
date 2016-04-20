@@ -25,13 +25,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu) :
-		window(aPosition, size{}, None | NoActivate, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
+		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu) :
-		window(aParent, aPosition, size{}, None | NoActivate, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
+		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
@@ -97,7 +97,12 @@ namespace neogfx
 			if (aSubMenu.item_count() > 0)
 			{
 				auto& itemWidget = layout().get_widget<menu_item_widget>(iMenu.find_item(aSubMenu));
+				iOpenSubMenu.reset();
 				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+				iOpenSubMenu->closed([this]()
+				{
+					iOpenSubMenu.reset();
+				}, this);
 			}
 		}, this);
 	}

@@ -93,8 +93,12 @@ namespace neogfx
 		return result;
 	}
 
+	std::map<void*, sdl_window*> sHandleMap;
+
 	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+		iParent(0),
+		iStyle(aStyle),
 		iHandle(NULL),
 		iContext(NULL),
 		iProcessingEvent(false),
@@ -110,13 +114,7 @@ namespace neogfx
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
 		if (iHandle == NULL)
 			throw failed_to_create_window(SDL_GetError());
-#ifdef WIN32
-		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS);
-		if (aStyle & window::None)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
-		if (aStyle & window::NoActivate)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE);
-#endif
+		init();
 		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
 		if (iContext == 0)
 		{
@@ -132,6 +130,8 @@ namespace neogfx
 
 	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, uint32_t aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+		iParent(0),
+		iStyle(aStyle),
 		iHandle(NULL),
 		iContext(NULL),
 		iProcessingEvent(false),
@@ -147,13 +147,7 @@ namespace neogfx
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
 		if (iHandle == NULL)
 			throw failed_to_create_window(SDL_GetError());
-#ifdef WIN32
-		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS);
-		if (aStyle & window::None)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
-		if (aStyle & window::NoActivate)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE);
-#endif
+		init();
 		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
 		if (iContext == 0)
 		{
@@ -169,6 +163,8 @@ namespace neogfx
 
 	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+		iParent(&aParent),
+		iStyle(aStyle),
 		iHandle(NULL),
 		iContext(NULL),
 		iProcessingEvent(false),
@@ -184,15 +180,7 @@ namespace neogfx
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
 		if (iHandle == NULL)
 			throw failed_to_create_window(SDL_GetError());
-#ifdef WIN32
-		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS | CS_DROPSHADOW);
-		if (aStyle & window::None)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
-		if (aStyle & window::NoActivate)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE);
-		SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(aParent.native_handle()));
-		SetWindowPos(static_cast<HWND>(native_handle()), NULL, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-#endif
+		init();
 		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
 		if (iContext == NULL)
 		{
@@ -208,6 +196,8 @@ namespace neogfx
 
 	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, uint32_t aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+		iParent(&aParent),
+		iStyle(aStyle),
 		iHandle(NULL),
 		iContext(NULL),
 		iProcessingEvent(false),
@@ -223,15 +213,7 @@ namespace neogfx
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
 		if (iHandle == NULL)
 			throw failed_to_create_window(SDL_GetError());
-#ifdef WIN32
-		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS | CS_DROPSHADOW);
-		if (aStyle & window::None)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
-		if (aStyle & window::NoActivate)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE);
-		SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(aParent.native_handle()));
-		SetWindowPos(static_cast<HWND>(native_handle()), NULL, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-#endif
+		init();
 		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
 		if (iContext == NULL)
 		{
@@ -249,6 +231,12 @@ namespace neogfx
 	{
 		release_capture();
 		close();
+		for (auto h = sHandleMap.begin(); h != sHandleMap.end(); ++h)
+			if (h->second = this)
+			{
+				sHandleMap.erase(h);
+				break;
+			}
 	}
 
 	void* sdl_window::handle() const
@@ -466,6 +454,37 @@ namespace neogfx
 			ReleaseCapture();
 #endif
 		}
+	}
+
+#ifdef WIN32
+	LRESULT CALLBACK sdl_window::CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	{
+		switch(msg)
+		{
+		case WM_MOUSEACTIVATE:
+			if (GetWindowLongPtr(hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE)
+				return MA_NOACTIVATEANDEAT;
+			return CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+		default:
+			return CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+		}
+	}
+#endif
+
+	void sdl_window::init()
+	{
+		sHandleMap[native_handle()] = this;
+#ifdef WIN32
+		iSDLWindowProc = (WNDPROC)SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)&CustomWindowProc);
+		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS | CS_DROPSHADOW);
+		if (iStyle & window::None)
+			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
+		if (iStyle & window::NoActivate)
+			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
+		if (iParent != 0)
+			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(iParent->native_handle()));
+		SetWindowPos(static_cast<HWND>(native_handle()), NULL, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+#endif
 	}
 
 	void sdl_window::process_event(const SDL_Event& aEvent)

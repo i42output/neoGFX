@@ -207,6 +207,11 @@ namespace neogfx
 		app::instance().surface_manager().remove_surface(*this);
 	}
 
+	uint32_t window::style() const
+	{
+		return iStyle;
+	}
+
 	bool window::is_root() const
 	{
 		return true;
@@ -292,6 +297,7 @@ namespace neogfx
 	void window::close()
 	{
 		native_surface().close();
+		closed.trigger();
 	}
 
 	bool window::has_parent_surface() const
@@ -449,6 +455,11 @@ namespace neogfx
 		layout_items(true);
 	}
 
+	bool window::requires_owner_focus() const
+	{
+		return (iStyle & RequiresOwnerFocus) == RequiresOwnerFocus;
+	}
+
 	bool window::has_entered_widget() const
 	{
 		return iEnteredWidget != 0;
@@ -568,7 +579,7 @@ namespace neogfx
 			iClosing = true;
 			update_modality();
 		}
-		if (has_parent())
+		if (has_parent() && !(static_cast<window&>(parent()).style() & window::NoActivate))
 			static_cast<window&>(parent()).activate();
 	}
 
@@ -581,7 +592,7 @@ namespace neogfx
 		}
 		iNativeWindow.reset();
 		app::instance().surface_manager().remove_surface(*this);
-		if (has_parent())
+		if (has_parent() && !(static_cast<window&>(parent()).style() & window::NoActivate))
 			static_cast<window&>(parent()).activate();
 	}
 
@@ -591,6 +602,17 @@ namespace neogfx
 
 	void window::native_window_focus_lost()
 	{
+		for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)
+		{
+			auto& s = app::instance().surface_manager().surface(i);
+			if (is_owner_of(s) && s.requires_owner_focus())
+			{
+				s.close();
+				i = 0;
+			}
+			else
+				++i;
+		}
 	}
 
 	void window::native_window_resized()

@@ -43,6 +43,7 @@ namespace neogfx
 			Modal				= 0x0020,
 			ApplicationModal	= 0x0040,
 			NoActivate			= 0x0080,
+			RequiresOwnerFocus	= 0x0100,
 			Default				= Titlebar | Resize | Close
 		};
 	public:
@@ -59,6 +60,8 @@ namespace neogfx
 		window(i_widget& aParent, const point& aPosition, const size& aDimensions, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle = Default, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		~window();
+	public:
+		uint32_t style() const;
 	public:
 		virtual bool is_root() const;
 		virtual bool can_defer_layout() const;
@@ -115,6 +118,7 @@ namespace neogfx
 		virtual void widget_added(i_widget& aWidget);
 		virtual void widget_removed(i_widget& aWidget);
 	public:
+		virtual bool requires_owner_focus() const;
 		virtual bool has_entered_widget() const;
 		virtual i_widget& entered_widget() const;
 		virtual bool has_capturing_widget() const;

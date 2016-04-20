@@ -91,14 +91,23 @@ namespace neogfx
 		virtual void set_capture();
 		virtual void release_capture();
 	private:
+		void init();
 		void process_event(const SDL_Event& aEvent);
+#ifdef WIN32
+		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+#endif
 	private:
 		virtual void activate_context();
 		virtual void deactivate_context();
 		virtual void display();
 		virtual bool processing_event() const;
 	private:
+		sdl_window* iParent;
+		uint32_t iStyle;
 		SDL_Window* iHandle;
+#ifdef WIN32
+		WNDPROC iSDLWindowProc;
+#endif
 		SDL_GLContext iContext;
 		size iExtents;
 		bool iProcessingEvent;
