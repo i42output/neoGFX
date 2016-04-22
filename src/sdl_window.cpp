@@ -478,7 +478,7 @@ namespace neogfx
 		iSDLWindowProc = (WNDPROC)SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)&CustomWindowProc);
 		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS | CS_DROPSHADOW);
 		if (iStyle & window::None)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
+			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP | WS_BORDER);
 		if (iStyle & window::NoActivate)
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
 		if (iParent != 0)

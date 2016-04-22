@@ -133,7 +133,7 @@ namespace neogfx
 				}
 				rect rect = client_rect(false);
 				aGraphicsContext.draw_texture(
-					point{ rect.right() - iGap + (iGap - iSubMenuArrow->second.extents().cx) / 2.0, (rect.height() - iSubMenuArrow->second.extents().cy) / 2.0 },
+					point{ rect.right() - iGap + std::floor((iGap - iSubMenuArrow->second.extents().cx) / 2.0), std::floor((rect.height() - iSubMenuArrow->second.extents().cy) / 2.0) },
 					iSubMenuArrow->second);
 			}
 		}
