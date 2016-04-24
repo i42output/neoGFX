@@ -779,6 +779,7 @@ namespace neogfx
 		{
 			Vertical,
 			Horizontal,
+			Radial
 		};
 		// construction
 	public:

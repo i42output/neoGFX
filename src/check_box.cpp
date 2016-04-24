@@ -49,7 +49,7 @@ namespace neogfx
 	{
 		scoped_units su(*this, UnitsPixels);
 		rect boxRect = client_rect();
-		aGraphicsContext.fill_solid_rect(boxRect, background_colour());
+		aGraphicsContext.fill_rect(boxRect, background_colour());
 		colour borderColour1 = container_background_colour().mid(container_background_colour().mid(background_colour()));
 		if (borderColour1.similar_intensity(container_background_colour(), 0.03125))
 			borderColour1.dark() ? borderColour1.lighten(0x40) : borderColour1.darken(0x40);
@@ -65,7 +65,7 @@ namespace neogfx
 		}
 		else if (static_cast<const check_box&>(parent()).is_indeterminate())
 		{
-			aGraphicsContext.fill_solid_rect(boxRect, app::instance().current_style().widget_detail_primary_colour());
+			aGraphicsContext.fill_rect(boxRect, app::instance().current_style().widget_detail_primary_colour());
 		}
 	}
 

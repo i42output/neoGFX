@@ -818,9 +818,9 @@ namespace neogfx
 		{
 			if (surface().native_surface().using_frame_buffer())
 				for (const auto& ur : iUpdateRects)
-					aGraphicsContext.fill_solid_rect(ur + (origin() - origin(true)), background_colour());
+					aGraphicsContext.fill_rect(ur + (origin() - origin(true)), background_colour());
 			else
-				aGraphicsContext.fill_solid_rect(client_rect() + (origin() - origin(true)), background_colour());
+				aGraphicsContext.fill_rect(client_rect() + (origin() - origin(true)), background_colour());
 		}
 	}
 

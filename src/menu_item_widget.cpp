@@ -100,7 +100,7 @@ namespace neogfx
 					background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
 					background.set_alpha(0x80);
 				}
-				aGraphicsContext.fill_solid_rect(client_rect(), background);
+				aGraphicsContext.fill_rect(client_rect(), background);
 			}
 		}
 	}
@@ -147,7 +147,7 @@ namespace neogfx
 			line.cx -= (iIconSize + iGap * 3.0);
 			colour ink = background_colour().light() ? background_colour().darker(0x60) : background_colour().lighter(0x60);
 			ink.set_alpha(0x80);
-			aGraphicsContext.fill_solid_rect(line, ink);
+			aGraphicsContext.fill_rect(line, ink);
 		}
 	}
 

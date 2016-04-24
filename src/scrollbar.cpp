@@ -164,7 +164,7 @@ namespace neogfx
 		colour baseColour = iContainer.scrollbar_colour(*this);
 		colour backgroundColour = baseColour.light() ? baseColour.darker(0x40) : baseColour.lighter(0x40);
 		colour foregroundColour = baseColour.light() ? baseColour.darker(0x80) : baseColour.lighter(0x80);
-		aGraphicsContext.fill_solid_rect(iContainer.scrollbar_geometry(aGraphicsContext, *this), backgroundColour);
+		aGraphicsContext.fill_rect(iContainer.scrollbar_geometry(aGraphicsContext, *this), backgroundColour);
 		const dimension margin = 3.0;
 		rect rectUpButton = element_geometry(aGraphicsContext, ElementUpButton).deflate(margin, margin);
 		rect rectDownButton = element_geometry(aGraphicsContext, ElementDownButton).deflate(margin, margin);
@@ -174,10 +174,10 @@ namespace neogfx
 			coordinate w = 1.0;
 			for (coordinate y = 0.0; y < rectUpButton.height(); ++y)
 			{
-				aGraphicsContext.fill_solid_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), baseColour.light() ?
+				aGraphicsContext.fill_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), baseColour.light() ?
 					foregroundColour.darker(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00) :
 					foregroundColour.lighter(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00));
-				aGraphicsContext.fill_solid_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)), baseColour.light() ?
+				aGraphicsContext.fill_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)), baseColour.light() ?
 					foregroundColour.darker(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00) :
 					foregroundColour.lighter(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00));
 				x -= 1.0;
@@ -190,17 +190,17 @@ namespace neogfx
 			coordinate h = 1.0;
 			for (coordinate x = 0.0; x < rectUpButton.width(); ++x)
 			{
-				aGraphicsContext.fill_solid_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)), baseColour.light() ?
+				aGraphicsContext.fill_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)), baseColour.light() ?
 					foregroundColour.darker(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00) :
 					foregroundColour.lighter(position() == minimum() ? 0x00 : iClickedElement == ElementUpButton ? 0x60 : iHoverElement == ElementUpButton ? 0x30 : 0x00));
-				aGraphicsContext.fill_solid_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)), baseColour.light() ?
+				aGraphicsContext.fill_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)), baseColour.light() ?
 					foregroundColour.darker(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00) :
 					foregroundColour.lighter(position() == maximum() - page() ? 0x00 : iClickedElement == ElementDownButton ? 0x60 : iHoverElement == ElementDownButton ? 0x30 : 0x00));
 				y -= 1.0;
 				h += 2.0;
 			}
 		}
-		aGraphicsContext.fill_solid_rect(element_geometry(aGraphicsContext, ElementThumb).deflate(iType == Vertical ? margin : 0.0, iType == Vertical ? 0.0 : margin), baseColour.light() ?
+		aGraphicsContext.fill_rect(element_geometry(aGraphicsContext, ElementThumb).deflate(iType == Vertical ? margin : 0.0, iType == Vertical ? 0.0 : margin), baseColour.light() ?
 			foregroundColour.darker(iClickedElement == ElementThumb ? 0x60 : iHoverElement == ElementThumb ? 0x30 : 0x00) :
 			foregroundColour.lighter(iClickedElement == ElementThumb ? 0x60 : iHoverElement == ElementThumb ? 0x30 : 0x00));
 		aGraphicsContext.set_origin(oldOrigin);

@@ -148,7 +148,7 @@ namespace neogfx
 			bb.position() += point{vec2{buddy_offset().xy}};
 		bb.position() = bb.position().ceil();
 		if (iBackgroundColour != boost::none)
-			aGraphicsContext.fill_solid_rect(bb, *iBackgroundColour);
+			aGraphicsContext.fill_rect(bb, *iBackgroundColour);
 		if (iBorder != boost::none)
 		{
 			aGraphicsContext.draw_rect(bb, pen(text_colour(), *iBorder));

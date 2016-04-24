@@ -48,6 +48,12 @@ namespace neogfx
 		typedef typename vector_type::template rebind<S>::type sizzled_vector_type;
 		typedef typename vector_type::value_type value_type;
 		typedef typename vector_type::array_type array_type;
+	private:
+		template <uint32_t Index, uint32_t... Indexes>
+		struct first
+		{
+			static constexpr uint32_t value = Index;
+		};
 	public:
 		swizzle& operator=(const sizzled_vector_type& aRhs)
 		{
@@ -59,6 +65,11 @@ namespace neogfx
 		{ 
 			static_assert(detail::greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
 			return sizzled_vector_type(v[Indexes]...);
+		}
+		template <uint32_t S2 = S>
+		operator typename std::enable_if<S2 == 1, value_type>::type() const
+		{
+			return v[first<Indexes...>::value];
 		}
 	private:
 		template <typename SourceIter, typename Next, typename... Rest>

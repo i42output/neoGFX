@@ -290,7 +290,7 @@ namespace neogfx
 		}
 		else if (current_frame().colour() != boost::none)
 		{
-			aGraphicsContext.fill_solid_shape(position() - origin(), m, *current_frame().colour());
+			aGraphicsContext.fill_shape(position() - origin(), m, *current_frame().colour());
 		}
 	}
 }

@@ -153,6 +153,10 @@ int main(int argc, char* argv[])
 		ng::vertical_layout layoutButtons(buttonsPage);
 		layoutButtons.set_margins(ng::margins(8));
 		ng::push_button button0(layoutButtons, "This is the neoGFX test application.");
+		button0.label().set_placement(ng::label_placement::ImageTextVertical);
+		button0.image().set_image(ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../../neoGFX.png" });
+		button0.image().set_minimum_size(ng::size{ 32, 32 });
+		button0.image().set_maximum_size(ng::size{ 160, std::numeric_limits<ng::dimension>::max() });
 		button0.set_size_policy(ng::size_policy::Expanding);
 		button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
 		ng::push_button button1(layoutButtons, "the,,, quick brown fox jumps over the lazy dog");
@@ -329,11 +333,21 @@ int main(int argc, char* argv[])
 		ng::vertical_layout gl(gamePage);
 		create_game(gl);
 
+		auto& tabDrawing = tabContainer.add_tab_page("Drawing").widget();
+		tabDrawing.painting([&tabDrawing](ng::graphics_context& aGc)
+		{
+			ng::texture logo{ ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../../neoGFX.png" } };
+			aGc.draw_texture(ng::point{ (tabDrawing.extents() - logo.extents()) / 2.0 }, logo);
+			aGc.fill_rounded_rect(ng::rect{ 100, 100, 100, 100 }, 10.0, ng::colour::Goldenrod);
+			aGc.fill_rounded_rect(ng::rect{ 300, 400, 200, 100 }, 10.0, ng::gradient{ ng::colour::Black, ng::colour::White, ng::gradient::Horizontal });
+			aGc.draw_rounded_rect(ng::rect{ 300, 400, 200, 100 }, 10.0, ng::pen{ ng::colour::Blue4, 2.0 });
+			aGc.draw_rounded_rect(ng::rect{ 150, 150, 300, 300 }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
+			aGc.fill_rounded_rect(ng::rect{ 500, 500, 200, 100 }, 10.0, ng::gradient{ ng::colour::Green, ng::colour::White, ng::gradient::Radial });
+			aGc.draw_rounded_rect(ng::rect{ 500, 500, 200, 100 }, 10.0, ng::pen{ ng::colour::Black, 2.0 });
+		});
 		tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
-		tabContainer.add_tab_page("Wibble").tab().set_image(smallHash);
-		tabContainer.add_tab_page("Bibble").tab().set_image(smallHash);
 		tabContainer.add_tab_page("XYZZY").tab().set_image(smallHash); 
 
 		return app.exec();

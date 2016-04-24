@@ -93,9 +93,9 @@ namespace neogfx
 			line.deflate(0, std::floor(client_rect().height() / 6.0));
 			line.cx = 1.0;
 			colour ink = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().foreground_colour());
-			aGraphicsContext.fill_solid_rect(line, ink.darker(0x40));
+			aGraphicsContext.fill_rect(line, ink.darker(0x40));
 			++line.x;
-			aGraphicsContext.fill_solid_rect(line, ink.lighter(0x40));
+			aGraphicsContext.fill_rect(line, ink.lighter(0x40));
 		}
 	}
 

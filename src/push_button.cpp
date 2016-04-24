@@ -78,7 +78,7 @@ namespace neogfx
 				app::instance().current_style().selection_colour() : 
 				background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40));
 			background.set_alpha(0x80);
-			aGraphicsContext.fill_solid_rect(client_rect(), background);
+			aGraphicsContext.fill_rect(client_rect(), background);
 		}
 	}
 
@@ -108,12 +108,12 @@ namespace neogfx
 					topHalf.cy = std::floor(topHalf.cy * 0.5);
 					bottomHalf.y = topHalf.bottom();
 					bottomHalf.cy -= topHalf.height();
-					aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
-					aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+					aGraphicsContext.fill_rect(topHalf, gradient(topHalfFrom, topHalfTo));
+					aGraphicsContext.fill_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
 				}
 				else
 				{
-					aGraphicsContext.fill_solid_rect(outline.bounding_rect(), faceColour);
+					aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
 				}
 			}
 			else 
@@ -125,12 +125,12 @@ namespace neogfx
 					topHalf.cy = std::floor(topHalf.cy * 0.5 + as_units(*this, UnitsMillimetres, 1.0));
 					bottomHalf.y = topHalf.bottom();
 					bottomHalf.cy -= topHalf.height();
-					aGraphicsContext.fill_gradient_rect(topHalf, gradient(topHalfFrom, topHalfTo));
-					aGraphicsContext.fill_gradient_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
+					aGraphicsContext.fill_rect(topHalf, gradient(topHalfFrom, topHalfTo));
+					aGraphicsContext.fill_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
 				}
 				else
 				{
-					aGraphicsContext.fill_solid_rect(outline.bounding_rect(), faceColour);
+					aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
 				}
 			}
 		}
@@ -138,11 +138,11 @@ namespace neogfx
 		{
 			if (!spot_colour())
 			{
-				aGraphicsContext.fill_gradient_rect(outline.bounding_rect(), gradient(topHalfTo, bottomHalfFrom));
+				aGraphicsContext.fill_rect(outline.bounding_rect(), gradient(topHalfTo, bottomHalfFrom));
 			}
 			else
 			{
-				aGraphicsContext.fill_solid_rect(outline.bounding_rect(), faceColour);
+				aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
 			}
 		}
 		aGraphicsContext.reset_clip();

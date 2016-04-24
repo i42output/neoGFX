@@ -59,9 +59,9 @@ namespace neogfx
 		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1.mid(background_colour()), 1.0));
 		discRect.deflate(2.0, 2.0);
 		if (static_cast<const radio_button&>(parent()).is_on())
-			aGraphicsContext.fill_solid_circle(discRect.centre(), discRect.width() / 2.0, app::instance().current_style().widget_detail_primary_colour());
+			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, app::instance().current_style().widget_detail_primary_colour());
 		else
-			aGraphicsContext.fill_solid_circle(discRect.centre(), discRect.width() / 2.0, background_colour());
+			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, background_colour());
 	}
 
 	radio_button::radio_button(const std::string& aText) :

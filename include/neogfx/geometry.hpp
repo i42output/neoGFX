@@ -30,6 +30,7 @@ namespace neogfx
 	typedef coordinate_value_type coordinate;
 	typedef coordinate_value_type dimension;
 	typedef coordinate_value_type coordinate_delta;
+	typedef coordinate_value_type angle;
 
 	template <typename CoordinateType>
 	class basic_delta 
@@ -120,10 +121,14 @@ namespace neogfx
 		bool operator!=(const basic_size& other) const { return !operator==(other); }
 		basic_size& operator+=(const basic_size& other) { cx += other.cx; cy += other.cy; return *this; }
 		basic_size& operator+=(const basic_delta<CoordinateType>& other) { cx += other.dx; cy += other.dy; return *this; }
+		basic_size& operator+=(const dimension_type other) { cx += other; cy += other; return *this; }
 		basic_size& operator-=(const basic_size& other) { cx -= other.cx; cy -= other.cy; return *this; }
 		basic_size& operator-=(const basic_delta<CoordinateType>& other) { cx -= other.dx; cy -= other.dy; return *this; }
+		basic_size& operator-=(const dimension_type other) { cx -= other; cy -= other; return *this; }
 		basic_size& operator*=(const basic_size& other) { cx *= other.cx; cy *= other.cy; return *this; }
+		basic_size& operator*=(const dimension_type other) { cx *= other; cy *= other; return *this; }
 		basic_size& operator/=(const basic_size& other) { cx /= other.cx; cy /= other.cy; return *this; }
+		basic_size& operator/=(const dimension_type other) { cx /= other; cy /= other; return *this; }
 		basic_size ceil() const { return basic_size(std::ceil(cx), std::ceil(cy)); }
 		basic_size floor() const { return basic_size(std::floor(cx), std::floor(cy)); }
 		// attributes
@@ -160,6 +165,38 @@ namespace neogfx
 
 	template <typename CoordinateType>
 	inline basic_size<CoordinateType> operator/(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		basic_size<CoordinateType> ret = left;
+		ret /= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_size<CoordinateType> operator+(const basic_size<CoordinateType>& left, typename basic_size<CoordinateType>::dimension_type right)
+	{
+		basic_size<CoordinateType> ret = left;
+		ret += right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_size<CoordinateType> operator-(const basic_size<CoordinateType>& left, typename basic_size<CoordinateType>::dimension_type right)
+	{
+		basic_size<CoordinateType> ret = left;
+		ret -= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_size<CoordinateType> operator*(const basic_size<CoordinateType>& left, typename basic_size<CoordinateType>::dimension_type right)
+	{
+		basic_size<CoordinateType> ret = left;
+		ret *= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_size<CoordinateType> operator/(const basic_size<CoordinateType>& left, typename basic_size<CoordinateType>::dimension_type right)
 	{
 		basic_size<CoordinateType> ret = left;
 		ret /= right;
@@ -579,6 +616,7 @@ namespace neogfx
 	typedef basic_margins<coordinate> margins;
 
 	typedef boost::optional<dimension> optional_dimension;
+	typedef boost::optional<angle> optional_angle;
 	typedef boost::optional<point> optional_point;
 	typedef boost::optional<size> optional_size;
 	typedef boost::optional<rect> optional_rect;

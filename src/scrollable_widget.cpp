@@ -92,7 +92,7 @@ namespace neogfx
 			point oldOrigin = aGraphicsContext.origin();
 			aGraphicsContext.set_origin(point(0.0, 0.0));
 			colour scrollbarColour = scrollbar_colour(iVerticalScrollbar);
-			aGraphicsContext.fill_solid_rect(
+			aGraphicsContext.fill_rect(
 				rect(
 					point(scrollbar_geometry(aGraphicsContext, horizontal_scrollbar()).right(), scrollbar_geometry(aGraphicsContext, iVerticalScrollbar).bottom()), 
 					size(scrollbar_geometry(aGraphicsContext, iVerticalScrollbar).width(), scrollbar_geometry(aGraphicsContext, horizontal_scrollbar()).height())),

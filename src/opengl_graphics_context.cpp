@@ -49,9 +49,91 @@ namespace neogfx
 				return GL_POINTS;
 			}
 		}
+
 		inline GLenum path_shape_to_gl_mode(const path& aPath)
 		{
 			return path_shape_to_gl_mode(aPath.shape());
+		}
+
+		namespace
+		{
+			std::vector<GLdouble> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
+			{
+				std::vector<GLdouble> result;
+				uint32_t segments = static_cast<uint32_t>(20 * std::sqrt(aRadius));
+				result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
+				if (aIncludeCentre)
+				{
+					result.push_back(aCentre.x);
+					result.push_back(aCentre.y);
+				}
+				coordinate theta = (aEndAngle - aStartAngle) / static_cast<coordinate>(segments);
+				coordinate c = std::cos(theta);
+				coordinate s = std::sin(theta);
+				auto startCoordinate = mat22{ { std::cos(aStartAngle), std::sin(aStartAngle) },{ -std::sin(aStartAngle), std::cos(aStartAngle) } } *
+					vec2{ aRadius, 0.0 };
+				coordinate x = startCoordinate.x;
+				coordinate y = startCoordinate.y;
+				for (uint32_t i = 0; i < segments; ++i)
+				{
+					result.push_back(x + aCentre.x);
+					result.push_back(y + aCentre.y);
+					coordinate t = x;
+					x = c * x - s * y;
+					y = s * t + c * y;
+				}
+				return result;
+			}
+
+			std::vector<GLdouble> circle_vertices(const point& aCentre, dimension aRadius, bool aIncludeCentre)
+			{
+				auto result = arc_vertices(aCentre, aRadius, 0, boost::math::constants::two_pi<coordinate>(), aIncludeCentre);
+				result.push_back(result[aIncludeCentre ? 2 : 0]);
+				result.push_back(result[aIncludeCentre ? 3 : 1]);
+				return result;
+			}
+
+			std::vector<GLdouble> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre)
+			{
+				std::vector<GLdouble> result;
+				auto topLeft = arc_vertices(
+					aRect.top_left() + point{ aRadius, aRadius },
+					aRadius,
+					boost::math::constants::pi<coordinate>(),
+					boost::math::constants::pi<coordinate>() * 1.5,
+					false);
+				auto topRight = arc_vertices(
+					aRect.top_right() + point{ -aRadius, aRadius },
+					aRadius,
+					boost::math::constants::pi<coordinate>() * 1.5,
+					boost::math::constants::pi<coordinate>() * 2.0,
+					false);
+				auto bottomRight = arc_vertices(
+					aRect.bottom_right() + point{ -aRadius, -aRadius },
+					aRadius,
+					0.0,
+					boost::math::constants::pi<coordinate>() * 0.5,
+					false);
+				auto bottomLeft = arc_vertices(
+					aRect.bottom_left() + point{ aRadius, -aRadius },
+					aRadius,
+					boost::math::constants::pi<coordinate>() * 0.5,
+					boost::math::constants::pi<coordinate>(),
+					false);
+				result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aIncludeCentre ? 2 : 1));
+				if (aIncludeCentre)
+				{
+					result.push_back(aRect.centre().x);
+					result.push_back(aRect.centre().y);
+				}
+				result.insert(result.end(), topLeft.begin(), topLeft.end());
+				result.insert(result.end(), topRight.begin(), topRight.end());
+				result.insert(result.end(), bottomRight.begin(), bottomRight.end());
+				result.insert(result.end(), bottomLeft.begin(), bottomLeft.end());
+				result.push_back(result[aIncludeCentre ? 2 : 0]);
+				result.push_back(result[aIncludeCentre ? 3 : 1]);
+				return result;
+			}
 		}
 	}
 
@@ -204,9 +286,9 @@ namespace neogfx
 		glCheck(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));  // draw 1s on test fail (always)
 		glCheck(glStencilMask(-1));
 		glCheck(glStencilFunc(GL_NEVER, 0, -1));
-		fill_solid_rect(rendering_area(), colour::White);
+		fill_rect(rendering_area(), colour::White);
 		glCheck(glStencilFunc(GL_NEVER, 1, -1));
-		fill_solid_rect(aRect, colour::White);
+		fill_rect(aRect, colour::White);
 		glCheck(glStencilFunc(GL_NEVER, 1, -1));
 		glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
 		glCheck(glDepthMask(GL_TRUE));
@@ -227,7 +309,7 @@ namespace neogfx
 		glCheck(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));  // draw 1s on test fail (always)
 		glCheck(glStencilMask(-1));
 		glCheck(glStencilFunc(GL_NEVER, 0, -1));
-		fill_solid_rect(rendering_area(), colour::White);
+		fill_rect(rendering_area(), colour::White);
 		glCheck(glStencilFunc(GL_EQUAL, 1, -1));
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
 		{
@@ -356,7 +438,7 @@ namespace neogfx
 	void opengl_graphics_context::clear(const colour& aColour)
 	{
 		disable_anti_alias daa(*this);
-		fill_solid_rect(rendering_area(), aColour);
+		fill_rect(rendering_area(), aColour);
 	}
 
 	void opengl_graphics_context::set_pixel(const point& aPoint, const colour& aColour)
@@ -398,35 +480,18 @@ namespace neogfx
 			reset_clip();
 	}
 
-	namespace
+	void opengl_graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
 	{
-		std::vector<GLdouble> circle_vertices(const point& aCentre, dimension aRadius, bool aIncludeCentre)
-		{
-			std::vector<GLdouble> result;
-			uint32_t segments = static_cast<uint32_t>(20 * std::sqrt(aRadius));
-			result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
-			if (aIncludeCentre)
-			{
-				result.push_back(aCentre.x);
-				result.push_back(aCentre.y);
-			}
-			coordinate theta = boost::math::constants::two_pi<coordinate>() / static_cast<coordinate>(segments);
-			coordinate c = std::cos(theta);
-			coordinate s = std::sin(theta);
-			coordinate x = aRadius;
-			coordinate y = 0.0;
-			for (uint32_t i = 0; i < segments; ++i)
-			{
-				result.push_back(x + aCentre.x);
-				result.push_back(y + aCentre.y);
-				coordinate t = x;
-				x = c * x - s * y;
-				y = s * t + c * y;
-			}
-			result.push_back(result[aIncludeCentre ? 2 : 0]);
-			result.push_back(result[aIncludeCentre ? 3 : 1]);
-			return result;
-		}
+		auto vertices = rounded_rect_vertices(aRect, aRadius, false);
+		std::vector<double> texCoords(vertices.size(), 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size() / 2));
+		glCheck(glLineWidth(1.0f));
+
 	}
 
 	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen)
@@ -463,7 +528,7 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::fill_solid_rect(const rect& aRect, const colour& aColour)
+	void opengl_graphics_context::fill_rect(const rect& aRect, const colour& aColour)
 	{
 		path rectPath(aRect);
 		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
@@ -475,7 +540,7 @@ namespace neogfx
 		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath.shape()), 0, vertices.size() / 2));
 	}
 
-	void opengl_graphics_context::fill_gradient_rect(const rect& aRect, const gradient& aGradient)
+	void opengl_graphics_context::fill_rect(const rect& aRect, const gradient& aGradient)
 	{
 		if (aRect.empty())
 			return;
@@ -504,6 +569,13 @@ namespace neogfx
 				}
 			}
 		}
+		else if (aGradient.direction() == gradient::Radial)
+		{
+			colour e = aGradient.at(1.0);
+			colours = decltype(colours){ vertices.size() / 2, std::array < uint8_t, 4 > { {e.red(), e.green(), e.blue(), e.alpha()}} };
+			colour c = aGradient.at(0.0);
+			colours[0] = std::array < uint8_t, 4 > { {c.red(), c.green(), c.blue(), c.alpha()}};
+		}
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
@@ -511,7 +583,58 @@ namespace neogfx
 		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath.shape()), 0, vertices.size() / 2));
 	}
 
-	void opengl_graphics_context::fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour)
+	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const colour& aColour)
+	{
+		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
+		std::vector<double> texCoords(vertices.size(), 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+	}
+
+	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const gradient& aGradient)
+	{
+		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
+		std::vector<double> texCoords(vertices.size(), 0.0);
+		std::vector<std::array<uint8_t, 4>> colours;
+		if (aGradient.direction() == gradient::Vertical)
+		{
+			for (auto& v : vertices)
+			{
+				if ((&v - &vertices[0]) % 2 == 1)
+				{
+					colour c = aGradient.at(v, aRect.top(), aRect.bottom());
+					colours.push_back(std::array < uint8_t, 4 > { {c.red(), c.green(), c.blue(), c.alpha()}});
+				}
+			}
+		}
+		else if (aGradient.direction() == gradient::Horizontal)
+		{
+			for (auto& v : vertices)
+			{
+				if ((&v - &vertices[0]) % 2 == 0)
+				{
+					colour c = aGradient.at(v, aRect.left(), aRect.right());
+					colours.push_back(std::array < uint8_t, 4 > { {c.red(), c.green(), c.blue(), c.alpha()}});
+				}
+			}
+		}
+		else if (aGradient.direction() == gradient::Radial)
+		{
+			colour e = aGradient.at(1.0);
+			colours = decltype(colours){ vertices.size() / 2, std::array < uint8_t, 4 > { {e.red(), e.green(), e.blue(), e.alpha()}} };
+			colour c = aGradient.at(0.0);
+			colours[0] = std::array < uint8_t, 4 > { {c.red(), c.green(), c.blue(), c.alpha()}};
+		}
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+	}
+
+	void opengl_graphics_context::fill_circle(const point& aCentre, dimension aRadius, const colour& aColour)
 	{
 		auto vertices = circle_vertices(aCentre, aRadius, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
@@ -522,7 +645,7 @@ namespace neogfx
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
 	}
 
-	void opengl_graphics_context::fill_solid_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour)
+	void opengl_graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour)
 	{
 		vertex_list2 vertices;
 		vertices.reserve(aVertices.size() + 2);

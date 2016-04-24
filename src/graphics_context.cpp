@@ -222,6 +222,11 @@ namespace neogfx
 		iNativeGraphicsContext->draw_rect(to_device_units(aRect) + iOrigin, aPen);
 	}
 
+	void graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen) const
+	{
+		iNativeGraphicsContext->draw_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aPen);
+	}
+
 	void graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen) const
 	{
 		iNativeGraphicsContext->draw_circle(to_device_units(aCentre) + iOrigin, aRadius, aPen);
@@ -243,37 +248,47 @@ namespace neogfx
 		pop_logical_operation();
 	}
 
-	void graphics_context::fill_solid_rect(const rect& aRect, const colour& aColour) const
+	void graphics_context::fill_rect(const rect& aRect, const colour& aColour) const
 	{
-		iNativeGraphicsContext->fill_solid_rect(to_device_units(aRect) + iOrigin, aColour);
+		iNativeGraphicsContext->fill_rect(to_device_units(aRect) + iOrigin, aColour);
 	}
 
-	void graphics_context::fill_gradient_rect(const rect& aRect, const gradient& aGradient) const
+	void graphics_context::fill_rect(const rect& aRect, const gradient& aGradient) const
 	{
-		iNativeGraphicsContext->fill_gradient_rect(to_device_units(aRect) + iOrigin, aGradient);
+		iNativeGraphicsContext->fill_rect(to_device_units(aRect) + iOrigin, aGradient);
 	}
 
-	void graphics_context::fill_solid_circle(const point& aCentre, dimension aRadius, const colour& aColour) const
+	void graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const colour& aColour) const
 	{
-		iNativeGraphicsContext->fill_solid_circle(to_device_units(aCentre) + iOrigin, aRadius, aColour);
+		iNativeGraphicsContext->fill_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aColour);
 	}
 
-	void graphics_context::fill_solid_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) const
+	void graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const gradient& aGradient) const
+	{
+		iNativeGraphicsContext->fill_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aGradient);
+	}
+
+	void graphics_context::fill_circle(const point& aCentre, dimension aRadius, const colour& aColour) const
+	{
+		iNativeGraphicsContext->fill_circle(to_device_units(aCentre) + iOrigin, aRadius, aColour);
+	}
+
+	void graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) const
 	{
 		vertex_list2 vertices;
 		vertices.reserve(aVertices.size());
 		for (const auto& v : aVertices)
 			vertices.push_back(to_device_units(v) + iOrigin.to_vector());
-		iNativeGraphicsContext->fill_solid_shape(to_device_units(aCentre) + iOrigin, vertices, aColour);
+		iNativeGraphicsContext->fill_shape(to_device_units(aCentre) + iOrigin, vertices, aColour);
 	}
 
-	void graphics_context::fill_solid_shape(const point& aCentre, const vertex_list3& aVertices, const colour& aColour) const
+	void graphics_context::fill_shape(const point& aCentre, const vertex_list3& aVertices, const colour& aColour) const
 	{
 		vertex_list2 vertices;
 		vertices.reserve(aVertices.size());
 		for (const auto& v : aVertices)
 			vertices.push_back(to_device_units(v.xy) + iOrigin.to_vector());
-		iNativeGraphicsContext->fill_solid_shape(to_device_units(aCentre) + iOrigin, vertices, aColour);
+		iNativeGraphicsContext->fill_shape(to_device_units(aCentre) + iOrigin, vertices, aColour);
 	}
 
 	void graphics_context::fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aOutlinePen) const
@@ -620,7 +635,7 @@ namespace neogfx
 		if (origin() == point{} && extents() == iSurface.extents())
 			iNativeGraphicsContext->clear(aColour);
 		else
-			fill_solid_rect(rect{origin(), extents()}, aColour);
+			fill_rect(rect{origin(), extents()}, aColour);
 	}
 
 	glyph_text graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const
