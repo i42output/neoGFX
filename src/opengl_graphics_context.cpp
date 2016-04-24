@@ -55,85 +55,92 @@ namespace neogfx
 			return path_shape_to_gl_mode(aPath.shape());
 		}
 
-		namespace
+		inline std::vector<GLdouble> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
 		{
-			std::vector<GLdouble> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
+			std::vector<GLdouble> result;
+			uint32_t segments = static_cast<uint32_t>(20 * std::sqrt(aRadius));
+			result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
+			if (aIncludeCentre)
 			{
-				std::vector<GLdouble> result;
-				uint32_t segments = static_cast<uint32_t>(20 * std::sqrt(aRadius));
-				result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
-				if (aIncludeCentre)
-				{
-					result.push_back(aCentre.x);
-					result.push_back(aCentre.y);
-				}
-				coordinate theta = (aEndAngle - aStartAngle) / static_cast<coordinate>(segments);
-				coordinate c = std::cos(theta);
-				coordinate s = std::sin(theta);
-				auto startCoordinate = mat22{ { std::cos(aStartAngle), std::sin(aStartAngle) },{ -std::sin(aStartAngle), std::cos(aStartAngle) } } *
-					vec2{ aRadius, 0.0 };
-				coordinate x = startCoordinate.x;
-				coordinate y = startCoordinate.y;
-				for (uint32_t i = 0; i < segments; ++i)
-				{
-					result.push_back(x + aCentre.x);
-					result.push_back(y + aCentre.y);
-					coordinate t = x;
-					x = c * x - s * y;
-					y = s * t + c * y;
-				}
-				return result;
+				result.push_back(aCentre.x);
+				result.push_back(aCentre.y);
 			}
+			coordinate theta = (aEndAngle - aStartAngle) / static_cast<coordinate>(segments);
+			coordinate c = std::cos(theta);
+			coordinate s = std::sin(theta);
+			auto startCoordinate = mat22{ { std::cos(aStartAngle), std::sin(aStartAngle) },{ -std::sin(aStartAngle), std::cos(aStartAngle) } } *
+				vec2{ aRadius, 0.0 };
+			coordinate x = startCoordinate.x;
+			coordinate y = startCoordinate.y;
+			for (uint32_t i = 0; i < segments; ++i)
+			{
+				result.push_back(x + aCentre.x);
+				result.push_back(y + aCentre.y);
+				coordinate t = x;
+				x = c * x - s * y;
+				y = s * t + c * y;
+			}
+			return result;
+		}
 
-			std::vector<GLdouble> circle_vertices(const point& aCentre, dimension aRadius, bool aIncludeCentre)
-			{
-				auto result = arc_vertices(aCentre, aRadius, 0, boost::math::constants::two_pi<coordinate>(), aIncludeCentre);
-				result.push_back(result[aIncludeCentre ? 2 : 0]);
-				result.push_back(result[aIncludeCentre ? 3 : 1]);
-				return result;
-			}
+		inline std::vector<GLdouble> circle_vertices(const point& aCentre, dimension aRadius, bool aIncludeCentre)
+		{
+			auto result = arc_vertices(aCentre, aRadius, 0, boost::math::constants::two_pi<coordinate>(), aIncludeCentre);
+			result.push_back(result[aIncludeCentre ? 2 : 0]);
+			result.push_back(result[aIncludeCentre ? 3 : 1]);
+			return result;
+		}
 
-			std::vector<GLdouble> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre)
+		inline std::vector<GLdouble> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre)
+		{
+			std::vector<GLdouble> result;
+			auto topLeft = arc_vertices(
+				aRect.top_left() + point{ aRadius, aRadius },
+				aRadius,
+				boost::math::constants::pi<coordinate>(),
+				boost::math::constants::pi<coordinate>() * 1.5,
+				false);
+			auto topRight = arc_vertices(
+				aRect.top_right() + point{ -aRadius, aRadius },
+				aRadius,
+				boost::math::constants::pi<coordinate>() * 1.5,
+				boost::math::constants::pi<coordinate>() * 2.0,
+				false);
+			auto bottomRight = arc_vertices(
+				aRect.bottom_right() + point{ -aRadius, -aRadius },
+				aRadius,
+				0.0,
+				boost::math::constants::pi<coordinate>() * 0.5,
+				false);
+			auto bottomLeft = arc_vertices(
+				aRect.bottom_left() + point{ aRadius, -aRadius },
+				aRadius,
+				boost::math::constants::pi<coordinate>() * 0.5,
+				boost::math::constants::pi<coordinate>(),
+				false);
+			result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aIncludeCentre ? 2 : 1));
+			if (aIncludeCentre)
 			{
-				std::vector<GLdouble> result;
-				auto topLeft = arc_vertices(
-					aRect.top_left() + point{ aRadius, aRadius },
-					aRadius,
-					boost::math::constants::pi<coordinate>(),
-					boost::math::constants::pi<coordinate>() * 1.5,
-					false);
-				auto topRight = arc_vertices(
-					aRect.top_right() + point{ -aRadius, aRadius },
-					aRadius,
-					boost::math::constants::pi<coordinate>() * 1.5,
-					boost::math::constants::pi<coordinate>() * 2.0,
-					false);
-				auto bottomRight = arc_vertices(
-					aRect.bottom_right() + point{ -aRadius, -aRadius },
-					aRadius,
-					0.0,
-					boost::math::constants::pi<coordinate>() * 0.5,
-					false);
-				auto bottomLeft = arc_vertices(
-					aRect.bottom_left() + point{ aRadius, -aRadius },
-					aRadius,
-					boost::math::constants::pi<coordinate>() * 0.5,
-					boost::math::constants::pi<coordinate>(),
-					false);
-				result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aIncludeCentre ? 2 : 1));
-				if (aIncludeCentre)
-				{
-					result.push_back(aRect.centre().x);
-					result.push_back(aRect.centre().y);
-				}
-				result.insert(result.end(), topLeft.begin(), topLeft.end());
-				result.insert(result.end(), topRight.begin(), topRight.end());
-				result.insert(result.end(), bottomRight.begin(), bottomRight.end());
-				result.insert(result.end(), bottomLeft.begin(), bottomLeft.end());
-				result.push_back(result[aIncludeCentre ? 2 : 0]);
-				result.push_back(result[aIncludeCentre ? 3 : 1]);
-				return result;
+				result.push_back(aRect.centre().x);
+				result.push_back(aRect.centre().y);
 			}
+			result.insert(result.end(), topLeft.begin(), topLeft.end());
+			result.insert(result.end(), topRight.begin(), topRight.end());
+			result.insert(result.end(), bottomRight.begin(), bottomRight.end());
+			result.insert(result.end(), bottomLeft.begin(), bottomLeft.end());
+			result.push_back(result[aIncludeCentre ? 2 : 0]);
+			result.push_back(result[aIncludeCentre ? 3 : 1]);
+			return result;
+		}
+
+		inline double pixel_adjust(const dimension aWidth)
+		{
+			return static_cast<uint32_t>(aWidth) % 2 == 1 ? 0.5 : 0.0;
+		}
+
+		inline double pixel_adjust(const pen& aPen)
+		{
+			return pixel_adjust(aPen.width());
 		}
 	}
 
@@ -451,7 +458,8 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
 	{
-		std::vector<double> vertices{aFrom.x, aFrom.y, aTo.x, aTo.y};
+		double pixelAdjust = pixel_adjust(aPen);
+		std::vector<double> vertices{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust, aTo.x + pixelAdjust, aTo.y + pixelAdjust };
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
@@ -464,25 +472,28 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
-		path rectPath(aRect, iLineStippleActive ? path::LineLoop : path::ConvexPolygon);
-		if (!iLineStippleActive)
-			clip_to(rectPath, aPen.width());
-		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
+		double pixelAdjust = pixel_adjust(aPen);
+		std::vector<double> vertices =
+		{
+			aRect.top_left().x, aRect.top_left().y + pixelAdjust, aRect.top_right().x, aRect.top_right().y + pixelAdjust,
+			aRect.top_right().x - pixelAdjust, aRect.top_right().y, aRect.bottom_right().x - pixelAdjust, aRect.bottom_right().y,
+			aRect.bottom_right().x, aRect.bottom_right().y - pixelAdjust, aRect.bottom_left().x, aRect.bottom_left().y - pixelAdjust,
+			aRect.bottom_left().x + pixelAdjust, aRect.bottom_left().y, aRect.top_left().x + pixelAdjust, aRect.top_left().y
+		};
 		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath), 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_LINES, 0, vertices.size() / 2));
 		glCheck(glLineWidth(1.0f));
-		if (!iLineStippleActive)
-			reset_clip();
 	}
 
 	void opengl_graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
 	{
-		auto vertices = rounded_rect_vertices(aRect, aRadius, false);
+		double pixelAdjust = pixel_adjust(aPen);
+		auto vertices = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
@@ -491,7 +502,6 @@ namespace neogfx
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size() / 2));
 		glCheck(glLineWidth(1.0f));
-
 	}
 
 	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen)
