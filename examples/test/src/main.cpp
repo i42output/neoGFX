@@ -124,11 +124,25 @@ int main(int argc, char* argv[])
 		subMenu2.set_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#folder.png");
 		auto& subMenu3 = favouritesMenu.add_sub_menu("Marvel Characters");
 		subMenu3.set_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#folder.png");
+		favouritesMenu.add_separator();
+		for (int i = 1; i <= 5; ++i)
+		{
+			auto& sm = favouritesMenu.add_sub_menu("More" + boost::lexical_cast<std::string>(i));
+			for (int j = 1; j <= 5; ++j)
+			{
+				auto& sm2 = sm.add_sub_menu("More" + boost::lexical_cast<std::string>(j));
+				int n = rand() % 100;
+				for (int k = 1; k < n; ++k)
+				{
+					sm2.add_action(app.add_action("More" + boost::lexical_cast<std::string>(k)));
+				}
+			}
+		}
 		menu.add_action(contactsAction);
 		menu.add_action(muteAction);
 		auto& windowMenu = menu.add_sub_menu("Window");
 		auto& helpMenu = menu.add_sub_menu("Help");
-
+/*
 		ng::toolbar toolbar(layout0);
 		toolbar.add_action(contactsAction);
 		toolbar.add_action(addFavouriteAction);
@@ -352,7 +366,7 @@ int main(int argc, char* argv[])
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
 		tabContainer.add_tab_page("XYZZY").tab().set_image(smallHash); 
-
+		*/
 		return app.exec();
 	}
 	catch (std::exception& e)

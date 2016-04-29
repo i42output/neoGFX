@@ -36,6 +36,8 @@ namespace neogfx
 		virtual neogfx::size_policy size_policy() const;	
 	public:
 		virtual colour background_colour() const;
+	public:
+		i_menu& menu() const;
 	private:
 		void init();
 	private:

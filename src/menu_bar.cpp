@@ -82,10 +82,13 @@ namespace neogfx
 		}, this);
 		item_selected([this](i_menu_item& aMenuItem)
 		{
-			if (aMenuItem.type() == i_menu_item::Action ||
-				(aMenuItem.type() == i_menu_item::SubMenu && iOpenSubMenu.get() != 0 && iOpenSubMenu.get() != &layout().get_widget<i_widget>(find_item(aMenuItem.sub_menu()))))
+			if (iOpenSubMenu.get() != 0)
 			{
-				iOpenSubMenu.reset();
+				if (aMenuItem.type() == i_menu_item::Action ||
+					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
+				{
+					iOpenSubMenu.reset();
+				}
 			}
 			update();
 		}, this);

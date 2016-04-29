@@ -62,6 +62,11 @@ namespace neogfx
 			app::instance().current_style().colour().lighter(0x40);
 	}
 
+	i_menu& popup_menu::menu() const
+	{
+		return iMenu;
+	}
+
 	void popup_menu::init()
 	{
 		iLayout.set_margins(neogfx::margins{});
@@ -85,10 +90,13 @@ namespace neogfx
 		layout_items();
 		iMenu.item_selected([this](i_menu_item& aMenuItem)
 		{
-			if (aMenuItem.type() == i_menu_item::Action ||
-				(aMenuItem.type() == i_menu_item::SubMenu && iOpenSubMenu.get() != 0 && iOpenSubMenu.get() != &layout().get_widget<i_widget>(iMenu.find_item(aMenuItem.sub_menu()))))
+			if (iOpenSubMenu.get() != 0)
 			{
-				iOpenSubMenu.reset();
+				if (aMenuItem.type() == i_menu_item::Action ||
+					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
+				{
+					iOpenSubMenu.reset();
+				}
 			}
 			update();
 		}, this);
