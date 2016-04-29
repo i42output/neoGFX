@@ -62,8 +62,8 @@ namespace neogfx
 			rect bestNode;
 			dimension bestScore1 = std::numeric_limits<dimension>::max();
 			dimension bestScore2 = std::numeric_limits<dimension>::max();
-			size_t bestSkylineIndex = -1;
-			size_t bestrectIndex = -1;
+			size_t bestSkylineIndex = static_cast<size_t>(-1);
+			size_t bestrectIndex = static_cast<size_t>(-1);
 			for (size_t i = 0; i < aRects.size(); ++i)
 			{
 				rect newNode;
@@ -93,7 +93,7 @@ namespace neogfx
 				}
 			}
 
-			if (bestrectIndex == -1)
+			if (bestrectIndex == static_cast<size_t>(-1))
 				return;
 
 			add_skyline_level(bestSkylineIndex, bestNode);
@@ -218,7 +218,7 @@ namespace neogfx
 	{
 		aBestHeight = std::numeric_limits<dimension>::max();
 		aBestWidth = std::numeric_limits<dimension>::max();
-		aBestIndex = -1;
+		aBestIndex = static_cast<size_t>(-1);
 		rect newNode = {};
 		for (size_t i = 0; i < iSkyLine.size(); ++i)
 		{
@@ -274,7 +274,7 @@ namespace neogfx
 	{
 		aBestHeight = std::numeric_limits<dimension>::max();
 		aBestWastedArea = std::numeric_limits<dimension>::max();
-		aBestIndex = -1;
+		aBestIndex = static_cast<size_t>(-1);
 		rect newNode = {};
 		for (size_t i = 0; i < iSkyLine.size(); ++i)
 		{

@@ -211,16 +211,10 @@ namespace neogfx
 
 	bool font_manager::is_font_file(const std::string& aFileName) const
 	{
-		FT_Error error;
 		FT_Face face;
-		if ((error = FT_New_Face(
-			iFontLib,
-			aFileName.c_str(),
-			0,
-			&face)))
-		{
+		FT_Error error = FT_New_Face(iFontLib, aFileName.c_str(), 0, &face);
+		if (error)
 			return false;
-		}
 		FT_Done_Face(face);
 		return true;
 	}
@@ -228,31 +222,54 @@ namespace neogfx
 	std::unique_ptr<i_native_font_face> font_manager::load_font_from_file(const std::string& aFileName, const i_device_resolution& aDevice)
 	{
 		throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
+		(void)aFileName;
+		(void)aDevice;
 	}
 
 	std::unique_ptr<i_native_font_face> font_manager::load_font_from_file(const std::string& aFileName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
 	{
 		throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
+		(void)aFileName;
+		(void)aStyle;
+		(void)aSize;
+		(void)aDevice;
 	}
 
 	std::unique_ptr<i_native_font_face> font_manager::load_font_from_file(const std::string& aFileName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
 	{
 		throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
+		(void)aFileName;
+		(void)aStyleName;
+		(void)aSize;
+		(void)aDevice;
 	}
 
 	std::unique_ptr<i_native_font_face> font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice)
 	{
 		throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
+		(void)aData;
+		(void)aSizeInBytes;
+		(void)aDevice;
 	}
 
 	std::unique_ptr<i_native_font_face> font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
 	{
 		throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
+		(void)aData;
+		(void)aSizeInBytes;
+		(void)aStyle;
+		(void)aSize;
+		(void)aDevice;
 	}
 
 	std::unique_ptr<i_native_font_face> font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
 	{
 		throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
+		(void)aData;
+		(void)aSizeInBytes;
+		(void)aStyleName;
+		(void)aSize;
+		(void)aDevice;
 	}
 
 	i_native_font& font_manager::find_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize)
@@ -290,7 +307,7 @@ namespace neogfx
 		}
 	}
 
-	i_native_font& font_manager::find_best_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize)
+	i_native_font& font_manager::find_best_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size)
 	{
 		auto family = iFontFamilies.find(neolib::make_ci_string(aFamilyName));
 		if (family == iFontFamilies.end())

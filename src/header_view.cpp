@@ -228,7 +228,7 @@ namespace neogfx
 		}
 	}
 
-	void header_view::column_info_changed(const i_item_model& aModel, item_model_index::value_type aColumnIndex)
+	void header_view::column_info_changed(const i_item_model&, item_model_index::value_type)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -237,7 +237,7 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::item_added(const i_item_model& aModel, const item_model_index& aItemIndex)
+	void header_view::item_added(const i_item_model&, const item_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -246,7 +246,7 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::item_changed(const i_item_model& aModel, const item_model_index& aItemIndex)
+	void header_view::item_changed(const i_item_model&, const item_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -255,7 +255,7 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::item_removed(const i_item_model& aModel, const item_model_index& aItemIndex)
+	void header_view::item_removed(const i_item_model&, const item_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -264,13 +264,13 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::items_sorted(const i_item_model& aModel)
+	void header_view::items_sorted(const i_item_model&)
 	{
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::model_destroyed(const i_item_model& aModel)
+	void header_view::model_destroyed(const i_item_model&)
 	{
 		iModel.reset();
 	}
@@ -356,7 +356,6 @@ namespace neogfx
 	void header_view::update_from_row(uint32_t aRow, bool aUpdateOwner)
 	{
 		graphics_context gc(*this);
-		dimension rowHorizontalExtent = 0.0;
 		bool updated = false;
 		for (uint32_t col = 0; col < model().columns(item_model_index(aRow)); ++col)
 		{

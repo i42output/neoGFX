@@ -135,7 +135,7 @@ namespace neogfx
 		return minimum_size(aAvailableSpace);
 	}
 
-	void tab_bar::paint(graphics_context& aGraphicsContext) const
+	void tab_bar::paint(graphics_context&) const
 	{
 	}
 }

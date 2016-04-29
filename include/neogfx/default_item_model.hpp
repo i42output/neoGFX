@@ -61,51 +61,51 @@ namespace neogfx
 	};
 
 	template <class Container>
-	struct container_helper
+	struct container_default_operations
 	{
-		struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::container_helper::operation_not_supported") {} };
+		struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::container_default_operations::operation_not_supported") {} };
 		template <typename T>
-		static typename Container::iterator append(Container& aContainer, typename Container::const_iterator aParent, const T& aValue)
+		static typename Container::iterator append(Container&, typename Container::const_iterator, const T&)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::iterator sibling_begin(Container& aContainer)
+		static i_item_model::iterator sibling_begin(Container&)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::const_iterator sibling_begin(const Container& aContainer)
+		static i_item_model::const_iterator sibling_begin(const Container&)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::iterator sibling_end(Container& aContainer)
+		static i_item_model::iterator sibling_end(Container&)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::const_iterator sibling_end(const Container& aContainer)
+		static i_item_model::const_iterator sibling_end(const Container&)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::iterator parent(Container& aContainer, i_item_model::iterator aChild)
+		static i_item_model::iterator parent(Container&, i_item_model::iterator)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::const_iterator parent(const Container& aContainer, i_item_model::const_iterator aChild)
+		static i_item_model::const_iterator parent(const Container&, i_item_model::const_iterator)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::iterator sibling_begin(Container& aContainer, i_item_model::iterator aParent)
+		static i_item_model::iterator sibling_begin(Container&, i_item_model::iterator)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::const_iterator sibling_begin(const Container& aContainer, i_item_model::const_iterator aParent)
+		static i_item_model::const_iterator sibling_begin(const Container&, i_item_model::const_iterator)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::iterator sibling_end(Container& aContainer, i_item_model::iterator aParent)
+		static i_item_model::iterator sibling_end(Container&, i_item_model::iterator)
 		{
 			throw operation_not_supported();
 		}
-		static i_item_model::const_iterator sibling_end(const Container& aContainer, i_item_model::const_iterator aParent)
+		static i_item_model::const_iterator sibling_end(const Container&, i_item_model::const_iterator)
 		{
 			throw operation_not_supported();
 		}
@@ -220,43 +220,43 @@ namespace neogfx
 		}
 		virtual i_item_model::iterator sibling_begin()
 		{
-			return base_iterator(container_helper<container_type>::sibling_begin(iItems));
+			return base_iterator(container_default_operations<container_type>::sibling_begin(iItems));
 		}
 		virtual i_item_model::const_iterator sibling_begin() const
 		{
-			return const_base_iterator(container_helper<container_type>::sibling_begin(iItems));
+			return const_base_iterator(container_default_operations<container_type>::sibling_begin(iItems));
 		}
 		virtual i_item_model::iterator sibling_end()
 		{
-			return base_iterator(container_helper<container_type>::sibling_end(iItems));
+			return base_iterator(container_default_operations<container_type>::sibling_end(iItems));
 		}
 		virtual i_item_model::const_iterator sibling_end() const
 		{
-			return const_base_iterator(container_helper<container_type>::sibling_end(iItems));
+			return const_base_iterator(container_default_operations<container_type>::sibling_end(iItems));
 		}
 		virtual i_item_model::iterator parent(i_item_model::iterator aChild)
 		{
-			return base_iterator(container_helper<container_type>::parent(iItems, aChild));
+			return base_iterator(container_default_operations<container_type>::parent(iItems, aChild));
 		}
 		virtual i_item_model::const_iterator parent(i_item_model::const_iterator aChild) const
 		{
-			return const_base_iterator(container_helper<container_type>::parent(iItems, aChild));
+			return const_base_iterator(container_default_operations<container_type>::parent(iItems, aChild));
 		}
 		virtual i_item_model::iterator sibling_begin(i_item_model::iterator aParent)
 		{
-			return base_iterator(container_helper<container_type>::sibling_begin(iItems, aParent));
+			return base_iterator(container_default_operations<container_type>::sibling_begin(iItems, aParent));
 		}
 		virtual i_item_model::const_iterator sibling_begin(i_item_model::const_iterator aParent) const
 		{
-			return const_base_iterator(container_helper<container_type>::sibling_begin(iItems, aParent));
+			return const_base_iterator(container_default_operations<container_type>::sibling_begin(iItems, aParent));
 		}
 		virtual i_item_model::iterator sibling_end(i_item_model::iterator aParent)
 		{
-			return base_iterator(container_helper<container_type>::sibling_end(iItems, aParent));
+			return base_iterator(container_default_operations<container_type>::sibling_end(iItems, aParent));
 		}
 		virtual i_item_model::const_iterator sibling_end(i_item_model::const_iterator aParent) const
 		{
-			return const_base_iterator(container_helper<container_type>::sibling_end(iItems, aParent));
+			return const_base_iterator(container_default_operations<container_type>::sibling_end(iItems, aParent));
 		}
 	public:
 		virtual void subscribe(i_item_model_subscriber& aSubscriber)
@@ -307,7 +307,7 @@ namespace neogfx
 		}
 		virtual i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue)
 		{
-			base_iterator i = container_helper<container_type>::append(iItems, aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type(aValue, row_container_type()));
+			base_iterator i = container_default_operations<container_type>::append(iItems, aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type(aValue, row_container_type()));
 			notify_observers(i_item_model_subscriber::NotifyItemAdded, iterator_to_index(i));
 			return i;
 		}
@@ -417,7 +417,7 @@ namespace neogfx
 			notify_observers(i_item_model_subscriber::NotifyItemsSorted);
 		}
 	private:
-		virtual void notify_observer(i_item_model_subscriber& aObserver, i_item_model_subscriber::notify_type aType, const void* aParameter, const void* aParameter2)
+		virtual void notify_observer(i_item_model_subscriber& aObserver, i_item_model_subscriber::notify_type aType, const void* aParameter, const void*)
 		{
 			switch (aType)
 			{

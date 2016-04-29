@@ -144,9 +144,9 @@ namespace neogfx
 			auto i = std::lower_bound(iPositions.begin(), iPositions.end(), aPosition, pred);
 			if (*i == boost::none)
 			{
-				auto i = std::lower_bound(iPositions.begin(), iPositions.end(), optional_position(), pred);
-				uint32_t row = std::distance(iPositions.begin(), i);
-				double position = (row == 0 ? 0.0 : **(std::prev(i)) + item_height(item_model_index(row - 1), aGraphicsContext));
+				auto j = std::lower_bound(iPositions.begin(), iPositions.end(), optional_position(), pred);
+				uint32_t row = std::distance(iPositions.begin(), j);
+				double position = (row == 0 ? 0.0 : **(std::prev(j)) + item_height(item_model_index(row - 1), aGraphicsContext));
 				while (row < iPositions.size())
 				{
 					iPositions[row] = position;
@@ -185,16 +185,16 @@ namespace neogfx
 				return "";
 			}
 		}
-		virtual boost::basic_format<char> cell_format(const item_model_index& aIndex) const
+		virtual boost::basic_format<char> cell_format(const item_model_index&) const
 		{
 			static const boost::basic_format<char> sDefaultFormat("%1%");
 			return sDefaultFormat;
 		}
-		virtual optional_colour cell_colour(const item_model_index& aIndex, colour_type_e aColourType) const
+		virtual optional_colour cell_colour(const item_model_index&, colour_type_e) const
 		{
 			return optional_colour();
 		}
-		virtual optional_font cell_font(const item_model_index& aIndex) const
+		virtual optional_font cell_font(const item_model_index&) const
 		{
 			return optional_font();
 		}
@@ -231,25 +231,25 @@ namespace neogfx
 			return units_converter(aGraphicsContext).from_device_units(*item_model().cell_meta(aIndex).extents);
 		}
 	private:
-		virtual void column_info_changed(const i_item_model& aModel, item_model_index::value_type aColumnIndex)
+		virtual void column_info_changed(const i_item_model&, item_model_index::value_type)
 		{
 		}
-		virtual void item_added(const i_item_model& aModel, const item_model_index& aItemIndex)
-		{
-			reset_position_meta(aItemIndex.row());
-		}
-		virtual void item_changed(const i_item_model& aModel, const item_model_index& aItemIndex)
+		virtual void item_added(const i_item_model&, const item_model_index& aItemIndex)
 		{
 			reset_position_meta(aItemIndex.row());
 		}
-		virtual void item_removed(const i_item_model& aModel, const item_model_index& aItemIndex)
+		virtual void item_changed(const i_item_model&, const item_model_index& aItemIndex)
+		{
+			reset_position_meta(aItemIndex.row());
+		}
+		virtual void item_removed(const i_item_model&, const item_model_index&)
 		{
 		}
-		virtual void items_sorted(const i_item_model& aModel)
+		virtual void items_sorted(const i_item_model&)
 		{
 			reset_position_meta(0);
 		}
-		virtual void model_destroyed(const i_item_model& aModel)
+		virtual void model_destroyed(const i_item_model&)
 		{
 			iItemModel = 0;
 		}

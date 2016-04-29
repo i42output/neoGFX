@@ -134,7 +134,7 @@ namespace neogfx
 
 	dimension units_converter::to_device_units(const size& aExtents, dimension aValue) const
 	{
-		return to_device_units(iContext.device_metrics().extents(), size{ aValue, 0 }).cx;
+		return to_device_units(aExtents, size{ aValue, 0 }).cx;
 	}
 
 	delta units_converter::to_device_units(const size& aExtents, const delta& aValue) const

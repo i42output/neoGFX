@@ -103,6 +103,8 @@ namespace neogfx
 	dimension native_font_face::kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const
 	{
 		/* todo */
+		(void)aFirstCodePoint;
+		(void)aSecondCodePoint;
 		return 0;
 	}
 

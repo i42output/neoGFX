@@ -193,7 +193,7 @@ namespace neogfx
 		return iMaximumSize != boost::none;
 	}
 
-	size spacer::maximum_size(const optional_size& aAvailableSpace) const
+	size spacer::maximum_size(const optional_size&) const
 	{
 		return has_maximum_size() ?
 			units_converter(*this).from_device_units(*iMaximumSize) :
@@ -221,7 +221,7 @@ namespace neogfx
 		return neogfx::margins{};
 	}
 
-	void spacer::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
+	void spacer::set_margins(const optional_margins&, bool)
 	{
 		/* do nothing */
 	}

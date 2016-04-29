@@ -531,7 +531,7 @@ namespace neogfx
 		return iMaximumSize != boost::none;
 	}
 
-	size layout::maximum_size(const optional_size& aAvailableSpace) const
+	size layout::maximum_size(const optional_size&) const
 	{
 		return has_maximum_size() ?
 			units_converter(*this).from_device_units(*iMaximumSize) :

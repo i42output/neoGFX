@@ -134,6 +134,7 @@ namespace neogfx
 	bool physical_object::collided(const i_physical_object& aOther) const
 	{
 		/* todo */
+		(void)aOther;
 		return false;
 	}
 

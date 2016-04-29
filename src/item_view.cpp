@@ -417,7 +417,7 @@ namespace neogfx
 		}
 	}
 
-	void item_view::column_info_changed(const i_item_model& aModel, item_model_index::value_type aColumnIndex)
+	void item_view::column_info_changed(const i_item_model&, item_model_index::value_type)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -425,7 +425,7 @@ namespace neogfx
 		update();
 	}
 
-	void item_view::item_added(const i_item_model& aModel, const item_model_index& aItemIndex)
+	void item_view::item_added(const i_item_model&, const item_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -433,7 +433,7 @@ namespace neogfx
 		update();
 	}
 
-	void item_view::item_changed(const i_item_model& aModel, const item_model_index& aItemIndex)
+	void item_view::item_changed(const i_item_model&, const item_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -441,7 +441,7 @@ namespace neogfx
 		update();
 	}
 
-	void item_view::item_removed(const i_item_model& aModel, const item_model_index& aItemIndex)
+	void item_view::item_removed(const i_item_model&, const item_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -449,17 +449,17 @@ namespace neogfx
 		update();
 	}
 
-	void item_view::items_sorted(const i_item_model& aModel)
+	void item_view::items_sorted(const i_item_model&)
 	{
 		update();
 	}
 
-	void item_view::model_destroyed(const i_item_model& aModel)
+	void item_view::model_destroyed(const i_item_model&)
 	{
 		iModel.reset();
 	}
 
-	void item_view::current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex)
+	void item_view::current_index_changed(const i_item_selection_model&, const optional_item_model_index& aCurrentIndex, const optional_item_model_index&)
 	{
 		if (aCurrentIndex != boost::none)
 			make_visible(*aCurrentIndex);
@@ -486,7 +486,7 @@ namespace neogfx
 		}
 	}
 
-	void item_view::header_view_updated(header_view& aHeaderView)
+	void item_view::header_view_updated(header_view&)
 	{
 		update_scrollbar_visibility();
 		update();

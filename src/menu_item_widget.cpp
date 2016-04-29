@@ -68,7 +68,7 @@ namespace neogfx
 		return neogfx::size_policy{ iMenu.type() == i_menu::type_e::Popup ? neogfx::size_policy::Expanding : neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
 	}
 
-	size menu_item_widget::minimum_size(const optional_size& aAvailableSpace) const
+	size menu_item_widget::minimum_size(const optional_size&) const
 	{
 		size result = widget::minimum_size();
 		if (iMenuItem.type() == i_menu_item::Action && iMenuItem.action().is_separator())
@@ -157,14 +157,14 @@ namespace neogfx
 		update();
 		if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
 		{
-			iSubMenuOpener = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			iSubMenuOpener = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
 			{
 				if (!iMenuItem.sub_menu().is_open())
 				{
 					iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
 					update();
 				}
-			}, 500);
+			}, 250);
 		}
 		iMenu.item_selected.trigger(iMenuItem);
 	}
@@ -187,7 +187,7 @@ namespace neogfx
 		}
 	}
 
-	void menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	void menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
 	{
 		if (aScanCode == ScanCode_SPACE)
 			handle_pressed();

@@ -270,6 +270,7 @@ namespace neogfx
 	bool shape::update(const optional_time_point& aNow)
 	{
 		/* todo: animate frames */
+		(void)aNow;
 		return false;
 	}
 

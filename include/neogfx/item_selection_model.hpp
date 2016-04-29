@@ -84,7 +84,6 @@ namespace neogfx
 		{
 			if (iMode == aMode)
 				return;
-			item_selection_mode oldMode = iMode;
 			iMode = aMode;
 			notify_observers(i_item_selection_model_subscriber::NotifySelectionModeChanged, mode());
 		}
@@ -129,10 +128,14 @@ namespace neogfx
 		virtual void select(const item_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect)
 		{
 			/* todo */
+			(void)aIndex;
+			(void)aOperation;
 		}
 		virtual void select(const item_selection::range& aRange, item_selection_operation aOperation = item_selection_operation::ClearAndSelect)
 		{
 			/* todo */
+			(void)aRange;
+			(void)aOperation;
 		}
 	public:
 		virtual void subscribe(i_item_selection_model_subscriber& aSubscriber)
@@ -172,19 +175,19 @@ namespace neogfx
 			}
 		}
 	private:
-		virtual void column_info_changed(const i_item_model& aModel, item_model_index::value_type aColumnIndex)
+		virtual void column_info_changed(const i_item_model&, item_model_index::value_type)
 		{
 		}
-		virtual void item_added(const i_item_model& aModel, const item_model_index& aItemIndex)
+		virtual void item_added(const i_item_model&, const item_model_index&)
 		{
 		}
-		virtual void item_changed(const i_item_model& aModel, const item_model_index& aItemIndex)
+		virtual void item_changed(const i_item_model&, const item_model_index&)
 		{
 		}
-		virtual void item_removed(const i_item_model& aModel, const item_model_index& aItemIndex)
+		virtual void item_removed(const i_item_model&, const item_model_index&)
 		{
 		}
-		virtual void items_sorted(const i_item_model& aModel)
+		virtual void items_sorted(const i_item_model&)
 		{
 		}
 		virtual void model_destroyed(const i_item_model& aModel)

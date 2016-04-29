@@ -73,7 +73,6 @@ namespace neogfx
 		}, this);
 		item_removed([this](item_index aItemIndex)
 		{
-			auto& item = layout().get_item(aItemIndex);
 			if (layout().is_widget(aItemIndex))
 			{
 				i_widget& w = layout().get_widget(aItemIndex);

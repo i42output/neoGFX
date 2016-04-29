@@ -308,17 +308,17 @@ namespace neogfx
 		glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
 		glCheck(glDepthMask(GL_FALSE));
 		glCheck(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));  // draw 1s on test fail (always)
-		glCheck(glStencilMask(-1));
-		glCheck(glStencilFunc(GL_NEVER, 0, -1));
+		glCheck(glStencilMask(static_cast<GLuint>(-1)));
+		glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
 		fill_rect(rendering_area(), colour::White);
-		glCheck(glStencilFunc(GL_NEVER, 1, -1));
+		glCheck(glStencilFunc(GL_NEVER, 1, static_cast<GLuint>(-1)));
 		fill_rect(aRect, colour::White);
-		glCheck(glStencilFunc(GL_NEVER, 1, -1));
+		glCheck(glStencilFunc(GL_NEVER, 1, static_cast<GLuint>(-1)));
 		glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
 		glCheck(glDepthMask(GL_TRUE));
 		glCheck(glStencilMask(0x00));
 		// draw only where stencil's value is 1
-		glCheck(glStencilFunc(GL_EQUAL, 1, -1));
+		glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
 	}
 
 	void opengl_graphics_context::clip_to(const path& aPath, dimension aPathOutline)
@@ -331,10 +331,10 @@ namespace neogfx
 		glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
 		glCheck(glDepthMask(GL_FALSE));
 		glCheck(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));  // draw 1s on test fail (always)
-		glCheck(glStencilMask(-1));
-		glCheck(glStencilFunc(GL_NEVER, 0, -1));
+		glCheck(glStencilMask(static_cast<GLuint>(-1)));
+		glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
 		fill_rect(rendering_area(), colour::White);
-		glCheck(glStencilFunc(GL_EQUAL, 1, -1));
+		glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
 		{
 			if (aPath.paths()[i].size() > 2)
@@ -350,7 +350,7 @@ namespace neogfx
 		}
 		if (aPathOutline != 0)
 		{
-			glCheck(glStencilFunc(GL_NEVER, 0, -1));
+			glCheck(glStencilFunc(GL_NEVER, 0, static_cast<GLuint>(-1)));
 			path innerPath = aPath;
 			innerPath.deflate(aPathOutline);
 			for (std::size_t i = 0; i < innerPath.paths().size(); ++i)
@@ -371,7 +371,7 @@ namespace neogfx
 		glCheck(glDepthMask(GL_TRUE));
 		glCheck(glStencilMask(0x00));
 		// draw only where stencil's value is 1
-		glCheck(glStencilFunc(GL_EQUAL, 1, -1));
+		glCheck(glStencilFunc(GL_EQUAL, 1, static_cast<GLuint>(-1)));
 	}
 
 	void opengl_graphics_context::reset_clip()
@@ -467,10 +467,16 @@ namespace neogfx
 
 	void opengl_graphics_context::set_pixel(const point& aPoint, const colour& aColour)
 	{
+		/* todo */
+		(void)aPoint;
+		(void)aColour;
 	}
 
 	void opengl_graphics_context::draw_pixel(const point& aPoint, const colour& aColour)
 	{
+		/* todo */
+		(void)aPoint;
+		(void)aColour;
 	}
 
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)

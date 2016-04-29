@@ -173,7 +173,7 @@ namespace neogfx
 	{
 	}
 
-	void splitter::reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane)
+	void splitter::reset_pane_sizes_requested(const boost::optional<uint32_t>&)
 	{
 	}
 

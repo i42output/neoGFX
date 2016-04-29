@@ -143,30 +143,27 @@ namespace neogfx
 
 	FT_Face native_font::open_face(FT_Long aFaceIndex)
 	{
-		FT_Error error;
 		FT_Face face;
 		if (iSource.is<filename_type>())
 		{
-			if ((error = FT_New_Face(
+			FT_Error error = FT_New_Face(
 				iFontLib,
 				static_variant_cast<const filename_type&>(iSource).c_str(),
 				aFaceIndex,
-				&face)))
-			{
+				&face);
+			if (error)
 				throw failed_to_load_font();
-			}
 		}
 		else
 		{
-			if ((error = FT_New_Memory_Face(
+			FT_Error error = FT_New_Memory_Face(
 				iFontLib,
 				static_cast<const FT_Byte*>(static_variant_cast<const memory_block_type&>(iSource).first),
 				static_variant_cast<const memory_block_type&>(iSource).second,
 				aFaceIndex,
-				&face)))
-			{
+				&face);
+			if (error)
 				throw failed_to_load_font();
-			}
 		}
 		return face;
 	}
@@ -181,8 +178,8 @@ namespace neogfx
 		{
 			std::unique_ptr<i_native_font_face> newFaceObject(new native_font_face(iRenderingEngine, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFace));
 			newFace = 0;
-			auto newFace = iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), std::move(newFaceObject))).first;
-			return *newFace->second;
+			auto iterNewFace = iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), std::move(newFaceObject))).first;
+			return *iterNewFace->second;
 		}
 		catch (...)
 		{

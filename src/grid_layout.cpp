@@ -432,25 +432,25 @@ namespace neogfx
 						{
 							point fromPos;
 							point toPos;
-							point rowPos = availablePos;
+							point rowPos2 = availablePos;
 							for (cell_coordinate row2 = 0; !foundSpan && row2 <= s.second.y; ++row2)
 							{
-								point colPos = rowPos;
+								point colPos2 = rowPos2;
 								for (cell_coordinate col2 = 0; !foundSpan && col2 <= s.second.x; ++col2)
 								{
 									if (row2 == s.first.y && col2 == s.first.x)
-										fromPos = colPos;
+										fromPos = colPos2;
 									if (row2 == s.second.y && col2 == s.second.x)
 									{
-										toPos = colPos + size{ maxColWidth[col2], maxRowHeight[row2] };
+										toPos = colPos2 + size{ maxColWidth[col2], maxRowHeight[row2] };
 										i->second->layout(fromPos, toPos - fromPos);
 										foundSpan = true;
 									}
-									colPos.x += maxColWidth[col2];
-									colPos.x += spacing().cx;
+									colPos2.x += maxColWidth[col2];
+									colPos2.x += spacing().cx;
 								}
-								rowPos.y += maxRowHeight[row2];
-								rowPos.y += spacing().cy;
+								rowPos2.y += maxRowHeight[row2];
+								rowPos2.y += spacing().cy;
 							}
 						}
 					}

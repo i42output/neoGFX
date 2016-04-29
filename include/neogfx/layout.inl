@@ -169,7 +169,6 @@ namespace neogfx
 		if (itemsVisibleIncludingSpacers == 0)
 			return;
 		uint32_t itemsVisible = items_visible();
-		bool haveSpacers = (itemsVisibleIncludingSpacers > itemsVisible);
 		size availableSize = aSize;
 		availableSize.cx -= (margins().left + margins().right);
 		availableSize.cy -= (margins().top + margins().bottom);

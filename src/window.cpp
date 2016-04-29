@@ -231,7 +231,6 @@ namespace neogfx
 	{
 		scrollable_widget::layout_items_completed();
 		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(iNativeWindow->mouse_position()) : *iCapturingWidget);
-		i_widget* previousEnteredWidget = iEnteredWidget;
 		if (iEnteredWidget != &widgetUnderMouse)
 			native_window_mouse_entered();
 	}
@@ -439,7 +438,7 @@ namespace neogfx
 		native_surface().restore_mouse_cursor();
 	}
 
-	void window::widget_added(i_widget& aWidget)
+	void window::widget_added(i_widget&)
 	{
 		layout_items(true);
 	}
@@ -620,7 +619,7 @@ namespace neogfx
 		resize(native_surface().surface_size());
 	}	
 
-	void window::native_window_render(const rect& aInvalidatedRect) const
+	void window::native_window_render(const rect&) const
 	{
 		graphics_context gc(surface());
 		gc.set_extents(extents());

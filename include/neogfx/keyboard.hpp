@@ -589,7 +589,7 @@ namespace neogfx
 			/* todo */
 		}
 	public:
-		bool operator==(const key_sequence& aRhs) const
+		bool operator==(const key_sequence& /*aRhs*/) const
 		{
 			/* todo */
 			return true;

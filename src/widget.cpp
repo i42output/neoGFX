@@ -510,7 +510,7 @@ namespace neogfx
 		move(aPosition);
 	}
 
-	point widget::origin(bool aNonClient) const
+	point widget::origin(bool) const
 	{
 		if (has_parent())
 			return position() + parent().origin(false);
@@ -824,7 +824,7 @@ namespace neogfx
 		}
 	}
 
-	void widget::paint(graphics_context& aGraphicsContext) const
+	void widget::paint(graphics_context&) const
 	{
 	}
 
@@ -1068,18 +1068,18 @@ namespace neogfx
 		}
 	}
 
-	void widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition)
+	void widget::mouse_button_double_clicked(mouse_button, const point&)
 	{
 	}
 
-	void widget::mouse_button_released(mouse_button aButton, const point& aPosition)
+	void widget::mouse_button_released(mouse_button, const point&)
 	{
 		if (capturing())
 			release_capture();
 		update();
 	}
 
-	void widget::mouse_moved(const point& aPosition)
+	void widget::mouse_moved(const point&)
 	{
 	}
 
@@ -1096,15 +1096,15 @@ namespace neogfx
 		surface().set_mouse_cursor(mouse_system_cursor::Arrow);
 	}
 
-	void widget::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	void widget::key_pressed(scan_code_e, key_code_e, key_modifiers_e)
 	{
 	}
 
-	void widget::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	void widget::key_released(scan_code_e, key_code_e, key_modifiers_e)
 	{
 	}
 
-	void widget::text_input(const std::string& aText)
+	void widget::text_input(const std::string&)
 	{
 	}
 

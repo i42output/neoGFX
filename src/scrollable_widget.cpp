@@ -280,7 +280,7 @@ namespace neogfx
 		return static_cast<child_widget_scrolling_disposition_e>(ScrollChildWidgetVertically | ScrollChildWidgetHorizontally);
 	}
 
-	scrollable_widget::child_widget_scrolling_disposition_e scrollable_widget::scrolling_disposition(const i_widget& aChildWidget) const
+	scrollable_widget::child_widget_scrolling_disposition_e scrollable_widget::scrolling_disposition(const i_widget&) const
 	{
 		return static_cast<child_widget_scrolling_disposition_e>(ScrollChildWidgetVertically | ScrollChildWidgetHorizontally);
 	}
@@ -302,7 +302,7 @@ namespace neogfx
 		}
 	}
 
-	void scrollable_widget::scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason)
+	void scrollable_widget::scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e)
 	{
 		if (iIgnoreScrollbarUpdates)
 			return;
@@ -330,7 +330,7 @@ namespace neogfx
 		update();
 	}
 
-	colour scrollable_widget::scrollbar_colour(const i_scrollbar& aScrollbar) const
+	colour scrollable_widget::scrollbar_colour(const i_scrollbar&) const
 	{
 		return background_colour();
 	}
