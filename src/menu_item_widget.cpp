@@ -65,7 +65,7 @@ namespace neogfx
 	{
 		if (widget::has_size_policy())
 			return widget::size_policy();
-		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+		return neogfx::size_policy{ iMenu.type() == i_menu::type_e::Popup ? neogfx::size_policy::Expanding : neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
 	}
 
 	size menu_item_widget::minimum_size(const optional_size& aAvailableSpace) const
@@ -164,7 +164,7 @@ namespace neogfx
 					iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
 					update();
 				}
-			}, 1000);
+			}, 500);
 		}
 		iMenu.item_selected.trigger(iMenuItem);
 	}
@@ -255,6 +255,8 @@ namespace neogfx
 				iMenuItem.action().triggered.trigger();
 				if (iMenuItem.action().is_checkable())
 					iMenuItem.action().toggle();
+				if (iMenu.type() == i_menu::Popup)
+					iMenu.close();
 			}
 		}
 		else

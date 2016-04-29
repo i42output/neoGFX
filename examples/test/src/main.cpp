@@ -344,7 +344,9 @@ int main(int argc, char* argv[])
 			aGc.draw_rounded_rect(ng::rect{ 150, 150, 300, 300 }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
 			aGc.fill_rounded_rect(ng::rect{ 500, 500, 200, 100 }, 10.0, ng::gradient{ ng::colour::Green, ng::colour::White, ng::gradient::Radial });
 			aGc.draw_rounded_rect(ng::rect{ 500, 500, 200, 100 }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
-			aGc.draw_line(ng::point{ 10, 10 }, ng::point{ 14, 10 }, ng::pen{ ng::colour::Black });
+			aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
+			aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
+			aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::colour::Yellow, 3.0 });
 		});
 		tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);

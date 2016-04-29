@@ -50,6 +50,10 @@ namespace neogfx
 			failed_to_get_window_information(const std::string& aReason) :
 				std::runtime_error("neogfx::sdl_window::failed_to_get_window_information: Failed to get window information, reason: " + aReason) {}
 		};
+		struct failed_to_detach_from_sdl_window : std::runtime_error {
+			failed_to_detach_from_sdl_window(const std::string& aReason) :
+				std::runtime_error("neogfx::sdl_window::failed_to_detach_from_sdl_window: Failed to detach from SDL window, reason: " + aReason) {}
+		};
 		struct no_cursors_saved : std::logic_error { no_cursors_saved() : std::logic_error("neogfx::sdl_window::no_cursors_saved") {} };
 	private:
 		typedef std::shared_ptr<SDL_Cursor> cursor_pointer;
@@ -105,6 +109,7 @@ namespace neogfx
 		sdl_window* iParent;
 		uint32_t iStyle;
 		SDL_Window* iHandle;
+		mutable void* iNativeHandle;
 #ifdef WIN32
 		WNDPROC iSDLWindowProc;
 #endif

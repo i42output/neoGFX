@@ -52,9 +52,10 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_font_face> create_font(const font_info& aInfo, const i_device_resolution& aDevice);
 		virtual std::unique_ptr<i_native_font_face> create_font(i_native_font& aFont, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice);
 		virtual std::unique_ptr<i_native_font_face> create_font(i_native_font& aFont, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice);
-		virtual std::unique_ptr<i_native_font_face> load_font_from_file(const std::string aFileName, const i_device_resolution& aDevice);
-		virtual std::unique_ptr<i_native_font_face> load_font_from_file(const std::string aFileName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice);
-		virtual std::unique_ptr<i_native_font_face> load_font_from_file(const std::string aFileName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice);
+		virtual bool is_font_file(const std::string& aFileName) const;
+		virtual std::unique_ptr<i_native_font_face> load_font_from_file(const std::string& aFileName, const i_device_resolution& aDevice);
+		virtual std::unique_ptr<i_native_font_face> load_font_from_file(const std::string& aFileName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice);
+		virtual std::unique_ptr<i_native_font_face> load_font_from_file(const std::string& aFileName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice);
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice);
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice);
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice);

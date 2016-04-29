@@ -232,6 +232,11 @@ namespace neogfx
 		iNativeGraphicsContext->draw_circle(to_device_units(aCentre) + iOrigin, aRadius, aPen);
 	}
 
+	void graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen) const
+	{
+		iNativeGraphicsContext->draw_arc(to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen);
+	}
+
 	void graphics_context::draw_path(const path& aPath, const pen& aPen) const
 	{
 		path path = to_device_units(aPath);
@@ -271,6 +276,11 @@ namespace neogfx
 	void graphics_context::fill_circle(const point& aCentre, dimension aRadius, const colour& aColour) const
 	{
 		iNativeGraphicsContext->fill_circle(to_device_units(aCentre) + iOrigin, aRadius, aColour);
+	}
+
+	void graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const colour& aColour) const
+	{
+		iNativeGraphicsContext->fill_arc(to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aColour);
 	}
 
 	void graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) const

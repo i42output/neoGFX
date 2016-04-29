@@ -41,7 +41,7 @@ namespace neogfx
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes>
-	class swizzle
+	struct swizzle
 	{
 	private:
 		typedef V vector_type;
@@ -83,7 +83,7 @@ namespace neogfx
 		{
 			/* finished */
 		}
-	private:
+	public:
 		array_type v;
 	};
 }

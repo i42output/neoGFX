@@ -168,13 +168,17 @@ namespace neogfx
 			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) > AxisPolicy::cx(availableSpace))
 			{
 				rows.add_item(std::make_shared<typename AxisPolicy::major_layout>());
+				rows.get_layout(rows.item_count() - 1).set_size_policy(size_policy::Minimum);
 				rows.get_layout(rows.item_count() - 1).add_item(item);
 				AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
 			}
 			else
 			{
 				if (rows.item_count() == 0)
+				{
 					rows.add_item(std::make_shared<typename AxisPolicy::major_layout>());
+					rows.get_layout(rows.item_count() - 1).set_size_policy(size_policy::Minimum);
+				}
 				rows.get_layout(rows.item_count() - 1).add_item(item);
 				AxisPolicy::x(pos) += AxisPolicy::cx(itemMinimumSize);
 			}

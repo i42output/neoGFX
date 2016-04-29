@@ -18,6 +18,7 @@
 */
 
 #include "neogfx.hpp"
+#include <thread>
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <SDL_mouse.h>
@@ -99,8 +100,9 @@ namespace neogfx
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
 		iParent(0),
 		iStyle(aStyle),
-		iHandle(NULL),
-		iContext(NULL),
+		iHandle(0),
+		iNativeHandle(0),
+		iContext(0),
 		iProcessingEvent(false),
 		iCapturingMouse(false)
 	{
@@ -112,7 +114,7 @@ namespace neogfx
 			aVideoMode.width(),
 			aVideoMode.height(),
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == NULL)
+		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
@@ -132,8 +134,9 @@ namespace neogfx
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
 		iParent(0),
 		iStyle(aStyle),
-		iHandle(NULL),
-		iContext(NULL),
+		iHandle(0),
+		iNativeHandle(0),
+		iContext(0),
 		iProcessingEvent(false),
 		iCapturingMouse(false)
 	{
@@ -145,7 +148,7 @@ namespace neogfx
 			aDimensions.cx,
 			aDimensions.cy,
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == NULL)
+		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
@@ -165,8 +168,9 @@ namespace neogfx
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
 		iParent(&aParent),
 		iStyle(aStyle),
-		iHandle(NULL),
-		iContext(NULL),
+		iHandle(0),
+		iNativeHandle(0),
+		iContext(0),
 		iProcessingEvent(false),
 		iCapturingMouse(false)
 	{
@@ -178,11 +182,11 @@ namespace neogfx
 			aVideoMode.width(),
 			aVideoMode.height(),
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == NULL)
+		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
-		if (iContext == NULL)
+		if (iContext == 0)
 		{
 			SDL_DestroyWindow(iHandle);
 			throw failed_to_create_opengl_context(SDL_GetError());
@@ -198,8 +202,9 @@ namespace neogfx
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
 		iParent(&aParent),
 		iStyle(aStyle),
-		iHandle(NULL),
-		iContext(NULL),
+		iHandle(0),
+		iNativeHandle(0),
+		iContext(0),
 		iProcessingEvent(false),
 		iCapturingMouse(false)
 	{
@@ -211,11 +216,11 @@ namespace neogfx
 			aDimensions.cx,
 			aDimensions.cy,
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == NULL)
+		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
-		if (iContext == NULL)
+		if (iContext == 0)
 		{
 			SDL_DestroyWindow(iHandle);
 			throw failed_to_create_opengl_context(SDL_GetError());
@@ -229,14 +234,7 @@ namespace neogfx
 
 	sdl_window::~sdl_window()
 	{
-		release_capture();
 		close();
-		for (auto h = sHandleMap.begin(); h != sHandleMap.end(); ++h)
-			if (h->second = this)
-			{
-				sHandleMap.erase(h);
-				break;
-			}
 	}
 
 	void* sdl_window::handle() const
@@ -246,18 +244,20 @@ namespace neogfx
 
 	void* sdl_window::native_handle() const
 	{
-		SDL_SysWMinfo info;
-		SDL_VERSION(&info.version);
-		if (SDL_GetWindowWMInfo(iHandle, &info))
+		if (iNativeHandle == 0)
 		{
+			SDL_SysWMinfo info;
+			SDL_VERSION(&info.version);
+			if (SDL_GetWindowWMInfo(iHandle, &info))
+			{
 #if defined(SDL_VIDEO_DRIVER_WINDOWS)
-			return info.info.win.window;
-#else
-			return 0;
+				iNativeHandle = info.info.win.window;
 #endif
+			}
+			else
+				throw failed_to_get_window_information(SDL_GetError());
 		}
-		else
-			throw failed_to_get_window_information(SDL_GetError());
+		return iNativeHandle;
 	}
 
 	void* sdl_window::native_context() const
@@ -296,7 +296,7 @@ namespace neogfx
 		int x, y;
 		SDL_Window* mouseFocus = SDL_GetMouseFocus();
 		SDL_GetMouseState(&x, &y);
-		if (mouseFocus != NULL)
+		if (mouseFocus != 0)
 		{
 			int mfx, mfy;
 			SDL_GetWindowPosition(mouseFocus, &mfx, &mfy);
@@ -311,7 +311,7 @@ namespace neogfx
 
 	bool sdl_window::is_mouse_button_pressed(mouse_button aButton) const
 	{
-		return (aButton & convert_mouse_button(SDL_GetMouseState(NULL, NULL))) != mouse_button::None;
+		return (aButton & convert_mouse_button(SDL_GetMouseState(0, 0))) != mouse_button::None;
 	}
 
 	void sdl_window::save_mouse_cursor()
@@ -388,10 +388,24 @@ namespace neogfx
 
 	void sdl_window::close()
 	{
-		event_handler().native_window_closing();
-		SDL_DestroyWindow(iHandle);
-		iHandle = NULL;
-		event_handler().native_window_closed();
+		if (iHandle != 0)
+		{
+			release_capture();
+			event_handler().native_window_closing();
+#ifdef WIN32
+			if (SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)iSDLWindowProc) == 0)
+				throw failed_to_detach_from_sdl_window(neolib::win32_get_last_error_as_string());
+#endif
+			SDL_DestroyWindow(iHandle);
+			iHandle = 0;
+			for (auto h = sHandleMap.begin(); h != sHandleMap.end(); ++h)
+				if (h->second == this)
+				{
+					sHandleMap.erase(h);
+					break;
+				}
+			event_handler().native_window_closed();
+		}
 	}
 
 	void sdl_window::show(bool aActivate)
@@ -421,7 +435,7 @@ namespace neogfx
 	{
 		SDL_RaiseWindow(iHandle);
 #ifdef WIN32
-		SetWindowPos(static_cast<HWND>(native_handle()), NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+		SetWindowPos(static_cast<HWND>(native_handle()), 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 #endif
 	}
 
@@ -476,14 +490,13 @@ namespace neogfx
 		sHandleMap[native_handle()] = this;
 #ifdef WIN32
 		iSDLWindowProc = (WNDPROC)SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)&CustomWindowProc);
-		SetClassLongPtr(static_cast<HWND>(native_handle()), GCL_STYLE, CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_SAVEBITS | CS_DROPSHADOW);
 		if (iStyle & window::None)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP | WS_BORDER);
+			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
 		if (iStyle & window::NoActivate)
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
 		if (iParent != 0)
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(iParent->native_handle()));
-		SetWindowPos(static_cast<HWND>(native_handle()), NULL, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+		SetWindowPos(static_cast<HWND>(native_handle()), 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 #endif
 	}
 

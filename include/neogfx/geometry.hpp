@@ -30,7 +30,6 @@ namespace neogfx
 	typedef coordinate_value_type coordinate;
 	typedef coordinate_value_type dimension;
 	typedef coordinate_value_type coordinate_delta;
-	typedef coordinate_value_type angle;
 
 	template <typename CoordinateType>
 	class basic_delta 

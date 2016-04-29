@@ -125,6 +125,7 @@ namespace neogfx
 		void draw_rect(const rect& aRect, const pen& aPen) const;
 		void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen) const;
 		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen) const;
+		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen) const;
 		void draw_path(const path& aPath, const pen& aPen) const;
 		void draw_focus_rect(const rect& aRect) const;
 		void fill_rect(const rect& aRect, const colour& aColour) const;
@@ -132,6 +133,7 @@ namespace neogfx
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const colour& aColour) const;		
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const gradient& aGradient) const;
 		void fill_circle(const point& aCentre, dimension aRadius, const colour& aColour) const;
+		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const colour& aColour) const;
 		void fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) const;
 		void fill_shape(const point& aCentre, const vertex_list3& aVertices, const colour& aColour) const;
 		void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aOutlinePen) const;

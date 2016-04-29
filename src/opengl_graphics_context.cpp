@@ -142,6 +142,23 @@ namespace neogfx
 		{
 			return pixel_adjust(aPen.width());
 		}
+
+		inline std::vector<GLdouble> line_loop_to_lines(const std::vector<GLdouble>& aLineLoop)
+		{
+			std::vector<GLdouble> result;
+			result.reserve(aLineLoop.size() * 2);
+			for (auto v = aLineLoop.begin(); v != aLineLoop.end(); v += 2)
+			{
+				result.push_back(*v);
+				result.push_back(*(v + 1));
+				if (v != aLineLoop.begin() && v != aLineLoop.end() - 2)
+				{
+					result.push_back(*v);
+					result.push_back(*(v + 1));
+				}
+			}
+			return result;
+		}
 	}
 
 	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface) :
@@ -517,6 +534,19 @@ namespace neogfx
 		glCheck(glLineWidth(1.0f));
 	}
 
+	void opengl_graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
+	{
+		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));
+		std::vector<double> texCoords(vertices.size(), 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_LINES, 0, vertices.size() / 2));
+		glCheck(glLineWidth(1.0f));
+	}
+
 	void opengl_graphics_context::draw_path(const path& aPath, const pen& aPen)
 	{
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
@@ -649,6 +679,17 @@ namespace neogfx
 		auto vertices = circle_vertices(aCentre, aRadius, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+	}
+
+	void opengl_graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const colour& aColour)
+	{
+		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
+		std::vector<double> texCoords(vertices.size(), 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));

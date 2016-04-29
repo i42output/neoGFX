@@ -60,12 +60,14 @@ namespace neogfx
 		virtual void draw_rect(const rect& aRect, const pen& aPen) = 0;
 		virtual void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen) = 0;
 		virtual void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen) = 0;
+		virtual void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen) = 0;
 		virtual void draw_path(const path& aPath, const pen& aPen) = 0;
 		virtual void fill_rect(const rect& aRect, const colour& aColour) = 0;
 		virtual void fill_rect(const rect& aRect, const gradient& aGradient) = 0;
 		virtual void fill_rounded_rect(const rect& aRect, dimension aRadius, const colour& aColour) = 0;
 		virtual void fill_rounded_rect(const rect& aRect, dimension aRadius, const gradient& aGradient) = 0;
 		virtual void fill_circle(const point& aCentre, dimension aRadius, const colour& aColour) = 0;
+		virtual void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const colour& aColour) = 0;
 		virtual void fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) = 0;
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen) = 0;
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const = 0;

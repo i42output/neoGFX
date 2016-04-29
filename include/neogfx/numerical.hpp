@@ -26,11 +26,23 @@
 #include <algorithm>
 #include <ostream>
 #include <boost/optional.hpp>
+#include <boost/math/constants/constants.hpp>
 #include "swizzle.hpp"
 
 namespace neogfx
 { 
 	typedef double scalar;
+	typedef double angle;
+
+	inline angle to_rad(angle aDegrees)
+	{
+		return aDegrees / 180.0 * boost::math::constants::pi<angle>();
+	}
+
+	inline angle to_deg(angle aRadians)
+	{
+		return aRadians * 180.0 / boost::math::constants::pi<angle>();
+	}
 
 	struct column_vector {};
 	struct row_vector {};
