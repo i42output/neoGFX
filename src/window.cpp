@@ -638,6 +638,20 @@ namespace neogfx
 
 	void window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition)
 	{
+		if ((style() & window::RequiresOwnerFocus) != window::RequiresOwnerFocus)
+		{
+			for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)
+			{
+				auto& s = app::instance().surface_manager().surface(i);
+				if (is_owner_of(s) && (s.style() & window::DismissOnOwnerClick) == window::DismissOnOwnerClick)
+				{
+					s.close();
+					i = 0;
+				}
+				else
+					++i;
+			}
+		}
 		i_widget& w = widget_for_mouse_event(aPosition);
 		update_click_focus(w);
 		w.mouse_button_pressed(aButton, aPosition - w.origin());

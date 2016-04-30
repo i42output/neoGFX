@@ -42,6 +42,7 @@ namespace neogfx
 
 	menu_bar::~menu_bar()
 	{
+		close_sub_menu();
 		item_added.unsubscribe(this);
 		item_removed.unsubscribe(this);
 		item_selected.unsubscribe(this);
@@ -97,7 +98,7 @@ namespace neogfx
 			if (aSubMenu.item_count() > 0)
 			{
 				auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
-				iOpenSubMenu.reset();
+				close_sub_menu();
 				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
 				iOpenSubMenu->menu().closed([this]()
 				{
@@ -111,4 +112,14 @@ namespace neogfx
 			}
 		}, this);
 	}
+
+	void menu_bar::close_sub_menu()
+	{
+		if (iOpenSubMenu.get() != 0)
+		{
+			iOpenSubMenu->menu().closed.unsubscribe(this);
+			iOpenSubMenu.reset();
+		}
+	}
+
 }

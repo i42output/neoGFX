@@ -468,7 +468,8 @@ namespace neogfx
 			{
 				iLayoutTimer = std::unique_ptr<neolib::callback_timer>(new neolib::callback_timer(app::instance(), [this](neolib::callback_timer&)
 				{
-					widget::layout_items();
+					if (!surface().destroyed())
+						widget::layout_items();
 					iLayoutTimer.reset();
 				}, 40));
 			}

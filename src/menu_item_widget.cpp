@@ -176,15 +176,16 @@ namespace neogfx
 		iSubMenuOpener.reset();
 	}
 
-	void menu_item_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
+	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point&)
 	{
-		bool wasCapturing = capturing();
-		widget::mouse_button_released(aButton, aPosition);
-		if (wasCapturing && client_rect().contains(aPosition))
-		{
-			if (aButton == mouse_button::Left)
-				handle_pressed();
-		}
+		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::SubMenu)
+			handle_pressed();
+	}
+
+	void menu_item_widget::mouse_button_released(mouse_button aButton, const point&)
+	{
+		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::Action)
+			handle_pressed();
 	}
 
 	void menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)

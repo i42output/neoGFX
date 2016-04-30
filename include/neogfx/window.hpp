@@ -44,6 +44,7 @@ namespace neogfx
 			ApplicationModal	= 0x0040,
 			NoActivate			= 0x0080,
 			RequiresOwnerFocus	= 0x0100,
+			DismissOnOwnerClick = 0x0200,
 			Default				= Titlebar | Resize | Close
 		};
 	public:

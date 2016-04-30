@@ -44,6 +44,7 @@ namespace neogfx
 		i_menu& menu() const;
 	private:
 		void init();
+		void close_sub_menu();
 	private:
 		i_menu& iMenu;
 		vertical_layout iLayout;

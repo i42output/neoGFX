@@ -41,6 +41,7 @@ namespace neogfx
 		virtual bool visible() const;
 	private:
 		void init();
+		void close_sub_menu();
 	private:
 		flow_layout iLayout;
 		std::unique_ptr<popup_menu> iOpenSubMenu;

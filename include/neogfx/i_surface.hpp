@@ -50,6 +50,7 @@ namespace neogfx
 		virtual bool is_owner_of(const i_surface& aChildSurface) const = 0;
 	public:
 		virtual neogfx::surface_type surface_type() const = 0;
+		virtual uint32_t style() const = 0;
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
 		virtual const vector4& logical_coordinates() const = 0;
