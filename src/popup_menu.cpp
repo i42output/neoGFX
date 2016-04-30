@@ -38,6 +38,7 @@ namespace neogfx
 
 	popup_menu::~popup_menu()
 	{
+		iOpenSubMenu.reset();
 		iMenu.item_added.unsubscribe(this);
 		iMenu.item_removed.unsubscribe(this);
 		iMenu.item_changed.unsubscribe(this);
@@ -137,7 +138,8 @@ namespace neogfx
 				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
 				iOpenSubMenu->menu().closed([this]()
 				{
-					iOpenSubMenu->close();
+					if (iOpenSubMenu.get() != 0)
+						iOpenSubMenu->close();
 				}, this);
 				iOpenSubMenu->closed([this]()
 				{

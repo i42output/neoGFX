@@ -94,9 +94,11 @@ namespace neogfx
 		virtual void enable(bool aEnable);
 		virtual void set_capture();
 		virtual void release_capture();
+		virtual bool is_destroyed() const;
 	private:
 		void init();
 		void process_event(const SDL_Event& aEvent);
+		void destroyed();
 #ifdef WIN32
 		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 #endif
@@ -119,5 +121,6 @@ namespace neogfx
 		bool iCapturingMouse;
 		cursor_pointer iCurrentCursor;
 		std::vector<cursor_pointer> iSavedCursors;
+		bool iDestroyed;
 	};
 }

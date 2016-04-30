@@ -104,7 +104,8 @@ namespace neogfx
 		iNativeHandle(0),
 		iContext(0),
 		iProcessingEvent(false),
-		iCapturingMouse(false)
+		iCapturingMouse(false),
+		iDestroyed(false)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		iHandle = SDL_CreateWindow(
@@ -138,7 +139,8 @@ namespace neogfx
 		iNativeHandle(0),
 		iContext(0),
 		iProcessingEvent(false),
-		iCapturingMouse(false)
+		iCapturingMouse(false),
+		iDestroyed(false)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		iHandle = SDL_CreateWindow(
@@ -172,7 +174,8 @@ namespace neogfx
 		iNativeHandle(0),
 		iContext(0),
 		iProcessingEvent(false),
-		iCapturingMouse(false)
+		iCapturingMouse(false),
+		iDestroyed(false)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		iHandle = SDL_CreateWindow(
@@ -206,7 +209,8 @@ namespace neogfx
 		iNativeHandle(0),
 		iContext(0),
 		iProcessingEvent(false),
-		iCapturingMouse(false)
+		iCapturingMouse(false),
+		iDestroyed(false)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		iHandle = SDL_CreateWindow(
@@ -244,7 +248,7 @@ namespace neogfx
 
 	void* sdl_window::native_handle() const
 	{
-		if (iNativeHandle == 0)
+		if (iNativeHandle == 0 && !iDestroyed)
 		{
 			SDL_SysWMinfo info;
 			SDL_VERSION(&info.version);
@@ -392,18 +396,8 @@ namespace neogfx
 		{
 			release_capture();
 			event_handler().native_window_closing();
-#ifdef WIN32
-			if (SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)iSDLWindowProc) == 0)
-				throw failed_to_detach_from_sdl_window(neolib::win32_get_last_error_as_string());
-#endif
 			SDL_DestroyWindow(iHandle);
 			iHandle = 0;
-			for (auto h = sHandleMap.begin(); h != sHandleMap.end(); ++h)
-				if (h->second == this)
-				{
-					sHandleMap.erase(h);
-					break;
-				}
 			event_handler().native_window_closed();
 		}
 	}
@@ -468,11 +462,20 @@ namespace neogfx
 		}
 	}
 
+	bool sdl_window::is_destroyed() const
+	{
+		return iDestroyed;
+	}
+
 #ifdef WIN32
 	LRESULT CALLBACK sdl_window::CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		switch(msg)
 		{
+		case WM_NCDESTROY:
+			CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+			sHandleMap[hwnd]->destroyed();
+			break;
 		case WM_MOUSEACTIVATE:
 			if (GetWindowLongPtr(hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE)
 				return MA_NOACTIVATE;
@@ -565,6 +568,14 @@ namespace neogfx
 			break;
 		}
 		iProcessingEvent = false;
+	}
+
+	void sdl_window::destroyed()
+	{
+		iDestroyed = true;
+		auto hmi = sHandleMap.find(iNativeHandle);
+		sHandleMap.erase(hmi);
+		iNativeHandle = 0;
 	}
 
 	void sdl_window::activate_context()

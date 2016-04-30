@@ -41,5 +41,6 @@ namespace neogfx
 		virtual void enable(bool aEnable) = 0;
 		virtual void set_capture() = 0;
 		virtual void release_capture() = 0;
+		virtual bool is_destroyed() const = 0;
 	};
 }
