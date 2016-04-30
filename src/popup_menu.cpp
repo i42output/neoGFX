@@ -95,7 +95,7 @@ namespace neogfx
 				if (aMenuItem.type() == i_menu_item::Action ||
 					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
 				{
-					iOpenSubMenu.reset();
+					iOpenSubMenu->menu().close();
 				}
 			}
 			update();
