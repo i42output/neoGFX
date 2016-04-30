@@ -31,9 +31,16 @@ namespace neogfx
 	public:
 		virtual neolib::io_thread& app_thread();
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const;
+		virtual uint32_t display_count() const;
+		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const;
 		virtual bool has_shared_menu_bar() const;
 		virtual i_shared_menu_bar& shared_menu_bar();
 	private:
+#ifdef WIN32
+		static BOOL CALLBACK enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aThis);
+#endif
+	private:
 		neolib::io_thread& iAppThread;
+		mutable std::vector<rect> iDesktopWorkAreas;
 	};
 }

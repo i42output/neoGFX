@@ -123,4 +123,39 @@ namespace neogfx
 	{
 		iBasicServices.display_error_dialog(aTitle.c_str(), aMessage.c_str(), aParent.handle());
 	}
+
+	uint32_t surface_manager::display_count() const
+	{
+		return iBasicServices.display_count();
+	}
+
+	rect surface_manager::desktop_rect(uint32_t aDisplayIndex) const
+	{
+		return iBasicServices.desktop_rect(aDisplayIndex);
+	}
+
+	rect surface_manager::desktop_rect(const i_surface& aSurface) const
+	{
+#ifdef WIN32
+		HMONITOR monitor = MonitorFromWindow(reinterpret_cast<HWND>(aSurface.native_surface().native_handle()), MONITOR_DEFAULTTONEAREST);
+		MONITORINFO mi;
+		mi.cbSize = sizeof(mi);
+		GetMonitorInfo(monitor, &mi);
+		return basic_rect<LONG>{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
+#else
+		/* todo */
+		rect rectSurface{ aSurface.surface_position(), aSurface.surface_size() };
+		std::multimap<double, uint32_t> matches;
+		for (uint32_t i = 0; i < display_count(); ++i)
+		{
+			rect rectDisplay = desktop_rect(i);
+			rect rectIntersection = rectDisplay.intersection(rectSurface);
+			if (!rectIntersection.empty())
+				matches[rectIntersection.width() * rectIntersection.height()] = i;
+		}
+		if (matches.empty())
+			return desktop_rect(0);
+		return desktop_rect(matches.rbegin()->second);
+#endif
+	}
 }

@@ -59,6 +59,9 @@ namespace neogfx
 		virtual void render_surfaces();
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const;
 		virtual void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const;
+		virtual uint32_t display_count() const;
+		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const;
+		virtual rect desktop_rect(const i_surface& aSurface) const;
 	private:
 		i_basic_services& iBasicServices;
 		i_rendering_engine& iRenderingEngine;

@@ -33,7 +33,11 @@ namespace neogfx
 		popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu);
 		~popup_menu();
 	public:
+		virtual void resized();
+	public:
 		virtual neogfx::size_policy size_policy() const;	
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual colour background_colour() const;
 	public:

@@ -40,6 +40,29 @@ namespace neogfx
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, aTitle.c_str(), aMessage.c_str(), static_cast<SDL_Window*>(aParentWindowHandle));
 	}
 
+	uint32_t sdl_basic_services::display_count() const
+	{
+		return SDL_GetNumVideoDisplays();
+	}
+
+	rect sdl_basic_services::desktop_rect(uint32_t aDisplayIndex) const
+	{
+		iDesktopWorkAreas.clear();
+#ifdef WIN32
+		EnumDisplayMonitors(NULL, NULL, &enum_display_monitors_proc, reinterpret_cast<LPARAM>(this));
+#else
+		for (int i = 0; i < display_count(); ++i)
+		{
+			SDL_Rect rectDisplayBounds;
+			SDL_GetDisplayBounds(i, &rectDisplayBounds);
+			iDesktopWorkAreas.push_back(rect{ point{ rectDisplayBounds.x, rectDisplayBounds.y }, size{ rectDisplayBounds.w, rectDisplayBounds.h } });
+		}
+#endif
+		if (aDisplayIndex >= iDesktopWorkAreas.size())
+			throw bad_display_index();
+		return iDesktopWorkAreas[aDisplayIndex];
+	}
+
 	bool sdl_basic_services::has_shared_menu_bar() const
 	{
 		return false;
@@ -49,4 +72,17 @@ namespace neogfx
 	{
 		throw no_shared_menu_bar();
 	}
+
+#ifdef WIN32
+	BOOL CALLBACK sdl_basic_services::enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aThis)
+	{
+		rect rectDisplay;
+		MONITORINFO mi;
+		mi.cbSize = sizeof(mi);
+		GetMonitorInfo(aMonitor, &mi);
+		basic_rect<LONG> workAreaRect{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
+		reinterpret_cast<const sdl_basic_services*>(aThis)->iDesktopWorkAreas.push_back(workAreaRect);
+		return true;
+	}
+#endif
 }

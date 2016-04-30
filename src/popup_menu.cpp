@@ -46,11 +46,39 @@ namespace neogfx
 		iMenu.close();
 	}
 
+	void popup_menu::resized()
+	{
+		window::resized();
+		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
+		rect surfaceRect{ surface().surface_position(), surface().surface_size() };
+		point newPosition = surface().surface_position();
+		if (surfaceRect.bottom() > desktopRect.bottom())
+			newPosition.y += (desktopRect.bottom() - surfaceRect.bottom());
+		if (surfaceRect.right() > desktopRect.right())
+			newPosition.x += (desktopRect.right() - surfaceRect.right());
+		if (newPosition != surface().surface_position())
+			surface().move_surface(newPosition);
+	}
+
 	size_policy popup_menu::size_policy() const
 	{
-		if (widget::has_size_policy())
-			return widget::size_policy();
+		if (window::has_size_policy())
+			return window::size_policy();
 		return neogfx::size_policy::Minimum;
+	}
+
+	size popup_menu::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		size result = window::minimum_size(aAvailableSpace);
+		rect desktopRect = app::instance().surface_manager().desktop_rect(surface());
+		result.cx = std::min(result.cx, desktopRect.cx);
+		result.cy = std::min(result.cy, desktopRect.cy);
+		return result;
+	}
+	
+	size popup_menu::maximum_size(const optional_size& aAvailableSpace) const
+	{
+		return minimum_size(aAvailableSpace);
 	}
 
 	colour popup_menu::background_colour() const
@@ -70,6 +98,9 @@ namespace neogfx
 	void popup_menu::init()
 	{
 		iLayout.set_margins(neogfx::margins{});
+		for (i_menu::item_index i = 0; i < iMenu.item_count(); ++i)
+			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(i)));
+		layout_items();
 		iMenu.open();
 		iMenu.item_added([this](i_menu::item_index aIndex)
 		{
@@ -85,9 +116,6 @@ namespace neogfx
 		{
 			layout_items();
 		}, this);
-		for (i_menu::item_index i = 0; i < iMenu.item_count(); ++i)
-			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(i)));
-		layout_items();
 		iMenu.item_selected([this](i_menu_item& aMenuItem)
 		{
 			if (iOpenSubMenu.get() != 0)
