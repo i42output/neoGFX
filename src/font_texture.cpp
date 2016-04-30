@@ -26,19 +26,19 @@ namespace neogfx
 		iExtents(aExtents), iSubPixelRendering(aSubPixelRendering), iBinPack(aExtents, false)
 	{
 		GLint previousTexture;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture);
-		glGenTextures(1, &iHandle);
-		glBindTexture(GL_TEXTURE_2D, iHandle);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
+		glCheck(glGenTextures(1, &iHandle));
+		glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		std::vector<std::array<uint8_t, 3>> data(static_cast<std::size_t>(iExtents.cx * iExtents.cy), std::array<uint8_t, 3>{{0xFF, 0xFF, 0xFF}});
-		glTexImage2D(GL_TEXTURE_2D, 0, aSubPixelRendering ? GL_RGB : GL_ALPHA, static_cast<GLsizei>(iExtents.cx), static_cast<GLsizei>(iExtents.cy), 0, aSubPixelRendering ? GL_RGB : GL_ALPHA, GL_UNSIGNED_BYTE, &data[0]);
-		glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture));
+		glCheck(glTexImage2D(GL_TEXTURE_2D, 0, aSubPixelRendering ? GL_RGB : GL_ALPHA, static_cast<GLsizei>(iExtents.cx), static_cast<GLsizei>(iExtents.cy), 0, aSubPixelRendering ? GL_RGB : GL_ALPHA, GL_UNSIGNED_BYTE, &data[0]));
+		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 
 	font_texture::~font_texture()
 	{
-		glDeleteTextures(1, &iHandle);
+		glCheck(glDeleteTextures(1, &iHandle));
 	}
 
 	const size& font_texture::extents() const

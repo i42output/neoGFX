@@ -47,9 +47,14 @@ namespace neogfx
 		};
 		typedef uint32_t item_index;
 	public:
+		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_menu::no_parent") {} };
 		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_menu::bad_item_index") {} };
 		struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_menu::item_not_found") {} };
 	public:
+		virtual ~i_menu() {}
+	public:
+		virtual bool has_parent() const = 0;
+		virtual i_menu& parent() = 0;
 		virtual type_e type() const = 0;
 		virtual const std::string& title() const = 0;
 		virtual void set_title(const std::string& aTitle) = 0;

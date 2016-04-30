@@ -22,6 +22,7 @@
 #include "neogfx.hpp"
 #include <GL/glew.h>
 #include <GL/GL.h>
+#include "opengl_error.hpp"
 #include "i_font_texture.hpp"
 #include "skyline_bin_pack.hpp"
 

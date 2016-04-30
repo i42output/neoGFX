@@ -24,6 +24,8 @@
 #include "i_native_window.hpp"
 #include "i_layout.hpp"
 
+#include "opengl_error.hpp"
+
 namespace neogfx
 {
 	window::window(const video_mode& aVideoMode, uint32_t aStyle, framed_widget::style_e aFrameStyle) :
@@ -295,6 +297,8 @@ namespace neogfx
 
 	void window::close()
 	{
+		layout().remove_items();
+		remove_widgets();
 		native_surface().close();
 		closed.trigger();
 	}

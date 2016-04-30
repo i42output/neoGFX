@@ -24,8 +24,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	menu::menu(type_e aType, const std::string& aTitle) : iType(aType), iTitle(aTitle), iOpenCount(0)
+	menu::menu(type_e aType, const std::string& aTitle) : iParent(0), iType(aType), iTitle(aTitle), iOpenCount(0)
 	{
+	}
+
+	menu::menu(i_menu& aParent, type_e aType, const std::string& aTitle) : iParent(&aParent), iType(aType), iTitle(aTitle), iOpenCount(0)
+	{
+	}
+
+	menu::~menu()
+	{
+	}
+
+	bool menu::has_parent() const
+	{
+		return iParent != 0;
+	}
+
+	i_menu& menu::parent()
+	{
+		if (iParent != 0)
+			return *iParent;
+		throw no_parent();
 	}
 
 	menu::type_e menu::type() const
@@ -101,7 +121,7 @@ namespace neogfx
 
 	i_menu& menu::insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuTitle)
 	{
-		auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(Popup, aSubMenuTitle)));
+		auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(*this, Popup, aSubMenuTitle)));
 		item_added.trigger(aItemIndex);
 		return (**newItem).sub_menu();
 	}
@@ -153,7 +173,10 @@ namespace neogfx
 
 	void menu::close()
 	{
-		if (--iOpenCount == 0)
-			closed.trigger();
+		if (iOpenCount > 0)
+		{
+			if (--iOpenCount == 0)
+				closed.trigger();
+		}
 	}
 }

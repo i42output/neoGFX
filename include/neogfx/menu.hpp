@@ -33,8 +33,12 @@ namespace neogfx
 		typedef std::unique_ptr<i_menu_item> item_pointer;
 		typedef std::vector<item_pointer> item_list;
 	public:
+		menu(i_menu& aParent, type_e aType = Popup, const std::string& aTitle = std::string());
 		menu(type_e aType = Popup, const std::string& aTitle = std::string());
+		~menu();
 	public:
+		virtual bool has_parent() const;
+		virtual i_menu& parent();
 		virtual type_e type() const;
 		virtual const std::string& title() const;
 		virtual void set_title(const std::string& aTitle);
@@ -57,6 +61,7 @@ namespace neogfx
 		virtual void open();
 		virtual void close();
 	private:
+		i_menu* iParent;
 		type_e iType;
 		std::string iTitle;
 		texture iImage;

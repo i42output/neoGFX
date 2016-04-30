@@ -255,8 +255,11 @@ namespace neogfx
 				iMenuItem.action().triggered.trigger();
 				if (iMenuItem.action().is_checkable())
 					iMenuItem.action().toggle();
-				if (iMenu.type() == i_menu::Popup)
-					iMenu.close();
+				i_menu* menuToClose = &iMenu;
+				while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
+					menuToClose = &menuToClose->parent();
+				if (menuToClose->type() == i_menu::Popup)
+					menuToClose->close();
 			}
 		}
 		else

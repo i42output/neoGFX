@@ -107,6 +107,10 @@ namespace neogfx
 				auto& itemWidget = layout().get_widget<menu_item_widget>(iMenu.find_item(aSubMenu));
 				iOpenSubMenu.reset();
 				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+				iOpenSubMenu->menu().closed([this]()
+				{
+					iOpenSubMenu->close();
+				}, this);
 				iOpenSubMenu->closed([this]()
 				{
 					iOpenSubMenu.reset();

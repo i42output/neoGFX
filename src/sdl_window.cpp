@@ -454,7 +454,6 @@ namespace neogfx
 #ifdef WIN32
 			SetCapture(static_cast<HWND>(native_handle()));
 #endif
-			SDL_CaptureMouse(SDL_TRUE);
 		}
 	}
 
@@ -463,7 +462,6 @@ namespace neogfx
 		if (iCapturingMouse)
 		{
 			iCapturingMouse = false;
-			SDL_CaptureMouse(SDL_FALSE);
 #ifdef WIN32
 			ReleaseCapture();
 #endif
@@ -477,7 +475,7 @@ namespace neogfx
 		{
 		case WM_MOUSEACTIVATE:
 			if (GetWindowLongPtr(hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE)
-				return MA_NOACTIVATEANDEAT;
+				return MA_NOACTIVATE;
 			return CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
 		default:
 			return CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
