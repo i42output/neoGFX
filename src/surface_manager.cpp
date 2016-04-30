@@ -138,7 +138,7 @@ namespace neogfx
 	{
 #ifdef WIN32
 		HMONITOR monitor = MonitorFromWindow(reinterpret_cast<HWND>(aSurface.native_surface().native_handle()), MONITOR_DEFAULTTONEAREST);
-		MONITORINFO mi;
+		MONITORINFOEX mi;
 		mi.cbSize = sizeof(mi);
 		GetMonitorInfo(monitor, &mi);
 		return basic_rect<LONG>{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
