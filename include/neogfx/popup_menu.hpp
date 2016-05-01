@@ -46,6 +46,7 @@ namespace neogfx
 		void init();
 		void close_sub_menu();
 	private:
+		i_widget* iParentWidget;
 		i_menu& iMenu;
 		vertical_layout iLayout;
 		std::unique_ptr<popup_menu> iOpenSubMenu;

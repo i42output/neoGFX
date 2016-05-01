@@ -45,6 +45,7 @@ namespace neogfx
 
 	menu_item_widget::~menu_item_widget()
 	{
+		iSubMenuOpener.reset();
 		if (iMenuItem.type() == i_menu_item::SubMenu)
 		{
 			iMenuItem.sub_menu().opened.unsubscribe(this);
@@ -157,7 +158,7 @@ namespace neogfx
 		update();
 		if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
 		{
-			iSubMenuOpener = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
+			iSubMenuOpener = std::make_unique<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
 			{
 				if (!iMenuItem.sub_menu().is_open())
 				{

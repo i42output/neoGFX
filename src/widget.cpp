@@ -163,7 +163,7 @@ namespace neogfx
 		if (!is_root())
 		{
 			bool onSurface = has_surface();
-			if (onSurface && &surface() != &aParent.surface())
+			if (onSurface && same_surface(aParent))
 			{
 				surface().widget_removed(*this);
 				onSurface = false;
@@ -183,20 +183,20 @@ namespace neogfx
 			managing_layout().layout_items(true);
 	}
 
-	const i_widget& widget::ultimate_ancestor() const
+	const i_widget& widget::ultimate_ancestor(bool aSameSurface) const
 	{
 		const i_widget* w = this;
-		while (w->has_parent())
+		while (w->has_parent() && (!aSameSurface || same_surface(w->parent())))
 			w = &w->parent();
 		return *w;
 	}
 
-	i_widget& widget::ultimate_ancestor()
+	i_widget& widget::ultimate_ancestor(bool aSameSurface)
 	{
 		i_widget* w = this;
-		while (w->has_parent())
+		while (w->has_parent() && (!aSameSurface || same_surface(w->parent())))
 			w = &w->parent();
-			return *w;
+		return *w;
 	}
 
 	bool widget::is_ancestor(const i_widget& aWidget) const
@@ -513,7 +513,7 @@ namespace neogfx
 
 	point widget::origin(bool) const
 	{
-		if (has_parent())
+		if (has_parent() && same_surface(parent()))
 			return position() + parent().origin(false);
 		else
 			return point{};
@@ -718,7 +718,7 @@ namespace neogfx
 		if (iUpdateRects.find(aUpdateRect) == iUpdateRects.end())
 		{
 			iUpdateRects.insert(aUpdateRect);
-			if ((iBackgroundColour == boost::none || iBackgroundColour->alpha() != 0xFF) && has_parent() && has_surface() && &parent().surface() == &surface())
+			if ((iBackgroundColour == boost::none || iBackgroundColour->alpha() != 0xFF) && has_parent() && has_surface() && same_surface(parent()))
 				parent().update(rect(aUpdateRect.position() + position() + (origin() - origin(true)), aUpdateRect.extents()));
 			else
 				surface().invalidate_surface(aUpdateRect + origin());

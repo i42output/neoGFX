@@ -72,8 +72,6 @@ namespace neogfx
 		virtual i_scrollbar& vertical_scrollbar();
 		virtual const i_scrollbar& horizontal_scrollbar() const;
 		virtual i_scrollbar& horizontal_scrollbar();
-	protected:
-		virtual void init();
 		virtual child_widget_scrolling_disposition_e scrolling_disposition() const;
 		virtual child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const;
 	private:
@@ -83,6 +81,8 @@ namespace neogfx
 	protected:
 		virtual void update_scrollbar_visibility();
 		virtual void update_scrollbar_visibility(usv_stage_e aStage);
+	protected:
+		void init();
 	private:
 		scrollbar iVerticalScrollbar;
 		scrollbar iHorizontalScrollbar;

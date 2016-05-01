@@ -631,12 +631,7 @@ namespace neogfx
 		render(gc);
 	}
 
-	void window::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
-	{
-		widget_for_mouse_event(iNativeWindow->mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
-	}
-
-	void window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	void window::native_window_dismiss_children()
 	{
 		if ((style() & window::RequiresOwnerFocus) != window::RequiresOwnerFocus)
 		{
@@ -652,6 +647,15 @@ namespace neogfx
 					++i;
 			}
 		}
+	}
+
+	void window::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
+	{
+		widget_for_mouse_event(iNativeWindow->mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
+	}
+
+	void window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	{
 		i_widget& w = widget_for_mouse_event(aPosition);
 		update_click_focus(w);
 		w.mouse_button_pressed(aButton, aPosition - w.origin());

@@ -23,7 +23,7 @@
 #include <SDL_syswm.h>
 #include <SDL_mouse.h>
 #include "sdl_window.hpp"
-
+#include "app.hpp"
 
 namespace neogfx
 {
@@ -472,6 +472,15 @@ namespace neogfx
 	{
 		switch(msg)
 		{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+		case WM_NCLBUTTONDOWN:
+		case WM_NCRBUTTONDOWN:
+		case WM_NCMBUTTONDOWN:
+			sHandleMap[hwnd]->event_handler().native_window_dismiss_children();
+			CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+			break;
 		case WM_NCDESTROY:
 			CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
 			sHandleMap[hwnd]->destroyed();

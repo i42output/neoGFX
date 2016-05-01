@@ -137,8 +137,6 @@ namespace neogfx
 		virtual bool has_surface() const;
 		virtual const i_surface& surface() const;
 		virtual i_surface& surface();
-	protected:
-		virtual void init();
 	private:
 		virtual void native_window_closing();
 		virtual void native_window_closed();
@@ -146,6 +144,7 @@ namespace neogfx
 		virtual void native_window_focus_lost();
 		virtual void native_window_resized();
 		virtual void native_window_render(const rect& aInvalidatedRect) const;
+		virtual void native_window_dismiss_children();
 		virtual void native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta);
 		virtual void native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition);
 		virtual void native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition);
@@ -158,6 +157,7 @@ namespace neogfx
 		virtual void native_window_text_input(const std::string& aText);
 		virtual void native_window_set_default_mouse_cursor();
 	private:
+		void init();
 		void update_click_focus(i_widget& aCandidateWidget);
 		void update_modality();
 	private:

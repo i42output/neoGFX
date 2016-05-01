@@ -25,13 +25,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu) :
-		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
+		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu) :
-		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, framed_widget::SolidFrame), iMenu(aMenu), iLayout(*this)
+		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
@@ -52,13 +52,40 @@ namespace neogfx
 		window::resized();
 		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
 		rect surfaceRect{ surface().surface_position(), surface().surface_size() };
-		point newPosition = surface().surface_position();
 		if (surfaceRect.bottom() > desktopRect.bottom())
-			newPosition.y += (desktopRect.bottom() - surfaceRect.bottom());
+			surfaceRect.position().y += (desktopRect.bottom() - surfaceRect.bottom());
 		if (surfaceRect.right() > desktopRect.right())
-			newPosition.x += (desktopRect.right() - surfaceRect.right());
-		if (newPosition != surface().surface_position())
-			surface().move_surface(newPosition);
+			surfaceRect.position().x += (desktopRect.right() - surfaceRect.right());
+		if (iMenu.has_parent())
+		{
+			if (iMenu.parent().type() == i_menu::MenuBar)
+			{
+				if (iParentWidget != 0)
+				{
+					rect menuBarRect = iParentWidget->window_rect() + parent_surface().surface_position();
+					if (!surfaceRect.intersection(menuBarRect).empty())
+					{
+						if (desktopRect.bottom() - menuBarRect.bottom() > surfaceRect.height())
+							surfaceRect.position().y = menuBarRect.bottom();
+						else
+							surfaceRect.position().y = menuBarRect.top() - surfaceRect.height();
+					}
+				}
+			}
+			else
+			{
+				rect parentSurfaceRect{ parent_surface().surface_position(), parent_surface().surface_size() };
+				if (surfaceRect.intersection(parentSurfaceRect).width() > 8.0)
+				{
+					if (parentSurfaceRect.right() + surfaceRect.width() < desktopRect.right())
+						surfaceRect.position().x = parentSurfaceRect.right();
+					else
+						surfaceRect.position().x = parentSurfaceRect.position().x - surfaceRect.width();
+				}
+			}
+		}
+		if (surfaceRect.position() != surface().surface_position())
+			surface().move_surface(surfaceRect.position());
 	}
 
 	size_policy popup_menu::size_policy() const

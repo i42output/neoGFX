@@ -31,6 +31,8 @@ namespace neogfx
 		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
 		iIgnoreScrollbarUpdates(0)
 	{
+		if (has_surface())
+			init();
 	}
 	
 	scrollable_widget::scrollable_widget(i_widget& aParent, framed_widget::style_e aFrameStyle) :
@@ -39,6 +41,8 @@ namespace neogfx
 		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
 		iIgnoreScrollbarUpdates(0)
 	{
+		if (has_surface())
+			init();
 	}
 	
 	scrollable_widget::scrollable_widget(i_layout& aLayout, framed_widget::style_e aFrameStyle) :
@@ -47,6 +51,8 @@ namespace neogfx
 		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
 		iIgnoreScrollbarUpdates(0)
 	{
+		if (has_surface())
+			init();
 	}
 	
 	scrollable_widget::~scrollable_widget()

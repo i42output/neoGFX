@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 				int n = rand() % 100;
 				for (int k = 1; k < n; ++k)
 				{
-					sm2.add_action(app.add_action("More" + boost::lexical_cast<std::string>(k)));
+					sm2.add_action(app.add_action("More" + boost::lexical_cast<std::string>(k), "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
 				}
 			}
 		}

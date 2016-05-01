@@ -70,8 +70,8 @@ namespace neogfx
 		virtual i_widget& parent() = 0;
 		virtual void set_parent(i_widget& aParent) = 0;
 		virtual void parent_changed() = 0;
-		virtual const i_widget& ultimate_ancestor() const = 0;
-		virtual i_widget& ultimate_ancestor() = 0;
+		virtual const i_widget& ultimate_ancestor(bool aSameSurface = true) const = 0;
+		virtual i_widget& ultimate_ancestor(bool aSameSurface = true) = 0;
 		virtual bool is_ancestor(const i_widget& aWidget) const = 0;
 		virtual bool is_sibling(const i_widget& aWidget) const = 0;
 		virtual i_widget& link_before() const = 0;
@@ -184,6 +184,12 @@ namespace neogfx
 		friend class widget;
 		virtual void set_link_before_ptr(i_widget& aWidget) = 0;
 		virtual void set_link_after_ptr(i_widget& aWidget) = 0;
+	// helpers
+	public:
+		bool same_surface(const i_widget& aWidget) const
+		{
+			return &surface() == &aWidget.surface();
+		}
 	};
 
 	inline focus_policy operator|(focus_policy aLhs, focus_policy aRhs)
