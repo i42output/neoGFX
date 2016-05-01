@@ -45,8 +45,9 @@ namespace neogfx
 				if (aSurface.is_owner_of(**s))
 				{
 					auto& childSurface = **s;
-					s = iSurfaces.erase(s);
+					iSurfaces.erase(s);
 					childSurface.close();
+					s = iSurfaces.begin();
 				}
 				else
 					++s;
