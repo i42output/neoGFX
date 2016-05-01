@@ -162,8 +162,10 @@ namespace neogfx
 			{
 				if (!iMenuItem.sub_menu().is_open())
 				{
+					destroyed_flag destroyed(*this);
 					iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
-					update();
+					if (!destroyed)
+						update();
 				}
 			}, 250);
 		}

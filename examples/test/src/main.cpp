@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 		menu.add_action(muteAction);
 		auto& windowMenu = menu.add_sub_menu("Window");
 		auto& helpMenu = menu.add_sub_menu("Help");
-/*
+
 		ng::toolbar toolbar(layout0);
 		toolbar.add_action(contactsAction);
 		toolbar.add_action(addFavouriteAction);
@@ -366,7 +366,7 @@ int main(int argc, char* argv[])
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
 		tabContainer.add_tab_page("XYZZY").tab().set_image(smallHash); 
-	*/	
+		
 		return app.exec();
 	}
 	catch (std::exception& e)

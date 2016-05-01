@@ -21,12 +21,13 @@
 
 #include "neogfx.hpp"
 #include <unordered_set>
+#include <neolib/destroyable.hpp>
 #include <neolib/timer.hpp>
 #include "i_widget.hpp"
 
 namespace neogfx
 {
-	class widget : public i_widget
+	class widget : public i_widget, protected neolib::destroyable
 	{
 	private:
 		class device_metrics_forwarder : public i_device_metrics

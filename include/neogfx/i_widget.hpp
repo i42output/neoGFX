@@ -188,7 +188,10 @@ namespace neogfx
 	public:
 		bool same_surface(const i_widget& aWidget) const
 		{
-			return &surface() == &aWidget.surface();
+			if (has_surface() && aWidget.has_surface())
+				return &surface() == &aWidget.surface();
+			else
+				return false;
 		}
 	};
 

@@ -170,7 +170,7 @@ namespace neogfx
 				}, this);
 				iOpenSubMenu->closed([this]()
 				{
-					iOpenSubMenu.reset();
+					close_sub_menu();
 				}, this);
 			}
 		}, this);
