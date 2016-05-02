@@ -480,8 +480,8 @@ namespace neogfx
 		case WM_NCLBUTTONDOWN:
 		case WM_NCRBUTTONDOWN:
 		case WM_NCMBUTTONDOWN:
+			sHandleMap[hwnd]->event_handler().native_window_dismiss_children(); // call this before default wndproc (which enters its own NC drag message loop)
 			result = CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
-			sHandleMap[hwnd]->event_handler().native_window_dismiss_children();
 			break;
 		case WM_NCDESTROY:
 			result = CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
