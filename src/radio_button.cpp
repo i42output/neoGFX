@@ -137,7 +137,7 @@ namespace neogfx
 		const i_widget* candidate = &link_after();
 		while (candidate != this)
 		{
-			if (is_sibling(*candidate))
+			if (is_sibling_of(*candidate))
 			{
 				// Teh ghastly dynamic_cast! A simpler CLEAN solution which doesn't leak details everywhere doesn't immediately spring to mind.
 				const radio_button* candidateRadioButton = dynamic_cast<const radio_button*>(candidate);

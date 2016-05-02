@@ -64,8 +64,6 @@ namespace neogfx
 	protected:
 		i_native_window_event_handler& event_handler() const;
 	private:
-		virtual void activate_context() = 0;
-		virtual void deactivate_context() = 0;
 		virtual void display() = 0;
 		virtual bool processing_event() const = 0;
 	private:

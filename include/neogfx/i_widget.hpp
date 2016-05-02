@@ -72,8 +72,8 @@ namespace neogfx
 		virtual void parent_changed() = 0;
 		virtual const i_widget& ultimate_ancestor(bool aSameSurface = true) const = 0;
 		virtual i_widget& ultimate_ancestor(bool aSameSurface = true) = 0;
-		virtual bool is_ancestor(const i_widget& aWidget) const = 0;
-		virtual bool is_sibling(const i_widget& aWidget) const = 0;
+		virtual bool is_ancestor_of(const i_widget& aWidget) const = 0;
+		virtual bool is_sibling_of(const i_widget& aWidget) const = 0;
 		virtual i_widget& link_before() const = 0;
 		virtual void set_link_before(i_widget& aWidget) = 0;
 		virtual i_widget& link_after() const = 0;

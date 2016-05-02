@@ -105,7 +105,8 @@ namespace neogfx
 		iContext(0),
 		iProcessingEvent(false),
 		iCapturingMouse(false),
-		iDestroyed(false)
+		iDestroyed(false), 
+		iContextActivationCounter(0)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		iHandle = SDL_CreateWindow(
@@ -140,7 +141,8 @@ namespace neogfx
 		iContext(0),
 		iProcessingEvent(false),
 		iCapturingMouse(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iContextActivationCounter(0)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		iHandle = SDL_CreateWindow(
@@ -175,7 +177,8 @@ namespace neogfx
 		iContext(0),
 		iProcessingEvent(false),
 		iCapturingMouse(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iContextActivationCounter(0)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		iHandle = SDL_CreateWindow(
@@ -210,7 +213,8 @@ namespace neogfx
 		iContext(0),
 		iProcessingEvent(false),
 		iCapturingMouse(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iContextActivationCounter(0)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		iHandle = SDL_CreateWindow(
@@ -470,28 +474,30 @@ namespace neogfx
 #ifdef WIN32
 	LRESULT CALLBACK sdl_window::CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
+		LRESULT result;
 		switch(msg)
 		{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-		case WM_MBUTTONDOWN:
 		case WM_NCLBUTTONDOWN:
 		case WM_NCRBUTTONDOWN:
 		case WM_NCMBUTTONDOWN:
+			result = CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
 			sHandleMap[hwnd]->event_handler().native_window_dismiss_children();
-			CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
 			break;
 		case WM_NCDESTROY:
-			CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+			result = CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
 			sHandleMap[hwnd]->destroyed();
 			break;
 		case WM_MOUSEACTIVATE:
 			if (GetWindowLongPtr(hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE)
-				return MA_NOACTIVATE;
-			return CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+				result = MA_NOACTIVATE;
+			else
+				result = CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+			break;
 		default:
-			return CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+			result = CallWindowProc(sHandleMap[hwnd]->iSDLWindowProc, hwnd, msg, wparam, lparam);
+			break;
 		}
+		return result;
 	}
 #endif
 
@@ -587,15 +593,18 @@ namespace neogfx
 		iNativeHandle = 0;
 	}
 
-	void sdl_window::activate_context()
+	void sdl_window::activate_context() const
 	{
-		if (SDL_GL_MakeCurrent(iHandle, iContext) != 0)
-			throw failed_to_activate_opengl_context(SDL_GetError());
+		if (++iContextActivationCounter == 1)
+		{
+			if (SDL_GL_MakeCurrent(iHandle, iContext) != 0)
+				throw failed_to_activate_opengl_context(SDL_GetError());
+		}
 	}
 
-	void sdl_window::deactivate_context()	
+	void sdl_window::deactivate_context() const
 	{
-		/* nothing to do */
+		--iContextActivationCounter;
 	}
 	
 	void sdl_window::display()

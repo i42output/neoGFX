@@ -199,7 +199,7 @@ namespace neogfx
 		return *w;
 	}
 
-	bool widget::is_ancestor(const i_widget& aWidget) const
+	bool widget::is_ancestor_of(const i_widget& aWidget) const
 	{
 		const i_widget* parent = &aWidget;
 		while (parent->has_parent())
@@ -211,7 +211,7 @@ namespace neogfx
 		return false;
 	}
 
-	bool widget::is_sibling(const i_widget& aWidget) const
+	bool widget::is_sibling_of(const i_widget& aWidget) const
 	{
 		return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
 	}

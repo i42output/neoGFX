@@ -19,6 +19,7 @@
 
 #include "neogfx.hpp"
 #include <boost/format.hpp>
+#include <neolib/raii.hpp>
 #include "window.hpp"
 #include "app.hpp"
 #include "i_native_window.hpp"
@@ -37,7 +38,8 @@ namespace neogfx
 		iClosing(false), 
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		init();
 	}
@@ -51,7 +53,8 @@ namespace neogfx
 		iClosing(false), 
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		init();
 	}
@@ -65,7 +68,8 @@ namespace neogfx
 		iClosing(false), 
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		init();
 	}
@@ -79,7 +83,8 @@ namespace neogfx
 		iClosing(false), 
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		init();
 	}
@@ -93,7 +98,8 @@ namespace neogfx
 		iClosing(false),
 		iEnteredWidget(0),
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		init();
 	}
@@ -107,7 +113,8 @@ namespace neogfx
 		iClosing(false),
 		iEnteredWidget(0),
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		init();
 	}
@@ -121,7 +128,8 @@ namespace neogfx
 		iClosing(false), 
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		set_parent(aParent.ultimate_ancestor());
 		init();
@@ -136,7 +144,8 @@ namespace neogfx
 		iClosing(false), 
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		set_parent(aParent.ultimate_ancestor());
 		init();
@@ -151,7 +160,8 @@ namespace neogfx
 		iClosing(false), 
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		set_parent(aParent.ultimate_ancestor());
 		init();
@@ -166,7 +176,8 @@ namespace neogfx
 		iClosing(false), 
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		set_parent(aParent.ultimate_ancestor());
 		init();
@@ -181,7 +192,8 @@ namespace neogfx
 		iClosing(false),
 		iEnteredWidget(0),
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		set_parent(aParent.ultimate_ancestor());
 		init();
@@ -196,7 +208,8 @@ namespace neogfx
 		iClosing(false),
 		iEnteredWidget(0),
 		iCapturingWidget(0),
-		iFocusedWidget(0)
+		iFocusedWidget(0),
+		iDismissingChildren(false)
 	{
 		set_parent(aParent.ultimate_ancestor());
 		init();
@@ -328,6 +341,16 @@ namespace neogfx
 				return true;
 		}
 		return false;
+	}
+
+	bool window::dismissing_children() const
+	{
+		return iDismissingChildren;
+	}
+
+	bool window::can_dismiss(const i_widget*) const
+	{
+		return true;
 	}
 
 	surface_type window::surface_type() const
@@ -633,20 +656,7 @@ namespace neogfx
 
 	void window::native_window_dismiss_children()
 	{
-		if ((style() & window::RequiresOwnerFocus) != window::RequiresOwnerFocus)
-		{
-			for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)
-			{
-				auto& s = app::instance().surface_manager().surface(i);
-				if (is_owner_of(s) && (s.style() & window::DismissOnOwnerClick) == window::DismissOnOwnerClick)
-				{
-					s.close();
-					i = 0;
-				}
-				else
-					++i;
-			}
-		}
+		dismiss_children();
 	}
 
 	void window::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
@@ -657,6 +667,7 @@ namespace neogfx
 	void window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition)
 	{
 		i_widget& w = widget_for_mouse_event(aPosition);
+		dismiss_children(&w);
 		update_click_focus(w);
 		w.mouse_button_pressed(aButton, aPosition - w.origin());
 	}
@@ -664,6 +675,7 @@ namespace neogfx
 	void window::native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition)
 	{
 		i_widget& w = widget_for_mouse_event(aPosition);
+		dismiss_children(&w);
 		update_click_focus(w);
 		w.mouse_button_double_clicked(aButton, aPosition - w.origin());
 	}
@@ -780,8 +792,27 @@ namespace neogfx
 				window& windowSurface = static_cast<window&>(surface);
 				if (iStyle & ApplicationModal)
 					windowSurface.counted_enable(!iNativeWindow || iClosing);
-				else if ((iStyle & Modal) && windowSurface.is_ancestor(*this))
+				else if ((iStyle & Modal) && windowSurface.is_ancestor_of(*this))
 					windowSurface.counted_enable(!iNativeWindow || iClosing);
+			}
+		}
+	}
+
+	void window::dismiss_children(const i_widget* aClickedWidget)
+	{
+		neolib::scoped_flag sf(iDismissingChildren);
+		if ((style() & window::RequiresOwnerFocus) != window::RequiresOwnerFocus)
+		{
+			for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)
+			{
+				auto& s = app::instance().surface_manager().surface(i);
+				if (is_owner_of(s) && (s.style() & window::DismissOnOwnerClick) == window::DismissOnOwnerClick && s.can_dismiss(aClickedWidget))
+				{
+					s.close();
+					i = 0;
+				}
+				else
+					++i;
 			}
 		}
 	}

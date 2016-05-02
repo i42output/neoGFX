@@ -172,6 +172,7 @@ namespace neogfx
 		iClipCounter(0),
 		iLineStippleActive(false)
 	{
+		iSurface.activate_context();
 		set_smoothing_mode(SmoothingModeAntiAlias);
 	}
 
@@ -186,6 +187,7 @@ namespace neogfx
 		iClipCounter(0), 
 		iLineStippleActive(false)
 	{
+		iSurface.activate_context();
 		set_smoothing_mode(SmoothingModeAntiAlias);
 	}
 
@@ -200,12 +202,14 @@ namespace neogfx
 		iClipCounter(0),
 		iLineStippleActive(false)
 	{
+		iSurface.activate_context();
 		set_smoothing_mode(iSmoothingMode);
 	}
 
 	opengl_graphics_context::~opengl_graphics_context()
 	{
 		set_logical_coordinate_system(iSavedCoordinateSystem);
+		iSurface.deactivate_context();
 	}
 
 	const i_native_surface& opengl_graphics_context::surface() const

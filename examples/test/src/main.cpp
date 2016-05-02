@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 		toolbar.add_action(pasteAndGoAction);
 		toolbar.add_separator();
 		toolbar.add_action(app.add_action("Check for Updates...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#setup.png"));
-
+/*
 		ng::tab_page_container tabContainer(layout0);
 
 		// Buttons
@@ -366,7 +366,7 @@ int main(int argc, char* argv[])
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
 		tabContainer.add_tab_page("XYZZY").tab().set_image(smallHash); 
-		
+	*/	
 		return app.exec();
 	}
 	catch (std::exception& e)

@@ -95,6 +95,9 @@ namespace neogfx
 		virtual void set_capture();
 		virtual void release_capture();
 		virtual bool is_destroyed() const;
+	public:
+		virtual void activate_context() const;
+		virtual void deactivate_context() const;
 	private:
 		void init();
 		void process_event(const SDL_Event& aEvent);
@@ -103,8 +106,6 @@ namespace neogfx
 		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 #endif
 	private:
-		virtual void activate_context();
-		virtual void deactivate_context();
 		virtual void display();
 		virtual bool processing_event() const;
 	private:
@@ -116,6 +117,7 @@ namespace neogfx
 		WNDPROC iSDLWindowProc;
 #endif
 		SDL_GLContext iContext;
+		mutable uint32_t iContextActivationCounter;
 		size iExtents;
 		bool iProcessingEvent;
 		bool iCapturingMouse;

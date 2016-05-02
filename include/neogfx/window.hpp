@@ -88,7 +88,9 @@ namespace neogfx
 		virtual bool has_parent_surface() const;
 		virtual const i_surface& parent_surface() const;
 		virtual i_surface& parent_surface();
-		bool is_owner_of(const i_surface& aChildSurface) const;
+		virtual bool is_owner_of(const i_surface& aChildSurface) const;
+		virtual bool dismissing_children() const;
+		virtual bool can_dismiss(const i_widget* aClickedWidget) const;
 	public:
 		virtual neogfx::surface_type surface_type() const;
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
@@ -160,6 +162,7 @@ namespace neogfx
 		void init();
 		void update_click_focus(i_widget& aCandidateWidget);
 		void update_modality();
+		void dismiss_children(const i_widget* aClickedWidget = 0);
 	private:
 		std::unique_ptr<i_native_window> iNativeWindow;
 		uint32_t iStyle;
@@ -169,5 +172,6 @@ namespace neogfx
 		i_widget* iEnteredWidget;
 		i_widget* iCapturingWidget;
 		i_widget* iFocusedWidget;
+		bool iDismissingChildren;
 	};
 }

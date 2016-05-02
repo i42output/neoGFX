@@ -35,6 +35,8 @@ namespace neogfx
 	public:
 		virtual void resized();
 	public:
+		virtual bool can_dismiss(const i_widget* aClickedWidget) const;
+	public:
 		virtual neogfx::size_policy size_policy() const;	
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;

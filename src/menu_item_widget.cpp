@@ -273,6 +273,11 @@ namespace neogfx
 				iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
 				update();
 			}
+			else if (iMenu.type() == i_menu::MenuBar)
+			{
+				iMenuItem.sub_menu().close();
+				update();
+			}
 		}
 	}
 }

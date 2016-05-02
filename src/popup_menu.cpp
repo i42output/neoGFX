@@ -47,6 +47,11 @@ namespace neogfx
 		iMenu.close();
 	}
 
+	bool popup_menu::can_dismiss(const i_widget* aClickedWidget) const
+	{
+		return aClickedWidget == 0 || iParentWidget == 0 || (iParentWidget != aClickedWidget && !iParentWidget->is_ancestor_of(*aClickedWidget));
+	}
+
 	void popup_menu::resized()
 	{
 		window::resized();
