@@ -92,6 +92,7 @@ namespace neogfx
 	{
 		bool handledEvents = false;
 		SDL_Event event;
+		auto lastRenderTime = neolib::thread::elapsed_ms();
 		while (SDL_PollEvent(&event))
 		{
 			handledEvents = true;
@@ -171,7 +172,11 @@ namespace neogfx
 			default:
 				break;
 			}
-			render_now();
+			if (neolib::thread::elapsed_ms() - lastRenderTime > 10)
+			{
+				lastRenderTime = neolib::thread::elapsed_ms();
+				render_now();
+			}
 		}
 		return handledEvents;
 	}

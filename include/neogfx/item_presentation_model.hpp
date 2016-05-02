@@ -153,8 +153,8 @@ namespace neogfx
 					position += item_height(item_model_index(row), aGraphicsContext);
 					++row;
 				}
+				i = std::lower_bound(iPositions.begin(), iPositions.end(), aPosition, pred);
 			}
-			i = std::lower_bound(iPositions.begin(), iPositions.end(), aPosition, pred);
 			if (i == iPositions.end() || *i > aPosition && i != iPositions.begin())
 				--i;
 			return std::pair<item_model_index::value_type, coordinate>(std::distance(iPositions.begin(), i), static_cast<coordinate>(**i - aPosition));
