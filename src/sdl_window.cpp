@@ -448,7 +448,8 @@ namespace neogfx
 	{
 		if (!iCapturingMouse)
 		{
-			iCapturingMouse = true;
+			iCapturingMouse = true; 
+			SDL_CaptureMouse(SDL_TRUE);
 #ifdef WIN32
 			SetCapture(static_cast<HWND>(native_handle()));
 #endif
@@ -460,6 +461,7 @@ namespace neogfx
 		if (iCapturingMouse)
 		{
 			iCapturingMouse = false;
+			SDL_CaptureMouse(SDL_FALSE);
 #ifdef WIN32
 			ReleaseCapture();
 #endif
