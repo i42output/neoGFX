@@ -333,11 +333,13 @@ namespace neogfx
 
 	bool window::is_owner_of(const i_surface& aChildSurface) const
 	{
-		const i_surface* parent = &aChildSurface;
-		while (parent->has_parent_surface())
+		const i_surface* s = &aChildSurface;
+		if (s == this)
+			return false;
+		while (s->has_parent_surface())
 		{
-			parent = &parent->parent_surface();
-			if (parent == this)
+			s = &s->parent_surface();
+			if (s == this)
 				return true;
 		}
 		return false;
@@ -778,7 +780,7 @@ namespace neogfx
 	{
 		if (aCandidateWidget.enabled() && (aCandidateWidget.focus_policy() & focus_policy::ClickFocus) == focus_policy::ClickFocus)
 			aCandidateWidget.set_focus();
-		else if (aCandidateWidget.has_parent())
+		else if (aCandidateWidget.has_parent() && aCandidateWidget.parent().same_surface(*this))
 			update_click_focus(aCandidateWidget.parent());
 	}
 

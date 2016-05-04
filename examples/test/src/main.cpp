@@ -140,9 +140,15 @@ int main(int argc, char* argv[])
 		}
 		menu.add_action(contactsAction);
 		menu.add_action(muteAction);
+		auto& testMenu = menu.add_sub_menu("Test");
+		testMenu.add_action(contactsAction);
+		testMenu.add_action(muteAction);
+		testMenu.add_action(muteAction);
+		testMenu.add_action(muteAction);
+		testMenu.add_action(muteAction);
 		auto& windowMenu = menu.add_sub_menu("Window");
 		auto& helpMenu = menu.add_sub_menu("Help");
-
+		
 		ng::toolbar toolbar(layout0);
 		toolbar.add_action(contactsAction);
 		toolbar.add_action(addFavouriteAction);

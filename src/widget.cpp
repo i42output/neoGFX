@@ -199,18 +199,23 @@ namespace neogfx
 		return *w;
 	}
 
-	bool widget::is_ancestor_of(const i_widget& aWidget) const
+	bool widget::is_ancestor_of(const i_widget& aWidget, bool aSameSurface) const
 	{
-		const i_widget* parent = &aWidget;
-		while (parent->has_parent())
+		const i_widget* w = &aWidget;
+		while (w->has_parent() && (!aSameSurface || same_surface(*w)))
 		{
-			parent = &parent->parent();
-			if (parent == this)
+			w = &w->parent();
+			if (w == this)
 				return true;
 		}
 		return false;
 	}
 
+	bool widget::is_descendent_of(const i_widget& aWidget, bool aSameSurface) const
+	{
+		return aWidget.is_ancestor_of(*this, aSameSurface);
+	}
+		
 	bool widget::is_sibling_of(const i_widget& aWidget) const
 	{
 		return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();

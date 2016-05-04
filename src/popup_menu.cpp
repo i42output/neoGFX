@@ -123,6 +123,11 @@ namespace neogfx
 			app::instance().current_style().colour().lighter(0x40);
 	}
 
+	void popup_menu::mouse_button_pressed(mouse_button, const point&)
+	{
+		/* do nothing */
+	}
+
 	i_menu& popup_menu::menu() const
 	{
 		return iMenu;
