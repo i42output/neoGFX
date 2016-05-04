@@ -86,9 +86,11 @@ namespace neogfx
 			if (iOpenSubMenu.get() != 0)
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
-					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
+					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.sub_menu().item_count() > 0))
 				{
 					iOpenSubMenu->menu().close();
+					if (aMenuItem.type() == i_menu_item::SubMenu)
+						open_sub_menu.trigger(aMenuItem.sub_menu());
 				}
 			}
 			update();

@@ -270,8 +270,11 @@ namespace neogfx
 		{
 			if (!iMenuItem.sub_menu().is_open())
 			{
-				iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
-				update();
+				if (iMenuItem.sub_menu().item_count() > 0)
+				{
+					iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
+					update();
+				}
 			}
 			else if (iMenu.type() == i_menu::MenuBar)
 			{
