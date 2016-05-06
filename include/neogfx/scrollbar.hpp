@@ -30,9 +30,10 @@ namespace neogfx
 	class scrollbar : public i_scrollbar
 	{
 	public:
-		scrollbar(i_scrollbar_container& aContainer, type_e aType, bool aIntegerPositions = true);
+		scrollbar(i_scrollbar_container& aContainer, type_e aType, style_e aStyle = Normal, bool aIntegerPositions = true);
 	public:
 		virtual type_e type() const;
+		virtual style_e style() const;
 		virtual void show();
 		virtual void hide();
 		virtual bool visible() const;
@@ -66,6 +67,7 @@ namespace neogfx
 	private:
 		i_scrollbar_container& iContainer;
 		type_e iType;
+		style_e iStyle;
 		bool iIntegerPositions;
 		bool iVisible;
 		value_type iPosition;

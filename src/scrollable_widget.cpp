@@ -25,30 +25,30 @@
 
 namespace neogfx
 {
-	scrollable_widget::scrollable_widget(framed_widget::style_e aFrameStyle) :
+	scrollable_widget::scrollable_widget(i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
 		framed_widget(aFrameStyle),
-		iVerticalScrollbar(*this, i_scrollbar::Vertical), 
-		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
+		iVerticalScrollbar(*this, i_scrollbar::Vertical, aScrollbarStyle),
+		iHorizontalScrollbar(*this, i_scrollbar::Horizontal, aScrollbarStyle),
 		iIgnoreScrollbarUpdates(0)
 	{
 		if (has_surface())
 			init();
 	}
 	
-	scrollable_widget::scrollable_widget(i_widget& aParent, framed_widget::style_e aFrameStyle) :
+	scrollable_widget::scrollable_widget(i_widget& aParent, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
 		framed_widget(aParent, aFrameStyle),
-		iVerticalScrollbar(*this, i_scrollbar::Vertical), 
-		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
+		iVerticalScrollbar(*this, i_scrollbar::Vertical, aScrollbarStyle),
+		iHorizontalScrollbar(*this, i_scrollbar::Horizontal, aScrollbarStyle),
 		iIgnoreScrollbarUpdates(0)
 	{
 		if (has_surface())
 			init();
 	}
 	
-	scrollable_widget::scrollable_widget(i_layout& aLayout, framed_widget::style_e aFrameStyle) :
+	scrollable_widget::scrollable_widget(i_layout& aLayout, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
 		framed_widget(aLayout, aFrameStyle),
-		iVerticalScrollbar(*this, i_scrollbar::Vertical), 
-		iHorizontalScrollbar(*this, i_scrollbar::Horizontal),
+		iVerticalScrollbar(*this, i_scrollbar::Vertical, aScrollbarStyle),
+		iHorizontalScrollbar(*this, i_scrollbar::Horizontal, aScrollbarStyle),
 		iIgnoreScrollbarUpdates(0)
 	{
 		if (has_surface())
@@ -80,9 +80,25 @@ namespace neogfx
 	{
 		rect result = framed_widget::client_rect(aIncludeMargins);
 		if (vertical_scrollbar().visible())
-			result.cx -= vertical_scrollbar().width(*this);
+		{
+			if (vertical_scrollbar().style() == i_scrollbar::Normal)
+				result.cx -= vertical_scrollbar().width(*this);
+			else // i_scrollbar::Button
+			{
+				result.y += vertical_scrollbar().width(*this);
+				result.cy -= vertical_scrollbar().width(*this) * 2.0;
+			}
+		}
 		if (horizontal_scrollbar().visible())
-			result.cy -= horizontal_scrollbar().width(*this);
+		{
+			if (horizontal_scrollbar().style() == i_scrollbar::Normal)
+				result.cy -= horizontal_scrollbar().width(*this);
+			else // i_scrollbar::Button
+			{
+				result.x += horizontal_scrollbar().width(*this);
+				result.cx -= horizontal_scrollbar().width(*this) * 2.0;
+			}
+		}
 		return result;
 	}
 
@@ -93,7 +109,7 @@ namespace neogfx
 			vertical_scrollbar().render(aGraphicsContext);
 		if (horizontal_scrollbar().visible())
 			horizontal_scrollbar().render(aGraphicsContext);
-		if (vertical_scrollbar().visible() && horizontal_scrollbar().visible())
+		if (vertical_scrollbar().visible() && horizontal_scrollbar().visible() && vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == i_scrollbar::Normal)
 		{
 			point oldOrigin = aGraphicsContext.origin();
 			aGraphicsContext.set_origin(point(0.0, 0.0));
@@ -296,13 +312,21 @@ namespace neogfx
 		switch (aScrollbar.type())
 		{
 		case i_scrollbar::Vertical:
-			return convert_units(*this, aContext, 
-				rect(window_rect().top_right() - point(aScrollbar.width(*this) + effective_frame_width(), -effective_frame_width()), 
-					size(aScrollbar.width(*this), window_rect().cy - (horizontal_scrollbar().visible() ? horizontal_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0)));
+			if (vertical_scrollbar().style() == i_scrollbar::Normal)
+				return convert_units(*this, aContext,
+					rect{ window_rect().top_right() - point{aScrollbar.width(*this) + effective_frame_width(), -effective_frame_width()},
+						size{aScrollbar.width(*this), window_rect().cy - (horizontal_scrollbar().visible() ? horizontal_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0} });
+			else // i_scrollbar::Button
+				return convert_units(*this, aContext,
+					rect{ window_rect().top_left() + point{client_rect().x, effective_frame_width()}, size{client_rect().width(), window_rect().height() - effective_frame_width() * 2.0}});
 		case i_scrollbar::Horizontal:
-			return convert_units(*this, aContext, 
-				rect(window_rect().bottom_left() - point(-effective_frame_width(), aScrollbar.width(*this) + effective_frame_width()), 
-					size(window_rect().cx - (vertical_scrollbar().visible() ? vertical_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0, aScrollbar.width(*this))));
+			if (horizontal_scrollbar().style() == i_scrollbar::Normal)
+				return convert_units(*this, aContext, 
+					rect(window_rect().bottom_left() - point(-effective_frame_width(), aScrollbar.width(*this) + effective_frame_width()), 
+						size(window_rect().cx - (vertical_scrollbar().visible() ? vertical_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0, aScrollbar.width(*this))));
+			else // i_scrollbar::Button
+				return convert_units(*this, aContext,
+					rect{ window_rect().top_left() + point{ effective_frame_width(), client_rect().y}, size{ horizontal_scrollbar().width(*this), client_rect().height()} });
 		default:
 			return rect{};
 		}

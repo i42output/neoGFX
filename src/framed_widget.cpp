@@ -41,20 +41,11 @@ namespace neogfx
 	{
 	}
 
-	point framed_widget::origin(bool aNonClient) const
-	{
-		point o = widget::origin(aNonClient);
-		if (!aNonClient)
-		{
-			o.x += effective_frame_width();
-			o.y += effective_frame_width();
-		}
-		return o;
-	}
-
 	rect framed_widget::client_rect(bool aIncludeMargins) const
 	{
 		rect cr = widget::client_rect(aIncludeMargins);
+		cr.x += effective_frame_width();
+		cr.y += effective_frame_width();
 		cr.cx -= effective_frame_width() * 2.0;
 		cr.cy -= effective_frame_width() * 2.0;
 		return cr;

@@ -25,13 +25,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu) :
-		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this)
+		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu) :
-		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this)
+		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this)
 	{
 		init();
 	}
@@ -123,7 +123,7 @@ namespace neogfx
 			app::instance().current_style().colour().lighter(0x40);
 	}
 
-	void popup_menu::mouse_button_pressed(mouse_button, const point&)
+	void popup_menu::set_capture()
 	{
 		/* do nothing */
 	}

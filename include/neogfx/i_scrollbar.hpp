@@ -32,7 +32,12 @@ namespace neogfx
 		enum type_e
 		{
 			Vertical	= 0x01,
-			Horizontal	= 0x02
+			Horizontal	= 0x02,
+		};
+		enum style_e
+		{
+			Normal,
+			Button
 		};
 		typedef double value_type;
 		enum element_e
@@ -65,6 +70,7 @@ namespace neogfx
 		struct element_not_clicked : std::logic_error{ element_not_clicked() : std::logic_error("neogfx::i_scrollbar::element_not_clicked") {} };
 	public:
 		virtual type_e type() const = 0;
+		virtual style_e style() const = 0;
 		virtual void show() = 0;
 		virtual void hide() = 0;
 		virtual bool visible() const = 0;

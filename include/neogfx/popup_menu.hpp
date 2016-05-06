@@ -43,7 +43,7 @@ namespace neogfx
 	public:
 		virtual colour background_colour() const;
 	public:
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
+		virtual void set_capture();
 	public:
 		i_menu& menu() const;
 	private:

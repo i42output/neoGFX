@@ -48,7 +48,6 @@ namespace neogfx
 		framed_widget(i_layout& aLayout, style_e aStyle = SolidFrame, dimension aLineWidth = 1.0);
 		~framed_widget();
 	public:
-		virtual point origin(bool aNonClient = false) const;
 		virtual rect client_rect(bool aIncludeMargins = true) const;
 	public:
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
