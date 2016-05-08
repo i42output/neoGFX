@@ -218,6 +218,18 @@ namespace neogfx
 		return 0;
 	}
 
+	void opengl_window::close()
+	{
+		activate_context();
+		if (iFrameBufferSize != size{})
+		{
+			glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
+			glCheck(glDeleteTextures(1, &iFrameBufferTexture));
+			glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
+		}
+		deactivate_context();
+	}
+
 	i_native_window_event_handler& opengl_window::event_handler() const
 	{
 		return iEventHandler;

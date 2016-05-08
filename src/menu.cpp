@@ -190,11 +190,13 @@ namespace neogfx
 			throw cannot_select_item();
 		iSelection = aItemIndex;
 		item_selected.trigger(item(aItemIndex));
+		item(aItemIndex).selected.trigger();
 	}
 
 	void menu::clear_selection()
 	{
 		iSelection = boost::none;
+		selection_cleared.trigger();
 	}
 
 	bool menu::has_available_items() const

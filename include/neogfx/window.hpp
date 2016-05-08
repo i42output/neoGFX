@@ -89,7 +89,7 @@ namespace neogfx
 		virtual const i_surface& parent_surface() const;
 		virtual i_surface& parent_surface();
 		virtual bool is_owner_of(const i_surface& aChildSurface) const;
-		virtual bool dismissing_children() const;
+		virtual bool is_dismissing_children() const;
 		virtual bool can_dismiss(const i_widget* aClickedWidget) const;
 	public:
 		virtual neogfx::surface_type surface_type() const;

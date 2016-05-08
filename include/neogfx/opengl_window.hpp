@@ -61,6 +61,8 @@ namespace neogfx
 		virtual dimension horizontal_dpi() const;
 		virtual dimension vertical_dpi() const;
 		virtual dimension em_size() const;
+	public:
+		virtual void close();
 	protected:
 		i_native_window_event_handler& event_handler() const;
 	private:

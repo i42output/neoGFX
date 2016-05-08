@@ -42,10 +42,12 @@ namespace neogfx
 
 	menu_bar::~menu_bar()
 	{
+		surface().dismissing_children.unsubscribe(this);
 		close_sub_menu();
 		item_added.unsubscribe(this);
 		item_removed.unsubscribe(this);
 		item_selected.unsubscribe(this);
+		selection_cleared.unsubscribe(this);
 		open_sub_menu.unsubscribe(this);
 		remove_widgets();
 	}
@@ -70,8 +72,10 @@ namespace neogfx
 		switch (aScanCode)
 		{
 		case ScanCode_LEFT:
+			select_item(previous_available_item(selected_item()));
 			break;
 		case ScanCode_RIGHT:
+			select_item(next_available_item(selected_item()));
 			break;
 		default:
 			handled = false;
@@ -84,6 +88,12 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins{});
 		layout().set_margins(neogfx::margins{});
+		surface().dismissing_children([this](const i_widget* aClickedWidget)
+		{
+			if (aClickedWidget != this && (aClickedWidget == 0 || !is_ancestor_of(*aClickedWidget)))
+				clear_selection();
+			update();
+		}, this);
 		item_added([this](item_index aItemIndex)
 		{
 			layout().add_item(aItemIndex, std::make_shared<menu_item_widget>(*this, item(aItemIndex)));
@@ -102,43 +112,47 @@ namespace neogfx
 			if (iOpenSubMenu.get() != 0)
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
-					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.sub_menu().item_count() > 0))
+					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.availabie()))
 				{
-					iOpenSubMenu->menu().close();
+					close_sub_menu(false);
 					if (aMenuItem.type() == i_menu_item::SubMenu)
 						open_sub_menu.trigger(aMenuItem.sub_menu());
 				}
 			}
 			update();
 		}, this);
+		selection_cleared([this]()
+		{
+			if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
+				app::instance().keyboard().ungrab_keyboard(*this);
+		}, this);
 		open_sub_menu([this](i_menu& aSubMenu)
 		{
-			if (aSubMenu.item_count() > 0)
-			{
-				auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
-				close_sub_menu();
-				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+			auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
+			close_sub_menu(false);
+			iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().grab_keyboard(*this);
-				iOpenSubMenu->menu().closed([this]()
-				{
-					if (iOpenSubMenu.get() != 0)
-						iOpenSubMenu->close();
-				}, this);
-				iOpenSubMenu->closed([this]()
-				{
-					close_sub_menu();
-				}, this);
-			}
+			iOpenSubMenu->menu().closed([this]()
+			{
+				if (iOpenSubMenu.get() != 0)
+					iOpenSubMenu->close();
+			}, this);
+			iOpenSubMenu->closed([this]()
+			{
+				close_sub_menu();
+			}, this);
 		}, this);
 	}
 
-	void menu_bar::close_sub_menu()
+	void menu_bar::close_sub_menu(bool aClearSelection)
 	{
 		if (iOpenSubMenu.get() != 0)
 		{
 			iOpenSubMenu->menu().closed.unsubscribe(this);
 			iOpenSubMenu.reset();
-			app::instance().keyboard().ungrab_keyboard(*this);
+			if (aClearSelection)
+				clear_selection();
 		}
 	}
 

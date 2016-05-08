@@ -398,6 +398,7 @@ namespace neogfx
 	{
 		if (iHandle != 0)
 		{
+			opengl_window::close();
 			release_capture();
 			event_handler().native_window_closing();
 			SDL_DestroyWindow(iHandle);

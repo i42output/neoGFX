@@ -345,7 +345,7 @@ namespace neogfx
 		return false;
 	}
 
-	bool window::dismissing_children() const
+	bool window::is_dismissing_children() const
 	{
 		return iDismissingChildren;
 	}
@@ -802,6 +802,7 @@ namespace neogfx
 
 	void window::dismiss_children(const i_widget* aClickedWidget)
 	{
+		dismissing_children.trigger(aClickedWidget);
 		neolib::scoped_flag sf(iDismissingChildren);
 		if ((style() & window::RequiresOwnerFocus) != window::RequiresOwnerFocus)
 		{

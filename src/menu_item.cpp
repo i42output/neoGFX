@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "neogfx.hpp"
 #include "menu_item.hpp"
+#include "i_menu.hpp"
 
 namespace neogfx
 {
@@ -69,6 +70,8 @@ namespace neogfx
 	bool menu_item::availabie() const
 	{
 		if (type() == Action && (action().is_separator() || action().is_disabled()))
+			return false;
+		if (type() == SubMenu && !sub_menu().has_available_items())
 			return false;
 		return true;
 	}

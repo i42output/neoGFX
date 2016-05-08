@@ -39,6 +39,7 @@ namespace neogfx
 	class i_surface : public i_device_metrics, public i_units_context
 	{
 	public:
+		event<const i_widget*> dismissing_children;
 		event<> closed;
 	public:
 		virtual ~i_surface() {}
@@ -48,7 +49,7 @@ namespace neogfx
 		virtual const i_surface& parent_surface() const = 0;
 		virtual i_surface& parent_surface() = 0;
 		virtual bool is_owner_of(const i_surface& aChildSurface) const = 0;
-		virtual bool dismissing_children() const = 0;
+		virtual bool is_dismissing_children() const = 0;
 		virtual bool can_dismiss(const i_widget* aClickedWidget) const = 0;
 	public:
 		virtual neogfx::surface_type surface_type() const = 0;

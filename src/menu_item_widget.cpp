@@ -45,6 +45,7 @@ namespace neogfx
 
 	menu_item_widget::~menu_item_widget()
 	{
+		iMenuItem.selected.unsubscribe(this);
 		iSubMenuOpener.reset();
 		if (iMenuItem.type() == i_menu_item::SubMenu)
 		{
@@ -79,30 +80,27 @@ namespace neogfx
 
 	void menu_item_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
-		if (iMenuItem.type() != i_menu_item::Action || !iMenuItem.action().is_separator())
+		if (iMenu.has_selected_item() && iMenu.selected_item() == (iMenu.find_item(iMenuItem)))
 		{
 			bool openSubMenu = (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open());
-			if (enabled() && (entered() || capturing() || openSubMenu))
+			colour background;
+			if (openSubMenu && iMenu.type() == i_menu::MenuBar)
 			{
-				colour background;
-				if (openSubMenu && iMenu.type() == i_menu::MenuBar)
+				background = app::instance().current_style().colour().dark() ?
+					app::instance().current_style().colour().darker(0x40) :
+					app::instance().current_style().colour().lighter(0x40);
+				if (background.similar_intensity(app::instance().current_style().colour(), 0.05))
 				{
-					background = app::instance().current_style().colour().dark() ?
-						app::instance().current_style().colour().darker(0x40) :
-						app::instance().current_style().colour().lighter(0x40);
-					if (background.similar_intensity(app::instance().current_style().colour(), 0.05))
-					{
-						background = app::instance().current_style().selection_colour();
-						background.set_alpha(0x80);
-					}
-				}
-				else
-				{
-					background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
+					background = app::instance().current_style().selection_colour();
 					background.set_alpha(0x80);
 				}
-				aGraphicsContext.fill_rect(client_rect(), background);
 			}
+			else
+			{
+				background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
+				background.set_alpha(0x80);
+			}
+			aGraphicsContext.fill_rect(client_rect(), background);
 		}
 	}
 
@@ -156,20 +154,8 @@ namespace neogfx
 	{
 		widget::mouse_entered();
 		update();
-		if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
-		{
-			iSubMenuOpener = std::make_unique<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
-			{
-				if (!iMenuItem.sub_menu().is_open())
-				{
-					destroyed_flag destroyed(*this);
-					iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
-					if (!destroyed)
-						update();
-				}
-			}, 250);
-		}
-		iMenu.item_selected.trigger(iMenuItem);
+		if (iMenuItem.availabie())
+			iMenu.select_item(iMenu.find_item(iMenuItem));
 	}
 
 	void menu_item_widget::mouse_left()
@@ -252,33 +238,46 @@ namespace neogfx
 			iMenuItem.sub_menu().menu_changed(menu_changed, this);
 			menu_changed();
 		}
+		iMenuItem.selected([this]()
+		{
+			if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
+			{
+				iSubMenuOpener = std::make_unique<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
+				{
+					if (!iMenuItem.sub_menu().is_open())
+					{
+						destroyed_flag destroyed(*this);
+						iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
+						if (!destroyed)
+							update();
+					}
+				}, 250);
+			}
+		}, this);
 	}
 
 	void menu_item_widget::handle_pressed()
 	{
+		if (!iMenuItem.availabie())
+			return;
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
-			if (iMenuItem.action().is_enabled())
-			{
-				iMenuItem.action().triggered.trigger();
-				if (iMenuItem.action().is_checkable())
-					iMenuItem.action().toggle();
-				i_menu* menuToClose = &iMenu;
-				while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
-					menuToClose = &menuToClose->parent();
-				if (menuToClose->type() == i_menu::Popup)
-					menuToClose->close();
-			}
+			iMenuItem.action().triggered.trigger();
+			if (iMenuItem.action().is_checkable())
+				iMenuItem.action().toggle();
+			i_menu* menuToClose = &iMenu;
+			while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
+				menuToClose = &menuToClose->parent();
+			if (menuToClose->type() == i_menu::Popup)
+				menuToClose->close();
+			iMenu.clear_selection();
 		}
 		else
 		{
 			if (!iMenuItem.sub_menu().is_open())
 			{
-				if (iMenuItem.sub_menu().item_count() > 0)
-				{
-					iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
-					update();
-				}
+				iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
+				update();
 			}
 			else if (iMenu.type() == i_menu::MenuBar)
 			{

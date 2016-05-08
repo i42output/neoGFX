@@ -38,6 +38,7 @@ namespace neogfx
 		event<> opened;
 		event<> closed;
 		event<i_menu_item&> item_selected;
+		event<> selection_cleared;
 		event<i_menu&> open_sub_menu;
 	public:
 		enum type_e
