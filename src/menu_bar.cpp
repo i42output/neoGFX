@@ -77,6 +77,29 @@ namespace neogfx
 		case ScanCode_RIGHT:
 			select_item(next_available_item(selected_item()));
 			break;
+		case ScanCode_DOWN:
+			if (has_selected_item() && item(selected_item()).availabie())
+			{
+				auto& selectedItem = item(selected_item());
+				if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
+					open_sub_menu.trigger(selectedItem.sub_menu());
+			}
+			break;
+		case ScanCode_RETURN:
+			if (has_selected_item() && item(selected_item()).availabie())
+			{
+				auto& selectedItem = item(selected_item());
+				if (selectedItem.type() == i_menu_item::Action)
+				{
+					selectedItem.action().triggered.trigger();
+					if (selectedItem.action().is_checkable())
+						selectedItem.action().toggle();
+					clear_selection();
+				}
+				else if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
+					open_sub_menu.trigger(selectedItem.sub_menu());
+			}
+			break;
 		default:
 			handled = false;
 			break;
