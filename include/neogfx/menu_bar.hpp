@@ -39,6 +39,8 @@ namespace neogfx
 		virtual neogfx::size_policy size_policy() const;	
 	public:
 		virtual bool visible() const;
+	public:
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	private:
 		void init();
 		void close_sub_menu();

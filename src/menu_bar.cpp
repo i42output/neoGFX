@@ -64,6 +64,22 @@ namespace neogfx
 		return widget::visible();
 	}
 
+	bool menu_bar::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+	{
+		bool handled = true;
+		switch (aScanCode)
+		{
+		case ScanCode_LEFT:
+			break;
+		case ScanCode_RIGHT:
+			break;
+		default:
+			handled = false;
+			break;
+		}
+		return handled;
+	}
+
 	void menu_bar::init()
 	{
 		set_margins(neogfx::margins{});
@@ -102,6 +118,7 @@ namespace neogfx
 				auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
 				close_sub_menu();
 				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+				app::instance().keyboard().grab_keyboard(*this);
 				iOpenSubMenu->menu().closed([this]()
 				{
 					if (iOpenSubMenu.get() != 0)
@@ -121,6 +138,7 @@ namespace neogfx
 		{
 			iOpenSubMenu->menu().closed.unsubscribe(this);
 			iOpenSubMenu.reset();
+			app::instance().keyboard().ungrab_keyboard(*this);
 		}
 	}
 

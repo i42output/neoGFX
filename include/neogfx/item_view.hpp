@@ -81,7 +81,7 @@ namespace neogfx
 	protected:
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
 	protected:
-		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	protected:
 		using scrollable_widget::scrolling_disposition;
 		virtual child_widget_scrolling_disposition_e scrolling_disposition() const;

@@ -66,7 +66,7 @@ namespace neogfx
 		virtual void mouse_entered();
 		virtual void mouse_left();
 	public:
-		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	public:
 		virtual const i_scrollbar& vertical_scrollbar() const;
 		virtual i_scrollbar& vertical_scrollbar();

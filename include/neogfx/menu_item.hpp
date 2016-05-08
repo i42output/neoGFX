@@ -42,6 +42,8 @@ namespace neogfx
 		virtual i_action& action();
 		virtual const i_menu& sub_menu() const;
 		virtual i_menu& sub_menu();
+	public:
+		virtual bool availabie() const;
 	private:
 		contents iContents;
 	};

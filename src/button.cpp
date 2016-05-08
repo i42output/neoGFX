@@ -165,10 +165,14 @@ namespace neogfx
 		}
 	}
 
-	void button::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+	bool button::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
 	{
 		if (aScanCode == ScanCode_SPACE)
+		{
 			handle_pressed();
+			return true;
+		}
+		return false;
 	}
 
 	void button::handle_pressed()

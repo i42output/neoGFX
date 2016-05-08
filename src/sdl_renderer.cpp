@@ -135,24 +135,36 @@ namespace neogfx
 				break;
 			case SDL_KEYDOWN:
 				{
-					iKeyboard.key_pressed.trigger(
-						static_cast<scan_code_e>(event.key.keysym.scancode), 
-						static_cast<key_code_e>(event.key.keysym.sym), 
-						static_cast<key_modifiers_e>(event.key.keysym.mod));
-					SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					if (!iKeyboard.grabber().key_pressed(
+						static_cast<scan_code_e>(event.key.keysym.scancode),
+						static_cast<key_code_e>(event.key.keysym.sym),
+						static_cast<key_modifiers_e>(event.key.keysym.mod)))
+					{
+						iKeyboard.key_pressed.trigger(
+							static_cast<scan_code_e>(event.key.keysym.scancode),
+							static_cast<key_code_e>(event.key.keysym.sym),
+							static_cast<key_modifiers_e>(event.key.keysym.mod));
+						SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
+						if (window != NULL)
+							static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					}
 				}
 				break;
 			case SDL_KEYUP:
 				{
-					iKeyboard.key_released.trigger(
+					if (!iKeyboard.grabber().key_released(
 						static_cast<scan_code_e>(event.key.keysym.scancode),
 						static_cast<key_code_e>(event.key.keysym.sym),
-						static_cast<key_modifiers_e>(event.key.keysym.mod));
-					SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+						static_cast<key_modifiers_e>(event.key.keysym.mod)))
+					{
+						iKeyboard.key_released.trigger(
+							static_cast<scan_code_e>(event.key.keysym.scancode),
+							static_cast<key_code_e>(event.key.keysym.sym),
+							static_cast<key_modifiers_e>(event.key.keysym.mod));
+						SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
+						if (window != NULL)
+							static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					}
 				}
 				break;
 			case SDL_TEXTEDITING:
@@ -164,9 +176,12 @@ namespace neogfx
 				break;
 			case SDL_TEXTINPUT:
 				{
-					SDL_Window* window = SDL_GetWindowFromID(event.text.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					if (!iKeyboard.grabber().text_input(event.text.text))
+					{
+						SDL_Window* window = SDL_GetWindowFromID(event.text.windowID);
+						if (window != NULL)
+							static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					}
 				}
 				break;
 			default:

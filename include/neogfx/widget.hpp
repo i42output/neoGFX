@@ -184,9 +184,9 @@ namespace neogfx
 		virtual void mouse_left();
 		virtual void set_default_mouse_cursor();
 	public:
-		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual void key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual void text_input(const std::string& aText);
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool text_input(const std::string& aText);
 	public:
 		virtual graphics_context create_graphics_context() const;
 	protected:

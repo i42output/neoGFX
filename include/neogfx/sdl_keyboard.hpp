@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-	class sdl_keyboard : public i_keyboard
+	class sdl_keyboard : public keyboard
 	{
 	public:
 		virtual bool is_key_pressed(scan_code_e aScanCode) const

@@ -57,7 +57,7 @@ namespace neogfx
 		virtual i_basic_services& basic_services() const;
 		virtual i_rendering_engine& rendering_engine() const;
 		virtual i_surface_manager& surface_manager() const;
-		virtual const i_keyboard& keyboard() const;
+		virtual i_keyboard& keyboard() const;
 	public:
 		virtual const i_style& current_style() const;
 		virtual i_style& current_style();

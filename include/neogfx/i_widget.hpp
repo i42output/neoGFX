@@ -23,7 +23,7 @@
 #include "i_geometry.hpp"
 #include "graphics_context.hpp"
 #include "mouse.hpp"
-#include "keyboard.hpp"
+#include "i_keyboard.hpp"
 
 namespace neogfx
 {
@@ -44,7 +44,7 @@ namespace neogfx
 		ConsumeReturnKey	= 0x20000000
 	};
 
-	class i_widget : public i_geometry, public i_units_context
+	class i_widget : public i_geometry, public i_units_context, public i_keyboard_handler
 	{
 	public:
 		event<> visibility_changed;
@@ -173,10 +173,6 @@ namespace neogfx
 		virtual void mouse_entered() = 0;
 		virtual void mouse_left() = 0;
 		virtual void set_default_mouse_cursor() = 0;
-	public:
-		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
-		virtual void key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
-		virtual void text_input(const std::string& aText) = 0;
 	public:
 		virtual graphics_context create_graphics_context() const = 0;
 	protected:

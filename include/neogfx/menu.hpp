@@ -56,7 +56,17 @@ namespace neogfx
 		virtual void insert_action(item_index aItemIndex, i_action& aAction);
 		virtual void insert_separator(item_index aItemIndex);
 		virtual void remove_item(item_index aItemIndex);
+		virtual item_index find_item(const i_menu_item& aItem) const;
 		virtual item_index find_item(const i_menu& aSubMenu) const;
+		virtual bool has_selected_item() const;
+		virtual item_index selected_item() const;
+		virtual void select_item(item_index aItemIndex);
+		virtual void clear_selection();
+		virtual bool has_available_items() const;
+		virtual bool item_available(item_index aItemIndex) const;
+		virtual item_index first_available_item() const;
+		virtual item_index previous_available_item(item_index aCurrentIndex) const;
+		virtual item_index next_available_item(item_index aCurrentIndex) const;
 		virtual bool is_open() const;
 		virtual void open();
 		virtual void close();
@@ -68,5 +78,6 @@ namespace neogfx
 		item_list iItems;
 		action iSeparator;
 		uint32_t iOpenCount;
+		boost::optional<item_index> iSelection;
 	};
 }

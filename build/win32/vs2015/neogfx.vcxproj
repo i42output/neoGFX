@@ -90,6 +90,7 @@
     <ClInclude Include="..\..\..\include\neogfx\i_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_shared_menu_bar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\keyboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\layout_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\menu_bar.hpp" />
@@ -169,7 +170,7 @@
     <ClInclude Include="..\..\..\include\neogfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_window.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\keyboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_keyboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\label.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\module_resource.hpp" />
@@ -226,6 +227,7 @@
     <ClCompile Include="..\..\..\src\action.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
     <ClCompile Include="..\..\..\src\flow_layout.cpp" />
+    <ClCompile Include="..\..\..\src\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\layout_item.cpp" />
     <ClCompile Include="..\..\..\src\menu.cpp" />
     <ClCompile Include="..\..\..\src\menu_bar.cpp" />

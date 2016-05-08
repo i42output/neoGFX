@@ -148,8 +148,18 @@ namespace neogfx
 
 	void menu::remove_item(item_index aItemIndex)
 	{
+		if (aItemIndex >= item_count())
+			throw bad_item_index();
 		iItems.erase(iItems.begin() + aItemIndex);
 		item_removed.trigger(aItemIndex);
+	}
+
+	menu::item_index menu::find_item(const i_menu_item& aItem) const
+	{
+		for (item_index i = 0; i < iItems.size(); ++i)
+			if (&*iItems[i] == &aItem)
+				return i;
+		throw item_not_found();
 	}
 
 	menu::item_index menu::find_item(const i_menu& aSubMenu) const
@@ -158,6 +168,88 @@ namespace neogfx
 			if (iItems[i]->type() == i_menu_item::SubMenu && &iItems[i]->sub_menu() == &aSubMenu)
 				return i;
 		throw item_not_found();
+	}
+
+	bool menu::has_selected_item() const
+	{
+		return iSelection != boost::none;
+	}
+
+	menu::item_index menu::selected_item() const
+	{
+		if (iSelection != boost::none)
+			return *iSelection;
+		throw no_selected_item();
+	}
+
+	void menu::select_item(item_index aItemIndex)
+	{
+		if (has_selected_item() && selected_item() == aItemIndex)
+			return;
+		if (!item_available(aItemIndex))
+			throw cannot_select_item();
+		iSelection = aItemIndex;
+		item_selected.trigger(item(aItemIndex));
+	}
+
+	void menu::clear_selection()
+	{
+		iSelection = boost::none;
+	}
+
+	bool menu::has_available_items() const
+	{
+		for (const auto& i : iItems)
+			if (i->availabie())
+				return true;
+		return false;
+	}
+
+	bool menu::item_available(item_index aItemIndex) const
+	{
+		return item(aItemIndex).availabie();
+	}
+
+	menu::item_index menu::first_available_item() const
+	{
+		for (item_index i = 0; i < item_count(); ++i)
+			if (item(i).availabie())
+				return i;
+		throw no_available_items();
+	}
+
+	menu::item_index menu::previous_available_item(item_index aCurrentIndex) const
+	{
+		if (aCurrentIndex >= item_count())
+			throw bad_item_index();
+		auto previous = [this](item_index aCurrent) -> item_index
+		{
+			if (aCurrent > 0)
+				return aCurrent - 1;
+			else
+				return item_count() - 1;
+		};
+		for (item_index previousIndex = previous(aCurrentIndex); previousIndex != aCurrentIndex; previousIndex = previous(previousIndex))
+			if (item(previousIndex).availabie())
+				return previousIndex;
+		return aCurrentIndex;
+	}
+
+	menu::item_index menu::next_available_item(item_index aCurrentIndex) const
+	{
+		if (aCurrentIndex >= item_count())
+			throw bad_item_index();
+		auto next = [this](item_index aCurrent) -> item_index
+		{
+			if (aCurrent < item_count() - 1)
+				return aCurrent + 1;
+			else
+				return 0;
+		};
+		for (item_index nextIndex = next(aCurrentIndex); nextIndex != aCurrentIndex; nextIndex = next(nextIndex))
+			if (item(nextIndex).availabie())
+				return nextIndex;
+		return aCurrentIndex;
 	}
 
 	bool menu::is_open() const

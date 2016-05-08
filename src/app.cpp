@@ -149,7 +149,7 @@ namespace neogfx
 			throw no_surface_manager();
 	}
 
-	const i_keyboard& app::keyboard() const
+	i_keyboard& app::keyboard() const
 	{
 		if (iKeyboard)
 			return *iKeyboard;

@@ -281,13 +281,9 @@ namespace neogfx
 		}
 	}
 
-	void item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	bool item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
-		if (model().rows() == 0)
-		{
-			scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
-			return;
-		}
+		bool handled = true;
 		if (selection_model().has_current_index())
 		{
 			item_model_index currentIndex = selection_model().current_index();
@@ -342,7 +338,7 @@ namespace neogfx
 					newIndex = item_model_index(model().rows() - 1, model().columns() - 1);
 				break;
 			default:
-				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+				handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 				break;
 			}
 			selection_model().set_current_index(newIndex);
@@ -362,10 +358,11 @@ namespace neogfx
 				selection_model().set_current_index(item_model_index(0, 0));
 				break;
 			default:
-				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+				handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 				break;
 			}
 		}
+		return handled;
 	}
 
 	item_view::child_widget_scrolling_disposition_e item_view::scrolling_disposition() const

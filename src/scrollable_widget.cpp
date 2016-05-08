@@ -230,8 +230,9 @@ namespace neogfx
 		horizontal_scrollbar().update(*this);
 	}
 
-	void scrollable_widget::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	bool scrollable_widget::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
+		bool handled = true;
 		switch (aScanCode)
 		{
 		case ScanCode_LEFT:
@@ -265,9 +266,10 @@ namespace neogfx
 				vertical_scrollbar().set_position(vertical_scrollbar().maximum());
 			break;
 		default:
-			framed_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			handled = framed_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			break;
 		}
+		return handled;
 	}
 
 	const i_scrollbar& scrollable_widget::vertical_scrollbar() const

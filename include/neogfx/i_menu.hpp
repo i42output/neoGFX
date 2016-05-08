@@ -50,6 +50,9 @@ namespace neogfx
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_menu::no_parent") {} };
 		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_menu::bad_item_index") {} };
 		struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_menu::item_not_found") {} };
+		struct no_selected_item : std::logic_error { no_selected_item() : std::logic_error("neogfx::i_menu::no_selected_item") {} };
+		struct cannot_select_item : std::logic_error { cannot_select_item() : std::logic_error("neogfx::i_menu::cannot_select_item") {} };
+		struct no_available_items : std::logic_error { no_available_items() : std::logic_error("neogfx::i_menu::no_available_items") {} };
 	public:
 		virtual ~i_menu() {}
 	public:
@@ -72,7 +75,17 @@ namespace neogfx
 		virtual void insert_action(item_index aItemIndex, i_action& aAction) = 0;
 		virtual void insert_separator(item_index aItemIndex) = 0;
 		virtual void remove_item(item_index aItemIndex) = 0;
+		virtual item_index find_item(const i_menu_item& aItem) const = 0;
 		virtual item_index find_item(const i_menu& aSubMenu) const = 0;
+		virtual bool has_selected_item() const = 0;
+		virtual item_index selected_item() const = 0;
+		virtual void select_item(item_index aItemIndex) = 0;
+		virtual void clear_selection() = 0;
+		virtual bool has_available_items() const = 0;
+		virtual bool item_available(item_index aItemIndex) const = 0;
+		virtual item_index first_available_item() const = 0;
+		virtual item_index previous_available_item(item_index aCurrentIndex) const = 0;
+		virtual item_index next_available_item(item_index aCurrentIndex) const = 0;
 		virtual bool is_open() const = 0;
 		virtual void open() = 0;
 		virtual void close() = 0;

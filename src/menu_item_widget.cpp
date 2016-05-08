@@ -191,10 +191,14 @@ namespace neogfx
 			handle_pressed();
 	}
 
-	void menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+	bool menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
 	{
-		if (aScanCode == ScanCode_SPACE)
+		if (aScanCode == ScanCode_RETURN)
+		{
 			handle_pressed();
+			return true;
+		}
+		return false;
 	}
 
 	point menu_item_widget::sub_menu_position() const

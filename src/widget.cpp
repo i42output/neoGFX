@@ -108,6 +108,8 @@ namespace neogfx
 
 	widget::~widget()
 	{
+		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
+			app::instance().keyboard().ungrab_keyboard(*this);
 		remove_widgets();
 		{
 			auto layout = iLayout;
@@ -1102,16 +1104,19 @@ namespace neogfx
 		surface().set_mouse_cursor(mouse_system_cursor::Arrow);
 	}
 
-	void widget::key_pressed(scan_code_e, key_code_e, key_modifiers_e)
+	bool widget::key_pressed(scan_code_e, key_code_e, key_modifiers_e)
 	{
+		return false;
 	}
 
-	void widget::key_released(scan_code_e, key_code_e, key_modifiers_e)
+	bool widget::key_released(scan_code_e, key_code_e, key_modifiers_e)
 	{
+		return false;
 	}
 
-	void widget::text_input(const std::string&)
+	bool widget::text_input(const std::string&)
 	{
+		return false;
 	}
 
 	i_widget& widget::widget_for_mouse_event(const point& aPosition)

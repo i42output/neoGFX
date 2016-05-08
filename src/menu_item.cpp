@@ -65,4 +65,11 @@ namespace neogfx
 	{
 		return const_cast<i_menu&>(const_cast<const menu_item*>(this)->sub_menu());
 	}
+
+	bool menu_item::availabie() const
+	{
+		if (type() == Action && (action().is_separator() || action().is_disabled()))
+			return false;
+		return true;
+	}
 }

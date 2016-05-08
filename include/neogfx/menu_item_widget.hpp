@@ -49,7 +49,7 @@ namespace neogfx
 		virtual void mouse_left();	
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-		virtual void key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	public:
 		point sub_menu_position() const;
 	private:
