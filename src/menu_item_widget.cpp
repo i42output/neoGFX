@@ -262,6 +262,7 @@ namespace neogfx
 			return;
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
+			iMenu.clear_selection();
 			iMenuItem.action().triggered.trigger();
 			if (iMenuItem.action().is_checkable())
 				iMenuItem.action().toggle();
@@ -270,12 +271,12 @@ namespace neogfx
 				menuToClose = &menuToClose->parent();
 			if (menuToClose->type() == i_menu::Popup)
 				menuToClose->close();
-			iMenu.clear_selection();
 		}
 		else
 		{
 			if (!iMenuItem.sub_menu().is_open())
 			{
+				iMenu.select_item(iMenu.find_item(iMenuItem));
 				iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
 				update();
 			}

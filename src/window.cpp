@@ -217,9 +217,7 @@ namespace neogfx
 
 	window::~window()
 	{
-		if (iNativeWindow)
-			iNativeWindow->close();
-		app::instance().surface_manager().remove_surface(*this);
+		close();
 	}
 
 	uint32_t window::style() const
@@ -310,9 +308,11 @@ namespace neogfx
 
 	void window::close()
 	{
-		layout().remove_items();
+		if (has_layout())
+			layout().remove_items();
 		remove_widgets();
-		native_surface().close();
+		if (!destroyed())
+			native_surface().close();
 		closed.trigger();
 	}
 

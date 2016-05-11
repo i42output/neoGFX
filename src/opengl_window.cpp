@@ -49,7 +49,7 @@ namespace neogfx
 	{
 	}
 
-	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const 
+	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const
 	{
 		return iLogicalCoordinateSystem;
 	}
@@ -66,9 +66,9 @@ namespace neogfx
 		case neogfx::logical_coordinate_system::Specified:
 			return iLogicalCoordinates;
 		case neogfx::logical_coordinate_system::AutomaticGui:
-			return iLogicalCoordinates = vector4{0.0, extents().cy, extents().cx, 0.0};
+			return iLogicalCoordinates = vector4{ 0.0, extents().cy, extents().cx, 0.0 };
 		case neogfx::logical_coordinate_system::AutomaticGame:
-			return iLogicalCoordinates = vector4{0.0, 0.0, extents().cx, extents().cy};
+			return iLogicalCoordinates = vector4{ 0.0, 0.0, extents().cx, extents().cy };
 		}
 		return iLogicalCoordinates;
 	}
@@ -104,7 +104,7 @@ namespace neogfx
 			return;
 
 		rendering_check.trigger();
-			
+
 		if (iInvalidatedRects.empty())
 			return;
 
@@ -202,12 +202,12 @@ namespace neogfx
 	{
 		return surface_size();
 	}
-	
+
 	dimension opengl_window::horizontal_dpi() const
 	{
 		return iPixelDensityDpi.cx;
 	}
-	
+
 	dimension opengl_window::vertical_dpi() const
 	{
 		return iPixelDensityDpi.cy;
@@ -218,7 +218,12 @@ namespace neogfx
 		return 0;
 	}
 
-	void opengl_window::close()
+	i_native_window_event_handler& opengl_window::event_handler() const
+	{
+		return iEventHandler;
+	}
+
+	void opengl_window::destroying()
 	{
 		activate_context();
 		if (iFrameBufferSize != size{})
@@ -230,8 +235,7 @@ namespace neogfx
 		deactivate_context();
 	}
 
-	i_native_window_event_handler& opengl_window::event_handler() const
+	void opengl_window::destroyed()
 	{
-		return iEventHandler;
 	}
 }

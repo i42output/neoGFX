@@ -369,9 +369,12 @@ namespace neogfx
 	void widget::set_layout(std::shared_ptr<i_layout> aLayout)
 	{
 		iLayout = aLayout;
-		iLayout->set_owner(this);
-		for (auto& c : iChildren)
-			iLayout->add_item(c);
+		if (iLayout != nullptr)
+		{
+			iLayout->set_owner(this);
+			for (auto& c : iChildren)
+				iLayout->add_item(c);
+		}
 	}
 
 	const i_layout& widget::layout() const

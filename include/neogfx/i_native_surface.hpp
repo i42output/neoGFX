@@ -35,6 +35,8 @@ namespace neogfx
 		event<> rendering_check;
 		event<> rendering;
 	public:
+		struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
+	public:
 		virtual ~i_native_surface() {}
 	public:
 		virtual void close() = 0;

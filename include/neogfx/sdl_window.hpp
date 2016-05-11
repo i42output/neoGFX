@@ -101,7 +101,10 @@ namespace neogfx
 	private:
 		void init();
 		void process_event(const SDL_Event& aEvent);
-		void destroyed();
+		virtual void destroying();
+		virtual void destroyed();
+		void do_activate_context() const;
+		static std::deque<const sdl_window*>& context_activation_stack();
 #ifdef WIN32
 		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 #endif
@@ -117,7 +120,6 @@ namespace neogfx
 		WNDPROC iSDLWindowProc;
 #endif
 		SDL_GLContext iContext;
-		mutable uint32_t iContextActivationCounter;
 		size iExtents;
 		bool iProcessingEvent;
 		bool iCapturingMouse;

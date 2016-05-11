@@ -112,6 +112,8 @@ namespace neogfx
 		remove_items();
 		if (iParent != 0)
 			iParent->remove_item(*this);
+		if (owner() && owner()->has_layout() && &owner()->layout() == this)
+			owner()->set_layout(nullptr);
 	}
 
 	i_widget* layout::owner() const
