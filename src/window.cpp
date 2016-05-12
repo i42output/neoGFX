@@ -35,7 +35,8 @@ namespace neogfx
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
-		iClosing(false), 
+		iNativeWindowClosing(false), 
+		iClosed(false),
 		iEnteredWidget(0), 
 		iCapturingWidget(0),
 		iFocusedWidget(0),
@@ -50,8 +51,9 @@ namespace neogfx
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
-		iClosing(false), 
-		iEnteredWidget(0), 
+		iNativeWindowClosing(false), 
+		iClosed(false),
+		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
 		iDismissingChildren(false)
@@ -65,8 +67,9 @@ namespace neogfx
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
-		iClosing(false), 
-		iEnteredWidget(0), 
+		iNativeWindowClosing(false), 
+		iClosed(false),
+		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
 		iDismissingChildren(false)
@@ -80,8 +83,9 @@ namespace neogfx
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
-		iClosing(false), 
-		iEnteredWidget(0), 
+		iNativeWindowClosing(false), 
+		iClosed(false),
+		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
 		iDismissingChildren(false)
@@ -95,7 +99,8 @@ namespace neogfx
 		iStyle(aStyle),
 		iUnits(UnitsPixels),
 		iCountedEnable(0),
-		iClosing(false),
+		iNativeWindowClosing(false),
+		iClosed(false),
 		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
@@ -110,7 +115,8 @@ namespace neogfx
 		iStyle(aStyle),
 		iUnits(UnitsPixels),
 		iCountedEnable(0),
-		iClosing(false),
+		iNativeWindowClosing(false),
+		iClosed(false),
 		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
@@ -125,8 +131,9 @@ namespace neogfx
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
-		iClosing(false), 
-		iEnteredWidget(0), 
+		iNativeWindowClosing(false), 
+		iClosed(false),
+		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
 		iDismissingChildren(false)
@@ -141,8 +148,9 @@ namespace neogfx
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
-		iClosing(false), 
-		iEnteredWidget(0), 
+		iNativeWindowClosing(false), 
+		iClosed(false),
+		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
 		iDismissingChildren(false)
@@ -157,8 +165,9 @@ namespace neogfx
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
-		iClosing(false), 
-		iEnteredWidget(0), 
+		iNativeWindowClosing(false), 
+		iClosed(false),
+		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
 		iDismissingChildren(false)
@@ -173,8 +182,9 @@ namespace neogfx
 		iStyle(aStyle), 
 		iUnits(UnitsPixels), 
 		iCountedEnable(0), 
-		iClosing(false), 
-		iEnteredWidget(0), 
+		iNativeWindowClosing(false), 
+		iClosed(false),
+		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
 		iDismissingChildren(false)
@@ -189,7 +199,8 @@ namespace neogfx
 		iStyle(aStyle),
 		iUnits(UnitsPixels),
 		iCountedEnable(0),
-		iClosing(false),
+		iNativeWindowClosing(false),
+		iClosed(false),
 		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
@@ -205,7 +216,8 @@ namespace neogfx
 		iStyle(aStyle),
 		iUnits(UnitsPixels),
 		iCountedEnable(0),
-		iClosing(false),
+		iNativeWindowClosing(false),
+		iClosed(false),
 		iEnteredWidget(0),
 		iCapturingWidget(0),
 		iFocusedWidget(0),
@@ -308,11 +320,21 @@ namespace neogfx
 
 	void window::close()
 	{
+		if (iClosed)
+			return;
+		if (!destroyed())
+			native_surface().activate_context();
 		if (has_layout())
 			layout().remove_items();
 		remove_widgets();
 		if (!destroyed())
+		{
+			native_surface().deactivate_context();
 			native_surface().close();
+		}
+		else
+			iNativeWindow.reset();
+		iClosed = true;
 		closed.trigger();
 	}
 
@@ -419,7 +441,7 @@ namespace neogfx
 
 	bool window::destroyed() const
 	{
-		return !iNativeWindow;
+		return !iNativeWindow || native_surface().is_destroyed();
 	}
 
 	point window::surface_position() const
@@ -602,9 +624,9 @@ namespace neogfx
 
 	void window::native_window_closing()
 	{
-		if (!iClosing)
+		if (!iNativeWindowClosing)
 		{
-			iClosing = true;
+			iNativeWindowClosing = true;
 			update_modality();
 		}
 		if (has_parent() && !(static_cast<window&>(parent()).style() & window::NoActivate))
@@ -613,9 +635,9 @@ namespace neogfx
 
 	void window::native_window_closed()
 	{
-		if (!iClosing)
+		if (!iNativeWindowClosing)
 		{
-			iClosing = true;
+			iNativeWindowClosing = true;
 			update_modality();
 		}
 		iNativeWindow.reset();
@@ -793,9 +815,9 @@ namespace neogfx
 			{
 				window& windowSurface = static_cast<window&>(surface);
 				if (iStyle & ApplicationModal)
-					windowSurface.counted_enable(!iNativeWindow || iClosing);
+					windowSurface.counted_enable(!iNativeWindow || iNativeWindowClosing);
 				else if ((iStyle & Modal) && windowSurface.is_ancestor_of(*this))
-					windowSurface.counted_enable(!iNativeWindow || iClosing);
+					windowSurface.counted_enable(!iNativeWindow || iNativeWindowClosing);
 			}
 		}
 	}

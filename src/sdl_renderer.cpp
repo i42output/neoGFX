@@ -101,36 +101,36 @@ namespace neogfx
 			case SDL_WINDOWEVENT:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.window.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_MOUSEMOTION:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.motion.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.button.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_MOUSEBUTTONUP:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.button.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_MOUSEWHEEL:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.wheel.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_KEYDOWN:
@@ -145,8 +145,8 @@ namespace neogfx
 							static_cast<key_code_e>(event.key.keysym.sym),
 							static_cast<key_modifiers_e>(event.key.keysym.mod));
 						SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
-						if (window != NULL)
-							static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+						if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+							static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 					}
 				}
 				break;
@@ -162,16 +162,16 @@ namespace neogfx
 							static_cast<key_code_e>(event.key.keysym.sym),
 							static_cast<key_modifiers_e>(event.key.keysym.mod));
 						SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
-						if (window != NULL)
-							static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+						if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+							static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 					}
 				}
 				break;
 			case SDL_TEXTEDITING:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.edit.windowID);
-					if (window != NULL)
-						static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_TEXTINPUT:
@@ -179,8 +179,8 @@ namespace neogfx
 					if (!iKeyboard.grabber().text_input(event.text.text))
 					{
 						SDL_Window* window = SDL_GetWindowFromID(event.text.windowID);
-						if (window != NULL)
-							static_cast<sdl_window&>(app::instance().surface_manager().surface_from_handle(window).native_surface()).process_event(event);
+						if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+							static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 					}
 				}
 				break;

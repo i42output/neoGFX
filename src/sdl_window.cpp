@@ -489,7 +489,18 @@ namespace neogfx
 			throw context_mismatch();
 		context_activation_stack().pop_back();
 		if (context_activation_stack().empty())
-			do_activate_context();
+		{
+			if (!iDestroyed)
+				do_activate_context();
+			else
+				for (std::size_t i = 0; i != surface_manager().surface_count(); ++i)
+					if (!surface_manager().surface(i).destroyed())
+					{
+						surface_manager().surface(i).native_surface().activate_context();
+						context_activation_stack().pop_back();
+						break;
+					}
+		}
 		else if (context_activation_stack().back() != this)
 			context_activation_stack().back()->do_activate_context();
 	}
@@ -632,6 +643,8 @@ namespace neogfx
 			opengl_window::destroyed();
 			iNativeHandle = 0;
 		}
+		while (!context_activation_stack().empty() && context_activation_stack().back() == this)
+			deactivate_context();
 	}
 
 	void sdl_window::do_activate_context() const

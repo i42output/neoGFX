@@ -168,7 +168,8 @@ namespace neogfx
 		uint32_t iStyle;
 		mutable units_e iUnits;
 		int32_t iCountedEnable;
-		bool iClosing;
+		bool iNativeWindowClosing;
+		bool iClosed;
 		i_widget* iEnteredWidget;
 		i_widget* iCapturingWidget;
 		i_widget* iFocusedWidget;

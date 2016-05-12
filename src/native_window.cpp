@@ -43,4 +43,9 @@ namespace neogfx
 	{
 		return iRenderingEngine;
 	}
+
+	i_surface_manager& native_window::surface_manager() const
+	{
+		return iSurfaceManager;
+	}
 }

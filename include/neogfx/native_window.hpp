@@ -36,6 +36,7 @@ namespace neogfx
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const;
 	public:
 		i_rendering_engine& rendering_engine() const;
+		i_surface_manager& surface_manager() const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		i_surface_manager& iSurfaceManager;

@@ -33,7 +33,6 @@ namespace neogfx
 	public:
 		virtual void add_surface(i_surface& aSurface) = 0;
 		virtual void remove_surface(i_surface& aSurface) = 0;
-		virtual i_surface& surface_from_handle(void* aHandle) = 0;
 		virtual std::size_t surface_count() const = 0;
 		virtual i_surface& surface(std::size_t aIndex) = 0;
 		virtual bool process_events(bool& aLastWindowClosed) = 0;
@@ -45,5 +44,8 @@ namespace neogfx
 		virtual uint32_t display_count() const = 0;
 		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const = 0;
 		virtual rect desktop_rect(const i_surface& aSurface) const = 0;
+	public:
+		virtual bool is_surface_attached(void* aNativeSurfaceHandle) const = 0;
+		virtual i_surface& attached_surface(void* aNativeSurfaceHandle) = 0;
 	};
 }
