@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "neogfx.hpp"
+#include <neolib/raii.hpp>
 #include "popup_menu.hpp"
 #include "menu_item_widget.hpp"
 #include "app.hpp"
@@ -25,13 +26,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu) :
-		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this)
+		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu) :
-		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this)
+		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
@@ -169,8 +170,9 @@ namespace neogfx
 		}, this);
 		iMenu.open_sub_menu([this](i_menu& aSubMenu)
 		{
-			if (aSubMenu.item_count() > 0)
+			if (!iOpeningSubMenu && aSubMenu.item_count() > 0)
 			{
+				neolib::scoped_flag sf(iOpeningSubMenu);
 				auto& itemWidget = layout().get_widget<menu_item_widget>(iMenu.find_item(aSubMenu));
 				close_sub_menu();
 				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
