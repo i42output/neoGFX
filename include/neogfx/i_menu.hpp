@@ -54,6 +54,7 @@ namespace neogfx
 		struct no_selected_item : std::logic_error { no_selected_item() : std::logic_error("neogfx::i_menu::no_selected_item") {} };
 		struct cannot_select_item : std::logic_error { cannot_select_item() : std::logic_error("neogfx::i_menu::cannot_select_item") {} };
 		struct no_available_items : std::logic_error { no_available_items() : std::logic_error("neogfx::i_menu::no_available_items") {} };
+		struct already_closed : std::logic_error { already_closed() : std::logic_error("neogfx::i_menu::already_closed") {} };
 	public:
 		virtual ~i_menu() {}
 	public:

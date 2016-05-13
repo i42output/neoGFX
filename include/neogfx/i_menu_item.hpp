@@ -30,6 +30,7 @@ namespace neogfx
 	{
 	public:
 		event<> selected;
+		event<> deselected;
 	public:
 		enum type_e
 		{

@@ -44,7 +44,8 @@ namespace neogfx
 		iMenu.item_changed.unsubscribe(this);
 		iMenu.item_selected.unsubscribe(this);
 		iMenu.open_sub_menu.unsubscribe(this);
-		iMenu.close();
+		if (iMenu.is_open())
+			iMenu.close();
 	}
 
 	bool popup_menu::can_dismiss(const i_widget* aClickedWidget) const

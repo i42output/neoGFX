@@ -46,6 +46,7 @@ namespace neogfx
 	menu_item_widget::~menu_item_widget()
 	{
 		iMenuItem.selected.unsubscribe(this);
+		iMenuItem.deselected.unsubscribe(this);
 		iSubMenuOpener.reset();
 		if (iMenuItem.type() == i_menu_item::SubMenu)
 		{
@@ -158,13 +159,6 @@ namespace neogfx
 			iMenu.select_item(iMenu.find_item(iMenuItem));
 	}
 
-	void menu_item_widget::mouse_left()
-	{
-		widget::mouse_left();
-		update();
-		iSubMenuOpener.reset();
-	}
-
 	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point&)
 	{
 		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::SubMenu)
@@ -253,6 +247,10 @@ namespace neogfx
 					}
 				}, 250);
 			}
+		}, this);
+		iMenuItem.deselected([this]()
+		{
+			iSubMenuOpener.reset();
 		}, this);
 	}
 

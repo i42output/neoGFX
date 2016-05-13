@@ -188,6 +188,8 @@ namespace neogfx
 			return;
 		if (!item_available(aItemIndex))
 			throw cannot_select_item();
+		if (has_selected_item())
+			item(selected_item()).deselected.trigger();
 		iSelection = aItemIndex;
 		item_selected.trigger(item(aItemIndex));
 		item(aItemIndex).selected.trigger();
@@ -195,8 +197,11 @@ namespace neogfx
 
 	void menu::clear_selection()
 	{
-		iSelection = boost::none;
-		selection_cleared.trigger();
+		if (has_selected_item())
+		{
+			iSelection = boost::none;
+			selection_cleared.trigger();
+		}
 	}
 
 	bool menu::has_available_items() const
@@ -267,10 +272,13 @@ namespace neogfx
 
 	void menu::close()
 	{
-		if (iOpenCount > 0)
+		if (!is_open())
+			throw already_closed();
+		if (--iOpenCount == 0)
 		{
-			if (--iOpenCount == 0)
-				closed.trigger();
+			if (has_selected_item())
+				clear_selection();
+			closed.trigger();
 		}
 	}
 }
