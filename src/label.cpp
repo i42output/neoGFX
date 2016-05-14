@@ -75,7 +75,7 @@ namespace neogfx
 	{
 		return iImage;
 	}
-
+		
 	image_widget& label::image()
 	{
 		return iImage;
@@ -89,6 +89,33 @@ namespace neogfx
 	text_widget& label::text()
 	{
 		return iText;
+	}
+
+	bool label::has_buddy() const
+	{
+		return iBuddy != nullptr;
+	}
+
+	i_widget& label::buddy() const
+	{
+		if (has_buddy())
+			return *iBuddy;
+		throw no_buddy();
+	}
+
+	void label::set_buddy(i_widget& aBuddy)
+	{
+		iBuddy = std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aBuddy);
+	}
+
+	void label::set_buddy(std::shared_ptr<i_widget> aBuddy)
+	{
+		iBuddy = aBuddy;
+	}
+
+	void label::unset_buddy()
+	{
+		iBuddy.reset();
 	}
 
 	void label::init()

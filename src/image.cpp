@@ -144,7 +144,7 @@ namespace neogfx
 
 	bool image::has_resource() const
 	{
-		return iResource.get() != 0;
+		return iResource != nullptr;
 	}
 
 	const i_resource& image::resource() const

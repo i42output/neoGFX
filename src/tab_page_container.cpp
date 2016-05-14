@@ -134,7 +134,7 @@ namespace neogfx
 		if (aTabIndex >= iTabs.size())
 			throw tab_not_found();
 		const auto& tabPagePtr = std::next(iTabs.begin(), aTabIndex)->second;
-		if (tabPagePtr.get() == 0)
+		if (tabPagePtr == nullptr)
 			throw tab_page_not_found();
 		return *tabPagePtr;
 	}
@@ -162,7 +162,7 @@ namespace neogfx
 		for (auto& tab : iTabs)
 			if (tab.first->is_selected())
 			{
-				if (tab.second.get() == 0)
+				if (tab.second == nullptr)
 					throw tab_page_not_found();
 				return *tab.second;
 			}
@@ -257,7 +257,7 @@ namespace neogfx
 	void tab_page_container::selecting_tab(i_tab& aTab)
 	{
 		for (auto& tab : iTabs)
-			if (tab.second.get() != 0)
+			if (tab.second != nullptr)
 			{
 				if (tab.first == &aTab)
 					tab.second->widget().show();

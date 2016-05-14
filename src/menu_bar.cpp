@@ -132,7 +132,7 @@ namespace neogfx
 		}, this);
 		item_selected([this](i_menu_item& aMenuItem)
 		{
-			if (iOpenSubMenu.get() != 0)
+			if (iOpenSubMenu != nullptr)
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
 					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.availabie()))
@@ -158,7 +158,7 @@ namespace neogfx
 				app::instance().keyboard().grab_keyboard(*this);
 			iOpenSubMenu->menu().closed([this]()
 			{
-				if (iOpenSubMenu.get() != 0)
+				if (iOpenSubMenu != nullptr)
 					iOpenSubMenu->close();
 			}, this);
 			iOpenSubMenu->closed([this]()
@@ -170,7 +170,7 @@ namespace neogfx
 
 	void menu_bar::close_sub_menu(bool aClearSelection)
 	{
-		if (iOpenSubMenu.get() != 0)
+		if (iOpenSubMenu != nullptr)
 		{
 			iOpenSubMenu->menu().closed.unsubscribe(this);
 			iOpenSubMenu.reset();

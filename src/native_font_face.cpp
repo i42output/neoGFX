@@ -122,7 +122,7 @@ namespace neogfx
 
 	void* native_font_face::aux_handle() const
 	{
-		if (iAuxHandle.get() == 0)
+		if (iAuxHandle == nullptr)
 			iAuxHandle = std::make_unique<hb_handle>(iHandle);
 		return &*iAuxHandle;
 	}

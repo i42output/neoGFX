@@ -45,6 +45,7 @@ namespace neogfx
 			NoActivate			= 0x0080,
 			RequiresOwnerFocus	= 0x0100,
 			DismissOnOwnerClick = 0x0200,
+			InitiallyHidden		= 0x0400,
 			Default				= Titlebar | Resize | Close
 		};
 	public:
@@ -121,6 +122,8 @@ namespace neogfx
 		virtual void widget_added(i_widget& aWidget);
 		virtual void widget_removed(i_widget& aWidget);
 	public:
+		virtual void show(bool aVisible);
+		using scrollable_widget::show;
 		virtual bool requires_owner_focus() const;
 		virtual bool has_entered_widget() const;
 		virtual i_widget& entered_widget() const;

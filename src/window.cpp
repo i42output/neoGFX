@@ -505,6 +505,18 @@ namespace neogfx
 		layout_items(true);
 	}
 
+	void window::show(bool aVisible)
+	{
+		widget::show(aVisible);
+		if (!destroyed())
+		{
+			if (aVisible)
+				native_surface().show();
+			else
+				native_surface().hide();
+		}
+	}
+
 	bool window::requires_owner_focus() const
 	{
 		return (iStyle & RequiresOwnerFocus) == RequiresOwnerFocus;

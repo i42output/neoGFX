@@ -129,7 +129,7 @@ namespace neogfx
 						{ 0, 1, 0, 0, 0, 0 },
 						{ 0, 0, 0, 0, 0, 0 },
 					};
-					iSubMenuArrow = std::make_pair(ink, image{ sArrowImagePattern, { { 0, colour{} },{ 1, ink } } });
+					iSubMenuArrow = std::make_pair(ink, image{ "neogfx::menu_item_widget::" + ink.to_string(), sArrowImagePattern, { { 0, colour{} },{ 1, ink } } });
 				}
 				rect rect = client_rect(false);
 				aGraphicsContext.draw_texture(

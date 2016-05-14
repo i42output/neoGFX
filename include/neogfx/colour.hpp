@@ -752,6 +752,7 @@ namespace neogfx
 		colour operator~() const;
 		bool operator==(const colour& aOther) const;
 		bool operator!=(const colour& aOther) const;
+		std::string to_string() const;
 		// attributes
 	private:
 		argb iValue;

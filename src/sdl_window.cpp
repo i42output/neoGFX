@@ -129,7 +129,7 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{w, h};
 
-		show((aStyle & window::NoActivate) != window::NoActivate);
+		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, uint32_t aStyle) :
@@ -164,7 +164,7 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		show((aStyle & window::NoActivate) != window::NoActivate);
+		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
@@ -199,7 +199,7 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		show((aStyle & window::NoActivate) != window::NoActivate);
+		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, uint32_t aStyle) :
@@ -234,7 +234,7 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		show((aStyle & window::NoActivate) != window::NoActivate);
+		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
 	}
 
 	sdl_window::~sdl_window()
@@ -552,7 +552,7 @@ namespace neogfx
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
 		if (iParent != 0)
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(iParent->native_handle()));
-		SetWindowPos(static_cast<HWND>(native_handle()), 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+		SetWindowPos(static_cast<HWND>(native_handle()), 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_HIDEWINDOW);
 #endif
 	}
 

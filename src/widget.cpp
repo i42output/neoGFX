@@ -355,7 +355,7 @@ namespace neogfx
 
 	bool widget::has_layout() const
 	{
-		return iLayout.get() != 0;
+		return iLayout != nullptr;
 	}
 
 	void widget::set_layout(i_layout& aLayout)

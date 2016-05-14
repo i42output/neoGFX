@@ -45,7 +45,7 @@ namespace neogfx
 
 	bool texture::is_empty() const
 	{
-		return iNativeTexture.get() == 0;
+		return iNativeTexture == nullptr;
 	}
 
 	size texture::extents() const

@@ -26,13 +26,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu) :
-		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
+		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick | InitiallyHidden, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu) :
-		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
+		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick | InitiallyHidden, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
@@ -158,7 +158,7 @@ namespace neogfx
 		}, this);
 		iMenu.item_selected([this](i_menu_item& aMenuItem)
 		{
-			if (iOpenSubMenu.get() != 0)
+			if (iOpenSubMenu != nullptr)
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
 					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
@@ -178,7 +178,7 @@ namespace neogfx
 				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
 				iOpenSubMenu->menu().closed([this]()
 				{
-					if (iOpenSubMenu.get() != 0)
+					if (iOpenSubMenu != nullptr)
 						iOpenSubMenu->close();
 				}, this);
 				iOpenSubMenu->closed([this]()
@@ -187,11 +187,12 @@ namespace neogfx
 				}, this);
 			}
 		}, this);
+		show();
 	}
 
 	void popup_menu::close_sub_menu()
 	{
-		if (iOpenSubMenu.get() != 0)
+		if (iOpenSubMenu != nullptr)
 		{
 			iOpenSubMenu->menu().closed.unsubscribe(this);
 			iOpenSubMenu.reset();

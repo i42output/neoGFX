@@ -17,6 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "neogfx.hpp"
+#include <iomanip>
 #include <neolib/string_utils.hpp>
 #include "colour.hpp"
 
@@ -214,6 +216,12 @@ namespace neogfx
 		return iValue != aOther.iValue; 
 	}
 
+	std::string colour::to_string() const
+	{
+		std::ostringstream result;
+		result << "rgba(" << static_cast<int>(red()) << ", " << static_cast<int>(green()) << ", " << static_cast<int>(blue()) << ", " << alpha() / 255.0 << ");";
+		return result.str();
+	}
 
 	gradient::gradient(const colour& aFrom, const colour& aTo, direction_e aDirection) : 
 		iFrom(aFrom), 

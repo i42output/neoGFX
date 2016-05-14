@@ -41,6 +41,8 @@ namespace neogfx
 	class label : public widget
 	{
 	public:
+		struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::label::no_buddy") {} };
+	public:
 		label(const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
 		label(i_widget& aParent, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
 		label(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
@@ -55,6 +57,11 @@ namespace neogfx
 		image_widget& image();
 		const text_widget& text() const;
 		text_widget& text();
+		bool has_buddy() const;
+		i_widget& buddy() const;
+		void set_buddy(i_widget& aBuddy);
+		void set_buddy(std::shared_ptr<i_widget> aBuddy);
+		void unset_buddy();
 	private:
 		void init();
 		label_placement effective_placement() const;
@@ -65,5 +72,6 @@ namespace neogfx
 		grid_layout iLayout;
 		image_widget iImage;
 		text_widget iText;
+		std::shared_ptr<i_widget> iBuddy;
 	};
 }
