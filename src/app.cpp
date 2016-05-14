@@ -51,6 +51,7 @@ namespace neogfx
 			rendering_engine().render_now();
 			return result;
 		});
+		iKeyboard->grab_keyboard(*this);
 		style whiteStyle("Default");
 		register_style(whiteStyle);
 		style slateStyle("Slate");
@@ -72,6 +73,7 @@ namespace neogfx
 
 	app::~app()
 	{
+		iKeyboard->ungrab_keyboard(*this);
 		app* tp = this;
 		app* np = nullptr;
 		sFirstInstance.compare_exchange_strong(tp, np);
@@ -274,5 +276,28 @@ namespace neogfx
 				iQuitResultCode = 0;
 		}
 		return didSome;
+	}
+
+	bool app::key_pressed(scan_code_e, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	{
+		for (auto& a : iActions)
+			if (a.shortcut() != boost::none && a.shortcut()->matches(aKeyCode, aKeyModifiers))
+			{
+				a.triggered.trigger();
+				if (a.is_checkable())
+					a.toggle();
+				return true;
+			}
+		return false;
+	}
+
+	bool app::key_released(scan_code_e, key_code_e, key_modifiers_e)
+	{
+		return false;
+	}
+
+	bool app::text_input(const std::string&)
+	{
+		return false;
 	}
 }

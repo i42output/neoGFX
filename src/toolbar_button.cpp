@@ -130,12 +130,7 @@ namespace neogfx
 		{
 			iAction.triggered.trigger();
 			if (iAction.is_checkable())
-			{
-				if (is_checked())
-					iAction.set_checked();
-				else
-					iAction.set_unchecked();
-			}
+				iAction.toggle();
 		}
 	}
 

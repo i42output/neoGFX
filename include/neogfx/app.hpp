@@ -33,7 +33,7 @@
 
 namespace neogfx
 {
-	class app : public i_app, public neolib::io_thread
+	class app : public i_app, public neolib::io_thread, private i_keyboard_handler
 	{
 	private:
 		typedef std::map<std::string, style> style_list;
@@ -74,6 +74,10 @@ namespace neogfx
 	private:
 		virtual void task() {}
 		bool do_process_events();
+	private:
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool text_input(const std::string& aText);
 	private:
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;

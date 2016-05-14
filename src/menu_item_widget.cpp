@@ -209,8 +209,9 @@ namespace neogfx
 				else if (iMenu.type() == i_menu::MenuBar)
 					iIcon.set_fixed_size(size{});
 				iText.set_text(iMenuItem.action().menu_text());
-				iShortcutText.set_text(iMenuItem.action().shortcut() != boost::none ? iMenuItem.action().shortcut()->as_text() : std::string());
-				iSpacer.set_minimum_size(size{ iMenuItem.action().shortcut() != boost::none ?  iGap * 2.0 : 0.0, 0.0 });
+				if (iMenu.type() != i_menu::MenuBar)
+					iShortcutText.set_text(iMenuItem.action().shortcut() != boost::none ? iMenuItem.action().shortcut()->as_text() : std::string());
+				iSpacer.set_minimum_size(size{ iMenuItem.action().shortcut() != boost::none && iMenu.type() != i_menu::MenuBar ? iGap * 2.0 : 0.0, 0.0 });
 				enable(iMenuItem.action().is_enabled());
 			};
 			iMenuItem.action().changed(action_changed, this);

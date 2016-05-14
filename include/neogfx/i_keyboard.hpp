@@ -21,6 +21,8 @@
 
 #include "neogfx.hpp"
 #include <boost/optional.hpp>
+#include <neolib/vecarray.hpp>
+#include <neolib/string_utils.hpp>
 #include "event.hpp"
 
 namespace neogfx
@@ -602,19 +604,107 @@ namespace neogfx
 	class key_sequence
 	{
 	public:
-		key_sequence(const std::string& aSequence) : iText(aSequence)
+		key_sequence(const std::string& aSequence) : iText(aSequence), iKeyCode(KeyCode_UNKNOWN)
 		{
-			/* todo */
+			neolib::vecarray<neolib::ci_string, 5> bits;
+			neolib::tokens(neolib::make_ci_string(aSequence), neolib::ci_string("+"), bits, bits.max_size(), false);
+			for (std::size_t i = 0; i < bits.size(); ++i)
+			{
+				if (i < bits.size() - 1)
+				{
+					if (bits[i] == "Ctrl")
+						iKeyModifiers.insert(KeyModifier_CTRL);
+					else if (bits[i] == "Alt")
+						iKeyModifiers.insert(KeyModifier_ALT);
+					else if (bits[i] == "Shift")
+						iKeyModifiers.insert(KeyModifier_SHIFT);
+				}
+				else
+				{
+					static const std::map<neolib::ci_string, key_code_e> sKeyNames
+					{
+						{ "Esc", KeyCode_ESCAPE },
+						{ "Escape", KeyCode_ESCAPE },
+						{ "Return", KeyCode_RETURN },
+						{ "Enter", KeyCode_KP_ENTER },
+						{ "Tab", KeyCode_TAB },
+						{ "Space", KeyCode_SPACE },
+						{ "Backspace", KeyCode_BACKSPACE },
+						{ "Ins", KeyCode_INSERT },
+						{ "Insert", KeyCode_INSERT },
+						{ "Del", KeyCode_DELETE },
+						{ "Delete", KeyCode_DELETE },
+						{ "Home", KeyCode_HOME },
+						{ "End", KeyCode_END },
+						{ "Up", KeyCode_UP },
+						{ "Arrow Up", KeyCode_UP },
+						{ "Down", KeyCode_DOWN },
+						{ "Arrow Down", KeyCode_DOWN },
+						{ "Left", KeyCode_LEFT },
+						{ "Arrow Left", KeyCode_LEFT },
+						{ "Right", KeyCode_RIGHT },
+						{ "Arrow Right", KeyCode_RIGHT },
+						{ "PgUp", KeyCode_PAGEUP },
+						{ "Page Up", KeyCode_PAGEUP },
+						{ "PgDn", KeyCode_PAGEDOWN },
+						{ "PgDown", KeyCode_PAGEDOWN },
+						{ "Page Down", KeyCode_PAGEDOWN },
+						{ "F1", KeyCode_F1 },
+						{ "F2", KeyCode_F2 },
+						{ "F3", KeyCode_F3 },
+						{ "F4", KeyCode_F4 },
+						{ "F5", KeyCode_F5 },
+						{ "F6", KeyCode_F6 },
+						{ "F7", KeyCode_F7 },
+						{ "F8", KeyCode_F8 },
+						{ "F9", KeyCode_F9 },
+						{ "F10", KeyCode_F10 },
+						{ "F11", KeyCode_F11 },
+						{ "F12", KeyCode_F12 },
+						{ "F13", KeyCode_F13 },
+						{ "F14", KeyCode_F14 },
+						{ "F15", KeyCode_F15 },
+						{ "F16", KeyCode_F16 },
+						{ "F17", KeyCode_F17 },
+						{ "F18", KeyCode_F18 },
+						{ "F19", KeyCode_F19 },
+						{ "F20", KeyCode_F20 },
+						{ "F21", KeyCode_F21 },
+						{ "F22", KeyCode_F22 },
+						{ "F23", KeyCode_F23 },
+						{ "F24", KeyCode_F24 }
+					};
+					if (!bits[i].empty())
+					{
+						auto name = sKeyNames.find(bits[i]);
+						if (name == sKeyNames.end())
+							iKeyCode = static_cast<key_code_e>(neolib::to_lower(bits[i])[0]);
+						else
+							iKeyCode = name->second;
+					}
+					else
+						iKeyCode = KeyCode_PLUS;
+				}
+			}
 		}
 	public:
-		bool operator==(const key_sequence& /*aRhs*/) const
+		bool operator==(const key_sequence& aRhs) const
 		{
-			/* todo */
-			return true;
+			return iKeyCode == aRhs.iKeyCode && iKeyModifiers == aRhs.iKeyModifiers;
 		}
 		bool operator!=(const key_sequence& aRhs) const
 		{
 			return !(*this == aRhs);
+		}
+	public:
+		bool matches(key_code_e aKeyCode, key_modifiers_e aKeyModifiers) const
+		{
+			if (iKeyCode != aKeyCode)
+				return false;
+			for (auto m : iKeyModifiers)
+				if ((m & aKeyModifiers) == 0)
+					return false;
+			return true;
 		}
 		const std::string as_text() const
 		{
@@ -622,6 +712,8 @@ namespace neogfx
 		}
 	private:
 		std::string iText;
+		key_code_e iKeyCode;
+		std::set<key_modifiers_e> iKeyModifiers;
 	};
 
 	typedef boost::optional<key_sequence> optional_key_sequence;
