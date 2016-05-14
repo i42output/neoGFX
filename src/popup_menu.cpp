@@ -182,6 +182,30 @@ namespace neogfx
 				}
 			}
 			break;
+		case ScanCode_RETURN:
+			if (iMenu.has_selected_item() && iMenu.item(iMenu.selected_item()).availabie())
+			{
+				auto& selectedItem = iMenu.item(iMenu.selected_item());
+				if (selectedItem.type() == i_menu_item::Action)
+				{
+					selectedItem.action().triggered.trigger();
+					if (selectedItem.action().is_checkable())
+						selectedItem.action().toggle();
+					iMenu.clear_selection();
+					i_menu* menuToClose = &iMenu;
+					while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
+						menuToClose = &menuToClose->parent();
+					if (menuToClose->type() == i_menu::Popup)
+						menuToClose->close();
+				}
+				else if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
+					iMenu.open_sub_menu.trigger(selectedItem.sub_menu());
+			}
+			break;
+		case ScanCode_ESCAPE:
+			iMenu.clear_selection();
+			iMenu.close();
+			break;
 		default:
 			handled = false;
 			break;
