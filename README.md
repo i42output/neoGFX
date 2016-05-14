@@ -11,7 +11,7 @@ Example test program will crash on shut-down due to bug related to focus tabbing
 Feature                   | % done  |     TODO
 --------------------------|---------|-------------------------------------------------------------------------------
 Window                    | 90      |     Icon
-Menu                      | 70      |     Vertical scrolling buttons, keyboard navigation, accelerators.
+Menu                      | 90      |     Keyboard navigation, accelerators.
 MDI                       | 0       |
 Tabs                      | 80      |
 Toolbars                  | 90      |     Drop-down button support
