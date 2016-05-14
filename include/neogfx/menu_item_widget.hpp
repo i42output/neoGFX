@@ -39,6 +39,8 @@ namespace neogfx
 		menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem);
 		~menu_item_widget();
 	public:
+		i_menu_item& menu_item() const;
+	public:
 		virtual neogfx::size_policy size_policy() const;
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:

@@ -59,6 +59,12 @@ namespace neogfx
 	{
 	}
 
+	void scrollable_widget::scroll_to(i_widget& aChild)
+	{
+		(void)aChild;
+		/* todo */
+	}
+
 	const i_surface& scrollable_widget::surface() const
 	{
 		return framed_widget::surface();

@@ -72,17 +72,24 @@ namespace neogfx
 		switch (aScanCode)
 		{
 		case ScanCode_LEFT:
-			select_item(previous_available_item(selected_item()));
+			if (has_selected_item())
+				select_item(previous_available_item(selected_item()));
 			break;
 		case ScanCode_RIGHT:
-			select_item(next_available_item(selected_item()));
+			if (has_selected_item())
+				select_item(next_available_item(selected_item()));
 			break;
 		case ScanCode_DOWN:
 			if (has_selected_item() && item(selected_item()).availabie())
 			{
 				auto& selectedItem = item(selected_item());
-				if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
-					open_sub_menu.trigger(selectedItem.sub_menu());
+				if (selectedItem.type() == i_menu_item::SubMenu)
+				{
+					if (!selectedItem.sub_menu().is_open())
+						open_sub_menu.trigger(selectedItem.sub_menu());
+					if (selectedItem.sub_menu().has_available_items())
+						selectedItem.sub_menu().select_item(selectedItem.sub_menu().first_available_item());
+				}
 			}
 			break;
 		case ScanCode_RETURN:
@@ -153,9 +160,9 @@ namespace neogfx
 		{
 			auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
 			close_sub_menu(false);
-			iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().grab_keyboard(*this);
+			iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
 			iOpenSubMenu->menu().closed([this]()
 			{
 				if (iOpenSubMenu != nullptr)

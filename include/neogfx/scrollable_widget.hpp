@@ -50,6 +50,8 @@ namespace neogfx
 		~scrollable_widget();
 		scrollable_widget(const scrollable_widget&) = delete;
 	public:
+		void scroll_to(i_widget& aChild);
+	public:
 		virtual const i_surface& surface() const;
 		virtual void layout_items_completed();
 	public:

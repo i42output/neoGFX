@@ -45,6 +45,8 @@ namespace neogfx
 	public:
 		virtual void set_capture();
 	public:
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+	public:
 		i_menu& menu() const;
 	private:
 		void init();

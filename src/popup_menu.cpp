@@ -39,6 +39,8 @@ namespace neogfx
 
 	popup_menu::~popup_menu()
 	{
+		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
+			app::instance().keyboard().ungrab_keyboard(*this);
 		close_sub_menu();
 		iMenu.item_added.unsubscribe(this);
 		iMenu.item_removed.unsubscribe(this);
@@ -130,6 +132,63 @@ namespace neogfx
 		/* do nothing */
 	}
 
+	bool popup_menu::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+	{
+		bool handled = true;
+		switch (aScanCode)
+		{
+		case ScanCode_UP:
+			if (iMenu.has_selected_item())
+				iMenu.select_item(iMenu.previous_available_item(iMenu.selected_item()));
+			else if (iMenu.has_available_items())
+				iMenu.select_item(iMenu.first_available_item());
+			break;
+		case ScanCode_DOWN:
+			if (iMenu.has_selected_item())
+				iMenu.select_item(iMenu.next_available_item(iMenu.selected_item()));
+			else if (iMenu.has_available_items())
+				iMenu.select_item(iMenu.first_available_item());
+			break;
+		case ScanCode_LEFT:
+			if (iMenu.has_parent())
+			{
+				if (iMenu.parent().type() == i_menu::Popup)
+					iMenu.close();
+				else if (iMenu.parent().has_selected_item())
+					iMenu.parent().select_item(iMenu.parent().previous_available_item(iMenu.parent().selected_item()));
+			}
+			break;
+		case ScanCode_RIGHT:
+			if (iMenu.has_selected_item())
+			{
+				if (iMenu.item(iMenu.selected_item()).type() == i_menu_item::SubMenu)
+				{
+					auto& subMenu = iMenu.item(iMenu.selected_item()).sub_menu();
+					if (!subMenu.is_open())
+						iMenu.open_sub_menu.trigger(subMenu);
+					if (subMenu.has_available_items())
+						subMenu.select_item(subMenu.first_available_item());
+				}
+				else
+				{
+					i_menu* m = &iMenu;
+					while (m->has_parent())
+						m = &m->parent();
+					if (m != &iMenu)
+					{
+						if (m->has_selected_item())
+							m->select_item(m->next_available_item(m->selected_item()));
+					}
+				}
+			}
+			break;
+		default:
+			handled = false;
+			break;
+		}
+		return handled;
+	}
+
 	i_menu& popup_menu::menu() const
 	{
 		return iMenu;
@@ -144,7 +203,7 @@ namespace neogfx
 		iMenu.open();
 		iMenu.item_added([this](i_menu::item_index aIndex)
 		{
-			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(aIndex)));
+			iLayout.add_item(aIndex, std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(aIndex)));
 			layout_items();
 		}, this);
 		iMenu.item_removed([this](i_menu::item_index aIndex)
@@ -158,6 +217,8 @@ namespace neogfx
 		}, this);
 		iMenu.item_selected([this](i_menu_item& aMenuItem)
 		{
+			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
+				app::instance().keyboard().grab_keyboard(*this);
 			if (iOpenSubMenu != nullptr)
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
@@ -166,6 +227,7 @@ namespace neogfx
 					iOpenSubMenu->menu().close();
 				}
 			}
+			scroll_to(layout().get_widget<menu_item_widget>(iMenu.find_item(aMenuItem)));
 			update();
 		}, this);
 		iMenu.open_sub_menu([this](i_menu& aSubMenu)

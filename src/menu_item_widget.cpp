@@ -64,6 +64,11 @@ namespace neogfx
 		}
 	}
 
+	i_menu_item& menu_item_widget::menu_item() const
+	{
+		return iMenuItem;
+	}
+
 	neogfx::size_policy menu_item_widget::size_policy() const
 	{
 		if (widget::has_size_policy())
