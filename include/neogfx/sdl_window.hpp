@@ -104,6 +104,7 @@ namespace neogfx
 		virtual void destroying();
 		virtual void destroyed();
 		void do_activate_context() const;
+		void do_activate_default_context() const;
 		static std::deque<const sdl_window*>& context_activation_stack();
 #ifdef WIN32
 		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);

@@ -240,6 +240,7 @@ namespace neogfx
 	sdl_window::~sdl_window()
 	{
 		close();
+		rendering_engine().destroy_context(*this);
 	}
 
 	void* sdl_window::handle() const
@@ -493,13 +494,7 @@ namespace neogfx
 			if (!iDestroyed)
 				do_activate_context();
 			else
-				for (std::size_t i = 0; i != surface_manager().surface_count(); ++i)
-					if (!surface_manager().surface(i).destroyed())
-					{
-						surface_manager().surface(i).native_surface().activate_context();
-						context_activation_stack().pop_back();
-						break;
-					}
+				do_activate_default_context();
 		}
 		else if (context_activation_stack().back() != this)
 			context_activation_stack().back()->do_activate_context();
@@ -643,8 +638,14 @@ namespace neogfx
 			opengl_window::destroyed();
 			iNativeHandle = 0;
 		}
+		bool activateDefaultContext = true;
 		while (!context_activation_stack().empty() && context_activation_stack().back() == this)
+		{
+			activateDefaultContext = false;
 			deactivate_context();
+		}
+		if (activateDefaultContext)
+			do_activate_default_context();
 	}
 
 	void sdl_window::do_activate_context() const
@@ -652,6 +653,17 @@ namespace neogfx
 		if (SDL_GL_MakeCurrent(iHandle, iContext) != 0)
 			throw failed_to_activate_opengl_context(SDL_GetError());
 		glCheck("");
+	}
+
+	void sdl_window::do_activate_default_context() const
+	{
+		for (std::size_t i = 0; i != surface_manager().surface_count(); ++i)
+			if (!surface_manager().surface(i).destroyed())
+			{
+				surface_manager().surface(i).native_surface().activate_context();
+				context_activation_stack().pop_back();
+				break;
+			}
 	}
 
 	std::deque<const sdl_window*>& sdl_window::context_activation_stack()
