@@ -10,7 +10,7 @@ Example test program will crash on shut-down due to bug related to focus tabbing
 # Implementation Progress
 Feature                   | % done  |     TODO
 --------------------------|---------|-------------------------------------------------------------------------------
-Window                    | 90      |     Icon
+Window                    | 90      |     Icon, drop shadow
 Menu                      | 95      |     Accelerators
 MDI                       | 0       |
 Tabs                      | 80      |
