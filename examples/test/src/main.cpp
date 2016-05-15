@@ -75,6 +75,11 @@ int main(int argc, char* argv[])
 		ng::window window(800, 800);
 		ng::vertical_layout layout0(window);
 
+		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
+		{
+			ng::app::instance().change_style("Keypad").set_colour(ng::colour::LightGoldenrod);
+		});
+
 		auto& contactsAction = app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png").set_shortcut("Alt+C");
 		contactsAction.triggered([]()
 		{

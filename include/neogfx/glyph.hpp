@@ -34,7 +34,7 @@ namespace neogfx
 	// case insensitive text
 	typedef std::basic_string<character, neolib::ci_char_traits<std::char_traits<character> > > ci_string;
 
-	enum class text_direction
+	enum class text_direction : uint8_t
 	{
 		Unknown,
 		None,
@@ -46,13 +46,19 @@ namespace neogfx
 	class glyph
 	{
 	public:
+		enum flags_e : uint8_t
+		{
+			Underline	= 0x01,
+			UseFallback = 0x80
+		};
+	public:
 		typedef uint32_t value_type;
 		typedef std::pair<string::size_type, string::size_type> source_type;
 	public:
 		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aExtents, size aOffset) :
-			iDirection(aDirection), iValue(aValue), iUseFallback(false), iSource(aSource), iExtents(aExtents), iOffset(aOffset) {}
+			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{aSource}, iExtents{aExtents}, iOffset{aOffset} {}
 		glyph(text_direction aDirection, value_type aValue) :
-			iDirection(aDirection), iValue(aValue), iUseFallback(), iSource(), iExtents(), iOffset() {}
+			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{}, iExtents{}, iOffset{} {}
 	public:
 		bool operator==(const glyph& aRhs) const { return iDirection == aRhs.iDirection && iValue == aRhs.iValue; }
 	public:
@@ -70,15 +76,19 @@ namespace neogfx
 		void set_extents(const size& aExtents) { iExtents = aExtents; }
 		size offset() const { return iOffset; }
 		void set_offset(const size& aOffset) { iOffset = aOffset; }
-		bool use_fallback() const { return iUseFallback; }
-		void set_use_fallback(bool aUseFallback) { iUseFallback = aUseFallback; }
+		flags_e flags() const { return iFlags; }
+		void set_flags(flags_e aFlags) { iFlags = aFlags; }
+		bool underline() const { return (iFlags & Underline) == Underline; }
+		void set_underline(bool aUnderline) { iFlags = static_cast<flags_e>(aUnderline ? iFlags | Underline : iFlags & ~Underline); }
+		bool use_fallback() const { return (iFlags & UseFallback) == UseFallback; }
+		void set_use_fallback(bool aUseFallback) { iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); }
 	private:
 		text_direction iDirection;
 		value_type iValue;
-		bool iUseFallback;
+		flags_e iFlags;
 		source_type iSource;
-		size iExtents;
-		size iOffset;
+		basic_size<float> iExtents;
+		basic_size<float> iOffset;
 	};
 
 	class glyph_text : private std::vector<glyph>
