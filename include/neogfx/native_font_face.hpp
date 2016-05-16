@@ -21,6 +21,8 @@
 
 #include "neogfx.hpp"
 #include <unordered_map>
+#include <boost/functional/hash.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #ifdef u8
@@ -49,6 +51,8 @@ namespace neogfx
 	{
 	private:
 		typedef std::unordered_map<uint32_t, neogfx::glyph_texture> glyph_map;
+		typedef std::unordered_map<std::pair<uint32_t, uint32_t>, dimension, boost::hash<std::pair<uint32_t, uint32_t>>, std::equal_to<std::pair<uint32_t, uint32_t>>, 
+			boost::fast_pool_allocator<std::pair<const std::pair<uint32_t, uint32_t>, dimension>>> kerning_table;
 	public:
 		struct hb_handle
 		{
@@ -81,7 +85,7 @@ namespace neogfx
 		virtual dimension height() const;
 		virtual dimension descender() const;
 		virtual dimension line_spacing() const;
-		virtual dimension kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const;
+		virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
 		virtual i_native_font_face& fallback() const;
 		virtual void* handle() const;
 		virtual void* aux_handle() const;
@@ -99,5 +103,7 @@ namespace neogfx
 		mutable glyph_map iGlyphs;
 		mutable std::vector<GLubyte> iGlyphTextureData;
 		mutable std::vector<std::array<GLubyte, 3>> iSubpixelGlyphTextureData;
+		bool iHasKerning;
+		mutable kerning_table iKerningTable;
 	};
 }

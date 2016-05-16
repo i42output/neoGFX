@@ -1037,6 +1037,8 @@ namespace neogfx
 					sourceClusterEnd = (c + 1)->first;
 				else
 					sourceClusterEnd = aTextEnd - aTextBegin;
+				if (j > 0)
+					result.back().kerning_adjust(static_cast<float>(aFont.kerning(glyphInfo[j - 1].codepoint, glyphInfo[j].codepoint)));
 				result.push_back(glyph(textDirections[cluster], glyphInfo[j].codepoint, glyph::source_type(sourceClusterStart, sourceClusterEnd), size(glyphPos[j].x_advance / 64.0, glyphPos[j].y_advance / 64.0), size(glyphPos[j].x_offset / 64.0, glyphPos[j].y_offset / 64.0)));
 				if (result.back().direction() == text_direction::Whitespace)
 					result.back().set_value(aTextBegin[sourceClusterStart]);

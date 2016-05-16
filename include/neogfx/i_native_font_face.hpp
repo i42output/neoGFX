@@ -45,7 +45,7 @@ namespace neogfx
 		virtual dimension height() const = 0;
 		virtual dimension descender() const = 0;
 		virtual dimension line_spacing() const = 0;
-		virtual dimension kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const = 0;
+		virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const = 0;
 		virtual i_native_font_face& fallback() const = 0;
 		virtual void* handle() const = 0;
 		virtual void* aux_handle() const = 0;

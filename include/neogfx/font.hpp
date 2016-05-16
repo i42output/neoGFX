@@ -115,7 +115,7 @@ namespace neogfx
 		dimension height() const;
 		dimension descender() const;
 		dimension line_spacing() const;
-		dimension kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const;
+		dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
 	public:
 		i_native_font_face& native_font_face() const;
 	private:

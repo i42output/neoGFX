@@ -46,7 +46,7 @@ namespace neogfx
 			virtual dimension height() const { return iFontFace.height(); }
 			virtual dimension descender() const { return iFontFace.descender(); }
 			virtual dimension line_spacing() const { return iFontFace.line_spacing(); }
-			virtual dimension kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const { return iFontFace.kerning(aFirstCodePoint, aSecondCodePoint); }
+			virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const { return iFontFace.kerning(aLeftGlyphIndex, aRightGlyphIndex); }
 			virtual i_native_font_face& fallback() const { return iFontFace.fallback(); }
 			virtual void* handle() const { return iFontFace.handle(); }
 			virtual void* aux_handle() const { return iFontFace.aux_handle(); }

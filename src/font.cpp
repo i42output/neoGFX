@@ -252,9 +252,9 @@ namespace neogfx
 		return 0;
 	}
 
-	dimension font::kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const
+	dimension font::kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const
 	{
-		return iNativeFontFace->kerning(aFirstCodePoint, aSecondCodePoint);
+		return iNativeFontFace->kerning(aLeftGlyphIndex, aRightGlyphIndex);
 	}
 
 	i_native_font_face& font::native_font_face() const

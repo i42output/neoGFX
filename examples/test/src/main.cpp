@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 		ng::push_button button4(layoutButtons, u8"请停止食用犬");
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
-		ng::push_button button5(layoutButtons, u8"sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text");
+		ng::push_button button5(layoutButtons, u8"sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW.");
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");

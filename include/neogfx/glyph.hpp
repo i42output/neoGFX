@@ -82,6 +82,7 @@ namespace neogfx
 		void set_underline(bool aUnderline) { iFlags = static_cast<flags_e>(aUnderline ? iFlags | Underline : iFlags & ~Underline); }
 		bool use_fallback() const { return (iFlags & UseFallback) == UseFallback; }
 		void set_use_fallback(bool aUseFallback) { iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); }
+		void kerning_adjust(float aAdjust) { iExtents.cx += aAdjust; }
 	private:
 		text_direction iDirection;
 		value_type iValue;

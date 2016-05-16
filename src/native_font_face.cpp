@@ -31,7 +31,7 @@
 namespace neogfx
 {
 	native_font_face::native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
-		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle)
+		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle), iHasKerning(!!FT_HAS_KERNING(iHandle))
 	{
 		FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(aSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy));
 		// Force UCS-2 charmap
@@ -100,12 +100,16 @@ namespace neogfx
 		return 0;
 	}
 
-	dimension native_font_face::kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const
+	dimension native_font_face::kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const
 	{
-		/* todo */
-		(void)aFirstCodePoint;
-		(void)aSecondCodePoint;
-		return 0;
+		if (!iHasKerning)
+			return 0.0;
+		auto existing = iKerningTable.find(std::make_pair(aLeftGlyphIndex, aRightGlyphIndex));
+		if (existing != iKerningTable.end())
+			return existing->second;
+		FT_Vector delta;
+		FT_Get_Kerning(iHandle, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_UNFITTED, &delta);
+		return (iKerningTable[std::make_pair(aLeftGlyphIndex, aRightGlyphIndex)] = delta.x / 64.0);
 	}
 
 	i_native_font_face& native_font_face::fallback() const
