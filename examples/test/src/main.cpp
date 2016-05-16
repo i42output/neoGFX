@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.change_style("Default");
-		ng::window window(800, 800);
+		ng::window window(832, 800);
 		ng::vertical_layout layout0(window);
 
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
@@ -97,7 +97,13 @@ int main(int argc, char* argv[])
 		auto& selectAllAction = app.add_action("Select All").set_shortcut("Ctrl+A");
 
 		ng::menu_bar menu(layout0);
+		auto& exitAction = app.add_action("Exit").set_shortcut("Alt+F4");
+		exitAction.triggered([]() 
+		{
+			ng::app::instance().quit(0);
+		});
 		auto& fileMenu = menu.add_sub_menu("File");
+		fileMenu.add_action(exitAction);
 		auto& editMenu = menu.add_sub_menu("Edit");
 		editMenu.add_action(app.add_action("Undo").set_shortcut("Ctrl+Z"));
 		editMenu.add_action(app.add_action("Redo").set_shortcut("Ctrl+Y"));

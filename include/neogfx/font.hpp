@@ -48,17 +48,19 @@ namespace neogfx
 			ItalicUnderline = Italic | Underline
 		};
 		typedef double point_size;
-	public:
-		typedef neolib::variant<style_e, std::string> style_descriptor;
+	private:
+		typedef boost::optional<style_e> optional_style;
+		typedef boost::optional<std::string> optional_style_name;
 	public:
 		font_info();
 		font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize);
 		font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize);
+		font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize);
 		font_info(const font_info& aOther);
 		virtual ~font_info();
 		font_info& operator=(const font_info& aOther);
 	private:
-		font_info(const std::string& aFamilyName, style_descriptor aStyle, point_size aSize);
+		font_info(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
 	public:
 		virtual const std::string& family_name() const;
 		virtual bool style_available() const;
@@ -74,7 +76,8 @@ namespace neogfx
 		bool operator<(const font_info& aRhs) const;
 	private:
 		std::string iFamilyName;
-		style_descriptor iStyle;
+		optional_style iStyle;
+		optional_style_name iStyleName;
 		point_size iSize;
 	};
 
@@ -100,6 +103,7 @@ namespace neogfx
 		font& operator=(const font& aOther);
 	private:
 		font(std::unique_ptr<i_native_font_face> aNativeFontFace);
+		font(std::unique_ptr<i_native_font_face> aNativeFontFace, style_e aStyle);
 	public:
 		font fallback() const;
 		// operations
@@ -114,6 +118,8 @@ namespace neogfx
 		dimension kerning(uint32_t aFirstCodePoint, uint32_t aSecondCodePoint) const;
 	public:
 		i_native_font_face& native_font_face() const;
+	private:
+		
 		// attributes
 	private:
 		std::shared_ptr<i_native_font_face> iNativeFontFace;

@@ -502,7 +502,7 @@ namespace neogfx
 							aAlignment == alignment::Right && glyph_text_direction(lineStart, next) == text_direction::LTR)
 							linePos.x += textExtent.cx - from_device_units(size(lineWidth, 0)).cx;
 						else if (aAlignment == alignment::Centre)
-							linePos.x += (textExtent.cx - from_device_units(size(lineWidth, 0)).cx) / 2;
+							linePos.x += std::ceil((textExtent.cx - from_device_units(size(lineWidth, 0)).cx) / 2);
 						draw_glyph_text(linePos, lineStart, lineEnd, aFont, aColour);
 						pos.y += glyph_text::extents(aFont, lineStart, lineEnd).cy;
 						lineStart = next;

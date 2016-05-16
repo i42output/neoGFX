@@ -25,23 +25,29 @@
 namespace neogfx
 {
 	font_info::font_info() :
-		iFamilyName(), iStyle(), iSize()
+		iSize{}
 	{
 	}
 
 	font_info::font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
-		iFamilyName(aFamilyName), iStyle(aStyle), iSize(aSize)
+		iFamilyName{aFamilyName}, iStyle{aStyle}, iSize{aSize}
 	{
 	}
 
 	font_info::font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
-		iFamilyName(aFamilyName), iStyle(aStyleName), iSize(aSize)
+		iFamilyName{aFamilyName}, iStyleName{aStyleName}, iSize{aSize}
+	{
+
+	}
+
+	font_info::font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
+		iFamilyName{aFamilyName}, iStyle{aStyle}, iStyleName{aStyleName}, iSize{aSize}
 	{
 
 	}
 
 	font_info::font_info(const font_info& aOther) :
-		iFamilyName(aOther.iFamilyName), iStyle(aOther.iStyle), iSize(aOther.iSize)
+		iFamilyName{aOther.iFamilyName}, iStyle{aOther.iStyle}, iStyleName{aOther.iStyleName}, iSize{aOther.iSize}
 	{
 	}
 
@@ -53,14 +59,9 @@ namespace neogfx
 	{
 		iFamilyName = aOther.iFamilyName;
 		iStyle = aOther.iStyle;
+		iStyleName = aOther.iStyleName;
 		iSize = aOther.iSize;
 		return *this;
-	}
-
-	font_info::font_info(const std::string& aFamilyName, style_descriptor aStyle, point_size aSize) :
-		iFamilyName(aFamilyName), iStyle(aStyle), iSize(aSize)
-	{
-
 	}
 
 	const std::string& font_info::family_name() const
@@ -70,26 +71,26 @@ namespace neogfx
 
 	bool font_info::style_available() const
 	{
-		return iStyle.is<style_e>();
+		return iStyle != boost::none;
 	}
 
 	font_info::style_e font_info::style() const
 	{
-		if (iStyle.is<style_e>())
-			return static_variant_cast<style_e>(iStyle);
+		if (style_available())
+			return *iStyle;
 		else
 			throw unknown_style();
 	}
 
 	bool font_info::style_name_available() const
 	{
-		return iStyle.is<std::string>();
+		return iStyleName != boost::none;
 	}
 
 	const std::string& font_info::style_name() const
 	{
-		if (iStyle.is<std::string>())
-			return static_variant_cast<const std::string&>(iStyle);
+		if (style_name_available())
+			return *iStyleName;
 		else
 			throw unknown_style_name();
 	}
@@ -101,12 +102,17 @@ namespace neogfx
 
 	font_info font_info::with_size(point_size aSize) const
 	{
-		return font_info(iFamilyName, iStyle, aSize);
+		return font_info(iFamilyName, iStyle, iStyleName, aSize);
 	}
 
 	bool font_info::operator==(const font_info& aRhs) const
 	{
 		return iFamilyName == aRhs.iFamilyName && iStyle == aRhs.iStyle && iSize == aRhs.iSize;
+	}
+
+	font_info::font_info(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
+		iFamilyName{aFamilyName}, iStyle{aStyle}, iStyleName{aStyleName}, iSize{aSize}
+	{
 	}
 
 	bool font_info::operator!=(const font_info& aRhs) const
@@ -159,6 +165,11 @@ namespace neogfx
 	{
 	}
 
+	font::font(std::unique_ptr<i_native_font_face> aNativeFontFace, style_e aStyle) :
+		font_info(aNativeFontFace->family_name(), aStyle, aNativeFontFace->style_name(), aNativeFontFace->size()), iNativeFontFace(std::move(aNativeFontFace))
+	{
+	}
+
 	font font::load_from_file(const std::string aFileName)
 	{
 		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, app::instance().rendering_engine().screen_metrics()));
@@ -202,7 +213,7 @@ namespace neogfx
 
 	font font::fallback() const
 	{
-		return font(app::instance().rendering_engine().font_manager().create_fallback_font(*iNativeFontFace));
+		return font{app::instance().rendering_engine().font_manager().create_fallback_font(*iNativeFontFace), style()};
 	}
 
 	const std::string& font::family_name() const

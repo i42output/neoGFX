@@ -1040,6 +1040,8 @@ namespace neogfx
 				result.push_back(glyph(textDirections[cluster], glyphInfo[j].codepoint, glyph::source_type(sourceClusterStart, sourceClusterEnd), size(glyphPos[j].x_advance / 64.0, glyphPos[j].y_advance / 64.0), size(glyphPos[j].x_offset / 64.0, glyphPos[j].y_offset / 64.0)));
 				if (result.back().direction() == text_direction::Whitespace)
 					result.back().set_value(aTextBegin[sourceClusterStart]);
+				if ((aFont.style() & font::Underline) == font::Underline)
+					result.back().set_underline(true);
 				if (glyphInfo[j].codepoint == 0)
 					result.back().set_use_fallback(true);
 			}

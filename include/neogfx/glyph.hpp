@@ -72,9 +72,9 @@ namespace neogfx
 		void set_value(value_type aValue) { iValue = aValue; }
 		const source_type& source() const { return iSource; }
 		void set_source(const source_type aSource) { iSource = aSource; }
-		size extents() const { return iExtents; }
+		size extents() const { return iExtents.ceil(); }
 		void set_extents(const size& aExtents) { iExtents = aExtents; }
-		size offset() const { return iOffset; }
+		size offset() const { return iOffset.ceil(); }
 		void set_offset(const size& aOffset) { iOffset = aOffset; }
 		flags_e flags() const { return iFlags; }
 		void set_flags(flags_e aFlags) { iFlags = aFlags; }
