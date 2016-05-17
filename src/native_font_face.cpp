@@ -94,6 +94,22 @@ namespace neogfx
 		return iHandle->size->metrics.descender / 64.0;
 	}
 
+	dimension native_font_face::underline_position() const
+	{
+		if (FT_IS_SCALABLE(iHandle))
+			return iHandle->underline_position / 64.0;
+		else
+			return underline_thickness() / 2.0;
+	}
+
+	dimension native_font_face::underline_thickness() const
+	{
+		if (FT_IS_SCALABLE(iHandle))
+			return iHandle->underline_thickness / 64.0;
+		else
+			return static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_info::WeightNormal);
+	}
+
 	dimension native_font_face::line_spacing() const
 	{
 		/* todo */

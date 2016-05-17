@@ -21,6 +21,7 @@
 #include "i_surface.hpp"
 #include "i_native_surface.hpp"
 #include "i_native_graphics_context.hpp"
+#include "i_native_font_face.hpp"
 #include "i_texture.hpp"
 #include "i_widget.hpp"
 
@@ -417,33 +418,24 @@ namespace neogfx
 
 	void graphics_context::draw_text(const point& aPoint, const string& aText, const font& aFont, const colour& aColour, bool aUseCache) const
 	{
-		glyph_drawing gd(*this);
 		draw_text(aPoint, aText.begin(), aText.end(), aFont, aColour, aUseCache);
 	}
 
 	void graphics_context::draw_text(const point& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const colour& aColour, bool aUseCache) const
 	{
-		glyph_drawing gd(*this);
 		const auto& glyphText = aUseCache && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aTextBegin, aTextEnd, aFont);
 		if (aUseCache && iGlyphTextCache->empty())
 			*iGlyphTextCache = glyphText;
-		point pt = aPoint;
-		for (glyph_text::const_iterator i = glyphText.cbegin(); i != glyphText.cend(); ++i)
-		{
-			draw_glyph(pt, *i, aFont, aColour);
-			pt.x += from_device_units(size(i->extents().cx, 0.0)).cx;
-		}
+		draw_glyph_text(aPoint, glyphText, aFont, aColour);
 	}
 
 	void graphics_context::draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, const colour& aColour, alignment aAlignment, bool aUseCache) const
 	{
-		glyph_drawing gd(*this);
 		draw_multiline_text(aPoint, aText, aFont, 0, aColour, aAlignment, aUseCache);
 	}
 
 	void graphics_context::draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const colour& aColour, alignment aAlignment, bool aUseCache) const
 	{
-		glyph_drawing gd(*this);
 		const auto& glyphText = aUseCache && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aText.begin(), aText.end(), aFont);
 		if (aUseCache && iGlyphTextCache->empty())
 			*iGlyphTextCache = glyphText;
@@ -517,17 +509,25 @@ namespace neogfx
 
 	void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, const font& aFont, const colour& aColour) const
 	{
-		glyph_drawing gd(*this);
 		draw_glyph_text(aPoint, aText.cbegin(), aText.cend(), aFont, aColour);
 	}
 
 	void graphics_context::draw_glyph_text(const point& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const font& aFont, const colour& aColour) const
 	{
-		glyph_drawing gd(*this);
+		{
+			glyph_drawing gd(*this);
+			point pos = aPoint;
+			for (glyph_text::const_iterator i = aTextBegin; i != aTextEnd; ++i)
+			{
+				draw_glyph(pos + i->offset(), *i, aFont, aColour);
+				pos.x += i->extents().cx;
+			}
+		}
 		point pos = aPoint;
 		for (glyph_text::const_iterator i = aTextBegin; i != aTextEnd; ++i)
 		{
-			draw_glyph(pos + i->offset(), *i, aFont, aColour);
+			if (i->underline())
+				draw_glyph_underline(pos, *i, aFont, aColour);
 			pos.x += i->extents().cx;
 		}
 	}
@@ -661,8 +661,23 @@ namespace neogfx
 
 	void graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const
 	{
-		glyph_drawing gd(*this);
-		iNativeGraphicsContext->draw_glyph(to_device_units(aPoint) + iOrigin, aGlyph, aFont, aColour);
+		{
+			glyph_drawing gd(*this);
+			iNativeGraphicsContext->draw_glyph(to_device_units(aPoint) + iOrigin, aGlyph, aFont, aColour);
+		}
+		if (iDrawingGlyphs == 0 && aGlyph.underline())
+			draw_glyph_underline(aPoint, aGlyph, aFont, aColour);
+	}
+
+	void graphics_context::draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const
+	{
+		auto yLine = logical_coordinates()[1] > logical_coordinates()[3] ?
+			(aFont.height() + aFont.descender()) - std::ceil(aFont.native_font_face().underline_position()) :
+			-aFont.descender() + std::ceil(aFont.native_font_face().underline_position());
+		draw_line(
+			aPoint + point{ 0, yLine },
+			aPoint + point{ aGlyph.extents().cx, yLine },
+			pen{ aColour, std::ceil(aFont.native_font_face().underline_thickness()) });
 	}
 
 	void graphics_context::set_glyph_text_cache(glyph_text& aGlyphTextCache) const

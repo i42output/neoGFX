@@ -47,6 +47,23 @@ namespace neogfx
 			BoldUnderline = Bold | Underline,
 			ItalicUnderline = Italic | Underline
 		};
+		enum weight_e
+		{
+			WeightThin			= 100,
+			WeightExtralight	= 200,
+			WeightUltralight	= 200,
+			WeightLight			= 300,
+			WeightNormal		= 400,
+			WeightRegular		= 400,
+			WeightMedium		= 500,
+			WeightSemibold		= 600,
+			WeightDemibold		= 600,
+			WeightBold			= 700,
+			WeightExtrabold		= 800,
+			WeightUltrabold		= 800,
+			WeightHeavy			= 900,
+			WeightBlack			= 900
+		};
 		typedef double point_size;
 	private:
 		typedef boost::optional<style_e> optional_style;
@@ -67,6 +84,9 @@ namespace neogfx
 		virtual style_e style() const;
 		virtual bool style_name_available() const;
 		virtual const std::string& style_name() const;
+		virtual bool underline() const;
+		virtual void set_underline(bool aUnderline);
+		virtual weight_e weight() const;
 		virtual point_size size() const;
 	public:
 		font_info with_size(point_size aSize) const;
@@ -74,10 +94,15 @@ namespace neogfx
 		bool operator==(const font_info& aRhs) const;
 		bool operator!=(const font_info& aRhs) const;
 		bool operator<(const font_info& aRhs) const;
+	public:
+		static weight_e weight_from_style(font_info::style_e aStyle);
+		static weight_e weight_from_style_name(std::string aStyleName);
 	private:
 		std::string iFamilyName;
 		optional_style iStyle;
 		optional_style_name iStyleName;
+		bool iUnderline;
+		weight_e iWeight;
 		point_size iSize;
 	};
 
