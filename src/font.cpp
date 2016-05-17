@@ -140,7 +140,7 @@ namespace neogfx
 
 	bool font_info::underline() const
 	{
-		return iUnderline;
+		return iUnderline || (font_info::style_available() && (font_info::style() & Underline) == Underline);
 	}
 
 	void font_info::set_underline(bool aUnderline)
