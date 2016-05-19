@@ -73,6 +73,7 @@ int main(int argc, char* argv[])
 		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.change_style("Default");
 		ng::window window(832, 800);
+
 		ng::vertical_layout layout0(window);
 
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
@@ -80,12 +81,12 @@ int main(int argc, char* argv[])
 			ng::app::instance().change_style("Keypad").set_colour(ng::colour::LightGoldenrod);
 		});
 
-		auto& contactsAction = app.add_action("Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png").set_shortcut("Alt+C");
+		auto& contactsAction = app.add_action("&Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png").set_shortcut("Alt+C");
 		contactsAction.triggered([]()
 		{
 			ng::app::instance().change_style("Keypad").set_colour(ng::colour::White);
 		});
-		auto& muteAction = app.add_action("Mute/Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png").set_shortcut("Alt+M");
+		auto& muteAction = app.add_action("Mute/&Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png").set_shortcut("Alt+M");
 		muteAction.set_checkable(true);
 		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
 
@@ -102,9 +103,9 @@ int main(int argc, char* argv[])
 		{
 			ng::app::instance().quit(0);
 		});
-		auto& fileMenu = menu.add_sub_menu("File");
+		auto& fileMenu = menu.add_sub_menu("&File");
 		fileMenu.add_action(exitAction);
-		auto& editMenu = menu.add_sub_menu("Edit");
+		auto& editMenu = menu.add_sub_menu("&Edit");
 		editMenu.add_action(app.add_action("Undo").set_shortcut("Ctrl+Z"));
 		editMenu.add_action(app.add_action("Redo").set_shortcut("Ctrl+Y"));
 		editMenu.add_separator();
@@ -115,10 +116,10 @@ int main(int argc, char* argv[])
 		editMenu.add_action(deleteAction);
 		editMenu.add_separator();
 		editMenu.add_action(selectAllAction);
-		auto& viewMenu = menu.add_sub_menu("View");
+		auto& viewMenu = menu.add_sub_menu("&View");
 		auto& addFavouriteAction = app.add_action("Add Favourite...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#add_favourite.png");
 		auto& organizeFavouritesAction = app.add_action("Organize Favourites...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#organize_favourites.png");
-		auto& favouritesMenu = menu.add_sub_menu("Favourites");
+		auto& favouritesMenu = menu.add_sub_menu("F&avourites");
 		favouritesMenu.add_action(addFavouriteAction);
 		favouritesMenu.add_action(organizeFavouritesAction);
 		favouritesMenu.add_separator();
@@ -151,14 +152,14 @@ int main(int argc, char* argv[])
 		}
 		menu.add_action(contactsAction);
 		menu.add_action(muteAction);
-		auto& testMenu = menu.add_sub_menu("Test");
+		auto& testMenu = menu.add_sub_menu("&Test");
 		testMenu.add_action(contactsAction);
 		testMenu.add_action(muteAction);
 		testMenu.add_action(muteAction);
 		testMenu.add_action(muteAction);
 		testMenu.add_action(muteAction);
-		auto& windowMenu = menu.add_sub_menu("Window");
-		auto& helpMenu = menu.add_sub_menu("Help");
+		auto& windowMenu = menu.add_sub_menu("&Window");
+		auto& helpMenu = menu.add_sub_menu("&Help");
 		
 		ng::toolbar toolbar(layout0);
 		toolbar.add_action(contactsAction);
@@ -200,12 +201,12 @@ int main(int argc, char* argv[])
 		ng::push_button button4(layoutButtons, u8"请停止食用犬");
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
-		ng::push_button button5(layoutButtons, u8"sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW.");
+		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW.");
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");
 		layout2.add_spacer().set_weight(ng::size(2.0f));
-		ng::push_button button7(layout2, "Toggle\nmute.");
+		ng::push_button button7(layout2, "Toggle\n&mute.");
 		button7.set_foreground_colour(ng::colour::LightCoral);
 		button7.set_maximum_size(ng::size(128, 64));
 		button7.pressed([&muteAction]() { muteAction.toggle(); });

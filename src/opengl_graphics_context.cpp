@@ -760,6 +760,21 @@ namespace neogfx
 		return glyph_text(aFont, std::move(result));
 	}
 
+	void opengl_graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix)
+	{
+		iMnemonic = std::make_pair(aShowMnemonics, aMnemonicPrefix);
+	}
+
+	void opengl_graphics_context::unset_mnemonic()
+	{
+		iMnemonic = boost::none;
+	}
+
+	bool opengl_graphics_context::mnemonics_shown() const
+	{
+		return iMnemonic != boost::none && iMnemonic->first;
+	}
+
 	void opengl_graphics_context::begin_drawing_glyphs()
 	{
 		iRenderingEngine.activate_shader_program(iRenderingEngine.subpixel_shader_program());
@@ -963,10 +978,31 @@ namespace neogfx
 		auto& textDirections = iTextDirections;
 		textDirections.clear();
 
-		std::u32string codePoints = neolib::utf8_to_utf32(aTextBegin, aTextEnd, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type aTo)
+		std::u32string codePoints = neolib::utf8_to_utf32(aTextBegin, aTextEnd, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type)
 		{
-			clusterMap.push_back(std::make_pair(aFrom, aTo));
+			clusterMap.push_back(cluster{aFrom});
 		});
+		
+		if (iMnemonic != boost::none)
+		{
+			for (auto i = codePoints.begin(); i != codePoints.end();)
+			{
+				if (*i == static_cast<char32_t>(iMnemonic->second))
+				{
+					clusterMap.erase(clusterMap.begin() + (i - codePoints.begin()));
+					i = codePoints.erase(i);
+					if (i != codePoints.end())
+					{
+						auto& cluster = *(clusterMap.begin() + (i - codePoints.begin()));
+						if (*i != static_cast<char32_t>(iMnemonic->second))
+							cluster.flags = glyph::Mnemonic;
+					}
+				}
+				else
+					++i;
+			}
+		}
+
 		if (codePoints.empty())
 			return result;
 		
@@ -1031,10 +1067,10 @@ namespace neogfx
 					aFallbackFontNeeded = true;
 				std::u32string::size_type cluster = glyphInfo[j].cluster + (std::get<0>(runs[i]) - &codePoints[0]);
 				std::string::size_type sourceClusterStart, sourceClusterEnd;
-				auto c = std::lower_bound(clusterMap.begin(), clusterMap.end(), cluster_map_t::value_type(0, cluster), [](const cluster_map_t::value_type& lhs, const cluster_map_t::value_type& rhs) { return lhs.second < rhs.second; });
-				sourceClusterStart = c->first;
+				auto c = clusterMap.begin() + cluster;
+				sourceClusterStart = c->from;
 				if (c + 1 != clusterMap.end())
-					sourceClusterEnd = (c + 1)->first;
+					sourceClusterEnd = (c + 1)->from;
 				else
 					sourceClusterEnd = aTextEnd - aTextBegin;
 				if (j > 0)
@@ -1044,6 +1080,8 @@ namespace neogfx
 					result.back().set_value(aTextBegin[sourceClusterStart]);
 				if ((aFont.style() & font::Underline) == font::Underline)
 					result.back().set_underline(true);
+				if ((c->flags & glyph::Mnemonic) == glyph::Mnemonic)
+					result.back().set_mnemonic(true);
 				if (glyphInfo[j].codepoint == 0)
 					result.back().set_use_fallback(true);
 			}

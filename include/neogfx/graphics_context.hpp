@@ -155,6 +155,9 @@ namespace neogfx
 		void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const;
 		void set_glyph_text_cache(glyph_text& aGlyphTextCache) const;
 		void reset_glyph_text_cache() const;
+		void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const;
+		void unset_mnemonic() const;
+		bool mnemonics_shown() const;
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
 		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
@@ -185,5 +188,21 @@ namespace neogfx
 		mutable size iExtents;
 		mutable glyph_text* iGlyphTextCache;
 		mutable uint32_t iDrawingGlyphs;
+	};
+
+	class scoped_mnemonics
+	{
+	public:
+		scoped_mnemonics(graphics_context& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
+			iGc(aGc)
+		{
+			iGc.set_mnemonic(aShowMnemonics, aMnemonicPrefix);
+		}
+		~scoped_mnemonics()
+		{
+			iGc.unset_mnemonic();
+		}
+	private:
+		graphics_context& iGc;
 	};
 }

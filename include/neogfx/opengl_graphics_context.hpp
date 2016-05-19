@@ -117,6 +117,9 @@ namespace neogfx
 		virtual void fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour);
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen);
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
+		virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&');
+		virtual void unset_mnemonic();
+		virtual bool mnemonics_shown() const;
 		virtual void begin_drawing_glyphs();
 		virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour);
 		virtual void end_drawing_glyphs();
@@ -142,12 +145,18 @@ namespace neogfx
 		mutable std::vector<GLshort> iIndices;
 		mutable std::vector<std::array<GLdouble, 4>> iColours;
 		mutable std::vector<std::array<GLdouble, 2>> iShifts;
-		typedef std::vector<std::pair<std::string::size_type, std::u32string::size_type>> cluster_map_t;
+		struct cluster
+		{
+			std::string::size_type from;
+			glyph::flags_e flags;
+		};
+		typedef std::vector<cluster> cluster_map_t;
 		mutable cluster_map_t iClusterMap;
 		mutable std::vector<text_direction> iTextDirections;
 		mutable std::vector<std::tuple<const char32_t*, const char32_t*, text_direction, hb_script_t>> iRuns;
 		GLint iPreviousTexture;
 		GLuint iActiveGlyphTexture;
 		bool iLineStippleActive;
+		boost::optional<std::pair<bool, char>> iMnemonic;
 	};
 }

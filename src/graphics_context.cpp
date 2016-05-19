@@ -526,7 +526,7 @@ namespace neogfx
 		point pos = aPoint;
 		for (glyph_text::const_iterator i = aTextBegin; i != aTextEnd; ++i)
 		{
-			if (i->underline())
+			if (i->underline() || (mnemonics_shown() && i->mnemonic()))
 				draw_glyph_underline(pos, *i, aFont, aColour);
 			pos.x += i->extents().cx;
 		}
@@ -665,7 +665,7 @@ namespace neogfx
 			glyph_drawing gd(*this);
 			iNativeGraphicsContext->draw_glyph(to_device_units(aPoint) + iOrigin, aGlyph, aFont, aColour);
 		}
-		if (iDrawingGlyphs == 0 && aGlyph.underline())
+		if (iDrawingGlyphs == 0 && (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic())))
 			draw_glyph_underline(aPoint, aGlyph, aFont, aColour);
 	}
 
@@ -674,9 +674,10 @@ namespace neogfx
 		auto yLine = logical_coordinates()[1] > logical_coordinates()[3] ?
 			(aFont.height() + aFont.descender()) - std::ceil(aFont.native_font_face().underline_position()) :
 			-aFont.descender() + std::ceil(aFont.native_font_face().underline_position());
+		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aFont.fallback().native_font_face().glyph_texture(aGlyph);
 		draw_line(
-			aPoint + point{ 0, yLine },
-			aPoint + point{ aGlyph.extents().cx, yLine },
+			aPoint + point{ glyphTexture.placement().x, yLine },
+			aPoint + point{ glyphTexture.placement().x + glyphTexture.extents().cx, yLine },
 			pen{ aColour, std::ceil(aFont.native_font_face().underline_thickness()) });
 	}
 
@@ -688,6 +689,21 @@ namespace neogfx
 	void graphics_context::reset_glyph_text_cache() const
 	{
 		iGlyphTextCache = 0;
+	}
+
+	void graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix) const
+	{
+		iNativeGraphicsContext->set_mnemonic(aShowMnemonics, aMnemonicPrefix);
+	}
+
+	void graphics_context::unset_mnemonic() const
+	{
+		iNativeGraphicsContext->unset_mnemonic();
+	}
+
+	bool graphics_context::mnemonics_shown() const
+	{
+		return iNativeGraphicsContext->mnemonics_shown();
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour) const

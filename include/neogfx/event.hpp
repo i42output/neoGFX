@@ -22,6 +22,7 @@
 #include "neogfx.hpp"
 #include <list>
 #include <deque>
+#include <boost/pool/pool_alloc.hpp>
 #include <neolib/destroyable.hpp>
 
 namespace neogfx
@@ -31,7 +32,7 @@ namespace neogfx
 	{
 	public:
 		typedef std::function<void(Arguments...)> sink_callback;
-		typedef std::list<std::pair<sink_callback, const void*>> sink_list;
+		typedef std::list<std::pair<sink_callback, const void*>, boost::fast_pool_allocator<std::pair<sink_callback, const void*>>> sink_list;
 		typedef typename sink_list::const_iterator handle;
 	private:
 		typedef std::deque<typename sink_list::const_iterator> notification_list;

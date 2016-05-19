@@ -67,6 +67,7 @@ namespace neogfx
 
 	void text_widget::paint(graphics_context& aGraphicsContext) const
 	{
+		scoped_mnemonics sm(aGraphicsContext, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT));
 		if (iGlyphTextCache.font() != font())
 		{
 			iTextExtent = boost::none;
@@ -213,6 +214,7 @@ namespace neogfx
 		if (!has_surface())
 			return size{};
 		graphics_context gc(*this);
+		scoped_mnemonics sm(gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT));
 		gc.set_glyph_text_cache(iGlyphTextCache);
 		if (iMultiLine)
 		{
