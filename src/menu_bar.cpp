@@ -160,6 +160,7 @@ namespace neogfx
 		{
 			if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().ungrab_keyboard(*this);
+			close_sub_menu(false);
 		}, this);
 		open_sub_menu([this](i_menu& aSubMenu)
 		{

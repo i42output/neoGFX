@@ -19,11 +19,13 @@
 
 #include "neogfx.hpp"
 #include <atomic>
+#include <boost/locale.hpp> 
 #include "app.hpp"
 #include "sdl_basic_services.hpp"
 #include "sdl_renderer.hpp"
 #include "surface_manager.hpp"
 #include "sdl_keyboard.hpp"
+#include "i_native_window.hpp"
 
 namespace neogfx
 {
@@ -234,6 +236,18 @@ namespace neogfx
 			}
 	}
 
+	void app::add_mnemonic(i_mnemonic& aMnemonic)
+	{
+		iMnemonics.push_back(&aMnemonic);
+	}
+
+	void app::remove_mnemonic(i_mnemonic& aMnemonic)
+	{
+		auto n = std::find(iMnemonics.begin(), iMnemonics.end(), &aMnemonic);
+		if (n != iMnemonics.end())
+			iMnemonics.erase(n);
+	}
+
 	bool app::process_events()
 	{
 		bool didSome = false;
@@ -278,8 +292,11 @@ namespace neogfx
 		return didSome;
 	}
 
-	bool app::key_pressed(scan_code_e, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	bool app::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
+		if (aScanCode == ScanCode_LALT || aScanCode == ScanCode_RALT)
+			for (auto& m : iMnemonics)
+				m->mnemonic_widget().update();
 		for (auto& a : iActions)
 			if (a.shortcut() != boost::none && a.shortcut()->matches(aKeyCode, aKeyModifiers))
 			{
@@ -291,13 +308,56 @@ namespace neogfx
 		return false;
 	}
 
-	bool app::key_released(scan_code_e, key_code_e, key_modifiers_e)
+	bool app::key_released(scan_code_e aScanCode, key_code_e, key_modifiers_e)
 	{
+		if (aScanCode == ScanCode_LALT || aScanCode == ScanCode_RALT)
+			for (auto& m : iMnemonics)
+				m->mnemonic_widget().update();
 		return false;
 	}
 
-	bool app::text_input(const std::string&)
+	namespace
 	{
+		struct mnemonic_sorter
+		{
+			bool operator()(i_mnemonic* lhs, i_mnemonic* rhs) const
+			{
+				if (!lhs->mnemonic_widget().has_surface() && !rhs->mnemonic_widget().has_surface())
+					return lhs < rhs;
+				else if (lhs->mnemonic_widget().has_surface() && !rhs->mnemonic_widget().has_surface())
+					return true;
+				else if (!lhs->mnemonic_widget().has_surface() && rhs->mnemonic_widget().has_surface())
+					return false;
+				else if (lhs->mnemonic_widget().same_surface(rhs->mnemonic_widget()))
+					return lhs < rhs;
+				else if (lhs->mnemonic_widget().surface().is_owner_of(rhs->mnemonic_widget().surface()))
+					return false;
+				else if (rhs->mnemonic_widget().surface().is_owner_of(lhs->mnemonic_widget().surface()))
+					return true;
+				else if (lhs->mnemonic_widget().has_surface() && lhs->mnemonic_widget().surface().surface_type() == surface_type::Window && static_cast<i_native_window&>(lhs->mnemonic_widget().surface().native_surface()).is_active())
+					return true;
+				else if (rhs->mnemonic_widget().has_surface() && rhs->mnemonic_widget().surface().surface_type() == surface_type::Window && static_cast<i_native_window&>(rhs->mnemonic_widget().surface().native_surface()).is_active())
+					return false;
+				else
+					return &lhs->mnemonic_widget().surface() < &rhs->mnemonic_widget().surface();
+			}
+		};
+	}
+
+	bool app::text_input(const std::string& aInput)
+	{
+		if (iKeyboard->is_key_pressed(ScanCode_LALT) || iKeyboard->is_key_pressed(ScanCode_RALT))
+		{
+			static boost::locale::generator gen;
+			static std::locale loc = gen("en_US.UTF-8");
+			std::sort(iMnemonics.begin(), iMnemonics.end(), mnemonic_sorter());
+			for (auto& m : iMnemonics)
+				if (boost::locale::to_lower(m->mnemonic(), loc) == boost::locale::to_lower(aInput, loc))
+				{
+					m->mnemonic_execute();
+					return true;
+				}
+		}
 		return false;
 	}
 }

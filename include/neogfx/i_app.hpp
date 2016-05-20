@@ -29,6 +29,7 @@ namespace neogfx
 	class i_keyboard;
 	class i_style;
 	class i_action;
+	class i_mnemonic;
 	class i_texture;
 	class i_image;
 
@@ -53,6 +54,8 @@ namespace neogfx
 		virtual i_action& add_action(const std::string& aText, const i_texture& aImage) = 0;
 		virtual i_action& add_action(const std::string& aText, const i_image& aImage) = 0;
 		virtual void remove_action(i_action& aAction) = 0;
+		virtual void add_mnemonic(i_mnemonic& aMnemonic) = 0;
+		virtual void remove_mnemonic(i_mnemonic& aMnemonic) = 0;
 	public:
 		virtual bool process_events() = 0;
 	};

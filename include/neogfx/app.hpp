@@ -27,9 +27,11 @@
 #include "i_basic_services.hpp"
 #include "i_rendering_engine.hpp"
 #include "i_surface_manager.hpp"
+#include "i_widget.hpp"
 #include "keyboard.hpp"
 #include "style.hpp"
 #include "action.hpp"
+#include "i_mnemonic.hpp"
 
 namespace neogfx
 {
@@ -38,6 +40,7 @@ namespace neogfx
 	private:
 		typedef std::map<std::string, style> style_list;
 		typedef std::list<action, boost::fast_pool_allocator<action>> action_list;
+		typedef std::vector<i_mnemonic*> mnemonic_list;
 	public:
 		struct no_instance : std::logic_error { no_instance() : std::logic_error("neogfx::app::no_instance") {} };
 		struct no_basic_services : std::logic_error { no_basic_services() : std::logic_error("neogfx::app::no_basic_services") {} };
@@ -69,6 +72,8 @@ namespace neogfx
 		virtual i_action& add_action(const std::string& aText, const i_texture& aImage);
 		virtual i_action& add_action(const std::string& aText, const i_image& aImage);
 		virtual void remove_action(i_action& aAction);
+		virtual void add_mnemonic(i_mnemonic& aMnemonic);
+		virtual void remove_mnemonic(i_mnemonic& aMnemonic);
 	public:
 		virtual bool process_events();
 	private:
@@ -89,5 +94,6 @@ namespace neogfx
 		style_list iStyles;
 		style_list::iterator iCurrentStyle;
 		action_list iActions;
+		mnemonic_list iMnemonics;
 	};
 }

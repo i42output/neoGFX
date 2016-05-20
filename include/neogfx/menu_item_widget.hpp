@@ -26,12 +26,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "image_widget.hpp"
 #include "spacer.hpp"
 #include "i_menu_item.hpp"
+#include "i_mnemonic.hpp"
 
 namespace neogfx
 {
 	class popup_menu;
 
-	class menu_item_widget : public widget
+	class menu_item_widget : public widget, protected i_mnemonic
 	{
 	public:
 		menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);
@@ -51,6 +52,10 @@ namespace neogfx
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+	protected:
+		virtual std::string mnemonic() const;
+		virtual void mnemonic_execute();
+		virtual i_widget& mnemonic_widget();
 	public:
 		point sub_menu_position() const;
 	private:

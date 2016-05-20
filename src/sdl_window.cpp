@@ -26,6 +26,11 @@
 #include "sdl_window.hpp"
 #include "app.hpp"
 
+#ifdef WIN32
+extern "C" BOOL WIN_ConvertUTF32toUTF8(UINT32 codepoint, char * text);
+extern "C" int SDL_SendKeyboardText(const char *text);
+#endif
+
 namespace neogfx
 {
 	Uint32 sdl_window::convert_style(uint32_t aStyle)
@@ -508,6 +513,13 @@ namespace neogfx
 		LRESULT result;
 		switch(msg)
 		{
+		case WM_SYSCHAR:
+			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			char text[5];
+			if (WIN_ConvertUTF32toUTF8((UINT32)wparam, text)) {
+				SDL_SendKeyboardText(text);
+			}
+			break;
 		case WM_NCLBUTTONDOWN:
 		case WM_NCRBUTTONDOWN:
 		case WM_NCMBUTTONDOWN:

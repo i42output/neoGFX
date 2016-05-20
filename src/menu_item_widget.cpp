@@ -45,6 +45,8 @@ namespace neogfx
 
 	menu_item_widget::~menu_item_widget()
 	{
+		app::instance().remove_mnemonic(*this);
+		iText.text_changed.unsubscribe(this);
 		iMenuItem.selected.unsubscribe(this);
 		iMenuItem.deselected.unsubscribe(this);
 		iSubMenuOpener.reset();
@@ -186,6 +188,21 @@ namespace neogfx
 		return false;
 	}
 
+	std::string menu_item_widget::mnemonic() const
+	{
+		return mnemonic_from_text(iText.text());
+	}
+
+	void menu_item_widget::mnemonic_execute()
+	{
+		handle_pressed();
+	}
+
+	i_widget& menu_item_widget::mnemonic_widget()
+	{
+		return iText;
+	}
+
 	point menu_item_widget::sub_menu_position() const
 	{
 		if (iMenu.type() == i_menu::MenuBar)
@@ -204,6 +221,16 @@ namespace neogfx
 		else
 			iIcon.set_fixed_size(size{});
 		iSpacer.set_minimum_size(size{ 0.0, 0.0 });
+		auto text_updated = [this]()
+		{
+			auto m = mnemonic_from_text(iText.text());
+			if (!m.empty())
+				app::instance().add_mnemonic(*this);
+			else
+				app::instance().remove_mnemonic(*this);
+		};
+		iText.text_changed(text_updated, this);
+		text_updated();
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
 			auto action_changed = [this]()

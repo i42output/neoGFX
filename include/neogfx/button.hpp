@@ -24,10 +24,11 @@
 #include "label.hpp"
 #include "horizontal_layout.hpp"
 #include "event.hpp"
+#include "i_mnemonic.hpp"
 
 namespace neogfx
 {
-	class button : public widget
+	class button : public widget, protected i_mnemonic
 	{
 	public:
 		event<> pressed;
@@ -79,6 +80,12 @@ namespace neogfx
 	protected:
 		virtual const boost::optional<bool>& checked_state() const;
 		virtual bool set_checked_state(const boost::optional<bool>& aCheckedState);
+	protected:
+		virtual std::string mnemonic() const;
+		virtual void mnemonic_execute();
+		virtual i_widget& mnemonic_widget();
+	private:
+		void init();
 	private:
 		checkable_e iCheckable;
 		boost::optional<bool> iCheckedState;

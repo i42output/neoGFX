@@ -27,30 +27,26 @@ namespace neogfx
 	button::button(const std::string& aText, alignment aAlignment) :
 		widget(), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
-		layout().set_margins(neogfx::margins(0.0));
-		iLabel.set_size_policy(neogfx::size_policy::Expanding);
-		set_focus_policy(focus_policy::TabFocus);
+		init();
 	}
 	
 	button::button(i_widget& aParent, const std::string& aText, alignment aAlignment) :
 		widget(aParent), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
-		layout().set_margins(neogfx::margins(0.0));
-		iLabel.set_size_policy(neogfx::size_policy::Expanding);
-		set_focus_policy(focus_policy::TabFocus);
+		init();
 	}
 
 
 	button::button(i_layout& aLayout, const std::string& aText, alignment aAlignment) :
 		widget(aLayout), iCheckable(NotCheckable), iCheckedState(false), iLayout(*this), iLabel(iLayout, aText, true, aAlignment)
 	{
-		layout().set_margins(neogfx::margins(0.0));
-		iLabel.set_size_policy(neogfx::size_policy::Expanding);
-		set_focus_policy(focus_policy::TabFocus);
+		init();
 	}
 
 	button::~button()
 	{
+		app::instance().remove_mnemonic(*this);
+		label().text().text_changed.unsubscribe(this);
 	}
 
 	neogfx::size_policy button::size_policy() const
@@ -202,6 +198,38 @@ namespace neogfx
 		else if (is_indeterminate())
 			indeterminate.trigger();
 		return true;
+	}
+
+	std::string button::mnemonic() const
+	{
+		return mnemonic_from_text(label().text().text());
+	}
+
+	void button::mnemonic_execute()
+	{
+		handle_pressed();
+	}
+
+	i_widget& button::mnemonic_widget()
+	{
+		return label().text();
+	}
+
+	void button::init()
+	{
+		layout().set_margins(neogfx::margins(0.0));
+		iLabel.set_size_policy(neogfx::size_policy::Expanding);
+		set_focus_policy(focus_policy::TabFocus);
+		auto label_text_updated = [this]()
+		{
+			auto m = mnemonic_from_text(label().text().text());
+			if (!m.empty())
+				app::instance().add_mnemonic(*this);
+			else
+				app::instance().remove_mnemonic(*this);
+		};
+		label().text().text_changed(label_text_updated, this);
+		label_text_updated();
 	}
 }
 
