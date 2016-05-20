@@ -344,20 +344,22 @@ namespace neogfx
 		};
 	}
 
-	bool app::text_input(const std::string& aInput)
+	bool app::text_input(const std::string&)
 	{
-		if (iKeyboard->is_key_pressed(ScanCode_LALT) || iKeyboard->is_key_pressed(ScanCode_RALT))
-		{
-			static boost::locale::generator gen;
-			static std::locale loc = gen("en_US.UTF-8");
-			std::sort(iMnemonics.begin(), iMnemonics.end(), mnemonic_sorter());
-			for (auto& m : iMnemonics)
-				if (boost::locale::to_lower(m->mnemonic(), loc) == boost::locale::to_lower(aInput, loc))
-				{
-					m->mnemonic_execute();
-					return true;
-				}
-		}
+		return false;
+	}
+
+	bool app::sys_text_input(const std::string& aInput)
+	{
+		static boost::locale::generator gen;
+		static std::locale loc = gen("en_US.UTF-8");
+		std::sort(iMnemonics.begin(), iMnemonics.end(), mnemonic_sorter());
+		for (auto& m : iMnemonics)
+			if (boost::locale::to_lower(m->mnemonic(), loc) == boost::locale::to_lower(aInput, loc))
+			{
+				m->mnemonic_execute();
+				return true;
+			}
 		return false;
 	}
 }

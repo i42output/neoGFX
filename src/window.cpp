@@ -804,6 +804,14 @@ namespace neogfx
 			text_input(aText);
 	}
 
+	void window::native_window_sys_text_input(const std::string& aText)
+	{
+		if (has_focused_widget())
+			focused_widget().sys_text_input(aText);
+		else
+			sys_text_input(aText);
+	}
+
 	void window::native_window_set_default_mouse_cursor()
 	{
 		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(iNativeWindow->mouse_position()) : *iCapturingWidget);

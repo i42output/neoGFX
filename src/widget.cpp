@@ -1122,6 +1122,11 @@ namespace neogfx
 		return false;
 	}
 
+	bool widget::sys_text_input(const std::string&)
+	{
+		return false;
+	}
+
 	i_widget& widget::widget_for_mouse_event(const point& aPosition)
 	{
 		if (client_rect().contains(aPosition))

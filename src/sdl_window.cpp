@@ -515,9 +515,17 @@ namespace neogfx
 		{
 		case WM_SYSCHAR:
 			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
-			char text[5];
-			if (WIN_ConvertUTF32toUTF8((UINT32)wparam, text)) {
-				SDL_SendKeyboardText(text);
+			{
+				std::string buffer;
+				buffer.resize(5);
+				if (WIN_ConvertUTF32toUTF8((UINT32)wparam, &buffer[0]))
+				{
+					std::string text = buffer.c_str();
+					if (!app::instance().keyboard().grabber().sys_text_input(text))
+					{
+						mapEntry->second->event_handler().native_window_sys_text_input(text);
+					}
+				}
 			}
 			break;
 		case WM_NCLBUTTONDOWN:

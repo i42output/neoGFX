@@ -50,6 +50,14 @@ namespace neogfx
 		return false;
 	}
 
+	bool keyboard_grabber::sys_text_input(const std::string& aText)
+	{
+		for (auto& g : iKeyboard.iGrabs)
+			if (g->sys_text_input(aText))
+				return true;
+		return false;
+	}
+
 	keyboard::keyboard() : iGrabber(*this)
 	{
 	}
