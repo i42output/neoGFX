@@ -357,6 +357,11 @@ namespace neogfx
 		typedef basic_delta<CoordinateType> delta_type;
 		typedef basic_size<CoordinateType> size_type;
 		typedef basic_point<CoordinateType> point_type;
+	public:
+		using point_type::x;
+		using point_type::y;
+		using size_type::cx;
+		using size_type::cy;
 		// construction
 	public:
 		basic_rect() {}
@@ -379,16 +384,16 @@ namespace neogfx
 		point_type& position() { return *this; }
 		const size_type& extents() const { return *this; }
 		size_type& extents() { return *this; }
-		coordinate_type left() const { return point_type::x; }
-		coordinate_type top() const { return point_type::y; }
-		coordinate_type right() const { return point_type::x + size_type::cx; }
-		coordinate_type bottom() const { return point_type::y + size_type::cy; }
-		point_type top_left() const { return point_type(point_type::x, point_type::y); }
-		point_type top_right() const { return point_type(point_type::x + size_type::cx, point_type::y); }
-		point_type bottom_left() const { return point_type(point_type::x, point_type::y + size_type::cy); }
-		point_type bottom_right() const { return point_type(point_type::x + size_type::cx, point_type::y + size_type::cy); }
-		coordinate_type width() const { return size_type::cx; }
-		coordinate_type height() const { return size_type::cy; }
+		coordinate_type left() const { return x; }
+		coordinate_type top() const { return y; }
+		coordinate_type right() const { return x + cx; }
+		coordinate_type bottom() const { return y + cy; }
+		point_type top_left() const { return point_type(x, y); }
+		point_type top_right() const { return point_type(x + cx, y); }
+		point_type bottom_left() const { return point_type(x, y + cy); }
+		point_type bottom_right() const { return point_type(x + cx, y + cy); }
+		coordinate_type width() const { return cx; }
+		coordinate_type height() const { return cy; }
 		bool operator==(const basic_rect& other) const { return x == other.x && y == other.y && cx == other.cx && cy == other.cy; }
 		bool operator!=(const basic_rect& other) const { return !operator==(other); }
 		basic_rect& operator*=(const basic_rect& other) { position() *= other.position(); extents() *= other.extents(); return *this; }
@@ -400,7 +405,7 @@ namespace neogfx
 		bool contains_y(const point_type& point) const { return point.y >= top() && point.y < bottom(); }
 		bool contains(const basic_rect& other) const { return other.left() >= left() && other.top() >= top() && other.right() <= right() && other.bottom() <= bottom(); }
 		point_type centre() const { return point_type(left() + static_cast<CoordinateType>(width() / 2), top() + static_cast<CoordinateType>(height() / 2)); }
-		basic_rect& inflate(const delta_type& delta) { point_type::x -= delta.dx; point_type::y -= delta.dy; size_type::cx += delta.dx * static_cast<CoordinateType>(2); size_type::cy += delta.dy * static_cast<CoordinateType>(2); return *this; }
+		basic_rect& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * static_cast<CoordinateType>(2); cy += delta.dy * static_cast<CoordinateType>(2); return *this; }
 		basic_rect& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
 		basic_rect& inflate(CoordinateType dx, CoordinateType dy) { return inflate(delta_type(dx, dy)); }
 		basic_rect& deflate(const delta_type& delta) { return inflate(-delta); }
@@ -599,8 +604,8 @@ namespace neogfx
 	public:
 		bool operator==(const basic_margins& other) const { return left == other.left && top == other.top && right == other.right && bottom == other.bottom; }
 		bool operator!=(const basic_margins& other) const { return !operator == (other); }
-		basic_margins& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount return *this; }
-		basic_margins& operator-=(dimension_type amount) { left -= amount; top -= amount; right -= amount; bottom -= amount return *this; }
+		basic_margins& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount; return *this; }
+		basic_margins& operator-=(dimension_type amount) { left -= amount; top -= amount; right -= amount; bottom -= amount; return *this; }
 	public:
 		point_type top_left() const { return point_type(left, top); }
 		size_type size() const { return size_type(left + right, top + bottom); }

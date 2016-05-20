@@ -383,7 +383,14 @@ namespace neogfx
 			*this = result;
 			return *this;
 		}
-
+		basic_matrix operator-() const
+		{
+			basic_matrix result = *this;
+			for (uint32_t column = 0; column < Columns; ++column)
+				for (uint32_t row = 0; row < Rows; ++row)
+					result[column][row] = -result[column][row];
+			return result;
+		}
 	private:
 		array_type m;
 	};
@@ -491,27 +498,22 @@ namespace neogfx
 	template <typename T, uint32_t Rows, uint32_t Columns>
 	inline basic_matrix<T, Rows, Columns> operator+(scalar left, const basic_matrix<T, Rows, Columns>& right)
 	{
-		basic_vector<T, D, Type, IsScalar> result = right;
-		for (uint32_t i = 0; i < D; ++i)
-			result[i] += left;
+		basic_matrix<T, Rows, Columns> result = right;
+		result += left;
 		return result;
 	}
 
 	template <typename T, uint32_t Rows, uint32_t Columns>
 	inline basic_matrix<T, Rows, Columns> operator-(scalar left, const basic_matrix<T, Rows, Columns>& right)
 	{
-		basic_vector<T, D, Type, IsScalar> result;
-		for (uint32_t i = 0; i < D; ++i)
-			result[i] = left - right[i];
-		return result;
+		return -right + left;
 	}
 
 	template <typename T, uint32_t Rows, uint32_t Columns>
 	inline basic_matrix<T, Rows, Columns> operator*(scalar left, const basic_matrix<T, Rows, Columns>& right)
 	{
-		basic_vector<T, D, Type, IsScalar> result = right;
-		for (uint32_t i = 0; i < D; ++i)
-			result[i] *= left;
+		basic_matrix<T, Rows, Columns> result = right;
+		result *= left;
 		return result;
 	}
 
