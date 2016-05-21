@@ -318,6 +318,11 @@ namespace neogfx
 			return container_background_colour();
 	}
 
+	bool window::is_weak() const
+	{
+		return (style() & Weak) == Weak;
+	}
+
 	void window::close()
 	{
 		if (iClosed)

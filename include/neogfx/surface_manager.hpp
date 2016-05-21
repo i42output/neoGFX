@@ -52,6 +52,7 @@ namespace neogfx
 		virtual void remove_surface(i_surface& aSurface);
 		virtual std::size_t surface_count() const;
 		virtual i_surface& surface(std::size_t aIndex);
+		virtual bool any_strong_surfaces() const;
 		virtual bool process_events(bool& aLastWindowClosed);
 		virtual void layout_surfaces();
 		virtual void invalidate_surfaces();

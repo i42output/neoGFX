@@ -44,6 +44,7 @@ namespace neogfx
 	public:
 		virtual ~i_surface() {}
 	public:
+		virtual bool is_weak() const = 0;
 		virtual void close() = 0;
 		virtual bool has_parent_surface() const = 0;
 		virtual const i_surface& parent_surface() const = 0;

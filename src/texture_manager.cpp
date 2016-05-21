@@ -78,6 +78,11 @@ namespace neogfx
 		return join_texture(*aTexture.native_texture());
 	}
 
+	void texture_manager::clear_textures()
+	{
+		iTextures.clear();
+	}
+
 	const texture_manager::texture_list& texture_manager::textures() const
 	{
 		return iTextures;

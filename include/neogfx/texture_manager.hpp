@@ -33,6 +33,7 @@ namespace neogfx
 	public:
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture);
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture);
+		virtual void clear_textures();
 	protected:
 		const texture_list& textures() const;
 		texture_list& textures();

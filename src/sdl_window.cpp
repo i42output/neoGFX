@@ -136,7 +136,8 @@ namespace neogfx
 
 		do_activate_context();
 
-		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
+		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
+			show((aStyle & window::NoActivate) != window::NoActivate);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, uint32_t aStyle) :
@@ -173,7 +174,8 @@ namespace neogfx
 
 		do_activate_context();
 
-		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
+		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
+			show((aStyle & window::NoActivate) != window::NoActivate);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
@@ -210,7 +212,8 @@ namespace neogfx
 
 		do_activate_context();
 
-		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
+		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
+			show((aStyle & window::NoActivate) != window::NoActivate);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, uint32_t aStyle) :
@@ -247,7 +250,8 @@ namespace neogfx
 
 		do_activate_context();
 
-		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
+		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
+			show((aStyle & window::NoActivate) != window::NoActivate);
 	}
 
 	sdl_window::~sdl_window()

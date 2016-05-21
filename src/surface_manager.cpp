@@ -81,12 +81,20 @@ namespace neogfx
 	{
 		return **std::next(iSurfaces.begin(), aIndex);
 	}
-	
+
+	bool surface_manager::any_strong_surfaces() const
+	{
+		for (auto& s : iSurfaces)
+			if (!s->is_weak())
+				return true;
+		return false;
+	}
+		
 	bool surface_manager::process_events(bool& aLastWindowClosed)
 	{
-		bool hadWindows = !iSurfaces.empty();
+		bool hadStrong = any_strong_surfaces();
 		bool handledEvents = iRenderingEngine.process_events();
-		if (hadWindows && iSurfaces.empty())
+		if (hadStrong && !any_strong_surfaces())
 			aLastWindowClosed = true;
 		return handledEvents;
 	}

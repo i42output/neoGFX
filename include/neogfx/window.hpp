@@ -46,6 +46,7 @@ namespace neogfx
 			RequiresOwnerFocus	= 0x0100,
 			DismissOnOwnerClick = 0x0200,
 			InitiallyHidden		= 0x0400,
+			Weak				= 0x8000,
 			Default				= Titlebar | Resize | Close
 		};
 	public:
@@ -85,6 +86,7 @@ namespace neogfx
 	public:
 		virtual colour background_colour() const;
 	public:
+		virtual bool is_weak() const;
 		virtual void close();
 		virtual bool has_parent_surface() const;
 		virtual const i_surface& parent_surface() const;

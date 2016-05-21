@@ -34,5 +34,6 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_texture> create_texture(const i_image& aImage) = 0;
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture) = 0;
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture) = 0;
+		virtual void clear_textures() = 0;
 	};
 }

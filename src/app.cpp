@@ -26,6 +26,7 @@
 #include "surface_manager.hpp"
 #include "sdl_keyboard.hpp"
 #include "i_native_window.hpp"
+#include "window.hpp"
 
 namespace neogfx
 {
@@ -59,6 +60,7 @@ namespace neogfx
 		style slateStyle("Slate");
 		slateStyle.set_colour(colour(0x35, 0x35, 0x35));
 		register_style(slateStyle);
+		iSystemCache.reset(new window{ point{}, size{}, "neogfx::system_cache", window::InitiallyHidden | window::Weak });
 	}
 	catch (std::exception& e)
 	{
@@ -75,7 +77,9 @@ namespace neogfx
 
 	app::~app()
 	{
+		rendering_engine().texture_manager().clear_textures();
 		iKeyboard->ungrab_keyboard(*this);
+		iSystemCache.reset();
 		app* tp = this;
 		app* np = nullptr;
 		sFirstInstance.compare_exchange_strong(tp, np);

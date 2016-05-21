@@ -96,5 +96,6 @@ namespace neogfx
 		style_list::iterator iCurrentStyle;
 		action_list iActions;
 		mnemonic_list iMnemonics;
+		std::unique_ptr<i_widget> iSystemCache;
 	};
 }
