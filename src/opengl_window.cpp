@@ -33,6 +33,7 @@ namespace neogfx
 		iEventHandler(aEventHandler),
 		iLogicalCoordinateSystem(neogfx::logical_coordinate_system::AutomaticGui),
 		iFrameRate(60),
+		iFrameCounter(0),
 		iLastFrameTime(0),
 		iRendering(false)
 	{
@@ -78,6 +79,11 @@ namespace neogfx
 		iLogicalCoordinates = aCoordinates;
 	}
 
+	uint64_t opengl_window::frame_counter() const
+	{
+		return iFrameCounter;
+	}
+
 	bool opengl_window::using_frame_buffer() const
 	{
 		return true;
@@ -103,10 +109,15 @@ namespace neogfx
 		if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / *iFrameRate)
 			return;
 
+		if (!iEventHandler.native_window_ready_to_render())
+			return;
+
 		rendering_check.trigger();
 
 		if (iInvalidatedRects.empty())
 			return;
+
+		++iFrameCounter;
 
 		iRendering = true;
 		iLastFrameTime = now;
@@ -191,6 +202,8 @@ namespace neogfx
 		deactivate_context();
 
 		iRendering = false;
+
+		rendering_finished.trigger();
 	}
 
 	bool opengl_window::is_rendering() const

@@ -83,6 +83,13 @@ namespace neogfx
 		return reinterpret_cast<void*>(iHandle);
 	}
 
+	bool opengl_texture::is_resident() const
+	{
+		GLboolean resident;
+		glCheck(glAreTexturesResident(1, &iHandle, &resident));
+		return resident == GL_TRUE;
+	}
+
 	const std::string& opengl_texture::uri() const
 	{
 		return iUri;

@@ -478,9 +478,11 @@ namespace neogfx
 			{
 				iLayoutTimer = std::unique_ptr<neolib::callback_timer>(new neolib::callback_timer(app::instance(), [this](neolib::callback_timer&)
 				{
-					if (!surface().destroyed())
-						widget::layout_items();
+					widget* _this = this;
 					iLayoutTimer.reset();
+					if (!_this->surface().destroyed())
+						_this->layout_items();
+					_this->update();
 				}, 40));
 			}
 		}
@@ -771,6 +773,11 @@ namespace neogfx
 		if (has_parent() && !is_root())
 			clipRect = clipRect.intersection(parent().default_clip_rect() - point(origin(aIncludeNonClient) - parent().origin()));
 		return clipRect;
+	}
+
+	bool widget::ready_to_render() const
+	{
+		return iLayoutTimer == nullptr;
 	}
 
 	void widget::render(graphics_context& aGraphicsContext) const

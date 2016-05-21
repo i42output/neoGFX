@@ -134,6 +134,8 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{w, h};
 
+		do_activate_context();
+
 		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
 	}
 
@@ -168,6 +170,8 @@ namespace neogfx
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
+
+		do_activate_context();
 
 		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
 	}
@@ -204,6 +208,8 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
+		do_activate_context();
+
 		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
 	}
 
@@ -238,6 +244,8 @@ namespace neogfx
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
+
+		do_activate_context();
 
 		show((aStyle & window::InitiallyHidden) != window::InitiallyHidden);
 	}

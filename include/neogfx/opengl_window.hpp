@@ -50,6 +50,7 @@ namespace neogfx
 		virtual const vector4& logical_coordinates() const;
 		virtual void set_logical_coordinates(const vector4& aCoordinates);
 	public:
+		virtual uint64_t frame_counter() const;
 		virtual bool using_frame_buffer() const;
 		virtual void limit_frame_rate(uint32_t aFps);
 	public:
@@ -78,6 +79,7 @@ namespace neogfx
 		GLuint iDepthStencilBuffer;
 		size iFrameBufferSize;
 		std::unordered_set<rect> iInvalidatedRects;
+		uint64_t iFrameCounter;
 		boost::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
 		bool iRendering;

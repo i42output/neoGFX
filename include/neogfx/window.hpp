@@ -148,6 +148,7 @@ namespace neogfx
 		virtual void native_window_focus_gained();
 		virtual void native_window_focus_lost();
 		virtual void native_window_resized();
+		virtual bool native_window_ready_to_render() const;
 		virtual void native_window_render(const rect& aInvalidatedRect) const;
 		virtual void native_window_dismiss_children();
 		virtual void native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta);

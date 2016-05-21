@@ -40,6 +40,7 @@ namespace neogfx
 		virtual size storage_extents() const;
 	public:
 		virtual void* handle() const;
+		virtual bool is_resident() const;
 		virtual const std::string& uri() const;
 	private:
 		basic_size<uint32_t> iSize;

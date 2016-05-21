@@ -48,6 +48,10 @@ namespace neogfx
 		{
 			return iTextureReference->handle();
 		}
+		virtual bool is_resident() const
+		{
+			return iTextureReference->is_resident();
+		}
 		virtual const std::string& uri() const
 		{
 			return iTextureReference->uri();

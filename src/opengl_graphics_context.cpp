@@ -937,6 +937,8 @@ namespace neogfx
 		GLint previousTexture;
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture()->handle())));
+		if (!aTexture.native_texture()->is_resident())
+			throw texture_not_resident();
 		auto texCoords = texture_vertices(aTexture.storage_extents(), aTextureRect);
 		if (logical_coordinates()[1] < logical_coordinates()[3])
 		{

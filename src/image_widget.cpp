@@ -201,7 +201,6 @@ namespace neogfx
 		image_changed.trigger();
 		if (oldSize != minimum_size() && has_managing_layout())
 			managing_layout().layout_items(true);
-		update();
 	}
 
 	void image_widget::set_image(const i_image& aImage)

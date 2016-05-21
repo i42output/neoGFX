@@ -34,6 +34,7 @@ namespace neogfx
 	public:
 		event<> rendering_check;
 		event<> rendering;
+		event<> rendering_finished;
 	public:
 		struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
 	public:
@@ -60,6 +61,7 @@ namespace neogfx
 		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
 		virtual void restore_mouse_cursor() = 0;
 	public:
+		virtual uint64_t frame_counter() const = 0;
 		virtual bool using_frame_buffer() const = 0;
 		virtual void limit_frame_rate(uint32_t aFps) = 0;
 	public:
