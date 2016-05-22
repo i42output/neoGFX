@@ -86,7 +86,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\neogfx\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\cursor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\flow_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_document.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_mnemonic.hpp" />
@@ -210,6 +212,7 @@
     <ClInclude Include="..\..\..\include\neogfx\glyph.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\texture_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text_direction_map.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\text_edit.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\text_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\toolbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\toolbar_button.hpp" />
@@ -227,6 +230,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\action.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
+    <ClCompile Include="..\..\..\src\cursor.cpp" />
     <ClCompile Include="..\..\..\src\flow_layout.cpp" />
     <ClCompile Include="..\..\..\src\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\layout_item.cpp" />
@@ -292,6 +296,7 @@
     <ClCompile Include="..\..\..\src\text.cpp" />
     <ClCompile Include="..\..\..\src\texture.cpp" />
     <ClCompile Include="..\..\..\src\texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\text_edit.cpp" />
     <ClCompile Include="..\..\..\src\text_widget.cpp" />
     <ClCompile Include="..\..\..\src\toolbar.cpp" />
     <ClCompile Include="..\..\..\src\toolbar_button.cpp" />

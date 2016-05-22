@@ -455,7 +455,7 @@ namespace neogfx
 				size lineExtent = from_device_units(glyph_text::extents(aFont, line.first, line.second));
 				if (glyph_text_direction(line.first, line.second) == text_direction::RTL)
 					linePos.x += textExtent.cx - lineExtent.cx;
-				draw_glyph_text(linePos, glyphText, aFont, aColour);
+				draw_glyph_text(linePos, line.first, line.second, aFont, aColour);
 				pos.y += lineExtent.cy;
 			}
 			else
