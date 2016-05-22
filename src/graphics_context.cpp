@@ -27,21 +27,18 @@
 
 namespace neogfx
 {
-	struct graphics_context::glyph_drawing
+	graphics_context::glyph_drawing::glyph_drawing(const graphics_context& aParent) : iParent(aParent)
 	{
-		const graphics_context& iParent;
-		glyph_drawing(const graphics_context& aParent) : iParent(aParent)
-		{
-			if (++iParent.iDrawingGlyphs == 1)
-				iParent.iNativeGraphicsContext->begin_drawing_glyphs();
-		}
-		~glyph_drawing()
-		{
-			if (--iParent.iDrawingGlyphs == 0)
-				iParent.iNativeGraphicsContext->end_drawing_glyphs();
-		}
-	};
+		if (++iParent.iDrawingGlyphs == 1)
+			iParent.iNativeGraphicsContext->begin_drawing_glyphs();
+	}
 
+	graphics_context::glyph_drawing::~glyph_drawing()
+	{
+		if (--iParent.iDrawingGlyphs == 0)
+			iParent.iNativeGraphicsContext->end_drawing_glyphs();
+	}
+		
 	graphics_context::graphics_context(const i_surface& aSurface) :
 		iSurface(aSurface),
 		iNativeGraphicsContext(aSurface.native_surface().create_graphics_context()),
@@ -465,9 +462,9 @@ namespace neogfx
 				glyph_text::const_iterator lineEnd = line.second;
 				dimension maxWidth = to_device_units(size(aMaxWidth, 0)).cx;
 				dimension lineWidth = 0;
-				bool gotLine = false;
 				while(next != line.second)
 				{
+					bool gotLine = false;
 					if (lineWidth + next->extents().cx > maxWidth)
 					{
 						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
@@ -500,9 +497,10 @@ namespace neogfx
 						lineStart = next;
 						lineEnd = line.second;
 						lineWidth = 0;
-						gotLine = false;
 					}
 				}
+				if (line.first == line.second)
+					pos.y += font().height();
 			}
 		}
 	}
@@ -514,22 +512,7 @@ namespace neogfx
 
 	void graphics_context::draw_glyph_text(const point& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const font& aFont, const colour& aColour) const
 	{
-		{
-			glyph_drawing gd(*this);
-			point pos = aPoint;
-			for (glyph_text::const_iterator i = aTextBegin; i != aTextEnd; ++i)
-			{
-				draw_glyph(pos + i->offset(), *i, aFont, aColour);
-				pos.x += i->extents().cx;
-			}
-		}
-		point pos = aPoint;
-		for (glyph_text::const_iterator i = aTextBegin; i != aTextEnd; ++i)
-		{
-			if (i->underline() || (mnemonics_shown() && i->mnemonic()))
-				draw_glyph_underline(pos, *i, aFont, aColour);
-			pos.x += i->extents().cx;
-		}
+		neogfx::draw_glyph_text(*this, aPoint, aTextBegin, aTextEnd, aFont, aColour);
 	}
 
 	size graphics_context::extents() const

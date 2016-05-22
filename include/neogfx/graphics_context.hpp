@@ -71,8 +71,14 @@ namespace neogfx
 	class graphics_context : public i_device_metrics, public i_units_context
 	{
 		// types
+	public:
+		struct glyph_drawing
+		{
+			const graphics_context& iParent;
+			glyph_drawing(const graphics_context& aParent);
+			~glyph_drawing();
+		};
 	private:
-		struct glyph_drawing;
 		friend class generic_surface;
 		// construction
 	public:
@@ -189,6 +195,28 @@ namespace neogfx
 		mutable glyph_text* iGlyphTextCache;
 		mutable uint32_t iDrawingGlyphs;
 	};
+
+	template <typename Iter>
+	inline void draw_glyph_text(const graphics_context& aGraphicsContext, const point& aPoint, Iter aTextBegin, Iter aTextEnd, const font& aFont, const colour& aColour)
+	{
+		{
+			graphics_context::glyph_drawing gd(aGraphicsContext);
+			point pos = aPoint;
+			for (Iter i = aTextBegin; i != aTextEnd; ++i)
+			{
+				aGraphicsContext.draw_glyph(pos + i->offset(), *i, aFont, aColour);
+				pos.x += i->extents().cx;
+			}
+		}
+		point pos = aPoint;
+		for (Iter i = aTextBegin; i != aTextEnd; ++i)
+		{
+			if (i->underline() || (aGraphicsContext.mnemonics_shown() && i->mnemonic()))
+				aGraphicsContext.draw_glyph_underline(pos, *i, aFont, aColour);
+			pos.x += i->extents().cx;
+		}
+	}
+
 
 	class scoped_mnemonics
 	{

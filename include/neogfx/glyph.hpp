@@ -184,11 +184,12 @@ namespace neogfx
 		neogfx::size iExtents;
 	};
 
-	inline text_direction glyph_text_direction(glyph_text::const_iterator aBegin, glyph_text::const_iterator aEnd)
+	template <typename Iter>
+	inline text_direction glyph_text_direction(Iter aBegin, Iter aEnd)
 	{
 		text_direction result = text_direction::LTR;
 		bool gotOne = false;
-		for (glyph_text::const_iterator i = aBegin; i != aEnd; ++i)
+		for (Iter i = aBegin; i != aEnd; ++i)
 		{
 			if (!i->is_whitespace() && !i->no_direction())
 			{

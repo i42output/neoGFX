@@ -30,6 +30,11 @@ namespace neogfx
 {
 	class text_edit : public scrollable_widget, public i_document
 	{
+	private:
+		typedef neolib::segmented_array<char, 256> document_text;
+		typedef neolib::segmented_array<glyph, 256> document_glyphs;
+	public:
+		typedef document_text::size_type position_type;
 	public:
 		text_edit();
 		text_edit(i_widget& aParent);
@@ -38,17 +43,36 @@ namespace neogfx
 	public:
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
+		virtual void paint(graphics_context& aGraphicsContext) const;
+	public:
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool text_input(const std::string& aText);
+	public:
 		virtual void move_cursor(cursor::move_operation_e aMoveOperation) const;
 	public:
+		neogfx::alignment alignment() const;
+		void set_alignment(neogfx::alignment aAlignment);
+		bool has_text_colour() const;
+		colour text_colour() const;
+		void set_text_colour(const optional_colour& aTextColour);
+	public:
 		neogfx::cursor& cursor() const;
+		point position(position_type aPosition) const;
+		position_type hit_test(const point& aPoint) const;
 		std::string text() const;
 		void set_text(const std::string& aText);
 		void insert_text(const std::string& aText);
 	private:
 		void init();
+		void refresh_paragraph(document_text::const_iterator aWhere);
+		size extents(const neogfx::font& aFont, document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const;
+		std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> word_break(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aFrom) const;
 	private:
+		neogfx::alignment iAlignment;
+		optional_colour iTextColour;
 		mutable neogfx::cursor iCursor;
-		neolib::segmented_array<char> iDocument;
-		neolib::segmented_array<glyph> iGlyphs;
+		document_text iText;
+		document_glyphs iGlyphs;
 	};
 }

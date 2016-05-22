@@ -56,7 +56,7 @@ namespace neogfx
 			Left,
 			Right
 		};
-		typedef uint64_t position_type;
+		typedef std::size_t position_type;
 	public:
 		struct no_document : std::logic_error { no_document() : std::logic_error("neogfx::cursor::no_document") {} };
 	public:
