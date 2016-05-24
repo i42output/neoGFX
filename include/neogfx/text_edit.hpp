@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <neolib/tag_array.hpp>
 #include <neolib/segmented_array.hpp>
 #include "scrollable_widget.hpp"
 #include "i_document.hpp"
@@ -30,8 +31,92 @@ namespace neogfx
 {
 	class text_edit : public scrollable_widget, public i_document
 	{
+	public:
+		class style
+		{
+		public:
+			typedef neolib::variant<colour, gradient> colour_type;
+		public:
+			style();
+			style(
+				const optional_font& aFont,
+				const colour_type& aTextColour,
+				const colour_type& aBackgroundColour);
+			style(
+				text_edit& aParent,
+				const style& aOther);
+		public:
+			void add_ref() const;
+			void release() const;
+		public:
+			const optional_font& font() const;
+			const colour_type& text_colour() const;
+			const colour_type& background_colour() const;
+		public:
+			bool operator<(const style& aRhs) const;
+		private:
+			text_edit* iParent;
+			mutable uint32_t iUseCount;
+			optional_font iFont;
+			colour_type iTextColour;
+			colour_type iBackgroundColour;
+		};
+		typedef std::set<style> style_list;
 	private:
-		typedef neolib::segmented_array<char, 256> document_text;
+		struct unknown_node {};
+		template <typename Node = unknown_node>
+		class tag
+		{
+		public:
+			typedef neolib::variant<style_list::const_iterator> contents_type;
+			template <typename Node2>
+			struct rebind { typedef tag<Node2> type; };
+		private:
+			typedef Node node_type;
+		public:
+			tag(const contents_type& aContents) :
+				iNode(nullptr), iContents(aContents)
+			{
+				if (iContents.is<style_list::const_iterator>())
+					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
+			}
+			template <typename Node2>
+			tag(node_type& aNode, const tag<Node2>& aTag) : 
+				iNode(&aNode), iContents(aTag.iContents)
+			{
+				if (iContents.is<style_list::const_iterator>())
+					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
+			}
+			tag(const tag& aOther) : 
+				iNode(aOther.iNode), iContents(aOther.iContents)
+			{
+				if (iContents.is<style_list::const_iterator>())
+					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
+			}
+			~tag()
+			{
+				if (iContents.is<style_list::const_iterator>())
+					static_variant_cast<style_list::const_iterator>(iContents)->release();
+			}
+		public:
+			bool operator==(const tag& aOther) const
+			{
+				return iContents == aOther.iContents;
+			}
+			bool operator!=(const tag& aOther) const
+			{
+				return !(*this == aOther);
+			}
+		public:
+			const contents_type& contents() const
+			{
+				return iContents;
+			}
+		private:
+			node_type* iNode;
+			contents_type iContents;
+		};
+		typedef neolib::tag_array<tag<>, char, 256> document_text;
 		typedef neolib::segmented_array<glyph, 256> document_glyphs;
 	public:
 		typedef document_text::size_type position_type;
@@ -53,26 +138,32 @@ namespace neogfx
 	public:
 		neogfx::alignment alignment() const;
 		void set_alignment(neogfx::alignment aAlignment);
-		bool has_text_colour() const;
-		colour text_colour() const;
-		void set_text_colour(const optional_colour& aTextColour);
+		const style& default_style() const;
+		void set_default_style(const style& aDefaultStyle);
+		colour default_text_colour() const;
 	public:
 		neogfx::cursor& cursor() const;
 		point position(position_type aPosition) const;
 		position_type hit_test(const point& aPoint) const;
 		std::string text() const;
 		void set_text(const std::string& aText);
+		void set_text(const std::string& aText, const style& aStyle);
 		void insert_text(const std::string& aText);
+		void insert_text(const std::string& aText, const style& aStyle);
 	private:
 		void init();
 		void refresh_paragraph(document_text::const_iterator aWhere);
+		void animate();
+		void draw_glyph_text(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const;
 		size extents(const neogfx::font& aFont, document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const;
 		std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> word_break(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aFrom) const;
 	private:
 		neogfx::alignment iAlignment;
-		optional_colour iTextColour;
+		style iDefaultStyle;
 		mutable neogfx::cursor iCursor;
 		document_text iText;
 		document_glyphs iGlyphs;
+		style_list iStyles;
+		neolib::callback_timer iAnimator;
 	};
 }

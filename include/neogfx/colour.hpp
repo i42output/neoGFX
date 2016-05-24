@@ -752,6 +752,7 @@ namespace neogfx
 		colour operator~() const;
 		bool operator==(const colour& aOther) const;
 		bool operator!=(const colour& aOther) const;
+		bool operator<(const colour& aOther) const;
 		std::string to_string() const;
 		// attributes
 	private:
@@ -782,6 +783,8 @@ namespace neogfx
 			Horizontal,
 			Radial
 		};
+	public:
+		struct bad_position : std::logic_error { bad_position() : std::logic_error("neogfx::gradient::bad_position") {} };
 		// construction
 	public:
 		gradient(const colour& aFrom, const colour& aTo, direction_e aDirection = Vertical);
@@ -790,6 +793,7 @@ namespace neogfx
 		colour at(coordinate aPos, coordinate aStart, coordinate aEnd) const;
 		colour at(double aPos) const;
 		direction_e direction() const;
+		bool operator<(const gradient& aOther) const;
 		// attributes
 	private:
 		colour iFrom;

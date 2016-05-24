@@ -217,7 +217,6 @@ namespace neogfx
 		}
 	}
 
-
 	class scoped_mnemonics
 	{
 	public:

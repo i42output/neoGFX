@@ -23,20 +23,98 @@
 
 namespace neogfx
 {
+	text_edit::style::style() :
+		iParent(nullptr),
+		iUseCount(0)
+	{
+	}
+		
+	text_edit::style::style(
+		const optional_font& aFont,
+		const colour_type& aTextColour,
+		const colour_type& aBackgroundColour) :
+		iParent(nullptr),
+		iUseCount(0),
+		iFont(aFont),
+		iTextColour(aTextColour),
+		iBackgroundColour(aBackgroundColour)
+	{
+	}
+
+	text_edit::style::style(
+		text_edit& aParent,
+		const style& aOther) : 
+		iParent(&aParent), 
+		iUseCount(0),
+		iFont(aOther.iFont),
+		iTextColour(aOther.iTextColour),
+		iBackgroundColour(aOther.iBackgroundColour)
+	{
+	}
+
+	void text_edit::style::add_ref() const
+	{
+		++iUseCount;
+	}
+
+	void text_edit::style::release() const
+	{
+		if (--iUseCount == 0 && iParent)
+			iParent->iStyles.erase(iParent->iStyles.find(*this));
+	}
+
+	const optional_font& text_edit::style::font() const
+	{
+		return iFont;
+	}
+
+	const text_edit::style::colour_type& text_edit::style::text_colour() const
+	{
+		return iTextColour;
+	}
+
+	const text_edit::style::colour_type& text_edit::style::background_colour() const
+	{
+		return iBackgroundColour;
+	}
+
+	bool text_edit::style::operator<(const style& aRhs) const
+	{
+		return std::tie(iFont, iTextColour, iBackgroundColour) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour);
+	}
+
 	text_edit::text_edit() : 
-		scrollable_widget(), iAlignment(neogfx::alignment::Left|neogfx::alignment::Top)
+		scrollable_widget(), 
+		iAlignment(neogfx::alignment::Left|neogfx::alignment::Top), 
+		iAnimator(app::instance(), [this](neolib::callback_timer&)
+		{
+			iAnimator.again();
+			animate();
+		}, 100)
 	{
 		init();
 	}
 
 	text_edit::text_edit(i_widget& aParent) :
-		scrollable_widget(aParent), iAlignment(neogfx::alignment::Left | neogfx::alignment::Top)
+		scrollable_widget(aParent), 
+		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top), 
+		iAnimator(app::instance(), [this](neolib::callback_timer&)
+		{
+			iAnimator.again();
+			animate();
+		}, 100)
 	{
 		init();
 	}
 
 	text_edit::text_edit(i_layout& aLayout) :
-		scrollable_widget(aLayout), iAlignment(neogfx::alignment::Left | neogfx::alignment::Top)
+		scrollable_widget(aLayout), 
+		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top), 
+		iAnimator(app::instance(), [this](neolib::callback_timer&)
+		{
+			iAnimator.again();
+			animate();
+		}, 100)
 	{
 		init();
 	}
@@ -100,7 +178,7 @@ namespace neogfx
 						linePos.x += client_rect(false).width() - aGraphicsContext.from_device_units(size{lineWidth, 0}).cx;
 					else if (iAlignment == alignment::Centre)
 						linePos.x += std::ceil((client_rect().width() - aGraphicsContext.from_device_units(size{lineWidth, 0}).cx) / 2);
-					draw_glyph_text(aGraphicsContext, linePos, lineStart, lineEnd, font(), text_colour());
+					draw_glyph_text(aGraphicsContext, linePos, lineStart, lineEnd);
 					pos.y += extents(font(), lineStart, lineEnd).cy;
 					lineStart = next;
 					lineEnd = line.second;
@@ -235,15 +313,23 @@ namespace neogfx
 		}
 	}
 
-	bool text_edit::has_text_colour() const
+	const text_edit::style& text_edit::default_style() const
 	{
-		return iTextColour != boost::none;
+		return iDefaultStyle;
 	}
 
-	colour text_edit::text_colour() const
+	void text_edit::set_default_style(const style& aDefaultStyle)
 	{
-		if (has_text_colour())
-			return *iTextColour;
+		iDefaultStyle = aDefaultStyle;
+		update();
+	}
+
+	colour text_edit::default_text_colour() const
+	{
+		if (default_style().text_colour().is<colour>())
+			return static_variant_cast<const colour&>(default_style().text_colour());
+		else if(default_style().text_colour().is<gradient>())
+			return static_variant_cast<const gradient&>(default_style().text_colour()).at(0.0);
 		optional_colour textColour;
 		const i_widget* w = 0;
 		do
@@ -268,12 +354,6 @@ namespace neogfx
 			return defaultTextColour;
 		else
 			return *textColour;
-	}
-
-	void text_edit::set_text_colour(const optional_colour& aTextColour)
-	{
-		iTextColour = aTextColour;
-		update();
 	}
 
 	neogfx::cursor& text_edit::cursor() const
@@ -302,15 +382,26 @@ namespace neogfx
 
 	void text_edit::set_text(const std::string& aText)
 	{
+		set_text(aText, default_style());
+	}
+
+	void text_edit::set_text(const std::string& aText, const style& aStyle)
+	{
 		iCursor.set_position(0);
 		iText.clear();
 		iGlyphs.clear();
-		insert_text(aText);
+		insert_text(aText, aStyle);
 	}
 
 	void text_edit::insert_text(const std::string& aText)
 	{
-		refresh_paragraph(iText.insert(iText.begin() + cursor().position(), aText.begin(), aText.end()));
+		insert_text(aText, default_style());
+	}
+
+	void text_edit::insert_text(const std::string& aText, const style& aStyle)
+	{
+		auto s = iStyles.insert(style(*this, aStyle)).first;
+		refresh_paragraph(iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), iText.begin() + cursor().position(), aText.begin(), aText.end()));
 		update();
 	}
 
@@ -334,6 +425,47 @@ namespace neogfx
 		auto gt = gc.to_glyph_text(text(), font());
 		iGlyphs.clear();
 		iGlyphs.insert(iGlyphs.begin(), gt.cbegin(), gt.cend());
+	}
+
+	void text_edit::animate()
+	{
+		update();
+	}
+
+	void text_edit::draw_glyph_text(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const
+	{
+		{
+			graphics_context::glyph_drawing gd(aGraphicsContext);
+			point pos = aPoint;
+			for (document_glyphs::const_iterator i = aTextBegin; i != aTextEnd; ++i)
+			{
+				const auto& glyph = *i;
+				const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+				aGraphicsContext.draw_glyph(pos + glyph.offset(), glyph, 
+					style.font() != boost::none ? *style.font() : font(),
+					style.text_colour().is<colour>() ?
+						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
+							static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
+							default_text_colour());
+				pos.x += glyph.extents().cx;
+			}
+		}
+		point pos = aPoint;
+		for (document_glyphs::const_iterator i = aTextBegin; i != aTextEnd; ++i)
+		{
+			const auto& glyph = *i;
+			const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+			if (glyph.underline())
+				aGraphicsContext.draw_glyph_underline(pos, glyph,
+					style.font() != boost::none ? *style.font() : font(),
+					style.text_colour().is<colour>() ?
+						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
+							static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
+							default_text_colour());
+			pos.x += glyph.extents().cx;
+		}
 	}
 
 	size text_edit::extents(const neogfx::font& aFont, document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const

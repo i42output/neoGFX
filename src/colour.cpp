@@ -216,6 +216,11 @@ namespace neogfx
 		return iValue != aOther.iValue; 
 	}
 
+	bool colour::operator<(const colour& aOther) const
+	{
+		return iValue < aOther.iValue;
+	}
+
 	std::string colour::to_string() const
 	{
 		std::ostringstream result;
@@ -256,12 +261,19 @@ namespace neogfx
 
 	colour gradient::at(double aPos) const
 	{
+		if (aPos < 0.0 || aPos > 1.0)
+			throw bad_position();
 		return at(static_cast<coordinate>(aPos * colour::MaxComponetValue), 0, colour::MaxComponetValue);
 	}
 
 	gradient::direction_e gradient::direction() const 
 	{ 
 		return iDirection; 
+	}
+
+	bool gradient::operator<(const gradient& aOther) const
+	{
+		return std::tie(iFrom, iTo, iDirection) < std::tie(aOther.iFrom, aOther.iTo, aOther.iDirection);
 	}
 
 	const colour colour::AliceBlue = colour(0xF0, 0xF8, 0xFF);
