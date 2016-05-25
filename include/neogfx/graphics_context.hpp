@@ -149,6 +149,7 @@ namespace neogfx
 		size multiline_text_extent(const string& aText, const font& aFont, dimension aMaxWidth, bool aUseCache = false) const;
 		glyph_text to_glyph_text(const string& aText, const font& aFont) const;
 		glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
+		glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
 		bool is_text_left_to_right(const string& aText, const font& aFont, bool aUseCache = false) const;
 		bool is_text_right_to_left(const string& aText, const font& aFont, bool aUseCache = false) const;
 		void draw_text(const point& aPoint, const string& aText, const font& aFont, const colour& aColour, bool aUseCache = false) const;

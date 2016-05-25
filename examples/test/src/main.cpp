@@ -51,15 +51,28 @@ public:
 class keypad_button : public ng::push_button
 {
 public:
-	keypad_button(uint32_t aNumber) : 
-		ng::push_button(boost::lexical_cast<std::string>(aNumber))
+	keypad_button(ng::text_edit& aTextEdit, uint32_t aNumber) :
+		ng::push_button(boost::lexical_cast<std::string>(aNumber)), iTextEdit(aTextEdit)
 	{
-		pressed([aNumber]()
+		pressed([this, aNumber]()
 		{
 			ng::app::instance().change_style("Keypad").
 				set_colour(aNumber != 9 ? ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0) : ng::colour::LightGoldenrod);
+			if (aNumber == 9)
+				iTextEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+			else if (aNumber == 0)
+				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
+			else
+				iTextEdit.set_default_style(
+					ng::text_edit::style(ng::optional_font(), 
+					ng::gradient(
+						ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0).lighter(0x40), 
+						ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0).lighter(0xC0), 
+						ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		});
 	}
+private:
+	ng::text_edit& iTextEdit;
 };
 
 void create_game(ng::i_layout& aLayout);
@@ -262,8 +275,8 @@ int main(int argc, char* argv[])
 		keypad.set_spacing(0.0);
 		for (uint32_t row = 0; row < 3; ++row)
 			for (uint32_t col = 0; col < 3; ++col)
-				keypad.add_item(row, col, std::make_shared<keypad_button>(row * 3 + col + 1));
-		keypad.add_item(3, 1, std::make_shared<keypad_button>(0));
+				keypad.add_item(row, col, std::make_shared<keypad_button>(textEdit, row * 3 + col + 1));
+		keypad.add_item(3, 1, std::make_shared<keypad_button>(textEdit, 0));
 		keypad.add_span(3, 1, 1, 2);
 
 		neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)

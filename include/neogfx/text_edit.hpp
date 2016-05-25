@@ -40,8 +40,8 @@ namespace neogfx
 			style();
 			style(
 				const optional_font& aFont,
-				const colour_type& aTextColour,
-				const colour_type& aBackgroundColour);
+				const colour_type& aTextColour = colour_type(),
+				const colour_type& aBackgroundColour = colour_type());
 			style(
 				text_edit& aParent,
 				const style& aOther);
@@ -155,7 +155,7 @@ namespace neogfx
 		void refresh_paragraph(document_text::const_iterator aWhere);
 		void animate();
 		void draw_glyph_text(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const;
-		size extents(const neogfx::font& aFont, document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const;
+		size extents(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const;
 		std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> word_break(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aFrom) const;
 	private:
 		neogfx::alignment iAlignment;

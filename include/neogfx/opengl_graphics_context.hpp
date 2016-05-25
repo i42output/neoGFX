@@ -117,6 +117,7 @@ namespace neogfx
 		virtual void fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour);
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen);
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
+		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
 		virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&');
 		virtual void unset_mnemonic();
 		virtual bool mnemonics_shown() const;
@@ -128,7 +129,7 @@ namespace neogfx
 		void apply_scissor();
 		void apply_logical_operation();
 		vertex to_shader_vertex(const point& aPoint) const;
-		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, bool& aFallbackFontNeeded) const;
+		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, bool& aFallbackFontNeeded) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		const i_native_surface& iSurface;

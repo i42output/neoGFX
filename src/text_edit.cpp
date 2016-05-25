@@ -154,7 +154,7 @@ namespace neogfx
 				if (lineWidth + next->extents().cx > client_rect(false).width())
 				{
 					std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> wordBreak = word_break(lineStart, next);
-					lineWidth -= extents(font(), wordBreak.first, next).cx;
+					lineWidth -= extents(wordBreak.first, next).cx;
 					lineEnd = wordBreak.first;
 					next = wordBreak.second;
 					if (lineEnd == next)
@@ -179,7 +179,7 @@ namespace neogfx
 					else if (iAlignment == alignment::Centre)
 						linePos.x += std::ceil((client_rect().width() - aGraphicsContext.from_device_units(size{lineWidth, 0}).cx) / 2);
 					draw_glyph_text(aGraphicsContext, linePos, lineStart, lineEnd);
-					pos.y += extents(font(), lineStart, lineEnd).cy;
+					pos.y += extents(lineStart, lineEnd).cy;
 					lineStart = next;
 					lineEnd = line.second;
 					lineWidth = 0;
@@ -421,8 +421,15 @@ namespace neogfx
 	void text_edit::refresh_paragraph(document_text::const_iterator aWhere)
 	{
 		/* simple (naive) implementation just to get things moving (so just refresh everything) ... */
+		(void)aWhere;
 		graphics_context gc(*this);
-		auto gt = gc.to_glyph_text(text(), font());
+		auto t = text();
+		auto gt = gc.to_glyph_text(t.begin(), t.end(), [this](std::string::size_type aSourceIndex)
+		{
+			const auto& tagContents = iText.tag(iText.begin() + aSourceIndex).contents(); // todo: cache iterator to increase throughput
+			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+			return style.font() != boost::none ? *style.font() : font();
+		});
 		iGlyphs.clear();
 		iGlyphs.insert(iGlyphs.begin(), gt.cbegin(), gt.cend());
 	}
@@ -468,23 +475,18 @@ namespace neogfx
 		}
 	}
 
-	size text_edit::extents(const neogfx::font& aFont, document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const
+	size text_edit::extents(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const
 	{
 		neogfx::size result;
-		bool usingNormal = false;
-		bool usingFallback = false;
 		for (document_glyphs::const_iterator i = aBegin; i != aEnd; ++i)
 		{
-			result.cx += i->extents().cx;
-			if (!i->use_fallback())
-				usingNormal = true;
-			else
-				usingFallback = true;
+			const auto& glyph = *i;
+			const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+			result.cx += glyph.extents().cx;
+			result.cy = std::max(result.cy, !glyph.use_fallback() ? glyphFont.height() : glyphFont.fallback().height());
 		}
-		if (usingNormal || !usingFallback)
-			result.cy = aFont.height();
-		if (usingFallback)
-			result.cy = std::max(result.cy, aFont.fallback().height());
 		return neogfx::size(std::ceil(result.cx), std::ceil(result.cy));
 	}
 

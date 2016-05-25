@@ -642,6 +642,11 @@ namespace neogfx
 		return iNativeGraphicsContext->to_glyph_text(aTextBegin, aTextEnd, aFont);
 	}
 
+	glyph_text graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
+	{
+		return iNativeGraphicsContext->to_glyph_text(aTextBegin, aTextEnd, aFontSelector);
+	}
+
 	void graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const
 	{
 		{

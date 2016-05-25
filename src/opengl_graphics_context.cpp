@@ -743,11 +743,17 @@ namespace neogfx
 
 	glyph_text opengl_graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const
 	{
+		return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::string::size_type) { return aFont; });
+	}
+
+	glyph_text opengl_graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
+	{
 		bool fallbackNeeded = false;
-		glyph_text::container result = to_glyph_text_impl(aTextBegin, aTextEnd, aFont, fallbackNeeded);
+		glyph_text::container result = to_glyph_text_impl(aTextBegin, aTextEnd, aFontSelector, fallbackNeeded);
 		if (fallbackNeeded)
 		{
-			glyph_text::container fallbackResult = to_glyph_text_impl(aTextBegin, aTextEnd, aFont.fallback(), fallbackNeeded);
+			glyph_text::container fallbackResult = 
+				to_glyph_text_impl(aTextBegin, aTextEnd, [&aFontSelector](std::string::size_type aSourceIndex) { return aFontSelector(aSourceIndex).fallback(); }, fallbackNeeded);
 			for (auto i = result.begin(), j = fallbackResult.begin(); i != result.end(); ++i, ++j)
 			{
 				if (i->use_fallback())
@@ -757,7 +763,7 @@ namespace neogfx
 				}
 			}
 		}
-		return glyph_text(aFont, std::move(result));
+		return glyph_text(aFontSelector(0), std::move(result));
 	}
 
 	void opengl_graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix)
@@ -968,7 +974,7 @@ namespace neogfx
 		return vertex{{aPoint.x, aPoint.y, 0.0}};
 	}
 
-	glyph_text::container opengl_graphics_context::to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, bool& aFallbackFontNeeded) const
+	glyph_text::container opengl_graphics_context::to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, bool& aFallbackFontNeeded) const
 	{
 		glyph_text::container result;
 		aFallbackFontNeeded = false;
@@ -1008,22 +1014,21 @@ namespace neogfx
 		if (codePoints.empty())
 			return result;
 		
-		hb_font_t* hbFont = static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->font;
-		hb_buffer_t* buf = static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->buf;
-		hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->unicodeFuncs;
-
 		auto& runs = iRuns;
 		runs.clear();
 		text_direction previousDirection = get_text_direction(codePoints[0]);
-		hb_script_t previousScript = hb_unicode_script(unicodeFuncs, codePoints[0]);
 		char32_t* runStart = &codePoints[0];
 		std::size_t lastCodePointIndex = codePoints.size() - 1;
+		font previousFont = aFontSelector(clusterMap[0].from);
+		hb_script_t previousScript = hb_unicode_script(static_cast<native_font_face::hb_handle*>(previousFont.native_font_face().aux_handle())->unicodeFuncs, codePoints[0]);
 		for (std::size_t i = 0; i <= lastCodePointIndex; ++i)
 		{
+			font currentFont = aFontSelector(clusterMap[i].from);
+			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
 			text_direction currentDirection = get_text_direction(codePoints[i]);
 			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
 			textDirections.push_back(currentDirection);
-			bool newRun = (previousDirection == text_direction::LTR && currentDirection == text_direction::RTL) ||
+			bool newRun = previousFont != currentFont || (previousDirection == text_direction::LTR && currentDirection == text_direction::RTL) ||
 				(previousDirection == text_direction::RTL && currentDirection == text_direction::LTR) ||
 				(previousScript != currentScript && (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL)) ||
 				i == lastCodePointIndex;
@@ -1056,6 +1061,9 @@ namespace neogfx
 
 		for (std::size_t i = 0; i < runs.size(); ++i)
 		{
+			std::string::size_type sourceClusterRunStart = (clusterMap.begin() + (std::get<0>(runs[i]) - &codePoints[0]))->from;
+			hb_font_t* hbFont = static_cast<native_font_face::hb_handle*>(aFontSelector(sourceClusterRunStart).native_font_face().aux_handle())->font;
+			hb_buffer_t* buf = static_cast<native_font_face::hb_handle*>(aFontSelector(sourceClusterRunStart).native_font_face().aux_handle())->buf;
 			hb_buffer_set_direction(buf, std::get<2>(runs[i]) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 			hb_buffer_set_script(buf, std::get<3>(runs[i]));
 			hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(std::get<0>(runs[i])), std::get<1>(runs[i]) - std::get<0>(runs[i]), 0, std::get<1>(runs[i]) - std::get<0>(runs[i]));
@@ -1076,11 +1084,11 @@ namespace neogfx
 				else
 					sourceClusterEnd = aTextEnd - aTextBegin;
 				if (j > 0)
-					result.back().kerning_adjust(static_cast<float>(aFont.kerning(glyphInfo[j - 1].codepoint, glyphInfo[j].codepoint)));
+					result.back().kerning_adjust(static_cast<float>(aFontSelector(sourceClusterStart).kerning(glyphInfo[j - 1].codepoint, glyphInfo[j].codepoint)));
 				result.push_back(glyph(textDirections[cluster], glyphInfo[j].codepoint, glyph::source_type(sourceClusterStart, sourceClusterEnd), size(glyphPos[j].x_advance / 64.0, glyphPos[j].y_advance / 64.0), size(glyphPos[j].x_offset / 64.0, glyphPos[j].y_offset / 64.0)));
 				if (result.back().direction() == text_direction::Whitespace)
 					result.back().set_value(aTextBegin[sourceClusterStart]);
-				if ((aFont.style() & font::Underline) == font::Underline)
+				if ((aFontSelector(sourceClusterStart).style() & font::Underline) == font::Underline)
 					result.back().set_underline(true);
 				if ((c->flags & glyph::Mnemonic) == glyph::Mnemonic)
 					result.back().set_mnemonic(true);

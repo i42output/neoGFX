@@ -73,6 +73,7 @@ namespace neogfx
 		virtual void fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) = 0;
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen) = 0;
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const = 0;
+		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const = 0;
 		virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') = 0;
 		virtual void unset_mnemonic() = 0;
 		virtual bool mnemonics_shown() const = 0;
