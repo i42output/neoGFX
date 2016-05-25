@@ -123,6 +123,8 @@ namespace neogfx
 		virtual bool mnemonics_shown() const;
 		virtual void begin_drawing_glyphs();
 		virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour);
+//		virtual void is_emoji(const std::u32string& aEmojiText) const;
+//		virtual void draw_emoji(const point& aPoint, const std::u32string& aEmojiText, const font& aFont);
 		virtual void end_drawing_glyphs();
 		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour);
 	private:

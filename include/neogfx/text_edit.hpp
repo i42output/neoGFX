@@ -23,13 +23,14 @@
 #include <neolib/tag_array.hpp>
 #include <neolib/segmented_array.hpp>
 #include "scrollable_widget.hpp"
+#include "i_clipboard.hpp"
 #include "i_document.hpp"
 #include "glyph.hpp"
 #include "cursor.hpp"
 
 namespace neogfx
 {
-	class text_edit : public scrollable_widget, public i_document
+	class text_edit : public scrollable_widget, public i_clipboard_sink, public i_document
 	{
 	public:
 		class style
@@ -130,12 +131,24 @@ namespace neogfx
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
+		virtual void focus_gained();
+		virtual void focus_lost();
+	public:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual bool text_input(const std::string& aText);
 	public:
+		virtual bool can_cut() const;
+		virtual bool can_copy() const;
+		virtual bool can_paste() const;
+		virtual void cut(i_clipboard& aClipboard);
+		virtual void copy(i_clipboard& aClipboard);
+		virtual void paste(i_clipboard& aClipboard);
+	public:
 		virtual void move_cursor(cursor::move_operation_e aMoveOperation) const;
 	public:
+		bool read_only() const;
+		void set_read_only(bool aReadOnly = true);
 		neogfx::alignment alignment() const;
 		void set_alignment(neogfx::alignment aAlignment);
 		const style& default_style() const;
@@ -158,6 +171,7 @@ namespace neogfx
 		size extents(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const;
 		std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> word_break(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aFrom) const;
 	private:
+		bool iReadOnly;
 		neogfx::alignment iAlignment;
 		style iDefaultStyle;
 		mutable neogfx::cursor iCursor;

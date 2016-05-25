@@ -21,6 +21,7 @@
 
 #include "neogfx.hpp"
 #include <SDL_messagebox.h>
+#include <SDL_clipboard.h>
 #include "sdl_basic_services.hpp"
 
 namespace neogfx
@@ -61,6 +62,33 @@ namespace neogfx
 		if (aDisplayIndex >= iDesktopWorkAreas.size())
 			throw bad_display_index();
 		return iDesktopWorkAreas[aDisplayIndex];
+	}
+
+	class sdl_clipboard : public i_native_clipboard
+	{
+	public:
+		virtual bool has_text() const
+		{
+			return SDL_HasClipboardText() == SDL_TRUE;
+		}
+		virtual std::string text() const
+		{
+			char* clipboardText = SDL_GetClipboardText();
+			if (clipboardText == NULL)
+				return std::string{};
+			else
+				return std::string{clipboardText};
+		}
+		virtual void set_text(const std::string& aText)
+		{
+			SDL_SetClipboardText(aText.c_str());
+		}
+	};
+
+	i_native_clipboard& sdl_basic_services::clipboard()
+	{
+		static sdl_clipboard sNativeClipboard;
+		return sNativeClipboard;
 	}
 
 	bool sdl_basic_services::has_shared_menu_bar() const

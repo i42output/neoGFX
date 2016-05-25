@@ -85,6 +85,7 @@ namespace neogfx
 
 	text_edit::text_edit() : 
 		scrollable_widget(), 
+		iReadOnly(false),
 		iAlignment(neogfx::alignment::Left|neogfx::alignment::Top), 
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -97,7 +98,8 @@ namespace neogfx
 
 	text_edit::text_edit(i_widget& aParent) :
 		scrollable_widget(aParent), 
-		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top), 
+		iReadOnly(false),
+		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
@@ -109,7 +111,8 @@ namespace neogfx
 
 	text_edit::text_edit(i_layout& aLayout) :
 		scrollable_widget(aLayout), 
-		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top), 
+		iReadOnly(false),
+		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
@@ -121,6 +124,8 @@ namespace neogfx
 
 	text_edit::~text_edit()
 	{
+		if (app::instance().clipboard().sink_active() && &app::instance().clipboard().active_sink() == this)
+			app::instance().clipboard().deactivate(*this);
 	}
 
 	size text_edit::minimum_size(const optional_size& aAvailableSpace) const
@@ -190,6 +195,16 @@ namespace neogfx
 		}
 	}
 
+	void text_edit::focus_gained()
+	{
+		app::instance().clipboard().activate(*this);
+	}
+
+	void text_edit::focus_lost()
+	{
+		app::instance().clipboard().deactivate(*this);
+	}
+
 	bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
 		bool handled = true;
@@ -250,6 +265,36 @@ namespace neogfx
 		return true;
 	}
 
+	bool text_edit::can_cut() const
+	{
+		return !read_only() && !iText.empty() && iCursor.position() != iCursor.anchor();
+	}
+
+	bool text_edit::can_copy() const
+	{
+		return !iText.empty() && iCursor.position() != iCursor.anchor();
+	}
+
+	bool text_edit::can_paste() const
+	{
+		return !read_only();
+	}
+
+	void text_edit::cut(i_clipboard& aClipboard)
+	{
+		// todo
+	}
+
+	void text_edit::copy(i_clipboard& aClipboard)
+	{
+		aClipboard.set_text(text());
+	}
+
+	void text_edit::paste(i_clipboard& aClipboard)
+	{
+		insert_text(aClipboard.text());
+	}
+
 	void text_edit::move_cursor(cursor::move_operation_e aMoveOperation) const
 	{
 		switch (aMoveOperation)
@@ -297,6 +342,17 @@ namespace neogfx
 		default:
 			break;
 		}
+	}
+
+	bool text_edit::read_only() const
+	{
+		return iReadOnly;
+	}
+
+	void text_edit::set_read_only(bool aReadOnly)
+	{
+		iReadOnly = aReadOnly;
+		update();
 	}
 
 	neogfx::alignment text_edit::alignment() const

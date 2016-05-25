@@ -21,6 +21,7 @@
 
 #include "neogfx.hpp"
 #include <neolib/io_thread.hpp>
+#include "i_native_clipboard.hpp"
 #include "i_shared_menu_bar.hpp"
 
 namespace neogfx
@@ -37,6 +38,7 @@ namespace neogfx
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const = 0;
 		virtual uint32_t display_count() const = 0;
 		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const = 0;
+		virtual i_native_clipboard& clipboard() = 0;
 		virtual bool has_shared_menu_bar() const = 0;
 		virtual i_shared_menu_bar& shared_menu_bar() = 0;
 	};

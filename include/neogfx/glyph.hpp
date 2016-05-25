@@ -50,6 +50,7 @@ namespace neogfx
 		{
 			Underline	= 0x01,
 			Mnemonic	= 0x02,
+			Emoji		= 0x04,
 			UseFallback = 0x80
 		};
 	public:

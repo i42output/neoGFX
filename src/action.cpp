@@ -166,13 +166,13 @@ namespace neogfx
 		return iShortcut;
 	}
 
-	i_action& action::set_enabled()
+	i_action& action::enable()
 	{
 		set_enabled(true);
 		return *this;
 	}
 
-	i_action& action::set_disabled()
+	i_action& action::disable()
 	{
 		set_enabled(false);
 		return *this;
@@ -188,13 +188,13 @@ namespace neogfx
 		return *this;
 	}
 
-	i_action& action::set_checked()
+	i_action& action::check()
 	{
 		set_checked(true);
 		return *this;
 	}
 
-	i_action& action::set_unchecked()
+	i_action& action::uncheck()
 	{
 		set_checked(false);
 		return *this;

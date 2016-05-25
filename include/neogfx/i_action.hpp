@@ -56,11 +56,11 @@ namespace neogfx
 		virtual const i_texture& image() const = 0;
 		virtual const i_texture& checked_image() const = 0;
 		virtual const optional_key_sequence& shortcut() const = 0;
-		virtual i_action& set_enabled() = 0;
-		virtual i_action& set_disabled() = 0;
+		virtual i_action& enable() = 0;
+		virtual i_action& disable() = 0;
 		virtual i_action& set_checkable(bool aCheckable) = 0;
-		virtual i_action& set_checked() = 0;
-		virtual i_action& set_unchecked() = 0;
+		virtual i_action& check() = 0;
+		virtual i_action& uncheck() = 0;
 		virtual i_action& set_group(uint32_t aGroup) = 0;
 		virtual i_action& set_separator(bool aIsSeparator) = 0;
 		virtual i_action& set_text(const optional_text& aText = optional_text()) = 0;
@@ -80,9 +80,9 @@ namespace neogfx
 		void toggle()
 		{
 			if (is_checked())
-				set_unchecked();
+				uncheck();
 			else
-				set_checked();
+				check();
 		}
 	};
 }

@@ -42,6 +42,7 @@ namespace neogfx
 		neolib::io_thread("neogfx::app", true),
 		iBasicServices(new neogfx::sdl_basic_services(*this)),
 		iKeyboard(new neogfx::sdl_keyboard()),
+		iClipboard(new neogfx::clipboard(basic_services().clipboard())),
 		iRenderingEngine(new neogfx::sdl_renderer(*iBasicServices, *iKeyboard)),
 		iSurfaceManager(new neogfx::surface_manager(*iBasicServices, *iRenderingEngine)),
 		iCurrentStyle(iStyles.begin())
@@ -163,6 +164,14 @@ namespace neogfx
 			return *iKeyboard;
 		else
 			throw no_keyboard();
+	}
+
+	i_clipboard& app::clipboard() const
+	{
+		if (iClipboard)
+			return *iClipboard;
+		else
+			throw no_clipboard();
 	}
 
 	const i_style& app::current_style() const

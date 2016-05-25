@@ -1,4 +1,4 @@
-// sdl_basic_services.hpp
+// clipboard.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -20,28 +20,30 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include "i_basic_services.hpp"
+#include "i_clipboard.hpp"
+#include "i_native_clipboard.hpp"
 
 namespace neogfx
 {
-	class sdl_basic_services : public i_basic_services
+	class clipboard : public i_clipboard
 	{
 	public:
-		sdl_basic_services(neolib::io_thread& aAppThread);
+		clipboard(i_native_clipboard& aNativeClipboard);
 	public:
-		virtual neolib::io_thread& app_thread();
-		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const;
-		virtual uint32_t display_count() const;
-		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const;
-		virtual i_native_clipboard& clipboard();
-		virtual bool has_shared_menu_bar() const;
-		virtual i_shared_menu_bar& shared_menu_bar();
+		virtual bool sink_active() const;
+		virtual i_clipboard_sink& active_sink();
+		virtual void activate(i_clipboard_sink& aSink);
+		virtual void deactivate(i_clipboard_sink& aSink);
+	public:
+		virtual bool has_text() const;
+		virtual std::string text() const;
+		virtual void set_text(const std::string& aText);
+	public:
+		virtual void cut();
+		virtual void copy();
+		virtual void paste();
 	private:
-#ifdef WIN32
-		static BOOL CALLBACK enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aThis);
-#endif
-	private:
-		neolib::io_thread& iAppThread;
-		mutable std::vector<rect> iDesktopWorkAreas;
+		i_native_clipboard& iNativeClipboard;
+		i_clipboard_sink* iActiveSink;
 	};
 }

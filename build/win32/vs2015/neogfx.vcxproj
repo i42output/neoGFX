@@ -86,8 +86,10 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\neogfx\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\clipboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\cursor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\flow_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\i_clipboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_document.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_menu_item.hpp" />
@@ -230,6 +232,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\action.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
+    <ClCompile Include="..\..\..\src\clipboard.cpp" />
     <ClCompile Include="..\..\..\src\cursor.cpp" />
     <ClCompile Include="..\..\..\src\flow_layout.cpp" />
     <ClCompile Include="..\..\..\src\keyboard.cpp" />

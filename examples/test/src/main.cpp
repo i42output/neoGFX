@@ -104,12 +104,44 @@ int main(int argc, char* argv[])
 		muteAction.set_checkable(true);
 		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
 
-		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png").set_disabled().set_shortcut("Ctrl+X");
-		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png").set_disabled().set_shortcut("Ctrl+C");
+		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png").disable().set_shortcut("Ctrl+X");
+		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png").disable().set_shortcut("Ctrl+C");
 		auto& pasteAction = app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png").set_shortcut("Ctrl+V");
 		auto& pasteAndGoAction = app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
 		auto& deleteAction = app.add_action("Delete").set_shortcut("Del");
 		auto& selectAllAction = app.add_action("Select All").set_shortcut("Ctrl+A");
+
+		neolib::callback_timer ct{ app, [&app, &cutAction, &copyAction, &pasteAction, &pasteAndGoAction](neolib::callback_timer& aTimer) 
+		{
+			aTimer.again();
+			if (app.clipboard().sink_active())
+			{
+				auto& sink = app.clipboard().active_sink();
+				if (sink.can_cut())
+					cutAction.enable();
+				else
+					cutAction.disable();
+				if (sink.can_copy())
+					copyAction.enable();
+				else
+					copyAction.disable();
+				if (sink.can_paste())
+				{
+					pasteAction.enable();
+					pasteAndGoAction.enable();
+				}
+				else
+				{
+					pasteAction.disable();
+					pasteAndGoAction.disable();
+				}
+			}
+		}, 100 };
+
+		pasteAction.triggered([&app]()
+		{
+			app.clipboard().paste();
+		});
 
 		ng::menu_bar menu(layout0);
 		auto& exitAction = app.add_action("Exit").set_shortcut("Alt+F4");
@@ -229,7 +261,7 @@ int main(int argc, char* argv[])
 		layout2.add_spacer().set_weight(ng::size(1.0));
 		ng::push_button button8(layout2, "Enable/disable\ncontacts action.");
 		button8.set_foreground_colour(ng::colour(255, 235, 160));
-		button8.pressed([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.set_disabled(); else contactsAction.set_enabled(); });
+		button8.pressed([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
 		ng::horizontal_layout layout3(layoutButtons);
 		std::srand(4242);
 		for (uint32_t i = 0; i < 10; ++i)

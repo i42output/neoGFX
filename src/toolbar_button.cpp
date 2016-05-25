@@ -132,9 +132,9 @@ namespace neogfx
 			if (iAction.is_checkable())
 			{
 				if (is_checked())
-					iAction.set_checked();
+					iAction.check();
 				else
-					iAction.set_unchecked();
+					iAction.uncheck();
 			}
 		}
 	}
@@ -153,12 +153,12 @@ namespace neogfx
 		{
 			if (is_checked())
 			{
-				iAction.set_checked();
+				iAction.check();
 				image().set_image(iAction.checked_image());
 			}
 			else
 			{
-				iAction.set_unchecked();
+				iAction.uncheck();
 				image().set_image(iAction.image());
 			}
 		};

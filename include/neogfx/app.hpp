@@ -29,6 +29,7 @@
 #include "i_surface_manager.hpp"
 #include "i_widget.hpp"
 #include "keyboard.hpp"
+#include "clipboard.hpp"
 #include "style.hpp"
 #include "action.hpp"
 #include "i_mnemonic.hpp"
@@ -47,6 +48,7 @@ namespace neogfx
 		struct no_renderer : std::logic_error { no_renderer() : std::logic_error("neogfx::app::no_renderer") {} };
 		struct no_surface_manager : std::logic_error { no_surface_manager() : std::logic_error("neogfx::app::no_surface_manager") {} };
 		struct no_keyboard : std::logic_error { no_keyboard() : std::logic_error("neogfx::app::no_keyboard") {} };
+		struct no_clipboard : std::logic_error { no_clipboard() : std::logic_error("neogfx::app::no_clipboard") {} };
 		struct style_not_found : std::runtime_error { style_not_found() : std::runtime_error("neogfx::app::style_not_found") {} };
 		struct style_exists : std::runtime_error { style_exists() : std::runtime_error("neogfx::app::style_exists") {} };
 	public:
@@ -61,6 +63,7 @@ namespace neogfx
 		virtual i_rendering_engine& rendering_engine() const;
 		virtual i_surface_manager& surface_manager() const;
 		virtual i_keyboard& keyboard() const;
+		virtual i_clipboard& clipboard() const;
 	public:
 		virtual const i_style& current_style() const;
 		virtual i_style& current_style();
@@ -89,6 +92,7 @@ namespace neogfx
 		bool iQuitWhenLastWindowClosed;
 		std::unique_ptr<i_basic_services> iBasicServices;
 		std::unique_ptr<i_keyboard> iKeyboard;
+		std::unique_ptr<i_clipboard> iClipboard;
 		std::unique_ptr<i_rendering_engine> iRenderingEngine;
 		std::unique_ptr<i_surface_manager> iSurfaceManager;
 		boost::optional<int> iQuitResultCode;
