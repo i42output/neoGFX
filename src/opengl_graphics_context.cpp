@@ -1057,6 +1057,7 @@ namespace neogfx
 				previousDirection = currentDirection;
 				previousScript = currentScript;
 			}
+			previousFont = currentFont;
 		}
 
 		for (std::size_t i = 0; i < runs.size(); ++i)
