@@ -139,6 +139,7 @@ namespace neogfx
 
 	void text_edit::paint(graphics_context& aGraphicsContext) const
 	{
+		scrollable_widget::paint(aGraphicsContext);
 		/* simple (naive) implementation just to get things moving... */
 		typedef std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> line_t;
 		typedef std::vector<line_t> lines_t;
@@ -149,6 +150,11 @@ namespace neogfx
 		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
 		{
 			const auto& line = *i;
+			if (line.first == line.second && 
+				line.first != iGlyphs.begin() && 
+				(line.first-1)->direction() == text_direction::Whitespace && (line.first-1)->value() == '\r' && 
+				line.first->direction() == text_direction::Whitespace && line.first->value() == '\n')
+				continue;
 			document_glyphs::const_iterator next = line.first;
 			document_glyphs::const_iterator lineStart = next;
 			document_glyphs::const_iterator lineEnd = line.second;
@@ -183,7 +189,7 @@ namespace neogfx
 						linePos.x += client_rect(false).width() - aGraphicsContext.from_device_units(size{lineWidth, 0}).cx;
 					else if (iAlignment == alignment::Centre)
 						linePos.x += std::ceil((client_rect().width() - aGraphicsContext.from_device_units(size{lineWidth, 0}).cx) / 2);
-					draw_glyph_text(aGraphicsContext, linePos, lineStart, lineEnd);
+					draw_glyphs(aGraphicsContext, linePos, lineStart, lineEnd);
 					pos.y += extents(lineStart, lineEnd).cy;
 					lineStart = next;
 					lineEnd = line.second;
@@ -495,7 +501,7 @@ namespace neogfx
 		update();
 	}
 
-	void text_edit::draw_glyph_text(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const
+	void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const
 	{
 		{
 			graphics_context::glyph_drawing gd(aGraphicsContext);

@@ -117,7 +117,7 @@ namespace neogfx
 			node_type* iNode;
 			contents_type iContents;
 		};
-		typedef neolib::tag_array<tag<>, char, 256> document_text;
+		typedef neolib::tag_array<tag<>, char, 32, 256> document_text;
 		typedef neolib::segmented_array<glyph, 256> document_glyphs;
 	public:
 		typedef document_text::size_type position_type;
@@ -167,7 +167,7 @@ namespace neogfx
 		void init();
 		void refresh_paragraph(document_text::const_iterator aWhere);
 		void animate();
-		void draw_glyph_text(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const;
+		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const;
 		size extents(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const;
 		std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> word_break(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aFrom) const;
 	private:

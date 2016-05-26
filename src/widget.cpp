@@ -796,7 +796,7 @@ namespace neogfx
 			aGraphicsContext.scissor_off();
 			aGraphicsContext.set_extents(client_rect().extents());
 			aGraphicsContext.set_origin(origin() + client_rect().position());
-			aGraphicsContext.scissor_on(default_clip_rect());
+			aGraphicsContext.scissor_on(default_clip_rect() - client_rect().position());
 			auto savedCoordinateSystem = aGraphicsContext.logical_coordinate_system();
 			if (savedCoordinateSystem != logical_coordinate_system())
 			{

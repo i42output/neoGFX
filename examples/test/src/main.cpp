@@ -437,7 +437,7 @@ int main(int argc, char* argv[])
 		tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
-		
+
 		return app.exec();
 	}
 	catch (std::exception& e)
