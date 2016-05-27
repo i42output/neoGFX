@@ -248,7 +248,13 @@ namespace neogfx
 		colour default_text_colour() const;
 	public:
 		neogfx::cursor& cursor() const;
-		point position(position_type aPosition) const;
+		struct position_info
+		{
+			document_glyphs::const_iterator glyph;
+			glyph_lines::const_iterator line;
+			point pos;
+		};
+		position_info position(position_type aPosition) const;
 		position_type hit_test(const point& aPoint) const;
 		std::string text() const;
 		void set_text(const std::string& aText);
@@ -260,7 +266,9 @@ namespace neogfx
 		void refresh_paragraph(document_text::const_iterator aWhere);
 		void refresh_lines();
 		void animate();
+		void update_cursor();
 		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const;
+		void draw_cursor(const graphics_context& aGraphicsContext) const;
 		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
 	private:
 		bool iReadOnly;
@@ -273,5 +281,6 @@ namespace neogfx
 		glyph_lines iGlyphLines;
 		style_list iStyles;
 		neolib::callback_timer iAnimator;
+		uint64_t iCursorAnimationStartTime;
 	};
 }
