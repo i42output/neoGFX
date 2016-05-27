@@ -130,7 +130,7 @@ namespace neogfx
 
 	void text_edit::resized()
 	{
-		refresh_lines();
+		scrollable_widget::resized();
 	}
 
 	size text_edit::minimum_size(const optional_size& aAvailableSpace) const
@@ -148,7 +148,9 @@ namespace neogfx
 		/* simple (naive) implementation just to get things moving... */
 		for (auto const& line : iGlyphLines)
 		{
-			point linePos = client_rect(false).top_left() + point{0.0, line.y};
+			point linePos = client_rect(false).top_left() + point{0.0, line.y - vertical_scrollbar().position()};
+			if (linePos.y + line.extents.cy < client_rect(false).top())
+				continue;
 			if (linePos.y > client_rect(false).bottom())
 				break;
 			auto textDirection = glyph_text_direction(line.start, line.end);
@@ -229,6 +231,53 @@ namespace neogfx
 		insert_text(aText);
 		cursor().set_position(cursor().position() + aText.size());
 		return true;
+	}
+
+	text_edit::child_widget_scrolling_disposition_e text_edit::scrolling_disposition() const
+	{
+		return DontScrollChildWidget;
+	}
+
+	void text_edit::update_scrollbar_visibility(usv_stage_e aStage)
+	{
+		switch (aStage)
+		{
+		case UsvStageInit:
+			vertical_scrollbar().hide();
+			horizontal_scrollbar().hide();
+			refresh_lines();
+			break;
+		case UsvStageCheckVertical1:
+		case UsvStageCheckHorizontal:
+			{
+				i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
+				vertical_scrollbar().set_maximum(iGlyphLines.empty() ? 0.0 : iGlyphLines.back().y + iGlyphLines.back().extents.cy);
+				vertical_scrollbar().set_step(font().height());
+				vertical_scrollbar().set_page(client_rect(false).height());
+				vertical_scrollbar().set_position(oldPosition);
+				if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
+					vertical_scrollbar().show();
+				else
+					vertical_scrollbar().hide();
+				oldPosition = horizontal_scrollbar().position();
+				horizontal_scrollbar().set_maximum(0.0);
+				horizontal_scrollbar().set_step(font().height());
+				horizontal_scrollbar().set_page(client_rect(false).width());
+				horizontal_scrollbar().set_position(oldPosition);
+				if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
+					horizontal_scrollbar().show();
+				else
+					horizontal_scrollbar().hide();
+				scrollable_widget::update_scrollbar_visibility(aStage);
+				refresh_lines();
+			}
+			break;
+		case UsvStageCheckVertical2:
+		case UsvStageDone:
+			break;
+		default:
+			break;
+		}
 	}
 
 	bool text_edit::can_cut() const
@@ -469,7 +518,7 @@ namespace neogfx
 				x += g->extents().cx;
 			}
 		}
-		refresh_lines(); // todo: remove
+		update_scrollbar_visibility();
 	}
 
 	void text_edit::refresh_lines()
@@ -522,6 +571,7 @@ namespace neogfx
 				lineEnd = paragraph.end();
 			}
 		}
+		vertical_scrollbar().set_maximum(pos.y);
 	}
 
 	void text_edit::animate()

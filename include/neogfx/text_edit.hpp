@@ -226,6 +226,10 @@ namespace neogfx
 		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual bool text_input(const std::string& aText);
 	public:
+		virtual child_widget_scrolling_disposition_e scrolling_disposition() const;
+		using scrollable_widget::update_scrollbar_visibility;
+		virtual void update_scrollbar_visibility(usv_stage_e aStage);
+	public:
 		virtual bool can_cut() const;
 		virtual bool can_copy() const;
 		virtual bool can_paste() const;
