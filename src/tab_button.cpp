@@ -26,18 +26,21 @@ namespace neogfx
 	tab_button::tab_button(i_tab_container& aContainer, const std::string& aText) :
 		push_button(aText, ButtonStyleTab), iContainer(aContainer), iSelectedState(false)
 	{
+		set_size_policy(neogfx::size_policy::Minimum);
 		iContainer.adding_tab(*this);
 	}
 
 	tab_button::tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText) :
 		push_button(aParent, aText, ButtonStyleTab), iContainer(aContainer), iSelectedState(false)
 	{
+		set_size_policy(neogfx::size_policy::Minimum);
 		iContainer.adding_tab(*this);
 	}
 
 	tab_button::tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText) :
 		push_button(aLayout, aText, ButtonStyleTab), iContainer(aContainer), iSelectedState(false)
 	{
+		set_size_policy(neogfx::size_policy::Minimum);
 		iContainer.adding_tab(*this);
 	}
 

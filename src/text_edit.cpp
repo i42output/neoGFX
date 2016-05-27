@@ -146,10 +146,11 @@ namespace neogfx
 	{
 		scrollable_widget::paint(aGraphicsContext);
 		/* simple (naive) implementation just to get things moving... */
-		point pos{ margins().left, margins().top };
 		for (auto const& line : iGlyphLines)
 		{
-			point linePos = pos;
+			point linePos = client_rect(false).top_left() + point{0.0, line.y};
+			if (linePos.y > client_rect(false).bottom())
+				break;
 			auto textDirection = glyph_text_direction(line.start, line.end);
 			if (iAlignment == alignment::Left && textDirection == text_direction::RTL ||
 				iAlignment == alignment::Right && textDirection == text_direction::LTR)
@@ -157,7 +158,6 @@ namespace neogfx
 			else if (iAlignment == alignment::Centre)
 				linePos.x += std::ceil((client_rect().width() - aGraphicsContext.from_device_units(size{line.extents.cx, 0}).cx) / 2);
 			draw_glyphs(aGraphicsContext, linePos, line.start, line.end);
-			pos.y += line.extents.cy;
 		}
 	}
 
@@ -455,15 +455,15 @@ namespace neogfx
 		iGlyphs.clear();
 		iGlyphs.insert(iGlyphs.begin(), gt.cbegin(), gt.cend());
 		iGlyphParagraphs.clear();
-		std::array<glyph, 1> delimeters = { glyph(text_direction::Whitespace, '\n') };
+		std::array<paragraph_positioned_glyph, 1> delimeters = { glyph(text_direction::Whitespace, '\n') };
 		neolib::tokens(iGlyphs.begin(), iGlyphs.end(), delimeters.begin(), delimeters.end(), iGlyphParagraphs, 0, false);
 		for (auto p = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
 		{
 			const auto& paragraph = *p;
-			if (paragraph.first == paragraph.second)
+			if (paragraph.start() == paragraph.end())
 				continue;
 			coordinate x = 0.0;
-			for (auto g = paragraph.first; g != paragraph.second; ++g)
+			for (auto g = paragraph.start(); g != paragraph.end(); ++g)
 			{
 				g->x = x;
 				x += g->extents().cx;
@@ -476,54 +476,50 @@ namespace neogfx
 	{
 		/* simple (naive) implementation just to get things moving... */
 		iGlyphLines.clear();
-		point pos{ margins().left, margins().top };
+		point pos{};
+		dimension availableWidth = client_rect(false).width();
 		for (auto p  = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
 		{
 			const auto& paragraph = *p;
-			document_glyphs::iterator next = paragraph.first;
-			document_glyphs::iterator lineStart = next;
-			document_glyphs::iterator lineEnd = paragraph.second;
-			dimension lineWidth = 0;
-			while (next != paragraph.second)
+			if (paragraph.start() == paragraph.end() || (paragraph.start()->is_whitespace() && paragraph.start()->value() == '\r'))
 			{
-				// todo: binary chop based on glyph position in paragraph
-				bool gotLine = false;
-				if (lineWidth + next->extents().cx > client_rect(false).width())
-				{
-					std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, next);
-					lineWidth -= extents(wordBreak.first, next).cx;
-					lineEnd = wordBreak.first;
-					next = wordBreak.second;
-					if (lineEnd == next)
-					{
-						while (lineEnd != paragraph.second && (lineEnd + 1)->source() == wordBreak.first->source())
-							++lineEnd;
-						next = lineEnd;
-					}
-					gotLine = true;
-				}
-				else
-				{
-					lineWidth += next->extents().cx;
-					++next;
-				}
-				if (gotLine || next == paragraph.second)
-				{
-					iGlyphLines.push_back(glyph_line{lineStart, lineEnd, pos.y, size{lineWidth, extents(lineStart, lineEnd).cy}});
-					pos.y += iGlyphLines.back().extents.cy;
-					lineStart = next;
-					lineEnd = paragraph.second;
-					lineWidth = 0;
-				}
-			}
-			if (paragraph.first == paragraph.second)
-			{
-				const auto& glyph = *paragraph.first;
+				const auto& glyph = *paragraph.start();
 				const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
 				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
-				iGlyphLines.push_back(glyph_line{paragraph.first, lineEnd, pos.y, size{0.0, glyphFont.height()}});
+				iGlyphLines.push_back(glyph_line{ paragraph.start(), paragraph.end(), pos.y, size{ 0.0, glyphFont.height() } });
 				pos.y += iGlyphLines.back().extents.cy;
+				continue;
+			}
+			document_glyphs::iterator next = paragraph.start();
+			document_glyphs::iterator lineStart = next;
+			document_glyphs::iterator lineEnd = paragraph.end();
+			coordinate offset = 0.0;
+			while (next != paragraph.end())
+			{
+				auto split = std::lower_bound(next, paragraph.end(), paragraph_positioned_glyph{offset + availableWidth});
+				if (split != next && (split != paragraph.end() || (split-1)->x + (split-1)->extents().cx >= offset + availableWidth))
+					--split;
+				if (split != paragraph.end())
+				{
+					std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraph.end());
+					lineEnd = wordBreak.first;
+					next = wordBreak.second;
+					if (wordBreak.first == wordBreak.second)
+					{
+						while (lineEnd != lineStart && (lineEnd - 1)->source() == wordBreak.first->source())
+							--lineEnd;
+						next = lineEnd;
+					}
+				}
+				else
+					next = paragraph.end();
+				iGlyphLines.push_back(glyph_line{lineStart, lineEnd, pos.y, size{split->x - offset, paragraph.height(*this, lineStart, lineEnd)}});
+				pos.y += iGlyphLines.back().extents.cy;
+				lineStart = next;
+				if (lineStart != paragraph.end())
+					offset = lineStart->x;
+				lineEnd = paragraph.end();
 			}
 		}
 	}
@@ -569,22 +565,7 @@ namespace neogfx
 		}
 	}
 
-	size text_edit::extents(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const
-	{
-		neogfx::size result;
-		for (document_glyphs::const_iterator i = aBegin; i != aEnd; ++i)
-		{
-			const auto& glyph = *i;
-			const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
-			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
-			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
-			result.cx += glyph.extents().cx;
-			result.cy = std::max(result.cy, !glyph.use_fallback() ? glyphFont.height() : glyphFont.fallback().height());
-		}
-		return neogfx::size(std::ceil(result.cx), std::ceil(result.cy));
-	}
-
-	std::pair<text_edit::document_glyphs::iterator, text_edit::document_glyphs::iterator> text_edit::word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom)
+	std::pair<text_edit::document_glyphs::iterator, text_edit::document_glyphs::iterator> text_edit::word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd)
 	{
 		std::pair<document_glyphs::iterator, document_glyphs::iterator> result(aFrom, aFrom);
 		if (!aFrom->is_whitespace())
@@ -601,9 +582,10 @@ namespace neogfx
 			}
 			result.second = result.first;
 		}
+		/* skip whitespace... */
 		while (result.first != aBegin && (result.first - 1)->is_whitespace())
 			--result.first;
-		while (result.second->is_whitespace() && result.second != iGlyphs.end())
+		while (result.second->is_whitespace() && result.second != aEnd)
 			++result.second;
 		return result;
 	}

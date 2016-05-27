@@ -57,6 +57,8 @@ namespace neogfx
 		typedef uint32_t value_type;
 		typedef std::pair<string::size_type, string::size_type> source_type;
 	public:
+		glyph() :
+			iDirection{}, iValue{}, iFlags{}, iSource{}, iExtents{}, iOffset{} {}
 		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aExtents, size aOffset) :
 			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{aSource}, iExtents{aExtents}, iOffset{aOffset} {}
 		glyph(text_direction aDirection, value_type aValue) :

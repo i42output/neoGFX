@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <boost/pool/pool_alloc.hpp>
 #include <neolib/tag_array.hpp>
 #include <neolib/segmented_array.hpp>
 #include "scrollable_widget.hpp"
@@ -122,22 +123,80 @@ namespace neogfx
 		{
 		public:
 			using glyph::glyph;
+			paragraph_positioned_glyph(double aX) : x(aX)
+			{
+			}
 			paragraph_positioned_glyph(const glyph& aOther) : glyph(aOther), x(0.0)
 			{
 			}
 		public:
 			paragraph_positioned_glyph& operator=(const glyph& aOther)
 			{
-				glyph::operator=(*this);
+				glyph::operator=(aOther);
 				x = 0.0;
 				return *this;
+			}
+		public:
+			bool operator<(const paragraph_positioned_glyph& aOther) const
+			{
+				return x < aOther.x;
 			}
 		public:
 			double x = 0.0;
 		};
 		typedef neolib::segmented_array<paragraph_positioned_glyph, 256> document_glyphs;
-		typedef std::pair<document_glyphs::iterator, document_glyphs::iterator> glyph_paragraph;
-		typedef std::vector<glyph_paragraph> glyph_paragraphs;
+		class glyph_paragraph
+		{
+		public:
+			typedef std::map<document_glyphs::iterator, dimension, std::less<document_glyphs::iterator>, boost::fast_pool_allocator<std::pair<const document_glyphs::iterator, dimension>>> height_list;
+		public:
+			glyph_paragraph(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) : iStart(aStart), iEnd(aEnd)
+			{
+			}
+		public:
+			document_glyphs::iterator start() const
+			{
+				return iStart;
+			}
+			document_glyphs::iterator end() const
+			{
+				return iEnd;
+			}
+			dimension height(text_edit& aParent, document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const
+			{
+				if (iHeights.empty())
+				{
+					dimension previousHeight = 0.0;
+					for (auto i = iStart; i != iEnd; ++i)
+					{
+						const auto& glyph = *i;
+						const auto& tagContents = aParent.iText.tag(aParent.iText.begin() + glyph.source().first).contents();
+						const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+						auto& glyphFont = style.font() != boost::none ? *style.font() : aParent.font();
+						dimension cy = !glyph.use_fallback() ? glyphFont.height() : glyphFont.fallback().height();
+						if (i == iStart || cy != previousHeight)
+						{
+							iHeights[i] = cy;
+							previousHeight = cy;
+						}
+					}
+					iHeights[iEnd] = 0.0;
+				}
+				dimension result = 0.0;
+				auto start = iHeights.lower_bound(aStart);
+				if (start != iHeights.begin() && aStart < start->first)
+					--start;
+				auto stop = iHeights.lower_bound(aEnd);
+				for (auto i = start; i != stop; ++i)
+					result = std::max(result, (*i).second);
+				return result;
+			}
+		private:
+			document_glyphs::iterator iStart;
+			document_glyphs::iterator iEnd;
+			mutable height_list iHeights;
+		};
+		typedef neolib::segmented_array<glyph_paragraph> glyph_paragraphs;
 		struct glyph_line
 		{
 			document_glyphs::iterator start;
@@ -198,8 +257,7 @@ namespace neogfx
 		void refresh_lines();
 		void animate();
 		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const;
-		size extents(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const;
-		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom);
+		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
 	private:
 		bool iReadOnly;
 		neogfx::alignment iAlignment;
