@@ -128,6 +128,11 @@ namespace neogfx
 			app::instance().clipboard().deactivate(*this);
 	}
 
+	void text_edit::resized()
+	{
+		refresh_lines();
+	}
+
 	size text_edit::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
@@ -141,63 +146,18 @@ namespace neogfx
 	{
 		scrollable_widget::paint(aGraphicsContext);
 		/* simple (naive) implementation just to get things moving... */
-		typedef std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> line_t;
-		typedef std::vector<line_t> lines_t;
-		lines_t lines;
-		std::array<glyph, 2> delimeters = { glyph(text_direction::Whitespace, '\r'), glyph(text_direction::Whitespace, '\n') };
-		neolib::tokens(iGlyphs.begin(), iGlyphs.end(), delimeters.begin(), delimeters.end(), lines, 0, false);
 		point pos{ margins().left, margins().top };
-		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
+		for (auto const& line : iGlyphLines)
 		{
-			const auto& line = *i;
-			if (line.first == line.second && 
-				line.first != iGlyphs.begin() && 
-				(line.first-1)->direction() == text_direction::Whitespace && (line.first-1)->value() == '\r' && 
-				line.first->direction() == text_direction::Whitespace && line.first->value() == '\n')
-				continue;
-			document_glyphs::const_iterator next = line.first;
-			document_glyphs::const_iterator lineStart = next;
-			document_glyphs::const_iterator lineEnd = line.second;
-			dimension lineWidth = 0;
-			while (next != line.second)
-			{
-				bool gotLine = false;
-				if (lineWidth + next->extents().cx > client_rect(false).width())
-				{
-					std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> wordBreak = word_break(lineStart, next);
-					lineWidth -= extents(wordBreak.first, next).cx;
-					lineEnd = wordBreak.first;
-					next = wordBreak.second;
-					if (lineEnd == next)
-					{
-						while (lineEnd != line.second && (lineEnd + 1)->source() == wordBreak.first->source())
-							++lineEnd;
-						next = lineEnd;
-					}
-					gotLine = true;
-				}
-				else
-				{
-					lineWidth += next->extents().cx;
-					++next;
-				}
-				if (gotLine || next == line.second)
-				{
-					point linePos = pos;
-					if (iAlignment == alignment::Left && glyph_text_direction(lineStart, next) == text_direction::RTL ||
-						iAlignment == alignment::Right && glyph_text_direction(lineStart, next) == text_direction::LTR)
-						linePos.x += client_rect(false).width() - aGraphicsContext.from_device_units(size{lineWidth, 0}).cx;
-					else if (iAlignment == alignment::Centre)
-						linePos.x += std::ceil((client_rect().width() - aGraphicsContext.from_device_units(size{lineWidth, 0}).cx) / 2);
-					draw_glyphs(aGraphicsContext, linePos, lineStart, lineEnd);
-					pos.y += extents(lineStart, lineEnd).cy;
-					lineStart = next;
-					lineEnd = line.second;
-					lineWidth = 0;
-				}
-			}
-			if (line.first == line.second)
-				pos.y += font().height();
+			point linePos = pos;
+			auto textDirection = glyph_text_direction(line.start, line.end);
+			if (iAlignment == alignment::Left && textDirection == text_direction::RTL ||
+				iAlignment == alignment::Right && textDirection == text_direction::LTR)
+				linePos.x += client_rect(false).width() - aGraphicsContext.from_device_units(size{line.extents.cx, 0}).cx;
+			else if (iAlignment == alignment::Centre)
+				linePos.x += std::ceil((client_rect().width() - aGraphicsContext.from_device_units(size{line.extents.cx, 0}).cx) / 2);
+			draw_glyphs(aGraphicsContext, linePos, line.start, line.end);
+			pos.y += line.extents.cy;
 		}
 	}
 
@@ -494,6 +454,78 @@ namespace neogfx
 		});
 		iGlyphs.clear();
 		iGlyphs.insert(iGlyphs.begin(), gt.cbegin(), gt.cend());
+		iGlyphParagraphs.clear();
+		std::array<glyph, 1> delimeters = { glyph(text_direction::Whitespace, '\n') };
+		neolib::tokens(iGlyphs.begin(), iGlyphs.end(), delimeters.begin(), delimeters.end(), iGlyphParagraphs, 0, false);
+		for (auto p = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
+		{
+			const auto& paragraph = *p;
+			if (paragraph.first == paragraph.second)
+				continue;
+			coordinate x = 0.0;
+			for (auto g = paragraph.first; g != paragraph.second; ++g)
+			{
+				g->x = x;
+				x += g->extents().cx;
+			}
+		}
+		refresh_lines(); // todo: remove
+	}
+
+	void text_edit::refresh_lines()
+	{
+		/* simple (naive) implementation just to get things moving... */
+		iGlyphLines.clear();
+		point pos{ margins().left, margins().top };
+		for (auto p  = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
+		{
+			const auto& paragraph = *p;
+			document_glyphs::iterator next = paragraph.first;
+			document_glyphs::iterator lineStart = next;
+			document_glyphs::iterator lineEnd = paragraph.second;
+			dimension lineWidth = 0;
+			while (next != paragraph.second)
+			{
+				// todo: binary chop based on glyph position in paragraph
+				bool gotLine = false;
+				if (lineWidth + next->extents().cx > client_rect(false).width())
+				{
+					std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, next);
+					lineWidth -= extents(wordBreak.first, next).cx;
+					lineEnd = wordBreak.first;
+					next = wordBreak.second;
+					if (lineEnd == next)
+					{
+						while (lineEnd != paragraph.second && (lineEnd + 1)->source() == wordBreak.first->source())
+							++lineEnd;
+						next = lineEnd;
+					}
+					gotLine = true;
+				}
+				else
+				{
+					lineWidth += next->extents().cx;
+					++next;
+				}
+				if (gotLine || next == paragraph.second)
+				{
+					iGlyphLines.push_back(glyph_line{lineStart, lineEnd, pos.y, size{lineWidth, extents(lineStart, lineEnd).cy}});
+					pos.y += iGlyphLines.back().extents.cy;
+					lineStart = next;
+					lineEnd = paragraph.second;
+					lineWidth = 0;
+				}
+			}
+			if (paragraph.first == paragraph.second)
+			{
+				const auto& glyph = *paragraph.first;
+				const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+				iGlyphLines.push_back(glyph_line{paragraph.first, lineEnd, pos.y, size{0.0, glyphFont.height()}});
+				pos.y += iGlyphLines.back().extents.cy;
+			}
+		}
 	}
 
 	void text_edit::animate()
@@ -552,9 +584,9 @@ namespace neogfx
 		return neogfx::size(std::ceil(result.cx), std::ceil(result.cy));
 	}
 
-	std::pair<text_edit::document_glyphs::const_iterator, text_edit::document_glyphs::const_iterator> text_edit::word_break(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aFrom) const
+	std::pair<text_edit::document_glyphs::iterator, text_edit::document_glyphs::iterator> text_edit::word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom)
 	{
-		std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> result(aFrom, aFrom);
+		std::pair<document_glyphs::iterator, document_glyphs::iterator> result(aFrom, aFrom);
 		if (!aFrom->is_whitespace())
 		{
 			while (result.first != aBegin && !result.first->is_whitespace())

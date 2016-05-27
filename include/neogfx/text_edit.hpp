@@ -118,7 +118,34 @@ namespace neogfx
 			contents_type iContents;
 		};
 		typedef neolib::tag_array<tag<>, char, 32, 256> document_text;
-		typedef neolib::segmented_array<glyph, 256> document_glyphs;
+		class paragraph_positioned_glyph : public glyph
+		{
+		public:
+			using glyph::glyph;
+			paragraph_positioned_glyph(const glyph& aOther) : glyph(aOther), x(0.0)
+			{
+			}
+		public:
+			paragraph_positioned_glyph& operator=(const glyph& aOther)
+			{
+				glyph::operator=(*this);
+				x = 0.0;
+				return *this;
+			}
+		public:
+			double x = 0.0;
+		};
+		typedef neolib::segmented_array<paragraph_positioned_glyph, 256> document_glyphs;
+		typedef std::pair<document_glyphs::iterator, document_glyphs::iterator> glyph_paragraph;
+		typedef std::vector<glyph_paragraph> glyph_paragraphs;
+		struct glyph_line
+		{
+			document_glyphs::iterator start;
+			document_glyphs::iterator end;
+			coordinate y;
+			size extents;
+		};
+		typedef neolib::segmented_array<glyph_line> glyph_lines;
 	public:
 		typedef document_text::size_type position_type;
 	public:
@@ -126,6 +153,8 @@ namespace neogfx
 		text_edit(i_widget& aParent);
 		text_edit(i_layout& aLayout);
 		~text_edit();
+	public:
+		virtual void resized();
 	public:
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
@@ -166,10 +195,11 @@ namespace neogfx
 	private:
 		void init();
 		void refresh_paragraph(document_text::const_iterator aWhere);
+		void refresh_lines();
 		void animate();
 		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const;
 		size extents(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aEnd) const;
-		std::pair<document_glyphs::const_iterator, document_glyphs::const_iterator> word_break(document_glyphs::const_iterator aBegin, document_glyphs::const_iterator aFrom) const;
+		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom);
 	private:
 		bool iReadOnly;
 		neogfx::alignment iAlignment;
@@ -177,6 +207,8 @@ namespace neogfx
 		mutable neogfx::cursor iCursor;
 		document_text iText;
 		document_glyphs iGlyphs;
+		glyph_paragraphs iGlyphParagraphs;
+		glyph_lines iGlyphLines;
 		style_list iStyles;
 		neolib::callback_timer iAnimator;
 	};
