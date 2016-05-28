@@ -432,7 +432,17 @@ int main(int argc, char* argv[])
 		auto& tabEditor = tabContainer.add_tab_page("Editor").widget();
 		ng::vertical_layout layoutEditor(tabEditor);
 		ng::text_edit textEdit2(layoutEditor);
-		textEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		ng::push_button editorStyle1(layoutEditor, "Style 1");
+		editorStyle1.pressed([&textEdit2]()
+		{
+			textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		});
+		ng::push_button editorStyle2(layoutEditor, "Style 2");
+		editorStyle2.pressed([&textEdit2]()
+		{
+			textEdit2.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
+		});
 
 		tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);

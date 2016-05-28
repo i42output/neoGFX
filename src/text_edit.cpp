@@ -149,20 +149,20 @@ namespace neogfx
 	{
 		scrollable_widget::paint(aGraphicsContext);
 		/* simple (naive) implementation just to get things moving... */
-		for (auto const& line : iGlyphLines)
+		for (auto line = iGlyphLines.begin(); line != iGlyphLines.end(); ++line)
 		{
-			point linePos = client_rect(false).top_left() + point{0.0, line.y - vertical_scrollbar().position()};
-			if (linePos.y + line.extents.cy < client_rect(false).top() || linePos.y + line.extents.cy < update_rect().top())
+			point linePos = client_rect(false).top_left() + point{0.0, line->y - vertical_scrollbar().position()};
+			if (linePos.y + line->extents.cy < client_rect(false).top() || linePos.y + line->extents.cy < update_rect().top())
 				continue;
 			if (linePos.y > client_rect(false).bottom() || linePos.y > update_rect().bottom())
 				break;
-			auto textDirection = glyph_text_direction(line.start, line.end);
+			auto textDirection = glyph_text_direction(line->start, line->end);
 			if (iAlignment == alignment::Left && textDirection == text_direction::RTL ||
 				iAlignment == alignment::Right && textDirection == text_direction::LTR)
-				linePos.x += client_rect(false).width() - aGraphicsContext.from_device_units(size{line.extents.cx, 0}).cx;
+				linePos.x += client_rect(false).width() - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx;
 			else if (iAlignment == alignment::Centre)
-				linePos.x += std::ceil((client_rect(false).width() - aGraphicsContext.from_device_units(size{line.extents.cx, 0}).cx) / 2);
-			draw_glyphs(aGraphicsContext, linePos, line.start, line.end);
+				linePos.x += std::ceil((client_rect(false).width() - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx) / 2);
+			draw_glyphs(aGraphicsContext, linePos, line);
 		}
 		draw_cursor(aGraphicsContext);
 	}
@@ -632,18 +632,19 @@ namespace neogfx
 		update(rect{ cursorPos.pos + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{1.0, glyphHeight} });
 	}
 
-	void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, document_glyphs::const_iterator aTextBegin, document_glyphs::const_iterator aTextEnd) const
+	void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, glyph_lines::const_iterator aLine) const
 	{
 		{
 			graphics_context::glyph_drawing gd(aGraphicsContext);
 			point pos = aPoint;
-			for (document_glyphs::const_iterator i = aTextBegin; i != aTextEnd; ++i)
+			for (document_glyphs::const_iterator i = aLine->start; i != aLine->end; ++i)
 			{
 				const auto& glyph = *i;
 				const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
 				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
-				aGraphicsContext.draw_glyph(pos + glyph.offset(), glyph, 
-					style.font() != boost::none ? *style.font() : font(),
+				const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+				aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() }, glyph,
+					glyphFont,
 					style.text_colour().is<colour>() ?
 						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
 							static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
@@ -652,14 +653,15 @@ namespace neogfx
 			}
 		}
 		point pos = aPoint;
-		for (document_glyphs::const_iterator i = aTextBegin; i != aTextEnd; ++i)
+		for (document_glyphs::const_iterator i = aLine->start; i != aLine->end; ++i)
 		{
 			const auto& glyph = *i;
 			const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
 			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+			const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			if (glyph.underline())
-				aGraphicsContext.draw_glyph_underline(pos, glyph,
-					style.font() != boost::none ? *style.font() : font(),
+				aGraphicsContext.draw_glyph_underline(pos + point{ 0.0, aLine->extents.cy - glyphFont.height() }, glyph,
+					glyphFont,
 					style.text_colour().is<colour>() ?
 						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
 							static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
