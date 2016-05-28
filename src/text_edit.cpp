@@ -92,7 +92,7 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 100),
-		iCursorAnimationStartTime(app::instance().elapsed_ms())
+		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
 	{
 		init();
 	}
@@ -106,7 +106,7 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 100),
-		iCursorAnimationStartTime(app::instance().elapsed_ms())
+		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
 	{
 		init();
 	}
@@ -120,7 +120,7 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 100),
-		iCursorAnimationStartTime(app::instance().elapsed_ms())
+		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
 	{
 		init();
 	}
@@ -510,7 +510,7 @@ namespace neogfx
 		set_focus_policy(focus_policy::ClickTabFocus);
 		iCursor.position_changed([this]()
 		{
-			iCursorAnimationStartTime = app::instance().elapsed_ms();
+			iCursorAnimationStartTime = app::instance().program_elapsed_ms();
 			update();
 		}, this);
 		iCursor.anchor_changed([this]()
@@ -688,7 +688,7 @@ namespace neogfx
 			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
 			glyphHeight = lineHeight = (default_style().font() != boost::none ? *default_style().font() : font()).height();
-		if (has_focus() && ((iCursorAnimationStartTime - app::instance().elapsed_ms()) / 500) % 2 == 0)
+		if (has_focus() && ((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
 		{
 			aGraphicsContext.push_logical_operation(LogicalXor);
 			aGraphicsContext.draw_line(

@@ -65,13 +65,13 @@ namespace neogfx
 	}
 	catch (std::exception& e)
 	{
-		std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
+		std::cerr << "neogfx::app::app: terminating with exception: " << e.what() << std::endl;
 		sdl_basic_services(*this).display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, std::string("main: terminating with exception: ") + e.what());
 		throw;
 	}
 	catch (...)
 	{
-		std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
+		std::cerr << "neogfx::app::app: terminating with unknown exception" << std::endl;
 		sdl_basic_services(*this).display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
 		throw;
 	}
@@ -275,8 +275,8 @@ namespace neogfx
 			if (!halted())
 			{
 				halt();
-				std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
-				iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
+				std::cerr << "neogfx::app::process_events: terminating with exception: " << e.what() << std::endl;
+				iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::process_events: terminating with exception: ") + e.what());
 				std::exit(EXIT_FAILURE);
 			}
 		}
@@ -285,8 +285,8 @@ namespace neogfx
 			if (!halted())
 			{
 				halt();
-				std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
-				iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
+				std::cerr << "neogfx::app::process_events: terminating with unknown exception" << std::endl;
+				iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::process_events: terminating with unknown exception");
 				std::exit(EXIT_FAILURE);
 			}
 		}
