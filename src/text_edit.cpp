@@ -553,6 +553,8 @@ namespace neogfx
 		auto t = text();
 		auto gt = gc.to_glyph_text(t.begin(), t.end(), [this](std::string::size_type aSourceIndex)
 		{
+			if (aSourceIndex >= iText.size())
+				return font();
 			const auto& tagContents = iText.tag(iText.begin() + aSourceIndex).contents(); // todo: cache iterator to increase throughput
 			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 			return style.font() != boost::none ? *style.font() : font();
