@@ -20,7 +20,10 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <neolib/variant.hpp>
 #include "event.hpp"
+#include "geometry.hpp"
+#include "colour.hpp"
 
 namespace neogfx
 {
@@ -31,6 +34,7 @@ namespace neogfx
 	public:
 		event<> position_changed;
 		event<> anchor_changed;
+		event<> appearance_changed;
 	public:
 		enum move_operation_e
 		{
@@ -57,6 +61,7 @@ namespace neogfx
 			Right
 		};
 		typedef std::size_t position_type;
+		typedef neolib::variant<neogfx::colour, neogfx::gradient> colour_type;
 	public:
 		struct no_document : std::logic_error { no_document() : std::logic_error("neogfx::cursor::no_document") {} };
 	public:
@@ -70,9 +75,15 @@ namespace neogfx
 		void set_position(position_type aPosition, bool aMoveAnchor = true);
 		position_type anchor() const;
 		void set_anchor(position_type aAnchor);
+		const colour_type& colour() const;
+		void set_colour(const colour_type& aColour);
+		dimension width() const;
+		void set_width(dimension aWidth);
 	private:
 		i_document* iDocument;
 		position_type iPosition;
 		position_type iAnchor;
+		colour_type iColour;
+		dimension iWidth;
 	};
 }

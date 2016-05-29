@@ -77,24 +77,53 @@ namespace neogfx
 		return (iValue >> BlueShift) & 0xFF; 
 	}
 
-	void colour::set_alpha(component aNewValue) 
+	colour& colour::set_alpha(component aNewValue)
 	{ 
 		*this = colour(red(), green(), blue(), aNewValue); 
+		return *this;
 	}
 
-	void colour::set_red(component aNewValue) 
+	colour& colour::set_red(component aNewValue)
 	{ 
 		*this = colour(aNewValue, green(), blue(), alpha()); 
+		return *this;
 	}
 
-	void colour::set_green(component aNewValue) 
+	colour& colour::set_green(component aNewValue)
 	{ 
 		*this = colour(red(), aNewValue, blue(), alpha()); 
+		return *this;
 	}
 
-	void colour::set_blue(component aNewValue) 
+	colour& colour::set_blue(component aNewValue)
 	{ 
 		*this = colour(red(), green(), aNewValue, alpha()); 
+		return *this;
+	}
+
+	colour colour::with_alpha(component aNewValue) const
+	{
+		return colour(red(), green(), blue(), aNewValue);
+	}
+
+	colour colour::with_red(component aNewValue) const
+	{
+		return colour(aNewValue, green(), blue(), alpha());
+	}
+
+	colour colour::with_green(component aNewValue) const
+	{
+		return colour(red(), aNewValue, blue(), alpha());
+	}
+
+	colour colour::with_blue(component aNewValue) const
+	{
+		return colour(red(), green(), aNewValue, alpha());
+	}
+
+	colour colour::with_combined_alpha(component aNewValue) const
+	{
+		return colour(red(), green(), blue(), static_cast<component>((alpha() / 255.0 * aNewValue / 255.0) * 255));
 	}
 
 	hsl_colour colour::to_hsl() const
@@ -235,6 +264,13 @@ namespace neogfx
 	{
 	}
 
+	gradient::gradient(const colour& aFromTo, direction_e aDirection) :
+		iFrom(aFromTo),
+		iTo(aFromTo),
+		iDirection(aDirection)
+	{
+	}
+
 	colour gradient::at(coordinate aPos, coordinate aStart, coordinate aEnd) const
 	{
 		if (aEnd - aStart == 0)
@@ -266,9 +302,55 @@ namespace neogfx
 		return at(static_cast<coordinate>(aPos * colour::MaxComponetValue), 0, colour::MaxComponetValue);
 	}
 
-	gradient::direction_e gradient::direction() const 
+	const colour& gradient::from() const
+	{
+		return iFrom;
+	}
+
+	colour& gradient::from()
+	{
+		return iFrom;
+	}
+
+	const colour& gradient::to() const
+	{
+		return iTo;
+	}
+
+	colour& gradient::to()
+	{
+		return iTo;
+	}
+
+	gradient gradient::with_alpha(colour::component aAlpha) const
+	{
+		gradient result = *this;
+		result.from() = result.from().with_alpha(aAlpha);
+		result.to() = result.to().with_alpha(aAlpha);
+		return result;
+	}
+
+	gradient gradient::with_combined_alpha(colour::component aAlpha) const
+	{
+		gradient result = *this;
+		result.from() = result.from().with_combined_alpha(aAlpha);
+		result.to() = result.to().with_combined_alpha(aAlpha);
+		return result;
+	}
+
+	gradient::direction_e gradient::direction() const
 	{ 
 		return iDirection; 
+	}
+
+	bool gradient::operator==(const gradient& aOther) const
+	{
+		return iFrom == aOther.iFrom && iTo == aOther.iTo && iDirection == aOther.iDirection;
+	}
+
+	bool gradient::operator!=(const gradient& aOther) const
+	{
+		return !(*this == aOther);
 	}
 
 	bool gradient::operator<(const gradient& aOther) const

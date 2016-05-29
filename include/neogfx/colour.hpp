@@ -729,10 +729,15 @@ namespace neogfx
 		T green() const { return static_cast<T>(green()) / 0xFF; }
 		template <typename T>
 		T blue() const { return static_cast<T>(blue()) / 0xFF; }
-		void set_alpha(component aNewValue);
-		void set_red(component aNewValue);
-		void set_green(component aNewValue);
-		void set_blue(component aNewValue);
+		colour& set_alpha(component aNewValue);
+		colour& set_red(component aNewValue);
+		colour& set_green(component aNewValue);
+		colour& set_blue(component aNewValue);
+		colour with_alpha(component aNewValue) const; 
+		colour with_red(component aNewValue) const;
+		colour with_green(component aNewValue) const;
+		colour with_blue(component aNewValue) const;
+		colour with_combined_alpha(component aNewValue) const;
 		hsl_colour to_hsl() const;
 		double intensity() const;
 		bool similar_intensity(const colour& aOther, double aThreshold = 0.5);
@@ -788,11 +793,20 @@ namespace neogfx
 		// construction
 	public:
 		gradient(const colour& aFrom, const colour& aTo, direction_e aDirection = Vertical);
+		gradient(const colour& aFromTo, direction_e aDirection = Vertical);
 		// operations
 	public:
 		colour at(coordinate aPos, coordinate aStart, coordinate aEnd) const;
 		colour at(double aPos) const;
+		const colour& from() const;
+		colour& from();
+		const colour& to() const;
+		colour& to();
+		gradient with_alpha(colour::component aAlpha) const;
+		gradient with_combined_alpha(colour::component aAlpha) const;
 		direction_e direction() const;
+		bool operator==(const gradient& aOther) const;
+		bool operator!=(const gradient& aOther) const;
 		bool operator<(const gradient& aOther) const;
 		// attributes
 	private:

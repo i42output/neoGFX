@@ -99,7 +99,7 @@ namespace neogfx
 		{
 			iAnimator.again();
 			animate();
-		}, 100),
+		}, 40),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
 	{
 		init();
@@ -113,7 +113,7 @@ namespace neogfx
 		{
 			iAnimator.again();
 			animate();
-		}, 100),
+		}, 40),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
 	{
 		init();
@@ -127,7 +127,7 @@ namespace neogfx
 		{
 			iAnimator.again();
 			animate();
-		}, 100),
+		}, 40),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
 	{
 		init();
@@ -529,12 +529,17 @@ namespace neogfx
 	void text_edit::init()
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
+		iCursor.set_width(2.0);
 		iCursor.position_changed([this]()
 		{
 			iCursorAnimationStartTime = app::instance().program_elapsed_ms();
 			update();
 		}, this);
 		iCursor.anchor_changed([this]()
+		{
+			update();
+		}, this);
+		iCursor.appearance_changed([this]()
 		{
 			update();
 		}, this);
@@ -745,12 +750,37 @@ namespace neogfx
 			glyphHeight = lineHeight = (default_style().font() != boost::none ? *default_style().font() : font()).height();
 		if (has_focus() && ((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
 		{
-			aGraphicsContext.push_logical_operation(LogicalXor);
-			aGraphicsContext.draw_line(
-				cursorPos.pos + client_rect(false).top_left() + point{ 0.0, lineHeight },
-				cursorPos.pos + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
-				pen{ colour::White });
-			aGraphicsContext.pop_logical_operation();
+			auto elapsed = (app::instance().program_elapsed_ms() - iCursorAnimationStartTime) % 1000;
+			colour::component alpha = 
+				elapsed < 500 ? 
+					255 : 
+					elapsed < 750 ? 
+						static_cast<colour::component>((249 - (elapsed - 500) % 250) * 255 / 249) : 
+						0;
+			if (iCursor.colour().empty())
+			{
+				aGraphicsContext.push_logical_operation(LogicalXor);
+				aGraphicsContext.draw_line(
+					cursorPos.pos + client_rect(false).top_left() + point{ 0.0, lineHeight },
+					cursorPos.pos + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
+					pen{ colour::White.with_alpha(alpha), iCursor.width() });
+				aGraphicsContext.pop_logical_operation();
+			}
+			else if (iCursor.colour().is<colour>())
+			{
+				aGraphicsContext.draw_line(
+					cursorPos.pos + client_rect(false).top_left() + point{ 0.0, lineHeight },
+					cursorPos.pos + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
+					pen{ static_variant_cast<const colour&>(iCursor.colour()).with_combined_alpha(alpha), iCursor.width() });
+			}
+			else if (iCursor.colour().is<gradient>())
+			{
+				aGraphicsContext.fill_rect(
+					rect{
+						cursorPos.pos + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight},
+						size{ iCursor.width(), glyphHeight} },
+					static_variant_cast<const gradient&>(iCursor.colour()).with_combined_alpha(alpha));
+			}
 		}
 	}
 
