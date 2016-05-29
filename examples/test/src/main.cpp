@@ -60,15 +60,19 @@ public:
 				set_colour(aNumber != 9 ? ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0) : ng::colour::LightGoldenrod);
 			if (aNumber == 9)
 				iTextEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+			else if (aNumber == 8)
+				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::Black, ng::text_edit::style::colour_type(), ng::colour::White));
 			else if (aNumber == 0)
 				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
 			else
 				iTextEdit.set_default_style(
-					ng::text_edit::style(ng::optional_font(), 
-					ng::gradient(
-						ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0).lighter(0x40), 
-						ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0).lighter(0xC0), 
-						ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+					ng::text_edit::style(
+						ng::optional_font(),
+						ng::gradient(
+							ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0).lighter(0x40),
+							ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0).lighter(0xC0),
+							ng::gradient::Horizontal),
+						ng::text_edit::style::colour_type()));
 		});
 	}
 private:

@@ -32,12 +32,14 @@ namespace neogfx
 	text_edit::style::style(
 		const optional_font& aFont,
 		const colour_type& aTextColour,
-		const colour_type& aBackgroundColour) :
+		const colour_type& aBackgroundColour,
+		const colour_type& aTextOutlineColour) :
 		iParent(nullptr),
 		iUseCount(0),
 		iFont(aFont),
 		iTextColour(aTextColour),
-		iBackgroundColour(aBackgroundColour)
+		iBackgroundColour(aBackgroundColour),
+		iTextOutlineColour(aTextOutlineColour)
 	{
 	}
 
@@ -48,7 +50,8 @@ namespace neogfx
 		iUseCount(0),
 		iFont(aOther.iFont),
 		iTextColour(aOther.iTextColour),
-		iBackgroundColour(aOther.iBackgroundColour)
+		iBackgroundColour(aOther.iBackgroundColour),
+		iTextOutlineColour(aOther.iTextOutlineColour)
 	{
 	}
 
@@ -76,6 +79,11 @@ namespace neogfx
 	const text_edit::style::colour_type& text_edit::style::background_colour() const
 	{
 		return iBackgroundColour;
+	}
+
+	const text_edit::style::colour_type& text_edit::style::text_outline_colour() const
+	{
+		return iTextOutlineColour;
 	}
 
 	bool text_edit::style::operator<(const style& aRhs) const
@@ -185,6 +193,13 @@ namespace neogfx
 		case ScanCode_RETURN:
 			insert_text("\n");
 			cursor().set_position(cursor().position() + 1);
+			break;
+		case ScanCode_BACKSPACE:
+			if (cursor().position() > 0)
+			{
+				delete_text(cursor().position() - 1, cursor().position());
+				cursor().set_position(cursor().position() - 1);
+			}
 			break;
 		case ScanCode_UP:
 			if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
@@ -505,6 +520,12 @@ namespace neogfx
 		update();
 	}
 
+	void text_edit::delete_text(position_type aStart, position_type aEnd)
+	{
+		refresh_paragraph(iText.erase(iText.begin() + aStart, iText.begin() + aEnd));
+		update();
+	}
+
 	void text_edit::init()
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
@@ -636,20 +657,52 @@ namespace neogfx
 	{
 		{
 			graphics_context::glyph_drawing gd(aGraphicsContext);
-			point pos = aPoint;
-			for (document_glyphs::const_iterator i = aLine->start; i != aLine->end; ++i)
+			bool outlinesPresent = false;
+			for (uint32_t pass = 1; pass <= 2; ++pass)
 			{
-				const auto& glyph = *i;
-				const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
-				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
-				const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
-				aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() }, glyph,
-					glyphFont,
-					style.text_colour().is<colour>() ?
-						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
-							static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
-							default_text_colour());
-				pos.x += glyph.extents().cx;
+				point pos = aPoint;
+				for (document_glyphs::const_iterator i = aLine->start; i != aLine->end; ++i)
+				{
+					const auto& glyph = *i;
+					const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+					const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+					switch (pass)
+					{
+					case 1:
+						if (style.text_outline_colour().empty())
+						{
+							pos.x += glyph.extents().cx;
+							continue;
+						}
+						outlinesPresent = true;
+						for (uint32_t outlinePos = 0; outlinePos < 8; ++outlinePos)
+						{
+							static point sOutlinePositions[] = 
+							{
+								point{-1.0, -1.0}, point{0.0, -1.0}, point{1.0, -1.0},
+								point{-1.0, 0.0}, point{1.0, 0.0},
+								point{-1.0, 1.0}, point{0.0, 1.0}, point{1.0, 1.0},
+							};
+							aGraphicsContext.draw_glyph(sOutlinePositions[outlinePos] + pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - 1.0 }, glyph,
+								glyphFont,
+								style.text_outline_colour().is<colour>() ?
+									static_variant_cast<const colour&>(style.text_outline_colour()) : style.text_outline_colour().is<gradient>() ?
+										static_variant_cast<const gradient&>(style.text_outline_colour()).at((pos.x - margins().left) / client_rect(false).width()) :
+										default_text_colour());
+						}
+						break;
+					case 2:
+						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0)}, glyph,
+							glyphFont,
+							style.text_colour().is<colour>() ?
+								static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
+									static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
+									default_text_colour());
+						break;
+					}
+					pos.x += glyph.extents().cx;
+				}
 			}
 		}
 		point pos = aPoint;

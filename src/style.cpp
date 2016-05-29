@@ -233,7 +233,7 @@ namespace neogfx
 		if (has_widget_detail_primary_colour())
 			return *iWidgetDetailPrimaryColour;
 		else
-			return colour().light() ? neogfx::colour::LawnGreen.darker(0x40) : neogfx::colour::LawnGreen.lighter(0x40);
+			return colour().same_lightness_as(colour().light() ? neogfx::colour{32, 32, 32} : neogfx::colour{224, 224, 224});
 	}
 
 	void style::set_widget_detail_primary_colour(const optional_colour& aWidgetDetailPrimaryColour)
@@ -256,7 +256,7 @@ namespace neogfx
 		if (has_widget_detail_secondary_colour())
 			return *iWidgetDetailSecondaryColour;
 		else
-			return neogfx::colour::Goldenrod;
+			return colour().same_lightness_as(colour().light() ? neogfx::colour{ 64, 64, 64 } : neogfx::colour{ 192, 192, 192 });
 	}
 
 	void style::set_widget_detail_secondary_colour(const optional_colour& aWidgetDetailSecondaryColour)

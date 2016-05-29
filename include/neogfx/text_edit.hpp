@@ -43,7 +43,8 @@ namespace neogfx
 			style(
 				const optional_font& aFont,
 				const colour_type& aTextColour = colour_type(),
-				const colour_type& aBackgroundColour = colour_type());
+				const colour_type& aBackgroundColour = colour_type(),
+				const colour_type& aTextOutlineColour = colour_type());
 			style(
 				text_edit& aParent,
 				const style& aOther);
@@ -54,6 +55,7 @@ namespace neogfx
 			const optional_font& font() const;
 			const colour_type& text_colour() const;
 			const colour_type& background_colour() const;
+			const colour_type& text_outline_colour() const;
 		public:
 			bool operator<(const style& aRhs) const;
 		private:
@@ -62,6 +64,7 @@ namespace neogfx
 			optional_font iFont;
 			colour_type iTextColour;
 			colour_type iBackgroundColour;
+			colour_type iTextOutlineColour;
 		};
 		typedef std::set<style> style_list;
 	private:
@@ -174,6 +177,8 @@ namespace neogfx
 						const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 						auto& glyphFont = style.font() != boost::none ? *style.font() : aParent.font();
 						dimension cy = !glyph.use_fallback() ? glyphFont.height() : glyphFont.fallback().height();
+						if (!style.text_outline_colour().empty())
+							cy += 2.0;
 						if (i == iStart || cy != previousHeight)
 						{
 							iHeights[i] = cy;
@@ -261,6 +266,7 @@ namespace neogfx
 		void set_text(const std::string& aText, const style& aStyle);
 		void insert_text(const std::string& aText);
 		void insert_text(const std::string& aText, const style& aStyle);
+		void delete_text(position_type aStart, position_type aEnd);
 	private:
 		void init();
 		void refresh_paragraph(document_text::const_iterator aWhere);
