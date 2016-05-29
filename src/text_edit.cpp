@@ -744,6 +744,8 @@ namespace neogfx
 			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			glyphHeight = glyphFont.height();
+			if (!style.text_outline_colour().empty())
+				glyphHeight += 2.0;
 			lineHeight = cursorPos.line->extents.cy;
 		}
 		else if (cursorPos.line != iGlyphLines.end())
