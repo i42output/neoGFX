@@ -19,6 +19,7 @@
 
 #include "neogfx.hpp"
 #include <boost/format.hpp>
+#include <neolib/string_utils.hpp>
 #include <neolib/raii.hpp>
 #include "window.hpp"
 #include "app.hpp"
@@ -814,10 +815,26 @@ namespace neogfx
 
 	void window::native_window_text_input(const std::string& aText)
 	{
-		if (has_focused_widget())
-			focused_widget().text_input(aText);
+		auto utf32 = neolib::utf8_to_utf32(aText);
+		if (neolib::utf16::is_high_surrogate(utf32[0]))
+			iSurrogatePairPart = utf32[0];
+		else if (neolib::utf16::is_low_surrogate(utf32[0]) && iSurrogatePairPart != boost::none)
+		{
+			char16_t utf16[] = { static_cast<char16_t>(*iSurrogatePairPart), static_cast<char16_t>(neolib::utf8_to_utf32(aText)[0]) };
+			iSurrogatePairPart = boost::none;
+			auto text = neolib::utf16_to_utf8(std::u16string(&utf16[0], 2));
+			if (has_focused_widget())
+				focused_widget().text_input(text);
+			else
+				text_input(text);
+		}
 		else
-			text_input(aText);
+		{
+			if (has_focused_widget())
+				focused_widget().text_input(aText);
+			else
+				text_input(aText);
+		}
 	}
 
 	void window::native_window_sys_text_input(const std::string& aText)

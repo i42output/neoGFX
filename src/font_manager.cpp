@@ -82,7 +82,7 @@ namespace neogfx
 					}
 					::RegCloseKey(hkeyDefaultFont);
 				}
-				return font_info(neolib::wide_to_utf8(defaultFontFaceName), font::Normal, 8);
+				return font_info(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(defaultFontFaceName.c_str())), font::Normal, 8);
 #else
 				throw std::logic_error("neogfx::detail::platform_specific::default_system_font_info: Unknown system");
 #endif

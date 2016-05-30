@@ -181,5 +181,6 @@ namespace neogfx
 		i_widget* iCapturingWidget;
 		i_widget* iFocusedWidget;
 		bool iDismissingChildren;
+		boost::optional<char32_t> iSurrogatePairPart;
 	};
 }
