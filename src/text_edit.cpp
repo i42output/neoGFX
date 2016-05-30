@@ -331,6 +331,9 @@ namespace neogfx
 
 	void text_edit::move_cursor(cursor::move_operation_e aMoveOperation) const
 	{
+		if (iGlyphs.empty())
+			return;
+		const auto& currentPosition = position(iCursor.position());
 		switch (aMoveOperation)
 		{
 		case cursor::StartOfDocument:
@@ -338,6 +341,8 @@ namespace neogfx
 		case cursor::StartOfParagraph:
 			break;
 		case cursor::StartOfLine:
+			if (currentPosition.line->start != currentPosition.line->end)
+				iCursor.set_position(currentPosition.line->start->source().first);
 			break;
 		case cursor::StartOfWord:
 			break;
@@ -346,6 +351,8 @@ namespace neogfx
 		case cursor::EndOfParagraph:
 			break;
 		case cursor::EndOfLine:
+			if (currentPosition.line->start != currentPosition.line->end)
+				iCursor.set_position((currentPosition.line->end-1)->source().second);
 			break;
 		case cursor::EndOfWord:
 			break;
@@ -478,9 +485,11 @@ namespace neogfx
 						linePos.x += glyph.extents().cx;
 					return position_info{ iterGlyph, line, linePos };
 				}
+				else
+					return position_info{ line->start, line, point{ 0.0, line->y } };
 			}
 		}
-		return position_info{ iGlyphs.begin(), iGlyphLines.begin(), point{} };
+		return position_info{ iGlyphs.end(), iGlyphLines.end(), iGlyphLines.empty() ? point{} : point{0.0, iGlyphLines.back().y + iGlyphLines.back().extents.cy} };
 	}
 
 	text_edit::position_type text_edit::hit_test(const point& aPoint) const
