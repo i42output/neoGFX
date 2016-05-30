@@ -1021,6 +1021,7 @@ namespace neogfx
 		std::size_t lastCodePointIndex = codePoints.size() - 1;
 		font previousFont = aFontSelector(clusterMap[0].from);
 		hb_script_t previousScript = hb_unicode_script(static_cast<native_font_face::hb_handle*>(previousFont.native_font_face().aux_handle())->unicodeFuncs, codePoints[0]);
+
 		for (std::size_t i = 0; i <= lastCodePointIndex; ++i)
 		{
 			font currentFont = aFontSelector(clusterMap[i].from);
@@ -1032,18 +1033,21 @@ namespace neogfx
 				(previousDirection == text_direction::RTL && currentDirection == text_direction::LTR) ||
 				(previousScript != currentScript && (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL)) ||
 				i == lastCodePointIndex;
-			if (!newRun && currentDirection == text_direction::Whitespace && previousDirection == text_direction::RTL)
+			if (!newRun)
 			{
-				for (std::size_t j = i + 1; j <= lastCodePointIndex; ++j)
+				if ((currentDirection == text_direction::Whitespace || currentDirection == text_direction::None) && previousDirection == text_direction::RTL)
 				{
-					text_direction nextDirection = get_text_direction(codePoints[j]);
-					if (nextDirection == text_direction::RTL)
-						break;
-					else if (nextDirection == text_direction::LTR)
+					for (std::size_t j = i + 1; j <= lastCodePointIndex; ++j)
 					{
-						newRun = true;
-						currentDirection = text_direction::LTR;
-						break;
+						text_direction nextDirection = get_text_direction(codePoints[j]);
+						if (nextDirection == text_direction::RTL)
+							break;
+						else if (nextDirection == text_direction::LTR)
+						{
+							newRun = true;
+							currentDirection = text_direction::LTR;
+							break;
+						}
 					}
 				}
 			}
