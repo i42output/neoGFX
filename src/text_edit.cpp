@@ -525,7 +525,15 @@ namespace neogfx
 	void text_edit::insert_text(const std::string& aText, const style& aStyle)
 	{
 		auto s = iStyles.insert(style(*this, aStyle)).first;
-		auto insertionPoint = iText.empty() ? iText.begin() : iText.begin() + position(iCursor.position()).glyph->source().first;
+		auto p = position(iCursor.position());
+		auto insertionPoint = iText.end();
+		if (p.glyph != iGlyphs.end())
+		{
+			if (p.glyph != p.line->end)
+				insertionPoint = iText.begin() + p.glyph->source().first;
+			else if (p.line->end != iGlyphs.end())
+				insertionPoint = iText.begin() + p.line->end->source().first;
+		}
 		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, aText.begin(), aText.end());
 		refresh_paragraph(insertionPoint);
 		update();

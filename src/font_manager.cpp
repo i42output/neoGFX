@@ -52,6 +52,7 @@ namespace neogfx
 			virtual i_native_font_face& fallback() const { return iFontFace.fallback(); }
 			virtual void* handle() const { return iFontFace.handle(); }
 			virtual void* aux_handle() const { return iFontFace.aux_handle(); }
+			virtual uint32_t glyph_index(char32_t aCodePoint) const { return iFontFace.glyph_index(aCodePoint); }
 			virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const { return iFontFace.glyph_texture(aGlyph); }
 		private:
 			i_native_font_face& iFontFace;

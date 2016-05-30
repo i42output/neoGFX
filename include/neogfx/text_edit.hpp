@@ -281,11 +281,11 @@ namespace neogfx
 		neogfx::alignment iAlignment;
 		style iDefaultStyle;
 		mutable neogfx::cursor iCursor;
+		style_list iStyles;
 		document_text iText;
 		document_glyphs iGlyphs;
 		glyph_paragraphs iGlyphParagraphs;
 		glyph_lines iGlyphLines;
-		style_list iStyles;
 		neolib::callback_timer iAnimator;
 		uint64_t iCursorAnimationStartTime;
 	};

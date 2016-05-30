@@ -1078,9 +1078,11 @@ namespace neogfx
 			hb_glyph_position_t* glyphPos = hb_buffer_get_glyph_positions(buf, &glyphCount);
 			for (unsigned int j = 0; j < glyphCount; ++j)
 			{
+				std::u32string::size_type cluster = glyphInfo[j].cluster + (std::get<0>(runs[i]) - &codePoints[0]);
+				if (glyphInfo[j].codepoint == 0)
+					glyphInfo[j].codepoint = aFontSelector(sourceClusterRunStart).native_font_face().glyph_index(codePoints[cluster]);
 				if (glyphInfo[j].codepoint == 0)
 					aFallbackFontNeeded = true;
-				std::u32string::size_type cluster = glyphInfo[j].cluster + (std::get<0>(runs[i]) - &codePoints[0]);
 				std::string::size_type sourceClusterStart, sourceClusterEnd;
 				auto c = clusterMap.begin() + cluster;
 				sourceClusterStart = c->from;

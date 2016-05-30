@@ -34,14 +34,7 @@ namespace neogfx
 		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle), iHasKerning(!!FT_HAS_KERNING(iHandle))
 	{
 		FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(aSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy));
-		// Force UCS-2 charmap
-		for (FT_Int i = 0; i < iHandle->num_charmaps; ++i)
-			if ((iHandle->charmaps[i]->platform_id == 0 && iHandle->charmaps[i]->encoding_id == 3) ||
-				(iHandle->charmaps[i]->platform_id == 3 && iHandle->charmaps[i]->encoding_id == 1))
-			{
-				FT_Set_Charmap(iHandle, iHandle->charmaps[i]);
-				break;
-			}
+		FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE);
 	}
 
 	native_font_face::~native_font_face()
@@ -145,6 +138,11 @@ namespace neogfx
 		if (iAuxHandle == nullptr)
 			iAuxHandle = std::make_unique<hb_handle>(iHandle);
 		return &*iAuxHandle;
+	}
+
+	uint32_t native_font_face::glyph_index(char32_t aCodePoint) const
+	{
+		return FT_Get_Char_Index(iHandle, aCodePoint);
 	}
 
 	i_glyph_texture& native_font_face::glyph_texture(const glyph& aGlyph) const
