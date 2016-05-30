@@ -248,7 +248,7 @@ namespace neogfx
 	bool text_edit::text_input(const std::string& aText)
 	{
 		insert_text(aText);
-		cursor().set_position(cursor().position() + aText.size());
+		cursor().set_position(cursor().position() + 1);
 		return true;
 	}
 
@@ -342,7 +342,7 @@ namespace neogfx
 			break;
 		case cursor::StartOfLine:
 			if (currentPosition.line->start != currentPosition.line->end)
-				iCursor.set_position(currentPosition.line->start->source().first);
+				iCursor.set_position(currentPosition.line->start - iGlyphs.begin());
 			break;
 		case cursor::StartOfWord:
 			break;
@@ -352,7 +352,7 @@ namespace neogfx
 			break;
 		case cursor::EndOfLine:
 			if (currentPosition.line->start != currentPosition.line->end)
-				iCursor.set_position((currentPosition.line->end-1)->source().second);
+				iCursor.set_position(currentPosition.line->end - iGlyphs.begin());
 			break;
 		case cursor::EndOfWord:
 			break;
@@ -478,8 +478,8 @@ namespace neogfx
 			{
 				if (lineStart != lineEnd)
 				{
-					auto iterGlyph = iGlyphs.begin() + (iCursor.position() < lineEnd ? iCursor.position() : iCursor.position() - 1);
-					const auto& glyph = *iterGlyph;
+					auto iterGlyph = iGlyphs.begin() + iCursor.position();
+					const auto& glyph = iCursor.position() < lineEnd ? *iterGlyph : *(iterGlyph - 1);
 					point linePos{ glyph.x - line->start->x, line->y };
 					if (iCursor.position() == lineEnd)
 						linePos.x += glyph.extents().cx;
@@ -525,13 +525,17 @@ namespace neogfx
 	void text_edit::insert_text(const std::string& aText, const style& aStyle)
 	{
 		auto s = iStyles.insert(style(*this, aStyle)).first;
-		refresh_paragraph(iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), iText.begin() + cursor().position(), aText.begin(), aText.end()));
+		auto insertionPoint = iText.empty() ? iText.begin() : iText.begin() + position(iCursor.position()).glyph->source().first;
+		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, aText.begin(), aText.end());
+		refresh_paragraph(insertionPoint);
 		update();
 	}
 
 	void text_edit::delete_text(position_type aStart, position_type aEnd)
 	{
-		refresh_paragraph(iText.erase(iText.begin() + aStart, iText.begin() + aEnd));
+		if (aStart == aEnd)
+			return;
+		refresh_paragraph(iText.erase(iText.begin() + iGlyphs[aStart].source().first, iText.begin() + iGlyphs[aEnd - 1].source().second));
 		update();
 	}
 
@@ -747,8 +751,6 @@ namespace neogfx
 		if (cursorPos.glyph != iGlyphs.end() && cursorPos.line->start != cursorPos.line->end)
 		{
 			const auto& glyph = *(cursorPos.glyph < cursorPos.line->end ? cursorPos.glyph : cursorPos.glyph - 1);
-			if (cursorPos.glyph == cursorPos.line->end)
-				cursorPos.pos.x += glyph.extents().cx;
 			const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
 			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
