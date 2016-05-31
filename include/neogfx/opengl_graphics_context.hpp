@@ -156,6 +156,7 @@ namespace neogfx
 		typedef std::vector<cluster> cluster_map_t;
 		mutable cluster_map_t iClusterMap;
 		mutable std::vector<text_direction> iTextDirections;
+		mutable std::u32string iCodePointsBuffer;
 		mutable std::vector<std::tuple<const char32_t*, const char32_t*, text_direction, hb_script_t>> iRuns;
 		GLint iPreviousTexture;
 		GLuint iActiveGlyphTexture;

@@ -986,7 +986,10 @@ namespace neogfx
 		auto& textDirections = iTextDirections;
 		textDirections.clear();
 
-		std::u32string codePoints = neolib::utf8_to_utf32(aTextBegin, aTextEnd, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type)
+		iCodePointsBuffer.clear();
+		std::u32string& codePoints = iCodePointsBuffer;
+
+		codePoints = neolib::utf8_to_utf32(aTextBegin, aTextEnd, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type)
 		{
 			clusterMap.push_back(cluster{aFrom});
 		});

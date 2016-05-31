@@ -100,7 +100,8 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 40),
-		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
+		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
+		iGlyphParagraphCache(nullptr)
 	{
 		init();
 	}
@@ -114,7 +115,8 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 40),
-		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
+		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
+		iGlyphParagraphCache(nullptr)
 	{
 		init();
 	}
@@ -128,7 +130,8 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 40),
-		iCursorAnimationStartTime(app::instance().program_elapsed_ms())
+		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
+		iGlyphParagraphCache(nullptr)
 	{
 		init();
 	}
@@ -530,9 +533,9 @@ namespace neogfx
 		if (p.glyph != iGlyphs.end())
 		{
 			if (p.glyph != p.line->end)
-				insertionPoint = iText.begin() + p.glyph->source().first;
+				insertionPoint = iText.begin() + text_source(p.glyph).first;
 			else if (p.line->end != iGlyphs.end())
-				insertionPoint = iText.begin() + p.line->end->source().first;
+				insertionPoint = iText.begin() + text_source(p.line->end).first;
 		}
 		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, aText.begin(), aText.end());
 		refresh_paragraph(insertionPoint);
@@ -543,7 +546,7 @@ namespace neogfx
 	{
 		if (aStart == aEnd)
 			return;
-		refresh_paragraph(iText.erase(iText.begin() + iGlyphs[aStart].source().first, iText.begin() + iGlyphs[aEnd - 1].source().second));
+		refresh_paragraph(iText.erase(iText.begin() + text_source(iGlyphs.begin() + aStart).first, iText.begin() + text_source(iGlyphs.begin() + aEnd - 1).second));
 		update();
 	}
 
@@ -566,28 +569,60 @@ namespace neogfx
 		}, this);
 	}
 
+	std::pair<text_edit::document_text::size_type, text_edit::document_text::size_type> text_edit::text_source(document_glyphs::const_iterator aGlyph) const
+	{
+		if (iGlyphParagraphCache != nullptr && aGlyph >= iGlyphParagraphCache->start() && aGlyph < iGlyphParagraphCache->end())
+			return std::make_pair(iGlyphParagraphCache->text_index() + aGlyph->source().first, iGlyphParagraphCache->text_index() + aGlyph->source().second);
+		auto paragraph = std::lower_bound(
+			iGlyphParagraphs.begin(), 
+			iGlyphParagraphs.end(), 
+			glyph_paragraph{0, static_cast<size_t>(aGlyph - iGlyphs.begin()), static_cast<size_t>(aGlyph - iGlyphs.begin()) }, 
+			[](const glyph_paragraph& left, const glyph_paragraph& right)
+		{
+			return left.start_index() < right.start_index();
+		});
+		if (paragraph == iGlyphParagraphs.end() && paragraph != iGlyphParagraphs.begin() && aGlyph <= (paragraph - 1)->end())
+			--paragraph;
+		if (paragraph != iGlyphParagraphs.end())
+		{
+			if (paragraph->start() > aGlyph)
+				--paragraph;
+			iGlyphParagraphCache = &*paragraph;
+			return std::make_pair(paragraph->text_index() + aGlyph->source().first, paragraph->text_index() + aGlyph->source().second);
+		}
+		return std::make_pair(iText.size(), iText.size());
+	}
+
 	void text_edit::refresh_paragraph(document_text::const_iterator aWhere)
 	{
 		/* simple (naive) implementation just to get things moving (so just refresh everything) ... */
 		(void)aWhere;
 		graphics_context gc(*this);
-		auto t = text();
-		auto gt = gc.to_glyph_text(t.begin(), t.end(), [this](std::string::size_type aSourceIndex)
-		{
-			if (aSourceIndex >= iText.size())
-				return font();
-			const auto& tagContents = iText.tag(iText.begin() + aSourceIndex).contents(); // todo: cache iterator to increase throughput
-			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
-			return style.font() != boost::none ? *style.font() : font();
-		});
 		iGlyphs.clear();
-		iGlyphs.insert(iGlyphs.begin(), gt.cbegin(), gt.cend());
 		iGlyphParagraphs.clear();
-		std::array<paragraph_positioned_glyph, 1> delimeters = { glyph(text_direction::Whitespace, '\n') };
-		neolib::tokens(iGlyphs.begin(), iGlyphs.end(), delimeters.begin(), delimeters.end(), iGlyphParagraphs, 0, false);
+		iGlyphParagraphCache = nullptr;
+		std::string paragraphBuffer;
+		auto paragraphStart = iText.begin();
+		for (auto ch = iText.begin(); ch != iText.end(); ++ch)
+		{
+			if (*ch == '\n' || ch == iText.end() - 1)
+			{
+				paragraphBuffer.assign(paragraphStart, ch + 1);
+				auto gt = gc.to_glyph_text(paragraphBuffer.begin(), paragraphBuffer.end(), [this, paragraphStart](std::string::size_type aSourceIndex)
+				{
+					const auto& tagContents = iText.tag(paragraphStart + aSourceIndex).contents(); // todo: cache iterator to increase throughput
+					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+					return style.font() != boost::none ? *style.font() : font();
+				});
+				auto paragraphGlyphs = iGlyphs.insert(iGlyphs.end(), gt.cbegin(), gt.cend());
+				iGlyphParagraphs.insert(iGlyphParagraphs.end(), 
+					glyph_paragraph{ *this, static_cast<size_t>(paragraphStart - iText.begin()), static_cast<size_t>(paragraphGlyphs - iGlyphs.begin()), iGlyphs.size() - (*ch == '\n' ? 1 : 0)});
+				paragraphStart = ch + 1;
+			}
+		}
 		for (auto p = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
 		{
-			const auto& paragraph = *p;
+			auto& paragraph = *p;
 			if (paragraph.start() == paragraph.end())
 				continue;
 			coordinate x = 0.0;
@@ -608,11 +643,11 @@ namespace neogfx
 		dimension availableWidth = client_rect(false).width();
 		for (auto p  = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
 		{
-			const auto& paragraph = *p;
+			auto& paragraph = *p;
 			if (paragraph.start() == paragraph.end() || (paragraph.start()->is_whitespace() && paragraph.start()->value() == '\r'))
 			{
 				const auto& glyph = *paragraph.start();
-				const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+				const auto& tagContents = iText.tag(iText.begin() + paragraph.text_index() + glyph.source().first).contents();
 				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 				iGlyphLines.push_back(glyph_line{ paragraph.start(), paragraph.end(), pos.y, size{ 0.0, glyphFont.height() } });
@@ -642,7 +677,7 @@ namespace neogfx
 				}
 				else
 					next = paragraph.end();
-				iGlyphLines.push_back(glyph_line{lineStart, lineEnd, pos.y, size{split->x - offset, paragraph.height(*this, lineStart, lineEnd)}});
+				iGlyphLines.push_back(glyph_line{lineStart, lineEnd, pos.y, size{split->x - offset, paragraph.height(lineStart, lineEnd)}});
 				pos.y += iGlyphLines.back().extents.cy;
 				lineStart = next;
 				if (lineStart != paragraph.end())
@@ -665,10 +700,11 @@ namespace neogfx
 		dimension lineHeight = 0.0;
 		if (cursorPos.glyph != iGlyphs.end() && cursorPos.line->start != cursorPos.line->end)
 		{
-			const auto& glyph = *(cursorPos.glyph < cursorPos.line->end ? cursorPos.glyph : cursorPos.glyph - 1);
+			auto iterGlyph = cursorPos.glyph < cursorPos.line->end ? cursorPos.glyph : cursorPos.glyph - 1;
+			const auto& glyph = *iterGlyph;
 			if (cursorPos.glyph == cursorPos.line->end)
 				cursorPos.pos.x += glyph.extents().cx;
-			const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+			const auto& tagContents = iText.tag(iText.begin() + text_source(iterGlyph).first).contents();
 			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			glyphHeight = glyphFont.height();
@@ -692,7 +728,7 @@ namespace neogfx
 				for (document_glyphs::const_iterator i = aLine->start; i != aLine->end; ++i)
 				{
 					const auto& glyph = *i;
-					const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+					const auto& tagContents = iText.tag(iText.begin() + text_source(i).first).contents();
 					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 					const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 					switch (pass)
@@ -737,7 +773,7 @@ namespace neogfx
 		for (document_glyphs::const_iterator i = aLine->start; i != aLine->end; ++i)
 		{
 			const auto& glyph = *i;
-			const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+			const auto& tagContents = iText.tag(iText.begin() + text_source(i).first).contents();
 			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 			const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			if (glyph.underline())
@@ -758,8 +794,8 @@ namespace neogfx
 		dimension lineHeight = 0.0;
 		if (cursorPos.glyph != iGlyphs.end() && cursorPos.line->start != cursorPos.line->end)
 		{
-			const auto& glyph = *(cursorPos.glyph < cursorPos.line->end ? cursorPos.glyph : cursorPos.glyph - 1);
-			const auto& tagContents = iText.tag(iText.begin() + glyph.source().first).contents();
+			auto iterGlyph = cursorPos.glyph < cursorPos.line->end ? cursorPos.glyph : cursorPos.glyph - 1;
+			const auto& tagContents = iText.tag(iText.begin() + text_source(iterGlyph).first).contents();
 			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			glyphHeight = glyphFont.height();
