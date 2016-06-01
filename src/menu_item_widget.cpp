@@ -166,6 +166,15 @@ namespace neogfx
 			iMenu.select_item(iMenu.find_item(iMenuItem));
 	}
 
+	void menu_item_widget::mouse_left()
+	{
+		widget::mouse_left();
+		update();
+		if (iMenu.has_selected_item() && iMenu.selected_item() == (iMenu.find_item(iMenuItem)) &&
+			(iMenuItem.type() == i_menu_item::Action || !iMenuItem.sub_menu().is_open()))
+			iMenu.clear_selection();
+	}
+
 	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point&)
 	{
 		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::SubMenu)
