@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png").disable().set_shortcut("Ctrl+C");
 		auto& pasteAction = app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png").set_shortcut("Ctrl+V");
 		auto& pasteAndGoAction = app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
-		auto& deleteAction = app.add_action("Delete").set_shortcut("Del");
+		auto& deleteAction = app.add_action("Delete");
 		auto& selectAllAction = app.add_action("Select All").set_shortcut("Ctrl+A");
 
 		neolib::callback_timer ct{ app, [&app, &cutAction, &copyAction, &pasteAction, &pasteAndGoAction](neolib::callback_timer& aTimer) 
@@ -451,7 +451,7 @@ int main(int argc, char* argv[])
 		tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
-
+		
 		return app.exec();
 	}
 	catch (std::exception& e)

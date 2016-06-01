@@ -117,7 +117,7 @@ namespace neogfx
 		if (existing != iKerningTable.end())
 			return existing->second;
 		FT_Vector delta;
-		FT_Get_Kerning(iHandle, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_UNFITTED, &delta);
+		FT_Get_Kerning(iHandle, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_DEFAULT, &delta);
 		return (iKerningTable[std::make_pair(aLeftGlyphIndex, aRightGlyphIndex)] = delta.x / 64.0);
 	}
 

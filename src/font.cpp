@@ -321,7 +321,8 @@ namespace neogfx
 
 	dimension font::kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const
 	{
-		return iNativeFontFace->kerning(aLeftGlyphIndex, aRightGlyphIndex);
+		dimension result = iNativeFontFace->kerning(aLeftGlyphIndex, aRightGlyphIndex);
+		return result < 0.0 ? std::floor(result) : std::ceil(result);
 	}
 
 	i_native_font_face& font::native_font_face() const

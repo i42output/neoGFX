@@ -204,6 +204,10 @@ namespace neogfx
 				cursor().set_position(cursor().position() - 1);
 			}
 			break;
+		case ScanCode_DELETE:
+			if (cursor().position() < iGlyphs.size())
+				delete_text(cursor().position(), cursor().position() + 1);
+			break;
 		case ScanCode_UP:
 			if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
 				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
