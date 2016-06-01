@@ -284,7 +284,7 @@ namespace neogfx
 		virtual void delete_selected(i_clipboard& aClipboard);
 		virtual void select_all(i_clipboard& aClipboard);
 	public:
-		virtual void move_cursor(cursor::move_operation_e aMoveOperation) const;
+		virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) const;
 	public:
 		bool read_only() const;
 		void set_read_only(bool aReadOnly = true);

@@ -27,6 +27,6 @@ namespace neogfx
 	class i_document
 	{
 	public:
-		virtual void move_cursor(cursor::move_operation_e aMoveOperation) const = 0;
+		virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) const = 0;
 	};
 }

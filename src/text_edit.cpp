@@ -223,32 +223,32 @@ namespace neogfx
 			if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
 				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			else
-				move_cursor(cursor::Up);
+				move_cursor(cursor::Up, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 			break;
 		case ScanCode_DOWN:
 			if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
 				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			else
-				move_cursor(cursor::Down);
+				move_cursor(cursor::Down, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 			break;
 		case ScanCode_LEFT:
-			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::PreviousWord : cursor::Left);
+			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::PreviousWord : cursor::Left, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 			break;
 		case ScanCode_RIGHT:
-			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::NextWord : cursor::Right);
+			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::NextWord : cursor::Right, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 			break;
 		case ScanCode_HOME:
-			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::StartOfDocument : cursor::StartOfLine);
+			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::StartOfDocument : cursor::StartOfLine, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 			break;
 		case ScanCode_END:
-			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::EndOfDocument : cursor::EndOfLine);
+			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::EndOfDocument : cursor::EndOfLine, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 			break;
 		case ScanCode_PAGEUP:
 		case ScanCode_PAGEDOWN:
 			{
 				auto pos = position(cursor().position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
 				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
-				cursor().set_position(hit_test(pos));
+				cursor().set_position(hit_test(pos), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 			}
 			break;
 		default:
@@ -372,7 +372,7 @@ namespace neogfx
 		cursor().set_position(iGlyphs.size(), false);
 	}
 
-	void text_edit::move_cursor(cursor::move_operation_e aMoveOperation) const
+	void text_edit::move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor) const
 	{
 		if (iGlyphs.empty())
 			return;
@@ -385,7 +385,7 @@ namespace neogfx
 			break;
 		case cursor::StartOfLine:
 			if (currentPosition.line->start != currentPosition.line->end)
-				iCursor.set_position(currentPosition.line->start - iGlyphs.begin());
+				iCursor.set_position(currentPosition.line->start - iGlyphs.begin(), aMoveAnchor);
 			break;
 		case cursor::StartOfWord:
 			break;
@@ -395,7 +395,7 @@ namespace neogfx
 			break;
 		case cursor::EndOfLine:
 			if (currentPosition.line->start != currentPosition.line->end)
-				iCursor.set_position(currentPosition.line->end - iGlyphs.begin());
+				iCursor.set_position(currentPosition.line->end - iGlyphs.begin(), aMoveAnchor);
 			break;
 		case cursor::EndOfWord:
 			break;
@@ -408,7 +408,7 @@ namespace neogfx
 		case cursor::PreviousCharacter:
 			/* todo: RTL check */
 			if (iCursor.position() > 0)
-				iCursor.set_position(iCursor.position() - 1);
+				iCursor.set_position(iCursor.position() - 1, aMoveAnchor);
 			break;
 		case cursor::NextParagraph:
 			break;
@@ -419,7 +419,7 @@ namespace neogfx
 		case cursor::NextCharacter:
 			/* todo: RTL check */
 			if (iCursor.position() < iGlyphs.size())
-				iCursor.set_position(iCursor.position() + 1);
+				iCursor.set_position(iCursor.position() + 1, aMoveAnchor);
 			break;
 		case cursor::Up:
 			break;
@@ -427,11 +427,11 @@ namespace neogfx
 			break;
 		case cursor::Left:
 			if (iCursor.position() > 0)
-				iCursor.set_position(iCursor.position() - 1);
+				iCursor.set_position(iCursor.position() - 1, aMoveAnchor);
 			break;
 		case cursor::Right:
 			if (iCursor.position() < iGlyphs.size())
-				iCursor.set_position(iCursor.position() + 1);
+				iCursor.set_position(iCursor.position() + 1, aMoveAnchor);
 			break;
 		default:
 			break;
