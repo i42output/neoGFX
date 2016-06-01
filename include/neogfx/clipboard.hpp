@@ -42,6 +42,8 @@ namespace neogfx
 		virtual void cut();
 		virtual void copy();
 		virtual void paste();
+		virtual void delete_selected();
+		virtual void select_all();
 	private:
 		i_native_clipboard& iNativeClipboard;
 		i_clipboard_sink* iActiveSink;

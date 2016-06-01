@@ -276,9 +276,13 @@ namespace neogfx
 		virtual bool can_cut() const;
 		virtual bool can_copy() const;
 		virtual bool can_paste() const;
+		virtual bool can_delete_selected() const;
+		virtual bool can_select_all() const;
 		virtual void cut(i_clipboard& aClipboard);
 		virtual void copy(i_clipboard& aClipboard);
 		virtual void paste(i_clipboard& aClipboard);
+		virtual void delete_selected(i_clipboard& aClipboard);
+		virtual void select_all(i_clipboard& aClipboard);
 	public:
 		virtual void move_cursor(cursor::move_operation_e aMoveOperation) const;
 	public:

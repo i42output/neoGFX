@@ -32,9 +32,13 @@ namespace neogfx
 		virtual bool can_cut() const = 0;
 		virtual bool can_copy() const = 0;
 		virtual bool can_paste() const = 0;
+		virtual bool can_delete_selected() const = 0;
+		virtual bool can_select_all() const = 0;
 		virtual void cut(i_clipboard& aClipboard) = 0;
 		virtual void copy(i_clipboard& aClipboard) = 0;
 		virtual void paste(i_clipboard& aClipboard) = 0;
+		virtual void delete_selected(i_clipboard& aClipboard) = 0;
+		virtual void select_all(i_clipboard& aClipboard) = 0;
 	};
 
 	class i_clipboard
@@ -58,5 +62,7 @@ namespace neogfx
 		virtual void cut() = 0;
 		virtual void copy() = 0;
 		virtual void paste() = 0;
+		virtual void delete_selected() = 0;
+		virtual void select_all() = 0;
 	};
 }

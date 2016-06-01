@@ -198,15 +198,31 @@ namespace neogfx
 			cursor().set_position(cursor().position() + 1);
 			break;
 		case ScanCode_BACKSPACE:
-			if (cursor().position() > 0)
+			if (cursor().position() == cursor().anchor())
 			{
-				delete_text(cursor().position() - 1, cursor().position());
-				cursor().set_position(cursor().position() - 1);
+				if (cursor().position() > 0)
+				{
+					delete_text(cursor().position() - 1, cursor().position());
+					cursor().set_position(cursor().position() - 1);
+				}
+			}
+			else
+			{
+				delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
+				cursor().set_position(std::min(cursor().position(), cursor().anchor()));
 			}
 			break;
 		case ScanCode_DELETE:
-			if (cursor().position() < iGlyphs.size())
-				delete_text(cursor().position(), cursor().position() + 1);
+			if (cursor().position() == cursor().anchor())
+			{
+				if (cursor().position() < iGlyphs.size())
+					delete_text(cursor().position(), cursor().position() + 1);
+			}
+			else
+			{
+				delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
+				cursor().set_position(std::min(cursor().position(), cursor().anchor()));
+			}
 			break;
 		case ScanCode_UP:
 			if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
@@ -321,6 +337,16 @@ namespace neogfx
 		return !read_only();
 	}
 
+	bool text_edit::can_delete_selected() const
+	{
+		return !read_only() && !iText.empty();
+	}
+
+	bool text_edit::can_select_all() const
+	{
+		return !iText.empty();
+	}
+
 	void text_edit::cut(i_clipboard& aClipboard)
 	{
 		// todo
@@ -334,6 +360,23 @@ namespace neogfx
 	void text_edit::paste(i_clipboard& aClipboard)
 	{
 		insert_text(aClipboard.text());
+	}
+
+	void text_edit::delete_selected(i_clipboard& aClipboard)
+	{
+		if (cursor().position() != cursor().anchor())
+		{
+			delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
+			cursor().set_position(std::min(cursor().position(), cursor().anchor()));
+		}
+		else if(cursor().position() < iGlyphs.size())
+			delete_text(cursor().position(), cursor().position() + 1);
+	}
+
+	void text_edit::select_all(i_clipboard& aClipboard)
+	{
+		cursor().set_anchor(0);
+		cursor().set_position(iGlyphs.size(), false);
 	}
 
 	void text_edit::move_cursor(cursor::move_operation_e aMoveOperation) const
@@ -724,19 +767,27 @@ namespace neogfx
 	void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, glyph_lines::const_iterator aLine) const
 	{
 		{
-			graphics_context::glyph_drawing gd(aGraphicsContext);
+			std::unique_ptr<graphics_context::glyph_drawing> gd;
 			bool outlinesPresent = false;
-			for (uint32_t pass = 1; pass <= 2; ++pass)
+			for (uint32_t pass = 0; pass <= 2; ++pass)
 			{
+				if (pass == 1)
+					gd = std::make_unique<graphics_context::glyph_drawing>(aGraphicsContext);
 				point pos = aPoint;
 				for (document_glyphs::const_iterator i = aLine->start; i != aLine->end; ++i)
 				{
+					bool selected = static_cast<cursor::position_type>(i - iGlyphs.begin()) >= std::min(cursor().position(), cursor().anchor()) &&
+						static_cast<cursor::position_type>(i - iGlyphs.begin()) < std::max(cursor().position(), cursor().anchor());
 					const auto& glyph = *i;
 					const auto& tagContents = iText.tag(iText.begin() + text_source(i).first).contents();
 					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 					const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 					switch (pass)
 					{
+					case 0:
+						if (selected)
+							aGraphicsContext.fill_rect(rect{ pos, size{glyph.extents().cx, aLine->extents.cy} }, app::instance().current_style().selection_colour());
+						break;
 					case 1:
 						if (style.text_outline_colour().empty())
 						{
@@ -763,10 +814,12 @@ namespace neogfx
 					case 2:
 						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0)}, glyph,
 							glyphFont,
-							style.text_colour().is<colour>() ?
-								static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
-									static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
-									default_text_colour());
+							selected ? 
+								(app::instance().current_style().selection_colour().light() ? colour::Black : colour::White) :
+								style.text_colour().is<colour>() ?
+									static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
+										static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
+										default_text_colour());
 						break;
 					}
 					pos.x += glyph.extents().cx;
