@@ -311,6 +311,7 @@ namespace neogfx
 		void delete_text(position_type aStart, position_type aEnd);
 	private:
 		void init();
+		void delete_any_selection();
 		std::pair<document_text::size_type, document_text::size_type> text_source(document_glyphs::const_iterator aGlyph) const;
 		void refresh_paragraph(document_text::const_iterator aWhere);
 		void refresh_lines();

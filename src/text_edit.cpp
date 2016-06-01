@@ -194,6 +194,7 @@ namespace neogfx
 		switch (aScanCode)
 		{
 		case ScanCode_RETURN:
+			delete_any_selection();
 			insert_text("\n");
 			cursor().set_position(cursor().position() + 1);
 			break;
@@ -207,10 +208,7 @@ namespace neogfx
 				}
 			}
 			else
-			{
-				delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
-				cursor().set_position(std::min(cursor().position(), cursor().anchor()));
-			}
+				delete_any_selection();
 			break;
 		case ScanCode_DELETE:
 			if (cursor().position() == cursor().anchor())
@@ -219,10 +217,7 @@ namespace neogfx
 					delete_text(cursor().position(), cursor().position() + 1);
 			}
 			else
-			{
-				delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
-				cursor().set_position(std::min(cursor().position(), cursor().anchor()));
-			}
+				delete_any_selection();
 			break;
 		case ScanCode_UP:
 			if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
@@ -270,6 +265,7 @@ namespace neogfx
 
 	bool text_edit::text_input(const std::string& aText)
 	{
+		delete_any_selection();
 		insert_text(aText);
 		cursor().set_position(cursor().position() + 1);
 		return true;
@@ -365,10 +361,7 @@ namespace neogfx
 	void text_edit::delete_selected(i_clipboard& aClipboard)
 	{
 		if (cursor().position() != cursor().anchor())
-		{
-			delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
-			cursor().set_position(std::min(cursor().position(), cursor().anchor()));
-		}
+			delete_any_selection();
 		else if(cursor().position() < iGlyphs.size())
 			delete_text(cursor().position(), cursor().position() + 1);
 	}
@@ -614,6 +607,15 @@ namespace neogfx
 		{
 			update();
 		}, this);
+	}
+
+	void text_edit::delete_any_selection()
+	{
+		if (cursor().position() != cursor().anchor())
+		{
+			delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
+			cursor().set_position(std::min(cursor().position(), cursor().anchor()));
+		}
 	}
 
 	std::pair<text_edit::document_text::size_type, text_edit::document_text::size_type> text_edit::text_source(document_glyphs::const_iterator aGlyph) const
