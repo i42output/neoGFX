@@ -445,8 +445,23 @@ namespace neogfx
 				iCursor.set_position(iCursor.position() + 1, aMoveAnchor);
 			break;
 		case cursor::Up:
+			{
+				auto p = position(iCursor.position());
+				if (p.line != iGlyphLines.begin())
+					iCursor.set_position(hit_test(point{ p.pos.x, (p.line - 1)->y }, false), aMoveAnchor);
+			}
 			break;
 		case cursor::Down:
+			{
+				auto p = position(iCursor.position());
+				if (p.line != iGlyphLines.end())
+				{
+					if (p.line + 1 != iGlyphLines.end())
+						iCursor.set_position(hit_test(point{ p.pos.x, (p.line + 1)->y }, false), aMoveAnchor);
+					else
+						iCursor.set_position(iGlyphs.size());
+				}
+			}
 			break;
 		case cursor::Left:
 			if (iCursor.position() > 0)
@@ -562,9 +577,11 @@ namespace neogfx
 		return position_info{ iGlyphs.end(), iGlyphLines.end(), pos };
 	}
 
-	text_edit::position_type text_edit::hit_test(const point& aPoint) const
+	text_edit::position_type text_edit::hit_test(const point& aPoint, bool aAdjustForScrollPosition) const
 	{
-		point adjusted = point{ aPoint - client_rect(false).top_left() } + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
+		point adjusted = aAdjustForScrollPosition ?
+			point{ aPoint - client_rect(false).top_left() } + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } :
+			aPoint;
 		auto line = std::lower_bound(
 			iGlyphLines.begin(),
 			iGlyphLines.end(),
@@ -578,7 +595,7 @@ namespace neogfx
 		if (line == iGlyphLines.end())
 			return iGlyphs.size();
 		for (auto g = line->start; g != line->end; ++g)
-			if (adjusted.x >= g->x - line->start->x && adjusted.x <= g->x - line->start->x + g->extents().cx)
+			if (adjusted.x >= g->x - line->start->x && adjusted.x < g->x - line->start->x + g->extents().cx)
 				return g - iGlyphs.begin();
 		return line->end - iGlyphs.begin();
 	}

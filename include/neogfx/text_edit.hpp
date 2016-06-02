@@ -327,7 +327,7 @@ namespace neogfx
 			point pos;
 		};
 		position_info position(position_type aPosition) const;
-		position_type hit_test(const point& aPoint) const;
+		position_type hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
 		std::string text() const;
 		void set_text(const std::string& aText);
 		void set_text(const std::string& aText, const style& aStyle);
