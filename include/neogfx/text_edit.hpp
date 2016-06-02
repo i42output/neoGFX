@@ -287,6 +287,9 @@ namespace neogfx
 		virtual void focus_gained();
 		virtual void focus_lost();
 	public:
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
+		virtual void mouse_moved(const point& aPosition);
+	public:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual bool text_input(const std::string& aText);
@@ -306,7 +309,7 @@ namespace neogfx
 		virtual void delete_selected(i_clipboard& aClipboard);
 		virtual void select_all(i_clipboard& aClipboard);
 	public:
-		virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) const;
+		virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true);
 	public:
 		bool read_only() const;
 		void set_read_only(bool aReadOnly = true);
@@ -340,6 +343,7 @@ namespace neogfx
 		void refresh_lines();
 		void animate();
 		void update_cursor();
+		void make_cursor_visible();
 		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, glyph_lines::const_iterator aLine) const;
 		void draw_cursor(const graphics_context& aGraphicsContext) const;
 		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
