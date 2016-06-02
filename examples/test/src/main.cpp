@@ -142,7 +142,22 @@ int main(int argc, char* argv[])
 			}
 		}, 100 };
 
+		cutAction.triggered([&app]()
+		{
+			app.clipboard().cut();
+		});
+
+		copyAction.triggered([&app]()
+		{
+			app.clipboard().copy();
+		});
+
 		pasteAction.triggered([&app]()
+		{
+			app.clipboard().paste();
+		});
+
+		pasteAndGoAction.triggered([&app]()
 		{
 			app.clipboard().paste();
 		});

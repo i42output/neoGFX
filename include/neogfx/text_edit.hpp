@@ -153,28 +153,49 @@ namespace neogfx
 		public:
 			typedef std::map<document_glyphs::size_type, dimension, std::less<document_glyphs::size_type>, boost::fast_pool_allocator<std::pair<const document_glyphs::size_type, dimension>>> height_list;
 		public:
-			glyph_paragraph(text_edit& aParent, document_text::size_type aTextIndex, document_glyphs::size_type aStart, document_glyphs::size_type aEnd) : 
-				iParent(&aParent), iTextIndex(aTextIndex), iStart(aStart), iEnd(aEnd)
+			glyph_paragraph(text_edit& aParent, document_text::size_type aTextStart, document_text::size_type aTextEnd, document_glyphs::size_type aStart, document_glyphs::size_type aEnd) :
+				iParent(&aParent), iTextStart(aTextStart), iTextEnd(aTextEnd), iStart(aStart), iEnd(aEnd)
 			{
 			}
-			glyph_paragraph(document_text::size_type aTextIndex, document_glyphs::size_type aStart, document_glyphs::size_type aEnd) :
-				iParent(nullptr), iTextIndex(aTextIndex), iStart(aStart), iEnd(aEnd)
+			glyph_paragraph(document_text::size_type aTextStart, document_text::size_type aTextEnd, document_glyphs::size_type aStart, document_glyphs::size_type aEnd) :
+				iParent(nullptr), iTextStart(aTextStart), iTextEnd(aTextEnd), iStart(aStart), iEnd(aEnd)
 			{
 			}
 		public:
 			glyph_paragraph& operator=(const glyph_paragraph& aOther)
 			{
 				iParent = aOther.iParent;
-				iTextIndex = aOther.iTextIndex;
+				iTextStart = aOther.iTextStart;
+				iTextEnd = aOther.iTextEnd;
 				iStart = aOther.iStart;
 				iEnd = aOther.iEnd;
 				iHeights = aOther.iHeights;
 				return *this;
 			}
 		public:
-			document_text::size_type text_index() const
+			document_text::size_type text_start_index() const
 			{
-				return iTextIndex;
+				return iTextStart;
+			}
+			document_text::const_iterator text_start() const
+			{
+				return iParent->iText.begin() + iTextStart;
+			}
+			document_text::iterator text_start()
+			{
+				return iParent->iText.begin() + iTextStart;
+			}
+			document_text::size_type text_end_index() const
+			{
+				return iTextEnd;
+			}
+			document_text::const_iterator text_end() const
+			{
+				return iParent->iText.begin() + iTextEnd;
+			}
+			document_text::iterator text_end()
+			{
+				return iParent->iText.begin() + iTextEnd;
 			}
 			document_glyphs::size_type start_index() const
 			{
@@ -209,7 +230,7 @@ namespace neogfx
 					for (auto i = iStart; i != iEnd; ++i)
 					{
 						const auto& glyph = *(iterGlyph++);
-						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + iTextIndex + glyph.source().first).contents();
+						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + iTextStart + glyph.source().first).contents();
 						const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 						auto& glyphFont = style.font() != boost::none ? *style.font() : iParent->font();
 						dimension cy = !glyph.use_fallback() ? glyphFont.height() : glyphFont.fallback().height();
@@ -234,7 +255,8 @@ namespace neogfx
 			}
 		private:
 			text_edit* iParent;
-			document_text::size_type iTextIndex;
+			document_text::size_type iTextStart;
+			document_text::size_type iTextEnd;
 			document_glyphs::size_type iStart;
 			document_glyphs::size_type iEnd;
 			mutable height_list iHeights;
@@ -312,7 +334,8 @@ namespace neogfx
 	private:
 		void init();
 		void delete_any_selection();
-		std::pair<document_text::size_type, document_text::size_type> text_source(document_glyphs::const_iterator aGlyph) const;
+		document_glyphs::const_iterator to_glyph(document_text::const_iterator aWhere) const;
+		std::pair<document_text::size_type, document_text::size_type> from_glyph(document_glyphs::const_iterator aWhere) const;
 		void refresh_paragraph(document_text::const_iterator aWhere);
 		void refresh_lines();
 		void animate();
