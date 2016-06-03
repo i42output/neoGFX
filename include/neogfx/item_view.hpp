@@ -79,7 +79,7 @@ namespace neogfx
 		virtual void released();
 		virtual void focus_gained();
 	protected:
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 	protected:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	protected:

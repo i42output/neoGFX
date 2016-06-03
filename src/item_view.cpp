@@ -263,9 +263,9 @@ namespace neogfx
 			selection_model().set_current_index(item_model_index(0, 0));
 	}
 
-	void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		scrollable_widget::mouse_button_pressed(aButton, aPosition);
+		scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (capturing() && aButton == mouse_button::Left && item_display_rect().contains(aPosition))
 		{
 			auto item = item_at(aPosition);

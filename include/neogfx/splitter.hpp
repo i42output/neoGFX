@@ -44,8 +44,8 @@ namespace neogfx
 	public:
 		virtual neogfx::size_policy size_policy() const;
 	public:
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
-		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition);
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		virtual void mouse_moved(const point& aPosition);
 		virtual void mouse_entered();
 		virtual void mouse_left();

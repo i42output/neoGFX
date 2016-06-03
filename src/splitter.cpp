@@ -83,9 +83,9 @@ namespace neogfx
 			return neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Expanding};
 	}
 
-	void splitter::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	void splitter::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		widget::mouse_button_pressed(aButton, aPosition);
+		widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
 		{
 			auto s = separator_at(aPosition);
@@ -101,15 +101,15 @@ namespace neogfx
 		}
 	}
 
-	void splitter::mouse_button_double_clicked(mouse_button aButton, const point& aPosition)
+	void splitter::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		widget::mouse_button_double_clicked(aButton, aPosition);
+		widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
 		{
 			auto s = separator_at(aPosition);
 			if (s != boost::none)
 			{
-				if (app::instance().keyboard().is_key_pressed(ScanCode_LSHIFT) || app::instance().keyboard().is_key_pressed(ScanCode_RSHIFT))
+				if ((aKeyModifiers & KeyModifier_SHIFT) != KeyModifier_NONE)
 					reset_pane_sizes_requested();
 				else
 					reset_pane_sizes_requested(s->first);

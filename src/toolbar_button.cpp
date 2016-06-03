@@ -111,9 +111,9 @@ namespace neogfx
 		return neogfx::focus_policy::NoFocus;
 	}
 
-	void toolbar_button::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	void toolbar_button::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		push_button::mouse_button_pressed(aButton, aPosition);
+		push_button::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		layout_items(false);
 	}
 

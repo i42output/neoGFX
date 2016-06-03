@@ -50,7 +50,7 @@ namespace neogfx
 	public:
 		virtual void mouse_entered();
 		virtual void mouse_left();
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	protected:

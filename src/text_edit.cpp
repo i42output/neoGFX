@@ -188,11 +188,11 @@ namespace neogfx
 		app::instance().clipboard().deactivate(*this);
 	}
 
-	void text_edit::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	void text_edit::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		scrollable_widget::mouse_button_pressed(aButton, aPosition);
+		scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
-			cursor().set_position(hit_test(aPosition));
+			cursor().set_position(hit_test(aPosition), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 	}
 
 	void text_edit::mouse_moved(const point& aPosition)

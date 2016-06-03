@@ -147,7 +147,7 @@ namespace neogfx
 			framed_widget::mouse_wheel_scrolled(passOn, aDelta);
 	}
 
-	void scrollable_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	void scrollable_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		if (aButton == mouse_button::Middle)
 		{
@@ -165,11 +165,11 @@ namespace neogfx
 			if (handled)
 				set_capture();
 			else
-				framed_widget::mouse_button_pressed(aButton, aPosition);
+				framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		}
 		else
 		{
-			framed_widget::mouse_button_pressed(aButton, aPosition);
+			framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 			if (aButton == mouse_button::Left)
 			{
 				if (vertical_scrollbar().clicked_element() == i_scrollbar::ElementNone && horizontal_scrollbar().clicked_element() == i_scrollbar::ElementNone)
@@ -183,9 +183,9 @@ namespace neogfx
 		}
 	}
 
-	void scrollable_widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition)
+	void scrollable_widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		framed_widget::mouse_button_double_clicked(aButton, aPosition);
+		framed_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
 		{
 			if (vertical_scrollbar().clicked_element() == i_scrollbar::ElementNone && horizontal_scrollbar().clicked_element() == i_scrollbar::ElementNone)

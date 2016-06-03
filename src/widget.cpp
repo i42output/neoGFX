@@ -1077,10 +1077,10 @@ namespace neogfx
 			parent().mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
-	void widget::mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	void widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		if (aButton == mouse_button::Middle && has_parent())
-			parent().mouse_button_pressed(aButton, aPosition + position());
+			parent().mouse_button_pressed(aButton, aPosition + position(), aKeyModifiers);
 		else
 		{
 			set_capture();
@@ -1088,7 +1088,7 @@ namespace neogfx
 		}
 	}
 
-	void widget::mouse_button_double_clicked(mouse_button, const point&)
+	void widget::mouse_button_double_clicked(mouse_button, const point&, key_modifiers_e aKeyModifiers)
 	{
 	}
 

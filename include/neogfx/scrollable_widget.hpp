@@ -61,8 +61,8 @@ namespace neogfx
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 	public:
 		virtual void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta);
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition);
-		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition);
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 		virtual void mouse_moved(const point& aPosition);
 		virtual void mouse_entered();

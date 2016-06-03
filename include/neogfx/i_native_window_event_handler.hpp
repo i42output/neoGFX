@@ -38,8 +38,8 @@ namespace neogfx
 		virtual void native_window_render(const rect& aInvalidatedRect) const = 0;
 		virtual void native_window_dismiss_children() = 0;
 		virtual void native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) = 0;
-		virtual void native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition) = 0;
-		virtual void native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition) = 0;
+		virtual void native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
+		virtual void native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
 		virtual void native_window_mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
 		virtual void native_window_mouse_moved(const point& aPosition) = 0;
 		virtual void native_window_mouse_entered() = 0;

@@ -717,20 +717,20 @@ namespace neogfx
 		widget_for_mouse_event(iNativeWindow->mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
-	void window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition)
+	void window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		i_widget& w = widget_for_mouse_event(aPosition);
 		dismiss_children(&w);
 		update_click_focus(w);
-		w.mouse_button_pressed(aButton, aPosition - w.origin());
+		w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
-	void window::native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition)
+	void window::native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		i_widget& w = widget_for_mouse_event(aPosition);
 		dismiss_children(&w);
 		update_click_focus(w);
-		w.mouse_button_double_clicked(aButton, aPosition - w.origin());
+		w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void window::native_window_mouse_button_released(mouse_button aButton, const point& aPosition)

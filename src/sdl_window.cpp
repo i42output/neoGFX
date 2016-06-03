@@ -540,6 +540,24 @@ namespace neogfx
 				}
 			}
 			break;
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+		case WM_XBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDBLCLK:
+		case WM_MBUTTONDBLCLK:
+		case WM_XBUTTONDBLCLK:
+		{
+				key_modifiers_e modifiers = KeyModifier_NONE;
+				if (wparam & MK_SHIFT)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
+				if (wparam & MK_CONTROL)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CTRL);
+				mapEntry->second->push_mouse_button_event_extra_info(modifiers);
+				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			}
+			break;
 		case WM_NCLBUTTONDOWN:
 		case WM_NCRBUTTONDOWN:
 		case WM_NCMBUTTONDOWN:
@@ -600,11 +618,11 @@ namespace neogfx
 				close();
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
-				iExtents = basic_size<decltype(aEvent.window.data1)>{aEvent.window.data1, aEvent.window.data2};
+				iExtents = basic_size<decltype(aEvent.window.data1)>{ aEvent.window.data1, aEvent.window.data2 };
 				event_handler().native_window_resized();
 				break;
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
-				iExtents = basic_size<decltype(aEvent.window.data1)>{aEvent.window.data1, aEvent.window.data2};
+				iExtents = basic_size<decltype(aEvent.window.data1)>{ aEvent.window.data1, aEvent.window.data2 };
 				event_handler().native_window_resized();
 				break;
 			case SDL_WINDOWEVENT_ENTER:
@@ -629,9 +647,17 @@ namespace neogfx
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			if (aEvent.button.clicks == 1)
-				event_handler().native_window_mouse_button_pressed(convert_mouse_button(aEvent.button.button), point(static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y)));
+				event_handler().native_window_mouse_button_pressed(
+					convert_mouse_button(aEvent.button.button),
+					point{static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y)},
+					iMouseButtonEventExtraInfo.front());
+				
 			else
-				event_handler().native_window_mouse_button_double_clicked(convert_mouse_button(aEvent.button.button), point(static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y)));
+				event_handler().native_window_mouse_button_double_clicked(
+					convert_mouse_button(aEvent.button.button), 
+					point{static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y)},
+					iMouseButtonEventExtraInfo.front());
+			iMouseButtonEventExtraInfo.pop_front();
 			break;
 		case SDL_MOUSEBUTTONUP:
 			event_handler().native_window_mouse_button_released(convert_mouse_button(aEvent.button.button), point(static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y)));
@@ -696,6 +722,11 @@ namespace neogfx
 				context_activation_stack().pop_back();
 				break;
 			}
+	}
+
+	void sdl_window::push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers)
+	{
+		iMouseButtonEventExtraInfo.push_back(aKeyModifiers);
 	}
 
 	std::deque<const sdl_window*>& sdl_window::context_activation_stack()

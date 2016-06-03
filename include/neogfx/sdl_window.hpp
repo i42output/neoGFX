@@ -105,6 +105,7 @@ namespace neogfx
 		virtual void destroyed();
 		void do_activate_context() const;
 		void do_activate_default_context() const;
+		void push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers);
 		static std::deque<const sdl_window*>& context_activation_stack();
 #ifdef WIN32
 		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
@@ -127,5 +128,6 @@ namespace neogfx
 		cursor_pointer iCurrentCursor;
 		std::vector<cursor_pointer> iSavedCursors;
 		bool iDestroyed;
+		std::deque<key_modifiers_e> iMouseButtonEventExtraInfo;
 	};
 }

@@ -167,8 +167,8 @@ namespace neogfx
 		virtual bool ignore_mouse_events() const = 0;
 		virtual void set_ignore_mouse_events(bool aIgnoreMouseEvents) = 0;
 		virtual void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) = 0;
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition) = 0;
-		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition) = 0;
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
+		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
 		virtual void mouse_moved(const point& aPosition) = 0;
 		virtual void mouse_entered() = 0;
