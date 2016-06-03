@@ -582,6 +582,8 @@ namespace neogfx
 		point adjusted = aAdjustForScrollPosition ?
 			point{ aPoint - client_rect(false).top_left() } + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } :
 			aPoint;
+		if (adjusted.x < 0.0)
+			adjusted.x = 0.0;
 		auto line = std::lower_bound(
 			iGlyphLines.begin(),
 			iGlyphLines.end(),
