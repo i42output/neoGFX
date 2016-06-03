@@ -191,17 +191,31 @@ namespace neogfx
 	void text_edit::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-		if (aButton == mouse_button::Left)
+		if (aButton == mouse_button::Left && client_rect().contains(aPosition))
+		{
 			cursor().set_position(hit_test(aPosition), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+			if (capturing())
+			{
+				iDragger.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+				{
+					aTimer.again();
+					cursor().set_position(hit_test(surface().mouse_position() - origin()), false);
+				}, 250);
+			}
+		}
+	}
+
+	void text_edit::mouse_button_released(mouse_button aButton, const point& aPosition)
+	{
+		scrollable_widget::mouse_button_released(aButton, aPosition);
+		iDragger = boost::none;
 	}
 
 	void text_edit::mouse_moved(const point& aPosition)
 	{
 		scrollable_widget::mouse_moved(aPosition);
-		if (capturing())
-		{
+		if (iDragger != boost::none)
 			cursor().set_position(hit_test(aPosition), false);
-		}
 	}
 
 	bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -262,9 +276,16 @@ namespace neogfx
 		case ScanCode_PAGEUP:
 		case ScanCode_PAGEDOWN:
 			{
-				auto pos = point{ position(cursor().position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } };
-				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
-				cursor().set_position(hit_test(pos + client_rect(false).top_left()), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+				if (aScanCode == ScanCode_PAGEUP && vertical_scrollbar().position() == vertical_scrollbar().minimum())
+					cursor().set_position(0.0, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+				else if (aScanCode == ScanCode_PAGEDOWN && vertical_scrollbar().position() == vertical_scrollbar().maximum() - vertical_scrollbar().page())
+					cursor().set_position(iGlyphs.size(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+				else
+				{
+					auto pos = point{ position(cursor().position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } };
+					scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+					cursor().set_position(hit_test(pos + client_rect(false).top_left()), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+				}
 			}
 			break;
 		default:
