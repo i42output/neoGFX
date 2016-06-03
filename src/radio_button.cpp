@@ -107,7 +107,7 @@ namespace neogfx
 
 	void radio_button::set_on()
 	{
-		set_checked();
+		check();
 	}
 
 	neogfx::size_policy radio_button::size_policy() const
@@ -160,7 +160,7 @@ namespace neogfx
 			return false;
 		if (aCheckedState != boost::none && *aCheckedState)
 			for (radio_button* nextRadioButton = next_radio_button(); nextRadioButton != this; nextRadioButton = nextRadioButton->next_radio_button())
-				nextRadioButton->set_unchecked();
+				nextRadioButton->uncheck();
 		button::set_checked_state(aCheckedState);
 		if (is_on())
 			on.trigger();

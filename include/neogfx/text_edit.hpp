@@ -314,6 +314,8 @@ namespace neogfx
 	public:
 		bool read_only() const;
 		void set_read_only(bool aReadOnly = true);
+		bool word_wrap() const;
+		void set_word_wrap(bool aWordWrap = true);
 		neogfx::alignment alignment() const;
 		void set_alignment(neogfx::alignment aAlignment);
 		const style& default_style() const;
@@ -350,6 +352,7 @@ namespace neogfx
 		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
 	private:
 		bool iReadOnly;
+		bool iWordWrap;
 		neogfx::alignment iAlignment;
 		style iDefaultStyle;
 		mutable neogfx::cursor iCursor;
@@ -358,6 +361,7 @@ namespace neogfx
 		document_glyphs iGlyphs;
 		glyph_paragraphs iGlyphParagraphs;
 		glyph_lines iGlyphLines;
+		size iTextExtents;
 		neolib::callback_timer iAnimator;
 		uint64_t iCursorAnimationStartTime;
 		mutable const glyph_paragraph* iGlyphParagraphCache;

@@ -59,8 +59,8 @@ namespace neogfx
 		bool is_checked() const;
 		bool is_unchecked() const;
 		bool is_indeterminate() const;
-		void set_checked();
-		void set_unchecked();
+		void check();
+		void uncheck();
 		void set_indeterminate();
 		void set_checked(bool aChecked);
 		void toggle();

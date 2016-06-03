@@ -94,6 +94,7 @@ namespace neogfx
 	text_edit::text_edit() : 
 		scrollable_widget(), 
 		iReadOnly(false),
+		iWordWrap(true),
 		iAlignment(neogfx::alignment::Left|neogfx::alignment::Top), 
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -109,6 +110,7 @@ namespace neogfx
 	text_edit::text_edit(i_widget& aParent) :
 		scrollable_widget(aParent), 
 		iReadOnly(false),
+		iWordWrap(true),
 		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -124,6 +126,7 @@ namespace neogfx
 	text_edit::text_edit(i_layout& aLayout) :
 		scrollable_widget(aLayout), 
 		iReadOnly(false),
+		iWordWrap(true),
 		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -162,7 +165,7 @@ namespace neogfx
 		/* simple (naive) implementation just to get things moving... */
 		for (auto line = iGlyphLines.begin(); line != iGlyphLines.end(); ++line)
 		{
-			point linePos = client_rect(false).top_left() + point{0.0, line->y - vertical_scrollbar().position()};
+			point linePos = client_rect(false).top_left() + point{-horizontal_scrollbar().position(), line->y - vertical_scrollbar().position()};
 			if (linePos.y + line->extents.cy < client_rect(false).top() || linePos.y + line->extents.cy < update_rect().top())
 				continue;
 			if (linePos.y > client_rect(false).bottom() || linePos.y > update_rect().bottom())
@@ -170,9 +173,9 @@ namespace neogfx
 			auto textDirection = glyph_text_direction(line->start, line->end);
 			if (iAlignment == alignment::Left && textDirection == text_direction::RTL ||
 				iAlignment == alignment::Right && textDirection == text_direction::LTR)
-				linePos.x += client_rect(false).width() - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx;
+				linePos.x += iTextExtents.cx - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx;
 			else if (iAlignment == alignment::Centre)
-				linePos.x += std::ceil((client_rect(false).width() - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx) / 2);
+				linePos.x += std::ceil((iTextExtents.cx - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx) / 2);
 			draw_glyphs(aGraphicsContext, linePos, line);
 		}
 		draw_cursor(aGraphicsContext);
@@ -277,7 +280,7 @@ namespace neogfx
 		case ScanCode_PAGEDOWN:
 			{
 				if (aScanCode == ScanCode_PAGEUP && vertical_scrollbar().position() == vertical_scrollbar().minimum())
-					cursor().set_position(0.0, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+					cursor().set_position(0, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 				else if (aScanCode == ScanCode_PAGEDOWN && vertical_scrollbar().position() == vertical_scrollbar().maximum() - vertical_scrollbar().page())
 					cursor().set_position(iGlyphs.size(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 				else
@@ -323,10 +326,10 @@ namespace neogfx
 			refresh_lines();
 			break;
 		case UsvStageCheckVertical1:
-		case UsvStageCheckHorizontal:
+		case UsvStageCheckVertical2:
 			{
 				i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
-				vertical_scrollbar().set_maximum(iGlyphLines.empty() ? 0.0 : iGlyphLines.back().y + iGlyphLines.back().extents.cy);
+				vertical_scrollbar().set_maximum(iGlyphLines.empty() ? 0.0 : iTextExtents.cy);
 				vertical_scrollbar().set_step(font().height());
 				vertical_scrollbar().set_page(client_rect(false).height());
 				vertical_scrollbar().set_position(oldPosition);
@@ -334,8 +337,13 @@ namespace neogfx
 					vertical_scrollbar().show();
 				else
 					vertical_scrollbar().hide();
-				oldPosition = horizontal_scrollbar().position();
-				horizontal_scrollbar().set_maximum(0.0);
+				scrollable_widget::update_scrollbar_visibility(aStage);
+				refresh_lines();
+			}
+		case UsvStageCheckHorizontal:
+			{
+				i_scrollbar::value_type oldPosition = horizontal_scrollbar().position();
+				horizontal_scrollbar().set_maximum(iGlyphLines.empty() ? 0.0 : iTextExtents.cx);
 				horizontal_scrollbar().set_step(font().height());
 				horizontal_scrollbar().set_page(client_rect(false).width());
 				horizontal_scrollbar().set_position(oldPosition);
@@ -347,7 +355,6 @@ namespace neogfx
 				refresh_lines();
 			}
 			break;
-		case UsvStageCheckVertical2:
 		case UsvStageDone:
 			break;
 		default:
@@ -554,6 +561,20 @@ namespace neogfx
 		update();
 	}
 
+	bool text_edit::word_wrap() const
+	{
+		return iWordWrap;
+	}
+	
+	void text_edit::set_word_wrap(bool aWordWrap)
+	{
+		if (iWordWrap != aWordWrap)
+		{
+			iWordWrap = aWordWrap;
+			update_scrollbar_visibility();
+		}
+	}
+
 	neogfx::alignment text_edit::alignment() const
 	{
 		return iAlignment;
@@ -640,7 +661,10 @@ namespace neogfx
 		}
 		point pos;
 		if (!iGlyphLines.empty())
+		{
+			pos.x = iGlyphLines.back().extents.cx;
 			pos.y = iGlyphLines.back().y + iGlyphLines.back().extents.cy;
+		}
 		return position_info{ iGlyphs.end(), iGlyphLines.end(), pos };
 	}
 
@@ -856,6 +880,7 @@ namespace neogfx
 		iGlyphLines.clear();
 		point pos{};
 		dimension availableWidth = client_rect(false).width();
+		iTextExtents = size{};
 		for (auto p  = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
 		{
 			auto& paragraph = *p;
@@ -867,42 +892,51 @@ namespace neogfx
 				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 				iGlyphLines.push_back(glyph_line{ paragraph.start(), paragraph.end(), pos.y, size{ 0.0, glyphFont.height() } });
 				pos.y += iGlyphLines.back().extents.cy;
-				continue;
 			}
-			document_glyphs::iterator next = paragraph.start();
-			document_glyphs::iterator lineStart = next;
-			document_glyphs::iterator lineEnd = paragraph.end();
-			coordinate offset = 0.0;
-			while (next != paragraph.end())
+			else if (iWordWrap)
 			{
-				auto split = std::lower_bound(next, paragraph.end(), paragraph_positioned_glyph{offset + availableWidth});
-				if (split != next && (split != paragraph.end() || (split-1)->x + (split-1)->extents().cx >= offset + availableWidth))
-					--split;
-				if (split != paragraph.end())
+				document_glyphs::iterator next = paragraph.start();
+				document_glyphs::iterator lineStart = next;
+				document_glyphs::iterator lineEnd = paragraph.end();
+				coordinate offset = 0.0;
+				while (next != paragraph.end())
 				{
-					std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraph.end());
-					lineEnd = wordBreak.first;
-					next = wordBreak.second;
-					if (wordBreak.first == wordBreak.second)
+					auto split = std::lower_bound(next, paragraph.end(), paragraph_positioned_glyph{ offset + availableWidth });
+					if (split != next && (split != paragraph.end() || (split - 1)->x + (split - 1)->extents().cx >= offset + availableWidth))
+						--split;
+					if (split != paragraph.end())
 					{
-						while (lineEnd != lineStart && (lineEnd - 1)->source() == wordBreak.first->source())
-							--lineEnd;
-						next = lineEnd;
+						std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraph.end());
+						lineEnd = wordBreak.first;
+						next = wordBreak.second;
+						if (wordBreak.first == wordBreak.second)
+						{
+							while (lineEnd != lineStart && (lineEnd - 1)->source() == wordBreak.first->source())
+								--lineEnd;
+							next = lineEnd;
+						}
 					}
+					else
+						next = paragraph.end();
+					iGlyphLines.push_back(glyph_line{ lineStart, lineEnd, pos.y, size{split->x - offset, paragraph.height(lineStart, lineEnd)} });
+					pos.y += iGlyphLines.back().extents.cy;
+					iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().extents.cx);
+					lineStart = next;
+					if (lineStart != paragraph.end())
+						offset = lineStart->x;
+					lineEnd = paragraph.end();
 				}
-				else
-					next = paragraph.end();
-				iGlyphLines.push_back(glyph_line{lineStart, lineEnd, pos.y, size{split->x - offset, paragraph.height(lineStart, lineEnd)}});
+			}
+			else
+			{
+				iGlyphLines.push_back(glyph_line{ paragraph.start(), paragraph.end(), pos.y, size{ (paragraph.end() - 1)->x + (paragraph.end() - 1)->extents().cx, paragraph.height(paragraph.start(), paragraph.end()) } });
 				pos.y += iGlyphLines.back().extents.cy;
-				lineStart = next;
-				if (lineStart != paragraph.end())
-					offset = lineStart->x;
-				lineEnd = paragraph.end();
+				iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().extents.cx);
 			}
 		}
 		if (!iGlyphs.empty() && iGlyphs.back().is_whitespace() && iGlyphs.back().value() == '\n')
 			pos.y += (default_style().font() != boost::none ? *default_style().font() : font()).height();
-		vertical_scrollbar().set_maximum(pos.y);
+		iTextExtents.cy = pos.y;
 	}
 
 	void text_edit::animate()
@@ -991,7 +1025,7 @@ namespace neogfx
 								glyphFont,
 								style.text_outline_colour().is<colour>() ?
 									static_variant_cast<const colour&>(style.text_outline_colour()) : style.text_outline_colour().is<gradient>() ?
-										static_variant_cast<const gradient&>(style.text_outline_colour()).at((pos.x - margins().left) / client_rect(false).width()) :
+										static_variant_cast<const gradient&>(style.text_outline_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / iTextExtents.cx) :
 										default_text_colour());
 						}
 						break;
@@ -1002,7 +1036,7 @@ namespace neogfx
 								(app::instance().current_style().selection_colour().light() ? colour::Black : colour::White) :
 								style.text_colour().is<colour>() ?
 									static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
-										static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
+										static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / iTextExtents.cx) : 
 										default_text_colour());
 						break;
 					}

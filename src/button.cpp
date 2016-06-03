@@ -92,12 +92,12 @@ namespace neogfx
 		return iCheckedState == boost::none;
 	}
 
-	void button::set_checked()
+	void button::check()
 	{
 		set_checked_state(true);
 	}
 
-	void button::set_unchecked()
+	void button::uncheck()
 	{
 		set_checked_state(false);
 	}

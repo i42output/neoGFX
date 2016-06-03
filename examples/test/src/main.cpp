@@ -308,6 +308,16 @@ int main(int argc, char* argv[])
 			if ((n++)%2 == 1)
 				triState.set_indeterminate();
 		});
+		ng::check_box wordWrap(layoutRadiosAndChecks, "Editor word wrap");
+		wordWrap.check();
+		wordWrap.checked([&textEdit]()
+		{
+			textEdit.set_word_wrap(true);
+		});
+		wordWrap.unchecked([&textEdit]()
+		{
+			textEdit.set_word_wrap(false);
+		});
 		ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
 		ng::vertical_layout layout4(layout2);
 		ng::push_button button9(layout4, "Default/Slate\nStyle");
