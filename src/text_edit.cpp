@@ -343,7 +343,7 @@ namespace neogfx
 		case UsvStageCheckHorizontal:
 			{
 				i_scrollbar::value_type oldPosition = horizontal_scrollbar().position();
-				horizontal_scrollbar().set_maximum(iGlyphLines.empty() ? 0.0 : iTextExtents.cx);
+				horizontal_scrollbar().set_maximum(iGlyphLines.empty() || iTextExtents.cx <= client_rect(false).width() ? 0.0 : iTextExtents.cx);
 				horizontal_scrollbar().set_step(font().height());
 				horizontal_scrollbar().set_page(client_rect(false).width());
 				horizontal_scrollbar().set_position(oldPosition);
@@ -356,6 +356,7 @@ namespace neogfx
 			}
 			break;
 		case UsvStageDone:
+			make_cursor_visible();
 			break;
 		default:
 			break;
@@ -439,6 +440,7 @@ namespace neogfx
 		switch (aMoveOperation)
 		{
 		case cursor::StartOfDocument:
+			iCursor.set_position(0, aMoveAnchor);
 			break;
 		case cursor::StartOfParagraph:
 			break;
@@ -449,6 +451,7 @@ namespace neogfx
 		case cursor::StartOfWord:
 			break;
 		case cursor::EndOfDocument:
+			iCursor.set_position(iGlyphs.size(), aMoveAnchor);
 			break;
 		case cursor::EndOfParagraph:
 			break;
@@ -971,7 +974,9 @@ namespace neogfx
 	void text_edit::make_cursor_visible()
 	{
 		auto p = position(cursor().position());
-		auto e = (p.line != iGlyphLines.end() ? p.line->extents : size{ 0.0, (default_style().font() != boost::none ? *default_style().font() : font()).height() });
+		auto e = (p.line != iGlyphLines.end() ? 
+			size{ p.glyph != p.line->end ? p.glyph->extents().cx : 0.0, p.line->extents.cy } : 
+			size{ 0.0, (default_style().font() != boost::none ? *default_style().font() : font()).height() });
 		if (p.pos.y < vertical_scrollbar().position())
 			vertical_scrollbar().set_position(p.pos.y);
 		else if (p.pos.y + e.cy > vertical_scrollbar().position() + vertical_scrollbar().page())
@@ -1025,7 +1030,7 @@ namespace neogfx
 								glyphFont,
 								style.text_outline_colour().is<colour>() ?
 									static_variant_cast<const colour&>(style.text_outline_colour()) : style.text_outline_colour().is<gradient>() ?
-										static_variant_cast<const gradient&>(style.text_outline_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / iTextExtents.cx) :
+										static_variant_cast<const gradient&>(style.text_outline_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
 										default_text_colour());
 						}
 						break;
@@ -1036,7 +1041,7 @@ namespace neogfx
 								(app::instance().current_style().selection_colour().light() ? colour::Black : colour::White) :
 								style.text_colour().is<colour>() ?
 									static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
-										static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / iTextExtents.cx) : 
+										static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
 										default_text_colour());
 						break;
 					}
