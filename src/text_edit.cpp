@@ -456,9 +456,31 @@ namespace neogfx
 		case cursor::PreviousLine:
 			break;
 		case cursor::PreviousWord:
+			/* todo: reverse for RTL */
+			if (!iGlyphs.empty())
+			{
+				auto p = iCursor.position();
+				if (p == iGlyphs.size())
+					--p;
+				while (p > 0 && iGlyphs[p].is_whitespace())
+					--p;
+				if (p > 0)
+				{
+					auto d = iGlyphs[p == iCursor.position() ? p - 1 : p].direction();
+					while (p > 0 && iGlyphs[p - 1].direction() == d)
+						--p;
+					if (p > 0 && d == text_direction::Whitespace)
+					{
+						d = iGlyphs[p - 1].direction();
+						while (p > 0 && iGlyphs[p - 1].direction() == d)
+							--p;
+					}
+				}
+				iCursor.set_position(p, aMoveAnchor);
+			}
 			break;
 		case cursor::PreviousCharacter:
-			/* todo: RTL check */
+			/* todo: reverse for RTL */
 			if (iCursor.position() > 0)
 				iCursor.set_position(iCursor.position() - 1, aMoveAnchor);
 			break;
@@ -467,9 +489,25 @@ namespace neogfx
 		case cursor::NextLine:
 			break;
 		case cursor::NextWord:
+			/* todo: reverse for RTL */
+			if (!iGlyphs.empty())
+			{
+				auto p = iCursor.position();
+				while (p < iGlyphs.size() && iGlyphs[p].is_whitespace())
+					++p;
+				if (p < iGlyphs.size() && p == iCursor.position())
+				{
+					auto d = iGlyphs[p].direction();
+					while (p < iGlyphs.size() && iGlyphs[p].direction() == d)
+						++p;
+					while (p < iGlyphs.size() && iGlyphs[p].is_whitespace())
+						++p;
+				}
+				iCursor.set_position(p, aMoveAnchor);
+			}
 			break;
 		case cursor::NextCharacter:
-			/* todo: RTL check */
+			/* todo: reverse for RTL */
 			if (iCursor.position() < iGlyphs.size())
 				iCursor.set_position(iCursor.position() + 1, aMoveAnchor);
 			break;
