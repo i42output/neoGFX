@@ -311,7 +311,7 @@ namespace neogfx
 			for (auto& m : iMnemonics)
 				m->mnemonic_widget().update();
 		for (auto& a : iActions)
-			if (a.shortcut() != boost::none && a.shortcut()->matches(aKeyCode, aKeyModifiers))
+			if (a.is_enabled() && a.shortcut() != boost::none && a.shortcut()->matches(aKeyCode, aKeyModifiers))
 			{
 				a.triggered.trigger();
 				if (a.is_checkable())

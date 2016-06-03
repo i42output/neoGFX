@@ -361,17 +361,25 @@ namespace neogfx
 
 	void text_edit::cut(i_clipboard& aClipboard)
 	{
-		copy(aClipboard);
-		delete_selected(aClipboard);
+		if (cursor().position() != cursor().anchor())
+		{
+			copy(aClipboard);
+			delete_selected(aClipboard);
+		}
 	}
 
 	void text_edit::copy(i_clipboard& aClipboard)
 	{
-		std::string selectedText;
-		selectedText.assign(
-			iText.begin() + from_glyph(iGlyphs.begin() + std::min(cursor().position(), cursor().anchor())).first,
-			iText.begin() + from_glyph(iGlyphs.begin() + std::max(cursor().position(), cursor().anchor())).second);
-		aClipboard.set_text(selectedText);
+		if (cursor().position() != cursor().anchor())
+		{
+			std::string selectedText;
+			auto selectionStart = std::min(cursor().position(), cursor().anchor());
+			auto selectionEnd = std::max(cursor().position(), cursor().anchor());
+			auto start = from_glyph(iGlyphs.begin() + selectionStart).first;
+			auto end = from_glyph(iGlyphs.begin() + selectionEnd).second;
+			selectedText.assign(iText.begin() + start, iText.begin() + end);
+			aClipboard.set_text(selectedText);
+		}
 	}
 
 	void text_edit::paste(i_clipboard& aClipboard)
@@ -707,6 +715,13 @@ namespace neogfx
 
 	std::pair<text_edit::document_text::size_type, text_edit::document_text::size_type> text_edit::from_glyph(document_glyphs::const_iterator aWhere) const
 	{
+		if (aWhere == iGlyphs.end())
+		{
+			if (iGlyphs.empty())
+				return std::make_pair(0, 0);
+			else
+				return std::make_pair((aWhere - 1)->source().second, (aWhere - 1)->source().second);
+		}
 		if (iGlyphParagraphCache != nullptr && aWhere >= iGlyphParagraphCache->start() && aWhere < iGlyphParagraphCache->end())
 			return std::make_pair(iGlyphParagraphCache->text_start_index() + aWhere->source().first, iGlyphParagraphCache->text_start_index() + aWhere->source().second);
 		auto paragraph = std::lower_bound(
