@@ -96,7 +96,8 @@ namespace neogfx
 		iType(aType),
 		iReadOnly(false),
 		iWordWrap(aType == MultiLine),
-		iAlignment(neogfx::alignment::Left|neogfx::alignment::Top), 
+		iPassword(false),
+		iAlignment(neogfx::alignment::Left|neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
@@ -113,6 +114,7 @@ namespace neogfx
 		iType(aType),
 		iReadOnly(false),
 		iWordWrap(aType == MultiLine),
+		iPassword(false),
 		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -130,6 +132,7 @@ namespace neogfx
 		iType(aType),
 		iReadOnly(false),
 		iWordWrap(aType == MultiLine),
+		iPassword(false),
 		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -192,6 +195,11 @@ namespace neogfx
 			draw_glyphs(aGraphicsContext, linePos, line);
 		}
 		draw_cursor(aGraphicsContext);
+	}
+
+	const font& text_edit::font() const
+	{
+		return default_style().font() != boost::none ? *default_style().font() : scrollable_widget::font();
 	}
 
 	void text_edit::focus_gained()
@@ -381,6 +389,13 @@ namespace neogfx
 		}
 	}
 
+	colour text_edit::frame_colour() const
+	{
+		if (app::instance().current_style().colour().similar_intensity(background_colour(), 0.05))
+			return scrollable_widget::frame_colour();
+		return app::instance().current_style().colour().mid(background_colour());
+	}
+
 	bool text_edit::can_cut() const
 	{
 		return !read_only() && !iText.empty() && iCursor.position() != iCursor.anchor();
@@ -555,7 +570,7 @@ namespace neogfx
 					if (p.line + 1 != iGlyphLines.end())
 						iCursor.set_position(hit_test(point{ p.pos.x, (p.line + 1)->y }, false), aMoveAnchor);
 					else
-						iCursor.set_position(iGlyphs.size());
+						iCursor.set_position(iGlyphs.size(), aMoveAnchor);
 				}
 			}
 			break;
@@ -597,6 +612,21 @@ namespace neogfx
 		}
 	}
 
+	bool text_edit::password() const
+	{
+		return iPassword;
+	}
+
+	void text_edit::set_password(bool aPassword, const std::string& aMask)
+	{
+		if (iPassword != aPassword)
+		{
+			iPassword = aPassword;
+			iPasswordMask = aMask;
+			refresh_paragraph(iText.begin());
+		}
+	}
+
 	neogfx::alignment text_edit::alignment() const
 	{
 		return iAlignment;
@@ -618,7 +648,10 @@ namespace neogfx
 
 	void text_edit::set_default_style(const style& aDefaultStyle)
 	{
+		neogfx::font oldFont = font();
 		iDefaultStyle = aDefaultStyle;
+		if (oldFont != font())
+			refresh_paragraph(iText.begin());
 		update();
 	}
 
@@ -875,12 +908,16 @@ namespace neogfx
 			if (*ch == '\n' || ch == iText.end() - 1)
 			{
 				paragraphBuffer.assign(paragraphStart, ch + 1);
-				auto gt = gc.to_glyph_text(paragraphBuffer.begin(), paragraphBuffer.end(), [this, paragraphStart](std::string::size_type aSourceIndex)
+				auto fs = [this, paragraphStart](std::string::size_type aSourceIndex)
 				{
 					const auto& tagContents = iText.tag(paragraphStart + aSourceIndex).contents(); // todo: cache iterator to increase throughput
 					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
-					return style.font() != boost::none ? *style.font() : font();
-				});
+					auto f = style.font() != boost::none ? *style.font() : font();
+					if (iPassword)
+						f.set_password(true, iPasswordMask.empty() ? "\xE2\x97\x8F" : iPasswordMask);
+					return f;
+				};
+				auto gt = gc.to_glyph_text(paragraphBuffer.begin(), paragraphBuffer.end(), fs);
 				auto paragraphGlyphs = iGlyphs.insert(iGlyphs.end(), gt.cbegin(), gt.cend());
 				iGlyphParagraphs.insert(iGlyphParagraphs.end(), 
 					glyph_paragraph{ 
@@ -970,7 +1007,7 @@ namespace neogfx
 			}
 		}
 		if (!iGlyphs.empty() && iGlyphs.back().is_whitespace() && iGlyphs.back().value() == '\n')
-			pos.y += (default_style().font() != boost::none ? *default_style().font() : font()).height();
+			pos.y += font().height();
 		iTextExtents.cy = pos.y;
 	}
 
@@ -999,7 +1036,7 @@ namespace neogfx
 		else if (cursorPos.line != iGlyphLines.end())
 			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
-			glyphHeight = lineHeight = (default_style().font() != boost::none ? *default_style().font() : font()).height();
+			glyphHeight = lineHeight = font().height();
 		update(rect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{1.0, glyphHeight} });
 	}
 
@@ -1008,7 +1045,7 @@ namespace neogfx
 		auto p = position(cursor().position());
 		auto e = (p.line != iGlyphLines.end() ? 
 			size{ p.glyph != p.line->end ? p.glyph->extents().cx : 0.0, p.line->extents.cy } : 
-			size{ 0.0, (default_style().font() != boost::none ? *default_style().font() : font()).height() });
+			size{ 0.0, font().height() });
 		if (p.pos.y < vertical_scrollbar().position())
 			vertical_scrollbar().set_position(p.pos.y);
 		else if (p.pos.y + e.cy > vertical_scrollbar().position() + vertical_scrollbar().page())
@@ -1118,7 +1155,7 @@ namespace neogfx
 		else if (cursorPos.line != iGlyphLines.end())
 			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
-			glyphHeight = lineHeight = (default_style().font() != boost::none ? *default_style().font() : font()).height();
+			glyphHeight = lineHeight = font().height();
 		if (has_focus() && ((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
 		{
 			auto elapsed = (app::instance().program_elapsed_ms() - iCursorAnimationStartTime) % 1000;

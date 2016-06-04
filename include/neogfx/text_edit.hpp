@@ -39,6 +39,7 @@ namespace neogfx
 			SingleLine,
 			MultiLine
 		};
+		typedef boost::optional<std::string> optional_password_mask;
 		class style
 		{
 		public:
@@ -290,6 +291,8 @@ namespace neogfx
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
+		virtual const neogfx::font& font() const;
+	public:
 		virtual void focus_gained();
 		virtual void focus_lost();
 	public:
@@ -304,6 +307,8 @@ namespace neogfx
 		virtual child_widget_scrolling_disposition_e scrolling_disposition() const;
 		using scrollable_widget::update_scrollbar_visibility;
 		virtual void update_scrollbar_visibility(usv_stage_e aStage);
+	protected:
+		virtual colour frame_colour() const;
 	public:
 		virtual bool can_cut() const;
 		virtual bool can_copy() const;
@@ -322,6 +327,8 @@ namespace neogfx
 		void set_read_only(bool aReadOnly = true);
 		bool word_wrap() const;
 		void set_word_wrap(bool aWordWrap = true);
+		bool password() const;
+		void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
 		neogfx::alignment alignment() const;
 		void set_alignment(neogfx::alignment aAlignment);
 		const style& default_style() const;
@@ -360,6 +367,8 @@ namespace neogfx
 		type_e iType;
 		bool iReadOnly;
 		bool iWordWrap;
+		bool iPassword;
+		std::string iPasswordMask;
 		neogfx::alignment iAlignment;
 		style iDefaultStyle;
 		mutable neogfx::cursor iCursor;

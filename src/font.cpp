@@ -102,6 +102,7 @@ namespace neogfx
 		iStyle = aOther.iStyle;
 		iStyleName = aOther.iStyleName;
 		iUnderline = aOther.iUnderline;
+		iPassword = aOther.iPassword;
 		iWeight = aOther.iWeight;
 		iSize = aOther.iSize;
 		return *this;
@@ -148,6 +149,30 @@ namespace neogfx
 		iUnderline = aUnderline;
 	}
 
+	bool font_info::password() const
+	{
+		return iPassword != boost::none;
+	}
+
+	const std::string& font_info::password_mask() const
+	{
+		if (password())
+		{
+			if (iPassword->empty())
+				iPassword = "\xE2\x97\x8F";
+			return *iPassword;
+		}
+		throw password_not_set();
+	}
+
+	void font_info::set_password(bool aPassword, const std::string& aMask)
+	{
+		if (aPassword)
+			iPassword = aMask;
+		else
+			iPassword = boost::none;
+	}
+
 	font_info::weight_e font_info::weight() const
 	{
 		return iWeight;
@@ -165,7 +190,12 @@ namespace neogfx
 
 	bool font_info::operator==(const font_info& aRhs) const
 	{
-		return iFamilyName == aRhs.iFamilyName && iStyle == aRhs.iStyle && iStyleName == aRhs.iStyleName && iUnderline == aRhs.iUnderline && iSize == aRhs.iSize;
+		return iFamilyName == aRhs.iFamilyName && 
+			iStyle == aRhs.iStyle && 
+			iStyleName == aRhs.iStyleName && 
+			iUnderline == aRhs.iUnderline && 
+			iPassword == aRhs.iPassword &&
+			iSize == aRhs.iSize;
 	}
 
 	font_info::font_info(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
@@ -189,7 +219,7 @@ namespace neogfx
 
 	bool font_info::operator<(const font_info& aRhs) const
 	{
-		return std::tie(iFamilyName, iStyle, iStyleName, iUnderline, iSize) < std::tie(aRhs.iFamilyName, aRhs.iStyle, aRhs.iStyleName, aRhs.iUnderline, aRhs.iSize);
+		return std::tie(iFamilyName, iStyle, iStyleName, iUnderline, iPassword, iSize) < std::tie(aRhs.iFamilyName, aRhs.iStyle, aRhs.iStyleName, aRhs.iUnderline, aRhs.iPassword, aRhs.iSize);
 	}
 
 	font::font() :

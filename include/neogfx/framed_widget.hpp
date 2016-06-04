@@ -56,6 +56,8 @@ namespace neogfx
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	protected:
+		virtual colour frame_colour() const;
+	protected:
 		dimension line_width() const;
 		dimension effective_frame_width() const;
 	private:

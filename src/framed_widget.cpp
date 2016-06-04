@@ -67,7 +67,7 @@ namespace neogfx
 
 	void framed_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
-		colour frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
+		colour frameColour = frame_colour();
 		widget::paint_non_client(aGraphicsContext);
 		switch (iStyle)
 		{
@@ -110,6 +110,11 @@ namespace neogfx
 	void framed_widget::paint(graphics_context& aGraphicsContext) const
 	{
 		widget::paint(aGraphicsContext);
+	}
+
+	colour framed_widget::frame_colour() const
+	{
+		return (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
 	}
 
 	dimension framed_widget::line_width() const

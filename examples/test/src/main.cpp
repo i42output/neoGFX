@@ -280,8 +280,13 @@ int main(int argc, char* argv[])
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW.");
 		ng::text_edit textEdit(layoutButtons);
 		textEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
-		ng::line_edit lineEdit(layoutButtons);
+		ng::horizontal_layout layoutLineEdits(layoutButtons);
+		ng::line_edit lineEdit(layoutLineEdits);
 		lineEdit.set_text("Line edit");
+		lineEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		ng::line_edit lineEditPassword(layoutLineEdits);
+		lineEditPassword.set_text("Password");
+		lineEditPassword.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");
@@ -320,6 +325,15 @@ int main(int argc, char* argv[])
 		wordWrap.unchecked([&textEdit]()
 		{
 			textEdit.set_word_wrap(false);
+		});
+		ng::check_box password(layoutRadiosAndChecks, "Password");
+		password.checked([&lineEditPassword]()
+		{
+			lineEditPassword.set_password(true);
+		});
+		password.unchecked([&lineEditPassword]()
+		{
+			lineEditPassword.set_password(false);
 		});
 		ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
 		ng::vertical_layout layout4(layout2);

@@ -1028,6 +1028,8 @@ namespace neogfx
 		for (std::size_t i = 0; i <= lastCodePointIndex; ++i)
 		{
 			font currentFont = aFontSelector(clusterMap[i].from);
+			if (currentFont.password())
+				codePoints[i] = neolib::utf8_to_utf32(currentFont.password_mask())[0];
 			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
 			text_direction currentDirection = get_text_direction(codePoints[i]);
 			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
