@@ -652,7 +652,7 @@ namespace neogfx
 			units_converter(*this).from_device_units(*iMinimumSize) :
 			has_layout() ? 
 				layout().minimum_size(aAvailableSpace) + margins().size() :
-				size{};
+				margins().size();
 	}
 
 	void widget::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
@@ -795,7 +795,7 @@ namespace neogfx
 			paint_non_client(aGraphicsContext);
 			aGraphicsContext.scissor_off();
 			aGraphicsContext.set_extents(client_rect().extents());
-			aGraphicsContext.set_origin(origin() + client_rect().position());
+			aGraphicsContext.set_origin(origin());
 			aGraphicsContext.scissor_on(default_clip_rect() - client_rect().position());
 			auto savedCoordinateSystem = aGraphicsContext.logical_coordinate_system();
 			if (savedCoordinateSystem != logical_coordinate_system())

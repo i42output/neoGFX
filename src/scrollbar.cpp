@@ -152,6 +152,8 @@ namespace neogfx
 
 	dimension scrollbar::width(const i_units_context& aContext) const
 	{
+		if (style() == Invisible)
+			return 0.0;
 		units_converter uc(aContext);
 		uc.set_units(UnitsMillimetres);
 		dimension w = std::ceil(uc.to_device_units(4.0));

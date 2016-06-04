@@ -432,6 +432,9 @@
     <ClInclude Include="..\..\..\include\neogfx\i_clipboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\line_edit.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\path.inl">
@@ -674,6 +677,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\clipboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\line_edit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

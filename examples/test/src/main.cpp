@@ -20,6 +20,7 @@
 #include <neogfx/toolbar.hpp>
 #include <neogfx/menu_bar.hpp>
 #include <neogfx/text_edit.hpp>
+#include <neogfx/line_edit.hpp>
 
 namespace ng = neogfx;
 
@@ -279,6 +280,8 @@ int main(int argc, char* argv[])
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW.");
 		ng::text_edit textEdit(layoutButtons);
 		textEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		ng::line_edit lineEdit(layoutButtons);
+		lineEdit.set_text("Line edit");
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");

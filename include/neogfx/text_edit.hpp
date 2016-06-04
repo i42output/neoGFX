@@ -34,6 +34,11 @@ namespace neogfx
 	class text_edit : public scrollable_widget, public i_clipboard_sink, public i_document
 	{
 	public:
+		enum type_e
+		{
+			SingleLine,
+			MultiLine
+		};
 		class style
 		{
 		public:
@@ -273,14 +278,15 @@ namespace neogfx
 	public:
 		typedef document_text::size_type position_type;
 	public:
-		text_edit();
-		text_edit(i_widget& aParent);
-		text_edit(i_layout& aLayout);
+		text_edit(type_e aType = MultiLine);
+		text_edit(i_widget& aParent, type_e aType = MultiLine);
+		text_edit(i_layout& aLayout, type_e aType = MultiLine);
 		~text_edit();
 	public:
 		virtual void resized();
 	public:
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
@@ -332,10 +338,10 @@ namespace neogfx
 		position_info position(position_type aPosition) const;
 		position_type hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
 		std::string text() const;
-		void set_text(const std::string& aText);
-		void set_text(const std::string& aText, const style& aStyle);
-		void insert_text(const std::string& aText);
-		void insert_text(const std::string& aText, const style& aStyle);
+		std::size_t set_text(const std::string& aText);
+		std::size_t set_text(const std::string& aText, const style& aStyle);
+		std::size_t insert_text(const std::string& aText);
+		std::size_t insert_text(const std::string& aText, const style& aStyle);
 		void delete_text(position_type aStart, position_type aEnd);
 	private:
 		void init();
@@ -351,6 +357,7 @@ namespace neogfx
 		void draw_cursor(const graphics_context& aGraphicsContext) const;
 		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
 	private:
+		type_e iType;
 		bool iReadOnly;
 		bool iWordWrap;
 		neogfx::alignment iAlignment;

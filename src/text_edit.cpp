@@ -91,10 +91,11 @@ namespace neogfx
 		return std::tie(iFont, iTextColour, iBackgroundColour) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour);
 	}
 
-	text_edit::text_edit() : 
-		scrollable_widget(), 
+	text_edit::text_edit(type_e aType) :
+		scrollable_widget(aType == MultiLine ? i_scrollbar::Normal : i_scrollbar::Invisible), 
+		iType(aType),
 		iReadOnly(false),
-		iWordWrap(true),
+		iWordWrap(aType == MultiLine),
 		iAlignment(neogfx::alignment::Left|neogfx::alignment::Top), 
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -107,10 +108,11 @@ namespace neogfx
 		init();
 	}
 
-	text_edit::text_edit(i_widget& aParent) :
-		scrollable_widget(aParent), 
+	text_edit::text_edit(i_widget& aParent, type_e aType) :
+		scrollable_widget(aParent, aType == MultiLine ? i_scrollbar::Normal : i_scrollbar::Invisible),
+		iType(aType),
 		iReadOnly(false),
-		iWordWrap(true),
+		iWordWrap(aType == MultiLine),
 		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -123,10 +125,11 @@ namespace neogfx
 		init();
 	}
 
-	text_edit::text_edit(i_layout& aLayout) :
-		scrollable_widget(aLayout), 
+	text_edit::text_edit(i_layout& aLayout, type_e aType) :
+		scrollable_widget(aLayout, aType == MultiLine ? i_scrollbar::Normal : i_scrollbar::Invisible),
+		iType(aType),
 		iReadOnly(false),
-		iWordWrap(true),
+		iWordWrap(aType == MultiLine),
 		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -155,7 +158,17 @@ namespace neogfx
 		if (has_minimum_size())
 			return scrollable_widget::minimum_size(aAvailableSpace);
 		scoped_units su(*this, UnitsPixels);
-		auto result = scrollable_widget::minimum_size() + size{ font().height() } + margins().size();
+		auto result = scrollable_widget::minimum_size(aAvailableSpace) + size{ font().height() };
+		return convert_units(*this, su.saved_units(), result);
+	}
+
+	size text_edit::maximum_size(const optional_size& aAvailableSpace) const
+	{
+		if (iType == MultiLine || has_maximum_size())
+			return scrollable_widget::maximum_size(aAvailableSpace);
+		scoped_units su(*this, UnitsPixels);
+		auto result = scrollable_widget::maximum_size(aAvailableSpace);
+		result.cy = minimum_size(aAvailableSpace).cy;
 		return convert_units(*this, su.saved_units(), result);
 	}
 
@@ -227,9 +240,14 @@ namespace neogfx
 		switch (aScanCode)
 		{
 		case ScanCode_RETURN:
-			delete_any_selection();
-			insert_text("\n");
-			cursor().set_position(cursor().position() + 1);
+			if (iType == MultiLine)
+			{
+				delete_any_selection();
+				insert_text("\n");
+				cursor().set_position(cursor().position() + 1);
+			}
+			else
+				handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			break;
 		case ScanCode_BACKSPACE:
 			if (cursor().position() == cursor().anchor())
@@ -306,8 +324,8 @@ namespace neogfx
 	bool text_edit::text_input(const std::string& aText)
 	{
 		delete_any_selection();
-		insert_text(aText);
-		cursor().set_position(cursor().position() + 1);
+		auto len = insert_text(aText);
+		cursor().set_position(cursor().position() + len);
 		return true;
 	}
 
@@ -413,9 +431,10 @@ namespace neogfx
 
 	void text_edit::paste(i_clipboard& aClipboard)
 	{
-		delete_selected(aClipboard);
-		insert_text(aClipboard.text());
-		cursor().set_position(to_glyph(iText.begin() + from_glyph(iGlyphs.begin() + cursor().position()).first + aClipboard.text().size()) - iGlyphs.begin());
+		if (cursor().position() != cursor().anchor())
+			delete_selected(aClipboard);
+		auto len = insert_text(aClipboard.text());
+		cursor().set_position(to_glyph(iText.begin() + from_glyph(iGlyphs.begin() + cursor().position()).first + len) - iGlyphs.begin());
 	}
 
 	void text_edit::delete_selected(i_clipboard& aClipboard)
@@ -701,26 +720,35 @@ namespace neogfx
 		return std::string(iText.begin(), iText.end());
 	}
 
-	void text_edit::set_text(const std::string& aText)
+	std::size_t text_edit::set_text(const std::string& aText)
 	{
-		set_text(aText, default_style());
+		return set_text(aText, default_style());
 	}
 
-	void text_edit::set_text(const std::string& aText, const style& aStyle)
+	std::size_t text_edit::set_text(const std::string& aText, const style& aStyle)
 	{
 		iCursor.set_position(0);
 		iText.clear();
 		iGlyphs.clear();
-		insert_text(aText, aStyle);
+		return insert_text(aText, aStyle);
 	}
 
-	void text_edit::insert_text(const std::string& aText)
+	std::size_t text_edit::insert_text(const std::string& aText)
 	{
-		insert_text(aText, default_style());
+		return insert_text(aText, default_style());
 	}
 
-	void text_edit::insert_text(const std::string& aText, const style& aStyle)
+	std::size_t text_edit::insert_text(const std::string& aText, const style& aStyle)
 	{
+		auto eos = aText.size();
+		if (iType == SingleLine)
+		{
+			auto eol = aText.find('\r');
+			if (eol == std::string::npos)
+				eol = aText.find('\n');
+			if (eol != std::string::npos)
+				eos = eol;
+		}
 		auto s = iStyles.insert(style(*this, aStyle)).first;
 		auto p = position(iCursor.position());
 		auto insertionPoint = iText.end();
@@ -731,9 +759,10 @@ namespace neogfx
 			else if (p.line->end != iGlyphs.end())
 				insertionPoint = iText.begin() + from_glyph(p.line->end).first;
 		}
-		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, aText.begin(), aText.end());
+		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, aText.begin(), aText.begin() + eos);
 		refresh_paragraph(insertionPoint);
 		update();
+		return eos;
 	}
 
 	void text_edit::delete_text(position_type aStart, position_type aEnd)
@@ -796,7 +825,8 @@ namespace neogfx
 		for (auto i = iGlyphParagraphCache->start(); i != iGlyphParagraphCache->end(); ++i)
 			if (textIndex >= i->source().first && textIndex < i->source().second)
 				return i;
-		return iGlyphParagraphCache->end();
+		return iGlyphParagraphCache->end() != iGlyphs.end() && iGlyphParagraphCache->end()->is_whitespace() && iGlyphParagraphCache->end()->value() == '\n' ? 
+			iGlyphParagraphCache->end() + 1 : iGlyphParagraphCache->end();
 	}
 
 	std::pair<text_edit::document_text::size_type, text_edit::document_text::size_type> text_edit::from_glyph(document_glyphs::const_iterator aWhere) const
@@ -806,7 +836,7 @@ namespace neogfx
 			if (iGlyphs.empty())
 				return std::make_pair(0, 0);
 			else
-				return std::make_pair((aWhere - 1)->source().second, (aWhere - 1)->source().second);
+				return std::make_pair(iGlyphParagraphs.back().text_start_index() + (aWhere - 1)->source().second, iGlyphParagraphs.back().text_start_index() + (aWhere - 1)->source().second);
 		}
 		if (iGlyphParagraphCache != nullptr && aWhere >= iGlyphParagraphCache->start() && aWhere < iGlyphParagraphCache->end())
 			return std::make_pair(iGlyphParagraphCache->text_start_index() + aWhere->source().first, iGlyphParagraphCache->text_start_index() + aWhere->source().second);
@@ -907,6 +937,8 @@ namespace neogfx
 					auto split = std::lower_bound(next, paragraph.end(), paragraph_positioned_glyph{ offset + availableWidth });
 					if (split != next && (split != paragraph.end() || (split - 1)->x + (split - 1)->extents().cx >= offset + availableWidth))
 						--split;
+					if (split == next)
+						++split;
 					if (split != paragraph.end())
 					{
 						std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraph.end());

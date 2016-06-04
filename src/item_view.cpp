@@ -505,7 +505,7 @@ namespace neogfx
 			if (col != 0)
 				x += cell_spacing().cx;
 			if (col == aItemIndex.column())
-				return rect(point(x - horizontal_scrollbar().position(), y - vertical_scrollbar().position() + item_display_rect().top()), size(column_width(col), h));
+				return rect(client_rect(false).top_left() + point(x - horizontal_scrollbar().position(), y - vertical_scrollbar().position() + item_display_rect().top()), size(column_width(col), h));
 			x += column_width(col);
 		}
 		return rect{};

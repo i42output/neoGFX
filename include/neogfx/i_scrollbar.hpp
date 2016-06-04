@@ -37,7 +37,8 @@ namespace neogfx
 		enum style_e
 		{
 			Normal,
-			Button
+			Button,
+			Invisible
 		};
 		typedef double value_type;
 		enum element_e
