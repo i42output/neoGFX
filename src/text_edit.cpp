@@ -366,6 +366,7 @@ namespace neogfx
 				scrollable_widget::update_scrollbar_visibility(aStage);
 				refresh_lines();
 			}
+			break;
 		case UsvStageCheckHorizontal:
 			{
 				i_scrollbar::value_type oldPosition = horizontal_scrollbar().position();
@@ -569,7 +570,7 @@ namespace neogfx
 				{
 					if (p.line + 1 != iGlyphLines.end())
 						iCursor.set_position(hit_test(point{ p.pos.x, (p.line + 1)->y }, false), aMoveAnchor);
-					else
+					else if (p.line->end != iGlyphs.end() && p.line->end->is_whitespace() && p.line->end->value() == '\n')
 						iCursor.set_position(iGlyphs.size(), aMoveAnchor);
 				}
 			}
@@ -619,7 +620,7 @@ namespace neogfx
 
 	void text_edit::set_password(bool aPassword, const std::string& aMask)
 	{
-		if (iPassword != aPassword)
+		if (iPassword != aPassword || iPasswordMask != aMask)
 		{
 			iPassword = aPassword;
 			iPasswordMask = aMask;
@@ -717,7 +718,7 @@ namespace neogfx
 		point pos;
 		if (!iGlyphLines.empty())
 		{
-			pos.x = iGlyphLines.back().extents.cx;
+			pos.x = 0.0;
 			pos.y = iGlyphLines.back().y + iGlyphLines.back().extents.cy;
 		}
 		return position_info{ iGlyphs.end(), iGlyphLines.end(), pos };
@@ -773,12 +774,16 @@ namespace neogfx
 
 	std::size_t text_edit::insert_text(const std::string& aText, const style& aStyle)
 	{
-		auto eos = aText.size();
+		if (iNormalizedTextBuffer.capacity() < aText.size())
+			iNormalizedTextBuffer.reserve(aText.size());
+		iNormalizedTextBuffer.clear();
+		for (auto ch : aText)
+			if (ch != '\r')
+				iNormalizedTextBuffer.push_back(ch);
+		auto eos = iNormalizedTextBuffer.size();
 		if (iType == SingleLine)
 		{
-			auto eol = aText.find('\r');
-			if (eol == std::string::npos)
-				eol = aText.find('\n');
+			auto eol = iNormalizedTextBuffer.find('\n');
 			if (eol != std::string::npos)
 				eos = eol;
 		}
@@ -792,7 +797,7 @@ namespace neogfx
 			else if (p.line->end != iGlyphs.end())
 				insertionPoint = iText.begin() + from_glyph(p.line->end).first;
 		}
-		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, aText.begin(), aText.begin() + eos);
+		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
 		refresh_paragraph(insertionPoint);
 		update();
 		return eos;
@@ -990,7 +995,10 @@ namespace neogfx
 					}
 					else
 						next = paragraph.end();
-					iGlyphLines.push_back(glyph_line{ lineStart, lineEnd, pos.y, size{split->x - offset, paragraph.height(lineStart, lineEnd)} });
+					if (lineStart != lineEnd && (lineEnd - 1)->is_whitespace() && (lineEnd - 1)->value() == '\r')
+						--lineEnd;
+					dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().extents().cx : 0.0));
+					iGlyphLines.push_back(glyph_line{ lineStart, lineEnd, pos.y, size{x - offset, paragraph.height(lineStart, lineEnd)} });
 					pos.y += iGlyphLines.back().extents.cy;
 					iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().extents.cx);
 					lineStart = next;

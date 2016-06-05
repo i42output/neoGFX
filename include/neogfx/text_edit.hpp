@@ -373,6 +373,7 @@ namespace neogfx
 		style iDefaultStyle;
 		mutable neogfx::cursor iCursor;
 		style_list iStyles;
+		std::string iNormalizedTextBuffer;
 		document_text iText;
 		document_glyphs iGlyphs;
 		glyph_paragraphs iGlyphParagraphs;
