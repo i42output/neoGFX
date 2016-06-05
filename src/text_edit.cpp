@@ -1057,6 +1057,7 @@ namespace neogfx
 
 	void text_edit::make_cursor_visible(bool aForcePreviewScroll)
 	{
+		scoped_units su(*this, UnitsPixels);
 		auto p = position(cursor().position());
 		auto e = (p.line != iGlyphLines.end() ? 
 			size{ p.glyph != p.line->end ? p.glyph->extents().cx : 0.0, p.line->extents.cy } : 
@@ -1065,12 +1066,13 @@ namespace neogfx
 			vertical_scrollbar().set_position(p.pos.y);
 		else if (p.pos.y + e.cy > vertical_scrollbar().position() + vertical_scrollbar().page())
 			vertical_scrollbar().set_position(p.pos.y + e.cy - vertical_scrollbar().page());
+		dimension previewWidth = std::ceil(std::min(client_rect(false).width() / 3.0, 200.0));
 		if (p.pos.x < horizontal_scrollbar().position() || 
-			(aForcePreviewScroll && p.pos.x < horizontal_scrollbar().position() + client_rect(false).width() / 3.0))
-			horizontal_scrollbar().set_position(p.pos.x - client_rect(false).width() / 3.0);
+			(aForcePreviewScroll && p.pos.x < horizontal_scrollbar().position() + previewWidth))
+			horizontal_scrollbar().set_position(p.pos.x - previewWidth);
 		else if (p.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() || 
-			(aForcePreviewScroll && p.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() - client_rect(false).width() / 3.0))
-			horizontal_scrollbar().set_position(p.pos.x + e.cx + client_rect(false).width() / 3.0 - horizontal_scrollbar().page());
+			(aForcePreviewScroll && p.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() - previewWidth))
+			horizontal_scrollbar().set_position(p.pos.x + e.cx + previewWidth - horizontal_scrollbar().page());
 	}
 
 	void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, glyph_lines::const_iterator aLine) const
