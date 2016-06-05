@@ -1025,18 +1025,74 @@ namespace neogfx
 		font previousFont = aFontSelector(clusterMap[0].from);
 		hb_script_t previousScript = hb_unicode_script(static_cast<native_font_face::hb_handle*>(previousFont.native_font_face().aux_handle())->unicodeFuncs, codePoints[0]);
 
+		std::deque<std::pair<text_direction, bool>> directionStack;
+		const char32_t LRE = U'\u202A';
+		const char32_t RLE = U'\u202B';
+		const char32_t LRO = U'\u202D';
+		const char32_t RLO = U'\u202E';
+		const char32_t PDF = U'\u202C';
+
+		bool currentLineHasLTR = false;
+
 		for (std::size_t i = 0; i <= lastCodePointIndex; ++i)
 		{
 			font currentFont = aFontSelector(clusterMap[i].from);
 			if (currentFont.password())
 				codePoints[i] = neolib::utf8_to_utf32(currentFont.password_mask())[0];
+			if (codePoints[i] == '\r' || codePoints[i] == '\n')
+				currentLineHasLTR = false;
+			switch (codePoints[i])
+			{
+			case PDF:
+				if (!directionStack.empty())
+					directionStack.pop_back();
+				break;
+			case LRE:
+				directionStack.push_back(std::make_pair(text_direction::LTR, false));
+				break;
+			case RLE:
+				directionStack.push_back(std::make_pair(text_direction::RTL, false));
+				break;
+			case LRO:
+				directionStack.push_back(std::make_pair(text_direction::LTR, true));
+				break;
+			case RLO:
+				directionStack.push_back(std::make_pair(text_direction::RTL, true));
+				break;
+			default:
+				break;
+			}
 			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
 			text_direction currentDirection = get_text_direction(codePoints[i]);
-			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
 			textDirections.push_back(currentDirection);
+			auto bidi_check = [&directionStack](text_direction aDirection)
+			{
+				if (!directionStack.empty())
+				{
+					switch (aDirection)
+					{
+					case text_direction::LTR:
+					case text_direction::RTL:
+						if (directionStack.back().second == true)
+							return directionStack.back().first;
+						break;
+					case text_direction::None:
+					case text_direction::Whitespace:
+						return directionStack.back().first;
+						break;
+					default:
+						break;
+					}
+				}
+				return aDirection;
+			};
+			currentDirection = bidi_check(currentDirection);
+			if (currentDirection == text_direction::LTR)
+				currentLineHasLTR = true;
+			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
 			bool newRun = previousFont != currentFont || (previousDirection == text_direction::LTR && currentDirection == text_direction::RTL) ||
 				(previousDirection == text_direction::RTL && currentDirection == text_direction::LTR) ||
-				(previousScript != currentScript && (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL)) ||
+				(previousScript != currentScript && (previousScript != HB_SCRIPT_COMMON && currentScript != HB_SCRIPT_COMMON)) ||
 				i == lastCodePointIndex;
 			if (!newRun)
 			{
@@ -1044,10 +1100,10 @@ namespace neogfx
 				{
 					for (std::size_t j = i + 1; j <= lastCodePointIndex; ++j)
 					{
-						text_direction nextDirection = get_text_direction(codePoints[j]);
+						text_direction nextDirection = bidi_check(get_text_direction(codePoints[j]));
 						if (nextDirection == text_direction::RTL)
 							break;
-						else if (nextDirection == text_direction::LTR)
+						else if (nextDirection == text_direction::LTR || (j == lastCodePointIndex - 1 && currentLineHasLTR))
 						{
 							newRun = true;
 							currentDirection = text_direction::LTR;
