@@ -204,11 +204,14 @@ namespace neogfx
 
 	void text_edit::focus_gained()
 	{
+		scrollable_widget::focus_gained();
 		app::instance().clipboard().activate(*this);
+		iCursorAnimationStartTime = app::instance().program_elapsed_ms();
 	}
 
 	void text_edit::focus_lost()
 	{
+		scrollable_widget::focus_lost();
 		app::instance().clipboard().deactivate(*this);
 	}
 
@@ -264,6 +267,7 @@ namespace neogfx
 				{
 					delete_text(cursor().position() - 1, cursor().position());
 					cursor().set_position(cursor().position() - 1);
+					make_cursor_visible(true);
 				}
 			}
 			else
@@ -273,7 +277,10 @@ namespace neogfx
 			if (cursor().position() == cursor().anchor())
 			{
 				if (cursor().position() < iGlyphs.size())
+				{
 					delete_text(cursor().position(), cursor().position() + 1);
+					make_cursor_visible(true);
+				}
 			}
 			else
 				delete_any_selection();
@@ -1048,7 +1055,7 @@ namespace neogfx
 		update(rect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{1.0, glyphHeight} });
 	}
 
-	void text_edit::make_cursor_visible()
+	void text_edit::make_cursor_visible(bool aForcePreviewScroll)
 	{
 		auto p = position(cursor().position());
 		auto e = (p.line != iGlyphLines.end() ? 
@@ -1058,10 +1065,12 @@ namespace neogfx
 			vertical_scrollbar().set_position(p.pos.y);
 		else if (p.pos.y + e.cy > vertical_scrollbar().position() + vertical_scrollbar().page())
 			vertical_scrollbar().set_position(p.pos.y + e.cy - vertical_scrollbar().page());
-		if (p.pos.x < horizontal_scrollbar().position())
-			horizontal_scrollbar().set_position(p.pos.x);
-		else if (p.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page())
-			horizontal_scrollbar().set_position(p.pos.x + e.cx - horizontal_scrollbar().page());
+		if (p.pos.x < horizontal_scrollbar().position() || 
+			(aForcePreviewScroll && p.pos.x < horizontal_scrollbar().position() + client_rect(false).width() / 3.0))
+			horizontal_scrollbar().set_position(p.pos.x - client_rect(false).width() / 3.0);
+		else if (p.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() || 
+			(aForcePreviewScroll && p.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() - client_rect(false).width() / 3.0))
+			horizontal_scrollbar().set_position(p.pos.x + e.cx + client_rect(false).width() / 3.0 - horizontal_scrollbar().page());
 	}
 
 	void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, glyph_lines::const_iterator aLine) const
