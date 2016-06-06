@@ -24,6 +24,7 @@
 namespace neogfx
 {
 	spin_box_impl::spin_box_impl() :
+		iNormalizedValue{ 0.0 },
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
@@ -35,6 +36,7 @@ namespace neogfx
 
 	spin_box_impl::spin_box_impl(i_widget& aParent) :
 		framed_widget(aParent),
+		iNormalizedValue{ 0.0 },
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
@@ -46,6 +48,7 @@ namespace neogfx
 
 	spin_box_impl::spin_box_impl(i_layout& aLayout) :
 		framed_widget(aLayout),
+		iNormalizedValue{ 0.0 },
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
@@ -62,6 +65,18 @@ namespace neogfx
 		return app::instance().current_style().colour().mid(background_colour());
 	}
 
+	line_edit& spin_box_impl::text_box()
+	{
+		return iTextBox;
+	}
+
+	void spin_box_impl::set_normalized_value(double aValue, bool aUpdateTextBox)
+	{
+		iNormalizedValue = aValue;
+		if (aUpdateTextBox)
+			iTextBox.set_text(value_to_string());
+	}
+
 	void spin_box_impl::init()
 	{
 		set_margins(neogfx::margins{});
@@ -73,6 +88,43 @@ namespace neogfx
 		iStepDownButton.set_minimum_size(size{16, 8});
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iTextBox.set_style(framed_widget::NoFrame);
+
+		iTextBox.text_changed([this]()
+		{
+			auto newNormalizedValue = string_to_normalized_value(iTextBox.text());
+			if (iNormalizedValue != newNormalizedValue)
+				set_normalized_value(newNormalizedValue);
+		});
+
+		iStepUpButton.pressed([this]()
+		{
+			set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())), true);
+			iStepper.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+			{
+				aTimer.set_duration(125, true);
+				aTimer.again();
+				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())), true);
+			}, 500);
+		});
+		iStepUpButton.released([this]()
+		{
+			iStepper = boost::none;
+		});
+
+		iStepDownButton.pressed([this]()
+		{
+			set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())), true);
+			iStepper.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+			{
+				aTimer.set_duration(125, true);
+				aTimer.again();
+				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())), true);
+			}, 500);
+		});
+		iStepDownButton.released([this]()
+		{
+			iStepper = boost::none;
+		});
 	}
 }
 

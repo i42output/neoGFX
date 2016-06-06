@@ -34,6 +34,8 @@ namespace neogfx
 	class text_edit : public scrollable_widget, public i_clipboard_sink, public i_document
 	{
 	public:
+		event<> text_changed;
+	public:
 		enum type_e
 		{
 			SingleLine,

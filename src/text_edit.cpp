@@ -298,16 +298,26 @@ namespace neogfx
 				delete_any_selection();
 			break;
 		case ScanCode_UP:
-			if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
-				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			if (iType == MultiLine)
+			{
+				if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
+					scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+				else
+					move_cursor(cursor::Up, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+			}
 			else
-				move_cursor(cursor::Up, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+				handled = false;
 			break;
 		case ScanCode_DOWN:
-			if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
-				scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			if (iType == MultiLine)
+			{
+				if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
+					scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+				else
+					move_cursor(cursor::Down, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+			}
 			else
-				move_cursor(cursor::Down, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+				handled = false;
 			break;
 		case ScanCode_LEFT:
 			move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::PreviousWord : cursor::Left, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
@@ -808,18 +818,22 @@ namespace neogfx
 				eos = eol;
 		}
 		auto s = iStyles.insert(style(*this, aStyle)).first;
-		auto p = position(iCursor.position());
 		auto insertionPoint = iText.end();
-		if (p.glyph != iGlyphs.end())
+		if (!iGlyphs.empty())
 		{
-			if (p.glyph != p.line->end)
-				insertionPoint = iText.begin() + from_glyph(p.glyph).first;
-			else if (p.line->end != iGlyphs.end())
-				insertionPoint = iText.begin() + from_glyph(p.line->end).first;
+			auto p = position(iCursor.position());
+			if (p.glyph != iGlyphs.end())
+			{
+				if (p.glyph != p.line->end)
+					insertionPoint = iText.begin() + from_glyph(p.glyph).first;
+				else if (p.line->end != iGlyphs.end())
+					insertionPoint = iText.begin() + from_glyph(p.line->end).first;
+			}
 		}
 		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
 		refresh_paragraph(insertionPoint);
 		update();
+		text_changed.trigger();
 		return eos;
 	}
 
@@ -829,6 +843,7 @@ namespace neogfx
 			return;
 		refresh_paragraph(iText.erase(iText.begin() + from_glyph(iGlyphs.begin() + aStart).first, iText.begin() + from_glyph(iGlyphs.begin() + aEnd - 1).second));
 		update();
+		text_changed.trigger();
 	}
 
 	void text_edit::init()

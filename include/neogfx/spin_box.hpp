@@ -39,18 +39,23 @@ namespace neogfx
 	protected:
 		virtual colour frame_colour() const;
 	public:
+		line_edit& text_box();
+	public:
 		virtual double normalized_step_value() const = 0;
 		virtual double normalized_value() const = 0;
-		virtual void set_normalized_value(double aValue) = 0;
+		virtual void set_normalized_value(double aValue, bool aUpdateTextBox = false);
+		virtual double string_to_normalized_value(const std::string& aText) const = 0;
 		virtual std::string value_to_string() const = 0;
 	private:
 		void init();
 	private:
+		double iNormalizedValue;
 		horizontal_layout iPrimaryLayout;
 		line_edit iTextBox;
 		vertical_layout iSecondaryLayout;
 		push_button iStepUpButton;
 		push_button iStepDownButton;
+		boost::optional<neolib::callback_timer> iStepper;
 	};
 
 	template <typename T>
@@ -76,7 +81,8 @@ namespace neogfx
 	public:
 		virtual double normalized_step_value() const;
 		virtual double normalized_value() const;
-		virtual void set_normalized_value(double aValue);
+		virtual void set_normalized_value(double aValue, bool aUpdateTextBox = false);
+		virtual double string_to_normalized_value(const std::string& aText) const;
 		virtual std::string value_to_string() const;
 	private:
 		value_type iMinimum;
