@@ -459,7 +459,7 @@ namespace neogfx
 			auto selectionStart = std::min(cursor().position(), cursor().anchor());
 			auto selectionEnd = std::max(cursor().position(), cursor().anchor());
 			auto start = from_glyph(iGlyphs.begin() + selectionStart).first;
-			auto end = from_glyph(iGlyphs.begin() + selectionEnd).second;
+			auto end = from_glyph(iGlyphs.begin() + selectionEnd).first;
 			selectedText.assign(iText.begin() + start, iText.begin() + end);
 			aClipboard.set_text(selectedText);
 		}
