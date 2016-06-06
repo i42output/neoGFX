@@ -147,6 +147,7 @@ namespace neogfx
 
 	text_edit::~text_edit()
 	{
+		app::instance().current_style_changed.unsubscribe(this);
 		if (app::instance().clipboard().sink_active() && &app::instance().clipboard().active_sink() == this)
 			app::instance().clipboard().deactivate(*this);
 	}
@@ -832,6 +833,10 @@ namespace neogfx
 
 	void text_edit::init()
 	{
+		app::instance().current_style_changed([this]()
+		{
+			refresh_paragraph(iText.begin());
+		}, this);
 		set_focus_policy(focus_policy::ClickTabFocus);
 		iCursor.set_width(2.0);
 		iCursor.position_changed([this]()

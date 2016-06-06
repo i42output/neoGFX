@@ -59,6 +59,18 @@ namespace neogfx
 		return result;
 	}
 
+	size framed_widget::maximum_size(const optional_size& aAvailableSpace) const
+	{
+		size result = widget::maximum_size(aAvailableSpace);
+		if (!has_maximum_size())
+		{
+			if (result.cx != std::numeric_limits<size::dimension_type>::max())
+				result.cx += effective_frame_width() * 2.0;
+			if (result.cy != std::numeric_limits<size::dimension_type>::max())
+				result.cy += effective_frame_width() * 2.0;
+		}
+		return result;
+	}
 
 	bool framed_widget::transparent_background() const
 	{

@@ -38,6 +38,8 @@ namespace neogfx
 {
 	class app : public i_app, public neolib::io_thread, private i_keyboard_handler
 	{
+	public:
+		event<> current_style_changed;
 	private:
 		typedef std::map<std::string, style> style_list;
 		typedef std::list<action, boost::fast_pool_allocator<action>> action_list;

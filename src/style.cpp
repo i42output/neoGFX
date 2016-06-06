@@ -281,7 +281,10 @@ namespace neogfx
 			iFontInfo = aFontInfo;
 			iFont.reset();
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().layout_surfaces();
+			}
 		}
 	}
 
