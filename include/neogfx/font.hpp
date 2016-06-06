@@ -93,6 +93,9 @@ namespace neogfx
 		virtual void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
 		virtual weight_e weight() const;
 		virtual point_size size() const;
+		virtual bool kerning() const;
+		virtual void enable_kerning();
+		virtual void disable_kerning();
 	public:
 		font_info with_size(point_size aSize) const;
 	public:
@@ -110,6 +113,7 @@ namespace neogfx
 		mutable optional_password iPassword;
 		weight_e iWeight;
 		point_size iSize;
+		bool iKerning;
 	};
 
 	class font : public font_info
@@ -146,6 +150,7 @@ namespace neogfx
 		dimension height() const;
 		dimension descender() const;
 		dimension line_spacing() const;
+		using font_info::kerning;
 		dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
 	public:
 		i_native_font_face& native_font_face() const;

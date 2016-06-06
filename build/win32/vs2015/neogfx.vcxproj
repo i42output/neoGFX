@@ -168,6 +168,7 @@
     <ClInclude Include="..\..\..\include\neogfx\rectangle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\shape.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\spin_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite_plane.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\menu_item.hpp" />
@@ -228,6 +229,7 @@
     <None Include="..\..\..\include\neogfx\flow_layout.inl" />
     <None Include="..\..\..\include\neogfx\layout.inl" />
     <None Include="..\..\..\include\neogfx\path.inl" />
+    <None Include="..\..\..\include\neogfx\spin_box.inl" />
     <None Include="..\..\..\src\subpixel_rgb_horizontal.frag" />
   </ItemGroup>
   <ItemGroup>
@@ -288,6 +290,7 @@
     <ClCompile Include="..\..\..\src\shape.cpp" />
     <ClCompile Include="..\..\..\src\skyline_bin_pack.cpp" />
     <ClCompile Include="..\..\..\src\spacer.cpp" />
+    <ClCompile Include="..\..\..\src\spin_box.cpp" />
     <ClCompile Include="..\..\..\src\splitter.cpp" />
     <ClCompile Include="..\..\..\src\sprite.cpp" />
     <ClCompile Include="..\..\..\src\sprite_plane.cpp" />

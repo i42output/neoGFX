@@ -112,6 +112,16 @@ namespace neogfx
 		widget::paint(aGraphicsContext);
 	}
 
+	void framed_widget::set_style(style_e aStyle)
+	{
+		if (iStyle != aStyle)
+		{
+			iStyle = aStyle;
+			if (has_managing_layout())
+				managing_layout().layout_items(true);
+		}
+	}
+
 	colour framed_widget::frame_colour() const
 	{
 		return (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));

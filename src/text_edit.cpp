@@ -340,6 +340,7 @@ namespace neogfx
 	{
 		delete_any_selection();
 		auto len = insert_text(aText);
+		// todo: move cursor left if RTL text
 		cursor().set_position(cursor().position() + len);
 		return true;
 	}
@@ -399,7 +400,7 @@ namespace neogfx
 
 	colour text_edit::frame_colour() const
 	{
-		if (app::instance().current_style().colour().similar_intensity(background_colour(), 0.05))
+		if (app::instance().current_style().colour().similar_intensity(background_colour(), 0.03125))
 			return scrollable_widget::frame_colour();
 		return app::instance().current_style().colour().mid(background_colour());
 	}

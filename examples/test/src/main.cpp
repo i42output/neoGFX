@@ -21,6 +21,7 @@
 #include <neogfx/menu_bar.hpp>
 #include <neogfx/text_edit.hpp>
 #include <neogfx/line_edit.hpp>
+#include <neogfx/spin_box.hpp>
 
 namespace ng = neogfx;
 
@@ -287,6 +288,10 @@ int main(int argc, char* argv[])
 		ng::line_edit lineEditPassword(layoutLineEdits);
 		lineEditPassword.set_text("Password");
 		lineEditPassword.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		ng::spin_box spinBox(layoutLineEdits);
+		spinBox.set_minimum(0);
+		spinBox.set_maximum(100);
+		spinBox.set_step(5);
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");
@@ -349,6 +354,7 @@ int main(int argc, char* argv[])
 		ng::horizontal_layout layout5(layout4);
 		ng::push_button buttonMinus(layout5, "-");
 		ng::push_button buttonPlus(layout5, "+");
+		ng::push_button buttonKerning(layout5, "kern");
 		buttonMinus.pressed([&app]()
 		{
 			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() - 0.1f));
@@ -356,6 +362,15 @@ int main(int argc, char* argv[])
 		buttonPlus.pressed([&app]()
 		{
 			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() + 0.1f));
+		});
+		buttonKerning.pressed([&app]()
+		{
+			auto fi = app.current_style().font_info();
+			if (fi.kerning())
+				fi.disable_kerning();
+			else
+				fi.enable_kerning();
+			app.current_style().set_font_info(fi);
 		});
 		ng::vertical_spacer spacer1(layout4);
 		ng::grid_layout keypad(4, 3, layout2);

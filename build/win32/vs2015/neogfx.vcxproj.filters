@@ -435,6 +435,9 @@
     <ClInclude Include="..\..\..\include\neogfx\line_edit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\spin_box.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\path.inl">
@@ -447,6 +450,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\flow_layout.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\spin_box.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
@@ -680,6 +686,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\line_edit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\spin_box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

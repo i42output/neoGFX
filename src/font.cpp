@@ -66,29 +66,29 @@ namespace neogfx
 	}
 
 	font_info::font_info() :
-		iSize{}, iUnderline{false}, iWeight{WeightNormal}
+		iSize{}, iUnderline{false}, iWeight{WeightNormal}, iKerning{ true }
 	{
 	}
 
 	font_info::font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
-		iFamilyName{aFamilyName}, iStyle{aStyle}, iUnderline{(aStyle & Underline) == Underline}, iWeight{weight_from_style(aStyle)}, iSize{aSize}
+		iFamilyName{aFamilyName}, iStyle{aStyle}, iUnderline{(aStyle & Underline) == Underline}, iWeight{weight_from_style(aStyle)}, iSize{aSize}, iKerning{ true }
 	{
 	}
 
 	font_info::font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
-		iFamilyName{aFamilyName}, iStyleName{aStyleName}, iUnderline(false), iWeight{weight_from_style_name(aStyleName)}, iSize{aSize}
+		iFamilyName{aFamilyName}, iStyleName{aStyleName}, iUnderline(false), iWeight{weight_from_style_name(aStyleName)}, iSize{aSize}, iKerning{ true }
 	{
 
 	}
 
 	font_info::font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
-		iFamilyName{aFamilyName}, iStyle{aStyle}, iStyleName{aStyleName}, iUnderline{(aStyle & Underline) == Underline}, iWeight{weight_from_style_name(aStyleName)}, iSize{aSize}
+		iFamilyName{aFamilyName}, iStyle{aStyle}, iStyleName{aStyleName}, iUnderline{(aStyle & Underline) == Underline}, iWeight{weight_from_style_name(aStyleName)}, iSize{aSize}, iKerning{true}
 	{
 
 	}
 
 	font_info::font_info(const font_info& aOther) :
-		iFamilyName{aOther.iFamilyName}, iStyle{aOther.iStyle}, iStyleName{aOther.iStyleName}, iUnderline{aOther.iUnderline}, iWeight{aOther.iWeight}, iSize{aOther.iSize}
+		iFamilyName{aOther.iFamilyName}, iStyle{aOther.iStyle}, iStyleName{aOther.iStyleName}, iUnderline{aOther.iUnderline}, iWeight{aOther.iWeight}, iSize{aOther.iSize}, iKerning{aOther.iKerning}
 	{
 	}
 
@@ -105,6 +105,7 @@ namespace neogfx
 		iPassword = aOther.iPassword;
 		iWeight = aOther.iWeight;
 		iSize = aOther.iSize;
+		iKerning = aOther.iKerning;
 		return *this;
 	}
 
@@ -183,6 +184,21 @@ namespace neogfx
 		return iSize;
 	}
 
+	bool font_info::kerning() const
+	{
+		return iKerning;
+	}
+
+	void font_info::enable_kerning()
+	{
+		iKerning = true;
+	}
+
+	void font_info::disable_kerning()
+	{
+		iKerning = false;
+	}
+
 	font_info font_info::with_size(point_size aSize) const
 	{
 		return font_info(iFamilyName, iStyle, iStyleName, aSize);
@@ -190,12 +206,13 @@ namespace neogfx
 
 	bool font_info::operator==(const font_info& aRhs) const
 	{
-		return iFamilyName == aRhs.iFamilyName && 
-			iStyle == aRhs.iStyle && 
-			iStyleName == aRhs.iStyleName && 
-			iUnderline == aRhs.iUnderline && 
+		return iFamilyName == aRhs.iFamilyName &&
+			iStyle == aRhs.iStyle &&
+			iStyleName == aRhs.iStyleName &&
+			iUnderline == aRhs.iUnderline &&
 			iPassword == aRhs.iPassword &&
-			iSize == aRhs.iSize;
+			iSize == aRhs.iSize &&
+			iKerning == aRhs.iKerning;
 	}
 
 	font_info::font_info(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
@@ -208,7 +225,8 @@ namespace neogfx
 			aStyle != boost::none ? 
 				weight_from_style(*aStyle) :
 				WeightNormal},
-		iSize{aSize}
+		iSize{aSize},
+		iKerning{true}
 	{
 	}
 
@@ -219,7 +237,7 @@ namespace neogfx
 
 	bool font_info::operator<(const font_info& aRhs) const
 	{
-		return std::tie(iFamilyName, iStyle, iStyleName, iUnderline, iPassword, iSize) < std::tie(aRhs.iFamilyName, aRhs.iStyle, aRhs.iStyleName, aRhs.iUnderline, aRhs.iPassword, aRhs.iSize);
+		return std::tie(iFamilyName, iStyle, iStyleName, iUnderline, iPassword, iSize, iKerning) < std::tie(aRhs.iFamilyName, aRhs.iStyle, aRhs.iStyleName, aRhs.iUnderline, aRhs.iPassword, aRhs.iSize, aRhs.iKerning);
 	}
 
 	font::font() :
@@ -351,8 +369,13 @@ namespace neogfx
 
 	dimension font::kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const
 	{
-		dimension result = iNativeFontFace->kerning(aLeftGlyphIndex, aRightGlyphIndex);
-		return result < 0.0 ? std::floor(result) : std::ceil(result);
+		if (kerning())
+		{
+			dimension result = iNativeFontFace->kerning(aLeftGlyphIndex, aRightGlyphIndex);
+			return result < 0.0 ? std::floor(result) : std::ceil(result);
+		}
+		else
+			return 0.0;
 	}
 
 	i_native_font_face& font::native_font_face() const

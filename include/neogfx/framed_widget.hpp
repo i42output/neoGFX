@@ -55,6 +55,8 @@ namespace neogfx
 		virtual bool transparent_background() const;
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
+	public:
+		void set_style(style_e aStyle);
 	protected:
 		virtual colour frame_colour() const;
 	protected:
