@@ -26,19 +26,19 @@ namespace neogfx
 {
 	template <typename T>
 	basic_spin_box<T>::basic_spin_box() :
-		spin_box_impl(), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{"%1%"}
+		spin_box_impl(), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{"%1%"}, iSettingNormalizedValue{ false }
 	{
 	}
 
 	template <typename T>
 	basic_spin_box<T>::basic_spin_box(i_widget& aParent) :
-		spin_box_impl(aParent), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{ "%1%" }
+		spin_box_impl(aParent), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{ "%1%" }, iSettingNormalizedValue{ false }
 	{
 	}
 
 	template <typename T>
 	basic_spin_box<T>::basic_spin_box(i_layout& aLayout) :
-		spin_box_impl(aLayout), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{ "%1%" }
+		spin_box_impl(aLayout), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{ "%1%" }, iSettingNormalizedValue{ false }
 	{
 	}
 
@@ -97,7 +97,8 @@ namespace neogfx
 	void basic_spin_box<T>::set_value(value_type aValue)
 	{
 		iValue = aValue;
-		spin_box_impl::set_normalized_value(normalized_value(), true);
+		if (!iSettingNormalizedValue)
+			spin_box_impl::set_normalized_value(normalized_value(), true);
 		value_changed.trigger();
 	}
 
@@ -135,9 +136,11 @@ namespace neogfx
 	template <typename T>
 	void basic_spin_box<T>::set_normalized_value(double aValue, bool aUpdateTextBox = false)
 	{
+		iSettingNormalizedValue = true;
 		auto range = maximum() - minimum();
 		set_value(static_cast<value_type>(range * aValue + minimum()));
 		spin_box_impl::set_normalized_value(aValue, aUpdateTextBox);
+		iSettingNormalizedValue = false;
 	}
 
 	template <typename T>
@@ -152,6 +155,15 @@ namespace neogfx
 		value_type result{};
 		iss >> result;
 		return (static_cast<double>(result) - minimum()) / range;
+	}
+
+	template <typename T>
+	std::string basic_spin_box<T>::normalized_value_to_string(double aNormalizedValue) const
+	{
+		auto range = maximum() - minimum();
+		std::ostringstream oss;
+		oss << static_cast<value_type>(aNormalizedValue * range);
+		return oss.str();
 	}
 
 	template <typename T>

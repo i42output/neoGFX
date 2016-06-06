@@ -351,8 +351,8 @@ namespace neogfx
 		std::string text() const;
 		std::size_t set_text(const std::string& aText);
 		std::size_t set_text(const std::string& aText, const style& aStyle);
-		std::size_t insert_text(const std::string& aText);
-		std::size_t insert_text(const std::string& aText, const style& aStyle);
+		std::size_t insert_text(const std::string& aText, bool aMoveCursor = false);
+		std::size_t insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
 		void delete_text(position_type aStart, position_type aEnd);
 	private:
 		void init();

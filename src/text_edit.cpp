@@ -278,7 +278,8 @@ namespace neogfx
 				if (cursor().position() > 0)
 				{
 					delete_text(cursor().position() - 1, cursor().position());
-					cursor().set_position(cursor().position() - 1);
+					if (cursor().position() > 0)
+						cursor().set_position(cursor().position() - 1);
 					make_cursor_visible(true);
 				}
 			}
@@ -361,9 +362,7 @@ namespace neogfx
 	bool text_edit::text_input(const std::string& aText)
 	{
 		delete_any_selection();
-		auto len = insert_text(aText);
-		// todo: move cursor left if RTL text
-		cursor().set_position(cursor().position() + len);
+		insert_text(aText, true);
 		return true;
 	}
 
@@ -794,15 +793,15 @@ namespace neogfx
 		iCursor.set_position(0);
 		iText.clear();
 		iGlyphs.clear();
-		return insert_text(aText, aStyle);
+		return insert_text(aText, aStyle, true);
 	}
 
-	std::size_t text_edit::insert_text(const std::string& aText)
+	std::size_t text_edit::insert_text(const std::string& aText, bool aMoveCursor)
 	{
-		return insert_text(aText, default_style());
+		return insert_text(aText, default_style(), aMoveCursor);
 	}
 
-	std::size_t text_edit::insert_text(const std::string& aText, const style& aStyle)
+	std::size_t text_edit::insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor)
 	{
 		if (iNormalizedTextBuffer.capacity() < aText.size())
 			iNormalizedTextBuffer.reserve(aText.size());
@@ -833,6 +832,9 @@ namespace neogfx
 		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
 		refresh_paragraph(insertionPoint);
 		update();
+		// todo: move cursor left if RTL text
+		if (aMoveCursor)
+			cursor().set_position(cursor().position() + eos);
 		text_changed.trigger();
 		return eos;
 	}
