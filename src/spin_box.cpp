@@ -91,11 +91,13 @@ namespace neogfx
 
 		iTextBox.text_changed([this]()
 		{
-			auto newNormalizedValue = string_to_normalized_value(iTextBox.text());
+			auto text = iTextBox.text();
+			auto newNormalizedValue = string_to_normalized_value(text);
+			auto firstCharacter = text.find_first_not_of(' ');
 			if (newNormalizedValue < 0.0)
 				iTextBox.set_text(normalized_value_to_string(0.0));
 			else if (newNormalizedValue > 1.0)
-				iTextBox.set_text(normalized_value_to_string(1.0));
+				iTextBox.set_text(normalized_value_to_string(text.find('-') == firstCharacter && firstCharacter != std::string::npos ? 0.0 : 1.0));
 			else if (iNormalizedValue != newNormalizedValue)
 				set_normalized_value(newNormalizedValue);
 		});
