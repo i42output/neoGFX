@@ -126,9 +126,9 @@ namespace neogfx
 		}
 	}
 
-	void radio_button::handle_pressed()
+	void radio_button::handle_clicked()
 	{
-		button::handle_pressed();
+		button::handle_clicked();
 		set_on();
 	}
 

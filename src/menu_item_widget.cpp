@@ -178,20 +178,20 @@ namespace neogfx
 	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point&, key_modifiers_e aKeyModifiers)
 	{
 		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::SubMenu)
-			handle_pressed();
+			handle_clicked();
 	}
 
 	void menu_item_widget::mouse_button_released(mouse_button aButton, const point&)
 	{
 		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::Action)
-			handle_pressed();
+			handle_clicked();
 	}
 
 	bool menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
 	{
 		if (aScanCode == ScanCode_RETURN)
 		{
-			handle_pressed();
+			handle_clicked();
 			return true;
 		}
 		return false;
@@ -204,7 +204,7 @@ namespace neogfx
 
 	void menu_item_widget::mnemonic_execute()
 	{
-		handle_pressed();
+		handle_clicked();
 	}
 
 	i_widget& menu_item_widget::mnemonic_widget()
@@ -296,7 +296,7 @@ namespace neogfx
 		}, this);
 	}
 
-	void menu_item_widget::handle_pressed()
+	void menu_item_widget::handle_clicked()
 	{
 		if (!iMenuItem.availabie())
 			return;

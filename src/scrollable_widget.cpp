@@ -65,11 +65,6 @@ namespace neogfx
 		/* todo */
 	}
 
-	const i_surface& scrollable_widget::surface() const
-	{
-		return framed_widget::surface();
-	}
-
 	void scrollable_widget::layout_items_completed()
 	{
 		framed_widget::layout_items_completed();
@@ -371,6 +366,11 @@ namespace neogfx
 	colour scrollable_widget::scrollbar_colour(const i_scrollbar&) const
 	{
 		return background_colour();
+	}
+
+	const i_surface& scrollable_widget::scrollbar_surface() const
+	{
+		return surface();
 	}
 
 	void scrollable_widget::update_scrollbar_visibility()

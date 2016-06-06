@@ -126,9 +126,9 @@ namespace neogfx
 		return convert_units(*this, su.saved_units(), push_button::minimum_size(aAvailableSpace) + as_units(*this, UnitsMillimetres, size(25.4/96.0, 25.4/96.0)).ceil() * size(4.0, 4.0));
 	}
 
-	void tab_button::handle_pressed()
+	void tab_button::handle_clicked()
 	{
-		push_button::handle_pressed();
+		push_button::handle_clicked();
 		select();
 	}
 

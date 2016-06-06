@@ -67,9 +67,10 @@ namespace neogfx
 		set_margins(neogfx::margins{});
 		iPrimaryLayout.set_margins(neogfx::margins{});
 		iSecondaryLayout.set_margins(neogfx::margins{});
-		iStepUpButton.set_minimum_size(size{16, 0});
+		iSecondaryLayout.set_spacing(size{});
+		iStepUpButton.set_minimum_size(size{16, 8});
 		iStepUpButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-		iStepDownButton.set_minimum_size(size{16, 0});
+		iStepDownButton.set_minimum_size(size{16, 8});
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iTextBox.set_style(framed_widget::NoFrame);
 	}

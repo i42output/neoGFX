@@ -48,7 +48,7 @@ namespace neogfx
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 	protected:
-		virtual void handle_pressed();
+		virtual void handle_clicked();
 	private:
 		void init();
 	private:

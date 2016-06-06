@@ -32,6 +32,8 @@ namespace neogfx
 	{
 	public:
 		event<> pressed;
+		event<> clicked;
+		event<> released;
 	public:
 		event<> checked;
 		event<> unchecked;
@@ -72,11 +74,12 @@ namespace neogfx
 		const text_widget& text() const;
 		text_widget& text();
 	protected:
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 	protected:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	protected:
-		virtual void handle_pressed();
+		virtual void handle_clicked();
 	protected:
 		virtual const boost::optional<bool>& checked_state() const;
 		virtual bool set_checked_state(const boost::optional<bool>& aCheckedState);

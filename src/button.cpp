@@ -150,6 +150,12 @@ namespace neogfx
 		return label().text();
 	}
 
+	void button::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+		if (aButton == mouse_button::Left)
+			pressed.trigger();
+	}
 	void button::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		bool wasCapturing = capturing();
@@ -157,7 +163,10 @@ namespace neogfx
 		if (wasCapturing && client_rect().contains(aPosition))
 		{
 			if (aButton == mouse_button::Left)
-				handle_pressed();
+			{
+				handle_clicked();
+				released.trigger();
+			}
 		}
 	}
 
@@ -165,15 +174,15 @@ namespace neogfx
 	{
 		if (aScanCode == ScanCode_SPACE)
 		{
-			handle_pressed();
+			handle_clicked();
 			return true;
 		}
 		return false;
 	}
 
-	void button::handle_pressed()
+	void button::handle_clicked()
 	{
-		pressed.trigger();
+		clicked.trigger();
 		if (iCheckable != NotCheckable)
 			toggle();
 	}
@@ -207,7 +216,7 @@ namespace neogfx
 
 	void button::mnemonic_execute()
 	{
-		handle_pressed();
+		handle_clicked();
 	}
 
 	i_widget& button::mnemonic_widget()

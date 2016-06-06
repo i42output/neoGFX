@@ -56,7 +56,7 @@ public:
 	keypad_button(ng::text_edit& aTextEdit, uint32_t aNumber) :
 		ng::push_button(boost::lexical_cast<std::string>(aNumber)), iTextEdit(aTextEdit)
 	{
-		pressed([this, aNumber]()
+		clicked([this, aNumber]()
 		{
 			ng::app::instance().change_style("Keypad").
 				set_colour(aNumber != 9 ? ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0) : ng::colour::LightGoldenrod);
@@ -299,11 +299,11 @@ int main(int argc, char* argv[])
 		ng::push_button button7(layout2, "Toggle\n&mute.");
 		button7.set_foreground_colour(ng::colour::LightCoral);
 		button7.set_maximum_size(ng::size(128, 64));
-		button7.pressed([&muteAction]() { muteAction.toggle(); });
+		button7.clicked([&muteAction]() { muteAction.toggle(); });
 		layout2.add_spacer().set_weight(ng::size(1.0));
 		ng::push_button button8(layout2, "Enable/disable\ncontacts action.");
 		button8.set_foreground_colour(ng::colour(255, 235, 160));
-		button8.pressed([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
+		button8.clicked([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
 		ng::horizontal_layout layout3(layoutButtons);
 		std::srand(4242);
 		for (uint32_t i = 0; i < 10; ++i)
@@ -343,7 +343,7 @@ int main(int argc, char* argv[])
 		ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
 		ng::vertical_layout layout4(layout2);
 		ng::push_button button9(layout4, "Default/Slate\nStyle");
-		button9.pressed([&app]()
+		button9.clicked([&app]()
 		{
 			if (app.current_style().name() == "Default")
 				app.change_style("Slate");
@@ -355,15 +355,15 @@ int main(int argc, char* argv[])
 		ng::push_button buttonMinus(layout5, "-");
 		ng::push_button buttonPlus(layout5, "+");
 		ng::push_button buttonKerning(layout5, "kern");
-		buttonMinus.pressed([&app]()
+		buttonMinus.clicked([&app]()
 		{
 			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() - 0.1f));
 		});
-		buttonPlus.pressed([&app]()
+		buttonPlus.clicked([&app]()
 		{
 			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() + 0.1f));
 		});
-		buttonKerning.pressed([&app]()
+		buttonKerning.clicked([&app]()
 		{
 			auto fi = app.current_style().font_info();
 			if (fi.kerning())
@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
 		ng::table_view tableView(layoutItemViews);
 		tableView.set_minimum_size(ng::size(128, 128));
 		ng::push_button button10(layoutItemViews, "Toggle List\nHeader View");
-		button10.pressed([&tableView]()
+		button10.clicked([&tableView]()
 		{
 			if (tableView.column_header().visible())
 				tableView.column_header().hide();
@@ -505,12 +505,12 @@ int main(int argc, char* argv[])
 		ng::text_edit textEdit2(layoutEditor);
 		textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::push_button editorStyle1(layoutEditor, "Style 1");
-		editorStyle1.pressed([&textEdit2]()
+		editorStyle1.clicked([&textEdit2]()
 		{
 			textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		});
 		ng::push_button editorStyle2(layoutEditor, "Style 2");
-		editorStyle2.pressed([&textEdit2]()
+		editorStyle2.clicked([&textEdit2]()
 		{
 			textEdit2.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
 		});

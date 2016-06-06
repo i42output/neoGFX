@@ -61,7 +61,7 @@ namespace neogfx
 		point sub_menu_position() const;
 	private:
 		void init();
-		virtual void handle_pressed();
+		virtual void handle_clicked();
 	private:
 		dimension iGap = 9.0;
 		dimension iIconSize = 16.0;

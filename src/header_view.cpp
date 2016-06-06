@@ -53,7 +53,7 @@ namespace neogfx
 							neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Fixed});
 						button.set_minimum_size(optional_size{});
 						button.enable(true);
-						button.pressed.subscribe([&aParent, i]()
+						button.clicked.subscribe([&aParent, i]()
 						{
 							aParent.surface().save_mouse_cursor();
 							aParent.surface().set_mouse_cursor(mouse_system_cursor::Wait);

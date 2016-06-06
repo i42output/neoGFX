@@ -52,7 +52,7 @@ namespace neogfx
 		virtual neogfx::size_policy size_policy() const;
 	protected:
 		virtual void paint(graphics_context& aGraphicsContext) const;
-		virtual void handle_pressed();
+		virtual void handle_clicked();
 	protected:
 		virtual const radio_button* next_radio_button() const;
 		virtual radio_button* next_radio_button();

@@ -51,7 +51,7 @@ namespace neogfx
 		virtual colour border_mid_colour() const;
 	protected:
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual void handle_pressed();
+		virtual void handle_clicked();
 	protected:
 		virtual colour foreground_colour() const;
 	protected:

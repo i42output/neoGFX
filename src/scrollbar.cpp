@@ -373,13 +373,13 @@ namespace neogfx
 
 	void scrollbar::update(const i_units_context& aContext, const update_params_t& aUpdateParams)
 	{
-		if (clicked_element() != i_scrollbar::ElementNone && clicked_element() != element_at(aContext, iContainer.surface().mouse_position()))
+		if (clicked_element() != i_scrollbar::ElementNone && clicked_element() != element_at(aContext, iContainer.scrollbar_surface().mouse_position()))
 			pause();
 		else
 			resume();
 		if (clicked_element() == i_scrollbar::ElementThumb)
 		{
-			point delta = (aUpdateParams.is<point>() ? static_variant_cast<point>(aUpdateParams) : iContainer.surface().mouse_position()) - iThumbClickedPosition;
+			point delta = (aUpdateParams.is<point>() ? static_variant_cast<point>(aUpdateParams) : iContainer.scrollbar_surface().mouse_position()) - iThumbClickedPosition;
 			scoped_units su(aContext, UnitsPixels);
 			rect g = iContainer.scrollbar_geometry(aContext, *this);
 			if (iType == Vertical)
@@ -398,7 +398,7 @@ namespace neogfx
 			}
 		}
 		if (clicked_element() == i_scrollbar::ElementNone)
-			hover_element(element_at(aContext, iContainer.surface().mouse_position()));
+			hover_element(element_at(aContext, iContainer.scrollbar_surface().mouse_position()));
 		else
 			unhover_element();
 		iContainer.scrollbar_updated(*this, Updated);
@@ -457,7 +457,7 @@ namespace neogfx
 			}, 500);
 			break;
 		case ElementThumb:
-			iThumbClickedPosition = iContainer.surface().mouse_position();
+			iThumbClickedPosition = iContainer.scrollbar_surface().mouse_position();
 			iThumbClickedValue = position();
 			break;
 		default:
@@ -506,23 +506,23 @@ namespace neogfx
 	{
 		if (iScrollTrackPosition == boost::none)
 		{
-			iScrollTrackPosition = iContainer.surface().mouse_position();
+			iScrollTrackPosition = iContainer.scrollbar_surface().mouse_position();
 			iTimer = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.again();
-				point delta = iContainer.surface().mouse_position() - *iScrollTrackPosition;
-				scoped_units su(iContainer.surface(), UnitsPixels);
-				rect g = iContainer.scrollbar_geometry(iContainer.surface(), *this);
+				point delta = iContainer.scrollbar_surface().mouse_position() - *iScrollTrackPosition;
+				scoped_units su(iContainer.scrollbar_surface(), UnitsPixels);
+				rect g = iContainer.scrollbar_geometry(iContainer.scrollbar_surface(), *this);
 				if (iType == Vertical)
 				{
-					g.y = element_geometry(iContainer.surface(), ElementUpButton).bottom() + 1.0;
-					g.cy = element_geometry(iContainer.surface(), ElementDownButton).top() - 1.0 - g.y;
+					g.y = element_geometry(iContainer.scrollbar_surface(), ElementUpButton).bottom() + 1.0;
+					g.cy = element_geometry(iContainer.scrollbar_surface(), ElementDownButton).top() - 1.0 - g.y;
 					set_position(position() + static_cast<value_type>(delta.y * 0.25f / g.height()) * (maximum() - minimum()));
 				}
 				else
 				{
-					g.x = element_geometry(iContainer.surface(), ElementUpButton).right() + 1.0;
-					g.cx = element_geometry(iContainer.surface(), ElementDownButton).left() - 1.0 - g.x;
+					g.x = element_geometry(iContainer.scrollbar_surface(), ElementUpButton).right() + 1.0;
+					g.cx = element_geometry(iContainer.scrollbar_surface(), ElementDownButton).left() - 1.0 - g.x;
 					set_position(position() + static_cast<value_type>(delta.x * 0.25f / g.width()) * (maximum() - minimum()));
 				}
 			}, 50);

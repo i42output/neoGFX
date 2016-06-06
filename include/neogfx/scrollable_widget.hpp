@@ -52,7 +52,6 @@ namespace neogfx
 	public:
 		void scroll_to(i_widget& aChild);
 	public:
-		virtual const i_surface& surface() const;
 		virtual void layout_items_completed();
 	public:
 		virtual void resized();
@@ -80,6 +79,7 @@ namespace neogfx
 		virtual rect scrollbar_geometry(const i_units_context& aContext, const i_scrollbar& aScrollbar) const;
 		virtual void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason);
 		virtual colour scrollbar_colour(const i_scrollbar& aScrollbar) const;
+		virtual const i_surface& scrollbar_surface() const;
 	protected:
 		virtual void update_scrollbar_visibility();
 		virtual void update_scrollbar_visibility(usv_stage_e aStage);

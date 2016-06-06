@@ -123,9 +123,9 @@ namespace neogfx
 		layout_items(false);
 	}
 
-	void toolbar_button::handle_pressed()
+	void toolbar_button::handle_clicked()
 	{
-		push_button::handle_pressed();
+		push_button::handle_clicked();
 		if (iAction.is_enabled() && !iAction.is_separator())
 		{
 			iAction.triggered.trigger();
