@@ -138,7 +138,15 @@ namespace neogfx
 	{
 		iSettingNormalizedValue = true;
 		auto range = maximum() - minimum();
-		set_value(static_cast<value_type>(range * aValue + minimum()));
+		auto denormalized = range * aValue + minimum();
+		if (std::is_integral<value_type>())
+		{
+			if (denormalized < 0.0)
+				denormalized = std::floor(denormalized + 0.5);
+			else if (denormalized > 0.0)
+				denormalized = std::ceil(denormalized - 0.5);
+		}
+		set_value(static_cast<value_type>(denormalized));
 		spin_box_impl::set_normalized_value(aValue, aUpdateTextBox);
 		iSettingNormalizedValue = false;
 	}

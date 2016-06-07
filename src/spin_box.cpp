@@ -96,9 +96,9 @@ namespace neogfx
 			if (newNormalizedValue)
 			{
 				if (*newNormalizedValue < 0.0)
-					set_normalized_value(0.0, true);
+					set_normalized_value(0.0);
 				else if (*newNormalizedValue > 1.0)
-					set_normalized_value(1.0, true);
+					set_normalized_value(1.0);
 				else
 					set_normalized_value(*newNormalizedValue);
 			}
