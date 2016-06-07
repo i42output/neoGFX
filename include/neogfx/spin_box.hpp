@@ -36,6 +36,7 @@ namespace neogfx
 		spin_box_impl();
 		spin_box_impl(i_widget& aParent);
 		spin_box_impl(i_layout& aLayout);
+		~spin_box_impl();
 	protected:
 		virtual colour frame_colour() const;
 	public:
@@ -49,6 +50,7 @@ namespace neogfx
 		virtual std::string value_to_string() const = 0;
 	private:
 		void init();
+		void update_arrows();
 	private:
 		double iNormalizedValue;
 		horizontal_layout iPrimaryLayout;
@@ -57,6 +59,8 @@ namespace neogfx
 		push_button iStepUpButton;
 		push_button iStepDownButton;
 		boost::optional<neolib::callback_timer> iStepper;
+		mutable boost::optional<std::pair<colour, texture>> iUpArrow;
+		mutable boost::optional<std::pair<colour, texture>> iDownArrow;
 	};
 
 	template <typename T>
