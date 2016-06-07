@@ -289,9 +289,13 @@ int main(int argc, char* argv[])
 		lineEditPassword.set_text("Password");
 		lineEditPassword.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::spin_box spinBox(layoutLineEdits);
-		spinBox.set_minimum(0);
+		spinBox.set_minimum(20);
 		spinBox.set_maximum(100);
 		spinBox.set_step(5);
+		ng::decimal_spin_box decimalSpinBox(layoutLineEdits);
+		decimalSpinBox.set_minimum(-10);
+		decimalSpinBox.set_maximum(20);
+		decimalSpinBox.set_step(0.5);
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");

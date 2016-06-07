@@ -28,8 +28,8 @@ namespace neogfx
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
-		iStepUpButton{ iSecondaryLayout },
-		iStepDownButton{ iSecondaryLayout }
+		iStepUpButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox },
+		iStepDownButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox }
 	{
 		init();
 	}
@@ -40,8 +40,8 @@ namespace neogfx
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
-		iStepUpButton{ iSecondaryLayout },
-		iStepDownButton{ iSecondaryLayout }
+		iStepUpButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox },
+		iStepDownButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox }
 	{
 		init();
 	}
@@ -52,8 +52,8 @@ namespace neogfx
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
-		iStepUpButton{ iSecondaryLayout },
-		iStepDownButton{ iSecondaryLayout }
+		iStepUpButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox },
+		iStepDownButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox }
 	{
 		init();
 	}
@@ -88,9 +88,11 @@ namespace neogfx
 		iPrimaryLayout.set_margins(neogfx::margins{});
 		iSecondaryLayout.set_margins(neogfx::margins{});
 		iSecondaryLayout.set_spacing(size{});
-		iStepUpButton.set_minimum_size(size{16, 8});
+		iStepUpButton.set_margins(neogfx::margins{});
+		iStepUpButton.set_minimum_size(size{15, 8});
 		iStepUpButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-		iStepDownButton.set_minimum_size(size{16, 8});
+		iStepDownButton.set_margins(neogfx::margins{});
+		iStepDownButton.set_minimum_size(size{15, 8});
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iTextBox.set_style(framed_widget::NoFrame);
 
@@ -164,7 +166,7 @@ namespace neogfx
 
 	void spin_box_impl::update_arrows()
 	{
-		auto ink = foreground_colour().light() ? foreground_colour().darker(0x80) : foreground_colour().lighter(0x80);
+		auto ink = app::instance().current_style().text_colour();
 		if (iUpArrow == boost::none || iUpArrow->first != ink)
 		{
 			const uint8_t sUpArrowImagePattern[5][9]

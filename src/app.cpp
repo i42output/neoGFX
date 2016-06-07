@@ -196,6 +196,7 @@ namespace neogfx
 		if (iCurrentStyle != existingStyle)
 		{
 			iCurrentStyle = existingStyle;
+			current_style_changed.trigger();
 			surface_manager().layout_surfaces();
 			surface_manager().invalidate_surfaces();
 		}

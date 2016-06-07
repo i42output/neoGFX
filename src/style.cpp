@@ -67,7 +67,10 @@ namespace neogfx
 		{
 			iMargins = aMargins;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().layout_surfaces();
+			}
 		}
 	}
 
@@ -82,7 +85,10 @@ namespace neogfx
 		{
 			iSpacing = aSpacing;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().layout_surfaces();
+			}
 		}
 	}
 
@@ -104,7 +110,10 @@ namespace neogfx
 		{
 			iColour = aColour;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().invalidate_surfaces();
+			}
 		}
 	}
 
@@ -127,7 +136,10 @@ namespace neogfx
 		{
 			iBackgroundColour = aBackgroundColour;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().invalidate_surfaces();
+			}
 		}
 	}
 
@@ -150,7 +162,10 @@ namespace neogfx
 		{
 			iForegroundColour = aForegroundColour;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().invalidate_surfaces();
+			}
 		}
 	}
 
@@ -173,7 +188,10 @@ namespace neogfx
 		{
 			iTextColour = aTextColour;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().invalidate_surfaces();
+			}
 		}
 	}
 
@@ -196,7 +214,10 @@ namespace neogfx
 		{
 			iSelectionColour = aSelectionColour;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().invalidate_surfaces();
+			}
 		}
 	}
 
@@ -219,7 +240,10 @@ namespace neogfx
 		{
 			iHoverColour = aHoverColour;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().invalidate_surfaces();
+			}
 		}
 	}
 
@@ -242,7 +266,10 @@ namespace neogfx
 		{
 			iWidgetDetailPrimaryColour = aWidgetDetailPrimaryColour;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().invalidate_surfaces();
+			}
 		}
 	}
 
@@ -265,7 +292,10 @@ namespace neogfx
 		{
 			iWidgetDetailSecondaryColour = aWidgetDetailSecondaryColour;
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().invalidate_surfaces();
+			}
 		}
 	}
 
@@ -309,7 +339,10 @@ namespace neogfx
 			iFallbackFontInfo = aFontInfo;
 			iFallbackFont.reset();
 			if (&app::instance().current_style() == this)
+			{
+				app::instance().current_style_changed.trigger();
 				app::instance().surface_manager().layout_surfaces();
+			}
 		}
 	}
 

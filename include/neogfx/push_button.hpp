@@ -33,6 +33,7 @@ namespace neogfx
 			ButtonStyleNormal,
 			ButtonStyleItemViewHeader,
 			ButtonStyleTab,
+			ButtonStyleSpinBox,
 			ButtonStyleToolbar
 		};
 		static const uint32_t kMaxAnimationFrame = 20;
