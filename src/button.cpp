@@ -156,6 +156,14 @@ namespace neogfx
 		if (aButton == mouse_button::Left)
 			pressed.trigger();
 	}
+
+	void button::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+		if (aButton == mouse_button::Left)
+			double_clicked.trigger();
+	}
+
 	void button::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		bool wasCapturing = capturing();

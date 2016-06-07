@@ -93,16 +93,20 @@ namespace neogfx
 		{
 			auto text = iTextBox.text();
 			auto newNormalizedValue = string_to_normalized_value(text);
-			auto firstCharacter = text.find_first_not_of(' ');
-			if (newNormalizedValue < 0.0)
-				iTextBox.set_text(normalized_value_to_string(0.0));
-			else if (newNormalizedValue > 1.0)
-				iTextBox.set_text(normalized_value_to_string(text.find('-') == firstCharacter && firstCharacter != std::string::npos ? 0.0 : 1.0));
-			else if (iNormalizedValue != newNormalizedValue)
-				set_normalized_value(newNormalizedValue);
+			if (newNormalizedValue)
+			{
+				if (*newNormalizedValue < 0.0)
+					set_normalized_value(0.0, true);
+				else if (*newNormalizedValue > 1.0)
+					set_normalized_value(1.0, true);
+				else
+					set_normalized_value(*newNormalizedValue);
+			}
+			else if (!text.empty() && (text != "+" && text != "-" && text.back() != '+' && text.back() != '-' && text.back() != 'e' && text.back() != 'E'))
+				iTextBox.set_text("");
 		});
 
-		iStepUpButton.pressed([this]()
+		auto step_up = [this]()
 		{
 			set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())), true);
 			iStepper.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
@@ -111,13 +115,15 @@ namespace neogfx
 				aTimer.again();
 				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())), true);
 			}, 500);
-		});
+		};
+		iStepUpButton.pressed(step_up);
+		iStepUpButton.double_clicked(step_up);
 		iStepUpButton.released([this]()
 		{
 			iStepper = boost::none;
 		});
 
-		iStepDownButton.pressed([this]()
+		auto step_down = [this]()
 		{
 			set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())), true);
 			iStepper.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
@@ -126,7 +132,9 @@ namespace neogfx
 				aTimer.again();
 				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())), true);
 			}, 500);
-		});
+		};
+		iStepDownButton.pressed(step_down);
+		iStepDownButton.double_clicked(step_down);
 		iStepDownButton.released([this]()
 		{
 			iStepper = boost::none;

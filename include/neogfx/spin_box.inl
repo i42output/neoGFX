@@ -144,7 +144,7 @@ namespace neogfx
 	}
 
 	template <typename T>
-	double basic_spin_box<T>::string_to_normalized_value(const std::string& aText) const
+	boost::optional<double> basic_spin_box<T>::string_to_normalized_value(const std::string& aText) const
 	{
 		if (aText.empty())
 			return 0.0;
@@ -153,7 +153,11 @@ namespace neogfx
 			return 1.0;
 		std::istringstream iss(aText);
 		value_type result{};
-		iss >> result;
+		if (!(iss >> result))
+			return boost::optional<double>();
+		std::string guff;
+		if (iss >> guff)
+			return boost::optional<double>();
 		return (static_cast<double>(result) - minimum()) / range;
 	}
 

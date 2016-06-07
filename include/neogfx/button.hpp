@@ -33,6 +33,7 @@ namespace neogfx
 	public:
 		event<> pressed;
 		event<> clicked;
+		event<> double_clicked;
 		event<> released;
 	public:
 		event<> checked;
@@ -75,6 +76,7 @@ namespace neogfx
 		text_widget& text();
 	protected:
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 	protected:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);

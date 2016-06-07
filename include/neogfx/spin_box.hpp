@@ -44,7 +44,7 @@ namespace neogfx
 		virtual double normalized_step_value() const = 0;
 		virtual double normalized_value() const = 0;
 		virtual void set_normalized_value(double aValue, bool aUpdateTextBox = false);
-		virtual double string_to_normalized_value(const std::string& aText) const = 0;
+		virtual boost::optional<double> string_to_normalized_value(const std::string& aText) const = 0;
 		virtual std::string normalized_value_to_string(double aNormalizedValue) const = 0;
 		virtual std::string value_to_string() const = 0;
 	private:
@@ -83,7 +83,7 @@ namespace neogfx
 		virtual double normalized_step_value() const;
 		virtual double normalized_value() const;
 		virtual void set_normalized_value(double aValue, bool aUpdateTextBox = false);
-		virtual double string_to_normalized_value(const std::string& aText) const;
+		virtual boost::optional<double> string_to_normalized_value(const std::string& aText) const;
 		virtual std::string normalized_value_to_string(double aNormalizedValue) const;
 		virtual std::string value_to_string() const;
 	private:
