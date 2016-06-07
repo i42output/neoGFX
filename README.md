@@ -21,14 +21,16 @@ Button                    | 100     |
 Table View                | 85      |     Selection, Icon
 Tree View                 | 0       |
 List View                 | 0       |
-Line Edit                 | 0       |
-Text Edit                 | 0       |
+Text Edit                 | 80      |
+Line Edit                 | 100     |
+Spin Box                  | 60      |
 Check Box                 | 100     |     
 Radio Button              | 100     |
 Combo Box                 | 0       |
+Colour Gradient Selector  | 0       |
 Colour Picker             | 0       |
 File Browsers (Native)    | 0       |
 XML Resource Description  | 0       |
 Skins                     | 0       |
 
-Last updated: 20/05/16
+Last updated: 07/06/16
