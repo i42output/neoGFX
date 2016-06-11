@@ -66,17 +66,17 @@ namespace neogfx
 			{ Discard,				{ DestructiveRole, "Discard"} },
 			{ Apply,				{ ApplyRole, "Apply"} },
 			{ Reset,				{ ResetRole, "Reset"} },
-			{ RestoreDefaults,		{ ResetRole, "RestoreDefaults"} },
+			{ RestoreDefaults,		{ ResetRole, "Restore Defaults"} },
 			{ Yes,					{ YesRole, "Yes"} },
 			{ No,					{ NoRole, "No"} },
-			{ YesToAll,				{ YesRole, "YesToAll"} },
-			{ NoToAll,				{ NoRole, "NoToAll"} },
+			{ YesToAll,				{ YesRole, "Yes To All"} },
+			{ NoToAll,				{ NoRole, "No To All"} },
 			{ Abort,				{ RejectRole, "Abort"} },
 			{ Retry,				{ AcceptRole, "Retry"} },
 			{ Ignore,				{ AcceptRole, "Ignore"} },
 			{ Open,					{ AcceptRole, "Open"} },
 			{ Save,					{ AcceptRole, "Save"} },
-			{ SaveAll,				{ AcceptRole, "SaveAll"} },
+			{ SaveAll,				{ AcceptRole, "Save All"} },
 			{ Help,					{ HelpRole, "Help"} }
 		};
 		auto bi = sButtonDetails.find(aStandardButton);
