@@ -25,7 +25,7 @@
 namespace neogfx
 {
 	push_button::push_button(const std::string& aText, style_e aStyle) :
-		button(aText, (aStyle == ButtonStyleNormal ? alignment::Centre : alignment::Left) | alignment::VCentre),
+		button(aText, (aStyle == ButtonStyleNormal || aStyle == ButtonStyleButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false), 
 		iAnimationFrame(0),
 		iStyle(aStyle)
@@ -40,7 +40,7 @@ namespace neogfx
 	}
 	
 	push_button::push_button(i_widget& aParent, const std::string& aText, style_e aStyle) :
-		button(aParent, aText, (aStyle == ButtonStyleNormal ? alignment::Centre : alignment::Left) | alignment::VCentre),
+		button(aParent, aText, (aStyle == ButtonStyleNormal || aStyle == ButtonStyleButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false), 
 		iAnimationFrame(0),
 		iStyle(aStyle)
@@ -55,7 +55,7 @@ namespace neogfx
 	}
 
 	push_button::push_button(i_layout& aLayout, const std::string& aText, style_e aStyle) :
-		button(aLayout, aText, (aStyle == ButtonStyleNormal ? alignment::Centre : alignment::Left) | alignment::VCentre),
+		button(aLayout, aText, (aStyle == ButtonStyleNormal || aStyle == ButtonStyleButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false),
 		iAnimationFrame(0),
 		iStyle(aStyle)
@@ -67,6 +67,24 @@ namespace neogfx
 			label().set_margins(neogfx::margins(0.0));
 			label().text().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
 		}
+	}
+
+	size push_button::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		if (has_minimum_size())
+			return button::minimum_size(aAvailableSpace);
+		size result = button::minimum_size(aAvailableSpace);
+		if (iStyle == ButtonStyleButtonBox)
+		{
+			if (iStandardButtonWidth == boost::none || iStandardButtonWidth->first != label().text().font())
+			{
+				graphics_context gc(*this);
+				iStandardButtonWidth.emplace(label().text().font(), gc.text_extent("#StdButton", label().text().font()));
+				iStandardButtonWidth->second.cx += (result.cx - label().text().minimum_size(aAvailableSpace).cx);
+			}
+			result.cx = std::max(result.cx, iStandardButtonWidth->second.cx);
+		}
+		return result;
 	}
 
 	void push_button::paint_non_client(graphics_context& aGraphicsContext) const
@@ -90,7 +108,7 @@ namespace neogfx
 		scoped_units su(*this, UnitsPixels);
 		neogfx::path outline = path();
 		dimension penWidth = device_metrics().horizontal_dpi() / 96;
-		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleTab || iStyle == ButtonStyleSpinBox)
+		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleButtonBox || iStyle == ButtonStyleTab || iStyle == ButtonStyleSpinBox)
 			outline.deflate(penWidth * 2.0, penWidth * 2.0);
 		aGraphicsContext.clip_to(outline);
 		colour topHalfFrom = faceColour.same_lightness_as(colour::White);
@@ -152,7 +170,7 @@ namespace neogfx
 			focusRect.deflate(2.0, 2.0);
 			aGraphicsContext.draw_focus_rect(focusRect);
 		}
-		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleTab || iStyle == ButtonStyleSpinBox)
+		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleButtonBox || iStyle == ButtonStyleTab || iStyle == ButtonStyleSpinBox)
 		{
 			outline.inflate(penWidth, penWidth);
 			aGraphicsContext.draw_path(outline, pen(innerBorderColour, penWidth));
@@ -188,6 +206,7 @@ namespace neogfx
 		switch (iStyle)
 		{
 		case ButtonStyleNormal:
+		case ButtonStyleButtonBox:
 		case ButtonStyleTab:
 		case ButtonStyleSpinBox:
 			ret.move_to(pixel.cx, 0, 12);

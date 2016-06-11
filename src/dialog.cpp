@@ -26,31 +26,73 @@ namespace neogfx
 	dialog::dialog(style_e aStyle) :
 		window(size{}, aStyle)
 	{
+		init();
+	}
+
+	dialog::dialog(const std::string& aDialogTitle, style_e aStyle) :
+		window(size{}, aDialogTitle, aStyle)
+	{
+		init();
+	}
+
+	dialog::dialog(const size& aDimensions, style_e aStyle) :
+		window(aDimensions, aStyle)
+	{
+		init();
+	}
+
+	dialog::dialog(const size& aDimensions, const std::string& aDialogTitle, style_e aStyle) :
+		window(aDimensions, aDialogTitle, aStyle)
+	{
+		init();
 	}
 
 	dialog::dialog(const point& aPosition, const size& aDimensions, style_e aStyle) :
 		window(aPosition, aDimensions, aStyle)
 	{
+		init();
 	}
 
 	dialog::dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle) :
 		window(aPosition, aDimensions, aDialogTitle, aStyle)
 	{
+		init();
 	}
 
 	dialog::dialog(i_widget& aParent, style_e aStyle) :
 		window(aParent, size{}, aStyle)
 	{
+		init();
+	}
+
+	dialog::dialog(i_widget& aParent, const std::string& aDialogTitle, style_e aStyle) :
+		window(aParent, size{}, aDialogTitle, aStyle)
+	{
+		init();
+	}
+
+	dialog::dialog(i_widget& aParent, const size& aDimensions, style_e aStyle) :
+		window(aParent, aDimensions, aStyle)
+	{
+		init();
+	}
+
+	dialog::dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle) :
+		window(aParent, aDimensions, aDialogTitle, aStyle)
+	{
+		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, style_e aStyle) :
 		window(aParent, aPosition, aDimensions, aStyle)
 	{
+		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle) :
 		window(aParent, aPosition, aDimensions, aDialogTitle, aStyle)
 	{
+		init();
 	}
 
 	dialog::~dialog()
@@ -63,7 +105,7 @@ namespace neogfx
 		{
 			if (!has_layout())
 				set_layout(std::make_shared<vertical_layout>());
-			iButtonBox.emplace(*this);
+			iButtonBox.emplace(layout());
 			iButtonBox->accepted([this]()
 			{
 				iResult = Accepted;
@@ -78,9 +120,10 @@ namespace neogfx
 
 	dialog::result_code_e dialog::exec()
 	{
+		app::event_processing_context epc(app::instance(), "neogfx::dialog");
 		while (iResult == boost::none)
 		{
-			app::instance().process_events();
+			app::instance().process_events(epc);
 			if (surface().destroyed() && iResult == boost::none)
 				iResult = Rejected;
 		}
@@ -89,6 +132,5 @@ namespace neogfx
 
 	void dialog::init()
 	{
-
 	}
 }

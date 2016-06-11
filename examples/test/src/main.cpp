@@ -68,7 +68,7 @@ public:
 				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::Black, ng::text_edit::style::colour_type(), ng::colour::White));
 			else if (aNumber == 0)
 			{
-				ng::colour_picker_dialog colourPicker(iTextEdit);
+				ng::colour_picker_dialog colourPicker(*this);
 				colourPicker.exec();
 				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
 			}
@@ -438,10 +438,11 @@ int main(int argc, char* argv[])
 		#else
 		itemModel.reserve(100);
 		#endif
+		ng::app::event_processing_context epc(app);
 		for (uint32_t row = 0; row < itemModel.capacity(); ++row)
 		{
 			if (row % 1000 == 0)
-				app.process_events();
+				app.process_events(epc);
 			for (uint32_t col = 0; col < 5; ++col)
 			{
 				if (col == 0)

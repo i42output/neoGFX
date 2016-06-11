@@ -302,6 +302,7 @@ namespace neogfx
 	{
 		resize_surface(widget::extents());
 		scrollable_widget::resized();
+		update();
 	}
 
 	neogfx::size_policy window::size_policy() const
@@ -869,7 +870,7 @@ namespace neogfx
 				window& windowSurface = static_cast<window&>(surface);
 				if (iStyle & ApplicationModal)
 					windowSurface.counted_enable(!iNativeWindow || iNativeWindowClosing);
-				else if ((iStyle & Modal) && windowSurface.is_ancestor_of(*this))
+				else if ((iStyle & Modal) && windowSurface.is_ancestor_of(*this, false))
 					windowSurface.counted_enable(!iNativeWindow || iNativeWindowClosing);
 			}
 		}

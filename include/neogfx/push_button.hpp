@@ -31,6 +31,7 @@ namespace neogfx
 		enum style_e
 		{
 			ButtonStyleNormal,
+			ButtonStyleButtonBox,
 			ButtonStyleItemViewHeader,
 			ButtonStyleTab,
 			ButtonStyleSpinBox,
@@ -41,6 +42,8 @@ namespace neogfx
 		push_button(const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);
 		push_button(i_widget& aParent, const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);
 		push_button(i_layout& aLayout, const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);
+	public:
+		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 	public:
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
@@ -63,5 +66,6 @@ namespace neogfx
 		uint32_t iAnimationFrame;
 		style_e iStyle;
 		optional_colour iHoverColour;
+		mutable boost::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
 	};
 }

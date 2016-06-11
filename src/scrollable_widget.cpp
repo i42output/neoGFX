@@ -74,6 +74,7 @@ namespace neogfx
 
 	void scrollable_widget::resized()
 	{
+		framed_widget::resized();
 		update_scrollbar_visibility();
 	}
 

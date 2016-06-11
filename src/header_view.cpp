@@ -72,13 +72,14 @@ namespace neogfx
 					}
 				}
 				uint64_t since = app::instance().program_elapsed_ms();
+				app::event_processing_context epc(app::instance(), "neogfx::header_view::updater");
 				for (uint32_t c = 0; c < 1000 && iRow < iParent.model().rows(); ++c, ++iRow)
 				{
 					iParent.update_from_row(iRow, false);
 					if (c % 25 == 0 && app::instance().program_elapsed_ms() - since > 20)
 					{
 						iParent.iOwner.header_view_updated(iParent);
-						app::instance().process_events();
+						app::instance().process_events(epc);
 						if (destroyed || iParent.surface().destroyed())
 							return;
 						since = app::instance().program_elapsed_ms();

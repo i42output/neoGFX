@@ -35,6 +35,17 @@ namespace neogfx
 		std::atomic<app*> sFirstInstance;
 	}
 
+	app::event_processing_context::event_processing_context(app& aParent, const std::string& aName) :
+		iContext(aParent.message_queue()),
+		iName(aName)
+	{
+	}
+
+	const std::string& app::event_processing_context::name() const
+	{
+		return iName;
+	}
+
 	app::app(const std::string& aName)
 		try :
 		iName(aName),
@@ -51,10 +62,9 @@ namespace neogfx
 		sFirstInstance.compare_exchange_strong(np, this);
 		create_message_queue([this]() -> bool 
 		{ 
-			bool result = process_events(); 
-			rendering_engine().render_now();
-			return result;
+			return process_events(*iContext); 
 		});
+		iContext = std::make_unique<event_processing_context>(*this, "neogfx::app");
 		iKeyboard->grab_keyboard(*this);
 		style whiteStyle("Default");
 		register_style(whiteStyle);
@@ -107,10 +117,7 @@ namespace neogfx
 			surface_manager().invalidate_surfaces();
 			iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
 			while (!iQuitResultCode.is_initialized())
-			{
-				process_events();
-				rendering_engine().render_now();
-			}
+				process_events(*iContext);
 			return *iQuitResultCode;
 		}
 		catch (std::exception& e)
@@ -262,7 +269,7 @@ namespace neogfx
 			iMnemonics.erase(n);
 	}
 
-	bool app::process_events()
+	bool app::process_events(i_event_processing_context&)
 	{
 		bool didSome = false;
 		try
@@ -291,6 +298,7 @@ namespace neogfx
 				std::exit(EXIT_FAILURE);
 			}
 		}
+		rendering_engine().render_now();
 		return didSome;
 	}
 

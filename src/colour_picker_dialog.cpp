@@ -22,13 +22,14 @@
 
 namespace neogfx
 {
-	colour_picker_dialog::colour_picker_dialog()
+	colour_picker_dialog::colour_picker_dialog() : 
+		dialog("Colour", Modal | Titlebar | Close)
 	{
 		init();
 	}
 
 	colour_picker_dialog::colour_picker_dialog(i_widget& aParent) :
-		dialog(aParent)
+		dialog(aParent, "Colour", Modal | Titlebar | Close)
 	{
 		init();
 	}
@@ -42,5 +43,7 @@ namespace neogfx
 		button_box().add_button(dialog_button_box::Ok);
 		button_box().add_button(dialog_button_box::Cancel);
 		resize(minimum_size());
+		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
+		move_surface((desktopRect.extents() - surface_size()) / 2.0);
 	}
 }

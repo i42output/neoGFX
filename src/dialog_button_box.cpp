@@ -39,7 +39,12 @@ namespace neogfx
 	}
 
 	dialog_button_box::dialog_button_box(i_widget& aParent) :
-		widget(aParent), iLayout(*this)
+		widget(aParent), iLayout(*this), iSpacer(iLayout)
+	{
+	}
+
+	dialog_button_box::dialog_button_box(i_layout& aLayout) :
+		widget(aLayout), iLayout(*this), iSpacer(iLayout)
 	{
 	}
 
@@ -80,7 +85,7 @@ namespace neogfx
 			{ Help,					{ HelpRole, "Help"} }
 		};
 		auto bi = sButtonDetails.find(aStandardButton);
-		auto newButton = iButtons.emplace(std::make_pair(bi->first, bi->second.first), std::make_unique<push_button>(iLayout, bi->second.second));
+		auto newButton = iButtons.emplace(std::make_pair(bi->first, bi->second.first), std::make_unique<push_button>(*this, bi->second.second, push_button::ButtonStyleButtonBox));
 		switch (newButton->first.second)
 		{
 		case AcceptRole:
@@ -90,6 +95,10 @@ namespace neogfx
 			newButton->second->clicked([this]() { rejected.trigger(); });
 			break;
 		}
+		iLayout.remove_items();
+		iLayout.add_item(iSpacer);
+		for (auto& button : iButtons)
+			iLayout.add_item(*button.second);
 	}
 
 	void dialog_button_box::init()

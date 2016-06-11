@@ -23,6 +23,7 @@
 #include "app.hpp"
 #include "widget.hpp"
 #include "horizontal_layout.hpp"
+#include "spacer.hpp"
 #include "push_button.hpp"
 
 namespace neogfx
@@ -79,6 +80,7 @@ namespace neogfx
 		struct button_not_found : std::logic_error { button_not_found() : std::logic_error("neogfx::dialog_button_box::button_not_found") {} };
 	public:
 		dialog_button_box(i_widget& aParent);
+		dialog_button_box(i_layout& aLayout);
 		~dialog_button_box();
 	public:
 		push_button& button(standard_button_e aStandardButton) const;
@@ -87,6 +89,7 @@ namespace neogfx
 		void init();
 	private:
 		horizontal_layout iLayout;
+		horizontal_spacer iSpacer;
 		button_list iButtons;
 	};
 }

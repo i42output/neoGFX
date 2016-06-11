@@ -35,9 +35,15 @@ namespace neogfx
 		};
 	public:
 		dialog(style_e aStyle = Default);
+		dialog(const std::string& aDialogTitle, style_e aStyle = Default);
+		dialog(const size& aDimensions, style_e aStyle = Default);
+		dialog(const size& aDimensions, const std::string& aDialogTitle, style_e aStyle = Default);
 		dialog(const point& aPosition, const size& aDimensions, style_e aStyle = Default);
 		dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle = Default);
 		dialog(i_widget& aParent, style_e aStyle = Default);
+		dialog(i_widget& aParent, const std::string& aDialogTitle, style_e aStyle = Default);
+		dialog(i_widget& aParent, const size& aDimensions, style_e aStyle = Default);
+		dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle = Default);
 		dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, style_e aStyle = Default);
 		dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle = Default);
 		~dialog();

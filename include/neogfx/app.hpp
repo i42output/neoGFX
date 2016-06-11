@@ -40,6 +40,17 @@ namespace neogfx
 	{
 	public:
 		event<> current_style_changed;
+	public:
+		class event_processing_context : public i_event_processing_context
+		{
+		public:
+			event_processing_context(app& aParent, const std::string& aName = std::string{});
+		public:
+			virtual const std::string& name() const;
+		private:
+			neolib::message_queue::scoped_context iContext;
+			std::string iName;
+		};
 	private:
 		typedef std::map<std::string, style> style_list;
 		typedef std::list<action, boost::fast_pool_allocator<action>> action_list;
@@ -80,7 +91,7 @@ namespace neogfx
 		virtual void add_mnemonic(i_mnemonic& aMnemonic);
 		virtual void remove_mnemonic(i_mnemonic& aMnemonic);
 	public:
-		virtual bool process_events();
+		virtual bool process_events(i_event_processing_context& aContext);
 	private:
 		virtual void task() {}
 		bool do_process_events();
@@ -103,5 +114,6 @@ namespace neogfx
 		action_list iActions;
 		mnemonic_list iMnemonics;
 		std::unique_ptr<i_widget> iSystemCache;
+		std::unique_ptr<event_processing_context> iContext;
 	};
 }
