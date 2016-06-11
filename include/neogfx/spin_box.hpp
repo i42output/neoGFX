@@ -104,7 +104,6 @@ namespace neogfx
 
 namespace neogfx
 {
-	typedef basic_spin_box<uint32_t> integer_spin_box;
-	typedef basic_spin_box<double> decimal_spin_box;
-	typedef integer_spin_box spin_box;
+	typedef basic_spin_box<int32_t> spin_box;
+	typedef basic_spin_box<double> double_spin_box;
 }

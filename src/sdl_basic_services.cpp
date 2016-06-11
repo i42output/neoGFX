@@ -31,6 +31,11 @@ namespace neogfx
 	{
 	}
 
+	neogfx::platform sdl_basic_services::platform() const
+	{
+		return neogfx::platform::Windows;
+	}
+
 	neolib::io_thread& sdl_basic_services::app_thread()
 	{
 		return iAppThread;

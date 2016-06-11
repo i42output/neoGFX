@@ -77,9 +77,13 @@ namespace neogfx
 
 	void spin_box_impl::set_normalized_value(double aValue, bool aUpdateTextBox)
 	{
-		iNormalizedValue = aValue;
-		if (aUpdateTextBox)
-			iTextBox.set_text(value_to_string());
+		aValue = std::max(0.0, std::min(1.0, aValue));
+		if (iNormalizedValue != aValue)
+		{
+			iNormalizedValue = aValue;
+			if (aUpdateTextBox)
+				iTextBox.set_text(value_to_string());
+		}
 	}
 
 	void spin_box_impl::init()

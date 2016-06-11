@@ -438,6 +438,18 @@
     <ClInclude Include="..\..\..\include\neogfx\spin_box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\slider.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\dialog.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\colour_picker_dialog.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\dialog_button_box.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\path.inl">
@@ -453,6 +465,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\spin_box.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\slider.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
@@ -689,6 +704,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\spin_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\slider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\colour_picker_dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dialog_button_box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

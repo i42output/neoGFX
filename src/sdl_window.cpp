@@ -33,7 +33,7 @@ extern "C" int SDL_SendKeyboardText(const char *text);
 
 namespace neogfx
 {
-	Uint32 sdl_window::convert_style(uint32_t aStyle)
+	Uint32 sdl_window::convert_style(window::style_e aStyle)
 	{   
 		uint32_t result = 0u;
 		if (aStyle & window::None)
@@ -102,7 +102,7 @@ namespace neogfx
 
 	std::map<void*, sdl_window*> sHandleMap;
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
 		iParent(0),
 		iStyle(aStyle),
@@ -140,7 +140,45 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, uint32_t aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+		iParent(0),
+		iStyle(aStyle),
+		iHandle(0),
+		iNativeHandle(0),
+		iContext(0),
+		iProcessingEvent(false),
+		iCapturingMouse(false),
+		iDestroyed(false)
+	{
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		iHandle = SDL_CreateWindow(
+			aWindowTitle.c_str(),
+			SDL_WINDOWPOS_CENTERED,
+			SDL_WINDOWPOS_CENTERED,
+			aDimensions.cx,
+			aDimensions.cy,
+			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
+		if (iHandle == 0)
+			throw failed_to_create_window(SDL_GetError());
+		init();
+		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
+		if (iContext == 0)
+		{
+			SDL_DestroyWindow(iHandle);
+			throw failed_to_create_opengl_context(SDL_GetError());
+		}
+		int w, h;
+		SDL_GetWindowSize(iHandle, &w, &h);
+		iExtents = basic_size<int>{ w, h };
+
+		do_activate_context();
+
+		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
+			show((aStyle & window::NoActivate) != window::NoActivate);
+	}
+
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
 		iParent(0),
 		iStyle(aStyle),
@@ -178,7 +216,7 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
 		iParent(&aParent),
 		iStyle(aStyle),
@@ -216,7 +254,45 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, uint32_t aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+		iParent(&aParent),
+		iStyle(aStyle),
+		iHandle(0),
+		iNativeHandle(0),
+		iContext(0),
+		iProcessingEvent(false),
+		iCapturingMouse(false),
+		iDestroyed(false)
+	{
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		iHandle = SDL_CreateWindow(
+			aWindowTitle.c_str(),
+			SDL_WINDOWPOS_CENTERED,
+			SDL_WINDOWPOS_CENTERED,
+			aDimensions.cx,
+			aDimensions.cy,
+			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
+		if (iHandle == 0)
+			throw failed_to_create_window(SDL_GetError());
+		init();
+		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
+		if (iContext == 0)
+		{
+			SDL_DestroyWindow(iHandle);
+			throw failed_to_create_opengl_context(SDL_GetError());
+		}
+		int w, h;
+		SDL_GetWindowSize(iHandle, &w, &h);
+		iExtents = basic_size<int>{ w, h };
+
+		do_activate_context();
+
+		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
+			show((aStyle & window::NoActivate) != window::NoActivate);
+	}
+
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
 		iParent(&aParent),
 		iStyle(aStyle),

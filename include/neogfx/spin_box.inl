@@ -96,10 +96,13 @@ namespace neogfx
 	template <typename T>
 	void basic_spin_box<T>::set_value(value_type aValue)
 	{
-		iValue = aValue;
-		if (!iSettingNormalizedValue)
-			spin_box_impl::set_normalized_value(normalized_value(), true);
-		value_changed.trigger();
+		if (iValue != aValue)
+		{
+			iValue = aValue;
+			if (!iSettingNormalizedValue)
+				spin_box_impl::set_normalized_value(normalized_value(), true);
+			value_changed.trigger();
+		}
 	}
 
 	template <typename T>
@@ -136,6 +139,7 @@ namespace neogfx
 	template <typename T>
 	void basic_spin_box<T>::set_normalized_value(double aValue, bool aUpdateTextBox = false)
 	{
+		aValue = std::max(0.0, std::min(1.0, aValue));
 		iSettingNormalizedValue = true;
 		auto range = maximum() - minimum();
 		auto denormalized = range * aValue + minimum();

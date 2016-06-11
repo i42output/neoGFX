@@ -208,12 +208,19 @@ namespace neogfx
 		scrollable_widget::focus_gained();
 		app::instance().clipboard().activate(*this);
 		iCursorAnimationStartTime = app::instance().program_elapsed_ms();
+		if (iType == SingleLine)
+		{
+			cursor().set_anchor(0);
+			cursor().set_position(iGlyphs.size(), false);
+		}
 	}
 
 	void text_edit::focus_lost()
 	{
 		scrollable_widget::focus_lost();
 		app::instance().clipboard().deactivate(*this);
+		if (iType == SingleLine)
+			cursor().set_position(iGlyphs.size());
 	}
 
 	void text_edit::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)

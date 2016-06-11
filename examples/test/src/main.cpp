@@ -22,6 +22,8 @@
 #include <neogfx/text_edit.hpp>
 #include <neogfx/line_edit.hpp>
 #include <neogfx/spin_box.hpp>
+#include <neogfx/slider.hpp>
+#include <neogfx/colour_picker_dialog.hpp>
 
 namespace ng = neogfx;
 
@@ -65,7 +67,11 @@ public:
 			else if (aNumber == 8)
 				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::Black, ng::text_edit::style::colour_type(), ng::colour::White));
 			else if (aNumber == 0)
+			{
+				ng::colour_picker_dialog colourPicker(iTextEdit);
+				colourPicker.exec();
 				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
+			}
 			else
 				iTextEdit.set_default_style(
 					ng::text_edit::style(
@@ -92,7 +98,7 @@ int main(int argc, char* argv[])
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.change_style("Default");
-		ng::window window(832, 800);
+		ng::window window(ng::size{ 832, 800 });
 
 		ng::vertical_layout layout0(window);
 
@@ -292,10 +298,17 @@ int main(int argc, char* argv[])
 		spinBox.set_minimum(20);
 		spinBox.set_maximum(100);
 		spinBox.set_step(5);
-		ng::decimal_spin_box decimalSpinBox(layoutLineEdits);
-		decimalSpinBox.set_minimum(-10);
-		decimalSpinBox.set_maximum(20);
-		decimalSpinBox.set_step(0.5);
+		ng::slider slider(layoutLineEdits);
+		slider.set_minimum(20);
+		slider.set_maximum(100);
+		slider.set_step(5);
+		spinBox.value_changed([&slider, &spinBox]() {slider.set_value(spinBox.value()); });
+		slider.value_changed([&slider, &spinBox]() {spinBox.set_value(slider.value()); });
+		slider.set_value(spinBox.value());
+		ng::double_spin_box doubleSpinBox(layoutLineEdits);
+		doubleSpinBox.set_minimum(-10);
+		doubleSpinBox.set_maximum(20);
+		doubleSpinBox.set_step(0.5);
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
 		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");

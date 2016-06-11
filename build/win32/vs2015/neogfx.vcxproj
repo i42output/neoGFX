@@ -87,7 +87,10 @@
     <ClInclude Include="..\..\..\include\neogfx\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\clipboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\colour_picker_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\cursor.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\dialog.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\dialog_button_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\flow_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_clipboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_document.hpp" />
@@ -168,6 +171,7 @@
     <ClInclude Include="..\..\..\include\neogfx\rectangle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\shape.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\slider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\spin_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sprite_plane.hpp" />
@@ -229,6 +233,7 @@
     <None Include="..\..\..\include\neogfx\flow_layout.inl" />
     <None Include="..\..\..\include\neogfx\layout.inl" />
     <None Include="..\..\..\include\neogfx\path.inl" />
+    <None Include="..\..\..\include\neogfx\slider.inl" />
     <None Include="..\..\..\include\neogfx\spin_box.inl" />
     <None Include="..\..\..\src\subpixel_rgb_horizontal.frag" />
   </ItemGroup>
@@ -236,7 +241,10 @@
     <ClCompile Include="..\..\..\src\action.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
     <ClCompile Include="..\..\..\src\clipboard.cpp" />
+    <ClCompile Include="..\..\..\src\colour_picker_dialog.cpp" />
     <ClCompile Include="..\..\..\src\cursor.cpp" />
+    <ClCompile Include="..\..\..\src\dialog.cpp" />
+    <ClCompile Include="..\..\..\src\dialog_button_box.cpp" />
     <ClCompile Include="..\..\..\src\flow_layout.cpp" />
     <ClCompile Include="..\..\..\src\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\layout_item.cpp" />
@@ -289,6 +297,7 @@
     <ClCompile Include="..\..\..\src\sdl_window.cpp" />
     <ClCompile Include="..\..\..\src\shape.cpp" />
     <ClCompile Include="..\..\..\src\skyline_bin_pack.cpp" />
+    <ClCompile Include="..\..\..\src\slider.cpp" />
     <ClCompile Include="..\..\..\src\spacer.cpp" />
     <ClCompile Include="..\..\..\src\spin_box.cpp" />
     <ClCompile Include="..\..\..\src\splitter.cpp" />

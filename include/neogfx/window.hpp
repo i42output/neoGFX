@@ -50,18 +50,18 @@ namespace neogfx
 			Default				= Titlebar | Resize | Close
 		};
 	public:
-		window(const video_mode& aVideoMode, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(dimension aWidth, dimension aHeight, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(const point& aPosition, const size& aDimensions, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const video_mode& aVideoMode, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, dimension aWidth, dimension aHeight, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, dimension aWidth, dimension aHeight, const std::string& aWindowTitle, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const point& aPosition, const size& aDimensions, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, uint32_t aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const video_mode& aVideoMode, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const video_mode& aVideoMode, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const size& aDimensions, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const size& aDimensions, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const point& aPosition, const size& aDimensions, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const video_mode& aVideoMode, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const size& aDimensions, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const point& aPosition, const size& aDimensions, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
 		~window();
 	public:
 		uint32_t style() const;
@@ -172,7 +172,7 @@ namespace neogfx
 		void dismiss_children(const i_widget* aClickedWidget = 0);
 	private:
 		std::unique_ptr<i_native_window> iNativeWindow;
-		uint32_t iStyle;
+		style_e iStyle;
 		mutable units_e iUnits;
 		int32_t iCountedEnable;
 		bool iNativeWindowClosing;
@@ -183,4 +183,14 @@ namespace neogfx
 		bool iDismissingChildren;
 		boost::optional<char32_t> iSurrogatePairPart;
 	};
+
+	inline constexpr window::style_e operator|(window::style_e aLhs, window::style_e aRhs)
+	{
+		return static_cast<window::style_e>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr window::style_e operator&(window::style_e aLhs, window::style_e aRhs)
+	{
+		return static_cast<window::style_e>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
 }

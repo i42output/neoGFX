@@ -29,6 +29,7 @@ namespace neogfx
 	public:
 		sdl_basic_services(neolib::io_thread& aAppThread);
 	public:
+		virtual neogfx::platform platform() const;
 		virtual neolib::io_thread& app_thread();
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const;
 		virtual uint32_t display_count() const;
