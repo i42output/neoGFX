@@ -67,11 +67,7 @@ public:
 			else if (aNumber == 8)
 				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::Black, ng::text_edit::style::colour_type(), ng::colour::White));
 			else if (aNumber == 0)
-			{
-				ng::colour_picker_dialog colourPicker(*this);
-				colourPicker.exec();
 				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
-			}
 			else
 				iTextEdit.set_default_style(
 					ng::text_edit::style(
@@ -388,6 +384,12 @@ int main(int argc, char* argv[])
 			else
 				fi.enable_kerning();
 			app.current_style().set_font_info(fi);
+		});
+		ng::push_button buttonColourPicker(layout4, "Colour Picker");
+		buttonColourPicker.clicked([&window]()
+		{
+			ng::colour_picker_dialog colourPicker(window);
+			colourPicker.exec();
 		});
 		ng::vertical_spacer spacer1(layout4);
 		ng::grid_layout keypad(4, 3, layout2);
