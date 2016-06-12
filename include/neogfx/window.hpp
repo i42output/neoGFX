@@ -37,17 +37,19 @@ namespace neogfx
 			Invalid				= 0x0000,
 			None				= 0x0001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
 			Titlebar			= 0x0002,	// The window has a titlebar
-			Resize				= 0x0004,	// The window can be resized and has a maximize button
-			Close				= 0x0008,	// The window has a close button
-			Fullscreen			= 0x0010,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
-			Modal				= 0x0020,
-			ApplicationModal	= 0x0040,
-			NoActivate			= 0x0080,
-			RequiresOwnerFocus	= 0x0100,
-			DismissOnOwnerClick = 0x0200,
-			InitiallyHidden		= 0x0400,
+			MinimizeBox			= 0x0004,
+			MaximizeBox			= 0x0008,
+			Resize				= 0x0010,	// The window can be resized and has a maximize button
+			Close				= 0x0020,	// The window has a close button
+			Fullscreen			= 0x0040,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
+			Modal				= 0x0080,
+			ApplicationModal	= 0x0100,
+			NoActivate			= 0x0200,
+			RequiresOwnerFocus	= 0x0400,
+			DismissOnOwnerClick = 0x0800,
+			InitiallyHidden		= 0x1000,
 			Weak				= 0x8000,
-			Default				= Titlebar | Resize | Close
+			Default				= Titlebar | MinimizeBox | MaximizeBox | Resize | Close
 		};
 	public:
 		window(const video_mode& aVideoMode, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);

@@ -72,7 +72,7 @@ namespace neogfx
 			aGraphicsContext.fill_rounded_rect(rectValue, 2.0, app::instance().current_style().selection_colour());
 		rect rectIndicator = indicator_box();
 		colour indicatorColour = foreground_colour();
-		if (capturing())
+		if (iDragOffset != boost::none)
 		{
 			if (indicatorColour.light(0x40))
 				indicatorColour.darken(0x40);
@@ -92,8 +92,8 @@ namespace neogfx
 		{
 			if (indicator_box().contains(aPosition))
 			{
-				iClickOffset = aPosition - indicator_box().centre();
-				set_normalized_value(std::max(0.0, std::min(aPosition.x - bar_box().x - iClickOffset->x, bar_box().right())) / bar_box().cx);
+				iDragOffset = aPosition - indicator_box().centre();
+				set_normalized_value(std::max(0.0, std::min(aPosition.x - bar_box().x - iDragOffset->x, bar_box().right())) / bar_box().cx);
 			}
 			else if (bar_box().contains(aPosition))
 			{
@@ -106,14 +106,14 @@ namespace neogfx
 	{
 		widget::mouse_button_released(aButton, aPosition);
 		if (aButton == mouse_button::Left)
-			iClickOffset = boost::none;
+			iDragOffset = boost::none;
 	}
 
 	void slider_impl::mouse_moved(const point& aPosition)
 	{
 		widget::mouse_moved(aPosition);
-		if (iClickOffset != boost::none)
-			set_normalized_value(std::max(0.0, std::min(aPosition.x - bar_box().x - iClickOffset->x, bar_box().right())) / bar_box().cx);
+		if (iDragOffset != boost::none)
+			set_normalized_value(std::max(0.0, std::min(aPosition.x - bar_box().x - iDragOffset->x, bar_box().right())) / bar_box().cx);
 	}
 
 	void slider_impl::set_normalized_value(double aValue)

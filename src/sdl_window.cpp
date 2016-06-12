@@ -672,8 +672,16 @@ namespace neogfx
 		sHandleMap[native_handle()] = this;
 #ifdef WIN32
 		iSDLWindowProc = (WNDPROC)SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)&CustomWindowProc);
+		DWORD existingStyle = GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE);
+		DWORD newStyle = existingStyle;
 		if (iStyle & window::None)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_POPUP);
+			newStyle |= WS_POPUP;
+		if ((iStyle & window::MinimizeBox) != window::MinimizeBox)
+			newStyle &= ~WS_MINIMIZEBOX;
+		if ((iStyle & window::MaximizeBox) != window::MaximizeBox)
+			newStyle &= ~WS_MAXIMIZEBOX;
+		if (newStyle != existingStyle)
+			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, newStyle);
 		if (iStyle & window::NoActivate)
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
 		if (iParent != 0)

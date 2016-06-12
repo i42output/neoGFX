@@ -59,7 +59,7 @@ namespace neogfx
 	private:
 		type_e iType;
 		double iNormalizedValue;
-		optional_point iClickOffset;
+		optional_point iDragOffset;
 	};
 
 	template <typename T>
