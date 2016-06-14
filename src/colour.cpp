@@ -131,6 +131,11 @@ namespace neogfx
 		return hsl_colour(*this);
 	}
 
+	hsv_colour colour::to_hsv() const
+	{
+		return hsv_colour(*this);
+	}
+
 	double colour::intensity() const
 	{ 
 		return (static_cast<argb>(red()) + static_cast<argb>(green()) + static_cast<argb>(blue())) / (3.0 * 255.0);
@@ -247,7 +252,12 @@ namespace neogfx
 
 	bool colour::operator<(const colour& aOther) const
 	{
-		return iValue < aOther.iValue;
+		if (intensity() < aOther.intensity())
+			return true;
+		else if (intensity() == aOther.intensity())
+			return iValue < aOther.iValue;
+		else
+			return false;
 	}
 
 	std::string colour::to_string() const

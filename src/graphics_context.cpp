@@ -211,9 +211,7 @@ namespace neogfx
 
 	void graphics_context::draw_pixel(const point& aPoint, const colour& aColour) const
 	{
-		/* todo */
-		(void)aPoint;
-		(void)aColour;
+		iNativeGraphicsContext->fill_rect(rect{ to_device_units(aPoint) + iOrigin, size{1.0, 1.0} }, aColour);
 	}
 
 	void graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen) const

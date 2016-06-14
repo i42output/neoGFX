@@ -97,7 +97,7 @@ namespace neogfx
 		size::dimension_type column_maximum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace = optional_size()) const;
 		void increment_cursor();
 		horizontal_layout& row_layout(cell_coordinate aRow);
-		uint32_t row_column(horizontal_layout& aRow, cell_coordinate aColumn) const;
+		span_list::const_iterator find_span(const cell_coordinates& aCell) const;
 	private:
 		vertical_layout iRowLayout;
 		std::vector<std::shared_ptr<horizontal_layout>> iRows;

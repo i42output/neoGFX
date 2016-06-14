@@ -162,7 +162,19 @@ namespace neogfx
 		if (has_minimum_size())
 			return scrollable_widget::minimum_size(aAvailableSpace);
 		scoped_units su(*this, UnitsPixels);
-		auto result = scrollable_widget::minimum_size(aAvailableSpace) + size{ font().height() };
+		auto result = scrollable_widget::minimum_size(aAvailableSpace);
+		if (iHint.empty())
+			result += size{ font().height() };
+		else
+		{
+			if (iHintedSize == boost::none || iHintedSize->first != font())
+			{
+				iHintedSize.emplace(font(), size{});
+				graphics_context gc(*this);
+				iHintedSize->second = gc.text_extent(iHint, font());
+			}
+			result += iHintedSize->second;
+		}
 		return convert_units(*this, su.saved_units(), result);
 	}
 
@@ -853,6 +865,18 @@ namespace neogfx
 		refresh_paragraph(iText.erase(iText.begin() + from_glyph(iGlyphs.begin() + aStart).first, iText.begin() + from_glyph(iGlyphs.begin() + aEnd - 1).second));
 		update();
 		text_changed.trigger();
+	}
+
+	void text_edit::set_hint(const std::string& aHint)
+	{
+		if (iHint != aHint)
+		{
+			iHint = aHint;
+			iHintedSize = boost::none;
+			if (has_managing_layout())
+				managing_layout().layout_items(true);
+			update();
+		}
 	}
 
 	void text_edit::init()

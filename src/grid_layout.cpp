@@ -300,6 +300,8 @@ namespace neogfx
 		size result;
 		uint32_t visibleColumns = visible_columns();
 		uint32_t visibleRows = visible_rows();
+		if (visibleRows == 6)
+			std::cerr << "ff" << std::endl;
 		for (cell_coordinate row = 0; row < rows(); ++row)
 		{
 			if (!is_row_visible(row))
@@ -406,8 +408,19 @@ namespace neogfx
 				{
 					if (i->second->get().is<item::spacer_pointer>() && column_minimum_size(col) != 0.0)
 						continue;
-					maxRowHeight[row] = std::max(maxRowHeight[row], i->second->extents().cy);
-					maxColWidth[col] = std::max(maxColWidth[col], i->second->extents().cx);
+					auto s = find_span(cell_coordinates{ col, row });
+					if (s == iSpans.end())
+					{
+						maxRowHeight[row] = std::max(maxRowHeight[row], i->second->extents().cy);
+						maxColWidth[col] = std::max(maxColWidth[col], i->second->extents().cx);
+					}
+					else
+					{
+						maxRowHeight[row] = std::max(maxRowHeight[row], 
+							(i->second->extents().cy - spacing().cy * (s->second.y - s->first.y)) / (s->second.y - s->first.y + 1));
+						maxColWidth[col] = std::max(maxColWidth[col],
+							(i->second->extents().cx - spacing().cx * (s->second.x - s->first.x)) / (s->second.x - s->first.x + 1));
+					}
 				}
 			}
 		}
@@ -525,7 +538,13 @@ namespace neogfx
 		size::dimension_type result {};
 		for (const auto& item : iCells)
 			if (item.first.y == aRow)
-				result = std::max(result, item.second->minimum_size(aAvailableSpace).cy);
+			{
+				auto s = find_span(item.first);
+				if (s == iSpans.end())
+					result = std::max(result, item.second->minimum_size(aAvailableSpace).cy);
+				else
+					result = std::max(result, (item.second->minimum_size(aAvailableSpace).cy - spacing().cy * (s->second.y - s->first.y)) / (s->second.y - s->first.y + 1));
+			}
 		return result;
 	}
 
@@ -534,7 +553,13 @@ namespace neogfx
 		size::dimension_type result {};
 		for (const auto& item : iCells)
 			if (item.first.x == aColumn)
-				result = std::max(result, item.second->minimum_size(aAvailableSpace).cx);
+			{
+				auto s = find_span(item.first);
+				if (s == iSpans.end())
+					result = std::max(result, item.second->minimum_size(aAvailableSpace).cx);
+				else
+					result = std::max(result, (item.second->minimum_size(aAvailableSpace).cx - spacing().cx * (s->second.x - s->first.x)) / (s->second.x - s->first.x + 1));
+			}
 		return result;
 	}
 
@@ -576,5 +601,13 @@ namespace neogfx
 			iRows.back()->set_spacing(spacing());
 		}
 		return *iRows[aRow];
+	}
+
+	grid_layout::span_list::const_iterator grid_layout::find_span(const cell_coordinates& aCell) const
+	{
+		for (auto s = iSpans.begin(); s != iSpans.end(); ++s)
+			if (aCell.x >= s->first.x && aCell.x <= s->second.x && aCell.y >= s->first.y && aCell.y <= s->second.y)
+				return s;
+		return iSpans.end();
 	}
 }

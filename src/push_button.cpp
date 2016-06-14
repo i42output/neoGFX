@@ -87,6 +87,15 @@ namespace neogfx
 		return result;
 	}
 
+	size push_button::maximum_size(const optional_size& aAvailableSpace) const
+	{
+		if (has_maximum_size())
+			return button::maximum_size(aAvailableSpace);
+		if (iStyle == ButtonStyleButtonBox)
+			return minimum_size(aAvailableSpace);
+		return button::maximum_size(aAvailableSpace);
+	}
+
 	void push_button::paint_non_client(graphics_context& aGraphicsContext) const
 	{
 		button::paint_non_client(aGraphicsContext);

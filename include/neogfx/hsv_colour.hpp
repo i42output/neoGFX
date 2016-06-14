@@ -1,4 +1,4 @@
-// hsl_colour.hpp
+// hsv_colour.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -25,30 +25,32 @@ namespace neogfx
 {
 	class colour;
 
-	class hsl_colour
+	class hsv_colour
 	{
 	public:
-		hsl_colour();
-		hsl_colour(double aHue, double aSaturation, double aLightness);
-		hsl_colour(const colour& aColour);
+		hsv_colour();
+		hsv_colour(double aHue, double aSaturation, double aValue);
+		hsv_colour(const colour& aColour);
 	public:
 		double hue() const;
 		double saturation() const;
-		double lightness() const;
+		double value() const;
+		double brightness() const;
 		void set_hue(double aHue);
 		void set_saturation(double aSaturation);
-		void set_lightness(double aLightness);
+		void set_value(double aValue);
+		void set_brightness(double aBrightness);
 	public:
-		hsl_colour with_lightness(double aNewLightness) const;
-		hsl_colour lighter(double aDelta) const;
-		hsl_colour lighter(double aCoeffecient, double aDelta) const;
+		hsv_colour with_brightness(double aNewLightness) const;
+		hsv_colour brighter(double aDelta) const;
+		hsv_colour brighter(double aCoeffecient, double aDelta) const;
 		colour to_rgb(double aAlpha = 1.0) const;
-		static hsl_colour from_rgb(const colour& aColour);
+		static hsv_colour from_rgb(const colour& aColour);
 	private:
 		static double undefined_hue();
 	private:
 		double iHue;
 		double iSaturation;
-		double iLightness;
+		double iValue;
 	};
 }

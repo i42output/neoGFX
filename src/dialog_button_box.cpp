@@ -41,11 +41,13 @@ namespace neogfx
 	dialog_button_box::dialog_button_box(i_widget& aParent) :
 		widget(aParent), iLayout(*this), iSpacer(iLayout)
 	{
+		init();
 	}
 
 	dialog_button_box::dialog_button_box(i_layout& aLayout) :
 		widget(aLayout), iLayout(*this), iSpacer(iLayout)
 	{
+		init();
 	}
 
 	dialog_button_box::~dialog_button_box()
@@ -103,5 +105,7 @@ namespace neogfx
 
 	void dialog_button_box::init()
 	{
+		set_margins(neogfx::margins{});
+		iLayout.set_margins(neogfx::margins{});
 	}
 }

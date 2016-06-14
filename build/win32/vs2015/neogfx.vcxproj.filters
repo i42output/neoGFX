@@ -450,6 +450,9 @@
     <ClInclude Include="..\..\..\include\neogfx\dialog_button_box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hsv_colour.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\path.inl">
@@ -716,6 +719,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\dialog_button_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hsv_colour.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

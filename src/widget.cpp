@@ -23,6 +23,8 @@
 #include "widget.hpp"
 #include "i_layout.hpp"
 
+#include "button.hpp"
+
 namespace neogfx
 {
 	widget::device_metrics_forwarder::device_metrics_forwarder(widget& aOwner) :
@@ -796,17 +798,15 @@ namespace neogfx
 			aGraphicsContext.scissor_off();
 			aGraphicsContext.set_extents(client_rect().extents());
 			aGraphicsContext.set_origin(origin());
-			aGraphicsContext.scissor_on(default_clip_rect() - client_rect().position());
+			aGraphicsContext.scissor_on(default_clip_rect());
 			auto savedCoordinateSystem = aGraphicsContext.logical_coordinate_system();
 			if (savedCoordinateSystem != logical_coordinate_system())
 			{
 				aGraphicsContext.set_logical_coordinate_system(logical_coordinate_system());
 				if (logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-					aGraphicsContext.set_origin(origin() + client_rect().position());
+					aGraphicsContext.set_origin(origin());
 				else if (logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
-					aGraphicsContext.set_origin(point{
-						(origin() + client_rect().bottom_left()).x,
-						surface().extents().cy - (origin() + client_rect().bottom_left()).y });
+					aGraphicsContext.set_origin(point{origin().x, surface().extents().cy - (origin().y + extents().cy)});
 			}
 			painting.trigger(aGraphicsContext);
 			paint(aGraphicsContext);

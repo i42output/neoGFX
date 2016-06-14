@@ -23,73 +23,83 @@
 
 namespace neogfx
 {
-	hsl_colour::hsl_colour() :
-		iHue(0.0), iSaturation(0.0), iLightness(0.0)
+	hsv_colour::hsv_colour() :
+		iHue(0.0), iSaturation(0.0), iValue(0.0)
 	{
 	}
 
-	hsl_colour::hsl_colour(double aHue, double aSaturation, double aLightness) :
-		iHue(aHue), iSaturation(aSaturation), iLightness(aLightness)
+	hsv_colour::hsv_colour(double aHue, double aSaturation, double aValue) :
+		iHue(aHue), iSaturation(aSaturation), iValue(aValue)
 	{
 	}
 
-	hsl_colour::hsl_colour(const colour& aColour)
+	hsv_colour::hsv_colour(const colour& aColour)
 	{
 		*this = from_rgb(aColour);
 	}
 
-	double hsl_colour::hue() const
+	double hsv_colour::hue() const
 	{
 		return iHue;
 	}
 
-	double hsl_colour::saturation() const
+	double hsv_colour::saturation() const
 	{
 		return iSaturation;
 	}
 
-	double hsl_colour::lightness() const
+	double hsv_colour::value() const
 	{
-		return iLightness;
+		return iValue;
 	}
 
-	void hsl_colour::set_hue(double aHue)
+	double hsv_colour::brightness() const
+	{
+		return value();
+	}
+
+	void hsv_colour::set_hue(double aHue)
 	{
 		iHue = aHue;
 	}
 
-	void hsl_colour::set_saturation(double aSaturation)
+	void hsv_colour::set_saturation(double aSaturation)
 	{
 		iSaturation = aSaturation;
 	}
 
-	void hsl_colour::set_lightness(double aLightness)
+	void hsv_colour::set_value(double aValue)
 	{
-		iLightness = aLightness;
+		iValue = aValue;
 	}
 
-	hsl_colour hsl_colour::with_lightness(double aNewLightness) const
+	void hsv_colour::set_brightness(double aBrightness)
 	{
-		return lighter(0.0, aNewLightness);
+		set_value(aBrightness);
 	}
 
-	hsl_colour hsl_colour::lighter(double aDelta) const
+	hsv_colour hsv_colour::with_brightness(double aNewBrightness) const
 	{
-		return lighter(1.0, aDelta);
+		return brighter(0.0, aNewBrightness);
 	}
 
-	hsl_colour hsl_colour::lighter(double coeffecient, double delta) const
+	hsv_colour hsv_colour::brighter(double aDelta) const
 	{
-		hsl_colour result = *this;
-		result.iLightness *= coeffecient;
-		result.iLightness += delta;
-		result.iLightness = std::min(std::max(result.iLightness, 0.0), 1.0);
+		return brighter(1.0, aDelta);
+	}
+
+	hsv_colour hsv_colour::brighter(double coeffecient, double delta) const
+	{
+		hsv_colour result = *this;
+		result.iValue *= coeffecient;
+		result.iValue += delta;
+		result.iValue = std::min(std::max(result.iValue, 0.0), 1.0);
 		return result;
 	}
 
-	colour hsl_colour::to_rgb(double aAlpha) const
+	colour hsv_colour::to_rgb(double aAlpha) const
 	{
-		double c = (1.0 - std::abs(2.0 * lightness() - 1.0)) * saturation();
+		double c = value() * saturation();
 		double h2 = hue() / 60.0;
 		double x = c * (1.0 - std::abs(std::fmod(h2, 2.0) - 1.0));
 		double r, g, b;
@@ -109,7 +119,7 @@ namespace neogfx
 			r = c, g = 0.0, b = x;
 		else
 			r = g = b = 0.0;
-		double m = lightness() - 0.5f * c;
+		double m = value() - c;
 		colour result(
 			static_cast<colour::component>(std::floor((r + m) * 255.0)),
 			static_cast<colour::component>(std::floor((g + m) * 255.0)),
@@ -118,9 +128,9 @@ namespace neogfx
 		return result;
 	}
 
-	hsl_colour hsl_colour::from_rgb(const colour& aColour)
+	hsv_colour hsv_colour::from_rgb(const colour& aColour)
 	{
-		double hue, saturation, lightness;
+		double hue, saturation, value;
 		double r = aColour.red() / 255.0, g = aColour.green() / 255.0, b = aColour.blue() / 255.0;
 		double M = std::max(std::max(r, g), b);
 		double m = std::min(std::min(r, g), b);
@@ -144,17 +154,17 @@ namespace neogfx
 		}
 		else
 			hue = undefined_hue();
-		lightness = 0.5f * (M + m);
-		lightness = std::max(std::min(lightness, 1.0), 0.0);
+		value = M;
+		value = std::max(std::min(value, 1.0), 0.0);
 		if (c == 0.0)
 			saturation = 0.0;
 		else
-			saturation = c / (1.0 - std::abs(2.0 * lightness - 1.0));
+			saturation = c / value;
 		saturation = std::max(std::min(saturation, 1.0), 0.0);
-		return hsl_colour(hue, saturation, lightness);
+		return hsv_colour(hue, saturation, value);
 	}
 
-	double hsl_colour::undefined_hue()
+	double hsv_colour::undefined_hue()
 	{
 		return -std::numeric_limits<double>::max();
 	}

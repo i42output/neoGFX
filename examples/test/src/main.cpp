@@ -94,6 +94,7 @@ int main(int argc, char* argv[])
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.change_style("Default");
+
 		ng::window window(ng::size{ 832, 800 });
 
 		ng::vertical_layout layout0(window);
@@ -307,7 +308,7 @@ int main(int argc, char* argv[])
 		doubleSpinBox.set_step(0.5);
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
-		ng::push_button button6(layout2, "RGB <-> HSL\ncolour space\nconversion test");
+		ng::push_button button6(layout2, "RGB <-> HSV\ncolour space\nconversion test");
 		layout2.add_spacer().set_weight(ng::size(2.0f));
 		ng::push_button button7(layout2, "Toggle\n&mute.");
 		button7.set_foreground_colour(ng::colour::LightCoral);
@@ -406,9 +407,9 @@ int main(int argc, char* argv[])
 			aTimer.again();
 			std::srand(static_cast<unsigned int>(app.program_elapsed_ms() / 5000));
 			const double PI = 2.0 * std::acos(0.0);
-			double lightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
+			double brightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
 			ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
-			randomColour = randomColour.to_hsl().with_lightness(lightness).to_rgb();
+			randomColour = randomColour.to_hsv().with_brightness(brightness).to_rgb();
 			button6.set_foreground_colour(randomColour);
 		}, 16);
 

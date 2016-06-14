@@ -354,6 +354,8 @@ namespace neogfx
 		std::size_t insert_text(const std::string& aText, bool aMoveCursor = false);
 		std::size_t insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
 		void delete_text(position_type aStart, position_type aEnd);
+	public:
+		void set_hint(const std::string& aHint);
 	private:
 		void init();
 		void delete_any_selection();
@@ -387,5 +389,7 @@ namespace neogfx
 		uint64_t iCursorAnimationStartTime;
 		mutable const glyph_paragraph* iGlyphParagraphCache;
 		boost::optional<neolib::callback_timer> iDragger;
+		std::string iHint;
+		mutable boost::optional<std::pair<neogfx::font, size>> iHintedSize;
 	};
 }

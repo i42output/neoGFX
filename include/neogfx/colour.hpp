@@ -22,6 +22,7 @@
 #include "neogfx.hpp"
 #include "geometry.hpp"
 #include "hsl_colour.hpp"
+#include "hsv_colour.hpp"
 
 namespace neogfx
 {
@@ -739,6 +740,7 @@ namespace neogfx
 		colour with_blue(component aNewValue) const;
 		colour with_combined_alpha(component aNewValue) const;
 		hsl_colour to_hsl() const;
+		hsv_colour to_hsv() const;
 		double intensity() const;
 		bool similar_intensity(const colour& aOther, double aThreshold = 0.5);
 		colour mid(const colour& aOther) const;
