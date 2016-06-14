@@ -18,6 +18,7 @@
 */
 
 #include "neogfx.hpp"
+#include <tuple>
 #include <iomanip>
 #include <neolib/string_utils.hpp>
 #include "colour.hpp"
@@ -252,12 +253,9 @@ namespace neogfx
 
 	bool colour::operator<(const colour& aOther) const
 	{
-		if (intensity() < aOther.intensity())
-			return true;
-		else if (intensity() == aOther.intensity())
-			return iValue < aOther.iValue;
-		else
-			return false;
+		hsv_colour left = to_hsv();
+		hsv_colour right = aOther.to_hsv();
+		return std::make_tuple(left.hue(), left.saturation(), left.value()) < std::make_tuple(right.hue(), right.saturation(), right.value());
 	}
 
 	std::string colour::to_string() const

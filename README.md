@@ -21,8 +21,8 @@ Tree View                 | 0       |
 List View                 | 0       |
 Text Edit                 | 80      |
 Line Edit                 | 100     |
-Spin Box                  | 80      |     Keyboard
-Slider                    | 80      |     Keyboard
+Spin Box                  | 80      |     Keyboard, mouse wheel
+Slider                    | 80      |     Keyboard, mouse wheel
 Check Box                 | 100     |     
 Radio Button              | 100     |
 Combo Box                 | 0       |
@@ -35,4 +35,4 @@ Skins                     | 0       |
 # Known Problems
 Example test program will crash on shut-down due to bug related to focus tabbing linked list.
 
-Last updated: 12/06/16
+Last updated: 14/06/16
