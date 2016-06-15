@@ -39,6 +39,7 @@ namespace neogfx
 			ModeCMYK
 		};
 	private:
+		typedef neolib::variant<colour, hsv_colour> representations;
 		class colour_box : public framed_widget
 		{
 		public:
@@ -101,15 +102,17 @@ namespace neogfx
 		void set_mode(mode_e aMode);
 		colour current_colour() const;
 		colour selected_colour() const;
+		hsv_colour selected_colour_as_hsv() const;
 		void select_colour(const colour& aColour);
 	private:
 		void init();
-		void select_colour(const colour& aColour, const i_widget& aUpdatingWidget);
+		hsv_colour selected_colour_as_hsv(bool aChangeRepresentation) const;
+		void select_colour(const representations& aColour, const i_widget& aUpdatingWidget);
 		void update_widgets(const i_widget& aUpdatingWidget);
 	private:
 		mode_e iMode;
 		colour iCurrentColour;
-		colour iSelectedColour;
+		mutable representations iSelectedColour;
 		bool iUpdatingWidgets;
 		vertical_layout iLayout;
 		horizontal_layout iLayout2;

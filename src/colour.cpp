@@ -20,6 +20,8 @@
 #include "neogfx.hpp"
 #include <tuple>
 #include <iomanip>
+#include <boost/lexical_cast.hpp>
+#include <neolib/vecarray.hpp>
 #include <neolib/string_utils.hpp>
 #include "colour.hpp"
 
@@ -45,9 +47,9 @@ namespace neogfx
 	{
 		if (aTextValue.empty())
 			*this = Black;
-		else if (aTextValue[0] == L'#' || (std::isxdigit(aTextValue[0]) && from_name(aTextValue) == boost::none))
+		else if (aTextValue[0] == L'#')
 		{
-			iValue = neolib::string_to_unsigned_integer(aTextValue.substr(aTextValue[0] == L'#' ? 1 : 0), 16);
+			iValue = neolib::string_to_unsigned_integer(aTextValue.substr(1), 16);
 			if (aTextValue.size() <= 7)
 				set_alpha(0xFF);
 			else
@@ -65,7 +67,47 @@ namespace neogfx
 			else
 			{
 				/* todo: parse rgba(x, y, z); */
-				*this = Black;
+				neolib::vecarray<std::string, 3> bits;
+				neolib::tokens(aTextValue, std::string("()"), bits, 3, false);
+				try
+				{
+					if ((bits.size() == 3 && bits[2] == ";") || bits.size() == 2)
+					{
+						if (bits[0] == "rgb")
+						{
+							neolib::vecarray<std::string, 3> moreBits;
+							neolib::tokens(bits[1], std::string(","), moreBits, 3, false);
+							if (moreBits.size() == 3)
+							{
+								*this = colour(
+									static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[0])),
+									static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[1])),
+									static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[2])));
+							}
+						}
+						else if (bits[0] == "rgba")
+						{
+							neolib::vecarray<std::string, 4> moreBits;
+							neolib::tokens(bits[1], std::string(","), moreBits, 4, false);
+							if (moreBits.size() == 4)
+							{
+								*this = colour(
+									static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[0])),
+									static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[1])),
+									static_cast<uint8_t>(boost::lexical_cast<uint32_t>(moreBits[2])),
+									static_cast<uint8_t>(boost::lexical_cast<double>(moreBits[3]) * 255.0));
+							}
+						}
+						else
+							*this = Black;
+					}
+					else
+						*this = Black;
+				}
+				catch (...)
+				{
+					*this = Black;
+				}
 			}
 		}
 	}
@@ -227,7 +269,7 @@ namespace neogfx
 	{
 		hsl_colour temp = to_hsl();
 		temp.set_lightness(aOther.to_hsl().lightness());
-		return temp.to_rgb(alpha() / 255.0);
+		return temp.to_rgb();
 	}
 
 	colour colour::inverse() const

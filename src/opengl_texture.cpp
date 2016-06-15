@@ -86,7 +86,7 @@ namespace neogfx
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
-			static_cast<GLint>(aRect.x), static_cast<GLint>(aRect.y), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
+			static_cast<GLint>(aRect.x + 1.0), static_cast<GLint>(aRect.y + 1.0), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
 			GL_RGBA, GL_UNSIGNED_BYTE, aPixelData));
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}

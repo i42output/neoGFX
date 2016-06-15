@@ -29,29 +29,36 @@ namespace neogfx
 	{
 	public:
 		hsv_colour();
-		hsv_colour(double aHue, double aSaturation, double aValue);
+		hsv_colour(double aHue, double aSaturation, double aValue, double aAlpha = 1.0);
 		hsv_colour(const colour& aColour);
 	public:
 		double hue() const;
 		double saturation() const;
 		double value() const;
 		double brightness() const;
+		double alpha() const;
 		void set_hue(double aHue);
 		void set_saturation(double aSaturation);
 		void set_value(double aValue);
 		void set_brightness(double aBrightness);
+		void set_alpha(double aAlpha);
 		bool hue_undefined() const;
 	public:
 		hsv_colour with_brightness(double aNewLightness) const;
 		hsv_colour brighter(double aDelta) const;
 		hsv_colour brighter(double aCoeffecient, double aDelta) const;
-		colour to_rgb(double aAlpha = 1.0) const;
+		colour to_rgb() const;
 		static hsv_colour from_rgb(const colour& aColour);
 	public:
 		static double undefined_hue();
+	public:
+		bool operator==(const hsv_colour& aOther) const;
+		bool operator!=(const hsv_colour& aOther) const;
+		bool operator<(const hsv_colour& aOther) const;
 	private:
 		double iHue;
 		double iSaturation;
 		double iValue;
+		double iAlpha;
 	};
 }

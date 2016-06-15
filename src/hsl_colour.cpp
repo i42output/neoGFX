@@ -24,12 +24,12 @@
 namespace neogfx
 {
 	hsl_colour::hsl_colour() :
-		iHue(0.0), iSaturation(0.0), iLightness(0.0)
+		iHue{0.0}, iSaturation{0.0}, iLightness{0.0}
 	{
 	}
 
-	hsl_colour::hsl_colour(double aHue, double aSaturation, double aLightness) :
-		iHue(aHue), iSaturation(aSaturation), iLightness(aLightness)
+	hsl_colour::hsl_colour(double aHue, double aSaturation, double aLightness, double aAlpha) :
+		iHue{aHue}, iSaturation{aSaturation}, iLightness{aLightness}, iAlpha{aAlpha}
 	{
 	}
 
@@ -55,6 +55,11 @@ namespace neogfx
 		return iLightness;
 	}
 
+	double hsl_colour::alpha() const
+	{
+		return iAlpha;
+	}
+
 	void hsl_colour::set_hue(double aHue)
 	{
 		iHue = aHue;
@@ -68,6 +73,11 @@ namespace neogfx
 	void hsl_colour::set_lightness(double aLightness)
 	{
 		iLightness = aLightness;
+	}
+
+	void hsl_colour::set_alpha(double aAlpha)
+	{
+		iAlpha = aAlpha;
 	}
 
 	bool hsl_colour::hue_undefined() const
@@ -94,7 +104,7 @@ namespace neogfx
 		return result;
 	}
 
-	colour hsl_colour::to_rgb(double aAlpha) const
+	colour hsl_colour::to_rgb() const
 	{
 		double c = (1.0 - std::abs(2.0 * lightness() - 1.0)) * saturation();
 		double h2 = hue() / 60.0;
@@ -121,7 +131,7 @@ namespace neogfx
 			static_cast<colour::component>(std::floor((r + m) * 255.0)),
 			static_cast<colour::component>(std::floor((g + m) * 255.0)),
 			static_cast<colour::component>(std::floor((b + m) * 255.0)),
-			static_cast<colour::component>(std::floor(aAlpha * 255.0)));
+			static_cast<colour::component>(std::floor(alpha() * 255.0)));
 		return result;
 	}
 
@@ -158,11 +168,29 @@ namespace neogfx
 		else
 			saturation = c / (1.0 - std::abs(2.0 * lightness - 1.0));
 		saturation = std::max(std::min(saturation, 1.0), 0.0);
-		return hsl_colour(hue, saturation, lightness);
+		return hsl_colour(hue, saturation, lightness, aColour.alpha() / 255.0);
 	}
 
 	double hsl_colour::undefined_hue()
 	{
 		return -std::numeric_limits<double>::max();
+	}
+
+	bool hsl_colour::operator==(const hsl_colour& aOther) const
+	{
+		return hue() == aOther.hue() &&
+			saturation() == aOther.saturation() &&
+			lightness() == aOther.lightness() &&
+			alpha() == aOther.alpha();
+	}
+
+	bool hsl_colour::operator!=(const hsl_colour& aOther) const
+	{
+		return !(*this == aOther);
+	}
+
+	bool hsl_colour::operator<(const hsl_colour& aOther) const
+	{
+		return std::make_tuple(hue(), saturation(), lightness(), alpha()) < std::make_tuple(aOther.hue(), aOther.saturation(), aOther.lightness(), aOther.alpha());
 	}
 }

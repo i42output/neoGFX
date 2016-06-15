@@ -141,7 +141,7 @@ namespace neogfx
 				double nz = z / (255.0);
 				if (iParent.mode() == ModeHSV)
 				{
-					hsv_colour hsvColour = iParent.selected_colour().to_hsv();
+					hsv_colour hsvColour = iParent.selected_colour_as_hsv(false);
 					hsvColour.set_saturation(ny);
 					hsvColour.set_value(nz);
 					auto rgbColour = hsvColour.to_rgb();
@@ -302,7 +302,18 @@ namespace neogfx
 
 	colour colour_picker_dialog::selected_colour() const
 	{
-		return iSelectedColour;
+		if (iSelectedColour.is<colour>())
+			return static_variant_cast<const colour&>(iSelectedColour);
+		else
+			return static_variant_cast<const hsv_colour&>(iSelectedColour).to_rgb();
+	}
+
+	hsv_colour colour_picker_dialog::selected_colour_as_hsv() const
+	{
+		return selected_colour_as_hsv(true);
+		if (iSelectedColour.is<colour>())
+			iSelectedColour = static_variant_cast<const colour&>(iSelectedColour).to_hsv();
+		return static_variant_cast<const hsv_colour&>(iSelectedColour).to_rgb();
 	}
 
 	void colour_picker_dialog::select_colour(const colour& aColour)
@@ -373,9 +384,9 @@ namespace neogfx
 		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
 		move_surface((desktopRect.extents() - surface_size()) / 2.0);
 
-		iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_hue(iH.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha()), iH.second); });
-		iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_saturation(iS.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha()), iS.second); });
-		iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_value(iV.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha()), iV.second); });
+		iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour_as_hsv(); c.set_hue(iH.second.value()); select_colour(c, iH.second); });
+		iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour_as_hsv(); c.set_saturation(iS.second.value()); select_colour(c, iS.second); });
+		iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour_as_hsv(); c.set_value(iV.second.value()); select_colour(c, iV.second); });
 		iR.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_red(static_cast<colour::component>(iR.second.value())), iR.second); });
 		iG.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_green(static_cast<colour::component>(iG.second.value())), iG.second); });
 		iB.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_blue(static_cast<colour::component>(iB.second.value())), iB.second); });
@@ -385,7 +396,20 @@ namespace neogfx
 		update_widgets(*this);
 	}
 
-	void colour_picker_dialog::select_colour(const colour& aColour, const i_widget& aUpdatingWidget)
+	hsv_colour colour_picker_dialog::selected_colour_as_hsv(bool aChangeRepresentation) const
+	{
+		if (iSelectedColour.is<colour>())
+		{
+			hsv_colour result = static_variant_cast<const colour&>(iSelectedColour).to_hsv();
+			if (aChangeRepresentation)
+				iSelectedColour = result;
+			return result;
+		}
+		else
+			return static_variant_cast<const hsv_colour&>(iSelectedColour).to_rgb();
+	}
+
+	void colour_picker_dialog::select_colour(const representations& aColour, const i_widget& aUpdatingWidget)
 	{
 		if (iUpdatingWidgets)
 			return;
@@ -403,21 +427,21 @@ namespace neogfx
 			return;
 		iUpdatingWidgets = true;
 		if (&aUpdatingWidget != &iH.second)
-			iH.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().hue()));
+			iH.second.set_value(static_cast<int32_t>(selected_colour_as_hsv(false).hue()));
 		if (&aUpdatingWidget != &iS.second)
-			iS.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().saturation() * 100.0));
+			iS.second.set_value(static_cast<int32_t>(selected_colour_as_hsv(false).saturation() * 100.0));
 		if (&aUpdatingWidget != &iV.second)
-			iV.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().value() * 100.0));
+			iV.second.set_value(static_cast<int32_t>(selected_colour_as_hsv(false).value() * 100.0));
 		if (&aUpdatingWidget != &iR.second)
-			iR.second.set_value(iSelectedColour.red());
+			iR.second.set_value(selected_colour().red());
 		if (&aUpdatingWidget != &iG.second)
-			iG.second.set_value(iSelectedColour.green());
+			iG.second.set_value(selected_colour().green());
 		if (&aUpdatingWidget != &iB.second)
-			iB.second.set_value(iSelectedColour.blue());
+			iB.second.set_value(selected_colour().blue());
 		if (&aUpdatingWidget != &iA.second)
-			iA.second.set_value(iSelectedColour.alpha());
+			iA.second.set_value(selected_colour().alpha());
 		if (&aUpdatingWidget != &iRgb)
-			iRgb.set_text(iSelectedColour.to_hex_string());
+			iRgb.set_text(selected_colour().to_hex_string());
 		iUpdatingWidgets = false;
 	}
 }

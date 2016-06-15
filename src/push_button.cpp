@@ -122,7 +122,7 @@ namespace neogfx
 		aGraphicsContext.clip_to(outline);
 		colour topHalfFrom = faceColour.same_lightness_as(colour::White);
 		colour topHalfTo = faceColour;
-		colour bottomHalfFrom = faceColour.to_hsl().lighter(-0.125).to_rgb(faceColour.alpha() / 255.0);
+		colour bottomHalfFrom = faceColour.to_hsl().lighter(-0.125).to_rgb();
 		colour bottomHalfTo = faceColour;
 		if (iStyle != ButtonStyleTab && iStyle != ButtonStyleSpinBox)
 		{
