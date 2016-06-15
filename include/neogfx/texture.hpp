@@ -41,6 +41,7 @@ namespace neogfx
 		virtual bool is_empty() const;
 		virtual size extents() const;
 		virtual size storage_extents() const;
+		virtual void set_pixels(const rect& aRect, void* aPixelData);
 	public:
 		virtual std::shared_ptr<i_native_texture> native_texture() const;
 		// attributes

@@ -38,13 +38,14 @@ namespace neogfx
 		void set_hue(double aHue);
 		void set_saturation(double aSaturation);
 		void set_lightness(double aLightness);
+		bool hue_undefined() const;
 	public:
 		hsl_colour with_lightness(double aNewLightness) const;
 		hsl_colour lighter(double aDelta) const;
 		hsl_colour lighter(double aCoeffecient, double aDelta) const;
 		colour to_rgb(double aAlpha = 1.0) const;
 		static hsl_colour from_rgb(const colour& aColour);
-	private:
+	public:
 		static double undefined_hue();
 	private:
 		double iHue;

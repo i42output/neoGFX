@@ -162,7 +162,7 @@ namespace neogfx
 			return 0.0;
 		auto range = maximum() - minimum();
 		if (range == 0)
-			return 1.0;
+			return 0.0;
 		std::istringstream iss(aText);
 		value_type result{};
 		if (!(iss >> result))

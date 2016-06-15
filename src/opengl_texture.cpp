@@ -78,6 +78,19 @@ namespace neogfx
 		return iStorageSize;
 	}
 
+	void opengl_texture::set_pixels(const rect& aRect, void* aPixelData)
+	{
+		GLint previousTexture;
+		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
+		glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
+			static_cast<GLint>(aRect.x), static_cast<GLint>(aRect.y), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
+			GL_RGBA, GL_UNSIGNED_BYTE, aPixelData));
+		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+	}
+
 	void* opengl_texture::handle() const
 	{
 		return reinterpret_cast<void*>(iHandle);

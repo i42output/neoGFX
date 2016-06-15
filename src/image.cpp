@@ -28,6 +28,14 @@ namespace neogfx
 	{
 	}
 
+	image::image(const neogfx::size& aSize, const colour& aColour) : iColourFormat(ColourFormatRGBA8)
+	{
+		resize(aSize);
+		for (std::size_t y = 0; y < aSize.cx; ++y)
+			for (std::size_t x = 0; x < aSize.cx; ++x)
+				set_pixel(point(x, y), aColour);
+	}
+
 	image::image(const std::string& aUri) : iResource(resource_manager::instance().load_resource(aUri)), iUri(aUri), iColourFormat(ColourFormatRGBA8)
 	{
 		if (available())

@@ -30,6 +30,8 @@ namespace neogfx
 	class colour_picker_dialog : public dialog
 	{
 	public:
+		event<> selection_changed;
+	public:
 		enum mode_e
 		{
 			ModeHSV,
@@ -46,6 +48,8 @@ namespace neogfx
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		public:
 			virtual void paint(graphics_context& aGraphicsContext) const;
+		public:
+			virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		private:
 			colour_picker_dialog& iParent;
 			colour iColour;
@@ -73,6 +77,8 @@ namespace neogfx
 			virtual void paint(graphics_context& aGraphicsContext) const;
 		private:
 			colour_picker_dialog& iParent;
+			mutable std::array<std::array<std::array<uint8_t, 4>, 256>, 256> iPixels;
+			mutable texture iTexture;
 		};
 		class colour_selection : public framed_widget
 		{
@@ -87,20 +93,23 @@ namespace neogfx
 			colour_picker_dialog& iParent;
 		};
 	public:
-		colour_picker_dialog();
-		colour_picker_dialog(i_widget& aParent);
+		colour_picker_dialog(const colour& aCurrentColour = colour::Black);
+		colour_picker_dialog(i_widget& aParent, const colour& aCurrentColour = colour::Black);
 		~colour_picker_dialog();
 	public:
 		mode_e mode() const;
 		void set_mode(mode_e aMode);
 		colour current_colour() const;
 		colour selected_colour() const;
+		void select_colour(const colour& aColour);
 	private:
 		void init();
+		void update_widgets();
 	private:
 		mode_e iMode;
 		colour iCurrentColour;
 		colour iSelectedColour;
+		bool iUpdatingWidgets;
 		vertical_layout iLayout;
 		horizontal_layout iLayout2;
 		vertical_layout iLeftLayout;
@@ -116,9 +125,9 @@ namespace neogfx
 		grid_layout iCustomColoursLayout;
 		yz_picker iYZPicker;
 		x_picker iXPicker;
-		std::pair<radio_button, spin_box> iH;
-		std::pair<radio_button, spin_box> iS;
-		std::pair<radio_button, spin_box> iV;
+		std::pair<radio_button, double_spin_box> iH;
+		std::pair<radio_button, double_spin_box> iS;
+		std::pair<radio_button, double_spin_box> iV;
 		std::pair<radio_button, spin_box> iR;
 		std::pair<radio_button, spin_box> iG;
 		std::pair<radio_button, spin_box> iB;

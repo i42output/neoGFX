@@ -62,6 +62,11 @@ namespace neogfx
 		return native_texture()->storage_extents();
 	}
 
+	void texture::set_pixels(const rect& aRect, void* aPixelData)
+	{
+		native_texture()->set_pixels(aRect, aPixelData);
+	}
+
 	std::shared_ptr<i_native_texture> texture::native_texture() const
 	{
 		if (is_empty())

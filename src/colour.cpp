@@ -265,7 +265,16 @@ namespace neogfx
 		return result.str();
 	}
 
-	gradient::gradient(const colour& aFrom, const colour& aTo, direction_e aDirection) : 
+	std::string colour::to_hex_string() const
+	{
+		std::ostringstream result;
+		result << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << with_alpha(0).value();
+		if (alpha() != 0xFF)
+			result << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << alpha();
+		return result.str();
+	}
+
+	gradient::gradient(const colour& aFrom, const colour& aTo, direction_e aDirection) :
 		iFrom(aFrom), 
 		iTo(aTo), 
 		iDirection(aDirection) 

@@ -43,6 +43,10 @@ namespace neogfx
 		{
 			return iTextureReference->storage_extents();
 		}
+		virtual void set_pixels(const rect& aRect, void* aPixelData)
+		{
+			iTextureReference->set_pixels(aRect, aPixelData);
+		}
 	public:
 		virtual void* handle() const
 		{

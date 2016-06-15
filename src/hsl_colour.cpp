@@ -40,7 +40,9 @@ namespace neogfx
 
 	double hsl_colour::hue() const
 	{
-		return iHue;
+		if (iHue != undefined_hue())
+			return iHue;
+		return 0.0;
 	}
 
 	double hsl_colour::saturation() const
@@ -68,6 +70,11 @@ namespace neogfx
 		iLightness = aLightness;
 	}
 
+	bool hsl_colour::hue_undefined() const
+	{
+		return iHue == undefined_hue();
+	}
+
 	hsl_colour hsl_colour::with_lightness(double aNewLightness) const
 	{
 		return lighter(0.0, aNewLightness);
@@ -93,7 +100,7 @@ namespace neogfx
 		double h2 = hue() / 60.0;
 		double x = c * (1.0 - std::abs(std::fmod(h2, 2.0) - 1.0));
 		double r, g, b;
-		if (hue() == undefined_hue())
+		if (hue_undefined())
 			r = g = b = 0.0;
 		else if (h2 >= 0.0 && h2 < 1.0)
 			r = c, g = x, b = 0.0;

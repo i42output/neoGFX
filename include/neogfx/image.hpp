@@ -39,11 +39,12 @@ namespace neogfx
 		struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
 	public:
 		image();
+		image(const neogfx::size& aSize, const colour& aColour);
 		image(const std::string& aUri);
 		template <typename T, std::size_t Width, std::size_t Height>
 		image(const std::string& aUri, const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap) : iUri(aUri), iColourFormat(ColourFormatRGBA8)
 		{
-			resize(neogfx::size(Width, Height));
+			resize(neogfx::size{ Width, Height });
 			for (std::size_t y = 0; y < Height; ++y)
 				for (std::size_t x = 0; x < Width; ++x)
 					set_pixel(point(x, y), aColourMap.find(aImagePattern[y][x])->second);
@@ -51,7 +52,7 @@ namespace neogfx
 		template <typename T, std::size_t Width, std::size_t Height>
 		image(const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap) : iColourFormat(ColourFormatRGBA8)
 		{
-			resize(neogfx::size(Width, Height));
+			resize(neogfx::size{ Width, Height });
 			for (std::size_t y = 0; y < Height; ++y)
 				for (std::size_t x = 0; x < Width; ++x)
 					set_pixel(point(x, y), aColourMap.find(aImagePattern[y][x])->second);
