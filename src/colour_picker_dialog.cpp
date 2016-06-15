@@ -148,7 +148,7 @@ namespace neogfx
 					iPixels[255 - z][y][0] = rgbColour.red();
 					iPixels[255 - z][y][1] = rgbColour.green();
 					iPixels[255 - z][y][2] = rgbColour.blue();
-					iPixels[255 - z][y][3] = rgbColour.alpha();
+					iPixels[255 - z][y][3] = 255; // alpha
 				}
 			}
 		}
@@ -350,9 +350,6 @@ namespace neogfx
 	hsv_colour colour_picker_dialog::selected_colour_as_hsv() const
 	{
 		return selected_colour_as_hsv(true);
-		if (iSelectedColour.is<colour>())
-			iSelectedColour = static_variant_cast<const colour&>(iSelectedColour).to_hsv();
-		return static_variant_cast<const hsv_colour&>(iSelectedColour).to_rgb();
 	}
 
 	void colour_picker_dialog::select_colour(const colour& aColour)
@@ -445,7 +442,7 @@ namespace neogfx
 			return result;
 		}
 		else
-			return static_variant_cast<const hsv_colour&>(iSelectedColour).to_rgb();
+			return static_variant_cast<const hsv_colour&>(iSelectedColour);
 	}
 
 	void colour_picker_dialog::select_colour(const representations& aColour, const i_widget& aUpdatingWidget)
