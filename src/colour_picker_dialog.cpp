@@ -420,13 +420,25 @@ namespace neogfx
 		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
 		move_surface((desktopRect.extents() - surface_size()) / 2.0);
 
-		iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour_as_hsv(); c.set_hue(iH.second.value()); select_colour(c, iH.second); });
-		iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour_as_hsv(); c.set_saturation(iS.second.value() / 100.0); select_colour(c, iS.second); });
-		iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour_as_hsv(); c.set_value(iV.second.value() / 100.0); select_colour(c, iV.second); });
+		iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_hue(iH.second.value()); select_colour(hsv, iH.second); });
+		iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_saturation(iS.second.value() / 100.0); select_colour(hsv, iS.second); });
+		iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_value(iV.second.value() / 100.0); select_colour(hsv, iV.second); });
 		iR.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_red(static_cast<colour::component>(iR.second.value())), iR.second); });
 		iG.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_green(static_cast<colour::component>(iG.second.value())), iG.second); });
 		iB.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_blue(static_cast<colour::component>(iB.second.value())), iB.second); });
-		iA.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_alpha(static_cast<colour::component>(iA.second.value())), iA.second); });
+		iA.second.value_changed([this]() 
+		{ 
+			if (iUpdatingWidgets) 
+				return;
+			if (iSelectedColour.is<colour>())
+				select_colour(selected_colour().with_alpha(static_cast<colour::component>(iA.second.value())), iA.second); 
+			else
+			{
+				auto hsv = selected_colour_as_hsv();
+				hsv.set_alpha(iA.second.value() / 255.0);
+				select_colour(hsv, iA.second);
+			}
+		});
 		iRgb.text_changed([this]() { if (iUpdatingWidgets) return; select_colour(colour{ iRgb.text() }, iRgb); });
 
 		update_widgets(*this);
