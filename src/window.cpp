@@ -800,7 +800,13 @@ namespace neogfx
 		else
 		{
 			if (has_focused_widget())
-				focused_widget().key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			{
+				i_widget* w = &focused_widget();
+				while (!w->key_pressed(aScanCode, aKeyCode, aKeyModifiers) && w != this)
+					w = &w->parent();
+				if (w == this)
+					key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			}
 			else
 				key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 		}
@@ -809,7 +815,13 @@ namespace neogfx
 	void window::native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
 		if (has_focused_widget())
-			focused_widget().key_released(aScanCode, aKeyCode, aKeyModifiers);
+		{
+			i_widget* w = &focused_widget();
+			while (!w->key_released(aScanCode, aKeyCode, aKeyModifiers) && w != this)
+				w = &w->parent();
+			if (w == this)
+				key_released(aScanCode, aKeyCode, aKeyModifiers);
+		}
 		else
 			key_released(aScanCode, aKeyCode, aKeyModifiers);
 	}
@@ -825,14 +837,26 @@ namespace neogfx
 			iSurrogatePairPart = boost::none;
 			auto text = neolib::utf16_to_utf8(std::u16string(&utf16[0], 2));
 			if (has_focused_widget())
-				focused_widget().text_input(text);
+			{
+				i_widget* w = &focused_widget();
+				while (!w->text_input(text) && w != this)
+					w = &w->parent();
+				if (w == this)
+					text_input(text);
+			}
 			else
 				text_input(text);
 		}
 		else
 		{
 			if (has_focused_widget())
-				focused_widget().text_input(aText);
+			{
+				i_widget* w = &focused_widget();
+				while (!w->text_input(aText) && w != this)
+					w = &w->parent();
+				if (w == this)
+					text_input(aText);
+			}
 			else
 				text_input(aText);
 		}
@@ -841,7 +865,13 @@ namespace neogfx
 	void window::native_window_sys_text_input(const std::string& aText)
 	{
 		if (has_focused_widget())
-			focused_widget().sys_text_input(aText);
+		{
+			i_widget* w = &focused_widget();
+			while (!w->sys_text_input(aText) && w != this)
+				w = &w->parent();
+			if (w == this)
+				sys_text_input(aText);
+		}
 		else
 			sys_text_input(aText);
 	}

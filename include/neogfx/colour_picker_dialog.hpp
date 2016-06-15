@@ -76,10 +76,17 @@ namespace neogfx
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		public:
 			virtual void paint(graphics_context& aGraphicsContext) const;
+		public:
+			virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+			virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+			virtual void mouse_moved(const point& aPosition);
+		private:
+			void select(const point& aCursorPos);
 		private:
 			colour_picker_dialog& iParent;
 			mutable std::array<std::array<std::array<uint8_t, 4>, 256>, 256> iPixels;
 			mutable texture iTexture;
+			bool iTracking;
 		};
 		class colour_selection : public framed_widget
 		{

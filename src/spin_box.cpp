@@ -70,6 +70,30 @@ namespace neogfx
 		return app::instance().current_style().colour().mid(background_colour());
 	}
 
+	void spin_box_impl::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
+	{
+		if (aWheel == mouse_wheel::Vertical)
+			set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + (aDelta.dy * normalized_step_value()))), true);
+		else
+			framed_widget::mouse_wheel_scrolled(aWheel, aDelta);
+	}
+
+	bool spin_box_impl::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	{
+		if (aScanCode == ScanCode_UP)
+		{
+			set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())), true);
+			return true;
+		}
+		else if (aScanCode == ScanCode_DOWN)
+		{
+			set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())), true);
+			return true;
+		}
+		else
+			return framed_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+	}
+
 	line_edit& spin_box_impl::text_box()
 	{
 		return iTextBox;
