@@ -54,8 +54,8 @@ namespace neogfx
 				set_alpha(0xFF);
 			else
 			{
-				auto actualAlpha = red();
-				set_red(alpha());
+				auto actualAlpha = blue();
+				iValue >>= GreenShift;
 				set_alpha(actualAlpha);
 			}
 		}
