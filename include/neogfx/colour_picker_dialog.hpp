@@ -104,7 +104,8 @@ namespace neogfx
 		void select_colour(const colour& aColour);
 	private:
 		void init();
-		void update_widgets();
+		void select_colour(const colour& aColour, const i_widget& aUpdatingWidget);
+		void update_widgets(const i_widget& aUpdatingWidget);
 	private:
 		mode_e iMode;
 		colour iCurrentColour;
@@ -132,7 +133,7 @@ namespace neogfx
 		std::pair<radio_button, spin_box> iG;
 		std::pair<radio_button, spin_box> iB;
 		std::pair<radio_button, spin_box> iA;
-		std::pair<label, line_edit> iRgb;
+		line_edit iRgb;
 		push_button iAddToCustomColours;
 	};
 }

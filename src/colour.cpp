@@ -29,7 +29,7 @@ namespace neogfx
 	{
 	}
 
-	colour::colour(argb aValue) : iValue(aValue) 
+	colour::colour(argb aValue) : iValue{aValue}
 	{
 	}
 
@@ -41,16 +41,33 @@ namespace neogfx
 	{
 	}
 
-	colour::colour(const std::string& aTextValue) : iValue()
+	colour::colour(const std::string& aTextValue) : iValue{}
 	{
-		if (aTextValue[0] == L'#')
+		if (aTextValue.empty())
+			*this = Black;
+		else if (aTextValue[0] == L'#' || (std::isxdigit(aTextValue[0]) && from_name(aTextValue) == boost::none))
 		{
-			iValue = neolib::string_to_unsigned_integer(aTextValue.substr(1), 16);
+			iValue = neolib::string_to_unsigned_integer(aTextValue.substr(aTextValue[0] == L'#' ? 1 : 0), 16);
 			if (aTextValue.size() <= 7)
 				set_alpha(0xFF);
+			else
+			{
+				auto actualAlpha = red();
+				set_red(alpha());
+				set_alpha(actualAlpha);
+			}
 		}
 		else
-			iValue = from_name(aTextValue).value();
+		{
+			auto namedColour = from_name(aTextValue);
+			if (namedColour != boost::none)
+				*this = *namedColour;
+			else
+			{
+				/* todo: parse rgba(x, y, z); */
+				*this = Black;
+			}
+		}
 	}
 
 	colour::argb colour::value() const 
@@ -268,9 +285,9 @@ namespace neogfx
 	std::string colour::to_hex_string() const
 	{
 		std::ostringstream result;
-		result << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << with_alpha(0).value();
+		result << "#" << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << with_alpha(0).value();
 		if (alpha() != 0xFF)
-			result << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << alpha();
+			result << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint32_t>(alpha());
 		return result.str();
 	}
 
@@ -1034,7 +1051,7 @@ namespace neogfx
 	const colour colour::Yellow4 = colour(0x8B, 0x8B, 0x00);
 	const colour colour::YellowGreen = colour(0x9A, 0xCD, 0x32);
 
-	colour colour::from_name(const std::string& aName)
+	optional_colour colour::from_name(const std::string& aName)
 	{
 		struct named_colours : public std::map<neolib::ci_string, colour>
 		{
@@ -1797,8 +1814,8 @@ namespace neogfx
 		};
 		static const named_colours sNamedColours;
 		named_colours::const_iterator theColour = sNamedColours.find(neolib::make_ci_string(aName));
-		if (theColour == sNamedColours.end())
-			throw not_found();
-		return theColour->second;
+		if (theColour != sNamedColours.end())
+			return theColour->second;
+		return optional_colour{};
 	}
 }

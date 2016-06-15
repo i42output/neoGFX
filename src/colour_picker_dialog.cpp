@@ -237,7 +237,7 @@ namespace neogfx
 		iG{ *this, *this },
 		iB{ *this, *this },
 		iA{ *this, *this },
-		iRgb{ *this, *this },
+		iRgb{ *this },
 		iAddToCustomColours{iRightLayout, "&Add to Custom Colours" }
 	{
 		init();
@@ -271,7 +271,7 @@ namespace neogfx
 		iG{ *this, *this },
 		iB{ *this, *this },
 		iA{ *this, *this },
-		iRgb{ *this, *this },
+		iRgb{ *this },
 		iAddToCustomColours{iRightLayout, "&Add to Custom Colours"}
 	{
 		init();
@@ -307,16 +307,9 @@ namespace neogfx
 
 	void colour_picker_dialog::select_colour(const colour& aColour)
 	{
-		if (iUpdatingWidgets)
-			return;
-		if (iSelectedColour != aColour)
-		{
-			iSelectedColour = aColour;
-			update_widgets();
-			selection_changed.trigger();
-		}
+		select_colour(aColour, *this);
 	}
-
+		
 	void colour_picker_dialog::init()
 	{
 		scoped_units su(static_cast<framed_widget&>(*this), UnitsPixels);
@@ -350,14 +343,14 @@ namespace neogfx
 		iRightTopLayout.set_spacing(16.0);
 		iRightBottomLayout.set_spacing(8.0);
 		iChannelLayout.set_spacing(8.0);
-		iH.first.label().text().set_text("&Hue:"); iH.second.set_size_policy(size_policy::Minimum); iH.second.text_box().set_hint("000000"); iH.second.set_minimum(0); iH.second.set_maximum(359); iH.second.set_step(1);
-		iS.first.label().text().set_text("&Sat:"); iS.second.set_size_policy(size_policy::Minimum); iS.second.text_box().set_hint("000000"); iS.second.set_minimum(0); iS.second.set_maximum(100); iS.second.set_step(1);
-		iV.first.label().text().set_text("&Val:"); iV.second.set_size_policy(size_policy::Minimum); iV.second.text_box().set_hint("000000"); iV.second.set_minimum(0); iV.second.set_maximum(100); iV.second.set_step(1);
-		iR.first.label().text().set_text("&Red:"); iR.second.set_size_policy(size_policy::Minimum); iR.second.text_box().set_hint("000000"); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
-		iG.first.label().text().set_text("&Green:"); iG.second.set_size_policy(size_policy::Minimum); iG.second.text_box().set_hint("000000"); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
-		iB.first.label().text().set_text("&Blue:"); iB.second.set_size_policy(size_policy::Minimum); iB.second.text_box().set_hint("000000"); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
-		iA.first.label().text().set_text("&Alpha:"); iA.second.set_size_policy(size_policy::Minimum); iA.second.text_box().set_hint("000000"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
-		iRgb.first.text().set_text("&#:"); iRgb.second.set_size_policy(size_policy::Minimum); iRgb.second.set_hint("000000"); 
+		iH.first.label().text().set_text("&Hue:"); iH.second.set_size_policy(size_policy::Minimum); iH.second.text_box().set_hint("359.9"); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
+		iS.first.label().text().set_text("&Sat:"); iS.second.set_size_policy(size_policy::Minimum); iS.second.text_box().set_hint("100.0"); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
+		iV.first.label().text().set_text("&Val:"); iV.second.set_size_policy(size_policy::Minimum); iV.second.text_box().set_hint("100.0"); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);
+		iR.first.label().text().set_text("&Red:"); iR.second.set_size_policy(size_policy::Minimum); iR.second.text_box().set_hint("255"); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
+		iG.first.label().text().set_text("&Green:"); iG.second.set_size_policy(size_policy::Minimum); iG.second.text_box().set_hint("255"); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
+		iB.first.label().text().set_text("&Blue:"); iB.second.set_size_policy(size_policy::Minimum); iB.second.text_box().set_hint("255"); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
+		iA.first.label().text().set_text("&Alpha:"); iA.second.set_size_policy(size_policy::Minimum); iA.second.text_box().set_hint("255"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
+		iRgb.set_size_policy(size_policy::Minimum); iRgb.set_hint("#000000"); 
 		iChannelLayout.set_dimensions(4, 4);
 		iChannelLayout.add_item(iH.first); iChannelLayout.add_item(iH.second);
 		iChannelLayout.add_item(iR.first); iChannelLayout.add_item(iR.second);
@@ -365,7 +358,8 @@ namespace neogfx
 		iChannelLayout.add_item(iG.first); iChannelLayout.add_item(iG.second);
 		iChannelLayout.add_item(iV.first); iChannelLayout.add_item(iV.second);
 		iChannelLayout.add_item(iB.first); iChannelLayout.add_item(iB.second);
-		iChannelLayout.add_item(iRgb.first); iChannelLayout.add_item(iRgb.second);
+		iChannelLayout.add_span(grid_layout::cell_coordinates{ 0, 3 }, grid_layout::cell_coordinates{ 1, 3 });
+		iChannelLayout.add_item(iRgb); iChannelLayout.add_spacer().set_size_policy(size_policy::Minimum);
 		iChannelLayout.add_item(iA.first); iChannelLayout.add_item(iA.second);
 		iBasicColoursLayout.set_dimensions(12, 12);
 		for (auto const& basicColour : sBasicColours)
@@ -379,30 +373,51 @@ namespace neogfx
 		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
 		move_surface((desktopRect.extents() - surface_size()) / 2.0);
 
-		iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_hue(iH.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha())); });
-		iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_saturation(iS.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha())); });
-		iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_value(iV.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha())); });
-		iR.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_red(static_cast<colour::component>(iR.second.value()))); });
-		iG.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_green(static_cast<colour::component>(iG.second.value()))); });
-		iB.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_blue(static_cast<colour::component>(iB.second.value()))); });
-		iA.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_alpha(static_cast<colour::component>(iA.second.value()))); });
+		iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_hue(iH.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha()), iH.second); });
+		iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_saturation(iS.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha()), iS.second); });
+		iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto c = selected_colour().to_hsv(); c.set_value(iV.second.value()); select_colour(c.to_rgb().with_alpha(selected_colour().alpha()), iV.second); });
+		iR.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_red(static_cast<colour::component>(iR.second.value())), iR.second); });
+		iG.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_green(static_cast<colour::component>(iG.second.value())), iG.second); });
+		iB.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_blue(static_cast<colour::component>(iB.second.value())), iB.second); });
+		iA.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_alpha(static_cast<colour::component>(iA.second.value())), iA.second); });
+		iRgb.text_changed([this]() { if (iUpdatingWidgets) return; select_colour(colour{ iRgb.text() }, iRgb); });
 
-		update_widgets();
+		update_widgets(*this);
 	}
 
-	void colour_picker_dialog::update_widgets()
+	void colour_picker_dialog::select_colour(const colour& aColour, const i_widget& aUpdatingWidget)
+	{
+		if (iUpdatingWidgets)
+			return;
+		if (iSelectedColour != aColour)
+		{
+			iSelectedColour = aColour;
+			update_widgets(aUpdatingWidget);
+			selection_changed.trigger();
+		}
+	}
+
+	void colour_picker_dialog::update_widgets(const i_widget& aUpdatingWidget)
 	{
 		if (iUpdatingWidgets)
 			return;
 		iUpdatingWidgets = true;
-		iH.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().hue()));
-		iS.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().saturation() * 100.0));
-		iV.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().value() * 100.0));
-		iR.second.set_value(iSelectedColour.red());
-		iG.second.set_value(iSelectedColour.green());
-		iB.second.set_value(iSelectedColour.blue());
-		iA.second.set_value(iSelectedColour.alpha());
-		iRgb.second.set_text(iSelectedColour.to_hex_string());
+		if (&aUpdatingWidget != &iH.second)
+			iH.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().hue()));
+		if (&aUpdatingWidget != &iS.second)
+			iS.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().saturation() * 100.0));
+		if (&aUpdatingWidget != &iV.second)
+			iV.second.set_value(static_cast<int32_t>(iSelectedColour.to_hsv().value() * 100.0));
+		if (&aUpdatingWidget != &iR.second)
+			iR.second.set_value(iSelectedColour.red());
+		if (&aUpdatingWidget != &iG.second)
+			iG.second.set_value(iSelectedColour.green());
+		if (&aUpdatingWidget != &iB.second)
+			iB.second.set_value(iSelectedColour.blue());
+		if (&aUpdatingWidget != &iA.second)
+			iA.second.set_value(iSelectedColour.alpha());
+		if (&aUpdatingWidget != &iRgb)
+			iRgb.set_text(iSelectedColour.to_hex_string());
 		iUpdatingWidgets = false;
 	}
 }

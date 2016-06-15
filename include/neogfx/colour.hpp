@@ -699,8 +699,6 @@ namespace neogfx
 		static const colour Yellow4;
 		static const colour YellowGreen;
 	public:
-		struct not_found : std::logic_error { not_found() : std::logic_error("neogfx::colour::not_found") {} };
-	public:
 		static const component MinComponetValue = 0x00;
 		static const component MaxComponetValue = 0xFF;
 	private:
@@ -716,7 +714,7 @@ namespace neogfx
 		colour(const std::string& aTextValue);
 		// operations
 	public:
-		static colour from_name(const std::string& aName);
+		static boost::optional<colour> from_name(const std::string& aName);
 		argb value() const;
 		component alpha() const;
 		component red() const;

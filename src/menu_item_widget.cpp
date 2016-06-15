@@ -175,7 +175,7 @@ namespace neogfx
 			iMenu.clear_selection();
 	}
 
-	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point&, key_modifiers_e aKeyModifiers)
+	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point&, key_modifiers_e)
 	{
 		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::SubMenu)
 			handle_clicked();
