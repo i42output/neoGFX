@@ -23,7 +23,7 @@
 #include <neogfx/line_edit.hpp>
 #include <neogfx/spin_box.hpp>
 #include <neogfx/slider.hpp>
-#include <neogfx/colour_picker_dialog.hpp>
+#include <neogfx/colour_dialog.hpp>
 
 namespace ng = neogfx;
 
@@ -389,7 +389,7 @@ int main(int argc, char* argv[])
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
 		buttonColourPicker.clicked([&window]()
 		{
-			ng::colour_picker_dialog colourPicker(window);
+			ng::colour_dialog colourPicker(window);
 			colourPicker.exec();
 		});
 		ng::vertical_spacer spacer1(layout4);

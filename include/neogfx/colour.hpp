@@ -816,5 +816,8 @@ namespace neogfx
 		direction_e iDirection;
 	};
 
+	typedef colour color;
+
 	typedef boost::optional<colour> optional_colour;
+	typedef boost::optional<color> optional_color;
 }

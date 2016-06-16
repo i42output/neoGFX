@@ -1,4 +1,4 @@
-// colour_picker_dialog.cpp
+// colour_dialog.cpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -18,17 +18,33 @@
 */
 
 #include "neogfx.hpp"
-#include "colour_picker_dialog.hpp"
+#include "colour_dialog.hpp"
 
 namespace neogfx
 {
-	colour_picker_dialog::colour_box::colour_box(colour_picker_dialog& aParent, const colour& aColour) :
+	inline void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect)
+	{
+		const dimension ALPHA_PATTERN_SIZE = 4.0;
+		for (coordinate x = 0; x < aRect.width(); x += ALPHA_PATTERN_SIZE)
+		{
+			bool alt = false;
+			if (static_cast<uint32_t>((x / ALPHA_PATTERN_SIZE)) % 2 == 1)
+				alt = !alt;
+			for (coordinate y = 0; y < aRect.height(); y += ALPHA_PATTERN_SIZE)
+			{
+				aGraphicsContext.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ ALPHA_PATTERN_SIZE, ALPHA_PATTERN_SIZE } }, alt ? colour{ 160, 160, 160 } : colour{ 255, 255, 255 });
+				alt = !alt;
+			}
+		}
+	}
+
+	colour_dialog::colour_box::colour_box(colour_dialog& aParent, const colour& aColour) :
 		framed_widget(aParent, SolidFrame), iParent(aParent), iColour(aColour)
 	{
 		set_margins(neogfx::margins{});
 	}
 
-	size colour_picker_dialog::colour_box::minimum_size(const optional_size& aAvailableSpace) const
+	size colour_dialog::colour_box::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
@@ -38,28 +54,28 @@ namespace neogfx
 		return result;
 	}
 
-	size colour_picker_dialog::colour_box::maximum_size(const optional_size& aAvailableSpace) const
+	size colour_dialog::colour_box::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_maximum_size())
 			return framed_widget::maximum_size(aAvailableSpace);
 		return minimum_size();
 	}
 
-	void colour_picker_dialog::colour_box::paint(graphics_context& aGraphicsContext) const
+	void colour_dialog::colour_box::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
 		aGraphicsContext.fill_rect(client_rect(false), iColour);
 	}
 
-	void colour_picker_dialog::colour_box::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	void colour_dialog::colour_box::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
 			iParent.select_colour(iColour.with_alpha(iParent.selected_colour().alpha()));
 	}
 
-	colour_picker_dialog::x_picker::x_picker(colour_picker_dialog& aParent) :
-		framed_widget(aParent.iRightTopLayout), iParent(aParent)
+	colour_dialog::x_picker::x_picker(colour_dialog& aParent) :
+		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTracking(false)
 	{
 		set_margins(neogfx::margins{});
 		iParent.selection_changed([this]
@@ -68,7 +84,7 @@ namespace neogfx
 		});
 	}
 
-	size colour_picker_dialog::x_picker::minimum_size(const optional_size& aAvailableSpace) const
+	size colour_dialog::x_picker::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
@@ -78,90 +94,32 @@ namespace neogfx
 		return result;
 	}
 
-	size colour_picker_dialog::x_picker::maximum_size(const optional_size& aAvailableSpace) const
+	size colour_dialog::x_picker::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_maximum_size())
 			return framed_widget::maximum_size(aAvailableSpace);
 		return minimum_size();
 	}
 
-	void colour_picker_dialog::x_picker::paint(graphics_context& aGraphicsContext) const
+	void colour_dialog::x_picker::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
 		scoped_units su(*this, UnitsPixels);
 		rect cr = client_rect(false);
-		for (uint32_t x = 0; x < cr.height(); ++x)
+		if (iParent.current_channel() == ChannelAlpha)
+			draw_alpha_background(aGraphicsContext, cr);
+		for (uint32_t y = 0; y < cr.height(); ++y)
 		{
-			double nx = x / (cr.height() - 1.0);
-			rect line{ cr.top_left() + point{ 0.0, cr.height() - x - 1.0 }, size{ cr.width(), 1.0 } };
-			if (iParent.mode() == ModeHSV)
-			{
-				hsv_colour hsvColour{ nx * 359.0, 1.0, 1.0 };
-				aGraphicsContext.fill_rect(line, hsvColour.to_rgb());
-			}
+			rect line{ cr.top_left() + point{ 0.0, static_cast<coordinate>(y) }, size{ cr.width(), 1.0 } };
+			auto r = colour_at_position(point{ 0.0, static_cast<coordinate>(y) });
+			auto rgb = r.is<hsv_colour>() ? static_variant_cast<hsv_colour>(r).to_rgb() : static_variant_cast<colour>(r);
+			if (iParent.current_channel() != ChannelAlpha)
+				rgb.set_alpha(255);
+			aGraphicsContext.fill_rect(line, rgb);
 		}
 	}
 
-	colour_picker_dialog::yz_picker::yz_picker(colour_picker_dialog& aParent) :
-		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTexture{ image{size{256, 256}, colour::Black} }, iTracking{false}
-	{
-		set_margins(neogfx::margins{});
-		iParent.selection_changed([this]
-		{
-			update();
-		});
-	}
-
-	size colour_picker_dialog::yz_picker::minimum_size(const optional_size& aAvailableSpace) const
-	{
-		if (has_minimum_size())
-			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
-		size result = framed_widget::minimum_size(aAvailableSpace);
-		result += size{ 256, 256 };
-		return result;
-	}
-
-	size colour_picker_dialog::yz_picker::maximum_size(const optional_size& aAvailableSpace) const
-	{
-		if (has_maximum_size())
-			return framed_widget::maximum_size(aAvailableSpace);
-		return minimum_size();
-	}
-
-	void colour_picker_dialog::yz_picker::paint(graphics_context& aGraphicsContext) const
-	{
-		framed_widget::paint(aGraphicsContext);
-		rect cr = client_rect(false);
-		for (uint32_t y = 0; y < 256; ++y)
-		{
-			for (uint32_t z = 0; z < 256; ++z)
-			{
-				double ny = y / (255.0);
-				double nz = z / (255.0);
-				if (iParent.mode() == ModeHSV)
-				{
-					hsv_colour hsvColour = iParent.selected_colour_as_hsv(false);
-					hsvColour.set_saturation(ny);
-					hsvColour.set_value(nz);
-					auto rgbColour = hsvColour.to_rgb();
-					iPixels[255 - z][y][0] = rgbColour.red();
-					iPixels[255 - z][y][1] = rgbColour.green();
-					iPixels[255 - z][y][2] = rgbColour.blue();
-					iPixels[255 - z][y][3] = 255; // alpha
-				}
-			}
-		}
-		iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
-		aGraphicsContext.draw_texture(cr.top_left(), iTexture);
-		point cursor;
-		if (iParent.mode() == ModeHSV)
-			cursor = point{iParent.selected_colour_as_hsv(false).saturation() * 255.0, 255.0 - iParent.selected_colour_as_hsv(false).value() * 255.0 };
-		aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iParent.selected_colour());
-		aGraphicsContext.draw_circle(cr.top_left() + cursor, 4.0, pen{ iParent.selected_colour().light(0x80) ? colour::Black : colour::White });
-	}
-
-	void colour_picker_dialog::yz_picker::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	void colour_dialog::x_picker::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
@@ -171,31 +129,299 @@ namespace neogfx
 		}
 	}
 
-	void colour_picker_dialog::yz_picker::mouse_button_released(mouse_button aButton, const point& aPosition)
+	void colour_dialog::x_picker::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		framed_widget::mouse_button_released(aButton, aPosition);
 		if (!capturing())
 			iTracking = false;
 	}
 
-	void colour_picker_dialog::yz_picker::mouse_moved(const point& aPosition)
+	void colour_dialog::x_picker::mouse_moved(const point& aPosition)
 	{
 		if (iTracking)
 			select(aPosition - client_rect(false).top_left());
 	}
 
-	void colour_picker_dialog::yz_picker::select(const point& aCursorPos)
+	void colour_dialog::x_picker::select(const point& aPosition)
 	{
-		if (iParent.mode() == ModeHSV)
+		iParent.select_colour(colour_at_position(aPosition), *this);
+	}
+
+	colour_dialog::representations colour_dialog::x_picker::colour_at_position(const point& aCursorPos) const
+	{
+		point pos{ std::max(std::min(aCursorPos.x, 255.0), 0.0), std::max(std::min(aCursorPos.y, 255.0), 0.0) };
+		switch (iParent.current_channel())
 		{
-			auto hsv = iParent.selected_colour_as_hsv(true);
-			hsv.set_saturation(std::max(std::min(aCursorPos.x / 255.0, 1.0), 0.0));
-			hsv.set_value(std::max(std::min((255.0 - aCursorPos.y) / 255.0, 1.0), 0.0));
-			iParent.select_colour(hsv, *this);
+		case ChannelHue:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				hsv.set_hue((255.0 - pos.y) / 255.0 * 360.0);
+				return hsv;
+			}
+			break;
+		case ChannelSaturation:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				hsv.set_saturation((255.0 - pos.y) / 255.0);
+				return hsv;
+			}
+			break;
+		case ChannelValue:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				hsv.set_value((255.0 - pos.y) / 255.0);
+				return hsv;
+			}
+			break;
+		case ChannelRed:
+			{
+				auto rgb = iParent.selected_colour();
+				rgb.set_red(static_cast<colour::component>(255.0 - pos.y));
+				return rgb;
+			}
+			break;
+		case ChannelGreen:
+			{
+				auto rgb = iParent.selected_colour();
+				rgb.set_green(static_cast<colour::component>(255.0 - pos.y));
+				return rgb;
+			}
+			break;
+		case ChannelBlue:
+			{
+				auto rgb = iParent.selected_colour();
+				rgb.set_blue(static_cast<colour::component>(255.0 - pos.y));
+				return rgb;
+			}
+			break;
+		case ChannelAlpha:
+			if (iParent.current_mode() == ModeHSV)
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				hsv.set_alpha((255.0 - pos.y) / 255.0);
+				return hsv;
+			}
+			else
+			{
+				auto rgb = iParent.selected_colour();
+				rgb.set_alpha(static_cast<colour::component>(255.0 - pos.y));
+				return rgb;
+			}
+			break;
+		default:
+			return colour::Black;
+		}
+	}
+
+	colour_dialog::yz_picker::yz_picker(colour_dialog& aParent) :
+		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTexture{ image{size{256, 256}, colour::Black} }, iTracking{false}
+	{
+		set_margins(neogfx::margins{});
+		iParent.selection_changed([this]
+		{
+			update();
+		});
+	}
+
+	size colour_dialog::yz_picker::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		if (has_minimum_size())
+			return framed_widget::minimum_size(aAvailableSpace);
+		scoped_units su(*this, UnitsPixels);
+		size result = framed_widget::minimum_size(aAvailableSpace);
+		result += size{ 256, 256 };
+		return result;
+	}
+
+	size colour_dialog::yz_picker::maximum_size(const optional_size& aAvailableSpace) const
+	{
+		if (has_maximum_size())
+			return framed_widget::maximum_size(aAvailableSpace);
+		return minimum_size();
+	}
+
+	void colour_dialog::yz_picker::paint(graphics_context& aGraphicsContext) const
+	{
+		framed_widget::paint(aGraphicsContext);
+		rect cr = client_rect(false);
+		for (uint32_t y = 0; y < 256; ++y)
+		{
+			for (uint32_t z = 0; z < 256; ++z)
+			{
+				auto r = colour_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
+				colour rgbColour = (r.is<hsv_colour>() ? static_variant_cast<const hsv_colour&>(r).to_rgb() : static_variant_cast<const colour&>(r));
+				iPixels[255 - z][y][0] = rgbColour.red();
+				iPixels[255 - z][y][1] = rgbColour.green();
+				iPixels[255 - z][y][2] = rgbColour.blue();
+				iPixels[255 - z][y][3] = 255; // alpha
+			}
+		}
+		iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
+		aGraphicsContext.draw_texture(cr.top_left(), iTexture);
+		point cursor = current_cursor_position();
+		aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iParent.selected_colour());
+		aGraphicsContext.draw_circle(cr.top_left() + cursor, 4.0, pen{ iParent.selected_colour().light(0x80) ? colour::Black : colour::White });
+	}
+
+	void colour_dialog::yz_picker::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+		if (aButton == mouse_button::Left)
+		{
+			select(aPosition - client_rect(false).top_left());
+			iTracking = true;
+		}
+	}
+
+	void colour_dialog::yz_picker::mouse_button_released(mouse_button aButton, const point& aPosition)
+	{
+		framed_widget::mouse_button_released(aButton, aPosition);
+		if (!capturing())
+			iTracking = false;
+	}
+
+	void colour_dialog::yz_picker::mouse_moved(const point& aPosition)
+	{
+		if (iTracking)
+			select(aPosition - client_rect(false).top_left());
+	}
+
+	void colour_dialog::yz_picker::select(const point& aPosition)
+	{
+		iParent.select_colour(colour_at_position(aPosition), *this);
+	}
+
+	colour_dialog::representations colour_dialog::yz_picker::colour_at_position(const point& aCursorPos) const
+	{
+		point pos{ std::max(std::min(aCursorPos.x, 255.0), 0.0), std::max(std::min(aCursorPos.y, 255.0), 0.0) };
+		switch (iParent.current_channel())
+		{
+		case ChannelHue:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				hsv.set_saturation(std::max(std::min(pos.x / 255.0, 1.0), 0.0));
+				hsv.set_value(std::max(std::min((255.0 - pos.y) / 255.0, 1.0), 0.0));
+				return hsv;
+			}
+			break;
+		case ChannelSaturation:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				hsv.set_hue(std::max(std::min(pos.x / 255.0 * 360.0, 360.0), 0.0));
+				hsv.set_value(std::max(std::min((255.0 - pos.y) / 255.0, 1.0), 0.0));
+				return hsv;
+			}
+			break;
+		case ChannelValue:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				hsv.set_hue(std::max(std::min(pos.x / 255.0 * 360.0, 360.0), 0.0));
+				hsv.set_saturation(std::max(std::min((255.0 - pos.y) / 255.0, 1.0), 0.0));
+				return hsv;
+			}
+			break;
+		case ChannelRed:
+			{
+				auto rgb = iParent.selected_colour();
+				rgb.set_blue(static_cast<colour::component>(pos.x));
+				rgb.set_green(static_cast<colour::component>(255.0 - pos.y));
+				return rgb;
+			}
+			break;
+		case ChannelGreen:
+			{
+				auto rgb = iParent.selected_colour();
+				rgb.set_blue(static_cast<colour::component>(pos.x));
+				rgb.set_red(static_cast<colour::component>(255.0 - pos.y));
+				return rgb;
+			}
+			break;
+		case ChannelBlue:
+			{
+				auto rgb = iParent.selected_colour();
+				rgb.set_red(static_cast<colour::component>(pos.x));
+				rgb.set_green(static_cast<colour::component>(255.0 - pos.y));
+				return rgb;
+			}
+			break;
+		case ChannelAlpha:
+			if (iParent.current_mode() == ModeHSV)
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				hsv.set_saturation(std::max(std::min(pos.x / 255.0, 1.0), 0.0));
+				hsv.set_value(std::max(std::min((255.0 - pos.y) / 255.0, 1.0), 0.0));
+				return hsv;
+			}
+			else
+			{
+				auto rgb = iParent.selected_colour();
+				rgb.set_blue(static_cast<colour::component>(pos.x));
+				rgb.set_green(static_cast<colour::component>(255.0 - pos.y));
+				return rgb;
+			}
+			break;
+		}
+		return colour::Black;
+	}
+
+	point colour_dialog::yz_picker::current_cursor_position() const
+	{
+		switch (iParent.current_channel())
+		{
+		case ChannelHue:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				return point{ hsv.saturation() * 255.0, (1.0 - hsv.value()) * 255.0 };
+			}
+			break;
+		case ChannelSaturation:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				return point{ hsv.hue() / 360.0 * 255.0, (1.0 - hsv.value()) * 255.0 };
+			}
+			break;
+		case ChannelValue:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				return point{ hsv.hue() / 360.0 * 255.0, (1.0 - hsv.saturation()) * 255.0 };
+			}
+			break;
+		case ChannelRed:
+			{
+				auto rgb = iParent.selected_colour();
+				return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.green()) };
+			}
+			break;
+		case ChannelGreen:
+			{
+				auto rgb = iParent.selected_colour();
+				return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.red()) };
+			}
+			break;
+		case ChannelBlue:
+			{
+				auto rgb = iParent.selected_colour();
+				return point{ static_cast<coordinate>(rgb.red()), static_cast<coordinate>(255 - rgb.green()) };
+			}
+			break;
+		case ChannelAlpha:
+			if (iParent.current_mode() == ModeHSV)
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				return point{ hsv.saturation() * 255.0, (1.0 - hsv.value()) * 255.0 };
+			}
+			else
+			{
+				auto rgb = iParent.selected_colour();
+				return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.green()) };
+			}
+			break;
+		default:
+			return point{};
 		}
 	}
 	
-	colour_picker_dialog::colour_selection::colour_selection(colour_picker_dialog& aParent) :
+	colour_dialog::colour_selection::colour_selection(colour_dialog& aParent) :
 		framed_widget(aParent.iRightBottomLayout), iParent(aParent)
 	{
 		set_margins(neogfx::margins{});
@@ -205,7 +431,7 @@ namespace neogfx
 		});
 	}
 
-	size colour_picker_dialog::colour_selection::minimum_size(const optional_size& aAvailableSpace) const
+	size colour_dialog::colour_selection::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
@@ -215,30 +441,19 @@ namespace neogfx
 		return result;
 	}
 
-	size colour_picker_dialog::colour_selection::maximum_size(const optional_size& aAvailableSpace) const
+	size colour_dialog::colour_selection::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_maximum_size())
 			return framed_widget::maximum_size(aAvailableSpace);
 		return minimum_size();
 	}
 
-	void colour_picker_dialog::colour_selection::paint(graphics_context& aGraphicsContext) const
+	void colour_dialog::colour_selection::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
 		scoped_units su(*this, aGraphicsContext, UnitsPixels);
 		rect cr = client_rect(false);
-		const dimension ALPHA_PATTERN_SIZE = 4.0;
-		for (coordinate x = 0; x < cr.width(); x += ALPHA_PATTERN_SIZE)
-		{
-			bool alt = false;
-			if (static_cast<uint32_t>((x / ALPHA_PATTERN_SIZE)) % 2 == 1)
-				alt = !alt;
-			for (coordinate y = 0; y < cr.height(); y += ALPHA_PATTERN_SIZE)
-			{
-				aGraphicsContext.fill_rect(rect{ cr.top_left() + point{ x, y }, size{ ALPHA_PATTERN_SIZE, ALPHA_PATTERN_SIZE } }, alt ? colour{ 160, 160, 160 } : colour{ 255, 255, 255 });
-				alt = !alt;
-			}
-		}
+		draw_alpha_background(aGraphicsContext, cr);
 		rect top = cr;
 		rect bottom = top;
 		top.cy = top.cy / 2.0;
@@ -248,11 +463,11 @@ namespace neogfx
 		aGraphicsContext.fill_rect(bottom, iParent.current_colour());
 	}
 
-	colour_picker_dialog::colour_picker_dialog(const colour& aCurrentColour) :
+	colour_dialog::colour_dialog(const colour& aCurrentColour) :
 		dialog("Select Colour", Modal | Titlebar | Close),
-		iMode(ModeHSV),
-		iCurrentColour(aCurrentColour),
-		iSelectedColour(aCurrentColour),
+		iCurrentChannel{ChannelHue},
+		iCurrentColour{aCurrentColour},
+		iSelectedColour{aCurrentColour.to_hsv()},
 		iUpdatingWidgets(false),
 		iLayout(*this),
 		iLayout2(iLayout),
@@ -282,11 +497,11 @@ namespace neogfx
 		init();
 	}
 
-	colour_picker_dialog::colour_picker_dialog(i_widget& aParent, const colour& aCurrentColour) :
+	colour_dialog::colour_dialog(i_widget& aParent, const colour& aCurrentColour) :
 		dialog(aParent, "Select Colour", Modal | Titlebar | Close),
-		iMode(ModeHSV),
-		iCurrentColour(aCurrentColour),
-		iSelectedColour(aCurrentColour),
+		iCurrentChannel{ChannelHue},
+		iCurrentColour{aCurrentColour},
+		iSelectedColour{aCurrentColour.to_hsv()},
 		iUpdatingWidgets(false),
 		iLayout(*this),
 		iLayout2(iLayout),
@@ -316,30 +531,16 @@ namespace neogfx
 		init();
 	}
 
-	colour_picker_dialog::~colour_picker_dialog()
+	colour_dialog::~colour_dialog()
 	{
 	}
 
-	colour_picker_dialog::mode_e colour_picker_dialog::mode() const
-	{
-		return iMode;
-	}
-
-	void colour_picker_dialog::set_mode(mode_e aMode)
-	{
-		if (iMode != aMode)
-		{
-			iMode = aMode;
-			update();
-		}
-	}
-
-	colour colour_picker_dialog::current_colour() const
+	colour colour_dialog::current_colour() const
 	{
 		return iCurrentColour;
 	}
 
-	colour colour_picker_dialog::selected_colour() const
+	colour colour_dialog::selected_colour() const
 	{
 		if (iSelectedColour.is<colour>())
 			return static_variant_cast<const colour&>(iSelectedColour);
@@ -347,18 +548,24 @@ namespace neogfx
 			return static_variant_cast<const hsv_colour&>(iSelectedColour).to_rgb();
 	}
 
-	hsv_colour colour_picker_dialog::selected_colour_as_hsv() const
+	hsv_colour colour_dialog::selected_colour_as_hsv() const
 	{
 		return selected_colour_as_hsv(true);
 	}
 
-	void colour_picker_dialog::select_colour(const colour& aColour)
+	void colour_dialog::select_colour(const colour& aColour)
 	{
 		select_colour(aColour, *this);
 	}
 		
-	void colour_picker_dialog::init()
+	void colour_dialog::init()
 	{
+		auto hsv = selected_colour_as_hsv();
+		if (hsv.hue_undefined())
+		{
+			hsv.set_hue(0.0);
+			iSelectedColour = hsv;
+		}
 		scoped_units su(static_cast<framed_widget&>(*this), UnitsPixels);
 		static const std::set<colour> sBasicColours
 		{
@@ -420,6 +627,13 @@ namespace neogfx
 		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
 		move_surface((desktopRect.extents() - surface_size()) / 2.0);
 
+		iH.first.checked([this]() { set_current_channel(ChannelHue); });
+		iS.first.checked([this]() { set_current_channel(ChannelSaturation); });
+		iV.first.checked([this]() { set_current_channel(ChannelValue); });
+		iR.first.checked([this]() { set_current_channel(ChannelRed); });
+		iG.first.checked([this]() { set_current_channel(ChannelGreen); });
+		iB.first.checked([this]() { set_current_channel(ChannelBlue); });
+		iA.first.checked([this]() { set_current_channel(ChannelAlpha); });
 		iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_hue(iH.second.value()); select_colour(hsv, iH.second); });
 		iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_saturation(iS.second.value() / 100.0); select_colour(hsv, iS.second); });
 		iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_value(iV.second.value() / 100.0); select_colour(hsv, iV.second); });
@@ -444,7 +658,29 @@ namespace neogfx
 		update_widgets(*this);
 	}
 
-	hsv_colour colour_picker_dialog::selected_colour_as_hsv(bool aChangeRepresentation) const
+	colour_dialog::mode_e colour_dialog::current_mode() const
+	{
+		if (iSelectedColour.is<hsv_colour>())
+			return ModeHSV;
+		else
+			return ModeRGB;
+	}
+
+	colour_dialog::channel_e colour_dialog::current_channel() const
+	{
+		return iCurrentChannel;
+	}
+
+	void colour_dialog::set_current_channel(channel_e aChannel)
+	{
+		if (iCurrentChannel != aChannel)
+		{
+			iCurrentChannel = aChannel;
+			update();
+		}
+	}
+
+	hsv_colour colour_dialog::selected_colour_as_hsv(bool aChangeRepresentation) const
 	{
 		if (iSelectedColour.is<colour>())
 		{
@@ -457,7 +693,7 @@ namespace neogfx
 			return static_variant_cast<const hsv_colour&>(iSelectedColour);
 	}
 
-	void colour_picker_dialog::select_colour(const representations& aColour, const i_widget& aUpdatingWidget)
+	void colour_dialog::select_colour(const representations& aColour, const i_widget& aUpdatingWidget)
 	{
 		if (iUpdatingWidgets)
 			return;
@@ -469,7 +705,7 @@ namespace neogfx
 		}
 	}
 
-	void colour_picker_dialog::update_widgets(const i_widget& aUpdatingWidget)
+	void colour_dialog::update_widgets(const i_widget& aUpdatingWidget)
 	{
 		if (iUpdatingWidgets)
 			return;

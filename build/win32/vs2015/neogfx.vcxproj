@@ -87,7 +87,7 @@
     <ClInclude Include="..\..\..\include\neogfx\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\clipboard.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\colour_picker_dialog.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\colour_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\cursor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\dialog_button_box.hpp" />
@@ -242,7 +242,7 @@
     <ClCompile Include="..\..\..\src\action.cpp" />
     <ClCompile Include="..\..\..\src\app.cpp" />
     <ClCompile Include="..\..\..\src\clipboard.cpp" />
-    <ClCompile Include="..\..\..\src\colour_picker_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\colour_dialog.cpp" />
     <ClCompile Include="..\..\..\src\cursor.cpp" />
     <ClCompile Include="..\..\..\src\dialog.cpp" />
     <ClCompile Include="..\..\..\src\dialog_button_box.cpp" />

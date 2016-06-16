@@ -1,4 +1,4 @@
-// colour_picker_dialog.hpp
+// colour_dialog.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-	class colour_picker_dialog : public dialog
+	class colour_dialog : public dialog
 	{
 	public:
 		event<> selection_changed;
@@ -35,15 +35,24 @@ namespace neogfx
 		enum mode_e
 		{
 			ModeHSV,
-			ModeRGB,
-			ModeCMYK
+			ModeRGB
+		};
+		enum channel_e
+		{
+			ChannelHue,
+			ChannelSaturation,
+			ChannelValue,
+			ChannelRed,
+			ChannelGreen,
+			ChannelBlue,
+			ChannelAlpha
 		};
 	private:
 		typedef neolib::variant<colour, hsv_colour> representations;
 		class colour_box : public framed_widget
 		{
 		public:
-			colour_box(colour_picker_dialog& aParent, const colour& aColour);
+			colour_box(colour_dialog& aParent, const colour& aColour);
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -52,25 +61,13 @@ namespace neogfx
 		public:
 			virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		private:
-			colour_picker_dialog& iParent;
+			colour_dialog& iParent;
 			colour iColour;
 		};
 		class x_picker : public framed_widget
 		{
 		public:
-			x_picker(colour_picker_dialog& aParent);
-		public:
-			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		public:
-			virtual void paint(graphics_context& aGraphicsContext) const;
-		private:
-			colour_picker_dialog& iParent;
-		};
-		class yz_picker : public framed_widget
-		{
-		public:
-			yz_picker(colour_picker_dialog& aParent);
+			x_picker(colour_dialog& aParent);
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -81,9 +78,31 @@ namespace neogfx
 			virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 			virtual void mouse_moved(const point& aPosition);
 		private:
-			void select(const point& aCursorPos);
+			void select(const point& aPosition);
+			representations colour_at_position(const point& aCursorPos) const;
 		private:
-			colour_picker_dialog& iParent;
+			colour_dialog& iParent;
+			bool iTracking;
+		};
+		class yz_picker : public framed_widget
+		{
+		public:
+			yz_picker(colour_dialog& aParent);
+		public:
+			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		public:
+			virtual void paint(graphics_context& aGraphicsContext) const;
+		public:
+			virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+			virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+			virtual void mouse_moved(const point& aPosition);
+		private:
+			void select(const point& aPosition);
+			representations colour_at_position(const point& aCursorPos) const;
+			point current_cursor_position() const;
+		private:
+			colour_dialog& iParent;
 			mutable std::array<std::array<std::array<uint8_t, 4>, 256>, 256> iPixels;
 			mutable texture iTexture;
 			bool iTracking;
@@ -91,33 +110,34 @@ namespace neogfx
 		class colour_selection : public framed_widget
 		{
 		public:
-			colour_selection(colour_picker_dialog& aParent);
+			colour_selection(colour_dialog& aParent);
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		public:
 			virtual void paint(graphics_context& aGraphicsContext) const;
 		private:
-			colour_picker_dialog& iParent;
+			colour_dialog& iParent;
 		};
 	public:
-		colour_picker_dialog(const colour& aCurrentColour = colour::Black);
-		colour_picker_dialog(i_widget& aParent, const colour& aCurrentColour = colour::Black);
-		~colour_picker_dialog();
+		colour_dialog(const colour& aCurrentColour = colour::Black);
+		colour_dialog(i_widget& aParent, const colour& aCurrentColour = colour::Black);
+		~colour_dialog();
 	public:
-		mode_e mode() const;
-		void set_mode(mode_e aMode);
 		colour current_colour() const;
 		colour selected_colour() const;
 		hsv_colour selected_colour_as_hsv() const;
 		void select_colour(const colour& aColour);
 	private:
 		void init();
+		mode_e current_mode() const;
+		channel_e current_channel() const;
+		void set_current_channel(channel_e aChannel);
 		hsv_colour selected_colour_as_hsv(bool aChangeRepresentation) const;
 		void select_colour(const representations& aColour, const i_widget& aUpdatingWidget);
 		void update_widgets(const i_widget& aUpdatingWidget);
 	private:
-		mode_e iMode;
+		channel_e iCurrentChannel;
 		colour iCurrentColour;
 		mutable representations iSelectedColour;
 		bool iUpdatingWidgets;
@@ -145,5 +165,18 @@ namespace neogfx
 		std::pair<radio_button, spin_box> iA;
 		line_edit iRgb;
 		push_button iAddToCustomColours;
+	};
+
+	/// The pesky US spelling variant
+	class color_dialog : public colour_dialog
+	{
+	public:
+		color_dialog(const color& aCurrentColor = color::Black) : colour_dialog(aCurrentColor) {}
+		color_dialog(i_widget& aParent, const color& aCurrentColor = color::Black) : colour_dialog(aParent, aCurrentColor) {}
+	public:
+		colour current_color() const { return current_colour(); }
+		colour selected_color() const { return selected_colour(); }
+		hsv_colour selected_color_as_hsv() const { return selected_colour_as_hsv(); }
+		void select_color(const color& aColor) { select_colour(aColor); }
 	};
 }

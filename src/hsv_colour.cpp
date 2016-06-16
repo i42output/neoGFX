@@ -29,7 +29,7 @@ namespace neogfx
 	}
 
 	hsv_colour::hsv_colour(double aHue, double aSaturation, double aValue, double aAlpha) :
-		iHue{aHue}, iSaturation{aSaturation}, iValue{aValue}, iAlpha{aAlpha}
+		iHue{std::fmod(aHue, 360.0)}, iSaturation{aSaturation}, iValue{aValue}, iAlpha{aAlpha}
 	{
 	}
 
@@ -67,7 +67,7 @@ namespace neogfx
 
 	void hsv_colour::set_hue(double aHue)
 	{
-		iHue = aHue;
+		iHue = std::fmod(aHue, 360.0);
 	}
 
 	void hsv_colour::set_saturation(double aSaturation)
