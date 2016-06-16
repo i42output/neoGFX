@@ -112,7 +112,19 @@ namespace neogfx
 		{
 			rect line{ cr.top_left() + point{ 0.0, static_cast<coordinate>(y) }, size{ cr.width(), 1.0 } };
 			auto r = colour_at_position(point{ 0.0, static_cast<coordinate>(y) });
-			auto rgb = r.is<hsv_colour>() ? static_variant_cast<hsv_colour>(r).to_rgb() : static_variant_cast<colour>(r);
+			colour rgb;
+			if (r.is<hsv_colour>())
+			{
+				hsv_colour hsv = static_variant_cast<hsv_colour>(r);
+				if (iParent.current_channel() == ChannelHue)
+				{
+					hsv.set_saturation(1.0);
+					hsv.set_value(1.0);
+				}
+				rgb = hsv.to_rgb();
+			}
+			else
+				rgb = static_variant_cast<colour>(r);
 			if (iParent.current_channel() != ChannelAlpha)
 				rgb.set_alpha(255);
 			aGraphicsContext.fill_rect(line, rgb);
