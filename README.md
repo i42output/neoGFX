@@ -27,7 +27,7 @@ Check Box                 | 100     |
 Radio Button              | 100     |
 Combo Box                 | 0       |
 Colour Gradient Selector  | 0       |
-Colour Picker             | 0       |
+Colour Picker             | 100     |
 File Browsers (Native)    | 0       |
 XML Resource Description  | 0       |
 Skins                     | 0       |
@@ -35,4 +35,4 @@ Skins                     | 0       |
 # Known Problems
 Example test program will crash on shut-down due to bug related to focus tabbing linked list.
 
-Last updated: 14/06/16
+Last updated: 17/06/16
