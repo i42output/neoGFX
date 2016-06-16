@@ -93,6 +93,8 @@ int main(int argc, char* argv[])
 		app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
 		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+		app.change_style("Keypad");
+		app.current_style().set_colour(ng::colour::Black);
 		app.change_style("Default");
 
 		ng::window window(ng::size{ 832, 800 });
@@ -389,8 +391,10 @@ int main(int argc, char* argv[])
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
 		buttonColourPicker.clicked([&window]()
 		{
-			ng::colour_dialog colourPicker(window);
-			colourPicker.exec();
+			ng::colour_dialog colourPicker(window, ng::app::instance().change_style("Keypad").colour());
+			if (colourPicker.exec() == ng::dialog::Accepted)
+				ng::app::instance().change_style("Keypad").set_colour(colourPicker.selected_colour());
+
 		});
 		ng::vertical_spacer spacer1(layout4);
 		ng::grid_layout keypad(4, 3, layout2);
