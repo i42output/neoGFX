@@ -69,23 +69,51 @@ namespace neogfx
 		};
 		class x_picker : public framed_widget
 		{
+		private:
+			class cursor_widget : public image_widget
+			{
+			public:
+				enum type_e
+				{
+					LeftCursor,
+					RightCursor
+				};
+			public:
+				cursor_widget(x_picker& aParent, type_e aType);
+			public:
+				virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+				virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+				virtual void mouse_moved(const point& aPosition);
+			private:
+				x_picker& iParent;
+				optional_point iDragOffset;
+			};
 		public:
 			x_picker(colour_dialog& aParent);
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		public:
+			virtual void moved();
+			virtual void resized();
+		public:
 			virtual void paint(graphics_context& aGraphicsContext) const;
 		public:
 			virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 			virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 			virtual void mouse_moved(const point& aPosition);
+		public:
+			using framed_widget::effective_frame_width;
 		private:
 			void select(const point& aPosition);
 			representations colour_at_position(const point& aCursorPos) const;
+			void update_cursors();
+			point x_picker::current_cursor_position() const;
 		private:
 			colour_dialog& iParent;
 			bool iTracking;
+			cursor_widget iLeftCursor;
+			cursor_widget iRightCursor;
 		};
 		class yz_picker : public framed_widget
 		{

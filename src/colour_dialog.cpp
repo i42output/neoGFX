@@ -18,6 +18,7 @@
 */
 
 #include "neogfx.hpp"
+#include "image.hpp"
 #include "colour_dialog.hpp"
 
 namespace neogfx
@@ -87,14 +88,84 @@ namespace neogfx
 		}
 	}
 
+	namespace
+	{
+		const uint8_t sLeftXPickerCursorImage[9][9]
+		{
+			{ 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+			{ 1, 2, 2, 2, 2, 1, 0, 0, 0 },
+			{ 1, 2, 2, 2, 2, 2, 1, 0, 0 },
+			{ 1, 2, 2, 2, 2, 2, 2, 1, 0 },
+			{ 1, 2, 2, 2, 2, 2, 2, 2, 1 },
+			{ 1, 2, 2, 2, 2, 2, 2, 1, 0 },
+			{ 1, 2, 2, 2, 2, 2, 1, 0, 0 },
+			{ 1, 2, 2, 2, 2, 1, 0, 0, 0 },
+			{ 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+		};
+		const uint8_t sRightXPickerCursorImage[9][9]
+		{
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 1 },
+			{ 0, 0, 0, 1, 2, 2, 2, 2, 1 },
+			{ 0, 0, 1, 2, 2, 2, 2, 2, 1 },
+			{ 0, 1, 2, 2, 2, 2, 2, 2, 1 },
+			{ 1, 2, 2, 2, 2, 2, 2, 2, 1 },
+			{ 0, 1, 2, 2, 2, 2, 2, 2, 1 },
+			{ 0, 0, 1, 2, 2, 2, 2, 2, 1 },
+			{ 0, 0, 0, 1, 2, 2, 2, 2, 1 },
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 1 },
+		};
+	}
+
+	colour_dialog::x_picker::cursor_widget::cursor_widget(x_picker& aParent, type_e aType) :
+		image_widget(
+			aParent.iParent,
+			neogfx::image{ aType == LeftCursor ? sLeftXPickerCursorImage : sRightXPickerCursorImage, { { 0, colour{} }, { 1, colour::Black } , { 2, colour::White } } }),
+		iParent(aParent)
+	{
+		set_ignore_mouse_events(false);
+		resize(minimum_size());
+	}
+
+	void colour_dialog::x_picker::cursor_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		image_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+		if (aButton == mouse_button::Left)
+			iDragOffset = point{ aPosition - client_rect().centre() };
+	}
+
+	void colour_dialog::x_picker::cursor_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
+	{
+		image_widget::mouse_button_released(aButton, aPosition);
+		if (!capturing())
+			iDragOffset = boost::none;
+	}
+
+	void colour_dialog::x_picker::cursor_widget::mouse_moved(const point& aPosition)
+	{
+		if (iDragOffset != boost::none)
+		{
+			point pt{ aPosition - *iDragOffset };
+			pt += position();
+			pt -= iParent.position();
+			pt += size{ iParent.effective_frame_width() };
+			iParent.select(point{ 0.0, pt.y});
+		}
+	}
+
 	colour_dialog::x_picker::x_picker(colour_dialog& aParent) :
-		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTracking(false)
+		framed_widget(aParent.iRightTopLayout), 
+		iParent(aParent), 
+		iTracking(false),
+		iLeftCursor(*this, cursor_widget::LeftCursor),
+		iRightCursor(*this, cursor_widget::RightCursor)
 	{
 		set_margins(neogfx::margins{});
-		iParent.selection_changed([this]
+		iParent.selection_changed([this]()
 		{
+			update_cursors();
 			update();
 		});
+		update_cursors();
 	}
 
 	size colour_dialog::x_picker::minimum_size(const optional_size& aAvailableSpace) const
@@ -112,6 +183,18 @@ namespace neogfx
 		if (has_maximum_size())
 			return framed_widget::maximum_size(aAvailableSpace);
 		return minimum_size();
+	}
+
+	void colour_dialog::x_picker::moved()
+	{
+		framed_widget::moved();
+		update_cursors();
+	}
+
+	void colour_dialog::x_picker::resized()
+	{
+		framed_widget::resized();
+		update_cursors();
 	}
 
 	void colour_dialog::x_picker::paint(graphics_context& aGraphicsContext) const
@@ -235,6 +318,69 @@ namespace neogfx
 			break;
 		default:
 			return colour::Black;
+		}
+	}
+
+	void colour_dialog::x_picker::update_cursors()
+	{
+		iLeftCursor.move(current_cursor_position() + position() + client_rect(false).top_left() + point{ -iLeftCursor.extents().cx - effective_frame_width(), -std::floor(iLeftCursor.client_rect().centre().y) });
+		iRightCursor.move(current_cursor_position() + position() + client_rect(false).top_right() + point{ effective_frame_width(), -std::floor(iLeftCursor.client_rect().centre().y) });
+	}
+
+	point colour_dialog::x_picker::current_cursor_position() const
+	{
+		switch (iParent.current_channel())
+		{
+		case ChannelHue:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				return point{ 0.0, 255.0 - hsv.hue() / 360.0 * 255.0};
+			}
+			break;
+		case ChannelSaturation:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				return point{ 0.0, 255.0 - hsv.saturation() * 255.0 };
+			}
+			break;
+		case ChannelValue:
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				return point{ 0.0, 255.0 - hsv.value() * 255.0 };
+			}
+			break;
+		case ChannelRed:
+			{
+				auto rgb = iParent.selected_colour();
+				return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.red()) };
+			}
+			break;
+		case ChannelGreen:
+			{
+				auto rgb = iParent.selected_colour();
+				return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.green()) };
+			}
+			break;
+		case ChannelBlue:
+			{
+				auto rgb = iParent.selected_colour();
+				return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.blue()) };
+			}
+			break;
+		case ChannelAlpha:
+			if (iParent.current_mode() == ModeHSV)
+			{
+				auto hsv = iParent.selected_colour_as_hsv(true);
+				return point{ 0.0, 255.0 - static_cast<coordinate>(hsv.alpha() * 255.0) };
+			}
+			else
+			{
+				auto rgb = iParent.selected_colour();
+				return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.alpha()) };
+			}
+			break;
+		default:
+			return point{};
 		}
 	}
 
