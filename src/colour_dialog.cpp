@@ -38,8 +38,8 @@ namespace neogfx
 		}
 	}
 
-	colour_dialog::colour_box::colour_box(colour_dialog& aParent, const colour& aColour) :
-		framed_widget(aParent, SolidFrame), iParent(aParent), iColour(aColour)
+	colour_dialog::colour_box::colour_box(colour_dialog& aParent, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour) :
+		framed_widget(aParent, SolidFrame), iParent(aParent), iColour(aColour), iCustomColour(aCustomColour)
 	{
 		set_margins(neogfx::margins{});
 	}
@@ -64,14 +64,27 @@ namespace neogfx
 	void colour_dialog::colour_box::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
-		aGraphicsContext.fill_rect(client_rect(false), iColour);
+		aGraphicsContext.fill_rect(client_rect(false), iCustomColour == boost::none ? iColour : **iCustomColour);
+		if (iCustomColour != boost::none && iParent.current_custom_colour() == *iCustomColour)
+		{
+			aGraphicsContext.fill_circle(client_rect(false).centre(), 3, colour::White);
+			aGraphicsContext.fill_circle(client_rect(false).centre(), 2, colour::Black);
+		}
 	}
 
 	void colour_dialog::colour_box::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
-			iParent.select_colour(iColour.with_alpha(iParent.selected_colour().alpha()));
+		{
+			if (iCustomColour == boost::none)
+				iParent.select_colour(iColour.with_alpha(iParent.selected_colour().alpha()));
+			else
+			{
+				iParent.select_colour(**iCustomColour);
+				iParent.set_current_custom_colour(*iCustomColour);
+			}
+		}
 	}
 
 	colour_dialog::x_picker::x_picker(colour_dialog& aParent) :
@@ -480,6 +493,7 @@ namespace neogfx
 		iCurrentChannel{ChannelHue},
 		iCurrentColour{aCurrentColour},
 		iSelectedColour{aCurrentColour.to_hsv()},
+		iCurrentCustomColour(iCustomColours.end()),
 		iUpdatingWidgets(false),
 		iLayout(*this),
 		iLayout2(iLayout),
@@ -514,6 +528,7 @@ namespace neogfx
 		iCurrentChannel{ChannelHue},
 		iCurrentColour{aCurrentColour},
 		iSelectedColour{aCurrentColour.to_hsv()},
+		iCurrentCustomColour(iCustomColours.end()),
 		iUpdatingWidgets(false),
 		iLayout(*this),
 		iLayout2(iLayout),
@@ -569,7 +584,17 @@ namespace neogfx
 	{
 		select_colour(aColour, *this);
 	}
-		
+
+	const colour_dialog::custom_colour_list& colour_dialog::custom_colours() const
+	{
+		return iCustomColours;
+	}
+
+	colour_dialog::custom_colour_list& colour_dialog::custom_colours()
+	{
+		return iCustomColours;
+	}
+
 	void colour_dialog::init()
 	{
 		scoped_units su(static_cast<framed_widget&>(*this), UnitsPixels);
@@ -625,8 +650,9 @@ namespace neogfx
 		for (auto const& basicColour : sBasicColours)
 			iBasicColoursLayout.add_item(std::make_shared<colour_box>(*this, basicColour));
 		iCustomColoursLayout.set_dimensions(2, 12);
-		for (uint32_t i = 0; i < 24; ++i)
-			iCustomColoursLayout.add_item(std::make_shared<colour_box>(*this, colour::White));
+		std::fill(iCustomColours.begin(), iCustomColours.end(), colour::White);
+		for (auto customColour = iCustomColours.begin(); customColour != iCustomColours.end(); ++customColour)
+			iCustomColoursLayout.add_item(std::make_shared<colour_box>(*this, *customColour, customColour));
 		button_box().add_button(dialog_button_box::Ok);
 		button_box().add_button(dialog_button_box::Cancel);
 		resize(minimum_size());
@@ -660,6 +686,12 @@ namespace neogfx
 			}
 		});
 		iRgb.text_changed([this]() { if (iUpdatingWidgets) return; select_colour(colour{ iRgb.text() }, iRgb); });
+
+		iAddToCustomColours.clicked([this]()
+		{
+			*iCurrentCustomColour = selected_colour();
+			update();
+		});
 
 		update_widgets(*this);
 	}
@@ -711,6 +743,18 @@ namespace neogfx
 		}
 	}
 
+	colour_dialog::custom_colour_list::iterator colour_dialog::current_custom_colour() const
+	{
+		return iCurrentCustomColour;
+	}
+
+	void colour_dialog::set_current_custom_colour(custom_colour_list::iterator aCustomColour)
+	{
+		iCurrentCustomColour = aCustomColour;
+		update_widgets(*this);
+		update();
+	}
+
 	void colour_dialog::update_widgets(const i_widget& aUpdatingWidget)
 	{
 		if (iUpdatingWidgets)
@@ -732,6 +776,7 @@ namespace neogfx
 			iA.second.set_value(selected_colour().alpha());
 		if (&aUpdatingWidget != &iRgb)
 			iRgb.set_text(selected_colour().to_hex_string());
+		iAddToCustomColours.enable(iCurrentCustomColour != iCustomColours.end());
 		iUpdatingWidgets = false;
 	}
 }

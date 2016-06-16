@@ -47,12 +47,14 @@ namespace neogfx
 			ChannelBlue,
 			ChannelAlpha
 		};
+		typedef std::array<colour, 24> custom_colour_list;
 	private:
 		typedef neolib::variant<colour, hsv_colour> representations;
+		typedef boost::optional<custom_colour_list::iterator> optional_custom_colour_list_iterator;
 		class colour_box : public framed_widget
 		{
 		public:
-			colour_box(colour_dialog& aParent, const colour& aColour);
+			colour_box(colour_dialog& aParent, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour = optional_custom_colour_list_iterator());
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -63,6 +65,7 @@ namespace neogfx
 		private:
 			colour_dialog& iParent;
 			colour iColour;
+			optional_custom_colour_list_iterator iCustomColour;
 		};
 		class x_picker : public framed_widget
 		{
@@ -128,6 +131,8 @@ namespace neogfx
 		colour selected_colour() const;
 		hsv_colour selected_colour_as_hsv() const;
 		void select_colour(const colour& aColour);
+		const custom_colour_list& custom_colours() const;
+		custom_colour_list& custom_colours();
 	private:
 		void init();
 		mode_e current_mode() const;
@@ -135,11 +140,15 @@ namespace neogfx
 		void set_current_channel(channel_e aChannel);
 		hsv_colour selected_colour_as_hsv(bool aChangeRepresentation) const;
 		void select_colour(const representations& aColour, const i_widget& aUpdatingWidget);
+		custom_colour_list::iterator current_custom_colour() const;
+		void set_current_custom_colour(custom_colour_list::iterator aCustomColour);
 		void update_widgets(const i_widget& aUpdatingWidget);
 	private:
 		channel_e iCurrentChannel;
 		colour iCurrentColour;
 		mutable representations iSelectedColour;
+		custom_colour_list iCustomColours;
+		custom_colour_list::iterator iCurrentCustomColour;
 		bool iUpdatingWidgets;
 		vertical_layout iLayout;
 		horizontal_layout iLayout2;
@@ -171,6 +180,8 @@ namespace neogfx
 	class color_dialog : public colour_dialog
 	{
 	public:
+		typedef custom_colour_list custom_color_list;
+	public:
 		color_dialog(const color& aCurrentColor = color::Black) : colour_dialog(aCurrentColor) {}
 		color_dialog(i_widget& aParent, const color& aCurrentColor = color::Black) : colour_dialog(aParent, aCurrentColor) {}
 	public:
@@ -178,5 +189,7 @@ namespace neogfx
 		colour selected_color() const { return selected_colour(); }
 		hsv_colour selected_color_as_hsv() const { return selected_colour_as_hsv(); }
 		void select_color(const color& aColor) { select_colour(aColor); }
+		const custom_color_list& custom_colors() const { return custom_colours(); }
+		custom_color_list& custom_colors() { return custom_colours(); }
 	};
 }
