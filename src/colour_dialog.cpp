@@ -560,12 +560,6 @@ namespace neogfx
 		
 	void colour_dialog::init()
 	{
-		auto hsv = selected_colour_as_hsv();
-		if (hsv.hue_undefined())
-		{
-			hsv.set_hue(0.0);
-			iSelectedColour = hsv;
-		}
 		scoped_units su(static_cast<framed_widget&>(*this), UnitsPixels);
 		static const std::set<colour> sBasicColours
 		{

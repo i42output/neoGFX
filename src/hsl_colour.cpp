@@ -31,6 +31,8 @@ namespace neogfx
 	hsl_colour::hsl_colour(double aHue, double aSaturation, double aLightness, double aAlpha) :
 		iHue{aHue}, iSaturation{aSaturation}, iLightness{aLightness}, iAlpha{aAlpha}
 	{
+		if (iHue != undefined_hue())
+			iHue = std::fmod(iHue, 360.0);
 	}
 
 	hsl_colour::hsl_colour(const colour& aColour)
@@ -110,9 +112,7 @@ namespace neogfx
 		double h2 = hue() / 60.0;
 		double x = c * (1.0 - std::abs(std::fmod(h2, 2.0) - 1.0));
 		double r, g, b;
-		if (hue_undefined())
-			r = g = b = 0.0;
-		else if (h2 >= 0.0 && h2 < 1.0)
+		if (h2 >= 0.0 && h2 < 1.0)
 			r = c, g = x, b = 0.0;
 		else if (h2 >= 1.0 && h2 < 2.0)
 			r = x, g = c, b = 0.0;
@@ -181,7 +181,8 @@ namespace neogfx
 		return hue() == aOther.hue() &&
 			saturation() == aOther.saturation() &&
 			lightness() == aOther.lightness() &&
-			alpha() == aOther.alpha();
+			alpha() == aOther.alpha() &&
+			hue_undefined() == aOther.hue_undefined();
 	}
 
 	bool hsl_colour::operator!=(const hsl_colour& aOther) const

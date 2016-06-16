@@ -29,8 +29,10 @@ namespace neogfx
 	}
 
 	hsv_colour::hsv_colour(double aHue, double aSaturation, double aValue, double aAlpha) :
-		iHue{std::fmod(aHue, 360.0)}, iSaturation{aSaturation}, iValue{aValue}, iAlpha{aAlpha}
+		iHue{aHue}, iSaturation{ aSaturation }, iValue{ aValue }, iAlpha{ aAlpha }
 	{
+		if (iHue != undefined_hue())
+			iHue = std::fmod(iHue, 360.0);
 	}
 
 	hsv_colour::hsv_colour(const colour& aColour)
@@ -120,9 +122,7 @@ namespace neogfx
 		double h2 = hue() / 60.0;
 		double x = c * (1.0 - std::abs(std::fmod(h2, 2.0) - 1.0));
 		double r, g, b;
-		if (hue_undefined())
-			r = g = b = 0.0;
-		else if (h2 >= 0.0 && h2 < 1.0)
+		if (h2 >= 0.0 && h2 < 1.0)
 			r = c, g = x, b = 0.0;
 		else if (h2 >= 1.0 && h2 < 2.0)
 			r = x, g = c, b = 0.0;
@@ -192,7 +192,8 @@ namespace neogfx
 		return hue() == aOther.hue() &&
 			saturation() == aOther.saturation() &&
 			value() == aOther.value() &&
-			alpha() == aOther.alpha();
+			alpha() == aOther.alpha() &&
+			hue_undefined() == aOther.hue_undefined();
 	}
 
 	bool hsv_colour::operator!=(const hsv_colour& aOther) const
