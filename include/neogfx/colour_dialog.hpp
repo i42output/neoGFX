@@ -215,7 +215,7 @@ namespace neogfx
 	public:
 		colour current_color() const { return current_colour(); }
 		colour selected_color() const { return selected_colour(); }
-		hsv_colour selected_color_as_hsv() const { return selected_colour_as_hsv(); }
+		hsv_color selected_color_as_hsv() const { return selected_colour_as_hsv(); }
 		void select_color(const color& aColor) { select_colour(aColor); }
 		const custom_color_list& custom_colors() const { return custom_colours(); }
 		custom_color_list& custom_colors() { return custom_colours(); }
