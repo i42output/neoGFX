@@ -55,6 +55,47 @@ namespace neogfx
 			return path_shape_to_gl_mode(aPath.shape());
 		}
 
+		inline std::vector<GLdouble> rect_vertices(const rect& aRect, dimension aPixelAdjust, bool aIncludeCentre)
+		{
+			std::vector<GLdouble> result;
+			result.reserve(16);
+			if (aIncludeCentre) // fill
+			{
+				result.push_back(aRect.centre().x);
+				result.push_back(aRect.centre().y);
+				result.push_back(aRect.top_left().x);
+				result.push_back(aRect.top_left().y);
+				result.push_back(aRect.top_right().x);
+				result.push_back(aRect.top_right().y);
+				result.push_back(aRect.bottom_right().x);
+				result.push_back(aRect.bottom_right().y);
+				result.push_back(aRect.bottom_left().x);
+				result.push_back(aRect.bottom_left().y);
+				result.push_back(aRect.top_left().x);
+				result.push_back(aRect.top_left().y);
+			}
+			else // draw (outline)
+			{
+				result.push_back(aRect.top_left().x);
+				result.push_back(aRect.top_left().y + aPixelAdjust);
+				result.push_back(aRect.top_right().x);
+				result.push_back(aRect.top_right().y + aPixelAdjust);
+				result.push_back(aRect.top_right().x - aPixelAdjust);
+				result.push_back(aRect.top_right().y);
+				result.push_back(aRect.bottom_right().x - aPixelAdjust);
+				result.push_back(aRect.bottom_right().y);
+				result.push_back(aRect.bottom_right().x);
+				result.push_back(aRect.bottom_right().y - aPixelAdjust);
+				result.push_back(aRect.bottom_left().x);
+				result.push_back(aRect.bottom_left().y - aPixelAdjust);
+				result.push_back(aRect.bottom_left().x + aPixelAdjust);
+				result.push_back(aRect.bottom_left().y);
+				result.push_back(aRect.top_left().x + aPixelAdjust);
+				result.push_back(aRect.top_left().y);
+			}
+			return result;
+		};
+
 		inline std::vector<GLdouble> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
 		{
 			std::vector<GLdouble> result;
@@ -499,14 +540,7 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
-		double pixelAdjust = pixel_adjust(aPen);
-		std::vector<double> vertices =
-		{
-			aRect.top_left().x, aRect.top_left().y + pixelAdjust, aRect.top_right().x, aRect.top_right().y + pixelAdjust,
-			aRect.top_right().x - pixelAdjust, aRect.top_right().y, aRect.bottom_right().x - pixelAdjust, aRect.bottom_right().y,
-			aRect.bottom_right().x, aRect.bottom_right().y - pixelAdjust, aRect.bottom_left().x, aRect.bottom_left().y - pixelAdjust,
-			aRect.bottom_left().x + pixelAdjust, aRect.bottom_left().y, aRect.top_left().x + pixelAdjust, aRect.top_left().y
-		};
+		auto vertices = rect_vertices(aRect, pixel_adjust(aPen), false);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
@@ -580,22 +614,22 @@ namespace neogfx
 
 	void opengl_graphics_context::fill_rect(const rect& aRect, const colour& aColour)
 	{
-		path rectPath(aRect);
-		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
+		if (aRect.empty())
+			return;
+		auto vertices = rect_vertices(aRect, 0.0, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath.shape()), 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
 	}
 
 	void opengl_graphics_context::fill_rect(const rect& aRect, const gradient& aGradient)
 	{
 		if (aRect.empty())
 			return;
-		path rectPath(aRect);
-		auto vertices = rectPath.to_vertices(rectPath.paths()[0]);
+		auto vertices = rect_vertices(aRect, 0.0, true);
 		std::vector<std::array<uint8_t, 4>> colours;
 		if (aGradient.direction() == gradient::Vertical)
 		{
@@ -630,7 +664,7 @@ namespace neogfx
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(path_shape_to_gl_mode(rectPath.shape()), 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
 	}
 
 	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const colour& aColour)
