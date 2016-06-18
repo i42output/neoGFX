@@ -430,7 +430,7 @@ namespace neogfx
 		auto leftAlpha = alphaStop;
 		auto rightAlpha = alphaStop + 1;
 		double na = (aPos - leftAlpha->first) / (rightAlpha->first - leftAlpha->first);
-		alpha *= interpolate(leftAlpha->second, rightAlpha->second, na);
+		alpha = static_cast<colour::component>((alpha / 255.0 * interpolate(leftAlpha->second, rightAlpha->second, na) / 255.0) * 255.0);
 		return colour(red, green, blue, alpha);
 	}
 
