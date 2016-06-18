@@ -333,84 +333,128 @@ namespace neogfx
 		return result.str();
 	}
 
-	gradient::gradient(const colour& aFrom, const colour& aTo, direction_e aDirection) :
-		iFrom(aFrom), 
-		iTo(aTo), 
-		iDirection(aDirection) 
+	gradient::gradient() :
+		iColourStops{{0.0, colour::Black}, {1.0, colour::Black}},
+		iAlphaStops{{0.0, 255}, {1.0, 255}},
+		iDirection(Horizontal)
 	{
 	}
 
-	gradient::gradient(const colour& aFromTo, direction_e aDirection) :
-		iFrom(aFromTo),
-		iTo(aFromTo),
+	gradient::gradient(const colour& aColour, direction_e aDirection) :
+		iColourStops{{0.0, aColour}, {1.0, aColour}},
+		iAlphaStops{{0.0, 255}, {1.0, 255}},
 		iDirection(aDirection)
 	{
 	}
 
-	colour gradient::at(coordinate aPos, coordinate aStart, coordinate aEnd) const
+	gradient::gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection) :
+		iColourStops{{0.0, aColour1}, {1.0, aColour2}},
+		iAlphaStops{{0.0, 255}, {1.0, 255}},
+		iDirection(aDirection)
 	{
-		if (aEnd - aStart == 0)
-			return iFrom;
-		colour::component red, green, blue, alpha;
-		if (iFrom.red() < iTo.red())
-			red = static_cast<colour::component>(static_cast<uint32_t>(iFrom.red() + (iTo.red() - iFrom.red()) * (aPos - aStart) / (aEnd - aStart)));
-		else
-			red = static_cast<colour::component>(static_cast<uint32_t>(iFrom.red() - (iFrom.red() - iTo.red()) * (aPos - aStart) / (aEnd - aStart)));
-		if (iFrom.green() < iTo.green())
-			green = static_cast<colour::component>(static_cast<uint32_t>(iFrom.green() + (iTo.green() - iFrom.green()) * (aPos - aStart) / (aEnd - aStart)));
-		else
-			green = static_cast<colour::component>(static_cast<uint32_t>(iFrom.green() - (iFrom.green() - iTo.green()) * (aPos - aStart) / (aEnd - aStart)));
-		if (iFrom.blue() < iTo.blue())
-			blue = static_cast<colour::component>(static_cast<uint32_t>(iFrom.blue() + (iTo.blue() - iFrom.blue()) * (aPos - aStart) / (aEnd - aStart)));
-		else
-			blue = static_cast<colour::component>(static_cast<uint32_t>(iFrom.blue() - (iFrom.blue() - iTo.blue()) * (aPos - aStart) / (aEnd - aStart)));
-		if (iFrom.alpha() < iTo.alpha())
-			alpha = static_cast<colour::component>(static_cast<uint32_t>(iFrom.alpha() + (iTo.alpha() - iFrom.alpha()) * (aPos - aStart) / (aEnd - aStart)));
-		else
-			alpha = static_cast<colour::component>(static_cast<uint32_t>(iFrom.alpha() - (iFrom.alpha() - iTo.alpha()) * (aPos - aStart) / (aEnd - aStart)));
-		return colour(red, green, blue, alpha);
+	}
+
+	gradient::gradient(const colour_stop_list& aColourStops, direction_e aDirection) :
+		iColourStops{!aColourStops.empty() ? aColourStops : colour_stop_list{{0.0, colour::Black}, {1.0, colour::Black}}},
+		iAlphaStops{{{0.0, 255}, {1.0, 255}}},
+		iDirection(aDirection)
+	{
+		fix();
+	}
+
+	gradient::gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection) :
+		iColourStops{!aColourStops.empty() ? aColourStops : colour_stop_list{{0.0, colour::Black}, {1.0, colour::Black}}},
+		iAlphaStops{!aAlphaStops.empty() ? aAlphaStops : alpha_stop_list{{0.0, 255}, {1.0, 255}}},
+		iDirection(aDirection)
+	{
+		fix();
+	}
+
+	const gradient::colour_stop_list& gradient::colour_stops() const
+	{
+		return iColourStops;
+	}
+
+	gradient::colour_stop_list& gradient::colour_stops()
+	{
+		return iColourStops;
+	}
+
+	const gradient::alpha_stop_list& gradient::alpha_stops() const
+	{
+		return iAlphaStops;
+	}
+
+	gradient::alpha_stop_list& gradient::alpha_stops()
+	{
+		return iAlphaStops;
+	}
+
+	namespace
+	{
+		template <typename T>
+		T interpolate(T aX1, T aX2, double aAmount)
+		{
+			double x1 = aX1;
+			double x2 = aX2;
+			return static_cast<T>((x2 - x1) * aAmount + x1);
+		}
 	}
 
 	colour gradient::at(double aPos) const
 	{
 		if (aPos < 0.0 || aPos > 1.0)
 			throw bad_position();
-		return at(static_cast<coordinate>(aPos * colour::MaxComponetValue), 0, colour::MaxComponetValue);
+		colour::component red{}, green{}, blue{}, alpha{};
+		auto colourStop = std::lower_bound(iColourStops.begin(), iColourStops.end(), colour_stop{ aPos, colour{} },
+			[](const colour_stop& aLeft, const colour_stop& aRight)
+			{
+				return aLeft.first < aRight.first;
+			});
+		if (colourStop->first >= aPos && colourStop != iColourStops.begin())
+			--colourStop;
+		auto left = colourStop;
+		auto right = colourStop + 1;
+		double nc = (aPos - left->first) / (right->first - left->first);
+		red = interpolate(left->second.red(), right->second.red(), nc);
+		green = interpolate(left->second.green(), right->second.green(), nc);
+		blue = interpolate(left->second.blue(), right->second.blue(), nc);
+		alpha = interpolate(left->second.alpha(), right->second.alpha(), nc);
+		auto alphaStop = std::lower_bound(iAlphaStops.begin(), iAlphaStops.end(), alpha_stop{ aPos, 255 },
+			[](const alpha_stop& aLeft, const alpha_stop& aRight)
+		{
+			return aLeft.first < aRight.first;
+		});
+		if (alphaStop->first >= aPos && alphaStop != iAlphaStops.begin())
+			--alphaStop;
+		auto leftAlpha = alphaStop;
+		auto rightAlpha = alphaStop + 1;
+		double na = (aPos - leftAlpha->first) / (rightAlpha->first - leftAlpha->first);
+		alpha *= interpolate(leftAlpha->second, rightAlpha->second, na);
+		return colour(red, green, blue, alpha);
 	}
 
-	const colour& gradient::from() const
+	colour gradient::at(double aPos, double aStart, double aEnd) const
 	{
-		return iFrom;
-	}
-
-	colour& gradient::from()
-	{
-		return iFrom;
-	}
-
-	const colour& gradient::to() const
-	{
-		return iTo;
-	}
-
-	colour& gradient::to()
-	{
-		return iTo;
+		if (aStart != aEnd)
+			return at((aPos - aStart) / (aEnd - aStart));
+		else
+			return at(0.0);
 	}
 
 	gradient gradient::with_alpha(colour::component aAlpha) const
 	{
-		gradient result = *this;
-		result.from() = result.from().with_alpha(aAlpha);
-		result.to() = result.to().with_alpha(aAlpha);
+		gradient result{colour_stops(), {{0.0, aAlpha}, {1.0, aAlpha}}, direction()};
+		for (auto& stop : result.colour_stops())
+			stop.second.set_alpha(255);
 		return result;
 	}
 
 	gradient gradient::with_combined_alpha(colour::component aAlpha) const
 	{
-		gradient result = *this;
-		result.from() = result.from().with_combined_alpha(aAlpha);
-		result.to() = result.to().with_combined_alpha(aAlpha);
+		gradient result{ colour_stops(), alpha_stops(), direction() };
+		for (auto& stop : result.alpha_stops())
+			stop.second = static_cast<colour::component>((stop.second / 255.0 * aAlpha / 255.0) * 255.0);
 		return result;
 	}
 
@@ -421,7 +465,7 @@ namespace neogfx
 
 	bool gradient::operator==(const gradient& aOther) const
 	{
-		return iFrom == aOther.iFrom && iTo == aOther.iTo && iDirection == aOther.iDirection;
+		return iColourStops == aOther.iColourStops && iAlphaStops == aOther.iAlphaStops && iDirection == aOther.iDirection;
 	}
 
 	bool gradient::operator!=(const gradient& aOther) const
@@ -431,7 +475,29 @@ namespace neogfx
 
 	bool gradient::operator<(const gradient& aOther) const
 	{
-		return std::tie(iFrom, iTo, iDirection) < std::tie(aOther.iFrom, aOther.iTo, aOther.iDirection);
+		return std::tie(iColourStops, iAlphaStops, iDirection) < std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection);
+	}
+
+	void gradient::fix()
+	{
+		if (iColourStops.size() == 1)
+		{
+			auto stop = iColourStops.back();
+			iColourStops.push_back(stop);
+			if (iColourStops[0].first < 1.0)
+				iColourStops[1].first = 1.0;
+			else
+				iColourStops[0].first = 0.0;
+		}
+		if (iAlphaStops.size() == 1)
+		{
+			auto stop = iAlphaStops.back();
+			iAlphaStops.push_back(stop);
+			if (iAlphaStops[0].first < 1.0)
+				iAlphaStops[1].first = 1.0;
+			else
+				iAlphaStops[0].first = 0.0;
+		}
 	}
 
 	const colour colour::AliceBlue = colour(0xF0, 0xF8, 0xFF);

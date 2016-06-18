@@ -789,30 +789,39 @@ namespace neogfx
 			Horizontal,
 			Radial
 		};
+		typedef std::pair<double, colour> colour_stop;
+		typedef std::vector<colour_stop> colour_stop_list;
+		typedef std::pair<double, colour::component> alpha_stop;
+		typedef std::vector<alpha_stop> alpha_stop_list;
 	public:
 		struct bad_position : std::logic_error { bad_position() : std::logic_error("neogfx::gradient::bad_position") {} };
 		// construction
 	public:
-		gradient(const colour& aFrom, const colour& aTo, direction_e aDirection = Vertical);
-		gradient(const colour& aFromTo, direction_e aDirection = Vertical);
+		gradient();
+		gradient(const colour& aColour, direction_e aDirection = Vertical);
+		gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection = Vertical);
+		gradient(const colour_stop_list& aColourStops, direction_e aDirection = Vertical);
+		gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection = Vertical);
 		// operations
 	public:
-		colour at(coordinate aPos, coordinate aStart, coordinate aEnd) const;
+		const colour_stop_list& colour_stops() const;
+		colour_stop_list& colour_stops();
+		const alpha_stop_list& alpha_stops() const;
+		alpha_stop_list& alpha_stops();
 		colour at(double aPos) const;
-		const colour& from() const;
-		colour& from();
-		const colour& to() const;
-		colour& to();
+		colour at(double aPos, double aStart, double aEnd) const;
 		gradient with_alpha(colour::component aAlpha) const;
 		gradient with_combined_alpha(colour::component aAlpha) const;
 		direction_e direction() const;
 		bool operator==(const gradient& aOther) const;
 		bool operator!=(const gradient& aOther) const;
 		bool operator<(const gradient& aOther) const;
+	private:
+		void fix();
 		// attributes
 	private:
-		colour iFrom;
-		colour iTo;
+		colour_stop_list iColourStops;
+		alpha_stop_list iAlphaStops;
 		direction_e iDirection;
 	};
 

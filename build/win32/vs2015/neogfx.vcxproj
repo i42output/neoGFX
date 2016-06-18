@@ -92,6 +92,7 @@
     <ClInclude Include="..\..\..\include\neogfx\dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\dialog_button_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\flow_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gradient_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hsv_colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_clipboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\i_document.hpp" />
