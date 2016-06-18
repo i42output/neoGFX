@@ -860,6 +860,7 @@ namespace neogfx
 		if (iCurrentChannel != aChannel)
 		{
 			iCurrentChannel = aChannel;
+			selection_changed.trigger();
 			update();
 		}
 	}
