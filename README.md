@@ -5,6 +5,9 @@ neoGFX is a cross-platform C++ GUI/game library.
 neoGFX is still a work in progress (incomplete) so is not yet suitable for making GUI apps or games. Currently neogfx has only been built for and tested on Windows.
 
 # Implementation Progress
+
+![](http://neogfx.org/temp/colour_picker_finished.png)
+
 Feature                   | % done  |     TODO
 --------------------------|---------|-------------------------------------------------------------------------------
 Window                    | 90      |     Icon, drop shadow
