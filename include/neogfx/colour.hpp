@@ -20,8 +20,6 @@
 #pragma once
 
 #include "neogfx.hpp"
-#include <set>
-#include <boost/pool/pool_alloc.hpp>
 #include "geometry.hpp"
 #include "hsl_colour.hpp"
 #include "hsv_colour.hpp"
