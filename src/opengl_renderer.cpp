@@ -174,6 +174,19 @@ namespace neogfx
 						"}\n"),
 					GL_FRAGMENT_SHADER) 
 			}, {});
+		iGradientProgram = create_shader_program(
+			shaders
+			{
+				std::make_pair(
+					std::string(
+						"#version 130\n"
+						"void main()\n"
+						"{\n"
+						"	/* todo */"
+						"	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n"
+						"}\n"),
+					GL_FRAGMENT_SHADER)
+			}, {});
 		switch (screen_metrics().subpixel_format())
 		{
 		case i_screen_metrics::SubpixelFormatRGBHorizontal:
@@ -181,7 +194,7 @@ namespace neogfx
 				shaders
 			{
 				std::make_pair(
-				std::string(
+					std::string(
 						"#version 130\n"
 						"in vec3 VertexPosition;\n"
 						"in vec4 VertexColor;\n"
@@ -211,33 +224,33 @@ namespace neogfx
 				shaders
 			{
 				std::make_pair(
-				std::string(
-				"#version 130\n"
-				"in vec3 VertexPosition;\n"
-				"in vec4 VertexColor;\n"
-				"in vec2 VertexTextureCoord;\n"
-				"out vec4 Color;\n"
-				"varying vec2 vGlyphTexCoord;\n"
-				"void main()\n"
-				"{\n"
-				"	Color = VertexColor;\n"
-				"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-				"	vGlyphTexCoord = VertexTextureCoord;\n"
-				"}\n"),
-				GL_VERTEX_SHADER),
+					std::string(
+						"#version 130\n"
+						"in vec3 VertexPosition;\n"
+						"in vec4 VertexColor;\n"
+						"in vec2 VertexTextureCoord;\n"
+						"out vec4 Color;\n"
+						"varying vec2 vGlyphTexCoord;\n"
+						"void main()\n"
+						"{\n"
+						"	Color = VertexColor;\n"
+						"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+						"	vGlyphTexCoord = VertexTextureCoord;\n"
+						"}\n"),
+					GL_VERTEX_SHADER),
 				std::make_pair(
-				std::string(
-				"#version 130\n"
-				"uniform sampler2D glyphTexture;\n"
-				"uniform vec2 glyphTextureExtents;\n"
-				"in vec4 Color;\n"
-				"out vec4 FragColor;\n"
-				"varying vec2 vGlyphTexCoord;\n"
-				"void main()\n"
-				"{\n"
-				"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vec2(vGlyphTexCoord.x, vGlyphTexCoord.y)).a);\n"
-				"}\n"),
-				GL_FRAGMENT_SHADER)
+					std::string(
+						"#version 130\n"
+						"uniform sampler2D glyphTexture;\n"
+						"uniform vec2 glyphTextureExtents;\n"
+						"in vec4 Color;\n"
+						"out vec4 FragColor;\n"
+						"varying vec2 vGlyphTexCoord;\n"
+						"void main()\n"
+						"{\n"
+						"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vec2(vGlyphTexCoord.x, vGlyphTexCoord.y)).a);\n"
+						"}\n"),
+					GL_FRAGMENT_SHADER)
 			},
 			{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 			break;
@@ -301,6 +314,16 @@ namespace neogfx
 	opengl_renderer::i_shader_program& opengl_renderer::monochrome_shader_program()
 	{
 		return *iMonochromeProgram;
+	}
+
+	const opengl_renderer::i_shader_program& opengl_renderer::gradient_shader_program() const
+	{
+		return *iGradientProgram;
+	}
+
+	opengl_renderer::i_shader_program& opengl_renderer::gradient_shader_program()
+	{
+		return *iGradientProgram;
 	}
 
 	const opengl_renderer::i_shader_program& opengl_renderer::subpixel_shader_program() const

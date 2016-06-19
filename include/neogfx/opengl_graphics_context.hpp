@@ -130,6 +130,8 @@ namespace neogfx
 	private:
 		void apply_scissor();
 		void apply_logical_operation();
+		void gradient_on(const gradient& aGradient);
+		void gradient_off();
 		vertex to_shader_vertex(const point& aPoint) const;
 		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, bool& aFallbackFontNeeded) const;
 	private:

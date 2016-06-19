@@ -491,6 +491,18 @@ namespace neogfx
 		}	
 	}
 
+	void opengl_graphics_context::gradient_on(const gradient& aGradient)
+	{
+		// todo: use GLSL to render gradients
+		iRenderingEngine.activate_shader_program(iRenderingEngine.monochrome_shader_program());
+		iRenderingEngine.monochrome_shader_program().set_uniform_variable("tex", 1);
+	}
+
+	void opengl_graphics_context::gradient_off()
+	{
+		iRenderingEngine.deactivate_shader_program();
+	}
+
 	void opengl_graphics_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
 	{
 		glCheck(glEnable(GL_LINE_STIPPLE));
@@ -630,41 +642,14 @@ namespace neogfx
 		if (aRect.empty())
 			return;
 		auto vertices = rect_vertices(aRect, 0.0, true);
-		std::vector<std::array<uint8_t, 4>> colours;
-		if (aGradient.direction() == gradient::Vertical)
-		{
-			for (auto& v : vertices)
-			{
-				if ((&v - &vertices[0]) % 2 == 1)
-				{
-					colour c = aGradient.at(v, aRect.top(), aRect.bottom());
-					colours.push_back(std::array < uint8_t, 4 > {{c.red(), c.green(), c.blue(), c.alpha()}});
-				}
-			}
-		}
-		else if (aGradient.direction() == gradient::Horizontal)
-		{
-			for (auto& v : vertices)
-			{
-				if ((&v - &vertices[0]) % 2 == 0)
-				{
-					colour c = aGradient.at(v, aRect.left(), aRect.right());
-					colours.push_back(std::array < uint8_t, 4 > {{c.red(), c.green(), c.blue(), c.alpha()}});
-				}
-			}
-		}
-		else if (aGradient.direction() == gradient::Radial)
-		{
-			colour e = aGradient.at(1.0);
-			colours = decltype(colours){ vertices.size() / 2, std::array < uint8_t, 4 > { {e.red(), e.green(), e.blue(), e.alpha()}} };
-			colour c = aGradient.at(0.0);
-			colours[0] = std::array < uint8_t, 4 > { {c.red(), c.green(), c.blue(), c.alpha()}};
-		}
+		std::vector<std::array<uint8_t, 4>> colours{ vertices.size() / 2, { { 0, 0, 0, 0 } } };
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		gradient_on(aGradient);
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		gradient_off();
 	}
 
 	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const colour& aColour)
@@ -682,40 +667,13 @@ namespace neogfx
 	{
 		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours;
-		if (aGradient.direction() == gradient::Vertical)
-		{
-			for (auto& v : vertices)
-			{
-				if ((&v - &vertices[0]) % 2 == 1)
-				{
-					colour c = aGradient.at(v, aRect.top(), aRect.bottom());
-					colours.push_back(std::array < uint8_t, 4 > { {c.red(), c.green(), c.blue(), c.alpha()}});
-				}
-			}
-		}
-		else if (aGradient.direction() == gradient::Horizontal)
-		{
-			for (auto& v : vertices)
-			{
-				if ((&v - &vertices[0]) % 2 == 0)
-				{
-					colour c = aGradient.at(v, aRect.left(), aRect.right());
-					colours.push_back(std::array < uint8_t, 4 > { {c.red(), c.green(), c.blue(), c.alpha()}});
-				}
-			}
-		}
-		else if (aGradient.direction() == gradient::Radial)
-		{
-			colour e = aGradient.at(1.0);
-			colours = decltype(colours){ vertices.size() / 2, std::array < uint8_t, 4 > { {e.red(), e.green(), e.blue(), e.alpha()}} };
-			colour c = aGradient.at(0.0);
-			colours[0] = std::array < uint8_t, 4 > { {c.red(), c.green(), c.blue(), c.alpha()}};
-		}
+		std::vector<std::array<uint8_t, 4>> colours{ vertices.size() / 2,{ { 0, 0, 0, 0 } } };
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		gradient_on(aGradient);
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		gradient_off();
 	}
 
 	void opengl_graphics_context::fill_circle(const point& aCentre, dimension aRadius, const colour& aColour)
@@ -990,7 +948,7 @@ namespace neogfx
 		colour c{0xFF, 0xFF, 0xFF, 0xFF};
 		if (aColour != boost::none)
 			c = *aColour;
-		std::vector<std::array<uint8_t, 4>> colours(4, std::array <uint8_t, 4>{{c.red(), c.green(), c.blue(), c.alpha()}});
+		std::vector<std::array<uint8_t, 4>> colours(4, std::array<uint8_t, 4>{{c.red(), c.green(), c.blue(), c.alpha()}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		if (iMonochrome)
 		{

@@ -20,6 +20,8 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <set>
+#include <boost/pool/pool_alloc.hpp>
 #include "geometry.hpp"
 #include "hsl_colour.hpp"
 #include "hsv_colour.hpp"
@@ -825,8 +827,9 @@ namespace neogfx
 		direction_e iDirection;
 	};
 
-	typedef colour color;
-
 	typedef boost::optional<colour> optional_colour;
+	typedef boost::optional<gradient> optional_gradient;
+
+	typedef colour color;
 	typedef boost::optional<color> optional_color;
 }

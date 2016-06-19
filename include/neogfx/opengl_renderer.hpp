@@ -100,6 +100,8 @@ namespace neogfx
 		virtual i_shader_program& active_shader_program();
 		virtual const i_shader_program& monochrome_shader_program() const;
 		virtual i_shader_program& monochrome_shader_program();
+		virtual const i_shader_program& gradient_shader_program() const;
+		virtual i_shader_program& gradient_shader_program();
 		virtual const i_shader_program& subpixel_shader_program() const;
 		virtual i_shader_program& subpixel_shader_program();
 	private:
@@ -111,6 +113,7 @@ namespace neogfx
 		shader_programs iShaderPrograms;
 		shader_programs::iterator iActiveProgram;
 		shader_programs::iterator iMonochromeProgram;
+		shader_programs::iterator iGradientProgram;
 		shader_programs::iterator iSubpixelProgram;
 	};
 }

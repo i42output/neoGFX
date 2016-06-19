@@ -18,6 +18,7 @@
 */
 
 #include "neogfx.hpp"
+#include <algorithm>
 #include <tuple>
 #include <iomanip>
 #include <boost/lexical_cast.hpp>
@@ -422,9 +423,9 @@ namespace neogfx
 		alpha = interpolate(left->second.alpha(), right->second.alpha(), nc);
 		auto alphaStop = std::lower_bound(iAlphaStops.begin(), iAlphaStops.end(), alpha_stop{ aPos, 255 },
 			[](const alpha_stop& aLeft, const alpha_stop& aRight)
-		{
-			return aLeft.first < aRight.first;
-		});
+			{
+				return aLeft.first < aRight.first;
+			});
 		if (alphaStop->first >= aPos && alphaStop != iAlphaStops.begin())
 			--alphaStop;
 		auto leftAlpha = alphaStop;
