@@ -493,9 +493,8 @@ namespace neogfx
 
 	void opengl_graphics_context::gradient_on(const gradient& aGradient)
 	{
-		// todo: use GLSL to render gradients
-		iRenderingEngine.activate_shader_program(iRenderingEngine.monochrome_shader_program());
-		iRenderingEngine.monochrome_shader_program().set_uniform_variable("tex", 1);
+		iRenderingEngine.activate_shader_program(iRenderingEngine.gradient_shader_program());
+		/* todo */
 	}
 
 	void opengl_graphics_context::gradient_off()
