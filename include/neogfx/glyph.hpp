@@ -58,11 +58,11 @@ namespace neogfx
 		typedef std::pair<string::size_type, string::size_type> source_type;
 	public:
 		glyph() :
-			iDirection{}, iValue{}, iFlags{}, iSource{}, iExtents{}, iOffset{} {}
-		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aExtents, size aOffset) :
-			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{aSource}, iExtents{aExtents}, iOffset{aOffset} {}
+			iDirection{}, iValue{}, iFlags{}, iSource{}, iAdvance{}, iOffset{} {}
+		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aAdvance, size aOffset) :
+			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{aSource}, iAdvance{aAdvance}, iOffset{aOffset} {}
 		glyph(text_direction aDirection, value_type aValue) :
-			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{}, iExtents{}, iOffset{} {}
+			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{}, iAdvance{}, iOffset{} {}
 	public:
 		bool operator==(const glyph& aRhs) const { return iDirection == aRhs.iDirection && iValue == aRhs.iValue; }
 	public:
@@ -76,8 +76,8 @@ namespace neogfx
 		void set_value(value_type aValue) { iValue = aValue; }
 		const source_type& source() const { return iSource; }
 		void set_source(const source_type aSource) { iSource = aSource; }
-		size extents() const { return iExtents.ceil(); }
-		void set_extents(const size& aExtents) { iExtents = aExtents; }
+		size advance() const { return iAdvance.ceil(); }
+		void set_advance(const size& aAdvance) { iAdvance = aAdvance; }
 		size offset() const { return iOffset.ceil(); }
 		void set_offset(const size& aOffset) { iOffset = aOffset; }
 		flags_e flags() const { return iFlags; }
@@ -88,13 +88,13 @@ namespace neogfx
 		void set_mnemonic(bool aMnemonic) { iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); }
 		bool use_fallback() const { return (iFlags & UseFallback) == UseFallback; }
 		void set_use_fallback(bool aUseFallback) { iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); }
-		void kerning_adjust(float aAdjust) { iExtents.cx += aAdjust; }
+		void kerning_adjust(float aAdjust) { iAdvance.cx += aAdjust; }
 	private:
 		text_direction iDirection;
 		value_type iValue;
 		flags_e iFlags;
 		source_type iSource;
-		basic_size<float> iExtents;
+		basic_size<float> iAdvance;
 		basic_size<float> iOffset;
 	};
 
@@ -138,7 +138,7 @@ namespace neogfx
 			bool usingFallback = false;
 			for (glyph_text::const_iterator i = aBegin; i != aEnd; ++i)
 			{
-				result.cx += i->extents().cx;
+				result.cx += i->advance().cx;
 				if (!i->use_fallback())
 					usingNormal = true;
 				else

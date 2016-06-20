@@ -357,7 +357,7 @@ namespace neogfx
 				bool gotLine = false;
 				while(next != i->second)
 				{
-					if (lineWidth + next->extents().cx > maxWidth)
+					if (lineWidth + next->advance().cx > maxWidth)
 					{
 						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
 						lineWidth -= glyph_text::extents(aFont, wordBreak.first, next).cx;
@@ -373,7 +373,7 @@ namespace neogfx
 					}
 					else
 					{	
-						lineWidth += next->extents().cx;
+						lineWidth += next->advance().cx;
 						++next;
 					}
 					if (gotLine || next == i->second)
@@ -463,7 +463,7 @@ namespace neogfx
 				while(next != line.second)
 				{
 					bool gotLine = false;
-					if (lineWidth + next->extents().cx > maxWidth)
+					if (lineWidth + next->advance().cx > maxWidth)
 					{
 						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
 						lineWidth -= glyph_text::extents(aFont, wordBreak.first, next).cx;
@@ -479,7 +479,7 @@ namespace neogfx
 					}
 					else
 					{
-						lineWidth += next->extents().cx;
+						lineWidth += next->advance().cx;
 						++next;
 					}
 					if (gotLine || next == line.second)

@@ -136,6 +136,7 @@ namespace neogfx
 			colour_dialog& iParent;
 			mutable std::array<std::array<std::array<uint8_t, 4>, 256>, 256> iPixels;
 			mutable texture iTexture;
+			mutable bool iUpdateTexture;
 			bool iTracking;
 		};
 		class colour_selection : public framed_widget

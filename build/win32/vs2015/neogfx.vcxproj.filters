@@ -461,9 +461,6 @@
     <None Include="..\..\..\include\neogfx\path.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\src\subpixel_rgb_horizontal.frag">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="..\..\..\include\neogfx\layout.inl">
       <Filter>Header Files</Filter>
     </None>

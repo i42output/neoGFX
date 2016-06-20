@@ -385,11 +385,14 @@ namespace neogfx
 	}
 
 	colour_dialog::yz_picker::yz_picker(colour_dialog& aParent) :
-		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTexture{ image{size{256, 256}, colour::Black} }, iTracking{false}
+		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTexture{ image{size{256, 256}, colour::Black} }, iUpdateTexture{true}, iTracking {
+		false
+	}
 	{
 		set_margins(neogfx::margins{});
 		iParent.selection_changed([this]
 		{
+			iUpdateTexture = true;
 			update();
 		});
 	}
@@ -415,19 +418,23 @@ namespace neogfx
 	{
 		framed_widget::paint(aGraphicsContext);
 		rect cr = client_rect(false);
-		for (uint32_t y = 0; y < 256; ++y)
+		if (iUpdateTexture)
 		{
-			for (uint32_t z = 0; z < 256; ++z)
+			iUpdateTexture = false;
+			for (uint32_t y = 0; y < 256; ++y)
 			{
-				auto r = colour_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
-				colour rgbColour = (r.is<hsv_colour>() ? static_variant_cast<const hsv_colour&>(r).to_rgb() : static_variant_cast<const colour&>(r));
-				iPixels[255 - z][y][0] = rgbColour.red();
-				iPixels[255 - z][y][1] = rgbColour.green();
-				iPixels[255 - z][y][2] = rgbColour.blue();
-				iPixels[255 - z][y][3] = 255; // alpha
+				for (uint32_t z = 0; z < 256; ++z)
+				{
+					auto r = colour_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
+					colour rgbColour = (r.is<hsv_colour>() ? static_variant_cast<const hsv_colour&>(r).to_rgb() : static_variant_cast<const colour&>(r));
+					iPixels[255 - z][y][0] = rgbColour.red();
+					iPixels[255 - z][y][1] = rgbColour.green();
+					iPixels[255 - z][y][2] = rgbColour.blue();
+					iPixels[255 - z][y][3] = 255; // alpha
+				}
 			}
+			iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
 		}
-		iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
 		aGraphicsContext.draw_texture(cr.top_left(), iTexture);
 		point cursor = current_cursor_position();
 		aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iParent.selected_colour());
@@ -460,6 +467,7 @@ namespace neogfx
 	void colour_dialog::yz_picker::select(const point& aPosition)
 	{
 		iParent.select_colour(colour_at_position(aPosition), *this);
+		iUpdateTexture = false;
 	}
 
 	colour_dialog::representations colour_dialog::yz_picker::colour_at_position(const point& aCursorPos) const

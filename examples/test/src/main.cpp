@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
 		layoutButtons.set_margins(ng::margins(8));
 		ng::push_button button0(layoutButtons, "This is the neoGFX test application.");
 		button0.label().set_placement(ng::label_placement::ImageTextVertical);
-		button0.image().set_image(ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../../neoGFX.png" });
+		button0.image().set_image(ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../neoGFX.png" });
 		button0.image().set_minimum_size(ng::size{ 32, 32 });
 		button0.image().set_maximum_size(ng::size{ 160, std::numeric_limits<ng::dimension>::max() });
 		button0.set_size_policy(ng::size_policy::Expanding);

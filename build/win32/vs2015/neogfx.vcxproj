@@ -237,7 +237,6 @@
     <None Include="..\..\..\include\neogfx\path.inl" />
     <None Include="..\..\..\include\neogfx\slider.inl" />
     <None Include="..\..\..\include\neogfx\spin_box.inl" />
-    <None Include="..\..\..\src\subpixel_rgb_horizontal.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\action.cpp" />

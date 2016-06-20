@@ -100,10 +100,11 @@ namespace neogfx
 		virtual i_shader_program& active_shader_program();
 		virtual const i_shader_program& monochrome_shader_program() const;
 		virtual i_shader_program& monochrome_shader_program();
+		virtual const i_shader_program& glyph_shader_program() const;
+		virtual i_shader_program& glyph_shader_program();
 		virtual const i_shader_program& gradient_shader_program() const;
 		virtual i_shader_program& gradient_shader_program();
-		virtual const i_shader_program& subpixel_shader_program() const;
-		virtual i_shader_program& subpixel_shader_program();
+
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
@@ -113,7 +114,7 @@ namespace neogfx
 		shader_programs iShaderPrograms;
 		shader_programs::iterator iActiveProgram;
 		shader_programs::iterator iMonochromeProgram;
+		shader_programs::iterator iGlyphProgram;
 		shader_programs::iterator iGradientProgram;
-		shader_programs::iterator iSubpixelProgram;
 	};
 }

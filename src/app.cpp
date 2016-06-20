@@ -277,6 +277,7 @@ namespace neogfx
 			didSome = pump_messages();
 			didSome = (do_io(neolib::yield_type::Sleep) || didSome);
 			didSome = (do_process_events() || didSome);
+			rendering_engine().render_now();
 		}
 		catch (std::exception& e)
 		{
@@ -298,7 +299,6 @@ namespace neogfx
 				std::exit(EXIT_FAILURE);
 			}
 		}
-		rendering_engine().render_now();
 		return didSome;
 	}
 

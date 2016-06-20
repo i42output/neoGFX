@@ -756,7 +756,7 @@ namespace neogfx
 					const auto& glyph = iCursor.position() < lineEnd ? *iterGlyph : *(iterGlyph - 1);
 					point linePos{ glyph.x - line->start->x, line->y };
 					if (iCursor.position() == lineEnd)
-						linePos.x += glyph.extents().cx;
+						linePos.x += glyph.advance().cx;
 					return position_info{ iterGlyph, line, linePos };
 				}
 				else
@@ -792,7 +792,7 @@ namespace neogfx
 		if (line == iGlyphLines.end())
 			return iGlyphs.size();
 		for (auto g = line->start; g != line->end; ++g)
-			if (adjusted.x >= g->x - line->start->x && adjusted.x < g->x - line->start->x + g->extents().cx)
+			if (adjusted.x >= g->x - line->start->x && adjusted.x < g->x - line->start->x + g->advance().cx)
 				return g - iGlyphs.begin();
 		return line->end - iGlyphs.begin();
 	}
@@ -1015,7 +1015,7 @@ namespace neogfx
 			for (auto g = paragraph.start(); g != paragraph.end(); ++g)
 			{
 				g->x = x;
-				x += g->extents().cx;
+				x += g->advance().cx;
 			}
 		}
 		update_scrollbar_visibility();
@@ -1049,7 +1049,7 @@ namespace neogfx
 				while (next != paragraph.end())
 				{
 					auto split = std::lower_bound(next, paragraph.end(), paragraph_positioned_glyph{ offset + availableWidth });
-					if (split != next && (split != paragraph.end() || (split - 1)->x + (split - 1)->extents().cx >= offset + availableWidth))
+					if (split != next && (split != paragraph.end() || (split - 1)->x + (split - 1)->advance().cx >= offset + availableWidth))
 						--split;
 					if (split == next)
 						++split;
@@ -1069,7 +1069,7 @@ namespace neogfx
 						next = paragraph.end();
 					if (lineStart != lineEnd && (lineEnd - 1)->is_whitespace() && (lineEnd - 1)->value() == '\r')
 						--lineEnd;
-					dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().extents().cx : 0.0));
+					dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().advance().cx : 0.0));
 					iGlyphLines.push_back(glyph_line{ lineStart, lineEnd, pos.y, size{x - offset, paragraph.height(lineStart, lineEnd)} });
 					pos.y += iGlyphLines.back().extents.cy;
 					iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().extents.cx);
@@ -1081,7 +1081,7 @@ namespace neogfx
 			}
 			else
 			{
-				iGlyphLines.push_back(glyph_line{ paragraph.start(), paragraph.end(), pos.y, size{ (paragraph.end() - 1)->x + (paragraph.end() - 1)->extents().cx, paragraph.height(paragraph.start(), paragraph.end()) } });
+				iGlyphLines.push_back(glyph_line{ paragraph.start(), paragraph.end(), pos.y, size{ (paragraph.end() - 1)->x + (paragraph.end() - 1)->advance().cx, paragraph.height(paragraph.start(), paragraph.end()) } });
 				pos.y += iGlyphLines.back().extents.cy;
 				iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().extents.cx);
 			}
@@ -1106,7 +1106,7 @@ namespace neogfx
 			auto iterGlyph = cursorPos.glyph < cursorPos.line->end ? cursorPos.glyph : cursorPos.glyph - 1;
 			const auto& glyph = *iterGlyph;
 			if (cursorPos.glyph == cursorPos.line->end)
-				cursorPos.pos.x += glyph.extents().cx;
+				cursorPos.pos.x += glyph.advance().cx;
 			const auto& tagContents = iText.tag(iText.begin() + from_glyph(iterGlyph).first).contents();
 			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
@@ -1125,7 +1125,7 @@ namespace neogfx
 		scoped_units su(*this, UnitsPixels);
 		auto p = position(cursor().position());
 		auto e = (p.line != iGlyphLines.end() ? 
-			size{ p.glyph != p.line->end ? p.glyph->extents().cx : 0.0, p.line->extents.cy } : 
+			size{ p.glyph != p.line->end ? p.glyph->advance().cx : 0.0, p.line->extents.cy } : 
 			size{ 0.0, font().height() });
 		if (p.pos.y < vertical_scrollbar().position())
 			vertical_scrollbar().set_position(p.pos.y);
@@ -1162,12 +1162,12 @@ namespace neogfx
 					{
 					case 0:
 						if (selected)
-							aGraphicsContext.fill_rect(rect{ pos, size{glyph.extents().cx, aLine->extents.cy} }, app::instance().current_style().selection_colour());
+							aGraphicsContext.fill_rect(rect{ pos, size{glyph.advance().cx, aLine->extents.cy} }, app::instance().current_style().selection_colour());
 						break;
 					case 1:
 						if (style.text_outline_colour().empty())
 						{
-							pos.x += glyph.extents().cx;
+							pos.x += glyph.advance().cx;
 							continue;
 						}
 						outlinesPresent = true;
@@ -1198,7 +1198,7 @@ namespace neogfx
 										default_text_colour());
 						break;
 					}
-					pos.x += glyph.extents().cx;
+					pos.x += glyph.advance().cx;
 				}
 			}
 		}
@@ -1216,7 +1216,7 @@ namespace neogfx
 						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
 							static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
 							default_text_colour());
-			pos.x += glyph.extents().cx;
+			pos.x += glyph.advance().cx;
 		}
 	}
 

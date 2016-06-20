@@ -774,7 +774,7 @@ namespace neogfx
 
 	void opengl_graphics_context::begin_drawing_glyphs()
 	{
-		iRenderingEngine.activate_shader_program(iRenderingEngine.subpixel_shader_program());
+		iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program());
 
 		glCheck(glActiveTexture(GL_TEXTURE1));
 		glCheck(glClientActiveTexture(GL_TEXTURE1));
@@ -875,11 +875,11 @@ namespace neogfx
 		glCheck(glGenVertexArrays(1, &vaoHandle));
 		glCheck(glBindVertexArray(vaoHandle));
 
-		GLuint vertexPositionAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.subpixel_shader_program().variable("VertexPosition"));
+		GLuint vertexPositionAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program().variable("VertexPosition"));
 		glCheck(glEnableVertexAttribArray(vertexPositionAttribArrayIndex));
-		GLuint vertexColorAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.subpixel_shader_program().variable("VertexColor"));
+		GLuint vertexColorAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program().variable("VertexColor"));
 		glCheck(glEnableVertexAttribArray(vertexColorAttribArrayIndex));
-		GLuint vertexTextureCoordAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.subpixel_shader_program().variable("VertexTextureCoord"));
+		GLuint vertexTextureCoordAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program().variable("VertexTextureCoord"));
 		glCheck(glEnableVertexAttribArray(vertexTextureCoordAttribArrayIndex));
 
 		glCheck(glBindBuffer(GL_ARRAY_BUFFER, positionBufferHandle));
@@ -897,8 +897,8 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_2D, iActiveGlyphTexture));
 		}
 		
-		iRenderingEngine.subpixel_shader_program().set_uniform_variable("glyphTexture", 1);
-		iRenderingEngine.subpixel_shader_program().set_uniform_variable("glyphTextureExtents", glyphTexture.font_texture().extents().cx, glyphTexture.font_texture().extents().cy);
+		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTexture", 1);
+		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTextureExtents", glyphTexture.font_texture().extents().cx, glyphTexture.font_texture().extents().cy);
 
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));

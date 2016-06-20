@@ -190,7 +190,7 @@ namespace neogfx
 		switch (screen_metrics().subpixel_format())
 		{
 		case i_screen_metrics::SubpixelFormatRGBHorizontal:
-			iSubpixelProgram = create_shader_program(
+			iGlyphProgram = create_shader_program(
 				shaders
 			{
 				std::make_pair(
@@ -210,7 +210,18 @@ namespace neogfx
 						"}\n"),
 					GL_VERTEX_SHADER),
 				std::make_pair(
-					glsl::SUBPIXEL_RGB_HORIZONTAL_FRAG,
+					std::string(
+						"#version 130\n"
+						"uniform sampler2D glyphTexture;\n"
+						"uniform vec2 glyphTextureExtents;\n"
+						"in vec4 Color;\n"
+						"out vec4 FragColor;\n"
+						"varying vec2 vGlyphTexCoord;\n"
+						"void main()\n"
+						"{\n"
+						"   /* todo */\n"
+						"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vec2(vGlyphTexCoord.x, vGlyphTexCoord.y)).a);\n"
+						"}\n"),
 					GL_FRAGMENT_SHADER)
 			},
 			{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
@@ -220,7 +231,7 @@ namespace neogfx
 		case i_screen_metrics::SubpixelFormatRGBVertical:
 		case i_screen_metrics::SubpixelFormatBGRVertical:
 		default:
-			iSubpixelProgram = create_shader_program(
+			iGlyphProgram = create_shader_program(
 				shaders
 			{
 				std::make_pair(
@@ -326,14 +337,14 @@ namespace neogfx
 		return *iGradientProgram;
 	}
 
-	const opengl_renderer::i_shader_program& opengl_renderer::subpixel_shader_program() const
+	const opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program() const
 	{
-		return *iSubpixelProgram;
+		return *iGlyphProgram;
 	}
 
-	opengl_renderer::i_shader_program& opengl_renderer::subpixel_shader_program()
+	opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program()
 	{
-		return *iSubpixelProgram;
+		return *iGlyphProgram;
 	}
 
 	opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)

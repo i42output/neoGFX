@@ -206,7 +206,7 @@ namespace neogfx
 			for (Iter i = aTextBegin; i != aTextEnd; ++i)
 			{
 				aGraphicsContext.draw_glyph(pos + i->offset(), *i, aFont, aColour);
-				pos.x += i->extents().cx;
+				pos.x += i->advance().cx;
 			}
 		}
 		point pos = aPoint;
@@ -214,7 +214,7 @@ namespace neogfx
 		{
 			if (i->underline() || (aGraphicsContext.mnemonics_shown() && i->mnemonic()))
 				aGraphicsContext.draw_glyph_underline(pos, *i, aFont, aColour);
-			pos.x += i->extents().cx;
+			pos.x += i->advance().cx;
 		}
 	}
 

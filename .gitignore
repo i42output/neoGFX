@@ -58,3 +58,5 @@
 /examples/test/build/win32/vs2015/caw_toolbar.naa
 /build/win32/vs2015/.vs/neogfx/v14/.suo
 /build/win32/vs2015/neogfx.sdf
+/examples/test/build/win32/vs2015/test.VC.VC.opendb
+/examples/test/build/win32/vs2015/test.VC.db
