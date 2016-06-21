@@ -1147,7 +1147,8 @@ namespace neogfx
 					sourceClusterEnd = aTextEnd - aTextBegin;
 				if (j > 0)
 					result.back().kerning_adjust(static_cast<float>(aFontSelector(sourceClusterStart).kerning(glyphInfo[j - 1].codepoint, glyphInfo[j].codepoint)));
-				result.push_back(glyph(textDirections[cluster], glyphInfo[j].codepoint, glyph::source_type(sourceClusterStart, sourceClusterEnd), size(glyphPos[j].x_advance / 64.0, glyphPos[j].y_advance / 64.0), size(glyphPos[j].x_offset / 64.0, glyphPos[j].y_offset / 64.0)));
+				size advance{ glyphPos[j].x_advance / 64.0, glyphPos[j].y_advance / 64.0 };
+				result.push_back(glyph(textDirections[cluster], glyphInfo[j].codepoint, glyph::source_type(sourceClusterStart, sourceClusterEnd), advance, size(glyphPos[j].x_offset / 64.0, glyphPos[j].y_offset / 64.0)));
 				if (result.back().direction() == text_direction::Whitespace)
 					result.back().set_value(aTextBegin[sourceClusterStart]);
 				if ((aFontSelector(sourceClusterStart).style() & font::Underline) == font::Underline)
@@ -1156,6 +1157,20 @@ namespace neogfx
 					result.back().set_mnemonic(true);
 				if (glyphInfo[j].codepoint == 0)
 					result.back().set_use_fallback(true);
+				else if (result.back().direction() != text_direction::Whitespace)
+				{
+					auto& glyph = result.back();
+					if (glyph.advance() != advance.ceil())
+					{
+						const i_glyph_texture& glyphTexture = aFontSelector(sourceClusterStart).native_font_face().glyph_texture(glyph);
+						auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.extents().cx);
+						if (visibleAdvance > advance.cx)
+						{
+							advance.cx = visibleAdvance;
+							glyph.set_advance(advance);
+						}
+					}
+				}
 			}
 			hb_buffer_clear_contents(buf);
 		}
