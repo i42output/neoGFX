@@ -78,7 +78,7 @@ namespace neogfx
 		virtual void unset_mnemonic() = 0;
 		virtual bool mnemonics_shown() const = 0;
 		virtual void begin_drawing_glyphs() = 0;
-		virtual void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) = 0;
+		virtual size draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) = 0;
 		virtual void end_drawing_glyphs() = 0;
 		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) = 0;
 	};

@@ -67,7 +67,7 @@ public:
 			else if (aNumber == 8)
 				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::Black, ng::text_edit::style::colour_type(), ng::colour::White));
 			else if (aNumber == 0)
-				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
+				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::colour::White));
 			else
 				iTextEdit.set_default_style(
 					ng::text_edit::style(

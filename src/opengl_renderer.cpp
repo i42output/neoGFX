@@ -205,7 +205,6 @@ namespace neogfx
 						"void main()\n"
 						"{\n"
 						"	Color = VertexColor;\n"
-						"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 						"	vGlyphTexCoord = VertexTextureCoord;\n"
 						"}\n"),
 					GL_VERTEX_SHADER),

@@ -802,10 +802,10 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour)
+	size opengl_graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour)
 	{
 		if (aGlyph.is_whitespace())
-			return;
+			return size{};
 
 		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aFont.fallback().native_font_face().glyph_texture(aGlyph);
 
@@ -821,6 +821,7 @@ namespace neogfx
 			logical_coordinates()[1] < logical_coordinates()[3] ? 
 				aPoint.y + (glyphTexture.placement().y + -aFont.descender()) :
 				aPoint.y + aFont.height() - (glyphTexture.placement().y + -aFont.descender()) - glyphTexture.extents().cy);
+
 		vertices.clear();
 		vertices.insert(vertices.begin(),
 		{
@@ -913,6 +914,8 @@ namespace neogfx
 		glCheck(glDeleteVertexArrays(1, &vaoHandle));
 
 		glCheck(glDeleteBuffers(3, boHandles));
+
+		return glyphTexture.extents();
 	}
 
 	void opengl_graphics_context::end_drawing_glyphs()

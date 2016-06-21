@@ -645,14 +645,16 @@ namespace neogfx
 		return iNativeGraphicsContext->to_glyph_text(aTextBegin, aTextEnd, aFontSelector);
 	}
 
-	void graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const
+	size graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const
 	{
+		size result;
 		{
 			glyph_drawing gd(*this);
-			iNativeGraphicsContext->draw_glyph(to_device_units(aPoint) + iOrigin, aGlyph, aFont, aColour);
+			result = iNativeGraphicsContext->draw_glyph(to_device_units(aPoint) + iOrigin, aGlyph, aFont, aColour);
 		}
 		if (iDrawingGlyphs == 0 && (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic())))
 			draw_glyph_underline(aPoint, aGlyph, aFont, aColour);
+		return result;
 	}
 
 	void graphics_context::draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const
