@@ -1084,10 +1084,11 @@ namespace neogfx
 			if (currentDirection == text_direction::LTR)
 				currentLineHasLTR = true;
 			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
-			bool newRun = previousFont != currentFont || (previousDirection == text_direction::LTR && currentDirection == text_direction::RTL) ||
+			bool newRun = 
+				previousFont != currentFont || 
+				(previousDirection == text_direction::LTR && currentDirection == text_direction::RTL) ||
 				(previousDirection == text_direction::RTL && currentDirection == text_direction::LTR) ||
-				(previousScript != currentScript && (previousScript != HB_SCRIPT_COMMON && currentScript != HB_SCRIPT_COMMON)) ||
-				i == lastCodePointIndex;
+				(previousScript != currentScript && (previousScript != HB_SCRIPT_COMMON && currentScript != HB_SCRIPT_COMMON));
 			if (!newRun)
 			{
 				if ((currentDirection == text_direction::Whitespace || currentDirection == text_direction::None) && previousDirection == text_direction::RTL)
@@ -1108,9 +1109,11 @@ namespace neogfx
 			}
 			if (newRun)
 			{
-				runs.push_back(std::make_tuple(runStart, &codePoints[i != lastCodePointIndex ? i : i+1], previousDirection, previousScript));
+				runs.push_back(std::make_tuple(runStart, &codePoints[i], previousDirection, previousScript));
 				runStart = &codePoints[i];
 			}
+			if (i == lastCodePointIndex)
+				runs.push_back(std::make_tuple(runStart, &codePoints[i + 1], currentDirection, currentScript));
 			if (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL)
 			{
 				previousDirection = currentDirection;

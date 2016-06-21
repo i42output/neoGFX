@@ -207,7 +207,8 @@ namespace neogfx
 				linePos.x += std::ceil((iTextExtents.cx - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx) / 2);
 			draw_glyphs(aGraphicsContext, linePos, line);
 		}
-		draw_cursor(aGraphicsContext);
+		if (has_focus())
+			draw_cursor(aGraphicsContext);
 	}
 
 	const font& text_edit::font() const
@@ -1240,7 +1241,7 @@ namespace neogfx
 			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
 			glyphHeight = lineHeight = font().height();
-		if (has_focus() && ((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
+		if (((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
 		{
 			auto elapsed = (app::instance().program_elapsed_ms() - iCursorAnimationStartTime) % 1000;
 			colour::component alpha = 
