@@ -944,6 +944,14 @@ namespace neogfx
 			visibility_changed.trigger();
 			if (has_managing_layout())
 				managing_layout().layout_items(true);
+			if (effectively_hidden())
+			{
+				if (surface().has_focused_widget() &&
+					(surface().focused_widget().is_descendent_of(*this) || &surface().focused_widget() == this))
+				{
+					surface().release_focused_widget(surface().focused_widget());
+				}
+			}
 		}
 	}
 
