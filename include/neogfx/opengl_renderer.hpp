@@ -71,8 +71,10 @@ namespace neogfx
 		public:
 			virtual void* handle() const;
 			virtual void* variable(const std::string& aVariableName) const;
+			virtual void set_uniform_variable(const std::string& aName, float aValue);
 			virtual void set_uniform_variable(const std::string& aName, double aValue);
 			virtual void set_uniform_variable(const std::string& aName, int aValue);
+			virtual void set_uniform_variable(const std::string& aName, float aValue1, float aValue2);
 			virtual void set_uniform_variable(const std::string& aName, double aValue1, double aValue2);
 		public:
 			GLuint register_variable(const std::string& aVariableName);

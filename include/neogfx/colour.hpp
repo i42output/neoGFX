@@ -781,13 +781,16 @@ namespace neogfx
 
 	class gradient
 	{
+		// constants
+	public:
+		static const std::size_t MaxStops = 256;
 		// types
 	public:
 		enum direction_e
 		{
-			Vertical,
-			Horizontal,
-			Radial
+			Vertical	= 0,
+			Horizontal	= 1,
+			Radial		= 2
 		};
 		typedef std::pair<double, colour> colour_stop;
 		typedef std::vector<colour_stop> colour_stop_list;
@@ -808,6 +811,7 @@ namespace neogfx
 		colour_stop_list& colour_stops();
 		const alpha_stop_list& alpha_stops() const;
 		alpha_stop_list& alpha_stops();
+		colour_stop_list combined_stops() const;
 		colour at(double aPos) const;
 		colour at(double aPos, double aStart, double aEnd) const;
 		gradient with_alpha(colour::component aAlpha) const;

@@ -60,3 +60,4 @@
 /build/win32/vs2015/neogfx.sdf
 /examples/test/build/win32/vs2015/test.VC.VC.opendb
 /examples/test/build/win32/vs2015/test.VC.db
+/tools/glsl2hpp.exe

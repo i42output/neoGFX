@@ -391,6 +391,27 @@ namespace neogfx
 		return iAlphaStops;
 	}
 
+	gradient::colour_stop_list gradient::combined_stops() const
+	{
+		colour_stop_list results;
+		results.reserve(colour_stops().size() + alpha_stops().size() + 2);
+		results.push_back(std::make_pair(0.0, at(0.0)));
+		for (const auto& colourStop : colour_stops())
+			results.push_back(std::make_pair(colourStop.first, at(colourStop.first)));
+		for (const auto& alphaStops : alpha_stops())
+			results.push_back(std::make_pair(alphaStops.first, at(alphaStops.first)));
+		results.push_back(std::make_pair(1.0, at(1.0)));
+		std::sort(results.begin(), results.end(), [](const colour_stop& aLeft, const colour_stop& aRight)
+		{
+			return aLeft.first < aRight.first;
+		});
+		results.erase(std::unique(results.begin(), results.end(), [](const colour_stop& aLeft, const colour_stop& aRight)
+		{
+			return aLeft.first == aRight.first;
+		}), results.end());
+		return results;
+	}
+
 	namespace
 	{
 		template <typename T>

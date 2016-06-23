@@ -26,6 +26,9 @@
 #include "opengl_window.hpp"
 #include "subpixel_rgb_horizontal.frag.glsl.hpp"
 
+#include "gradient.vert.hpp"
+#include "gradient.frag.hpp"
+
 namespace neogfx
 {
 	detail::screen_metrics::screen_metrics() :
@@ -106,6 +109,14 @@ namespace neogfx
 		return reinterpret_cast<void*>(v->second);
 	}
 
+	void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, float aValue)
+	{
+		glUniform1f(uniform_location(aName), aValue);
+		GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+			throw shader_program_error(errorCode);
+	}
+
 	void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, double aValue)
 	{
 		glUniform1d(uniform_location(aName), aValue);
@@ -125,6 +136,14 @@ namespace neogfx
 	void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, double aValue1, double aValue2)
 	{
 		glUniform2d(uniform_location(aName), aValue1, aValue2);
+		GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+			throw shader_program_error(errorCode);
+	}
+
+	void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, float aValue1, float aValue2)
+	{
+		glUniform2f(uniform_location(aName), aValue1, aValue2);
 		GLenum errorCode = glGetError();
 		if (errorCode != GL_NO_ERROR)
 			throw shader_program_error(errorCode);
@@ -178,13 +197,10 @@ namespace neogfx
 			shaders
 			{
 				std::make_pair(
-					std::string(
-						"#version 130\n"
-						"void main()\n"
-						"{\n"
-						"	/* todo */"
-						"	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n"
-						"}\n"),
+					glsl::NEOGFX_GRADIENT_VERT,
+					GL_VERTEX_SHADER),
+				std::make_pair(
+					glsl::NEOGFX_GRADIENT_FRAG,
 					GL_FRAGMENT_SHADER)
 			}, {});
 		switch (screen_metrics().subpixel_format())
@@ -192,7 +208,7 @@ namespace neogfx
 		case i_screen_metrics::SubpixelFormatRGBHorizontal:
 			iGlyphProgram = create_shader_program(
 				shaders
-			{
+				{
 				std::make_pair(
 					std::string(
 						"#version 130\n"

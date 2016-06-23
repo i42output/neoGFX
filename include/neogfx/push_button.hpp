@@ -37,7 +37,7 @@ namespace neogfx
 			ButtonStyleSpinBox,
 			ButtonStyleToolbar
 		};
-		static const uint32_t kMaxAnimationFrame = 20;
+		static const uint32_t kMaxAnimationFrame = 10;
 	public:
 		push_button(const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);
 		push_button(i_widget& aParent, const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);

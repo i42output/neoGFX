@@ -130,7 +130,7 @@ namespace neogfx
 	private:
 		void apply_scissor();
 		void apply_logical_operation();
-		void gradient_on(const gradient& aGradient);
+		void gradient_on(const gradient& aGradient, const rect& aBoundingBox);
 		void gradient_off();
 		vertex to_shader_vertex(const point& aPoint) const;
 		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, bool& aFallbackFontNeeded) const;
@@ -164,5 +164,8 @@ namespace neogfx
 		GLuint iActiveGlyphTexture;
 		bool iLineStippleActive;
 		boost::optional<std::pair<bool, char>> iMnemonic;
+		boost::optional<std::pair<GLuint, GLuint>> iGradientTextures;
+		std::vector<float> iGradientStopPositions;
+		std::vector<std::array<uint8_t, 4>> iGradientStopColours;
 	};
 }

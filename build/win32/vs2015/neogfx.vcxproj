@@ -53,7 +53,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>SFML_STATIC;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\neogfx;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include\neogfx;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -70,7 +70,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>SFML_STATIC;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\neogfx;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include\neogfx;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -230,6 +230,7 @@
     <ClInclude Include="..\..\..\include\neogfx\video_mode.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\window.hpp" />
+    <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\flow_layout.inl" />
@@ -237,6 +238,28 @@
     <None Include="..\..\..\include\neogfx\path.inl" />
     <None Include="..\..\..\include\neogfx\slider.inl" />
     <None Include="..\..\..\include\neogfx\spin_box.inl" />
+    <CustomBuild Include="..\..\..\src\gradient.frag">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)\tools\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp NEOGFX_GRADIENT_FRAG</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)\tools\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp NEOGFX_GRADIENT_FRAG</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">glsl2hpp %(Identity)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">glsl2hpp %(Identity)</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gradient.vert">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)\tools\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).vert.hpp NEOGFX_GRADIENT_VERT</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)\tools\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).vert.hpp NEOGFX_GRADIENT_VERT</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">glsl2hpp %(Identity)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">glsl2hpp %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\action.cpp" />
