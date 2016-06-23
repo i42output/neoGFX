@@ -523,9 +523,9 @@ int main(int argc, char* argv[])
 					{{0.0, ng::colour::Black}, {0.33, ng::colour::Yellow}, { 0.66, ng::colour::Red}, {1.0, ng::colour::White}}, ng::gradient::Horizontal });
 			aGc.draw_rounded_rect(ng::rect{ 300, 400, 200, 100 }, 10.0, ng::pen{ ng::colour::Blue4, 2.0 });
 			aGc.draw_rounded_rect(ng::rect{ 150, 150, 300, 300 }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
-			aGc.fill_rounded_rect(ng::rect{ 500, 500, 200, 100 }, 10.0, 
+			aGc.fill_rounded_rect(ng::rect{ 500, 500, 200, 200 }, 10.0, 
 				ng::gradient{ { { 0.0, ng::colour::Black },{ 0.33, ng::colour::Yellow },{ 0.66, ng::colour::Red },{ 1.0, ng::colour::White } }, ng::gradient::Radial });
-			aGc.draw_rounded_rect(ng::rect{ 500, 500, 200, 100 }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
+			aGc.draw_rounded_rect(ng::rect{ 500, 500, 200, 200 }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
 			aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
 			aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
 			aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::colour::Yellow, 3.0 });

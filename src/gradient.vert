@@ -17,11 +17,11 @@ void main()
 	{
 		float height = posBottomRight.y - posTopLeft.y;
 		float width = posBottomRight.x - posTopLeft.x;
-		float r = (height > width ? height : width) / 2.0;
+		float M = sqrt(height * height / 4.0 + width * width / 4.0);
 		float dy = gl_Vertex.y - (posTopLeft.y + height / 2.0);
 		float dx = gl_Vertex.x - (posTopLeft.x + width / 2.0);
-		float r2 = sqrt(dy * dy + dx * dx);
-		vGradientPos = r2 / r;
+		float r = sqrt(dy * dy + dx * dx);
+		vGradientPos = r / M;
 	}
 	Color = vec4(0.0, 0.0, 0.0, 0.0);
 }
