@@ -106,7 +106,8 @@ namespace neogfx
 		virtual i_shader_program& glyph_shader_program();
 		virtual const i_shader_program& gradient_shader_program() const;
 		virtual i_shader_program& gradient_shader_program();
-
+	public:
+		virtual bool process_events();
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:

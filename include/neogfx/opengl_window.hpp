@@ -63,12 +63,11 @@ namespace neogfx
 		virtual dimension vertical_dpi() const;
 		virtual dimension em_size() const;
 	protected:
-		i_native_window_event_handler& event_handler() const;
+		virtual i_native_window_event_handler& event_handler() const;
 		virtual void destroying();
 		virtual void destroyed();
 	private:
 		virtual void display() = 0;
-		virtual bool processing_event() const = 0;
 	private:
 		i_native_window_event_handler& iEventHandler;
 		size iPixelDensityDpi;

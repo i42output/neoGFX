@@ -405,6 +405,7 @@ namespace neogfx
 		bool contains_y(const point_type& point) const { return point.y >= top() && point.y < bottom(); }
 		bool contains(const basic_rect& other) const { return other.left() >= left() && other.top() >= top() && other.right() <= right() && other.bottom() <= bottom(); }
 		point_type centre() const { return point_type(left() + static_cast<CoordinateType>(width() / 2), top() + static_cast<CoordinateType>(height() / 2)); }
+		basic_rect& move(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
 		basic_rect& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * static_cast<CoordinateType>(2); cy += delta.dy * static_cast<CoordinateType>(2); return *this; }
 		basic_rect& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
 		basic_rect& inflate(CoordinateType dx, CoordinateType dy) { return inflate(delta_type(dx, dy)); }

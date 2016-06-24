@@ -24,6 +24,7 @@
 #include <neogfx/spin_box.hpp>
 #include <neogfx/slider.hpp>
 #include <neogfx/colour_dialog.hpp>
+#include <neogfx/gradient_widget.hpp>
 
 namespace ng = neogfx;
 
@@ -356,6 +357,7 @@ int main(int argc, char* argv[])
 		{
 			lineEditPassword.set_password(false);
 		});
+		ng::gradient_widget gw(layoutRadiosAndChecks);
 		ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
 		ng::vertical_layout layout4(layout2);
 		ng::push_button button9(layout4, "Default/Slate\nStyle");

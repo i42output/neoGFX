@@ -29,6 +29,8 @@
 #include "gradient.vert.hpp"
 #include "gradient.frag.hpp"
 
+#include "app.hpp"
+
 namespace neogfx
 {
 	detail::screen_metrics::screen_metrics() :
@@ -360,6 +362,32 @@ namespace neogfx
 	opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program()
 	{
 		return *iGlyphProgram;
+	}
+
+	bool opengl_renderer::process_events()
+	{
+		bool didSome = false;
+		auto lastRenderTime = neolib::thread::program_elapsed_ms();
+		bool finished = false;
+		while (!finished)
+		{	
+			finished = true;
+			for (std::size_t s = 0; s < app::instance().surface_manager().surface_count(); ++s)
+			{
+				auto& surface = app::instance().surface_manager().surface(s);
+				if (surface.native_surface().pump_event())
+				{
+					didSome = true;
+					finished = false;
+				}
+			}
+			if (neolib::thread::program_elapsed_ms() - lastRenderTime > 10)
+			{
+				lastRenderTime = neolib::thread::program_elapsed_ms();
+				render_now();
+			}
+		}
+		return didSome;
 	}
 
 	opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)

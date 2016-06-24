@@ -29,6 +29,7 @@
 #ifdef WIN32
 extern "C" BOOL WIN_ConvertUTF32toUTF8(UINT32 codepoint, char * text);
 extern "C" int SDL_SendKeyboardText(const char *text);
+extern "C" void SDL_ResetMouse(void);
 #endif
 
 namespace neogfx
@@ -109,7 +110,6 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iContext(0),
-		iProcessingEvent(false),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -147,7 +147,6 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iContext(0),
-		iProcessingEvent(false),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -185,7 +184,6 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iContext(0),
-		iProcessingEvent(false),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -223,7 +221,6 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iContext(0),
-		iProcessingEvent(false),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -261,7 +258,6 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iContext(0),
-		iProcessingEvent(false),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -299,7 +295,6 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iContext(0),
-		iProcessingEvent(false),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -592,7 +587,7 @@ namespace neogfx
 		else if (context_activation_stack().back() != this)
 			context_activation_stack().back()->do_activate_context();
 	}
-
+	
 #ifdef WIN32
 	LRESULT CALLBACK sdl_window::CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
@@ -609,10 +604,7 @@ namespace neogfx
 				if (WIN_ConvertUTF32toUTF8((UINT32)wparam, &buffer[0]))
 				{
 					std::string text = buffer.c_str();
-					if (!app::instance().keyboard().grabber().sys_text_input(text))
-					{
-						mapEntry->second->event_handler().native_window_sys_text_input(text);
-					}
+					mapEntry->second->push_event(native_keyboard_event(native_keyboard_event::TextInput, text));
 				}
 			}
 			break;
@@ -624,7 +616,7 @@ namespace neogfx
 		case WM_RBUTTONDBLCLK:
 		case WM_MBUTTONDBLCLK:
 		case WM_XBUTTONDBLCLK:
-		{
+			{
 				key_modifiers_e modifiers = KeyModifier_NONE;
 				if (wparam & MK_SHIFT)
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
@@ -692,79 +684,84 @@ namespace neogfx
 
 	void sdl_window::process_event(const SDL_Event& aEvent)
 	{
-		iProcessingEvent = true;
 		switch (aEvent.type)
 		{
 		case SDL_WINDOWEVENT:
 			switch (aEvent.window.event)
 			{
 			case SDL_WINDOWEVENT_CLOSE:
-				close();
+				push_event(native_window_event(native_window_event::Close));
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
 				iExtents = basic_size<decltype(aEvent.window.data1)>{ aEvent.window.data1, aEvent.window.data2 };
-				event_handler().native_window_resized();
+				push_event(native_window_event(native_window_event::Resized, iExtents));
 				break;
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
 				iExtents = basic_size<decltype(aEvent.window.data1)>{ aEvent.window.data1, aEvent.window.data2 };
-				event_handler().native_window_resized();
+				push_event(native_window_event(native_window_event::SizeChanged, iExtents));
 				break;
 			case SDL_WINDOWEVENT_ENTER:
-				event_handler().native_window_mouse_entered();
+				push_event(native_window_event(native_window_event::Enter));
 				break;
 			case SDL_WINDOWEVENT_LEAVE:
-				event_handler().native_window_mouse_left();
+				push_event(native_window_event(native_window_event::Leave));
 				break;
 			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				event_handler().native_window_focus_gained();
+				push_event(native_window_event(native_window_event::FocusGained));
 				break;
 			case SDL_WINDOWEVENT_FOCUS_LOST:
-				event_handler().native_window_focus_lost();
+				SDL_ResetMouse();
+				push_event(native_window_event(native_window_event::FocusLost));
 				break;
 			}
 			break;
 		case SDL_MOUSEWHEEL:
-			event_handler().native_window_mouse_wheel_scrolled(
-				static_cast<mouse_wheel>(
-					(aEvent.wheel.y != 0 ? mouse_wheel::Vertical : mouse_wheel::None) | (aEvent.wheel.x != 0 ? mouse_wheel::Horizontal : mouse_wheel::None)),
-				delta(static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y)));
+			push_event(
+				native_mouse_event(
+					native_mouse_event::WheelScrolled,
+					static_cast<mouse_wheel>(
+						(aEvent.wheel.y != 0 ? mouse_wheel::Vertical : mouse_wheel::None) | (aEvent.wheel.x != 0 ? mouse_wheel::Horizontal : mouse_wheel::None)),
+					delta(static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y))));
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			if (aEvent.button.clicks == 1)
-				event_handler().native_window_mouse_button_pressed(
-					convert_mouse_button(aEvent.button.button),
-					point{static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y)},
-					iMouseButtonEventExtraInfo.front());
-				
+				push_event(
+					native_mouse_event(
+						native_mouse_event::ButtonPressed,
+						convert_mouse_button(aEvent.button.button),
+						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+						iMouseButtonEventExtraInfo.front()));
+
 			else
-				event_handler().native_window_mouse_button_double_clicked(
-					convert_mouse_button(aEvent.button.button), 
-					point{static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y)},
-					iMouseButtonEventExtraInfo.front());
+				push_event(
+					native_mouse_event(
+						native_mouse_event::ButtonDoubleClicked,
+						convert_mouse_button(aEvent.button.button),
+						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+						iMouseButtonEventExtraInfo.front()));
 			iMouseButtonEventExtraInfo.pop_front();
 			break;
 		case SDL_MOUSEBUTTONUP:
-			event_handler().native_window_mouse_button_released(convert_mouse_button(aEvent.button.button), point(static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y)));
+			push_event(native_mouse_event(native_mouse_event::ButtonReleased, convert_mouse_button(aEvent.button.button), point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) }));
 			break;
 		case SDL_MOUSEMOTION:
-			event_handler().native_window_mouse_moved(point(static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y)));
+			push_event(native_mouse_event(native_mouse_event::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
 			break;
 		case SDL_KEYDOWN:
-			event_handler().native_window_key_pressed(static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod));
+			push_event(native_keyboard_event(native_keyboard_event::KeyPressed, static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod)));
 			break;
 		case SDL_KEYUP:
-			event_handler().native_window_key_released(static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod));
+			push_event(native_keyboard_event(native_keyboard_event::KeyReleased, static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod)));
 			break;
 		case SDL_TEXTEDITING:
 			/* todo */
 			break;
 		case SDL_TEXTINPUT:
-			event_handler().native_window_text_input(aEvent.text.text);
+			push_event(native_keyboard_event(native_keyboard_event::TextInput, std::string(aEvent.text.text)));
 			break;
 		default:
 			break;
 		}
-		iProcessingEvent = false;
 	}
 
 	void sdl_window::destroying()
@@ -822,10 +819,5 @@ namespace neogfx
 	void sdl_window::display()
 	{
 		SDL_GL_SwapWindow(iHandle);
-	}
-
-	bool sdl_window::processing_event() const
-	{
-		return iProcessingEvent;
 	}
 }

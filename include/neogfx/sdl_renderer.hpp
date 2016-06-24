@@ -49,6 +49,8 @@ namespace neogfx
 	public:
 		virtual bool process_events();
 	private:
+		bool queue_events();
+	private:
 		i_basic_services& iBasicServices;
 		i_keyboard& iKeyboard;
 		std::map<i_native_surface*, void*> iContexts;

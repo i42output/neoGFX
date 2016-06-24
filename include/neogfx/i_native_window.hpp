@@ -22,6 +22,8 @@
 #include "neogfx.hpp"
 #include "geometry.hpp"
 #include "i_native_surface.hpp"
+#include "i_native_window_event_handler.hpp"
+#include "native_window_events.hpp"
 
 namespace neogfx
 {
@@ -30,9 +32,14 @@ namespace neogfx
 	class i_native_window : public i_native_surface, public i_device_metrics
 	{
 	public:
+		typedef neolib::variant<native_window_event, native_mouse_event, native_keyboard_event> native_event;
+	public:
 		virtual ~i_native_window() {}
 	public:
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
+		virtual void push_event(const native_event& aEvent) = 0;
+		virtual bool pump_event() = 0;
+		virtual i_native_window_event_handler& event_handler() const = 0;
 		virtual void close() = 0;
 		virtual void show(bool aActivate = false) = 0;
 		virtual void hide() = 0;

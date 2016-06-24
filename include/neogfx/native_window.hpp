@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <neolib/variant.hpp>
 #include "i_native_window.hpp"
 
 namespace neogfx
@@ -29,16 +30,22 @@ namespace neogfx
 
 	class native_window : public i_native_window
 	{
+		typedef std::deque<native_event> event_queue;
 	public:
 		native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager);
 		virtual ~native_window();
 	public:
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const;
+		virtual void push_event(const native_event& aEvent);
+		virtual bool pump_event();
+		virtual bool processing_event() const;
 	public:
 		i_rendering_engine& rendering_engine() const;
 		i_surface_manager& surface_manager() const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		i_surface_manager& iSurfaceManager;
+		event_queue iEventQueue;
+		bool iProcessingEvent;
 	};
 }

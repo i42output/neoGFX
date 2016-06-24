@@ -25,31 +25,31 @@
 namespace neogfx
 {
 	template <typename T>
-	basic_spin_box<T>::basic_spin_box() :
+	inline basic_spin_box<T>::basic_spin_box() :
 		spin_box_impl(), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{"%1%"}, iSettingNormalizedValue{ false }
 	{
 	}
 
 	template <typename T>
-	basic_spin_box<T>::basic_spin_box(i_widget& aParent) :
+	inline basic_spin_box<T>::basic_spin_box(i_widget& aParent) :
 		spin_box_impl(aParent), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{ "%1%" }, iSettingNormalizedValue{ false }
 	{
 	}
 
 	template <typename T>
-	basic_spin_box<T>::basic_spin_box(i_layout& aLayout) :
+	inline basic_spin_box<T>::basic_spin_box(i_layout& aLayout) :
 		spin_box_impl(aLayout), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iFormat{ "%1%" }, iSettingNormalizedValue{ false }
 	{
 	}
 
 	template <typename T>
-	typename basic_spin_box<T>::value_type basic_spin_box<T>::minimum() const
+	inline typename basic_spin_box<T>::value_type basic_spin_box<T>::minimum() const
 	{
 		return iMinimum;
 	}
 
 	template <typename T>
-	void basic_spin_box<T>::set_minimum(value_type aMinimum)
+	inline void basic_spin_box<T>::set_minimum(value_type aMinimum)
 	{
 		iMinimum = aMinimum;
 		if (text_box().text().empty())
@@ -60,13 +60,13 @@ namespace neogfx
 	}
 
 	template <typename T>
-	typename basic_spin_box<T>::value_type basic_spin_box<T>::maximum() const
+	inline typename basic_spin_box<T>::value_type basic_spin_box<T>::maximum() const
 	{
 		return iMaximum;
 	}
 
 	template <typename T>
-	void basic_spin_box<T>::set_maximum(value_type aMaximum)
+	inline void basic_spin_box<T>::set_maximum(value_type aMaximum)
 	{
 		iMaximum = aMaximum;
 		constraints_changed.trigger();
@@ -75,26 +75,26 @@ namespace neogfx
 	}
 
 	template <typename T>
-	typename basic_spin_box<T>::value_type basic_spin_box<T>::step() const
+	inline typename basic_spin_box<T>::value_type basic_spin_box<T>::step() const
 	{
 		return iStep;
 	}
 
 	template <typename T>
-	void basic_spin_box<T>::set_step(value_type aStep)
+	inline void basic_spin_box<T>::set_step(value_type aStep)
 	{
 		iStep = aStep;
 		constraints_changed.trigger();
 	}
 
 	template <typename T>
-	typename basic_spin_box<T>::value_type basic_spin_box<T>::value() const
+	inline typename basic_spin_box<T>::value_type basic_spin_box<T>::value() const
 	{
 		return iValue;
 	}
 
 	template <typename T>
-	void basic_spin_box<T>::set_value(value_type aValue)
+	inline void basic_spin_box<T>::set_value(value_type aValue)
 	{
 		if (iValue != aValue)
 		{
@@ -106,20 +106,20 @@ namespace neogfx
 	}
 
 	template <typename T>
-	const std::string& basic_spin_box<T>::format() const
+	inline const std::string& basic_spin_box<T>::format() const
 	{
 		return iForamt;
 	}
 
 	template <typename T>
-	void basic_spin_box<T>::set_format(const std::string& aFormat)
+	inline void basic_spin_box<T>::set_format(const std::string& aFormat)
 	{
 		iFormat = aFormat;
 		update();
 	}
 
 	template <typename T>
-	double basic_spin_box<T>::normalized_step_value() const
+	inline double basic_spin_box<T>::normalized_step_value() const
 	{
 		auto range = maximum() - minimum();
 		if (range == 0)
@@ -128,7 +128,7 @@ namespace neogfx
 	}
 
 	template <typename T>
-	double basic_spin_box<T>::normalized_value() const
+	inline double basic_spin_box<T>::normalized_value() const
 	{
 		auto range = maximum() - minimum();
 		if (range == 0)
@@ -137,7 +137,7 @@ namespace neogfx
 	}
 
 	template <typename T>
-	void basic_spin_box<T>::set_normalized_value(double aValue, bool aUpdateTextBox = false)
+	inline void basic_spin_box<T>::set_normalized_value(double aValue, bool aUpdateTextBox = false)
 	{
 		aValue = std::max(0.0, std::min(1.0, aValue));
 		iSettingNormalizedValue = true;
@@ -156,7 +156,7 @@ namespace neogfx
 	}
 
 	template <typename T>
-	boost::optional<double> basic_spin_box<T>::string_to_normalized_value(const std::string& aText) const
+	inline boost::optional<double> basic_spin_box<T>::string_to_normalized_value(const std::string& aText) const
 	{
 		if (aText.empty())
 			return 0.0;
@@ -174,7 +174,7 @@ namespace neogfx
 	}
 
 	template <typename T>
-	std::string basic_spin_box<T>::normalized_value_to_string(double aNormalizedValue) const
+	inline std::string basic_spin_box<T>::normalized_value_to_string(double aNormalizedValue) const
 	{
 		auto range = maximum() - minimum();
 		std::ostringstream oss;
@@ -183,7 +183,7 @@ namespace neogfx
 	}
 
 	template <typename T>
-	std::string basic_spin_box<T>::value_to_string() const
+	inline std::string basic_spin_box<T>::value_to_string() const
 	{
 		return boost::str(boost::format(iFormat) % value());
 	}

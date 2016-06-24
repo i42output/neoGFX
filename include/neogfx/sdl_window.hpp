@@ -114,7 +114,6 @@ namespace neogfx
 #endif
 	private:
 		virtual void display();
-		virtual bool processing_event() const;
 	private:
 		sdl_window* iParent;
 		uint32_t iStyle;
@@ -125,7 +124,6 @@ namespace neogfx
 #endif
 		SDL_GLContext iContext;
 		size iExtents;
-		bool iProcessingEvent;
 		bool iCapturingMouse;
 		cursor_pointer iCurrentCursor;
 		std::vector<cursor_pointer> iSavedCursors;

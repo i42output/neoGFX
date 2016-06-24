@@ -485,6 +485,11 @@ namespace neogfx
 		return iDirection; 
 	}
 
+	void gradient::set_direction(direction_e aDirection)
+	{
+		iDirection = aDirection;
+	}
+
 	bool gradient::operator==(const gradient& aOther) const
 	{
 		return iColourStops == aOther.iColourStops && iAlphaStops == aOther.iAlphaStops && iDirection == aOther.iDirection;

@@ -40,6 +40,7 @@ namespace neogfx
 	public:
 		virtual ~i_native_surface() {}
 	public:
+		virtual bool pump_event() = 0;
 		virtual void close() = 0;
 	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;

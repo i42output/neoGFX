@@ -106,6 +106,7 @@
     <ClInclude Include="..\..\..\include\neogfx\menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\menu_item_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\native_window_events.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\popup_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\sdl_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\button.hpp" />
@@ -270,6 +271,7 @@
     <ClCompile Include="..\..\..\src\dialog.cpp" />
     <ClCompile Include="..\..\..\src\dialog_button_box.cpp" />
     <ClCompile Include="..\..\..\src\flow_layout.cpp" />
+    <ClCompile Include="..\..\..\src\gradient_widget.cpp" />
     <ClCompile Include="..\..\..\src\hsv_colour.cpp" />
     <ClCompile Include="..\..\..\src\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\layout_item.cpp" />

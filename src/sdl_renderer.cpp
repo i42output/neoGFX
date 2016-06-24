@@ -114,12 +114,19 @@ namespace neogfx
 
 	bool sdl_renderer::process_events()
 	{
-		bool handledEvents = false;
+		if (queue_events())
+			return opengl_renderer::process_events();
+		else
+			return false;
+	}
+
+	bool sdl_renderer::queue_events()
+	{
+		bool queuedEvents = false;
 		SDL_Event event;
-		auto lastRenderTime = neolib::thread::program_elapsed_ms();
 		while (SDL_PollEvent(&event))
 		{
-			handledEvents = true;
+			queuedEvents = true;
 			switch (event.type)
 			{
 			case SDL_WINDOWEVENT:
@@ -159,36 +166,16 @@ namespace neogfx
 				break;
 			case SDL_KEYDOWN:
 				{
-					if (!iKeyboard.grabber().key_pressed(
-						static_cast<scan_code_e>(event.key.keysym.scancode),
-						static_cast<key_code_e>(event.key.keysym.sym),
-						static_cast<key_modifiers_e>(event.key.keysym.mod)))
-					{
-						iKeyboard.key_pressed.trigger(
-							static_cast<scan_code_e>(event.key.keysym.scancode),
-							static_cast<key_code_e>(event.key.keysym.sym),
-							static_cast<key_modifiers_e>(event.key.keysym.mod));
-						SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
-						if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-							static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
-					}
+					SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_KEYUP:
 				{
-					if (!iKeyboard.grabber().key_released(
-						static_cast<scan_code_e>(event.key.keysym.scancode),
-						static_cast<key_code_e>(event.key.keysym.sym),
-						static_cast<key_modifiers_e>(event.key.keysym.mod)))
-					{
-						iKeyboard.key_released.trigger(
-							static_cast<scan_code_e>(event.key.keysym.scancode),
-							static_cast<key_code_e>(event.key.keysym.sym),
-							static_cast<key_modifiers_e>(event.key.keysym.mod));
-						SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
-						if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-							static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
-					}
+					SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_TEXTEDITING:
@@ -200,23 +187,15 @@ namespace neogfx
 				break;
 			case SDL_TEXTINPUT:
 				{
-					if (!iKeyboard.grabber().text_input(event.text.text))
-					{
-						SDL_Window* window = SDL_GetWindowFromID(event.text.windowID);
-						if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-							static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
-					}
+					SDL_Window* window = SDL_GetWindowFromID(event.text.windowID);
+					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
+						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			default:
 				break;
 			}
-			if (neolib::thread::program_elapsed_ms() - lastRenderTime > 10)
-			{
-				lastRenderTime = neolib::thread::program_elapsed_ms();
-				render_now();
-			}
 		}
-		return handledEvents;
+		return queuedEvents;
 	}
 }
