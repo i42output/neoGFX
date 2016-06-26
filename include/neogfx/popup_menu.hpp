@@ -29,8 +29,10 @@ namespace neogfx
 	class popup_menu : public window
 	{
 	public:
-		popup_menu(const point& aPosition, i_menu& aMenu);
-		popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu);
+		static const style_e DEFAULT_STYLE = None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick | InitiallyHidden;
+	public:
+		popup_menu(const point& aPosition, i_menu& aMenu, style_e aStyle = DEFAULT_STYLE);
+		popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, style_e aStyle = DEFAULT_STYLE);
 		~popup_menu();
 	public:
 		virtual void resized();

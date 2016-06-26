@@ -109,9 +109,10 @@ namespace neogfx
 		return insert_sub_menu(item_count(), aSubMenuTitle);
 	}
 
-	void menu::add_action(i_action& aAction)
+	i_action& menu::add_action(i_action& aAction)
 	{
 		insert_action(item_count(), aAction);
+		return aAction;
 	}
 
 	void menu::add_separator()

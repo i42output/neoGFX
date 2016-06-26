@@ -309,7 +309,7 @@ namespace neogfx
 			i_menu* menuToClose = &iMenu;
 			while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
 				menuToClose = &menuToClose->parent();
-			if (menuToClose->type() == i_menu::Popup)
+			if (menuToClose->type() == i_menu::Popup && menuToClose->is_open())
 				menuToClose->close();
 		}
 		else

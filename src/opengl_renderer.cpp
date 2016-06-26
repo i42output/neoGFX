@@ -375,7 +375,7 @@ namespace neogfx
 			for (std::size_t s = 0; s < app::instance().surface_manager().surface_count(); ++s)
 			{
 				auto& surface = app::instance().surface_manager().surface(s);
-				if (surface.native_surface().pump_event())
+				if (!surface.destroyed() && surface.native_surface().pump_event())
 				{
 					didSome = true;
 					finished = false;

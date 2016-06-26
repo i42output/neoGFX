@@ -47,7 +47,8 @@ namespace neogfx
 			NoActivate			= 0x0200,
 			RequiresOwnerFocus	= 0x0400,
 			DismissOnOwnerClick = 0x0800,
-			InitiallyHidden		= 0x1000,
+			DismissOnParentClick= 0x1000,
+			InitiallyHidden		= 0x2000,
 			Weak				= 0x8000,
 			Default				= Titlebar | MinimizeBox | MaximizeBox | Resize | Close
 		};
@@ -67,6 +68,7 @@ namespace neogfx
 		~window();
 	public:
 		uint32_t style() const;
+		void set_style(uint32_t aStyle);
 	public:
 		virtual bool is_root() const;
 		virtual bool can_defer_layout() const;

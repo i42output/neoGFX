@@ -385,11 +385,11 @@ namespace neogfx
 		glyph_paragraphs iGlyphParagraphs;
 		glyph_lines iGlyphLines;
 		size iTextExtents;
-		neolib::callback_timer iAnimator;
 		uint64_t iCursorAnimationStartTime;
 		mutable const glyph_paragraph* iGlyphParagraphCache;
-		boost::optional<neolib::callback_timer> iDragger;
 		std::string iHint;
 		mutable boost::optional<std::pair<neogfx::font, size>> iHintedSize;
+		neolib::callback_timer iAnimator;
+		boost::optional<neolib::callback_timer> iDragger;
 	};
 }

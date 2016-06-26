@@ -238,6 +238,11 @@ namespace neogfx
 		return iStyle;
 	}
 
+	void window::set_style(uint32_t aStyle)
+	{
+		iStyle = static_cast<style_e>(aStyle);
+	}
+
 	bool window::is_root() const
 	{
 		return true;
@@ -340,7 +345,9 @@ namespace neogfx
 			native_surface().close();
 		}
 		else
-			iNativeWindow.reset();
+		{
+			auto ptr = std::move(iNativeWindow);
+		}
 		iClosed = true;
 		closed.trigger();
 	}
@@ -665,10 +672,17 @@ namespace neogfx
 			iNativeWindowClosing = true;
 			update_modality();
 		}
-		iNativeWindow.reset();
+		{
+			auto ptr = std::move(iNativeWindow);
+		}
 		app::instance().surface_manager().remove_surface(*this);
 		if (has_parent() && !(static_cast<window&>(parent()).style() & window::NoActivate))
 			static_cast<window&>(parent()).activate();
+		if (!iClosed)
+		{
+			iClosed = true;
+			closed.trigger();
+		}
 	}
 
 	void window::native_window_focus_gained()

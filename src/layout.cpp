@@ -255,19 +255,37 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
-	void layout::remove_item(std::size_t aIndex)
+	void layout::remove_item(item_index aIndex)
 	{
 		remove_item(std::next(iItems.begin(), aIndex));
 	}
 
-	void layout::remove_item(i_layout& aItem)
+	bool layout::remove_item(i_layout& aItem)
 	{
 		for (auto i = items().begin(); i != items().end(); ++i)
 			if (i->get().is<item::layout_pointer>() && &aItem == &*static_variant_cast<item::layout_pointer&>(i->get()))
 			{
 				remove_item(i);
-				break;
+				return true;
 			}
+		return false;
+	}
+
+	bool layout::remove_item(i_widget& aItem)
+	{
+		for (auto i = items().begin(); i != items().end(); ++i)
+			if (i->get().is<item::widget_pointer>() && &aItem == &*static_variant_cast<item::widget_pointer&>(i->get()))
+			{
+				remove_item(i);
+				return true;
+			}
+		for (auto i = items().begin(); i != items().end(); ++i)
+			if (i->get().is<item::layout_pointer>())
+			{
+				if (static_variant_cast<item::layout_pointer&>(i->get())->remove_item(aItem))
+					return true;
+			}
+		return false;
 	}
 
 	void layout::remove_items()
@@ -278,12 +296,44 @@ namespace neogfx
 			iOwner->ultimate_ancestor().layout_items(true);
 	}
 
-	std::size_t layout::item_count() const
+	layout::item_index layout::item_count() const
 	{
 		return iItems.size();
 	}
 
-	bool layout::is_widget(std::size_t aIndex) const
+	layout::optional_item_index layout::find_item(i_layout& aItem) const
+	{
+		for (auto i = iItems.begin(); i != iItems.end(); ++i)
+		{
+			const auto& item = *i;
+			if (item.get().is<item::layout_pointer>() && &*static_variant_cast<item::layout_pointer>(item.get()) == &aItem)
+				return std::distance(iItems.begin(), i);
+		}
+		return optional_item_index();
+	}
+
+	layout::optional_item_index layout::find_item(i_widget& aItem) const
+	{
+		for (auto i = iItems.begin(); i != iItems.end(); ++i)
+		{
+			const auto& item = *i;
+			if (item.get().is<item::widget_pointer>() && &*static_variant_cast<item::widget_pointer>(item.get()) == &aItem)
+				return std::distance(iItems.begin(), i);
+		}
+		return optional_item_index();
+	}
+
+	layout::optional_item_index layout::find_item(const layout_item& aItem) const
+	{
+		for (auto i = iItems.begin(); i != iItems.end(); ++i)
+		{
+			if (aItem == *i)
+				return std::distance(iItems.begin(), i);
+		}
+		return optional_item_index();
+	}
+
+	bool layout::is_widget(item_index aIndex) const
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
@@ -291,7 +341,7 @@ namespace neogfx
 		return item->get().is<item::widget_pointer>();
 	}
 
-	i_geometry& layout::get_item(std::size_t aIndex)
+	i_geometry& layout::get_item(item_index aIndex)
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
@@ -304,7 +354,7 @@ namespace neogfx
 			throw wrong_item_type();
 	}
 
-	i_widget& layout::get_widget(std::size_t aIndex)
+	i_widget& layout::get_widget(item_index aIndex)
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
@@ -315,7 +365,7 @@ namespace neogfx
 			throw wrong_item_type();
 	}
 
-	i_layout& layout::get_layout(std::size_t aIndex)
+	i_layout& layout::get_layout(item_index aIndex)
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();

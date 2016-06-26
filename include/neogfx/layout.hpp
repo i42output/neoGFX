@@ -88,15 +88,19 @@ namespace neogfx
 		virtual void add_item(std::shared_ptr<i_spacer> aSpacer);
 		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer);
 		virtual void add_item(const item& aItem);
-		virtual void remove_item(std::size_t aIndex);
-		virtual void remove_item(i_layout& aItem);
+		virtual void remove_item(item_index aIndex);
+		virtual bool remove_item(i_layout& aItem);
+		virtual bool remove_item(i_widget& aItem);
 		virtual void remove_items();
-		virtual std::size_t item_count() const;
-		virtual bool is_widget(std::size_t aIndex) const;
-		virtual i_geometry& get_item(std::size_t aIndex);
+		virtual item_index item_count() const;
+		virtual optional_item_index find_item(i_layout& aItem) const;
+		virtual optional_item_index find_item(i_widget& aItem) const;
+		virtual optional_item_index find_item(const layout_item& aItem) const;
+		virtual bool is_widget(item_index aIndex) const;
+		virtual i_geometry& get_item(item_index aIndex);
 		using i_layout::get_widget;
-		virtual i_widget& get_widget(std::size_t aIndex);
-		virtual i_layout& get_layout(std::size_t aIndex);
+		virtual i_widget& get_widget(item_index aIndex);
+		virtual i_layout& get_layout(item_index aIndex);
 	public:
 		virtual bool has_margins() const;
 		virtual neogfx::margins margins() const;

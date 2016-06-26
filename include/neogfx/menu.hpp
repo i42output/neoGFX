@@ -50,7 +50,7 @@ namespace neogfx
 		virtual const i_menu_item& item(item_index aItemIndex) const;
 		virtual i_menu_item& item(item_index aItemIndex);
 		virtual i_menu& add_sub_menu(const std::string& aSubMenuTitle);
-		virtual void add_action(i_action& aAction);
+		virtual i_action& add_action(i_action& aAction);
 		virtual void add_separator();
 		virtual i_menu& insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuText);
 		virtual void insert_action(item_index aItemIndex, i_action& aAction);

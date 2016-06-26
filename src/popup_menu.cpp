@@ -25,14 +25,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu) :
-		window(aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick | InitiallyHidden, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
+	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu, style_e aStyle) :
+		window(aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
 
-	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu) :
-		window(aParent, aPosition, size{}, None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick | InitiallyHidden, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
+	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, style_e aStyle) :
+		window(aParent, aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
@@ -53,7 +53,10 @@ namespace neogfx
 
 	bool popup_menu::can_dismiss(const i_widget* aClickedWidget) const
 	{
-		return aClickedWidget == 0 || iParentWidget == 0 || (iParentWidget != aClickedWidget && !iParentWidget->is_ancestor_of(*aClickedWidget));
+		return aClickedWidget == 0 || 
+			iParentWidget == 0 || 
+			(iParentWidget == aClickedWidget && (style() & DismissOnParentClick)) || 
+			(iParentWidget != aClickedWidget && !iParentWidget->is_ancestor_of(*aClickedWidget));
 	}
 
 	void popup_menu::resized()
@@ -221,6 +224,11 @@ namespace neogfx
 	void popup_menu::init()
 	{
 		iLayout.set_margins(neogfx::margins{});
+		closed([this]()
+		{
+			if (iMenu.is_open())
+				iMenu.close();
+		});
 		for (i_menu::item_index i = 0; i < iMenu.item_count(); ++i)
 			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(i)));
 		layout_items();

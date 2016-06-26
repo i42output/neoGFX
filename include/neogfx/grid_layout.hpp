@@ -65,7 +65,9 @@ namespace neogfx
 		virtual i_spacer& add_spacer();
 		virtual i_spacer& add_spacer(uint32_t aPosition);
 		virtual i_spacer& add_spacer(cell_coordinate aRow, cell_coordinate aColumn);
-		virtual void remove_item(std::size_t aIndex);
+		virtual void remove_item(item_index aIndex);
+		virtual bool remove_item(i_layout& aItem);
+		virtual bool remove_item(i_widget& aItem);
 		virtual void remove_item(cell_coordinate aRow, cell_coordinate aColumn);
 		virtual void remove_items();
 		using layout::get_widget;

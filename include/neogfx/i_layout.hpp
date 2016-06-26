@@ -34,12 +34,16 @@ namespace neogfx
 	{
 	public:
 		event<> alignment_changed;
+	public:
+		typedef std::size_t item_index;
+		typedef boost::optional<item_index> optional_item_index;
 	protected:
 		class item;
 	public:
 		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_layout::bad_item_index") {} };
 		struct no_widget : std::logic_error { no_widget() : std::logic_error("neogfx::i_layout::no_widget") {} };
 		struct wrong_item_type : std::logic_error { wrong_item_type() : std::logic_error("neogfx::i_layout::wrong_item_type") {} };
+		struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_layout::item_not_found") {} };
 	public:
 		virtual ~i_layout() {}
 	public:	
@@ -62,14 +66,18 @@ namespace neogfx
 		virtual void add_item(const	layout_item& aItem) = 0;
 		virtual i_spacer& add_spacer() = 0;
 		virtual i_spacer& add_spacer(uint32_t aPosition) = 0;
-		virtual void remove_item(std::size_t aIndex) = 0;
-		virtual void remove_item(i_layout& aItem) = 0;
+		virtual void remove_item(item_index aIndex) = 0;
+		virtual bool remove_item(i_layout& aItem) = 0;
+		virtual bool remove_item(i_widget& aItem) = 0;
 		virtual void remove_items() = 0;
-		virtual std::size_t item_count() const = 0;
+		virtual item_index item_count() const = 0;
+		virtual optional_item_index find_item(i_layout& aItem) const = 0;
+		virtual optional_item_index find_item(i_widget& aItem) const = 0;
+		virtual optional_item_index find_item(const layout_item& aItem) const = 0;
 		virtual bool is_widget(std::size_t aIndex) const = 0;
-		virtual i_geometry& get_item(std::size_t aIndex) = 0;
-		virtual i_widget& get_widget(std::size_t aIndex) = 0;
-		virtual i_layout& get_layout(std::size_t aIndex) = 0;
+		virtual i_geometry& get_item(item_index aIndex) = 0;
+		virtual i_widget& get_widget(item_index aIndex) = 0;
+		virtual i_layout& get_layout(item_index aIndex) = 0;
 	public:
 		virtual size spacing() const = 0;
 		virtual void set_spacing(const size& sSpacing) = 0;

@@ -21,6 +21,8 @@
 #include "app.hpp"
 #include "image.hpp"
 #include "colour_dialog.hpp"
+#include "context_menu.hpp"
+#include "menu.hpp"
 #include "gradient_widget.hpp"
 
 namespace neogfx
@@ -108,6 +110,42 @@ namespace neogfx
 	void gradient_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+		if (aButton == mouse_button::Right)
+		{
+			auto stopIter = stop_at(aPosition);
+			if (stopIter.is<gradient::colour_stop_list::iterator>())
+			{
+				auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
+				action selectColourAction{ "Select stop colour..." };
+				selectColourAction.triggered([this, &stop]()
+				{
+					colour_dialog cd{ *this, stop.second };
+					if (cd.exec() == dialog::Accepted)
+					{
+						stop.second = cd.selected_colour();
+						update();
+					}
+				});
+				action deleteStopAction{ "Delete stop" };
+				deleteStopAction.triggered([this, &stop]()
+				{
+					for (auto s = iSelection.colour_stops().begin(); s != iSelection.colour_stops().end(); ++s)
+						if (&*s == &stop)
+						{
+							iSelection.colour_stops().erase(s);
+							update();
+							break;
+						}
+				});
+				if (iSelection.colour_stops().size() <= 2)
+					deleteStopAction.disable();
+				iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+				iMenu->menu().add_action(selectColourAction);
+				iMenu->menu().add_action(deleteStopAction);
+				iMenu->exec();
+				iMenu.reset();
+			};
+		}
 	}
 
 	void gradient_widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)

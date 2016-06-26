@@ -234,25 +234,55 @@ namespace neogfx
 		return *s;
 	}
 
-	void grid_layout::remove_item(std::size_t aIndex)
+	void grid_layout::remove_item(item_index aIndex)
 	{
 		auto itemIter = std::next(items().begin(), aIndex);
 		for (cell_list::reverse_iterator i = iCells.rbegin(); i != iCells.rend(); ++i)
+		{
 			if (i->second == itemIter)
 			{
 				remove_item(i->first.y, i->first.x);
 				break;
 			}
+		}
+	}
+
+	bool grid_layout::remove_item(i_layout& aItem)
+	{
+		auto item = find_item(aItem);
+		if (item != boost::none)
+		{
+			remove_item(*item);
+			return true;
+		}
+		return false;
+	}
+
+	bool grid_layout::remove_item(i_widget& aItem)
+	{
+		auto item = find_item(aItem);
+		if (item != boost::none)
+		{
+			remove_item(*item);
+			return true;
+		}
+		return false;
 	}
 
 	void grid_layout::remove_item(cell_coordinate aRow, cell_coordinate aColumn)
 	{
-		auto iterExisting = iCells.find(cell_coordinates{ aColumn, aRow });
-		if (iterExisting == iCells.end())
+		auto iterExistingCell = iCells.find(cell_coordinates{ aColumn, aRow });
+		if (iterExistingCell == iCells.end())
 			throw cell_unoccupied();
-		auto itemIterExisting = iterExisting->second;
-		row_layout(aRow).remove_item(aColumn);
-		iCells.erase(iterExisting);
+		auto iterExistingItem = iterExistingCell->second;
+		{
+			auto existing = row_layout(aRow).find_item(*iterExistingItem);
+			if (existing != boost::none)
+				row_layout(aRow).remove_item(*existing);
+		}
+		if (aColumn < row_layout(aRow).item_count())
+			row_layout(aRow).remove_item(aColumn);
+		iCells.erase(iterExistingCell);
 		iDimensions = cell_dimensions{};
 		for (const auto& cell : iCells)
 		{
@@ -260,7 +290,7 @@ namespace neogfx
 			iDimensions.cx = std::max(iDimensions.cx, cell.first.x);
 		}
 		iCursor = cell_coordinates{};
-		layout::remove_item(itemIterExisting);
+		layout::remove_item(iterExistingItem);
 	}
 
 	void grid_layout::remove_items()

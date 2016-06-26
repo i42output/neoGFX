@@ -22,6 +22,7 @@
 #include <neolib/variant.hpp>
 #include "widget.hpp"
 #include "colour.hpp"
+#include "context_menu.hpp"
 
 namespace neogfx
 {
@@ -59,5 +60,6 @@ namespace neogfx
 		boost::optional<std::size_t> iCurrentColourStop;
 		boost::optional<std::size_t> iCurrentAlphaStop;
 		bool iTracking;
+		std::unique_ptr<context_menu> iMenu;
 	};
 }

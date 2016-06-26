@@ -711,6 +711,7 @@ namespace neogfx
 				break;
 			case SDL_WINDOWEVENT_FOCUS_LOST:
 				SDL_ResetMouse();
+				iMouseButtonEventExtraInfo.clear();
 				push_event(native_window_event(native_window_event::FocusLost));
 				break;
 			}
@@ -724,22 +725,25 @@ namespace neogfx
 					delta(static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y))));
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			if (aEvent.button.clicks == 1)
-				push_event(
-					native_mouse_event(
-						native_mouse_event::ButtonPressed,
-						convert_mouse_button(aEvent.button.button),
-						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
-						iMouseButtonEventExtraInfo.front()));
+			if (!iMouseButtonEventExtraInfo.empty())
+			{
+				if (aEvent.button.clicks == 1)
+					push_event(
+						native_mouse_event(
+							native_mouse_event::ButtonPressed,
+							convert_mouse_button(aEvent.button.button),
+							point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+							iMouseButtonEventExtraInfo.front()));
 
-			else
-				push_event(
-					native_mouse_event(
-						native_mouse_event::ButtonDoubleClicked,
-						convert_mouse_button(aEvent.button.button),
-						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
-						iMouseButtonEventExtraInfo.front()));
-			iMouseButtonEventExtraInfo.pop_front();
+				else
+					push_event(
+						native_mouse_event(
+							native_mouse_event::ButtonDoubleClicked,
+							convert_mouse_button(aEvent.button.button),
+							point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+							iMouseButtonEventExtraInfo.front()));
+				iMouseButtonEventExtraInfo.pop_front();
+			}
 			break;
 		case SDL_MOUSEBUTTONUP:
 			push_event(native_mouse_event(native_mouse_event::ButtonReleased, convert_mouse_button(aEvent.button.button), point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) }));

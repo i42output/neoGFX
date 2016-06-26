@@ -308,24 +308,24 @@ namespace neogfx
 		if (!aWidget.has_parent() && &aWidget.parent() != this)
 			throw not_child();
 		aWidget.unlink();
-		for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
+		for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
 			if (&**i == &aWidget)
 			{
-				iChildren.erase(i);
+				iChildren.erase(i.base() - 1);
 				break;
 			}
+		if (has_layout())
+			layout().remove_item(aWidget);
 		if (has_surface())
 			surface().widget_removed(aWidget);
 	}
 
 	void widget::remove_widgets()
 	{
-		while(!iChildren.empty())
+		while (!iChildren.empty())
 		{
 			auto child = iChildren.back();
 			iChildren.pop_back();
-			if (has_surface())
-				surface().widget_removed(*child);
 		}
 	}
 

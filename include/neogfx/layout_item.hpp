@@ -71,6 +71,8 @@ namespace neogfx
 		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
 	public:
 		bool visible() const;
+	public:
+		bool operator==(const layout_item& aOther) const;
 	private:
 		i_layout& iParent;
 		pointer_wrapper iPointerWrapper;

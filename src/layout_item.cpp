@@ -227,4 +227,9 @@ namespace neogfx
 		else
 			return true;
 	}
+
+	bool layout_item::operator==(const layout_item& aOther) const
+	{
+		return iPointerWrapper == aOther.iPointerWrapper;
+	}
 }
