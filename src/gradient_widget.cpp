@@ -236,6 +236,7 @@ namespace neogfx
 	void gradient_widget::draw_colour_stop(graphics_context& aGraphicsContext, const gradient::colour_stop& aColourStop) const
 	{
 		rect r = colour_stop_rect(aColourStop);
+		draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, SMALL_ALPHA_PATTERN_SIZE);
 		static const uint8_t stopGlpyhPattern[17][11] =
 		{
 			{ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
@@ -274,6 +275,7 @@ namespace neogfx
 	void gradient_widget::draw_alpha_stop(graphics_context& aGraphicsContext, const gradient::alpha_stop& aAlphaStop) const 
 	{
 		rect r = alpha_stop_rect(aAlphaStop);
+		draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 2.0 }, size{ 7.0, 7.0 } }, SMALL_ALPHA_PATTERN_SIZE);
 		static const uint8_t stopGlpyhPattern[17][11] =
 		{
 			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
@@ -297,7 +299,6 @@ namespace neogfx
 		colour transparentColour{ 255, 255, 255, 0 };
 		colour backgroundColour = background_colour();
 		color frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
-		draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{2.0, 2.0}, size{7.0, 7.0} }, SMALL_ALPHA_PATTERN_SIZE);
 		image stopGlyph{
 			stopGlpyhPattern,
 			{
