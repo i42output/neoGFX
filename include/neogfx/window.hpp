@@ -117,6 +117,7 @@ namespace neogfx
 		virtual void move_surface(const point& aPosition);
 		virtual size surface_size() const;
 		virtual void resize_surface(const size& aSize);
+		virtual void centre();
 	public:
 		virtual point mouse_position() const;
 		virtual bool is_mouse_button_pressed(mouse_button aButton) const;

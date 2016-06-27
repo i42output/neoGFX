@@ -478,6 +478,13 @@ namespace neogfx
 		native_surface().resize_surface(aSize);
 	}
 
+	void window::centre()
+	{
+		resize(minimum_size());
+		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
+		move_surface((desktopRect.extents() - surface_size()) / 2.0);
+	}
+
 	point window::mouse_position() const
 	{
 		return native_surface().mouse_position();

@@ -57,6 +57,7 @@ namespace neogfx
 		void draw_alpha_stop(graphics_context& aGraphicsContext, const gradient::alpha_stop& aAlphaStop) const;
 	private:
 		gradient iSelection;
+		boost::optional<point> iClicked;
 		boost::optional<std::size_t> iCurrentColourStop;
 		boost::optional<std::size_t> iCurrentAlphaStop;
 		bool iTracking;

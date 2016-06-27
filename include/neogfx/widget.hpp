@@ -192,6 +192,8 @@ namespace neogfx
 	public:
 		virtual graphics_context create_graphics_context() const;
 	protected:
+		virtual const update_rect_list& update_rects() const;
+	protected:
 		virtual i_widget& widget_for_mouse_event(const point& aPosition);
 		// helpers
 	public:
@@ -213,7 +215,7 @@ namespace neogfx
 		optional_size iMinimumSize;
 		optional_size iMaximumSize;
 		uint32_t iLayoutInProgress;
-		mutable std::unordered_set<rect> iUpdateRects;
+		mutable update_rect_list iUpdateRects;
 		bool iVisible;
 		bool iEnabled;
 		neogfx::focus_policy iFocusPolicy;

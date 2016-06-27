@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <unordered_set>
 #include "i_geometry.hpp"
 #include "graphics_context.hpp"
 #include "mouse.hpp"
@@ -51,6 +52,8 @@ namespace neogfx
 		event<graphics_context&> painting;
 	public:
 		typedef std::vector<std::shared_ptr<i_widget>> widget_list;
+	protected:
+		typedef std::unordered_set<rect> update_rect_list;
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_widget::no_parent") {} };
 		struct not_child : std::logic_error { not_child() : std::logic_error("neogfx::i_widget::not_child") {} };
@@ -176,6 +179,8 @@ namespace neogfx
 		virtual void set_default_mouse_cursor() = 0;
 	public:
 		virtual graphics_context create_graphics_context() const = 0;
+	protected:
+		virtual const update_rect_list& update_rects() const = 0;
 	protected:
 		virtual i_widget& widget_for_mouse_event(const point& aPosition) = 0;
 	private:

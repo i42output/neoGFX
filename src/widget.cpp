@@ -1170,5 +1170,10 @@ namespace neogfx
 	{
 		return graphics_context(*this);
 	}
+
+	const widget::update_rect_list& widget::update_rects() const
+	{
+		return iUpdateRects;
+	}
 }
 

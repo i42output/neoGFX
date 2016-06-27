@@ -809,10 +809,7 @@ namespace neogfx
 			iCustomColoursLayout.add_item(std::make_shared<colour_box>(*this, *customColour, customColour));
 		button_box().add_button(dialog_button_box::Ok);
 		button_box().add_button(dialog_button_box::Cancel);
-		resize(minimum_size());
-		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
-		move_surface((desktopRect.extents() - surface_size()) / 2.0);
-
+		centre();
 		iH.first.checked([this]() { set_current_channel(ChannelHue); });
 		iS.first.checked([this]() { set_current_channel(ChannelSaturation); });
 		iV.first.checked([this]() { set_current_channel(ChannelValue); });

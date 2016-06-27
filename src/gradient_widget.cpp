@@ -21,6 +21,7 @@
 #include "app.hpp"
 #include "image.hpp"
 #include "colour_dialog.hpp"
+#include "slider.hpp"
 #include "context_menu.hpp"
 #include "menu.hpp"
 #include "gradient_widget.hpp"
@@ -56,6 +57,67 @@ namespace neogfx
 			}
 			aGraphicsContext.scissor_off();
 		}
+
+		class alpha_dialog : public dialog
+		{
+		public:
+			alpha_dialog(i_widget& aParent, colour::component aCurrentAlpha) :
+				dialog(aParent, "Select Alpha (Opacity Level)", Modal | Titlebar | Close), iLayout{*this}, iLayout2{iLayout}, iSlider{iLayout2}, iSpinBox{iLayout2}
+			{
+				init(aCurrentAlpha);
+			}
+		public:
+			colour::component selected_alpha() const
+			{
+				return static_cast<colour::component>(iSpinBox.value());
+			}
+		private:
+			void init(colour::component aCurrentAlpha)
+			{
+				set_margins(neogfx::margins{ 16.0 });
+				iLayout.set_margins(neogfx::margins{});
+				iLayout.set_spacing(16.0);
+				iLayout2.set_margins(neogfx::margins{});
+				iLayout2.set_spacing(16.0);
+				iSlider.set_minimum(0);
+				iSlider.set_maximum(255);
+				iSlider.set_step(1);
+				iSpinBox.text_box().set_hint("255");
+				iSpinBox.set_minimum(0);
+				iSpinBox.set_maximum(255);
+				iSpinBox.set_step(1);
+				iSpinBox.value_changed([this]() {iSlider.set_value(iSpinBox.value()); update(); });
+				iSlider.value_changed([this]() {iSpinBox.set_value(iSlider.value()); });
+				iSlider.set_value(aCurrentAlpha);
+				button_box().add_button(dialog_button_box::Ok);
+				button_box().add_button(dialog_button_box::Cancel);
+				centre();
+			}
+		private:
+			virtual void paint_non_client(graphics_context& aGraphicsContext) const
+			{
+				dialog::paint_non_client(aGraphicsContext);
+				auto backgroundRect = client_rect() + (origin() - origin(true));
+				if (surface().native_surface().using_frame_buffer())
+					for (const auto& ur : update_rects())
+					{
+						aGraphicsContext.scissor_on(ur);
+						draw_alpha_background(aGraphicsContext, backgroundRect);
+						aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));
+						aGraphicsContext.scissor_off();
+					}
+				else
+				{
+					draw_alpha_background(aGraphicsContext, backgroundRect);
+					aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));
+				}
+			}
+		private:
+			vertical_layout iLayout;
+			horizontal_layout iLayout2;
+			slider iSlider;
+			spin_box iSpinBox;
+		};
 	}
 
 	gradient_widget::gradient_widget() : iTracking{false}
@@ -110,42 +172,7 @@ namespace neogfx
 	void gradient_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-		if (aButton == mouse_button::Right)
-		{
-			auto stopIter = stop_at(aPosition);
-			if (stopIter.is<gradient::colour_stop_list::iterator>())
-			{
-				auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
-				action selectColourAction{ "Select stop colour..." };
-				selectColourAction.triggered([this, &stop]()
-				{
-					colour_dialog cd{ *this, stop.second };
-					if (cd.exec() == dialog::Accepted)
-					{
-						stop.second = cd.selected_colour();
-						update();
-					}
-				});
-				action deleteStopAction{ "Delete stop" };
-				deleteStopAction.triggered([this, &stop]()
-				{
-					for (auto s = iSelection.colour_stops().begin(); s != iSelection.colour_stops().end(); ++s)
-						if (&*s == &stop)
-						{
-							iSelection.colour_stops().erase(s);
-							update();
-							break;
-						}
-				});
-				if (iSelection.colour_stops().size() <= 2)
-					deleteStopAction.disable();
-				iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
-				iMenu->menu().add_action(selectColourAction);
-				iMenu->menu().add_action(deleteStopAction);
-				iMenu->exec();
-				iMenu.reset();
-			};
-		}
+		iClicked = aPosition;
 	}
 
 	void gradient_widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -173,6 +200,78 @@ namespace neogfx
 	void gradient_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		widget::mouse_button_released(aButton, aPosition);
+		if (aButton == mouse_button::Right)
+		{
+			auto stopIter = stop_at(aPosition);
+			if (stopIter == stop_at(*iClicked))
+			{
+				if (stopIter.is<gradient::colour_stop_list::iterator>())
+				{
+					auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
+					action selectColourAction{ "Select stop colour..." };
+					selectColourAction.triggered([this, &stop]()
+					{
+						colour_dialog cd{ *this, stop.second };
+						if (cd.exec() == dialog::Accepted)
+						{
+							stop.second = cd.selected_colour();
+							update();
+						}
+					});
+					action deleteStopAction{ "Delete stop" };
+					deleteStopAction.triggered([this, &stop]()
+					{
+						for (auto s = iSelection.colour_stops().begin(); s != iSelection.colour_stops().end(); ++s)
+							if (&*s == &stop)
+							{
+								iSelection.colour_stops().erase(s);
+								update();
+								break;
+							}
+					});
+					if (iSelection.colour_stops().size() <= 2)
+						deleteStopAction.disable();
+					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+					iMenu->menu().add_action(selectColourAction);
+					iMenu->menu().add_action(deleteStopAction);
+					iMenu->exec();
+					iMenu.reset();
+				}
+				else if (stopIter.is<gradient::alpha_stop_list::iterator>())
+				{
+					auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
+					action selectAlphaAction{ "Select stop alpha (opacity level)..." };
+					selectAlphaAction.triggered([this, &stop]()
+					{
+						alpha_dialog ad{ ultimate_ancestor(), stop.second };
+						if (ad.exec() == dialog::Accepted)
+						{
+							stop.second = ad.selected_alpha();
+							update();
+						}
+					});
+					action deleteStopAction{ "Delete stop" };
+					deleteStopAction.triggered([this, &stop]()
+					{
+						for (auto s = iSelection.alpha_stops().begin(); s != iSelection.alpha_stops().end(); ++s)
+							if (&*s == &stop)
+							{
+								iSelection.alpha_stops().erase(s);
+								update();
+								break;
+							}
+					});
+					if (iSelection.colour_stops().size() <= 2)
+						deleteStopAction.disable();
+					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+					iMenu->menu().add_action(selectAlphaAction);
+					iMenu->menu().add_action(deleteStopAction);
+					iMenu->exec();
+					iMenu.reset();
+				}
+			}
+		}
+		iClicked == boost::none;
 	}
 
 	void gradient_widget::mouse_moved(const point& aPosition)
