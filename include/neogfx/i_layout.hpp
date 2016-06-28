@@ -75,8 +75,11 @@ namespace neogfx
 		virtual optional_item_index find_item(i_widget& aItem) const = 0;
 		virtual optional_item_index find_item(const layout_item& aItem) const = 0;
 		virtual bool is_widget(std::size_t aIndex) const = 0;
+		virtual const i_geometry& get_item(item_index aIndex) const = 0;
 		virtual i_geometry& get_item(item_index aIndex) = 0;
+		virtual const i_widget& get_widget(item_index aIndex) const = 0;
 		virtual i_widget& get_widget(item_index aIndex) = 0;
+		virtual const i_layout& get_layout(item_index aIndex) const = 0;
 		virtual i_layout& get_layout(item_index aIndex) = 0;
 	public:
 		virtual size spacing() const = 0;
@@ -100,6 +103,11 @@ namespace neogfx
 			if (aPosition < item_count())
 				remove_item(aPosition);
 			add_item(aPosition, aItem);
+		}
+		template <typename WidgetT>
+		const WidgetT& get_widget(std::size_t aIndex) const
+		{
+			return static_cast<const WidgetT&>(get_widget(aIndex));
 		}
 		template <typename WidgetT>
 		WidgetT& get_widget(std::size_t aIndex)

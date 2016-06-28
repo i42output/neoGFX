@@ -268,13 +268,15 @@ namespace neogfx
 
 	void text_edit::mouse_entered()
 	{
-		surface().save_mouse_cursor();
-		surface().set_mouse_cursor(mouse_system_cursor::Ibeam);
 	}
 
 	void text_edit::mouse_left()
 	{
-		surface().restore_mouse_cursor();
+	}
+
+	neogfx::mouse_cursor text_edit::mouse_cursor() const
+	{
+		return mouse_system_cursor::Ibeam;
 	}
 
 	bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)

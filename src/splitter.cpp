@@ -96,7 +96,7 @@ namespace neogfx
 				iSizeBeforeTracking = std::make_pair(
 					layout().get_widget(iTracking->first).minimum_size().cx, 
 					layout().get_widget(iTracking->second).minimum_size().cx);
-				surface().set_mouse_cursor(iType == HorizontalSplitter ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS);
+				surface().update_mouse_cursor();
 			}
 		}
 	}
@@ -120,11 +120,6 @@ namespace neogfx
 
 	void splitter::mouse_moved(const point& aPosition)
 	{
-		auto s = separator_at(aPosition);
-		if (s != boost::none || iTracking != boost::none)
-			surface().set_mouse_cursor(iType == HorizontalSplitter ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS);
-		else
-			surface().set_mouse_cursor(mouse_system_cursor::Arrow);
 		if (iTracking != boost::none)
 		{
 			if (iType == HorizontalSplitter)
@@ -151,17 +146,19 @@ namespace neogfx
 
 	void splitter::mouse_entered()
 	{
-		surface().save_mouse_cursor();
-		auto s = separator_at(surface().mouse_position() - origin());
-		if (s != boost::none || iTracking != boost::none)
-			surface().set_mouse_cursor(iType == HorizontalSplitter ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS);
-		else
-			surface().set_mouse_cursor(mouse_system_cursor::Arrow);
 	}
 
 	void splitter::mouse_left()
 	{
-		surface().restore_mouse_cursor();
+	}
+	
+	neogfx::mouse_cursor splitter::mouse_cursor() const
+	{
+		auto s = separator_at(surface().mouse_position() - origin());
+		if (s != boost::none || iTracking != boost::none)
+			return iType == HorizontalSplitter ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
+		else
+			return widget::mouse_cursor();
 	}
 
 	void splitter::released()
@@ -177,7 +174,7 @@ namespace neogfx
 	{
 	}
 
-	boost::optional<std::pair<std::size_t, std::size_t>> splitter::separator_at(const point& aPosition)
+	boost::optional<std::pair<std::size_t, std::size_t>> splitter::separator_at(const point& aPosition) const
 	{
 		for (std::size_t i = 1; i < layout().item_count(); ++i)
 		{

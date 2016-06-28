@@ -116,6 +116,7 @@ namespace neogfx
 		virtual void resized() = 0;
 		virtual rect window_rect() const = 0;
 		virtual rect client_rect(bool aIncludeMargins = true) const = 0;
+		virtual const i_widget& widget_at(const point& aPosition) const = 0;
 		virtual i_widget& widget_at(const point& aPosition) = 0;
 	public:
 		virtual void update(bool aIncludeNonClient = false) = 0;
@@ -176,12 +177,13 @@ namespace neogfx
 		virtual void mouse_moved(const point& aPosition) = 0;
 		virtual void mouse_entered() = 0;
 		virtual void mouse_left() = 0;
-		virtual void set_default_mouse_cursor() = 0;
+		virtual neogfx::mouse_cursor mouse_cursor() const = 0;
 	public:
 		virtual graphics_context create_graphics_context() const = 0;
 	protected:
 		virtual const update_rect_list& update_rects() const = 0;
 	protected:
+		virtual const i_widget& widget_for_mouse_event(const point& aPosition) const = 0;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition) = 0;
 	private:
 		friend class widget;

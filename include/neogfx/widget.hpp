@@ -106,6 +106,7 @@ namespace neogfx
 		virtual void resized();
 		virtual rect window_rect() const;
 		virtual rect client_rect(bool aIncludeMargins = true) const;
+		virtual const i_widget& widget_at(const point& aPosition) const;
 		virtual i_widget& widget_at(const point& aPosition);
 	public:
 		virtual bool has_size_policy() const;
@@ -183,7 +184,7 @@ namespace neogfx
 		virtual void mouse_moved(const point& aPosition);
 		virtual void mouse_entered();
 		virtual void mouse_left();
-		virtual void set_default_mouse_cursor();
+		virtual neogfx::mouse_cursor mouse_cursor() const;
 	public:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
@@ -194,6 +195,7 @@ namespace neogfx
 	protected:
 		virtual const update_rect_list& update_rects() const;
 	protected:
+		virtual const i_widget& widget_for_mouse_event(const point& aPosition) const;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition);
 		// helpers
 	public:

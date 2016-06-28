@@ -49,12 +49,13 @@ namespace neogfx
 		virtual void mouse_moved(const point& aPosition);
 		virtual void mouse_entered();
 		virtual void mouse_left();
+		virtual neogfx::mouse_cursor mouse_cursor() const;
 		virtual void released();
 	public:
 		virtual void panes_resized();
 		virtual void reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane = boost::optional<uint32_t>());
 	private:
-		boost::optional<separator_type> separator_at(const point& aPosition);
+		boost::optional<separator_type> separator_at(const point& aPosition) const;
 	private:
 		type_e iType;
 		boost::optional<separator_type> iTracking;

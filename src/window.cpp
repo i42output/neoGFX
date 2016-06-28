@@ -510,6 +510,11 @@ namespace neogfx
 		native_surface().restore_mouse_cursor();
 	}
 
+	void window::update_mouse_cursor()
+	{
+		native_surface().update_mouse_cursor();
+	}
+
 	void window::widget_added(i_widget&)
 	{
 		layout_items(true);
@@ -897,10 +902,10 @@ namespace neogfx
 			sys_text_input(aText);
 	}
 
-	void window::native_window_set_default_mouse_cursor()
+	neogfx::mouse_cursor window::native_window_mouse_cursor() const
 	{
-		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(iNativeWindow->mouse_position()) : *iCapturingWidget);
-		widgetUnderMouse.set_default_mouse_cursor();
+		const i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(iNativeWindow->mouse_position()) : *iCapturingWidget);
+		return widgetUnderMouse.mouse_cursor();
 	}
 
 	void window::update_click_focus(i_widget& aCandidateWidget)

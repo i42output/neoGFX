@@ -125,6 +125,7 @@ namespace neogfx
 		virtual void save_mouse_cursor();
 		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor);
 		virtual void restore_mouse_cursor();
+		virtual void update_mouse_cursor();
 	public:
 		virtual void widget_added(i_widget& aWidget);
 		virtual void widget_removed(i_widget& aWidget);
@@ -169,7 +170,7 @@ namespace neogfx
 		virtual void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual void native_window_text_input(const std::string& aText);
 		virtual void native_window_sys_text_input(const std::string& aText);
-		virtual void native_window_set_default_mouse_cursor();
+		virtual neogfx::mouse_cursor native_window_mouse_cursor() const;
 	private:
 		void init();
 		void update_click_focus(i_widget& aCandidateWidget);

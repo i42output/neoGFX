@@ -61,6 +61,7 @@ namespace neogfx
 		virtual void save_mouse_cursor() = 0;
 		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
 		virtual void restore_mouse_cursor() = 0;
+		virtual void update_mouse_cursor() = 0;
 	public:
 		virtual uint64_t frame_counter() const = 0;
 		virtual bool using_frame_buffer() const = 0;

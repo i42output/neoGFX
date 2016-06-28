@@ -341,41 +341,56 @@ namespace neogfx
 		return item->get().is<item::widget_pointer>();
 	}
 
-	i_geometry& layout::get_item(item_index aIndex)
+	const i_geometry& layout::get_item(item_index aIndex) const
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
 		auto item = std::next(iItems.begin(), aIndex);
 		if (item->get().is<item::widget_pointer>())
-			return *static_variant_cast<item::widget_pointer&>(item->get());
+			return *static_variant_cast<const item::widget_pointer&>(item->get());
 		else if (item->get().is<item::layout_pointer>())
-			return *static_variant_cast<item::layout_pointer&>(item->get());
+			return *static_variant_cast<const item::layout_pointer&>(item->get());
+		else
+			throw wrong_item_type();
+	}
+
+	i_geometry& layout::get_item(item_index aIndex)
+	{
+		return const_cast<i_geometry&>(const_cast<const layout*>(this)->get_item(aIndex));
+	}
+		
+	const i_widget& layout::get_widget(item_index aIndex) const
+	{
+		if (aIndex >= iItems.size())
+			throw bad_item_index();
+		auto item = std::next(iItems.begin(), aIndex);
+		if (item->get().is<item::widget_pointer>())
+			return *static_variant_cast<const item::widget_pointer&>(item->get());
 		else
 			throw wrong_item_type();
 	}
 
 	i_widget& layout::get_widget(item_index aIndex)
 	{
+		return const_cast<i_widget&>(const_cast<const layout*>(this)->get_widget(aIndex));
+	}
+		
+	const i_layout& layout::get_layout(item_index aIndex) const
+	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
 		auto item = std::next(iItems.begin(), aIndex);
-		if (item->get().is<item::widget_pointer>())
-			return *static_variant_cast<item::widget_pointer&>(item->get());
+		if (item->get().is<item::layout_pointer>())
+			return *static_variant_cast<const item::layout_pointer&>(item->get());
 		else
 			throw wrong_item_type();
 	}
 
 	i_layout& layout::get_layout(item_index aIndex)
 	{
-		if (aIndex >= iItems.size())
-			throw bad_item_index();
-		auto item = std::next(iItems.begin(), aIndex);
-		if (item->get().is<item::layout_pointer>())
-			return *static_variant_cast<item::layout_pointer&>(item->get());
-		else
-			throw wrong_item_type();
+		return const_cast<i_layout&>(const_cast<const layout*>(this)->get_layout(aIndex));
 	}
-
+		
 	bool layout::has_margins() const
 	{
 		return iMargins != boost::none;

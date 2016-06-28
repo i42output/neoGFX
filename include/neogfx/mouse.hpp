@@ -20,6 +20,7 @@
 #pragma once
 
 #include "neogfx.hpp"
+#include <neolib/variant.hpp>
 #include "mouse.hpp"
 
 namespace neogfx
@@ -56,6 +57,32 @@ namespace neogfx
 		SizeAll,
 		No,
 		Hand
+	};
+
+	class mouse_cursor
+	{
+	public:
+		typedef neolib::variant<mouse_system_cursor> cursor_type;
+		/* todo: support for custom mouse cursors. */
+	public:
+		struct wrong_type : std::logic_error { wrong_type() : std::logic_error("neogfx::mouse_cursor::wrong_type") {} };
+	public:
+		mouse_cursor(mouse_system_cursor aSystemCursor) : iType(aSystemCursor)
+		{
+		}
+	public:
+		bool is_system_cursor() const
+		{
+			return iType.is<mouse_system_cursor>();
+		}
+		mouse_system_cursor system_cursor() const
+		{
+			if (is_system_cursor())
+				return static_variant_cast<mouse_system_cursor>(iType);
+			throw wrong_type();
+		}
+	public:
+		cursor_type iType;
 	};
 
 	inline mouse_button operator|(mouse_button aLhs, mouse_button aRhs)

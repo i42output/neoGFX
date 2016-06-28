@@ -466,8 +466,13 @@ namespace neogfx
 		iCurrentCursor = iSavedCursors.back();
 		iSavedCursors.pop_back();
 		SDL_SetCursor(&*iCurrentCursor);
+		update_mouse_cursor();
+	}
+
+	void sdl_window::update_mouse_cursor()
+	{
 		if (iSavedCursors.empty())
-			event_handler().native_window_set_default_mouse_cursor();
+			set_mouse_cursor(event_handler().native_window_mouse_cursor().system_cursor());
 	}
 
 	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context() const
@@ -749,6 +754,7 @@ namespace neogfx
 			push_event(native_mouse_event(native_mouse_event::ButtonReleased, convert_mouse_button(aEvent.button.button), point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) }));
 			break;
 		case SDL_MOUSEMOTION:
+			update_mouse_cursor();
 			push_event(native_mouse_event(native_mouse_event::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
 			break;
 		case SDL_KEYDOWN:

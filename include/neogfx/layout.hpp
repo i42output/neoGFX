@@ -97,9 +97,12 @@ namespace neogfx
 		virtual optional_item_index find_item(i_widget& aItem) const;
 		virtual optional_item_index find_item(const layout_item& aItem) const;
 		virtual bool is_widget(item_index aIndex) const;
+		virtual const i_geometry& get_item(item_index aIndex) const;
 		virtual i_geometry& get_item(item_index aIndex);
 		using i_layout::get_widget;
+		virtual const i_widget& get_widget(item_index aIndex) const;
 		virtual i_widget& get_widget(item_index aIndex);
+		virtual const i_layout& get_layout(item_index aIndex) const;
 		virtual i_layout& get_layout(item_index aIndex);
 	public:
 		virtual bool has_margins() const;

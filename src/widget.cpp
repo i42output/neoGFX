@@ -587,7 +587,7 @@ namespace neogfx
 			return rect{ point{}, extents() };
 	}
 
-	i_widget& widget::widget_at(const point& aPosition)
+	const i_widget& widget::widget_at(const point& aPosition) const
 	{
 		if (client_rect().contains(aPosition))
 		{
@@ -596,6 +596,11 @@ namespace neogfx
 					return c->widget_at(aPosition - c->position());
 		}
 		return *this;
+	}
+
+	i_widget& widget::widget_at(const point& aPosition)
+	{
+		return const_cast<i_widget&>(const_cast<const widget*>(this)->widget_at(aPosition));
 	}
 
 	bool widget::has_size_policy() const
@@ -1126,9 +1131,11 @@ namespace neogfx
 	{
 	}
 
-	void widget::set_default_mouse_cursor()
+	neogfx::mouse_cursor widget::mouse_cursor() const
 	{
-		surface().set_mouse_cursor(mouse_system_cursor::Arrow);
+		if (has_parent())
+			return parent().mouse_cursor();
+		return mouse_system_cursor::Arrow;
 	}
 
 	bool widget::key_pressed(scan_code_e, key_code_e, key_modifiers_e)
@@ -1151,11 +1158,11 @@ namespace neogfx
 		return false;
 	}
 
-	i_widget& widget::widget_for_mouse_event(const point& aPosition)
+	const i_widget& widget::widget_for_mouse_event(const point& aPosition) const
 	{
 		if (client_rect().contains(aPosition))
 		{
-			i_widget* w = &widget_at(aPosition);
+			const i_widget* w = &widget_at(aPosition);
 			while (w != this && (w->hidden() || w->disabled() || w->ignore_mouse_events()))
 			{
 				w = &w->parent();
@@ -1164,6 +1171,11 @@ namespace neogfx
 		}
 		else
 			return *this;
+	}
+
+	i_widget& widget::widget_for_mouse_event(const point& aPosition)
+	{
+		return const_cast<i_widget&>(const_cast<const widget*>(this)->widget_for_mouse_event(aPosition));
 	}
 
 	graphics_context widget::create_graphics_context() const

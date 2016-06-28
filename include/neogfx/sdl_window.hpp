@@ -84,6 +84,7 @@ namespace neogfx
 		virtual void save_mouse_cursor();
 		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor);
 		virtual void restore_mouse_cursor();
+		virtual void update_mouse_cursor();
 	public:
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const;
