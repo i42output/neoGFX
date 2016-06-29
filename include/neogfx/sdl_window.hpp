@@ -94,6 +94,7 @@ namespace neogfx
 		virtual void hide();
 		virtual bool is_active() const;
 		virtual void activate();
+		virtual bool is_enabled() const;
 		virtual void enable(bool aEnable);
 		virtual void set_capture();
 		virtual void release_capture();

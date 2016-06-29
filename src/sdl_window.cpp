@@ -528,9 +528,20 @@ namespace neogfx
 
 	void sdl_window::activate()
 	{
+		if (!is_enabled())
+			return;
 		SDL_RaiseWindow(iHandle);
 #ifdef WIN32
 		SetWindowPos(static_cast<HWND>(native_handle()), 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+#endif
+	}
+
+	bool sdl_window::is_enabled() const
+	{
+#ifdef WIN32
+		return ::IsWindowEnabled(static_cast<HWND>(native_handle())) == TRUE;
+#else
+		return true;
 #endif
 	}
 
@@ -621,7 +632,11 @@ namespace neogfx
 		case WM_RBUTTONDBLCLK:
 		case WM_MBUTTONDBLCLK:
 		case WM_XBUTTONDBLCLK:
-			{
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONUP:
+		case WM_XBUTTONUP:
+		{
 				key_modifiers_e modifiers = KeyModifier_NONE;
 				if (wparam & MK_SHIFT)
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
@@ -751,7 +766,15 @@ namespace neogfx
 			}
 			break;
 		case SDL_MOUSEBUTTONUP:
-			push_event(native_mouse_event(native_mouse_event::ButtonReleased, convert_mouse_button(aEvent.button.button), point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) }));
+			if (!iMouseButtonEventExtraInfo.empty())
+			{
+				push_event(
+					native_mouse_event(
+						native_mouse_event::ButtonReleased,
+						convert_mouse_button(aEvent.button.button),
+						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+						iMouseButtonEventExtraInfo.front()));
+			}
 			break;
 		case SDL_MOUSEMOTION:
 			update_mouse_cursor();
