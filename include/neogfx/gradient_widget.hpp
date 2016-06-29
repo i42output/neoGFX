@@ -47,6 +47,7 @@ namespace neogfx
 		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 		virtual void mouse_moved(const point& aPosition);
+		virtual neogfx::mouse_cursor mouse_cursor() const;
 	private:
 		rect contents_rect() const;
 		stop_const_iterator stop_at(const point& aPosition) const;
@@ -58,8 +59,8 @@ namespace neogfx
 	private:
 		gradient iSelection;
 		boost::optional<point> iClicked;
-		boost::optional<std::size_t> iCurrentColourStop;
-		boost::optional<std::size_t> iCurrentAlphaStop;
+		boost::optional<gradient::colour_stop_list::iterator> iCurrentColourStop;
+		boost::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;
 		bool iTracking;
 		std::unique_ptr<context_menu> iMenu;
 	};

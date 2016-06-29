@@ -173,6 +173,48 @@ namespace neogfx
 	{
 		widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		iClicked = aPosition;
+		if (aButton == mouse_button::Left)
+		{
+			if (contents_rect().contains(aPosition))
+			{
+				if (iCurrentColourStop != boost::none)
+					(**iCurrentColourStop).second = iSelection.colour_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
+				else if (iCurrentAlphaStop != boost::none)
+					(**iCurrentAlphaStop).second = iSelection.alpha_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
+				update();
+			}
+			else
+			{
+				auto stopIter = stop_at(aPosition);
+				if (stopIter.is<gradient::colour_stop_list::iterator>())
+				{
+					iCurrentColourStop = static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
+					iCurrentAlphaStop = boost::none;
+					iTracking = true;
+				}
+				else if (stopIter.is<gradient::alpha_stop_list::iterator>())
+				{
+					iCurrentAlphaStop = static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
+					iCurrentColourStop = boost::none;
+					iTracking = true;
+				}
+				else
+				{
+					if (aPosition.y < contents_rect().top())
+					{
+						iCurrentAlphaStop = iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
+						iCurrentColourStop = boost::none;
+						update();
+					}
+					else if (aPosition.y >= contents_rect().bottom())
+					{
+						iCurrentColourStop = iSelection.insert_colour_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
+						iCurrentAlphaStop = boost::none;
+						update();
+					}
+				}
+			}
+		}
 	}
 
 	void gradient_widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -193,6 +235,13 @@ namespace neogfx
 			}
 			else if (stopIter.is<gradient::alpha_stop_list::iterator>())
 			{
+				auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
+				alpha_dialog ad{ *this, stop.second };
+				if (ad.exec() == dialog::Accepted)
+				{
+					stop.second = ad.selected_alpha();
+					update();
+				}
 			}
 		}
 	}
@@ -219,15 +268,12 @@ namespace neogfx
 						}
 					});
 					action deleteStopAction{ "Delete stop" };
-					deleteStopAction.triggered([this, &stop]()
+					deleteStopAction.triggered([this, &stopIter]()
 					{
-						for (auto s = iSelection.colour_stops().begin(); s != iSelection.colour_stops().end(); ++s)
-							if (&*s == &stop)
-							{
-								iSelection.colour_stops().erase(s);
-								update();
-								break;
-							}
+						if (iCurrentColourStop != boost::none && *iCurrentColourStop == static_variant_cast<gradient::colour_stop_list::iterator>(stopIter))
+							iCurrentColourStop = boost::none;
+						iSelection.colour_stops().erase(static_variant_cast<gradient::colour_stop_list::iterator>(stopIter));
+						update();
 					});
 					if (iSelection.colour_stops().size() <= 2)
 						deleteStopAction.disable();
@@ -251,17 +297,14 @@ namespace neogfx
 						}
 					});
 					action deleteStopAction{ "Delete stop" };
-					deleteStopAction.triggered([this, &stop]()
+					deleteStopAction.triggered([this, &stopIter]()
 					{
-						for (auto s = iSelection.alpha_stops().begin(); s != iSelection.alpha_stops().end(); ++s)
-							if (&*s == &stop)
-							{
-								iSelection.alpha_stops().erase(s);
-								update();
-								break;
-							}
+						if (iCurrentAlphaStop != boost::none && *iCurrentAlphaStop == static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter))
+							iCurrentAlphaStop = boost::none;
+						iSelection.alpha_stops().erase(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
+						update();
 					});
-					if (iSelection.colour_stops().size() <= 2)
+					if (iSelection.alpha_stops().size() <= 2)
 						deleteStopAction.disable();
 					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
 					iMenu->menu().add_action(selectAlphaAction);
@@ -272,13 +315,64 @@ namespace neogfx
 			}
 		}
 		iClicked == boost::none;
+		iTracking = false;
 	}
 
 	void gradient_widget::mouse_moved(const point& aPosition)
 	{
 		widget::mouse_moved(aPosition);
+		if (iTracking)
+		{
+			double pos = gradient::normalized_position(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
+			double min = gradient::normalized_position(contents_rect().left() + STOP_WIDTH, contents_rect().left(), contents_rect().right() - 1.0);
+			if (iCurrentColourStop != boost::none)
+			{
+				auto leftStop = *iCurrentColourStop;
+				if (leftStop != iSelection.colour_stops().begin())
+					--leftStop;
+				auto rightStop = *iCurrentColourStop;
+				if (rightStop + 1 != iSelection.colour_stops().end())
+					++rightStop;
+				(**iCurrentColourStop).first =
+					std::min(std::max(pos,
+						leftStop == *iCurrentColourStop ? 0.0 : leftStop->first + min),
+						rightStop == *iCurrentColourStop ? 1.0 : rightStop->first - min);
+				update();
+			}
+			else if (iCurrentAlphaStop != boost::none)
+			{
+				auto leftStop = *iCurrentAlphaStop;
+				if (leftStop != iSelection.alpha_stops().begin())
+					--leftStop;
+				auto rightStop = *iCurrentAlphaStop;
+				if (rightStop + 1 != iSelection.alpha_stops().end())
+					++rightStop;
+				(**iCurrentAlphaStop).first =
+					std::min(std::max(pos,
+						leftStop == *iCurrentAlphaStop ? 0.0 : leftStop->first + min),
+						rightStop == *iCurrentAlphaStop ? 1.0 : rightStop->first - min);
+				update();
+			}
+		}
 	}
-
+	
+	neogfx::mouse_cursor gradient_widget::mouse_cursor() const
+	{
+		point mousePos = surface().mouse_position() - origin();
+		if (contents_rect().contains(mousePos))
+		{
+			if (iCurrentColourStop != boost::none || iCurrentAlphaStop != boost::none)
+				return mouse_system_cursor::Crosshair;
+			else
+				return mouse_system_cursor::Arrow;
+		}
+		else if (stop_at(mousePos) != boost::none)
+			return mouse_system_cursor::Arrow;
+		else if (mousePos.x >= contents_rect().left() && mousePos.x < contents_rect().right())
+			return mouse_system_cursor::Hand;
+		return widget::mouse_cursor();
+	}
+	
 	rect gradient_widget::contents_rect() const
 	{
 		rect r = client_rect(false);
@@ -365,8 +459,8 @@ namespace neogfx
 				{0, transparentColour},
 				{1, frameColour},
 				{2, frameColour.mid(backgroundColour)},
-				{3, iCurrentColourStop == boost::none || &iSelection.colour_stops()[*iCurrentColourStop] != &aColourStop ? backgroundColour : app::instance().current_style().selection_colour()},
-				{4, iCurrentColourStop == boost::none || &iSelection.colour_stops()[*iCurrentColourStop] != &aColourStop ? backgroundColour : app::instance().current_style().selection_colour().lighter(0x40)},
+				{3, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().selection_colour()},
+				{4, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().selection_colour().lighter(0x40)},
 				{9, aColourStop.second}} };
 		aGraphicsContext.draw_texture(r.top_left(), texture{ stopGlyph });
 	}
@@ -404,8 +498,8 @@ namespace neogfx
 				{ 0, transparentColour },
 				{ 1, frameColour },
 				{ 2, frameColour.mid(backgroundColour) },
-				{ 3, iCurrentAlphaStop == boost::none || &iSelection.alpha_stops()[*iCurrentAlphaStop] != &aAlphaStop ? backgroundColour : app::instance().current_style().selection_colour() },
-				{ 4, iCurrentAlphaStop == boost::none || &iSelection.alpha_stops()[*iCurrentAlphaStop] != &aAlphaStop ? backgroundColour : app::instance().current_style().selection_colour().lighter(0x40) },
+				{ 3, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().selection_colour() },
+				{ 4, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().selection_colour().lighter(0x40) },
 				{ 9, colour::White.with_alpha(aAlphaStop.second) } } };
 		aGraphicsContext.draw_texture(r.top_left(), texture{ stopGlyph });
 	}

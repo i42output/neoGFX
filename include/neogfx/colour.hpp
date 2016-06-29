@@ -812,15 +812,30 @@ namespace neogfx
 		const alpha_stop_list& alpha_stops() const;
 		alpha_stop_list& alpha_stops();
 		colour_stop_list combined_stops() const;
+		colour_stop_list::iterator find_colour_stop(double aPos);
+		colour_stop_list::iterator find_colour_stop(double aPos, double aStart, double aEnd);
+		alpha_stop_list::iterator find_alpha_stop(double aPos);
+		alpha_stop_list::iterator find_alpha_stop(double aPos, double aStart, double aEnd);
+		colour_stop_list::iterator insert_colour_stop(double aPos);
+		colour_stop_list::iterator insert_colour_stop(double aPos, double aStart, double aEnd);
+		alpha_stop_list::iterator insert_alpha_stop(double aPos);
+		alpha_stop_list::iterator insert_alpha_stop(double aPos, double aStart, double aEnd);
 		colour at(double aPos) const;
 		colour at(double aPos, double aStart, double aEnd) const;
+		colour colour_at(double aPos) const;
+		colour colour_at(double aPos, double aStart, double aEnd) const;
+		colour::component alpha_at(double aPos) const;
+		colour::component alpha_at(double aPos, double aStart, double aEnd) const;
 		gradient with_alpha(colour::component aAlpha) const;
 		gradient with_combined_alpha(colour::component aAlpha) const;
 		direction_e direction() const;
 		void set_direction(direction_e aDirection);
+	public:
 		bool operator==(const gradient& aOther) const;
 		bool operator!=(const gradient& aOther) const;
 		bool operator<(const gradient& aOther) const;
+	public:
+		static double normalized_position(double aPos, double aStart, double aEnd);
 	private:
 		void fix();
 		// attributes

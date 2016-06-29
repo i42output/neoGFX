@@ -411,7 +411,57 @@ namespace neogfx
 		}), results.end());
 		return results;
 	}
+	
+	gradient::colour_stop_list::iterator gradient::find_colour_stop(double aPos)
+	{
+		auto colourStop = std::lower_bound(iColourStops.begin(), iColourStops.end(), colour_stop{ aPos, colour{} },
+			[](const colour_stop& aLeft, const colour_stop& aRight)
+		{
+			return aLeft.first < aRight.first;
+		});
+		return colourStop;
+	}
 
+	gradient::colour_stop_list::iterator gradient::find_colour_stop(double aPos, double aStart, double aEnd)
+	{
+		return find_colour_stop(normalized_position(aPos, aStart, aEnd));
+	}
+
+	gradient::alpha_stop_list::iterator gradient::find_alpha_stop(double aPos)
+	{
+		auto alphaStop = std::lower_bound(iAlphaStops.begin(), iAlphaStops.end(), alpha_stop{ aPos, 255 },
+			[](const alpha_stop& aLeft, const alpha_stop& aRight)
+		{
+			return aLeft.first < aRight.first;
+		});
+		return alphaStop;
+	}
+
+	gradient::alpha_stop_list::iterator gradient::find_alpha_stop(double aPos, double aStart, double aEnd)
+	{
+		return find_alpha_stop(normalized_position(aPos, aStart, aEnd));
+	}
+
+	gradient::colour_stop_list::iterator gradient::insert_colour_stop(double aPos)
+	{
+		return iColourStops.insert(find_colour_stop(aPos), colour_stop(aPos, colour_at(aPos)));
+	}
+
+	gradient::colour_stop_list::iterator gradient::insert_colour_stop(double aPos, double aStart, double aEnd)
+	{
+		return insert_colour_stop(normalized_position(aPos, aStart, aEnd));
+	}
+
+	gradient::alpha_stop_list::iterator gradient::insert_alpha_stop(double aPos)
+	{
+		return iAlphaStops.insert(find_alpha_stop(aPos), alpha_stop(aPos, alpha_at(aPos)));
+	}
+
+	gradient::alpha_stop_list::iterator gradient::insert_alpha_stop(double aPos, double aStart, double aEnd)
+	{
+		return insert_alpha_stop(normalized_position(aPos, aStart, aEnd));
+	}
+	
 	namespace
 	{
 		template <typename T>
@@ -425,14 +475,25 @@ namespace neogfx
 
 	colour gradient::at(double aPos) const
 	{
+		color result = colour_at(aPos);
+		return result.with_combined_alpha(alpha_at(aPos));
+	}
+
+	colour gradient::at(double aPos, double aStart, double aEnd) const
+	{
+		return at(normalized_position(aPos, aStart, aEnd));
+	}
+
+	colour gradient::colour_at(double aPos) const
+	{
 		if (aPos < 0.0 || aPos > 1.0)
 			throw bad_position();
 		colour::component red{}, green{}, blue{}, alpha{};
 		auto colourStop = std::lower_bound(iColourStops.begin(), iColourStops.end(), colour_stop{ aPos, colour{} },
 			[](const colour_stop& aLeft, const colour_stop& aRight)
-			{
-				return aLeft.first < aRight.first;
-			});
+		{
+			return aLeft.first < aRight.first;
+		});
 		if (colourStop->first >= aPos && colourStop != iColourStops.begin())
 			--colourStop;
 		auto left = colourStop;
@@ -442,26 +503,33 @@ namespace neogfx
 		green = interpolate(left->second.green(), right->second.green(), nc);
 		blue = interpolate(left->second.blue(), right->second.blue(), nc);
 		alpha = interpolate(left->second.alpha(), right->second.alpha(), nc);
+		return colour{ red, green, blue, alpha };
+	}
+
+	colour gradient::colour_at(double aPos, double aStart, double aEnd) const
+	{
+		return colour_at(normalized_position(aPos, aStart, aEnd));
+	}
+
+	colour::component gradient::alpha_at(double aPos) const
+	{
 		auto alphaStop = std::lower_bound(iAlphaStops.begin(), iAlphaStops.end(), alpha_stop{ aPos, 255 },
 			[](const alpha_stop& aLeft, const alpha_stop& aRight)
-			{
-				return aLeft.first < aRight.first;
-			});
+		{
+			return aLeft.first < aRight.first;
+		});
 		if (alphaStop->first >= aPos && alphaStop != iAlphaStops.begin())
 			--alphaStop;
 		auto leftAlpha = alphaStop;
 		auto rightAlpha = alphaStop + 1;
 		double na = (aPos - leftAlpha->first) / (rightAlpha->first - leftAlpha->first);
-		alpha = static_cast<colour::component>((alpha / 255.0 * interpolate(leftAlpha->second, rightAlpha->second, na) / 255.0) * 255.0);
-		return colour(red, green, blue, alpha);
+		colour::component alpha = static_cast<colour::component>((interpolate(leftAlpha->second, rightAlpha->second, na) / 255.0) * 255.0);
+		return alpha;
 	}
 
-	colour gradient::at(double aPos, double aStart, double aEnd) const
+	colour::component gradient::alpha_at(double aPos, double aStart, double aEnd) const
 	{
-		if (aStart != aEnd)
-			return at((aPos - aStart) / (aEnd - aStart));
-		else
-			return at(0.0);
+		return alpha_at(normalized_position(aPos, aStart, aEnd));
 	}
 
 	gradient gradient::with_alpha(colour::component aAlpha) const
@@ -503,6 +571,14 @@ namespace neogfx
 	bool gradient::operator<(const gradient& aOther) const
 	{
 		return std::tie(iColourStops, iAlphaStops, iDirection) < std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection);
+	}
+
+	double gradient::normalized_position(double aPos, double aStart, double aEnd)
+	{
+		if (aStart != aEnd)
+			return std::max(0.0, std::min(1.0, (aPos - aStart) / (aEnd - aStart)));
+		else
+			return 0.0;
 	}
 
 	void gradient::fix()
