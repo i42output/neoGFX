@@ -807,11 +807,14 @@ namespace neogfx
 		gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection = Vertical);
 		// operations
 	public:
-		const colour_stop_list& colour_stops() const;
-		colour_stop_list& colour_stops();
-		const alpha_stop_list& alpha_stops() const;
-		alpha_stop_list& alpha_stops();
-		colour_stop_list combined_stops() const;
+		colour_stop_list::const_iterator colour_begin() const;
+		colour_stop_list::const_iterator colour_end() const;
+		alpha_stop_list::const_iterator alpha_begin() const;
+		alpha_stop_list::const_iterator alpha_end() const;
+		colour_stop_list::iterator colour_begin();
+		colour_stop_list::iterator colour_end();
+		alpha_stop_list::iterator alpha_begin();
+		alpha_stop_list::iterator alpha_end();
 		colour_stop_list::iterator find_colour_stop(double aPos);
 		colour_stop_list::iterator find_colour_stop(double aPos, double aStart, double aEnd);
 		alpha_stop_list::iterator find_alpha_stop(double aPos);
@@ -820,6 +823,11 @@ namespace neogfx
 		colour_stop_list::iterator insert_colour_stop(double aPos, double aStart, double aEnd);
 		alpha_stop_list::iterator insert_alpha_stop(double aPos);
 		alpha_stop_list::iterator insert_alpha_stop(double aPos, double aStart, double aEnd);
+		void erase_stop(colour_stop_list::iterator aStop);
+		void erase_stop(alpha_stop_list::iterator aStop);
+		std::size_t colour_stop_count() const;
+		std::size_t alpha_stop_count() const;
+		colour_stop_list combined_stops() const;
 		colour at(double aPos) const;
 		colour at(double aPos, double aStart, double aEnd) const;
 		colour colour_at(double aPos) const;
@@ -837,6 +845,10 @@ namespace neogfx
 	public:
 		static double normalized_position(double aPos, double aStart, double aEnd);
 	private:
+		const colour_stop_list& colour_stops() const;
+		colour_stop_list& colour_stops();
+		const alpha_stop_list& alpha_stops() const;
+		alpha_stop_list& alpha_stops();
 		void fix();
 		// attributes
 	private:

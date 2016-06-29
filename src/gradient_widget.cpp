@@ -163,9 +163,9 @@ namespace neogfx
 		aGraphicsContext.draw_rect(rectContents, pen(frameColour.mid(background_colour()), BORDER_THICKNESS));
 		rectContents.inflate(size{ BORDER_THICKNESS });
 		aGraphicsContext.draw_rect(rectContents, pen(frameColour, BORDER_THICKNESS));
-		for (gradient::colour_stop_list::const_iterator i = iSelection.colour_stops().begin(); i != iSelection.colour_stops().end(); ++i)
+		for (gradient::colour_stop_list::const_iterator i = iSelection.colour_begin(); i != iSelection.colour_end(); ++i)
 			draw_colour_stop(aGraphicsContext, *i);
-		for (gradient::alpha_stop_list::const_iterator i = iSelection.alpha_stops().begin(); i != iSelection.alpha_stops().end(); ++i)
+		for (gradient::alpha_stop_list::const_iterator i = iSelection.alpha_begin(); i != iSelection.alpha_end(); ++i)
 			draw_alpha_stop(aGraphicsContext, *i);
 	}
 
@@ -272,10 +272,10 @@ namespace neogfx
 					{
 						if (iCurrentColourStop != boost::none && *iCurrentColourStop == static_variant_cast<gradient::colour_stop_list::iterator>(stopIter))
 							iCurrentColourStop = boost::none;
-						iSelection.colour_stops().erase(static_variant_cast<gradient::colour_stop_list::iterator>(stopIter));
+						iSelection.erase_stop(static_variant_cast<gradient::colour_stop_list::iterator>(stopIter));
 						update();
 					});
-					if (iSelection.colour_stops().size() <= 2)
+					if (iSelection.colour_stop_count() <= 2)
 						deleteStopAction.disable();
 					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
 					iMenu->menu().add_action(selectColourAction);
@@ -301,10 +301,10 @@ namespace neogfx
 					{
 						if (iCurrentAlphaStop != boost::none && *iCurrentAlphaStop == static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter))
 							iCurrentAlphaStop = boost::none;
-						iSelection.alpha_stops().erase(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
+						iSelection.erase_stop(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
 						update();
 					});
-					if (iSelection.alpha_stops().size() <= 2)
+					if (iSelection.alpha_stop_count() <= 2)
 						deleteStopAction.disable();
 					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
 					iMenu->menu().add_action(selectAlphaAction);
@@ -328,10 +328,10 @@ namespace neogfx
 			if (iCurrentColourStop != boost::none)
 			{
 				auto leftStop = *iCurrentColourStop;
-				if (leftStop != iSelection.colour_stops().begin())
+				if (leftStop != iSelection.colour_begin())
 					--leftStop;
 				auto rightStop = *iCurrentColourStop;
-				if (rightStop + 1 != iSelection.colour_stops().end())
+				if (rightStop + 1 != iSelection.colour_end())
 					++rightStop;
 				(**iCurrentColourStop).first =
 					std::min(std::max(pos,
@@ -342,10 +342,10 @@ namespace neogfx
 			else if (iCurrentAlphaStop != boost::none)
 			{
 				auto leftStop = *iCurrentAlphaStop;
-				if (leftStop != iSelection.alpha_stops().begin())
+				if (leftStop != iSelection.alpha_begin())
 					--leftStop;
 				auto rightStop = *iCurrentAlphaStop;
-				if (rightStop + 1 != iSelection.alpha_stops().end())
+				if (rightStop + 1 != iSelection.alpha_end())
 					++rightStop;
 				(**iCurrentAlphaStop).first =
 					std::min(std::max(pos,
@@ -386,10 +386,10 @@ namespace neogfx
 
 	gradient_widget::stop_const_iterator gradient_widget::stop_at(const point& aPosition) const
 	{
-		for (auto i = iSelection.colour_stops().begin(); i != iSelection.colour_stops().end(); ++i)
+		for (auto i = iSelection.colour_begin(); i != iSelection.colour_end(); ++i)
 			if (colour_stop_rect(*i).contains(aPosition))
 				return i;
-		for (auto i = iSelection.alpha_stops().begin(); i != iSelection.alpha_stops().end(); ++i)
+		for (auto i = iSelection.alpha_begin(); i != iSelection.alpha_end(); ++i)
 			if (alpha_stop_rect(*i).contains(aPosition))
 				return i;
 		return stop_const_iterator{};
@@ -397,10 +397,10 @@ namespace neogfx
 
 	gradient_widget::stop_iterator gradient_widget::stop_at(const point& aPosition)
 	{
-		for (auto i = iSelection.colour_stops().begin(); i != iSelection.colour_stops().end(); ++i)
+		for (auto i = iSelection.colour_begin(); i != iSelection.colour_end(); ++i)
 			if (colour_stop_rect(*i).contains(aPosition))
 				return i;
-		for (auto i = iSelection.alpha_stops().begin(); i != iSelection.alpha_stops().end(); ++i)
+		for (auto i = iSelection.alpha_begin(); i != iSelection.alpha_end(); ++i)
 			if (alpha_stop_rect(*i).contains(aPosition))
 				return i;
 		return stop_iterator{};
