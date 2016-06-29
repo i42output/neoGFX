@@ -549,7 +549,7 @@ namespace neogfx
 		if (right == colour_stops().end())
 			--right;
 		aPos = std::min(std::max(left->first, aPos), right->first);
-		double nc = (aPos - left->first) / (right->first - left->first);
+		double nc = (left != right ? (aPos - left->first) / (right->first - left->first) : 0.0);
 		red = interpolate(left->second.red(), right->second.red(), nc);
 		green = interpolate(left->second.green(), right->second.green(), nc);
 		blue = interpolate(left->second.blue(), right->second.blue(), nc);
@@ -578,7 +578,7 @@ namespace neogfx
 		if (right == alpha_stops().end())
 			--right;
 		aPos = std::min(std::max(left->first, aPos), right->first);
-		double na = (aPos - left->first) / (right->first - left->first);
+		double na = (left != right ? (aPos - left->first) / (right->first - left->first) : 0.0);
 		colour::component alpha = static_cast<colour::component>((interpolate(left->second, right->second, na) / 255.0) * 255.0);
 		return alpha;
 	}
