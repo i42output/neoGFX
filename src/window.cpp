@@ -261,24 +261,24 @@ namespace neogfx
 	void window::layout_items_completed()
 	{
 		scrollable_widget::layout_items_completed();
-		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(iNativeWindow->mouse_position()) : *iCapturingWidget);
+		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position()) : *iCapturingWidget);
 		if (iEnteredWidget != &widgetUnderMouse)
 			native_window_mouse_entered();
 	}
 
 	size window::extents() const
 	{
-		return iNativeWindow->extents();
+		return native_surface().extents();
 	}
 
 	dimension window::horizontal_dpi() const
 	{
-		return iNativeWindow->horizontal_dpi();
+		return native_surface().horizontal_dpi();
 	}
 
 	dimension window::vertical_dpi() const
 	{
-		return iNativeWindow->vertical_dpi();
+		return native_surface().vertical_dpi();
 	}
 
 	dimension window::em_size() const
@@ -339,7 +339,8 @@ namespace neogfx
 		if (has_layout())
 			layout().remove_items();
 		remove_widgets();
-		if (!destroyed())
+		destroyed_flag destroyed(*this);
+		if (!window::destroyed())
 		{
 			native_surface().deactivate_context();
 			native_surface().close();
@@ -348,6 +349,8 @@ namespace neogfx
 		{
 			auto ptr = std::move(iNativeWindow);
 		}
+		if (destroyed)
+			return;
 		iClosed = true;
 		closed.trigger();
 	}
@@ -423,14 +426,15 @@ namespace neogfx
 
 	void window::invalidate_surface(const rect& aInvalidatedRect, bool aInternal)
 	{
-		iNativeWindow->invalidate(aInvalidatedRect);
+		native_surface().invalidate(aInvalidatedRect);
 		if (!aInternal)
 			update(aInvalidatedRect);
 	}
 
 	void window::render_surface()
 	{
-		iNativeWindow->render();
+		if (!destroyed())
+			native_surface().render();
 	}
 	
 	graphics_context window::create_graphics_context() const
@@ -445,11 +449,15 @@ namespace neogfx
 
 	const i_native_window& window::native_surface() const
 	{
+		if (iNativeWindow == nullptr)
+			throw no_native_surface();
 		return *iNativeWindow;
 	}
 
 	i_native_window& window::native_surface()
 	{
+		if (iNativeWindow == nullptr)
+			throw no_native_surface();
 		return *iNativeWindow;
 	}
 
@@ -577,7 +585,7 @@ namespace neogfx
 		if (iCapturingWidget != &aWidget)
 		{
 			iCapturingWidget = &aWidget;
-			iNativeWindow->set_capture();
+			native_surface().set_capture();
 			aWidget.captured();
 			native_window_mouse_entered();
 		}
@@ -587,7 +595,7 @@ namespace neogfx
 	{
 		if (iCapturingWidget != &aWidget)
 			throw widget_not_capturing();
-		iNativeWindow->release_capture();
+		native_surface().release_capture();
 		iCapturingWidget = 0;
 		aWidget.released();
 		native_window_mouse_entered();
@@ -625,7 +633,7 @@ namespace neogfx
 	void window::activate()
 	{
 		if (iNativeWindow)
-			iNativeWindow->activate();
+			native_surface().activate();
 	}
 
 	void window::counted_enable(bool aEnable)
@@ -635,7 +643,7 @@ namespace neogfx
 		else
 			--iCountedEnable;
 		if (iNativeWindow)
-			iNativeWindow->enable(iCountedEnable >= 0);
+			native_surface().enable(iCountedEnable >= 0);
 	}
 
 	bool window::has_surface() const
@@ -684,9 +692,12 @@ namespace neogfx
 			iNativeWindowClosing = true;
 			update_modality();
 		}
+		destroyed_flag destroyed(*this);
 		{
 			auto ptr = std::move(iNativeWindow);
 		}
+		if (destroyed)
+			return;
 		app::instance().surface_manager().remove_surface(*this);
 		if (has_parent() && !(static_cast<window&>(parent()).style() & window::NoActivate))
 			static_cast<window&>(parent()).activate();
@@ -741,7 +752,7 @@ namespace neogfx
 
 	void window::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
-		widget_for_mouse_event(iNativeWindow->mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
+		widget_for_mouse_event(native_surface().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
 	void window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -779,7 +790,7 @@ namespace neogfx
 
 	void window::native_window_mouse_entered()
 	{
-		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(iNativeWindow->mouse_position()) : *iCapturingWidget);
+		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position()) : *iCapturingWidget);
 		i_widget* previousEnteredWidget = iEnteredWidget;
 		iEnteredWidget = &widgetUnderMouse;
 		if (iEnteredWidget != previousEnteredWidget)
@@ -904,7 +915,7 @@ namespace neogfx
 
 	neogfx::mouse_cursor window::native_window_mouse_cursor() const
 	{
-		const i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(iNativeWindow->mouse_position()) : *iCapturingWidget);
+		const i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position()) : *iCapturingWidget);
 		return widgetUnderMouse.mouse_cursor();
 	}
 

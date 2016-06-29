@@ -59,7 +59,7 @@ namespace neogfx
 	bool surface_manager::is_surface_attached(void* aNativeSurfaceHandle) const
 	{
 		for (auto& s : iSurfaces)
-			if (s->native_surface().handle() == aNativeSurfaceHandle)
+			if (!s->destroyed() && s->native_surface().handle() == aNativeSurfaceHandle)
 				return true;
 		return false;
 	}
@@ -67,7 +67,7 @@ namespace neogfx
 	i_surface& surface_manager::attached_surface(void* aNativeSurfaceHandle)
 	{
 		for (auto& s : iSurfaces)
-			if (s->native_surface().handle() == aNativeSurfaceHandle)
+			if (!s->destroyed() && s->native_surface().handle() == aNativeSurfaceHandle)
 				return *s;
 		throw surface_not_found();
 	}
