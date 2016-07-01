@@ -241,9 +241,16 @@ int main(int argc, char* argv[])
 		testMenu.add_action(muteAction);
 		testMenu.add_action(muteAction);
 		testMenu.add_action(muteAction);
+		ng::i_action& colourAction = app.add_action("Colour Dialog...");
+		colourAction.triggered([&window]()
+		{
+			ng::color_dialog cd(window);
+			cd.exec();
+		});
+		testMenu.add_action(colourAction);
 		auto& windowMenu = menu.add_sub_menu("&Window");
 		auto& helpMenu = menu.add_sub_menu("&Help");
-		
+
 		ng::toolbar toolbar(layout0);
 		toolbar.add_action(contactsAction);
 		toolbar.add_action(addFavouriteAction);
