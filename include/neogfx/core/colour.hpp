@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometry.hpp>
+#include "geometry.hpp"
 #include "hsl_colour.hpp"
 #include "hsv_colour.hpp"
 
