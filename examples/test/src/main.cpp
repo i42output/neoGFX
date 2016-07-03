@@ -1,30 +1,30 @@
 ﻿#include <neolib/neolib.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
-#include <neogfx/app.hpp>
-#include <neogfx/window.hpp>
-#include <neogfx/push_button.hpp>
-#include <neogfx/vertical_layout.hpp>
-#include <neogfx/horizontal_layout.hpp>
-#include <neogfx/grid_layout.hpp>
-#include <neogfx/spacer.hpp>
-#include <neogfx/table_view.hpp>
-#include <neogfx/radio_button.hpp>
-#include <neogfx/check_box.hpp>
-#include <neogfx/default_item_model.hpp>
-#include <neogfx/item_presentation_model.hpp>
-#include <neogfx/tab_page_container.hpp>
-#include <neogfx/i_surface.hpp>
-#include <neogfx/image_widget.hpp>
-#include <neogfx/sprite_plane.hpp>
-#include <neogfx/toolbar.hpp>
-#include <neogfx/menu_bar.hpp>
-#include <neogfx/text_edit.hpp>
-#include <neogfx/line_edit.hpp>
-#include <neogfx/spin_box.hpp>
-#include <neogfx/slider.hpp>
-#include <neogfx/colour_dialog.hpp>
-#include <neogfx/gradient_widget.hpp>
+#include <neogfx/app/app.hpp>
+#include <neogfx/gui/window/window.hpp>
+#include <neogfx/gui/widget/push_button.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/layout/grid_layout.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/table_view.hpp>
+#include <neogfx/gui/widget/radio_button.hpp>
+#include <neogfx/gui/widget/check_box.hpp>
+#include <neogfx/gui/widget/default_item_model.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/gui/widget/tab_page_container.hpp>
+#include <neogfx/hid/i_surface.hpp>
+#include <neogfx/gui/widget/image_widget.hpp>
+#include <neogfx/game/sprite_plane.hpp>
+#include <neogfx/gui/widget/toolbar.hpp>
+#include <neogfx/gui/widget/menu_bar.hpp>
+#include <neogfx/gui/widget/text_edit.hpp>
+#include <neogfx/gui/widget/line_edit.hpp>
+#include <neogfx/gui/widget/spin_box.hpp>
+#include <neogfx/gui/widget/slider.hpp>
+#include <neogfx/gui/dialog/colour_dialog.hpp>
+#include <neogfx/gui/widget/gradient_widget.hpp>
 
 namespace ng = neogfx;
 
@@ -276,7 +276,7 @@ int main(int argc, char* argv[])
 		layoutButtons.set_margins(ng::margins(8));
 		ng::push_button button0(layoutButtons, "This is the neoGFX test application.");
 		button0.label().set_placement(ng::label_placement::ImageTextVertical);
-		button0.image().set_image(ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../neoGFX.png" });
+		button0.image().set_image(ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../../neoGFX.png" });
 		button0.image().set_minimum_size(ng::size{ 32, 32 });
 		button0.image().set_maximum_size(ng::size{ 160, std::numeric_limits<ng::dimension>::max() });
 		button0.set_size_policy(ng::size_policy::Expanding);
@@ -521,7 +521,7 @@ int main(int argc, char* argv[])
 		auto& tabDrawing = tabContainer.add_tab_page("Drawing").widget();
 		tabDrawing.painting([&tabDrawing](ng::graphics_context& aGc)
 		{
-			ng::texture logo{ ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../neoGFX.png" } };
+			ng::texture logo{ ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../../neoGFX.png" } };
 			aGc.draw_texture(ng::point{ (tabDrawing.extents() - logo.extents()) / 2.0 }, logo);
 			aGc.fill_rounded_rect(ng::rect{ 100, 100, 100, 100 }, 10.0, ng::colour::Goldenrod);
 			aGc.fill_rect(ng::rect{ 300, 250, 200, 100 },

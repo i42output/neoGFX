@@ -1,10 +1,10 @@
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app.hpp>
-#include <neogfx/window.hpp>
-#include <neogfx/vertical_layout.hpp>
-#include <neogfx/sprite.hpp>
-#include <neogfx/sprite_plane.hpp>
-#include <neogfx/image.hpp>
+#include <neogfx/app/app.hpp>
+#include <neogfx/gui/window/window.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/game/sprite.hpp>
+#include <neogfx/game/sprite_plane.hpp>
+#include <neogfx/gfx/image.hpp>
 
 namespace ng = neogfx;
 

@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 		{
 			std::ofstream output(outputFileName);
 			output << "// This is a automatically generated file, do not edit!" << std::endl;
-			output << "#include <neogfx/resource_manager.hpp>" << std::endl << std::endl;
+			output << "#include <neogfx/app/resource_manager.hpp>" << std::endl << std::endl;
 			output << "namespace nrc" << std::endl << "{" << std::endl;
 			output << "namespace" << std::endl << "{" << std::endl;
 			std::vector<std::string> resourcePaths;

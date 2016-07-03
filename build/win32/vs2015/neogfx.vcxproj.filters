@@ -21,734 +21,737 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\neogfx\app.hpp">
+    <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\i_native_window.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\sdl_renderer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_renderer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\hid\native\sdl_keyboard.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\i_native_window_event_handler.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\sdl_basic_services.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\i_native_graphics_context.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\native_window_events.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\i_native_texture.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font_face.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\i_native_clipboard.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\text\native\native_font.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_graphics_context.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\sdl_graphics_context.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\sdl_window.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\font_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\button.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\hid\surface_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\colour.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\i_window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\default_item_model.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_mnemonic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\event.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_style.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\font.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\font_manager.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\font_texture.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_engine.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\framed_widget.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_surface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\generic_cursor.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\app.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\geometry.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\spacer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\graphics_context.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\grid_layout.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\header_view.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_widget_geometry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\horizontal_layout.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_spacer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\hsl_colour.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_app.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_basic_item_model.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_action.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_font_manager.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\texture_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_font_texture.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\shape.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_geometry.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\image.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_item_model.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_item_presentation_model.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_item_selection_model.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\i_shape.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_layout.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\action.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_native_font.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_presentation_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_native_font_face.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog_button_box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_native_graphics_context.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_item_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_native_surface.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\clipboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_native_window.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_shared_menu_bar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_native_window_event_handler.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_rendering_engine.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\image_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_scrollbar.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_page_container.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_spacer.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_selection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_style.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_surface.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_container.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_surface_manager.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_keyboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_widget.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_selection_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_window.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_clipboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\item_model_index.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\item_presentation_model.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\item_selection.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_resource.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\item_selection_model.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\item_view.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\label.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\layout.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\mouse.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\native_font.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\native_font_face.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\native_window.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\path.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\neogfx.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\opengl_error.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\opengl_graphics_context.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_basic_services.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\opengl_renderer.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_image.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\opengl_window.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\scrollbar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\path.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\i_sprite.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\pen.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_scrollbar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\primitives.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_presentation_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\push_button.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\gradient_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\scrollable_widget.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\skyline_bin_pack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\scrollbar.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\sdl_graphics_context.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\i_physical_object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\sdl_keyboard.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\sdl_renderer.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\sdl_window.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\horizontal_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\skyline_bin_pack.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\glyph.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\spacer.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\font.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\splitter.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\flow_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\style.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\colour.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\subpixel_rgb_horizontal.frag.glsl.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\surface_manager.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\colour_dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\table_view.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\text_direction_map.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\event.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\text_widget.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\framed_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\vertical_layout.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\geometry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\video_mode.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\grid_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\widget.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\header_view.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\window.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\hsl_colour.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\check_box.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\hsv_colour.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\radio_button.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_app.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\tab_button.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_basic_item_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\tab_bar.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_document.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_tab.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_tab_page.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_tab_container.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_tab_page_container.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\i_resource_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\tab_page_container.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_surface_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\stack_layout.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page_container.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\resource_manager.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model_index.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_resource.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_selection_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\module_resource.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_view.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\texture.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\hid\keyboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_texture.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\label.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_image.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\line_edit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\image.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_bar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\resource.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_resource_manager.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\image_widget.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\module_resource.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_texture_manager.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\hid\mouse.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\texture_manager.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_native_texture.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\physical_object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\opengl_texture.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\popup_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\sprite.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\push_button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_sprite.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\radio_button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\numerical.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\swizzle.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\resource.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\sprite_plane.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\resource_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_physical_object.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\physical_object.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\slider.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_shape.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\spin_box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\shape.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\splitter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\rectangle.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\sprite.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\glyph.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\sprite_plane.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\text.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\stack_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\action.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\app\style.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_action.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\toolbar_button.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_bar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\toolbar.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_basic_services.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\table_view.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\sdl_basic_services.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\text.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\flow_layout.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_direction_map.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\menu_bar.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_edit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_menu_item.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_menu.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\menu.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar_button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_shared_menu_bar.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\vertical_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\layout_item.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\hid\video_mode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\menu_item.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\menu_item_widget.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\popup_menu.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_keyboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\keyboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_mnemonic.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\text_edit.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\cursor.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_document.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\clipboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\i_clipboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\line_edit.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\spin_box.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\slider.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\dialog.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\dialog_button_box.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\hsv_colour.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\colour_dialog.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gradient_widget.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\native_window_events.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\..\src\gfx\text\native\native_font_texture.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\context_menu.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\include\neogfx\path.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\include\neogfx\layout.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\include\neogfx\flow_layout.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\include\neogfx\spin_box.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\include\neogfx\slider.inl">
-      <Filter>Header Files</Filter>
-    </None>
+    <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\gradient.vert">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\app.cpp">
+    <ClCompile Include="..\..\..\src\app\resource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\button.cpp">
+    <ClCompile Include="..\..\..\src\app\native\sdl_basic_services.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\colour.cpp">
+    <ClCompile Include="..\..\..\src\app\clipboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\font.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\font_manager.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\font_texture.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\framed_widget.cpp">
+    <ClCompile Include="..\..\..\src\gui\window\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\geometry.cpp">
+    <ClCompile Include="..\..\..\src\app\app.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphics_context.cpp">
+    <ClCompile Include="..\..\..\src\gui\layout\layout_item.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\grid_layout.cpp">
+    <ClCompile Include="..\..\..\src\gui\layout\layout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\header_view.cpp">
+    <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\horizontal_layout.cpp">
+    <ClCompile Include="..\..\..\src\app\style.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\hsl_colour.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\item_view.cpp">
+    <ClCompile Include="..\..\..\src\gfx\texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\label.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\text_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\layout.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\text_edit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\native_font.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\tab_button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\native_font_face.cpp">
+    <ClCompile Include="..\..\..\src\game\sprite_plane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\native_window.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\splitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\layout\spacer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\slider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\native\sdl_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\scrollbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\native\opengl_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\native\native_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\menu_item_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\menu_bar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\item_view.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\header_view.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\gradient_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\text\font_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\text\font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\dialog\dialog_button_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\module_resource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\hsv_colour.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\hsl_colour.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\colour.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\dialog\colour_dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\layout\flow_layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\layout\grid_layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\layout\horizontal_layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\image_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\label.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\line_edit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\menu_item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\text\native\native_font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\text\native\native_font_face.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\neogfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\opengl_error.cpp">
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\opengl_graphics_context.cpp">
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_graphics_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\opengl_renderer.cpp">
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\opengl_window.cpp">
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\push_button.cpp">
+    <ClCompile Include="..\..\..\src\game\physical_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\scrollable_widget.cpp">
+    <ClCompile Include="..\..\..\src\game\rectangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\scrollbar.cpp">
+    <ClCompile Include="..\..\..\src\app\resource_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\sdl_graphics_context.cpp">
+    <ClCompile Include="..\..\..\src\gfx\native\sdl_graphics_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\sdl_renderer.cpp">
+    <ClCompile Include="..\..\..\src\game\shape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\sdl_window.cpp">
+    <ClCompile Include="..\..\..\src\gfx\text\skyline_bin_pack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\skyline_bin_pack.cpp">
+    <ClCompile Include="..\..\..\src\game\sprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\spacer.cpp">
+    <ClCompile Include="..\..\..\src\gui\layout\stack_layout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\splitter.cpp">
+    <ClCompile Include="..\..\..\src\hid\surface_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\style.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\tab_bar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\surface_manager.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\tab_page_container.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\table_view.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\table_view.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\text_widget.cpp">
+    <ClCompile Include="..\..\..\src\game\text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\vertical_layout.cpp">
+    <ClCompile Include="..\..\..\src\gfx\texture_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\widget.cpp">
+    <ClCompile Include="..\..\..\src\gui\widget\toolbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\window.cpp">
+    <ClCompile Include="..\..\..\src\gui\layout\vertical_layout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\stack_layout.cpp">
+    <ClCompile Include="..\..\..\src\app\action.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\resource_manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\module_resource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\resource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\image_widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\opengl_texture_manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\texture_manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\opengl_texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\sprite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\check_box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\radio_button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\sprite_plane.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\tab_bar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\tab_button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\tab_page_container.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\physical_object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\shape.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\rectangle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\text.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\action.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\toolbar_button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\toolbar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\sdl_basic_services.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\flow_layout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\menu_bar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\menu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\layout_item.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\menu_item.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\menu_item_widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\popup_menu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\keyboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\text_edit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\cursor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\clipboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\line_edit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\spin_box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\slider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\dialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\dialog_button_box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\hsv_colour.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\colour_dialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gradient_widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\context_menu.cpp">
+    <ClCompile Include="..\..\..\src\gfx\text\native\native_font_texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\src\gradient.frag">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gradient.vert">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
+    <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\widget\slider.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\layout\layout.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\layout\flow_layout.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\core\path.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
