@@ -199,7 +199,10 @@ namespace neogfx
 				return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
 			}
 		}();
-		next_physics().iVelocity = current_physics().iVelocity + ((current_physics().iMass == 0 ? vec3{} : aForce / current_physics().iMass) + (rotation * current_physics().iAcceleration)) * vec3{aElapsedTime, aElapsedTime, aElapsedTime}; // v = u + at
+		// GCSE-level physics (Newtonian) going on here... :)
+		// v = u + at
+		// F = ma; a = F/m
+		next_physics().iVelocity = current_physics().iVelocity + ((current_physics().iMass == 0 ? vec3{} : aForce / current_physics().iMass) + (rotation * current_physics().iAcceleration)) * vec3{aElapsedTime, aElapsedTime, aElapsedTime};
 		next_physics().iPosition = current_physics().iPosition + vec3{1.0, 1.0, 1.0} * (current_physics().iVelocity * aElapsedTime + ((next_physics().iVelocity - current_physics().iVelocity) * aElapsedTime / 2.0));
 		next_physics().iAngle = (current_physics().iAngle + current_physics().iSpin * aElapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 		return next_physics().iPosition != current_physics().iPosition || next_physics().iAngle != current_physics().iAngle;
