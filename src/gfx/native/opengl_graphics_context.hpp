@@ -144,11 +144,9 @@ namespace neogfx
 		std::vector<logical_operation_e> iLogicalOperationStack;
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;
-		mutable std::vector<vertex> iVertices;
-		mutable std::vector<GLdouble> iTextureCoords;
-		mutable std::vector<GLshort> iIndices;
-		mutable std::vector<std::array<GLdouble, 4>> iColours;
-		mutable std::vector<std::array<GLdouble, 2>> iShifts;
+		mutable std::vector<vertex> iGlyphVertices;
+		mutable std::vector<GLdouble> iGlyphTextureCoords;
+		mutable std::vector<std::array<GLdouble, 4>> iGlyphColours;
 		struct cluster
 		{
 			std::string::size_type from;

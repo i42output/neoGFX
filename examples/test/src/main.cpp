@@ -91,14 +91,14 @@ int main(int argc, char* argv[])
 	ng::app app("neoGFX Test App");
 	try
 	{
-		app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
-		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
-		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Semibold"), 12));
+		app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
+		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
+		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 		app.change_style("Keypad");
 		app.current_style().set_colour(ng::colour::Black);
 		app.change_style("Default");
 
-		ng::window window(ng::size{ 832, 800 });
+		ng::window window(ng::size{ 675, 675 });
 
 		ng::vertical_layout layout0(window);
 

@@ -842,11 +842,10 @@ namespace neogfx
 
 	namespace
 	{
-		std::vector<double> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect)
+		std::vector<double> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const vec4& aLogicalCoordinates)
 		{
 			std::vector<double> result;
-			rect actualRect = aTextureRect + point(1.0, 1.0);
-			rect normalizedRect = actualRect / aTextureStorageSize;
+			rect normalizedRect = aTextureRect / aTextureStorageSize;
 			result.push_back(normalizedRect.top_left().x);
 			result.push_back(normalizedRect.top_left().y);
 			result.push_back(normalizedRect.top_right().x);
@@ -855,6 +854,11 @@ namespace neogfx
 			result.push_back(normalizedRect.bottom_right().y);
 			result.push_back(normalizedRect.bottom_left().x);
 			result.push_back(normalizedRect.bottom_left().y);
+			if (aLogicalCoordinates[1] < aLogicalCoordinates[3])
+			{
+				std::swap(result[1], result[5]);
+				std::swap(result[3], result[7]);
+			}
 			return result;
 		}
 	}
@@ -866,13 +870,9 @@ namespace neogfx
 
 		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aFont.fallback().native_font_face().glyph_texture(aGlyph);
 
-		auto& vertices = iVertices;
-		auto& colours = iColours;
-		auto& textureCoords = iTextureCoords;
-		textureCoords.resize(8);
-		auto& shifts = iShifts;
-		shifts.clear();
-		shifts.resize(4, std::array<GLdouble, 2>{{aPoint.x - std::floor(aPoint.x), aPoint.y - std::floor(aPoint.y)}});
+		auto& vertices = iGlyphVertices;
+		auto& colours = iGlyphColours;
+		auto& textureCoords = iGlyphTextureCoords;
 
 		point glyphOrigin(aPoint.x + glyphTexture.placement().x, 
 			logical_coordinates()[1] < logical_coordinates()[3] ? 
@@ -883,9 +883,9 @@ namespace neogfx
 		vertices.insert(vertices.begin(),
 		{
 			to_shader_vertex(glyphOrigin),
-			to_shader_vertex(glyphOrigin + point(0.0, glyphTexture.extents().cy)),
-			to_shader_vertex(glyphOrigin + point(glyphTexture.extents().cx, glyphTexture.extents().cy)),
-			to_shader_vertex(glyphOrigin + point(glyphTexture.extents().cx, 0.0))
+			to_shader_vertex(glyphOrigin + point{ glyphTexture.extents().cx, 0.0 }),
+			to_shader_vertex(glyphOrigin + point{ glyphTexture.extents().cx, glyphTexture.extents().cy }),
+			to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.extents().cy })
 		});
 
 		colours.clear();
@@ -894,20 +894,7 @@ namespace neogfx
 		bool lcdMode = iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal ||
 			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal;
 
-		textureCoords[0] = glyphTexture.font_texture_location().x / glyphTexture.font_texture().extents().cx;
-		textureCoords[1] = glyphTexture.font_texture_location().y / glyphTexture.font_texture().extents().cy;
-		textureCoords[2] = glyphTexture.font_texture_location().x / glyphTexture.font_texture().extents().cx;
-		textureCoords[3] = (glyphTexture.font_texture_location().y + glyphTexture.extents().cy) / glyphTexture.font_texture().extents().cy;
-		textureCoords[4] = (glyphTexture.font_texture_location().x + glyphTexture.extents().cx * (lcdMode ? 3.0 : 1.0)) / glyphTexture.font_texture().extents().cx;
-		textureCoords[5] = (glyphTexture.font_texture_location().y + glyphTexture.extents().cy) / glyphTexture.font_texture().extents().cy;
-		textureCoords[6] = (glyphTexture.font_texture_location().x + glyphTexture.extents().cx * (lcdMode ? 3.0 : 1.0)) / glyphTexture.font_texture().extents().cx;
-		textureCoords[7] = glyphTexture.font_texture_location().y / glyphTexture.font_texture().extents().cy;
-
-		if (logical_coordinates()[1] < logical_coordinates()[3])
-		{
-			std::swap(textureCoords[1], textureCoords[5]);
-			std::swap(textureCoords[3], textureCoords[7]);
-		}
+		textureCoords = texture_vertices(glyphTexture.font_texture().extents(), rect{ glyphTexture.font_texture_location(), glyphTexture.extents() }, logical_coordinates());
 
 		GLuint boHandles[3];
 		glCheck(glGenBuffers(3, boHandles));
@@ -956,7 +943,6 @@ namespace neogfx
 		}
 		
 		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTexture", 1);
-		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTextureExtents", glyphTexture.font_texture().extents().cx, glyphTexture.font_texture().extents().cy);
 
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -983,7 +969,7 @@ namespace neogfx
 	}
 
 	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour)
-	{	
+	{
 		if (aTexture.is_empty())
 			return;
 		glCheck(glActiveTexture(GL_TEXTURE1));
@@ -996,12 +982,7 @@ namespace neogfx
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture()->handle())));
 		if (!aTexture.native_texture()->is_resident())
 			throw texture_not_resident();
-		auto texCoords = texture_vertices(aTexture.storage_extents(), aTextureRect);
-		if (logical_coordinates()[1] < logical_coordinates()[3])
-		{
-			std::swap(texCoords[1], texCoords[5]);
-			std::swap(texCoords[3], texCoords[7]);
-		}
+		auto texCoords = texture_vertices(aTexture.storage_extents(), aTextureRect + point{1.0, 1.0}, logical_coordinates());
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &aTextureMap[0][0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		colour c{0xFF, 0xFF, 0xFF, 0xFF};

@@ -152,7 +152,7 @@ namespace neogfx
 			return existingGlyph->second;
 		bool lcdMode = iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal ||
 			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal;
-		FT_Load_Glyph(iHandle, aGlyph.value(), (lcdMode ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL) | FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT);
+		FT_Load_Glyph(iHandle, aGlyph.value(), (lcdMode ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL) | FT_LOAD_RENDER);
 		FT_Glyph glyphDesc;
 		FT_Get_Glyph(iHandle->glyph, &glyphDesc);
 		FT_Glyph_To_Bitmap(&glyphDesc, lcdMode ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL, 0, 1);
