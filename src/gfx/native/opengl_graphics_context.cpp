@@ -891,9 +891,6 @@ namespace neogfx
 		colours.clear();
 		colours.resize(vertices.size(), std::array<double, 4>{{aColour.red<double>(), aColour.green<double>(), aColour.blue<double>(), aColour.alpha<double>()}});
 
-		bool lcdMode = iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal ||
-			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal;
-
 		textureCoords = texture_vertices(glyphTexture.font_texture().extents(), rect{ glyphTexture.font_texture_location(), glyphTexture.extents() }, logical_coordinates());
 
 		GLuint boHandles[3];

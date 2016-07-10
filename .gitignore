@@ -61,3 +61,6 @@
 /examples/test/build/win32/vs2015/test.VC.VC.opendb
 /examples/test/build/win32/vs2015/test.VC.db
 /tools/glsl2hpp.exe
+/3rdparty/freetype/freetype-2.6.4/build
+/3rdparty/freetype/freetype-2.6.4/lib/freetype.lib
+/3rdparty/freetype/freetype-2.6.4/lib/freetyped.lib

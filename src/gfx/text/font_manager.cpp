@@ -123,10 +123,6 @@ namespace neogfx
 		{
 			throw error_initializing_font_library();
 		}
-		bool lcdMode = aScreenMetrics.subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal ||
-			aScreenMetrics.subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal;
-		if (lcdMode)
-			FT_Library_SetLcdFilter(iFontLib, FT_LCD_FILTER_LIGHT);
 		std::string fontsDirectory = detail::platform_specific::get_system_font_directory();
 		for (boost::filesystem::directory_iterator file(fontsDirectory); file != boost::filesystem::directory_iterator(); ++file)
 		{
@@ -155,6 +151,11 @@ namespace neogfx
 		iFontFamilies.clear();
 		iNativeFonts.clear();
 		FT_Done_FreeType(iFontLib);
+	}
+
+	void* font_manager::font_library_handle() const
+	{
+		return iFontLib;
 	}
 
 	const font_info& font_manager::default_system_font_info() const

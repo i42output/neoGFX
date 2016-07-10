@@ -105,7 +105,7 @@ namespace neogfx
 		mutable std::unique_ptr<i_native_font_face> iFallbackFont;
 		mutable glyph_map iGlyphs;
 		mutable std::vector<GLubyte> iGlyphTextureData;
-		mutable std::vector<std::array<GLubyte, 3>> iSubpixelGlyphTextureData;
+		mutable std::vector<std::array<GLubyte, 4>> iSubpixelGlyphTextureData;
 		bool iHasKerning;
 		mutable kerning_table iKerningTable;
 	};

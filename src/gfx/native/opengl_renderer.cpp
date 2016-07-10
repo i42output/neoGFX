@@ -63,8 +63,8 @@ namespace neogfx
 		}
 		else
 			iSubpixelFormat = SubpixelFormatRGBHorizontal;
-		iSubpixelFormat = SubpixelFormatUnknown;
 #endif
+		//iSubpixelFormat = SubpixelFormatUnknown;
 	}
 
 	dimension detail::screen_metrics::horizontal_dpi() const
@@ -218,46 +218,6 @@ namespace neogfx
 						"in vec2 VertexTextureCoord;\n"
 						"out vec4 Color;\n"
 						"varying vec2 vGlyphTexCoord;\n"
-						"varying vec2 vShift;\n"
-						"void main()\n"
-						"{\n"
-						"	Color = VertexColor;\n"
-						"	vGlyphTexCoord = VertexTextureCoord;\n"
-						"}\n"),
-					GL_VERTEX_SHADER),
-				std::make_pair(
-					std::string(
-						"#version 130\n"
-						"uniform sampler2D glyphTexture;\n"
-						"uniform vec2 glyphTextureExtents;\n"
-						"in vec4 Color;\n"
-						"out vec4 FragColor;\n"
-						"varying vec2 vGlyphTexCoord;\n"
-						"void main()\n"
-						"{\n"
-						"   /* todo */\n"
-						"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vec2(vGlyphTexCoord.x, vGlyphTexCoord.y)).a);\n"
-						"}\n"),
-					GL_FRAGMENT_SHADER)
-			},
-			{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
-			break;
-		case i_screen_metrics::SubpixelFormatBGRHorizontal:
-			/* todo */
-		case i_screen_metrics::SubpixelFormatRGBVertical:
-		case i_screen_metrics::SubpixelFormatBGRVertical:
-		default:
-			iGlyphProgram = create_shader_program(
-				shaders
-			{
-				std::make_pair(
-					std::string(
-						"#version 130\n"
-						"in vec3 VertexPosition;\n"
-						"in vec4 VertexColor;\n"
-						"in vec2 VertexTextureCoord;\n"
-						"out vec4 Color;\n"
-						"varying vec2 vGlyphTexCoord;\n"
 						"void main()\n"
 						"{\n"
 						"	Color = VertexColor;\n"
@@ -275,11 +235,54 @@ namespace neogfx
 						"varying vec2 vGlyphTexCoord;\n"
 						"void main()\n"
 						"{\n"
-						"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vec2(vGlyphTexCoord.x, vGlyphTexCoord.y)).a);\n"
+						"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
+						"	if (rgbAlpha.r == rgbAlpha.g && rgbAlpha.r == rgbAlpha.b)\n"
+						"		FragColor = vec4(Color.rgb, rgbAlpha.a * Color.a);\n"
+						"	else\n"
+						"		FragColor = vec4(rgbAlpha.rgb * Color.rgb, rgbAlpha.a * Color.a);\n"
 						"}\n"),
 					GL_FRAGMENT_SHADER)
-			},
-			{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
+				},
+				{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
+			break;
+		case i_screen_metrics::SubpixelFormatBGRHorizontal:
+			/* todo */
+		case i_screen_metrics::SubpixelFormatRGBVertical:
+		case i_screen_metrics::SubpixelFormatBGRVertical:
+		default:
+			iGlyphProgram = create_shader_program(
+				shaders
+				{
+					std::make_pair(
+						std::string(
+							"#version 130\n"
+							"in vec3 VertexPosition;\n"
+							"in vec4 VertexColor;\n"
+							"in vec2 VertexTextureCoord;\n"
+							"out vec4 Color;\n"
+							"varying vec2 vGlyphTexCoord;\n"
+							"void main()\n"
+							"{\n"
+							"	Color = VertexColor;\n"
+							"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+							"	vGlyphTexCoord = VertexTextureCoord;\n"
+							"}\n"),
+						GL_VERTEX_SHADER),
+					std::make_pair(
+						std::string(
+							"#version 130\n"
+							"uniform sampler2D glyphTexture;\n"
+							"uniform vec2 glyphTextureExtents;\n"
+							"in vec4 Color;\n"
+							"out vec4 FragColor;\n"
+							"varying vec2 vGlyphTexCoord;\n"
+							"void main()\n"
+							"{\n"
+							"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vGlyphTexCoord).a);\n"
+							"}\n"),
+						GL_FRAGMENT_SHADER)
+				},
+				{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 			break;
 		}
 	}

@@ -32,6 +32,7 @@ namespace neogfx
 	class i_font_manager
 	{
 	public:
+		virtual void* font_library_handle() const = 0;
 		virtual const font_info& default_system_font_info() const = 0;
 		virtual const font_info& default_fallback_font_info() const = 0;
 		virtual std::unique_ptr<i_native_font_face> create_default_font(const i_device_resolution& aDevice) = 0;
