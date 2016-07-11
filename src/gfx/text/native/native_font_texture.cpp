@@ -29,8 +29,8 @@ namespace neogfx
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 		glCheck(glGenTextures(1, &iHandle));
 		glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		std::vector<std::array<uint8_t, 4>> data(static_cast<std::size_t>(iExtents.cx * iExtents.cy), std::array<uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
 		glCheck(glTexImage2D(GL_TEXTURE_2D, 0, aSubPixelRendering ? GL_RGBA8 : GL_ALPHA, static_cast<GLsizei>(iExtents.cx), static_cast<GLsizei>(iExtents.cy), 0, aSubPixelRendering ? GL_RGBA : GL_ALPHA, GL_UNSIGNED_BYTE, &data[0]));
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));

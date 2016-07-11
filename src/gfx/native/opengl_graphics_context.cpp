@@ -868,6 +868,9 @@ namespace neogfx
 		if (aGlyph.is_whitespace())
 			return size{};
 
+		if (iGlyphDestinationBuffer == boost::none)
+			iGlyphDestinationBuffer.emplace(size{ 512.0, 512.0 }, colour::Black);
+
 		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aFont.fallback().native_font_face().glyph_texture(aGlyph);
 
 		auto& vertices = iGlyphVertices;
@@ -887,6 +890,13 @@ namespace neogfx
 			to_shader_vertex(glyphOrigin + point{ glyphTexture.extents().cx, glyphTexture.extents().cy }),
 			to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.extents().cy })
 		});
+
+		glCheck(glActiveTexture(GL_TEXTURE2));
+		glCheck(glClientActiveTexture(GL_TEXTURE2));
+		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(iGlyphDestinationBuffer->handle())));
+		//glCheck(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, static_cast<GLint>(glyphOrigin.x), static_cast<GLint>(glyphOrigin.y), static_cast<GLsizei>(glyphTexture.extents().cx), static_cast<GLsizei>(glyphTexture.extents().cy)));
+		glCheck(glActiveTexture(GL_TEXTURE1));
+		glCheck(glClientActiveTexture(GL_TEXTURE1));
 
 		colours.clear();
 		colours.resize(vertices.size(), std::array<double, 4>{{aColour.red<double>(), aColour.green<double>(), aColour.blue<double>(), aColour.alpha<double>()}});
@@ -939,7 +949,12 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_2D, iActiveGlyphTexture));
 		}
 		
+		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTextureOffset", static_cast<float>(textureCoords[0]), static_cast<float>(textureCoords[1]));
+		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTextureExtents", static_cast<float>(textureCoords[2] - textureCoords[0]), static_cast<float>(textureCoords[7] - textureCoords[1]));
+		auto destinationTextureCoords = texture_vertices(iGlyphDestinationBuffer->extents(), rect{ point{}, glyphTexture.extents() }, logical_coordinates());
+		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphDestinationTextureExtents", static_cast<float>(destinationTextureCoords[2] - destinationTextureCoords[0]), static_cast<float>(destinationTextureCoords[7] - destinationTextureCoords[1]));
 		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTexture", 1);
+		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphDestinationTexture", 2);
 
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));

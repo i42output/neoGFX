@@ -32,6 +32,7 @@ namespace neogfx
 	public:
 		struct unsupported_colour_format : std::runtime_error { unsupported_colour_format() : std::runtime_error("neogfx::opengl_texture::unsupported_colour_format") {} };
 	public:
+		opengl_texture(const neogfx::size& aExtents, const optional_colour& aColour = optional_colour());
 		opengl_texture(const i_image& aImage);
 		~opengl_texture();
 	public:

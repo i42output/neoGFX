@@ -180,18 +180,24 @@ namespace neogfx
 		{
 			for (uint32_t y = 0; y < bitmap.rows; y++)
 			{
-				GLubyte history[] = { 0, 0, 0 };
-				for (uint32_t x = 0; x < bitmap.width; x++)
+				for (uint32_t x = 1; x < bitmap.width - 1; x++)
 				{
-					GLubyte alpha = (x >= bitmap.width || y >= bitmap.rows) ? 0 : bitmap.buffer[x + bitmap.pitch * y];
-					history[x % 3] = alpha;
-					alpha = (history[0] + history[1] + history[2]) / 3;
+					auto mid = &bitmap.buffer[x + bitmap.pitch * y];
+					GLubyte alpha = (mid[-1] + mid[0] + mid[1]) / 3;
 					iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
 				}
 			}
+			/*const auto copy = iSubpixelGlyphTextureData;
+			for (uint32_t y = 0; y < bitmap.rows; y++)
+			{
+				for (uint32_t x = 1; x < bitmap.width - 1; x++)
+				{
+					auto mid = &copy[1 + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][0] + x;
+					GLubyte alpha = (mid[-1] + mid[0] + mid[1]) / 3;
+					iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
+				}
+			}*/
 			textureData = &iSubpixelGlyphTextureData[0][0];
-			for (auto& t : iSubpixelGlyphTextureData)
-				t[3] = (t[0] + t[1] + t[2]) / 3;
 		}
 		else
 		{

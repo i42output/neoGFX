@@ -39,6 +39,7 @@
 #include FT_BITMAP_H
 #include "opengl_error.hpp"
 #include "i_native_graphics_context.hpp"
+#include "opengl_texture.hpp"
 
 namespace neogfx
 {
@@ -147,6 +148,7 @@ namespace neogfx
 		mutable std::vector<vertex> iGlyphVertices;
 		mutable std::vector<GLdouble> iGlyphTextureCoords;
 		mutable std::vector<std::array<GLdouble, 4>> iGlyphColours;
+		mutable boost::optional<opengl_texture> iGlyphDestinationBuffer;
 		struct cluster
 		{
 			std::string::size_type from;

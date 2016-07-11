@@ -64,7 +64,6 @@ namespace neogfx
 		else
 			iSubpixelFormat = SubpixelFormatRGBHorizontal;
 #endif
-		//iSubpixelFormat = SubpixelFormatUnknown;
 	}
 
 	dimension detail::screen_metrics::horizontal_dpi() const
@@ -229,17 +228,22 @@ namespace neogfx
 					std::string(
 						"#version 130\n"
 						"uniform sampler2D glyphTexture;\n"
+						"uniform sampler2D glyphDestinationTexture;\n"
+						"uniform vec2 glyphTextureOffset;\n"
 						"uniform vec2 glyphTextureExtents;\n"
+						"uniform vec2 glyphDestinationTextureExtents;\n"
 						"in vec4 Color;\n"
 						"out vec4 FragColor;\n"
 						"varying vec2 vGlyphTexCoord;\n"
 						"void main()\n"
 						"{\n"
 						"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-						"	if (rgbAlpha.r == rgbAlpha.g && rgbAlpha.r == rgbAlpha.b)\n"
-						"		FragColor = vec4(Color.rgb, rgbAlpha.a * Color.a);\n"
+						"   vec4 rgbDestination = texture(glyphDestinationTexture, (vGlyphTexCoord - glyphTextureOffset) / glyphTextureExtents * glyphDestinationTextureExtents);\n"
+						"	rgbDestination = vec4(0.0, 0.0, 0.0, 0.0);\n"
+						"	if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
+						"		FragColor = Color;\n"
 						"	else\n"
-						"		FragColor = vec4(rgbAlpha.rgb * Color.rgb, rgbAlpha.a * Color.a);\n"
+						"		FragColor = vec4(Color.rgb * rgbAlpha.rgb + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.rgb), 1.0);\n"
 						"}\n"),
 					GL_FRAGMENT_SHADER)
 				},
@@ -272,7 +276,10 @@ namespace neogfx
 						std::string(
 							"#version 130\n"
 							"uniform sampler2D glyphTexture;\n"
+							"uniform sampler2D glyphDestinationTexture;\n"
+							"uniform vec2 glyphTextureOffset;\n"
 							"uniform vec2 glyphTextureExtents;\n"
+							"uniform vec2 glyphDestinationTextureExtents;\n"
 							"in vec4 Color;\n"
 							"out vec4 FragColor;\n"
 							"varying vec2 vGlyphTexCoord;\n"

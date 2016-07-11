@@ -23,6 +23,46 @@
 
 namespace neogfx
 {
+	opengl_texture::opengl_texture(const neogfx::size& aExtents, const optional_colour& aColour) :
+		iSize(aExtents),
+		iStorageSize{ size{ std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0) } },
+		iHandle(0),
+		iUri("neogfx::opengl_texture::internal")
+	{
+		GLint previousTexture;
+		try
+		{
+			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
+			glCheck(glGenTextures(1, &iHandle));
+			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
+			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			if (aColour != boost::none)
+			{
+				std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
+				for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+					for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+					{
+						data[y * iStorageSize.cx * 4 + x * 4 + 0] = aColour->red();
+						data[y * iStorageSize.cx * 4 + x * 4 + 1] = aColour->green();
+						data[y * iStorageSize.cx * 4 + x * 4 + 2] = aColour->blue();
+						data[y * iStorageSize.cx * 4 + x * 4 + 3] = aColour->alpha();
+					}
+				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
+			}
+			else
+			{
+				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0));
+			}
+			glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+		}
+		catch (...)
+		{
+			glCheck(glDeleteTextures(1, &iHandle));
+			throw;
+		}
+	}
+
 	opengl_texture::opengl_texture(const i_image& aImage) :
 		iSize(aImage.extents()), 
 		iStorageSize{size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}},

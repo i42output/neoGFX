@@ -186,7 +186,7 @@ namespace neogfx
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
 			throw failed_to_create_framebuffer(status);
-		glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
+		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 
