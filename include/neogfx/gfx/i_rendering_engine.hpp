@@ -36,7 +36,7 @@ namespace neogfx
 	public:
 		enum subpixel_format_e
 		{
-			SubpixelFormatUnknown,
+			SubpixelFormatNone,
 			SubpixelFormatRGBHorizontal,
 			SubpixelFormatBGRHorizontal,
 			SubpixelFormatRGBVertical,

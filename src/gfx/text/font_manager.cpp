@@ -113,7 +113,7 @@ namespace neogfx
 		}
 	}
 
-	font_manager::font_manager(i_rendering_engine& aRenderingEngine, i_screen_metrics& aScreenMetrics) :
+	font_manager::font_manager(i_rendering_engine& aRenderingEngine, i_screen_metrics&) :
 		iRenderingEngine(aRenderingEngine),
 		iDefaultSystemFontInfo(detail::platform_specific::default_system_font_info()),
 		iDefaultFallbackFontInfo(detail::platform_specific::default_fallback_font_info())
@@ -335,7 +335,9 @@ namespace neogfx
 		for (auto& ft : iFontTextures)
 			if (ft->allocate_glyph_space(aSize, aResult))
 				return *ft;
-		iFontTextures.push_back(std::make_unique<native_font_texture>(size(1024, 1024), iRenderingEngine.screen_metrics().subpixel_format() != i_screen_metrics::SubpixelFormatUnknown));
+		iFontTextures.push_back(std::make_unique<native_font_texture>(size(1024, 1024), 
+			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal || 
+			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal));
 		if (!iFontTextures.back()->allocate_glyph_space(aSize, aResult))
 			throw failed_to_allocate_glyph_space();
 		return *iFontTextures.back();

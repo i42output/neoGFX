@@ -154,7 +154,7 @@ namespace neogfx
 		bool lcdMode = iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal ||
 			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal;
 
-		FT_Load_Glyph(iHandle, aGlyph.value(), lcdMode ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
+		FT_Load_Glyph(iHandle, aGlyph.value(), (lcdMode ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL) | FT_LOAD_NO_AUTOHINT);
 		FT_Render_Glyph(iHandle->glyph, lcdMode ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL);
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
 
@@ -178,25 +178,16 @@ namespace neogfx
 
 		if (lcdMode)
 		{
+			/* todo */
 			for (uint32_t y = 0; y < bitmap.rows; y++)
 			{
-				for (uint32_t x = 1; x < bitmap.width - 1; x++)
+				for (uint32_t x = 0; x < bitmap.width; x++)
 				{
 					auto mid = &bitmap.buffer[x + bitmap.pitch * y];
-					GLubyte alpha = (mid[-1] + mid[0] + mid[1]) / 3;
+					GLubyte alpha = (mid[x > 0 ? -1 : 0] + mid[0] + mid[x < bitmap.width - 1 ? 1 : 0]) / 3;
 					iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
 				}
 			}
-			/*const auto copy = iSubpixelGlyphTextureData;
-			for (uint32_t y = 0; y < bitmap.rows; y++)
-			{
-				for (uint32_t x = 1; x < bitmap.width - 1; x++)
-				{
-					auto mid = &copy[1 + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][0] + x;
-					GLubyte alpha = (mid[-1] + mid[0] + mid[1]) / 3;
-					iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
-				}
-			}*/
 			textureData = &iSubpixelGlyphTextureData[0][0];
 		}
 		else
