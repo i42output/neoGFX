@@ -178,13 +178,15 @@ namespace neogfx
 
 		if (lcdMode)
 		{
-			/* todo */
+			// sub-pixel FIR filter.
+			static double coefficients[] = { 1.5/16.0, 3.0/16.0, 7.0/16.0, 3.0/16.0, 1.5/16.0 };
 			for (uint32_t y = 0; y < bitmap.rows; y++)
 			{
 				for (uint32_t x = 0; x < bitmap.width; x++)
 				{
-					auto mid = &bitmap.buffer[x + bitmap.pitch * y];
-					GLubyte alpha = (mid[x > 0 ? -1 : 0] + mid[0] + mid[x < bitmap.width - 1 ? 1 : 0]) / 3;
+					uint8_t alpha = 0;
+					for (int32_t z = 0; z < 5; ++z)
+						alpha += static_cast<uint8_t>(bitmap.buffer[std::max<int32_t>(0, x - 2 + z) + bitmap.pitch * y] * coefficients[z]);
 					iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
 				}
 			}
