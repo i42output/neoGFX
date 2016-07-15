@@ -50,6 +50,8 @@ namespace neogfx
 	protected:
 		size text_extent() const;
 	private:
+		void init();
+	private:
 		std::string iText;
 		mutable glyph_text iGlyphTextCache;
 		mutable optional_size iTextExtent;

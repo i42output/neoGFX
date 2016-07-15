@@ -148,25 +148,23 @@ namespace neogfx
 
 	i_glyph_texture& native_font_face::glyph_texture(const glyph& aGlyph) const
 	{
-		auto existingGlyph = iGlyphs.find(aGlyph.value());
+		auto existingGlyph = iGlyphs.find(std::make_pair(aGlyph.value(), aGlyph.subpixel()));
 		if (existingGlyph != iGlyphs.end())
 			return existingGlyph->second;
-		bool lcdMode = iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal ||
-			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal;
 
-		FT_Load_Glyph(iHandle, aGlyph.value(), (lcdMode ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL) | FT_LOAD_NO_AUTOHINT);
-		FT_Render_Glyph(iHandle->glyph, lcdMode ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL);
+		FT_Load_Glyph(iHandle, aGlyph.value(), (aGlyph.subpixel() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL) | FT_LOAD_NO_AUTOHINT);
+		FT_Render_Glyph(iHandle->glyph, aGlyph.subpixel() ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL);
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
 
 		rect glyphRect;
-		i_font_texture& fontTexture = iRenderingEngine.font_manager().allocate_glyph_space(neogfx::size{ static_cast<dimension>(bitmap.width / (lcdMode ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) }, glyphRect);
-		i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(aGlyph.value(),
+		i_font_texture& fontTexture = iRenderingEngine.font_manager().allocate_glyph_space(neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) }, glyphRect);
+		i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(std::make_pair(aGlyph.value(), aGlyph.subpixel()),
 			neogfx::glyph_texture(
 				fontTexture,
 				glyphRect + point{ 1.0, 1.0 } -delta{ 2.0, 2.0 },
-				neogfx::size{ static_cast<dimension>(bitmap.width / (lcdMode ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) },
+				neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) },
 				neogfx::point{
-					iHandle->glyph->metrics.horiBearingX / 64.0 / (lcdMode ? 3.0 : 1.0),
+					iHandle->glyph->metrics.horiBearingX / 64.0 / (aGlyph.subpixel() ? 3.0 : 1.0),
 					(iHandle->glyph->metrics.horiBearingY - iHandle->glyph->metrics.height) / 64.0 }))).first->second;
 
 		iGlyphTextureData.clear();
@@ -176,7 +174,7 @@ namespace neogfx
 
 		const GLubyte* textureData = 0;
 
-		if (lcdMode)
+		if (aGlyph.subpixel())
 		{
 			// sub-pixel FIR filter.
 			static double coefficients[] = { 1.5/16.0, 3.0/16.0, 7.0/16.0, 3.0/16.0, 1.5/16.0 };
@@ -207,7 +205,7 @@ namespace neogfx
 
 		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
 			static_cast<GLint>(glyphRect.x), static_cast<GLint>(glyphRect.y), static_cast<GLsizei>(glyphRect.cx), static_cast<GLsizei>(glyphRect.cy), 
-			lcdMode ? GL_RGBA : GL_ALPHA, GL_UNSIGNED_BYTE, &textureData[0]));
+			aGlyph.subpixel() ? GL_RGBA : GL_ALPHA, GL_UNSIGNED_BYTE, &textureData[0]));
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 

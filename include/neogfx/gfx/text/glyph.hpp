@@ -49,8 +49,9 @@ namespace neogfx
 		enum flags_e : uint8_t
 		{
 			Underline	= 0x01,
-			Mnemonic	= 0x02,
-			Emoji		= 0x04,
+			Subpixel	= 0x02,
+			Mnemonic	= 0x04,
+			Emoji		= 0x08,
 			UseFallback = 0x80
 		};
 	public:
@@ -84,6 +85,8 @@ namespace neogfx
 		void set_flags(flags_e aFlags) { iFlags = aFlags; }
 		bool underline() const { return (iFlags & Underline) == Underline; }
 		void set_underline(bool aUnderline) { iFlags = static_cast<flags_e>(aUnderline ? iFlags | Underline : iFlags & ~Underline); }
+		bool subpixel() const { return (iFlags & Subpixel) == Subpixel; }
+		void set_subpixel(bool aSubpixel) { iFlags = static_cast<flags_e>(aSubpixel ? iFlags | Subpixel : iFlags & ~Subpixel); }
 		bool mnemonic() const { return (iFlags & Mnemonic) == Mnemonic; }
 		void set_mnemonic(bool aMnemonic) { iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); }
 		bool use_fallback() const { return (iFlags & UseFallback) == UseFallback; }

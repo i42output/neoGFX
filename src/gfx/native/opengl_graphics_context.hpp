@@ -99,6 +99,9 @@ namespace neogfx
 		virtual void pop_logical_operation();
 		virtual void line_stipple_on(uint32_t aFactor, uint16_t aPattern);
 		virtual void line_stipple_off();
+		virtual bool is_subpixel_rendering_on() const;
+		virtual void subpixel_rendering_on();
+		virtual void subpixel_rendering_off();
 		virtual void clear(const colour& aColour);
 		virtual void set_pixel(const point& aPoint, const colour& aColour);
 		virtual void draw_pixel(const point& aPoint, const colour& aColour);
@@ -162,6 +165,7 @@ namespace neogfx
 		GLint iPreviousTexture;
 		GLuint iActiveGlyphTexture;
 		bool iLineStippleActive;
+		bool iSubpixelRendering;
 		boost::optional<std::pair<bool, char>> iMnemonic;
 		boost::optional<std::pair<GLuint, GLuint>> iGradientTextures;
 		std::vector<float> iGradientStopPositions;

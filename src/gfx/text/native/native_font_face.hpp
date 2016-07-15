@@ -50,7 +50,7 @@ namespace neogfx
 	class native_font_face : public i_native_font_face
 	{
 	private:
-		typedef std::unordered_map<uint32_t, neogfx::glyph_texture> glyph_map;
+		typedef std::unordered_map<std::pair<uint32_t, bool>, neogfx::glyph_texture, boost::hash<std::pair<uint32_t, bool>>> glyph_map;
 		typedef std::unordered_map<std::pair<uint32_t, uint32_t>, dimension, boost::hash<std::pair<uint32_t, uint32_t>>, std::equal_to<std::pair<uint32_t, uint32_t>>, 
 			boost::fast_pool_allocator<std::pair<const std::pair<uint32_t, uint32_t>, dimension>>> kerning_table;
 	public:

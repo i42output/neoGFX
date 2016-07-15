@@ -100,10 +100,14 @@ namespace neogfx
 		virtual i_shader_program& active_shader_program();
 		virtual const i_shader_program& monochrome_shader_program() const;
 		virtual i_shader_program& monochrome_shader_program();
-		virtual const i_shader_program& glyph_shader_program() const;
-		virtual i_shader_program& glyph_shader_program();
+		virtual const i_shader_program& glyph_shader_program(bool aSubpixel) const;
+		virtual i_shader_program& glyph_shader_program(bool aSubpixel);
 		virtual const i_shader_program& gradient_shader_program() const;
 		virtual i_shader_program& gradient_shader_program();
+	public:
+		virtual bool is_subpixel_rendering_on() const;
+		virtual void subpixel_rendering_on();
+		virtual void subpixel_rendering_off();
 	public:
 		virtual bool process_events();
 	private:
@@ -116,6 +120,8 @@ namespace neogfx
 		shader_programs::iterator iActiveProgram;
 		shader_programs::iterator iMonochromeProgram;
 		shader_programs::iterator iGlyphProgram;
+		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;
+		bool iSubpixelRendering;
 	};
 }

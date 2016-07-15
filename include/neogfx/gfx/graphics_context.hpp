@@ -123,6 +123,9 @@ namespace neogfx
 		void pop_logical_operation() const;
 		void line_stipple_on(uint32_t aFactor, uint16_t aPattern) const;
 		void line_stipple_off() const;
+		bool is_subpixel_rendering_on() const;
+		void subpixel_rendering_on() const;
+		void subpixel_rendering_off() const;
 		void clear(const colour& aColour) const;
 		void set_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_pixel(const point& aPoint, const colour& aColour) const;

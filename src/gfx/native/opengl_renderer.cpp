@@ -64,8 +64,6 @@ namespace neogfx
 		else
 			iSubpixelFormat = SubpixelFormatRGBHorizontal;
 #endif
-		/* Sub-pixel rendering currently disabled. */
-		iSubpixelFormat = SubpixelFormatNone; 
 	}
 
 	dimension detail::screen_metrics::horizontal_dpi() const
@@ -173,8 +171,9 @@ namespace neogfx
 	}
 
 	opengl_renderer::opengl_renderer() :
-		iFontManager(*this, iScreenMetrics),
-		iActiveProgram(iShaderPrograms.end())
+		iFontManager{*this, iScreenMetrics},
+		iActiveProgram{iShaderPrograms.end()},
+		iSubpixelRendering{false}
 	{
 	}
 
@@ -195,6 +194,7 @@ namespace neogfx
 						"}\n"),
 					GL_FRAGMENT_SHADER) 
 			}, {});
+
 		iGradientProgram = create_shader_program(
 			shaders
 			{
@@ -205,10 +205,44 @@ namespace neogfx
 					glsl::NEOGFX_GRADIENT_FRAG,
 					GL_FRAGMENT_SHADER)
 			}, {});
+
+		iGlyphProgram = create_shader_program(
+			shaders
+			{
+				std::make_pair(
+					std::string(
+						"#version 130\n"
+						"in vec3 VertexPosition;\n"
+						"in vec4 VertexColor;\n"
+						"in vec2 VertexTextureCoord;\n"
+						"out vec4 Color;\n"
+						"varying vec2 vGlyphTexCoord;\n"
+						"void main()\n"
+						"{\n"
+						"	Color = VertexColor;\n"
+						"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+						"	vGlyphTexCoord = VertexTextureCoord;\n"
+						"}\n"),
+					GL_VERTEX_SHADER),
+				std::make_pair(
+					std::string(
+						"#version 130\n"
+						"uniform sampler2D glyphTexture;\n"
+						"in vec4 Color;\n"
+						"out vec4 FragColor;\n"
+						"varying vec2 vGlyphTexCoord;\n"
+						"void main()\n"
+						"{\n"
+						"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vGlyphTexCoord).a);\n"
+						"}\n"),
+					GL_FRAGMENT_SHADER)
+			},
+			{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
+
 		switch (screen_metrics().subpixel_format())
 		{
 		case i_screen_metrics::SubpixelFormatRGBHorizontal:
-			iGlyphProgram = create_shader_program(
+			iGlyphSubpixelProgram = create_shader_program(
 				shaders
 				{
 					std::make_pair(
@@ -251,7 +285,7 @@ namespace neogfx
 					{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 			break;
 		case i_screen_metrics::SubpixelFormatBGRHorizontal:
-			iGlyphProgram = create_shader_program(
+			iGlyphSubpixelProgram = create_shader_program(
 				shaders
 				{
 					std::make_pair(
@@ -296,7 +330,7 @@ namespace neogfx
 		case i_screen_metrics::SubpixelFormatRGBVertical:
 		case i_screen_metrics::SubpixelFormatBGRVertical:
 		default:
-			iGlyphProgram = create_shader_program(
+			iGlyphSubpixelProgram = create_shader_program(
 				shaders
 				{
 					std::make_pair(
@@ -318,16 +352,21 @@ namespace neogfx
 						std::string(
 							"#version 130\n"
 							"uniform sampler2D glyphTexture;\n"
+							"uniform sampler2D glyphDestinationTexture;\n"
+							"uniform vec2 glyphTextureOffset;\n"
+							"uniform vec2 glyphTextureExtents;\n"
+							"uniform vec2 glyphDestinationTextureExtents;\n"
 							"in vec4 Color;\n"
 							"out vec4 FragColor;\n"
 							"varying vec2 vGlyphTexCoord;\n"
 							"void main()\n"
 							"{\n"
-							"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vGlyphTexCoord).a);\n"
+							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
+							"	FragColor = vec4(Color.rgb, (rgbAlpha.r + rgbAlpha.g + rgbAlpha.b) / 3.0);\n"
 							"}\n"),
 						GL_FRAGMENT_SHADER)
-				},
-				{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
+					},
+					{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 			break;
 		}
 	}
@@ -401,14 +440,37 @@ namespace neogfx
 		return *iGradientProgram;
 	}
 
-	const opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program() const
+	const opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program(bool aSubpixel) const
 	{
-		return *iGlyphProgram;
+		return aSubpixel ? *iGlyphSubpixelProgram : *iGlyphProgram;
 	}
 
-	opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program()
+	opengl_renderer::i_shader_program& opengl_renderer::glyph_shader_program(bool aSubpixel)
 	{
-		return *iGlyphProgram;
+		return aSubpixel ? *iGlyphSubpixelProgram : *iGlyphProgram;
+	}
+
+	bool opengl_renderer::is_subpixel_rendering_on() const
+	{
+		return iSubpixelRendering;
+	}
+	
+	void opengl_renderer::subpixel_rendering_on()
+	{
+		if (!iSubpixelRendering)
+		{
+			iSubpixelRendering = true;
+			subpixel_rendering_changed.trigger();
+		}
+	}
+
+	void opengl_renderer::subpixel_rendering_off()
+	{
+		if (iSubpixelRendering)
+		{
+			iSubpixelRendering = false;
+			subpixel_rendering_changed.trigger();
+		}
 	}
 
 	bool opengl_renderer::process_events()

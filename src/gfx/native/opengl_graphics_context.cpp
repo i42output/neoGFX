@@ -212,7 +212,8 @@ namespace neogfx
 		iSmoothingMode(SmoothingModeNone), 
 		iMonochrome(false), 
 		iClipCounter(0),
-		iLineStippleActive(false)
+		iLineStippleActive(false),
+		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
 	{
 		iSurface.activate_context();
 		set_smoothing_mode(SmoothingModeAntiAlias);
@@ -227,7 +228,8 @@ namespace neogfx
 		iSmoothingMode(SmoothingModeNone), 
 		iMonochrome(false),
 		iClipCounter(0), 
-		iLineStippleActive(false)
+		iLineStippleActive(false),
+		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
 	{
 		iSurface.activate_context();
 		set_smoothing_mode(SmoothingModeAntiAlias);
@@ -242,7 +244,8 @@ namespace neogfx
 		iSmoothingMode(aOther.iSmoothingMode), 
 		iMonochrome(false),
 		iClipCounter(0),
-		iLineStippleActive(false)
+		iLineStippleActive(false),
+		iSubpixelRendering(false)
 	{
 		iSurface.activate_context();
 		set_smoothing_mode(iSmoothingMode);
@@ -568,6 +571,21 @@ namespace neogfx
 		iLineStippleActive = false;
 	}
 
+	bool opengl_graphics_context::is_subpixel_rendering_on() const
+	{
+		return iSubpixelRendering;
+	}
+
+	void opengl_graphics_context::subpixel_rendering_on()
+	{
+		iSubpixelRendering = true;
+	}
+
+	void opengl_graphics_context::subpixel_rendering_off()
+	{
+		iSubpixelRendering = false;
+	}
+
 	void opengl_graphics_context::clear(const colour& aColour)
 	{
 		disable_anti_alias daa(*this);
@@ -831,13 +849,12 @@ namespace neogfx
 
 	void opengl_graphics_context::begin_drawing_glyphs()
 	{
-		iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program());
-
 		glCheck(glActiveTexture(GL_TEXTURE1));
 		glCheck(glClientActiveTexture(GL_TEXTURE1));
 		glCheck(glEnable(GL_TEXTURE_2D));
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
 		iActiveGlyphTexture = static_cast<GLuint>(iPreviousTexture);
+		iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program(is_subpixel_rendering_on()));
 	}
 
 	namespace
@@ -867,6 +884,9 @@ namespace neogfx
 	{
 		if (aGlyph.is_whitespace())
 			return size{};
+
+		if (&iRenderingEngine.active_shader_program() != &iRenderingEngine.glyph_shader_program(aGlyph.subpixel()))
+			iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()));
 
 		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aFont.fallback().native_font_face().glyph_texture(aGlyph);
 
@@ -917,11 +937,11 @@ namespace neogfx
 		glCheck(glGenVertexArrays(1, &vaoHandle));
 		glCheck(glBindVertexArray(vaoHandle));
 
-		GLuint vertexPositionAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program().variable("VertexPosition"));
+		GLuint vertexPositionAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).variable("VertexPosition"));
 		glCheck(glEnableVertexAttribArray(vertexPositionAttribArrayIndex));
-		GLuint vertexColorAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program().variable("VertexColor"));
+		GLuint vertexColorAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).variable("VertexColor"));
 		glCheck(glEnableVertexAttribArray(vertexColorAttribArrayIndex));
-		GLuint vertexTextureCoordAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program().variable("VertexTextureCoord"));
+		GLuint vertexTextureCoordAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).variable("VertexTextureCoord"));
 		glCheck(glEnableVertexAttribArray(vertexTextureCoordAttribArrayIndex));
 
 		glCheck(glBindBuffer(GL_ARRAY_BUFFER, positionBufferHandle));
@@ -939,9 +959,8 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_2D, iActiveGlyphTexture));
 		}
 		
-		iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTexture", 1);
-		if (iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal ||
-			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal)
+		iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTexture", 1);
+		if (aGlyph.subpixel())
 		{
 
 			glCheck(glActiveTexture(GL_TEXTURE2));
@@ -949,14 +968,14 @@ namespace neogfx
 			if (iGlyphDestinationBuffer == boost::none)
 				iGlyphDestinationBuffer.emplace(size{ 512.0, 512.0 });
 			glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(iGlyphDestinationBuffer->handle())));
-			glCheck(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, static_cast<GLint>(glyphOrigin.x), static_cast<GLint>(glyphOrigin.y), static_cast<GLsizei>(glyphTexture.extents().cx), static_cast<GLsizei>(glyphTexture.extents().cy)));
-			glCheck(glActiveTexture(GL_TEXTURE1));
+			//glBlitNamedFramebuffer
+			glCheck(glActiveTexture(GL_TEXTURE1));	
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
-			iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTextureOffset", static_cast<float>(textureCoords[0]), static_cast<float>(textureCoords[1]));
-			iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphTextureExtents", static_cast<float>(textureCoords[2] - textureCoords[0]), static_cast<float>(textureCoords[7] - textureCoords[1]));
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureOffset", static_cast<float>(textureCoords[0]), static_cast<float>(textureCoords[1]));
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureExtents", static_cast<float>(textureCoords[2] - textureCoords[0]), static_cast<float>(textureCoords[7] - textureCoords[1]));
 			auto destinationTextureCoords = texture_vertices(iGlyphDestinationBuffer->extents(), rect{ point{}, glyphTexture.extents() }, logical_coordinates());
-			iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphDestinationTextureExtents", static_cast<float>(destinationTextureCoords[2] - destinationTextureCoords[0]), static_cast<float>(destinationTextureCoords[7] - destinationTextureCoords[1]));
-			iRenderingEngine.glyph_shader_program().set_uniform_variable("glyphDestinationTexture", 2);
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTextureExtents", static_cast<float>(destinationTextureCoords[2] - destinationTextureCoords[0]), static_cast<float>(destinationTextureCoords[7] - destinationTextureCoords[1]));
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTexture", 2);
 		}
 
 		glCheck(glEnable(GL_BLEND));
@@ -979,7 +998,6 @@ namespace neogfx
 	void opengl_graphics_context::end_drawing_glyphs()
 	{
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
-
 		iRenderingEngine.deactivate_shader_program();
 	}
 
@@ -1209,6 +1227,8 @@ namespace neogfx
 					result.back().set_value(aTextBegin[sourceClusterStart]);
 				if ((aFontSelector(sourceClusterStart).style() & font::Underline) == font::Underline)
 					result.back().set_underline(true);
+				if (is_subpixel_rendering_on())
+					result.back().set_subpixel(true);
 				if ((c->flags & glyph::Mnemonic) == glyph::Mnemonic)
 					result.back().set_mnemonic(true);
 				if (glyphInfo[j].codepoint == 0)

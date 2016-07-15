@@ -627,6 +627,21 @@ namespace neogfx
 		iNativeGraphicsContext->line_stipple_off();
 	}
 
+	bool graphics_context::is_subpixel_rendering_on() const
+	{
+		return iNativeGraphicsContext->is_subpixel_rendering_on();
+	}
+
+	void graphics_context::subpixel_rendering_on() const
+	{
+		iNativeGraphicsContext->subpixel_rendering_on();
+	}
+
+	void graphics_context::subpixel_rendering_off() const
+	{
+		iNativeGraphicsContext->subpixel_rendering_off();
+	}
+
 	void graphics_context::clear(const colour& aColour) const
 	{
 		if (origin() == point{} && extents() == iSurface.extents())

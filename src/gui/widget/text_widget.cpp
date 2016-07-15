@@ -27,22 +27,19 @@ namespace neogfx
 	text_widget::text_widget(const std::string& aText, bool aMultiLine) : 
 		widget(), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
 	{
-		set_margins(neogfx::margins(0.0));
-		set_ignore_mouse_events(true);
+		init();
 	}
 
 	text_widget::text_widget(i_widget& aParent, const std::string& aText, bool aMultiLine) :
 		widget(aParent), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
 	{
-		set_margins(neogfx::margins(0.0));
-		set_ignore_mouse_events(true);
+		init();
 	}
 
 	text_widget::text_widget(i_layout& aLayout, const std::string& aText, bool aMultiLine) :
 		widget(aLayout), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
 	{
-		set_margins(neogfx::margins(0.0));
-		set_ignore_mouse_events(true);
+		init();
 	}
 
 	neogfx::size_policy text_widget::size_policy() const
@@ -225,5 +222,19 @@ namespace neogfx
 		}
 		else
 			return *(iTextExtent = gc.text_extent(iText, font(), true));
+	}
+
+	void text_widget::init()
+	{
+		set_margins(neogfx::margins(0.0));
+		set_ignore_mouse_events(true);
+		app::instance().rendering_engine().subpixel_rendering_changed([this]()
+		{
+			iTextExtent = boost::none;
+			iGlyphTextCache = glyph_text(font());
+			if (has_managing_layout())
+				managing_layout().layout_items(true);
+			update();
+		});
 	}
 }

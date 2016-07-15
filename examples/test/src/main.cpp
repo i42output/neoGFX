@@ -376,10 +376,12 @@ int main(int argc, char* argv[])
 				app.change_style("Default");
 		});
 		button9.set_foreground_colour(ng::colour::Aquamarine);
-		ng::horizontal_layout layout5(layout4);
-		ng::push_button buttonMinus(layout5, "-");
-		ng::push_button buttonPlus(layout5, "+");
-		ng::push_button buttonKerning(layout5, "kern");
+		ng::horizontal_layout layout6(layout4);
+		ng::push_button buttonMinus(layout6, "-");
+		ng::push_button buttonPlus(layout6, "+");
+		ng::horizontal_layout layout7(layout4);
+		ng::push_button buttonKerning(layout7, "kern");
+		ng::push_button buttonSubpixel(layout7, "subpix");
 		buttonMinus.clicked([&app]()
 		{
 			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() - 0.1f));
@@ -396,6 +398,13 @@ int main(int argc, char* argv[])
 			else
 				fi.enable_kerning();
 			app.current_style().set_font_info(fi);
+		});
+		buttonSubpixel.clicked([&app]()
+		{
+			if (app.rendering_engine().is_subpixel_rendering_on())
+				app.rendering_engine().subpixel_rendering_off();
+			else
+				app.rendering_engine().subpixel_rendering_on();
 		});
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
 		buttonColourPicker.clicked([&window]()

@@ -49,6 +49,8 @@ namespace neogfx
 	class i_rendering_engine
 	{
 	public:
+		event<> subpixel_rendering_changed;
+	public:
 		class i_shader_program
 		{
 		public:
@@ -92,10 +94,15 @@ namespace neogfx
 		virtual i_shader_program& active_shader_program() = 0;
 		virtual const i_shader_program& monochrome_shader_program() const = 0;
 		virtual i_shader_program& monochrome_shader_program() = 0;
-		virtual const i_shader_program& glyph_shader_program() const = 0;
-		virtual i_shader_program& glyph_shader_program() = 0;
+		virtual const i_shader_program& glyph_shader_program(bool aSubpixel) const = 0;
+		virtual i_shader_program& glyph_shader_program(bool aSubpixel) = 0;
 		virtual const i_shader_program& gradient_shader_program() const = 0;
 		virtual i_shader_program& gradient_shader_program() = 0;
+	public:
+		virtual bool is_subpixel_rendering_on() const = 0;
+		virtual void subpixel_rendering_on() = 0;
+		virtual void subpixel_rendering_off() = 0;
+	public:
 		virtual void render_now() = 0;
 	public:
 		virtual bool process_events() = 0;
