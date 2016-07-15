@@ -42,6 +42,11 @@ namespace neogfx
 		init();
 	}
 
+	text_widget::~text_widget()
+	{
+		app::instance().rendering_engine().subpixel_rendering_changed.unsubscribe(this);
+	}
+
 	neogfx::size_policy text_widget::size_policy() const
 	{
 		if (widget::has_size_policy())
@@ -235,6 +240,6 @@ namespace neogfx
 			if (has_managing_layout())
 				managing_layout().layout_items(true);
 			update();
-		});
+		}, this);
 	}
 }

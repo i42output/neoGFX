@@ -152,7 +152,7 @@ namespace neogfx
 		if (existingGlyph != iGlyphs.end())
 			return existingGlyph->second;
 
-		FT_Load_Glyph(iHandle, aGlyph.value(), (aGlyph.subpixel() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL) | FT_LOAD_NO_AUTOHINT);
+		FT_Load_Glyph(iHandle, aGlyph.value(), aGlyph.subpixel() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
 		FT_Render_Glyph(iHandle->glyph, aGlyph.subpixel() ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL);
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
 
@@ -184,7 +184,7 @@ namespace neogfx
 				{
 					uint8_t alpha = 0;
 					for (int32_t z = 0; z < 5; ++z)
-						alpha += static_cast<uint8_t>(bitmap.buffer[std::max<int32_t>(0, x - 2 + z) + bitmap.pitch * y] * coefficients[z]);
+						alpha += static_cast<uint8_t>(bitmap.buffer[std::max<int32_t>(0, x - z + 2) + bitmap.pitch * y] * coefficients[z]);
 					iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
 				}
 			}
