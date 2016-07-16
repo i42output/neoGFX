@@ -262,9 +262,9 @@ namespace neogfx
 						GL_VERTEX_SHADER),
 					std::make_pair(
 						std::string(
-							"#version 130\n"
+							"#version 150\n"
 							"uniform sampler2D glyphTexture;\n"
-							"uniform sampler2D glyphDestinationTexture;\n"
+							"uniform sampler2DMS glyphDestinationTexture;\n"
 							"uniform vec2 glyphTextureOffset;\n"
 							"uniform vec2 glyphTextureExtents;\n"
 							"uniform vec2 glyphDestinationTextureExtents;\n"
@@ -274,11 +274,11 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-							"   vec4 rgbDestination = texture(glyphDestinationTexture, (vGlyphTexCoord - glyphTextureOffset) / glyphTextureExtents * glyphDestinationTextureExtents);\n"
+							"   vec4 rgbDestination = texelFetch(glyphDestinationTexture, ivec2((vGlyphTexCoord - glyphTextureOffset) / glyphTextureExtents * glyphDestinationTextureExtents), 4);\n"
 							"	if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
 							"		FragColor = Color;\n"
 							"	else\n"
-							"		FragColor = vec4(Color.rgb * rgbAlpha.rgb + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.rgb), 1.0);\n"
+							"		FragColor = vec4(Color.rgb * rgbAlpha.rgb * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.rgb) * (1.0 - Color.a), 1.0);\n"
 							"}\n"),
 						GL_FRAGMENT_SHADER)
 					},
@@ -305,9 +305,9 @@ namespace neogfx
 						GL_VERTEX_SHADER),
 					std::make_pair(
 						std::string(
-							"#version 130\n"
+							"#version 150\n"
 							"uniform sampler2D glyphTexture;\n"
-							"uniform sampler2D glyphDestinationTexture;\n"
+							"uniform sampler2DMS glyphDestinationTexture;\n"
 							"uniform vec2 glyphTextureOffset;\n"
 							"uniform vec2 glyphTextureExtents;\n"
 							"uniform vec2 glyphDestinationTextureExtents;\n"
@@ -317,11 +317,11 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-							"   vec4 rgbDestination = texture(glyphDestinationTexture, (vGlyphTexCoord - glyphTextureOffset) / glyphTextureExtents * glyphDestinationTextureExtents);\n"
+							"   vec4 rgbDestination = texelFetch(glyphDestinationTexture, ivec2((vGlyphTexCoord - glyphTextureOffset) / glyphTextureExtents * glyphDestinationTextureExtents), 4);\n"
 							"	if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
 							"		FragColor = Color;\n"
 							"	else\n"
-							"		FragColor = vec4(Color.rgb * rgbAlpha.bgr + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.bgr), 1.0);\n"
+							"		FragColor = vec4(Color.rgb * rgbAlpha.bgr * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.bgr) * (1.0 - Color.a), 1.0);\n"
 							"}\n"),
 						GL_FRAGMENT_SHADER)
 					},

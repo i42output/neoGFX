@@ -30,9 +30,16 @@ namespace neogfx
 	class opengl_texture : public i_native_texture
 	{
 	public:
-		struct unsupported_colour_format : std::runtime_error { unsupported_colour_format() : std::runtime_error("neogfx::opengl_texture::unsupported_colour_format") {} };
+		enum type_e
+		{
+			Normal,
+			Multisample
+		};
 	public:
-		opengl_texture(const neogfx::size& aExtents, const optional_colour& aColour = optional_colour());
+		struct unsupported_colour_format : std::runtime_error { unsupported_colour_format() : std::runtime_error("neogfx::opengl_texture::unsupported_colour_format") {} };
+		struct multisample_texture_initialization_unsupported : std::runtime_error{ multisample_texture_initialization_unsupported() : std::runtime_error("neogfx::opengl_texture::multisample_texture_initialization_unsupported") {} };
+	public:
+		opengl_texture(const neogfx::size& aExtents, type_e aType = Normal, const optional_colour& aColour = optional_colour());
 		opengl_texture(const i_image& aImage);
 		~opengl_texture();
 	public:
@@ -44,6 +51,7 @@ namespace neogfx
 		virtual bool is_resident() const;
 		virtual const std::string& uri() const;
 	private:
+		type_e iType;
 		basic_size<uint32_t> iSize;
 		basic_size<uint32_t> iStorageSize;
 		GLuint iHandle;

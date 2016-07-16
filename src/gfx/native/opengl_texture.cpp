@@ -23,7 +23,8 @@
 
 namespace neogfx
 {
-	opengl_texture::opengl_texture(const neogfx::size& aExtents, const optional_colour& aColour) :
+	opengl_texture::opengl_texture(const neogfx::size& aExtents, type_e aType, const optional_colour& aColour) :
+		iType(aType),
 		iSize(aExtents),
 		iStorageSize{ size{ std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0) } },
 		iHandle(0),
@@ -32,13 +33,18 @@ namespace neogfx
 		GLint previousTexture;
 		try
 		{
-			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
+			glCheck(glGetIntegerv(aType == Normal ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
 			glCheck(glGenTextures(1, &iHandle));
-			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
-			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			glCheck(glBindTexture(aType == Normal ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, iHandle));
+			if (iType == Normal)
+			{
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			}
 			if (aColour != boost::none)
 			{
+				if (iType != Normal)
+					throw multisample_texture_initialization_unsupported();
 				std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
 				for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
 					for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
@@ -48,13 +54,20 @@ namespace neogfx
 						data[y * iStorageSize.cx * 4 + x * 4 + 2] = aColour->blue();
 						data[y * iStorageSize.cx * 4 + x * 4 + 3] = aColour->alpha();
 					}
-				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
+				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
 			}
 			else
 			{
-				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0));
+				if (iType == Normal)
+				{
+					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0));
+				}
+				else
+				{
+					glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
+				}
 			}
-			glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+			glCheck(glBindTexture(aType == Normal ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
 		}
 		catch (...)
 		{
@@ -64,6 +77,7 @@ namespace neogfx
 	}
 
 	opengl_texture::opengl_texture(const i_image& aImage) :
+		iType(Normal),
 		iSize(aImage.extents()), 
 		iStorageSize{size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}},
 		iHandle(0), 
@@ -87,7 +101,7 @@ namespace neogfx
 						for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
 							for (std::size_t c = 0; c < 4; ++c)
 								data[y * iStorageSize.cx * 4 + x * 4 + c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
-					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
+					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
 				}
 				break;
 			default:

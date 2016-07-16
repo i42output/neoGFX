@@ -260,6 +260,10 @@ namespace neogfx
 			glCheck(glDeleteTextures(1, &iGradientTextures->first));
 			glCheck(glDeleteTextures(1, &iGradientTextures->second));
 		}
+		if (iGlyphDestinationBuffer != boost::none)
+		{
+			glCheck(glDeleteFramebuffers(1, &iGlyphDestinationFrameBuffer));
+		}
 	}
 
 	const i_native_surface& opengl_graphics_context::surface() const
@@ -962,19 +966,42 @@ namespace neogfx
 		iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTexture", 1);
 		if (aGlyph.subpixel())
 		{
-
+			GLuint renderingTargetFramebuffer;
+			GLint previousFramebufferBinding;
+			glCheck(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFramebufferBinding));
+			renderingTargetFramebuffer = previousFramebufferBinding;
+			if (iGlyphDestinationBuffer == boost::none)
+			{
+				iGlyphDestinationBuffer.emplace(size{ 512.0, 512.0 }, opengl_texture::Multisample);
+				glCheck(glGenFramebuffers(1, &iGlyphDestinationFrameBuffer));
+				glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iGlyphDestinationFrameBuffer));
+				glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iGlyphDestinationBuffer->handle()), 0));
+				GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+				if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
+					throw failed_to_create_framebuffer(status);
+				glCheck(glBindFramebuffer(GL_FRAMEBUFFER, renderingTargetFramebuffer));
+			}
+			glCheck(glBlitNamedFramebuffer(
+				renderingTargetFramebuffer,
+				iGlyphDestinationFrameBuffer,
+				static_cast<GLint>(glyphOrigin.x),
+				static_cast<GLint>(glyphOrigin.y),
+				static_cast<GLint>(glyphOrigin.x + glyphTexture.extents().cx),
+				static_cast<GLint>(glyphOrigin.y + glyphTexture.extents().cy),
+				0,
+				0,
+				static_cast<GLint>(glyphTexture.extents().cx),
+				static_cast<GLint>(glyphTexture.extents().cy),
+				GL_COLOR_BUFFER_BIT,
+				GL_NEAREST));
 			glCheck(glActiveTexture(GL_TEXTURE2));
 			glCheck(glClientActiveTexture(GL_TEXTURE2));
-			if (iGlyphDestinationBuffer == boost::none)
-				iGlyphDestinationBuffer.emplace(size{ 512.0, 512.0 });
-			glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(iGlyphDestinationBuffer->handle())));
-			//glBlitNamedFramebuffer
-			glCheck(glActiveTexture(GL_TEXTURE1));	
+			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iGlyphDestinationBuffer->handle())));
+			glCheck(glActiveTexture(GL_TEXTURE1));
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureOffset", static_cast<float>(textureCoords[0]), static_cast<float>(textureCoords[1]));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureExtents", static_cast<float>(textureCoords[2] - textureCoords[0]), static_cast<float>(textureCoords[7] - textureCoords[1]));
-			auto destinationTextureCoords = texture_vertices(iGlyphDestinationBuffer->extents(), rect{ point{}, glyphTexture.extents() }, logical_coordinates());
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTextureExtents", static_cast<float>(destinationTextureCoords[2] - destinationTextureCoords[0]), static_cast<float>(destinationTextureCoords[7] - destinationTextureCoords[1]));
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTextureExtents", static_cast<float>(glyphTexture.extents().cx), static_cast<float>(glyphTexture.extents().cy));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTexture", 2);
 		}
 

@@ -56,6 +56,8 @@ namespace neogfx
 		virtual void invalidate(const rect& aInvalidatedRect);
 		virtual void render();
 		virtual bool is_rendering() const;
+		virtual void* rendering_target_texture_handle() const;
+		virtual size rendering_target_texture_extents() const;
 	public:
 		virtual size extents() const;
 		virtual dimension horizontal_dpi() const;

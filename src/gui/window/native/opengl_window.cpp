@@ -209,6 +209,16 @@ namespace neogfx
 		return iRendering;
 	}
 
+	void* opengl_window::rendering_target_texture_handle() const
+	{
+		return reinterpret_cast<void*>(iFrameBufferTexture);
+	}
+
+	size opengl_window::rendering_target_texture_extents() const
+	{
+		return iFrameBufferSize;
+	}
+
 	size opengl_window::extents() const
 	{
 		return surface_size();

@@ -70,6 +70,8 @@ namespace neogfx
 		virtual void invalidate(const rect& aInvalidatedRect) = 0;
 		virtual void render() = 0;
 		virtual bool is_rendering() const = 0;
+		virtual void* rendering_target_texture_handle() const = 0;
+		virtual size rendering_target_texture_extents() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
 	public:
