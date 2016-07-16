@@ -147,6 +147,7 @@ namespace neogfx
 
 	text_edit::~text_edit()
 	{
+		app::instance().rendering_engine().subpixel_rendering_changed.unsubscribe(this);
 		app::instance().current_style_changed.unsubscribe(this);
 		if (app::instance().clipboard().sink_active() && &app::instance().clipboard().active_sink() == this)
 			app::instance().clipboard().deactivate(*this);
@@ -885,6 +886,10 @@ namespace neogfx
 	void text_edit::init()
 	{
 		app::instance().current_style_changed([this]()
+		{
+			refresh_paragraph(iText.begin());
+		}, this);
+		app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
 			refresh_paragraph(iText.begin());
 		}, this);

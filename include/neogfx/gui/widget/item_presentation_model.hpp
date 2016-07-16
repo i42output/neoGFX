@@ -40,9 +40,14 @@ namespace neogfx
 	public:
 		item_presentation_model() : iItemModel(0)
 		{
+			app::instance().rendering_engine().subpixel_rendering_changed([this]()
+			{
+				reset_meta();
+			}, this);
 		}
 		~item_presentation_model()
 		{
+			app::instance().rendering_engine().subpixel_rendering_changed.unsubscribe(this);
 			if (has_item_model())
 				item_model().unsubscribe(*this);
 		}
