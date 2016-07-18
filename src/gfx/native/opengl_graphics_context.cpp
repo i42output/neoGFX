@@ -975,25 +975,39 @@ namespace neogfx
 				iGlyphDestinationBuffer.emplace(size{ 512.0, 512.0 }, opengl_texture::Multisample);
 				glCheck(glGenFramebuffers(1, &iGlyphDestinationFrameBuffer));
 				glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iGlyphDestinationFrameBuffer));
-				glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iGlyphDestinationBuffer->handle()), 0));
+				glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iGlyphDestinationBuffer->handle()), 0));
 				GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 				if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
 					throw failed_to_create_framebuffer(status);
 				glCheck(glBindFramebuffer(GL_FRAMEBUFFER, renderingTargetFramebuffer));
 			}
+			glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iGlyphDestinationFrameBuffer));
+			glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, renderingTargetFramebuffer));
+			GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT1 };
+			glCheck(glNamedFramebufferDrawBuffers(iGlyphDestinationFrameBuffer, sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
+			glCheck(glNamedFramebufferReadBuffer(renderingTargetFramebuffer, GL_COLOR_ATTACHMENT0));
+			point fboGlyphOrigin = logical_coordinates()[1] < logical_coordinates()[3] ?
+				glyphOrigin : point{ glyphOrigin.x, logical_coordinates()[1] - glyphOrigin.y - glyphTexture.extents().cy };
+			glCheck(glDisable(GL_SCISSOR_TEST));
 			glCheck(glBlitNamedFramebuffer(
 				renderingTargetFramebuffer,
 				iGlyphDestinationFrameBuffer,
-				static_cast<GLint>(glyphOrigin.x),
-				static_cast<GLint>(glyphOrigin.y),
-				static_cast<GLint>(glyphOrigin.x + glyphTexture.extents().cx),
-				static_cast<GLint>(glyphOrigin.y + glyphTexture.extents().cy),
+				static_cast<GLint>(fboGlyphOrigin.x),
+				static_cast<GLint>(fboGlyphOrigin.y),
+				static_cast<GLint>(fboGlyphOrigin.x + glyphTexture.extents().cx),
+				static_cast<GLint>(fboGlyphOrigin.y + glyphTexture.extents().cy),
 				0,
 				0,
 				static_cast<GLint>(glyphTexture.extents().cx),
 				static_cast<GLint>(glyphTexture.extents().cy),
 				GL_COLOR_BUFFER_BIT,
 				GL_NEAREST));
+			if (!iScissorRects.empty())
+			{
+				glCheck(glEnable(GL_SCISSOR_TEST));
+			}
+			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iGlyphDestinationFrameBuffer));
+			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, renderingTargetFramebuffer));
 			glCheck(glActiveTexture(GL_TEXTURE2));
 			glCheck(glClientActiveTexture(GL_TEXTURE2));
 			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iGlyphDestinationBuffer->handle())));
@@ -1001,6 +1015,7 @@ namespace neogfx
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureOffset", static_cast<float>(textureCoords[0]), static_cast<float>(textureCoords[1]));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureExtents", static_cast<float>(textureCoords[2] - textureCoords[0]), static_cast<float>(textureCoords[7] - textureCoords[1]));
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("guiCoordinates", logical_coordinates()[1] > logical_coordinates()[3]);
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTextureExtents", static_cast<float>(glyphTexture.extents().cx), static_cast<float>(glyphTexture.extents().cy));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTexture", 2);
 		}
@@ -1224,7 +1239,7 @@ namespace neogfx
 		{
 			std::string::size_type sourceClusterRunStart = (clusterMap.begin() + (std::get<0>(runs[i]) - &codePoints[0]))->from;
 			hb_font_t* hbFont = static_cast<native_font_face::hb_handle*>(aFontSelector(sourceClusterRunStart).native_font_face().aux_handle())->font;
-			hb_ft_font_set_load_flags(hbFont, is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
+//			hb_ft_font_set_load_flags(hbFont, is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
 			hb_buffer_t* buf = static_cast<native_font_face::hb_handle*>(aFontSelector(sourceClusterRunStart).native_font_face().aux_handle())->buf;
 			hb_buffer_set_direction(buf, std::get<2>(runs[i]) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 			hb_buffer_set_script(buf, std::get<3>(runs[i]));
