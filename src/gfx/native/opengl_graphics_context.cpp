@@ -1239,7 +1239,7 @@ namespace neogfx
 		{
 			std::string::size_type sourceClusterRunStart = (clusterMap.begin() + (std::get<0>(runs[i]) - &codePoints[0]))->from;
 			hb_font_t* hbFont = static_cast<native_font_face::hb_handle*>(aFontSelector(sourceClusterRunStart).native_font_face().aux_handle())->font;
-//			hb_ft_font_set_load_flags(hbFont, is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
+			hb_ft_font_set_load_flags(hbFont, is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
 			hb_buffer_t* buf = static_cast<native_font_face::hb_handle*>(aFontSelector(sourceClusterRunStart).native_font_face().aux_handle())->buf;
 			hb_buffer_set_direction(buf, std::get<2>(runs[i]) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 			hb_buffer_set_script(buf, std::get<3>(runs[i]));
