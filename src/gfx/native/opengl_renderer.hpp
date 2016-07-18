@@ -26,6 +26,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include "opengl_texture_manager.hpp"
+#include "opengl_texture.hpp"
 
 std::string glErrorString(GLenum aErrorCode);
 GLenum glCheckError(const char* file, unsigned int line);
@@ -59,6 +60,10 @@ namespace neogfx
 			shader_program_error(GLenum aErrorCode) :
 				i_rendering_engine::shader_program_error(glErrorString(aErrorCode)) {}
 		};
+		struct failed_to_create_framebuffer : std::runtime_error {
+			failed_to_create_framebuffer(GLenum aErrorCode) :
+				std::runtime_error("neogfx::opengl_renderer::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + glErrorString(aErrorCode)) {}
+		};
 	public:
 		class shader_program : public i_shader_program
 		{
@@ -89,6 +94,7 @@ namespace neogfx
 		typedef std::list<shader_program> shader_programs;
 	public:
 		opengl_renderer();
+		~opengl_renderer();
 	public:
 		virtual void initialize();
 		virtual const i_screen_metrics& screen_metrics() const;
@@ -110,6 +116,9 @@ namespace neogfx
 		virtual void subpixel_rendering_off();
 	public:
 		virtual bool process_events();
+	public:
+		virtual i_native_texture& subpixel_rendering_texture() const;
+		virtual void* subpixel_rendering_framebuffer();
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
@@ -123,5 +132,7 @@ namespace neogfx
 		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;
 		bool iSubpixelRendering;
+		mutable boost::optional<opengl_texture> iSubpixelRenderingTexture;
+		mutable GLuint iSubpixelRenderingFramebuffer;
 	};
 }

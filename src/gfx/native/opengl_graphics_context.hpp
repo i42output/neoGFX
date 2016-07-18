@@ -39,7 +39,6 @@
 #include FT_BITMAP_H
 #include "opengl_error.hpp"
 #include "i_native_graphics_context.hpp"
-#include "opengl_texture.hpp"
 
 namespace neogfx
 {
@@ -71,11 +70,6 @@ namespace neogfx
 			}
 		};
 		typedef std::array<double, 3> vertex;
-	public:
-		struct failed_to_create_framebuffer : std::runtime_error {
-			failed_to_create_framebuffer(GLenum aErrorCode) :
-				std::runtime_error("neogfx::opengl_graphics_context::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + glErrorString(aErrorCode)) {}
-		};
 	public:
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface);
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget);
@@ -156,8 +150,6 @@ namespace neogfx
 		mutable std::vector<vertex> iGlyphVertices;
 		mutable std::vector<GLdouble> iGlyphTextureCoords;
 		mutable std::vector<std::array<GLdouble, 4>> iGlyphColours;
-		mutable boost::optional<opengl_texture> iGlyphDestinationBuffer;
-		GLuint iGlyphDestinationFrameBuffer;
 		struct cluster
 		{
 			std::string::size_type from;

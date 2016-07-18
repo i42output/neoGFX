@@ -106,5 +106,8 @@ namespace neogfx
 		virtual void render_now() = 0;
 	public:
 		virtual bool process_events() = 0;
+	public:
+		virtual i_native_texture& subpixel_rendering_texture() const = 0;
+		virtual void* subpixel_rendering_framebuffer() = 0;
 	};
 }
