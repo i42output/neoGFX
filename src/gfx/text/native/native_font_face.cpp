@@ -164,7 +164,7 @@ namespace neogfx
 				glyphRect + point{ 1.0, 1.0 } -delta{ 2.0, 2.0 },
 				neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) },
 				neogfx::point{
-					iHandle->glyph->metrics.horiBearingX / 64.0 / (aGlyph.subpixel() ? 3.0 : 1.0),
+					iHandle->glyph->metrics.horiBearingX / 64.0,
 					(iHandle->glyph->metrics.horiBearingY - iHandle->glyph->metrics.height) / 64.0 }))).first->second;
 
 		iGlyphTextureData.clear();

@@ -101,7 +101,6 @@ int main(int argc, char* argv[])
 		ng::window window(ng::size{ 675, 675 });
 
 		ng::vertical_layout layout0(window);
-
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{
 			ng::app::instance().change_style("Keypad").set_colour(ng::colour::LightGoldenrod);
