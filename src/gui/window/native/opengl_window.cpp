@@ -46,6 +46,10 @@ namespace neogfx
 
 	opengl_window::~opengl_window()
 	{
+		if (iSubpixelRenderingTexture != boost::none)
+		{
+			glCheck(glDeleteFramebuffers(1, &iSubpixelRenderingFramebuffer));
+		}
 	}
 
 	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const
@@ -237,6 +241,30 @@ namespace neogfx
 	dimension opengl_window::em_size() const
 	{
 		return 0;
+	}
+
+	i_native_texture& opengl_window::subpixel_rendering_texture() const
+	{
+		if (iSubpixelRenderingTexture == boost::none)
+		{
+			GLint previousFramebufferBinding;
+			glCheck(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFramebufferBinding));
+			GLuint renderingTargetFramebuffer = previousFramebufferBinding;
+			iSubpixelRenderingTexture.emplace(size{ 512.0, 512.0 }, opengl_texture::Multisample);
+			glCheck(glGenFramebuffers(1, &iSubpixelRenderingFramebuffer));
+			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iSubpixelRenderingFramebuffer));
+			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSubpixelRenderingTexture->handle()), 0));
+			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
+				throw failed_to_create_framebuffer(status);
+			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, renderingTargetFramebuffer));
+		}
+		return *iSubpixelRenderingTexture;
+	}
+
+	void* opengl_window::subpixel_rendering_framebuffer() const
+	{
+		return reinterpret_cast<void*>(iSubpixelRenderingFramebuffer);
 	}
 
 	i_native_window_event_handler& opengl_window::event_handler() const

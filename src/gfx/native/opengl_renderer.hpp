@@ -26,7 +26,6 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include "opengl_texture_manager.hpp"
-#include "opengl_texture.hpp"
 
 std::string glErrorString(GLenum aErrorCode);
 GLenum glCheckError(const char* file, unsigned int line);
@@ -116,9 +115,7 @@ namespace neogfx
 		virtual void subpixel_rendering_off();
 	public:
 		virtual bool process_events();
-	public:
-		virtual i_native_texture& subpixel_rendering_texture() const;
-		virtual void* subpixel_rendering_framebuffer();
+
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
@@ -132,7 +129,5 @@ namespace neogfx
 		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;
 		bool iSubpixelRendering;
-		mutable boost::optional<opengl_texture> iSubpixelRenderingTexture;
-		mutable GLuint iSubpixelRenderingFramebuffer;
 	};
 }

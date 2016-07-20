@@ -965,8 +965,8 @@ namespace neogfx
 			GLint previousFramebufferBinding;
 			glCheck(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFramebufferBinding));
 			GLuint renderingTargetFramebuffer = static_cast<GLuint>(previousFramebufferBinding);
-			auto& subpixelRenderingTexture = iRenderingEngine.subpixel_rendering_texture();
-			GLuint subpixelRenderingFramebuffer = reinterpret_cast<GLuint>(iRenderingEngine.subpixel_rendering_framebuffer());
+			auto& subpixelRenderingTexture = iSurface.subpixel_rendering_texture();
+			GLuint subpixelRenderingFramebuffer = reinterpret_cast<GLuint>(iSurface.subpixel_rendering_framebuffer());
 			glCheck(glNamedFramebufferDrawBuffer(subpixelRenderingFramebuffer, GL_COLOR_ATTACHMENT1));
 			glCheck(glNamedFramebufferReadBuffer(renderingTargetFramebuffer, GL_COLOR_ATTACHMENT0));
 			point fboGlyphOrigin = logical_coordinates()[1] < logical_coordinates()[3] ?

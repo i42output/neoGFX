@@ -25,9 +25,10 @@
 #include <neolib/string_utils.hpp>
 #include <neolib/timer.hpp>
 #include <neogfx/neogfx.hpp>
-#include "../../../src/gfx/native/opengl.hpp"
-#include "../../../src/gfx/native/opengl.hpp"
-#include "../../../src/gfx/native/i_native_graphics_context.hpp"
+#include "../../../gfx/native/opengl.hpp"
+#include "../../../gfx/native/opengl.hpp"
+#include "../../../gfx/native/i_native_graphics_context.hpp"
+#include "../../../gfx/native/opengl_texture.hpp"
 #include "native_window.hpp"
 #include "i_native_window_event_handler.hpp"
 
@@ -63,6 +64,9 @@ namespace neogfx
 		virtual dimension horizontal_dpi() const;
 		virtual dimension vertical_dpi() const;
 		virtual dimension em_size() const;
+	public:
+		virtual i_native_texture& subpixel_rendering_texture() const;
+		virtual void* subpixel_rendering_framebuffer() const;
 	protected:
 		virtual i_native_window_event_handler& event_handler() const;
 		virtual void destroying();
@@ -83,5 +87,7 @@ namespace neogfx
 		boost::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
 		bool iRendering;
+		mutable boost::optional<opengl_texture> iSubpixelRenderingTexture;
+		mutable GLuint iSubpixelRenderingFramebuffer;
 	};
 }
