@@ -109,6 +109,14 @@ namespace neogfx
 			iDragOffset = boost::none;
 	}
 
+	void slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
+	{
+		if (aWheel == mouse_wheel::Vertical)
+			set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + (aDelta.dy * normalized_step_value()))));
+		else
+			widget::mouse_wheel_scrolled(aWheel, aDelta);
+	}
+
 	void slider_impl::mouse_moved(const point& aPosition)
 	{
 		widget::mouse_moved(aPosition);
@@ -147,7 +155,7 @@ namespace neogfx
 	rect slider_impl::bar_box() const
 	{
 		rect result = client_rect(false);
-		result.deflate(size{ result.height() / 2.5 });
+		result.deflate(size{ std::ceil(result.height() / 2.5) });
 		return result;
 	}
 
@@ -155,7 +163,7 @@ namespace neogfx
 	{
 		rect rectBarBox = bar_box();
 		rect result{ point{ rectBarBox.x + rectBarBox.cx * normalized_value(), rectBarBox.centre().y}, size{} };
-		result.inflate(size{ rectBarBox.height() * 1.5 });
+		result.inflate(size{ std::ceil(rectBarBox.height() * 1.5) });
 		return result;
 	}
 }
