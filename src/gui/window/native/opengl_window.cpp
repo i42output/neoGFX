@@ -250,10 +250,10 @@ namespace neogfx
 			GLint previousFramebufferBinding;
 			glCheck(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFramebufferBinding));
 			GLuint renderingTargetFramebuffer = previousFramebufferBinding;
-			iSubpixelRenderingTexture.emplace(size{ 512.0, 512.0 }, opengl_texture::Multisample);
+			iSubpixelRenderingTexture.emplace(size{ 512.0, 512.0 });
 			glCheck(glGenFramebuffers(1, &iSubpixelRenderingFramebuffer));
 			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iSubpixelRenderingFramebuffer));
-			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSubpixelRenderingTexture->handle()), 0));
+			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, reinterpret_cast<GLuint>(iSubpixelRenderingTexture->handle()), 0));
 			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
 				throw failed_to_create_framebuffer(status);

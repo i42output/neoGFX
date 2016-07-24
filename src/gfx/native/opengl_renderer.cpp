@@ -268,7 +268,7 @@ namespace neogfx
 						std::string(
 							"#version 150\n"
 							"uniform sampler2D glyphTexture;\n"
-							"uniform sampler2DMS glyphDestinationTexture;\n"
+							"uniform sampler2D glyphDestinationTexture;\n"
 							"uniform vec2 glyphTextureOffset;\n"
 							"uniform vec2 glyphTextureExtents;\n"
 							"uniform vec2 glyphDestinationTextureExtents;\n"
@@ -315,7 +315,7 @@ namespace neogfx
 						std::string(
 							"#version 150\n"
 							"uniform sampler2D glyphTexture;\n"
-							"uniform sampler2DMS glyphDestinationTexture;\n"
+							"uniform sampler2D glyphDestinationTexture;\n"
 							"uniform vec2 glyphTextureOffset;\n"
 							"uniform vec2 glyphTextureExtents;\n"
 							"uniform vec2 glyphDestinationTextureExtents;\n"

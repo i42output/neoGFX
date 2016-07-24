@@ -991,7 +991,7 @@ namespace neogfx
 			}
 			glCheck(glActiveTexture(GL_TEXTURE2));
 			glCheck(glClientActiveTexture(GL_TEXTURE2));
-			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(subpixelRenderingTexture.handle())));
+			glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(subpixelRenderingTexture.handle())));
 			glCheck(glActiveTexture(GL_TEXTURE1));
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureOffset", static_cast<float>(textureCoords[0]), static_cast<float>(textureCoords[1]));
