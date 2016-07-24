@@ -272,8 +272,8 @@ namespace neogfx
 		typedef neolib::segmented_array<glyph_paragraph> glyph_paragraphs;
 		struct glyph_line
 		{
-			document_glyphs::iterator start;
-			document_glyphs::iterator end;
+			document_glyphs::const_iterator start;
+			document_glyphs::const_iterator end;
 			coordinate y;
 			size extents;
 		};

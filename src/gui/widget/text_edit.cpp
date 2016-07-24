@@ -756,11 +756,20 @@ namespace neogfx
 
 	text_edit::position_info text_edit::position(position_type aPosition) const
 	{
-		// todo: use binary search to find line
-		for (auto line = iGlyphLines.begin(); line != iGlyphLines.end(); ++line)
+		auto line = std::lower_bound(
+			iGlyphLines.begin(),
+			iGlyphLines.end(),
+			glyph_line{ iGlyphs.begin() + aPosition, iGlyphs.begin() + aPosition, 0.0, size{} },
+			[](const glyph_line& left, const glyph_line& right)
 		{
-			std::size_t lineStart = (line->start - iGlyphs.begin());
-			std::size_t lineEnd = (line->end - iGlyphs.begin());
+			return left.start < right.start;
+		});
+		if (line != iGlyphLines.begin() && aPosition <= static_cast<position_type>((line - 1)->end - iGlyphs.begin()))
+			--line;
+		if (line != iGlyphLines.end())
+		{
+			position_type lineStart = (line->start - iGlyphs.begin());
+			position_type lineEnd = (line->end - iGlyphs.begin());
 			if (aPosition >= lineStart && aPosition <= lineEnd)
 			{
 				if (lineStart != lineEnd)
