@@ -685,7 +685,7 @@ namespace neogfx
 		{
 			iPassword = aPassword;
 			iPasswordMask = aMask;
-			refresh_paragraph(iText.begin());
+			refresh_paragraph(iText.begin(), 0);
 		}
 	}
 
@@ -713,7 +713,7 @@ namespace neogfx
 		neogfx::font oldFont = font();
 		iDefaultStyle = aDefaultStyle;
 		if (oldFont != font())
-			refresh_paragraph(iText.begin());
+			refresh_paragraph(iText.begin(), 0);
 		update();
 	}
 
@@ -871,7 +871,7 @@ namespace neogfx
 			}
 		}
 		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
-		refresh_paragraph(insertionPoint);
+		refresh_paragraph(insertionPoint, eos);
 		update();
 		// todo: move cursor left if RTL text
 		if (aMoveCursor)
@@ -884,7 +884,10 @@ namespace neogfx
 	{
 		if (aStart == aEnd)
 			return;
-		refresh_paragraph(iText.erase(iText.begin() + from_glyph(iGlyphs.begin() + aStart).first, iText.begin() + from_glyph(iGlyphs.begin() + aEnd - 1).second));
+		auto eraseBegin = iText.begin() + from_glyph(iGlyphs.begin() + aStart).first;
+		auto eraseEnd = iText.begin() + from_glyph(iGlyphs.begin() + aEnd - 1).second;
+		auto eraseAmount = eraseEnd - eraseBegin;
+		refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
 		update();
 		text_changed.trigger();
 	}
@@ -909,12 +912,12 @@ namespace neogfx
 			if (iDefaultFont != app::instance().current_style().font_info())
 			{
 				iDefaultFont = app::instance().current_style().font_info();
-				refresh_paragraph(iText.begin());
+				refresh_paragraph(iText.begin(), 0);
 			}
 		}, this);
 		app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
-			refresh_paragraph(iText.begin());
+			refresh_paragraph(iText.begin(), 0);
 		}, this);
 		set_focus_policy(focus_policy::ClickTabFocus);
 		iCursor.set_width(2.0);
@@ -1001,7 +1004,7 @@ namespace neogfx
 		return std::make_pair(iText.size(), iText.size());
 	}
 
-	void text_edit::refresh_paragraph(document_text::const_iterator aWhere)
+	void text_edit::refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta)
 	{
 		/* simple (naive) implementation just to get things moving (so just refresh everything) ... */
 		(void)aWhere;

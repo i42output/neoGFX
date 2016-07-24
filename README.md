@@ -10,7 +10,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 
 Feature                   | % done  |     TODO
 --------------------------|---------|-------------------------------------------------------------------------------
-Window                    | 90      |     Icon, drop shadow
+Window                    | 90      |     Icon; drop shadow
 Dialog                    | 90      |     Default button
 Menu                      | 100     | 
 MDI                       | 0       |
@@ -19,10 +19,10 @@ Toolbars                  | 90      |     Drop-down button support
 Layout Managers           | 95      |     Need to fully support size policies
 Label                     | 100     |     
 Button                    | 100     |     
-Table View                | 85      |     Selection, Icon
+Table View                | 85      |     Selection; icon
 Tree View                 | 0       |
 List View                 | 0       |
-Text Edit                 | 80      |
+Text Edit                 | 80      |     Columns; inline images and emoji
 Line Edit                 | 100     |
 Spin Box                  | 100     |
 Slider                    | 90      |     Keyboard
@@ -38,4 +38,4 @@ Skins                     | 0       |
 # Known Problems
 Example test program will crash on shut-down due to bug related to focus tabbing linked list.
 
-Last updated: 21/07/16
+Last updated: 24/07/16

@@ -362,7 +362,7 @@ namespace neogfx
 		void delete_any_selection();
 		document_glyphs::const_iterator to_glyph(document_text::const_iterator aWhere) const;
 		std::pair<document_text::size_type, document_text::size_type> from_glyph(document_glyphs::const_iterator aWhere) const;
-		void refresh_paragraph(document_text::const_iterator aWhere);
+		void refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta);
 		void refresh_lines();
 		void animate();
 		void update_cursor();
