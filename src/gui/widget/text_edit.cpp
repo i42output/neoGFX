@@ -192,8 +192,17 @@ namespace neogfx
 	void text_edit::paint(graphics_context& aGraphicsContext) const
 	{
 		scrollable_widget::paint(aGraphicsContext);
-		/* simple (naive) implementation just to get things moving... */
-		for (auto line = iGlyphLines.begin(); line != iGlyphLines.end(); ++line)
+		auto line = std::lower_bound(
+			iGlyphLines.begin(),
+			iGlyphLines.end(),
+			glyph_line{ document_glyphs::iterator{}, document_glyphs::iterator{}, vertical_scrollbar().position(), size{} },
+			[](const glyph_line& left, const glyph_line& right)
+		{
+			return left.y < right.y;
+		});
+		if (line != iGlyphLines.begin() && line->y > vertical_scrollbar().position())
+			--line;
+		for (; line != iGlyphLines.end(); ++line)
 		{
 			point linePos = client_rect(false).top_left() + point{-horizontal_scrollbar().position(), line->y - vertical_scrollbar().position()};
 			if (linePos.y + line->extents.cy < client_rect(false).top() || linePos.y + line->extents.cy < update_rect().top())
