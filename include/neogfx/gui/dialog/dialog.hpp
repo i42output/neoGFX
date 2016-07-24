@@ -50,6 +50,8 @@ namespace neogfx
 	public:
 		dialog_button_box& button_box();
 		result_code_e exec();
+	public:
+		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	private:
 		void init();
 	private:

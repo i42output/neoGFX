@@ -130,6 +130,21 @@ namespace neogfx
 		return *iResult;
 	}
 
+	bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	{
+		switch (aScanCode)
+		{
+		case ScanCode_RETURN:
+			iResult = Accepted;
+			return true;
+		case ScanCode_ESCAPE:
+			iResult = Rejected;
+			return true;
+		default:
+			return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+		}
+	}
+
 	void dialog::init()
 	{
 	}
