@@ -378,6 +378,7 @@ namespace neogfx
 		std::string iPasswordMask;
 		neogfx::alignment iAlignment;
 		style iDefaultStyle;
+		font_info iDefaultFont;
 		mutable neogfx::cursor iCursor;
 		style_list iStyles;
 		std::string iNormalizedTextBuffer;

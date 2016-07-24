@@ -903,9 +903,14 @@ namespace neogfx
 
 	void text_edit::init()
 	{
+		iDefaultFont = app::instance().current_style().font_info();
 		app::instance().current_style_changed([this]()
 		{
-			refresh_paragraph(iText.begin());
+			if (iDefaultFont != app::instance().current_style().font_info())
+			{
+				iDefaultFont = app::instance().current_style().font_info();
+				refresh_paragraph(iText.begin());
+			}
 		}, this);
 		app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
