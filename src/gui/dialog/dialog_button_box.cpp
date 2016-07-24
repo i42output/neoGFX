@@ -91,16 +91,27 @@ namespace neogfx
 		switch (newButton->first.second)
 		{
 		case AcceptRole:
-			newButton->second->clicked([this]() { accepted.trigger(); });
+		case YesRole:
+			newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); accepted.trigger(); });
 			break;
 		case RejectRole:
-			newButton->second->clicked([this]() { rejected.trigger(); });
+		case NoRole:
+			newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); rejected.trigger(); });
+			break;
+		default:
+			newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); });
 			break;
 		}
 		iLayout.remove_items();
 		iLayout.add_item(iSpacer);
 		for (auto& button : iButtons)
 			iLayout.add_item(*button.second);
+	}
+
+	void dialog_button_box::clear()
+	{
+		iLayout.remove_items();
+		iButtons.clear();
 	}
 
 	void dialog_button_box::init()

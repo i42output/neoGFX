@@ -56,6 +56,9 @@ namespace neogfx
 			SaveAll,
 			Help
 		};
+	public:
+		event<standard_button_e> clicked;
+	public:
 		enum button_role_e
 		{
 			InvalidRole,
@@ -85,6 +88,7 @@ namespace neogfx
 	public:
 		push_button& button(standard_button_e aStandardButton) const;
 		void add_button(standard_button_e aStandardButton);
+		void clear();
 	private:
 		void init();
 	private:
