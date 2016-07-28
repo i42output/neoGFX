@@ -77,8 +77,5 @@ namespace neogfx
 	public:
 		virtual void activate_context() const = 0;
 		virtual void deactivate_context() const = 0;
-	public:
-		virtual i_native_texture& subpixel_rendering_texture() const = 0;
-		virtual void* subpixel_rendering_framebuffer() const = 0;
 	};
 }

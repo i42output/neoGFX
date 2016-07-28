@@ -849,6 +849,7 @@ namespace neogfx
 
 	void opengl_graphics_context::begin_drawing_glyphs()
 	{
+		glCheck(glTextureBarrierNV());
 		glCheck(glActiveTexture(GL_TEXTURE1));
 		glCheck(glClientActiveTexture(GL_TEXTURE1));
 		glCheck(glEnable(GL_TEXTURE_2D));
@@ -962,43 +963,14 @@ namespace neogfx
 		iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTexture", 1);
 		if (aGlyph.subpixel())
 		{
-			GLint previousFramebufferBinding;
-			glCheck(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFramebufferBinding));
-			GLuint renderingTargetFramebuffer = static_cast<GLuint>(previousFramebufferBinding);
-			auto& subpixelRenderingTexture = iSurface.subpixel_rendering_texture();
-			GLuint subpixelRenderingFramebuffer = reinterpret_cast<GLuint>(iSurface.subpixel_rendering_framebuffer());
-			glCheck(glNamedFramebufferDrawBuffer(subpixelRenderingFramebuffer, GL_COLOR_ATTACHMENT1));
-			glCheck(glNamedFramebufferReadBuffer(renderingTargetFramebuffer, GL_COLOR_ATTACHMENT0));
-			point fboGlyphOrigin = logical_coordinates()[1] < logical_coordinates()[3] ?
-				glyphOrigin : point{ glyphOrigin.x, logical_coordinates()[1] - glyphOrigin.y - glyphTexture.extents().cy };
-			glCheck(glDisable(GL_SCISSOR_TEST));
-			glCheck(glBlitNamedFramebuffer(
-				renderingTargetFramebuffer,
-				subpixelRenderingFramebuffer,
-				static_cast<GLint>(fboGlyphOrigin.x),
-				static_cast<GLint>(fboGlyphOrigin.y),
-				static_cast<GLint>(fboGlyphOrigin.x + glyphTexture.extents().cx),
-				static_cast<GLint>(fboGlyphOrigin.y + glyphTexture.extents().cy),
-				0,
-				0,
-				static_cast<GLint>(glyphTexture.extents().cx),
-				static_cast<GLint>(glyphTexture.extents().cy),
-				GL_COLOR_BUFFER_BIT,
-				GL_NEAREST));
-			if (!iScissorRects.empty())
-			{
-				glCheck(glEnable(GL_SCISSOR_TEST));
-			}
 			glCheck(glActiveTexture(GL_TEXTURE2));
 			glCheck(glClientActiveTexture(GL_TEXTURE2));
-			glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(subpixelRenderingTexture.handle())));
+			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSurface.rendering_target_texture_handle())));
 			glCheck(glActiveTexture(GL_TEXTURE1));
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureOffset", static_cast<float>(textureCoords[0]), static_cast<float>(textureCoords[1]));
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTextureExtents", static_cast<float>(textureCoords[2] - textureCoords[0]), static_cast<float>(textureCoords[7] - textureCoords[1]));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("guiCoordinates", logical_coordinates()[1] > logical_coordinates()[3]);
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTextureExtents", static_cast<float>(glyphTexture.extents().cx), static_cast<float>(glyphTexture.extents().cy));
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphDestinationTexture", 2);
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("outputTexture", 2);
 		}
 
 		glCheck(glEnable(GL_BLEND));

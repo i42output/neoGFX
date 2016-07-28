@@ -292,14 +292,14 @@ int main(int argc, char* argv[])
 		button4.set_maximum_size(ng::size(128, 64));
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
 		ng::text_edit textEdit(layoutButtons);
-		textEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		textEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::horizontal_layout layoutLineEdits(layoutButtons);
 		ng::line_edit lineEdit(layoutLineEdits);
 		lineEdit.set_text("Line edit");
-		lineEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		lineEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::line_edit lineEditPassword(layoutLineEdits);
 		lineEditPassword.set_text("Password");
-		lineEditPassword.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		lineEditPassword.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::spin_box spinBox(layoutLineEdits);
 		spinBox.set_minimum(20);
 		spinBox.set_maximum(100);
@@ -551,11 +551,11 @@ int main(int argc, char* argv[])
 		auto& tabEditor = tabContainer.add_tab_page("Editor").widget();
 		ng::vertical_layout layoutEditor(tabEditor);
 		ng::text_edit textEdit2(layoutEditor);
-		textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::push_button editorStyle1(layoutEditor, "Style 1");
 		editorStyle1.clicked([&textEdit2]()
 		{
-			textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+			textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		});
 		ng::push_button editorStyle2(layoutEditor, "Style 2");
 		editorStyle2.clicked([&textEdit2]()

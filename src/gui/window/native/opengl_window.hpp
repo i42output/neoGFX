@@ -64,9 +64,6 @@ namespace neogfx
 		virtual dimension horizontal_dpi() const;
 		virtual dimension vertical_dpi() const;
 		virtual dimension em_size() const;
-	public:
-		virtual i_native_texture& subpixel_rendering_texture() const;
-		virtual void* subpixel_rendering_framebuffer() const;
 	protected:
 		virtual i_native_window_event_handler& event_handler() const;
 		virtual void destroying();
@@ -87,7 +84,5 @@ namespace neogfx
 		boost::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
 		bool iRendering;
-		mutable boost::optional<opengl_texture> iSubpixelRenderingTexture;
-		mutable GLuint iSubpixelRenderingFramebuffer;
 	};
 }
