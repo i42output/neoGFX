@@ -40,6 +40,7 @@ namespace neogfx
 		virtual const std::string& error_string() const;
 	public:
 		virtual const std::string& uri() const;
+		virtual const void* cdata() const;
 		virtual const void* data() const;
 		virtual void* data();
 		virtual std::size_t size() const;

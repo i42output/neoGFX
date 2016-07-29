@@ -33,10 +33,21 @@
     <ClCompile Include="Debug\GeneratedFiles\test.nrc.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
+    <ClCompile Include="Release\GeneratedFiles\toolbar.nrc.cpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\GeneratedFiles\toolbar.nrc.cpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\test.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\..\src\closed\toolbar.nrc">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

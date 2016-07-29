@@ -106,19 +106,19 @@ int main(int argc, char* argv[])
 			ng::app::instance().change_style("Keypad").set_colour(ng::colour::LightGoldenrod);
 		});
 
-		auto& contactsAction = app.add_action("&Contacts...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#contacts.png").set_shortcut("Alt+C");
+		auto& contactsAction = app.add_action("&Contacts...", ":/closed/resources/caw_toolbar.naa#contacts.png").set_shortcut("Alt+C");
 		contactsAction.triggered([]()
 		{
 			ng::app::instance().change_style("Keypad").set_colour(ng::colour::White);
 		});
-		auto& muteAction = app.add_action("Mute/&Unmute Sound", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#mute.png");
+		auto& muteAction = app.add_action("Mute/&Unmute Sound", ":/closed/resources/caw_toolbar.naa#mute.png");
 		muteAction.set_checkable(true);
-		muteAction.set_checked_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#unmute.png");
+		muteAction.set_checked_image(":/closed/resources/caw_toolbar.naa#unmute.png");
 
-		auto& cutAction = app.add_action("Cut", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#cut.png").disable().set_shortcut("Ctrl+X");
-		auto& copyAction = app.add_action("Copy", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#copy.png").disable().set_shortcut("Ctrl+C");
-		auto& pasteAction = app.add_action("Paste", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste.png").set_shortcut("Ctrl+V");
-		auto& pasteAndGoAction = app.add_action("Paste and Go", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
+		auto& cutAction = app.add_action("Cut", ":/closed/resources/caw_toolbar.naa#cut.png").disable().set_shortcut("Ctrl+X");
+		auto& copyAction = app.add_action("Copy", ":/closed/resources/caw_toolbar.naa#copy.png").disable().set_shortcut("Ctrl+C");
+		auto& pasteAction = app.add_action("Paste", ":/closed/resources/caw_toolbar.naa#paste.png").set_shortcut("Ctrl+V");
+		auto& pasteAndGoAction = app.add_action("Paste and Go", ":/closed/resources/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
 		auto& deleteAction = app.add_action("Delete").set_shortcut("Del");
 		auto& selectAllAction = app.add_action("Select All").set_shortcut("Ctrl+A");
 
@@ -199,25 +199,25 @@ int main(int argc, char* argv[])
 		editMenu.add_separator();
 		editMenu.add_action(selectAllAction);
 		auto& viewMenu = menu.add_sub_menu("&View");
-		auto& addFavouriteAction = app.add_action("Add Favourite...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#add_favourite.png");
-		auto& organizeFavouritesAction = app.add_action("Organize Favourites...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#organize_favourites.png");
+		auto& addFavouriteAction = app.add_action("Add Favourite...", ":/closed/resources/caw_toolbar.naa#add_favourite.png");
+		auto& organizeFavouritesAction = app.add_action("Organize Favourites...", ":/closed/resources/caw_toolbar.naa#organize_favourites.png");
 		auto& favouritesMenu = menu.add_sub_menu("F&avourites");
 		favouritesMenu.add_action(addFavouriteAction);
 		favouritesMenu.add_action(organizeFavouritesAction);
 		favouritesMenu.add_separator();
-		favouritesMenu.add_action(app.add_action("Alice", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
-		favouritesMenu.add_action(app.add_action("Bob", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
-		favouritesMenu.add_action(app.add_action("Carlos", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
-		favouritesMenu.add_action(app.add_action("Dave", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		favouritesMenu.add_action(app.add_action("Alice", ":/closed/resources/caw_toolbar.naa#favourite.png"));
+		favouritesMenu.add_action(app.add_action("Bob", ":/closed/resources/caw_toolbar.naa#favourite.png"));
+		favouritesMenu.add_action(app.add_action("Carlos", ":/closed/resources/caw_toolbar.naa#favourite.png"));
+		favouritesMenu.add_action(app.add_action("Dave", ":/closed/resources/caw_toolbar.naa#favourite.png"));
 		auto& menuDrones = favouritesMenu.add_sub_menu("Silent Running Drones");
-		menuDrones.set_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#folder.png");
-		menuDrones.add_action(app.add_action("Dewey", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
-		menuDrones.add_action(app.add_action("Huey", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
-		menuDrones.add_action(app.add_action("Louie", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+		menuDrones.set_image(":/closed/resources/caw_toolbar.naa#folder.png");
+		menuDrones.add_action(app.add_action("Dewey", ":/closed/resources/caw_toolbar.naa#favourite.png"));
+		menuDrones.add_action(app.add_action("Huey", ":/closed/resources/caw_toolbar.naa#favourite.png"));
+		menuDrones.add_action(app.add_action("Louie", ":/closed/resources/caw_toolbar.naa#favourite.png"));
 		auto& subMenu2 = favouritesMenu.add_sub_menu("DC Characters");
-		subMenu2.set_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#folder.png");
+		subMenu2.set_image(":/closed/resources/caw_toolbar.naa#folder.png");
 		auto& subMenu3 = favouritesMenu.add_sub_menu("Marvel Characters");
-		subMenu3.set_image("file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#folder.png");
+		subMenu3.set_image(":/closed/resources/caw_toolbar.naa#folder.png");
 		favouritesMenu.add_separator();
 		for (int i = 1; i <= 5; ++i)
 		{
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 				int n = rand() % 100;
 				for (int k = 1; k < n; ++k)
 				{
-					sm2.add_action(app.add_action("More" + boost::lexical_cast<std::string>(k), "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#favourite.png"));
+					sm2.add_action(app.add_action("More" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.naa#favourite.png"));
 				}
 			}
 		}
@@ -254,9 +254,9 @@ int main(int argc, char* argv[])
 		toolbar.add_action(contactsAction);
 		toolbar.add_action(addFavouriteAction);
 		toolbar.add_action(organizeFavouritesAction);
-		toolbar.add_action(app.add_action("Keywords...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#keyword.png"));
-		toolbar.add_action(app.add_action("Settings...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#settings.png"));
-		toolbar.add_action(app.add_action("Manage Plugins...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#manage_plugins.png"));
+		toolbar.add_action(app.add_action("Keywords...", ":/closed/resources/caw_toolbar.naa#keyword.png"));
+		toolbar.add_action(app.add_action("Settings...", ":/closed/resources/caw_toolbar.naa#settings.png"));
+		toolbar.add_action(app.add_action("Manage Plugins...", ":/closed/resources/caw_toolbar.naa#manage_plugins.png"));
 		toolbar.add_action(muteAction);
 		toolbar.add_separator();
 		toolbar.add_action(cutAction);
@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
 		toolbar.add_action(pasteAction);
 		toolbar.add_action(pasteAndGoAction);
 		toolbar.add_separator();
-		toolbar.add_action(app.add_action("Check for Updates...", "file://" + boost::filesystem::current_path().string() + "/caw_toolbar.naa#setup.png"));
+		toolbar.add_action(app.add_action("Check for Updates...", ":/closed/resources/caw_toolbar.naa#setup.png"));
 
 		ng::tab_page_container tabContainer(layout0);
 
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
 		layoutButtons.set_margins(ng::margins(8));
 		ng::push_button button0(layoutButtons, "This is the neoGFX test application.");
 		button0.label().set_placement(ng::label_placement::ImageTextVertical);
-		button0.image().set_image(ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../../neoGFX.png" });
+		button0.image().set_image(ng::image{ ":/test/resources/neoGFX.png" });
 		button0.image().set_minimum_size(ng::size{ 32, 32 });
 		button0.image().set_maximum_size(ng::size{ 160, std::numeric_limits<ng::dimension>::max() });
 		button0.set_size_policy(ng::size_policy::Expanding);
@@ -529,7 +529,7 @@ int main(int argc, char* argv[])
 		auto& tabDrawing = tabContainer.add_tab_page("Drawing").widget();
 		tabDrawing.painting([&tabDrawing](ng::graphics_context& aGc)
 		{
-			ng::texture logo{ ng::image{ "file://" + boost::filesystem::current_path().string() + "/../../../../../../neoGFX.png" } };
+			ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
 			aGc.draw_texture(ng::point{ (tabDrawing.extents() - logo.extents()) / 2.0 }, logo);
 			aGc.fill_rounded_rect(ng::rect{ 100, 100, 100, 100 }, 10.0, ng::colour::Goldenrod);
 			aGc.fill_rect(ng::rect{ 300, 250, 200, 100 },

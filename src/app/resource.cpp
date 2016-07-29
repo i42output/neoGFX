@@ -27,9 +27,9 @@
 namespace neogfx
 {
 	resource::resource(i_resource_manager& aManager, const std::string& aUri) : 
-		iManager(aManager), iUri(aUri), iSize(0)
+		iManager{aManager}, iUri{aUri}, iSize{0}
 	{
-		neolib::uri uri(aUri);
+		neolib::uri uri{aUri};
 		if (uri.scheme() == "file")
 		{
 			if (uri.fragment().empty()) // individual asset file
@@ -41,7 +41,33 @@ namespace neogfx
 			}
 			else // asset archive
 			{
-				neolib::zip archive(uri.path());
+				neolib::zip archive{uri.path()};
+				for (std::size_t i = 0; i < archive.file_count(); ++i)
+				{
+					if (archive.file_path(i) == uri.fragment())
+					{
+						archive.extract_to(i, iData);
+						iSize = iData.size();
+					}
+					else
+					{
+						neolib::uri otherResource{uri};
+						otherResource.set_fragment(archive.file_path(i));
+						std::ostringstream oss;
+						oss << otherResource;
+						neolib::zip::buffer_type buffer;
+						archive.extract_to(i, buffer);
+						aManager.add_resource(oss.str(), &buffer[0], buffer.size());
+					}
+				}
+			}
+		}
+		else if (uri.scheme().empty())
+		{
+			if (!uri.fragment().empty()) // asset archive
+			{
+				auto assetArchive = aManager.load_resource(":/" + uri.path());
+				neolib::zip archive{assetArchive->cdata(), assetArchive->size()};
 				for (std::size_t i = 0; i < archive.file_count(); ++i)
 				{
 					if (archive.file_path(i) == uri.fragment())
@@ -65,7 +91,7 @@ namespace neogfx
 	}
 
 	resource::resource(i_resource_manager& aManager, const std::string& aUri, const void* aData, std::size_t aSize) : 
-		iManager(aManager), iUri(aUri), iSize(aSize), iData(reinterpret_cast<const uint8_t*>(aData), reinterpret_cast<const uint8_t*>(aData) + aSize)
+		iManager{aManager}, iUri{aUri}, iSize{aSize}, iData{reinterpret_cast<const uint8_t*>(aData), reinterpret_cast<const uint8_t*>(aData) + aSize}
 	{
 	}
 
@@ -107,11 +133,16 @@ namespace neogfx
 		return iUri;
 	}
 	
-	const void* resource::data() const
+	const void* resource::cdata() const
 	{
 		if (iData.empty())
 			throw no_data();
 		return &iData[0];
+	}
+
+	const void* resource::data() const
+	{
+		return cdata();
 	}
 	
 	void* resource::data()
