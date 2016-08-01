@@ -432,43 +432,43 @@ namespace neogfx
 		return results;
 	}
 	
-	gradient::colour_stop_list::iterator gradient::find_colour_stop(double aPos)
+	gradient::colour_stop_list::iterator gradient::find_colour_stop(double aPos, bool aToInsert)
 	{
 		auto colourStop = std::lower_bound(colour_stops().begin(), colour_stops().end(), colour_stop{ aPos, colour{} },
 			[](const colour_stop& aLeft, const colour_stop& aRight)
 		{
 			return aLeft.first < aRight.first;
 		});
-		if (colourStop == colour_stops().end())
+		if (colourStop == colour_stops().end() && !aToInsert)
 			--colourStop;
 		return colourStop;
 	}
 
-	gradient::colour_stop_list::iterator gradient::find_colour_stop(double aPos, double aStart, double aEnd)
+	gradient::colour_stop_list::iterator gradient::find_colour_stop(double aPos, double aStart, double aEnd, bool aToInsert)
 	{
-		return find_colour_stop(normalized_position(aPos, aStart, aEnd));
+		return find_colour_stop(normalized_position(aPos, aStart, aEnd), aToInsert);
 	}
 
-	gradient::alpha_stop_list::iterator gradient::find_alpha_stop(double aPos)
+	gradient::alpha_stop_list::iterator gradient::find_alpha_stop(double aPos, bool aToInsert)
 	{
 		auto alphaStop = std::lower_bound(alpha_stops().begin(), alpha_stops().end(), alpha_stop{ aPos, 255 },
 			[](const alpha_stop& aLeft, const alpha_stop& aRight)
 		{
 			return aLeft.first < aRight.first;
 		});
-		if (alphaStop == alpha_stops().end())
+		if (alphaStop == alpha_stops().end() && !aToInsert)
 			--alphaStop;
 		return alphaStop;
 	}
 
-	gradient::alpha_stop_list::iterator gradient::find_alpha_stop(double aPos, double aStart, double aEnd)
+	gradient::alpha_stop_list::iterator gradient::find_alpha_stop(double aPos, double aStart, double aEnd, bool aToInsert)
 	{
-		return find_alpha_stop(normalized_position(aPos, aStart, aEnd));
+		return find_alpha_stop(normalized_position(aPos, aStart, aEnd), aToInsert);
 	}
 
 	gradient::colour_stop_list::iterator gradient::insert_colour_stop(double aPos)
 	{
-		return colour_stops().insert(find_colour_stop(aPos), colour_stop(aPos, colour_at(aPos)));
+		return colour_stops().insert(find_colour_stop(aPos, true), colour_stop(aPos, colour_at(aPos)));
 	}
 
 	gradient::colour_stop_list::iterator gradient::insert_colour_stop(double aPos, double aStart, double aEnd)
@@ -478,7 +478,7 @@ namespace neogfx
 
 	gradient::alpha_stop_list::iterator gradient::insert_alpha_stop(double aPos)
 	{
-		return alpha_stops().insert(find_alpha_stop(aPos), alpha_stop(aPos, alpha_at(aPos)));
+		return alpha_stops().insert(find_alpha_stop(aPos, true), alpha_stop(aPos, alpha_at(aPos)));
 	}
 
 	gradient::alpha_stop_list::iterator gradient::insert_alpha_stop(double aPos, double aStart, double aEnd)

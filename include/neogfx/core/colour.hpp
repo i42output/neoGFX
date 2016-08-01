@@ -815,10 +815,10 @@ namespace neogfx
 		colour_stop_list::iterator colour_end();
 		alpha_stop_list::iterator alpha_begin();
 		alpha_stop_list::iterator alpha_end();
-		colour_stop_list::iterator find_colour_stop(double aPos);
-		colour_stop_list::iterator find_colour_stop(double aPos, double aStart, double aEnd);
-		alpha_stop_list::iterator find_alpha_stop(double aPos);
-		alpha_stop_list::iterator find_alpha_stop(double aPos, double aStart, double aEnd);
+		colour_stop_list::iterator find_colour_stop(double aPos, bool aToInsert = false);
+		colour_stop_list::iterator find_colour_stop(double aPos, double aStart, double aEnd, bool aToInsert = false);
+		alpha_stop_list::iterator find_alpha_stop(double aPos, bool aToInsert = false);
+		alpha_stop_list::iterator find_alpha_stop(double aPos, double aStart, double aEnd, bool aToInsert = false);
 		colour_stop_list::iterator insert_colour_stop(double aPos);
 		colour_stop_list::iterator insert_colour_stop(double aPos, double aStart, double aEnd);
 		alpha_stop_list::iterator insert_alpha_stop(double aPos);
