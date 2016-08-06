@@ -804,19 +804,9 @@ namespace neogfx
 			aGraphicsContext.set_extents(client_rect().extents());
 			aGraphicsContext.set_origin(origin());
 			aGraphicsContext.scissor_on(default_clip_rect());
-			auto savedCoordinateSystem = aGraphicsContext.logical_coordinate_system();
-			if (savedCoordinateSystem != logical_coordinate_system())
-			{
-				aGraphicsContext.set_logical_coordinate_system(logical_coordinate_system());
-				if (logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-					aGraphicsContext.set_origin(origin());
-				else if (logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
-					aGraphicsContext.set_origin(point{origin().x, surface().extents().cy - (origin().y + extents().cy)});
-			}
+			scoped_coordinate_system scs(aGraphicsContext, origin(), logical_coordinate_system());
 			painting.trigger(aGraphicsContext);
 			paint(aGraphicsContext);
-			if (savedCoordinateSystem != aGraphicsContext.logical_coordinate_system())
-				aGraphicsContext.set_logical_coordinate_system(savedCoordinateSystem);
 			aGraphicsContext.scissor_off();
 		}
 		iUpdateRects.clear();

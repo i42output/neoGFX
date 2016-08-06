@@ -914,6 +914,8 @@ namespace neogfx
 
 		textureCoords = texture_vertices(glyphTexture.font_texture().extents(), rect{ glyphTexture.font_texture_location(), glyphTexture.extents() }, logical_coordinates());
 
+		/* todo: cache VBOs and use glBufferSubData(). */
+
 		GLuint boHandles[3];
 		glCheck(glGenBuffers(3, boHandles));
 

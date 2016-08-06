@@ -235,4 +235,42 @@ namespace neogfx
 	private:
 		graphics_context& iGc;
 	};
+
+
+	class scoped_coordinate_system
+	{
+	public:
+		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, logical_coordinate_system aCoordinateSystem) :
+			iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+		{
+			iGc.set_logical_coordinate_system(aCoordinateSystem);
+			apply_origin(aOrigin);
+		}
+		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, logical_coordinate_system aCoordinateSystem, const vector4& aCoordinates) :
+			iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+		{
+			iGc.set_logical_coordinate_system(aCoordinateSystem);
+			iGc.set_logical_coordinates(aCoordinates);
+			apply_origin(aOrigin);
+		}
+		~scoped_coordinate_system()
+		{
+			if (iGc.logical_coordinate_system() != iPreviousCoordinateSystem)
+				iGc.set_logical_coordinate_system(iPreviousCoordinateSystem);
+			if (iGc.logical_coordinates() != iPreviousCoordinates)
+			iGc.set_logical_coordinates(iPreviousCoordinates);
+		}
+	private:
+		void apply_origin(const point& aOrigin)
+		{
+			if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
+				iGc.set_origin(aOrigin);
+			else if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
+				iGc.set_origin(point{ aOrigin.x, iGc.extents().cy - (aOrigin.y + iGc.extents().cy) });
+		}
+	private:
+		graphics_context& iGc;
+		logical_coordinate_system iPreviousCoordinateSystem;
+		vector4 iPreviousCoordinates;
+	};
 }
