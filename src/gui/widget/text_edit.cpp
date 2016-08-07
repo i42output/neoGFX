@@ -875,7 +875,7 @@ namespace neogfx
 		update();
 		// todo: move cursor left if RTL text
 		if (aMoveCursor)
-			cursor().set_position(cursor().position() + eos);
+			cursor().set_position(to_glyph(iText.begin() + from_glyph(iGlyphs.begin() + cursor().position()).first + eos) - iGlyphs.begin());
 		text_changed.trigger();
 		return eos;
 	}
