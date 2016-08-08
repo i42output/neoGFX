@@ -804,7 +804,7 @@ namespace neogfx
 			aGraphicsContext.set_extents(client_rect().extents());
 			aGraphicsContext.set_origin(origin());
 			aGraphicsContext.scissor_on(default_clip_rect());
-			scoped_coordinate_system scs(aGraphicsContext, origin(), logical_coordinate_system());
+			scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
 			painting.trigger(aGraphicsContext);
 			paint(aGraphicsContext);
 			aGraphicsContext.scissor_off();

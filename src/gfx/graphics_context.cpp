@@ -87,6 +87,11 @@ namespace neogfx
 	{
 	}
 
+	const i_surface& graphics_context::surface() const
+	{
+		return iSurface;
+	}
+
 	delta graphics_context::to_device_units(const delta& aValue) const
 	{
 		return units_converter(*this).to_device_units(aValue);
@@ -737,5 +742,36 @@ namespace neogfx
 	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) const
 	{
 		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, aTextureRect, aColour);
+	}
+
+	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
+		iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+	{
+		iGc.set_logical_coordinate_system(aCoordinateSystem);
+		apply_origin(aOrigin, aExtents);
+	}
+
+	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const vector4& aCoordinates) :
+		iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+	{
+		iGc.set_logical_coordinate_system(aCoordinateSystem);
+		iGc.set_logical_coordinates(aCoordinates);
+		apply_origin(aOrigin, aExtents);
+	}
+
+	scoped_coordinate_system::~scoped_coordinate_system()
+	{
+		if (iGc.logical_coordinate_system() != iPreviousCoordinateSystem)
+			iGc.set_logical_coordinate_system(iPreviousCoordinateSystem);
+		if (iGc.logical_coordinates() != iPreviousCoordinates)
+			iGc.set_logical_coordinates(iPreviousCoordinates);
+	}
+
+	void scoped_coordinate_system::apply_origin(const point& aOrigin, const size& aExtents)
+	{
+		if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
+			iGc.set_origin(aOrigin);
+		else if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
+			iGc.set_origin(point{ aOrigin.x, iGc.surface().extents().cy - (aOrigin.y + aExtents.cy) });
 	}
 }
