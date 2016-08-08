@@ -49,10 +49,10 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
-		size result = framed_widget::minimum_size(aAvailableSpace);
-		result += size{ 16, 14 };
-		return result;
+		scoped_units su(*this, UnitsMillimetres);
+		auto result = convert_units(*this, UnitsPixels, framed_widget::minimum_size(aAvailableSpace) + size{ 4, 3.5 }).ceil();
+		su.restore_saved_units();
+		return units_converter(*this).from_device_units(result);
 	}
 
 	size colour_dialog::colour_box::maximum_size(const optional_size& aAvailableSpace) const
@@ -840,7 +840,11 @@ namespace neogfx
 
 		iAddToCustomColours.clicked([this]()
 		{
+			if (iCurrentCustomColour == iCustomColours.end())
+				iCurrentCustomColour = iCustomColours.begin();
 			*iCurrentCustomColour = selected_colour();
+			if (iCurrentCustomColour != iCustomColours.end())
+				++iCurrentCustomColour;
 			update();
 		});
 
@@ -928,7 +932,6 @@ namespace neogfx
 			iA.second.set_value(selected_colour().alpha());
 		if (&aUpdatingWidget != &iRgb)
 			iRgb.set_text(selected_colour().to_hex_string());
-		iAddToCustomColours.enable(iCurrentCustomColour != iCustomColours.end());
 		iUpdatingWidgets = false;
 	}
 }

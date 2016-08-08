@@ -621,7 +621,7 @@ namespace neogfx
 				if (WIN_ConvertUTF32toUTF8((UINT32)wparam, &buffer[0]))
 				{
 					std::string text = buffer.c_str();
-					mapEntry->second->push_event(native_keyboard_event(native_keyboard_event::TextInput, text));
+					mapEntry->second->push_event(native_keyboard_event(native_keyboard_event::SysTextInput, text));
 				}
 			}
 			break;

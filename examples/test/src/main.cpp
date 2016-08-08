@@ -408,10 +408,17 @@ int main(int argc, char* argv[])
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
 		buttonColourPicker.clicked([&window]()
 		{
+			static boost::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
+			if (sCustomColours == boost::none)
+			{
+				sCustomColours = ng::colour_dialog::custom_colour_list{};
+				std::fill(sCustomColours->begin(), sCustomColours->end(), ng::colour::White);
+			}
 			ng::colour_dialog colourPicker(window, ng::app::instance().change_style("Keypad").colour());
+			colourPicker.custom_colours() = *sCustomColours;
 			if (colourPicker.exec() == ng::dialog::Accepted)
 				ng::app::instance().change_style("Keypad").set_colour(colourPicker.selected_colour());
-
+			*sCustomColours = colourPicker.custom_colours();
 		});
 		ng::vertical_spacer spacer1(layout4);
 		ng::grid_layout keypad(4, 3, layout2);
@@ -488,7 +495,11 @@ int main(int argc, char* argv[])
 
 		auto& w = tabContainer.add_tab_page("Lots").widget();
 		ng::vertical_layout l(w);
+		#ifdef NDEBUG
 		for (int i = 0; i < 10000; ++i)
+		#else
+		for (int i = 0; i < 100; ++i)
+		#endif
 			l.add_item(std::make_shared<ng::push_button>(boost::lexical_cast<std::string>(i)));
 		auto& w2 = tabContainer.add_tab_page("Images").widget();
 		ng::horizontal_layout l2(w2);

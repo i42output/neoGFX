@@ -818,7 +818,7 @@ namespace neogfx
 			return aValue;
 		T result = units_converter(aSourceUnitsContext).to_device_units(aValue);
 		scoped_units su(aSourceUnitsContext, aNewUnits);
-		return units_converter(aSourceUnitsContext).from_device_units(aValue);
+		return units_converter(aSourceUnitsContext).from_device_units(result);
 	}
 
 	template<typename T>

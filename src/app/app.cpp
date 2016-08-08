@@ -376,12 +376,24 @@ namespace neogfx
 		static boost::locale::generator gen;
 		static std::locale loc = gen("en_US.UTF-8");
 		std::sort(iMnemonics.begin(), iMnemonics.end(), mnemonic_sorter());
+		i_surface* lastWindowSurface = 0;
 		for (auto& m : iMnemonics)
+		{
+			if (lastWindowSurface == 0)
+			{
+				if (m->mnemonic_widget().has_surface() && m->mnemonic_widget().surface().surface_type() == surface_type::Window)
+					lastWindowSurface = &m->mnemonic_widget().surface();
+			}
+			else if (m->mnemonic_widget().has_surface() && m->mnemonic_widget().surface().surface_type() == surface_type::Window && lastWindowSurface != &m->mnemonic_widget().surface())
+			{
+				continue;
+			}
 			if (boost::locale::to_lower(m->mnemonic(), loc) == boost::locale::to_lower(aInput, loc))
 			{
 				m->mnemonic_execute();
 				return true;
 			}
+		}
 		return false;
 	}
 }
