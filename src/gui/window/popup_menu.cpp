@@ -42,11 +42,6 @@ namespace neogfx
 		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().ungrab_keyboard(*this);
 		close_sub_menu();
-		iMenu.item_added.unsubscribe(this);
-		iMenu.item_removed.unsubscribe(this);
-		iMenu.item_changed.unsubscribe(this);
-		iMenu.item_selected.unsubscribe(this);
-		iMenu.open_sub_menu.unsubscribe(this);
 		if (iMenu.is_open())
 			iMenu.close();
 	}
@@ -233,21 +228,21 @@ namespace neogfx
 			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(i)));
 		layout_items();
 		iMenu.open();
-		iMenu.item_added([this](i_menu::item_index aIndex)
+		iSink += iMenu.item_added([this](i_menu::item_index aIndex)
 		{
 			iLayout.add_item(aIndex, std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(aIndex)));
 			layout_items();
-		}, this);
-		iMenu.item_removed([this](i_menu::item_index aIndex)
+		});
+		iSink += iMenu.item_removed([this](i_menu::item_index aIndex)
 		{
 			iLayout.remove_item(aIndex);
 			layout_items();
-		}, this);
-		iMenu.item_changed([this](i_menu::item_index)
+		});
+		iSink += iMenu.item_changed([this](i_menu::item_index)
 		{
 			layout_items();
-		}, this);
-		iMenu.item_selected([this](i_menu_item& aMenuItem)
+		});
+		iSink += iMenu.item_selected([this](i_menu_item& aMenuItem)
 		{
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().grab_keyboard(*this);
@@ -261,8 +256,8 @@ namespace neogfx
 			}
 			scroll_to(layout().get_widget<menu_item_widget>(iMenu.find_item(aMenuItem)));
 			update();
-		}, this);
-		iMenu.open_sub_menu([this](i_menu& aSubMenu)
+		});
+		iSink += iMenu.open_sub_menu([this](i_menu& aSubMenu)
 		{
 			if (!iOpeningSubMenu && aSubMenu.item_count() > 0)
 			{
@@ -270,17 +265,17 @@ namespace neogfx
 				auto& itemWidget = layout().get_widget<menu_item_widget>(iMenu.find_item(aSubMenu));
 				close_sub_menu();
 				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
-				iOpenSubMenu->menu().closed([this]()
+				iSink2 += iOpenSubMenu->menu().closed([this]()
 				{
 					if (iOpenSubMenu != nullptr)
 						iOpenSubMenu->close();
-				}, this);
-				iOpenSubMenu->closed([this]()
+				});
+				iSink2 += iOpenSubMenu->closed([this]()
 				{
 					close_sub_menu();
-				}, this);
+				});
 			}
-		}, this);
+		});
 		show();
 	}
 
@@ -288,7 +283,7 @@ namespace neogfx
 	{
 		if (iOpenSubMenu != nullptr)
 		{
-			iOpenSubMenu->menu().closed.unsubscribe(this);
+			iSink2 = sink{};
 			iOpenSubMenu.reset();
 		}
 	}

@@ -40,14 +40,13 @@ namespace neogfx
 	public:
 		item_presentation_model() : iItemModel(0)
 		{
-			app::instance().rendering_engine().subpixel_rendering_changed([this]()
+			iSink = app::instance().rendering_engine().subpixel_rendering_changed([this]()
 			{
 				reset_meta();
-			}, this);
+			});
 		}
 		~item_presentation_model()
 		{
-			app::instance().rendering_engine().subpixel_rendering_changed.unsubscribe(this);
 			if (has_item_model())
 				item_model().unsubscribe(*this);
 		}
@@ -282,5 +281,6 @@ namespace neogfx
 		mutable font iFont;
 		mutable boost::optional<i_scrollbar::value_type> iTotalHeight;
 		mutable neolib::segmented_array<optional_position, 256> iPositions;
+		sink iSink;
 	};
 }

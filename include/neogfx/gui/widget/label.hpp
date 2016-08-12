@@ -67,6 +67,7 @@ namespace neogfx
 		label_placement effective_placement() const;
 		void handle_placement_change();
 	private:
+		sink iSink;
 		alignment iAlignment;
 		label_placement iPlacement;
 		grid_layout iLayout;

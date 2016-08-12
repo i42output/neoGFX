@@ -95,6 +95,7 @@ namespace neogfx
 	private:
 		bool update_objects();
 	private:
+		sink iSink;
 		bool iEnableZSorting;
 		scalar iG;
 		optional_vec3 iUniformGravity;

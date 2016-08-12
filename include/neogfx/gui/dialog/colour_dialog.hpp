@@ -111,6 +111,7 @@ namespace neogfx
 			point x_picker::current_cursor_position() const;
 		private:
 			colour_dialog& iParent;
+			sink iSink;
 			bool iTracking;
 			cursor_widget iLeftCursor;
 			cursor_widget iRightCursor;
@@ -173,6 +174,7 @@ namespace neogfx
 		void set_current_custom_colour(custom_colour_list::iterator aCustomColour);
 		void update_widgets(const i_widget& aUpdatingWidget);
 	private:
+		sink iSink;
 		channel_e iCurrentChannel;
 		colour iCurrentColour;
 		mutable representations iSelectedColour;

@@ -53,5 +53,6 @@ namespace neogfx
 		void init();
 	private:
 		i_action& iAction;
+		sink iSink;
 	};
 }

@@ -63,6 +63,7 @@ namespace neogfx
 		void init();
 		virtual void handle_clicked();
 	private:
+		sink iSink;
 		dimension iGap = 9.0;
 		dimension iIconSize = 16.0;
 		i_menu& iMenu;

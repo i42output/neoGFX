@@ -46,24 +46,7 @@ namespace neogfx
 	menu_item_widget::~menu_item_widget()
 	{
 		app::instance().remove_mnemonic(*this);
-		iText.text_changed.unsubscribe(this);
-		iMenuItem.selected.unsubscribe(this);
-		iMenuItem.deselected.unsubscribe(this);
 		iSubMenuOpener.reset();
-		if (iMenuItem.type() == i_menu_item::SubMenu)
-		{
-			iMenuItem.sub_menu().opened.unsubscribe(this);
-			iMenuItem.sub_menu().closed.unsubscribe(this);
-			iMenuItem.sub_menu().menu_changed.unsubscribe(this);
-		}
-		if (iMenuItem.type() == i_menu_item::Action)
-		{
-			iMenuItem.action().changed.unsubscribe(this);
-			iMenuItem.action().checked.unsubscribe(this);
-			iMenuItem.action().unchecked.unsubscribe(this);
-			iMenuItem.action().enabled.unsubscribe(this);
-			iMenuItem.action().disabled.unsubscribe(this);
-		}
 	}
 
 	i_menu_item& menu_item_widget::menu_item() const
@@ -238,7 +221,7 @@ namespace neogfx
 			else
 				app::instance().remove_mnemonic(*this);
 		};
-		iText.text_changed(text_updated, this);
+		iSink += iText.text_changed(text_updated);
 		text_updated();
 		if (iMenuItem.type() == i_menu_item::Action)
 		{
@@ -255,26 +238,26 @@ namespace neogfx
 				iSpacer.set_minimum_size(size{ iMenuItem.action().shortcut() != boost::none && iMenu.type() != i_menu::MenuBar ? iGap * 2.0 : 0.0, 0.0 });
 				enable(iMenuItem.action().is_enabled());
 			};
-			iMenuItem.action().changed(action_changed, this);
-			iMenuItem.action().checked(action_changed, this);
-			iMenuItem.action().unchecked(action_changed, this);
-			iMenuItem.action().enabled(action_changed, this);
-			iMenuItem.action().disabled(action_changed, this);
+			iSink += iMenuItem.action().changed(action_changed);
+			iSink += iMenuItem.action().checked(action_changed);
+			iSink += iMenuItem.action().unchecked(action_changed);
+			iSink += iMenuItem.action().enabled(action_changed);
+			iSink += iMenuItem.action().disabled(action_changed);
 			action_changed();
 		}
 		else
 		{
-			iMenuItem.sub_menu().opened([this]() {update(); }, this);
-			iMenuItem.sub_menu().closed([this]() {update(); }, this);
+			iSink += iMenuItem.sub_menu().opened([this]() {update(); });
+			iSink += iMenuItem.sub_menu().closed([this]() {update(); });
 			auto menu_changed = [this]() 
 			{ 
 				iIcon.set_image(iMenuItem.sub_menu().image());
 				iText.set_text(iMenuItem.sub_menu().title());
 			};
-			iMenuItem.sub_menu().menu_changed(menu_changed, this);
+			iSink += iMenuItem.sub_menu().menu_changed(menu_changed);
 			menu_changed();
 		}
-		iMenuItem.selected([this]()
+		iSink += iMenuItem.selected([this]()
 		{
 			if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
 			{
@@ -289,11 +272,11 @@ namespace neogfx
 					}
 				}, 250);
 			}
-		}, this);
-		iMenuItem.deselected([this]()
+		});
+		iSink += iMenuItem.deselected([this]()
 		{
 			iSubMenuOpener.reset();
-		}, this);
+		});
 	}
 
 	void menu_item_widget::handle_clicked()

@@ -27,18 +27,45 @@
 
 namespace neogfx
 {
+	class sink;
+
+	template <typename... Arguments>
+	class event;
+		
+	template <typename... Arguments>
+	class event_handle
+	{
+	public:
+		typedef event<Arguments...>* event_ptr;
+		typedef std::shared_ptr<event_ptr> event_instance_ptr;
+		typedef std::weak_ptr<event_ptr> event_instance_weak_ptr;
+		typedef std::function<void(Arguments...)> sink_callback;
+		typedef uint32_t sink_reference_count;
+		struct sink_list_item { sink_callback iSinkCallback; sink_reference_count iSinkReferenceCount; };
+		typedef std::list<sink_list_item, boost::fast_pool_allocator<sink_list_item>> sink_list;
+	public:
+		event_instance_weak_ptr iEvent;
+		typename sink_list::iterator iSink;
+	};
+
 	template <typename... Arguments>
 	class event : private neolib::destroyable
 	{
-	public:
-		typedef std::function<void(Arguments...)> sink_callback;
-		typedef std::list<std::pair<sink_callback, const void*>, boost::fast_pool_allocator<std::pair<sink_callback, const void*>>> sink_list;
-		typedef typename sink_list::const_iterator handle;
+		friend class sink;
 	private:
+		typedef event_handle<Arguments...> handle;
+		typedef typename handle::event_ptr ptr;
+		typedef typename handle::event_instance_ptr instance_ptr;
+		typedef typename handle::event_instance_weak_ptr instance_weak_ptr;
+		typedef typename handle::sink_callback sink_callback;
+		typedef typename handle::sink_reference_count sink_reference_count;
+		typedef typename handle::sink_list_item sink_list_item;
+		typedef typename handle::sink_list sink_list;
 		typedef std::deque<typename sink_list::const_iterator> notification_list;
 	public:
 		event() :
-			iAccepted(false)
+			iInstancePtr{new ptr{this}},
+			iAccepted{false}
 		{
 		}
 		bool trigger(Arguments... aArguments) const
@@ -50,7 +77,7 @@ namespace neogfx
 			{
 				auto i = iNotifications.front();
 				iNotifications.pop_front();
-				i->first(aArguments...);
+				i->iSinkCallback(aArguments...);
 				if (destroyed)
 					return false;
 				if (iAccepted)
@@ -73,40 +100,101 @@ namespace neogfx
 	public:
 		handle subscribe(const sink_callback& aSinkCallback)
 		{
-			return iSinks.insert(iSinks.end(), std::make_pair(aSinkCallback, nullptr));
-		}
-		handle subscribe(const sink_callback& aSinkCallback, const void* aSinkObject)
-		{
-			unsubscribe(aSinkObject);
-			return iSinks.insert(iSinks.end(), std::make_pair(aSinkCallback, aSinkObject));
+			return handle{ iInstancePtr, iSinks.insert(iSinks.end(), sink_list_item{ aSinkCallback, 0 }) };
 		}
 		handle operator()(const sink_callback& aSinkCallback)
 		{
 			return subscribe(aSinkCallback);
 		}
-		handle operator()(const sink_callback& aSinkCallback, const void* aSinkObject)
-		{
-			return subscribe(aSinkCallback, aSinkObject);
-		}
+	private:
 		void unsubscribe(handle aHandle)
 		{
-			iNotifications.erase(std::remove(iNotifications.begin(), iNotifications.end(), aHandle), iNotifications.end())
-			iSinks.erase(aHandle);
-		}
-		void unsubscribe(const void* aSinkObject)
-		{
-			for (auto i = iSinks.begin(); i != iSinks.end();)
-				if (i->second == aSinkObject)
-				{
-					iNotifications.erase(std::remove(iNotifications.begin(), iNotifications.end(), i), iNotifications.end());
-					i = iSinks.erase(i);
-				}
-				else
-					++i;
+			iNotifications.erase(std::remove(iNotifications.begin(), iNotifications.end(), aHandle.iSink), iNotifications.end());
+			iSinks.erase(aHandle.iSink);
 		}
 	private:
+		instance_ptr iInstancePtr;
 		sink_list iSinks;
 		mutable bool iAccepted;
 		mutable notification_list iNotifications;
+	};
+
+	class sink
+	{
+	private:
+		enum controller_op_e
+		{
+			AddRef,
+			Release
+		};
+	public:
+		sink()
+		{
+		}
+		template <typename... Arguments>
+		sink(event_handle<Arguments...> aHandle) :
+			iControllers{[aHandle](controller_op_e aOperation)
+				{ 
+					if (!aHandle.iEvent.expired())
+					{
+						switch (aOperation)
+						{
+						case AddRef:
+							++aHandle.iSink->iSinkReferenceCount;
+							break;
+						case Release:
+							if (--aHandle.iSink->iSinkReferenceCount == 0)
+								(**aHandle.iEvent.lock()).unsubscribe(aHandle);
+							break;
+						}
+					}
+				}}
+		{
+			add_ref();
+		}
+		sink(const sink& aSink) : 
+			iControllers{aSink.iControllers}
+		{
+			add_ref();
+		}
+		sink& operator=(const sink& aSink)
+		{
+			if (this == &aSink)
+				return *this;
+			release();
+			iControllers = aSink.iControllers;
+			add_ref();
+			return *this;
+		}
+		template <typename... Arguments>
+		sink& operator=(event_handle<Arguments...> aHandle)
+		{
+			return *this = sink{aHandle};
+		}
+		template <typename... Arguments>
+		sink& operator+=(event_handle<Arguments...> aHandle)
+		{
+			sink s{aHandle};
+			s.add_ref();
+			iControllers.insert(iControllers.end(), s.iControllers.begin(), s.iControllers.end());
+			return *this;
+		}
+		~sink()
+		{
+			release();
+		}
+	private:
+		void add_ref() const
+		{
+			for (auto c : iControllers)
+				c(AddRef);
+		}
+		void release() const
+		{
+			for (auto c : iControllers)
+				c(Release);
+		}
+	private:
+		std::vector<std::function<void(controller_op_e)>> iControllers;
 	};
 }

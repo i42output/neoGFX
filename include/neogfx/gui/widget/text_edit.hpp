@@ -371,6 +371,7 @@ namespace neogfx
 		void draw_cursor(const graphics_context& aGraphicsContext) const;
 		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
 	private:
+		sink iSink;
 		type_e iType;
 		bool iReadOnly;
 		bool iWordWrap;

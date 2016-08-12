@@ -45,6 +45,8 @@ namespace neogfx
 		void init();
 		void close_sub_menu(bool aClearSelection = true);
 	private:
+		sink iSink;
+		sink iSink2;
 		flow_layout iLayout;
 		std::unique_ptr<popup_menu> iOpenSubMenu;
 	};

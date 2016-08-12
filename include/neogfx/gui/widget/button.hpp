@@ -92,6 +92,7 @@ namespace neogfx
 	private:
 		void init();
 	private:
+		sink iSink;
 		checkable_e iCheckable;
 		boost::optional<bool> iCheckedState;
 		horizontal_layout iLayout;

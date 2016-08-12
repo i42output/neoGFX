@@ -42,13 +42,7 @@ namespace neogfx
 
 	menu_bar::~menu_bar()
 	{
-		surface().dismissing_children.unsubscribe(this);
 		close_sub_menu();
-		item_added.unsubscribe(this);
-		item_removed.unsubscribe(this);
-		item_selected.unsubscribe(this);
-		selection_cleared.unsubscribe(this);
-		open_sub_menu.unsubscribe(this);
 		remove_widgets();
 	}
 
@@ -123,17 +117,17 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins{});
 		layout().set_margins(neogfx::margins{});
-		surface().dismissing_children([this](const i_widget* aClickedWidget)
+		iSink += surface().dismissing_children([this](const i_widget* aClickedWidget)
 		{
 			if (aClickedWidget != this && (aClickedWidget == 0 || !is_ancestor_of(*aClickedWidget)))
 				clear_selection();
 			update();
-		}, this);
-		item_added([this](item_index aItemIndex)
+		});
+		iSink += item_added([this](item_index aItemIndex)
 		{
 			layout().add_item(aItemIndex, std::make_shared<menu_item_widget>(*this, item(aItemIndex)));
-		}, this);
-		item_removed([this](item_index aItemIndex)
+		});
+		iSink += item_removed([this](item_index aItemIndex)
 		{
 			if (layout().is_widget(aItemIndex))
 			{
@@ -141,8 +135,8 @@ namespace neogfx
 				w.parent().remove_widget(w);
 			}
 			layout().remove_item(aItemIndex);
-		}, this);
-		item_selected([this](i_menu_item& aMenuItem)
+		});
+		iSink += item_selected([this](i_menu_item& aMenuItem)
 		{
 			if (iOpenSubMenu != nullptr)
 			{
@@ -155,37 +149,37 @@ namespace neogfx
 				}
 			}
 			update();
-		}, this);
-		selection_cleared([this]()
+		});
+		iSink += selection_cleared([this]()
 		{
 			if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().ungrab_keyboard(*this);
 			close_sub_menu(false);
-		}, this);
-		open_sub_menu([this](i_menu& aSubMenu)
+		});
+		iSink += open_sub_menu([this](i_menu& aSubMenu)
 		{
 			auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
 			close_sub_menu(false);
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().grab_keyboard(*this);
 			iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
-			iOpenSubMenu->menu().closed([this]()
+			iSink2 = iOpenSubMenu->menu().closed([this]()
 			{
 				if (iOpenSubMenu != nullptr)
 					iOpenSubMenu->close();
-			}, this);
-			iOpenSubMenu->closed([this]()
+			});
+			iSink2 += iOpenSubMenu->closed([this]()
 			{
 				close_sub_menu();
-			}, this);
-		}, this);
+			});
+		});
 	}
 
 	void menu_bar::close_sub_menu(bool aClearSelection)
 	{
 		if (iOpenSubMenu != nullptr)
 		{
-			iOpenSubMenu->menu().closed.unsubscribe(this);
+			iSink2 = sink{};
 			iOpenSubMenu.reset();
 			if (aClearSelection)
 				clear_selection();

@@ -127,11 +127,11 @@ namespace neogfx
 		iText.set_ignore_mouse_events(true);
 		iImage.set_ignore_mouse_events(true);
 		handle_placement_change();
-		iLayout.alignment_changed([this]() { handle_placement_change(); });
-		iText.visibility_changed([this](){ handle_placement_change(); });
-		iText.text_changed([this]() { handle_placement_change(); });
-		iImage.visibility_changed([this]() { handle_placement_change(); });
-		iImage.image_changed([this]() { handle_placement_change(); });
+		iSink += iLayout.alignment_changed([this]() { handle_placement_change(); });
+		iSink += iText.visibility_changed([this](){ handle_placement_change(); });
+		iSink += iText.text_changed([this]() { handle_placement_change(); });
+		iSink += iImage.visibility_changed([this]() { handle_placement_change(); });
+		iSink += iImage.image_changed([this]() { handle_placement_change(); });
 	}
 
 	label_placement label::effective_placement() const

@@ -54,6 +54,8 @@ namespace neogfx
 		void init();
 		void close_sub_menu();
 	private:
+		sink iSink;
+		sink iSink2;
 		i_widget* iParentWidget;
 		i_menu& iMenu;
 		vertical_layout iLayout;

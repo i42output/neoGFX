@@ -60,7 +60,6 @@ namespace neogfx
 
 	spin_box_impl::~spin_box_impl()
 	{
-		app::instance().current_style_changed.unsubscribe(this);
 	}
 
 	colour spin_box_impl::frame_colour() const
@@ -124,7 +123,7 @@ namespace neogfx
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iTextBox.set_style(framed_widget::NoFrame);
 
-		iTextBox.text_changed([this]()
+		iSink += iTextBox.text_changed([this]()
 		{
 			auto text = iTextBox.text();
 			auto newNormalizedValue = string_to_normalized_value(text);
@@ -151,14 +150,14 @@ namespace neogfx
 				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())), true);
 			}, 500);
 		};
-		iStepUpButton.pressed(step_up);
-		iStepUpButton.clicked([this]()
+		iSink += iStepUpButton.pressed(step_up);
+		iSink += iStepUpButton.clicked([this]()
 		{
 			if (iStepper == boost::none) // key press?
 				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())), true);
 		});
-		iStepUpButton.double_clicked(step_up);
-		iStepUpButton.released([this]()
+		iSink += iStepUpButton.double_clicked(step_up);
+		iSink += iStepUpButton.released([this]()
 		{
 			iStepper = boost::none;
 		});
@@ -173,23 +172,23 @@ namespace neogfx
 				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())), true);
 			}, 500);
 		};
-		iStepDownButton.pressed(step_down);
-		iStepDownButton.clicked([this]()
+		iSink += iStepDownButton.pressed(step_down);
+		iSink += iStepDownButton.clicked([this]()
 		{
 			if (iStepper == boost::none) // key press?
 				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())), true);
 		});
-		iStepDownButton.double_clicked(step_down);
-		iStepDownButton.released([this]()
+		iSink += iStepDownButton.double_clicked(step_down);
+		iSink += iStepDownButton.released([this]()
 		{
 			iStepper = boost::none;
 		});
 
 		update_arrows();
-		app::instance().current_style_changed([this]()
+		iSink += app::instance().current_style_changed([this]()
 		{
 			update_arrows();
-		}, this);
+		});
 	}
 
 	void spin_box_impl::update_arrows()

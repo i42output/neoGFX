@@ -160,7 +160,7 @@ namespace neogfx
 		iRightCursor(*this, cursor_widget::RightCursor)
 	{
 		set_margins(neogfx::margins{});
-		iParent.selection_changed([this]()
+		iSink = iParent.selection_changed([this]()
 		{
 			update_cursors();
 			update();
@@ -810,20 +810,20 @@ namespace neogfx
 		button_box().add_button(dialog_button_box::Ok);
 		button_box().add_button(dialog_button_box::Cancel);
 		centre();
-		iH.first.checked([this]() { set_current_channel(ChannelHue); });
-		iS.first.checked([this]() { set_current_channel(ChannelSaturation); });
-		iV.first.checked([this]() { set_current_channel(ChannelValue); });
-		iR.first.checked([this]() { set_current_channel(ChannelRed); });
-		iG.first.checked([this]() { set_current_channel(ChannelGreen); });
-		iB.first.checked([this]() { set_current_channel(ChannelBlue); });
-		iA.first.checked([this]() { set_current_channel(ChannelAlpha); });
-		iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_hue(iH.second.value()); select_colour(hsv, iH.second); });
-		iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_saturation(iS.second.value() / 100.0); select_colour(hsv, iS.second); });
-		iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_value(iV.second.value() / 100.0); select_colour(hsv, iV.second); });
-		iR.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_red(static_cast<colour::component>(iR.second.value())), iR.second); });
-		iG.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_green(static_cast<colour::component>(iG.second.value())), iG.second); });
-		iB.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_blue(static_cast<colour::component>(iB.second.value())), iB.second); });
-		iA.second.value_changed([this]() 
+		iSink += iH.first.checked([this]() { set_current_channel(ChannelHue); });
+		iSink += iS.first.checked([this]() { set_current_channel(ChannelSaturation); });
+		iSink += iV.first.checked([this]() { set_current_channel(ChannelValue); });
+		iSink += iR.first.checked([this]() { set_current_channel(ChannelRed); });
+		iSink += iG.first.checked([this]() { set_current_channel(ChannelGreen); });
+		iSink += iB.first.checked([this]() { set_current_channel(ChannelBlue); });
+		iSink += iA.first.checked([this]() { set_current_channel(ChannelAlpha); });
+		iSink += iH.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_hue(iH.second.value()); select_colour(hsv, iH.second); });
+		iSink += iS.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_saturation(iS.second.value() / 100.0); select_colour(hsv, iS.second); });
+		iSink += iV.second.value_changed([this]() { if (iUpdatingWidgets) return; auto hsv = selected_colour_as_hsv(); hsv.set_value(iV.second.value() / 100.0); select_colour(hsv, iV.second); });
+		iSink += iR.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_red(static_cast<colour::component>(iR.second.value())), iR.second); });
+		iSink += iG.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_green(static_cast<colour::component>(iG.second.value())), iG.second); });
+		iSink += iB.second.value_changed([this]() { if (iUpdatingWidgets) return; select_colour(selected_colour().with_blue(static_cast<colour::component>(iB.second.value())), iB.second); });
+		iSink += iA.second.value_changed([this]() 
 		{ 
 			if (iUpdatingWidgets) 
 				return;
@@ -836,9 +836,9 @@ namespace neogfx
 				select_colour(hsv, iA.second);
 			}
 		});
-		iRgb.text_changed([this]() { if (iUpdatingWidgets) return; select_colour(colour{ iRgb.text() }, iRgb); });
+		iSink += iRgb.text_changed([this]() { if (iUpdatingWidgets) return; select_colour(colour{ iRgb.text() }, iRgb); });
 
-		iAddToCustomColours.clicked([this]()
+		iSink += iAddToCustomColours.clicked([this]()
 		{
 			if (iCurrentCustomColour == iCustomColours.end())
 				iCurrentCustomColour = iCustomColours.begin();

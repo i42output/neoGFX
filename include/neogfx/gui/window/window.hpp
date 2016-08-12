@@ -180,6 +180,7 @@ namespace neogfx
 		void update_modality();
 		void dismiss_children(const i_widget* aClickedWidget = 0);
 	private:
+		sink iSink;
 		std::unique_ptr<i_native_window> iNativeWindow;
 		style_e iStyle;
 		mutable units_e iUnits;

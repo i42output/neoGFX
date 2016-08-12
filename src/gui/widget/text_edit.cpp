@@ -147,8 +147,6 @@ namespace neogfx
 
 	text_edit::~text_edit()
 	{
-		app::instance().rendering_engine().subpixel_rendering_changed.unsubscribe(this);
-		app::instance().current_style_changed.unsubscribe(this);
 		if (app::instance().clipboard().sink_active() && &app::instance().clipboard().active_sink() == this)
 			app::instance().clipboard().deactivate(*this);
 	}
@@ -907,34 +905,34 @@ namespace neogfx
 	void text_edit::init()
 	{
 		iDefaultFont = app::instance().current_style().font_info();
-		app::instance().current_style_changed([this]()
+		iSink += app::instance().current_style_changed([this]()
 		{
 			if (iDefaultFont != app::instance().current_style().font_info())
 			{
 				iDefaultFont = app::instance().current_style().font_info();
 				refresh_paragraph(iText.begin(), 0);
 			}
-		}, this);
-		app::instance().rendering_engine().subpixel_rendering_changed([this]()
+		});
+		iSink += app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
 			refresh_paragraph(iText.begin(), 0);
-		}, this);
+		});
 		set_focus_policy(focus_policy::ClickTabFocus);
 		iCursor.set_width(2.0);
-		iCursor.position_changed([this]()
+		iSink += iCursor.position_changed([this]()
 		{
 			iCursorAnimationStartTime = app::instance().program_elapsed_ms();
 			make_cursor_visible();
 			update();
-		}, this);
-		iCursor.anchor_changed([this]()
+		});
+		iSink += iCursor.anchor_changed([this]()
 		{
 			update();
-		}, this);
-		iCursor.appearance_changed([this]()
+		});
+		iSink += iCursor.appearance_changed([this]()
 		{
 			update();
-		}, this);
+		});
 	}
 
 	void text_edit::delete_any_selection()

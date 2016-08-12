@@ -46,7 +46,6 @@ namespace neogfx
 	button::~button()
 	{
 		app::instance().remove_mnemonic(*this);
-		label().text().text_changed.unsubscribe(this);
 	}
 
 	neogfx::size_policy button::size_policy() const
@@ -248,7 +247,7 @@ namespace neogfx
 			else
 				app::instance().remove_mnemonic(*this);
 		};
-		label().text().text_changed(label_text_updated, this);
+		iSink = label().text().text_changed(label_text_updated);
 		label_text_updated();
 	}
 }

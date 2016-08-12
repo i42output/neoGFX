@@ -35,37 +35,35 @@ namespace neogfx
 	sprite_plane::sprite_plane(i_widget& aParent) :
 		widget(aParent), iEnableZSorting(false), iG(6.67408e-11)
 	{
-		surface().native_surface().rendering_check([this]()
+		iSink = surface().native_surface().rendering_check([this]()
 		{
 			if (update_objects())
 				update();
-		}, this);
+		});
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
 		widget(aLayout), iEnableZSorting(false), iG(6.67408e-11)
 	{
-		surface().native_surface().rendering_check([this]()
+		iSink = surface().native_surface().rendering_check([this]()
 		{
 			if (update_objects())
 				update();
-		}, this);
+		});
 	}
 
 	sprite_plane::~sprite_plane()
 	{
-		if (has_surface() && !surface().destroyed())
-			surface().native_surface().rendering_check.unsubscribe(this);
 	}
 
 	void sprite_plane::parent_changed()
 	{
 		widget::parent_changed();
-		surface().native_surface().rendering_check([this]()
+		iSink = surface().native_surface().rendering_check([this]()
 		{
 			if (update_objects())
 				update();
-		}, this);
+		});
 	}
 
 	logical_coordinate_system sprite_plane::logical_coordinate_system() const

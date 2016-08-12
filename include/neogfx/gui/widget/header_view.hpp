@@ -83,6 +83,7 @@ namespace neogfx
 		void update_from_row(uint32_t aRow, bool aUpdateOwner);
 	private:
 		i_owner& iOwner;
+		sink iSink;
 		type_e iType;
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;

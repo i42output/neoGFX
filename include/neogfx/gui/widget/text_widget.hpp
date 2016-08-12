@@ -53,6 +53,7 @@ namespace neogfx
 	private:
 		void init();
 	private:
+		sink iSink;
 		std::string iText;
 		mutable glyph_text iGlyphTextCache;
 		mutable optional_size iTextExtent;

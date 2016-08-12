@@ -56,6 +56,7 @@ namespace neogfx
 		void init();
 		void update_arrows();
 	private:
+		sink iSink;
 		double iNormalizedValue;
 		horizontal_layout iPrimaryLayout;
 		line_edit iTextBox;

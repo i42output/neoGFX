@@ -677,12 +677,12 @@ namespace neogfx
 
 	void window::init()
 	{
-		native_surface().rendering_finished([this]()
+		iSink = native_surface().rendering_finished([this]()
 		{
 			// For some reason textures aren't rendered on initial render so render again. FBO bug to fix?
 			if (native_surface().frame_counter() < 3)
 				invalidate_surface(rect{point{}, surface_size()}, false);
-		}, this);
+		});
 		app::instance().surface_manager().add_surface(*this);
 		update_modality();
 		scrollable_widget::init();

@@ -44,7 +44,6 @@ namespace neogfx
 
 	text_widget::~text_widget()
 	{
-		app::instance().rendering_engine().subpixel_rendering_changed.unsubscribe(this);
 	}
 
 	neogfx::size_policy text_widget::size_policy() const
@@ -233,13 +232,13 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
-		app::instance().rendering_engine().subpixel_rendering_changed([this]()
+		iSink += app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
 			iTextExtent = boost::none;
 			iGlyphTextCache = glyph_text(font());
 			if (has_managing_layout())
 				managing_layout().layout_items(true);
 			update();
-		}, this);
+		});
 	}
 }
