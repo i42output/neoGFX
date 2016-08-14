@@ -39,9 +39,10 @@ namespace neogfx
 		typedef event<Arguments...>* event_ptr;
 		typedef std::shared_ptr<event_ptr> event_instance_ptr;
 		typedef std::weak_ptr<event_ptr> event_instance_weak_ptr;
+		typedef const void* unique_id_type;
 		typedef std::function<void(Arguments...)> sink_callback;
 		typedef uint32_t sink_reference_count;
-		struct sink_list_item { sink_callback iSinkCallback; sink_reference_count iSinkReferenceCount; };
+		struct sink_list_item { unique_id_type iUniqueId;  sink_callback iSinkCallback; sink_reference_count iSinkReferenceCount; };
 		typedef std::list<sink_list_item, boost::fast_pool_allocator<sink_list_item>> sink_list;
 	public:
 		event_instance_weak_ptr iEvent;
@@ -57,10 +58,12 @@ namespace neogfx
 		typedef typename handle::event_ptr ptr;
 		typedef typename handle::event_instance_ptr instance_ptr;
 		typedef typename handle::event_instance_weak_ptr instance_weak_ptr;
+		typedef typename handle::unique_id_type unique_id_type;
 		typedef typename handle::sink_callback sink_callback;
 		typedef typename handle::sink_reference_count sink_reference_count;
 		typedef typename handle::sink_list_item sink_list_item;
 		typedef typename handle::sink_list sink_list;
+		typedef std::map<unique_id_type, typename sink_list::iterator> unique_id_map;
 		typedef std::deque<typename sink_list::const_iterator> notification_list;
 	public:
 		event() :
@@ -98,23 +101,125 @@ namespace neogfx
 			iAccepted = false;
 		}
 	public:
-		handle subscribe(const sink_callback& aSinkCallback)
+		handle subscribe(const sink_callback& aSinkCallback, const void* aUniqueId = 0)
 		{
-			return handle{ iInstancePtr, iSinks.insert(iSinks.end(), sink_list_item{ aSinkCallback, 0 }) };
+			if (aUniqueId == 0)
+				return handle{ iInstancePtr, iSinks.insert(iSinks.end(), sink_list_item{ aUniqueId, aSinkCallback, 0 }) };
+			auto existing = iUniqueIdMap.find(aUniqueId);
+			if (existing == iUniqueIdMap.end())
+				existing = iUniqueIdMap.insert(std::make_pair(aUniqueId, iSinks.insert(iSinks.end(), sink_list_item{ aUniqueId, aSinkCallback, 0 }))).first;
+			return handle{ iInstancePtr, existing->second };
 		}
-		handle operator()(const sink_callback& aSinkCallback)
+		handle operator()(const sink_callback& aSinkCallback, const void* aUniqueId = 0)
 		{
-			return subscribe(aSinkCallback);
+			return subscribe(aSinkCallback, aUniqueId);
+		}
+		template <typename T>
+		handle subscribe(const sink_callback& aSinkCallback, const T* aUniqueIdObject)
+		{
+			return subscribe(aSinkCallback, static_cast<const void*>(aUniqueIdObject));
+		}
+		template <typename T>
+		handle operator()(const sink_callback& aSinkCallback, const T* aUniqueIdObject)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		{
+			return subscribe(aSinkCallback, static_cast<const void*>(aUniqueIdObject));
+		}
+		template <typename T>
+		handle subscribe(const sink_callback& aSinkCallback, const T& aUniqueIdObject)
+		{
+			return subscribe(aSinkCallback, static_cast<const void*>(&aUniqueIdObject));
+		}
+		template <typename T>
+		handle operator()(const sink_callback& aSinkCallback, const T& aUniqueIdObject)
+		{
+			return subscribe(aSinkCallback, static_cast<const void*>(&aUniqueIdObject));
 		}
 	private:
 		void unsubscribe(handle aHandle)
 		{
 			iNotifications.erase(std::remove(iNotifications.begin(), iNotifications.end(), aHandle.iSink), iNotifications.end());
+			if (aHandle.iSink->iUniqueId != 0)
+			{
+				auto existing = iUniqueIdMap.find(aHandle.iSink->iUniqueId);
+				if (existing != iUniqueIdMap.end())
+					iUniqueIdMap.erase(existing);
+			}
 			iSinks.erase(aHandle.iSink);
 		}
 	private:
 		instance_ptr iInstancePtr;
 		sink_list iSinks;
+		mutable unique_id_map iUniqueIdMap;
 		mutable bool iAccepted;
 		mutable notification_list iNotifications;
 	};
