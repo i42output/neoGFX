@@ -873,7 +873,10 @@ namespace neogfx
 		update();
 		// todo: move cursor left if RTL text
 		if (aMoveCursor)
-			cursor().set_position(to_glyph(iText.begin() + from_glyph(iGlyphs.begin() + cursor().position()).first + eos) - iGlyphs.begin());
+		{
+			auto textPos = from_glyph(iGlyphs.begin() + cursor().position()).first + eos;
+			cursor().set_position(to_glyph(iText.begin() + textPos) - iGlyphs.begin());
+		}
 		text_changed.trigger();
 		return eos;
 	}
@@ -965,10 +968,12 @@ namespace neogfx
 		if (iGlyphParagraphCache == nullptr)
 			return iGlyphs.end();
 		for (auto i = iGlyphParagraphCache->start(); i != iGlyphParagraphCache->end(); ++i)
-			if (textIndex >= i->source().first && textIndex < i->source().second)
+		{
+			auto const& g = *i;
+			if (textIndex >= g.source().first + iGlyphParagraphCache->text_start_index() && textIndex < g.source().second + iGlyphParagraphCache->text_start_index())
 				return i;
-		return iGlyphParagraphCache->end() != iGlyphs.end() && iGlyphParagraphCache->end()->is_whitespace() && iGlyphParagraphCache->end()->value() == '\n' ? 
-			iGlyphParagraphCache->end() + 1 : iGlyphParagraphCache->end();
+		}
+		return iGlyphParagraphCache->end();
 	}
 
 	std::pair<text_edit::document_text::size_type, text_edit::document_text::size_type> text_edit::from_glyph(document_glyphs::const_iterator aWhere) const
