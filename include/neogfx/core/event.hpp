@@ -108,6 +108,8 @@ namespace neogfx
 			auto existing = iUniqueIdMap.find(aUniqueId);
 			if (existing == iUniqueIdMap.end())
 				existing = iUniqueIdMap.insert(std::make_pair(aUniqueId, iSinks.insert(iSinks.end(), sink_list_item{ aUniqueId, aSinkCallback, 0 }))).first;
+			else
+				existing->second->iSinkCallback = aSinkCallback;
 			return handle{ iInstancePtr, existing->second };
 		}
 		handle operator()(const sink_callback& aSinkCallback, const void* aUniqueId = 0)
@@ -121,76 +123,6 @@ namespace neogfx
 		}
 		template <typename T>
 		handle operator()(const sink_callback& aSinkCallback, const T* aUniqueIdObject)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		{
 			return subscribe(aSinkCallback, static_cast<const void*>(aUniqueIdObject));
 		}
