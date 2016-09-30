@@ -23,6 +23,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/tag_array.hpp>
 #include <neolib/segmented_array.hpp>
+#include <neolib/indexitor.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include "scrollable_widget.hpp"
@@ -156,101 +157,132 @@ namespace neogfx
 			double x = 0.0;
 		};
 		typedef neolib::segmented_array<paragraph_positioned_glyph, 256> document_glyphs;
+		class glyph_paragraph;
+		class glyph_paragraph_index
+		{
+		public:
+			glyph_paragraph_index() :
+				iCharacters(0), iGlyphs(0)
+			{
+			}
+			glyph_paragraph_index(document_text::size_type aCharacters, document_glyphs::size_type aGlyphs) :
+				iCharacters(aCharacters), iGlyphs(aGlyphs)
+			{
+			}
+		public:
+			document_text::size_type characters() const { return iCharacters; }
+			document_glyphs::size_type glyphs() const { return iGlyphs; }
+		public:
+			bool operator==(const glyph_paragraph_index& aRhs) const { return iCharacters == aRhs.iCharacters; }
+			bool operator!=(const glyph_paragraph_index& aRhs) const { return !(*this == aRhs);	}
+			bool operator<(const glyph_paragraph_index& aRhs) const { return iCharacters < aRhs.iCharacters; }
+			bool operator>(const glyph_paragraph_index& aRhs) const { return aRhs < *this; }
+			glyph_paragraph_index operator+(const glyph_paragraph_index& aRhs) const { return glyph_paragraph_index{ iCharacters + aRhs.iCharacters, iGlyphs + aRhs.iGlyphs }; }
+			glyph_paragraph_index operator-(const glyph_paragraph_index& aRhs) const { return glyph_paragraph_index{ iCharacters - aRhs.iCharacters, iGlyphs - aRhs.iGlyphs }; }
+		private:
+			document_text::size_type iCharacters;
+			document_glyphs::size_type iGlyphs;
+		};
+		typedef neolib::indexitor<glyph_paragraph, glyph_paragraph_index, boost::fast_pool_allocator<std::pair<glyph_paragraph, const glyph_paragraph_index>>> glyph_paragraphs;
 		class glyph_paragraph
 		{
 		public:
 			typedef std::map<document_glyphs::size_type, dimension, std::less<document_glyphs::size_type>, boost::fast_pool_allocator<std::pair<const document_glyphs::size_type, dimension>>> height_list;
 		public:
-			glyph_paragraph(text_edit& aParent, document_text::size_type aTextStart, document_text::size_type aTextEnd, document_glyphs::size_type aStart, document_glyphs::size_type aEnd) :
-				iParent(&aParent), iTextStart(aTextStart), iTextEnd(aTextEnd), iStart(aStart), iEnd(aEnd)
+			glyph_paragraph(text_edit& aParent) :
+				iParent(&aParent)
 			{
 			}
-			glyph_paragraph(document_text::size_type aTextStart, document_text::size_type aTextEnd, document_glyphs::size_type aStart, document_glyphs::size_type aEnd) :
-				iParent(nullptr), iTextStart(aTextStart), iTextEnd(aTextEnd), iStart(aStart), iEnd(aEnd)
+			glyph_paragraph() :
+				iParent(nullptr)
 			{
 			}
 		public:
+			void set_position(glyph_paragraphs::const_iterator aPosition)
+			{
+				iPosition = aPosition;
+			}
 			glyph_paragraph& operator=(const glyph_paragraph& aOther)
 			{
 				iParent = aOther.iParent;
-				iTextStart = aOther.iTextStart;
-				iTextEnd = aOther.iTextEnd;
-				iStart = aOther.iStart;
-				iEnd = aOther.iEnd;
+				iPosition = aOther.iPosition;
 				iHeights = aOther.iHeights;
 				return *this;
 			}
 		public:
 			document_text::size_type text_start_index() const
 			{
-				return iTextStart;
+				return iParent->iGlyphParagraphs.foreign_index(iPosition).characters();
 			}
 			document_text::const_iterator text_start() const
 			{
-				return iParent->iText.begin() + iTextStart;
+				return iParent->iText.begin() + text_start_index();
 			}
 			document_text::iterator text_start()
 			{
-				return iParent->iText.begin() + iTextStart;
+				return iParent->iText.begin() + text_start_index();
 			}
 			document_text::size_type text_end_index() const
 			{
-				return iTextEnd;
+				return iParent->iGlyphParagraphs.foreign_index(iPosition + 1).characters();
 			}
 			document_text::const_iterator text_end() const
 			{
-				return iParent->iText.begin() + iTextEnd;
+				return iParent->iText.begin() + text_end_index();
 			}
 			document_text::iterator text_end()
 			{
-				return iParent->iText.begin() + iTextEnd;
+				return iParent->iText.begin() + text_end_index();
 			}
 			document_glyphs::size_type start_index() const
 			{
-				return iStart;
+				return iParent->iGlyphParagraphs.foreign_index(iPosition).glyphs();
 			}
 			document_glyphs::const_iterator start() const
 			{
-				return iParent->iGlyphs.begin() + iStart;
+				return iParent->iGlyphs.begin() + start_index();
 			}
 			document_glyphs::iterator start()
 			{
-				return iParent->iGlyphs.begin() + iStart;
+				return iParent->iGlyphs.begin() + start_index();
 			}
 			document_glyphs::size_type end_index() const
 			{
-				return iEnd;
+				return iParent->iGlyphParagraphs.foreign_index(iPosition + 1).glyphs();
 			}
 			document_glyphs::const_iterator end() const
 			{
-				return iParent->iGlyphs.begin() + iEnd;
+				return iParent->iGlyphs.begin() + end_index();
 			}
 			document_glyphs::iterator end()
 			{
-				return iParent->iGlyphs.begin() + iEnd;
+				return iParent->iGlyphs.begin() + end_index();
 			}
 			dimension height(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const
 			{
 				if (iHeights.empty())
 				{
 					dimension previousHeight = 0.0;
+					auto textStartIndex = text_start_index();
+					auto glyphsStartIndex = start_index();
+					auto glyphsEndIndex = end_index();
 					auto iterGlyph = start();
-					for (auto i = iStart; i != iEnd; ++i)
+					for (auto i = glyphsStartIndex; i != glyphsEndIndex; ++i)
 					{
 						const auto& glyph = *(iterGlyph++);
-						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + iTextStart + glyph.source().first).contents();
+						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + textStartIndex + glyph.source().first).contents();
 						const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 						auto& glyphFont = style.font() != boost::none ? *style.font() : iParent->font();
 						dimension cy = !glyph.use_fallback() ? glyphFont.height() : glyphFont.fallback().height();
 						if (!style.text_outline_colour().empty())
 							cy += 2.0;
-						if (i == iStart || cy != previousHeight)
+						if (i == glyphsStartIndex || cy != previousHeight)
 						{
 							iHeights[i] = cy;
 							previousHeight = cy;
 						}
 					}
-					iHeights[iEnd] = 0.0;
+					iHeights[end_index()] = 0.0;
 				}
 				dimension result = 0.0;
 				auto start = iHeights.lower_bound(aStart - iParent->iGlyphs.begin());
@@ -263,21 +295,40 @@ namespace neogfx
 			}
 		private:
 			text_edit* iParent;
-			document_text::size_type iTextStart;
-			document_text::size_type iTextEnd;
-			document_glyphs::size_type iStart;
-			document_glyphs::size_type iEnd;
+			glyph_paragraphs::const_iterator iPosition;
 			mutable height_list iHeights;
 		};
-		typedef neolib::segmented_array<glyph_paragraph> glyph_paragraphs;
+		typedef document_glyphs::size_type glyph_line_index;
+		class glyph_line_index
+		{
+		public:
+			glyph_line_index() :
+				iGlyphs(0), iHeight(0.0)
+			{
+			}
+			glyph_line_index(document_glyphs::size_type aGlyphs, coordinate aHeight) :
+				iGlyphs(aGlyphs), iHeight(aHeight)
+			{
+			}
+		public:
+			document_glyphs::size_type glyphs() const { return iGlyphs; }
+			coordinate height() const { return iHeight; }
+		public:
+			bool operator==(const glyph_line_index& aRhs) const { return iGlyphs == aRhs.iGlyphs; }
+			bool operator!=(const glyph_line_index& aRhs) const { return !(*this == aRhs); }
+			bool operator<(const glyph_line_index& aRhs) const { return iGlyphs < aRhs.iGlyphs; }
+			bool operator>(const glyph_line_index& aRhs) const { return aRhs < *this; }
+			glyph_line_index operator+(const glyph_line_index& aRhs) const { return glyph_line_index{ iGlyphs + aRhs.iGlyphs, iHeight + aRhs.iHeight }; }
+			glyph_line_index operator-(const glyph_line_index& aRhs) const { return glyph_line_index{ iGlyphs - aRhs.iGlyphs, iHeight - aRhs.iHeight }; }
+		private:
+			document_glyphs::size_type iGlyphs;
+			coordinate iHeight;
+		};
 		struct glyph_line
 		{
-			document_glyphs::const_iterator start;
-			document_glyphs::const_iterator end;
-			coordinate y;
 			size extents;
 		};
-		typedef neolib::segmented_array<glyph_line> glyph_lines;
+		typedef neolib::indexitor<glyph_line, glyph_line_index, boost::fast_pool_allocator<std::pair<glyph_line, const glyph_line_index>>> glyph_lines;
 	public:
 		typedef document_text::size_type position_type;
 	public:
