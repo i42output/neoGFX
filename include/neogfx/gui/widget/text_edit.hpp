@@ -298,7 +298,6 @@ namespace neogfx
 			glyph_paragraphs::const_iterator iPosition;
 			mutable height_list iHeights;
 		};
-		typedef document_glyphs::size_type glyph_line_index;
 		class glyph_line_index
 		{
 		public:
@@ -396,6 +395,8 @@ namespace neogfx
 		{
 			document_glyphs::const_iterator glyph;
 			glyph_lines::const_iterator line;
+			document_glyphs::const_iterator lineStart;
+			document_glyphs::const_iterator lineEnd;
 			point pos;
 		};
 		position_info position(position_type aPosition) const;

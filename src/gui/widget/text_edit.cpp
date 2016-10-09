@@ -190,29 +190,28 @@ namespace neogfx
 	void text_edit::paint(graphics_context& aGraphicsContext) const
 	{
 		scrollable_widget::paint(aGraphicsContext);
-		auto line = std::lower_bound(
-			iGlyphLines.begin(),
-			iGlyphLines.end(),
-			glyph_line{ document_glyphs::iterator{}, document_glyphs::iterator{}, vertical_scrollbar().position(), size{} },
-			[](const glyph_line& left, const glyph_line& right)
+		auto line = iGlyphLines.find_by_foreign_index(glyph_line_index{ 0, vertical_scrollbar().position() },
+			[](const glyph_line_index& left, const glyph_line_index& right)
 		{
-			return left.y < right.y;
+			return left.height() < right.height();
 		});
-		if (line != iGlyphLines.begin() && line->y > vertical_scrollbar().position())
+		auto lineForeignIndex = iGlyphLines.foreign_index(line);
+		if (line != iGlyphLines.begin() && lineForeignIndex.height() > vertical_scrollbar().position())
 			--line;
-		for (; line != iGlyphLines.end(); ++line)
+		auto y = lineForeignIndex.height();
+		for (; line != iGlyphLines.end(); y += (line++)->first.extents.cy)
 		{
-			point linePos = client_rect(false).top_left() + point{-horizontal_scrollbar().position(), line->y - vertical_scrollbar().position()};
-			if (linePos.y + line->extents.cy < client_rect(false).top() || linePos.y + line->extents.cy < update_rect().top())
+			point linePos = client_rect(false).top_left() + point{-horizontal_scrollbar().position(), y - vertical_scrollbar().position()};
+			if (linePos.y + line->first.extents.cy < client_rect(false).top() || linePos.y + line->first.extents.cy < update_rect().top())
 				continue;
 			if (linePos.y > client_rect(false).bottom() || linePos.y > update_rect().bottom())
 				break;
-			auto textDirection = glyph_text_direction(line->start, line->end);
+			auto textDirection = glyph_text_direction(lineForeignIndex.glyphs(), lineForeignIndex.glyphs() + line->second.glyphs());
 			if (iAlignment == alignment::Left && textDirection == text_direction::RTL ||
 				iAlignment == alignment::Right && textDirection == text_direction::LTR)
-				linePos.x += iTextExtents.cx - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx;
+				linePos.x += iTextExtents.cx - aGraphicsContext.from_device_units(size{line->first.extents.cx, 0}).cx;
 			else if (iAlignment == alignment::Centre)
-				linePos.x += std::ceil((iTextExtents.cx - aGraphicsContext.from_device_units(size{line->extents.cx, 0}).cx) / 2);
+				linePos.x += std::ceil((iTextExtents.cx - aGraphicsContext.from_device_units(size{line->first.extents.cx, 0}).cx) / 2);
 			draw_glyphs(aGraphicsContext, linePos, line);
 		}
 		if (has_focus())
@@ -539,8 +538,8 @@ namespace neogfx
 		case cursor::StartOfParagraph:
 			break;
 		case cursor::StartOfLine:
-			if (currentPosition.line->start != currentPosition.line->end)
-				iCursor.set_position(currentPosition.line->start - iGlyphs.begin(), aMoveAnchor);
+			if (currentPosition.lineStart != currentPosition.lineEnd)
+				iCursor.set_position(currentPosition.lineStart - iGlyphs.begin(), aMoveAnchor);
 			break;
 		case cursor::StartOfWord:
 			break;
@@ -550,8 +549,8 @@ namespace neogfx
 		case cursor::EndOfParagraph:
 			break;
 		case cursor::EndOfLine:
-			if (currentPosition.line->start != currentPosition.line->end)
-				iCursor.set_position(currentPosition.line->end - iGlyphs.begin(), aMoveAnchor);
+			if (currentPosition.lineStart != currentPosition.lineEnd)
+				iCursor.set_position(currentPosition.lineEnd - iGlyphs.begin(), aMoveAnchor);
 			break;
 		case cursor::EndOfWord:
 			break;
@@ -619,7 +618,7 @@ namespace neogfx
 			{
 				auto p = position(iCursor.position());
 				if (p.line != iGlyphLines.begin())
-					iCursor.set_position(hit_test(point{ p.pos.x, (p.line - 1)->y }, false), aMoveAnchor);
+					iCursor.set_position(hit_test(point{ p.pos.x, iGlyphLines.foreign_index(p.line - 1).height() + (p.line - 1)->second.height() }, false), aMoveAnchor);
 			}
 			break;
 		case cursor::Down:
@@ -628,8 +627,8 @@ namespace neogfx
 				if (p.line != iGlyphLines.end())
 				{
 					if (p.line + 1 != iGlyphLines.end())
-						iCursor.set_position(hit_test(point{ p.pos.x, (p.line + 1)->y }, false), aMoveAnchor);
-					else if (p.line->end != iGlyphs.end() && p.line->end->is_whitespace() && p.line->end->value() == '\n')
+						iCursor.set_position(hit_test(point{ p.pos.x, iGlyphLines.foreign_index(p.line + 1).height() + (p.line + 1)->second.height() }, false), aMoveAnchor);
+					else if (p.lineEnd != iGlyphs.end() && p.lineEnd->is_whitespace() && p.lineEnd->value() == '\n')
 						iCursor.set_position(iGlyphs.size(), aMoveAnchor);
 				}
 			}
@@ -754,42 +753,40 @@ namespace neogfx
 
 	text_edit::position_info text_edit::position(position_type aPosition) const
 	{
-		auto line = std::lower_bound(
-			iGlyphLines.begin(),
-			iGlyphLines.end(),
-			glyph_line{ iGlyphs.begin() + aPosition, iGlyphs.begin() + aPosition, 0.0, size{} },
-			[](const glyph_line& left, const glyph_line& right)
+		auto line = iGlyphLines.find_by_foreign_index(glyph_line_index{ aPosition, 0.0 },
+			[](const glyph_line_index& left, const glyph_line_index& right)
 		{
-			return left.start < right.start;
+			return left.glyphs() < right.glyphs();
 		});
-		if (line != iGlyphLines.begin() && aPosition <= static_cast<position_type>((line - 1)->end - iGlyphs.begin()))
+		if (line != iGlyphLines.begin() && aPosition <= static_cast<position_type>(iGlyphLines.foreign_index(line - 1).glyphs() + (line - 1)->second.glyphs()))
 			--line;
+		auto lineForeignIndex = iGlyphLines.foreign_index(line);
 		if (line != iGlyphLines.end())
 		{
-			position_type lineStart = (line->start - iGlyphs.begin());
-			position_type lineEnd = (line->end - iGlyphs.begin());
+			position_type lineStart = lineForeignIndex.glyphs();
+			position_type lineEnd = lineStart + line->second.glyphs();
 			if (aPosition >= lineStart && aPosition <= lineEnd)
 			{
 				if (lineStart != lineEnd)
 				{
 					auto iterGlyph = iGlyphs.begin() + iCursor.position();
 					const auto& glyph = iCursor.position() < lineEnd ? *iterGlyph : *(iterGlyph - 1);
-					point linePos{ glyph.x - line->start->x, line->y };
+					point linePos{ glyph.x - iGlyphs[lineForeignIndex.glyphs()].x, lineForeignIndex.height() };
 					if (iCursor.position() == lineEnd)
 						linePos.x += glyph.advance().cx;
-					return position_info{ iterGlyph, line, linePos };
+					return position_info{ iterGlyph, line, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, linePos };
 				}
 				else
-					return position_info{ line->start, line, point{ 0.0, line->y } };
+					return position_info{ iGlyphs.begin() + lineForeignIndex.glyphs(), line, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, point{ 0.0, lineForeignIndex.height() } };
 			}
 		}
 		point pos;
 		if (!iGlyphLines.empty())
 		{
 			pos.x = 0.0;
-			pos.y = iGlyphLines.back().y + iGlyphLines.back().extents.cy;
+			pos.y = iGlyphLines.foreign_index(iGlyphLines.end()).height();
 		}
-		return position_info{ iGlyphs.end(), iGlyphLines.end(), pos };
+		return position_info{ iGlyphs.end(), iGlyphLines.end(), iGlyphs.end(), iGlyphs.end(), pos };
 	}
 
 	text_edit::position_type text_edit::hit_test(const point& aPoint, bool aAdjustForScrollPosition) const
