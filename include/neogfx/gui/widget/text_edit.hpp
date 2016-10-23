@@ -177,8 +177,12 @@ namespace neogfx
 			bool operator!=(const glyph_paragraph_index& aRhs) const { return !(*this == aRhs);	}
 			bool operator<(const glyph_paragraph_index& aRhs) const { return iCharacters < aRhs.iCharacters; }
 			bool operator>(const glyph_paragraph_index& aRhs) const { return aRhs < *this; }
-			glyph_paragraph_index operator+(const glyph_paragraph_index& aRhs) const { return glyph_paragraph_index{ iCharacters + aRhs.iCharacters, iGlyphs + aRhs.iGlyphs }; }
-			glyph_paragraph_index operator-(const glyph_paragraph_index& aRhs) const { return glyph_paragraph_index{ iCharacters - aRhs.iCharacters, iGlyphs - aRhs.iGlyphs }; }
+			bool operator<=(const glyph_paragraph_index& aRhs) const { return iCharacters <= aRhs.iCharacters; }
+			bool operator>=(const glyph_paragraph_index& aRhs) const { return aRhs <= *this; }
+			glyph_paragraph_index operator+(const glyph_paragraph_index& aRhs) const { glyph_paragraph_index result = *this; result += aRhs; return result; }
+			glyph_paragraph_index operator-(const glyph_paragraph_index& aRhs) const { glyph_paragraph_index result = *this; result -= aRhs; return result; }
+			glyph_paragraph_index& operator+=(const glyph_paragraph_index& aRhs) { iCharacters += aRhs.iCharacters; iGlyphs += aRhs.iGlyphs; return *this; };
+			glyph_paragraph_index& operator-=(const glyph_paragraph_index& aRhs) { iCharacters -= aRhs.iCharacters; iGlyphs -= aRhs.iGlyphs; return *this; };
 		private:
 			document_text::size_type iCharacters;
 			document_glyphs::size_type iGlyphs;
@@ -317,8 +321,12 @@ namespace neogfx
 			bool operator!=(const glyph_line_index& aRhs) const { return !(*this == aRhs); }
 			bool operator<(const glyph_line_index& aRhs) const { return iGlyphs < aRhs.iGlyphs; }
 			bool operator>(const glyph_line_index& aRhs) const { return aRhs < *this; }
-			glyph_line_index operator+(const glyph_line_index& aRhs) const { return glyph_line_index{ iGlyphs + aRhs.iGlyphs, iHeight + aRhs.iHeight }; }
-			glyph_line_index operator-(const glyph_line_index& aRhs) const { return glyph_line_index{ iGlyphs - aRhs.iGlyphs, iHeight - aRhs.iHeight }; }
+			bool operator<=(const glyph_line_index& aRhs) const { return iGlyphs <= aRhs.iGlyphs; }
+			bool operator>=(const glyph_line_index& aRhs) const { return aRhs <= *this; }
+			glyph_line_index operator+(const glyph_line_index& aRhs) const { glyph_line_index result = *this; result += aRhs; return result; }
+			glyph_line_index operator-(const glyph_line_index& aRhs) const { glyph_line_index result = *this; result -= aRhs; return result; }
+			glyph_line_index& operator+=(const glyph_line_index& aRhs) { iGlyphs += aRhs.iGlyphs; iHeight += aRhs.iHeight; return *this; }
+			glyph_line_index& operator-=(const glyph_line_index& aRhs) { iGlyphs -= aRhs.iGlyphs; iHeight -= aRhs.iHeight; return *this; }
 		private:
 			document_glyphs::size_type iGlyphs;
 			coordinate iHeight;
