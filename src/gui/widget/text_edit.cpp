@@ -947,6 +947,8 @@ namespace neogfx
 				paragraph = std::make_pair(paragraph.first - 1, iGlyphParagraphs.foreign_index(paragraph.first - 1));
 			if (paragraph.first != iGlyphParagraphs.end())
 				iGlyphParagraphCache = &paragraph.first->first;
+			else
+				iGlyphParagraphCache = nullptr;
 		}
 		if (iGlyphParagraphCache == nullptr)
 			return iGlyphs.end();
@@ -980,6 +982,8 @@ namespace neogfx
 			iGlyphParagraphCache = &paragraph.first->first;
 			return std::make_pair(paragraph.first->first.text_start_index() + aWhere->source().first, paragraph.first->first.text_start_index() + aWhere->source().second);
 		}
+		else
+			iGlyphParagraphCache = nullptr;
 		return std::make_pair(iText.size(), iText.size());
 	}
 
@@ -1015,7 +1019,7 @@ namespace neogfx
 						glyph_paragraph_index{
 							static_cast<std::size_t>((ch + 1) - iText.begin()) - static_cast<std::size_t>(paragraphStart - iText.begin()),
 							iGlyphs.size() - (*ch == '\n' ? 1 : 0) - static_cast<std::size_t>(paragraphGlyphs - iGlyphs.begin())})); // todo: only valid for naive implementation
-				newParagraph->first.set_position(newParagraph);
+				newParagraph->first.set_self(newParagraph);
 				paragraphStart = ch + 1;
 			}
 		}

@@ -194,29 +194,32 @@ namespace neogfx
 			typedef std::map<document_glyphs::size_type, dimension, std::less<document_glyphs::size_type>, boost::fast_pool_allocator<std::pair<const document_glyphs::size_type, dimension>>> height_list;
 		public:
 			glyph_paragraph(text_edit& aParent) :
-				iParent(&aParent)
+				iParent{&aParent}, iSelf{}
 			{
 			}
 			glyph_paragraph() :
-				iParent(nullptr)
+				iParent{nullptr}, iSelf{}
+			{
+			}
+			~glyph_paragraph()
 			{
 			}
 		public:
-			void set_position(glyph_paragraphs::const_iterator aPosition)
+			void set_self(glyph_paragraphs::const_iterator aSelf)
 			{
-				iPosition = aPosition;
+				iSelf = aSelf;
 			}
 			glyph_paragraph& operator=(const glyph_paragraph& aOther)
 			{
 				iParent = aOther.iParent;
-				iPosition = aOther.iPosition;
+				iSelf = aOther.iSelf;
 				iHeights = aOther.iHeights;
 				return *this;
 			}
 		public:
 			document_text::size_type text_start_index() const
 			{
-				return iParent->iGlyphParagraphs.foreign_index(iPosition).characters();
+				return iParent->iGlyphParagraphs.foreign_index(iSelf).characters();
 			}
 			document_text::const_iterator text_start() const
 			{
@@ -228,7 +231,7 @@ namespace neogfx
 			}
 			document_text::size_type text_end_index() const
 			{
-				return iParent->iGlyphParagraphs.foreign_index(iPosition + 1).characters();
+				return iParent->iGlyphParagraphs.foreign_index(iSelf + 1).characters();
 			}
 			document_text::const_iterator text_end() const
 			{
@@ -240,7 +243,7 @@ namespace neogfx
 			}
 			document_glyphs::size_type start_index() const
 			{
-				return iParent->iGlyphParagraphs.foreign_index(iPosition).glyphs();
+				return iParent->iGlyphParagraphs.foreign_index(iSelf).glyphs();
 			}
 			document_glyphs::const_iterator start() const
 			{
@@ -252,7 +255,7 @@ namespace neogfx
 			}
 			document_glyphs::size_type end_index() const
 			{
-				return iParent->iGlyphParagraphs.foreign_index(iPosition + 1).glyphs();
+				return iParent->iGlyphParagraphs.foreign_index(iSelf + 1).glyphs();
 			}
 			document_glyphs::const_iterator end() const
 			{
@@ -299,7 +302,7 @@ namespace neogfx
 			}
 		private:
 			text_edit* iParent;
-			glyph_paragraphs::const_iterator iPosition;
+			glyph_paragraphs::const_iterator iSelf;
 			mutable height_list iHeights;
 		};
 		class glyph_line_index
