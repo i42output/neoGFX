@@ -1018,7 +1018,8 @@ namespace neogfx
 						glyph_paragraph{*this},
 						glyph_paragraph_index{
 							static_cast<std::size_t>((ch + 1) - iText.begin()) - static_cast<std::size_t>(paragraphStart - iText.begin()),
-							iGlyphs.size() - (*ch == '\n' ? 1 : 0) - static_cast<std::size_t>(paragraphGlyphs - iGlyphs.begin())})); // todo: only valid for naive implementation
+							iGlyphs.size() - (*ch == '\n' ? 1 : 0) - static_cast<std::size_t>(paragraphGlyphs - iGlyphs.begin())}),
+					glyph_paragraphs::skip_type{glyph_paragraph_index{}, glyph_paragraph_index{0, *ch == '\n' ? 1u : 0u}}); // todo: only valid for naive implementation
 				newParagraph->first.set_self(newParagraph);
 				paragraphStart = ch + 1;
 			}
@@ -1086,11 +1087,17 @@ namespace neogfx
 					}
 					else
 						next = paragraphEnd;
+					bool skipNewline = false;
 					if (lineStart != lineEnd && (lineEnd - 1)->is_whitespace() && (lineEnd - 1)->value() == '\n')
+					{
+						skipNewline = true;
 						--lineEnd;
+					}
 					dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().advance().cx : 0.0));
 					auto height = paragraph.first.height(lineStart, lineEnd);
-					iGlyphLines.push_back(std::make_pair(glyph_line{size{x - offset, height}}, glyph_line_index{static_cast<std::size_t>(lineEnd - lineStart), height}));
+					auto line = iGlyphLines.insert(iGlyphLines.end(), 
+						std::make_pair(glyph_line{size{x - offset, height}}, glyph_line_index{static_cast<std::size_t>(lineEnd - lineStart), height}), 
+						glyph_lines::skip_type{glyph_line_index{}, glyph_line_index{ skipNewline ? 1u : 0u, 0.0 }});
 					pos.y += height;
 					iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().first.extents.cx);
 					lineStart = next;
