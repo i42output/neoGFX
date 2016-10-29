@@ -971,7 +971,12 @@ namespace neogfx
 				return std::make_pair(iGlyphParagraphs.back().first.text_start_index() + (aWhere - 1)->source().second, iGlyphParagraphs.back().first.text_start_index() + (aWhere - 1)->source().second);
 		}
 		if (iGlyphParagraphCache != nullptr && aWhere >= iGlyphParagraphCache->start() && aWhere < iGlyphParagraphCache->end())
-			return std::make_pair(iGlyphParagraphCache->text_start_index() + aWhere->source().first, iGlyphParagraphCache->text_start_index() + aWhere->source().second);
+		{
+			auto textStart = iGlyphParagraphCache->text_start_index();
+			auto sourceStart = aWhere->source().first;
+			auto sourceEnd = aWhere->source().second;
+			return std::make_pair(textStart + sourceStart, textStart + sourceEnd);
+		}
 		auto paragraph = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{0, static_cast<std::size_t>(aWhere - iGlyphs.begin())}, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs();});
 		if (paragraph.first == iGlyphParagraphs.end() && paragraph.first != iGlyphParagraphs.begin() && aWhere <= (paragraph.first - 1)->first.end())
 			--paragraph.first;
@@ -980,7 +985,10 @@ namespace neogfx
 			if (paragraph.first->first.start() > aWhere)
 				--paragraph.first;
 			iGlyphParagraphCache = &paragraph.first->first;
-			return std::make_pair(paragraph.first->first.text_start_index() + aWhere->source().first, paragraph.first->first.text_start_index() + aWhere->source().second);
+			auto textStart = paragraph.first->first.text_start_index();
+			auto sourceStart = aWhere->source().first;
+			auto sourceEnd = aWhere->source().second;
+			return std::make_pair(textStart + sourceStart, textStart + sourceEnd);
 		}
 		else
 			iGlyphParagraphCache = nullptr;
