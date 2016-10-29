@@ -803,7 +803,7 @@ namespace neogfx
 			if (adjusted.x >= g.x - lineStartX && adjusted.x < g.x - lineStartX + g.advance().cx)
 				return gi;
 		}
-		return line.second.glyphs();
+		return line.first->second.glyphs();
 	}
 
 	std::string text_edit::text() const
