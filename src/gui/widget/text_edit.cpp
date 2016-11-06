@@ -613,22 +613,16 @@ namespace neogfx
 				iCursor.set_position(iCursor.position() + 1, aMoveAnchor);
 			break;
 		case cursor::Up:
-			{
-				auto p = position(iCursor.position());
-				if (p.line != iGlyphLines.begin())
-					iCursor.set_position(hit_test(point{ p.pos.x, iGlyphLines.foreign_index(p.line - 1).height() + (p.line - 1)->second.height() }, false), aMoveAnchor);
-			}
+			if (currentPosition.line != iGlyphLines.begin())
+				iCursor.set_position(hit_test(point{ currentPosition.pos.x, iGlyphLines.foreign_index(currentPosition.line - 1).height() }, false), aMoveAnchor);
 			break;
 		case cursor::Down:
+			if (currentPosition.line != iGlyphLines.end())
 			{
-				auto p = position(iCursor.position());
-				if (p.line != iGlyphLines.end())
-				{
-					if (p.line + 1 != iGlyphLines.end())
-						iCursor.set_position(hit_test(point{ p.pos.x, iGlyphLines.foreign_index(p.line + 1).height() + (p.line + 1)->second.height() }, false), aMoveAnchor);
-					else if (p.lineEnd != iGlyphs.end() && p.lineEnd->is_whitespace() && p.lineEnd->value() == '\n')
-						iCursor.set_position(iGlyphs.size(), aMoveAnchor);
-				}
+				if (currentPosition.line + 1 != iGlyphLines.end())
+					iCursor.set_position(hit_test(point{ currentPosition.pos.x, iGlyphLines.foreign_index(currentPosition.line + 1).height() }, false), aMoveAnchor);
+				else if (currentPosition.lineEnd != iGlyphs.end() && currentPosition.lineEnd->is_whitespace() && currentPosition.lineEnd->value() == '\n')
+					iCursor.set_position(iGlyphs.size(), aMoveAnchor);
 			}
 			break;
 		case cursor::Left:
@@ -753,7 +747,9 @@ namespace neogfx
 	{
 		auto line = iGlyphLines.find_by_foreign_index(glyph_line_index{ aPosition, 0.0 },
 			[](const glyph_line_index& left, const glyph_line_index& right) { return left.glyphs() < right.glyphs(); });
-		if (line.first != iGlyphLines.begin() && aPosition <= static_cast<position_type>(line.second.glyphs()))
+		if (line.first != iGlyphLines.begin() && 
+			(aPosition < static_cast<position_type>(line.second.glyphs()) || 
+			(line.first == iGlyphLines.end() && (!iGlyphs.back().is_whitespace() || iGlyphs.back().value() != '\n'))))
 			line = std::make_pair(line.first - 1, iGlyphLines.foreign_index(line.first - 1));
 		if (line.first != iGlyphLines.end())
 		{
@@ -803,7 +799,7 @@ namespace neogfx
 			if (adjusted.x >= g.x - lineStartX && adjusted.x < g.x - lineStartX + g.advance().cx)
 				return gi;
 		}
-		return line.first->second.glyphs();
+		return line.second.glyphs() + line.first->second.glyphs();
 	}
 
 	std::string text_edit::text() const
