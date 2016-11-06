@@ -432,7 +432,7 @@ namespace neogfx
 		void make_cursor_visible(bool aForcePreviewScroll = false);
 		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, glyph_lines::const_iterator aLine) const;
 		void draw_cursor(const graphics_context& aGraphicsContext) const;
-		std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
+		static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
 	private:
 		sink iSink;
 		type_e iType;

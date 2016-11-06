@@ -292,8 +292,11 @@ int main(int argc, char* argv[])
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
-		ng::text_edit textEdit(layoutButtons);
+		ng::horizontal_layout editLayout(layoutButtons);
+		ng::text_edit textEdit(editLayout);
 		textEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+		ng::text_edit smallTextEdit(editLayout);
+		smallTextEdit.set_maximum_width(100);
 		ng::horizontal_layout layoutLineEdits(layoutButtons);
 		ng::line_edit lineEdit(layoutLineEdits);
 		lineEdit.set_text("Line edit");

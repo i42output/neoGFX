@@ -120,5 +120,29 @@ namespace neogfx
 			set_minimum_size(aSize, aUpdateLayout);
 			set_maximum_size(aSize, aUpdateLayout);
 		}
+		void set_minimum_width(dimension aWidth, bool aUpdateLayout = true)
+		{
+			auto newSize = minimum_size();
+			newSize.cx = aWidth;
+			set_minimum_size(newSize, aUpdateLayout);
+		}
+		void set_minimum_height(dimension aHeight, bool aUpdateLayout = true)
+		{
+			auto newSize = minimum_size();
+			newSize.cy = aHeight;
+			set_minimum_size(newSize, aUpdateLayout);
+		}
+		void set_maximum_width(dimension aWidth, bool aUpdateLayout = true)
+		{
+			auto newSize = maximum_size();
+			newSize.cx = aWidth;
+			set_maximum_size(newSize, aUpdateLayout);
+		}
+		void set_maximum_height(dimension aHeight, bool aUpdateLayout = true)
+		{
+			auto newSize = maximum_size();
+			newSize.cy = aHeight;
+			set_maximum_size(newSize, aUpdateLayout);
+		}
 	};
 }
