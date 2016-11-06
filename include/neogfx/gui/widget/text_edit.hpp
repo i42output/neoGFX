@@ -231,7 +231,7 @@ namespace neogfx
 			}
 			document_text::size_type text_end_index() const
 			{
-				return iParent->iGlyphParagraphs.foreign_index(iSelf + 1).characters();
+				return (iParent->iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + iParent->iGlyphParagraphs.skip_after(iSelf)).characters();
 			}
 			document_text::const_iterator text_end() const
 			{
@@ -255,7 +255,7 @@ namespace neogfx
 			}
 			document_glyphs::size_type end_index() const
 			{
-				return iParent->iGlyphParagraphs.foreign_index(iSelf + 1).glyphs();
+				return (iParent->iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + iParent->iGlyphParagraphs.skip_after(iSelf)).glyphs();
 			}
 			document_glyphs::const_iterator end() const
 			{

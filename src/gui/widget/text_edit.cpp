@@ -1061,7 +1061,9 @@ namespace neogfx
 				const auto& tagContents = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).contents();
 				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
-				iGlyphLines.push_back(std::make_pair(glyph_line{ size{ 0.0, glyphFont.height() } }, glyph_line_index{0, glyphFont.height()}));
+				iGlyphLines.push_back(
+					std::make_pair(glyph_line{ size{ 0.0, glyphFont.height() } }, glyph_line_index{0, glyphFont.height()}), 
+					std::make_pair(glyph_line_index{}, glyph_line_index{paragraphStart != paragraphEnd ? 1u : 0u, 0.0}));
 				pos.y += iGlyphLines.back().first.extents.cy;
 			}
 			else if (iWordWrap)
