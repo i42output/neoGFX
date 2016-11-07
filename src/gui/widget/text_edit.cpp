@@ -1066,7 +1066,7 @@ namespace neogfx
 					std::make_pair(glyph_line_index{}, glyph_line_index{paragraphStart != paragraphEnd ? 1u : 0u, 0.0}));
 				pos.y += iGlyphLines.back().first.extents.cy;
 			}
-			else if (iWordWrap)
+			else if (iWordWrap && (paragraphEnd-1)->x + (paragraphEnd-1)->advance().cx > availableWidth)
 			{
 				document_glyphs::iterator next = paragraph.first.start();
 				document_glyphs::iterator lineStart = next;

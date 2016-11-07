@@ -187,7 +187,10 @@ namespace neogfx
 			document_text::size_type iCharacters;
 			document_glyphs::size_type iGlyphs;
 		};
-		typedef neolib::indexitor<glyph_paragraph, glyph_paragraph_index, boost::fast_pool_allocator<std::pair<glyph_paragraph, const glyph_paragraph_index>>> glyph_paragraphs;
+		typedef neolib::indexitor<
+			glyph_paragraph, 
+			glyph_paragraph_index, 
+			boost::fast_pool_allocator<std::pair<glyph_paragraph, const glyph_paragraph_index>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> glyph_paragraphs;
 		class glyph_paragraph
 		{
 		public:
@@ -338,7 +341,7 @@ namespace neogfx
 		{
 			size extents;
 		};
-		typedef neolib::indexitor<glyph_line, glyph_line_index, boost::fast_pool_allocator<std::pair<glyph_line, const glyph_line_index>>> glyph_lines;
+		typedef neolib::indexitor<glyph_line, glyph_line_index, boost::fast_pool_allocator<std::pair<glyph_line, const glyph_line_index>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> glyph_lines;
 	public:
 		typedef document_text::size_type position_type;
 	public:
