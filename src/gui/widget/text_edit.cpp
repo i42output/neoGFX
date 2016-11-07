@@ -420,7 +420,6 @@ namespace neogfx
 				else
 					vertical_scrollbar().hide();
 				scrollable_widget::update_scrollbar_visibility(aStage);
-				refresh_lines();
 			}
 			break;
 		case UsvStageCheckHorizontal:
@@ -435,7 +434,6 @@ namespace neogfx
 				else
 					horizontal_scrollbar().hide();
 				scrollable_widget::update_scrollbar_visibility(aStage);
-				refresh_lines();
 			}
 			break;
 		case UsvStageDone:
@@ -1049,8 +1047,12 @@ namespace neogfx
 		iGlyphLines.clear();
 		point pos{};
 		dimension availableWidth = client_rect(false).width();
+		dimension availableHeight = client_rect(false).height();
+		bool showVerticalScrollbar = false;
+		bool showHorizontalScrollbar = false;
 		iTextExtents = size{};
-		for (auto p = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
+		uint32_t pass = 1;
+		for (auto p = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end();)
 		{
 			auto& paragraph = *p;
 			auto paragraphStart = paragraph.first.start();
@@ -1062,11 +1064,11 @@ namespace neogfx
 				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 				iGlyphLines.push_back(
-					std::make_pair(glyph_line{ size{ 0.0, glyphFont.height() } }, glyph_line_index{0, glyphFont.height()}), 
-					std::make_pair(glyph_line_index{}, glyph_line_index{paragraphStart != paragraphEnd ? 1u : 0u, 0.0}));
+					std::make_pair(glyph_line{ size{ 0.0, glyphFont.height() } }, glyph_line_index{ 0, glyphFont.height() }),
+					std::make_pair(glyph_line_index{}, glyph_line_index{ paragraphStart != paragraphEnd ? 1u : 0u, 0.0 }));
 				pos.y += iGlyphLines.back().first.extents.cy;
 			}
-			else if (iWordWrap && (paragraphEnd-1)->x + (paragraphEnd-1)->advance().cx > availableWidth)
+			else if (iWordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
 			{
 				document_glyphs::iterator next = paragraph.first.start();
 				document_glyphs::iterator lineStart = next;
@@ -1097,9 +1099,9 @@ namespace neogfx
 						--lineEnd;
 					dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().advance().cx : 0.0));
 					auto height = paragraph.first.height(lineStart, lineEnd);
-					auto line = iGlyphLines.insert(iGlyphLines.end(), 
-						std::make_pair(glyph_line{size{x - offset, height}}, glyph_line_index{static_cast<std::size_t>(lineEnd - lineStart), height}), 
-						glyph_lines::skip_type{glyph_line_index{}, glyph_line_index{ static_cast<std::size_t>(next - lineEnd), 0.0 }});
+					auto line = iGlyphLines.insert(iGlyphLines.end(),
+						std::make_pair(glyph_line{ size{x - offset, height} }, glyph_line_index{ static_cast<std::size_t>(lineEnd - lineStart), height }),
+						glyph_lines::skip_type{ glyph_line_index{}, glyph_line_index{ static_cast<std::size_t>(next - lineEnd), 0.0 } });
 					pos.y += height;
 					iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().first.extents.cx);
 					lineStart = next;
@@ -1112,10 +1114,42 @@ namespace neogfx
 			{
 				auto height = paragraph.first.height(paragraphStart, paragraphEnd);
 				iGlyphLines.push_back(std::make_pair(
-					glyph_line{size{(paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx, height}},
-					glyph_line_index{static_cast<std::size_t>(paragraphEnd - paragraphStart), height}));
+					glyph_line{ size{(paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx, height} },
+					glyph_line_index{ static_cast<std::size_t>(paragraphEnd - paragraphStart), height }));
 				pos.y += iGlyphLines.back().first.extents.cy;
 				iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().first.extents.cx);
+			}
+			switch (pass)
+			{
+			case 1:
+			case 3:
+				if (!showVerticalScrollbar && pos.y >= availableHeight)
+				{
+					showVerticalScrollbar = true;
+					availableWidth -= vertical_scrollbar().width(*this);
+					iGlyphLines.clear();
+					pos = point{};
+					iTextExtents = size{};
+					p = iGlyphParagraphs.begin();
+					++pass;
+				}
+				else
+					++p;
+				break;
+			case 2:
+				if (!showHorizontalScrollbar && iTextExtents.cx > availableWidth)
+				{
+					showHorizontalScrollbar = true;
+					availableHeight -= horizontal_scrollbar().width(*this);
+					iGlyphLines.clear();
+					pos = point{};
+					iTextExtents = size{};
+					p = iGlyphParagraphs.begin();
+					++pass;
+				}
+				else
+					++p;
+				break;
 			}
 		}
 		if (!iGlyphs.empty() && iGlyphs.back().is_whitespace() && iGlyphs.back().value() == '\n')
