@@ -1070,9 +1070,9 @@ namespace neogfx
 			}
 			else if (iWordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
 			{
-				document_glyphs::iterator next = paragraph.first.start();
-				document_glyphs::iterator lineStart = next;
-				document_glyphs::iterator lineEnd = paragraphEnd;
+				auto next = paragraph.first.start();
+				auto lineStart = next;
+				auto lineEnd = paragraphEnd;
 				coordinate offset = 0.0;
 				while (next != paragraphEnd)
 				{
@@ -1112,10 +1112,14 @@ namespace neogfx
 			}
 			else
 			{
-				auto height = paragraph.first.height(paragraphStart, paragraphEnd);
+				auto lineEnd = paragraphEnd;
+				if ((lineEnd - 1)->is_whitespace() && (lineEnd - 1)->value() == '\n')
+					--lineEnd;
+				auto height = paragraph.first.height(paragraphStart, lineEnd);
 				iGlyphLines.push_back(std::make_pair(
-					glyph_line{ size{(paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx, height} },
-					glyph_line_index{ static_cast<std::size_t>(paragraphEnd - paragraphStart), height }));
+					glyph_line{ size{(lineEnd - 1)->x + (lineEnd - 1)->advance().cx, height} },
+					glyph_line_index{ static_cast<std::size_t>(lineEnd - paragraphStart), height }),
+					glyph_lines::skip_type{ glyph_line_index{}, glyph_line_index{ static_cast<std::size_t>(paragraphEnd - lineEnd), 0.0 } });
 				pos.y += iGlyphLines.back().first.extents.cy;
 				iTextExtents.cx = std::max(iTextExtents.cx, iGlyphLines.back().first.extents.cx);
 			}
