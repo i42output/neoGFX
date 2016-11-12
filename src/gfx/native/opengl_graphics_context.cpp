@@ -1198,7 +1198,7 @@ namespace neogfx
 					std::u32string::size_type cluster = glyphInfo[j].cluster + (std::get<0>(runs[i]) - &codePoints[0]);
 					if (glyphInfo[j].codepoint == 0)
 						glyphInfo[j].codepoint = tryFont.native_font_face().glyph_index(codePoints[cluster]);
-					if (glyphInfo[j].codepoint == 0)
+					if (glyphInfo[j].codepoint == 0 && textDirections[cluster] != text_direction::Whitespace)
 					{
 						// todo: improve on this naive font selection method (OS may have multiple fallback fonts)
 						auto currentFont = tryFont;
