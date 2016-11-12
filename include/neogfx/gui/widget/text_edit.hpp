@@ -421,6 +421,7 @@ namespace neogfx
 		std::size_t insert_text(const std::string& aText, bool aMoveCursor = false);
 		std::size_t insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
 		void delete_text(position_type aStart, position_type aEnd);
+		std::pair<position_type, position_type> related_glyphs(position_type aPosition) const;
 	public:
 		void set_hint(const std::string& aHint);
 	private:

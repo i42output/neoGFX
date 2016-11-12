@@ -814,22 +814,7 @@ namespace neogfx
 
 	glyph_text opengl_graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
 	{
-		bool fallbackNeeded = false;
-		glyph_text::container result = to_glyph_text_impl(aTextBegin, aTextEnd, aFontSelector, fallbackNeeded);
-		if (fallbackNeeded)
-		{
-			glyph_text::container fallbackResult = 
-				to_glyph_text_impl(aTextBegin, aTextEnd, [&aFontSelector](std::string::size_type aSourceIndex) { return aFontSelector(aSourceIndex).fallback(); }, fallbackNeeded);
-			for (auto i = result.begin(), j = fallbackResult.begin(); i != result.end(); ++i, ++j)
-			{
-				if (i->use_fallback())
-				{
-					*i = *j;
-					i->set_use_fallback(true);
-				}
-			}
-		}
-		return glyph_text(aFontSelector(0), std::move(result));
+		return glyph_text(aFontSelector(0), to_glyph_text_impl(aTextBegin, aTextEnd, aFontSelector));
 	}
 
 	void opengl_graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix)
@@ -1036,10 +1021,9 @@ namespace neogfx
 		return vertex{{aPoint.x, aPoint.y, 0.0}};
 	}
 
-	glyph_text::container opengl_graphics_context::to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, bool& aFallbackFontNeeded) const
+	glyph_text::container opengl_graphics_context::to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
 	{
 		glyph_text::container result;
-		aFallbackFontNeeded = false;
 		if (aTextEnd - aTextBegin == 0)
 			return result;
 
@@ -1193,60 +1177,84 @@ namespace neogfx
 		for (std::size_t i = 0; i < runs.size(); ++i)
 		{
 			std::string::size_type sourceClusterRunStart = (clusterMap.begin() + (std::get<0>(runs[i]) - &codePoints[0]))->from;
-			hb_font_t* hbFont = static_cast<native_font_face::hb_handle*>(aFontSelector(sourceClusterRunStart).native_font_face().aux_handle())->font;
-			hb_ft_font_set_load_flags(hbFont, is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
-			hb_buffer_t* buf = static_cast<native_font_face::hb_handle*>(aFontSelector(sourceClusterRunStart).native_font_face().aux_handle())->buf;
-			hb_buffer_set_direction(buf, std::get<2>(runs[i]) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
-			hb_buffer_set_script(buf, std::get<3>(runs[i]));
-			hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(std::get<0>(runs[i])), std::get<1>(runs[i]) - std::get<0>(runs[i]), 0, std::get<1>(runs[i]) - std::get<0>(runs[i]));
-			hb_shape(hbFont, buf, NULL, 0);
-			unsigned int glyphCount;
-			hb_glyph_info_t* glyphInfo = hb_buffer_get_glyph_infos(buf, &glyphCount);
-			hb_glyph_position_t* glyphPos = hb_buffer_get_glyph_positions(buf, &glyphCount);
-			for (unsigned int j = 0; j < glyphCount; ++j)
+			font tryFont = aFontSelector(sourceClusterRunStart);
+			bool usingFallback = false;
+			bool glyphNotFound = false;
+			do
 			{
-				std::u32string::size_type cluster = glyphInfo[j].cluster + (std::get<0>(runs[i]) - &codePoints[0]);
-				if (glyphInfo[j].codepoint == 0)
-					glyphInfo[j].codepoint = aFontSelector(sourceClusterRunStart).native_font_face().glyph_index(codePoints[cluster]);
-				if (glyphInfo[j].codepoint == 0)
-					aFallbackFontNeeded = true;
-				std::string::size_type sourceClusterStart, sourceClusterEnd;
-				auto c = clusterMap.begin() + cluster;
-				sourceClusterStart = c->from;
-				if (c + 1 != clusterMap.end())
-					sourceClusterEnd = (c + 1)->from;
-				else
-					sourceClusterEnd = aTextEnd - aTextBegin;
-				if (j > 0)
-					result.back().kerning_adjust(static_cast<float>(aFontSelector(sourceClusterStart).kerning(glyphInfo[j - 1].codepoint, glyphInfo[j].codepoint)));
-				size advance{ glyphPos[j].x_advance / 64.0, glyphPos[j].y_advance / 64.0 };
-				result.push_back(glyph(textDirections[cluster], glyphInfo[j].codepoint, glyph::source_type(sourceClusterStart, sourceClusterEnd), advance, size(glyphPos[j].x_offset / 64.0, glyphPos[j].y_offset / 64.0)));
-				if (result.back().direction() == text_direction::Whitespace)
-					result.back().set_value(aTextBegin[sourceClusterStart]);
-				if ((aFontSelector(sourceClusterStart).style() & font::Underline) == font::Underline)
-					result.back().set_underline(true);
-				if (is_subpixel_rendering_on())
-					result.back().set_subpixel(true);
-				if ((c->flags & glyph::Mnemonic) == glyph::Mnemonic)
-					result.back().set_mnemonic(true);
-				if (glyphInfo[j].codepoint == 0)
-					result.back().set_use_fallback(true);
-				else if (result.back().direction() != text_direction::Whitespace)
+				glyphNotFound = false;
+				hb_font_t* hbFont = static_cast<native_font_face::hb_handle*>(tryFont.native_font_face().aux_handle())->font;
+				hb_ft_font_set_load_flags(hbFont, is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
+				hb_buffer_t* buf = static_cast<native_font_face::hb_handle*>(tryFont.native_font_face().aux_handle())->buf;
+				hb_buffer_set_direction(buf, std::get<2>(runs[i]) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
+				hb_buffer_set_script(buf, std::get<3>(runs[i]));
+				hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(std::get<0>(runs[i])), std::get<1>(runs[i]) - std::get<0>(runs[i]), 0, std::get<1>(runs[i]) - std::get<0>(runs[i]));
+				hb_shape(hbFont, buf, NULL, 0);
+				unsigned int glyphCount;
+				hb_glyph_info_t* glyphInfo = hb_buffer_get_glyph_infos(buf, &glyphCount);
+				hb_glyph_position_t* glyphPos = hb_buffer_get_glyph_positions(buf, &glyphCount);
+				for (unsigned int j = 0; j < glyphCount; ++j)
 				{
-					auto& glyph = result.back();
-					if (glyph.advance() != advance.ceil())
+					std::u32string::size_type cluster = glyphInfo[j].cluster + (std::get<0>(runs[i]) - &codePoints[0]);
+					if (glyphInfo[j].codepoint == 0)
+						glyphInfo[j].codepoint = tryFont.native_font_face().glyph_index(codePoints[cluster]);
+					if (glyphInfo[j].codepoint == 0)
 					{
-						const i_glyph_texture& glyphTexture = aFontSelector(sourceClusterStart).native_font_face().glyph_texture(glyph);
-						auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.extents().cx);
-						if (visibleAdvance > advance.cx)
+						// todo: improve on this naive font selection method (OS may have multiple fallback fonts)
+						auto currentFont = tryFont;
+						tryFont = tryFont.fallback();
+						if (tryFont != currentFont)
 						{
-							advance.cx = visibleAdvance;
-							glyph.set_advance(advance);
+							usingFallback = true;
+							glyphNotFound = true;
+							break;
 						}
 					}
 				}
-			}
-			hb_buffer_clear_contents(buf);
+				if (!glyphNotFound)
+				{
+					for (unsigned int j = 0; j < glyphCount; ++j)
+					{
+						std::u32string::size_type cluster = glyphInfo[j].cluster + (std::get<0>(runs[i]) - &codePoints[0]);
+						std::string::size_type sourceClusterStart, sourceClusterEnd;
+						auto c = clusterMap.begin() + cluster;
+						sourceClusterStart = c->from;
+						if (c + 1 != clusterMap.end())
+							sourceClusterEnd = (c + 1)->from;
+						else
+							sourceClusterEnd = aTextEnd - aTextBegin;
+						if (j > 0)
+							result.back().kerning_adjust(static_cast<float>(aFontSelector(sourceClusterStart).kerning(glyphInfo[j - 1].codepoint, glyphInfo[j].codepoint)));
+						size advance{ glyphPos[j].x_advance / 64.0, glyphPos[j].y_advance / 64.0 };
+						result.push_back(glyph(textDirections[cluster], glyphInfo[j].codepoint, glyph::source_type(sourceClusterStart, sourceClusterEnd), advance, size(glyphPos[j].x_offset / 64.0, glyphPos[j].y_offset / 64.0)));
+						if (result.back().direction() == text_direction::Whitespace)
+							result.back().set_value(aTextBegin[sourceClusterStart]);
+						if ((aFontSelector(sourceClusterStart).style() & font::Underline) == font::Underline)
+							result.back().set_underline(true);
+						if (is_subpixel_rendering_on())
+							result.back().set_subpixel(true);
+						if ((c->flags & glyph::Mnemonic) == glyph::Mnemonic)
+							result.back().set_mnemonic(true);
+						if (usingFallback)
+							result.back().set_use_fallback(true);
+						if (result.back().direction() != text_direction::Whitespace)
+						{
+							auto& glyph = result.back();
+							if (glyph.advance() != advance.ceil())
+							{
+								const i_glyph_texture& glyphTexture = aFontSelector(sourceClusterStart).native_font_face().glyph_texture(glyph);
+								auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.extents().cx);
+								if (visibleAdvance > advance.cx)
+								{
+									advance.cx = visibleAdvance;
+									glyph.set_advance(advance);
+								}
+							}
+						}
+					}
+				}
+				hb_buffer_clear_contents(buf);
+			} while (glyphNotFound);
 		}
 
 		return result;

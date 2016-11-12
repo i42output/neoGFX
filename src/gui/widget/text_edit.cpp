@@ -304,9 +304,10 @@ namespace neogfx
 			{
 				if (cursor().position() > 0)
 				{
-					delete_text(cursor().position() - 1, cursor().position());
-					if (cursor().position() > 0)
-						cursor().set_position(cursor().position() - 1);
+					auto rg = related_glyphs(cursor().position() - 1);
+					auto tp = from_glyph(iGlyphs.begin() + rg.first);
+					delete_text(rg.first, rg.second);
+					cursor().set_position(to_glyph(iText.begin() + tp.first) - iGlyphs.begin());
 					make_cursor_visible(true);
 				}
 			}
@@ -318,7 +319,10 @@ namespace neogfx
 			{
 				if (cursor().position() < iGlyphs.size())
 				{
-					delete_text(cursor().position(), cursor().position() + 1);
+					auto rg = related_glyphs(cursor().position());
+					auto tp = from_glyph(iGlyphs.begin() + rg.first);
+					delete_text(rg.first, rg.second);
+					cursor().set_position(to_glyph(iText.begin() + tp.first) - iGlyphs.begin());
 					make_cursor_visible(true);
 				}
 			}
@@ -876,6 +880,16 @@ namespace neogfx
 		text_changed.trigger();
 	}
 
+	std::pair<text_edit::position_type, text_edit::position_type> text_edit::related_glyphs(position_type aPosition) const
+	{
+		std::pair<position_type, position_type> result{ aPosition, aPosition + 1 };
+		while (result.first > 0 && iGlyphs[result.first-1].source() == iGlyphs[aPosition].source())
+			--result.first;
+		while (result.second < iGlyphs.size() && iGlyphs[result.second].source() == iGlyphs[aPosition].source())
+			++result.second;
+		return result;
+	}
+
 	void text_edit::set_hint(const std::string& aHint)
 	{
 		if (iHint != aHint)
@@ -925,8 +939,11 @@ namespace neogfx
 	{
 		if (cursor().position() != cursor().anchor())
 		{
-			delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
-			cursor().set_position(std::min(cursor().position(), cursor().anchor()));
+			auto rgStart = related_glyphs(std::min(cursor().position(), cursor().anchor()));
+			auto rgEnd = related_glyphs(std::max(cursor().position(), cursor().anchor()));
+			auto tp = from_glyph(iGlyphs.begin() + rgStart.first);
+			delete_text(rgStart.first, rgEnd.second);
+			cursor().set_position(to_glyph(iText.begin() + tp.first) - iGlyphs.begin());
 		}
 	}
 
@@ -946,13 +963,16 @@ namespace neogfx
 		}
 		if (iGlyphParagraphCache == nullptr)
 			return iGlyphs.end();
-		for (auto i = iGlyphParagraphCache->start(); i != iGlyphParagraphCache->end(); ++i)
+		auto paragraphEnd = iGlyphParagraphCache->end();
+		for (auto i = iGlyphParagraphCache->start(); i != paragraphEnd; ++i)
 		{
 			auto const& g = *i;
-			if (textIndex >= g.source().first + iGlyphParagraphCache->text_start_index() && textIndex < g.source().second + iGlyphParagraphCache->text_start_index())
+			auto start = g.source().first + iGlyphParagraphCache->text_start_index();
+			auto end = g.source().second + iGlyphParagraphCache->text_start_index();
+			if (textIndex >= start && textIndex < end)
 				return i;
 		}
-		return iGlyphParagraphCache->end();
+		return paragraphEnd;
 	}
 
 	std::pair<text_edit::document_text::size_type, text_edit::document_text::size_type> text_edit::from_glyph(document_glyphs::const_iterator aWhere) const

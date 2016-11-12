@@ -135,7 +135,7 @@ namespace neogfx
 		void gradient_on(const gradient& aGradient, const rect& aBoundingBox);
 		void gradient_off();
 		vertex to_shader_vertex(const point& aPoint) const;
-		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, bool& aFallbackFontNeeded) const;
+		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		const i_native_surface& iSurface;
