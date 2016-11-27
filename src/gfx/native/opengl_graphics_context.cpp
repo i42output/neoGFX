@@ -1094,14 +1094,14 @@ namespace neogfx
 			auto g = iGlyphsList.begin();
 			for (uint32_t i = 0; i < g->glyph_count();)
 			{
-				if (g->glyph_info(i).codepoint != 0 || text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) == text_direction::Whitespace)
+				if (g->glyph_info(i).codepoint != 0 || get_text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) == text_direction::Whitespace)
 				{
 					iResults.push_back(std::make_pair(g, i++));
 				}
 				else
 				{
 					std::vector<uint32_t> clusters;
-					while (g->glyph_info(i).codepoint == 0 && text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) != text_direction::Whitespace)
+					while (g->glyph_info(i).codepoint == 0 && get_text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) != text_direction::Whitespace)
 					{
 						clusters.push_back(g->glyph_info(i).cluster);
 						++i;
@@ -1125,11 +1125,16 @@ namespace neogfx
 							}
 							else
 							{
-								break;
+								if (get_text_direction(std::get<0>(aGlyphRun)[fallbackGlyphs.glyph_info(j).cluster]) != text_direction::Whitespace)
+									break;
+								else
+									goto whitespace_break;
 							}
 						}
 					}
 				}
+			whitespace_break:
+				;
 			}
 		}
 	public:
@@ -1228,7 +1233,7 @@ namespace neogfx
 				codePoints[i] = neolib::utf8_to_utf32(currentFont.password_mask())[0];
 			if (codePoints[i] == '\r' || codePoints[i] == '\n')
 				currentLineHasLTR = false;
-			switch (codePoints[i])
+			switch (codePoints[i])  
 			{
 			case PDF:
 				if (!directionStack.empty())
