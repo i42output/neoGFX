@@ -103,15 +103,31 @@ namespace neogfx
 #endif
 			}
 
-			font_info default_fallback_font_info()
+			fallback_font_info default_fallback_font_info()
 			{
 #ifdef WIN32
-				return font_info("Arial Unicode MS", font::Normal, 8);
+				return fallback_font_info{ {"Segoe UI Symbol", "Arial Unicode MS" } };
 #else
 				throw std::logic_error("neogfx::detail::platform_specific::default_fallback_font_info: Unknown system");
 #endif
 			}
 		}
+	}
+
+	fallback_font_info::fallback_font_info(std::vector<std::string> aFallbackFontFamilies) :
+		iFallbackFontFamilies(std::move(aFallbackFontFamilies))
+	{
+	}
+
+	const std::string& fallback_font_info::fallback_for(const std::string& aFontFamilyName) const
+	{
+		auto f = std::find(iFallbackFontFamilies.begin(), iFallbackFontFamilies.end(), aFontFamilyName);
+		if (f == iFallbackFontFamilies.end())
+			return *iFallbackFontFamilies.begin();
+		++f;
+		if (f == iFallbackFontFamilies.end())
+			--f;
+		return *f;
 	}
 
 	font_manager::font_manager(i_rendering_engine& aRenderingEngine, i_screen_metrics&) :
@@ -164,7 +180,7 @@ namespace neogfx
 		return iDefaultSystemFontInfo;
 	}
 
-	const font_info& font_manager::default_fallback_font_info() const
+	const i_fallback_font_info& font_manager::default_fallback_font_info() const
 	{
 		return iDefaultFallbackFontInfo;
 	}
@@ -176,8 +192,7 @@ namespace neogfx
 
 	bool font_manager::has_fallback_font(const i_native_font_face& aExistingFont) const
 	{
-		// todo: add support for multiple fallback fonts
-		return aExistingFont.family_name() != app::instance().current_style().fallback_font().family_name();
+		return aExistingFont.family_name() != default_fallback_font_info().fallback_for(aExistingFont.family_name());
 	}
 		
 	std::unique_ptr<i_native_font_face> font_manager::create_fallback_font(const i_native_font_face& aExistingFont)
@@ -189,7 +204,7 @@ namespace neogfx
 			virtual dimension vertical_dpi() const { return iResolution.cy; }
 		} deviceResolution;
 		deviceResolution.iResolution = size(aExistingFont.horizontal_dpi(), aExistingFont.vertical_dpi());
-		return create_font(app::instance().current_style().fallback_font().family_name(), aExistingFont.style(), aExistingFont.size(), deviceResolution);
+		return create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), aExistingFont.style(), aExistingFont.size(), deviceResolution);
 	}
 
 	std::unique_ptr<i_native_font_face> font_manager::create_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)

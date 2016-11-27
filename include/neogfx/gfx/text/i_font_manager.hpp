@@ -29,12 +29,18 @@ namespace neogfx
 	class i_native_font;
 	class i_native_font_face;
 
+	class i_fallback_font_info
+	{
+	public:
+		virtual const std::string& fallback_for(const std::string& aFontFamilyName) const = 0;
+	};
+
 	class i_font_manager
 	{
 	public:
 		virtual void* font_library_handle() const = 0;
 		virtual const font_info& default_system_font_info() const = 0;
-		virtual const font_info& default_fallback_font_info() const = 0;
+		virtual const i_fallback_font_info& default_fallback_font_info() const = 0;
 		virtual std::unique_ptr<i_native_font_face> create_default_font(const i_device_resolution& aDevice) = 0;
 		virtual bool has_fallback_font(const i_native_font_face& aExistingFont) const = 0;
 		virtual std::unique_ptr<i_native_font_face> create_fallback_font(const i_native_font_face& aExistingFont) = 0;

@@ -63,8 +63,5 @@ namespace neogfx
 		virtual const font_info& font_info() const = 0;
 		virtual void set_font_info(const neogfx::font_info& aFontInfo) = 0;
 		virtual const neogfx::font& font() const = 0;
-		virtual const neogfx::font_info& fallback_font_info() const = 0;
-		virtual void set_fallback_font_info(const neogfx::font_info& aFontInfo) = 0;
-		virtual const neogfx::font& fallback_font() const = 0;
 	};
 }

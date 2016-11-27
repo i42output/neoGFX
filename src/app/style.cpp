@@ -27,8 +27,7 @@ namespace neogfx
 		iName(aName),
 		iMargins(2.0),
 		iSpacing(2.0, 2.0),
-		iFontInfo(app::instance().rendering_engine().font_manager().default_system_font_info()),
-		iFallbackFontInfo(app::instance().rendering_engine().font_manager().default_fallback_font_info())
+		iFontInfo(app::instance().rendering_engine().font_manager().default_system_font_info())
 	{
 	}
 
@@ -42,8 +41,7 @@ namespace neogfx
 		iTextColour(aOther.has_text_colour() ? aOther.text_colour() : optional_colour()),
 		iSelectionColour(aOther.has_selection_colour() ? aOther.selection_colour() : optional_colour()),
 		iHoverColour(aOther.has_hover_colour() ? aOther.hover_colour() : optional_colour()),
-		iFontInfo(aOther.font_info()),
-		iFallbackFontInfo(aOther.fallback_font_info())
+		iFontInfo(aOther.font_info())
 	{
 	}
 
@@ -325,33 +323,5 @@ namespace neogfx
 			iFont = neogfx::font(iFontInfo);
 		}
 		return *iFont;
-	}
-
-	const font_info& style::fallback_font_info() const
-	{
-		return iFallbackFontInfo;
-	}
-
-	void style::set_fallback_font_info(const neogfx::font_info& aFontInfo)
-	{
-		if (iFallbackFontInfo != aFontInfo)
-		{
-			iFallbackFontInfo = aFontInfo;
-			iFallbackFont.reset();
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().layout_surfaces();
-			}
-		}
-	}
-
-	const font& style::fallback_font() const
-	{
-		if (iFallbackFont == boost::none)
-		{
-			iFallbackFont = neogfx::font(iFallbackFontInfo);
-		}
-		return *iFallbackFont;
 	}
 }

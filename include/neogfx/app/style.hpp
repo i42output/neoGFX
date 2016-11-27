@@ -63,9 +63,6 @@ namespace neogfx
 		virtual const neogfx::font_info& font_info() const;
 		virtual void set_font_info(const neogfx::font_info& aFontInfo);
 		virtual const neogfx::font& font() const;
-		virtual const neogfx::font_info& fallback_font_info() const;
-		virtual void set_fallback_font_info(const neogfx::font_info& aFontInfo);
-		virtual const neogfx::font& fallback_font() const;
 	private:
 		std::string iName;
 		neogfx::margins iMargins;
@@ -79,8 +76,6 @@ namespace neogfx
 		optional_colour iWidgetDetailPrimaryColour;
 		optional_colour iWidgetDetailSecondaryColour;
 		neogfx::font_info iFontInfo;
-		neogfx::font_info iFallbackFontInfo;
 		mutable optional_font iFont;
-		mutable optional_font iFallbackFont;
 	};
 }

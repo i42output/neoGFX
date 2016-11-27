@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <set>
 #include <neolib/string_utils.hpp>
 #include "i_font_manager.hpp"
 #include "../../../../src/gfx/text/native/native_font.hpp"
@@ -27,6 +28,16 @@
 namespace neogfx
 {
 	class i_rendering_engine;
+
+	class fallback_font_info : public i_fallback_font_info
+	{
+	public:
+		fallback_font_info(std::vector<std::string> aFallbackFontFamilies);
+	public:
+		virtual const std::string& fallback_for(const std::string& aFontFamilyName) const;
+	private:
+		std::vector<std::string> iFallbackFontFamilies;
+	};
 
 	class font_manager : public i_font_manager
 	{
@@ -45,7 +56,7 @@ namespace neogfx
 	public:
 		virtual void* font_library_handle() const;
 		virtual const font_info& default_system_font_info() const;
-		virtual const font_info& default_fallback_font_info() const;
+		virtual const i_fallback_font_info& default_fallback_font_info() const;
 		virtual std::unique_ptr<i_native_font_face> create_default_font(const i_device_resolution& aDevice);
 		virtual bool has_fallback_font(const i_native_font_face& aExistingFont) const;
 		virtual std::unique_ptr<i_native_font_face> create_fallback_font(const i_native_font_face& aExistingFont);
@@ -68,7 +79,7 @@ namespace neogfx
 	private:
 		i_rendering_engine& iRenderingEngine;
 		font_info iDefaultSystemFontInfo;
-		font_info iDefaultFallbackFontInfo;
+		fallback_font_info iDefaultFallbackFontInfo;
 		FT_Library iFontLib;
 		native_font_list iNativeFonts;
 		font_family_list iFontFamilies;
