@@ -47,6 +47,7 @@ namespace neogfx
 		virtual const font_info& default_system_font_info() const;
 		virtual const font_info& default_fallback_font_info() const;
 		virtual std::unique_ptr<i_native_font_face> create_default_font(const i_device_resolution& aDevice);
+		virtual bool has_fallback_font(const i_native_font_face& aExistingFont) const;
 		virtual std::unique_ptr<i_native_font_face> create_fallback_font(const i_native_font_face& aExistingFont);
 		virtual std::unique_ptr<i_native_font_face> create_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice);
 		virtual std::unique_ptr<i_native_font_face> create_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice);

@@ -88,6 +88,7 @@ namespace neogfx
 		virtual dimension underline_thickness() const;
 		virtual dimension line_spacing() const;
 		virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
+		virtual bool has_fallback() const;
 		virtual i_native_font_face& fallback() const;
 		virtual void* handle() const;
 		virtual void* aux_handle() const;

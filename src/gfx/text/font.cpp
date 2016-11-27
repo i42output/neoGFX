@@ -326,6 +326,11 @@ namespace neogfx
 		return *this;
 	}
 
+	bool font::has_fallback() const
+	{
+		return app::instance().rendering_engine().font_manager().has_fallback_font(*iNativeFontFace);
+	}
+
 	font font::fallback() const
 	{
 		return font{app::instance().rendering_engine().font_manager().create_fallback_font(*iNativeFontFace), style()};

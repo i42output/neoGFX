@@ -70,6 +70,7 @@ namespace neogfx
 			}
 		};
 		typedef std::array<double, 3> vertex;
+		class glyph_shapes;
 	public:
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface);
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget);
@@ -159,7 +160,10 @@ namespace neogfx
 		mutable cluster_map_t iClusterMap;
 		mutable std::vector<text_direction> iTextDirections;
 		mutable std::u32string iCodePointsBuffer;
-		mutable std::vector<std::tuple<const char32_t*, const char32_t*, text_direction, hb_script_t>> iRuns;
+		typedef std::tuple<const char32_t*, const char32_t*, text_direction, hb_script_t> glyph_run;
+		typedef std::vector<glyph_run> run_list;
+		mutable run_list iRuns;
+		mutable glyph_text::container iGlyphTextResult;
 		GLint iPreviousTexture;
 		GLuint iActiveGlyphTexture;
 		bool iLineStippleActive;

@@ -33,6 +33,8 @@ namespace neogfx
 	class i_native_font_face
 	{
 	public:
+		struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::i_native_font_face::no_fallback_font") {} };
+	public:
 		virtual ~i_native_font_face() {}
 	public:
 		virtual i_native_font& native_font() = 0;
@@ -48,6 +50,7 @@ namespace neogfx
 		virtual dimension underline_thickness() const = 0;
 		virtual dimension line_spacing() const = 0;
 		virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const = 0;
+		virtual bool has_fallback() const = 0;
 		virtual i_native_font_face& fallback() const = 0;
 		virtual void* handle() const = 0;
 		virtual void* aux_handle() const = 0;

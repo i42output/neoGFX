@@ -140,6 +140,7 @@ namespace neogfx
 		font(std::unique_ptr<i_native_font_face> aNativeFontFace);
 		font(std::unique_ptr<i_native_font_face> aNativeFontFace, style_e aStyle);
 	public:
+		bool has_fallback() const;
 		font fallback() const;
 		// operations
 	public:

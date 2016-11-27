@@ -122,8 +122,15 @@ namespace neogfx
 		return (iKerningTable[std::make_pair(aLeftGlyphIndex, aRightGlyphIndex)] = delta.x / 64.0);
 	}
 
+	bool native_font_face::has_fallback() const
+	{
+		return iRenderingEngine.font_manager().has_fallback_font(*this);
+	}
+
 	i_native_font_face& native_font_face::fallback() const
 	{
+		if (!has_fallback())
+			throw no_fallback_font();
 		if (iFallbackFont == 0)
 			iFallbackFont = iRenderingEngine.font_manager().create_fallback_font(*this);
 		return *iFallbackFont;

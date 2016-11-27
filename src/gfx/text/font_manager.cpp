@@ -49,6 +49,7 @@ namespace neogfx
 			virtual dimension underline_thickness() const { return iFontFace.underline_thickness(); }
 			virtual dimension line_spacing() const { return iFontFace.line_spacing(); }
 			virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const { return iFontFace.kerning(aLeftGlyphIndex, aRightGlyphIndex); }
+			virtual bool has_fallback() const { return iFontFace.has_fallback(); }
 			virtual i_native_font_face& fallback() const { return iFontFace.fallback(); }
 			virtual void* handle() const { return iFontFace.handle(); }
 			virtual void* aux_handle() const { return iFontFace.aux_handle(); }
@@ -173,6 +174,12 @@ namespace neogfx
 		return create_font(app::instance().current_style().font_info(), aDevice);
 	}
 
+	bool font_manager::has_fallback_font(const i_native_font_face& aExistingFont) const
+	{
+		// todo: add support for multiple fallback fonts
+		return aExistingFont.family_name() != app::instance().current_style().fallback_font().family_name();
+	}
+		
 	std::unique_ptr<i_native_font_face> font_manager::create_fallback_font(const i_native_font_face& aExistingFont)
 	{
 		struct : i_device_resolution
