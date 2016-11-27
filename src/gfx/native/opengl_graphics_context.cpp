@@ -1092,21 +1092,43 @@ namespace neogfx
 				iGlyphsList.emplace_back(glyphs(aParent, tryFont, aGlyphRun));
 			}
 			auto g = iGlyphsList.begin();
-			for (uint32_t i = 0; i < g->glyph_count(); ++i)
+			for (uint32_t i = 0; i < g->glyph_count();)
 			{
 				if (g->glyph_info(i).codepoint != 0 || text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) == text_direction::Whitespace)
 				{
-					iResults.push_back(std::make_pair(g, i));
+					iResults.push_back(std::make_pair(g, i++));
 				}
 				else
 				{
-					auto f = std::next(g);
-					while (f != iGlyphsList.end() && f->glyph_info(i).codepoint == 0)
-						++f;
-					if (f != iGlyphsList.end())
-						iResults.push_back(std::make_pair(f, i));
-					else
-						iResults.push_back(std::make_pair(g, i));
+					std::vector<uint32_t> clusters;
+					while (g->glyph_info(i).codepoint == 0 && text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) != text_direction::Whitespace)
+					{
+						clusters.push_back(g->glyph_info(i).cluster);
+						++i;
+					}
+					std::sort(clusters.begin(), clusters.end());
+					auto nextFallback = std::next(g);
+					while (nextFallback != iGlyphsList.end() && !clusters.empty())
+					{
+						auto currentFallback = nextFallback++;
+						const auto& fallbackGlyphs = *currentFallback;
+						for (uint32_t j = 0; j < fallbackGlyphs.glyph_count(); ++j)
+						{
+							if (fallbackGlyphs.glyph_info(j).codepoint != 0)
+							{
+								auto c = std::find(clusters.begin(), clusters.end(), fallbackGlyphs.glyph_info(j).cluster);
+								if (c != clusters.end())
+								{
+									iResults.push_back(std::make_pair(currentFallback, j));
+									clusters.erase(c);
+								}
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
 				}
 			}
 		}
