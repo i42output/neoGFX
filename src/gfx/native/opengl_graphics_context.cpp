@@ -874,7 +874,7 @@ namespace neogfx
 		if (&iRenderingEngine.active_shader_program() != &iRenderingEngine.glyph_shader_program(aGlyph.subpixel()))
 			iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()));
 
-		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aFont.fallback().native_font_face().glyph_texture(aGlyph);
+		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aGlyph.fallback_font(aFont).native_font_face().glyph_texture(aGlyph);
 
 		auto& vertices = iGlyphVertices;
 		auto& colours = iGlyphColours;
@@ -1322,7 +1322,9 @@ namespace neogfx
 				if ((c->flags & glyph::Mnemonic) == glyph::Mnemonic)
 					result.back().set_mnemonic(true);
 				if (shapes.using_fallback(j))
-					result.back().set_use_fallback(true);
+				{
+					result.back().set_use_fallback(true, shapes.fallback_index(j));
+				}
 				if (result.back().direction() != text_direction::Whitespace)
 				{
 					auto& glyph = result.back();

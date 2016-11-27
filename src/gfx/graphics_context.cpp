@@ -682,7 +682,7 @@ namespace neogfx
 		auto yLine = logical_coordinates()[1] > logical_coordinates()[3] ?
 			(aFont.height() + aFont.descender()) - std::ceil(aFont.native_font_face().underline_position()) :
 			-aFont.descender() + std::ceil(aFont.native_font_face().underline_position());
-		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aFont.fallback().native_font_face().glyph_texture(aGlyph);
+		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aGlyph.fallback_font(aFont).native_font_face().glyph_texture(aGlyph);
 		draw_line(
 			aPoint + point{ glyphTexture.placement().x, yLine },
 			aPoint + point{ glyphTexture.placement().x + glyphTexture.extents().cx, yLine },

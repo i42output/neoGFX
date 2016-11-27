@@ -283,7 +283,7 @@ namespace neogfx
 						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + textStartIndex + glyph.source().first).contents();
 						const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
 						auto& glyphFont = style.font() != boost::none ? *style.font() : iParent->font();
-						dimension cy = !glyph.use_fallback() ? glyphFont.height() : glyphFont.fallback().height();
+						dimension cy = !glyph.use_fallback() ? glyphFont.height() : glyph.fallback_font(glyphFont).fallback().height();
 						if (!style.text_outline_colour().empty())
 							cy += 2.0;
 						if (i == glyphsStartIndex || cy != previousHeight)

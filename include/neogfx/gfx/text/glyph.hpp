@@ -59,11 +59,11 @@ namespace neogfx
 		typedef std::pair<string::size_type, string::size_type> source_type;
 	public:
 		glyph() :
-			iDirection{}, iValue{}, iFlags{}, iSource{}, iAdvance{}, iOffset{} {}
+			iDirection{}, iValue{}, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
 		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aAdvance, size aOffset) :
-			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{aSource}, iAdvance{aAdvance}, iOffset{aOffset} {}
+			iDirection{aDirection}, iValue{aValue}, iFlags{}, iFallbackIndex{}, iSource{aSource}, iAdvance{aAdvance}, iOffset{aOffset} {}
 		glyph(text_direction aDirection, value_type aValue) :
-			iDirection{aDirection}, iValue{aValue}, iFlags{}, iSource{}, iAdvance{}, iOffset{} {}
+			iDirection{aDirection}, iValue{aValue}, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
 	public:
 		bool operator==(const glyph& aRhs) const { return iDirection == aRhs.iDirection && iValue == aRhs.iValue; }
 	public:
@@ -90,12 +90,25 @@ namespace neogfx
 		bool mnemonic() const { return (iFlags & Mnemonic) == Mnemonic; }
 		void set_mnemonic(bool aMnemonic) { iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); }
 		bool use_fallback() const { return (iFlags & UseFallback) == UseFallback; }
-		void set_use_fallback(bool aUseFallback) { iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); }
+		void set_use_fallback(bool aUseFallback, uint32_t aFallbackIndex = 0) { iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); iFallbackIndex = static_cast<uint8_t>(aFallbackIndex); }
+		font fallback_font(font aFont) const
+		{
+			if (!use_fallback())
+				return aFont;
+			else
+			{
+				font fallbackFont = aFont.fallback();
+				for (uint8_t i = 0; i < iFallbackIndex; ++i)
+					fallbackFont = fallbackFont.fallback();
+				return fallbackFont;
+			}
+		}
 		void kerning_adjust(float aAdjust) { iAdvance.cx += aAdjust; }
 	private:
 		text_direction iDirection;
 		value_type iValue;
 		flags_e iFlags;
+		uint8_t iFallbackIndex;
 		source_type iSource;
 		basic_size<float> iAdvance;
 		basic_size<float> iOffset;
