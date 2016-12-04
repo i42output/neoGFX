@@ -1094,7 +1094,8 @@ namespace neogfx
 			auto g = iGlyphsList.begin();
 			for (uint32_t i = 0; i < g->glyph_count();)
 			{
-				if (g->glyph_info(i).codepoint != 0 || get_text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) == text_direction::Whitespace)
+				const auto& gi = g->glyph_info(i);
+				if (gi.codepoint != 0 || get_text_direction(std::get<0>(aGlyphRun)[gi.cluster]) == text_direction::Whitespace)
 				{
 					iResults.push_back(std::make_pair(g, i++));
 				}
@@ -1327,11 +1328,16 @@ namespace neogfx
 			for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
 			{
 				std::u32string::size_type cluster = shapes.glyph_info(j).cluster + (std::get<0>(runs[i]) - &codePoints[0]);
+				std::u32string::size_type startCluster = cluster;
+				std::u32string::size_type endCluster = j < shapes.glyph_count() - 1 ? shapes.glyph_info(j + 1).cluster + (std::get<0>(runs[i]) - &codePoints[0]) : std::get<2>(runs[i]) == text_direction::LTR ? startCluster + 1 : startCluster - 1;
+				if (std::get<2>(runs[i]) == text_direction::RTL)
+					std::swap(startCluster, endCluster);
 				std::string::size_type sourceClusterStart, sourceClusterEnd;
-				auto c = clusterMap.begin() + cluster;
-				sourceClusterStart = c->from;
-				if (c + 1 != clusterMap.end())
-					sourceClusterEnd = (c + 1)->from;
+				auto cs = clusterMap.begin() + startCluster;
+				sourceClusterStart = cs->from;
+				auto ce = clusterMap.begin() + endCluster;
+				if (ce != clusterMap.end())
+					sourceClusterEnd = (ce)->from;
 				else
 					sourceClusterEnd = aTextEnd - aTextBegin;
 				if (j > 0)
@@ -1346,12 +1352,10 @@ namespace neogfx
 					result.back().set_underline(true);
 				if (is_subpixel_rendering_on())
 					result.back().set_subpixel(true);
-				if ((c->flags & glyph::Mnemonic) == glyph::Mnemonic)
+				if ((cs->flags & glyph::Mnemonic) == glyph::Mnemonic)
 					result.back().set_mnemonic(true);
 				if (shapes.using_fallback(j))
-				{
 					result.back().set_use_fallback(true, shapes.fallback_index(j));
-				}
 				if (result.back().direction() != text_direction::Whitespace)
 				{
 					auto& glyph = result.back();
