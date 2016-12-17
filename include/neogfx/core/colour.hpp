@@ -26,8 +26,6 @@
 
 namespace neogfx
 {
-	class hsl_colour;
-
 	class colour
 	{
 		// types
