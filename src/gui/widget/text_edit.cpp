@@ -305,9 +305,9 @@ namespace neogfx
 				if (cursor().position() > 0)
 				{
 					auto rg = related_glyphs(cursor().position() - 1);
-					auto tp = from_glyph(iGlyphs.begin() + rg.first);
-					delete_text(rg.first, rg.second);
-					cursor().set_position(to_glyph(iText.begin() + tp.first) - iGlyphs.begin());
+					auto tp = from_glyph(iGlyphs.begin() + rg.second - 1);
+					auto ea = delete_glyph(rg.second - 1);
+					cursor().set_position(to_glyph(iText.begin() + (tp.second - ea)) - iGlyphs.begin());
 					make_cursor_visible(true);
 				}
 			}
@@ -788,6 +788,8 @@ namespace neogfx
 			aPoint;
 		if (adjusted.x < 0.0)
 			adjusted.x = 0.0;
+		if (adjusted.y < 0.0)
+			adjusted.y = 0.0;
 		auto line = iGlyphLines.find_by_foreign_index(glyph_line_index{0, adjusted.y },
 			[](const glyph_line_index& left, const glyph_line_index& right) { return left.height() < right.height(); });
 		if (line.first != iGlyphLines.begin() && adjusted.y < line.second.height())
@@ -880,14 +882,37 @@ namespace neogfx
 		text_changed.trigger();
 	}
 
+	std::size_t text_edit::delete_glyph(position_type aPosition)
+	{
+		auto eraseEnd = iText.begin() + from_glyph(iGlyphs.begin() + aPosition).second;
+		auto eraseBegin = eraseEnd;
+		// remove last UTF-8 codepoint
+		while (eraseBegin != iText.begin() && (*(eraseBegin - 1) & 0xC0) == 0x80)
+			--eraseBegin;
+		if (eraseBegin != iText.begin())
+			--eraseBegin;
+		auto eraseAmount = eraseEnd - eraseBegin;
+		refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
+		update();
+		text_changed.trigger();
+		return eraseAmount;
+	}
+
 	std::pair<text_edit::position_type, text_edit::position_type> text_edit::related_glyphs(position_type aPosition) const
 	{
 		std::pair<position_type, position_type> result{ aPosition, aPosition + 1 };
-		while (result.first > 0 && iGlyphs[result.first-1].source() == iGlyphs[aPosition].source())
+		while (result.first > 0 && same_paragraph(aPosition, result.first - 1) && iGlyphs[result.first-1].source() == iGlyphs[aPosition].source())
 			--result.first;
-		while (result.second < iGlyphs.size() && iGlyphs[result.second].source() == iGlyphs[aPosition].source())
+		while (result.second < iGlyphs.size() && same_paragraph(aPosition, result.second) && iGlyphs[result.second].source() == iGlyphs[aPosition].source())
 			++result.second;
 		return result;
+	}
+
+	bool text_edit::same_paragraph(position_type aFirst, position_type aSecond) const
+	{
+		auto paragraph1 = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ 0, aFirst }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs(); });
+		auto paragraph2 = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ 0, aSecond }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs(); });
+		return paragraph1.first == paragraph2.first;
 	}
 
 	void text_edit::set_hint(const std::string& aHint)
@@ -987,9 +1012,8 @@ namespace neogfx
 		if (iGlyphParagraphCache != nullptr && aWhere >= iGlyphParagraphCache->start() && aWhere < iGlyphParagraphCache->end())
 		{
 			auto textStart = iGlyphParagraphCache->text_start_index();
-			auto sourceStart = aWhere->source().first;
-			auto sourceEnd = aWhere->source().second;
-			return std::make_pair(textStart + sourceStart, textStart + sourceEnd);
+			auto rg = related_glyphs(aWhere - iGlyphs.begin());
+			return std::make_pair(textStart + iGlyphs[rg.first].source().first, textStart + iGlyphs[rg.second - 1].source().second);
 		}
 		auto paragraph = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{0, static_cast<std::size_t>(aWhere - iGlyphs.begin())}, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs();});
 		if (paragraph.first == iGlyphParagraphs.end() && paragraph.first != iGlyphParagraphs.begin() && aWhere <= (paragraph.first - 1)->first.end())
@@ -1000,9 +1024,8 @@ namespace neogfx
 				--paragraph.first;
 			iGlyphParagraphCache = &paragraph.first->first;
 			auto textStart = paragraph.first->first.text_start_index();
-			auto sourceStart = aWhere->source().first;
-			auto sourceEnd = aWhere->source().second;
-			return std::make_pair(textStart + sourceStart, textStart + sourceEnd);
+			auto rg = related_glyphs(aWhere - iGlyphs.begin());
+			return std::make_pair(textStart + iGlyphs[rg.first].source().first, textStart + iGlyphs[rg.second - 1].source().second);
 		}
 		else
 			iGlyphParagraphCache = nullptr;
