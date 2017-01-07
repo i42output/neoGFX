@@ -1329,7 +1329,10 @@ namespace neogfx
 			{
 				std::u32string::size_type cluster = shapes.glyph_info(j).cluster + (std::get<0>(runs[i]) - &codePoints[0]);
 				std::u32string::size_type startCluster = cluster;
-				std::u32string::size_type endCluster = j < shapes.glyph_count() - 1 ? shapes.glyph_info(j + 1).cluster + (std::get<0>(runs[i]) - &codePoints[0]) : startCluster + 1;
+				uint32_t k = j + 1;
+				while (k < shapes.glyph_count() && shapes.glyph_info(k).cluster == shapes.glyph_info(j).cluster)
+					++k;
+				std::u32string::size_type endCluster = k < shapes.glyph_count() ? shapes.glyph_info(k).cluster + (std::get<0>(runs[i]) - &codePoints[0]) : std::get<1>(runs[i]) - &codePoints[0];
 				std::string::size_type sourceClusterStart, sourceClusterEnd;
 				auto cs = clusterMap.begin() + startCluster;
 				sourceClusterStart = cs->from;
@@ -1370,16 +1373,7 @@ namespace neogfx
 				}
 			}
 		}
-		for (auto i = result.rbegin(); i != result.rend(); ++i)
-		{
-			if (i->source().first == i->source().second)
-			{
-				if (i != result.rbegin())
-					i->set_source(std::prev(i)->source());
-				else
-					i->set_source(std::make_pair(i->source().first, i->source().second + 1));
-			}
-		}
+
 		return result;
 	}
 }
