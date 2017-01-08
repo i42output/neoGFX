@@ -56,7 +56,34 @@ namespace neogfx
 		iClipboard(new neogfx::clipboard(basic_services().clipboard())),
 		iRenderingEngine(new neogfx::sdl_renderer(*iBasicServices, *iKeyboard)),
 		iSurfaceManager(new neogfx::surface_manager(*iBasicServices, *iRenderingEngine)),
-		iCurrentStyle(iStyles.begin())
+		iCurrentStyle(iStyles.begin()),
+		iActionUndo{add_action("Undo").set_shortcut("Ctrl+Z")},
+		iActionRedo{add_action("Redo").set_shortcut("Ctrl+Shift+Z")},
+		iActionCut{add_action("Cut").set_shortcut("Ctrl+X")},
+		iActionCopy{add_action("Copy").set_shortcut("Ctrl+C")},
+		iActionPaste{add_action("Paste").set_shortcut("Ctrl+V")},
+		iActionDelete{add_action("Delete").set_shortcut("Del")},
+		iActionSelectAll{add_action("Select All").set_shortcut("Ctrl+A")},
+		iStandardActionManager{ *this, [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			if (clipboard().sink_active())
+			{
+				auto& sink = clipboard().active_sink();
+				if (sink.can_cut())
+					iActionCut.enable();
+				else
+					iActionCut.disable();
+				if (sink.can_copy())
+					iActionCopy.enable();
+				else
+					iActionCopy.disable();
+				if (sink.can_paste())
+					iActionPaste.enable();
+				else
+					iActionPaste.disable();
+			}
+		}, 100 }
 	{
 		app* np = nullptr;
 		sFirstInstance.compare_exchange_strong(np, this);
@@ -64,14 +91,24 @@ namespace neogfx
 		{ 
 			return process_events(*iContext); 
 		});
+
 		iContext = std::make_unique<event_processing_context>(*this, "neogfx::app");
+
 		iKeyboard->grab_keyboard(*this);
+
 		style whiteStyle("Default");
 		register_style(whiteStyle);
 		style slateStyle("Slate");
 		slateStyle.set_colour(colour(0x35, 0x35, 0x35));
 		register_style(slateStyle);
+
 		iSystemCache.reset(new window{ point{}, size{}, "neogfx::system_cache", window::InitiallyHidden | window::Weak });
+
+		iActionCut.triggered([this]() { clipboard().cut(); });
+		iActionCopy.triggered([this]() { clipboard().copy(); });
+		iActionPaste.triggered([this]() { clipboard().paste(); });
+		iActionDelete.triggered([this]() { clipboard().delete_selected(); });
+		iActionSelectAll.triggered([this]() { clipboard().select_all(); });
 	}
 	catch (std::exception& e)
 	{
@@ -223,34 +260,77 @@ namespace neogfx
 		return newStyle->second;
 	}
 
+	i_action& app::action_undo()
+	{
+		return iActionUndo;
+	}
+
+	i_action& app::action_redo()
+	{
+		return iActionRedo;
+	}
+
+	i_action& app::action_cut()
+	{
+		return iActionCut;
+	}
+
+	i_action& app::action_copy()
+	{
+		return iActionCopy;
+	}
+
+	i_action& app::action_paste()
+	{
+		return iActionPaste;
+	}
+
+	i_action& app::action_delete()
+	{
+		return iActionDelete;
+	}
+
+	i_action& app::action_select_all()
+	{
+		return iActionSelectAll;
+	}
+
+	i_action& app::find_action(const std::string& aText)
+	{
+		auto a = iActions.find(aText);
+		if (a == iActions.end())
+			throw action_not_found();
+		return a->second;
+	}
+
 	i_action& app::add_action(const std::string& aText)
 	{
-		iActions.emplace_back(aText);
-		return iActions.back();
+		auto a = iActions.emplace(aText, action{ aText });
+		return a->second;
 	}
 
 	i_action& app::add_action(const std::string& aText, const std::string& aImageUri)
 	{
-		iActions.emplace_back(aText, aImageUri);
-		return iActions.back();
+		auto a = iActions.emplace(aText, action{ aText, aImageUri });
+		return a->second;
 	}
 
 	i_action& app::add_action(const std::string& aText, const i_texture& aImage)
 	{
-		iActions.emplace_back(aText, aImage);
-		return iActions.back();
+		auto a = iActions.emplace(aText, action{ aText, aImage });
+		return a->second;
 	}
 
 	i_action& app::add_action(const std::string& aText, const i_image& aImage)
 	{
-		iActions.emplace_back(aText, aImage);
-		return iActions.back();
+		auto a = iActions.emplace(aText, action{ aText, aImage });
+		return a->second;
 	}
 
 	void app::remove_action(i_action& aAction)
 	{
 		for (auto i = iActions.begin(); i != iActions.end(); ++i)
-			if (&*i == &aAction)
+			if (&i->second == &aAction)
 			{
 				iActions.erase(i);
 				break;
@@ -320,11 +400,11 @@ namespace neogfx
 			for (auto& m : iMnemonics)
 				m->mnemonic_widget().update();
 		for (auto& a : iActions)
-			if (a.is_enabled() && a.shortcut() != boost::none && a.shortcut()->matches(aKeyCode, aKeyModifiers))
+			if (a.second.is_enabled() && a.second.shortcut() != boost::none && a.second.shortcut()->matches(aKeyCode, aKeyModifiers))
 			{
-				a.triggered.trigger();
-				if (a.is_checkable())
-					a.toggle();
+				a.second.triggered.trigger();
+				if (a.second.is_checkable())
+					a.second.toggle();
 				return true;
 			}
 		return false;

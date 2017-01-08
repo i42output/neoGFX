@@ -33,7 +33,7 @@ class my_item_model : public ng::basic_default_item_model<void*, 5>, public ng::
 public:
 	my_item_model()
 	{
-		set_column_heading_text(0, "TOne");
+		set_column_heading_text(0, "One");
 		set_column_heading_text(1, "Two");
 		set_column_heading_text(2, "Three");
 		set_column_heading_text(3, "Four");
@@ -117,68 +117,32 @@ int main(int argc, char* argv[])
 		muteAction.set_checkable(true);
 		muteAction.set_checked_image(":/closed/resources/caw_toolbar.naa#unmute.png");
 
-		auto& cutAction = app.add_action("Cut", ":/closed/resources/caw_toolbar.naa#cut.png").disable().set_shortcut("Ctrl+X");
-		auto& copyAction = app.add_action("Copy", ":/closed/resources/caw_toolbar.naa#copy.png").disable().set_shortcut("Ctrl+C");
-		auto& pasteAction = app.add_action("Paste", ":/closed/resources/caw_toolbar.naa#paste.png").set_shortcut("Ctrl+V");
-		auto& pasteAndGoAction = app.add_action("Paste and Go", ":/closed/resources/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
-		auto& deleteAction = app.add_action("Delete").set_shortcut("Del");
-		auto& selectAllAction = app.add_action("Select All").set_shortcut("Ctrl+A");
+		app.action_cut().set_image(":/closed/resources/caw_toolbar.naa#cut.png");
+		app.action_copy().set_image(":/closed/resources/caw_toolbar.naa#copy.png");
+		app.action_paste().set_image(":/closed/resources/caw_toolbar.naa#paste.png");
 
-		neolib::callback_timer ct{ app, [&app, &cutAction, &copyAction, &pasteAction, &pasteAndGoAction](neolib::callback_timer& aTimer) 
+		auto& pasteAndGoAction = app.add_action("Paste and Go", ":/closed/resources/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
+
+		neolib::callback_timer ct{ app, [&app, &pasteAndGoAction](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
 			if (app.clipboard().sink_active())
 			{
 				auto& sink = app.clipboard().active_sink();
-				if (sink.can_cut())
-					cutAction.enable();
-				else
-					cutAction.disable();
-				if (sink.can_copy())
-					copyAction.enable();
-				else
-					copyAction.disable();
 				if (sink.can_paste())
 				{
-					pasteAction.enable();
 					pasteAndGoAction.enable();
 				}
 				else
 				{
-					pasteAction.disable();
 					pasteAndGoAction.disable();
 				}
 			}
 		}, 100 };
 
-		cutAction.triggered([&app]()
-		{
-			app.clipboard().cut();
-		});
-
-		copyAction.triggered([&app]()
-		{
-			app.clipboard().copy();
-		});
-
-		pasteAction.triggered([&app]()
-		{
-			app.clipboard().paste();
-		});
-
 		pasteAndGoAction.triggered([&app]()
 		{
 			app.clipboard().paste();
-		});
-
-		deleteAction.triggered([&app]()
-		{
-			app.clipboard().delete_selected();
-		});
-
-		selectAllAction.triggered([&app]()
-		{
-			app.clipboard().select_all();
 		});
 
 		ng::menu_bar menu(layout0);
@@ -190,16 +154,16 @@ int main(int argc, char* argv[])
 		auto& fileMenu = menu.add_sub_menu("&File");
 		fileMenu.add_action(exitAction);
 		auto& editMenu = menu.add_sub_menu("&Edit");
-		editMenu.add_action(app.add_action("Undo").set_shortcut("Ctrl+Z"));
-		editMenu.add_action(app.add_action("Redo").set_shortcut("Ctrl+Y"));
+		editMenu.add_action(app.action_undo());
+		editMenu.add_action(app.action_redo());
 		editMenu.add_separator();
-		editMenu.add_action(cutAction);
-		editMenu.add_action(copyAction);
-		editMenu.add_action(pasteAction);
+		editMenu.add_action(app.action_cut());
+		editMenu.add_action(app.action_copy());
+		editMenu.add_action(app.action_paste());
 		editMenu.add_action(pasteAndGoAction);
-		editMenu.add_action(deleteAction);
+		editMenu.add_action(app.action_delete());
 		editMenu.add_separator();
-		editMenu.add_action(selectAllAction);
+		editMenu.add_action(app.action_select_all());
 		auto& viewMenu = menu.add_sub_menu("&View");
 		auto& addFavouriteAction = app.add_action("Add Favourite...", ":/closed/resources/caw_toolbar.naa#add_favourite.png");
 		auto& organizeFavouritesAction = app.add_action("Organize Favourites...", ":/closed/resources/caw_toolbar.naa#organize_favourites.png");
@@ -261,9 +225,9 @@ int main(int argc, char* argv[])
 		toolbar.add_action(app.add_action("Manage Plugins...", ":/closed/resources/caw_toolbar.naa#manage_plugins.png"));
 		toolbar.add_action(muteAction);
 		toolbar.add_separator();
-		toolbar.add_action(cutAction);
-		toolbar.add_action(copyAction);
-		toolbar.add_action(pasteAction);
+		toolbar.add_action(app.action_cut());
+		toolbar.add_action(app.action_copy());
+		toolbar.add_action(app.action_paste());
 		toolbar.add_action(pasteAndGoAction);
 		toolbar.add_separator();
 		toolbar.add_action(app.add_action("Check for Updates...", ":/closed/resources/caw_toolbar.naa#setup.png"));

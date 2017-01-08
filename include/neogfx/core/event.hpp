@@ -40,13 +40,13 @@ namespace neogfx
 		typedef std::shared_ptr<event_ptr> event_instance_ptr;
 		typedef std::weak_ptr<event_ptr> event_instance_weak_ptr;
 		typedef const void* unique_id_type;
-		typedef std::function<void(Arguments...)> sink_callback;
+		typedef std::function<void(Arguments...)> handler_callback;
 		typedef uint32_t sink_reference_count;
-		struct sink_list_item { unique_id_type iUniqueId;  sink_callback iSinkCallback; sink_reference_count iSinkReferenceCount; };
-		typedef std::list<sink_list_item, boost::fast_pool_allocator<sink_list_item>> sink_list;
+		struct handler_list_item { unique_id_type iUniqueId; handler_callback iHandlerCallback; sink_reference_count iSinkReferenceCount; };
+		typedef std::list<handler_list_item, boost::fast_pool_allocator<handler_list_item>> handler_list;
 	public:
 		event_instance_weak_ptr iEvent;
-		typename sink_list::iterator iSink;
+		typename handler_list::iterator iHandler;
 	};
 
 	template <typename... Arguments>
@@ -59,28 +59,36 @@ namespace neogfx
 		typedef typename handle::event_instance_ptr instance_ptr;
 		typedef typename handle::event_instance_weak_ptr instance_weak_ptr;
 		typedef typename handle::unique_id_type unique_id_type;
-		typedef typename handle::sink_callback sink_callback;
+		typedef typename handle::handler_callback handler_callback;
 		typedef typename handle::sink_reference_count sink_reference_count;
-		typedef typename handle::sink_list_item sink_list_item;
-		typedef typename handle::sink_list sink_list;
-		typedef std::map<unique_id_type, typename sink_list::iterator> unique_id_map;
-		typedef std::deque<typename sink_list::const_iterator> notification_list;
+		typedef typename handle::handler_list_item handler_list_item;
+		typedef typename handle::handler_list handler_list;
+		typedef std::map<unique_id_type, typename handler_list::iterator> unique_id_map;
+		typedef std::deque<typename handler_list::const_iterator> notification_list;
 	public:
 		event() :
 			iInstancePtr{new ptr{this}},
 			iAccepted{false}
 		{
 		}
+		event(const event& aOther) :
+			iInstancePtr{new ptr{this}},
+			iAccepted{false}
+		{
+		}
+		~event()
+		{
+		}
 		bool trigger(Arguments... aArguments) const
 		{
 			destroyed_flag destroyed(*this);
-			for (auto i = iSinks.begin(); i != iSinks.end(); ++i)
+			for (auto i = iHandlers.begin(); i != iHandlers.end(); ++i)
 				iNotifications.push_back(i);
 			while (!iNotifications.empty())
 			{
 				auto i = iNotifications.front();
 				iNotifications.pop_front();
-				i->iSinkCallback(aArguments...);
+				i->iHandlerCallback(aArguments...);
 				if (destroyed)
 					return false;
 				if (iAccepted)
@@ -101,56 +109,56 @@ namespace neogfx
 			iAccepted = false;
 		}
 	public:
-		handle subscribe(const sink_callback& aSinkCallback, const void* aUniqueId = 0)
+		handle subscribe(const handler_callback& aHandlerCallback, const void* aUniqueId = 0)
 		{
 			if (aUniqueId == 0)
-				return handle{ iInstancePtr, iSinks.insert(iSinks.end(), sink_list_item{ aUniqueId, aSinkCallback, 0 }) };
+				return handle{ iInstancePtr, iHandlers.insert(iHandlers.end(), handler_list_item{ aUniqueId, aHandlerCallback, 0 }) };
 			auto existing = iUniqueIdMap.find(aUniqueId);
 			if (existing == iUniqueIdMap.end())
-				existing = iUniqueIdMap.insert(std::make_pair(aUniqueId, iSinks.insert(iSinks.end(), sink_list_item{ aUniqueId, aSinkCallback, 0 }))).first;
+				existing = iUniqueIdMap.insert(std::make_pair(aUniqueId, iHandlers.insert(iHandlers.end(), handler_list_item{ aUniqueId, aHandlerCallback, 0 }))).first;
 			else
-				existing->second->iSinkCallback = aSinkCallback;
+				existing->second->iHandlerCallback = aHandlerCallback;
 			return handle{ iInstancePtr, existing->second };
 		}
-		handle operator()(const sink_callback& aSinkCallback, const void* aUniqueId = 0)
+		handle operator()(const handler_callback& aHandlerCallback, const void* aUniqueId = 0)
 		{
-			return subscribe(aSinkCallback, aUniqueId);
+			return subscribe(aHandlerCallback, aUniqueId);
 		}
 		template <typename T>
-		handle subscribe(const sink_callback& aSinkCallback, const T* aUniqueIdObject)
+		handle subscribe(const handler_callback& aHandlerCallback, const T* aUniqueIdObject)
 		{
-			return subscribe(aSinkCallback, static_cast<const void*>(aUniqueIdObject));
+			return subscribe(aHandlerCallback, static_cast<const void*>(aUniqueIdObject));
 		}
 		template <typename T>
-		handle operator()(const sink_callback& aSinkCallback, const T* aUniqueIdObject)
+		handle operator()(const handler_callback& aHandlerCallback, const T* aUniqueIdObject)
 		{
-			return subscribe(aSinkCallback, static_cast<const void*>(aUniqueIdObject));
+			return subscribe(aHandlerCallback, static_cast<const void*>(aUniqueIdObject));
 		}
 		template <typename T>
-		handle subscribe(const sink_callback& aSinkCallback, const T& aUniqueIdObject)
+		handle subscribe(const handler_callback& aHandlerCallback, const T& aUniqueIdObject)
 		{
-			return subscribe(aSinkCallback, static_cast<const void*>(&aUniqueIdObject));
+			return subscribe(aHandlerCallback, static_cast<const void*>(&aUniqueIdObject));
 		}
 		template <typename T>
-		handle operator()(const sink_callback& aSinkCallback, const T& aUniqueIdObject)
+		handle operator()(const handler_callback& aHandlerCallback, const T& aUniqueIdObject)
 		{
-			return subscribe(aSinkCallback, static_cast<const void*>(&aUniqueIdObject));
+			return subscribe(aHandlerCallback, static_cast<const void*>(&aUniqueIdObject));
 		}
 	private:
 		void unsubscribe(handle aHandle)
 		{
-			iNotifications.erase(std::remove(iNotifications.begin(), iNotifications.end(), aHandle.iSink), iNotifications.end());
-			if (aHandle.iSink->iUniqueId != 0)
+			iNotifications.erase(std::remove(iNotifications.begin(), iNotifications.end(), aHandle.iHandler), iNotifications.end());
+			if (aHandle.iHandler->iUniqueId != 0)
 			{
-				auto existing = iUniqueIdMap.find(aHandle.iSink->iUniqueId);
+				auto existing = iUniqueIdMap.find(aHandle.iHandler->iUniqueId);
 				if (existing != iUniqueIdMap.end())
 					iUniqueIdMap.erase(existing);
 			}
-			iSinks.erase(aHandle.iSink);
+			iHandlers.erase(aHandle.iHandler);
 		}
 	private:
 		instance_ptr iInstancePtr;
-		sink_list iSinks;
+		handler_list iHandlers;
 		mutable unique_id_map iUniqueIdMap;
 		mutable bool iAccepted;
 		mutable notification_list iNotifications;
@@ -177,10 +185,10 @@ namespace neogfx
 						switch (aOperation)
 						{
 						case AddRef:
-							++aHandle.iSink->iSinkReferenceCount;
+							++aHandle.iHandler->iSinkReferenceCount;
 							break;
 						case Release:
-							if (--aHandle.iSink->iSinkReferenceCount == 0)
+							if (--aHandle.iHandler->iSinkReferenceCount == 0 && !aHandle.iEvent.expired())
 								(**aHandle.iEvent.lock()).unsubscribe(aHandle);
 							break;
 						}

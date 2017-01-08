@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <map>
 #include <boost/optional.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/io_thread.hpp>
@@ -53,7 +54,7 @@ namespace neogfx
 		};
 	private:
 		typedef std::map<std::string, style> style_list;
-		typedef std::list<action, boost::fast_pool_allocator<action>> action_list;
+		typedef std::multimap<std::string, action, std::less<std::string>, boost::fast_pool_allocator<std::pair<const std::string, action>>> action_list;
 		typedef std::vector<i_mnemonic*> mnemonic_list;
 	public:
 		struct no_instance : std::logic_error { no_instance() : std::logic_error("neogfx::app::no_instance") {} };
@@ -62,6 +63,7 @@ namespace neogfx
 		struct no_surface_manager : std::logic_error { no_surface_manager() : std::logic_error("neogfx::app::no_surface_manager") {} };
 		struct no_keyboard : std::logic_error { no_keyboard() : std::logic_error("neogfx::app::no_keyboard") {} };
 		struct no_clipboard : std::logic_error { no_clipboard() : std::logic_error("neogfx::app::no_clipboard") {} };
+		struct action_not_found : std::runtime_error { action_not_found() : std::runtime_error("neogfx::app::action_not_found") {} };
 		struct style_not_found : std::runtime_error { style_not_found() : std::runtime_error("neogfx::app::style_not_found") {} };
 		struct style_exists : std::runtime_error { style_exists() : std::runtime_error("neogfx::app::style_exists") {} };
 	public:
@@ -83,6 +85,14 @@ namespace neogfx
 		virtual i_style& change_style(const std::string& aStyleName);
 		virtual i_style& register_style(const i_style& aStyle);
 	public:
+		virtual i_action& action_undo();
+		virtual i_action& action_redo();
+		virtual i_action& action_cut();
+		virtual i_action& action_copy();
+		virtual i_action& action_paste();
+		virtual i_action& action_delete();
+		virtual i_action& action_select_all();
+		virtual i_action& find_action(const std::string& aText);
 		virtual i_action& add_action(const std::string& aText);
 		virtual i_action& add_action(const std::string& aText, const std::string& aImageUri);
 		virtual i_action& add_action(const std::string& aText, const i_texture& aImage);
@@ -112,6 +122,14 @@ namespace neogfx
 		style_list iStyles;
 		style_list::iterator iCurrentStyle;
 		action_list iActions;
+		i_action& iActionUndo;
+		i_action& iActionRedo;
+		i_action& iActionCut;
+		i_action& iActionCopy;
+		i_action& iActionPaste;
+		i_action& iActionDelete;
+		i_action& iActionSelectAll;
+		neolib::callback_timer iStandardActionManager;
 		mnemonic_list iMnemonics;
 		std::unique_ptr<i_widget> iSystemCache;
 		std::unique_ptr<event_processing_context> iContext;
