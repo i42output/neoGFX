@@ -262,6 +262,21 @@ namespace neogfx
 	{
 		scrollable_widget::mouse_button_released(aButton, aPosition);
 		iDragger = boost::none;
+		if (aButton == mouse_button::Right)
+		{
+			iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+			iMenu->menu().add_action(app::instance().action_undo());
+			iMenu->menu().add_action(app::instance().action_redo());
+			iMenu->menu().add_separator();
+			iMenu->menu().add_action(app::instance().action_cut());
+			iMenu->menu().add_action(app::instance().action_copy());
+			iMenu->menu().add_action(app::instance().action_paste());
+			iMenu->menu().add_action(app::instance().action_delete());
+			iMenu->menu().add_separator();
+			iMenu->menu().add_action(app::instance().action_select_all());
+			iMenu->exec();
+			iMenu.reset();
+		}
 	}
 
 	void text_edit::mouse_moved(const point& aPosition)

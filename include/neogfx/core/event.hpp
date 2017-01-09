@@ -71,7 +71,7 @@ namespace neogfx
 			iAccepted{false}
 		{
 		}
-		event(const event& aOther) :
+		event(const event&) :
 			iInstancePtr{new ptr{this}},
 			iAccepted{false}
 		{

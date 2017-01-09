@@ -26,6 +26,7 @@
 #include <neolib/indexitor.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gui/window/context_menu.hpp>
 #include "scrollable_widget.hpp"
 #include "i_document.hpp"
 #include "cursor.hpp"
@@ -463,5 +464,6 @@ namespace neogfx
 		mutable boost::optional<std::pair<neogfx::font, size>> iHintedSize;
 		neolib::callback_timer iAnimator;
 		boost::optional<neolib::callback_timer> iDragger;
+		std::unique_ptr<context_menu> iMenu;
 	};
 }
