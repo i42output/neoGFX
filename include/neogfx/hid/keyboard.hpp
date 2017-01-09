@@ -47,6 +47,7 @@ namespace neogfx
 	public:
 		virtual bool is_keyboard_grabbed() const;
 		virtual bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const;
+		virtual bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const;
 		virtual void grab_keyboard(i_keyboard_handler& aKeyboardHandler);
 		virtual void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler);
 		virtual i_keyboard_handler& grabber() const;

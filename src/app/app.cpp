@@ -402,10 +402,18 @@ namespace neogfx
 		for (auto& a : iActions)
 			if (a.second.is_enabled() && a.second.shortcut() != boost::none && a.second.shortcut()->matches(aKeyCode, aKeyModifiers))
 			{
-				a.second.triggered.trigger();
-				if (a.second.is_checkable())
-					a.second.toggle();
-				return true;
+				if (keyboard().is_front_grabber(*this))
+				{
+					a.second.triggered.trigger();
+					if (a.second.is_checkable())
+						a.second.toggle();
+					return true;
+				}
+				else
+				{
+					basic_services().system_beep();
+					return false;
+				}
 			}
 		return false;
 	}

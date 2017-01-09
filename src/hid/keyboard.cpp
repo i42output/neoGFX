@@ -72,6 +72,11 @@ namespace neogfx
 		return std::find(iGrabs.begin(), iGrabs.end(), &aKeyboardHandler) != iGrabs.end();
 	}
 
+	bool keyboard::is_front_grabber(i_keyboard_handler& aKeyboardHandler) const
+	{
+		return !iGrabs.empty() && &**iGrabs.begin() == &aKeyboardHandler;
+	}
+
 	void keyboard::grab_keyboard(i_keyboard_handler& aKeyboardHandler)
 	{
 		if (is_keyboard_grabbed_by(aKeyboardHandler))

@@ -22,8 +22,13 @@
 #include <neogfx/neogfx.hpp>
 #include <SDL_messagebox.h>
 #include <SDL_clipboard.h>
+#include <SDL_syswm.h>
+#ifdef WIN32
+#include <Windows.h>
+#endif
 #include "sdl_basic_services.hpp"
 #include "i_native_clipboard.hpp"
+
 
 namespace neogfx
 {
@@ -40,6 +45,23 @@ namespace neogfx
 	neolib::io_thread& sdl_basic_services::app_thread()
 	{
 		return iAppThread;
+	}
+
+
+	void sdl_basic_services::system_beep()
+	{
+#if defined(WIN32) 
+		MessageBeep(MB_OK);
+#elif defined(__APPLE__) 
+		SysBeep(1);
+#elif defined(SDL_VIDEO_DRIVER_X11) 
+		SDL_SysWMInfo info;
+		SDL_VERSION(&info.version);
+		SDL_GetWMInfo(&info);
+		XBell(info.info.x11.display, 100);
+#else 
+		std::cerr << '\a' << std::flush;
+#endif 
 	}
 
 	void sdl_basic_services::display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle) const

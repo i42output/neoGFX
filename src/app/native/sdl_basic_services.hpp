@@ -31,6 +31,7 @@ namespace neogfx
 	public:
 		virtual neogfx::platform platform() const;
 		virtual neolib::io_thread& app_thread();
+		virtual void system_beep();
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const;
 		virtual uint32_t display_count() const;
 		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const;

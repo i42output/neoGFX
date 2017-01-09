@@ -60,6 +60,7 @@ namespace neogfx
 		iWidget = iParent != nullptr ?
 			std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
 			std::make_unique<popup_menu>(iPosition, menu(), iStyle);
+		app::instance().keyboard().grab_keyboard(*iWidget);
 		app::event_processing_context epc(app::instance(), "neogfx::context_menu");
 		while (!finished)
 		{
