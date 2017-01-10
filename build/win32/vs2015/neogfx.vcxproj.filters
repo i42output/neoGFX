@@ -471,6 +471,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\app\i_service_factory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
@@ -734,6 +737,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font_texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\native\sdl_service_factory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

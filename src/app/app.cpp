@@ -23,9 +23,6 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
-#include "native/sdl_basic_services.hpp"
-#include "../hid/native/sdl_keyboard.hpp"
-#include "../gfx/native/sdl_renderer.hpp"
 #include "../gui/window/native/i_native_window.hpp"
 
 namespace neogfx
@@ -46,15 +43,15 @@ namespace neogfx
 		return iName;
 	}
 
-	app::app(const std::string& aName)
+	app::app(const std::string& aName, i_service_factory& aServiceFactory)
 		try :
 		iName(aName),
 		iQuitWhenLastWindowClosed(true),
 		neolib::io_thread("neogfx::app", true),
-		iBasicServices(new neogfx::sdl_basic_services(*this)),
-		iKeyboard(new neogfx::sdl_keyboard()),
+		iBasicServices(aServiceFactory.create_basic_services(*this)),
+		iKeyboard(aServiceFactory.create_keyboard()),
 		iClipboard(new neogfx::clipboard(basic_services().system_clipboard())),
-		iRenderingEngine(new neogfx::sdl_renderer(basic_services(), *iKeyboard)),
+		iRenderingEngine(aServiceFactory.create_rendering_engine(basic_services(), keyboard())),
 		iSurfaceManager(new neogfx::surface_manager(basic_services(), *iRenderingEngine)),
 		iCurrentStyle(iStyles.begin()),
 		iActionUndo{add_action("Undo").set_shortcut("Ctrl+Z")},
@@ -113,13 +110,13 @@ namespace neogfx
 	catch (std::exception& e)
 	{
 		std::cerr << "neogfx::app::app: terminating with exception: " << e.what() << std::endl;
-		sdl_basic_services(*this).display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, std::string("main: terminating with exception: ") + e.what());
+		aServiceFactory.create_basic_services(*this)->display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, std::string("main: terminating with exception: ") + e.what());
 		throw;
 	}
 	catch (...)
 	{
 		std::cerr << "neogfx::app::app: terminating with unknown exception" << std::endl;
-		sdl_basic_services(*this).display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
+		aServiceFactory.create_basic_services(*this)->display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
 		throw;
 	}
 

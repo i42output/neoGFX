@@ -25,6 +25,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/io_thread.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_service_factory.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/keyboard.hpp>
@@ -67,7 +68,7 @@ namespace neogfx
 		struct style_not_found : std::runtime_error { style_not_found() : std::runtime_error("neogfx::app::style_not_found") {} };
 		struct style_exists : std::runtime_error { style_exists() : std::runtime_error("neogfx::app::style_exists") {} };
 	public:
-		app(const std::string& aName = std::string());
+		app(const std::string& aName = std::string(), i_service_factory& aServiceFactory = default_service_factory());
 		~app();
 	public:
 		static app& instance();
