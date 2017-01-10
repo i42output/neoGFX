@@ -29,7 +29,7 @@ namespace neogfx
 	class clipboard : public i_clipboard
 	{
 	public:
-		clipboard(i_native_clipboard& aNativeClipboard);
+		clipboard(i_native_clipboard& aSystemClipboard);
 	public:
 		virtual bool sink_active() const;
 		virtual i_clipboard_sink& active_sink();
@@ -46,7 +46,7 @@ namespace neogfx
 		virtual void delete_selected();
 		virtual void select_all();
 	private:
-		i_native_clipboard& iNativeClipboard;
+		i_native_clipboard& iSystemClipboard;
 		i_clipboard_sink* iActiveSink;
 	};
 }

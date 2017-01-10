@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-	clipboard::clipboard(i_native_clipboard& aNativeClipboard) : iNativeClipboard(aNativeClipboard), iActiveSink(nullptr)
+	clipboard::clipboard(i_native_clipboard& aSystemClipboard) : iSystemClipboard(aSystemClipboard), iActiveSink(nullptr)
 	{
 	}
 
@@ -57,17 +57,17 @@ namespace neogfx
 
 	bool clipboard::has_text() const
 	{
-		return iNativeClipboard.has_text();
+		return iSystemClipboard.has_text();
 	}
 
 	std::string clipboard::text() const
 	{
-		return iNativeClipboard.text();
+		return iSystemClipboard.text();
 	}
 
 	void clipboard::set_text(const std::string& aText)
 	{
-		iNativeClipboard.set_text(aText);
+		iSystemClipboard.set_text(aText);
 	}
 
 	void clipboard::cut()

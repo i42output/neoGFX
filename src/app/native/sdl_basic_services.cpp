@@ -1,7 +1,7 @@
 // sdl_basic_services.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright(C) 2017 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -113,20 +113,25 @@ namespace neogfx
 		}
 	};
 
-	i_native_clipboard& sdl_basic_services::clipboard()
+	bool sdl_basic_services::has_system_clipboard() const
 	{
-		static sdl_clipboard sNativeClipboard;
-		return sNativeClipboard;
+		return true;
 	}
 
-	bool sdl_basic_services::has_shared_menu_bar() const
+	i_native_clipboard& sdl_basic_services::system_clipboard()
+	{
+		static sdl_clipboard sSystemClipboard;
+		return sSystemClipboard;
+	}
+
+	bool sdl_basic_services::has_system_menu_bar() const
 	{
 		return false;
 	}
 
-	i_shared_menu_bar& sdl_basic_services::shared_menu_bar()
+	i_shared_menu_bar& sdl_basic_services::system_menu_bar()
 	{
-		throw no_shared_menu_bar();
+		throw no_system_menu_bar();
 	}
 
 #ifdef WIN32

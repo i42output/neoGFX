@@ -55,7 +55,7 @@ namespace neogfx
 
 	bool menu_bar::visible() const
 	{
-		if (app::instance().basic_services().has_shared_menu_bar())
+		if (app::instance().basic_services().has_system_menu_bar())
 			return false;
 		return widget::visible();
 	}
