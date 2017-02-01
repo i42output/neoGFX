@@ -154,6 +154,9 @@ namespace neogfx
 		glyph_text to_glyph_text(const string& aText, const font& aFont) const;
 		glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
 		glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
+		glyph_text to_glyph_text(const std::u32string& aText, const font& aFont) const;
+		glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const;
+		glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
 		bool is_text_left_to_right(const string& aText, const font& aFont, bool aUseCache = false) const;
 		bool is_text_right_to_left(const string& aText, const font& aFont, bool aUseCache = false) const;
 		void draw_text(const point& aPoint, const string& aText, const font& aFont, const colour& aColour, bool aUseCache = false) const;
@@ -169,6 +172,9 @@ namespace neogfx
 		void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const;
 		void unset_mnemonic() const;
 		bool mnemonics_shown() const;
+		bool password() const;
+		const std::string& password_mask() const;
+		void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
 		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;

@@ -31,6 +31,7 @@ namespace neogfx
 	{
 	public:
 		struct texture_not_resident : std::runtime_error { texture_not_resident() : std::runtime_error("neogfx::i_native_graphics_context::texture_not_resident") {} };
+		struct password_not_set : std::logic_error { password_not_set() : std::logic_error("neogfx::font_info::password_not_set") {} };
 	public:
 		virtual ~i_native_graphics_context() {}
 		virtual std::unique_ptr<i_native_graphics_context> clone() const = 0;
@@ -77,9 +78,14 @@ namespace neogfx
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen) = 0;
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const = 0;
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const = 0;
+		virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const = 0;
+		virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const = 0;
 		virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') = 0;
 		virtual void unset_mnemonic() = 0;
 		virtual bool mnemonics_shown() const = 0;
+		virtual bool password() const = 0;
+		virtual const std::string& password_mask() const = 0;
+		virtual void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F") = 0;
 		virtual void begin_drawing_glyphs() = 0;
 		virtual size draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) = 0;
 		virtual void end_drawing_glyphs() = 0;

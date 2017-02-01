@@ -817,6 +817,16 @@ namespace neogfx
 		return glyph_text(aFontSelector(0), to_glyph_text_impl(aTextBegin, aTextEnd, aFontSelector));
 	}
 
+	glyph_text opengl_graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const
+	{
+		return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::u32string::size_type) { return aFont; });
+	}
+
+	glyph_text opengl_graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const
+	{
+		return glyph_text(aFontSelector(0), to_glyph_text_impl(aTextBegin, aTextEnd, aFontSelector));
+	}
+
 	void opengl_graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix)
 	{
 		iMnemonic = std::make_pair(aShowMnemonics, aMnemonicPrefix);
@@ -830,6 +840,30 @@ namespace neogfx
 	bool opengl_graphics_context::mnemonics_shown() const
 	{
 		return iMnemonic != boost::none && iMnemonic->first;
+	}
+
+	bool opengl_graphics_context::password() const
+	{
+		return iPassword != boost::none;
+	}
+
+	const std::string& opengl_graphics_context::password_mask() const
+	{
+		if (password())
+		{
+			if (iPassword->empty())
+				iPassword = "\xE2\x97\x8F";
+			return *iPassword;
+		}
+		throw password_not_set();
+	}
+
+	void opengl_graphics_context::set_password(bool aPassword, const std::string& aMask)
+	{
+		if (aPassword)
+			iPassword = aMask;
+		else
+			iPassword = boost::none;
 	}
 
 	void opengl_graphics_context::begin_drawing_glyphs()
@@ -1168,54 +1202,52 @@ namespace neogfx
 
 	glyph_text::container opengl_graphics_context::to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
 	{
-		auto& result = iGlyphTextResult;
-		result.clear();
-
-		if (aTextEnd - aTextBegin == 0)
-			return result;
-
 		auto& clusterMap = iClusterMap;
 		clusterMap.clear();
-		auto& textDirections = iTextDirections;
-		textDirections.clear();
-
 		iCodePointsBuffer.clear();
 		std::u32string& codePoints = iCodePointsBuffer;
 
 		codePoints = neolib::utf8_to_utf32(aTextBegin, aTextEnd, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type)
 		{
-			clusterMap.push_back(cluster{aFrom});
+			clusterMap.push_back(cluster{ aFrom });
 		});
-		
-		if (iMnemonic != boost::none)
-		{
-			for (auto i = codePoints.begin(); i != codePoints.end();)
-			{
-				if (*i == static_cast<char32_t>(iMnemonic->second))
-				{
-					clusterMap.erase(clusterMap.begin() + (i - codePoints.begin()));
-					i = codePoints.erase(i);
-					if (i != codePoints.end())
-					{
-						auto& cluster = *(clusterMap.begin() + (i - codePoints.begin()));
-						if (*i != static_cast<char32_t>(iMnemonic->second))
-							cluster.flags = glyph::Mnemonic;
-					}
-				}
-				else
-					++i;
-			}
-		}
 
-		if (codePoints.empty())
+		auto result = to_glyph_text_impl(codePoints.begin(), codePoints.end(), [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
+		{
+			return aFontSelector(clusterMap[aIndex].from);
+		});
+
+		return result;
+	}
+
+
+	glyph_text::container opengl_graphics_context::to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const
+	{
+		auto& result = iGlyphTextResult;
+		result.clear();
+
+		if (aTextEnd == aTextBegin)
 			return result;
-		
+
+		auto& textDirections = iTextDirections;
+		textDirections.clear();
+
+		std::u32string::size_type codePointCount = aTextEnd - aTextBegin;
+
+		std::u32string adjustedCodepoints;
+		if (password())
+			adjustedCodepoints.assign(codePointCount, neolib::utf8_to_utf32(password_mask())[0]);
+		const char32_t* codePoints = adjustedCodepoints.empty() ? &*aTextBegin : &adjustedCodepoints[0];
+
 		auto& runs = iRuns;
 		runs.clear();
 		text_direction previousDirection = get_text_direction(codePoints[0]);
-		char32_t* runStart = &codePoints[0];
-		std::size_t lastCodePointIndex = codePoints.size() - 1;
-		font previousFont = aFontSelector(clusterMap[0].from);
+		if (iMnemonic != boost::none && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
+			previousDirection = text_direction::Mnemonic;
+
+		const char32_t* runStart = &codePoints[0];
+		std::u32string::size_type lastCodePointIndex = codePointCount - 1;
+		font previousFont = aFontSelector(0);
 		hb_script_t previousScript = hb_unicode_script(static_cast<native_font_face::hb_handle*>(previousFont.native_font_face().aux_handle())->unicodeFuncs, codePoints[0]);
 
 		std::deque<std::pair<text_direction, bool>> directionStack;
@@ -1229,12 +1261,10 @@ namespace neogfx
 
 		for (std::size_t i = 0; i <= lastCodePointIndex; ++i)
 		{
-			font currentFont = aFontSelector(clusterMap[i].from);
-			if (currentFont.password())
-				codePoints[i] = neolib::utf8_to_utf32(currentFont.password_mask())[0];
+			font currentFont = aFontSelector(i);
 			if (codePoints[i] == '\r' || codePoints[i] == '\n')
 				currentLineHasLTR = false;
-			switch (codePoints[i])  
+			switch (codePoints[i])
 			{
 			case PDF:
 				if (!directionStack.empty())
@@ -1257,6 +1287,8 @@ namespace neogfx
 			}
 			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
 			text_direction currentDirection = get_text_direction(codePoints[i]);
+			if (iMnemonic != boost::none && codePoints[i] == static_cast<char32_t>(iMnemonic->second))
+				currentDirection = text_direction::Mnemonic;
 			textDirections.push_back(currentDirection);
 			auto bidi_check = [&directionStack](text_direction aDirection)
 			{
@@ -1271,6 +1303,7 @@ namespace neogfx
 						break;
 					case text_direction::None:
 					case text_direction::Whitespace:
+					case text_direction::Mnemonic:
 						return directionStack.back().first;
 						break;
 					default:
@@ -1284,13 +1317,15 @@ namespace neogfx
 				currentLineHasLTR = true;
 			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
 			bool newRun = 
-				previousFont != currentFont || 
+				previousFont != currentFont ||
+				currentDirection == text_direction::Mnemonic ||
+				previousDirection == text_direction::Mnemonic ||
 				(previousDirection == text_direction::LTR && currentDirection == text_direction::RTL) ||
 				(previousDirection == text_direction::RTL && currentDirection == text_direction::LTR) ||
 				(previousScript != currentScript && (previousScript != HB_SCRIPT_COMMON && currentScript != HB_SCRIPT_COMMON));
 			if (!newRun)
 			{
-				if ((currentDirection == text_direction::Whitespace || currentDirection == text_direction::None) && previousDirection == text_direction::RTL)
+				if ((currentDirection == text_direction::Whitespace || currentDirection == text_direction::None || currentDirection == text_direction::Mnemonic) && previousDirection == text_direction::RTL)
 				{
 					for (std::size_t j = i + 1; j <= lastCodePointIndex; ++j)
 					{
@@ -1311,7 +1346,7 @@ namespace neogfx
 				runs.push_back(std::make_tuple(runStart, &codePoints[i], previousDirection, previousScript));
 				runStart = &codePoints[i];
 			}
-			if (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL)
+			if (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL || currentDirection == text_direction::Mnemonic)
 			{
 				previousDirection = currentDirection;
 				previousScript = currentScript;
@@ -1323,7 +1358,10 @@ namespace neogfx
 
 		for (std::size_t i = 0; i < runs.size(); ++i)
 		{
-			std::string::size_type sourceClusterRunStart = (clusterMap.begin() + (std::get<0>(runs[i]) - &codePoints[0]))->from;
+			if (std::get<2>(runs[i]) == text_direction::Mnemonic)
+				continue;
+			bool drawMnemonic = (i > 0 && std::get<2>(runs[i - 1]) == text_direction::Mnemonic);
+			std::string::size_type sourceClusterRunStart = std::get<0>(runs[i]) - &codePoints[0];
 			glyph_shapes shapes{ *this, aFontSelector(sourceClusterRunStart), runs[i] };
 			for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
 			{
@@ -1334,13 +1372,11 @@ namespace neogfx
 					++k;
 				std::u32string::size_type endCluster = k < shapes.glyph_count() ? shapes.glyph_info(k).cluster + (std::get<0>(runs[i]) - &codePoints[0]) : std::get<1>(runs[i]) - &codePoints[0];
 				std::string::size_type sourceClusterStart, sourceClusterEnd;
-				auto cs = clusterMap.begin() + startCluster;
-				sourceClusterStart = cs->from;
-				auto ce = clusterMap.begin() + endCluster;
-				if (ce != clusterMap.end())
-					sourceClusterEnd = (ce)->from;
+				sourceClusterStart = startCluster;
+				if (endCluster != codePointCount)
+					sourceClusterEnd = endCluster;
 				else
-					sourceClusterEnd = aTextEnd - aTextBegin;
+					sourceClusterEnd = codePointCount;
 				if (j > 0)
 					result.back().kerning_adjust(static_cast<float>(aFontSelector(sourceClusterStart).kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
 				size advance{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 };
@@ -1353,7 +1389,7 @@ namespace neogfx
 					result.back().set_underline(true);
 				if (is_subpixel_rendering_on())
 					result.back().set_subpixel(true);
-				if ((cs->flags & glyph::Mnemonic) == glyph::Mnemonic)
+				if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
 					result.back().set_mnemonic(true);
 				if (shapes.using_fallback(j))
 					result.back().set_use_fallback(true, shapes.fallback_index(j));

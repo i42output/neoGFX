@@ -398,11 +398,6 @@ namespace neogfx
 		return result;
 	}
 
-	glyph_text graphics_context::to_glyph_text(const string& aText, const font& aFont) const
-	{
-		return to_glyph_text(aText.begin(), aText.end(), aFont);
-	}
-
 	bool graphics_context::is_text_left_to_right(const string& aText, const font& aFont, bool aUseCache) const
 	{
 		const auto& glyphText = aUseCache && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aText.begin(), aText.end(), aFont);
@@ -655,12 +650,32 @@ namespace neogfx
 			fill_rect(rect{origin(), extents()}, aColour);
 	}
 
+	glyph_text graphics_context::to_glyph_text(const string& aText, const font& aFont) const
+	{
+		return to_glyph_text(aText.begin(), aText.end(), aFont);
+	}
+
 	glyph_text graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const
 	{
 		return iNativeGraphicsContext->to_glyph_text(aTextBegin, aTextEnd, aFont);
 	}
 
 	glyph_text graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
+	{
+		return iNativeGraphicsContext->to_glyph_text(aTextBegin, aTextEnd, aFontSelector);
+	}
+
+	glyph_text graphics_context::to_glyph_text(const std::u32string& aText, const font& aFont) const
+	{
+		return to_glyph_text(aText.begin(), aText.end(), aFont);
+	}
+
+	glyph_text graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const
+	{
+		return iNativeGraphicsContext->to_glyph_text(aTextBegin, aTextEnd, aFont);
+	}
+
+	glyph_text graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const
 	{
 		return iNativeGraphicsContext->to_glyph_text(aTextBegin, aTextEnd, aFontSelector);
 	}
@@ -712,6 +727,21 @@ namespace neogfx
 	bool graphics_context::mnemonics_shown() const
 	{
 		return iNativeGraphicsContext->mnemonics_shown();
+	}
+
+	bool graphics_context::password() const
+	{
+		return iNativeGraphicsContext->password();
+	}
+
+	const std::string& graphics_context::password_mask() const
+	{
+		return iNativeGraphicsContext->password_mask();
+	}
+
+	void graphics_context::set_password(bool aPassword, const std::string& aMask)
+	{
+		iNativeGraphicsContext->set_password(aPassword, aMask);
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour) const

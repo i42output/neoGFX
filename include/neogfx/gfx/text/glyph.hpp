@@ -40,7 +40,8 @@ namespace neogfx
 		None,
 		Whitespace,
 		LTR,
-		RTL
+		RTL,
+		Mnemonic
 	};
 
 	class glyph
@@ -56,7 +57,7 @@ namespace neogfx
 		};
 	public:
 		typedef uint32_t value_type;
-		typedef std::pair<string::size_type, string::size_type> source_type;
+		typedef std::pair<uint32_t, uint32_t> source_type;
 	public:
 		glyph() :
 			iDirection{}, iValue{}, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}

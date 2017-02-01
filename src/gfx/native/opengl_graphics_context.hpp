@@ -121,9 +121,14 @@ namespace neogfx
 		virtual void fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen);
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
+		virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const;
+		virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
 		virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&');
 		virtual void unset_mnemonic();
 		virtual bool mnemonics_shown() const;
+		virtual bool password() const;
+		virtual const std::string& password_mask() const;
+		virtual void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
 		virtual void begin_drawing_glyphs();
 		virtual size draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour);
 //		virtual void is_emoji(const std::u32string& aEmojiText) const;
@@ -137,6 +142,7 @@ namespace neogfx
 		void gradient_off();
 		vertex to_shader_vertex(const point& aPoint) const;
 		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
+		glyph_text::container to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		const i_native_surface& iSurface;
@@ -169,6 +175,7 @@ namespace neogfx
 		bool iLineStippleActive;
 		bool iSubpixelRendering;
 		boost::optional<std::pair<bool, char>> iMnemonic;
+		mutable boost::optional<std::string> iPassword;
 		boost::optional<std::pair<GLuint, GLuint>> iGradientTextures;
 		std::vector<float> iGradientStopPositions;
 		std::vector<std::array<uint8_t, 4>> iGradientStopColours;

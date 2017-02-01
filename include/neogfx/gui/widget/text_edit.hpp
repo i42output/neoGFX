@@ -131,7 +131,7 @@ namespace neogfx
 			node_type* iNode;
 			contents_type iContents;
 		};
-		typedef neolib::tag_array<tag<>, char, 32, 256> document_text;
+		typedef neolib::tag_array<tag<>, char32_t, 32, 256> document_text;
 		class paragraph_positioned_glyph : public glyph
 		{
 		public:
@@ -414,7 +414,9 @@ namespace neogfx
 			document_glyphs::const_iterator lineEnd;
 			point pos;
 		};
-		position_info position(position_type aPosition) const;
+		position_info position(position_type aGlyphPosition) const;
+		position_type cursor_glyph_position() const;
+		void set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor = true);
 		position_type hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
 		std::string text() const;
 		std::size_t set_text(const std::string& aText);
@@ -422,8 +424,8 @@ namespace neogfx
 		std::size_t insert_text(const std::string& aText, bool aMoveCursor = false);
 		std::size_t insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
 		void delete_text(position_type aStart, position_type aEnd);
-		std::size_t delete_glyph(position_type aPosition);
-		std::pair<position_type, position_type> related_glyphs(position_type aPosition) const;
+		std::size_t delete_glyph(position_type aGlyphPosition);
+		std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
 		bool same_paragraph(position_type aFirst, position_type aSecond) const;
 	public:
 		void set_hint(const std::string& aHint);
@@ -452,7 +454,7 @@ namespace neogfx
 		font_info iDefaultFont;
 		mutable neogfx::cursor iCursor;
 		style_list iStyles;
-		std::string iNormalizedTextBuffer;
+		std::u32string iNormalizedTextBuffer;
 		document_text iText;
 		document_glyphs iGlyphs;
 		glyph_paragraphs iGlyphParagraphs;

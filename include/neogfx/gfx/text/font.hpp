@@ -33,7 +33,6 @@ namespace neogfx
 	public:
 		struct unknown_style : std::logic_error { unknown_style() : std::logic_error("neogfx::font_info::unknown_style") {} };
 		struct unknown_style_name : std::logic_error { unknown_style_name() : std::logic_error("neogfx::font_info::unknown_style_name") {} };
-		struct password_not_set : std::logic_error { password_not_set() : std::logic_error("neogfx::font_info::password_not_set") {} };
 		// types
 	public:
 		enum style_e
@@ -66,7 +65,6 @@ namespace neogfx
 			WeightBlack			= 900
 		};
 		typedef double point_size;
-		typedef boost::optional<std::string> optional_password;
 	private:
 		typedef boost::optional<style_e> optional_style;
 		typedef boost::optional<std::string> optional_style_name;
@@ -88,9 +86,6 @@ namespace neogfx
 		virtual const std::string& style_name() const;
 		virtual bool underline() const;
 		virtual void set_underline(bool aUnderline);
-		virtual bool password() const;
-		virtual const std::string& password_mask() const;
-		virtual void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
 		virtual weight_e weight() const;
 		virtual point_size size() const;
 		virtual bool kerning() const;
@@ -110,7 +105,6 @@ namespace neogfx
 		optional_style iStyle;
 		optional_style_name iStyleName;
 		bool iUnderline;
-		mutable optional_password iPassword;
 		weight_e iWeight;
 		point_size iSize;
 		bool iKerning;
