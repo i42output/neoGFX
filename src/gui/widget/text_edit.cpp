@@ -554,7 +554,7 @@ namespace neogfx
 						break;
 					--p;
 				}
-				iCursor.set_position(p);
+				iCursor.set_position(p, aMoveAnchor);
 			}
 			break;
 		case cursor::StartOfWord:
@@ -573,7 +573,7 @@ namespace neogfx
 						break;
 					++p;
 				}
-				iCursor.set_position(p);
+				iCursor.set_position(p, aMoveAnchor);
 			}
 			break;
 		case cursor::EndOfWord:
@@ -837,7 +837,7 @@ namespace neogfx
 		{
 			auto& g = iGlyphs[gi];
 			if (adjusted.x >= g.x - lineStartX && adjusted.x < g.x - lineStartX + g.advance().cx)
-				return gi;
+				return adjusted.x < g.x - lineStartX + g.advance().cx / 2.0 ? gi : gi + 1;
 		}
 		return line.second.glyphs() + line.first->second.glyphs();
 	}
@@ -997,7 +997,7 @@ namespace neogfx
 	{
 		if (cursor().position() != cursor().anchor())
 		{
-			delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()) + 1);
+			delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
 			cursor().set_position(std::min(cursor().position(), cursor().anchor()));
 		}
 	}
