@@ -383,7 +383,7 @@ namespace neogfx
 					cursor().set_position(iText.size(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 				else
 				{
-					auto pos = point{ position(cursor_glyph_position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } };
+					auto pos = point{ glyph_position(cursor_glyph_position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } };
 					scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 					set_cursor_glyph_position(hit_test(pos + client_rect(false).top_left()), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 				}
@@ -636,14 +636,14 @@ namespace neogfx
 			break;
 		case cursor::Up:
 			{
-				auto currentPosition = position(to_glyph(iText.begin() + iCursor.position()) - iGlyphs.begin());
+				auto currentPosition = glyph_position(cursor_glyph_position());
 				if (currentPosition.line != iGlyphLines.begin())
 					iCursor.set_position(from_glyph(iGlyphs.begin() + hit_test(point{ currentPosition.pos.x, iGlyphLines.foreign_index(currentPosition.line - 1).height() }, false)).first, aMoveAnchor);
 			}
 			break;
 		case cursor::Down:
 			{
-				auto currentPosition = position(to_glyph(iText.begin() + iCursor.position()) - iGlyphs.begin());
+				auto currentPosition = glyph_position(cursor_glyph_position());
 				if (currentPosition.line != iGlyphLines.end())
 				{
 					if (currentPosition.line + 1 != iGlyphLines.end())
@@ -771,7 +771,7 @@ namespace neogfx
 		return iCursor;
 	}
 
-	text_edit::position_info text_edit::position(position_type aGlyphPosition) const
+	text_edit::position_info text_edit::glyph_position(position_type aGlyphPosition, bool aForCursor) const
 	{
 		auto line = iGlyphLines.find_by_foreign_index(glyph_line_index{ aGlyphPosition, 0.0 },
 			[](const glyph_line_index& left, const glyph_line_index& right) { return left.glyphs() < right.glyphs(); });
@@ -787,10 +787,10 @@ namespace neogfx
 			{
 				if (lineStart != lineEnd)
 				{
-					auto iterGlyph = iGlyphs.begin() + iCursor.position();
-					const auto& glyph = iCursor.position() < lineEnd ? *iterGlyph : *(iterGlyph - 1);
+					auto iterGlyph = iGlyphs.begin() + aGlyphPosition;
+					const auto& glyph = aGlyphPosition < lineEnd ? *iterGlyph : *(iterGlyph - 1);
 					point linePos{ glyph.x - iGlyphs[line.second.glyphs()].x, line.second.height() };
-					if (iCursor.position() == lineEnd)
+					if (aGlyphPosition == lineEnd)
 						linePos.x += glyph.advance().cx;
 					return position_info{ iterGlyph, line.first, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, linePos };
 				}
@@ -810,6 +810,11 @@ namespace neogfx
 	text_edit::position_type text_edit::cursor_glyph_position() const
 	{
 		return to_glyph(iText.begin() + cursor().position()) - iGlyphs.begin();
+	}
+
+	text_edit::position_type text_edit::cursor_glyph_anchor() const
+	{
+		return to_glyph(iText.begin() + cursor().anchor()) - iGlyphs.begin();
 	}
 
 	void text_edit::set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor)
@@ -882,18 +887,7 @@ namespace neogfx
 				eos = eol;
 		}
 		auto s = iStyles.insert(style(*this, aStyle)).first;
-		auto insertionPoint = iText.end();
-		if (!iGlyphs.empty())
-		{
-			auto p = position(iCursor.position());
-			if (p.glyph != iGlyphs.end())
-			{
-				if (p.glyph != p.lineEnd)
-					insertionPoint = iText.begin() + from_glyph(p.glyph).first;
-				else if (p.lineEnd != iGlyphs.end())
-					insertionPoint = iText.begin() + from_glyph(p.lineEnd).first;
-			}
-		}
+		auto insertionPoint = iText.begin() + iCursor.position();
 		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
 		refresh_paragraph(insertionPoint, eos);
 		update();
@@ -1241,7 +1235,7 @@ namespace neogfx
 
 	void text_edit::update_cursor()
 	{
-		auto cursorPos = position(iCursor.position());
+		auto cursorPos = glyph_position(cursor_glyph_position(), true);
 		dimension glyphHeight = 0.0;
 		dimension lineHeight = 0.0;
 		if (cursorPos.glyph != iGlyphs.end() && cursorPos.lineStart != cursorPos.lineEnd)
@@ -1266,7 +1260,7 @@ namespace neogfx
 	void text_edit::make_cursor_visible(bool aForcePreviewScroll)
 	{
 		scoped_units su(*this, UnitsPixels);
-		auto p = position(cursor().position());
+		auto p = glyph_position(cursor_glyph_position());
 		auto e = (p.line != iGlyphLines.end() ? 
 			size{ p.glyph != p.lineEnd ? p.glyph->advance().cx : 0.0, p.line->first.extents.cy } : 
 			size{ 0.0, font().height() });
@@ -1297,8 +1291,8 @@ namespace neogfx
 				point pos = aPoint;
 				for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
 				{
-					bool selected = static_cast<cursor::position_type>(i - iGlyphs.begin()) >= std::min(cursor().position(), cursor().anchor()) &&
-						static_cast<cursor::position_type>(i - iGlyphs.begin()) < std::max(cursor().position(), cursor().anchor());
+					bool selected = static_cast<cursor::position_type>(i - iGlyphs.begin()) >= std::min(cursor_glyph_position(), cursor_glyph_anchor()) &&
+						static_cast<cursor::position_type>(i - iGlyphs.begin()) < std::max(cursor_glyph_position(), cursor_glyph_anchor());
 					const auto& glyph = *i;
 					const auto& tagContents = iText.tag(iText.begin() + from_glyph(i).first).contents();
 					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
@@ -1367,10 +1361,8 @@ namespace neogfx
 
 	void text_edit::draw_cursor(const graphics_context& aGraphicsContext) const
 	{
-		auto cursorGlyphIndex = iCursor.position();
-		if (cursorGlyphIndex > 0 && iGlyphs[cursorGlyphIndex - 1].direction() == text_direction::RTL)
-			--cursorGlyphIndex;
-		auto cursorPos = position(cursorGlyphIndex);
+		auto cursorGlyphIndex = cursor_glyph_position();
+		auto cursorPos = glyph_position(cursorGlyphIndex, true);
 		dimension glyphHeight = 0.0;
 		dimension lineHeight = 0.0;
 		if (cursorPos.glyph != iGlyphs.end() && cursorPos.lineStart != cursorPos.lineEnd)

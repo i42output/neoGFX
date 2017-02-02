@@ -414,8 +414,9 @@ namespace neogfx
 			document_glyphs::const_iterator lineEnd;
 			point pos;
 		};
-		position_info position(position_type aGlyphPosition) const;
+		position_info glyph_position(position_type aGlyphPosition, bool aForCursor = false) const;
 		position_type cursor_glyph_position() const;
+		position_type cursor_glyph_anchor() const;
 		void set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor = true);
 		position_type hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
 		std::string text() const;

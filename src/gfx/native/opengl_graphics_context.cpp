@@ -1380,6 +1380,8 @@ namespace neogfx
 				if (j > 0)
 					result.back().kerning_adjust(static_cast<float>(aFontSelector(sourceClusterStart).kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
 				size advance{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 };
+				if (sourceClusterStart > sourceClusterEnd)
+					std::swap(sourceClusterStart, sourceClusterEnd);
 				result.push_back(glyph(textDirections[cluster], 
 					shapes.glyph_info(j).codepoint, 
 					glyph::source_type(sourceClusterStart, sourceClusterEnd), advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0)));
