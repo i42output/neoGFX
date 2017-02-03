@@ -1367,7 +1367,7 @@ namespace neogfx
 			{
 				std::u32string::size_type startCluster = shapes.glyph_info(j).cluster;
 				std::u32string::size_type endCluster;
-				if (std::get<2>(runs[i]) == text_direction::LTR)
+				if (std::get<2>(runs[i]) != text_direction::RTL)
 				{
 					uint32_t k = j + 1;
 					while (k < shapes.glyph_count() && shapes.glyph_info(k).cluster == startCluster)
