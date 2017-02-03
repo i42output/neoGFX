@@ -773,6 +773,8 @@ namespace neogfx
 
 	text_edit::position_info text_edit::glyph_position(position_type aGlyphPosition, bool aForCursor) const
 	{
+		if (aForCursor && aGlyphPosition > 0 && aGlyphPosition == iGlyphs.size() && iGlyphs.back().direction() == text_direction::RTL)
+			aGlyphPosition = to_glyph(iText.end() - 1) - iGlyphs.begin();
 		auto line = iGlyphLines.find_by_foreign_index(glyph_line_index{ aGlyphPosition, 0.0 },
 			[](const glyph_line_index& left, const glyph_line_index& right) { return left.glyphs() < right.glyphs(); });
 		if (line.first != iGlyphLines.begin() && 
@@ -790,7 +792,7 @@ namespace neogfx
 					auto iterGlyph = iGlyphs.begin() + aGlyphPosition;
 					const auto& glyph = aGlyphPosition < lineEnd ? *iterGlyph : *(iterGlyph - 1);
 					point linePos{ glyph.x - iGlyphs[line.second.glyphs()].x, line.second.height() };
-					if (aGlyphPosition == lineEnd)
+					if (aGlyphPosition == lineEnd && (!aForCursor || glyph.direction() != text_direction::RTL))
 						linePos.x += glyph.advance().cx;
 					return position_info{ iterGlyph, line.first, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, linePos };
 				}
@@ -1260,7 +1262,7 @@ namespace neogfx
 	void text_edit::make_cursor_visible(bool aForcePreviewScroll)
 	{
 		scoped_units su(*this, UnitsPixels);
-		auto p = glyph_position(cursor_glyph_position());
+		auto p = glyph_position(cursor_glyph_position(), true);
 		auto e = (p.line != iGlyphLines.end() ? 
 			size{ p.glyph != p.lineEnd ? p.glyph->advance().cx : 0.0, p.line->first.extents.cy } : 
 			size{ 0.0, font().height() });

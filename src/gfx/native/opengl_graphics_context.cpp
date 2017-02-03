@@ -1365,29 +1365,33 @@ namespace neogfx
 			glyph_shapes shapes{ *this, aFontSelector(sourceClusterRunStart), runs[i] };
 			for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
 			{
-				std::u32string::size_type cluster = shapes.glyph_info(j).cluster + (std::get<0>(runs[i]) - &codePoints[0]);
-				std::u32string::size_type startCluster = cluster;
-				uint32_t k = j + 1;
-				while (k < shapes.glyph_count() && shapes.glyph_info(k).cluster == shapes.glyph_info(j).cluster)
-					++k;
-				std::u32string::size_type endCluster = k < shapes.glyph_count() ? shapes.glyph_info(k).cluster + (std::get<0>(runs[i]) - &codePoints[0]) : std::get<1>(runs[i]) - &codePoints[0];
-				std::string::size_type sourceClusterStart, sourceClusterEnd;
-				sourceClusterStart = startCluster;
-				if (endCluster != codePointCount)
-					sourceClusterEnd = endCluster;
+				std::u32string::size_type startCluster = shapes.glyph_info(j).cluster;
+				std::u32string::size_type endCluster;
+				if (std::get<2>(runs[i]) == text_direction::LTR)
+				{
+					uint32_t k = j + 1;
+					while (k < shapes.glyph_count() && shapes.glyph_info(k).cluster == startCluster)
+						++k;
+					endCluster = (k < shapes.glyph_count() ? shapes.glyph_info(k).cluster : startCluster + 1);
+				}
 				else
-					sourceClusterEnd = codePointCount;
+				{
+					uint32_t k = j;
+					while (k > 0 && shapes.glyph_info(k).cluster == startCluster)
+						--k;
+					endCluster = (shapes.glyph_info(k).cluster != startCluster ? shapes.glyph_info(k).cluster : startCluster + 1);
+				}
+				startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
+				endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
 				if (j > 0)
-					result.back().kerning_adjust(static_cast<float>(aFontSelector(sourceClusterStart).kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
+					result.back().kerning_adjust(static_cast<float>(aFontSelector(startCluster).kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
 				size advance{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 };
-				if (sourceClusterStart > sourceClusterEnd)
-					std::swap(sourceClusterStart, sourceClusterEnd);
-				result.push_back(glyph(textDirections[cluster], 
+				result.push_back(glyph(textDirections[startCluster],
 					shapes.glyph_info(j).codepoint, 
-					glyph::source_type(sourceClusterStart, sourceClusterEnd), advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0)));
+					glyph::source_type(startCluster, endCluster), advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0)));
 				if (result.back().direction() == text_direction::Whitespace)
-					result.back().set_value(aTextBegin[sourceClusterStart]);
-				if ((aFontSelector(sourceClusterStart).style() & font::Underline) == font::Underline)
+					result.back().set_value(aTextBegin[startCluster]);
+				if ((aFontSelector(startCluster).style() & font::Underline) == font::Underline)
 					result.back().set_underline(true);
 				if (is_subpixel_rendering_on())
 					result.back().set_subpixel(true);
@@ -1400,7 +1404,7 @@ namespace neogfx
 					auto& glyph = result.back();
 					if (glyph.advance() != advance.ceil())
 					{
-						const i_glyph_texture& glyphTexture = aFontSelector(sourceClusterStart).native_font_face().glyph_texture(glyph);
+						const i_glyph_texture& glyphTexture = aFontSelector(startCluster).native_font_face().glyph_texture(glyph);
 						auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.extents().cx);
 						if (visibleAdvance > advance.cx)
 						{
