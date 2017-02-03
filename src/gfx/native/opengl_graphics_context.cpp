@@ -1383,6 +1383,8 @@ namespace neogfx
 				}
 				startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
 				endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
+				if (endCluster > 1000)
+					_asm int 3;
 				if (j > 0)
 					result.back().kerning_adjust(static_cast<float>(aFontSelector(startCluster).kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
 				size advance{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 };
