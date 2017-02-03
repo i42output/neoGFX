@@ -773,8 +773,21 @@ namespace neogfx
 
 	text_edit::position_info text_edit::glyph_position(position_type aGlyphPosition, bool aForCursor) const
 	{
-		if (aForCursor && aGlyphPosition > 0 && aGlyphPosition == iGlyphs.size() && iGlyphs.back().direction() == text_direction::RTL)
-			aGlyphPosition = to_glyph(iText.end() - 1) - iGlyphs.begin();
+		if (aForCursor && aGlyphPosition > 0)
+		{
+			if (aGlyphPosition == iGlyphs.size() && iGlyphs.back().direction() == text_direction::RTL)
+				aGlyphPosition = to_glyph(iText.end() - 1) - iGlyphs.begin();
+			else if (aGlyphPosition < iGlyphs.size())
+			{
+				auto iterChar = iText.begin() + from_glyph(iGlyphs.begin() + aGlyphPosition).first;
+				if (iterChar != iText.begin())
+				{
+					auto g = to_glyph(iterChar - 1);
+					if (g->direction() == text_direction::RTL)
+						aGlyphPosition = g - iGlyphs.begin();
+				}
+			}
+		}
 		auto line = iGlyphLines.find_by_foreign_index(glyph_line_index{ aGlyphPosition, 0.0 },
 			[](const glyph_line_index& left, const glyph_line_index& right) { return left.glyphs() < right.glyphs(); });
 		if (line.first != iGlyphLines.begin() && 
