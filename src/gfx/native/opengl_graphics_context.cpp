@@ -1136,7 +1136,7 @@ namespace neogfx
 				else
 				{
 					std::vector<uint32_t> clusters;
-					while (g->glyph_info(i).codepoint == 0 && get_text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) != text_direction::Whitespace)
+					while (i < g->glyph_count() && g->glyph_info(i).codepoint == 0 && get_text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) != text_direction::Whitespace)
 					{
 						clusters.push_back(g->glyph_info(i).cluster);
 						++i;
