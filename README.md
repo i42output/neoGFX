@@ -22,8 +22,8 @@ Button                    | 100     |
 Table View                | 85      |     Selection; icon
 Tree View                 | 0       |
 List View                 | 0       |
-Text Edit                 | 80      |     RTL input; columns; inline images and emoji
-Line Edit                 | 95      |     RTL input
+Text Edit                 | 85      |     Columns; inline images and emoji
+Line Edit                 | 100     |     
 Spin Box                  | 100     |
 Slider                    | 90      |     Keyboard
 Check Box                 | 100     |     
@@ -38,4 +38,4 @@ Skins                     | 0       |
 # Known Problems
 Example test program will crash on shut-down due to bug related to focus tabbing linked list.
 
-Last updated: 15/01/2017
+Last updated: 07/02/2017
