@@ -1244,7 +1244,9 @@ namespace neogfx
 		text_direction previousDirection = get_text_direction(codePoints[0]);
 		if (iMnemonic != boost::none && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
 			previousDirection = text_direction::Mnemonic;
-
+		text_direction previousMasterDirection = previousDirection;
+		if (previousMasterDirection != text_direction::RTL)
+			previousMasterDirection = text_direction::LTR;
 		const char32_t* runStart = &codePoints[0];
 		std::u32string::size_type lastCodePointIndex = codePointCount - 1;
 		font previousFont = aFontSelector(0);
@@ -1262,8 +1264,6 @@ namespace neogfx
 		for (std::size_t i = 0; i <= lastCodePointIndex; ++i)
 		{
 			font currentFont = aFontSelector(i);
-			if (codePoints[i] == '\r' || codePoints[i] == '\n')
-				currentLineHasLTR = false;
 			switch (codePoints[i])
 			{
 			case PDF:
@@ -1290,6 +1290,12 @@ namespace neogfx
 			if (iMnemonic != boost::none && codePoints[i] == static_cast<char32_t>(iMnemonic->second))
 				currentDirection = text_direction::Mnemonic;
 			textDirections.push_back(currentDirection);
+			bool newLine = (codePoints[i] == '\r' || codePoints[i] == '\n');
+			if (newLine)
+			{
+				currentLineHasLTR = false;
+				currentDirection = text_direction::LTR;
+			}
 			auto bidi_check = [&directionStack](text_direction aDirection)
 			{
 				if (!directionStack.empty())
@@ -1298,6 +1304,7 @@ namespace neogfx
 					{
 					case text_direction::LTR:
 					case text_direction::RTL:
+					case text_direction::Digits:
 						if (directionStack.back().second == true)
 							return directionStack.back().first;
 						break;
@@ -1313,15 +1320,17 @@ namespace neogfx
 				return aDirection;
 			};
 			currentDirection = bidi_check(currentDirection);
+			bool currentDirectionIsMaster = (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL);
 			if (currentDirection == text_direction::LTR)
 				currentLineHasLTR = true;
 			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
 			bool newRun = 
 				previousFont != currentFont ||
+				(newLine && previousMasterDirection == text_direction::RTL) ||
 				currentDirection == text_direction::Mnemonic ||
 				previousDirection == text_direction::Mnemonic ||
-				(previousDirection == text_direction::LTR && currentDirection == text_direction::RTL) ||
-				(previousDirection == text_direction::RTL && currentDirection == text_direction::LTR) ||
+				((previousDirection == text_direction::LTR || previousDirection == text_direction::Digits) && currentDirection == text_direction::RTL) ||
+				(previousDirection == text_direction::RTL && (currentDirection == text_direction::Digits || currentDirection == text_direction::LTR)) ||
 				(previousScript != currentScript && (previousScript != HB_SCRIPT_COMMON && currentScript != HB_SCRIPT_COMMON));
 			if (!newRun)
 			{
@@ -1332,28 +1341,57 @@ namespace neogfx
 						text_direction nextDirection = bidi_check(get_text_direction(codePoints[j]));
 						if (nextDirection == text_direction::RTL)
 							break;
-						else if (nextDirection == text_direction::LTR || (j == lastCodePointIndex - 1 && currentLineHasLTR))
+						else if (nextDirection == text_direction::LTR || nextDirection == text_direction::Digits)
+						{
+							newRun = true;
+							currentDirection = nextDirection;
+							currentDirectionIsMaster = true;
+							break;
+						}
+						else if (j == lastCodePointIndex - 1 && currentLineHasLTR)
 						{
 							newRun = true;
 							currentDirection = text_direction::LTR;
+							currentDirectionIsMaster = true;
 							break;
 						}
 					}
 				}
 			}
-			if (newRun)
+			if (newRun && i > 0)
 			{
 				runs.push_back(std::make_tuple(runStart, &codePoints[i], previousDirection, previousScript));
 				runStart = &codePoints[i];
 			}
-			if (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL || currentDirection == text_direction::Mnemonic)
+			if (currentDirectionIsMaster || currentDirection == text_direction::Digits || currentDirection == text_direction::Mnemonic)
 			{
+				if (currentDirectionIsMaster)
+					previousMasterDirection = previousDirection;
 				previousDirection = currentDirection;
 				previousScript = currentScript;
 			}
 			if (i == lastCodePointIndex)
 				runs.push_back(std::make_tuple(runStart, &codePoints[i + 1], previousDirection, previousScript));
 			previousFont = currentFont;
+		}
+
+		for (std::size_t i = 1; i < runs.size(); ++i)
+		{
+			int j = i - 1;
+			auto startDirection = std::get<2>(runs[j]);
+			do 
+			{
+				auto direction = std::get<2>(runs[i]);
+				if (startDirection == text_direction::RTL && (direction == text_direction::RTL || direction == text_direction::Digits))
+				{
+					auto m = runs[i];
+					runs.erase(runs.begin() + i);
+					runs.insert(runs.begin() + j, m);
+					++i;
+				}
+				else
+					break;
+			} while (i < runs.size());
 		}
 
 		for (std::size_t i = 0; i < runs.size(); ++i)

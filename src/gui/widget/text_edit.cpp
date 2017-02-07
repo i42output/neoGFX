@@ -783,7 +783,7 @@ namespace neogfx
 		{
 			position_type lineStart = line.second.glyphs();
 			position_type lineEnd = lineStart + line.first->second.glyphs();
-			bool placeCursorToRight = (aGlyphPosition == iGlyphs.size() && (aGlyphPosition > 0 && iGlyphs[aGlyphPosition - 1].direction() != text_direction::RTL));
+			bool placeCursorToRight = (aGlyphPosition == lineEnd);
 			if (aForCursor)
 			{
 				if (aGlyphPosition == lineEnd)

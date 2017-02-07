@@ -34,7 +34,7 @@ namespace neogfx
 			{ 0x0000E, text_direction::None },
 			{ 0x0001C, text_direction::Whitespace },
 			{ 0x00021, text_direction::None },
-			{ 0x00030, text_direction::LTR },
+			{ 0x00030, text_direction::Digits },
 			{ 0x0003A, text_direction::None },
 			{ 0x00041, text_direction::LTR },
 			{ 0x0005B, text_direction::None },

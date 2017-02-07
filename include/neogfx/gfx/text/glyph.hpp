@@ -39,6 +39,7 @@ namespace neogfx
 		Unknown,
 		None,
 		Whitespace,
+		Digits,
 		LTR,
 		RTL,
 		Mnemonic
@@ -49,10 +50,10 @@ namespace neogfx
 	public:
 		enum flags_e : uint8_t
 		{
-			Underline	= 0x01,
-			Subpixel	= 0x02,
-			Mnemonic	= 0x04,
-			Emoji		= 0x08,
+			Underline = 0x01,
+			Subpixel = 0x02,
+			Mnemonic = 0x04,
+			Emoji = 0x08,
 			UseFallback = 0x80
 		};
 	public:
@@ -62,13 +63,14 @@ namespace neogfx
 		glyph() :
 			iDirection{}, iValue{}, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
 		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aAdvance, size aOffset) :
-			iDirection{aDirection}, iValue{aValue}, iFlags{}, iFallbackIndex{}, iSource{aSource}, iAdvance{aAdvance}, iOffset{aOffset} {}
+			iDirection{ aDirection }, iValue{ aValue }, iFlags{}, iFallbackIndex{}, iSource{ aSource }, iAdvance{ aAdvance }, iOffset{ aOffset } {}
 		glyph(text_direction aDirection, value_type aValue) :
-			iDirection{aDirection}, iValue{aValue}, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
+			iDirection{ aDirection }, iValue{ aValue }, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
 	public:
 		bool operator==(const glyph& aRhs) const { return iDirection == aRhs.iDirection && iValue == aRhs.iValue; }
 	public:
 		bool is_whitespace() const { return iDirection == text_direction::Whitespace; }
+		bool is_digit() const { return iDirection == text_direction::Digits; }
 		text_direction direction() const { return iDirection; }
 		bool no_direction() const { return iDirection != text_direction::LTR && iDirection != text_direction::RTL; }
 		bool left_to_right() const { return iDirection == text_direction::LTR; }
