@@ -1316,8 +1316,8 @@ namespace neogfx
 				point pos = aPoint;
 				for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
 				{
-					bool selected = static_cast<cursor::position_type>(i - iGlyphs.begin()) >= std::min(cursor_glyph_position(), cursor_glyph_anchor()) &&
-						static_cast<cursor::position_type>(i - iGlyphs.begin()) < std::max(cursor_glyph_position(), cursor_glyph_anchor());
+					bool selected = static_cast<cursor::position_type>(from_glyph(i).first) >= std::min(cursor().position(), cursor().anchor()) &&
+						static_cast<cursor::position_type>(from_glyph(i).first) < std::max(cursor().position(), cursor().anchor());
 					const auto& glyph = *i;
 					const auto& tagContents = iText.tag(iText.begin() + from_glyph(i).first).contents();
 					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
