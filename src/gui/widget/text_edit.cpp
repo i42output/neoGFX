@@ -63,7 +63,7 @@ namespace neogfx
 
 	void text_edit::style::release() const
 	{
-		if (--iUseCount == 0 && iParent)
+		if (iParent && &iParent->iDefaultStyle != this && --iUseCount == 0)
 			iParent->iStyles.erase(iParent->iStyles.find(*this));
 	}
 
@@ -915,9 +915,10 @@ namespace neogfx
 			if (eol != std::u32string::npos)
 				eos = eol;
 		}
-		auto s = iStyles.insert(style(*this, aStyle)).first;
+		auto s = &aStyle != &iDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end();
 		auto insertionPoint = iText.begin() + iCursor.position();
-		insertionPoint = iText.insert(document_text::tag_type(static_cast<style_list::const_iterator>(s)), insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
+		insertionPoint = iText.insert(s != iStyles.end() ? document_text::tag_type{ static_cast<style_list::const_iterator>(s) } : document_text::tag_type{ nullptr },
+			insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
 		refresh_paragraph(insertionPoint, eos);
 		update();
 		if (aMoveCursor)
@@ -1100,7 +1101,7 @@ namespace neogfx
 				auto fs = [this, paragraphStart](std::u32string::size_type aSourceIndex)
 				{
 					const auto& tagContents = iText.tag(paragraphStart + aSourceIndex).contents(); // todo: cache iterator to increase throughput
-					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+					const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 					auto f = style.font() != boost::none ? *style.font() : font();
 					return f;
 				};
@@ -1152,7 +1153,7 @@ namespace neogfx
 			{
 				const auto& glyph = *paragraphStart;
 				const auto& tagContents = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).contents();
-				const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+				const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 				iGlyphLines.push_back(
 					std::make_pair(glyph_line{ size{ 0.0, glyphFont.height() } }, glyph_line_index{ 0, glyphFont.height() }),
@@ -1270,7 +1271,7 @@ namespace neogfx
 			if (cursorPos.glyph == cursorPos.lineEnd)
 				cursorPos.pos.x += glyph.advance().cx;
 			const auto& tagContents = iText.tag(iText.begin() + from_glyph(iterGlyph).first).contents();
-			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+			const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			glyphHeight = glyphFont.height();
 			lineHeight = cursorPos.line->first.extents.cy;
@@ -1320,7 +1321,7 @@ namespace neogfx
 						static_cast<cursor::position_type>(from_glyph(i).first) < std::max(cursor().position(), cursor().anchor());
 					const auto& glyph = *i;
 					const auto& tagContents = iText.tag(iText.begin() + from_glyph(i).first).contents();
-					const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+					const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 					const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 					switch (pass)
 					{
@@ -1371,7 +1372,7 @@ namespace neogfx
 		{
 			const auto& glyph = *i;
 			const auto& tagContents = iText.tag(iText.begin() + from_glyph(i).first).contents();
-			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+			const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 			const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			if (glyph.underline())
 				aGraphicsContext.draw_glyph_underline(pos + point{ 0.0, aLine->first.extents.cy - glyphFont.height() }, glyph,
@@ -1394,7 +1395,7 @@ namespace neogfx
 		{
 			auto iterGlyph = cursorPos.glyph < cursorPos.lineEnd ? cursorPos.glyph : cursorPos.glyph - 1;
 			const auto& tagContents = iText.tag(iText.begin() + from_glyph(iterGlyph).first).contents();
-			const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+			const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			glyphHeight = glyphFont.height();
 			if (!style.text_outline_colour().empty())

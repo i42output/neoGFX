@@ -83,7 +83,7 @@ namespace neogfx
 		class tag
 		{
 		public:
-			typedef neolib::variant<style_list::const_iterator> contents_type;
+			typedef neolib::variant<style_list::const_iterator, nullptr_t> contents_type;
 			template <typename Node2>
 			struct rebind { typedef tag<Node2> type; };
 		private:
@@ -282,7 +282,7 @@ namespace neogfx
 					{
 						const auto& glyph = *(iterGlyph++);
 						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + textStartIndex + glyph.source().first).contents();
-						const auto& style = *static_variant_cast<style_list::const_iterator>(tagContents);
+						const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iParent->default_style();
 						auto& glyphFont = style.font() != boost::none ? *style.font() : iParent->font();
 						dimension cy = !glyph.use_fallback() ? glyphFont.height() : glyph.fallback_font(glyphFont).fallback().height();
 						if (!style.text_outline_colour().empty())
