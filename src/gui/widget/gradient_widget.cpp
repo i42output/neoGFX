@@ -138,7 +138,22 @@ namespace neogfx
 		set_margins(neogfx::margins{});
 	}
 
-	neogfx::size_policy gradient_widget::size_policy() const
+	const gradient& gradient_widget::gradient() const
+	{
+		return iSelection;
+	}
+
+	void gradient_widget::set_gradient(const neogfx::gradient& aGradient)
+	{
+		if (iSelection != aGradient)
+		{
+			iSelection = aGradient;
+			update();
+			gradient_changed.trigger();
+		}
+	}
+
+	size_policy gradient_widget::size_policy() const
 	{
 		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
 	}
@@ -157,7 +172,7 @@ namespace neogfx
 		rect rectContents = contents_rect();
 		color frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
 		draw_alpha_background(aGraphicsContext, rectContents);
-		gradient selection = iSelection;
+		neogfx::gradient selection = iSelection;
 		selection.set_direction(gradient::Horizontal);
 		aGraphicsContext.fill_rect(rectContents, selection);
 		rectContents.inflate(size{ BORDER_THICKNESS });
@@ -183,6 +198,7 @@ namespace neogfx
 				else if (iCurrentAlphaStop != boost::none)
 					(**iCurrentAlphaStop).second = iSelection.alpha_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
 				update();
+				gradient_changed.trigger();
 			}
 			else
 			{
@@ -206,12 +222,14 @@ namespace neogfx
 						iCurrentAlphaStop = iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
 						iCurrentColourStop = boost::none;
 						update();
+						gradient_changed.trigger();
 					}
 					else if (aPosition.y >= contents_rect().bottom())
 					{
 						iCurrentColourStop = iSelection.insert_colour_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
 						iCurrentAlphaStop = boost::none;
 						update();
+						gradient_changed.trigger();
 					}
 				}
 			}
@@ -232,6 +250,7 @@ namespace neogfx
 				{
 					stop.second = cd.selected_colour();
 					update();
+					gradient_changed.trigger();
 				}
 			}
 			else if (stopIter.is<gradient::alpha_stop_list::iterator>())
@@ -242,6 +261,7 @@ namespace neogfx
 				{
 					stop.second = ad.selected_alpha();
 					update();
+					gradient_changed.trigger();
 				}
 			}
 		}
@@ -266,6 +286,7 @@ namespace neogfx
 						{
 							stop.second = cd.selected_colour();
 							update();
+							gradient_changed.trigger();
 						}
 					});
 					action deleteStopAction{ "Delete stop" };
@@ -275,6 +296,7 @@ namespace neogfx
 							iCurrentColourStop = boost::none;
 						iSelection.erase_stop(static_variant_cast<gradient::colour_stop_list::iterator>(stopIter));
 						update();
+						gradient_changed.trigger();
 					});
 					if (iSelection.colour_stop_count() <= 2)
 						deleteStopAction.disable();
@@ -295,6 +317,7 @@ namespace neogfx
 						{
 							stop.second = ad.selected_alpha();
 							update();
+							gradient_changed.trigger();
 						}
 					});
 					action deleteStopAction{ "Delete stop" };
@@ -304,6 +327,7 @@ namespace neogfx
 							iCurrentAlphaStop = boost::none;
 						iSelection.erase_stop(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
 						update();
+						gradient_changed.trigger();
 					});
 					if (iSelection.alpha_stop_count() <= 2)
 						deleteStopAction.disable();
@@ -339,6 +363,7 @@ namespace neogfx
 						leftStop == *iCurrentColourStop ? 0.0 : leftStop->first + min),
 						rightStop == *iCurrentColourStop ? 1.0 : rightStop->first - min);
 				update();
+				gradient_changed.trigger();
 			}
 			else if (iCurrentAlphaStop != boost::none)
 			{
@@ -353,6 +378,7 @@ namespace neogfx
 						leftStop == *iCurrentAlphaStop ? 0.0 : leftStop->first + min),
 						rightStop == *iCurrentAlphaStop ? 1.0 : rightStop->first - min);
 				update();
+				gradient_changed.trigger();
 			}
 		}
 	}
@@ -407,7 +433,7 @@ namespace neogfx
 		return stop_iterator{};
 	}
 
-	rect gradient_widget::colour_stop_rect(const gradient::colour_stop& aColourStop) const
+	rect gradient_widget::colour_stop_rect(const neogfx::gradient::colour_stop& aColourStop) const
 	{
 		rect result = contents_rect();
 		result.x = result.left() + std::floor((result.width() - 1.0) * aColourStop.first) - std::floor(STOP_WIDTH / 2);
@@ -417,7 +443,7 @@ namespace neogfx
 		return result;
 	}
 
-	rect gradient_widget::alpha_stop_rect(const gradient::alpha_stop& aAlphaStop) const
+	rect gradient_widget::alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const
 	{
 		rect result = contents_rect();
 		result.x = result.left() + std::floor((result.width() - 1.0) * aAlphaStop.first) - std::floor(STOP_WIDTH / 2);
@@ -427,7 +453,7 @@ namespace neogfx
 		return result;
 	}
 
-	void gradient_widget::draw_colour_stop(graphics_context& aGraphicsContext, const gradient::colour_stop& aColourStop) const
+	void gradient_widget::draw_colour_stop(graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const
 	{
 		rect r = colour_stop_rect(aColourStop);
 		draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, SMALL_ALPHA_PATTERN_SIZE);
@@ -466,7 +492,7 @@ namespace neogfx
 		aGraphicsContext.draw_texture(r.top_left(), texture{ stopGlyph });
 	}
 
-	void gradient_widget::draw_alpha_stop(graphics_context& aGraphicsContext, const gradient::alpha_stop& aAlphaStop) const 
+	void gradient_widget::draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const
 	{
 		rect r = alpha_stop_rect(aAlphaStop);
 		draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 2.0 }, size{ 7.0, 7.0 } }, SMALL_ALPHA_PATTERN_SIZE);

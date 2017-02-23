@@ -67,6 +67,8 @@ namespace neogfx
 			const colour_type& background_colour() const;
 			const colour_type& text_outline_colour() const;
 		public:
+			bool operator==(const style& aRhs) const;
+			bool operator!=(const style& aRhs) const;
 			bool operator<(const style& aRhs) const;
 		private:
 			text_edit* iParent;
@@ -77,6 +79,43 @@ namespace neogfx
 			colour_type iTextOutlineColour;
 		};
 		typedef std::set<style> style_list;
+		class column_info
+		{
+		public:
+			column_info() :
+				iDelimiter{ U'\t' }
+			{
+			}
+
+		public:
+			char32_t delimiter() const { return iDelimiter; }
+			void set_delimiter(char32_t aDelimiter) { iDelimiter = aDelimiter; }
+			const optional_dimension& min_width() const { return iMinWidth; }
+			void set_min_width(const optional_dimension& aMinWidth) { iMinWidth = aMinWidth; }
+			const optional_dimension& max_width() const { return iMaxWidth; }
+			void set_max_width(const optional_dimension& aMaxWidth) { iMaxWidth = aMaxWidth; }
+			const neogfx::margins& margins() const { return iMargins; }
+			void set_margins(const neogfx::margins& aMargins) { iMargins = aMargins; }
+			const text_edit::style& style() const { return iStyle; }
+			void set_style(const text_edit::style& aStyle) { iStyle = aStyle; }
+
+		public:
+			bool operator==(const column_info& aRhs) const
+			{
+				return std::tie(iDelimiter, iMinWidth, iMaxWidth, iMargins, iStyle) == std::tie(aRhs.iDelimiter, aRhs.iMinWidth, aRhs.iMaxWidth, aRhs.iMargins, aRhs.iStyle);
+			}
+			bool operator!=(const column_info& aRhs) const
+			{
+				return !(*this == aRhs);
+			}
+
+		private:
+			char32_t iDelimiter;
+			optional_dimension iMinWidth;
+			optional_dimension iMaxWidth;
+			neogfx::margins iMargins;
+			text_edit::style iStyle;
+		};
 	private:
 		struct unknown_node {};
 		template <typename Node = unknown_node>
@@ -343,8 +382,29 @@ namespace neogfx
 			size extents;
 		};
 		typedef neolib::indexitor<glyph_line, glyph_line_index, boost::fast_pool_allocator<std::pair<glyph_line, const glyph_line_index>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> glyph_lines;
+		class glyph_column : public column_info
+		{
+		public:
+			glyph_column() :
+				iWidth(0.0)
+			{
+			}
+
+		public:
+			const glyph_lines& lines() const { return iLines; }
+			glyph_lines& lines() { return iLines; }
+			dimension width() const { return iWidth; }
+			void set_width(dimension aWidth) { iWidth = aWidth; }
+
+		private:
+			glyph_lines iLines;
+			dimension iWidth;
+		};
+		typedef std::vector<glyph_column> glyph_columns;
 	public:
 		typedef document_text::size_type position_type;
+	public:
+		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::text_edit::bad_column_index") {} }; 
 	public:
 		text_edit(type_e aType = MultiLine);
 		text_edit(i_widget& aParent, type_e aType = MultiLine);
@@ -409,6 +469,7 @@ namespace neogfx
 		struct position_info
 		{
 			document_glyphs::const_iterator glyph;
+			glyph_columns::const_iterator column;
 			glyph_lines::const_iterator line;
 			document_glyphs::const_iterator lineStart;
 			document_glyphs::const_iterator lineEnd;
@@ -425,22 +486,27 @@ namespace neogfx
 		std::size_t insert_text(const std::string& aText, bool aMoveCursor = false);
 		std::size_t insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor = false);
 		void delete_text(position_type aStart, position_type aEnd);
-		std::size_t delete_glyph(position_type aGlyphPosition);
-		std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
-		bool same_paragraph(position_type aFirst, position_type aSecond) const;
+		std::size_t columns() const;
+		void set_columns(std::size_t aColumnCount);
+		void remove_columns();
+		const column_info& column(std::size_t aColumnIndex);
+		void set_column(std::size_t aColumnIndex, const column_info& aColumn);
 	public:
 		void set_hint(const std::string& aHint);
 	private:
 		void init();
 		void delete_any_selection();
+		std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
+		bool same_paragraph(position_type aFirst, position_type aSecond) const;
 		document_glyphs::const_iterator to_glyph(document_text::const_iterator aWhere) const;
 		std::pair<document_text::size_type, document_text::size_type> from_glyph(document_glyphs::const_iterator aWhere) const;
 		void refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta);
+		void refresh_columns();
 		void refresh_lines();
 		void animate();
 		void update_cursor();
 		void make_cursor_visible(bool aForcePreviewScroll = false);
-		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, glyph_lines::const_iterator aLine) const;
+		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
 		void draw_cursor(const graphics_context& aGraphicsContext) const;
 		static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
 	private:
@@ -459,7 +525,7 @@ namespace neogfx
 		document_text iText;
 		document_glyphs iGlyphs;
 		glyph_paragraphs iGlyphParagraphs;
-		glyph_lines iGlyphLines;
+		glyph_columns iGlyphColumns;
 		size iTextExtents;
 		uint64_t iCursorAnimationStartTime;
 		mutable const glyph_paragraph* iGlyphParagraphCache;

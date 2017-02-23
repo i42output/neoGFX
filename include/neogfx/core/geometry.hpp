@@ -583,13 +583,13 @@ namespace neogfx
 
 	typedef basic_line<coordinate> line;
 
-	template <typename CoordinateType>
+	template <typename DimensionType>
 	class basic_margins
 	{
 		// types
 	public:
-		typedef CoordinateType coordinate_type;
-		typedef coordinate_type dimension_type;
+		typedef DimensionType dimension_type;
+		typedef dimension_type coordinate_type;
 		typedef basic_point<coordinate_type> point_type;
 		typedef basic_size<dimension_type> size_type;
 		// construction
@@ -598,8 +598,8 @@ namespace neogfx
 		basic_margins(dimension_type all) : left(all), top(all), right(all), bottom(all) {}
 		basic_margins(dimension_type left, dimension_type top, dimension_type right, dimension_type bottom) : left(left), top(top), right(right), bottom(bottom) {}
 		basic_margins(dimension_type leftRight, dimension_type topBottom) : left(leftRight), top(topBottom), right(leftRight), bottom(topBottom) {}
-		template <typename CoordinateType2>
-		basic_margins(const basic_margins<CoordinateType2>& other) :
+		template <typename DimensionType2>
+		basic_margins(const basic_margins<DimensionType2>& other) :
 			left(static_cast<dimension_type>(other.left)), top(static_cast<dimension_type>(other.top)), right(static_cast<dimension_type>(other.right)), bottom(static_cast<dimension_type>(other.bottom)) {}
 		// operations
 	public:
@@ -618,7 +618,7 @@ namespace neogfx
 		dimension_type bottom;
 	};
 
-	typedef basic_margins<coordinate> margins;
+	typedef basic_margins<dimension> margins;
 
 	typedef boost::optional<dimension> optional_dimension;
 	typedef boost::optional<angle> optional_angle;

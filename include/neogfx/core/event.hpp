@@ -144,6 +144,22 @@ namespace neogfx
 		{
 			return subscribe(aHandlerCallback, static_cast<const void*>(&aUniqueIdObject));
 		}
+		void unsubscribe(const void* aUniqueId)
+		{
+			auto existing = iUniqueIdMap.find(aUniqueId);
+			if (existing != iUniqueIdMap.end())
+				unsubscribe(*existing);
+		}
+		template <typename T>
+		void unsubscribe(const T* aUniqueIdObject)
+		{
+			return unsubscribe(static_cast<const void*>(aUniqueIdObject));
+		}
+		template <typename T>
+		void unsubscribe(const T& aUniqueIdObject)
+		{
+			return unsubscribe(static_cast<const void*>(&aUniqueIdObject));
+		}
 	private:
 		void unsubscribe(handle aHandle)
 		{

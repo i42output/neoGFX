@@ -850,35 +850,74 @@ namespace neogfx
 		}
 		else
 		{
+			auto can_consume = [aScanCode](const i_widget& aWidget)
+			{
+				if (aScanCode == ScanCode_TAB)
+					return (aWidget.focus_policy() & focus_policy::ConsumeTabKey) == focus_policy::ConsumeTabKey;
+				else if (aScanCode == ScanCode_RETURN)
+					return (aWidget.focus_policy() & focus_policy::ConsumeReturnKey) == focus_policy::ConsumeReturnKey;
+				else
+					return true;
+			};
 			if (has_focused_widget())
 			{
 				i_widget* w = &focused_widget();
-				while (!w->key_pressed(aScanCode, aKeyCode, aKeyModifiers) && w != this)
+				while ((!can_consume(*w) || !w->key_pressed(aScanCode, aKeyCode, aKeyModifiers)) && w != this)
 					w = &w->parent();
-				if (w == this)
+				if (w == this && can_consume(*this))
 					key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			}
-			else
+			else if (can_consume(*this))
 				key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 		}
 	}
 
 	void window::native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
+		auto can_consume = [aScanCode](const i_widget& aWidget)
+		{
+			if (aScanCode == ScanCode_TAB)
+				return (aWidget.focus_policy() & focus_policy::ConsumeTabKey) == focus_policy::ConsumeTabKey;
+			else if (aScanCode == ScanCode_RETURN)
+				return (aWidget.focus_policy() & focus_policy::ConsumeReturnKey) == focus_policy::ConsumeReturnKey;
+			else
+				return true;
+		};
 		if (has_focused_widget())
 		{
 			i_widget* w = &focused_widget();
-			while (!w->key_released(aScanCode, aKeyCode, aKeyModifiers) && w != this)
+			while ((!can_consume(*w) || !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != this)
 				w = &w->parent();
-			if (w == this)
+			if (w == this && can_consume(*this))
 				key_released(aScanCode, aKeyCode, aKeyModifiers);
 		}
-		else
+		else if (can_consume(*this))
 			key_released(aScanCode, aKeyCode, aKeyModifiers);
 	}
 
 	void window::native_window_text_input(const std::string& aText)
 	{
+		auto send = [this](const std::string& aText)
+		{
+			auto can_consume = [&aText](i_widget& aWidget)
+			{
+				if (aText == "\t" && (aWidget.focus_policy() & focus_policy::ConsumeTabKey) != focus_policy::ConsumeTabKey)
+					return false;
+				else if (aText == "\n" && (aWidget.focus_policy() & focus_policy::ConsumeReturnKey) != focus_policy::ConsumeReturnKey)
+					return false;
+				return true;
+			};
+			if (has_focused_widget())
+			{
+				i_widget* w = &focused_widget();
+				while (can_consume(*w) && !w->text_input(aText) && w != this)
+					w = &w->parent();
+				if (w == this && can_consume(*this))
+					text_input(aText);
+			}
+			else if (can_consume(*this))
+				text_input(aText);
+		};
 		auto utf32 = neolib::utf8_to_utf32(aText);
 		if (neolib::utf16::is_high_surrogate(utf32[0]))
 			iSurrogatePairPart = utf32[0];
@@ -886,31 +925,10 @@ namespace neogfx
 		{
 			char16_t utf16[] = { static_cast<char16_t>(*iSurrogatePairPart), static_cast<char16_t>(neolib::utf8_to_utf32(aText)[0]) };
 			iSurrogatePairPart = boost::none;
-			auto text = neolib::utf16_to_utf8(std::u16string(&utf16[0], 2));
-			if (has_focused_widget())
-			{
-				i_widget* w = &focused_widget();
-				while (!w->text_input(text) && w != this)
-					w = &w->parent();
-				if (w == this)
-					text_input(text);
-			}
-			else
-				text_input(text);
+			send(neolib::utf16_to_utf8(std::u16string(&utf16[0], 2)));
 		}
 		else
-		{
-			if (has_focused_widget())
-			{
-				i_widget* w = &focused_widget();
-				while (!w->text_input(aText) && w != this)
-					w = &w->parent();
-				if (w == this)
-					text_input(aText);
-			}
-			else
-				text_input(aText);
-		}
+			send(aText);
 	}
 
 	void window::native_window_sys_text_input(const std::string& aText)

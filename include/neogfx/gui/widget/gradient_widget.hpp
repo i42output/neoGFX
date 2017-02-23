@@ -31,12 +31,15 @@ namespace neogfx
 	public:
 		event<> gradient_changed;
 	private:
-		typedef neolib::variant<gradient::colour_stop_list::const_iterator, gradient::alpha_stop_list::const_iterator> stop_const_iterator;
-		typedef neolib::variant<gradient::colour_stop_list::iterator, gradient::alpha_stop_list::iterator> stop_iterator;
+		typedef neolib::variant<neogfx::gradient::colour_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
+		typedef neolib::variant<neogfx::gradient::colour_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
 	public:
 		gradient_widget();
 		gradient_widget(i_widget& aParent);
 		gradient_widget(i_layout& aLayout);
+	public:
+		const neogfx::gradient& gradient() const;
+		void set_gradient(const neogfx::gradient& aGradient);
 	public:
 		virtual neogfx::size_policy size_policy() const;
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -52,12 +55,12 @@ namespace neogfx
 		rect contents_rect() const;
 		stop_const_iterator stop_at(const point& aPosition) const;
 		stop_iterator stop_at(const point& aPosition);
-		rect colour_stop_rect(const gradient::colour_stop& aColourStop) const;
-		rect alpha_stop_rect(const gradient::alpha_stop& aAlphaStop) const;
-		void draw_colour_stop(graphics_context& aGraphicsContext, const gradient::colour_stop& aColourStop) const;
-		void draw_alpha_stop(graphics_context& aGraphicsContext, const gradient::alpha_stop& aAlphaStop) const;
+		rect colour_stop_rect(const neogfx::gradient::colour_stop& aColourStop) const;
+		rect alpha_stop_rect(const neogfx::gradient::alpha_stop& aAlphaStop) const;
+		void draw_colour_stop(graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const;
+		void draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const;
 	private:
-		gradient iSelection;
+		neogfx::gradient iSelection;
 		boost::optional<point> iClicked;
 		boost::optional<gradient::colour_stop_list::iterator> iCurrentColourStop;
 		boost::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;

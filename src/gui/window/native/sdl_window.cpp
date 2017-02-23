@@ -625,6 +625,20 @@ namespace neogfx
 				}
 			}
 			break;
+		case WM_CHAR:
+			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			{
+				// SDL doesn't send characters with ASCII value < 32 (e.g. tab) so we do it properly here...
+				std::string buffer;
+				buffer.resize(5);
+				if (WIN_ConvertUTF32toUTF8((UINT32)wparam, &buffer[0]))
+				{
+					std::string text = buffer.c_str();
+					if ((text[0] >= 32 && text[0] != 127) || text[0] == '\t' || text[0] == '\n')
+						mapEntry->second->push_event(native_keyboard_event(native_keyboard_event::TextInput, text));
+				}
+			}
+			break;
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
 		case WM_MBUTTONDOWN:
@@ -637,7 +651,7 @@ namespace neogfx
 		case WM_RBUTTONUP:
 		case WM_MBUTTONUP:
 		case WM_XBUTTONUP:
-		{
+			{
 				key_modifiers_e modifiers = KeyModifier_NONE;
 				if (wparam & MK_SHIFT)
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
@@ -791,7 +805,7 @@ namespace neogfx
 			/* todo */
 			break;
 		case SDL_TEXTINPUT:
-			push_event(native_keyboard_event(native_keyboard_event::TextInput, std::string(aEvent.text.text)));
+			/* do nothing; we handle text input separately. */
 			break;
 		default:
 			break;

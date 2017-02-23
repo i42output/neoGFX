@@ -332,7 +332,26 @@ int main(int argc, char* argv[])
 		{
 			lineEditPassword.set_password(false);
 		});
+		ng::check_box columns(layoutRadiosAndChecks, "Columns");
 		ng::gradient_widget gw(layoutRadiosAndChecks);
+		columns.checked([&textEdit, &gw]()
+		{
+			textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
+			textEdit.set_columns(3);
+			gw.gradient_changed([&gw, &textEdit]()
+			{
+				auto cs = textEdit.column(2);
+				typedef ng::text_edit::style::colour_type colour_type;
+				cs.set_style(ng::text_edit::style{ ng::optional_font{}, colour_type{}, colour_type{}, colour_type{gw.gradient()} });
+				textEdit.set_column(2, cs);
+			}, textEdit);
+		});
+		columns.unchecked([&textEdit, &gw]()
+		{
+			textEdit.set_focus_policy(textEdit.focus_policy() & ~neogfx::focus_policy::ConsumeTabKey);
+			textEdit.remove_columns();
+			gw.gradient_changed.unsubscribe(textEdit);
+		});
 		ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
 		ng::vertical_layout layout4(layout2);
 		ng::push_button button9(layout4, "Default/Slate\nStyle");

@@ -205,9 +205,21 @@ namespace neogfx
 		return static_cast<focus_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
 	}
 
+	inline focus_policy& operator|=(focus_policy& aLhs, focus_policy aRhs)
+	{
+		aLhs = static_cast<focus_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+		return aLhs;
+	}
+
 	inline focus_policy operator&(focus_policy aLhs, focus_policy aRhs)
 	{
-		return static_cast<focus_policy>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+		return static_cast<focus_policy>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
+	inline focus_policy& operator&=(focus_policy& aLhs, focus_policy aRhs)
+	{
+		aLhs = static_cast<focus_policy>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+		return aLhs;
 	}
 
 	inline focus_policy operator~(focus_policy aLhs)
