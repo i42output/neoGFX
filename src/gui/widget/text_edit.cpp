@@ -87,9 +87,22 @@ namespace neogfx
 		return iTextOutlineColour;
 	}
 
+	text_edit::style& text_edit::style::merge(const style& aOverridingStyle)
+	{
+		if (aOverridingStyle.font() != boost::none)
+			iFont = aOverridingStyle.font();
+		if (aOverridingStyle.text_colour() != boost::none)
+			iTextColour = aOverridingStyle.text_colour();
+		if (aOverridingStyle.background_colour() != boost::none)
+			iBackgroundColour = aOverridingStyle.background_colour();
+		if (aOverridingStyle.text_outline_colour() != boost::none)
+			iTextOutlineColour = aOverridingStyle.text_outline_colour();
+		return *this;
+	}
+
 	bool text_edit::style::operator==(const style& aRhs) const
 	{
-		return std::tie(iFont, iTextColour, iBackgroundColour) == std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour);
+		return std::tie(iFont, iTextColour, iBackgroundColour, iTextOutlineColour) == std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextOutlineColour);
 	}
 
 	bool text_edit::style::operator!=(const style& aRhs) const
@@ -99,7 +112,7 @@ namespace neogfx
 
 	bool text_edit::style::operator<(const style& aRhs) const
 	{
-		return std::tie(iFont, iTextColour, iBackgroundColour) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour);
+		return std::tie(iFont, iTextColour, iBackgroundColour, iTextOutlineColour) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextOutlineColour);
 	}
 
 	text_edit::text_edit(type_e aType) :
@@ -1420,6 +1433,16 @@ namespace neogfx
 			horizontal_scrollbar().set_position(p.pos.x + e.cx + previewWidth - horizontal_scrollbar().page());
 	}
 
+	text_edit::style text_edit::glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const
+	{
+		style result = iDefaultStyle;
+		result.merge(aColumn.style());
+		const auto& tagContents = iText.tag(iText.begin() + from_glyph(aGlyph).first).contents();
+		if (tagContents.is<style_list::const_iterator>())
+			result.merge(*static_variant_cast<style_list::const_iterator>(tagContents));
+		return result;
+	}
+
 	void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
 	{
 		auto lineStart = iGlyphs.begin() + aColumn.lines().foreign_index(aLine).glyphs();
@@ -1437,8 +1460,7 @@ namespace neogfx
 					bool selected = static_cast<cursor::position_type>(from_glyph(i).first) >= std::min(cursor().position(), cursor().anchor()) &&
 						static_cast<cursor::position_type>(from_glyph(i).first) < std::max(cursor().position(), cursor().anchor());
 					const auto& glyph = *i;
-					const auto& tagContents = iText.tag(iText.begin() + from_glyph(i).first).contents();
-					const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
+					const auto& style = glyph_style(i, aColumn);
 					const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 					switch (pass)
 					{
@@ -1488,8 +1510,7 @@ namespace neogfx
 		for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
 		{
 			const auto& glyph = *i;
-			const auto& tagContents = iText.tag(iText.begin() + from_glyph(i).first).contents();
-			const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
+			const auto& style = glyph_style(i, aColumn);
 			const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			if (glyph.underline())
 				aGraphicsContext.draw_glyph_underline(pos + point{ 0.0, aLine->first.extents.cy - glyphFont.height() }, glyph,
