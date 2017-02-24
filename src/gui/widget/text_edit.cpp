@@ -460,15 +460,21 @@ namespace neogfx
 				vertical_scrollbar().set_page(client_rect(false).height());
 				vertical_scrollbar().set_position(oldPosition);
 				bool changed = false;
-				if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0 && !vertical_scrollbar().visible())
+				if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
 				{
-					vertical_scrollbar().show();
-					changed = true;
+					if (!vertical_scrollbar().visible())
+					{
+						vertical_scrollbar().show();
+						changed = true;
+					}
 				}
-				else if (vertical_scrollbar().visible())
+				else
 				{
-					vertical_scrollbar().hide();
-					changed = true;
+					if (vertical_scrollbar().visible())
+					{
+						vertical_scrollbar().hide();
+						changed = true;
+					}
 				}
 				if (changed)
 					refresh_lines();
