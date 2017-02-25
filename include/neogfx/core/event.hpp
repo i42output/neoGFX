@@ -148,7 +148,7 @@ namespace neogfx
 		{
 			auto existing = iUniqueIdMap.find(aUniqueId);
 			if (existing != iUniqueIdMap.end())
-				unsubscribe(*existing);
+				unsubscribe(handle{ iInstancePtr, existing->second });
 		}
 		template <typename T>
 		void unsubscribe(const T* aUniqueIdObject)

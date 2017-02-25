@@ -87,6 +87,26 @@ namespace neogfx
 		return iTextOutlineColour;
 	}
 
+	void text_edit::style::set_font(const optional_font& aFont)
+	{
+		iFont = aFont;
+	}
+
+	void text_edit::style::set_text_colour(const colour_type& aColour)
+	{
+		iTextColour = aColour;
+	}
+
+	void text_edit::style::set_background_colour(const colour_type& aColour)
+	{
+		iBackgroundColour = aColour;
+	}
+
+	void text_edit::style::set_text_outline_colour(const colour_type& aColour)
+	{
+		iTextOutlineColour = aColour;
+	}
+
 	text_edit::style& text_edit::style::merge(const style& aOverridingStyle)
 	{
 		if (aOverridingStyle.font() != boost::none)
@@ -1437,6 +1457,7 @@ namespace neogfx
 	{
 		style result = iDefaultStyle;
 		result.merge(aColumn.style());
+		result.set_background_colour();
 		const auto& tagContents = iText.tag(iText.begin() + from_glyph(aGlyph).first).contents();
 		if (tagContents.is<style_list::const_iterator>())
 			result.merge(*static_variant_cast<style_list::const_iterator>(tagContents));

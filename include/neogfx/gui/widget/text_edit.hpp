@@ -66,6 +66,10 @@ namespace neogfx
 			const colour_type& text_colour() const;
 			const colour_type& background_colour() const;
 			const colour_type& text_outline_colour() const;
+			void set_font(const optional_font& aFont = optional_font{});
+			void set_text_colour(const colour_type& aColour = colour_type{});
+			void set_background_colour(const colour_type& aColour = colour_type{});
+			void set_text_outline_colour(const colour_type& aColour = colour_type{});
 		public:
 			style& merge(const style& aOverridingStyle);
 		public:
