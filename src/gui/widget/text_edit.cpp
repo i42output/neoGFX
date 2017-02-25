@@ -314,6 +314,23 @@ namespace neogfx
 		}
 	}
 
+	void text_edit::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+		if (aButton == mouse_button::Left && client_rect().contains(aPosition))
+		{
+			auto pos = hit_test(aPosition);
+			auto start = pos;
+			auto end = pos;
+			while (start > 0 && iText[start - 1] != U'\n' && get_text_direction(iText[start - 1]) == get_text_direction(iText[pos]))
+				--start;
+			while (end < iText.size() && iText[end] != U'\n' && get_text_direction(iText[end]) == get_text_direction(iText[pos]))
+				++end;
+			iCursor.set_anchor(start);
+			iCursor.set_position(end, false);
+		}
+	}
+	
 	void text_edit::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		scrollable_widget::mouse_button_released(aButton, aPosition);

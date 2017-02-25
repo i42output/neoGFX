@@ -430,6 +430,7 @@ namespace neogfx
 		virtual void focus_lost();
 	public:
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
 		virtual void mouse_moved(const point& aPosition);
 		virtual void mouse_entered();
