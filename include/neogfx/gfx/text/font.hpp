@@ -149,8 +149,6 @@ namespace neogfx
 		dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
 	public:
 		i_native_font_face& native_font_face() const;
-	private:
-		
 		// attributes
 	private:
 		std::shared_ptr<i_native_font_face> iNativeFontFace;

@@ -217,46 +217,55 @@ namespace neogfx
 	font::font() :
 		font_info(app::instance().current_style().font_info()), iNativeFontFace(app::instance().current_style().font().iNativeFontFace)
 	{
+		iNativeFontFace->add_ref();
 	}
 
 	font::font(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
 		font_info(aFamilyName, aStyle, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyle, aSize, app::instance().rendering_engine().screen_metrics()))
 	{
+		iNativeFontFace->add_ref();
 	}
 
 	font::font(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
 		font_info(aFamilyName, aStyleName, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyleName, aSize, app::instance().rendering_engine().screen_metrics()))
 	{
+		iNativeFontFace->add_ref();
 	}
 
 	font::font(const font_info& aFontInfo) :
 		font_info(aFontInfo), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(static_cast<font_info>(*this), app::instance().rendering_engine().screen_metrics()))
 	{
+		iNativeFontFace->add_ref();
 	}
 
 	font::font(const font& aOther) :
 		font_info(aOther), iNativeFontFace(aOther.iNativeFontFace)
 	{
+		iNativeFontFace->add_ref();
 	}
 	
 	font::font(const font& aOther, style_e aStyle, point_size aSize) :
 		font_info(aOther.native_font_face().family_name(), aStyle, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aOther.iNativeFontFace->native_font(), aStyle, aSize, app::instance().rendering_engine().screen_metrics()))
 	{
+		iNativeFontFace->add_ref();
 	}
 
 	font::font(const font& aOther, const std::string& aStyleName, point_size aSize) :
 		font_info(aOther.native_font_face().family_name(), aStyleName, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aOther.iNativeFontFace->native_font(), aStyleName, aSize, app::instance().rendering_engine().screen_metrics()))
 	{
+		iNativeFontFace->add_ref();
 	}
 
 	font::font(std::unique_ptr<i_native_font_face> aNativeFontFace) :
 		font_info(aNativeFontFace->family_name(), aNativeFontFace->style_name(), aNativeFontFace->size()), iNativeFontFace(std::move(aNativeFontFace))
 	{
+		iNativeFontFace->add_ref();
 	}
 
 	font::font(std::unique_ptr<i_native_font_face> aNativeFontFace, style_e aStyle) :
 		font_info(aNativeFontFace->family_name(), aStyle, aNativeFontFace->style_name(), aNativeFontFace->size()), iNativeFontFace(std::move(aNativeFontFace))
 	{
+		iNativeFontFace->add_ref();
 	}
 
 	font font::load_from_file(const std::string& aFileName)
@@ -291,12 +300,18 @@ namespace neogfx
 
 	font::~font()
 	{
+		iNativeFontFace->release();
 	}
 
 	font& font::operator=(const font& aOther)
 	{
+		if (&aOther == this)
+			return *this;
 		font_info::operator=(aOther);
+		auto oldFontFace = iNativeFontFace;
 		iNativeFontFace = aOther.iNativeFontFace;
+		iNativeFontFace->add_ref();
+		oldFontFace->release();
 		return *this;
 	}
 
@@ -307,7 +322,7 @@ namespace neogfx
 
 	font font::fallback() const
 	{
-		return font{app::instance().rendering_engine().font_manager().create_fallback_font(*iNativeFontFace), style()};
+		return font{ app::instance().rendering_engine().font_manager().create_fallback_font(*iNativeFontFace), style() };
 	}
 
 	const std::string& font::family_name() const

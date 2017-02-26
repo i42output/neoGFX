@@ -451,6 +451,8 @@ int main(int argc, char* argv[])
 		ng::radio_button multipleSelection(layoutItemViews, "Multiple selection");
 		ng::radio_button extendedSelection(layoutItemViews, "Extended selection");
 
+		std::cout << "Adding tableview items..." << std::endl;
+
 		my_item_model itemModel;
 		#ifdef NDEBUG
 		itemModel.reserve(10000);
@@ -460,6 +462,9 @@ int main(int argc, char* argv[])
 		ng::app::event_processing_context epc(app);
 		for (uint32_t row = 0; row < itemModel.capacity(); ++row)
 		{
+			std::cout << "[" << row << "]" << std::flush;
+			if (row % 10 == 0)
+				std::cout << std::flush;
 			if (row % 1000 == 0)
 				app.process_events(epc);
 			for (uint32_t col = 0; col < 5; ++col)

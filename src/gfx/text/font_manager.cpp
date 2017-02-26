@@ -52,9 +52,13 @@ namespace neogfx
 			virtual bool has_fallback() const { return iFontFace.has_fallback(); }
 			virtual i_native_font_face& fallback() const { return iFontFace.fallback(); }
 			virtual void* handle() const { return iFontFace.handle(); }
+			virtual void update_handle(void* aHandle) { iFontFace.update_handle(aHandle); }
 			virtual void* aux_handle() const { return iFontFace.aux_handle(); }
 			virtual uint32_t glyph_index(char32_t aCodePoint) const { return iFontFace.glyph_index(aCodePoint); }
 			virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const { return iFontFace.glyph_texture(aGlyph); }
+		public:
+			virtual void add_ref() { iFontFace.add_ref(); }
+			virtual void release() { iFontFace.release(); }
 		private:
 			i_native_font_face& iFontFace;
 		};
@@ -204,7 +208,9 @@ namespace neogfx
 			virtual dimension vertical_dpi() const { return iResolution.cy; }
 		} deviceResolution;
 		deviceResolution.iResolution = size(aExistingFont.horizontal_dpi(), aExistingFont.vertical_dpi());
-		return create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), aExistingFont.style(), aExistingFont.size(), deviceResolution);
+		auto fallbackFont = create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), aExistingFont.style(), aExistingFont.size(), deviceResolution);
+		fallbackFont->add_ref();
+		return fallbackFont;
 	}
 
 	std::unique_ptr<i_native_font_face> font_manager::create_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)

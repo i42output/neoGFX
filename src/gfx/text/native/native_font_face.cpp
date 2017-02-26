@@ -41,6 +41,8 @@ namespace neogfx
 	native_font_face::~native_font_face()
 	{
 		FT_Done_Face(iHandle);
+		if (iFallbackFont != nullptr)
+			iFallbackFont->add_ref();
 	}
 
 	i_native_font& native_font_face::native_font()
@@ -131,7 +133,7 @@ namespace neogfx
 	{
 		if (!has_fallback())
 			throw no_fallback_font();
-		if (iFallbackFont == 0)
+		if (iFallbackFont == nullptr)
 			iFallbackFont = iRenderingEngine.font_manager().create_fallback_font(*this);
 		return *iFallbackFont;
 	}
@@ -139,6 +141,12 @@ namespace neogfx
 	void* native_font_face::handle() const
 	{
 		return iHandle;
+	}
+
+	void native_font_face::update_handle(void* aHandle) 
+	{ 
+		iHandle = static_cast<FT_Face>(aHandle);
+		iAuxHandle.reset();
 	}
 
 	void* native_font_face::aux_handle() const
@@ -217,5 +225,15 @@ namespace neogfx
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 
 		return glyphTexture;
+	}
+
+	void native_font_face::add_ref()
+	{
+		native_font().add_ref(*this);
+	}
+
+	void native_font_face::release()
+	{
+		native_font().release(*this);
 	}
 }

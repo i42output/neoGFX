@@ -38,5 +38,8 @@ namespace neogfx
 		virtual const std::string& style_name(std::size_t aStyleIndex) const = 0;
 		virtual i_native_font_face& create_face(font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual i_native_font_face& create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+	public:
+		virtual void add_ref(i_native_font_face& aFace) = 0;
+		virtual void release(i_native_font_face& aFace) = 0;
 	};
 }

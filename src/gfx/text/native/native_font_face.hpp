@@ -91,9 +91,13 @@ namespace neogfx
 		virtual bool has_fallback() const;
 		virtual i_native_font_face& fallback() const;
 		virtual void* handle() const;
+		virtual void update_handle(void* aHandle);
 		virtual void* aux_handle() const;
 		virtual uint32_t glyph_index(char32_t aCodePoint) const;
 		virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const;
+	public:
+		virtual void add_ref();
+		virtual void release();
 	private:
 		i_rendering_engine& iRenderingEngine;
 		i_native_font& iFont;

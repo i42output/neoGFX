@@ -18,25 +18,30 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <boost/filesystem.hpp>
 #include "native_font.hpp"
 #include "native_font_face.hpp"
 
 namespace neogfx
 {
 	native_font::native_font(i_rendering_engine& aRenderingEngine, FT_Library aFontLib, const std::string aFileName) :
-		iRenderingEngine(aRenderingEngine), iFontLib(aFontLib), iSource(filename_type(aFileName)), iFaceCount(0)
+		iRenderingEngine(aRenderingEngine), iFontLib(aFontLib), iSource(filename_type(aFileName)), iCache{}, iFaceCount(0)
 	{
 		register_face(0);
 		for (FT_Long f = 1; f < iFaceCount; ++f)
 			register_face(f);
+		iCache.clear();
+		iCache.shrink_to_fit();
 	}
 
 	native_font::native_font(i_rendering_engine& aRenderingEngine, FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes) :
-		iRenderingEngine(aRenderingEngine), iFontLib(aFontLib), iSource(memory_block_type(aData, aSizeInBytes)), iFaceCount(0)
+		iRenderingEngine(aRenderingEngine), iFontLib(aFontLib), iSource(memory_block_type(aData, aSizeInBytes)), iCache{}, iFaceCount(0)
 	{
 		register_face(0);
 		for (FT_Long f = 1; f < iFaceCount; ++f)
 			register_face(f);
+		iCache.clear();
+		iCache.shrink_to_fit();
 	}
 
 	native_font::~native_font()
@@ -114,6 +119,38 @@ namespace neogfx
 		return create_face(faceIndex, faceStyle, aSize, aDevice);
 	}
 
+	void native_font::add_ref(i_native_font_face& aFace)
+	{
+		++iFaceUsage[&aFace];
+		if (iFaceUsage[&aFace] == 1 && aFace.handle() == nullptr)
+		{
+			for (auto& face : iFaces)
+			{
+				if (&*face.second == &aFace)
+				{
+					face.second->update_handle(open_face(std::get<0>(face.first)));
+					break;
+				}
+			}
+		}
+	}
+
+	void native_font::release(i_native_font_face& aFace)
+	{
+		--iFaceUsage[&aFace];
+		if (iFaceUsage[&aFace] == 0)
+		{
+			close_face(static_cast<FT_Face>(aFace.handle()));
+			iFaceUsage.erase(iFaceUsage.find(&aFace));
+			aFace.update_handle(nullptr);
+		}
+		if (iFaceUsage.empty())
+		{
+			iCache.clear();
+			iCache.shrink_to_fit();
+		}
+	}
+
 	void native_font::register_face(FT_Long aFaceIndex)
 	{
 		FT_Face face = open_face(aFaceIndex);
@@ -135,10 +172,10 @@ namespace neogfx
 		}
 		catch (...)
 		{
-			FT_Done_Face(face);
+			close_face(face);
 			throw;
 		}
-		FT_Done_Face(face);
+		close_face(face);
 	}
 
 	FT_Face native_font::open_face(FT_Long aFaceIndex)
@@ -146,9 +183,17 @@ namespace neogfx
 		FT_Face face;
 		if (iSource.is<filename_type>())
 		{
-			FT_Error error = FT_New_Face(
+			if (iCache.empty())
+			{
+				std::size_t fileSize = static_cast<std::size_t>(boost::filesystem::file_size(static_variant_cast<const filename_type&>(iSource)));
+				iCache.resize(fileSize);
+				std::ifstream file{ static_variant_cast<const filename_type&>(iSource).c_str(), std::ios::in | std::ios::binary };
+				file.read(reinterpret_cast<char*>(&iCache[0]), fileSize);
+			}
+			FT_Error error = FT_New_Memory_Face(
 				iFontLib,
-				static_variant_cast<const filename_type&>(iSource).c_str(),
+				static_cast<const FT_Byte*>(&iCache[0]),
+				iCache.size(),
 				aFaceIndex,
 				&face);
 			if (error)
@@ -166,6 +211,11 @@ namespace neogfx
 				throw failed_to_load_font();
 		}
 		return face;
+	}
+
+	void native_font::close_face(FT_Face aFace)
+	{
+		FT_Done_Face(aFace);
 	}
 
 	i_native_font_face& native_font::create_face(FT_Long aFaceIndex, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
@@ -188,5 +238,4 @@ namespace neogfx
 			throw;
 		}
 	}
-
 }
