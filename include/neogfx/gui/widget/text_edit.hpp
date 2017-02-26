@@ -472,21 +472,6 @@ namespace neogfx
 		void set_default_style(const style& aDefaultStyle);
 		colour default_text_colour() const;
 	public:
-		neogfx::cursor& cursor() const;
-		struct position_info
-		{
-			document_glyphs::const_iterator glyph;
-			glyph_columns::const_iterator column;
-			glyph_lines::const_iterator line;
-			document_glyphs::const_iterator lineStart;
-			document_glyphs::const_iterator lineEnd;
-			point pos;
-		};
-		position_info glyph_position(position_type aGlyphPosition, bool aForCursor = false) const;
-		position_type cursor_glyph_position() const;
-		position_type cursor_glyph_anchor() const;
-		void set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor = true);
-		position_type hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
 		std::string text() const;
 		std::size_t set_text(const std::string& aText);
 		std::size_t set_text(const std::string& aText, const style& aStyle);
@@ -500,6 +485,26 @@ namespace neogfx
 		void set_column(std::size_t aColumnIndex, const column_info& aColumn);
 	public:
 		void set_hint(const std::string& aHint);
+	public:
+		position_type hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
+		virtual bool same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const;
+		virtual std::pair<position_type, position_type> word_at(position_type aTextPosition) const;
+	public:
+		neogfx::cursor& cursor() const;
+	public:
+		struct position_info
+		{
+			document_glyphs::const_iterator glyph;
+			glyph_columns::const_iterator column;
+			glyph_lines::const_iterator line;
+			document_glyphs::const_iterator lineStart;
+			document_glyphs::const_iterator lineEnd;
+			point pos;
+		};
+		position_info glyph_position(position_type aGlyphPosition, bool aForCursor = false) const;
+		position_type cursor_glyph_position() const;
+		position_type cursor_glyph_anchor() const;
+		void set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor = true);
 	private:
 		void init();
 		void delete_any_selection();

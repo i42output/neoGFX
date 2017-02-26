@@ -319,19 +319,9 @@ namespace neogfx
 		scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
 		if (!password() && aButton == mouse_button::Left && client_rect().contains(aPosition))
 		{
-			auto pos = hit_test(aPosition);
-			auto start = pos;
-			auto end = pos;
-			while (start > 0 && iText[start - 1] != U'\n' && 
-				(get_text_direction(iText[start - 1]) == get_text_direction(iText[pos]) || 
-				get_text_direction(iText[start - 1]) == text_direction::None))
-				--start;
-			while (end < iText.size() && iText[end] != U'\n' && 
-				(get_text_direction(iText[end]) == get_text_direction(iText[pos]) ||
-				get_text_direction(iText[end]) == text_direction::None))
-				++end;
-			cursor().set_anchor(start);
-			cursor().set_position(end, false);
+			auto word = word_at(hit_test(aPosition));
+			cursor().set_anchor(word.first);
+			cursor().set_position(word.second, false);
 		}
 	}
 	
@@ -993,11 +983,29 @@ namespace neogfx
 				}
 			}
 		}
-		if (iGlyphs[lineEnd - 1].direction() == text_direction::Whitespace && iGlyphs[lineEnd - 1].value() == U'\n')
+		if (lineEnd > 0 && iGlyphs[lineEnd - 1].direction() == text_direction::Whitespace && iGlyphs[lineEnd - 1].value() == U'\n')
 			--lineEnd;
 		if (lineEnd > lineStart && iGlyphs[lineEnd - 1].direction() == text_direction::RTL)
 			return lineEnd - 1;
 		return lineEnd;
+	}
+
+	bool text_edit::same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const
+	{
+		if (iText[aTextPositionLeft] == U'\n' || iText[aTextPositionRight] == U'\n')
+			return false;
+		return get_text_direction(iText[aTextPositionLeft]) == get_text_direction(iText[aTextPositionRight]);
+	}
+
+	std::pair<text_edit::position_type, text_edit::position_type> text_edit::word_at(position_type aTextPosition) const
+	{
+		auto start = aTextPosition;
+		auto end = aTextPosition;
+		while (start > 0 && same_word(start - 1, aTextPosition))
+			--start;
+		while (end < iText.size() && same_word(aTextPosition, end))
+			++end;
+		return std::make_pair(start, end);
 	}
 
 	std::string text_edit::text() const
