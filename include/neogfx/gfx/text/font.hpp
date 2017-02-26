@@ -122,9 +122,9 @@ namespace neogfx
 		font(const font& aOther);
 		font(const font& aOther, style_e aStyle, point_size aSize);
 		font(const font& aOther, const std::string& aStyleName, point_size aSize);
-		static font load_from_file(const std::string aFileName);
-		static font load_from_file(const std::string aFileName, style_e aStyle, point_size aSize);
-		static font load_from_file(const std::string aFileName, const std::string& aStyleName, point_size aSize);
+		static font load_from_file(const std::string& aFileName);
+		static font load_from_file(const std::string& aFileName, style_e aStyle, point_size aSize);
+		static font load_from_file(const std::string& aFileName, const std::string& aStyleName, point_size aSize);
 		static font load_from_memory(const void* aData, std::size_t aSizeInBytes);
 		static font load_from_memory(const void* aData, std::size_t aSizeInBytes, style_e aStyle, point_size aSize);
 		static font load_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, point_size aSize);

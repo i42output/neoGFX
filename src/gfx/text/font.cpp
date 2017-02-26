@@ -259,17 +259,17 @@ namespace neogfx
 	{
 	}
 
-	font font::load_from_file(const std::string aFileName)
+	font font::load_from_file(const std::string& aFileName)
 	{
 		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, app::instance().rendering_engine().screen_metrics()));
 	}
 
-	font font::load_from_file(const std::string aFileName, style_e aStyle, point_size aSize)
+	font font::load_from_file(const std::string& aFileName, style_e aStyle, point_size aSize)
 	{
 		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, aStyle, aSize, app::instance().rendering_engine().screen_metrics()));
 	}
 	
-	font font::load_from_file(const std::string aFileName, const std::string& aStyleName, point_size aSize)
+	font font::load_from_file(const std::string& aFileName, const std::string& aStyleName, point_size aSize)
 	{
 		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, aStyleName, aSize, app::instance().rendering_engine().screen_metrics()));
 	}
