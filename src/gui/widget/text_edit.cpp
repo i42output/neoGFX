@@ -322,9 +322,13 @@ namespace neogfx
 			auto pos = hit_test(aPosition);
 			auto start = pos;
 			auto end = pos;
-			while (start > 0 && iText[start - 1] != U'\n' && get_text_direction(iText[start - 1]) == get_text_direction(iText[pos]))
+			while (start > 0 && iText[start - 1] != U'\n' && 
+				(get_text_direction(iText[start - 1]) == get_text_direction(iText[pos]) || 
+				get_text_direction(iText[start - 1]) == text_direction::None))
 				--start;
-			while (end < iText.size() && iText[end] != U'\n' && get_text_direction(iText[end]) == get_text_direction(iText[pos]))
+			while (end < iText.size() && iText[end] != U'\n' && 
+				(get_text_direction(iText[end]) == get_text_direction(iText[pos]) ||
+				get_text_direction(iText[end]) == text_direction::None))
 				++end;
 			cursor().set_anchor(start);
 			cursor().set_position(end, false);
