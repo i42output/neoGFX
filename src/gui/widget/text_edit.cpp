@@ -287,6 +287,7 @@ namespace neogfx
 			cursor().set_anchor(0);
 			cursor().set_position(iText.size(), false);
 		}
+		update();
 	}
 
 	void text_edit::focus_lost()
@@ -295,6 +296,7 @@ namespace neogfx
 		app::instance().clipboard().deactivate(*this);
 		if (iType == SingleLine)
 			cursor().set_position(iText.size());
+		update();
 	}
 
 	void text_edit::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -1520,7 +1522,10 @@ namespace neogfx
 					{
 					case 0:
 						if (selected)
-							aGraphicsContext.fill_rect(rect{ pos, size{glyph.advance().cx, aLine->first.extents.cy} }, app::instance().current_style().selection_colour());
+							aGraphicsContext.fill_rect(rect{ pos, size{glyph.advance().cx, aLine->first.extents.cy} }, 
+								has_focus() ? 
+									app::instance().current_style().selection_colour() : 
+									app::instance().current_style().selection_colour().with_alpha(64));
 						break;
 					case 1:
 						if (style.text_outline_colour().empty())
@@ -1548,7 +1553,7 @@ namespace neogfx
 					case 2:
 						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->first.extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0)}, glyph,
 							glyphFont,
-							selected ? 
+							selected && has_focus() ? 
 								(app::instance().current_style().selection_colour().light() ? colour::Black : colour::White) :
 								style.text_colour().is<colour>() ?
 									static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
