@@ -908,7 +908,18 @@ namespace neogfx
 		if (&iRenderingEngine.active_shader_program() != &iRenderingEngine.glyph_shader_program(aGlyph.subpixel()))
 			iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()));
 
-		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aGlyph.fallback_font(aFont).native_font_face().glyph_texture(aGlyph);
+		const font* glyphFont = &aFont;
+		if (aGlyph.use_fallback())
+		{
+			if (iLastDrawGlyphFallbackFont != aFont || iLastDrawGlyphFallbackFontIndex == boost::none || *iLastDrawGlyphFallbackFontIndex != aGlyph.fallback_font_index())
+			{
+				iLastDrawGlyphFallbackFont = aGlyph.fallback_font(aFont);
+				iLastDrawGlyphFallbackFontIndex = aGlyph.fallback_font_index();
+			}
+			glyphFont = &iLastDrawGlyphFallbackFont;
+		}
+
+		const i_glyph_texture& glyphTexture = glyphFont->native_font_face().glyph_texture(aGlyph);
 
 		auto& vertices = iGlyphVertices;
 		auto& colours = iGlyphColours;

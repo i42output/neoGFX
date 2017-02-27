@@ -42,7 +42,7 @@ namespace neogfx
 	{
 		FT_Done_Face(iHandle);
 		if (iFallbackFont != nullptr)
-			iFallbackFont->add_ref();
+			iFallbackFont->release();
 	}
 
 	i_native_font& native_font_face::native_font()
@@ -147,6 +147,11 @@ namespace neogfx
 	{ 
 		iHandle = static_cast<FT_Face>(aHandle);
 		iAuxHandle.reset();
+		if (iHandle != nullptr)
+		{
+			FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(iSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy));
+			FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE);
+		}
 	}
 
 	void* native_font_face::aux_handle() const

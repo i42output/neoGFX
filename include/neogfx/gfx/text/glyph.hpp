@@ -106,6 +106,7 @@ namespace neogfx
 				return fallbackFont;
 			}
 		}
+		uint8_t fallback_font_index() const { return iFallbackIndex; }
 		void kerning_adjust(float aAdjust) { iAdvance.cx += aAdjust; }
 	private:
 		text_direction iDirection;

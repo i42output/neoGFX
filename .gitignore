@@ -170,3 +170,5 @@
 /3rdparty/harfbuzz/harfbuzz-1.4.2/src/ucdn.h
 /3rdparty/harfbuzz/harfbuzz-1.4.2/src/unicodedata_db.h
 /3rdparty/SDL/SDL2-2.0.5/build
+/3rdparty/SDL/SDL2-2.0.5/lib/SDL2.lib
+/3rdparty/SDL/SDL2-2.0.5/lib/SDL2d.lib

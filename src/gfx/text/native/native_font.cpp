@@ -234,7 +234,7 @@ namespace neogfx
 		catch (...)
 		{
 			if (newFace != 0)
-				FT_Done_Face(newFace);
+				close_face(newFace);
 			throw;
 		}
 	}

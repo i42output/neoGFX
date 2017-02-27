@@ -179,5 +179,7 @@ namespace neogfx
 		boost::optional<std::pair<GLuint, GLuint>> iGradientTextures;
 		std::vector<float> iGradientStopPositions;
 		std::vector<std::array<uint8_t, 4>> iGradientStopColours;
+		font iLastDrawGlyphFallbackFont;
+		boost::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
 	};
 }
