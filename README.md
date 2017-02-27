@@ -22,7 +22,7 @@ Button                    | 100     |
 Table View                | 85      |     Selection; icon
 Tree View                 | 0       |
 List View                 | 0       |
-Text Edit                 | 85      |     Columns; inline images and emoji
+Text Edit                 | 85      |     Columns; inline images and emoji; undo/redo
 Line Edit                 | 100     |     
 Spin Box                  | 100     |
 Slider                    | 90      |     Keyboard
