@@ -26,13 +26,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu, style_e aStyle) :
-		window(aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
+		window(aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+	{
+		init();
+		set_menu(aMenu, aPosition);
+	}
+
+	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, style_e aStyle) :
+		window(aParent, aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+	{
+		init();
+		set_menu(aMenu, aPosition);
+	}
+
+	popup_menu::popup_menu(const point& aPosition, style_e aStyle) :
+		window(aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
 
-	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, style_e aStyle) :
-		window(aParent, aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(aMenu), iLayout(*this), iOpeningSubMenu(false)
+	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, style_e aStyle) :
+		window(aParent, aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
@@ -42,16 +56,141 @@ namespace neogfx
 		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().ungrab_keyboard(*this);
 		close_sub_menu();
-		if (iMenu.is_open())
-			iMenu.close();
+		iOpenSubMenu.reset();
+		if (has_menu() && menu().is_open())
+			menu().close();
 	}
 
 	bool popup_menu::can_dismiss(const i_widget* aClickedWidget) const
 	{
 		return aClickedWidget == 0 || 
 			iParentWidget == 0 || 
-			(iParentWidget == aClickedWidget && (style() & DismissOnParentClick)) || 
+			(iParentWidget == aClickedWidget && (style() & (DismissOnParentClick|HideOnParentClick))) || 
 			(iParentWidget != aClickedWidget && !iParentWidget->is_ancestor_of(*aClickedWidget));
+	}
+
+	i_surface::dismissal_type_e popup_menu::dismissal_type() const
+	{
+		if (style() & DismissOnOwnerClick)
+			return CloseOnDismissal;
+		else if (style() & HideOnOwnerClick)
+			return HideOnDismissal;
+		else
+			return CannotDismiss;
+	}
+
+	bool popup_menu::dismissed() const
+	{
+		switch (dismissal_type())
+		{
+		case CloseOnDismissal:
+			return is_closed();
+		case HideOnDismissal:
+			return hidden();
+		default:
+			return false;
+		}
+	}
+
+	void popup_menu::dismiss()
+	{
+		if (style() & DismissOnOwnerClick)
+			close();
+		else if (style() & HideOnOwnerClick)
+			hide();
+	}
+
+	bool popup_menu::has_menu() const
+	{
+		return iMenu != nullptr;
+	}
+
+	i_menu& popup_menu::menu() const
+	{
+		if (has_menu())
+			return *iMenu;
+		throw no_menu();
+	}
+
+	void popup_menu::set_menu(i_menu& aMenu, const point& aPosition)
+	{
+		if (has_menu())
+			clear_menu();
+		iMenu = &aMenu;
+		if (iOpenSubMenu.get() == nullptr)
+			iOpenSubMenu = std::make_unique<popup_menu>(*this, point{});
+		if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
+			app::instance().keyboard().grab_keyboard(*this);
+		for (i_menu::item_index i = 0; i < menu().item_count(); ++i)
+			iLayout.add_item(std::make_shared<menu_item_widget>(*this, menu(), menu().item(i)));
+		layout_items();
+		menu().open();
+		iSink += menu().item_added([this](i_menu::item_index aIndex)
+		{
+			iLayout.add_item(aIndex, std::make_shared<menu_item_widget>(*this, menu(), menu().item(aIndex)));
+			layout_items();
+		});
+		iSink += menu().item_removed([this](i_menu::item_index aIndex)
+		{
+			iLayout.remove_item(aIndex);
+			layout_items();
+		});
+		iSink += menu().item_changed([this](i_menu::item_index)
+		{
+			layout_items();
+		});
+		iSink += menu().item_selected([this](i_menu_item& aMenuItem)
+		{
+			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
+				app::instance().keyboard().grab_keyboard(*this);
+			if (iOpenSubMenu->has_menu())
+			{
+				if (aMenuItem.type() == i_menu_item::Action ||
+					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
+				{
+					iOpenSubMenu->menu().close();
+				}
+			}
+			scroll_to(layout().get_widget<menu_item_widget>(menu().find_item(aMenuItem)));
+			update();
+		});
+		iSink += menu().open_sub_menu([this](i_menu& aSubMenu)
+		{
+			if (!iOpeningSubMenu && aSubMenu.item_count() > 0)
+			{
+				neolib::scoped_flag sf(iOpeningSubMenu);
+				auto& itemWidget = layout().get_widget<menu_item_widget>(menu().find_item(aSubMenu));
+				close_sub_menu();
+				iOpenSubMenu->set_menu(aSubMenu, itemWidget.sub_menu_position());
+				iSink2 += iOpenSubMenu->menu().closed([this]()
+				{
+					if (iOpenSubMenu->has_menu())
+						iOpenSubMenu->clear_menu();
+				});
+				iSink2 += iOpenSubMenu->closed([this]()
+				{
+					close_sub_menu();
+					iOpenSubMenu.reset();
+				});
+			}
+		});
+		move_surface(aPosition);
+		show();
+	}
+
+	void popup_menu::clear_menu()
+	{
+		if (iOpenSubMenu.get() != nullptr)
+			iOpenSubMenu->clear_menu();
+		if (has_menu() && menu().is_open())
+			menu().close();
+		iSink = sink{};
+		iSink2 = sink{};
+		iMenu = nullptr;
+		hide();
+		iLayout.remove_items();
+		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
+			app::instance().keyboard().ungrab_keyboard(*this);
 	}
 
 	void popup_menu::resized()
@@ -63,9 +202,9 @@ namespace neogfx
 			surfaceRect.position().y += (desktopRect.bottom() - surfaceRect.bottom());
 		if (surfaceRect.right() > desktopRect.right())
 			surfaceRect.position().x += (desktopRect.right() - surfaceRect.right());
-		if (iMenu.has_parent())
+		if (has_menu() && menu().has_parent())
 		{
-			if (iMenu.parent().type() == i_menu::MenuBar)
+			if (menu().parent().type() == i_menu::MenuBar)
 			{
 				if (iParentWidget != 0)
 				{
@@ -135,78 +274,78 @@ namespace neogfx
 		switch (aScanCode)
 		{
 		case ScanCode_UP:
-			if (iMenu.has_selected_item())
-				iMenu.select_item(iMenu.previous_available_item(iMenu.selected_item()));
-			else if (iMenu.has_available_items())
-				iMenu.select_item(iMenu.first_available_item());
+			if (menu().has_selected_item())
+				menu().select_item(menu().previous_available_item(menu().selected_item()));
+			else if (menu().has_available_items())
+				menu().select_item(menu().first_available_item());
 			break;
 		case ScanCode_DOWN:
-			if (iMenu.has_selected_item())
-				iMenu.select_item(iMenu.next_available_item(iMenu.selected_item()));
-			else if (iMenu.has_available_items())
-				iMenu.select_item(iMenu.first_available_item());
+			if (menu().has_selected_item())
+				menu().select_item(menu().next_available_item(menu().selected_item()));
+			else if (menu().has_available_items())
+				menu().select_item(menu().first_available_item());
 			break;
 		case ScanCode_LEFT:
-			if (iMenu.has_parent())
+			if (menu().has_parent())
 			{
-				if (iMenu.parent().type() == i_menu::Popup)
-					iMenu.close();
-				else if (iMenu.parent().has_selected_item())
-					iMenu.parent().select_item(iMenu.parent().previous_available_item(iMenu.parent().selected_item()), true);
+				if (menu().parent().type() == i_menu::Popup)
+					menu().close();
+				else if (menu().parent().has_selected_item())
+					menu().parent().select_item(menu().parent().previous_available_item(menu().parent().selected_item()), true);
 			}
 			break;
 		case ScanCode_RIGHT:
-			if (iMenu.has_selected_item())
+			if (menu().has_selected_item())
 			{
-				if (iMenu.item(iMenu.selected_item()).type() == i_menu_item::SubMenu)
+				if (menu().item(menu().selected_item()).type() == i_menu_item::SubMenu)
 				{
-					auto& subMenu = iMenu.item(iMenu.selected_item()).sub_menu();
+					auto& subMenu = menu().item(menu().selected_item()).sub_menu();
 					if (!subMenu.is_open())
-						iMenu.open_sub_menu.trigger(subMenu);
+						menu().open_sub_menu.trigger(subMenu);
 					if (subMenu.has_available_items())
 						subMenu.select_item(subMenu.first_available_item());
 				}
 				else
 				{
-					i_menu* m = &iMenu;
+					i_menu* m = &menu();
 					while (m->has_parent())
 						m = &m->parent();
-					if (m != &iMenu)
+					if (m != &menu())
 					{
 						if (m->has_selected_item())
 							m->select_item(m->next_available_item(m->selected_item()), true);
 					}
 				}
 			}
-			else if (iMenu.has_parent() && iMenu.parent().type() == i_menu::MenuBar)
+			else if (menu().has_parent() && menu().parent().type() == i_menu::MenuBar)
 			{
-				if (iMenu.parent().has_selected_item())
-					iMenu.parent().select_item(iMenu.parent().next_available_item(iMenu.parent().selected_item()), true);
+				if (menu().parent().has_selected_item())
+					menu().parent().select_item(menu().parent().next_available_item(menu().parent().selected_item()), true);
 			}
 			break;
 		case ScanCode_RETURN:
-			if (iMenu.has_selected_item() && iMenu.item(iMenu.selected_item()).availabie())
+			if (menu().has_selected_item() && menu().item(menu().selected_item()).availabie())
 			{
-				auto& selectedItem = iMenu.item(iMenu.selected_item());
+				auto& selectedItem = menu().item(menu().selected_item());
 				if (selectedItem.type() == i_menu_item::Action)
 				{
 					selectedItem.action().triggered.trigger();
 					if (selectedItem.action().is_checkable())
 						selectedItem.action().toggle();
-					iMenu.clear_selection();
-					i_menu* menuToClose = &iMenu;
+					menu().clear_selection();
+					i_menu* menuToClose = &menu();
 					while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
 						menuToClose = &menuToClose->parent();
 					if (menuToClose->type() == i_menu::Popup)
 						menuToClose->close();
 				}
 				else if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
-					iMenu.open_sub_menu.trigger(selectedItem.sub_menu());
+					menu().open_sub_menu.trigger(selectedItem.sub_menu());
 			}
 			break;
 		case ScanCode_ESCAPE:
-			iMenu.clear_selection();
-			iMenu.close();
+			menu().clear_selection();
+			menu().close();
 			break;
 		default:
 			break;
@@ -225,73 +364,16 @@ namespace neogfx
 		return true;
 	}
 
-	i_menu& popup_menu::menu() const
-	{
-		return iMenu;
-	}
-
 	void popup_menu::init()
 	{
-		app::instance().keyboard().grab_keyboard(*this);
 		iLayout.set_margins(neogfx::margins{});
 		closed([this]()
 		{
-			if (iMenu.is_open())
-				iMenu.close();
+			if (has_menu() && menu().is_open())
+				menu().close();
 		});
-		for (i_menu::item_index i = 0; i < iMenu.item_count(); ++i)
-			iLayout.add_item(std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(i)));
-		layout_items();
-		iMenu.open();
-		iSink += iMenu.item_added([this](i_menu::item_index aIndex)
-		{
-			iLayout.add_item(aIndex, std::make_shared<menu_item_widget>(*this, iMenu, iMenu.item(aIndex)));
-			layout_items();
-		});
-		iSink += iMenu.item_removed([this](i_menu::item_index aIndex)
-		{
-			iLayout.remove_item(aIndex);
-			layout_items();
-		});
-		iSink += iMenu.item_changed([this](i_menu::item_index)
-		{
-			layout_items();
-		});
-		iSink += iMenu.item_selected([this](i_menu_item& aMenuItem)
-		{
-			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
-				app::instance().keyboard().grab_keyboard(*this);
-			if (iOpenSubMenu != nullptr)
-			{
-				if (aMenuItem.type() == i_menu_item::Action ||
-					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))
-				{
-					iOpenSubMenu->menu().close();
-				}
-			}
-			scroll_to(layout().get_widget<menu_item_widget>(iMenu.find_item(aMenuItem)));
-			update();
-		});
-		iSink += iMenu.open_sub_menu([this](i_menu& aSubMenu)
-		{
-			if (!iOpeningSubMenu && aSubMenu.item_count() > 0)
-			{
-				neolib::scoped_flag sf(iOpeningSubMenu);
-				auto& itemWidget = layout().get_widget<menu_item_widget>(iMenu.find_item(aSubMenu));
-				close_sub_menu();
-				iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
-				iSink2 += iOpenSubMenu->menu().closed([this]()
-				{
-					if (iOpenSubMenu != nullptr)
-						iOpenSubMenu->close();
-				});
-				iSink2 += iOpenSubMenu->closed([this]()
-				{
-					close_sub_menu();
-				});
-			}
-		});
-		show();
+		if (has_menu())
+			show();
 	}
 
 	void popup_menu::close_sub_menu()
@@ -299,7 +381,7 @@ namespace neogfx
 		if (iOpenSubMenu != nullptr)
 		{
 			iSink2 = sink{};
-			iOpenSubMenu.reset();
+			iOpenSubMenu->clear_menu();
 		}
 	}
 }

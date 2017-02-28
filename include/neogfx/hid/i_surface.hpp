@@ -45,11 +45,19 @@ namespace neogfx
 		event<const i_widget*> dismissing_children;
 		event<> closed;
 	public:
+		enum dismissal_type_e
+		{
+			CannotDismiss,
+			CloseOnDismissal,
+			HideOnDismissal
+		};
+	public:
 		struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_surface::no_native_surface") {} };
 	public:
 		virtual ~i_surface() {}
 	public:
 		virtual bool is_weak() const = 0;
+		virtual bool is_closed() const = 0;
 		virtual void close() = 0;
 		virtual bool has_parent_surface() const = 0;
 		virtual const i_surface& parent_surface() const = 0;
@@ -57,6 +65,9 @@ namespace neogfx
 		virtual bool is_owner_of(const i_surface& aChildSurface) const = 0;
 		virtual bool is_dismissing_children() const = 0;
 		virtual bool can_dismiss(const i_widget* aClickedWidget) const = 0;
+		virtual dismissal_type_e dismissal_type() const = 0;
+		virtual bool dismissed() const = 0;
+		virtual void dismiss() = 0;
 	public:
 		virtual neogfx::surface_type surface_type() const = 0;
 		virtual uint32_t style() const = 0;

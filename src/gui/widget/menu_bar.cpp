@@ -25,17 +25,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	menu_bar::menu_bar() : menu(MenuBar), iLayout(*this)
+	menu_bar::menu_bar() : menu(MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
 	{
 		init();
 	}
 
-	menu_bar::menu_bar(i_widget& aParent) : widget(aParent), menu(MenuBar), iLayout(*this)
+	menu_bar::menu_bar(i_widget& aParent) : widget(aParent), menu(MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
 	{
 		init();
 	}
 
-	menu_bar::menu_bar(i_layout& aLayout) : widget(aLayout), menu(MenuBar), iLayout(*this)
+	menu_bar::menu_bar(i_layout& aLayout) : widget(aLayout), menu(MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
 	{
 		init();
 	}
@@ -43,6 +43,7 @@ namespace neogfx
 	menu_bar::~menu_bar()
 	{
 		close_sub_menu();
+		iOpenSubMenu.reset();
 		remove_widgets();
 	}
 
@@ -62,7 +63,6 @@ namespace neogfx
 
 	bool menu_bar::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
 	{
-		bool handled = true;
 		switch (aScanCode)
 		{
 		case ScanCode_LEFT:
@@ -107,10 +107,20 @@ namespace neogfx
 			update();
 			break;
 		default:
-			handled = false;
 			break;
 		}
-		return handled;
+		return true;
+	}
+
+	bool menu_bar::key_released(scan_code_e, key_code_e, key_modifiers_e)
+	{
+		return true;
+	}
+
+	bool menu_bar::text_input(const std::string&)
+	{
+		app::instance().basic_services().system_beep();
+		return true;
 	}
 
 	void menu_bar::init()
@@ -138,7 +148,7 @@ namespace neogfx
 		});
 		iSink += item_selected([this](i_menu_item& aMenuItem)
 		{
-			if (iOpenSubMenu != nullptr)
+			if (iOpenSubMenu->has_menu())
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
 					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.availabie()))
@@ -162,28 +172,26 @@ namespace neogfx
 			close_sub_menu(false);
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().grab_keyboard(*this);
-			iOpenSubMenu = std::make_unique<popup_menu>(*this, itemWidget.sub_menu_position(), aSubMenu);
+			iOpenSubMenu->set_menu(aSubMenu, itemWidget.sub_menu_position());
 			iSink2 = iOpenSubMenu->menu().closed([this]()
 			{
-				if (iOpenSubMenu != nullptr)
-					iOpenSubMenu->close();
+				if (iOpenSubMenu->has_menu())
+					iOpenSubMenu->clear_menu();
 			});
 			iSink2 += iOpenSubMenu->closed([this]()
 			{
 				close_sub_menu();
+				iOpenSubMenu.reset();
 			});
 		});
 	}
 
 	void menu_bar::close_sub_menu(bool aClearSelection)
 	{
-		if (iOpenSubMenu != nullptr)
-		{
-			iSink2 = sink{};
-			iOpenSubMenu.reset();
-			if (aClearSelection)
-				clear_selection();
-		}
+		iSink2 = sink{};
+		iOpenSubMenu->clear_menu();
+		if (aClearSelection)
+			clear_selection();
 	}
 
 }

@@ -29,15 +29,27 @@ namespace neogfx
 	class popup_menu : public window
 	{
 	public:
-		static const style_e DEFAULT_STYLE = None | NoActivate | RequiresOwnerFocus | DismissOnOwnerClick | InitiallyHidden;
+		static const style_e DEFAULT_STYLE = None | NoActivate | RequiresOwnerFocus | HideOnOwnerClick | InitiallyHidden;
+	public:
+		struct no_menu : std::logic_error { no_menu() : std::logic_error("neogfx::popup_menu::no_menu") {} };
 	public:
 		popup_menu(const point& aPosition, i_menu& aMenu, style_e aStyle = DEFAULT_STYLE);
 		popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, style_e aStyle = DEFAULT_STYLE);
+		popup_menu(const point& aPosition, style_e aStyle = DEFAULT_STYLE);
+		popup_menu(i_widget& aParent, const point& aPosition, style_e aStyle = DEFAULT_STYLE);
 		~popup_menu();
+	public:
+		bool has_menu() const;
+		i_menu& menu() const;
+		void set_menu(i_menu& aMenu, const point& aPosition = point{});
+		void clear_menu();
 	public:
 		virtual void resized();
 	public:
 		virtual bool can_dismiss(const i_widget* aClickedWidget) const;
+		virtual dismissal_type_e dismissal_type() const;
+		virtual bool dismissed() const;
+		virtual void dismiss();
 	public:
 		virtual neogfx::size_policy size_policy() const;	
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -50,8 +62,6 @@ namespace neogfx
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 		virtual bool text_input(const std::string& aText);
-	public:
-		i_menu& menu() const;
 	private:
 		void init();
 		void close_sub_menu();
@@ -59,7 +69,7 @@ namespace neogfx
 		sink iSink;
 		sink iSink2;
 		i_widget* iParentWidget;
-		i_menu& iMenu;
+		i_menu* iMenu;
 		vertical_layout iLayout;
 		std::unique_ptr<popup_menu> iOpenSubMenu;
 		bool iOpeningSubMenu;

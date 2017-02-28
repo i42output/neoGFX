@@ -329,6 +329,11 @@ namespace neogfx
 		return (style() & Weak) == Weak;
 	}
 
+	bool window::is_closed() const
+	{
+		return iClosed;
+	}
+
 	void window::close()
 	{
 		if (iClosed)
@@ -391,6 +396,21 @@ namespace neogfx
 	bool window::can_dismiss(const i_widget*) const
 	{
 		return true;
+	}
+
+	i_surface::dismissal_type_e window::dismissal_type() const
+	{
+		return CloseOnDismissal;
+	}
+
+	bool window::dismissed() const
+	{
+		return iClosed;
+	}
+
+	void window::dismiss()
+	{
+		close();
 	}
 
 	surface_type window::surface_type() const
@@ -731,10 +751,13 @@ namespace neogfx
 		for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)
 		{
 			auto& s = app::instance().surface_manager().surface(i);
-			if (is_owner_of(s) && s.requires_owner_focus())
+			if (!s.dismissed() && is_owner_of(s) && s.requires_owner_focus())
 			{
-				s.close();
-				i = 0;
+				if (s.dismissal_type() == CloseOnDismissal)
+					i = 0;
+				else
+					++i;
+				s.dismiss();
 			}
 			else
 				++i;
@@ -984,10 +1007,13 @@ namespace neogfx
 			for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)
 			{
 				auto& s = app::instance().surface_manager().surface(i);
-				if (is_owner_of(s) && (s.style() & window::DismissOnOwnerClick) == window::DismissOnOwnerClick && s.can_dismiss(aClickedWidget))
+				if (!s.dismissed() && is_owner_of(s) && s.can_dismiss(aClickedWidget))
 				{
-					s.close();
-					i = 0;
+					if (s.dismissal_type() == CloseOnDismissal)
+						i = 0;
+					else
+						++i;
+					s.dismiss();
 				}
 				else
 					++i;

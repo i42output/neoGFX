@@ -34,22 +34,24 @@ namespace neogfx
 	public:
 		enum style_e : uint32_t
 		{
-			Invalid				= 0x0000,
-			None				= 0x0001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
-			Titlebar			= 0x0002,	// The window has a titlebar
-			MinimizeBox			= 0x0004,
-			MaximizeBox			= 0x0008,
-			Resize				= 0x0010,	// The window can be resized and has a maximize button
-			Close				= 0x0020,	// The window has a close button
-			Fullscreen			= 0x0040,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
-			Modal				= 0x0080,
-			ApplicationModal	= 0x0100,
-			NoActivate			= 0x0200,
-			RequiresOwnerFocus	= 0x0400,
-			DismissOnOwnerClick = 0x0800,
-			DismissOnParentClick= 0x1000,
-			InitiallyHidden		= 0x2000,
-			Weak				= 0x8000,
+			Invalid				= 0x00000,
+			None				= 0x00001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
+			Titlebar			= 0x00002,	// The window has a titlebar
+			MinimizeBox			= 0x00004,
+			MaximizeBox			= 0x00008,
+			Resize				= 0x00010,	// The window can be resized and has a maximize button
+			Close				= 0x00020,	// The window has a close button
+			Fullscreen			= 0x00040,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
+			Modal				= 0x00080,
+			ApplicationModal	= 0x01000,
+			NoActivate			= 0x02000,
+			RequiresOwnerFocus	= 0x04000,
+			DismissOnOwnerClick = 0x08000,
+			DismissOnParentClick= 0x10000,
+			HideOnOwnerClick	= 0x20000,
+			HideOnParentClick	= 0x40000,
+			InitiallyHidden		= 0x80000,
+			Weak				= 0x10000,
 			Default				= Titlebar | MinimizeBox | MaximizeBox | Resize | Close
 		};
 	public:
@@ -91,6 +93,7 @@ namespace neogfx
 		virtual colour background_colour() const;
 	public:
 		virtual bool is_weak() const;
+		virtual bool is_closed() const;
 		virtual void close();
 		virtual bool has_parent_surface() const;
 		virtual const i_surface& parent_surface() const;
@@ -98,6 +101,9 @@ namespace neogfx
 		virtual bool is_owner_of(const i_surface& aChildSurface) const;
 		virtual bool is_dismissing_children() const;
 		virtual bool can_dismiss(const i_widget* aClickedWidget) const;
+		virtual dismissal_type_e dismissal_type() const;
+		virtual bool dismissed() const;
+		virtual void dismiss();
 	public:
 		virtual neogfx::surface_type surface_type() const;
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
