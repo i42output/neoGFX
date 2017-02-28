@@ -40,6 +40,7 @@ namespace neogfx
 		menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem);
 		~menu_item_widget();
 	public:
+		i_menu& menu() const;
 		i_menu_item& menu_item() const;
 	public:
 		virtual neogfx::size_policy size_policy() const;
@@ -61,7 +62,7 @@ namespace neogfx
 		point sub_menu_position() const;
 	private:
 		void init();
-		virtual void handle_clicked();
+		virtual void select_item(bool aSelectAnySubMenuItem = false);
 	private:
 		sink iSink;
 		dimension iGap = 9.0;

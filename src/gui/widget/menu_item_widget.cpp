@@ -49,6 +49,11 @@ namespace neogfx
 		iSubMenuOpener.reset();
 	}
 
+	i_menu& menu_item_widget::menu() const
+	{
+		return iMenu;
+	}
+
 	i_menu_item& menu_item_widget::menu_item() const
 	{
 		return iMenuItem;
@@ -58,24 +63,24 @@ namespace neogfx
 	{
 		if (widget::has_size_policy())
 			return widget::size_policy();
-		return neogfx::size_policy{ iMenu.type() == i_menu::type_e::Popup ? neogfx::size_policy::Expanding : neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
+		return neogfx::size_policy{ menu().type() == i_menu::type_e::Popup ? neogfx::size_policy::Expanding : neogfx::size_policy::Minimum, neogfx::size_policy::Minimum };
 	}
 
 	size menu_item_widget::minimum_size(const optional_size&) const
 	{
 		size result = widget::minimum_size();
-		if (iMenuItem.type() == i_menu_item::Action && iMenuItem.action().is_separator())
+		if (menu_item().type() == i_menu_item::Action && menu_item().action().is_separator())
 			result.cy = units_converter(*this).from_device_units(3.0);
 		return result;
 	}
 
 	void menu_item_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
-		if (iMenu.has_selected_item() && iMenu.selected_item() == (iMenu.find_item(iMenuItem)))
+		if (menu().has_selected_item() && menu().selected_item() == (menu().find_item(menu_item())))
 		{
-			bool openSubMenu = (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open());
+			bool openSubMenu = (menu_item().type() == i_menu_item::SubMenu && menu_item().sub_menu().is_open());
 			colour background;
-			if (openSubMenu && iMenu.type() == i_menu::MenuBar)
+			if (openSubMenu && menu().type() == i_menu::MenuBar)
 			{
 				background = app::instance().current_style().colour().dark() ?
 					app::instance().current_style().colour().darker(0x40) :
@@ -97,12 +102,12 @@ namespace neogfx
 
 	void menu_item_widget::paint(graphics_context& aGraphicsContext) const
 	{
-		if (iMenuItem.type() != i_menu_item::Action || !iMenuItem.action().is_separator())
+		if (menu_item().type() != i_menu_item::Action || !menu_item().action().is_separator())
 		{
 			widget::paint(aGraphicsContext);
-			if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
+			if (menu_item().type() == i_menu_item::SubMenu && menu().type() == i_menu::Popup)
 			{
-				bool openSubMenu = (iMenuItem.type() == i_menu_item::SubMenu && iMenuItem.sub_menu().is_open());
+				bool openSubMenu = (menu_item().type() == i_menu_item::SubMenu && menu_item().sub_menu().is_open());
 				colour ink = openSubMenu ? app::instance().current_style().selection_colour()
 					: background_colour().light() ? background_colour().darker(0x80) : background_colour().lighter(0x80);
 				if (iSubMenuArrow == boost::none || iSubMenuArrow->first != ink)
@@ -145,36 +150,36 @@ namespace neogfx
 	{
 		widget::mouse_entered();
 		update();
-		if (iMenuItem.availabie())
-			iMenu.select_item(iMenu.find_item(iMenuItem));
+		if (menu_item().availabie())
+			menu().select_item(menu().find_item(menu_item()));
 	}
 
 	void menu_item_widget::mouse_left()
 	{
 		widget::mouse_left();
 		update();
-		if (iMenu.has_selected_item() && iMenu.selected_item() == (iMenu.find_item(iMenuItem)) &&
-			(iMenuItem.type() == i_menu_item::Action || !iMenuItem.sub_menu().is_open()))
-			iMenu.clear_selection();
+		if (menu().has_selected_item() && menu().selected_item() == (menu().find_item(menu_item())) &&
+			(menu_item().type() == i_menu_item::Action || !menu_item().sub_menu().is_open()))
+			menu().clear_selection();
 	}
 
 	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point&, key_modifiers_e)
 	{
-		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::SubMenu)
-			handle_clicked();
+		if (aButton == mouse_button::Left && menu_item().type() == i_menu_item::SubMenu)
+			select_item();
 	}
 
 	void menu_item_widget::mouse_button_released(mouse_button aButton, const point&)
 	{
-		if (aButton == mouse_button::Left && iMenuItem.type() == i_menu_item::Action)
-			handle_clicked();
+		if (aButton == mouse_button::Left && menu_item().type() == i_menu_item::Action)
+			select_item();
 	}
 
 	bool menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
 	{
 		if (aScanCode == ScanCode_RETURN)
 		{
-			handle_clicked();
+			select_item(true);
 			return true;
 		}
 		return false;
@@ -187,7 +192,7 @@ namespace neogfx
 
 	void menu_item_widget::mnemonic_execute()
 	{
-		handle_clicked();
+		select_item(true);
 	}
 
 	i_widget& menu_item_widget::mnemonic_widget()
@@ -197,7 +202,7 @@ namespace neogfx
 
 	point menu_item_widget::sub_menu_position() const
 	{
-		if (iMenu.type() == i_menu::MenuBar)
+		if (menu().type() == i_menu::MenuBar)
 			return window_rect().bottom_left() + surface().surface_position();
 		else
 			return window_rect().top_right() + surface().surface_position();
@@ -206,9 +211,9 @@ namespace neogfx
 	void menu_item_widget::init()
 	{
 		set_margins(neogfx::margins{});
-		iLayout.set_margins(neogfx::margins{ iGap, 0.0, iGap * (iMenu.type() == i_menu::Popup ? 2.0 : 1.0), 0.0 });
+		iLayout.set_margins(neogfx::margins{ iGap, 0.0, iGap * (menu().type() == i_menu::Popup ? 2.0 : 1.0), 0.0 });
 		iLayout.set_spacing(size{ iGap, 0.0 });
-		if (iMenu.type() == i_menu::Popup)
+		if (menu().type() == i_menu::Popup)
 			iIcon.set_fixed_size(size{ iIconSize, iIconSize });
 		else
 			iIcon.set_fixed_size(size{});
@@ -223,73 +228,73 @@ namespace neogfx
 		};
 		iSink += iText.text_changed(text_updated);
 		text_updated();
-		if (iMenuItem.type() == i_menu_item::Action)
+		if (menu_item().type() == i_menu_item::Action)
 		{
 			auto action_changed = [this]()
 			{
-				iIcon.set_image(iMenuItem.action().is_unchecked() ? iMenuItem.action().image() : iMenuItem.action().checked_image());
+				iIcon.set_image(menu_item().action().is_unchecked() ? menu_item().action().image() : menu_item().action().checked_image());
 				if (!iIcon.image().is_empty())
 					iIcon.set_fixed_size(size{ iIconSize, iIconSize });
-				else if (iMenu.type() == i_menu::MenuBar)
+				else if (menu().type() == i_menu::MenuBar)
 					iIcon.set_fixed_size(size{});
-				iText.set_text(iMenuItem.action().menu_text());
-				if (iMenu.type() != i_menu::MenuBar)
-					iShortcutText.set_text(iMenuItem.action().shortcut() != boost::none ? iMenuItem.action().shortcut()->as_text() : std::string());
-				iSpacer.set_minimum_size(size{ iMenuItem.action().shortcut() != boost::none && iMenu.type() != i_menu::MenuBar ? iGap * 2.0 : 0.0, 0.0 });
-				enable(iMenuItem.action().is_enabled());
+				iText.set_text(menu_item().action().menu_text());
+				if (menu().type() != i_menu::MenuBar)
+					iShortcutText.set_text(menu_item().action().shortcut() != boost::none ? menu_item().action().shortcut()->as_text() : std::string());
+				iSpacer.set_minimum_size(size{ menu_item().action().shortcut() != boost::none && menu().type() != i_menu::MenuBar ? iGap * 2.0 : 0.0, 0.0 });
+				enable(menu_item().action().is_enabled());
 			};
-			iSink += iMenuItem.action().changed(action_changed);
-			iSink += iMenuItem.action().checked(action_changed);
-			iSink += iMenuItem.action().unchecked(action_changed);
-			iSink += iMenuItem.action().enabled(action_changed);
-			iSink += iMenuItem.action().disabled(action_changed);
+			iSink += menu_item().action().changed(action_changed);
+			iSink += menu_item().action().checked(action_changed);
+			iSink += menu_item().action().unchecked(action_changed);
+			iSink += menu_item().action().enabled(action_changed);
+			iSink += menu_item().action().disabled(action_changed);
 			action_changed();
 		}
 		else
 		{
-			iSink += iMenuItem.sub_menu().opened([this]() {update(); });
-			iSink += iMenuItem.sub_menu().closed([this]() {update(); });
+			iSink += menu_item().sub_menu().opened([this]() {update(); });
+			iSink += menu_item().sub_menu().closed([this]() {update(); });
 			auto menu_changed = [this]() 
 			{ 
-				iIcon.set_image(iMenuItem.sub_menu().image());
-				iText.set_text(iMenuItem.sub_menu().title());
+				iIcon.set_image(menu_item().sub_menu().image());
+				iText.set_text(menu_item().sub_menu().title());
 			};
-			iSink += iMenuItem.sub_menu().menu_changed(menu_changed);
+			iSink += menu_item().sub_menu().menu_changed(menu_changed);
 			menu_changed();
 		}
-		iSink += iMenuItem.selected([this]()
+		iSink += menu_item().selected([this]()
 		{
-			if (iMenuItem.type() == i_menu_item::SubMenu && iMenu.type() == i_menu::Popup)
+			if (menu_item().type() == i_menu_item::SubMenu && menu().type() == i_menu::Popup)
 			{
 				iSubMenuOpener = std::make_unique<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
 				{
-					if (!iMenuItem.sub_menu().is_open())
+					if (!menu_item().sub_menu().is_open())
 					{
 						destroyed_flag destroyed(*this);
-						iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
+						menu().open_sub_menu.trigger(menu_item().sub_menu());
 						if (!destroyed)
 							update();
 					}
 				}, 250);
 			}
 		});
-		iSink += iMenuItem.deselected([this]()
+		iSink += menu_item().deselected([this]()
 		{
 			iSubMenuOpener.reset();
 		});
 	}
 
-	void menu_item_widget::handle_clicked()
+	void menu_item_widget::select_item(bool aSelectAnySubMenuItem)
 	{
-		if (!iMenuItem.availabie())
+		if (!menu_item().availabie())
 			return;
-		if (iMenuItem.type() == i_menu_item::Action)
+		if (menu_item().type() == i_menu_item::Action)
 		{
-			iMenu.clear_selection();
-			iMenuItem.action().triggered.trigger();
-			if (iMenuItem.action().is_checkable())
-				iMenuItem.action().toggle();
-			i_menu* menuToClose = &iMenu;
+			menu().clear_selection();
+			menu_item().action().triggered.trigger();
+			if (menu_item().action().is_checkable())
+				menu_item().action().toggle();
+			i_menu* menuToClose = &menu();
 			while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
 				menuToClose = &menuToClose->parent();
 			if (menuToClose->type() == i_menu::Popup && menuToClose->is_open())
@@ -297,17 +302,23 @@ namespace neogfx
 		}
 		else
 		{
-			if (!iMenuItem.sub_menu().is_open())
+			if (!menu_item().sub_menu().is_open())
 			{
-				iMenu.select_item(iMenu.find_item(iMenuItem));
-				iMenu.open_sub_menu.trigger(iMenuItem.sub_menu());
+				menu().select_item(menu().find_item(menu_item()));
+				menu().open_sub_menu.trigger(menu_item().sub_menu());
 				update();
 			}
-			else if (iMenu.type() == i_menu::MenuBar)
+			else if (menu().type() == i_menu::MenuBar)
 			{
-				iMenuItem.sub_menu().close();
+				menu_item().sub_menu().close();
 				update();
 			}
+		}
+		if (aSelectAnySubMenuItem && menu_item().type() == i_menu_item::SubMenu)
+		{
+			auto& subMenu = menu_item().sub_menu();
+			if (subMenu.is_open() && !subMenu.has_selected_item() && subMenu.has_available_items())
+				subMenu.select_item(subMenu.first_available_item());
 		}
 	}
 }

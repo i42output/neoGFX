@@ -60,7 +60,7 @@ namespace neogfx
 		virtual item_index find_item(const i_menu& aSubMenu) const;
 		virtual bool has_selected_item() const;
 		virtual item_index selected_item() const;
-		virtual void select_item(item_index aItemIndex);
+		virtual void select_item(item_index aItemIndex, bool aSelectAnySubMenuItem = false);
 		virtual void clear_selection();
 		virtual bool has_available_items() const;
 		virtual bool item_available(item_index aItemIndex) const;

@@ -132,7 +132,6 @@ namespace neogfx
 
 	bool popup_menu::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
 	{
-		bool handled = true;
 		switch (aScanCode)
 		{
 		case ScanCode_UP:
@@ -153,7 +152,7 @@ namespace neogfx
 				if (iMenu.parent().type() == i_menu::Popup)
 					iMenu.close();
 				else if (iMenu.parent().has_selected_item())
-					iMenu.parent().select_item(iMenu.parent().previous_available_item(iMenu.parent().selected_item()));
+					iMenu.parent().select_item(iMenu.parent().previous_available_item(iMenu.parent().selected_item()), true);
 			}
 			break;
 		case ScanCode_RIGHT:
@@ -175,9 +174,14 @@ namespace neogfx
 					if (m != &iMenu)
 					{
 						if (m->has_selected_item())
-							m->select_item(m->next_available_item(m->selected_item()));
+							m->select_item(m->next_available_item(m->selected_item()), true);
 					}
 				}
+			}
+			else if (iMenu.has_parent() && iMenu.parent().type() == i_menu::MenuBar)
+			{
+				if (iMenu.parent().has_selected_item())
+					iMenu.parent().select_item(iMenu.parent().next_available_item(iMenu.parent().selected_item()), true);
 			}
 			break;
 		case ScanCode_RETURN:
@@ -205,10 +209,20 @@ namespace neogfx
 			iMenu.close();
 			break;
 		default:
-			handled = false;
 			break;
 		}
-		return handled;
+		return true;
+	}
+
+	bool popup_menu::key_released(scan_code_e, key_code_e, key_modifiers_e)
+	{
+		return true;
+	}
+
+	bool popup_menu::text_input(const std::string&)
+	{
+		app::instance().basic_services().system_beep();
+		return true;
 	}
 
 	i_menu& popup_menu::menu() const
@@ -218,6 +232,7 @@ namespace neogfx
 
 	void popup_menu::init()
 	{
+		app::instance().keyboard().grab_keyboard(*this);
 		iLayout.set_margins(neogfx::margins{});
 		closed([this]()
 		{

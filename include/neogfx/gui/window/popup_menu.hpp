@@ -48,6 +48,8 @@ namespace neogfx
 		virtual void set_capture();
 	public:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		virtual bool text_input(const std::string& aText);
 	public:
 		i_menu& menu() const;
 	private:
