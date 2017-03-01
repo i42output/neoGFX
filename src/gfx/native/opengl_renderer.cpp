@@ -400,6 +400,11 @@ namespace neogfx
 		return iTextureManager;
 	}
 
+	bool opengl_renderer::shader_program_active() const
+	{
+		return iActiveProgram != iShaderPrograms.end();
+	}
+
 	void opengl_renderer::activate_shader_program(i_shader_program& aProgram)
 	{
 		for (auto i = iShaderPrograms.begin(); i != iShaderPrograms.end(); ++i)

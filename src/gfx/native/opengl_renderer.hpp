@@ -99,6 +99,7 @@ namespace neogfx
 		virtual const i_screen_metrics& screen_metrics() const;
 		virtual i_font_manager& font_manager();
 		virtual i_texture_manager& texture_manager();
+		virtual bool shader_program_active() const;
 		virtual void activate_shader_program(i_shader_program& aProgram);
 		virtual void deactivate_shader_program();
 		virtual const i_shader_program& active_shader_program() const;

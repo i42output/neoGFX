@@ -35,21 +35,27 @@ namespace neogfx
 		AutomaticGame
 	};
 
-	enum colour_format_e
+	enum class colour_format
 	{
-		ColourFormatRGBA8
+		RGBA8
 	};
 
-	enum smoothing_mode_e
+	enum class smoothing_mode
 	{
-		SmoothingModeNone,
-		SmoothingModeAntiAlias
+		None,
+		AntiAlias
 	};
 
-	enum logical_operation_e
+	enum class logical_operation
 	{
-		LogicalNone,
-		LogicalXor
+		None,
+		Xor
+	};
+
+	enum class shader_effect
+	{
+		None,
+		Monochrome
 	};
 
 	typedef std::vector<vec2> vertex_list2;
@@ -117,11 +123,9 @@ namespace neogfx
 		void clip_to(const rect& aRect) const;
 		void clip_to(const path& aPath, dimension aPathOutline = 0) const;
 		void reset_clip() const;
-		smoothing_mode_e smoothing_mode() const;
-		smoothing_mode_e set_smoothing_mode(smoothing_mode_e aSmoothingMode) const;
-		bool monochrome() const;
-		void set_monochrome(bool aMonochrome);
-		void push_logical_operation(logical_operation_e aLogicalOperation) const;
+		neogfx::smoothing_mode smoothing_mode() const;
+		neogfx::smoothing_mode set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const;
+		void push_logical_operation(logical_operation aLogicalOperation) const;
 		void pop_logical_operation() const;
 		void line_stipple_on(uint32_t aFactor, uint16_t aPattern) const;
 		void line_stipple_off() const;
@@ -175,12 +179,12 @@ namespace neogfx
 		bool password() const;
 		const std::string& password_mask() const;
 		void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
-		void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
-		void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
-		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const optional_colour& aColour = optional_colour()) const;
-		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour()) const;
-		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour()) const;
-		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour()) const;
+		void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		// implementation
 		// from i_device_metrics
 	public:

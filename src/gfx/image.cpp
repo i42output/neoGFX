@@ -24,11 +24,11 @@
 
 namespace neogfx
 {
-	image::image() : iColourFormat(ColourFormatRGBA8)
+	image::image() : iColourFormat(neogfx::colour_format::RGBA8)
 	{
 	}
 
-	image::image(const neogfx::size& aSize, const colour& aColour) : iColourFormat(ColourFormatRGBA8)
+	image::image(const neogfx::size& aSize, const colour& aColour) : iColourFormat(neogfx::colour_format::RGBA8)
 	{
 		resize(aSize);
 		for (std::size_t y = 0; y < aSize.cx; ++y)
@@ -36,7 +36,7 @@ namespace neogfx
 				set_pixel(point(x, y), aColour);
 	}
 
-	image::image(const std::string& aUri) : iResource(resource_manager::instance().load_resource(aUri)), iUri(aUri), iColourFormat(ColourFormatRGBA8)
+	image::image(const std::string& aUri) : iResource(resource_manager::instance().load_resource(aUri)), iUri(aUri), iColourFormat(neogfx::colour_format::RGBA8)
 	{
 		if (available())
 			load();
@@ -107,7 +107,7 @@ namespace neogfx
 		return iData.size();
 	}
 
-	colour_format_e image::colour_format() const
+	colour_format image::colour_format() const
 	{
 		return iColourFormat;
 	}
@@ -127,7 +127,7 @@ namespace neogfx
 	{
 		switch (iColourFormat)
 		{
-		case ColourFormatRGBA8:
+		case neogfx::colour_format::RGBA8:
 			{
 				const uint8_t* pixel = &iData[static_cast<std::size_t>(aPoint.y * extents().cx * 4 + aPoint.x * 4)];
 				return colour{pixel[0], pixel[1], pixel[2], pixel[3]};
@@ -141,7 +141,7 @@ namespace neogfx
 	{
 		switch (iColourFormat)
 		{
-		case ColourFormatRGBA8:
+		case neogfx::colour_format::RGBA8:
 			{
 				uint8_t* pixel = &iData[static_cast<std::size_t>(aPoint.y * extents().cx * 4 + aPoint.x * 4)];
 				pixel[0] = aColour.red();

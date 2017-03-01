@@ -48,11 +48,9 @@ namespace neogfx
 		virtual void clip_to(const rect& aRect) = 0;
 		virtual void clip_to(const path& aPath, dimension aPathOutline = 0) = 0;
 		virtual void reset_clip() = 0;
-		virtual smoothing_mode_e smoothing_mode() const = 0;
-		virtual smoothing_mode_e set_smoothing_mode(smoothing_mode_e aSmoothingMode) = 0;
-		virtual bool monochrome() const = 0;
-		virtual void set_monochrome(bool aMonochrome) = 0;
-		virtual void push_logical_operation(logical_operation_e aLogicalOperation) = 0;
+		virtual neogfx::smoothing_mode smoothing_mode() const = 0;
+		virtual neogfx::smoothing_mode set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) = 0;
+		virtual void push_logical_operation(logical_operation aLogicalOperation) = 0;
 		virtual void pop_logical_operation() = 0;
 		virtual void line_stipple_on(uint32_t aFactor, uint16_t aPattern) = 0;
 		virtual void line_stipple_off() = 0;
@@ -89,6 +87,6 @@ namespace neogfx
 		virtual void begin_drawing_glyphs() = 0;
 		virtual size draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) = 0;
 		virtual void end_drawing_glyphs() = 0;
-		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) = 0;
+		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) = 0;
 	};
 }

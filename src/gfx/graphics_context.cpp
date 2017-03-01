@@ -253,7 +253,7 @@ namespace neogfx
 
 	void graphics_context::draw_focus_rect(const rect& aRect) const
 	{
-		push_logical_operation(LogicalXor);
+		push_logical_operation(neogfx::logical_operation::Xor);
 		line_stipple_on(1, 0xAAAA);
 		draw_rect(aRect, pen(colour::White, 1.0));
 		line_stipple_off();
@@ -587,27 +587,17 @@ namespace neogfx
 		iNativeGraphicsContext->reset_clip();
 	}
 
-	smoothing_mode_e graphics_context::smoothing_mode() const
+	smoothing_mode graphics_context::smoothing_mode() const
 	{
 		return iNativeGraphicsContext->smoothing_mode();
 	}
 
-	smoothing_mode_e graphics_context::set_smoothing_mode(smoothing_mode_e aSmoothingMode) const
+	smoothing_mode graphics_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const
 	{
 		return iNativeGraphicsContext->set_smoothing_mode(aSmoothingMode);
 	}
 
-	bool graphics_context::monochrome() const
-	{
-		return iNativeGraphicsContext->monochrome();
-	}
-	
-	void graphics_context::set_monochrome(bool aMonochrome)
-	{
-		iNativeGraphicsContext->set_monochrome(aMonochrome);
-	}
-
-	void graphics_context::push_logical_operation(logical_operation_e aLogicalOperation) const
+	void graphics_context::push_logical_operation(logical_operation aLogicalOperation) const
 	{
 		iNativeGraphicsContext->push_logical_operation(aLogicalOperation);
 	}
@@ -744,34 +734,34 @@ namespace neogfx
 		iNativeGraphicsContext->set_password(aPassword, aMask);
 	}
 
-	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour) const
+	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour);
+		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour) const
+	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour);
+		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const optional_colour& aColour) const
+	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour);
+		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) const
+	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, aTextureRect, aColour);
+		iNativeGraphicsContext->draw_texture(rect{to_device_units(aPoint) + iOrigin, aTexture.extents()}.to_vector(), aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) const
+	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, aTextureRect, aColour);
+		iNativeGraphicsContext->draw_texture((to_device_units(aRect) + iOrigin).to_vector(), aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour) const
+	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, aTextureRect, aColour);
+		iNativeGraphicsContext->draw_texture(to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
 	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :

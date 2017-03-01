@@ -1614,7 +1614,7 @@ namespace neogfx
 						0;
 			if (cursor().colour().empty())
 			{
-				aGraphicsContext.push_logical_operation(LogicalXor);
+				aGraphicsContext.push_logical_operation(logical_operation::Xor);
 				aGraphicsContext.draw_line(
 					point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight },
 					point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },

@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
 
+
 namespace neogfx
 {
 	image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
@@ -183,10 +184,7 @@ namespace neogfx
 			placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
 			break;
 		}
-		if (effectively_disabled())
-			aGraphicsContext.set_monochrome(true);
-		aGraphicsContext.draw_texture(placementRect, iTexture, effectively_disabled() ? colour(0xFF, 0xFF, 0xFF, 0x80) : optional_colour());
-		aGraphicsContext.set_monochrome(false);
+		aGraphicsContext.draw_texture(placementRect, iTexture, effectively_disabled() ? colour(0xFF, 0xFF, 0xFF, 0x80) : optional_colour(), effectively_disabled() ? shader_effect::Monochrome : shader_effect::None);
 	}
 
 	const texture& image_widget::image() const
@@ -201,6 +199,7 @@ namespace neogfx
 		image_changed.trigger();
 		if (oldSize != minimum_size() && has_managing_layout())
 			managing_layout().layout_items(true);
+		update();
 	}
 
 	void image_widget::set_image(const i_image& aImage)

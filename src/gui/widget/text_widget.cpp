@@ -104,15 +104,11 @@ namespace neogfx
 		}
 		colour ink = text_colour();
 		if (effectively_disabled())
-		{
-			aGraphicsContext.set_monochrome(true);
 			ink.set_alpha(ink.alpha() / 2);
-		}
 		if (multi_line())
 			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, ink, alignment::Centre, true);
 		else
 			aGraphicsContext.draw_text(textPosition, text(), font(), ink, true);
-		aGraphicsContext.set_monochrome(false);
 	}
 
 	void text_widget::set_font(const optional_font& aFont)

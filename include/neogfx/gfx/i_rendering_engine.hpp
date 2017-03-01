@@ -88,6 +88,7 @@ namespace neogfx
 		virtual bool creating_window() const = 0;
 		virtual i_font_manager& font_manager() = 0;
 		virtual i_texture_manager& texture_manager() = 0;
+		virtual bool shader_program_active() const = 0;
 		virtual void activate_shader_program(i_shader_program& aProgram) = 0;
 		virtual void deactivate_shader_program() = 0;
 		virtual const i_shader_program& active_shader_program() const = 0;

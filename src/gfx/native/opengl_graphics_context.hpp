@@ -50,7 +50,7 @@ namespace neogfx
 		class scoped_anti_alias
 		{
 		public:
-			scoped_anti_alias(opengl_graphics_context& aParent, smoothing_mode_e aNewSmoothingMode) : iParent(aParent), iOldSmoothingMode(aParent.smoothing_mode())
+			scoped_anti_alias(opengl_graphics_context& aParent, neogfx::smoothing_mode aNewSmoothingMode) : iParent(aParent), iOldSmoothingMode(aParent.smoothing_mode())
 			{
 				iParent.set_smoothing_mode(aNewSmoothingMode);
 			}
@@ -60,12 +60,12 @@ namespace neogfx
 			}
 		private:
 			opengl_graphics_context& iParent;
-			smoothing_mode_e iOldSmoothingMode;
+			neogfx::smoothing_mode iOldSmoothingMode;
 		};
 		class disable_anti_alias : public scoped_anti_alias
 		{
 		public:
-			disable_anti_alias(opengl_graphics_context& aParent) : scoped_anti_alias(aParent, SmoothingModeNone)
+			disable_anti_alias(opengl_graphics_context& aParent) : scoped_anti_alias(aParent, neogfx::smoothing_mode::None)
 			{
 			}
 		};
@@ -91,11 +91,9 @@ namespace neogfx
 		virtual void clip_to(const rect& aRect);
 		virtual void clip_to(const path& aPath, dimension aPathOutline);
 		virtual void reset_clip();
-		virtual smoothing_mode_e smoothing_mode() const;
-		virtual smoothing_mode_e set_smoothing_mode(smoothing_mode_e aSmoothingMode);
-		virtual bool monochrome() const;
-		virtual void set_monochrome(bool aMonochrome);
-		virtual void push_logical_operation(logical_operation_e aLogicalOperation);
+		virtual neogfx::smoothing_mode smoothing_mode() const;
+		virtual neogfx::smoothing_mode set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode);
+		virtual void push_logical_operation(logical_operation aLogicalOperation);
 		virtual void pop_logical_operation();
 		virtual void line_stipple_on(uint32_t aFactor, uint16_t aPattern);
 		virtual void line_stipple_off();
@@ -134,7 +132,7 @@ namespace neogfx
 //		virtual void is_emoji(const std::u32string& aEmojiText) const;
 //		virtual void draw_emoji(const point& aPoint, const std::u32string& aEmojiText, const font& aFont);
 		virtual void end_drawing_glyphs();
-		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour);
+		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect);
 	private:
 		void apply_scissor();
 		void apply_logical_operation();
@@ -149,9 +147,8 @@ namespace neogfx
 		neogfx::logical_coordinate_system iSavedCoordinateSystem;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable vector4 iLogicalCoordinates;
-		smoothing_mode_e iSmoothingMode; 
-		bool iMonochrome;
-		std::vector<logical_operation_e> iLogicalOperationStack;
+		neogfx::smoothing_mode iSmoothingMode; 
+		std::vector<logical_operation> iLogicalOperationStack;
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;
 		mutable std::vector<vertex> iGlyphVertices;

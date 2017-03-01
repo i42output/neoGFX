@@ -93,7 +93,7 @@ namespace neogfx
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 			switch (aImage.colour_format())
 			{
-			case ColourFormatRGBA8:
+			case colour_format::RGBA8:
 				{
 					const uint8_t* imageData = static_cast<const uint8_t*>(aImage.data());
 					std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);

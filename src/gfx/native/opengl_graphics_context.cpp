@@ -209,14 +209,13 @@ namespace neogfx
 		iSavedCoordinateSystem(aSurface.logical_coordinate_system()), 
 		iLogicalCoordinateSystem(iSavedCoordinateSystem), 
 		iLogicalCoordinates(aSurface.logical_coordinates()), 
-		iSmoothingMode(SmoothingModeNone), 
-		iMonochrome(false), 
+		iSmoothingMode(neogfx::smoothing_mode::None),
 		iClipCounter(0),
 		iLineStippleActive(false),
 		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
 	{
 		iSurface.activate_context();
-		set_smoothing_mode(SmoothingModeAntiAlias);
+		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
 	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget) :
@@ -225,14 +224,13 @@ namespace neogfx
 		iSavedCoordinateSystem(aWidget.logical_coordinate_system()),
 		iLogicalCoordinateSystem(iSavedCoordinateSystem),
 		iLogicalCoordinates(aSurface.logical_coordinates()),
-		iSmoothingMode(SmoothingModeNone), 
-		iMonochrome(false),
+		iSmoothingMode(neogfx::smoothing_mode::None),
 		iClipCounter(0), 
 		iLineStippleActive(false),
 		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
 	{
 		iSurface.activate_context();
-		set_smoothing_mode(SmoothingModeAntiAlias);
+		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
@@ -242,7 +240,6 @@ namespace neogfx
 		iLogicalCoordinateSystem(aOther.iLogicalCoordinateSystem),
 		iLogicalCoordinates(aOther.iLogicalCoordinates),
 		iSmoothingMode(aOther.iSmoothingMode), 
-		iMonochrome(false),
 		iClipCounter(0),
 		iLineStippleActive(false),
 		iSubpixelRendering(false)
@@ -436,27 +433,17 @@ namespace neogfx
 		}
 	}
 
-	bool opengl_graphics_context::monochrome() const
-	{
-		return iMonochrome;
-	}
-
-	void opengl_graphics_context::set_monochrome(bool aMonochrome)
-	{
-		iMonochrome = aMonochrome;
-	}
-
-	smoothing_mode_e opengl_graphics_context::smoothing_mode() const
+	smoothing_mode opengl_graphics_context::smoothing_mode() const
 	{
 		return iSmoothingMode;
 	}
 
-	smoothing_mode_e opengl_graphics_context::set_smoothing_mode(smoothing_mode_e aSmoothingMode)
+	smoothing_mode opengl_graphics_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
 	{
 		glCheck((void)0);
-		smoothing_mode_e oldSmoothingMode = iSmoothingMode;
+		neogfx::smoothing_mode oldSmoothingMode = iSmoothingMode;
 		iSmoothingMode = aSmoothingMode;
-		if (iSmoothingMode == SmoothingModeAntiAlias)
+		if (iSmoothingMode == neogfx::smoothing_mode::AntiAlias)
 		{
 			glCheck(glEnable(GL_LINE_SMOOTH));
 			glCheck(glEnable(GL_POLYGON_SMOOTH));
@@ -469,7 +456,7 @@ namespace neogfx
 		return oldSmoothingMode;
 	}
 
-	void opengl_graphics_context::push_logical_operation(logical_operation_e aLogicalOperation)
+	void opengl_graphics_context::push_logical_operation(logical_operation aLogicalOperation)
 	{
 		iLogicalOperationStack.push_back(aLogicalOperation);
 		apply_logical_operation();
@@ -484,7 +471,7 @@ namespace neogfx
 
 	void opengl_graphics_context::apply_logical_operation()
 	{
-		if (iLogicalOperationStack.empty() || iLogicalOperationStack.back() == LogicalNone)
+		if (iLogicalOperationStack.empty() || iLogicalOperationStack.back() == logical_operation::None)
 		{
 			glCheck(glDisable(GL_COLOR_LOGIC_OP));
 		}
@@ -493,7 +480,7 @@ namespace neogfx
 			glCheck(glEnable(GL_COLOR_LOGIC_OP));
 			switch (iLogicalOperationStack.back())
 			{
-			case LogicalXor:
+			case logical_operation::Xor:
 				glCheck(glLogicOp(GL_XOR));
 				break;
 			}
@@ -905,8 +892,12 @@ namespace neogfx
 		if (aGlyph.is_whitespace())
 			return size{};
 
-		if (&iRenderingEngine.active_shader_program() != &iRenderingEngine.glyph_shader_program(aGlyph.subpixel()))
+		bool shaderProgramActivated = false;
+		if (!iRenderingEngine.shader_program_active() || &iRenderingEngine.active_shader_program() != &iRenderingEngine.glyph_shader_program(aGlyph.subpixel()))
+		{
 			iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()));
+			shaderProgramActivated = true;
+		}
 
 		const font* glyphFont = &aFont;
 		if (aGlyph.use_fallback())
@@ -1019,6 +1010,9 @@ namespace neogfx
 
 		glCheck(glDeleteBuffers(3, boHandles));
 
+		if (shaderProgramActivated)
+			iRenderingEngine.deactivate_shader_program();
+
 		return glyphTexture.extents();
 	}
 
@@ -1028,7 +1022,7 @@ namespace neogfx
 		iRenderingEngine.deactivate_shader_program();
 	}
 
-	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour)
+	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect)
 	{
 		if (aTexture.is_empty())
 			return;
@@ -1050,13 +1044,13 @@ namespace neogfx
 			c = *aColour;
 		std::vector<std::array<uint8_t, 4>> colours(4, std::array<uint8_t, 4>{{c.red(), c.green(), c.blue(), c.alpha()}});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		if (iMonochrome)
+		if (aShaderEffect == shader_effect::Monochrome)
 		{
 			iRenderingEngine.activate_shader_program(iRenderingEngine.monochrome_shader_program());
 			iRenderingEngine.monochrome_shader_program().set_uniform_variable("tex", 1);
 		}
 		glCheck(glDrawArrays(GL_QUADS, 0, 4));
-		if (iMonochrome)
+		if (aShaderEffect == shader_effect::Monochrome)
 			iRenderingEngine.deactivate_shader_program();
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
