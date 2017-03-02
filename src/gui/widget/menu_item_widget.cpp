@@ -286,31 +286,48 @@ namespace neogfx
 
 	void menu_item_widget::select_item(bool aSelectAnySubMenuItem)
 	{
+		destroyed_flag destroyed(*this);
 		if (!menu_item().availabie())
 			return;
 		if (menu_item().type() == i_menu_item::Action)
 		{
 			menu().clear_selection();
+			if (destroyed)
+				return;
 			menu_item().action().triggered.trigger();
+			if (destroyed)
+				return;
 			if (menu_item().action().is_checkable())
 				menu_item().action().toggle();
+			if (destroyed)
+				return;
 			i_menu* menuToClose = &menu();
-			while (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::Popup)
+			while (menuToClose->has_parent())
 				menuToClose = &menuToClose->parent();
-			if (menuToClose->type() == i_menu::Popup && menuToClose->is_open())
+			if (menuToClose->type() == i_menu::MenuBar)
+				menuToClose->clear_selection();
+			else if (menuToClose->type() == i_menu::Popup && menuToClose->is_open())
 				menuToClose->close();
+			if (destroyed)
+				return;
 		}
 		else
 		{
 			if (!menu_item().sub_menu().is_open())
 			{
 				menu().select_item(menu().find_item(menu_item()));
+				if (destroyed)
+					return;
 				menu().open_sub_menu.trigger(menu_item().sub_menu());
+				if (destroyed)
+					return;
 				update();
 			}
 			else if (menu().type() == i_menu::MenuBar)
 			{
 				menu_item().sub_menu().close();
+				if (destroyed)
+					return;
 				update();
 			}
 		}
