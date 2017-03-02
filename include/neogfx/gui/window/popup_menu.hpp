@@ -65,6 +65,7 @@ namespace neogfx
 	private:
 		void init();
 		void close_sub_menu();
+		void update_position();
 	private:
 		sink iSink;
 		sink iSink2;

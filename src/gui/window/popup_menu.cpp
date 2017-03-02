@@ -175,6 +175,8 @@ namespace neogfx
 			}
 		});
 		move_surface(aPosition);
+		resize(minimum_size());
+		update_position();
 		show();
 	}
 
@@ -196,42 +198,7 @@ namespace neogfx
 	void popup_menu::resized()
 	{
 		window::resized();
-		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
-		rect surfaceRect{ surface().surface_position(), surface().surface_size() };
-		if (surfaceRect.bottom() > desktopRect.bottom())
-			surfaceRect.position().y += (desktopRect.bottom() - surfaceRect.bottom());
-		if (surfaceRect.right() > desktopRect.right())
-			surfaceRect.position().x += (desktopRect.right() - surfaceRect.right());
-		if (has_menu() && menu().has_parent())
-		{
-			if (menu().parent().type() == i_menu::MenuBar)
-			{
-				if (iParentWidget != 0)
-				{
-					rect menuBarRect = iParentWidget->window_rect() + parent_surface().surface_position();
-					if (!surfaceRect.intersection(menuBarRect).empty())
-					{
-						if (desktopRect.bottom() - menuBarRect.bottom() > surfaceRect.height())
-							surfaceRect.position().y = menuBarRect.bottom();
-						else
-							surfaceRect.position().y = menuBarRect.top() - surfaceRect.height();
-					}
-				}
-			}
-			else
-			{
-				rect parentSurfaceRect{ parent_surface().surface_position(), parent_surface().surface_size() };
-				if (surfaceRect.intersection(parentSurfaceRect).width() > 8.0)
-				{
-					if (parentSurfaceRect.right() + surfaceRect.width() < desktopRect.right())
-						surfaceRect.position().x = parentSurfaceRect.right();
-					else
-						surfaceRect.position().x = parentSurfaceRect.position().x - surfaceRect.width();
-				}
-			}
-		}
-		if (surfaceRect.position() != surface().surface_position())
-			surface().move_surface(surfaceRect.position());
+		update_position();
 	}
 
 	size_policy popup_menu::size_policy() const
@@ -383,5 +350,45 @@ namespace neogfx
 			iSink2 = sink{};
 			iOpenSubMenu->clear_menu();
 		}
+	}
+
+	void popup_menu::update_position()
+	{
+		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
+		rect surfaceRect{ surface().surface_position(), surface().surface_size() };
+		if (surfaceRect.bottom() > desktopRect.bottom())
+			surfaceRect.position().y += (desktopRect.bottom() - surfaceRect.bottom());
+		if (surfaceRect.right() > desktopRect.right())
+			surfaceRect.position().x += (desktopRect.right() - surfaceRect.right());
+		if (has_menu() && menu().has_parent())
+		{
+			if (menu().parent().type() == i_menu::MenuBar)
+			{
+				if (iParentWidget != 0)
+				{
+					rect menuBarRect = iParentWidget->window_rect() + parent_surface().surface_position();
+					if (!surfaceRect.intersection(menuBarRect).empty())
+					{
+						if (desktopRect.bottom() - menuBarRect.bottom() > surfaceRect.height())
+							surfaceRect.position().y = menuBarRect.bottom();
+						else
+							surfaceRect.position().y = menuBarRect.top() - surfaceRect.height();
+					}
+				}
+			}
+			else
+			{
+				rect parentSurfaceRect{ parent_surface().surface_position(), parent_surface().surface_size() };
+				if (surfaceRect.intersection(parentSurfaceRect).width() > 8.0)
+				{
+					if (parentSurfaceRect.right() + surfaceRect.width() < desktopRect.right())
+						surfaceRect.position().x = parentSurfaceRect.right();
+					else
+						surfaceRect.position().x = parentSurfaceRect.position().x - surfaceRect.width();
+				}
+			}
+		}
+		if (surfaceRect.position() != surface().surface_position())
+			surface().move_surface(surfaceRect.position());
 	}
 }
