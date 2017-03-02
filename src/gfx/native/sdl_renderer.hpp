@@ -36,8 +36,9 @@ namespace neogfx
 		sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard);
 		~sdl_renderer();
 	public:
-		virtual void* create_context(i_native_surface& aSurface);
-		virtual void destroy_context(i_native_surface& aSurface);
+		virtual void activate_context(const i_native_surface& aSurface);
+		virtual opengl_context create_context(const i_native_surface& aSurface);
+		virtual void destroy_context(opengl_context aContext);
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle);
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const size& aDimensions, const std::string& aWindowTitle, window::style_e aStyle);
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window::style_e aStyle);
@@ -53,7 +54,8 @@ namespace neogfx
 	private:
 		i_basic_services& iBasicServices;
 		i_keyboard& iKeyboard;
-		std::map<i_native_surface*, void*> iContexts;
+		opengl_context iContext;
 		uint32_t iCreatingWindow;
+		bool iContextSharingEnabled;
 	};
 }

@@ -338,17 +338,12 @@ namespace neogfx
 	{
 		if (iClosed)
 			return;
-		if (!destroyed())
-			native_surface().activate_context();
 		if (has_layout())
 			layout().remove_items();
 		remove_widgets();
 		destroyed_flag destroyed(*this);
 		if (!window::destroyed())
-		{
-			native_surface().deactivate_context();
 			native_surface().close();
-		}
 		else
 		{
 			auto ptr = std::move(iNativeWindow);

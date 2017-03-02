@@ -51,6 +51,7 @@ namespace neogfx
 	public:
 		event<> subpixel_rendering_changed;
 	public:
+		typedef void* opengl_context;
 		class i_shader_program
 		{
 		public:
@@ -76,8 +77,9 @@ namespace neogfx
 		struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::i_rendering_engine::shader_program_error: " + aError) {} };
 	public:
 		virtual void initialize() = 0;
-		virtual void* create_context(i_native_surface& aSurface) = 0; 
-		virtual void destroy_context(i_native_surface& aSurface) = 0;
+		virtual void activate_context(const i_native_surface& aSurface) = 0;
+		virtual opengl_context create_context(const i_native_surface& aSurface) = 0;
+		virtual void destroy_context(opengl_context aContext) = 0;
 		virtual const i_screen_metrics& screen_metrics() const = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle = window::Default) = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const size& aDimensions, const std::string& aWindowTitle, window::style_e aStyle = window::Default) = 0;

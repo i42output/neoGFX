@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-	sdl_renderer::sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard) : iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0)
+	sdl_renderer::sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard) : iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), iContext(nullptr)
 	{
 		SDL_Init(SDL_INIT_VIDEO);
 	}
@@ -37,21 +37,24 @@ namespace neogfx
 		SDL_Quit();
 	}
 
-	void* sdl_renderer::create_context(i_native_surface& aSurface)
+	void sdl_renderer::activate_context(const i_native_surface& aSurface)
 	{
-		if (iContexts.find(&aSurface) != iContexts.end())
-			throw context_exists();
-		SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-		return (iContexts[&aSurface] = SDL_GL_CreateContext(static_cast<SDL_Window*>(aSurface.handle())));
+		if (iContext == nullptr)
+			iContext = create_context(aSurface);
+		else
+			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(aSurface.handle()), static_cast<SDL_GLContext>(iContext));
 	}
 
-	void sdl_renderer::destroy_context(i_native_surface& aSurface)
+	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_native_surface& aSurface)
 	{
-		auto c = iContexts.find(&aSurface);
-		if (c == iContexts.end())
-			throw context_not_found();
-		SDL_GL_DeleteContext(c->second);
-		iContexts.erase(c);
+		return SDL_GL_CreateContext(static_cast<SDL_Window*>(aSurface.handle()));
+	}
+
+	void sdl_renderer::destroy_context(opengl_context aContext)
+	{
+		SDL_GL_DeleteContext(static_cast<SDL_GLContext>(aContext));
+		if (iContext == aContext)
+			iContext = nullptr;
 	}
 
 	std::unique_ptr<i_native_window> sdl_renderer::create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle)

@@ -50,7 +50,6 @@ namespace neogfx
 	public:
 		virtual void* handle() const = 0;
 		virtual void* native_handle() const = 0;
-		virtual void* native_context() const = 0;
 		virtual point surface_position() const = 0;
 		virtual void move_surface(const point& aPosition) = 0;
 		virtual size surface_size() const = 0;
@@ -74,8 +73,5 @@ namespace neogfx
 		virtual size rendering_target_texture_extents() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
-	public:
-		virtual void activate_context() const = 0;
-		virtual void deactivate_context() const = 0;
 	};
 }

@@ -138,7 +138,7 @@ namespace neogfx
 			initialized = true;
 		}
 
-		activate_context();
+		rendering_engine().activate_context(*this);
 
 		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
 		glCheck(glMatrixMode(GL_PROJECTION));
@@ -197,7 +197,6 @@ namespace neogfx
 		glCheck(glBlitFramebuffer(0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), 0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), GL_COLOR_BUFFER_BIT, GL_NEAREST));
 
 		display();
-		deactivate_context();
 
 		iRendering = false;
 
@@ -246,14 +245,12 @@ namespace neogfx
 
 	void opengl_window::destroying()
 	{
-		activate_context();
 		if (iFrameBufferSize != size{})
 		{
 			glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
 			glCheck(glDeleteTextures(1, &iFrameBufferTexture));
 			glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
 		}
-		deactivate_context();
 	}
 
 	void opengl_window::destroyed()

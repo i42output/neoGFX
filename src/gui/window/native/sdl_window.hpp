@@ -74,7 +74,6 @@ namespace neogfx
 	public:
 		virtual void* handle() const;
 		virtual void* native_handle() const;
-		virtual void* native_context() const;
 		virtual point surface_position() const;
 		virtual void move_surface(const point& aPosition);
 		virtual size surface_size() const;
@@ -100,9 +99,6 @@ namespace neogfx
 		virtual void set_capture();
 		virtual void release_capture();
 		virtual bool is_destroyed() const;
-	public:
-		virtual void activate_context() const;
-		virtual void deactivate_context() const;
 	private:
 		void init();
 		void process_event(const SDL_Event& aEvent);
@@ -111,7 +107,6 @@ namespace neogfx
 		void do_activate_context() const;
 		void do_activate_default_context() const;
 		void push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers);
-		static std::deque<const sdl_window*>& context_activation_stack();
 #ifdef WIN32
 		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 #endif
@@ -125,7 +120,6 @@ namespace neogfx
 #ifdef WIN32
 		WNDPROC iSDLWindowProc;
 #endif
-		SDL_GLContext iContext;
 		size iExtents;
 		bool iCapturingMouse;
 		cursor_pointer iCurrentCursor;

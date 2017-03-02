@@ -110,7 +110,6 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
-		iContext(0),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -125,20 +124,14 @@ namespace neogfx
 		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
-		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
-		if (iContext == 0)
-		{
-			SDL_DestroyWindow(iHandle);
-			throw failed_to_create_opengl_context(SDL_GetError());
-		}
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{w, h};
 
-		do_activate_context();
-
 		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
 			show((aStyle & window::NoActivate) != window::NoActivate);
+
+		aRenderingEngine.activate_context(*this);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -147,7 +140,6 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
-		iContext(0),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -162,20 +154,14 @@ namespace neogfx
 		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
-		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
-		if (iContext == 0)
-		{
-			SDL_DestroyWindow(iHandle);
-			throw failed_to_create_opengl_context(SDL_GetError());
-		}
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		do_activate_context();
-
 		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
 			show((aStyle & window::NoActivate) != window::NoActivate);
+
+		aRenderingEngine.activate_context(*this);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -184,7 +170,6 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
-		iContext(0),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -199,20 +184,14 @@ namespace neogfx
 		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
-		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
-		if (iContext == 0)
-		{
-			SDL_DestroyWindow(iHandle);
-			throw failed_to_create_opengl_context(SDL_GetError());
-		}
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		do_activate_context();
-
 		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
 			show((aStyle & window::NoActivate) != window::NoActivate);
+
+		aRenderingEngine.activate_context(*this);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -221,7 +200,6 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
-		iContext(0),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -236,20 +214,14 @@ namespace neogfx
 		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
-		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
-		if (iContext == 0)
-		{
-			SDL_DestroyWindow(iHandle);
-			throw failed_to_create_opengl_context(SDL_GetError());
-		}
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		do_activate_context();
-
 		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
 			show((aStyle & window::NoActivate) != window::NoActivate);
+
+		aRenderingEngine.activate_context(*this);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -258,7 +230,6 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
-		iContext(0),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -273,20 +244,14 @@ namespace neogfx
 		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
-		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
-		if (iContext == 0)
-		{
-			SDL_DestroyWindow(iHandle);
-			throw failed_to_create_opengl_context(SDL_GetError());
-		}
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		do_activate_context();
-
 		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
 			show((aStyle & window::NoActivate) != window::NoActivate);
+
+		aRenderingEngine.activate_context(*this);
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -295,7 +260,6 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
-		iContext(0),
 		iCapturingMouse(false),
 		iDestroyed(false)
 	{
@@ -310,26 +274,19 @@ namespace neogfx
 		if (iHandle == 0)
 			throw failed_to_create_window(SDL_GetError());
 		init();
-		iContext = reinterpret_cast<SDL_GLContext>(aRenderingEngine.create_context(*this));
-		if (iContext == 0)
-		{
-			SDL_DestroyWindow(iHandle);
-			throw failed_to_create_opengl_context(SDL_GetError());
-		}
 		int w, h;
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		do_activate_context();
-
 		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
 			show((aStyle & window::NoActivate) != window::NoActivate);
+
+		aRenderingEngine.activate_context(*this);
 	}
 
 	sdl_window::~sdl_window()
 	{
 		close();
-		rendering_engine().destroy_context(*this);
 	}
 
 	void* sdl_window::handle() const
@@ -353,11 +310,6 @@ namespace neogfx
 				throw failed_to_get_window_information(SDL_GetError());
 		}
 		return iNativeHandle;
-	}
-
-	void* sdl_window::native_context() const
-	{
-		return iContext;
 	}
 
 	point sdl_window::surface_position() const
@@ -582,29 +534,6 @@ namespace neogfx
 		return iDestroyed;
 	}
 
-	void sdl_window::activate_context() const
-	{
-		if (context_activation_stack().empty() || context_activation_stack().back() != this)
-			do_activate_context();
-		context_activation_stack().push_back(this);
-	}
-
-	void sdl_window::deactivate_context() const
-	{
-		if (context_activation_stack().empty() || context_activation_stack().back() != this)
-			throw context_mismatch();
-		context_activation_stack().pop_back();
-		if (context_activation_stack().empty())
-		{
-			if (!iDestroyed)
-				do_activate_context();
-			else
-				do_activate_default_context();
-		}
-		else if (context_activation_stack().back() != this)
-			context_activation_stack().back()->do_activate_context();
-	}
-	
 #ifdef WIN32
 	LRESULT CALLBACK sdl_window::CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
@@ -825,43 +754,11 @@ namespace neogfx
 			opengl_window::destroyed();
 			iNativeHandle = 0;
 		}
-		bool activateDefaultContext = true;
-		while (!context_activation_stack().empty() && context_activation_stack().back() == this)
-		{
-			activateDefaultContext = false;
-			deactivate_context();
-		}
-		if (activateDefaultContext)
-			do_activate_default_context();
-	}
-
-	void sdl_window::do_activate_context() const
-	{
-		if (SDL_GL_MakeCurrent(iHandle, iContext) != 0)
-			throw failed_to_activate_opengl_context(SDL_GetError());
-		glCheck("");
-	}
-
-	void sdl_window::do_activate_default_context() const
-	{
-		for (std::size_t i = 0; i != surface_manager().surface_count(); ++i)
-			if (!surface_manager().surface(i).destroyed())
-			{
-				surface_manager().surface(i).native_surface().activate_context();
-				context_activation_stack().pop_back();
-				break;
-			}
 	}
 
 	void sdl_window::push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers)
 	{
 		iMouseButtonEventExtraInfo.push_back(aKeyModifiers);
-	}
-
-	std::deque<const sdl_window*>& sdl_window::context_activation_stack()
-	{
-		static std::deque<const sdl_window*> sStack;
-		return sStack;
 	}
 
 	void sdl_window::display()

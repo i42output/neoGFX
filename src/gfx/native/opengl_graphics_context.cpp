@@ -214,7 +214,7 @@ namespace neogfx
 		iLineStippleActive(false),
 		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
 	{
-		iSurface.activate_context();
+		iRenderingEngine.activate_context(iSurface);
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
@@ -229,7 +229,7 @@ namespace neogfx
 		iLineStippleActive(false),
 		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
 	{
-		iSurface.activate_context();
+		iRenderingEngine.activate_context(iSurface);
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
@@ -244,14 +244,13 @@ namespace neogfx
 		iLineStippleActive(false),
 		iSubpixelRendering(false)
 	{
-		iSurface.activate_context();
+		iRenderingEngine.activate_context(iSurface);
 		set_smoothing_mode(iSmoothingMode);
 	}
 
 	opengl_graphics_context::~opengl_graphics_context()
 	{
 		set_logical_coordinate_system(iSavedCoordinateSystem);
-		iSurface.deactivate_context();
 		if (iGradientTextures != boost::none)
 		{
 			glCheck(glDeleteTextures(1, &iGradientTextures->first));
@@ -1050,7 +1049,7 @@ namespace neogfx
 			iRenderingEngine.monochrome_shader_program().set_uniform_variable("tex", 1);
 		}
 		glCheck(glDrawArrays(GL_QUADS, 0, 4));
-		if (aShaderEffect == shader_effect::Monochrome)
+		if (aShaderEffect != shader_effect::None)
 			iRenderingEngine.deactivate_shader_program();
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
