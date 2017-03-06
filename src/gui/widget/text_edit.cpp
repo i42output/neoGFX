@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
-#include <neogfx/gfx/text/text_direction_map.hpp>
+#include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/app/app.hpp>
 
 namespace neogfx
@@ -678,17 +678,17 @@ namespace neogfx
 				auto p = cursor().position();
 				if (p == iText.size())
 					--p;
-				while (p > 0 && get_text_direction(iText[p]) == text_direction::Whitespace)
+				while (p > 0 && get_text_category(iText[p]) == text_category::Whitespace)
 					--p;
 				if (p > 0)
 				{
-					auto d = get_text_direction(iText[p == cursor().position() ? p - 1 : p]);
-					while (p > 0 && iGlyphs[p - 1].direction() == d)
+					auto c = get_text_category(iText[p == cursor().position() ? p - 1 : p]);
+					while (p > 0 && iGlyphs[p - 1].category() == c)
 						--p;
-					if (p > 0 && d == text_direction::Whitespace)
+					if (p > 0 && c == text_category::Whitespace)
 					{
-						d = get_text_direction(iText[p - 1]);
-						while (p > 0 && get_text_direction(iText[p - 1]) == d)
+						c = get_text_category(iText[p - 1]);
+						while (p > 0 && get_text_category(iText[p - 1]) == c)
 							--p;
 					}
 				}
@@ -707,14 +707,14 @@ namespace neogfx
 			if (!iText.empty())
 			{
 				auto p = cursor().position();
-				while (p < iText.size() && get_text_direction(iText[p]) == text_direction::Whitespace)
+				while (p < iText.size() && get_text_category(iText[p]) == text_category::Whitespace)
 					++p;
 				if (p < iText.size() && p == cursor().position())
 				{
-					auto d = get_text_direction(iText[p]);
-					while (p < iText.size() && get_text_direction(iText[p]) == d)
+					auto c = get_text_category(iText[p]);
+					while (p < iText.size() && get_text_category(iText[p]) == c)
 						++p;
-					while (p < iText.size() && get_text_direction(iText[p]) == text_direction::Whitespace)
+					while (p < iText.size() && get_text_category(iText[p]) == text_category::Whitespace)
 						++p;
 				}
 				cursor().set_position(p, aMoveAnchor);
@@ -891,11 +891,12 @@ namespace neogfx
 					auto iterChar = iText.begin() + from_glyph(iGlyphs.begin() + aGlyphPosition).first;
 					if (iterChar != iText.begin())
 					{
-						auto g = to_glyph(iterChar - 1);
-						if (g->direction() == text_direction::RTL)
+						auto iterGlyph = to_glyph(iterChar - 1);
+						const auto& g = *iterGlyph;
+						if (g.direction() == text_direction::RTL || g.direction() == text_direction::Digits_RTL)
 						{
-							aGlyphPosition = g - iGlyphs.begin();
-							placeCursorToRight = false;
+							aGlyphPosition = iterGlyph - iGlyphs.begin();
+							placeCursorToRight = (g.direction() == text_direction::RTL ? false : true);
 						}
 					}
 				}
@@ -985,7 +986,7 @@ namespace neogfx
 				}
 			}
 		}
-		if (lineEnd > 0 && iGlyphs[lineEnd - 1].direction() == text_direction::Whitespace && iGlyphs[lineEnd - 1].value() == U'\n')
+		if (lineEnd > 0 && iGlyphs[lineEnd - 1].category() == text_category::Whitespace && iGlyphs[lineEnd - 1].value() == U'\n')
 			--lineEnd;
 		if (lineEnd > lineStart && iGlyphs[lineEnd - 1].direction() == text_direction::RTL)
 			return lineEnd - 1;
@@ -996,7 +997,7 @@ namespace neogfx
 	{
 		if (iText[aTextPositionLeft] == U'\n' || iText[aTextPositionRight] == U'\n')
 			return false;
-		return get_text_direction(iText[aTextPositionLeft]) == get_text_direction(iText[aTextPositionRight]);
+		return get_text_category(iText[aTextPositionLeft]) == get_text_category(iText[aTextPositionRight]);
 	}
 
 	std::pair<text_edit::position_type, text_edit::position_type> text_edit::word_at(position_type aTextPosition) const
@@ -1501,7 +1502,7 @@ namespace neogfx
 	{
 		auto lineStart = iGlyphs.begin() + aColumn.lines().foreign_index(aLine).glyphs();
 		auto lineEnd = lineStart + aLine->second.glyphs();
-		if (lineEnd != lineStart && (lineEnd - 1)->direction() == text_direction::Whitespace && (lineEnd - 1)->value() == U'\n')
+		if (lineEnd != lineStart && (lineEnd - 1)->category() == text_category::Whitespace && (lineEnd - 1)->value() == U'\n')
 			--lineEnd;
 		{
 			std::unique_ptr<graphics_context::glyph_drawing> gd;

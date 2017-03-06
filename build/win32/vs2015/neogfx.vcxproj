@@ -135,7 +135,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\skyline_bin_pack.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_direction_map.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\colour_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog_button_box.hpp" />

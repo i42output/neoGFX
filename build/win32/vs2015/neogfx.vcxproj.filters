@@ -438,9 +438,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\text.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_direction_map.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_edit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -472,6 +469,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\app\i_service_factory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

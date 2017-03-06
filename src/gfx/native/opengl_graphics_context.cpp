@@ -21,7 +21,7 @@
 #include <boost/math/constants/constants.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
-#include <neogfx/gfx/text/text_direction_map.hpp>
+#include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/gfx/text/i_font_texture.hpp>
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
@@ -1077,7 +1077,7 @@ namespace neogfx
 			{
 				hb_ft_font_set_load_flags(iFont, aParent.is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
 				hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
-				hb_buffer_set_script(iBuf, std::get<3>(aGlyphRun));
+				hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
 				hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun), 0, std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
 				hb_shape(iFont, iBuf, NULL, 0);
 				unsigned int glyphCount = 0;
@@ -1105,7 +1105,7 @@ namespace neogfx
 			bool needs_fallback_font() const
 			{
 				for (uint32_t i = 0; i < glyph_count(); ++i)
-					if (glyph_info(i).codepoint == 0 && get_text_direction(std::get<0>(iGlyphRun)[glyph_info(i).cluster]) != text_direction::Whitespace)
+					if (glyph_info(i).codepoint == 0 && get_text_category(std::get<0>(iGlyphRun)[glyph_info(i).cluster]) != text_category::Whitespace)
 						return true;
 				return false;
 			}
@@ -1133,14 +1133,14 @@ namespace neogfx
 			for (uint32_t i = 0; i < g->glyph_count();)
 			{
 				const auto& gi = g->glyph_info(i);
-				if (gi.codepoint != 0 || get_text_direction(std::get<0>(aGlyphRun)[gi.cluster]) == text_direction::Whitespace)
+				if (gi.codepoint != 0 || get_text_category(std::get<0>(aGlyphRun)[gi.cluster]) == text_category::Whitespace)
 				{
 					iResults.push_back(std::make_pair(g, i++));
 				}
 				else
 				{
 					std::vector<uint32_t> clusters;
-					while (i < g->glyph_count() && g->glyph_info(i).codepoint == 0 && get_text_direction(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) != text_direction::Whitespace)
+					while (i < g->glyph_count() && g->glyph_info(i).codepoint == 0 && get_text_category(std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]) != text_category::Whitespace)
 					{
 						clusters.push_back(g->glyph_info(i).cluster);
 						++i;
@@ -1164,7 +1164,7 @@ namespace neogfx
 							}
 							else
 							{
-								if (get_text_direction(std::get<0>(aGlyphRun)[fallbackGlyphs.glyph_info(j).cluster]) != text_direction::Whitespace)
+								if (get_text_category(std::get<0>(aGlyphRun)[fallbackGlyphs.glyph_info(j).cluster]) != text_category::Whitespace)
 									break;
 								else
 									goto whitespace_break;
@@ -1245,12 +1245,10 @@ namespace neogfx
 
 		auto& runs = iRuns;
 		runs.clear();
-		text_direction previousDirection = get_text_direction(codePoints[0]);
+		text_category previousCategory = get_text_category(codePoints[0]);
 		if (iMnemonic != boost::none && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
-			previousDirection = text_direction::Mnemonic;
-		text_direction previousMasterDirection = previousDirection;
-		if (previousMasterDirection != text_direction::RTL)
-			previousMasterDirection = text_direction::LTR;
+			previousCategory = text_category::Mnemonic;
+		text_direction previousDirection = (previousCategory != text_category::RTL ? text_direction::LTR : text_direction::RTL);
 		const char32_t* runStart = &codePoints[0];
 		std::u32string::size_type lastCodePointIndex = codePointCount - 1;
 		font previousFont = aFontSelector(0);
@@ -1290,31 +1288,36 @@ namespace neogfx
 				break;
 			}
 			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
-			text_direction currentDirection = get_text_direction(codePoints[i]);
+			text_category currentCategory = get_text_category(codePoints[i]);
 			if (iMnemonic != boost::none && codePoints[i] == static_cast<char32_t>(iMnemonic->second))
-				currentDirection = text_direction::Mnemonic;
-			textDirections.push_back(currentDirection);
+				currentCategory = text_category::Mnemonic;
+			text_direction currentDirection = previousDirection;
+			if (currentCategory == text_category::LTR)
+				currentDirection = text_direction::LTR;
+			else if (currentCategory == text_category::RTL)
+				currentDirection = text_direction::RTL;
+			
 			bool newLine = (codePoints[i] == '\r' || codePoints[i] == '\n');
 			if (newLine)
 			{
 				currentLineHasLTR = false;
 				currentDirection = text_direction::LTR;
 			}
-			auto bidi_check = [&directionStack](text_direction aDirection)
+			auto bidi_check = [&directionStack](text_category aCategory, text_direction aDirection)
 			{
 				if (!directionStack.empty())
 				{
-					switch (aDirection)
+					switch (aCategory)
 					{
-					case text_direction::LTR:
-					case text_direction::RTL:
-					case text_direction::Digits:
+					case text_category::LTR:
+					case text_category::RTL:
+					case text_category::Digit:
 						if (directionStack.back().second == true)
 							return directionStack.back().first;
 						break;
-					case text_direction::None:
-					case text_direction::Whitespace:
-					case text_direction::Mnemonic:
+					case text_category::None:
+					case text_category::Whitespace:
+					case text_category::Mnemonic:
 						return directionStack.back().first;
 						break;
 					default:
@@ -1323,59 +1326,66 @@ namespace neogfx
 				}
 				return aDirection;
 			};
-			currentDirection = bidi_check(currentDirection);
-			bool currentDirectionIsMaster = (currentDirection == text_direction::LTR || currentDirection == text_direction::RTL);
-			if (currentDirection == text_direction::LTR)
+			currentDirection = bidi_check(currentCategory, currentDirection);
+			switch(currentCategory)
+			{
+			case text_category::LTR:
 				currentLineHasLTR = true;
+				if (currentDirection == text_direction::Digits_LTR || currentDirection == text_direction::Digits_RTL)
+					currentDirection = text_direction::LTR;
+				break;
+			case text_category::RTL:
+				if (currentDirection == text_direction::Digits_LTR || currentDirection == text_direction::Digits_RTL)
+					currentDirection = text_direction::RTL;
+				break;
+			case text_category::Digit:
+				if (currentDirection == text_direction::LTR)
+					currentDirection = text_direction::Digits_LTR;
+				else if (currentDirection == text_direction::RTL)
+					currentDirection = text_direction::Digits_RTL;
+				break;
+			}
+			if (currentDirection == text_direction::Digits_LTR) // optimization (less runs for LTR text)
+				currentDirection = text_direction::LTR;
 			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
 			bool newRun = 
 				previousFont != currentFont ||
-				(newLine && previousMasterDirection == text_direction::RTL) ||
-				currentDirection == text_direction::Mnemonic ||
-				previousDirection == text_direction::Mnemonic ||
-				((previousDirection == text_direction::LTR || previousDirection == text_direction::Digits) && currentDirection == text_direction::RTL) ||
-				(previousDirection == text_direction::RTL && (currentDirection == text_direction::Digits || currentDirection == text_direction::LTR)) ||
+				(newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::Digits_RTL)) ||
+				currentCategory == text_category::Mnemonic ||
+				previousCategory == text_category::Mnemonic ||
+				previousDirection != currentDirection ||
 				(previousScript != currentScript && (previousScript != HB_SCRIPT_COMMON && currentScript != HB_SCRIPT_COMMON));
 			if (!newRun)
 			{
-				if ((currentDirection == text_direction::Whitespace || currentDirection == text_direction::None || currentDirection == text_direction::Mnemonic) && previousDirection == text_direction::RTL)
+				if ((currentCategory == text_category::Whitespace || currentCategory == text_category::None || currentCategory == text_category::Mnemonic) && 
+					(currentDirection == text_direction::RTL || currentDirection == text_direction::Digits_RTL))
 				{
 					for (std::size_t j = i + 1; j <= lastCodePointIndex; ++j)
 					{
-						text_direction nextDirection = bidi_check(get_text_direction(codePoints[j]));
-						if (nextDirection == text_direction::RTL)
+						text_direction nextDirection = bidi_check(get_text_category(codePoints[j]), get_text_direction(codePoints[j], currentDirection));
+						if (nextDirection == text_direction::RTL || nextDirection == text_direction::Digits_RTL)
 							break;
-						else if (nextDirection == text_direction::LTR || nextDirection == text_direction::Digits)
-						{
-							newRun = true;
-							currentDirection = nextDirection;
-							currentDirectionIsMaster = true;
-							break;
-						}
-						else if (j == lastCodePointIndex - 1 && currentLineHasLTR)
+						else if (nextDirection == text_direction::LTR || (j == lastCodePointIndex - 1 && currentLineHasLTR))
 						{
 							newRun = true;
 							currentDirection = text_direction::LTR;
-							currentDirectionIsMaster = true;
 							break;
 						}
 					}
 				}
 			}
+			textDirections.push_back(character_type{ currentCategory, currentDirection });
 			if (newRun && i > 0)
 			{
-				runs.push_back(std::make_tuple(runStart, &codePoints[i], previousDirection, previousScript));
+				runs.push_back(std::make_tuple(runStart, &codePoints[i], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
 				runStart = &codePoints[i];
 			}
-			if (currentDirectionIsMaster || currentDirection == text_direction::Digits || currentDirection == text_direction::Mnemonic)
-			{
-				if (currentDirectionIsMaster)
-					previousMasterDirection = previousDirection;
-				previousDirection = currentDirection;
+			previousDirection = currentDirection;
+			previousCategory = currentCategory;
+			if (previousCategory == text_category::LTR || previousCategory == text_category::RTL || previousCategory == text_category::Mnemonic)
 				previousScript = currentScript;
-			}
 			if (i == lastCodePointIndex)
-				runs.push_back(std::make_tuple(runStart, &codePoints[i + 1], previousDirection, previousScript));
+				runs.push_back(std::make_tuple(runStart, &codePoints[i + 1], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
 			previousFont = currentFont;
 		}
 
@@ -1386,7 +1396,8 @@ namespace neogfx
 			do 
 			{
 				auto direction = std::get<2>(runs[i]);
-				if (startDirection == text_direction::RTL && (direction == text_direction::RTL || direction == text_direction::Digits))
+				if ((startDirection == text_direction::RTL || startDirection == text_direction::Digits_RTL) && 
+					(direction == text_direction::RTL || direction == text_direction::Digits_RTL))
 				{
 					auto m = runs[i];
 					runs.erase(runs.begin() + i);
@@ -1394,15 +1405,17 @@ namespace neogfx
 					++i;
 				}
 				else
+				{
 					break;
+				}
 			} while (i < runs.size());
 		}
 
 		for (std::size_t i = 0; i < runs.size(); ++i)
 		{
-			if (std::get<2>(runs[i]) == text_direction::Mnemonic)
+			if (std::get<3>(runs[i]))
 				continue;
-			bool drawMnemonic = (i > 0 && std::get<2>(runs[i - 1]) == text_direction::Mnemonic);
+			bool drawMnemonic = (i > 0 && std::get<3>(runs[i - 1]));
 			std::string::size_type sourceClusterRunStart = std::get<0>(runs[i]) - &codePoints[0];
 			glyph_shapes shapes{ *this, aFontSelector(sourceClusterRunStart), runs[i] };
 			for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
@@ -1433,7 +1446,7 @@ namespace neogfx
 				result.push_back(glyph(textDirections[startCluster],
 					shapes.glyph_info(j).codepoint, 
 					glyph::source_type(startCluster, endCluster), advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0)));
-				if (result.back().direction() == text_direction::Whitespace)
+				if (result.back().category() == text_category::Whitespace)
 					result.back().set_value(aTextBegin[startCluster]);
 				if ((aFontSelector(startCluster).style() & font::Underline) == font::Underline)
 					result.back().set_underline(true);
@@ -1443,7 +1456,7 @@ namespace neogfx
 					result.back().set_mnemonic(true);
 				if (shapes.using_fallback(j))
 					result.back().set_use_fallback(true, shapes.fallback_index(j));
-				if (result.back().direction() != text_direction::Whitespace)
+				if (result.back().category() != text_category::Whitespace)
 				{
 					auto& glyph = result.back();
 					if (glyph.advance() != advance.ceil())

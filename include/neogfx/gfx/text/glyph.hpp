@@ -34,15 +34,41 @@ namespace neogfx
 	// case insensitive text
 	typedef std::basic_string<character, neolib::ci_char_traits<std::char_traits<character> > > ci_string;
 
+	enum class text_category : uint8_t
+	{
+		Unknown = 0x00,
+		None = 0x01,
+		Whitespace = 0x02,
+		Digit = 0x04,
+		LTR = 0x08,
+		RTL = 0x10,
+		Mnemonic = 0x20
+	};
+
 	enum class text_direction : uint8_t
 	{
-		Unknown,
-		None,
-		Whitespace,
-		Digits,
-		LTR,
-		RTL,
-		Mnemonic
+		Invalid = 0x00,
+		LTR = 0x01,
+		RTL = 0x02,
+		Digits_LTR = 0x04, // unused
+		Digits_RTL = 0x08
+	};
+
+	class character_type
+	{
+	public:
+		text_category category;
+		text_direction direction;
+	public:
+		character_type() :
+			category(text_category::Unknown), direction(text_direction::LTR) {}
+		character_type(text_category aCategory, text_direction aDirection) :
+			category(aCategory), direction(aDirection) {}
+		character_type(text_category aCategory) :
+			category(aCategory), direction(text_direction::LTR) {}
+	public:
+		bool operator==(const character_type& aRhs) const { return category == aRhs.category && direction == aRhs.direction; }
+		bool operator!=(const character_type& aRhs) const { return !(*this == aRhs); }
 	};
 
 	class glyph
@@ -61,21 +87,24 @@ namespace neogfx
 		typedef std::pair<uint32_t, uint32_t> source_type;
 	public:
 		glyph() :
-			iDirection{}, iValue{}, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
-		glyph(text_direction aDirection, value_type aValue, source_type aSource, size aAdvance, size aOffset) :
-			iDirection{ aDirection }, iValue{ aValue }, iFlags{}, iFallbackIndex{}, iSource{ aSource }, iAdvance{ aAdvance }, iOffset{ aOffset } {}
-		glyph(text_direction aDirection, value_type aValue) :
-			iDirection{ aDirection }, iValue{ aValue }, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
+			iType{}, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
+		glyph(const character_type& aType, value_type aValue, source_type aSource, size aAdvance, size aOffset) :
+			iType{ aType.category, aType.direction }, iValue{ aValue }, iFlags{}, iFallbackIndex{}, iSource{ aSource }, iAdvance{ aAdvance }, iOffset{ aOffset } {}
+		glyph(const character_type& aType, value_type aValue) :
+			iType{ aType.category, aType.direction }, iValue{ aValue }, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
 	public:
-		bool operator==(const glyph& aRhs) const { return iDirection == aRhs.iDirection && iValue == aRhs.iValue; }
+		bool operator==(const glyph& aRhs) const { return iType.category == aRhs.iType.category && iValue == aRhs.iValue; }
 	public:
-		bool is_whitespace() const { return iDirection == text_direction::Whitespace; }
-		bool is_digit() const { return iDirection == text_direction::Digits; }
-		text_direction direction() const { return iDirection; }
-		bool no_direction() const { return iDirection != text_direction::LTR && iDirection != text_direction::RTL; }
-		bool left_to_right() const { return iDirection == text_direction::LTR; }
-		bool right_to_left() const { return iDirection == text_direction::RTL; }
-		void set_direction(text_direction aDirection) { iDirection = aDirection; }
+		bool is_whitespace() const { return category() == text_category::Whitespace; }
+		bool is_digit() const { return category() == text_category::Digit; }
+		text_category category() const { return iType.category; }
+		text_direction direction() const { return iType.direction; }
+	public:
+		bool left_to_right() const { return direction() == text_direction::LTR; }
+		bool right_to_left() const { return direction() == text_direction::RTL; }
+		bool category_has_no_direction() const { return iType.category != text_category::LTR && iType.category != text_category::RTL; }
+		void set_category(text_category aCategory) { iType.category = aCategory; }
+		void set_direction(text_direction aDirection) { iType.direction = aDirection; }
 		value_type value() const { return iValue; }
 		void set_value(value_type aValue) { iValue = aValue; }
 		const source_type& source() const { return iSource; }
@@ -109,7 +138,7 @@ namespace neogfx
 		uint8_t fallback_font_index() const { return iFallbackIndex; }
 		void kerning_adjust(float aAdjust) { iAdvance.cx += aAdjust; }
 	private:
-		text_direction iDirection;
+		character_type iType;
 		value_type iValue;
 		flags_e iFlags;
 		uint8_t iFallbackIndex;
@@ -214,7 +243,7 @@ namespace neogfx
 		bool gotOne = false;
 		for (Iter i = aBegin; i != aEnd; ++i)
 		{
-			if (!i->is_whitespace() && !i->no_direction())
+			if (!i->is_whitespace() && !i->category_has_no_direction())
 			{
 				if (!gotOne)
 				{

@@ -341,7 +341,7 @@ namespace neogfx
 		typedef std::pair<glyph_text::const_iterator, glyph_text::const_iterator> line_t;
 		typedef std::vector<line_t> lines_t;
 		lines_t lines;
-		std::array<glyph, 2> delimeters = { glyph(text_direction::Whitespace, '\r'), glyph(text_direction::Whitespace, '\n') };
+		std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
 		neolib::tokens(glyphText.cbegin(), glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
 		size result;
 		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
@@ -437,7 +437,7 @@ namespace neogfx
 		typedef std::pair<glyph_text::const_iterator, glyph_text::const_iterator> line_t;
 		typedef std::vector<line_t> lines_t;
 		lines_t lines;
-		std::array<glyph, 2> delimeters = { glyph(text_direction::Whitespace, '\r'), glyph(text_direction::Whitespace, '\n') };
+		std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
 		neolib::tokens(glyphText.cbegin(), glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
 		size textExtent = multiline_text_extent(aText, aFont, aMaxWidth, aUseCache);
 		point pos = aPoint;
