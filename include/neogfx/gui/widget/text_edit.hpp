@@ -354,40 +354,15 @@ namespace neogfx
 			glyph_paragraphs::const_iterator iSelf;
 			mutable height_list iHeights;
 		};
-		class glyph_line_index
-		{
-		public:
-			glyph_line_index() :
-				iGlyphs(0), iHeight(0.0)
-			{
-			}
-			glyph_line_index(document_glyphs::size_type aGlyphs, coordinate aHeight) :
-				iGlyphs(aGlyphs), iHeight(aHeight)
-			{
-			}
-		public:
-			document_glyphs::size_type glyphs() const { return iGlyphs; }
-			coordinate height() const { return iHeight; }
-		public:
-			bool operator==(const glyph_line_index& aRhs) const { return iGlyphs == aRhs.iGlyphs; }
-			bool operator!=(const glyph_line_index& aRhs) const { return !(*this == aRhs); }
-			bool operator<(const glyph_line_index& aRhs) const { return iGlyphs < aRhs.iGlyphs; }
-			bool operator>(const glyph_line_index& aRhs) const { return aRhs < *this; }
-			bool operator<=(const glyph_line_index& aRhs) const { return iGlyphs <= aRhs.iGlyphs; }
-			bool operator>=(const glyph_line_index& aRhs) const { return aRhs <= *this; }
-			glyph_line_index operator+(const glyph_line_index& aRhs) const { glyph_line_index result = *this; result += aRhs; return result; }
-			glyph_line_index operator-(const glyph_line_index& aRhs) const { glyph_line_index result = *this; result -= aRhs; return result; }
-			glyph_line_index& operator+=(const glyph_line_index& aRhs) { iGlyphs += aRhs.iGlyphs; iHeight += aRhs.iHeight; return *this; }
-			glyph_line_index& operator-=(const glyph_line_index& aRhs) { iGlyphs -= aRhs.iGlyphs; iHeight -= aRhs.iHeight; return *this; }
-		private:
-			document_glyphs::size_type iGlyphs;
-			coordinate iHeight;
-		};
 		struct glyph_line
 		{
+			std::pair<glyph_paragraphs::size_type, glyph_paragraphs::const_iterator> paragraph;
+			std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineStart;
+			std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineEnd;
+			coordinate ypos;
 			size extents;
 		};
-		typedef neolib::indexitor<glyph_line, glyph_line_index, boost::fast_pool_allocator<std::pair<glyph_line, const glyph_line_index>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> glyph_lines;
+		typedef std::vector<glyph_line> glyph_lines;
 		class glyph_column : public column_info
 		{
 		public:

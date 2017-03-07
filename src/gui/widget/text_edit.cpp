@@ -242,29 +242,29 @@ namespace neogfx
 		{
 			const auto& column = *iterColumn;
 			const auto& lines = column.lines();
-			auto line = lines.find_by_foreign_index(glyph_line_index{ 0, vertical_scrollbar().position() },
-				[](const glyph_line_index& left, const glyph_line_index& right) { return left.height() < right.height(); });
-			if (line.first != lines.begin() && line.second.height() > vertical_scrollbar().position())
-				line = std::make_pair(line.first - 1, lines.foreign_index(line.first - 1));
-			auto y = line.second.height();
-			auto startLineGlyph = line.second.glyphs();
-			for (auto paintLine = line.first; paintLine != lines.end(); y += (paintLine++)->first.extents.cy)
+			auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, vertical_scrollbar().position(), {} },
+				[](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
+			if (line != lines.begin() && line->ypos > vertical_scrollbar().position())
+				--line;
+			if (line == lines.end())
+				continue;
+			auto y = line->ypos;
+			for (auto paintLine = line; paintLine != lines.end(); y += (paintLine++)->extents.cy)
 			{
 				point linePos = client_rect(false).top_left() + point{ -horizontal_scrollbar().position(), y - vertical_scrollbar().position() };
-				if (linePos.y + paintLine->first.extents.cy < client_rect(false).top() || linePos.y + paintLine->first.extents.cy < update_rect().top())
+				if (linePos.y + paintLine->extents.cy < client_rect(false).top() || linePos.y + paintLine->extents.cy < update_rect().top())
 					continue;
 				if (linePos.y > client_rect(false).bottom() || linePos.y > update_rect().bottom())
 					break;
-				auto textDirection = glyph_text_direction(iGlyphs.begin() + startLineGlyph, iGlyphs.begin() + startLineGlyph + paintLine->second.glyphs());
+				auto textDirection = glyph_text_direction(paintLine->lineStart.second, paintLine->lineEnd.second);
 				if (iAlignment == alignment::Left && textDirection == text_direction::RTL ||
 					iAlignment == alignment::Right && textDirection == text_direction::LTR)
-					linePos.x += column.width() - column.margins().right - aGraphicsContext.from_device_units(size{ paintLine->first.extents.cx, 0 }).cx;
+					linePos.x += column.width() - column.margins().right - aGraphicsContext.from_device_units(size{ paintLine->extents.cx, 0 }).cx;
 				else if (iAlignment == alignment::Centre)
-					linePos.x += std::ceil((column.width() - aGraphicsContext.from_device_units(size{ paintLine->first.extents.cx, 0 }).cx) / 2);
+					linePos.x += std::ceil((column.width() - aGraphicsContext.from_device_units(size{ paintLine->extents.cx, 0 }).cx) / 2);
 				else
 					linePos.x += column.margins().left;
 				draw_glyphs(aGraphicsContext, linePos, column, paintLine);
-				startLineGlyph += paintLine->second.glyphs();
 			}
 			x += column.width();
 		}
@@ -728,7 +728,7 @@ namespace neogfx
 			{
 				auto currentPosition = glyph_position(cursor_glyph_position());
 				if (currentPosition.line != currentPosition.column->lines().begin())
-					cursor().set_position(from_glyph(iGlyphs.begin() + hit_test(point{ currentPosition.pos.x, currentPosition.column->lines().foreign_index(currentPosition.line - 1).height() }, false)).first, aMoveAnchor);
+					cursor().set_position(from_glyph(iGlyphs.begin() + hit_test(point{ currentPosition.pos.x, (currentPosition.line - 1)->ypos }, false)).first, aMoveAnchor);
 			}
 			break;
 		case cursor::Down:
@@ -737,7 +737,7 @@ namespace neogfx
 				if (currentPosition.line != currentPosition.column->lines().end())
 				{
 					if (currentPosition.line + 1 != currentPosition.column->lines().end())
-						cursor().set_position(from_glyph(iGlyphs.begin() + hit_test(point{ currentPosition.pos.x, currentPosition.column->lines().foreign_index(currentPosition.line + 1).height() }, false)).first, aMoveAnchor);
+						cursor().set_position(from_glyph(iGlyphs.begin() + hit_test(point{ currentPosition.pos.x, (currentPosition.line + 1)->ypos }, false)).first, aMoveAnchor);
 					else if (currentPosition.lineEnd != iGlyphs.end() && currentPosition.lineEnd->is_whitespace() && currentPosition.lineEnd->value() == '\n')
 						cursor().set_position(iText.size(), aMoveAnchor);
 				}
@@ -864,29 +864,36 @@ namespace neogfx
 	text_edit::position_info text_edit::glyph_position(position_type aGlyphPosition, bool aForCursor) const
 	{
 		auto column = iGlyphColumns.begin();
-		std::pair<glyph_lines::const_iterator, glyph_lines::foreign_index_type> line;
+		glyph_lines::const_iterator line;
 		for (; column != iGlyphColumns.end(); ++column)
 		{
-			line = column->lines().find_by_foreign_index(glyph_line_index{ aGlyphPosition, 0.0 },
-				[](const glyph_line_index& left, const glyph_line_index& right) { return left.glyphs() < right.glyphs(); });
-			if (line.first != column->lines().end())
+			line = std::lower_bound(column->lines().begin(), column->lines().end(), glyph_line{ {}, { aGlyphPosition, iGlyphs.begin() + aGlyphPosition }, {}, 0.0, {} },
+				[](const glyph_line& left, const glyph_line& right) { return left.lineStart.first < right.lineStart.first; });
+			if (line != column->lines().end())
 				break;
 		}
 		if (column == iGlyphColumns.end())
 			--column;
 		auto& lines = column->lines();
-		if (line.first != lines.begin() &&
-			(aGlyphPosition < static_cast<position_type>(line.second.glyphs()) ||
-			(line.first == lines.end() && (!iGlyphs.back().is_whitespace() || iGlyphs.back().value() != '\n'))))
-			line = std::make_pair(line.first - 1, lines.foreign_index(line.first - 1));
-		if (line.first != lines.end())
+		if (line != lines.begin())
 		{
-			position_type lineStart = line.second.glyphs();
-			position_type lineEnd = lineStart + line.first->second.glyphs();
+			if (line == lines.end())
+			{
+				if (aGlyphPosition < lines.back().lineEnd.first || (!iGlyphs.back().is_whitespace() || iGlyphs.back().value() != '\n'))
+					--line;
+			}
+			else if (aGlyphPosition < line->lineStart.first)
+				--line;
+		}
+		if (line != lines.end())
+		{
+			position_type lineStart = line->lineStart.first;
+			position_type lineEnd = line->lineEnd.first;
 			bool placeCursorToRight = (aGlyphPosition == lineEnd);
 			if (aForCursor)
 			{
-				if (aGlyphPosition == lineEnd)
+				auto paragraph = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ 0, aGlyphPosition }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs(); });
+				if (aGlyphPosition == iGlyphs.size() || aGlyphPosition == paragraph.first->first.end_index())
 				{
 					auto iterChar = iText.begin() + from_glyph(iGlyphs.begin() + aGlyphPosition).first;
 					if (iterChar != iText.begin())
@@ -909,20 +916,20 @@ namespace neogfx
 				{
 					auto iterGlyph = iGlyphs.begin() + aGlyphPosition;
 					const auto& glyph = aGlyphPosition < lineEnd ? *iterGlyph : *(iterGlyph - 1);
-					point linePos{ glyph.x - iGlyphs[line.second.glyphs()].x, line.second.height() };
+					point linePos{ glyph.x - line->lineStart.second->x, line->ypos };
 					if (placeCursorToRight)
 						linePos.x += glyph.advance().cx;
-					return position_info{ iterGlyph, column, line.first, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, linePos };
+					return position_info{ iterGlyph, column, line, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, linePos };
 				}
 				else
-					return position_info{ iGlyphs.begin() + line.second.glyphs(), column, line.first, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, point{ 0.0, line.second.height() } };
+					return position_info{ line->lineStart.second, column, line, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, point{ 0.0, line->ypos } };
 			}
 		}
 		point pos;
 		if (!lines.empty())
 		{
 			pos.x = 0.0;
-			pos.y = lines.foreign_index(lines.end()).height();
+			pos.y = lines.back().ypos + lines.back().extents.cy;
 		}
 		return position_info{ iGlyphs.end(), column, lines.end(), iGlyphs.end(), iGlyphs.end(), pos };
 	}
@@ -965,32 +972,42 @@ namespace neogfx
 		if (adjusted.x < 0.0)
 			adjusted.x = 0.0;
 		const auto& lines = column.lines();
-		auto line = lines.find_by_foreign_index(glyph_line_index{0, adjusted.y },
-			[](const glyph_line_index& left, const glyph_line_index& right) { return left.height() < right.height(); });
-		if (line.first != lines.begin() && adjusted.y < line.second.height())
-			line = std::make_pair(line.first - 1, lines.foreign_index(line.first - 1));
-		auto lineStart = line.second.glyphs();
-		auto lineEnd = line.first != lines.end() ? lineStart + line.first->second.glyphs() : iGlyphs.size();
-		if (line.first != lines.end())
+		auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, adjusted.y, {} },
+			[](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
+		if (line != lines.begin() && adjusted.y < line->ypos)
+			--line;
+		if (line != lines.end())
 		{
-			auto lineStartX = iGlyphs[line.second.glyphs()].x;
-			for (auto gi = line.second.glyphs(); gi != lineEnd; ++gi)
+			auto lineStart = (line != lines.end() ? line->lineStart.first : iGlyphs.size());
+			auto lineEnd = (line != lines.end() ? line->lineEnd.first : iGlyphs.size());
+			if (line != lines.end())
 			{
-				auto& g = iGlyphs[gi];
-				if (adjusted.x >= g.x - lineStartX && adjusted.x < g.x - lineStartX + g.advance().cx)
+				auto lineStartX = line->lineStart.second->x;
+				for (auto gi = line->lineStart.first; gi != lineEnd; ++gi)
 				{
-					if (g.direction() != text_direction::RTL)
-						return adjusted.x < g.x - lineStartX + g.advance().cx / 2.0 ? gi : gi + 1;
-					else
-						return gi + 1;
+					auto& g = iGlyphs[gi];
+					if (adjusted.x >= g.x - lineStartX && adjusted.x < g.x - lineStartX + g.advance().cx)
+					{
+						if (g.direction() != text_direction::RTL)
+							return adjusted.x < g.x - lineStartX + g.advance().cx / 2.0 ? gi : gi + 1;
+						else
+							return gi + 1;
+					}
 				}
 			}
+			if (lineEnd > 0 && iGlyphs[lineEnd - 1].category() == text_category::Whitespace && iGlyphs[lineEnd - 1].value() == U'\n')
+				--lineEnd;
+			if (lineEnd > lineStart && iGlyphs[lineEnd - 1].direction() == text_direction::RTL)
+				return lineEnd - 1;
+			return lineEnd;
 		}
-		if (lineEnd > 0 && iGlyphs[lineEnd - 1].category() == text_category::Whitespace && iGlyphs[lineEnd - 1].value() == U'\n')
-			--lineEnd;
-		if (lineEnd > lineStart && iGlyphs[lineEnd - 1].direction() == text_direction::RTL)
-			return lineEnd - 1;
-		return lineEnd;
+		else
+		{
+			if (line != lines.begin())
+				return (line - 1)->lineEnd.first;
+			else
+				return iGlyphs.size();
+		}
 	}
 
 	bool text_edit::same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const
@@ -1339,13 +1356,19 @@ namespace neogfx
 			auto paragraphEnd = paragraph.first.end();
 			if (paragraphStart == paragraphEnd || (paragraphStart->is_whitespace() && paragraphStart->value() == '\n'))
 			{
-				const auto& glyph = *paragraphStart;
+				auto lineStart = paragraphStart;
+				auto lineEnd = lineStart;
+				const auto& glyph = *lineStart;
 				const auto& tagContents = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).contents();
 				const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 				lines.push_back(
-					std::make_pair(glyph_line{ size{ 0.0, glyphFont.height() } }, glyph_line_index{ paragraphStart != paragraphEnd ? 1u : 0u, glyphFont.height() }),
-					std::make_pair(glyph_line_index{}, glyph_line_index{}));
+					glyph_line{
+						{ p - iGlyphParagraphs.begin(), p },
+						{ lineStart - iGlyphs.begin(), lineStart },
+						{ lineEnd - iGlyphs.begin(), lineEnd },
+						pos.y,
+						{ 0.0, glyphFont.height() } });
 				pos.y += glyphFont.height();
 			}
 			else if (iWordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
@@ -1377,9 +1400,13 @@ namespace neogfx
 						next = paragraphEnd;
 					dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().advance().cx : 0.0));
 					auto height = paragraph.first.height(lineStart, lineEnd);
-					auto line = lines.insert(lines.end(),
-						std::make_pair(glyph_line{ size{x - offset, height} }, glyph_line_index{ static_cast<std::size_t>(lineEnd - lineStart), height }),
-						glyph_lines::skip_type{ glyph_line_index{}, glyph_line_index{ static_cast<std::size_t>(next - lineEnd), 0.0 } });
+					lines.push_back(
+						glyph_line{
+							{ p - iGlyphParagraphs.begin(), p },
+							{ lineStart - iGlyphs.begin(), lineStart },
+							{ lineEnd - iGlyphs.begin(), lineEnd },
+							pos.y,
+							{ x - offset, height } });
 					pos.y += height;
 					iTextExtents.cx = std::max(iTextExtents.cx, x - offset);
 					lineStart = next;
@@ -1390,14 +1417,18 @@ namespace neogfx
 			}
 			else
 			{
+				auto lineStart = paragraphStart;
 				auto lineEnd = paragraphEnd;
-				auto height = paragraph.first.height(paragraphStart, lineEnd);
-				lines.push_back(std::make_pair(
-					glyph_line{ size{(lineEnd - 1)->x + (lineEnd - 1)->advance().cx, height} },
-					glyph_line_index{ static_cast<std::size_t>(lineEnd - paragraphStart), height }),
-					glyph_lines::skip_type{ glyph_line_index{}, glyph_line_index{ static_cast<std::size_t>(paragraphEnd - lineEnd), 0.0 } });
-				pos.y += lines.back().first.extents.cy;
-				iTextExtents.cx = std::max(iTextExtents.cx, lines.back().first.extents.cx);
+				auto height = paragraph.first.height(lineStart, lineEnd);
+				lines.push_back(
+					glyph_line{
+						{ p - iGlyphParagraphs.begin(), p },
+						{ lineStart - iGlyphs.begin(), lineStart },
+						{ lineEnd - iGlyphs.begin(), lineEnd },
+						pos.y,
+						{ (lineEnd - 1)->x + (lineEnd - 1)->advance().cx, height} });
+				pos.y += lines.back().extents.cy;
+				iTextExtents.cx = std::max(iTextExtents.cx, lines.back().extents.cx);
 			}
 			switch (pass)
 			{
@@ -1458,10 +1489,10 @@ namespace neogfx
 			const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			glyphHeight = glyphFont.height();
-			lineHeight = cursorPos.line->first.extents.cy;
+			lineHeight = cursorPos.line->extents.cy;
 		}
 		else if (cursorPos.line != cursorPos.column->lines().end())
-			glyphHeight = lineHeight = cursorPos.line->first.extents.cy;
+			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
 			glyphHeight = lineHeight = font().height();
 		update(rect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{1.0, glyphHeight} });
@@ -1472,7 +1503,7 @@ namespace neogfx
 		scoped_units su(*this, UnitsPixels);
 		auto p = glyph_position(cursor_glyph_position(), true);
 		auto e = (p.line != p.column->lines().end() ? 
-			size{ p.glyph != p.lineEnd ? p.glyph->advance().cx : 0.0, p.line->first.extents.cy } : 
+			size{ p.glyph != p.lineEnd ? p.glyph->advance().cx : 0.0, p.line->extents.cy } : 
 			size{ 0.0, font().height() });
 		if (p.pos.y < vertical_scrollbar().position())
 			vertical_scrollbar().set_position(p.pos.y);
@@ -1500,8 +1531,8 @@ namespace neogfx
 
 	void text_edit::draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
 	{
-		auto lineStart = iGlyphs.begin() + aColumn.lines().foreign_index(aLine).glyphs();
-		auto lineEnd = lineStart + aLine->second.glyphs();
+		auto lineStart = aLine->lineStart.second;
+		auto lineEnd = aLine->lineEnd.second;
 		if (lineEnd != lineStart && (lineEnd - 1)->category() == text_category::Whitespace && (lineEnd - 1)->value() == U'\n')
 			--lineEnd;
 		{
@@ -1523,7 +1554,7 @@ namespace neogfx
 					{
 					case 0:
 						if (selected)
-							aGraphicsContext.fill_rect(rect{ pos, size{glyph.advance().cx, aLine->first.extents.cy} }, 
+							aGraphicsContext.fill_rect(rect{ pos, size{glyph.advance().cx, aLine->extents.cy} }, 
 								has_focus() ? 
 									app::instance().current_style().selection_colour() : 
 									app::instance().current_style().selection_colour().with_alpha(64));
@@ -1543,7 +1574,7 @@ namespace neogfx
 								point{-1.0, 0.0}, point{1.0, 0.0},
 								point{-1.0, 1.0}, point{0.0, 1.0}, point{1.0, 1.0},
 							};
-							aGraphicsContext.draw_glyph(sOutlinePositions[outlinePos] + pos + glyph.offset() + point{ 0.0, aLine->first.extents.cy - glyphFont.height() - 1.0 }, glyph,
+							aGraphicsContext.draw_glyph(sOutlinePositions[outlinePos] + pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - 1.0 }, glyph,
 								glyphFont,
 								style.text_outline_colour().is<colour>() ?
 									static_variant_cast<const colour&>(style.text_outline_colour()) : style.text_outline_colour().is<gradient>() ?
@@ -1552,7 +1583,7 @@ namespace neogfx
 						}
 						break;
 					case 2:
-						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->first.extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0)}, glyph,
+						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0)}, glyph,
 							glyphFont,
 							selected && has_focus() ? 
 								(app::instance().current_style().selection_colour().light() ? colour::Black : colour::White) :
@@ -1573,7 +1604,7 @@ namespace neogfx
 			const auto& style = glyph_style(i, aColumn);
 			const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			if (glyph.underline())
-				aGraphicsContext.draw_glyph_underline(pos + point{ 0.0, aLine->first.extents.cy - glyphFont.height() }, glyph,
+				aGraphicsContext.draw_glyph_underline(pos + point{ 0.0, aLine->extents.cy - glyphFont.height() }, glyph,
 					glyphFont,
 					style.text_colour().is<colour>() ?
 						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
@@ -1598,10 +1629,10 @@ namespace neogfx
 			glyphHeight = glyphFont.height();
 			if (!style.text_outline_colour().empty())
 				glyphHeight += 2.0;
-			lineHeight = cursorPos.line->first.extents.cy;
+			lineHeight = cursorPos.line->extents.cy;
 		}
 		else if (cursorPos.line != cursorPos.column->lines().end())
-			glyphHeight = lineHeight = cursorPos.line->first.extents.cy;
+			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
 			glyphHeight = lineHeight = font().height();
 		if (((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
