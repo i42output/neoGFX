@@ -739,6 +739,8 @@ namespace neogfx
 
 	void window::native_window_focus_gained()
 	{
+		if (has_focused_widget())
+			focused_widget().focus_gained();
 	}
 
 	void window::native_window_focus_lost()
@@ -757,6 +759,8 @@ namespace neogfx
 			else
 				++i;
 		}
+		if (has_focused_widget())
+			focused_widget().focus_lost();
 	}
 
 	void window::native_window_resized()
