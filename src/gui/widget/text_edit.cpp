@@ -1367,6 +1367,8 @@ namespace neogfx
 			}
 			else if (iWordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
 			{
+				auto insertionPoint = lines.end();
+				bool first = true;
 				auto next = paragraph.first.start();
 				auto lineStart = next;
 				auto lineEnd = paragraphEnd;
@@ -1396,19 +1398,38 @@ namespace neogfx
 					auto height = paragraph.first.height(lineStart, lineEnd);
 					if (lineEnd != lineStart && (lineEnd - 1)->is_whitespace() && (lineEnd - 1)->value() == U'\n')
 						--lineEnd;
-					lines.push_back(
+					bool rtl = false;
+					if (!first &&
+						insertionPoint->lineStart != insertionPoint->lineEnd &&
+						lineStart != lineEnd &&
+						insertionPoint->lineStart.second->direction() == text_direction::RTL &&
+						(lineEnd - 1)->direction() == text_direction::RTL)
+						rtl = true; // todo: is this sufficient for multi-line RTL text?
+					if (!rtl)
+						insertionPoint = lines.end();
+					insertionPoint = lines.insert(insertionPoint,
 						glyph_line{
 							{ p - iGlyphParagraphs.begin(), p },
 							{ lineStart - iGlyphs.begin(), lineStart },
 							{ lineEnd - iGlyphs.begin(), lineEnd },
 							pos.y,
 							{ x - offset, height } });
+					if (rtl)
+					{
+						auto ypos = (insertionPoint + 1)->ypos;
+						for (auto i = insertionPoint; i != lines.end(); ++i)
+						{
+							i->ypos = ypos;
+							ypos += i->extents.cy;
+						}
+					}
 					pos.y += height;
 					iTextExtents.cx = std::max(iTextExtents.cx, x - offset);
 					lineStart = next;
 					if (lineStart != paragraphEnd)
 						offset = lineStart->x;
 					lineEnd = paragraphEnd;
+					first = false;
 				}
 			}
 			else
