@@ -259,6 +259,8 @@ int main(int argc, char* argv[])
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
 		ng::horizontal_layout editLayout(layoutButtons);
 		ng::text_edit textEdit(editLayout);
+		textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
+		textEdit.set_tab_stop_hint("00000000");
 		textEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::text_edit smallTextEdit(editLayout);
 		smallTextEdit.set_maximum_width(100);
@@ -336,7 +338,6 @@ int main(int argc, char* argv[])
 		ng::gradient_widget gw(layoutRadiosAndChecks);
 		columns.checked([&textEdit, &gw]()
 		{
-			textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
 			textEdit.set_columns(3);
 			gw.gradient_changed([&gw, &textEdit]()
 			{
@@ -348,7 +349,6 @@ int main(int argc, char* argv[])
 		});
 		columns.unchecked([&textEdit, &gw]()
 		{
-			textEdit.set_focus_policy(textEdit.focus_policy() & ~neogfx::focus_policy::ConsumeTabKey);
 			textEdit.remove_columns();
 			gw.gradient_changed.unsubscribe(textEdit);
 		});
@@ -565,7 +565,7 @@ int main(int argc, char* argv[])
 		tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
-		
+
 		return app.exec();
 	}
 	catch (std::exception& e)

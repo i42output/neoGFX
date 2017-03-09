@@ -145,6 +145,7 @@ namespace neogfx
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
 		iGlyphParagraphCache(nullptr),
+		iTabStopHint("0000"),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
@@ -164,6 +165,7 @@ namespace neogfx
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
 		iGlyphParagraphCache(nullptr),
+		iTabStopHint("0000"),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
@@ -183,6 +185,7 @@ namespace neogfx
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
 		iGlyphParagraphCache(nullptr),
+		iTabStopHint("0000"),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
@@ -1150,6 +1153,34 @@ namespace neogfx
 		}
 	}
 
+	dimension text_edit::tab_stops() const
+	{
+		if (iCalculatedTabStops == boost::none || iCalculatedTabStops->first != font())
+			iCalculatedTabStops = std::make_pair(font(), (iTabStops != boost::none ?
+				*iTabStops : graphics_context(*this).text_extent(iTabStopHint, font()).cx));
+		return iCalculatedTabStops->second;
+	}
+
+	void text_edit::set_tab_stop_hint(const std::string& aTabStopHint)
+	{
+		if (iTabStopHint != aTabStopHint)
+		{
+			iTabStopHint = aTabStopHint;
+			iCalculatedTabStops.reset();
+		}
+	}
+
+	void text_edit::set_tab_stops(const optional_dimension& aTabStops)
+	{
+		optional_dimension newTabStops = (aTabStops != boost::none ? units_converter(*this).to_device_units(size{ *aTabStops, 0.0 }).cx : optional_dimension{});
+		if (iTabStops != newTabStops)
+		{
+			iTabStops = newTabStops;
+			refresh_columns();
+		}
+		iCalculatedTabStops.reset();
+	}
+
 	void text_edit::init()
 	{
 		iDefaultFont = app::instance().current_style().font_info();
@@ -1268,6 +1299,18 @@ namespace neogfx
 		auto paragraphStart = iText.begin();
 		auto iterColumn = iGlyphColumns.begin();
 		neolib::vecarray<std::u32string::size_type, 16, -1> columnDelimiters;
+		auto fs = [this, paragraphStart, &columnDelimiters](std::u32string::size_type aSourceIndex)
+		{
+			const auto& tagContents = iText.tag(paragraphStart + aSourceIndex).contents();
+			std::size_t indexColumn = std::lower_bound(columnDelimiters.begin(), columnDelimiters.end(), aSourceIndex) - columnDelimiters.begin();
+			if (indexColumn > columns() - 1)
+				indexColumn = columns() - 1;
+			const auto& columnStyle = text_edit::column(indexColumn).style();
+			const auto& style =
+				tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) :
+				columnStyle.font() != boost::none ? columnStyle : iDefaultStyle;
+			return style.font() != boost::none ? *style.font() : font();
+		};
 		for (auto iterChar = iText.begin(); iterChar != iText.end(); ++iterChar)
 		{
 			auto& column = *(iterColumn);
@@ -1282,18 +1325,6 @@ namespace neogfx
 			if (newLine || iterChar == iText.end() - 1)
 			{
 				paragraphBuffer.assign(paragraphStart, iterChar + 1);
-				auto fs = [this, paragraphStart, &columnDelimiters](std::u32string::size_type aSourceIndex)
-				{
-					const auto& tagContents = iText.tag(paragraphStart + aSourceIndex).contents();
-					std::size_t indexColumn = std::lower_bound(columnDelimiters.begin(), columnDelimiters.end(), aSourceIndex) - columnDelimiters.begin();
-					if (indexColumn > columns() - 1)
-						indexColumn = columns() - 1;
-					const auto& columnStyle = text_edit::column(indexColumn).style();
-					const auto& style = 
-						tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : 
-						columnStyle.font() != boost::none ? columnStyle : iDefaultStyle;
-					return style.font() != boost::none ? *style.font() : font();
-				};
 				auto gt = gc.to_glyph_text(paragraphBuffer.begin(), paragraphBuffer.end(), fs);
 				auto paragraphGlyphs = iGlyphs.insert(iGlyphs.end(), gt.cbegin(), gt.cend());
 				auto newParagraph = iGlyphParagraphs.insert(iGlyphParagraphs.end(),
@@ -1314,10 +1345,22 @@ namespace neogfx
 			if (paragraph.first.start() == paragraph.first.end())
 				continue;
 			coordinate x = 0.0;
-			for (auto g = paragraph.first.start(); g != paragraph.first.end(); ++g)
+			iterColumn = iGlyphColumns.begin();
+			for (auto iterGlyph = paragraph.first.start(); iterGlyph != paragraph.first.end(); ++iterGlyph)
 			{
-				g->x = x;
-				x += g->advance().cx;
+				if (iText[iterGlyph->source().first] == iterColumn->delimiter() && iterColumn + 1 != iGlyphColumns.end())
+				{
+					iterGlyph->set_advance(size{});
+					++iterColumn;
+					continue;
+				}
+				else if (iterGlyph->is_whitespace() && iterGlyph->value() == U'\t')
+				{
+					auto advance = iterGlyph->advance();
+					iterGlyph->set_advance(tab_stops() - std::fmod(x, tab_stops()));
+				}
+				iterGlyph->x = x;
+				x += iterGlyph->advance().cx;
 			}
 		}
 		refresh_columns();
