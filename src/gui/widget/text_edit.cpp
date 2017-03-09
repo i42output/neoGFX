@@ -1357,7 +1357,8 @@ namespace neogfx
 				else if (iterGlyph->is_whitespace() && iterGlyph->value() == U'\t')
 				{
 					auto advance = iterGlyph->advance();
-					iterGlyph->set_advance(tab_stops() - std::fmod(x, tab_stops()));
+					advance.cx = tab_stops() - std::fmod(x, tab_stops());
+					iterGlyph->set_advance(advance);
 				}
 				iterGlyph->x = x;
 				x += iterGlyph->advance().cx;
