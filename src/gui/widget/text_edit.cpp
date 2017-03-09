@@ -1113,14 +1113,14 @@ namespace neogfx
 	void text_edit::set_columns(std::size_t aColumnCount)
 	{
 		iGlyphColumns.resize(aColumnCount);
-		refresh_columns();
+		refresh_paragraph(iText.begin(), 0);
 	}
 
 	void text_edit::remove_columns()
 	{
 		iGlyphColumns.resize(1);
 		iGlyphColumns[0] = glyph_column{};
-		refresh_columns();
+		refresh_paragraph(iText.begin(), 0);
 	}
 
 	const text_edit::column_info& text_edit::column(std::size_t aColumnIndex)
@@ -1137,7 +1137,7 @@ namespace neogfx
 		if (iGlyphColumns[aColumnIndex] != aColumn)
 		{
 			static_cast<column_info&>(iGlyphColumns[aColumnIndex]) = aColumn;
-			refresh_columns();
+			refresh_paragraph(iText.begin(), 0);
 		}
 	}
 
