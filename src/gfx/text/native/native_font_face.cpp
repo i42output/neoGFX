@@ -25,6 +25,7 @@
 #include FT_BITMAP_H
 #include FT_LCD_FILTER_H
 #include "../../native/opengl.hpp"
+#include "../../native/i_native_texture.hpp"
 #include "native_font_face.hpp"
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -176,16 +177,15 @@ namespace neogfx
 		FT_Render_Glyph(iHandle->glyph, aGlyph.subpixel() ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL);
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
 
-		rect glyphRect;
-		i_font_texture& fontTexture = iRenderingEngine.font_manager().allocate_glyph_space(neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) }, glyphRect);
+		auto& subTexture = iRenderingEngine.font_manager().glyph_atlas().create_sub_texture(
+			neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) });
+		rect glyphRect{ subTexture.atlas_location() };
 		i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(std::make_pair(aGlyph.value(), aGlyph.subpixel()),
-			neogfx::glyph_texture(
-				fontTexture,
-				glyphRect + point{ 1.0, 1.0 } -delta{ 2.0, 2.0 },
-				neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) },
-				neogfx::point{
+			neogfx::glyph_texture{
+				subTexture,
+				point{
 					iHandle->glyph->metrics.horiBearingX / 64.0,
-					(iHandle->glyph->metrics.horiBearingY - iHandle->glyph->metrics.height) / 64.0 }))).first->second;
+					(iHandle->glyph->metrics.horiBearingY - iHandle->glyph->metrics.height) / 64.0 } })).first->second;
 
 		iGlyphTextureData.clear();
 		iGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
@@ -221,7 +221,7 @@ namespace neogfx
 
 		GLint previousTexture;
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
-		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(glyphTexture.font_texture().handle())));
+		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle())));
 
 		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
 			static_cast<GLint>(glyphRect.x), static_cast<GLint>(glyphRect.y), static_cast<GLsizei>(glyphRect.cx), static_cast<GLsizei>(glyphRect.cy), 

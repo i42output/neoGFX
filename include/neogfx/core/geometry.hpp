@@ -353,9 +353,10 @@ namespace neogfx
 		// types
 	public:
 		typedef CoordinateType coordinate_type;
+		typedef coordinate_type dimension_type;
 	private:
 		typedef basic_delta<CoordinateType> delta_type;
-		typedef basic_size<CoordinateType> size_type;
+		typedef basic_size<dimension_type> size_type;
 		typedef basic_point<CoordinateType> point_type;
 	public:
 		using point_type::x;
@@ -370,7 +371,7 @@ namespace neogfx
 			point_type(topLeft), 
 			size_type(static_cast<CoordinateType>(bottomRight.x - topLeft.x), static_cast<CoordinateType>(bottomRight.y - topLeft.y)) {}
 		basic_rect(const size_type& dimensions) : point_type(), size_type(dimensions) {}
-		basic_rect(CoordinateType x, CoordinateType y, CoordinateType cx, CoordinateType cy) : point_type(x, y), size_type(cx, cy) {}
+		basic_rect(coordinate_type x, coordinate_type y, dimension_type cx, dimension_type cy) : point_type(x, y), size_type(cx, cy) {}
 		template <typename CoordinateType2>
 		basic_rect(const basic_rect<CoordinateType2>& other) : point_type(other), size_type(other) {}
 		// assignment
@@ -392,8 +393,8 @@ namespace neogfx
 		point_type top_right() const { return point_type(x + cx, y); }
 		point_type bottom_left() const { return point_type(x, y + cy); }
 		point_type bottom_right() const { return point_type(x + cx, y + cy); }
-		coordinate_type width() const { return cx; }
-		coordinate_type height() const { return cy; }
+		dimension_type width() const { return cx; }
+		dimension_type height() const { return cy; }
 		bool operator==(const basic_rect& other) const { return x == other.x && y == other.y && cx == other.cx && cy == other.cy; }
 		bool operator!=(const basic_rect& other) const { return !operator==(other); }
 		basic_rect& operator*=(const basic_rect& other) { position() *= other.position(); extents() *= other.extents(); return *this; }

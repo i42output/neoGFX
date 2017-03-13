@@ -27,6 +27,7 @@ namespace neogfx
 	class opengl_texture_manager : public texture_manager
 	{
 	public:
+		virtual std::unique_ptr<i_native_texture> create_texture(const neogfx::size& aExtents, const optional_colour& aColour = optional_colour());
 		virtual std::unique_ptr<i_native_texture> create_texture(const i_image& aImage);
 	};
 }

@@ -29,6 +29,11 @@ namespace neogfx
 	{
 	}
 
+	texture::texture(const neogfx::size& aExtents, const optional_colour& aColour) :
+		iNativeTexture(app::instance().rendering_engine().texture_manager().create_texture(aExtents, aColour))
+	{
+	}
+
 	texture::texture(const i_texture& aTexture) :
 		iNativeTexture(!aTexture.is_empty() ? aTexture.native_texture() : std::shared_ptr<i_native_texture>())
 	{
@@ -41,6 +46,11 @@ namespace neogfx
 
 	texture::~texture()
 	{
+	}
+
+	i_texture::type_e texture::type() const
+	{
+		return Texture;
 	}
 
 	bool texture::is_empty() const
@@ -62,7 +72,7 @@ namespace neogfx
 		return native_texture()->storage_extents();
 	}
 
-	void texture::set_pixels(const rect& aRect, void* aPixelData)
+	void texture::set_pixels(const rect& aRect, const void* aPixelData)
 	{
 		native_texture()->set_pixels(aRect, aPixelData);
 	}

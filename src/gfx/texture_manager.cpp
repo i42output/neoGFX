@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/texture_manager.hpp>
+#include <neogfx/gfx/texture_atlas.hpp>
 #include "native/i_native_texture.hpp"
 
 namespace neogfx
@@ -44,7 +45,7 @@ namespace neogfx
 		{
 			return iTextureReference->storage_extents();
 		}
-		virtual void set_pixels(const rect& aRect, void* aPixelData)
+		virtual void set_pixels(const rect& aRect, const void* aPixelData)
 		{
 			iTextureReference->set_pixels(aRect, aPixelData);
 		}
@@ -86,6 +87,11 @@ namespace neogfx
 	void texture_manager::clear_textures()
 	{
 		iTextures.clear();
+	}
+
+	std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize)
+	{
+		return std::make_unique<texture_atlas>(*this, aSize);
 	}
 
 	const texture_manager::texture_list& texture_manager::textures() const

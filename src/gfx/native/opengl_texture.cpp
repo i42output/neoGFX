@@ -132,7 +132,7 @@ namespace neogfx
 		return iStorageSize;
 	}
 
-	void opengl_texture::set_pixels(const rect& aRect, void* aPixelData)
+	void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData)
 	{
 		GLint previousTexture;
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));

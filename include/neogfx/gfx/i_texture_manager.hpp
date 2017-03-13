@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/i_texture_atlas.hpp>
 
 namespace neogfx
 {
@@ -32,9 +33,11 @@ namespace neogfx
 	public:
 		struct texture_not_found : std::logic_error { texture_not_found() : std::logic_error("neogfx::i_texture_manager::texture_not_found") {} };
 	public:
+		virtual std::unique_ptr<i_native_texture> create_texture(const neogfx::size& aExtents, const optional_colour& aColour = optional_colour()) = 0;
 		virtual std::unique_ptr<i_native_texture> create_texture(const i_image& aImage) = 0;
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture) = 0;
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture) = 0;
 		virtual void clear_textures() = 0;
+		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;
 	};
 }

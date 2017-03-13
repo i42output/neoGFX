@@ -36,10 +36,11 @@
 #include <hb-ft.h>
 #include <hb-ucdn\ucdn.h>
 #endif
+#include "..\..\native\opengl.hpp"
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include "native_font_texture.hpp"
+#include "glyph_texture.hpp"
 #include "i_native_font.hpp"
 #include "i_native_font_face.hpp"
 

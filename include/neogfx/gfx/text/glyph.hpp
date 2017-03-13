@@ -23,7 +23,7 @@
 #include <boost/optional.hpp>
 #include <neolib/string_utils.hpp>
 #include <neogfx/core/geometry.hpp>
-#include "i_font_texture.hpp"
+#include "i_glyph_texture.hpp"
 #include "font.hpp"
 
 namespace neogfx

@@ -129,8 +129,6 @@ namespace neogfx
 		virtual void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
 		virtual void begin_drawing_glyphs();
 		virtual size draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour);
-//		virtual void is_emoji(const std::u32string& aEmojiText) const;
-//		virtual void draw_emoji(const point& aPoint, const std::u32string& aEmojiText, const font& aFont);
 		virtual void end_drawing_glyphs();
 		virtual void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect);
 	private:

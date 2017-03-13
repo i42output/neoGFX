@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/optional.hpp>
+#include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 
 namespace neogfx
@@ -33,15 +34,17 @@ namespace neogfx
 		// construction
 	public:
 		texture();
+		texture(const neogfx::size& aExtents, const optional_colour& aColour = optional_colour());
 		texture(const i_texture& aTexture);
 		texture(const i_image& aImage);
 		~texture();
 		// operations
 	public:
+		virtual type_e type() const;
 		virtual bool is_empty() const;
 		virtual size extents() const;
 		virtual size storage_extents() const;
-		virtual void set_pixels(const rect& aRect, void* aPixelData);
+		virtual void set_pixels(const rect& aRect, const void* aPixelData);
 	public:
 		virtual std::shared_ptr<i_native_texture> native_texture() const;
 		// attributes

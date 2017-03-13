@@ -21,8 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometry.hpp>
+#include <neogfx/gfx/i_texture_atlas.hpp>
 #include "font.hpp"
-#include "i_font_texture.hpp"
 
 namespace neogfx
 {
@@ -56,6 +56,8 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice) = 0;
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-		virtual i_font_texture& allocate_glyph_space(const size& aSize, rect& aResult) = 0;
+	public:
+		virtual const i_texture_atlas& glyph_atlas() const = 0;
+		virtual i_texture_atlas& glyph_atlas() = 0;
 	};
 }

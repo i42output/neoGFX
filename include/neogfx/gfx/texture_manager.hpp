@@ -34,6 +34,7 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture);
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture);
 		virtual void clear_textures();
+		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 });
 	protected:
 		const texture_list& textures() const;
 		texture_list& textures();
@@ -44,5 +45,6 @@ namespace neogfx
 		void cleanup(texture_list::iterator aTexture);
 	private:
 		texture_list iTextures;
+		std::vector<std::unique_ptr<i_texture_atlas>> iTextureAtlases;
 	};
 }

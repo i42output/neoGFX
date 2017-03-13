@@ -25,7 +25,8 @@
 #include FT_LCD_FILTER_H
 #include <neogfx/app/app.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
-#include "native/native_font_texture.hpp"
+#include "../../gfx/text/native/native_font_face.hpp"
+#include "../../gfx/text/native/native_font.hpp"
 
 namespace neogfx
 {
@@ -137,7 +138,8 @@ namespace neogfx
 	font_manager::font_manager(i_rendering_engine& aRenderingEngine, i_screen_metrics&) :
 		iRenderingEngine(aRenderingEngine),
 		iDefaultSystemFontInfo(detail::platform_specific::default_system_font_info()),
-		iDefaultFallbackFontInfo(detail::platform_specific::default_fallback_font_info())
+		iDefaultFallbackFontInfo(detail::platform_specific::default_fallback_font_info()),
+		iGlyphAtlas{aRenderingEngine.texture_manager(), size{1024.0, 1024.0}}
 	{
 		FT_Error error = FT_Init_FreeType(&iFontLib);
 		if (error)
@@ -304,6 +306,16 @@ namespace neogfx
 		(void)aDevice;
 	}
 
+	const i_texture_atlas& font_manager::glyph_atlas() const
+	{
+		return iGlyphAtlas;
+	}
+
+	i_texture_atlas& font_manager::glyph_atlas()
+	{
+		return iGlyphAtlas;
+	}
+
 	i_native_font& font_manager::find_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize)
 	{
 		auto family = iFontFamilies.find(neolib::make_ci_string(aFamilyName));
@@ -356,18 +368,5 @@ namespace neogfx
 		if (matches.empty())
 			throw no_matching_font_found();
 		return *matches.rbegin()->second;
-	}
-
-	i_font_texture& font_manager::allocate_glyph_space(const size& aSize, rect& aResult)
-	{
-		for (auto& ft : iFontTextures)
-			if (ft->allocate_glyph_space(aSize, aResult))
-				return *ft;
-		iFontTextures.push_back(std::make_unique<native_font_texture>(size(1024, 1024), 
-			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatRGBHorizontal || 
-			iRenderingEngine.screen_metrics().subpixel_format() == i_screen_metrics::SubpixelFormatBGRHorizontal));
-		if (!iFontTextures.back()->allocate_glyph_space(aSize, aResult))
-			throw failed_to_allocate_glyph_space();
-		return *iFontTextures.back();
 	}
 }

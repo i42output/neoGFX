@@ -45,7 +45,7 @@ namespace neogfx
 	public:
 		virtual size extents() const;
 		virtual size storage_extents() const;
-		virtual void set_pixels(const rect& aRect, void* aPixelData);
+		virtual void set_pixels(const rect& aRect, const void* aPixelData);
 	public:
 		virtual void* handle() const;
 		virtual bool is_resident() const;

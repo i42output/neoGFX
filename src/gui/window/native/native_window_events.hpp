@@ -34,6 +34,7 @@ namespace neogfx
 		enum type_e
 		{
 			Close,
+			Resizing,
 			Resized,
 			SizeChanged,
 			Enter,

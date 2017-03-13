@@ -603,6 +603,16 @@ namespace neogfx
 				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
 			}
 			break;
+		case WM_ERASEBKGND:
+			result = true;
+			break;
+		case WM_SIZING:
+			mapEntry->second->iExtents = size{
+				static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->right - reinterpret_cast<const RECT*>(lparam)->left),
+				static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->bottom - reinterpret_cast<const RECT*>(lparam)->top) };
+			mapEntry->second->push_event(native_window_event(native_window_event::Resizing, mapEntry->second->iExtents));
+			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			break;
 		case WM_NCDESTROY:
 			{
 				mapEntry->second->destroyed();

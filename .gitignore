@@ -172,3 +172,4 @@
 /3rdparty/SDL/SDL2-2.0.5/build
 /3rdparty/SDL/SDL2-2.0.5/lib/SDL2.lib
 /3rdparty/SDL/SDL2-2.0.5/lib/SDL2d.lib
+/examples/test/build/win32/vs2015/.vs/config/applicationhost.config

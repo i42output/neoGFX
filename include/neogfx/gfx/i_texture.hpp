@@ -29,14 +29,21 @@ namespace neogfx
 	class i_texture
 	{
 	public:
+		enum type_e
+		{
+			Texture,
+			SubTexture
+		};
+	public:
 		struct texture_empty : std::logic_error { texture_empty() : std::logic_error("neogfx::i_texture::texture_empty") {} };
 	public:
 		virtual ~i_texture() {}
 	public:
+		virtual type_e type() const = 0;
 		virtual bool is_empty() const = 0;
 		virtual size extents() const = 0;
 		virtual size storage_extents() const = 0;
-		virtual void set_pixels(const rect& aRect, void* aPixelData) = 0;
+		virtual void set_pixels(const rect& aRect, const void* aPixelData) = 0;
 	public:
 		virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
 	};

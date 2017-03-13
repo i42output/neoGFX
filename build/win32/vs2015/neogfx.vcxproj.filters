@@ -264,9 +264,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\i_physical_object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_texture.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -462,9 +459,6 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\text\native\native_font_texture.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -473,6 +467,33 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\emoji_atlas.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_emoji_atlas.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_sub_texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\sub_texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_atlas.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\texture_atlas.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\skyline_bin_pack.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\text\native\glyph_texture.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -700,9 +721,6 @@
     <ClCompile Include="..\..\..\src\game\shape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\text\skyline_bin_pack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\game\sprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -736,10 +754,22 @@
     <ClCompile Include="..\..\..\src\app\action.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\text\native\native_font_texture.cpp">
+    <ClCompile Include="..\..\..\src\app\native\sdl_service_factory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\app\native\sdl_service_factory.cpp">
+    <ClCompile Include="..\..\..\src\gfx\sub_texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\text\emoji_atlas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\skyline_bin_pack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\text\native\glyph_texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\texture_atlas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -21,12 +21,15 @@
 
 #include <neogfx/neogfx.hpp>
 #include <set>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <neolib/string_utils.hpp>
+#include <neogfx/gfx/texture_atlas.hpp>
 #include "i_font_manager.hpp"
-#include "../../../../src/gfx/text/native/native_font.hpp"
 
 namespace neogfx
 {
+	class native_font;
 	class i_rendering_engine;
 
 	class fallback_font_info : public i_fallback_font_info
@@ -45,7 +48,6 @@ namespace neogfx
 	private:
 		typedef std::list<native_font> native_font_list;
 		typedef std::map<neolib::ci_string, std::vector<native_font_list::iterator>> font_family_list;
-		typedef std::vector<std::unique_ptr<i_font_texture>> font_textures;
 	public:
 		struct error_initializing_font_library : std::runtime_error { error_initializing_font_library() : std::runtime_error("neogfx::font_manager::error_initializing_font_library") {} };
 		struct no_matching_font_found : std::runtime_error { no_matching_font_found() : std::runtime_error("neogfx::font_manager::no_matching_font_found") {} };
@@ -72,7 +74,9 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice);
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice);
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice);
-		virtual i_font_texture& allocate_glyph_space(const size& aSize, rect& aResult);
+	public:
+		virtual const i_texture_atlas& glyph_atlas() const;
+		virtual i_texture_atlas& glyph_atlas();
 	private:
 		i_native_font& find_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize);
 		i_native_font& find_best_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize);
@@ -83,6 +87,6 @@ namespace neogfx
 		FT_Library iFontLib;
 		native_font_list iNativeFonts;
 		font_family_list iFontFamilies;
-		font_textures iFontTextures;
+		texture_atlas iGlyphAtlas;
 	};
 }

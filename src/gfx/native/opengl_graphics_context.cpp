@@ -22,7 +22,7 @@
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
-#include <neogfx/gfx/text/i_font_texture.hpp>
+#include <neogfx/gfx/text/i_glyph_texture.hpp>
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
 #include "../text/native/native_font_face.hpp"
@@ -918,21 +918,21 @@ namespace neogfx
 		point glyphOrigin(aPoint.x + glyphTexture.placement().x, 
 			logical_coordinates()[1] < logical_coordinates()[3] ? 
 				aPoint.y + (glyphTexture.placement().y + -aFont.descender()) :
-				aPoint.y + aFont.height() - (glyphTexture.placement().y + -aFont.descender()) - glyphTexture.extents().cy);
+				aPoint.y + aFont.height() - (glyphTexture.placement().y + -aFont.descender()) - glyphTexture.texture().extents().cy);
 
 		vertices.clear();
 		vertices.insert(vertices.begin(),
 		{
 			to_shader_vertex(glyphOrigin),
-			to_shader_vertex(glyphOrigin + point{ glyphTexture.extents().cx, 0.0 }),
-			to_shader_vertex(glyphOrigin + point{ glyphTexture.extents().cx, glyphTexture.extents().cy }),
-			to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.extents().cy })
+			to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, 0.0 }),
+			to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, glyphTexture.texture().extents().cy }),
+			to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.texture().extents().cy })
 		});
 
 		colours.clear();
 		colours.resize(vertices.size(), std::array<double, 4>{{aColour.red<double>(), aColour.green<double>(), aColour.blue<double>(), aColour.alpha<double>()}});
 
-		textureCoords = texture_vertices(glyphTexture.font_texture().extents(), rect{ glyphTexture.font_texture_location(), glyphTexture.extents() }, logical_coordinates());
+		textureCoords = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates());
 
 		/* todo: cache VBOs and use glBufferSubData(). */
 
@@ -976,9 +976,9 @@ namespace neogfx
 
 		glCheck(glBindVertexArray(vaoHandle));
 
-		if (iActiveGlyphTexture != reinterpret_cast<GLuint>(glyphTexture.font_texture().handle()))
+		if (iActiveGlyphTexture != reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle()))
 		{
-			iActiveGlyphTexture = reinterpret_cast<GLuint>(glyphTexture.font_texture().handle());
+			iActiveGlyphTexture = reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle());
 			glCheck(glBindTexture(GL_TEXTURE_2D, iActiveGlyphTexture));
 		}
 		
@@ -1012,7 +1012,7 @@ namespace neogfx
 		if (shaderProgramActivated)
 			iRenderingEngine.deactivate_shader_program();
 
-		return glyphTexture.extents();
+		return glyphTexture.texture().extents();
 	}
 
 	void opengl_graphics_context::end_drawing_glyphs()
@@ -1462,7 +1462,7 @@ namespace neogfx
 					if (glyph.advance() != advance.ceil())
 					{
 						const i_glyph_texture& glyphTexture = aFontSelector(startCluster).native_font_face().glyph_texture(glyph);
-						auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.extents().cx);
+						auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
 						if (visibleAdvance > advance.cx)
 						{
 							advance.cx = visibleAdvance;

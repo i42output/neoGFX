@@ -60,6 +60,9 @@ namespace neogfx
 			case native_window_event::Close:
 				close();
 				break;
+			case native_window_event::Resizing:
+				event_handler().native_window_resized();
+				break;
 			case native_window_event::Resized:
 				event_handler().native_window_resized();
 				break;
