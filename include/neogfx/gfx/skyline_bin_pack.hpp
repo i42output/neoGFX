@@ -61,7 +61,7 @@ namespace neogfx
 
 	public:
 		/// Instantiates a bin of the given size.
-		skyline_bin_pack(const size& aDimensions, bool aAllowRotations = true);
+		skyline_bin_pack(const size& aDimensions, bool aAllowRotations = false);
 
 		/// (Re)initializes the packer to an empty bin of width x height units. Call whenever
 		/// you need to restart with a new bin.
