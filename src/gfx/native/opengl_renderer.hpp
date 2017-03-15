@@ -121,8 +121,8 @@ namespace neogfx
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
 		detail::screen_metrics iScreenMetrics;		
-		neogfx::font_manager iFontManager;
 		opengl_texture_manager iTextureManager;
+		neogfx::font_manager iFontManager;
 		shader_programs iShaderPrograms;
 		shader_programs::iterator iActiveProgram;
 		shader_programs::iterator iMonochromeProgram;

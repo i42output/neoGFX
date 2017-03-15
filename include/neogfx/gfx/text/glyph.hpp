@@ -42,7 +42,8 @@ namespace neogfx
 		Digit = 0x04,
 		LTR = 0x08,
 		RTL = 0x10,
-		Mnemonic = 0x20
+		Mnemonic = 0x20,
+		Emoji = 0x40,
 	};
 
 	enum class text_direction : uint8_t
@@ -51,7 +52,9 @@ namespace neogfx
 		LTR = 0x01,
 		RTL = 0x02,
 		Digits_LTR = 0x04, // unused
-		Digits_RTL = 0x08
+		Digits_RTL = 0x08,
+		Emoji_LTR = 0x10,
+		Emoji_RTL = 0x20
 	};
 
 	class character_type
@@ -79,7 +82,6 @@ namespace neogfx
 			Underline = 0x01,
 			Subpixel = 0x02,
 			Mnemonic = 0x04,
-			Emoji = 0x08,
 			UseFallback = 0x80
 		};
 	public:
@@ -97,6 +99,7 @@ namespace neogfx
 	public:
 		bool is_whitespace() const { return category() == text_category::Whitespace; }
 		bool is_digit() const { return category() == text_category::Digit; }
+		bool is_emoji() const { return category() == text_category::Emoji; }
 		text_category category() const { return iType.category; }
 		text_direction direction() const { return iType.direction; }
 	public:

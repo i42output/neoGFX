@@ -36,6 +36,7 @@ namespace neogfx
 		// operations
 	public:
 		virtual type_e type() const;
+		virtual texture_sampling sampling() const;
 		virtual bool is_empty() const;
 		virtual size extents() const;
 		virtual size storage_extents() const;

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include "glyph.hpp"
+#include "i_emoji_atlas.hpp"
 
 namespace neogfx
 {
@@ -1825,8 +1826,10 @@ namespace neogfx
 		};
 	}
 
-	inline text_category get_text_category(uint32_t aCodePoint)
+	inline text_category get_text_category(const i_emoji_atlas& aEmojiAtlas, uint32_t aCodePoint)
 	{
+		if (aEmojiAtlas.is_emoji(aCodePoint))
+			return text_category::Emoji;
 		const detail::TEXT_CATEGORY_MAP_VALUE_TYPE* rangeStart = std::lower_bound(
 			&detail::TEXT_CATEGORY_MAP[0], 
 			&detail::TEXT_CATEGORY_MAP[0] + sizeof(detail::TEXT_CATEGORY_MAP) / sizeof(detail::TEXT_CATEGORY_MAP[0]),
@@ -1840,9 +1843,9 @@ namespace neogfx
 		return rangeStart->second;
 	}
 
-	inline text_direction get_text_direction(uint32_t aCodePoint, text_direction aExistingDirection)
+	inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, uint32_t aCodePoint, text_direction aExistingDirection)
 	{
-		switch (get_text_category(aCodePoint))
+		switch (get_text_category(aEmojiAtlas, aCodePoint))
 		{
 		case text_category::LTR:
 			return text_direction::LTR;
@@ -1853,6 +1856,11 @@ namespace neogfx
 				return text_direction::Digits_RTL;
 			else
 				return text_direction::LTR;
+		case text_category::Emoji:
+			if (aExistingDirection == text_direction::RTL || aExistingDirection == text_direction::Emoji_RTL)
+				return text_direction::Emoji_RTL;
+			else
+				return text_direction::Emoji_LTR;
 		default:
 			return aExistingDirection;
 		}

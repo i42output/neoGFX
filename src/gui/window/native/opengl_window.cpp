@@ -131,13 +131,6 @@ namespace neogfx
 		invalidatedRect.cx = std::min(invalidatedRect.cx, surface_size().cx - invalidatedRect.x);
 		invalidatedRect.cy = std::min(invalidatedRect.cy, surface_size().cy - invalidatedRect.y);
 
-		static bool initialized = false;
-		if (!initialized)
-		{
-			rendering_engine().initialize();
-			initialized = true;
-		}
-
 		rendering_engine().activate_context(*this);
 
 		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));

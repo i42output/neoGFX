@@ -29,8 +29,8 @@ namespace neogfx
 	{
 	}
 
-	texture::texture(const neogfx::size& aExtents, const optional_colour& aColour) :
-		iNativeTexture(app::instance().rendering_engine().texture_manager().create_texture(aExtents, aColour))
+	texture::texture(const neogfx::size& aExtents, texture_sampling aSampling, const optional_colour& aColour) :
+		iNativeTexture(app::instance().rendering_engine().texture_manager().create_texture(aExtents, aSampling, aColour))
 	{
 	}
 
@@ -51,6 +51,13 @@ namespace neogfx
 	i_texture::type_e texture::type() const
 	{
 		return Texture;
+	}
+
+	texture_sampling texture::sampling() const
+	{
+		if (is_empty())
+			return texture_sampling::NormalMipmap;
+		return native_texture()->sampling();
 	}
 
 	bool texture::is_empty() const

@@ -43,6 +43,13 @@ namespace neogfx
 			iContext = create_context(aSurface);
 		else
 			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(aSurface.handle()), static_cast<SDL_GLContext>(iContext));
+
+		static bool initialized = false;
+		if (!initialized)
+		{
+			initialize();
+			initialized = true;
+		}
 	}
 
 	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_native_surface& aSurface)

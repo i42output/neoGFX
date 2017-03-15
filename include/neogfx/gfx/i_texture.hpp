@@ -26,6 +26,13 @@ namespace neogfx
 {
 	class i_native_texture;
 
+	enum class texture_sampling
+	{
+		Normal,
+		NormalMipmap,
+		Multisample
+	};
+
 	class i_texture
 	{
 	public:
@@ -40,6 +47,7 @@ namespace neogfx
 		virtual ~i_texture() {}
 	public:
 		virtual type_e type() const = 0;
+		virtual texture_sampling sampling() const = 0;
 		virtual bool is_empty() const = 0;
 		virtual size extents() const = 0;
 		virtual size storage_extents() const = 0;

@@ -136,10 +136,11 @@ namespace neogfx
 	}
 
 	font_manager::font_manager(i_rendering_engine& aRenderingEngine, i_screen_metrics&) :
-		iRenderingEngine(aRenderingEngine),
-		iDefaultSystemFontInfo(detail::platform_specific::default_system_font_info()),
-		iDefaultFallbackFontInfo(detail::platform_specific::default_fallback_font_info()),
-		iGlyphAtlas{aRenderingEngine.texture_manager(), size{1024.0, 1024.0}}
+		iRenderingEngine{ aRenderingEngine },
+		iDefaultSystemFontInfo{ detail::platform_specific::default_system_font_info() },
+		iDefaultFallbackFontInfo{ detail::platform_specific::default_fallback_font_info() },
+		iGlyphAtlas{ aRenderingEngine.texture_manager(), size{1024.0, 1024.0}, texture_sampling::Normal },
+		iEmojiAtlas{ aRenderingEngine.texture_manager() }
 	{
 		FT_Error error = FT_Init_FreeType(&iFontLib);
 		if (error)
@@ -314,6 +315,16 @@ namespace neogfx
 	i_texture_atlas& font_manager::glyph_atlas()
 	{
 		return iGlyphAtlas;
+	}
+
+	const i_emoji_atlas& font_manager::emoji_atlas() const
+	{
+		return iEmojiAtlas;
+	}
+
+	i_emoji_atlas& font_manager::emoji_atlas()
+	{
+		return iEmojiAtlas;
 	}
 
 	i_native_font& font_manager::find_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize)

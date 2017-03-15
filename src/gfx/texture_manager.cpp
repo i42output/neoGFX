@@ -37,6 +37,10 @@ namespace neogfx
 			iParent.cleanup(iTexture);
 		}
 	public:
+		virtual texture_sampling sampling() const
+		{
+			return iTextureReference->sampling();
+		}
 		virtual size extents() const
 		{
 			return iTextureReference->extents();
@@ -89,9 +93,9 @@ namespace neogfx
 		iTextures.clear();
 	}
 
-	std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize)
+	std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize, texture_sampling aSampling)
 	{
-		return std::make_unique<texture_atlas>(*this, aSize);
+		return std::make_unique<texture_atlas>(*this, aSize, aSampling);
 	}
 
 	const texture_manager::texture_list& texture_manager::textures() const

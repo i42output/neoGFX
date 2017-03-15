@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometry.hpp>
+#include <neogfx/gfx/i_texture.hpp>
 
 namespace neogfx
 {
@@ -29,6 +30,7 @@ namespace neogfx
 	public:
 		virtual ~i_native_texture() {}
 	public:
+		virtual texture_sampling sampling() const = 0;
 		virtual size extents() const = 0;
 		virtual size storage_extents() const = 0;
 		virtual void set_pixels(const rect& aRect, const void* aPixelData) = 0;

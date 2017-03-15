@@ -25,6 +25,7 @@
 #include FT_FREETYPE_H
 #include <neolib/string_utils.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
+#include <neogfx/gfx/text/emoji_atlas.hpp>
 #include "i_font_manager.hpp"
 
 namespace neogfx
@@ -77,6 +78,8 @@ namespace neogfx
 	public:
 		virtual const i_texture_atlas& glyph_atlas() const;
 		virtual i_texture_atlas& glyph_atlas();
+		virtual const i_emoji_atlas& emoji_atlas() const;
+		virtual i_emoji_atlas& emoji_atlas();
 	private:
 		i_native_font& find_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize);
 		i_native_font& find_best_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize);
@@ -88,5 +91,6 @@ namespace neogfx
 		native_font_list iNativeFonts;
 		font_family_list iFontFamilies;
 		texture_atlas iGlyphAtlas;
+		neogfx::emoji_atlas iEmojiAtlas;
 	};
 }

@@ -25,8 +25,8 @@
 
 namespace neogfx
 {
-	texture_atlas::texture_atlas(i_texture_manager& aTextureManager, const size& aPageSize) : 
-		iTextureManager(aTextureManager), iPageSize(aPageSize), iNextId(0u)
+	texture_atlas::texture_atlas(i_texture_manager& aTextureManager, const size& aPageSize, texture_sampling aSampling) :
+		iTextureManager(aTextureManager), iPageSize(aPageSize), iSampling(aSampling), iNextId(0u)
 	{
 	}
 
@@ -83,7 +83,7 @@ namespace neogfx
 
 	texture_atlas::pages::iterator texture_atlas::create_page()
 	{
-		return iPages.insert(iPages.end(), page{ texture{page_size()}, fragments{page_size()} });
+		return iPages.insert(iPages.end(), page{ texture{ page_size(), iSampling }, fragments{ page_size() } });
 	}
 
 	std::pair<texture_atlas::pages::iterator, rect> texture_atlas::allocate_space(const size& aSize)

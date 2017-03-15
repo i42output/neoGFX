@@ -64,7 +64,7 @@ namespace neogfx
 		typedef std::pair<pages::iterator, neogfx::sub_texture> entry;
 		typedef std::unordered_map<i_sub_texture::id, entry> entries;
 	public:
-		texture_atlas(i_texture_manager& aTextureManager, const size& aPageSize);
+		texture_atlas(i_texture_manager& aTextureManager, const size& aPageSize, texture_sampling aSampling = texture_sampling::NormalMipmap);
 	public:
 		virtual const i_sub_texture& sub_texture(i_sub_texture::id aSubTextureId) const;
 		virtual i_sub_texture& sub_texture(i_sub_texture::id aSubTextureId);
@@ -77,6 +77,7 @@ namespace neogfx
 		std::pair<pages::iterator, rect> allocate_space(const size& aSize);
 	private:
 		i_texture_manager& iTextureManager;
+		texture_sampling iSampling;
 		size iPageSize;
 		pages iPages;
 		i_sub_texture::id iNextId;

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/gfx/i_texture_atlas.hpp>
+#include <neogfx/gfx/text/i_emoji_atlas.hpp>
 #include "font.hpp"
 
 namespace neogfx
@@ -59,5 +60,7 @@ namespace neogfx
 	public:
 		virtual const i_texture_atlas& glyph_atlas() const = 0;
 		virtual i_texture_atlas& glyph_atlas() = 0;
+		virtual const i_emoji_atlas& emoji_atlas() const = 0;
+		virtual i_emoji_atlas& emoji_atlas() = 0;
 	};
 }

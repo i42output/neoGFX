@@ -678,20 +678,21 @@ namespace neogfx
 		case cursor::PreviousWord:
 			if (!iText.empty())
 			{
+				auto const& emojiAtlas = app::instance().rendering_engine().font_manager().emoji_atlas();
 				auto p = cursor().position();
 				if (p == iText.size())
 					--p;
-				while (p > 0 && get_text_category(iText[p]) == text_category::Whitespace)
+				while (p > 0 && get_text_category(emojiAtlas, iText[p]) == text_category::Whitespace)
 					--p;
 				if (p > 0)
 				{
-					auto c = get_text_category(iText[p == cursor().position() ? p - 1 : p]);
+					auto c = get_text_category(emojiAtlas, iText[p == cursor().position() ? p - 1 : p]);
 					while (p > 0 && iGlyphs[p - 1].category() == c)
 						--p;
 					if (p > 0 && c == text_category::Whitespace)
 					{
-						c = get_text_category(iText[p - 1]);
-						while (p > 0 && get_text_category(iText[p - 1]) == c)
+						c = get_text_category(emojiAtlas, iText[p - 1]);
+						while (p > 0 && get_text_category(emojiAtlas, iText[p - 1]) == c)
 							--p;
 					}
 				}
@@ -709,15 +710,16 @@ namespace neogfx
 		case cursor::NextWord:
 			if (!iText.empty())
 			{
+				auto const& emojiAtlas = app::instance().rendering_engine().font_manager().emoji_atlas();
 				auto p = cursor().position();
-				while (p < iText.size() && get_text_category(iText[p]) == text_category::Whitespace)
+				while (p < iText.size() && get_text_category(emojiAtlas, iText[p]) == text_category::Whitespace)
 					++p;
 				if (p < iText.size() && p == cursor().position())
 				{
-					auto c = get_text_category(iText[p]);
-					while (p < iText.size() && get_text_category(iText[p]) == c)
+					auto c = get_text_category(emojiAtlas, iText[p]);
+					while (p < iText.size() && get_text_category(emojiAtlas, iText[p]) == c)
 						++p;
-					while (p < iText.size() && get_text_category(iText[p]) == text_category::Whitespace)
+					while (p < iText.size() && get_text_category(emojiAtlas, iText[p]) == text_category::Whitespace)
 						++p;
 				}
 				cursor().set_position(p, aMoveAnchor);
@@ -1011,7 +1013,8 @@ namespace neogfx
 	{
 		if (iText[aTextPositionLeft] == U'\n' || iText[aTextPositionRight] == U'\n')
 			return false;
-		return get_text_category(iText[aTextPositionLeft]) == get_text_category(iText[aTextPositionRight]);
+		auto const& emojiAtlas = app::instance().rendering_engine().font_manager().emoji_atlas();
+		return get_text_category(emojiAtlas, iText[aTextPositionLeft]) == get_text_category(emojiAtlas, iText[aTextPositionRight]);
 	}
 
 	std::pair<text_edit::position_type, text_edit::position_type> text_edit::word_at(position_type aTextPosition) const

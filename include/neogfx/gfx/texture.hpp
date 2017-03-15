@@ -34,13 +34,14 @@ namespace neogfx
 		// construction
 	public:
 		texture();
-		texture(const neogfx::size& aExtents, const optional_colour& aColour = optional_colour());
+		texture(const neogfx::size& aExtents, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
 		texture(const i_texture& aTexture);
 		texture(const i_image& aImage);
 		~texture();
 		// operations
 	public:
 		virtual type_e type() const;
+		virtual texture_sampling sampling() const;
 		virtual bool is_empty() const;
 		virtual size extents() const;
 		virtual size storage_extents() const;

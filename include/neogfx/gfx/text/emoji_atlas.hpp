@@ -29,14 +29,21 @@ namespace neogfx
 {
 	class emoji_atlas : public i_emoji_atlas
 	{
+	private:
+		typedef std::map<dimension, std::string> sets;
+		typedef std::map<std::u32string, sets> emojis;
 	public:
 		emoji_atlas(i_texture_manager& aTextureManager);
 	public:
+		virtual bool is_emoji(char32_t aCodePoint) const;
 		virtual bool is_emoji(const std::u32string& aCodePoints) const;
-		virtual emoji_id emoji(const std::u32string& aCodePoints) const;
+		virtual emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const;
+		virtual emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize = 64) const;
 		virtual const i_texture& emoji_texture(emoji_id aId) const;
 	private:
+		const std::string kFilePath;
 		std::unique_ptr<i_texture_atlas> iTextureAtlas;
-		mutable std::unordered_map<std::u32string, boost::optional<emoji_id>> m_EmojiMap;
+		emojis iEmojis;
+		mutable std::unordered_map<std::u32string, boost::optional<emoji_id>> iEmojiMap;
 	};
 }

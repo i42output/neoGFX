@@ -49,16 +49,6 @@ namespace neogfx
 						archive.extract_to(i, iData);
 						iSize = iData.size();
 					}
-					else
-					{
-						neolib::uri otherResource{uri};
-						otherResource.set_fragment(archive.file_path(i));
-						std::ostringstream oss;
-						oss << otherResource;
-						neolib::zip::buffer_type buffer;
-						archive.extract_to(i, buffer);
-						aManager.add_resource(oss.str(), &buffer[0], buffer.size());
-					}
 				}
 			}
 		}
