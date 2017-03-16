@@ -1255,7 +1255,6 @@ namespace neogfx
 		return result;
 	}
 
-
 	glyph_text::container opengl_graphics_context::to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const
 	{
 		auto& result = iGlyphTextResult;
@@ -1263,6 +1262,8 @@ namespace neogfx
 
 		if (aTextEnd == aTextBegin)
 			return result;
+
+		bool hasEmojis = false;
 
 		auto& textDirections = iTextDirections;
 		textDirections.clear();
@@ -1319,6 +1320,7 @@ namespace neogfx
 			default:
 				break;
 			}
+			
 			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
 			text_category currentCategory = get_text_category(emojiAtlas, codePoints[i]);
 			if (iMnemonic != boost::none && codePoints[i] == static_cast<char32_t>(iMnemonic->second))
@@ -1417,6 +1419,8 @@ namespace neogfx
 				}
 			}
 			textDirections.push_back(character_type{ currentCategory, currentDirection });
+			if (currentCategory == text_category::Emoji)
+				hasEmojis = true;
 			if (newRun && i > 0)
 			{
 				runs.push_back(std::make_tuple(runStart, &codePoints[i], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
@@ -1516,6 +1520,47 @@ namespace neogfx
 					}
 				}
 			}
+		}
+		if (hasEmojis)
+		{
+			auto& emojiResult = iGlyphTextResult2;
+			emojiResult.clear();
+			for (auto i = result.begin(); i != result.end(); ++i)
+			{
+				if (i->category() == text_category::Emoji)
+				{
+					auto cluster = i->source().first;
+					std::u32string sequence;
+					sequence += aTextBegin[cluster];
+					auto j = i + 1;
+					for (; j != result.end(); ++j)
+					{
+						auto prev = aTextBegin[cluster + (j - i) - 1];
+						auto ch = aTextBegin[cluster + (j - i)];
+						if (ch == 0x200D)
+							continue;
+						if (iRenderingEngine.font_manager().emoji_atlas().is_emoji(sequence + ch) || prev == 0x200D)
+							sequence += ch;
+						else
+							break;
+					}
+					if (sequence.size() > 1 && iRenderingEngine.font_manager().emoji_atlas().is_emoji(sequence))
+					{
+						auto g = *i;
+						g.set_value(iRenderingEngine.font_manager().emoji_atlas().emoji(sequence, aFontSelector(cluster).height()));
+						g.set_source(std::make_pair(g.source().first, g.source().first + sequence.size()));
+						emojiResult.push_back(g);
+						i = j - 1;
+					}
+					else
+						emojiResult.push_back(*i);
+				}
+				else
+				{
+					emojiResult.push_back(*i);
+				}
+			}
+			return emojiResult;
 		}
 		return result;
 	}

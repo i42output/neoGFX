@@ -165,6 +165,7 @@ namespace neogfx
 		typedef std::vector<glyph_run> run_list;
 		mutable run_list iRuns;
 		mutable glyph_text::container iGlyphTextResult;
+		mutable glyph_text::container iGlyphTextResult2;
 		GLint iPreviousTexture;
 		GLuint iActiveGlyphTexture;
 		bool iLineStippleActive;

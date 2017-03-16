@@ -753,7 +753,7 @@ namespace neogfx
 				cursor().set_position(cursor().position() - 1, aMoveAnchor);
 			break;
 		case cursor::Right:
-			if (cursor().position() < iGlyphs.size())
+			if (cursor().position() < iText.size())
 				cursor().set_position(cursor().position() + 1, aMoveAnchor);
 			break;
 		default:
