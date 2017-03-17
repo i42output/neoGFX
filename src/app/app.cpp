@@ -306,9 +306,9 @@ namespace neogfx
 		return a->second;
 	}
 
-	i_action& app::add_action(const std::string& aText, const std::string& aImageUri)
+	i_action& app::add_action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling)
 	{
-		auto a = iActions.emplace(aText, action{ aText, aImageUri });
+		auto a = iActions.emplace(aText, action{ aText, aImageUri, aSampling });
 		return a->second;
 	}
 

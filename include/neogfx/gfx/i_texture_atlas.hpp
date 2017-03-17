@@ -33,7 +33,7 @@ namespace neogfx
 	public:
 		virtual const i_sub_texture& sub_texture(i_sub_texture::id aSubTextureId) const = 0;
 		virtual i_sub_texture& sub_texture(i_sub_texture::id aSubTextureId) = 0;
-		virtual i_sub_texture& create_sub_texture(const size& aSize) = 0;
+		virtual i_sub_texture& create_sub_texture(const size& aSize, texture_sampling aSampling) = 0;
 		virtual i_sub_texture& create_sub_texture(const i_image& aImage) = 0;
 		virtual void destroy_sub_texture(i_sub_texture& aSubTexture) = 0;
 	};

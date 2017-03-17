@@ -385,7 +385,7 @@ namespace neogfx
 	}
 
 	colour_dialog::yz_picker::yz_picker(colour_dialog& aParent) :
-		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTexture{ image{size{256, 256}, colour::Black} }, iUpdateTexture{true}, iTracking {
+		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTexture{ image{ size{256, 256}, colour::Black } }, iUpdateTexture{true}, iTracking {
 		false
 	}
 	{

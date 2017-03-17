@@ -90,7 +90,7 @@ namespace neogfx
 	}
 
 	opengl_texture::opengl_texture(const i_image& aImage) :
-		iSampling(texture_sampling::NormalMipmap),
+		iSampling(aImage.sampling()),
 		iSize(aImage.extents()), 
 		iStorageSize{size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}},
 		iHandle(0), 
@@ -102,8 +102,16 @@ namespace neogfx
 			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 			glCheck(glGenTextures(1, &iHandle));
 			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
-			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			if (iSampling == texture_sampling::Normal)
+			{
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			}
+			else if (iSampling == texture_sampling::NormalMipmap)
+			{
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			}
 			switch (aImage.colour_format())
 			{
 			case colour_format::RGBA8:

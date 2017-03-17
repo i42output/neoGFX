@@ -93,9 +93,9 @@ namespace neogfx
 		iTextures.clear();
 	}
 
-	std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize, texture_sampling aSampling)
+	std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize)
 	{
-		return std::make_unique<texture_atlas>(*this, aSize, aSampling);
+		return std::make_unique<texture_atlas>(*this, aSize);
 	}
 
 	const texture_manager::texture_list& texture_manager::textures() const

@@ -68,10 +68,10 @@ namespace neogfx
 		virtual i_action& set_button_text(const optional_text& aButtonText = optional_text()) = 0;
 		virtual i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text()) = 0;
 		virtual i_action& set_statis_tip_text(const optional_text& aStatusTipText = optional_text()) = 0;
-		virtual i_action& set_image(const std::string& aUri) = 0;
+		virtual i_action& set_image(const std::string& aUri, texture_sampling aSampling = texture_sampling::Normal) = 0;
 		virtual i_action& set_image(const i_image& aImage) = 0;
 		virtual i_action& set_image(const i_texture& aTexture) = 0;
-		virtual i_action& set_checked_image(const std::string& aUri) = 0;
+		virtual i_action& set_checked_image(const std::string& aUri, texture_sampling aSampling = texture_sampling::Normal) = 0;
 		virtual i_action& set_checked_image(const i_image& aImage) = 0;
 		virtual i_action& set_checked_image(const i_texture& aTexture) = 0;
 		virtual i_action& set_shortcut(const optional_key_sequence& aShortcut) = 0;

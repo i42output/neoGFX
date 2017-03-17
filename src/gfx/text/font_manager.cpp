@@ -139,7 +139,7 @@ namespace neogfx
 		iRenderingEngine{ aRenderingEngine },
 		iDefaultSystemFontInfo{ detail::platform_specific::default_system_font_info() },
 		iDefaultFallbackFontInfo{ detail::platform_specific::default_fallback_font_info() },
-		iGlyphAtlas{ aRenderingEngine.texture_manager(), size{1024.0, 1024.0}, texture_sampling::Normal },
+		iGlyphAtlas{ aRenderingEngine.texture_manager(), size{1024.0, 1024.0} },
 		iEmojiAtlas{ aRenderingEngine.texture_manager() }
 	{
 		FT_Error error = FT_Init_FreeType(&iFontLib);

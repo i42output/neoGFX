@@ -33,8 +33,8 @@ namespace neogfx
 	{
 	}
 
-	action::action(const std::string& aText, const std::string& aImageUri) :
-		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText), iImage(neogfx::image(aImageUri))
+	action::action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling) :
+		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText), iImage(neogfx::image(aImageUri, aSampling))
 	{
 	}
 
@@ -280,9 +280,9 @@ namespace neogfx
 		return *this;
 	}
 
-	i_action& action::set_image(const std::string& aUri)
+	i_action& action::set_image(const std::string& aUri, texture_sampling aSampling)
 	{
-		set_image(neogfx::image(aUri));
+		set_image(neogfx::image{ aUri, aSampling });
 		return *this;
 	}
 
@@ -301,9 +301,9 @@ namespace neogfx
 		return *this;
 	}
 
-	i_action& action::set_checked_image(const std::string& aUri)
+	i_action& action::set_checked_image(const std::string& aUri, texture_sampling aSampling)
 	{
-		set_checked_image(neogfx::image(aUri));
+		set_checked_image(neogfx::image{ aUri, aSampling });
 		return *this;
 	}
 

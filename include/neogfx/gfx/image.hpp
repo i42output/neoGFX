@@ -38,11 +38,11 @@ namespace neogfx
 	private:
 		struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
 	public:
-		image();
-		image(const neogfx::size& aSize, const colour& aColour);
-		image(const std::string& aUri);
+		image(texture_sampling aSampling = texture_sampling::NormalMipmap);
+		image(const neogfx::size& aSize, const colour& aColour = colour::Black, texture_sampling aSampling = texture_sampling::NormalMipmap);
+		image(const std::string& aUri, texture_sampling aSampling = texture_sampling::NormalMipmap);
 		template <typename T, std::size_t Width, std::size_t Height>
-		image(const std::string& aUri, const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap) : iUri(aUri), iColourFormat(neogfx::colour_format::RGBA8)
+		image(const std::string& aUri, const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap, texture_sampling aSampling = texture_sampling::NormalMipmap) : iUri(aUri), iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
 		{
 			resize(neogfx::size{ Width, Height });
 			for (std::size_t y = 0; y < Height; ++y)
@@ -50,7 +50,7 @@ namespace neogfx
 					set_pixel(point(x, y), aColourMap.find(aImagePattern[y][x])->second);
 		}
 		template <typename T, std::size_t Width, std::size_t Height>
-		image(const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap) : iColourFormat(neogfx::colour_format::RGBA8)
+		image(const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap, texture_sampling aSampling = texture_sampling::NormalMipmap) : iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
 		{
 			resize(neogfx::size{ Width, Height });
 			for (std::size_t y = 0; y < Height; ++y)
@@ -71,6 +71,7 @@ namespace neogfx
 		virtual std::size_t size() const;
 	public:
 		virtual neogfx::colour_format colour_format() const;
+		virtual texture_sampling sampling() const;
 		virtual const neogfx::size& extents() const;
 		virtual void resize(const neogfx::size& aNewSize);
 		virtual colour get_pixel(const point& aPoint) const;
@@ -87,6 +88,7 @@ namespace neogfx
 		boost::optional<std::string> iError;
 		neogfx::colour_format iColourFormat;
 		std::vector<uint8_t> iData;
+		texture_sampling iSampling;
 		neogfx::size iSize;
 	};
 }

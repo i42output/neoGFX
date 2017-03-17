@@ -38,6 +38,6 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture) = 0;
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture) = 0;
 		virtual void clear_textures() = 0;
-		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }, texture_sampling aSampling = texture_sampling::NormalMipmap) = 0;
+		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;
 	};
 }

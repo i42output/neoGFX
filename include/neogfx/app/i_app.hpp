@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_texture.hpp>
 
 namespace neogfx
 {
@@ -30,7 +31,6 @@ namespace neogfx
 	class i_style;
 	class i_action;
 	class i_mnemonic;
-	class i_texture;
 	class i_image;
 
 	class event_processing_context;
@@ -68,7 +68,7 @@ namespace neogfx
 		virtual i_action& action_select_all() = 0;
 		virtual i_action& find_action(const std::string& aText) = 0;
 		virtual i_action& add_action(const std::string& aText) = 0;
-		virtual i_action& add_action(const std::string& aText, const std::string& aImageUri) = 0;
+		virtual i_action& add_action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling = texture_sampling::Normal) = 0;
 		virtual i_action& add_action(const std::string& aText, const i_texture& aImage) = 0;
 		virtual i_action& add_action(const std::string& aText, const i_image& aImage) = 0;
 		virtual void remove_action(i_action& aAction) = 0;

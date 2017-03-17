@@ -24,11 +24,11 @@
 
 namespace neogfx
 {
-	image::image() : iColourFormat(neogfx::colour_format::RGBA8)
+	image::image(texture_sampling aSampling) : iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
 	{
 	}
 
-	image::image(const neogfx::size& aSize, const colour& aColour) : iColourFormat(neogfx::colour_format::RGBA8)
+	image::image(const neogfx::size& aSize, const colour& aColour, texture_sampling aSampling) : iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
 	{
 		resize(aSize);
 		for (std::size_t y = 0; y < aSize.cx; ++y)
@@ -36,7 +36,7 @@ namespace neogfx
 				set_pixel(point(x, y), aColour);
 	}
 
-	image::image(const std::string& aUri) : iResource(resource_manager::instance().load_resource(aUri)), iUri(aUri), iColourFormat(neogfx::colour_format::RGBA8)
+	image::image(const std::string& aUri, texture_sampling aSampling) : iResource(resource_manager::instance().load_resource(aUri)), iUri(aUri), iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
 	{
 		if (available())
 			load();
@@ -110,6 +110,11 @@ namespace neogfx
 	colour_format image::colour_format() const
 	{
 		return iColourFormat;
+	}
+
+	texture_sampling image::sampling() const
+	{
+		return iSampling;
 	}
 
 	const size& image::extents() const

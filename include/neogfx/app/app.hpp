@@ -95,7 +95,7 @@ namespace neogfx
 		virtual i_action& action_select_all();
 		virtual i_action& find_action(const std::string& aText);
 		virtual i_action& add_action(const std::string& aText);
-		virtual i_action& add_action(const std::string& aText, const std::string& aImageUri);
+		virtual i_action& add_action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling = texture_sampling::Normal);
 		virtual i_action& add_action(const std::string& aText, const i_texture& aImage);
 		virtual i_action& add_action(const std::string& aText, const i_image& aImage);
 		virtual void remove_action(i_action& aAction);
