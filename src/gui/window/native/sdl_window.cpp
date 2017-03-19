@@ -675,6 +675,15 @@ namespace neogfx
 				iExtents = basic_size<decltype(aEvent.window.data1)>{ aEvent.window.data1, aEvent.window.data2 };
 				push_event(native_window_event(native_window_event::SizeChanged, iExtents));
 				break;
+			case SDL_WINDOWEVENT_MINIMIZED:
+				invalidate(surface_size());
+				break;
+			case SDL_WINDOWEVENT_MAXIMIZED:
+				invalidate(surface_size());
+				break;
+			case SDL_WINDOWEVENT_RESTORED:
+				invalidate(surface_size());
+				break;
 			case SDL_WINDOWEVENT_ENTER:
 				push_event(native_window_event(native_window_event::Enter));
 				break;
@@ -688,6 +697,9 @@ namespace neogfx
 				SDL_ResetMouse();
 				iMouseButtonEventExtraInfo.clear();
 				push_event(native_window_event(native_window_event::FocusLost));
+				break;
+			case SDL_WINDOWEVENT_EXPOSED:
+				invalidate(surface_size());
 				break;
 			}
 			break;
