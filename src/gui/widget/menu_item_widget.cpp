@@ -150,7 +150,7 @@ namespace neogfx
 	{
 		widget::mouse_entered();
 		update();
-		if (menu_item().availabie())
+		if (menu_item().available())
 			menu().select_item(menu().find_item(menu_item()));
 	}
 
@@ -211,7 +211,7 @@ namespace neogfx
 	void menu_item_widget::init()
 	{
 		set_margins(neogfx::margins{});
-		iLayout.set_margins(neogfx::margins{ iGap, 0.0, iGap * (menu().type() == i_menu::Popup ? 2.0 : 1.0), 0.0 });
+		iLayout.set_margins(neogfx::margins{ iGap, 2.0, iGap * (menu().type() == i_menu::Popup ? 2.0 : 1.0), 2.0 });
 		iLayout.set_spacing(size{ iGap, 0.0 });
 		if (menu().type() == i_menu::Popup)
 			iIcon.set_fixed_size(size{ iIconSize, iIconSize });
@@ -287,7 +287,7 @@ namespace neogfx
 	void menu_item_widget::select_item(bool aSelectAnySubMenuItem)
 	{
 		destroyed_flag destroyed(*this);
-		if (!menu_item().availabie())
+		if (!menu_item().available())
 			return;
 		if (menu_item().type() == i_menu_item::Action)
 		{

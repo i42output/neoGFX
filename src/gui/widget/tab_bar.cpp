@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	tab_bar::tab_bar(i_tab_page_container& aContainer) :
+	tab_bar::tab_bar(i_tab_container& aContainer) :
 		iContainer(aContainer)
 	{
 		set_margins(neogfx::margins{});
@@ -35,7 +35,7 @@ namespace neogfx
 		layout().set_spacing(size{});
 	}
 
-	tab_bar::tab_bar(i_widget& aParent, i_tab_page_container& aContainer) :
+	tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer) :
 		widget(aParent), iContainer(aContainer)
 	{
 		set_margins(neogfx::margins{});
@@ -44,7 +44,7 @@ namespace neogfx
 		layout().set_spacing(size{});
 	}
 
-	tab_bar::tab_bar(i_layout& aLayout, i_tab_page_container& aContainer) :
+	tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer) :
 		widget(aLayout), iContainer(aContainer)
 	{
 		set_margins(neogfx::margins{});

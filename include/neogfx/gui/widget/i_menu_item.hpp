@@ -46,6 +46,6 @@ namespace neogfx
 		virtual const i_menu& sub_menu() const = 0;
 		virtual i_menu& sub_menu() = 0;
 	public:
-		virtual bool availabie() const = 0;
+		virtual bool available() const = 0;
 	};
 }

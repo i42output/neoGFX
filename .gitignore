@@ -173,3 +173,10 @@
 /3rdparty/SDL/SDL2-2.0.5/lib/SDL2.lib
 /3rdparty/SDL/SDL2-2.0.5/lib/SDL2d.lib
 /examples/test/build/win32/vs2015/.vs/config/applicationhost.config
+/examples/test/build/win32/vs2015/ipch/NEOGUI-6ed3c289/*.ipch
+/tools/neoGUI/Debug
+/tools/neoGUI/Release
+/tools/neoGUI/.vs/neoGUI/v14/*.suo
+/tools/neoGUI/neoGUI.VC.opendb
+/tools/neoGUI/neoGUI.sdf
+/tools/neoGUI/neoGUI.vcxproj.user

@@ -1,7 +1,7 @@
-// menu_item.hpp
+// i_controller.hpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright(C) 2017 Leigh Johnston
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -20,31 +20,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_menu_item.hpp"
+#include <neogfx/core/event.hpp>
 
 namespace neogfx
 {
-	class i_menu;
+	class i_model;
+	class i_view;
 
-	class menu_item : public i_menu_item
+	class i_view_container;
+
+	class i_controller
 	{
-	private:
-		typedef i_action* action_pointer;
-		typedef std::shared_ptr<i_menu> menu_pointer;
-		typedef neolib::variant<action_pointer, menu_pointer> contents;
 	public:
-		menu_item(i_action& aAction);
-		menu_item(i_menu& aSubMenu);
-		menu_item(std::shared_ptr<i_menu> aSubMenu);
+		event<i_view&> view_added;
+		event<i_view&> view_removed;
 	public:
-		virtual type_e type() const;
-		virtual const i_action& action() const;
-		virtual i_action& action();
-		virtual const i_menu& sub_menu() const;
-		virtual i_menu& sub_menu();
+		struct view_not_found : std::logic_error { view_not_found() : std::logic_error("neogfx::i_controller::view_not_found") {} };
 	public:
-		virtual bool available() const;
-	private:
-		contents iContents;
+		virtual const i_model& model() const = 0;
+		virtual i_model& model() = 0;
+	public:
+		virtual void add_view(i_view& aView) = 0;
+		virtual void add_view(std::shared_ptr<i_view> aView) = 0;
+		virtual void remove_view(i_view& aView) = 0;
+		virtual bool only_weak_views() const = 0;
+	public:
+		virtual const i_view_container& container() const = 0;
+		virtual i_view_container& container() = 0;
 	};
 }

@@ -684,7 +684,7 @@ namespace neogfx
 			minimum_size(aAvailableSpace) :
 			has_maximum_size() ?
 				units_converter(*this).from_device_units(*iMaximumSize) :
-				has_layout() ?
+				has_layout() && aAvailableSpace != boost::none ?
 					layout().maximum_size(aAvailableSpace) :
 					size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
 	}
@@ -913,7 +913,8 @@ namespace neogfx
 
 	bool widget::visible() const
 	{
-		return iVisible;
+		auto maximumSize = maximum_size();
+		return iVisible && maximumSize.cx != 0.0 && maximumSize.cy != 0.0;
 	}
 
 	bool widget::effectively_visible() const

@@ -74,7 +74,7 @@ namespace neogfx
 				select_item(next_available_item(selected_item()));
 			break;
 		case ScanCode_DOWN:
-			if (has_selected_item() && item(selected_item()).availabie())
+			if (has_selected_item() && item(selected_item()).available())
 			{
 				auto& selectedItem = item(selected_item());
 				if (selectedItem.type() == i_menu_item::SubMenu)
@@ -87,7 +87,7 @@ namespace neogfx
 			}
 			break;
 		case ScanCode_RETURN:
-			if (has_selected_item() && item(selected_item()).availabie())
+			if (has_selected_item() && item(selected_item()).available())
 			{
 				auto& selectedItem = item(selected_item());
 				if (selectedItem.type() == i_menu_item::Action)
@@ -151,7 +151,7 @@ namespace neogfx
 			if (iOpenSubMenu->has_menu())
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
-					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.availabie()))
+					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu() && aMenuItem.available()))
 				{
 					close_sub_menu(false);
 					if (aMenuItem.type() == i_menu_item::SubMenu)

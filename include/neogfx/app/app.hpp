@@ -86,6 +86,13 @@ namespace neogfx
 		virtual i_style& change_style(const std::string& aStyleName);
 		virtual i_style& register_style(const i_style& aStyle);
 	public:
+		virtual i_action& action_file_new();
+		virtual i_action& action_file_open();
+		virtual i_action& action_file_close();
+		virtual i_action& action_file_close_all();
+		virtual i_action& action_file_save();
+		virtual i_action& action_file_save_all();
+		virtual i_action& action_file_exit();
 		virtual i_action& action_undo();
 		virtual i_action& action_redo();
 		virtual i_action& action_cut();
@@ -123,6 +130,13 @@ namespace neogfx
 		style_list iStyles;
 		style_list::iterator iCurrentStyle;
 		action_list iActions;
+		i_action& iActionFileNew;
+		i_action& iActionFileOpen;
+		i_action& iActionFileClose;
+		i_action& iActionFileCloseAll;
+		i_action& iActionFileSave;
+		i_action& iActionFileSaveAll;
+		i_action& iActionFileExit;		
 		i_action& iActionUndo;
 		i_action& iActionRedo;
 		i_action& iActionCut;

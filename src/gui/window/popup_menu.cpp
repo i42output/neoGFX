@@ -291,7 +291,7 @@ namespace neogfx
 			}
 			break;
 		case ScanCode_RETURN:
-			if (menu().has_selected_item() && menu().item(menu().selected_item()).availabie())
+			if (menu().has_selected_item() && menu().item(menu().selected_item()).available())
 			{
 				auto& selectedItem = menu().item(menu().selected_item());
 				if (selectedItem.type() == i_menu_item::Action)

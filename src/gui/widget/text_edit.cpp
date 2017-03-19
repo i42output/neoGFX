@@ -559,6 +559,18 @@ namespace neogfx
 		return app::instance().current_style().colour().mid(background_colour());
 	}
 
+	bool text_edit::can_undo() const
+	{
+		/* todo */
+		return false;
+	}
+
+	bool text_edit::can_redo() const
+	{
+		/* todo */
+		return false;
+	}
+
 	bool text_edit::can_cut() const
 	{
 		return !read_only() && !iText.empty() && cursor().position() != cursor().anchor();
@@ -582,6 +594,16 @@ namespace neogfx
 	bool text_edit::can_select_all() const
 	{
 		return !iText.empty();
+	}
+
+	void text_edit::undo(i_clipboard& aClipboard)
+	{
+		/* todo */
+	}
+
+	void text_edit::redo(i_clipboard& aClipboard)
+	{
+		/* todo */
 	}
 
 	void text_edit::cut(i_clipboard& aClipboard)

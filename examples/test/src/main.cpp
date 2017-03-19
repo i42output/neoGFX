@@ -146,13 +146,8 @@ int main(int argc, char* argv[])
 		});
 
 		ng::menu_bar menu(layout0);
-		auto& exitAction = app.add_action("Exit").set_shortcut("Alt+F4");
-		exitAction.triggered([]() 
-		{
-			ng::app::instance().quit(0);
-		});
 		auto& fileMenu = menu.add_sub_menu("&File");
-		fileMenu.add_action(exitAction);
+		fileMenu.add_action(app.action_file_exit());
 		auto& editMenu = menu.add_sub_menu("&Edit");
 		editMenu.add_action(app.action_undo());
 		editMenu.add_action(app.action_redo());

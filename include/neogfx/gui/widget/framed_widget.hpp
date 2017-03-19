@@ -39,7 +39,8 @@ namespace neogfx
 			RidgeFrame,
 			InsetFrame,
 			OutsetFrame,
-			HiddenFrame
+			HiddenFrame,
+			WindowFrame
 		};
 	public:
 		framed_widget(style_e aStyle = SolidFrame, dimension aLineWidth = 1.0);

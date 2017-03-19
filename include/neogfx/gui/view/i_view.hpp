@@ -1,7 +1,7 @@
-// menu_item.hpp
+// i_view.hpp
 /*
 neogfx C++ GUI Library
-Copyright(C) 2016 Leigh Johnston
+Copyright(C) 2017 Leigh Johnston
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -20,31 +20,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_menu_item.hpp"
+#include <neogfx/core/event.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
+#include "i_model.hpp"
 
 namespace neogfx
 {
-	class i_menu;
-
-	class menu_item : public i_menu_item
+	class i_view
 	{
-	private:
-		typedef i_action* action_pointer;
-		typedef std::shared_ptr<i_menu> menu_pointer;
-		typedef neolib::variant<action_pointer, menu_pointer> contents;
 	public:
-		menu_item(i_action& aAction);
-		menu_item(i_menu& aSubMenu);
-		menu_item(std::shared_ptr<i_menu> aSubMenu);
+		event<> activated;
+		event<> deactivated;
 	public:
-		virtual type_e type() const;
-		virtual const i_action& action() const;
-		virtual i_action& action();
-		virtual const i_menu& sub_menu() const;
-		virtual i_menu& sub_menu();
+		virtual const i_widget& as_widget() const = 0;
+		virtual i_widget& as_widget() = 0;
 	public:
-		virtual bool available() const;
-	private:
-		contents iContents;
+		virtual const i_model& model() const = 0;
+		virtual i_model& model() = 0;
+		virtual void update() = 0;
+	public:
+		virtual bool is_weak() const = 0;
+		virtual bool is_active() const = 0;
+		virtual void activate() = 0;
+		virtual void deactivate() = 0;
 	};
 }

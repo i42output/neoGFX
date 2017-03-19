@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include "widget.hpp"
 #include "tab_button.hpp"
-#include "i_tab_page_container.hpp"
 
 namespace neogfx
 {
@@ -34,9 +33,9 @@ namespace neogfx
 	public:
 		typedef tab_list::size_type tab_index;
 	public:
-		tab_bar(i_tab_page_container& aContainer);
-		tab_bar(i_widget& aParent, i_tab_page_container& aContainer);
-		tab_bar(i_layout& aLayout, i_tab_page_container& aContainer);
+		tab_bar(i_tab_container& aContainer);
+		tab_bar(i_widget& aParent, i_tab_container& aContainer);
+		tab_bar(i_layout& aLayout, i_tab_container& aContainer);
 	public:
 		virtual bool has_tabs() const;
 		virtual uint32_t tab_count() const;
@@ -55,7 +54,7 @@ namespace neogfx
 		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	private:
-		i_tab_page_container& iContainer;
+		i_tab_container& iContainer;
 		tab_list iTabs;
 	};
 }

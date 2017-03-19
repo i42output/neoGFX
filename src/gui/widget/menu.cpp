@@ -214,20 +214,20 @@ namespace neogfx
 	bool menu::has_available_items() const
 	{
 		for (const auto& i : iItems)
-			if (i->availabie())
+			if (i->available())
 				return true;
 		return false;
 	}
 
 	bool menu::item_available(item_index aItemIndex) const
 	{
-		return item(aItemIndex).availabie();
+		return item(aItemIndex).available();
 	}
 
 	menu::item_index menu::first_available_item() const
 	{
 		for (item_index i = 0; i < item_count(); ++i)
-			if (item(i).availabie())
+			if (item(i).available())
 				return i;
 		throw no_available_items();
 	}
@@ -244,7 +244,7 @@ namespace neogfx
 				return item_count() - 1;
 		};
 		for (item_index previousIndex = previous(aCurrentIndex); previousIndex != aCurrentIndex; previousIndex = previous(previousIndex))
-			if (item(previousIndex).availabie())
+			if (item(previousIndex).available())
 				return previousIndex;
 		return aCurrentIndex;
 	}
@@ -261,7 +261,7 @@ namespace neogfx
 				return 0;
 		};
 		for (item_index nextIndex = next(aCurrentIndex); nextIndex != aCurrentIndex; nextIndex = next(nextIndex))
-			if (item(nextIndex).availabie())
+			if (item(nextIndex).available())
 				return nextIndex;
 		return aCurrentIndex;
 	}

@@ -54,19 +54,34 @@ namespace neogfx
 		iRenderingEngine(aServiceFactory.create_rendering_engine(basic_services(), keyboard())),
 		iSurfaceManager(new neogfx::surface_manager(basic_services(), *iRenderingEngine)),
 		iCurrentStyle(iStyles.begin()),
-		iActionUndo{add_action("Undo").set_shortcut("Ctrl+Z")},
-		iActionRedo{add_action("Redo").set_shortcut("Ctrl+Shift+Z")},
-		iActionCut{add_action("Cut").set_shortcut("Ctrl+X")},
-		iActionCopy{add_action("Copy").set_shortcut("Ctrl+C")},
-		iActionPaste{add_action("Paste").set_shortcut("Ctrl+V")},
-		iActionDelete{add_action("Delete").set_shortcut("Del")},
-		iActionSelectAll{add_action("Select All").set_shortcut("Ctrl+A")},
+		iActionFileNew{ add_action("&New").set_shortcut("Ctrl+Shift+N") },
+		iActionFileOpen{ add_action("&Open").set_shortcut("Ctrl+Shift+O") },
+		iActionFileClose{ add_action("&Close").set_shortcut("Ctrl+F4 ") },
+		iActionFileCloseAll{ add_action("Close All") },
+		iActionFileSave{ add_action("&Save").set_shortcut("Ctrl+S") },
+		iActionFileSaveAll{ add_action("Save A&ll").set_shortcut("Ctrl+Shift+S") },
+		iActionFileExit{ add_action("E&xit").set_shortcut("Alt+F4") },
+		iActionUndo{ add_action("Undo").set_shortcut("Ctrl+Z") },
+		iActionRedo{ add_action("Redo").set_shortcut("Ctrl+Shift+Z") },
+		iActionCut{ add_action("Cut").set_shortcut("Ctrl+X") },
+		iActionCopy{ add_action("Copy").set_shortcut("Ctrl+C") },
+		iActionPaste{ add_action("Paste").set_shortcut("Ctrl+V") },
+		iActionDelete{ add_action("Delete").set_shortcut("Del") },
+		iActionSelectAll{ add_action("Select All").set_shortcut("Ctrl+A") },
 		iStandardActionManager{ *this, [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
 			if (clipboard().sink_active())
 			{
 				auto& sink = clipboard().active_sink();
+				if (sink.can_undo())
+					iActionUndo.enable();
+				else
+					iActionUndo.disable();
+				if (sink.can_redo())
+					iActionRedo.enable();
+				else
+					iActionRedo.disable();
 				if (sink.can_cut())
 					iActionCut.enable();
 				else
@@ -79,6 +94,24 @@ namespace neogfx
 					iActionPaste.enable();
 				else
 					iActionPaste.disable();
+				if (sink.can_delete_selected())
+					iActionDelete.enable();
+				else
+					iActionDelete.disable();
+				if (sink.can_select_all())
+					iActionSelectAll.enable();
+				else
+					iActionSelectAll.disable();
+			}
+			else
+			{
+				iActionUndo.disable();
+				iActionRedo.disable();
+				iActionCut.disable();
+				iActionCopy.disable();
+				iActionPaste.disable();
+				iActionDelete.disable();
+				iActionSelectAll.disable();
 			}
 		}, 100 }
 	{
@@ -101,6 +134,7 @@ namespace neogfx
 
 		iSystemCache.reset(new window{ point{}, size{}, "neogfx::system_cache", window::InitiallyHidden | window::Weak });
 
+		iActionFileExit.triggered([this]() { quit(0); });
 		iActionCut.triggered([this]() { clipboard().cut(); });
 		iActionCopy.triggered([this]() { clipboard().copy(); });
 		iActionPaste.triggered([this]() { clipboard().paste(); });
@@ -255,6 +289,41 @@ namespace neogfx
 			surface_manager().invalidate_surfaces();
 		}
 		return newStyle->second;
+	}
+
+	i_action& app::action_file_new()
+	{
+		return iActionFileNew;
+	}
+
+	i_action& app::action_file_open()
+	{
+		return iActionFileOpen;
+	}
+
+	i_action& app::action_file_close()
+	{
+		return iActionFileClose;
+	}
+
+	i_action& app::action_file_close_all()
+	{
+		return iActionFileCloseAll;
+	}
+
+	i_action& app::action_file_save()
+	{
+		return iActionFileSave;
+	}
+
+	i_action& app::action_file_save_all()
+	{
+		return iActionFileSaveAll;
+	}
+
+	i_action& app::action_file_exit()
+	{
+		return iActionFileExit;
 	}
 
 	i_action& app::action_undo()

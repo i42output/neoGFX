@@ -29,11 +29,15 @@ namespace neogfx
 	class i_clipboard_sink
 	{
 	public:
+		virtual bool can_undo() const = 0;
+		virtual bool can_redo() const = 0;
 		virtual bool can_cut() const = 0;
 		virtual bool can_copy() const = 0;
 		virtual bool can_paste() const = 0;
 		virtual bool can_delete_selected() const = 0;
 		virtual bool can_select_all() const = 0;
+		virtual void undo(i_clipboard& aClipboard) = 0;
+		virtual void redo(i_clipboard& aClipboard) = 0;
 		virtual void cut(i_clipboard& aClipboard) = 0;
 		virtual void copy(i_clipboard& aClipboard) = 0;
 		virtual void paste(i_clipboard& aClipboard) = 0;

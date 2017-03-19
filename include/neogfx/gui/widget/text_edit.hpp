@@ -422,11 +422,15 @@ namespace neogfx
 	protected:
 		virtual colour frame_colour() const;
 	public:
+		virtual bool can_undo() const;
+		virtual bool can_redo() const;
 		virtual bool can_cut() const;
 		virtual bool can_copy() const;
 		virtual bool can_paste() const;
 		virtual bool can_delete_selected() const;
 		virtual bool can_select_all() const;
+		virtual void undo(i_clipboard& aClipboard);
+		virtual void redo(i_clipboard& aClipboard);
 		virtual void cut(i_clipboard& aClipboard);
 		virtual void copy(i_clipboard& aClipboard);
 		virtual void paste(i_clipboard& aClipboard);
