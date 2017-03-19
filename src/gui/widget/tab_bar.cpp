@@ -138,4 +138,12 @@ namespace neogfx
 	void tab_bar::paint(graphics_context&) const
 	{
 	}
+
+	bool tab_bar::visible() const
+	{
+		if (iTabs.empty())
+			return false;
+		else
+			return widget::visible();
+	}
 }

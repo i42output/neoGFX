@@ -63,6 +63,16 @@ int main()
 		ng::horizontal_layout workspaceLayout(mainLayout);
 		ng::view_container workspace(workspaceLayout);
 
+		workspace.view_stack().painting([&workspace](ng::graphics_context& aGC)
+		{
+			static ng::texture sBackgroundTexture{ ng::image{":/neoGUI/resource/neoGFX.png"} };
+			auto rc = workspace.view_stack().client_rect();
+			aGC.draw_texture(
+				ng::point{ (rc.extents() - sBackgroundTexture.extents()) / 2.0 },
+				sBackgroundTexture,
+				ng::colour::White.with_alpha(32));
+		});
+
 		return app.exec();
 	}
 	catch (std::exception& e)

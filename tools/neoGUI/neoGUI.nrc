@@ -1,0 +1,5 @@
+<nrc>
+	<resource prefix="neoGUI">
+		<file>resource/neoGFX.png</file>
+	</resource>
+</nrc>

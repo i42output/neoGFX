@@ -27,6 +27,10 @@ struct invalid_file : std::runtime_error
 	invalid_file() : std::runtime_error("Not a valid neogfx resource meta file (.nrc)!") {} 
 	invalid_file(const std::string& aReason) : std::runtime_error("Not a valid neogfx resource meta file (.nrc), " + aReason + "!") {}
 };
+struct failed_to_read_resource_file : std::runtime_error
+{
+	failed_to_read_resource_file(const std::string& aPath) : std::runtime_error("Failed to read resource file '" + aPath + "'!") {}
+};
 struct bad_usage : std::runtime_error { bad_usage() : std::runtime_error("Bad usage") {} };
 
 int main(int argc, char* argv[])
@@ -96,13 +100,17 @@ int main(int argc, char* argv[])
 						{
 							std::cout << "Processing " << std::string(file.text()) << "..." << std::endl;
 							resourcePaths.push_back((resource.has_attribute("prefix") ? std::string(resource.attribute_value("prefix")) + "/" : "") + std::string(file.text()));
-							std::ifstream resourceFile(boost::filesystem::path(inputFileName).parent_path().string() + "/" + std::string(file.text()), std::ios_base::in | std::ios_base::binary);
+							std::string resourcePath = boost::filesystem::path(inputFileName).parent_path().string();
+							if (!resourcePath.empty())
+								resourcePath += "/";
+							resourcePath += std::string(file.text());
+							std::ifstream resourceFile(resourcePath, std::ios_base::in | std::ios_base::binary);
 							output << "\tconst unsigned char resource_" << resourceIndex << "_data[] =" << std::endl << "\t{" << std::endl;
 							const std::size_t kBufferSize = 32;
 							bool doneSome = false;
-							for (;;)
+							unsigned char buffer[kBufferSize];
+							while (resourceFile)
 							{
-								unsigned char buffer[kBufferSize];
 								resourceFile.read(reinterpret_cast<char*>(buffer), kBufferSize);
 								std::streamsize amount = resourceFile.gcount();
 								if (amount != 0)
@@ -127,6 +135,8 @@ int main(int argc, char* argv[])
 									break;
 								}
 							}
+							if (resourceFile.fail() && !resourceFile.eof())
+								throw failed_to_read_resource_file(resourcePath);
 							output << "\t};" << std::endl;
 							++resourceIndex;
 						}

@@ -657,7 +657,7 @@ namespace neogfx
 	{
 		return has_minimum_size() ?
 			units_converter(*this).from_device_units(*iMinimumSize) :
-			has_layout() ? 
+			has_layout() ?
 				layout().minimum_size(aAvailableSpace) + margins().size() :
 				margins().size();
 	}
@@ -684,9 +684,9 @@ namespace neogfx
 			minimum_size(aAvailableSpace) :
 			has_maximum_size() ?
 				units_converter(*this).from_device_units(*iMaximumSize) :
-				has_layout() && aAvailableSpace != boost::none ?
+				has_layout() ?
 					layout().maximum_size(aAvailableSpace) :
-					size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
+					size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
 	}
 
 	void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
@@ -913,8 +913,7 @@ namespace neogfx
 
 	bool widget::visible() const
 	{
-		auto maximumSize = maximum_size();
-		return iVisible && maximumSize.cx != 0.0 && maximumSize.cy != 0.0;
+		return iVisible && (iMaximumSize == boost::none || (iMaximumSize->cx != 0.0 && iMaximumSize->cy != 0.0));
 	}
 
 	bool widget::effectively_visible() const
