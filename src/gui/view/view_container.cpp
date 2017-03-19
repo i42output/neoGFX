@@ -26,11 +26,14 @@ namespace neogfx
 	view_stack::view_stack(i_layout& aLayout, i_view_container& aParent) :
 		scrollable_widget{ aLayout, i_scrollbar::Normal, framed_widget::NoFrame }, iLayout{ *this }, iParent{ aParent }
 	{
+		set_margins(neogfx::margins{});
 	}
 
 	view_container::view_container(i_widget& aParent, view_container_style aStyle) :
 		widget{ aParent }, iStyle(aStyle), iLayout0{ *this }, iTabBar{ iLayout0, *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
 	{
+		set_margins(neogfx::margins{});
+		iLayout0.set_margins(neogfx::margins{});
 		if (aStyle != view_container_style::Tabbed)
 			iTabBar.hide();
 	}
@@ -38,6 +41,8 @@ namespace neogfx
 	view_container::view_container(i_layout& aLayout, view_container_style aStyle) :
 		widget{ aLayout }, iStyle(aStyle), iLayout0{ *this }, iTabBar{ iLayout0, *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
 	{
+		set_margins(neogfx::margins{});
+		iLayout0.set_margins(neogfx::margins{});
 		if (aStyle != view_container_style::Tabbed)
 			iTabBar.hide();
 	}

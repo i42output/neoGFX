@@ -56,7 +56,7 @@ namespace neogfx
 		iCurrentStyle(iStyles.begin()),
 		iActionFileNew{ add_action("&New").set_shortcut("Ctrl+Shift+N") },
 		iActionFileOpen{ add_action("&Open").set_shortcut("Ctrl+Shift+O") },
-		iActionFileClose{ add_action("&Close").set_shortcut("Ctrl+F4 ") },
+		iActionFileClose{ add_action("&Close").set_shortcut("Ctrl+F4") },
 		iActionFileCloseAll{ add_action("Close All") },
 		iActionFileSave{ add_action("&Save").set_shortcut("Ctrl+S") },
 		iActionFileSaveAll{ add_action("Save A&ll").set_shortcut("Ctrl+Shift+S") },

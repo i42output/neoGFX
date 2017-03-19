@@ -31,13 +31,14 @@ int main()
 	ng::app app("neoGFX GUI Designer (neoGUI)");
 	try
 	{
-		ng::window mainWindow(app.basic_services().desktop_rect() * ng::size{ 0.75, 0.75 });
+		app.current_style().set_colour(ng::colour{ 64, 64, 64 });
+
+		ng::window mainWindow(app.basic_services().desktop_rect() * ng::size{ 0.5, 0.5 });
+		mainWindow.set_margins(ng::margins{});
 		ng::vertical_layout mainLayout(mainWindow);
+		mainLayout.set_margins(ng::margins{});
 		ng::menu_bar mainMenu(mainLayout);
-		ng::horizontal_layout workspaceLayout(mainLayout);
-		ng::view_container workspace(workspaceLayout);
-		workspace.set_background_colour(ng::colour::Red);
-		workspace.view_stack().set_background_colour(ng::colour::Green);
+
 		auto& fileMenu = mainMenu.add_sub_menu("&File");
 		fileMenu.add_action(app.action_file_new());
 		fileMenu.add_action(app.action_file_open());
@@ -47,6 +48,7 @@ int main()
 		fileMenu.add_action(app.action_file_save());
 		fileMenu.add_separator();
 		fileMenu.add_action(app.action_file_exit());
+
 		auto& editMenu = mainMenu.add_sub_menu("&Edit");
 		editMenu.add_action(app.action_undo());
 		editMenu.add_action(app.action_redo());
@@ -57,6 +59,9 @@ int main()
 		editMenu.add_action(app.action_delete());
 		editMenu.add_separator();
 		editMenu.add_action(app.action_select_all());
+
+		ng::horizontal_layout workspaceLayout(mainLayout);
+		ng::view_container workspace(workspaceLayout);
 
 		return app.exec();
 	}
@@ -74,6 +79,5 @@ int main()
 		app.surface_manager().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
 		std::exit(EXIT_FAILURE);
 	}
-	return app.exec();
 }
 

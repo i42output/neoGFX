@@ -94,7 +94,7 @@ namespace neogfx
 		iOwner(aParent.owner()), 
 		iParent(&aParent),
 		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
-		iMargins(neogfx::margins(0)),
+		iMargins(neogfx::margins{}),
 		iSpacing(app::instance().current_style().spacing()),
 		iAlwaysUseSpacing(false),
 		iAlignment(aAlignment),
