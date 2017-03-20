@@ -42,6 +42,25 @@ namespace neogfx
 
 	void native_window::push_event(const native_event& aEvent)
 	{
+		if (aEvent.is<native_window_event>())
+		{
+			const auto& windowEvent = static_variant_cast<const native_window_event&>(aEvent);
+			switch (windowEvent.type())
+			{
+			case native_window_event::Resized:
+			case native_window_event::SizeChanged:
+				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
+				{
+					if (e->is<native_window_event>() && static_variant_cast<const native_window_event&>(*e).type() == windowEvent.type())
+						e = iEventQueue.erase(e);
+					else
+						++e;
+				}
+				break;
+			default:
+				break;
+			}
+		}
 		iEventQueue.push_back(aEvent);
 	}
 
@@ -52,16 +71,43 @@ namespace neogfx
 		iProcessingEvent = true;
 		auto nativeEvent = iEventQueue.front();
 		iEventQueue.pop_front();
-		if (nativeEvent.is<native_window_event>())
+		handle_event(nativeEvent);
+		iProcessingEvent = false;
+		return true;
+	}
+
+	void native_window::handle_event(const native_event& aNativeEvent)
+	{
+		if (aNativeEvent.is<native_window_event>())
 		{
-			const auto& windowEvent = static_variant_cast<const native_window_event&>(nativeEvent);
+			const auto& windowEvent = static_variant_cast<const native_window_event&>(aNativeEvent);
 			switch (windowEvent.type())
 			{
+			case native_window_event::Paint:
+				invalidate(surface_size());
+				render(true);
+				break;
 			case native_window_event::Close:
 				close();
 				break;
 			case native_window_event::Resizing:
 				event_handler().native_window_resized();
+				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
+				{
+					if (e->is<native_window_event>())
+					{
+						switch (static_variant_cast<const native_window_event&>(*e).type())
+						{
+						case native_window_event::Resized:
+						case native_window_event::SizeChanged:
+							e = iEventQueue.erase(e);
+							break;
+						default:
+							++e;
+							break;
+						}
+					}
+				}
 				break;
 			case native_window_event::Resized:
 				event_handler().native_window_resized();
@@ -86,9 +132,9 @@ namespace neogfx
 				break;
 			}
 		}
-		else if (nativeEvent.is<native_mouse_event>())
+		else if (aNativeEvent.is<native_mouse_event>())
 		{
-			const auto& mouseEvent = static_variant_cast<const native_mouse_event&>(nativeEvent);
+			const auto& mouseEvent = static_variant_cast<const native_mouse_event&>(aNativeEvent);
 			switch (mouseEvent.type())
 			{
 			case native_mouse_event::WheelScrolled:
@@ -111,10 +157,10 @@ namespace neogfx
 				break;
 			}
 		}
-		else if (nativeEvent.is<native_keyboard_event>())
+		else if (aNativeEvent.is<native_keyboard_event>())
 		{
 			auto& keyboard = app::instance().keyboard();
-			const auto& keyboardEvent = static_variant_cast<const native_keyboard_event&>(nativeEvent);
+			const auto& keyboardEvent = static_variant_cast<const native_keyboard_event&>(aNativeEvent);
 			switch (keyboardEvent.type())
 			{
 			case native_keyboard_event::KeyPressed:
@@ -150,8 +196,6 @@ namespace neogfx
 				break;
 			}
 		}
-		iProcessingEvent = false;
-		return true;
 	}
 
 	bool native_window::processing_event() const

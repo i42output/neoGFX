@@ -766,8 +766,7 @@ namespace neogfx
 	void window::native_window_resized()
 	{
 		resize(native_surface().surface_size());
-		render_surface();
-	}	
+	}
 
 	bool window::native_window_ready_to_render() const
 	{

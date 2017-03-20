@@ -55,7 +55,7 @@ namespace neogfx
 		virtual void limit_frame_rate(uint32_t aFps);
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect);
-		virtual void render();
+		virtual void render(bool aOOBRequest = false);
 		virtual bool is_rendering() const;
 		virtual void* rendering_target_texture_handle() const;
 		virtual size rendering_target_texture_extents() const;

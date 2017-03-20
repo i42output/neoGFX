@@ -34,24 +34,25 @@ namespace neogfx
 	public:
 		enum style_e : uint32_t
 		{
-			Invalid				= 0x00000,
-			None				= 0x00001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
-			Titlebar			= 0x00002,	// The window has a titlebar
-			MinimizeBox			= 0x00004,
-			MaximizeBox			= 0x00008,
-			Resize				= 0x00010,	// The window can be resized and has a maximize button
-			Close				= 0x00020,	// The window has a close button
-			Fullscreen			= 0x00040,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
-			Modal				= 0x00080,
-			ApplicationModal	= 0x01000,
-			NoActivate			= 0x02000,
-			RequiresOwnerFocus	= 0x04000,
-			DismissOnOwnerClick = 0x08000,
-			DismissOnParentClick= 0x10000,
-			HideOnOwnerClick	= 0x20000,
-			HideOnParentClick	= 0x40000,
-			InitiallyHidden		= 0x80000,
-			Weak				= 0x10000,
+			Invalid				= 0x000000,
+			None				= 0x000001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
+			Titlebar			= 0x000002,	// The window has a titlebar
+			MinimizeBox			= 0x000004,
+			MaximizeBox			= 0x000008,
+			Resize				= 0x000010,	// The window can be resized and has a maximize button
+			Close				= 0x000020,	// The window has a close button
+			Fullscreen			= 0x000040,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
+			Modal				= 0x000080,
+			ApplicationModal	= 0x001000,
+			NoActivate			= 0x002000,
+			RequiresOwnerFocus	= 0x004000,
+			DismissOnOwnerClick = 0x008000,
+			DismissOnParentClick= 0x010000,
+			HideOnOwnerClick	= 0x020000,
+			HideOnParentClick	= 0x040000,
+			InitiallyHidden		= 0x080000,
+			Weak				= 0x100000,
+			DoubleBuffered		= 0x200000,
 			Default				= Titlebar | MinimizeBox | MaximizeBox | Resize | Close
 		};
 	public:

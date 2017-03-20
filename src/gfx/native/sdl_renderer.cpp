@@ -27,7 +27,8 @@
 
 namespace neogfx
 {
-	sdl_renderer::sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard) : iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), iContext(nullptr)
+	sdl_renderer::sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard) : 
+		iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), iContext(nullptr)
 	{
 		SDL_Init(SDL_INIT_VIDEO);
 	}

@@ -88,7 +88,7 @@ void create_game(ng::i_layout& aLayout);
 
 int main(int argc, char* argv[])
 {
-	ng::app app("neoGFX Test App");
+	ng::app app(argc, argv, "neoGFX Test App");
 
 	try
 	{

@@ -39,6 +39,7 @@ namespace neogfx
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
 		virtual void push_event(const native_event& aEvent) = 0;
 		virtual bool pump_event() = 0;
+		virtual void handle_event(const native_event& aNativeEvent) = 0;
 		virtual i_native_window_event_handler& event_handler() const = 0;
 		virtual void close() = 0;
 		virtual void show(bool aActivate = false) = 0;

@@ -111,9 +111,10 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iCapturingMouse(false),
+		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_UNDEFINED,
@@ -132,6 +133,8 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
+
+		iReady = true;
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -141,9 +144,10 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iCapturingMouse(false),
+		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_CENTERED,
@@ -162,6 +166,8 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
+
+		iReady = true;
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -171,9 +177,10 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iCapturingMouse(false),
+		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			aPosition.x,
@@ -192,6 +199,8 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
+
+		iReady = true;
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -201,9 +210,10 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iCapturingMouse(false),
+		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_UNDEFINED,
@@ -222,6 +232,8 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
+
+		iReady = true;
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -231,9 +243,10 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iCapturingMouse(false),
+		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_CENTERED,
@@ -252,6 +265,8 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
+
+		iReady = true;
 	}
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
@@ -261,9 +276,10 @@ namespace neogfx
 		iHandle(0),
 		iNativeHandle(0),
 		iCapturingMouse(false),
+		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			aPosition.x,
@@ -282,6 +298,8 @@ namespace neogfx
 			show((aStyle & window::NoActivate) != window::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
+
+		iReady = true;
 	}
 
 	sdl_window::~sdl_window()
@@ -333,8 +351,8 @@ namespace neogfx
 	{
 		if (iExtents != aSize)
 		{
-			SDL_SetWindowSize(iHandle, static_cast<int>(aSize.cx), static_cast<int>(aSize.cy));
 			iExtents = aSize;
+			SDL_SetWindowSize(iHandle, static_cast<int>(aSize.cx), static_cast<int>(aSize.cy));
 		}
 	}
 
@@ -542,6 +560,11 @@ namespace neogfx
 		LRESULT result;
 		switch(msg)
 		{
+		case WM_PAINT:
+			ValidateRect(hwnd, NULL);
+			mapEntry->second->handle_event(native_window_event(native_window_event::Paint));
+			result = 0;
+			break;
 		case WM_SYSCHAR:
 			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
 			{
@@ -607,11 +630,19 @@ namespace neogfx
 			result = true;
 			break;
 		case WM_SIZING:
-			mapEntry->second->iExtents = size{
-				static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->right - reinterpret_cast<const RECT*>(lparam)->left),
-				static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->bottom - reinterpret_cast<const RECT*>(lparam)->top) };
-			mapEntry->second->push_event(native_window_event(native_window_event::Resizing, mapEntry->second->iExtents));
-			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			{
+				const RECT referenceClientRect = { 0, 0, 256, 256 };
+				RECT referenceWindowRect = referenceClientRect;
+				AdjustWindowRectEx(&referenceWindowRect, GetWindowLongPtr(hwnd, GWL_STYLE), false, GetWindowLongPtr(hwnd, GWL_EXSTYLE));
+				auto windowExtents = size {
+					static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->right - reinterpret_cast<const RECT*>(lparam)->left),
+					static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->bottom - reinterpret_cast<const RECT*>(lparam)->top) };
+				mapEntry->second->iExtents = windowExtents + size{
+					basic_size<LONG>{ referenceClientRect.right - referenceClientRect.left, referenceClientRect.bottom - referenceClientRect.top } -
+					basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
+				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+				mapEntry->second->handle_event(native_window_event(native_window_event::Resizing, mapEntry->second->iExtents));
+			}
 			break;
 		case WM_NCDESTROY:
 			{
@@ -638,6 +669,7 @@ namespace neogfx
 	{
 		sHandleMap[native_handle()] = this;
 #ifdef WIN32
+		SetClassLongPtr(static_cast<HWND>(native_handle()), GCLP_HBRBACKGROUND, NULL);
 		iSDLWindowProc = (WNDPROC)SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)&CustomWindowProc);
 		DWORD existingStyle = GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE);
 		DWORD newStyle = existingStyle;
@@ -677,12 +709,15 @@ namespace neogfx
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:
 				invalidate(surface_size());
+				render(true);
 				break;
 			case SDL_WINDOWEVENT_MAXIMIZED:
 				invalidate(surface_size());
+				render(true);
 				break;
 			case SDL_WINDOWEVENT_RESTORED:
 				invalidate(surface_size());
+				render(true);
 				break;
 			case SDL_WINDOWEVENT_ENTER:
 				push_event(native_window_event(native_window_event::Enter));
@@ -700,6 +735,7 @@ namespace neogfx
 				break;
 			case SDL_WINDOWEVENT_EXPOSED:
 				invalidate(surface_size());
+				render(true);
 				break;
 			}
 			break;
@@ -786,6 +822,9 @@ namespace neogfx
 
 	void sdl_window::display()
 	{
-		SDL_GL_SwapWindow(iHandle);
+		if (iStyle & window::DoubleBuffered)
+			SDL_GL_SwapWindow(iHandle);
+		else
+			glCheck(glFinish());
 	}
 }

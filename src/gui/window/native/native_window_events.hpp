@@ -33,6 +33,7 @@ namespace neogfx
 		typedef neolib::variant<neogfx::size> parameter_type;
 		enum type_e
 		{
+			Paint,
 			Close,
 			Resizing,
 			Resized,
@@ -55,6 +56,10 @@ namespace neogfx
 		neogfx::size size() const
 		{
 			return static_variant_cast<neogfx::size>(iParameter);
+		}
+		void set_size(const neogfx::size& aSize)
+		{
+			static_variant_cast<neogfx::size&>(iParameter) = aSize;;
 		}
 	private:
 		type_e iType;

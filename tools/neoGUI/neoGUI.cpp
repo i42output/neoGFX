@@ -26,9 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ng = neogfx;
 
-int main()
+int main(int argc, char* argv[])
 {
-	ng::app app("neoGFX GUI Designer (neoGUI)");
+	ng::app app(argc, argv, "neoGFX GUI Designer (neoGUI)");
 	try
 	{
 		app.current_style().set_colour(ng::colour{ 64, 64, 64 });
@@ -65,11 +65,16 @@ int main()
 
 		workspace.view_stack().painting([&workspace](ng::graphics_context& aGC)
 		{
-			static ng::texture sBackgroundTexture{ ng::image{":/neoGUI/resource/neoGFX.png"} };
+			static ng::texture sBackgroundTexture1{ ng::image{ ":/neoGUI/resource/neoGFX.png" } };
+			static ng::texture sBackgroundTexture2{ ng::image{ ":/neoGUI/resource/logo_i42.png" } };
 			auto rc = workspace.view_stack().client_rect();
 			aGC.draw_texture(
-				ng::point{ (rc.extents() - sBackgroundTexture.extents()) / 2.0 },
-				sBackgroundTexture,
+				ng::point{ (rc.extents() - sBackgroundTexture1.extents()) / 2.0 },
+				sBackgroundTexture1,
+				ng::colour::White.with_alpha(32));
+			aGC.draw_texture(
+				ng::point{ rc.bottom_right() - sBackgroundTexture2.extents() },
+				sBackgroundTexture2,
 				ng::colour::White.with_alpha(32));
 		});
 

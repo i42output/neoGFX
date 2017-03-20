@@ -29,7 +29,8 @@ namespace neogfx
 		return sObject;
 	}
 
-	inline void set_debug(const void* aObject)
+	template <typename T>
+	inline void set_debug(const T* aObject)
 	{
 		debug() = aObject;
 	}

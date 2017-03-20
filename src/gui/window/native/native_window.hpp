@@ -38,6 +38,7 @@ namespace neogfx
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const;
 		virtual void push_event(const native_event& aEvent);
 		virtual bool pump_event();
+		virtual void handle_event(const native_event& aNativeEvent);
 		virtual bool processing_event() const;
 	public:
 		i_rendering_engine& rendering_engine() const;

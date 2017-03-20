@@ -54,6 +54,15 @@ namespace neogfx
 			std::string iName;
 		};
 	private:
+		class loader
+		{
+		public:
+			loader(int argc, char* argv[], app& aApp);
+			~loader();
+		private:
+			app& iApp;
+		};
+	private:
 		typedef std::map<std::string, style> style_list;
 		typedef std::multimap<std::string, action, std::less<std::string>, boost::fast_pool_allocator<std::pair<const std::string, action>>> action_list;
 		typedef std::vector<i_mnemonic*> mnemonic_list;
@@ -69,6 +78,7 @@ namespace neogfx
 		struct style_exists : std::runtime_error { style_exists() : std::runtime_error("neogfx::app::style_exists") {} };
 	public:
 		app(const std::string& aName = std::string(), i_service_factory& aServiceFactory = default_service_factory());
+		app(int argc, char* argv[], const std::string& aName = std::string(), i_service_factory& aServiceFactory = default_service_factory());
 		~app();
 	public:
 		static app& instance();
@@ -119,6 +129,7 @@ namespace neogfx
 		virtual bool text_input(const std::string& aText);
 		virtual bool sys_text_input(const std::string& aText);
 	private:
+		loader iLoader;
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;
 		std::unique_ptr<i_basic_services> iBasicServices;

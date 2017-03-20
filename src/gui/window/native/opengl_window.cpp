@@ -98,17 +98,24 @@ namespace neogfx
 			iInvalidatedRects.insert(aInvalidatedRect);
 	}
 
-	void opengl_window::render()
+	void opengl_window::render(bool aOOBRequest)
 	{
-		if (iRendering || processing_event())
+		if (iRendering || rendering_engine().creating_window())
 			return;
 
 		uint64_t now = app::instance().program_elapsed_ms();
-		if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / *iFrameRate)
-			return;
 
-		if (!iEventHandler.native_window_ready_to_render())
-			return;
+		if (!aOOBRequest)
+		{
+			if (processing_event())
+				return;
+
+			if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / *iFrameRate)
+				return;
+
+			if (!iEventHandler.native_window_ready_to_render())
+				return;
+		}
 
 		rendering_check.trigger();
 

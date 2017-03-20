@@ -32,6 +32,31 @@ namespace neogfx
 		std::atomic<app*> sFirstInstance;
 	}
 
+	app::loader::loader(int argc, char* argv[], app& aApp) : iApp(aApp)
+	{
+		app* np = nullptr;
+		sFirstInstance.compare_exchange_strong(np, &aApp);
+		if (sFirstInstance == &aApp && argc > 1 && std::string(argv[1]) == "-debug")
+		{
+#if defined(_WIN32)
+			AllocConsole();
+			freopen("CONOUT$", "w", stdout);
+			freopen("CONOUT$", "w", stderr);
+			std::cout.sync_with_stdio(false);
+			std::cout.sync_with_stdio(true);
+			std::cerr.sync_with_stdio(false);
+			std::cerr.sync_with_stdio(true);
+#endif
+		}
+	}
+
+	app::loader::~loader()
+	{
+		app* tp = &iApp;
+		app* np = nullptr;
+		sFirstInstance.compare_exchange_strong(tp, np);
+	}
+
 	app::event_processing_context::event_processing_context(app& aParent, const std::string& aName) :
 		iContext(aParent.message_queue()),
 		iName(aName)
@@ -43,8 +68,14 @@ namespace neogfx
 		return iName;
 	}
 
-	app::app(const std::string& aName, i_service_factory& aServiceFactory)
+	app::app(const std::string& aName, i_service_factory& aServiceFactory) :
+		app(0, nullptr, aName, aServiceFactory)
+	{
+	}
+	
+	app::app(int argc, char* argv[], const std::string& aName, i_service_factory& aServiceFactory)
 		try :
+		iLoader(argc, argv, *this),
 		iName(aName),
 		iQuitWhenLastWindowClosed(true),
 		neolib::io_thread("neogfx::app", true),
@@ -115,11 +146,11 @@ namespace neogfx
 			}
 		}, 100 }
 	{
-		app* np = nullptr;
-		sFirstInstance.compare_exchange_strong(np, this);
 		create_message_queue([this]() -> bool 
 		{ 
-			return process_events(*iContext); 
+			auto result = process_events(*iContext); 
+			rendering_engine().render_now();
+			return result;
 		});
 
 		iContext = std::make_unique<event_processing_context>(*this, "neogfx::app");
@@ -159,9 +190,6 @@ namespace neogfx
 		rendering_engine().texture_manager().clear_textures();
 		iKeyboard->ungrab_keyboard(*this);
 		iSystemCache.reset();
-		app* tp = this;
-		app* np = nullptr;
-		sFirstInstance.compare_exchange_strong(tp, np);
 	}
 
 	app& app::instance()
