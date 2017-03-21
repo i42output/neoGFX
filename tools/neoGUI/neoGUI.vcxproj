@@ -164,6 +164,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="new_project_dialog.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

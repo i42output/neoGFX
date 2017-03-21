@@ -171,6 +171,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\framed_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\gradient_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\group_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\header_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\image_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model_index.hpp" />
@@ -287,6 +288,7 @@
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
     <ClCompile Include="..\..\..\src\app\style.cpp" />
     <ClCompile Include="..\..\..\src\core\colour.cpp" />
+    <ClCompile Include="..\..\..\src\core\event.cpp" />
     <ClCompile Include="..\..\..\src\core\geometry.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
@@ -335,6 +337,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\gradient_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\group_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\header_view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\image_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\item_view.cpp" />

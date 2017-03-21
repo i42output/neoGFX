@@ -24,6 +24,7 @@
 #include <deque>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/destroyable.hpp>
+#include <neolib/timer.hpp>
 
 namespace neogfx
 {
@@ -49,10 +50,47 @@ namespace neogfx
 		typename handler_list::iterator iHandler;
 	};
 
+	class async_event_queue
+	{
+	public:
+		typedef std::function<void()> callback;
+	public:
+		struct event_not_found : std::logic_error { event_not_found() : std::logic_error("neogfx::async_event_queue::event_not_found") {} };
+	private:
+		typedef std::multimap<const void*, std::pair<callback, neolib::destroyable::destroyed_flag>> event_list;
+	public:
+		async_event_queue();
+		static async_event_queue& instance();
+	public:
+		template<typename... Arguments>
+		void add(const event<Arguments...>& aEvent, callback aCallback)
+		{
+			add(static_cast<const void*>(&aEvent), aCallback, neolib::destroyable::destroyed_flag(aEvent));
+		}
+		template<typename... Arguments>
+		void remove(const event<Arguments...>& aEvent)
+		{
+			remove(static_cast<const void*>(&aEvent));
+		}
+		template<typename... Arguments>
+		bool has(const event<Arguments...>& aEvent) const
+		{
+			return has(static_cast<const void*>(&aEvent));
+		}
+	private:
+		void add(const void* aEvent, callback aCallback, neolib::destroyable::destroyed_flag aDestroyedFlag);
+		void remove(const void* aEvent);
+		bool has(const void* aEvent) const;
+	private:
+		neolib::callback_timer iTimer;
+		event_list iEvents;
+	};
+
 	template <typename... Arguments>
-	class event : private neolib::destroyable
+	class event : protected neolib::destroyable
 	{
 		friend class sink;
+		friend class async_event_queue;
 	private:
 		typedef event_handle<Arguments...> handle;
 		typedef typename handle::event_ptr ptr;
@@ -78,6 +116,12 @@ namespace neogfx
 		}
 		~event()
 		{
+			if (async_event_queue::instance().has(*this))
+				async_event_queue::instance().remove(*this);
+		}
+		void async_trigger(Arguments... aArguments) const
+		{
+			async_event_queue::instance().add(*this, [&]() { trigger(aArguments...); });
 		}
 		bool trigger(Arguments... aArguments) const
 		{
@@ -172,6 +216,7 @@ namespace neogfx
 			}
 			iHandlers.erase(aHandle.iHandler);
 		}
+
 	private:
 		instance_ptr iInstancePtr;
 		handler_list iHandlers;

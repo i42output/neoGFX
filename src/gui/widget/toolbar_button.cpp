@@ -123,7 +123,7 @@ namespace neogfx
 		push_button::handle_clicked();
 		if (iAction.is_enabled() && !iAction.is_separator())
 		{
-			iAction.triggered.trigger();
+			iAction.triggered.async_trigger();
 			if (iAction.is_checkable())
 			{
 				if (is_checked())

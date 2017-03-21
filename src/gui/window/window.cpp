@@ -517,6 +517,28 @@ namespace neogfx
 		move_surface((desktopRect.extents() - surface_size()) / 2.0);
 	}
 
+	void window::centre_on_parent()
+	{
+		if (has_parent_surface())
+		{
+			resize(minimum_size());
+			rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
+			rect parentRect{ parent_surface().surface_position(), parent_surface().surface_size() };
+			point position = point{ (parentRect.extents() - surface_size()) / 2.0 } + parentRect.top_left();
+			if (position.x < 0.0)
+				position.x = 0.0;
+			if (position.y < 0.0)
+				position.y = 0.0;
+			if (position.x + surface_size().cx > desktopRect.right())
+				position.x = desktopRect.right() - surface_size().cx;
+			if (position.y + surface_size().cy > desktopRect.bottom())
+				position.y = desktopRect.bottom() - surface_size().cy;
+			move_surface(position);
+		}
+		else
+			centre();
+	}
+
 	point window::mouse_position() const
 	{
 		return native_surface().mouse_position();

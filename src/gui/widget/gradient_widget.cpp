@@ -92,7 +92,7 @@ namespace neogfx
 				iSlider.set_value(aCurrentAlpha);
 				button_box().add_button(dialog_button_box::Ok);
 				button_box().add_button(dialog_button_box::Cancel);
-				centre();
+				centre_on_parent();
 			}
 		private:
 			virtual void paint_non_client(graphics_context& aGraphicsContext) const

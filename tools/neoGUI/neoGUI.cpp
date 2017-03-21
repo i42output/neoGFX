@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/widget/menu_bar.hpp>
 #include <neogfx/gui/view/view_container.hpp>
+#include "new_project_dialog.hpp"
 
 namespace ng = neogfx;
 
@@ -31,6 +32,7 @@ int main(int argc, char* argv[])
 	ng::app app(argc, argv, "neoGFX GUI Designer (neoGUI)");
 	try
 	{
+		app.rendering_engine().subpixel_rendering_on();
 		app.current_style().set_colour(ng::colour{ 64, 64, 64 });
 
 		ng::window mainWindow(app.basic_services().desktop_rect() * ng::size{ 0.5, 0.5 });
@@ -41,6 +43,13 @@ int main(int argc, char* argv[])
 
 		auto& fileMenu = mainMenu.add_sub_menu("&File");
 		fileMenu.add_action(app.action_file_new());
+		app.action_file_new().triggered([&]()
+		{
+			neogui::new_project_dialog dialog{ mainWindow };
+			if (dialog.exec() == ng::dialog::Accepted)
+			{
+			}
+		});
 		fileMenu.add_action(app.action_file_open());
 		fileMenu.add_separator();
 		fileMenu.add_action(app.action_file_close());
