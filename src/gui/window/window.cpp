@@ -723,6 +723,7 @@ namespace neogfx
 		app::instance().surface_manager().add_surface(*this);
 		update_modality();
 		scrollable_widget::init();
+		layout_items(true);
 	}
 
 	void window::native_window_closing()

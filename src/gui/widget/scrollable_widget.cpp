@@ -68,7 +68,7 @@ namespace neogfx
 	void scrollable_widget::layout_items_completed()
 	{
 		framed_widget::layout_items_completed();
-		if (!iIgnoreScrollbarUpdates)
+		if (!layout_items_in_progress() && !iIgnoreScrollbarUpdates)
 			update_scrollbar_visibility();
 	}
 
@@ -379,9 +379,13 @@ namespace neogfx
 		{
 			neolib::scoped_counter sc(iIgnoreScrollbarUpdates);
 			update_scrollbar_visibility(UsvStageInit);
-			update_scrollbar_visibility(UsvStageCheckVertical1);
-			update_scrollbar_visibility(UsvStageCheckHorizontal);
-			update_scrollbar_visibility(UsvStageCheckVertical2);
+			if (client_rect().cx > vertical_scrollbar().width(*this) &&
+				client_rect().cy > horizontal_scrollbar().width(*this))
+			{
+				update_scrollbar_visibility(UsvStageCheckVertical1);
+				update_scrollbar_visibility(UsvStageCheckHorizontal);
+				update_scrollbar_visibility(UsvStageCheckVertical2);
+			}
 			update_scrollbar_visibility(UsvStageDone);
 		}
 		vertical_scrollbar().update(*this);
@@ -407,7 +411,7 @@ namespace neogfx
 			{
 				for (auto& c : children())
 				{
-					if (c->hidden())
+					if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
 						continue;
 					if ((scrolling_disposition(*c) & ScrollChildWidgetVertically) == DontScrollChildWidget)
 						continue;
@@ -425,7 +429,7 @@ namespace neogfx
 			{
 				for (auto& c : children())
 				{
-					if (c->hidden())
+					if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
 						continue;
 					if ((scrolling_disposition(*c) & ScrollChildWidgetHorizontally) == DontScrollChildWidget)
 						continue;
@@ -443,7 +447,7 @@ namespace neogfx
 				point max;
 				for (auto& c : children())
 				{
-					if (c->hidden())
+					if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
 						continue;
 					if ((scrolling_disposition(*c) & ScrollChildWidgetHorizontally) == ScrollChildWidgetHorizontally)
 						max.x = std::max(max.x, units_converter(*c).to_device_units(c->position().x + c->extents().cx));

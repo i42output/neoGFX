@@ -438,6 +438,7 @@ namespace neogfx
 			return;
 		if (!aDefer)
 		{
+			iLayoutTimer.reset();
 			if (has_layout())
 			{
 				layout_items_started();

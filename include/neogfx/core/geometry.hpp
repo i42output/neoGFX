@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
+#include <ostream>
 #include <boost/optional.hpp>
 #include "numerical.hpp"
 
@@ -869,6 +870,27 @@ namespace neogfx
 	{
 		return static_cast<alignment>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}
+
+	template <typename Elem, typename Traits, typename T>
+	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_point<T>& aPoint)
+	{
+		aStream << "(" << aPoint.x << ", " << aPoint.y << ")";
+		return aStream;
+	}
+
+	template <typename Elem, typename Traits, typename T>
+	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_size<T>& aSize)
+	{
+		aStream << "{" << aSize.cx << ", " << aSize.cy << "}";
+		return aStream;
+	}
+
+	template <typename Elem, typename Traits, typename T>
+	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_rect<T>& aRect)
+	{
+		aStream << "[" << aRect.position() << ", " << aRect.extents() << "]";
+		return aStream;
+	}
 }
 
 namespace std 
@@ -884,3 +906,4 @@ namespace std
 		}
 	};
 }
+
