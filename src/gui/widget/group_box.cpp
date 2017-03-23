@@ -25,24 +25,27 @@ namespace neogfx
 	group_box::group_box(const std::string& aText) : 
 		widget(), iLayout{ *this }, iLabel{ iLayout, aText }
 	{
-		iLayout.set_margins(neogfx::margins{ 4.0 });
-		iLayout.set_spacing(neogfx::size{ 6.0 });
+		set_margins(neogfx::margins{});
+		iLayout.set_margins(neogfx::margins{ 5.0 });
+		iLayout.set_spacing(neogfx::size{ 5.0 });
 		set_item_layout(std::make_shared<vertical_layout>());
 	}
 
 	group_box::group_box(i_widget& aParent, const std::string& aText) :
 		widget(aParent), iLayout{ *this }, iLabel{ iLayout, aText }
 	{
-		iLayout.set_margins(neogfx::margins{ 4.0 });
-		iLayout.set_spacing(neogfx::size{ 6.0 });
+		set_margins(neogfx::margins{});
+		iLayout.set_margins(neogfx::margins{ 5.0 });
+		iLayout.set_spacing(neogfx::size{ 5.0 });
 		set_item_layout(std::make_shared<vertical_layout>());
 	}
 
 	group_box::group_box(i_layout& aLayout, const std::string& aText) :
 		widget(aLayout), iLayout{ *this }, iLabel{ iLayout, aText }
 	{
-		iLayout.set_margins(neogfx::margins{ 4.0 });
-		iLayout.set_spacing(neogfx::size{ 6.0 });
+		set_margins(neogfx::margins{});
+		iLayout.set_margins(neogfx::margins{ 5.0 });
+		iLayout.set_spacing(neogfx::size{ 5.0 });
 		set_item_layout(std::make_shared<vertical_layout>());
 	}
 
@@ -82,11 +85,30 @@ namespace neogfx
 	{
 		widget::paint(aGraphicsContext);
 		rect lr{ item_layout().position(), item_layout().extents() };
-		lr.inflate(size{ 4.0 });
-		aGraphicsContext.fill_rounded_rect(lr, 4.0,
-			background_colour().dark() ? background_colour().lighter(64) : background_colour().darker(64));
+		lr.inflate(size{ 5.0 });
+		aGraphicsContext.fill_rounded_rect(lr, 4.0, border_colour());
 		lr.deflate(size{ 1.0 });
-		aGraphicsContext.fill_rounded_rect(lr, 1.0,
-			background_colour().dark() ? background_colour().lighter(48) : background_colour().darker(48));
+		aGraphicsContext.fill_rounded_rect(lr, 4.0, fill_colour());
+	}
+
+	colour group_box::border_colour() const
+	{
+		if (container_background_colour().light())
+			return background_colour().darker(24);
+		else
+			return background_colour().lighter(24);
+	}
+
+	colour group_box::fill_colour() const
+	{
+		return container_background_colour().light() ? border_colour().lighter(24) : border_colour().darker(24);
+	}
+
+	colour group_box::background_colour() const
+	{
+		if (container_background_colour().light())
+			return parent().background_colour().darker(24);
+		else
+			return parent().background_colour().lighter(24);
 	}
 }

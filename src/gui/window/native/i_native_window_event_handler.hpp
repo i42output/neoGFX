@@ -29,6 +29,7 @@ namespace neogfx
 	class i_native_window_event_handler
 	{
 	public:
+		virtual bool native_window_can_close() const = 0;
 		virtual void native_window_closing() = 0;
 		virtual void native_window_closed() = 0;
 		virtual void native_window_focus_gained() = 0;

@@ -329,6 +329,11 @@ namespace neogfx
 		return (style() & Weak) == Weak;
 	}
 
+	bool window::can_close() const
+	{
+		return true;
+	}
+
 	bool window::is_closed() const
 	{
 		return iClosed;
@@ -724,6 +729,11 @@ namespace neogfx
 		update_modality();
 		scrollable_widget::init();
 		layout_items(true);
+	}
+
+	bool window::native_window_can_close() const
+	{
+		return can_close();
 	}
 
 	void window::native_window_closing()

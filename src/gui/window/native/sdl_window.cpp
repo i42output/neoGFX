@@ -460,17 +460,20 @@ namespace neogfx
 	{
 		if (iHandle != 0)
 		{
-			release_capture();
-			event_handler().native_window_closing();
-			if (!iDestroyed)
+			if (event_handler().native_window_can_close())
 			{
+				release_capture();
+				event_handler().native_window_closing();
+				if (!iDestroyed)
+				{
 #ifdef WIN32
-				DestroyWindow(static_cast<HWND>(native_handle()));
+					DestroyWindow(static_cast<HWND>(native_handle()));
 #endif
-				SDL_DestroyWindow(iHandle);
+					SDL_DestroyWindow(iHandle);
+				}
+				iHandle = 0;
+				event_handler().native_window_closed();
 			}
-			iHandle = 0;
-			event_handler().native_window_closed();
 		}
 	}
 

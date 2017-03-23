@@ -99,6 +99,32 @@ namespace neogfx
 	{
 	}
 
+	void dialog::accept()
+	{
+		if (iResult != Accepted)
+		{
+			bool canAccept = true;
+			try_accept.trigger(canAccept);
+			if (canAccept)
+				iResult = Accepted;
+			else
+				app::instance().basic_services().system_beep();
+		}
+	}
+
+	void dialog::reject()
+	{
+		if (iResult != Rejected)
+		{
+			bool canReject = true;
+			try_reject.trigger(canReject);
+			if (canReject)
+				iResult = Rejected;
+			else
+				app::instance().basic_services().system_beep();
+		}
+	}
+
 	dialog_button_box& dialog::button_box()
 	{
 		if (iButtonBox == boost::none)
@@ -108,11 +134,11 @@ namespace neogfx
 			iButtonBox.emplace(layout());
 			iButtonBox->accepted([this]()
 			{
-				iResult = Accepted;
+				accept();
 			});
 			iButtonBox->rejected([this]()
 			{
-				iResult = Rejected;
+				reject();
 			});
 		}
 		return *iButtonBox;
@@ -130,15 +156,22 @@ namespace neogfx
 		return *iResult;
 	}
 
+	bool dialog::can_close() const
+	{
+		bool canReject = true;
+		try_reject.trigger(canReject);
+		return canReject;
+	}
+
 	bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
 		switch (aScanCode)
 		{
 		case ScanCode_RETURN:
-			iResult = Accepted;
+			accept();
 			return true;
 		case ScanCode_ESCAPE:
-			iResult = Rejected;
+			reject();
 			return true;
 		default:
 			return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);

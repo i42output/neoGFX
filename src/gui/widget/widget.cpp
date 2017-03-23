@@ -659,7 +659,7 @@ namespace neogfx
 		return has_minimum_size() ?
 			units_converter(*this).from_device_units(*iMinimumSize) :
 			has_layout() ?
-				layout().minimum_size(aAvailableSpace) + margins().size() :
+				layout().minimum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size() :
 				margins().size();
 	}
 
@@ -686,7 +686,7 @@ namespace neogfx
 			has_maximum_size() ?
 				units_converter(*this).from_device_units(*iMaximumSize) :
 				has_layout() ?
-					layout().maximum_size(aAvailableSpace) :
+					layout().maximum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size() :
 					size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
 	}
 
@@ -883,7 +883,7 @@ namespace neogfx
 	colour widget::container_background_colour() const
 	{
 		const i_widget* w = this;
-		while (w->transparent_background() && w->has_parent())
+		while (w->transparent_background() && w->has_parent() && same_surface(w->parent()))
 			w = &w->parent();
 		if (!w->transparent_background() && w->has_background_colour())
 			return w->background_colour();

@@ -166,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="new_project_dialog.hpp" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="symbol.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="neoGUI.rc" />

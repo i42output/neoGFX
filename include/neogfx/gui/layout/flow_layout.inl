@@ -30,9 +30,11 @@ namespace neogfx
 		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
 		if (itemsVisible == 0)
 			return size{};
+		auto availableSpaceForChildren = aAvailableSpace;
+		if (availableSpaceForChildren != boost::none)
+			*availableSpaceForChildren -= margins().size();
 		size result;
 		uint32_t itemsZeroSized = 0;
-		size availableSpace = *aAvailableSpace - margins().size();
 		size extent;
 		point pos;
 		bool previousNonZeroSize = false;
@@ -40,7 +42,7 @@ namespace neogfx
 		{
 			if (!item.visible())
 				continue;
-			auto itemMinimumSize = item.minimum_size(availableSpace);
+			auto itemMinimumSize = item.minimum_size(availableSpaceForChildren);
 			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
 			{
 				++itemsZeroSized;
@@ -49,7 +51,7 @@ namespace neogfx
 			}
 			if (previousNonZeroSize)
 				AxisPolicy::x(pos) += AxisPolicy::cx(spacing());
-			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) > AxisPolicy::cx(availableSpace))
+			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) > AxisPolicy::cx(*availableSpaceForChildren))
 			{
 				AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
 				AxisPolicy::y(pos) += (AxisPolicy::cy(extent) + AxisPolicy::cy(spacing()));
@@ -74,21 +76,23 @@ namespace neogfx
 	{
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+		auto availableSpaceForChildren = aAvailableSpace;
+		if (availableSpaceForChildren != boost::none)
+			*availableSpaceForChildren -= margins().size();
 		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
 		size result;
-		size availableSpace = *aAvailableSpace - margins().size();
 		coordinate extent = 0.0;
 		point pos;
 		for (const auto& item : items())
 		{
 			if (!item.visible())
 				continue;
-			auto itemMaximumSize = item.maximum_size(availableSpace);
+			auto itemMaximumSize = item.maximum_size(availableSpaceForChildren);
 			if (AxisPolicy::cx(itemMaximumSize) != std::numeric_limits<size::dimension_type>::max())
 			{
 				if (AxisPolicy::x(pos) != std::numeric_limits<size::dimension_type>::max())
 				{
-					if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMaximumSize) > AxisPolicy::cx(availableSpace))
+					if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMaximumSize) > AxisPolicy::cx(*availableSpaceForChildren))
 					{
 						AxisPolicy::x(pos) = (AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing()));
 						if (AxisPolicy::cy(itemMaximumSize) != std::numeric_limits<size::dimension_type>::max())

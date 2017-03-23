@@ -682,7 +682,7 @@ namespace neogfx
 					{
 						auto name = sKeyNames.find(bits[i]);
 						if (name == sKeyNames.end())
-							iKeyCode = static_cast<key_code_e>(neolib::to_lower(bits[i])[0]);
+							iKeyCode = static_cast<key_code_e>(neolib::to_lower(neolib::make_string(bits[i]))[0]);
 						else
 							iKeyCode = name->second;
 					}

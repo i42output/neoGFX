@@ -34,11 +34,13 @@ int main(int argc, char* argv[])
 	{
 		app.rendering_engine().subpixel_rendering_on();
 		app.current_style().set_colour(ng::colour{ 64, 64, 64 });
+		app.current_style().set_spacing(ng::size{ 4.0 });
 
 		ng::window mainWindow(app.basic_services().desktop_rect() * ng::size{ 0.5, 0.5 });
 		mainWindow.set_margins(ng::margins{});
 		ng::vertical_layout mainLayout(mainWindow);
 		mainLayout.set_margins(ng::margins{});
+
 		ng::menu_bar mainMenu(mainLayout);
 
 		auto& fileMenu = mainMenu.add_sub_menu("&File");

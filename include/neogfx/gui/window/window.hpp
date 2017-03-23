@@ -94,6 +94,7 @@ namespace neogfx
 		virtual colour background_colour() const;
 	public:
 		virtual bool is_weak() const;
+		virtual bool can_close() const;
 		virtual bool is_closed() const;
 		virtual void close();
 		virtual bool has_parent_surface() const;
@@ -162,6 +163,7 @@ namespace neogfx
 		virtual const i_surface& surface() const;
 		virtual i_surface& surface();
 	private:
+		virtual bool native_window_can_close() const;
 		virtual void native_window_closing();
 		virtual void native_window_closed();
 		virtual void native_window_focus_gained();

@@ -327,6 +327,9 @@ namespace neogfx
 	{
 		if (items_visible() == 0)
 			return size{};
+		auto availableSpaceForChildren = aAvailableSpace;
+		if (availableSpaceForChildren != boost::none)
+			*availableSpaceForChildren -= margins().size();
 		size result;
 		uint32_t visibleColumns = visible_columns();
 		uint32_t visibleRows = visible_rows();
@@ -336,13 +339,13 @@ namespace neogfx
 		{
 			if (!is_row_visible(row))
 				continue;
-			result.cy += row_minimum_size(row, aAvailableSpace);
+			result.cy += row_minimum_size(row, availableSpaceForChildren);
 		}
 		for (cell_coordinate column = 0; column < columns(); ++column)
 		{
 			if (!is_column_visible(column))
 				continue;
-			result.cx += column_minimum_size(column, aAvailableSpace);
+			result.cx += column_minimum_size(column, availableSpaceForChildren);
 		}
 		result.cx += (margins().left + margins().right);
 		result.cy += (margins().top + margins().bottom);
@@ -359,10 +362,13 @@ namespace neogfx
 	{
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return size{};
+		auto availableSpaceForChildren = aAvailableSpace;
+		if (availableSpaceForChildren != boost::none)
+			*availableSpaceForChildren -= margins().size();
 		size result;
 		for (cell_coordinate row = 0; row < visible_rows(); ++row)
 		{
-			size::dimension_type rowMaxSize = row_maximum_size(row, aAvailableSpace);
+			size::dimension_type rowMaxSize = row_maximum_size(row, availableSpaceForChildren);
 			if (rowMaxSize == std::numeric_limits<size::dimension_type>::max())
 				result.cy = rowMaxSize;
 			else if (result.cy != std::numeric_limits<size::dimension_type>::max())
@@ -370,7 +376,7 @@ namespace neogfx
 		}
 		for (cell_coordinate column = 0; column < visible_columns(); ++column)
 		{
-			size::dimension_type columnMaxSize = column_maximum_size(column, aAvailableSpace);
+			size::dimension_type columnMaxSize = column_maximum_size(column, availableSpaceForChildren);
 			if (columnMaxSize == std::numeric_limits<size::dimension_type>::max())
 				result.cx = columnMaxSize;
 			else if (result.cx != std::numeric_limits<size::dimension_type>::max())

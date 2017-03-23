@@ -888,7 +888,7 @@ namespace neogfx
 	template <typename Elem, typename Traits, typename T>
 	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_rect<T>& aRect)
 	{
-		aStream << "[" << aRect.position() << ", " << aRect.extents() << "]";
+		aStream << "[" << aRect.top_left() << " -> " << aRect.bottom_right() << ", " << aRect.extents() << "]";
 		return aStream;
 	}
 }

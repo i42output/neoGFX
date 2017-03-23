@@ -28,6 +28,9 @@ namespace neogfx
 	class dialog : public window
 	{
 	public:
+		event<bool&> try_accept;
+		event<bool&> try_reject;
+	public:
 		enum result_code_e
 		{
 			Accepted,
@@ -48,8 +51,13 @@ namespace neogfx
 		dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle = Default);
 		~dialog();
 	public:
+		virtual void accept();
+		virtual void reject();
+	public:
 		dialog_button_box& button_box();
 		result_code_e exec();
+	public:
+		virtual bool can_close() const;
 	public:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	private:
