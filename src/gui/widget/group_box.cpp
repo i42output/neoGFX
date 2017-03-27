@@ -23,7 +23,7 @@
 namespace neogfx
 {
 	group_box::group_box(const std::string& aText) : 
-		widget(), iLayout{ *this }, iLabel{ iLayout, aText }
+		widget(), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{ 5.0 });
@@ -32,7 +32,7 @@ namespace neogfx
 	}
 
 	group_box::group_box(i_widget& aParent, const std::string& aText) :
-		widget(aParent), iLayout{ *this }, iLabel{ iLayout, aText }
+		widget(aParent), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{ 5.0 });
@@ -41,7 +41,7 @@ namespace neogfx
 	}
 
 	group_box::group_box(i_layout& aLayout, const std::string& aText) :
-		widget(aLayout), iLayout{ *this }, iLabel{ iLayout, aText }
+		widget(aLayout), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{ 5.0 });
@@ -49,14 +49,58 @@ namespace neogfx
 		set_item_layout(std::make_shared<vertical_layout>());
 	}
 
+	bool group_box::is_checkable() const
+	{
+		return iTitle.is<check_box_ptr>();
+	}
+
+	void group_box::set_checkable(bool aCheckable)
+	{
+		if (is_checkable() != aCheckable)
+		{
+			std::string text = label().text().text();
+			iTitle.clear();
+			if (aCheckable)
+			{
+				iTitle = std::make_unique<neogfx::check_box>(text);
+				iLayout.add_item(0, *static_variant_cast<check_box_ptr&>(iTitle));
+			}
+			else
+			{
+				iTitle = std::make_unique<neogfx::label>(text);
+				iLayout.add_item(0, *static_variant_cast<label_ptr&>(iTitle));
+			}
+		}
+	}
+
 	const label& group_box::label() const
 	{
-		return iLabel;
+		if (iTitle.is<label_ptr>())
+			return *static_variant_cast<const label_ptr&>(iTitle);
+		else
+			return static_variant_cast<const check_box_ptr&>(iTitle)->label();
 	}
 
 	label& group_box::label()
 	{
-		return iLabel;
+		if (iTitle.is<label_ptr>())
+			return *static_variant_cast<label_ptr&>(iTitle);
+		else
+			return static_variant_cast<check_box_ptr&>(iTitle)->label();
+	}
+
+	const check_box& group_box::check_box() const
+	{
+		if (iTitle.is<check_box_ptr>())
+			return *static_variant_cast<const check_box_ptr&>(iTitle);
+		throw not_checkable();
+	}
+
+	check_box& group_box::check_box()
+	{
+		if (iTitle.is<check_box_ptr>())
+			return *static_variant_cast<check_box_ptr&>(iTitle);
+		throw not_checkable();
 	}
 
 	void group_box::set_item_layout(i_layout& aItemLayout)

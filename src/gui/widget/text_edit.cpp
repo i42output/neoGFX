@@ -142,6 +142,7 @@ namespace neogfx
 		iWordWrap(aType == MultiLine),
 		iPassword(false),
 		iAlignment(neogfx::alignment::Left|neogfx::alignment::Top),
+		iPersistDefaultStyle(false),
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
 		iGlyphParagraphCache(nullptr),
@@ -162,6 +163,7 @@ namespace neogfx
 		iWordWrap(aType == MultiLine),
 		iPassword(false),
 		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
+		iPersistDefaultStyle(false),
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
 		iGlyphParagraphCache(nullptr),
@@ -182,6 +184,7 @@ namespace neogfx
 		iWordWrap(aType == MultiLine),
 		iPassword(false),
 		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
+		iPersistDefaultStyle(false),
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
 		iGlyphParagraphCache(nullptr),
@@ -842,12 +845,13 @@ namespace neogfx
 		return iDefaultStyle;
 	}
 
-	void text_edit::set_default_style(const style& aDefaultStyle)
+	void text_edit::set_default_style(const style& aDefaultStyle, bool aPersist)
 	{
 		neogfx::font oldFont = font();
 		iDefaultStyle = aDefaultStyle;
 		if (oldFont != font())
 			refresh_paragraph(iText.begin(), 0);
+		iPersistDefaultStyle = aPersist;
 		update();
 	}
 
@@ -1089,7 +1093,7 @@ namespace neogfx
 			if (eol != std::u32string::npos)
 				eos = eol;
 		}
-		auto s = &aStyle != &iDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end();
+		auto s = (&aStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end());
 		auto insertionPoint = iText.begin() + cursor().position();
 		insertionPoint = iText.insert(s != iStyles.end() ? document_text::tag_type{ static_cast<style_list::const_iterator>(s) } : document_text::tag_type{ nullptr },
 			insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);

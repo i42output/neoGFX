@@ -102,6 +102,12 @@ namespace neogfx
 		iPageLayout.set_margins(neogfx::margins{});
 	}
 
+	tab_page_container::~tab_page_container()
+	{
+		while (tab_count() > 0)
+			remove_tab(tab_count() - 1);
+	}
+
 	stack_layout& tab_page_container::page_layout()
 	{
 		return iPageLayout;

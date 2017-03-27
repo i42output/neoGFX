@@ -22,6 +22,7 @@
 #include <boost/locale.hpp> 
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
+#include <neogfx/app/resource_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 
@@ -163,8 +164,6 @@ namespace neogfx
 		slateStyle.set_colour(colour(0x35, 0x35, 0x35));
 		register_style(slateStyle);
 
-		iSystemCache.reset(new window{ point{}, size{}, "neogfx::system_cache", window::InitiallyHidden | window::Weak });
-
 		iActionFileExit.triggered([this]() { quit(0); });
 		iActionCut.triggered([this]() { clipboard().cut(); });
 		iActionCopy.triggered([this]() { clipboard().copy(); });
@@ -187,9 +186,8 @@ namespace neogfx
 
 	app::~app()
 	{
-		rendering_engine().texture_manager().clear_textures();
 		iKeyboard->ungrab_keyboard(*this);
-		iSystemCache.reset();
+		resource_manager::instance().clean();
 	}
 
 	app& app::instance()

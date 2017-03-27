@@ -33,10 +33,15 @@ namespace neogfx
 	class sdl_renderer : public opengl_renderer
 	{
 	public:
+		struct failed_to_activate_gl_context : std::runtime_error { failed_to_activate_gl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_activate_gl_context: " + aReason) {} };
+		struct failed_to_create_system_cache_window : std::runtime_error { failed_to_create_system_cache_window(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_create_system_cache_window: " + aReason) {} };
+	public:
 		sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard);
 		~sdl_renderer();
 	public:
+		virtual const i_native_surface* active_context_surface() const;
 		virtual void activate_context(const i_native_surface& aSurface);
+		virtual void deactivate_context();
 		virtual opengl_context create_context(const i_native_surface& aSurface);
 		virtual void destroy_context(opengl_context aContext);
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle);
@@ -54,8 +59,9 @@ namespace neogfx
 	private:
 		i_basic_services& iBasicServices;
 		i_keyboard& iKeyboard;
+		void* iSystemCacheWindowHandle;
 		opengl_context iContext;
 		uint32_t iCreatingWindow;
-		bool iContextSharingEnabled;
+		const i_native_surface* iActiveContextSurface;
 	};
 }

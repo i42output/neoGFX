@@ -53,9 +53,9 @@ namespace neogfx
 	}
 
 	widget::widget() :
-		iParent(0),
-		iLinkBefore(this),
-		iLinkAfter(this),
+		iParent(nullptr),
+		iLinkBefore(nullptr),
+		iLinkAfter(nullptr),
 		iDeviceMetricsForwarder(*this),
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
@@ -71,9 +71,9 @@ namespace neogfx
 	}
 	
 	widget::widget(i_widget& aParent) :
-		iParent(0),
-		iLinkBefore(this),
-		iLinkAfter(this),
+		iParent(nullptr),
+		iLinkBefore(nullptr),
+		iLinkAfter(nullptr),
 		iDeviceMetricsForwarder(*this),
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
@@ -90,9 +90,9 @@ namespace neogfx
 	}
 
 	widget::widget(i_layout& aLayout) :
-		iParent(0),
-		iLinkBefore(this),
-		iLinkAfter(this),
+		iParent(nullptr),
+		iLinkBefore(nullptr),
+		iLinkAfter(nullptr),
 		iDeviceMetricsForwarder(*this),
 		iUnitsContext(iDeviceMetricsForwarder),
 		iMinimumSize{},
@@ -110,6 +110,7 @@ namespace neogfx
 
 	widget::~widget()
 	{
+		unlink();
 		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().ungrab_keyboard(*this);
 		remove_widgets();
@@ -119,8 +120,6 @@ namespace neogfx
 		}
 		if (has_parent())
 			parent().remove_widget(*this);
-		else
-			unlink();
 	}
 
 	const i_device_metrics& widget::device_metrics() const
@@ -225,65 +224,11 @@ namespace neogfx
 		return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
 	}
 
-	i_widget& widget::link_before() const
-	{
-		return *iLinkBefore;
-	}
-
-	void widget::set_link_before(i_widget& aWidget)
-	{
-		if (iLinkBefore != &aWidget)
-		{
-			aWidget.set_link_before_ptr(link_before());
-			link_before().set_link_after_ptr(aWidget);
-			set_link_before_ptr(aWidget);
-			link_before().set_link_after_ptr(*this);
-		}
-	}
-
-	void widget::set_link_before_ptr(i_widget& aWidget)
-	{
-		iLinkBefore = &aWidget;
-	}
-
-	i_widget& widget::link_after() const
-	{
-		return *iLinkAfter;
-	}
-
-	void widget::set_link_after(i_widget& aWidget)
-	{
-		if (iLinkAfter != &aWidget)
-		{
-			aWidget.set_link_after_ptr(link_after());
-			link_after().set_link_before_ptr(aWidget);
-			set_link_after_ptr(aWidget);
-			link_after().set_link_before_ptr(*this);
-		}
-	}
-
-	void widget::set_link_after_ptr(i_widget& aWidget)
-	{
-		iLinkAfter = &aWidget;
-	}
-
-	void widget::unlink()
-	{
-		link_before().set_link_after_ptr(link_after());
-		link_after().set_link_before_ptr(link_before());
-		iLinkBefore = this;
-		iLinkAfter = this;
-	}
-
 	void widget::add_widget(i_widget& aWidget)
 	{
 		if (aWidget.has_parent() && &aWidget.parent() == this)
 			return;
 		aWidget.set_parent(*this);
-		if (iChildren.empty())
-			set_link_after(aWidget);
-		else
-			iChildren.back()->set_link_after(aWidget);
 		iChildren.push_back(std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aWidget));
 		if (has_surface())
 			surface().widget_added(aWidget);
@@ -294,10 +239,6 @@ namespace neogfx
 		if (aWidget->has_parent() && &aWidget->parent() == this)
 			return;
 		aWidget->set_parent(*this);
-		if (iChildren.empty())
-			set_link_after(*aWidget);
-		else 
-			iChildren.back()->set_link_after(*aWidget);
 		iChildren.push_back(aWidget);
 		if (has_surface())
 			surface().widget_added(*aWidget);
@@ -305,15 +246,11 @@ namespace neogfx
 
 	void widget::remove_widget(i_widget& aWidget)
 	{
-		if (!aWidget.has_parent() && &aWidget.parent() != this)
-			throw not_child();
-		aWidget.unlink();
-		for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
-			if (&**i == &aWidget)
-			{
-				iChildren.erase(i.base() - 1);
-				break;
-			}
+		auto existing = find_child(aWidget, false);
+		if (existing == iChildren.end())
+			return;
+		auto keep = *existing;
+		iChildren.erase(existing);
 		if (has_layout())
 			layout().remove_item(aWidget);
 		if (has_surface())
@@ -323,15 +260,142 @@ namespace neogfx
 	void widget::remove_widgets()
 	{
 		while (!iChildren.empty())
-		{
-			auto child = iChildren.back();
-			iChildren.pop_back();
-		}
+			remove_widget(*iChildren.back());
+	}
+
+	bool widget::has_children() const
+	{
+		return !iChildren.empty();
 	}
 
 	const widget::widget_list& widget::children() const
 	{
 		return iChildren;
+	}
+
+	widget::widget_list::const_iterator widget::last_child() const
+	{
+		if (!has_children())
+		{
+			if (has_parent())
+				return parent().find_child(*this);
+			else
+				throw no_children();
+		}
+		else
+			return iChildren.back()->last_child();
+	}
+
+	widget::widget_list::iterator widget::last_child()
+	{
+		if (!has_children())
+		{
+			if (has_parent())
+				return parent().find_child(*this);
+			else
+				throw no_children();
+		}
+		else
+			return iChildren.back()->last_child();
+	}
+
+	widget::widget_list::const_iterator widget::find_child(const i_widget& aChild, bool aThrowIfNotFound) const
+	{
+		for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
+			if (&**i == &aChild)
+				return i;
+		if (aThrowIfNotFound)
+			throw not_child();
+		else
+			return iChildren.end();
+	}
+
+	widget::widget_list::iterator widget::find_child(const i_widget& aChild, bool aThrowIfNotFound)
+	{
+		for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
+			if (&**i == &aChild)
+				return i;
+		if (aThrowIfNotFound)
+			throw not_child();
+		else
+			return iChildren.end();
+	}
+
+	const i_widget& widget::before() const
+	{
+		if (iLinkBefore != nullptr)
+			return *iLinkBefore;
+		if (has_parent())
+		{
+			auto me = parent().find_child(*this);
+			if (me != parent().children().begin())
+				return **(*(me - 1))->last_child();
+			else
+				return parent();
+		}
+		else if (has_children())
+			return **last_child();
+		else
+			return *this;
+	}
+
+	i_widget& widget::before()
+	{
+		return const_cast<i_widget&>(const_cast<const widget*>(this)->before());
+	}
+
+	const i_widget& widget::after() const
+	{
+		if (iLinkAfter != nullptr)
+			return *iLinkAfter;
+		if (has_children())
+			return *iChildren.front();
+		if (has_parent())
+		{
+			auto me = parent().find_child(*this);
+			if (me + 1 != parent().children().end())
+				return *(*(me + 1));
+			else if (parent().has_parent())
+			{
+				auto myParent = parent().parent().find_child(parent());
+				while ((*myParent)->has_parent() && (*myParent)->parent().has_parent() &&
+					myParent + 1 == (*myParent)->parent().children().end())
+					myParent = (*myParent)->parent().parent().find_child((*myParent)->parent());
+				if ((*myParent)->has_parent() && myParent + 1 != (*myParent)->parent().children().end())
+					return **(myParent + 1);
+				else
+					return **myParent;
+			}
+			else
+				return parent();
+		}
+		else
+			return *this;
+	}
+
+	i_widget& widget::after()
+	{
+		return const_cast<i_widget&>(const_cast<const widget*>(this)->after());
+	}
+
+	void widget::link_before(i_widget* aPreviousWidget)
+	{
+		iLinkBefore = aPreviousWidget;
+	}
+
+	void widget::link_after(i_widget* aNextWidget)
+	{
+		iLinkAfter = aNextWidget;
+	}
+
+	void widget::unlink()
+	{
+		if (iLinkBefore != nullptr)
+			iLinkBefore->link_after(iLinkAfter);
+		if (iLinkAfter != nullptr)
+			iLinkAfter->link_before(iLinkBefore);
+		iLinkBefore = nullptr;
+		iLinkAfter = nullptr;
 	}
 
 	bool widget::has_surface() const

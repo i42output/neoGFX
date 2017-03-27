@@ -76,6 +76,8 @@ namespace neogfx
 	{
 		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
 		{
+			if (i->expired())
+				continue;
 			auto p = i->lock();
 			if (aTexture.handle() == p->handle())
 				return std::make_unique<texture_wrapper>(*this, i);
@@ -123,6 +125,8 @@ namespace neogfx
 	{
 		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
 		{
+			if (i->expired())
+				continue;
 			auto p = i->lock();
 			if (!aImage.uri().empty() && aImage.uri() == p->uri())
 				return i;

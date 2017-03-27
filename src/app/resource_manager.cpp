@@ -70,4 +70,12 @@ namespace neogfx
 				++i;
 		}
 	}
+
+	void resource_manager::clean()
+	{
+		decltype(iResources) resources;
+		resources.swap(iResources);
+		decltype(iResourceArchives) resourceArchives;
+		resourceArchives.swap(iResourceArchives);
+	}
 }

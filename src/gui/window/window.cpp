@@ -888,16 +888,16 @@ namespace neogfx
 			i_widget* w = start;
 			if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
 			{
-				for (w = &w->link_after(); 
+				for (w = &w->after(); 
 					w != start && (w->effectively_hidden() || w->effectively_disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus); 
-					w = &w->link_after())
+					w = &w->after())
 					;
 			}
 			else
 			{
-				for (w = &w->link_before();
+				for (w = &w->before();
 					w != start && (w->effectively_hidden() || w->effectively_disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus);
-					w = &w->link_before())
+					w = &w->before())
 					;
 			}
 			if ((w->focus_policy() & focus_policy::TabFocus) == focus_policy::TabFocus)

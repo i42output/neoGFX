@@ -448,7 +448,7 @@ namespace neogfx
 		neogfx::alignment alignment() const;
 		void set_alignment(neogfx::alignment aAlignment);
 		const style& default_style() const;
-		void set_default_style(const style& aDefaultStyle);
+		void set_default_style(const style& aDefaultStyle, bool aPersist = false);
 		colour default_text_colour() const;
 	public:
 		std::string text() const;
@@ -513,6 +513,7 @@ namespace neogfx
 		std::string iPasswordMask;
 		neogfx::alignment iAlignment;
 		style iDefaultStyle;
+		bool iPersistDefaultStyle;
 		font_info iDefaultFont;
 		mutable neogfx::cursor iCursor;
 		style_list iStyles;

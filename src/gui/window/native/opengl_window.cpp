@@ -33,7 +33,8 @@ namespace neogfx
 		iFrameRate(60),
 		iFrameCounter(0),
 		iLastFrameTime(0),
-		iRendering(false)
+		iRendering(false),
+		iDestroying(false)
 	{
 #ifdef _WIN32
 		ID2D1Factory* m_pDirect2dFactory;
@@ -46,6 +47,8 @@ namespace neogfx
 
 	opengl_window::~opengl_window()
 	{
+		if (rendering_engine().active_context_surface() == this)
+			rendering_engine().deactivate_context();
 	}
 
 	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const
@@ -246,8 +249,12 @@ namespace neogfx
 
 	void opengl_window::destroying()
 	{
+		if (iDestroying)
+			return;
+		iDestroying = true;
 		if (iFrameBufferSize != size{})
 		{
+			rendering_engine().activate_context(*this);
 			glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
 			glCheck(glDeleteTextures(1, &iFrameBufferTexture));
 			glCheck(glDeleteFramebuffers(1, &iFrameBuffer));

@@ -56,6 +56,7 @@ namespace neogfx
 		typedef std::unordered_set<rect> update_rect_list;
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_widget::no_parent") {} };
+		struct no_children : std::logic_error { no_children() : std::logic_error("neogfx::i_widget::no_children") {} };
 		struct not_child : std::logic_error { not_child() : std::logic_error("neogfx::i_widget::not_child") {} };
 		struct no_update_rect : std::logic_error { no_update_rect() : std::logic_error("neogfx::i_widget::no_update_rect") {} };
 		struct widget_not_entered : std::logic_error { widget_not_entered() : std::logic_error("neogfx::i_widget::widget_not_entered") {} };
@@ -78,16 +79,23 @@ namespace neogfx
 		virtual bool is_ancestor_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
 		virtual bool is_descendent_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
 		virtual bool is_sibling_of(const i_widget& aWidget) const = 0;
-		virtual i_widget& link_before() const = 0;
-		virtual void set_link_before(i_widget& aWidget) = 0;
-		virtual i_widget& link_after() const = 0;
-		virtual void set_link_after(i_widget& aWidget) = 0;
-		virtual void unlink() = 0;
 		virtual void add_widget(i_widget& aWidget) = 0;
 		virtual void add_widget(std::shared_ptr<i_widget> aWidget) = 0;
 		virtual void remove_widget(i_widget& aWidget) = 0;
 		virtual void remove_widgets() = 0;
+		virtual bool has_children() const = 0;
 		virtual const widget_list& children() const = 0;
+		virtual widget_list::const_iterator last_child() const = 0;
+		virtual widget_list::iterator last_child() = 0;
+		virtual widget_list::const_iterator find_child(const i_widget& aChild, bool aThrowIfNotFound = true) const = 0;
+		virtual widget_list::iterator find_child(const i_widget& aChild, bool aThrowIfNotFound = true) = 0;
+		virtual const i_widget& before() const = 0;
+		virtual i_widget& before() = 0;
+		virtual const i_widget& after() const = 0;
+		virtual i_widget& after() = 0;
+		virtual void link_before(i_widget* aPreviousWidget) = 0;
+		virtual void link_after(i_widget* aNextWidget) = 0;
+		virtual void unlink() = 0;
 		virtual bool has_surface() const = 0;
 		virtual const i_surface& surface() const = 0;
 		virtual i_surface& surface() = 0;
@@ -185,11 +193,7 @@ namespace neogfx
 	protected:
 		virtual const i_widget& widget_for_mouse_event(const point& aPosition) const = 0;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition) = 0;
-	private:
-		friend class widget;
-		virtual void set_link_before_ptr(i_widget& aWidget) = 0;
-		virtual void set_link_after_ptr(i_widget& aWidget) = 0;
-	// helpers
+		// helpers
 	public:
 		bool same_surface(const i_widget& aWidget) const
 		{

@@ -466,6 +466,7 @@ namespace neogfx
 				event_handler().native_window_closing();
 				if (!iDestroyed)
 				{
+					destroying();
 #ifdef WIN32
 					DestroyWindow(static_cast<HWND>(native_handle()));
 #endif

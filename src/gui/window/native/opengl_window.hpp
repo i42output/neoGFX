@@ -84,5 +84,6 @@ namespace neogfx
 		boost::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
 		bool iRendering;
+		bool iDestroying;
 	};
 }

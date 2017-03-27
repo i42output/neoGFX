@@ -157,7 +157,6 @@ namespace neogfx
 		i_action& iActionSelectAll;
 		neolib::callback_timer iStandardActionManager;
 		mnemonic_list iMnemonics;
-		std::unique_ptr<i_widget> iSystemCache;
 		std::unique_ptr<event_processing_context> iContext;
 	};
 }

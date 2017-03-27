@@ -25,6 +25,7 @@
 #include <neogfx/gui/widget/slider.hpp>
 #include <neogfx/gui/dialog/colour_dialog.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
+#include <neogfx/gui/widget/group_box.hpp>
 
 namespace ng = neogfx;
 
@@ -64,11 +65,11 @@ public:
 			ng::app::instance().change_style("Keypad").
 				set_colour(aNumber != 9 ? ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0) : ng::colour::LightGoldenrod);
 			if (aNumber == 9)
-				iTextEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
+				iTextEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()), true);
 			else if (aNumber == 8)
-				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::Black, ng::text_edit::style::colour_type(), ng::colour::White));
+				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::Black, ng::text_edit::style::colour_type(), ng::colour::White), true);
 			else if (aNumber == 0)
-				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::colour::White));
+				iTextEdit.set_default_style(ng::text_edit::style(ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::colour::White), true);
 			else
 				iTextEdit.set_default_style(
 					ng::text_edit::style(
@@ -77,7 +78,7 @@ public:
 							ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0).lighter(0x40),
 							ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0).lighter(0xC0),
 							ng::gradient::Horizontal),
-						ng::text_edit::style::colour_type()));
+						ng::text_edit::style::colour_type()), true);
 		});
 	}
 private:
@@ -100,8 +101,12 @@ int main(int argc, char* argv[])
 		app.change_style("Default");
 
 		ng::window window(ng::size{ 675, 675 });
-
 		ng::vertical_layout layout0(window);
+
+/*		ng::group_box gb{ layout0, "foo" };
+		ng::check_box cb{ gb.item_layout(), "bar" };
+		cb.checked([&gb]() { gb.set_checkable(true); });
+		cb.unchecked([&gb]() { gb.set_checkable(false); }); */
 
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{
@@ -302,7 +307,8 @@ int main(int argc, char* argv[])
 			ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
 			button->set_foreground_colour(randomColour);
 		}
-		ng::vertical_layout layoutRadiosAndChecks(layout2);
+		ng::group_box groupBox{ layout2, "Group Box" };
+		ng::vertical_layout& layoutRadiosAndChecks = static_cast<ng::vertical_layout&>(groupBox.item_layout());
 		ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbox", ng::check_box::TriState);
 		triState.checked([&triState]()
 		{
@@ -330,6 +336,15 @@ int main(int argc, char* argv[])
 			lineEditPassword.set_password(false);
 		});
 		ng::check_box columns(layoutRadiosAndChecks, "Columns");
+		ng::check_box groupBoxCheckable(layoutRadiosAndChecks, "Group Box Checkable");
+		groupBoxCheckable.checked([&groupBox]()
+		{
+			groupBox.set_checkable(true);
+		});
+		groupBoxCheckable.unchecked([&groupBox]()
+		{
+			groupBox.set_checkable(false);
+		});
 		ng::gradient_widget gw(layoutRadiosAndChecks);
 		columns.checked([&textEdit, &gw]()
 		{
@@ -448,14 +463,14 @@ int main(int argc, char* argv[])
 
 		my_item_model itemModel;
 		#ifdef NDEBUG
-		itemModel.reserve(10000);
+		itemModel.reserve(500);
 		#else
 		itemModel.reserve(100);
 		#endif
 		ng::app::event_processing_context epc(app);
 		for (uint32_t row = 0; row < itemModel.capacity(); ++row)
 		{
-			if (row % 1000 == 0)
+			if (row % 100 == 0)
 				app.process_events(epc);
 			for (uint32_t col = 0; col < 5; ++col)
 			{
@@ -479,7 +494,7 @@ int main(int argc, char* argv[])
 		auto& w = tabContainer.add_tab_page("Lots").widget();
 		ng::vertical_layout l(w);
 		#ifdef NDEBUG
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i < 1000; ++i)
 		#else
 		for (int i = 0; i < 100; ++i)
 		#endif

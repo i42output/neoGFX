@@ -136,7 +136,7 @@ namespace neogfx
 
 	const radio_button* radio_button::next_radio_button() const
 	{
-		const i_widget* candidate = &link_after();
+		const i_widget* candidate = &after();
 		while (candidate != this)
 		{
 			if (is_sibling_of(*candidate))
@@ -146,7 +146,7 @@ namespace neogfx
 				if (candidateRadioButton != 0)
 					return candidateRadioButton;
 			}
-			candidate = &candidate->link_after();
+			candidate = &candidate->after();
 		}
 		return this;
 	}

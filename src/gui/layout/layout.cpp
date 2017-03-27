@@ -292,8 +292,6 @@ namespace neogfx
 	{
 		item_list toRemove;
 		toRemove.splice(toRemove.begin(), items());
-		if (iOwner != 0)
-			iOwner->ultimate_ancestor().layout_items(true);
 	}
 
 	layout::item_index layout::item_count() const

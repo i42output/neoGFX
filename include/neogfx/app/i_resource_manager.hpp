@@ -32,5 +32,6 @@ namespace neogfx
 		virtual i_resource::pointer load_resource(const std::string& aUri) = 0;
 	public:
 		virtual void cleanup() = 0;
+		virtual void clean() = 0;
 	};
 }

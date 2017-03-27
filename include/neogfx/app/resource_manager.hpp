@@ -36,6 +36,7 @@ namespace neogfx
 		virtual i_resource::pointer load_resource(const std::string& aUri);
 	public:
 		virtual void cleanup();
+		virtual void clean();
 	private:
 		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResources;
 		std::map<std::string, neolib::variant<i_resource::pointer, i_resource::weak_pointer>> iResourceArchives;

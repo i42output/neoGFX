@@ -27,15 +27,49 @@
 
 namespace neogfx
 {
-	sdl_renderer::sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard) : 
-		iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), iContext(nullptr)
+	class sdl_instance
 	{
-		SDL_Init(SDL_INIT_VIDEO);
+	public:
+		sdl_instance()
+		{
+			SDL_Init(SDL_INIT_VIDEO);
+		}
+		~sdl_instance()
+		{
+			SDL_Quit();
+		}
+	public:
+		static void instantiate()
+		{
+			static sdl_instance sSdlInstance;
+		}
+	};
+
+	sdl_renderer::sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard) : 
+		iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), 
+		iContext(nullptr), iActiveContextSurface(nullptr)
+	{
+		sdl_instance::instantiate();
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0);
+		iSystemCacheWindowHandle = SDL_CreateWindow(
+			"neogfx::system_cache_window",
+			0,
+			0,
+			0,
+			0,
+			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+		if (iSystemCacheWindowHandle == 0)
+			throw failed_to_create_system_cache_window(SDL_GetError());
 	}
 
 	sdl_renderer::~sdl_renderer()
 	{
-		SDL_Quit();
+		deactivate_context();
+	}
+
+	const i_native_surface* sdl_renderer::active_context_surface() const
+	{
+		return iActiveContextSurface;
 	}
 
 	void sdl_renderer::activate_context(const i_native_surface& aSurface)
@@ -43,14 +77,24 @@ namespace neogfx
 		if (iContext == nullptr)
 			iContext = create_context(aSurface);
 		else
-			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(aSurface.handle()), static_cast<SDL_GLContext>(iContext));
-
+		{
+			if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(aSurface.handle()), static_cast<SDL_GLContext>(iContext)) == -1)
+				throw failed_to_activate_gl_context(SDL_GetError());
+		}
+		iActiveContextSurface = &aSurface;
 		static bool initialized = false;
 		if (!initialized)
 		{
 			initialize();
 			initialized = true;
 		}
+	}
+
+	void sdl_renderer::deactivate_context()
+	{
+		iActiveContextSurface = nullptr;
+		if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), static_cast<SDL_GLContext>(iContext)) == -1)
+			throw failed_to_activate_gl_context(SDL_GetError());
 	}
 
 	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_native_surface& aSurface)

@@ -59,6 +59,7 @@ namespace neogfx
 		tab_page_container();
 		tab_page_container(i_widget& aParent);
 		tab_page_container(i_layout& aLayout);
+		~tab_page_container();
 	public:
 		stack_layout& page_layout();
 	public:
