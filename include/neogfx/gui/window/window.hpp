@@ -159,9 +159,9 @@ namespace neogfx
 		virtual void activate();
 		virtual void counted_enable(bool aEnable);
 	public:
-		virtual bool has_surface() const;
 		virtual const i_surface& surface() const;
 		virtual i_surface& surface();
+		virtual bool is_surface() const;
 	private:
 		virtual bool native_window_can_close() const;
 		virtual void native_window_closing();

@@ -54,7 +54,7 @@ namespace neogfx
 		virtual units_e set_units(units_e aUnits) const;
 	public:
 		virtual bool is_root() const;
-		virtual bool has_parent() const;
+		virtual bool has_parent(bool aSameSurface = true) const;
 		virtual const i_widget& parent() const;
 		virtual i_widget& parent();
 		virtual void set_parent(i_widget& aParent);
@@ -84,6 +84,7 @@ namespace neogfx
 		virtual bool has_surface() const;
 		virtual const i_surface& surface() const;
 		virtual i_surface& surface();
+		virtual bool is_surface() const;
 		virtual bool has_layout() const;
 		virtual void set_layout(i_layout& aLayout);
 		virtual void set_layout(std::shared_ptr<i_layout> aLayout);

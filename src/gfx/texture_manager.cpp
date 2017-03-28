@@ -27,49 +27,45 @@ namespace neogfx
 	class texture_wrapper : public i_native_texture
 	{
 	public:
-		texture_wrapper(texture_manager& aParent, texture_manager::texture_list::iterator aTexture) :
-			iParent(aParent), iTexture(aTexture), iTextureReference(aTexture->lock())
+		texture_wrapper(texture_manager::texture_list::iterator aTexture) :
+			iTexture(aTexture->lock())
 		{
 		}
 		~texture_wrapper()
 		{
-			iTextureReference.reset();
-			iParent.cleanup(iTexture);
 		}
 	public:
 		virtual texture_sampling sampling() const
 		{
-			return iTextureReference->sampling();
+			return iTexture->sampling();
 		}
 		virtual size extents() const
 		{
-			return iTextureReference->extents();
+			return iTexture->extents();
 		}
 		virtual size storage_extents() const
 		{
-			return iTextureReference->storage_extents();
+			return iTexture->storage_extents();
 		}
 		virtual void set_pixels(const rect& aRect, const void* aPixelData)
 		{
-			iTextureReference->set_pixels(aRect, aPixelData);
+			iTexture->set_pixels(aRect, aPixelData);
 		}
 	public:
 		virtual void* handle() const
 		{
-			return iTextureReference->handle();
+			return iTexture->handle();
 		}
 		virtual bool is_resident() const
 		{
-			return iTextureReference->is_resident();
+			return iTexture->is_resident();
 		}
 		virtual const std::string& uri() const
 		{
-			return iTextureReference->uri();
+			return iTexture->uri();
 		}
 	private:
-		texture_manager& iParent;
-		texture_manager::texture_list::iterator iTexture;
-		std::shared_ptr<i_native_texture> iTextureReference;
+		std::shared_ptr<i_native_texture> iTexture;
 	};
 
 	std::unique_ptr<i_native_texture> texture_manager::join_texture(const i_native_texture& aTexture)
@@ -80,7 +76,7 @@ namespace neogfx
 				continue;
 			auto p = i->lock();
 			if (aTexture.handle() == p->handle())
-				return std::make_unique<texture_wrapper>(*this, i);
+				return std::make_unique<texture_wrapper>(i);
 		}
 		throw texture_not_found();
 	}
@@ -136,13 +132,15 @@ namespace neogfx
 
 	std::unique_ptr<i_native_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)
 	{
+		// cleanup opportunity
+		for (auto i = iTextures.begin(); i != iTextures.end();)
+		{
+			if (i->expired())
+				i = iTextures.erase(i);
+			else
+				++i;
+		}
 		auto newTexture = iTextures.insert(iTextures.end(), aTexture);
-		return std::make_unique<texture_wrapper>(*this, newTexture);
-	}
-
-	void texture_manager::cleanup(texture_list::iterator aTexture)
-	{
-		if (aTexture->expired())
-			iTextures.erase(aTexture);
+		return std::make_unique<texture_wrapper>(newTexture);
 	}
 }

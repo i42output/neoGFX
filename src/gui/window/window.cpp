@@ -361,7 +361,7 @@ namespace neogfx
 
 	bool window::has_parent_surface() const
 	{
-		return has_parent();
+		return has_parent(false);
 	}
 
 	const i_surface& window::parent_surface() const
@@ -702,11 +702,6 @@ namespace neogfx
 			native_window().enable(iCountedEnable >= 0);
 	}
 
-	bool window::has_surface() const
-	{
-		return true;
-	}
-
 	const i_surface& window::surface() const
 	{
 		return *this;
@@ -715,6 +710,11 @@ namespace neogfx
 	i_surface& window::surface()
 	{
 		return *this;
+	}
+
+	bool window::is_surface() const
+	{
+		return true;
 	}
 
 	void window::init()
@@ -743,7 +743,7 @@ namespace neogfx
 			iNativeWindowClosing = true;
 			update_modality();
 		}
-		if (has_parent() && !(static_cast<window&>(parent()).style() & window::NoActivate))
+		if (has_parent(false) && !(static_cast<window&>(parent()).style() & window::NoActivate))
 			static_cast<window&>(parent()).activate();
 	}
 
@@ -761,7 +761,7 @@ namespace neogfx
 		if (destroyed)
 			return;
 		app::instance().surface_manager().remove_surface(*this);
-		if (has_parent() && !(static_cast<window&>(parent()).style() & window::NoActivate))
+		if (has_parent(false) && !(static_cast<window&>(parent()).style() & window::NoActivate))
 			static_cast<window&>(parent()).activate();
 		if (!iClosed)
 		{
@@ -1010,7 +1010,7 @@ namespace neogfx
 	{
 		if (aCandidateWidget.enabled() && (aCandidateWidget.focus_policy() & focus_policy::ClickFocus) == focus_policy::ClickFocus)
 			aCandidateWidget.set_focus();
-		else if (aCandidateWidget.has_parent() && aCandidateWidget.parent().same_surface(*this))
+		else if (aCandidateWidget.has_parent())
 			update_click_focus(aCandidateWidget.parent());
 	}
 

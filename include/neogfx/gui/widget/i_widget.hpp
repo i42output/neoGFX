@@ -69,7 +69,7 @@ namespace neogfx
 		virtual ~i_widget() {}
 	public:
 		virtual bool is_root() const = 0;
-		virtual bool has_parent() const = 0;
+		virtual bool has_parent(bool aSameSurface = true) const = 0;
 		virtual const i_widget& parent() const = 0;
 		virtual i_widget& parent() = 0;
 		virtual void set_parent(i_widget& aParent) = 0;
@@ -99,6 +99,7 @@ namespace neogfx
 		virtual bool has_surface() const = 0;
 		virtual const i_surface& surface() const = 0;
 		virtual i_surface& surface() = 0;
+		virtual bool is_surface() const = 0;
 		virtual bool has_layout() const = 0;
 		virtual void set_layout(i_layout& aLayout) = 0;
 		virtual void set_layout(std::shared_ptr<i_layout> aLayout) = 0;
@@ -197,8 +198,14 @@ namespace neogfx
 	public:
 		bool same_surface(const i_widget& aWidget) const
 		{
-			if (has_surface() && aWidget.has_surface())
-				return &surface() == &aWidget.surface();
+			const i_widget* w1 = this;
+			while (!w1->is_surface() && w1->has_parent(false))
+				w1 = &w1->parent();
+			const i_widget* w2 = &aWidget;
+			while (!w2->is_surface() && w2->has_parent(false))
+				w2 = &w2->parent();
+			if (w1->is_surface() && w2->is_surface())
+				return &w1->surface() == &w2->surface();
 			else
 				return false;
 		}

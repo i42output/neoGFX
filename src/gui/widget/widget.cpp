@@ -142,21 +142,21 @@ namespace neogfx
 		return false;
 	}
 
-	bool widget::has_parent() const
+	bool widget::has_parent(bool aSameSurface) const
 	{
-		return iParent != 0;
+		return iParent != 0 && (!aSameSurface || same_surface(*iParent));
 	}
 
 	const i_widget& widget::parent() const
 	{
-		if (!has_parent())
+		if (!has_parent(false))
 			throw no_parent();
 		return *iParent;
 	}
 
 	i_widget& widget::parent()
 	{
-		if (!has_parent())
+		if (!has_parent(false))
 			throw no_parent();
 		return *iParent;
 	}
@@ -189,7 +189,7 @@ namespace neogfx
 	const i_widget& widget::ultimate_ancestor(bool aSameSurface) const
 	{
 		const i_widget* w = this;
-		while (w->has_parent() && (!aSameSurface || same_surface(w->parent())))
+		while (w->has_parent(aSameSurface))
 			w = &w->parent();
 		return *w;
 	}
@@ -197,7 +197,7 @@ namespace neogfx
 	i_widget& widget::ultimate_ancestor(bool aSameSurface)
 	{
 		i_widget* w = this;
-		while (w->has_parent() && (!aSameSurface || same_surface(w->parent())))
+		while (w->has_parent(aSameSurface))
 			w = &w->parent();
 		return *w;
 	}
@@ -205,7 +205,7 @@ namespace neogfx
 	bool widget::is_ancestor_of(const i_widget& aWidget, bool aSameSurface) const
 	{
 		const i_widget* w = &aWidget;
-		while (w->has_parent() && (!aSameSurface || same_surface(*w)))
+		while (w->has_parent(aSameSurface))
 		{
 			w = &w->parent();
 			if (w == this)
@@ -229,7 +229,8 @@ namespace neogfx
 		if (aWidget.has_parent() && &aWidget.parent() == this)
 			return;
 		aWidget.set_parent(*this);
-		iChildren.push_back(std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aWidget));
+		if (find_child(aWidget, false) == iChildren.end())
+			iChildren.push_back(std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aWidget));
 		if (has_surface())
 			surface().widget_added(aWidget);
 	}
@@ -239,7 +240,8 @@ namespace neogfx
 		if (aWidget->has_parent() && &aWidget->parent() == this)
 			return;
 		aWidget->set_parent(*this);
-		iChildren.push_back(aWidget);
+		if (find_child(*aWidget, false) == iChildren.end())
+			iChildren.push_back(aWidget);
 		if (has_surface())
 			surface().widget_added(*aWidget);
 	}
@@ -363,6 +365,8 @@ namespace neogfx
 					myParent = (*myParent)->parent().parent().find_child((*myParent)->parent());
 				if ((*myParent)->has_parent() && myParent + 1 != (*myParent)->parent().children().end())
 					return **(myParent + 1);
+				else if ((*(myParent))->has_parent())
+					return (*(myParent))->parent();
 				else
 					return **myParent;
 			}
@@ -400,9 +404,10 @@ namespace neogfx
 
 	bool widget::has_surface() const
 	{
-		if (has_parent())
-			return parent().has_surface();
-		return false;
+		const i_widget* w = this;
+		while (!w->is_root() && w->has_parent())
+			w = &w->parent();
+		return w->is_surface();
 	}
 
 	const i_surface& widget::surface() const
@@ -417,6 +422,11 @@ namespace neogfx
 		if (has_parent())
 			return parent().surface();
 		throw no_parent();
+	}
+
+	bool widget::is_surface() const
+	{
+		return false;
 	}
 
 	bool widget::has_layout() const
@@ -592,7 +602,7 @@ namespace neogfx
 
 	point widget::origin(bool) const
 	{
-		if (has_parent() && same_surface(parent()))
+		if (has_parent())
 			return position() + parent().origin(false);
 		else
 			return point{};
