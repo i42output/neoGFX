@@ -84,6 +84,7 @@ namespace neogfx
 		static app& instance();
 		virtual const std::string& name() const;
 		virtual int exec(bool aQuitWhenLastWindowClosed = true);
+		virtual bool in_exec() const;
 		virtual void quit(int aResultCode);
 		virtual i_basic_services& basic_services() const;
 		virtual i_rendering_engine& rendering_engine() const;
@@ -132,6 +133,7 @@ namespace neogfx
 		loader iLoader;
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;
+		bool iInExec;
 		std::unique_ptr<i_basic_services> iBasicServices;
 		std::unique_ptr<i_keyboard> iKeyboard;
 		std::unique_ptr<i_clipboard> iClipboard;

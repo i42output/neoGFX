@@ -79,6 +79,7 @@ namespace neogfx
 		iLoader(argc, argv, *this),
 		iName(aName),
 		iQuitWhenLastWindowClosed(true),
+		iInExec(false),
 		neolib::io_thread("neogfx::app", true),
 		iBasicServices(aServiceFactory.create_basic_services(*this)),
 		iKeyboard(aServiceFactory.create_keyboard()),
@@ -205,6 +206,7 @@ namespace neogfx
 	
 	int app::exec(bool aQuitWhenLastWindowClosed)
 	{
+		iInExec = true;
 		try
 		{
 			surface_manager().layout_surfaces();
@@ -228,6 +230,11 @@ namespace neogfx
 			iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
 			std::exit(EXIT_FAILURE);
 		}
+	}
+
+	bool app::in_exec() const
+	{
+		return iInExec;
 	}
 
 	void app::quit(int aResultCode)
@@ -446,9 +453,12 @@ namespace neogfx
 		bool didSome = false;
 		try
 		{
+			bool hadStrongSurfaces = surface_manager().any_strong_surfaces();
 			didSome = pump_messages();
 			didSome = (do_io(neolib::yield_type::Sleep) || didSome);
 			didSome = (do_process_events() || didSome);
+			if (!in_exec() && hadStrongSurfaces && !surface_manager().any_strong_surfaces())
+				throw main_window_closed_prematurely();
 			rendering_engine().render_now();
 		}
 		catch (std::exception& e)

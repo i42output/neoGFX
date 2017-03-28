@@ -1116,7 +1116,7 @@ namespace neogfx
 
 	bool widget::has_focus() const
 	{
-		return has_surface() && surface().surface_type() == surface_type::Window &&
+		return has_surface() && !surface().destroyed() && surface().surface_type() == surface_type::Window &&
 			static_cast<const i_native_window&>(surface().native_surface()).is_active() &&
 			surface().has_focused_widget() && &surface().focused_widget() == this;
 	}

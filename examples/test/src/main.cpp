@@ -470,8 +470,13 @@ int main(int argc, char* argv[])
 		ng::app::event_processing_context epc(app);
 		for (uint32_t row = 0; row < itemModel.capacity(); ++row)
 		{
+			#ifdef NDEBUG
 			if (row % 100 == 0)
 				app.process_events(epc);
+			#else
+			if (row % 10 == 0)
+				app.process_events(epc);
+			#endif
 			for (uint32_t col = 0; col < 5; ++col)
 			{
 				if (col == 0)

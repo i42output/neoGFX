@@ -46,8 +46,11 @@ namespace neogfx
 			virtual const std::string& name() const = 0;
 		};
 	public:
+		struct main_window_closed_prematurely : std::runtime_error { main_window_closed_prematurely() : std::runtime_error("Main window closed prematurely!") {} };
+	public:
 		virtual const std::string& name() const = 0;
 		virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
+		virtual bool in_exec() const = 0;
 		virtual void quit(int aResultCode) = 0;
 		virtual i_basic_services& basic_services() const = 0;
 		virtual i_rendering_engine& rendering_engine() const = 0;
