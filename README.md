@@ -6,6 +6,8 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 
 # Implementation Progress
 
+![](http://neogfx.org/temp/bugfix.png)
+![](http://neogfx.org/temp/emoji.png)
 ![](http://neogfx.org/temp/colour_picker_finished.png)
 
 Feature                   | % done  |     TODO
