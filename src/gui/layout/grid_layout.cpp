@@ -423,6 +423,7 @@ namespace neogfx
 			return;
 		owner()->layout_items_started();
 		next_layout_id();
+		validate();
 		set_position(aPosition);
 		set_extents(aSize);
 		for (auto& r : iRows)

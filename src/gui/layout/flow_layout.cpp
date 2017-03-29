@@ -82,6 +82,7 @@ namespace neogfx
 			return;
 		owner()->layout_items_started();
 		next_layout_id();
+		validate();
 		if (iFlowDirection == FlowDirectionHorizontal)
 			do_layout_items<layout::column_major<flow_layout>>(aPosition, aSize);
 		else

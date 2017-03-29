@@ -121,6 +121,9 @@ namespace neogfx
 		virtual bool enabled() const;
 		virtual uint32_t layout_id() const;
 		virtual void next_layout_id();
+		virtual bool invalidated() const;
+		virtual void invalidate();
+		virtual void validate();
 	public:
 		virtual point position() const;
 		virtual void set_position(const point& aPosition);
@@ -174,6 +177,7 @@ namespace neogfx
 		item_list iItems;
 		bool iLayoutStarted;
 		uint32_t iLayoutId;
+		bool iInvalidated;
 	};
 }
 

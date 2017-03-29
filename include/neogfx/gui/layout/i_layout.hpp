@@ -95,6 +95,9 @@ namespace neogfx
 		virtual void layout_items(const point& aPosition, const size& aSize) = 0;
 		virtual uint32_t layout_id() const = 0;
 		virtual void next_layout_id() = 0;
+		virtual bool invalidated() const = 0;
+		virtual void invalidate() = 0;
+		virtual void validate() = 0;
 		// helpers
 	public:
 		template <typename ItemType>

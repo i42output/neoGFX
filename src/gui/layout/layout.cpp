@@ -33,28 +33,28 @@ namespace neogfx
 
 	size layout::device_metrics_forwarder::extents() const
 	{
-		if (iOwner.owner() == 0)
+		if (iOwner.owner() == nullptr)
 			throw no_widget();
 		return iOwner.owner()->device_metrics().extents();
 	}
 
 	dimension layout::device_metrics_forwarder::horizontal_dpi() const
 	{
-		if (iOwner.owner() == 0)
+		if (iOwner.owner() == nullptr)
 			throw no_widget();
 		return iOwner.owner()->device_metrics().horizontal_dpi();
 	}
 
 	dimension layout::device_metrics_forwarder::vertical_dpi() const
 	{
-		if (iOwner.owner() == 0)
+		if (iOwner.owner() == nullptr)
 			throw no_widget();
 		return iOwner.owner()->device_metrics().vertical_dpi();
 	}
 
 	dimension layout::device_metrics_forwarder::em_size() const
 	{
-		if (iOwner.owner() == 0)
+		if (iOwner.owner() == nullptr)
 			throw no_widget();
 		return iOwner.owner()->device_metrics().em_size();
 	}
@@ -70,7 +70,8 @@ namespace neogfx
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutStarted(false),
-		iLayoutId(0)
+		iLayoutId(0),
+		iInvalidated(false)
 	{
 	}
 
@@ -85,7 +86,8 @@ namespace neogfx
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutStarted(false),
-		iLayoutId(0)
+		iLayoutId(0),
+		iInvalidated(false)
 	{
 		aParent.set_layout(*this);
 	}
@@ -102,7 +104,8 @@ namespace neogfx
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutStarted(false),
-		iLayoutId(0)
+		iLayoutId(0),
+		iInvalidated(false)
 	{
 		aParent.add_item(*this);
 	}
@@ -110,7 +113,7 @@ namespace neogfx
 	layout::~layout()
 	{
 		remove_items();
-		if (iParent != 0)
+		if (iParent != nullptr)
 			iParent->remove_item(*this);
 		if (owner() && owner()->has_layout() && &owner()->layout() == this)
 			owner()->set_layout(nullptr);
@@ -140,8 +143,9 @@ namespace neogfx
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
+		invalidate();
 		iItems.push_back(item(*this, aWidget));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 	}
 
@@ -149,10 +153,11 @@ namespace neogfx
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
+		invalidate();
 		while (aPosition > iItems.size())
 			add_spacer(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aWidget));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			i->set_owner(iOwner);
 	}
 
@@ -160,8 +165,9 @@ namespace neogfx
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
+		invalidate();
 		iItems.push_back(item(*this, aWidget));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 	}
 
@@ -169,89 +175,99 @@ namespace neogfx
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
+		invalidate();
 		while (aPosition > iItems.size())
 			add_spacer(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aWidget));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			i->set_owner(iOwner);
 	}
 
 	void layout::add_item(i_layout& aLayout)
 	{
+		invalidate();
 		iItems.push_back(item(*this, aLayout));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 		aLayout.set_parent(this);
 	}
 
 	void layout::add_item(uint32_t aPosition, i_layout& aLayout)
 	{
+		invalidate();
 		while (aPosition > iItems.size())
 			add_spacer(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aLayout));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			i->set_owner(iOwner);
 		aLayout.set_parent(this);
 	}
 
 	void layout::add_item(std::shared_ptr<i_layout> aLayout)
 	{
+		invalidate();
 		iItems.push_back(item(*this, aLayout));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 		aLayout->set_parent(this);
 	}
 
 	void layout::add_item(uint32_t aPosition, std::shared_ptr<i_layout> aLayout)
 	{
+		invalidate();
 		while (aPosition > iItems.size())
 			add_spacer(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aLayout));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			i->set_owner(iOwner);
 		aLayout->set_parent(this);
 	}
 
 	void layout::add_item(i_spacer& aSpacer)
 	{
+		invalidate();
 		iItems.push_back(item(*this, aSpacer));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 		aSpacer.set_parent(*this);
 	}
 
 	void layout::add_item(uint32_t aPosition, i_spacer& aSpacer)
 	{
+		invalidate();
 		while (aPosition > iItems.size())
 			add_spacer(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aSpacer));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			i->set_owner(iOwner);
 		aSpacer.set_parent(*this);
 	}
 
 	void layout::add_item(std::shared_ptr<i_spacer> aSpacer)
 	{
+		invalidate();
 		iItems.push_back(item(*this, aSpacer));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 		aSpacer->set_parent(*this);
 	}
 
 	void layout::add_item(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer)
 	{
+		invalidate();
 		while (aPosition > iItems.size())
 			add_spacer(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aSpacer));
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			i->set_owner(iOwner);
 		aSpacer->set_parent(*this);
 	}
 
 	void layout::add_item(const item& aItem)
 	{
+		invalidate();
 		iItems.push_back(aItem);
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 	}
 
@@ -290,6 +306,7 @@ namespace neogfx
 
 	void layout::remove_items()
 	{
+		invalidate();
 		item_list toRemove;
 		toRemove.splice(toRemove.begin(), items());
 	}
@@ -405,7 +422,7 @@ namespace neogfx
 		if (iMargins != newMargins)
 		{
 			iMargins = newMargins;
-			if (iOwner != 0 && aUpdateLayout)
+			if (iOwner != nullptr && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
 	}
@@ -420,7 +437,7 @@ namespace neogfx
 		if (iSpacing != aSpacing)
 		{
 			iSpacing = units_converter(*this).to_device_units(aSpacing);
-			if (iOwner != 0)
+			if (iOwner != nullptr)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
 	}
@@ -446,7 +463,7 @@ namespace neogfx
 		{
 			iAlignment = aAlignment;
 			alignment_changed.trigger();
-			if (iOwner != 0 && aUpdateLayout)
+			if (iOwner != nullptr && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
 	}
@@ -491,6 +508,39 @@ namespace neogfx
 			}
 			else if (item.get().is<item::layout_pointer>())
 				static_variant_cast<item::layout_pointer&>(item.get())->next_layout_id();
+	}
+
+	bool layout::invalidated() const
+	{
+		return iInvalidated;
+	}
+
+	void layout::invalidate()
+	{
+		if (iInvalidated)
+			return;
+		iInvalidated = true;
+		if (iParent != nullptr)
+			iParent->invalidate();
+		if (iOwner != nullptr)
+		{
+			if (iOwner->is_managing_layout())
+				iOwner->layout_items(true);
+			i_widget* w = iOwner;
+			while (w != nullptr && w->has_parent())
+			{
+				w = &w->parent();
+				if (w->has_layout())
+					break;
+			}
+			if (w != nullptr && w != iOwner && w->has_layout())
+				w->layout().invalidate();
+		}
+	}
+
+	void layout::validate()
+	{
+		iInvalidated = false;
 	}
 
 	point layout::position() const
@@ -540,7 +590,7 @@ namespace neogfx
 		if (iSizePolicy != aSizePolicy)
 		{
 			iSizePolicy = aSizePolicy;
-			if (iOwner != 0 && aUpdateLayout)
+			if (iOwner != nullptr && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
 	}
@@ -563,7 +613,7 @@ namespace neogfx
 		if (iWeight != aWeight)
 		{
 			iWeight = aWeight;
-			if (iOwner != 0 && aUpdateLayout)
+			if (iOwner != nullptr && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
 	}
@@ -586,7 +636,7 @@ namespace neogfx
 		if (iMinimumSize != newMinimumSize)
 		{
 			iMinimumSize = newMinimumSize;
-			if (iOwner != 0 && aUpdateLayout)
+			if (iOwner != nullptr && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
 	}
@@ -609,7 +659,7 @@ namespace neogfx
 		if (iMaximumSize != newMaximumSize)
 		{
 			iMaximumSize = newMaximumSize;
-			if (iOwner != 0 && aUpdateLayout)
+			if (iOwner != nullptr && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
 	}
@@ -650,9 +700,10 @@ namespace neogfx
 
 	void layout::remove_item(item_list::const_iterator aItem)
 	{
+		invalidate();
 		item_list toRemove;
 		toRemove.splice(toRemove.begin(), items(), aItem);
-		if (iOwner != 0)
+		if (iOwner != nullptr)
 			iOwner->ultimate_ancestor().layout_items(true);
 	}
 

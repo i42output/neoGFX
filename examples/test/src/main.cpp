@@ -103,11 +103,6 @@ int main(int argc, char* argv[])
 		ng::window window(ng::size{ 675, 675 });
 		ng::vertical_layout layout0(window);
 
-/*		ng::group_box gb{ layout0, "foo" };
-		ng::check_box cb{ gb.item_layout(), "bar" };
-		cb.checked([&gb]() { gb.set_checkable(true); });
-		cb.unchecked([&gb]() { gb.set_checkable(false); }); */
-
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{
 			ng::app::instance().change_style("Keypad").set_colour(ng::colour::LightGoldenrod);

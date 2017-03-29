@@ -90,8 +90,12 @@ namespace neogfx
 	{
 		if (iPointerWrapper.is<widget_pointer>())
 		{
-			static_variant_cast<widget_pointer&>(iPointerWrapper)->move(aPosition);
-			static_variant_cast<widget_pointer&>(iPointerWrapper)->resize(aSize);
+			auto& w = *static_variant_cast<widget_pointer&>(iPointerWrapper);
+			w.move(aPosition);
+			if (w.extents() != aSize)
+				w.resize(aSize);
+			else if (w.has_layout() && w.layout().invalidated())
+				w.layout_items();
 		}
 		else if (iPointerWrapper.is<layout_pointer>())
 		{

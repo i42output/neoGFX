@@ -90,6 +90,7 @@ namespace neogfx
 			return;
 		owner()->layout_items_started();
 		next_layout_id();
+		validate();
 		for (auto& item : items())
 		{
 			if (!item.visible())
