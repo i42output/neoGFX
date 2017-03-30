@@ -98,6 +98,8 @@ namespace neogfx
 			close();
 		else if (style() & HideOnOwnerClick)
 			hide();
+		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
+			app::instance().keyboard().ungrab_keyboard(*this);
 	}
 
 	bool popup_menu::has_menu() const
