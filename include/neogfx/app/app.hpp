@@ -130,6 +130,7 @@ namespace neogfx
 		virtual bool text_input(const std::string& aText);
 		virtual bool sys_text_input(const std::string& aText);
 	private:
+		async_event_queue iAsyncEventQueue;
 		loader iLoader;
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;

@@ -36,12 +36,23 @@ namespace neogfx
 			aTimer.again();
 	}, 10, false }
 	{
+		if (sInstance != nullptr)
+			throw instance_exists();
+		sInstance = this;
 	}
+
+	async_event_queue::~async_event_queue()
+	{
+		sInstance = nullptr;
+	}
+
+	async_event_queue* async_event_queue::sInstance;
 
 	async_event_queue& async_event_queue::instance()
 	{
-		static async_event_queue sInstance;
-		return sInstance;
+		if (sInstance != nullptr)
+			return *sInstance;
+		throw no_instance();
 	}
 
 	void async_event_queue::add(const void* aEvent, callback aCallback, neolib::destroyable::destroyed_flag aDestroyedFlag)

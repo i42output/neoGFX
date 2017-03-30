@@ -76,11 +76,11 @@ namespace neogfx
 	
 	app::app(int argc, char* argv[], const std::string& aName, i_service_factory& aServiceFactory)
 		try :
+		neolib::io_thread("neogfx::app", true),
 		iLoader(argc, argv, *this),
 		iName(aName),
 		iQuitWhenLastWindowClosed(true),
 		iInExec(false),
-		neolib::io_thread("neogfx::app", true),
 		iBasicServices(aServiceFactory.create_basic_services(*this)),
 		iKeyboard(aServiceFactory.create_keyboard()),
 		iClipboard(new neogfx::clipboard(basic_services().system_clipboard())),

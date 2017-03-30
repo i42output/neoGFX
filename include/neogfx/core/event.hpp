@@ -55,11 +55,14 @@ namespace neogfx
 	public:
 		typedef std::function<void()> callback;
 	public:
+		struct no_instance : std::logic_error { no_instance() : std::logic_error("neogfx::async_event_queue::no_instance") {} };
+		struct instance_exists : std::logic_error { instance_exists() : std::logic_error("neogfx::async_event_queue::instance_exists") {} };
 		struct event_not_found : std::logic_error { event_not_found() : std::logic_error("neogfx::async_event_queue::event_not_found") {} };
 	private:
 		typedef std::multimap<const void*, std::pair<callback, neolib::destroyable::destroyed_flag>> event_list;
 	public:
 		async_event_queue();
+		~async_event_queue();
 		static async_event_queue& instance();
 	public:
 		template<typename... Arguments>
@@ -82,6 +85,7 @@ namespace neogfx
 		void remove(const void* aEvent);
 		bool has(const void* aEvent) const;
 	private:
+		static async_event_queue* sInstance;
 		neolib::callback_timer iTimer;
 		event_list iEvents;
 	};
