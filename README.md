@@ -4,6 +4,15 @@
 neoGFX is a cross-platform C++ GUI/game library.
 neoGFX is still a work in progress (incomplete) so is not yet suitable for making GUI apps or games. Currently neogfx has only been built for and tested on Windows.
 
+# Roadmap
+
+Version | ETA           | Features
+--------|---------------|---------------------------------------------------
+v0.99   | Summer 2017   | Windows OpenGL; widget library feature complete; GUI designer tool
+v1.00   | Winter 2017   | Linux OpenGL; Vulkan; scripting engine
+v1.10   | Spring 2018   | Android support; physics engine
+v1.20   | Summer 2018   | macOS support
+
 # Implementation Progress
 
 ![](http://neogfx.org/temp/bugfix.png)
