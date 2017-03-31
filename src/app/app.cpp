@@ -77,6 +77,7 @@ namespace neogfx
 	app::app(int argc, char* argv[], const std::string& aName, i_service_factory& aServiceFactory)
 		try :
 		neolib::io_thread("neogfx::app", true),
+		async_event_queue(static_cast<neolib::io_thread&>(*this)),
 		iLoader(argc, argv, *this),
 		iName(aName),
 		iQuitWhenLastWindowClosed(true),

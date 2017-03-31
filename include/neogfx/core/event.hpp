@@ -61,7 +61,7 @@ namespace neogfx
 	private:
 		typedef std::multimap<const void*, std::pair<callback, neolib::destroyable::destroyed_flag>> event_list;
 	public:
-		async_event_queue();
+		async_event_queue(neolib::io_thread& aIoThread);
 		~async_event_queue();
 		static async_event_queue& instance();
 	public:

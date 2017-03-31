@@ -38,10 +38,8 @@
 
 namespace neogfx
 {
-	class app : public i_app, public neolib::io_thread, private i_keyboard_handler
+	class app : public neolib::io_thread, private async_event_queue, public i_app, private i_keyboard_handler
 	{
-	public:
-		event<> current_style_changed;
 	public:
 		class event_processing_context : public i_event_processing_context
 		{
@@ -130,7 +128,6 @@ namespace neogfx
 		virtual bool text_input(const std::string& aText);
 		virtual bool sys_text_input(const std::string& aText);
 	private:
-		async_event_queue iAsyncEventQueue;
 		loader iLoader;
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;

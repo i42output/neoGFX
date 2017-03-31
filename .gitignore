@@ -180,3 +180,8 @@
 /tools/neoGUI/neoGUI.VC.opendb
 /tools/neoGUI/neoGUI.sdf
 /tools/neoGUI/neoGUI.vcxproj.user
+/3rdparty/SDL/SDL2-2.0.5/stage
+/3rdparty/freetype/freetype-2.6.4/stage
+/3rdparty/harfbuzz/harfbuzz-1.4.2/stage/harfbuzz
+/tools/neoGUI/x64/Release
+/tools/neoGUI/neoGUI.VC.db

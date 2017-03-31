@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 
 namespace neogfx
@@ -37,6 +38,8 @@ namespace neogfx
 
 	class i_app
 	{
+	public:
+		event<> current_style_changed;
 	public:
 		class i_event_processing_context
 		{
