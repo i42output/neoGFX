@@ -61,10 +61,14 @@ namespace neogfx
 			assign(std::begin(aRhs.v), &v[Indexes]...);
 			return *this;
 		}
-		operator sizzled_vector_type() const 
-		{ 
+		sizzled_vector_type operator*() const
+		{
 			static_assert(detail::greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
 			return sizzled_vector_type(v[Indexes]...);
+		}
+		operator sizzled_vector_type() const 
+		{ 
+			return **this;
 		}
 		template <uint32_t S2 = S>
 		operator typename std::enable_if<S2 == 1, value_type>::type() const
@@ -86,4 +90,88 @@ namespace neogfx
 	public:
 		array_type v;
 	};
+
+	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
+	inline typename V::value_type operator+(const swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) + static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
+	inline typename V::value_type operator-(const swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) - static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
+	inline typename V::value_type operator*(const swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) * static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
+	inline typename V::value_type operator/(const swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) / static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline typename swizzle<V, S, Indexes1...>::sizzled_vector_type operator+(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs + *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline typename swizzle<V, S, Indexes1...>::sizzled_vector_type operator-(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs - *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline typename swizzle<V, S, Indexes1...>::sizzled_vector_type operator*(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs * *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline typename swizzle<V, S, Indexes1...>::sizzled_vector_type operator/(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs / *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline bool operator<(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs < *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline bool operator<=(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs <= *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline bool operator>(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs > *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline bool operator>=(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs >= *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline bool operator==(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs == *aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
+	inline bool operator!=(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
+	{
+		return *aLhs != *aRhs;
+	}
 }

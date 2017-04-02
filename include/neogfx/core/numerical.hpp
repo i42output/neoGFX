@@ -201,6 +201,42 @@ namespace neogfx
 		array_type v;
 	};
 
+	template <typename T, uint32_t Size, typename Type>
+	inline bool operator<(const basic_vector<T, Size, Type>& aLhs, const basic_vector<T, Size, Type>& aRhs)
+	{
+		return aLhs.v < aRhs.v;
+	}
+
+	template <typename T, uint32_t Size, typename Type>
+	inline bool operator<=(const basic_vector<T, Size, Type>& aLhs, const basic_vector<T, Size, Type>& aRhs)
+	{
+		return aLhs.v <= aRhs.v;
+	}
+
+	template <typename T, uint32_t Size, typename Type>
+	inline bool operator>(const basic_vector<T, Size, Type>& aLhs, const basic_vector<T, Size, Type>& aRhs)
+	{
+		return aLhs.v > aRhs.v;
+	}
+
+	template <typename T, uint32_t Size, typename Type>
+	inline bool operator>=(const basic_vector<T, Size, Type>& aLhs, const basic_vector<T, Size, Type>& aRhs)
+	{
+		return aLhs.v >= aRhs.v;
+	}
+
+	template <typename T, uint32_t Size, typename Type>
+	inline bool operator==(const basic_vector<T, Size, Type>& aLhs, const basic_vector<T, Size, Type>& aRhs)
+	{
+		return aLhs.v == aRhs.v;
+	}
+
+	template <typename T, uint32_t Size, typename Type>
+	inline bool operator!=(const basic_vector<T, Size, Type>& aLhs, const basic_vector<T, Size, Type>& aRhs)
+	{
+		return aLhs.v != aRhs.v;
+	}
+
 	typedef basic_vector<double, 1> vector1;
 	typedef basic_vector<double, 2> vector2;
 	typedef basic_vector<double, 3> vector3;

@@ -224,28 +224,38 @@ namespace neogfx
 		iNativeGraphicsContext->draw_line(to_device_units(aFrom) + iOrigin, to_device_units(aTo) + iOrigin, aPen);
 	}
 
-	void graphics_context::draw_rect(const rect& aRect, const pen& aPen) const
+	void graphics_context::draw_rect(const rect& aRect, const pen& aPen, const fill& aFill) const
 	{
+		if (!aFill.empty())
+			iNativeGraphicsContext->fill_rect(to_device_units(aRect) + iOrigin, aFill);
 		iNativeGraphicsContext->draw_rect(to_device_units(aRect) + iOrigin, aPen);
 	}
 
-	void graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen) const
+	void graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const fill& aFill) const
 	{
+		if (!aFill.empty())
+			iNativeGraphicsContext->fill_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aFill);
 		iNativeGraphicsContext->draw_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aPen);
 	}
 
-	void graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen) const
+	void graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const fill& aFill) const
 	{
+		if (!aFill.empty())
+			iNativeGraphicsContext->fill_circle(to_device_units(aCentre) + iOrigin, aRadius, aFill);
 		iNativeGraphicsContext->draw_circle(to_device_units(aCentre) + iOrigin, aRadius, aPen);
 	}
 
-	void graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen) const
+	void graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const fill& aFill) const
 	{
+		if (!aFill.empty())
+			iNativeGraphicsContext->fill_arc(to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aFill);
 		iNativeGraphicsContext->draw_arc(to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen);
 	}
 
-	void graphics_context::draw_path(const path& aPath, const pen& aPen) const
+	void graphics_context::draw_path(const path& aPath, const pen& aPen, const fill& aFill) const
 	{
+		if (!aFill.empty())
+			fill_path(aPath, aFill);
 		path path = to_device_units(aPath);
 		path.set_position(path.position() + iOrigin);
 		iNativeGraphicsContext->draw_path(path, aPen);
@@ -260,59 +270,49 @@ namespace neogfx
 		pop_logical_operation();
 	}
 
-	void graphics_context::fill_rect(const rect& aRect, const colour& aColour) const
+	void graphics_context::fill_rect(const rect& aRect, const fill& aFill) const
 	{
-		iNativeGraphicsContext->fill_rect(to_device_units(aRect) + iOrigin, aColour);
+		iNativeGraphicsContext->fill_rect(to_device_units(aRect) + iOrigin, aFill);
 	}
 
-	void graphics_context::fill_rect(const rect& aRect, const gradient& aGradient) const
+	void graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const fill& aFill) const
 	{
-		iNativeGraphicsContext->fill_rect(to_device_units(aRect) + iOrigin, aGradient);
+		iNativeGraphicsContext->fill_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aFill);
 	}
 
-	void graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const colour& aColour) const
+	void graphics_context::fill_circle(const point& aCentre, dimension aRadius, const fill& aFill) const
 	{
-		iNativeGraphicsContext->fill_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aColour);
+		iNativeGraphicsContext->fill_circle(to_device_units(aCentre) + iOrigin, aRadius, aFill);
 	}
 
-	void graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const gradient& aGradient) const
+	void graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill) const
 	{
-		iNativeGraphicsContext->fill_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aGradient);
+		iNativeGraphicsContext->fill_arc(to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aFill);
 	}
 
-	void graphics_context::fill_circle(const point& aCentre, dimension aRadius, const colour& aColour) const
-	{
-		iNativeGraphicsContext->fill_circle(to_device_units(aCentre) + iOrigin, aRadius, aColour);
-	}
-
-	void graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const colour& aColour) const
-	{
-		iNativeGraphicsContext->fill_arc(to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aColour);
-	}
-
-	void graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour) const
+	void graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const fill& aFill) const
 	{
 		vertex_list2 vertices;
 		vertices.reserve(aVertices.size());
 		for (const auto& v : aVertices)
 			vertices.push_back(to_device_units(v) + iOrigin.to_vector());
-		iNativeGraphicsContext->fill_shape(to_device_units(aCentre) + iOrigin, vertices, aColour);
+		iNativeGraphicsContext->fill_shape(to_device_units(aCentre) + iOrigin, vertices, aFill);
 	}
 
-	void graphics_context::fill_shape(const point& aCentre, const vertex_list3& aVertices, const colour& aColour) const
+	void graphics_context::fill_shape(const point& aCentre, const vertex_list3& aVertices, const fill& aFill) const
 	{
 		vertex_list2 vertices;
 		vertices.reserve(aVertices.size());
 		for (const auto& v : aVertices)
 			vertices.push_back(to_device_units(v.xy) + iOrigin.to_vector());
-		iNativeGraphicsContext->fill_shape(to_device_units(aCentre) + iOrigin, vertices, aColour);
+		iNativeGraphicsContext->fill_shape(to_device_units(aCentre) + iOrigin, vertices, aFill);
 	}
 
-	void graphics_context::fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aOutlinePen) const
+	void graphics_context::fill_path(const path& aPath, const fill& aFill) const
 	{
 		path path = to_device_units(aPath);
 		path.set_position(path.position() + iOrigin);
-		iNativeGraphicsContext->fill_and_draw_path(path, aFillColour, aOutlinePen);
+		iNativeGraphicsContext->fill_path(path, aFill);
 	}
 
 	size graphics_context::text_extent(const string& aText, const font& aFont, bool aUseCache) const

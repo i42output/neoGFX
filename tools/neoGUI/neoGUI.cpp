@@ -74,16 +74,16 @@ int main(int argc, char* argv[])
 		ng::horizontal_layout workspaceLayout(mainLayout);
 		ng::view_container workspace(workspaceLayout);
 
-		workspace.view_stack().painting([&workspace](ng::graphics_context& aGC)
+		workspace.view_stack().painting([&workspace](ng::graphics_context& aGc)
 		{
 			static ng::texture sBackgroundTexture1{ ng::image{ ":/neoGUI/resource/neoGFX.png" } };
 			static ng::texture sBackgroundTexture2{ ng::image{ ":/neoGUI/resource/logo_i42.png" } };
 			auto rc = workspace.view_stack().client_rect();
-			aGC.draw_texture(
+			aGc.draw_texture(
 				ng::point{ (rc.extents() - sBackgroundTexture1.extents()) / 2.0 },
 				sBackgroundTexture1,
 				ng::colour::White.with_alpha(32));
-			aGC.draw_texture(
+			aGc.draw_texture(
 				ng::point{ rc.bottom_right() - sBackgroundTexture2.extents() },
 				sBackgroundTexture2,
 				ng::colour::White.with_alpha(32));

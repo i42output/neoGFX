@@ -41,4 +41,6 @@ namespace neogfx
 		dimension iWidth;
 		bool iAntiAliased;
 	};
+
+	typedef boost::optional<pen> optional_pen;
 }

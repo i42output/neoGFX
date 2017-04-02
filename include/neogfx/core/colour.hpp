@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <type_traits>
 #include "geometry.hpp"
 #include "hsl_colour.hpp"
 #include "hsv_colour.hpp"
@@ -709,6 +710,11 @@ namespace neogfx
 		colour();
 		explicit colour(argb aValue);
 		colour(component aRed, component aGreen, component aBlue, component aAlpha = 0xFF);
+		template <typename T>
+		colour(T aRed, T aGreen, T aBlue, T aAlpha = static_cast<T>(0xFF), typename std::enable_if<std::is_integral<T>::value, void>::type* = nullptr) :
+			colour(static_cast<component>(aRed), static_cast<component>(aGreen), static_cast<component>(aBlue), static_cast<component>(aAlpha))
+		{
+		}
 		colour(const std::string& aTextValue);
 		// operations
 	public:

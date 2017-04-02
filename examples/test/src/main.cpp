@@ -1,6 +1,7 @@
 ﻿#include <neolib/neolib.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+#include <neolib/random.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
@@ -43,13 +44,13 @@ public:
 public:
 	virtual ng::optional_colour cell_colour(const ng::item_model_index& aIndex, colour_type_e aColourType) const
 	{
-		std::srand(aIndex.row() ^ aIndex.column()); // use seed to make random colour based on row/index
+		neolib::basic_random<uint8_t> prng{ aIndex.row() ^ aIndex.column() }; // use seed to make random colour based on row/index
 		switch (aColourType)
 		{
 		case ForegroundColour:
-			return ng::colour(32 + rand() % (256 - 64), 32 + rand() % (256 - 64), 32 + rand() % (256 - 64));
+			return ng::colour{ 32 + prng(256 - 64 - 1), 32 + prng(256 - 64 - 1), 32 + prng(256 - 64 - 1) };
 		default:
-			return ng::optional_colour();
+			return ng::optional_colour{};
 		}
 	}
 };
@@ -186,7 +187,8 @@ int main(int argc, char* argv[])
 			for (int j = 1; j <= 5; ++j)
 			{
 				auto& sm2 = sm.add_sub_menu("More" + boost::lexical_cast<std::string>(j));
-				int n = rand() % 100;
+				neolib::random prng;
+				int n = prng(100);
 				for (int k = 1; k < n; ++k)
 				{
 					sm2.add_action(app.add_action("More" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.naa#favourite.png"));
@@ -294,12 +296,12 @@ int main(int argc, char* argv[])
 		button8.set_foreground_colour(ng::colour(255, 235, 160));
 		button8.clicked([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
 		ng::horizontal_layout layout3(layoutButtons);
-		std::srand(4242);
+		neolib::random prng{ 4242 };
 		for (uint32_t i = 0; i < 10; ++i)
 		{
 			auto button = std::make_shared<ng::push_button>(std::string(1, 'A' + i));
 			layout3.add_item(button);
-			ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
+			ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
 			button->set_foreground_colour(randomColour);
 		}
 		ng::group_box groupBox{ layout2, "Group Box" };
@@ -426,10 +428,10 @@ int main(int argc, char* argv[])
 		neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			std::srand(static_cast<unsigned int>(app.program_elapsed_ms() / 5000));
 			const double PI = 2.0 * std::acos(0.0);
 			double brightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
-			ng::colour randomColour = ng::colour(std::rand() % 256, std::rand() % 256, std::rand() % 256);
+			neolib::random prng{ app.program_elapsed_ms() / 5000 };
+			ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
 			randomColour = randomColour.to_hsv().with_brightness(brightness).to_rgb();
 			button6.set_foreground_colour(randomColour);
 		}, 16);
@@ -472,6 +474,7 @@ int main(int argc, char* argv[])
 			if (row % 10 == 0)
 				app.process_events(epc);
 			#endif
+			neolib::random prng;
 			for (uint32_t col = 0; col < 5; ++col)
 			{
 				if (col == 0)
@@ -479,8 +482,8 @@ int main(int argc, char* argv[])
 				else
 				{
 					std::string randomString;
-					for (uint32_t j = std::rand() % 16; j-- > 0;)
-						randomString += static_cast<char>('A' + std::rand() % ('z' - 'A' + 1));
+					for (uint32_t j = prng(15); j-- > 0;)
+						randomString += static_cast<char>('A' + prng('z' - 'A'));
 					itemModel.insert_cell_data(ng::item_model_index(row, col), randomString);
 				}
 			}
@@ -572,9 +575,40 @@ int main(int argc, char* argv[])
 			textEdit2.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
 		});
 
+		auto& circlesWidget = tabContainer.add_tab_page("Circles").widget();
+		circlesWidget.painting([](ng::graphics_context& aGc)
+		{
+			neolib::basic_random<ng::coordinate> prng;
+			neolib::basic_random<uint8_t> rngColour;
+			auto random_colour = [&]()
+			{
+				return ng::colour{ rngColour(255), rngColour(255), rngColour(255) };
+			};
+			for (int i = 0; i < 100; ++i)
+			{
+				switch (static_cast<int>(prng(2)))
+				{
+				case 0:
+					aGc.draw_circle(
+						ng::point{ prng(aGc.extents().cx - 1), prng(aGc.extents().cy - 1) }, prng(255),
+						ng::pen{ random_colour(), prng(1, 3) });
+					break;
+				case 1:
+					aGc.draw_circle(
+						ng::point{ prng(aGc.extents().cx - 1), prng(aGc.extents().cy - 1) }, prng(255),
+						ng::pen{ random_colour(), prng(1, 3) },
+						random_colour().with_alpha(rngColour(255)));
+					break;
+				case 2:
+					aGc.fill_circle(
+						ng::point{ prng(aGc.extents().cx - 1), prng(aGc.extents().cy - 1) }, prng(255),
+						random_colour().with_alpha(rngColour(255)));
+					break;
+				}
+			}
+		});
 		tabContainer.add_tab_page("Foo").tab().set_image(smallHash);
 		tabContainer.add_tab_page("Bar").tab().set_image(smallHash);
-		tabContainer.add_tab_page("Baz").tab().set_image(smallHash);
 
 		return app.exec();
 	}

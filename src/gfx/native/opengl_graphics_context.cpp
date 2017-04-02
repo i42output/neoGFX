@@ -680,117 +680,163 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::fill_rect(const rect& aRect, const colour& aColour)
+	void opengl_graphics_context::fill_rect(const rect& aRect, const fill& aFill)
 	{
 		if (aRect.empty())
 			return;
+		if (aFill.is<gradient>())
+			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
 		auto vertices = rect_vertices(aRect, 0.0, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
+			std::array <uint8_t, 4>{{
+					static_variant_cast<const colour&>(aFill).red(), 
+					static_variant_cast<const colour&>(aFill).green(), 
+					static_variant_cast<const colour&>(aFill).blue(),
+					static_variant_cast<const colour&>(aFill).alpha()}} : 
+			std::array <uint8_t, 4>{});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		if (aFill.is<gradient>())
+			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_rect(const rect& aRect, const gradient& aGradient)
+	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const fill& aFill)
 	{
 		if (aRect.empty())
 			return;
-		gradient_on(aGradient, aRect);
-		auto vertices = rect_vertices(aRect, 0.0, true);
-		std::vector<std::array<uint8_t, 4>> colours{ vertices.size() / 2, { { 0, 0, 0, 0 } } };
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
-		gradient_off();
-	}
-
-	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const colour& aColour)
-	{
-		if (aRect.empty())
-			return;
+		if (aFill.is<gradient>())
+			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
 		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		if (aFill.is<gradient>())
+			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const gradient& aGradient)
+	void opengl_graphics_context::fill_circle(const point& aCentre, dimension aRadius, const fill& aFill)
 	{
-		if (aRect.empty())
-			return;
-		gradient_on(aGradient, aRect);
-		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours{ vertices.size() / 2,{ { 0, 0, 0, 0 } } };
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
-		gradient_off();
-	}
-
-	void opengl_graphics_context::fill_circle(const point& aCentre, dimension aRadius, const colour& aColour)
-	{
+		if (aFill.is<gradient>())
+			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 		auto vertices = circle_vertices(aCentre, aRadius, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		if (aFill.is<gradient>())
+			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const colour& aColour)
+	void opengl_graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill)
 	{
+		if (aFill.is<gradient>())
+			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		if (aFill.is<gradient>())
+			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const colour& aColour)
+	void opengl_graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const fill& aFill)
 	{
+		vec2 min = aVertices[0];
+		vec2 max = min;
+		for (auto const& v : aVertices)
+		{
+			min.x = std::min(min.x, v.x);
+			max.x = std::max(max.x, v.x);
+			min.y = std::min(min.y, v.y);
+			max.y = std::max(max.y, v.y);
+		}
+		if (aFill.is<gradient>())
+			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{min.x, min.y}, size{max.x - min.y, max.y - min.y} });
 		vertex_list2 vertices;
 		vertices.reserve(aVertices.size() + 2);
 		vertices.push_back(aCentre.to_vector());
 		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
 		vertices.push_back(vertices[1]);
 		std::vector<double> texCoords(vertices.size() * 2, 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size(), std::array <uint8_t, 4>{ {aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
 		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
+		if (aFill.is<gradient>())
+			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_and_draw_path(const path& aPath, const colour& aFillColour, const pen& aPen)
+	void opengl_graphics_context::fill_path(const path& aPath, const fill& aFill)
 	{
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
 		{
 			if (aPath.paths()[i].size() > 2)
 			{
 				clip_to(aPath, 0.0);
+				point min = aPath.paths()[i][0];
+				point max = min;
+				for (auto const& pt : aPath.paths()[i])
+				{
+					min.x = std::min(min.x, pt.x);
+					max.x = std::max(max.x, pt.x);
+					min.y = std::min(min.y, pt.y);
+					max.y = std::max(max.y, pt.y);
+				}
+				if (aFill.is<gradient>())
+					gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
-				std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aFillColour.red(), aFillColour.green(), aFillColour.blue(), aFillColour.alpha()}});
+				std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
+					std::array <uint8_t, 4>{ {
+							static_variant_cast<const colour&>(aFill).red(),
+								static_variant_cast<const colour&>(aFill).green(),
+								static_variant_cast<const colour&>(aFill).blue(),
+								static_variant_cast<const colour&>(aFill).alpha()}} :
+					std::array <uint8_t, 4>{});
 				glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
 				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 				std::vector<double> texCoords(vertices.size(), 0.0);
 				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size() / 2));
 				reset_clip();
+				if (aFill.is<gradient>())
+					gradient_off();
 			}
 		}
-		if (aPen.width() != 0.0)
-			draw_path(aPath, aPen);
 	}
 
 	glyph_text opengl_graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const
