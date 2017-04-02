@@ -524,9 +524,6 @@
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gfx\gradient.vert">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\app\resource.cpp">

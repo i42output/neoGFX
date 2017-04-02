@@ -490,6 +490,7 @@ namespace neogfx
 	{
 		basic_rect<float> boundingBox{ aBoundingBox };
 		iRenderingEngine.activate_shader_program(iRenderingEngine.gradient_shader_program());
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(logical_coordinates()[1]));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));

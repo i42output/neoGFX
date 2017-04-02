@@ -265,17 +265,6 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">glsl2hpp %(Identity)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">glsl2hpp %(Identity)</Message>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gfx\gradient.vert">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)\tools\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).vert.hpp NEOGFX_GRADIENT_VERT</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)\tools\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).vert.hpp NEOGFX_GRADIENT_VERT</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">glsl2hpp %(Identity)</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">glsl2hpp %(Identity)</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp</Outputs>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\app\action.cpp" />

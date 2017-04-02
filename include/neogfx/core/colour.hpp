@@ -842,6 +842,7 @@ namespace neogfx
 		gradient with_combined_alpha(colour::component aAlpha) const;
 		direction_e direction() const;
 		void set_direction(direction_e aDirection);
+		gradient with_direction(direction_e aDirection) const;
 	public:
 		bool operator==(const gradient& aOther) const;
 		bool operator!=(const gradient& aOther) const;

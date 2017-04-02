@@ -614,6 +614,13 @@ namespace neogfx
 		iDirection = aDirection;
 	}
 
+	gradient gradient::with_direction(direction_e aDirection) const
+	{
+		gradient result = *this;
+		result.set_direction(aDirection);
+		return result;
+	}
+
 	bool gradient::operator==(const gradient& aOther) const
 	{
 		return colour_stops() == aOther.colour_stops() && alpha_stops() == aOther.alpha_stops() && direction() == aOther.direction();

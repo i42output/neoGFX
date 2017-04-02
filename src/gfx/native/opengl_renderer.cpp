@@ -25,7 +25,6 @@
 #include "opengl_renderer.hpp"
 #include "../../gui/window/native/opengl_window.hpp"
 
-#include "gradient.vert.hpp"
 #include "gradient.frag.hpp"
 
 #include <neogfx/app/app.hpp>
@@ -202,9 +201,6 @@ namespace neogfx
 		iGradientProgram = create_shader_program(
 			shaders
 			{
-				std::make_pair(
-					glsl::NEOGFX_GRADIENT_VERT,
-					GL_VERTEX_SHADER),
 				std::make_pair(
 					glsl::NEOGFX_GRADIENT_FRAG,
 					GL_FRAGMENT_SHADER)

@@ -1,9 +1,12 @@
-#version 140
+#version 150
 
+uniform float posViewportTop;
+uniform vec2 posTopLeft;
+uniform vec2 posBottomRight;
+uniform int nGradientDirection;
 uniform int nStopCount;
 uniform sampler2DRect texStopPositions;
 uniform sampler2DRect texStopColours;
-varying float vGradientPos;
 in vec4 Color;
 out vec4 FragColor;
 
@@ -44,5 +47,30 @@ vec4 gradient_colour(in float n)
 
 void main()
 {
-	FragColor = gradient_colour(vGradientPos);
+	vec4 pos = gl_FragCoord;
+	pos.y = posViewportTop - pos.y;
+	float gradientPos;
+	if (nGradientDirection == 0) /* vertical */
+		gradientPos = (pos.y - posTopLeft.y) / (posBottomRight.y - posTopLeft.y);
+	else if (nGradientDirection == 1) /* horizontal */
+		gradientPos = (pos.x - posTopLeft.x) / (posBottomRight.x - posTopLeft.x);
+	else /* radial */
+	{
+	    float x = pos.x - posTopLeft.x;
+		float y = pos.y - posTopLeft.y;
+		float cx = (posBottomRight.x - posTopLeft.x);
+		float cy = (posBottomRight.y - posTopLeft.y);
+		float centreX = cx / 2.0;
+		float centreY = cy / 2.0;
+		float dx = x - centreX;
+		float dy = y - centreY;
+		float d = sqrt(dx * dx + dy * dy);
+		float r = centreX;
+		if (d < r)
+			gradientPos = d/r;
+		else
+			gradientPos = 1.0;
+	}
+
+	FragColor = gradient_colour(gradientPos);
 }
