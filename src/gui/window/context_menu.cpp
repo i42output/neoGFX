@@ -53,6 +53,7 @@ namespace neogfx
 	void context_menu::exec()
 	{
 		bool finished = false;
+		menu().set_modal(true);
 		menu().closed([&finished]()
 		{
 			finished = true;

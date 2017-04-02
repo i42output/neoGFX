@@ -156,6 +156,13 @@ namespace neogfx
 		return *iResult;
 	}
 
+	neogfx::size_policy dialog::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		return neogfx::size_policy::Minimum;
+	}
+
 	bool dialog::can_close() const
 	{
 		bool canReject = true;

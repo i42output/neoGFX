@@ -91,5 +91,7 @@ namespace neogfx
 		virtual bool is_open() const = 0;
 		virtual void open() = 0;
 		virtual void close() = 0;
+		virtual bool is_modal() const = 0;
+		virtual void set_modal(bool aModal) = 0;
 	};
 }

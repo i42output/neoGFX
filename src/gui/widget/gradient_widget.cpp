@@ -21,6 +21,7 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gui/dialog/colour_dialog.hpp>
+#include <neogfx/gui/dialog/gradient_dialog.hpp>
 #include <neogfx/gui/widget/slider.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/gui/widget/menu.hpp>
@@ -41,29 +42,32 @@ namespace neogfx
 		static const dimension STOP_WIDTH = 11;
 		static const dimension STOP_HEIGHT = STOP_WIDTH + STOP_POINTER_HEIGHT;
 		static const dimension CONTROL_HEIGHT = BAR_HEIGHT + STOP_HEIGHT * 2;
+	}
 
-		inline void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
+	void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
+	{
+		aGraphicsContext.scissor_on(aRect);
+		for (coordinate x = 0; x < aRect.width(); x += aAlphaPatternSize)
 		{
-			aGraphicsContext.scissor_on(aRect);
-			for (coordinate x = 0; x < aRect.width(); x += aAlphaPatternSize)
+			bool alt = false;
+			if (static_cast<uint32_t>((x / aAlphaPatternSize)) % 2 == 1)
+				alt = !alt;
+			for (coordinate y = 0; y < aRect.height(); y += aAlphaPatternSize)
 			{
-				bool alt = false;
-				if (static_cast<uint32_t>((x / aAlphaPatternSize)) % 2 == 1)
-					alt = !alt;
-				for (coordinate y = 0; y < aRect.height(); y += aAlphaPatternSize)
-				{
-					aGraphicsContext.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ aAlphaPatternSize, aAlphaPatternSize } }, alt ? colour{ 160, 160, 160 } : colour{ 255, 255, 255 });
-					alt = !alt;
-				}
+				aGraphicsContext.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ aAlphaPatternSize, aAlphaPatternSize } }, alt ? colour{ 160, 160, 160 } : colour{ 255, 255, 255 });
+				alt = !alt;
 			}
-			aGraphicsContext.scissor_off();
 		}
-
+		aGraphicsContext.scissor_off();
+	}
+	
+	namespace
+	{
 		class alpha_dialog : public dialog
 		{
 		public:
 			alpha_dialog(i_widget& aParent, colour::component aCurrentAlpha) :
-				dialog(aParent, "Select Alpha (Opacity Level)", Modal | Titlebar | Close), iLayout{*this}, iLayout2{iLayout}, iSlider{iLayout2}, iSpinBox{iLayout2}
+				dialog(aParent, "Select Alpha (Opacity Level)", Modal | Titlebar | Close), iLayout{ *this }, iLayout2{ iLayout }, iSlider{ iLayout2 }, iSpinBox{ iLayout2 }
 			{
 				init(aCurrentAlpha);
 			}
@@ -121,21 +125,32 @@ namespace neogfx
 		};
 	}
 
-	gradient_widget::gradient_widget() : iTracking{false}
+	gradient_widget::gradient_widget(const neogfx::gradient& aGradient) :
+		iInGradientDialog{ false }, iTracking{ false }
 	{
 		set_margins(neogfx::margins{});
+		set_gradient(aGradient);
 	}
 
-	gradient_widget::gradient_widget(i_widget& aParent) : 
-		widget(aParent), iTracking{ false }
+	gradient_widget::gradient_widget(i_widget& aParent, const neogfx::gradient& aGradient) :
+		widget{ aParent }, iInGradientDialog{ false }, iTracking{ false }
 	{
 		set_margins(neogfx::margins{});
+		set_gradient(aGradient);
 	}
 
-	gradient_widget::gradient_widget(i_layout& aLayout) :
-		widget(aLayout), iTracking{ false }
+	gradient_widget::gradient_widget(i_layout& aLayout, const neogfx::gradient& aGradient) :
+		widget{ aLayout }, iInGradientDialog{ false }, iTracking{ false }
 	{
 		set_margins(neogfx::margins{});
+		set_gradient(aGradient);
+	}
+
+	gradient_widget::gradient_widget(gradient_dialog&, i_layout& aLayout, const neogfx::gradient& aGradient) :
+		widget{ aLayout }, iInGradientDialog{ true }, iTracking{ false }
+	{
+		set_margins(neogfx::margins{});
+		set_gradient(aGradient);
 	}
 
 	const gradient& gradient_widget::gradient() const
@@ -272,8 +287,27 @@ namespace neogfx
 		widget::mouse_button_released(aButton, aPosition);
 		if (aButton == mouse_button::Right)
 		{
+			action directionAction{ "Direction..." };
+			directionAction.triggered([this]()
+			{
+				gradient_dialog gd{ *this, gradient() };
+				auto update_gradient = [&]()
+				{
+					if (iSelection != gd.gradient())
+					{
+						iSelection = gd.gradient();
+						update();
+						gradient_changed.trigger();
+					}
+				};
+				if (gd.exec() == dialog::Accepted)
+				{
+					update_gradient();
+					gradient_changed.trigger();
+				}
+			});
 			auto stopIter = stop_at(aPosition);
-			if (stopIter == stop_at(*iClicked))
+			if (!stopIter.empty() && stopIter == stop_at(*iClicked))
 			{
 				if (stopIter.is<gradient::colour_stop_list::iterator>())
 				{
@@ -303,6 +337,8 @@ namespace neogfx
 					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
 					iMenu->menu().add_action(selectColourAction);
 					iMenu->menu().add_action(deleteStopAction);
+					if (!iInGradientDialog)
+						iMenu->menu().add_action(directionAction);
 					iMenu->exec();
 					iMenu.reset();
 				}
@@ -334,9 +370,18 @@ namespace neogfx
 					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
 					iMenu->menu().add_action(selectAlphaAction);
 					iMenu->menu().add_action(deleteStopAction);
+					if (!iInGradientDialog)
+						iMenu->menu().add_action(directionAction);
 					iMenu->exec();
 					iMenu.reset();
 				}
+			}
+			else if (!iInGradientDialog)
+			{
+				iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+				iMenu->menu().add_action(directionAction);
+				iMenu->exec();
+				iMenu.reset();
 			}
 		}
 		iClicked == boost::none;

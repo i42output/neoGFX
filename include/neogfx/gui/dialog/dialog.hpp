@@ -57,6 +57,8 @@ namespace neogfx
 		dialog_button_box& button_box();
 		result_code_e exec();
 	public:
+		virtual neogfx::size_policy size_policy() const;
+	public:
 		virtual bool can_close() const;
 	public:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);

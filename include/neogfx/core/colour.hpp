@@ -794,7 +794,8 @@ namespace neogfx
 		{
 			Vertical	= 0,
 			Horizontal	= 1,
-			Radial		= 2
+			Diagonal	= 2,
+			Radial		= 3
 		};
 		typedef std::pair<double, colour> colour_stop;
 		typedef std::vector<colour_stop> colour_stop_list;

@@ -75,7 +75,8 @@ namespace neogfx
 	void scrollable_widget::resized()
 	{
 		framed_widget::resized();
-		update_scrollbar_visibility();
+		if (!layout_items_in_progress() && !iIgnoreScrollbarUpdates)
+			update_scrollbar_visibility();
 	}
 
 	rect scrollable_widget::client_rect(bool aIncludeMargins) const
@@ -409,13 +410,14 @@ namespace neogfx
 		case UsvStageCheckVertical2:
 			if ((scrolling_disposition() & ScrollChildWidgetVertically) == ScrollChildWidgetVertically)
 			{
+				auto cr = client_rect();
 				for (auto& c : children())
 				{
 					if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
 						continue;
 					if ((scrolling_disposition(*c) & ScrollChildWidgetVertically) == DontScrollChildWidget)
 						continue;
-					if (c->position().y < client_rect().top() || c->position().y + c->extents().cy > client_rect().bottom())
+					if (c->position().y < cr.top() || c->position().y + c->extents().cy > cr.bottom())
 					{
 						vertical_scrollbar().show();
 						layout_items();
@@ -427,13 +429,14 @@ namespace neogfx
 		case UsvStageCheckHorizontal:
 			if ((scrolling_disposition() & ScrollChildWidgetHorizontally) == ScrollChildWidgetHorizontally)
 			{
+				auto cr = client_rect();
 				for (auto& c : children())
 				{
 					if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
 						continue;
 					if ((scrolling_disposition(*c) & ScrollChildWidgetHorizontally) == DontScrollChildWidget)
 						continue;
-					if (c->position().x < client_rect().left() || c->position().x + c->extents().cx > client_rect().right())
+					if (c->position().x < cr.left() || c->position().x + c->extents().cx > cr.right())
 					{
 						horizontal_scrollbar().show();
 						layout_items();

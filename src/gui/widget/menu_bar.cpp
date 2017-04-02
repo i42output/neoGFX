@@ -92,7 +92,10 @@ namespace neogfx
 				auto& selectedItem = item(selected_item());
 				if (selectedItem.type() == i_menu_item::Action)
 				{
-					selectedItem.action().triggered.async_trigger();
+					if (!menu().is_modal())
+						selectedItem.action().triggered.async_trigger();
+					else
+						selectedItem.action().triggered.trigger();
 					if (selectedItem.action().is_checkable())
 						selectedItem.action().toggle();
 					clear_selection();

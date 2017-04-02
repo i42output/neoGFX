@@ -95,6 +95,9 @@ namespace neogfx
 		virtual const i_widget& managing_layout() const;
 		virtual i_widget& managing_layout();
 		virtual bool is_managing_layout() const;
+		virtual bool has_parent_layout() const;
+		virtual const i_layout& parent_layout() const;
+		virtual i_layout& parent_layout();
 		virtual void layout_items(bool aDefer = false);
 		virtual void layout_items_started();
 		virtual bool layout_items_in_progress() const;

@@ -64,6 +64,7 @@ namespace neogfx
 		struct widget_not_focused : std::logic_error { widget_not_focused() : std::logic_error("neogfx::i_widget::widget_not_focused") {} };
 		struct widget_cannot_defer_layout : std::logic_error { widget_cannot_defer_layout() : std::logic_error("neogfx::i_widget::widget_cannot_defer_layout") {} };
 		struct no_managing_layout : std::logic_error { no_managing_layout() : std::logic_error("neogfx::i_widget::no_managing_layout") {} };
+		struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::i_widget::no_parent_layout") {} };
 		struct no_layout : std::logic_error { no_layout() : std::logic_error("neogfx::i_widget::no_layout") {} };
 	public:
 		virtual ~i_widget() {}
@@ -110,6 +111,9 @@ namespace neogfx
 		virtual const i_widget& managing_layout() const = 0;
 		virtual i_widget& managing_layout() = 0;
 		virtual bool is_managing_layout() const = 0;
+		virtual bool has_parent_layout() const = 0;
+		virtual const i_layout& parent_layout() const = 0;
+		virtual i_layout& parent_layout() = 0;
 		virtual void layout_items(bool aDefer = false) = 0;
 		virtual void layout_items_started() = 0;
 		virtual bool layout_items_in_progress() const = 0;

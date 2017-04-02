@@ -70,6 +70,8 @@ namespace neogfx
 		virtual bool is_open() const;
 		virtual void open();
 		virtual void close();
+		virtual bool is_modal() const;
+		virtual void set_modal(bool aModal);
 	private:
 		i_menu* iParent;
 		type_e iType;
@@ -79,5 +81,6 @@ namespace neogfx
 		action iSeparator;
 		uint32_t iOpenCount;
 		boost::optional<item_index> iSelection;
+		bool iModal;
 	};
 }

@@ -506,6 +506,33 @@ namespace neogfx
 		return false;
 	}
 
+	bool widget::has_parent_layout() const
+	{
+		if (!has_parent())
+			return false;
+		const i_widget* w = &parent();
+		while (!w->has_layout() && w->has_parent())
+			w = &w->parent();
+		return w->has_layout();
+	}
+	
+	const i_layout& widget::parent_layout() const
+	{
+		if (!has_parent())
+			throw no_parent_layout();
+		const i_widget* w = &parent();
+		while (!w->has_layout() && w->has_parent())
+			w = &w->parent();
+		if (w->has_layout())
+			return w->layout();
+		throw no_parent_layout();
+	}
+
+	i_layout& widget::parent_layout()
+	{
+		return const_cast<i_layout&>(const_cast<const widget*>(this)->parent_layout());
+	}
+
 	void widget::layout_items(bool aDefer)
 	{
 		if (layout_items_in_progress())
@@ -555,11 +582,10 @@ namespace neogfx
 			{
 				iLayoutTimer = std::unique_ptr<neolib::callback_timer>(new neolib::callback_timer(app::instance(), [this](neolib::callback_timer&)
 				{
-					widget* _this = this;
-					iLayoutTimer.reset();
-					if (!_this->surface().destroyed())
-						_this->layout_items();
-					_this->update();
+					auto t = std::move(iLayoutTimer);
+					if (!surface().destroyed())
+						layout_items();
+					update();
 				}, 40));
 			}
 		}
@@ -1012,8 +1038,8 @@ namespace neogfx
 		{
 			iVisible = aVisible;
 			visibility_changed.trigger();
-			if (has_managing_layout())
-				managing_layout().layout_items(true);
+			if (has_parent_layout())
+				parent_layout().invalidate();
 			if (effectively_hidden())
 			{
 				if (surface().has_focused_widget() &&

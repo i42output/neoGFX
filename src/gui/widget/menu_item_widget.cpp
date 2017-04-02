@@ -294,7 +294,10 @@ namespace neogfx
 			menu().clear_selection();
 			if (destroyed)
 				return;
-			menu_item().action().triggered.async_trigger();
+			if (!menu().is_modal())
+				menu_item().action().triggered.async_trigger();
+			else
+				menu_item().action().triggered.trigger();
 			if (destroyed)
 				return;
 			if (menu_item().action().is_checkable())

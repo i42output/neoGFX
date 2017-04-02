@@ -26,6 +26,8 @@
 
 namespace neogfx
 {
+	class gradient_dialog;
+
 	class gradient_widget : public widget
 	{
 	public:
@@ -34,9 +36,10 @@ namespace neogfx
 		typedef neolib::variant<neogfx::gradient::colour_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
 		typedef neolib::variant<neogfx::gradient::colour_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
 	public:
-		gradient_widget();
-		gradient_widget(i_widget& aParent);
-		gradient_widget(i_layout& aLayout);
+		gradient_widget(const neogfx::gradient& aGradient = neogfx::gradient{});
+		gradient_widget(i_widget& aParent, const neogfx::gradient& aGradient = neogfx::gradient{});
+		gradient_widget(i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
+		gradient_widget(gradient_dialog& aParent, i_layout& aLayout, const neogfx::gradient& aGradient = neogfx::gradient{});
 	public:
 		const neogfx::gradient& gradient() const;
 		void set_gradient(const neogfx::gradient& aGradient);
@@ -60,6 +63,7 @@ namespace neogfx
 		void draw_colour_stop(graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const;
 		void draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const;
 	private:
+		bool iInGradientDialog;
 		neogfx::gradient iSelection;
 		boost::optional<point> iClicked;
 		boost::optional<gradient::colour_stop_list::iterator> iCurrentColourStop;

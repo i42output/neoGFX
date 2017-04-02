@@ -54,6 +54,8 @@ void main()
 		gradientPos = (pos.y - posTopLeft.y) / (posBottomRight.y - posTopLeft.y);
 	else if (nGradientDirection == 1) /* horizontal */
 		gradientPos = (pos.x - posTopLeft.x) / (posBottomRight.x - posTopLeft.x);
+	else if (nGradientDirection == 2) /* diagonal - todo */
+		gradientPos = (pos.x - posTopLeft.x) / (posBottomRight.x - posTopLeft.x);
 	else /* radial */
 	{
 	    float x = pos.x - posTopLeft.x;
@@ -65,7 +67,7 @@ void main()
 		float dx = x - centreX;
 		float dy = y - centreY;
 		float d = sqrt(dx * dx + dy * dy);
-		float r = centreX;
+		float r = max(centreX, centreY);
 		if (d < r)
 			gradientPos = d/r;
 		else

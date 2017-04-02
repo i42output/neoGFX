@@ -24,11 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	menu::menu(type_e aType, const std::string& aTitle) : iParent(0), iType(aType), iTitle(aTitle), iOpenCount(0)
+	menu::menu(type_e aType, const std::string& aTitle) : iParent(0), iType(aType), iTitle(aTitle), iOpenCount(0), iModal(false)
 	{
 	}
 
-	menu::menu(i_menu& aParent, type_e aType, const std::string& aTitle) : iParent(&aParent), iType(aType), iTitle(aTitle), iOpenCount(0)
+	menu::menu(i_menu& aParent, type_e aType, const std::string& aTitle) : iParent(&aParent), iType(aType), iTitle(aTitle), iOpenCount(0), iModal(false)
 	{
 	}
 
@@ -288,4 +288,15 @@ namespace neogfx
 			closed.trigger();
 		}
 	}
+
+	bool menu::is_modal() const
+	{
+		return iModal;
+	}
+
+	void menu::set_modal(bool aModal)
+	{
+		iModal = aModal;
+	}
+
 }
