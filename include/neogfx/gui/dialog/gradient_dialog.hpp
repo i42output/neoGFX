@@ -50,11 +50,15 @@ namespace neogfx
 		radio_button iDirectionVerticalRadioButton;
 		radio_button iDirectionDiagonalRadioButton;
 		radio_button iDirectionRadialRadioButton;
+		horizontal_layout iLayout5;
 		group_box iSizeGroupBox;
 		radio_button iSizeClosestSideRadioButton;
 		radio_button iSizeFarthestSideRadioButton;
 		radio_button iSizeClosestCornerRadioButton;
 		radio_button iSizeFarthestCornerRadioButton;
+		group_box iShapeGroupBox;
+		radio_button iShapeEllipseRadioButton;
+		radio_button iShapeCircleRadioButton;
 		vertical_spacer iSpacer1;
 		group_box iPreviewGroupBox;
 		framed_widget iPreview;

@@ -797,6 +797,18 @@ namespace neogfx
 			Diagonal	= 2,
 			Radial		= 3
 		};
+		enum shape_e
+		{
+			Ellipse		= 0,
+			Circle		= 1
+		};
+		enum size_e
+		{
+			ClosestSide		= 0,
+			FarthestSide	= 1,
+			ClosestCorner	= 2,
+			FarthestCorner	= 3
+		};
 		typedef std::pair<double, colour> colour_stop;
 		typedef std::vector<colour_stop> colour_stop_list;
 		typedef std::pair<double, colour::component> alpha_stop;
@@ -844,6 +856,12 @@ namespace neogfx
 		direction_e direction() const;
 		void set_direction(direction_e aDirection);
 		gradient with_direction(direction_e aDirection) const;
+		shape_e shape() const;
+		void set_shape(shape_e aShape);
+		gradient with_shape(shape_e aShape) const;
+		size_e size() const;
+		void set_size(size_e aSize);
+		gradient with_size(size_e aSize) const;
 	public:
 		bool operator==(const gradient& aOther) const;
 		bool operator!=(const gradient& aOther) const;
@@ -861,6 +879,8 @@ namespace neogfx
 		colour_stop_list iColourStops;
 		alpha_stop_list iAlphaStops;
 		direction_e iDirection;
+		shape_e iShape;
+		size_e iSize;
 	};
 
 	typedef boost::optional<colour> optional_colour;

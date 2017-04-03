@@ -23,7 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	menu_item::menu_item(i_action& aAction) : iContents(&aAction)
+	menu_item::menu_item(i_action& aAction) : iContents(std::shared_ptr<i_action>(std::shared_ptr<i_action>(), &aAction))
+	{
+	}
+
+	menu_item::menu_item(std::shared_ptr<i_action> aAction) : iContents(aAction)
 	{
 	}
 

@@ -4,6 +4,7 @@ uniform float posViewportTop;
 uniform vec2 posTopLeft;
 uniform vec2 posBottomRight;
 uniform int nGradientDirection;
+uniform int nGradientSize;
 uniform int nStopCount;
 uniform sampler2DRect texStopPositions;
 uniform sampler2DRect texStopColours;
@@ -67,7 +68,23 @@ void main()
 		float dx = x - centreX;
 		float dy = y - centreY;
 		float d = sqrt(dx * dx + dy * dy);
-		float r = max(centreX, centreY);
+		float r;
+		switch(nGradientSize)
+		{
+		default:
+		case 0:
+			r = min(centreX, centreY);
+			break;
+		case 1:
+			r = max(centreX, centreY);
+			break;
+		case 2:
+			r = min(sqrt(centreX * centreX + centreY * centreY), sqrt(centreX * centreX + centreY * centreY));
+			break;
+		case 3:
+			r = max(sqrt(centreX * centreX + centreY * centreY), sqrt(centreX * centreX + centreY * centreY));
+			break;
+		}
 		if (d < r)
 			gradientPos = d/r;
 		else

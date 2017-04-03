@@ -287,8 +287,8 @@ namespace neogfx
 		widget::mouse_button_released(aButton, aPosition);
 		if (aButton == mouse_button::Right)
 		{
-			action directionAction{ "Direction..." };
-			directionAction.triggered([this]()
+			auto directionAction = std::make_shared<action>("Direction...");
+			directionAction->triggered([this]()
 			{
 				gradient_dialog gd{ *this, gradient() };
 				auto update_gradient = [&]()

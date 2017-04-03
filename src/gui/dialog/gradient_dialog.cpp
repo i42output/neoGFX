@@ -34,11 +34,15 @@ namespace neogfx
 		iDirectionVerticalRadioButton{ iDirectionGroupBox.item_layout(), "Vertical" },
 		iDirectionDiagonalRadioButton{ iDirectionGroupBox.item_layout(), "Diagonal" },
 		iDirectionRadialRadioButton{ iDirectionGroupBox.item_layout(), "Radial" },
-		iSizeGroupBox{ iLayout3, "Size" },
+		iLayout5{ iLayout3 },
+		iSizeGroupBox{ iLayout5, "Size" },
 		iSizeClosestSideRadioButton{ iSizeGroupBox.item_layout(), "Closest side" },
 		iSizeFarthestSideRadioButton{ iSizeGroupBox.item_layout(), "Farthest side" },
 		iSizeClosestCornerRadioButton{ iSizeGroupBox.item_layout(), "Closest corner" },
 		iSizeFarthestCornerRadioButton{ iSizeGroupBox.item_layout(), "Farthest corner" },
+		iShapeGroupBox{ iLayout5, "Shape" },
+		iShapeEllipseRadioButton{ iShapeGroupBox.item_layout(), "Ellipse" },
+		iShapeCircleRadioButton{ iShapeGroupBox.item_layout(), "Circle" },
 		iSpacer1{ iLayout3 },
 		iPreviewGroupBox{ iLayout4, "Preview" },
 		iPreview{ iPreviewGroupBox.item_layout() },
@@ -76,33 +80,34 @@ namespace neogfx
 		iLayout2.set_spacing(16.0);
 		iLayout3.set_margins(neogfx::margins{});
 		iLayout3.set_spacing(16.0);
+		iLayout5.set_alignment(alignment::Top);
 
 		iGradientSelector.set_fixed_size(size{ 256.0, iGradientSelector.minimum_size().cy });
 
 		auto update_widgets = [this]()
 		{
-			iSizeClosestSideRadioButton.set_checked(false); // todo
-			iSizeFarthestSideRadioButton.set_checked(true);
-			iSizeClosestCornerRadioButton.set_checked(false); // todo
-			iSizeFarthestCornerRadioButton.set_checked(false); // todo
-			iSizeClosestSideRadioButton.enable(false); // todo
-			iSizeFarthestSideRadioButton.enable(true);
-			iSizeClosestCornerRadioButton.enable(false); // todo
-			iSizeFarthestCornerRadioButton.enable(false); // todo
 			iDirectionDiagonalRadioButton.enable(false); // todo
 			iDirectionHorizontalRadioButton.set_checked(gradient().direction() == gradient::Horizontal);
 			iDirectionVerticalRadioButton.set_checked(gradient().direction() == gradient::Vertical);
 			iDirectionDiagonalRadioButton.set_checked(gradient().direction() == gradient::Diagonal);
 			iDirectionRadialRadioButton.set_checked(gradient().direction() == gradient::Radial);
+			iSizeClosestSideRadioButton.set_checked(gradient().size() == gradient::ClosestSide);
+			iSizeFarthestSideRadioButton.set_checked(gradient().size() == gradient::FarthestSide);
+			iSizeClosestCornerRadioButton.set_checked(gradient().size() == gradient::ClosestCorner);
+			iSizeFarthestCornerRadioButton.set_checked(gradient().size() == gradient::FarthestCorner);
+			iShapeEllipseRadioButton.set_checked(gradient().shape() == gradient::Ellipse);
+			iShapeCircleRadioButton.set_checked(gradient().shape() == gradient::Circle);
 			switch (gradient().direction())
 			{
 			case gradient::Vertical:
 			case gradient::Horizontal:
 			case gradient::Diagonal:
 				iSizeGroupBox.hide();
+				iShapeGroupBox.hide();
 				break;
 			case gradient::Radial:
 				iSizeGroupBox.show();
+				iShapeGroupBox.show();
 				break;
 			}
 			iPreview.update();
@@ -115,13 +120,21 @@ namespace neogfx
 		iDirectionDiagonalRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Diagonal)); update_widgets(); });
 		iDirectionRadialRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Radial)); update_widgets(); });
 
-		iPreview.set_fixed_size(size{ 256.0, 256.0 });
+		iSizeClosestSideRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_size(gradient::ClosestSide)); update_widgets(); });
+		iSizeFarthestSideRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_size(gradient::FarthestSide)); update_widgets(); });
+		iSizeClosestCornerRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_size(gradient::ClosestCorner)); update_widgets(); });
+		iSizeFarthestCornerRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_size(gradient::FarthestCorner)); update_widgets(); });
+
+		iShapeEllipseRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_shape(gradient::Ellipse)); update_widgets(); });
+		iShapeCircleRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_shape(gradient::Circle)); update_widgets(); });
+
+		iPreview.set_margins(neogfx::margins{});
+		iPreview.set_fixed_size(size{ std::ceil(256.0 * 16.0 / 9.0), 256.0 });
 		iPreview.painting([this](graphics_context& aGc)
 		{
-			rect r{ point{}, aGc.extents() };
-			r.deflate(size{ 1.0 });
-			draw_alpha_background(aGc, r);
-			aGc.fill_rect(r, gradient());
+			rect cr = iPreview.client_rect(false);
+			draw_alpha_background(aGc, cr);
+			aGc.fill_rect(cr, gradient());
 		});
 
 		button_box().add_button(dialog_button_box::Ok);

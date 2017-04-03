@@ -115,6 +115,12 @@ namespace neogfx
 		return aAction;
 	}
 
+	i_action& menu::add_action(std::shared_ptr<i_action> aAction)
+	{
+		insert_action(item_count(), aAction);
+		return *aAction;
+	}
+
 	void menu::add_separator()
 	{
 		insert_separator(item_count());
@@ -129,12 +135,17 @@ namespace neogfx
 
 	void menu::insert_action(item_index aItemIndex, i_action& aAction)
 	{
+		insert_action(aItemIndex, std::shared_ptr<i_action>(std::shared_ptr<i_action>(), &aAction));
+	}
+	
+	void menu::insert_action(item_index aItemIndex, std::shared_ptr<i_action> aAction)
+	{
 		iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
 		item_added.trigger(aItemIndex);
-		aAction.changed([this, &aAction]()
+		aAction->changed([this, &aAction]()
 		{
 			for (item_index i = 0; i < iItems.size(); ++i)
-				if (&(iItems[i]->action()) == &aAction)
+				if (&(iItems[i]->action()) == &*aAction)
 				{
 					item_changed.trigger(i);
 					return;
