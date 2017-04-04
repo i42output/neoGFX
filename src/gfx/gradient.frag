@@ -5,6 +5,7 @@ uniform vec2 posTopLeft;
 uniform vec2 posBottomRight;
 uniform int nGradientDirection;
 uniform int nGradientSize;
+uniform int nGradientShape;
 uniform int nStopCount;
 uniform sampler2DRect texStopPositions;
 uniform sampler2DRect texStopColours;
@@ -46,6 +47,11 @@ vec4 gradient_colour(in float n)
 	return mix(firstColour, secondColour, (n - firstPos) / (secondPos - firstPos));
 }
 
+float ellipse_radius(float cx, float cy, float angle)
+{
+	return cx * cy / sqrt(cx * cx * sin(angle) * sin(angle) + cy * cy * cos(angle) * cos(angle));
+}
+
 void main()
 {
 	vec4 pos = gl_FragCoord;
@@ -68,22 +74,46 @@ void main()
 		float dx = x - centreX;
 		float dy = y - centreY;
 		float d = sqrt(dx * dx + dy * dy);
+		float dnc = min(sqrt(centreX * centreX + centreY * centreY), sqrt(centreX * centreX + centreY * centreY));
+		float rnc = ellipse_radius(centreX, centreY, atan(centreY, centreX));
+		float dfc = max(sqrt(centreX * centreX + centreY * centreY), sqrt(centreX * centreX + centreY * centreY));
+		float rfc = ellipse_radius(centreX, centreY, atan(centreY, centreX));
 		float r;
-		switch(nGradientSize)
+		if (nGradientShape == 0)
 		{
-		default:
-		case 0:
-			r = min(centreX, centreY);
-			break;
-		case 1:
-			r = max(centreX, centreY);
-			break;
-		case 2:
-			r = min(sqrt(centreX * centreX + centreY * centreY), sqrt(centreX * centreX + centreY * centreY));
-			break;
-		case 3:
-			r = max(sqrt(centreX * centreX + centreY * centreY), sqrt(centreX * centreX + centreY * centreY));
-			break;
+			r = ellipse_radius(centreX, centreY, atan(dy, dx));
+			switch(nGradientSize)
+			{
+			default:
+			case 0:
+			case 1:
+				break;
+			case 2:
+				r = r * dnc / rnc;
+				break;
+			case 3:
+				r = r * dfc / rfc;
+				break;
+			}
+		}
+		else
+		{
+			switch(nGradientSize)
+			{
+			default:
+			case 0:
+				r = min(centreX, centreY);
+				break;
+			case 1:
+				r = max(centreX, centreY);
+				break;
+			case 2:
+				r = dnc;
+				break;
+			case 3:
+				r = dfc;
+				break;
+			}
 		}
 		if (d < r)
 			gradientPos = d/r;

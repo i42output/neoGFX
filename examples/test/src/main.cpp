@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
 		button8.set_foreground_colour(ng::colour(255, 235, 160));
 		button8.clicked([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
 		ng::horizontal_layout layout3(layoutButtons);
-		neolib::random prng{ 4242 };
+		neolib::random prng{ 3 };
 		for (uint32_t i = 0; i < 10; ++i)
 		{
 			auto button = std::make_shared<ng::push_button>(std::string(1, 'A' + i));
