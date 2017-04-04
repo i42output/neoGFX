@@ -665,13 +665,31 @@ namespace neogfx
 		return result;
 	}
 
+	const optional_point& gradient::centre() const
+	{
+		return iCentre;
+	}
+
+	void gradient::set_centre(const optional_point& aCentre)
+	{
+		iCentre = aCentre;
+	}
+
+	gradient gradient::with_centre(const optional_point& aCentre) const
+	{
+		gradient result = *this;
+		result.set_centre(aCentre);
+		return result;
+	}
+
 	bool gradient::operator==(const gradient& aOther) const
 	{
-		return colour_stops() == aOther.colour_stops() && 
-			alpha_stops() == aOther.alpha_stops() && 
-			direction() == aOther.direction() && 
+		return colour_stops() == aOther.colour_stops() &&
+			alpha_stops() == aOther.alpha_stops() &&
+			direction() == aOther.direction() &&
 			shape() == aOther.shape() &&
-			size() == aOther.size();
+			size() == aOther.size() &&
+			centre() == aOther.centre();
 	}
 
 	bool gradient::operator!=(const gradient& aOther) const
@@ -681,7 +699,7 @@ namespace neogfx
 
 	bool gradient::operator<(const gradient& aOther) const
 	{
-		return std::tie(iColourStops, iAlphaStops, iDirection, iShape, iSize) < std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection, aOther.iShape, aOther.iSize);
+		return std::tie(iColourStops, iAlphaStops, iDirection, iShape, iSize, iCentre) < std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection, aOther.iShape, aOther.iSize, aOther.iCentre);
 	}
 
 	double gradient::normalized_position(double aPos, double aStart, double aEnd)

@@ -43,6 +43,12 @@ namespace neogfx
 		iShapeGroupBox{ iLayout5, "Shape" },
 		iShapeEllipseRadioButton{ iShapeGroupBox.item_layout(), "Ellipse" },
 		iShapeCircleRadioButton{ iShapeGroupBox.item_layout(), "Circle" },
+		iCentreGroupBox{ iLayout5, "Centre" },
+		iCentreLayout{ iCentreGroupBox.layout() },
+		iXCentre { iCentreLayout, "X:" },
+		iXCentreSpinBox { iCentreLayout },
+		iYCentre { iCentreLayout, "Y:" },
+		iYCentreSpinBox { iCentreLayout },
 		iSpacer1{ iLayout3 },
 		iPreviewGroupBox{ iLayout4, "Preview" },
 		iPreview{ iPreviewGroupBox.item_layout() },
@@ -82,6 +88,15 @@ namespace neogfx
 		iLayout3.set_spacing(16.0);
 		iLayout5.set_alignment(alignment::Top);
 
+		iCentreGroupBox.set_checkable(true);
+		iCentreGroupBox.set_item_layout(iCentreLayout);
+		iXCentreSpinBox.set_minimum(-1.0);
+		iXCentreSpinBox.set_maximum(1.0);
+		iXCentreSpinBox.set_step(0.01);
+		iYCentreSpinBox.set_minimum(-1.0);
+		iYCentreSpinBox.set_maximum(1.0);
+		iYCentreSpinBox.set_step(0.01);
+
 		iGradientSelector.set_fixed_size(size{ 256.0, iGradientSelector.minimum_size().cy });
 
 		auto update_widgets = [this]()
@@ -97,6 +112,15 @@ namespace neogfx
 			iSizeFarthestCornerRadioButton.set_checked(gradient().size() == gradient::FarthestCorner);
 			iShapeEllipseRadioButton.set_checked(gradient().shape() == gradient::Ellipse);
 			iShapeCircleRadioButton.set_checked(gradient().shape() == gradient::Circle);
+			iCentreGroupBox.check_box().set_checked(gradient().centre() != optional_point{});
+			iXCentreSpinBox.set_value(gradient().centre() != optional_point{} ? gradient().centre()->x : 0.0);
+			iYCentreSpinBox.set_value(gradient().centre() != optional_point{} ? gradient().centre()->y : 0.0);
+			iXCentre.enable(gradient().centre() != optional_point{});
+			iXCentreSpinBox.enable(gradient().centre() != optional_point{});
+			iXCentreSpinBox.set_format(gradient().centre() != optional_point{} ? "%.2f" : "");
+			iYCentre.enable(gradient().centre() != optional_point{});
+			iYCentreSpinBox.enable(gradient().centre() != optional_point{});
+			iYCentreSpinBox.set_format(gradient().centre() != optional_point{} ? "%.2f" : "");
 			switch (gradient().direction())
 			{
 			case gradient::Vertical:
@@ -104,10 +128,12 @@ namespace neogfx
 			case gradient::Diagonal:
 				iSizeGroupBox.hide();
 				iShapeGroupBox.hide();
+				iCentreGroupBox.hide();
 				break;
 			case gradient::Radial:
 				iSizeGroupBox.show();
 				iShapeGroupBox.show();
+				iCentreGroupBox.show();
 				break;
 			}
 			iPreview.update();
@@ -128,6 +154,9 @@ namespace neogfx
 		iShapeEllipseRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_shape(gradient::Ellipse)); update_widgets(); });
 		iShapeCircleRadioButton.checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_shape(gradient::Circle)); update_widgets(); });
 
+		iCentreGroupBox.check_box().checked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_centre(point{})); update_widgets(); });
+		iCentreGroupBox.check_box().unchecked([this, update_widgets]() { iGradientSelector.set_gradient(gradient().with_centre(optional_point{})); update_widgets(); });
+
 		iPreview.set_margins(neogfx::margins{});
 		iPreview.set_fixed_size(size{ std::ceil(256.0 * 16.0 / 9.0), 256.0 });
 		iPreview.painting([this](graphics_context& aGc)
@@ -135,6 +164,14 @@ namespace neogfx
 			rect cr = iPreview.client_rect(false);
 			draw_alpha_background(aGc, cr);
 			aGc.fill_rect(cr, gradient());
+			if (gradient().centre() != optional_point{})
+			{
+				point centre{ cr.centre().x + cr.width() / 2.0 * gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * gradient().centre()->y };
+				aGc.draw_circle(centre, 4.0, pen{ colour::White, 2.0 });
+				aGc.line_stipple_on(3, 0xAAAA);
+				aGc.draw_circle(centre, 4.0, pen{ colour::Black, 2.0 });
+				aGc.line_stipple_off();
+			}
 		});
 
 		button_box().add_button(dialog_button_box::Ok);

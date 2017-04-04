@@ -24,6 +24,7 @@
 #include <neogfx/gui/widget/gradient_widget.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
+#include <neogfx/gui/widget/spin_box.hpp>
 
 namespace neogfx
 {
@@ -59,6 +60,12 @@ namespace neogfx
 		group_box iShapeGroupBox;
 		radio_button iShapeEllipseRadioButton;
 		radio_button iShapeCircleRadioButton;
+		group_box iCentreGroupBox;
+		grid_layout iCentreLayout;
+		label iXCentre;
+		double_spin_box iXCentreSpinBox;
+		label iYCentre;
+		double_spin_box iYCentreSpinBox;
 		vertical_spacer iSpacer1;
 		group_box iPreviewGroupBox;
 		framed_widget iPreview;

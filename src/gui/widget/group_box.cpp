@@ -106,13 +106,15 @@ namespace neogfx
 	void group_box::set_item_layout(i_layout& aItemLayout)
 	{
 		iItemLayout = std::shared_ptr<i_layout>(std::shared_ptr<i_layout>(), &aItemLayout);
-		iLayout.add_item(iItemLayout);
+		if (aItemLayout.parent() != &iLayout)
+			iLayout.add_item(iItemLayout);
 	}
 
 	void group_box::set_item_layout(std::shared_ptr<i_layout> aItemLayout)
 	{
 		iItemLayout = aItemLayout;
-		iLayout.add_item(iItemLayout);
+		if (aItemLayout->parent() != &iLayout)
+			iLayout.add_item(iItemLayout);
 	}
 
 	const i_layout& group_box::item_layout() const

@@ -287,8 +287,8 @@ namespace neogfx
 		widget::mouse_button_released(aButton, aPosition);
 		if (aButton == mouse_button::Right)
 		{
-			auto directionAction = std::make_shared<action>("Direction...");
-			directionAction->triggered([this]()
+			auto moreAction = std::make_shared<action>("More...");
+			moreAction->triggered([this]()
 			{
 				gradient_dialog gd{ *this, gradient() };
 				auto update_gradient = [&]()
@@ -311,10 +311,10 @@ namespace neogfx
 			{
 				if (stopIter.is<gradient::colour_stop_list::iterator>())
 				{
-					auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
-					action selectColourAction{ "Select stop colour..." };
-					selectColourAction.triggered([this, &stop]()
+					auto selectColourAction = std::make_shared<action>("Select stop colour...");
+					selectColourAction->triggered([this, stopIter]()
 					{
+						auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
 						colour_dialog cd{ *this, stop.second };
 						if (cd.exec() == dialog::Accepted)
 						{
@@ -323,8 +323,8 @@ namespace neogfx
 							gradient_changed.trigger();
 						}
 					});
-					action deleteStopAction{ "Delete stop" };
-					deleteStopAction.triggered([this, &stopIter]()
+					auto deleteStopAction = std::make_shared<action>("Delete stop");
+					deleteStopAction->triggered([this, stopIter]()
 					{
 						if (iCurrentColourStop != boost::none && *iCurrentColourStop == static_variant_cast<gradient::colour_stop_list::iterator>(stopIter))
 							iCurrentColourStop = boost::none;
@@ -333,21 +333,21 @@ namespace neogfx
 						gradient_changed.trigger();
 					});
 					if (iSelection.colour_stop_count() <= 2)
-						deleteStopAction.disable();
+						deleteStopAction->disable();
 					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
 					iMenu->menu().add_action(selectColourAction);
 					iMenu->menu().add_action(deleteStopAction);
 					if (!iInGradientDialog)
-						iMenu->menu().add_action(directionAction);
+						iMenu->menu().add_action(moreAction);
 					iMenu->exec();
 					iMenu.reset();
 				}
 				else if (stopIter.is<gradient::alpha_stop_list::iterator>())
 				{
-					auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
-					action selectAlphaAction{ "Select stop alpha (opacity level)..." };
-					selectAlphaAction.triggered([this, &stop]()
+					auto selectAlphaAction = std::make_shared<action>("Select stop alpha (opacity level)...");
+					selectAlphaAction->triggered([this, stopIter]()
 					{
+						auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
 						alpha_dialog ad{ ultimate_ancestor(), stop.second };
 						if (ad.exec() == dialog::Accepted)
 						{
@@ -356,8 +356,8 @@ namespace neogfx
 							gradient_changed.trigger();
 						}
 					});
-					action deleteStopAction{ "Delete stop" };
-					deleteStopAction.triggered([this, &stopIter]()
+					auto deleteStopAction = std::make_shared<action>("Delete stop");
+					deleteStopAction->triggered([this, stopIter]()
 					{
 						if (iCurrentAlphaStop != boost::none && *iCurrentAlphaStop == static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter))
 							iCurrentAlphaStop = boost::none;
@@ -366,12 +366,12 @@ namespace neogfx
 						gradient_changed.trigger();
 					});
 					if (iSelection.alpha_stop_count() <= 2)
-						deleteStopAction.disable();
+						deleteStopAction->disable();
 					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
 					iMenu->menu().add_action(selectAlphaAction);
 					iMenu->menu().add_action(deleteStopAction);
 					if (!iInGradientDialog)
-						iMenu->menu().add_action(directionAction);
+						iMenu->menu().add_action(moreAction);
 					iMenu->exec();
 					iMenu.reset();
 				}
@@ -379,7 +379,7 @@ namespace neogfx
 			else if (!iInGradientDialog)
 			{
 				iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
-				iMenu->menu().add_action(directionAction);
+				iMenu->menu().add_action(moreAction);
 				iMenu->exec();
 				iMenu.reset();
 			}

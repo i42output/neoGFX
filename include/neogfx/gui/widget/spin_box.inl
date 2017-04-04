@@ -52,8 +52,10 @@ namespace neogfx
 	inline void basic_spin_box<T>::set_minimum(value_type aMinimum)
 	{
 		iMinimum = aMinimum;
+		std::string text;
+		try { text = boost::str(boost::format(iFormat) % minimum()); } catch (...) {}
 		if (text_box().text().empty())
-			text_box().set_text(boost::str(boost::format(iFormat) % minimum()));
+			text_box().set_text(text);
 		constraints_changed.trigger();
 		if (iValue < minimum())
 			set_value(minimum());
@@ -185,6 +187,8 @@ namespace neogfx
 	template <typename T>
 	inline std::string basic_spin_box<T>::value_to_string() const
 	{
-		return boost::str(boost::format(iFormat) % value());
+		std::string text;
+		try { text = boost::str(boost::format(iFormat) % value()); } catch (...) {}
+		return text;
 	}
 }
