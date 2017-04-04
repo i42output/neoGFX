@@ -23,6 +23,7 @@
 #include <memory>
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/core/path.hpp>
+#include <neogfx/game/i_shape.hpp>
 #include <neogfx/gfx/pen.hpp>
 #include <neogfx/gfx/text/font.hpp>
 
@@ -59,11 +60,6 @@ namespace neogfx
 		None,
 		Monochrome
 	};
-
-	typedef std::vector<vec2> vertex_list2;
-	typedef std::vector<vec3> vertex_list3;
-
-	typedef vertex_list2 vertex_list;
 
 	typedef basic_vector<vector2, 4> texture_map2;
 	typedef basic_vector<vector3, 4> texture_map3;
@@ -140,17 +136,20 @@ namespace neogfx
 		void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const;
 		void draw_rect(const rect& aRect, const pen& aPen, const fill& = fill{}) const;
 		void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const fill& = fill{}) const;
-		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const fill& = fill{}) const;
+		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const fill& = fill{}, angle aStartAngle = 0.0) const;
 		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const fill& = fill{}) const;
 		void draw_path(const path& aPath, const pen& aPen, const fill& = fill{}) const;
+		void draw_shape(const i_shape& aShape, const pen& aPen, const fill& = fill{}) const;
+		void draw_shape(const vec2_list& aVertices, const pen& aPen) const;
+		void draw_shape(const vec3_list& aVertices, const pen& aPen) const;
 		void draw_focus_rect(const rect& aRect) const;
 		void fill_rect(const rect& aRect, const fill& aFill) const;
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const fill& aFill) const;
 		void fill_circle(const point& aCentre, dimension aRadius, const fill& aFill) const;
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill) const;
-		void fill_shape(const point& aCentre, const vertex_list2& aVertices, const fill& aFill) const;
-		void fill_shape(const point& aCentre, const vertex_list3& aVertices, const fill& aFill) const;
 		void fill_path(const path& aPath, const fill& aFill) const;
+		void fill_shape(const vec2_list& aVertices, const fill& aFill) const;
+		void fill_shape(const vec3_list& aVertices, const fill& aFill) const;
 		size text_extent(const string& aText, const font& aFont, bool aUseCache = false) const;
 		size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, bool aUseCache = false) const;
 		size multiline_text_extent(const string& aText, const font& aFont, bool aUseCache = false) const;

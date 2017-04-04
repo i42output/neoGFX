@@ -37,10 +37,19 @@ public:
 		physics().set_velocity(tm * ng::vec3{0.0, 360.0, 0.0} + aParent.physics().velocity());
 	}
 public:
-	virtual ng::vertex_list3 map() const
+	virtual std::size_t vertex_count(bool aIncludeCentre) const
 	{
+		return aIncludeCentre ? 5 : 4;
+	}
+	virtual ng::vec3_list vertices(bool aIncludeCentre)
+	{
+		ng::vec3_list result = shape::vertices(aIncludeCentre);
 		auto r = bounding_box();
-		return ng::vertex_list3{ r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
+		result.push_back(r.top_left().to_vector3());
+		result.push_back(r.top_right().to_vector3());
+		result.push_back(r.bottom_right().to_vector3());
+		result.push_back(r.bottom_left().to_vector3());
+		return result;
 	}
 };
 
@@ -71,6 +80,8 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->add_shape(shipInfo);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
+		aGraphicsContext.draw_shape(ng::rectangle{ *spritePlane, ng::vec3{ 250.0, 250.0, 0.0 }, ng::size{ 25.0, 25.0 } }, 
+			ng::pen{ ng::colour::Goldenrod, 3.0 }, ng::colour::DarkGoldenrod4);
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});
 	spritePlane->physics_applied([spritePlane, &spaceshipSprite, shipInfo]()

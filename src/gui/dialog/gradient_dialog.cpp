@@ -52,7 +52,12 @@ namespace neogfx
 		iSpacer1{ iLayout3 },
 		iPreviewGroupBox{ iLayout4, "Preview" },
 		iPreview{ iPreviewGroupBox.item_layout() },
-		iSpacer2{ iLayout4 }
+		iSpacer2{ iLayout4 },
+		iAnimationTimer{ app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			animate();
+		}, 10, true}
 	{
 		init();
 	}
@@ -169,7 +174,7 @@ namespace neogfx
 				point centre{ cr.centre().x + cr.width() / 2.0 * gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * gradient().centre()->y };
 				aGc.draw_circle(centre, 4.0, pen{ colour::White, 2.0 });
 				aGc.line_stipple_on(3, 0xAAAA);
-				aGc.draw_circle(centre, 4.0, pen{ colour::Black, 2.0 });
+				aGc.draw_circle(centre, 4.0, pen{ colour::Black, 2.0 }, fill{}, to_rad(neolib::thread::program_elapsed_ms() / 10 % 100 * 3.6));
 				aGc.line_stipple_off();
 			}
 		});
@@ -180,5 +185,15 @@ namespace neogfx
 		update_widgets();
 
 		centre_on_parent();
+	}
+
+	void gradient_dialog::animate()
+	{
+		if (gradient().centre() != optional_point{})
+		{
+			rect cr = iPreview.client_rect(false);
+			point centre{ cr.centre().x + cr.width() / 2.0 * gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * gradient().centre()->y };
+			iPreview.update(rect{ centre - point{10, 10}, size{20, 20} });
+		}
 	}
 }

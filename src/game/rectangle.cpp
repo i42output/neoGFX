@@ -56,9 +56,19 @@ namespace neogfx
 	{
 	}
 
-	vertex_list3 rectangle::map() const
+	std::size_t rectangle::vertex_count(bool aIncludeCentre) const
 	{
+		return aIncludeCentre ? 5 : 4;
+	}
+
+	vec3_list rectangle::vertices(bool aIncludeCentre) const
+	{
+		vec3_list result = shape::vertices(aIncludeCentre);
 		auto r = bounding_box();
-		return vertex_list3{ r.top_left().to_vector3(), r.top_right().to_vector3(), r.bottom_right().to_vector3(), r.bottom_left().to_vector3() };
+		result.push_back(r.top_left().to_vector3());
+		result.push_back(r.top_right().to_vector3());
+		result.push_back(r.bottom_right().to_vector3());
+		result.push_back(r.bottom_left().to_vector3());
+		return result;
 	}
 }

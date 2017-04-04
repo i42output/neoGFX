@@ -105,6 +105,9 @@ namespace neogfx
 		virtual void set_transformation_matrix(const optional_matrix33& aTransformationMatrix);
 		// rendering
 	public:
+		virtual std::size_t vertex_count(bool aIncludeCentre = false) const;
+		virtual vec3_list vertices(bool aIncludeCentre = false) const;
+		virtual vec3_list transformed_vertices(bool aIncludeCentre = false) const;
 		virtual bool update(const optional_time_point& aNow = optional_time_point());
 		virtual void paint(graphics_context& aGraphicsContext) const;
 		// attributes

@@ -277,6 +277,11 @@ namespace neogfx
 	typedef boost::optional<row_vec3> optional_row_vec3;
 	typedef boost::optional<row_vec4> optional_row_vec4;
 
+	typedef std::vector<vec2> vec2_list;
+	typedef std::vector<vec3> vec3_list;
+
+	typedef vec2_list vertex_list;
+
 	template <typename T, uint32_t D, typename Type, bool IsScalar>
 	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{

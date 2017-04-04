@@ -238,11 +238,11 @@ namespace neogfx
 		iNativeGraphicsContext->draw_rounded_rect(to_device_units(aRect) + iOrigin, aRadius, aPen);
 	}
 
-	void graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const fill& aFill) const
+	void graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const fill& aFill, angle aStartAngle) const
 	{
 		if (!aFill.empty())
 			iNativeGraphicsContext->fill_circle(to_device_units(aCentre) + iOrigin, aRadius, aFill);
-		iNativeGraphicsContext->draw_circle(to_device_units(aCentre) + iOrigin, aRadius, aPen);
+		iNativeGraphicsContext->draw_circle(to_device_units(aCentre) + iOrigin, aRadius, aPen, aStartAngle);
 	}
 
 	void graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const fill& aFill) const
@@ -259,6 +259,31 @@ namespace neogfx
 		path path = to_device_units(aPath);
 		path.set_position(path.position() + iOrigin);
 		iNativeGraphicsContext->draw_path(path, aPen);
+	}
+
+	void graphics_context::draw_shape(const i_shape& aShape, const pen& aPen, const fill& aFill) const
+	{
+		if (!aFill.empty())
+			fill_shape(aShape.transformed_vertices(true), aFill);
+		draw_shape(aShape.transformed_vertices(false), aPen);
+	}
+
+	void graphics_context::draw_shape(const vec2_list& aVertices, const pen& aPen) const
+	{
+		vec2_list vertices;
+		vertices.reserve(aVertices.size());
+		for (const auto& v : aVertices)
+			vertices.push_back(to_device_units(v) + iOrigin.to_vector());
+		iNativeGraphicsContext->draw_shape(vertices, aPen);
+	}
+
+	void graphics_context::draw_shape(const vec3_list& aVertices, const pen& aPen) const
+	{
+		vec2_list vertices;
+		vertices.reserve(aVertices.size());
+		for (const auto& v : aVertices)
+			vertices.push_back(to_device_units(v.xy) + iOrigin.to_vector());
+		iNativeGraphicsContext->draw_shape(vertices, aPen);
 	}
 
 	void graphics_context::draw_focus_rect(const rect& aRect) const
@@ -290,29 +315,29 @@ namespace neogfx
 		iNativeGraphicsContext->fill_arc(to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aFill);
 	}
 
-	void graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const fill& aFill) const
-	{
-		vertex_list2 vertices;
-		vertices.reserve(aVertices.size());
-		for (const auto& v : aVertices)
-			vertices.push_back(to_device_units(v) + iOrigin.to_vector());
-		iNativeGraphicsContext->fill_shape(to_device_units(aCentre) + iOrigin, vertices, aFill);
-	}
-
-	void graphics_context::fill_shape(const point& aCentre, const vertex_list3& aVertices, const fill& aFill) const
-	{
-		vertex_list2 vertices;
-		vertices.reserve(aVertices.size());
-		for (const auto& v : aVertices)
-			vertices.push_back(to_device_units(v.xy) + iOrigin.to_vector());
-		iNativeGraphicsContext->fill_shape(to_device_units(aCentre) + iOrigin, vertices, aFill);
-	}
-
 	void graphics_context::fill_path(const path& aPath, const fill& aFill) const
 	{
 		path path = to_device_units(aPath);
 		path.set_position(path.position() + iOrigin);
 		iNativeGraphicsContext->fill_path(path, aFill);
+	}
+
+	void graphics_context::fill_shape(const vec2_list& aVertices, const fill& aFill) const
+	{
+		vec2_list vertices;
+		vertices.reserve(aVertices.size());
+		for (const auto& v : aVertices)
+			vertices.push_back(to_device_units(v) + iOrigin.to_vector());
+		iNativeGraphicsContext->fill_shape(vertices, aFill);
+	}
+
+	void graphics_context::fill_shape(const vec3_list& aVertices, const fill& aFill) const
+	{
+		vec2_list vertices;
+		vertices.reserve(aVertices.size());
+		for (const auto& v : aVertices)
+			vertices.push_back(to_device_units(v.xy) + iOrigin.to_vector());
+		iNativeGraphicsContext->fill_shape(vertices, aFill);
 	}
 
 	size graphics_context::text_extent(const string& aText, const font& aFont, bool aUseCache) const

@@ -39,6 +39,7 @@ namespace neogfx
 		gradient_widget& gradient_selector();
 	private:
 		void init();
+		void animate();
 	private:
 		vertical_layout iLayout;
 		horizontal_layout iLayout2;
@@ -70,5 +71,6 @@ namespace neogfx
 		group_box iPreviewGroupBox;
 		framed_widget iPreview;
 		vertical_spacer iSpacer2;
+		neolib::callback_timer iAnimationTimer;
 	};
 }

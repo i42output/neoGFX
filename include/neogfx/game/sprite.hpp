@@ -87,8 +87,10 @@ namespace neogfx
 		virtual bool update(const optional_time_point& aNow, const vec3& aForce);
 		// rendering
 	public:
+		virtual std::size_t vertex_count(bool aIncludeCentre = false) const;
+		virtual vec3_list vertices(bool aIncludeCentre = false) const;
+		virtual vec3_list transformed_vertices(bool aIncludeCentre = false) const;
 		virtual bool update(const optional_time_point& aNow);
-		virtual vertex_list3 map() const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 		// attributes
 	private:

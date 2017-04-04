@@ -48,7 +48,8 @@ namespace neogfx
 		virtual point position() const;
 		virtual rect bounding_box() const;
 	public:
-		virtual vertex_list3 map() const;
+		virtual std::size_t vertex_count(bool aIncludeCentre = false) const;
+		virtual vec3_list vertices(bool aIncludeCentre = false) const;
 		virtual void paint(graphics_context& aGraphicsContext) const;	
 	private:
 		size text_extent() const;

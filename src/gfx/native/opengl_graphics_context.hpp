@@ -106,15 +106,16 @@ namespace neogfx
 		virtual void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
 		virtual void draw_rect(const rect& aRect, const pen& aPen);
 		virtual void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen);
-		virtual void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen);
+		virtual void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle);
 		virtual void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen);
 		virtual void draw_path(const path& aPath, const pen& aPen);
+		virtual void draw_shape(const vec2_list& aVertices, const pen& aPen);
 		virtual void fill_rect(const rect& aRect, const fill& aFill);
 		virtual void fill_rounded_rect(const rect& aRect, dimension aRadius, const fill& aFill);
 		virtual void fill_circle(const point& aCentre, dimension aRadius, const fill& aFill);
 		virtual void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill);
-		virtual void fill_shape(const point& aCentre, const vertex_list2& aVertices, const fill& aFill);
 		virtual void fill_path(const path& aPath, const fill& aFill);
+		virtual void fill_shape(const vec2_list& aVertices, const fill& aFill);
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
 		virtual glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
 		virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const;

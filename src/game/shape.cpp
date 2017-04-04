@@ -267,6 +267,32 @@ namespace neogfx
 		iTransformationMatrix = aTransformationMatrix;
 	}
 	
+	std::size_t shape::vertex_count(bool aIncludeCentre) const
+	{
+		return aIncludeCentre ? 1 : 0;
+	}
+	
+	vec3_list shape::vertices(bool aIncludeCentre) const
+	{
+		vec3_list result;
+		result.reserve(vertex_count(aIncludeCentre));
+		if (aIncludeCentre)
+		{
+			point centre{ position() - origin() };
+			result.push_back(vec3{ centre.x, centre.y });
+		}
+		return result;
+	}
+
+	vec3_list shape::transformed_vertices(bool aIncludeCentre) const
+	{
+		vec3_list result = vertices(aIncludeCentre);
+		auto tm = transformation_matrix();
+		for (auto& vertex : result)
+			vertex = tm * vertex;
+		return result;
+	}
+
 	bool shape::update(const optional_time_point& aNow)
 	{
 		/* todo: animate frames */
@@ -278,10 +304,7 @@ namespace neogfx
 	{
 		if (frame_count() == 0)
 			return;
-		auto tm = transformation_matrix();
-		auto m = map();
-		for (auto& vertex : m)
-			vertex = tm * vertex;
+		auto m = transformed_vertices(current_frame().texture() == boost::none);
 		if (current_frame().texture() != boost::none)
 		{
 			if (current_frame().texture_rect() == boost::none)
@@ -291,7 +314,7 @@ namespace neogfx
 		}
 		else if (current_frame().colour() != boost::none)
 		{
-			aGraphicsContext.fill_shape(position() - origin(), m, *current_frame().colour());
+			aGraphicsContext.fill_shape(m, *current_frame().colour());
 		}
 	}
 }

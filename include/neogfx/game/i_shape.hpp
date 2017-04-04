@@ -21,10 +21,11 @@
 #include <neogfx/neogfx.hpp>
 #include <chrono>
 #include <boost/optional.hpp>
+#include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/texture.hpp>
 
 namespace neogfx
 {
@@ -43,6 +44,7 @@ namespace neogfx
 		virtual void set_transformation(const optional_mat33& aTransformation) = 0;
 	};
 
+	class i_widget;
 	class i_shape;
 
 	class i_shape_container
@@ -117,8 +119,10 @@ namespace neogfx
 		virtual void set_transformation_matrix(const optional_mat33& aTransformationMatrix) = 0;
 		// rendering
 	public:
+		virtual std::size_t vertex_count(bool aIncludeCentre = false) const = 0;
+		virtual vec3_list vertices(bool aIncludeCentre = false) const = 0;
+		virtual vec3_list transformed_vertices(bool aIncludeCentre = false) const = 0;
 		virtual bool update(const optional_time_point& aNow) = 0;
-		virtual vertex_list3 map() const = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 		// helpers
 	public:

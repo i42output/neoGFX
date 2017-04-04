@@ -108,6 +108,8 @@ namespace neogfx
 				result.push_back(aCentre.y);
 			}
 			coordinate theta = (aEndAngle - aStartAngle) / static_cast<coordinate>(segments);
+			if (aEndAngle == aStartAngle)
+				theta = boost::math::constants::two_pi<coordinate>() / static_cast<coordinate>(segments);
 			coordinate c = std::cos(theta);
 			coordinate s = std::sin(theta);
 			auto startCoordinate = mat22{ { std::cos(aStartAngle), std::sin(aStartAngle) },{ -std::sin(aStartAngle), std::cos(aStartAngle) } } *
@@ -125,9 +127,9 @@ namespace neogfx
 			return result;
 		}
 
-		inline std::vector<GLdouble> circle_vertices(const point& aCentre, dimension aRadius, bool aIncludeCentre)
+		inline std::vector<GLdouble> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre)
 		{
-			auto result = arc_vertices(aCentre, aRadius, 0, boost::math::constants::two_pi<coordinate>(), aIncludeCentre);
+			auto result = arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aIncludeCentre);
 			result.push_back(result[aIncludeCentre ? 2 : 0]);
 			result.push_back(result[aIncludeCentre ? 3 : 1]);
 			return result;
@@ -636,9 +638,9 @@ namespace neogfx
 		glCheck(glLineWidth(1.0f));
 	}
 
-	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen)
+	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
 	{
-		auto vertices = circle_vertices(aCentre, aRadius, false);
+		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, false);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
@@ -681,6 +683,21 @@ namespace neogfx
 					reset_clip();
 			}
 		}
+	}
+
+	void opengl_graphics_context::draw_shape(const vec2_list& aVertices, const pen& aPen)
+	{
+		vec2_list vertices;
+		vertices.reserve(aVertices.size() + 1);
+		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
+		vertices.push_back(vertices[0]);
+		std::vector<double> texCoords(vertices.size() * 2, 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size(), 
+			std::array <uint8_t, 4>{ { aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
 	}
 
 	void opengl_graphics_context::fill_rect(const rect& aRect, const fill& aFill)
@@ -733,7 +750,7 @@ namespace neogfx
 	{
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
-		auto vertices = circle_vertices(aCentre, aRadius, true);
+		auto vertices = circle_vertices(aCentre, aRadius, 0.0, true);
 		std::vector<double> texCoords(vertices.size(), 0.0);
 		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
 			std::array <uint8_t, 4>{ {
@@ -767,40 +784,6 @@ namespace neogfx
 		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
 		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
-		if (aFill.is<gradient>())
-			gradient_off();
-	}
-
-	void opengl_graphics_context::fill_shape(const point& aCentre, const vertex_list2& aVertices, const fill& aFill)
-	{
-		vec2 min = aVertices[0];
-		vec2 max = min;
-		for (auto const& v : aVertices)
-		{
-			min.x = std::min(min.x, v.x);
-			max.x = std::max(max.x, v.x);
-			min.y = std::min(min.y, v.y);
-			max.y = std::max(max.y, v.y);
-		}
-		if (aFill.is<gradient>())
-			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{min.x, min.y}, size{max.x - min.y, max.y - min.y} });
-		vertex_list2 vertices;
-		vertices.reserve(aVertices.size() + 2);
-		vertices.push_back(aCentre.to_vector());
-		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
-		vertices.push_back(vertices[1]);
-		std::vector<double> texCoords(vertices.size() * 2, 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
-			std::array <uint8_t, 4>{ {
-					static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-			std::array <uint8_t, 4>{});
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -840,6 +823,39 @@ namespace neogfx
 					gradient_off();
 			}
 		}
+	}
+
+	void opengl_graphics_context::fill_shape(const vec2_list& aVertices, const fill& aFill)
+	{
+		vec2 min = aVertices[0];
+		vec2 max = min;
+		for (auto const& v : aVertices)
+		{
+			min.x = std::min(min.x, v.x);
+			max.x = std::max(max.x, v.x);
+			min.y = std::min(min.y, v.y);
+			max.y = std::max(max.y, v.y);
+		}
+		if (aFill.is<gradient>())
+			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
+		vec2_list vertices;
+		vertices.reserve(aVertices.size());
+		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
+		vertices.push_back(vertices[1]);
+		std::vector<double> texCoords(vertices.size() * 2, 0.0);
+		std::vector<std::array<uint8_t, 4>> colours(vertices.size(), aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
+		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
+		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
+		if (aFill.is<gradient>())
+			gradient_off();
 	}
 
 	glyph_text opengl_graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const

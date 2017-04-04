@@ -32,6 +32,7 @@ namespace neogfx
 		rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		rectangle(const rectangle& aOther);
 	public:
-		virtual vertex_list3 map() const;
+		virtual std::size_t vertex_count(bool aIncludeCentre = false) const;
+		virtual vec3_list vertices(bool aIncludeCentre = false) const;
 	};
 }
