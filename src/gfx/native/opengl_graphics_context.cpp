@@ -100,18 +100,17 @@ namespace neogfx
 		inline std::vector<GLdouble> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
 		{
 			std::vector<GLdouble> result;
-			uint32_t segments = static_cast<uint32_t>(20 * std::sqrt(aRadius));
+			angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
+			uint32_t segments = static_cast<uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
+			angle theta = arc / static_cast<angle>(segments);
 			result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
 			if (aIncludeCentre)
 			{
 				result.push_back(aCentre.x);
 				result.push_back(aCentre.y);
 			}
-			coordinate theta = (aEndAngle - aStartAngle) / static_cast<coordinate>(segments);
-			if (aEndAngle == aStartAngle)
-				theta = boost::math::constants::two_pi<coordinate>() / static_cast<coordinate>(segments);
-			coordinate c = std::cos(theta);
-			coordinate s = std::sin(theta);
+			auto c = std::cos(theta);
+			auto s = std::sin(theta);
 			auto startCoordinate = mat22{ { std::cos(aStartAngle), std::sin(aStartAngle) },{ -std::sin(aStartAngle), std::cos(aStartAngle) } } *
 				vec2{ aRadius, 0.0 };
 			coordinate x = startCoordinate.x;
