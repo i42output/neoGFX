@@ -100,18 +100,17 @@ namespace neogfx
 		inline std::vector<GLdouble> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
 		{
 			std::vector<GLdouble> result;
-			uint32_t segments = static_cast<uint32_t>(20 * std::sqrt(aRadius));
+			angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
+			uint32_t segments = static_cast<uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
+			angle theta = arc / static_cast<angle>(segments);
 			result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
 			if (aIncludeCentre)
 			{
 				result.push_back(aCentre.x);
 				result.push_back(aCentre.y);
 			}
-			coordinate theta = (aEndAngle - aStartAngle) / static_cast<coordinate>(segments);
-			if (aEndAngle == aStartAngle)
-				theta = boost::math::constants::two_pi<coordinate>() / static_cast<coordinate>(segments);
-			coordinate c = std::cos(theta);
-			coordinate s = std::sin(theta);
+			auto c = std::cos(theta);
+			auto s = std::sin(theta);
 			auto startCoordinate = mat22{ { std::cos(aStartAngle), std::sin(aStartAngle) },{ -std::sin(aStartAngle), std::cos(aStartAngle) } } *
 				vec2{ aRadius, 0.0 };
 			coordinate x = startCoordinate.x;
@@ -498,6 +497,8 @@ namespace neogfx
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientSize", static_cast<int>(aGradient.size()));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
+		basic_point<float> gradientCentre = (aGradient.centre() != boost::none ? *aGradient.centre() : point{});
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
 		auto combinedStops = aGradient.combined_stops();
 		iGradientStopPositions.reserve(combinedStops.size());
 		iGradientStopColours.reserve(combinedStops.size());

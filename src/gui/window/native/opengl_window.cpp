@@ -114,7 +114,7 @@ namespace neogfx
 			if (processing_event())
 				return;
 
-			if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / *iFrameRate)
+			if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / (is_active() ? *iFrameRate : *iFrameRate / 10.0))
 				return;
 
 			if (!iEventHandler.native_window_ready_to_render())
