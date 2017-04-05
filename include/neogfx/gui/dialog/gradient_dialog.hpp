@@ -30,6 +30,7 @@ namespace neogfx
 {
 	class gradient_dialog : public dialog
 	{
+		class preview_box;
 	public:
 		gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient);
 	public:
@@ -39,6 +40,7 @@ namespace neogfx
 		gradient_widget& gradient_selector();
 	private:
 		void init();
+		void update_widgets();
 		void animate();
 	private:
 		vertical_layout iLayout;
@@ -69,8 +71,8 @@ namespace neogfx
 		double_spin_box iYCentreSpinBox;
 		vertical_spacer iSpacer1;
 		group_box iPreviewGroupBox;
-		framed_widget iPreview;
+		std::shared_ptr<i_widget> iPreview;
 		vertical_spacer iSpacer2;
-		neolib::callback_timer iAnimationTimer;
+		bool iUpdatingWidgets;
 	};
 }
