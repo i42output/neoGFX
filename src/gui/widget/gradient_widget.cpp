@@ -198,6 +198,10 @@ namespace neogfx
 			draw_colour_stop(aGraphicsContext, *i);
 		for (gradient::alpha_stop_list::const_iterator i = iSelection.alpha_begin(); i != iSelection.alpha_end(); ++i)
 			draw_alpha_stop(aGraphicsContext, *i);
+		if (iCurrentColourStop != boost::none)
+			draw_colour_stop(aGraphicsContext, **iCurrentColourStop);
+		if (iCurrentAlphaStop != boost::none)
+			draw_alpha_stop(aGraphicsContext, **iCurrentAlphaStop);
 	}
 
 	void gradient_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -223,12 +227,14 @@ namespace neogfx
 					iCurrentColourStop = static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
 					iCurrentAlphaStop = boost::none;
 					iTracking = true;
+					update();
 				}
 				else if (stopIter.is<gradient::alpha_stop_list::iterator>())
 				{
 					iCurrentAlphaStop = static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
 					iCurrentColourStop = boost::none;
 					iTracking = true;
+					update();
 				}
 				else
 				{
@@ -311,10 +317,11 @@ namespace neogfx
 			{
 				if (stopIter.is<gradient::colour_stop_list::iterator>())
 				{
+					auto iter = static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
 					auto selectColourAction = std::make_shared<action>("Select stop colour...");
-					selectColourAction->triggered([this, stopIter]()
+					selectColourAction->triggered([this, iter]()
 					{
-						auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
+						auto& stop = *iter;
 						colour_dialog cd{ *this, stop.second };
 						if (cd.exec() == dialog::Accepted)
 						{
@@ -323,12 +330,35 @@ namespace neogfx
 							gradient_changed.trigger();
 						}
 					});
-					auto deleteStopAction = std::make_shared<action>("Delete stop");
-					deleteStopAction->triggered([this, stopIter]()
+					auto splitStopAction = std::make_shared<action>("Split stop");
+					splitStopAction->triggered([this, iter]()
 					{
-						if (iCurrentColourStop != boost::none && *iCurrentColourStop == static_variant_cast<gradient::colour_stop_list::iterator>(stopIter))
+						auto prev = iter;
+						if (prev != iSelection.colour_begin())
+							--prev;
+						auto next = iter;
+						if (next != iSelection.colour_end() - 1)
+							++next;
+						double p1 = (iter->first + (prev)->first) / 2.0;
+						double p2 = (iter->first + (next)->first) / 2.0;
+						colour c = iter->second;
+						if (iCurrentColourStop != boost::none && *iCurrentColourStop == iter)
 							iCurrentColourStop = boost::none;
-						iSelection.erase_stop(static_variant_cast<gradient::colour_stop_list::iterator>(stopIter));
+						if (iter != prev && iter != next)
+							iSelection.erase_stop(iter);
+						if (iter != prev)
+							iSelection.insert_colour_stop(p1)->second = c;
+						if (iter != next)
+							iSelection.insert_colour_stop(p2)->second = c;
+						update();
+						gradient_changed.trigger();
+					});
+					auto deleteStopAction = std::make_shared<action>("Delete stop");
+					deleteStopAction->triggered([this, iter]()
+					{
+						if (iCurrentColourStop != boost::none && *iCurrentColourStop == iter)
+							iCurrentColourStop = boost::none;
+						iSelection.erase_stop(iter);
 						update();
 						gradient_changed.trigger();
 					});
@@ -337,6 +367,7 @@ namespace neogfx
 					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
 					iMenu->menu().add_action(selectColourAction);
 					iMenu->menu().add_action(deleteStopAction);
+					iMenu->menu().add_action(splitStopAction);
 					if (!iInGradientDialog)
 						iMenu->menu().add_action(moreAction);
 					iMenu->exec();
@@ -386,6 +417,7 @@ namespace neogfx
 		}
 		iClicked == boost::none;
 		iTracking = false;
+		update();
 	}
 
 	void gradient_widget::mouse_moved(const point& aPosition)
@@ -394,7 +426,7 @@ namespace neogfx
 		if (iTracking)
 		{
 			double pos = gradient::normalized_position(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
-			double min = gradient::normalized_position(contents_rect().left() + STOP_WIDTH, contents_rect().left(), contents_rect().right() - 1.0);
+			const double min = 0.0001;
 			if (iCurrentColourStop != boost::none)
 			{
 				auto leftStop = *iCurrentColourStop;
