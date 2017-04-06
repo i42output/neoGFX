@@ -167,10 +167,26 @@ namespace neogfx
 				result.push_back(aRect.centre().x);
 				result.push_back(aRect.centre().y);
 			}
+			result.insert(result.end(), (aRect.top_left() + point{ 0.0, aRadius }).x);
+			result.insert(result.end(), (aRect.top_left() + point{ 0.0, aRadius }).y);
 			result.insert(result.end(), topLeft.begin(), topLeft.end());
+			result.insert(result.end(), (aRect.top_left() + point{ aRadius, 0.0 }).x);
+			result.insert(result.end(), (aRect.top_left() + point{ aRadius, 0.0 }).y);
+			result.insert(result.end(), (aRect.top_right() + point{ -aRadius, 0.0 }).x);
+			result.insert(result.end(), (aRect.top_right() + point{ -aRadius, 0.0 }).y);
 			result.insert(result.end(), topRight.begin(), topRight.end());
+			result.insert(result.end(), (aRect.top_right() + point{ 0.0, aRadius }).x);
+			result.insert(result.end(), (aRect.top_right() + point{ 0.0, aRadius }).y);
+			result.insert(result.end(), (aRect.bottom_right() + point{ 0.0, -aRadius }).x);
+			result.insert(result.end(), (aRect.bottom_right() + point{ 0.0, -aRadius }).y);
 			result.insert(result.end(), bottomRight.begin(), bottomRight.end());
+			result.insert(result.end(), (aRect.bottom_right() + point{ -aRadius, 0.0 }).x);
+			result.insert(result.end(), (aRect.bottom_right() + point{ -aRadius, 0.0 }).y);
+			result.insert(result.end(), (aRect.bottom_left() + point{ aRadius, 0.0 }).x);
+			result.insert(result.end(), (aRect.bottom_left() + point{ aRadius, 0.0 }).y);
 			result.insert(result.end(), bottomLeft.begin(), bottomLeft.end());
+			result.insert(result.end(), (aRect.bottom_left() + point{ 0.0, -aRadius }).x);
+			result.insert(result.end(), (aRect.bottom_left() + point{ 0.0, -aRadius }).y);
 			result.push_back(result[aIncludeCentre ? 2 : 0]);
 			result.push_back(result[aIncludeCentre ? 3 : 1]);
 			return result;
@@ -495,6 +511,7 @@ namespace neogfx
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("radGradientAngle", static_cast<float>(aGradient.angle()));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientSize", static_cast<int>(aGradient.size()));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
 		basic_point<float> gradientCentre = (aGradient.centre() != boost::none ? *aGradient.centre() : point{});

@@ -4,6 +4,7 @@ uniform float posViewportTop;
 uniform vec2 posTopLeft;
 uniform vec2 posBottomRight;
 uniform int nGradientDirection;
+uniform float radGradientAngle;
 uniform int nGradientSize;
 uniform int nGradientShape;
 uniform int nStopCount;
@@ -62,8 +63,17 @@ void main()
 		gradientPos = (viewPos.y - posTopLeft.y) / (posBottomRight.y - posTopLeft.y);
 	else if (nGradientDirection == 1) /* horizontal */
 		gradientPos = (viewPos.x - posTopLeft.x) / (posBottomRight.x - posTopLeft.x);
-	else if (nGradientDirection == 2) /* diagonal - todo */
-		gradientPos = (viewPos.x - posTopLeft.x) / (posBottomRight.x - posTopLeft.x);
+	else if (nGradientDirection == 2) /* diagonal - */
+	{
+		vec2 pos = viewPos - posTopLeft;
+		vec2 s = posBottomRight - posTopLeft;
+		vec2 centre = s / 2.0;
+		pos = pos - centre;
+		mat2 rot = mat2(cos(radGradientAngle), sin(radGradientAngle), -sin(radGradientAngle), cos(radGradientAngle));
+		pos = rot * pos;
+		pos = pos + centre;
+		gradientPos = pos.y / s.y;
+	}
 	else /* radial */
 	{
 	    vec2 pos = viewPos - posTopLeft;

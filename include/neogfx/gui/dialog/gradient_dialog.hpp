@@ -25,6 +25,7 @@
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
+#include <neogfx/gui/widget/slider.hpp>
 
 namespace neogfx
 {
@@ -41,7 +42,6 @@ namespace neogfx
 	private:
 		void init();
 		void update_widgets();
-		void animate();
 	private:
 		vertical_layout iLayout;
 		horizontal_layout iLayout2;
@@ -55,6 +55,11 @@ namespace neogfx
 		radio_button iDirectionDiagonalRadioButton;
 		radio_button iDirectionRadialRadioButton;
 		horizontal_layout iLayout5;
+		group_box iOrientationGroupBox;
+		grid_layout iOrientationLayout;
+		label iAngle;
+		double_spin_box iAngleSpinBox;
+		double_slider iAngleSlider;
 		group_box iSizeGroupBox;
 		radio_button iSizeClosestSideRadioButton;
 		radio_button iSizeFarthestSideRadioButton;
@@ -69,6 +74,7 @@ namespace neogfx
 		double_spin_box iXCentreSpinBox;
 		label iYCentre;
 		double_spin_box iYCentreSpinBox;
+		horizontal_spacer iSpacer0;
 		vertical_spacer iSpacer1;
 		group_box iPreviewGroupBox;
 		std::shared_ptr<i_widget> iPreview;

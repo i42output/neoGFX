@@ -338,6 +338,7 @@ namespace neogfx
 		iColourStops{{0.0, colour::Black}, {1.0, colour::Black}},
 		iAlphaStops{{0.0, 255}, {1.0, 255}},
 		iDirection(Horizontal),
+		iAngle(0.0),
 		iShape(Ellipse),
 		iSize(FarthestCorner)
 	{
@@ -347,6 +348,7 @@ namespace neogfx
 		iColourStops{{0.0, aColour}, {1.0, aColour}},
 		iAlphaStops{{0.0, 255}, {1.0, 255}},
 		iDirection(aDirection),
+		iAngle(0.0),
 		iShape(Ellipse),
 		iSize(FarthestCorner)
 	{
@@ -356,6 +358,7 @@ namespace neogfx
 		iColourStops{{0.0, aColour1}, {1.0, aColour2}},
 		iAlphaStops{{0.0, 255}, {1.0, 255}},
 		iDirection(aDirection),
+		iAngle(0.0),
 		iShape(Ellipse),
 		iSize(FarthestCorner)
 	{
@@ -365,6 +368,7 @@ namespace neogfx
 		iColourStops{!aColourStops.empty() ? aColourStops : colour_stop_list{{0.0, colour::Black}, {1.0, colour::Black}}},
 		iAlphaStops{{{0.0, 255}, {1.0, 255}}},
 		iDirection(aDirection),
+		iAngle(0.0),
 		iShape(Ellipse),
 		iSize(FarthestCorner)
 	{
@@ -375,6 +379,7 @@ namespace neogfx
 		iColourStops{!aColourStops.empty() ? aColourStops : colour_stop_list{{0.0, colour::Black}, {1.0, colour::Black}}},
 		iAlphaStops{!aAlphaStops.empty() ? aAlphaStops : alpha_stop_list{{0.0, 255}, {1.0, 255}}},
 		iDirection(aDirection),
+		iAngle(0.0),
 		iShape(Ellipse),
 		iSize(FarthestCorner)
 	{
@@ -622,12 +627,33 @@ namespace neogfx
 	void gradient::set_direction(direction_e aDirection)
 	{
 		iDirection = aDirection;
+		if (iDirection != Diagonal)
+			iAngle = 0.0;
+		if (iDirection != Radial)
+			iCentre = optional_point{};
 	}
 
 	gradient gradient::with_direction(direction_e aDirection) const
 	{
 		gradient result = *this;
 		result.set_direction(aDirection);
+		return result;
+	}
+
+	double gradient::angle() const
+	{
+		return iAngle;
+	}
+
+	void gradient::set_angle(double aAngle)
+	{
+		iAngle = aAngle;
+	}
+
+	gradient gradient::with_angle(double aAngle) const
+	{
+		gradient result = *this;
+		result.set_angle(aAngle);
 		return result;
 	}
 
@@ -694,7 +720,8 @@ namespace neogfx
 			direction() == aOther.direction() &&
 			shape() == aOther.shape() &&
 			size() == aOther.size() &&
-			centre() == aOther.centre();
+			centre() == aOther.centre() &&
+			angle() == aOther.angle();
 	}
 
 	bool gradient::operator!=(const gradient& aOther) const
@@ -704,7 +731,7 @@ namespace neogfx
 
 	bool gradient::operator<(const gradient& aOther) const
 	{
-		return std::tie(iColourStops, iAlphaStops, iDirection, iShape, iSize, iCentre) < std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection, aOther.iShape, aOther.iSize, aOther.iCentre);
+		return std::tie(iColourStops, iAlphaStops, iDirection, iAngle, iShape, iSize, iCentre) < std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection, aOther.iAngle, aOther.iShape, aOther.iSize, aOther.iCentre);
 	}
 
 	double gradient::normalized_position(double aPos, double aStart, double aEnd)

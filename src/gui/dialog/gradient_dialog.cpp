@@ -28,7 +28,7 @@ namespace neogfx
 	{
 	public:
 		preview_box(gradient_dialog& aOwner) :
-			framed_widget(aOwner.iPreviewGroupBox.item_layout()), 
+			framed_widget(aOwner.iPreviewGroupBox.item_layout()),
 			iOwner(aOwner),
 			iAnimationTimer{ app::instance(), [this](neolib::callback_timer& aTimer)
 			{
@@ -110,6 +110,11 @@ namespace neogfx
 		iDirectionDiagonalRadioButton{ iDirectionGroupBox.item_layout(), "Diagonal" },
 		iDirectionRadialRadioButton{ iDirectionGroupBox.item_layout(), "Radial" },
 		iLayout5{ iLayout3 },
+		iOrientationGroupBox{ iLayout5, "Orientation" },
+		iOrientationLayout{ iOrientationGroupBox.layout() },
+		iAngle{ (iOrientationGroupBox.set_item_layout(iOrientationLayout), iOrientationLayout), "Angle:" },
+		iAngleSpinBox{ iOrientationLayout },
+		iAngleSlider{ iOrientationLayout },
 		iSizeGroupBox{ iLayout5, "Size" },
 		iSizeClosestSideRadioButton{ iSizeGroupBox.item_layout(), "Closest side" },
 		iSizeFarthestSideRadioButton{ iSizeGroupBox.item_layout(), "Farthest side" },
@@ -120,10 +125,11 @@ namespace neogfx
 		iShapeCircleRadioButton{ iShapeGroupBox.item_layout(), "Circle" },
 		iCentreGroupBox{ iLayout5, "Centre" },
 		iCentreLayout{ iCentreGroupBox.layout() },
-		iXCentre { iCentreLayout, "X:" },
+		iXCentre{ (iCentreGroupBox.set_item_layout(iCentreLayout), iCentreLayout), "X:" },
 		iXCentreSpinBox { iCentreLayout },
-		iYCentre { iCentreLayout, "Y:" },
+		iYCentre{ iCentreLayout, "Y:" },
 		iYCentreSpinBox { iCentreLayout },
+		iSpacer0{ iLayout5 },
 		iSpacer1{ iLayout3 },
 		iPreviewGroupBox{ iLayout4, "Preview" },
 		iPreview{ new preview_box{*this} },
@@ -164,8 +170,14 @@ namespace neogfx
 		iLayout3.set_spacing(16.0);
 		iLayout5.set_alignment(alignment::Top);
 
+		iAngleSpinBox.set_minimum(0.0);
+		iAngleSpinBox.set_maximum(360.0);
+		iAngleSpinBox.set_step(0.1);
+		iAngleSpinBox.set_format("%.1f");
+		iAngleSlider.set_minimum(0.0);
+		iAngleSlider.set_maximum(360.0);
+		iAngleSlider.set_step(0.1);
 		iCentreGroupBox.set_checkable(true);
-		iCentreGroupBox.set_item_layout(iCentreLayout);
 		iXCentreSpinBox.set_minimum(-1.0);
 		iXCentreSpinBox.set_maximum(1.0);
 		iXCentreSpinBox.set_step(0.001);
@@ -181,6 +193,9 @@ namespace neogfx
 		iDirectionVerticalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Vertical)); update_widgets(); });
 		iDirectionDiagonalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Diagonal)); update_widgets(); });
 		iDirectionRadialRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Radial)); update_widgets(); });
+
+		iAngleSpinBox.value_changed([this]() { iGradientSelector.set_gradient(gradient().with_angle(to_rad(iAngleSpinBox.value()))); update_widgets(); });
+		iAngleSlider.value_changed([this]() { iGradientSelector.set_gradient(gradient().with_angle(to_rad(iAngleSlider.value()))); update_widgets(); });
 
 		iSizeClosestSideRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient::ClosestSide)); update_widgets(); });
 		iSizeFarthestSideRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_size(gradient::FarthestSide)); update_widgets(); });
@@ -212,11 +227,12 @@ namespace neogfx
 		if (iUpdatingWidgets)
 			return;
 		iUpdatingWidgets = true;
-		iDirectionDiagonalRadioButton.enable(false); // todo
 		iDirectionHorizontalRadioButton.set_checked(gradient().direction() == gradient::Horizontal);
 		iDirectionVerticalRadioButton.set_checked(gradient().direction() == gradient::Vertical);
 		iDirectionDiagonalRadioButton.set_checked(gradient().direction() == gradient::Diagonal);
 		iDirectionRadialRadioButton.set_checked(gradient().direction() == gradient::Radial);
+		iAngleSpinBox.set_value(to_deg(gradient().angle()));
+		iAngleSlider.set_value(to_deg(gradient().angle()));
 		iSizeClosestSideRadioButton.set_checked(gradient().size() == gradient::ClosestSide);
 		iSizeFarthestSideRadioButton.set_checked(gradient().size() == gradient::FarthestSide);
 		iSizeClosestCornerRadioButton.set_checked(gradient().size() == gradient::ClosestCorner);
@@ -236,12 +252,19 @@ namespace neogfx
 		{
 		case gradient::Vertical:
 		case gradient::Horizontal:
+			iOrientationGroupBox.hide();
+			iSizeGroupBox.hide();
+			iShapeGroupBox.hide();
+			iCentreGroupBox.hide();
+			break;
 		case gradient::Diagonal:
+			iOrientationGroupBox.show();
 			iSizeGroupBox.hide();
 			iShapeGroupBox.hide();
 			iCentreGroupBox.hide();
 			break;
 		case gradient::Radial:
+			iOrientationGroupBox.hide();
 			iSizeGroupBox.show();
 			iShapeGroupBox.show();
 			iCentreGroupBox.show();

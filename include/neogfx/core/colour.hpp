@@ -856,6 +856,9 @@ namespace neogfx
 		direction_e direction() const;
 		void set_direction(direction_e aDirection);
 		gradient with_direction(direction_e aDirection) const;
+		double angle() const;
+		void set_angle(double aAngle);
+		gradient with_angle(double aAngle) const;
 		shape_e shape() const;
 		void set_shape(shape_e aShape);
 		gradient with_shape(shape_e aShape) const;
@@ -882,6 +885,7 @@ namespace neogfx
 		colour_stop_list iColourStops;
 		alpha_stop_list iAlphaStops;
 		direction_e iDirection;
+		double iAngle;
 		shape_e iShape;
 		size_e iSize;
 		optional_point iCentre;
