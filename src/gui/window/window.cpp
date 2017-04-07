@@ -265,6 +265,11 @@ namespace neogfx
 			native_window_mouse_entered();
 	}
 
+	bool window::metrics_available() const
+	{
+		return native_window().metrics_available();
+	}
+
 	size window::extents() const
 	{
 		return native_window().extents();
@@ -1033,7 +1038,7 @@ namespace neogfx
 	void window::dismiss_children(const i_widget* aClickedWidget)
 	{
 		dismissing_children.trigger(aClickedWidget);
-		neolib::scoped_flag sf(iDismissingChildren);
+		neolib::scoped_flag sf{ iDismissingChildren };
 		if ((style() & window::RequiresOwnerFocus) != window::RequiresOwnerFocus)
 		{
 			for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)

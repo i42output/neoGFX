@@ -75,6 +75,11 @@ namespace neogfx
 		return iPixelDensityDpi.cy;
 	}
 
+	bool detail::screen_metrics::metrics_available() const
+	{
+		return false;
+	}
+
 	size detail::screen_metrics::extents() const
 	{
 		throw unsupported_function();

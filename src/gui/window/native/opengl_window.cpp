@@ -222,6 +222,11 @@ namespace neogfx
 		return iFrameBufferSize;
 	}
 
+	bool opengl_window::metrics_available() const
+	{
+		return true;
+	}
+
 	size opengl_window::extents() const
 	{
 		return surface_size();

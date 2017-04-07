@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <neolib/raii.hpp>
 #include "slider.hpp"
 
 namespace neogfx
@@ -124,7 +125,7 @@ namespace neogfx
 	inline void basic_slider<T>::set_normalized_value(double aValue)
 	{
 		aValue = std::max(0.0, std::min(1.0, aValue));
-		iSettingNormalizedValue = true;
+		neolib::scoped_flag sf{ iSettingNormalizedValue };
 		auto range = maximum() - minimum();
 		auto denormalized = range * aValue + minimum();
 		if (std::is_integral<value_type>())

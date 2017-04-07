@@ -160,7 +160,7 @@ namespace neogfx
 		{
 			if (!iOpeningSubMenu && aSubMenu.item_count() > 0)
 			{
-				neolib::scoped_flag sf(iOpeningSubMenu);
+				neolib::scoped_flag sf{ iOpeningSubMenu };
 				auto& itemWidget = layout().get_widget<menu_item_widget>(menu().find_item(aSubMenu));
 				close_sub_menu();
 				iOpenSubMenu->set_menu(aSubMenu, itemWidget.sub_menu_position());

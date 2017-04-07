@@ -102,6 +102,13 @@ namespace neogfx
 		}
 	}
 
+	void slider_impl::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+		if (aButton == mouse_button::Left)
+			set_normalized_value(0.5);
+	}
+
 	void slider_impl::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		widget::mouse_button_released(aButton, aPosition);

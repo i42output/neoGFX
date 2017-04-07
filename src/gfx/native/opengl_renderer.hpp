@@ -43,6 +43,7 @@ namespace neogfx
 		public:
 			virtual dimension horizontal_dpi() const;
 			virtual dimension vertical_dpi() const;
+			virtual bool metrics_available() const;
 			virtual size extents() const;
 			virtual dimension em_size() const;
 			virtual subpixel_format_e subpixel_format() const;

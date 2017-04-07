@@ -30,6 +30,11 @@ namespace neogfx
 	{
 	}
 
+	bool spacer::device_metrics_forwarder::metrics_available() const
+	{
+		return iOwner.parent().device_metrics().metrics_available();
+	}
+
 	size spacer::device_metrics_forwarder::extents() const
 	{
 		return iOwner.parent().device_metrics().extents();

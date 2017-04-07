@@ -657,6 +657,7 @@ namespace neogfx
 	class i_device_metrics : public i_device_resolution
 	{
 	public:
+		virtual bool metrics_available() const = 0;
 		virtual size extents() const = 0;
 		virtual dimension em_size() const = 0;
 	};
@@ -686,6 +687,7 @@ namespace neogfx
 	{
 	public:
 		struct bad_parameter : std::logic_error { bad_parameter() : std::logic_error("neogfx::units_converter::bad_parameter") {} };
+		struct device_metrics_unavailable : std::logic_error { device_metrics_unavailable() : std::logic_error("neogfx::units_converter::device_metrics_unavailable") {} };
 		// construction
 	public:
 		units_converter() = delete;

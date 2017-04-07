@@ -42,6 +42,7 @@ namespace neogfx
 		typedef std::map<cell_coordinates, item_list::iterator, std::less<cell_coordinates>, boost::pool_allocator<std::pair<cell_coordinates, item_list::iterator>>> cell_list;
 		typedef std::vector<std::pair<cell_coordinates, cell_coordinates>> span_list;
 	public:
+		grid_layout();
 		grid_layout(i_widget& aParent);
 		grid_layout(i_layout& aParent);
 		grid_layout(cell_coordinate aRows, cell_coordinate aColumns, i_widget& aParent);

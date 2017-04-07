@@ -538,6 +538,11 @@ namespace neogfx
 		neogfx::draw_glyph_text(*this, aPoint, aTextBegin, aTextEnd, aFont, aColour);
 	}
 
+	bool graphics_context::metrics_available() const
+	{
+		return true;
+	}
+
 	size graphics_context::extents() const
 	{
 		return iExtents;

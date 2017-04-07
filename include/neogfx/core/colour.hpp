@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
+#include <neolib/variant.hpp>
 #include "geometry.hpp"
 #include "hsl_colour.hpp"
 #include "hsv_colour.hpp"
@@ -797,6 +798,14 @@ namespace neogfx
 			Diagonal	= 2,
 			Radial		= 3
 		};
+		enum corner_e
+		{
+			TopLeft		= 0,
+			TopRight	= 1,
+			BottomRight	= 2,
+			BottomLeft	= 3
+		};
+		typedef neolib::variant<corner_e, double> orientation_type;
 		enum shape_e
 		{
 			Ellipse		= 0,
@@ -856,9 +865,9 @@ namespace neogfx
 		direction_e direction() const;
 		void set_direction(direction_e aDirection);
 		gradient with_direction(direction_e aDirection) const;
-		double angle() const;
-		void set_angle(double aAngle);
-		gradient with_angle(double aAngle) const;
+		orientation_type orientation() const;
+		void set_orientation(orientation_type aOrientation);
+		gradient with_orientation(orientation_type aOrientation) const;
 		shape_e shape() const;
 		void set_shape(shape_e aShape);
 		gradient with_shape(shape_e aShape) const;
@@ -885,7 +894,7 @@ namespace neogfx
 		colour_stop_list iColourStops;
 		alpha_stop_list iAlphaStops;
 		direction_e iDirection;
-		double iAngle;
+		orientation_type iOrientation;
 		shape_e iShape;
 		size_e iSize;
 		optional_point iCentre;

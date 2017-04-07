@@ -35,6 +35,7 @@ namespace neogfx
 		public:
 			device_metrics_forwarder(widget& aOwner);
 		public:
+			virtual bool metrics_available() const;
 			virtual size extents() const;
 			virtual dimension horizontal_dpi() const;
 			virtual dimension vertical_dpi() const;

@@ -26,6 +26,14 @@
 
 namespace neogfx
 {
+	grid_layout::grid_layout() :
+		layout(), iRowLayout(*this)
+	{
+		iRowLayout.set_margins(neogfx::margins{});
+		iRowLayout.set_spacing(spacing());
+		iRowLayout.set_always_use_spacing(true);
+	}
+
 	grid_layout::grid_layout(i_widget& aParent) :
 		layout(aParent), iRowLayout(*this)
 	{

@@ -187,6 +187,7 @@ namespace neogfx
 		// implementation
 		// from i_device_metrics
 	public:
+		virtual bool metrics_available() const;
 		virtual size extents() const;
 		virtual dimension horizontal_dpi() const;
 		virtual dimension vertical_dpi() const;

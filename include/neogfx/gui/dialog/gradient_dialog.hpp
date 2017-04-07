@@ -34,6 +34,7 @@ namespace neogfx
 		class preview_box;
 	public:
 		gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient);
+		~gradient_dialog();
 	public:
 		const neogfx::gradient& gradient() const;
 		void set_gradient(const neogfx::gradient& aGradient);
@@ -56,10 +57,18 @@ namespace neogfx
 		radio_button iDirectionRadialRadioButton;
 		horizontal_layout iLayout5;
 		group_box iOrientationGroupBox;
-		grid_layout iOrientationLayout;
+		group_box iStartingFromGroupBox;
+		radio_button iTopLeftRadioButton;
+		radio_button iTopRightRadioButton;
+		radio_button iBottomRightRadioButton;
+		radio_button iBottomLeftRadioButton;
+		radio_button iAngleRadioButton;
+		vertical_layout iLayout6;
+		group_box iAngleGroupBox;
 		label iAngle;
 		double_spin_box iAngleSpinBox;
 		double_slider iAngleSlider;
+		vertical_spacer iSpacer1;
 		group_box iSizeGroupBox;
 		radio_button iSizeClosestSideRadioButton;
 		radio_button iSizeFarthestSideRadioButton;
@@ -69,16 +78,15 @@ namespace neogfx
 		radio_button iShapeEllipseRadioButton;
 		radio_button iShapeCircleRadioButton;
 		group_box iCentreGroupBox;
-		grid_layout iCentreLayout;
 		label iXCentre;
 		double_spin_box iXCentreSpinBox;
 		label iYCentre;
 		double_spin_box iYCentreSpinBox;
-		horizontal_spacer iSpacer0;
-		vertical_spacer iSpacer1;
+		horizontal_spacer iSpacer2;
+		vertical_spacer iSpacer3;
 		group_box iPreviewGroupBox;
 		std::shared_ptr<i_widget> iPreview;
-		vertical_spacer iSpacer2;
+		vertical_spacer iSpacer4;
 		bool iUpdatingWidgets;
 	};
 }

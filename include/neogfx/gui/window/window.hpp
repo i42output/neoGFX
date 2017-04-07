@@ -78,6 +78,7 @@ namespace neogfx
 		virtual bool is_managing_layout() const;
 		virtual void layout_items_completed();
 	public:
+		virtual bool metrics_available() const;
 		virtual size extents() const;
 		virtual dimension horizontal_dpi() const;
 		virtual dimension vertical_dpi() const;

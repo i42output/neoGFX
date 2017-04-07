@@ -49,6 +49,12 @@ namespace neogfx
 		void set_item_layout(std::shared_ptr<i_layout> aItemLayout);
 		const i_layout& item_layout() const;
 		i_layout& item_layout();
+		template <typename LayoutT>
+		i_layout& with_item_layout()
+		{
+			set_item_layout(std::make_shared<LayoutT>());
+			return item_layout();
+		}
 	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:

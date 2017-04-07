@@ -50,6 +50,7 @@ namespace neogfx
 		public:
 			device_metrics_forwarder(i_layout& aOwner);
 		public:
+			virtual bool metrics_available() const;
 			virtual size extents() const;
 			virtual dimension horizontal_dpi() const;
 			virtual dimension vertical_dpi() const;
@@ -159,7 +160,7 @@ namespace neogfx
 		template <typename AxisPolicy>
 		void do_layout_items(const point& aPosition, const size& aSize);
 	private:
-		i_widget* iOwner;
+		mutable i_widget* iOwner;
 		i_layout* iParent;
 		device_metrics_forwarder iDeviceMetricsForwarder;
 		units_context iUnitsContext;

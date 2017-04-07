@@ -31,6 +31,11 @@ namespace neogfx
 	{
 	}
 
+	bool layout::device_metrics_forwarder::metrics_available() const
+	{
+		return iOwner.owner() != nullptr && iOwner.owner()->device_metrics().metrics_available();
+	}
+
 	size layout::device_metrics_forwarder::extents() const
 	{
 		if (iOwner.owner() == nullptr)
@@ -121,12 +126,17 @@ namespace neogfx
 
 	i_widget* layout::owner() const
 	{
+		if (iOwner == nullptr && parent() != nullptr)
+			return (iOwner = parent()->owner());
 		return iOwner;
 	}
 
 	void layout::set_owner(i_widget* aOwner)
 	{
 		iOwner = aOwner;
+		for (auto& i : iItems)
+			if (i.get().is<layout_item::layout_pointer>() && static_variant_cast<layout_item::layout_pointer&>(i.get())->owner() == nullptr)
+				static_variant_cast<layout_item::layout_pointer&>(i.get())->set_owner(aOwner);
 	}
 
 	i_layout* layout::parent() const

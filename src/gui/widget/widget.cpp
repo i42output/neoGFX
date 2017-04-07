@@ -32,6 +32,11 @@ namespace neogfx
 	{
 	}
 
+	bool widget::device_metrics_forwarder::metrics_available() const
+	{
+		return true;
+	}
+
 	size widget::device_metrics_forwarder::extents() const
 	{
 		return iOwner.iSize;

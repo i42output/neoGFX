@@ -60,6 +60,7 @@ namespace neogfx
 		virtual void* rendering_target_texture_handle() const;
 		virtual size rendering_target_texture_extents() const;
 	public:
+		virtual bool metrics_available() const;
 		virtual size extents() const;
 		virtual dimension horizontal_dpi() const;
 		virtual dimension vertical_dpi() const;
