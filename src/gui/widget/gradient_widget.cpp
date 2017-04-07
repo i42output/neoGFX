@@ -342,8 +342,7 @@ namespace neogfx
 						double p1 = (iter->first + (prev)->first) / 2.0;
 						double p2 = (iter->first + (next)->first) / 2.0;
 						colour c = iter->second;
-						if (iCurrentColourStop != boost::none && *iCurrentColourStop == iter)
-							iCurrentColourStop = boost::none;
+						iCurrentColourStop = boost::none;
 						if (iter != prev && iter != next)
 							iSelection.erase_stop(iter);
 						if (iter != prev)
@@ -356,8 +355,7 @@ namespace neogfx
 					auto deleteStopAction = std::make_shared<action>("Delete stop");
 					deleteStopAction->triggered([this, iter]()
 					{
-						if (iCurrentColourStop != boost::none && *iCurrentColourStop == iter)
-							iCurrentColourStop = boost::none;
+						iCurrentColourStop = boost::none;
 						iSelection.erase_stop(iter);
 						update();
 						gradient_changed.trigger();
