@@ -68,7 +68,6 @@ namespace neogfx
 		label iAngle;
 		double_spin_box iAngleSpinBox;
 		double_slider iAngleSlider;
-		vertical_spacer iSpacer1;
 		group_box iSizeGroupBox;
 		radio_button iSizeClosestSideRadioButton;
 		radio_button iSizeFarthestSideRadioButton;

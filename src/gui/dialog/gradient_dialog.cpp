@@ -122,7 +122,6 @@ namespace neogfx
 		iAngle{ iAngleGroupBox.with_item_layout<grid_layout>(), "Angle:" },
 		iAngleSpinBox{ iAngleGroupBox.item_layout() },
 		iAngleSlider{ iAngleGroupBox.item_layout() },
-		iSpacer1{ iLayout6 },
 		iSizeGroupBox{ iLayout5, "Size" },
 		iSizeClosestSideRadioButton{ iSizeGroupBox.item_layout(), "Closest side" },
 		iSizeFarthestSideRadioButton{ iSizeGroupBox.item_layout(), "Farthest side" },
@@ -180,7 +179,7 @@ namespace neogfx
 		iLayout3.set_margins(neogfx::margins{});
 		iLayout3.set_spacing(16.0);
 		iLayout5.set_alignment(alignment::Top);
-
+		iOrientationGroupBox.item_layout().set_alignment(alignment::Top);
 		iAngleSpinBox.set_minimum(-360.0);
 		iAngleSpinBox.set_maximum(360.0);
 		iAngleSpinBox.set_step(0.1);

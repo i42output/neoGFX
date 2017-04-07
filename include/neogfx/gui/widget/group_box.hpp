@@ -56,6 +56,8 @@ namespace neogfx
 			return item_layout();
 		}
 	public:
+		virtual neogfx::size_policy size_policy() const;
+	public:
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
 		virtual colour border_colour() const;

@@ -127,6 +127,14 @@ namespace neogfx
 		return *iItemLayout;
 	}
 
+	neogfx::size_policy group_box::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		else
+			return size_policy::Minimum;
+	}
+
 	void group_box::paint(graphics_context& aGraphicsContext) const
 	{
 		widget::paint(aGraphicsContext);
