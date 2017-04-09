@@ -104,6 +104,7 @@
     <ClInclude Include="..\..\..\include\neogfx\app\resource_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\colour.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\css.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\geometry.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsl_colour.hpp" />
@@ -278,6 +279,7 @@
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
     <ClCompile Include="..\..\..\src\app\style.cpp" />
     <ClCompile Include="..\..\..\src\core\colour.cpp" />
+    <ClCompile Include="..\..\..\src\core\css.cpp" />
     <ClCompile Include="..\..\..\src\core\event.cpp" />
     <ClCompile Include="..\..\..\src\core\geometry.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
