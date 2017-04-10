@@ -101,7 +101,7 @@ namespace neogfx
 	void spin_box_impl::set_normalized_value(double aValue, bool aUpdateTextBox)
 	{
 		aValue = std::max(0.0, std::min(1.0, aValue));
-		if (iNormalizedValue != aValue)
+		if (iNormalizedValue != aValue || (iTextBox.text().empty() && aUpdateTextBox))
 		{
 			iNormalizedValue = aValue;
 			if (aUpdateTextBox)

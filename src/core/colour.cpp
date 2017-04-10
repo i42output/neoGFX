@@ -699,7 +699,7 @@ namespace neogfx
 	void gradient::set_centre(const optional_point& aCentre)
 	{
 		iCentre = aCentre;
-		if (iCentre != boost::none)
+		if (iCentre != optional_point{})
 		{
 			iCentre->x = std::max(-1.0, std::min(1.0, iCentre->x));
 			iCentre->y = std::max(-1.0, std::min(1.0, iCentre->y));

@@ -27,6 +27,8 @@
 #include "hsv_colour.hpp"
 #include "colour.hpp"
 
+#if 0
+
 namespace neogfx
 {
 	class css
@@ -128,3 +130,5 @@ namespace neogfx
 		rule_list iRules;
 	};
 }
+
+#endif

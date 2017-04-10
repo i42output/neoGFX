@@ -856,7 +856,10 @@ namespace neogfx
 			max.y = std::max(max.y, v.y);
 		}
 		if (aFill.is<gradient>())
-			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
+			gradient_on(static_variant_cast<const gradient&>(aFill), 
+				rect{ 
+					point{ min.x, min.y }, 
+					size{ max.x - min.y, max.y - min.y } });
 		vec2_list vertices;
 		vertices.reserve(aVertices.size());
 		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());

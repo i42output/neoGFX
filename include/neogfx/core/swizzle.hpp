@@ -43,7 +43,7 @@ namespace neogfx
 	template <typename V, uint32_t S, uint32_t... Indexes>
 	struct swizzle
 	{
-	private:
+	public:
 		typedef V vector_type;
 		typedef typename vector_type::template rebind<S>::type sizzled_vector_type;
 		typedef typename vector_type::value_type value_type;

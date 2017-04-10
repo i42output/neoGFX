@@ -24,6 +24,8 @@
 
 using namespace std::string_literals;
 
+#if 0
+
 namespace neogfx
 {
 	css::selector::selector(type_e aType, const arguments_type& aArguments = arguments_type()) :
@@ -120,3 +122,5 @@ namespace neogfx
 	{
 	}
 }
+
+#endif

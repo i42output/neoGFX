@@ -161,17 +161,17 @@ namespace neogfx
 	inline boost::optional<double> basic_spin_box<T>::string_to_normalized_value(const std::string& aText) const
 	{
 		if (aText.empty())
-			return 0.0;
+			return boost::optional<double>{};
 		auto range = maximum() - minimum();
 		if (range == 0)
 			return 0.0;
 		std::istringstream iss(aText);
 		value_type result{};
 		if (!(iss >> result))
-			return boost::optional<double>();
+			return boost::optional<double>{};
 		std::string guff;
 		if (iss >> guff)
-			return boost::optional<double>();
+			return boost::optional<double>{};
 		return (static_cast<double>(result) - minimum()) / range;
 	}
 
