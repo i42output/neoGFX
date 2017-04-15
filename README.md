@@ -9,7 +9,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - support for stack, member sub-object and heap allocated widgets;
 - all strings are UTF-8;
 - uses standard C++ data types including using standard string classes and containers from the C++ standard library and Boost instead of non-standard proprietary ones;
-- no baggage: neoGFX is a pure GUI library;- 
+- no baggage: neoGFX is a pure GUI library;
 - support for OpenGL, DirectX and Vulkan.
 
 
