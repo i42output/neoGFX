@@ -18,11 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/app/app.hpp>
+#include <fstream>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/widget/menu_bar.hpp>
 #include <neogfx/gui/view/view_container.hpp>
+#include <neogfx/core/css.hpp>
 #include "new_project_dialog.hpp"
 
 namespace ng = neogfx;
@@ -88,6 +90,9 @@ int main(int argc, char* argv[])
 				sBackgroundTexture2,
 				ng::colour::White.with_alpha(32));
 		});
+
+		std::ifstream styleSheet("text.css");
+		ng::css css{ styleSheet };
 
 		return app.exec();
 	}

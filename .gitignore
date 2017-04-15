@@ -186,3 +186,4 @@
 /tools/neoGUI/x64/Release
 /tools/neoGUI/neoGUI.VC.db
 /tools/neoGUI/neoGUI.VC.VC.opendb
+/tools/glsl2hpp/build/win32/vs2015/glsl2hpp.vcxproj.user

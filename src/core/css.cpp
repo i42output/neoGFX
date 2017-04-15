@@ -19,16 +19,14 @@
 
 #include <neogfx/neogfx.hpp>
 #include <string>
-#include <neolib/vecarray.hpp>
+#include <neolib/lexer.hpp>
 #include <neogfx/core/css.hpp>
 
 using namespace std::string_literals;
 
-#if 0
-
 namespace neogfx
 {
-	css::selector::selector(type_e aType, const arguments_type& aArguments = arguments_type()) :
+	css::selector::selector(type_e aType, const arguments_type& aArguments) :
 		iType(aType), iArguments(aArguments)
 	{
 	}
@@ -42,17 +40,13 @@ namespace neogfx
 	{
 	}
 
-	css::css(const std::string& aStyleSheet) : 
-		css(std::istringstream(aStyleSheet))
-	{
-	}
-
 	namespace
 	{
 		enum class token
 		{
 			Comment,
 			Whitespace,
+			Escape,
 			Comma,
 			Period,
 			Colon,
@@ -71,42 +65,53 @@ namespace neogfx
 		};
 
 		typedef neolib::lexer_atom<token> lexer_atom;
-		typedef neolib::lexer_rule<token> lexer_rule;
-		lexer_rule sLexerRules[] =
+		typedef neolib::lexer_rule<lexer_atom> lexer_rule;
+		const lexer_rule sLexerRules[] =
 		{
-			{{ ',', token::Comma }},
-			{{ '.', token::Period }},
-			{{ '/', token::Divide }},
-			{{ '*', token::Multiply }},
-			{{ ' ', token::Whitespace }}, {{ '\t', token::Whitespace }}, {{ '\r', token::Whitespace }}, {{ '\n', token::Whitespace }},
-			{{ ':', token::Colon }},
-			{{ token::Colon, token::Colon, token::DoubleColon }},
-			{{ '\\', token::Backslash }},
-			{{ token::Divide, token::Multiply, neolib::token_push(token::Comment) }},
-			{{ token::Comment, token::Multiply, token::Divide, neolib::token_pop(token::Comment) }},
-			{{ neolib::token_range<'0', '9'>, token::Integer }},
-			{{ token::Integer, token::Integer, token::Integer }},
-			{{ token::Integer, token::Period, token::Integer, token::Float }},
-			{{ token::Float, token::Integer, token::Float }},
-			{{ neolib::token_range<'A', 'Z'>, token::Symbol }},
-			{{ neolib::token_range<'a', 'z'>, token::Symbol }},
-			{{ token::Symbol, token::Symbol, token::Symbol }},
-			{{ token::Symbol, token::Integer, token::Symbol }},
-			{{ '"', token::DoubleQuote }},
-			{{ '\'', token::SingleQuote }},
-			{{ token::DoubleQuote, token::DoubleQuote, neolib::token_eat_left(neolib::token_eat_right(token::String)) }}, // empty string
-			{{ token::DoubleQuote, neolib::token_not(token::DoubleQuote), neolib::token_eat_left(neolib::token_push(token::String)) }},
-			{{ token::String, token::Backslash, neolib::token_any(), neolib::token_eat_middle(token::String) }},
-			{{ token::String, token::token_not(token::DoubleQuote), token::String }},
-			{{ token::String, token::DoubleQuote, neolib::token_pop(token::String) }},
-			{{ "color"s, token::PropertyColor }},
-			{{ "background"s, token::PropertyBackground }}
+			{ token::Comma, {{ ',' }} },
+			{ token::Period, {{ '.' }} },
+			{ token::Divide, {{ '/' }} },
+			{ token::Multiply, {{ '*' }} },
+			{ token::Whitespace, {{ ' ' }} },
+			{ token::Whitespace, {{ '\t' }} },
+			{ token::Whitespace, {{ '\r' }} },
+			{ token::Whitespace, {{ '\n' }} },
+			{ token::Colon, {{ ':' }} },
+			{ token::DoubleColon, {{ token::Colon, token::Colon }} },
+			{ token::Backslash, {{ '\\' }} },
+			{ neolib::token_eat(token::Escape), {{ token::Backslash, 't' }} },
+			{ neolib::token_eat(token::Escape), {{ token::Backslash, 'r' }} },
+			{ neolib::token_eat(token::Escape), {{ token::Backslash, 'n' }} },
+			{ neolib::token_push(token::Comment), {{ token::Divide, token::Multiply }} },
+			{ neolib::token_pop(token::Comment), {{ token::Multiply, token::Divide }} },
+			{ token::Integer, {{ neolib::token_range('0', '9') }} },
+			{ token::Integer, {{ token::Integer, token::Integer }} },
+			{ token::Float, {{ token::Integer, token::Period, token::Integer }} },
+			{ token::Float, {{ token::Float, token::Integer }} },
+			{ token::Symbol, {{ neolib::token_range('A', 'Z') }} },
+			{ token::Symbol, {{ neolib::token_range('a', 'z') }} },
+			{ token::Symbol, {{ token::Symbol, token::Symbol }} },
+			{ token::Symbol, {{ token::Symbol, token::Integer }} },
+			{ token::DoubleQuote, {{ '"' }} },
+			{ token::SingleQuote, {{ '\'' }} },
+			{ neolib::token_eat(neolib::token_eat(token::String)), {{ token::DoubleQuote, token::DoubleQuote }} }, // empty string
+			{ neolib::token_eat(neolib::token_push(token::String)), {{ token::DoubleQuote, neolib::token_not(token::DoubleQuote) }} },
+			{ token::String, {{ token::String, neolib::token_not(token::DoubleQuote) }} },
+			{ neolib::token_pop(token::String), {{ token::String, token::DoubleQuote }} },
+			{ token::PropertyColor, {{ "color"s }} },
+			{ token::PropertyBackground, {{ "background"s }} }
 		};
 	}
 
-	css::css(const std::istream& aStyleSheet)
+	css::css(const std::string& aStyleSheet)
 	{
-		neolib::lexer<token> lexer{ aStyleSheet };
+		std::istringstream iss(aStyleSheet);
+		parse(iss);
+	}
+
+	css::css(std::istream& aStyleSheet)
+	{
+		parse(aStyleSheet);
 	}
 
 	void css::accept(i_visitor& aVisitor) const
@@ -120,7 +125,12 @@ namespace neogfx
 
 	std::string css::to_string() const
 	{
+		/* todo */
+		return "";
+	}
+
+	void css::parse(std::istream& aStyleSheet)
+	{
+		static neolib::lexer<lexer_atom> sLexer{ aStyleSheet, std::cbegin(sLexerRules), std::cend(sLexerRules) };
 	}
 }
-
-#endif

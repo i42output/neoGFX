@@ -27,8 +27,6 @@
 #include "hsv_colour.hpp"
 #include "colour.hpp"
 
-#if 0
-
 namespace neogfx
 {
 	class css
@@ -117,18 +115,18 @@ namespace neogfx
 			virtual bool has_parent() = 0;
 			virtual i_visitor& parent() = 0;
 		public:
-			virtual void apply(const declaration_block& aDeclarations) = 0
+			virtual void apply(const declaration_block& aDeclarations) = 0;
 		};
 	public:
 		css(const std::string& aStyleSheet);
-		css(const std::istream& aStyleSheet);
+		css(std::istream& aStyleSheet);
 	public:
 		void accept(i_visitor& aVisitor) const;
 		const rule_list& rules() const;
 		std::string to_string() const;
 	private:
+		void parse(std::istream& aStyleSheet);
+	private:
 		rule_list iRules;
 	};
 }
-
-#endif

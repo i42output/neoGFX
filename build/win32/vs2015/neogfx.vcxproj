@@ -10,6 +10,9 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup>
+  <UseNativeEnvironment>true</UseNativeEnvironment>
+</PropertyGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -49,13 +52,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -65,8 +68,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -74,6 +76,7 @@
       <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
