@@ -62,6 +62,15 @@ namespace neogfx
 			Symbol,
 			PropertyColor,
 			PropertyBackground,
+			PropertyBackgroundAttachment,
+			PropertyBackgroundClip,
+			PropertyBackgroundColor,
+			PropertyBackgroundImage,
+			PropertyBackgroundOrigin,
+			PropertyBackgroundPosition,
+			PropertyBackgroundRepeat,
+			PropertyBackgroundSize,
+			PropertyBorder
 		};
 
 		typedef neolib::lexer_atom<token> lexer_atom;
@@ -79,9 +88,9 @@ namespace neogfx
 			{ token::Colon, {{ ':' }} },
 			{ token::DoubleColon, {{ token::Colon, token::Colon }} },
 			{ token::Backslash, {{ '\\' }} },
-			{ neolib::token_eat(token::Escape), {{ token::Backslash, 't' }} },
-			{ neolib::token_eat(token::Escape), {{ token::Backslash, 'r' }} },
-			{ neolib::token_eat(token::Escape), {{ token::Backslash, 'n' }} },
+			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\t'))), {{ token::Backslash, 't' }} },
+			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\r'))), {{ token::Backslash, 'r' }} },
+			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\n'))), {{ token::Backslash, 'n' }} },
 			{ neolib::token_push(token::Comment), {{ token::Divide, token::Multiply }} },
 			{ neolib::token_pop(token::Comment), {{ token::Multiply, token::Divide }} },
 			{ token::Integer, {{ neolib::token_range('0', '9') }} },
@@ -95,11 +104,23 @@ namespace neogfx
 			{ token::DoubleQuote, {{ '"' }} },
 			{ token::SingleQuote, {{ '\'' }} },
 			{ neolib::token_eat(neolib::token_eat(token::String)), {{ token::DoubleQuote, token::DoubleQuote }} }, // empty string
-			{ neolib::token_eat(neolib::token_push(token::String)), {{ token::DoubleQuote, neolib::token_not(token::DoubleQuote) }} },
-			{ token::String, {{ token::String, neolib::token_not(token::DoubleQuote) }} },
-			{ neolib::token_pop(token::String), {{ token::String, token::DoubleQuote }} },
+			{ neolib::token_eat(neolib::token_push(token::String)), {{ token::DoubleQuote }} },
+			{ token::String, {{ token::String, token::Escape }} },
+			{ token::String, {{ token::String, ' ' }} },
+			{ token::String, {{ token::String, '\t' }} },
+			{ token::String, {{ token::String, neolib::token_not(token::Whitespace) }} },
+			{ neolib::token_eat(neolib::token_keep(neolib::token_pop(token::String))), {{ token::String, token::DoubleQuote }} },
 			{ token::PropertyColor, {{ "color"s }} },
-			{ token::PropertyBackground, {{ "background"s }} }
+			{ token::PropertyBackground, {{ "background"s }} },
+			{ token::PropertyBackgroundAttachment, {{ "background-attachment"s }} },
+			{ token::PropertyBackgroundClip, {{ "background-clip"s }} },
+			{ token::PropertyBackgroundColor, {{ "background-color"s }} },
+			{ token::PropertyBackgroundImage, {{ "background-image"s }} },
+			{ token::PropertyBackgroundOrigin, {{ "background-origin"s }} },
+			{ token::PropertyBackgroundPosition, {{ "background-position"s }} },
+			{ token::PropertyBackgroundRepeat, {{ "background-repeat"s }} },
+			{ token::PropertyBackgroundSize, {{ "background-size"s }} },
+			{ token::PropertyBorder, {{ "border"s }} }
 		};
 	}
 
