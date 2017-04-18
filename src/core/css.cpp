@@ -51,10 +51,14 @@ namespace neogfx
 			Period,
 			Semicolon,
 			Colon,
-			DoubleColon, 
+			OpenBrace,
+			CloseBrace,
+			DoubleColon,
 			DoubleQuote,
 			SingleQuote,
 			Backslash,
+			Plus,
+			Minus,
 			Multiply,
 			Divide,
 			Integer,
@@ -81,12 +85,20 @@ namespace neogfx
 		{
 			{ token::Comma, {{ ',' }} },
 			{ token::Period, {{ '.' }} },
+			{ token::OpenBrace, {{ '{' }} },
+			{ token::CloseBrace, {{ '}' }} },
+			{ token::Plus, {{ '+' }} },
+			{ token::Minus, {{ '-' }} },
 			{ token::Divide, {{ '/' }} },
+			{ token::Divide, {{ token::Divide }} },
 			{ token::Multiply, {{ '*' }} },
+			{ token::Multiply, {{ token::Multiply }} },
 			{ token::Whitespace, {{ ' ' }} },
 			{ token::Whitespace, {{ '\t' }} },
 			{ token::Whitespace, {{ '\r' }} },
 			{ token::Whitespace, {{ '\n' }} },
+			{ token::Whitespace, {{ token::Whitespace }} },
+			{ token::Whitespace, {{ token::Whitespace, token::Whitespace }} },
 			{ token::Semicolon, {{ ';' }} },
 			{ token::Colon, {{ ':' }} },
 			{ token::Colon, {{ token::Colon }} },
@@ -97,7 +109,9 @@ namespace neogfx
 			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\n'))), {{ token::Backslash, 'n' }} },
 			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\''))), {{ token::Backslash, '\'' }} },
 			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\"'))), {{ token::Backslash, '\"' }} },
+			{ token::Comment, {{ token::Comment }} },
 			{ token::Comment, {{ token::Divide, token::Multiply }} },
+			{ token::Comment, {{ token::Comment, token::Comment }} },
 			{ token::Comment, {{ token::Comment, neolib::token_not(token::Multiply) }} },
 			{ token::Comment, {{ token::Comment, token::Multiply, neolib::token_not(token::Divide) }} },
 			{ neolib::token_end(token::Comment), {{ token::Comment, token::Multiply, token::Divide }} },
@@ -106,8 +120,11 @@ namespace neogfx
 			{ token::Integer, {{ token::Integer, token::Integer }} },
 			{ token::Float, {{ token::Integer, token::Period, token::Integer }} },
 			{ token::Float, {{ token::Float, token::Integer }} },
+			{ token::Float, {{ token::Float }} },
 			{ token::Symbol, {{ neolib::token_range('A', 'Z') }} },
 			{ token::Symbol, {{ neolib::token_range('a', 'z') }} },
+			{ token::Symbol, {{ '_'}} },
+			{ token::Symbol, {{ token::Symbol }} },
 			{ token::Symbol, {{ token::Symbol, token::Symbol }} },
 			{ token::Symbol, {{ token::Symbol, token::Integer }} },
 			{ token::DoubleQuote, {{ '"' }} },
@@ -163,5 +180,12 @@ namespace neogfx
 		lexer_token token;
 		while (sLexer >> token)
 			tokens.push_back(token);
+		tokens.erase(
+			std::remove_if(tokens.begin(), tokens.end(), 
+				[](const lexer_token& aToken) 
+				{ 
+					return aToken.first == token::Whitespace || aToken.first == token::Comment; 
+				}), 
+			tokens.end());
 	}
 }
