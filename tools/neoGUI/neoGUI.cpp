@@ -91,8 +91,7 @@ int main(int argc, char* argv[])
 				ng::colour::White.with_alpha(32));
 		});
 
-		std::ifstream styleSheet("text.css");
-		ng::css css{ styleSheet };
+		ng::css css{"test.css"};
 
 		return app.exec();
 	}

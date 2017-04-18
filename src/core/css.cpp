@@ -49,6 +49,7 @@ namespace neogfx
 			Escape,
 			Comma,
 			Period,
+			Semicolon,
 			Colon,
 			DoubleColon, 
 			DoubleQuote,
@@ -73,6 +74,7 @@ namespace neogfx
 			PropertyBorder
 		};
 
+		typedef neolib::lexer_token<token> lexer_token;
 		typedef neolib::lexer_atom<token> lexer_atom;
 		typedef neolib::lexer_rule<lexer_atom> lexer_rule;
 		const lexer_rule sLexerRules[] =
@@ -85,15 +87,22 @@ namespace neogfx
 			{ token::Whitespace, {{ '\t' }} },
 			{ token::Whitespace, {{ '\r' }} },
 			{ token::Whitespace, {{ '\n' }} },
+			{ token::Semicolon, {{ ';' }} },
 			{ token::Colon, {{ ':' }} },
+			{ token::Colon, {{ token::Colon }} },
 			{ token::DoubleColon, {{ token::Colon, token::Colon }} },
 			{ token::Backslash, {{ '\\' }} },
 			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\t'))), {{ token::Backslash, 't' }} },
 			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\r'))), {{ token::Backslash, 'r' }} },
 			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\n'))), {{ token::Backslash, 'n' }} },
-			{ neolib::token_push(token::Comment), {{ token::Divide, token::Multiply }} },
-			{ neolib::token_pop(token::Comment), {{ token::Multiply, token::Divide }} },
+			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\''))), {{ token::Backslash, '\'' }} },
+			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\"'))), {{ token::Backslash, '\"' }} },
+			{ token::Comment, {{ token::Divide, token::Multiply }} },
+			{ token::Comment, {{ token::Comment, neolib::token_not(token::Multiply) }} },
+			{ token::Comment, {{ token::Comment, token::Multiply, neolib::token_not(token::Divide) }} },
+			{ neolib::token_end(token::Comment), {{ token::Comment, token::Multiply, token::Divide }} },
 			{ token::Integer, {{ neolib::token_range('0', '9') }} },
+			{ token::Integer, {{ token::Integer }} },
 			{ token::Integer, {{ token::Integer, token::Integer }} },
 			{ token::Float, {{ token::Integer, token::Period, token::Integer }} },
 			{ token::Float, {{ token::Float, token::Integer }} },
@@ -103,13 +112,13 @@ namespace neogfx
 			{ token::Symbol, {{ token::Symbol, token::Integer }} },
 			{ token::DoubleQuote, {{ '"' }} },
 			{ token::SingleQuote, {{ '\'' }} },
-			{ neolib::token_eat(neolib::token_eat(token::String)), {{ token::DoubleQuote, token::DoubleQuote }} }, // empty string
-			{ neolib::token_eat(neolib::token_push(token::String)), {{ token::DoubleQuote }} },
+			{ neolib::token_eat(neolib::token_eat(neolib::token_end(token::String))), {{ token::DoubleQuote, token::DoubleQuote }} }, // empty string
+			{ neolib::token_eat(token::String), {{ token::DoubleQuote }} },
 			{ token::String, {{ token::String, token::Escape }} },
 			{ token::String, {{ token::String, ' ' }} },
 			{ token::String, {{ token::String, '\t' }} },
 			{ token::String, {{ token::String, neolib::token_not(token::Whitespace) }} },
-			{ neolib::token_eat(neolib::token_keep(neolib::token_pop(token::String))), {{ token::String, token::DoubleQuote }} },
+			{ neolib::token_end(neolib::token_eat(neolib::token_keep(token::String))), {{ token::String, token::DoubleQuote }} },
 			{ token::PropertyColor, {{ "color"s }} },
 			{ token::PropertyBackground, {{ "background"s }} },
 			{ token::PropertyBackgroundAttachment, {{ "background-attachment"s }} },
@@ -124,15 +133,10 @@ namespace neogfx
 		};
 	}
 
-	css::css(const std::string& aStyleSheet)
+	css::css(const std::string& aStyleSheetPath) : 
+		iStyleSheetPath{ aStyleSheetPath }
 	{
-		std::istringstream iss(aStyleSheet);
-		parse(iss);
-	}
-
-	css::css(std::istream& aStyleSheet)
-	{
-		parse(aStyleSheet);
+		parse();
 	}
 
 	void css::accept(i_visitor& aVisitor) const
@@ -150,8 +154,14 @@ namespace neogfx
 		return "";
 	}
 
-	void css::parse(std::istream& aStyleSheet)
+	void css::parse()
 	{
-		static neolib::lexer<lexer_atom> sLexer{ aStyleSheet, std::cbegin(sLexerRules), std::cend(sLexerRules) };
+		static neolib::lexer<lexer_atom> sLexer{ std::cbegin(sLexerRules), std::cend(sLexerRules) };
+		if (!sLexer.open(iStyleSheetPath))
+			throw failed_to_open_style_sheet();
+		std::vector<lexer_token> tokens;
+		lexer_token token;
+		while (sLexer >> token)
+			tokens.push_back(token);
 	}
 }

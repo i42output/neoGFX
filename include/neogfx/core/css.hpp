@@ -118,15 +118,17 @@ namespace neogfx
 			virtual void apply(const declaration_block& aDeclarations) = 0;
 		};
 	public:
-		css(const std::string& aStyleSheet);
-		css(std::istream& aStyleSheet);
+		struct failed_to_open_style_sheet : std::runtime_error { failed_to_open_style_sheet() : std::runtime_error("neogfx::css::failed_to_open_style_sheet") {} };
+	public:
+		css(const std::string& aStyleSheetPath);
 	public:
 		void accept(i_visitor& aVisitor) const;
 		const rule_list& rules() const;
 		std::string to_string() const;
 	private:
-		void parse(std::istream& aStyleSheet);
+		void parse();
 	private:
+		std::string iStyleSheetPath;
 		rule_list iRules;
 	};
 }
