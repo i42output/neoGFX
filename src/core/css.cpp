@@ -127,6 +127,7 @@ namespace neogfx
 			{ token::Symbol, {{ token::Symbol }} },
 			{ token::Symbol, {{ token::Symbol, token::Symbol }} },
 			{ token::Symbol, {{ token::Symbol, token::Integer }} },
+			{ token::Symbol, {{ token::Symbol, token::Minus }} },
 			{ token::DoubleQuote, {{ '"' }} },
 			{ token::SingleQuote, {{ '\'' }} },
 			{ neolib::token_eat(neolib::token_eat(neolib::token_end(token::String))), {{ token::DoubleQuote, token::DoubleQuote }} }, // empty string
@@ -173,12 +174,13 @@ namespace neogfx
 
 	void css::parse()
 	{
-		static neolib::lexer<lexer_atom> sLexer{ std::cbegin(sLexerRules), std::cend(sLexerRules) };
-		if (!sLexer.open(iStyleSheetPath))
+		static const neolib::lexer<lexer_atom> sLexer{ std::cbegin(sLexerRules), std::cend(sLexerRules) };
+		neolib::lexer<lexer_atom>::context lexerContext = sLexer.open(iStyleSheetPath);
+		if (!lexerContext)
 			throw failed_to_open_style_sheet();
 		std::vector<lexer_token> tokens;
 		lexer_token token;
-		while (sLexer >> token)
+		while (lexerContext >> token)
 			tokens.push_back(token);
 		tokens.erase(
 			std::remove_if(tokens.begin(), tokens.end(), 
