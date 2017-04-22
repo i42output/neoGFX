@@ -56,6 +56,7 @@ namespace neogfx
 			DoubleColon,
 			DoubleQuote,
 			SingleQuote,
+			Hash,
 			Backslash,
 			Plus,
 			Minus,
@@ -65,6 +66,10 @@ namespace neogfx
 			Float,
 			String,
 			Symbol,
+			Hex,
+			Px,
+			Pt,
+			Id,
 			PropertyColor,
 			PropertyBackground,
 			PropertyBackgroundAttachment,
@@ -78,8 +83,14 @@ namespace neogfx
 			PropertyBorder
 		};
 
+		enum class scope
+		{
+			ScopeSelector,
+			ScopeDeclarationBlock
+		};
+
 		typedef neolib::lexer_token<token> lexer_token;
-		typedef neolib::lexer_atom<token> lexer_atom;
+		typedef neolib::lexer_atom<token, scope> lexer_atom;
 		typedef neolib::lexer_rule<lexer_atom> lexer_rule;
 		const lexer_rule sLexerRules[] =
 		{
@@ -87,6 +98,8 @@ namespace neogfx
 			{ token::Period, {{ '.' }} },
 			{ token::OpenBrace, {{ '{' }} },
 			{ token::CloseBrace, {{ '}' }} },
+			{ lexer_rule::enter_scope(scope::ScopeDeclarationBlock), {{ scope::ScopeSelector, token::OpenBrace }} },
+			{ lexer_rule::leave_scope(scope::ScopeDeclarationBlock), {{ scope::ScopeSelector, token::CloseBrace }} },
 			{ token::Plus, {{ '+' }} },
 			{ token::Minus, {{ '-' }} },
 			{ token::Divide, {{ '/' }} },
@@ -104,25 +117,35 @@ namespace neogfx
 			{ token::Colon, {{ token::Colon }} },
 			{ token::DoubleColon, {{ token::Colon, token::Colon }} },
 			{ token::Backslash, {{ '\\' }} },
-			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\t'))), {{ token::Backslash, 't' }} },
-			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\r'))), {{ token::Backslash, 'r' }} },
-			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\n'))), {{ token::Backslash, 'n' }} },
-			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\''))), {{ token::Backslash, '\'' }} },
-			{ neolib::token_eat(neolib::token_eat(neolib::token_make(token::Escape, '\"'))), {{ token::Backslash, '\"' }} },
+			{ token::Hash, {{ '#' }} },
+			{ token::Hex, {{ scope::ScopeDeclarationBlock, token::Hash, lexer_rule::token_range('0', '9') }} },
+			{ token::Hex, {{ scope::ScopeDeclarationBlock, token::Hash, lexer_rule::token_range('A', 'F') }} },
+			{ token::Hex, {{ scope::ScopeDeclarationBlock, token::Hash, lexer_rule::token_range('a', 'f') }} },
+			{ token::Hex, {{ scope::ScopeDeclarationBlock, token::Hex, lexer_rule::token_range('0', '9') }} },
+			{ token::Hex, {{ scope::ScopeDeclarationBlock, token::Hex, lexer_rule::token_range('A', 'F') }} },
+			{ token::Hex, {{ scope::ScopeDeclarationBlock, token::Hex, lexer_rule::token_range('a', 'f') }} },
+			{ token::Id, {{ token::Hash, token::Symbol }} },
+			{ lexer_rule::token_eat(lexer_rule::token_eat(lexer_rule::token_make(token::Escape, '\t'))), {{ token::Backslash, 't' }} },
+			{ lexer_rule::token_eat(lexer_rule::token_eat(lexer_rule::token_make(token::Escape, '\r'))), {{ token::Backslash, 'r' }} },
+			{ lexer_rule::token_eat(lexer_rule::token_eat(lexer_rule::token_make(token::Escape, '\n'))), {{ token::Backslash, 'n' }} },
+			{ lexer_rule::token_eat(lexer_rule::token_eat(lexer_rule::token_make(token::Escape, '\''))), {{ token::Backslash, '\'' }} },
+			{ lexer_rule::token_eat(lexer_rule::token_eat(lexer_rule::token_make(token::Escape, '\"'))), {{ token::Backslash, '\"' }} },
 			{ token::Comment, {{ token::Comment }} },
 			{ token::Comment, {{ token::Divide, token::Multiply }} },
 			{ token::Comment, {{ token::Comment, token::Comment }} },
-			{ token::Comment, {{ token::Comment, neolib::token_not(token::Multiply) }} },
-			{ token::Comment, {{ token::Comment, token::Multiply, neolib::token_not(token::Divide) }} },
-			{ neolib::token_end(token::Comment), {{ token::Comment, token::Multiply, token::Divide }} },
-			{ token::Integer, {{ neolib::token_range('0', '9') }} },
+			{ token::Comment, {{ token::Comment, lexer_rule::token_not(token::Multiply) }} },
+			{ token::Comment, {{ token::Comment, token::Multiply, lexer_rule::token_not(token::Divide) }} },
+			{ lexer_rule::token_end(token::Comment), {{ token::Comment, token::Multiply, token::Divide }} },
+			{ token::Integer, {{ lexer_rule::token_range('0', '9') }} },
 			{ token::Integer, {{ token::Integer }} },
 			{ token::Integer, {{ token::Integer, token::Integer }} },
+			{ token::Integer, {{ token::Minus, token::Integer }} },
 			{ token::Float, {{ token::Integer, token::Period, token::Integer }} },
 			{ token::Float, {{ token::Float, token::Integer }} },
 			{ token::Float, {{ token::Float }} },
-			{ token::Symbol, {{ neolib::token_range('A', 'Z') }} },
-			{ token::Symbol, {{ neolib::token_range('a', 'z') }} },
+			{ token::Float, {{ token::Minus, token::Float }} },
+			{ token::Symbol, {{ lexer_rule::token_range('A', 'Z') }} },
+			{ token::Symbol, {{ lexer_rule::token_range('a', 'z') }} },
 			{ token::Symbol, {{ '_'}} },
 			{ token::Symbol, {{ token::Symbol }} },
 			{ token::Symbol, {{ token::Symbol, token::Symbol }} },
@@ -130,13 +153,15 @@ namespace neogfx
 			{ token::Symbol, {{ token::Symbol, token::Minus }} },
 			{ token::DoubleQuote, {{ '"' }} },
 			{ token::SingleQuote, {{ '\'' }} },
-			{ neolib::token_eat(neolib::token_eat(neolib::token_end(token::String))), {{ token::DoubleQuote, token::DoubleQuote }} }, // empty string
-			{ neolib::token_eat(token::String), {{ token::DoubleQuote }} },
+			{ lexer_rule::token_eat(lexer_rule::token_eat(lexer_rule::token_end(token::String))), {{ token::DoubleQuote, token::DoubleQuote }} }, // empty string
+			{ lexer_rule::token_eat(token::String), {{ token::DoubleQuote }} },
 			{ token::String, {{ token::String, token::Escape }} },
 			{ token::String, {{ token::String, ' ' }} },
 			{ token::String, {{ token::String, '\t' }} },
-			{ token::String, {{ token::String, neolib::token_not(token::Whitespace) }} },
-			{ neolib::token_end(neolib::token_eat(neolib::token_keep(token::String))), {{ token::String, token::DoubleQuote }} },
+			{ token::String, {{ token::String, lexer_rule::token_not(token::Whitespace) }} },
+			{ lexer_rule::token_end(lexer_rule::token_eat(lexer_rule::token_keep(token::String))), {{ token::String, token::DoubleQuote }} },
+			{ token::Px, {{ "px"s }} },
+			{ token::Pt, {{ "pt"s }} },
 			{ token::PropertyColor, {{ "color"s }} },
 			{ token::PropertyBackground, {{ "background"s }} },
 			{ token::PropertyBackgroundAttachment, {{ "background-attachment"s }} },
@@ -174,7 +199,7 @@ namespace neogfx
 
 	void css::parse()
 	{
-		static const neolib::lexer<lexer_atom> sLexer{ std::cbegin(sLexerRules), std::cend(sLexerRules) };
+		static const neolib::lexer<lexer_atom> sLexer{ scope::ScopeSelector, std::cbegin(sLexerRules), std::cend(sLexerRules) };
 		neolib::lexer<lexer_atom>::context lexerContext = sLexer.open(iStyleSheetPath);
 		if (!lexerContext)
 			throw failed_to_open_style_sheet();
