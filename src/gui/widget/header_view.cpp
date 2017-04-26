@@ -37,14 +37,14 @@ namespace neogfx
 				iParent.layout().set_spacing(iParent.separator_width());
 				iParent.iSectionWidths.resize(iParent.model().columns());
 				while (iParent.layout().item_count() > iParent.model().columns() + 1)
-					iParent.layout().remove_item(iParent.layout().item_count() - 1);
+					iParent.layout().remove_item_at(iParent.layout().item_count() - 1);
 				while (iParent.layout().item_count() < iParent.model().columns() + 1)
 				{
 					iParent.layout().add_item(std::make_shared<push_button>("", push_button::ButtonStyleItemViewHeader));
 				}
 				for (std::size_t i = 0; i < iParent.layout().item_count(); ++i)
 				{
-					push_button& button = iParent.layout().get_widget<push_button>(i);
+					push_button& button = iParent.layout().get_widget_at<push_button>(i);
 					if (i < iParent.model().columns())
 					{
 						button.text().set_text(iParent.model().column_heading_text(i));
@@ -334,7 +334,7 @@ namespace neogfx
 		for (uint32_t col = 0; col < model().columns(); ++col)
 		{
 			dimension oldSectionWidth = section_width(col);
-			dimension newSectionWidth = layout().get_widget(col).extents().cx;
+			dimension newSectionWidth = layout().get_widget_at(col).extents().cx;
 			if (newSectionWidth != oldSectionWidth)
 				iSectionWidths[col].first = newSectionWidth;
 		}
@@ -348,7 +348,7 @@ namespace neogfx
 			if (aPane != boost::none && *aPane != col)
 				continue;
 			iSectionWidths[col].first = boost::none;
-			layout().get_widget(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget(col).minimum_size().cy), false);
+			layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy), false);
 		}
 		layout_items();
 		iOwner.header_view_updated(*this);
@@ -364,9 +364,9 @@ namespace neogfx
 			dimension cellWidth = presentation_model().cell_extents(item_model_index(aRow, col), gc).cx + iOwner.cell_margins().size().cx * 2.0;
 			dimension oldSectionWidth = iSectionWidths[col].second;
 			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
-			if (section_width(col) != oldSectionWidth || layout().get_widget(col).minimum_size().cx != section_width(col))
+			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col))
 			{
-				layout().get_widget(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget(col).minimum_size().cy));
+				layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
 				updated = true;
 			}
 		}

@@ -56,30 +56,30 @@ namespace neogfx
 		virtual void add_item(std::shared_ptr<i_widget> aWidget);
 		virtual void add_item(i_layout& aLayout);
 		virtual void add_item(std::shared_ptr<i_layout> aLayout);
-		virtual void add_item(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget);
-		virtual void add_item(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget);
-		virtual void add_item(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout);
-		virtual void add_item(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout);
-		virtual void add_item(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer);
-		virtual void add_item(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_spacer> aSpacer);
-		using layout::add_item;
+		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget);
+		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget);
+		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout);
+		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout);
+		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer);
+		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_spacer> aSpacer);
+		using layout::add_item_at;
 		virtual i_spacer& add_spacer();
-		virtual i_spacer& add_spacer(uint32_t aPosition);
-		virtual i_spacer& add_spacer(cell_coordinate aRow, cell_coordinate aColumn);
-		virtual void remove_item(item_index aIndex);
+		virtual i_spacer& add_spacer_at(item_index aPosition);
+		virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+		virtual void remove_item_at(item_index aIndex);
 		virtual bool remove_item(i_layout& aItem);
 		virtual bool remove_item(i_widget& aItem);
-		virtual void remove_item(cell_coordinate aRow, cell_coordinate aColumn);
+		virtual void remove_item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		virtual void remove_items();
-		using layout::get_widget;
-		i_widget& get_widget(cell_coordinate aRow, cell_coordinate aColumn);
+		i_widget& get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		template <typename WidgetT>
-		WidgetT& get_widget(cell_coordinate aRow, cell_coordinate aColumn)
+		WidgetT& get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
 		{
 			return static_cast<WidgetT&>(get_widget(aRow, aColumn));
 		}
-		using layout::get_layout;
-		i_layout& get_layout(cell_coordinate aRow, cell_coordinate aColumn);
+		using layout::get_widget_at;
+		i_layout& get_layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+		using layout::get_layout_at;
 	public:
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;

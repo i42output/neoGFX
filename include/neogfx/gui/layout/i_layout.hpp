@@ -35,7 +35,7 @@ namespace neogfx
 	public:
 		event<> alignment_changed;
 	public:
-		typedef std::size_t item_index;
+		typedef uint32_t item_index;
 		typedef boost::optional<item_index> optional_item_index;
 	protected:
 		class item;
@@ -52,21 +52,21 @@ namespace neogfx
 		virtual i_layout* parent() const = 0;
 		virtual void set_parent(i_layout* aParent) = 0;
 		virtual void add_item(i_widget& aWidget) = 0;
-		virtual void add_item(uint32_t aPosition, i_widget& aWidget) = 0;
+		virtual void add_item_at(item_index aPosition, i_widget& aWidget) = 0;
 		virtual void add_item(std::shared_ptr<i_widget> aWidget) = 0;
-		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_widget> aWidget) = 0;
+		virtual void add_item_at(item_index aPosition, std::shared_ptr<i_widget> aWidget) = 0;
 		virtual void add_item(i_layout& aLayout) = 0;
-		virtual void add_item(uint32_t aPosition, i_layout& aLayout) = 0;
+		virtual void add_item_at(item_index aPosition, i_layout& aLayout) = 0;
 		virtual void add_item(std::shared_ptr<i_layout> aLayout) = 0;
-		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_layout> aLayout) = 0;
+		virtual void add_item_at(item_index aPosition, std::shared_ptr<i_layout> aLayout) = 0;
 		virtual void add_item(i_spacer& aSpacer) = 0;
-		virtual void add_item(uint32_t aPosition, i_spacer& aSpacer) = 0;
+		virtual void add_item_at(item_index aPosition, i_spacer& aSpacer) = 0;
 		virtual void add_item(std::shared_ptr<i_spacer> aSpacer) = 0;
-		virtual void add_item(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer) = 0;
+		virtual void add_item_at(item_index aPosition, std::shared_ptr<i_spacer> aSpacer) = 0;
 		virtual void add_item(const	layout_item& aItem) = 0;
 		virtual i_spacer& add_spacer() = 0;
-		virtual i_spacer& add_spacer(uint32_t aPosition) = 0;
-		virtual void remove_item(item_index aIndex) = 0;
+		virtual i_spacer& add_spacer_at(item_index aPosition) = 0;
+		virtual void remove_item_at(item_index aIndex) = 0;
 		virtual bool remove_item(i_layout& aItem) = 0;
 		virtual bool remove_item(i_widget& aItem) = 0;
 		virtual void remove_items() = 0;
@@ -74,13 +74,13 @@ namespace neogfx
 		virtual optional_item_index find_item(i_layout& aItem) const = 0;
 		virtual optional_item_index find_item(i_widget& aItem) const = 0;
 		virtual optional_item_index find_item(const layout_item& aItem) const = 0;
-		virtual bool is_widget(std::size_t aIndex) const = 0;
-		virtual const i_widget_geometry& get_item(item_index aIndex) const = 0;
-		virtual i_widget_geometry& get_item(item_index aIndex) = 0;
-		virtual const i_widget& get_widget(item_index aIndex) const = 0;
-		virtual i_widget& get_widget(item_index aIndex) = 0;
-		virtual const i_layout& get_layout(item_index aIndex) const = 0;
-		virtual i_layout& get_layout(item_index aIndex) = 0;
+		virtual bool is_widget_at(item_index aIndex) const = 0;
+		virtual const i_widget_geometry& get_item_at(item_index aIndex) const = 0;
+		virtual i_widget_geometry& get_item_at(item_index aIndex) = 0;
+		virtual const i_widget& get_widget_at(item_index aIndex) const = 0;
+		virtual i_widget& get_widget_at(item_index aIndex) = 0;
+		virtual const i_layout& get_layout_at(item_index aIndex) const = 0;
+		virtual i_layout& get_layout_at(item_index aIndex) = 0;
 	public:
 		virtual size spacing() const = 0;
 		virtual void set_spacing(const size& sSpacing) = 0;
@@ -101,21 +101,21 @@ namespace neogfx
 		// helpers
 	public:
 		template <typename ItemType>
-		void replace_item(uint32_t aPosition, ItemType&& aItem)
+		void replace_item_at(item_index aPosition, ItemType&& aItem)
 		{
 			if (aPosition < item_count())
-				remove_item(aPosition);
-			add_item(aPosition, aItem);
+				remove_item_at(aPosition);
+			add_item_at(aPosition, aItem);
 		}
 		template <typename WidgetT>
-		const WidgetT& get_widget(std::size_t aIndex) const
+		const WidgetT& get_widget_at(item_index aIndex) const
 		{
-			return static_cast<const WidgetT&>(get_widget(aIndex));
+			return static_cast<const WidgetT&>(get_widget_at(aIndex));
 		}
 		template <typename WidgetT>
-		WidgetT& get_widget(std::size_t aIndex)
+		WidgetT& get_widget_at(item_index aIndex)
 		{
-			return static_cast<WidgetT&>(get_widget(aIndex));
+			return static_cast<WidgetT&>(get_widget_at(aIndex));
 		}
 	};
 }

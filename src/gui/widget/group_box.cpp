@@ -63,12 +63,12 @@ namespace neogfx
 			if (aCheckable)
 			{
 				iTitle = std::make_unique<neogfx::check_box>(text);
-				iLayout.add_item(0, *static_variant_cast<check_box_ptr&>(iTitle));
+				iLayout.add_item_at(0, *static_variant_cast<check_box_ptr&>(iTitle));
 			}
 			else
 			{
 				iTitle = std::make_unique<neogfx::label>(text);
-				iLayout.add_item(0, *static_variant_cast<label_ptr&>(iTitle));
+				iLayout.add_item_at(0, *static_variant_cast<label_ptr&>(iTitle));
 			}
 		}
 	}

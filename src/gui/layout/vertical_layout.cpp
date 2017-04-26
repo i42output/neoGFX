@@ -50,10 +50,10 @@ namespace neogfx
 		return *s;
 	}
 
-	i_spacer& vertical_layout::add_spacer(uint32_t aPosition)
+	i_spacer& vertical_layout::add_spacer_at(item_index aPosition)
 	{
 		auto s = std::make_shared<vertical_spacer>();
-		add_item(aPosition, s);
+		add_item_at(aPosition, s);
 		return *s;
 	}
 

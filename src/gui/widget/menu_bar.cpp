@@ -67,29 +67,29 @@ namespace neogfx
 		{
 		case ScanCode_LEFT:
 			if (has_selected_item())
-				select_item(previous_available_item(selected_item()));
+				select_item_at(previous_available_item(selected_item()));
 			break;
 		case ScanCode_RIGHT:
 			if (has_selected_item())
-				select_item(next_available_item(selected_item()));
+				select_item_at(next_available_item(selected_item()));
 			break;
 		case ScanCode_DOWN:
-			if (has_selected_item() && item(selected_item()).available())
+			if (has_selected_item() && item_at(selected_item()).available())
 			{
-				auto& selectedItem = item(selected_item());
+				auto& selectedItem = item_at(selected_item());
 				if (selectedItem.type() == i_menu_item::SubMenu)
 				{
 					if (!selectedItem.sub_menu().is_open())
 						open_sub_menu.trigger(selectedItem.sub_menu());
 					if (selectedItem.sub_menu().has_available_items())
-						selectedItem.sub_menu().select_item(selectedItem.sub_menu().first_available_item());
+						selectedItem.sub_menu().select_item_at(selectedItem.sub_menu().first_available_item());
 				}
 			}
 			break;
 		case ScanCode_RETURN:
-			if (has_selected_item() && item(selected_item()).available())
+			if (has_selected_item() && item_at(selected_item()).available())
 			{
-				auto& selectedItem = item(selected_item());
+				auto& selectedItem = item_at(selected_item());
 				if (selectedItem.type() == i_menu_item::Action)
 				{
 					selectedItem.action().triggered.async_trigger();
@@ -135,16 +135,16 @@ namespace neogfx
 		});
 		iSink += item_added([this](item_index aItemIndex)
 		{
-			layout().add_item(aItemIndex, std::make_shared<menu_item_widget>(*this, item(aItemIndex)));
+			layout().add_item_at(aItemIndex, std::make_shared<menu_item_widget>(*this, item_at(aItemIndex)));
 		});
 		iSink += item_removed([this](item_index aItemIndex)
 		{
-			if (layout().is_widget(aItemIndex))
+			if (layout().is_widget_at(aItemIndex))
 			{
-				i_widget& w = layout().get_widget(aItemIndex);
+				i_widget& w = layout().get_widget_at(aItemIndex);
 				w.parent().remove_widget(w);
 			}
-			layout().remove_item(aItemIndex);
+			layout().remove_item_at(aItemIndex);
 		});
 		iSink += item_selected([this](i_menu_item& aMenuItem)
 		{
@@ -168,7 +168,7 @@ namespace neogfx
 		});
 		iSink += open_sub_menu([this](i_menu& aSubMenu)
 		{
-			auto& itemWidget = layout().get_widget<menu_item_widget>(find_item(aSubMenu));
+			auto& itemWidget = layout().get_widget_at<menu_item_widget>(find_item(aSubMenu));
 			close_sub_menu(false);
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().grab_keyboard(*this);

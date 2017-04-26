@@ -175,35 +175,35 @@ namespace neogfx
 		switch (effective_placement())
 		{
 		case label_placement::TextHorizontal:
-			iLayout.add_item(0, 0, iText);
+			iLayout.add_item_at_position(0, 0, iText);
 			break;
 		case label_placement::TextVertical:
-			iLayout.add_item(0, 0, iText);
+			iLayout.add_item_at_position(0, 0, iText);
 			break;
 		case label_placement::ImageHorizontal:
-			iLayout.add_item(0, 0, iImage);
+			iLayout.add_item_at_position(0, 0, iImage);
 			break;
 		case label_placement::ImageVertical:
-			iLayout.add_item(0, 0, iImage);
+			iLayout.add_item_at_position(0, 0, iImage);
 			break;
 		case label_placement::TextImageHorizontal:
 			switch (iLayout.alignment() & neogfx::alignment::Horizontal)
 			{
 			case neogfx::alignment::Left:
-				iLayout.add_item(0, 0, iText);
-				iLayout.add_item(0, 1, iImage);
-				iLayout.add_spacer(0, 2);
+				iLayout.add_item_at_position(0, 0, iText);
+				iLayout.add_item_at_position(0, 1, iImage);
+				iLayout.add_spacer_at_position(0, 2);
 				break;
 			case neogfx::alignment::Centre:
-				iLayout.add_spacer(0, 0);
-				iLayout.add_item(0, 1, iText);
-				iLayout.add_item(0, 2, iImage);
-				iLayout.add_spacer(0, 3);
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(0, 1, iText);
+				iLayout.add_item_at_position(0, 2, iImage);
+				iLayout.add_spacer_at_position(0, 3);
 				break;
 			case neogfx::alignment::Right:
-				iLayout.add_spacer(0, 0);
-				iLayout.add_item(0, 1, iText);
-				iLayout.add_item(0, 2, iImage);
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(0, 1, iText);
+				iLayout.add_item_at_position(0, 2, iImage);
 				break;
 			}
 			break;
@@ -211,20 +211,20 @@ namespace neogfx
 			switch (iLayout.alignment() & neogfx::alignment::Vertical)
 			{
 			case neogfx::alignment::Top:
-				iLayout.add_item(0, 0, iText);
-				iLayout.add_item(1, 0, iImage);
-				iLayout.add_spacer(2, 0);
+				iLayout.add_item_at_position(0, 0, iText);
+				iLayout.add_item_at_position(1, 0, iImage);
+				iLayout.add_spacer_at_position(2, 0);
 				break;
 			case neogfx::alignment::VCentre:
-				iLayout.add_spacer(0, 0);
-				iLayout.add_item(1, 0, iText);
-				iLayout.add_item(2, 0, iImage);
-				iLayout.add_spacer(3, 0);
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(1, 0, iText);
+				iLayout.add_item_at_position(2, 0, iImage);
+				iLayout.add_spacer_at_position(3, 0);
 				break;
 			case neogfx::alignment::Bottom:
-				iLayout.add_spacer(0, 0);
-				iLayout.add_item(1, 0, iText);
-				iLayout.add_item(2, 0, iImage);
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(1, 0, iText);
+				iLayout.add_item_at_position(2, 0, iImage);
 				break;
 			}
 			break;
@@ -232,20 +232,20 @@ namespace neogfx
 			switch (iLayout.alignment() & neogfx::alignment::Horizontal)
 			{
 			case neogfx::alignment::Left:
-				iLayout.add_item(0, 0, iImage);
-				iLayout.add_item(0, 1, iText);
-				iLayout.add_spacer(0, 2);
+				iLayout.add_item_at_position(0, 0, iImage);
+				iLayout.add_item_at_position(0, 1, iText);
+				iLayout.add_spacer_at_position(0, 2);
 				break;
 			case neogfx::alignment::Centre:
-				iLayout.add_spacer(0, 0);
-				iLayout.add_item(0, 1, iImage);
-				iLayout.add_item(0, 2, iText);
-				iLayout.add_spacer(0, 3);
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(0, 1, iImage);
+				iLayout.add_item_at_position(0, 2, iText);
+				iLayout.add_spacer_at_position(0, 3);
 				break;
 			case neogfx::alignment::Right:
-				iLayout.add_spacer(0, 0);
-				iLayout.add_item(0, 1, iImage);
-				iLayout.add_item(0, 2, iText);
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(0, 1, iImage);
+				iLayout.add_item_at_position(0, 2, iText);
 				break;
 			}
 			break;
@@ -253,20 +253,20 @@ namespace neogfx
 			switch (iLayout.alignment() & neogfx::alignment::Vertical)
 			{
 			case neogfx::alignment::Top:
-				iLayout.add_item(0, 0, iImage);
-				iLayout.add_item(1, 0, iText);
-				iLayout.add_spacer(2, 0);
+				iLayout.add_item_at_position(0, 0, iImage);
+				iLayout.add_item_at_position(1, 0, iText);
+				iLayout.add_spacer_at_position(2, 0);
 				break;
 			case neogfx::alignment::VCentre:
-				iLayout.add_spacer(0, 0);
-				iLayout.add_item(1, 0, iImage);
-				iLayout.add_item(2, 0, iText);
-				iLayout.add_spacer(3, 0);
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(1, 0, iImage);
+				iLayout.add_item_at_position(2, 0, iText);
+				iLayout.add_spacer_at_position(3, 0);
 				break;
 			case neogfx::alignment::Bottom:
-				iLayout.add_spacer(0, 0);
-				iLayout.add_item(1, 0, iImage);
-				iLayout.add_item(2, 0, iText);
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(1, 0, iImage);
+				iLayout.add_item_at_position(2, 0, iText);
 				break;
 			}
 			break;

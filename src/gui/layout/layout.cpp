@@ -159,13 +159,13 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
-	void layout::add_item(uint32_t aPosition, i_widget& aWidget)
+	void layout::add_item_at(item_index aPosition, i_widget& aWidget)
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
 		invalidate();
 		while (aPosition > iItems.size())
-			add_spacer(0);
+			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aWidget));
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
@@ -181,13 +181,13 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
-	void layout::add_item(uint32_t aPosition, std::shared_ptr<i_widget> aWidget)
+	void layout::add_item_at(item_index aPosition, std::shared_ptr<i_widget> aWidget)
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
 		invalidate();
 		while (aPosition > iItems.size())
-			add_spacer(0);
+			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aWidget));
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
@@ -202,11 +202,11 @@ namespace neogfx
 		aLayout.set_parent(this);
 	}
 
-	void layout::add_item(uint32_t aPosition, i_layout& aLayout)
+	void layout::add_item_at(item_index aPosition, i_layout& aLayout)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
-			add_spacer(0);
+			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aLayout));
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
@@ -222,11 +222,11 @@ namespace neogfx
 		aLayout->set_parent(this);
 	}
 
-	void layout::add_item(uint32_t aPosition, std::shared_ptr<i_layout> aLayout)
+	void layout::add_item_at(item_index aPosition, std::shared_ptr<i_layout> aLayout)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
-			add_spacer(0);
+			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aLayout));
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
@@ -242,11 +242,11 @@ namespace neogfx
 		aSpacer.set_parent(*this);
 	}
 
-	void layout::add_item(uint32_t aPosition, i_spacer& aSpacer)
+	void layout::add_item_at(item_index aPosition, i_spacer& aSpacer)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
-			add_spacer(0);
+			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aSpacer));
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
@@ -262,11 +262,11 @@ namespace neogfx
 		aSpacer->set_parent(*this);
 	}
 
-	void layout::add_item(uint32_t aPosition, std::shared_ptr<i_spacer> aSpacer)
+	void layout::add_item_at(item_index aPosition, std::shared_ptr<i_spacer> aSpacer)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
-			add_spacer(0);
+			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aSpacer));
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
@@ -281,7 +281,7 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
-	void layout::remove_item(item_index aIndex)
+	void layout::remove_item_at(item_index aIndex)
 	{
 		remove_item(std::next(iItems.begin(), aIndex));
 	}
@@ -358,7 +358,7 @@ namespace neogfx
 		return optional_item_index();
 	}
 
-	bool layout::is_widget(item_index aIndex) const
+	bool layout::is_widget_at(item_index aIndex) const
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
@@ -366,7 +366,7 @@ namespace neogfx
 		return item->get().is<item::widget_pointer>();
 	}
 
-	const i_widget_geometry& layout::get_item(item_index aIndex) const
+	const i_widget_geometry& layout::get_item_at(item_index aIndex) const
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
@@ -379,12 +379,12 @@ namespace neogfx
 			throw wrong_item_type();
 	}
 
-	i_widget_geometry& layout::get_item(item_index aIndex)
+	i_widget_geometry& layout::get_item_at(item_index aIndex)
 	{
-		return const_cast<i_widget_geometry&>(const_cast<const layout*>(this)->get_item(aIndex));
+		return const_cast<i_widget_geometry&>(const_cast<const layout*>(this)->get_item_at(aIndex));
 	}
 		
-	const i_widget& layout::get_widget(item_index aIndex) const
+	const i_widget& layout::get_widget_at(item_index aIndex) const
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
@@ -395,12 +395,12 @@ namespace neogfx
 			throw wrong_item_type();
 	}
 
-	i_widget& layout::get_widget(item_index aIndex)
+	i_widget& layout::get_widget_at(item_index aIndex)
 	{
-		return const_cast<i_widget&>(const_cast<const layout*>(this)->get_widget(aIndex));
+		return const_cast<i_widget&>(const_cast<const layout*>(this)->get_widget_at(aIndex));
 	}
 		
-	const i_layout& layout::get_layout(item_index aIndex) const
+	const i_layout& layout::get_layout_at(item_index aIndex) const
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
@@ -411,9 +411,9 @@ namespace neogfx
 			throw wrong_item_type();
 	}
 
-	i_layout& layout::get_layout(item_index aIndex)
+	i_layout& layout::get_layout_at(item_index aIndex)
 	{
-		return const_cast<i_layout&>(const_cast<const layout*>(this)->get_layout(aIndex));
+		return const_cast<i_layout&>(const_cast<const layout*>(this)->get_layout_at(aIndex));
 	}
 		
 	bool layout::has_margins() const

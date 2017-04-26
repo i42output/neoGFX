@@ -26,7 +26,7 @@ namespace neogfx
 {
 	radio_button::disc::disc(radio_button& aParent)
 	{
-		aParent.layout().add_item(0, *this);
+		aParent.layout().add_item_at(0, *this);
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}

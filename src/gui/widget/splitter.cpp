@@ -94,8 +94,8 @@ namespace neogfx
 				iTracking = s;
 				iTrackFrom = aPosition;
 				iSizeBeforeTracking = std::make_pair(
-					layout().get_widget(iTracking->first).minimum_size().cx, 
-					layout().get_widget(iTracking->second).minimum_size().cx);
+					layout().get_widget_at(iTracking->first).minimum_size().cx, 
+					layout().get_widget_at(iTracking->second).minimum_size().cx);
 				surface().update_mouse_cursor();
 			}
 		}
@@ -125,14 +125,14 @@ namespace neogfx
 			if (iType == HorizontalSplitter)
 			{
 
-				layout().get_widget(iTracking->first).set_fixed_size(size(
+				layout().get_widget_at(iTracking->first).set_fixed_size(size(
 					std::max(iSizeBeforeTracking.first + (aPosition.x - iTrackFrom.x), layout().spacing().cx * 3.0),
-					layout().get_widget(iTracking->first).minimum_size().cy), false);
+					layout().get_widget_at(iTracking->first).minimum_size().cy), false);
 				if (app::instance().keyboard().is_key_pressed(ScanCode_LSHIFT) || app::instance().keyboard().is_key_pressed(ScanCode_RSHIFT))
 				{
-					layout().get_widget(iTracking->second).set_fixed_size(size(
+					layout().get_widget_at(iTracking->second).set_fixed_size(size(
 						std::max(iSizeBeforeTracking.second - (aPosition.x - iTrackFrom.x), layout().spacing().cx * 3.0),
-						layout().get_widget(iTracking->second).minimum_size().cy), false);
+						layout().get_widget_at(iTracking->second).minimum_size().cy), false);
 				}
 				layout_items();
 				panes_resized();
@@ -178,8 +178,8 @@ namespace neogfx
 	{
 		for (std::size_t i = 1; i < layout().item_count(); ++i)
 		{
-			rect r1(layout().get_widget(i - 1).position(), layout().get_widget(i - 1).extents());
-			rect r2(layout().get_widget(i).position(), layout().get_widget(i).extents());
+			rect r1(layout().get_widget_at(i - 1).position(), layout().get_widget_at(i - 1).extents());
+			rect r2(layout().get_widget_at(i).position(), layout().get_widget_at(i).extents());
 			if (iType == HorizontalSplitter)
 			{
 				rect r3(point(r1.right(), r1.top()), size(r2.left() - r1.right(), r1.height()));

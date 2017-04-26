@@ -151,7 +151,7 @@ namespace neogfx
 		widget::mouse_entered();
 		update();
 		if (menu_item().available())
-			menu().select_item(menu().find_item(menu_item()));
+			menu().select_item_at(menu().find_item(menu_item()));
 	}
 
 	void menu_item_widget::mouse_left()
@@ -315,7 +315,7 @@ namespace neogfx
 		{
 			if (!menu_item().sub_menu().is_open())
 			{
-				menu().select_item(menu().find_item(menu_item()));
+				menu().select_item_at(menu().find_item(menu_item()));
 				if (destroyed)
 					return;
 				menu().open_sub_menu.trigger(menu_item().sub_menu());
@@ -335,7 +335,7 @@ namespace neogfx
 		{
 			auto& subMenu = menu_item().sub_menu();
 			if (subMenu.is_open() && !subMenu.has_selected_item() && subMenu.has_available_items())
-				subMenu.select_item(subMenu.first_available_item());
+				subMenu.select_item_at(subMenu.first_available_item());
 		}
 	}
 }

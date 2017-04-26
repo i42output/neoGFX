@@ -88,63 +88,63 @@ namespace neogfx
 
 	void grid_layout::add_item(i_widget& aWidget)
 	{
-		add_item(iCursor.y, iCursor.x, aWidget);
+		add_item_at_position(iCursor.y, iCursor.x, aWidget);
 		increment_cursor();
 	}
 
 	void grid_layout::add_item(std::shared_ptr<i_widget> aWidget)
 	{
-		add_item(iCursor.y, iCursor.x, aWidget);
+		add_item_at_position(iCursor.y, iCursor.x, aWidget);
 		increment_cursor();
 	}
 
 	void grid_layout::add_item(i_layout& aLayout)
 	{
-		add_item(iCursor.y, iCursor.x, aLayout);
+		add_item_at_position(iCursor.y, iCursor.x, aLayout);
 		increment_cursor();
 	}
 
 	void grid_layout::add_item(std::shared_ptr<i_layout> aLayout)
 	{
-		add_item(iCursor.y, iCursor.x, aLayout);
+		add_item_at_position(iCursor.y, iCursor.x, aLayout);
 		increment_cursor();
 	}
 
-	void grid_layout::add_item(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget)
+	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget)
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
 		if (iCells.find(cell_coordinates{aColumn, aRow}) != iCells.end())
-			remove_item(aRow, aColumn);
+			remove_item_at_position(aRow, aColumn);
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{col, aRow}) == iCells.end())
-				add_spacer(aRow, col);
+				add_spacer_at_position(aRow, col);
 		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aWidget));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
-		row_layout(aRow).replace_item(aColumn, aWidget);
+		row_layout(aRow).replace_item_at(aColumn, aWidget);
 	}
 
-	void grid_layout::add_item(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget)
+	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget)
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
 		if (iCells.find(cell_coordinates{aColumn, aRow}) != iCells.end())
-			remove_item(aRow, aColumn);
+			remove_item_at_position(aRow, aColumn);
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
-				add_spacer(aRow, col);
+				add_spacer_at_position(aRow, col);
 		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aWidget));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
-		row_layout(aRow).replace_item(aColumn, aWidget);
+		row_layout(aRow).replace_item_at(aColumn, aWidget);
 	}
 
-	void grid_layout::add_item(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout)
+	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout)
 	{
 		if (&aLayout == &iRowLayout)
 		{
@@ -153,74 +153,74 @@ namespace neogfx
 			return;
 		}
 		if (iCells.find(cell_coordinates{aColumn, aRow}) != iCells.end())
-			remove_item(aRow, aColumn);
+			remove_item_at_position(aRow, aColumn);
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
-				add_spacer(aRow, col);
+				add_spacer_at_position(aRow, col);
 		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aLayout));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
-		row_layout(aRow).replace_item(aColumn, aLayout);
+		row_layout(aRow).replace_item_at(aColumn, aLayout);
 	}
 
-	void grid_layout::add_item(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout)
+	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout)
 	{
 		if (iCells.find(cell_coordinates{aColumn, aRow}) != iCells.end())
-			remove_item(aRow, aColumn);
+			remove_item_at_position(aRow, aColumn);
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
-				add_spacer(aRow, col);
+				add_spacer_at_position(aRow, col);
 		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aLayout));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
-		row_layout(aRow).replace_item(aColumn, aLayout);
+		row_layout(aRow).replace_item_at(aColumn, aLayout);
 	}
 
-	void grid_layout::add_item(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer)
+	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer)
 	{
 		if (iCells.find(cell_coordinates{ aColumn, aRow }) != iCells.end())
-			remove_item(aRow, aColumn);
+			remove_item_at_position(aRow, aColumn);
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
-				add_spacer(aRow, col);
+				add_spacer_at_position(aRow, col);
 		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item(*this, aSpacer));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
 		aSpacer.set_parent(*this);
-		row_layout(aRow).replace_item(aColumn, aSpacer);
+		row_layout(aRow).replace_item_at(aColumn, aSpacer);
 	}
 
-	void grid_layout::add_item(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_spacer> aSpacer)
+	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_spacer> aSpacer)
 	{
 		if (iCells.find(cell_coordinates{ aColumn, aRow }) != iCells.end())
-			remove_item(aRow, aColumn);
+			remove_item_at_position(aRow, aColumn);
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
-				add_spacer(aRow, col);
+				add_spacer_at_position(aRow, col);
 		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item(*this, aSpacer));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
 			items().back().set_owner(owner());
 		aSpacer->set_parent(*this);
-		row_layout(aRow).replace_item(aColumn, aSpacer);
+		row_layout(aRow).replace_item_at(aColumn, aSpacer);
 	}
 
 	i_spacer& grid_layout::add_spacer()
 	{
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
-		add_item(iCursor.y, iCursor.x, s);
+		add_item_at_position(iCursor.y, iCursor.x, s);
 		increment_cursor();
 		return *s;
 	}
 
-	i_spacer& grid_layout::add_spacer(uint32_t aPosition)
+	i_spacer& grid_layout::add_spacer_at(item_index aPosition)
 	{
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
 		cell_coordinates oldCursor = iCursor;
@@ -228,28 +228,28 @@ namespace neogfx
 		iCursor.x = 0;
 		while (aPosition--)
 			increment_cursor();
-		add_item(iCursor.y, iCursor.x, s);
+		add_item_at_position(iCursor.y, iCursor.x, s);
 		iCursor = oldCursor;
 		return *s;
 	}
 
-	i_spacer& grid_layout::add_spacer(cell_coordinate aRow, cell_coordinate aColumn)
+	i_spacer& grid_layout::add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn)
 	{
 		if (iCells.find(cell_coordinates{ aColumn, aRow }) != iCells.end())
-			remove_item(aRow, aColumn);
+			remove_item_at_position(aRow, aColumn);
 		auto s = std::make_shared<spacer>(static_cast<i_spacer::expansion_policy_e>(i_spacer::ExpandHorizontally | i_spacer::ExpandVertically));
-		add_item(aRow, aColumn, s);
+		add_item_at_position(aRow, aColumn, s);
 		return *s;
 	}
 
-	void grid_layout::remove_item(item_index aIndex)
+	void grid_layout::remove_item_at(item_index aIndex)
 	{
 		auto itemIter = std::next(items().begin(), aIndex);
 		for (cell_list::reverse_iterator i = iCells.rbegin(); i != iCells.rend(); ++i)
 		{
 			if (i->second == itemIter)
 			{
-				remove_item(i->first.y, i->first.x);
+				remove_item_at_position(i->first.y, i->first.x);
 				break;
 			}
 		}
@@ -260,7 +260,7 @@ namespace neogfx
 		auto item = find_item(aItem);
 		if (item != boost::none)
 		{
-			remove_item(*item);
+			remove_item_at(*item);
 			return true;
 		}
 		return false;
@@ -271,13 +271,13 @@ namespace neogfx
 		auto item = find_item(aItem);
 		if (item != boost::none)
 		{
-			remove_item(*item);
+			remove_item_at(*item);
 			return true;
 		}
 		return false;
 	}
 
-	void grid_layout::remove_item(cell_coordinate aRow, cell_coordinate aColumn)
+	void grid_layout::remove_item_at_position(cell_coordinate aRow, cell_coordinate aColumn)
 	{
 		auto iterExistingCell = iCells.find(cell_coordinates{ aColumn, aRow });
 		if (iterExistingCell == iCells.end())
@@ -286,10 +286,10 @@ namespace neogfx
 		{
 			auto existing = row_layout(aRow).find_item(*iterExistingItem);
 			if (existing != boost::none)
-				row_layout(aRow).remove_item(*existing);
+				row_layout(aRow).remove_item_at(*existing);
 		}
 		if (aColumn < row_layout(aRow).item_count())
-			row_layout(aRow).remove_item(aColumn);
+			row_layout(aRow).remove_item_at(aColumn);
 		iCells.erase(iterExistingCell);
 		iDimensions = cell_dimensions{};
 		for (const auto& cell : iCells)
@@ -311,7 +311,7 @@ namespace neogfx
 		iCursor = cell_coordinates{};
 	}
 
-	i_widget& grid_layout::get_widget(cell_coordinate aRow, cell_coordinate aColumn)
+	i_widget& grid_layout::get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
 	{
 		if (iCells.find(cell_coordinates{aColumn, aRow}) == iCells.end())
 			throw cell_unoccupied();
@@ -321,7 +321,7 @@ namespace neogfx
 			throw wrong_item_type();
 	}
 
-	i_layout& grid_layout::get_layout(cell_coordinate aRow, cell_coordinate aColumn)
+	i_layout& grid_layout::get_layout_at_position(cell_coordinate aRow, cell_coordinate aColumn)
 	{
 		if (iCells.find(cell_coordinates{aColumn, aRow}) == iCells.end())
 			throw cell_unoccupied();

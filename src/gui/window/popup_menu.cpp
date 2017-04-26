@@ -124,17 +124,17 @@ namespace neogfx
 		if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().grab_keyboard(*this);
 		for (i_menu::item_index i = 0; i < menu().item_count(); ++i)
-			iLayout.add_item(std::make_shared<menu_item_widget>(*this, menu(), menu().item(i)));
+			iLayout.add_item(std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(i)));
 		layout_items();
 		menu().open();
 		iSink += menu().item_added([this](i_menu::item_index aIndex)
 		{
-			iLayout.add_item(aIndex, std::make_shared<menu_item_widget>(*this, menu(), menu().item(aIndex)));
+			iLayout.add_item_at(aIndex, std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(aIndex)));
 			layout_items();
 		});
 		iSink += menu().item_removed([this](i_menu::item_index aIndex)
 		{
-			iLayout.remove_item(aIndex);
+			iLayout.remove_item_at(aIndex);
 			layout_items();
 		});
 		iSink += menu().item_changed([this](i_menu::item_index)
@@ -153,7 +153,7 @@ namespace neogfx
 					iOpenSubMenu->menu().close();
 				}
 			}
-			scroll_to(layout().get_widget<menu_item_widget>(menu().find_item(aMenuItem)));
+			scroll_to(layout().get_widget_at<menu_item_widget>(menu().find_item(aMenuItem)));
 			update();
 		});
 		iSink += menu().open_sub_menu([this](i_menu& aSubMenu)
@@ -161,7 +161,7 @@ namespace neogfx
 			if (!iOpeningSubMenu && aSubMenu.item_count() > 0)
 			{
 				neolib::scoped_flag sf{ iOpeningSubMenu };
-				auto& itemWidget = layout().get_widget<menu_item_widget>(menu().find_item(aSubMenu));
+				auto& itemWidget = layout().get_widget_at<menu_item_widget>(menu().find_item(aSubMenu));
 				close_sub_menu();
 				iOpenSubMenu->set_menu(aSubMenu, itemWidget.sub_menu_position());
 				iSink2 += iOpenSubMenu->menu().closed([this]()
@@ -244,15 +244,15 @@ namespace neogfx
 		{
 		case ScanCode_UP:
 			if (menu().has_selected_item())
-				menu().select_item(menu().previous_available_item(menu().selected_item()));
+				menu().select_item_at(menu().previous_available_item(menu().selected_item()));
 			else if (menu().has_available_items())
-				menu().select_item(menu().first_available_item());
+				menu().select_item_at(menu().first_available_item());
 			break;
 		case ScanCode_DOWN:
 			if (menu().has_selected_item())
-				menu().select_item(menu().next_available_item(menu().selected_item()));
+				menu().select_item_at(menu().next_available_item(menu().selected_item()));
 			else if (menu().has_available_items())
-				menu().select_item(menu().first_available_item());
+				menu().select_item_at(menu().first_available_item());
 			break;
 		case ScanCode_LEFT:
 			if (menu().has_parent())
@@ -260,19 +260,19 @@ namespace neogfx
 				if (menu().parent().type() == i_menu::Popup)
 					menu().close();
 				else if (menu().parent().has_selected_item())
-					menu().parent().select_item(menu().parent().previous_available_item(menu().parent().selected_item()), true);
+					menu().parent().select_item_at(menu().parent().previous_available_item(menu().parent().selected_item()), true);
 			}
 			break;
 		case ScanCode_RIGHT:
 			if (menu().has_selected_item())
 			{
-				if (menu().item(menu().selected_item()).type() == i_menu_item::SubMenu)
+				if (menu().item_at(menu().selected_item()).type() == i_menu_item::SubMenu)
 				{
-					auto& subMenu = menu().item(menu().selected_item()).sub_menu();
+					auto& subMenu = menu().item_at(menu().selected_item()).sub_menu();
 					if (!subMenu.is_open())
 						menu().open_sub_menu.trigger(subMenu);
 					if (subMenu.has_available_items())
-						subMenu.select_item(subMenu.first_available_item());
+						subMenu.select_item_at(subMenu.first_available_item());
 				}
 				else
 				{
@@ -282,20 +282,20 @@ namespace neogfx
 					if (m != &menu())
 					{
 						if (m->has_selected_item())
-							m->select_item(m->next_available_item(m->selected_item()), true);
+							m->select_item_at(m->next_available_item(m->selected_item()), true);
 					}
 				}
 			}
 			else if (menu().has_parent() && menu().parent().type() == i_menu::MenuBar)
 			{
 				if (menu().parent().has_selected_item())
-					menu().parent().select_item(menu().parent().next_available_item(menu().parent().selected_item()), true);
+					menu().parent().select_item_at(menu().parent().next_available_item(menu().parent().selected_item()), true);
 			}
 			break;
 		case ScanCode_RETURN:
-			if (menu().has_selected_item() && menu().item(menu().selected_item()).available())
+			if (menu().has_selected_item() && menu().item_at(menu().selected_item()).available())
 			{
-				auto& selectedItem = menu().item(menu().selected_item());
+				auto& selectedItem = menu().item_at(menu().selected_item());
 				if (selectedItem.type() == i_menu_item::Action)
 				{
 					selectedItem.action().triggered.async_trigger();

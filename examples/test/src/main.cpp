@@ -421,8 +421,8 @@ int main(int argc, char* argv[])
 		keypad.set_spacing(0.0);
 		for (uint32_t row = 0; row < 3; ++row)
 			for (uint32_t col = 0; col < 3; ++col)
-				keypad.add_item(row, col, std::make_shared<keypad_button>(textEdit, row * 3 + col + 1));
-		keypad.add_item(3, 1, std::make_shared<keypad_button>(textEdit, 0));
+				keypad.add_item_at_position(row, col, std::make_shared<keypad_button>(textEdit, row * 3 + col + 1));
+		keypad.add_item_at_position(3, 1, std::make_shared<keypad_button>(textEdit, 0));
 		keypad.add_span(3, 1, 1, 2);
 
 		neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
@@ -530,7 +530,7 @@ int main(int argc, char* argv[])
 			auto hashWidget = std::make_shared<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal_placement>(i));
 			hashWidget->set_size_policy(ng::size_policy::Expanding);
 			hashWidget->set_background_colour(i % 2 == 0 ? ng::colour::Black : ng::colour::White);
-			l4.add_item(i / 3, i % 3, hashWidget);
+			l4.add_item_at_position(i / 3, i % 3, hashWidget);
 		}
 		ng::image smallHash(":/test/resources/channel.png");
 

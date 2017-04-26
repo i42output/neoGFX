@@ -92,53 +92,53 @@ namespace neogfx
 		return iItems.size();
 	}
 
-	const i_menu_item& menu::item(item_index aItemIndex) const
+	const i_menu_item& menu::item_at(item_index aItemIndex) const
 	{
 		if (aItemIndex >= item_count())
 			throw bad_item_index();
 		return *iItems[aItemIndex];
 	}
 
-	i_menu_item& menu::item(item_index aItemIndex)
+	i_menu_item& menu::item_at(item_index aItemIndex)
 	{
-		return const_cast<i_menu_item&>(const_cast<const menu*>(this)->item(aItemIndex));
+		return const_cast<i_menu_item&>(const_cast<const menu*>(this)->item_at(aItemIndex));
 	}
 
 	i_menu& menu::add_sub_menu(const std::string& aSubMenuTitle)
 	{
-		return insert_sub_menu(item_count(), aSubMenuTitle);
+		return insert_sub_menu_at(item_count(), aSubMenuTitle);
 	}
 
 	i_action& menu::add_action(i_action& aAction)
 	{
-		insert_action(item_count(), aAction);
+		insert_action_at(item_count(), aAction);
 		return aAction;
 	}
 
 	i_action& menu::add_action(std::shared_ptr<i_action> aAction)
 	{
-		insert_action(item_count(), aAction);
+		insert_action_at(item_count(), aAction);
 		return *aAction;
 	}
 
 	void menu::add_separator()
 	{
-		insert_separator(item_count());
+		insert_separator_at(item_count());
 	}
 
-	i_menu& menu::insert_sub_menu(item_index aItemIndex, const std::string& aSubMenuTitle)
+	i_menu& menu::insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuTitle)
 	{
 		auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(*this, Popup, aSubMenuTitle)));
 		item_added.trigger(aItemIndex);
 		return (**newItem).sub_menu();
 	}
 
-	void menu::insert_action(item_index aItemIndex, i_action& aAction)
+	void menu::insert_action_at(item_index aItemIndex, i_action& aAction)
 	{
-		insert_action(aItemIndex, std::shared_ptr<i_action>(std::shared_ptr<i_action>(), &aAction));
+		insert_action_at(aItemIndex, std::shared_ptr<i_action>(std::shared_ptr<i_action>(), &aAction));
 	}
 	
-	void menu::insert_action(item_index aItemIndex, std::shared_ptr<i_action> aAction)
+	void menu::insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction)
 	{
 		iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
 		item_added.trigger(aItemIndex);
@@ -153,12 +153,12 @@ namespace neogfx
 		});
 	}
 
-	void menu::insert_separator(item_index aItemIndex)
+	void menu::insert_separator_at(item_index aItemIndex)
 	{
-		insert_action(aItemIndex, iSeparator);
+		insert_action_at(aItemIndex, iSeparator);
 	}
 
-	void menu::remove_item(item_index aItemIndex)
+	void menu::remove_item_at(item_index aItemIndex)
 	{
 		if (aItemIndex >= item_count())
 			throw bad_item_index();
@@ -194,22 +194,22 @@ namespace neogfx
 		throw no_selected_item();
 	}
 
-	void menu::select_item(item_index aItemIndex, bool aSelectAnySubMenuItem)
+	void menu::select_item_at(item_index aItemIndex, bool aSelectAnySubMenuItem)
 	{
 		if (has_selected_item() && selected_item() == aItemIndex)
 			return;
-		if (!item_available(aItemIndex))
+		if (!item_available_at(aItemIndex))
 			throw cannot_select_item();
 		if (has_selected_item())
-			item(selected_item()).deselected.trigger();
+			item_at(selected_item()).deselected.trigger();
 		iSelection = aItemIndex;
-		item_selected.trigger(item(aItemIndex));
-		item(aItemIndex).selected.trigger();
-		if (aSelectAnySubMenuItem && item(aItemIndex).type() == i_menu_item::SubMenu)
+		item_selected.trigger(item_at(aItemIndex));
+		item_at(aItemIndex).selected.trigger();
+		if (aSelectAnySubMenuItem && item_at(aItemIndex).type() == i_menu_item::SubMenu)
 		{
-			auto& subMenu = item(aItemIndex).sub_menu();
+			auto& subMenu = item_at(aItemIndex).sub_menu();
 			if (subMenu.is_open() && !subMenu.has_selected_item() && subMenu.has_available_items())
-				subMenu.select_item(subMenu.first_available_item());
+				subMenu.select_item_at(subMenu.first_available_item());
 		}
 	}
 
@@ -230,15 +230,15 @@ namespace neogfx
 		return false;
 	}
 
-	bool menu::item_available(item_index aItemIndex) const
+	bool menu::item_available_at(item_index aItemIndex) const
 	{
-		return item(aItemIndex).available();
+		return item_at(aItemIndex).available();
 	}
 
 	menu::item_index menu::first_available_item() const
 	{
 		for (item_index i = 0; i < item_count(); ++i)
-			if (item(i).available())
+			if (item_at(i).available())
 				return i;
 		throw no_available_items();
 	}
@@ -255,7 +255,7 @@ namespace neogfx
 				return item_count() - 1;
 		};
 		for (item_index previousIndex = previous(aCurrentIndex); previousIndex != aCurrentIndex; previousIndex = previous(previousIndex))
-			if (item(previousIndex).available())
+			if (item_at(previousIndex).available())
 				return previousIndex;
 		return aCurrentIndex;
 	}
@@ -272,7 +272,7 @@ namespace neogfx
 				return 0;
 		};
 		for (item_index nextIndex = next(aCurrentIndex); nextIndex != aCurrentIndex; nextIndex = next(nextIndex))
-			if (item(nextIndex).available())
+			if (item_at(nextIndex).available())
 				return nextIndex;
 		return aCurrentIndex;
 	}

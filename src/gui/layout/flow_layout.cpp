@@ -41,21 +41,21 @@ namespace neogfx
 
 	i_spacer& flow_layout::add_spacer()
 	{
-		return add_spacer(item_count());
+		return add_spacer_at(item_count());
 	}
 
-	i_spacer& flow_layout::add_spacer(uint32_t aPosition)
+	i_spacer& flow_layout::add_spacer_at(item_index aPosition)
 	{
 		if (iFlowDirection == FlowDirectionHorizontal)
 		{
 			auto s = std::make_shared<horizontal_spacer>();
-			add_item(aPosition, s);
+			add_item_at(aPosition, s);
 			return *s;
 		}
 		else
 		{
 			auto s = std::make_shared<vertical_spacer>();
-			add_item(aPosition, s);
+			add_item_at(aPosition, s);
 			return *s;
 		}
 	}
