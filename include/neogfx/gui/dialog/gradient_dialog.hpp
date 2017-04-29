@@ -50,6 +50,9 @@ namespace neogfx
 		vertical_layout iLayout4;
 		group_box iSelectorGroupBox;
 		gradient_widget iGradientSelector;
+		group_box iSmoothnessGroupBox;
+		double_spin_box iSmoothnessSpinBox;
+		double_slider iSmoothnessSlider;
 		group_box iDirectionGroupBox;
 		radio_button iDirectionHorizontalRadioButton;
 		radio_button iDirectionVerticalRadioButton;

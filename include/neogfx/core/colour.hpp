@@ -877,6 +877,9 @@ namespace neogfx
 		const optional_point& centre() const;
 		void set_centre(const optional_point& aCentre);
 		gradient with_centre(const optional_point& aCentre) const;
+		double smoothness() const;
+		void set_smoothness(double aSmoothness);
+		gradient with_smoothness(double aSmoothness) const;
 	public:
 		bool operator==(const gradient& aOther) const;
 		bool operator!=(const gradient& aOther) const;
@@ -898,6 +901,7 @@ namespace neogfx
 		shape_e iShape;
 		size_e iSize;
 		optional_point iCentre;
+		double iSmoothness;
 	};
 
 	typedef boost::optional<colour> optional_colour;

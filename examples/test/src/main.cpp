@@ -91,7 +91,7 @@ void create_game(ng::i_layout& aLayout);
 int main(int argc, char* argv[])
 {
 	ng::app app(argc, argv, "neoGFX Test App");
-
+	
 	try
 	{
 		app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));

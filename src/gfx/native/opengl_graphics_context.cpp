@@ -517,6 +517,8 @@ namespace neogfx
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
 		basic_point<float> gradientCentre = (aGradient.centre() != boost::none ? *aGradient.centre() : point{});
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
+		auto filter = gaussian_filter<float, 101>(static_cast<float>(aGradient.smoothness() * 50.0));
+		iRenderingEngine.gradient_shader_program().set_uniform_array("filter", 101, &filter[0]);
 		auto combinedStops = aGradient.combined_stops();
 		iGradientStopPositions.reserve(combinedStops.size());
 		iGradientStopColours.reserve(combinedStops.size());

@@ -10,6 +10,9 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup>
+    <UseNativeEnvironment>true</UseNativeEnvironment>
+  </PropertyGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EA135436-DFC4-4277-A66A-BCDE83D37104}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

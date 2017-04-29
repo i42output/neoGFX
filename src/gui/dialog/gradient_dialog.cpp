@@ -104,6 +104,9 @@ namespace neogfx
 		iLayout{ *this }, iLayout2{ iLayout }, iLayout3{ iLayout2 }, iLayout4{ iLayout2 },
 		iSelectorGroupBox{ iLayout3 },
 		iGradientSelector{ *this, iSelectorGroupBox.item_layout(), aCurrentGradient },
+		iSmoothnessGroupBox{ iSelectorGroupBox.item_layout(), "Smoothness (%)" },
+		iSmoothnessSpinBox{ iSmoothnessGroupBox.item_layout() },
+		iSmoothnessSlider{ iSmoothnessGroupBox.item_layout() },
 		iDirectionGroupBox{ iLayout3, "Direction" },
 		iDirectionHorizontalRadioButton{ iDirectionGroupBox.item_layout(), "Horizontal" },
 		iDirectionVerticalRadioButton{ iDirectionGroupBox.item_layout(), "Vertical" },
@@ -179,6 +182,13 @@ namespace neogfx
 		iLayout3.set_margins(neogfx::margins{});
 		iLayout3.set_spacing(16.0);
 		iLayout5.set_alignment(alignment::Top);
+		iSmoothnessSpinBox.set_minimum(0.0);
+		iSmoothnessSpinBox.set_maximum(100.0);
+		iSmoothnessSpinBox.set_step(0.01);
+		iSmoothnessSpinBox.set_format("%.01f");
+		iSmoothnessSlider.set_minimum(0.0);
+		iSmoothnessSlider.set_maximum(100.0);
+		iSmoothnessSlider.set_step(0.01);
 		iOrientationGroupBox.item_layout().set_alignment(alignment::Top);
 		iAngleSpinBox.set_minimum(-360.0);
 		iAngleSpinBox.set_maximum(360.0);
@@ -200,6 +210,9 @@ namespace neogfx
 		iGradientSelector.set_fixed_size(size{ 256.0, iGradientSelector.minimum_size().cy });
 
 		iGradientSelector.gradient_changed([this]() { update_widgets(); });
+
+		iSmoothnessSpinBox.value_changed([this]() { iGradientSelector.set_gradient(gradient().with_smoothness(iSmoothnessSpinBox.value() / 100.0)); update_widgets(); });
+		iSmoothnessSlider.value_changed([this]() { iGradientSelector.set_gradient(gradient().with_smoothness(iSmoothnessSlider.value() / 100.0)); update_widgets(); });
 
 		iDirectionHorizontalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Horizontal)); update_widgets(); });
 		iDirectionVerticalRadioButton.checked([this]() { iGradientSelector.set_gradient(gradient().with_direction(gradient::Vertical)); update_widgets(); });
@@ -245,6 +258,8 @@ namespace neogfx
 		if (iUpdatingWidgets)
 			return;
 		iUpdatingWidgets = true;
+		iSmoothnessSpinBox.set_value(gradient().smoothness() * 100.0);
+		iSmoothnessSlider.set_value(gradient().smoothness() * 100.0);
 		iDirectionHorizontalRadioButton.set_checked(gradient().direction() == gradient::Horizontal);
 		iDirectionVerticalRadioButton.set_checked(gradient().direction() == gradient::Vertical);
 		iDirectionDiagonalRadioButton.set_checked(gradient().direction() == gradient::Diagonal);

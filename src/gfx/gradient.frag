@@ -12,6 +12,7 @@ uniform int nStopCount;
 uniform vec2 posGradientCentre;
 uniform sampler2DRect texStopPositions;
 uniform sampler2DRect texStopColours;
+uniform float filter[101];
 in vec4 Color;
 out vec4 FragColor;
 
@@ -55,10 +56,8 @@ float ellipse_radius(float cx, float cy, float angle)
 	return cx * cy / sqrt(cx * cx * sin(angle) * sin(angle) + cy * cy * cos(angle) * cos(angle));
 }
 
-void main()
+vec4 colour_at(vec2 viewPos)
 {
-	vec2 viewPos = gl_FragCoord.xy;
-	viewPos.y = posViewportTop - viewPos.y;
 	float gradientPos;
 	if (nGradientDirection == 0) /* vertical */
 		gradientPos = (viewPos.y - posTopLeft.y) / (posBottomRight.y - posTopLeft.y);
@@ -163,6 +162,38 @@ void main()
 		else
 			gradientPos = 1.0;
 	}
+	return gradient_colour(gradientPos);
+}
 
-	FragColor = gradient_colour(gradientPos);
+int to_1d(int x, int y, int width)
+{
+	if (x < 0)
+		x = 0;
+	if (x > width - 1)
+		x = width - 1;
+	if (y < 0)
+		y = 0;
+	if (y > width - 1)
+		y = width - 1;
+	return x + (y * width);
+}
+
+void main()
+{
+	vec2 viewPos = gl_FragCoord.xy;
+	viewPos.y = posViewportTop - viewPos.y;
+	if (filter[50] == 1.0)
+	{
+		FragColor = colour_at(viewPos);
+	}
+	else
+	{
+		vec4 sum;
+		for (int f = -50; f <= 50; ++f)
+		{
+			sum += (colour_at(viewPos + vec2(0, f)) * filter[f + 50]);
+			sum += (colour_at(viewPos + vec2(f, 0)) * filter[f + 50]);
+		}
+		FragColor = sum / 2.0;
+	}
 }

@@ -163,6 +163,8 @@ namespace neogfx
 		if (iSelection != aGradient)
 		{
 			iSelection = aGradient;
+			iCurrentColourStop.reset();
+			iCurrentAlphaStop.reset();
 			update();
 			gradient_changed.trigger();
 		}

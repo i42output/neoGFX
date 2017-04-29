@@ -153,6 +153,14 @@ namespace neogfx
 			throw shader_program_error(errorCode);
 	}
 
+	void opengl_renderer::shader_program::set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray)
+	{
+		glUniform1fv(uniform_location(aName), aSize, aArray);
+		GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+			throw shader_program_error(errorCode);
+	}
+
 	GLuint opengl_renderer::shader_program::register_variable(const std::string& aVariableName)
 	{
 		GLuint index = static_cast<GLuint>(iVariables.size());

@@ -261,4 +261,25 @@ namespace neogfx
 		logical_coordinate_system iPreviousCoordinateSystem;
 		vector4 iPreviousCoordinates;
 	};
+
+	template <typename ValueType = double, uint32_t W = 5>
+	inline std::array<ValueType, W> gaussian_filter(ValueType aSigma = 1.0)
+	{
+		int32_t mean = static_cast<int32_t>(W / 2);
+		std::array<ValueType, W> kernel = {};
+		if (aSigma != 0)
+		{
+			ValueType sum = 0.0;
+			for (int32_t x = -mean; x <= mean; ++x)
+			{
+				kernel[x + mean] = static_cast<ValueType>(1.0 / (aSigma * std::sqrt(2.0 * boost::math::constants::pi<ValueType>())) * std::exp(-(x * x) / (2.0 * aSigma * aSigma)));
+				sum += kernel[x + mean];
+			}
+			for (uint32_t w = 0; w < W; ++w)
+				kernel[w] /= sum;
+		}
+		else
+			kernel[mean] = static_cast<ValueType>(1.0);
+		return kernel;
+	}
 }

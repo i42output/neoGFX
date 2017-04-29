@@ -340,7 +340,8 @@ namespace neogfx
 		iDirection(Horizontal),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
-		iSize(FarthestCorner)
+		iSize(FarthestCorner),
+		iSmoothness{0.0}
 	{
 	}
 
@@ -350,7 +351,8 @@ namespace neogfx
 		iDirection(aDirection),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
-		iSize(FarthestCorner)
+		iSize(FarthestCorner),
+		iSmoothness{0.0}
 	{
 	}
 
@@ -360,7 +362,8 @@ namespace neogfx
 		iDirection(aDirection),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
-		iSize(FarthestCorner)
+		iSize(FarthestCorner),
+		iSmoothness{0.0}
 	{
 	}
 
@@ -370,7 +373,8 @@ namespace neogfx
 		iDirection(aDirection),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
-		iSize(FarthestCorner)
+		iSize(FarthestCorner),
+		iSmoothness{0.0}
 	{
 		fix();
 	}
@@ -381,7 +385,8 @@ namespace neogfx
 		iDirection(aDirection),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
-		iSize(FarthestCorner)
+		iSize(FarthestCorner),
+		iSmoothness{0.0}
 	{
 		fix();
 	}
@@ -713,6 +718,23 @@ namespace neogfx
 		return result;
 	}
 
+	double gradient::smoothness() const
+	{
+		return iSmoothness;
+	}
+
+	void gradient::set_smoothness(double aSmoothness)
+	{
+		iSmoothness = aSmoothness;
+	}
+
+	gradient gradient::with_smoothness(double aSmoothness) const
+	{
+		gradient result = *this;
+		result.set_smoothness(aSmoothness);
+		return result;
+	}
+
 	bool gradient::operator==(const gradient& aOther) const
 	{
 		return colour_stops() == aOther.colour_stops() &&
@@ -721,7 +743,8 @@ namespace neogfx
 			orientation() == aOther.orientation() &&
 			shape() == aOther.shape() &&
 			size() == aOther.size() &&
-			centre() == aOther.centre();
+			centre() == aOther.centre() &&
+			smoothness() == aOther.smoothness();
 	}
 
 	bool gradient::operator!=(const gradient& aOther) const
@@ -731,7 +754,8 @@ namespace neogfx
 
 	bool gradient::operator<(const gradient& aOther) const
 	{
-		return std::tie(iColourStops, iAlphaStops, iDirection, iOrientation, iShape, iSize, iCentre) < std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection, aOther.iOrientation, aOther.iShape, aOther.iSize, aOther.iCentre);
+		return std::tie(iColourStops, iAlphaStops, iDirection, iOrientation, iShape, iSize, iCentre, iSmoothness) < 
+			std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection, aOther.iOrientation, aOther.iShape, aOther.iSize, aOther.iCentre, aOther.iSmoothness);
 	}
 
 	double gradient::normalized_position(double aPos, double aStart, double aEnd)

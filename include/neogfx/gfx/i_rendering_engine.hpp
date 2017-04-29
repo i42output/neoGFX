@@ -64,6 +64,7 @@ namespace neogfx
 			virtual void set_uniform_variable(const std::string& aName, int aValue) = 0;
 			virtual void set_uniform_variable(const std::string& aName, float aValue1, float aValue2) = 0;
 			virtual void set_uniform_variable(const std::string& aName, double aValue1, double aValue2) = 0;
+			virtual void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray) = 0;
 		};
 	public:
 		virtual ~i_rendering_engine() {}
