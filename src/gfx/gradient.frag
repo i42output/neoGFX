@@ -10,9 +10,10 @@ uniform int nGradientSize;
 uniform int nGradientShape;
 uniform int nStopCount;
 uniform vec2 posGradientCentre;
+uniform int nFilterSize;
 uniform sampler2DRect texStopPositions;
 uniform sampler2DRect texStopColours;
-uniform float filter[101];
+uniform sampler2DRect texFilter;
 in vec4 Color;
 out vec4 FragColor;
 
@@ -182,18 +183,21 @@ void main()
 {
 	vec2 viewPos = gl_FragCoord.xy;
 	viewPos.y = posViewportTop - viewPos.y;
-	if (filter[50] == 1.0)
+	int d = nFilterSize / 2;
+	if (texelFetch(texFilter, ivec2(d, d)).r == 1.0)
 	{
 		FragColor = colour_at(viewPos);
 	}
 	else
 	{
 		vec4 sum;
-		for (int f = -50; f <= 50; ++f)
+		for (int fy = -d; fy <= d; ++fy)
 		{
-			sum += (colour_at(viewPos + vec2(0, f)) * filter[f + 50]);
-			sum += (colour_at(viewPos + vec2(f, 0)) * filter[f + 50]);
+			for (int fx = -d; fx <= d; ++fx)
+			{
+				sum += (colour_at(viewPos + vec2(fx, fy)) * texelFetch(texFilter, ivec2(fx + d, fy + d)).r);
+			}
 		}
-		FragColor = sum / 2.0;
+		FragColor = sum;
 	}
 }

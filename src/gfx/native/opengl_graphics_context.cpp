@@ -270,8 +270,9 @@ namespace neogfx
 		set_logical_coordinate_system(iSavedCoordinateSystem);
 		if (iGradientTextures != boost::none)
 		{
-			glCheck(glDeleteTextures(1, &iGradientTextures->first));
-			glCheck(glDeleteTextures(1, &iGradientTextures->second));
+			glCheck(glDeleteTextures(1, &(*iGradientTextures)[0]));
+			glCheck(glDeleteTextures(1, &(*iGradientTextures)[1]));
+			glCheck(glDeleteTextures(1, &(*iGradientTextures)[2]));
 		}
 	}
 
@@ -517,8 +518,6 @@ namespace neogfx
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
 		basic_point<float> gradientCentre = (aGradient.centre() != boost::none ? *aGradient.centre() : point{});
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
-		auto filter = gaussian_filter<float, 101>(static_cast<float>(aGradient.smoothness() * 50.0));
-		iRenderingEngine.gradient_shader_program().set_uniform_array("filter", 101, &filter[0]);
 		auto combinedStops = aGradient.combined_stops();
 		iGradientStopPositions.reserve(combinedStops.size());
 		iGradientStopColours.reserve(combinedStops.size());
@@ -530,36 +529,50 @@ namespace neogfx
 			iGradientStopColours.push_back(std::array<uint8_t, 4>{ {stop.second.red(), stop.second.green(), stop.second.blue(), stop.second.alpha()}});
 		}
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(iGradientStopPositions.size()));
+		const uint32_t FILTER_SIZE = 33;
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("nFilterSize", static_cast<int>(FILTER_SIZE));
+		auto filter = gaussian_filter<float, FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
 		glCheck(glEnable(GL_TEXTURE_RECTANGLE));
 		if (iGradientTextures == boost::none)
 		{
-			iGradientTextures.emplace(0, 0);
-			glCheck(glGenTextures(1, &iGradientTextures->first));
-			glCheck(glGenTextures(1, &iGradientTextures->second));
+			iGradientTextures.emplace(std::array<GLuint, 3>{});
+			glCheck(glGenTextures(1, &(*iGradientTextures)[0]));
+			glCheck(glGenTextures(1, &(*iGradientTextures)[1]));
+			glCheck(glGenTextures(1, &(*iGradientTextures)[2]));
 			GLint previousTexture;
 			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE, &previousTexture));
-			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, iGradientTextures->first));
+			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[0]));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 			static const std::array<float, gradient::MaxStops> sZeroStopPositions = {};
 			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R32F, static_cast<GLsizei>(gradient::MaxStops), 1, 0, GL_RED, GL_FLOAT, &sZeroStopPositions[0]));
-			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, iGradientTextures->second));
+			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[1]));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 			static const std::array<std::array<uint8_t, 4>, gradient::MaxStops> sZeroStopColours = {};
 			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, static_cast<GLsizei>(gradient::MaxStops), 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &sZeroStopColours[0]));
+			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[2]));
+			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+			static const std::array<float, FILTER_SIZE * FILTER_SIZE> sFilter = {};
+			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R32F, FILTER_SIZE, FILTER_SIZE, 0, GL_RED, GL_FLOAT, &sFilter[0]));
 			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, previousTexture));
 		}
 		glCheck(glActiveTexture(GL_TEXTURE2));
 		glCheck(glClientActiveTexture(GL_TEXTURE2));
-		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, iGradientTextures->first));
+		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[0]));
 		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, iGradientStopPositions.size(), 1, GL_RED, GL_FLOAT, &iGradientStopPositions[0]));
 		glCheck(glActiveTexture(GL_TEXTURE3));
 		glCheck(glClientActiveTexture(GL_TEXTURE3));
-		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, iGradientTextures->second));
+		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[1]));
 		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, iGradientStopColours.size(), 1, GL_RGBA, GL_UNSIGNED_BYTE, &iGradientStopColours[0]));
+		glCheck(glActiveTexture(GL_TEXTURE4));
+		glCheck(glClientActiveTexture(GL_TEXTURE4));
+		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[2]));
+		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, FILTER_SIZE, FILTER_SIZE, GL_RED, GL_FLOAT, &filter[0][0]));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("texStopPositions", 2);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("texStopColours", 3);
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("texFilter", 4);
 		glCheck(glActiveTexture(GL_TEXTURE1));
 		glCheck(glClientActiveTexture(GL_TEXTURE1));
 	}

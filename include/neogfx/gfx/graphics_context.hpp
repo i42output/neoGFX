@@ -263,23 +263,28 @@ namespace neogfx
 	};
 
 	template <typename ValueType = double, uint32_t W = 5>
-	inline std::array<ValueType, W> gaussian_filter(ValueType aSigma = 1.0)
+	inline std::array<std::array<ValueType, W>, W> gaussian_filter(ValueType aSigma = 1.0)
 	{
-		int32_t mean = static_cast<int32_t>(W / 2);
-		std::array<ValueType, W> kernel = {};
+		const int32_t mean = static_cast<int32_t>(W / 2);
+		std::array<std::array<ValueType, W>, W> kernel = {};
 		if (aSigma != 0)
 		{
 			ValueType sum = 0.0;
 			for (int32_t x = -mean; x <= mean; ++x)
 			{
-				kernel[x + mean] = static_cast<ValueType>(1.0 / (aSigma * std::sqrt(2.0 * boost::math::constants::pi<ValueType>())) * std::exp(-(x * x) / (2.0 * aSigma * aSigma)));
-				sum += kernel[x + mean];
+				for (int32_t y = -mean; y <= mean; ++y)
+				{
+					kernel[x + mean][y + mean] =
+						static_cast<ValueType>((1.0 / (2.0 * boost::math::constants::pi<ValueType>() * aSigma * aSigma)) * std::exp(-((x * x + y * y) / (2.0 * aSigma * aSigma))));
+					sum += kernel[x + mean][y + mean];
+				}
 			}
-			for (uint32_t w = 0; w < W; ++w)
-				kernel[w] /= sum;
+			for (uint32_t x = 0; x < W; ++x)
+				for (uint32_t y = 0; y < W; ++y)
+					kernel[x][y] /= sum;
 		}
 		else
-			kernel[mean] = static_cast<ValueType>(1.0);
+			kernel[mean][mean] = static_cast<ValueType>(1.0);
 		return kernel;
 	}
 }
