@@ -163,8 +163,8 @@ namespace neogfx
 		if (iSelection != aGradient)
 		{
 			iSelection = aGradient;
-			iCurrentColourStop.reset();
-			iCurrentAlphaStop.reset();
+			iCurrentColourStop = boost::none;
+			iCurrentAlphaStop = boost::none;
 			update();
 			gradient_changed.trigger();
 		}
@@ -299,20 +299,8 @@ namespace neogfx
 			moreAction->triggered([this]()
 			{
 				gradient_dialog gd{ *this, gradient() };
-				auto update_gradient = [&]()
-				{
-					if (iSelection != gd.gradient())
-					{
-						iSelection = gd.gradient();
-						update();
-						gradient_changed.trigger();
-					}
-				};
 				if (gd.exec() == dialog::Accepted)
-				{
-					update_gradient();
-					gradient_changed.trigger();
-				}
+					set_gradient(gd.gradient());
 			});
 			auto stopIter = stop_at(aPosition);
 			if (!stopIter.empty() && stopIter == stop_at(*iClicked))
