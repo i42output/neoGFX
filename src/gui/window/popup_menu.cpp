@@ -336,6 +336,7 @@ namespace neogfx
 	void popup_menu::init()
 	{
 		iLayout.set_margins(neogfx::margins{});
+		iLayout.set_spacing(neogfx::size{});
 		closed([this]()
 		{
 			if (has_menu() && menu().is_open())

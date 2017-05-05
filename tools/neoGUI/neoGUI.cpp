@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
 		mainWindow.set_margins(ng::margins{});
 		ng::vertical_layout mainLayout(mainWindow);
 		mainLayout.set_margins(ng::margins{});
+		mainLayout.set_spacing(ng::size{});
 
 		ng::menu_bar mainMenu(mainLayout);
 
@@ -91,7 +92,7 @@ int main(int argc, char* argv[])
 				ng::colour::White.with_alpha(32));
 		});
 
-		ng::css css{"test.css"};
+//		ng::css css{"test.css"};
 
 		return app.exec();
 	}
