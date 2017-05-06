@@ -834,6 +834,6 @@ namespace neogfx
 		if (iStyle & window::DoubleBuffered)
 			SDL_GL_SwapWindow(iHandle);
 		else
-			glCheck(glFinish());
+			glCheck(glFlush());
 	}
 }
