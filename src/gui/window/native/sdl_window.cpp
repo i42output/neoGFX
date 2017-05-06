@@ -104,8 +104,8 @@ namespace neogfx
 
 	std::map<void*, sdl_window*> sHandleMap;
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
-		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
+		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(0),
 		iStyle(aStyle),
 		iHandle(0),
@@ -137,8 +137,8 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
-		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(0),
 		iStyle(aStyle),
 		iHandle(0),
@@ -170,8 +170,8 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
-		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(0),
 		iStyle(aStyle),
 		iHandle(0),
@@ -203,8 +203,8 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
-		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
+		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(&aParent),
 		iStyle(aStyle),
 		iHandle(0),
@@ -236,8 +236,8 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
-		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(&aParent),
 		iStyle(aStyle),
 		iHandle(0),
@@ -269,8 +269,8 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
-		opengl_window(aRenderingEngine, aSurfaceManager, aEventHandler),
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(&aParent),
 		iStyle(aStyle),
 		iHandle(0),
@@ -443,7 +443,7 @@ namespace neogfx
 	void sdl_window::update_mouse_cursor()
 	{
 		if (iSavedCursors.empty())
-			set_mouse_cursor(event_handler().native_window_mouse_cursor().system_cursor());
+			set_mouse_cursor(window().native_window_mouse_cursor().system_cursor());
 	}
 
 	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context() const
@@ -460,10 +460,10 @@ namespace neogfx
 	{
 		if (iHandle != 0)
 		{
-			if (event_handler().native_window_can_close())
+			if (window().native_window_can_close())
 			{
 				release_capture();
-				event_handler().native_window_closing();
+				window().native_window_closing();
 				if (!iDestroyed)
 				{
 					destroying();
@@ -473,7 +473,7 @@ namespace neogfx
 					SDL_DestroyWindow(iHandle);
 				}
 				iHandle = 0;
-				event_handler().native_window_closed();
+				window().native_window_closed();
 			}
 		}
 	}
@@ -525,6 +525,11 @@ namespace neogfx
 #ifdef WIN32
 		EnableWindow(static_cast<HWND>(native_handle()), aEnable);
 #endif
+	}
+
+	bool sdl_window::is_capturing() const
+	{
+		return iCapturingMouse;
 	}
 
 	void sdl_window::set_capture()
@@ -621,7 +626,7 @@ namespace neogfx
 		case WM_NCLBUTTONDOWN:
 		case WM_NCRBUTTONDOWN:
 		case WM_NCMBUTTONDOWN:
-			mapEntry->second->event_handler().native_window_dismiss_children(); // call this before default wndproc (which enters its own NC drag message loop)
+			mapEntry->second->window().native_window_dismiss_children(); // call this before default wndproc (which enters its own NC drag message loop)
 			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
 			break;
 		case WM_DESTROY:

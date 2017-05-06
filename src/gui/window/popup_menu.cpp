@@ -102,6 +102,11 @@ namespace neogfx
 			app::instance().keyboard().ungrab_keyboard(*this);
 	}
 
+	bool popup_menu::has_rendering_priority() const
+	{
+		return window::has_rendering_priority() || visible();
+	}
+
 	bool popup_menu::has_menu() const
 	{
 		return iMenu != nullptr;
@@ -145,7 +150,7 @@ namespace neogfx
 		{
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().grab_keyboard(*this);
-			if (iOpenSubMenu->has_menu())
+			if (iOpenSubMenu->has_menu() && iOpenSubMenu->menu().is_open())
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
 					(aMenuItem.type() == i_menu_item::SubMenu && &iOpenSubMenu->menu() != &aMenuItem.sub_menu()))

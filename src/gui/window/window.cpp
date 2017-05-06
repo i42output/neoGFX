@@ -455,6 +455,11 @@ namespace neogfx
 			update(aInvalidatedRect);
 	}
 
+	bool window::has_rendering_priority() const
+	{
+		return is_active();
+	}
+
 	void window::render_surface()
 	{
 		if (!destroyed())
@@ -804,6 +809,11 @@ namespace neogfx
 	void window::native_window_resized()
 	{
 		resize(native_surface().surface_size());
+	}
+
+	bool window::native_window_has_rendering_priority() const
+	{
+		return has_rendering_priority();
 	}
 
 	bool window::native_window_ready_to_render() const

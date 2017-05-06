@@ -40,6 +40,7 @@ namespace neogfx
 		virtual bool pump_event();
 		virtual void handle_event(const native_event& aNativeEvent);
 		virtual bool processing_event() const;
+		virtual bool has_rendering_priority() const;
 	public:
 		i_rendering_engine& rendering_engine() const;
 		i_surface_manager& surface_manager() const;

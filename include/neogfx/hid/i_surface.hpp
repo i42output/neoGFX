@@ -78,6 +78,7 @@ namespace neogfx
 		virtual void set_logical_coordinates(const vector4& aCoordinates) = 0;
 		virtual void layout_surface() = 0;
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) = 0;
+		virtual bool has_rendering_priority() const = 0;
 		virtual void render_surface() = 0;
 		virtual graphics_context create_graphics_context() const = 0;
 		virtual graphics_context create_graphics_context(const i_widget& aWidget) const = 0;

@@ -22,12 +22,11 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometry.hpp>
 #include "../../../hid/native/i_native_surface.hpp"
-#include "i_native_window_event_handler.hpp"
 #include "native_window_events.hpp"
 
 namespace neogfx
 {
-	class i_native_window_event_handler;
+	class i_window;
 
 	class i_native_window : public i_native_surface, public i_device_metrics
 	{
@@ -40,7 +39,7 @@ namespace neogfx
 		virtual void push_event(const native_event& aEvent) = 0;
 		virtual bool pump_event() = 0;
 		virtual void handle_event(const native_event& aNativeEvent) = 0;
-		virtual i_native_window_event_handler& event_handler() const = 0;
+		virtual i_window& window() const = 0;
 		virtual void close() = 0;
 		virtual void show(bool aActivate = false) = 0;
 		virtual void hide() = 0;
@@ -48,8 +47,10 @@ namespace neogfx
 		virtual void activate() = 0;
 		virtual bool is_enabled() const = 0;
 		virtual void enable(bool aEnable) = 0;
+		virtual bool is_capturing() const = 0;
 		virtual void set_capture() = 0;
 		virtual void release_capture() = 0;
 		virtual bool is_destroyed() const = 0;
+		virtual bool has_rendering_priority() const = 0;
 	};
 }

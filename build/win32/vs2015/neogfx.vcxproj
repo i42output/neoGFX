@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup>
-  <UseNativeEnvironment>true</UseNativeEnvironment>
-</PropertyGroup>
+    <UseNativeEnvironment>true</UseNativeEnvironment>
+  </PropertyGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -249,7 +249,6 @@
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\glyph_texture.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\i_native_window.hpp" />
-    <ClInclude Include="..\..\..\src\gui\window\native\i_native_window_event_handler.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window_events.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp" />

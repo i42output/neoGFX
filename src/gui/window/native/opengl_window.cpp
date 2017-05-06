@@ -26,9 +26,9 @@
 
 namespace neogfx
 {
-	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler) :
+	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow) :
 		native_window(aRenderingEngine, aSurfaceManager),
-		iEventHandler(aEventHandler),
+		iWindow(aWindow),
 		iLogicalCoordinateSystem(neogfx::logical_coordinate_system::AutomaticGui),
 		iFrameRate(60),
 		iFrameCounter(0),
@@ -114,10 +114,10 @@ namespace neogfx
 			if (processing_event())
 				return;
 
-			if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / (is_active() ? *iFrameRate : *iFrameRate / 10.0))
+			if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / (has_rendering_priority() ? *iFrameRate : *iFrameRate / 10.0))
 				return;
 
-			if (!iEventHandler.native_window_ready_to_render())
+			if (!iWindow.native_window_ready_to_render())
 				return;
 		}
 
@@ -194,7 +194,7 @@ namespace neogfx
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 
-		glCheck(iEventHandler.native_window_render(invalidatedRect));
+		glCheck(iWindow.native_window_render(invalidatedRect));
 
 		glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 		glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, iFrameBuffer));
@@ -247,9 +247,9 @@ namespace neogfx
 		return 0;
 	}
 
-	i_native_window_event_handler& opengl_window::event_handler() const
+	i_window& opengl_window::window() const
 	{
-		return iEventHandler;
+		return iWindow;
 	}
 
 	void opengl_window::destroying()

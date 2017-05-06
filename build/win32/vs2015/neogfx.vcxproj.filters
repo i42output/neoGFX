@@ -42,9 +42,6 @@
     <ClInclude Include="..\..\..\src\hid\native\sdl_keyboard.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\window\native\i_native_window_event_handler.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>

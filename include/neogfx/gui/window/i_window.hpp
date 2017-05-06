@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface.hpp>
+#include <neogfx/hid/i_keyboard.hpp>
 
 namespace neogfx
 {
@@ -35,5 +36,28 @@ namespace neogfx
 		virtual bool is_active() const = 0;
 		virtual void activate() = 0;
 		virtual void counted_enable(bool aEnable) = 0;
+	public:
+		virtual bool native_window_can_close() const = 0;
+		virtual void native_window_closing() = 0;
+		virtual void native_window_closed() = 0;
+		virtual void native_window_focus_gained() = 0;
+		virtual void native_window_focus_lost() = 0;
+		virtual void native_window_resized() = 0;
+		virtual bool native_window_has_rendering_priority() const = 0;
+		virtual bool native_window_ready_to_render() const = 0;
+		virtual void native_window_render(const rect& aInvalidatedRect) const = 0;
+		virtual void native_window_dismiss_children() = 0;
+		virtual void native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) = 0;
+		virtual void native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
+		virtual void native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
+		virtual void native_window_mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
+		virtual void native_window_mouse_moved(const point& aPosition) = 0;
+		virtual void native_window_mouse_entered() = 0;
+		virtual void native_window_mouse_left() = 0;
+		virtual void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
+		virtual void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
+		virtual void native_window_text_input(const std::string& aText) = 0;
+		virtual void native_window_sys_text_input(const std::string& aText) = 0;
+		virtual neogfx::mouse_cursor native_window_mouse_cursor() const = 0;
 	};
 }

@@ -30,7 +30,6 @@
 #include "../../../gfx/native/i_native_graphics_context.hpp"
 #include "../../../gfx/native/opengl_texture.hpp"
 #include "native_window.hpp"
-#include "i_native_window_event_handler.hpp"
 
 namespace neogfx
 {
@@ -42,7 +41,7 @@ namespace neogfx
 				std::runtime_error("neogfx::opengl_window::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + glErrorString(aErrorCode)) {} };
 		struct busy_rendering : std::logic_error { busy_rendering() : std::logic_error("neogfx::opengl_window::busy_rendering") {} };
 	public:
-		opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_native_window_event_handler& aEventHandler);
+		opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow);
 		~opengl_window();
 	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
@@ -66,13 +65,13 @@ namespace neogfx
 		virtual dimension vertical_dpi() const;
 		virtual dimension em_size() const;
 	protected:
-		virtual i_native_window_event_handler& event_handler() const;
+		virtual i_window& window() const;
 		virtual void destroying();
 		virtual void destroyed();
 	private:
 		virtual void display() = 0;
 	private:
-		i_native_window_event_handler& iEventHandler;
+		i_window& iWindow;
 		size iPixelDensityDpi;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable vector4 iLogicalCoordinates;

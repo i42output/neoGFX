@@ -91,7 +91,7 @@ namespace neogfx
 				close();
 				break;
 			case native_window_event::Resizing:
-				event_handler().native_window_resized();
+				window().native_window_resized();
 				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
 				{
 					if (e->is<native_window_event>())
@@ -110,22 +110,22 @@ namespace neogfx
 				}
 				break;
 			case native_window_event::Resized:
-				event_handler().native_window_resized();
+				window().native_window_resized();
 				break;
 			case native_window_event::SizeChanged:
-				event_handler().native_window_resized();
+				window().native_window_resized();
 				break;
 			case native_window_event::Enter:
-				event_handler().native_window_mouse_entered();
+				window().native_window_mouse_entered();
 				break;
 			case native_window_event::Leave:
-				event_handler().native_window_mouse_left();
+				window().native_window_mouse_left();
 				break;
 			case native_window_event::FocusGained:
-				event_handler().native_window_focus_gained();
+				window().native_window_focus_gained();
 				break;
 			case native_window_event::FocusLost:
-				event_handler().native_window_focus_lost();
+				window().native_window_focus_lost();
 				break;
 			default:
 				/* do nothing */
@@ -138,19 +138,19 @@ namespace neogfx
 			switch (mouseEvent.type())
 			{
 			case native_mouse_event::WheelScrolled:
-				event_handler().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
+				window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
 				break;
 			case native_mouse_event::ButtonPressed:
-				event_handler().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+				window().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
 				break;
 			case native_mouse_event::ButtonDoubleClicked:
-				event_handler().native_window_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+				window().native_window_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
 				break;
 			case native_mouse_event::ButtonReleased:
-				event_handler().native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
+				window().native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
 				break;
 			case native_mouse_event::Moved:
-				event_handler().native_window_mouse_moved(mouseEvent.position());
+				window().native_window_mouse_moved(mouseEvent.position());
 				break;
 			default:
 				/* do nothing */
@@ -167,28 +167,28 @@ namespace neogfx
 				if (!keyboard.grabber().key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
 				{
 					keyboard.key_pressed.trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
-					event_handler().native_window_key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
+					window().native_window_key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 				}
 				break;
 			case native_keyboard_event::KeyReleased:
 				if (!keyboard.grabber().key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
 				{
 					keyboard.key_released.trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
-					event_handler().native_window_key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
+					window().native_window_key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 				}
 				break;
 			case native_keyboard_event::TextInput:
 				if (!keyboard.grabber().text_input(keyboardEvent.text()))
 				{
 					keyboard.text_input.trigger(keyboardEvent.text());
-					event_handler().native_window_text_input(keyboardEvent.text());
+					window().native_window_text_input(keyboardEvent.text());
 				}
 				break;
 			case native_keyboard_event::SysTextInput:
 				if (!keyboard.grabber().sys_text_input(keyboardEvent.text()))
 				{
 					keyboard.sys_text_input.trigger(keyboardEvent.text());
-					event_handler().native_window_sys_text_input(keyboardEvent.text());
+					window().native_window_sys_text_input(keyboardEvent.text());
 				}
 				break;
 			default:
@@ -201,6 +201,11 @@ namespace neogfx
 	bool native_window::processing_event() const
 	{
 		return iProcessingEvent;
+	}
+
+	bool native_window::has_rendering_priority() const
+	{
+		return window().native_window_has_rendering_priority();
 	}
 
 	i_rendering_engine& native_window::rendering_engine() const

@@ -23,13 +23,12 @@
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
-#include "../../../../neogfx/src/gui/window/native/i_native_window_event_handler.hpp"
 
 namespace neogfx
 {
 	class i_native_window;
 
-	class window : public i_window, public scrollable_widget, private i_native_window_event_handler
+	class window : public i_window, public scrollable_widget
 	{
 	public:
 		enum style_e : uint32_t
@@ -115,6 +114,7 @@ namespace neogfx
 		virtual void set_logical_coordinates(const vector4& aCoordinates);
 		virtual void layout_surface();
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true);
+		virtual bool has_rendering_priority() const;
 		virtual void render_surface();
 		virtual graphics_context create_graphics_context() const;
 		virtual graphics_context create_graphics_context(const i_widget& aWidget) const;
@@ -170,6 +170,7 @@ namespace neogfx
 		virtual void native_window_focus_gained();
 		virtual void native_window_focus_lost();
 		virtual void native_window_resized();
+		virtual bool native_window_has_rendering_priority() const;
 		virtual bool native_window_ready_to_render() const;
 		virtual void native_window_render(const rect& aInvalidatedRect) const;
 		virtual void native_window_dismiss_children();

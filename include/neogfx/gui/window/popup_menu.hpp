@@ -51,6 +51,8 @@ namespace neogfx
 		virtual bool dismissed() const;
 		virtual void dismiss();
 	public:
+		virtual bool has_rendering_priority() const;
+	public:
 		virtual neogfx::size_policy size_policy() const;	
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
