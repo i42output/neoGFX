@@ -182,7 +182,8 @@ namespace neogfx
 		return var;
 	}
 
-	opengl_renderer::opengl_renderer() :
+	opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
+		iRenderer{aRenderer},
 		iFontManager{*this, iScreenMetrics},
 		iActiveProgram{iShaderPrograms.end()},
 		iSubpixelRendering{false}
@@ -193,23 +194,79 @@ namespace neogfx
 	{
 	}
 
+	renderer opengl_renderer::renderer() const
+	{
+		return iRenderer;
+	}
+
 	void opengl_renderer::initialize()
 	{
 		glCheck(glewInit());
+
+		iTextureProgram = create_shader_program(
+			shaders
+			{
+				std::make_pair(
+					std::string(
+						"#version 130\n"
+						"in vec3 VertexPosition;\n"
+						"in vec4 VertexColor;\n"
+						"in vec2 VertexTextureCoord;\n"
+						"out vec4 Color;\n"
+						"varying vec2 vTexCoord;\n"
+						"void main()\n"
+						"{\n"
+						"	Color = VertexColor;\n"
+						"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+						"	vTexCoord = VertexTextureCoord;\n"
+						"}\n"),
+					GL_VERTEX_SHADER),
+				std::make_pair(
+					std::string(
+						"#version 130\n"
+						"uniform sampler2D tex;"
+						"in vec4 Color;\n"
+						"out vec4 FragColor;\n"
+						"varying vec2 vTexCoord;\n"
+						"void main()\n"
+						"{\n"
+						"	FragColor = texture(tex, vTexCoord).rgba * Color;\n"
+						"}\n"),
+					GL_FRAGMENT_SHADER) 
+			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
+
 		iMonochromeProgram = create_shader_program(
 			shaders
 			{
 				std::make_pair(
 					std::string(
 						"#version 130\n"
-						"uniform sampler2D tex;"
+						"in vec3 VertexPosition;\n"
+						"in vec4 VertexColor;\n"
+						"in vec2 VertexTextureCoord;\n"
+						"out vec4 Color;\n"
+						"varying vec2 vTexCoord;\n"
 						"void main()\n"
 						"{\n"
-						"	float gray = dot(gl_Color.rgb * texture2D(tex, gl_TexCoord[1].xy).rgb, vec3(0.299, 0.587, 0.114));\n"
-						"	gl_FragColor = vec4(gray, gray, gray, gl_Color.a * texture2D(tex, gl_TexCoord[1].xy).a);\n"
+						"	Color = VertexColor;\n"
+						"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+						"	vTexCoord = VertexTextureCoord;\n"
+						"}\n"),
+					GL_VERTEX_SHADER),
+				std::make_pair(
+					std::string(
+						"#version 130\n"
+						"uniform sampler2D tex;"
+						"in vec4 Color;\n"
+						"out vec4 FragColor;\n"
+						"varying vec2 vTexCoord;\n"
+						"void main()\n"
+						"{\n"
+						"	float gray = dot(Color.rgb * texture(tex, vTexCoord).rgb, vec3(0.299, 0.587, 0.114));\n"
+						"	FragColor = vec4(gray, gray, gray, Color.a * texture(tex, vTexCoord).a);\n"
 						"}\n"),
 					GL_FRAGMENT_SHADER) 
-			}, {});
+			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
 
 		iGradientProgram = create_shader_program(
 			shaders
@@ -448,6 +505,16 @@ namespace neogfx
 		return *iActiveProgram;
 	}
 
+	const opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program() const
+	{
+		return *iTextureProgram;
+	}
+
+	opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program()
+	{
+		return *iTextureProgram;
+	}
+
 	const opengl_renderer::i_shader_program& opengl_renderer::monochrome_shader_program() const
 	{
 		return *iMonochromeProgram;
@@ -537,7 +604,17 @@ namespace neogfx
 			GLuint shader = glCheck(glCreateShader(s.second));
 			if (0 == shader)
 				throw failed_to_create_shader_program("Failed to create shader object");
-			const char* codeArray[] = { s.first.c_str() };
+			std::string source = s.first;
+			if (renderer() == neogfx::renderer::DirectX)
+			{
+				std::size_t v;
+				const std::size_t VERSION_STRING_LENGTH = 12;
+				if ((v = source.find("#version 130")) != std::string::npos)
+					source.replace(v, VERSION_STRING_LENGTH, "#version 110");
+				else if ((v = source.find("#version 150")) != std::string::npos)
+					source.replace(v, VERSION_STRING_LENGTH, "#version 110");
+			}
+			const char* codeArray[] = { source.c_str() };
 			glCheck(glShaderSource(shader, 1, codeArray, NULL));
 			glCheck(glCompileShader(shader));
 			GLint result;

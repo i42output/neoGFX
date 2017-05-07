@@ -45,12 +45,32 @@ namespace neogfx
 		}
 	};
 
-	sdl_renderer::sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard) : 
+	sdl_renderer::sdl_renderer(neogfx::renderer aRenderer, i_basic_services& aBasicServices, i_keyboard& aKeyboard) :
+		opengl_renderer(aRenderer),
 		iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), 
 		iContext(nullptr), iActiveContextSurface(nullptr)
 	{
 		sdl_instance::instantiate();
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0);
+		switch (aRenderer)
+		{
+		case renderer::Vulkan:
+		case renderer::Software:
+			throw unsupported_renderer();
+		case renderer::DirectX: // ANGLE
+			#ifdef _WIN32
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_EGL, 1);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+			#else
+			throw unsupported_renderer();
+			#endif
+			break;
+		case renderer::OpenGL:
+		default:
+			break;
+		}
 		iSystemCacheWindowHandle = SDL_CreateWindow(
 			"neogfx::system_cache_window",
 			0,

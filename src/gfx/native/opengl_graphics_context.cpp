@@ -27,10 +27,11 @@
 #include "../text/native/i_native_font_face.hpp"
 #include "../text/native/native_font_face.hpp"
 #include "opengl_graphics_context.hpp"
+#include "opengl_helpers.hpp"
 
 namespace neogfx
 {
-	namespace
+	namespace 
 	{
 		inline GLenum path_shape_to_gl_mode(path::shape_type_e aShape)
 		{
@@ -969,22 +970,19 @@ namespace neogfx
 
 	namespace
 	{
-		std::vector<double> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const vec4& aLogicalCoordinates)
+		std::vector<std::array<double, 2>> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const vec4& aLogicalCoordinates)
 		{
-			std::vector<double> result;
+			typedef std::array<double, 2> xy;
+			std::vector<xy> result;
 			rect normalizedRect = aTextureRect / aTextureStorageSize;
-			result.push_back(normalizedRect.top_left().x);
-			result.push_back(normalizedRect.top_left().y);
-			result.push_back(normalizedRect.top_right().x);
-			result.push_back(normalizedRect.top_right().y);
-			result.push_back(normalizedRect.bottom_right().x);
-			result.push_back(normalizedRect.bottom_right().y);
-			result.push_back(normalizedRect.bottom_left().x);
-			result.push_back(normalizedRect.bottom_left().y);
+			result.push_back(xy{ normalizedRect.top_left().x, normalizedRect.top_left().y });
+			result.push_back(xy{ normalizedRect.top_right().x, normalizedRect.top_right().y });
+			result.push_back(xy{ normalizedRect.bottom_right().x, normalizedRect.bottom_right().y });
+			result.push_back(xy{ normalizedRect.bottom_left().x, normalizedRect.bottom_left().y });
 			if (aLogicalCoordinates[1] < aLogicalCoordinates[3])
 			{
-				std::swap(result[1], result[5]);
-				std::swap(result[3], result[7]);
+				std::swap(result[0][1], result[2][1]);
+				std::swap(result[1][1], result[3][1]);
 			}
 			return result;
 		}
@@ -1054,45 +1052,15 @@ namespace neogfx
 
 		/* todo: cache VBOs and use glBufferSubData(). */
 
-		GLuint boHandles[3];
-		glCheck(glGenBuffers(3, boHandles));
+		opengl_buffer positionBuffer{ vertices };
+		opengl_buffer colourBuffer{ colours };
+		opengl_buffer textureCoordBuffer{ textureCoords };
 
-		GLuint positionBufferHandle = boHandles[0];
-		GLuint colourBufferHandle = boHandles[1];
-		GLuint textureCoordBufferHandle = boHandles[2];
+		opengl_vertex_array vertexArray;
 
-		GLint previousVertexArrayBinding;
-		glCheck(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVertexArrayBinding));
-
-		GLint previousArrayBufferBinding;
-		glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousArrayBufferBinding));
-
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, positionBufferHandle));
-		glCheck(glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_STATIC_DRAW));
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, colourBufferHandle));
-		glCheck(glBufferData(GL_ARRAY_BUFFER, colours.size() * sizeof(colours[0]), &colours[0], GL_STATIC_DRAW));
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, textureCoordBufferHandle));
-		glCheck(glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(textureCoords[0]), &textureCoords[0], GL_STATIC_DRAW));
-
-		GLuint vaoHandle;
-		glCheck(glGenVertexArrays(1, &vaoHandle));
-		glCheck(glBindVertexArray(vaoHandle));
-
-		GLuint vertexPositionAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).variable("VertexPosition"));
-		glCheck(glEnableVertexAttribArray(vertexPositionAttribArrayIndex));
-		GLuint vertexColorAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).variable("VertexColor"));
-		glCheck(glEnableVertexAttribArray(vertexColorAttribArrayIndex));
-		GLuint vertexTextureCoordAttribArrayIndex = reinterpret_cast<GLuint>(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).variable("VertexTextureCoord"));
-		glCheck(glEnableVertexAttribArray(vertexTextureCoordAttribArrayIndex));
-
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, positionBufferHandle));
-		glCheck(glVertexAttribPointer(vertexPositionAttribArrayIndex, 3, GL_DOUBLE, GL_FALSE, 0, 0));
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, colourBufferHandle));
-		glCheck(glVertexAttribPointer(vertexColorAttribArrayIndex, 4, GL_DOUBLE, GL_FALSE, 0, 0));
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, textureCoordBufferHandle));
-		glCheck(glVertexAttribPointer(vertexTextureCoordAttribArrayIndex, 2, GL_DOUBLE, GL_FALSE, 0, 0));
-
-		glCheck(glBindVertexArray(vaoHandle));
+		opengl_vertex_attrib_array vertexPositionAttribArray{ positionBuffer, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()), "VertexPosition" };
+		opengl_vertex_attrib_array vertexColorAttribArray{ colourBuffer, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()), "VertexColor" };
+		opengl_vertex_attrib_array vertexTextureCoordAttribArray{ textureCoordBuffer, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()), "VertexTextureCoord" };
 
 		if (iActiveGlyphTexture != reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle()))
 		{
@@ -1118,14 +1086,6 @@ namespace neogfx
 
 		disable_anti_alias daa(*this);
 		glCheck(glDrawArrays(GL_QUADS, 0, vertices.size()));
-
-		glCheck(glBindVertexArray(previousVertexArrayBinding));
-
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, previousArrayBufferBinding));
-
-		glCheck(glDeleteVertexArrays(1, &vaoHandle));
-
-		glCheck(glDeleteBuffers(3, boHandles));
 
 		if (shaderProgram == nullptr && iRenderingEngine.shader_program_active())
 			iRenderingEngine.deactivate_shader_program();
@@ -1160,22 +1120,39 @@ namespace neogfx
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture()->handle())));
 		if (!aTexture.native_texture()->is_resident())
 			throw texture_not_resident();
+		typedef std::array<double, 3> vertex;
+		std::vector<vertex> vertices;
+		for (auto& v : aTextureMap)
+			vertices.push_back(vertex{ v.x, v.y });
 		auto texCoords = texture_vertices(aTexture.storage_extents(), textureRect + point{1.0, 1.0}, logical_coordinates());
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &aTextureMap[0][0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
 		colour c{0xFF, 0xFF, 0xFF, 0xFF};
 		if (aColour != boost::none)
 			c = *aColour;
-		std::vector<std::array<uint8_t, 4>> colours(4, std::array<uint8_t, 4>{{c.red(), c.green(), c.blue(), c.alpha()}});
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
+		std::vector<std::array<double, 4>> colours{ aTextureMap.size(), std::array<double, 4>{ {c.red<double>(), c.green<double>(), c.blue<double>(), c.alpha<double>()}} };
+
 		if (aShaderEffect == shader_effect::Monochrome)
 		{
 			iRenderingEngine.activate_shader_program(iRenderingEngine.monochrome_shader_program());
 			iRenderingEngine.monochrome_shader_program().set_uniform_variable("tex", 1);
 		}
+		else
+		{
+			iRenderingEngine.activate_shader_program(iRenderingEngine.texture_shader_program());
+			iRenderingEngine.texture_shader_program().set_uniform_variable("tex", 1);
+		}
+
+		opengl_buffer positionBuffer{ vertices };
+		opengl_buffer colourBuffer{ colours };
+		opengl_buffer textureCoordBuffer{ texCoords };
+
+		opengl_vertex_array vertexArray;
+
+		opengl_vertex_attrib_array vertexPositionAttribArray{ positionBuffer, iRenderingEngine.monochrome_shader_program(), "VertexPosition" };
+		opengl_vertex_attrib_array vertexColorAttribArray{ colourBuffer, iRenderingEngine.monochrome_shader_program(), "VertexColor" };
+		opengl_vertex_attrib_array vertexTextureCoordAttribArray{ textureCoordBuffer, iRenderingEngine.monochrome_shader_program(), "VertexTextureCoord" };
+
 		glCheck(glDrawArrays(GL_QUADS, 0, 4));
-		if (aShaderEffect != shader_effect::None)
-			iRenderingEngine.deactivate_shader_program();
+		iRenderingEngine.deactivate_shader_program();
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 

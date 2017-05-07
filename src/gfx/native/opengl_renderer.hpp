@@ -94,9 +94,10 @@ namespace neogfx
 		typedef std::vector<std::pair<std::string, GLenum>> shaders;
 		typedef std::list<shader_program> shader_programs;
 	public:
-		opengl_renderer();
+		opengl_renderer(neogfx::renderer aRenderer);
 		~opengl_renderer();
 	public:
+		virtual neogfx::renderer renderer() const;
 		virtual void initialize();
 		virtual const i_screen_metrics& screen_metrics() const;
 		virtual i_font_manager& font_manager();
@@ -106,6 +107,8 @@ namespace neogfx
 		virtual void deactivate_shader_program();
 		virtual const i_shader_program& active_shader_program() const;
 		virtual i_shader_program& active_shader_program();
+		virtual const i_shader_program& texture_shader_program() const;
+		virtual i_shader_program& texture_shader_program();
 		virtual const i_shader_program& monochrome_shader_program() const;
 		virtual i_shader_program& monochrome_shader_program();
 		virtual const i_shader_program& glyph_shader_program(bool aSubpixel) const;
@@ -118,15 +121,16 @@ namespace neogfx
 		virtual void subpixel_rendering_off();
 	public:
 		virtual bool process_events();
-
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
+		neogfx::renderer iRenderer;
 		detail::screen_metrics iScreenMetrics;		
 		opengl_texture_manager iTextureManager;
 		neogfx::font_manager iFontManager;
 		shader_programs iShaderPrograms;
 		shader_programs::iterator iActiveProgram;
+		shader_programs::iterator iTextureProgram;
 		shader_programs::iterator iMonochromeProgram;
 		shader_programs::iterator iGlyphProgram;
 		shader_programs::iterator iGlyphSubpixelProgram;

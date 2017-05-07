@@ -238,6 +238,7 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_graphics_context.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_helpers.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp" />

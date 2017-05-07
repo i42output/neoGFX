@@ -33,10 +33,11 @@ namespace neogfx
 	class sdl_renderer : public opengl_renderer
 	{
 	public:
+		struct unsupported_renderer : std::runtime_error { unsupported_renderer() : std::runtime_error("neogfx::sdl_renderer::unsupported_renderer") {} };
 		struct failed_to_activate_gl_context : std::runtime_error { failed_to_activate_gl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_activate_gl_context: " + aReason) {} };
 		struct failed_to_create_system_cache_window : std::runtime_error { failed_to_create_system_cache_window(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_create_system_cache_window: " + aReason) {} };
 	public:
-		sdl_renderer(i_basic_services& aBasicServices, i_keyboard& aKeyboard);
+		sdl_renderer(neogfx::renderer aRenderer, i_basic_services& aBasicServices, i_keyboard& aKeyboard);
 		~sdl_renderer();
 	public:
 		virtual const i_native_surface* active_context_surface() const;

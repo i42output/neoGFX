@@ -33,11 +33,11 @@ namespace neogfx
 		std::atomic<app*> sFirstInstance;
 	}
 
-	app::loader::loader(int argc, char* argv[], app& aApp) : iApp(aApp)
+	app::loader::loader(const program_options& aProgramOptions, app& aApp) : iApp(aApp)
 	{
 		app* np = nullptr;
 		sFirstInstance.compare_exchange_strong(np, &aApp);
-		if (sFirstInstance == &aApp && argc > 1 && std::string(argv[1]) == "-debug")
+		if (sFirstInstance == &aApp && aProgramOptions.options().count("debug"))
 		{
 #if defined(_WIN32)
 			AllocConsole();
@@ -73,21 +73,22 @@ namespace neogfx
 		app(0, nullptr, aName, aServiceFactory)
 	{
 	}
-	
+
 	app::app(int argc, char* argv[], const std::string& aName, i_service_factory& aServiceFactory)
 		try :
-		neolib::io_thread("neogfx::app", true),
-		async_event_queue(static_cast<neolib::io_thread&>(*this)),
-		iLoader(argc, argv, *this),
-		iName(aName),
-		iQuitWhenLastWindowClosed(true),
-		iInExec(false),
-		iBasicServices(aServiceFactory.create_basic_services(*this)),
-		iKeyboard(aServiceFactory.create_keyboard()),
-		iClipboard(new neogfx::clipboard(basic_services().system_clipboard())),
-		iRenderingEngine(aServiceFactory.create_rendering_engine(basic_services(), keyboard())),
-		iSurfaceManager(new neogfx::surface_manager(basic_services(), *iRenderingEngine)),
-		iCurrentStyle(iStyles.begin()),
+		neolib::io_thread{ "neogfx::app", true },
+		async_event_queue{ static_cast<neolib::io_thread&>(*this) },
+		iProgramOptions{ argc, argv },
+		iLoader{ iProgramOptions, *this },
+		iName{ aName },
+		iQuitWhenLastWindowClosed{ true },
+		iInExec{ false },
+		iBasicServices{ aServiceFactory.create_basic_services(*this) },
+		iKeyboard{ aServiceFactory.create_keyboard() },
+		iClipboard{ new neogfx::clipboard(basic_services().system_clipboard()) },
+		iRenderingEngine{ aServiceFactory.create_rendering_engine(iProgramOptions.renderer(), basic_services(), keyboard()) },
+		iSurfaceManager{ new neogfx::surface_manager(basic_services(), *iRenderingEngine) },
+		iCurrentStyle{ iStyles.begin() },
 		iActionFileNew{ add_action("&New...").set_shortcut("Ctrl+Shift+N") },
 		iActionFileOpen{ add_action("&Open...").set_shortcut("Ctrl+Shift+O") },
 		iActionFileClose{ add_action("&Close").set_shortcut("Ctrl+F4") },

@@ -23,6 +23,7 @@
 #include <map>
 #include <boost/optional.hpp>
 #include <boost/pool/pool_alloc.hpp>
+#include <boost/program_options.hpp>
 #include <neolib/io_thread.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_service_factory.hpp>
@@ -52,10 +53,45 @@ namespace neogfx
 			std::string iName;
 		};
 	private:
+		class program_options
+		{
+			struct invalid_options : std::runtime_error { invalid_options(const std::string& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
+		public:
+			program_options(int argc, char* argv[])
+			{
+				boost::program_options::options_description description{ "Allowed options" };
+				description.add_options()
+					("debug", "open debug console")
+					("vulkan", "use Vulkan renderer")
+					("directx", "use DirectX (ANGLE) renderer")
+					("software", "use software renderer");
+				boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), iOptions);
+				if (iOptions.count("vulkan") + iOptions.count("directx") + iOptions.count("software") > 1)
+					throw invalid_options("more than one renderer specified");
+			}
+		public:
+			neogfx::renderer renderer() const
+			{
+				if (iOptions.count("vulkan") == 1)
+					return neogfx::renderer::Vulkan;
+				else if (iOptions.count("directx") == 1)
+					return neogfx::renderer::DirectX;
+				else if (iOptions.count("software") == 1)
+					return neogfx::renderer::Software;
+				else
+					return neogfx::renderer::OpenGL;
+			}
+			const boost::program_options::variables_map& options() const
+			{
+				return iOptions;
+			}
+		private:
+			boost::program_options::variables_map iOptions;
+		};
 		class loader
 		{
 		public:
-			loader(int argc, char* argv[], app& aApp);
+			loader(const program_options& aProgramOptions, app& aApp);
 			~loader();
 		private:
 			app& iApp;
@@ -128,6 +164,7 @@ namespace neogfx
 		virtual bool text_input(const std::string& aText);
 		virtual bool sys_text_input(const std::string& aText);
 	private:
+		program_options iProgramOptions;
 		loader iLoader;
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;

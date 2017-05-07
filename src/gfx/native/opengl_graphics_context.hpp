@@ -149,7 +149,7 @@ namespace neogfx
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;
 		mutable std::vector<vertex> iGlyphVertices;
-		mutable std::vector<GLdouble> iGlyphTextureCoords;
+		mutable std::vector<std::array<GLdouble, 2>> iGlyphTextureCoords;
 		mutable std::vector<std::array<GLdouble, 4>> iGlyphColours;
 		struct cluster
 		{

@@ -522,6 +522,9 @@
     <ClInclude Include="..\..\..\include\neogfx\core\css.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl_helpers.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag">

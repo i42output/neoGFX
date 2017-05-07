@@ -45,6 +45,14 @@ namespace neogfx
 		virtual subpixel_format_e subpixel_format() const = 0;
 	};
 
+	enum class renderer
+	{
+		OpenGL,
+		DirectX,
+		Vulkan,
+		Software
+	};
+
 	class i_rendering_engine
 	{
 	public:
@@ -76,6 +84,7 @@ namespace neogfx
 		struct shader_program_not_found : std::logic_error { shader_program_not_found() : std::logic_error("neogfx::i_rendering_engine::shader_program_not_found") {} };
 		struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::i_rendering_engine::shader_program_error: " + aError) {} };
 	public:
+		virtual neogfx::renderer renderer() const = 0;
 		virtual void initialize() = 0;
 		virtual const i_native_surface* active_context_surface() const = 0;
 		virtual void activate_context(const i_native_surface& aSurface) = 0;
@@ -97,6 +106,8 @@ namespace neogfx
 		virtual void deactivate_shader_program() = 0;
 		virtual const i_shader_program& active_shader_program() const = 0;
 		virtual i_shader_program& active_shader_program() = 0;
+		virtual const i_shader_program& texture_shader_program() const = 0;
+		virtual i_shader_program& texture_shader_program() = 0;
 		virtual const i_shader_program& monochrome_shader_program() const = 0;
 		virtual i_shader_program& monochrome_shader_program() = 0;
 		virtual const i_shader_program& glyph_shader_program(bool aSubpixel) const = 0;
