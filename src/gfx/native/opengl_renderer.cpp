@@ -95,14 +95,19 @@ namespace neogfx
 		return iSubpixelFormat;
 	}
 
-	opengl_renderer::shader_program::shader_program(GLuint aHandle) :
-		iHandle(aHandle)
+	opengl_renderer::shader_program::shader_program(GLuint aHandle, bool aHasProjectionMatrix) :
+		iHandle(aHandle), iHasProjectionMatrix(aHasProjectionMatrix)
 	{
 	}
 
 	void* opengl_renderer::shader_program::handle() const
 	{
 		return reinterpret_cast<void*>(iHandle);
+	}
+
+	bool opengl_renderer::shader_program::has_projection_matrix() const
+	{
+		return iHasProjectionMatrix;
 	}
 
 	void* opengl_renderer::shader_program::variable(const std::string& aVariableName) const
@@ -161,6 +166,15 @@ namespace neogfx
 			throw shader_program_error(errorCode);
 	}
 
+	void opengl_renderer::shader_program::set_uniform_matrix(const std::string& aName, const mat44& aMatrix)
+	{
+		basic_matrix<float, 4, 4> fmat44 = aMatrix;
+		glUniformMatrix4fv(uniform_location(aName), 1, false, &fmat44[0][0]);
+		GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+			throw shader_program_error(errorCode);
+	}
+
 	GLuint opengl_renderer::shader_program::register_variable(const std::string& aVariableName)
 	{
 		GLuint index = static_cast<GLuint>(iVariables.size());
@@ -203,36 +217,66 @@ namespace neogfx
 	{
 		glCheck(glewInit());
 
+		iDefaultProgram = create_shader_program(
+			shaders
+		{
+			std::make_pair(
+				std::string(
+					"#version 130\n"
+					"uniform mat4 uProjectionMatrix;\n"
+					"in vec3 VertexPosition;\n"
+					"in vec4 VertexColor;\n"
+					"in vec2 VertexTextureCoord;\n"
+					"out vec4 Color;\n"
+					"void main()\n"
+					"{\n"
+					"	Color = VertexColor;\n"
+					"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+					"}\n"),
+				GL_VERTEX_SHADER),
+			std::make_pair(
+				std::string(
+					"#version 130\n"
+					"in vec4 Color;\n"
+					"out vec4 FragColor;\n"
+					"void main()\n"
+					"{\n"
+					"	FragColor = Color;\n"
+					"}\n"),
+				GL_FRAGMENT_SHADER) 
+			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
+
 		iTextureProgram = create_shader_program(
 			shaders
-			{
-				std::make_pair(
-					std::string(
-						"#version 130\n"
-						"in vec3 VertexPosition;\n"
-						"in vec4 VertexColor;\n"
-						"in vec2 VertexTextureCoord;\n"
-						"out vec4 Color;\n"
-						"varying vec2 vTexCoord;\n"
-						"void main()\n"
-						"{\n"
-						"	Color = VertexColor;\n"
-						"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-						"	vTexCoord = VertexTextureCoord;\n"
-						"}\n"),
-					GL_VERTEX_SHADER),
-				std::make_pair(
-					std::string(
-						"#version 130\n"
-						"uniform sampler2D tex;"
-						"in vec4 Color;\n"
-						"out vec4 FragColor;\n"
-						"varying vec2 vTexCoord;\n"
-						"void main()\n"
-						"{\n"
-						"	FragColor = texture(tex, vTexCoord).rgba * Color;\n"
-						"}\n"),
-					GL_FRAGMENT_SHADER) 
+		{
+			std::make_pair(
+				std::string(
+					"#version 130\n"
+					"uniform mat4 uProjectionMatrix;\n"
+					"in vec3 VertexPosition;\n"
+					"in vec4 VertexColor;\n"
+					"in vec2 VertexTextureCoord;\n"
+					"out vec4 Color;\n"
+					"varying vec2 vTexCoord;\n"
+					"void main()\n"
+					"{\n"
+					"	Color = VertexColor;\n"
+					"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+					"	vTexCoord = VertexTextureCoord;\n"
+					"}\n"),
+				GL_VERTEX_SHADER),
+			std::make_pair(
+				std::string(
+					"#version 130\n"
+					"uniform sampler2D tex;"
+					"in vec4 Color;\n"
+					"out vec4 FragColor;\n"
+					"varying vec2 vTexCoord;\n"
+					"void main()\n"
+					"{\n"
+					"	FragColor = texture(tex, vTexCoord).rgba * Color;\n"
+					"}\n"),
+				GL_FRAGMENT_SHADER) 
 			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
 
 		iMonochromeProgram = create_shader_program(
@@ -241,6 +285,7 @@ namespace neogfx
 				std::make_pair(
 					std::string(
 						"#version 130\n"
+						"uniform mat4 uProjectionMatrix;\n"
 						"in vec3 VertexPosition;\n"
 						"in vec4 VertexColor;\n"
 						"in vec2 VertexTextureCoord;\n"
@@ -249,7 +294,7 @@ namespace neogfx
 						"void main()\n"
 						"{\n"
 						"	Color = VertexColor;\n"
-						"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+						"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 						"	vTexCoord = VertexTextureCoord;\n"
 						"}\n"),
 					GL_VERTEX_SHADER),
@@ -272,9 +317,23 @@ namespace neogfx
 			shaders
 			{
 				std::make_pair(
+					std::string(
+						"#version 130\n"
+						"uniform mat4 uProjectionMatrix;\n"
+						"in vec3 VertexPosition;\n"
+						"in vec4 VertexColor;\n"
+						"in vec2 VertexTextureCoord;\n"
+						"out vec4 Color;\n"
+						"void main()\n"
+						"{\n"
+						"	Color = VertexColor;\n"
+						"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+						"}\n"),
+					GL_VERTEX_SHADER),
+				std::make_pair(
 					glsl::NEOGFX_GRADIENT_FRAG,
 					GL_FRAGMENT_SHADER)
-			}, {});
+			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
 
 		iGlyphProgram = create_shader_program(
 			shaders
@@ -282,6 +341,7 @@ namespace neogfx
 				std::make_pair(
 					std::string(
 						"#version 130\n"
+						"uniform mat4 uProjectionMatrix;\n"
 						"in vec3 VertexPosition;\n"
 						"in vec4 VertexColor;\n"
 						"in vec2 VertexTextureCoord;\n"
@@ -290,7 +350,7 @@ namespace neogfx
 						"void main()\n"
 						"{\n"
 						"	Color = VertexColor;\n"
-						"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+						"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 						"	vGlyphTexCoord = VertexTextureCoord;\n"
 						"}\n"),
 					GL_VERTEX_SHADER),
@@ -318,6 +378,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 130\n"
+							"uniform mat4 uProjectionMatrix;\n"
 							"in vec3 VertexPosition;\n"
 							"in vec4 VertexColor;\n"
 							"in vec2 VertexTextureCoord;\n"
@@ -327,7 +388,7 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	Color = VertexColor;\n"
-							"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+							"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 							"	vGlyphTexCoord = VertexTextureCoord;\n"
 							"   vOutputCoord = VertexPosition.xy;\n"
 							"}\n"),
@@ -366,6 +427,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 130\n"
+							"uniform mat4 uProjectionMatrix;\n"
 							"in vec3 VertexPosition;\n"
 							"in vec4 VertexColor;\n"
 							"in vec2 VertexTextureCoord;\n"
@@ -375,7 +437,7 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	Color = VertexColor;\n"
-							"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+							"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 							"	vGlyphTexCoord = VertexTextureCoord;\n"
 							"   vOutputCoord = VertexPosition.xy;\n"
 							"}\n"),
@@ -416,6 +478,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 130\n"
+							"uniform mat4 uProjectionMatrix;\n"
 							"in vec3 VertexPosition;\n"
 							"in vec4 VertexColor;\n"
 							"in vec2 VertexTextureCoord;\n"
@@ -424,7 +487,7 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	Color = VertexColor;\n"
-							"   gl_Position = gl_ModelViewProjectionMatrix * vec4(VertexPosition, 1.0);\n"
+							"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 							"	vGlyphTexCoord = VertexTextureCoord;\n"
 							"}\n"),
 						GL_VERTEX_SHADER),
@@ -471,13 +534,32 @@ namespace neogfx
 		return iActiveProgram != iShaderPrograms.end();
 	}
 
-	void opengl_renderer::activate_shader_program(i_shader_program& aProgram)
+	void opengl_renderer::activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram)
 	{
 		for (auto i = iShaderPrograms.begin(); i != iShaderPrograms.end(); ++i)
 			if (&*i == &aProgram)
 			{
-				iActiveProgram = i;
-				glCheck(glUseProgram(reinterpret_cast<GLuint>(iActiveProgram->handle())));
+				if (iActiveProgram != i)
+				{
+					iActiveProgram = i;
+					glCheck(glUseProgram(reinterpret_cast<GLuint>(iActiveProgram->handle())));
+				}
+				if (iActiveProgram->has_projection_matrix())
+				{
+					const auto& logicalCoordinates = aGraphicsContext.logical_coordinates();
+					double left = logicalCoordinates.first.x;
+					double right = logicalCoordinates.second.x;
+					double bottom = logicalCoordinates.first.y;
+					double top = logicalCoordinates.second.y;
+					double zFar = 1.0;
+					double zNear = -1.0;
+					mat44 orthoMatrix = mat44{
+						{ 2.0 / (right - left), 0.0, 0.0, -(right + left) / (right - left) },
+						{ 0.0, 2.0 / (top - bottom), 0.0, -(top + bottom) / (top - bottom) },
+						{ 0.0, 0.0, -2.0 / (zFar - zNear), -(zFar + zNear) / (zFar - zNear) },
+						{ 0.0, 0.0, 0.0, 1.0 } }.transposed();
+					iActiveProgram->set_uniform_matrix("uProjectionMatrix", orthoMatrix);
+				}
 				return;
 			}
 		throw shader_program_not_found();
@@ -503,6 +585,16 @@ namespace neogfx
 		if (iActiveProgram == iShaderPrograms.end())
 			throw no_shader_program_active();
 		return *iActiveProgram;
+	}
+
+	const opengl_renderer::i_shader_program& opengl_renderer::default_shader_program() const
+	{
+		return *iDefaultProgram;
+	}
+
+	opengl_renderer::i_shader_program& opengl_renderer::default_shader_program()
+	{
+		return *iDefaultProgram;
 	}
 
 	const opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program() const
@@ -599,12 +691,15 @@ namespace neogfx
 		GLuint programHandle = glCheck(glCreateProgram());
 		if (0 == programHandle)
 			throw failed_to_create_shader_program("Failed to create shader program object");
+		bool hasProjectionMatrix = false;
 		for (auto& s : aShaders)
 		{
 			GLuint shader = glCheck(glCreateShader(s.second));
 			if (0 == shader)
 				throw failed_to_create_shader_program("Failed to create shader object");
 			std::string source = s.first;
+			if (source.find("uProjectionMatrix") != std::string::npos)
+				hasProjectionMatrix = true;
 			if (renderer() == neogfx::renderer::DirectX)
 			{
 				std::size_t v;
@@ -630,7 +725,7 @@ namespace neogfx
 			}
 			glCheck(glAttachShader(programHandle, shader));
 		}
-		shader_program program(programHandle);
+		shader_program program(programHandle, hasProjectionMatrix);
 		for (auto& v : aVariables)
 			glCheck(glBindAttribLocation(programHandle, program.register_variable(v), v.c_str()));
 		auto s = iShaderPrograms.insert(iShaderPrograms.end(), program);

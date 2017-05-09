@@ -177,12 +177,12 @@ namespace neogfx
 		iNativeGraphicsContext->set_logical_coordinate_system(aSystem);
 	}
 
-	const vector4& graphics_context::logical_coordinates() const
+	const std::pair<vec2, vec2>& graphics_context::logical_coordinates() const
 	{
 		return iNativeGraphicsContext->logical_coordinates();
 	}
 
-	void graphics_context::set_logical_coordinates(const vector4& aCoordinates) const
+	void graphics_context::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const
 	{
 		iNativeGraphicsContext->set_logical_coordinates(aCoordinates);
 	}
@@ -468,7 +468,7 @@ namespace neogfx
 		point pos = aPoint;
 		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
 		{
-			const auto& line = (logical_coordinates()[1] > logical_coordinates()[3] ? *i : *(lines.rbegin() + (i - lines.begin())));
+			const auto& line = (logical_coordinates().first.y > logical_coordinates().second.y ? *i : *(lines.rbegin() + (i - lines.begin())));
 			if (aMaxWidth == 0)
 			{
 				point linePos = pos;
@@ -714,7 +714,7 @@ namespace neogfx
 
 	void graphics_context::draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const
 	{
-		auto yLine = logical_coordinates()[1] > logical_coordinates()[3] ?
+		auto yLine = logical_coordinates().first.y > logical_coordinates().second.y ?
 			(aFont.height() + aFont.descender()) - std::ceil(aFont.native_font_face().underline_position()) :
 			-aFont.descender() + std::ceil(aFont.native_font_face().underline_position());
 		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aGlyph.fallback_font(aFont).native_font_face().glyph_texture(aGlyph);
@@ -801,7 +801,7 @@ namespace neogfx
 		apply_origin(aOrigin, aExtents);
 	}
 
-	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const vector4& aCoordinates) :
+	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const std::pair<vec2, vec2>& aCoordinates) :
 		iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
 	{
 		iGc.set_logical_coordinate_system(aCoordinateSystem);

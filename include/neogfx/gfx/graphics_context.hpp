@@ -109,8 +109,8 @@ namespace neogfx
 		path from_device_units(const path& aValue) const;
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const;
-		const vector4& logical_coordinates() const;
-		void set_logical_coordinates(const vector4& aCoordinates) const;
+		const std::pair<vec2, vec2>& logical_coordinates() const;
+		void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const;
 		void set_default_font(const font& aDefaultFont) const;
 		void set_extents(const size& aExtents) const;
 		void set_origin(const point& aOrigin) const;
@@ -252,14 +252,14 @@ namespace neogfx
 	{
 	public:
 		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem);
-		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const vector4& aCoordinates);
+		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const std::pair<vec2, vec2>& aCoordinates);
 		~scoped_coordinate_system();
 	private:
 		void apply_origin(const point& aOrigin, const size& aExtents);
 	private:
 		graphics_context& iGc;
 		logical_coordinate_system iPreviousCoordinateSystem;
-		vector4 iPreviousCoordinates;
+		std::pair<vec2, vec2> iPreviousCoordinates;
 	};
 
 	template <typename ValueType = double, uint32_t W = 5>

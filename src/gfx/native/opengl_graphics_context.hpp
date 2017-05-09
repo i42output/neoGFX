@@ -39,6 +39,7 @@
 #include FT_BITMAP_H
 #include "opengl_error.hpp"
 #include "i_native_graphics_context.hpp"
+#include "opengl_helpers.hpp"
 
 namespace neogfx
 {
@@ -69,7 +70,7 @@ namespace neogfx
 			{
 			}
 		};
-		typedef std::array<double, 3> vertex;
+		typedef xyz vertex;
 		class glyph_shapes;
 	public:
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface);
@@ -82,8 +83,8 @@ namespace neogfx
 	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
-		virtual const vector4& logical_coordinates() const;
-		virtual void set_logical_coordinates(const vector4& aCoordinates) const;
+		virtual const std::pair<vec2, vec2>& logical_coordinates() const;
+		virtual void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const;
 		virtual void flush();
 		virtual void scissor_on(const rect& aRect);
 		virtual void scissor_off();
@@ -143,9 +144,10 @@ namespace neogfx
 		const i_native_surface& iSurface;
 		neogfx::logical_coordinate_system iSavedCoordinateSystem;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
-		mutable vector4 iLogicalCoordinates;
+		mutable std::pair<vec2, vec2> iLogicalCoordinates;
 		neogfx::smoothing_mode iSmoothingMode; 
 		std::vector<logical_operation> iLogicalOperationStack;
+		std::list<use_shader_program> iShaderProgramStack;
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;
 		mutable std::vector<vertex> iGlyphVertices;
@@ -173,7 +175,7 @@ namespace neogfx
 		mutable boost::optional<std::string> iPassword;
 		boost::optional<std::array<GLuint, 3>> iGradientTextures;
 		std::vector<float> iGradientStopPositions;
-		std::vector<std::array<uint8_t, 4>> iGradientStopColours;
+		std::vector<std::array<float, 4>> iGradientStopColours;
 		font iLastDrawGlyphFallbackFont;
 		boost::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
 	};

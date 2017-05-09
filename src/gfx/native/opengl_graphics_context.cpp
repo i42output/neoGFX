@@ -27,7 +27,6 @@
 #include "../text/native/i_native_font_face.hpp"
 #include "../text/native/native_font_face.hpp"
 #include "opengl_graphics_context.hpp"
-#include "opengl_helpers.hpp"
 
 namespace neogfx
 {
@@ -57,58 +56,43 @@ namespace neogfx
 			return path_shape_to_gl_mode(aPath.shape());
 		}
 
-		inline std::vector<GLdouble> rect_vertices(const rect& aRect, dimension aPixelAdjust, bool aIncludeCentre)
+		inline std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, bool aIncludeCentre)
 		{
-			std::vector<GLdouble> result;
+			std::vector<xyz> result;
 			result.reserve(16);
 			if (aIncludeCentre) // fill
 			{
-				result.push_back(aRect.centre().x);
-				result.push_back(aRect.centre().y);
-				result.push_back(aRect.top_left().x);
-				result.push_back(aRect.top_left().y);
-				result.push_back(aRect.top_right().x);
-				result.push_back(aRect.top_right().y);
-				result.push_back(aRect.bottom_right().x);
-				result.push_back(aRect.bottom_right().y);
-				result.push_back(aRect.bottom_left().x);
-				result.push_back(aRect.bottom_left().y);
-				result.push_back(aRect.top_left().x);
-				result.push_back(aRect.top_left().y);
+				result.push_back(xyz{ aRect.centre().x, aRect.centre().y });
+				result.push_back(xyz{ aRect.top_left().x, aRect.top_left().y });
+				result.push_back(xyz{ aRect.top_right().x, aRect.top_right().y });
+				result.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y });
+				result.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y });
+				result.push_back(xyz{ aRect.top_left().x, aRect.top_left().y });
 			}
 			else // draw (outline)
 			{
-				result.push_back(aRect.top_left().x);
-				result.push_back(aRect.top_left().y + aPixelAdjust);
-				result.push_back(aRect.top_right().x);
-				result.push_back(aRect.top_right().y + aPixelAdjust);
-				result.push_back(aRect.top_right().x - aPixelAdjust);
-				result.push_back(aRect.top_right().y);
-				result.push_back(aRect.bottom_right().x - aPixelAdjust);
-				result.push_back(aRect.bottom_right().y);
-				result.push_back(aRect.bottom_right().x);
-				result.push_back(aRect.bottom_right().y - aPixelAdjust);
-				result.push_back(aRect.bottom_left().x);
-				result.push_back(aRect.bottom_left().y - aPixelAdjust);
-				result.push_back(aRect.bottom_left().x + aPixelAdjust);
-				result.push_back(aRect.bottom_left().y);
-				result.push_back(aRect.top_left().x + aPixelAdjust);
-				result.push_back(aRect.top_left().y);
+				result.push_back(xyz{ aRect.top_left().x, aRect.top_left().y + aPixelAdjust });
+				result.push_back(xyz{ aRect.top_right().x, aRect.top_right().y + aPixelAdjust });
+				result.push_back(xyz{ aRect.top_right().x - aPixelAdjust, aRect.top_right().y });
+				result.push_back(xyz{ aRect.bottom_right().x - aPixelAdjust, aRect.bottom_right().y });
+				result.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y - aPixelAdjust });
+				result.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y - aPixelAdjust });
+				result.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y });
+				result.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y });
 			}
 			return result;
 		};
 
-		inline std::vector<GLdouble> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
+		inline std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
 		{
-			std::vector<GLdouble> result;
+			std::vector<xyz> result;
 			angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
 			uint32_t segments = static_cast<uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
 			angle theta = arc / static_cast<angle>(segments);
 			result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
 			if (aIncludeCentre)
 			{
-				result.push_back(aCentre.x);
-				result.push_back(aCentre.y);
+				result.push_back(xyz{ aCentre.x, aCentre.y });
 			}
 			auto c = std::cos(theta);
 			auto s = std::sin(theta);
@@ -118,8 +102,7 @@ namespace neogfx
 			coordinate y = startCoordinate.y;
 			for (uint32_t i = 0; i < segments; ++i)
 			{
-				result.push_back(x + aCentre.x);
-				result.push_back(y + aCentre.y);
+				result.push_back(xyz{ x + aCentre.x, y + aCentre.y });
 				coordinate t = x;
 				x = c * x - s * y;
 				y = s * t + c * y;
@@ -127,17 +110,16 @@ namespace neogfx
 			return result;
 		}
 
-		inline std::vector<GLdouble> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre)
+		inline std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre)
 		{
 			auto result = arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aIncludeCentre);
-			result.push_back(result[aIncludeCentre ? 2 : 0]);
-			result.push_back(result[aIncludeCentre ? 3 : 1]);
+			result.push_back(result[aIncludeCentre ? 1 : 0]);
 			return result;
 		}
 
-		inline std::vector<GLdouble> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre)
+		inline std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre)
 		{
-			std::vector<GLdouble> result;
+			std::vector<xyz> result;
 			auto topLeft = arc_vertices(
 				aRect.top_left() + point{ aRadius, aRadius },
 				aRadius,
@@ -162,34 +144,24 @@ namespace neogfx
 				boost::math::constants::pi<coordinate>() * 0.5,
 				boost::math::constants::pi<coordinate>(),
 				false);
-			result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aIncludeCentre ? 2 : 1));
+			result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aIncludeCentre ? 9 : 8));
 			if (aIncludeCentre)
 			{
-				result.push_back(aRect.centre().x);
-				result.push_back(aRect.centre().y);
+				result.push_back(xyz{ aRect.centre().x, aRect.centre().y });
 			}
-			result.insert(result.end(), (aRect.top_left() + point{ 0.0, aRadius }).x);
-			result.insert(result.end(), (aRect.top_left() + point{ 0.0, aRadius }).y);
+			result.insert(result.end(), xyz{ (aRect.top_left() + point{ 0.0, aRadius }).x, (aRect.top_left() + point{ 0.0, aRadius }).y });
 			result.insert(result.end(), topLeft.begin(), topLeft.end());
-			result.insert(result.end(), (aRect.top_left() + point{ aRadius, 0.0 }).x);
-			result.insert(result.end(), (aRect.top_left() + point{ aRadius, 0.0 }).y);
-			result.insert(result.end(), (aRect.top_right() + point{ -aRadius, 0.0 }).x);
-			result.insert(result.end(), (aRect.top_right() + point{ -aRadius, 0.0 }).y);
+			result.insert(result.end(), xyz{ (aRect.top_left() + point{ aRadius, 0.0 }).x, (aRect.top_left() + point{ aRadius, 0.0 }).y });
+			result.insert(result.end(), xyz{ (aRect.top_right() + point{ -aRadius, 0.0 }).x, (aRect.top_right() + point{ -aRadius, 0.0 }).y });
 			result.insert(result.end(), topRight.begin(), topRight.end());
-			result.insert(result.end(), (aRect.top_right() + point{ 0.0, aRadius }).x);
-			result.insert(result.end(), (aRect.top_right() + point{ 0.0, aRadius }).y);
-			result.insert(result.end(), (aRect.bottom_right() + point{ 0.0, -aRadius }).x);
-			result.insert(result.end(), (aRect.bottom_right() + point{ 0.0, -aRadius }).y);
+			result.insert(result.end(), xyz{ (aRect.top_right() + point{ 0.0, aRadius }).x, (aRect.top_right() + point{ 0.0, aRadius }).y });
+			result.insert(result.end(), xyz{ (aRect.bottom_right() + point{ 0.0, -aRadius }).x, (aRect.bottom_right() + point{ 0.0, -aRadius }).y });
 			result.insert(result.end(), bottomRight.begin(), bottomRight.end());
-			result.insert(result.end(), (aRect.bottom_right() + point{ -aRadius, 0.0 }).x);
-			result.insert(result.end(), (aRect.bottom_right() + point{ -aRadius, 0.0 }).y);
-			result.insert(result.end(), (aRect.bottom_left() + point{ aRadius, 0.0 }).x);
-			result.insert(result.end(), (aRect.bottom_left() + point{ aRadius, 0.0 }).y);
+			result.insert(result.end(), xyz{ (aRect.bottom_right() + point{ -aRadius, 0.0 }).x, (aRect.bottom_right() + point{ -aRadius, 0.0 }).y });
+			result.insert(result.end(), xyz{ (aRect.bottom_left() + point{ aRadius, 0.0 }).x, (aRect.bottom_left() + point{ aRadius, 0.0 }).y });
 			result.insert(result.end(), bottomLeft.begin(), bottomLeft.end());
-			result.insert(result.end(), (aRect.bottom_left() + point{ 0.0, -aRadius }).x);
-			result.insert(result.end(), (aRect.bottom_left() + point{ 0.0, -aRadius }).y);
-			result.push_back(result[aIncludeCentre ? 2 : 0]);
-			result.push_back(result[aIncludeCentre ? 3 : 1]);
+			result.insert(result.end(), xyz{ (aRect.bottom_left() + point{ 0.0, -aRadius }).x, (aRect.bottom_left() + point{ 0.0, -aRadius }).y });
+			result.push_back(result[aIncludeCentre ? 1 : 0]);
 			return result;
 		}
 
@@ -203,19 +175,15 @@ namespace neogfx
 			return pixel_adjust(aPen.width());
 		}
 
-		inline std::vector<GLdouble> line_loop_to_lines(const std::vector<GLdouble>& aLineLoop)
+		inline std::vector<xyz> line_loop_to_lines(const std::vector<xyz>& aLineLoop)
 		{
-			std::vector<GLdouble> result;
+			std::vector<xyz> result;
 			result.reserve(aLineLoop.size() * 2);
-			for (auto v = aLineLoop.begin(); v != aLineLoop.end(); v += 2)
+			for (auto v = aLineLoop.begin(); v != aLineLoop.end(); ++v)
 			{
 				result.push_back(*v);
-				result.push_back(*(v + 1));
-				if (v != aLineLoop.begin() && v != aLineLoop.end() - 2)
-				{
+				if (v != aLineLoop.begin() && v != aLineLoop.end() - 1)
 					result.push_back(*v);
-					result.push_back(*(v + 1));
-				}
 			}
 			return result;
 		}
@@ -233,6 +201,7 @@ namespace neogfx
 		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
 	{
 		iRenderingEngine.activate_context(iSurface);
+		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
@@ -248,6 +217,7 @@ namespace neogfx
 		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
 	{
 		iRenderingEngine.activate_context(iSurface);
+		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
@@ -263,6 +233,7 @@ namespace neogfx
 		iSubpixelRendering(false)
 	{
 		iRenderingEngine.activate_context(iSurface);
+		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
 		set_smoothing_mode(iSmoothingMode);
 	}
 
@@ -289,38 +260,26 @@ namespace neogfx
 
 	void opengl_graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
 	{
-		if (iLogicalCoordinateSystem != aSystem)
-		{
-			iLogicalCoordinateSystem = aSystem;
-			const auto& logicalCoordinates = logical_coordinates();
-			glCheck(glLoadIdentity());
-			glCheck(glOrtho(logicalCoordinates[0], logicalCoordinates[2], logicalCoordinates[1], logicalCoordinates[3], -1.0, 1.0));
-		}
+		iLogicalCoordinateSystem = aSystem;
 	}
 
-	const vector4& opengl_graphics_context::logical_coordinates() const
+	const std::pair<vec2, vec2>& opengl_graphics_context::logical_coordinates() const
 	{
 		switch (iLogicalCoordinateSystem)
 		{
 		case neogfx::logical_coordinate_system::Specified:
 			return iLogicalCoordinates;
 		case neogfx::logical_coordinate_system::AutomaticGui:
-			return iLogicalCoordinates = vector4{ 0.0, surface().surface_size().cy, surface().surface_size().cx, 0.0 };
+			return iLogicalCoordinates = std::make_pair<vec2, vec2>({ 0.0, surface().surface_size().cy }, { surface().surface_size().cx, 0.0 });
 		case neogfx::logical_coordinate_system::AutomaticGame:
-			return iLogicalCoordinates = vector4{ 0.0, 0.0, surface().surface_size().cx, surface().surface_size().cy };
+			return iLogicalCoordinates = std::make_pair<vec2, vec2>({ 0.0, 0.0 }, { surface().surface_size().cx, surface().surface_size().cy });
 		}
 		return iLogicalCoordinates;
 	}
 
-	void opengl_graphics_context::set_logical_coordinates(const vector4& aCoordinates) const
+	void opengl_graphics_context::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const
 	{
-		if (iLogicalCoordinates != aCoordinates)
-		{
-			iLogicalCoordinates = aCoordinates;
-			const auto& logicalCoordinates = logical_coordinates();
-			glCheck(glLoadIdentity());
-			glCheck(glOrtho(logicalCoordinates[0], logicalCoordinates[2], logicalCoordinates[1], logicalCoordinates[3], -1.0, 1.0));
-		}
+		iLogicalCoordinates = aCoordinates;
 	}
 
 	void opengl_graphics_context::flush()
@@ -409,12 +368,12 @@ namespace neogfx
 			if (aPath.paths()[i].size() > 2)
 			{
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
-				std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
-				glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-				std::vector<double> texCoords(vertices.size(), 0.0);
-				glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath), 0, vertices.size() / 2));
+				std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{1.0, 1.0, 1.0, 1.0}});
+				std::vector<std::array<double, 2>> texCoords(vertices.size());
+
+				opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath), 0, vertices.size()));
 			}
 		}
 		if (aPathOutline != 0)
@@ -427,12 +386,12 @@ namespace neogfx
 				if (innerPath.paths()[i].size() > 2)
 				{
 					auto vertices = aPath.to_vertices(innerPath.paths()[i]);
-					std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
-					glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-					glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-					std::vector<double> texCoords(vertices.size(), 0.0);
-					glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-					glCheck(glDrawArrays(path_shape_to_gl_mode(innerPath), 0, vertices.size() / 2));
+					std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{1.0, 1.0, 1.0, 1.0}});
+					std::vector<std::array<double, 2>> texCoords(vertices.size());
+
+					opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
+					glCheck(glDrawArrays(path_shape_to_gl_mode(innerPath), 0, vertices.size()));
 				}
 			}
 		} 
@@ -508,8 +467,8 @@ namespace neogfx
 	void opengl_graphics_context::gradient_on(const gradient& aGradient, const rect& aBoundingBox)
 	{
 		basic_rect<float> boundingBox{ aBoundingBox };
-		iRenderingEngine.activate_shader_program(iRenderingEngine.gradient_shader_program());
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(logical_coordinates()[1]));
+		iShaderProgramStack.emplace_back(*this, iRenderingEngine, iRenderingEngine.gradient_shader_program());
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(logical_coordinates().first.y));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
@@ -527,7 +486,7 @@ namespace neogfx
 		for (const auto& stop : combinedStops)
 		{
 			iGradientStopPositions.push_back(static_cast<float>(stop.first));
-			iGradientStopColours.push_back(std::array<uint8_t, 4>{ {stop.second.red(), stop.second.green(), stop.second.blue(), stop.second.alpha()}});
+			iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
 		}
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(iGradientStopPositions.size()));
 		const uint32_t FILTER_SIZE = 33;
@@ -550,8 +509,8 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[1]));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-			static const std::array<std::array<uint8_t, 4>, gradient::MaxStops> sZeroStopColours = {};
-			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, static_cast<GLsizei>(gradient::MaxStops), 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &sZeroStopColours[0]));
+			static const std::array<std::array<double, 4>, gradient::MaxStops> sZeroStopColours = {};
+			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, static_cast<GLsizei>(gradient::MaxStops), 1, 0, GL_RGBA, GL_FLOAT, &sZeroStopColours[0]));
 			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[2]));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
@@ -566,7 +525,7 @@ namespace neogfx
 		glCheck(glActiveTexture(GL_TEXTURE3));
 		glCheck(glClientActiveTexture(GL_TEXTURE3));
 		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[1]));
-		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, iGradientStopColours.size(), 1, GL_RGBA, GL_UNSIGNED_BYTE, &iGradientStopColours[0]));
+		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, iGradientStopColours.size(), 1, GL_RGBA, GL_FLOAT, &iGradientStopColours[0]));
 		glCheck(glActiveTexture(GL_TEXTURE4));
 		glCheck(glClientActiveTexture(GL_TEXTURE4));
 		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[2]));
@@ -580,7 +539,7 @@ namespace neogfx
 
 	void opengl_graphics_context::gradient_off()
 	{
-		iRenderingEngine.deactivate_shader_program();
+		iShaderProgramStack.pop_back();
 		glCheck(glDisable(GL_TEXTURE_RECTANGLE));
 	}
 
@@ -635,27 +594,27 @@ namespace neogfx
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
 	{
 		double pixelAdjust = pixel_adjust(aPen);
-		std::vector<double> vertices{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust, aTo.x + pixelAdjust, aTo.y + pixelAdjust };
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		std::vector<xyz> vertices{ xyz{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust}, xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust} };
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_LINES, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
 		auto vertices = rect_vertices(aRect, pixel_adjust(aPen), false);
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{ {aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glDrawArrays(GL_LINES, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
@@ -663,39 +622,39 @@ namespace neogfx
 	{
 		double pixelAdjust = pixel_adjust(aPen);
 		auto vertices = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{ {aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
 	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
 	{
 		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, false);
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
 	void opengl_graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
 	{
 		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{ {aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_LINES, 0, vertices.size() / 2));
+		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
@@ -708,12 +667,12 @@ namespace neogfx
 				if (aPath.shape() == path::ConvexPolygon)
 					clip_to(aPath, aPen.width());
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
-				std::vector<double> texCoords(vertices.size(), 0.0);
-				std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
-				glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-				glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size() / 2));
+				std::vector<std::array<double, 2>> texCoords(vertices.size());
+				std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+
+				opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size()));
 				if (aPath.shape() == path::ConvexPolygon)
 					reset_clip();
 			}
@@ -726,12 +685,12 @@ namespace neogfx
 		vertices.reserve(aVertices.size() + 1);
 		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
 		vertices.push_back(vertices[0]);
-		std::vector<double> texCoords(vertices.size() * 2, 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size(), 
-			std::array <uint8_t, 4>{ { aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), 
+			std::array <double, 4>{ { aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
 		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
 	}
 
@@ -742,18 +701,18 @@ namespace neogfx
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
 		auto vertices = rect_vertices(aRect, 0.0, true);
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
-			std::array <uint8_t, 4>{{
-					static_variant_cast<const colour&>(aFill).red(), 
-					static_variant_cast<const colour&>(aFill).green(), 
-					static_variant_cast<const colour&>(aFill).blue(),
-					static_variant_cast<const colour&>(aFill).alpha()}} : 
-			std::array <uint8_t, 4>{});
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
+			std::array <double, 4>{{
+					static_variant_cast<const colour&>(aFill).red<double>(), 
+					static_variant_cast<const colour&>(aFill).green<double>(), 
+					static_variant_cast<const colour&>(aFill).blue<double>(),
+					static_variant_cast<const colour&>(aFill).alpha<double>()}} : 
+			std::array <double, 4>{});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -765,18 +724,18 @@ namespace neogfx
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
 		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
-			std::array <uint8_t, 4>{ {
-					static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-			std::array <uint8_t, 4>{});
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
+			std::array <double, 4>{ {
+					static_variant_cast<const colour&>(aFill).red<double>(),
+						static_variant_cast<const colour&>(aFill).green<double>(),
+						static_variant_cast<const colour&>(aFill).blue<double>(),
+						static_variant_cast<const colour&>(aFill).alpha<double>()}} :
+			std::array <double, 4>{});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -786,18 +745,18 @@ namespace neogfx
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 		auto vertices = circle_vertices(aCentre, aRadius, 0.0, true);
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
-			std::array <uint8_t, 4>{ {
-					static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-			std::array <uint8_t, 4>{});
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
+			std::array <double, 4>{ {
+					static_variant_cast<const colour&>(aFill).red<double>(),
+						static_variant_cast<const colour&>(aFill).green<double>(),
+						static_variant_cast<const colour&>(aFill).blue<double>(),
+						static_variant_cast<const colour&>(aFill).alpha<double>()}} :
+			std::array <double, 4>{});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -807,18 +766,18 @@ namespace neogfx
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
-		std::vector<double> texCoords(vertices.size(), 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
-			std::array <uint8_t, 4>{ {
-					static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-			std::array <uint8_t, 4>{});
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size() / 2));
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
+			std::array <double, 4>{ {
+					static_variant_cast<const colour&>(aFill).red<double>(),
+						static_variant_cast<const colour&>(aFill).green<double>(),
+						static_variant_cast<const colour&>(aFill).blue<double>(),
+						static_variant_cast<const colour&>(aFill).alpha<double>()}} :
+			std::array <double, 4>{});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -842,17 +801,18 @@ namespace neogfx
 				if (aFill.is<gradient>())
 					gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
-				std::vector<std::array<uint8_t, 4>> colours(vertices.size() / 2, aFill.is<colour>() ?
-					std::array <uint8_t, 4>{ {
-							static_variant_cast<const colour&>(aFill).red(),
-								static_variant_cast<const colour&>(aFill).green(),
-								static_variant_cast<const colour&>(aFill).blue(),
-								static_variant_cast<const colour&>(aFill).alpha()}} :
-					std::array <uint8_t, 4>{});
-				glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-				glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-				std::vector<double> texCoords(vertices.size(), 0.0);
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size() / 2));
+				std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
+					std::array <double, 4>{ {
+							static_variant_cast<const colour&>(aFill).red<double>(),
+								static_variant_cast<const colour&>(aFill).green<double>(),
+								static_variant_cast<const colour&>(aFill).blue<double>(),
+								static_variant_cast<const colour&>(aFill).alpha<double>()}} :
+					std::array <double, 4>{});
+				std::vector<std::array<double, 2>> texCoords(vertices.size());
+
+				opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size()));
 				reset_clip();
 				if (aFill.is<gradient>())
 					gradient_off();
@@ -880,17 +840,17 @@ namespace neogfx
 		vertices.reserve(aVertices.size());
 		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
 		vertices.push_back(vertices[1]);
-		std::vector<double> texCoords(vertices.size() * 2, 0.0);
-		std::vector<std::array<uint8_t, 4>> colours(vertices.size(), aFill.is<colour>() ?
-			std::array <uint8_t, 4>{ {
-					static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-			std::array <uint8_t, 4>{});
-		glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, 0, &colours[0]));
-		glCheck(glVertexPointer(2, GL_DOUBLE, 0, &vertices[0]));
-		glCheck(glTexCoordPointer(2, GL_DOUBLE, 0, &texCoords[0]));
+		std::vector<std::array<double, 2>> texCoords(vertices.size());
+		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
+			std::array <double, 4>{ {
+					static_variant_cast<const colour&>(aFill).red<double>(),
+						static_variant_cast<const colour&>(aFill).green<double>(),
+						static_variant_cast<const colour&>(aFill).blue<double>(),
+						static_variant_cast<const colour&>(aFill).alpha<double>()}} :
+			std::array <double, 4>{});
+
+		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+
 		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 		if (aFill.is<gradient>())
 			gradient_off();
@@ -965,12 +925,12 @@ namespace neogfx
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		iActiveGlyphTexture = static_cast<GLuint>(iPreviousTexture);
-		iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program(is_subpixel_rendering_on()));
+		iShaderProgramStack.emplace_back(*this, iRenderingEngine, iRenderingEngine.glyph_shader_program(is_subpixel_rendering_on()));
 	}
 
 	namespace
 	{
-		std::vector<std::array<double, 2>> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const vec4& aLogicalCoordinates)
+		std::vector<std::array<double, 2>> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates)
 		{
 			typedef std::array<double, 2> xy;
 			std::vector<xy> result;
@@ -979,7 +939,7 @@ namespace neogfx
 			result.push_back(xy{ normalizedRect.top_right().x, normalizedRect.top_right().y });
 			result.push_back(xy{ normalizedRect.bottom_right().x, normalizedRect.bottom_right().y });
 			result.push_back(xy{ normalizedRect.bottom_left().x, normalizedRect.bottom_left().y });
-			if (aLogicalCoordinates[1] < aLogicalCoordinates[3])
+			if (aLogicalCoordinates.first.y < aLogicalCoordinates.second.y)
 			{
 				std::swap(result[0][1], result[2][1]);
 				std::swap(result[1][1], result[3][1]);
@@ -993,26 +953,18 @@ namespace neogfx
 		if (aGlyph.is_whitespace())
 			return size{};
 
-		i_rendering_engine::i_shader_program* shaderProgram = nullptr;
-		if (iRenderingEngine.shader_program_active())
-			shaderProgram = &iRenderingEngine.active_shader_program();
-
 		if (aGlyph.is_emoji())
 		{
-			if (shaderProgram != nullptr)
-				iRenderingEngine.deactivate_shader_program();
+			use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 			auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(aGlyph.value());
 			draw_texture(rect{ aPoint, size{aFont.height(), aFont.height()} }.to_vector(), emojiTexture, rect{ point{}, emojiTexture.extents() }, optional_colour{}, shader_effect::None);
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			if (shaderProgram != nullptr)
-				iRenderingEngine.activate_shader_program(*shaderProgram);
 			return size{ aFont.height(), aFont.height() };
 		}
 
-		if (shaderProgram != &iRenderingEngine.glyph_shader_program(aGlyph.subpixel()))
-			iRenderingEngine.activate_shader_program(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()));
+		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()) };
 
 		const font* glyphFont = &aFont;
 		if (aGlyph.use_fallback())
@@ -1032,7 +984,7 @@ namespace neogfx
 		auto& textureCoords = iGlyphTextureCoords;
 
 		point glyphOrigin(aPoint.x + glyphTexture.placement().x, 
-			logical_coordinates()[1] < logical_coordinates()[3] ? 
+			logical_coordinates().first.y < logical_coordinates().second.y ? 
 				aPoint.y + (glyphTexture.placement().y + -aFont.descender()) :
 				aPoint.y + aFont.height() - (glyphTexture.placement().y + -aFont.descender()) - glyphTexture.texture().extents().cy);
 
@@ -1076,7 +1028,7 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSurface.rendering_target_texture_handle())));
 			glCheck(glActiveTexture(GL_TEXTURE1));
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("guiCoordinates", logical_coordinates()[1] > logical_coordinates()[3]);
+			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("guiCoordinates", logical_coordinates().first.y > logical_coordinates().second.y);
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
 			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("outputTexture", 2);
 		}
@@ -1087,18 +1039,13 @@ namespace neogfx
 		disable_anti_alias daa(*this);
 		glCheck(glDrawArrays(GL_QUADS, 0, vertices.size()));
 
-		if (shaderProgram == nullptr && iRenderingEngine.shader_program_active())
-			iRenderingEngine.deactivate_shader_program();
-		else if (shaderProgram != &iRenderingEngine.active_shader_program())
-			iRenderingEngine.activate_shader_program(*shaderProgram);
-
 		return glyphTexture.texture().extents();
 	}
 
 	void opengl_graphics_context::end_drawing_glyphs()
 	{
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
-		iRenderingEngine.deactivate_shader_program();
+		iShaderProgramStack.pop_back();
 	}
 
 	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect)
@@ -1120,7 +1067,7 @@ namespace neogfx
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture()->handle())));
 		if (!aTexture.native_texture()->is_resident())
 			throw texture_not_resident();
-		typedef std::array<double, 3> vertex;
+		typedef xyz vertex;
 		std::vector<vertex> vertices;
 		for (auto& v : aTextureMap)
 			vertices.push_back(vertex{ v.x, v.y });
@@ -1130,16 +1077,11 @@ namespace neogfx
 			c = *aColour;
 		std::vector<std::array<double, 4>> colours{ aTextureMap.size(), std::array<double, 4>{ {c.red<double>(), c.green<double>(), c.blue<double>(), c.alpha<double>()}} };
 
-		if (aShaderEffect == shader_effect::Monochrome)
-		{
-			iRenderingEngine.activate_shader_program(iRenderingEngine.monochrome_shader_program());
-			iRenderingEngine.monochrome_shader_program().set_uniform_variable("tex", 1);
-		}
-		else
-		{
-			iRenderingEngine.activate_shader_program(iRenderingEngine.texture_shader_program());
-			iRenderingEngine.texture_shader_program().set_uniform_variable("tex", 1);
-		}
+		use_shader_program usp{ *this, iRenderingEngine, aShaderEffect == shader_effect::Monochrome ?
+			iRenderingEngine.monochrome_shader_program() :
+			iRenderingEngine.texture_shader_program() };
+
+		iRenderingEngine.active_shader_program().set_uniform_variable("tex", 1);
 
 		opengl_buffer positionBuffer{ vertices };
 		opengl_buffer colourBuffer{ colours };
@@ -1152,7 +1094,6 @@ namespace neogfx
 		opengl_vertex_attrib_array vertexTextureCoordAttribArray{ textureCoordBuffer, iRenderingEngine.monochrome_shader_program(), "VertexTextureCoord" };
 
 		glCheck(glDrawArrays(GL_QUADS, 0, 4));
-		iRenderingEngine.deactivate_shader_program();
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 

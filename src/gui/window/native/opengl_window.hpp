@@ -46,8 +46,8 @@ namespace neogfx
 	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
-		virtual const vector4& logical_coordinates() const;
-		virtual void set_logical_coordinates(const vector4& aCoordinates);
+		virtual const std::pair<vec2, vec2>& logical_coordinates() const;
+		virtual void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates);
 	public:
 		virtual uint64_t frame_counter() const;
 		virtual bool using_frame_buffer() const;
@@ -74,7 +74,7 @@ namespace neogfx
 		i_window& iWindow;
 		size iPixelDensityDpi;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
-		mutable vector4 iLogicalCoordinates;
+		mutable std::pair<vec2, vec2> iLogicalCoordinates;
 		GLuint iFrameBuffer;
 		GLuint iFrameBufferTexture;
 		GLuint iDepthStencilBuffer;

@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include "opengl.hpp"
+#include "i_native_graphics_context.hpp"
 
 namespace neogfx
 {
@@ -53,7 +55,7 @@ namespace neogfx
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			glCheck(glGenBuffers(1, &iHandle));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
-			glCheck(glBufferData(GL_ARRAY_BUFFER, aData.size() * sizeof(aData[0]), &aData[0], GL_STATIC_DRAW));
+			glCheck(glBufferData(GL_ARRAY_BUFFER, aData.size() * sizeof(aData[0]), &aData[0], GL_STREAM_DRAW));
 		}
 		~opengl_buffer()
 		{
@@ -92,5 +94,48 @@ namespace neogfx
 		}
 	private:
 		GLint iPreviousBindingHandle;
+	};
+
+	class opengl_standard_vertex_arrays
+	{
+	public:
+		template <typename VertexContainer, typename ColourContainer, typename TextureCoordContainer>
+		opengl_standard_vertex_arrays(const i_rendering_engine::i_shader_program& aShaderProgram,
+			const VertexContainer& aVertices, const ColourContainer& aColours, const TextureCoordContainer& aTextureCoordinates) :
+			iPositionBuffer{ aVertices }, iColourBuffer{ aColours }, iTextureCoordBuffer{ aTextureCoordinates },
+			iVertexPositionAttribArray{ iPositionBuffer, aShaderProgram, "VertexPosition" },
+			iVertexColorAttribArray{ iColourBuffer, aShaderProgram, "VertexColor" },
+			iVertexTextureCoordAttribArray{ iTextureCoordBuffer, aShaderProgram, "VertexTextureCoord" }
+		{
+		}
+	private:
+		opengl_buffer iPositionBuffer;
+		opengl_buffer iColourBuffer;
+		opengl_buffer iTextureCoordBuffer;
+		opengl_vertex_array iVertexArray;
+		opengl_vertex_attrib_array iVertexPositionAttribArray;
+		opengl_vertex_attrib_array iVertexColorAttribArray;
+		opengl_vertex_attrib_array iVertexTextureCoordAttribArray;
+	};
+
+	class use_shader_program
+	{
+	public:
+		use_shader_program(i_native_graphics_context& aGraphicsContext, i_rendering_engine& aRenderingEngine, i_rendering_engine::i_shader_program& aShaderProgram) :
+			iGraphicsContext{ aGraphicsContext },
+			iRenderingEngine{ aRenderingEngine },
+			iPreviousProgram{ aRenderingEngine.shader_program_active() ? &aRenderingEngine.active_shader_program() : nullptr }
+		{
+			iRenderingEngine.activate_shader_program(iGraphicsContext, aShaderProgram);
+		}
+		~use_shader_program()
+		{
+			if (iPreviousProgram != nullptr)
+				iRenderingEngine.activate_shader_program(iGraphicsContext, *iPreviousProgram);
+		}
+	private:
+		i_native_graphics_context& iGraphicsContext;
+		i_rendering_engine& iRenderingEngine;
+		i_rendering_engine::i_shader_program* iPreviousProgram;
 	};
 }

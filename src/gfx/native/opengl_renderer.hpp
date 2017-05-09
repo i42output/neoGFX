@@ -70,9 +70,10 @@ namespace neogfx
 		public:
 			typedef std::map<std::string, GLuint> variable_map;
 		public:
-			shader_program(GLuint aHandle);
+			shader_program(GLuint aHandle, bool aHasProjectionMatrix);
 		public:
 			virtual void* handle() const;
+			virtual bool has_projection_matrix() const;
 			virtual void* variable(const std::string& aVariableName) const;
 			virtual void set_uniform_variable(const std::string& aName, float aValue);
 			virtual void set_uniform_variable(const std::string& aName, double aValue);
@@ -80,6 +81,7 @@ namespace neogfx
 			virtual void set_uniform_variable(const std::string& aName, float aValue1, float aValue2);
 			virtual void set_uniform_variable(const std::string& aName, double aValue1, double aValue2);
 			virtual void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray);
+			virtual void set_uniform_matrix(const std::string& aName, const mat44& aMatrix);
 		public:
 			GLuint register_variable(const std::string& aVariableName);
 		public:
@@ -88,6 +90,7 @@ namespace neogfx
 			GLint uniform_location(const std::string& aName);
 		private:
 			GLuint iHandle;
+			bool iHasProjectionMatrix;
 			variable_map iVariables;
 		};
 	private:
@@ -103,10 +106,12 @@ namespace neogfx
 		virtual i_font_manager& font_manager();
 		virtual i_texture_manager& texture_manager();
 		virtual bool shader_program_active() const;
-		virtual void activate_shader_program(i_shader_program& aProgram);
+		virtual void activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram);
 		virtual void deactivate_shader_program();
 		virtual const i_shader_program& active_shader_program() const;
 		virtual i_shader_program& active_shader_program();
+		virtual const i_shader_program& default_shader_program() const;
+		virtual i_shader_program& default_shader_program();
 		virtual const i_shader_program& texture_shader_program() const;
 		virtual i_shader_program& texture_shader_program();
 		virtual const i_shader_program& monochrome_shader_program() const;
@@ -130,6 +135,7 @@ namespace neogfx
 		neogfx::font_manager iFontManager;
 		shader_programs iShaderPrograms;
 		shader_programs::iterator iActiveProgram;
+		shader_programs::iterator iDefaultProgram;
 		shader_programs::iterator iTextureProgram;
 		shader_programs::iterator iMonochromeProgram;
 		shader_programs::iterator iGlyphProgram;

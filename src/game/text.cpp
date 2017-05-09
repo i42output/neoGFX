@@ -170,7 +170,7 @@ namespace neogfx
 			bb.extents() -= size{iMargins->left + iMargins->right, iMargins->bottom + iMargins->top};
 		}
 		aGraphicsContext.draw_multiline_text(
-			aGraphicsContext.logical_coordinates()[1] < aGraphicsContext.logical_coordinates()[1] ? bb.bottom_left() : bb.top_left(), 
+			aGraphicsContext.logical_coordinates().first.y < aGraphicsContext.logical_coordinates().second.y ? bb.bottom_left() : bb.top_left(), 
 			iText, font(), bb.extents().cx, text_colour(), iAlignment, true);
 	}
 

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <array>
 #include <type_traits>
 #include <ostream>
 #include <boost/optional.hpp>
@@ -31,6 +32,8 @@ namespace neogfx
 	typedef coordinate_value_type coordinate;
 	typedef coordinate_value_type dimension;
 	typedef coordinate_value_type coordinate_delta;
+
+	typedef std::array<coordinate, 3> xyz;
 
 	template <typename CoordinateType>
 	class basic_delta 

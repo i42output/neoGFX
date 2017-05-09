@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
@@ -29,6 +30,7 @@ namespace neogfx
 {
 	class i_surface_manager;
 	class i_native_window;
+	class i_native_graphics_context;
 
 	class i_screen_metrics : public i_device_metrics
 	{
@@ -65,6 +67,7 @@ namespace neogfx
 			struct variable_not_found : std::logic_error { variable_not_found() : std::logic_error("neogfx::i_rendering_engine::i_shader_program::variable_not_found") {} };
 		public:
 			virtual void* handle() const = 0;
+			virtual bool has_projection_matrix() const = 0;
 			virtual void* variable(const std::string& aVariableName) const = 0;
 			virtual void set_uniform_variable(const std::string& aName, float aValue) = 0;
 			virtual void set_uniform_variable(const std::string& aName, double aValue) = 0;
@@ -72,6 +75,7 @@ namespace neogfx
 			virtual void set_uniform_variable(const std::string& aName, float aValue1, float aValue2) = 0;
 			virtual void set_uniform_variable(const std::string& aName, double aValue1, double aValue2) = 0;
 			virtual void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray) = 0;
+			virtual void set_uniform_matrix(const std::string& aName, const mat44& aMatrix) = 0;
 		};
 	public:
 		virtual ~i_rendering_engine() {}
@@ -102,10 +106,12 @@ namespace neogfx
 		virtual i_font_manager& font_manager() = 0;
 		virtual i_texture_manager& texture_manager() = 0;
 		virtual bool shader_program_active() const = 0;
-		virtual void activate_shader_program(i_shader_program& aProgram) = 0;
+		virtual void activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram) = 0;
 		virtual void deactivate_shader_program() = 0;
 		virtual const i_shader_program& active_shader_program() const = 0;
 		virtual i_shader_program& active_shader_program() = 0;
+		virtual const i_shader_program& default_shader_program() const = 0;
+		virtual i_shader_program& default_shader_program() = 0;
 		virtual const i_shader_program& texture_shader_program() const = 0;
 		virtual i_shader_program& texture_shader_program() = 0;
 		virtual const i_shader_program& monochrome_shader_program() const = 0;

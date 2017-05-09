@@ -72,6 +72,7 @@ namespace neogfx
 		explicit basic_vector(value_type value) : v{{value}} {}
 		template <typename... Arguments>
 		explicit basic_vector(value_type value, Arguments... aArguments) : v{{value, aArguments...}} {}
+		basic_vector(const array_type& a) : v(a) {}
 		basic_vector(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type()); }
 		basic_vector(const basic_vector& other) : v(other.v) {}
 		basic_vector(basic_vector&& other) : v(std::move(other.v)) {}
@@ -401,6 +402,13 @@ namespace neogfx
 		basic_matrix(std::initializer_list<column_type> aColumns) { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
 		basic_matrix(const basic_matrix& other) : m{other.m} {}
 		basic_matrix(basic_matrix&& other) : m{std::move(other.m)} {}
+		template <typename T2>
+		basic_matrix(const basic_matrix<T2, Rows, Columns>& other)
+		{
+			for (uint32_t column = 0; column < Columns; ++column)
+				for (uint32_t row = 0; row < Rows; ++row)
+					(*this)[column][row] = static_cast<value_type>(other[column][row]);
+		}
 		basic_matrix& operator=(const basic_matrix& other) { m = other.m; return *this; }
 		basic_matrix& operator=(basic_matrix&& other) { m = std::move(other.m); return *this; }
 	public:
@@ -430,6 +438,14 @@ namespace neogfx
 			for (uint32_t column = 0; column < Columns; ++column)
 				for (uint32_t row = 0; row < Rows; ++row)
 					result[column][row] = -result[column][row];
+			return result;
+		}
+		basic_matrix<T, Columns, Rows> transposed() const
+		{
+			basic_matrix<T, Columns, Rows> result;
+			for (uint32_t column = 0; column < Columns; ++column)
+				for (uint32_t row = 0; row < Rows; ++row)
+					result[row][column] = m[column][row];
 			return result;
 		}
 	private:

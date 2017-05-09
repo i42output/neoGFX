@@ -433,12 +433,12 @@ namespace neogfx
 		native_surface().set_logical_coordinate_system(aSystem);
 	}
 
-	const vector4& window::logical_coordinates() const
+	const std::pair<vec2, vec2>& window::logical_coordinates() const
 	{
 		return native_surface().logical_coordinates();
 	}
 
-	void window::set_logical_coordinates(const vector4& aCoordinates)
+	void window::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates)
 	{
 		native_surface().set_logical_coordinates(aCoordinates);
 	}
