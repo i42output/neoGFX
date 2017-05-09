@@ -367,13 +367,12 @@ namespace neogfx
 		{
 			if (aPath.paths()[i].size() > 2)
 			{
-				auto vertices = aPath.to_vertices(aPath.paths()[i]);
-				std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{1.0, 1.0, 1.0, 1.0}});
-				std::vector<std::array<double, 2>> texCoords(vertices.size());
+				iVertexArrays.vertices() = aPath.to_vertices(aPath.paths()[i]);
+				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
+				iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+				iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-				opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
-
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath), 0, vertices.size()));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath), 0, iVertexArrays.vertices().size()));
 			}
 		}
 		if (aPathOutline != 0)
@@ -385,13 +384,12 @@ namespace neogfx
 			{
 				if (innerPath.paths()[i].size() > 2)
 				{
-					auto vertices = aPath.to_vertices(innerPath.paths()[i]);
-					std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{1.0, 1.0, 1.0, 1.0}});
-					std::vector<std::array<double, 2>> texCoords(vertices.size());
+					iVertexArrays.vertices() = aPath.to_vertices(innerPath.paths()[i]);
+					iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
+					iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+					iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-					opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
-
-					glCheck(glDrawArrays(path_shape_to_gl_mode(innerPath), 0, vertices.size()));
+					glCheck(glDrawArrays(path_shape_to_gl_mode(innerPath), 0, iVertexArrays.vertices().size()));
 				}
 			}
 		} 
@@ -509,7 +507,7 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[1]));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-			static const std::array<std::array<double, 4>, gradient::MaxStops> sZeroStopColours = {};
+			static const std::array<std::array<uint8_t, 4>, gradient::MaxStops> sZeroStopColours = {};
 			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, static_cast<GLsizei>(gradient::MaxStops), 1, 0, GL_RGBA, GL_FLOAT, &sZeroStopColours[0]));
 			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[2]));
 			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
@@ -594,67 +592,63 @@ namespace neogfx
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
 	{
 		double pixelAdjust = pixel_adjust(aPen);
-		std::vector<xyz> vertices{ xyz{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust}, xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust} };
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
-
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.vertices().assign({ xyz{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust}, xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust} });
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
-		auto vertices = rect_vertices(aRect, pixel_adjust(aPen), false);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{ {aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
-
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.vertices() = rect_vertices(aRect, pixel_adjust(aPen), false);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
 	void opengl_graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
 	{
 		double pixelAdjust = pixel_adjust(aPen);
-		auto vertices = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{ {aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
-
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.vertices() = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
 	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
 	{
-		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, false);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+		iVertexArrays.vertices() = circle_vertices(aCentre, aRadius, aStartAngle, false);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
 
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
 	void opengl_graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
 	{
-		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{ {aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
-
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.vertices() = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
 	}
 
@@ -666,13 +660,13 @@ namespace neogfx
 			{
 				if (aPath.shape() == path::ConvexPolygon)
 					clip_to(aPath, aPen.width());
-				auto vertices = aPath.to_vertices(aPath.paths()[i]);
-				std::vector<std::array<double, 2>> texCoords(vertices.size());
-				std::vector<std::array<double, 4>> colours(vertices.size(), std::array <double, 4>{{aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
 
-				opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+				iVertexArrays.vertices() = aPath.to_vertices(aPath.paths()[i]);
+				iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+				iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size()));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, iVertexArrays.vertices().size()));
 				if (aPath.shape() == path::ConvexPolygon)
 					reset_clip();
 			}
@@ -681,17 +675,16 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_shape(const vec2_list& aVertices, const pen& aPen)
 	{
-		vec2_list vertices;
-		vertices.reserve(aVertices.size() + 1);
-		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
-		vertices.push_back(vertices[0]);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), 
-			std::array <double, 4>{ { aPen.colour().red<double>(), aPen.colour().green<double>(), aPen.colour().blue<double>(), aPen.colour().alpha<double>()}});
+		iVertexArrays.vertices().clear();
+		for (auto const& v : aVertices)
+			iVertexArrays.vertices().push_back(xyz{ v[0], v[1] });
+		iVertexArrays.vertices().push_back(iVertexArrays.vertices()[0]);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(),
+			std::array <uint8_t, 4>{ { aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
-
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
 	}
 
 	void opengl_graphics_context::fill_rect(const rect& aRect, const fill& aFill)
@@ -700,19 +693,19 @@ namespace neogfx
 			return;
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
-		auto vertices = rect_vertices(aRect, 0.0, true);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
-			std::array <double, 4>{{
-					static_variant_cast<const colour&>(aFill).red<double>(), 
-					static_variant_cast<const colour&>(aFill).green<double>(), 
-					static_variant_cast<const colour&>(aFill).blue<double>(),
-					static_variant_cast<const colour&>(aFill).alpha<double>()}} : 
-			std::array <double, 4>{});
 
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.vertices() = rect_vertices(aRect, 0.0, true);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+			std::array <uint8_t, 4>{{
+					static_variant_cast<const colour&>(aFill).red(), 
+					static_variant_cast<const colour&>(aFill).green(), 
+					static_variant_cast<const colour&>(aFill).blue(),
+					static_variant_cast<const colour&>(aFill).alpha()}} : 
+			std::array <uint8_t, 4>{});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -723,19 +716,19 @@ namespace neogfx
 			return;
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
-		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
-			std::array <double, 4>{ {
-					static_variant_cast<const colour&>(aFill).red<double>(),
-						static_variant_cast<const colour&>(aFill).green<double>(),
-						static_variant_cast<const colour&>(aFill).blue<double>(),
-						static_variant_cast<const colour&>(aFill).alpha<double>()}} :
-			std::array <double, 4>{});
 
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.vertices() = rounded_rect_vertices(aRect, aRadius, true);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -744,19 +737,19 @@ namespace neogfx
 	{
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
-		auto vertices = circle_vertices(aCentre, aRadius, 0.0, true);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
-			std::array <double, 4>{ {
-					static_variant_cast<const colour&>(aFill).red<double>(),
-						static_variant_cast<const colour&>(aFill).green<double>(),
-						static_variant_cast<const colour&>(aFill).blue<double>(),
-						static_variant_cast<const colour&>(aFill).alpha<double>()}} :
-			std::array <double, 4>{});
 
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.vertices() = circle_vertices(aCentre, aRadius, 0.0, true);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -765,19 +758,19 @@ namespace neogfx
 	{
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
-		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
-			std::array <double, 4>{ {
-					static_variant_cast<const colour&>(aFill).red<double>(),
-						static_variant_cast<const colour&>(aFill).green<double>(),
-						static_variant_cast<const colour&>(aFill).blue<double>(),
-						static_variant_cast<const colour&>(aFill).alpha<double>()}} :
-			std::array <double, 4>{});
+		
+		iVertexArrays.vertices() = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
-
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -800,19 +793,19 @@ namespace neogfx
 				}
 				if (aFill.is<gradient>())
 					gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
-				auto vertices = aPath.to_vertices(aPath.paths()[i]);
-				std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
-					std::array <double, 4>{ {
-							static_variant_cast<const colour&>(aFill).red<double>(),
-								static_variant_cast<const colour&>(aFill).green<double>(),
-								static_variant_cast<const colour&>(aFill).blue<double>(),
-								static_variant_cast<const colour&>(aFill).alpha<double>()}} :
-					std::array <double, 4>{});
-				std::vector<std::array<double, 2>> texCoords(vertices.size());
 
-				opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+				iVertexArrays.vertices() = aPath.to_vertices(aPath.paths()[i]);
+				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+					std::array <uint8_t, 4>{ {
+							static_variant_cast<const colour&>(aFill).red(),
+								static_variant_cast<const colour&>(aFill).green(),
+								static_variant_cast<const colour&>(aFill).blue(),
+								static_variant_cast<const colour&>(aFill).alpha()}} :
+					std::array <uint8_t, 4>{});
+				iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+				iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size()));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, iVertexArrays.vertices().size()));
 				reset_clip();
 				if (aFill.is<gradient>())
 					gradient_off();
@@ -836,22 +829,22 @@ namespace neogfx
 				rect{ 
 					point{ min.x, min.y }, 
 					size{ max.x - min.y, max.y - min.y } });
-		vec2_list vertices;
-		vertices.reserve(aVertices.size());
-		vertices.insert(vertices.end(), aVertices.begin(), aVertices.end());
-		vertices.push_back(vertices[1]);
-		std::vector<std::array<double, 2>> texCoords(vertices.size());
-		std::vector<std::array<double, 4>> colours(vertices.size(), aFill.is<colour>() ?
-			std::array <double, 4>{ {
-					static_variant_cast<const colour&>(aFill).red<double>(),
-						static_variant_cast<const colour&>(aFill).green<double>(),
-						static_variant_cast<const colour&>(aFill).blue<double>(),
-						static_variant_cast<const colour&>(aFill).alpha<double>()}} :
-			std::array <double, 4>{});
 
-		opengl_standard_vertex_arrays sva{ iRenderingEngine.active_shader_program(), vertices, colours, texCoords };
+		iVertexArrays.vertices().clear();
+		for (auto const& v : aVertices)
+			iVertexArrays.vertices().push_back(xyz{ v[0], v[1] });
+		iVertexArrays.vertices().push_back(iVertexArrays.vertices()[1]);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+			std::array <uint8_t, 4>{ {
+					static_variant_cast<const colour&>(aFill).red(),
+						static_variant_cast<const colour&>(aFill).green(),
+						static_variant_cast<const colour&>(aFill).blue(),
+						static_variant_cast<const colour&>(aFill).alpha()}} :
+			std::array <uint8_t, 4>{});
+		iVertexArrays.instantiate(iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -979,40 +972,22 @@ namespace neogfx
 
 		const i_glyph_texture& glyphTexture = glyphFont->native_font_face().glyph_texture(aGlyph);
 
-		auto& vertices = iGlyphVertices;
-		auto& colours = iGlyphColours;
-		auto& textureCoords = iGlyphTextureCoords;
-
 		point glyphOrigin(aPoint.x + glyphTexture.placement().x, 
 			logical_coordinates().first.y < logical_coordinates().second.y ? 
 				aPoint.y + (glyphTexture.placement().y + -aFont.descender()) :
 				aPoint.y + aFont.height() - (glyphTexture.placement().y + -aFont.descender()) - glyphTexture.texture().extents().cy);
 
-		vertices.clear();
-		vertices.insert(vertices.begin(),
+		iVertexArrays.vertices().clear();
+		iVertexArrays.vertices().insert(iVertexArrays.vertices().begin(),
 		{
 			to_shader_vertex(glyphOrigin),
 			to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, 0.0 }),
 			to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, glyphTexture.texture().extents().cy }),
 			to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.texture().extents().cy })
 		});
-
-		colours.clear();
-		colours.resize(vertices.size(), std::array<double, 4>{{aColour.red<double>(), aColour.green<double>(), aColour.blue<double>(), aColour.alpha<double>()}});
-
-		textureCoords = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates());
-
-		/* todo: cache VBOs and use glBufferSubData(). */
-
-		opengl_buffer positionBuffer{ vertices };
-		opengl_buffer colourBuffer{ colours };
-		opengl_buffer textureCoordBuffer{ textureCoords };
-
-		opengl_vertex_array vertexArray;
-
-		opengl_vertex_attrib_array vertexPositionAttribArray{ positionBuffer, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()), "VertexPosition" };
-		opengl_vertex_attrib_array vertexColorAttribArray{ colourBuffer, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()), "VertexColor" };
-		opengl_vertex_attrib_array vertexTextureCoordAttribArray{ textureCoordBuffer, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()), "VertexTextureCoord" };
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array<uint8_t, 4>{{aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
+		iVertexArrays.texture_coords() = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates());
+		iVertexArrays.instantiate(iRenderingEngine.glyph_shader_program(aGlyph.subpixel()));
 
 		if (iActiveGlyphTexture != reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle()))
 		{
@@ -1037,7 +1012,7 @@ namespace neogfx
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 		disable_anti_alias daa(*this);
-		glCheck(glDrawArrays(GL_QUADS, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_QUADS, 0, iVertexArrays.vertices().size()));
 
 		return glyphTexture.texture().extents();
 	}
@@ -1067,15 +1042,15 @@ namespace neogfx
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(aTexture.native_texture()->handle())));
 		if (!aTexture.native_texture()->is_resident())
 			throw texture_not_resident();
-		typedef xyz vertex;
-		std::vector<vertex> vertices;
+
+		iVertexArrays.vertices().clear();
 		for (auto& v : aTextureMap)
-			vertices.push_back(vertex{ v.x, v.y });
-		auto texCoords = texture_vertices(aTexture.storage_extents(), textureRect + point{1.0, 1.0}, logical_coordinates());
+			iVertexArrays.vertices().push_back(vertex{ v.x, v.y });
+		iVertexArrays.texture_coords() = texture_vertices(aTexture.storage_extents(), textureRect + point{1.0, 1.0}, logical_coordinates());
 		colour c{0xFF, 0xFF, 0xFF, 0xFF};
 		if (aColour != boost::none)
 			c = *aColour;
-		std::vector<std::array<double, 4>> colours{ aTextureMap.size(), std::array<double, 4>{ {c.red<double>(), c.green<double>(), c.blue<double>(), c.alpha<double>()}} };
+		iVertexArrays.colours().assign(aTextureMap.size(), std::array<uint8_t, 4>{ {c.red(), c.green(), c.blue(), c.alpha()}});
 
 		use_shader_program usp{ *this, iRenderingEngine, aShaderEffect == shader_effect::Monochrome ?
 			iRenderingEngine.monochrome_shader_program() :
@@ -1083,15 +1058,7 @@ namespace neogfx
 
 		iRenderingEngine.active_shader_program().set_uniform_variable("tex", 1);
 
-		opengl_buffer positionBuffer{ vertices };
-		opengl_buffer colourBuffer{ colours };
-		opengl_buffer textureCoordBuffer{ texCoords };
-
-		opengl_vertex_array vertexArray;
-
-		opengl_vertex_attrib_array vertexPositionAttribArray{ positionBuffer, iRenderingEngine.monochrome_shader_program(), "VertexPosition" };
-		opengl_vertex_attrib_array vertexColorAttribArray{ colourBuffer, iRenderingEngine.monochrome_shader_program(), "VertexColor" };
-		opengl_vertex_attrib_array vertexTextureCoordAttribArray{ textureCoordBuffer, iRenderingEngine.monochrome_shader_program(), "VertexTextureCoord" };
+		iVertexArrays.instantiate(iRenderingEngine.monochrome_shader_program());
 
 		glCheck(glDrawArrays(GL_QUADS, 0, 4));
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));

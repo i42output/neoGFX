@@ -45,17 +45,19 @@ namespace neogfx
 		GLuint iHandle;
 	};
 
+	template <typename T>
 	class opengl_buffer
 	{
 	public:
-		template <typename ContainerT>
-		opengl_buffer(const ContainerT& aData) :
-			iElementSize{ aData[0].size() }
+		typedef T value_type;
+	public:
+		opengl_buffer(std::size_t aSize, std::size_t aElementSize) :
+			iSize{ aSize }, iElementSize { aElementSize	}
 		{
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			glCheck(glGenBuffers(1, &iHandle));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
-			glCheck(glBufferData(GL_ARRAY_BUFFER, aData.size() * sizeof(aData[0]), &aData[0], GL_STREAM_DRAW));
+			glCheck(glBufferData(GL_ARRAY_BUFFER, iSize * iElementSize * sizeof(value_type), nullptr, GL_DYNAMIC_DRAW));
 		}
 		~opengl_buffer()
 		{
@@ -63,6 +65,10 @@ namespace neogfx
 			glCheck(glDeleteBuffers(1, &iHandle));
 		}
 	public:
+		std::size_t size() const
+		{
+			return iSize;
+		}
 		std::size_t element_size() const
 		{
 			return iElementSize;
@@ -72,21 +78,25 @@ namespace neogfx
 			return iHandle;
 		}
 	private:
+		const std::size_t iSize;
 		const std::size_t iElementSize;
 		GLint iPreviousBindingHandle;
 		GLuint iHandle;
 	};
 
+	template <typename T>
 	class opengl_vertex_attrib_array
 	{
 	public:
-		opengl_vertex_attrib_array(opengl_buffer& aBuffer, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
+		typedef T value_type;
+	public:
+		opengl_vertex_attrib_array(opengl_buffer<value_type>& aBuffer, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
 		{
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			GLuint index = reinterpret_cast<GLuint>(aShaderProgram.variable(aVariableName));
 			glCheck(glEnableVertexAttribArray(index));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
-			glCheck(glVertexAttribPointer(index, aBuffer.element_size(), GL_DOUBLE, GL_FALSE, 0, 0));
+			glCheck(glVertexAttribPointer(index, aBuffer.element_size(), std::is_same<value_type, double>() ? GL_DOUBLE : GL_UNSIGNED_BYTE, GL_FALSE, 0, 0));
 		}
 		~opengl_vertex_attrib_array()
 		{
@@ -99,23 +109,107 @@ namespace neogfx
 	class opengl_standard_vertex_arrays
 	{
 	public:
-		template <typename VertexContainer, typename ColourContainer, typename TextureCoordContainer>
-		opengl_standard_vertex_arrays(const i_rendering_engine::i_shader_program& aShaderProgram,
-			const VertexContainer& aVertices, const ColourContainer& aColours, const TextureCoordContainer& aTextureCoordinates) :
-			iPositionBuffer{ aVertices }, iColourBuffer{ aColours }, iTextureCoordBuffer{ aTextureCoordinates },
-			iVertexPositionAttribArray{ iPositionBuffer, aShaderProgram, "VertexPosition" },
-			iVertexColorAttribArray{ iColourBuffer, aShaderProgram, "VertexColor" },
-			iVertexTextureCoordAttribArray{ iTextureCoordBuffer, aShaderProgram, "VertexTextureCoord" }
+		typedef std::vector<std::array<double, 3>> vertex_array;
+		typedef std::vector<std::array<uint8_t, 4>> colour_array;
+		typedef std::vector<std::array<double, 2>> texture_coord_array;
+	private:
+		class buffer_instance
+		{
+		public:
+			buffer_instance(std::size_t aSize) :
+				iSize{ aSize },
+				iPositionBuffer{ aSize, 3 },
+				iColourBuffer{ aSize, 4 },
+				iTextureCoordBuffer{ aSize, 2 }
+			{
+			}
+		public:
+			std::size_t size() const
+			{
+				return iSize;
+			}
+			opengl_buffer<double>& position_buffer()
+			{ 
+				return iPositionBuffer; 
+			}
+			opengl_buffer<uint8_t>& colour_buffer()
+			{
+				return iColourBuffer;
+			}
+			opengl_buffer<double>& texture_coord_buffer()
+			{
+				return iTextureCoordBuffer;
+			}
+		private:
+			std::size_t iSize;
+			opengl_buffer<double> iPositionBuffer;
+			opengl_buffer<uint8_t> iColourBuffer;
+			opengl_buffer<double> iTextureCoordBuffer;
+		};
+		class instance
+		{
+		public:
+			instance(const i_rendering_engine::i_shader_program& aShaderProgram, opengl_buffer<double>& aPositionBuffer, opengl_buffer<uint8_t>& aColourBuffer, opengl_buffer<double>& aTextureCoordBuffer) :
+				iVertexPositionAttribArray{ aPositionBuffer, aShaderProgram, "VertexPosition" },
+				iVertexColorAttribArray{ aColourBuffer, aShaderProgram, "VertexColor" },
+				iVertexTextureCoordAttribArray{ aTextureCoordBuffer, aShaderProgram, "VertexTextureCoord" }
+			{
+			}
+		private:
+			opengl_vertex_array iVao;
+			opengl_vertex_attrib_array<double> iVertexPositionAttribArray;
+			opengl_vertex_attrib_array<uint8_t> iVertexColorAttribArray;
+			opengl_vertex_attrib_array<double> iVertexTextureCoordAttribArray;
+		};
+	public:
+		opengl_standard_vertex_arrays() :
+			iShaderProgram{ nullptr },
+			iBufferInstance{ std::make_unique<buffer_instance>(32) }
 		{
 		}
+	public:
+		std::vector<std::array<double, 3>>& vertices()
+		{
+			return iVertices;
+		}
+		std::vector<std::array<uint8_t, 4>>& colours()
+		{
+			return iColours;
+		}
+		std::vector<std::array<double, 2>>& texture_coords()
+		{
+			return iTextureCoords;
+		}
+		void instantiate(const i_rendering_engine::i_shader_program& aShaderProgram)
+		{
+			if (buffers().size() < vertices().size())
+			{
+				iInstance.reset();
+				iBufferInstance.reset();
+				iBufferInstance = std::make_unique<buffer_instance>(vertices().size() * 2);
+			}
+			glCheck(glNamedBufferSubData(buffers().position_buffer().handle(), 0, vertices().size() * sizeof(vertices()[0]), &vertices()[0][0]));
+			glCheck(glNamedBufferSubData(buffers().colour_buffer().handle(), 0, colours().size() * sizeof(colours()[0]), &colours()[0][0]));
+			glCheck(glNamedBufferSubData(buffers().texture_coord_buffer().handle(), 0, texture_coords().size() * sizeof(texture_coords()[0]), &texture_coords()[0][0]));
+			if (iInstance.get() == nullptr || iShaderProgram != &aShaderProgram)
+			{
+				iShaderProgram = &aShaderProgram;
+				iInstance.reset();
+				iInstance = std::make_unique<instance>(aShaderProgram, buffers().position_buffer(), buffers().colour_buffer(), buffers().texture_coord_buffer());
+			}
+		}
 	private:
-		opengl_buffer iPositionBuffer;
-		opengl_buffer iColourBuffer;
-		opengl_buffer iTextureCoordBuffer;
-		opengl_vertex_array iVertexArray;
-		opengl_vertex_attrib_array iVertexPositionAttribArray;
-		opengl_vertex_attrib_array iVertexColorAttribArray;
-		opengl_vertex_attrib_array iVertexTextureCoordAttribArray;
+		buffer_instance& buffers()
+		{
+			return *iBufferInstance;
+		}
+	private:
+		const i_rendering_engine::i_shader_program* iShaderProgram;
+		std::unique_ptr<buffer_instance> iBufferInstance;
+		std::unique_ptr<instance> iInstance;
+		std::vector<std::array<double, 3>> iVertices;
+		std::vector<std::array<uint8_t, 4>> iColours;
+		std::vector<std::array<double, 2>> iTextureCoords;
 	};
 
 	class use_shader_program

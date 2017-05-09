@@ -147,12 +147,10 @@ namespace neogfx
 		mutable std::pair<vec2, vec2> iLogicalCoordinates;
 		neogfx::smoothing_mode iSmoothingMode; 
 		std::vector<logical_operation> iLogicalOperationStack;
+		opengl_standard_vertex_arrays iVertexArrays;
 		std::list<use_shader_program> iShaderProgramStack;
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;
-		mutable std::vector<vertex> iGlyphVertices;
-		mutable std::vector<std::array<GLdouble, 2>> iGlyphTextureCoords;
-		mutable std::vector<std::array<GLdouble, 4>> iGlyphColours;
 		struct cluster
 		{
 			std::string::size_type from;
