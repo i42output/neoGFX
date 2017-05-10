@@ -114,7 +114,6 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_UNDEFINED,
@@ -147,7 +146,6 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_CENTERED,
@@ -180,7 +178,6 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			aPosition.x,
@@ -213,7 +210,6 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_UNDEFINED,
@@ -246,7 +242,6 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_CENTERED,
@@ -279,7 +274,6 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, iStyle & window::DoubleBuffered ? 1 : 0);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			aPosition.x,
@@ -831,7 +825,7 @@ namespace neogfx
 
 	void sdl_window::display()
 	{
-		if (iStyle & window::DoubleBuffered)
+		if (rendering_engine().double_buffering())
 			SDL_GL_SwapWindow(iHandle);
 		else
 			glCheck(glFlush());

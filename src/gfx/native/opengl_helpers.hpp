@@ -188,9 +188,16 @@ namespace neogfx
 				iBufferInstance.reset();
 				iBufferInstance = std::make_unique<buffer_instance>(vertices().size() * 2);
 			}
-			glCheck(glNamedBufferSubData(buffers().position_buffer().handle(), 0, vertices().size() * sizeof(vertices()[0]), &vertices()[0][0]));
-			glCheck(glNamedBufferSubData(buffers().colour_buffer().handle(), 0, colours().size() * sizeof(colours()[0]), &colours()[0][0]));
-			glCheck(glNamedBufferSubData(buffers().texture_coord_buffer().handle(), 0, texture_coords().size() * sizeof(texture_coords()[0]), &texture_coords()[0][0]));
+			void* data;
+			glCheck(data = glMapNamedBuffer(buffers().position_buffer().handle(), GL_WRITE_ONLY));
+			std::memcpy(data, &vertices()[0][0], vertices().size() * sizeof(vertices()[0]));
+			glCheck(glUnmapNamedBuffer(buffers().position_buffer().handle()));
+			glCheck(data = glMapNamedBuffer(buffers().colour_buffer().handle(), GL_WRITE_ONLY));
+			std::memcpy(data, &colours()[0][0], colours().size() * sizeof(colours()[0]));
+			glCheck(glUnmapNamedBuffer(buffers().colour_buffer().handle()));
+			glCheck(data = glMapNamedBuffer(buffers().texture_coord_buffer().handle(), GL_WRITE_ONLY));
+			std::memcpy(data, &texture_coords()[0][0], texture_coords().size() * sizeof(texture_coords()[0]));
+			glCheck(glUnmapNamedBuffer(buffers().texture_coord_buffer().handle()));
 			if (iInstance.get() == nullptr || iShaderProgram != &aShaderProgram)
 			{
 				iShaderProgram = &aShaderProgram;

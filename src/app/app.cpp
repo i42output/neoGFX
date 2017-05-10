@@ -86,7 +86,7 @@ namespace neogfx
 		iBasicServices{ aServiceFactory.create_basic_services(*this) },
 		iKeyboard{ aServiceFactory.create_keyboard() },
 		iClipboard{ new neogfx::clipboard(basic_services().system_clipboard()) },
-		iRenderingEngine{ aServiceFactory.create_rendering_engine(iProgramOptions.renderer(), basic_services(), keyboard()) },
+		iRenderingEngine{ aServiceFactory.create_rendering_engine(iProgramOptions.renderer(), iProgramOptions.double_buffering(), basic_services(), keyboard()) },
 		iSurfaceManager{ new neogfx::surface_manager(basic_services(), *iRenderingEngine) },
 		iCurrentStyle{ iStyles.begin() },
 		iActionFileNew{ add_action("&New...").set_shortcut("Ctrl+Shift+N") },

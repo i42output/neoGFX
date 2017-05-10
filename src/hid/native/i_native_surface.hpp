@@ -26,6 +26,7 @@
 
 namespace neogfx
 {
+	class i_rendering_engine;
 	class i_native_graphics_context;
 	class i_widget;
 
@@ -63,7 +64,6 @@ namespace neogfx
 		virtual void update_mouse_cursor() = 0;
 	public:
 		virtual uint64_t frame_counter() const = 0;
-		virtual bool using_frame_buffer() const = 0;
 		virtual void limit_frame_rate(uint32_t aFps) = 0;
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect) = 0;

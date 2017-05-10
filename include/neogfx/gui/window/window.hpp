@@ -51,7 +51,6 @@ namespace neogfx
 			HideOnParentClick	= 0x040000,
 			InitiallyHidden		= 0x080000,
 			Weak				= 0x100000,
-			DoubleBuffered		= 0x200000,
 			Default				= Titlebar | MinimizeBox | MaximizeBox | Resize | Close
 		};
 	public:

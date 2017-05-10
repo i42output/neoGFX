@@ -103,18 +103,12 @@ namespace neogfx
 			{
 				dialog::paint_non_client(aGraphicsContext);
 				auto backgroundRect = client_rect() + (origin() - origin(true));
-				if (surface().native_surface().using_frame_buffer())
-					for (const auto& ur : update_rects())
-					{
-						aGraphicsContext.scissor_on(ur);
-						draw_alpha_background(aGraphicsContext, backgroundRect);
-						aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));
-						aGraphicsContext.scissor_off();
-					}
-				else
+				for (const auto& ur : update_rects())
 				{
+					aGraphicsContext.scissor_on(ur);
 					draw_alpha_background(aGraphicsContext, backgroundRect);
 					aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));
+					aGraphicsContext.scissor_off();
 				}
 			}
 		private:

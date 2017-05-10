@@ -50,7 +50,6 @@ namespace neogfx
 		virtual void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates);
 	public:
 		virtual uint64_t frame_counter() const;
-		virtual bool using_frame_buffer() const;
 		virtual void limit_frame_rate(uint32_t aFps);
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect);

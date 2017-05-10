@@ -45,13 +45,14 @@ namespace neogfx
 		}
 	};
 
-	sdl_renderer::sdl_renderer(neogfx::renderer aRenderer, i_basic_services& aBasicServices, i_keyboard& aKeyboard) :
+	sdl_renderer::sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard) :
 		opengl_renderer(aRenderer),
+		iDoubleBuffering(aDoubleBufferedWindows),
 		iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), 
 		iContext(nullptr), iActiveContextSurface(nullptr)
 	{
 		sdl_instance::instantiate();
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, aDoubleBufferedWindows ? 1 : 0);
 		switch (aRenderer)
 		{
 		case renderer::Vulkan:
@@ -85,6 +86,11 @@ namespace neogfx
 	sdl_renderer::~sdl_renderer()
 	{
 		deactivate_context();
+	}
+
+	bool sdl_renderer::double_buffering() const
+	{
+		return iDoubleBuffering;
 	}
 
 	const i_native_surface* sdl_renderer::active_context_surface() const

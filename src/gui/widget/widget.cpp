@@ -861,10 +861,7 @@ namespace neogfx
 
 	bool widget::requires_update() const
 	{
-		if (!surface().native_surface().using_frame_buffer())
-			return true;
-		else
-			return !iUpdateRects.empty();
+		return !iUpdateRects.empty();
 	}
 
 	rect widget::update_rect() const
@@ -935,11 +932,8 @@ namespace neogfx
 	{
 		if (has_background_colour() || !transparent_background())
 		{
-			if (surface().native_surface().using_frame_buffer())
-				for (const auto& ur : iUpdateRects)
-					aGraphicsContext.fill_rect(ur + (origin() - origin(true)), background_colour());
-			else
-				aGraphicsContext.fill_rect(client_rect() + (origin() - origin(true)), background_colour());
+			for (const auto& ur : iUpdateRects)
+				aGraphicsContext.fill_rect(ur + (origin() - origin(true)), background_colour());
 		}
 	}
 

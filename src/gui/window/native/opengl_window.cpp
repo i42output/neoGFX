@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <numeric>
 #include <neogfx/app/app.hpp>
 #include "opengl_window.hpp"
 #ifdef _WIN32
@@ -83,11 +84,6 @@ namespace neogfx
 	uint64_t opengl_window::frame_counter() const
 	{
 		return iFrameCounter;
-	}
-
-	bool opengl_window::using_frame_buffer() const
-	{
-		return true;
 	}
 
 	void opengl_window::limit_frame_rate(uint32_t aFps)
@@ -198,6 +194,12 @@ namespace neogfx
 		iRendering = false;
 
 		rendering_finished.trigger();
+
+		static std::deque<double> speed;
+		speed.push_back(1000.0 / (app::instance().program_elapsed_ms() - now));
+		if (speed.size() > 25)
+			speed.pop_front();
+		std::cout << std::accumulate(speed.begin(), speed.end(), 0.0) / speed.size() << std::endl;
 	}
 
 	bool opengl_window::is_rendering() const

@@ -89,6 +89,7 @@ namespace neogfx
 		struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::i_rendering_engine::shader_program_error: " + aError) {} };
 	public:
 		virtual neogfx::renderer renderer() const = 0;
+		virtual bool double_buffering() const = 0;
 		virtual void initialize() = 0;
 		virtual const i_native_surface* active_context_surface() const = 0;
 		virtual void activate_context(const i_native_surface& aSurface) = 0;

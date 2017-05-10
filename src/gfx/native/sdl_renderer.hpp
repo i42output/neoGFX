@@ -37,9 +37,10 @@ namespace neogfx
 		struct failed_to_activate_gl_context : std::runtime_error { failed_to_activate_gl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_activate_gl_context: " + aReason) {} };
 		struct failed_to_create_system_cache_window : std::runtime_error { failed_to_create_system_cache_window(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_create_system_cache_window: " + aReason) {} };
 	public:
-		sdl_renderer(neogfx::renderer aRenderer, i_basic_services& aBasicServices, i_keyboard& aKeyboard);
+		sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard);
 		~sdl_renderer();
 	public:
+		virtual bool double_buffering() const;
 		virtual const i_native_surface* active_context_surface() const;
 		virtual void activate_context(const i_native_surface& aSurface);
 		virtual void deactivate_context();
@@ -58,6 +59,7 @@ namespace neogfx
 	private:
 		bool queue_events();
 	private:
+		bool iDoubleBuffering;
 		i_basic_services& iBasicServices;
 		i_keyboard& iKeyboard;
 		void* iSystemCacheWindowHandle;

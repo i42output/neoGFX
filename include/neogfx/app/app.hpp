@@ -64,7 +64,8 @@ namespace neogfx
 					("debug", "open debug console")
 					("vulkan", "use Vulkan renderer")
 					("directx", "use DirectX (ANGLE) renderer")
-					("software", "use software renderer");
+					("software", "use software renderer")
+					("double", "enable window double buffering");
 				boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), iOptions);
 				if (iOptions.count("vulkan") + iOptions.count("directx") + iOptions.count("software") > 1)
 					throw invalid_options("more than one renderer specified");
@@ -80,6 +81,10 @@ namespace neogfx
 					return neogfx::renderer::Software;
 				else
 					return neogfx::renderer::OpenGL;
+			}
+			bool double_buffering() const
+			{
+				return iOptions.count("double") == 1;
 			}
 			const boost::program_options::variables_map& options() const
 			{
