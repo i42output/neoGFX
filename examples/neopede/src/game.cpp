@@ -36,21 +36,6 @@ public:
 		physics().set_angle_radians(aParent.physics().angle_radians());
 		physics().set_velocity(tm * ng::vec3{0.0, 360.0, 0.0} + aParent.physics().velocity());
 	}
-public:
-	virtual std::size_t vertex_count(bool aIncludeCentre) const
-	{
-		return aIncludeCentre ? 5 : 4;
-	}
-	virtual ng::vec3_list vertices(bool aIncludeCentre)
-	{
-		ng::vec3_list result = shape::vertices(aIncludeCentre);
-		auto r = bounding_box();
-		result.push_back(r.top_left().to_vector3());
-		result.push_back(r.top_right().to_vector3());
-		result.push_back(r.bottom_right().to_vector3());
-		result.push_back(r.bottom_left().to_vector3());
-		return result;
-	}
 };
 
 void create_game(ng::i_layout& aLayout)

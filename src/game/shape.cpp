@@ -277,10 +277,7 @@ namespace neogfx
 		vec3_list result;
 		result.reserve(vertex_count(aIncludeCentre));
 		if (aIncludeCentre)
-		{
-			point centre{ position() - origin() };
-			result.push_back(vec3{ centre.x, centre.y });
-		}
+			result.push_back(origin().to_vector3());
 		return result;
 	}
 

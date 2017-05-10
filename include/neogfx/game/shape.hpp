@@ -36,16 +36,16 @@ namespace neogfx
 		frame(const i_texture& aTexture, const optional_rect& aTextureRect) : iTexture(aTexture), iTextureRect(aTextureRect) {}
 		frame(const i_texture& aTexture, const optional_rect& aTextureRect, const mat33& aTransformation) : iTexture(aTexture), iTextureRect(aTextureRect), iTransformation(aTransformation) {}
 	public:
-		virtual bool has_extents() const { return iTextureRect != boost::none; }
-		virtual size extents() const { return iTextureRect != boost::none ? iTextureRect->extents() : size{}; }
-		virtual const optional_colour& colour() const { return iColour; }
-		virtual void set_colour(const optional_colour& aColour) { iColour = aColour; }
-		virtual const optional_texture& texture() const { return iTexture; }
-		virtual void set_texture(const optional_texture& aTexture) { iTexture = aTexture; }
-		virtual const optional_rect& texture_rect() const { return iTextureRect; }
-		virtual void set_texture_rect(const optional_rect& aTextureRect) { iTextureRect = aTextureRect; }
-		virtual const optional_mat33& transformation() const { return iTransformation; }
-		virtual void set_transformation(const optional_mat33& aTransformation) { iTransformation = aTransformation; }
+		bool has_extents() const override { return iTextureRect != boost::none; }
+		size extents() const override { return iTextureRect != boost::none ? iTextureRect->extents() : size{}; }
+		const optional_colour& colour() const override { return iColour; }
+		void set_colour(const optional_colour& aColour) override { iColour = aColour; }
+		const optional_texture& texture() const override { return iTexture; }
+		void set_texture(const optional_texture& aTexture) override { iTexture = aTexture; }
+		const optional_rect& texture_rect() const override { return iTextureRect; }
+		void set_texture_rect(const optional_rect& aTextureRect) override { iTextureRect = aTextureRect; }
+		const optional_mat33& transformation() const override { return iTransformation; }
+		void set_transformation(const optional_mat33& aTransformation) override { iTransformation = aTransformation; }
 	private:
 		optional_colour iColour;
 		optional_texture iTexture;
@@ -65,51 +65,51 @@ namespace neogfx
 		shape(const shape& aOther);
 		// container/buddy
 	public:
-		virtual i_shape_container& container() const;
-		virtual bool has_buddy() const;
-		virtual i_shape& buddy() const;
-		virtual void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{});
-		virtual const vec3& buddy_offset() const;
-		virtual void set_buddy_offset(const vec3& aBuddyOffset);
-		virtual void unset_buddy();
+		i_shape_container& container() const override;
+		bool has_buddy() const override;
+		i_shape& buddy() const override;
+		void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{}) override;
+		const vec3& buddy_offset() const override;
+		void set_buddy_offset(const vec3& aBuddyOffset) override;
+		void unset_buddy() override;
 		// animation
 	public:
-		virtual frame_index frame_count() const;
-		virtual const i_frame& frame(frame_index aFrameIndex) const;
-		virtual i_frame& frame(frame_index aFrameIndex);
-		virtual void add_frame(i_frame& aFrame);
-		virtual void add_frame(std::shared_ptr<i_frame> aFrame);
-		virtual void replace_frame(frame_index aFrameIndex, i_frame& aFrame);
-		virtual void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame);
-		virtual void remove_frame(frame_index aFrameIndex);
-		virtual void set_texture_rect_for_all_frames(const optional_rect& aTextureRect);
+		frame_index frame_count() const override;
+		const i_frame& frame(frame_index aFrameIndex) const override;
+		i_frame& frame(frame_index aFrameIndex) override;
+		void add_frame(i_frame& aFrame) override;
+		void add_frame(std::shared_ptr<i_frame> aFrame) override;
+		void replace_frame(frame_index aFrameIndex, i_frame& aFrame) override;
+		void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame) override;
+		void remove_frame(frame_index aFrameIndex) override;
+		void set_texture_rect_for_all_frames(const optional_rect& aTextureRect) override;
 		// geometry
 	public:
-		virtual const animation_frames& animation() const;
-		virtual const i_frame& current_frame() const;
-		virtual i_frame& current_frame();
-		virtual point origin() const;
-		virtual point position() const;
-		virtual vec3 position_3D() const;
-		virtual rect bounding_box() const;
-		virtual const vec2& scale() const;
-		virtual bool has_transformation_matrix() const;
-		virtual mat33 transformation_matrix() const;
-		virtual void set_animation(const animation_frames& aAnimation);
-		virtual void set_current_frame(frame_index aFrameIndex);
-		virtual void set_origin(const point& aOrigin);
-		virtual void set_position(const point& aPosition);
-		virtual void set_position_3D(const vec3& aPosition3D);
-		virtual void set_bounding_box(const optional_rect& aBoundingBox);
-		virtual void set_scale(const vec2& aScale);
-		virtual void set_transformation_matrix(const optional_matrix33& aTransformationMatrix);
+		const animation_frames& animation() const override;
+		const i_frame& current_frame() const override;
+		i_frame& current_frame();
+		point origin() const override;
+		point position() const override;
+		vec3 position_3D() const override;
+		rect bounding_box() const override;
+		const vec2& scale() const override;
+		bool has_transformation_matrix() const override;
+		mat33 transformation_matrix() const override;
+		void set_animation(const animation_frames& aAnimation) override;
+		void set_current_frame(frame_index aFrameIndex) override;
+		void set_origin(const point& aOrigin) override;
+		void set_position(const point& aPosition) override;
+		void set_position_3D(const vec3& aPosition3D) override;
+		void set_bounding_box(const optional_rect& aBoundingBox) override;
+		void set_scale(const vec2& aScale) override;
+		void set_transformation_matrix(const optional_matrix33& aTransformationMatrix) override;
 		// rendering
 	public:
-		virtual std::size_t vertex_count(bool aIncludeCentre = false) const;
-		virtual vec3_list vertices(bool aIncludeCentre = false) const;
-		virtual vec3_list transformed_vertices(bool aIncludeCentre = false) const;
-		virtual bool update(const optional_time_point& aNow = optional_time_point());
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		std::size_t vertex_count(bool aIncludeCentre = false) const override;
+		vec3_list vertices(bool aIncludeCentre = false) const override;
+		vec3_list transformed_vertices(bool aIncludeCentre = false) const override;
+		bool update(const optional_time_point& aNow = optional_time_point()) override;
+		void paint(graphics_context& aGraphicsContext) const override;
 		// attributes
 	private:
 		i_shape_container& iContainer;
