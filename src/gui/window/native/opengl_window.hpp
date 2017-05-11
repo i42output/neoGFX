@@ -51,6 +51,7 @@ namespace neogfx
 	public:
 		virtual uint64_t frame_counter() const;
 		virtual void limit_frame_rate(uint32_t aFps);
+		virtual double fps() const;
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect);
 		virtual void render(bool aOOBRequest = false);
@@ -82,6 +83,7 @@ namespace neogfx
 		uint64_t iFrameCounter;
 		boost::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
+		std::deque<double> iFpsData;
 		bool iRendering;
 		bool iDestroying;
 	};

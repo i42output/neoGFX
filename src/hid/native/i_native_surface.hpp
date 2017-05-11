@@ -65,6 +65,7 @@ namespace neogfx
 	public:
 		virtual uint64_t frame_counter() const = 0;
 		virtual void limit_frame_rate(uint32_t aFps) = 0;
+		virtual double fps() const = 0;
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect) = 0;
 		virtual void render(bool aOOBRequest = false) = 0;

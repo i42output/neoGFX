@@ -180,7 +180,7 @@ namespace neogfx
 		{
 			return iTextureCoords;
 		}
-		void instantiate(const i_rendering_engine::i_shader_program& aShaderProgram)
+		void instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
 		{
 			if (buffers().size() < vertices().size())
 			{
@@ -204,6 +204,8 @@ namespace neogfx
 				iInstance.reset();
 				iInstance = std::make_unique<instance>(aShaderProgram, buffers().position_buffer(), buffers().colour_buffer(), buffers().texture_coord_buffer());
 			}
+			if (iShaderProgram->has_projection_matrix())
+				iShaderProgram->set_projection_matrix(aGraphicsContext);
 		}
 	private:
 		buffer_instance& buffers()
@@ -211,7 +213,7 @@ namespace neogfx
 			return *iBufferInstance;
 		}
 	private:
-		const i_rendering_engine::i_shader_program* iShaderProgram;
+		i_rendering_engine::i_shader_program* iShaderProgram;
 		std::unique_ptr<buffer_instance> iBufferInstance;
 		std::unique_ptr<instance> iInstance;
 		std::vector<std::array<double, 3>> iVertices;

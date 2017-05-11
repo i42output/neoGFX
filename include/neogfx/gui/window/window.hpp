@@ -31,6 +31,8 @@ namespace neogfx
 	class window : public i_window, public scrollable_widget
 	{
 	public:
+		event<graphics_context&> paint_overlay;
+	public:
 		enum style_e : uint32_t
 		{
 			Invalid				= 0x000000,
@@ -70,6 +72,7 @@ namespace neogfx
 	public:
 		uint32_t style() const;
 		void set_style(uint32_t aStyle);
+		double fps() const;
 	public:
 		virtual bool is_root() const;
 		virtual bool can_defer_layout() const;

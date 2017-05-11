@@ -103,6 +103,19 @@ int main(int argc, char* argv[])
 
 		ng::window window(ng::size{ 700, 700 });
 
+		bool showFps = false;
+		auto fpsFont = window.font().with_size(18);
+		window.paint_overlay([&showFps, &window, fpsFont](ng::graphics_context& aGc)
+		{
+			if (showFps)
+			{
+				std::ostringstream oss;
+				oss << window.fps() << " FPS";
+				aGc.fill_rect(ng::rect{ 100, 100, 128, 32 }, ng::colour::DarkBlue);
+				aGc.draw_text(ng::point{ 100, 100 }, oss.str(), fpsFont, ng::colour::White);
+			}
+		});
+
 		ng::vertical_layout layout0(window);
 
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
@@ -335,12 +348,14 @@ int main(int argc, char* argv[])
 		});
 		ng::check_box columns(layoutRadiosAndChecks, "Columns");
 		ng::check_box groupBoxCheckable(layoutRadiosAndChecks, "Group Box Checkable");
-		groupBoxCheckable.checked([&groupBox]()
+		groupBoxCheckable.checked([&showFps, &groupBox]()
 		{
+			showFps = true;
 			groupBox.set_checkable(true);
 		});
-		groupBoxCheckable.unchecked([&groupBox]()
+		groupBoxCheckable.unchecked([&showFps, &groupBox]()
 		{
+			showFps = false;
 			groupBox.set_checkable(false);
 		});
 		ng::gradient_widget gw(layoutRadiosAndChecks);

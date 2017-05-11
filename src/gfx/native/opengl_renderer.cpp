@@ -110,6 +110,28 @@ namespace neogfx
 		return iHasProjectionMatrix;
 	}
 
+	void opengl_renderer::shader_program::set_projection_matrix(const i_native_graphics_context& aGraphicsContext)
+	{
+		auto const& logicalCoordinates = aGraphicsContext.logical_coordinates();
+		if (iLogicalCoordinates != logicalCoordinates)
+		{
+			iLogicalCoordinates = logicalCoordinates;
+			double left = logicalCoordinates.first.x;
+			double right = logicalCoordinates.second.x;
+			double bottom = logicalCoordinates.first.y;
+			double top = logicalCoordinates.second.y;
+			double zFar = 1.0;
+			double zNear = -1.0;
+			mat44 orthoMatrix = mat44{
+				{ 2.0 / (right - left), 0.0, 0.0, -(right + left) / (right - left) },
+				{ 0.0, 2.0 / (top - bottom), 0.0, -(top + bottom) / (top - bottom) },
+				{ 0.0, 0.0, -2.0 / (zFar - zNear), -(zFar + zNear) / (zFar - zNear) },
+				{ 0.0, 0.0, 0.0, 1.0 } }.transposed();
+			set_uniform_matrix("uProjectionMatrix", orthoMatrix);
+		}
+	}
+
+
 	void* opengl_renderer::shader_program::variable(const std::string& aVariableName) const
 	{
 		auto v = iVariables.find(aVariableName);
@@ -545,21 +567,7 @@ namespace neogfx
 					glCheck(glUseProgram(reinterpret_cast<GLuint>(iActiveProgram->handle())));
 				}
 				if (iActiveProgram->has_projection_matrix())
-				{
-					const auto& logicalCoordinates = aGraphicsContext.logical_coordinates();
-					double left = logicalCoordinates.first.x;
-					double right = logicalCoordinates.second.x;
-					double bottom = logicalCoordinates.first.y;
-					double top = logicalCoordinates.second.y;
-					double zFar = 1.0;
-					double zNear = -1.0;
-					mat44 orthoMatrix = mat44{
-						{ 2.0 / (right - left), 0.0, 0.0, -(right + left) / (right - left) },
-						{ 0.0, 2.0 / (top - bottom), 0.0, -(top + bottom) / (top - bottom) },
-						{ 0.0, 0.0, -2.0 / (zFar - zNear), -(zFar + zNear) / (zFar - zNear) },
-						{ 0.0, 0.0, 0.0, 1.0 } }.transposed();
-					iActiveProgram->set_uniform_matrix("uProjectionMatrix", orthoMatrix);
-				}
+					iActiveProgram->set_projection_matrix(aGraphicsContext);
 				return;
 			}
 		throw shader_program_not_found();

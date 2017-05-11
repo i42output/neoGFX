@@ -68,6 +68,7 @@ namespace neogfx
 		public:
 			virtual void* handle() const = 0;
 			virtual bool has_projection_matrix() const = 0;
+			virtual void set_projection_matrix(const i_native_graphics_context& aGraphicsContext) = 0;
 			virtual void* variable(const std::string& aVariableName) const = 0;
 			virtual void set_uniform_variable(const std::string& aName, float aValue) = 0;
 			virtual void set_uniform_variable(const std::string& aName, double aValue) = 0;

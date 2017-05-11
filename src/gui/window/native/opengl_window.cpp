@@ -91,6 +91,11 @@ namespace neogfx
 		iFrameRate = aFps;
 	}
 
+	double opengl_window::fps() const
+	{
+		return std::accumulate(iFpsData.begin(), iFpsData.end(), 0.0) / iFpsData.size();
+	}
+
 	void opengl_window::invalidate(const rect& aInvalidatedRect)
 	{
 		if (aInvalidatedRect.cx != 0.0 && aInvalidatedRect.cy != 0.0 && 
@@ -195,11 +200,9 @@ namespace neogfx
 
 		rendering_finished.trigger();
 
-		static std::deque<double> speed;
-		speed.push_back(1000.0 / (app::instance().program_elapsed_ms() - now));
-		if (speed.size() > 25)
-			speed.pop_front();
-		std::cout << std::accumulate(speed.begin(), speed.end(), 0.0) / speed.size() << std::endl;
+		iFpsData.push_back(1000.0 / (app::instance().program_elapsed_ms() - now));
+		if (iFpsData.size() > 25)
+			iFpsData.pop_front();		
 	}
 
 	bool opengl_window::is_rendering() const

@@ -72,16 +72,17 @@ namespace neogfx
 		public:
 			shader_program(GLuint aHandle, bool aHasProjectionMatrix);
 		public:
-			virtual void* handle() const;
-			virtual bool has_projection_matrix() const;
-			virtual void* variable(const std::string& aVariableName) const;
-			virtual void set_uniform_variable(const std::string& aName, float aValue);
-			virtual void set_uniform_variable(const std::string& aName, double aValue);
-			virtual void set_uniform_variable(const std::string& aName, int aValue);
-			virtual void set_uniform_variable(const std::string& aName, float aValue1, float aValue2);
-			virtual void set_uniform_variable(const std::string& aName, double aValue1, double aValue2);
-			virtual void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray);
-			virtual void set_uniform_matrix(const std::string& aName, const mat44& aMatrix);
+			void* handle() const override;
+			bool has_projection_matrix() const override;
+			void set_projection_matrix(const i_native_graphics_context& aGraphicsContext) override;
+			void* variable(const std::string& aVariableName) const override;
+			void set_uniform_variable(const std::string& aName, float aValue) override;
+			void set_uniform_variable(const std::string& aName, double aValue) override;
+			void set_uniform_variable(const std::string& aName, int aValue) override;
+			void set_uniform_variable(const std::string& aName, float aValue1, float aValue2) override;
+			void set_uniform_variable(const std::string& aName, double aValue1, double aValue2) override;
+			void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray) override;
+			void set_uniform_matrix(const std::string& aName, const mat44& aMatrix) override;
 		public:
 			GLuint register_variable(const std::string& aVariableName);
 		public:
@@ -91,6 +92,7 @@ namespace neogfx
 		private:
 			GLuint iHandle;
 			bool iHasProjectionMatrix;
+			std::pair<vec2, vec2> iLogicalCoordinates;
 			variable_map iVariables;
 		};
 	private:

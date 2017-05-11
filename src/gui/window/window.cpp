@@ -242,6 +242,14 @@ namespace neogfx
 		iStyle = static_cast<style_e>(aStyle);
 	}
 
+	double window::fps() const
+	{
+		if (iNativeWindow)
+			return iNativeWindow->fps();
+		else
+			return 0.0;
+	}
+
 	bool window::is_root() const
 	{
 		return true;
@@ -827,6 +835,9 @@ namespace neogfx
 		gc.set_extents(extents());
 		gc.set_origin(origin());
 		render(gc);
+		gc.set_extents(extents());
+		gc.set_origin(origin());
+		paint_overlay.trigger(gc);
 	}
 
 	void window::native_window_dismiss_children()
