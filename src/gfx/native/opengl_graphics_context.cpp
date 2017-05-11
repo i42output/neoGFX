@@ -1058,7 +1058,7 @@ namespace neogfx
 
 		iRenderingEngine.active_shader_program().set_uniform_variable("tex", 1);
 
-		iVertexArrays.instantiate(*this, iRenderingEngine.monochrome_shader_program());
+		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glDrawArrays(GL_QUADS, 0, 4));
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
