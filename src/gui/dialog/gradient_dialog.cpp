@@ -184,11 +184,11 @@ namespace neogfx
 		iLayout5.set_alignment(alignment::Top);
 		iSmoothnessSpinBox.set_minimum(0.0);
 		iSmoothnessSpinBox.set_maximum(100.0);
-		iSmoothnessSpinBox.set_step(0.01);
-		iSmoothnessSpinBox.set_format("%.01f");
+		iSmoothnessSpinBox.set_step(0.1);
+		iSmoothnessSpinBox.set_format("%.1f");
 		iSmoothnessSlider.set_minimum(0.0);
 		iSmoothnessSlider.set_maximum(100.0);
-		iSmoothnessSlider.set_step(0.01);
+		iSmoothnessSlider.set_step(0.1);
 		iOrientationGroupBox.item_layout().set_alignment(alignment::Top);
 		iAngleSpinBox.set_minimum(-360.0);
 		iAngleSpinBox.set_maximum(360.0);
