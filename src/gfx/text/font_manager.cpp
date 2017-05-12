@@ -201,7 +201,8 @@ namespace neogfx
 
 	bool font_manager::has_fallback_font(const i_native_font_face& aExistingFont) const
 	{
-		return aExistingFont.family_name() != default_fallback_font_info().fallback_for(aExistingFont.family_name());
+		auto fallbackFontFamilyName = default_fallback_font_info().fallback_for(aExistingFont.family_name());
+		return aExistingFont.family_name() != fallbackFontFamilyName && iFontFamilies.find(neolib::make_ci_string(fallbackFontFamilyName)) != iFontFamilies.end();
 	}
 		
 	std::unique_ptr<i_native_font_face> font_manager::create_fallback_font(const i_native_font_face& aExistingFont)

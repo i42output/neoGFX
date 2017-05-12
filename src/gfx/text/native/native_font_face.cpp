@@ -127,7 +127,9 @@ namespace neogfx
 
 	bool native_font_face::has_fallback() const
 	{
-		return iRenderingEngine.font_manager().has_fallback_font(*this);
+		if (iHasFallback == boost::none)
+			iHasFallback = iRenderingEngine.font_manager().has_fallback_font(*this);
+		return *iHasFallback;
 	}
 
 	bool native_font_face::fallback_cached() const
