@@ -36,7 +36,7 @@ namespace neogfx
 
 	font_info::weight_e font_info::weight_from_style_name(std::string aStyleName)
 	{
-		static std::unordered_map<std::string, font_info::weight_e> sWeightMap = 
+		static std::unordered_map<std::string, font_info::weight_e> sWeightMap =
 		{
 			{ "thin", font_info::WeightThin },
 			{ "extralight", font_info::WeightExtralight },
@@ -66,29 +66,29 @@ namespace neogfx
 	}
 
 	font_info::font_info() :
-		iSize{}, iUnderline{false}, iWeight{WeightNormal}, iKerning{ true }
+		iSize{}, iUnderline{ false }, iWeight{ WeightNormal }, iKerning{ true }
 	{
 	}
 
 	font_info::font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
-		iFamilyName{aFamilyName}, iStyle{aStyle}, iUnderline{(aStyle & Underline) == Underline}, iWeight{weight_from_style(aStyle)}, iSize{aSize}, iKerning{ true }
+		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style(aStyle) }, iSize{ aSize }, iKerning{ true }
 	{
 	}
 
 	font_info::font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
-		iFamilyName{aFamilyName}, iStyleName{aStyleName}, iUnderline(false), iWeight{weight_from_style_name(aStyleName)}, iSize{aSize}, iKerning{ true }
+		iFamilyName{ aFamilyName }, iStyleName{ aStyleName }, iUnderline(false), iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ true }
 	{
 
 	}
 
 	font_info::font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
-		iFamilyName{aFamilyName}, iStyle{aStyle}, iStyleName{aStyleName}, iUnderline{(aStyle & Underline) == Underline}, iWeight{weight_from_style_name(aStyleName)}, iSize{aSize}, iKerning{true}
+		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iStyleName{ aStyleName }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ true }
 	{
 
 	}
 
 	font_info::font_info(const font_info& aOther) :
-		iFamilyName{aOther.iFamilyName}, iStyle{aOther.iStyle}, iStyleName{aOther.iStyleName}, iUnderline{aOther.iUnderline}, iWeight{aOther.iWeight}, iSize{aOther.iSize}, iKerning{aOther.iKerning}
+		iFamilyName{ aOther.iFamilyName }, iStyle{ aOther.iStyle }, iStyleName{ aOther.iStyleName }, iUnderline{ aOther.iUnderline }, iWeight{ aOther.iWeight }, iSize{ aOther.iSize }, iKerning{ aOther.iKerning }
 	{
 	}
 
@@ -190,17 +190,17 @@ namespace neogfx
 	}
 
 	font_info::font_info(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
-		iFamilyName{aFamilyName}, 
-		iStyle{aStyle}, 
-		iStyleName{aStyleName}, 
-		iUnderline{false},
-		iWeight{aStyleName != boost::none ? 
-			weight_from_style_name(*aStyleName) : 
-			aStyle != boost::none ? 
+		iFamilyName{ aFamilyName },
+		iStyle{ aStyle },
+		iStyleName{ aStyleName },
+		iUnderline{ false },
+		iWeight{ aStyleName != boost::none ?
+			weight_from_style_name(*aStyleName) :
+			aStyle != boost::none ?
 				weight_from_style(*aStyle) :
-				WeightNormal},
-		iSize{aSize},
-		iKerning{true}
+				WeightNormal },
+		iSize{ aSize },
+		iKerning{ true }
 	{
 	}
 
@@ -214,58 +214,152 @@ namespace neogfx
 		return std::tie(iFamilyName, iStyle, iStyleName, iUnderline, iSize, iKerning) < std::tie(aRhs.iFamilyName, aRhs.iStyle, aRhs.iStyleName, aRhs.iUnderline, aRhs.iSize, aRhs.iKerning);
 	}
 
-	font::font() :
-		font_info(app::instance().current_style().font_info()), iNativeFontFace(app::instance().current_style().font().iNativeFontFace)
+
+	class font::instance
 	{
-		iNativeFontFace->add_ref();
+	public:
+		instance(std::unique_ptr<i_native_font_face> aNativeFontFace);
+		instance(std::shared_ptr<i_native_font_face> aNativeFontFace);
+		instance(const instance& aOther);
+		~instance();
+	public:
+		instance& operator=(const instance& aOther);
+	public:
+		i_native_font_face& native_font_face() const;
+		bool has_fallback_font() const;
+		font fallback_font() const;
+	private:
+		void add_ref();
+		void release();
+	private:
+		std::shared_ptr<i_native_font_face> iNativeFontFace;
+		mutable boost::optional<bool> iHasFallbackFont;
+		mutable boost::optional<font> iFallbackFont;
+	};
+
+	font::instance::instance(std::unique_ptr<i_native_font_face> aNativeFontFace) :
+		iNativeFontFace{ std::move(aNativeFontFace) }
+	{
+		add_ref();
+	}
+
+	font::instance::instance(std::shared_ptr<i_native_font_face> aNativeFontFace) :
+		iNativeFontFace{ aNativeFontFace }
+	{
+		add_ref();
+	}
+
+	font::instance::instance(const instance& aOther) :
+		iNativeFontFace{ aOther.iNativeFontFace }, iHasFallbackFont{ aOther.iHasFallbackFont }, iFallbackFont{ aOther.iFallbackFont }
+	{
+		add_ref();
+	}
+
+	font::instance::~instance()
+	{
+		release();
+	}
+		
+	font::instance& font::instance::operator=(const instance& aOther)
+	{
+		auto old = *this;
+		release();
+		iNativeFontFace = aOther.iNativeFontFace;
+		iHasFallbackFont = aOther.iHasFallbackFont;
+		iFallbackFont = aOther.iFallbackFont;
+		add_ref();
+		return *this;
+	}
+
+	i_native_font_face& font::instance::native_font_face() const
+	{
+		return *iNativeFontFace;
+	}
+
+	bool font::instance::has_fallback_font() const
+	{
+		if (iHasFallbackFont == boost::none)
+			iHasFallbackFont = app::instance().rendering_engine().font_manager().has_fallback_font(native_font_face());
+		return *iHasFallbackFont;
+	}
+
+	font font::instance::fallback_font() const
+	{
+		if (iFallbackFont == boost::none)
+		{
+			if (has_fallback_font())
+				iFallbackFont = font{ app::instance().rendering_engine().font_manager().create_fallback_font(*iNativeFontFace) };
+			else
+				throw no_fallback_font();
+		}
+		return *iFallbackFont;
+	}
+
+	void font::instance::add_ref()
+	{
+		if (iNativeFontFace != nullptr)
+			iNativeFontFace->add_ref();
+	}
+
+	void font::instance::release()
+	{
+		if (iNativeFontFace != nullptr)
+			iNativeFontFace->release();
+	}
+
+
+	font::font() :
+		font_info{ app::instance().current_style().font_info() }, 
+		iInstance{ app::instance().current_style().font().iInstance }
+	{
 	}
 
 	font::font(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
-		font_info(aFamilyName, aStyle, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyle, aSize, app::instance().rendering_engine().screen_metrics()))
+		font_info{ aFamilyName, aStyle, aSize }, 
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyle, aSize, app::instance().rendering_engine().screen_metrics())) }
 	{
-		iNativeFontFace->add_ref();
 	}
 
 	font::font(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
-		font_info(aFamilyName, aStyleName, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyleName, aSize, app::instance().rendering_engine().screen_metrics()))
+		font_info{ aFamilyName, aStyleName, aSize }, 
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyleName, aSize, app::instance().rendering_engine().screen_metrics())) }
 	{
-		iNativeFontFace->add_ref();
 	}
 
 	font::font(const font_info& aFontInfo) :
-		font_info(aFontInfo), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(static_cast<font_info>(*this), app::instance().rendering_engine().screen_metrics()))
+		font_info{ aFontInfo }, 
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(static_cast<font_info>(*this), app::instance().rendering_engine().screen_metrics())) }
 	{
-		iNativeFontFace->add_ref();
 	}
 
 	font::font(const font& aOther) :
-		font_info(aOther), iNativeFontFace(aOther.iNativeFontFace)
+		font_info{ aOther }, 
+		iInstance{ aOther.iInstance }
 	{
-		iNativeFontFace->add_ref();
 	}
 	
 	font::font(const font& aOther, style_e aStyle, point_size aSize) :
-		font_info(aOther.native_font_face().family_name(), aStyle, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aOther.iNativeFontFace->native_font(), aStyle, aSize, app::instance().rendering_engine().screen_metrics()))
+		font_info{ aOther.native_font_face().family_name(), aStyle, aSize }, 
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aOther.iInstance->native_font_face().native_font(), aStyle, aSize, app::instance().rendering_engine().screen_metrics())) }
 	{
-		iNativeFontFace->add_ref();
 	}
 
 	font::font(const font& aOther, const std::string& aStyleName, point_size aSize) :
-		font_info(aOther.native_font_face().family_name(), aStyleName, aSize), iNativeFontFace(app::instance().rendering_engine().font_manager().create_font(aOther.iNativeFontFace->native_font(), aStyleName, aSize, app::instance().rendering_engine().screen_metrics()))
+		font_info{ aOther.native_font_face().family_name(), aStyleName, aSize },
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aOther.iInstance->native_font_face().native_font(), aStyleName, aSize, app::instance().rendering_engine().screen_metrics())) }
 	{
-		iNativeFontFace->add_ref();
 	}
 
 	font::font(std::unique_ptr<i_native_font_face> aNativeFontFace) :
-		font_info(aNativeFontFace->family_name(), aNativeFontFace->style_name(), aNativeFontFace->size()), iNativeFontFace(std::move(aNativeFontFace))
+		font_info{ aNativeFontFace->family_name(), aNativeFontFace->style_name(), aNativeFontFace->size() }, 
+		iInstance{ std::make_shared<instance>(std::move(aNativeFontFace)) }
 	{
-		iNativeFontFace->add_ref();
 	}
 
 	font::font(std::unique_ptr<i_native_font_face> aNativeFontFace, style_e aStyle) :
-		font_info(aNativeFontFace->family_name(), aStyle, aNativeFontFace->style_name(), aNativeFontFace->size()), iNativeFontFace(std::move(aNativeFontFace))
+		font_info{ aNativeFontFace->family_name(), aStyle, aNativeFontFace->style_name(), aNativeFontFace->size() }, 
+		iInstance{ std::make_shared<instance>(std::move(aNativeFontFace)) }
 	{
-		iNativeFontFace->add_ref();
 	}
 
 	font font::load_from_file(const std::string& aFileName)
@@ -300,7 +394,6 @@ namespace neogfx
 
 	font::~font()
 	{
-		iNativeFontFace->release();
 	}
 
 	font& font::operator=(const font& aOther)
@@ -308,51 +401,49 @@ namespace neogfx
 		if (&aOther == this)
 			return *this;
 		font_info::operator=(aOther);
-		auto oldFontFace = iNativeFontFace;
-		iNativeFontFace = aOther.iNativeFontFace;
-		iNativeFontFace->add_ref();
-		oldFontFace->release();
+		auto oldFontFaces = iInstance;
+		iInstance = aOther.iInstance;
 		return *this;
 	}
 
 	bool font::has_fallback() const
 	{
-		return app::instance().rendering_engine().font_manager().has_fallback_font(*iNativeFontFace);
+		return iInstance->has_fallback_font();
 	}
 
 	font font::fallback() const
 	{
-		return font{ app::instance().rendering_engine().font_manager().create_fallback_font(*iNativeFontFace), style() };
+		return iInstance->fallback_font();
 	}
 
 	const std::string& font::family_name() const
 	{
-		return iNativeFontFace->family_name();
+		return native_font_face().family_name();
 	}
 
 	font::style_e font::style() const
 	{
-		return static_cast<style_e>(iNativeFontFace->style() | (underline() ? Underline : 0));
+		return static_cast<style_e>(native_font_face().style() | (underline() ? Underline : 0));
 	}
 
 	const std::string& font::style_name() const
 	{
-		return iNativeFontFace->style_name();
+		return native_font_face().style_name();
 	}
 
 	font::point_size font::size() const
 	{
-		return iNativeFontFace->size();
+		return native_font_face().size();
 	}
 
 	dimension font::height() const
 	{
-		return iNativeFontFace->height();
+		return native_font_face().height();
 	}
 
 	dimension font::descender() const
 	{
-		return iNativeFontFace->descender();
+		return native_font_face().descender();
 	}
 
 	dimension font::line_spacing() const
@@ -365,7 +456,7 @@ namespace neogfx
 	{
 		if (kerning())
 		{
-			dimension result = iNativeFontFace->kerning(aLeftGlyphIndex, aRightGlyphIndex);
+			dimension result = native_font_face().kerning(aLeftGlyphIndex, aRightGlyphIndex);
 			return result < 0.0 ? std::floor(result) : std::ceil(result);
 		}
 		else
@@ -374,6 +465,6 @@ namespace neogfx
 
 	i_native_font_face& font::native_font_face() const
 	{
-		return *iNativeFontFace;
+		return iInstance->native_font_face();
 	}
 }

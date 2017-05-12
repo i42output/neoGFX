@@ -130,6 +130,11 @@ namespace neogfx
 		return iRenderingEngine.font_manager().has_fallback_font(*this);
 	}
 
+	bool native_font_face::fallback_cached() const
+	{
+		return iFallbackFont != nullptr;
+	}
+
 	i_native_font_face& native_font_face::fallback() const
 	{
 		if (!has_fallback())

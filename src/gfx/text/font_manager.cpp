@@ -35,31 +35,33 @@ namespace neogfx
 		class native_font_face_wrapper : public i_native_font_face
 		{
 		public:
-			native_font_face_wrapper(i_native_font_face& aFontFace) : iFontFace(aFontFace) {}
+			native_font_face_wrapper(i_native_font_face& aFontFace) : iFontFace(aFontFace) { add_ref(); }
+			~native_font_face_wrapper() { release(); }
 		public:
-			virtual i_native_font& native_font() { return iFontFace.native_font(); }
-			virtual const std::string& family_name() const { return iFontFace.family_name(); }
-			virtual font::style_e style() const { return iFontFace.style(); }
-			virtual const std::string& style_name() const { return iFontFace.style_name(); }
-			virtual font::point_size size() const { return iFontFace.size(); }
-			virtual dimension horizontal_dpi() const { return iFontFace.horizontal_dpi(); }
-			virtual dimension vertical_dpi() const { return iFontFace.vertical_dpi(); }
-			virtual dimension height() const { return iFontFace.height(); }
-			virtual dimension descender() const { return iFontFace.descender(); }
-			virtual dimension underline_position() const { return iFontFace.underline_position(); }
-			virtual dimension underline_thickness() const { return iFontFace.underline_thickness(); }
-			virtual dimension line_spacing() const { return iFontFace.line_spacing(); }
-			virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const { return iFontFace.kerning(aLeftGlyphIndex, aRightGlyphIndex); }
-			virtual bool has_fallback() const { return iFontFace.has_fallback(); }
-			virtual i_native_font_face& fallback() const { return iFontFace.fallback(); }
-			virtual void* handle() const { return iFontFace.handle(); }
-			virtual void update_handle(void* aHandle) { iFontFace.update_handle(aHandle); }
-			virtual void* aux_handle() const { return iFontFace.aux_handle(); }
-			virtual uint32_t glyph_index(char32_t aCodePoint) const { return iFontFace.glyph_index(aCodePoint); }
-			virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const { return iFontFace.glyph_texture(aGlyph); }
+			i_native_font& native_font() override { return iFontFace.native_font(); }
+			const std::string& family_name() const override { return iFontFace.family_name(); }
+			font::style_e style() const override { return iFontFace.style(); }
+			const std::string& style_name() const override { return iFontFace.style_name(); }
+			font::point_size size() const override { return iFontFace.size(); }
+			dimension horizontal_dpi() const override { return iFontFace.horizontal_dpi(); }
+			dimension vertical_dpi() const override { return iFontFace.vertical_dpi(); }
+			dimension height() const override { return iFontFace.height(); }
+			dimension descender() const override { return iFontFace.descender(); }
+			dimension underline_position() const override { return iFontFace.underline_position(); }
+			dimension underline_thickness() const override { return iFontFace.underline_thickness(); }
+			dimension line_spacing() const override { return iFontFace.line_spacing(); }
+			dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const override { return iFontFace.kerning(aLeftGlyphIndex, aRightGlyphIndex); }
+			bool has_fallback() const override { return iFontFace.has_fallback(); }
+			bool fallback_cached() const override { return iFontFace.fallback_cached(); }
+			i_native_font_face& fallback() const override { return iFontFace.fallback(); }
+			void* handle() const override { return iFontFace.handle(); }
+			void update_handle(void* aHandle) override { iFontFace.update_handle(aHandle); }
+			void* aux_handle() const override { return iFontFace.aux_handle(); }
+			uint32_t glyph_index(char32_t aCodePoint) const override { return iFontFace.glyph_index(aCodePoint); }
+			i_glyph_texture& glyph_texture(const glyph& aGlyph) const override { return iFontFace.glyph_texture(aGlyph); }
 		public:
-			virtual void add_ref() { iFontFace.add_ref(); }
-			virtual void release() { iFontFace.release(); }
+			void add_ref() override { iFontFace.add_ref(); }
+			void release() override { iFontFace.release(); }
 		private:
 			i_native_font_face& iFontFace;
 		};
@@ -204,6 +206,8 @@ namespace neogfx
 		
 	std::unique_ptr<i_native_font_face> font_manager::create_fallback_font(const i_native_font_face& aExistingFont)
 	{
+		if (aExistingFont.fallback_cached())
+			return std::unique_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aExistingFont.fallback()));
 		struct : i_device_resolution
 		{
 			size iResolution;

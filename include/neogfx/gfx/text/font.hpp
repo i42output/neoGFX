@@ -113,6 +113,12 @@ namespace neogfx
 	class font : public font_info
 	{
 		friend class graphics_context;
+		// exceptions
+	public:
+		struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::font::no_fallback_font") {} };
+		// types
+	private:
+		class instance;
 		// construction
 	public:
 		font();
@@ -128,7 +134,7 @@ namespace neogfx
 		static font load_from_memory(const void* aData, std::size_t aSizeInBytes);
 		static font load_from_memory(const void* aData, std::size_t aSizeInBytes, style_e aStyle, point_size aSize);
 		static font load_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, point_size aSize);
-		virtual ~font();
+		~font();
 		font& operator=(const font& aOther);
 	private:
 		font(std::unique_ptr<i_native_font_face> aNativeFontFace);
@@ -138,10 +144,10 @@ namespace neogfx
 		font fallback() const;
 		// operations
 	public:
-		virtual const std::string& family_name() const;
-		virtual style_e style() const;
-		virtual const std::string& style_name() const;
-		virtual point_size size() const;
+		const std::string& family_name() const override;
+		style_e style() const override;
+		const std::string& style_name() const override;
+		point_size size() const override;
 		dimension height() const;
 		dimension descender() const;
 		dimension line_spacing() const;
@@ -151,7 +157,7 @@ namespace neogfx
 		i_native_font_face& native_font_face() const;
 		// attributes
 	private:
-		std::shared_ptr<i_native_font_face> iNativeFontFace;
+		mutable std::shared_ptr<instance> iInstance;
 	};
 
 	typedef boost::optional<font> optional_font;

@@ -51,6 +51,7 @@ namespace neogfx
 		virtual dimension line_spacing() const = 0;
 		virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const = 0;
 		virtual bool has_fallback() const = 0;
+		virtual bool fallback_cached() const = 0;
 		virtual i_native_font_face& fallback() const = 0;
 		virtual void* handle() const = 0;
 		virtual void update_handle(void* aHandle) = 0;
