@@ -54,8 +54,8 @@ namespace neogfx
 		button(i_layout& aLayout, const std::string& aText = std::string(), alignment aAlignment = alignment::Left | alignment::VCentre);
 		~button();
 	public:
-		virtual neogfx::size_policy size_policy() const;
-		virtual neogfx::margins margins() const;
+		neogfx::size_policy size_policy() const override;
+		neogfx::margins margins() const override;
 	public:
 		checkable_e checkable() const;
 		void set_checkable(checkable_e aCheckable = BiState);
@@ -75,20 +75,20 @@ namespace neogfx
 		const text_widget& text() const;
 		text_widget& text();
 	protected:
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_button_released(mouse_button aButton, const point& aPosition) override;
 	protected:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 	protected:
 		virtual void handle_clicked();
 	protected:
 		virtual const boost::optional<bool>& checked_state() const;
 		virtual bool set_checked_state(const boost::optional<bool>& aCheckedState);
 	protected:
-		virtual std::string mnemonic() const;
-		virtual void mnemonic_execute();
-		virtual i_widget& mnemonic_widget();
+		std::string mnemonic() const override;
+		void mnemonic_execute() override;
+		i_widget& mnemonic_widget() override;
 	private:
 		void init();
 	private:

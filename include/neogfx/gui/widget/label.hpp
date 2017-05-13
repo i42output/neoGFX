@@ -26,6 +26,8 @@
 
 namespace neogfx
 {
+	class i_spacer;
+
 	enum class label_placement
 	{
 		TextHorizontal,
@@ -36,20 +38,25 @@ namespace neogfx
 		TextImageVertical,
 		ImageTextHorizontal,
 		ImageTextVertical,
+		TextSpacerImageHorizontal,
+		TextSpacerImageVertical,
+		ImageSpacerTextHorizontal,
+		ImageSpacerTextVertical
 	};
 
 	class label : public widget
 	{
 	public:
+		struct no_centre_spacer : std::logic_error { no_centre_spacer() : std::logic_error("neogfx::label::no_centre_spacer") {} };
 		struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::label::no_buddy") {} };
 	public:
 		label(const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
 		label(i_widget& aParent, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
 		label(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false, alignment aAlignment = alignment::Left | alignment::VCentre, label_placement aPlacement = label_placement::ImageTextHorizontal);
 	public:
-		virtual neogfx::size_policy size_policy() const;
+		neogfx::size_policy size_policy() const override;
 		using widget::set_size_policy;
-		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
+		void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
 	public:
 		label_placement placement() const;
 		void set_placement(label_placement aPlacement);
@@ -57,6 +64,8 @@ namespace neogfx
 		image_widget& image();
 		const text_widget& text() const;
 		text_widget& text();
+		const i_spacer& centre_spacer() const;
+		i_spacer& centre_spacer();
 		bool has_buddy() const;
 		i_widget& buddy() const;
 		void set_buddy(i_widget& aBuddy);
@@ -73,6 +82,7 @@ namespace neogfx
 		grid_layout iLayout;
 		image_widget iImage;
 		text_widget iText;
+		i_spacer* iCentreSpacer;
 		std::shared_ptr<i_widget> iBuddy;
 	};
 }

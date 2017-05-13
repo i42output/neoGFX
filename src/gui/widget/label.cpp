@@ -25,21 +25,21 @@
 namespace neogfx
 {
 	label::label(const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget(), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
+		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture() }, iText{ iLayout, aText, aMultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
 	label::label(i_widget& aParent, const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget(aParent), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
+		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture() }, iText{ iLayout, aText, aMultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
 	label::label(i_layout& aLayout, const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget(aLayout), iAlignment(aAlignment), iPlacement(aPlacement), iLayout(*this), iImage(iLayout, neogfx::texture()), iText(iLayout, aText, aMultiLine)
+		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture() }, iText{ iLayout, aText, aMultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
@@ -89,6 +89,20 @@ namespace neogfx
 	text_widget& label::text()
 	{
 		return iText;
+	}
+
+	const i_spacer& label::centre_spacer() const
+	{
+		if (iCentreSpacer != nullptr)
+			return *iCentreSpacer;
+		throw no_centre_spacer();
+	}
+
+	i_spacer& label::centre_spacer()
+	{
+		if (iCentreSpacer != nullptr)
+			return *iCentreSpacer;
+		throw no_centre_spacer();
 	}
 
 	bool label::has_buddy() const
@@ -171,6 +185,7 @@ namespace neogfx
 	void label::handle_placement_change()
 	{
 		iLayout.remove_items();
+		iCentreSpacer = nullptr;
 
 		switch (effective_placement())
 		{
@@ -267,6 +282,102 @@ namespace neogfx
 				iLayout.add_spacer_at_position(0, 0);
 				iLayout.add_item_at_position(1, 0, iImage);
 				iLayout.add_item_at_position(2, 0, iText);
+				break;
+			}
+			break;
+		case label_placement::TextSpacerImageHorizontal:
+			switch (iLayout.alignment() & neogfx::alignment::Horizontal)
+			{
+			case neogfx::alignment::Left:
+				iLayout.add_item_at_position(0, 0, iText);
+				iCentreSpacer = &iLayout.add_spacer_at_position(0, 1);
+				iLayout.add_item_at_position(0, 2, iImage);
+				iLayout.add_spacer_at_position(0, 3);
+				break;
+			case neogfx::alignment::Centre:
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(0, 1, iText);
+				iCentreSpacer = &iLayout.add_spacer_at_position(0, 2);
+				iLayout.add_item_at_position(0, 3, iImage);
+				iLayout.add_spacer_at_position(0, 3);
+				break;
+			case neogfx::alignment::Right:
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(0, 1, iText);
+				iCentreSpacer = &iLayout.add_spacer_at_position(0, 2);
+				iLayout.add_item_at_position(0, 3, iImage);
+				break;
+			}
+			break;
+		case label_placement::TextSpacerImageVertical:
+			switch (iLayout.alignment() & neogfx::alignment::Vertical)
+			{
+			case neogfx::alignment::Top:
+				iLayout.add_item_at_position(0, 0, iText);
+				iCentreSpacer = &iLayout.add_spacer_at_position(1, 0);
+				iLayout.add_item_at_position(2, 0, iImage);
+				iLayout.add_spacer_at_position(3, 0);
+				break;
+			case neogfx::alignment::VCentre:
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(1, 0, iText);
+				iCentreSpacer = &iLayout.add_spacer_at_position(2, 0);
+				iLayout.add_item_at_position(3, 0, iImage);
+				iLayout.add_spacer_at_position(4, 0);
+				break;
+			case neogfx::alignment::Bottom:
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(1, 0, iText);
+				iCentreSpacer = &iLayout.add_spacer_at_position(2, 0);
+				iLayout.add_item_at_position(3, 0, iImage);
+				break;
+			}
+			break;
+		case label_placement::ImageSpacerTextHorizontal:
+			switch (iLayout.alignment() & neogfx::alignment::Horizontal)
+			{
+			case neogfx::alignment::Left:
+				iLayout.add_item_at_position(0, 0, iImage);
+				iCentreSpacer = &iLayout.add_spacer_at_position(0, 1);
+				iLayout.add_item_at_position(0, 2, iText);
+				iLayout.add_spacer_at_position(0, 3);
+				break;
+			case neogfx::alignment::Centre:
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(0, 1, iImage);
+				iCentreSpacer = &iLayout.add_spacer_at_position(0, 2);
+				iLayout.add_item_at_position(0, 3, iText);
+				iLayout.add_spacer_at_position(0, 4);
+				break;
+			case neogfx::alignment::Right:
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(0, 1, iImage);
+				iCentreSpacer = &iLayout.add_spacer_at_position(0, 2);
+				iLayout.add_item_at_position(0, 3, iText);
+				break;
+			}
+			break;
+		case label_placement::ImageSpacerTextVertical:
+			switch (iLayout.alignment() & neogfx::alignment::Vertical)
+			{
+			case neogfx::alignment::Top:
+				iLayout.add_item_at_position(0, 0, iImage);
+				iCentreSpacer = &iLayout.add_spacer_at_position(1, 0);
+				iLayout.add_item_at_position(2, 0, iText);
+				iLayout.add_spacer_at_position(3, 0);
+				break;
+			case neogfx::alignment::VCentre:
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(1, 0, iImage);
+				iCentreSpacer = &iLayout.add_spacer_at_position(2, 0);
+				iLayout.add_item_at_position(3, 0, iText);
+				iLayout.add_spacer_at_position(4, 0);
+				break;
+			case neogfx::alignment::Bottom:
+				iLayout.add_spacer_at_position(0, 0);
+				iLayout.add_item_at_position(1, 0, iImage);
+				iCentreSpacer = &iLayout.add_spacer_at_position(2, 0);
+				iLayout.add_item_at_position(3, 0, iText);
 				break;
 			}
 			break;

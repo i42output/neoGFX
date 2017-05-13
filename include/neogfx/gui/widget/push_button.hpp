@@ -34,6 +34,7 @@ namespace neogfx
 			ButtonStyleButtonBox,
 			ButtonStyleItemViewHeader,
 			ButtonStyleTab,
+			ButtonStyleDropList,
 			ButtonStyleSpinBox,
 			ButtonStyleToolbar
 		};
@@ -43,14 +44,14 @@ namespace neogfx
 		push_button(i_widget& aParent, const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);
 		push_button(i_layout& aLayout, const std::string& aText = std::string(), style_e aStyle = ButtonStyleNormal);
 	public:
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
-		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		void paint_non_client(graphics_context& aGraphicsContext) const override;
+		void paint(graphics_context& aGraphicsContext) const override;
 	public:
-		virtual void mouse_entered();
-		virtual void mouse_left();
+		void mouse_entered() override;
+		void mouse_left() override;
 	protected:
 		virtual rect path_bounding_rect() const;
 		virtual neogfx::path path() const;

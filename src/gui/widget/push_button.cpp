@@ -117,15 +117,27 @@ namespace neogfx
 		scoped_units su(*this, UnitsPixels);
 		neogfx::path outline = path();
 		dimension penWidth = device_metrics().horizontal_dpi() / 96;
-		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleButtonBox || iStyle == ButtonStyleTab || iStyle == ButtonStyleSpinBox)
+		switch (iStyle)
+		{
+		case ButtonStyleNormal:
+		case ButtonStyleButtonBox:
+		case ButtonStyleTab:
+		case ButtonStyleDropList:
+		case ButtonStyleSpinBox:
 			outline.deflate(penWidth * 2.0, penWidth * 2.0);
+			break;
+		}
 		aGraphicsContext.clip_to(outline);
 		colour topHalfFrom = faceColour.same_lightness_as(colour::White);
 		colour topHalfTo = faceColour;
 		colour bottomHalfFrom = faceColour.to_hsl().lighter(-0.125).to_rgb();
 		colour bottomHalfTo = faceColour;
-		if (iStyle != ButtonStyleTab && iStyle != ButtonStyleSpinBox)
+		switch(iStyle)
 		{
+		case ButtonStyleNormal:
+		case ButtonStyleButtonBox:
+		case ButtonStyleItemViewHeader:
+		case ButtonStyleToolbar:
 			if (!capturing())
 			{
 				if (!spot_colour())
@@ -160,9 +172,10 @@ namespace neogfx
 					aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
 				}
 			}
-		}
-		else
-		{
+			break;
+		case ButtonStyleTab:
+		case ButtonStyleDropList:
+		case ButtonStyleSpinBox:
 			if (!spot_colour())
 			{
 				aGraphicsContext.fill_rect(outline.bounding_rect(), gradient(topHalfTo, bottomHalfFrom));
@@ -171,6 +184,7 @@ namespace neogfx
 			{
 				aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
 			}
+			break;
 		}
 		aGraphicsContext.reset_clip();
 		if (has_focus())
@@ -179,12 +193,18 @@ namespace neogfx
 			focusRect.deflate(2.0, 2.0);
 			aGraphicsContext.draw_focus_rect(focusRect);
 		}
-		if (iStyle == ButtonStyleNormal || iStyle == ButtonStyleButtonBox || iStyle == ButtonStyleTab || iStyle == ButtonStyleSpinBox)
+		switch(iStyle)
 		{
+		case ButtonStyleNormal:
+		case ButtonStyleButtonBox:
+		case ButtonStyleTab:
+		case ButtonStyleDropList:
+		case ButtonStyleSpinBox:
 			outline.inflate(penWidth, penWidth);
 			aGraphicsContext.draw_path(outline, pen(innerBorderColour, penWidth));
 			outline.inflate(penWidth, penWidth);
 			aGraphicsContext.draw_path(outline, pen(borderColour, penWidth));
+			break;
 		}
 	}
 
@@ -217,6 +237,7 @@ namespace neogfx
 		case ButtonStyleNormal:
 		case ButtonStyleButtonBox:
 		case ButtonStyleTab:
+		case ButtonStyleDropList:
 		case ButtonStyleSpinBox:
 			ret.move_to(pixel.cx, 0, 12);
 			ret.line_to(currentSize.cx - pixel.cx, 0);

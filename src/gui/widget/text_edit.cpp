@@ -1652,7 +1652,7 @@ namespace neogfx
 									app::instance().current_style().selection_colour().with_alpha(64));
 						break;
 					case 1:
-						if (style.text_outline_colour().empty())
+						if (style.text_outline_colour().empty() || glyph.is_emoji())
 						{
 							pos.x += glyph.advance().cx;
 							continue;

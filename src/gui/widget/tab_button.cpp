@@ -142,17 +142,15 @@ namespace neogfx
 	void tab_button::paint(graphics_context& aGraphicsContext) const
 	{
 		push_button::paint(aGraphicsContext);
-		{
-			scoped_units su1(*this, UnitsPixels);
-			scoped_units su2(aGraphicsContext, UnitsPixels);
-			rect clipRect = default_clip_rect();
-			clipRect.cy += 2.0;
-			clipRect.x += 1.0;
-			clipRect.cx -= 2.0;
-			aGraphicsContext.scissor_off();
-			aGraphicsContext.scissor_on(clipRect);
-			push_button::paint(aGraphicsContext);
-		}
+		scoped_units su1(*this, UnitsPixels);
+		scoped_units su2(aGraphicsContext, UnitsPixels);
+		rect clipRect = default_clip_rect();
+		clipRect.cy += 2.0;
+		clipRect.x += 1.0;
+		clipRect.cx -= 2.0;
+		aGraphicsContext.scissor_off();
+		aGraphicsContext.scissor_on(clipRect);
+		push_button::paint(aGraphicsContext);
 	}
 
 	void tab_button::set_selected_state(bool aSelectedState)

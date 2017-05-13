@@ -27,6 +27,7 @@
 #include <neogfx/gui/dialog/colour_dialog.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
+#include <neogfx/gui/widget/drop_list.hpp>
 
 namespace ng = neogfx;
 
@@ -268,6 +269,10 @@ int main(int argc, char* argv[])
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
+		ng::horizontal_layout dropListLayout(layoutButtons);
+		ng::drop_list dropList(dropListLayout);
+		ng::drop_list dropList2(dropListLayout);
+		dropList2.set_editable(true);
 		ng::horizontal_layout editLayout(layoutButtons);
 		ng::text_edit textEdit(editLayout);
 		textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);

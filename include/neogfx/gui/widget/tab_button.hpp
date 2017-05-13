@@ -35,27 +35,27 @@ namespace neogfx
 		tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText = std::string());
 		~tab_button();
 	public:
-		virtual bool is_selected() const;
-		virtual bool is_deselected() const;
-		virtual void select();
-		virtual const i_tab_container& container() const;
-		virtual i_tab_container& container();
+		bool is_selected() const override;
+		bool is_deselected() const override;
+		void select() override;
+		const i_tab_container& container() const override;
+		i_tab_container& container() override;
 	public:
-		virtual const std::string& text() const;
-		virtual void set_text(const std::string& aText);
-		virtual void set_image(const i_texture& aTexture);
-		virtual void set_image(const i_image& aImage);
+		const std::string& text() const override;
+		void set_text(const std::string& aText) override;
+		void set_image(const i_texture& aTexture) override;
+		void set_image(const i_image& aImage) override;
 	protected:
-		virtual rect path_bounding_rect() const;
-		virtual bool spot_colour() const;
-		virtual colour border_mid_colour() const;
+		rect path_bounding_rect() const override;
+		bool spot_colour() const override;
+		colour border_mid_colour() const override;
 	protected:
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual void handle_clicked();
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		void handle_clicked() override;
 	protected:
-		virtual colour foreground_colour() const;
+		colour foreground_colour() const override;
 	protected:
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		void paint(graphics_context& aGraphicsContext) const override;
 	protected:
 		void set_selected_state(bool aSelectedState);
 	private:

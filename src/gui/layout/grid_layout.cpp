@@ -86,6 +86,11 @@ namespace neogfx
 		iDimensions = cell_dimensions{aColumns, aRows};
 	}
 
+	bool grid_layout::is_item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const
+	{
+		return iCells.find(cell_coordinates{ aColumn, aRow }) != iCells.end();
+	}
+
 	void grid_layout::add_item(i_widget& aWidget)
 	{
 		add_item_at_position(iCursor.y, iCursor.x, aWidget);
@@ -451,8 +456,6 @@ namespace neogfx
 				auto i = iCells.find(cell_coordinates{ col, row });
 				if (i != iCells.end())
 				{
-					if (i->second->get().is<item::spacer_pointer>() && column_minimum_size(col) != 0.0)
-						continue;
 					auto s = find_span(cell_coordinates{ col, row });
 					if (s == iSpans.end())
 					{
@@ -531,7 +534,7 @@ namespace neogfx
 			for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
 			{
 				auto i = iCells.find(cell_coordinates{col, row});
-				if (i != iCells.end() && !i->second->get().is<item::spacer_pointer>() && i->second->visible() && i->second->minimum_size().cy != 0.0)
+				if (i != iCells.end() && i->second->visible() && i->second->minimum_size().cy != 0.0)
 				{
 					++result;
 					break;
@@ -545,7 +548,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
 		{
 			auto i = iCells.find(cell_coordinates{col, aRow});
-			if (i != iCells.end() && !i->second->get().is<item::spacer_pointer>() && i->second->visible() && i->second->minimum_size().cy != 0.0)
+			if (i != iCells.end() && i->second->visible() && i->second->minimum_size().cy != 0.0)
 				return true;
 		}
 		return false;
@@ -558,7 +561,7 @@ namespace neogfx
 			for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
 			{
 				auto i = iCells.find(cell_coordinates{col, row});
-				if (i != iCells.end() && !i->second->get().is<item::spacer_pointer>() && i->second->visible() && i->second->minimum_size().cx != 0.0)
+				if (i != iCells.end() && i->second->visible() && i->second->minimum_size().cx != 0.0)
 				{
 					++result;
 					break;
@@ -572,7 +575,7 @@ namespace neogfx
 		for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
 		{
 			auto i = iCells.find(cell_coordinates{aColumn, row});
-			if (i != iCells.end() && !i->second->get().is<item::spacer_pointer>() && i->second->visible() && i->second->minimum_size().cx != 0.0)
+			if (i != iCells.end() && i->second->visible() && i->second->minimum_size().cx != 0.0)
 				return true;
 		}
 		return false;
