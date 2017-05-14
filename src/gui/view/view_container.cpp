@@ -202,6 +202,21 @@ namespace neogfx
 		layout_items();
 	}
 
+	bool view_container::has_tab_page(tab_index aTabIndex) const
+	{
+		return false;
+	}
+
+	const i_tab_page& view_container::tab_page(tab_index aTabIndex) const
+	{
+		throw no_tab_page();
+	}
+
+	i_tab_page& view_container::tab_page(tab_index aTabIndex)
+	{
+		throw no_tab_page();
+	}
+
 	bool view_container::has_parent_container() const
 	{
 		return false;

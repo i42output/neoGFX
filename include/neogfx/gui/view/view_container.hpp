@@ -81,6 +81,10 @@ namespace neogfx
 		void selecting_tab(i_tab& aTab) override;
 		void removing_tab(i_tab& aTab) override;
 	public:
+		bool has_tab_page(tab_index aTabIndex) const override;
+		const i_tab_page& tab_page(tab_index aTabIndex) const override;
+		i_tab_page& tab_page(tab_index aTabIndex) override;
+	public:
 		bool has_parent_container() const override;
 		const i_tab_container& parent_container() const override;
 		i_tab_container& parent_container() override;
