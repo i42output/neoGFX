@@ -37,24 +37,35 @@ namespace neogfx
 		tab_bar(i_widget& aParent, i_tab_container& aContainer);
 		tab_bar(i_layout& aLayout, i_tab_container& aContainer);
 	public:
-		virtual bool has_tabs() const;
-		virtual uint32_t tab_count() const;
-		virtual const i_tab& tab(tab_index aTabIndex) const;
-		virtual i_tab& tab(tab_index aTabIndex);
-		virtual const i_tab& selected_tab() const;
-		virtual i_tab& selected_tab();
-		virtual i_tab& add_tab(const std::string& aTabText);
-		virtual i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText);
-		virtual void remove_tab(tab_index aTabIndex);
+		bool has_tabs() const override;
+		uint32_t tab_count() const override;
+		tab_index index_of(const i_tab& aTab) const override;
+		const i_tab& tab(tab_index aTabIndex) const override;
+		i_tab& tab(tab_index aTabIndex) override;
+		const i_tab& selected_tab() const override;
+		i_tab& selected_tab() override;
+		i_tab& add_tab(const std::string& aTabText) override;
+		i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText) override;
+		void remove_tab(tab_index aTabIndex) override;
 	public:
-		virtual void adding_tab(i_tab& aTab);
-		virtual void selecting_tab(i_tab& aTab);
-		virtual void removing_tab(i_tab& aTab);
+		void adding_tab(i_tab& aTab) override;
+		void selecting_tab(i_tab& aTab) override;
+		void removing_tab(i_tab& aTab) override;
 	public:
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		bool has_tab_page(tab_index aTabIndex) const override;
+		const i_tab_page& tab_page(tab_index aTabIndex) const override;
+		i_tab_page& tab_page(tab_index aTabIndex) override;
 	public:
-		virtual bool visible() const;
+		bool has_parent_container() const override;
+		const i_tab_container& parent_container() const override;
+		i_tab_container& parent_container() override;
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+	public:
+		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		void paint(graphics_context& aGraphicsContext) const override;
+	public:
+		bool visible() const override;
 	private:
 		i_tab_container& iContainer;
 		tab_list iTabs;

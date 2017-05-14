@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
 
 		// Buttons
 
-		ng::i_widget& buttonsPage = tabContainer.add_tab_page("Buttons").widget();
+		ng::i_widget& buttonsPage = tabContainer.add_tab_page("Buttons").as_widget();
 		ng::vertical_layout layoutButtons(buttonsPage);
 		layoutButtons.set_margins(ng::margins(8));
 		ng::push_button button0(layoutButtons, "This is the neoGFX test application.");
@@ -462,7 +462,7 @@ int main(int argc, char* argv[])
 		app.surface_manager().surface(0).save_mouse_cursor();
 		app.surface_manager().surface(0).set_mouse_cursor(ng::mouse_system_cursor::Wait);
 
-		ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").widget();
+		ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").as_widget();
 		ng::vertical_layout layoutItemViews(itemViewsPage);
 		ng::table_view tableView(layoutItemViews);
 		tableView.set_minimum_size(ng::size(128, 128));
@@ -515,7 +515,7 @@ int main(int argc, char* argv[])
 
 		app.surface_manager().surface(0).restore_mouse_cursor();
 
-		auto& w = tabContainer.add_tab_page("Lots").widget();
+		auto& w = tabContainer.add_tab_page("Lots").as_widget();
 		ng::vertical_layout l(w);
 		#ifdef NDEBUG
 		for (int i = 0; i < 1000; ++i)
@@ -523,7 +523,7 @@ int main(int argc, char* argv[])
 		for (int i = 0; i < 100; ++i)
 		#endif
 			l.add_item(std::make_shared<ng::push_button>(boost::lexical_cast<std::string>(i)));
-		auto& w2 = tabContainer.add_tab_page("Images").widget();
+		auto& w2 = tabContainer.add_tab_page("Images").as_widget();
 		ng::horizontal_layout l2(w2);
 		ng::vertical_layout l3(l2);
 		ng::image_widget iw(l3, ng::image(":/test/resources/channel_256.png"), ng::aspect_ratio::Ignore);
@@ -555,11 +555,11 @@ int main(int argc, char* argv[])
 		}
 		ng::image smallHash(":/test/resources/channel.png");
 
-		auto& gamePage = tabContainer.add_tab_page("Game").widget();
+		auto& gamePage = tabContainer.add_tab_page("Game").as_widget();
 		ng::vertical_layout gl(gamePage);
 		create_game(gl);
 
-		auto& tabDrawing = tabContainer.add_tab_page("Drawing").widget();
+		auto& tabDrawing = tabContainer.add_tab_page("Drawing").as_widget();
 		tabDrawing.painting([&tabDrawing, &gw](ng::graphics_context& aGc)
 		{
 			ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
@@ -576,7 +576,7 @@ int main(int argc, char* argv[])
 			aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::colour::Yellow, 3.0 });
 		});
 		
-		auto& tabEditor = tabContainer.add_tab_page("Editor").widget();
+		auto& tabEditor = tabContainer.add_tab_page("Editor").as_widget();
 		ng::vertical_layout layoutEditor(tabEditor);
 		ng::text_edit textEdit2(layoutEditor);
 		textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
@@ -591,7 +591,7 @@ int main(int argc, char* argv[])
 			textEdit2.set_default_style(ng::text_edit::style(ng::font("SnareDrum One NBP", "Regular", 60.0), ng::colour::White));
 		});
 
-		auto& circlesWidget = tabContainer.add_tab_page("Circles").widget();
+		auto& circlesWidget = tabContainer.add_tab_page("Circles").as_widget();
 		circlesWidget.painting([](ng::graphics_context& aGc)
 		{
 			neolib::basic_random<ng::coordinate> prng;

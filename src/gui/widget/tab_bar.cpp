@@ -63,6 +63,14 @@ namespace neogfx
 		return iTabs.size();
 	}
 
+	tab_bar::tab_index tab_bar::index_of(const i_tab& aTab) const
+	{
+		for (auto i = iTabs.begin(); i != iTabs.end(); ++i)
+			if (&**i == &aTab)
+				return i - iTabs.begin();
+		throw tab_not_found();
+	}
+
 	const i_tab& tab_bar::tab(tab_index aTabIndex) const
 	{
 		if (aTabIndex >= iTabs.size())
@@ -126,6 +134,46 @@ namespace neogfx
 	void tab_bar::removing_tab(i_tab& aTab)
 	{
 		iContainer.removing_tab(aTab);
+	}
+
+	bool tab_bar::has_tab_page(tab_index aTabIndex) const
+	{
+		return iContainer.has_tab_page(aTabIndex);
+	}
+
+	const i_tab_page& tab_bar::tab_page(tab_index aTabIndex) const
+	{
+		return iContainer.tab_page(aTabIndex);
+	}
+
+	i_tab_page& tab_bar::tab_page(tab_index aTabIndex)
+	{
+		return iContainer.tab_page(aTabIndex);
+	}
+
+	bool tab_bar::has_parent_container() const
+	{
+		return true;
+	}
+	
+	const i_tab_container& tab_bar::parent_container() const
+	{
+		return iContainer;
+	}
+
+	i_tab_container& tab_bar::parent_container()
+	{
+		return iContainer;
+	}
+
+	const i_widget& tab_bar::as_widget() const
+	{
+		return *this;
+	}
+
+	i_widget& tab_bar::as_widget()
+	{
+		return *this;
 	}
 
 	size tab_bar::maximum_size(const optional_size& aAvailableSpace) const

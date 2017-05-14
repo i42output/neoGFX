@@ -272,7 +272,7 @@ namespace neogfx
 
 	colour push_button::border_mid_colour() const
 	{
-		return animation_colour();
+		return animation_colour().darker(0x20);
 	}
 
 	bool push_button::has_hover_colour() const

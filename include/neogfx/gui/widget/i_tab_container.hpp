@@ -32,9 +32,12 @@ namespace neogfx
 		typedef uint32_t tab_index;
 	public:
 		struct tab_not_found : std::logic_error { tab_not_found() : std::logic_error("neogfx::i_tab_container::tab_not_found") {} };
+		struct no_parent_container : std::logic_error { no_parent_container() : std::logic_error("neogfx::i_tab_container::no_parent_container") {} };
+		struct no_tab_page : std::logic_error { no_tab_page() : std::logic_error("neogfx::i_tab_container::no_tab_page") {} };
 	public:
 		virtual bool has_tabs() const = 0;
 		virtual uint32_t tab_count() const = 0;
+		virtual tab_index index_of(const i_tab& aTab) const = 0;
 		virtual const i_tab& tab(tab_index aTabIndex) const = 0;
 		virtual i_tab& tab(tab_index aTabIndex) = 0;
 		virtual const i_tab& selected_tab() const = 0;
@@ -46,5 +49,15 @@ namespace neogfx
 		virtual void adding_tab(i_tab& aTab) = 0;
 		virtual void selecting_tab(i_tab& aTab) = 0;
 		virtual void removing_tab(i_tab& aTab) = 0;
+	public:
+		virtual bool has_tab_page(tab_index aTabIndex) const = 0;
+		virtual const i_tab_page& tab_page(tab_index aTabIndex) const = 0;
+		virtual i_tab_page& tab_page(tab_index aTabIndex) = 0;
+	public:
+		virtual bool has_parent_container() const = 0;
+		virtual const i_tab_container& parent_container() const = 0;
+		virtual i_tab_container& parent_container() = 0;
+		virtual const i_widget& as_widget() const = 0;
+		virtual i_widget& as_widget() = 0;
 	};
 }

@@ -128,6 +128,11 @@ namespace neogfx
 		return iTabs.size();
 	}
 
+	view_container::tab_index view_container::index_of(const i_tab& aTab) const
+	{
+		return iTabBar.index_of(aTab);
+	}
+
 	const i_tab& view_container::tab(tab_index aTabIndex) const
 	{
 		if (aTabIndex >= iTabs.size())
@@ -195,5 +200,20 @@ namespace neogfx
 			throw tab_not_found();
 		iTabs.erase(existingTab);
 		layout_items();
+	}
+
+	bool view_container::has_parent_container() const
+	{
+		return false;
+	}
+
+	const i_tab_container& view_container::parent_container() const
+	{
+		throw no_parent_container();
+	}
+
+	i_tab_container& view_container::parent_container()
+	{
+		throw no_parent_container();
 	}
 }

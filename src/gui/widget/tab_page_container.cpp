@@ -65,12 +65,12 @@ namespace neogfx
 		return iTab;
 	}
 
-	const i_widget& tab_page_container::default_tab_page::widget() const
+	const i_widget& tab_page_container::default_tab_page::as_widget() const
 	{
 		return *this;
 	}
 
-	i_widget& tab_page_container::default_tab_page::widget()
+	i_widget& tab_page_container::default_tab_page::as_widget()
 	{
 		return *this;
 	}
@@ -123,11 +123,16 @@ namespace neogfx
 		return iTabs.size();
 	}
 
+	tab_page_container::tab_index tab_page_container::index_of(const i_tab& aTab) const
+	{
+		return iTabBar.index_of(aTab);
+	}
+
 	const i_tab& tab_page_container::tab(tab_index aTabIndex) const
 	{
 		if (aTabIndex >= iTabs.size())
 			throw tab_not_found();
-		return *std::next(iTabs.begin(), aTabIndex)->first;
+		return iTabBar.tab(aTabIndex);
 	}
 
 	i_tab& tab_page_container::tab(tab_index aTabIndex)
@@ -135,11 +140,16 @@ namespace neogfx
 		return const_cast<i_tab&>(const_cast<const tab_page_container*>(this)->tab(aTabIndex));
 	}
 
+	bool tab_page_container::has_tab_page(tab_index aTabIndex) const
+	{
+		return aTabIndex < iTabs.size();
+	}
+
 	const i_tab_page& tab_page_container::tab_page(tab_index aTabIndex) const
 	{
 		if (aTabIndex >= iTabs.size())
 			throw tab_not_found();
-		const auto& tabPagePtr = std::next(iTabs.begin(), aTabIndex)->second;
+		const auto& tabPagePtr = iTabs.find(&tab(aTabIndex))->second;
 		if (tabPagePtr == nullptr)
 			throw tab_page_not_found();
 		return *tabPagePtr;
@@ -182,12 +192,16 @@ namespace neogfx
 
 	i_tab& tab_page_container::add_tab(const std::string& aTabText)
 	{
-		return *iTabs.emplace(&iTabBar.add_tab(aTabText), tab_page_pointer()).first->first;
+		auto& newTab = iTabBar.add_tab(aTabText);
+		iTabs.emplace(&newTab, tab_page_pointer());
+		return newTab;
 	}
 
 	i_tab& tab_page_container::insert_tab(tab_index aTabIndex, const std::string& aTabText)
 	{
-		return *iTabs.emplace(&iTabBar.insert_tab(aTabIndex, aTabText), tab_page_pointer()).first->first;
+		auto& newTab = iTabBar.insert_tab(aTabIndex, aTabText);
+		iTabs.emplace(&newTab, tab_page_pointer());
+		return newTab;
 	}
 
 	void tab_page_container::remove_tab(tab_index aTabIndex)
@@ -213,11 +227,11 @@ namespace neogfx
 		existingTab->second = tab_page_pointer(new default_tab_page(iPageLayout, aTab));
 		if (aTab.is_selected())
 		{
-			existingTab->second->widget().show();
+			existingTab->second->as_widget().show();
 			layout_items();
 		}
 		else
-			existingTab->second->widget().hide();
+			existingTab->second->as_widget().hide();
 		return *existingTab->second;
 	}
 
@@ -229,11 +243,11 @@ namespace neogfx
 		existingTab->second = tab_page_pointer(tab_page_pointer(), &aWidget);
 		if (aTab.is_selected())
 		{
-			existingTab->second->widget().show();
+			existingTab->second->as_widget().show();
 			layout_items();
 		}
 		else
-			existingTab->second->widget().hide();
+			existingTab->second->as_widget().hide();
 		return *existingTab->second;
 	}
 
@@ -245,11 +259,11 @@ namespace neogfx
 		existingTab->second = aWidget;
 		if (aTab.is_selected())
 		{
-			existingTab->second->widget().show();
+			existingTab->second->as_widget().show();
 			layout_items();
 		}
 		else
-			existingTab->second->widget().hide();
+			existingTab->second->as_widget().hide();
 		return *existingTab->second;
 	}
 
@@ -266,9 +280,9 @@ namespace neogfx
 			if (tab.second != nullptr)
 			{
 				if (tab.first == &aTab)
-					tab.second->widget().show();
+					tab.second->as_widget().show();
 				else
-					tab.second->widget().hide();
+					tab.second->as_widget().hide();
 			}
 		layout_items();
 	}
@@ -279,6 +293,33 @@ namespace neogfx
 		if (existingTab == iTabs.end())
 			throw tab_not_found();
 		iTabs.erase(existingTab);
+	}
+
+	bool tab_page_container::has_parent_container() const
+	{
+		return false;
+	}
+
+	const i_tab_container& tab_page_container::parent_container() const
+	{
+		throw no_parent_container();
+	}
+
+	i_tab_container& tab_page_container::parent_container()
+	{
+		throw no_parent_container();
+	}
+
+
+
+	const i_widget& tab_page_container::as_widget() const
+	{
+		return *this;
+	}
+
+	i_widget& tab_page_container::as_widget()
+	{
+		return *this;
 	}
 
 	bool tab_page_container::can_defer_layout() const

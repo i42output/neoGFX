@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/tab_button.hpp>
+#include <neogfx/gui/widget/i_tab_page_container.hpp>
 
 namespace neogfx
 {
@@ -112,12 +113,12 @@ namespace neogfx
 
 	colour tab_button::border_mid_colour() const
 	{
-		colour result = push_button::border_mid_colour();
-		if (!is_selected())
-			result.darken(0x20);
-		return result;
+		if (is_deselected() || !container().has_tab_page(container().index_of(*this)))
+			return push_button::border_mid_colour();
+		auto& tabPage = container().tab_page(container().index_of(*this)).as_widget();
+		return tabPage.background_colour();
 	}
-	
+
 	size tab_button::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
@@ -134,23 +135,27 @@ namespace neogfx
 
 	colour tab_button::foreground_colour() const
 	{
-		if (has_foreground_colour() || is_deselected())
+		if (has_foreground_colour() || is_deselected() || !container().has_tab_page(container().index_of(*this)))
 			return push_button::foreground_colour();
-		return container_background_colour();
+		auto& tabPage = container().tab_page(container().index_of(*this)).as_widget();
+		return tabPage.background_colour();
 	}
 
 	void tab_button::paint(graphics_context& aGraphicsContext) const
 	{
 		push_button::paint(aGraphicsContext);
-		scoped_units su1(*this, UnitsPixels);
-		scoped_units su2(aGraphicsContext, UnitsPixels);
-		rect clipRect = default_clip_rect();
-		clipRect.cy += 2.0;
-		clipRect.x += 1.0;
-		clipRect.cx -= 2.0;
-		aGraphicsContext.scissor_off();
-		aGraphicsContext.scissor_on(clipRect);
-		push_button::paint(aGraphicsContext);
+		if (is_selected())
+		{
+			scoped_units su1(*this, UnitsPixels);
+			scoped_units su2(aGraphicsContext, UnitsPixels);
+			rect clipRect = default_clip_rect();
+			clipRect.cy += 2.0;
+			clipRect.x += 1.0;
+			clipRect.cx -= 2.0;
+			aGraphicsContext.scissor_off();
+			aGraphicsContext.scissor_on(clipRect);
+			push_button::paint(aGraphicsContext);
+		}
 	}
 
 	void tab_button::set_selected_state(bool aSelectedState)

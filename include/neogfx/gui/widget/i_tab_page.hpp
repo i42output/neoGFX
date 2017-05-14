@@ -37,7 +37,7 @@ namespace neogfx
 	public:
 		virtual const i_tab& tab() const = 0;
 		virtual i_tab& tab() = 0;
-		virtual const i_widget& widget() const = 0;
-		virtual i_widget& widget() = 0;
+		virtual const i_widget& as_widget() const = 0;
+		virtual i_widget& as_widget() = 0;
 	};
 }

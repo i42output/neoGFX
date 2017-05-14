@@ -51,34 +51,39 @@ namespace neogfx
 		view_container(i_widget& aParent, view_container_style aStyle = view_container_style::Tabbed);
 		view_container(i_layout& aLayout, view_container_style aStyle = view_container_style::Tabbed);
 	public:
-		virtual const i_widget& as_widget() const;
-		virtual i_widget& as_widget();
-		virtual const neogfx::view_stack& view_stack() const;
-		virtual neogfx::view_stack& view_stack();
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+		const neogfx::view_stack& view_stack() const override;
+		neogfx::view_stack& view_stack() override;
 	public:
-		view_container_style style() const;
-		void change_style(view_container_style aNewStyle);
+		view_container_style style() const override;
+		void change_style(view_container_style aNewStyle) override;
 	public:
-		virtual void add_controller(i_controller& aController);
-		virtual void add_controller(std::shared_ptr<i_controller> aController);
-		virtual void remove_controller(i_controller& aController);
+		void add_controller(i_controller& aController) override;
+		void add_controller(std::shared_ptr<i_controller> aController) override;
+		void remove_controller(i_controller& aController) override;
 	public:
-		virtual bool can_defer_layout() const;
-		virtual bool is_managing_layout() const;
+		bool can_defer_layout() const override;
+		bool is_managing_layout() const override;
 	private:
-		virtual bool has_tabs() const;
-		virtual uint32_t tab_count() const;
-		virtual const i_tab& tab(tab_index aTabIndex) const;
-		virtual i_tab& tab(tab_index aTabIndex);
-		virtual const i_tab& selected_tab() const;
-		virtual i_tab& selected_tab();
-		virtual i_tab& add_tab(const std::string& aTabText);
-		virtual i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText);
-		virtual void remove_tab(tab_index aTabIndex);
+		bool has_tabs() const override;
+		uint32_t tab_count() const override;
+		tab_index index_of(const i_tab& aTab) const override;
+		const i_tab& tab(tab_index aTabIndex) const override;
+		i_tab& tab(tab_index aTabIndex) override;
+		const i_tab& selected_tab() const override;
+		i_tab& selected_tab() override;
+		i_tab& add_tab(const std::string& aTabText) override;
+		i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText) override;
+		void remove_tab(tab_index aTabIndex) override;
 	private:
-		virtual void adding_tab(i_tab& aTab);
-		virtual void selecting_tab(i_tab& aTab);
-		virtual void removing_tab(i_tab& aTab);
+		void adding_tab(i_tab& aTab) override;
+		void selecting_tab(i_tab& aTab) override;
+		void removing_tab(i_tab& aTab) override;
+	public:
+		bool has_parent_container() const override;
+		const i_tab_container& parent_container() const override;
+		i_tab_container& parent_container() override;
 	private:
 		view_container_style iStyle;
 		vertical_layout iLayout0;

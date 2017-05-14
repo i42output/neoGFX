@@ -36,6 +36,7 @@ namespace neogfx
 		void set_editable(bool aEditable);
 	protected:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+	protected:
 		void handle_clicked() override;
 	private:
 		void init();
