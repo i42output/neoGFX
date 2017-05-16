@@ -326,11 +326,27 @@ int main(int argc, char* argv[])
 		ng::group_box groupBox{ layout2, "Group Box" };
 		ng::vertical_layout& layoutRadiosAndChecks = static_cast<ng::vertical_layout&>(groupBox.item_layout());
 		ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbox", ng::check_box::TriState);
-		triState.checked([&triState]()
+		auto showHideTabs = [&triState, &tabContainer]()
+		{
+			if (triState.is_checked())
+				tabContainer.hide_tab(8);
+			else
+				tabContainer.show_tab(8);
+			if (triState.is_indeterminate())
+				tabContainer.hide_tab(9);
+			else
+				tabContainer.show_tab(9);
+		};
+		triState.checked([&triState, showHideTabs]()
 		{
 			static uint32_t n;
 			if ((n++)%2 == 1)
 				triState.set_indeterminate();
+			showHideTabs();
+		});
+		triState.unchecked([&triState, showHideTabs]()
+		{
+			showHideTabs();
 		});
 		ng::check_box wordWrap(layoutRadiosAndChecks, "Editor word wrap");
 		wordWrap.check();

@@ -47,6 +47,8 @@ namespace neogfx
 		i_tab& add_tab(const std::string& aTabText) override;
 		i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText) override;
 		void remove_tab(tab_index aTabIndex) override;
+		void show_tab(tab_index aTabIndex) override;
+		void hide_tab(tab_index aTabIndex) override;
 	public:
 		void adding_tab(i_tab& aTab) override;
 		void selecting_tab(i_tab& aTab) override;

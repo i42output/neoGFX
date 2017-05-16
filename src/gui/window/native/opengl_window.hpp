@@ -44,30 +44,32 @@ namespace neogfx
 		opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow);
 		~opengl_window();
 	public:
-		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
-		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
-		virtual const std::pair<vec2, vec2>& logical_coordinates() const;
-		virtual void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates);
+		neogfx::logical_coordinate_system logical_coordinate_system() const override;
+		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
+		const std::pair<vec2, vec2>& logical_coordinates() const override;
+		void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) override;
 	public:
-		virtual uint64_t frame_counter() const;
-		virtual void limit_frame_rate(uint32_t aFps);
-		virtual double fps() const;
+		uint64_t frame_counter() const override;
+		void limit_frame_rate(uint32_t aFps) override;
+		double fps() const override;
 	public:
-		virtual void invalidate(const rect& aInvalidatedRect);
-		virtual void render(bool aOOBRequest = false);
-		virtual bool is_rendering() const;
-		virtual void* rendering_target_texture_handle() const;
-		virtual size rendering_target_texture_extents() const;
+		void invalidate(const rect& aInvalidatedRect) override;
+		void render(bool aOOBRequest = false) override;
+		void pause() override;
+		void resume() override;
+		bool is_rendering() const override;
+		void* rendering_target_texture_handle() const override;
+		size rendering_target_texture_extents() const override;
 	public:
-		virtual bool metrics_available() const;
-		virtual size extents() const;
-		virtual dimension horizontal_dpi() const;
-		virtual dimension vertical_dpi() const;
-		virtual dimension em_size() const;
+		bool metrics_available() const override;
+		size extents() const override;
+		dimension horizontal_dpi() const override;
+		dimension vertical_dpi() const override;
+		dimension em_size() const override;
 	protected:
-		virtual i_window& window() const;
-		virtual void destroying();
-		virtual void destroyed();
+		i_window& window() const override;
+		void destroying();
+		void destroyed();
 	private:
 		virtual void display() = 0;
 	private:
@@ -86,5 +88,6 @@ namespace neogfx
 		std::deque<double> iFpsData;
 		bool iRendering;
 		bool iDestroying;
+		uint32_t iPaused;
 	};
 }

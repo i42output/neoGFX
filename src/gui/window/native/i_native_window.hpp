@@ -39,6 +39,7 @@ namespace neogfx
 		virtual void push_event(const native_event& aEvent) = 0;
 		virtual bool pump_event() = 0;
 		virtual void handle_event(const native_event& aNativeEvent) = 0;
+		virtual bool processing_event() const = 0;
 		virtual i_window& window() const = 0;
 		virtual void close() = 0;
 		virtual void show(bool aActivate = false) = 0;

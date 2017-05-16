@@ -473,6 +473,18 @@ namespace neogfx
 		if (!destroyed())
 			native_surface().render();
 	}
+
+	void window::pause_rendering()
+	{
+		if (!destroyed())
+			native_surface().pause();
+	}
+
+	void window::resume_rendering()
+	{
+		if (!destroyed())
+			native_surface().resume();
+	}
 	
 	graphics_context window::create_graphics_context() const
 	{

@@ -46,5 +46,8 @@ namespace neogfx
 		virtual void set_text(const std::string& aText) = 0;
 		virtual void set_image(const i_texture& aTexture) = 0;
 		virtual void set_image(const i_image& aImage) = 0;
+	public:
+		virtual const i_widget& as_widget() const = 0;
+		virtual i_widget& as_widget() = 0;
 	};
 }

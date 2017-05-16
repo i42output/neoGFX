@@ -35,12 +35,12 @@ namespace neogfx
 		native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager);
 		virtual ~native_window();
 	public:
-		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const;
-		virtual void push_event(const native_event& aEvent);
-		virtual bool pump_event();
-		virtual void handle_event(const native_event& aNativeEvent);
-		virtual bool processing_event() const;
-		virtual bool has_rendering_priority() const;
+		void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
+		void push_event(const native_event& aEvent) override;
+		bool pump_event() override;
+		void handle_event(const native_event& aNativeEvent) override;
+		bool processing_event() const override;
+		bool has_rendering_priority() const override;
 	public:
 		i_rendering_engine& rendering_engine() const;
 		i_surface_manager& surface_manager() const;

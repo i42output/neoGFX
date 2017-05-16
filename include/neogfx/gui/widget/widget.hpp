@@ -216,7 +216,8 @@ namespace neogfx
 		i_widget* iLinkBefore;
 		i_widget* iLinkAfter;
 		std::shared_ptr<i_layout> iLayout;
-		std::unique_ptr<neolib::callback_timer> iLayoutTimer;
+		class layout_timer;
+		std::unique_ptr<layout_timer> iLayoutTimer;
 		device_metrics_forwarder iDeviceMetricsForwarder;
 		units_context iUnitsContext;
 		point iPosition;

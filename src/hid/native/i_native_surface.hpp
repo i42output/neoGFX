@@ -69,6 +69,8 @@ namespace neogfx
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect) = 0;
 		virtual void render(bool aOOBRequest = false) = 0;
+		virtual void pause() = 0;
+		virtual void resume() = 0;
 		virtual bool is_rendering() const = 0;
 		virtual void* rendering_target_texture_handle() const = 0;
 		virtual size rendering_target_texture_extents() const = 0;

@@ -80,6 +80,8 @@ namespace neogfx
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) = 0;
 		virtual bool has_rendering_priority() const = 0;
 		virtual void render_surface() = 0;
+		virtual void pause_rendering() = 0;
+		virtual void resume_rendering() = 0;
 		virtual graphics_context create_graphics_context() const = 0;
 		virtual graphics_context create_graphics_context(const i_widget& aWidget) const = 0;
 		virtual const i_native_surface& native_surface() const = 0;
@@ -113,5 +115,20 @@ namespace neogfx
 		virtual i_widget& focused_widget() const = 0;
 		virtual void set_focused_widget(i_widget& aWidget) = 0;
 		virtual void release_focused_widget(i_widget& aWidget) = 0;
+	};
+
+	class pause_rendering
+	{
+	public:
+		pause_rendering(i_surface& aSurface) : iSurface(aSurface)
+		{
+			iSurface.pause_rendering();
+		}
+		~pause_rendering()
+		{
+			iSurface.resume_rendering();
+		}
+	private:
+		i_surface& iSurface;
 	};
 }

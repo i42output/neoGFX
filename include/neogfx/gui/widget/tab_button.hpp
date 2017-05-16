@@ -45,6 +45,9 @@ namespace neogfx
 		void set_text(const std::string& aText) override;
 		void set_image(const i_texture& aTexture) override;
 		void set_image(const i_image& aImage) override;
+	public:
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
 	protected:
 		rect path_bounding_rect() const override;
 		bool spot_colour() const override;

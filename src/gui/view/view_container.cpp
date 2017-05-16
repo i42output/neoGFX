@@ -173,6 +173,20 @@ namespace neogfx
 		iTabBar.remove_tab(aTabIndex);
 	}
 
+	void view_container::show_tab(tab_index aTabIndex)
+	{
+		tab(aTabIndex).as_widget().show();
+		if (has_tab_page(aTabIndex))
+			tab_page(aTabIndex).as_widget().show();
+	}
+
+	void view_container::hide_tab(tab_index aTabIndex)
+	{
+		tab(aTabIndex).as_widget().hide();
+		if (has_tab_page(aTabIndex))
+			tab_page(aTabIndex).as_widget().hide();
+	}
+
 	void view_container::adding_tab(i_tab& aTab)
 	{
 		iTabs.emplace(&aTab, nullptr);
@@ -202,17 +216,17 @@ namespace neogfx
 		layout_items();
 	}
 
-	bool view_container::has_tab_page(tab_index aTabIndex) const
+	bool view_container::has_tab_page(tab_index) const
 	{
 		return false;
 	}
 
-	const i_tab_page& view_container::tab_page(tab_index aTabIndex) const
+	const i_tab_page& view_container::tab_page(tab_index) const
 	{
 		throw no_tab_page();
 	}
 
-	i_tab_page& view_container::tab_page(tab_index aTabIndex)
+	i_tab_page& view_container::tab_page(tab_index)
 	{
 		throw no_tab_page();
 	}

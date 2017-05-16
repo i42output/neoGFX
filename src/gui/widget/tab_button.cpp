@@ -95,6 +95,16 @@ namespace neogfx
 		push_button::image().set_image(aImage);
 	}
 
+	const i_widget& tab_button::as_widget() const
+	{
+		return *this;
+	}
+
+	i_widget& tab_button::as_widget()
+	{
+		return *this;
+	}
+
 	rect tab_button::path_bounding_rect() const
 	{
 		scoped_units su(*this, UnitsPixels);

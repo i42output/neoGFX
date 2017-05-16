@@ -118,6 +118,20 @@ namespace neogfx
 		iTabs.erase(iTabs.begin() + aTabIndex);
 	}
 
+	void tab_bar::show_tab(tab_index aTabIndex)
+	{
+		tab(aTabIndex).as_widget().show();
+		if (has_tab_page(aTabIndex))
+			tab_page(aTabIndex).as_widget().show();
+	}
+
+	void tab_bar::hide_tab(tab_index aTabIndex)
+	{
+		tab(aTabIndex).as_widget().hide();
+		if (has_tab_page(aTabIndex))
+			tab_page(aTabIndex).as_widget().hide();
+	}
+
 	void tab_bar::adding_tab(i_tab& aTab)
 	{
 		iContainer.adding_tab(aTab);

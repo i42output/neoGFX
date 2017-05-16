@@ -35,7 +35,8 @@ namespace neogfx
 		iFrameCounter(0),
 		iLastFrameTime(0),
 		iRendering(false),
-		iDestroying(false)
+		iDestroying(false),
+		iPaused(0)
 	{
 #ifdef _WIN32
 		ID2D1Factory* m_pDirect2dFactory;
@@ -105,7 +106,7 @@ namespace neogfx
 
 	void opengl_window::render(bool aOOBRequest)
 	{
-		if (iRendering || rendering_engine().creating_window())
+		if (iRendering || rendering_engine().creating_window() || iPaused)
 			return;
 
 		uint64_t now = app::instance().program_elapsed_ms();
@@ -203,6 +204,16 @@ namespace neogfx
 		iFpsData.push_back(1000.0 / (app::instance().program_elapsed_ms() - now));
 		if (iFpsData.size() > 25)
 			iFpsData.pop_front();		
+	}
+
+	void opengl_window::pause()
+	{
+		++iPaused;
+	}
+
+	void opengl_window::resume()
+	{
+		--iPaused;
 	}
 
 	bool opengl_window::is_rendering() const

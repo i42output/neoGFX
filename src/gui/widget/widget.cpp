@@ -27,6 +27,16 @@
 
 namespace neogfx
 {
+	class widget::layout_timer : public pause_rendering, neolib::callback_timer
+	{
+	public:
+		layout_timer(i_surface& aSurface, neolib::io_thread& aOwnerThread, std::function<void(callback_timer&)> aCallback) :
+			pause_rendering(aSurface), neolib::callback_timer(aOwnerThread, aCallback, 0)
+		{
+		}
+	};
+
+
 	widget::device_metrics_forwarder::device_metrics_forwarder(widget& aOwner) :
 		iOwner(aOwner)
 	{
@@ -585,13 +595,13 @@ namespace neogfx
 		{
 			if (!iLayoutTimer)
 			{
-				iLayoutTimer = std::unique_ptr<neolib::callback_timer>(new neolib::callback_timer(app::instance(), [this](neolib::callback_timer&)
+				iLayoutTimer = std::make_unique<layout_timer>(surface(), app::instance(), [this](neolib::callback_timer&)
 				{
 					auto t = std::move(iLayoutTimer);
 					if (!surface().destroyed())
 						layout_items();
 					update();
-				}, 40));
+				});
 			}
 		}
 		else if (has_managing_layout())

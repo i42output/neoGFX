@@ -78,6 +78,8 @@ namespace neogfx
 		i_tab& add_tab(const std::string& aTabText) override;
 		i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText) override;
 		void remove_tab(tab_index aTabIndex) override;
+		void show_tab(tab_index aTabIndex) override;
+		void hide_tab(tab_index aTabIndex) override;
 		i_tab_page& add_tab_page(const std::string& aTabText) override;
 		i_tab_page& insert_tab_page(tab_index aTabIndex, const std::string& aTabText) override;
 		i_tab_page& add_tab_page(i_tab& aTab) override;

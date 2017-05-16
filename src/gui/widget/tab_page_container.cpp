@@ -209,6 +209,20 @@ namespace neogfx
 		iTabBar.remove_tab(aTabIndex);
 	}
 
+	void tab_page_container::show_tab(tab_index aTabIndex)
+	{
+		tab(aTabIndex).as_widget().show();
+		if (has_tab_page(aTabIndex))
+			tab_page(aTabIndex).as_widget().show();
+	}
+
+	void tab_page_container::hide_tab(tab_index aTabIndex)
+	{
+		tab(aTabIndex).as_widget().hide();
+		if (has_tab_page(aTabIndex))
+			tab_page(aTabIndex).as_widget().hide();
+	}
+
 	i_tab_page& tab_page_container::add_tab_page(const std::string& aTabText)
 	{
 		return add_tab_page(add_tab(aTabText));
