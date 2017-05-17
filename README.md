@@ -4,7 +4,7 @@
 neoGFX is a cross-platform C++ GPU-based GUI/game library.
 neoGFX is still a work in progress (incomplete) so is not yet suitable for making GUI apps or games. Currently neogfx has only been built for and tested on Windows.
 
-# Features
+# Features (at version 1.0 release)
 - clean modern C++ design including full exception safety supporting various widget allocation patterns (stack, member variable or free store);
 - use of standard non-proprietary C++ data types including using standard string classes (UTF-8 encoding) and containers from the C++ standard library;
 - no baggage: neoGFX primarily contains only the GUI and graphics related functionality needed for creating apps and games;
