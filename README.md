@@ -5,11 +5,17 @@ neoGFX is a cross-platform C++ GPU-based GUI/game library.
 neoGFX is still a work in progress (incomplete) so is not yet suitable for making GUI apps or games. Currently neogfx has only been built for and tested on Windows.
 
 # Features
-- full exception safety;
-- support for stack, member sub-object and heap allocated widgets;
-- all strings are UTF-8;
-- uses standard C++ data types including using standard string classes and containers from the C++ standard library and Boost instead of non-standard proprietary ones;
-- no baggage: neoGFX is a pure GUI library;
+- clean modern C++ design including full exception safety supporting various widget allocation patterns (stack, member variable or free store);
+- use of standard non-proprietary C++ data types including using standard string classes (UTF-8 encoding) and containers from the C++ standard library;
+- no baggage: neoGFX primarily contains only the GUI and graphics related functionality needed for creating apps and games;
+- full library of widgets and layout managers specifiable in XML using the included GUI designer tool;
+- CSS3 style sheet support with support for custom skins;
+- sub-pixel text rendering;
+- "text_edit" widget supports multiple fonts, text colours (with optional gradient effects), colour emojis and rendering text in columns;
+- GPU shader rendered CSS3 compliant gradients with optional gaussian smoothing;
+- MVC (model-view-controller) related classes supporting robust and fast app design;
+- 2D (initially) game support: sprites and 2D physics;
+-flexible asset management: texture images (e.g PNGs) can be stored in .zip archives which can be optionally embedded inside the program binary accessible using simple URLs;
 - support for OpenGL, DirectX and Vulkan.
 
 
