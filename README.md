@@ -34,7 +34,7 @@ Window                    | 90      |     Icon; drop shadow
 Dialog                    | 90      |     Default button
 Menu                      | 100     | 
 MDI                       | 0       |
-Tabs                      | 80      |     Close button
+Tabs                      | 80      |     Close button, multi-line and/or scroller
 Toolbars                  | 90      |     Drop-down button support
 Layout Managers           | 95      |     Need to fully support size policies
 Label                     | 100     |     
@@ -56,4 +56,4 @@ File Browsers (Native)    | 0       |
 XML Resource Description  | 0       |
 Skins                     | 0       |
 
-Last updated: 29/03/2017
+Last updated: 17/05/2017
