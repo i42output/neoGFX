@@ -10,6 +10,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - no baggage: neoGFX primarily contains only the GUI and graphics related functionality needed for creating apps and games;
 - full library of widgets and layout managers specifiable in XML using the included GUI designer tool;
 - CSS3 style sheet support with support for custom skins;
+- scripting engine (Lua);
 - sub-pixel text rendering;
 - "text_edit" widget supports multiple fonts, text colours (with optional gradient effects), colour emojis and rendering text in columns;
 - GPU shader rendered CSS3 compliant gradients with optional gaussian smoothing;
