@@ -32,14 +32,14 @@ namespace neogfx
 	public:
 		view(i_controller& aController, i_model& aModel);
 	public:
-		virtual const i_widget& as_widget() const;
-		virtual i_widget& as_widget();
-		virtual const i_model& model() const;
-		virtual i_model& model();
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+		const i_model& model() const override;
+		i_model& model() override;
 	public:
-		virtual bool is_active() const;
-		virtual void activate();
-		virtual void deactivate();
+		bool is_active() const override;
+		void activate() override;
+		void deactivate() override;
 	private:
 		i_controller& iController;
 		i_model& iModel;

@@ -25,28 +25,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu, style_e aStyle) :
-		window(aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu, window_style aStyle) :
+		window(aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame), iParentWidget(0), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 		set_menu(aMenu, aPosition);
 	}
 
-	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, style_e aStyle) :
-		window(aParent, aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, window_style aStyle) :
+		window(aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame), iParentWidget(&aParent), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 		set_menu(aMenu, aPosition);
 	}
 
-	popup_menu::popup_menu(const point& aPosition, style_e aStyle) :
-		window(aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(0), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+	popup_menu::popup_menu(const point& aPosition, window_style aStyle) :
+		window(aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame), iParentWidget(0), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
 
-	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, style_e aStyle) :
-		window(aParent, aPosition, size{}, aStyle, i_scrollbar::Button, framed_widget::SolidFrame), iParentWidget(&aParent), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, window_style aStyle) :
+		window(aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame), iParentWidget(&aParent), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
 	{
 		init();
 	}
@@ -65,15 +65,15 @@ namespace neogfx
 	{
 		return aClickedWidget == 0 || 
 			iParentWidget == 0 || 
-			(iParentWidget == aClickedWidget && (style() & (DismissOnParentClick|HideOnParentClick))) || 
+			(iParentWidget == aClickedWidget && (style() & (window_style::DismissOnParentClick | window_style::HideOnParentClick)) != window_style::Invalid) ||
 			(iParentWidget != aClickedWidget && !iParentWidget->is_ancestor_of(*aClickedWidget));
 	}
 
 	i_surface::dismissal_type_e popup_menu::dismissal_type() const
 	{
-		if (style() & DismissOnOwnerClick)
+		if ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick)
 			return CloseOnDismissal;
-		else if (style() & HideOnOwnerClick)
+		else if ((style() & window_style::HideOnOwnerClick) == window_style::HideOnOwnerClick)
 			return HideOnDismissal;
 		else
 			return CannotDismiss;
@@ -94,9 +94,9 @@ namespace neogfx
 
 	void popup_menu::dismiss()
 	{
-		if (style() & DismissOnOwnerClick)
+		if ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick)
 			close();
-		else if (style() & HideOnOwnerClick)
+		else if ((style() & window_style::HideOnOwnerClick) == window_style::HideOnOwnerClick)
 			hide();
 		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().ungrab_keyboard(*this);

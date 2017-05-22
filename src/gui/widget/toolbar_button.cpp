@@ -24,19 +24,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	toolbar_button::toolbar_button(i_action& aAction) : 
-		push_button(aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
+		push_button(aAction.button_text(), push_button_style::Toolbar), iAction(aAction)
 	{
 		init();
 	}
 
 	toolbar_button::toolbar_button(i_widget& aParent, i_action& aAction) :
-		push_button(aParent, aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
+		push_button(aParent, aAction.button_text(), push_button_style::Toolbar), iAction(aAction)
 	{
 		init();
 	}
 
 	toolbar_button::toolbar_button(i_layout& aLayout, i_action& aAction) :
-		push_button(aLayout, aAction.button_text(), ButtonStyleToolbar), iAction(aAction)
+		push_button(aLayout, aAction.button_text(), push_button_style::Toolbar), iAction(aAction)
 	{
 		init();
 	}

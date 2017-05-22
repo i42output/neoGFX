@@ -40,7 +40,7 @@ namespace neogfx
 					iParent.layout().remove_item_at(iParent.layout().item_count() - 1);
 				while (iParent.layout().item_count() < iParent.model().columns() + 1)
 				{
-					iParent.layout().add_item(std::make_shared<push_button>("", push_button::ButtonStyleItemViewHeader));
+					iParent.layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
 				}
 				for (std::size_t i = 0; i < iParent.layout().item_count(); ++i)
 				{

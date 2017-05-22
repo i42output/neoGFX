@@ -40,7 +40,7 @@ namespace neogfx
 	}
 
 	colour_dialog::colour_box::colour_box(colour_dialog& aParent, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour) :
-		framed_widget(aParent, SolidFrame), iParent(aParent), iColour(aColour), iCustomColour(aCustomColour)
+		framed_widget(aParent, frame_style::SolidFrame), iParent(aParent), iColour(aColour), iCustomColour(aCustomColour)
 	{
 		set_margins(neogfx::margins{});
 	}
@@ -643,7 +643,7 @@ namespace neogfx
 	}
 
 	colour_dialog::colour_dialog(const colour& aCurrentColour) :
-		dialog("Select Colour", Modal | Titlebar | Close),
+		dialog("Select Colour", window_style::Modal | window_style::Titlebar | window_style::Close),
 		iCurrentChannel{ChannelHue},
 		iCurrentColour{aCurrentColour},
 		iSelectedColour{aCurrentColour.to_hsv()},
@@ -678,7 +678,7 @@ namespace neogfx
 	}
 
 	colour_dialog::colour_dialog(i_widget& aParent, const colour& aCurrentColour) :
-		dialog(aParent, "Select Colour", Modal | Titlebar | Close),
+		dialog(aParent, "Select Colour", window_style::Modal | window_style::Titlebar | window_style::Close),
 		iCurrentChannel{ChannelHue},
 		iCurrentColour{aCurrentColour},
 		iSelectedColour{aCurrentColour.to_hsv()},

@@ -136,7 +136,7 @@ namespace neogfx
 	}
 
 	text_edit::text_edit(type_e aType) :
-		scrollable_widget(aType == MultiLine ? i_scrollbar::Normal : i_scrollbar::Invisible), 
+		scrollable_widget(aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible), 
 		iType(aType),
 		iReadOnly(false),
 		iWordWrap(aType == MultiLine),
@@ -157,7 +157,7 @@ namespace neogfx
 	}
 
 	text_edit::text_edit(i_widget& aParent, type_e aType) :
-		scrollable_widget(aParent, aType == MultiLine ? i_scrollbar::Normal : i_scrollbar::Invisible),
+		scrollable_widget(aParent, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible),
 		iType(aType),
 		iReadOnly(false),
 		iWordWrap(aType == MultiLine),
@@ -178,7 +178,7 @@ namespace neogfx
 	}
 
 	text_edit::text_edit(i_layout& aLayout, type_e aType) :
-		scrollable_widget(aLayout, aType == MultiLine ? i_scrollbar::Normal : i_scrollbar::Invisible),
+		scrollable_widget(aLayout, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible),
 		iType(aType),
 		iReadOnly(false),
 		iWordWrap(aType == MultiLine),

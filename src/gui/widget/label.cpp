@@ -45,6 +45,10 @@ namespace neogfx
 		init();
 	}
 
+	label::~label()
+	{
+	}
+
 	neogfx::size_policy label::size_policy() const
 	{
 		if (widget::has_size_policy())

@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 		app.current_style().set_colour(ng::colour::Black);
 		app.change_style("Default");
 
-		ng::window window(ng::size{ 700, 700 });
+		ng::window window(ng::size{ 800, 700 });
 
 		bool showFps = false;
 		auto fpsFont = window.font().with_size(18);
@@ -162,8 +162,10 @@ int main(int argc, char* argv[])
 		});
 
 		ng::menu_bar menu(layout0);
+
 		auto& fileMenu = menu.add_sub_menu("&File");
 		fileMenu.add_action(app.action_file_exit());
+
 		auto& editMenu = menu.add_sub_menu("&Edit");
 		editMenu.add_action(app.action_undo());
 		editMenu.add_action(app.action_redo());
@@ -178,6 +180,7 @@ int main(int argc, char* argv[])
 		auto& viewMenu = menu.add_sub_menu("&View");
 		auto& addFavouriteAction = app.add_action("Add Favourite...", ":/closed/resources/caw_toolbar.naa#add_favourite.png");
 		auto& organizeFavouritesAction = app.add_action("Organize Favourites...", ":/closed/resources/caw_toolbar.naa#organize_favourites.png");
+
 		auto& favouritesMenu = menu.add_sub_menu("F&avourites");
 		favouritesMenu.add_action(addFavouriteAction);
 		favouritesMenu.add_action(organizeFavouritesAction);
@@ -212,6 +215,7 @@ int main(int argc, char* argv[])
 		}
 		menu.add_action(contactsAction);
 		menu.add_action(muteAction);
+
 		auto& testMenu = menu.add_sub_menu("&Test");
 		testMenu.add_action(contactsAction);
 		testMenu.add_action(muteAction);
@@ -225,7 +229,11 @@ int main(int argc, char* argv[])
 			cd.exec();
 		});
 		testMenu.add_action(colourAction);
+
 		auto& windowMenu = menu.add_sub_menu("&Window");
+		auto& nextTab = windowMenu.add_action(app.add_action("Next Tab").set_shortcut("Ctrl+Tab"));
+		auto& previousTab = windowMenu.add_action(app.add_action("Previous Tab").set_shortcut("Shift+Ctrl+Tab"));
+
 		auto& helpMenu = menu.add_sub_menu("&Help");
 
 		ng::toolbar toolbar(layout0);
@@ -244,7 +252,10 @@ int main(int argc, char* argv[])
 		toolbar.add_separator();
 		toolbar.add_action(app.add_action("Check for Updates...", ":/closed/resources/caw_toolbar.naa#setup.png"));
 
-		ng::tab_page_container tabContainer(layout0);
+		ng::tab_page_container tabContainer(layout0, true);
+
+		nextTab.triggered([&]() { tabContainer.select_next_tab(); });
+		previousTab.triggered([&]() { tabContainer.select_previous_tab(); });
 
 		// Buttons
 
@@ -464,6 +475,8 @@ int main(int argc, char* argv[])
 
 		neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
 		{
+			if (button6.is_singular())
+				return;
 			aTimer.again();
 			const double PI = 2.0 * std::acos(0.0);
 			double brightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;

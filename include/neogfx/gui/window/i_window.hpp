@@ -27,6 +27,8 @@ namespace neogfx
 {
 	class i_native_window;
 
+	typedef surface_style window_style;
+
 	class i_window : public i_surface
 	{
 	public:

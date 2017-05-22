@@ -24,13 +24,13 @@
 
 namespace neogfx
 {
-	push_button::push_button(const std::string& aText, style_e aStyle) :
-		button(aText, (aStyle == ButtonStyleNormal || aStyle == ButtonStyleButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
+	push_button::push_button(const std::string& aText, push_button_style aStyle) :
+		button(aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false), 
 		iAnimationFrame(0),
 		iStyle(aStyle)
 	{
-		if (iStyle == ButtonStyleItemViewHeader)
+		if (iStyle == push_button_style::ItemViewHeader)
 		{
 			set_margins(neogfx::margins(1.0, 2.0));
 			layout().set_margins(neogfx::margins(0.0));
@@ -39,13 +39,13 @@ namespace neogfx
 		}
 	}
 	
-	push_button::push_button(i_widget& aParent, const std::string& aText, style_e aStyle) :
-		button(aParent, aText, (aStyle == ButtonStyleNormal || aStyle == ButtonStyleButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
+	push_button::push_button(i_widget& aParent, const std::string& aText, push_button_style aStyle) :
+		button(aParent, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false), 
 		iAnimationFrame(0),
 		iStyle(aStyle)
 	{
-		if (iStyle == ButtonStyleItemViewHeader)
+		if (iStyle == push_button_style::ItemViewHeader)
 		{
 			set_margins(neogfx::margins(1.0, 2.0));
 			layout().set_margins(neogfx::margins(0.0));
@@ -54,13 +54,13 @@ namespace neogfx
 		}
 	}
 
-	push_button::push_button(i_layout& aLayout, const std::string& aText, style_e aStyle) :
-		button(aLayout, aText, (aStyle == ButtonStyleNormal || aStyle == ButtonStyleButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
+	push_button::push_button(i_layout& aLayout, const std::string& aText, push_button_style aStyle) :
+		button(aLayout, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false),
 		iAnimationFrame(0),
 		iStyle(aStyle)
 	{
-		if (iStyle == ButtonStyleItemViewHeader)
+		if (iStyle == push_button_style::ItemViewHeader)
 		{
 			set_margins(neogfx::margins(1.0, 2.0));
 			layout().set_margins(neogfx::margins(0.0));
@@ -74,7 +74,7 @@ namespace neogfx
 		if (has_minimum_size())
 			return button::minimum_size(aAvailableSpace);
 		size result = button::minimum_size(aAvailableSpace);
-		if (iStyle == ButtonStyleButtonBox)
+		if (iStyle == push_button_style::ButtonBox)
 		{
 			if (iStandardButtonWidth == boost::none || iStandardButtonWidth->first != label().text().font())
 			{
@@ -91,7 +91,7 @@ namespace neogfx
 	{
 		if (has_maximum_size())
 			return button::maximum_size(aAvailableSpace);
-		if (iStyle == ButtonStyleButtonBox)
+		if (iStyle == push_button_style::ButtonBox)
 			return minimum_size(aAvailableSpace);
 		return button::maximum_size(aAvailableSpace);
 	}
@@ -99,7 +99,7 @@ namespace neogfx
 	void push_button::paint_non_client(graphics_context& aGraphicsContext) const
 	{
 		button::paint_non_client(aGraphicsContext);
-		if (iStyle == ButtonStyleToolbar && enabled() && (entered() || capturing()))
+		if (iStyle == push_button_style::Toolbar && enabled() && (entered() || capturing()))
 		{
 			colour background = (capturing() && entered() ? 
 				app::instance().current_style().selection_colour() : 
@@ -119,11 +119,11 @@ namespace neogfx
 		dimension penWidth = device_metrics().horizontal_dpi() / 96;
 		switch (iStyle)
 		{
-		case ButtonStyleNormal:
-		case ButtonStyleButtonBox:
-		case ButtonStyleTab:
-		case ButtonStyleDropList:
-		case ButtonStyleSpinBox:
+		case push_button_style::Normal:
+		case push_button_style::ButtonBox:
+		case push_button_style::Tab:
+		case push_button_style::DropList:
+		case push_button_style::SpinBox:
 			outline.deflate(penWidth * 2.0, penWidth * 2.0);
 			break;
 		}
@@ -134,10 +134,10 @@ namespace neogfx
 		colour bottomHalfTo = faceColour;
 		switch(iStyle)
 		{
-		case ButtonStyleNormal:
-		case ButtonStyleButtonBox:
-		case ButtonStyleItemViewHeader:
-		case ButtonStyleToolbar:
+		case push_button_style::Normal:
+		case push_button_style::ButtonBox:
+		case push_button_style::ItemViewHeader:
+		case push_button_style::Toolbar:
 			if (!capturing())
 			{
 				if (!spot_colour())
@@ -173,9 +173,9 @@ namespace neogfx
 				}
 			}
 			break;
-		case ButtonStyleTab:
-		case ButtonStyleDropList:
-		case ButtonStyleSpinBox:
+		case push_button_style::Tab:
+		case push_button_style::DropList:
+		case push_button_style::SpinBox:
 			if (!spot_colour())
 			{
 				aGraphicsContext.fill_rect(outline.bounding_rect(), gradient(topHalfTo, bottomHalfFrom));
@@ -195,11 +195,11 @@ namespace neogfx
 		}
 		switch(iStyle)
 		{
-		case ButtonStyleNormal:
-		case ButtonStyleButtonBox:
-		case ButtonStyleTab:
-		case ButtonStyleDropList:
-		case ButtonStyleSpinBox:
+		case push_button_style::Normal:
+		case push_button_style::ButtonBox:
+		case push_button_style::Tab:
+		case push_button_style::DropList:
+		case push_button_style::SpinBox:
 			outline.inflate(penWidth, penWidth);
 			aGraphicsContext.draw_path(outline, pen(innerBorderColour, penWidth));
 			outline.inflate(penWidth, penWidth);
@@ -234,11 +234,11 @@ namespace neogfx
 		size currentSize = path_bounding_rect().extents();
 		switch (iStyle)
 		{
-		case ButtonStyleNormal:
-		case ButtonStyleButtonBox:
-		case ButtonStyleTab:
-		case ButtonStyleDropList:
-		case ButtonStyleSpinBox:
+		case push_button_style::Normal:
+		case push_button_style::ButtonBox:
+		case push_button_style::Tab:
+		case push_button_style::DropList:
+		case push_button_style::SpinBox:
 			ret.move_to(pixel.cx, 0, 12);
 			ret.line_to(currentSize.cx - pixel.cx, 0);
 			ret.line_to(currentSize.cx - pixel.cx, pixel.cy);
@@ -253,7 +253,7 @@ namespace neogfx
 			ret.line_to(pixel.cx, pixel.cy);
 			ret.line_to(pixel.cx, 0);
 			break;
-		case ButtonStyleItemViewHeader:
+		case push_button_style::ItemViewHeader:
 			ret.move_to(0, 0, 4);
 			ret.line_to(currentSize.cx, 0);
 			ret.line_to(currentSize.cx, currentSize.cy);

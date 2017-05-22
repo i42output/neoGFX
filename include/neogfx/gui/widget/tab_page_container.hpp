@@ -56,9 +56,9 @@ namespace neogfx
 		typedef std::shared_ptr<i_tab_page> tab_page_pointer;
 		typedef std::map<const i_tab*, tab_page_pointer> tab_list;
 	public:
-		tab_page_container();
-		tab_page_container(i_widget& aParent);
-		tab_page_container(i_layout& aLayout);
+		tab_page_container(bool aClosableTabs = false);
+		tab_page_container(i_widget& aParent, bool aClosableTabs = false);
+		tab_page_container(i_layout& aLayout, bool aClosableTabs = false);
 		~tab_page_container();
 	public:
 		stack_layout& page_layout();
@@ -71,6 +71,7 @@ namespace neogfx
 		bool has_tab_page(tab_index aTabIndex) const override;
 		const i_tab_page& tab_page(tab_index aTabIndex) const override;
 		i_tab_page& tab_page(tab_index aTabIndex) override;
+		bool is_tab_selected() const override;
 		const i_tab& selected_tab() const override;
 		i_tab& selected_tab() override;
 		const i_tab_page& selected_tab_page() const override;
@@ -80,6 +81,11 @@ namespace neogfx
 		void remove_tab(tab_index aTabIndex) override;
 		void show_tab(tab_index aTabIndex) override;
 		void hide_tab(tab_index aTabIndex) override;
+		optional_tab_index next_visible_tab(tab_index aStartFrom) const override;
+		optional_tab_index previous_visible_tab(tab_index aStartFrom) const  override;
+		void select_next_tab() override;
+		void select_previous_tab() override;
+	public:
 		i_tab_page& add_tab_page(const std::string& aTabText) override;
 		i_tab_page& insert_tab_page(tab_index aTabIndex, const std::string& aTabText) override;
 		i_tab_page& add_tab_page(i_tab& aTab) override;

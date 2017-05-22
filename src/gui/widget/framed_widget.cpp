@@ -22,17 +22,17 @@
 
 namespace neogfx
 {
-	framed_widget::framed_widget(style_e aStyle, dimension aLineWidth) : 
+	framed_widget::framed_widget(frame_style aStyle, dimension aLineWidth) :
 		iStyle(aStyle), iLineWidth(aLineWidth)
 	{
 	}
 
-	framed_widget::framed_widget(i_widget& aParent, style_e aStyle, dimension aLineWidth) :
+	framed_widget::framed_widget(i_widget& aParent, frame_style aStyle, dimension aLineWidth) :
 		widget(aParent), iStyle(aStyle), iLineWidth(aLineWidth)
 	{
 	}
 
-	framed_widget::framed_widget(i_layout& aLayout, style_e aStyle, dimension aLineWidth) :
+	framed_widget::framed_widget(i_layout& aLayout, frame_style aStyle, dimension aLineWidth) :
 		widget(aLayout), iStyle(aStyle), iLineWidth(aLineWidth)
 	{
 	}
@@ -83,18 +83,18 @@ namespace neogfx
 		widget::paint_non_client(aGraphicsContext);
 		switch (iStyle)
 		{
-		case NoFrame:
-		case HiddenFrame:
+		case frame_style::NoFrame:
+		case frame_style::HiddenFrame:
 		default:
 			break;
-		case DottedFrame:
+		case frame_style::DottedFrame:
 			break;
-		case DashedFrame:
+		case frame_style::DashedFrame:
 			break;
-		case SolidFrame:
+		case frame_style::SolidFrame:
 			aGraphicsContext.draw_rect(rect(point(0.0, 0.0), window_rect().extents()), pen(frameColour, effective_frame_width()));
 			break;
-		case ContainerFrame:
+		case frame_style::ContainerFrame:
 			{
 				colour midColour = (has_foreground_colour() ? foreground_colour() : container_background_colour());
 				colour borderColour = midColour.darker(0x40);
@@ -106,15 +106,15 @@ namespace neogfx
 				aGraphicsContext.draw_rect(rectBorder, pen(borderColour, line_width()));
 			}
 			break;
-		case DoubleFrame:
+		case frame_style::DoubleFrame:
 			break;
-		case GrooveFrame:
+		case frame_style::GrooveFrame:
 			break;
-		case RidgeFrame:
+		case frame_style::RidgeFrame:
 			break;
-		case InsetFrame:
+		case frame_style::InsetFrame:
 			break;
-		case OutsetFrame:
+		case frame_style::OutsetFrame:
 			break;
 		}
 	}
@@ -124,7 +124,7 @@ namespace neogfx
 		widget::paint(aGraphicsContext);
 	}
 
-	void framed_widget::set_style(style_e aStyle)
+	void framed_widget::set_style(frame_style aStyle)
 	{
 		if (iStyle != aStyle)
 		{
@@ -148,22 +148,22 @@ namespace neogfx
 	{
 		switch (iStyle)
 		{
-		case NoFrame:
+		case frame_style::NoFrame:
 		default:
 			return 0.0;
-		case DottedFrame:
-		case DashedFrame:
-		case SolidFrame:
+		case frame_style::DottedFrame:
+		case frame_style::DashedFrame:
+		case frame_style::SolidFrame:
 			return line_width();
-		case ContainerFrame:
+		case frame_style::ContainerFrame:
 			return line_width() * 2.0;
-		case DoubleFrame:
-		case GrooveFrame:
-		case RidgeFrame:
+		case frame_style::DoubleFrame:
+		case frame_style::GrooveFrame:
+		case frame_style::RidgeFrame:
 			return line_width() * 3.0;
-		case InsetFrame:
-		case OutsetFrame:
-		case HiddenFrame:
+		case frame_style::InsetFrame:
+		case frame_style::OutsetFrame:
+		case frame_style::HiddenFrame:
 			return line_width();
 		}
 	}

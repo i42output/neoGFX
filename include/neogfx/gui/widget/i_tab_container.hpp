@@ -30,6 +30,7 @@ namespace neogfx
 	{
 	public:
 		typedef uint32_t tab_index;
+		typedef boost::optional<tab_index> optional_tab_index;
 	public:
 		struct tab_not_found : std::logic_error { tab_not_found() : std::logic_error("neogfx::i_tab_container::tab_not_found") {} };
 		struct no_parent_container : std::logic_error { no_parent_container() : std::logic_error("neogfx::i_tab_container::no_parent_container") {} };
@@ -40,6 +41,7 @@ namespace neogfx
 		virtual tab_index index_of(const i_tab& aTab) const = 0;
 		virtual const i_tab& tab(tab_index aTabIndex) const = 0;
 		virtual i_tab& tab(tab_index aTabIndex) = 0;
+		virtual bool is_tab_selected() const = 0;
 		virtual const i_tab& selected_tab() const = 0;
 		virtual i_tab& selected_tab() = 0;
 		virtual i_tab& add_tab(const std::string& aTabText) = 0;
@@ -47,6 +49,10 @@ namespace neogfx
 		virtual void remove_tab(tab_index aTabIndex) = 0;
 		virtual void show_tab(tab_index aTabIndex) = 0;
 		virtual void hide_tab(tab_index aTabIndex) = 0;
+		virtual optional_tab_index next_visible_tab(tab_index aStartFrom) const = 0;
+		virtual optional_tab_index previous_visible_tab(tab_index aStartFrom) const = 0;
+		virtual void select_next_tab() = 0;
+		virtual void select_previous_tab() = 0;
 	public:
 		virtual void adding_tab(i_tab& aTab) = 0;
 		virtual void selecting_tab(i_tab& aTab) = 0;

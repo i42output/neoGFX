@@ -39,6 +39,29 @@ namespace neogfx
 
 	class i_native_surface;
 
+	enum class surface_style : uint32_t
+	{
+		Invalid = 0x000000,
+		None = 0x000001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
+		Titlebar = 0x000002,	// The window has a titlebar
+		MinimizeBox = 0x000004,
+		MaximizeBox = 0x000008,
+		Resize = 0x000010,	// The window can be resized and has a maximize button
+		Close = 0x000020,	// The window has a close button
+		Fullscreen = 0x000040,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
+		Modal = 0x000080,
+		ApplicationModal = 0x001000,
+		NoActivate = 0x002000,
+		RequiresOwnerFocus = 0x004000,
+		DismissOnOwnerClick = 0x008000,
+		DismissOnParentClick = 0x010000,
+		HideOnOwnerClick = 0x020000,
+		HideOnParentClick = 0x040000,
+		InitiallyHidden = 0x080000,
+		Weak = 0x100000,
+		Default = Titlebar | MinimizeBox | MaximizeBox | Resize | Close
+	};
+
 	class i_surface : public i_device_metrics, public i_units_context
 	{
 	public:
@@ -70,8 +93,8 @@ namespace neogfx
 		virtual void dismiss() = 0;
 	public:
 		virtual neogfx::surface_type surface_type() const = 0;
-		virtual uint32_t style() const = 0;
-		virtual void set_style(uint32_t aStyle) = 0;
+		virtual surface_style style() const = 0;
+		virtual void set_style(surface_style aStyle) = 0;
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
 		virtual const std::pair<vec2, vec2>& logical_coordinates() const = 0;

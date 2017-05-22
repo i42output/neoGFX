@@ -25,30 +25,30 @@
 
 namespace neogfx
 {
-	scrollable_widget::scrollable_widget(i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	scrollable_widget::scrollable_widget(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		framed_widget(aFrameStyle),
-		iVerticalScrollbar(*this, i_scrollbar::Vertical, aScrollbarStyle),
-		iHorizontalScrollbar(*this, i_scrollbar::Horizontal, aScrollbarStyle),
+		iVerticalScrollbar(*this, scrollbar_type::Vertical, aScrollbarStyle),
+		iHorizontalScrollbar(*this, scrollbar_type::Horizontal, aScrollbarStyle),
 		iIgnoreScrollbarUpdates(0)
 	{
 		if (has_surface())
 			init();
 	}
 	
-	scrollable_widget::scrollable_widget(i_widget& aParent, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	scrollable_widget::scrollable_widget(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		framed_widget(aParent, aFrameStyle),
-		iVerticalScrollbar(*this, i_scrollbar::Vertical, aScrollbarStyle),
-		iHorizontalScrollbar(*this, i_scrollbar::Horizontal, aScrollbarStyle),
+		iVerticalScrollbar(*this, scrollbar_type::Vertical, aScrollbarStyle),
+		iHorizontalScrollbar(*this, scrollbar_type::Horizontal, aScrollbarStyle),
 		iIgnoreScrollbarUpdates(0)
 	{
 		if (has_surface())
 			init();
 	}
 	
-	scrollable_widget::scrollable_widget(i_layout& aLayout, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	scrollable_widget::scrollable_widget(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		framed_widget(aLayout, aFrameStyle),
-		iVerticalScrollbar(*this, i_scrollbar::Vertical, aScrollbarStyle),
-		iHorizontalScrollbar(*this, i_scrollbar::Horizontal, aScrollbarStyle),
+		iVerticalScrollbar(*this, scrollbar_type::Vertical, aScrollbarStyle),
+		iHorizontalScrollbar(*this, scrollbar_type::Horizontal, aScrollbarStyle),
 		iIgnoreScrollbarUpdates(0)
 	{
 		if (has_surface())
@@ -84,23 +84,27 @@ namespace neogfx
 		rect result = framed_widget::client_rect(aIncludeMargins);
 		if (vertical_scrollbar().visible())
 		{
-			if (vertical_scrollbar().style() == i_scrollbar::Normal)
+			if (vertical_scrollbar().style() == scrollbar_style::Normal)
 				result.cx -= vertical_scrollbar().width(*this);
-			else // i_scrollbar::Button
+			else if (vertical_scrollbar().style() == scrollbar_style::Menu)
 			{
 				result.y += vertical_scrollbar().width(*this);
 				result.cy -= vertical_scrollbar().width(*this) * 2.0;
 			}
+			else if (vertical_scrollbar().style() == scrollbar_style::Scroller)
+				result.cy -= vertical_scrollbar().width(*this) * 2.0;
 		}
 		if (horizontal_scrollbar().visible())
 		{
-			if (horizontal_scrollbar().style() == i_scrollbar::Normal)
+			if (horizontal_scrollbar().style() == scrollbar_style::Normal)
 				result.cy -= horizontal_scrollbar().width(*this);
-			else // i_scrollbar::Button
+			else if (vertical_scrollbar().style() == scrollbar_style::Menu)
 			{
 				result.x += horizontal_scrollbar().width(*this);
 				result.cx -= horizontal_scrollbar().width(*this) * 2.0;
 			}
+			else if (vertical_scrollbar().style() == scrollbar_style::Scroller)
+				result.cx -= horizontal_scrollbar().width(*this) * 2.0;
 		}
 		return result;
 	}
@@ -112,11 +116,11 @@ namespace neogfx
 			vertical_scrollbar().render(aGraphicsContext);
 		if (horizontal_scrollbar().visible())
 			horizontal_scrollbar().render(aGraphicsContext);
-		if (vertical_scrollbar().visible() && horizontal_scrollbar().visible() && vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == i_scrollbar::Normal)
+		if (vertical_scrollbar().visible() && horizontal_scrollbar().visible() && vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == scrollbar_style::Normal)
 		{
 			point oldOrigin = aGraphicsContext.origin();
 			aGraphicsContext.set_origin(point(0.0, 0.0));
-			colour scrollbarColour = scrollbar_colour(iVerticalScrollbar);
+			auto scrollbarColour = background_colour();
 			aGraphicsContext.fill_rect(
 				rect(
 					point(scrollbar_geometry(aGraphicsContext, horizontal_scrollbar()).right(), scrollbar_geometry(aGraphicsContext, iVerticalScrollbar).bottom()), 
@@ -171,9 +175,9 @@ namespace neogfx
 			{
 				if (vertical_scrollbar().clicked_element() == i_scrollbar::ElementNone && horizontal_scrollbar().clicked_element() == i_scrollbar::ElementNone)
 				{
-					if (vertical_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
+					if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
 						vertical_scrollbar().click_element(vertical_scrollbar().element_at(*this, aPosition + origin()));
-					else if (horizontal_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
+					else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
 						horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(*this, aPosition + origin()));
 				}
 			}
@@ -187,9 +191,9 @@ namespace neogfx
 		{
 			if (vertical_scrollbar().clicked_element() == i_scrollbar::ElementNone && horizontal_scrollbar().clicked_element() == i_scrollbar::ElementNone)
 			{
-				if (vertical_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
+				if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
 					vertical_scrollbar().click_element(vertical_scrollbar().element_at(*this, aPosition + origin()));
-				else if (horizontal_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
+				else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
 					horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(*this, aPosition + origin()));
 			}
 		}
@@ -316,22 +320,20 @@ namespace neogfx
 	{
 		switch (aScrollbar.type())
 		{
-		case i_scrollbar::Vertical:
-			if (vertical_scrollbar().style() == i_scrollbar::Normal)
+		case scrollbar_type::Vertical:
+			if (vertical_scrollbar().style() == scrollbar_style::Normal)
 				return convert_units(*this, aContext,
 					rect{ window_rect().top_right() - point{aScrollbar.width(*this) + effective_frame_width(), -effective_frame_width()},
 						size{aScrollbar.width(*this), window_rect().cy - (horizontal_scrollbar().visible() ? horizontal_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0} });
-			else // i_scrollbar::Button
-				return convert_units(*this, aContext,
-					rect{ window_rect().top_left() + point{client_rect().x, effective_frame_width()}, size{client_rect().width(), window_rect().height() - effective_frame_width() * 2.0}});
-		case i_scrollbar::Horizontal:
-			if (horizontal_scrollbar().style() == i_scrollbar::Normal)
+			else // scrollbar_style::Menu
+				return convert_units(*this, aContext, window_rect().deflate(size{ effective_frame_width() }));
+		case scrollbar_type::Horizontal:
+			if (horizontal_scrollbar().style() == scrollbar_style::Normal)
 				return convert_units(*this, aContext, 
 					rect(window_rect().bottom_left() - point(-effective_frame_width(), aScrollbar.width(*this) + effective_frame_width()), 
 						size(window_rect().cx - (vertical_scrollbar().visible() ? vertical_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0, aScrollbar.width(*this))));
-			else // i_scrollbar::Button
-				return convert_units(*this, aContext,
-					rect{ window_rect().top_left() + point{ effective_frame_width(), client_rect().y}, size{ horizontal_scrollbar().width(*this), client_rect().height()} });
+			else // scrollbar_style::Menu
+				return convert_units(*this, aContext, window_rect().deflate(size{ effective_frame_width() }));
 		default:
 			return rect{};
 		}
@@ -347,17 +349,17 @@ namespace neogfx
 			for (auto& c : children())
 			{
 				point delta = -(scrollPosition - iOldScrollPosition);
-				if (aScrollbar.type() == i_scrollbar::Horizontal || (scrolling_disposition(*c) & ScrollChildWidgetVertically) == DontScrollChildWidget)
+				if (aScrollbar.type() == scrollbar_type::Horizontal || (scrolling_disposition(*c) & ScrollChildWidgetVertically) == DontScrollChildWidget)
 					delta.y = 0.0;
-				if (aScrollbar.type() == i_scrollbar::Vertical || (scrolling_disposition(*c) & ScrollChildWidgetHorizontally) == DontScrollChildWidget)
+				if (aScrollbar.type() == scrollbar_type::Vertical || (scrolling_disposition(*c) & ScrollChildWidgetHorizontally) == DontScrollChildWidget)
 					delta.x = 0.0;
 				c->move(c->position() + delta);
 			}
-			if (aScrollbar.type() == i_scrollbar::Vertical)
+			if (aScrollbar.type() == scrollbar_type::Vertical)
 			{
 				iOldScrollPosition.y = scrollPosition.y;
 			}
-			else if (aScrollbar.type() == i_scrollbar::Horizontal)
+			else if (aScrollbar.type() == scrollbar_type::Horizontal)
 			{
 				iOldScrollPosition.x = scrollPosition.x;
 			}
@@ -370,9 +372,9 @@ namespace neogfx
 		return background_colour();
 	}
 
-	const i_surface& scrollable_widget::scrollbar_surface() const
+	const i_widget& scrollable_widget::as_widget() const
 	{
-		return surface();
+		return *this;
 	}
 
 	void scrollable_widget::update_scrollbar_visibility()

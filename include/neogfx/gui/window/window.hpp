@@ -33,45 +33,22 @@ namespace neogfx
 	public:
 		event<graphics_context&> paint_overlay;
 	public:
-		enum style_e : uint32_t
-		{
-			Invalid				= 0x000000,
-			None				= 0x000001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
-			Titlebar			= 0x000002,	// The window has a titlebar
-			MinimizeBox			= 0x000004,
-			MaximizeBox			= 0x000008,
-			Resize				= 0x000010,	// The window can be resized and has a maximize button
-			Close				= 0x000020,	// The window has a close button
-			Fullscreen			= 0x000040,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
-			Modal				= 0x000080,
-			ApplicationModal	= 0x001000,
-			NoActivate			= 0x002000,
-			RequiresOwnerFocus	= 0x004000,
-			DismissOnOwnerClick = 0x008000,
-			DismissOnParentClick= 0x010000,
-			HideOnOwnerClick	= 0x020000,
-			HideOnParentClick	= 0x040000,
-			InitiallyHidden		= 0x080000,
-			Weak				= 0x100000,
-			Default				= Titlebar | MinimizeBox | MaximizeBox | Resize | Close
-		};
-	public:
-		window(const video_mode& aVideoMode, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(const video_mode& aVideoMode, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(const size& aDimensions, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(const size& aDimensions, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(const point& aPosition, const size& aDimensions, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const video_mode& aVideoMode, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const size& aDimensions, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const point& aPosition, const size& aDimensions, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
-		window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle = Default, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::NoFrame);
+		window(const video_mode& aVideoMode, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(i_widget& aParent, const video_mode& aVideoMode, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(i_widget& aParent, const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
+		window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::NoFrame);
 		~window();
 	public:
-		uint32_t style() const;
-		void set_style(uint32_t aStyle);
+		window_style style() const;
+		void set_style(window_style aStyle);
 		double fps() const;
 	public:
 		virtual bool is_root() const;
@@ -198,7 +175,7 @@ namespace neogfx
 	private:
 		sink iSink;
 		std::unique_ptr<i_native_window> iNativeWindow;
-		style_e iStyle;
+		window_style iStyle;
 		mutable units_e iUnits;
 		int32_t iCountedEnable;
 		bool iNativeWindowClosing;
@@ -210,13 +187,13 @@ namespace neogfx
 		boost::optional<char32_t> iSurrogatePairPart;
 	};
 
-	inline constexpr window::style_e operator|(window::style_e aLhs, window::style_e aRhs)
+	inline constexpr window_style operator|(window_style aLhs, window_style aRhs)
 	{
-		return static_cast<window::style_e>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+		return static_cast<window_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
 	}
 
-	inline constexpr window::style_e operator&(window::style_e aLhs, window::style_e aRhs)
+	inline constexpr window_style operator&(window_style aLhs, window_style aRhs)
 	{
-		return static_cast<window::style_e>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+		return static_cast<window_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}
 }

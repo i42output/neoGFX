@@ -29,7 +29,7 @@
 
 namespace neogfx
 {
-	window::window(const video_mode& aVideoMode, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(const video_mode& aVideoMode, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aVideoMode, app::instance().name(), aStyle)), 
 		iStyle(aStyle), 
@@ -45,7 +45,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(const video_mode& aVideoMode, const std::string& aWindowTitle, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aVideoMode, aWindowTitle, aStyle)), 
 		iStyle(aStyle), 
@@ -61,7 +61,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(const size& aDimensions, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aDimensions, app::instance().name(), aStyle)),
 		iStyle(aStyle),
@@ -77,7 +77,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(const size& aDimensions, const std::string& aWindowTitle, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aDimensions, aWindowTitle, aStyle)),
 		iStyle(aStyle),
@@ -93,7 +93,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(const point& aPosition, const size& aDimensions, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aPosition, aDimensions, app::instance().name(), aStyle)),
 		iStyle(aStyle),
@@ -109,7 +109,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aPosition, aDimensions, aWindowTitle, aStyle)),
 		iStyle(aStyle),
@@ -125,7 +125,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(i_widget& aParent, const video_mode& aVideoMode, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(i_widget& aParent, const video_mode& aVideoMode, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, app::instance().name(), aStyle)),
 		iStyle(aStyle), 
@@ -142,7 +142,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, aWindowTitle, aStyle)),
 		iStyle(aStyle), 
@@ -159,7 +159,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(i_widget& aParent, const size& aDimensions, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(i_widget& aParent, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aDimensions, app::instance().name(), aStyle)),
 		iStyle(aStyle),
@@ -176,7 +176,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle)),
 		iStyle(aStyle),
@@ -193,7 +193,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aPosition, aDimensions, app::instance().name(), aStyle)),
 		iStyle(aStyle),
@@ -210,7 +210,7 @@ namespace neogfx
 		init();
 	}
 
-	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, style_e aStyle, i_scrollbar::style_e aScrollbarStyle, framed_widget::style_e aFrameStyle) :
+	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle)),
 		iStyle(aStyle),
@@ -232,14 +232,14 @@ namespace neogfx
 		close();
 	}
 
-	uint32_t window::style() const
+	window_style window::style() const
 	{
 		return iStyle;
 	}
 
-	void window::set_style(uint32_t aStyle)
+	void window::set_style(window_style aStyle)
 	{
-		iStyle = static_cast<style_e>(aStyle);
+		iStyle = aStyle;
 	}
 
 	double window::fps() const
@@ -339,7 +339,7 @@ namespace neogfx
 
 	bool window::is_weak() const
 	{
-		return (style() & Weak) == Weak;
+		return (iStyle & window_style::Weak) == window_style::Weak;
 	}
 
 	bool window::can_close() const
@@ -634,7 +634,7 @@ namespace neogfx
 
 	bool window::requires_owner_focus() const
 	{
-		return (iStyle & RequiresOwnerFocus) == RequiresOwnerFocus;
+		return (iStyle & window_style::RequiresOwnerFocus) == window_style::RequiresOwnerFocus;
 	}
 
 	bool window::has_entered_widget() const
@@ -773,7 +773,7 @@ namespace neogfx
 			iNativeWindowClosing = true;
 			update_modality();
 		}
-		if (has_parent(false) && !(static_cast<window&>(parent()).style() & window::NoActivate))
+		if (has_parent(false) && (static_cast<window&>(parent()).iStyle & window_style::NoActivate) != window_style::NoActivate)
 			static_cast<window&>(parent()).activate();
 	}
 
@@ -791,7 +791,7 @@ namespace neogfx
 		if (destroyed)
 			return;
 		app::instance().surface_manager().remove_surface(*this);
-		if (has_parent(false) && !(static_cast<window&>(parent()).style() & window::NoActivate))
+		if (has_parent(false) && (static_cast<window&>(parent()).iStyle & window_style::NoActivate) != window_style::NoActivate)
 			static_cast<window&>(parent()).activate();
 		if (!iClosed)
 		{
@@ -1060,9 +1060,9 @@ namespace neogfx
 			if (surface.surface_type() == surface_type::Window && &surface != this)
 			{
 				window& windowSurface = static_cast<window&>(surface);
-				if (iStyle & ApplicationModal)
+				if ((iStyle & window_style::ApplicationModal) == window_style::ApplicationModal)
 					windowSurface.counted_enable(!iNativeWindow || iNativeWindowClosing);
-				else if ((iStyle & Modal) && windowSurface.is_ancestor_of(*this, false))
+				else if ((iStyle & window_style::Modal) == window_style::Modal && windowSurface.is_ancestor_of(*this, false))
 					windowSurface.counted_enable(!iNativeWindow || iNativeWindowClosing);
 			}
 		}
@@ -1072,7 +1072,7 @@ namespace neogfx
 	{
 		dismissing_children.trigger(aClickedWidget);
 		neolib::scoped_flag sf{ iDismissingChildren };
-		if ((style() & window::RequiresOwnerFocus) != window::RequiresOwnerFocus)
+		if ((iStyle & window_style::RequiresOwnerFocus) != window_style::RequiresOwnerFocus)
 		{
 			for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)
 			{

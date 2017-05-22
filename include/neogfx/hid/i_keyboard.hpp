@@ -572,6 +572,7 @@ namespace neogfx
 		KeyModifier_NUM = 0x1000,
 		KeyModifier_CAPS = 0x2000,
 		KeyModifier_MODE = 0x4000,
+		KeyModifier_LOCKS = KeyModifier_NUM | KeyModifier_CAPS | KeyModifier_MODE,
 		KeyModifier_RESERVED = 0x8000
 	};
 
@@ -706,9 +707,11 @@ namespace neogfx
 			if (iKeyCode != aKeyCode)
 				return false;
 			for (auto m : iKeyModifiers)
-				if ((m & aKeyModifiers) == 0)
+				if ((aKeyModifiers & m) != 0)
+					aKeyModifiers = static_cast<key_modifiers_e>(aKeyModifiers & ~m);
+				else
 					return false;
-			return true;
+			return (aKeyModifiers & ~KeyModifier_LOCKS) == 0;
 		}
 		const std::string as_text() const
 		{

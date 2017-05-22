@@ -24,48 +24,48 @@
 
 namespace neogfx
 {
+	enum class frame_style
+	{
+		NoFrame,
+		DottedFrame,
+		DashedFrame,
+		SolidFrame,
+		ContainerFrame,
+		DoubleFrame,
+		GrooveFrame,
+		RidgeFrame,
+		InsetFrame,
+		OutsetFrame,
+		HiddenFrame,
+		WindowFrame
+	};
+
 	class framed_widget : public widget
 	{
 	public:
-		enum style_e
-		{
-			NoFrame,
-			DottedFrame,
-			DashedFrame,
-			SolidFrame,
-			ContainerFrame,
-			DoubleFrame,
-			GrooveFrame,
-			RidgeFrame,
-			InsetFrame,
-			OutsetFrame,
-			HiddenFrame,
-			WindowFrame
-		};
-	public:
-		framed_widget(style_e aStyle = SolidFrame, dimension aLineWidth = 1.0);
+		framed_widget(frame_style aStyle = frame_style::SolidFrame, dimension aLineWidth = 1.0);
 		framed_widget(const framed_widget&) = delete;
-		framed_widget(i_widget& aParent, style_e aStyle = SolidFrame, dimension aLineWidth = 1.0);
-		framed_widget(i_layout& aLayout, style_e aStyle = SolidFrame, dimension aLineWidth = 1.0);
+		framed_widget(i_widget& aParent, frame_style aStyle = frame_style::SolidFrame, dimension aLineWidth = 1.0);
+		framed_widget(i_layout& aLayout, frame_style aStyle = frame_style::SolidFrame, dimension aLineWidth = 1.0);
 		~framed_widget();
 	public:
-		virtual rect client_rect(bool aIncludeMargins = true) const;
+		rect client_rect(bool aIncludeMargins = true) const override;
 	public:
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
-		virtual bool transparent_background() const;
-		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		bool transparent_background() const override;
+		void paint_non_client(graphics_context& aGraphicsContext) const override;
+		void paint(graphics_context& aGraphicsContext) const override;
 	public:
-		void set_style(style_e aStyle);
+		void set_style(frame_style aStyle);
 	protected:
 		virtual colour frame_colour() const;
 	protected:
 		dimension line_width() const;
 		dimension effective_frame_width() const;
 	private:
-		style_e iStyle;
+		frame_style iStyle;
 		dimension iLineWidth;
 	};
 }

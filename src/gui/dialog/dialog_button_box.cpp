@@ -87,7 +87,7 @@ namespace neogfx
 			{ Help,					{ HelpRole, "Help"} }
 		};
 		auto bi = sButtonDetails.find(aStandardButton);
-		auto newButton = iButtons.emplace(std::make_pair(bi->first, bi->second.first), std::make_unique<push_button>(*this, bi->second.second, push_button::ButtonStyleButtonBox));
+		auto newButton = iButtons.emplace(std::make_pair(bi->first, bi->second.first), std::make_unique<push_button>(*this, bi->second.second, push_button_style::ButtonBox));
 		switch (newButton->first.second)
 		{
 		case AcceptRole:

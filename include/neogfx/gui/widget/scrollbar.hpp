@@ -30,44 +30,44 @@ namespace neogfx
 	class scrollbar : public i_scrollbar
 	{
 	public:
-		scrollbar(i_scrollbar_container& aContainer, type_e aType, style_e aStyle = Normal, bool aIntegerPositions = true);
+		scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
 	public:
-		virtual type_e type() const;
-		virtual style_e style() const;
-		virtual void show();
-		virtual void hide();
-		virtual bool visible() const;
-		virtual value_type position() const;
-		virtual bool set_position(value_type aPosition);
-		virtual value_type minimum() const;
-		virtual void set_minimum(value_type aMinimum);
-		virtual value_type maximum() const;
-		virtual void set_maximum(value_type aMaximum);
-		virtual value_type step() const;
-		virtual void set_step(value_type aStep);
-		virtual value_type page() const;
-		virtual void set_page(value_type aPage);
+		scrollbar_type type() const override;
+		scrollbar_style style() const override;
+		void show() override;
+		void hide() override;
+		bool visible() const override;
+		value_type position() const override;
+		bool set_position(value_type aPosition) override;
+		value_type minimum() const override;
+		void set_minimum(value_type aMinimum) override;
+		value_type maximum() const override;
+		void set_maximum(value_type aMaximum) override;
+		value_type step() const override;
+		void set_step(value_type aStep) override;
+		value_type page() const override;
+		void set_page(value_type aPage) override;
 	public:
-		virtual dimension width(const i_units_context& aContext) const;
-		virtual void render(graphics_context& aGraphicsContext) const;
+		dimension width(const i_units_context& aContext) const override;
+		void render(graphics_context& aGraphicsContext) const override;
 	public:
-		virtual rect element_geometry(const i_units_context& aContext, element_e aElement) const;
-		virtual element_e element_at(const i_units_context& aContext, const point& aPosition) const;
+		rect element_geometry(const i_units_context& aContext, element_e aElement) const override;
+		element_e element_at(const i_units_context& aContext, const point& aPosition) const override;
 	public:
-		virtual void update(const i_units_context& aContext, const update_params_t& aUpdateParams = update_params_t());
-		virtual element_e clicked_element() const;
-		virtual void click_element(element_e aElement);
-		virtual void unclick_element();
-		virtual void hover_element(element_e aElement);
-		virtual void unhover_element();
-		virtual void pause();
-		virtual void resume();
-		virtual void track();
-		virtual void untrack();
+		void update(const i_units_context& aContext, const update_params_t& aUpdateParams = update_params_t()) override;
+		element_e clicked_element() const override;
+		void click_element(element_e aElement) override;
+		void unclick_element() override;
+		void hover_element(element_e aElement) override;
+		void unhover_element() override;
+		void pause() override;
+		void resume() override;
+		void track() override;
+		void untrack() override;
 	private:
 		i_scrollbar_container& iContainer;
-		type_e iType;
-		style_e iStyle;
+		scrollbar_type iType;
+		scrollbar_style iStyle;
 		bool iIntegerPositions;
 		bool iVisible;
 		value_type iPosition;

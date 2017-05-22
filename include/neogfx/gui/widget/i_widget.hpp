@@ -69,6 +69,8 @@ namespace neogfx
 	public:
 		virtual ~i_widget() {}
 	public:
+		virtual bool is_singular() const = 0;
+		virtual void set_singular(bool aSingular) = 0;
 		virtual bool is_root() const = 0;
 		virtual bool has_parent(bool aSameSurface = true) const = 0;
 		virtual const i_widget& parent() const = 0;
@@ -82,7 +84,7 @@ namespace neogfx
 		virtual bool is_sibling_of(const i_widget& aWidget) const = 0;
 		virtual void add_widget(i_widget& aWidget) = 0;
 		virtual void add_widget(std::shared_ptr<i_widget> aWidget) = 0;
-		virtual void remove_widget(i_widget& aWidget) = 0;
+		virtual void remove_widget(i_widget& aWidget, bool aSingular = false) = 0;
 		virtual void remove_widgets() = 0;
 		virtual bool has_children() const = 0;
 		virtual const widget_list& children() const = 0;
@@ -211,8 +213,26 @@ namespace neogfx
 				w2 = &w2->parent();
 			if (w1->is_surface() && w2->is_surface())
 				return &w1->surface() == &w2->surface();
+			else if (!w1->is_surface() && !w2->is_surface())
+				return true;
 			else
 				return false;
+		}
+		point to_window_coordinates(const point& aClientCoordinates) const
+		{
+			return aClientCoordinates + window_rect().top_left();
+		}
+		rect to_window_coordinates(const rect& aClientCoordinates) const
+		{
+			return aClientCoordinates + window_rect().top_left();
+		}
+		point to_client_coordinates(const point& aWindowCoordinates) const
+		{
+			return aWindowCoordinates - window_rect().top_left();
+		}
+		rect to_client_coordinates(const rect& aWindowCoordinates) const
+		{
+			return aWindowCoordinates - window_rect().top_left();
 		}
 	};
 

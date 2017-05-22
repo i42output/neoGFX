@@ -25,12 +25,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	tab_page_container::default_tab_page::default_tab_page(i_widget& aParent, i_tab& aTab) : 
-		scrollable_widget(aParent, i_scrollbar::Normal, framed_widget::ContainerFrame), iTab(aTab)
+		scrollable_widget(aParent, scrollbar_style::Normal, frame_style::ContainerFrame), iTab(aTab)
 	{
 	}
 
 	tab_page_container::default_tab_page::default_tab_page(i_layout& aLayout, i_tab& aTab) :
-		scrollable_widget(aLayout, i_scrollbar::Normal, framed_widget::ContainerFrame), iTab(aTab)
+		scrollable_widget(aLayout, scrollbar_style::Normal, frame_style::ContainerFrame), iTab(aTab)
 	{
 	}
 
@@ -75,8 +75,8 @@ namespace neogfx
 		return *this;
 	}
 
-	tab_page_container::tab_page_container() : 
-		widget(), iContainerLayout(*this), iTabBar(iContainerLayout, *this), iPageLayout(iContainerLayout)
+	tab_page_container::tab_page_container(bool aClosableTabs) :
+		widget(), iContainerLayout(*this), iTabBar(iContainerLayout, *this, aClosableTabs), iPageLayout(iContainerLayout)
 	{
 		set_margins(neogfx::margins{});
 		iContainerLayout.set_margins(neogfx::margins{});
@@ -84,8 +84,8 @@ namespace neogfx
 		iPageLayout.set_margins(neogfx::margins{});
 	}
 
-	tab_page_container::tab_page_container(i_widget& aParent) :
-		widget(aParent), iContainerLayout(*this), iTabBar(iContainerLayout, *this), iPageLayout(iContainerLayout)
+	tab_page_container::tab_page_container(i_widget& aParent, bool aClosableTabs) :
+		widget(aParent), iContainerLayout(*this), iTabBar(iContainerLayout, *this, aClosableTabs), iPageLayout(iContainerLayout)
 	{
 		set_margins(neogfx::margins{});
 		iContainerLayout.set_margins(neogfx::margins{});
@@ -93,8 +93,8 @@ namespace neogfx
 		iPageLayout.set_margins(neogfx::margins{});
 	}
 
-	tab_page_container::tab_page_container(i_layout& aLayout) :
-		widget(aLayout), iContainerLayout(*this), iTabBar(iContainerLayout, *this), iPageLayout(iContainerLayout)
+	tab_page_container::tab_page_container(i_layout& aLayout, bool aClosableTabs) :
+		widget(aLayout), iContainerLayout(*this), iTabBar(iContainerLayout, *this, aClosableTabs), iPageLayout(iContainerLayout)
 	{
 		set_margins(neogfx::margins{});
 		iContainerLayout.set_margins(neogfx::margins{});
@@ -160,6 +160,14 @@ namespace neogfx
 		return const_cast<i_tab_page&>(const_cast<const tab_page_container*>(this)->tab_page(aTabIndex));
 	}
 
+	bool tab_page_container::is_tab_selected() const
+	{
+		for (auto& tab : iTabs)
+			if (tab.first->is_selected())
+				return true;
+		return false;
+	}
+
 	const i_tab& tab_page_container::selected_tab() const
 	{
 		for (auto& tab : iTabs)
@@ -221,6 +229,26 @@ namespace neogfx
 		tab(aTabIndex).as_widget().hide();
 		if (has_tab_page(aTabIndex))
 			tab_page(aTabIndex).as_widget().hide();
+	}
+
+	tab_page_container::optional_tab_index tab_page_container::next_visible_tab(tab_index aStartFrom) const
+	{
+		return iTabBar.next_visible_tab(aStartFrom);
+	}
+
+	tab_page_container::optional_tab_index tab_page_container::previous_visible_tab(tab_index aStartFrom) const
+	{
+		return iTabBar.previous_visible_tab(aStartFrom);
+	}
+
+	void tab_page_container::select_next_tab()
+	{
+		iTabBar.select_next_tab();
+	}
+
+	void tab_page_container::select_previous_tab()
+	{
+		iTabBar.select_previous_tab();
 	}
 
 	i_tab_page& tab_page_container::add_tab_page(const std::string& aTabText)

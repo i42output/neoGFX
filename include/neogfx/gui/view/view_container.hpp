@@ -71,6 +71,7 @@ namespace neogfx
 		tab_index index_of(const i_tab& aTab) const override;
 		const i_tab& tab(tab_index aTabIndex) const override;
 		i_tab& tab(tab_index aTabIndex) override;
+		bool is_tab_selected() const override;
 		const i_tab& selected_tab() const override;
 		i_tab& selected_tab() override;
 		i_tab& add_tab(const std::string& aTabText) override;
@@ -78,6 +79,10 @@ namespace neogfx
 		void remove_tab(tab_index aTabIndex) override;
 		void show_tab(tab_index aTabIndex) override;
 		void hide_tab(tab_index aTabIndex) override;
+		optional_tab_index next_visible_tab(tab_index aStartFrom) const override;
+		optional_tab_index previous_visible_tab(tab_index aStartFrom) const  override;
+		void select_next_tab() override;
+		void select_previous_tab() override;
 	private:
 		void adding_tab(i_tab& aTab) override;
 		void selecting_tab(i_tab& aTab) override;

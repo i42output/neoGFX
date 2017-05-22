@@ -28,8 +28,8 @@ namespace neogfx
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
-		iStepUpButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox },
-		iStepDownButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox }
+		iStepUpButton{ iSecondaryLayout, std::string{}, push_button_style::SpinBox },
+		iStepDownButton{ iSecondaryLayout, std::string{}, push_button_style::SpinBox }
 	{
 		init();
 	}
@@ -40,8 +40,8 @@ namespace neogfx
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
-		iStepUpButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox },
-		iStepDownButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox }
+		iStepUpButton{ iSecondaryLayout, std::string{}, push_button_style::SpinBox },
+		iStepDownButton{ iSecondaryLayout, std::string{}, push_button_style::SpinBox }
 	{
 		init();
 	}
@@ -52,8 +52,8 @@ namespace neogfx
 		iPrimaryLayout{ *this },
 		iTextBox{ iPrimaryLayout },
 		iSecondaryLayout{ iPrimaryLayout },
-		iStepUpButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox },
-		iStepDownButton{ iSecondaryLayout, std::string{}, push_button::ButtonStyleSpinBox }
+		iStepUpButton{ iSecondaryLayout, std::string{}, push_button_style::SpinBox },
+		iStepDownButton{ iSecondaryLayout, std::string{}, push_button_style::SpinBox }
 	{
 		init();
 	}
@@ -121,7 +121,7 @@ namespace neogfx
 		iStepDownButton.set_margins(neogfx::margins{});
 		iStepDownButton.set_minimum_size(size{15, 8});
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-		iTextBox.set_style(framed_widget::NoFrame);
+		iTextBox.set_style(frame_style::NoFrame);
 
 		iSink += iTextBox.text_changed([this]()
 		{

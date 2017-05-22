@@ -24,12 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	context_menu::context_menu(const point& aPosition, window::style_e aStyle)
+	context_menu::context_menu(const point& aPosition, window_style aStyle)
 		: iMenu{ new neogfx::menu{} }, iParent{ nullptr }, iPosition{ aPosition }, iStyle{ aStyle }
 	{
 	}
 
-	context_menu::context_menu(i_widget& aParent, const point& aPosition, window::style_e aStyle)
+	context_menu::context_menu(i_widget& aParent, const point& aPosition, window_style aStyle)
 		: iMenu{ new neogfx::menu{} }, iParent{ &aParent }, iPosition{ aPosition }, iStyle{ aStyle }
 	{
 	}

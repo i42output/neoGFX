@@ -54,6 +54,8 @@ namespace neogfx
 		units_e units() const override;
 		units_e set_units(units_e aUnits) const override;
 	public:
+		bool is_singular() const override;
+		void set_singular(bool aSingular) override;
 		bool is_root() const override;
 		bool has_parent(bool aSameSurface = true) const override;
 		const i_widget& parent() const override;
@@ -67,7 +69,7 @@ namespace neogfx
 		bool is_sibling_of(const i_widget& aWidget) const override;
 		void add_widget(i_widget& aWidget) override;
 		void add_widget(std::shared_ptr<i_widget> aWidget) override;
-		void remove_widget(i_widget& aWidget) override;
+		void remove_widget(i_widget& aWidget, bool aSingular = false) override;
 		void remove_widgets() override;
 		bool has_children() const override;
 		const widget_list& children() const override;
@@ -211,6 +213,7 @@ namespace neogfx
 	public:
 		using i_widget::set_size_policy;
 	private:
+		bool iSingular;
 		i_widget* iParent;
 		widget_list iChildren;
 		i_widget* iLinkBefore;

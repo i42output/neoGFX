@@ -26,8 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	tab_bar::tab_bar(i_tab_container& aContainer) :
-		iContainer(aContainer)
+	tab_bar::tab_bar(i_tab_container& aContainer, bool aClosableTabs) :
+		scrollable_widget{ scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
 	{
 		set_margins(neogfx::margins{});
 		set_layout(std::make_shared<horizontal_layout>(*this));
@@ -35,8 +35,8 @@ namespace neogfx
 		layout().set_spacing(size{});
 	}
 
-	tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer) :
-		widget(aParent), iContainer(aContainer)
+	tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs) :
+		scrollable_widget{ aParent, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
 	{
 		set_margins(neogfx::margins{});
 		set_layout(std::make_shared<horizontal_layout>(*this));
@@ -44,13 +44,25 @@ namespace neogfx
 		layout().set_spacing(size{});
 	}
 
-	tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer) :
-		widget(aLayout), iContainer(aContainer)
+	tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs) :
+		scrollable_widget{ aLayout, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
 	{
 		set_margins(neogfx::margins{});
 		set_layout(std::make_shared<horizontal_layout>(*this));
 		layout().set_margins(neogfx::margins{});
 		layout().set_spacing(size{});
+	}
+
+	size tab_bar::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		auto result = scrollable_widget::minimum_size(aAvailableSpace);
+		result.cx = 0.0;
+		return result;
+	}
+
+	bool tab_bar::transparent_background() const
+	{
+		return true;
 	}
 
 	bool tab_bar::has_tabs() const
@@ -85,6 +97,14 @@ namespace neogfx
 		return *iTabs[aTabIndex];
 	}
 
+	bool tab_bar::is_tab_selected() const
+	{
+		for (auto& tab : iTabs)
+			if (tab->is_selected())
+				return true;
+		return false;
+	}
+
 	const i_tab& tab_bar::selected_tab() const
 	{
 		for (auto& tab : iTabs)
@@ -100,13 +120,13 @@ namespace neogfx
 
 	i_tab& tab_bar::add_tab(const std::string& aTabText)
 	{
-		iTabs.push_back(std::make_unique<tab_button>(layout(), *this, aTabText));
+		iTabs.push_back(std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
 		return *iTabs.back();
 	}
 
 	i_tab& tab_bar::insert_tab(tab_index aTabIndex, const std::string& aTabText)
 	{
-		iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText));
+		iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
 		return *iTabs.back();
 	}
 
@@ -114,8 +134,17 @@ namespace neogfx
 	{
 		if (aTabIndex >= iTabs.size())
 			throw tab_not_found();
-		auto tab = std::move(iTabs[aTabIndex]);
-		iTabs.erase(iTabs.begin() + aTabIndex);
+		bool wasSelected = tab(aTabIndex).is_selected();
+		{
+			auto keep = std::move(iTabs[aTabIndex]);
+			iTabs.erase(iTabs.begin() + aTabIndex);
+		}
+		if (wasSelected)
+		{
+			auto nextVisible = (aTabIndex < tab_count() ? next_visible_tab(aTabIndex) : previous_visible_tab(aTabIndex));
+			if (nextVisible)
+				tab(*nextVisible).select();
+		}
 	}
 
 	void tab_bar::show_tab(tab_index aTabIndex)
@@ -130,6 +159,50 @@ namespace neogfx
 		tab(aTabIndex).as_widget().hide();
 		if (has_tab_page(aTabIndex))
 			tab_page(aTabIndex).as_widget().hide();
+	}
+
+	tab_bar::optional_tab_index tab_bar::next_visible_tab(tab_index aStartFrom) const
+	{
+		if (tab_count() == 0)
+			return optional_tab_index{};
+		if (aStartFrom > tab_count() - 1)
+			aStartFrom = 0;
+		auto next = aStartFrom;
+		while (tab(next).as_widget().hidden())
+			if ((next = (next + 1) % tab_count()) == aStartFrom)
+				break;
+		if (tab(next).as_widget().visible())
+			return next;
+		return optional_tab_index{};
+	}
+
+	tab_bar::optional_tab_index tab_bar::previous_visible_tab(tab_index aStartFrom) const
+	{
+		if (tab_count() == 0)
+			return optional_tab_index{};
+		if (aStartFrom > tab_count() - 1)
+			aStartFrom = tab_count() - 1;
+		auto previous = aStartFrom;
+		while (tab(previous).as_widget().hidden())
+			if ((previous = (previous > 0 ? previous - 1 : tab_count() - 1)) == aStartFrom)
+				break;
+		if (tab(previous).as_widget().visible())
+			return previous;
+		return optional_tab_index{};
+	}
+
+	void tab_bar::select_next_tab()
+	{
+		auto next = next_visible_tab(is_tab_selected() ? index_of(selected_tab()) + 1 : 0);
+		if (next)
+			tab(*next).select();
+	}
+
+	void tab_bar::select_previous_tab()
+	{
+		auto previous = previous_visible_tab(is_tab_selected() ? index_of(selected_tab()) - 1 : 0);
+		if (previous)
+			tab(*previous).select();
 	}
 
 	void tab_bar::adding_tab(i_tab& aTab)
@@ -188,17 +261,6 @@ namespace neogfx
 	i_widget& tab_bar::as_widget()
 	{
 		return *this;
-	}
-
-	size tab_bar::maximum_size(const optional_size& aAvailableSpace) const
-	{
-		if (has_maximum_size())
-			return widget::maximum_size(aAvailableSpace);
-		return minimum_size(aAvailableSpace);
-	}
-
-	void tab_bar::paint(graphics_context&) const
-	{
 	}
 
 	bool tab_bar::visible() const

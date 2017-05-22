@@ -100,7 +100,7 @@ namespace neogfx
 	};
 
 	gradient_dialog::gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient) :
-		dialog(aParent, "Select Gradient", Modal | Titlebar | Close),
+		dialog(aParent, "Select Gradient", window_style::Modal | window_style::Titlebar | window_style::Close),
 		iLayout{ *this }, iLayout2{ iLayout }, iLayout3{ iLayout2 }, iLayout4{ iLayout2 },
 		iSelectorGroupBox{ iLayout3 },
 		iGradientSelector{ *this, iSelectorGroupBox.item_layout(), aCurrentGradient },

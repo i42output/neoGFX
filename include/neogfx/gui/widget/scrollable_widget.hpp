@@ -44,30 +44,30 @@ namespace neogfx
 			UsvStageDone
 		};
 	public:
-		scrollable_widget(i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::SolidFrame);
-		scrollable_widget(i_widget& aParent, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::SolidFrame);
-		scrollable_widget(i_layout& aLayout, i_scrollbar::style_e aScrollbarStyle = i_scrollbar::Normal, framed_widget::style_e aFrameStyle = framed_widget::SolidFrame);
+		scrollable_widget(scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
+		scrollable_widget(i_widget& aParent, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
+		scrollable_widget(i_layout& aLayout, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::SolidFrame);
 		~scrollable_widget();
 		scrollable_widget(const scrollable_widget&) = delete;
 	public:
 		void scroll_to(i_widget& aChild);
 	public:
-		virtual void layout_items_completed();
+		void layout_items_completed() override;
 	public:
-		virtual void resized();
-		virtual rect client_rect(bool aIncludeMargins = true) const;
+		void resized() override;
+		rect client_rect(bool aIncludeMargins = true) const override;
 	public:
-		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
+		void paint_non_client(graphics_context& aGraphicsContext) const override;
 	public:
-		virtual void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta);
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-		virtual void mouse_moved(const point& aPosition);
-		virtual void mouse_entered();
-		virtual void mouse_left();
+		void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
+		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+		void mouse_moved(const point& aPosition) override;
+		void mouse_entered() override;
+		void mouse_left() override;
 	public:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 	public:
 		virtual const i_scrollbar& vertical_scrollbar() const;
 		virtual i_scrollbar& vertical_scrollbar();
@@ -76,10 +76,10 @@ namespace neogfx
 		virtual child_widget_scrolling_disposition_e scrolling_disposition() const;
 		virtual child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const;
 	private:
-		virtual rect scrollbar_geometry(const i_units_context& aContext, const i_scrollbar& aScrollbar) const;
-		virtual void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason);
-		virtual colour scrollbar_colour(const i_scrollbar& aScrollbar) const;
-		virtual const i_surface& scrollbar_surface() const;
+		rect scrollbar_geometry(const i_units_context& aContext, const i_scrollbar& aScrollbar) const override;
+		void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) override;
+		colour scrollbar_colour(const i_scrollbar& aScrollbar) const override;
+		const i_widget& as_widget() const override;
 	protected:
 		virtual void update_scrollbar_visibility();
 		virtual void update_scrollbar_visibility(usv_stage_e aStage);

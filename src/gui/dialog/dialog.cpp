@@ -23,73 +23,73 @@
 
 namespace neogfx
 {
-	dialog::dialog(style_e aStyle) :
+	dialog::dialog(window_style aStyle) :
 		window(size{}, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(const std::string& aDialogTitle, style_e aStyle) :
+	dialog::dialog(const std::string& aDialogTitle, window_style aStyle) :
 		window(size{}, aDialogTitle, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(const size& aDimensions, style_e aStyle) :
+	dialog::dialog(const size& aDimensions, window_style aStyle) :
 		window(aDimensions, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(const size& aDimensions, const std::string& aDialogTitle, style_e aStyle) :
+	dialog::dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
 		window(aDimensions, aDialogTitle, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(const point& aPosition, const size& aDimensions, style_e aStyle) :
+	dialog::dialog(const point& aPosition, const size& aDimensions, window_style aStyle) :
 		window(aPosition, aDimensions, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle) :
+	dialog::dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
 		window(aPosition, aDimensions, aDialogTitle, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(i_widget& aParent, style_e aStyle) :
+	dialog::dialog(i_widget& aParent, window_style aStyle) :
 		window(aParent, size{}, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(i_widget& aParent, const std::string& aDialogTitle, style_e aStyle) :
+	dialog::dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle) :
 		window(aParent, size{}, aDialogTitle, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(i_widget& aParent, const size& aDimensions, style_e aStyle) :
+	dialog::dialog(i_widget& aParent, const size& aDimensions, window_style aStyle) :
 		window(aParent, aDimensions, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle) :
+	dialog::dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
 		window(aParent, aDimensions, aDialogTitle, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, style_e aStyle) :
+	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle) :
 		window(aParent, aPosition, aDimensions, aStyle)
 	{
 		init();
 	}
 
-	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, style_e aStyle) :
+	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
 		window(aParent, aPosition, aDimensions, aDialogTitle, aStyle)
 	{
 		init();

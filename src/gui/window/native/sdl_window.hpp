@@ -59,17 +59,17 @@ namespace neogfx
 	private:
 		typedef std::shared_ptr<SDL_Cursor> cursor_pointer;
 	public:
-		static uint32_t convert_style(window::style_e aStyle);
+		static uint32_t convert_style(window_style aStyle);
 		static mouse_button convert_mouse_button(Uint32 aButton);
 		static mouse_button convert_mouse_button(Uint8 aButtonIndex);
 		static Uint32 convert_mouse_button(mouse_button aButton);
 	public:
-		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle = window::Default);
-		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle = window::Default);
-		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle = window::Default);
-		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle = window::Default);
-		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle = window::Default);
-		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle = window::Default);
+		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
+		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
+		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
+		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
+		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
+		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
 		~sdl_window();
 	public:
 		virtual void* handle() const;
@@ -113,7 +113,7 @@ namespace neogfx
 		virtual void display();
 	private:
 		sdl_window* iParent;
-		uint32_t iStyle;
+		surface_style iStyle;
 		SDL_Window* iHandle;
 		mutable void* iNativeHandle;
 #ifdef WIN32

@@ -68,6 +68,7 @@ namespace neogfx
 	}
 
 	widget::widget() :
+		iSingular(false),
 		iParent(nullptr),
 		iLinkBefore(nullptr),
 		iLinkAfter(nullptr),
@@ -86,6 +87,7 @@ namespace neogfx
 	}
 	
 	widget::widget(i_widget& aParent) :
+		iSingular(false),
 		iParent(nullptr),
 		iLinkBefore(nullptr),
 		iLinkAfter(nullptr),
@@ -105,6 +107,7 @@ namespace neogfx
 	}
 
 	widget::widget(i_layout& aLayout) :
+		iSingular(false),
 		iParent(nullptr),
 		iLinkBefore(nullptr),
 		iLinkAfter(nullptr),
@@ -152,6 +155,21 @@ namespace neogfx
 		return iUnitsContext.set_units(aUnits);
 	}
 
+	bool widget::is_singular() const
+	{
+		return iSingular;
+	}
+
+	void widget::set_singular(bool aSingular)
+	{
+		if (iSingular != aSingular)
+		{
+			iSingular = aSingular;
+			if (iSingular)
+				iParent = nullptr;
+		}
+	}
+
 	bool widget::is_root() const
 	{
 		return false;
@@ -159,7 +177,7 @@ namespace neogfx
 
 	bool widget::has_parent(bool aSameSurface) const
 	{
-		return iParent != 0 && (!aSameSurface || same_surface(*iParent));
+		return iParent != nullptr && (!aSameSurface || same_surface(*iParent));
 	}
 
 	const i_widget& widget::parent() const
@@ -243,9 +261,13 @@ namespace neogfx
 	{
 		if (aWidget.has_parent() && &aWidget.parent() == this)
 			return;
+		i_widget* oldParent = aWidget.has_parent() ? &aWidget.parent() : nullptr;
 		aWidget.set_parent(*this);
 		if (find_child(aWidget, false) == iChildren.end())
 			iChildren.push_back(std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aWidget));
+		if (oldParent != nullptr)
+			oldParent->remove_widget(aWidget);
+		aWidget.set_singular(false);
 		if (has_surface())
 			surface().widget_added(aWidget);
 	}
@@ -254,19 +276,25 @@ namespace neogfx
 	{
 		if (aWidget->has_parent() && &aWidget->parent() == this)
 			return;
+		i_widget* oldParent = aWidget->has_parent() ? &aWidget->parent() : nullptr;
 		aWidget->set_parent(*this);
 		if (find_child(*aWidget, false) == iChildren.end())
 			iChildren.push_back(aWidget);
+		if (oldParent != nullptr)
+			oldParent->remove_widget(*aWidget);
+		aWidget->set_singular(false);
 		if (has_surface())
 			surface().widget_added(*aWidget);
 	}
 
-	void widget::remove_widget(i_widget& aWidget)
+	void widget::remove_widget(i_widget& aWidget, bool aSingular)
 	{
 		auto existing = find_child(aWidget, false);
 		if (existing == iChildren.end())
 			return;
 		auto keep = *existing;
+		if (aSingular)
+			keep->set_singular(true);
 		iChildren.erase(existing);
 		if (has_layout())
 			layout().remove_item(aWidget);
@@ -277,7 +305,7 @@ namespace neogfx
 	void widget::remove_widgets()
 	{
 		while (!iChildren.empty())
-			remove_widget(*iChildren.back());
+			remove_widget(*iChildren.back(), true);
 	}
 
 	bool widget::has_children() const

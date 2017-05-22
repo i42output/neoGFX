@@ -20,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "widget.hpp"
+#include "scrollable_widget.hpp"
 #include "tab_button.hpp"
 
 namespace neogfx
 {
-	class tab_bar : public widget, public i_tab_container
+	class tab_bar : public scrollable_widget, public i_tab_container
 	{
 	private:
 		typedef std::unique_ptr<tab_button> tab_pointer;
@@ -33,15 +33,20 @@ namespace neogfx
 	public:
 		typedef tab_list::size_type tab_index;
 	public:
-		tab_bar(i_tab_container& aContainer);
-		tab_bar(i_widget& aParent, i_tab_container& aContainer);
-		tab_bar(i_layout& aLayout, i_tab_container& aContainer);
+		tab_bar(i_tab_container& aContainer, bool aClosableTabs = false);
+		tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs = false);
+		tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs = false);
+	public:
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+	public:
+		bool transparent_background() const override;
 	public:
 		bool has_tabs() const override;
 		uint32_t tab_count() const override;
 		tab_index index_of(const i_tab& aTab) const override;
 		const i_tab& tab(tab_index aTabIndex) const override;
 		i_tab& tab(tab_index aTabIndex) override;
+		bool is_tab_selected() const override;
 		const i_tab& selected_tab() const override;
 		i_tab& selected_tab() override;
 		i_tab& add_tab(const std::string& aTabText) override;
@@ -49,6 +54,10 @@ namespace neogfx
 		void remove_tab(tab_index aTabIndex) override;
 		void show_tab(tab_index aTabIndex) override;
 		void hide_tab(tab_index aTabIndex) override;
+		optional_tab_index next_visible_tab(tab_index aStartFrom) const override;
+		optional_tab_index previous_visible_tab(tab_index aStartFrom) const override;
+		void select_next_tab() override;
+		void select_previous_tab() override;
 	public:
 		void adding_tab(i_tab& aTab) override;
 		void selecting_tab(i_tab& aTab) override;
@@ -64,12 +73,10 @@ namespace neogfx
 		const i_widget& as_widget() const override;
 		i_widget& as_widget() override;
 	public:
-		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-		void paint(graphics_context& aGraphicsContext) const override;
-	public:
 		bool visible() const override;
 	private:
 		i_tab_container& iContainer;
+		bool iClosableTabs;
 		tab_list iTabs;
 	};
 }

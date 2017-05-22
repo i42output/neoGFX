@@ -25,19 +25,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	drop_list::drop_list() :
-		push_button{ "Drop list widget", ButtonStyleDropList }, iEditable{ false }, iDownArrow{ texture{} }
+		push_button{ "Drop list widget", push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }
 	{
 		init();
 	}
 
 	drop_list::drop_list(i_widget& aParent) :
-		push_button{ aParent, "Drop list widget", ButtonStyleDropList }, iEditable{ false }, iDownArrow{ texture{} }
+		push_button{ aParent, "Drop list widget", push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }
 	{
 		init();
 	}
 
 	drop_list::drop_list(i_layout& aLayout) :
-		push_button{ aLayout, "Drop list widget", ButtonStyleDropList }, iEditable{ false }, iDownArrow{ texture{} }
+		push_button{ aLayout, "Drop list widget", push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }
 	{
 		init();
 	}
@@ -72,12 +72,10 @@ namespace neogfx
 	{
 		set_size_policy(neogfx::size_policy::Minimum);
 		label().layout().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
-		label().set_placement(label_placement::TextImageHorizontal);
-		auto& l = static_cast<grid_layout&>(label().layout());
-		auto& s = l.add_spacer_at_position(0, l.columns());
+		auto& s = layout().add_spacer();
 		scoped_units su{ s, UnitsPixels };
 		s.set_minimum_width(std::max(0.0, 8.0 - label().layout().spacing().cx * 2));
-		l.add_item_at_position(0, l.columns(), iDownArrow);
+		layout().add_item(iDownArrow);
 		update_arrow();
 		iSink += app::instance().current_style_changed([this]() { update_arrow(); });
 	}
@@ -94,7 +92,7 @@ namespace neogfx
 				{ 0, 0, 1, 1, 1, 1, 0, 0 },
 				{ 0, 0, 0, 1, 1, 0, 0, 0 },
 			};
-			iDownArrowTexture = std::make_pair(ink, neogfx::image{ "neogfx::drop_list_impl::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern,{ { 0, colour{} },{ 1, ink } } });
+			iDownArrowTexture = std::make_pair(ink, neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern,{ { 0, colour{} },{ 1, ink } } });
 		}
 		iDownArrow.set_image(iDownArrowTexture->second);
 	}

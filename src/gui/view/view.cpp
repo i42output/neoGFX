@@ -27,8 +27,8 @@ namespace neogfx
 	view::view(i_controller& aController, i_model& aModel) :
 		scrollable_widget{ 
 			aController.container().as_widget(),
-			i_scrollbar::Normal, 
-			aController.container().style() != view_container_style::MDI ? framed_widget::NoFrame : framed_widget::WindowFrame },
+			scrollbar_style::Normal, 
+			aController.container().style() != view_container_style::MDI ? frame_style::NoFrame : frame_style::WindowFrame },
 		iController(aController), iModel(aModel), iActive(false)
 	{
 	}

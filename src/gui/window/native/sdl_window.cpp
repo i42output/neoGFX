@@ -35,18 +35,18 @@ extern "C" void SDL_ResetMouse(void);
 
 namespace neogfx
 {
-	Uint32 sdl_window::convert_style(window::style_e aStyle)
+	Uint32 sdl_window::convert_style(window_style aStyle)
 	{   
 		uint32_t result = 0u;
-		if (aStyle & window::None)
+		if ((aStyle & window_style::None) == window_style::None)
 			result |= SDL_WINDOW_BORDERLESS;
-		if (aStyle & window::Titlebar)
+		if ((aStyle & window_style::Titlebar) == window_style::Titlebar)
 			result &= ~SDL_WINDOW_BORDERLESS;
-		if (aStyle & window::Resize)
+		if ((aStyle & window_style::Resize) == window_style::Resize)
 			result |= SDL_WINDOW_RESIZABLE;
-		if (aStyle & window::Close)
+		if ((aStyle & window_style::Close) == window_style::Close)
 			result &= ~SDL_WINDOW_BORDERLESS;
-		if (aStyle & window::Fullscreen)
+		if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
 			result |= SDL_WINDOW_FULLSCREEN;
 		return result;
 	}
@@ -104,7 +104,7 @@ namespace neogfx
 
 	std::map<void*, sdl_window*> sHandleMap;
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(0),
 		iStyle(aStyle),
@@ -128,15 +128,15 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{w, h};
 
-		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
-			show((aStyle & window::NoActivate) != window::NoActivate);
+		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
+			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
 
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(0),
 		iStyle(aStyle),
@@ -160,15 +160,15 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
-			show((aStyle & window::NoActivate) != window::NoActivate);
+		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
+			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
 
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(0),
 		iStyle(aStyle),
@@ -192,15 +192,15 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
-			show((aStyle & window::NoActivate) != window::NoActivate);
+		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
+			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
 
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window::style_e aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(&aParent),
 		iStyle(aStyle),
@@ -224,15 +224,15 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
-			show((aStyle & window::NoActivate) != window::NoActivate);
+		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
+			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
 
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(&aParent),
 		iStyle(aStyle),
@@ -256,15 +256,15 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
-			show((aStyle & window::NoActivate) != window::NoActivate);
+		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
+			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
 
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window::style_e aStyle) :
+	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
 		iParent(&aParent),
 		iStyle(aStyle),
@@ -288,8 +288,8 @@ namespace neogfx
 		SDL_GetWindowSize(iHandle, &w, &h);
 		iExtents = basic_size<int>{ w, h };
 
-		if ((aStyle & window::InitiallyHidden) != window::InitiallyHidden)
-			show((aStyle & window::NoActivate) != window::NoActivate);
+		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
+			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
 
@@ -676,15 +676,15 @@ namespace neogfx
 		iSDLWindowProc = (WNDPROC)SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)&CustomWindowProc);
 		DWORD existingStyle = GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE);
 		DWORD newStyle = existingStyle;
-		if (iStyle & window::None)
+		if ((iStyle & window_style::None) == window_style::None)
 			newStyle |= WS_POPUP;
-		if ((iStyle & window::MinimizeBox) != window::MinimizeBox)
+		if ((iStyle & window_style::MinimizeBox) != window_style::MinimizeBox)
 			newStyle &= ~WS_MINIMIZEBOX;
-		if ((iStyle & window::MaximizeBox) != window::MaximizeBox)
+		if ((iStyle & window_style::MaximizeBox) != window_style::MaximizeBox)
 			newStyle &= ~WS_MAXIMIZEBOX;
 		if (newStyle != existingStyle)
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, newStyle);
-		if (iStyle & window::NoActivate)
+		if ((iStyle & window_style::NoActivate) == window_style::NoActivate)
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
 		if (iParent != 0)
 			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(iParent->native_handle()));

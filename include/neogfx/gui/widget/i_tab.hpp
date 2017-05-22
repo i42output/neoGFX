@@ -36,11 +36,13 @@ namespace neogfx
 	public:
 		virtual ~i_tab() {}
 	public:
+		virtual const i_tab_container& container() const = 0;
+		virtual i_tab_container& container() = 0;
+		virtual bool closable() const = 0;
+		virtual void set_closable(bool aClosable) = 0;
 		virtual bool is_selected() const = 0;
 		virtual bool is_deselected() const = 0;
 		virtual void select() = 0;
-		virtual const i_tab_container& container() const = 0;
-		virtual i_tab_container& container() = 0;
 	public:
 		virtual const std::string& text() const = 0;
 		virtual void set_text(const std::string& aText) = 0;

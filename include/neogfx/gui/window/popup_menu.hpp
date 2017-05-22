@@ -29,14 +29,14 @@ namespace neogfx
 	class popup_menu : public window
 	{
 	public:
-		static const style_e DEFAULT_STYLE = None | NoActivate | RequiresOwnerFocus | HideOnOwnerClick | InitiallyHidden;
+		static const window_style DEFAULT_STYLE = window_style::None | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::HideOnOwnerClick | window_style::InitiallyHidden;
 	public:
 		struct no_menu : std::logic_error { no_menu() : std::logic_error("neogfx::popup_menu::no_menu") {} };
 	public:
-		popup_menu(const point& aPosition, i_menu& aMenu, style_e aStyle = DEFAULT_STYLE);
-		popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, style_e aStyle = DEFAULT_STYLE);
-		popup_menu(const point& aPosition, style_e aStyle = DEFAULT_STYLE);
-		popup_menu(i_widget& aParent, const point& aPosition, style_e aStyle = DEFAULT_STYLE);
+		popup_menu(const point& aPosition, i_menu& aMenu, window_style aStyle = DEFAULT_STYLE);
+		popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, window_style aStyle = DEFAULT_STYLE);
+		popup_menu(const point& aPosition, window_style aStyle = DEFAULT_STYLE);
+		popup_menu(i_widget& aParent, const point& aPosition, window_style aStyle = DEFAULT_STYLE);
 		~popup_menu();
 	public:
 		bool has_menu() const;

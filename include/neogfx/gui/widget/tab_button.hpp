@@ -29,17 +29,20 @@ namespace neogfx
 	class tab_button : public push_button, public i_tab
 	{
 		friend class tab_bar;
+		class close_button;
 	public:
-		tab_button(i_tab_container& aContainer, const std::string& aText = std::string());
-		tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText = std::string());
-		tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText = std::string());
+		tab_button(i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
+		tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
+		tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
 		~tab_button();
 	public:
+		const i_tab_container& container() const override;
+		i_tab_container& container() override;
+		bool closable() const override;
+		void set_closable(bool aClosable) override;
 		bool is_selected() const override;
 		bool is_deselected() const override;
 		void select() override;
-		const i_tab_container& container() const override;
-		i_tab_container& container() override;
 	public:
 		const std::string& text() const override;
 		void set_text(const std::string& aText) override;
@@ -60,9 +63,13 @@ namespace neogfx
 	protected:
 		void paint(graphics_context& aGraphicsContext) const override;
 	protected:
+		void mouse_entered() override;
+		void mouse_left() override;
+	protected:
 		void set_selected_state(bool aSelectedState);
 	private:
 		i_tab_container& iContainer;
+		std::unique_ptr<close_button> iCloseButton;
 		bool iSelectedState;
 	};
 }

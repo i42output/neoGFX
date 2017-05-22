@@ -29,8 +29,8 @@ namespace neogfx
 	public:
 		struct widget_not_created_yet : std::logic_error { widget_not_created_yet() : std::logic_error("neogfx::context_menu::widget_not_created_yet") {} };
 	public:
-		context_menu(const point& aPosition, window::style_e aStyle = popup_menu::DEFAULT_STYLE | popup_menu::DismissOnParentClick);
-		context_menu(i_widget& aParent, const point& aPosition, window::style_e aStyle = popup_menu::DEFAULT_STYLE | popup_menu::DismissOnParentClick);
+		context_menu(const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
+		context_menu(i_widget& aParent, const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
 		~context_menu();
 	public:
 		i_menu& menu();
@@ -40,7 +40,7 @@ namespace neogfx
 		std::unique_ptr<i_menu> iMenu;
 		i_widget* iParent;
 		point iPosition;
-		window::style_e iStyle;
+		window_style iStyle;
 		std::unique_ptr<popup_menu> iWidget;
 	};
 }

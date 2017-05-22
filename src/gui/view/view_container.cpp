@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	view_stack::view_stack(i_layout& aLayout, i_view_container& aParent) :
-		scrollable_widget{ aLayout, i_scrollbar::Normal, framed_widget::NoFrame }, iLayout{ *this }, iParent{ aParent }
+		scrollable_widget{ aLayout, scrollbar_style::Normal, frame_style::NoFrame }, iLayout{ *this }, iParent{ aParent }
 	{
 		set_margins(neogfx::margins{});
 	}
@@ -145,6 +145,14 @@ namespace neogfx
 		return const_cast<i_tab&>(const_cast<const view_container*>(this)->tab(aTabIndex));
 	}
 
+	bool view_container::is_tab_selected() const
+	{
+		for (auto& tab : iTabs)
+			if (tab.first->is_selected())
+				return true;
+		return false;
+	}
+
 	const i_tab& view_container::selected_tab() const
 	{
 		for (auto& tab : iTabs)
@@ -185,6 +193,26 @@ namespace neogfx
 		tab(aTabIndex).as_widget().hide();
 		if (has_tab_page(aTabIndex))
 			tab_page(aTabIndex).as_widget().hide();
+	}
+
+	view_container::optional_tab_index view_container::next_visible_tab(tab_index aStartFrom) const
+	{
+		return iTabBar.next_visible_tab(aStartFrom);
+	}
+
+	view_container::optional_tab_index view_container::previous_visible_tab(tab_index aStartFrom) const
+	{
+		return iTabBar.previous_visible_tab(aStartFrom);
+	}
+
+	void view_container::select_next_tab()
+	{
+		iTabBar.select_next_tab();
+	}
+
+	void view_container::select_previous_tab()
+	{
+		iTabBar.select_previous_tab();
 	}
 
 	void view_container::adding_tab(i_tab& aTab)
