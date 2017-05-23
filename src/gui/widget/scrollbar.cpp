@@ -176,10 +176,12 @@ namespace neogfx
 		aGraphicsContext.set_origin(point(0.0, 0.0));
 		colour baseColour = iContainer.scrollbar_colour(*this);
 		colour backgroundColour = baseColour.light() ? baseColour.darker(0x40) : baseColour.lighter(0x40);
+		if (iContainer.as_widget().transparent_background())
+			backgroundColour = iContainer.as_widget().container_background_colour();
 		colour foregroundColour = baseColour.light() ? baseColour.darker(0x80) : baseColour.lighter(0x80);
 		if (style() == scrollbar_style::Normal)
 			aGraphicsContext.fill_rect(iContainer.scrollbar_geometry(aGraphicsContext, *this), backgroundColour);
-		else if (style() == scrollbar_style::Menu && !iContainer.as_widget().transparent_background())
+		else if (style() == scrollbar_style::Menu)
 		{
 			auto g1 = g;
 			auto g2 = g;
@@ -198,7 +200,7 @@ namespace neogfx
 			aGraphicsContext.fill_rect(g1, backgroundColour);
 			aGraphicsContext.fill_rect(g2, backgroundColour);
 		}
-		else if (style() == scrollbar_style::Scroller && !iContainer.as_widget().transparent_background())
+		else if (style() == scrollbar_style::Scroller)
 		{
 			auto g1 = g;
 			auto g2 = g;
@@ -218,6 +220,40 @@ namespace neogfx
 			}
 			aGraphicsContext.fill_rect(g1, backgroundColour);
 			aGraphicsContext.fill_rect(g2, backgroundColour);
+			if (position() != minimum())
+			{
+				auto fadeRect = g;
+				if (type() == scrollbar_type::Vertical)
+					fadeRect.cy = width(aGraphicsContext);
+				else
+					fadeRect.cx = width(aGraphicsContext);
+				aGraphicsContext.fill_rect(fadeRect, gradient
+				{
+					gradient::colour_stop_list{ { 0.0, backgroundColour }, { 1.0, backgroundColour } },
+					gradient::alpha_stop_list{ { 0.0, 0xFF }, { 1.0, 0x00} },
+					type() == scrollbar_type::Vertical ? gradient::Vertical : gradient::Horizontal
+				});
+			}
+			if (position() != maximum() - page())
+			{
+				auto fadeRect = g;
+				if (type() == scrollbar_type::Vertical)
+				{
+					fadeRect.y = fadeRect.y + fadeRect.cy - width(aGraphicsContext) * 3.0;
+					fadeRect.cy = width(aGraphicsContext);
+				}
+				else
+				{
+					fadeRect.x = fadeRect.x + fadeRect.cx - width(aGraphicsContext) * 3.0;
+					fadeRect.cx = width(aGraphicsContext);
+				}
+				aGraphicsContext.fill_rect(fadeRect, gradient
+				{
+					gradient::colour_stop_list{ { 0.0, backgroundColour }, { 1.0, backgroundColour } },
+					gradient::alpha_stop_list{ { 0.0, 0x00 },{ 1.0, 0xFF } },
+					type() == scrollbar_type::Vertical ? gradient::Vertical : gradient::Horizontal
+				});
+			}
 		}
 
 		const dimension margin = 3.0;

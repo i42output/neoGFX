@@ -935,7 +935,8 @@ namespace neogfx
 			iUpdateRects.clear();
 			return;
 		}
-		if (requires_update())
+		bool requiresUpdate = requires_update();
+		if (requiresUpdate)
 		{
 			aGraphicsContext.set_extents(extents());
 			aGraphicsContext.set_origin(origin(true));
@@ -959,6 +960,14 @@ namespace neogfx
 			if (!intersection.empty())
 				c->render(aGraphicsContext);
 		}
+		if (requiresUpdate)
+		{
+			aGraphicsContext.set_extents(extents());
+			aGraphicsContext.set_origin(origin(true));
+			aGraphicsContext.scissor_on(default_clip_rect(true));
+			paint_non_client_after(aGraphicsContext);
+			aGraphicsContext.scissor_off();
+		}
 	}
 
 	bool widget::transparent_background() const
@@ -973,6 +982,10 @@ namespace neogfx
 			for (const auto& ur : iUpdateRects)
 				aGraphicsContext.fill_rect(ur + (origin() - origin(true)), background_colour());
 		}
+	}
+
+	void widget::paint_non_client_after(graphics_context&) const
+	{
 	}
 
 	void widget::paint(graphics_context&) const

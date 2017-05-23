@@ -109,9 +109,9 @@ namespace neogfx
 		return result;
 	}
 
-	void scrollable_widget::paint_non_client(graphics_context& aGraphicsContext) const
+	void scrollable_widget::paint_non_client_after(graphics_context& aGraphicsContext) const
 	{
-		framed_widget::paint_non_client(aGraphicsContext);
+		framed_widget::paint_non_client_after(aGraphicsContext);
 		if (vertical_scrollbar().visible())
 			vertical_scrollbar().render(aGraphicsContext);
 		if (horizontal_scrollbar().visible())

@@ -143,6 +143,7 @@ namespace neogfx
 		virtual void render(graphics_context& aGraphicsContext) const = 0;
 		virtual bool transparent_background() const = 0;
 		virtual void paint_non_client(graphics_context& aGraphicsContext) const = 0;
+		virtual void paint_non_client_after(graphics_context& aGraphicsContext) const = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 	public:
 		virtual bool has_foreground_colour() const = 0;

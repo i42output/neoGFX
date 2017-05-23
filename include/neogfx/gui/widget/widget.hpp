@@ -147,6 +147,7 @@ namespace neogfx
 		bool transparent_background() const override;
 		void paint_non_client(graphics_context& aGraphicsContext) const override;
 		void paint(graphics_context& aGraphicsContext) const override;
+		void paint_non_client_after(graphics_context& aGraphicsContext) const override;
 	public:
 		bool has_foreground_colour() const override;
 		colour foreground_colour() const override;
