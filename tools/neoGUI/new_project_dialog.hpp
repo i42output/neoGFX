@@ -39,7 +39,7 @@ namespace neogui
 		};
 	public:
 		new_project_dialog(i_widget& aParent) :
-			dialog{ aParent, "New Project", Modal | Titlebar | Close },
+			dialog{ aParent, "New Project", neogfx::window_style::Modal | neogfx::window_style::Titlebar | neogfx::window_style::Close },
 			iNamingConvention{ naming_convention::NeoGfx },
 			iLayout0{ *this }, iLayout01{ iLayout0 }, iLayout1{ iLayout01 }, iLayout2{ iLayout01 }, 
 			iType{ iLayout1, "Project Type" }, iDefaults{ iLayout2, "Project Defaults" },
