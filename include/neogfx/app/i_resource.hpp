@@ -30,6 +30,8 @@ namespace neogfx
 		event<> downloaded;
 		event<> failed_to_download;
 	public:
+		typedef std::vector<uint8_t> data_type;
+		typedef data_type hash_digest_type;
 		typedef std::shared_ptr<i_resource> pointer;
 		typedef std::weak_ptr<i_resource> weak_pointer;
 	public:
@@ -49,5 +51,6 @@ namespace neogfx
 		virtual const void* data() const = 0;
 		virtual void* data() = 0;
 		virtual std::size_t size() const = 0;
+		virtual hash_digest_type hash() const = 0;
 	};
 }

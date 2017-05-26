@@ -127,6 +127,9 @@ namespace neogfx
 		virtual void subpixel_rendering_on();
 		virtual void subpixel_rendering_off();
 	public:
+		static const uint32_t GRADIENT_FILTER_SIZE = 33;
+		const std::array<GLuint, 3>& gradient_textures() const; // todo: use texture class and add to base class interface
+	public:
 		virtual bool process_events();
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
@@ -144,5 +147,6 @@ namespace neogfx
 		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;
 		bool iSubpixelRendering;
+		mutable boost::optional<std::array<GLuint, 3>> iGradientTextures;
 	};
 }

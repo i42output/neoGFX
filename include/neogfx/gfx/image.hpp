@@ -69,6 +69,7 @@ namespace neogfx
 		virtual const void* data() const;
 		virtual void* data();
 		virtual std::size_t size() const;
+		virtual hash_digest_type hash() const;
 	public:
 		virtual neogfx::colour_format colour_format() const;
 		virtual texture_sampling sampling() const;
@@ -87,7 +88,7 @@ namespace neogfx
 		std::string iUri;
 		boost::optional<std::string> iError;
 		neogfx::colour_format iColourFormat;
-		std::vector<uint8_t> iData;
+		data_type iData;
 		texture_sampling iSampling;
 		neogfx::size iSize;
 	};

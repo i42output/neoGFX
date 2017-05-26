@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <openssl/sha.h>
 #include <neogfx/app/module_resource.hpp>
 
 namespace neogfx
@@ -71,5 +72,12 @@ namespace neogfx
 	std::size_t module_resource::size() const
 	{
 		return iSize;
+	}
+
+	module_resource::hash_digest_type module_resource::hash() const
+	{
+		hash_digest_type result{ SHA256_DIGEST_LENGTH };
+		SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+		return result;
 	}
 }

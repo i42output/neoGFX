@@ -171,7 +171,6 @@ namespace neogfx
 		bool iSubpixelRendering;
 		boost::optional<std::pair<bool, char>> iMnemonic;
 		mutable boost::optional<std::string> iPassword;
-		boost::optional<std::array<GLuint, 3>> iGradientTextures;
 		std::vector<float> iGradientStopPositions;
 		std::vector<std::array<float, 4>> iGradientStopColours;
 		font iLastDrawGlyphFallbackFont;

@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <libpng/png.h>
+#include <openssl/sha.h>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/resource_manager.hpp>
 
@@ -105,6 +106,13 @@ namespace neogfx
 	std::size_t image::size() const
 	{
 		return iData.size();
+	}
+
+	image::hash_digest_type image::hash() const
+	{
+		hash_digest_type result(SHA256_DIGEST_LENGTH);
+		SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+		return result;
 	}
 
 	colour_format image::colour_format() const

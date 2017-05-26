@@ -44,6 +44,7 @@ namespace neogfx
 		virtual const void* data() const;
 		virtual void* data();
 		virtual std::size_t size() const;
+		virtual hash_digest_type hash() const;
 	private:
 		i_resource_manager& iManager;
 		std::string iUri;

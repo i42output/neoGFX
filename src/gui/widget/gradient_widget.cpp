@@ -548,7 +548,10 @@ namespace neogfx
 				{3, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().selection_colour()},
 				{4, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().selection_colour().lighter(0x40)},
 				{9, aColourStop.second}} };
-		aGraphicsContext.draw_texture(r.top_left(), texture{ stopGlyph });
+		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
+		if (stopGlyphTexture == iStopTextures.end())
+			stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
+		aGraphicsContext.draw_texture(r.top_left(), stopGlyphTexture->second);
 	}
 
 	void gradient_widget::draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const
@@ -587,6 +590,9 @@ namespace neogfx
 				{ 3, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().selection_colour() },
 				{ 4, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().selection_colour().lighter(0x40) },
 				{ 9, colour::White.with_alpha(aAlphaStop.second) } } };
-		aGraphicsContext.draw_texture(r.top_left(), texture{ stopGlyph });
+		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
+		if (stopGlyphTexture == iStopTextures.end())
+			stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
+		aGraphicsContext.draw_texture(r.top_left(), stopGlyphTexture->second);
 	}
 }

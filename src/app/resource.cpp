@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <sstream>
 #include <boost/filesystem.hpp>
+#include <openssl/sha.h>
 #include <neolib/uri.hpp>
 #include <neolib/zip.hpp>
 #include <neogfx/app/resource.hpp>
@@ -143,5 +144,12 @@ namespace neogfx
 	std::size_t resource::size() const
 	{
 		return iData.size();
+	}
+
+	resource::hash_digest_type resource::hash() const
+	{
+		hash_digest_type result{ SHA256_DIGEST_LENGTH };
+		SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+		return result;
 	}
 }
