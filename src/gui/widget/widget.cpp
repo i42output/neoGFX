@@ -736,7 +736,7 @@ namespace neogfx
 		if (client_rect().contains(aPosition))
 		{
 			for (const auto& c : children())
-				if (c->visible() && rect(c->position(), c->extents()).contains(aPosition))
+				if (c->visible() && to_client_coordinates(c->window_rect()).contains(aPosition))
 					return c->widget_at(aPosition - c->position());
 		}
 		return *this;
@@ -869,7 +869,7 @@ namespace neogfx
 	{
 		if ((!is_root() && !has_parent()) || !has_surface() || surface().destroyed() || hidden() || layout_items_in_progress())
 			return;
-		update(aIncludeNonClient ? rect{ origin(true) - origin(), extents() } : client_rect());
+		update(aIncludeNonClient ? to_client_coordinates(window_rect()) : client_rect());
 	}
 
 	void widget::update(const rect& aUpdateRect)
@@ -882,15 +882,14 @@ namespace neogfx
 		{
 			iUpdateRects.insert(aUpdateRect);
 			if ((iBackgroundColour == boost::none || iBackgroundColour->alpha() != 0xFF) && has_parent() && has_surface() && same_surface(parent()))
-				parent().update(rect(aUpdateRect.position() + position() + (origin() - origin(true)), aUpdateRect.extents()));
+				parent().update(parent().to_client_coordinates(to_window_coordinates(aUpdateRect)));
 			else
-				surface().invalidate_surface(aUpdateRect + origin());
+				surface().invalidate_surface(to_window_coordinates(aUpdateRect));
 			for (auto& c : iChildren)
 			{
 				if (c->hidden())
 					continue;
-				rect rectChild(c->position(), c->extents());
-				rect intersection = aUpdateRect.intersection(rectChild);
+				rect intersection = aUpdateRect.intersection(to_client_coordinates(c->window_rect()));
 				if (!intersection.empty())
 					c->update();
 			}
@@ -919,7 +918,7 @@ namespace neogfx
 		if (!aIncludeNonClient)
 			clipRect = clipRect.intersection(client_rect());
 		if (has_parent() && !is_root())
-			clipRect = clipRect.intersection(parent().default_clip_rect() - point(origin(aIncludeNonClient) - parent().origin()));
+			clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect())));
 		return clipRect;
 	}
 
@@ -931,10 +930,7 @@ namespace neogfx
 	void widget::render(graphics_context& aGraphicsContext) const
 	{
 		if (effectively_hidden())
-		{
-			iUpdateRects.clear();
 			return;
-		}
 		bool requiresUpdate = requires_update();
 		if (requiresUpdate)
 		{
@@ -1092,6 +1088,7 @@ namespace neogfx
 				parent_layout().invalidate();
 			if (effectively_hidden())
 			{
+				iUpdateRects.clear();
 				if (surface().has_focused_widget() &&
 					(surface().focused_widget().is_descendent_of(*this) || &surface().focused_widget() == this))
 				{
