@@ -187,3 +187,8 @@
 /tools/neoGUI/neoGUI.VC.db
 /tools/neoGUI/neoGUI.VC.VC.opendb
 /tools/glsl2hpp/build/win32/vs2015/glsl2hpp.vcxproj.user
+/3rdparty/harfbuzz/harfbuzz-1.4.6/stage
+/3rdparty/glew/glew-1.13.0/build/cmake/stage
+/3rdparty/libpng/libpng-1.6.21/stage
+/3rdparty/zlib/zlib-1.2.8/stage
+/3rdparty/harfbuzz/harfbuzz-1.4.6/lib/*.lib

@@ -52,7 +52,7 @@ namespace neogfx
 
 	void scrollbar::show()
 	{
-		if (!iVisible)
+		if (!iVisible && style() != scrollbar_style::Invisible)
 		{
 			iVisible = true;
 			iContainer.scrollbar_updated(*this, Shown);
@@ -170,6 +170,8 @@ namespace neogfx
 
 	void scrollbar::render(graphics_context& aGraphicsContext) const
 	{
+		if (style() == scrollbar_style::Invisible)
+			return;
 		scoped_units su(aGraphicsContext, UnitsPixels);
 		rect g = iContainer.scrollbar_geometry(aGraphicsContext, *this);
 		point oldOrigin = aGraphicsContext.origin();
@@ -300,6 +302,8 @@ namespace neogfx
 
 	rect scrollbar::element_geometry(const i_units_context& aContext, element_e aElement) const
 	{
+		if (style() == scrollbar_style::Invisible)
+			return rect{};
 		scoped_units su(aContext, UnitsPixels);
 		rect g = iContainer.scrollbar_geometry(aContext, *this);
 		const dimension margin = 3.0;
@@ -439,7 +443,9 @@ namespace neogfx
 
 	scrollbar::element_e scrollbar::element_at(const i_units_context& aContext, const point& aPosition) const
 	{
-		if (element_geometry(aContext, ElementUpButton).contains(aPosition))
+		if (style() == scrollbar_style::Invisible)
+			return ElementNone;
+		else if (element_geometry(aContext, ElementUpButton).contains(aPosition))
 			return ElementUpButton;
 		else if (element_geometry(aContext, ElementDownButton).contains(aPosition))
 			return ElementDownButton;

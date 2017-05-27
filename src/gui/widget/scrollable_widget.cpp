@@ -364,7 +364,7 @@ namespace neogfx
 				iOldScrollPosition.x = scrollPosition.x;
 			}
 		}
-		update();
+		update(true);
 	}
 
 	colour scrollable_widget::scrollbar_colour(const i_scrollbar&) const
