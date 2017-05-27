@@ -206,8 +206,6 @@ namespace neogfx
 	public:
 		graphics_context create_graphics_context() const override;
 	protected:
-		const update_rect_list& update_rects() const override;
-	protected:
 		const i_widget& widget_for_mouse_event(const point& aPosition) const override;
 		i_widget& widget_for_mouse_event(const point& aPosition) override;
 		// helpers
@@ -232,7 +230,6 @@ namespace neogfx
 		optional_size iMinimumSize;
 		optional_size iMaximumSize;
 		uint32_t iLayoutInProgress;
-		mutable update_rect_list iUpdateRects;
 		bool iVisible;
 		bool iEnabled;
 		neogfx::focus_policy iFocusPolicy;

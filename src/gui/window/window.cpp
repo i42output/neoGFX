@@ -463,6 +463,16 @@ namespace neogfx
 			update(aInvalidatedRect);
 	}
 
+	bool window::has_invalidated_area() const
+	{
+		return native_surface().has_invalidated_area();
+	}
+
+	const rect& window::invalidated_area() const
+	{
+		return native_surface().invalidated_area();
+	}
+
 	bool window::has_rendering_priority() const
 	{
 		return is_active();

@@ -104,6 +104,18 @@ namespace neogfx
 			iInvalidatedRects.insert(aInvalidatedRect);
 	}
 
+	bool opengl_window::has_invalidated_area() const
+	{
+		return iInvalidatedArea != boost::none;
+	}
+
+	const rect& opengl_window::invalidated_area() const
+	{
+		if (has_invalidated_area())
+			return *iInvalidatedArea;
+		throw no_invalidated_area();
+	}
+
 	void opengl_window::render(bool aOOBRequest)
 	{
 		if (iRendering || rendering_engine().creating_window() || iPaused)
@@ -135,14 +147,14 @@ namespace neogfx
 
 		rendering.trigger();
 
-		rect invalidatedRect = *iInvalidatedRects.begin();
+		iInvalidatedArea = *iInvalidatedRects.begin();
 		for (const auto& ir : iInvalidatedRects)
 		{
-			invalidatedRect = invalidatedRect.combine(ir);
+			*iInvalidatedArea = iInvalidatedArea->combine(ir);
 		}
 		iInvalidatedRects.clear();
-		invalidatedRect.cx = std::min(invalidatedRect.cx, surface_size().cx - invalidatedRect.x);
-		invalidatedRect.cy = std::min(invalidatedRect.cy, surface_size().cy - invalidatedRect.y);
+		iInvalidatedArea->cx = std::min(iInvalidatedArea->cx, surface_size().cx - iInvalidatedArea->x);
+		iInvalidatedArea->cy = std::min(iInvalidatedArea->cy, surface_size().cy - iInvalidatedArea->y);
 
 		rendering_engine().activate_context(*this);
 
@@ -189,13 +201,15 @@ namespace neogfx
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 
-		glCheck(iWindow.native_window_render(invalidatedRect));
+		glCheck(iWindow.native_window_render(invalidated_area()));
 
 		glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 		glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, iFrameBuffer));
 		glCheck(glBlitFramebuffer(0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), 0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), GL_COLOR_BUFFER_BIT, GL_NEAREST));
 
 		display();
+
+		iInvalidatedArea = boost::none;
 
 		iRendering = false;
 

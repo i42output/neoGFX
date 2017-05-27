@@ -878,37 +878,19 @@ namespace neogfx
 			return;
 		if (aUpdateRect.empty())
 			return;
-		if (iUpdateRects.find(aUpdateRect) == iUpdateRects.end())
-		{
-			iUpdateRects.insert(aUpdateRect);
-			if ((iBackgroundColour == boost::none || iBackgroundColour->alpha() != 0xFF) && has_parent() && has_surface() && same_surface(parent()))
-				parent().update(parent().to_client_coordinates(to_window_coordinates(aUpdateRect)));
-			else
-				surface().invalidate_surface(to_window_coordinates(aUpdateRect));
-			for (auto& c : iChildren)
-			{
-				if (c->hidden())
-					continue;
-				rect intersection = aUpdateRect.intersection(to_client_coordinates(c->window_rect()));
-				if (!intersection.empty())
-					c->update();
-			}
-		}
+		surface().invalidate_surface(to_window_coordinates(aUpdateRect));
 	}
 
 	bool widget::requires_update() const
 	{
-		return !iUpdateRects.empty();
+		return surface().has_invalidated_area() && !surface().invalidated_area().intersection(window_rect()).empty();
 	}
 
 	rect widget::update_rect() const
 	{
-		if (iUpdateRects.empty())
+		if (!requires_update())
 			throw no_update_rect();
-		rect result = *(iUpdateRects.begin());
-		for (const auto& ur : iUpdateRects)
-			result = result.combine(ur);
-		return result;
+		return to_client_coordinates(surface().invalidated_area().intersection(window_rect()));
 	}
 
 	rect widget::default_clip_rect(bool aIncludeNonClient) const
@@ -931,39 +913,37 @@ namespace neogfx
 	{
 		if (effectively_hidden())
 			return;
-		bool requiresUpdate = requires_update();
-		if (requiresUpdate)
-		{
-			aGraphicsContext.set_extents(extents());
-			aGraphicsContext.set_origin(origin(true));
-			aGraphicsContext.scissor_on(default_clip_rect(true));
-			paint_non_client(aGraphicsContext);
-			aGraphicsContext.scissor_off();
-			aGraphicsContext.set_extents(client_rect().extents());
-			aGraphicsContext.set_origin(origin());
-			aGraphicsContext.scissor_on(default_clip_rect());
-			scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
-			painting.trigger(aGraphicsContext);
-			paint(aGraphicsContext);
-			aGraphicsContext.scissor_off();
-		}
-		iUpdateRects.clear();
+		if (!requires_update())
+			return;
+		rect updateRect = update_rect();
+
+		aGraphicsContext.set_extents(extents());
+		aGraphicsContext.set_origin(origin(true));
+		aGraphicsContext.scissor_on(default_clip_rect(true).intersection(updateRect));
+		paint_non_client(aGraphicsContext);
+		aGraphicsContext.scissor_off();
+
+		aGraphicsContext.set_extents(client_rect().extents());
+		aGraphicsContext.set_origin(origin());
+		aGraphicsContext.scissor_on(default_clip_rect().intersection(updateRect));
+		scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
+		painting.trigger(aGraphicsContext);
+		paint(aGraphicsContext);
+		aGraphicsContext.scissor_off();
+
 		for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
 		{
 			const auto& c = *i;
-			rect rectChild(c->position(), c->extents());
-			rect intersection = client_rect().intersection(rectChild);
+			rect intersection = default_clip_rect().intersection(updateRect).intersection(to_client_coordinates(c->window_rect()));
 			if (!intersection.empty())
 				c->render(aGraphicsContext);
 		}
-		if (requiresUpdate)
-		{
-			aGraphicsContext.set_extents(extents());
-			aGraphicsContext.set_origin(origin(true));
-			aGraphicsContext.scissor_on(default_clip_rect(true));
-			paint_non_client_after(aGraphicsContext);
-			aGraphicsContext.scissor_off();
-		}
+
+		aGraphicsContext.set_extents(extents());
+		aGraphicsContext.set_origin(origin(true));
+		aGraphicsContext.scissor_on(default_clip_rect(true).intersection(updateRect));
+		paint_non_client_after(aGraphicsContext);
+		aGraphicsContext.scissor_off();
 	}
 
 	bool widget::transparent_background() const
@@ -974,10 +954,7 @@ namespace neogfx
 	void widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
 		if (has_background_colour() || !transparent_background())
-		{
-			for (const auto& ur : iUpdateRects)
-				aGraphicsContext.fill_rect(ur + (origin() - origin(true)), background_colour());
-		}
+			aGraphicsContext.fill_rect(update_rect(), background_colour());
 	}
 
 	void widget::paint_non_client_after(graphics_context&) const
@@ -1088,7 +1065,6 @@ namespace neogfx
 				parent_layout().invalidate();
 			if (effectively_hidden())
 			{
-				iUpdateRects.clear();
 				if (surface().has_focused_widget() &&
 					(surface().focused_widget().is_descendent_of(*this) || &surface().focused_widget() == this))
 				{
@@ -1321,11 +1297,6 @@ namespace neogfx
 	graphics_context widget::create_graphics_context() const
 	{
 		return graphics_context(*this);
-	}
-
-	const widget::update_rect_list& widget::update_rects() const
-	{
-		return iUpdateRects;
 	}
 }
 

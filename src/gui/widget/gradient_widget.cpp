@@ -102,14 +102,11 @@ namespace neogfx
 			virtual void paint_non_client(graphics_context& aGraphicsContext) const
 			{
 				dialog::paint_non_client(aGraphicsContext);
-				auto backgroundRect = client_rect() + (origin() - origin(true));
-				for (const auto& ur : update_rects())
-				{
-					aGraphicsContext.scissor_on(ur);
-					draw_alpha_background(aGraphicsContext, backgroundRect);
-					aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));
-					aGraphicsContext.scissor_off();
-				}
+				auto backgroundRect = client_rect();
+				aGraphicsContext.scissor_on(update_rect());
+				draw_alpha_background(aGraphicsContext, backgroundRect);
+				aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));
+				aGraphicsContext.scissor_off();
 			}
 		private:
 			vertical_layout iLayout;

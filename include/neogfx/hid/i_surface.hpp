@@ -80,6 +80,7 @@ namespace neogfx
 		virtual ~i_surface() {}
 	public:
 		virtual bool is_weak() const = 0;
+		virtual bool can_close() const = 0;
 		virtual bool is_closed() const = 0;
 		virtual void close() = 0;
 		virtual bool has_parent_surface() const = 0;
@@ -101,6 +102,8 @@ namespace neogfx
 		virtual void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) = 0;
 		virtual void layout_surface() = 0;
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) = 0;
+		virtual bool has_invalidated_area() const = 0;
+		virtual const rect& invalidated_area() const = 0;
 		virtual bool has_rendering_priority() const = 0;
 		virtual void render_surface() = 0;
 		virtual void pause_rendering() = 0;
@@ -115,6 +118,8 @@ namespace neogfx
 		virtual void move_surface(const point& aPosition) = 0;
 		virtual size surface_size() const = 0;
 		virtual void resize_surface(const size& aSize) = 0;
+		virtual void centre() = 0;
+		virtual void centre_on_parent() = 0;
 	public:
 		virtual point mouse_position() const = 0;
 		virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;

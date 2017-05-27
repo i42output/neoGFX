@@ -198,8 +198,6 @@ namespace neogfx
 	public:
 		virtual graphics_context create_graphics_context() const = 0;
 	protected:
-		virtual const update_rect_list& update_rects() const = 0;
-	protected:
 		virtual const i_widget& widget_for_mouse_event(const point& aPosition) const = 0;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition) = 0;
 		// helpers

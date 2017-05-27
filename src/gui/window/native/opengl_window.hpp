@@ -54,6 +54,8 @@ namespace neogfx
 		double fps() const override;
 	public:
 		void invalidate(const rect& aInvalidatedRect) override;
+		bool has_invalidated_area() const override;
+		const rect& invalidated_area() const override;
 		void render(bool aOOBRequest = false) override;
 		void pause() override;
 		void resume() override;
@@ -82,6 +84,7 @@ namespace neogfx
 		GLuint iDepthStencilBuffer;
 		size iFrameBufferSize;
 		std::unordered_set<rect> iInvalidatedRects;
+		boost::optional<rect> iInvalidatedArea;
 		uint64_t iFrameCounter;
 		boost::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;

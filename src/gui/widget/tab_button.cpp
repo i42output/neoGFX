@@ -298,7 +298,7 @@ namespace neogfx
 			clipRect.x += 1.0;
 			clipRect.cx -= 2.0;
 			aGraphicsContext.scissor_off();
-			aGraphicsContext.scissor_on(clipRect);
+			aGraphicsContext.scissor_on(clipRect.intersection(update_rect()));
 			push_button::paint(aGraphicsContext);
 		}
 	}

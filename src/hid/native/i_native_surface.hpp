@@ -38,6 +38,7 @@ namespace neogfx
 		event<> rendering_finished;
 	public:
 		struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
+		struct no_invalidated_area : std::logic_error { no_invalidated_area() : std::logic_error("neogfx::i_native_surface::no_invalidated_area") {} };
 	public:
 		virtual ~i_native_surface() {}
 	public:
@@ -68,6 +69,8 @@ namespace neogfx
 		virtual double fps() const = 0;
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect) = 0;
+		virtual bool has_invalidated_area() const = 0;
+		virtual const rect& invalidated_area() const = 0;
 		virtual void render(bool aOOBRequest = false) = 0;
 		virtual void pause() = 0;
 		virtual void resume() = 0;
