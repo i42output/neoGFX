@@ -61,7 +61,8 @@ namespace neogfx
 	protected:
 		colour foreground_colour() const override;
 	protected:
-		void paint(graphics_context& aGraphicsContext) const override;
+		using push_button::update;
+		void update(const rect& aUpdateRect) override;
 	protected:
 		void mouse_entered() override;
 		void mouse_left() override;

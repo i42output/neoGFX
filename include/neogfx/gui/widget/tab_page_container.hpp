@@ -42,6 +42,7 @@ namespace neogfx
 			size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 		public:
 			bool transparent_background() const override;
+			void paint_non_client(graphics_context& aGraphicsContext) const override;
 		public:
 			colour background_colour() const override;
 		public:
@@ -51,6 +52,7 @@ namespace neogfx
 			i_widget& as_widget() override;
 		private:
 			i_tab& iTab;
+			sink iSink;
 		};
 	private:
 		typedef std::shared_ptr<i_tab_page> tab_page_pointer;

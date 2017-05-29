@@ -79,7 +79,6 @@ namespace neogfx
 
 	void framed_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
-		colour frameColour = frame_colour();
 		widget::paint_non_client(aGraphicsContext);
 		switch (iStyle)
 		{
@@ -92,18 +91,15 @@ namespace neogfx
 		case frame_style::DashedFrame:
 			break;
 		case frame_style::SolidFrame:
-			aGraphicsContext.draw_rect(rect(point(0.0, 0.0), window_rect().extents()), pen(frameColour, effective_frame_width()));
+			aGraphicsContext.draw_rect(rect(point(0.0, 0.0), window_rect().extents()), pen(frame_colour(), effective_frame_width()));
 			break;
 		case frame_style::ContainerFrame:
 			{
-				colour midColour = (has_foreground_colour() ? foreground_colour() : container_background_colour());
-				colour borderColour = midColour.darker(0x40);
-				colour innerBorderColour = midColour.lighter(0x40);
 				rect rectBorder = rect(point(0.0, 0.0), window_rect().extents());
 				rectBorder.deflate(line_width(), line_width());
-				aGraphicsContext.draw_rect(rectBorder, pen(innerBorderColour, line_width()));
+				aGraphicsContext.draw_rect(rectBorder, pen(inner_frame_colour(), line_width()));
 				rectBorder.inflate(line_width(), line_width());
-				aGraphicsContext.draw_rect(rectBorder, pen(borderColour, line_width()));
+				aGraphicsContext.draw_rect(rectBorder, pen(frame_colour(), line_width()));
 			}
 			break;
 		case frame_style::DoubleFrame:
@@ -136,7 +132,18 @@ namespace neogfx
 
 	colour framed_widget::frame_colour() const
 	{
-		return (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
+		if (iStyle != frame_style::ContainerFrame)
+			return (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
+		else
+			return (has_foreground_colour() ? foreground_colour() : container_background_colour()).darker(0x40);
+	}
+
+	colour framed_widget::inner_frame_colour() const
+	{
+		if (iStyle != frame_style::ContainerFrame)
+			return frame_colour();
+		else
+			return (has_foreground_colour() ? foreground_colour() : container_background_colour()).lighter(0x40);
 	}
 
 	dimension framed_widget::line_width() const

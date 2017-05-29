@@ -47,6 +47,19 @@ namespace neogfx
 		return false;
 	}
 
+	void tab_page_container::default_tab_page::paint_non_client(graphics_context& aGraphicsContext) const
+	{
+		scrollable_widget::paint_non_client(aGraphicsContext);
+		if (iTab.is_selected())
+		{
+			auto hole = to_client_coordinates(iTab.as_widget().window_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(window_rect()));
+			hole = hole.intersection(to_client_coordinates(window_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
+			aGraphicsContext.fill_rect(hole, inner_frame_colour());
+			hole.deflate(size{ effective_frame_width() / 2.0, 0.0 });
+			aGraphicsContext.fill_rect(hole, background_colour());
+		}
+	}
+
 	colour tab_page_container::default_tab_page::background_colour() const
 	{
 		if (has_background_colour())

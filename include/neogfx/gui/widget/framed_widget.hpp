@@ -61,6 +61,7 @@ namespace neogfx
 		void set_style(frame_style aStyle);
 	protected:
 		virtual colour frame_colour() const;
+		virtual colour inner_frame_colour() const;
 	protected:
 		dimension line_width() const;
 		dimension effective_frame_width() const;

@@ -286,21 +286,12 @@ namespace neogfx
 		return tabPage.background_colour();
 	}
 
-	void tab_button::paint(graphics_context& aGraphicsContext) const
+	void tab_button::update(const rect& aUpdateRect)
 	{
-		push_button::paint(aGraphicsContext);
-		if (is_selected())
-		{
-			scoped_units su1(*this, UnitsPixels);
-			scoped_units su2(aGraphicsContext, UnitsPixels);
-			rect clipRect = default_clip_rect();
-			clipRect.cy += 2.0;
-			clipRect.x += 1.0;
-			clipRect.cx -= 2.0;
-			aGraphicsContext.scissor_off();
-			aGraphicsContext.scissor_on(clipRect.intersection(update_rect()));
-			push_button::paint(aGraphicsContext);
-		}
+		if (!is_selected())
+			push_button::update(aUpdateRect);
+		else
+			push_button::update(to_client_coordinates(window_rect() + delta{ 0.0, 2.0 }));
 	}
 
 	void tab_button::mouse_entered()
