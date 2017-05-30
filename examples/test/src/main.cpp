@@ -621,7 +621,7 @@ int main(int argc, char* argv[])
 		});
 
 		auto& circlesWidget = tabContainer.add_tab_page("Circles").as_widget();
-		circlesWidget.painting([](ng::graphics_context& aGc)
+		circlesWidget.painting([&circlesWidget](ng::graphics_context& aGc)
 		{
 			neolib::basic_random<ng::coordinate> prng;
 			neolib::basic_random<uint8_t> rngColour;
@@ -635,18 +635,18 @@ int main(int argc, char* argv[])
 				{
 				case 0:
 					aGc.draw_circle(
-						ng::point{ prng(aGc.extents().cx - 1), prng(aGc.extents().cy - 1) }, prng(255),
+						ng::point{ prng(circlesWidget.client_rect().cx - 1), prng(circlesWidget.client_rect().extents().cy - 1) }, prng(255),
 						ng::pen{ random_colour(), prng(1, 3) });
 					break;
 				case 1:
 					aGc.draw_circle(
-						ng::point{ prng(aGc.extents().cx - 1), prng(aGc.extents().cy - 1) }, prng(255),
+						ng::point{ prng(circlesWidget.client_rect().cx - 1), prng(circlesWidget.client_rect().cy - 1) }, prng(255),
 						ng::pen{ random_colour(), prng(1, 3) },
 						random_colour().with_alpha(rngColour(255)));
 					break;
 				case 2:
 					aGc.fill_circle(
-						ng::point{ prng(aGc.extents().cx - 1), prng(aGc.extents().cy - 1) }, prng(255),
+						ng::point{ prng(circlesWidget.client_rect().cx - 1), prng(circlesWidget.client_rect().cy - 1) }, prng(255),
 						random_colour().with_alpha(rngColour(255)));
 					break;
 				}
