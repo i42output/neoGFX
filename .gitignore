@@ -192,3 +192,4 @@
 /3rdparty/libpng/libpng-1.6.21/stage
 /3rdparty/zlib/zlib-1.2.8/stage
 /3rdparty/harfbuzz/harfbuzz-1.4.6/lib/*.lib
+/tools/neoGUI/x64/Debug

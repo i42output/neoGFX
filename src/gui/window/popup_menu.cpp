@@ -97,7 +97,11 @@ namespace neogfx
 		if ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick)
 			close();
 		else if ((style() & window_style::HideOnOwnerClick) == window_style::HideOnOwnerClick)
+		{
 			hide();
+			if (has_menu() && menu().is_open())
+				menu().close();
+		}
 		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().ungrab_keyboard(*this);
 	}
