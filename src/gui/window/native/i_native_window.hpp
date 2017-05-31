@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/event.hpp>
 #include <neogfx/core/geometry.hpp>
 #include "../../../hid/native/i_native_surface.hpp"
 #include "native_window_events.hpp"
@@ -33,11 +34,16 @@ namespace neogfx
 	public:
 		typedef neolib::variant<native_window_event, native_mouse_event, native_keyboard_event> native_event;
 	public:
+		event<native_event&> filter_event;
+	public:
+		struct no_current_event : std::logic_error { no_current_event() : std::logic_error("neogfx::i_native_window::no_current_event") {} };
+	public:
 		virtual ~i_native_window() {}
 	public:
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
 		virtual void push_event(const native_event& aEvent) = 0;
 		virtual bool pump_event() = 0;
+		virtual native_event& current_event() = 0;
 		virtual void handle_event(const native_event& aNativeEvent) = 0;
 		virtual bool processing_event() const = 0;
 		virtual i_window& window() const = 0;

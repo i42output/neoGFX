@@ -69,11 +69,20 @@ namespace neogfx
 		if (iEventQueue.empty())
 			return false;
 		iProcessingEvent = true;
-		auto nativeEvent = iEventQueue.front();
+		iCurrentEvent = iEventQueue.front();
 		iEventQueue.pop_front();
-		handle_event(nativeEvent);
+		if (filter_event.trigger(iCurrentEvent))
+			handle_event(iCurrentEvent);
+		iCurrentEvent = boost::none;
 		iProcessingEvent = false;
 		return true;
+	}
+
+	native_window::native_event& native_window::current_event()
+	{
+		if (iCurrentEvent != boost::none)
+			return iCurrentEvent;
+		throw no_current_event();
 	}
 
 	void native_window::handle_event(const native_event& aNativeEvent)
