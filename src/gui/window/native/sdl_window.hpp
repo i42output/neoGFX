@@ -72,34 +72,37 @@ namespace neogfx
 		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
 		~sdl_window();
 	public:
-		virtual void* handle() const;
-		virtual void* native_handle() const;
-		virtual point surface_position() const;
-		virtual void move_surface(const point& aPosition);
-		virtual size surface_size() const;
-		virtual void resize_surface(const size& aSize);
-		virtual point mouse_position() const;
-		virtual bool is_mouse_button_pressed(mouse_button aButton) const;
+		void* handle() const override;
+		void* native_handle() const override;
+		point surface_position() const override;
+		void move_surface(const point& aPosition) override;
+		size surface_size() const override;
+		void resize_surface(const size& aSize) override;
+		point mouse_position() const override;
+		bool is_mouse_button_pressed(mouse_button aButton) const override;
 	public:
-		virtual void save_mouse_cursor();
-		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor);
-		virtual void restore_mouse_cursor();
-		virtual void update_mouse_cursor();
+		void save_mouse_cursor() override;
+		void set_mouse_cursor(mouse_system_cursor aSystemCursor) override;
+		void restore_mouse_cursor() override;
+		void update_mouse_cursor() override;
 	public:
-		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const;
-		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const;
+		bool can_render() const override;
 	public:
-		virtual void close();
-		virtual void show(bool aActivate = false);
-		virtual void hide();
-		virtual bool is_active() const;
-		virtual void activate();
-		virtual bool is_enabled() const;
-		virtual void enable(bool aEnable);
-		virtual bool is_capturing() const;
-		virtual void set_capture();
-		virtual void release_capture();
-		virtual bool is_destroyed() const;
+		std::unique_ptr<i_native_graphics_context> create_graphics_context() const override;
+		std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const override;
+	public:
+		void close() override;
+		bool is_visible() const override;
+		void show(bool aActivate = false) override;
+		void hide() override;
+		bool is_active() const override;
+		void activate() override;
+		bool is_enabled() const override;
+		void enable(bool aEnable) override;
+		bool is_capturing() const override;
+		void set_capture() override;
+		void release_capture() override;
+		bool is_destroyed() const override;
 	private:
 		void init();
 		void process_event(const SDL_Event& aEvent);
@@ -120,6 +123,7 @@ namespace neogfx
 		WNDPROC iSDLWindowProc;
 #endif
 		size iExtents;
+		bool iVisible;
 		bool iCapturingMouse;
 		cursor_pointer iCurrentCursor;
 		std::vector<cursor_pointer> iSavedCursors;

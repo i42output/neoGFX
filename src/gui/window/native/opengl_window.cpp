@@ -116,9 +116,14 @@ namespace neogfx
 		throw no_invalidated_area();
 	}
 
+	bool opengl_window::can_render() const
+	{
+		return !iPaused;
+	}
+
 	void opengl_window::render(bool aOOBRequest)
 	{
-		if (iRendering || rendering_engine().creating_window() || iPaused)
+		if (iRendering || rendering_engine().creating_window() || !can_render())
 			return;
 
 		uint64_t now = app::instance().program_elapsed_ms();

@@ -225,7 +225,13 @@ namespace neogfx
 
 	bool native_window::has_rendering_priority() const
 	{
-		return window().native_window_has_rendering_priority();
+		if (window().native_window_has_rendering_priority())
+			return true;
+		uint32_t surfacesThatCanRender = 0;
+		for (std::size_t i = 0; i < surface_manager().surface_count(); ++i)
+			if (surface_manager().surface(i).native_surface().can_render())
+				++surfacesThatCanRender;
+		return surfacesThatCanRender == 1 && can_render();
 	}
 
 	i_rendering_engine& native_window::rendering_engine() const

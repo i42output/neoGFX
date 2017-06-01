@@ -71,6 +71,7 @@ namespace neogfx
 		virtual void invalidate(const rect& aInvalidatedRect) = 0;
 		virtual bool has_invalidated_area() const = 0;
 		virtual const rect& invalidated_area() const = 0;
+		virtual bool can_render() const = 0;
 		virtual void render(bool aOOBRequest = false) = 0;
 		virtual void pause() = 0;
 		virtual void resume() = 0;

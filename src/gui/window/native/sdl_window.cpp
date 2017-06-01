@@ -110,6 +110,7 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
+		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false)
@@ -142,6 +143,7 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
+		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false)
@@ -174,6 +176,7 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
+		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false)
@@ -206,6 +209,7 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
+		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false)
@@ -238,6 +242,7 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
+		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false)
@@ -270,6 +275,7 @@ namespace neogfx
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
+		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false)
@@ -440,6 +446,11 @@ namespace neogfx
 			set_mouse_cursor(window().native_window_mouse_cursor().system_cursor());
 	}
 
+	bool sdl_window::can_render() const
+	{
+		return is_visible() && opengl_window::can_render();
+	}
+
 	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context() const
 	{
 		return std::unique_ptr<i_native_graphics_context>(new sdl_graphics_context(rendering_engine(), *this));
@@ -472,8 +483,14 @@ namespace neogfx
 		}
 	}
 
+	bool sdl_window::is_visible() const
+	{
+		return iVisible;
+	}
+
 	void sdl_window::show(bool aActivate)
 	{
+		iVisible = true;
 #ifdef WIN32
 		ShowWindow(static_cast<HWND>(native_handle()), aActivate ? SW_SHOW : SW_SHOWNA);
 #else
@@ -483,6 +500,7 @@ namespace neogfx
 
 	void sdl_window::hide()
 	{
+		iVisible = false;
 #ifdef WIN32
 		ShowWindow(static_cast<HWND>(native_handle()), SW_HIDE);
 #else

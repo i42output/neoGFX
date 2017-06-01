@@ -49,6 +49,7 @@ namespace neogfx
 		virtual bool processing_event() const = 0;
 		virtual i_window& window() const = 0;
 		virtual void close() = 0;
+		virtual bool is_visible() const = 0;
 		virtual void show(bool aActivate = false) = 0;
 		virtual void hide() = 0;
 		virtual bool is_active() const = 0;

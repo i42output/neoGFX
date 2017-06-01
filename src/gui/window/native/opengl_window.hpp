@@ -56,6 +56,7 @@ namespace neogfx
 		void invalidate(const rect& aInvalidatedRect) override;
 		bool has_invalidated_area() const override;
 		const rect& invalidated_area() const override;
+		bool can_render() const override;
 		void render(bool aOOBRequest = false) override;
 		void pause() override;
 		void resume() override;
