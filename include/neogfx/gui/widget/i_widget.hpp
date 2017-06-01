@@ -24,6 +24,7 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
+#include <neogfx/gui/window/window_events.hpp>
 #include "../layout/i_widget_geometry.hpp"
 
 namespace neogfx
@@ -50,6 +51,8 @@ namespace neogfx
 	public:
 		event<> visibility_changed;
 		event<graphics_context&> painting;
+		event<neogfx::mouse_event&> mouse_event;
+		event<neogfx::keyboard_event&> keyboard_event;
 	public:
 		typedef std::vector<std::shared_ptr<i_widget>> widget_list;
 	protected:

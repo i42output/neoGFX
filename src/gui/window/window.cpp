@@ -270,7 +270,7 @@ namespace neogfx
 		scrollable_widget::layout_items_completed();
 		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position()) : *iCapturingWidget);
 		if (iEnteredWidget != &widgetUnderMouse)
-			native_window_mouse_entered();
+			mouse_entered();
 	}
 
 	bool window::metrics_available() const
@@ -678,7 +678,7 @@ namespace neogfx
 			iCapturingWidget = &aWidget;
 			native_window().set_capture();
 			aWidget.captured();
-			native_window_mouse_entered();
+			mouse_entered();
 		}
 	}
 
@@ -689,7 +689,7 @@ namespace neogfx
 		native_window().release_capture();
 		iCapturingWidget = 0;
 		aWidget.released();
-		native_window_mouse_entered();
+		mouse_entered();
 	}
 
 	bool window::has_focused_widget() const
@@ -869,7 +869,9 @@ namespace neogfx
 
 	void window::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
-		widget_for_mouse_event(native_surface().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
+		i_widget& w = widget_for_mouse_event(native_surface().mouse_position());
+		if (w.mouse_event.trigger(native_window().current_event()))
+			widget_for_mouse_event(native_surface().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
 	void window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -877,7 +879,8 @@ namespace neogfx
 		i_widget& w = widget_for_mouse_event(aPosition);
 		dismiss_children(&w);
 		update_click_focus(w);
-		w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
+		if (w.mouse_event.trigger(native_window().current_event()))
+			w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void window::native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -885,37 +888,28 @@ namespace neogfx
 		i_widget& w = widget_for_mouse_event(aPosition);
 		dismiss_children(&w);
 		update_click_focus(w);
-		w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
+		if (w.mouse_event.trigger(native_window().current_event()))
+			w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void window::native_window_mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
-		if (iCapturingWidget == 0)
-			widget_for_mouse_event(aPosition).mouse_button_released(aButton, aPosition - widget_for_mouse_event(aPosition).origin());
-		else
-			iCapturingWidget->mouse_button_released(aButton, aPosition - iCapturingWidget->origin());
+		i_widget& w = (iCapturingWidget == 0 ? widget_for_mouse_event(aPosition) : *iCapturingWidget);
+		if (w.mouse_event.trigger(native_window().current_event()))
+			w.mouse_button_released(aButton, aPosition - w.origin());
 	}
 
 	void window::native_window_mouse_moved(const point& aPosition)
 	{
-		native_window_mouse_entered();
-		if (iCapturingWidget == 0)
-			widget_for_mouse_event(aPosition).mouse_moved(aPosition - widget_for_mouse_event(aPosition).origin());
-		else
-			iCapturingWidget->mouse_moved(aPosition - iCapturingWidget->origin());
+		mouse_entered();
+		i_widget& w = (iCapturingWidget == 0 ? widget_for_mouse_event(aPosition) : *iCapturingWidget);
+		if (w.mouse_event.trigger(native_window().current_event()))
+			w.mouse_moved(aPosition - w.origin());
 	}
 
 	void window::native_window_mouse_entered()
 	{
-		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position()) : *iCapturingWidget);
-		i_widget* previousEnteredWidget = iEnteredWidget;
-		iEnteredWidget = &widgetUnderMouse;
-		if (iEnteredWidget != previousEnteredWidget)
-		{
-			if (previousEnteredWidget != 0)
-				previousEnteredWidget->mouse_left();
-			iEnteredWidget->mouse_entered();
-		}
+		mouse_entered();
 	}
 
 	void window::native_window_mouse_left()
@@ -965,12 +959,12 @@ namespace neogfx
 			if (has_focused_widget())
 			{
 				i_widget* w = &focused_widget();
-				while ((!can_consume(*w) || !w->key_pressed(aScanCode, aKeyCode, aKeyModifiers)) && w != this)
+				while ((!can_consume(*w) || !w->keyboard_event.trigger(native_window().current_event()) || !w->key_pressed(aScanCode, aKeyCode, aKeyModifiers)) && w != this)
 					w = &w->parent();
-				if (w == this && can_consume(*this))
+				if (w == this && can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
 					key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			}
-			else if (can_consume(*this))
+			else if (can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
 				key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 		}
 	}
@@ -989,12 +983,12 @@ namespace neogfx
 		if (has_focused_widget())
 		{
 			i_widget* w = &focused_widget();
-			while ((!can_consume(*w) || !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != this)
+			while ((!can_consume(*w) || !w->keyboard_event.trigger(native_window().current_event()) || !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != this)
 				w = &w->parent();
-			if (w == this && can_consume(*this))
+			if (w == this && can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
 				key_released(aScanCode, aKeyCode, aKeyModifiers);
 		}
-		else if (can_consume(*this))
+		else if (can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
 			key_released(aScanCode, aKeyCode, aKeyModifiers);
 	}
 
@@ -1013,12 +1007,12 @@ namespace neogfx
 			if (has_focused_widget())
 			{
 				i_widget* w = &focused_widget();
-				while (can_consume(*w) && !w->text_input(aText) && w != this)
+				while ((!can_consume(*w) || !keyboard_event.trigger(native_window().current_event()) || !w->text_input(aText)) && w != this)
 					w = &w->parent();
-				if (w == this && can_consume(*this))
+				if (w == this && can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
 					text_input(aText);
 			}
-			else if (can_consume(*this))
+			else if (can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
 				text_input(aText);
 		};
 		auto utf32 = neolib::utf8_to_utf32(aText);
@@ -1039,9 +1033,9 @@ namespace neogfx
 		if (has_focused_widget())
 		{
 			i_widget* w = &focused_widget();
-			while (!w->sys_text_input(aText) && w != this)
+			while ((!keyboard_event.trigger(native_window().current_event()) || !w->sys_text_input(aText)) && w != this)
 				w = &w->parent();
-			if (w == this)
+			if (w == this && keyboard_event.trigger(native_window().current_event()))
 				sys_text_input(aText);
 		}
 		else
@@ -1098,6 +1092,19 @@ namespace neogfx
 				else
 					++i;
 			}
+		}
+	}
+
+	void window::mouse_entered()
+	{
+		i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position()) : *iCapturingWidget);
+		i_widget* previousEnteredWidget = iEnteredWidget;
+		iEnteredWidget = &widgetUnderMouse;
+		if (iEnteredWidget != previousEnteredWidget)
+		{
+			if (previousEnteredWidget != 0)
+				previousEnteredWidget->mouse_left();
+			iEnteredWidget->mouse_entered();
 		}
 	}
 }

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/raii.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -26,7 +27,7 @@
 namespace neogfx
 {
 	native_window::native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager) :
-		iRenderingEngine(aRenderingEngine), iSurfaceManager(aSurfaceManager), iProcessingEvent{ false }
+		iRenderingEngine(aRenderingEngine), iSurfaceManager(aSurfaceManager), iProcessingEvent{ 0u }
 	{
 
 	}
@@ -42,16 +43,16 @@ namespace neogfx
 
 	void native_window::push_event(const native_event& aEvent)
 	{
-		if (aEvent.is<native_window_event>())
+		if (aEvent.is<window_event>())
 		{
-			const auto& windowEvent = static_variant_cast<const native_window_event&>(aEvent);
+			const auto& windowEvent = static_variant_cast<const window_event&>(aEvent);
 			switch (windowEvent.type())
 			{
-			case native_window_event::Resized:
-			case native_window_event::SizeChanged:
+			case window_event::Resized:
+			case window_event::SizeChanged:
 				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
 				{
-					if (e->is<native_window_event>() && static_variant_cast<const native_window_event&>(*e).type() == windowEvent.type())
+					if (e->is<window_event>() && static_variant_cast<const window_event&>(*e).type() == windowEvent.type())
 						e = iEventQueue.erase(e);
 					else
 						++e;
@@ -66,16 +67,21 @@ namespace neogfx
 
 	bool native_window::pump_event()
 	{
+		neolib::scoped_counter sc{ iProcessingEvent };
 		if (iEventQueue.empty())
 			return false;
-		iProcessingEvent = true;
-		iCurrentEvent = iEventQueue.front();
+		auto e = iEventQueue.front();
 		iEventQueue.pop_front();
-		if (filter_event.trigger(iCurrentEvent))
-			handle_event(iCurrentEvent);
-		iCurrentEvent = boost::none;
-		iProcessingEvent = false;
+		handle_event(e);
 		return true;
+	}
+
+	void native_window::handle_event(const native_event& aEvent)
+	{
+		neolib::scoped_counter sc{ iProcessingEvent };
+		iCurrentEvent = aEvent;
+		handle_event();
+		iCurrentEvent = boost::none;
 	}
 
 	native_window::native_event& native_window::current_event()
@@ -85,30 +91,35 @@ namespace neogfx
 		throw no_current_event();
 	}
 
-	void native_window::handle_event(const native_event& aNativeEvent)
+	void native_window::handle_event()
 	{
-		if (aNativeEvent.is<native_window_event>())
+		neolib::scoped_counter sc{ iProcessingEvent };
+		if (!filter_event.trigger(iCurrentEvent))
+			return;
+		if (iCurrentEvent.is<window_event>())
 		{
-			const auto& windowEvent = static_variant_cast<const native_window_event&>(aNativeEvent);
+			auto& windowEvent = static_variant_cast<window_event&>(iCurrentEvent);
+			if (!window().window_event.trigger(windowEvent))
+				return;
 			switch (windowEvent.type())
 			{
-			case native_window_event::Paint:
+			case window_event::Paint:
 				invalidate(surface_size());
 				render(true);
 				break;
-			case native_window_event::Close:
+			case window_event::Close:
 				close();
 				break;
-			case native_window_event::Resizing:
+			case window_event::Resizing:
 				window().native_window_resized();
 				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
 				{
-					if (e->is<native_window_event>())
+					if (e->is<window_event>())
 					{
-						switch (static_variant_cast<const native_window_event&>(*e).type())
+						switch (static_variant_cast<const window_event&>(*e).type())
 						{
-						case native_window_event::Resized:
-						case native_window_event::SizeChanged:
+						case window_event::Resized:
+						case window_event::SizeChanged:
 							e = iEventQueue.erase(e);
 							break;
 						default:
@@ -118,22 +129,22 @@ namespace neogfx
 					}
 				}
 				break;
-			case native_window_event::Resized:
+			case window_event::Resized:
 				window().native_window_resized();
 				break;
-			case native_window_event::SizeChanged:
+			case window_event::SizeChanged:
 				window().native_window_resized();
 				break;
-			case native_window_event::Enter:
+			case window_event::Enter:
 				window().native_window_mouse_entered();
 				break;
-			case native_window_event::Leave:
+			case window_event::Leave:
 				window().native_window_mouse_left();
 				break;
-			case native_window_event::FocusGained:
+			case window_event::FocusGained:
 				window().native_window_focus_gained();
 				break;
-			case native_window_event::FocusLost:
+			case window_event::FocusLost:
 				window().native_window_focus_lost();
 				break;
 			default:
@@ -141,24 +152,24 @@ namespace neogfx
 				break;
 			}
 		}
-		else if (aNativeEvent.is<native_mouse_event>())
+		else if (iCurrentEvent.is<mouse_event>())
 		{
-			const auto& mouseEvent = static_variant_cast<const native_mouse_event&>(aNativeEvent);
+			const auto& mouseEvent = static_variant_cast<const mouse_event&>(iCurrentEvent);
 			switch (mouseEvent.type())
 			{
-			case native_mouse_event::WheelScrolled:
+			case mouse_event::WheelScrolled:
 				window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
 				break;
-			case native_mouse_event::ButtonPressed:
+			case mouse_event::ButtonPressed:
 				window().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
 				break;
-			case native_mouse_event::ButtonDoubleClicked:
+			case mouse_event::ButtonDoubleClicked:
 				window().native_window_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
 				break;
-			case native_mouse_event::ButtonReleased:
+			case mouse_event::ButtonReleased:
 				window().native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
 				break;
-			case native_mouse_event::Moved:
+			case mouse_event::Moved:
 				window().native_window_mouse_moved(mouseEvent.position());
 				break;
 			default:
@@ -166,34 +177,34 @@ namespace neogfx
 				break;
 			}
 		}
-		else if (aNativeEvent.is<native_keyboard_event>())
+		else if (iCurrentEvent.is<keyboard_event>())
 		{
 			auto& keyboard = app::instance().keyboard();
-			const auto& keyboardEvent = static_variant_cast<const native_keyboard_event&>(aNativeEvent);
+			const auto& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
 			switch (keyboardEvent.type())
 			{
-			case native_keyboard_event::KeyPressed:
+			case keyboard_event::KeyPressed:
 				if (!keyboard.grabber().key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
 				{
 					keyboard.key_pressed.trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 					window().native_window_key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 				}
 				break;
-			case native_keyboard_event::KeyReleased:
+			case keyboard_event::KeyReleased:
 				if (!keyboard.grabber().key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
 				{
 					keyboard.key_released.trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 					window().native_window_key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 				}
 				break;
-			case native_keyboard_event::TextInput:
+			case keyboard_event::TextInput:
 				if (!keyboard.grabber().text_input(keyboardEvent.text()))
 				{
 					keyboard.text_input.trigger(keyboardEvent.text());
 					window().native_window_text_input(keyboardEvent.text());
 				}
 				break;
-			case native_keyboard_event::SysTextInput:
+			case keyboard_event::SysTextInput:
 				if (!keyboard.grabber().sys_text_input(keyboardEvent.text()))
 				{
 					keyboard.sys_text_input.trigger(keyboardEvent.text());
@@ -209,7 +220,7 @@ namespace neogfx
 
 	bool native_window::processing_event() const
 	{
-		return iProcessingEvent;
+		return iProcessingEvent != 0;
 	}
 
 	bool native_window::has_rendering_priority() const

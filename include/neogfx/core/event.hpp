@@ -37,7 +37,7 @@ namespace neogfx
 	class event_handle
 	{
 	public:
-		typedef event<Arguments...>* event_ptr;
+		typedef const event<Arguments...>* event_ptr;
 		typedef std::shared_ptr<event_ptr> event_instance_ptr;
 		typedef std::weak_ptr<event_ptr> event_instance_weak_ptr;
 		typedef const void* unique_id_type;
@@ -107,42 +107,53 @@ namespace neogfx
 		typedef typename handle::handler_list handler_list;
 		typedef std::map<unique_id_type, typename handler_list::iterator> unique_id_map;
 		typedef std::deque<typename handler_list::const_iterator> notification_list;
+		struct instance_data
+		{
+			instance_ptr instancePtr;
+			handler_list handlers;
+			unique_id_map uniqueIdMap;
+			bool accepted;
+			notification_list notifications;
+		};
+		typedef std::list<instance_data, boost::fast_pool_allocator<instance_data>> instance_data_list;
 	public:
-		event() :
-			iInstancePtr{new ptr{this}},
-			iAccepted{false}
+		event()
 		{
 		}
-		event(const event&) :
-			iInstancePtr{new ptr{this}},
-			iAccepted{false}
+		event(const event&)
 		{
 		}
 		~event()
 		{
 			if (async_event_queue::instance().has(*this))
 				async_event_queue::instance().remove(*this);
+			if (iInstanceData != boost::none)
+				instance_list().erase(*iInstanceData);
 		}
 		void async_trigger(Arguments... aArguments) const
 		{
+			if (!has_instance()) // no instance means no subscribers so no point triggering.
+				return;
 			async_event_queue::instance().add(*this, [&]() { trigger(aArguments...); });
 		}
 		bool trigger(Arguments... aArguments) const
 		{
+			if (!has_instance()) // no instance means no subscribers so no point triggering.
+				return true;
 			destroyed_flag destroyed(*this);
-			for (auto i = iHandlers.begin(); i != iHandlers.end(); ++i)
-				iNotifications.push_back(i);
-			while (!iNotifications.empty())
+			for (auto i = instance().handlers.begin(); i != instance().handlers.end(); ++i)
+				instance().notifications.push_back(i);
+			while (!instance().notifications.empty())
 			{
-				auto i = iNotifications.front();
-				iNotifications.pop_front();
+				auto i = instance().notifications.front();
+				instance().notifications.pop_front();
 				i->iHandlerCallback(aArguments...);
 				if (destroyed)
 					return false;
-				if (iAccepted)
+				if (instance().accepted)
 				{
-					iNotifications.clear();
-					iAccepted = false;
+					instance().notifications.clear();
+					instance().accepted = false;
 					return false;
 				}
 			}
@@ -150,83 +161,93 @@ namespace neogfx
 		}
 		void accept() const
 		{
-			iAccepted = true;
+			instance().accepted = true;
 		}
 		void ignore() const
 		{
-			iAccepted = false;
+			instance().accepted = false;
 		}
 	public:
-		handle subscribe(const handler_callback& aHandlerCallback, const void* aUniqueId = 0)
+		handle subscribe(const handler_callback& aHandlerCallback, const void* aUniqueId = 0) const
 		{
 			if (aUniqueId == 0)
-				return handle{ iInstancePtr, iHandlers.insert(iHandlers.end(), handler_list_item{ aUniqueId, aHandlerCallback, 0 }) };
-			auto existing = iUniqueIdMap.find(aUniqueId);
-			if (existing == iUniqueIdMap.end())
-				existing = iUniqueIdMap.insert(std::make_pair(aUniqueId, iHandlers.insert(iHandlers.end(), handler_list_item{ aUniqueId, aHandlerCallback, 0 }))).first;
+				return handle{ instance().instancePtr, instance().handlers.insert(instance().handlers.end(), handler_list_item{ aUniqueId, aHandlerCallback, 0 }) };
+			auto existing = instance().uniqueIdMap.find(aUniqueId);
+			if (existing == instance().uniqueIdMap.end())
+				existing = instance().uniqueIdMap.insert(std::make_pair(aUniqueId, instance().handlers.insert(instance().handlers.end(), handler_list_item{ aUniqueId, aHandlerCallback, 0 }))).first;
 			else
 				existing->second->iHandlerCallback = aHandlerCallback;
-			return handle{ iInstancePtr, existing->second };
+			return handle{ instance().instancePtr, existing->second };
 		}
-		handle operator()(const handler_callback& aHandlerCallback, const void* aUniqueId = 0)
+		handle operator()(const handler_callback& aHandlerCallback, const void* aUniqueId = 0) const
 		{
 			return subscribe(aHandlerCallback, aUniqueId);
 		}
 		template <typename T>
-		handle subscribe(const handler_callback& aHandlerCallback, const T* aUniqueIdObject)
+		handle subscribe(const handler_callback& aHandlerCallback, const T* aUniqueIdObject) const
 		{
 			return subscribe(aHandlerCallback, static_cast<const void*>(aUniqueIdObject));
 		}
 		template <typename T>
-		handle operator()(const handler_callback& aHandlerCallback, const T* aUniqueIdObject)
+		handle operator()(const handler_callback& aHandlerCallback, const T* aUniqueIdObject) const
 		{
 			return subscribe(aHandlerCallback, static_cast<const void*>(aUniqueIdObject));
 		}
 		template <typename T>
-		handle subscribe(const handler_callback& aHandlerCallback, const T& aUniqueIdObject)
+		handle subscribe(const handler_callback& aHandlerCallback, const T& aUniqueIdObject) const
 		{
 			return subscribe(aHandlerCallback, static_cast<const void*>(&aUniqueIdObject));
 		}
 		template <typename T>
-		handle operator()(const handler_callback& aHandlerCallback, const T& aUniqueIdObject)
+		handle operator()(const handler_callback& aHandlerCallback, const T& aUniqueIdObject) const
 		{
 			return subscribe(aHandlerCallback, static_cast<const void*>(&aUniqueIdObject));
 		}
-		void unsubscribe(const void* aUniqueId)
+		void unsubscribe(const void* aUniqueId) const
 		{
-			auto existing = iUniqueIdMap.find(aUniqueId);
-			if (existing != iUniqueIdMap.end())
-				unsubscribe(handle{ iInstancePtr, existing->second });
+			auto existing = instance().uniqueIdMap.find(aUniqueId);
+			if (existing != instance().uniqueIdMap.end())
+				unsubscribe(handle{ instance().instancePtr, existing->second });
 		}
 		template <typename T>
-		void unsubscribe(const T* aUniqueIdObject)
+		void unsubscribe(const T* aUniqueIdObject) const
 		{
 			return unsubscribe(static_cast<const void*>(aUniqueIdObject));
 		}
 		template <typename T>
-		void unsubscribe(const T& aUniqueIdObject)
+		void unsubscribe(const T& aUniqueIdObject) const
 		{
 			return unsubscribe(static_cast<const void*>(&aUniqueIdObject));
 		}
 	private:
-		void unsubscribe(handle aHandle)
+		void unsubscribe(handle aHandle) const
 		{
-			iNotifications.erase(std::remove(iNotifications.begin(), iNotifications.end(), aHandle.iHandler), iNotifications.end());
+			instance().notifications.erase(std::remove(instance().notifications.begin(), instance().notifications.end(), aHandle.iHandler), instance().notifications.end());
 			if (aHandle.iHandler->iUniqueId != 0)
 			{
-				auto existing = iUniqueIdMap.find(aHandle.iHandler->iUniqueId);
-				if (existing != iUniqueIdMap.end())
-					iUniqueIdMap.erase(existing);
+				auto existing = instance().uniqueIdMap.find(aHandle.iHandler->iUniqueId);
+				if (existing != instance().uniqueIdMap.end())
+					instance().uniqueIdMap.erase(existing);
 			}
-			iHandlers.erase(aHandle.iHandler);
+			instance().handlers.erase(aHandle.iHandler);
 		}
-
+		bool has_instance() const
+		{
+			return iInstanceData != boost::none;
+		}
+		instance_data& instance() const
+		{
+			if (iInstanceData == boost::none)
+				iInstanceData = instance_list().insert(instance_list().end(), instance_data{ instance_ptr{ new ptr{ this } } });
+			return **iInstanceData;
+		}
+		static instance_data_list& instance_list()
+		{
+			static instance_data_list sInstanceDataList;
+			return sInstanceDataList;
+		}
 	private:
-		instance_ptr iInstancePtr;
-		handler_list iHandlers;
-		mutable unique_id_map iUniqueIdMap;
-		mutable bool iAccepted;
-		mutable notification_list iNotifications;
+		mutable boost::optional<typename instance_data_list::iterator> iInstanceData;
 	};
 
 	class sink

@@ -38,8 +38,9 @@ namespace neogfx
 		void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
 		void push_event(const native_event& aEvent) override;
 		bool pump_event() override;
+		void handle_event(const native_event& aEvent) override;
 		native_event& current_event() override;
-		void handle_event(const native_event& aNativeEvent) override;
+		void handle_event() override;
 		bool processing_event() const override;
 		bool has_rendering_priority() const override;
 	public:
@@ -50,6 +51,6 @@ namespace neogfx
 		i_surface_manager& iSurfaceManager;
 		event_queue iEventQueue;
 		native_event iCurrentEvent;
-		bool iProcessingEvent;
+		uint32_t iProcessingEvent;
 	};
 }

@@ -18,6 +18,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>neogfx</RootNamespace>
     <ProjectName>neoGFX</ProjectName>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -30,7 +31,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -59,24 +60,32 @@
       <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirZlib);$(DevDirOpenSSL)\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -84,6 +93,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -224,6 +236,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\window\i_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\popup_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\window_events.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_keyboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_surface.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_surface_manager.hpp" />
@@ -252,7 +265,6 @@
     <ClInclude Include="..\..\..\src\gfx\text\native\glyph_texture.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\i_native_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp" />
-    <ClInclude Include="..\..\..\src\gui\window\native\native_window_events.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\sdl_window.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp" />

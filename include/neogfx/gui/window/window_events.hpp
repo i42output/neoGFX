@@ -1,4 +1,4 @@
-// native_window_events.hpp
+// window_events.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-	class native_window_event
+	class window_event
 	{
 	public:
 		typedef neolib::variant<neogfx::size> parameter_type;
@@ -44,7 +44,7 @@ namespace neogfx
 			FocusLost
 		};
 	public:
-		native_window_event(type_e aType, const parameter_type& aParameter = parameter_type()) :
+		window_event(type_e aType, const parameter_type& aParameter = parameter_type()) :
 			iType(aType), iParameter(aParameter)
 		{
 		}
@@ -66,7 +66,7 @@ namespace neogfx
 		parameter_type iParameter;
 	};
 
-	class native_mouse_event
+	class mouse_event
 	{
 	public:
 		typedef neolib::variant<neogfx::mouse_wheel, neogfx::delta, neogfx::mouse_button, neogfx::point, neogfx::key_modifiers_e> parameter_type;
@@ -79,7 +79,7 @@ namespace neogfx
 			Moved
 		};
 	public:
-		native_mouse_event(type_e aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
+		mouse_event(type_e aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
 			iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
 		{
 		}
@@ -115,7 +115,7 @@ namespace neogfx
 		parameter_type iParameter3;
 	};
 
-	class native_keyboard_event
+	class keyboard_event
 	{
 	public:
 		typedef neolib::variant<neogfx::scan_code_e, neogfx::key_code_e, neogfx::key_modifiers_e, std::string> parameter_type;
@@ -127,7 +127,7 @@ namespace neogfx
 			SysTextInput
 		};
 	public:
-		native_keyboard_event(type_e aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
+		keyboard_event(type_e aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
 			iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
 		{
 		}

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
+#include <neogfx/gui/window/window_events.hpp>
 
 namespace neogfx
 {
@@ -31,6 +32,8 @@ namespace neogfx
 
 	class i_window : public i_surface
 	{
+	public:
+		event<window_event&> window_event;
 	public:
 		virtual const i_native_window& native_window() const = 0;
 		virtual i_native_window& native_window() = 0;

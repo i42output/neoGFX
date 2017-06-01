@@ -174,6 +174,7 @@ namespace neogfx
 		void update_click_focus(i_widget& aCandidateWidget);
 		void update_modality();
 		void dismiss_children(const i_widget* aClickedWidget = 0);
+		void mouse_entered();
 	private:
 		sink iSink;
 		std::unique_ptr<i_native_window> iNativeWindow;
