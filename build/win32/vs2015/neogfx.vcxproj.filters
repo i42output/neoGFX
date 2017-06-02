@@ -51,9 +51,6 @@
     <ClInclude Include="..\..\..\src\gfx\native\i_native_graphics_context.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\window\native\native_window_events.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -526,6 +523,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\drop_list.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\window_events.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
