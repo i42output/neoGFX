@@ -1587,7 +1587,7 @@ namespace neogfx
 			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
 			glyphHeight = lineHeight = font().height();
-		update(rect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{1.0, glyphHeight} });
+		update(rect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{cursor().width(), glyphHeight} });
 	}
 
 	void text_edit::make_cursor_visible(bool aForcePreviewScroll)
@@ -1739,18 +1739,20 @@ namespace neogfx
 			if (cursor().colour().empty())
 			{
 				aGraphicsContext.push_logical_operation(logical_operation::Xor);
-				aGraphicsContext.draw_line(
-					point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight },
-					point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
-					pen{ colour::White.with_alpha(alpha), cursor().width() });
+				aGraphicsContext.fill_rect(
+					rect{
+						point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
+						size{ cursor().width(), glyphHeight } },
+					colour::White.with_alpha(alpha));
 				aGraphicsContext.pop_logical_operation();
 			}
 			else if (cursor().colour().is<colour>())
 			{
-				aGraphicsContext.draw_line(
-					point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight },
-					point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
-					pen{ static_variant_cast<const colour&>(cursor().colour()).with_combined_alpha(alpha), cursor().width() });
+				aGraphicsContext.fill_rect(
+					rect{
+						point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
+						size{ cursor().width(), glyphHeight } },
+					static_variant_cast<const colour&>(cursor().colour()).with_combined_alpha(alpha));
 			}
 			else if (cursor().colour().is<gradient>())
 			{
