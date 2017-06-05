@@ -161,6 +161,8 @@ namespace neogfx
 		iInvalidatedArea->cx = std::min(iInvalidatedArea->cx, surface_size().cx - iInvalidatedArea->x);
 		iInvalidatedArea->cy = std::min(iInvalidatedArea->cy, surface_size().cy - iInvalidatedArea->y);
 
+		iInvalidatedArea = iInvalidatedArea->ceil();
+
 		rendering_engine().activate_context(*this);
 
 		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));

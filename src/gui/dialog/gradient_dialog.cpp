@@ -37,12 +37,13 @@ namespace neogfx
 			}, 10, true },
 			iTracking{ false }
 		{
+			set_margins(neogfx::margins{});
 		}
 	public:
 		virtual void paint(graphics_context& aGc) const
 		{
 			framed_widget::paint(aGc);
-			rect cr = client_rect(false);
+			rect cr = client_rect();
 			draw_alpha_background(aGc, cr);
 			aGc.fill_rect(cr, iOwner.gradient());
 			if (iOwner.gradient().direction() == gradient::Radial && iOwner.gradient().centre() != optional_point{})
@@ -88,7 +89,7 @@ namespace neogfx
 		{
 			if (iOwner.gradient().direction() == gradient::Radial && iOwner.gradient().centre() != optional_point{})
 			{
-				rect cr = client_rect(false);
+				rect cr = client_rect();
 				point centre{ cr.centre().x + cr.width() / 2.0 * iOwner.gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * iOwner.gradient().centre()->y };
 				update(rect{ centre - point{ 10, 10 }, size{ 20, 20 } });
 			}

@@ -895,8 +895,7 @@ namespace neogfx
 
 	rect widget::default_clip_rect(bool aIncludeNonClient) const
 	{
-		rect clipRect = window_rect();
-		clipRect = clipRect - origin(aIncludeNonClient);
+		rect clipRect = to_client_coordinates(window_rect());
 		if (!aIncludeNonClient)
 			clipRect = clipRect.intersection(client_rect());
 		if (has_parent() && !is_root())

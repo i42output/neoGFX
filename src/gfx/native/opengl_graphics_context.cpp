@@ -314,10 +314,11 @@ namespace neogfx
 
 	void opengl_graphics_context::apply_scissor()
 	{
-		GLint x = static_cast<GLint>(std::ceil(scissor_rect()->x));
-		GLint y = static_cast<GLint>(std::ceil(rendering_area(false).cy - scissor_rect()->cy - scissor_rect()->y));
-		GLsizei cx = static_cast<GLsizei>(std::ceil(scissor_rect()->cx));
-		GLsizei cy = static_cast<GLsizei>(std::ceil(scissor_rect()->cy));
+		auto sr = *scissor_rect();
+		GLint x = static_cast<GLint>(std::ceil(sr.x));
+		GLint y = static_cast<GLint>(std::ceil(rendering_area(false).cy - sr.cy - sr.y));
+		GLsizei cx = static_cast<GLsizei>(std::ceil(sr.cx));
+		GLsizei cy = static_cast<GLsizei>(std::ceil(sr.cy));
 		glCheck(glScissor(x, y, cx, cy));
 	}
 

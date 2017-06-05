@@ -59,6 +59,7 @@ namespace neogfx
 		basic_delta& operator/=(const basic_delta& other) { dx /= other.dx; dy /= other.dy; return *this; }
 		basic_delta operator-() const { return basic_delta(-dx, -dy); }
 		basic_delta ceil() const { return basic_delta(std::ceil(dx), std::ceil(dy)); }
+		basic_delta floor() const { return basic_delta(std::floor(dx), std::floor(dy)); }
 		// attributes
 	public:
 		coordinate_type dx;
@@ -245,6 +246,7 @@ namespace neogfx
 		basic_point& operator-=(const basic_size<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.cx); y -= static_cast<coordinate_type>(other.cy); return *this; }
 		basic_point operator-() const { return basic_point(-x, -y); }
 		basic_point ceil() const { return basic_point(std::ceil(x), std::ceil(y)); }
+		basic_point floor() const { return basic_point(std::floor(x), std::floor(y)); }
 		// attributes
 	public:
 		coordinate_type x;
@@ -433,6 +435,8 @@ namespace neogfx
 			point_type bottomRight(std::max(right(), other.right()), std::max(bottom(), other.bottom()));
 			return basic_rect(topLeft, bottomRight);
 		}
+		basic_rect ceil() const { return basic_rect(point_type::ceil(), size_type::ceil()); }
+		basic_rect floor() const { return basic_rect(point_type::floor(), size_type::floor()); }
 	};
 
 	typedef basic_rect<coordinate> rect;
