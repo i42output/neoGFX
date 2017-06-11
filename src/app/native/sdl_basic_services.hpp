@@ -27,10 +27,10 @@ namespace neogfx
 	class sdl_basic_services : public i_basic_services
 	{
 	public:
-		sdl_basic_services(neolib::io_thread& aAppThread);
+		sdl_basic_services(neolib::io_task& aAppThread);
 	public:
 		virtual neogfx::platform platform() const;
-		virtual neolib::io_thread& app_thread();
+		virtual neolib::io_task& app_task();
 		virtual void system_beep();
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const;
 		virtual uint32_t display_count() const;
@@ -44,7 +44,7 @@ namespace neogfx
 		static BOOL CALLBACK enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aThis);
 #endif
 	private:
-		neolib::io_thread& iAppThread;
+		neolib::io_task& iAppTask;
 		mutable std::vector<rect> iDesktopWorkAreas;
 	};
 }

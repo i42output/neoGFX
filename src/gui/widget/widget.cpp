@@ -30,8 +30,8 @@ namespace neogfx
 	class widget::layout_timer : public pause_rendering, neolib::callback_timer
 	{
 	public:
-		layout_timer(i_surface& aSurface, neolib::io_thread& aOwnerThread, std::function<void(callback_timer&)> aCallback) :
-			pause_rendering(aSurface), neolib::callback_timer(aOwnerThread, aCallback, 0)
+		layout_timer(i_surface& aSurface, neolib::io_task& aIoTask, std::function<void(callback_timer&)> aCallback) :
+			pause_rendering(aSurface), neolib::callback_timer(aIoTask, aCallback, 0)
 		{
 		}
 	};

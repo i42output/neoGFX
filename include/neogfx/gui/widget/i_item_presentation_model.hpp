@@ -37,6 +37,7 @@ namespace neogfx
 	public:
 		struct cell_meta_type
 		{
+			mutable optional_texture texture;
 			mutable optional_glyph_text text;
 			mutable optional_size extents;
 			mutable enum class selection_flags

@@ -28,9 +28,9 @@ namespace neogfx
 	class sdl_service_factory : public i_service_factory
 	{
 	public:
-		virtual std::unique_ptr<i_basic_services> create_basic_services(neolib::io_thread& aAppThread)
+		virtual std::unique_ptr<i_basic_services> create_basic_services(neolib::io_task& aAppTask)
 		{
-			return std::make_unique<sdl_basic_services>(aAppThread);
+			return std::make_unique<sdl_basic_services>(aAppTask);
 		}
 		virtual std::unique_ptr<i_keyboard> create_keyboard()
 		{

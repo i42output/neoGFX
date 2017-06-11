@@ -24,7 +24,8 @@
 #include <boost/optional.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <boost/program_options.hpp>
-#include <neolib/io_thread.hpp>
+#include <neolib/thread.hpp>
+#include <neolib/io_task.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_service_factory.hpp>
 #include <neogfx/app/i_basic_services.hpp>
@@ -39,7 +40,7 @@
 
 namespace neogfx
 {
-	class app : public neolib::io_thread, private async_event_queue, public i_app, private i_keyboard_handler
+	class app : public neolib::thread, public neolib::io_task, private async_event_queue, public i_app, private i_keyboard_handler
 	{
 	public:
 		class event_processing_context : public i_event_processing_context

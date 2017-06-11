@@ -22,8 +22,10 @@
 #include <neogfx/neogfx.hpp>
 #include <list>
 #include <deque>
+#include <boost/optional.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/destroyable.hpp>
+#include <neolib/io_task.hpp>
 #include <neolib/timer.hpp>
 
 namespace neogfx
@@ -61,7 +63,7 @@ namespace neogfx
 	private:
 		typedef std::multimap<const void*, std::pair<callback, neolib::destroyable::destroyed_flag>> event_list;
 	public:
-		async_event_queue(neolib::io_thread& aIoThread);
+		async_event_queue(neolib::io_task& aIoTask);
 		~async_event_queue();
 		static async_event_queue& instance();
 	public:

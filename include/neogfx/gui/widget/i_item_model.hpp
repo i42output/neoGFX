@@ -49,7 +49,30 @@ namespace neogfx
 		typedef neolib::generic_iterator iterator;
 		typedef neolib::generic_iterator const_iterator;
 	public:
-		typedef neolib::variant<bool, int32_t, uint32_t, int64_t, uint64_t, float, double, std::string> cell_data_type;
+		template <typename T>
+		struct choice_type
+		{
+			typedef T value_type;
+			typedef std::pair<value_type, std::string> option;
+			typedef std::vector<option> type;
+		};
+		typedef neolib::variant<
+			bool, 
+			int32_t, 
+			uint32_t, 
+			int64_t, 
+			uint64_t, 
+			float, 
+			double, 
+			std::string, 
+			choice_type<bool>::type::const_iterator, 
+			choice_type<int32_t>::type::const_iterator,
+			choice_type<uint32_t>::type::const_iterator,
+			choice_type<int64_t>::type::const_iterator,
+			choice_type<uint64_t>::type::const_iterator,
+			choice_type<float>::type::const_iterator,
+			choice_type<double>::type::const_iterator,
+			choice_type<std::string>::type::const_iterator> cell_data_type;
 		typedef std::pair<cell_data_type, i_item_presentation_model::cell_meta_type> cell_type;
 		enum sort_direction_e
 		{

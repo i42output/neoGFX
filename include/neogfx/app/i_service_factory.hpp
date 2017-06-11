@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/io_thread.hpp>
+#include <neolib/io_task.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -30,7 +30,7 @@ namespace neogfx
 	class i_service_factory
 	{
 	public:
-		virtual std::unique_ptr<i_basic_services> create_basic_services(neolib::io_thread& aAppThread) = 0;
+		virtual std::unique_ptr<i_basic_services> create_basic_services(neolib::io_task& aAppTask) = 0;
 		virtual std::unique_ptr<i_keyboard> create_keyboard() = 0;
 		virtual std::unique_ptr<i_rendering_engine> create_rendering_engine(renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard) = 0;
 	};

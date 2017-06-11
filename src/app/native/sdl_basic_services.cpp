@@ -32,8 +32,8 @@
 
 namespace neogfx
 {
-	sdl_basic_services::sdl_basic_services(neolib::io_thread& aAppThread) : 
-		iAppThread(aAppThread)
+	sdl_basic_services::sdl_basic_services(neolib::io_task& aAppTask) : 
+		iAppTask{ aAppTask }
 	{
 	}
 
@@ -42,9 +42,9 @@ namespace neogfx
 		return neogfx::platform::Windows;
 	}
 
-	neolib::io_thread& sdl_basic_services::app_thread()
+	neolib::io_task& sdl_basic_services::app_task()
 	{
-		return iAppThread;
+		return iAppTask;
 	}
 
 

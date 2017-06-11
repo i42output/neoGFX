@@ -456,11 +456,15 @@ namespace neogfx
 		iModel.reset();
 	}
 
-	void item_view::current_index_changed(const i_item_selection_model&, const optional_item_model_index& aCurrentIndex, const optional_item_model_index&)
+	void item_view::current_index_changed(const i_item_selection_model&, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex)
 	{
 		if (aCurrentIndex != boost::none)
+		{
 			make_visible(*aCurrentIndex);
-		update();
+			update(cell_rect(*aCurrentIndex));
+		}
+		if (aPreviousIndex != boost::none)
+			update(cell_rect(*aPreviousIndex));
 	}
 
 	void item_view::make_visible(const item_model_index& aItemIndex)
