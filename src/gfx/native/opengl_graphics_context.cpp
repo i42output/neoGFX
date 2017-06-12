@@ -549,6 +549,7 @@ namespace neogfx
 	void opengl_graphics_context::set_pixel(const point& aPoint, const colour& aColour)
 	{
 		/* todo: faster alternative to this... */
+		disable_anti_alias daa(*this);
 		draw_pixel(aPoint, aColour.with_alpha(0xFF));
 	}
 
