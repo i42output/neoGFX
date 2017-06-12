@@ -606,7 +606,7 @@ int main(int argc, char* argv[])
 			for (int x = 0; x < 10; ++x)
 				for (int y = 0; y < 10; ++y)
 					if ((x + y % 2) % 2 == 0)
-						aGc.draw_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Blue);
+						aGc.draw_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Black);
 					else
 						aGc.set_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Goldenrod);
 		});
