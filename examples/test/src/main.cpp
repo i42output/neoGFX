@@ -603,10 +603,12 @@ int main(int argc, char* argv[])
 			aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
 			aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
 			aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::colour::Yellow, 3.0 });
-			aGc.draw_pixel(ng::point{ 10, 10 }, ng::colour::Blue);
-			aGc.draw_pixel(ng::point{ 11, 11 }, ng::colour::Blue);
-			aGc.set_pixel(ng::point{ 10, 11 }, ng::colour::White);
-			aGc.set_pixel(ng::point{ 11, 10 }, ng::colour::White);
+			for (int x = 0; x < 10; ++x)
+				for (int y = 0; y < 10; ++y)
+					if ((x + y % 2) % 2 == 0)
+						aGc.draw_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Blue);
+					else
+						aGc.set_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Goldenrod);
 		});
 		
 		auto& tabEditor = tabContainer.add_tab_page("Editor").as_widget();
