@@ -548,16 +548,14 @@ namespace neogfx
 
 	void opengl_graphics_context::set_pixel(const point& aPoint, const colour& aColour)
 	{
-		/* todo */
-		(void)aPoint;
-		(void)aColour;
+		/* todo: faster alternative to this... */
+		draw_pixel(aPoint, aColour.with_alpha(0xFF));
 	}
 
 	void opengl_graphics_context::draw_pixel(const point& aPoint, const colour& aColour)
 	{
-		/* todo */
-		(void)aPoint;
-		(void)aColour;
+		/* todo: faster alternative to this... */
+		fill_rect(rect{ aPoint, size{1.0, 1.0} }, aColour);
 	}
 
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
