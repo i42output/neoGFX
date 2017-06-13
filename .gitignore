@@ -193,3 +193,6 @@
 /3rdparty/zlib/zlib-1.2.8/stage
 /3rdparty/harfbuzz/harfbuzz-1.4.6/lib/*.lib
 /tools/neoGUI/x64/Debug
+/3rdparty/freetype/freetype-2.8/stage
+/3rdparty/freetype/freetype-2.8/lib/freetype.lib
+/3rdparty/freetype/freetype-2.8/lib/freetyped.lib

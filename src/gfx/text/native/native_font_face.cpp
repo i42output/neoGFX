@@ -201,7 +201,7 @@ namespace neogfx
 		iSubpixelGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
 
 		const GLubyte* textureData = 0;
-
+		
 		if (aGlyph.subpixel())
 		{
 			// sub-pixel FIR filter.
