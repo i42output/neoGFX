@@ -35,8 +35,8 @@ namespace neogfx
 	native_font_face::native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
 		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle), iHasKerning(!!FT_HAS_KERNING(iHandle))
 	{
-		FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(aSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy));
-		FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE);
+		freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(aSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
+		freetypeCheck(FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE));
 	}
 
 	native_font_face::~native_font_face()
@@ -121,7 +121,7 @@ namespace neogfx
 		if (existing != iKerningTable.end())
 			return existing->second;
 		FT_Vector delta;
-		FT_Get_Kerning(iHandle, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_DEFAULT, &delta);
+		freetypeCheck(FT_Get_Kerning(iHandle, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_DEFAULT, &delta));
 		return (iKerningTable[std::make_pair(aLeftGlyphIndex, aRightGlyphIndex)] = delta.x / 64.0);
 	}
 
@@ -157,8 +157,8 @@ namespace neogfx
 		iAuxHandle.reset();
 		if (iHandle != nullptr)
 		{
-			FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(iSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy));
-			FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE);
+			freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(iSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
+			freetypeCheck(FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE));
 		}
 	}
 
@@ -180,8 +180,8 @@ namespace neogfx
 		if (existingGlyph != iGlyphs.end())
 			return existingGlyph->second;
 
-		FT_Load_Glyph(iHandle, aGlyph.value(), aGlyph.subpixel() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
-		FT_Render_Glyph(iHandle->glyph, aGlyph.subpixel() ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL);
+		freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), aGlyph.subpixel() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL));
+		freetypeCheck(FT_Render_Glyph(iHandle->glyph, aGlyph.subpixel() ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL));
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
 
 		auto& subTexture = iRenderingEngine.font_manager().glyph_atlas().create_sub_texture(

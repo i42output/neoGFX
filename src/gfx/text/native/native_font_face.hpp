@@ -46,6 +46,27 @@
 
 namespace neogfx
 {
+	struct freetype_error : std::runtime_error { freetype_error(const std::string& aError) : std::runtime_error("neogfx::freetype_error: " + aError) {} };
+	inline const char* getFreeTypeErrorMessage(FT_Error err)
+	{
+#undef __FTERRORS_H__
+#define FT_ERRORDEF( e, v, s )  case e: return s;
+#define FT_ERROR_START_LIST     switch (err) {
+#define FT_ERROR_END_LIST       }
+#include FT_ERRORS_H
+		return "(Unknown error)";
+	}
+}
+
+#define freetypeCheck(x) \
+{ \
+	FT_Error err = x; \
+	if (err != 0) \
+		throw freetype_error(getFreeTypeErrorMessage(err)); \
+}
+
+namespace neogfx
+{
 	class i_rendering_engine;
 
 	class native_font_face : public i_native_font_face
