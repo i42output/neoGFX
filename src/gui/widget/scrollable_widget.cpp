@@ -176,9 +176,15 @@ namespace neogfx
 				if (vertical_scrollbar().clicked_element() == i_scrollbar::ElementNone && horizontal_scrollbar().clicked_element() == i_scrollbar::ElementNone)
 				{
 					if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
+					{
+						update(true);
 						vertical_scrollbar().click_element(vertical_scrollbar().element_at(*this, aPosition + origin()));
+					}
 					else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
+					{
+						update(true);
 						horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(*this, aPosition + origin()));
+					}
 				}
 			}
 		}
@@ -192,9 +198,15 @@ namespace neogfx
 			if (vertical_scrollbar().clicked_element() == i_scrollbar::ElementNone && horizontal_scrollbar().clicked_element() == i_scrollbar::ElementNone)
 			{
 				if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
+				{
+					update(true);
 					vertical_scrollbar().click_element(vertical_scrollbar().element_at(*this, aPosition + origin()));
+				}
 				else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(*this, aPosition + origin()) != i_scrollbar::ElementNone)
+				{
+					update(true);
 					horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(*this, aPosition + origin()));
+				}
 			}
 		}
 	}
@@ -205,9 +217,15 @@ namespace neogfx
 		if (aButton == mouse_button::Left)
 		{
 			if (vertical_scrollbar().clicked_element() != i_scrollbar::ElementNone)
+			{
+				update(true);
 				vertical_scrollbar().unclick_element();
+			}
 			else if (horizontal_scrollbar().clicked_element() != i_scrollbar::ElementNone)
+			{
+				update(true);
 				horizontal_scrollbar().unclick_element();
+			}
 		}
 		else if (aButton == mouse_button::Middle)
 		{

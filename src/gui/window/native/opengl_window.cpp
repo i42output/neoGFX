@@ -99,7 +99,8 @@ namespace neogfx
 
 	void opengl_window::invalidate(const rect& aInvalidatedRect)
 	{
-		if (aInvalidatedRect.cx != 0.0 && aInvalidatedRect.cy != 0.0 && 
+		//std::cerr << "invalidate: " << aInvalidatedRect << std::endl;
+		if (aInvalidatedRect.cx != 0.0 && aInvalidatedRect.cy != 0.0 &&
 			iInvalidatedRects.find(aInvalidatedRect) == iInvalidatedRects.end())
 			iInvalidatedRects.insert(aInvalidatedRect);
 	}
@@ -145,13 +146,6 @@ namespace neogfx
 		if (iInvalidatedRects.empty())
 			return;
 
-		++iFrameCounter;
-
-		iRendering = true;
-		iLastFrameTime = now;
-
-		rendering.trigger();
-
 		iInvalidatedArea = *iInvalidatedRects.begin();
 		for (const auto& ir : iInvalidatedRects)
 		{
@@ -162,6 +156,21 @@ namespace neogfx
 		iInvalidatedArea->cy = std::min(iInvalidatedArea->cy, surface_size().cy - iInvalidatedArea->y);
 
 		iInvalidatedArea = iInvalidatedArea->ceil();
+
+		if (iInvalidatedArea->cx <= 0.0 || iInvalidatedArea->cy <= 0.0)
+		{
+			iInvalidatedArea = boost::none;
+			return;
+		}
+
+		//std::cerr << "invalidated: " << *iInvalidatedArea << std::endl;
+
+		++iFrameCounter;
+
+		iRendering = true;
+		iLastFrameTime = now;
+
+		rendering.trigger();
 
 		rendering_engine().activate_context(*this);
 

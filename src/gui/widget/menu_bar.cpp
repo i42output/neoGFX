@@ -131,7 +131,6 @@ namespace neogfx
 		{
 			if (aClickedWidget != this && (aClickedWidget == 0 || !is_ancestor_of(*aClickedWidget)))
 				clear_selection();
-			update();
 		});
 		iSink += item_added([this](item_index aItemIndex)
 		{
@@ -165,6 +164,7 @@ namespace neogfx
 			if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().ungrab_keyboard(*this);
 			close_sub_menu(false);
+			update();
 		});
 		iSink += open_sub_menu([this](i_menu& aSubMenu)
 		{

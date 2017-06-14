@@ -489,12 +489,12 @@ namespace neogfx
 				g.cx -= (element_geometry(aContext, ElementThumb).cx - std::ceil(g.cx * static_cast<dimension>(page() / (maximum() - minimum()))));
 				set_position(static_cast<value_type>(delta.x / g.width()) * (maximum() - minimum()) + iThumbClickedValue);
 			}
+			iContainer.scrollbar_updated(*this, Updated);
 		}
 		if (clicked_element() == i_scrollbar::ElementNone)
 			hover_element(element_at(aContext, iContainer.as_widget().surface().mouse_position()));
 		else
 			unhover_element();
-		iContainer.scrollbar_updated(*this, Updated);
 	}
 
 	scrollbar::element_e scrollbar::clicked_element() const

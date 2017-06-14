@@ -1210,10 +1210,7 @@ namespace neogfx
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_pressed(aButton, aPosition + position(), aKeyModifiers);
 		else
-		{
 			set_capture();
-			update();
-		}
 	}
 
 	void widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -1221,17 +1218,13 @@ namespace neogfx
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_double_clicked(aButton, aPosition + position(), aKeyModifiers);
 		else
-		{
 			set_capture();
-			update();
-		}
 	}
 
 	void widget::mouse_button_released(mouse_button, const point&)
 	{
 		if (capturing())
 			release_capture();
-		update();
 	}
 
 	void widget::mouse_moved(const point&)

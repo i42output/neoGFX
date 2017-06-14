@@ -391,7 +391,10 @@ namespace neogfx
 						"varying vec2 vGlyphTexCoord;\n"
 						"void main()\n"
 						"{\n"
-						"	FragColor = vec4(Color.xyz, Color.a * texture(glyphTexture, vGlyphTexCoord).a);\n"
+						"   float a = texture(glyphTexture, vGlyphTexCoord).a;\n"
+						"   if (a == 0.0)\n"
+						"       discard;\n"
+						"	FragColor = vec4(Color.xyz, Color.a * a);\n"
 						"}\n"),
 					GL_FRAGMENT_SHADER)
 			},
@@ -435,6 +438,8 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
+							"	if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
+							"       discard;\n"
 							"	ivec2 dtpos = ivec2(vOutputCoord);\n"
 							"	if (guiCoordinates)\n"
 							"		dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
@@ -484,6 +489,8 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
+							"	if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
+							"		discard;\n"
 							"	ivec2 dtpos = ivec2(vOutputCoord);\n"
 							"	if (guiCoordinates)\n"
 							"		dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"

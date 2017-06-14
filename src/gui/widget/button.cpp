@@ -153,14 +153,20 @@ namespace neogfx
 	{
 		widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
+		{
+			update();
 			pressed.trigger();
+		}
 	}
 
 	void button::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
+		{
+			update();
 			double_clicked.trigger();
+		}
 	}
 
 	void button::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -169,6 +175,7 @@ namespace neogfx
 		widget::mouse_button_released(aButton, aPosition);
 		if (wasCapturing && client_rect().contains(aPosition))
 		{
+			update();
 			if (aButton == mouse_button::Left)
 			{
 				destroyed_flag destroyed(*this);
