@@ -100,7 +100,7 @@ namespace neogfx
 		iDefaultFont(aWidget.font()),
 		iOrigin(aWidget.origin()),
 		iExtents(aWidget.extents()),
-		iLogicalCoordinateSystem(iSurface.logical_coordinate_system()),
+		iLogicalCoordinateSystem(aWidget.logical_coordinate_system()),
 		iLogicalCoordinates(iSurface.logical_coordinates()),
 		iSmoothingMode(neogfx::smoothing_mode::None),
 		iSubpixelRendering(iSurface.rendering_engine().is_subpixel_rendering_on()),
@@ -115,8 +115,8 @@ namespace neogfx
 		iDefaultFont(aOther.iDefaultFont),
 		iOrigin(aOther.origin()),
 		iExtents(aOther.extents()),
-		iLogicalCoordinateSystem(iSurface.logical_coordinate_system()),
-		iLogicalCoordinates(iSurface.logical_coordinates()),
+		iLogicalCoordinateSystem(aOther.logical_coordinate_system()),
+		iLogicalCoordinates(aOther.logical_coordinates()),
 		iSmoothingMode(neogfx::smoothing_mode::None),
 		iSubpixelRendering(iSurface.rendering_engine().is_subpixel_rendering_on()),
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -220,7 +220,7 @@ namespace neogfx
 
 	const std::pair<vec2, vec2>& graphics_context::logical_coordinates() const
 	{
-		return iLogicalCoordinates;
+		return get_logical_coordinates(surface().extents(), iLogicalCoordinateSystem, iLogicalCoordinates);
 	}
 
 	void graphics_context::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const
@@ -1354,5 +1354,19 @@ namespace neogfx
 			iGc.set_origin(aOrigin);
 		else if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
 			iGc.set_origin(point{ aOrigin.x, iGc.surface().extents().cy - (aOrigin.y + aExtents.cy) });
+	}
+
+	const std::pair<vec2, vec2>& get_logical_coordinates(const size& aSurfaceSize, logical_coordinate_system aSystem, std::pair<vec2, vec2>& aCoordinates)
+	{
+		switch (aSystem)
+		{
+		case neogfx::logical_coordinate_system::Specified:
+			return aCoordinates;
+		case neogfx::logical_coordinate_system::AutomaticGui:
+			return aCoordinates = std::make_pair<vec2, vec2>({ 0.0, aSurfaceSize.cy }, { aSurfaceSize.cx, 0.0 });
+		case neogfx::logical_coordinate_system::AutomaticGame:
+			return aCoordinates = std::make_pair<vec2, vec2>({ 0.0, 0.0 }, { aSurfaceSize.cx, aSurfaceSize.cy });
+		}
+		return aCoordinates;
 	}
 }

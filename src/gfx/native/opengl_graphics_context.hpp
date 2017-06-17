@@ -102,13 +102,11 @@ namespace neogfx
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill);
 		void fill_path(const path& aPath, const fill& aFill);
 		void fill_shape(const vec2_list& aVertices, const fill& aFill);
-		void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour);
+		void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);
 		void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect);
 	private:
 		void apply_scissor();
 		void apply_logical_operation();
-		void begin_drawing_glyphs();
-		void end_drawing_glyphs();
 		void gradient_on(const gradient& aGradient, const rect& aBoundingBox);
 		void gradient_off();
 		vertex to_shader_vertex(const point& aPoint) const;
@@ -126,7 +124,6 @@ namespace neogfx
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;
 		GLint iPreviousTexture;
-		GLuint iActiveGlyphTexture;
 		bool iLineStippleActive;
 		std::vector<float> iGradientStopPositions;
 		std::vector<std::array<float, 4>> iGradientStopColours;

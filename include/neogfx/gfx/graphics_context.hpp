@@ -261,6 +261,8 @@ namespace neogfx
 		std::pair<vec2, vec2> iPreviousCoordinates;
 	};
 
+	const std::pair<vec2, vec2>& get_logical_coordinates(const size& aSurfaceSize, logical_coordinate_system aSystem, std::pair<vec2, vec2>& aCoordinates);
+
 	template <typename ValueType = double, uint32_t W = 5>
 	inline std::array<std::array<ValueType, W>, W> gaussian_filter(ValueType aSigma = 1.0)
 	{

@@ -321,6 +321,8 @@ namespace neogfx
 			{
 				auto& left = static_variant_cast<const draw_glyph&>(aLeft);
 				auto& right = static_variant_cast<const draw_glyph&>(aRight);
+				if (left.glyph.is_emoji() || right.glyph.is_emoji())
+					return false;
 				const i_glyph_texture& leftGlyphTexture = !left.glyph.use_fallback() ? left.font.native_font_face().glyph_texture(left.glyph) : 
 					left.glyph.fallback_font(left.font).native_font_face().glyph_texture(left.glyph);
 				const i_glyph_texture& rightGlyphTexture = !right.glyph.use_fallback() ? right.font.native_font_face().glyph_texture(right.glyph) :

@@ -256,16 +256,7 @@ namespace neogfx
 
 	const std::pair<vec2, vec2>& opengl_graphics_context::logical_coordinates() const
 	{
-		switch (iLogicalCoordinateSystem)
-		{
-		case neogfx::logical_coordinate_system::Specified:
-			return iLogicalCoordinates;
-		case neogfx::logical_coordinate_system::AutomaticGui:
-			return iLogicalCoordinates = std::make_pair<vec2, vec2>({ 0.0, surface().surface_size().cy }, { surface().surface_size().cx, 0.0 });
-		case neogfx::logical_coordinate_system::AutomaticGame:
-			return iLogicalCoordinates = std::make_pair<vec2, vec2>({ 0.0, 0.0 }, { surface().surface_size().cx, surface().surface_size().cy });
-		}
-		return iLogicalCoordinates;
+		return get_logical_coordinates(surface().surface_size(), iLogicalCoordinateSystem, iLogicalCoordinates);
 	}
 
 	void opengl_graphics_context::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const
@@ -449,13 +440,7 @@ namespace neogfx
 					fill_shape(static_variant_cast<const graphics_operation::fill_shape&>(op).vertices, static_variant_cast<const graphics_operation::fill_shape&>(op).fill);
 				break;
 			case graphics_operation::operation_type::DrawGlyph:
-				begin_drawing_glyphs();
-				for (auto& op : opBatch)
-				{
-					const auto& args = static_variant_cast<const graphics_operation::draw_glyph&>(op);
-					draw_glyph(args.point, args.glyph, args.font, args.colour);
-				}
-				end_drawing_glyphs();
+				draw_glyphs(opBatch);
 				break;
 			case graphics_operation::operation_type::DrawTexture:
 				for (auto& op : opBatch)
@@ -1004,19 +989,6 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::begin_drawing_glyphs()
-	{
-		glCheck(glTextureBarrierNV());
-		glCheck(glActiveTexture(GL_TEXTURE1));
-		glCheck(glClientActiveTexture(GL_TEXTURE1));
-		glCheck(glEnable(GL_TEXTURE_2D));
-		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		iActiveGlyphTexture = static_cast<GLuint>(iPreviousTexture);
-		iShaderProgramStack.emplace_back(*this, iRenderingEngine, iRenderingEngine.glyph_shader_program(is_subpixel_rendering_on()));
-	}
-
 	namespace
 	{
 		std::vector<std::array<double, 2>> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates)
@@ -1037,71 +1009,80 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour)
+	void opengl_graphics_context::draw_glyphs(const graphics_operation::batch& aDrawGlyphOps)
 	{
-		if (aGlyph.is_whitespace())
-			return;
+		auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(aDrawGlyphOps.front());
 
-		if (aGlyph.is_emoji())
+		if (firstOp.glyph.is_emoji())
 		{
 			use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 			auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
-			auto const& emojiTexture = emojiAtlas.emoji_texture(aGlyph.value());
-			draw_texture(rect{ aPoint, size{aFont.height(), aFont.height()} }.to_vector(), emojiTexture, rect{ point{}, emojiTexture.extents() }, optional_colour{}, shader_effect::None);
+			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value());
+			draw_texture(rect{ firstOp.point, size{firstOp.font.height(), firstOp.font.height()} }.to_vector(), emojiTexture, rect{ point{}, emojiTexture.extents() }, optional_colour{}, shader_effect::None);
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 			return;
 		}
 
-		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()) };
-
-		const font* glyphFont = &aFont;
-		if (aGlyph.use_fallback())
-		{
-			if (iLastDrawGlyphFallbackFont != aFont || iLastDrawGlyphFallbackFontIndex == boost::none || *iLastDrawGlyphFallbackFontIndex != aGlyph.fallback_font_index())
-			{
-				iLastDrawGlyphFallbackFont = aGlyph.fallback_font(aFont);
-				iLastDrawGlyphFallbackFontIndex = aGlyph.fallback_font_index();
-			}
-			glyphFont = &iLastDrawGlyphFallbackFont;
-		}
-
-		const i_glyph_texture& glyphTexture = glyphFont->native_font_face().glyph_texture(aGlyph);
-
-		point glyphOrigin(aPoint.x + glyphTexture.placement().x, 
-			logical_coordinates().first.y < logical_coordinates().second.y ? 
-				aPoint.y + (glyphTexture.placement().y + -aFont.descender()) :
-				aPoint.y + aFont.height() - (glyphTexture.placement().y + -aFont.descender()) - glyphTexture.texture().extents().cy);
-
 		iVertexArrays.vertices().clear();
-		iVertexArrays.vertices().insert(iVertexArrays.vertices().begin(),
-		{
-			to_shader_vertex(glyphOrigin),
-			to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, 0.0 }),
-			to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, glyphTexture.texture().extents().cy }),
-			to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.texture().extents().cy })
-		});
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array<uint8_t, 4>{{aColour.red(), aColour.green(), aColour.blue(), aColour.alpha()}});
-		iVertexArrays.texture_coords() = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates());
-		iVertexArrays.instantiate(*this, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()));
+		iVertexArrays.colours().clear();
+		iVertexArrays.texture_coords().clear();
 
-		if (iActiveGlyphTexture != reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle()))
+		for (const auto& op : aDrawGlyphOps)
 		{
-			iActiveGlyphTexture = reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle());
-			glCheck(glBindTexture(GL_TEXTURE_2D, iActiveGlyphTexture));
+			auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(op);
+
+			if (drawOp.glyph.is_whitespace())
+				continue;
+
+			const i_glyph_texture& glyphTexture = !drawOp.glyph.use_fallback() ? drawOp.font.native_font_face().glyph_texture(drawOp.glyph) : drawOp.glyph.fallback_font(drawOp.font).native_font_face().glyph_texture(drawOp.glyph);
+
+			point glyphOrigin(drawOp.point.x + glyphTexture.placement().x,
+				logical_coordinates().first.y < logical_coordinates().second.y ? 
+					drawOp.point.y + (glyphTexture.placement().y + -drawOp.font.descender()) :
+					drawOp.point.y + drawOp.font.height() - (glyphTexture.placement().y + -drawOp.font.descender()) - glyphTexture.texture().extents().cy);
+
+			iVertexArrays.vertices().insert(iVertexArrays.vertices().end(),
+			{
+				to_shader_vertex(glyphOrigin),
+				to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, 0.0 }),
+				to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, glyphTexture.texture().extents().cy }),
+				to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.texture().extents().cy })
+			});
+			iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4, std::array<uint8_t, 4>{{drawOp.colour.red(), drawOp.colour.green(), drawOp.colour.blue(), drawOp.colour.alpha()}});
+			auto textureCoords = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates());
+			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
 		}
-		
-		iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("glyphTexture", 1);
-		if (aGlyph.subpixel())
+
+		if (iVertexArrays.vertices().empty())
+			return;
+
+		glCheck(glTextureBarrierNV());
+		glCheck(glActiveTexture(GL_TEXTURE1));
+		glCheck(glClientActiveTexture(GL_TEXTURE1));
+		glCheck(glEnable(GL_TEXTURE_2D));
+		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+
+		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()) };
+
+		iVertexArrays.instantiate(*this, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()));
+
+		const i_glyph_texture& firstGlyphTexture = !firstOp.glyph.use_fallback() ? firstOp.font.native_font_face().glyph_texture(firstOp.glyph) : firstOp.glyph.fallback_font(firstOp.font).native_font_face().glyph_texture(firstOp.glyph);
+		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
+
+		iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()).set_uniform_variable("glyphTexture", 1);
+		if (firstOp.glyph.subpixel())
 		{
 			glCheck(glActiveTexture(GL_TEXTURE2));
 			glCheck(glClientActiveTexture(GL_TEXTURE2));
 			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSurface.rendering_target_texture_handle())));
 			glCheck(glActiveTexture(GL_TEXTURE1));
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("guiCoordinates", logical_coordinates().first.y > logical_coordinates().second.y);
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
-			iRenderingEngine.glyph_shader_program(aGlyph.subpixel()).set_uniform_variable("outputTexture", 2);
+			iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()).set_uniform_variable("guiCoordinates", logical_coordinates().first.y > logical_coordinates().second.y);
+			iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()).set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
+			iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()).set_uniform_variable("outputTexture", 2);
 		}
 
 		glCheck(glEnable(GL_BLEND));
@@ -1109,12 +1090,8 @@ namespace neogfx
 
 		disable_anti_alias daa(*this);
 		glCheck(glDrawArrays(GL_QUADS, 0, iVertexArrays.vertices().size()));
-	}
 
-	void opengl_graphics_context::end_drawing_glyphs()
-	{
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
-		iShaderProgramStack.pop_back();
 	}
 
 	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect)
