@@ -1628,12 +1628,9 @@ namespace neogfx
 		if (lineEnd != lineStart && (lineEnd - 1)->category() == text_category::Whitespace && (lineEnd - 1)->value() == U'\n')
 			--lineEnd;
 		{
-			std::unique_ptr<graphics_context::glyph_drawing> gd;
 			bool outlinesPresent = false;
 			for (uint32_t pass = 0; pass <= 2; ++pass)
 			{
-				if (pass == 1)
-					gd = std::make_unique<graphics_context::glyph_drawing>(aGraphicsContext);
 				point pos = aPoint;
 				for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
 				{

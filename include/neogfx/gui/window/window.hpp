@@ -72,6 +72,8 @@ namespace neogfx
 	public:
 		colour background_colour() const override;
 	public:
+		i_rendering_engine& rendering_engine() const override;
+	public:
 		bool is_weak() const override;
 		bool can_close() const override;
 		bool is_closed() const override;

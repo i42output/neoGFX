@@ -21,11 +21,10 @@
 #include <boost/math/constants/constants.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
-#include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
-#include "../text/native/native_font_face.hpp"
 #include "opengl_graphics_context.hpp"
 #include "opengl_renderer.hpp" // todo: remove this #include when base class interface abstraction complete
 
@@ -193,13 +192,12 @@ namespace neogfx
 	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface) :
 		iRenderingEngine(aRenderingEngine), 
 		iSurface(aSurface), 
-		iSavedCoordinateSystem(aSurface.logical_coordinate_system()), 
-		iLogicalCoordinateSystem(iSavedCoordinateSystem), 
+		iLogicalCoordinateSystem(aSurface.logical_coordinate_system()),
 		iLogicalCoordinates(aSurface.logical_coordinates()), 
 		iSmoothingMode(neogfx::smoothing_mode::None),
+		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on()),
 		iClipCounter(0),
-		iLineStippleActive(false),
-		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
+		iLineStippleActive(false)
 	{
 		iRenderingEngine.activate_context(iSurface);
 		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
@@ -209,13 +207,12 @@ namespace neogfx
 	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget) :
 		iRenderingEngine(aRenderingEngine), 
 		iSurface(aSurface), 
-		iSavedCoordinateSystem(aWidget.logical_coordinate_system()),
-		iLogicalCoordinateSystem(iSavedCoordinateSystem),
+		iLogicalCoordinateSystem(aWidget.logical_coordinate_system()),
 		iLogicalCoordinates(aSurface.logical_coordinates()),
 		iSmoothingMode(neogfx::smoothing_mode::None),
-		iClipCounter(0), 
-		iLineStippleActive(false),
-		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on())
+		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on()),
+		iClipCounter(0),
+		iLineStippleActive(false)
 	{
 		iRenderingEngine.activate_context(iSurface);
 		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
@@ -225,13 +222,12 @@ namespace neogfx
 	opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
 		iRenderingEngine(aOther.iRenderingEngine), 
 		iSurface(aOther.iSurface), 
-		iSavedCoordinateSystem(aOther.iSavedCoordinateSystem),
 		iLogicalCoordinateSystem(aOther.iLogicalCoordinateSystem),
 		iLogicalCoordinates(aOther.iLogicalCoordinates),
 		iSmoothingMode(aOther.iSmoothingMode), 
+		iSubpixelRendering(aOther.iSubpixelRendering),
 		iClipCounter(0),
-		iLineStippleActive(false),
-		iSubpixelRendering(false)
+		iLineStippleActive(false)
 	{
 		iRenderingEngine.activate_context(iSurface);
 		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
@@ -240,7 +236,7 @@ namespace neogfx
 
 	opengl_graphics_context::~opengl_graphics_context()
 	{
-		set_logical_coordinate_system(iSavedCoordinateSystem);
+		flush();
 	}
 
 	const i_native_surface& opengl_graphics_context::surface() const
@@ -277,8 +273,200 @@ namespace neogfx
 		iLogicalCoordinates = aCoordinates;
 	}
 
+	void opengl_graphics_context::enqueue(const graphics_operation::operation& aOperation)
+	{
+		if (!iQueue.empty() && graphics_operation::batchable(iQueue.back().back(), aOperation))
+			iQueue.back().push_back(aOperation);
+		else
+			iQueue.push_back(graphics_operation::batch{ {aOperation} });
+	}
+
 	void opengl_graphics_context::flush()
 	{
+		while (!iQueue.empty())
+		{
+			const auto& opBatch = iQueue.front();
+			switch (opBatch.front().which())
+			{
+			case graphics_operation::operation_type::SetLogicalCoordinateSystem:
+				for (auto& op : opBatch)
+					set_logical_coordinate_system(static_variant_cast<const graphics_operation::set_logical_coordinate_system&>(op).system);
+				break;
+			case graphics_operation::operation_type::SetLogicalCoordinates:
+				for (auto& op : opBatch)
+					set_logical_coordinates(static_variant_cast<const graphics_operation::set_logical_coordinates&>(op).coordinates);
+				break;
+			case graphics_operation::operation_type::ScissorOn:
+				for (auto& op : opBatch)
+					scissor_on(static_variant_cast<const graphics_operation::scissor_on&>(op).rect);
+				break;
+			case graphics_operation::operation_type::ScissorOff:
+				for (auto& op : opBatch)
+				{
+					(void)op;
+					scissor_off();
+				}
+				break;
+			case graphics_operation::operation_type::ClipToRect:
+				for (auto& op : opBatch)
+					clip_to(static_variant_cast<const graphics_operation::clip_to_rect&>(op).rect);
+				break;
+			case graphics_operation::operation_type::ClipToPath:
+				for (auto& op : opBatch)
+					clip_to(static_variant_cast<const graphics_operation::clip_to_path&>(op).path, static_variant_cast<const graphics_operation::clip_to_path&>(op).pathOutline);
+				break;
+			case graphics_operation::operation_type::ResetClip:
+				for (auto& op : opBatch)
+				{
+					(void)op;
+					reset_clip();
+				}
+				break;
+			case graphics_operation::operation_type::SetSmoothingMode:
+				for (auto& op : opBatch)
+					set_smoothing_mode(static_variant_cast<const graphics_operation::set_smoothing_mode&>(op).smoothingMode);
+				break;
+			case graphics_operation::operation_type::PushLogicalOperation:
+				for (auto& op : opBatch)
+					push_logical_operation(static_variant_cast<const graphics_operation::push_logical_operation&>(op).logicalOperation);
+				break;
+			case graphics_operation::operation_type::PopLogicalOperation:
+				for (auto& op : opBatch)
+				{
+					(void)op;
+					pop_logical_operation();
+				}
+				break;
+			case graphics_operation::operation_type::LineStippleOn:
+				for (auto& op : opBatch)
+					line_stipple_on(static_variant_cast<const graphics_operation::line_stipple_on&>(op).factor, static_variant_cast<const graphics_operation::line_stipple_on&>(op).pattern);
+				break;
+			case graphics_operation::operation_type::LineStippleOff:
+				for (auto& op : opBatch)
+				{
+					(void)op;
+					line_stipple_off();
+				}
+				break;
+			case graphics_operation::operation_type::SubpixelRenderingOn:
+				subpixel_rendering_on();
+				break;
+			case graphics_operation::operation_type::SubpixelRenderingOff:
+				subpixel_rendering_off();
+				break;
+			case graphics_operation::operation_type::Clear:
+				for (auto& op : opBatch)
+					clear(static_variant_cast<const graphics_operation::clear&>(op).colour);
+				break;
+			case graphics_operation::operation_type::SetPixel:
+				for (auto& op : opBatch)
+					set_pixel(static_variant_cast<const graphics_operation::set_pixel&>(op).point, static_variant_cast<const graphics_operation::set_pixel&>(op).colour);
+				break;
+			case graphics_operation::operation_type::DrawPixel:
+				for (auto& op : opBatch)
+					draw_pixel(static_variant_cast<const graphics_operation::draw_pixel&>(op).point, static_variant_cast<const graphics_operation::draw_pixel&>(op).colour);
+				break;
+			case graphics_operation::operation_type::DrawLine:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::draw_line&>(op);
+					draw_line(args.from, args.to, args.pen);
+				}
+				break;
+			case graphics_operation::operation_type::DrawRect:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::draw_rect&>(op);
+					draw_rect(args.rect, args.pen);
+				}
+				break;
+			case graphics_operation::operation_type::DrawRoundedRect:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::draw_rounded_rect&>(op);
+					draw_rounded_rect(args.rect, args.radius, args.pen);
+				}
+				break;
+			case graphics_operation::operation_type::DrawCircle:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::draw_circle&>(op);
+					draw_circle(args.centre, args.radius, args.pen, args.startAngle);
+				}
+				break;
+			case graphics_operation::operation_type::DrawArc:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::draw_arc&>(op);
+					draw_arc(args.centre, args.radius, args.startAngle, args.endAngle, args.pen);
+				}
+				break;
+			case graphics_operation::operation_type::DrawPath:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::draw_path&>(op);
+					draw_path(args.path, args.pen);
+				}
+				break;
+			case graphics_operation::operation_type::DrawShape:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::draw_shape&>(op);
+					draw_shape(args.vertices, args.pen);
+				}
+				break;
+			case graphics_operation::operation_type::FillRect:
+				for (auto& op : opBatch)
+					fill_rect(static_cast<const graphics_operation::fill_rect&>(op).rect, static_cast<const graphics_operation::fill_rect&>(op).fill);
+				break;
+			case graphics_operation::operation_type::FillRoundedRect:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::fill_rounded_rect&>(op);
+					fill_rounded_rect(args.rect, args.radius, args.fill);
+				}
+				break;
+			case graphics_operation::operation_type::FillCircle:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::fill_circle&>(op);
+					fill_circle(args.centre, args.radius, args.fill);
+				}
+				break;
+			case graphics_operation::operation_type::FillArc:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_cast<const graphics_operation::fill_arc&>(op);
+					fill_arc(args.centre, args.radius, args.startAngle, args.endAngle, args.fill);
+				}
+				break;
+			case graphics_operation::operation_type::FillPath:
+				for (auto& op : opBatch)
+					fill_path(static_variant_cast<const graphics_operation::fill_path&>(op).path, static_variant_cast<const graphics_operation::fill_path&>(op).fill);
+				break;
+			case graphics_operation::operation_type::FillShape:
+				for (auto& op : opBatch)
+					fill_shape(static_variant_cast<const graphics_operation::fill_shape&>(op).vertices, static_variant_cast<const graphics_operation::fill_shape&>(op).fill);
+				break;
+			case graphics_operation::operation_type::DrawGlyph:
+				begin_drawing_glyphs();
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_variant_cast<const graphics_operation::draw_glyph&>(op);
+					draw_glyph(args.point, args.glyph, args.font, args.colour);
+				}
+				end_drawing_glyphs();
+				break;
+			case graphics_operation::operation_type::DrawTexture:
+				for (auto& op : opBatch)
+				{
+					const auto& args = static_variant_cast<const graphics_operation::draw_texture&>(op);
+					draw_texture(args.textureMap, args.texture, args.textureRect, args.colour, args.shaderEffect);
+				}
+				break;
+			}
+			iQueue.pop_front();
+		}
 	}
 
 	void opengl_graphics_context::scissor_on(const rect& aRect)
@@ -364,7 +552,7 @@ namespace neogfx
 			if (aPath.paths()[i].size() > 2)
 			{
 				iVertexArrays.vertices() = aPath.to_vertices(aPath.paths()[i]);
-				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
+				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {0xFF, 0xFF, 0xFF, 0xFF}});
 				iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
 				iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
@@ -381,14 +569,14 @@ namespace neogfx
 				if (innerPath.paths()[i].size() > 2)
 				{
 					iVertexArrays.vertices() = aPath.to_vertices(innerPath.paths()[i]);
-					iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}});
+					iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {0xFF, 0xFF, 0xFF, 0xFF}});
 					iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
 					iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 					glCheck(glDrawArrays(path_shape_to_gl_mode(innerPath), 0, iVertexArrays.vertices().size()));
 				}
 			}
-		} 
+		}
 		glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
 		glCheck(glDepthMask(GL_TRUE));
 		glCheck(glStencilMask(0x00));
@@ -409,10 +597,8 @@ namespace neogfx
 		return iSmoothingMode;
 	}
 
-	smoothing_mode opengl_graphics_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
+	void opengl_graphics_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
 	{
-		glCheck((void)0);
-		neogfx::smoothing_mode oldSmoothingMode = iSmoothingMode;
 		iSmoothingMode = aSmoothingMode;
 		if (iSmoothingMode == neogfx::smoothing_mode::AntiAlias)
 		{
@@ -424,7 +610,6 @@ namespace neogfx
 			glCheck(glDisable(GL_LINE_SMOOTH));
 			glCheck(glDisable(GL_POLYGON_SMOOTH));
 		}
-		return oldSmoothingMode;
 	}
 
 	void opengl_graphics_context::push_logical_operation(logical_operation aLogicalOperation)
@@ -819,65 +1004,6 @@ namespace neogfx
 			gradient_off();
 	}
 
-	glyph_text opengl_graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const
-	{
-		return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::string::size_type) { return aFont; });
-	}
-
-	glyph_text opengl_graphics_context::to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
-	{
-		return glyph_text(aFontSelector(0), to_glyph_text_impl(aTextBegin, aTextEnd, aFontSelector));
-	}
-
-	glyph_text opengl_graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const
-	{
-		return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::u32string::size_type) { return aFont; });
-	}
-
-	glyph_text opengl_graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const
-	{
-		return glyph_text(aFontSelector(0), to_glyph_text_impl(aTextBegin, aTextEnd, aFontSelector));
-	}
-
-	void opengl_graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix)
-	{
-		iMnemonic = std::make_pair(aShowMnemonics, aMnemonicPrefix);
-	}
-
-	void opengl_graphics_context::unset_mnemonic()
-	{
-		iMnemonic = boost::none;
-	}
-
-	bool opengl_graphics_context::mnemonics_shown() const
-	{
-		return iMnemonic != boost::none && iMnemonic->first;
-	}
-
-	bool opengl_graphics_context::password() const
-	{
-		return iPassword != boost::none;
-	}
-
-	const std::string& opengl_graphics_context::password_mask() const
-	{
-		if (password())
-		{
-			if (iPassword->empty())
-				iPassword = "\xE2\x97\x8F";
-			return *iPassword;
-		}
-		throw password_not_set();
-	}
-
-	void opengl_graphics_context::set_password(bool aPassword, const std::string& aMask)
-	{
-		if (aPassword)
-			iPassword = aMask;
-		else
-			iPassword = boost::none;
-	}
-
 	void opengl_graphics_context::begin_drawing_glyphs()
 	{
 		glCheck(glTextureBarrierNV());
@@ -911,10 +1037,10 @@ namespace neogfx
 		}
 	}
 
-	size opengl_graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour)
+	void opengl_graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour)
 	{
 		if (aGlyph.is_whitespace())
-			return size{};
+			return;
 
 		if (aGlyph.is_emoji())
 		{
@@ -924,7 +1050,7 @@ namespace neogfx
 			draw_texture(rect{ aPoint, size{aFont.height(), aFont.height()} }.to_vector(), emojiTexture, rect{ point{}, emojiTexture.extents() }, optional_colour{}, shader_effect::None);
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			return size{ aFont.height(), aFont.height() };
+			return;
 		}
 
 		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(aGlyph.subpixel()) };
@@ -983,8 +1109,6 @@ namespace neogfx
 
 		disable_anti_alias daa(*this);
 		glCheck(glDrawArrays(GL_QUADS, 0, iVertexArrays.vertices().size()));
-
-		return glyphTexture.texture().extents();
 	}
 
 	void opengl_graphics_context::end_drawing_glyphs()
@@ -1039,486 +1163,4 @@ namespace neogfx
 		return vertex{{aPoint.x, aPoint.y, 0.0}};
 	}
 
-	class opengl_graphics_context::glyph_shapes
-	{
-	public:
-		struct not_using_fallback : std::logic_error { not_using_fallback() : std::logic_error("neogfx::opengl_graphics_context::glyph_shapes::not_using_fallback") {} };
-	public:
-		class glyphs
-		{
-		public:
-			glyphs(const opengl_graphics_context& aParent, const font& aFont, const glyph_run& aGlyphRun) :
-				iParent{ aParent },
-				iFont{static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->font },
-				iGlyphRun{ aGlyphRun },
-				iBuf{ static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->buf },
-				iGlyphCount{ 0u },
-				iGlyphInfo{ nullptr },
-				iGlyphPos{ nullptr }
-			{
-				hb_ft_font_set_load_flags(iFont, aParent.is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
-				hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
-				hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
-				hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun), 0, std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
-				hb_shape(iFont, iBuf, NULL, 0);
-				unsigned int glyphCount = 0;
-				iGlyphInfo = hb_buffer_get_glyph_infos(iBuf, &glyphCount);
-				iGlyphPos = hb_buffer_get_glyph_positions(iBuf, &glyphCount);
-				iGlyphCount = glyphCount;
-			}
-			~glyphs()
-			{
-				hb_buffer_clear_contents(iBuf);
-			}
-		public:
-			uint32_t glyph_count() const
-			{
-				return iGlyphCount;
-			}
-			const hb_glyph_info_t& glyph_info(uint32_t aIndex) const
-			{
-				return iGlyphInfo[aIndex];
-			}
-			const hb_glyph_position_t& glyph_position(uint32_t aIndex) const
-			{
-				return iGlyphPos[aIndex];
-			}
-			bool needs_fallback_font() const
-			{
-				for (uint32_t i = 0; i < glyph_count(); ++i)
-				{
-					auto tc = get_text_category(iParent.iRenderingEngine.font_manager().emoji_atlas(), std::get<0>(iGlyphRun)[glyph_info(i).cluster]);
-					if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
-						return true;
-				}
-				return false;
-			}
-		private:
-			const opengl_graphics_context& iParent;
-			hb_font_t* iFont;
-			const glyph_run& iGlyphRun;
-			hb_buffer_t* iBuf;
-			uint32_t iGlyphCount;
-			hb_glyph_info_t* iGlyphInfo;
-			hb_glyph_position_t* iGlyphPos;
-		};
-		typedef std::list<glyphs> glyphs_list;
-		typedef std::vector<std::pair<glyphs_list::const_iterator, uint32_t>> result_type;
-	public:
-		glyph_shapes(const opengl_graphics_context& aParent, const font& aFont, const glyph_run& aGlyphRun)
-		{
-			font tryFont = aFont;
-			iGlyphsList.emplace_back(glyphs(aParent, tryFont, aGlyphRun));
-			while (iGlyphsList.back().needs_fallback_font() && tryFont.has_fallback())
-			{
-				tryFont = tryFont.fallback();
-				iGlyphsList.emplace_back(glyphs(aParent, tryFont, aGlyphRun));
-			}
-			auto g = iGlyphsList.begin();
-			for (uint32_t i = 0; i < g->glyph_count();)
-			{
-				const auto& gi = g->glyph_info(i);
-				auto tc = get_text_category(aParent.iRenderingEngine.font_manager().emoji_atlas(), std::get<0>(aGlyphRun)[gi.cluster]);
-				if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
-				{
-					iResults.push_back(std::make_pair(g, i++));
-				}
-				else
-				{
-					std::vector<uint32_t> clusters;
-					tc = get_text_category(aParent.iRenderingEngine.font_manager().emoji_atlas(), std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]);
-					while (i < g->glyph_count() && g->glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
-					{
-						clusters.push_back(g->glyph_info(i).cluster);
-						++i;
-					}
-					std::sort(clusters.begin(), clusters.end());
-					auto nextFallback = std::next(g);
-					while (nextFallback != iGlyphsList.end() && !clusters.empty())
-					{
-						auto currentFallback = nextFallback++;
-						const auto& fallbackGlyphs = *currentFallback;
-						for (uint32_t j = 0; j < fallbackGlyphs.glyph_count(); ++j)
-						{
-							if (fallbackGlyphs.glyph_info(j).codepoint != 0)
-							{
-								auto c = std::find(clusters.begin(), clusters.end(), fallbackGlyphs.glyph_info(j).cluster);
-								if (c != clusters.end())
-								{
-									iResults.push_back(std::make_pair(currentFallback, j));
-									clusters.erase(c);
-								}
-							}
-							else
-							{
-								tc = get_text_category(aParent.iRenderingEngine.font_manager().emoji_atlas(), std::get<0>(aGlyphRun)[fallbackGlyphs.glyph_info(j).cluster]);
-								if (tc != text_category::Whitespace && tc != text_category::Emoji)
-									break;
-								else
-									goto whitespace_break;
-							}
-						}
-					}
-				}
-			whitespace_break:
-				;
-			}
-		}
-	public:
-		uint32_t glyph_count() const
-		{
-			return iResults.size();
-		}
-		const hb_glyph_info_t& glyph_info(uint32_t aIndex) const
-		{
-			return iResults[aIndex].first->glyph_info(iResults[aIndex].second);
-		}
-		const hb_glyph_position_t& glyph_position(uint32_t aIndex) const
-		{
-			return iResults[aIndex].first->glyph_position(iResults[aIndex].second);
-		}
-		bool using_fallback(uint32_t aIndex) const
-		{
-			return iResults[aIndex].first != iGlyphsList.begin();
-		}
-		uint32_t fallback_index(uint32_t aIndex) const
-		{
-			if (!using_fallback(aIndex))
-				throw not_using_fallback();
-			return std::distance(iGlyphsList.begin(), iResults[aIndex].first) - 1;
-		}
-	private:
-		glyphs_list iGlyphsList;
-		result_type iResults;
-	};
-
-	glyph_text::container opengl_graphics_context::to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
-	{
-		auto& clusterMap = iClusterMap;
-		clusterMap.clear();
-		iCodePointsBuffer.clear();
-		std::u32string& codePoints = iCodePointsBuffer;
-
-		codePoints = neolib::utf8_to_utf32(aTextBegin, aTextEnd, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type)
-		{
-			clusterMap.push_back(cluster{ aFrom });
-		});
-
-		auto result = to_glyph_text_impl(codePoints.begin(), codePoints.end(), [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
-		{
-			return aFontSelector(clusterMap[aIndex].from);
-		});
-
-		return result;
-	}
-
-	glyph_text::container opengl_graphics_context::to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const
-	{
-		auto& result = iGlyphTextResult;
-		result.clear();
-
-		if (aTextEnd == aTextBegin)
-			return result;
-
-		bool hasEmojis = false;
-
-		auto& textDirections = iTextDirections;
-		textDirections.clear();
-
-		std::u32string::size_type codePointCount = aTextEnd - aTextBegin;
-
-		std::u32string adjustedCodepoints;
-		if (password())
-			adjustedCodepoints.assign(codePointCount, neolib::utf8_to_utf32(password_mask())[0]);
-		const char32_t* codePoints = adjustedCodepoints.empty() ? &*aTextBegin : &adjustedCodepoints[0];
-
-		auto& runs = iRuns;
-		runs.clear();
-		auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
-		text_category previousCategory = get_text_category(emojiAtlas, codePoints[0]);
-		if (iMnemonic != boost::none && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
-			previousCategory = text_category::Mnemonic;
-		text_direction previousDirection = (previousCategory != text_category::RTL ? text_direction::LTR : text_direction::RTL);
-		const char32_t* runStart = &codePoints[0];
-		std::u32string::size_type lastCodePointIndex = codePointCount - 1;
-		font previousFont = aFontSelector(0);
-		hb_script_t previousScript = hb_unicode_script(static_cast<native_font_face::hb_handle*>(previousFont.native_font_face().aux_handle())->unicodeFuncs, codePoints[0]);
-
-		std::deque<std::pair<text_direction, bool>> directionStack;
-		const char32_t LRE = U'\u202A';
-		const char32_t RLE = U'\u202B';
-		const char32_t LRO = U'\u202D';
-		const char32_t RLO = U'\u202E';
-		const char32_t PDF = U'\u202C';
-
-		bool currentLineHasLTR = false;
-
-		for (std::size_t i = 0; i <= lastCodePointIndex; ++i)
-		{
-			font currentFont = aFontSelector(i);
-			switch (codePoints[i])
-			{
-			case PDF:
-				if (!directionStack.empty())
-					directionStack.pop_back();
-				break;
-			case LRE:
-				directionStack.push_back(std::make_pair(text_direction::LTR, false));
-				break;
-			case RLE:
-				directionStack.push_back(std::make_pair(text_direction::RTL, false));
-				break;
-			case LRO:
-				directionStack.push_back(std::make_pair(text_direction::LTR, true));
-				break;
-			case RLO:
-				directionStack.push_back(std::make_pair(text_direction::RTL, true));
-				break;
-			default:
-				break;
-			}
-			
-			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
-			text_category currentCategory = get_text_category(emojiAtlas, codePoints[i]);
-			if (iMnemonic != boost::none && codePoints[i] == static_cast<char32_t>(iMnemonic->second))
-				currentCategory = text_category::Mnemonic;
-			text_direction currentDirection = previousDirection;
-			if (currentCategory == text_category::LTR)
-				currentDirection = text_direction::LTR;
-			else if (currentCategory == text_category::RTL)
-				currentDirection = text_direction::RTL;
-			
-			bool newLine = (codePoints[i] == '\r' || codePoints[i] == '\n');
-			if (newLine)
-			{
-				currentLineHasLTR = false;
-				currentDirection = text_direction::LTR;
-			}
-			auto bidi_check = [&directionStack](text_category aCategory, text_direction aDirection)
-			{
-				if (!directionStack.empty())
-				{
-					switch (aCategory)
-					{
-					case text_category::LTR:
-					case text_category::RTL:
-					case text_category::Digit:
-					case text_category::Emoji:
-						if (directionStack.back().second == true)
-							return directionStack.back().first;
-						break;
-					case text_category::None:
-					case text_category::Whitespace:
-					case text_category::Mnemonic:
-						return directionStack.back().first;
-						break;
-					default:
-						break;
-					}
-				}
-				return aDirection;
-			};
-			currentDirection = bidi_check(currentCategory, currentDirection);
-			switch(currentCategory)
-			{
-			case text_category::LTR:
-				currentLineHasLTR = true;
-				if (currentDirection == text_direction::Digits_LTR || currentDirection == text_direction::Digits_RTL ||
-					currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
-					currentDirection = text_direction::LTR;
-				break;
-			case text_category::RTL:
-				if (currentDirection == text_direction::Digits_LTR || currentDirection == text_direction::Digits_RTL ||
-					currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
-					currentDirection = text_direction::RTL;
-				break;
-			case text_category::Digit:
-				if (currentDirection == text_direction::LTR)
-					currentDirection = text_direction::Digits_LTR;
-				else if (currentDirection == text_direction::RTL)
-					currentDirection = text_direction::Digits_RTL;
-				break;
-			case text_category::Emoji:
-				if (currentDirection == text_direction::LTR)
-					currentDirection = text_direction::Emoji_LTR;
-				else if (currentDirection == text_direction::RTL)
-					currentDirection = text_direction::Emoji_RTL;
-				break;
-			}
-			if (currentDirection == text_direction::Digits_LTR) // optimization (less runs for LTR text)
-				currentDirection = text_direction::LTR;
-			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
-			bool newRun = 
-				previousFont != currentFont ||
-				(newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::Digits_RTL
-					|| previousDirection == text_direction::Emoji_RTL)) ||
-				currentCategory == text_category::Mnemonic ||
-				previousCategory == text_category::Mnemonic ||
-				previousDirection != currentDirection ||
-				(previousScript != currentScript && (previousScript != HB_SCRIPT_COMMON && currentScript != HB_SCRIPT_COMMON));
-			if (!newRun)
-			{
-				if ((currentCategory == text_category::Whitespace || currentCategory == text_category::None || currentCategory == text_category::Mnemonic) && 
-					(currentDirection == text_direction::RTL || currentDirection == text_direction::Digits_RTL || currentDirection == text_direction::Emoji_RTL))
-				{
-					for (std::size_t j = i + 1; j <= lastCodePointIndex; ++j)
-					{
-						text_direction nextDirection = bidi_check(get_text_category(emojiAtlas, codePoints[j]), get_text_direction(emojiAtlas, codePoints[j], currentDirection));
-						if (nextDirection == text_direction::RTL || nextDirection == text_direction::Digits_RTL)
-							break;
-						else if (nextDirection == text_direction::LTR || (j == lastCodePointIndex - 1 && currentLineHasLTR))
-						{
-							newRun = true;
-							currentDirection = text_direction::LTR;
-							break;
-						}
-					}
-				}
-			}
-			textDirections.push_back(character_type{ currentCategory, currentDirection });
-			if (currentCategory == text_category::Emoji)
-				hasEmojis = true;
-			if (newRun && i > 0)
-			{
-				runs.push_back(std::make_tuple(runStart, &codePoints[i], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
-				runStart = &codePoints[i];
-			}
-			previousDirection = currentDirection;
-			previousCategory = currentCategory;
-			if (previousCategory == text_category::LTR || previousCategory == text_category::RTL || previousCategory == text_category::Mnemonic)
-				previousScript = currentScript;
-			if (i == lastCodePointIndex)
-				runs.push_back(std::make_tuple(runStart, &codePoints[i + 1], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
-			previousFont = currentFont;
-		}
-
-		for (std::size_t i = 1; i < runs.size(); ++i)
-		{
-			int j = i - 1;
-			auto startDirection = std::get<2>(runs[j]);
-			do 
-			{
-				auto direction = std::get<2>(runs[i]);
-				if ((startDirection == text_direction::RTL || startDirection == text_direction::Digits_RTL || startDirection == text_direction::Emoji_RTL) && 
-					(direction == text_direction::RTL || direction == text_direction::Digits_RTL || direction == text_direction::Emoji_RTL))
-				{
-					auto m = runs[i];
-					runs.erase(runs.begin() + i);
-					runs.insert(runs.begin() + j, m);
-					++i;
-				}
-				else
-				{
-					break;
-				}
-			} while (i < runs.size());
-		}
-
-		for (std::size_t i = 0; i < runs.size(); ++i)
-		{
-			if (std::get<3>(runs[i]))
-				continue;
-			bool drawMnemonic = (i > 0 && std::get<3>(runs[i - 1]));
-			std::string::size_type sourceClusterRunStart = std::get<0>(runs[i]) - &codePoints[0];
-			glyph_shapes shapes{ *this, aFontSelector(sourceClusterRunStart), runs[i] };
-			for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
-			{
-				std::u32string::size_type startCluster = shapes.glyph_info(j).cluster;
-				std::u32string::size_type endCluster;
-				if (std::get<2>(runs[i]) != text_direction::RTL)
-				{
-					uint32_t k = j + 1;
-					while (k < shapes.glyph_count() && shapes.glyph_info(k).cluster == startCluster)
-						++k;
-					endCluster = (k < shapes.glyph_count() ? shapes.glyph_info(k).cluster : startCluster + 1);
-				}
-				else
-				{
-					uint32_t k = j;
-					while (k > 0 && shapes.glyph_info(k).cluster == startCluster)
-						--k;
-					endCluster = (shapes.glyph_info(k).cluster != startCluster ? shapes.glyph_info(k).cluster : startCluster + 1);
-				}
-				startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
-				endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
-				auto const& font = aFontSelector(startCluster);
-				if (j > 0)
-					result.back().kerning_adjust(static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
-				size advance = textDirections[startCluster].category != text_category::Emoji ?
-					size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :
-					size{ font.height(), 0.0 };
-				result.push_back(glyph(textDirections[startCluster],
-					shapes.glyph_info(j).codepoint, 
-					glyph::source_type(startCluster, endCluster), advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0)));
-				if (result.back().category() == text_category::Whitespace)
-					result.back().set_value(aTextBegin[startCluster]);
-				else if (result.back().category() == text_category::Emoji)
-					result.back().set_value(emojiAtlas.emoji(aTextBegin[startCluster], font.height()));
-				if ((aFontSelector(startCluster).style() & font::Underline) == font::Underline)
-					result.back().set_underline(true);
-				if (is_subpixel_rendering_on())
-					result.back().set_subpixel(true);
-				if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
-					result.back().set_mnemonic(true);
-				if (shapes.using_fallback(j))
-					result.back().set_use_fallback(true, shapes.fallback_index(j));
-				if (result.back().category() != text_category::Whitespace && result.back().category() != text_category::Emoji)
-				{
-					auto& glyph = result.back();
-					if (glyph.advance() != advance.ceil())
-					{
-						const i_glyph_texture& glyphTexture = aFontSelector(startCluster).native_font_face().glyph_texture(glyph);
-						auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
-						if (visibleAdvance > advance.cx)
-						{
-							advance.cx = visibleAdvance;
-							glyph.set_advance(advance);
-						}
-					}
-				}
-			}
-		}
-		if (hasEmojis)
-		{
-			auto& emojiResult = iGlyphTextResult2;
-			emojiResult.clear();
-			for (auto i = result.begin(); i != result.end(); ++i)
-			{
-				if (i->category() == text_category::Emoji)
-				{
-					auto cluster = i->source().first;
-					std::u32string sequence;
-					sequence += aTextBegin[cluster];
-					auto j = i + 1;
-					for (; j != result.end(); ++j)
-					{
-						auto prev = aTextBegin[cluster + (j - i) - 1];
-						auto ch = aTextBegin[cluster + (j - i)];
-						if (ch == 0x200D)
-							continue;
-						if (iRenderingEngine.font_manager().emoji_atlas().is_emoji(sequence + ch) || prev == 0x200D)
-							sequence += ch;
-						else
-							break;
-					}
-					if (sequence.size() > 1 && iRenderingEngine.font_manager().emoji_atlas().is_emoji(sequence))
-					{
-						auto g = *i;
-						g.set_value(iRenderingEngine.font_manager().emoji_atlas().emoji(sequence, aFontSelector(cluster).height()));
-						g.set_source(std::make_pair(g.source().first, g.source().first + sequence.size()));
-						emojiResult.push_back(g);
-						i = j - 1;
-					}
-					else
-						emojiResult.push_back(*i);
-				}
-				else
-				{
-					emojiResult.push_back(*i);
-				}
-			}
-			return emojiResult;
-		}
-		return result;
-	}
 }

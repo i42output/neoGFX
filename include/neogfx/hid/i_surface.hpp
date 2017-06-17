@@ -37,6 +37,7 @@ namespace neogfx
 		Paper		// Printing support
 	};
 
+	class i_rendering_engine;
 	class i_native_surface;
 
 	enum class surface_style : uint32_t
@@ -78,6 +79,8 @@ namespace neogfx
 		struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_surface::no_native_surface") {} };
 	public:
 		virtual ~i_surface() {}
+	public:
+		virtual i_rendering_engine& rendering_engine() const = 0;
 	public:
 		virtual bool is_weak() const = 0;
 		virtual bool can_close() const = 0;

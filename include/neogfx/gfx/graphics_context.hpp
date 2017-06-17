@@ -75,14 +75,12 @@ namespace neogfx
 	{
 		// types
 	public:
-		struct glyph_drawing
-		{
-			const graphics_context& iParent;
-			glyph_drawing(const graphics_context& aParent);
-			~glyph_drawing();
-		};
 	private:
 		friend class generic_surface;
+		class glyph_shapes;
+		// exceptions
+	public:
+		struct password_not_set : std::logic_error { password_not_set() : std::logic_error("neogfx::graphics_context::password_not_set") {} };
 		// construction
 	public:
 		graphics_context(const i_surface& aSurface);
@@ -122,7 +120,7 @@ namespace neogfx
 		void clip_to(const path& aPath, dimension aPathOutline = 0) const;
 		void reset_clip() const;
 		neogfx::smoothing_mode smoothing_mode() const;
-		neogfx::smoothing_mode set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const;
+		void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const;
 		void push_logical_operation(logical_operation aLogicalOperation) const;
 		void pop_logical_operation() const;
 		void line_stipple_on(uint32_t aFactor, uint16_t aPattern) const;
@@ -168,7 +166,7 @@ namespace neogfx
 		void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const colour& aColour, alignment aAlignment = alignment::Left, bool aUseCache = false) const;
 		void draw_glyph_text(const point& aPoint, const glyph_text& aText, const font& aFont, const colour& aColour) const;
 		void draw_glyph_text(const point& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const font& aFont, const colour& aColour) const;
-		size draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const;
+		void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const;
 		void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const font& aFont, const colour& aColour) const;
 		void set_glyph_text_cache(glyph_text& aGlyphTextCache) const;
 		void reset_glyph_text_cache() const;
@@ -199,6 +197,10 @@ namespace neogfx
 		// helpers
 	protected:
 		static i_native_font_face& to_native_font_face(const font& aFont);
+		// own
+	private:
+		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
+		glyph_text::container to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
 		// attributes
 	private:
 		const i_surface& iSurface;
@@ -207,27 +209,24 @@ namespace neogfx
 		mutable font iDefaultFont;
 		mutable point iOrigin;
 		mutable size iExtents;
+		mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
+		mutable std::pair<vec2, vec2> iLogicalCoordinates;
+		mutable neogfx::smoothing_mode iSmoothingMode;
+		mutable bool iSubpixelRendering;
+		mutable boost::optional<std::pair<bool, char>> iMnemonic;
+		mutable boost::optional<std::string> iPassword;
+		struct glyph_text_data;
+		std::unique_ptr<glyph_text_data> iGlyphTextData;
 		mutable glyph_text* iGlyphTextCache;
-		mutable uint32_t iDrawingGlyphs;
 	};
 
 	template <typename Iter>
 	inline void draw_glyph_text(const graphics_context& aGraphicsContext, const point& aPoint, Iter aTextBegin, Iter aTextEnd, const font& aFont, const colour& aColour)
 	{
-		{
-			graphics_context::glyph_drawing gd(aGraphicsContext);
-			point pos = aPoint;
-			for (Iter i = aTextBegin; i != aTextEnd; ++i)
-			{
-				aGraphicsContext.draw_glyph(pos + i->offset(), *i, aFont, aColour);
-				pos.x += i->advance().cx;
-			}
-		}
 		point pos = aPoint;
 		for (Iter i = aTextBegin; i != aTextEnd; ++i)
 		{
-			if (i->underline() || (aGraphicsContext.mnemonics_shown() && i->mnemonic()))
-				aGraphicsContext.draw_glyph_underline(pos, *i, aFont, aColour);
+			aGraphicsContext.draw_glyph(pos + i->offset(), *i, aFont, aColour);
 			pos.x += i->advance().cx;
 		}
 	}

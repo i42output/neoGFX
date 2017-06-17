@@ -65,6 +65,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,6 +90,7 @@
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,6 +143,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\sprite_plane.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\text.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_operations.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_engine.hpp" />

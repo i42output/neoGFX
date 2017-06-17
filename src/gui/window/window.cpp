@@ -337,6 +337,11 @@ namespace neogfx
 			return container_background_colour();
 	}
 
+	i_rendering_engine& window::rendering_engine() const
+	{
+		return app::instance().rendering_engine();
+	}
+
 	bool window::is_weak() const
 	{
 		return (iStyle & window_style::Weak) == window_style::Weak;
@@ -860,6 +865,7 @@ namespace neogfx
 		gc.set_extents(extents());
 		gc.set_origin(origin());
 		paint_overlay.trigger(gc);
+		gc.flush();
 	}
 
 	void window::native_window_dismiss_children()
