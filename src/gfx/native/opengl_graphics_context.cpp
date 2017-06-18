@@ -1057,7 +1057,6 @@ namespace neogfx
 		if (iVertexArrays.vertices().empty())
 			return;
 
-		glCheck(glTextureBarrierNV());
 		glCheck(glActiveTexture(GL_TEXTURE1));
 		glCheck(glClientActiveTexture(GL_TEXTURE1));
 		glCheck(glEnable(GL_TEXTURE_2D));
@@ -1089,7 +1088,18 @@ namespace neogfx
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 		disable_anti_alias daa(*this);
-		glCheck(glDrawArrays(GL_QUADS, 0, iVertexArrays.vertices().size()));
+		if (!firstOp.glyph.subpixel())
+		{
+			glCheck(glDrawArrays(GL_QUADS, 0, iVertexArrays.vertices().size()));
+		}
+		else
+		{
+			for (std::size_t i = 0; i < iVertexArrays.vertices().size(); i += 4)
+			{
+				glCheck(glTextureBarrierNV());
+				glCheck(glDrawArrays(GL_QUADS, i, 4));
+			}
+		}
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
 	}
