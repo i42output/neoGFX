@@ -1135,7 +1135,7 @@ namespace neogfx
 			aCharacterPos >= (*iCharacterToParagraphCacheLastAccess)->first.first && aCharacterPos < (*iCharacterToParagraphCacheLastAccess)->first.second)
 			return (*iCharacterToParagraphCacheLastAccess)->second;
 		auto existing = iCharacterToParagraphCache.lower_bound(std::make_pair(aCharacterPos, aCharacterPos));
-		if (existing != iCharacterToParagraphCache.end() && (aCharacterPos >= existing->first.first || aCharacterPos < existing->first.first + existing->first.second))
+		if (existing != iCharacterToParagraphCache.end() && aCharacterPos >= existing->first.first && aCharacterPos < existing->first.second)
 			return (*(iCharacterToParagraphCacheLastAccess = existing))->second;
 		auto gp = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ aCharacterPos, 0 }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.characters() < aRhs.characters(); }).first;
 		if (gp != iGlyphParagraphs.end())
@@ -1149,7 +1149,7 @@ namespace neogfx
 			aGlyphPos >= (*iGlyphToParagraphCacheLastAccess)->first.first && aGlyphPos < (*iGlyphToParagraphCacheLastAccess)->first.second)
 			return (*iGlyphToParagraphCacheLastAccess)->second;
 		auto existing = iGlyphToParagraphCache.lower_bound(std::make_pair(aGlyphPos, aGlyphPos));
-		if (existing != iGlyphToParagraphCache.end() && (aGlyphPos >= existing->first.first || aGlyphPos < existing->first.first + existing->first.second))
+		if (existing != iGlyphToParagraphCache.end() && aGlyphPos >= existing->first.first && aGlyphPos < existing->first.second)
 			return (*(iGlyphToParagraphCacheLastAccess = existing))->second;
 		auto gp = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ 0, aGlyphPos }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs(); }).first;
 		if (gp != iGlyphParagraphs.end())
