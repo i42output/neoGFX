@@ -1403,6 +1403,7 @@ namespace neogfx
 	void text_edit::refresh_columns()
 	{
 		update_scrollbar_visibility();
+		update();
 	}
 
 	void text_edit::refresh_lines()
