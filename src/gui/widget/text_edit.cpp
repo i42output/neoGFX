@@ -145,7 +145,6 @@ namespace neogfx
 		iPersistDefaultStyle(false),
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
-		iGlyphParagraphCache(nullptr),
 		iTabStopHint("0000"),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -166,7 +165,6 @@ namespace neogfx
 		iPersistDefaultStyle(false),
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
-		iGlyphParagraphCache(nullptr),
 		iTabStopHint("0000"),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -187,7 +185,6 @@ namespace neogfx
 		iPersistDefaultStyle(false),
 		iGlyphColumns(1),
 		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
-		iGlyphParagraphCache(nullptr),
 		iTabStopHint("0000"),
 		iAnimator(app::instance(), [this](neolib::callback_timer&)
 		{
@@ -923,8 +920,8 @@ namespace neogfx
 			bool placeCursorToRight = (aGlyphPosition == lineEnd);
 			if (aForCursor)
 			{
-				auto paragraph = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ 0, aGlyphPosition }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs(); });
-				if (aGlyphPosition == iGlyphs.size() || aGlyphPosition == paragraph.first->first.end_index())
+				auto paragraph = glyph_to_paragraph(aGlyphPosition);
+				if (aGlyphPosition == iGlyphs.size() || aGlyphPosition == paragraph->first.end_index())
 				{
 					auto iterChar = iText.begin() + from_glyph(iGlyphs.begin() + aGlyphPosition).first;
 					if (iterChar != iText.begin())
@@ -1127,11 +1124,37 @@ namespace neogfx
 		return result;
 	}
 
-	bool text_edit::same_paragraph(position_type aFirst, position_type aSecond) const
+	bool text_edit::same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const
 	{
-		auto paragraph1 = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ 0, aFirst }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs(); });
-		auto paragraph2 = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ 0, aSecond }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs(); });
-		return paragraph1.first == paragraph2.first;
+		return glyph_to_paragraph(aFirstGlyphPos) == glyph_to_paragraph(aSecondGlyphPos);
+	}
+
+	text_edit::glyph_paragraphs::const_iterator text_edit::character_to_paragraph(position_type aCharacterPos) const
+	{
+		if (iCharacterToParagraphCacheLastAccess != boost::none &&
+			aCharacterPos >= (*iCharacterToParagraphCacheLastAccess)->first.first && aCharacterPos < (*iCharacterToParagraphCacheLastAccess)->first.second)
+			return (*iCharacterToParagraphCacheLastAccess)->second;
+		auto existing = iCharacterToParagraphCache.lower_bound(std::make_pair(aCharacterPos, aCharacterPos));
+		if (existing != iCharacterToParagraphCache.end() && (aCharacterPos >= existing->first.first || aCharacterPos < existing->first.first + existing->first.second))
+			return (*(iCharacterToParagraphCacheLastAccess = existing))->second;
+		auto gp = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ aCharacterPos, 0 }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.characters() < aRhs.characters(); }).first;
+		if (gp != iGlyphParagraphs.end())
+			(*(iCharacterToParagraphCacheLastAccess = iCharacterToParagraphCache.insert(std::make_pair(std::make_pair(gp->first.text_start_index(), gp->first.text_end_index()), gp)).first));
+		return gp;
+	}
+
+	text_edit::glyph_paragraphs::const_iterator text_edit::glyph_to_paragraph(position_type aGlyphPos) const
+	{
+		if (iGlyphToParagraphCacheLastAccess != boost::none &&
+			aGlyphPos >= (*iGlyphToParagraphCacheLastAccess)->first.first && aGlyphPos < (*iGlyphToParagraphCacheLastAccess)->first.second)
+			return (*iGlyphToParagraphCacheLastAccess)->second;
+		auto existing = iGlyphToParagraphCache.lower_bound(std::make_pair(aGlyphPos, aGlyphPos));
+		if (existing != iGlyphToParagraphCache.end() && (aGlyphPos >= existing->first.first || aGlyphPos < existing->first.first + existing->first.second))
+			return (*(iGlyphToParagraphCacheLastAccess = existing))->second;
+		auto gp = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ 0, aGlyphPos }, [](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.glyphs() < aRhs.glyphs(); }).first;
+		if (gp != iGlyphParagraphs.end())
+			(*(iGlyphToParagraphCacheLastAccess = iGlyphToParagraphCache.insert(std::make_pair(std::make_pair(gp->first.start_index(), gp->first.end_index()), gp)).first));
+		return gp;
 	}
 
 	std::size_t text_edit::columns() const
@@ -1258,25 +1281,16 @@ namespace neogfx
 	text_edit::document_glyphs::const_iterator text_edit::to_glyph(document_text::const_iterator aWhere) const
 	{
 		std::size_t textIndex = static_cast<std::size_t>(aWhere - iText.begin());
-		if (iGlyphParagraphCache == nullptr || aWhere < iGlyphParagraphCache->text_start() || aWhere >= iGlyphParagraphCache->text_end())
-		{
-			auto paragraph = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{ textIndex, 0 }, 
-				[](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) { return aLhs.characters() < aRhs.characters(); });
-			if (paragraph.first == iGlyphParagraphs.end() && paragraph.first != iGlyphParagraphs.begin() && textIndex <= iGlyphParagraphs.foreign_index(paragraph.first - 1).characters())
-				paragraph = std::make_pair(paragraph.first - 1, iGlyphParagraphs.foreign_index(paragraph.first - 1));
-			if (paragraph.first != iGlyphParagraphs.end())
-				iGlyphParagraphCache = &paragraph.first->first;
-			else
-				iGlyphParagraphCache = nullptr;
-		}
-		if (iGlyphParagraphCache == nullptr)
+		auto paragraph = character_to_paragraph(textIndex);
+		if (paragraph == iGlyphParagraphs.end())
 			return iGlyphs.end();
-		auto paragraphEnd = iGlyphParagraphCache->end();
-		for (auto i = iGlyphParagraphCache->start(); i != paragraphEnd; ++i)
+		auto paragraphEnd = paragraph->first.end();
+		for (auto i = paragraph->first.start(); i != paragraphEnd; ++i)
 		{
 			auto const& g = *i;
-			auto start = g.source().first + iGlyphParagraphCache->text_start_index();
-			auto end = g.source().second + iGlyphParagraphCache->text_start_index();
+			auto si = paragraph->first.text_start_index();
+			auto start = g.source().first + si;
+			auto end = g.source().second + si;
 			if (textIndex >= start && textIndex < end)
 				return i;
 		}
@@ -1287,30 +1301,17 @@ namespace neogfx
 	{
 		if (aWhere == iGlyphs.end())
 			return std::make_pair(iText.size(), iText.size());
-		if (iGlyphParagraphCache != nullptr && aWhere >= iGlyphParagraphCache->start() && aWhere < iGlyphParagraphCache->end())
+		auto paragraph = glyph_to_paragraph(aWhere - iGlyphs.begin());
+		if (paragraph == iGlyphParagraphs.end() && paragraph != iGlyphParagraphs.begin() && aWhere <= (paragraph - 1)->first.end())
+			--paragraph;
+		if (paragraph != iGlyphParagraphs.end())
 		{
-			auto textStart = iGlyphParagraphCache->text_start_index();
+			if (paragraph->first.start() > aWhere)
+				--paragraph;
+			auto textStart = paragraph->first.text_start_index();
 			auto rg = related_glyphs(aWhere - iGlyphs.begin());
 			return std::make_pair(textStart + iGlyphs[rg.first].source().first, textStart + iGlyphs[rg.second - 1].source().second);
 		}
-		auto paragraph = iGlyphParagraphs.find_by_foreign_index(glyph_paragraph_index{0, static_cast<std::size_t>(aWhere - iGlyphs.begin())}, 
-			[](const glyph_paragraph_index& aLhs, const glyph_paragraph_index& aRhs) 
-		{ 
-			return aLhs.glyphs() < aRhs.glyphs();
-		});
-		if (paragraph.first == iGlyphParagraphs.end() && paragraph.first != iGlyphParagraphs.begin() && aWhere <= (paragraph.first - 1)->first.end())
-			--paragraph.first;
-		if (paragraph.first != iGlyphParagraphs.end())
-		{
-			if (paragraph.first->first.start() > aWhere)
-				--paragraph.first;
-			iGlyphParagraphCache = &paragraph.first->first;
-			auto textStart = paragraph.first->first.text_start_index();
-			auto rg = related_glyphs(aWhere - iGlyphs.begin());
-			return std::make_pair(textStart + iGlyphs[rg.first].source().first, textStart + iGlyphs[rg.second - 1].source().second);
-		}
-		else
-			iGlyphParagraphCache = nullptr;
 		return std::make_pair(iText.size(), iText.size());
 	}
 
@@ -1323,7 +1324,10 @@ namespace neogfx
 			gc.set_password(true, iPasswordMask.empty() ? "\xE2\x97\x8F" : iPasswordMask);
 		iGlyphs.clear();
 		iGlyphParagraphs.clear();
-		iGlyphParagraphCache = nullptr;
+		iCharacterToParagraphCache.clear();
+		iCharacterToParagraphCacheLastAccess.reset();
+		iGlyphToParagraphCache.clear();
+		iGlyphToParagraphCacheLastAccess.reset();
 		std::u32string paragraphBuffer;
 		auto paragraphStart = iText.begin();
 		auto iterColumn = iGlyphColumns.begin();
@@ -1634,8 +1638,12 @@ namespace neogfx
 				point pos = aPoint;
 				for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
 				{
-					bool selected = static_cast<cursor::position_type>(from_glyph(i).first) >= std::min(cursor().position(), cursor().anchor()) &&
-						static_cast<cursor::position_type>(from_glyph(i).first) < std::max(cursor().position(), cursor().anchor());
+					bool selected = false;
+					if (cursor().position() != cursor().anchor())
+					{
+						auto gp = static_cast<cursor::position_type>(from_glyph(i).first);
+						selected = (gp >= std::min(cursor().position(), cursor().anchor()) && gp < std::max(cursor().position(), cursor().anchor()));
+					}
 					const auto& glyph = *i;
 					const auto& style = glyph_style(i, aColumn);
 					const auto& glyphFont = style.font() != boost::none ? *style.font() : font();

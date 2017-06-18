@@ -491,7 +491,9 @@ namespace neogfx
 		void init();
 		void delete_any_selection();
 		std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
-		bool same_paragraph(position_type aFirst, position_type aSecond) const;
+		bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
+		glyph_paragraphs::const_iterator character_to_paragraph(position_type aCharacterPos) const;
+		glyph_paragraphs::const_iterator glyph_to_paragraph(position_type aGlyphPos) const;
 		document_glyphs::const_iterator to_glyph(document_text::const_iterator aWhere) const;
 		std::pair<document_text::size_type, document_text::size_type> from_glyph(document_glyphs::const_iterator aWhere) const;
 		void refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta);
@@ -524,7 +526,16 @@ namespace neogfx
 		glyph_columns iGlyphColumns;
 		size iTextExtents;
 		uint64_t iCursorAnimationStartTime;
-		mutable const glyph_paragraph* iGlyphParagraphCache;
+		typedef std::pair<position_type, position_type> find_span;
+		typedef std::map<
+			find_span,
+			glyph_paragraphs::const_iterator,
+			std::less<find_span>,
+			boost::fast_pool_allocator<std::pair<const find_span, glyph_paragraphs::const_iterator>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> find_in_paragraph_cache;
+		mutable find_in_paragraph_cache iCharacterToParagraphCache;
+		mutable boost::optional<find_in_paragraph_cache::iterator> iCharacterToParagraphCacheLastAccess;
+		mutable find_in_paragraph_cache iGlyphToParagraphCache;
+		mutable boost::optional<find_in_paragraph_cache::iterator> iGlyphToParagraphCacheLastAccess;
 		std::string iHint;
 		mutable boost::optional<std::pair<neogfx::font, size>> iHintedSize;
 		optional_dimension iTabStops;
