@@ -247,7 +247,7 @@ namespace neogfx
 			const auto& lines = column.lines();
 			auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, vertical_scrollbar().position(), {} },
 				[](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
-			if (line != lines.begin() && line->ypos > vertical_scrollbar().position())
+			if (line != lines.begin() && (line == lines.end() || line->ypos > vertical_scrollbar().position()))
 				--line;
 			if (line == lines.end())
 				continue;
@@ -1602,6 +1602,7 @@ namespace neogfx
 		auto e = (p.line != p.column->lines().end() ? 
 			size{ p.glyph != p.lineEnd ? p.glyph->advance().cx : 0.0, p.line->extents.cy } : 
 			size{ 0.0, font().height() });
+		e.cy = std::min(e.cy, vertical_scrollbar().page());
 		if (p.pos.y < vertical_scrollbar().position())
 			vertical_scrollbar().set_position(p.pos.y);
 		else if (p.pos.y + e.cy > vertical_scrollbar().position() + vertical_scrollbar().page())
