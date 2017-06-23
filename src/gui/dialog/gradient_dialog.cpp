@@ -44,7 +44,7 @@ namespace neogfx
 		{
 			framed_widget::paint(aGc);
 			rect cr = client_rect();
-			draw_alpha_background(aGc, cr);
+			draw_alpha_background(aGc, cr, 16);
 			aGc.fill_rect(cr, iOwner.gradient());
 			if (iOwner.gradient().direction() == gradient::Radial && iOwner.gradient().centre() != optional_point{})
 			{

@@ -23,18 +23,21 @@
 
 namespace neogfx
 {
-	inline void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect)
+	namespace
 	{
-		const dimension ALPHA_PATTERN_SIZE = 4.0;
-		for (coordinate x = 0; x < aRect.width(); x += ALPHA_PATTERN_SIZE)
+		void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect)
 		{
-			bool alt = false;
-			if (static_cast<uint32_t>((x / ALPHA_PATTERN_SIZE)) % 2 == 1)
-				alt = !alt;
-			for (coordinate y = 0; y < aRect.height(); y += ALPHA_PATTERN_SIZE)
+			const dimension ALPHA_PATTERN_SIZE = 4.0;
+			for (coordinate x = 0; x < aRect.width(); x += ALPHA_PATTERN_SIZE)
 			{
-				aGraphicsContext.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ ALPHA_PATTERN_SIZE, ALPHA_PATTERN_SIZE } }, alt ? colour{ 160, 160, 160 } : colour{ 255, 255, 255 });
-				alt = !alt;
+				bool alt = false;
+				if (static_cast<uint32_t>((x / ALPHA_PATTERN_SIZE)) % 2 == 1)
+					alt = !alt;
+				for (coordinate y = 0; y < aRect.height(); y += ALPHA_PATTERN_SIZE)
+				{
+					aGraphicsContext.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ ALPHA_PATTERN_SIZE, ALPHA_PATTERN_SIZE } }, alt ? colour{ 160, 160, 160 } : colour{ 255, 255, 255 });
+					alt = !alt;
+				}
 			}
 		}
 	}

@@ -315,7 +315,9 @@ int main(int argc, char* argv[])
 		doubleSpinBox.set_step(0.5);
 		ng::horizontal_layout layout2(layoutButtons);
 		ng::label label1(layout2, "Label 1:");
+		bool colourCycle = true;
 		ng::push_button button6(layout2, "RGB <-> HSV\ncolour space\nconversion test");
+		button6.clicked([&colourCycle]() { colourCycle = !colourCycle; });
 		layout2.add_spacer().set_weight(ng::size(2.0f));
 		ng::push_button button7(layout2, "Toggle\n&mute.");
 		button7.set_foreground_colour(ng::colour::LightCoral);
@@ -478,12 +480,15 @@ int main(int argc, char* argv[])
 			if (button6.is_singular())
 				return;
 			aTimer.again();
-			const double PI = 2.0 * std::acos(0.0);
-			double brightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
-			neolib::random prng{ app.program_elapsed_ms() / 5000 };
-			ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
-			randomColour = randomColour.to_hsv().with_brightness(brightness).to_rgb();
-			button6.set_foreground_colour(randomColour);
+			if (colourCycle)
+			{
+				const double PI = 2.0 * std::acos(0.0);
+				double brightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
+				neolib::random prng{ app.program_elapsed_ms() / 5000 };
+				ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
+				randomColour = randomColour.to_hsv().with_brightness(brightness).to_rgb();
+				button6.set_foreground_colour(randomColour);
+			}
 		}, 16);
 
 		// Item Views
