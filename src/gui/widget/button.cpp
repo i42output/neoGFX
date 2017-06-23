@@ -165,7 +165,7 @@ namespace neogfx
 		if (aButton == mouse_button::Left)
 		{
 			update();
-			double_clicked.trigger();
+			double_clicked.async_trigger();
 		}
 	}
 
@@ -199,7 +199,7 @@ namespace neogfx
 	void button::handle_clicked()
 	{
 		destroyed_flag destroyed(*this);
-		clicked.trigger();
+		clicked.async_trigger();
 		if (!destroyed && iCheckable != NotCheckable)
 			toggle();
 	}
