@@ -441,8 +441,7 @@ namespace neogfx
 					fill_path(static_variant_cast<const graphics_operation::fill_path&>(op).path, static_variant_cast<const graphics_operation::fill_path&>(op).fill);
 				break;
 			case graphics_operation::operation_type::FillShape:
-				for (auto& op : opBatch)
-					fill_shape(static_variant_cast<const graphics_operation::fill_shape&>(op).vertices, static_variant_cast<const graphics_operation::fill_shape&>(op).fill);
+				fill_shape(opBatch);
 				break;
 			case graphics_operation::operation_type::DrawGlyph:
 				draw_glyphs(opBatch);
@@ -988,40 +987,60 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::fill_shape(const vec2_list& aVertices, const fill& aFill)
+	void opengl_graphics_context::fill_shape(const graphics_operation::batch& aFillShapeOps)
 	{
-		vec2 min = aVertices[0];
-		vec2 max = min;
-		for (auto const& v : aVertices)
+		auto& firstOp = static_variant_cast<const graphics_operation::fill_shape&>(aFillShapeOps.front());
+
+		if (firstOp.fill.is<gradient>())
 		{
-			min.x = std::min(min.x, v.x);
-			max.x = std::max(max.x, v.x);
-			min.y = std::min(min.y, v.y);
-			max.y = std::max(max.y, v.y);
-		}
-		if (aFill.is<gradient>())
-			gradient_on(static_variant_cast<const gradient&>(aFill), 
-				rect{ 
-					point{ min.x, min.y }, 
+			vec2 min = firstOp.vertices[0];
+			vec2 max = min;
+			for (auto const& v : firstOp.vertices)
+			{
+				min.x = std::min(min.x, v.x);
+				max.x = std::max(max.x, v.x);
+				min.y = std::min(min.y, v.y);
+				max.y = std::max(max.y, v.y);
+			}
+			gradient_on(static_variant_cast<const gradient&>(firstOp.fill),
+				rect{
+					point{ min.x, min.y },
 					size{ max.x - min.y, max.y - min.y } });
+		}
 
 		iVertexArrays.vertices().clear();
-		for (auto const& v : aVertices)
-			iVertexArrays.vertices().push_back(xyz{ v[0], v[1] });
-		iVertexArrays.vertices().push_back(iVertexArrays.vertices()[1]);
-		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
-			std::array <uint8_t, 4>{ {
-					static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-			std::array <uint8_t, 4>{});
+		iVertexArrays.texture_coords().clear();
+		iVertexArrays.colours().clear();
+
+		for (auto const& op : aFillShapeOps)
+		{
+			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(op);
+			for (auto const& v : drawOp.vertices)
+				iVertexArrays.vertices().push_back(xyz{ v[0], v[1] });
+			iVertexArrays.vertices().push_back(xyz{ drawOp.vertices[1][0], drawOp.vertices[1][1] });
+			auto vertexCount = drawOp.vertices.size() + 1;
+			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), vertexCount, std::array<double, 2>{});
+			iVertexArrays.colours().insert(iVertexArrays.colours().end(), vertexCount, drawOp.fill.is<colour>() ?
+				std::array <uint8_t, 4>{ {
+						static_variant_cast<const colour&>(drawOp.fill).red(),
+						static_variant_cast<const colour&>(drawOp.fill).green(),
+						static_variant_cast<const colour&>(drawOp.fill).blue(),
+						static_variant_cast<const colour&>(drawOp.fill).alpha()}} :
+				std::array <uint8_t, 4>{});
+		}
+
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
+		std::size_t idx = 0;
+		for (auto const& op : aFillShapeOps)
+		{
+			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(op);
+			auto vertexCount = drawOp.vertices.size() + 1;
+			glCheck(glDrawArrays(GL_TRIANGLE_FAN, idx, vertexCount));
+			idx += vertexCount;
+		}
 
-		if (aFill.is<gradient>())
+		if (firstOp.fill.is<gradient>())
 			gradient_off();
 	}
 

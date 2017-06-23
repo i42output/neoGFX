@@ -50,7 +50,7 @@ void create_game(ng::i_layout& aLayout)
 			*spritePlane,
 			ng::vec3{static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -(static_cast<ng::scalar>(std::rand() % 32))},
 			ng::size{static_cast<ng::scalar>(std::rand() % 64), static_cast<ng::scalar>(std::rand() % 64)},
-			ng::colour(std::rand() % 64, std::rand() % 64, std::rand() % 64)));
+			ng::colour(std::rand() % 64, std::rand() % 64, std::rand() % 64).lighter(0x32)));
 	//spritePlane->set_uniform_gravity();
 	//spritePlane->set_gravitational_constant(0.0);
 	//spritePlane->create_earth();

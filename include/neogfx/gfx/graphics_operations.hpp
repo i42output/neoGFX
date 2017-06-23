@@ -317,6 +317,12 @@ namespace neogfx
 				auto& right = static_variant_cast<const fill_rect&>(aRight);
 				return left.fill.which() == right.fill.which() && left.fill.is<colour>();
 			}
+			case operation_type::FillShape:
+			{
+				auto& left = static_variant_cast<const fill_shape&>(aLeft);
+				auto& right = static_variant_cast<const fill_shape&>(aRight);
+				return left.fill.which() == right.fill.which() && left.fill.is<colour>();
+			}
 			case operation_type::DrawGlyph:
 			{
 				auto& left = static_variant_cast<const draw_glyph&>(aLeft);

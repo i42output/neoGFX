@@ -102,7 +102,7 @@ namespace neogfx
 		void fill_circle(const point& aCentre, dimension aRadius, const fill& aFill);
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill);
 		void fill_path(const path& aPath, const fill& aFill);
-		void fill_shape(const vec2_list& aVertices, const fill& aFill);
+		void fill_shape(const graphics_operation::batch& aFillShapeOps);
 		void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);
 		void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect);
 	private:
