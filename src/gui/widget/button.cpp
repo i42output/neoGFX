@@ -243,9 +243,14 @@ namespace neogfx
 
 	void button::init()
 	{
+		clicked.set_trigger_type(event_trigger_type::Asynchronous);
+		double_clicked.set_trigger_type(event_trigger_type::Asynchronous);
+
 		layout().set_margins(neogfx::margins(0.0));
 		iLabel.set_size_policy(neogfx::size_policy::Expanding);
+
 		set_focus_policy(focus_policy::TabFocus);
+
 		auto label_text_updated = [this]()
 		{
 			auto m = mnemonic_from_text(label().text().text());

@@ -92,6 +92,13 @@ namespace neogfx
 		event_list iEvents;
 	};
 
+	enum class event_trigger_type
+	{
+		Default,
+		Synchronous,
+		Asynchronous
+	};
+
 	template <typename... Arguments>
 	class event : protected neolib::destroyable
 	{
@@ -114,6 +121,7 @@ namespace neogfx
 			instance_ptr instancePtr;
 			handler_list handlers;
 			unique_id_map uniqueIdMap;
+			event_trigger_type triggerType;
 			bool accepted;
 			notification_list notifications;
 		};
@@ -132,13 +140,30 @@ namespace neogfx
 			if (iInstanceData != boost::none)
 				instance_list().erase(*iInstanceData);
 		}
-		void async_trigger(Arguments... aArguments) const
+		event_trigger_type trigger_type() const
 		{
-			if (!has_instance()) // no instance means no subscribers so no point triggering.
-				return;
-			async_event_queue::instance().add(*this, [&]() { trigger(aArguments...); });
+			return instance().triggerType;
+		}
+		void set_trigger_type(event_trigger_type aTriggerType)
+		{
+			instance().triggerType = aTriggerType;
 		}
 		bool trigger(Arguments... aArguments) const
+		{
+			if (!has_instance()) // no instance means no subscribers so no point triggering.
+				return true;
+			switch (instance().triggerType)
+			{
+			case event_trigger_type::Default:
+			case event_trigger_type::Synchronous:
+			default:
+				return sync_trigger(aArguments...);
+			case event_trigger_type::Asynchronous:
+				async_trigger(aArguments...);
+				return true;
+			}
+		}
+		bool sync_trigger(Arguments... aArguments) const
 		{
 			if (!has_instance()) // no instance means no subscribers so no point triggering.
 				return true;
@@ -160,6 +185,12 @@ namespace neogfx
 				}
 			}
 			return true;
+		}
+		void async_trigger(Arguments... aArguments) const
+		{
+			if (!has_instance()) // no instance means no subscribers so no point triggering.
+				return;
+			async_event_queue::instance().add(*this, [&]() { sync_trigger(aArguments...); });
 		}
 		void accept() const
 		{
