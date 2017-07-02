@@ -236,7 +236,7 @@ namespace neogfx
 			if (textColour == boost::none)
 				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().text_colour();
 			finished = true;
-			for (uint32_t col = 0; col < model().columns(row); ++col)
+			for (uint32_t col = 0; col < model().columns(row); ++col) // TODO: O(n) isn't good enough if lots of columns
 			{
 				rect cellRect = cell_rect(item_model_index(row, col));
 				if (cellRect.y > item_display_rect().bottom())
@@ -471,19 +471,20 @@ namespace neogfx
 	{
 		graphics_context gc(*this);
 		rect cellRect = cell_rect(aItemIndex);
+		point adjustment = -client_rect(false).top_left();
 		if (cellRect.height() < item_display_rect().height() || cellRect.intersection(item_display_rect()).height() == 0.0)
 		{
 			if (cellRect.top() < item_display_rect().top())
-				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - item_display_rect().top()));
+				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - item_display_rect().top()) + adjustment.y);
 			else if (cellRect.bottom() > item_display_rect().bottom())
-				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - item_display_rect().bottom()));
+				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - item_display_rect().bottom()) + adjustment.y);
 		}
 		if (cellRect.width() < item_display_rect().width() || cellRect.intersection(item_display_rect()).width() == 0.0)
 		{
 			if (cellRect.left() < item_display_rect().left())
-				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - item_display_rect().left()));
+				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - item_display_rect().left()) + adjustment.x);
 			else if (cellRect.right() > item_display_rect().right())
-				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - item_display_rect().right()));
+				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - item_display_rect().right()) + adjustment.x);
 		}
 	}
 
@@ -504,12 +505,16 @@ namespace neogfx
 		coordinate y = presentation_model().item_position(aItemIndex, gc);
 		dimension h = presentation_model().item_height(aItemIndex, gc);
 		coordinate x = 0.0;
-		for (uint32_t col = 0; col < model().columns(aItemIndex.row()); ++col)
+		for (uint32_t col = 0; col < model().columns(aItemIndex.row()); ++col) // TODO: O(n) isn't good enough if lots of columns
 		{
 			if (col != 0)
 				x += cell_spacing().cx;
 			if (col == aItemIndex.column())
-				return rect(client_rect(false).top_left() + point(x - horizontal_scrollbar().position(), y - vertical_scrollbar().position() + item_display_rect().top()), size(column_width(col), h));
+			{
+				x -= horizontal_scrollbar().position();
+				y -= vertical_scrollbar().position();
+				return rect{ client_rect(false).top_left() + point{x, y} + item_display_rect().top_left(), size{ column_width(col), h } };
+			}
 			x += column_width(col);
 		}
 		return rect{};
@@ -524,7 +529,7 @@ namespace neogfx
 			std::min(std::max(aPosition.x, item_display_rect().left()), item_display_rect().right()),
 			std::min(std::max(aPosition.y, item_display_rect().top()), item_display_rect().bottom()));
 		item_model_index index = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), gc).first;
-		for (uint32_t col = 0; col < model().columns(index.row()); ++col)
+		for (uint32_t col = 0; col < model().columns(index.row()); ++col) // TODO: O(n) isn't good enough if lots of columns
 		{
 			index.set_column(col);
 			rect cellRect = cell_rect(index);
