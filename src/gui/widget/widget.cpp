@@ -914,17 +914,22 @@ namespace neogfx
 			return;
 		if (!requires_update())
 			return;
-		rect updateRect = update_rect();
+		
+		const rect updateRect = update_rect();
+
+		const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
 		aGraphicsContext.set_extents(extents());
 		aGraphicsContext.set_origin(origin(true));
-		aGraphicsContext.scissor_on(default_clip_rect(true).intersection(updateRect));
+		aGraphicsContext.scissor_on(nonClientClipRect);
 		paint_non_client(aGraphicsContext);
 		aGraphicsContext.scissor_off();
 
+		const rect clipRect = default_clip_rect().intersection(updateRect);
+
 		aGraphicsContext.set_extents(client_rect().extents());
 		aGraphicsContext.set_origin(origin());
-		aGraphicsContext.scissor_on(default_clip_rect().intersection(updateRect));
+		aGraphicsContext.scissor_on(clipRect);
 		scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
 		painting.trigger(aGraphicsContext);
 		paint(aGraphicsContext);
@@ -933,14 +938,14 @@ namespace neogfx
 		for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
 		{
 			const auto& c = *i;
-			rect intersection = default_clip_rect().intersection(updateRect).intersection(to_client_coordinates(c->window_rect()));
+			rect intersection = clipRect.intersection(to_client_coordinates(c->window_rect()));
 			if (!intersection.empty())
 				c->render(aGraphicsContext);
 		}
 
 		aGraphicsContext.set_extents(extents());
 		aGraphicsContext.set_origin(origin(true));
-		aGraphicsContext.scissor_on(default_clip_rect(true).intersection(updateRect));
+		aGraphicsContext.scissor_on(nonClientClipRect);
 		paint_non_client_after(aGraphicsContext);
 		aGraphicsContext.scissor_off();
 	}
