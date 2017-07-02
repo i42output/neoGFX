@@ -21,7 +21,7 @@
 #include <neogfx/gui/widget/table_view.hpp>
 #include <neogfx/gui/widget/item_selection_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
-#include <neogfx/gui/widget/default_item_model.hpp>
+#include <neogfx/gui/widget/basic_item_model.hpp>
 
 namespace neogfx
 {
@@ -34,7 +34,7 @@ namespace neogfx
 		layout().set_margins(neogfx::margins(0.0));
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-		set_model(std::shared_ptr<i_item_model>(new default_item_model()));
+		set_model(std::shared_ptr<i_item_model>(new basic_item_model()));
 	}
 
 	table_view::table_view(i_widget& aParent) : 
@@ -46,7 +46,7 @@ namespace neogfx
 		layout().set_margins(neogfx::margins(0.0));
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-		set_model(std::shared_ptr<i_item_model>(new default_item_model()));
+		set_model(std::shared_ptr<i_item_model>(new basic_item_model()));
 	}
 
 	table_view::table_view(i_layout& aLayout) :
@@ -58,7 +58,7 @@ namespace neogfx
 		layout().set_margins(neogfx::margins(0.0));
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-		set_model(std::shared_ptr<i_item_model>(new default_item_model()));
+		set_model(std::shared_ptr<i_item_model>(new basic_item_model()));
 	}
 
 	table_view::~table_view()

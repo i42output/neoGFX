@@ -12,7 +12,7 @@
 #include <neogfx/gui/widget/table_view.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
-#include <neogfx/gui/widget/default_item_model.hpp>
+#include <neogfx/gui/widget/basic_item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/tab_page_container.hpp>
 #include <neogfx/hid/i_surface.hpp>
@@ -31,16 +31,16 @@
 
 namespace ng = neogfx;
 
-class my_item_model : public ng::basic_default_item_model<void*, 5>, public ng::item_presentation_model
+class my_item_model : public ng::basic_item_model<void*, 5>, public ng::item_presentation_model
 {
 public:
 	my_item_model()
 	{
-		set_column_heading_text(0, "One");
-		set_column_heading_text(1, "Two");
-		set_column_heading_text(2, "Three");
-		set_column_heading_text(3, "Four");
-		set_column_heading_text(4, "Five");
+		set_column_name(0, "One");
+		set_column_name(1, "Two");
+		set_column_name(2, "Three");
+		set_column_name(3, "Four");
+		set_column_name(4, "Five");
 	}
 public:
 	virtual ng::optional_colour cell_colour(const ng::item_model_index& aIndex, colour_type_e aColourType) const
@@ -498,15 +498,21 @@ int main(int argc, char* argv[])
 
 		ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").as_widget();
 		ng::vertical_layout layoutItemViews(itemViewsPage);
-		ng::table_view tableView(layoutItemViews);
-		tableView.set_minimum_size(ng::size(128, 128));
+		ng::table_view tableView1(layoutItemViews);
+		ng::table_view tableView2(layoutItemViews);
+		tableView1.set_minimum_size(ng::size(128, 128));
+		tableView2.set_minimum_size(ng::size(128, 128));
 		ng::push_button button10(layoutItemViews, "Toggle List\nHeader View");
-		button10.clicked([&tableView]()
+		button10.clicked([&tableView1, &tableView2]()
 		{
-			if (tableView.column_header().visible())
-				tableView.column_header().hide();
+			if (tableView1.column_header().visible())
+				tableView1.column_header().hide();
 			else
-				tableView.column_header().show();
+				tableView1.column_header().show();
+			if (tableView2.column_header().visible())
+				tableView2.column_header().hide();
+			else
+				tableView2.column_header().show();
 		});
 		ng::radio_button noSelection(layoutItemViews, "No selection");
 		ng::radio_button singleSelection(layoutItemViews, "Single selection");
@@ -544,8 +550,10 @@ int main(int argc, char* argv[])
 			}
 		} 
 	
-		tableView.set_model(itemModel);
-		tableView.set_presentation_model(itemModel);
+		tableView1.set_model(itemModel);
+		tableView1.set_presentation_model(itemModel);
+		tableView2.set_model(itemModel);
+		tableView2.set_presentation_model(itemModel);
 
 		app.surface_manager().surface(0).restore_mouse_cursor();
 

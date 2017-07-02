@@ -38,6 +38,4 @@ namespace neogfx
 		virtual value_type& item(const item_model_index& aIndex) = 0;
 		virtual const value_type& item(const item_model_index& aIndex) const = 0;
 	};
-
-	typedef i_basic_item_model<void*> i_default_item_model;
 }

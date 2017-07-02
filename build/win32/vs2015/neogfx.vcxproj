@@ -191,14 +191,14 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_item_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\drop_list.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\framed_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\gradient_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\group_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\header_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\image_widget.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model_index.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_index.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_presentation_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_selection.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_selection_model.hpp" />

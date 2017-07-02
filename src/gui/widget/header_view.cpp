@@ -35,19 +35,19 @@ namespace neogfx
 			{
 				neolib::destroyable::destroyed_flag destroyed(*this);
 				iParent.layout().set_spacing(iParent.separator_width());
-				iParent.iSectionWidths.resize(iParent.model().columns());
-				while (iParent.layout().item_count() > iParent.model().columns() + 1)
+				iParent.iSectionWidths.resize(iParent.presentation_model().columns());
+				while (iParent.layout().item_count() > iParent.presentation_model().columns() + 1)
 					iParent.layout().remove_item_at(iParent.layout().item_count() - 1);
-				while (iParent.layout().item_count() < iParent.model().columns() + 1)
+				while (iParent.layout().item_count() < iParent.presentation_model().columns() + 1)
 				{
 					iParent.layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
 				}
 				for (std::size_t i = 0; i < iParent.layout().item_count(); ++i)
 				{
 					push_button& button = iParent.layout().get_widget_at<push_button>(i);
-					if (i < iParent.model().columns())
+					if (i < iParent.presentation_model().columns())
 					{
-						button.text().set_text(iParent.model().column_heading_text(i));
+						button.text().set_text(iParent.presentation_model().column_heading_text(i));
 						button.set_size_policy(iParent.iType == header_view::HorizontalHeader ?
 							neogfx::size_policy{neogfx::size_policy::Fixed, neogfx::size_policy::Minimum} :
 							neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Fixed});
@@ -57,7 +57,7 @@ namespace neogfx
 						{
 							aParent.surface().save_mouse_cursor();
 							aParent.surface().set_mouse_cursor(mouse_system_cursor::Wait);
-							aParent.model().sort_by(i);
+							aParent.presentation_model().sort_by(i);
 							aParent.surface().restore_mouse_cursor();
 						}, aParent);
 					}
@@ -73,7 +73,7 @@ namespace neogfx
 				}
 				uint64_t since = app::instance().program_elapsed_ms();
 				app::event_processing_context epc(app::instance(), "neogfx::header_view::updater");
-				for (uint32_t c = 0; c < 1000 && iRow < iParent.model().rows(); ++c, ++iRow)
+				for (uint32_t c = 0; c < 1000 && iRow < iParent.presentation_model().rows(); ++c, ++iRow)
 				{
 					iParent.update_from_row(iRow, false);
 					if (c % 25 == 0 && app::instance().program_elapsed_ms() - since > 20)
@@ -85,7 +85,7 @@ namespace neogfx
 						since = app::instance().program_elapsed_ms();
 					}
 				}
-				if (iRow == iParent.model().rows())
+				if (iRow == iParent.presentation_model().rows())
 					iParent.iOwner.header_view_updated(iParent);
 				else
 					again();
@@ -130,7 +130,7 @@ namespace neogfx
 	header_view::~header_view()
 	{
 		if (has_model())
-			model().unsubscribe(*this);
+			presentation_model().unsubscribe(*this);
 	}
 
 	bool header_view::has_model() const
@@ -154,13 +154,13 @@ namespace neogfx
 	void header_view::set_model(i_item_model& aModel)
 	{
 		if (has_model())
-			model().unsubscribe(*this);
+			presentation_model().unsubscribe(*this);
 		iModel = std::shared_ptr<i_item_model>(std::shared_ptr<i_item_model>(), &aModel);
-		iSectionWidths.resize(model().columns());
+		iSectionWidths.resize(presentation_model().columns());
 		if (has_model())
-			model().subscribe(*this);
+			presentation_model().subscribe(*this);
 		if (has_presentation_model())
-			presentation_model().set_item_model(aModel);
+			presentation_presentation_model().set_item_model(aModel);
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 		update();
@@ -169,13 +169,13 @@ namespace neogfx
 	void header_view::set_model(std::shared_ptr<i_item_model> aModel)
 	{
 		if (has_model())
-			model().unsubscribe(*this);
+			presentation_model().unsubscribe(*this);
 		iModel = aModel;
-		iSectionWidths.resize(model().columns());
+		iSectionWidths.resize(presentation_model().columns());
 		if (has_model())
-			model().subscribe(*this);
+			presentation_model().subscribe(*this);
 		if (has_presentation_model())
-			presentation_model().set_item_model(*aModel);
+			presentation_presentation_model().set_item_model(*aModel);
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 		update();
@@ -203,14 +203,14 @@ namespace neogfx
 	{
 		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
 		if (has_model())
-			presentation_model().set_item_model(model());
+			presentation_presentation_model().set_item_model(model());
 	}
 
 	void header_view::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
 	{
 		iPresentationModel = aPresentationModel;
 		if (has_presentation_model() && has_model())
-			presentation_model().set_item_model(model());
+			presentation_presentation_model().set_item_model(model());
 	}
 
 	void header_view::start_batch_update()
@@ -222,7 +222,7 @@ namespace neogfx
 	{
 		if (--iBatchUpdatesInProgress == 0)
 		{
-			iSectionWidths.resize(model().columns());
+			iSectionWidths.resize(presentation_model().columns());
 			iUpdater.reset();
 			iUpdater.reset(new updater(*this));
 			update();
@@ -233,7 +233,7 @@ namespace neogfx
 	{
 		if (iBatchUpdatesInProgress)
 			return;
-		iSectionWidths.resize(model().columns());
+		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
@@ -242,7 +242,7 @@ namespace neogfx
 	{
 		if (iBatchUpdatesInProgress)
 			return;
-		iSectionWidths.resize(model().columns());
+		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
@@ -251,7 +251,7 @@ namespace neogfx
 	{
 		if (iBatchUpdatesInProgress)
 			return;
-		iSectionWidths.resize(model().columns());
+		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
@@ -260,7 +260,7 @@ namespace neogfx
 	{
 		if (iBatchUpdatesInProgress)
 			return;
-		iSectionWidths.resize(model().columns());
+		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
@@ -310,7 +310,7 @@ namespace neogfx
 	dimension header_view::total_width() const
 	{
 		dimension result = 0.0;
-		for (uint32_t col = 0; col < model().columns(); ++col)
+		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 		{
 			if (col != 0)
 				result += separator_width();
@@ -331,7 +331,7 @@ namespace neogfx
 
 	void header_view::panes_resized()
 	{
-		for (uint32_t col = 0; col < model().columns(); ++col)
+		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 		{
 			dimension oldSectionWidth = section_width(col);
 			dimension newSectionWidth = layout().get_widget_at(col).extents().cx;
@@ -343,7 +343,7 @@ namespace neogfx
 
 	void header_view::reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane)
 	{
-		for (uint32_t col = 0; col < model().columns(); ++col)
+		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 		{
 			if (aPane != boost::none && *aPane != col)
 				continue;
@@ -358,10 +358,10 @@ namespace neogfx
 	{
 		graphics_context gc(*this);
 		bool updated = false;
-		for (uint32_t col = 0; col < model().columns(item_model_index(aRow)); ++col)
+		for (uint32_t col = 0; col < presentation_presentation_model().columns(item_model_index(aRow)); ++col)
 		{
-			dimension headingWidth = model().column_heading_extents(col, gc).cx + iOwner.cell_margins().size().cx * 2.0;
-			dimension cellWidth = presentation_model().cell_extents(item_model_index(aRow, col), gc).cx + iOwner.cell_margins().size().cx * 2.0;
+			dimension headingWidth = presentation_model().column_heading_extents(col, gc).cx + iOwner.cell_margins().size().cx * 2.0;
+			dimension cellWidth = presentation_presentation_model().cell_extents(item_model_index(aRow, col), gc).cx + iOwner.cell_margins().size().cx * 2.0;
 			dimension oldSectionWidth = iSectionWidths[col].second;
 			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
 			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col))

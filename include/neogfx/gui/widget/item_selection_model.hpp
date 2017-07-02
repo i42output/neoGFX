@@ -21,12 +21,12 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/observable.hpp>
-#include "i_item_model.hpp"
+#include "i_item_presentation_model.hpp"
 #include "i_item_selection_model.hpp"
 
 namespace neogfx
 {
-	class item_selection_model : public i_item_selection_model, private neolib::observable<i_item_selection_model_subscriber>, private i_item_model_subscriber
+	class item_selection_model : public i_item_selection_model, private neolib::observable<i_item_selection_model_subscriber>, private i_item_presentation_model_subscriber
 	{
 	public:
 		current_index_changed_event current_index_changed;
@@ -37,43 +37,43 @@ namespace neogfx
 			iMode(aMode)
 		{
 		}
-		item_selection_model(i_item_model& aModel, item_selection_mode aMode = item_selection_mode::SingleSelection) :
+		item_selection_model(i_item_presentation_model& aModel, item_selection_mode aMode = item_selection_mode::SingleSelection) :
 			iModel(0),
 			iMode(aMode)
 		{
-			set_item_model(aModel);
+			set_item_presentation_model(aModel);
 		}
 		~item_selection_model()
 		{
-			if (has_item_model())
-				item_model().unsubscribe(*this);
+			if (has_item_presentation_model())
+				item_presentation_model().unsubscribe(*this);
 			notify_observers(i_item_selection_model_subscriber::NotifySelectionModelDestroyed);
 		}
 	public:
-		virtual bool has_item_model() const
+		virtual bool has_item_presentation_model() const
 		{
 			return iModel != 0;
 		}
-		virtual i_item_model& item_model() const
+		virtual i_item_presentation_model& item_presentation_model() const
 		{
 			if (iModel == 0)
-				throw no_item_model();
+				throw no_item_presentation_model();
 			return *iModel;
 		}
-		virtual void set_item_model(i_item_model& aItemModel)
+		virtual void set_item_presentation_model(i_item_presentation_model& aModel)
 		{
-			if (iModel == &aItemModel)
+			if (iModel == &aModel)
 				return;
-			if (has_item_model())
-				item_model().unsubscribe(*this);
+			if (has_item_presentation_model())
+				item_presentation_model().unsubscribe(*this);
 			unset_current_index();
-			i_item_model* oldModel = iModel;
-			iModel = &aItemModel;
-			item_model().subscribe(*this);
+			i_item_presentation_model* oldModel = iModel;
+			iModel = &aModel;
+			item_presentation_model().subscribe(*this);
 			if (oldModel == 0)
-				notify_observers(i_item_selection_model_subscriber::NotifyItemModelAdded, item_model());
+				notify_observers(i_item_selection_model_subscriber::NotifyModelAdded, item_presentation_model());
 			else
-				notify_observers(i_item_selection_model_subscriber::NotifyItemModelChanged, item_model(), *oldModel);
+				notify_observers(i_item_selection_model_subscriber::NotifyModelChanged, item_presentation_model(), *oldModel);
 		}
 	public:
 		virtual item_selection_mode mode() const
@@ -123,7 +123,7 @@ namespace neogfx
 		}
 		virtual bool is_selected(const item_model_index& aIndex) const
 		{
-			return (item_model().cell_meta(aIndex).selection & i_item_presentation_model::cell_meta_type::selection_flags::Selected) == i_item_presentation_model::cell_meta_type::selection_flags::Selected;
+			return (item_presentation_model().cell_meta(aIndex).selection & i_item_presentation_model::cell_meta_type::selection_flags::Selected) == i_item_presentation_model::cell_meta_type::selection_flags::Selected;
 		}	
 		virtual void select(const item_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect)
 		{
@@ -151,14 +151,14 @@ namespace neogfx
 		{
 			switch (aType)
 			{
-			case i_item_selection_model_subscriber::NotifyItemModelAdded:
-				aObserver.item_model_added(*this, const_cast<i_item_model&>(*static_cast<const i_item_model*>(aParameter)));
+			case i_item_selection_model_subscriber::NotifyModelAdded:
+				aObserver.model_added(*this, const_cast<i_item_presentation_model&>(*static_cast<const i_item_presentation_model*>(aParameter)));
 				break;
-			case i_item_selection_model_subscriber::NotifyItemModelChanged:
-				aObserver.item_model_changed(*this, const_cast<i_item_model&>(*static_cast<const i_item_model*>(aParameter)), const_cast<i_item_model&>(*static_cast<const i_item_model*>(aParameter2)));
+			case i_item_selection_model_subscriber::NotifyModelChanged:
+				aObserver.model_changed(*this, const_cast<i_item_presentation_model&>(*static_cast<const i_item_presentation_model*>(aParameter)), const_cast<i_item_presentation_model&>(*static_cast<const i_item_presentation_model*>(aParameter2)));
 				break;
-			case i_item_selection_model_subscriber::NotifyItemModelRemoved:
-				aObserver.item_model_removed(*this, const_cast<i_item_model&>(*static_cast<const i_item_model*>(aParameter)));
+			case i_item_selection_model_subscriber::NotifyModelRemoved:
+				aObserver.model_removed(*this, const_cast<i_item_presentation_model&>(*static_cast<const i_item_presentation_model*>(aParameter)));
 				break;
 			case i_item_selection_model_subscriber::NotifySelectionModeChanged:
 				aObserver.selection_mode_changed(*this, *static_cast<const item_selection_mode*>(aParameter));
@@ -175,29 +175,29 @@ namespace neogfx
 			}
 		}
 	private:
-		virtual void column_info_changed(const i_item_model&, item_model_index::value_type)
+		virtual void column_info_changed(const i_item_presentation_model&, item_model_index::value_type)
 		{
 		}
-		virtual void item_added(const i_item_model&, const item_model_index&)
+		virtual void item_added(const i_item_presentation_model&, const item_model_index&)
 		{
 		}
-		virtual void item_changed(const i_item_model&, const item_model_index&)
+		virtual void item_changed(const i_item_presentation_model&, const item_model_index&)
 		{
 		}
-		virtual void item_removed(const i_item_model&, const item_model_index&)
+		virtual void item_removed(const i_item_presentation_model&, const item_model_index&)
 		{
 		}
-		virtual void items_sorted(const i_item_model&)
+		virtual void items_sorted(const i_item_presentation_model&)
 		{
 		}
-		virtual void model_destroyed(const i_item_model& aModel)
+		virtual void model_destroyed(const i_item_presentation_model& aModel)
 		{
 			unset_current_index();
 			iModel = 0;
-			notify_observers(i_item_selection_model_subscriber::NotifyItemModelRemoved, aModel);
+			notify_observers(i_item_selection_model_subscriber::NotifyModelRemoved, aModel);
 		}
 	private:
-		i_item_model* iModel;
+		i_item_presentation_model* iModel;
 		item_selection_mode iMode;
 		optional_item_model_index iCurrentIndex;
 		item_selection iSelection;

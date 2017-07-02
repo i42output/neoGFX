@@ -23,24 +23,25 @@
 #include <boost/format.hpp>
 #include <neolib/variant.hpp>
 #include <neolib/generic_iterator.hpp>
-#include "item_model_index.hpp"
-#include "i_item_presentation_model.hpp"
+#include "item_index.hpp"
 
 namespace neogfx
 {
 	class i_item_model;
 
+	typedef item_index item_model_index;
+	typedef optional_item_index optional_item_model_index;
+
 	class i_item_model_subscriber
 	{
 	public:
-		virtual void column_info_changed(const i_item_model& aModel, item_model_index::value_type aColumnIndex) = 0;
+		virtual void column_info_changed(const i_item_model& aModel, item_model_index::column_type aColumnIndex) = 0;
 		virtual void item_added(const i_item_model& aModel, const item_model_index& aItemIndex) = 0;
 		virtual void item_changed(const i_item_model& aModel, const item_model_index& aItemIndex) = 0;
 		virtual void item_removed(const i_item_model& aModel, const item_model_index& aItemIndex) = 0;
-		virtual void items_sorted(const i_item_model& aModel) = 0;
 		virtual void model_destroyed(const i_item_model& aModel) = 0;
 	public:
-		enum notify_type { NotifyColumnInfoChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorted, NotifyModelDestroyed };
+		enum notify_type { NotifyColumnInfoChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyModelDestroyed };
 	};
 
 	class i_item_model
@@ -72,16 +73,7 @@ namespace neogfx
 			choice_type<uint64_t>::type::const_iterator,
 			choice_type<float>::type::const_iterator,
 			choice_type<double>::type::const_iterator,
-			choice_type<std::string>::type::const_iterator> cell_data_type;
-		typedef std::pair<cell_data_type, i_item_presentation_model::cell_meta_type> cell_type;
-		enum sort_direction_e
-		{
-			SortAscending,
-			SortDescending,
-		};
-		typedef boost::optional<sort_direction_e> optional_sort_direction;
-		typedef std::pair<item_model_index::value_type, sort_direction_e> sort_order;
-		typedef boost::optional<sort_order> optional_sort_order;
+			choice_type<std::string>::type::const_iterator> cell_type;
 	public:
 		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_model::bad_column_index") {} };
 	public:
@@ -90,9 +82,8 @@ namespace neogfx
 		virtual uint32_t rows() const = 0;
 		virtual uint32_t columns() const = 0;
 		virtual uint32_t columns(const item_model_index& aIndex) const = 0;
-		virtual const std::string& column_heading_text(item_model_index::value_type aColumnIndex) const = 0;
-		virtual size column_heading_extents(item_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext) const = 0;
-		virtual void set_column_heading_text(item_model_index::value_type aColumnIndex, const std::string& aHeadingText) = 0;
+		virtual const std::string& column_name(item_model_index::value_type aColumnIndex) const = 0;
+		virtual void set_column_name(item_model_index::value_type aColumnIndex, const std::string& aName) = 0;
 		virtual iterator index_to_iterator(const item_model_index& aIndex) = 0;
 		virtual const_iterator index_to_iterator(const item_model_index& aIndex) const = 0;
 		virtual item_model_index iterator_to_index(const_iterator aPosition) const = 0;
@@ -113,19 +104,15 @@ namespace neogfx
 	public:
 		virtual void reserve(uint32_t aItemCount) = 0;
 		virtual uint32_t capacity() const = 0;
-		virtual iterator insert_item(const_iterator aPosition, const cell_data_type& aCellData) = 0;
-		virtual iterator insert_item(const item_model_index& aIndex, const cell_data_type& aCellData) = 0;
-		virtual iterator append_item(const_iterator aParent, const cell_data_type& aCellData) = 0;
-		virtual void insert_cell_data(const_iterator aItem, item_model_index::value_type aColumnIndex, const cell_data_type& aCellData) = 0;
-		virtual void insert_cell_data(const item_model_index& aIndex, const cell_data_type& aCellData) = 0;
-		virtual void update_cell_data(const item_model_index& aIndex, const cell_data_type& aCellData) = 0;
+		virtual iterator insert_item(const_iterator aPosition, const cell_type& aCellData) = 0;
+		virtual iterator insert_item(const item_model_index& aIndex, const cell_type& aCellData) = 0;
+		virtual iterator append_item(const_iterator aParent, const cell_type& aCellData) = 0;
+		virtual void remove_item(const_iterator aPosition) = 0;
+		virtual void insert_cell_data(const_iterator aItem, item_model_index::value_type aColumnIndex, const cell_type& aCellData) = 0;
+		virtual void insert_cell_data(const item_model_index& aIndex, const cell_type& aCellData) = 0;
+		virtual void update_cell_data(const item_model_index& aIndex, const cell_type& aCellData) = 0;
 	public:
-		virtual optional_sort_order sorting_by() const = 0;
-		virtual void sort_by(item_model_index::value_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction()) = 0;
-		virtual void reset_sort() = 0;
-	public:
-		virtual const cell_data_type& cell_data(const item_model_index& aIndex) const = 0;
-		virtual const i_item_presentation_model::cell_meta_type& cell_meta(const item_model_index& aIndex) const = 0;
+		virtual const cell_type& cell_data(const item_model_index& aIndex) const = 0;
 	public:
 		virtual void subscribe(i_item_model_subscriber& aSubscriber) = 0;
 		virtual void unsubscribe(i_item_model_subscriber& aSubscriber) = 0;
