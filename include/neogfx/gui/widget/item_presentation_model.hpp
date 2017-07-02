@@ -37,7 +37,7 @@ namespace neogfx
 	class basic_item_presentation_model : public i_item_presentation_model, private i_item_model_subscriber
 	{
 	private:
-		typedef typename Model::container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type>::other container_traits;
+		typedef typename Model::item_container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type>::other item_container_traits;
 		typedef boost::optional<i_scrollbar::value_type> optional_position;
 	private:
 		struct column_info

@@ -32,12 +32,12 @@
 
 namespace neogfx
 {
-	class default_container_traits
+	class default_item_container_traits
 	{
 	public:
 		typedef i_item_model::cell_type cell_type;
 	public:
-		struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::default_container_traits::operation_not_supported") {} };
+		struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::default_item_container_traits::operation_not_supported") {} };
 	public:
 		template <typename Container, typename T>
 		static typename Container::iterator append(Container&, typename Container::const_iterator, const T&)
@@ -97,7 +97,7 @@ namespace neogfx
 	};
 
 	template <typename T, uint32_t Columns = 0, typename CellType = i_item_model::cell_type>
-	class container_traits : public default_container_traits
+	class item_container_traits : public default_item_container_traits
 	{
 	public:
 		typedef T value_type;
@@ -112,12 +112,12 @@ namespace neogfx
 		template <typename T2, typename CellType2>
 		struct rebind
 		{
-			typedef container_traits<T2, Columns, CellType2> other;
+			typedef item_container_traits<T2, Columns, CellType2> other;
 		};
 	};
 
 	template <typename T, typename CellType>
-	class container_traits<T, 0, CellType> : public default_container_traits
+	class item_container_traits<T, 0, CellType> : public default_item_container_traits
 	{
 	public:
 		typedef T value_type;
@@ -132,19 +132,19 @@ namespace neogfx
 		template <typename T2, typename CellType2>
 		struct rebind
 		{
-			typedef container_traits<T2, 0, CellType2> other;
+			typedef item_container_traits<T2, 0, CellType2> other;
 		};
 	};
 
-	template <typename T, uint32_t Columns = 0, typename ContainerTraits = container_traits<T, Columns>>
+	template <typename T, uint32_t Columns = 0, typename ContainerTraits = item_container_traits<T, Columns>>
 	class basic_item_model : public i_basic_item_model<T>, private neolib::observable<i_item_model_subscriber>
 	{
 	public:
-		typedef ContainerTraits container_traits;
-		typedef typename container_traits::value_type value_type;
-		typedef typename container_traits::allocator_type allocator_type;
-		typedef typename container_traits::row_container_type row_container_type;
-		typedef typename container_traits::container_type container_type;
+		typedef ContainerTraits item_container_traits;
+		typedef typename item_container_traits::value_type value_type;
+		typedef typename item_container_traits::allocator_type allocator_type;
+		typedef typename item_container_traits::row_container_type row_container_type;
+		typedef typename item_container_traits::container_type container_type;
 		typedef typename container_type::value_type row_type;
 		typedef typename container_type::iterator iterator;
 		typedef typename container_type::const_iterator const_iterator;
