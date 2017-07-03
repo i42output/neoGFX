@@ -129,7 +129,7 @@ namespace neogfx
 
 	header_view::~header_view()
 	{
-		if (has_model())
+		if (has_presentation_model())
 			presentation_model().unsubscribe(*this);
 	}
 
@@ -157,10 +157,8 @@ namespace neogfx
 			presentation_model().unsubscribe(*this);
 		iModel = std::shared_ptr<i_item_model>(std::shared_ptr<i_item_model>(), &aModel);
 		iSectionWidths.resize(presentation_model().columns());
-		if (has_model())
-			presentation_model().subscribe(*this);
 		if (has_presentation_model())
-			presentation_presentation_model().set_item_model(aModel);
+			presentation_model().set_item_model(aModel);
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 		update();
@@ -172,10 +170,8 @@ namespace neogfx
 			presentation_model().unsubscribe(*this);
 		iModel = aModel;
 		iSectionWidths.resize(presentation_model().columns());
-		if (has_model())
-			presentation_model().subscribe(*this);
 		if (has_presentation_model())
-			presentation_presentation_model().set_item_model(*aModel);
+			presentation_model().set_item_model(*aModel);
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 		update();
@@ -201,16 +197,25 @@ namespace neogfx
 
 	void header_view::set_presentation_model(i_item_presentation_model& aPresentationModel)
 	{
+		if (has_presentation_model())
+			presentation_model().unsubscribe(*this);
 		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
+		presentation_model().subscribe(*this);
 		if (has_model())
-			presentation_presentation_model().set_item_model(model());
+			presentation_model().set_item_model(model());
 	}
 
 	void header_view::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
 	{
+		if (has_presentation_model())
+			presentation_model().unsubscribe(*this);
 		iPresentationModel = aPresentationModel;
-		if (has_presentation_model() && has_model())
-			presentation_presentation_model().set_item_model(model());
+		if (has_presentation_model())
+		{
+			presentation_model().subscribe(*this);
+			if (has_model())
+				presentation_model().set_item_model(model());
+		}
 	}
 
 	void header_view::start_batch_update()
@@ -229,7 +234,7 @@ namespace neogfx
 		}
 	}
 
-	void header_view::column_info_changed(const i_item_model&, item_model_index::value_type)
+	void header_view::column_info_changed(const i_item_presentation_model&, item_presentation_model_index::column_type)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -238,7 +243,7 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::item_added(const i_item_model&, const item_model_index&)
+	void header_view::item_added(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -247,7 +252,7 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::item_changed(const i_item_model&, const item_model_index&)
+	void header_view::item_changed(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -256,7 +261,7 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::item_removed(const i_item_model&, const item_model_index&)
+	void header_view::item_removed(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
 		if (iBatchUpdatesInProgress)
 			return;
@@ -265,13 +270,13 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::items_sorted(const i_item_model&)
+	void header_view::items_sorted(const i_item_presentation_model&)
 	{
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::model_destroyed(const i_item_model&)
+	void header_view::model_destroyed(const i_item_presentation_model&)
 	{
 		iModel.reset();
 	}
@@ -358,10 +363,10 @@ namespace neogfx
 	{
 		graphics_context gc(*this);
 		bool updated = false;
-		for (uint32_t col = 0; col < presentation_presentation_model().columns(item_model_index(aRow)); ++col)
+		for (uint32_t col = 0; col < presentation_model().columns(item_model_index(aRow)); ++col)
 		{
 			dimension headingWidth = presentation_model().column_heading_extents(col, gc).cx + iOwner.cell_margins().size().cx * 2.0;
-			dimension cellWidth = presentation_presentation_model().cell_extents(item_model_index(aRow, col), gc).cx + iOwner.cell_margins().size().cx * 2.0;
+			dimension cellWidth = presentation_model().cell_extents(item_model_index(aRow, col), gc).cx + iOwner.cell_margins().size().cx * 2.0;
 			dimension oldSectionWidth = iSectionWidths[col].second;
 			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
 			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col))

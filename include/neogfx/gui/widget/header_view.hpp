@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-	class header_view : public splitter, private i_item_model_subscriber
+	class header_view : public splitter, private i_item_presentation_model_subscriber
 	{
 	private:
 		class updater;
@@ -67,18 +67,18 @@ namespace neogfx
 		dimension section_width(uint32_t aSectionIndex) const;
 		dimension total_width() const;
 	public:
-		virtual bool can_defer_layout() const;
-		virtual bool is_managing_layout() const;
+		bool can_defer_layout() const override;
+		bool is_managing_layout() const override;
 	public:
-		virtual void panes_resized();
-		virtual void reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane = boost::optional<uint32_t>());
+		void panes_resized() override;
+		void reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane = boost::optional<uint32_t>()) override;
 	private:
-		virtual void column_info_changed(const i_item_model& aModel, item_model_index::value_type aColumnIndex);
-		virtual void item_added(const i_item_model& aModel, const item_model_index& aItemIndex);
-		virtual void item_changed(const i_item_model& aModel, const item_model_index& aItemIndex);
-		virtual void item_removed(const i_item_model& aModel, const item_model_index& aItemIndex);
-		virtual void items_sorted(const i_item_model& aModel);
-		virtual void model_destroyed(const i_item_model& aModel);
+		void column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex) override;
+		void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
+		void item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
+		void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
+		void items_sorted(const i_item_presentation_model& aModel) override;
+		void model_destroyed(const i_item_presentation_model& aModel) override;
 	private:
 		void update_from_row(uint32_t aRow, bool aUpdateOwner);
 	private:

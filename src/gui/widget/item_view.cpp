@@ -83,8 +83,6 @@ namespace neogfx
 			model().subscribe(*this);
 			if (has_presentation_model())
 				presentation_model().set_item_model(aModel);
-			if (has_selection_model())
-				selection_model().set_item_model(aModel);
 		}
 		model_changed();
 		update_scrollbar_visibility();
@@ -101,8 +99,6 @@ namespace neogfx
 			model().subscribe(*this);
 			if (has_presentation_model())
 				presentation_model().set_item_model(*aModel);
-			if (has_selection_model())
-				selection_model().set_item_model(*aModel);
 		}
 		model_changed();
 		update_scrollbar_visibility();
@@ -132,6 +128,8 @@ namespace neogfx
 		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
 		if (has_model())
 			presentation_model().set_item_model(model());
+		if (has_selection_model())
+			selection_model().set_presentation_model(aPresentationModel);
 		presentation_model_changed();
 		update_scrollbar_visibility();
 		update();
@@ -142,6 +140,8 @@ namespace neogfx
 		iPresentationModel = aPresentationModel;
 		if (has_presentation_model() && has_model())
 			presentation_model().set_item_model(model());
+		if (has_presentation_model() && has_selection_model())
+			selection_model().set_presentation_model(*aPresentationModel);
 		presentation_model_changed();
 		update_scrollbar_visibility();
 		update();
@@ -171,8 +171,8 @@ namespace neogfx
 			selection_model().unsubscribe(*this);
 		iSelectionModel = std::shared_ptr<i_item_selection_model>(std::shared_ptr<i_item_selection_model>(), &aSelectionModel);
 		selection_model().subscribe(*this);
-		if (has_model())
-			selection_model().set_item_model(model());
+		if (has_presentation_model())
+			selection_model().set_presentation_model(presentation_model());
 		selection_model_changed();
 		update_scrollbar_visibility();
 		update();
@@ -184,8 +184,8 @@ namespace neogfx
 			selection_model().unsubscribe(*this);
 		iSelectionModel = aSelectionModel;
 		selection_model().subscribe(*this);
-		if (has_selection_model() && has_model())
-			selection_model().set_item_model(model());
+		if (has_presentation_model() && has_selection_model())
+			selection_model().set_presentation_model(presentation_model());
 		selection_model_changed();
 		update_scrollbar_visibility();
 		update();

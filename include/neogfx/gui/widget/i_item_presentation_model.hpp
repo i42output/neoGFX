@@ -49,14 +49,36 @@ namespace neogfx
 		enum notify_type { NotifyColumnInfoChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorted, NotifyModelDestroyed };
 	};
 
+	enum class item_selection_flags
+	{
+		Current = 0x01,
+		Selected = 0x02
+	};
+
+	inline item_selection_flags operator|(item_selection_flags aLhs, item_selection_flags aRhs)
+	{
+		return static_cast<item_selection_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline item_selection_flags operator&(item_selection_flags aLhs, item_selection_flags aRhs)
+	{
+		return static_cast<item_selection_flags>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+	}
+
+	inline item_selection_flags operator~(item_selection_flags aLhs)
+	{
+		return static_cast<item_selection_flags>(~static_cast<uint32_t>(aLhs));
+	}
+
 	class i_item_presentation_model
 	{
 	public:
 		struct cell_meta_type
 		{
-			optional_texture texture;
-			optional_glyph_text text;
-			optional_size extents;
+			mutable item_selection_flags selection;
+			mutable optional_texture texture;
+			mutable optional_glyph_text text;
+			mutable optional_size extents;
 		};
 		enum colour_type_e
 		{

@@ -37,12 +37,12 @@ namespace neogfx
 	class basic_item_presentation_model : public i_item_presentation_model, private i_item_model_subscriber
 	{
 	private:
-		typedef typename Model::item_container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type>::other item_container_traits;
+		typedef typename Model::container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type>::other container_traits;
 		typedef boost::optional<i_scrollbar::value_type> optional_position;
 	private:
 		struct column_info
 		{
-			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn }
+			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn } {}
 			item_model_index::column_type modelColumn;
 			mutable boost::optional<std::string> headingText;
 			mutable font headingFont;
@@ -215,21 +215,21 @@ namespace neogfx
 			{
 			case 0:
 				return "";
-			case i_item_model::cell_data_type::type_id<bool>::value:
+			case i_item_model::data_type::type_id<bool>::value:
 				return (cell_format(aIndex) % static_variant_cast<bool>(item_model().cell_data(aIndex))).str();
-			case i_item_model::cell_data_type::type_id<int32_t>::value:
+			case i_item_model::data_type::type_id<int32_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<int32_t>(item_model().cell_data(aIndex))).str();
-			case i_item_model::cell_data_type::type_id<uint32_t>::value:
+			case i_item_model::data_type::type_id<uint32_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<uint32_t>(item_model().cell_data(aIndex))).str();
-			case i_item_model::cell_data_type::type_id<int64_t>::value:
+			case i_item_model::data_type::type_id<int64_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<int64_t>(item_model().cell_data(aIndex))).str();
-			case i_item_model::cell_data_type::type_id<uint64_t>::value:
+			case i_item_model::data_type::type_id<uint64_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<uint64_t>(item_model().cell_data(aIndex))).str();
-			case i_item_model::cell_data_type::type_id<float>::value:
+			case i_item_model::data_type::type_id<float>::value:
 				return (cell_format(aIndex) % static_variant_cast<float>(item_model().cell_data(aIndex))).str();
-			case i_item_model::cell_data_type::type_id<double>::value:
+			case i_item_model::data_type::type_id<double>::value:
 				return (cell_format(aIndex) % static_variant_cast<double>(item_model().cell_data(aIndex))).str();
-			case i_item_model::cell_data_type::type_id<std::string>::value:
+			case i_item_model::data_type::type_id<std::string>::value:
 				return (cell_format(aIndex) % static_variant_cast<const std::string&>(item_model().cell_data(aIndex))).str();
 			default:
 				return "";
@@ -314,7 +314,7 @@ namespace neogfx
 			sort_by(0, SortAscending);
 		}
 	private:
-		void sort() override
+		void sort()
 		{
 			if (iSortOrder.empty())
 				return;
@@ -344,23 +344,19 @@ namespace neogfx
 			notify_observers(i_item_model_subscriber::NotifyItemsSorted);
 		}
 	private:
-		void column_info_changed(const i_item_model&, item_presentation_model_index::column_type) override
+		void column_info_changed(const i_item_model&, item_model_index::column_type) override
 		{
 		}
-		void item_added(const i_item_model&, const item_presentation_model_index& aItemIndex) override
+		void item_added(const i_item_model&, const item_model_index& aItemIndex) override
 		{
 			reset_position_meta(aItemIndex.row());
 		}
-		void item_changed(const i_item_model&, const item_presentation_model_index& aItemIndex) override
+		void item_changed(const i_item_model&, const item_model_index& aItemIndex) override
 		{
 			reset_position_meta(aItemIndex.row());
 		}
-		void item_removed(const i_item_model&, const item_presentation_model_index&) override
+		void item_removed(const i_item_model&, const item_model_index&) override
 		{
-		}
-		void items_sorted(const i_item_model&) override
-		{
-			reset_position_meta(0);
 		}
 		void model_destroyed(const i_item_model&) override
 		{

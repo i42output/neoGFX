@@ -21,20 +21,18 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
-#include "item_model_index.hpp"
+#include "item_index.hpp"
 
 namespace neogfx
 {
-	class i_item_model;
-
 	class item_selection
 	{
 	public:
-		typedef std::vector<item_model_index> index_list;
+		typedef std::vector<item_index> index_list;
 		class range
 		{
 		public:
-			range(const item_model_index& aStart, const item_model_index& aEnd) :
+			range(const item_index& aStart, const item_index& aEnd) :
 				iStart(aStart), iEnd(aEnd)
 			{
 			}
@@ -44,32 +42,32 @@ namespace neogfx
 				return iStart < aRhs.iStart;
 			}
 		public:
-			const item_model_index& start() const
+			const item_index& start() const
 			{
 				return iStart;
 			}
-			item_model_index& start()
+			item_index& start()
 			{
 				return iStart;
 			}
-			const item_model_index& end() const
+			const item_index& end() const
 			{
 				return iEnd;
 			}
-			item_model_index& end()
+			item_index& end()
 			{
 				return iEnd;
 			}
 		private:
-			item_model_index iStart;
-			item_model_index iEnd;
+			item_index iStart;
+			item_index iEnd;
 		};
 		typedef std::vector<range> range_list;
 	public:
 		item_selection()
 		{
 		}
-		item_selection(const item_model_index& aIndex)
+		item_selection(const item_index& aIndex)
 		{
 			iSelections.push_back(range(aIndex, aIndex));
 		}
@@ -118,13 +116,13 @@ namespace neogfx
 				{
 					for (auto c = s.start().column(); c <= s.start().column(); ++c)
 					{
-						result.push_back(item_model_index(r, c));
+						result.push_back(item_index(r, c));
 					}
 				}
 			}
 			return result;
 		}
-		void add(const item_model_index& aIndex)
+		void add(const item_index& aIndex)
 		{
 			auto i = find(aIndex);
 			if (i != iSelections.begin() && std::prev(i)->end().row() == aIndex.row() && std::prev(i)->end().column() == aIndex.column() - 1)
@@ -147,7 +145,7 @@ namespace neogfx
 			sort();
 		}	
 	private:
-		range_list::iterator find(const item_model_index& aIndex)
+		range_list::iterator find(const item_index& aIndex)
 		{
 			return std::lower_bound(iSelections.begin(), iSelections.end(), range_list::value_type(aIndex, aIndex), [](const range_list::value_type& lhs, const range_list::value_type& rhs) -> bool
 			{

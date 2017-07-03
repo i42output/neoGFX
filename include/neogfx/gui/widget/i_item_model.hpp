@@ -58,6 +58,7 @@ namespace neogfx
 			typedef std::vector<option> type;
 		};
 		typedef neolib::variant<
+			void*,
 			bool, 
 			int32_t, 
 			uint32_t, 
@@ -73,7 +74,7 @@ namespace neogfx
 			choice_type<uint64_t>::type::const_iterator,
 			choice_type<float>::type::const_iterator,
 			choice_type<double>::type::const_iterator,
-			choice_type<std::string>::type::const_iterator> cell_type;
+			choice_type<std::string>::type::const_iterator> data_type;
 	public:
 		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_model::bad_column_index") {} };
 	public:
@@ -82,8 +83,8 @@ namespace neogfx
 		virtual uint32_t rows() const = 0;
 		virtual uint32_t columns() const = 0;
 		virtual uint32_t columns(const item_model_index& aIndex) const = 0;
-		virtual const std::string& column_name(item_model_index::value_type aColumnIndex) const = 0;
-		virtual void set_column_name(item_model_index::value_type aColumnIndex, const std::string& aName) = 0;
+		virtual const std::string& column_name(item_model_index::column_type aColumnIndex) const = 0;
+		virtual void set_column_name(item_model_index::column_type aColumnIndex, const std::string& aName) = 0;
 		virtual iterator index_to_iterator(const item_model_index& aIndex) = 0;
 		virtual const_iterator index_to_iterator(const item_model_index& aIndex) const = 0;
 		virtual item_model_index iterator_to_index(const_iterator aPosition) const = 0;
@@ -104,15 +105,15 @@ namespace neogfx
 	public:
 		virtual void reserve(uint32_t aItemCount) = 0;
 		virtual uint32_t capacity() const = 0;
-		virtual iterator insert_item(const_iterator aPosition, const cell_type& aCellData) = 0;
-		virtual iterator insert_item(const item_model_index& aIndex, const cell_type& aCellData) = 0;
-		virtual iterator append_item(const_iterator aParent, const cell_type& aCellData) = 0;
+		virtual iterator insert_item(const_iterator aPosition, const data_type& aCellData) = 0;
+		virtual iterator insert_item(const item_model_index& aIndex, const data_type& aCellData) = 0;
+		virtual iterator append_item(const_iterator aParent, const data_type& aCellData) = 0;
 		virtual void remove_item(const_iterator aPosition) = 0;
-		virtual void insert_cell_data(const_iterator aItem, item_model_index::value_type aColumnIndex, const cell_type& aCellData) = 0;
-		virtual void insert_cell_data(const item_model_index& aIndex, const cell_type& aCellData) = 0;
-		virtual void update_cell_data(const item_model_index& aIndex, const cell_type& aCellData) = 0;
+		virtual void insert_cell_data(const_iterator aItem, item_model_index::column_type aColumnIndex, const data_type& aCellData) = 0;
+		virtual void insert_cell_data(const item_model_index& aIndex, const data_type& aCellData) = 0;
+		virtual void update_cell_data(const item_model_index& aIndex, const data_type& aCellData) = 0;
 	public:
-		virtual const cell_type& cell_data(const item_model_index& aIndex) const = 0;
+		virtual const data_type& cell_data(const item_model_index& aIndex) const = 0;
 	public:
 		virtual void subscribe(i_item_model_subscriber& aSubscriber) = 0;
 		virtual void unsubscribe(i_item_model_subscriber& aSubscriber) = 0;

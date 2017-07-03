@@ -56,12 +56,6 @@ namespace neogfx
 		ClearAndSelectColumn	= Clear | Select | Column
 	};
 
-	enum class item_selection_flags
-	{
-		Current		= 0x01,
-		Selected	= 0x02
-	};
-
 	class i_item_selection_model;
 
 	class i_item_selection_model_subscriber
@@ -84,14 +78,14 @@ namespace neogfx
 		typedef event<const optional_item_model_index&, const optional_item_model_index&> current_index_changed_event;
 		typedef event<const item_selection&, const item_selection&> selection_changed_event;
 	public:
-		struct no_item_presentation_model : std::logic_error { no_item_presentation_model() : std::logic_error("neogfx::i_item_selection_model::no_item_presentation_model") {} };
+		struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::i_item_selection_model::no_presentation_model") {} };
 		struct no_current_index : std::logic_error { no_current_index() : std::logic_error("neogfx::i_item_selection_model::no_current_index") {} };
 	public:
 		virtual ~i_item_selection_model() {}
 	public:
-		virtual bool has_item_presentation_model() const = 0;
-		virtual i_item_presentation_model& item_presentation_model() const = 0;
-		virtual void set_item_presentation_model(i_item_presentation_model& aItemModel) = 0;
+		virtual bool has_presentation_model() const = 0;
+		virtual i_item_presentation_model& presentation_model() const = 0;
+		virtual void set_presentation_model(i_item_presentation_model& aModel) = 0;
 	public:
 		virtual item_selection_mode mode() const = 0;
 		virtual void set_mode(item_selection_mode aType) = 0;

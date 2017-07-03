@@ -41,39 +41,39 @@ namespace neogfx
 			iModel(0),
 			iMode(aMode)
 		{
-			set_item_presentation_model(aModel);
+			set_presentation_model(aModel);
 		}
 		~item_selection_model()
 		{
-			if (has_item_presentation_model())
-				item_presentation_model().unsubscribe(*this);
+			if (has_presentation_model())
+				presentation_model().unsubscribe(*this);
 			notify_observers(i_item_selection_model_subscriber::NotifySelectionModelDestroyed);
 		}
 	public:
-		virtual bool has_item_presentation_model() const
+		virtual bool has_presentation_model() const
 		{
 			return iModel != 0;
 		}
-		virtual i_item_presentation_model& item_presentation_model() const
+		virtual i_item_presentation_model& presentation_model() const
 		{
 			if (iModel == 0)
-				throw no_item_presentation_model();
+				throw no_presentation_model();
 			return *iModel;
 		}
-		virtual void set_item_presentation_model(i_item_presentation_model& aModel)
+		virtual void set_presentation_model(i_item_presentation_model& aModel)
 		{
 			if (iModel == &aModel)
 				return;
-			if (has_item_presentation_model())
-				item_presentation_model().unsubscribe(*this);
+			if (has_presentation_model())
+				presentation_model().unsubscribe(*this);
 			unset_current_index();
 			i_item_presentation_model* oldModel = iModel;
 			iModel = &aModel;
-			item_presentation_model().subscribe(*this);
+			presentation_model().subscribe(*this);
 			if (oldModel == 0)
-				notify_observers(i_item_selection_model_subscriber::NotifyModelAdded, item_presentation_model());
+				notify_observers(i_item_selection_model_subscriber::NotifyModelAdded, presentation_model());
 			else
-				notify_observers(i_item_selection_model_subscriber::NotifyModelChanged, item_presentation_model(), *oldModel);
+				notify_observers(i_item_selection_model_subscriber::NotifyModelChanged, presentation_model(), *oldModel);
 		}
 	public:
 		virtual item_selection_mode mode() const
@@ -123,7 +123,7 @@ namespace neogfx
 		}
 		virtual bool is_selected(const item_model_index& aIndex) const
 		{
-			return (item_presentation_model().cell_meta(aIndex).selection & i_item_presentation_model::cell_meta_type::selection_flags::Selected) == i_item_presentation_model::cell_meta_type::selection_flags::Selected;
+			return (presentation_model().cell_meta(aIndex).selection & item_selection_flags::Selected) == item_selection_flags::Selected;
 		}	
 		virtual void select(const item_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect)
 		{
