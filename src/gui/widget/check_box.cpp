@@ -49,7 +49,13 @@ namespace neogfx
 	{
 		scoped_units su(*this, UnitsPixels);
 		rect boxRect = client_rect();
-		aGraphicsContext.fill_rect(boxRect, background_colour());
+		colour hoverColour = app::instance().current_style().hover_colour().same_lightness_as(
+			container_background_colour().light() ?
+				container_background_colour().darker(0x20) :
+				container_background_colour().lighter(0x20));
+		if (parent().capturing())
+			hoverColour.light(0x40) ? hoverColour.darken(0x20) : hoverColour.lighten(0x20);
+		aGraphicsContext.fill_rect(boxRect, parent().enabled() && parent().client_rect().contains(surface().mouse_position() - parent().origin()) ? hoverColour : background_colour());
 		colour borderColour1 = container_background_colour().mid(container_background_colour().mid(background_colour()));
 		if (borderColour1.similar_intensity(container_background_colour(), 0.03125))
 			borderColour1.dark() ? borderColour1.lighten(0x40) : borderColour1.darken(0x40);
@@ -110,5 +116,17 @@ namespace neogfx
 			rect focusRect = label().client_rect() + label().position();
 			aGraphicsContext.draw_focus_rect(focusRect);
 		}
+	}
+
+	void check_box::mouse_entered()
+	{
+		button::mouse_entered();
+		update();
+	}
+
+	void check_box::mouse_left()
+	{
+		button::mouse_left();
+		update();
 	}
 }

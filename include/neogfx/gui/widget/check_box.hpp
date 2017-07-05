@@ -33,19 +33,22 @@ namespace neogfx
 		public:
 			box(check_box& aParent);
 		public:
-			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+			size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+			size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 		public:
-			virtual void paint(graphics_context& aGraphicsContext) const;
+			void paint(graphics_context& aGraphicsContext) const override;
 		};
 	public:
 		check_box(const std::string& aText = std::string(), checkable_e aCheckable = BiState);
 		check_box(i_widget& aParent, const std::string& aText = std::string(), checkable_e aCheckable = BiState);
 		check_box(i_layout& aLayout, const std::string& aText = std::string(), checkable_e aCheckable = BiState);
 	public:
-		virtual neogfx::size_policy size_policy() const;
+		neogfx::size_policy size_policy() const override;
 	protected:
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		void paint(graphics_context& aGraphicsContext) const override;
+	protected:
+		void mouse_entered() override;
+		void mouse_left() override;
 	private:
 		box iBox;
 	};
