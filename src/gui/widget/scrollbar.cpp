@@ -466,6 +466,8 @@ namespace neogfx
 
 	void scrollbar::update(const i_units_context& aContext, const update_params_t& aUpdateParams)
 	{
+		if (!visible())
+			return;
 		if (clicked_element() != i_scrollbar::ElementNone && clicked_element() != element_at(aContext, iContainer.as_widget().surface().mouse_position()))
 			pause();
 		else
