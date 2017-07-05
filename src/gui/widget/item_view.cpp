@@ -234,7 +234,7 @@ namespace neogfx
 			const neogfx::font& f = (of != boost::none ? *of : app::instance().current_style().font());
 			optional_colour textColour = presentation_model().cell_colour(item_model_index(row), i_item_presentation_model::ForegroundColour);
 			if (textColour == boost::none)
-				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().text_colour();
+				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
 			finished = true;
 			for (uint32_t col = 0; col < model().columns(row); ++col) // TODO: O(n) isn't good enough if lots of columns
 			{

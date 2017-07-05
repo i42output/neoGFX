@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include "i_style.hpp"
+#include "palette.hpp"
 
 namespace neogfx
 {
@@ -29,52 +30,33 @@ namespace neogfx
 	public:
 		style(const std::string& aName);
 		style(const std::string& aName, const i_style& aOther);
+		style(const i_style& aOther);
+		style(const style& aOther);
 		virtual ~style();
 	public:
-		virtual const std::string& name() const;
-		virtual const neogfx::margins& margins() const;
-		virtual void set_margins(const neogfx::margins& aMargins);
-		virtual const size& spacing() const;
-		virtual void set_spacing(const size& aSpacing);
-		virtual bool has_colour() const;
-		virtual neogfx::colour colour() const;
-		virtual void set_colour(const optional_colour& aColour);
-		virtual bool has_background_colour() const;
-		virtual neogfx::colour background_colour() const;
-		virtual void set_background_colour(const optional_colour& aBackgroundColour);
-		virtual bool has_foreground_colour() const;
-		virtual neogfx::colour foreground_colour() const;
-		virtual void set_foreground_colour(const optional_colour& aForegroundColour);
-		virtual bool has_text_colour() const;
-		virtual neogfx::colour text_colour() const;
-		virtual void set_text_colour(const optional_colour& aTextColour);
-		virtual bool has_selection_colour() const;
-		virtual neogfx::colour selection_colour() const;
-		virtual void set_selection_colour(const optional_colour& aSelectionColour);
-		virtual bool has_hover_colour() const;
-		virtual neogfx::colour hover_colour() const;
-		virtual void set_hover_colour(const optional_colour& aHoverColour);
-		virtual bool has_widget_detail_primary_colour() const;
-		virtual neogfx::colour widget_detail_primary_colour() const;
-		virtual void set_widget_detail_primary_colour(const optional_colour& aWidgetDetailPrimaryColour);
-		virtual bool has_widget_detail_secondary_colour() const;
-		virtual neogfx::colour widget_detail_secondary_colour() const;
-		virtual void set_widget_detail_secondary_colour(const optional_colour& aWidgetDetailSecondaryColour);
-		virtual const neogfx::font_info& font_info() const;
-		virtual void set_font_info(const neogfx::font_info& aFontInfo);
-		virtual const neogfx::font& font() const;
+		style& operator=(const i_style& aOther);
+	public:
+		bool operator==(const i_style& aOther) const;
+		bool operator!=(const i_style& aOther) const;
+	public:
+		const std::string& name() const override;
+		const neogfx::margins& margins() const override;
+		void set_margins(const neogfx::margins& aMargins) override;
+		const size& spacing() const override;
+		void set_spacing(const size& aSpacing) override;
+		const i_palette& palette() const override;
+		i_palette& palette() override;
+		void set_palette(const i_palette& aPalette) override;
+		const neogfx::font_info& font_info() const override;
+		void set_font_info(const neogfx::font_info& aFontInfo) override;
+		const neogfx::font& font() const override;
+	private:
+		void handle_change();
 	private:
 		std::string iName;
 		neogfx::margins iMargins;
 		size iSpacing;
-		optional_colour iColour;
-		optional_colour iBackgroundColour;
-		optional_colour iForegroundColour;
-		optional_colour iTextColour;
-		optional_colour iSelectionColour;
-		optional_colour iHoverColour;
-		optional_colour iWidgetDetailPrimaryColour;
-		optional_colour iWidgetDetailSecondaryColour;
+		neogfx::palette iPalette;
 		neogfx::font_info iFontInfo;
 		mutable optional_font iFont;
 	};

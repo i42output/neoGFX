@@ -64,9 +64,9 @@ namespace neogfx
 
 	colour spin_box_impl::frame_colour() const
 	{
-		if (app::instance().current_style().colour().similar_intensity(background_colour(), 0.03125))
+		if (app::instance().current_style().palette().colour().similar_intensity(background_colour(), 0.03125))
 			return framed_widget::frame_colour();
-		return app::instance().current_style().colour().mid(background_colour());
+		return app::instance().current_style().palette().colour().mid(background_colour());
 	}
 
 	void spin_box_impl::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
@@ -197,7 +197,7 @@ namespace neogfx
 
 	void spin_box_impl::update_arrows()
 	{
-		auto ink = app::instance().current_style().text_colour();
+		auto ink = app::instance().current_style().palette().text_colour();
 		if (iUpArrow == boost::none || iUpArrow->first != ink)
 		{
 			const uint8_t sUpArrowImagePattern[5][9]

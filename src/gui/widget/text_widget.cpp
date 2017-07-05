@@ -186,7 +186,7 @@ namespace neogfx
 				break;
 			}
 		} while (w->has_parent());
-		colour defaultTextColour = app::instance().current_style().text_colour();
+		colour defaultTextColour = app::instance().current_style().palette().text_colour();
 		if (textColour == boost::none || textColour->similar_intensity(defaultTextColour))
 			return defaultTextColour;
 		else

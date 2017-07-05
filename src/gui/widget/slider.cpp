@@ -69,7 +69,7 @@ namespace neogfx
 		rect rectValue = rectBarBox;
 		rectValue.cx = rectValue.width() * normalized_value();
 		if (normalized_value() > 0.0)
-			aGraphicsContext.fill_rounded_rect(rectValue, 2.0, app::instance().current_style().selection_colour());
+			aGraphicsContext.fill_rounded_rect(rectValue, 2.0, app::instance().current_style().palette().selection_colour());
 		rect rectIndicator = indicator_box();
 		colour indicatorColour = foreground_colour();
 		if (iDragOffset != boost::none)

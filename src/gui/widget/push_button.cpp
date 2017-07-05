@@ -102,7 +102,7 @@ namespace neogfx
 		if (iStyle == push_button_style::Toolbar && enabled() && (entered() || capturing()))
 		{
 			colour background = (capturing() && entered() ? 
-				app::instance().current_style().selection_colour() : 
+				app::instance().current_style().palette().selection_colour() : 
 				background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40));
 			background.set_alpha(0x80);
 			aGraphicsContext.fill_rect(client_rect(), background);
@@ -282,7 +282,7 @@ namespace neogfx
 
 	colour push_button::hover_colour() const
 	{
-		colour hoverColour = (has_hover_colour() ? *iHoverColour : app::instance().current_style().hover_colour());
+		colour hoverColour = (has_hover_colour() ? *iHoverColour : app::instance().current_style().palette().hover_colour());
 		if (capturing())
 			return hoverColour.light(0x40) ? hoverColour.darker(0x40) : hoverColour.lighter(0x40);
 		else 

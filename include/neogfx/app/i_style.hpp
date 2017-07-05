@@ -20,14 +20,18 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/event.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/text/font.hpp>
+#include "i_palette.hpp"
 
 namespace neogfx
 {
 	class i_style
 	{
+	public:
+		event<> changed;
 	public:
 		virtual ~i_style() {}
 	public:
@@ -36,30 +40,9 @@ namespace neogfx
 		virtual void set_margins(const neogfx::margins& aMargins) = 0;
 		virtual const size& spacing() const = 0;
 		virtual void set_spacing(const size& aSpacing) = 0;
-		virtual bool has_colour() const = 0;
-		virtual neogfx::colour colour() const = 0;
-		virtual void set_colour(const optional_colour& aDefaultColour) = 0;
-		virtual bool has_background_colour() const = 0;
-		virtual neogfx::colour background_colour() const = 0;
-		virtual void set_background_colour(const optional_colour& aBackgroundColour) = 0;
-		virtual bool has_foreground_colour() const = 0;
-		virtual neogfx::colour foreground_colour() const = 0;
-		virtual void set_foreground_colour(const optional_colour& aForegroundColour) = 0;
-		virtual bool has_text_colour() const = 0;
-		virtual neogfx::colour text_colour() const = 0;
-		virtual void set_text_colour(const optional_colour& aTextColour) = 0;
-		virtual bool has_selection_colour() const = 0;
-		virtual neogfx::colour selection_colour() const = 0;
-		virtual void set_selection_colour(const optional_colour& aSelectionColour) = 0;
-		virtual bool has_hover_colour() const = 0;
-		virtual neogfx::colour hover_colour() const = 0;
-		virtual void set_hover_colour(const optional_colour& aHoverColour) = 0;
-		virtual bool has_widget_detail_primary_colour() const = 0;
-		virtual neogfx::colour widget_detail_primary_colour() const = 0;
-		virtual void set_widget_detail_primary_colour(const optional_colour& aWidgetDetailPrimaryColour) = 0;
-		virtual bool has_widget_detail_secondary_colour() const = 0;
-		virtual neogfx::colour widget_detail_secondary_colour() const = 0;
-		virtual void set_widget_detail_secondary_colour(const optional_colour& aWidgetDetailSecondaryColour) = 0;
+		virtual const i_palette& palette() const = 0;
+		virtual i_palette& palette() = 0;
+		virtual void set_palette(const i_palette& aPalette) = 0;
 		virtual const font_info& font_info() const = 0;
 		virtual void set_font_info(const neogfx::font_info& aFontInfo) = 0;
 		virtual const neogfx::font& font() const = 0;

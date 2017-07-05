@@ -237,9 +237,9 @@ namespace neogfx
 	{
 		if (window::has_background_colour())
 			return window::background_colour();
-		return app::instance().current_style().colour().dark() ?
-			app::instance().current_style().colour().darker(0x40) :
-			app::instance().current_style().colour().lighter(0x40);
+		return app::instance().current_style().palette().colour().dark() ?
+			app::instance().current_style().palette().colour().darker(0x40) :
+			app::instance().current_style().palette().colour().lighter(0x40);
 	}
 
 	void popup_menu::set_capture()
