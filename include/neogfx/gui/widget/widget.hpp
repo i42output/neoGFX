@@ -175,6 +175,7 @@ namespace neogfx
 		void enable() override;
 		void disable() override;
 		bool entered() const override;
+		bool can_capture() const override;
 		bool capturing() const override;
 		void set_capture() override;
 		void release_capture() override;
