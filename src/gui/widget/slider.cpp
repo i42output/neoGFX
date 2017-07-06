@@ -113,7 +113,10 @@ namespace neogfx
 	{
 		widget::mouse_button_released(aButton, aPosition);
 		if (aButton == mouse_button::Left)
+		{
 			iDragOffset = boost::none;
+			update();
+		}
 	}
 
 	void slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
