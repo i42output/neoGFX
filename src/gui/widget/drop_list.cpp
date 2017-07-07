@@ -82,7 +82,7 @@ namespace neogfx
 
 	void drop_list::update_arrow()
 	{
-		auto ink = app::instance().current_style().text_colour();
+		auto ink = app::instance().current_style().palette().text_colour();
 		if (iDownArrowTexture == boost::none || iDownArrowTexture->first != ink)
 		{
 			const uint8_t sDownArrowImagePattern[4][8]

@@ -979,7 +979,7 @@ namespace neogfx
 		if (has_foreground_colour())
 			return *iForegroundColour;
 		else
-			return app::instance().current_style().foreground_colour();
+			return app::instance().current_style().palette().foreground_colour();
 	}
 
 	void widget::set_foreground_colour(const optional_colour& aForegroundColour)
@@ -998,7 +998,7 @@ namespace neogfx
 		if (has_background_colour())
 			return *iBackgroundColour;
 		else
-			return app::instance().current_style().background_colour();
+			return app::instance().current_style().palette().background_colour();
 	}
 
 	void widget::set_background_colour(const optional_colour& aBackgroundColour)
@@ -1015,7 +1015,7 @@ namespace neogfx
 		if (!w->transparent_background() && w->has_background_colour())
 			return w->background_colour();
 		else
-			return app::instance().current_style().colour();
+			return app::instance().current_style().palette().colour();
 	}
 
 	bool widget::has_font() const
@@ -1134,6 +1134,11 @@ namespace neogfx
 		return surface().has_entered_widget() && &surface().entered_widget() == this;
 	}
 
+	bool widget::can_capture() const
+	{
+		return true;
+	}
+
 	bool widget::capturing() const
 	{
 		return surface().has_capturing_widget() && &surface().capturing_widget() == this;
@@ -1141,7 +1146,10 @@ namespace neogfx
 
 	void widget::set_capture()
 	{
-		surface().set_capture(*this);
+		if (can_capture())
+			surface().set_capture(*this);
+		else
+			throw widget_cannot_capture();
 	}
 
 	void widget::release_capture()
@@ -1214,7 +1222,7 @@ namespace neogfx
 	{
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_pressed(aButton, aPosition + position(), aKeyModifiers);
-		else
+		else if (can_capture())
 			set_capture();
 	}
 
@@ -1222,13 +1230,15 @@ namespace neogfx
 	{
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_double_clicked(aButton, aPosition + position(), aKeyModifiers);
-		else
+		else if (can_capture())
 			set_capture();
 	}
 
-	void widget::mouse_button_released(mouse_button, const point&)
+	void widget::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
-		if (capturing())
+		if (aButton == mouse_button::Middle && has_parent())
+			parent().mouse_button_released(aButton, aPosition + position());
+		else if (capturing())
 			release_capture();
 	}
 

@@ -82,12 +82,12 @@ namespace neogfx
 			colour background;
 			if (openSubMenu && menu().type() == i_menu::MenuBar)
 			{
-				background = app::instance().current_style().colour().dark() ?
-					app::instance().current_style().colour().darker(0x40) :
-					app::instance().current_style().colour().lighter(0x40);
-				if (background.similar_intensity(app::instance().current_style().colour(), 0.05))
+				background = app::instance().current_style().palette().colour().dark() ?
+					app::instance().current_style().palette().colour().darker(0x40) :
+					app::instance().current_style().palette().colour().lighter(0x40);
+				if (background.similar_intensity(app::instance().current_style().palette().colour(), 0.05))
 				{
-					background = app::instance().current_style().selection_colour();
+					background = app::instance().current_style().palette().selection_colour();
 					background.set_alpha(0x80);
 				}
 			}
@@ -108,7 +108,7 @@ namespace neogfx
 			if (menu_item().type() == i_menu_item::SubMenu && menu().type() == i_menu::Popup)
 			{
 				bool openSubMenu = (menu_item().type() == i_menu_item::SubMenu && menu_item().sub_menu().is_open());
-				colour ink = openSubMenu ? app::instance().current_style().selection_colour()
+				colour ink = openSubMenu ? app::instance().current_style().palette().selection_colour()
 					: background_colour().light() ? background_colour().darker(0x80) : background_colour().lighter(0x80);
 				if (iSubMenuArrow == boost::none || iSubMenuArrow->first != ink)
 				{
@@ -146,6 +146,11 @@ namespace neogfx
 		}
 	}
 
+	bool menu_item_widget::can_capture() const
+	{
+		return false;
+	}
+
 	void menu_item_widget::mouse_entered()
 	{
 		widget::mouse_entered();
@@ -163,14 +168,16 @@ namespace neogfx
 			menu().clear_selection();
 	}
 
-	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point&, key_modifiers_e)
+	void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
+		widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left && menu_item().type() == i_menu_item::SubMenu)
 			select_item();
 	}
 
-	void menu_item_widget::mouse_button_released(mouse_button aButton, const point&)
+	void menu_item_widget::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
+		widget::mouse_button_released(aButton, aPosition);
 		if (aButton == mouse_button::Left && menu_item().type() == i_menu_item::Action)
 			select_item();
 	}

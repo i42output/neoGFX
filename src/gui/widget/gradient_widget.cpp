@@ -542,8 +542,8 @@ namespace neogfx
 				{0, transparentColour},
 				{1, frameColour},
 				{2, frameColour.mid(backgroundColour)},
-				{3, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().selection_colour()},
-				{4, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().selection_colour().lighter(0x40)},
+				{3, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour()},
+				{4, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40)},
 				{9, aColourStop.second}} };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())
@@ -584,8 +584,8 @@ namespace neogfx
 				{ 0, transparentColour },
 				{ 1, frameColour },
 				{ 2, frameColour.mid(backgroundColour) },
-				{ 3, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().selection_colour() },
-				{ 4, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().selection_colour().lighter(0x40) },
+				{ 3, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour() },
+				{ 4, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40) },
 				{ 9, colour::White.with_alpha(aAlphaStop.second) } } };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())

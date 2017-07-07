@@ -43,21 +43,23 @@ namespace neogfx
 		i_menu& menu() const;
 		i_menu_item& menu_item() const;
 	public:
-		virtual neogfx::size_policy size_policy() const;
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		neogfx::size_policy size_policy() const override;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
-		virtual void paint_non_client(graphics_context& aGraphicsContext) const;
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		void paint_non_client(graphics_context& aGraphicsContext) const override;
+		void paint(graphics_context& aGraphicsContext) const override;
 	public:
-		virtual void mouse_entered();
-		virtual void mouse_left();
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		bool can_capture() const override;
+	public:
+		void mouse_entered() override;
+		void mouse_left() override;
+		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 	protected:
-		virtual std::string mnemonic() const;
-		virtual void mnemonic_execute();
-		virtual i_widget& mnemonic_widget();
+		std::string mnemonic() const override;
+		void mnemonic_execute() override;
+		i_widget& mnemonic_widget() override;
 	public:
 		point sub_menu_position() const;
 	private:

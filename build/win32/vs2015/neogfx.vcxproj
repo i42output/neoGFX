@@ -114,12 +114,14 @@
     <ClInclude Include="..\..\..\include\neogfx\app\i_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_clipboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_mnemonic.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\i_palette.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_resource_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_service_factory.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_shared_menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\module_resource.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\palette.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\resource_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\style.hpp" />
@@ -297,6 +299,7 @@
     <ClCompile Include="..\..\..\src\app\module_resource.cpp" />
     <ClCompile Include="..\..\..\src\app\native\sdl_basic_services.cpp" />
     <ClCompile Include="..\..\..\src\app\native\sdl_service_factory.cpp" />
+    <ClCompile Include="..\..\..\src\app\palette.cpp" />
     <ClCompile Include="..\..\..\src\app\resource.cpp" />
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
     <ClCompile Include="..\..\..\src\app\style.cpp" />

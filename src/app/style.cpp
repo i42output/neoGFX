@@ -29,24 +29,64 @@ namespace neogfx
 		iSpacing(2.0, 2.0),
 		iFontInfo(app::instance().rendering_engine().font_manager().default_system_font_info())
 	{
+		iPalette.changed([this]() { handle_change(); });
 	}
 
 	style::style(const std::string& aName, const i_style& aOther) :
 		iName(aName),
 		iMargins(aOther.margins()),
 		iSpacing(aOther.spacing()),
-		iColour(aOther.has_colour() ? aOther.colour() : optional_colour()),
-		iBackgroundColour(aOther.has_background_colour() ? aOther.background_colour() : optional_colour()),
-		iForegroundColour(aOther.has_foreground_colour() ? aOther.foreground_colour() : optional_colour()),
-		iTextColour(aOther.has_text_colour() ? aOther.text_colour() : optional_colour()),
-		iSelectionColour(aOther.has_selection_colour() ? aOther.selection_colour() : optional_colour()),
-		iHoverColour(aOther.has_hover_colour() ? aOther.hover_colour() : optional_colour()),
+		iPalette(aOther.palette()),
 		iFontInfo(aOther.font_info())
+	{
+		iPalette.changed([this]() { handle_change(); });
+	}
+
+	style::style(const i_style& aOther) :
+		iName(aOther.name()),
+		iMargins(aOther.margins()),
+		iSpacing(aOther.spacing()),
+		iPalette(aOther.palette()),
+		iFontInfo(aOther.font_info())
+	{
+		iPalette.changed([this]() { handle_change(); });
+	}
+
+	style::style(const style& aOther) :
+		style(static_cast<const i_style&>(aOther))
 	{
 	}
 
 	style::~style()
 	{
+	}
+
+	style& style::operator=(const i_style& aOther)
+	{
+		if (*this != aOther)
+		{
+			iName = aOther.name();
+			iMargins = aOther.margins();
+			iSpacing = aOther.spacing();
+			iPalette = aOther.palette();
+			iFontInfo = aOther.font_info();
+			handle_change();
+		}
+		return *this;
+	}
+
+	bool style::operator==(const i_style& aOther) const
+	{
+		return iName == aOther.name() && 
+			iMargins == aOther.margins() &&
+			iSpacing == aOther.spacing() &&
+			iPalette == aOther.palette() &&
+			iFontInfo == aOther.font_info();
+	}
+
+	bool style::operator!=(const i_style& aOther) const
+	{
+		return !(*this == aOther);
 	}
 
 	const std::string& style::name() const
@@ -64,11 +104,7 @@ namespace neogfx
 		if (iMargins != aMargins)
 		{
 			iMargins = aMargins;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().layout_surfaces();
-			}
+			handle_change();
 		}
 	}
 
@@ -82,218 +118,26 @@ namespace neogfx
 		if (iSpacing != aSpacing)
 		{
 			iSpacing = aSpacing;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().layout_surfaces();
-			}
+			handle_change();
 		}
 	}
 
-	bool style::has_colour() const
+	const i_palette& style::palette() const
 	{
-		return iColour != boost::none;
+		return iPalette;
 	}
 
-	colour style::colour() const
+	i_palette& style::palette()
 	{
-		if (has_colour())
-			return *iColour;
-		return neogfx::colour(0xEF, 0xEB, 0xE7);
+		return iPalette;
 	}
 
-	void style::set_colour(const optional_colour& aColour)
+	void style::set_palette(const i_palette& aPalette)
 	{
-		if (iColour != aColour)
+		if (iPalette != aPalette)
 		{
-			iColour = aColour;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().invalidate_surfaces();
-			}
-		}
-	}
-
-	bool style::has_background_colour() const
-	{
-		return iBackgroundColour != boost::none;
-	}
-
-	colour style::background_colour() const
-	{
-		if (has_background_colour())
-			return *iBackgroundColour;
-		else
-			return colour().light() ? colour().lighter(0x20) : colour().darker(0x20);
-	}
-
-	void style::set_background_colour(const optional_colour& aBackgroundColour)
-	{
-		if (iBackgroundColour != aBackgroundColour)
-		{
-			iBackgroundColour = aBackgroundColour;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().invalidate_surfaces();
-			}
-		}
-	}
-
-	bool style::has_foreground_colour() const
-	{
-		return iForegroundColour != boost::none;
-	}
-
-	colour style::foreground_colour() const
-	{
-		if (has_foreground_colour())
-			return *iForegroundColour;
-		else
-			return colour().light() ? colour().darker(0x20) : colour().lighter(0x20);
-	}
-
-	void style::set_foreground_colour(const optional_colour& aForegroundColour)
-	{
-		if (iForegroundColour != aForegroundColour)
-		{
-			iForegroundColour = aForegroundColour;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().invalidate_surfaces();
-			}
-		}
-	}
-
-	bool style::has_text_colour() const
-	{
-		return iTextColour != boost::none;
-	}
-
-	colour style::text_colour() const
-	{
-		if (has_text_colour())
-			return *iTextColour;
-		else
-			return colour().dark() ? colour::White : colour::Black;
-	}
-
-	void style::set_text_colour(const optional_colour& aTextColour)
-	{
-		if (iTextColour != aTextColour)
-		{
-			iTextColour = aTextColour;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().invalidate_surfaces();
-			}
-		}
-	}
-
-	bool style::has_selection_colour() const
-	{
-		return iTextColour != boost::none;
-	}
-
-	colour style::selection_colour() const
-	{
-		if (has_selection_colour())
-			return *iTextColour;
-		else
-			return neogfx::colour(0x2A, 0x82, 0xDA);
-	}
-
-	void style::set_selection_colour(const optional_colour& aSelectionColour)
-	{
-		if (iSelectionColour != aSelectionColour)
-		{
-			iSelectionColour = aSelectionColour;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().invalidate_surfaces();
-			}
-		}
-	}
-
-	bool style::has_hover_colour() const
-	{
-		return iHoverColour != boost::none;
-	}
-
-	colour style::hover_colour() const
-	{
-		if (has_hover_colour())
-			return *iHoverColour;
-		else
-			return selection_colour().lighter(0x40);
-	}
-
-	void style::set_hover_colour(const optional_colour& aHoverColour)
-	{
-		if (iHoverColour != aHoverColour)
-		{
-			iHoverColour = aHoverColour;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().invalidate_surfaces();
-			}
-		}
-	}
-
-	bool style::has_widget_detail_primary_colour() const
-	{
-		return iWidgetDetailPrimaryColour != boost::none;
-	}
-
-	colour style::widget_detail_primary_colour() const
-	{
-		if (has_widget_detail_primary_colour())
-			return *iWidgetDetailPrimaryColour;
-		else
-			return colour().same_lightness_as(colour().light() ? neogfx::colour{32, 32, 32} : neogfx::colour{224, 224, 224});
-	}
-
-	void style::set_widget_detail_primary_colour(const optional_colour& aWidgetDetailPrimaryColour)
-	{
-		if (iWidgetDetailPrimaryColour != aWidgetDetailPrimaryColour)
-		{
-			iWidgetDetailPrimaryColour = aWidgetDetailPrimaryColour;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().invalidate_surfaces();
-			}
-		}
-	}
-
-	bool style::has_widget_detail_secondary_colour() const
-	{
-		return iWidgetDetailSecondaryColour != boost::none;
-	}
-
-	colour style::widget_detail_secondary_colour() const
-	{
-		if (has_widget_detail_secondary_colour())
-			return *iWidgetDetailSecondaryColour;
-		else
-			return colour().same_lightness_as(colour().light() ? neogfx::colour{ 64, 64, 64 } : neogfx::colour{ 192, 192, 192 });
-	}
-
-	void style::set_widget_detail_secondary_colour(const optional_colour& aWidgetDetailSecondaryColour)
-	{
-		if (iWidgetDetailSecondaryColour != aWidgetDetailSecondaryColour)
-		{
-			iWidgetDetailSecondaryColour = aWidgetDetailSecondaryColour;
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().invalidate_surfaces();
-			}
+			iPalette = aPalette;
+			handle_change();
 		}
 	}
 
@@ -308,11 +152,7 @@ namespace neogfx
 		{
 			iFontInfo = aFontInfo;
 			iFont.reset();
-			if (&app::instance().current_style() == this)
-			{
-				app::instance().current_style_changed.trigger();
-				app::instance().surface_manager().layout_surfaces();
-			}
+			handle_change();
 		}
 	}
 
@@ -323,5 +163,15 @@ namespace neogfx
 			iFont = neogfx::font(iFontInfo);
 		}
 		return *iFont;
+	}
+
+	void style::handle_change()
+	{
+		changed.trigger();
+		if (&app::instance().current_style() == this)
+		{
+			app::instance().current_style_changed.trigger();
+			app::instance().surface_manager().layout_surfaces();
+		}
 	}
 }

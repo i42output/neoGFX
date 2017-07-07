@@ -63,6 +63,7 @@ namespace neogfx
 		struct not_child : std::logic_error { not_child() : std::logic_error("neogfx::i_widget::not_child") {} };
 		struct no_update_rect : std::logic_error { no_update_rect() : std::logic_error("neogfx::i_widget::no_update_rect") {} };
 		struct widget_not_entered : std::logic_error { widget_not_entered() : std::logic_error("neogfx::i_widget::widget_not_entered") {} };
+		struct widget_cannot_capture : std::logic_error { widget_cannot_capture() : std::logic_error("neogfx::i_widget::widget_cannot_capture") {} };
 		struct widget_not_capturing : std::logic_error { widget_not_capturing() : std::logic_error("neogfx::i_widget::widget_not_capturing") {} };
 		struct widget_not_focused : std::logic_error { widget_not_focused() : std::logic_error("neogfx::i_widget::widget_not_focused") {} };
 		struct widget_cannot_defer_layout : std::logic_error { widget_cannot_defer_layout() : std::logic_error("neogfx::i_widget::widget_cannot_defer_layout") {} };
@@ -175,6 +176,7 @@ namespace neogfx
 		virtual void enable() = 0;
 		virtual void disable() = 0;
 		virtual bool entered() const = 0;
+		virtual bool can_capture() const = 0;
 		virtual bool capturing() const = 0;
 		virtual void set_capture() = 0;
 		virtual void release_capture() = 0;

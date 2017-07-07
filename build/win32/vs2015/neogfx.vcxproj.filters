@@ -525,6 +525,12 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_operations.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\app\palette.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\app\i_palette.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -827,6 +833,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\palette.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

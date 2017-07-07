@@ -359,27 +359,28 @@ namespace neogfx
 
 	void scrollable_widget::scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e)
 	{
-		if (iIgnoreScrollbarUpdates)
-			return;
-		point scrollPosition = units_converter(*this).from_device_units(point(static_cast<coordinate>(horizontal_scrollbar().position()), static_cast<coordinate>(vertical_scrollbar().position())));
-		if (iOldScrollPosition != scrollPosition)
+		if (!iIgnoreScrollbarUpdates)
 		{
-			for (auto& c : children())
+			point scrollPosition = units_converter(*this).from_device_units(point(static_cast<coordinate>(horizontal_scrollbar().position()), static_cast<coordinate>(vertical_scrollbar().position())));
+			if (iOldScrollPosition != scrollPosition)
 			{
-				point delta = -(scrollPosition - iOldScrollPosition);
-				if (aScrollbar.type() == scrollbar_type::Horizontal || (scrolling_disposition(*c) & ScrollChildWidgetVertically) == DontScrollChildWidget)
-					delta.y = 0.0;
-				if (aScrollbar.type() == scrollbar_type::Vertical || (scrolling_disposition(*c) & ScrollChildWidgetHorizontally) == DontScrollChildWidget)
-					delta.x = 0.0;
-				c->move(c->position() + delta);
-			}
-			if (aScrollbar.type() == scrollbar_type::Vertical)
-			{
-				iOldScrollPosition.y = scrollPosition.y;
-			}
-			else if (aScrollbar.type() == scrollbar_type::Horizontal)
-			{
-				iOldScrollPosition.x = scrollPosition.x;
+				for (auto& c : children())
+				{
+					point delta = -(scrollPosition - iOldScrollPosition);
+					if (aScrollbar.type() == scrollbar_type::Horizontal || (scrolling_disposition(*c) & ScrollChildWidgetVertically) == DontScrollChildWidget)
+						delta.y = 0.0;
+					if (aScrollbar.type() == scrollbar_type::Vertical || (scrolling_disposition(*c) & ScrollChildWidgetHorizontally) == DontScrollChildWidget)
+						delta.x = 0.0;
+					c->move(c->position() + delta);
+				}
+				if (aScrollbar.type() == scrollbar_type::Vertical)
+				{
+					iOldScrollPosition.y = scrollPosition.y;
+				}
+				else if (aScrollbar.type() == scrollbar_type::Horizontal)
+				{
+					iOldScrollPosition.x = scrollPosition.x;
+				}
 			}
 		}
 		update(true);

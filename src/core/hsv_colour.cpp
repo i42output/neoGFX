@@ -136,7 +136,7 @@ namespace neogfx
 			r = c, g = 0.0, b = x;
 		else
 			r = g = b = 0.0;
-		double m = value() - c;
+		double m = std::abs(value() - c);
 		colour result(
 			static_cast<colour::component>(std::floor((r + m) * 255.0)),
 			static_cast<colour::component>(std::floor((g + m) * 255.0)),

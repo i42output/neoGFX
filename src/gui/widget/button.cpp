@@ -173,13 +173,14 @@ namespace neogfx
 	{
 		bool wasCapturing = capturing();
 		widget::mouse_button_released(aButton, aPosition);
-		if (wasCapturing && client_rect().contains(aPosition))
+		if (aButton == mouse_button::Left)
 		{
 			update();
-			if (aButton == mouse_button::Left)
+			if (wasCapturing)
 			{
 				destroyed_flag destroyed(*this);
-				handle_clicked();
+				if (client_rect().contains(aPosition))
+					handle_clicked();
 				if (!destroyed)
 					released.trigger();
 			}

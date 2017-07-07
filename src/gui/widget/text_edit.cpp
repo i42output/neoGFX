@@ -554,9 +554,9 @@ namespace neogfx
 
 	colour text_edit::frame_colour() const
 	{
-		if (app::instance().current_style().colour().similar_intensity(background_colour(), 0.03125))
+		if (app::instance().current_style().palette().colour().similar_intensity(background_colour(), 0.03125))
 			return scrollable_widget::frame_colour();
-		return app::instance().current_style().colour().mid(background_colour());
+		return app::instance().current_style().palette().colour().mid(background_colour());
 	}
 
 	bool text_edit::can_undo() const
@@ -877,7 +877,7 @@ namespace neogfx
 				break;
 			}
 		} while (w->has_parent());
-		colour defaultTextColour = app::instance().current_style().text_colour();
+		colour defaultTextColour = app::instance().current_style().palette().text_colour();
 		if (textColour == boost::none || textColour->similar_intensity(defaultTextColour))
 			return defaultTextColour;
 		else
@@ -1655,8 +1655,8 @@ namespace neogfx
 						if (selected)
 							aGraphicsContext.fill_rect(rect{ pos, size{glyph.advance().cx, aLine->extents.cy} }, 
 								has_focus() ? 
-									app::instance().current_style().selection_colour() : 
-									app::instance().current_style().selection_colour().with_alpha(64));
+									app::instance().current_style().palette().selection_colour() : 
+									app::instance().current_style().palette().selection_colour().with_alpha(64));
 						break;
 					case 1:
 						if (style.text_outline_colour().empty() || glyph.is_emoji())
@@ -1685,7 +1685,7 @@ namespace neogfx
 						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0)}, glyph,
 							glyphFont,
 							selected && has_focus() ? 
-								(app::instance().current_style().selection_colour().light() ? colour::Black : colour::White) :
+								(app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White) :
 								style.text_colour().is<colour>() ?
 									static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
 										static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :

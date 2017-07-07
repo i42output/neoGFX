@@ -65,7 +65,7 @@ public:
 		clicked([this, aNumber]()
 		{
 			ng::app::instance().change_style("Keypad").
-				set_colour(aNumber != 9 ? ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0) : ng::colour::LightGoldenrod);
+				palette().set_colour(aNumber != 9 ? ng::colour(aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0) : ng::colour::LightGoldenrod);
 			if (aNumber == 9)
 				iTextEdit.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal), ng::text_edit::style::colour_type()), true);
 			else if (aNumber == 8)
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 		app.change_style("Keypad");
-		app.current_style().set_colour(ng::colour::Black);
+		app.current_style().palette().set_colour(ng::colour::Black);
 		app.change_style("Default");
 
 		ng::window window(ng::size{ 800, 700 });
@@ -121,13 +121,13 @@ int main(int argc, char* argv[])
 
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{
-			ng::app::instance().change_style("Keypad").set_colour(ng::colour::LightGoldenrod);
+			ng::app::instance().change_style("Keypad").palette().set_colour(ng::colour::LightGoldenrod);
 		});
 
 		auto& contactsAction = app.add_action("&Contacts...", ":/closed/resources/caw_toolbar.naa#contacts.png").set_shortcut("Alt+C");
 		contactsAction.triggered([]()
 		{
-			ng::app::instance().change_style("Keypad").set_colour(ng::colour::White);
+			ng::app::instance().change_style("Keypad").palette().set_colour(ng::colour::White);
 		});
 		auto& muteAction = app.add_action("Mute/&Unmute Sound", ":/closed/resources/caw_toolbar.naa#mute.png");
 		muteAction.set_checkable(true);
@@ -393,8 +393,9 @@ int main(int argc, char* argv[])
 			groupBox.set_checkable(false);
 		});
 		ng::gradient_widget gw(layoutRadiosAndChecks);
-		columns.checked([&textEdit, &gw]()
+		columns.checked([&textEdit, &gw, &password]()
 		{
+			password.disable();
 			textEdit.set_columns(3);
 			gw.gradient_changed([&gw, &textEdit]()
 			{
@@ -404,8 +405,9 @@ int main(int argc, char* argv[])
 				textEdit.set_column(2, cs);
 			}, textEdit);
 		});
-		columns.unchecked([&textEdit, &gw]()
+		columns.unchecked([&textEdit, &gw, &password]()
 		{
+			password.enable();
 			textEdit.remove_columns();
 			gw.gradient_changed.unsubscribe(textEdit);
 		});
@@ -451,6 +453,12 @@ int main(int argc, char* argv[])
 				app.rendering_engine().subpixel_rendering_on();
 		});
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
+		ng::radio_button radio1(layout4, "Radio 1");
+		ng::radio_button radio2(layout4, "Radio 2");
+		ng::radio_button radio3(layout4, "Radio 3");
+		radio3.disable();
+		ng::radio_button radio4(layout4, "Radio 4");
+
 		buttonColourPicker.clicked([&window]()
 		{
 			static boost::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
@@ -459,10 +467,10 @@ int main(int argc, char* argv[])
 				sCustomColours = ng::colour_dialog::custom_colour_list{};
 				std::fill(sCustomColours->begin(), sCustomColours->end(), ng::colour::White);
 			}
-			ng::colour_dialog colourPicker(window, ng::app::instance().change_style("Keypad").colour());
+			ng::colour_dialog colourPicker(window, ng::app::instance().change_style("Keypad").palette().colour());
 			colourPicker.custom_colours() = *sCustomColours;
 			if (colourPicker.exec() == ng::dialog::Accepted)
-				ng::app::instance().change_style("Keypad").set_colour(colourPicker.selected_colour());
+				ng::app::instance().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
 			*sCustomColours = colourPicker.custom_colours();
 		});
 		ng::vertical_spacer spacer1(layout4);
