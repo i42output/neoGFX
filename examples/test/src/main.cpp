@@ -393,8 +393,9 @@ int main(int argc, char* argv[])
 			groupBox.set_checkable(false);
 		});
 		ng::gradient_widget gw(layoutRadiosAndChecks);
-		columns.checked([&textEdit, &gw]()
+		columns.checked([&textEdit, &gw, &password]()
 		{
+			password.disable();
 			textEdit.set_columns(3);
 			gw.gradient_changed([&gw, &textEdit]()
 			{
@@ -404,8 +405,9 @@ int main(int argc, char* argv[])
 				textEdit.set_column(2, cs);
 			}, textEdit);
 		});
-		columns.unchecked([&textEdit, &gw]()
+		columns.unchecked([&textEdit, &gw, &password]()
 		{
+			password.enable();
 			textEdit.remove_columns();
 			gw.gradient_changed.unsubscribe(textEdit);
 		});
@@ -451,6 +453,12 @@ int main(int argc, char* argv[])
 				app.rendering_engine().subpixel_rendering_on();
 		});
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
+		ng::radio_button radio1(layout4, "Radio 1");
+		ng::radio_button radio2(layout4, "Radio 2");
+		ng::radio_button radio3(layout4, "Radio 3");
+		radio3.disable();
+		ng::radio_button radio4(layout4, "Radio 4");
+
 		buttonColourPicker.clicked([&window]()
 		{
 			static boost::optional<ng::colour_dialog::custom_colour_list> sCustomColours;

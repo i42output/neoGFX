@@ -54,14 +54,14 @@ namespace neogfx
 		if (borderColour1.similar_intensity(container_background_colour(), 0.03125))
 			borderColour1.dark() ? borderColour1.lighten(0x40) : borderColour1.darken(0x40);
 		discRect.deflate(1.0, 1.0);
-		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1, 1.0));
+		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1.with_alpha(effectively_enabled() ? 0xFF : 0x80), 1.0));
 		discRect.deflate(1.0, 1.0);
-		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1.mid(background_colour()), 1.0));
+		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1.mid(background_colour()).with_alpha(effectively_enabled() ? 0xFF : 0x80), 1.0));
 		discRect.deflate(2.0, 2.0);
 		if (static_cast<const radio_button&>(parent()).is_on())
-			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, app::instance().current_style().palette().widget_detail_primary_colour());
+			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, app::instance().current_style().palette().widget_detail_primary_colour().with_alpha(effectively_enabled() ? 0xFF : 0x80));
 		else
-			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, background_colour());
+			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, background_colour().with_alpha(effectively_enabled() ? 0xFF : 0x80));
 	}
 
 	radio_button::radio_button(const std::string& aText) :
