@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-	class sprite : public shape, public i_sprite
+	class sprite : public shape<i_sprite>
 	{
 		// types
 	public:
@@ -38,47 +38,16 @@ namespace neogfx
 		sprite(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
 		sprite(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		sprite(const sprite& aOther);
-		// container/buddy
-	public:
-		i_shape_container& container() const override;
-		bool has_buddy() const override;
-		i_shape& buddy() const override;
-		void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{}) override;
-		const vec3& buddy_offset() const override;
-		void set_buddy_offset(const vec3& aBuddyOffset) override;
-		void unset_buddy() override;
-		// animation
-	public:
-		frame_index frame_count() const override;
-		const i_frame& frame(frame_index aFrameIndex) const override;
-		i_frame& frame(frame_index aFrameIndex) override;
-		void add_frame(i_frame& aFrame) override;
-		void add_frame(std::shared_ptr<i_frame> aFrame) override;
-		void replace_frame(frame_index aFrameIndex, i_frame& aFrame) override;
-		void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame) override;
-		void remove_frame(frame_index aFrameIndex) override;
-		void set_texture_rect_for_all_frames(const optional_rect& aTextureRect) override;
 		// geometry
 	public:
-		const animation_frames& animation() const override;
-		const i_frame& current_frame() const override;
-		i_frame& current_frame() override;
 		point origin() const override;
 		point position() const override;
 		vec3 position_3D() const override;
-		rect bounding_box() const override;
-		const vec2& scale() const override;
-		bool has_transformation_matrix() const override;
 		mat33 transformation_matrix() const override;
 		const optional_path& path() const override;
-		void set_animation(const animation_frames& aAnimation) override;
-		void set_current_frame(frame_index aFrameIndex) override;
 		void set_origin(const point& aOrigin) override;
 		void set_position(const point& aPosition) override;
 		void set_position_3D(const vec3& aPosition3D) override;
-		void set_bounding_box(const optional_rect& aBoundingBox) override;
-		void set_scale(const vec2& aScale) override;
-		void set_transformation_matrix(const optional_mat33& aTransformationMatrix) override;
 		void set_path(const optional_path& aPath) override;
 		// physics
 	public:
@@ -89,9 +58,7 @@ namespace neogfx
 	public:
 		std::size_t vertex_count(bool aIncludeCentre = false) const override;
 		vec3_list vertices(bool aIncludeCentre = false) const override;
-		vec3_list transformed_vertices(bool aIncludeCentre = false) const override;
 		bool update(const optional_time_point& aNow) override;
-		void paint(graphics_context& aGraphicsContext) const override;
 		// attributes
 	private:
 		optional_path iPath;

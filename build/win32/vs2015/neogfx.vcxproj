@@ -311,7 +311,6 @@
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
     <ClCompile Include="..\..\..\src\game\physical_object.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
-    <ClCompile Include="..\..\..\src\game\shape.cpp" />
     <ClCompile Include="..\..\..\src\game\sprite.cpp" />
     <ClCompile Include="..\..\..\src\game\sprite_plane.cpp" />
     <ClCompile Include="..\..\..\src\game\text.cpp" />
@@ -394,6 +393,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\core\path.inl" />
+    <None Include="..\..\..\include\neogfx\game\shape.inl" />
     <None Include="..\..\..\include\neogfx\gui\layout\flow_layout.inl" />
     <None Include="..\..\..\include\neogfx\gui\layout\layout.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />

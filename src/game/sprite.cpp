@@ -50,101 +50,6 @@ namespace neogfx
 	{
 	}
 
-	i_shape_container& sprite::container() const
-	{
-		return shape::container();
-	}
-
-	bool sprite::has_buddy() const
-	{
-		return shape::has_buddy();
-	}
-
-	i_shape& sprite::buddy() const
-	{
-		return shape::buddy();
-	}
-
-	void sprite::set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset)
-	{
-		shape::set_buddy(aBuddy, aBuddyOffset);
-	}
-
-	const vec3& sprite::buddy_offset() const
-	{
-		return shape::buddy_offset();
-	}
-
-	void sprite::set_buddy_offset(const vec3& aBuddyOffset)
-	{
-		shape::set_buddy_offset(aBuddyOffset);
-	}
-
-	void sprite::unset_buddy()
-	{
-		shape::unset_buddy();
-	}
-
-	sprite::frame_index sprite::frame_count() const
-	{
-		return shape::frame_count();
-	}
-
-	const i_frame& sprite::frame(frame_index aFrameIndex) const
-	{
-		return shape::frame(aFrameIndex);
-	}
-
-	i_frame& sprite::frame(frame_index aFrameIndex)
-	{
-		return shape::frame(aFrameIndex);
-	}
-
-	void sprite::add_frame(i_frame& aFrame)
-	{
-		shape::add_frame(aFrame);
-	}
-
-	void sprite::add_frame(std::shared_ptr<i_frame> aFrame)
-	{
-		shape::add_frame(aFrame);
-	}
-
-	void sprite::replace_frame(frame_index aFrameIndex, i_frame& aFrame)
-	{
-		shape::replace_frame(aFrameIndex, aFrame);
-	}
-
-	void sprite::replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame)
-	{
-		shape::replace_frame(aFrameIndex, aFrame);
-	}
-
-	void sprite::remove_frame(frame_index aFrameIndex)
-	{
-		shape::remove_frame(aFrameIndex);
-	}
-
-	void sprite::set_texture_rect_for_all_frames(const optional_rect& aTextureRect)
-	{
-		shape::set_texture_rect_for_all_frames(aTextureRect);
-	}
-
-	const sprite::animation_frames& sprite::animation() const
-	{
-		return shape::animation();
-	}
-
-	const i_frame& sprite::current_frame() const
-	{
-		return shape::current_frame();
-	}
-
-	i_frame& sprite::current_frame()
-	{
-		return shape::current_frame();
-	}
-
 	point sprite::origin() const
 	{
 		return point{ physics().origin()[0], physics().origin()[1] };
@@ -158,21 +63,6 @@ namespace neogfx
 	vec3 sprite::position_3D() const
 	{
 		return physics().position();
-	}
-
-	rect sprite::bounding_box() const
-	{
-		return shape::bounding_box();
-	}
-
-	const vec2& sprite::scale() const
-	{
-		return shape::scale();
-	}
-
-	bool sprite::has_transformation_matrix() const
-	{
-		return shape::has_transformation_matrix();
 	}
 
 	mat33 sprite::transformation_matrix() const
@@ -189,16 +79,6 @@ namespace neogfx
 		return iPath;
 	}
 	
-	void sprite::set_animation(const animation_frames& aAnimation)
-	{
-		shape::set_animation(aAnimation);
-	}
-
-	void sprite::set_current_frame(frame_index aFrameIndex)
-	{
-		shape::set_current_frame(aFrameIndex);
-	}
-
 	void sprite::set_origin(const point& aOrigin)
 	{
 		shape::set_origin(aOrigin);
@@ -215,21 +95,6 @@ namespace neogfx
 	{
 		shape::set_position_3D(aPosition3D);
 		physics().set_position(aPosition3D);
-	}
-
-	void sprite::set_bounding_box(const optional_rect& aBoundingBox)
-	{
-		shape::set_bounding_box(aBoundingBox);
-	}
-
-	void sprite::set_scale(const vec2& aScale)
-	{
-		shape::set_scale(aScale);
-	}
-
-	void sprite::set_transformation_matrix(const optional_mat33& aTransformationMatrix)
-	{
-		shape::set_transformation_matrix(aTransformationMatrix);
 	}
 
 	void sprite::set_path(const optional_path& aPath)
@@ -272,15 +137,5 @@ namespace neogfx
 		result.push_back(r.bottom_right().to_vector3());
 		result.push_back(r.bottom_left().to_vector3());
 		return result;
-	}
-
-	vec3_list sprite::transformed_vertices(bool aIncludeCentre) const
-	{
-		return shape::transformed_vertices(aIncludeCentre);
-	}
-
-	void sprite::paint(graphics_context& aGraphicsContext) const
-	{
-		shape::paint(aGraphicsContext);
 	}
 }

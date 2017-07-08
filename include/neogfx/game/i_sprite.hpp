@@ -22,7 +22,6 @@
 #include <chrono>
 #include <boost/optional.hpp>
 #include <neogfx/core/geometry.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
 #include "i_shape.hpp"
 #include "i_physical_object.hpp"
 
@@ -43,8 +42,5 @@ namespace neogfx
 	public:
 		virtual const optional_path& path() const = 0;
 		virtual void set_path(const optional_path& aPath) = 0;
-		// rendering
-	public:
-		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 	};
 }

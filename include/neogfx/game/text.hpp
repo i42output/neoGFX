@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-	class text : public shape
+	class text : public shape<>
 	{
 	public:
 		text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const colour& aTextColour, neogfx::alignment aAlignment = alignment::Left, const optional_colour& aBackgroundColour = optional_colour());

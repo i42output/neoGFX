@@ -757,9 +757,6 @@
     <ClCompile Include="..\..\..\src\gfx\native\sdl_graphics_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\game\shape.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\game\sprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -853,6 +850,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\core\path.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\game\shape.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

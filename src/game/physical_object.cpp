@@ -142,15 +142,10 @@ namespace neogfx
 	{
 		bool updated = false;
 		if (iTimeOfLastUpdate == boost::none)
-		{
-			iTimeOfLastUpdate = aNow;
 			updated = true;
-		}
 		next_physics() = current_physics();
-		if (iTimeOfLastUpdate != boost::none && aNow != boost::none)
-			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den), aForce) || updated;
-		else
-			updated = apply_physics(1.0, aForce) || updated;
+		if (!updated)
+			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den), aForce);
 		iTimeOfLastUpdate = aNow;
 		current_physics() = next_physics();
 		return updated;

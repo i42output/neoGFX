@@ -54,6 +54,7 @@ void create_game(ng::i_layout& aLayout)
 	//spritePlane->set_uniform_gravity();
 	//spritePlane->set_gravitational_constant(0.0);
 	//spritePlane->create_earth();
+	spritePlane->sprites().reserve(10000);
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::LightGoldenrod}, {2, ng::colour::DarkGoldenrod4} }));
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_size(ng::size(36.0, 36.0));
@@ -69,7 +70,7 @@ void create_game(ng::i_layout& aLayout)
 			ng::pen{ ng::colour::Goldenrod, 3.0 }, ng::colour::DarkGoldenrod4);
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});
-	spritePlane->physics_applied([spritePlane, &spaceshipSprite, shipInfo]()
+	spritePlane->applying_physics([spritePlane, &spaceshipSprite, shipInfo]()
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		spaceshipSprite.physics().set_acceleration({  
@@ -81,8 +82,13 @@ void create_game(ng::i_layout& aLayout)
 			spaceshipSprite.physics().set_spin_degrees(-30.0);
 		else
 			spaceshipSprite.physics().set_spin_degrees(0.0);
-		if (keyboard.is_key_pressed(ng::ScanCode_SPACE))
-			spritePlane->add_sprite(std::make_shared<bullet>(spaceshipSprite));
+		static std::vector<bullet> bullets;
+		bullets.reserve(10000);
+		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) && bullets.size() < bullets.capacity())
+		{
+			bullets.emplace_back(spaceshipSprite);
+			spritePlane->add_sprite(bullets.back());
+		}
 		std::ostringstream oss;
 		oss << "VELOCITY:  " << spaceshipSprite.physics().velocity().magnitude() << " m/s" << "\n";
 		oss << "ACCELERATION:  " << spaceshipSprite.physics().acceleration().magnitude() << " m/s/s";

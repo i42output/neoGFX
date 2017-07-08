@@ -53,10 +53,17 @@ namespace neogfx
 		optional_mat33 iTransformation;
 	};
 
-	class shape : public i_shape
+	template <typename MixinInterface = i_shape>
+	class shape : public MixinInterface
 	{
 	private:
 		typedef std::vector<std::shared_ptr<i_frame>> frame_list;
+	public:
+		typedef i_shape::frame_index frame_index;
+		typedef i_shape::time_interval time_interval;
+		typedef i_shape::animation_frames animation_frames;
+		typedef i_shape::time_point time_point;
+		typedef i_shape::optional_time_point optional_time_point;
 	public:
 		shape(i_shape_container& aContainer);
 		shape(i_shape_container& aContainer, const colour& aColour);
@@ -125,5 +132,7 @@ namespace neogfx
 		mutable optional_mat33 iTransformationMatrix;
 	};
 }
+
+#include "shape.inl"
 
 #include "rectangle.hpp"

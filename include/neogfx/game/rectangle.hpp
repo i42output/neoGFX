@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-	class rectangle : public shape
+	class rectangle : public shape<>
 	{
 	public:
 		rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize);

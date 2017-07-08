@@ -303,7 +303,6 @@ namespace neogfx
 	bool sprite_plane::update_objects()
 	{
 		applying_physics.trigger();
-		auto now = std::chrono::steady_clock::now();
 		bool updated = false;
 		iUpdateBuffer.reserve(iSprites.size() + iObjects.size());
 		iUpdateBuffer.clear();
@@ -315,6 +314,7 @@ namespace neogfx
 		{
 			return left->mass() > right->mass();
 		});
+		auto now = std::chrono::steady_clock::now();
 		for (auto& o2 : iUpdateBuffer)
 		{
 			vec3 totalForce;
