@@ -57,11 +57,18 @@ namespace neogfx
 		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1.with_alpha(effectively_enabled() ? 0xFF : 0x80), 1.0));
 		discRect.deflate(1.0, 1.0);
 		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1.mid(background_colour()).with_alpha(effectively_enabled() ? 0xFF : 0x80), 1.0));
-		discRect.deflate(2.0, 2.0);
+		discRect.deflate(1.0, 1.0);
+		colour hoverColour = app::instance().current_style().palette().hover_colour().same_lightness_as(
+			background_colour().dark() ?
+			background_colour().lighter(0x20) :
+			background_colour().darker(0x20));
+		if (parent().capturing())
+			background_colour().dark() ? hoverColour.lighten(0x20) : hoverColour.darken(0x20);
+		colour backgroundFillColour = parent().enabled() && parent().client_rect().contains(surface().mouse_position() - parent().origin()) ? hoverColour : background_colour();
+		aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColour.with_alpha(effectively_enabled() ? 0xFF : 0x80));
+		discRect.deflate(1.0, 1.0);
 		if (static_cast<const radio_button&>(parent()).is_on())
 			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, app::instance().current_style().palette().widget_detail_primary_colour().with_alpha(effectively_enabled() ? 0xFF : 0x80));
-		else
-			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, background_colour().with_alpha(effectively_enabled() ? 0xFF : 0x80));
 	}
 
 	radio_button::radio_button(const std::string& aText) :
@@ -126,6 +133,18 @@ namespace neogfx
 			rect focusRect = label().client_rect() + label().position();
 			aGraphicsContext.draw_focus_rect(focusRect);
 		}
+	}
+
+	void radio_button::mouse_entered()
+	{
+		button::mouse_entered();
+		update();
+	}
+
+	void radio_button::mouse_left()
+	{
+		button::mouse_left();
+		update();
 	}
 
 	void radio_button::handle_clicked()
