@@ -35,6 +35,7 @@ namespace neogfx
 		event<graphics_context&> sprites_painted;
 	public:
 		typedef i_sprite::time_interval time_interval;
+		typedef i_sprite::optional_time_interval optional_time_interval;
 		typedef i_sprite::step_time_interval step_time_interval;
 	public:
 		typedef std::vector<std::shared_ptr<i_shape>> shape_list;
@@ -86,8 +87,10 @@ namespace neogfx
 		void add_object(std::shared_ptr<i_physical_object> aObject);
 		i_physical_object& create_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
 		i_physical_object& create_object();
-		time_interval physics_time() const;
-		step_time_interval physics_step_time(step_time_interval aStepInterval) const;
+		const optional_time_interval& physics_time() const;
+		void set_physics_time(const optional_time_interval& aTime);
+		step_time_interval physics_step_interval() const;
+		void set_physics_step_interval(step_time_interval aStepInterval);
 	public:
 		const shape_list& shapes() const;
 		shape_list& shapes();
@@ -104,7 +107,8 @@ namespace neogfx
 		bool iEnableZSorting;
 		scalar iG;
 		optional_vec3 iUniformGravity;
-		time_interval iPhysicsTime;
+		optional_time_interval iPhysicsTime;
+		step_time_interval iStepInterval;
 		shape_list iShapes;
 		sprite_list iSprites;
 		object_list iObjects;

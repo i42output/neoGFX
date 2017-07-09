@@ -27,13 +27,12 @@
 namespace neogfx
 {
 	sprite_plane::sprite_plane() : 
-		iEnableZSorting(false),
-		iG(6.67408e-11)
+		iEnableZSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
 	{
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
-		widget(aParent), iEnableZSorting(false), iG(6.67408e-11), iPhysicsTime(0.0)
+		widget{ aParent }, iEnableZSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
 	{
 		iSink = surface().native_surface().rendering_check([this]()
 		{
@@ -43,7 +42,7 @@ namespace neogfx
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
-		widget(aLayout), iEnableZSorting(false), iG(6.67408e-11), iPhysicsTime(0.0)
+		widget{ aLayout }, iEnableZSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
 	{
 		iSink = surface().native_surface().rendering_check([this]()
 		{
@@ -260,15 +259,24 @@ namespace neogfx
 		return earth;
 	}
 
-	sprite_plane::time_interval sprite_plane::physics_time() const
+	const sprite_plane::optional_time_interval& sprite_plane::physics_time() const
 	{
 		return iPhysicsTime;
 	}
 
-	sprite_plane::step_time_interval sprite_plane::physics_step_time(step_time_interval aStepInterval) const
+	void sprite_plane::set_physics_time(const optional_time_interval& aTime)
 	{
-		auto ms = static_cast<step_time_interval>(physics_time() * 1000.0);
-		return ms - (ms % aStepInterval);
+		iPhysicsTime = aTime;
+	}
+
+	sprite_plane::step_time_interval sprite_plane::physics_step_interval() const
+	{
+		return iStepInterval;
+	}
+
+	void sprite_plane::set_physics_step_interval(step_time_interval aStepInterval)
+	{
+		iStepInterval = aStepInterval;
 	}
 
 	const sprite_plane::shape_list& sprite_plane::shapes() const
@@ -313,46 +321,55 @@ namespace neogfx
 
 	bool sprite_plane::update_objects()
 	{
-		iPhysicsTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() * .001;
-		applying_physics.trigger();
+		auto nowClock = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
+		auto now = to_step_time(nowClock.count() * .001, physics_step_interval());
+		if (!iPhysicsTime)
+			iPhysicsTime = from_step_time(now);
+		auto stepTime = to_step_time(iPhysicsTime, physics_step_interval());
 		bool updated = false;
-		iUpdateBuffer.reserve(iSprites.size() + iObjects.size());
-		iUpdateBuffer.clear();
-		for (const auto& s : iSprites)
-			iUpdateBuffer.push_back(&s->physics());
-		for (const auto& s : iObjects)
-			iUpdateBuffer.push_back(&*s);
-		std::stable_sort(iUpdateBuffer.begin(), iUpdateBuffer.end(), [](i_physical_object* left, i_physical_object* right) ->bool
+		while (stepTime != now)
 		{
-			return left->mass() > right->mass();
-		});
-		for (auto& o2 : iUpdateBuffer)
-		{
-			vec3 totalForce;
-			if (o2->mass() == 0.0)
-				continue;
-			if (iUniformGravity != boost::none)
-				totalForce = *iUniformGravity * o2->mass();
-			else if (iG != 0.0)
+			stepTime += physics_step_interval();
+			iPhysicsTime = from_step_time(stepTime);
+			applying_physics.trigger();
+			iUpdateBuffer.reserve(iSprites.size() + iObjects.size());
+			iUpdateBuffer.clear();
+			for (const auto& s : iSprites)
+				iUpdateBuffer.push_back(&s->physics());
+			for (const auto& s : iObjects)
+				iUpdateBuffer.push_back(&*s);
+			std::stable_sort(iUpdateBuffer.begin(), iUpdateBuffer.end(), [](i_physical_object* left, i_physical_object* right) ->bool
 			{
-				for (auto& o1 : iUpdateBuffer)
+				return left->mass() > right->mass();
+			});
+			for (auto& o2 : iUpdateBuffer)
+			{
+				vec3 totalForce;
+				if (o2->mass() == 0.0)
+					continue;
+				if (iUniformGravity != boost::none)
+					totalForce = *iUniformGravity * o2->mass();
+				else if (iG != 0.0)
 				{
-					if (o1 == o2)
-						continue;
-					if (o1->collided(*o2))
-						continue;
-					vec3 force;
-					vec3 r12 = o2->position() - o1->position();
-					if (r12.magnitude() > 0.0)
-						force = -iG * o1->mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
-					if (force.magnitude() < 1.0e-6)
-						break;
-					totalForce += force;
+					for (auto& o1 : iUpdateBuffer)
+					{
+						if (o1 == o2)
+							continue;
+						if (o1->collided(*o2))
+							continue;
+						vec3 force;
+						vec3 r12 = o2->position() - o1->position();
+						if (r12.magnitude() > 0.0)
+							force = -iG * o1->mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
+						if (force.magnitude() < 1.0e-6)
+							break;
+						totalForce += force;
+					}
 				}
+				updated = (o2->update(iPhysicsTime, totalForce) || updated);
 			}
-			updated = (o2->update(iPhysicsTime, totalForce) || updated);
+			physics_applied.trigger();
 		}
-		physics_applied.trigger();
 		return updated;
 	}
 }

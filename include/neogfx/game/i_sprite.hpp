@@ -41,8 +41,6 @@ namespace neogfx
 		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
 		virtual const optional_time_interval& update_time() const = 0;
 		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;
-		virtual step_time_interval step_time(step_time_interval aStepInterval) const = 0;
-		virtual void set_step_time(step_time_interval aInterval) = 0;
 		// geometry
 	public:
 		virtual const optional_path& path() const = 0;

@@ -76,7 +76,24 @@ namespace neogfx
 		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
 		virtual const optional_time_interval& update_time() const = 0;
 		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;
-		virtual step_time_interval step_time(step_time_interval aStepInterval) const = 0;
-		virtual void set_step_time(step_time_interval aInterval) = 0;
 	};
+
+	inline i_physical_object::step_time_interval to_step_time(i_physical_object::time_interval aTime, i_physical_object::step_time_interval aStepInterval)
+	{
+		auto ms = static_cast<i_physical_object::step_time_interval>(aTime * 1000.0);
+		return ms - (ms % aStepInterval);
+	}
+
+	inline i_physical_object::step_time_interval to_step_time(const i_physical_object::optional_time_interval& aTime, i_physical_object::step_time_interval aStepInterval)
+	{
+		if (aTime)
+			return to_step_time(*aTime, aStepInterval);
+		else
+			return 0;
+	}
+
+	inline i_physical_object::time_interval from_step_time(i_physical_object::step_time_interval aStepTime)
+	{
+		return aStepTime / 1000.0;
+	}
 }

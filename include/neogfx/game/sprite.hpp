@@ -62,8 +62,6 @@ namespace neogfx
 		bool update(const optional_time_interval& aNow) override;
 		const optional_time_interval& update_time() const override;
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
-		step_time_interval step_time(step_time_interval aStepInterval) const override;
-		void set_step_time(step_time_interval aInterval) override;
 		// attributes
 	private:
 		optional_path iPath;

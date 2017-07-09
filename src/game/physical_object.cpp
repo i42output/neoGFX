@@ -163,21 +163,6 @@ namespace neogfx
 		iTimeOfLastUpdate = aLastUpdateTime;
 	}
 
-	physical_object::step_time_interval physical_object::step_time(step_time_interval aStepInterval) const
-	{
-		if (update_time())
-		{
-			auto ms = static_cast<step_time_interval>(*update_time() * 1000.0);
-			return ms - (ms % aStepInterval);
-		}
-		return 0;
-	}
-
-	void physical_object::set_step_time(step_time_interval aInterval)
-	{
-		set_update_time(aInterval / 1000.0);
-	}
-
 	const physical_object::physics& physical_object::current_physics() const
 	{
 		if (iCurrentPhysics == boost::none)
