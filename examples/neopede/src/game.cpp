@@ -102,6 +102,8 @@ void create_game(ng::i_layout& aLayout)
 							spritePlane->add_sprite(bullets.back());
 						}
 					}
+					else
+						break;
 				}
 			}
 		}
