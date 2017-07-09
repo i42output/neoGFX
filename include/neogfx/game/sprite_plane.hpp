@@ -38,9 +38,11 @@ namespace neogfx
 		typedef i_sprite::optional_time_interval optional_time_interval;
 		typedef i_sprite::step_time_interval step_time_interval;
 	public:
-		typedef std::vector<std::shared_ptr<i_shape>> shape_list;
-		typedef std::vector<std::shared_ptr<i_sprite>> sprite_list;
-		typedef std::vector<std::shared_ptr<i_physical_object>> object_list;
+		typedef std::shared_ptr<i_sprite> sprite_pointer;
+		typedef std::shared_ptr<i_physical_object> object_pointer;
+		typedef std::shared_ptr<i_shape> shape_pointer;
+		typedef neolib::variant<sprite_pointer, object_pointer, shape_pointer> item;
+		typedef std::vector<item> item_list;
 		typedef std::map<const i_shape*, std::pair<i_shape*, vec3>> buddy_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
@@ -92,30 +94,26 @@ namespace neogfx
 		step_time_interval physics_step_interval() const;
 		void set_physics_step_interval(step_time_interval aStepInterval);
 	public:
-		const shape_list& shapes() const;
-		shape_list& shapes();
-		const sprite_list& sprites() const;
-		sprite_list& sprites();
-		const object_list& objects() const;
-		object_list& objects();
+		void reserve(std::size_t aCapacity);
+		const item_list& items() const;
 		const buddy_list& buddies() const;
 		buddy_list& buddies();
 	private:
+		void sort_shapes() const;
+		void sort_objects();
 		bool update_objects();
 	private:
 		sink iSink;
 		bool iEnableZSorting;
+		bool iNeedsSorting;
 		scalar iG;
 		optional_vec3 iUniformGravity;
 		optional_time_interval iPhysicsTime;
 		step_time_interval iStepInterval;
-		shape_list iShapes;
-		sprite_list iSprites;
-		object_list iObjects;
+		item_list iItems;
+		mutable std::vector<i_shape*> iRenderBuffer;
 		buddy_list iBuddies;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
-		mutable std::vector<i_shape*> iRenderBuffer;
-		mutable std::vector<i_physical_object*> iUpdateBuffer;
 	};
 }

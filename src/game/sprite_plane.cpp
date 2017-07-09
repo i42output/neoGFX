@@ -27,12 +27,12 @@
 namespace neogfx
 {
 	sprite_plane::sprite_plane() : 
-		iEnableZSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG { 6.67408e-11 }, iStepInterval{ 10 }
 	{
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
-		widget{ aParent }, iEnableZSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
+		widget{ aParent }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
 	{
 		iSink = surface().native_surface().rendering_check([this]()
 		{
@@ -42,7 +42,7 @@ namespace neogfx
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
-		widget{ aLayout }, iEnableZSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
+		widget{ aLayout }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
 	{
 		iSink = surface().native_surface().rendering_check([this]()
 		{
@@ -73,43 +73,12 @@ namespace neogfx
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
 	{	
 		painting_sprites.trigger(aGraphicsContext);
-		if (iEnableZSorting)
+		sort_shapes();
+		for (auto s : iRenderBuffer)
 		{
-			iRenderBuffer.reserve(iShapes.size() + iSprites.size());
-			iRenderBuffer.clear();
-			for (const auto& s : iShapes)
-			{
-				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
-					continue;
-				iRenderBuffer.push_back(&*s);
-			}
-			for (const auto& s : iSprites)
-			{
-				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
-					continue;
-				iRenderBuffer.push_back(&*s);
-			}
-			std::stable_sort(iRenderBuffer.begin(), iRenderBuffer.end(), [](i_shape* left, i_shape* right) ->bool
-			{
-				return left->position_3D()[2] < right->position_3D()[2];
-			});
-			for (auto s : iRenderBuffer)
-				s->paint(aGraphicsContext);
-		}
-		else
-		{
-			for (const auto& s : iShapes)
-			{
-				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
-					continue;
-				s->paint(aGraphicsContext);
-			}
-			for (const auto& s : iSprites)
-			{
-				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
-					continue;
-				s->paint(aGraphicsContext);
-			}
+			if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
+				continue;
+			s->paint(aGraphicsContext);
 		}
 		sprites_painted.trigger(aGraphicsContext);
 	}
@@ -175,22 +144,30 @@ namespace neogfx
 
 	void sprite_plane::add_shape(i_shape& aShape)
 	{
-		iShapes.push_back(std::shared_ptr<i_shape>(std::shared_ptr<i_shape>(), &aShape));
+		iItems.push_back(std::shared_ptr<i_shape>(std::shared_ptr<i_shape>(), &aShape));
+		iRenderBuffer.push_back(&aShape);
+		iNeedsSorting = true;
 	}
 
 	void sprite_plane::add_shape(std::shared_ptr<i_shape> aShape)
 	{
-		iShapes.push_back(aShape);
+		iItems.push_back(aShape);
+		iRenderBuffer.push_back(&*aShape);
+		iNeedsSorting = true;
 	}
 
 	void sprite_plane::add_sprite(i_sprite& aSprite)
 	{
-		iSprites.push_back(std::shared_ptr<i_sprite>(std::shared_ptr<i_sprite>(), &aSprite));
+		iItems.push_back(std::shared_ptr<i_sprite>(std::shared_ptr<i_sprite>(), &aSprite));
+		iRenderBuffer.push_back(&aSprite);
+		iNeedsSorting = true;
 	}
 
 	void sprite_plane::add_sprite(std::shared_ptr<i_sprite> aSprite)
 	{
-		iSprites.push_back(aSprite);
+		iItems.push_back(aSprite);
+		iRenderBuffer.push_back(&*aSprite);
+		iNeedsSorting = true;
 	}
 
 	i_sprite& sprite_plane::create_sprite()
@@ -236,12 +213,14 @@ namespace neogfx
 
 	void sprite_plane::add_object(i_physical_object& aObject)
 	{
-		iObjects.push_back(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
+		iItems.push_back(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
+		iNeedsSorting = true;
 	}
 
 	void sprite_plane::add_object(std::shared_ptr<i_physical_object> aObject)
 	{
-		iObjects.push_back(aObject);
+		iItems.push_back(aObject);
+		iNeedsSorting = true;
 	}
 
 	i_physical_object& sprite_plane::create_object()
@@ -279,34 +258,14 @@ namespace neogfx
 		iStepInterval = aStepInterval;
 	}
 
-	const sprite_plane::shape_list& sprite_plane::shapes() const
+	void sprite_plane::reserve(std::size_t aCapacity)
 	{
-		return iShapes;
+		iItems.reserve(aCapacity);
 	}
 
-	sprite_plane::shape_list& sprite_plane::shapes()
+	const sprite_plane::item_list& sprite_plane::items() const
 	{
-		return iShapes;
-	}
-
-	const sprite_plane::sprite_list& sprite_plane::sprites() const
-	{
-		return iSprites;
-	}
-
-	sprite_plane::sprite_list& sprite_plane::sprites()
-	{
-		return iSprites;
-	}
-
-	const sprite_plane::object_list& sprite_plane::objects() const
-	{
-		return iObjects;
-	}
-
-	sprite_plane::object_list& sprite_plane::objects()
-	{
-		return iObjects;
+		return iItems;
 	}
 
 	const sprite_plane::buddy_list& sprite_plane::buddies() const
@@ -319,8 +278,42 @@ namespace neogfx
 		return iBuddies;
 	}
 
+	void sprite_plane::sort_shapes() const
+	{
+		if (iNeedsSorting && iEnableZSorting)
+		{
+			std::stable_sort(iRenderBuffer.begin(), iRenderBuffer.end(), [this](i_shape* left, i_shape* right) -> bool
+			{
+				return left->position_3D()[2] < right->position_3D()[2];
+			});
+		}
+	}
+
+	void sprite_plane::sort_objects()
+	{
+		if (iNeedsSorting)
+		{
+			sort_shapes();
+			std::stable_sort(iItems.begin(), iItems.end(), [this](const item& left, const item& right) -> bool
+			{
+				if (left.which() != right.which())
+					return left.which() < right.which();
+				else if (left.is<shape_pointer>())
+					return &left < &right;
+				else
+				{
+					const i_physical_object* leftObject = &(left.is<sprite_pointer>() ? static_variant_cast<const sprite_pointer&>(left)->physics() : *static_variant_cast<const object_pointer&>(left));
+					const i_physical_object* rightObject = &(right.is<sprite_pointer>() ? static_variant_cast<const sprite_pointer&>(right)->physics() : *static_variant_cast<const object_pointer&>(right));
+					return leftObject->mass() > rightObject->mass();
+				}
+			});
+			iNeedsSorting = false;
+		}
+	}
+
 	bool sprite_plane::update_objects()
 	{
+		sort_objects();
 		auto nowClock = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
 		auto now = to_step_time(nowClock.count() * .001, physics_step_interval());
 		if (!iPhysicsTime)
@@ -332,27 +325,23 @@ namespace neogfx
 			stepTime += physics_step_interval();
 			iPhysicsTime = from_step_time(stepTime);
 			applying_physics.trigger();
-			iUpdateBuffer.reserve(iSprites.size() + iObjects.size());
-			iUpdateBuffer.clear();
-			for (const auto& s : iSprites)
-				iUpdateBuffer.push_back(&s->physics());
-			for (const auto& s : iObjects)
-				iUpdateBuffer.push_back(&*s);
-			std::stable_sort(iUpdateBuffer.begin(), iUpdateBuffer.end(), [](i_physical_object* left, i_physical_object* right) ->bool
-			{
-				return left->mass() > right->mass();
-			});
-			for (auto& o2 : iUpdateBuffer)
+			for (auto& i2 : iItems)
 			{
 				vec3 totalForce;
+				if (i2.is<shape_pointer>())
+					break;
+				i_physical_object* o2 = &(i2.is<sprite_pointer>() ? static_variant_cast<sprite_pointer&>(i2)->physics() : *static_variant_cast<object_pointer&>(i2));
 				if (o2->mass() == 0.0)
 					continue;
 				if (iUniformGravity != boost::none)
 					totalForce = *iUniformGravity * o2->mass();
 				else if (iG != 0.0)
 				{
-					for (auto& o1 : iUpdateBuffer)
+					for (auto& i1 : iItems)
 					{
+						if (i1.is<shape_pointer>())
+							break;
+						i_physical_object* o1 = &(i1.is<sprite_pointer>() ? static_variant_cast<sprite_pointer&>(i1)->physics() : *static_variant_cast<object_pointer&>(i1));
 						if (o1 == o2)
 							continue;
 						if (o1->collided(*o2))

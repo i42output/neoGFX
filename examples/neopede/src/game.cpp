@@ -24,8 +24,8 @@ const uint8_t sSpaceshipImagePattern[9][9]
 class bullet : public ng::sprite
 {
 public:
-	bullet(const ng::i_sprite& aParent) : 
-		ng::sprite(aParent.container(), ng::colour::Pink2)
+	bullet(const ng::i_sprite& aParent, ng::angle aAngle) : 
+		ng::sprite(aParent.container(), (int)aAngle % 20 == 0 ? ng::colour::Red.shade(std::rand() % 32) : ng::colour::Goldenrod.shade(std::rand() % 32))
 	{
 		shape::set_size(ng::size{ 3.0, 3.0 });
 		ng::vec3 relativePos = aParent.physics().origin();
@@ -33,8 +33,8 @@ public:
 		auto tm = aParent.transformation_matrix();
 		physics().set_position(aParent.physics().position() + tm * relativePos);
 		physics().set_mass(0.016);
-		physics().set_angle_radians(aParent.physics().angle_radians());
-		physics().set_velocity(tm * ng::vec3{0.0, 360.0, 0.0} + aParent.physics().velocity());
+		physics().set_angle_radians(aParent.physics().angle_radians() + ng::vec3{0.0, 0.0, ng::to_rad(aAngle)});
+		physics().set_velocity(transformation_matrix() * ng::vec3{0.0, 360.0, 0.0} + aParent.physics().velocity());
 	}
 };
 
@@ -50,11 +50,11 @@ void create_game(ng::i_layout& aLayout)
 			*spritePlane,
 			ng::vec3{static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -(static_cast<ng::scalar>(std::rand() % 32))},
 			ng::size{static_cast<ng::scalar>(std::rand() % 64), static_cast<ng::scalar>(std::rand() % 64)},
-			ng::colour(std::rand() % 64, std::rand() % 64, std::rand() % 64).lighter(0x32)));
+			ng::colour(std::rand() % 64, std::rand() % 64, std::rand() % 64).lighter(0x40)));
 	//spritePlane->set_uniform_gravity();
 	//spritePlane->set_gravitational_constant(0.0);
 	//spritePlane->create_earth();
-	spritePlane->sprites().reserve(10000);
+	spritePlane->reserve(10000);
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::LightGoldenrod}, {2, ng::colour::DarkGoldenrod4} }));
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_size(ng::size(36.0, 36.0));
@@ -83,17 +83,26 @@ void create_game(ng::i_layout& aLayout)
 		else
 			spaceshipSprite.physics().set_spin_degrees(0.0);
 		static std::vector<bullet> bullets;
-		bullets.reserve(10000);
-		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) && bullets.size() < bullets.capacity())
+		bullets.reserve(100000);
+		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) && bullets.size() < bullets.capacity() - 7)
 		{
 			const ng::i_sprite::step_time_interval kBulletInterval = 20;
 			auto firingTime = ng::to_step_time(spritePlane->physics_time(), kBulletInterval);
-			while (bullets.empty() || firingTime - ng::to_step_time(bullets.back().update_time(), kBulletInterval) > 0.0)
+			if ((firingTime / 100) % 2 == 0)
 			{
-				auto ourFiringTime = bullets.empty() ? firingTime : ng::to_step_time(bullets.back().update_time(), kBulletInterval) + kBulletInterval;
-				bullets.emplace_back(spaceshipSprite);
-				bullets.back().set_update_time(ng::from_step_time(ourFiringTime));
-				spritePlane->add_sprite(bullets.back());
+				while (bullets.empty() || firingTime - ng::to_step_time(bullets.back().update_time(), kBulletInterval) > 0.0)
+				{
+					auto ourFiringTime = bullets.empty() ? firingTime : ng::to_step_time(bullets.back().update_time(), kBulletInterval) + kBulletInterval;
+					if ((ourFiringTime / 100) % 2 == 0)
+					{
+						for (double a = -30.0; a <= 30.0; a += 10.0)
+						{
+							bullets.emplace_back(spaceshipSprite, a);
+							bullets.back().set_update_time(ng::from_step_time(ourFiringTime));
+							spritePlane->add_sprite(bullets.back());
+						}
+					}
+				}
 			}
 		}
 		std::ostringstream oss;
