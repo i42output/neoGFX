@@ -33,7 +33,7 @@ namespace neogfx
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
-		widget(aParent), iEnableZSorting(false), iG(6.67408e-11)
+		widget(aParent), iEnableZSorting(false), iG(6.67408e-11), iPhysicsTime(0.0)
 	{
 		iSink = surface().native_surface().rendering_check([this]()
 		{
@@ -43,7 +43,7 @@ namespace neogfx
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
-		widget(aLayout), iEnableZSorting(false), iG(6.67408e-11)
+		widget(aLayout), iEnableZSorting(false), iG(6.67408e-11), iPhysicsTime(0.0)
 	{
 		iSink = surface().native_surface().rendering_check([this]()
 		{
@@ -260,6 +260,17 @@ namespace neogfx
 		return earth;
 	}
 
+	sprite_plane::time_interval sprite_plane::physics_time() const
+	{
+		return iPhysicsTime;
+	}
+
+	sprite_plane::step_time_interval sprite_plane::physics_step_time(step_time_interval aStepInterval) const
+	{
+		auto ms = static_cast<step_time_interval>(physics_time() * 1000.0);
+		return ms - (ms % aStepInterval);
+	}
+
 	const sprite_plane::shape_list& sprite_plane::shapes() const
 	{
 		return iShapes;
@@ -302,6 +313,7 @@ namespace neogfx
 
 	bool sprite_plane::update_objects()
 	{
+		iPhysicsTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() * .001;
 		applying_physics.trigger();
 		bool updated = false;
 		iUpdateBuffer.reserve(iSprites.size() + iObjects.size());
@@ -314,7 +326,6 @@ namespace neogfx
 		{
 			return left->mass() > right->mass();
 		});
-		auto now = std::chrono::steady_clock::now();
 		for (auto& o2 : iUpdateBuffer)
 		{
 			vec3 totalForce;
@@ -339,7 +350,7 @@ namespace neogfx
 					totalForce += force;
 				}
 			}
-			updated = (o2->update(now, totalForce) || updated);
+			updated = (o2->update(iPhysicsTime, totalForce) || updated);
 		}
 		physics_applied.trigger();
 		return updated;

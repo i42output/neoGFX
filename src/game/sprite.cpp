@@ -112,13 +112,33 @@ namespace neogfx
 		return iObject;
 	}
 
-	bool sprite::update(const optional_time_point& aNow, const vec3& aForce)
+	bool sprite::update(const optional_time_interval& aNow, const vec3& aForce)
 	{
 		bool updated = shape::update(aNow);
 		return physics().update(aNow, aForce) || updated;
 	}
 
-	bool sprite::update(const optional_time_point& aNow)
+	const sprite::optional_time_interval& sprite::update_time() const
+	{
+		return physics().update_time();
+	}
+
+	void sprite::set_update_time(const optional_time_interval& aLastUpdateTime)
+	{
+		physics().set_update_time(aLastUpdateTime);
+	}
+
+	sprite::step_time_interval sprite::step_time(step_time_interval aStepInterval) const
+	{
+		return physics().step_time(aStepInterval);
+	}
+
+	void sprite::set_step_time(step_time_interval aInterval)
+	{
+		physics().set_step_time(aInterval);
+	}
+		
+	bool sprite::update(const optional_time_interval& aNow)
 	{
 		return update(aNow, vec3{});
 	}

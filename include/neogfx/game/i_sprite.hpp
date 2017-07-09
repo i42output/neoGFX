@@ -31,13 +31,18 @@ namespace neogfx
 	{
 		// types
 	public:
-		typedef i_physical_object::time_point time_point;
-		typedef i_physical_object::optional_time_point optional_time_point;
+		typedef i_physical_object::time_interval time_interval;
+		typedef i_physical_object::optional_time_interval optional_time_interval;
+		typedef i_physical_object::step_time_interval step_time_interval;
 		// physics
 	public:
 		virtual const i_physical_object& physics() const = 0;
 		virtual i_physical_object& physics() = 0;
-		virtual bool update(const optional_time_point& aNow, const vec3& aForce) = 0;
+		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
+		virtual const optional_time_interval& update_time() const = 0;
+		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;
+		virtual step_time_interval step_time(step_time_interval aStepInterval) const = 0;
+		virtual void set_step_time(step_time_interval aInterval) = 0;
 		// geometry
 	public:
 		virtual const optional_path& path() const = 0;

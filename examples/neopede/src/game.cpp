@@ -86,8 +86,15 @@ void create_game(ng::i_layout& aLayout)
 		bullets.reserve(10000);
 		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) && bullets.size() < bullets.capacity())
 		{
-			bullets.emplace_back(spaceshipSprite);
-			spritePlane->add_sprite(bullets.back());
+			const ng::i_sprite::step_time_interval kBulletInterval = 20;
+			auto firingTime = spritePlane->physics_step_time(kBulletInterval);
+			while (bullets.empty() || firingTime - bullets.back().step_time(kBulletInterval) > 0.0)
+			{
+				auto ourFiringTime = bullets.empty() ? firingTime : bullets.back().step_time(kBulletInterval) + kBulletInterval;
+				bullets.emplace_back(spaceshipSprite);
+				bullets.back().set_step_time(ourFiringTime);
+				spritePlane->add_sprite(bullets.back());
+			}
 		}
 		std::ostringstream oss;
 		oss << "VELOCITY:  " << spaceshipSprite.physics().velocity().magnitude() << " m/s" << "\n";

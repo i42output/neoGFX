@@ -68,8 +68,7 @@ namespace neogfx
 		typedef std::size_t frame_index;
 		typedef scalar time_interval;
 		typedef std::vector<std::pair<frame_index, time_interval>> animation_frames;
-		typedef std::chrono::time_point<std::chrono::steady_clock> time_point;
-		typedef boost::optional<time_point> optional_time_point;
+		typedef boost::optional<time_interval> optional_time_interval;
 		// exceptions
 	public:
 		struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::i_shape::no_buddy") {} };
@@ -122,7 +121,7 @@ namespace neogfx
 		virtual std::size_t vertex_count(bool aIncludeCentre = false) const = 0;
 		virtual vec3_list vertices(bool aIncludeCentre = false) const = 0;
 		virtual vec3_list transformed_vertices(bool aIncludeCentre = false) const = 0;
-		virtual bool update(const optional_time_point& aNow) = 0;
+		virtual bool update(const optional_time_interval& aNow = optional_time_interval{}) = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 		// helpers
 	public:

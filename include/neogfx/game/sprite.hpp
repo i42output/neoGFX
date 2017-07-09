@@ -29,8 +29,9 @@ namespace neogfx
 	{
 		// types
 	public:
-		using i_sprite::time_point;
-		using i_sprite::optional_time_point;
+		using i_sprite::time_interval;
+		using i_sprite::optional_time_interval;
+		using i_sprite::step_time_interval;
 		// construction
 	public:
 		sprite(i_shape_container& aContainer);
@@ -53,12 +54,16 @@ namespace neogfx
 	public:
 		const i_physical_object& physics() const override;
 		i_physical_object& physics() override;
-		bool update(const optional_time_point& aNow, const vec3& aForce) override;
+		bool update(const optional_time_interval& aNow, const vec3& aForce) override;
 		// rendering
 	public:
 		std::size_t vertex_count(bool aIncludeCentre = false) const override;
 		vec3_list vertices(bool aIncludeCentre = false) const override;
-		bool update(const optional_time_point& aNow) override;
+		bool update(const optional_time_interval& aNow) override;
+		const optional_time_interval& update_time() const override;
+		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
+		step_time_interval step_time(step_time_interval aStepInterval) const override;
+		void set_step_time(step_time_interval aInterval) override;
 		// attributes
 	private:
 		optional_path iPath;

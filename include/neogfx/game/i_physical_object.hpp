@@ -29,8 +29,9 @@ namespace neogfx
 	{
 	public:
 		typedef std::array<vec3, 6> aabb_type;
-		typedef std::chrono::time_point<std::chrono::steady_clock> time_point;
-		typedef boost::optional<time_point> optional_time_point;
+		typedef scalar time_interval;
+		typedef boost::optional<time_interval> optional_time_interval;
+		typedef int64_t step_time_interval;
 	public:
 		virtual ~i_physical_object() {}
 	public:
@@ -72,6 +73,10 @@ namespace neogfx
 	public:
 		virtual const aabb_type& aabb() const = 0;
 		virtual bool collided(const i_physical_object& aOther) const = 0;
-		virtual bool update(const optional_time_point& aNow, const vec3& aForce) = 0;
+		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
+		virtual const optional_time_interval& update_time() const = 0;
+		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;
+		virtual step_time_interval step_time(step_time_interval aStepInterval) const = 0;
+		virtual void set_step_time(step_time_interval aInterval) = 0;
 	};
 }

@@ -21,6 +21,8 @@
 #include <boost/math/constants/constants.hpp>
 #include <neogfx/game/physical_object.hpp>
 
+#include <iostream>
+
 namespace neogfx
 {
 	physical_object::physical_object() :
@@ -138,17 +140,42 @@ namespace neogfx
 		return false;
 	}
 
-	bool physical_object::update(const optional_time_point& aNow, const vec3& aForce)
+	bool physical_object::update(const optional_time_interval& aNow, const vec3& aForce)
 	{
 		bool updated = false;
 		if (iTimeOfLastUpdate == boost::none)
 			updated = true;
 		next_physics() = current_physics();
 		if (!updated)
-			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den), aForce);
+			updated = apply_physics(*aNow - *iTimeOfLastUpdate, aForce);
 		iTimeOfLastUpdate = aNow;
 		current_physics() = next_physics();
 		return updated;
+	}
+
+	const physical_object::optional_time_interval& physical_object::update_time() const
+	{
+		return iTimeOfLastUpdate;
+	}
+
+	void physical_object::set_update_time(const optional_time_interval& aLastUpdateTime)
+	{
+		iTimeOfLastUpdate = aLastUpdateTime;
+	}
+
+	physical_object::step_time_interval physical_object::step_time(step_time_interval aStepInterval) const
+	{
+		if (update_time())
+		{
+			auto ms = static_cast<step_time_interval>(*update_time() * 1000.0);
+			return ms - (ms % aStepInterval);
+		}
+		return 0;
+	}
+
+	void physical_object::set_step_time(step_time_interval aInterval)
+	{
+		set_update_time(aInterval / 1000.0);
 	}
 
 	const physical_object::physics& physical_object::current_physics() const

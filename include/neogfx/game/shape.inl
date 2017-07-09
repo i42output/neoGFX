@@ -330,10 +330,10 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::update(const optional_time_point& aNow)
+	inline bool shape<MixinInterface>::update(const optional_time_interval& aNow)
 	{
 		/* todo: animate frames */
-		(void)aNow;
+		iTimeOfLastUpdate = aNow;
 		return false;
 	}
 

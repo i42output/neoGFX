@@ -62,8 +62,8 @@ namespace neogfx
 		typedef i_shape::frame_index frame_index;
 		typedef i_shape::time_interval time_interval;
 		typedef i_shape::animation_frames animation_frames;
-		typedef i_shape::time_point time_point;
-		typedef i_shape::optional_time_point optional_time_point;
+		typedef i_shape::time_interval time_interval;
+		typedef i_shape::optional_time_interval optional_time_interval;
 	public:
 		shape(i_shape_container& aContainer);
 		shape(i_shape_container& aContainer, const colour& aColour);
@@ -115,7 +115,7 @@ namespace neogfx
 		std::size_t vertex_count(bool aIncludeCentre = false) const override;
 		vec3_list vertices(bool aIncludeCentre = false) const override;
 		vec3_list transformed_vertices(bool aIncludeCentre = false) const override;
-		bool update(const optional_time_point& aNow = optional_time_point()) override;
+		bool update(const optional_time_interval& aNow = optional_time_interval{}) override;
 		void paint(graphics_context& aGraphicsContext) const override;
 		// attributes
 	private:
@@ -123,7 +123,7 @@ namespace neogfx
 		frame_list iFrames;
 		animation_frames iAnimation;
 		frame_index iCurrentFrame;
-		optional_time_point iTimeOfLastUpdate;
+		optional_time_interval iTimeOfLastUpdate;
 		point iOrigin;
 		point iPosition;
 		coordinate iZPos;
