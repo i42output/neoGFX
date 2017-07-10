@@ -27,42 +27,42 @@
 namespace neogfx
 {
 	sprite_plane::sprite_plane() : 
+		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			if (update_objects())
+				update();
+		}, 10 },
 		iEnableZSorting{ false }, iNeedsSorting{ false }, iG { 6.67408e-11 }, iStepInterval{ 10 }
 	{
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
-		widget{ aParent }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
-	{
-		iSink = surface().native_surface().rendering_check([this]()
+		widget{ aParent }, 
+		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
+			aTimer.again();
 			if (update_objects())
 				update();
-		});
+		}, 10 },
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG { 6.67408e-11 }, iStepInterval{ 10 }
+	{
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
-		widget{ aLayout }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }
-	{
-		iSink = surface().native_surface().rendering_check([this]()
+		widget{ aLayout }, 
+		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
+			aTimer.again();
 			if (update_objects())
 				update();
-		});
+		}, 10 },
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG { 6.67408e-11 }, iStepInterval{ 10 }
+	{
 	}
 
 	sprite_plane::~sprite_plane()
 	{
-	}
-
-	void sprite_plane::parent_changed()
-	{
-		widget::parent_changed();
-		iSink = surface().native_surface().rendering_check([this]()
-		{
-			if (update_objects())
-				update();
-		});
 	}
 
 	logical_coordinate_system sprite_plane::logical_coordinate_system() const

@@ -141,8 +141,6 @@ namespace neogfx
 				return;
 		}
 
-		rendering_check.trigger();
-
 		if (iInvalidatedRects.empty())
 			return;
 

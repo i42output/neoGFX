@@ -56,7 +56,6 @@ namespace neogfx
 		sprite_plane(i_layout& aLayout);
 		~sprite_plane();
 	public:
-		virtual void parent_changed();
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
@@ -103,7 +102,7 @@ namespace neogfx
 		void sort_objects();
 		bool update_objects();
 	private:
-		sink iSink;
+		neolib::callback_timer iUpdater;
 		bool iEnableZSorting;
 		bool iNeedsSorting;
 		scalar iG;
