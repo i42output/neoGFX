@@ -86,24 +86,15 @@ void create_game(ng::i_layout& aLayout)
 		bullets.reserve(100000);
 		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) && bullets.size() < bullets.capacity() - 7)
 		{
-			const ng::i_sprite::step_time_interval kBulletInterval = 20;
-			auto firingTime = ng::to_step_time(spritePlane->physics_time(), kBulletInterval);
-			if ((firingTime / 100) % 2 == 0)
+			auto stepTime = ng::to_step_time(spritePlane->physics_time(), spritePlane->physics_step_interval());
+			auto firingTime = ng::to_step_time(spritePlane->physics_time(), 20);
+			if (firingTime == stepTime && (firingTime / 100) % 2 == 0)
 			{
-				while (bullets.empty() || firingTime - ng::to_step_time(bullets.back().update_time(), kBulletInterval) > 0.0)
+				for (double a = -30.0; a <= 30.0; a += 10.0)
 				{
-					auto ourFiringTime = bullets.empty() ? firingTime : ng::to_step_time(bullets.back().update_time(), kBulletInterval) + kBulletInterval;
-					if ((ourFiringTime / 100) % 2 == 0)
-					{
-						for (double a = -30.0; a <= 30.0; a += 10.0)
-						{
-							bullets.emplace_back(spaceshipSprite, a);
-							bullets.back().set_update_time(ng::from_step_time(ourFiringTime));
-							spritePlane->add_sprite(bullets.back());
-						}
-					}
-					else
-						break;
+					bullets.emplace_back(spaceshipSprite, a);
+					bullets.back().set_update_time(ng::from_step_time(firingTime));
+					spritePlane->add_sprite(bullets.back());
 				}
 			}
 		}
