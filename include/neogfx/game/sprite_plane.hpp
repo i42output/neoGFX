@@ -29,14 +29,16 @@ namespace neogfx
 	class sprite_plane : public widget, public i_shape_container
 	{
 	public:
-		event<> applying_physics;
-		event<> physics_applied;
+		typedef i_physical_object::step_time_interval step_time_interval;
+	public:
+		event<step_time_interval> applying_physics;
+		event<step_time_interval> physics_applied;
 		event<graphics_context&> painting_sprites;
 		event<graphics_context&> sprites_painted;
 	public:
-		typedef i_sprite::time_interval time_interval;
-		typedef i_sprite::optional_time_interval optional_time_interval;
-		typedef i_sprite::step_time_interval step_time_interval;
+		typedef i_physical_object::time_interval time_interval;
+		typedef i_physical_object::optional_time_interval optional_time_interval;
+		typedef i_physical_object::optional_step_time_interval optional_step_time_interval;
 	public:
 		typedef std::shared_ptr<i_sprite> sprite_pointer;
 		typedef std::shared_ptr<i_physical_object> object_pointer;
@@ -88,8 +90,8 @@ namespace neogfx
 		void add_object(std::shared_ptr<i_physical_object> aObject);
 		i_physical_object& create_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
 		i_physical_object& create_object();
-		const optional_time_interval& physics_time() const;
-		void set_physics_time(const optional_time_interval& aTime);
+		const optional_step_time_interval& physics_time() const;
+		void set_physics_time(const optional_step_time_interval& aTime);
 		step_time_interval physics_step_interval() const;
 		void set_physics_step_interval(step_time_interval aStepInterval);
 	public:
@@ -107,7 +109,7 @@ namespace neogfx
 		bool iNeedsSorting;
 		scalar iG;
 		optional_vec3 iUniformGravity;
-		optional_time_interval iPhysicsTime;
+		optional_step_time_interval iPhysicsTime;
 		step_time_interval iStepInterval;
 		item_list iItems;
 		mutable std::vector<i_shape*> iRenderBuffer;

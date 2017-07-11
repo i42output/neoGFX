@@ -238,12 +238,12 @@ namespace neogfx
 		return earth;
 	}
 
-	const sprite_plane::optional_time_interval& sprite_plane::physics_time() const
+	const sprite_plane::optional_step_time_interval& sprite_plane::physics_time() const
 	{
 		return iPhysicsTime;
 	}
 
-	void sprite_plane::set_physics_time(const optional_time_interval& aTime)
+	void sprite_plane::set_physics_time(const optional_step_time_interval& aTime)
 	{
 		iPhysicsTime = aTime;
 	}
@@ -313,18 +313,17 @@ namespace neogfx
 
 	bool sprite_plane::update_objects()
 	{
-		sort_objects();
 		auto nowClock = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
 		auto now = to_step_time(nowClock.count() * .001, physics_step_interval());
 		if (!iPhysicsTime)
-			iPhysicsTime = from_step_time(now);
-		auto stepTime = to_step_time(iPhysicsTime, physics_step_interval());
+			iPhysicsTime = now;
+		if (*iPhysicsTime == now)
+			return false;
 		bool updated = false;
-		while (stepTime != now)
+		while (*iPhysicsTime <= now)
 		{
-			stepTime += physics_step_interval();
-			iPhysicsTime = from_step_time(stepTime);
-			applying_physics.trigger();
+			applying_physics.trigger(*iPhysicsTime);
+			sort_objects();
 			for (auto& i2 : iItems)
 			{
 				vec3 totalForce;
@@ -355,9 +354,10 @@ namespace neogfx
 						totalForce += force;
 					}
 				}
-				updated = (o2->update(iPhysicsTime, totalForce) || updated);
+				updated = (o2->update(from_step_time(*iPhysicsTime), totalForce) || updated);
 			}
-			physics_applied.trigger();
+			physics_applied.trigger(*iPhysicsTime);
+			*iPhysicsTime += physics_step_interval();
 		}
 		return updated;
 	}

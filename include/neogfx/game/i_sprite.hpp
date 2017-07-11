@@ -34,6 +34,7 @@ namespace neogfx
 		typedef i_physical_object::time_interval time_interval;
 		typedef i_physical_object::optional_time_interval optional_time_interval;
 		typedef i_physical_object::step_time_interval step_time_interval;
+		typedef i_physical_object::optional_step_time_interval optional_step_time_interval;
 		// physics
 	public:
 		virtual const i_physical_object& physics() const = 0;

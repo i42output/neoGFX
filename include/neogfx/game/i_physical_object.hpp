@@ -32,6 +32,7 @@ namespace neogfx
 		typedef scalar time_interval;
 		typedef boost::optional<time_interval> optional_time_interval;
 		typedef int64_t step_time_interval;
+		typedef boost::optional<step_time_interval> optional_step_time_interval;
 	public:
 		virtual ~i_physical_object() {}
 	public:

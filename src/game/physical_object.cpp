@@ -145,11 +145,13 @@ namespace neogfx
 		bool updated = false;
 		if (iTimeOfLastUpdate == boost::none)
 			updated = true;
-		next_physics() = current_physics();
 		if (!updated)
+		{
+			next_physics() = current_physics();
 			updated = apply_physics(*aNow - *iTimeOfLastUpdate, aForce);
+			current_physics() = next_physics();
+		}
 		iTimeOfLastUpdate = aNow;
-		current_physics() = next_physics();
 		return updated;
 	}
 

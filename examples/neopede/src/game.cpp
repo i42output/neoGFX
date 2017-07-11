@@ -70,7 +70,7 @@ void create_game(ng::i_layout& aLayout)
 			ng::pen{ ng::colour::Goldenrod, 3.0 }, ng::colour::DarkGoldenrod4);
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});
-	spritePlane->applying_physics([spritePlane, &spaceshipSprite, shipInfo]()
+	spritePlane->applying_physics([spritePlane, &spaceshipSprite, shipInfo](ng::sprite_plane::step_time_interval aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		spaceshipSprite.physics().set_acceleration({  
@@ -86,14 +86,11 @@ void create_game(ng::i_layout& aLayout)
 		bullets.reserve(100000);
 		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) && bullets.size() < bullets.capacity() - 7)
 		{
-			auto stepTime = ng::to_step_time(spritePlane->physics_time(), spritePlane->physics_step_interval());
-			auto firingTime = ng::to_step_time(spritePlane->physics_time(), 20);
-			if (firingTime == stepTime && (firingTime / 100) % 2 == 0)
+			if ((aPhysicsStepTime / 10) % 2 == 0 && (aPhysicsStepTime / 100) % 2 == 0)
 			{
 				for (double a = -30.0; a <= 30.0; a += 10.0)
 				{
 					bullets.emplace_back(spaceshipSprite, a);
-					bullets.back().set_update_time(ng::from_step_time(firingTime));
 					spritePlane->add_sprite(bullets.back());
 				}
 			}
