@@ -52,12 +52,12 @@ namespace neogfx
 
 	point sprite::origin() const
 	{
-		return point{ physics().origin()[0], physics().origin()[1] };
+		return point{ physics().origin().x, physics().origin().y };
 	}
 
 	point sprite::position() const
 	{
-		return point{ physics().position()[0], physics().position()[1] };
+		return point{ physics().position().x, physics().position().y };
 	}
 
 	vec3 sprite::position_3D() const
@@ -67,11 +67,12 @@ namespace neogfx
 
 	mat33 sprite::transformation_matrix() const
 	{
-		if (shape::has_transformation_matrix())
-			return shape::transformation_matrix();
-		auto az = physics().angle_radians()[2];
+		auto az = physics().angle_radians().z;
 		auto pos = physics().position();
-		return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ pos[0], pos[1], 1.0 } };
+		mat33 result{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ pos.x, pos.y, 1.0 } };
+		if (shape::has_transformation_matrix())
+			result *= shape::transformation_matrix();
+		return result;
 	}
 
 	const optional_path& sprite::path() const

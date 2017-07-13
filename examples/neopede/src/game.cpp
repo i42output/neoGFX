@@ -25,7 +25,7 @@ class bullet : public ng::sprite
 {
 public:
 	bullet(const ng::i_sprite& aParent, ng::angle aAngle) : 
-		ng::sprite(aParent.container(), (int)aAngle % 20 == 0 ? ng::colour::Red.shade(std::rand() % 32) : ng::colour::Goldenrod.shade(std::rand() % 32))
+		ng::sprite{ aParent.container(), ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }
 	{
 		shape::set_size(ng::size{ 3.0, 3.0 });
 		ng::vec3 relativePos = aParent.physics().origin();
@@ -95,6 +95,7 @@ void create_game(ng::i_layout& aLayout)
 				}
 			}
 		}
+		
 		std::ostringstream oss;
 		oss << "VELOCITY:  " << spaceshipSprite.physics().velocity().magnitude() << " m/s" << "\n";
 		oss << "ACCELERATION:  " << spaceshipSprite.physics().acceleration().magnitude() << " m/s/s";

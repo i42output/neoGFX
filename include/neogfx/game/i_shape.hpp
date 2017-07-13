@@ -26,6 +26,7 @@
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/game/i_mesh.hpp>
 
 namespace neogfx
 {
@@ -61,7 +62,7 @@ namespace neogfx
 		virtual void unset_buddy(const i_shape& aShape) = 0;
 	};
 
-	class i_shape
+	class i_shape : public i_mesh
 	{
 		// types
 	public:
@@ -118,9 +119,6 @@ namespace neogfx
 		virtual void set_transformation_matrix(const optional_mat33& aTransformationMatrix) = 0;
 		// rendering
 	public:
-		virtual std::size_t vertex_count(bool aIncludeCentre = false) const = 0;
-		virtual vec3_list vertices(bool aIncludeCentre = false) const = 0;
-		virtual vec3_list transformed_vertices(bool aIncludeCentre = false) const = 0;
 		virtual bool update(const optional_time_interval& aNow = optional_time_interval{}) = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 		// helpers
