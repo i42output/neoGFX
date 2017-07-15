@@ -23,52 +23,35 @@
 
 namespace neogfx
 {
-	rectangle::rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize) : 
-		shape(aContainer)
+	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents)
 	{
-		set_position_3D(aPosition);
-		set_size(aSize);
+		set_position(aPosition);
+		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const colour& aColour) :
-		shape(aContainer, aColour)
+	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const colour& aColour) :
+		shape(aColour)
 	{
-		set_position_3D(aPosition);
-		set_size(aSize);
+		set_position(aPosition);
+		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const i_texture& aTexture, const optional_rect& aTextureRect) :
-		shape(aContainer, aTexture, aTextureRect)
+	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const optional_rect& aTextureRect) :
+		shape(aTexture, aTextureRect)
 	{
-		set_position_3D(aPosition);
-		set_size(aSize);
+		set_position(aPosition);
+		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(i_shape_container& aContainer, const vec3& aPosition, const size& aSize, const i_image& aImage, const optional_rect& aTextureRect) :
-		shape(aContainer, aImage, aTextureRect)
+	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const optional_rect& aTextureRect) :
+		shape(aImage, aTextureRect)
 	{
-		set_position_3D(aPosition);
-		set_size(aSize);
+		set_position(aPosition);
+		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
 	rectangle::rectangle(const rectangle& aOther) :
 		shape(aOther)
 	{
-	}
-
-	std::size_t rectangle::vertex_count(bool aIncludeCentre) const
-	{
-		return aIncludeCentre ? 5 : 4;
-	}
-
-	vec3_list rectangle::vertices(bool aIncludeCentre) const
-	{
-		vec3_list result = shape::vertices(aIncludeCentre);
-		auto r = bounding_box();
-		result.push_back(r.top_left().to_vector3());
-		result.push_back(r.top_right().to_vector3());
-		result.push_back(r.bottom_right().to_vector3());
-		result.push_back(r.bottom_left().to_vector3());
-		return result;
 	}
 }

@@ -25,7 +25,7 @@
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gui/window/window_events.hpp>
-#include "../layout/i_widget_geometry.hpp"
+#include <neogfx/gui/layout/i_widget_geometry.hpp>
 
 namespace neogfx
 {

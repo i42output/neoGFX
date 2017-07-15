@@ -1,7 +1,7 @@
-// rectangle.hpp
+// mesh.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright(C) 2017 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -19,17 +19,27 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "shape.hpp"
+#include "i_mesh.hpp"
 
 namespace neogfx
 {
-	class rectangle : public shape<>
+	class mesh : public i_mesh
 	{
 	public:
-		rectangle(const vec3& aPosition, const vec2& aExtents);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const colour& aColour);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
-		rectangle(const rectangle& aOther);
+		mesh();
+		mesh(const i_mesh& aMesh);
+		mesh(const i_mesh& aMesh, const mat44& aTransformationMatrix);
+		mesh(const mesh& aMesh);
+		mesh(const mesh& aMesh, const mat44& aTransformationMatrix);
+	public:
+		const vec3_list& vertices() const override;
+		const face_list& faces() const override;
+		bool has_transformation_matrix() const override;
+		mat44 transformation_matrix() const override;
+		vec3_list transformed_vertices() const override;
+	private:
+		vec3_list iVertices;
+		face_list iFaces;
+		optional_mat44 iTransformationMatrix;
 	};
 }

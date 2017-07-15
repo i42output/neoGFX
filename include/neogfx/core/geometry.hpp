@@ -51,6 +51,8 @@ namespace neogfx
 			dx(static_cast<CoordinateType>(other.dx)), dy(static_cast<CoordinateType>(other.dy)) {}
 		// operations
 	public:
+		basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ dx, dy }; }
+		basic_vector<coordinate_type, 3> to_vec3() const { return basic_vector<coordinate_type, 3>{ dx, dy, 0.0 }; }
 		bool operator==(const basic_delta& other) const { return dx == other.dx && dy == other.dy; }
 		bool operator!=(const basic_delta& other) const { return !operator==(other); }
 		basic_delta& operator+=(const basic_delta& other) { dx += other.dx; dy += other.dy; return *this; }
@@ -111,6 +113,10 @@ namespace neogfx
 		// construction
 	public:
 		basic_size() : cx(0), cy(0) {}
+		template <typename Scalar>
+		basic_size(const basic_vector<Scalar, 2>& other) : cx(static_cast<dimension_type>(other.x)), cy(static_cast<dimension_type>(other.y)) {}
+		template <typename Scalar>
+		basic_size(const basic_vector<Scalar, 3>& other) : cx(static_cast<dimension_type>(other.x)), cy(static_cast<dimension_type>(other.y)) {}
 		basic_size(dimension_type cx, dimension_type cy) : cx(cx), cy(cy) {}
 		basic_size(dimension_type aSquareDimension) : cx(aSquareDimension), cy(aSquareDimension) {}
 		template <typename CoordinateType2>
@@ -119,6 +125,8 @@ namespace neogfx
 		basic_size(const basic_delta<CoordinateType>& other) : cx(other.dx), cy(other.dy) {}
 		// operations
 	public:
+		basic_vector<dimension_type, 2> to_vec2() const { return basic_vector<dimension_type, 2>{ cx, cy }; }
+		basic_vector<dimension_type, 3> to_vec3() const { return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
 		delta_type to_delta() const { return delta_type(cx, cy); }
 		bool empty() const { return cx == 0 || cy == 0; }
 		bool operator==(const basic_size& other) const { return cx == other.cx && cy == other.cy; }
@@ -223,7 +231,9 @@ namespace neogfx
 	public:
 		basic_point() : x(0), y(0) {}
 		template <typename Scalar>
-		basic_point(const basic_vector<Scalar, 2>& other) : x(static_cast<coordinate_type>(other[0])), y(static_cast<coordinate_type>(other[1])) {}
+		basic_point(const basic_vector<Scalar, 2>& other) : x(static_cast<coordinate_type>(other.x)), y(static_cast<coordinate_type>(other.y)) {}
+		template <typename Scalar>
+		basic_point(const basic_vector<Scalar, 3>& other) : x(static_cast<coordinate_type>(other.x)), y(static_cast<coordinate_type>(other.y)) {}
 		basic_point(CoordinateType x, CoordinateType y) : x(x), y(y) {}
 		template <typename CoordinateType2>
 		basic_point(const basic_point<CoordinateType2>& other) :
@@ -232,8 +242,8 @@ namespace neogfx
 		basic_point(const basic_size<CoordinateType>& other) : x(other.cx), y(other.cy) {}
 		// operations
 	public:
-		basic_vector<coordinate_type, 2> to_vector() const { return basic_vector<coordinate_type, 2>(x, y); }
-		basic_vector<coordinate_type, 3> to_vector3(coordinate_type fill = 1.0) const { return basic_vector<coordinate_type, 3>(x, y, fill); }
+		basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ x, y }; }
+		basic_vector<coordinate_type, 3> to_vec3() const { return basic_vector<coordinate_type, 3>{ x, y, 0.0 }; }
 		bool operator==(const basic_point& other) const { return x == other.x && y == other.y; }
 		bool operator!=(const basic_point& other) const { return !operator==(other); }
 		basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; return *this; }

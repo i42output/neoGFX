@@ -409,7 +409,7 @@ namespace neogfx
 				for (auto& op : opBatch)
 				{
 					const auto& args = static_cast<const graphics_operation::draw_shape&>(op);
-					draw_shape(args.vertices, args.pen);
+					draw_shape(args.mesh.vertices(), args.pen);
 				}
 				break;
 			case graphics_operation::operation_type::FillRect:
@@ -817,11 +817,11 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::draw_shape(const vec2_list& aVertices, const pen& aPen)
+	void opengl_graphics_context::draw_shape(const vec3_list& aVertices, const pen& aPen)
 	{
 		iVertexArrays.vertices().clear();
 		for (auto const& v : aVertices)
-			iVertexArrays.vertices().push_back(xyz{ v[0], v[1] });
+			iVertexArrays.vertices().push_back(xyz{ v.x, v.y, v.z });
 		iVertexArrays.vertices().push_back(iVertexArrays.vertices()[0]);
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
 		iVertexArrays.colours().assign(iVertexArrays.vertices().size(),
@@ -993,14 +993,15 @@ namespace neogfx
 
 		if (firstOp.fill.is<gradient>())
 		{
-			vec2 min = firstOp.vertices[0];
-			vec2 max = min;
-			for (auto const& v : firstOp.vertices)
+			vec3 min = firstOp.mesh.vertices()[0].xyz;
+			vec3 max = min;
+			for (auto const& v : firstOp.mesh.vertices())
 			{
-				min.x = std::min(min.x, v.x);
-				max.x = std::max(max.x, v.x);
-				min.y = std::min(min.y, v.y);
-				max.y = std::max(max.y, v.y);
+				auto tv = (firstOp.mesh.has_transformation_matrix() ? (firstOp.mesh.transformation_matrix() * vec4 { v.x, v.y, v.z, 0.0 }).xyz : v);
+				min.x = std::min(min.x, tv.x);
+				max.x = std::max(max.x, tv.x);
+				min.y = std::min(min.y, tv.y);
+				max.y = std::max(max.y, tv.y);
 			}
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill),
 				rect{
@@ -1015,10 +1016,10 @@ namespace neogfx
 		for (auto const& op : aFillShapeOps)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(op);
-			for (auto const& v : drawOp.vertices)
+			for (auto const& v : drawOp.mesh.vertices())
 				iVertexArrays.vertices().push_back(xyz{ v[0], v[1] });
-			iVertexArrays.vertices().push_back(xyz{ drawOp.vertices[1][0], drawOp.vertices[1][1] });
-			auto vertexCount = drawOp.vertices.size() + 1;
+			iVertexArrays.vertices().push_back(xyz{ drawOp.mesh.vertices()[1][0], drawOp.mesh.vertices()[1][1] });
+			auto vertexCount = drawOp.mesh.vertices().size() + 1;
 			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), vertexCount, std::array<double, 2>{});
 			iVertexArrays.colours().insert(iVertexArrays.colours().end(), vertexCount, drawOp.fill.is<colour>() ?
 				std::array <uint8_t, 4>{ {
@@ -1035,7 +1036,7 @@ namespace neogfx
 		for (auto const& op : aFillShapeOps)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(op);
-			auto vertexCount = drawOp.vertices.size() + 1;
+			auto vertexCount = drawOp.mesh.vertices().size() + 1;
 			glCheck(glDrawArrays(GL_TRIANGLE_FAN, idx, vertexCount));
 			idx += vertexCount;
 		}

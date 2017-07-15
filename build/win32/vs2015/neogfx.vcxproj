@@ -139,6 +139,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\i_physical_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_shape.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_sprite.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\mesh.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\physical_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\shape.hpp" />
@@ -310,6 +311,7 @@
     <ClCompile Include="..\..\..\src\core\geometry.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
+    <ClCompile Include="..\..\..\src\game\mesh.cpp" />
     <ClCompile Include="..\..\..\src\game\physical_object.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
     <ClCompile Include="..\..\..\src\game\sprite.cpp" />

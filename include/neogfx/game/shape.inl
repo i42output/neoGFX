@@ -20,100 +20,174 @@
 namespace neogfx
 {
 	template <typename MixinInterface>
+	inline shape<MixinInterface>::shape() :
+		iContainer{ nullptr }, iCurrentFrame{ 0 }
+	{
+	}
+
+	template <typename MixinInterface>
+	inline shape<MixinInterface>::shape(const colour& aColour) :
+		iContainer{ nullptr }, iCurrentFrame{ 0 }
+	{
+		iFrames.push_back(std::make_shared<neogfx::frame>(aColour));
+	}
+
+	template <typename MixinInterface>
+	inline shape<MixinInterface>::shape(const i_texture& aTexture, const optional_rect& aTextureRect) :
+		iContainer{ nullptr }, iCurrentFrame{ 0 }
+	{
+		iFrames.push_back(std::make_shared<neogfx::frame>(aTexture, aTextureRect));
+	}
+
+	template <typename MixinInterface>
+	inline shape<MixinInterface>::shape(const i_image& aImage, const optional_rect& aTextureRect) :
+		iContainer{ nullptr }, iCurrentFrame{ 0 }
+	{
+		iFrames.push_back(std::make_shared<neogfx::frame>(texture(aImage), aTextureRect));
+	}
+
+	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape(i_shape_container& aContainer) :
-		iContainer{aContainer},
-		iCurrentFrame{0},
-		iZPos{0.0},
-		iScale{1.0, 1.0}
+		iContainer{ &aContainer }, iCurrentFrame{ 0 }
 	{
 	}
 
 	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const colour& aColour) :
-		iContainer{aContainer},
-		iCurrentFrame{0},
-		iZPos{0.0},
-		iScale{1.0, 1.0}
+		iContainer{ &aContainer }, iCurrentFrame{ 0 }
 	{
 		iFrames.push_back(std::make_shared<neogfx::frame>(aColour));
 	}
 
 	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect) :
-		iContainer{aContainer},
-		iCurrentFrame{0},
-		iZPos{0.0},
-		iScale{1.0, 1.0}
+		iContainer{ &aContainer }, iCurrentFrame{ 0 }
 	{
 		iFrames.push_back(std::make_shared<neogfx::frame>(aTexture, aTextureRect));
 	}
 
 	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect) :
-		iContainer{aContainer},
-		iCurrentFrame{0},
-		iZPos{0.0},
-		iScale{1.0, 1.0}
+		iContainer{ &aContainer }, iCurrentFrame{ 0 }
 	{
 		iFrames.push_back(std::make_shared<neogfx::frame>(texture(aImage), aTextureRect));
 	}
 
 	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape(const shape& aOther) :
-		iContainer{aOther.iContainer},
-		iFrames{aOther.iFrames},
-		iAnimation{aOther.iAnimation},
-		iCurrentFrame{aOther.iCurrentFrame},
-		iTimeOfLastUpdate{aOther.iTimeOfLastUpdate},
-		iBoundingBox{aOther.iBoundingBox},
-		iZPos{aOther.iZPos},
-		iScale{aOther.iScale},
+		iContainer{ aOther.iContainer },
+		iFrames{ aOther.iFrames },
+		iAnimation{ aOther.iAnimation },
+		iCurrentFrame{ aOther.iCurrentFrame },
+		iTimeOfLastUpdate{ aOther.iTimeOfLastUpdate },
+		iOrigin{ aOther.iOrigin },
+		iPosition{ aOther.iPosition },
+		iExtents{ aOther.iExtents },
 		iTransformationMatrix{aOther.iTransformationMatrix}
 	{
 	}
 
 	template <typename MixinInterface>
-	inline i_shape_container& shape<MixinInterface>::container() const
+	inline const vec3_list& shape<MixinInterface>::vertices() const
 	{
-		return iContainer;
+		if (iVertices = boost::none)
+		{
+			auto r = bounding_box_2d();
+			iVertices = vec3_list{ r.top_left().to_vec3(), r.top_right().to_vec3(), r.bottom_right().to_vec3(), r.bottom_left().to_vec3() };
+		}
+		return *iVertices;
 	}
 
 	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::has_buddy() const
+	inline const typename shape<MixinInterface>::face_list& shape<MixinInterface>::faces() const
 	{
-		return container().has_buddy(*this);
+		if (iFaces.empty())
+			iFaces = face_list{ { 0, 1, 2 },{ 0, 3, 2 } };
+		return iFaces;
 	}
 
 	template <typename MixinInterface>
-	inline i_shape& shape<MixinInterface>::buddy() const
+	inline bool shape<MixinInterface>::has_transformation_matrix() const
 	{
-		if (!has_buddy())
-			throw no_buddy();
-		return container().buddy(*this);
+		return iTransformationMatrix != boost::none;
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset)
+	inline mat44 shape<MixinInterface>::transformation_matrix() const
 	{
-		container().set_buddy(*this, aBuddy, aBuddyOffset);
+		if (iTransformationMatrix != boost::none)
+			return *iTransformationMatrix;
+		return mat44{ { 1.0, 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0, 0.0 }, { 0.0, 0.0, 1.0, 0.0 }, { position().x, position().y, position().z, 1.0 } };
+	}
+	
+	template <typename MixinInterface>
+	inline vec3_list shape<MixinInterface>::transformed_vertices() const
+	{
+		vec3_list result;
+		result.reserve(vertices().size());
+		for (auto const& v : vertices())
+			result.push_back((transformation_matrix() * vec4 { v.x, v.y, v.z, 0.0 }).xyz);
+		return result;
 	}
 
 	template <typename MixinInterface>
-	inline const vec3& shape<MixinInterface>::buddy_offset() const
+	inline const i_shape_container& shape<MixinInterface>::container() const
 	{
-		return container().buddy_offset(*this);
+		if (iContainer != nullptr)
+			return *iContainer;
+		throw no_shape_container();
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_buddy_offset(const vec3& aBuddyOffset)
+	inline i_shape_container& shape<MixinInterface>::container()
 	{
-		container().set_buddy_offset(*this, aBuddyOffset);
+		if (iContainer != nullptr)
+			return *iContainer;
+		throw no_shape_container();
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::unset_buddy()
+	inline bool shape<MixinInterface>::is_tag() const
 	{
-		container().unset_buddy(*this);
+		return iTagOf.first != nullptr;
+	}
+
+	template <typename MixinInterface>
+	inline i_shape& shape<MixinInterface>::tag_of() const
+	{
+		if (iTagOf.first == nullptr)
+			throw not_a_tag();
+		return *iTagOf.first;
+	}
+
+	template <typename MixinInterface>
+	inline void shape<MixinInterface>::set_tag_of(i_shape& aTagOf, const vec3& aOffset)
+	{
+		iTagOf.first = &aTagOf;
+		iTagOf.second = aOffset;
+	}
+
+	template <typename MixinInterface>
+	inline const vec3& shape<MixinInterface>::tag_offset() const
+	{
+		if (iTagOf.first == nullptr)
+			throw not_a_tag();
+		return iTagOf.second;
+	}
+
+	template <typename MixinInterface>
+	inline void shape<MixinInterface>::set_tag_offset(const vec3& aOffset)
+	{
+		if (iTagOf.first == nullptr)
+			throw not_a_tag();
+		iTagOf.second = aOffset;
+	}
+
+	template <typename MixinInterface>
+	inline void shape<MixinInterface>::unset_tag_of()
+	{
+		iTagOf.first = nullptr;
+		iTagOf.second = vec3{};
 	}
 
 	template <typename MixinInterface>
@@ -202,53 +276,32 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline point shape<MixinInterface>::origin() const
+	inline vec3 shape<MixinInterface>::origin() const
 	{
 		return iOrigin;
 	}
 
 	template <typename MixinInterface>
-	inline point shape<MixinInterface>::position() const
+	inline vec3 shape<MixinInterface>::position() const
 	{
-		return iPosition;
+		return is_tag() ? tag_of().position() + tag_offset() : iPosition;
 	}
 
 	template <typename MixinInterface>
-	inline vec3 shape<MixinInterface>::position_3D() const
+	inline vec3 shape<MixinInterface>::extents() const
 	{
-		auto xy = position();
-		return vec3{xy.x, xy.y, iZPos};
-	}
-
-	template <typename MixinInterface>
-	inline rect shape<MixinInterface>::bounding_box() const
-	{
-		if (iBoundingBox != boost::none)
-			return *iBoundingBox;
+		if (iExtents != boost::none)
+			return *iExtents;
 		else if (frame_count() > 0 && current_frame().has_extents())
-			return rect{ origin() - current_frame().extents() / size{2.0}, current_frame().extents() };
+			return vec3{ current_frame().extents().cx, current_frame().extents().cy, 0.0 };
 		else
-			return rect{ origin(), size{} };
+			return vec3{};
 	}
 
 	template <typename MixinInterface>
-	inline const vec2& shape<MixinInterface>::scale() const
+	inline rect shape<MixinInterface>::bounding_box_2d() const
 	{
-		return iScale;
-	}
-
-	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::has_transformation_matrix() const
-	{
-		return iTransformationMatrix != boost::none;
-	}
-
-	template <typename MixinInterface>
-	inline mat33 shape<MixinInterface>::transformation_matrix() const
-	{
-		if (iTransformationMatrix != boost::none)
-			return *iTransformationMatrix;
-		return mat33{ { 1.0, 0.0, 0.0 },{ 0.0, 1.0, 0.0 },{ position().x, position().y, 1.0 } };
+		return rect{ point{ origin() - extents() / 2.0 + position() }, size{ extents() } };
 	}
 
 	template <typename MixinInterface>
@@ -266,69 +319,55 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_origin(const point& aOrigin)
+	inline void shape<MixinInterface>::set_origin(const vec3& aOrigin)
 	{
 		iOrigin = aOrigin;
+		clear_vertices_cache();
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_position(const point& aPosition)
+	inline void shape<MixinInterface>::set_position(const vec3& aPosition)
 	{
 		iPosition = aPosition;
+		clear_vertices_cache();
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_position_3D(const vec3& aPosition3D)
+	inline void shape<MixinInterface>::clear_extents()
 	{
-		iPosition.x = aPosition3D[0];
-		iPosition.y = aPosition3D[1];
-		iZPos = aPosition3D[2];
+		iExtents = boost::none;
+		clear_vertices_cache();
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_bounding_box(const optional_rect& aBoundingBox)
+	inline void shape<MixinInterface>::set_extents(const vec3& aExtents)
 	{
-		iBoundingBox = aBoundingBox;
+		iExtents = aExtents;
+		clear_vertices_cache();
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_scale(const vec2& aScale)
+	inline void shape<MixinInterface>::clear_transformation_matrix()
 	{
-		iScale = aScale;
+		iTransformationMatrix = boost::none;
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_transformation_matrix(const optional_matrix33& aTransformationMatrix)
+	inline void shape<MixinInterface>::set_transformation_matrix(const mat33& aTransformationMatrix)
+	{
+		iTransformationMatrix = mat44{
+			{ aTransformationMatrix[0][0], aTransformationMatrix[0][1], aTransformationMatrix[0][2], 0.0 },
+			{ aTransformationMatrix[1][0], aTransformationMatrix[1][1], aTransformationMatrix[1][2], 0.0 },
+			{ aTransformationMatrix[2][0], aTransformationMatrix[2][1], aTransformationMatrix[2][2], 0.0 },
+			{ 0.0, 0.0, 0.0, 1.0 } };
+	}
+
+	template <typename MixinInterface>
+	inline void shape<MixinInterface>::set_transformation_matrix(const mat44& aTransformationMatrix)
 	{
 		iTransformationMatrix = aTransformationMatrix;
 	}
 	
-	template <typename MixinInterface>
-	inline std::size_t shape<MixinInterface>::vertex_count(bool aIncludeCentre) const
-	{
-		return aIncludeCentre ? 1 : 0;
-	}
-	
-	template <typename MixinInterface>
-	inline vec3_list shape<MixinInterface>::vertices(bool aIncludeCentre) const
-	{
-		vec3_list result;
-		result.reserve(vertex_count(aIncludeCentre));
-		if (aIncludeCentre)
-			result.push_back(origin().to_vector3());
-		return result;
-	}
-
-	template <typename MixinInterface>
-	inline vec3_list shape<MixinInterface>::transformed_vertices(bool aIncludeCentre) const
-	{
-		vec3_list result = vertices(aIncludeCentre);
-		auto tm = transformation_matrix();
-		for (auto& vertex : result)
-			vertex = tm * vertex;
-		return result;
-	}
-
 	template <typename MixinInterface>
 	inline bool shape<MixinInterface>::update(const optional_time_interval& aNow)
 	{
@@ -342,17 +381,22 @@ namespace neogfx
 	{
 		if (frame_count() == 0)
 			return;
-		auto m = transformed_vertices(current_frame().texture() == boost::none);
 		if (current_frame().texture() != boost::none)
 		{
 			if (current_frame().texture_rect() == boost::none)
-				aGraphicsContext.draw_texture(texture_map{ {m[0][0], m[0][1]}, {m[1][0], m[1][1]}, {m[2][0], m[2][1]}, {m[3][0], m[3][1]} }, *current_frame().texture());
+				aGraphicsContext.draw_texture(*this, *current_frame().texture());
 			else
-				aGraphicsContext.draw_texture(texture_map{ {m[0][0], m[0][1]}, {m[1][0], m[1][1]}, {m[2][0], m[2][1]}, {m[3][0], m[3][1]} }, *current_frame().texture(), *current_frame().texture_rect());
+				aGraphicsContext.draw_texture(*this, *current_frame().texture(), *current_frame().texture_rect());
 		}
 		else if (current_frame().colour() != boost::none)
 		{
-			aGraphicsContext.fill_shape(m, *current_frame().colour());
+			aGraphicsContext.fill_shape(*this, *current_frame().colour());
 		}
+	}
+
+	template <typename MixinInterface>
+	inline void shape<MixinInterface>::clear_vertices_cache()
+	{
+		iVertices = boost::none;
 	}
 }

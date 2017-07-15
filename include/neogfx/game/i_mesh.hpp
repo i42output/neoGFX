@@ -25,15 +25,16 @@ namespace neogfx
 {
 	class i_mesh
 	{
+	public:
 		typedef std::array<vec3, 3> triangle;
-		typedef uint32_t vertex_index;
+		typedef vec3_list::size_type vertex_index;
 		typedef std::array<vertex_index, 3> face;
 		typedef std::vector<face> face_list;
 	public:
-		virtual uint32_t face_count() const = 0;
-		virtual face_list faces() const = 0;
-		virtual uint32_t vertex_count() const = 0;
-		virtual vec3_list vertices() const = 0;
+		virtual const vec3_list& vertices() const = 0;
+		virtual const face_list& faces() const = 0;
+		virtual bool has_transformation_matrix() const = 0;
+		virtual mat44 transformation_matrix() const = 0;
 		virtual vec3_list transformed_vertices() const = 0;
 	};
 }

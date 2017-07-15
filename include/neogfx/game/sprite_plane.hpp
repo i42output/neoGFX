@@ -45,13 +45,9 @@ namespace neogfx
 		typedef std::shared_ptr<i_shape> shape_pointer;
 		typedef neolib::variant<sprite_pointer, object_pointer, shape_pointer> item;
 		typedef std::vector<item> item_list;
-		typedef std::map<const i_shape*, std::pair<i_shape*, vec3>> buddy_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
-	public:
-		struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::sprite_plane::no_buddy") {} };
-		struct buddy_exists : std::logic_error { buddy_exists() : std::logic_error("neogfx::sprite_plane::buddy_exists") {} };
 	public:
 		sprite_plane();
 		sprite_plane(i_widget& aParent);
@@ -63,13 +59,6 @@ namespace neogfx
 	public:
 		virtual const i_widget& as_widget() const;
 		virtual i_widget& as_widget();
-	public:
-		virtual bool has_buddy(const i_shape& aShape) const;
-		virtual i_shape& buddy(const i_shape& aShape) const;
-		virtual void set_buddy(const i_shape& aShape, i_shape& aBuddy, const vec3& aBuddyOffset = vec3{});
-		virtual const vec3& buddy_offset(const i_shape& aShape) const;
-		virtual void set_buddy_offset(const i_shape& aShape, const vec3& aBuddyOffset);
-		virtual void unset_buddy(const i_shape& aShape);
 	public:
 		void enable_z_sorting(bool aEnableZSorting);
 	public:
@@ -97,8 +86,6 @@ namespace neogfx
 	public:
 		void reserve(std::size_t aCapacity);
 		const item_list& items() const;
-		const buddy_list& buddies() const;
-		buddy_list& buddies();
 	private:
 		void sort_shapes() const;
 		void sort_objects();
@@ -113,7 +100,6 @@ namespace neogfx
 		step_time_interval iStepInterval;
 		item_list iItems;
 		mutable std::vector<i_shape*> iRenderBuffer;
-		buddy_list iBuddies;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
 	};

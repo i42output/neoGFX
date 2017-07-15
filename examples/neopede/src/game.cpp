@@ -25,16 +25,16 @@ class bullet : public ng::sprite
 {
 public:
 	bullet(const ng::i_sprite& aParent, ng::angle aAngle) : 
-		ng::sprite{ aParent.container(), ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }
+		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }
 	{
-		shape::set_size(ng::size{ 3.0, 3.0 });
+		shape::set_extents(ng::vec2{ 3.0, 3.0 });
 		ng::vec3 relativePos = aParent.physics().origin();
 		relativePos[1] += 18.0;
 		auto tm = aParent.transformation_matrix();
-		physics().set_position(aParent.physics().position() + tm * relativePos);
+		physics().set_position(aParent.physics().position() + *(tm * ng::vec4{ relativePos.x, relativePos.y, relativePos.z, 0.0 }).xyz);
 		physics().set_mass(0.016);
 		physics().set_angle_radians(aParent.physics().angle_radians() + ng::vec3{0.0, 0.0, ng::to_rad(aAngle)});
-		physics().set_velocity(transformation_matrix() * ng::vec3{0.0, 360.0, 0.0} + aParent.physics().velocity());
+		physics().set_velocity(*(transformation_matrix() * ng::vec4{0.0, 360.0, 0.0, 0.0}).xyz + aParent.physics().velocity());
 	}
 };
 
@@ -47,26 +47,25 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->enable_z_sorting(true);
 	for (uint32_t i = 0; i < 1000; ++i)
 		spritePlane->add_shape(std::make_shared<ng::rectangle>(
-			*spritePlane,
-			ng::vec3{static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -(static_cast<ng::scalar>(std::rand() % 32))},
-			ng::size{static_cast<ng::scalar>(std::rand() % 64), static_cast<ng::scalar>(std::rand() % 64)},
-			ng::colour(std::rand() % 64, std::rand() % 64, std::rand() % 64).lighter(0x40)));
+			ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -(static_cast<ng::scalar>(std::rand() % 32)) },
+			ng::vec2{ static_cast<ng::scalar>(std::rand() % 64), static_cast<ng::scalar>(std::rand() % 64) },
+			ng::colour{ std::rand() % 64, std::rand() % 64, std::rand() % 64 }.lighter(0x40)));
 	//spritePlane->set_uniform_gravity();
 	//spritePlane->set_gravitational_constant(0.0);
 	//spritePlane->create_earth();
 	spritePlane->reserve(10000);
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::LightGoldenrod}, {2, ng::colour::DarkGoldenrod4} }));
 	spaceshipSprite.physics().set_mass(1.0);
-	spaceshipSprite.set_size(ng::size(36.0, 36.0));
-	spaceshipSprite.set_position_3D(ng::vec3(400.0, 18.0, 1.0));
+	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
+	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 1.0 });
 	auto shipInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{}, "", ng::font("SnareDrum One NBP", "Regular", 24.0), ng::colour::White);
 	shipInfo->set_border(1.0);
 	shipInfo->set_margins(ng::margins(2.0));
-	shipInfo->set_buddy(spaceshipSprite, ng::vec3{18.0, 18.0, 0.0});
+	shipInfo->set_tag_of(spaceshipSprite, ng::vec3{18.0, 18.0, 0.0});
 	spritePlane->add_shape(shipInfo);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
-		aGraphicsContext.draw_shape(ng::rectangle{ *spritePlane, ng::vec3{ 250.0, 250.0, 0.0 }, ng::size{ 25.0, 25.0 } }, 
+		aGraphicsContext.draw_shape(ng::rectangle{ ng::vec3{ 250.0, 250.0, 0.0 }, ng::vec2{ 25.0, 25.0 } }, 
 			ng::pen{ ng::colour::Goldenrod, 3.0 }, ng::colour::DarkGoldenrod4);
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});

@@ -53,13 +53,6 @@ namespace neogfx
 	public:
 		virtual const i_widget& as_widget() const = 0;
 		virtual i_widget& as_widget() = 0;
-	public:
-		virtual bool has_buddy(const i_shape& aShape) const = 0;
-		virtual i_shape& buddy(const i_shape& aShape) const = 0;
-		virtual void set_buddy(const i_shape& aShape, i_shape& aBuddy, const vec3& aBuddyOffset = vec3{}) = 0;
-		virtual const vec3& buddy_offset(const i_shape& aShape) const = 0;
-		virtual void set_buddy_offset(const i_shape& aShape, const vec3& aBuddyOffset) = 0;
-		virtual void unset_buddy(const i_shape& aShape) = 0;
 	};
 
 	class i_shape : public i_mesh
@@ -72,20 +65,24 @@ namespace neogfx
 		typedef boost::optional<time_interval> optional_time_interval;
 		// exceptions
 	public:
-		struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::i_shape::no_buddy") {} };
+		struct no_shape_container : std::logic_error { no_shape_container() : std::logic_error("neogfx::i_shape::no_shape_container") {} };
+		struct not_a_tag : std::logic_error { not_a_tag() : std::logic_error("neogfx::i_shape::not_a_tag") {} };
 		struct bad_frame_index : std::logic_error { bad_frame_index() : std::logic_error("neogfx::i_shape::bad_frame_index") {} };
 		// construction
 	public:
 		virtual ~i_shape() {}
-		// container/buddy
+		// container
 	public:
-		virtual i_shape_container& container() const = 0;
-		virtual bool has_buddy() const = 0;
-		virtual i_shape& buddy() const = 0;
-		virtual void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{}) = 0;
-		virtual const vec3& buddy_offset() const = 0;
-		virtual void set_buddy_offset(const vec3& aBuddyOffset) = 0;
-		virtual void unset_buddy() = 0;
+		virtual const i_shape_container& container() const = 0;
+		virtual i_shape_container& container() = 0;
+		// tag
+	public:
+		virtual bool is_tag() const = 0;
+		virtual i_shape& tag_of() const = 0;
+		virtual void set_tag_of(i_shape& aTagOf, const vec3& aOffset = vec3{}) = 0;
+		virtual const vec3& tag_offset() const = 0;
+		virtual void set_tag_offset(const vec3& aOffset) = 0;
+		virtual void unset_tag_of() = 0;
 		// animation
 	public:
 		virtual frame_index frame_count() const = 0;
@@ -102,30 +99,48 @@ namespace neogfx
 		virtual const animation_frames& animation() const = 0;
 		virtual const i_frame& current_frame() const = 0;
 		virtual i_frame& current_frame() = 0;
-		virtual point origin() const = 0;
-		virtual point position() const = 0;
-		virtual vec3 position_3D() const = 0;
-		virtual rect bounding_box() const = 0;
-		virtual const vec2& scale() const = 0;
-		virtual bool has_transformation_matrix() const = 0;
-		virtual mat33 transformation_matrix() const = 0;
+		virtual vec3 origin() const = 0;
+		virtual vec3 position() const = 0;
+		virtual vec3 extents() const = 0;
+		virtual rect bounding_box_2d() const = 0;
 		virtual void set_animation(const animation_frames& aAnimation) = 0;
 		virtual void set_current_frame(frame_index aFrameIndex) = 0;
-		virtual void set_origin(const point& aOrigin) = 0;
-		virtual void set_position(const point& aPosition) = 0;
-		virtual void set_position_3D(const vec3& aPosition3D) = 0;
-		virtual void set_bounding_box(const optional_rect& aBoundingBox) = 0;
-		virtual void set_scale(const vec2& aScale) = 0;
-		virtual void set_transformation_matrix(const optional_mat33& aTransformationMatrix) = 0;
+		virtual void set_origin(const vec3& aOrigin) = 0;
+		virtual void set_position(const vec3& aPosition) = 0;
+		virtual void clear_extents() = 0;
+		virtual void set_extents(const vec3& aExtents) = 0;
+		virtual void clear_transformation_matrix() = 0;
+		virtual void set_transformation_matrix(const mat33& aTransformationMatrix) = 0;
+		virtual void set_transformation_matrix(const mat44& aTransformationMatrix) = 0;
 		// rendering
 	public:
 		virtual bool update(const optional_time_interval& aNow = optional_time_interval{}) = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 		// helpers
 	public:
-		void set_size(const size& aSize)
+		void set_origin(const vec2& aOrigin)
 		{
-			set_bounding_box(rect{ origin() - (aSize / size{ 2.0 }), aSize });
+			set_origin(vec3{ aOrigin.x, aOrigin.y, 0.0 });
+		}
+		void set_origin(const point& aOrigin)
+		{
+			set_origin(vec3{ aOrigin.x, aOrigin.y, 0.0 });
+		}
+		void set_position(const vec2& aPosition)
+		{
+			set_position(vec3{ aPosition.x, aPosition.y, 0.0 });
+		}
+		void set_position(const point& aPosition)
+		{
+			set_position(vec3{ aPosition.x, aPosition.y, 0.0 });
+		}
+		void set_extents(const vec2& aExtents)
+		{
+			set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
+		}
+		void set_extents(const size& aExtents)
+		{
+			set_extents(vec3{ aExtents.cx, aExtents.cy, 0.0 });
 		}
 	};
 }

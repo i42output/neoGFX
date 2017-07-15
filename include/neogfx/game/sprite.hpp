@@ -34,21 +34,19 @@ namespace neogfx
 		using i_sprite::step_time_interval;
 		// construction
 	public:
-		sprite(i_shape_container& aContainer);
-		sprite(i_shape_container& aContainer, const colour& aColour);
-		sprite(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		sprite(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		sprite();
+		sprite(const colour& aColour);
+		sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
+		sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		sprite(const sprite& aOther);
 		// geometry
 	public:
-		point origin() const override;
-		point position() const override;
-		vec3 position_3D() const override;
-		mat33 transformation_matrix() const override;
+		vec3 origin() const override;
+		vec3 position() const override;
+		mat44 transformation_matrix() const override;
 		const optional_path& path() const override;
-		void set_origin(const point& aOrigin) override;
-		void set_position(const point& aPosition) override;
-		void set_position_3D(const vec3& aPosition3D) override;
+		void set_origin(const vec3& aOrigin) override;
+		void set_position(const vec3& aPosition) override;
 		void set_path(const optional_path& aPath) override;
 		// physics
 	public:
@@ -57,8 +55,6 @@ namespace neogfx
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;
 		// rendering
 	public:
-		std::size_t vertex_count(bool aIncludeCentre = false) const override;
-		vec3_list vertices(bool aIncludeCentre = false) const override;
 		bool update(const optional_time_interval& aNow) override;
 		const optional_time_interval& update_time() const override;
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;

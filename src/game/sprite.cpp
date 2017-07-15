@@ -23,23 +23,22 @@
 
 namespace neogfx
 {
-	sprite::sprite(i_shape_container& aContainer) :
-		shape(aContainer)
+	sprite::sprite()
 	{
 	}
 
-	sprite::sprite(i_shape_container& aContainer, const colour& aColour) :
-		shape(aContainer, aColour)
+	sprite::sprite(const colour& aColour) :
+		shape(aColour)
 	{
 	}
 
-	sprite::sprite(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect) :
-		shape(aContainer, aTexture, aTextureRect)
+	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect) :
+		shape(aTexture, aTextureRect)
 	{
 	}
 
-	sprite::sprite(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect) :
-		shape(aContainer, aImage, aTextureRect)
+	sprite::sprite(const i_image& aImage, const optional_rect& aTextureRect) :
+		shape(aImage, aTextureRect)
 	{
 	}
 
@@ -50,26 +49,22 @@ namespace neogfx
 	{
 	}
 
-	point sprite::origin() const
+	vec3 sprite::origin() const
 	{
-		return point{ physics().origin().x, physics().origin().y };
+		return physics().origin();
 	}
 
-	point sprite::position() const
-	{
-		return point{ physics().position().x, physics().position().y };
-	}
-
-	vec3 sprite::position_3D() const
+	vec3 sprite::position() const
 	{
 		return physics().position();
 	}
 
-	mat33 sprite::transformation_matrix() const
+	mat44 sprite::transformation_matrix() const
 	{
 		auto az = physics().angle_radians().z;
 		auto pos = physics().position();
-		mat33 result{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ pos.x, pos.y, 1.0 } };
+		// todo: following rotation is 2D, make it 3D...
+		mat44 result{ { std::cos(az), -std::sin(az), 0.0, 0.0 },{ std::sin(az), std::cos(az), 0.0, 0.0 },{ pos.x, pos.y, 1.0, 0.0 }, { 0.0, 0.0, 0.0, 1.0 } };
 		if (shape::has_transformation_matrix())
 			result *= shape::transformation_matrix();
 		return result;
@@ -80,22 +75,16 @@ namespace neogfx
 		return iPath;
 	}
 	
-	void sprite::set_origin(const point& aOrigin)
+	void sprite::set_origin(const vec3& aOrigin)
 	{
 		shape::set_origin(aOrigin);
-		physics().set_origin(aOrigin.to_vector3());
+		physics().set_origin(aOrigin);
 	}
 	
-	void sprite::set_position(const point& aPosition)
+	void sprite::set_position(const vec3& aPosition)
 	{
 		shape::set_position(aPosition);
-		physics().set_position(aPosition.to_vector3());
-	}
-	
-	void sprite::set_position_3D(const vec3& aPosition3D)
-	{
-		shape::set_position_3D(aPosition3D);
-		physics().set_position(aPosition3D);
+		physics().set_position(aPosition);
 	}
 
 	void sprite::set_path(const optional_path& aPath)
@@ -132,21 +121,5 @@ namespace neogfx
 	bool sprite::update(const optional_time_interval& aNow)
 	{
 		return update(aNow, vec3{});
-	}
-
-	std::size_t sprite::vertex_count(bool aIncludeCentre) const
-	{
-		return aIncludeCentre ? 5 : 4;
-	}
-
-	vec3_list sprite::vertices(bool aIncludeCentre) const
-	{
-		vec3_list result = shape::vertices(aIncludeCentre);
-		auto r = bounding_box();
-		result.push_back(r.top_left().to_vector3());
-		result.push_back(r.top_right().to_vector3());
-		result.push_back(r.bottom_right().to_vector3());
-		result.push_back(r.bottom_left().to_vector3());
-		return result;
 	}
 }

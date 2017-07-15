@@ -23,9 +23,9 @@
 namespace neogfx
 {
 	text::text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const colour& aTextColour, neogfx::alignment aAlignment, const optional_colour& aBackgroundColour) :
-		shape(aContainer), iText{aText}, iFont{aFont}, iAlignment{aAlignment}, iGlyphTextCache(aFont), iBackgroundColour{aBackgroundColour}
+		shape{ aContainer }, iText{ aText }, iFont{ aFont }, iAlignment{ aAlignment }, iGlyphTextCache(aFont), iBackgroundColour{ aBackgroundColour }
 	{
-		set_position_3D(aPosition);
+		set_position(aPosition);
 		add_frame(std::make_shared<neogfx::frame>(aTextColour));
 	}
 
@@ -53,6 +53,7 @@ namespace neogfx
 		iText = aText;
 		iTextExtent = boost::none;
 		iGlyphTextCache = glyph_text(font());
+		clear_vertices_cache();
 	}
 
 	const neogfx::font& text::font() const
@@ -65,6 +66,7 @@ namespace neogfx
 		iFont = aFont;
 		iTextExtent = boost::none;
 		iGlyphTextCache = glyph_text(font());
+		clear_vertices_cache();
 	}
 
 	neogfx::alignment text::alignment() const
@@ -95,6 +97,7 @@ namespace neogfx
 	void text::set_border(const optional_dimension& aBorder)
 	{
 		iBorder = aBorder;
+		clear_vertices_cache();
 	}
 
 	const optional_margins& text::margins() const
@@ -105,43 +108,28 @@ namespace neogfx
 	void text::set_margins(const optional_margins& aMargins)
 	{
 		iMargins = aMargins;
+		clear_vertices_cache();
 	}
 
-	point text::position() const
+	vec3 text::extents() const
 	{
-		return has_buddy() ? buddy().position() + point{vec2{iBuddyOffset.xy}} : shape::position();
-	}
-
-	rect text::bounding_box() const
-	{
-		auto s = text_extent();
+		auto e = text_extent();
 		if (iBorder != boost::none)
 		{
-			s.cx += (*iBorder * 2.0);
-			s.cy += (*iBorder * 2.0);
+			e.cx += (*iBorder * 2.0);
+			e.cy += (*iBorder * 2.0);
 		}
 		if (iMargins != boost::none)
 		{
-			s.cx += (iMargins->left + iMargins->right);
-			s.cy += (iMargins->top + iMargins->bottom);
+			e.cx += (iMargins->left + iMargins->right);
+			e.cy += (iMargins->top + iMargins->bottom);
 		}
-		return rect{ origin(), s };
+		return vec3{ e.cx, e.cy, 0.0 };
 	}
 
-	std::size_t text::vertex_count(bool aIncludeCentre) const
+	rect text::bounding_box_2d() const
 	{
-		return aIncludeCentre ? 5 : 4;
-	}
-
-	vec3_list text::vertices(bool aIncludeCentre) const
-	{
-		vec3_list result = shape::vertices(aIncludeCentre);
-		auto r = bounding_box();
-		result.push_back(r.top_left().to_vector3());
-		result.push_back(r.top_right().to_vector3());
-		result.push_back(r.bottom_right().to_vector3());
-		result.push_back(r.bottom_left().to_vector3());
-		return result;
+		return rect{ point{ origin() + position() }, size{ extents() } };
 	}
 
 	void text::paint(graphics_context& aGraphicsContext) const
@@ -152,10 +140,7 @@ namespace neogfx
 			iGlyphTextCache = glyph_text(font());
 		}
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
-		auto bb = bounding_box();
-		bb.position() += position();
-		if (has_buddy())
-			bb.position() += point{vec2{buddy_offset().xy}};
+		auto bb = bounding_box_2d();
 		bb.position() = bb.position().ceil();
 		if (iBackgroundColour != boost::none)
 			aGraphicsContext.fill_rect(bb, *iBackgroundColour);

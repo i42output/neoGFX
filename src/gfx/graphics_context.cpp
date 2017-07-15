@@ -39,6 +39,8 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/game/mesh.hpp>
+#include <neogfx/game/rectangle.hpp>
 #include "native/i_native_graphics_context.hpp"
 #include "text/native/native_font_face.hpp"
 #include "../hid/native/i_native_surface.hpp"
@@ -64,61 +66,61 @@ namespace neogfx
 	};
 
 	graphics_context::graphics_context(const i_surface& aSurface) :
-		iSurface(aSurface),
-		iNativeGraphicsContext(aSurface.native_surface().create_graphics_context()),
-		iUnitsContext(*this),
-		iDefaultFont(),
-		iOrigin(0, 0),
-		iExtents(aSurface.extents()),
-		iLogicalCoordinateSystem(iSurface.logical_coordinate_system()),
-		iLogicalCoordinates(iSurface.logical_coordinates()),
-		iSmoothingMode(neogfx::smoothing_mode::None),
-		iSubpixelRendering(iSurface.rendering_engine().is_subpixel_rendering_on()),
+		iSurface{ aSurface },
+		iNativeGraphicsContext{ aSurface.native_surface().create_graphics_context() },
+		iUnitsContext{ *this },
+		iDefaultFont{},
+		iOrigin{ 0.0, 0.0 },
+		iExtents{ aSurface.extents() },
+		iLogicalCoordinateSystem{ iSurface.logical_coordinate_system() },
+		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iSmoothingMode{ neogfx::smoothing_mode::None },
+		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
 
 	graphics_context::graphics_context(const i_surface& aSurface, const font& aDefaultFont) :
-		iSurface(aSurface),
-		iNativeGraphicsContext(aSurface.native_surface().create_graphics_context()),
-		iUnitsContext(*this),
-		iDefaultFont(aDefaultFont),
-		iOrigin(0, 0),
-		iExtents(aSurface.extents()),
-		iLogicalCoordinateSystem(iSurface.logical_coordinate_system()),
-		iLogicalCoordinates(iSurface.logical_coordinates()),
-		iSmoothingMode(neogfx::smoothing_mode::None),
-		iSubpixelRendering(iSurface.rendering_engine().is_subpixel_rendering_on()),
+		iSurface{ aSurface },
+		iNativeGraphicsContext{ aSurface.native_surface().create_graphics_context() },
+		iUnitsContext{ *this },
+		iDefaultFont{ aDefaultFont },
+		iOrigin{ 0.0, 0.0 },
+		iExtents{ aSurface.extents() },
+		iLogicalCoordinateSystem{ iSurface.logical_coordinate_system() },
+		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iSmoothingMode{ neogfx::smoothing_mode::None },
+		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
 
 	graphics_context::graphics_context(const i_widget& aWidget) :
-		iSurface(aWidget.surface()),
-		iNativeGraphicsContext(aWidget.surface().native_surface().create_graphics_context(aWidget)),
-		iUnitsContext(*this),
-		iDefaultFont(aWidget.font()),
-		iOrigin(aWidget.origin()),
-		iExtents(aWidget.extents()),
-		iLogicalCoordinateSystem(aWidget.logical_coordinate_system()),
-		iLogicalCoordinates(iSurface.logical_coordinates()),
-		iSmoothingMode(neogfx::smoothing_mode::None),
-		iSubpixelRendering(iSurface.rendering_engine().is_subpixel_rendering_on()),
+		iSurface{ aWidget.surface() },
+		iNativeGraphicsContext{ aWidget.surface().native_surface().create_graphics_context(aWidget) },
+		iUnitsContext{ *this },
+		iDefaultFont{ aWidget.font() },
+		iOrigin{ aWidget.origin() },
+		iExtents{ aWidget.extents() },
+		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
+		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iSmoothingMode{ neogfx::smoothing_mode::None },
+		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
 
 	graphics_context::graphics_context(const graphics_context& aOther) :
-		iSurface(aOther.iSurface),
-		iNativeGraphicsContext(aOther.iNativeGraphicsContext->clone()),
-		iUnitsContext(*this),
-		iDefaultFont(aOther.iDefaultFont),
-		iOrigin(aOther.origin()),
-		iExtents(aOther.extents()),
-		iLogicalCoordinateSystem(aOther.logical_coordinate_system()),
-		iLogicalCoordinates(aOther.logical_coordinates()),
-		iSmoothingMode(neogfx::smoothing_mode::None),
-		iSubpixelRendering(iSurface.rendering_engine().is_subpixel_rendering_on()),
+		iSurface{ aOther.iSurface },
+		iNativeGraphicsContext{ aOther.iNativeGraphicsContext->clone() },
+		iUnitsContext{ *this },
+		iDefaultFont{ aOther.iDefaultFont },
+		iOrigin{ aOther.origin() },
+		iExtents{ aOther.extents() },
+		iLogicalCoordinateSystem{ aOther.logical_coordinate_system() },
+		iLogicalCoordinates{ aOther.logical_coordinates() },
+		iSmoothingMode{ neogfx::smoothing_mode::None },
+		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
@@ -157,11 +159,6 @@ namespace neogfx
 		return units_converter(*this).to_device_units(aValue);
 	}
 
-	texture_map graphics_context::to_device_units(const texture_map& aValue) const
-	{
-		return units_converter(*this).to_device_units(aValue);
-	}
-
 	path graphics_context::to_device_units(const path& aValue) const
 	{
 		path result = aValue;
@@ -188,11 +185,6 @@ namespace neogfx
 	}
 
 	rect graphics_context::from_device_units(const rect& aValue) const
-	{
-		return units_converter(*this).from_device_units(aValue);
-	}
-
-	texture_map graphics_context::from_device_units(const texture_map& aValue) const
 	{
 		return units_converter(*this).from_device_units(aValue);
 	}
@@ -304,26 +296,18 @@ namespace neogfx
 	void graphics_context::draw_shape(const i_shape& aShape, const pen& aPen, const fill& aFill) const
 	{
 		if (!aFill.empty())
-			fill_shape(aShape.transformed_vertices(true), aFill);
-		draw_shape(aShape.transformed_vertices(false), aPen);
-	}
-
-	void graphics_context::draw_shape(const vec2_list& aVertices, const pen& aPen) const
-	{
-		vec2_list vertices;
-		vertices.reserve(aVertices.size());
-		for (const auto& v : aVertices)
-			vertices.push_back(to_device_units(v) + iOrigin.to_vector());
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_shape{ vertices, aPen });
-	}
-
-	void graphics_context::draw_shape(const vec3_list& aVertices, const pen& aPen) const
-	{
-		vec2_list vertices;
-		vertices.reserve(aVertices.size());
-		for (const auto& v : aVertices)
-			vertices.push_back(to_device_units(v.xy) + iOrigin.to_vector());
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_shape{ vertices, aPen });
+			fill_shape(aShape, aFill);
+		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+		iNativeGraphicsContext->enqueue(
+			graphics_operation::draw_shape{
+				mesh{ 
+					aShape, 
+					mat44{ 
+						{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+						{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+						{ 0.0, 0.0, 1.0, 0.0 }, 
+						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },
+				aPen });
 	}
 
 	void graphics_context::draw_focus_rect(const rect& aRect) const
@@ -362,22 +346,19 @@ namespace neogfx
 		iNativeGraphicsContext->enqueue(graphics_operation::fill_path{ path, aFill });
 	}
 
-	void graphics_context::fill_shape(const vec2_list& aVertices, const fill& aFill) const
+	void graphics_context::fill_shape(const i_shape& aShape, const fill& aFill) const
 	{
-		vec2_list vertices;
-		vertices.reserve(aVertices.size());
-		for (const auto& v : aVertices)
-			vertices.push_back(to_device_units(v) + iOrigin.to_vector());
-		iNativeGraphicsContext->enqueue(graphics_operation::fill_shape{ vertices, aFill });
-	}
-
-	void graphics_context::fill_shape(const vec3_list& aVertices, const fill& aFill) const
-	{
-		vec2_list vertices;
-		vertices.reserve(aVertices.size());
-		for (const auto& v : aVertices)
-			vertices.push_back(to_device_units(v.xy) + iOrigin.to_vector());
-		iNativeGraphicsContext->enqueue(graphics_operation::fill_shape{ vertices, aFill });
+		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+		iNativeGraphicsContext->enqueue(
+			graphics_operation::fill_shape{
+				mesh{ 
+					aShape, 
+					mat44{ 
+						{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+						{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+						{ 0.0, 0.0, 1.0, 0.0 }, 
+						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },
+				aFill });
 	}
 
 	size graphics_context::text_extent(const string& aText, const font& aFont, bool aUseCache) const
@@ -814,32 +795,45 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_texture{ rect{ to_device_units(aPoint) + iOrigin, aTexture.extents() }.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour, aShaderEffect });
+		draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_texture{ (to_device_units(aRect) + iOrigin).to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour, aShaderEffect });
+		draw_texture(rectangle{ vec3{ aRect.x, aRect.y, 0.0 }, aRect.extents().to_vec2() }, aTexture, aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
+	void graphics_context::draw_texture(const i_shape& aShape, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_texture{ to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, rect(point(0.0, 0.0), aTexture.extents()), aColour, aShaderEffect });
+		draw_texture(aShape, aTexture, rect{ point{ 0.0, 0.0 }, aTexture.extents() }, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_texture{ rect{ to_device_units(aPoint) + iOrigin, aTexture.extents() }.to_vector(), aTexture, aTextureRect, aColour, aShaderEffect });
+		draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_texture{ (to_device_units(aRect) + iOrigin).to_vector(), aTexture, aTextureRect, aColour, aShaderEffect });
+		draw_texture(rectangle{ vec3{ aRect.x, aRect.y, 0.0 }, aRect.extents().to_vec2() }, aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
+	void graphics_context::draw_texture(const i_shape& aShape, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_texture{ to_device_units(aTextureMap) + iOrigin.to_vector(), aTexture, aTextureRect, aColour, aShaderEffect });
+		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+		iNativeGraphicsContext->enqueue(
+			graphics_operation::draw_texture{
+				mesh{
+					aShape,
+					mat44{
+						{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+						{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+						{ 0.0, 0.0, 1.0, 0.0 },
+						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },
+				aTexture,
+				aTextureRect,
+				aColour,
+				aShaderEffect});	
 	}
 
 	class graphics_context::glyph_shapes

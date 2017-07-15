@@ -59,26 +59,45 @@ namespace neogfx
 	private:
 		typedef std::vector<std::shared_ptr<i_frame>> frame_list;
 	public:
+		typedef i_mesh::triangle triangle;
+		typedef i_mesh::vertex_index vertex_index;
+		typedef i_mesh::face face;
+		typedef i_mesh::face_list face_list;
+	public:
 		typedef i_shape::frame_index frame_index;
 		typedef i_shape::time_interval time_interval;
 		typedef i_shape::animation_frames animation_frames;
 		typedef i_shape::time_interval time_interval;
 		typedef i_shape::optional_time_interval optional_time_interval;
 	public:
+		shape();
+		shape(const colour& aColour);
+		shape(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
+		shape(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		shape(i_shape_container& aContainer);
 		shape(i_shape_container& aContainer, const colour& aColour);
 		shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
 		shape(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		shape(const shape& aOther);
-		// container/buddy
+		// mesh
 	public:
-		i_shape_container& container() const override;
-		bool has_buddy() const override;
-		i_shape& buddy() const override;
-		void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{}) override;
-		const vec3& buddy_offset() const override;
-		void set_buddy_offset(const vec3& aBuddyOffset) override;
-		void unset_buddy() override;
+		const vec3_list& vertices() const override;
+		const face_list& faces() const override;
+		bool has_transformation_matrix() const override;
+		mat44 transformation_matrix() const override;
+		vec3_list transformed_vertices() const override;
+		// container
+	public:
+		const i_shape_container& container() const override;
+		i_shape_container& container() override;
+		// tag
+	public:
+		bool is_tag() const override;
+		i_shape& tag_of() const override;
+		void set_tag_of(i_shape& aTagOf, const vec3& aOffset = vec3{}) override;
+		const vec3& tag_offset() const override;
+		void set_tag_offset(const vec3& aOffset) override;
+		void unset_tag_of() override;
 		// animation
 	public:
 		frame_index frame_count() const override;
@@ -95,41 +114,45 @@ namespace neogfx
 		const animation_frames& animation() const override;
 		const i_frame& current_frame() const override;
 		i_frame& current_frame();
-		point origin() const override;
-		point position() const override;
-		vec3 position_3D() const override;
-		rect bounding_box() const override;
-		const vec2& scale() const override;
-		bool has_transformation_matrix() const override;
-		mat33 transformation_matrix() const override;
+		vec3 origin() const override;
+		vec3 position() const override;
+		vec3 extents() const override;
+		rect bounding_box_2d() const override;
 		void set_animation(const animation_frames& aAnimation) override;
 		void set_current_frame(frame_index aFrameIndex) override;
-		void set_origin(const point& aOrigin) override;
-		void set_position(const point& aPosition) override;
-		void set_position_3D(const vec3& aPosition3D) override;
-		void set_bounding_box(const optional_rect& aBoundingBox) override;
-		void set_scale(const vec2& aScale) override;
-		void set_transformation_matrix(const optional_matrix33& aTransformationMatrix) override;
+		void set_origin(const vec3& aOrigin) override;
+		void set_position(const vec3& aPosition) override;
+		void clear_extents() override;
+		void set_extents(const vec3& aExtents) override;
+		void clear_transformation_matrix() override;
+		void set_transformation_matrix(const mat33& aTransformationMatrix) override;
+		void set_transformation_matrix(const mat44& aTransformationMatrix) override;
 		// rendering
 	public:
-		std::size_t vertex_count(bool aIncludeCentre = false) const override;
-		vec3_list vertices(bool aIncludeCentre = false) const override;
-		vec3_list transformed_vertices(bool aIncludeCentre = false) const override;
 		bool update(const optional_time_interval& aNow = optional_time_interval{}) override;
 		void paint(graphics_context& aGraphicsContext) const override;
+		// udates
+	public:
+		void clear_vertices_cache();
+		// helpers
+	public:
+		using i_shape::set_origin;
+		using i_shape::set_position;
+		using i_shape::set_extents;
 		// attributes
 	private:
-		i_shape_container& iContainer;
+		i_shape_container* iContainer;
 		frame_list iFrames;
 		animation_frames iAnimation;
 		frame_index iCurrentFrame;
 		optional_time_interval iTimeOfLastUpdate;
-		point iOrigin;
-		point iPosition;
-		coordinate iZPos;
-		optional_rect iBoundingBox;
-		vec2 iScale;
-		mutable optional_mat33 iTransformationMatrix;
+		vec3 iOrigin;
+		vec3 iPosition;
+		optional_vec3 iExtents;
+		mutable optional_mat44 iTransformationMatrix;
+		std::pair<i_shape*, vec3> iTagOf;
+		mutable optional_vec3_list iVertices;
+		mutable face_list iFaces;
 	};
 }
 

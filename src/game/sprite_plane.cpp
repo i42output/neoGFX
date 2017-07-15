@@ -76,7 +76,7 @@ namespace neogfx
 		sort_shapes();
 		for (auto s : iRenderBuffer)
 		{
-			if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
+			if (s->bounding_box_2d().intersection(client_rect()).empty())
 				continue;
 			s->paint(aGraphicsContext);
 		}
@@ -91,50 +91,6 @@ namespace neogfx
 	i_widget& sprite_plane::as_widget()
 	{
 		return *this;
-	}
-
-	bool sprite_plane::has_buddy(const i_shape& aShape) const
-	{
-		return iBuddies.find(&aShape) != iBuddies.end();
-	}
-
-	i_shape& sprite_plane::buddy(const i_shape& aShape) const
-	{
-		auto b = iBuddies.find(&aShape);
-		if (b == iBuddies.end())
-			throw no_buddy();
-		return *b->second.first;
-	}
-
-	void sprite_plane::set_buddy(const i_shape& aShape, i_shape& aBuddy, const vec3& aBuddyOffset)
-	{
-		if (has_buddy(aShape))
-			throw buddy_exists();
-		iBuddies.emplace(&aShape, std::make_pair(&aBuddy, aBuddyOffset));
-	}
-
-	const vec3& sprite_plane::buddy_offset(const i_shape& aShape) const
-	{
-		auto b = iBuddies.find(&aShape);
-		if (b == iBuddies.end())
-			throw no_buddy();
-		return b->second.second;
-	}
-
-	void sprite_plane::set_buddy_offset(const i_shape& aShape, const vec3& aBuddyOffset)
-	{
-		auto b = iBuddies.find(&aShape);
-		if (b == iBuddies.end())
-			throw no_buddy();
-		b->second.second = aBuddyOffset;
-	}
-
-	void sprite_plane::unset_buddy(const i_shape& aShape)
-	{
-		auto b = iBuddies.find(&aShape);
-		if (b == iBuddies.end())
-			throw no_buddy();
-		iBuddies.erase(b);
 	}
 
 	void sprite_plane::enable_z_sorting(bool aEnableZSorting)
@@ -172,21 +128,21 @@ namespace neogfx
 
 	i_sprite& sprite_plane::create_sprite()
 	{
-		iSimpleSprites.push_back(sprite(*this));
+		iSimpleSprites.push_back(sprite{});
 		add_sprite(iSimpleSprites.back());
 		return iSimpleSprites.back();
 	}
 
 	i_sprite& sprite_plane::create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect)
 	{
-		iSimpleSprites.emplace_back(*this, aTexture, aTextureRect);
+		iSimpleSprites.emplace_back(aTexture, aTextureRect);
 		add_sprite(iSimpleSprites.back());
 		return iSimpleSprites.back();
 	}
 
 	i_sprite& sprite_plane::create_sprite(const i_image& aImage, const optional_rect& aTextureRect)
 	{
-		iSimpleSprites.emplace_back(*this, aImage, aTextureRect);
+		iSimpleSprites.emplace_back(aImage, aTextureRect);
 		add_sprite(iSimpleSprites.back());
 		return iSimpleSprites.back();
 	}
@@ -268,23 +224,13 @@ namespace neogfx
 		return iItems;
 	}
 
-	const sprite_plane::buddy_list& sprite_plane::buddies() const
-	{
-		return iBuddies;
-	}
-
-	sprite_plane::buddy_list& sprite_plane::buddies()
-	{
-		return iBuddies;
-	}
-
 	void sprite_plane::sort_shapes() const
 	{
 		if (iNeedsSorting && iEnableZSorting)
 		{
 			std::stable_sort(iRenderBuffer.begin(), iRenderBuffer.end(), [this](i_shape* left, i_shape* right) -> bool
 			{
-				return left->position_3D()[2] < right->position_3D()[2];
+				return left->position().z < right->position().z;
 			});
 		}
 	}
