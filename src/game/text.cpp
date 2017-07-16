@@ -127,9 +127,9 @@ namespace neogfx
 		return vec3{ e.cx, e.cy, 0.0 };
 	}
 
-	rect text::bounding_box_2d() const
+	rect text::bounding_box_2d(bool aWithPosition) const
 	{
-		return rect{ point{ origin() + position() }, size{ extents() } };
+		return rect{ point{ origin() + (aWithPosition ? position() : vec3{}) }, size{ extents() } };
 	}
 
 	void text::paint(graphics_context& aGraphicsContext) const

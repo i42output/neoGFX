@@ -61,13 +61,11 @@ namespace neogfx
 
 	mat44 sprite::transformation_matrix() const
 	{
-		auto az = physics().angle_radians().z;
-		auto pos = physics().position();
-		// todo: following rotation is 2D, make it 3D...
-		mat44 result{ { std::cos(az), -std::sin(az), 0.0, 0.0 },{ std::sin(az), std::cos(az), 0.0, 0.0 },{ pos.x, pos.y, 1.0, 0.0 }, { 0.0, 0.0, 0.0, 1.0 } };
 		if (shape::has_transformation_matrix())
-			result *= shape::transformation_matrix();
-		return result;
+			return shape::transformation_matrix();
+		auto az = physics().angle_radians().z;
+		// todo: following rotation is 2D, make it 3D...
+		return mat44{ { std::cos(az), -std::sin(az), 0.0, 0.0 }, { std::sin(az), std::cos(az), 0.0, 0.0 }, { 0.0, 0.0, 1.0, 0.0 }, { position().x, position().y, position().z, 1.0 } };
 	}
 
 	const optional_path& sprite::path() const

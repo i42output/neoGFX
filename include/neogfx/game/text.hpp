@@ -46,7 +46,7 @@ namespace neogfx
 		void set_margins(const optional_margins& aMargins);
 	public:
 		vec3 extents() const override;
-		rect bounding_box_2d() const override;
+		rect bounding_box_2d(bool aWithPosition = true) const override;
 	public:
 		void paint(graphics_context& aGraphicsContext) const override;
 	private:

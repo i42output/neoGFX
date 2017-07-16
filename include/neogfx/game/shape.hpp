@@ -60,6 +60,7 @@ namespace neogfx
 		typedef std::vector<std::shared_ptr<i_frame>> frame_list;
 	public:
 		typedef i_mesh::triangle triangle;
+		typedef i_mesh::vertex_list vertex_list;
 		typedef i_mesh::vertex_index vertex_index;
 		typedef i_mesh::face face;
 		typedef i_mesh::face_list face_list;
@@ -81,11 +82,10 @@ namespace neogfx
 		shape(const shape& aOther);
 		// mesh
 	public:
-		const vec3_list& vertices() const override;
+		const vertex_list& vertices() const override;
 		const face_list& faces() const override;
-		bool has_transformation_matrix() const override;
 		mat44 transformation_matrix() const override;
-		vec3_list transformed_vertices() const override;
+		vertex_list transformed_vertices() const override;
 		// container
 	public:
 		const i_shape_container& container() const override;
@@ -117,13 +117,14 @@ namespace neogfx
 		vec3 origin() const override;
 		vec3 position() const override;
 		vec3 extents() const override;
-		rect bounding_box_2d() const override;
+		rect bounding_box_2d(bool aWithPosition = true) const override;
 		void set_animation(const animation_frames& aAnimation) override;
 		void set_current_frame(frame_index aFrameIndex) override;
 		void set_origin(const vec3& aOrigin) override;
 		void set_position(const vec3& aPosition) override;
 		void clear_extents() override;
 		void set_extents(const vec3& aExtents) override;
+		bool has_transformation_matrix() const override;
 		void clear_transformation_matrix() override;
 		void set_transformation_matrix(const mat33& aTransformationMatrix) override;
 		void set_transformation_matrix(const mat44& aTransformationMatrix) override;
@@ -149,9 +150,9 @@ namespace neogfx
 		vec3 iOrigin;
 		vec3 iPosition;
 		optional_vec3 iExtents;
-		mutable optional_mat44 iTransformationMatrix;
+		optional_mat44 iTransformationMatrix;
 		std::pair<i_shape*, vec3> iTagOf;
-		mutable optional_vec3_list iVertices;
+		mutable boost::optional<vertex_list> iVertices;
 		mutable face_list iFaces;
 	};
 }

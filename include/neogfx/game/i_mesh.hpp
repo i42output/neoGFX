@@ -27,14 +27,19 @@ namespace neogfx
 	{
 	public:
 		typedef std::array<vec3, 3> triangle;
-		typedef vec3_list::size_type vertex_index;
+		struct vertex
+		{
+			vec3 coordinates;
+			vec2 textureCoordinates;
+		};
+		typedef std::vector<vertex> vertex_list;
+		typedef vertex_list::size_type vertex_index;
 		typedef std::array<vertex_index, 3> face;
 		typedef std::vector<face> face_list;
 	public:
-		virtual const vec3_list& vertices() const = 0;
+		virtual const vertex_list& vertices() const = 0;
 		virtual const face_list& faces() const = 0;
-		virtual bool has_transformation_matrix() const = 0;
 		virtual mat44 transformation_matrix() const = 0;
-		virtual vec3_list transformed_vertices() const = 0;
+		virtual vertex_list transformed_vertices() const = 0;
 	};
 }

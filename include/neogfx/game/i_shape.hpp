@@ -102,13 +102,14 @@ namespace neogfx
 		virtual vec3 origin() const = 0;
 		virtual vec3 position() const = 0;
 		virtual vec3 extents() const = 0;
-		virtual rect bounding_box_2d() const = 0;
+		virtual rect bounding_box_2d(bool aWithPosition = true) const = 0;
 		virtual void set_animation(const animation_frames& aAnimation) = 0;
 		virtual void set_current_frame(frame_index aFrameIndex) = 0;
 		virtual void set_origin(const vec3& aOrigin) = 0;
 		virtual void set_position(const vec3& aPosition) = 0;
 		virtual void clear_extents() = 0;
 		virtual void set_extents(const vec3& aExtents) = 0;
+		virtual bool has_transformation_matrix() const = 0;
 		virtual void clear_transformation_matrix() = 0;
 		virtual void set_transformation_matrix(const mat33& aTransformationMatrix) = 0;
 		virtual void set_transformation_matrix(const mat44& aTransformationMatrix) = 0;

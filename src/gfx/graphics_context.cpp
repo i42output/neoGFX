@@ -800,7 +800,10 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		draw_texture(rectangle{ vec3{ aRect.x, aRect.y, 0.0 }, aRect.extents().to_vec2() }, aTexture, aColour, aShaderEffect);
+		vec2 extents = aRect.extents().to_vec2();
+		vec2 offset = extents / 2.0;
+		vec3 centre = vec3{ aRect.x, aRect.y, 0.0 } + vec3{ offset.x, offset.y, 0.0 };
+		draw_texture(rectangle{ centre, extents }, aTexture, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const i_shape& aShape, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
@@ -815,7 +818,10 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		draw_texture(rectangle{ vec3{ aRect.x, aRect.y, 0.0 }, aRect.extents().to_vec2() }, aTexture, aTextureRect, aColour, aShaderEffect);
+		vec2 extents = aRect.extents().to_vec2();
+		vec2 offset = extents / 2.0;
+		vec3 centre = vec3{ aRect.x, aRect.y, 0.0 } + vec3{ offset.x, offset.y, 0.0 };
+		draw_texture(rectangle{ centre, extents }, aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const i_shape& aShape, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
@@ -829,7 +835,7 @@ namespace neogfx
 						{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
 						{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
 						{ 0.0, 0.0, 1.0, 0.0 },
-						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },
+						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },	
 				aTexture,
 				aTextureRect,
 				aColour,

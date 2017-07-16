@@ -86,6 +86,7 @@ namespace neogfx
 		const_iterator end() const { return v.end(); }
 		iterator begin() { return v.begin(); }
 		iterator end() { return v.end(); }
+		operator const array_type&() const { return v; }
 	public:
 		bool operator==(const basic_vector& right) const { return v == right.v; }
 		bool operator!=(const basic_vector& right) const { return v != right.v; }
@@ -180,6 +181,7 @@ namespace neogfx
 		const_iterator end() const { return v.end(); }
 		iterator begin() { return v.begin(); }
 		iterator end() { return v.end(); }
+		operator const array_type&() const { return v; }
 	public:
 		bool operator==(const basic_vector& right) const { return v == right.v; }
 		bool operator!=(const basic_vector& right) const { return v != right.v; }
@@ -693,6 +695,18 @@ namespace neogfx
 		return result;
 	}
 
+	template <typename T, uint32_t D1, uint32_t D2>
+	inline basic_matrix<T, D1, D1> operator^(const basic_matrix<T, D1, D2>& left, const basic_matrix<T, D2, D1>& right) // for combining transformation matrices
+	{
+		basic_matrix<T, D1, D1> result;
+		for (uint32_t column = 0; column < D1 - 1; ++column)
+			for (uint32_t row = 0; row < D1 - 1; ++row)
+				for (uint32_t index = 0; index < D2; ++index)
+					result[column][row] += left[index][row] * right[column][index];
+		result[D1 - 1] = left[D1 - 1] + right[D1 - 1];
+		return result;
+	}
+
 	template <typename T, uint32_t D, bool IsScalar>
 	inline basic_vector<T, D, column_vector, IsScalar> operator*(const basic_matrix<T, D, D>& left, const basic_vector<T, D, column_vector, IsScalar>& right)
 	{
@@ -704,7 +718,7 @@ namespace neogfx
 	}
 
 	template <typename T, uint32_t D, bool IsScalar>
-	inline basic_vector<T, D, row_vector, IsScalar> operator*(const basic_vector<T, D, row_vector, IsScalar>& left , const basic_matrix<T, D, D>& right)
+	inline basic_vector<T, D, row_vector, IsScalar> operator*(const basic_vector<T, D, row_vector, IsScalar>& left, const basic_matrix<T, D, D>& right)
 	{
 		basic_vector<T, D, row_vector, IsScalar> result;
 		for (uint32_t column = 0; column < D; ++column)
@@ -720,6 +734,15 @@ namespace neogfx
 		for (uint32_t column = 0; column < D; ++column)
 			for (uint32_t row = 0; row < D; ++row)
 				result[column][row] = (left[row] * right[column]);
+		return result;
+	}
+
+	template <typename T, uint32_t D>
+	inline basic_matrix<T, D, D> without_translation(const basic_matrix<T, D, D>& matrix)
+	{
+		auto result = matrix;
+		for (uint32_t row = 0; row < D - 1; ++row)
+			result[D - 1][row] = 0.0;
 		return result;
 	}
 

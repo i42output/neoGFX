@@ -30,8 +30,8 @@ public:
 		shape::set_extents(ng::vec2{ 3.0, 3.0 });
 		ng::vec3 relativePos = aParent.physics().origin();
 		relativePos[1] += 18.0;
-		auto tm = aParent.transformation_matrix();
-		physics().set_position(aParent.physics().position() + *(tm * ng::vec4{ relativePos.x, relativePos.y, relativePos.z, 0.0 }).xyz);
+		auto tm = ng::without_translation(aParent.transformation_matrix());
+		physics().set_position(aParent.physics().position() + *(tm * ng::vec4{ relativePos.x, relativePos.y, relativePos.z, 1.0 }).xyz);
 		physics().set_mass(0.016);
 		physics().set_angle_radians(aParent.physics().angle_radians() + ng::vec3{0.0, 0.0, ng::to_rad(aAngle)});
 		physics().set_velocity(*(transformation_matrix() * ng::vec4{0.0, 360.0, 0.0, 0.0}).xyz + aParent.physics().velocity());

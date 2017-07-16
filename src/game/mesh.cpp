@@ -22,31 +22,32 @@
 
 namespace neogfx
 {
-	mesh::mesh()
+	mesh::mesh() : 
+		iTransformationMatrix{ { 1.0, 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0, 0.0 }, { 0.0, 0.0, 1.0, 0.0 }, { 0.0, 0.0, 0.0, 1.0 } }
 	{
 	}
 
 	mesh::mesh(const i_mesh& aMesh) : 
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }
+		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() }
 	{
 	}
 
 	mesh::mesh(const i_mesh& aMesh, const mat44& aTransformationMatrix) :
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aTransformationMatrix }
+		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() ^ aTransformationMatrix }
 	{
 	}
 
 	mesh::mesh(const mesh& aMesh) :
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }
+		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() }
 	{
 	}
 
 	mesh::mesh(const mesh& aMesh, const mat44& aTransformationMatrix) :
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aTransformationMatrix }
+		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() ^ aTransformationMatrix }
 	{
 	}
 
-	const vec3_list& mesh::vertices() const
+	const mesh::vertex_list& mesh::vertices() const
 	{
 		return iVertices;
 	}
@@ -56,30 +57,17 @@ namespace neogfx
 		return iFaces;
 	}
 
-	bool mesh::has_transformation_matrix() const
-	{
-		return iTransformationMatrix != boost::none;
-	}
-
 	mat44 mesh::transformation_matrix() const
 	{
-		if (has_transformation_matrix())
-			return *iTransformationMatrix;
-		else
-			return mat44{ { 1.0, 0.0, 0.0, 0.0}, { 0.0, 1.0, 0.0, 0.0 }, { 0.0, 0.0, 1.0, 0.0 } ,{ 0.0, 0.0, 0.0, 1.0 } };
+		return iTransformationMatrix;
 	}
 
-	vec3_list mesh::transformed_vertices() const
+	mesh::vertex_list mesh::transformed_vertices() const
 	{
-		if (!has_transformation_matrix())
-			return iVertices;
-		else
-		{
-			vec3_list result;
-			result.reserve(iVertices.size());
-			for (auto const& v : iVertices)
-				result.push_back((*iTransformationMatrix * vec4{ v.x, v.y, v.z, 0.0 }).xyz);
-			return result;
-		}
+		mesh::vertex_list result;
+		result.reserve(iVertices.size());
+		for (auto const& v : iVertices)
+			result.push_back(vertex{ (transformation_matrix() * vec4{ v.coordinates.x, v.coordinates.y, v.coordinates.z, 1.0 }).xyz, v.textureCoordinates });
+		return result;
 	}
 }

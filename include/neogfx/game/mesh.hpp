@@ -32,14 +32,13 @@ namespace neogfx
 		mesh(const mesh& aMesh);
 		mesh(const mesh& aMesh, const mat44& aTransformationMatrix);
 	public:
-		const vec3_list& vertices() const override;
+		const vertex_list& vertices() const override;
 		const face_list& faces() const override;
-		bool has_transformation_matrix() const override;
 		mat44 transformation_matrix() const override;
-		vec3_list transformed_vertices() const override;
+		vertex_list transformed_vertices() const override;
 	private:
-		vec3_list iVertices;
+		vertex_list iVertices;
 		face_list iFaces;
-		optional_mat44 iTransformationMatrix;
+		mat44 iTransformationMatrix;
 	};
 }

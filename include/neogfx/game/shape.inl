@@ -88,12 +88,16 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline const vec3_list& shape<MixinInterface>::vertices() const
+	inline const typename shape<MixinInterface>::vertex_list& shape<MixinInterface>::vertices() const
 	{
-		if (iVertices = boost::none)
+		if (iVertices == boost::none)
 		{
-			auto r = bounding_box_2d();
-			iVertices = vec3_list{ r.top_left().to_vec3(), r.top_right().to_vec3(), r.bottom_right().to_vec3(), r.bottom_left().to_vec3() };
+			auto r = bounding_box_2d(false);
+			iVertices = vertex_list{
+				vertex{ r.top_left().to_vec3(), vec2{ 0.0, 0.0 } },
+				vertex{ r.top_right().to_vec3(), vec2{ 1.0, 0.0 } },
+				vertex{ r.bottom_right().to_vec3(), vec2{ 1.0, 1.0 } },
+				vertex{ r.bottom_left().to_vec3(), vec2{ 0.0, 1.0 } } };
 		}
 		return *iVertices;
 	}
@@ -107,26 +111,20 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::has_transformation_matrix() const
-	{
-		return iTransformationMatrix != boost::none;
-	}
-
-	template <typename MixinInterface>
 	inline mat44 shape<MixinInterface>::transformation_matrix() const
 	{
-		if (iTransformationMatrix != boost::none)
-			return *iTransformationMatrix;
-		return mat44{ { 1.0, 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0, 0.0 }, { 0.0, 0.0, 1.0, 0.0 }, { position().x, position().y, position().z, 1.0 } };
+		if (iTransformationMatrix == boost::none)
+			return mat44{ { 1.0, 0.0, 0.0, 0.0 },{ 0.0, 1.0, 0.0, 0.0 },{ 0.0, 0.0, 1.0, 0.0 }, { position().x, position().y, position().z, 1.0 } };
+		return *iTransformationMatrix;
 	}
 	
 	template <typename MixinInterface>
-	inline vec3_list shape<MixinInterface>::transformed_vertices() const
+	inline typename shape<MixinInterface>::vertex_list shape<MixinInterface>::transformed_vertices() const
 	{
-		vec3_list result;
+		vertex_list result;
 		result.reserve(vertices().size());
 		for (auto const& v : vertices())
-			result.push_back((transformation_matrix() * vec4 { v.x, v.y, v.z, 0.0 }).xyz);
+			result.push_back(vertex{ (transformation_matrix() * vec4 { v.coordinates.x, v.coordinates.y, v.coordinates.z, 1.0 }).xyz, v.textureCoordinates });
 		return result;
 	}
 
@@ -299,9 +297,9 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline rect shape<MixinInterface>::bounding_box_2d() const
+	inline rect shape<MixinInterface>::bounding_box_2d(bool aWithPosition) const
 	{
-		return rect{ point{ origin() - extents() / 2.0 + position() }, size{ extents() } };
+		return rect{ point{ origin() - extents() / 2.0 + (aWithPosition ? position() : vec3{}) }, size{ extents() } };
 	}
 
 	template <typename MixinInterface>
@@ -344,6 +342,12 @@ namespace neogfx
 	{
 		iExtents = aExtents;
 		clear_vertices_cache();
+	}
+
+	template <typename MixinInterface>
+	inline bool shape<MixinInterface>::has_transformation_matrix() const
+	{
+		return iTransformationMatrix != boost::none;
 	}
 
 	template <typename MixinInterface>

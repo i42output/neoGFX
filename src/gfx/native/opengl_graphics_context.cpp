@@ -22,6 +22,7 @@
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/game/rectangle.hpp>
 #include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
@@ -409,7 +410,7 @@ namespace neogfx
 				for (auto& op : opBatch)
 				{
 					const auto& args = static_cast<const graphics_operation::draw_shape&>(op);
-					draw_shape(args.mesh.vertices(), args.pen);
+					draw_shape(args.mesh, args.pen);
 				}
 				break;
 			case graphics_operation::operation_type::FillRect:
@@ -450,7 +451,7 @@ namespace neogfx
 				for (auto& op : opBatch)
 				{
 					const auto& args = static_variant_cast<const graphics_operation::draw_texture&>(op);
-					draw_texture(args.textureMap, args.texture, args.textureRect, args.colour, args.shaderEffect);
+					draw_texture(args.mesh, args.texture, args.textureRect, args.colour, args.shaderEffect);
 				}
 				break;
 			}
@@ -817,11 +818,12 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::draw_shape(const vec3_list& aVertices, const pen& aPen)
+	void opengl_graphics_context::draw_shape(const i_mesh& aMesh, const pen& aPen)
 	{
 		iVertexArrays.vertices().clear();
-		for (auto const& v : aVertices)
-			iVertexArrays.vertices().push_back(xyz{ v.x, v.y, v.z });
+		auto tvs = aMesh.transformed_vertices();
+		for (auto const& v : tvs) // todo: have vertex shader do this transformation
+			iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, 0.0 /* v.coordinates.z */ }); // todo: z-axis
 		iVertexArrays.vertices().push_back(iVertexArrays.vertices()[0]);
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
 		iVertexArrays.colours().assign(iVertexArrays.vertices().size(),
@@ -993,15 +995,15 @@ namespace neogfx
 
 		if (firstOp.fill.is<gradient>())
 		{
-			vec3 min = firstOp.mesh.vertices()[0].xyz;
+			auto tvs = firstOp.mesh.transformed_vertices();
+			vec3 min = tvs[0].coordinates.xyz;
 			vec3 max = min;
-			for (auto const& v : firstOp.mesh.vertices())
+			for (auto const& v : tvs)
 			{
-				auto tv = (firstOp.mesh.has_transformation_matrix() ? (firstOp.mesh.transformation_matrix() * vec4 { v.x, v.y, v.z, 0.0 }).xyz : v);
-				min.x = std::min(min.x, tv.x);
-				max.x = std::max(max.x, tv.x);
-				min.y = std::min(min.y, tv.y);
-				max.y = std::max(max.y, tv.y);
+				min.x = std::min(min.x, v.coordinates.x);
+				max.x = std::max(max.x, v.coordinates.x);
+				min.y = std::min(min.y, v.coordinates.y);
+				max.y = std::max(max.y, v.coordinates.y);
 			}
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill),
 				rect{
@@ -1016,10 +1018,10 @@ namespace neogfx
 		for (auto const& op : aFillShapeOps)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(op);
-			for (auto const& v : drawOp.mesh.vertices())
-				iVertexArrays.vertices().push_back(xyz{ v[0], v[1] });
-			iVertexArrays.vertices().push_back(xyz{ drawOp.mesh.vertices()[1][0], drawOp.mesh.vertices()[1][1] });
-			auto vertexCount = drawOp.mesh.vertices().size() + 1;
+			auto tvs = drawOp.mesh.transformed_vertices(); // todo: have vertex shader do this transformation
+			for (auto const& v : tvs)
+				iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, 0.0 /* v.coordinates.z */ }); // todo: z-axis
+			auto vertexCount = tvs.size();
 			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), vertexCount, std::array<double, 2>{});
 			iVertexArrays.colours().insert(iVertexArrays.colours().end(), vertexCount, drawOp.fill.is<colour>() ?
 				std::array <uint8_t, 4>{ {
@@ -1036,7 +1038,7 @@ namespace neogfx
 		for (auto const& op : aFillShapeOps)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(op);
-			auto vertexCount = drawOp.mesh.vertices().size() + 1;
+			auto vertexCount = drawOp.mesh.vertices().size();
 			glCheck(glDrawArrays(GL_TRIANGLE_FAN, idx, vertexCount));
 			idx += vertexCount;
 		}
@@ -1047,15 +1049,14 @@ namespace neogfx
 
 	namespace
 	{
-		std::vector<std::array<double, 2>> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates)
+		std::vector<vec2> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates)
 		{
-			typedef std::array<double, 2> xy;
-			std::vector<xy> result;
+			std::vector<vec2> result;
 			rect normalizedRect = aTextureRect / aTextureStorageSize;
-			result.push_back(xy{ normalizedRect.top_left().x, normalizedRect.top_left().y });
-			result.push_back(xy{ normalizedRect.top_right().x, normalizedRect.top_right().y });
-			result.push_back(xy{ normalizedRect.bottom_right().x, normalizedRect.bottom_right().y });
-			result.push_back(xy{ normalizedRect.bottom_left().x, normalizedRect.bottom_left().y });
+			result.push_back(vec2{ normalizedRect.top_left().x, normalizedRect.top_left().y });
+			result.push_back(vec2{ normalizedRect.top_right().x, normalizedRect.top_right().y });
+			result.push_back(vec2{ normalizedRect.bottom_right().x, normalizedRect.bottom_right().y });
+			result.push_back(vec2{ normalizedRect.bottom_left().x, normalizedRect.bottom_left().y });
 			if (aLogicalCoordinates.first.y < aLogicalCoordinates.second.y)
 			{
 				std::swap(result[0][1], result[2][1]);
@@ -1074,7 +1075,7 @@ namespace neogfx
 			use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 			auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value());
-			draw_texture(rect{ firstOp.point, size{firstOp.font.height(), firstOp.font.height()} }.to_vector(), emojiTexture, rect{ point{}, emojiTexture.extents() }, optional_colour{}, shader_effect::None);
+			draw_texture(rectangle{ firstOp.point.to_vec3(), size{firstOp.font.height(), firstOp.font.height()}.to_vec2() }, emojiTexture, rect{ point{}, emojiTexture.extents() }, optional_colour{}, shader_effect::None);
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 			return;
@@ -1160,7 +1161,7 @@ namespace neogfx
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
 	}
 
-	void opengl_graphics_context::draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect)
+	void opengl_graphics_context::draw_texture(const i_mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect)
 	{
 		if (aTexture.is_empty())
 			return;
@@ -1180,14 +1181,28 @@ namespace neogfx
 		if (!aTexture.native_texture()->is_resident())
 			throw texture_not_resident();
 
-		iVertexArrays.vertices().clear();
-		for (auto& v : aTextureMap)
-			iVertexArrays.vertices().push_back(vertex{ v.x, v.y });
-		iVertexArrays.texture_coords() = texture_vertices(aTexture.storage_extents(), textureRect + point{1.0, 1.0}, logical_coordinates());
-		colour c{0xFF, 0xFF, 0xFF, 0xFF};
+		auto tv = texture_vertices(aTexture.storage_extents(), textureRect + point{ 1.0, 1.0 }, logical_coordinates());
+
+		colour c{ 0xFF, 0xFF, 0xFF, 0xFF };
 		if (aColour != boost::none)
 			c = *aColour;
-		iVertexArrays.colours().assign(aTextureMap.size(), std::array<uint8_t, 4>{ {c.red(), c.green(), c.blue(), c.alpha()}});
+
+		iVertexArrays.vertices().clear();
+		iVertexArrays.texture_coords().clear();
+		iVertexArrays.colours().clear();
+
+		auto tvs = aMesh.transformed_vertices(); // todo: have vertex shader do this transformation
+
+		for (auto const& f : aMesh.faces())   
+		{
+			for (auto vi : f)
+			{
+				auto const& v = tvs[vi];
+				iVertexArrays.vertices().push_back(vertex{ v.coordinates.x, v.coordinates.y, 0.0 /* v.coordinates.z */ }); // todo: z-axis
+				iVertexArrays.texture_coords().push_back((tv[0] + (tv[2] - tv[0]) * *v.textureCoordinates.xy).v);
+				iVertexArrays.colours().push_back(std::array<uint8_t, 4>{ {c.red(), c.green(), c.blue(), c.alpha()}});
+			}
+		}
 
 		use_shader_program usp{ *this, iRenderingEngine, aShaderEffect == shader_effect::Monochrome ?
 			iRenderingEngine.monochrome_shader_program() :
@@ -1197,7 +1212,7 @@ namespace neogfx
 
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_QUADS, 0, 4));
+		glCheck(glDrawArrays(GL_TRIANGLES, 0, iVertexArrays.vertices().size()));
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 
