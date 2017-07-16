@@ -33,7 +33,7 @@ namespace neogfx
 	}
 
 	mesh::mesh(const i_mesh& aMesh, const mat44& aTransformationMatrix) :
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() ^ aTransformationMatrix }
+		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aTransformationMatrix * aMesh.transformation_matrix() }
 	{
 	}
 
@@ -43,7 +43,7 @@ namespace neogfx
 	}
 
 	mesh::mesh(const mesh& aMesh, const mat44& aTransformationMatrix) :
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() ^ aTransformationMatrix }
+		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aTransformationMatrix * aMesh.transformation_matrix() }
 	{
 	}
 

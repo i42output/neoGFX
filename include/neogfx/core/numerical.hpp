@@ -695,19 +695,6 @@ namespace neogfx
 		return result;
 	}
 
-	template <typename T, uint32_t D1, uint32_t D2>
-	inline basic_matrix<T, D1, D1> operator^(const basic_matrix<T, D1, D2>& left, const basic_matrix<T, D2, D1>& right) // for combining transformation matrices
-	{
-		basic_matrix<T, D1, D1> result;
-		for (uint32_t column = 0; column < D1 - 1; ++column)
-			for (uint32_t row = 0; row < D1 - 1; ++row)
-				for (uint32_t index = 0; index < D2; ++index)
-					result[column][row] += left[index][row] * right[column][index];
-		result[D1 - 1] = left[D1 - 1] + right[D1 - 1];
-		result[D1 - 1][D1 - 1] = 1.0;
-		return result;
-	}
-
 	template <typename T, uint32_t D, bool IsScalar>
 	inline basic_vector<T, D, column_vector, IsScalar> operator*(const basic_matrix<T, D, D>& left, const basic_vector<T, D, column_vector, IsScalar>& right)
 	{
