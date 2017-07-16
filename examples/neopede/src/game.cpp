@@ -47,7 +47,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->enable_z_sorting(true);
 	for (uint32_t i = 0; i < 1000; ++i)
 		spritePlane->add_shape(std::make_shared<ng::rectangle>(
-			ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -(static_cast<ng::scalar>(std::rand() % 32)) },
+			ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -(static_cast<ng::scalar>(std::rand() % 32)) / 32.0 },
 			ng::vec2{ static_cast<ng::scalar>(std::rand() % 64), static_cast<ng::scalar>(std::rand() % 64) },
 			ng::colour{ std::rand() % 64, std::rand() % 64, std::rand() % 64 }.lighter(0x40)));
 	//spritePlane->set_uniform_gravity();

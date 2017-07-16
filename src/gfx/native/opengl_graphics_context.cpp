@@ -823,7 +823,7 @@ namespace neogfx
 		iVertexArrays.vertices().clear();
 		auto tvs = aMesh.transformed_vertices();
 		for (auto const& v : tvs) // todo: have vertex shader do this transformation
-			iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, 0.0 /* v.coordinates.z */ }); // todo: z-axis
+			iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, v.coordinates.z });
 		iVertexArrays.vertices().push_back(iVertexArrays.vertices()[0]);
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
 		iVertexArrays.colours().assign(iVertexArrays.vertices().size(),
@@ -1020,7 +1020,7 @@ namespace neogfx
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(op);
 			auto tvs = drawOp.mesh.transformed_vertices(); // todo: have vertex shader do this transformation
 			for (auto const& v : tvs)
-				iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, 0.0 /* v.coordinates.z */ }); // todo: z-axis
+				iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, v.coordinates.z });
 			auto vertexCount = tvs.size();
 			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), vertexCount, std::array<double, 2>{});
 			iVertexArrays.colours().insert(iVertexArrays.colours().end(), vertexCount, drawOp.fill.is<colour>() ?
@@ -1198,7 +1198,7 @@ namespace neogfx
 			for (auto vi : f)
 			{
 				auto const& v = tvs[vi];
-				iVertexArrays.vertices().push_back(vertex{ v.coordinates.x, v.coordinates.y, 0.0 /* v.coordinates.z */ }); // todo: z-axis
+				iVertexArrays.vertices().push_back(vertex{ v.coordinates.x, v.coordinates.y, v.coordinates.z });
 				iVertexArrays.texture_coords().push_back((tv[0] + (tv[2] - tv[0]) * *v.textureCoordinates.xy).v);
 				iVertexArrays.colours().push_back(std::array<uint8_t, 4>{ {c.red(), c.green(), c.blue(), c.alpha()}});
 			}
