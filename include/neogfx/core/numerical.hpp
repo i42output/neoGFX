@@ -704,6 +704,7 @@ namespace neogfx
 				for (uint32_t index = 0; index < D2; ++index)
 					result[column][row] += left[index][row] * right[column][index];
 		result[D1 - 1] = left[D1 - 1] + right[D1 - 1];
+		result[D1 - 1][D1 - 1] = 1.0;
 		return result;
 	}
 
