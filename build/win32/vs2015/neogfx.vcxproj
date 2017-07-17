@@ -136,6 +136,7 @@
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_mesh.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_physical_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_shape.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_sprite.hpp" />

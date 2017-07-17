@@ -26,6 +26,7 @@
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/game/i_object.hpp>
 #include <neogfx/game/i_mesh.hpp>
 
 namespace neogfx
@@ -55,7 +56,7 @@ namespace neogfx
 		virtual i_widget& as_widget() = 0;
 	};
 
-	class i_shape : public i_mesh
+	class i_shape : public i_object, public i_mesh
 	{
 		// types
 	public:

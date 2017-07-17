@@ -40,13 +40,15 @@ namespace neogfx
 		physical_object();
 		physical_object(const physical_object& aOther);
 	public:
-		const vec3& origin() const override;
-		const vec3& position() const override;
-		const vec3& angle_radians() const override;
+		object_category category() const override;
+	public:
+		vec3 origin() const override;
+		vec3 position() const override;
+		vec3 angle_radians() const override;
 		vec3 angle_degrees() const override;
-		const vec3& velocity() const override;
-		const vec3& acceleration() const override;
-		const vec3& spin_radians() const override;
+		vec3 velocity() const override;
+		vec3 acceleration() const override;
+		vec3 spin_radians() const override;
 		vec3 spin_degrees() const override;
 		scalar mass() const override;
 		void set_origin(const vec3& aOrigin) override;
@@ -59,8 +61,9 @@ namespace neogfx
 		void set_spin_degrees(const vec3& aSpin) override;
 		void set_mass(scalar aMass) override;
 	public:
-		const aabb_type& aabb() const override;
-		bool collided(const i_physical_object& aOther) const override;
+		aabb_type aabb() const override;
+		bool has_collided(const i_physical_object& aOther) const override;
+		void collided(const i_physical_object& aOther) override;
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;
 		const optional_time_interval& update_time() const override;
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
@@ -72,7 +75,6 @@ namespace neogfx
 		bool apply_physics(double aElapsedTime, const vec3& aForce);
 	private:
 		vec3 iOrigin;
-		mutable aabb_type iAxisAlignedBoundingBox;
 		optional_time_interval iTimeOfLastUpdate;
 		mutable optional_physics iCurrentPhysics;
 		mutable optional_physics iNextPhysics;

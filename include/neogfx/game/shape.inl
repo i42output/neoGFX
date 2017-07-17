@@ -88,6 +88,12 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
+	inline object_category shape<MixinInterface>::category() const
+	{
+		return object_category::Shape;
+	}
+
+	template <typename MixinInterface>
 	inline const typename shape<MixinInterface>::vertex_list& shape<MixinInterface>::vertices() const
 	{
 		if (iVertices == boost::none)

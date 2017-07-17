@@ -21,8 +21,6 @@
 #include <boost/math/constants/constants.hpp>
 #include <neogfx/game/physical_object.hpp>
 
-#include <iostream>
-
 namespace neogfx
 {
 	physical_object::physical_object() :
@@ -38,17 +36,22 @@ namespace neogfx
 	{
 	}
 
-	const vec3& physical_object::origin() const
+	object_category physical_object::category() const
+	{
+		return object_category::PhysicalObject;
+	}
+
+	vec3 physical_object::origin() const
 	{
 		return iOrigin;
 	}
 
-	const vec3& physical_object::position() const
+	vec3 physical_object::position() const
 	{
 		return current_physics().iPosition;
 	}
 
-	const vec3& physical_object::angle_radians() const
+	vec3 physical_object::angle_radians() const
 	{
 		return current_physics().iAngle;
 	}
@@ -58,17 +61,17 @@ namespace neogfx
 		return current_physics().iAngle * 180.0 / boost::math::constants::pi<double>();
 	}
 
-	const vec3& physical_object::velocity() const
+	vec3 physical_object::velocity() const
 	{
 		return current_physics().iVelocity;
 	}
 
-	const vec3& physical_object::acceleration() const
+	vec3 physical_object::acceleration() const
 	{
 		return current_physics().iAcceleration;
 	}
 
-	const vec3& physical_object::spin_radians() const
+	vec3 physical_object::spin_radians() const
 	{
 		return current_physics().iSpin;
 	}
@@ -128,16 +131,26 @@ namespace neogfx
 		current_physics().iMass = aMass;
 	}
 
-	const physical_object::aabb_type& physical_object::aabb() const
+	physical_object::aabb_type physical_object::aabb() const
 	{
-		return iAxisAlignedBoundingBox;
+		return aabb_type{ position() + origin(), position() + origin() };
 	}
 
-	bool physical_object::collided(const i_physical_object& aOther) const
+	bool physical_object::has_collided(const i_physical_object& aOther) const
 	{
-		/* todo */
-		(void)aOther;
-		return false;
+		auto aabbLeft = aabb();
+		auto aabbRight = aOther.aabb();
+		if (aabbLeft.min.x > aabbRight.max.x || aabbLeft.max.x < aabbRight.min.x ||
+			aabbLeft.min.y > aabbRight.max.y || aabbLeft.max.y < aabbRight.min.y ||
+			aabbLeft.min.z > aabbRight.max.z || aabbLeft.max.z < aabbRight.min.z)
+			return false;
+		// todo: we *might* have collided; now do 2D SAT test to find out if we have actaully collided...
+		return true;
+	}
+
+	void physical_object::collided(const i_physical_object&)
+	{
+		/* default behaviour: do nothing */
 	}
 
 	bool physical_object::update(const optional_time_interval& aNow, const vec3& aForce)

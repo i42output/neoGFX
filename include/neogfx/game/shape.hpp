@@ -80,6 +80,9 @@ namespace neogfx
 		shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
 		shape(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		shape(const shape& aOther);
+		// object
+	public:
+		object_category category() const override;
 		// mesh
 	public:
 		const vertex_list& vertices() const override;
@@ -134,7 +137,7 @@ namespace neogfx
 		void paint(graphics_context& aGraphicsContext) const override;
 		// udates
 	public:
-		void clear_vertices_cache();
+		virtual void clear_vertices_cache();
 		// helpers
 	public:
 		using i_shape::set_origin;

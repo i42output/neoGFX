@@ -22,13 +22,18 @@
 #include <chrono>
 #include <boost/optional.hpp>
 #include <neogfx/core/geometry.hpp>
+#include "i_object.hpp"
 
 namespace neogfx
 {
-	class i_physical_object
+	class i_physical_object : public i_object
 	{
 	public:
-		typedef std::array<vec3, 6> aabb_type;
+		struct aabb_type
+		{
+			vec3 min;
+			vec3 max;
+		};
 		typedef scalar time_interval;
 		typedef boost::optional<time_interval> optional_time_interval;
 		typedef int64_t step_time_interval;
@@ -36,13 +41,13 @@ namespace neogfx
 	public:
 		virtual ~i_physical_object() {}
 	public:
-		virtual const vec3& origin() const = 0;
-		virtual const vec3& position() const = 0;
-		virtual const vec3& angle_radians() const = 0;
+		virtual vec3 origin() const = 0;
+		virtual vec3 position() const = 0;
+		virtual vec3 angle_radians() const = 0;
 		virtual vec3 angle_degrees() const = 0;
-		virtual const vec3& velocity() const = 0;
-		virtual const vec3& acceleration() const = 0;
-		virtual const vec3& spin_radians() const = 0;
+		virtual vec3 velocity() const = 0;
+		virtual vec3 acceleration() const = 0;
+		virtual vec3 spin_radians() const = 0;
 		virtual vec3 spin_degrees() const = 0;
 		virtual scalar mass() const = 0;
 		virtual void set_origin(const vec3& aOrigin) = 0;
@@ -72,8 +77,9 @@ namespace neogfx
 			set_spin_degrees(vec3{ 0.0, 0.0, aSpin });
 		}
 	public:
-		virtual const aabb_type& aabb() const = 0;
-		virtual bool collided(const i_physical_object& aOther) const = 0;
+		virtual aabb_type aabb() const = 0;
+		virtual bool has_collided(const i_physical_object& aOther) const = 0;
+		virtual void collided(const i_physical_object& aOther) = 0;
 		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
 		virtual const optional_time_interval& update_time() const = 0;
 		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;

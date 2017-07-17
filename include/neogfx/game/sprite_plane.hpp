@@ -35,16 +35,14 @@ namespace neogfx
 		event<step_time_interval> physics_applied;
 		event<graphics_context&> painting_sprites;
 		event<graphics_context&> sprites_painted;
+		event<i_object&, i_object&> object_collision;
 	public:
 		typedef i_physical_object::time_interval time_interval;
 		typedef i_physical_object::optional_time_interval optional_time_interval;
 		typedef i_physical_object::optional_step_time_interval optional_step_time_interval;
 	public:
-		typedef std::shared_ptr<i_sprite> sprite_pointer;
-		typedef std::shared_ptr<i_physical_object> object_pointer;
-		typedef std::shared_ptr<i_shape> shape_pointer;
-		typedef neolib::variant<sprite_pointer, object_pointer, shape_pointer> item;
-		typedef std::vector<item> item_list;
+		typedef std::shared_ptr<i_object> object_pointer;
+		typedef std::vector<object_pointer> object_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
@@ -62,11 +60,13 @@ namespace neogfx
 	public:
 		void enable_z_sorting(bool aEnableZSorting);
 	public:
-		void add_shape(i_shape& aShape);
-		void add_shape(std::shared_ptr<i_shape> aShape);
+		void add_sprite(i_sprite& aObject);
+		void add_sprite(std::shared_ptr<i_sprite> aObject);
+		void add_physical_object(i_physical_object& aObject);
+		void add_physical_object(std::shared_ptr<i_physical_object> aObject);
+		void add_shape(i_shape& aObject);
+		void add_shape(std::shared_ptr<i_shape> aObject);
 	public:
-		void add_sprite(i_sprite& aSprite);
-		void add_sprite(std::shared_ptr<i_sprite> aSprite);
 		i_sprite& create_sprite();
 		i_sprite& create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
 		i_sprite& create_sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
@@ -75,17 +75,15 @@ namespace neogfx
 		void set_gravitational_constant(scalar aG);
 		const optional_vec3& uniform_gravity() const;
 		void set_uniform_gravity(const optional_vec3& aUniformGravity = vec3{ 0.0, -9.80665, 0.0});
-		void add_object(i_physical_object& aObject);
-		void add_object(std::shared_ptr<i_physical_object> aObject);
 		i_physical_object& create_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
-		i_physical_object& create_object();
+		i_physical_object& create_physical_object();
 		const optional_step_time_interval& physics_time() const;
 		void set_physics_time(const optional_step_time_interval& aTime);
 		step_time_interval physics_step_interval() const;
 		void set_physics_step_interval(step_time_interval aStepInterval);
 	public:
 		void reserve(std::size_t aCapacity);
-		const item_list& items() const;
+		const object_list& objects() const;
 	private:
 		void sort_shapes() const;
 		void sort_objects();
@@ -98,9 +96,10 @@ namespace neogfx
 		optional_vec3 iUniformGravity;
 		optional_step_time_interval iPhysicsTime;
 		step_time_interval iStepInterval;
-		item_list iItems;
+		object_list iObjects;
 		mutable std::vector<i_shape*> iRenderBuffer;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
+		mutable bool iWaitForRender;
 	};
 }

@@ -21,11 +21,11 @@ const uint8_t sSpaceshipImagePattern[9][9]
 	{ 0, 1, 0, 0, 0, 0, 0, 1, 0 },
 };
 
-class bullet : public ng::sprite
+class missile : public ng::sprite
 {
 public:
-	bullet(const ng::i_sprite& aParent, ng::angle aAngle) : 
-		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }
+	missile(ng::sprite_plane& aWorld, const ng::i_sprite& aParent, ng::angle aAngle) :
+		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }
 	{
 		shape::set_extents(ng::vec2{ 3.0, 3.0 });
 		ng::vec3 relativePos = aParent.physics().origin();
@@ -36,6 +36,26 @@ public:
 		physics().set_angle_radians(aParent.physics().angle_radians() + ng::vec3{0.0, 0.0, ng::to_rad(aAngle)});
 		physics().set_velocity(*(transformation_matrix() * ng::vec4{0.0, 360.0, 0.0, 0.0}).xyz + aParent.physics().velocity());
 	}
+public:
+	const uuid& type() const override
+	{
+		static uuid sTypeId = neolib::make_uuid("F5B70B06-6B72-465B-9499-44EB994D2923");
+		return sTypeId;
+	}
+	bool update(const optional_time_interval& aNow, const ng::vec3& aForce) override
+	{
+		bool updated = physical_object::update(aNow, aForce);
+		if (updated && bounding_box_2d().intersection(iWorld.client_rect()).empty())
+			destroy();
+		return updated;
+	}
+	void collided(const i_physical_object& aOther) override
+	{
+		if (aOther.type() != type())
+			destroy();
+	}
+private:
+	ng::sprite_plane& iWorld;
 };
 
 void create_game(ng::i_layout& aLayout)
@@ -63,14 +83,17 @@ void create_game(ng::i_layout& aLayout)
 	shipInfo->set_margins(ng::margins(2.0));
 	shipInfo->set_tag_of(spaceshipSprite, ng::vec3{18.0, 18.0, 0.0});
 	spritePlane->add_shape(shipInfo);
+	auto target = std::make_shared<ng::sprite>();
+	spritePlane->add_sprite(target);
+	target->set_position(ng::vec2{ 250.0, 250.0 });
+	target->set_extents(ng::vec2{ 25.0, 25.0 });
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_shape(ng::rectangle{ ng::vec3{ 250.0, 250.0, 0.0 }, ng::vec2{ 25.0, 25.0 } }, 
 			ng::pen{ ng::colour::Goldenrod, 3.0 }, ng::colour::DarkGoldenrod4);
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});
-	auto bullets = std::make_shared<std::vector<bullet>>();
-	spritePlane->applying_physics([spritePlane, &spaceshipSprite, shipInfo, bullets](ng::sprite_plane::step_time_interval aPhysicsStepTime)
+	spritePlane->applying_physics([spritePlane, &spaceshipSprite, shipInfo](ng::sprite_plane::step_time_interval aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		spaceshipSprite.physics().set_acceleration({  
@@ -82,15 +105,14 @@ void create_game(ng::i_layout& aLayout)
 			spaceshipSprite.physics().set_spin_degrees(-30.0);
 		else
 			spaceshipSprite.physics().set_spin_degrees(0.0);
-		bullets->reserve(100000);
-		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) && bullets->size() < bullets->capacity() - 7)
+		if (keyboard.is_key_pressed(ng::ScanCode_SPACE))
 		{
 			if ((aPhysicsStepTime / 10) % 2 == 0 && (aPhysicsStepTime / 100) % 2 == 0)
 			{
 				for (double a = -30.0; a <= 30.0; a += 10.0)
 				{
-					bullets->emplace_back(spaceshipSprite, a);
-					spritePlane->add_sprite(bullets->back());
+					static boost::fast_pool_allocator<missile> alloc;
+					spritePlane->add_sprite(std::allocate_shared<missile, boost::fast_pool_allocator<missile>>(alloc, *spritePlane, spaceshipSprite, a));
 				}
 			}
 		}

@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-	class sprite : public shape<i_sprite>
+	class sprite : public physical_object, public shape<i_sprite>
 	{
 		// types
 	public:
@@ -39,6 +39,10 @@ namespace neogfx
 		sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
 		sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
 		sprite(const sprite& aOther);
+		// object
+	public:
+		object_category category() const override;
+		bool destroyed() const override;
 		// geometry
 	public:
 		vec3 origin() const override;
@@ -46,21 +50,30 @@ namespace neogfx
 		mat44 transformation_matrix() const override;
 		const optional_path& path() const override;
 		void set_origin(const vec3& aOrigin) override;
+		using i_shape::set_origin;
 		void set_position(const vec3& aPosition) override;
+		using i_shape::set_position;
 		void set_path(const optional_path& aPath) override;
+		// udates
+	public:
+		void clear_vertices_cache() override;
 		// physics
 	public:
 		const i_physical_object& physics() const override;
 		i_physical_object& physics() override;
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;
-		// rendering
-	public:
-		bool update(const optional_time_interval& aNow) override;
 		const optional_time_interval& update_time() const override;
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
+		// physical object
+	public:
+		aabb_type aabb() const override;
+		// own
+	public:
+		void destroy();
 		// attributes
 	private:
 		optional_path iPath;
-		physical_object iObject;
+		mutable boost::optional<aabb_type> iAabb;
+		bool iDestroyed;
 	};
 }
