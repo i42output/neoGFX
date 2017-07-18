@@ -173,7 +173,7 @@ namespace neogfx
 	{
 		rect rectBarBox = bar_box();
 		rect result{ point{ rectBarBox.x + rectBarBox.cx * normalized_value(), rectBarBox.centre().y}, size{} };
-		result.inflate(size{ std::ceil(rectBarBox.height() * 1.5) });
+		result.inflate(size{ std::ceil(client_rect(false).height() / 3.0) });
 		return result;
 	}
 }
