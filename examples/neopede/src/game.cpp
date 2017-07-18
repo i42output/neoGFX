@@ -27,6 +27,7 @@ public:
 	missile(ng::sprite_plane& aWorld, const ng::i_sprite& aParent, ng::angle aAngle) :
 		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }
 	{
+		set_collision_mask(1ull);
 		shape::set_extents(ng::vec2{ 3.0, 3.0 });
 		ng::vec3 relativePos = aParent.physics().origin();
 		relativePos[1] += 18.0;
@@ -51,8 +52,7 @@ public:
 	}
 	void collided(const i_physical_object& aOther) override
 	{
-		if (aOther.type() != type())
-			destroy();
+		destroy();
 	}
 private:
 	ng::sprite_plane& iWorld;
@@ -75,6 +75,7 @@ void create_game(ng::i_layout& aLayout)
 	//spritePlane->create_earth();
 	spritePlane->reserve(10000);
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::LightGoldenrod}, {2, ng::colour::DarkGoldenrod4} }));
+	spaceshipSprite.set_collision_mask(1ull);
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
 	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 1.0 });

@@ -62,6 +62,7 @@ namespace neogfx
 		void set_mass(scalar aMass) override;
 	public:
 		aabb_type aabb() const override;
+		void clear_aabb_cache() override;
 		bool has_collided(const i_physical_object& aOther) const override;
 		void collided(const i_physical_object& aOther) override;
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;

@@ -136,8 +136,15 @@ namespace neogfx
 		return aabb_type{ position() + origin(), position() + origin() };
 	}
 
+	void physical_object::clear_aabb_cache()
+	{
+		/* do nothing */
+	}
+
 	bool physical_object::has_collided(const i_physical_object& aOther) const
 	{
+		if ((collision_mask() & aOther.collision_mask()) != 0ull)
+			return false;
 		auto aabbLeft = aabb();
 		auto aabbRight = aOther.aabb();
 		if (aabbLeft.min.x > aabbRight.max.x || aabbLeft.max.x < aabbRight.min.x ||
@@ -165,6 +172,8 @@ namespace neogfx
 			current_physics() = next_physics();
 		}
 		iTimeOfLastUpdate = aNow;
+		if (updated)
+			clear_aabb_cache();
 		return updated;
 	}
 

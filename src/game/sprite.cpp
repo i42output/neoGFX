@@ -24,25 +24,25 @@
 namespace neogfx
 {
 	sprite::sprite() :
-		iDestroyed{ false }
+		iCollisionMask{ 0ull }, iDestroyed { false }
 	{
 	}
 
 	sprite::sprite(const colour& aColour) :
 		shape{ aColour },
-		iDestroyed{ false }
+		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
 	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect) :
 		shape{ aTexture, aTextureRect },
-		iDestroyed{ false }
+		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
 	sprite::sprite(const i_image& aImage, const optional_rect& aTextureRect) :
 		shape{ aImage, aTextureRect },
-		iDestroyed{ false }
+		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
@@ -50,13 +50,23 @@ namespace neogfx
 		shape{ aOther },
 		physical_object{ aOther },
 		iPath{ aOther.iPath },
-		iDestroyed{ false }
+		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
 	object_category sprite::category() const
 	{
 		return object_category::Sprite;
+	}
+
+	uint64_t sprite::collision_mask() const
+	{
+		return iCollisionMask;
+	}
+
+	void sprite::set_collision_mask(uint64_t aMask)
+	{
+		iCollisionMask = aMask;
 	}
 
 	bool sprite::destroyed() const
@@ -108,7 +118,7 @@ namespace neogfx
 	void sprite::clear_vertices_cache()
 	{
 		shape::clear_vertices_cache();
-		iAabb = boost::none;
+		clear_aabb_cache();
 	}
 
 	const i_physical_object& sprite::physics() const
@@ -123,8 +133,7 @@ namespace neogfx
 
 	bool sprite::update(const optional_time_interval& aNow, const vec3& aForce)
 	{
-		bool updated = shape::update(aNow);
-		return physical_object::update(aNow, aForce) || updated;
+		return physical_object::update(aNow, aForce);
 	}
 
 	const sprite::optional_time_interval& sprite::update_time() const
@@ -141,14 +150,15 @@ namespace neogfx
 	{
 		if (iAabb == boost::none)
 		{
-			auto iv = vertices()[0];
+			auto tvs = transformed_vertices();
+			auto iv = tvs[0];
 			coordinate xMin = iv.coordinates.x;
 			coordinate yMin = iv.coordinates.y;
 			coordinate zMin = iv.coordinates.z;
 			coordinate xMax = iv.coordinates.x;
 			coordinate yMax = iv.coordinates.y;
 			coordinate zMax = iv.coordinates.z;
-			for (const auto& v : vertices())
+			for (const auto& v : tvs)
 			{
 				xMin = std::min<coordinate>(xMin, v.coordinates.x);
 				yMin = std::min<coordinate>(yMin, v.coordinates.y);
@@ -159,10 +169,12 @@ namespace neogfx
 			}
 			iAabb = aabb_type{ vec3{ xMin, yMin, zMin }, vec3{ xMax, yMax, zMax } };
 		}
-		auto result = *iAabb;
-		result.min = (transformation_matrix() * vec4 { result.min.x, result.min.y, result.min.z, 0.0 }).xyz;
-		result.max = (transformation_matrix() * vec4 { result.max.x, result.max.y, result.max.z, 0.0 }).xyz;
-		return result;
+		return *iAabb;
+	}
+
+	void sprite::clear_aabb_cache()
+	{
+		iAabb = boost::none;
 	}
 
 	void sprite::destroy()

@@ -78,6 +78,7 @@ namespace neogfx
 		}
 	public:
 		virtual aabb_type aabb() const = 0;
+		virtual void clear_aabb_cache() = 0;
 		virtual bool has_collided(const i_physical_object& aOther) const = 0;
 		virtual void collided(const i_physical_object& aOther) = 0;
 		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;

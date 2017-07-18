@@ -36,10 +36,14 @@ namespace neogfx
 	public:
 		typedef neolib::uuid uuid;
 	public:
+		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_object::not_implemented") {} };
+	public:
 		virtual ~i_object() {}
 	public:
 		virtual object_category category() const = 0;
 		virtual const uuid& type() const { static uuid sNullTypeId = {}; return sNullTypeId; }
+		virtual uint64_t collision_mask() const { return 0ull; }
+		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
 		virtual bool destroyed() const { return false; }
 	};
 }
