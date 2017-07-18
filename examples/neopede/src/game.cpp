@@ -86,7 +86,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->add_shape(shipInfo);
 	auto target = std::make_shared<ng::sprite>();
 	spritePlane->add_sprite(target);
-	target->set_position(ng::vec2{ 250.0, 250.0 });
+	target->set_position(ng::vec3{ 250.0, 250.0, 1.0 });
 	target->set_extents(ng::vec2{ 25.0, 25.0 });
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{

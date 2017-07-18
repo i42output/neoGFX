@@ -307,7 +307,7 @@ namespace neogfx
 					i_physical_object& o2 = static_cast<i_physical_object&>(*i2);
 					if (&o2 == &o1)
 						continue;
-					if (o1.has_collided(o2))
+					if (&o1 < &o2 && o1.has_collided(o2))
 					{
 						o1.collided(o2);
 						object_collision.trigger(o1, o2);
