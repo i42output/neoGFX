@@ -24,8 +24,8 @@ const uint8_t sSpaceshipImagePattern[9][9]
 class missile : public ng::sprite
 {
 public:
-	missile(ng::sprite_plane& aWorld, const ng::i_sprite& aParent, ng::angle aAngle) :
-		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }
+	missile(ng::sprite_plane& aWorld, const ng::i_sprite& aParent, std::pair<uint32_t, ng::text>& aScore, ng::angle aAngle) :
+		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }, iScore(aScore)
 	{
 		set_collision_mask(1ull);
 		shape::set_extents(ng::vec2{ 3.0, 3.0 });
@@ -52,10 +52,15 @@ public:
 	}
 	void collided(const i_physical_object& aOther) override
 	{
+		iScore.first += 250;
+		std::ostringstream oss;
+		oss << std::setfill('0') << std::setw(6) << iScore.first;
+		iScore.second.set_value(oss.str());
 		destroy();
 	}
 private:
 	ng::sprite_plane& iWorld;
+	std::pair<uint32_t, ng::text>& iScore;
 };
 
 void create_game(ng::i_layout& aLayout)
@@ -79,6 +84,16 @@ void create_game(ng::i_layout& aLayout)
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
 	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 1.0 });
+	auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ *spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::colour::White });
+	score->second.set_value("000000");
+	score->second.set_position(ng::vec2{ 0.0, 0.0 });
+	auto positionScore = [spritePlane, score]()
+	{
+		score->second.set_position(ng::point{ spritePlane->extents().cx - 256.0, spritePlane->extents().cy - 40 });
+	};
+	spritePlane->size_changed(positionScore);
+	positionScore();
+	spritePlane->add_shape(score->second);
 	auto shipInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{}, "", ng::font("SnareDrum One NBP", "Regular", 24.0), ng::colour::White);
 	shipInfo->set_border(1.0);
 	shipInfo->set_margins(ng::margins(2.0));
@@ -95,7 +110,7 @@ void create_game(ng::i_layout& aLayout)
 			ng::pen{ ng::colour::Goldenrod, 3.0 }, ng::colour::DarkGoldenrod4);
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});
-	spritePlane->applying_physics([spritePlane, &spaceshipSprite, shipInfo](ng::sprite_plane::step_time_interval aPhysicsStepTime)
+	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo](ng::sprite_plane::step_time_interval aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		spaceshipSprite.physics().set_acceleration({  
@@ -114,7 +129,7 @@ void create_game(ng::i_layout& aLayout)
 				for (double a = -30.0; a <= 30.0; a += 10.0)
 				{
 					static boost::fast_pool_allocator<missile> alloc;
-					spritePlane->add_sprite(std::allocate_shared<missile, boost::fast_pool_allocator<missile>>(alloc, *spritePlane, spaceshipSprite, a));
+					spritePlane->add_sprite(std::allocate_shared<missile, boost::fast_pool_allocator<missile>>(alloc, *spritePlane, spaceshipSprite, *score, a));
 				}
 			}
 		}

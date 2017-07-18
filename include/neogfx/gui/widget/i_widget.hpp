@@ -50,6 +50,8 @@ namespace neogfx
 	{
 	public:
 		event<> visibility_changed;
+		event<> position_changed;
+		event<> size_changed;
 		event<graphics_context&> painting;
 		event<neogfx::mouse_event&> mouse_event;
 		event<neogfx::keyboard_event&> keyboard_event;
