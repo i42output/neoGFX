@@ -252,10 +252,13 @@ namespace neogfx
 			{
 				if (left->destroyed() != right->destroyed())
 					return left->destroyed() < right->destroyed();
-				else if (left->category() != right->category())
-					return left->category() < right->category();
-				else if (left->category() == object_category::Shape)
-					return &left < &right;
+				else if (left->category() == object_category::Shape || right->category() == object_category::Shape)
+				{
+					if (left->category() != right->category())
+						return left->category() < right->category();
+					else
+						return &left < &right;
+				}
 				else
 				{
 					const i_physical_object& leftObject = static_cast<const i_physical_object&>(*left);
@@ -284,9 +287,41 @@ namespace neogfx
 		{
 			applying_physics.trigger(*iPhysicsTime);
 			sort_objects();
+			if (iG != 0.0)
+			{
+				for (auto& i1 : iObjects)
+				{
+					vec3 totalForce;
+					if (i1->category() == object_category::Shape)
+						break;
+					i_physical_object& o1 = static_cast<i_physical_object&>(*i1);
+					if (o1.mass() == 0.0)
+						break;
+					if (iUniformGravity != boost::none)
+						totalForce = *iUniformGravity * o1.mass();
+					for (auto& i2 : iObjects)
+					{
+						if (i2->category() == object_category::Shape)
+							break;
+						i_physical_object& o2 = static_cast<i_physical_object&>(*i2);
+						if (&o2 == &o1)
+							continue;
+						if (o2.mass() == 0.0)
+							break;
+						vec3 force;
+						vec3 r12 = o1.position() - o2.position();
+						if (r12.magnitude() > 0.0)
+							force = -iG * o2.mass() * o1.mass() * r12 / std::pow(r12.magnitude(), 3.0);
+						if (force.magnitude() >= 1.0e-6)
+							totalForce += force;
+						else
+							break;
+					}
+					updated = (o1.update(from_step_time(*iPhysicsTime), totalForce) || updated);
+				}
+			}
 			for (auto& i1 : iObjects)
 			{
-				vec3 totalForce;
 				if (i1->destroyed())
 				{
 					iNeedsSorting = true;
@@ -295,13 +330,13 @@ namespace neogfx
 				if (i1->category() == object_category::Shape)
 					break;
 				i_physical_object& o1 = static_cast<i_physical_object&>(*i1);
-				if (iUniformGravity != boost::none)
-					totalForce = *iUniformGravity * o1.mass();
-				bool tooSmall = false;
 				for (auto& i2 : iObjects)
 				{
 					if (i2->destroyed())
+					{
+						iNeedsSorting = true;
 						continue;
+					}
 					if (i2->category() == object_category::Shape)
 						break;
 					i_physical_object& o2 = static_cast<i_physical_object&>(*i2);
@@ -310,21 +345,10 @@ namespace neogfx
 					if (&o1 < &o2 && o1.has_collided(o2))
 					{
 						o1.collided(o2);
+						o2.collided(o1);
 						object_collision.trigger(o1, o2);
 					}
-					if (iG != 0.0 && o1.mass() != 0.0 && !tooSmall)
-					{
-						vec3 force;
-						vec3 r12 = o1.position() - o2.position();
-						if (r12.magnitude() > 0.0)
-							force = -iG * o2.mass() * o1.mass() * r12 / std::pow(r12.magnitude(), 3.0);
-						if (force.magnitude() >= 1.0e-6)
-							totalForce += force;
-						else
-							tooSmall = true;
-					}
 				}
-				updated = (o1.update(from_step_time(*iPhysicsTime), totalForce) || updated);
 			}
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();

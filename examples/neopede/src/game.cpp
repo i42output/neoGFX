@@ -38,9 +38,9 @@ public:
 		physics().set_velocity(*(transformation_matrix() * ng::vec4{0.0, 360.0, 0.0, 0.0}).xyz + aParent.physics().velocity());
 	}
 public:
-	const uuid& type() const override
+	const ng::object_type& type() const override
 	{
-		static uuid sTypeId = neolib::make_uuid("F5B70B06-6B72-465B-9499-44EB994D2923");
+		static ng::object_type sTypeId = neolib::make_uuid("F5B70B06-6B72-465B-9499-44EB994D2923");
 		return sTypeId;
 	}
 	bool update(const optional_time_interval& aNow, const ng::vec3& aForce) override
@@ -75,7 +75,7 @@ void create_game(ng::i_layout& aLayout)
 	//spritePlane->create_earth();
 	spritePlane->reserve(10000);
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { {0, ng::colour()}, {1, ng::colour::LightGoldenrod}, {2, ng::colour::DarkGoldenrod4} }));
-	spaceshipSprite.set_collision_mask(1ull);
+	spaceshipSprite.physics().set_collision_mask(1ull);
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
 	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 1.0 });
@@ -88,6 +88,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->add_sprite(target);
 	target->set_position(ng::vec3{ 250.0, 250.0, 1.0 });
 	target->set_extents(ng::vec2{ 25.0, 25.0 });
+	target->set_mass(1.0);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_shape(ng::rectangle{ ng::vec3{ 250.0, 250.0, 0.0 }, ng::vec2{ 25.0, 25.0 } }, 

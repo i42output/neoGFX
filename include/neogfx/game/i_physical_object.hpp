@@ -28,6 +28,7 @@ namespace neogfx
 {
 	class i_physical_object : public i_object
 	{
+		// types
 	public:
 		struct aabb_type
 		{
@@ -38,8 +39,10 @@ namespace neogfx
 		typedef boost::optional<time_interval> optional_time_interval;
 		typedef int64_t step_time_interval;
 		typedef boost::optional<step_time_interval> optional_step_time_interval;
+		// lifetime
 	public:
 		virtual ~i_physical_object() {}
+		// physics
 	public:
 		virtual vec3 origin() const = 0;
 		virtual vec3 position() const = 0;
@@ -59,6 +62,18 @@ namespace neogfx
 		virtual void set_spin_radians(const vec3& aSpin) = 0;
 		virtual void set_spin_degrees(const vec3& aSpin) = 0;
 		virtual void set_mass(scalar aMass) = 0;
+		// object
+	public:
+		virtual aabb_type aabb() const = 0;
+		virtual void clear_aabb_cache() = 0;
+		virtual uint64_t collision_mask() const { return 0ull; }
+		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
+		virtual bool has_collided(const i_physical_object& aOther) const = 0;
+		virtual void collided(const i_physical_object& aOther) = 0;
+		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
+		virtual const optional_time_interval& update_time() const = 0;
+		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;
+		// helpers
 	public:
 		void set_angle_radians(scalar aAngle)
 		{
@@ -76,14 +91,6 @@ namespace neogfx
 		{
 			set_spin_degrees(vec3{ 0.0, 0.0, aSpin });
 		}
-	public:
-		virtual aabb_type aabb() const = 0;
-		virtual void clear_aabb_cache() = 0;
-		virtual bool has_collided(const i_physical_object& aOther) const = 0;
-		virtual void collided(const i_physical_object& aOther) = 0;
-		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
-		virtual const optional_time_interval& update_time() const = 0;
-		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;
 	};
 
 	inline i_physical_object::step_time_interval to_step_time(i_physical_object::time_interval aTime, i_physical_object::step_time_interval aStepInterval)
