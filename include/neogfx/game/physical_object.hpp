@@ -58,7 +58,9 @@ namespace neogfx
 		void set_velocity(const vec3& aVelocity) override;
 		void set_acceleration(const vec3& aAcceleration) override;
 		void set_spin_radians(const vec3& aSpin) override;
+		using i_physical_object::set_spin_radians;
 		void set_spin_degrees(const vec3& aSpin) override;
+		using i_physical_object::set_spin_degrees;
 		void set_mass(scalar aMass) override;
 	public:
 		aabb_type aabb() const override;

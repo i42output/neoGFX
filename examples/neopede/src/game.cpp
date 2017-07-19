@@ -104,9 +104,10 @@ void create_game(ng::i_layout& aLayout)
 	target->set_position(ng::vec3{ 250.0, 250.0, 1.0 });
 	target->set_extents(ng::vec2{ 25.0, 25.0 });
 	target->set_mass(1.0);
-	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
+	target->set_spin_degrees(360.0);
+	spritePlane->sprites_painted([spritePlane, target](ng::graphics_context& aGraphicsContext)
 	{
-		aGraphicsContext.draw_shape(ng::rectangle{ ng::vec3{ 250.0, 250.0, 0.0 }, ng::vec2{ 25.0, 25.0 } }, 
+		aGraphicsContext.draw_shape(*target, 
 			ng::pen{ ng::colour::Goldenrod, 3.0 }, ng::colour::DarkGoldenrod4);
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});
