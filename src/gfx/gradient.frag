@@ -190,7 +190,7 @@ void main()
 	}
 	else
 	{
-		vec4 sum;
+		vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
 		for (int fy = -d; fy <= d; ++fy)
 		{
 			for (int fx = -d; fx <= d; ++fx)
