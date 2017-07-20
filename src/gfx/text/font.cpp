@@ -66,23 +66,23 @@ namespace neogfx
 	}
 
 	font_info::font_info() :
-		iSize{}, iUnderline{ false }, iWeight{ WeightNormal }, iKerning{ true }
+		iSize{}, iUnderline{ false }, iWeight{ WeightNormal }, iKerning{ false }
 	{
 	}
 
 	font_info::font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
-		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style(aStyle) }, iSize{ aSize }, iKerning{ true }
+		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style(aStyle) }, iSize{ aSize }, iKerning{ false }
 	{
 	}
 
 	font_info::font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
-		iFamilyName{ aFamilyName }, iStyleName{ aStyleName }, iUnderline(false), iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ true }
+		iFamilyName{ aFamilyName }, iStyleName{ aStyleName }, iUnderline(false), iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ false }
 	{
 
 	}
 
 	font_info::font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
-		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iStyleName{ aStyleName }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ true }
+		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iStyleName{ aStyleName }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ false }
 	{
 
 	}

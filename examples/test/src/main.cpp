@@ -426,8 +426,8 @@ int main(int argc, char* argv[])
 		ng::push_button buttonMinus(layout6, "-");
 		ng::push_button buttonPlus(layout6, "+");
 		ng::horizontal_layout layout7(layout4);
-		ng::push_button buttonKerning(layout7, "kern");
-		ng::push_button buttonSubpixel(layout7, "subpix");
+		ng::check_box buttonKerning(layout7, "kern");
+		ng::check_box buttonSubpixel(layout7, "subpix");
 		buttonMinus.clicked([&app]()
 		{
 			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() - 0.1f));
@@ -436,21 +436,21 @@ int main(int argc, char* argv[])
 		{
 			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() + 0.1f));
 		});
-		buttonKerning.clicked([&app]()
+		buttonKerning.toggled([&app, &buttonKerning]()
 		{
 			auto fi = app.current_style().font_info();
-			if (fi.kerning())
-				fi.disable_kerning();
-			else
+			if (buttonKerning.is_checked())
 				fi.enable_kerning();
+			else
+				fi.disable_kerning();
 			app.current_style().set_font_info(fi);
 		});
-		buttonSubpixel.clicked([&app]()
+		buttonSubpixel.toggled([&app, &buttonSubpixel]()
 		{
-			if (app.rendering_engine().is_subpixel_rendering_on())
-				app.rendering_engine().subpixel_rendering_off();
-			else
+			if (buttonSubpixel.is_checked())
 				app.rendering_engine().subpixel_rendering_on();
+			else
+				app.rendering_engine().subpixel_rendering_off();
 		});
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
 		ng::radio_button radio1(layout4, "Radio 1");
