@@ -60,7 +60,6 @@ public:
 		static boost::fast_pool_allocator<ng::sprite> alloc;
 		auto explosion = std::allocate_shared<ng::sprite, boost::fast_pool_allocator<sprite>>(
 			alloc, *iExplosion, ng::sprite::animation_info{ ng::point{}, ng::size{ 60.0, 60.0 }, 12, 0.040, false });
-		explosion->set_collision_mask(1ull);
 		static neolib::basic_random<double> r;
 		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), 1.0 });
 		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
