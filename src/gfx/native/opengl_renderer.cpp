@@ -392,8 +392,6 @@ namespace neogfx
 						"void main()\n"
 						"{\n"
 						"   float a = texture(glyphTexture, vGlyphTexCoord).a;\n"
-						"   if (a == 0.0)\n"
-						"       discard;\n"
 						"	FragColor = vec4(Color.xyz, Color.a * a);\n"
 						"}\n"),
 					GL_FRAGMENT_SHADER)
@@ -438,16 +436,18 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-							"	if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
-							"       discard;\n"
-							"	ivec2 dtpos = ivec2(vOutputCoord);\n"
-							"	if (guiCoordinates)\n"
-							"		dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
-							"   vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
 							"	if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
 							"		FragColor = Color;\n"
+							"	else if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
+							"		FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
 							"	else\n"
+							"   {\n"
+							"		ivec2 dtpos = ivec2(vOutputCoord);\n"
+							"		if (guiCoordinates)\n"
+							"			dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
+							"		vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
 							"		FragColor = vec4(Color.rgb * rgbAlpha.rgb * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.rgb * Color.a), 1.0);\n"
+							"   }\n"
 							"}\n"),
 						GL_FRAGMENT_SHADER)
 					},
@@ -489,16 +489,18 @@ namespace neogfx
 							"void main()\n"
 							"{\n"
 							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-							"	if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
-							"		discard;\n"
-							"	ivec2 dtpos = ivec2(vOutputCoord);\n"
-							"	if (guiCoordinates)\n"
-							"		dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
-							"   vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
 							"	if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
 							"		FragColor = Color;\n"
+							"	else if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
+							"		FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
 							"	else\n"
+							"   {\n"
+							"		ivec2 dtpos = ivec2(vOutputCoord);\n"
+							"		if (guiCoordinates)\n"
+							"			dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
+							"		vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
 							"		FragColor = vec4(Color.rgb * rgbAlpha.bgr * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.bgr * Color.a), 1.0);\n"
+							"	}\n"
 							"}\n"),
 						GL_FRAGMENT_SHADER)
 					},
