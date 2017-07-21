@@ -64,6 +64,7 @@ public:
 		static neolib::basic_random<double> r;
 		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), 1.0 });
 		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
+		explosion->set_extents(ng::vec2{r.get(40.0, 80.0), r.get(40.0, 80.0)});
 		iWorld.add_sprite(explosion);
 		destroy();
 	}
