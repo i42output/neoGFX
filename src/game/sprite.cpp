@@ -34,14 +34,26 @@ namespace neogfx
 	{
 	}
 
-	sprite::sprite(const i_texture& aTexture, const optional_rect& aTextureRect) :
-		shape{ aTexture, aTextureRect },
+	sprite::sprite(const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
+		shape{ aTexture, aAnimationInfo },
 		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
-	sprite::sprite(const i_image& aImage, const optional_rect& aTextureRect) :
-		shape{ aImage, aTextureRect },
+	sprite::sprite(const i_image& aImage, const optional_animation_info& aAnimationInfo) :
+		shape{ aImage, aAnimationInfo },
+		iCollisionMask{ 0ull }, iDestroyed{ false }
+	{
+	}
+
+	sprite::sprite(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+		shape{ aTexture, aTextureRect, aAnimationInfo },
+		iCollisionMask{ 0ull }, iDestroyed{ false }
+	{
+	}
+
+	sprite::sprite(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+		shape{ aImage, aTextureRect, aAnimationInfo },
 		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
@@ -72,6 +84,11 @@ namespace neogfx
 	bool sprite::destroyed() const
 	{
 		return iDestroyed;
+	}
+
+	void sprite::animation_finished()
+	{
+		destroy();
 	}
 
 	vec3 sprite::origin() const

@@ -36,8 +36,10 @@ namespace neogfx
 	public:
 		sprite();
 		sprite(const colour& aColour);
-		sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		sprite(const i_texture& aTexture, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		sprite(const i_image& aImage, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		sprite(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		sprite(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
 		sprite(const sprite& aOther);
 		// object
 	public:
@@ -47,6 +49,7 @@ namespace neogfx
 		bool destroyed() const override;
 		// geometry
 	public:
+		void animation_finished() override;
 		vec3 origin() const override;
 		vec3 position() const override;
 		mat44 transformation_matrix() const override;
@@ -56,7 +59,7 @@ namespace neogfx
 		void set_position(const vec3& aPosition) override;
 		using i_shape::set_position;
 		void set_path(const optional_path& aPath) override;
-		// udates
+		// updates
 	public:
 		void clear_vertices_cache() override;
 		// physics

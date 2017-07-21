@@ -36,8 +36,8 @@ namespace neogfx
 		frame(const i_texture& aTexture, const optional_rect& aTextureRect) : iTexture(aTexture), iTextureRect(aTextureRect) {}
 		frame(const i_texture& aTexture, const optional_rect& aTextureRect, const mat33& aTransformation) : iTexture(aTexture), iTextureRect(aTextureRect), iTransformation(aTransformation) {}
 	public:
-		bool has_extents() const override { return iTextureRect != boost::none; }
-		size extents() const override { return iTextureRect != boost::none ? iTextureRect->extents() : size{}; }
+		bool has_extents() const override { return iTexture != boost::none; }
+		size extents() const override { return iTextureRect != boost::none ? *iTextureRect : iTexture != boost::none ? iTexture->extents() : size{}; }
 		const optional_colour& colour() const override { return iColour; }
 		void set_colour(const optional_colour& aColour) override { iColour = aColour; }
 		const optional_texture& texture() const override { return iTexture; }
@@ -67,18 +67,33 @@ namespace neogfx
 	public:
 		typedef i_shape::frame_index frame_index;
 		typedef i_shape::time_interval time_interval;
+		typedef i_shape::animation_frame animation_frame;
 		typedef i_shape::animation_frames animation_frames;
 		typedef i_shape::time_interval time_interval;
 		typedef i_shape::optional_time_interval optional_time_interval;
 	public:
+		struct animation_info
+		{
+			point sheetOffset;
+			size extents;
+			uint32_t count;
+			time_interval time;
+			bool repeat;
+		};
+		typedef boost::optional<animation_info> optional_animation_info;
+	public:
 		shape();
 		shape(const colour& aColour);
-		shape(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		shape(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		shape(const i_texture& aTexture, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		shape(const i_image& aImage, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		shape(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		shape(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
 		shape(i_shape_container& aContainer);
 		shape(i_shape_container& aContainer, const colour& aColour);
-		shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		shape(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		shape(i_shape_container& aContainer, const i_image& aImage, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		shape(i_shape_container& aContainer, const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		shape(i_shape_container& aContainer, const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
 		shape(const shape& aOther);
 		// object
 	public:
@@ -115,6 +130,11 @@ namespace neogfx
 		// geometry
 	public:
 		const animation_frames& animation() const override;
+		bool repeat_animation() const override;
+		const animation_frame& current_animation_frame() const override;
+		bool has_animation_finished() const override;
+		void animation_finished() override;
+		frame_index current_frame_index() const override;
 		const i_frame& current_frame() const override;
 		i_frame& current_frame();
 		vec3 origin() const override;
@@ -133,7 +153,7 @@ namespace neogfx
 		void set_transformation_matrix(const mat44& aTransformationMatrix) override;
 		// rendering
 	public:
-		bool update(const optional_time_interval& aNow = optional_time_interval{}) override;
+		bool update(time_interval aNow) override;
 		void paint(graphics_context& aGraphicsContext) const override;
 		// udates
 	public:
@@ -143,11 +163,16 @@ namespace neogfx
 		using i_shape::set_origin;
 		using i_shape::set_position;
 		using i_shape::set_extents;
+		// implementation
+	private:
+		void init_from_texture(const i_texture& aTexture, const optional_rect& aTextureRect, const optional_animation_info& aAnimationInfo);
 		// attributes
 	private:
 		i_shape_container* iContainer;
 		frame_list iFrames;
 		animation_frames iAnimation;
+		bool iRepeatAnimation;
+		frame_index iAnimationFrame;
 		frame_index iCurrentFrame;
 		optional_time_interval iTimeOfLastUpdate;
 		vec3 iOrigin;

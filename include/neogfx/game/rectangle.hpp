@@ -28,8 +28,10 @@ namespace neogfx
 	public:
 		rectangle(const vec3& aPosition, const vec2& aExtents);
 		rectangle(const vec3& aPosition, const vec2& aExtents, const colour& aColour);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture);
+		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage);
+		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect);
+		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect);
 		rectangle(const rectangle& aOther);
 	};
 }

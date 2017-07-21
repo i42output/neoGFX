@@ -21,56 +21,84 @@ namespace neogfx
 {
 	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape() :
-		iContainer{ nullptr }, iCurrentFrame{ 0 }
+		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame { 0 }
 	{
 	}
 
 	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape(const colour& aColour) :
-		iContainer{ nullptr }, iCurrentFrame{ 0 }
+		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
 		iFrames.push_back(std::make_shared<neogfx::frame>(aColour));
 	}
 
 	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(const i_texture& aTexture, const optional_rect& aTextureRect) :
-		iContainer{ nullptr }, iCurrentFrame{ 0 }
+	inline shape<MixinInterface>::shape(const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
+		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
-		iFrames.push_back(std::make_shared<neogfx::frame>(aTexture, aTextureRect));
+		init_from_texture(aTexture, optional_rect{}, aAnimationInfo);
 	}
 
 	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(const i_image& aImage, const optional_rect& aTextureRect) :
-		iContainer{ nullptr }, iCurrentFrame{ 0 }
+	inline shape<MixinInterface>::shape(const i_image& aImage, const optional_animation_info& aAnimationInfo) :
+		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
-		iFrames.push_back(std::make_shared<neogfx::frame>(texture(aImage), aTextureRect));
+		init_from_texture(texture{ aImage }, optional_rect{}, aAnimationInfo);
+	}
+
+	template <typename MixinInterface>
+	inline shape<MixinInterface>::shape(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
+	{
+		init_from_texture(aTexture, aTextureRect, aAnimationInfo);
+	}
+
+	template <typename MixinInterface>
+	inline shape<MixinInterface>::shape(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
+	{
+		init_from_texture(texture{ aImage }, aTextureRect, aAnimationInfo);
 	}
 
 	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape(i_shape_container& aContainer) :
-		iContainer{ &aContainer }, iCurrentFrame{ 0 }
+		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
 	}
 
 	template <typename MixinInterface>
 	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const colour& aColour) :
-		iContainer{ &aContainer }, iCurrentFrame{ 0 }
+		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
 		iFrames.push_back(std::make_shared<neogfx::frame>(aColour));
 	}
 
 	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect) :
-		iContainer{ &aContainer }, iCurrentFrame{ 0 }
+	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
+		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
-		iFrames.push_back(std::make_shared<neogfx::frame>(aTexture, aTextureRect));
+		init_from_texture(aTexture, optional_rect{} , aAnimationInfo);
 	}
 
 	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect) :
-		iContainer{ &aContainer }, iCurrentFrame{ 0 }
+	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_image& aImage, const optional_animation_info& aAnimationInfo) :
+		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
-		iFrames.push_back(std::make_shared<neogfx::frame>(texture(aImage), aTextureRect));
+		init_from_texture(texture{ aImage }, optional_rect{}, aAnimationInfo);
+	}
+
+	template <typename MixinInterface>
+	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
+	{
+		init_from_texture(aTexture, aTextureRect, aAnimationInfo);
+	}
+
+	template <typename MixinInterface>
+	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
+	{
+		init_from_texture(texture{ aImage }, aTextureRect, aAnimationInfo);
 	}
 
 	template <typename MixinInterface>
@@ -78,6 +106,8 @@ namespace neogfx
 		iContainer{ aOther.iContainer },
 		iFrames{ aOther.iFrames },
 		iAnimation{ aOther.iAnimation },
+		iRepeatAnimation{ aOther.iRepeatAnimation },
+		iAnimationFrame{ aOther.iAnimationFrame },
 		iCurrentFrame{ aOther.iCurrentFrame },
 		iTimeOfLastUpdate{ aOther.iTimeOfLastUpdate },
 		iOrigin{ aOther.iOrigin },
@@ -268,15 +298,48 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
+	inline bool shape<MixinInterface>::repeat_animation() const
+	{
+		return iRepeatAnimation;
+	}
+
+	template <typename MixinInterface>
+	inline typename const shape<MixinInterface>::animation_frame& shape<MixinInterface>::current_animation_frame() const
+	{
+		static const animation_frame sNullAnimationFrame{ 0, 0 };
+		if (!animation().empty())
+			return iAnimationFrame < iAnimation.size() ? iAnimation[iAnimationFrame] : iAnimation.back();
+		else
+			return sNullAnimationFrame;
+	}
+
+	template <typename MixinInterface>
+	inline bool shape<MixinInterface>::has_animation_finished() const
+	{
+		return iAnimation.empty() || (iAnimationFrame == iAnimation.size() && !repeat_animation());
+	}
+
+	template <typename MixinInterface>
+	inline void shape<MixinInterface>::animation_finished()
+	{
+	}
+
+	template <typename MixinInterface>
+	inline typename shape<MixinInterface>::frame_index shape<MixinInterface>::current_frame_index() const
+	{
+		return has_animation_finished() ? iCurrentFrame : current_animation_frame().first;
+	}
+
+	template <typename MixinInterface>
 	inline const i_frame& shape<MixinInterface>::current_frame() const
 	{
-		return frame(iCurrentFrame);
+		return frame(current_frame_index());
 	}
 
 	template <typename MixinInterface>
 	inline i_frame& shape<MixinInterface>::current_frame()
 	{
-		return frame(iCurrentFrame);
+		return frame(current_frame_index());
 	}
 
 	template <typename MixinInterface>
@@ -379,11 +442,27 @@ namespace neogfx
 	}
 	
 	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::update(const optional_time_interval& aNow)
+	inline bool shape<MixinInterface>::update(time_interval aNow)
 	{
-		/* todo: animate frames */
-		iTimeOfLastUpdate = aNow;
-		return false;
+		bool updated = false;
+		if (iTimeOfLastUpdate == boost::none)
+			iTimeOfLastUpdate = aNow;
+		auto left = aNow - *iTimeOfLastUpdate;
+		while (!has_animation_finished() && left >= current_animation_frame().second)
+		{
+			left -= current_animation_frame().second;
+			*iTimeOfLastUpdate += current_animation_frame().second;
+			++iAnimationFrame;
+			if (iAnimationFrame == iAnimation.size())
+			{
+				if (repeat_animation())
+					iAnimationFrame = 0;
+				else
+					animation_finished();
+			}
+			updated = true;
+		}
+		return updated;
 	}
 
 	template <typename MixinInterface>
@@ -408,5 +487,33 @@ namespace neogfx
 	inline void shape<MixinInterface>::clear_vertices_cache()
 	{
 		iVertices = boost::none;
+	}
+
+	template <typename MixinInterface>
+	inline void shape<MixinInterface>::init_from_texture(const i_texture& aTexture, const optional_rect& aTextureRect, const optional_animation_info& aAnimationInfo)
+	{
+		if (aAnimationInfo == boost::none)
+		{
+			iFrames.push_back(std::make_shared<neogfx::frame>(aTexture, aTextureRect));
+		}
+		else
+		{
+			auto sheetRect = aTextureRect != boost::none ? *aTextureRect : rect{ point{}, aTexture.extents() };
+			iRepeatAnimation = aAnimationInfo->repeat;
+			auto pos = aAnimationInfo->sheetOffset;
+			frame_index frameIndex = 0;
+			while (frameIndex < aAnimationInfo->count)
+			{
+				iFrames.push_back(std::make_shared<neogfx::frame>(aTexture, rect{ pos, aAnimationInfo->extents }));
+				iAnimation.push_back(std::make_pair(frameIndex, aAnimationInfo->time));
+				pos.x += aAnimationInfo->extents.cx;
+				if (pos.x >= sheetRect.right())
+				{
+					pos.x = aAnimationInfo->sheetOffset.x;
+					pos.y += aAnimationInfo->extents.cy;
+				}
+				++frameIndex;
+			}
+		}
 	}
 }

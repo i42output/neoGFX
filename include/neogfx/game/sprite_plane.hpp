@@ -68,8 +68,10 @@ namespace neogfx
 		void add_shape(std::shared_ptr<i_shape> aObject);
 	public:
 		i_sprite& create_sprite();
-		i_sprite& create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		i_sprite& create_sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		i_sprite& create_sprite(const i_texture& aTexture);
+		i_sprite& create_sprite(const i_image& aImage);
+		i_sprite& create_sprite(const i_texture& aTexture, const rect& aTextureRect);
+		i_sprite& create_sprite(const i_image& aImage, const rect& aTextureRect);
 	public:
 		scalar gravitational_constant() const;
 		void set_gravitational_constant(scalar aG);

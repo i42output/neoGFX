@@ -36,14 +36,28 @@ namespace neogfx
 		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const optional_rect& aTextureRect) :
+	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :
+		shape(aTexture)
+	{
+		set_position(aPosition);
+		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
+	}
+
+	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage) :
+		shape(aImage)
+	{
+		set_position(aPosition);
+		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
+	}
+
+	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect) :
 		shape(aTexture, aTextureRect)
 	{
 		set_position(aPosition);
 		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const optional_rect& aTextureRect) :
+	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect) :
 		shape(aImage, aTextureRect)
 	{
 		set_position(aPosition);

@@ -148,14 +148,28 @@ namespace neogfx
 		return iSimpleSprites.back();
 	}
 
-	i_sprite& sprite_plane::create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect)
+	i_sprite& sprite_plane::create_sprite(const i_texture& aTexture)
+	{
+		iSimpleSprites.emplace_back(aTexture);
+		add_sprite(iSimpleSprites.back());
+		return iSimpleSprites.back();
+	}
+
+	i_sprite& sprite_plane::create_sprite(const i_image& aImage)
+	{
+		iSimpleSprites.emplace_back(aImage);
+		add_sprite(iSimpleSprites.back());
+		return iSimpleSprites.back();
+	}
+
+	i_sprite& sprite_plane::create_sprite(const i_texture& aTexture, const rect& aTextureRect)
 	{
 		iSimpleSprites.emplace_back(aTexture, aTextureRect);
 		add_sprite(iSimpleSprites.back());
 		return iSimpleSprites.back();
 	}
 
-	i_sprite& sprite_plane::create_sprite(const i_image& aImage, const optional_rect& aTextureRect)
+	i_sprite& sprite_plane::create_sprite(const i_image& aImage, const rect& aTextureRect)
 	{
 		iSimpleSprites.emplace_back(aImage, aTextureRect);
 		add_sprite(iSimpleSprites.back());
@@ -352,6 +366,10 @@ namespace neogfx
 			}
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();
+		}
+		for (auto& s : iRenderBuffer)
+		{
+			updated = s->update(from_step_time(now)) || updated;
 		}
 		if (updated)
 			iWaitForRender = true;

@@ -62,7 +62,8 @@ namespace neogfx
 	public:
 		typedef std::size_t frame_index;
 		typedef scalar time_interval;
-		typedef std::vector<std::pair<frame_index, time_interval>> animation_frames;
+		typedef std::pair<frame_index, time_interval> animation_frame;
+		typedef std::vector<animation_frame> animation_frames;
 		typedef boost::optional<time_interval> optional_time_interval;
 		// exceptions
 	public:
@@ -98,6 +99,11 @@ namespace neogfx
 		// geometry
 	public:
 		virtual const animation_frames& animation() const = 0;
+		virtual bool repeat_animation() const = 0;
+		virtual const animation_frame& current_animation_frame() const = 0;
+		virtual bool has_animation_finished() const = 0;
+		virtual void animation_finished() = 0;
+		virtual frame_index current_frame_index() const = 0;
 		virtual const i_frame& current_frame() const = 0;
 		virtual i_frame& current_frame() = 0;
 		virtual vec3 origin() const = 0;
@@ -116,7 +122,7 @@ namespace neogfx
 		virtual void set_transformation_matrix(const mat44& aTransformationMatrix) = 0;
 		// rendering
 	public:
-		virtual bool update(const optional_time_interval& aNow = optional_time_interval{}) = 0;
+		virtual bool update(time_interval aNow) = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 		// helpers
 	public:

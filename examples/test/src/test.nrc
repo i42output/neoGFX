@@ -5,6 +5,7 @@
 		<file>resources/channel_32.png</file>
 		<file>resources/channel_128.png</file>
 		<file>resources/channel_256.png</file>	
-		<file>resources/orca.png</file>	
-	</resource>
+		<file>resources/orca.png</file>
+    <file>resources/explosion.png</file>
+  </resource>
 </nrc>

@@ -1,4 +1,5 @@
 #include <neogfx/neogfx.hpp>
+#include <neolib/random.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gfx/image.hpp>
@@ -24,8 +25,8 @@ const uint8_t sSpaceshipImagePattern[9][9]
 class missile : public ng::sprite
 {
 public:
-	missile(ng::sprite_plane& aWorld, const ng::i_sprite& aParent, std::pair<uint32_t, ng::text>& aScore, ng::angle aAngle) :
-		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }, iScore(aScore)
+	missile(ng::sprite_plane& aWorld, const ng::i_sprite& aParent, std::pair<uint32_t, ng::text>& aScore, std::shared_ptr<ng::texture> aExplosion, ng::angle aAngle) :
+		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }, iScore(aScore), iExplosion(aExplosion)
 	{
 		set_collision_mask(1ull);
 		shape::set_extents(ng::vec2{ 3.0, 3.0 });
@@ -56,11 +57,20 @@ public:
 		std::ostringstream oss;
 		oss << std::setfill('0') << std::setw(6) << iScore.first;
 		iScore.second.set_value(oss.str());
+		static boost::fast_pool_allocator<ng::sprite> alloc;
+		auto explosion = std::allocate_shared<ng::sprite, boost::fast_pool_allocator<sprite>>(
+			alloc, *iExplosion, ng::sprite::animation_info{ ng::point{}, ng::size{ 60.0, 60.0 }, 12, 0.040, false });
+		explosion->set_collision_mask(1ull);
+		static neolib::basic_random<double> r;
+		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), 1.0 });
+		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
+		iWorld.add_sprite(explosion);
 		destroy();
 	}
 private:
 	ng::sprite_plane& iWorld;
 	std::pair<uint32_t, ng::text>& iScore;
+	std::shared_ptr<ng::texture> iExplosion;
 };
 
 void create_game(ng::i_layout& aLayout)
@@ -83,7 +93,7 @@ void create_game(ng::i_layout& aLayout)
 	spaceshipSprite.physics().set_collision_mask(1ull);
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
-	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 1.0 });
+	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 0.0 });
 	auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ *spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::colour::White });
 	score->second.set_value("000000");
 	score->second.set_position(ng::vec2{ 0.0, 0.0 });
@@ -99,19 +109,18 @@ void create_game(ng::i_layout& aLayout)
 	shipInfo->set_margins(ng::margins(2.0));
 	shipInfo->set_tag_of(spaceshipSprite, ng::vec3{18.0, 18.0, 0.0});
 	spritePlane->add_shape(shipInfo);
-	auto target = std::make_shared<ng::sprite>();
+	auto target = std::make_shared<ng::sprite>(ng::colour::Goldenrod);
 	spritePlane->add_sprite(target);
-	target->set_position(ng::vec3{ 250.0, 250.0, 1.0 });
+	target->set_position(ng::vec3{ 250.0, 250.0, 0.0 });
 	target->set_extents(ng::vec2{ 25.0, 25.0 });
 	target->set_mass(1.0);
 	target->set_spin_degrees(360.0);
 	spritePlane->sprites_painted([spritePlane, target](ng::graphics_context& aGraphicsContext)
 	{
-		aGraphicsContext.draw_shape(*target, 
-			ng::pen{ ng::colour::Goldenrod, 3.0 }, ng::colour::DarkGoldenrod4);
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});
-	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo](ng::sprite_plane::step_time_interval aPhysicsStepTime)
+	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
+	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		spaceshipSprite.physics().set_acceleration({  
@@ -130,7 +139,7 @@ void create_game(ng::i_layout& aLayout)
 				for (double a = -30.0; a <= 30.0; a += 10.0)
 				{
 					static boost::fast_pool_allocator<missile> alloc;
-					spritePlane->add_sprite(std::allocate_shared<missile, boost::fast_pool_allocator<missile>>(alloc, *spritePlane, spaceshipSprite, *score, a));
+					spritePlane->add_sprite(std::allocate_shared<missile, boost::fast_pool_allocator<missile>>(alloc, *spritePlane, spaceshipSprite, *score, explosion, a));
 				}
 			}
 		}
