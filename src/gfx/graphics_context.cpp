@@ -890,7 +890,7 @@ namespace neogfx
 			{
 				for (uint32_t i = 0; i < glyph_count(); ++i)
 				{
-					auto tc = get_text_category(iParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(iGlyphRun)[glyph_info(i).cluster]);
+					auto tc = get_text_category(iParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
 					if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
 						return true;
 				}
@@ -921,7 +921,7 @@ namespace neogfx
 			for (uint32_t i = 0; i < g->glyph_count();)
 			{
 				const auto& gi = g->glyph_info(i);
-				auto tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun)[gi.cluster]);
+				auto tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
 				if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
 				{
 					iResults.push_back(std::make_pair(g, i++));
@@ -929,7 +929,6 @@ namespace neogfx
 				else
 				{
 					std::vector<uint32_t> clusters;
-					tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun)[g->glyph_info(i).cluster]);
 					while (i < g->glyph_count() && g->glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
 					{
 						clusters.push_back(g->glyph_info(i).cluster);
@@ -954,7 +953,7 @@ namespace neogfx
 							}
 							else
 							{
-								tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun)[fallbackGlyphs.glyph_info(j).cluster]);
+								tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun) + fallbackGlyphs.glyph_info(j).cluster, std::get<1>(aGlyphRun));
 								if (tc != text_category::Whitespace && tc != text_category::Emoji)
 									break;
 								else
@@ -1033,12 +1032,12 @@ namespace neogfx
 		std::u32string adjustedCodepoints;
 		if (password())
 			adjustedCodepoints.assign(codePointCount, neolib::utf8_to_utf32(password_mask())[0]);
-		const char32_t* codePoints = adjustedCodepoints.empty() ? &*aTextBegin : &adjustedCodepoints[0];
+		auto codePoints = adjustedCodepoints.empty() ? &*aTextBegin : &adjustedCodepoints[0];
 
 		auto& runs = iGlyphTextData->iRuns;
 		runs.clear();
 		auto const& emojiAtlas = surface().rendering_engine().font_manager().emoji_atlas();
-		text_category previousCategory = get_text_category(emojiAtlas, codePoints[0]);
+		text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
 		if (iMnemonic != boost::none && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
 			previousCategory = text_category::Mnemonic;
 		text_direction previousDirection = (previousCategory != text_category::RTL ? text_direction::LTR : text_direction::RTL);
@@ -1082,7 +1081,7 @@ namespace neogfx
 			}
 
 			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
-			text_category currentCategory = get_text_category(emojiAtlas, codePoints[i]);
+			text_category currentCategory = get_text_category(emojiAtlas, codePoints + i, codePoints + codePointCount);
 			if (iMnemonic != boost::none && codePoints[i] == static_cast<char32_t>(iMnemonic->second))
 				currentCategory = text_category::Mnemonic;
 			text_direction currentDirection = previousDirection;
@@ -1166,7 +1165,7 @@ namespace neogfx
 				{
 					for (std::size_t j = i + 1; j <= lastCodePointIndex; ++j)
 					{
-						text_direction nextDirection = bidi_check(get_text_category(emojiAtlas, codePoints[j]), get_text_direction(emojiAtlas, codePoints[j], currentDirection));
+						text_direction nextDirection = bidi_check(get_text_category(emojiAtlas, codePoints + j, codePoints + codePointCount), get_text_direction(emojiAtlas, codePoints + j, codePoints + codePointCount, currentDirection));
 						if (nextDirection == text_direction::RTL || nextDirection == text_direction::Digits_RTL)
 							break;
 						else if (nextDirection == text_direction::LTR || (j == lastCodePointIndex - 1 && currentLineHasLTR))
@@ -1245,11 +1244,13 @@ namespace neogfx
 				startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
 				endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
 				auto const& font = aFontSelector(startCluster);
-				if (j > 0)
+				if (j > 0 && !result.empty())
 					result.back().kerning_adjust(static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
 				size advance = textDirections[startCluster].category != text_category::Emoji ?
 					size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :
 					size{ font.height(), 0.0 };
+				if (textDirections[startCluster].category == text_category::Control)
+					continue;
 				result.push_back(glyph(textDirections[startCluster],
 					shapes.glyph_info(j).codepoint,
 					glyph::source_type(startCluster, endCluster), advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0)));
@@ -1287,11 +1288,12 @@ namespace neogfx
 			emojiResult.clear();
 			for (auto i = result.begin(); i != result.end(); ++i)
 			{
+				auto cluster = i->source().first;
+				auto chStart = aTextBegin[cluster];
 				if (i->category() == text_category::Emoji)
 				{
-					auto cluster = i->source().first;
 					std::u32string sequence;
-					sequence += aTextBegin[cluster];
+					sequence += chStart;
 					auto j = i + 1;
 					for (; j != result.end(); ++j)
 					{
@@ -1299,7 +1301,7 @@ namespace neogfx
 						auto ch = aTextBegin[cluster + (j - i)];
 						if (ch == 0x200D)
 							continue;
-						if (surface().rendering_engine().font_manager().emoji_atlas().is_emoji(sequence + ch) || prev == 0x200D)
+						else if (surface().rendering_engine().font_manager().emoji_atlas().is_emoji(sequence + ch) || prev == 0x200D)
 							sequence += ch;
 						else
 							break;
@@ -1312,13 +1314,8 @@ namespace neogfx
 						emojiResult.push_back(g);
 						i = j - 1;
 					}
-					else
-						emojiResult.push_back(*i);
 				}
-				else
-				{
-					emojiResult.push_back(*i);
-				}
+				emojiResult.push_back(*i);
 			}
 			return emojiResult;
 		}
