@@ -922,9 +922,13 @@ namespace neogfx
 			{
 				const auto& gi = g->glyph_info(i);
 				auto tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
-				if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
+				if (tc == text_category::Control)
+					++i;
+				else if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
 				{
-					iResults.push_back(std::make_pair(g, i++));
+					if (tc != text_category::Emoji || iResults.empty() || iResults.back().first->glyph_info(iResults.back().second).cluster != gi.cluster)
+						iResults.push_back(std::make_pair(g, i));
+					++i;
 				}
 				else
 				{
