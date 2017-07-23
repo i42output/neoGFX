@@ -922,15 +922,9 @@ namespace neogfx
 			{
 				const auto& gi = g->glyph_info(i);
 				auto tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
-				if (tc == text_category::Control)
-					++i;
-				else if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
-				{
-					if (tc != text_category::Emoji || iResults.empty() || iResults.back().first->glyph_info(iResults.back().second).cluster != gi.cluster)
-						iResults.push_back(std::make_pair(g, i));
-					++i;
-				}
-				else
+				if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
+					iResults.push_back(std::make_pair(g, i++));
+ 				else
 				{
 					std::vector<uint32_t> clusters;
 					while (i < g->glyph_count() && g->glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
@@ -1253,8 +1247,6 @@ namespace neogfx
 				size advance = textDirections[startCluster].category != text_category::Emoji ?
 					size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :
 					size{ font.height(), 0.0 };
-				if (textDirections[startCluster].category == text_category::Control)
-					continue;
 				result.push_back(glyph(textDirections[startCluster],
 					shapes.glyph_info(j).codepoint,
 					glyph::source_type(startCluster, endCluster), advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0)));
@@ -1296,6 +1288,19 @@ namespace neogfx
 				auto chStart = aTextBegin[cluster];
 				if (i->category() == text_category::Emoji)
 				{
+					if (!emojiResult.empty() && emojiResult.back().is_emoji() && emojiResult.back().source() == i->source())
+					{
+						// probable variant selector fubar'd by harfbuzz
+						auto s = emojiResult.back().source();
+						if (s.second < codePointCount && get_text_category(surface().rendering_engine().font_manager().emoji_atlas(), aTextBegin[s.second]) == text_category::Control)
+						{
+							++s.first;
+							++s.second;
+							i->set_source(s);
+							i->set_category(text_category::Control);
+							i->set_advance(size{});
+						}
+					}
 					std::u32string sequence;
 					sequence += chStart;
 					auto j = i + 1;
