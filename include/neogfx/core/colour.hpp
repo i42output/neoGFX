@@ -747,8 +747,8 @@ namespace neogfx
 		double intensity() const;
 		bool similar_intensity(const colour& aOther, double aThreshold = 0.5);
 		colour mid(const colour& aOther) const;
-		bool light(double aLightIntensity = 0.75) const;
-		bool dark(double aDarkIntensity = 0.25) const;
+		bool light(double aLightIntensity = 0.70) const;
+		bool dark(double aDarkIntensity = 0.30) const;
 		colour& lighten(component aDelta);
 		colour& darken(component aDelta);
 		colour lighter(component aDelta) const;
