@@ -160,7 +160,12 @@ namespace neogfx
 		if (has_text_colour())
 			return *iTextColour;
 		else
-			return colour().dark() ? colour::White : colour::Black;
+		{
+			if (colour().to_hsl().lightness() < 0.6)
+				return colour::White;
+			else
+				return colour::Black;
+		}
 	}
 
 	void palette::set_text_colour(const optional_colour& aTextColour)

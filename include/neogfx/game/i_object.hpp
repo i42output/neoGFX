@@ -1,4 +1,4 @@
-// rectangle.hpp
+// i_object.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -19,19 +19,29 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "shape.hpp"
+#include <neolib/uuid.hpp>
 
 namespace neogfx
 {
-	class rectangle : public shape<>
+	enum class object_category
+	{
+		Sprite,
+		PhysicalObject,
+		Custom,
+		Shape // Shape must sort last
+	};
+
+	typedef neolib::uuid object_type;
+
+	class i_object
 	{
 	public:
-		rectangle(const vec3& aPosition, const vec2& aExtents);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const colour& aColour);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect);
-		rectangle(const rectangle& aOther);
+		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_object::not_implemented") {} };
+	public:
+		virtual ~i_object() {}
+	public:
+		virtual object_category category() const = 0;
+		virtual const object_type& type() const { static object_type sNullTypeId = {}; return sNullTypeId; }
+		virtual bool destroyed() const { return false; }
 	};
 }

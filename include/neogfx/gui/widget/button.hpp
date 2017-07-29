@@ -36,6 +36,7 @@ namespace neogfx
 		event<> double_clicked;
 		event<> released;
 	public:
+		event<> toggled;
 		event<> checked;
 		event<> unchecked;
 		event<> indeterminate;

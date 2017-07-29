@@ -55,6 +55,7 @@ namespace neogfx
 			}
 		};
 		typedef xyz vertex;
+		typedef xy texture_vertex;
 	public:
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface);
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget);
@@ -95,7 +96,7 @@ namespace neogfx
 		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle);
 		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen);
 		void draw_path(const path& aPath, const pen& aPen);
-		void draw_shape(const vec2_list& aVertices, const pen& aPen);
+		void draw_shape(const i_mesh& aMesh, const pen& aPen);
 		void fill_rect(const rect& aRect, const fill& aFill);
 		void fill_rect(const graphics_operation::batch& aFillRectOps);
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const fill& aFill);
@@ -104,7 +105,7 @@ namespace neogfx
 		void fill_path(const path& aPath, const fill& aFill);
 		void fill_shape(const graphics_operation::batch& aFillShapeOps);
 		void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);
-		void draw_texture(const texture_map& aTextureMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect);
+		void draw_texture(const i_mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect);
 	private:
 		void apply_scissor();
 		void apply_logical_operation();

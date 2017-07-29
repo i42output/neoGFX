@@ -33,7 +33,6 @@ namespace neogfx
 	class i_native_surface
 	{
 	public:
-		event<> rendering_check;
 		event<> rendering;
 		event<> rendering_finished;
 	public:

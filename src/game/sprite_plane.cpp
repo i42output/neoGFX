@@ -27,43 +27,42 @@
 namespace neogfx
 {
 	sprite_plane::sprite_plane() : 
-		iEnableZSorting(false),
-		iG(6.67408e-11)
+		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			if (update_objects())
+				update();
+		}, 10 },
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }
 	{
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
-		widget(aParent), iEnableZSorting(false), iG(6.67408e-11)
-	{
-		iSink = surface().native_surface().rendering_check([this]()
+		widget{ aParent }, 
+		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
+			aTimer.again();
 			if (update_objects())
 				update();
-		});
+		}, 10 },
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }
+	{
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
-		widget(aLayout), iEnableZSorting(false), iG(6.67408e-11)
-	{
-		iSink = surface().native_surface().rendering_check([this]()
+		widget{ aLayout }, 
+		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
+			aTimer.again();
 			if (update_objects())
 				update();
-		});
+		}, 10 },
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }
+	{
 	}
 
 	sprite_plane::~sprite_plane()
 	{
-	}
-
-	void sprite_plane::parent_changed()
-	{
-		widget::parent_changed();
-		iSink = surface().native_surface().rendering_check([this]()
-		{
-			if (update_objects())
-				update();
-		});
 	}
 
 	logical_coordinate_system sprite_plane::logical_coordinate_system() const
@@ -74,45 +73,17 @@ namespace neogfx
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
 	{	
 		painting_sprites.trigger(aGraphicsContext);
-		if (iEnableZSorting)
+		sort_shapes();
+		for (auto s : iRenderBuffer)
 		{
-			iRenderBuffer.reserve(iShapes.size() + iSprites.size());
-			iRenderBuffer.clear();
-			for (const auto& s : iShapes)
-			{
-				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
-					continue;
-				iRenderBuffer.push_back(&*s);
-			}
-			for (const auto& s : iSprites)
-			{
-				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
-					continue;
-				iRenderBuffer.push_back(&*s);
-			}
-			std::stable_sort(iRenderBuffer.begin(), iRenderBuffer.end(), [](i_shape* left, i_shape* right) ->bool
-			{
-				return left->position_3D()[2] < right->position_3D()[2];
-			});
-			for (auto s : iRenderBuffer)
-				s->paint(aGraphicsContext);
-		}
-		else
-		{
-			for (const auto& s : iShapes)
-			{
-				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
-					continue;
-				s->paint(aGraphicsContext);
-			}
-			for (const auto& s : iSprites)
-			{
-				if ((s->bounding_box() + s->position()).intersection(client_rect()).empty())
-					continue;
-				s->paint(aGraphicsContext);
-			}
+			if (s->destroyed())
+				continue;
+			if (s->bounding_box_2d().intersection(client_rect()).empty())
+				continue;
+			s->paint(aGraphicsContext);
 		}
 		sprites_painted.trigger(aGraphicsContext);
+		iWaitForRender = false;
 	}
 
 	const i_widget& sprite_plane::as_widget() const
@@ -125,92 +96,82 @@ namespace neogfx
 		return *this;
 	}
 
-	bool sprite_plane::has_buddy(const i_shape& aShape) const
-	{
-		return iBuddies.find(&aShape) != iBuddies.end();
-	}
-
-	i_shape& sprite_plane::buddy(const i_shape& aShape) const
-	{
-		auto b = iBuddies.find(&aShape);
-		if (b == iBuddies.end())
-			throw no_buddy();
-		return *b->second.first;
-	}
-
-	void sprite_plane::set_buddy(const i_shape& aShape, i_shape& aBuddy, const vec3& aBuddyOffset)
-	{
-		if (has_buddy(aShape))
-			throw buddy_exists();
-		iBuddies.emplace(&aShape, std::make_pair(&aBuddy, aBuddyOffset));
-	}
-
-	const vec3& sprite_plane::buddy_offset(const i_shape& aShape) const
-	{
-		auto b = iBuddies.find(&aShape);
-		if (b == iBuddies.end())
-			throw no_buddy();
-		return b->second.second;
-	}
-
-	void sprite_plane::set_buddy_offset(const i_shape& aShape, const vec3& aBuddyOffset)
-	{
-		auto b = iBuddies.find(&aShape);
-		if (b == iBuddies.end())
-			throw no_buddy();
-		b->second.second = aBuddyOffset;
-	}
-
-	void sprite_plane::unset_buddy(const i_shape& aShape)
-	{
-		auto b = iBuddies.find(&aShape);
-		if (b == iBuddies.end())
-			throw no_buddy();
-		iBuddies.erase(b);
-	}
-
 	void sprite_plane::enable_z_sorting(bool aEnableZSorting)
 	{
 		iEnableZSorting = aEnableZSorting;
 	}
 
-	void sprite_plane::add_shape(i_shape& aShape)
+	void sprite_plane::add_sprite(i_sprite& aObject)
 	{
-		iShapes.push_back(std::shared_ptr<i_shape>(std::shared_ptr<i_shape>(), &aShape));
+		iObjects.push_back(std::shared_ptr<i_object>(std::shared_ptr<i_object>(), &aObject.physics())); // todo: using aliasing ctor here; not quite happy with the i_object based class hierarchy at present
+		iRenderBuffer.push_back(static_cast<i_shape*>(&aObject));
+		iNeedsSorting = true;
 	}
 
-	void sprite_plane::add_shape(std::shared_ptr<i_shape> aShape)
+	void sprite_plane::add_sprite(std::shared_ptr<i_sprite> aObject)
 	{
-		iShapes.push_back(aShape);
+		iObjects.push_back(std::shared_ptr<i_object>(aObject, &aObject->physics())); // todo: using aliasing ctor here; not quite happy with the i_object based class hierarchy at present
+		iRenderBuffer.push_back(static_cast<i_shape*>(&*aObject));
+		iNeedsSorting = true;
 	}
 
-	void sprite_plane::add_sprite(i_sprite& aSprite)
+	void sprite_plane::add_physical_object(i_physical_object& aObject)
 	{
-		iSprites.push_back(std::shared_ptr<i_sprite>(std::shared_ptr<i_sprite>(), &aSprite));
+		iObjects.push_back(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
+		iNeedsSorting = true;
 	}
 
-	void sprite_plane::add_sprite(std::shared_ptr<i_sprite> aSprite)
+	void sprite_plane::add_physical_object(std::shared_ptr<i_physical_object> aObject)
 	{
-		iSprites.push_back(aSprite);
+		iObjects.push_back(aObject);
+		iNeedsSorting = true;
+	}
+
+	void sprite_plane::add_shape(i_shape& aObject)
+	{
+		iObjects.push_back(std::shared_ptr<i_shape>(std::shared_ptr<i_shape>(), &aObject));
+		iRenderBuffer.push_back(&aObject);
+		iNeedsSorting = true;
+	}
+
+	void sprite_plane::add_shape(std::shared_ptr<i_shape> aObject)
+	{
+		iObjects.push_back(aObject);
+		iRenderBuffer.push_back(&*aObject);
+		iNeedsSorting = true;
 	}
 
 	i_sprite& sprite_plane::create_sprite()
 	{
-		iSimpleSprites.push_back(sprite(*this));
+		iSimpleSprites.push_back(sprite{});
 		add_sprite(iSimpleSprites.back());
 		return iSimpleSprites.back();
 	}
 
-	i_sprite& sprite_plane::create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect)
+	i_sprite& sprite_plane::create_sprite(const i_texture& aTexture)
 	{
-		iSimpleSprites.emplace_back(*this, aTexture, aTextureRect);
+		iSimpleSprites.emplace_back(aTexture);
 		add_sprite(iSimpleSprites.back());
 		return iSimpleSprites.back();
 	}
 
-	i_sprite& sprite_plane::create_sprite(const i_image& aImage, const optional_rect& aTextureRect)
+	i_sprite& sprite_plane::create_sprite(const i_image& aImage)
 	{
-		iSimpleSprites.emplace_back(*this, aImage, aTextureRect);
+		iSimpleSprites.emplace_back(aImage);
+		add_sprite(iSimpleSprites.back());
+		return iSimpleSprites.back();
+	}
+
+	i_sprite& sprite_plane::create_sprite(const i_texture& aTexture, const rect& aTextureRect)
+	{
+		iSimpleSprites.emplace_back(aTexture, aTextureRect);
+		add_sprite(iSimpleSprites.back());
+		return iSimpleSprites.back();
+	}
+
+	i_sprite& sprite_plane::create_sprite(const i_image& aImage, const rect& aTextureRect)
+	{
+		iSimpleSprites.emplace_back(aImage, aTextureRect);
 		add_sprite(iSimpleSprites.back());
 		return iSimpleSprites.back();
 	}
@@ -235,49 +196,44 @@ namespace neogfx
 		iUniformGravity = aUniformGravity;
 	}
 
-	void sprite_plane::add_object(i_physical_object& aObject)
+	i_physical_object& sprite_plane::create_physical_object()
 	{
-		iObjects.push_back(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
-	}
-
-	void sprite_plane::add_object(std::shared_ptr<i_physical_object> aObject)
-	{
-		iObjects.push_back(aObject);
-	}
-
-	i_physical_object& sprite_plane::create_object()
-	{
-		iSimpleObjects.push_back(physical_object());
-		add_object(iSimpleObjects.back());
+		iSimpleObjects.push_back(physical_object{});
+		add_physical_object(iSimpleObjects.back());
 		return iSimpleObjects.back();
 	}
 
 	i_physical_object& sprite_plane::create_earth()
 	{
-		auto& earth = create_object();
+		auto& earth = create_physical_object();
 		earth.set_position({ 0.0, -6371000.0, 0.0 });
 		earth.set_mass(5.972e24);
 		return earth;
 	}
 
-	const sprite_plane::shape_list& sprite_plane::shapes() const
+	const sprite_plane::optional_step_time_interval& sprite_plane::physics_time() const
 	{
-		return iShapes;
+		return iPhysicsTime;
 	}
 
-	sprite_plane::shape_list& sprite_plane::shapes()
+	void sprite_plane::set_physics_time(const optional_step_time_interval& aTime)
 	{
-		return iShapes;
+		iPhysicsTime = aTime;
 	}
 
-	const sprite_plane::sprite_list& sprite_plane::sprites() const
+	sprite_plane::step_time_interval sprite_plane::physics_step_interval() const
 	{
-		return iSprites;
+		return iStepInterval;
 	}
 
-	sprite_plane::sprite_list& sprite_plane::sprites()
+	void sprite_plane::set_physics_step_interval(step_time_interval aStepInterval)
 	{
-		return iSprites;
+		iStepInterval = aStepInterval;
+	}
+
+	void sprite_plane::reserve(std::size_t aCapacity)
+	{
+		iObjects.reserve(aCapacity);
 	}
 
 	const sprite_plane::object_list& sprite_plane::objects() const
@@ -285,63 +241,138 @@ namespace neogfx
 		return iObjects;
 	}
 
-	sprite_plane::object_list& sprite_plane::objects()
+	void sprite_plane::sort_shapes() const
 	{
-		return iObjects;
+		if (iNeedsSorting && iEnableZSorting)
+		{
+			std::stable_sort(iRenderBuffer.begin(), iRenderBuffer.end(), [this](i_shape* left, i_shape* right) -> bool
+			{
+				if (left->destroyed() != right->destroyed())
+					return left->destroyed() < right->destroyed();
+				else
+					return left->position().z < right->position().z;
+			});
+			while (!iRenderBuffer.empty() && iRenderBuffer.back()->destroyed())
+				iRenderBuffer.pop_back();
+		}
 	}
 
-	const sprite_plane::buddy_list& sprite_plane::buddies() const
+	void sprite_plane::sort_objects()
 	{
-		return iBuddies;
-	}
-
-	sprite_plane::buddy_list& sprite_plane::buddies()
-	{
-		return iBuddies;
+		if (iNeedsSorting)
+		{
+			sort_shapes();
+			std::stable_sort(iObjects.begin(), iObjects.end(), [this](const object_pointer& left, const object_pointer& right) -> bool
+			{
+				if (left->destroyed() != right->destroyed())
+					return left->destroyed() < right->destroyed();
+				else if (left->category() == object_category::Shape || right->category() == object_category::Shape)
+				{
+					if (left->category() != right->category())
+						return left->category() < right->category();
+					else
+						return &left < &right;
+				}
+				else
+				{
+					const i_physical_object& leftObject = static_cast<const i_physical_object&>(*left);
+					const i_physical_object& rightObject = static_cast<const i_physical_object&>(*right);
+					return leftObject.mass() > rightObject.mass();
+				}
+			});
+			while (!iObjects.empty() && iObjects.back()->destroyed())
+				iObjects.pop_back();
+			iNeedsSorting = false;
+		}
 	}
 
 	bool sprite_plane::update_objects()
 	{
-		applying_physics.trigger();
-		auto now = std::chrono::steady_clock::now();
+		if (iWaitForRender)
+			return false;
+		auto nowClock = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
+		auto now = to_step_time(nowClock.count() * .001, physics_step_interval());
+		if (!iPhysicsTime)
+			iPhysicsTime = now;
+		if (*iPhysicsTime == now)
+			return false;
 		bool updated = false;
-		iUpdateBuffer.reserve(iSprites.size() + iObjects.size());
-		iUpdateBuffer.clear();
-		for (const auto& s : iSprites)
-			iUpdateBuffer.push_back(&s->physics());
-		for (const auto& s : iObjects)
-			iUpdateBuffer.push_back(&*s);
-		std::stable_sort(iUpdateBuffer.begin(), iUpdateBuffer.end(), [](i_physical_object* left, i_physical_object* right) ->bool
+		while (*iPhysicsTime <= now)
 		{
-			return left->mass() > right->mass();
-		});
-		for (auto& o2 : iUpdateBuffer)
-		{
-			vec3 totalForce;
-			if (o2->mass() == 0.0)
-				continue;
-			if (iUniformGravity != boost::none)
-				totalForce = *iUniformGravity * o2->mass();
-			else if (iG != 0.0)
+			applying_physics.trigger(*iPhysicsTime);
+			sort_objects();
+			if (iG != 0.0)
 			{
-				for (auto& o1 : iUpdateBuffer)
+				for (auto& i1 : iObjects)
 				{
-					if (o1 == o2)
-						continue;
-					if (o1->collided(*o2))
-						continue;
-					vec3 force;
-					vec3 r12 = o2->position() - o1->position();
-					if (r12.magnitude() > 0.0)
-						force = -iG * o1->mass() * o2->mass() * r12 / std::pow(r12.magnitude(), 3.0);
-					if (force.magnitude() < 1.0e-6)
+					vec3 totalForce;
+					if (i1->category() == object_category::Shape)
 						break;
-					totalForce += force;
+					i_physical_object& o1 = static_cast<i_physical_object&>(*i1);
+					if (o1.mass() == 0.0)
+						break;
+					if (iUniformGravity != boost::none)
+						totalForce = *iUniformGravity * o1.mass();
+					for (auto& i2 : iObjects)
+					{
+						if (i2->category() == object_category::Shape)
+							break;
+						i_physical_object& o2 = static_cast<i_physical_object&>(*i2);
+						if (&o2 == &o1)
+							continue;
+						if (o2.mass() == 0.0)
+							break;
+						vec3 force;
+						vec3 r12 = o1.position() - o2.position();
+						if (r12.magnitude() > 0.0)
+							force = -iG * o2.mass() * o1.mass() * r12 / std::pow(r12.magnitude(), 3.0);
+						if (force.magnitude() >= 1.0e-6)
+							totalForce += force;
+						else
+							break;
+					}
+					updated = (o1.update(from_step_time(*iPhysicsTime), totalForce) || updated);
 				}
 			}
-			updated = (o2->update(now, totalForce) || updated);
+			for (auto& i1 : iObjects)
+			{
+				if (i1->destroyed())
+				{
+					iNeedsSorting = true;
+					continue;
+				}
+				if (i1->category() == object_category::Shape)
+					break;
+				i_physical_object& o1 = static_cast<i_physical_object&>(*i1);
+				for (auto& i2 : iObjects)
+				{
+					if (i2->destroyed())
+					{
+						iNeedsSorting = true;
+						continue;
+					}
+					if (i2->category() == object_category::Shape)
+						break;
+					i_physical_object& o2 = static_cast<i_physical_object&>(*i2);
+					if (&o2 == &o1)
+						continue;
+					if (&o1 < &o2 && o1.has_collided(o2))
+					{
+						o1.collided(o2);
+						o2.collided(o1);
+						object_collision.trigger(o1, o2);
+					}
+				}
+			}
+			physics_applied.trigger(*iPhysicsTime);
+			*iPhysicsTime += physics_step_interval();
 		}
-		physics_applied.trigger();
+		for (auto& s : iRenderBuffer)
+		{
+			updated = s->update(from_step_time(now)) || updated;
+		}
+		if (updated)
+			iWaitForRender = true;
 		return updated;
 	}
 }

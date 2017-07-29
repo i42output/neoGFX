@@ -35,10 +35,10 @@ namespace neogfx
 		public:
 			disc(radio_button& aParent);
 		public:
-			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+			size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+			size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 		public:
-			virtual void paint(graphics_context& aGraphicsContext) const;
+			void paint(graphics_context& aGraphicsContext) const override;
 		};
 	public:
 		radio_button(const std::string& aText = std::string());
@@ -49,15 +49,20 @@ namespace neogfx
 		bool is_off() const;
 		void set_on();
 	public:
-		virtual neogfx::size_policy size_policy() const;
+		neogfx::size_policy size_policy() const override;
 	protected:
-		virtual void paint(graphics_context& aGraphicsContext) const;
-		virtual void handle_clicked();
+		void paint(graphics_context& aGraphicsContext) const override;
+	protected:
+		void mouse_entered() override;
+		void mouse_left() override;
+	protected:
+		void handle_clicked() override;
+	protected:
+		bool set_checked_state(const boost::optional<bool>& aCheckedState) override;
 	protected:
 		virtual const radio_button* next_radio_button() const;
 		virtual radio_button* next_radio_button();
 		virtual bool any_siblings_on() const;
-		virtual bool set_checked_state(const boost::optional<bool>& aCheckedState);
 	private:
 		disc iDisc;
 	};

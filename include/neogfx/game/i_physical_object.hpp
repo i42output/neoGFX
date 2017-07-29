@@ -22,25 +22,35 @@
 #include <chrono>
 #include <boost/optional.hpp>
 #include <neogfx/core/geometry.hpp>
+#include "i_object.hpp"
 
 namespace neogfx
 {
-	class i_physical_object
+	class i_physical_object : public i_object
 	{
+		// types
 	public:
-		typedef std::array<vec3, 6> aabb_type;
-		typedef std::chrono::time_point<std::chrono::steady_clock> time_point;
-		typedef boost::optional<time_point> optional_time_point;
+		struct aabb_type
+		{
+			vec3 min;
+			vec3 max;
+		};
+		typedef scalar time_interval;
+		typedef boost::optional<time_interval> optional_time_interval;
+		typedef int64_t step_time_interval;
+		typedef boost::optional<step_time_interval> optional_step_time_interval;
+		// lifetime
 	public:
 		virtual ~i_physical_object() {}
+		// physics
 	public:
-		virtual const vec3& origin() const = 0;
-		virtual const vec3& position() const = 0;
-		virtual const vec3& angle_radians() const = 0;
+		virtual vec3 origin() const = 0;
+		virtual vec3 position() const = 0;
+		virtual vec3 angle_radians() const = 0;
 		virtual vec3 angle_degrees() const = 0;
-		virtual const vec3& velocity() const = 0;
-		virtual const vec3& acceleration() const = 0;
-		virtual const vec3& spin_radians() const = 0;
+		virtual vec3 velocity() const = 0;
+		virtual vec3 acceleration() const = 0;
+		virtual vec3 spin_radians() const = 0;
 		virtual vec3 spin_degrees() const = 0;
 		virtual scalar mass() const = 0;
 		virtual void set_origin(const vec3& aOrigin) = 0;
@@ -52,6 +62,18 @@ namespace neogfx
 		virtual void set_spin_radians(const vec3& aSpin) = 0;
 		virtual void set_spin_degrees(const vec3& aSpin) = 0;
 		virtual void set_mass(scalar aMass) = 0;
+		// object
+	public:
+		virtual aabb_type aabb() const = 0;
+		virtual void clear_aabb_cache() = 0;
+		virtual uint64_t collision_mask() const { return 0ull; }
+		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
+		virtual bool has_collided(const i_physical_object& aOther) const = 0;
+		virtual void collided(const i_physical_object& aOther) = 0;
+		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
+		virtual const optional_time_interval& update_time() const = 0;
+		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;
+		// helpers
 	public:
 		void set_angle_radians(scalar aAngle)
 		{
@@ -69,9 +91,24 @@ namespace neogfx
 		{
 			set_spin_degrees(vec3{ 0.0, 0.0, aSpin });
 		}
-	public:
-		virtual const aabb_type& aabb() const = 0;
-		virtual bool collided(const i_physical_object& aOther) const = 0;
-		virtual bool update(const optional_time_point& aNow, const vec3& aForce) = 0;
 	};
+
+	inline i_physical_object::step_time_interval to_step_time(i_physical_object::time_interval aTime, i_physical_object::step_time_interval aStepInterval)
+	{
+		auto ms = static_cast<i_physical_object::step_time_interval>(aTime * 1000.0);
+		return ms - (ms % aStepInterval);
+	}
+
+	inline i_physical_object::step_time_interval to_step_time(const i_physical_object::optional_time_interval& aTime, i_physical_object::step_time_interval aStepInterval)
+	{
+		if (aTime)
+			return to_step_time(*aTime, aStepInterval);
+		else
+			return 0;
+	}
+
+	inline i_physical_object::time_interval from_step_time(i_physical_object::step_time_interval aStepTime)
+	{
+		return aStepTime / 1000.0;
+	}
 }

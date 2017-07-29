@@ -25,76 +25,62 @@
 
 namespace neogfx
 {
-	class sprite : public shape, public i_sprite
+	class sprite : public physical_object, public shape<i_sprite>
 	{
 		// types
 	public:
-		using i_sprite::time_point;
-		using i_sprite::optional_time_point;
+		using i_sprite::time_interval;
+		using i_sprite::optional_time_interval;
+		using i_sprite::step_time_interval;
 		// construction
 	public:
-		sprite(i_shape_container& aContainer);
-		sprite(i_shape_container& aContainer, const colour& aColour);
-		sprite(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		sprite(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		sprite();
+		sprite(const colour& aColour);
+		sprite(const i_texture& aTexture, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		sprite(const i_image& aImage, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		sprite(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
+		sprite(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
 		sprite(const sprite& aOther);
-		// container/buddy
+		// object
 	public:
-		i_shape_container& container() const override;
-		bool has_buddy() const override;
-		i_shape& buddy() const override;
-		void set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset = vec3{}) override;
-		const vec3& buddy_offset() const override;
-		void set_buddy_offset(const vec3& aBuddyOffset) override;
-		void unset_buddy() override;
-		// animation
-	public:
-		frame_index frame_count() const override;
-		const i_frame& frame(frame_index aFrameIndex) const override;
-		i_frame& frame(frame_index aFrameIndex) override;
-		void add_frame(i_frame& aFrame) override;
-		void add_frame(std::shared_ptr<i_frame> aFrame) override;
-		void replace_frame(frame_index aFrameIndex, i_frame& aFrame) override;
-		void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame) override;
-		void remove_frame(frame_index aFrameIndex) override;
-		void set_texture_rect_for_all_frames(const optional_rect& aTextureRect) override;
+		object_category category() const override;
+		uint64_t collision_mask() const override;
+		void set_collision_mask(uint64_t aMask) override;
+		bool destroyed() const override;
 		// geometry
 	public:
-		const animation_frames& animation() const override;
-		const i_frame& current_frame() const override;
-		i_frame& current_frame() override;
-		point origin() const override;
-		point position() const override;
-		vec3 position_3D() const override;
-		rect bounding_box() const override;
-		const vec2& scale() const override;
-		bool has_transformation_matrix() const override;
-		mat33 transformation_matrix() const override;
+		void animation_finished() override;
+		vec3 origin() const override;
+		vec3 position() const override;
+		mat44 transformation_matrix() const override;
 		const optional_path& path() const override;
-		void set_animation(const animation_frames& aAnimation) override;
-		void set_current_frame(frame_index aFrameIndex) override;
-		void set_origin(const point& aOrigin) override;
-		void set_position(const point& aPosition) override;
-		void set_position_3D(const vec3& aPosition3D) override;
-		void set_bounding_box(const optional_rect& aBoundingBox) override;
-		void set_scale(const vec2& aScale) override;
-		void set_transformation_matrix(const optional_mat33& aTransformationMatrix) override;
+		void set_origin(const vec3& aOrigin) override;
+		using i_shape::set_origin;
+		void set_position(const vec3& aPosition) override;
+		using i_shape::set_position;
 		void set_path(const optional_path& aPath) override;
+		// updates
+	public:
+		void clear_vertices_cache() override;
 		// physics
 	public:
 		const i_physical_object& physics() const override;
 		i_physical_object& physics() override;
-		bool update(const optional_time_point& aNow, const vec3& aForce) override;
-		// rendering
+		bool update(const optional_time_interval& aNow, const vec3& aForce) override;
+		const optional_time_interval& update_time() const override;
+		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
+		// physical object
 	public:
-		std::size_t vertex_count(bool aIncludeCentre = false) const override;
-		vec3_list vertices(bool aIncludeCentre = false) const override;
-		vec3_list transformed_vertices(bool aIncludeCentre = false) const override;
-		bool update(const optional_time_point& aNow) override;
-		void paint(graphics_context& aGraphicsContext) const override;
+		aabb_type aabb() const override;
+		void clear_aabb_cache() override;
+		// own
+	public:
+		void destroy();
 		// attributes
 	private:
 		optional_path iPath;
-		physical_object iObject;
+		uint64_t iCollisionMask;
+		mutable boost::optional<aabb_type> iAabb;
+		bool iDestroyed;
 	};
 }

@@ -29,83 +29,79 @@ namespace neogfx
 	class sprite_plane : public widget, public i_shape_container
 	{
 	public:
-		event<> applying_physics;
-		event<> physics_applied;
+		typedef i_physical_object::step_time_interval step_time_interval;
+	public:
+		event<step_time_interval> applying_physics;
+		event<step_time_interval> physics_applied;
 		event<graphics_context&> painting_sprites;
 		event<graphics_context&> sprites_painted;
+		event<i_object&, i_object&> object_collision;
 	public:
-		typedef std::vector<std::shared_ptr<i_shape>> shape_list;
-		typedef std::vector<std::shared_ptr<i_sprite>> sprite_list;
-		typedef std::vector<std::shared_ptr<i_physical_object>> object_list;
-		typedef std::map<const i_shape*, std::pair<i_shape*, vec3>> buddy_list;
+		typedef i_physical_object::time_interval time_interval;
+		typedef i_physical_object::optional_time_interval optional_time_interval;
+		typedef i_physical_object::optional_step_time_interval optional_step_time_interval;
+	public:
+		typedef std::shared_ptr<i_object> object_pointer;
+		typedef std::vector<object_pointer> object_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
-	public:
-		struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::sprite_plane::no_buddy") {} };
-		struct buddy_exists : std::logic_error { buddy_exists() : std::logic_error("neogfx::sprite_plane::buddy_exists") {} };
 	public:
 		sprite_plane();
 		sprite_plane(i_widget& aParent);
 		sprite_plane(i_layout& aLayout);
 		~sprite_plane();
 	public:
-		virtual void parent_changed();
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
 		virtual const i_widget& as_widget() const;
 		virtual i_widget& as_widget();
 	public:
-		virtual bool has_buddy(const i_shape& aShape) const;
-		virtual i_shape& buddy(const i_shape& aShape) const;
-		virtual void set_buddy(const i_shape& aShape, i_shape& aBuddy, const vec3& aBuddyOffset = vec3{});
-		virtual const vec3& buddy_offset(const i_shape& aShape) const;
-		virtual void set_buddy_offset(const i_shape& aShape, const vec3& aBuddyOffset);
-		virtual void unset_buddy(const i_shape& aShape);
-	public:
 		void enable_z_sorting(bool aEnableZSorting);
 	public:
-		void add_shape(i_shape& aShape);
-		void add_shape(std::shared_ptr<i_shape> aShape);
+		void add_sprite(i_sprite& aObject);
+		void add_sprite(std::shared_ptr<i_sprite> aObject);
+		void add_physical_object(i_physical_object& aObject);
+		void add_physical_object(std::shared_ptr<i_physical_object> aObject);
+		void add_shape(i_shape& aObject);
+		void add_shape(std::shared_ptr<i_shape> aObject);
 	public:
-		void add_sprite(i_sprite& aSprite);
-		void add_sprite(std::shared_ptr<i_sprite> aSprite);
 		i_sprite& create_sprite();
-		i_sprite& create_sprite(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect());
-		i_sprite& create_sprite(const i_image& aImage, const optional_rect& aTextureRect = optional_rect());
+		i_sprite& create_sprite(const i_texture& aTexture);
+		i_sprite& create_sprite(const i_image& aImage);
+		i_sprite& create_sprite(const i_texture& aTexture, const rect& aTextureRect);
+		i_sprite& create_sprite(const i_image& aImage, const rect& aTextureRect);
 	public:
 		scalar gravitational_constant() const;
 		void set_gravitational_constant(scalar aG);
 		const optional_vec3& uniform_gravity() const;
 		void set_uniform_gravity(const optional_vec3& aUniformGravity = vec3{ 0.0, -9.80665, 0.0});
-		void add_object(i_physical_object& aObject);
-		void add_object(std::shared_ptr<i_physical_object> aObject);
 		i_physical_object& create_earth(); ///< adds gravity by simulating the earth, groundlevel at y = 0;
-		i_physical_object& create_object();
+		i_physical_object& create_physical_object();
+		const optional_step_time_interval& physics_time() const;
+		void set_physics_time(const optional_step_time_interval& aTime);
+		step_time_interval physics_step_interval() const;
+		void set_physics_step_interval(step_time_interval aStepInterval);
 	public:
-		const shape_list& shapes() const;
-		shape_list& shapes();
-		const sprite_list& sprites() const;
-		sprite_list& sprites();
+		void reserve(std::size_t aCapacity);
 		const object_list& objects() const;
-		object_list& objects();
-		const buddy_list& buddies() const;
-		buddy_list& buddies();
 	private:
+		void sort_shapes() const;
+		void sort_objects();
 		bool update_objects();
 	private:
-		sink iSink;
+		neolib::callback_timer iUpdater;
 		bool iEnableZSorting;
+		bool iNeedsSorting;
 		scalar iG;
 		optional_vec3 iUniformGravity;
-		shape_list iShapes;
-		sprite_list iSprites;
+		optional_step_time_interval iPhysicsTime;
+		step_time_interval iStepInterval;
 		object_list iObjects;
-		buddy_list iBuddies;
+		mutable std::vector<i_shape*> iRenderBuffer;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
-		mutable std::vector<i_shape*> iRenderBuffer;
-		mutable std::vector<i_physical_object*> iUpdateBuffer;
+		mutable bool iWaitForRender;
 	};
 }

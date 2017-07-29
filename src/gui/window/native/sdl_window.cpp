@@ -625,6 +625,7 @@ namespace neogfx
 		case WM_RBUTTONUP:
 		case WM_MBUTTONUP:
 		case WM_XBUTTONUP:
+		case WM_MOUSEWHEEL:
 			{
 				key_modifiers_e modifiers = KeyModifier_NONE;
 				if (wparam & MK_SHIFT)

@@ -690,6 +690,7 @@ namespace neogfx
 
 	void widget::moved()
 	{
+		position_changed.trigger();
 	}
 	
 	size widget::extents() const
@@ -715,6 +716,7 @@ namespace neogfx
 
 	void widget::resized()
 	{
+		size_changed.trigger();
 		layout_items();
 	}
 

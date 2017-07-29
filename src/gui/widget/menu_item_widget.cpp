@@ -88,13 +88,13 @@ namespace neogfx
 				if (background.similar_intensity(app::instance().current_style().palette().colour(), 0.05))
 				{
 					background = app::instance().current_style().palette().selection_colour();
-					background.set_alpha(0x80);
+					background.set_alpha(0xC0);
 				}
 			}
 			else
 			{
 				background = background_colour().light() ? background_colour().darker(0x40) : background_colour().lighter(0x40);
-				background.set_alpha(0x80);
+				background.set_alpha(0xC0);
 			}
 			aGraphicsContext.fill_rect(client_rect(), background);
 		}
@@ -164,7 +164,7 @@ namespace neogfx
 		widget::mouse_left();
 		update();
 		if (menu().has_selected_item() && menu().selected_item() == (menu().find_item(menu_item())) &&
-			(menu_item().type() == i_menu_item::Action || !menu_item().sub_menu().is_open()))
+			(menu_item().type() == i_menu_item::Action || (!menu_item().sub_menu().is_open() && !iSubMenuOpener)))
 			menu().clear_selection();
 	}
 
@@ -273,16 +273,18 @@ namespace neogfx
 		{
 			if (menu_item().type() == i_menu_item::SubMenu && menu().type() == i_menu::Popup)
 			{
-				iSubMenuOpener = std::make_unique<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
+				if (!iSubMenuOpener)
 				{
-					if (!menu_item().sub_menu().is_open())
+					iSubMenuOpener = std::make_unique<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
 					{
 						destroyed_flag destroyed(*this);
-						menu().open_sub_menu.trigger(menu_item().sub_menu());
+						if (!menu_item().sub_menu().is_open())
+							menu().open_sub_menu.trigger(menu_item().sub_menu());
 						if (!destroyed)
 							update();
-					}
-				}, 250);
+						iSubMenuOpener.reset();
+					}, 250);
+				}
 			}
 		});
 		iSink += menu_item().deselected([this]()

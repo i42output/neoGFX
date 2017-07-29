@@ -23,165 +23,91 @@
 
 namespace neogfx
 {
-	sprite::sprite(i_shape_container& aContainer) :
-		shape(aContainer)
+	sprite::sprite() :
+		iCollisionMask{ 0ull }, iDestroyed { false }
 	{
 	}
 
-	sprite::sprite(i_shape_container& aContainer, const colour& aColour) :
-		shape(aContainer, aColour)
+	sprite::sprite(const colour& aColour) :
+		shape{ aColour },
+		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
-	sprite::sprite(i_shape_container& aContainer, const i_texture& aTexture, const optional_rect& aTextureRect) :
-		shape(aContainer, aTexture, aTextureRect)
+	sprite::sprite(const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
+		shape{ aTexture, aAnimationInfo },
+		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
-	sprite::sprite(i_shape_container& aContainer, const i_image& aImage, const optional_rect& aTextureRect) :
-		shape(aContainer, aImage, aTextureRect)
+	sprite::sprite(const i_image& aImage, const optional_animation_info& aAnimationInfo) :
+		shape{ aImage, aAnimationInfo },
+		iCollisionMask{ 0ull }, iDestroyed{ false }
+	{
+	}
+
+	sprite::sprite(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+		shape{ aTexture, aTextureRect, aAnimationInfo },
+		iCollisionMask{ 0ull }, iDestroyed{ false }
+	{
+	}
+
+	sprite::sprite(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+		shape{ aImage, aTextureRect, aAnimationInfo },
+		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
 	sprite::sprite(const sprite& aOther) :
-		shape(aOther),
-		iPath(aOther.iPath),
-		iObject(aOther.iObject)
+		shape{ aOther },
+		physical_object{ aOther },
+		iPath{ aOther.iPath },
+		iCollisionMask{ 0ull }, iDestroyed{ false }
 	{
 	}
 
-	i_shape_container& sprite::container() const
+	object_category sprite::category() const
 	{
-		return shape::container();
+		return object_category::Sprite;
 	}
 
-	bool sprite::has_buddy() const
+	uint64_t sprite::collision_mask() const
 	{
-		return shape::has_buddy();
+		return iCollisionMask;
 	}
 
-	i_shape& sprite::buddy() const
+	void sprite::set_collision_mask(uint64_t aMask)
 	{
-		return shape::buddy();
+		iCollisionMask = aMask;
 	}
 
-	void sprite::set_buddy(i_shape& aBuddy, const vec3& aBuddyOffset)
+	bool sprite::destroyed() const
 	{
-		shape::set_buddy(aBuddy, aBuddyOffset);
+		return iDestroyed;
 	}
 
-	const vec3& sprite::buddy_offset() const
+	void sprite::animation_finished()
 	{
-		return shape::buddy_offset();
+		destroy();
 	}
 
-	void sprite::set_buddy_offset(const vec3& aBuddyOffset)
+	vec3 sprite::origin() const
 	{
-		shape::set_buddy_offset(aBuddyOffset);
+		return physical_object::origin();
 	}
 
-	void sprite::unset_buddy()
+	vec3 sprite::position() const
 	{
-		shape::unset_buddy();
+		return physical_object::position();
 	}
 
-	sprite::frame_index sprite::frame_count() const
-	{
-		return shape::frame_count();
-	}
-
-	const i_frame& sprite::frame(frame_index aFrameIndex) const
-	{
-		return shape::frame(aFrameIndex);
-	}
-
-	i_frame& sprite::frame(frame_index aFrameIndex)
-	{
-		return shape::frame(aFrameIndex);
-	}
-
-	void sprite::add_frame(i_frame& aFrame)
-	{
-		shape::add_frame(aFrame);
-	}
-
-	void sprite::add_frame(std::shared_ptr<i_frame> aFrame)
-	{
-		shape::add_frame(aFrame);
-	}
-
-	void sprite::replace_frame(frame_index aFrameIndex, i_frame& aFrame)
-	{
-		shape::replace_frame(aFrameIndex, aFrame);
-	}
-
-	void sprite::replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame)
-	{
-		shape::replace_frame(aFrameIndex, aFrame);
-	}
-
-	void sprite::remove_frame(frame_index aFrameIndex)
-	{
-		shape::remove_frame(aFrameIndex);
-	}
-
-	void sprite::set_texture_rect_for_all_frames(const optional_rect& aTextureRect)
-	{
-		shape::set_texture_rect_for_all_frames(aTextureRect);
-	}
-
-	const sprite::animation_frames& sprite::animation() const
-	{
-		return shape::animation();
-	}
-
-	const i_frame& sprite::current_frame() const
-	{
-		return shape::current_frame();
-	}
-
-	i_frame& sprite::current_frame()
-	{
-		return shape::current_frame();
-	}
-
-	point sprite::origin() const
-	{
-		return point{ physics().origin()[0], physics().origin()[1] };
-	}
-
-	point sprite::position() const
-	{
-		return point{ physics().position()[0], physics().position()[1] };
-	}
-
-	vec3 sprite::position_3D() const
-	{
-		return physics().position();
-	}
-
-	rect sprite::bounding_box() const
-	{
-		return shape::bounding_box();
-	}
-
-	const vec2& sprite::scale() const
-	{
-		return shape::scale();
-	}
-
-	bool sprite::has_transformation_matrix() const
-	{
-		return shape::has_transformation_matrix();
-	}
-
-	mat33 sprite::transformation_matrix() const
+	mat44 sprite::transformation_matrix() const
 	{
 		if (shape::has_transformation_matrix())
 			return shape::transformation_matrix();
-		auto az = physics().angle_radians()[2];
-		auto pos = physics().position();
-		return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ pos[0], pos[1], 1.0 } };
+		auto az = physical_object::angle_radians().z;
+		// todo: following rotation is 2D, make it 3D...
+		return mat44{ { std::cos(az), -std::sin(az), 0.0, 0.0 }, { std::sin(az), std::cos(az), 0.0, 0.0 }, { 0.0, 0.0, 1.0, 0.0 }, { position().x, position().y, position().z, 1.0 } };
 	}
 
 	const optional_path& sprite::path() const
@@ -189,47 +115,16 @@ namespace neogfx
 		return iPath;
 	}
 	
-	void sprite::set_animation(const animation_frames& aAnimation)
-	{
-		shape::set_animation(aAnimation);
-	}
-
-	void sprite::set_current_frame(frame_index aFrameIndex)
-	{
-		shape::set_current_frame(aFrameIndex);
-	}
-
-	void sprite::set_origin(const point& aOrigin)
+	void sprite::set_origin(const vec3& aOrigin)
 	{
 		shape::set_origin(aOrigin);
-		physics().set_origin(aOrigin.to_vector3());
+		physical_object::set_origin(aOrigin);
 	}
 	
-	void sprite::set_position(const point& aPosition)
+	void sprite::set_position(const vec3& aPosition)
 	{
 		shape::set_position(aPosition);
-		physics().set_position(aPosition.to_vector3());
-	}
-	
-	void sprite::set_position_3D(const vec3& aPosition3D)
-	{
-		shape::set_position_3D(aPosition3D);
-		physics().set_position(aPosition3D);
-	}
-
-	void sprite::set_bounding_box(const optional_rect& aBoundingBox)
-	{
-		shape::set_bounding_box(aBoundingBox);
-	}
-
-	void sprite::set_scale(const vec2& aScale)
-	{
-		shape::set_scale(aScale);
-	}
-
-	void sprite::set_transformation_matrix(const optional_mat33& aTransformationMatrix)
-	{
-		shape::set_transformation_matrix(aTransformationMatrix);
+		physical_object::set_position(aPosition);
 	}
 
 	void sprite::set_path(const optional_path& aPath)
@@ -237,50 +132,70 @@ namespace neogfx
 		iPath = aPath;
 	}
 
+	void sprite::clear_vertices_cache()
+	{
+		shape::clear_vertices_cache();
+		clear_aabb_cache();
+	}
+
 	const i_physical_object& sprite::physics() const
 	{
-		return iObject;
+		return *this;
 	}
 
 	i_physical_object& sprite::physics()
 	{
-		return iObject;
+		return *this;
 	}
 
-	bool sprite::update(const optional_time_point& aNow, const vec3& aForce)
+	bool sprite::update(const optional_time_interval& aNow, const vec3& aForce)
 	{
-		bool updated = shape::update(aNow);
-		return physics().update(aNow, aForce) || updated;
+		return physical_object::update(aNow, aForce);
 	}
 
-	bool sprite::update(const optional_time_point& aNow)
+	const sprite::optional_time_interval& sprite::update_time() const
 	{
-		return update(aNow, vec3{});
+		return physical_object::update_time();
 	}
 
-	std::size_t sprite::vertex_count(bool aIncludeCentre) const
+	void sprite::set_update_time(const optional_time_interval& aLastUpdateTime)
 	{
-		return aIncludeCentre ? 5 : 4;
+		physical_object::set_update_time(aLastUpdateTime);
 	}
 
-	vec3_list sprite::vertices(bool aIncludeCentre) const
+	sprite::aabb_type sprite::aabb() const
 	{
-		vec3_list result = shape::vertices(aIncludeCentre);
-		auto r = bounding_box();
-		result.push_back(r.top_left().to_vector3());
-		result.push_back(r.top_right().to_vector3());
-		result.push_back(r.bottom_right().to_vector3());
-		result.push_back(r.bottom_left().to_vector3());
-		return result;
+		if (iAabb == boost::none)
+		{
+			auto tvs = transformed_vertices();
+			auto iv = tvs[0];
+			coordinate xMin = iv.coordinates.x;
+			coordinate yMin = iv.coordinates.y;
+			coordinate zMin = iv.coordinates.z;
+			coordinate xMax = iv.coordinates.x;
+			coordinate yMax = iv.coordinates.y;
+			coordinate zMax = iv.coordinates.z;
+			for (const auto& v : tvs)
+			{
+				xMin = std::min<coordinate>(xMin, v.coordinates.x);
+				yMin = std::min<coordinate>(yMin, v.coordinates.y);
+				zMin = std::min<coordinate>(zMin, v.coordinates.z);
+				xMax = std::max<coordinate>(xMax, v.coordinates.x);
+				yMax = std::max<coordinate>(yMax, v.coordinates.y);
+				zMax = std::max<coordinate>(zMax, v.coordinates.z);
+			}
+			iAabb = aabb_type{ vec3{ xMin, yMin, zMin }, vec3{ xMax, yMax, zMax } };
+		}
+		return *iAabb;
 	}
 
-	vec3_list sprite::transformed_vertices(bool aIncludeCentre) const
+	void sprite::clear_aabb_cache()
 	{
-		return shape::transformed_vertices(aIncludeCentre);
+		iAabb = boost::none;
 	}
 
-	void sprite::paint(graphics_context& aGraphicsContext) const
+	void sprite::destroy()
 	{
-		shape::paint(aGraphicsContext);
+		iDestroyed = true;
 	}
 }

@@ -55,6 +55,11 @@ namespace neogfx
 			{
 				reset_meta();
 			});
+			iSink += app::instance().current_style_changed([this]()
+			{
+				reset_meta();
+				reset_position_meta(0);
+			});
 		}
 		~basic_item_presentation_model()
 		{

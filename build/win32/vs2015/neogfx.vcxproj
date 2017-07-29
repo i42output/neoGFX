@@ -87,7 +87,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
-      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -135,9 +135,12 @@
     <ClInclude Include="..\..\..\include\neogfx\core\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\i_mesh.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_physical_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_shape.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_sprite.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\mesh.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\physical_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\shape.hpp" />
@@ -309,9 +312,9 @@
     <ClCompile Include="..\..\..\src\core\geometry.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
+    <ClCompile Include="..\..\..\src\game\mesh.cpp" />
     <ClCompile Include="..\..\..\src\game\physical_object.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
-    <ClCompile Include="..\..\..\src\game\shape.cpp" />
     <ClCompile Include="..\..\..\src\game\sprite.cpp" />
     <ClCompile Include="..\..\..\src\game\sprite_plane.cpp" />
     <ClCompile Include="..\..\..\src\game\text.cpp" />
@@ -394,6 +397,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\core\path.inl" />
+    <None Include="..\..\..\include\neogfx\game\shape.inl" />
     <None Include="..\..\..\include\neogfx\gui\layout\flow_layout.inl" />
     <None Include="..\..\..\include\neogfx\gui\layout\layout.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />

@@ -61,11 +61,6 @@ namespace neogfx
 		Monochrome
 	};
 
-	typedef basic_vector<vector2, 4> texture_map2;
-	typedef basic_vector<vector3, 4> texture_map3;
-
-	typedef texture_map2 texture_map;
-
 	class i_surface;
 	class i_texture;
 	class i_widget;
@@ -97,13 +92,11 @@ namespace neogfx
 		point to_device_units(const point& aValue) const;
 		vec2 to_device_units(const vec2& aValue) const;
 		rect to_device_units(const rect& aValue) const;
-		texture_map to_device_units(const texture_map& aValue) const;
 		path to_device_units(const path& aValue) const;
 		delta from_device_units(const delta& aValue) const;
 		size from_device_units(const size& aValue) const;
 		point from_device_units(const point& aValue) const;
 		rect from_device_units(const rect& aValue) const;
-		texture_map from_device_units(const texture_map& aValue) const;
 		path from_device_units(const path& aValue) const;
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const;
@@ -132,22 +125,19 @@ namespace neogfx
 		void set_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const;
-		void draw_rect(const rect& aRect, const pen& aPen, const fill& = fill{}) const;
-		void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const fill& = fill{}) const;
-		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const fill& = fill{}, angle aStartAngle = 0.0) const;
-		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const fill& = fill{}) const;
-		void draw_path(const path& aPath, const pen& aPen, const fill& = fill{}) const;
-		void draw_shape(const i_shape& aShape, const pen& aPen, const fill& = fill{}) const;
-		void draw_shape(const vec2_list& aVertices, const pen& aPen) const;
-		void draw_shape(const vec3_list& aVertices, const pen& aPen) const;
+		void draw_rect(const rect& aRect, const pen& aPen, const fill& aFill = fill{}) const;
+		void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const fill& aFill = fill{}) const;
+		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const fill& aFill = fill{}, angle aStartAngle = 0.0) const;
+		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const fill& aFill = fill{}) const;
+		void draw_path(const path& aPath, const pen& aPen, const fill& aFill = fill{}) const;
+		void draw_shape(const i_shape& aShape, const pen& aPen, const fill& aFill = fill{}) const;
 		void draw_focus_rect(const rect& aRect) const;
 		void fill_rect(const rect& aRect, const fill& aFill) const;
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const fill& aFill) const;
 		void fill_circle(const point& aCentre, dimension aRadius, const fill& aFill) const;
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill) const;
 		void fill_path(const path& aPath, const fill& aFill) const;
-		void fill_shape(const vec2_list& aVertices, const fill& aFill) const;
-		void fill_shape(const vec3_list& aVertices, const fill& aFill) const;
+		void fill_shape(const i_shape& aShape, const fill& aFill) const;
 		size text_extent(const string& aText, const font& aFont, bool aUseCache = false) const;
 		size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, bool aUseCache = false) const;
 		size multiline_text_extent(const string& aText, const font& aFont, bool aUseCache = false) const;
@@ -178,10 +168,10 @@ namespace neogfx
 		void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
-		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const i_shape& aShape, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
-		void draw_texture(const texture_map& aMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const i_shape& aMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		// implementation
 		// from i_device_metrics
 	public:

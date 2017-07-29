@@ -26,6 +26,7 @@
 #include <neogfx/core/path.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/game/mesh.hpp>
 #include <neogfx/../../src/gfx/native/i_native_texture.hpp>
 #include <neogfx/../../src/gfx/text/native/i_native_font_face.hpp>
 
@@ -161,7 +162,7 @@ namespace neogfx
 
 		struct draw_shape
 		{
-			vec2_list vertices;
+			neogfx::mesh mesh;
 			pen pen;
 		};
 
@@ -202,7 +203,7 @@ namespace neogfx
 
 		struct fill_shape
 		{
-			vec2_list vertices;
+			neogfx::mesh mesh;
 			fill fill;
 		};
 
@@ -216,7 +217,7 @@ namespace neogfx
 
 		struct draw_texture
 		{
-			texture_map textureMap;
+			neogfx::mesh mesh;
 			texture texture;
 			rect textureRect;
 			optional_colour colour;

@@ -218,6 +218,7 @@ namespace neogfx
 			throw not_tri_state_checkable();
 		iCheckedState = aCheckedState;
 		update();
+		toggled.trigger();
 		if (is_checked())
 			checked.trigger();
 		else if (is_unchecked())

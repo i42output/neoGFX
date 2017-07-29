@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-	class text : public shape
+	class text : public shape<>
 	{
 	public:
 		text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const colour& aTextColour, neogfx::alignment aAlignment = alignment::Left, const optional_colour& aBackgroundColour = optional_colour());
@@ -45,16 +45,13 @@ namespace neogfx
 		const optional_margins& margins() const;
 		void set_margins(const optional_margins& aMargins);
 	public:
-		virtual point position() const;
-		virtual rect bounding_box() const;
+		vec3 extents() const override;
+		rect bounding_box_2d(bool aWithPosition = true) const override;
 	public:
-		virtual std::size_t vertex_count(bool aIncludeCentre = false) const;
-		virtual vec3_list vertices(bool aIncludeCentre = false) const;
-		virtual void paint(graphics_context& aGraphicsContext) const;	
+		void paint(graphics_context& aGraphicsContext) const override;
 	private:
 		size text_extent() const;
 	private:
-		vec3 iBuddyOffset;
 		std::string iText;
 		neogfx::font iFont;
 		neogfx::alignment iAlignment;

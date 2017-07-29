@@ -1826,26 +1826,38 @@ namespace neogfx
 		};
 	}
 
-	inline text_category get_text_category(const i_emoji_atlas& aEmojiAtlas, uint32_t aCodePoint)
+	inline text_category get_text_category(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd)
 	{
-		if (aEmojiAtlas.is_emoji(aCodePoint))
-			return text_category::Emoji;
+		char32_t ch = aCodePoint[0];
+		if (aEmojiAtlas.is_emoji(ch))
+		{
+			if (aCodePoint + 1 == aCodePointEnd || aCodePoint[1] != 0xEF0E)
+				return text_category::Emoji;
+			return text_category::None;
+		}
+		else if (ch == 0xFE0F || ch == 0xFE0E)
+			return text_category::Control;
 		const detail::TEXT_CATEGORY_MAP_VALUE_TYPE* rangeStart = std::lower_bound(
 			&detail::TEXT_CATEGORY_MAP[0], 
 			&detail::TEXT_CATEGORY_MAP[0] + sizeof(detail::TEXT_CATEGORY_MAP) / sizeof(detail::TEXT_CATEGORY_MAP[0]),
-			detail::TEXT_CATEGORY_MAP_VALUE_TYPE(aCodePoint, text_category::Unknown),
+			detail::TEXT_CATEGORY_MAP_VALUE_TYPE(ch, text_category::Unknown),
 			[](const detail::TEXT_CATEGORY_MAP_VALUE_TYPE& lhs, const detail::TEXT_CATEGORY_MAP_VALUE_TYPE& rhs) -> bool
 		{
 			return lhs.first < rhs.first;
 		});
-		if (rangeStart != &detail::TEXT_CATEGORY_MAP[0] && aCodePoint < rangeStart->first)
+		if (rangeStart != &detail::TEXT_CATEGORY_MAP[0] && ch < rangeStart->first)
 			--rangeStart;
 		return rangeStart->second;
 	}
 
-	inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, uint32_t aCodePoint, text_direction aExistingDirection)
+	inline text_category get_text_category(const i_emoji_atlas& aEmojiAtlas, char32_t aCodePoint)
 	{
-		switch (get_text_category(aEmojiAtlas, aCodePoint))
+		return get_text_category(aEmojiAtlas, &aCodePoint, &aCodePoint + 1);
+	}
+
+	inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd, text_direction aExistingDirection)
+	{
+		switch (get_text_category(aEmojiAtlas, aCodePoint, aCodePointEnd))
 		{
 		case text_category::LTR:
 			return text_direction::LTR;
@@ -1864,5 +1876,10 @@ namespace neogfx
 		default:
 			return aExistingDirection;
 		}
+	}
+
+	inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, char32_t aCodePoint, text_direction aExistingDirection)
+	{
+		return get_text_direction(aEmojiAtlas, &aCodePoint, &aCodePoint + 1, aExistingDirection);
 	}
 }

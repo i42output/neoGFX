@@ -1,7 +1,7 @@
-// rectangle.hpp
+// i_mesh.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright(C) 2017 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -19,19 +19,27 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "shape.hpp"
+#include <neogfx/core/numerical.hpp>
 
 namespace neogfx
 {
-	class rectangle : public shape<>
+	class i_mesh
 	{
 	public:
-		rectangle(const vec3& aPosition, const vec2& aExtents);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const colour& aColour);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect);
-		rectangle(const rectangle& aOther);
+		typedef std::array<vec3, 3> triangle;
+		struct vertex
+		{
+			vec3 coordinates;
+			vec2 textureCoordinates;
+		};
+		typedef std::vector<vertex> vertex_list;
+		typedef vertex_list::size_type vertex_index;
+		typedef std::array<vertex_index, 3> face;
+		typedef std::vector<face> face_list;
+	public:
+		virtual const vertex_list& vertices() const = 0;
+		virtual const face_list& faces() const = 0;
+		virtual mat44 transformation_matrix() const = 0;
+		virtual vertex_list transformed_vertices() const = 0;
 	};
 }

@@ -36,17 +36,22 @@ namespace neogfx
 	{
 	}
 
-	const vec3& physical_object::origin() const
+	object_category physical_object::category() const
+	{
+		return object_category::PhysicalObject;
+	}
+
+	vec3 physical_object::origin() const
 	{
 		return iOrigin;
 	}
 
-	const vec3& physical_object::position() const
+	vec3 physical_object::position() const
 	{
 		return current_physics().iPosition;
 	}
 
-	const vec3& physical_object::angle_radians() const
+	vec3 physical_object::angle_radians() const
 	{
 		return current_physics().iAngle;
 	}
@@ -56,17 +61,17 @@ namespace neogfx
 		return current_physics().iAngle * 180.0 / boost::math::constants::pi<double>();
 	}
 
-	const vec3& physical_object::velocity() const
+	vec3 physical_object::velocity() const
 	{
 		return current_physics().iVelocity;
 	}
 
-	const vec3& physical_object::acceleration() const
+	vec3 physical_object::acceleration() const
 	{
 		return current_physics().iAcceleration;
 	}
 
-	const vec3& physical_object::spin_radians() const
+	vec3 physical_object::spin_radians() const
 	{
 		return current_physics().iSpin;
 	}
@@ -126,34 +131,60 @@ namespace neogfx
 		current_physics().iMass = aMass;
 	}
 
-	const physical_object::aabb_type& physical_object::aabb() const
+	physical_object::aabb_type physical_object::aabb() const
 	{
-		return iAxisAlignedBoundingBox;
+		return aabb_type{ position() + origin(), position() + origin() };
 	}
 
-	bool physical_object::collided(const i_physical_object& aOther) const
+	void physical_object::clear_aabb_cache()
 	{
-		/* todo */
-		(void)aOther;
-		return false;
+		/* do nothing */
 	}
 
-	bool physical_object::update(const optional_time_point& aNow, const vec3& aForce)
+	bool physical_object::has_collided(const i_physical_object& aOther) const
+	{
+		if ((collision_mask() & aOther.collision_mask()) != 0ull)
+			return false;
+		auto aabbLeft = aabb();
+		auto aabbRight = aOther.aabb();
+		if (aabbLeft.min.x > aabbRight.max.x || aabbLeft.max.x < aabbRight.min.x ||
+			aabbLeft.min.y > aabbRight.max.y || aabbLeft.max.y < aabbRight.min.y ||
+			aabbLeft.min.z > aabbRight.max.z || aabbLeft.max.z < aabbRight.min.z)
+			return false;
+		// todo: we *might* have collided; now do 2D SAT test to find out if we have actaully collided...
+		return true;
+	}
+
+	void physical_object::collided(const i_physical_object&)
+	{
+		/* default behaviour: do nothing */
+	}
+
+	bool physical_object::update(const optional_time_interval& aNow, const vec3& aForce)
 	{
 		bool updated = false;
 		if (iTimeOfLastUpdate == boost::none)
-		{
-			iTimeOfLastUpdate = aNow;
 			updated = true;
+		if (!updated)
+		{
+			next_physics() = current_physics();
+			updated = apply_physics(*aNow - *iTimeOfLastUpdate, aForce);
+			current_physics() = next_physics();
 		}
-		next_physics() = current_physics();
-		if (iTimeOfLastUpdate != boost::none && aNow != boost::none)
-			updated = apply_physics((*aNow - *iTimeOfLastUpdate).count() * std::chrono::steady_clock::period::num / static_cast<double>(std::chrono::steady_clock::period::den), aForce) || updated;
-		else
-			updated = apply_physics(1.0, aForce) || updated;
 		iTimeOfLastUpdate = aNow;
-		current_physics() = next_physics();
+		if (updated)
+			clear_aabb_cache();
 		return updated;
+	}
+
+	const physical_object::optional_time_interval& physical_object::update_time() const
+	{
+		return iTimeOfLastUpdate;
+	}
+
+	void physical_object::set_update_time(const optional_time_interval& aLastUpdateTime)
+	{
+		iTimeOfLastUpdate = aLastUpdateTime;
 	}
 
 	const physical_object::physics& physical_object::current_physics() const
