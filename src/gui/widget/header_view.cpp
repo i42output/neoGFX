@@ -109,6 +109,11 @@ namespace neogfx
 		iType(aType),
 		iBatchUpdatesInProgress(0)
 	{
+		iSink += app::instance().current_style_changed([this]()
+		{
+			iUpdater.reset();
+			iUpdater.reset(new updater(*this));
+		});
 	}
 
 	header_view::header_view(i_widget& aParent, i_owner& aOwner, type_e aType) :
@@ -117,6 +122,11 @@ namespace neogfx
 		iType(aType),
 		iBatchUpdatesInProgress(0)
 	{
+		iSink += app::instance().current_style_changed([this]()
+		{
+			iUpdater.reset();
+			iUpdater.reset(new updater(*this));
+		});
 	}
 
 	header_view::header_view(i_layout& aLayout, i_owner& aOwner, type_e aType) :
@@ -125,6 +135,11 @@ namespace neogfx
 		iType(aType),
 		iBatchUpdatesInProgress(0)
 	{
+		iSink += app::instance().current_style_changed([this]()
+		{
+			iUpdater.reset();
+			iUpdater.reset(new updater(*this));
+		});
 	}
 
 	header_view::~header_view()

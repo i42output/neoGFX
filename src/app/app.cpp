@@ -296,7 +296,7 @@ namespace neogfx
 	{
 		if (iCurrentStyle == iStyles.end())
 			throw style_not_found();
-		return iCurrentStyle->second;;
+		return iCurrentStyle->second;
 	}
 
 	i_style& app::change_style(const std::string& aStyleName)
