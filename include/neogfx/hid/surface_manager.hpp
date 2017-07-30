@@ -48,23 +48,24 @@ namespace neogfx
 	public:
 		surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine);
 	public:
-		virtual void add_surface(i_surface& aSurface);
-		virtual void remove_surface(i_surface& aSurface);
-		virtual std::size_t surface_count() const;
-		virtual i_surface& surface(std::size_t aIndex);
-		virtual bool any_strong_surfaces() const;
-		virtual bool process_events(bool& aLastWindowClosed);
-		virtual void layout_surfaces();
-		virtual void invalidate_surfaces();
-		virtual void render_surfaces();
-		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const;
-		virtual void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const;
-		virtual uint32_t display_count() const;
-		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const;
-		virtual rect desktop_rect(const i_surface& aSurface) const;
+		bool initialising_surface() const override;
+		void add_surface(i_surface& aSurface) override;
+		void remove_surface(i_surface& aSurface) override;
+		std::size_t surface_count() const override;
+		i_surface& surface(std::size_t aIndex) override;
+		bool any_strong_surfaces() const override;
+		bool process_events(bool& aLastWindowClosed) override;
+		void layout_surfaces() override;
+		void invalidate_surfaces() override;
+		void render_surfaces() override;
+		void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
+		void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const override;
+		uint32_t display_count() const override;
+		rect desktop_rect(uint32_t aDisplayIndex = 0) const override;
+		rect desktop_rect(const i_surface& aSurface) const override;
 	public:
-		virtual bool is_surface_attached(void* aNativeSurfaceHandle) const;
-		virtual i_surface& attached_surface(void* aNativeSurfaceHandle);
+		bool is_surface_attached(void* aNativeSurfaceHandle) const override;
+		i_surface& attached_surface(void* aNativeSurfaceHandle) override;
 	private:
 		i_basic_services& iBasicServices;
 		i_rendering_engine& iRenderingEngine;

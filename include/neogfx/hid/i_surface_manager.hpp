@@ -31,6 +31,7 @@ namespace neogfx
 	public:
 		virtual ~i_surface_manager() {}
 	public:
+		virtual bool initialising_surface() const = 0;
 		virtual void add_surface(i_surface& aSurface) = 0;
 		virtual void remove_surface(i_surface& aSurface) = 0;
 		virtual std::size_t surface_count() const = 0;

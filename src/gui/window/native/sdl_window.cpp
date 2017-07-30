@@ -307,6 +307,11 @@ namespace neogfx
 		close();
 	}
 
+	bool sdl_window::initialising() const
+	{
+		return !iReady;
+	}
+
 	void* sdl_window::handle() const
 	{
 		return iHandle;

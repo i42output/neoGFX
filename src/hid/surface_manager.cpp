@@ -30,6 +30,16 @@ namespace neogfx
 	{
 	}
 
+	bool surface_manager::initialising_surface() const
+	{
+		for (auto const& s : iSurfaces)
+		{
+			if (!s->destroyed() && s->native_surface().initialising())
+				return true;
+		}
+		return false;
+	}
+
 	void surface_manager::add_surface(i_surface& aSurface)
 	{
 		iSurfaces.insert(&aSurface);

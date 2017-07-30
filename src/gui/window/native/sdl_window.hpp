@@ -72,6 +72,7 @@ namespace neogfx
 		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
 		~sdl_window();
 	public:
+		bool initialising() const override;
 		void* handle() const override;
 		void* native_handle() const override;
 		point surface_position() const override;

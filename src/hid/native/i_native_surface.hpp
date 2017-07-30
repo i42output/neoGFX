@@ -49,6 +49,7 @@ namespace neogfx
 		virtual const std::pair<vec2, vec2>& logical_coordinates() const = 0;
 		virtual void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) = 0;
 	public:
+		virtual bool initialising() const = 0;
 		virtual void* handle() const = 0;
 		virtual void* native_handle() const = 0;
 		virtual point surface_position() const = 0;

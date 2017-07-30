@@ -453,6 +453,8 @@ namespace neogfx
 
 	bool app::process_events(i_event_processing_context&)
 	{
+		if (rendering_engine().creating_window() || surface_manager().initialising_surface())
+			return false;
 		bool didSome = false;
 		try
 		{
