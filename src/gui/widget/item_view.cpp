@@ -24,24 +24,21 @@
 namespace neogfx
 {
 	item_view::item_view() :
-		scrollable_widget(),
-		iBatchUpdatesInProgress(0)
+		scrollable_widget()
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));
 	}
 
 	item_view::item_view(i_widget& aParent) : 
-		scrollable_widget(aParent),
-		iBatchUpdatesInProgress(0)
+		scrollable_widget(aParent)
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));
 	}
 
 	item_view::item_view(i_layout& aLayout) :
-		scrollable_widget(aLayout),
-		iBatchUpdatesInProgress(0)
+		scrollable_widget(aLayout)
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));
@@ -189,21 +186,6 @@ namespace neogfx
 		selection_model_changed();
 		update_scrollbar_visibility();
 		update();
-	}
-
-	void item_view::start_batch_update()
-	{
-		if (++iBatchUpdatesInProgress == 1)
-			batch_update_started();
-	}
-	void item_view::end_batch_update()
-	{
-		if (--iBatchUpdatesInProgress == 0)
-		{
-			batch_update_ended();
-			update_scrollbar_visibility();
-			update();
-		}
 	}
 
 	std::pair<item_model_index::value_type, coordinate> item_view::first_visible_item(graphics_context& aGraphicsContext) const
@@ -416,47 +398,82 @@ namespace neogfx
 
 	void item_view::column_info_changed(const i_item_model&, item_model_index::value_type)
 	{
-		if (iBatchUpdatesInProgress)
-			return;
 		update_scrollbar_visibility();
 		update();
 	}
 
 	void item_view::item_added(const i_item_model&, const item_model_index&)
 	{
-		if (iBatchUpdatesInProgress)
-			return;
-		update_scrollbar_visibility();
-		update();
 	}
 
 	void item_view::item_changed(const i_item_model&, const item_model_index&)
 	{
-		if (iBatchUpdatesInProgress)
-			return;
-		update_scrollbar_visibility();
-		update();
 	}
 
 	void item_view::item_removed(const i_item_model&, const item_model_index&)
 	{
-		if (iBatchUpdatesInProgress)
-			return;
-		update_scrollbar_visibility();
-		update();
-	}
-
-	void item_view::items_sorted(const i_item_model&)
-	{
-		update();
 	}
 
 	void item_view::model_destroyed(const i_item_model&)
 	{
-		iModel.reset();
+		iModel = nullptr;
 	}
 
-	void item_view::current_index_changed(const i_item_selection_model&, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex)
+	void item_view::column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex)
+	{
+	}
+
+	void item_view::item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel)
+	{
+		update_scrollbar_visibility();
+		update();
+	}
+
+	void item_view::item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex)
+	{
+		update_scrollbar_visibility();
+		update();
+	}
+
+	void item_view::item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex)
+	{
+		update_scrollbar_visibility();
+		update();
+	}
+
+	void item_view::item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex)
+	{
+		update_scrollbar_visibility();
+		update();
+	}
+
+	void item_view::items_sorted(const i_item_presentation_model& aModel)
+	{
+		update();
+	}
+
+	void item_view::model_destroyed(const i_item_presentation_model& aModel)
+	{
+		iPresentationModel = nullptr;
+	}
+
+	void item_view::model_added(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel)
+	{
+	}
+
+	void item_view::model_changed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel)
+	{
+	}
+
+	void item_view::model_removed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aOldModel)
+	{
+	}
+
+	void item_view::selection_mode_changed(const i_item_selection_model& aSelectionModel, item_selection_mode aNewMode)
+	{
+	}
+
+	void item_view::current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex)
 	{
 		if (aCurrentIndex != boost::none)
 		{
@@ -465,6 +482,14 @@ namespace neogfx
 		}
 		if (aPreviousIndex != boost::none)
 			update(cell_rect(*aPreviousIndex));
+	}
+
+	void item_view::selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection)
+	{
+	}
+
+	void item_view::selection_model_destroyed(const i_item_selection_model& aSelectionModel)
+	{
 	}
 
 	void item_view::make_visible(const item_model_index& aItemIndex)

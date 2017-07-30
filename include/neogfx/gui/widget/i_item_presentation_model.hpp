@@ -40,13 +40,14 @@ namespace neogfx
 	{
 	public:
 		virtual void column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex) = 0;
+		virtual void item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel) = 0;
 		virtual void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
 		virtual void item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
 		virtual void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
 		virtual void items_sorted(const i_item_presentation_model& aModel) = 0;
 		virtual void model_destroyed(const i_item_presentation_model& aModel) = 0;
 	public:
-		enum notify_type { NotifyColumnInfoChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorted, NotifyModelDestroyed };
+		enum notify_type { NotifyColumnInfoChanged, NotifyItemModelChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorted, NotifyModelDestroyed };
 	};
 
 	enum class item_selection_flags
@@ -95,6 +96,8 @@ namespace neogfx
 		typedef boost::optional<sort_order> optional_sort_order;
 	public:
 		struct no_item_model : std::logic_error { no_item_model() : std::logic_error("neogfx::i_item_presentation_model::no_item_model") {} };
+		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_presentation_model::bad_column_index") {} };
+		struct bad_item_model_index : std::logic_error { bad_item_model_index() : std::logic_error("neogfx::i_item_presentation_model::bad_item_model_index") {} };
 	public:
 		virtual ~i_item_presentation_model() {}
 	public:

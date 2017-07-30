@@ -50,17 +50,17 @@ namespace neogfx
 			notify_observers(i_item_selection_model_subscriber::NotifySelectionModelDestroyed);
 		}
 	public:
-		virtual bool has_presentation_model() const
+		bool has_presentation_model() const override
 		{
 			return iModel != 0;
 		}
-		virtual i_item_presentation_model& presentation_model() const
+		i_item_presentation_model& presentation_model() const override
 		{
 			if (iModel == 0)
 				throw no_presentation_model();
 			return *iModel;
 		}
-		virtual void set_presentation_model(i_item_presentation_model& aModel)
+		void set_presentation_model(i_item_presentation_model& aModel) override
 		{
 			if (iModel == &aModel)
 				return;
@@ -76,11 +76,11 @@ namespace neogfx
 				notify_observers(i_item_selection_model_subscriber::NotifyModelChanged, presentation_model(), *oldModel);
 		}
 	public:
-		virtual item_selection_mode mode() const
+		item_selection_mode mode() const override
 		{
 			return iMode;
 		}
-		virtual void set_mode(item_selection_mode aMode)
+		void set_mode(item_selection_mode aMode) override
 		{
 			if (iMode == aMode)
 				return;
@@ -88,17 +88,17 @@ namespace neogfx
 			notify_observers(i_item_selection_model_subscriber::NotifySelectionModeChanged, mode());
 		}
 	public:
-		virtual bool has_current_index() const
+		bool has_current_index() const override
 		{
 			return iCurrentIndex != boost::none;
 		}
-		virtual const item_model_index& current_index() const
+		const item_model_index& current_index() const override
 		{
 			if (iCurrentIndex == boost::none)
 				throw no_current_index();
 			return *iCurrentIndex;
 		}
-		virtual void set_current_index(const item_model_index& aIndex)
+		void set_current_index(const item_model_index& aIndex) override
 		{
 			if (iCurrentIndex == aIndex)
 				return;
@@ -107,7 +107,7 @@ namespace neogfx
 			notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
 			current_index_changed.trigger(iCurrentIndex, previousIndex);
 		}
-		virtual void unset_current_index()
+		void unset_current_index() override
 		{
 			if (iCurrentIndex == boost::none)
 				return;
@@ -117,37 +117,37 @@ namespace neogfx
 			current_index_changed.trigger(iCurrentIndex, previousIndex);
 		}
 	public:
-		virtual const item_selection& selection() const
+		const item_selection& selection() const override
 		{
 			return iSelection;
 		}
-		virtual bool is_selected(const item_model_index& aIndex) const
+		bool is_selected(const item_model_index& aIndex) const override
 		{
 			return (presentation_model().cell_meta(aIndex).selection & item_selection_flags::Selected) == item_selection_flags::Selected;
 		}	
-		virtual void select(const item_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect)
+		void select(const item_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
 		{
 			/* todo */
 			(void)aIndex;
 			(void)aOperation;
 		}
-		virtual void select(const item_selection::range& aRange, item_selection_operation aOperation = item_selection_operation::ClearAndSelect)
+		void select(const item_selection::range& aRange, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
 		{
 			/* todo */
 			(void)aRange;
 			(void)aOperation;
 		}
 	public:
-		virtual void subscribe(i_item_selection_model_subscriber& aSubscriber)
+		void subscribe(i_item_selection_model_subscriber& aSubscriber) override
 		{
 			add_observer(aSubscriber);
 		}
-		virtual void unsubscribe(i_item_selection_model_subscriber& aSubscriber)
+		void unsubscribe(i_item_selection_model_subscriber& aSubscriber) override
 		{
 			remove_observer(aSubscriber);
 		}
 	private:
-		virtual void notify_observer(i_item_selection_model_subscriber& aObserver, i_item_selection_model_subscriber::notify_type aType, const void* aParameter, const void* aParameter2)
+		void notify_observer(i_item_selection_model_subscriber& aObserver, i_item_selection_model_subscriber::notify_type aType, const void* aParameter, const void* aParameter2) override
 		{
 			switch (aType)
 			{
@@ -175,22 +175,25 @@ namespace neogfx
 			}
 		}
 	private:
-		virtual void column_info_changed(const i_item_presentation_model&, item_model_index::value_type)
+		void column_info_changed(const i_item_presentation_model&, item_model_index::value_type) override
 		{
 		}
-		virtual void item_added(const i_item_presentation_model&, const item_model_index&)
+		void item_model_changed(const i_item_presentation_model&, const i_item_model&) override
 		{
 		}
-		virtual void item_changed(const i_item_presentation_model&, const item_model_index&)
+		void item_added(const i_item_presentation_model&, const item_model_index&) override
 		{
 		}
-		virtual void item_removed(const i_item_presentation_model&, const item_model_index&)
+		void item_changed(const i_item_presentation_model&, const item_model_index&) override
 		{
 		}
-		virtual void items_sorted(const i_item_presentation_model&)
+		void item_removed(const i_item_presentation_model&, const item_model_index&) override
 		{
 		}
-		virtual void model_destroyed(const i_item_presentation_model& aModel)
+		void items_sorted(const i_item_presentation_model&) override
+		{
+		}
+		void model_destroyed(const i_item_presentation_model& aModel) override
 		{
 			unset_current_index();
 			iModel = 0;

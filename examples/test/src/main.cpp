@@ -12,7 +12,7 @@
 #include <neogfx/gui/widget/table_view.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
-#include <neogfx/gui/widget/basic_item_model.hpp>
+#include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/tab_page_container.hpp>
 #include <neogfx/hid/i_surface.hpp>
@@ -31,7 +31,7 @@
 
 namespace ng = neogfx;
 
-class my_item_model : public ng::basic_item_model<void*, 5>, public ng::item_presentation_model
+class my_item_model : public ng::basic_item_model<void*, 5>
 {
 public:
 	my_item_model()
@@ -42,8 +42,16 @@ public:
 		set_column_name(3, "Four");
 		set_column_name(4, "Five");
 	}
+};
+
+class my_item_presentation_model : public ng::basic_item_presentation_model<my_item_model>
+{
 public:
-	virtual ng::optional_colour cell_colour(const ng::item_model_index& aIndex, colour_type_e aColourType) const
+	my_item_presentation_model(my_item_model& aModel) : basic_item_presentation_model{ aModel }
+	{
+	}
+public:
+	ng::optional_colour cell_colour(const ng::item_model_index& aIndex, colour_type_e aColourType) const override
 	{
 		neolib::basic_random<uint8_t> prng{ aIndex.row() ^ aIndex.column() }; // use seed to make random colour based on row/index
 		switch (aColourType)
@@ -559,9 +567,11 @@ int main(int argc, char* argv[])
 		} 
 	
 		tableView1.set_model(itemModel);
-		tableView1.set_presentation_model(itemModel);
+		my_item_presentation_model ipm1{ itemModel};
+		tableView1.set_presentation_model(ipm1);
 		tableView2.set_model(itemModel);
-		tableView2.set_presentation_model(itemModel);
+		my_item_presentation_model ipm2{ itemModel };
+		tableView2.set_presentation_model(ipm2);
 
 		app.surface_manager().surface(0).restore_mouse_cursor();
 

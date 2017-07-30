@@ -39,29 +39,29 @@ namespace neogfx
 		struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::default_item_container_traits::operation_not_supported") {} };
 	public:
 		template <typename Container, typename T>
-		static typename Container::iterator append(Container&, typename Container::const_iterator, const T&)
+		static typename Container::iterator append(Container& aContainer, typename Container::const_iterator aPosition, const T& aValue)
 		{
-			throw operation_not_supported();
+			return aContainer.insert(aPosition, aValue);
 		}
 		template <typename Container>
-		static i_item_model::iterator sibling_begin(Container&)
+		static i_item_model::iterator sibling_begin(Container& aContainer)
 		{
-			throw operation_not_supported();
+			return neolib::make_generic_iterator(aContainer.begin());
 		}
 		template <typename Container>
-		static i_item_model::const_iterator sibling_begin(const Container&)
+		static i_item_model::const_iterator sibling_begin(const Container& aContainer)
 		{
-			throw operation_not_supported();
+			return neolib::make_generic_iterator(aContainer.begin());
 		}
 		template <typename Container>
-		static i_item_model::iterator sibling_end(Container&)
+		static i_item_model::iterator sibling_end(Container& aContainer)
 		{
-			throw operation_not_supported();
+			return neolib::make_generic_iterator(aContainer.end());
 		}
 		template <typename Container>
-		static i_item_model::const_iterator sibling_end(const Container&)
+		static i_item_model::const_iterator sibling_end(const Container& aContainer)
 		{
-			throw operation_not_supported();
+			return neolib::make_generic_iterator(aContainer.end());
 		}
 		template <typename Container>
 		static i_item_model::iterator parent(Container&, i_item_model::iterator)
@@ -135,7 +135,7 @@ namespace neogfx
 		};
 	};
 
-	template <typename T, typename CellType = i_item_model::data_type, uint32_t Columns = 0, typename ContainerTraits = item_container_traits<T, CellType, Columns>>
+	template <typename T, uint32_t Columns = 0, typename CellType = i_item_model::data_type, typename ContainerTraits = item_container_traits<T, CellType, Columns>>
 	class basic_item_model : public i_basic_item_model<T>, private neolib::observable<i_item_model_subscriber>
 	{
 	public:
@@ -162,7 +162,6 @@ namespace neogfx
 	public:
 		basic_item_model()
 		{
-			reset_sort();
 		}
 		~basic_item_model()
 		{
@@ -224,43 +223,43 @@ namespace neogfx
 		}
 		i_item_model::iterator sibling_begin() override
 		{
-			return base_iterator(container_default_operations<container_type>::sibling_begin(iItems));
+			return base_iterator(container_traits::sibling_begin(iItems));
 		}
 		i_item_model::const_iterator sibling_begin() const override
 		{
-			return const_base_iterator(container_default_operations<container_type>::sibling_begin(iItems));
+			return const_base_iterator(container_traits::sibling_begin(iItems));
 		}
 		i_item_model::iterator sibling_end() override
 		{
-			return base_iterator(container_default_operations<container_type>::sibling_end(iItems));
+			return base_iterator(container_traits::sibling_end(iItems));
 		}
 		i_item_model::const_iterator sibling_end() const override
 		{
-			return const_base_iterator(container_default_operations<container_type>::sibling_end(iItems));
+			return const_base_iterator(container_traits::sibling_end(iItems));
 		}
 		i_item_model::iterator parent(i_item_model::iterator aChild) override
 		{
-			return base_iterator(container_default_operations<container_type>::parent(iItems, aChild));
+			return base_iterator(container_traits::parent(iItems, aChild));
 		}
 		i_item_model::const_iterator parent(i_item_model::const_iterator aChild) const override
 		{
-			return const_base_iterator(container_default_operations<container_type>::parent(iItems, aChild));
+			return const_base_iterator(container_traits::parent(iItems, aChild));
 		}
 		i_item_model::iterator sibling_begin(i_item_model::iterator aParent) override
 		{
-			return base_iterator(container_default_operations<container_type>::sibling_begin(iItems, aParent));
+			return base_iterator(container_traits::sibling_begin(iItems, aParent));
 		}
 		i_item_model::const_iterator sibling_begin(i_item_model::const_iterator aParent) const override
 		{
-			return const_base_iterator(container_default_operations<container_type>::sibling_begin(iItems, aParent));
+			return const_base_iterator(container_traits::sibling_begin(iItems, aParent));
 		}
 		i_item_model::iterator sibling_end(i_item_model::iterator aParent) override
 		{
-			return base_iterator(container_default_operations<container_type>::sibling_end(iItems, aParent));
+			return base_iterator(container_traits::sibling_end(iItems, aParent));
 		}
 		i_item_model::const_iterator sibling_end(i_item_model::const_iterator aParent) const override
 		{
-			return const_base_iterator(container_default_operations<container_type>::sibling_end(iItems, aParent));
+			return const_base_iterator(container_traits::sibling_end(iItems, aParent));
 		}
 	public:
 		void subscribe(i_item_model_subscriber& aSubscriber) override
@@ -274,7 +273,7 @@ namespace neogfx
 	public:
 		const data_type& cell_data(const item_model_index& aIndex) const override
 		{
-			return iItems[aIndex.row()].second[aIndex.column()].first;
+			return iItems[aIndex.row()].second[aIndex.column()];
 		}
 	public:
 		void reserve(uint32_t aItemCount) override
@@ -307,7 +306,7 @@ namespace neogfx
 		}
 		i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue) override
 		{
-			base_iterator i = container_default_operations<container_type>::append(iItems, aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type(aValue, row_container_type()));
+			base_iterator i = container_traits::append(iItems, aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type(aValue, row_container_type()));
 			notify_observers(i_item_model_subscriber::NotifyItemAdded, iterator_to_index(i));
 			return i;
 		}
@@ -321,12 +320,17 @@ namespace neogfx
 		{
 			return append_item(aParent, value_type(), aCellData);
 		}
+		void remove_item(i_item_model::const_iterator aPosition) override
+		{
+			notify_observers(i_item_model_subscriber::NotifyItemRemoved, iterator_to_index(aPosition));
+			iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>());
+		}
 		void insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const data_type& aCellData) override
 		{
 			auto ri = aItem.get<iterator, iterator, sibling_iterator>();
 			if (ri->second.size() < aColumnIndex + 1)
 				ri->second.resize(aColumnIndex + 1);
-			ri->second[aColumnIndex] = std::make_pair(aCellData, i_item_presentation_model::cell_meta_type());
+			ri->second[aColumnIndex] = aCellData;
 			if (iColumns.size() < aColumnIndex + 1)
 				iColumns.resize(aColumnIndex + 1);
 			item_model_index index = iterator_to_index(aItem);
@@ -339,8 +343,7 @@ namespace neogfx
 		}
 		void update_cell_data(const item_model_index& aIndex, const data_type& aCellData) override
 		{
-			iItems[aIndex.row()].second[aIndex.column()].first = aCellData;
-			iItems[aIndex.row()].second[aIndex.column()].second = i_item_presentation_model::cell_meta_type();
+			iItems[aIndex.row()].second[aIndex.column()] = aCellData;
 			notify_observers(i_item_model_subscriber::NotifyItemChanged, aIndex);
 		}
 	public:

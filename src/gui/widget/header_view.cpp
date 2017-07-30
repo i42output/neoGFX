@@ -106,8 +106,7 @@ namespace neogfx
 	header_view::header_view(i_owner& aOwner, type_e aType) :
 		splitter(aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter),
 		iOwner(aOwner),
-		iType(aType),
-		iBatchUpdatesInProgress(0)
+		iType(aType)
 	{
 		iSink += app::instance().current_style_changed([this]()
 		{
@@ -119,8 +118,7 @@ namespace neogfx
 	header_view::header_view(i_widget& aParent, i_owner& aOwner, type_e aType) :
 		splitter(aParent, aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter),
 		iOwner(aOwner),
-		iType(aType),
-		iBatchUpdatesInProgress(0)
+		iType(aType)
 	{
 		iSink += app::instance().current_style_changed([this]()
 		{
@@ -132,8 +130,7 @@ namespace neogfx
 	header_view::header_view(i_layout& aLayout, i_owner& aOwner, type_e aType) :
 		splitter(aLayout, aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter),
 		iOwner(aOwner),
-		iType(aType),
-		iBatchUpdatesInProgress(0)
+		iType(aType)
 	{
 		iSink += app::instance().current_style_changed([this]()
 		{
@@ -233,26 +230,15 @@ namespace neogfx
 		}
 	}
 
-	void header_view::start_batch_update()
-	{
-		++iBatchUpdatesInProgress;
-	}
-
-	void header_view::end_batch_update()
-	{
-		if (--iBatchUpdatesInProgress == 0)
-		{
-			iSectionWidths.resize(presentation_model().columns());
-			iUpdater.reset();
-			iUpdater.reset(new updater(*this));
-			update();
-		}
-	}
-
 	void header_view::column_info_changed(const i_item_presentation_model&, item_presentation_model_index::column_type)
 	{
-		if (iBatchUpdatesInProgress)
-			return;
+		iSectionWidths.resize(presentation_model().columns());
+		iUpdater.reset();
+		iUpdater.reset(new updater(*this));
+	}
+
+	void header_view::item_model_changed(const i_item_presentation_model&, const i_item_model&)
+	{
 		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
@@ -260,8 +246,6 @@ namespace neogfx
 
 	void header_view::item_added(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
-		if (iBatchUpdatesInProgress)
-			return;
 		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
@@ -269,8 +253,6 @@ namespace neogfx
 
 	void header_view::item_changed(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
-		if (iBatchUpdatesInProgress)
-			return;
 		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
@@ -278,8 +260,6 @@ namespace neogfx
 
 	void header_view::item_removed(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
-		if (iBatchUpdatesInProgress)
-			return;
 		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));

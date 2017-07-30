@@ -99,16 +99,6 @@ namespace neogfx
 	{
 	}
 
-	void table_view::batch_update_started()
-	{
-		column_header().start_batch_update();
-	}
-
-	void table_view::batch_update_ended()
-	{
-		column_header().end_batch_update();
-	}
-
 	rect table_view::item_display_rect() const
 	{
 		return rect(

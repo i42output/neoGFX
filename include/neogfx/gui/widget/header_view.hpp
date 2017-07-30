@@ -58,8 +58,6 @@ namespace neogfx
 		i_item_presentation_model& presentation_model();
 		void set_presentation_model(i_item_presentation_model& aPresentationModel);
 		void set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel);
-		void start_batch_update();
-		void end_batch_update();
 	public:
 		dimension separator_width() const;
 		void set_separator_width(const optional_dimension& aWidth);
@@ -74,6 +72,7 @@ namespace neogfx
 		void reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane = boost::optional<uint32_t>()) override;
 	private:
 		void column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex) override;
+		void item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel) override;
 		void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
 		void item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
 		void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
@@ -87,7 +86,6 @@ namespace neogfx
 		type_e iType;
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
-		uint32_t iBatchUpdatesInProgress;
 		optional_dimension iSeparatorWidth;
 		std::vector<std::pair<optional_dimension, dimension>> iSectionWidths;
 		std::unique_ptr<updater> iUpdater;

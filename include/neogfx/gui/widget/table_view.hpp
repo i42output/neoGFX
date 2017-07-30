@@ -40,18 +40,16 @@ namespace neogfx
 		const header_view& column_header() const;
 		header_view& column_header();
 	protected:
-		virtual void model_changed();
-		virtual void presentation_model_changed();
-		virtual void selection_model_changed();
-		virtual void batch_update_started();
-		virtual void batch_update_ended();
+		void model_changed() override;
+		void presentation_model_changed() override;
+		void selection_model_changed() override;
 	protected:
-		virtual rect item_display_rect() const;
-		virtual size item_total_area(graphics_context& aGraphicsContext) const;
-		virtual size cell_spacing() const;
-		virtual dimension column_width(uint32_t aColumn) const;
+		rect item_display_rect() const override;
+		size item_total_area(graphics_context& aGraphicsContext) const override;
+		size cell_spacing() const override;
+		dimension column_width(uint32_t aColumn) const override;
 	protected:
-		virtual child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const;
+		child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const override;
 	protected:
 		dimension column_separator_width() const;
 	private:
