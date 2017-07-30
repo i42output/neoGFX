@@ -55,7 +55,7 @@ namespace neogfx
 			mutable font headingFont;
 			mutable optional_size extents;
 		};
-		typedef typename item_model_type::container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
+		typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
 	public:
 		basic_item_presentation_model() : iItemModel{ 0 }, iInitializing{ false }
 		{
@@ -91,8 +91,11 @@ namespace neogfx
 			item_model().subscribe(*this);
 			reset_maps();
 			reset_meta();
-			reset_position_meta(0);
 			reset_sort();
+			iColumns.clear();
+			for (item_model_index::column_type col = 0; col < item_model().columns(); ++col)
+				iColumns.push_back(column_info{ col });
+			iRows.clear();
 			for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
 				item_added(item_model(), item_model_index{ row });
 			iInitializing = false;
@@ -381,7 +384,6 @@ namespace neogfx
 			iSink += app::instance().current_style_changed([this]()
 			{
 				reset_meta();
-				reset_position_meta(0);
 			});
 			reset_sort();
 		}
@@ -394,8 +396,8 @@ namespace neogfx
 				for (std::size_t i = 0; i < iSortOrder.size(); ++i)
 				{
 					auto col = iSortOrder[i].first;
-					const auto& v1 = item_model().cell_data(to_item_model_index(item_presentation_model_index{ aLhs.first, col }));
-					const auto& v2 = item_model().cell_data(to_item_model_index(item_presentation_model_index{ aRhs.first, col }));
+					const auto& v1 = item_model().cell_data(item_model_index{ aLhs.first, iColumns[col].modelColumn });
+					const auto& v2 = item_model().cell_data(item_model_index{ aRhs.first, iColumns[col].modelColumn });
 					if (v1.is<std::string>())
 					{
 						std::string s1 = boost::to_upper_copy<std::string>(v1);
@@ -497,6 +499,7 @@ namespace neogfx
 				}
 			}
 			reset_column_meta();
+			reset_position_meta(0);
 		}
 		void reset_column_meta() const
 		{

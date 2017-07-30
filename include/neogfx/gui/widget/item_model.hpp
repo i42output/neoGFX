@@ -95,7 +95,7 @@ namespace neogfx
 		}
 	};
 
-	template <typename T, typename CellType = i_item_model::data_type, uint32_t Columns = 0>
+	template <typename T, typename CellType, uint32_t Columns>
 	class item_container_traits : public default_item_container_traits
 	{
 	public:
@@ -159,6 +159,7 @@ namespace neogfx
 		{
 			std::string name;
 		};
+		typedef typename container_traits::template rebind<item_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
 	public:
 		basic_item_model()
 		{
@@ -379,7 +380,7 @@ namespace neogfx
 		}
 	private:
 		container_type iItems;
-		std::vector<column_info> iColumns;
+		column_info_container_type iColumns;
 	};
 
 	typedef basic_item_model<void*> item_model;

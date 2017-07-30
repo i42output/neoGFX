@@ -79,10 +79,11 @@ namespace neogfx
 		void items_sorted(const i_item_presentation_model& aModel) override;
 		void model_destroyed(const i_item_presentation_model& aModel) override;
 	private:
-		void update_from_row(uint32_t aRow, bool aUpdateOwner);
+		void update_from_row(uint32_t aRow, bool aUpdateOwner, graphics_context& aGc);
 	private:
 		i_owner& iOwner;
 		sink iSink;
+		std::vector<sink> iButtonSinks;
 		type_e iType;
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;

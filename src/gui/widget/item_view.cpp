@@ -122,6 +122,7 @@ namespace neogfx
 
 	void item_view::set_presentation_model(i_item_presentation_model& aPresentationModel)
 	{
+		auto oldModel = iPresentationModel;
 		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
 		if (has_model())
 			presentation_model().set_item_model(model());
@@ -134,6 +135,7 @@ namespace neogfx
 
 	void item_view::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
 	{
+		auto oldModel = iPresentationModel;
 		iPresentationModel = aPresentationModel;
 		if (has_presentation_model() && has_model())
 			presentation_model().set_item_model(model());
@@ -419,61 +421,61 @@ namespace neogfx
 		iModel = nullptr;
 	}
 
-	void item_view::column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex)
+	void item_view::column_info_changed(const i_item_presentation_model&, item_presentation_model_index::column_type)
 	{
 	}
 
-	void item_view::item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel)
-	{
-		update_scrollbar_visibility();
-		update();
-	}
-
-	void item_view::item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex)
+	void item_view::item_model_changed(const i_item_presentation_model&, const i_item_model&)
 	{
 		update_scrollbar_visibility();
 		update();
 	}
 
-	void item_view::item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex)
+	void item_view::item_added(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
 		update_scrollbar_visibility();
 		update();
 	}
 
-	void item_view::item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex)
+	void item_view::item_changed(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
 		update_scrollbar_visibility();
 		update();
 	}
 
-	void item_view::items_sorted(const i_item_presentation_model& aModel)
+	void item_view::item_removed(const i_item_presentation_model&, const item_presentation_model_index&)
+	{
+		update_scrollbar_visibility();
+		update();
+	}
+
+	void item_view::items_sorted(const i_item_presentation_model&)
 	{
 		update();
 	}
 
-	void item_view::model_destroyed(const i_item_presentation_model& aModel)
+	void item_view::model_destroyed(const i_item_presentation_model&)
 	{
 		iPresentationModel = nullptr;
 	}
 
-	void item_view::model_added(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel)
+	void item_view::model_added(const i_item_selection_model&, i_item_presentation_model&)
 	{
 	}
 
-	void item_view::model_changed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel)
+	void item_view::model_changed(const i_item_selection_model&, i_item_presentation_model&, i_item_presentation_model&)
 	{
 	}
 
-	void item_view::model_removed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aOldModel)
+	void item_view::model_removed(const i_item_selection_model&, i_item_presentation_model&)
 	{
 	}
 
-	void item_view::selection_mode_changed(const i_item_selection_model& aSelectionModel, item_selection_mode aNewMode)
+	void item_view::selection_mode_changed(const i_item_selection_model&, item_selection_mode)
 	{
 	}
 
-	void item_view::current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex)
+	void item_view::current_index_changed(const i_item_selection_model&, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex)
 	{
 		if (aCurrentIndex != boost::none)
 		{
@@ -484,11 +486,11 @@ namespace neogfx
 			update(cell_rect(*aPreviousIndex));
 	}
 
-	void item_view::selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection)
+	void item_view::selection_changed(const i_item_selection_model&, const item_selection&, const item_selection&)
 	{
 	}
 
-	void item_view::selection_model_destroyed(const i_item_selection_model& aSelectionModel)
+	void item_view::selection_model_destroyed(const i_item_selection_model&)
 	{
 	}
 

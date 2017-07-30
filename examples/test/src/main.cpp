@@ -31,7 +31,7 @@
 
 namespace ng = neogfx;
 
-class my_item_model : public ng::basic_item_model<void*, 5>
+class my_item_model : public ng::basic_item_model<void*, 5u>
 {
 public:
 	my_item_model()
@@ -46,8 +46,10 @@ public:
 
 class my_item_presentation_model : public ng::basic_item_presentation_model<my_item_model>
 {
+private:
+	typedef ng::basic_item_presentation_model<my_item_model> base_type;
 public:
-	my_item_presentation_model(my_item_model& aModel) : basic_item_presentation_model{ aModel }
+	my_item_presentation_model(my_item_model& aModel) : base_type{ aModel }
 	{
 	}
 public:

@@ -42,6 +42,8 @@ namespace neogfx
 				{
 					iParent.layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
 				}
+				if (aParent.iButtonSinks.size() < iParent.layout().item_count())
+					aParent.iButtonSinks.resize(iParent.layout().item_count());
 				for (std::size_t i = 0; i < iParent.layout().item_count(); ++i)
 				{
 					push_button& button = iParent.layout().get_widget_at<push_button>(i);
@@ -53,7 +55,7 @@ namespace neogfx
 							neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Fixed});
 						button.set_minimum_size(optional_size{});
 						button.enable(true);
-						aParent.iSink += button.clicked([&aParent, i]()
+						aParent.iButtonSinks[i] = button.clicked([&aParent, i]()
 						{
 							aParent.surface().save_mouse_cursor();
 							aParent.surface().set_mouse_cursor(mouse_system_cursor::Wait);
@@ -73,9 +75,10 @@ namespace neogfx
 				}
 				uint64_t since = app::instance().program_elapsed_ms();
 				app::event_processing_context epc(app::instance(), "neogfx::header_view::updater");
+				graphics_context gc{ iParent };
 				for (uint32_t c = 0; c < 1000 && iRow < iParent.presentation_model().rows(); ++c, ++iRow)
 				{
-					iParent.update_from_row(iRow, false);
+					iParent.update_from_row(iRow, false, gc);
 					if (c % 25 == 0 && app::instance().program_elapsed_ms() - since > 20)
 					{
 						iParent.iOwner.header_view_updated(iParent);
@@ -354,14 +357,13 @@ namespace neogfx
 		iOwner.header_view_updated(*this);
 	}
 
-	void header_view::update_from_row(uint32_t aRow, bool aUpdateOwner)
+	void header_view::update_from_row(uint32_t aRow, bool aUpdateOwner, graphics_context& aGc)
 	{
-		graphics_context gc(*this);
 		bool updated = false;
 		for (uint32_t col = 0; col < presentation_model().columns(item_model_index(aRow)); ++col)
 		{
-			dimension headingWidth = presentation_model().column_heading_extents(col, gc).cx + iOwner.cell_margins().size().cx * 2.0;
-			dimension cellWidth = presentation_model().cell_extents(item_model_index(aRow, col), gc).cx + iOwner.cell_margins().size().cx * 2.0;
+			dimension headingWidth = presentation_model().column_heading_extents(col, aGc).cx + iOwner.cell_margins().size().cx * 2.0;
+			dimension cellWidth = presentation_model().cell_extents(item_model_index(aRow, col), aGc).cx + iOwner.cell_margins().size().cx * 2.0;
 			dimension oldSectionWidth = iSectionWidths[col].second;
 			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
 			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col))
