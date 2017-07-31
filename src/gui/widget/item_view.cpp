@@ -229,12 +229,13 @@ namespace neogfx
 				optional_colour backgroundColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, i_item_presentation_model::BackgroundColour);
 				if (backgroundColour == boost::none)
 					backgroundColour = has_background_colour() ? background_colour() : app::instance().current_style().palette().background_colour();
+				rect cellBackgroundRect = cell_rect(item_presentation_model_index{ row, col }, true);
+				aGraphicsContext.fill_rect(cellBackgroundRect, *backgroundColour);
 				aGraphicsContext.scissor_on(default_clip_rect().intersection(cellRect));
-				aGraphicsContext.fill_rect(cellRect, *backgroundColour);
 				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), f, *textColour);
-				if (selection_model().has_current_index() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
-					aGraphicsContext.draw_focus_rect(cellRect);
 				aGraphicsContext.scissor_off();
+				if (selection_model().has_current_index() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
+					aGraphicsContext.draw_focus_rect(cellBackgroundRect);
 			}
 		}
 	}
@@ -484,10 +485,10 @@ namespace neogfx
 		if (aCurrentIndex != boost::none)
 		{
 			make_visible(*aCurrentIndex);
-			update(cell_rect(*aCurrentIndex));
+			update(cell_rect(*aCurrentIndex, true));
 		}
 		if (aPreviousIndex != boost::none)
-			update(cell_rect(*aPreviousIndex));
+			update(cell_rect(*aPreviousIndex, true));
 	}
 
 	void item_view::selection_changed(const i_item_selection_model&, const item_selection&, const item_selection&)
@@ -530,13 +531,13 @@ namespace neogfx
 		return units_converter(*this).from_device_units(neogfx::margins(1.0, 0.0, 1.0, 0.0));
 	}
 
-	rect item_view::cell_rect(const item_model_index& aItemIndex) const
+	rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground) const
 	{
 		graphics_context gc(*this);
 		coordinate y = presentation_model().item_position(aItemIndex, gc);
 		dimension h = presentation_model().item_height(aItemIndex, gc);
 		coordinate x = 0.0;
-		for (uint32_t col = 0; col < model().columns(aItemIndex.row()); ++col) // TODO: O(n) isn't good enough if lots of columns
+		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 		{
 			if (col != 0)
 				x += cell_spacing().cx;
@@ -544,7 +545,20 @@ namespace neogfx
 			{
 				x -= horizontal_scrollbar().position();
 				y -= vertical_scrollbar().position();
-				return rect{ client_rect(false).top_left() + point{x, y} + item_display_rect().top_left(), size{ column_width(col), h } };
+				rect result{ client_rect(false).top_left() + point{x, y} + item_display_rect().top_left(), size{ column_width(col), h } };
+				if (aBackground)
+				{
+					if (col == 0)
+						result.cx += cell_spacing().cx / 2.0;
+					else if (col == presentation_model().columns() - 1)
+					{
+						result.x -= cell_spacing().cx / 2.0;
+						result.cx += cell_spacing().cx / 2.0;
+					}
+					else
+						result.inflate(size{ cell_spacing().cx / 2.0, 0.0 });
+				}
+				return result;
 			}
 			x += column_width(col);
 		}

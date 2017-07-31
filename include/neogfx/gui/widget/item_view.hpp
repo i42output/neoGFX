@@ -106,7 +106,7 @@ namespace neogfx
 		void selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) override;
 		void selection_model_destroyed(const i_item_selection_model& aSelectionModel) override;
 	public:
-		rect cell_rect(const item_model_index& aItemIndex) const;
+		rect cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground = false) const;
 		optional_item_model_index item_at(const point& aPosition) const;
 	private:
 		std::shared_ptr<i_item_model> iModel;
