@@ -212,6 +212,7 @@ namespace neogfx
 		scrollable_widget::paint(aGraphicsContext);
 		auto first = first_visible_item(aGraphicsContext);
 		bool finished = false;
+		rect clipRect = default_clip_rect().intersection(item_display_rect());
 		for (item_presentation_model_index::value_type row = first.first; row < presentation_model().rows() && !finished; ++row)
 		{
 			optional_font of = presentation_model().cell_font(item_presentation_model_index{ row });
@@ -220,7 +221,7 @@ namespace neogfx
 			for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 			{
 				rect cellRect = cell_rect(item_presentation_model_index{ row, col });
-				if (cellRect.y > item_display_rect().bottom())
+				if (cellRect.y > clipRect.bottom())
 					continue;
 				finished = false;
 				optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, i_item_presentation_model::ForegroundColour);
@@ -230,8 +231,10 @@ namespace neogfx
 				if (backgroundColour == boost::none)
 					backgroundColour = has_background_colour() ? background_colour() : app::instance().current_style().palette().background_colour();
 				rect cellBackgroundRect = cell_rect(item_presentation_model_index{ row, col }, true);
+				aGraphicsContext.scissor_on(clipRect.intersection(cellBackgroundRect));
 				aGraphicsContext.fill_rect(cellBackgroundRect, *backgroundColour);
-				aGraphicsContext.scissor_on(default_clip_rect().intersection(cellRect));
+				aGraphicsContext.scissor_off();
+				aGraphicsContext.scissor_on(clipRect.intersection(cellRect));
 				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), f, *textColour);
 				aGraphicsContext.scissor_off();
 				if (selection_model().has_current_index() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
@@ -502,21 +505,20 @@ namespace neogfx
 	void item_view::make_visible(const item_model_index& aItemIndex)
 	{
 		graphics_context gc(*this);
-		rect cellRect = cell_rect(aItemIndex);
-		point adjustment = -client_rect(false).top_left();
+		rect cellRect = cell_rect(aItemIndex, true);
 		if (cellRect.height() < item_display_rect().height() || cellRect.intersection(item_display_rect()).height() == 0.0)
 		{
 			if (cellRect.top() < item_display_rect().top())
-				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - item_display_rect().top()) + adjustment.y);
+				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - item_display_rect().top()));
 			else if (cellRect.bottom() > item_display_rect().bottom())
-				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - item_display_rect().bottom()) + adjustment.y);
+				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - item_display_rect().bottom()));
 		}
 		if (cellRect.width() < item_display_rect().width() || cellRect.intersection(item_display_rect()).width() == 0.0)
 		{
 			if (cellRect.left() < item_display_rect().left())
-				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - item_display_rect().left()) + adjustment.x);
+				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - item_display_rect().left()));
 			else if (cellRect.right() > item_display_rect().right())
-				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - item_display_rect().right()) + adjustment.x);
+				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - item_display_rect().right()));
 		}
 	}
 
@@ -545,7 +547,7 @@ namespace neogfx
 			{
 				x -= horizontal_scrollbar().position();
 				y -= vertical_scrollbar().position();
-				rect result{ client_rect(false).top_left() + point{x, y} + item_display_rect().top_left(), size{ column_width(col), h } };
+				rect result{ point{x, y} + item_display_rect().top_left(), size{ column_width(col), h } };
 				if (aBackground)
 				{
 					if (col == 0)
