@@ -228,12 +228,13 @@ namespace neogfx
 				if (textColour == boost::none)
 					textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
 				optional_colour backgroundColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, i_item_presentation_model::BackgroundColour);
-				if (backgroundColour == boost::none)
-					backgroundColour = has_background_colour() ? background_colour() : app::instance().current_style().palette().background_colour();
 				rect cellBackgroundRect = cell_rect(item_presentation_model_index{ row, col }, true);
-				aGraphicsContext.scissor_on(clipRect.intersection(cellBackgroundRect));
-				aGraphicsContext.fill_rect(cellBackgroundRect, *backgroundColour);
-				aGraphicsContext.scissor_off();
+				if (backgroundColour != boost::none)
+				{
+					aGraphicsContext.scissor_on(clipRect.intersection(cellBackgroundRect));
+					aGraphicsContext.fill_rect(cellBackgroundRect, *backgroundColour);
+					aGraphicsContext.scissor_off();
+				}
 				aGraphicsContext.scissor_on(clipRect.intersection(cellRect));
 				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), f, *textColour);
 				aGraphicsContext.scissor_off();
