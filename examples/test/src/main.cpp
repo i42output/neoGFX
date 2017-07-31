@@ -49,21 +49,20 @@ class my_item_presentation_model : public ng::basic_item_presentation_model<my_i
 private:
 	typedef ng::basic_item_presentation_model<my_item_model> base_type;
 public:
-	my_item_presentation_model(my_item_model& aModel) : base_type{ aModel }
+	my_item_presentation_model(my_item_model& aModel, colour_type_e aColourType) : base_type{ aModel }, iColourType{ aColourType }
 	{
 	}
 public:
-	ng::optional_colour cell_colour(const ng::item_model_index& aIndex, colour_type_e aColourType) const override
+	ng::optional_colour cell_colour(const ng::item_presentation_model_index& aIndex, colour_type_e aColourType) const override
 	{
-		neolib::basic_random<uint8_t> prng{ aIndex.row() ^ aIndex.column() }; // use seed to make random colour based on row/index
-		switch (aColourType)
-		{
-		case ForegroundColour:
+		neolib::basic_random<uint8_t> prng{ to_item_model_index(aIndex).row() ^ to_item_model_index(aIndex).column() }; // use seed to make random colour based on row/index
+		if (aColourType == iColourType)
 			return ng::colour{ 32 + prng(256 - 64 - 1), 32 + prng(256 - 64 - 1), 32 + prng(256 - 64 - 1) };
-		default:
-			return ng::optional_colour{};
-		}
+		else
+			return iColourType == ForegroundColour ? ng::optional_colour{} : ng::colour::Black;
 	}
+private:
+	colour_type_e iColourType;
 };
 
 class keypad_button : public ng::push_button
@@ -569,10 +568,10 @@ int main(int argc, char* argv[])
 		} 
 	
 		tableView1.set_model(itemModel);
-		my_item_presentation_model ipm1{ itemModel};
+		my_item_presentation_model ipm1{ itemModel, my_item_presentation_model::ForegroundColour };
 		tableView1.set_presentation_model(ipm1);
 		tableView2.set_model(itemModel);
-		my_item_presentation_model ipm2{ itemModel };
+		my_item_presentation_model ipm2{ itemModel, my_item_presentation_model::BackgroundColour };
 		tableView2.set_presentation_model(ipm2);
 
 		app.surface_manager().surface(0).restore_mouse_cursor();

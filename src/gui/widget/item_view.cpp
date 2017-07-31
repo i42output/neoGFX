@@ -212,23 +212,27 @@ namespace neogfx
 		scrollable_widget::paint(aGraphicsContext);
 		auto first = first_visible_item(aGraphicsContext);
 		bool finished = false;
-		for (item_model_index::value_type row = first.first; row < model().rows() && !finished; ++row)
+		for (item_presentation_model_index::value_type row = first.first; row < presentation_model().rows() && !finished; ++row)
 		{
-			optional_font of = presentation_model().cell_font(item_model_index(row));
+			optional_font of = presentation_model().cell_font(item_presentation_model_index{ row });
 			const neogfx::font& f = (of != boost::none ? *of : app::instance().current_style().font());
-			optional_colour textColour = presentation_model().cell_colour(item_model_index(row), i_item_presentation_model::ForegroundColour);
-			if (textColour == boost::none)
-				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
 			finished = true;
-			for (uint32_t col = 0; col < model().columns(row); ++col) // TODO: O(n) isn't good enough if lots of columns
+			for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 			{
-				rect cellRect = cell_rect(item_model_index(row, col));
+				rect cellRect = cell_rect(item_presentation_model_index{ row, col });
 				if (cellRect.y > item_display_rect().bottom())
 					continue;
 				finished = false;
+				optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, i_item_presentation_model::ForegroundColour);
+				if (textColour == boost::none)
+					textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
+				optional_colour backgroundColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, i_item_presentation_model::BackgroundColour);
+				if (backgroundColour == boost::none)
+					backgroundColour = has_background_colour() ? background_colour() : app::instance().current_style().palette().background_colour();
 				aGraphicsContext.scissor_on(default_clip_rect().intersection(cellRect));
-				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_model_index(row, col), aGraphicsContext), f, *textColour);
-				if (selection_model().has_current_index() && selection_model().current_index() == item_model_index(row, col) && has_focus())
+				aGraphicsContext.fill_rect(cellRect, *backgroundColour);
+				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), f, *textColour);
+				if (selection_model().has_current_index() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
 					aGraphicsContext.draw_focus_rect(cellRect);
 				aGraphicsContext.scissor_off();
 			}
