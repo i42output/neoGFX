@@ -55,9 +55,9 @@ public:
 public:
 	ng::optional_colour cell_colour(const ng::item_presentation_model_index& aIndex, colour_type_e aColourType) const override
 	{
-		neolib::basic_random<uint8_t> prng{ to_item_model_index(aIndex).row() ^ to_item_model_index(aIndex).column() }; // use seed to make random colour based on row/index
+		neolib::basic_random<double> prng{ (to_item_model_index(aIndex).row() << 16) + to_item_model_index(aIndex).column() }; // use seed to make random colour based on row/index
 		if (aColourType == iColourType)
-			return ng::colour{ 32 + prng(256 - 64 - 1), 32 + prng(256 - 64 - 1), 32 + prng(256 - 64 - 1) };
+			return ng::hsv_color{prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
 		else
 			return iColourType == ForegroundColour ? ng::optional_colour{} : ng::colour::Black;
 	}
