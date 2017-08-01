@@ -104,7 +104,6 @@ namespace neogfx
 		case ScanCode_ESCAPE:
 			close_sub_menu(false);
 			clear_selection();
-			update();
 			break;
 		default:
 			break;

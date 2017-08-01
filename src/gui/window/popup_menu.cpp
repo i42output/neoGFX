@@ -316,6 +316,8 @@ namespace neogfx
 						menuToClose = &menuToClose->parent();
 					if (menuToClose->type() == i_menu::Popup)
 						menuToClose->close();
+					if (menuToClose->has_parent() && menuToClose->parent().type() == i_menu::MenuBar)
+						menuToClose->parent().clear_selection();
 				}
 				else if (selectedItem.type() == i_menu_item::SubMenu && !selectedItem.sub_menu().is_open())
 					menu().open_sub_menu.trigger(selectedItem.sub_menu());
