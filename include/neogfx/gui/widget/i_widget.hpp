@@ -53,8 +53,8 @@ namespace neogfx
 		event<> position_changed;
 		event<> size_changed;
 		event<graphics_context&> painting;
-		event<neogfx::mouse_event&> mouse_event;
-		event<neogfx::keyboard_event&> keyboard_event;
+		event<const neogfx::mouse_event&> mouse_event;
+		event<const neogfx::keyboard_event&> keyboard_event;
 	public:
 		typedef std::vector<std::shared_ptr<i_widget>> widget_list;
 	protected:

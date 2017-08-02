@@ -574,6 +574,11 @@ int main(int argc, char* argv[])
 		my_item_presentation_model ipm2{ itemModel, my_item_presentation_model::BackgroundColour };
 		tableView2.set_presentation_model(ipm2);
 		tableView2.column_header().set_expand_last_column(true);
+		tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)
+		{
+			if (ke.type() == ng::keyboard_event::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE)
+				tableView1.model().remove_item(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
+		});
 
 		app.surface_manager().surface(0).restore_mouse_cursor();
 
