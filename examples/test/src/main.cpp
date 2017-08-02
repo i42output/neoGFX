@@ -573,6 +573,7 @@ int main(int argc, char* argv[])
 		tableView2.set_model(itemModel);
 		my_item_presentation_model ipm2{ itemModel, my_item_presentation_model::BackgroundColour };
 		tableView2.set_presentation_model(ipm2);
+		tableView2.column_header().set_expand_last_column(true);
 
 		app.surface_manager().surface(0).restore_mouse_cursor();
 

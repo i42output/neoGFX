@@ -31,29 +31,35 @@ namespace neogfx
 	{
 	public:
 		updater(header_view& aParent) :
-			neolib::callback_timer(app::instance(), [this, &aParent](neolib::callback_timer&)
+			neolib::callback_timer{ app::instance(), [this, &aParent](neolib::callback_timer&)
 			{
 				neolib::destroyable::destroyed_flag destroyed(*this);
-				iParent.layout().set_spacing(iParent.separator_width());
-				iParent.iSectionWidths.resize(iParent.presentation_model().columns());
-				while (iParent.layout().item_count() > iParent.presentation_model().columns() + 1)
-					iParent.layout().remove_item_at(iParent.layout().item_count() - 1);
-				while (iParent.layout().item_count() < iParent.presentation_model().columns() + 1)
+				aParent.layout().set_spacing(aParent.separator_width());
+				aParent.iSectionWidths.resize(aParent.presentation_model().columns());
+				while (aParent.layout().item_count() > aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
+					aParent.layout().remove_item_at(aParent.layout().item_count() - 1);
+				while (aParent.layout().item_count() < aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
 				{
-					iParent.layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
+					aParent.layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
 				}
-				if (aParent.iButtonSinks.size() < iParent.layout().item_count())
-					aParent.iButtonSinks.resize(iParent.layout().item_count());
-				for (std::size_t i = 0; i < iParent.layout().item_count(); ++i)
+				if (aParent.iButtonSinks.size() < aParent.layout().item_count())
+					aParent.iButtonSinks.resize(aParent.layout().item_count());
+				for (std::size_t i = 0; i < aParent.layout().item_count(); ++i)
 				{
-					push_button& button = iParent.layout().get_widget_at<push_button>(i);
-					if (i < iParent.presentation_model().columns())
+					push_button& button = aParent.layout().get_widget_at<push_button>(i);
+					if (i < aParent.presentation_model().columns())
 					{
-						button.text().set_text(iParent.presentation_model().column_heading_text(i));
-						button.set_size_policy(iParent.iType == header_view::HorizontalHeader ?
-							neogfx::size_policy{neogfx::size_policy::Fixed, neogfx::size_policy::Minimum} :
-							neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Fixed});
+						button.text().set_text(aParent.presentation_model().column_heading_text(i));
+						if (!aParent.expand_last_column() || i != aParent.presentation_model().columns() - 1)
+							button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
+								neogfx::size_policy{neogfx::size_policy::Fixed, neogfx::size_policy::Minimum} :
+								neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Fixed});
+						else
+							button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
+								neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
+								neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Fixed });
 						button.set_minimum_size(optional_size{});
+						button.set_maximum_size(optional_size{});
 						button.enable(true);
 						aParent.iButtonSinks[i] = button.clicked([&aParent, i]()
 						{
@@ -63,10 +69,10 @@ namespace neogfx
 							aParent.surface().restore_mouse_cursor();
 						}, aParent);
 					}
-					else
+					else if (!aParent.expand_last_column())
 					{
 						button.text().set_text(std::string());
-						button.set_size_policy(iParent.iType == header_view::HorizontalHeader ? 
+						button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
 							neogfx::size_policy{neogfx::size_policy::Expanding, neogfx::size_policy::Minimum} :
 							neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Expanding});
 						button.set_minimum_size(size{});
@@ -75,41 +81,39 @@ namespace neogfx
 				}
 				uint64_t since = app::instance().program_elapsed_ms();
 				app::event_processing_context epc(app::instance(), "neogfx::header_view::updater");
-				graphics_context gc{ iParent };
-				for (uint32_t c = 0; c < 1000 && iRow < iParent.presentation_model().rows(); ++c, ++iRow)
+				graphics_context gc{ aParent };
+				for (uint32_t c = 0; c < 1000 && iRow < aParent.presentation_model().rows(); ++c, ++iRow)
 				{
-					iParent.update_from_row(iRow, false, gc);
+					aParent.update_from_row(iRow, false, gc);
 					if (c % 25 == 0 && app::instance().program_elapsed_ms() - since > 20)
 					{
-						iParent.iOwner.header_view_updated(iParent);
+						aParent.iOwner.header_view_updated(aParent);
 						app::instance().process_events(epc);
-						if (destroyed || iParent.surface().destroyed())
+						if (destroyed || aParent.surface().destroyed())
 							return;
 						since = app::instance().program_elapsed_ms();
 					}
 				}
-				if (iRow == iParent.presentation_model().rows())
-					iParent.iOwner.header_view_updated(iParent);
+				if (iRow == aParent.presentation_model().rows())
+					aParent.iOwner.header_view_updated(aParent);
 				else
 					again();
-			}, 10),
-			iParent(aParent),
-			iRow(0)
+			}, 10 },
+			iRow{ 0 }
 		{
 		}
 		~updater()
 		{
 			cancel();
 		}
-	private:
-		header_view& iParent;
 		uint32_t iRow;
 	};
 
 	header_view::header_view(i_owner& aOwner, type_e aType) :
-		splitter(aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter),
-		iOwner(aOwner),
-		iType(aType)
+		splitter{ aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter },
+		iOwner{ aOwner },
+		iType{ aType },
+		iExpandLastColumn{ false }
 	{
 		iSink += app::instance().current_style_changed([this]()
 		{
@@ -119,9 +123,10 @@ namespace neogfx
 	}
 
 	header_view::header_view(i_widget& aParent, i_owner& aOwner, type_e aType) :
-		splitter(aParent, aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter),
-		iOwner(aOwner),
-		iType(aType)
+		splitter{ aParent, aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter },
+		iOwner{ aOwner },
+		iType{ aType },
+		iExpandLastColumn{ false }
 	{
 		iSink += app::instance().current_style_changed([this]()
 		{
@@ -131,9 +136,10 @@ namespace neogfx
 	}
 
 	header_view::header_view(i_layout& aLayout, i_owner& aOwner, type_e aType) :
-		splitter(aLayout, aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter),
-		iOwner(aOwner),
-		iType(aType)
+		splitter{ aLayout, aType == HorizontalHeader ? HorizontalSplitter : VerticalSplitter },
+		iOwner{ aOwner },
+		iType{ aType },
+		iExpandLastColumn{ false }
 	{
 		iSink += app::instance().current_style_changed([this]()
 		{
@@ -233,6 +239,21 @@ namespace neogfx
 		}
 	}
 
+	bool header_view::expand_last_column() const
+	{
+		return iExpandLastColumn;
+	}
+
+	void header_view::set_expand_last_column(bool aExpandLastColumn)
+	{
+		if (iExpandLastColumn != aExpandLastColumn)
+		{
+			iExpandLastColumn = aExpandLastColumn;
+			iUpdater.reset();
+			iUpdater.reset(new updater(*this));
+		}
+	}
+
 	void header_view::column_info_changed(const i_item_presentation_model&, item_presentation_model_index::column_type)
 	{
 		iSectionWidths.resize(presentation_model().columns());
@@ -305,9 +326,12 @@ namespace neogfx
 
 	dimension header_view::section_width(uint32_t aSectionIndex) const
 	{
-		return units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].first != boost::none ? 
-			*iSectionWidths[aSectionIndex].first : 
-			iSectionWidths[aSectionIndex].second);
+		if (!expand_last_column() || aSectionIndex != iSectionWidths.size() - 1)
+			return units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].first != boost::none ?
+				*iSectionWidths[aSectionIndex].first :
+				iSectionWidths[aSectionIndex].second);
+		else
+			return layout().get_widget_at(aSectionIndex).extents().cx;
 	}
 
 	dimension header_view::total_width() const
@@ -368,7 +392,10 @@ namespace neogfx
 			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
 			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col))
 			{
-				layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
+				if (!expand_last_column() || col != presentation_model().columns(item_model_index(aRow)) - 1)
+					layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
+				else
+					layout().get_widget_at(col).set_minimum_size(size(std::max(iSectionWidths[col].second, layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
 				updated = true;
 			}
 		}
