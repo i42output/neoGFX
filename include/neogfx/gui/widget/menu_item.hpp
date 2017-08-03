@@ -38,14 +38,17 @@ namespace neogfx
 		menu_item(i_menu& aSubMenu);
 		menu_item(std::shared_ptr<i_menu> aSubMenu);
 	public:
-		virtual type_e type() const;
-		virtual const i_action& action() const;
-		virtual i_action& action();
-		virtual const i_menu& sub_menu() const;
-		virtual i_menu& sub_menu();
+		type_e type() const override;
+		const i_action& action() const override;
+		i_action& action() override;
+		const i_menu& sub_menu() const override;
+		i_menu& sub_menu() override;
 	public:
-		virtual bool available() const;
+		bool available() const override;
+		void select(bool aSelectAnySubMenuItem = true) override;
+		bool select_any_sub_menu_item() const override;
 	private:
 		contents iContents;
+		bool iSelectAnySubMenuItem;
 	};
 }

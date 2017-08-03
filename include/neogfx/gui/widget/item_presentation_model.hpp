@@ -446,9 +446,7 @@ namespace neogfx
 		void item_removed(const i_item_model&, const item_model_index& aItemIndex) override
 		{
 			if (!iInitializing)
-			{
 				notify_observers(i_item_presentation_model_subscriber::NotifyItemRemoved, from_item_model_index(aItemIndex));
-			}
 			iRows.erase(iRows.begin() + from_item_model_index(aItemIndex).row());
 			for (auto& row : iRows)
 				if (row.first >= aItemIndex.row())

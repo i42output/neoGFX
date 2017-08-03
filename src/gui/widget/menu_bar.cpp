@@ -67,11 +67,11 @@ namespace neogfx
 		{
 		case ScanCode_LEFT:
 			if (has_selected_item())
-				select_item_at(previous_available_item(selected_item()));
+				select_item_at(previous_available_item(selected_item()), false);
 			break;
 		case ScanCode_RIGHT:
 			if (has_selected_item())
-				select_item_at(next_available_item(selected_item()));
+				select_item_at(next_available_item(selected_item()), false);
 			break;
 		case ScanCode_DOWN:
 			if (has_selected_item() && item_at(selected_item()).available())
@@ -82,7 +82,7 @@ namespace neogfx
 					if (!selectedItem.sub_menu().is_open())
 						open_sub_menu.trigger(selectedItem.sub_menu());
 					if (selectedItem.sub_menu().has_available_items())
-						selectedItem.sub_menu().select_item_at(selectedItem.sub_menu().first_available_item());
+						selectedItem.sub_menu().select_item_at(selectedItem.sub_menu().first_available_item(), false);
 				}
 			}
 			break;

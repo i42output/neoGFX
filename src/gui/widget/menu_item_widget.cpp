@@ -271,7 +271,7 @@ namespace neogfx
 		}
 		iSink += menu_item().selected([this]()
 		{
-			if (menu_item().type() == i_menu_item::SubMenu && menu().type() == i_menu::Popup)
+			if (menu_item().type() == i_menu_item::SubMenu && menu_item().select_any_sub_menu_item() && menu().type() == i_menu::Popup)
 			{
 				if (!iSubMenuOpener)
 				{
@@ -324,7 +324,7 @@ namespace neogfx
 		{
 			if (!menu_item().sub_menu().is_open())
 			{
-				menu().select_item_at(menu().find_item(menu_item()));
+				menu().select_item_at(menu().find_item(menu_item()), aSelectAnySubMenuItem);
 				if (destroyed)
 					return;
 				menu().open_sub_menu.trigger(menu_item().sub_menu());
@@ -339,12 +339,12 @@ namespace neogfx
 					return;
 				update();
 			}
-		}
-		if (aSelectAnySubMenuItem && menu_item().type() == i_menu_item::SubMenu)
-		{
-			auto& subMenu = menu_item().sub_menu();
-			if (subMenu.is_open() && !subMenu.has_selected_item() && subMenu.has_available_items())
-				subMenu.select_item_at(subMenu.first_available_item());
+			else
+			{
+				auto& subMenu = menu_item().sub_menu();
+				if (!subMenu.has_selected_item() && subMenu.has_available_items())
+					subMenu.select_item_at(subMenu.first_available_item(), false);
+			}
 		}
 	}
 }

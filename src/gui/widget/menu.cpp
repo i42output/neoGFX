@@ -204,12 +204,12 @@ namespace neogfx
 			item_at(selected_item()).deselected.trigger();
 		iSelection = aItemIndex;
 		item_selected.trigger(item_at(aItemIndex));
-		item_at(aItemIndex).selected.trigger();
+		item_at(aItemIndex).select(aSelectAnySubMenuItem);
 		if (aSelectAnySubMenuItem && item_at(aItemIndex).type() == i_menu_item::SubMenu)
 		{
 			auto& subMenu = item_at(aItemIndex).sub_menu();
 			if (subMenu.is_open() && !subMenu.has_selected_item() && subMenu.has_available_items())
-				subMenu.select_item_at(subMenu.first_available_item());
+				subMenu.select_item_at(subMenu.first_available_item(), false);
 		}
 	}
 

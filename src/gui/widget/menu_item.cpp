@@ -18,24 +18,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/raii.hpp>
 #include <neogfx/gui/widget/menu_item.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 
 namespace neogfx
 {
-	menu_item::menu_item(i_action& aAction) : iContents(std::shared_ptr<i_action>(std::shared_ptr<i_action>(), &aAction))
+	menu_item::menu_item(i_action& aAction) : iContents{ std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction } }, iSelectAnySubMenuItem{ true }
 	{
 	}
 
-	menu_item::menu_item(std::shared_ptr<i_action> aAction) : iContents(aAction)
+	menu_item::menu_item(std::shared_ptr<i_action> aAction) : iContents{ aAction }, iSelectAnySubMenuItem{ true }
 	{
 	}
 
-	menu_item::menu_item(i_menu& aSubMenu) : iContents(std::shared_ptr<i_menu>(std::shared_ptr<i_menu>(), &aSubMenu))
+	menu_item::menu_item(i_menu& aSubMenu) : iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iSelectAnySubMenuItem{ true }
 	{
 	}
 
-	menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu) : iContents(aSubMenu)
+	menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu) : iContents{ aSubMenu }, iSelectAnySubMenuItem{ true }
 	{
 	}
 
@@ -78,5 +79,16 @@ namespace neogfx
 		if (type() == SubMenu && sub_menu().item_count() == 0)
 			return false;
 		return true;
+	}
+
+	void menu_item::select(bool aSelectAnySubMenuItem)
+	{
+		neolib::scoped_flag sf{ iSelectAnySubMenuItem, aSelectAnySubMenuItem };
+		selected.trigger();
+	}
+
+	bool menu_item::select_any_sub_menu_item() const
+	{
+		return iSelectAnySubMenuItem;
 	}
 }

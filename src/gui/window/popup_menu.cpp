@@ -253,15 +253,15 @@ namespace neogfx
 		{
 		case ScanCode_UP:
 			if (menu().has_selected_item())
-				menu().select_item_at(menu().previous_available_item(menu().selected_item()));
+				menu().select_item_at(menu().previous_available_item(menu().selected_item()), false);
 			else if (menu().has_available_items())
-				menu().select_item_at(menu().first_available_item());
+				menu().select_item_at(menu().first_available_item(), false);
 			break;
 		case ScanCode_DOWN:
 			if (menu().has_selected_item())
-				menu().select_item_at(menu().next_available_item(menu().selected_item()));
+				menu().select_item_at(menu().next_available_item(menu().selected_item()), false);
 			else if (menu().has_available_items())
-				menu().select_item_at(menu().first_available_item());
+				menu().select_item_at(menu().first_available_item(), false);
 			break;
 		case ScanCode_LEFT:
 			if (menu().has_parent())
@@ -269,7 +269,7 @@ namespace neogfx
 				if (menu().parent().type() == i_menu::Popup)
 					menu().close();
 				else if (menu().parent().has_selected_item())
-					menu().parent().select_item_at(menu().parent().previous_available_item(menu().parent().selected_item()), true);
+					menu().parent().select_item_at(menu().parent().previous_available_item(menu().parent().selected_item()));
 			}
 			break;
 		case ScanCode_RIGHT:
@@ -281,7 +281,7 @@ namespace neogfx
 					if (!subMenu.is_open())
 						menu().open_sub_menu.trigger(subMenu);
 					if (subMenu.has_available_items())
-						subMenu.select_item_at(subMenu.first_available_item());
+						subMenu.select_item_at(subMenu.first_available_item(), false);
 				}
 				else
 				{
@@ -291,14 +291,14 @@ namespace neogfx
 					if (m != &menu())
 					{
 						if (m->has_selected_item())
-							m->select_item_at(m->next_available_item(m->selected_item()), true);
+							m->select_item_at(m->next_available_item(m->selected_item()), false);
 					}
 				}
 			}
 			else if (menu().has_parent() && menu().parent().type() == i_menu::MenuBar)
 			{
 				if (menu().parent().has_selected_item())
-					menu().parent().select_item_at(menu().parent().next_available_item(menu().parent().selected_item()), true);
+					menu().parent().select_item_at(menu().parent().next_available_item(menu().parent().selected_item()));
 			}
 			break;
 		case ScanCode_RETURN:

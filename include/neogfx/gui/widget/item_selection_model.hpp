@@ -175,20 +175,27 @@ namespace neogfx
 			}
 		}
 	private:
-		void column_info_changed(const i_item_presentation_model&, item_model_index::value_type) override
+		void column_info_changed(const i_item_presentation_model&, item_presentation_model_index::value_type) override
 		{
 		}
 		void item_model_changed(const i_item_presentation_model&, const i_item_model&) override
 		{
 		}
-		void item_added(const i_item_presentation_model&, const item_model_index&) override
+		void item_added(const i_item_presentation_model&, const item_presentation_model_index&) override
 		{
 		}
-		void item_changed(const i_item_presentation_model&, const item_model_index&) override
+		void item_changed(const i_item_presentation_model&, const item_presentation_model_index&) override
 		{
 		}
-		void item_removed(const i_item_presentation_model&, const item_model_index&) override
+		void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aIndex) override
 		{
+			if (has_current_index())
+			{
+				if (aModel.rows() <= 1)
+					iCurrentIndex = boost::none;
+				else if (iCurrentIndex->row() >= aModel.rows() - 1)
+					iCurrentIndex->set_row(iCurrentIndex->row() - 1);
+			}
 		}
 		void items_sorted(const i_item_presentation_model&) override
 		{
