@@ -67,11 +67,11 @@ namespace neogfx
 		{
 		case ScanCode_LEFT:
 			if (has_selected_item())
-				select_item_at(previous_available_item(selected_item()), false);
+				select_item_at(previous_available_item(selected_item()));
 			break;
 		case ScanCode_RIGHT:
 			if (has_selected_item())
-				select_item_at(next_available_item(selected_item()), false);
+				select_item_at(next_available_item(selected_item()));
 			break;
 		case ScanCode_DOWN:
 			if (has_selected_item() && item_at(selected_item()).available())

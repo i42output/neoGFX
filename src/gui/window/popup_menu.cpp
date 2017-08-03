@@ -291,7 +291,7 @@ namespace neogfx
 					if (m != &menu())
 					{
 						if (m->has_selected_item())
-							m->select_item_at(m->next_available_item(m->selected_item()), false);
+							m->select_item_at(m->next_available_item(m->selected_item()), m->type() == i_menu::MenuBar);
 					}
 				}
 			}
