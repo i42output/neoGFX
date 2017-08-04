@@ -130,6 +130,8 @@ namespace neogfx
 		iSink += iTextBox.text_filter([this](const std::string& aText, bool& aAccept)
 		{
 			aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
+			if (!aAccept)
+				app::instance().basic_services().system_beep();
 		});
 
 		iSink += iTextBox.text_changed([this]()
@@ -151,6 +153,7 @@ namespace neogfx
 			{
 				iTextBox.set_text(iText);
 				iTextBox.cursor().set_position(iTextCursorPos);
+				app::instance().basic_services().system_beep();
 			}
 			else
 			{
