@@ -121,6 +121,34 @@ namespace neogfx
 	}
 
 	template <typename T>
+	const std::string& basic_spin_box<T>::valid_text_characters() const
+	{
+		if (std::is_integral<T>::value)
+		{
+			if (std::is_signed<T>::value)
+			{
+				static const std::string sValid{ "01234567890+-" };
+				return sValid;
+			}
+			else
+			{
+				static const std::string sValid{ "01234567890" };
+				return sValid;
+			}
+		}
+		else if (std::is_floating_point<T>::value)
+		{
+			static const std::string sValid{ "01234567890.+-eE" };
+			return sValid;
+		}
+		else
+		{
+			static const std::string sValid;
+			return sValid;
+		}
+	}
+
+	template <typename T>
 	inline double basic_spin_box<T>::normalized_step_value() const
 	{
 		auto range = maximum() - minimum();

@@ -46,6 +46,7 @@ namespace neogfx
 	public:
 		line_edit& text_box();
 	public:
+		virtual const std::string& valid_text_characters() const = 0;
 		virtual double normalized_step_value() const = 0;
 		virtual double normalized_value() const = 0;
 		virtual void set_normalized_value(double aValue, bool aUpdateTextBox = false);
@@ -89,12 +90,13 @@ namespace neogfx
 		const std::string& format() const;
 		void set_format(const std::string& aFormat);
 	public:
-		virtual double normalized_step_value() const;
-		virtual double normalized_value() const;
-		virtual void set_normalized_value(double aValue, bool aUpdateTextBox = false);
-		virtual boost::optional<double> string_to_normalized_value(const std::string& aText) const;
-		virtual std::string normalized_value_to_string(double aNormalizedValue) const;
-		virtual std::string value_to_string() const;
+		const std::string& valid_text_characters() const override;
+		double normalized_step_value() const override;
+		double normalized_value() const override;
+		void set_normalized_value(double aValue, bool aUpdateTextBox = false) override;
+		boost::optional<double> string_to_normalized_value(const std::string& aText) const override;
+		std::string normalized_value_to_string(double aNormalizedValue) const override;
+		std::string value_to_string() const override;
 	private:
 		value_type iMinimum;
 		value_type iMaximum;

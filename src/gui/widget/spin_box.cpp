@@ -127,6 +127,11 @@ namespace neogfx
 		iStepDownButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iTextBox.set_style(frame_style::NoFrame);
 
+		iSink += iTextBox.text_filter([this](const std::string& aText, bool& aAccept)
+		{
+			aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
+		});
+
 		iSink += iTextBox.text_changed([this]()
 		{
 			auto text = iTextBox.text();

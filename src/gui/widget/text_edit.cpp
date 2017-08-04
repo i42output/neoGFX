@@ -1076,6 +1076,11 @@ namespace neogfx
 
 	std::size_t text_edit::insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor)
 	{
+		bool accept = true;
+		text_filter.trigger(aText, accept);
+		if (!accept)
+			return 0;
+
 		std::u32string text = neolib::utf8_to_utf32(aText);
 		if (iNormalizedTextBuffer.capacity() < text.size())
 			iNormalizedTextBuffer.reserve(text.size());
