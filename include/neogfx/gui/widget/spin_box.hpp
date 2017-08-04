@@ -58,6 +58,8 @@ namespace neogfx
 		void update_arrows();
 	private:
 		sink iSink;
+		std::string iText;
+		cursor::position_type iTextCursorPos;
 		double iNormalizedValue;
 		horizontal_layout iPrimaryLayout;
 		line_edit iTextBox;

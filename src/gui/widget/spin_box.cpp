@@ -138,6 +138,8 @@ namespace neogfx
 			auto newNormalizedValue = string_to_normalized_value(text);
 			if (newNormalizedValue)
 			{
+				iText = text;
+				iTextCursorPos = iTextBox.cursor().position();
 				if (*newNormalizedValue < 0.0)
 					set_normalized_value(0.0);
 				else if (*newNormalizedValue > 1.0)
@@ -145,8 +147,17 @@ namespace neogfx
 				else
 					set_normalized_value(*newNormalizedValue);
 			}
-			else if (!text.empty() && (text != "+" && text != "-" && text.back() != '+' && text.back() != '-' && text.back() != 'e' && text.back() != 'E'))
-				iTextBox.set_text("");
+			else if (!text.empty())
+			{
+				iTextBox.set_text(iText);
+				iTextBox.cursor().set_position(iTextCursorPos);
+			}
+			else
+			{
+				iText = text;
+				iTextCursorPos = iTextBox.cursor().position();
+				set_normalized_value(0.0);
+			}
 		});
 
 		auto step_up = [this]()
