@@ -57,6 +57,7 @@ namespace neogfx
 		void make_visible(const item_presentation_model_index& aItemIndex);
 		const optional_item_presentation_model_index& editing() const;
 		void edit(const item_presentation_model_index& aItemIndex);
+		void begin_edit();
 		void end_edit(bool aCommit);
 		i_widget& editor() const;
 	protected:

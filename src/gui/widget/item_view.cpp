@@ -255,6 +255,9 @@ namespace neogfx
 		scrollable_widget::focus_gained();
 		if (model().rows() > 0 && !selection_model().has_current_index())
 			selection_model().set_current_index(item_model_index(0, 0));
+		if (editing() == boost::none && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
+			edit(selection_model().current_index());
+		begin_edit();
 	}
 
 	void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -543,7 +546,7 @@ namespace neogfx
 		if (!selection_model().has_current_index() || selection_model().current_index() != aItemIndex)
 			selection_model().set_current_index(aItemIndex);
 		iEditor = std::make_shared<line_edit>(*this);
-		auto& lineEdit = static_cast<line_edit&>(*iEditor);
+		auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
 		lineEdit.set_style(frame_style::NoFrame);
 		lineEdit.move(cell_rect(aItemIndex).position());
 		lineEdit.resize(cell_rect(aItemIndex).extents());
@@ -554,13 +557,23 @@ namespace neogfx
 		optional_colour backgroundColour = presentation_model().cell_colour(aItemIndex, item_cell_colour_type::Background);
 		lineEdit.set_default_style(line_edit::style{ presentation_model().cell_font(aItemIndex), *textColour, backgroundColour != boost::none ? line_edit::style::colour_type{ *backgroundColour } : line_edit::style::colour_type{} });
 		lineEdit.set_text(presentation_model().cell_to_string(aItemIndex));
-		lineEdit.set_focus();
-		lineEdit.cursor().set_anchor(lineEdit.cursor().position()); // todo: set cursor to mouse click position
-		lineEdit.focus_event([this, aItemIndex, &lineEdit](neogfx::focus_event fe)
+		lineEdit.focus_event([this, aItemIndex](neogfx::focus_event fe)
 		{
-			if (fe == neogfx::focus_event::FocusLost)
+			if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != aItemIndex))
 				end_edit(true);
 		});
+		if (has_focus())
+			begin_edit();
+	}
+
+	void item_view::begin_edit()
+	{
+		if (editing() != boost::none)
+		{
+			auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
+			lineEdit.set_focus();
+			lineEdit.cursor().set_anchor(lineEdit.cursor().position()); // todo: set cursor to mouse click position
+		}
 	}
 
 	void item_view::end_edit(bool aCommit)
@@ -571,11 +584,18 @@ namespace neogfx
 		{
 			auto modelIndex = presentation_model().to_item_model_index(*editing());
 			auto lineEdit = dynamic_cast<line_edit*>(&*iEditor); // todo: refactor away this dynamic_cast
+			item_cell_data cellData;
 			if (lineEdit)
-				model().update_cell_data(modelIndex, presentation_model().string_to_cell_data(*editing(), lineEdit->text()));
+				cellData = presentation_model().string_to_cell_data(*editing(), lineEdit->text());
+			iEditing = boost::none;
+			iEditor = nullptr;
+			model().update_cell_data(modelIndex, cellData);
 		}
-		iEditing = boost::none;
-		iEditor = nullptr;
+		else
+		{
+			iEditing = boost::none;
+			iEditor = nullptr;
+		}
 	}
 
 	i_widget& item_view::editor() const
