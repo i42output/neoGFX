@@ -567,9 +567,14 @@ int main(int argc, char* argv[])
 			}
 		} 
 	
+		itemModel.set_column_min_value(0, 0);
+		itemModel.set_column_max_value(0, 99999);
+		itemModel.set_column_step_value(0, 1);
 		tableView1.set_model(itemModel);
 		my_item_presentation_model ipm1{ itemModel, my_item_presentation_model::ForegroundColour };
 		tableView1.set_presentation_model(ipm1);
+		ipm1.set_column_editable(0, ng::item_editable::WhenFocused);
+		ipm1.set_column_editable(1, ng::item_editable::OnInputEvent);
 		tableView2.set_model(itemModel);
 		my_item_presentation_model ipm2{ itemModel, my_item_presentation_model::BackgroundColour };
 		tableView2.set_presentation_model(ipm2);

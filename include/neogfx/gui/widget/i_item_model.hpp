@@ -44,37 +44,73 @@ namespace neogfx
 		enum notify_type { NotifyColumnInfoChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyModelDestroyed };
 	};
 
+	enum item_cell_data_type
+	{
+		Unknown,
+		Custom,
+		Bool,
+		Int32,
+		UInt32,
+		Int64,
+		UInt64,
+		Float,
+		Double,
+		String,
+		ChoiceCustom,
+		ChoiceBool,
+		ChoiceInt32,
+		ChoiceUInt32,
+		ChoiceInt64,
+		ChoiceUInt16,
+		ChoiceFloat,
+		ChoiceDouble,
+		ChoiceString
+	};
+
+	template <typename T>
+	struct item_cell_choice_type
+	{
+		typedef T value_type;
+		typedef std::pair<value_type, std::string> option;
+		typedef std::vector<option> type;
+	};
+
+	typedef neolib::variant<
+		void*,
+		bool,
+		int32_t,
+		uint32_t,
+		int64_t,
+		uint64_t,
+		float,
+		double,
+		std::string,
+		item_cell_choice_type<void*>::type::const_iterator,
+		item_cell_choice_type<bool>::type::const_iterator,
+		item_cell_choice_type<int32_t>::type::const_iterator,
+		item_cell_choice_type<uint32_t>::type::const_iterator,
+		item_cell_choice_type<int64_t>::type::const_iterator,
+		item_cell_choice_type<uint64_t>::type::const_iterator,
+		item_cell_choice_type<float>::type::const_iterator,
+		item_cell_choice_type<double>::type::const_iterator,
+		item_cell_choice_type<std::string>::type::const_iterator> item_cell_data;
+
+	struct item_cell_data_info
+	{
+		bool readOnly;
+		item_cell_data_type type;
+		item_cell_data min;
+		item_cell_data max;
+		item_cell_data step;
+	};
+
+	typedef boost::optional<item_cell_data_info> optional_item_cell_data_info;
+
 	class i_item_model
 	{
 	public:
 		typedef neolib::generic_iterator iterator;
 		typedef neolib::generic_iterator const_iterator;
-	public:
-		template <typename T>
-		struct choice_type
-		{
-			typedef T value_type;
-			typedef std::pair<value_type, std::string> option;
-			typedef std::vector<option> type;
-		};
-		typedef neolib::variant<
-			void*,
-			bool, 
-			int32_t, 
-			uint32_t, 
-			int64_t, 
-			uint64_t, 
-			float, 
-			double, 
-			std::string, 
-			choice_type<bool>::type::const_iterator, 
-			choice_type<int32_t>::type::const_iterator,
-			choice_type<uint32_t>::type::const_iterator,
-			choice_type<int64_t>::type::const_iterator,
-			choice_type<uint64_t>::type::const_iterator,
-			choice_type<float>::type::const_iterator,
-			choice_type<double>::type::const_iterator,
-			choice_type<std::string>::type::const_iterator> data_type;
 	public:
 		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_model::bad_column_index") {} };
 	public:
@@ -85,6 +121,15 @@ namespace neogfx
 		virtual uint32_t columns(const item_model_index& aIndex) const = 0;
 		virtual const std::string& column_name(item_model_index::column_type aColumnIndex) const = 0;
 		virtual void set_column_name(item_model_index::column_type aColumnIndex, const std::string& aName) = 0;
+		virtual item_cell_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
+		virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_cell_data_type aType) = 0;
+		virtual const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const = 0;
+		virtual void set_column_min_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) = 0;
+		virtual const item_cell_data& column_max_value(item_model_index::column_type aColumnIndex) const = 0;
+		virtual void set_column_max_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) = 0;
+		virtual const item_cell_data& column_step_value(item_model_index::column_type aColumnIndex) const = 0;
+		virtual void set_column_step_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) = 0;
+	public:
 		virtual iterator index_to_iterator(const item_model_index& aIndex) = 0;
 		virtual const_iterator index_to_iterator(const item_model_index& aIndex) const = 0;
 		virtual item_model_index iterator_to_index(const_iterator aPosition) const = 0;
@@ -105,15 +150,16 @@ namespace neogfx
 	public:
 		virtual void reserve(uint32_t aItemCount) = 0;
 		virtual uint32_t capacity() const = 0;
-		virtual iterator insert_item(const_iterator aPosition, const data_type& aCellData) = 0;
-		virtual iterator insert_item(const item_model_index& aIndex, const data_type& aCellData) = 0;
-		virtual iterator append_item(const_iterator aParent, const data_type& aCellData) = 0;
+		virtual iterator insert_item(const_iterator aPosition, const item_cell_data& aCellData) = 0;
+		virtual iterator insert_item(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
+		virtual iterator append_item(const_iterator aParent, const item_cell_data& aCellData) = 0;
 		virtual void remove_item(const_iterator aPosition) = 0;
-		virtual void insert_cell_data(const_iterator aItem, item_model_index::column_type aColumnIndex, const data_type& aCellData) = 0;
-		virtual void insert_cell_data(const item_model_index& aIndex, const data_type& aCellData) = 0;
-		virtual void update_cell_data(const item_model_index& aIndex, const data_type& aCellData) = 0;
+		virtual void insert_cell_data(const_iterator aItem, item_model_index::column_type aColumnIndex, const item_cell_data& aCellData) = 0;
+		virtual void insert_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
+		virtual void update_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
 	public:
-		virtual const data_type& cell_data(const item_model_index& aIndex) const = 0;
+		virtual optional_item_cell_data_info cell_data_info(const item_model_index& aIndex) const = 0;
+		virtual const item_cell_data& cell_data(const item_model_index& aIndex) const = 0;
 	public:
 		virtual void subscribe(i_item_model_subscriber& aSubscriber) = 0;
 		virtual void unsubscribe(i_item_model_subscriber& aSubscriber) = 0;

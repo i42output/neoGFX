@@ -49,8 +49,9 @@ namespace neogfx
 			typename container_traits::allocator_type::template rebind<std::pair<const item_model_index::column_type, item_presentation_model_index::column_type>>::other> column_map_type;
 		struct column_info
 		{
-			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn } {}
+			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn }, editable{ item_editable::No } {}
 			item_model_index::column_type modelColumn;
+			item_editable editable;
 			mutable boost::optional<std::string> headingText;
 			mutable font headingFont;
 			mutable optional_size extents;
@@ -160,6 +161,18 @@ namespace neogfx
 			iColumns[aColumnIndex].extents = boost::none;
 			notify_observers(i_item_presentation_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
 		}
+		item_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const override
+		{
+			if (iColumns.size() < aColumnIndex + 1)
+				throw bad_column_index();
+			return iColumns[aColumnIndex].editable;
+		}
+		void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_editable aEditable) override
+		{
+			if (iColumns.size() < aColumnIndex + 1)
+				throw bad_column_index();
+			iColumns[aColumnIndex].editable = aEditable;
+		}
 	public:
 		dimension item_height(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
 		{
@@ -267,21 +280,21 @@ namespace neogfx
 			{
 			case 0:
 				return "";
-			case i_item_model::data_type::type_id<bool>::value:
+			case item_cell_data::type_id<bool>::value:
 				return (cell_format(aIndex) % static_variant_cast<bool>(item_model().cell_data(modelIndex))).str();
-			case i_item_model::data_type::type_id<int32_t>::value:
+			case item_cell_data::type_id<int32_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<int32_t>(item_model().cell_data(modelIndex))).str();
-			case i_item_model::data_type::type_id<uint32_t>::value:
+			case item_cell_data::type_id<uint32_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<uint32_t>(item_model().cell_data(modelIndex))).str();
-			case i_item_model::data_type::type_id<int64_t>::value:
+			case item_cell_data::type_id<int64_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<int64_t>(item_model().cell_data(modelIndex))).str();
-			case i_item_model::data_type::type_id<uint64_t>::value:
+			case item_cell_data::type_id<uint64_t>::value:
 				return (cell_format(aIndex) % static_variant_cast<uint64_t>(item_model().cell_data(modelIndex))).str();
-			case i_item_model::data_type::type_id<float>::value:
+			case item_cell_data::type_id<float>::value:
 				return (cell_format(aIndex) % static_variant_cast<float>(item_model().cell_data(modelIndex))).str();
-			case i_item_model::data_type::type_id<double>::value:
+			case item_cell_data::type_id<double>::value:
 				return (cell_format(aIndex) % static_variant_cast<double>(item_model().cell_data(modelIndex))).str();
-			case i_item_model::data_type::type_id<std::string>::value:
+			case item_cell_data::type_id<std::string>::value:
 				return (cell_format(aIndex) % static_variant_cast<const std::string&>(item_model().cell_data(modelIndex))).str();
 			default:
 				return "";

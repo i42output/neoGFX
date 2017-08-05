@@ -56,6 +56,13 @@ namespace neogfx
 		Selected = 0x02
 	};
 
+	enum class item_editable
+	{
+		No,
+		WhenFocused,
+		OnInputEvent
+	};
+
 	inline item_selection_flags operator|(item_selection_flags aLhs, item_selection_flags aRhs)
 	{
 		return static_cast<item_selection_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
@@ -113,6 +120,8 @@ namespace neogfx
 		virtual const std::string& column_heading_text(item_presentation_model_index::value_type aColumnIndex) const = 0;
 		virtual size column_heading_extents(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext) const = 0;
 		virtual void set_column_heading_text(item_presentation_model_index::value_type aColumnIndex, const std::string& aHeadingText) = 0;
+		virtual item_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const = 0;
+		virtual void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_editable aEditable) = 0;
 	public:
 		virtual dimension item_height(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
 		virtual double total_height(const graphics_context& aGraphicsContext) const = 0;

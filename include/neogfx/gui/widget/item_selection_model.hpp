@@ -187,7 +187,7 @@ namespace neogfx
 		void item_changed(const i_item_presentation_model&, const item_presentation_model_index&) override
 		{
 		}
-		void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aIndex) override
+		void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index&) override
 		{
 			if (has_current_index())
 			{

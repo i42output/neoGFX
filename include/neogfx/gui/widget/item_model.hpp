@@ -135,7 +135,7 @@ namespace neogfx
 		};
 	};
 
-	template <typename T, uint32_t Columns = 0, typename CellType = i_item_model::data_type, typename ContainerTraits = item_container_traits<T, CellType, Columns>>
+	template <typename T, uint32_t Columns = 0, typename CellType = item_cell_data, typename ContainerTraits = item_container_traits<T, CellType, Columns>>
 	class basic_item_model : public i_basic_item_model<T>, private neolib::observable<i_item_model_subscriber>
 	{
 	public:
@@ -158,6 +158,7 @@ namespace neogfx
 		struct column_info
 		{
 			std::string name;
+			mutable optional_item_cell_data_info defaultDataInfo;
 		};
 		typedef typename container_traits::template rebind<item_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
 	public:
@@ -194,6 +195,43 @@ namespace neogfx
 			iColumns[aColumnIndex].name = aName;
 			notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
 		}
+		item_cell_data_type column_data_type(item_model_index::column_type aColumnIndex) const override
+		{
+			return default_cell_data_info(aColumnIndex).type;
+		}
+		void set_column_data_type(item_model_index::column_type aColumnIndex, item_cell_data_type aType) override
+		{
+			default_cell_data_info(aColumnIndex).type = aType;
+			notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+		}
+		const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const override
+		{
+			return default_cell_data_info(aColumnIndex).min;
+		}
+		void set_column_min_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
+		{
+			default_cell_data_info(aColumnIndex).min = aValue;
+			notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+		}
+		const item_cell_data& column_max_value(item_model_index::column_type aColumnIndex) const override
+		{
+			return default_cell_data_info(aColumnIndex).max;
+		}
+		void set_column_max_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
+		{
+			default_cell_data_info(aColumnIndex).max = aValue;
+			notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+		}
+		const item_cell_data& column_step_value(item_model_index::column_type aColumnIndex) const override
+		{
+			return default_cell_data_info(aColumnIndex).step;
+		}
+		void set_column_step_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) override
+		{
+			default_cell_data_info(aColumnIndex).step = aValue;
+			notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+		}
+	public:
 		i_item_model::iterator index_to_iterator(const item_model_index& aIndex) override
 		{
 			return base_iterator(std::next(iItems.begin(), aIndex.row()));
@@ -272,9 +310,13 @@ namespace neogfx
 			remove_observer(aSubscriber);
 		}
 	public:
-		const data_type& cell_data(const item_model_index& aIndex) const override
+		const item_cell_data& cell_data(const item_model_index& aIndex) const override
 		{
 			return iItems[aIndex.row()].second[aIndex.column()];
+		}
+		optional_item_cell_data_info cell_data_info(const item_model_index&) const override
+		{
+			return optional_item_cell_data_info{};
 		}
 	public:
 		void reserve(uint32_t aItemCount) override
@@ -291,17 +333,17 @@ namespace neogfx
 			notify_observers(i_item_model_subscriber::NotifyItemAdded, iterator_to_index(i));
 			return i;
 		}
-		i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue, const data_type& aCellData) override
+		i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const value_type& aValue, const item_cell_data& aCellData) override
 		{
 			auto i = insert_item(aPosition, aValue);
 			insert_cell_data(i, 0, aCellData);
 			return i;
 		}
-		i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const data_type& aCellData) override
+		i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, const item_cell_data& aCellData) override
 		{
 			return insert_item(aPosition, value_type(), aCellData);
 		}
-		i_item_model::iterator insert_item(const item_model_index& aIndex, const data_type& aCellData) override
+		i_item_model::iterator insert_item(const item_model_index& aIndex, const item_cell_data& aCellData) override
 		{
 			return insert_item(index_to_iterator(aIndex), aCellData);
 		}
@@ -311,13 +353,13 @@ namespace neogfx
 			notify_observers(i_item_model_subscriber::NotifyItemAdded, iterator_to_index(i));
 			return i;
 		}
-		i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue, const data_type& aCellData) override
+		i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue, const item_cell_data& aCellData) override
 		{
 			auto i = append_item(aParent, aValue);
 			insert_cell_data(i, 0, aCellData);
 			return i;
 		}
-		i_item_model::iterator append_item(i_item_model::const_iterator aParent, const data_type& aCellData) override
+		i_item_model::iterator append_item(i_item_model::const_iterator aParent, const item_cell_data& aCellData) override
 		{
 			return append_item(aParent, value_type(), aCellData);
 		}
@@ -326,7 +368,7 @@ namespace neogfx
 			notify_observers(i_item_model_subscriber::NotifyItemRemoved, iterator_to_index(aPosition));
 			iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>());
 		}
-		void insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const data_type& aCellData) override
+		void insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const item_cell_data& aCellData) override
 		{
 			auto ri = aItem.get<iterator, iterator, sibling_iterator>();
 			if (ri->second.size() < aColumnIndex + 1)
@@ -338,11 +380,11 @@ namespace neogfx
 			index.set_column(aColumnIndex);
 			notify_observers(i_item_model_subscriber::NotifyItemChanged, index);
 		}
-		void insert_cell_data(const item_model_index& aIndex, const data_type& aCellData) override
+		void insert_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) override
 		{
 			insert_cell_data(index_to_iterator(aIndex), aIndex.column(), aCellData);
 		}
-		void update_cell_data(const item_model_index& aIndex, const data_type& aCellData) override
+		void update_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) override
 		{
 			iItems[aIndex.row()].second[aIndex.column()] = aCellData;
 			notify_observers(i_item_model_subscriber::NotifyItemChanged, aIndex);
@@ -355,6 +397,27 @@ namespace neogfx
 		const value_type& item(const item_model_index& aIndex) const override
 		{
 			return iItems[aIndex.row()].first;
+		}
+	private:
+		const item_cell_data_info& default_cell_data_info(item_model_index::column_type aColumnIndex) const
+		{
+			if (iColumns.size() < aColumnIndex + 1)
+				throw bad_column_index();
+			if (iColumns[aColumnIndex].defaultDataInfo != boost::none)
+				return *iColumns[aColumnIndex].defaultDataInfo;
+			else
+			{
+				static const item_cell_data_info sZero;
+				return sZero;
+			}
+		}
+		item_cell_data_info& default_cell_data_info(item_model_index::column_type aColumnIndex)
+		{
+			if (iColumns.size() < aColumnIndex + 1)
+				iColumns.resize(aColumnIndex + 1);
+			if (iColumns[aColumnIndex].defaultDataInfo == boost::none)
+				iColumns[aColumnIndex].defaultDataInfo = item_cell_data_info{};
+			return *iColumns[aColumnIndex].defaultDataInfo;
 		}
 	private:
 		void notify_observer(i_item_model_subscriber& aObserver, i_item_model_subscriber::notify_type aType, const void* aParameter, const void*) override
