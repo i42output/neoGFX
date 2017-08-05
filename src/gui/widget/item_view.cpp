@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/item_view.hpp>
+#include <neogfx/gui/widget/line_edit.hpp>
 
 namespace neogfx
 {
@@ -224,10 +225,10 @@ namespace neogfx
 				if (cellRect.y > clipRect.bottom())
 					continue;
 				finished = false;
-				optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, i_item_presentation_model::ForegroundColour);
+				optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Foreground);
 				if (textColour == boost::none)
 					textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
-				optional_colour backgroundColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, i_item_presentation_model::BackgroundColour);
+				optional_colour backgroundColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Background);
 				rect cellBackgroundRect = cell_rect(item_presentation_model_index{ row, col }, true);
 				if (backgroundColour != boost::none)
 				{
@@ -238,7 +239,7 @@ namespace neogfx
 				aGraphicsContext.scissor_on(clipRect.intersection(cellRect));
 				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), f, *textColour);
 				aGraphicsContext.scissor_off();
-				if (selection_model().has_current_index() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
+				if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
 					aGraphicsContext.draw_focus_rect(cellBackgroundRect);
 			}
 		}
@@ -484,12 +485,17 @@ namespace neogfx
 	{
 	}
 
-	void item_view::current_index_changed(const i_item_selection_model&, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex)
+	void item_view::current_index_changed(const i_item_selection_model&, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
 	{
 		if (aCurrentIndex != boost::none)
 		{
 			make_visible(*aCurrentIndex);
 			update(cell_rect(*aCurrentIndex, true));
+			auto modelIndex = presentation_model().to_item_model_index(*aCurrentIndex);
+			if (presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex)
+				edit(*aCurrentIndex);
+			else if (editing() != boost::none)
+				end_edit(true);
 		}
 		if (aPreviousIndex != boost::none)
 			update(cell_rect(*aPreviousIndex, true));
@@ -503,7 +509,7 @@ namespace neogfx
 	{
 	}
 
-	void item_view::make_visible(const item_model_index& aItemIndex)
+	void item_view::make_visible(const item_presentation_model_index& aItemIndex)
 	{
 		graphics_context gc(*this);
 		rect cellRect = cell_rect(aItemIndex, true);
@@ -521,6 +527,62 @@ namespace neogfx
 			else if (cellRect.right() > item_display_rect().right())
 				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - item_display_rect().right()));
 		}
+	}
+
+	const optional_item_presentation_model_index& item_view::editing() const
+	{
+		return iEditing;
+	}
+
+	void item_view::edit(const item_presentation_model_index& aItemIndex)
+	{
+		if (editing() == aItemIndex)
+			return;
+		end_edit(true);
+		iEditing = aItemIndex;
+		if (!selection_model().has_current_index() || selection_model().current_index() != aItemIndex)
+			selection_model().set_current_index(aItemIndex);
+		iEditor = std::make_shared<line_edit>(*this);
+		auto& lineEdit = static_cast<line_edit&>(*iEditor);
+		lineEdit.set_style(frame_style::NoFrame);
+		lineEdit.move(cell_rect(aItemIndex).position());
+		lineEdit.resize(cell_rect(aItemIndex).extents());
+		lineEdit.set_margins(cell_margins());
+		optional_colour textColour = presentation_model().cell_colour(aItemIndex, item_cell_colour_type::Foreground);
+		if (textColour == boost::none)
+			textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
+		optional_colour backgroundColour = presentation_model().cell_colour(aItemIndex, item_cell_colour_type::Background);
+		lineEdit.set_default_style(line_edit::style{ presentation_model().cell_font(aItemIndex), *textColour, backgroundColour != boost::none ? line_edit::style::colour_type{ *backgroundColour } : line_edit::style::colour_type{} });
+		lineEdit.set_text(presentation_model().cell_to_string(aItemIndex));
+		lineEdit.set_focus();
+		lineEdit.cursor().set_anchor(lineEdit.cursor().position()); // todo: set cursor to mouse click position
+		lineEdit.focus_event([this, aItemIndex, &lineEdit](neogfx::focus_event fe)
+		{
+			if (fe == neogfx::focus_event::FocusLost)
+				end_edit(true);
+		});
+	}
+
+	void item_view::end_edit(bool aCommit)
+	{
+		if (editing() == boost::none)
+			return;
+		if (aCommit)
+		{
+			auto modelIndex = presentation_model().to_item_model_index(*editing());
+			auto lineEdit = dynamic_cast<line_edit*>(&*iEditor); // todo: refactor away this dynamic_cast
+			if (lineEdit)
+				model().update_cell_data(modelIndex, presentation_model().string_to_cell_data(*editing(), lineEdit->text()));
+		}
+		iEditing = boost::none;
+		iEditor = nullptr;
+	}
+
+	i_widget& item_view::editor() const
+	{
+		if (iEditor == nullptr)
+			throw no_editor();
+		return *iEditor;
 	}
 
 	void item_view::header_view_updated(header_view&)

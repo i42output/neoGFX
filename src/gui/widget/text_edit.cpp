@@ -295,7 +295,10 @@ namespace neogfx
 
 	void text_edit::focus_lost()
 	{
+		destroyed_flag destroyed{ *this };
 		scrollable_widget::focus_lost();
+		if (destroyed)
+			return;
 		app::instance().clipboard().deactivate(*this);
 		if (iType == SingleLine)
 			cursor().set_position(iText.size());

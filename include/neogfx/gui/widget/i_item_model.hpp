@@ -158,7 +158,7 @@ namespace neogfx
 		virtual void insert_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
 		virtual void update_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) = 0;
 	public:
-		virtual optional_item_cell_data_info cell_data_info(const item_model_index& aIndex) const = 0;
+		virtual const item_cell_data_info& cell_data_info(const item_model_index& aIndex) const = 0;
 		virtual const item_cell_data& cell_data(const item_model_index& aIndex) const = 0;
 	public:
 		virtual void subscribe(i_item_model_subscriber& aSubscriber) = 0;

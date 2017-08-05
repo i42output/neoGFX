@@ -50,32 +50,39 @@ namespace neogfx
 		enum notify_type { NotifyColumnInfoChanged, NotifyItemModelChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorted, NotifyModelDestroyed };
 	};
 
-	enum class item_selection_flags
+	enum class item_cell_selection_flags
 	{
 		Current = 0x01,
 		Selected = 0x02
 	};
 
-	enum class item_editable
+	enum class item_cell_editable
 	{
 		No,
 		WhenFocused,
 		OnInputEvent
 	};
 
-	inline item_selection_flags operator|(item_selection_flags aLhs, item_selection_flags aRhs)
+	enum class item_cell_colour_type
 	{
-		return static_cast<item_selection_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+		Foreground = 0x01,
+		Background = 0x02,
+	};
+	typedef item_cell_colour_type item_cell_color_type;
+
+	inline item_cell_selection_flags operator|(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
+	{
+		return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
 	}
 
-	inline item_selection_flags operator&(item_selection_flags aLhs, item_selection_flags aRhs)
+	inline item_cell_selection_flags operator&(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
 	{
-		return static_cast<item_selection_flags>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+		return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
 	}
 
-	inline item_selection_flags operator~(item_selection_flags aLhs)
+	inline item_cell_selection_flags operator~(item_cell_selection_flags aLhs)
 	{
-		return static_cast<item_selection_flags>(~static_cast<uint32_t>(aLhs));
+		return static_cast<item_cell_selection_flags>(~static_cast<uint32_t>(aLhs));
 	}
 
 	class i_item_presentation_model
@@ -83,15 +90,10 @@ namespace neogfx
 	public:
 		struct cell_meta_type
 		{
-			mutable item_selection_flags selection;
+			mutable item_cell_selection_flags selection;
 			mutable optional_texture texture;
 			mutable optional_glyph_text text;
 			mutable optional_size extents;
-		};
-		enum colour_type_e
-		{
-			ForegroundColour = 0x01,
-			BackgroundColour = 0x02,
 		};
 		enum sort_direction_e
 		{
@@ -120,8 +122,8 @@ namespace neogfx
 		virtual const std::string& column_heading_text(item_presentation_model_index::value_type aColumnIndex) const = 0;
 		virtual size column_heading_extents(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext) const = 0;
 		virtual void set_column_heading_text(item_presentation_model_index::value_type aColumnIndex, const std::string& aHeadingText) = 0;
-		virtual item_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const = 0;
-		virtual void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_editable aEditable) = 0;
+		virtual item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const = 0;
+		virtual void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_cell_editable aEditable) = 0;
 	public:
 		virtual dimension item_height(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
 		virtual double total_height(const graphics_context& aGraphicsContext) const = 0;
@@ -130,9 +132,11 @@ namespace neogfx
 	public:
 		virtual const cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const = 0;
 	public:
+		virtual item_cell_editable cell_editable(const item_presentation_model_index& aIndex) const = 0;
 		virtual std::string cell_to_string(const item_presentation_model_index& aIndex) const = 0;
+		virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const = 0;
 		virtual boost::basic_format<char> cell_format(const item_presentation_model_index& aIndex) const = 0;
-		virtual optional_colour cell_colour(const item_presentation_model_index& aIndex, colour_type_e aColourType) const = 0;
+		virtual optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const = 0;
 		virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
 		virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
 		virtual size cell_extents(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;

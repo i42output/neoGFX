@@ -53,9 +53,9 @@ namespace neogfx
 			style();
 			style(
 				const optional_font& aFont,
-				const colour_type& aTextColour = colour_type(),
-				const colour_type& aBackgroundColour = colour_type(),
-				const colour_type& aTextOutlineColour = colour_type());
+				const colour_type& aTextColour = colour_type{},
+				const colour_type& aBackgroundColour = colour_type{},
+				const colour_type& aTextOutlineColour = colour_type{});
 			style(
 				text_edit& aParent,
 				const style& aOther);
@@ -393,52 +393,52 @@ namespace neogfx
 		text_edit(i_layout& aLayout, type_e aType = MultiLine);
 		~text_edit();
 	public:
-		virtual void resized();
+		void resized() override;
 	public:
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		void paint(graphics_context& aGraphicsContext) const override;
 	public:
-		virtual const neogfx::font& font() const;
+		const neogfx::font& font() const override;
 	public:
-		virtual void focus_gained();
-		virtual void focus_lost();
+		void focus_gained() override;
+		void focus_lost() override;
 	public:
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
-		virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
-		virtual void mouse_moved(const point& aPosition);
-		virtual void mouse_entered();
-		virtual void mouse_left();
-		virtual neogfx::mouse_cursor mouse_cursor() const;
+		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+		void mouse_moved(const point& aPosition) override;
+		void mouse_entered() override;
+		void mouse_left() override;
+		neogfx::mouse_cursor mouse_cursor() const override;
 	public:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool text_input(const std::string& aText);
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool text_input(const std::string& aText) override;
 	public:
-		virtual child_widget_scrolling_disposition_e scrolling_disposition() const;
+		child_widget_scrolling_disposition_e scrolling_disposition() const override;
 		using scrollable_widget::update_scrollbar_visibility;
-		virtual void update_scrollbar_visibility(usv_stage_e aStage);
+		void update_scrollbar_visibility(usv_stage_e aStage) override;
 	protected:
-		virtual colour frame_colour() const;
+		colour frame_colour() const override;
 	public:
-		virtual bool can_undo() const;
-		virtual bool can_redo() const;
-		virtual bool can_cut() const;
-		virtual bool can_copy() const;
-		virtual bool can_paste() const;
-		virtual bool can_delete_selected() const;
-		virtual bool can_select_all() const;
-		virtual void undo(i_clipboard& aClipboard);
-		virtual void redo(i_clipboard& aClipboard);
-		virtual void cut(i_clipboard& aClipboard);
-		virtual void copy(i_clipboard& aClipboard);
-		virtual void paste(i_clipboard& aClipboard);
-		virtual void delete_selected(i_clipboard& aClipboard);
-		virtual void select_all(i_clipboard& aClipboard);
+		bool can_undo() const override;
+		bool can_redo() const override;
+		bool can_cut() const override;
+		bool can_copy() const override;
+		bool can_paste() const override;
+		bool can_delete_selected() const override;
+		bool can_select_all() const override;
+		void undo(i_clipboard& aClipboard) override;
+		void redo(i_clipboard& aClipboard) override;
+		void cut(i_clipboard& aClipboard) override;
+		void copy(i_clipboard& aClipboard) override;
+		void paste(i_clipboard& aClipboard) override;
+		void delete_selected(i_clipboard& aClipboard) override;
+		void select_all(i_clipboard& aClipboard) override;
 	public:
-		virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true);
+		void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) override;
 	public:
 		bool read_only() const;
 		void set_read_only(bool aReadOnly = true);

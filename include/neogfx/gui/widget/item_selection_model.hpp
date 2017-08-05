@@ -92,17 +92,17 @@ namespace neogfx
 		{
 			return iCurrentIndex != boost::none;
 		}
-		const item_model_index& current_index() const override
+		const item_presentation_model_index& current_index() const override
 		{
 			if (iCurrentIndex == boost::none)
 				throw no_current_index();
 			return *iCurrentIndex;
 		}
-		void set_current_index(const item_model_index& aIndex) override
+		void set_current_index(const item_presentation_model_index& aIndex) override
 		{
 			if (iCurrentIndex == aIndex)
 				return;
-			optional_item_model_index previousIndex = iCurrentIndex;
+			optional_item_presentation_model_index previousIndex = iCurrentIndex;
 			iCurrentIndex = aIndex;
 			notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
 			current_index_changed.trigger(iCurrentIndex, previousIndex);
@@ -111,7 +111,7 @@ namespace neogfx
 		{
 			if (iCurrentIndex == boost::none)
 				return;
-			optional_item_model_index previousIndex = iCurrentIndex;
+			optional_item_presentation_model_index previousIndex = iCurrentIndex;
 			iCurrentIndex = boost::none;
 			notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
 			current_index_changed.trigger(iCurrentIndex, previousIndex);
@@ -121,11 +121,11 @@ namespace neogfx
 		{
 			return iSelection;
 		}
-		bool is_selected(const item_model_index& aIndex) const override
+		bool is_selected(const item_presentation_model_index& aIndex) const override
 		{
-			return (presentation_model().cell_meta(aIndex).selection & item_selection_flags::Selected) == item_selection_flags::Selected;
+			return (presentation_model().cell_meta(aIndex).selection & item_cell_selection_flags::Selected) == item_cell_selection_flags::Selected;
 		}	
-		void select(const item_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
+		void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
 		{
 			/* todo */
 			(void)aIndex;
@@ -164,7 +164,7 @@ namespace neogfx
 				aObserver.selection_mode_changed(*this, *static_cast<const item_selection_mode*>(aParameter));
 				break;
 			case i_item_selection_model_subscriber::NotifyCurrentIndexChanged:
-				aObserver.current_index_changed(*this, *static_cast<const optional_item_model_index*>(aParameter), *static_cast<const optional_item_model_index*>(aParameter2));
+				aObserver.current_index_changed(*this, *static_cast<const optional_item_presentation_model_index*>(aParameter), *static_cast<const optional_item_presentation_model_index*>(aParameter2));
 				break;
 			case i_item_selection_model_subscriber::NotifySelectionChanged:
 				aObserver.selection_changed(*this, *static_cast<const item_selection*>(aParameter), *static_cast<const item_selection*>(aParameter2));
@@ -209,7 +209,7 @@ namespace neogfx
 	private:
 		i_item_presentation_model* iModel;
 		item_selection_mode iMode;
-		optional_item_model_index iCurrentIndex;
+		optional_item_presentation_model_index iCurrentIndex;
 		item_selection iSelection;
 	};
 }

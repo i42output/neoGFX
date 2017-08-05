@@ -314,9 +314,9 @@ namespace neogfx
 		{
 			return iItems[aIndex.row()].second[aIndex.column()];
 		}
-		optional_item_cell_data_info cell_data_info(const item_model_index&) const override
+		const item_cell_data_info& cell_data_info(const item_model_index& aIndex) const override
 		{
-			return optional_item_cell_data_info{};
+			return default_cell_data_info(aIndex.column());
 		}
 	public:
 		void reserve(uint32_t aItemCount) override

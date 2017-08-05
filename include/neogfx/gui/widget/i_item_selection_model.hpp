@@ -65,7 +65,7 @@ namespace neogfx
 		virtual void model_changed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel) = 0;
 		virtual void model_removed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aOldModel) = 0;
 		virtual void selection_mode_changed(const i_item_selection_model& aSelectionModel, item_selection_mode aNewMode) = 0;
-		virtual void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex) = 0;
+		virtual void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) = 0;
 		virtual void selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) = 0;
 		virtual void selection_model_destroyed(const i_item_selection_model& aSelectionModel) = 0;
 	public:
@@ -75,7 +75,7 @@ namespace neogfx
 	class i_item_selection_model
 	{
 	public:
-		typedef event<const optional_item_model_index&, const optional_item_model_index&> current_index_changed_event;
+		typedef event<const optional_item_presentation_model_index&, const optional_item_presentation_model_index&> current_index_changed_event;
 		typedef event<const item_selection&, const item_selection&> selection_changed_event;
 	public:
 		struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::i_item_selection_model::no_presentation_model") {} };
@@ -91,13 +91,13 @@ namespace neogfx
 		virtual void set_mode(item_selection_mode aType) = 0;
 	public:
 		virtual bool has_current_index() const = 0;
-		virtual const item_model_index& current_index() const = 0;
-		virtual void set_current_index(const item_model_index& aIndex) = 0;
+		virtual const item_presentation_model_index& current_index() const = 0;
+		virtual void set_current_index(const item_presentation_model_index& aIndex) = 0;
 		virtual void unset_current_index() = 0;
 	public:
 		virtual const item_selection& selection() const = 0;
-		virtual bool is_selected(const item_model_index& aIndex) const = 0;
-		virtual void select(const item_model_index& aIndex, item_selection_operation = item_selection_operation::Select) = 0;
+		virtual bool is_selected(const item_presentation_model_index& aIndex) const = 0;
+		virtual void select(const item_presentation_model_index& aIndex, item_selection_operation = item_selection_operation::Select) = 0;
 		virtual void select(const item_selection::range& aRange, item_selection_operation = item_selection_operation::Select) = 0;
 	public:
 		virtual void subscribe(i_item_selection_model_subscriber& aSubscriber) = 0;

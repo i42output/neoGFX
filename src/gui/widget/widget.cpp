@@ -1197,11 +1197,13 @@ namespace neogfx
 	void widget::focus_gained()
 	{
 		update();
+		focus_event.trigger(focus_event::FocusGained);
 	}
 
 	void widget::focus_lost()
 	{
 		update();
+		focus_event.trigger(focus_event::FocusLost);
 	}
 
 	bool widget::ignore_mouse_events() const

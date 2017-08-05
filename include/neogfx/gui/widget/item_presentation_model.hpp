@@ -49,9 +49,9 @@ namespace neogfx
 			typename container_traits::allocator_type::template rebind<std::pair<const item_model_index::column_type, item_presentation_model_index::column_type>>::other> column_map_type;
 		struct column_info
 		{
-			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn }, editable{ item_editable::No } {}
+			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn }, editable{ item_cell_editable::No } {}
 			item_model_index::column_type modelColumn;
-			item_editable editable;
+			item_cell_editable editable;
 			mutable boost::optional<std::string> headingText;
 			mutable font headingFont;
 			mutable optional_size extents;
@@ -161,13 +161,13 @@ namespace neogfx
 			iColumns[aColumnIndex].extents = boost::none;
 			notify_observers(i_item_presentation_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
 		}
-		item_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const override
+		item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const override
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				throw bad_column_index();
 			return iColumns[aColumnIndex].editable;
 		}
-		void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_editable aEditable) override
+		void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_cell_editable aEditable) override
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				throw bad_column_index();
@@ -273,6 +273,10 @@ namespace neogfx
 			return iRows[aIndex.row()].second[aIndex.column()];
 		}
 	public:
+		item_cell_editable cell_editable(const item_presentation_model_index& aIndex) const override
+		{
+			return column_editable(aIndex.column());
+		}
 		std::string cell_to_string(const item_presentation_model_index& aIndex) const override
 		{
 			auto modelIndex = to_item_model_index(aIndex);
@@ -300,12 +304,16 @@ namespace neogfx
 				return "";
 			}
 		}
+		item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const override
+		{
+			return 424242u; /* todo */
+		}
 		boost::basic_format<char> cell_format(const item_presentation_model_index&) const override
 		{
 			static const boost::basic_format<char> sDefaultFormat("%1%");
 			return sDefaultFormat;
 		}
-		optional_colour cell_colour(const item_presentation_model_index&, colour_type_e) const override
+		optional_colour cell_colour(const item_presentation_model_index&, item_cell_colour_type) const override
 		{
 			return optional_colour();
 		}
@@ -452,6 +460,9 @@ namespace neogfx
 		{
 			if (!iInitializing)
 			{
+				auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
+				cellMeta.text = boost::none;
+				cellMeta.extents = boost::none;
 				notify_observers(i_item_presentation_model_subscriber::NotifyItemChanged, from_item_model_index(aItemIndex));
 				sort();
 			}

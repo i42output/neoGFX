@@ -46,6 +46,12 @@ namespace neogfx
 		ConsumeReturnKey	= 0x20000000
 	};
 
+	enum class focus_event
+	{
+		FocusGained,
+		FocusLost
+	};
+
 	class i_widget : public i_widget_geometry, public i_units_context, public i_keyboard_handler
 	{
 	public:
@@ -55,6 +61,7 @@ namespace neogfx
 		event<graphics_context&> painting;
 		event<const neogfx::mouse_event&> mouse_event;
 		event<const neogfx::keyboard_event&> keyboard_event;
+		event<neogfx::focus_event> focus_event;
 	public:
 		typedef std::vector<std::shared_ptr<i_widget>> widget_list;
 	protected:

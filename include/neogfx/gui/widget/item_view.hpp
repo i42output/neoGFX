@@ -31,6 +31,8 @@ namespace neogfx
 	class item_view : public scrollable_widget, protected header_view::i_owner, private i_item_model_subscriber, private i_item_presentation_model_subscriber, private i_item_selection_model_subscriber
 	{
 	public:
+		struct no_editor : std::logic_error { no_editor() : std::logic_error("neogfx::item_view::no_editor") {} };
+	public:
 		item_view();
 		item_view(i_widget& aParent);
 		item_view(i_layout& aLayout);
@@ -52,7 +54,11 @@ namespace neogfx
 		void set_selection_model(i_item_selection_model& aSelectionModel);
 		void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
 	public:
-		void make_visible(const item_model_index& aItemIndex);
+		void make_visible(const item_presentation_model_index& aItemIndex);
+		const optional_item_presentation_model_index& editing() const;
+		void edit(const item_presentation_model_index& aItemIndex);
+		void end_edit(bool aCommit);
+		i_widget& editor() const;
 	protected:
 		void header_view_updated(header_view& aHeaderView) override;
 		neogfx::margins cell_margins() const override;
@@ -102,7 +108,7 @@ namespace neogfx
 		void model_changed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel, i_item_presentation_model& aOldModel) override;
 		void model_removed(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aOldModel) override;
 		void selection_mode_changed(const i_item_selection_model& aSelectionModel, item_selection_mode aNewMode) override;
-		void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_model_index& aCurrentIndex, const optional_item_model_index& aPreviousIndex) override;
+		void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) override;
 		void selection_changed(const i_item_selection_model& aSelectionModel, const item_selection& aCurrentSelection, const item_selection& aPreviousSelection) override;
 		void selection_model_destroyed(const i_item_selection_model& aSelectionModel) override;
 	public:
@@ -113,5 +119,7 @@ namespace neogfx
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
 		std::shared_ptr<i_item_selection_model> iSelectionModel;
 		boost::optional<std::shared_ptr<neolib::callback_timer>> iMouseTracker;
+		optional_item_presentation_model_index iEditing;
+		std::shared_ptr<i_widget> iEditor;
 	};
 }

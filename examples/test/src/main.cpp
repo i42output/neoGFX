@@ -49,20 +49,20 @@ class my_item_presentation_model : public ng::basic_item_presentation_model<my_i
 private:
 	typedef ng::basic_item_presentation_model<my_item_model> base_type;
 public:
-	my_item_presentation_model(my_item_model& aModel, colour_type_e aColourType) : base_type{ aModel }, iColourType{ aColourType }
+	my_item_presentation_model(my_item_model& aModel, ng::item_cell_colour_type aColourType) : base_type{ aModel }, iColourType{ aColourType }
 	{
 	}
 public:
-	ng::optional_colour cell_colour(const ng::item_presentation_model_index& aIndex, colour_type_e aColourType) const override
+	ng::optional_colour cell_colour(const ng::item_presentation_model_index& aIndex, ng::item_cell_colour_type aColourType) const override
 	{
 		neolib::basic_random<double> prng{ (to_item_model_index(aIndex).row() << 16) + to_item_model_index(aIndex).column() }; // use seed to make random colour based on row/index
 		if (aColourType == iColourType)
 			return ng::hsv_color{prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
 		else
-			return iColourType == ForegroundColour ? ng::optional_colour{} : ng::colour::Black;
+			return iColourType == ng::item_cell_colour_type::Foreground ? ng::optional_colour{} : ng::colour::Black;
 	}
 private:
-	colour_type_e iColourType;
+	ng::item_cell_colour_type iColourType;
 };
 
 class keypad_button : public ng::push_button
@@ -571,12 +571,12 @@ int main(int argc, char* argv[])
 		itemModel.set_column_max_value(0, 99999);
 		itemModel.set_column_step_value(0, 1);
 		tableView1.set_model(itemModel);
-		my_item_presentation_model ipm1{ itemModel, my_item_presentation_model::ForegroundColour };
+		my_item_presentation_model ipm1{ itemModel, ng::item_cell_colour_type::Foreground };
 		tableView1.set_presentation_model(ipm1);
-		ipm1.set_column_editable(0, ng::item_editable::WhenFocused);
-		ipm1.set_column_editable(1, ng::item_editable::OnInputEvent);
+		ipm1.set_column_editable(0, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(1, ng::item_cell_editable::OnInputEvent);
 		tableView2.set_model(itemModel);
-		my_item_presentation_model ipm2{ itemModel, my_item_presentation_model::BackgroundColour };
+		my_item_presentation_model ipm2{ itemModel, ng::item_cell_colour_type::Background };
 		tableView2.set_presentation_model(ipm2);
 		tableView2.column_header().set_expand_last_column(true);
 		tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)
