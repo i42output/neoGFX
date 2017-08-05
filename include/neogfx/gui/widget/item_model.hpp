@@ -376,6 +376,8 @@ namespace neogfx
 			ri->second[aColumnIndex] = aCellData;
 			if (iColumns.size() < aColumnIndex + 1)
 				iColumns.resize(aColumnIndex + 1);
+			if (default_cell_data_info(aColumnIndex).type == item_cell_data_type::Unknown)
+				default_cell_data_info(aColumnIndex).type = static_cast<item_cell_data_type>(aCellData.which());
 			item_model_index index = iterator_to_index(aItem);
 			index.set_column(aColumnIndex);
 			notify_observers(i_item_model_subscriber::NotifyItemChanged, index);
@@ -387,6 +389,8 @@ namespace neogfx
 		void update_cell_data(const item_model_index& aIndex, const item_cell_data& aCellData) override
 		{
 			iItems[aIndex.row()].second[aIndex.column()] = aCellData;
+			if (default_cell_data_info(aIndex.column()).type == item_cell_data_type::Unknown)
+				default_cell_data_info(aIndex.column()).type = static_cast<item_cell_data_type>(aCellData.which());
 			notify_observers(i_item_model_subscriber::NotifyItemChanged, aIndex);
 		}
 	public:

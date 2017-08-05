@@ -575,6 +575,9 @@ int main(int argc, char* argv[])
 		tableView1.set_presentation_model(ipm1);
 		ipm1.set_column_editable(0, ng::item_cell_editable::WhenFocused);
 		ipm1.set_column_editable(1, ng::item_cell_editable::OnInputEvent);
+		ipm1.set_column_editable(2, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(3, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(4, ng::item_cell_editable::WhenFocused);
 		tableView2.set_model(itemModel);
 		my_item_presentation_model ipm2{ itemModel, ng::item_cell_colour_type::Background };
 		tableView2.set_presentation_model(ipm2);

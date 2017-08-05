@@ -306,7 +306,55 @@ namespace neogfx
 		}
 		item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const override
 		{
-			return 424242u; /* todo */
+			switch (item_model().cell_data_info(to_item_model_index(aIndex)).type)
+			{
+			case item_cell_data_type::Bool:
+				{
+					bool value;
+					std::istringstream(aString) >> value;
+					return value;
+				}
+			case item_cell_data_type::Int32:
+				{
+					int32_t value;
+					std::istringstream(aString) >> value;
+					return value;
+				}
+			case item_cell_data_type::UInt32:
+				{
+					uint32_t value;
+					std::istringstream(aString) >> value;
+					return value;
+				}
+			case item_cell_data_type::Int64:
+				{
+					int64_t value;
+					std::istringstream(aString) >> value;
+					return value;
+				}
+			case item_cell_data_type::UInt64:
+				{
+					uint64_t value;
+					std::istringstream(aString) >> value;
+					return value;
+				}
+			case item_cell_data_type::Float:
+				{
+					float value;
+					std::istringstream(aString) >> value;
+					return value;
+				}
+			case item_cell_data_type::Double:
+				{
+					double value;
+					std::istringstream(aString) >> value;
+					return value;
+				}
+			case item_cell_data_type::String:
+				return aString;
+			default:
+				return item_cell_data{};
+			}
 		}
 		boost::basic_format<char> cell_format(const item_presentation_model_index&) const override
 		{
