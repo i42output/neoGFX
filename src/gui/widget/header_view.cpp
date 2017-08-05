@@ -36,6 +36,9 @@ namespace neogfx
 				neolib::destroyable::destroyed_flag destroyed(*this);
 				aParent.layout().set_spacing(aParent.separator_width());
 				aParent.iSectionWidths.resize(aParent.presentation_model().columns());
+				if (iRow == 0)
+					for (auto& sw : aParent.iSectionWidths)
+						sw.second = 0.0;
 				while (aParent.layout().item_count() > aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
 					aParent.layout().remove_item_at(aParent.layout().item_count() - 1);
 				while (aParent.layout().item_count() < aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))

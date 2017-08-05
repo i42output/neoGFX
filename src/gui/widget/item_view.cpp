@@ -557,9 +557,15 @@ namespace neogfx
 		optional_colour backgroundColour = presentation_model().cell_colour(aItemIndex, item_cell_colour_type::Background);
 		lineEdit.set_default_style(line_edit::style{ presentation_model().cell_font(aItemIndex), *textColour, backgroundColour != boost::none ? line_edit::style::colour_type{ *backgroundColour } : line_edit::style::colour_type{} });
 		lineEdit.set_text(presentation_model().cell_to_string(aItemIndex));
+		lineEdit.set_focus_policy(lineEdit.focus_policy() | neogfx::focus_policy::ConsumeReturnKey);
 		lineEdit.focus_event([this, aItemIndex](neogfx::focus_event fe)
 		{
 			if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != aItemIndex))
+				end_edit(true);
+		});
+		lineEdit.keyboard_event([this](neogfx::keyboard_event ke)
+		{
+			if (ke.type() == neogfx::keyboard_event::KeyPressed && (ke.scan_code() == ScanCode_RETURN || ke.scan_code() == ScanCode_KP_ENTER))
 				end_edit(true);
 		});
 		if (has_focus())
@@ -570,7 +576,7 @@ namespace neogfx
 	{
 		if (editing() != boost::none)
 		{
-			auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
+			auto& lineEdit = dynamic_cast<line_edit&>(editor()); // todo: refactor away this dynamic_cast
 			lineEdit.set_focus();
 			lineEdit.cursor().set_anchor(lineEdit.cursor().position()); // todo: set cursor to mouse click position
 		}
@@ -580,10 +586,11 @@ namespace neogfx
 	{
 		if (editing() == boost::none)
 			return;
+		bool hadFocus = editor().has_focus();
 		if (aCommit)
 		{
 			auto modelIndex = presentation_model().to_item_model_index(*editing());
-			auto lineEdit = dynamic_cast<line_edit*>(&*iEditor); // todo: refactor away this dynamic_cast
+			auto lineEdit = dynamic_cast<line_edit*>(&editor()); // todo: refactor away this dynamic_cast
 			item_cell_data cellData;
 			if (lineEdit)
 				cellData = presentation_model().string_to_cell_data(*editing(), lineEdit->text());
@@ -596,6 +603,8 @@ namespace neogfx
 			iEditing = boost::none;
 			iEditor = nullptr;
 		}
+		if (hadFocus)
+			set_focus();
 	}
 
 	i_widget& item_view::editor() const
@@ -609,6 +618,11 @@ namespace neogfx
 	{
 		update_scrollbar_visibility();
 		update();
+		if (editing() != boost::none)
+		{
+			editor().move(cell_rect(*editing()).position());
+			editor().resize(cell_rect(*editing()).extents());
+		}
 	}
 
 	neogfx::margins item_view::cell_margins() const

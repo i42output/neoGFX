@@ -49,6 +49,7 @@ namespace neogfx
 		widget(i_widget& aParent);
 		widget(i_layout& aLayout);
 		~widget();
+		neolib::i_destroyable& as_destroyable() override;
 	public:
 		const i_device_metrics& device_metrics() const override;
 		units_e units() const override;

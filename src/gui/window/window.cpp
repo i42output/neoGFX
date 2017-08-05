@@ -965,9 +965,29 @@ namespace neogfx
 			if (has_focused_widget())
 			{
 				i_widget* w = &focused_widget();
-				while ((!can_consume(*w) || !w->keyboard_event.trigger(native_window().current_event()) || !w->key_pressed(aScanCode, aKeyCode, aKeyModifiers)) && w != this)
+				auto reject = [this, can_consume, aScanCode, aKeyCode, aKeyModifiers](i_widget*& w)
+				{
+					if (w == this)
+						return false;
+					i_widget& check = *w;
 					w = &w->parent();
-				if (w == this && can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
+					if (!can_consume(check))
+						return true;
+					destroyed_flag destroyed{ check.as_destroyable() };
+					if (!check.keyboard_event.trigger(native_window().current_event()))
+						return true;
+					if (destroyed)
+						return true;
+					if (!check.key_pressed(aScanCode, aKeyCode, aKeyModifiers))
+						return true;
+					if (destroyed)
+						return true;
+					return false;
+				};
+				while (reject(w))
+					;
+				destroyed_flag destroyed{ *this };
+				if (w == this && can_consume(*this) && keyboard_event.trigger(native_window().current_event()) && !destroyed)
 					key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			}
 			else if (can_consume(*this) && keyboard_event.trigger(native_window().current_event()))

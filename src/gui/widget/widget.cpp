@@ -140,6 +140,11 @@ namespace neogfx
 			parent().remove_widget(*this);
 	}
 
+	neolib::i_destroyable& widget::as_destroyable()
+	{
+		return *this;
+	}
+
 	const i_device_metrics& widget::device_metrics() const
 	{
 		return iDeviceMetricsForwarder;
