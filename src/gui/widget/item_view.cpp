@@ -490,10 +490,15 @@ namespace neogfx
 	void item_view::items_sorting(const i_item_presentation_model&)
 	{
 		end_edit(true);
+		if (selection_model().has_current_index())
+			iSavedModelIndex = presentation_model().to_item_model_index(selection_model().current_index());
 	}
 
 	void item_view::items_sorted(const i_item_presentation_model&)
 	{
+		if (iSavedModelIndex != boost::none)
+			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
+		iSavedModelIndex = boost::none;
 		update();
 	}
 
@@ -525,7 +530,7 @@ namespace neogfx
 			make_visible(*aCurrentIndex);
 			update(cell_rect(*aCurrentIndex, true));
 			auto modelIndex = presentation_model().to_item_model_index(*aCurrentIndex);
-			if (presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex)
+			if (presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == boost::none)
 				edit(*aCurrentIndex);
 			else if (editing() != boost::none)
 				end_edit(true);

@@ -126,5 +126,6 @@ namespace neogfx
 		optional_item_presentation_model_index iEditing;
 		std::shared_ptr<i_widget> iEditor;
 		bool iEndingEdit;
+		optional_item_model_index iSavedModelIndex;
 	};
 }
