@@ -442,6 +442,7 @@ namespace neogfx
 			break;
 		case ScanCode_PAGEUP:
 		case ScanCode_PAGEDOWN:
+			if (iType == MultiLine)
 			{
 				if (aScanCode == ScanCode_PAGEUP && vertical_scrollbar().position() == vertical_scrollbar().minimum())
 					cursor().set_position(0, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
@@ -454,6 +455,14 @@ namespace neogfx
 					set_cursor_position(pos + client_rect(false).top_left(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 				}
 			}
+			else
+				handled = false;
+			break;
+		case ScanCode_ESCAPE:
+			if (cursor().anchor() != cursor().position())
+				cursor().set_anchor(cursor().position());
+			else if (iType == SingleLine)
+				set_text(std::string{});
 			break;
 		default:
 			handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
