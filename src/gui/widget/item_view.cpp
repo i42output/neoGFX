@@ -26,21 +26,21 @@
 namespace neogfx
 {
 	item_view::item_view() :
-		scrollable_widget()
+		scrollable_widget{}, iBeginningEdit{ false }, iEndingEdit {	false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));
 	}
 
 	item_view::item_view(i_widget& aParent) : 
-		scrollable_widget(aParent)
+		scrollable_widget{ aParent }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));
 	}
 
 	item_view::item_view(i_layout& aLayout) :
-		scrollable_widget(aLayout)
+		scrollable_widget{ aLayout }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));
@@ -256,6 +256,14 @@ namespace neogfx
 		iMouseTracker = boost::none;
 	}
 
+	neogfx::focus_policy item_view::focus_policy() const
+	{
+		auto result = scrollable_widget::focus_policy();
+		if (editing() != boost::none)
+			result |= (focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
+		return result;
+	}
+
 	void item_view::focus_gained()
 	{
 		scrollable_widget::focus_gained();
@@ -312,6 +320,21 @@ namespace neogfx
 			item_presentation_model_index newIndex = currentIndex;
 			switch (aScanCode)
 			{
+			case ScanCode_RETURN:
+			case ScanCode_KP_ENTER:
+				if (editing() != boost::none)
+					end_edit(true);
+				break;
+			case ScanCode_TAB:
+				if (editing() != boost::none)
+				{
+					if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
+						edit(selection_model().next_cell());
+					else
+						edit(selection_model().previous_cell());
+					return true;
+				}
+				break;
 			case ScanCode_LEFT:
 				if (currentIndex.column() > 0)
 					newIndex.set_column(currentIndex.column() - 1);
@@ -574,33 +597,30 @@ namespace neogfx
 
 	void item_view::edit(const item_presentation_model_index& aItemIndex)
 	{
-		if (editing() == aItemIndex || ending_edit())
+		if (editing() == aItemIndex || beginning_edit() || ending_edit())
 			return;
+		neolib::scoped_flag sf{ iBeginningEdit };
+		auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
 		end_edit(true);
-		iEditing = aItemIndex;
-		if (!selection_model().has_current_index() || selection_model().current_index() != aItemIndex)
-			selection_model().set_current_index(aItemIndex);
+		auto newIndex = presentation_model().from_item_model_index(modelIndex);
+		if (!selection_model().has_current_index() || selection_model().current_index() != newIndex)
+			selection_model().set_current_index(newIndex);
+		iEditing = newIndex;
 		iEditor = std::make_shared<line_edit>(*this);
 		auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
 		lineEdit.set_style(frame_style::NoFrame);
-		lineEdit.move(cell_rect(aItemIndex).position());
-		lineEdit.resize(cell_rect(aItemIndex).extents());
+		lineEdit.move(cell_rect(newIndex).position());
+		lineEdit.resize(cell_rect(newIndex).extents());
 		lineEdit.set_margins(cell_margins());
-		optional_colour textColour = presentation_model().cell_colour(aItemIndex, item_cell_colour_type::Foreground);
+		optional_colour textColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Foreground);
 		if (textColour == boost::none)
 			textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
-		optional_colour backgroundColour = presentation_model().cell_colour(aItemIndex, item_cell_colour_type::Background);
-		lineEdit.set_default_style(line_edit::style{ presentation_model().cell_font(aItemIndex), *textColour, backgroundColour != boost::none ? line_edit::style::colour_type{ *backgroundColour } : line_edit::style::colour_type{} });
-		lineEdit.set_text(presentation_model().cell_to_string(aItemIndex));
-		lineEdit.set_focus_policy(lineEdit.focus_policy() | neogfx::focus_policy::ConsumeReturnKey);
-		lineEdit.focus_event([this, aItemIndex](neogfx::focus_event fe)
+		optional_colour backgroundColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Background);
+		lineEdit.set_default_style(line_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != boost::none ? line_edit::style::colour_type{ *backgroundColour } : line_edit::style::colour_type{} });
+		lineEdit.set_text(presentation_model().cell_to_string(newIndex));
+		lineEdit.focus_event([this, newIndex](neogfx::focus_event fe)
 		{
-			if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != aItemIndex))
-				end_edit(true);
-		});
-		lineEdit.keyboard_event([this](neogfx::keyboard_event ke)
-		{
-			if (ke.type() == neogfx::keyboard_event::KeyPressed && (ke.scan_code() == ScanCode_RETURN || ke.scan_code() == ScanCode_KP_ENTER))
+			if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
 				end_edit(true);
 		});
 		if (has_focus())
@@ -649,6 +669,11 @@ namespace neogfx
 		}
 		if (hadFocus)
 			set_focus();
+	}
+
+	bool item_view::beginning_edit() const
+	{
+		return iBeginningEdit;
 	}
 
 	bool item_view::ending_edit() const

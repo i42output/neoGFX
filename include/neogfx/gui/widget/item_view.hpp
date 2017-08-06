@@ -59,6 +59,7 @@ namespace neogfx
 		void edit(const item_presentation_model_index& aItemIndex);
 		void begin_edit();
 		void end_edit(bool aCommit);
+		bool beginning_edit() const;
 		bool ending_edit() const;
 		i_widget& editor() const;
 	protected:
@@ -81,6 +82,7 @@ namespace neogfx
 		void paint(graphics_context& aGraphicsContext) const override;
 	protected:
 		void released() override;
+		neogfx::focus_policy focus_policy() const override;
 		void focus_gained() override;
 	protected:
 		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
@@ -125,6 +127,7 @@ namespace neogfx
 		boost::optional<std::shared_ptr<neolib::callback_timer>> iMouseTracker;
 		optional_item_presentation_model_index iEditing;
 		std::shared_ptr<i_widget> iEditor;
+		bool iBeginningEdit;
 		bool iEndingEdit;
 		optional_item_model_index iSavedModelIndex;
 	};

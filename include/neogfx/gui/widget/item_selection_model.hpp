@@ -116,6 +116,24 @@ namespace neogfx
 			notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
 			current_index_changed.trigger(iCurrentIndex, previousIndex);
 		}
+		item_presentation_model_index next_cell() const override
+		{
+			if (current_index().column() + 1 < presentation_model().columns())
+				return item_presentation_model_index{ current_index().row(), current_index().column() + 1 };
+			else if (current_index().row() + 1 < presentation_model().rows())
+				return item_presentation_model_index{ current_index().row() + 1, 0 };
+			else
+				return current_index();
+		}
+		item_presentation_model_index previous_cell() const override
+		{
+			if (current_index().column() > 0)
+				return item_presentation_model_index{ current_index().row(), current_index().column() - 1 };
+			else if (current_index().row() > 0)
+				return item_presentation_model_index{ current_index().row() - 1, presentation_model().columns() - 1 };
+			else
+				return current_index();
+		}
 	public:
 		const item_selection& selection() const override
 		{

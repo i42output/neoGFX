@@ -94,6 +94,8 @@ namespace neogfx
 		virtual const item_presentation_model_index& current_index() const = 0;
 		virtual void set_current_index(const item_presentation_model_index& aIndex) = 0;
 		virtual void unset_current_index() = 0;
+		virtual item_presentation_model_index next_cell() const = 0;
+		virtual item_presentation_model_index previous_cell() const = 0;
 	public:
 		virtual const item_selection& selection() const = 0;
 		virtual bool is_selected(const item_presentation_model_index& aIndex) const = 0;

@@ -931,6 +931,14 @@ namespace neogfx
 		i_widget* start = this;
 		if (has_focused_widget())
 			start = &focused_widget();
+		if (aScanCode == ScanCode_TAB)
+		{
+			i_widget* w = start;
+			while (w->has_parent() && (w->focus_policy() & focus_policy::ConsumeTabKey) != focus_policy::ConsumeTabKey)
+				w = &w->parent();
+			if ((w->focus_policy() & focus_policy::ConsumeTabKey) == focus_policy::ConsumeTabKey)
+				start = w;
+		}
 		if (aScanCode == ScanCode_TAB && (start->focus_policy() & focus_policy::ConsumeTabKey) != focus_policy::ConsumeTabKey)
 		{
 			i_widget* w = start;
@@ -962,36 +970,39 @@ namespace neogfx
 				else
 					return true;
 			};
-			if (has_focused_widget())
+			auto reject = [this, can_consume, aScanCode, aKeyCode, aKeyModifiers](i_widget*& w)
 			{
-				i_widget* w = &focused_widget();
-				auto reject = [this, can_consume, aScanCode, aKeyCode, aKeyModifiers](i_widget*& w)
-				{
-					if (w == this)
-						return false;
-					i_widget& check = *w;
-					w = &w->parent();
-					if (!can_consume(check))
-						return true;
-					destroyed_flag destroyed{ check.as_destroyable() };
-					if (!check.keyboard_event.trigger(native_window().current_event()))
-						return true;
-					if (destroyed)
-						return true;
-					if (!check.key_pressed(aScanCode, aKeyCode, aKeyModifiers))
-						return true;
-					if (destroyed)
-						return true;
+				if (w == this)
 					return false;
-				};
-				while (reject(w))
-					;
-				destroyed_flag destroyed{ *this };
-				if (w == this && can_consume(*this) && keyboard_event.trigger(native_window().current_event()) && !destroyed)
+				i_widget& check = *w;
+				w = &w->parent();
+				if (!can_consume(check))
+					return true;
+				destroyed_flag destroyed{ check.as_destroyable() };
+				if (!check.keyboard_event.trigger(native_window().current_event()))
+					return true;
+				if (destroyed)
+					return true;
+				if (!check.key_pressed(aScanCode, aKeyCode, aKeyModifiers))
+					return true;
+				if (destroyed)
+					return true;
+				return false;
+			};
+			if (aScanCode != ScanCode_TAB || !can_consume(*start) || reject(start))
+			{
+				if (has_focused_widget())
+				{
+					i_widget* w = &focused_widget();
+					while (reject(w))
+						;
+					destroyed_flag destroyed{ *this };
+					if (w == this && can_consume(*this) && keyboard_event.trigger(native_window().current_event()) && !destroyed)
+						key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+				}
+				else if (can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
 					key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			}
-			else if (can_consume(*this) && keyboard_event.trigger(native_window().current_event()))
-				key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 		}
 	}
 
