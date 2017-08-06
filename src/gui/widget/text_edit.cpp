@@ -285,7 +285,7 @@ namespace neogfx
 		scrollable_widget::focus_gained();
 		app::instance().clipboard().activate(*this);
 		iCursorAnimationStartTime = app::instance().program_elapsed_ms();
-		if (iType == SingleLine)
+		if (iType == SingleLine && !capturing())
 		{
 			cursor().set_anchor(0);
 			cursor().set_position(iText.size(), false);
