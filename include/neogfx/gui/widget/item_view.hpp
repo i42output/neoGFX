@@ -59,6 +59,7 @@ namespace neogfx
 		void edit(const item_presentation_model_index& aItemIndex);
 		void begin_edit();
 		void end_edit(bool aCommit);
+		bool ending_edit() const;
 		i_widget& editor() const;
 	protected:
 		void header_view_updated(header_view& aHeaderView) override;
@@ -83,6 +84,7 @@ namespace neogfx
 		void focus_gained() override;
 	protected:
 		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 	protected:
 		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 	protected:
@@ -102,6 +104,7 @@ namespace neogfx
 		void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
 		void item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
 		void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
+		void items_sorting(const i_item_presentation_model& aModel) override;
 		void items_sorted(const i_item_presentation_model& aModel) override;
 		void model_destroyed(const i_item_presentation_model& aModel) override;
 	protected:
@@ -114,7 +117,7 @@ namespace neogfx
 		void selection_model_destroyed(const i_item_selection_model& aSelectionModel) override;
 	public:
 		rect cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground = false) const;
-		optional_item_model_index item_at(const point& aPosition) const;
+		optional_item_presentation_model_index item_at(const point& aPosition) const;
 	private:
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
@@ -122,5 +125,6 @@ namespace neogfx
 		boost::optional<std::shared_ptr<neolib::callback_timer>> iMouseTracker;
 		optional_item_presentation_model_index iEditing;
 		std::shared_ptr<i_widget> iEditor;
+		bool iEndingEdit;
 	};
 }

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/raii.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/item_view.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
@@ -49,6 +50,8 @@ namespace neogfx
 	{
 		if (has_selection_model())
 			selection_model().unsubscribe(*this);
+		if (has_presentation_model())
+			presentation_model().unsubscribe(*this);
 		if (has_model())
 			model().unsubscribe(*this);
 	}
@@ -123,8 +126,11 @@ namespace neogfx
 
 	void item_view::set_presentation_model(i_item_presentation_model& aPresentationModel)
 	{
+		if (has_presentation_model())
+			presentation_model().unsubscribe(*this);
 		auto oldModel = iPresentationModel;
 		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
+		presentation_model().subscribe(*this);
 		if (has_model())
 			presentation_model().set_item_model(model());
 		if (has_selection_model())
@@ -191,12 +197,12 @@ namespace neogfx
 		update();
 	}
 
-	std::pair<item_model_index::value_type, coordinate> item_view::first_visible_item(graphics_context& aGraphicsContext) const
+	std::pair<item_presentation_model_index::value_type, coordinate> item_view::first_visible_item(graphics_context& aGraphicsContext) const
 	{
 		return presentation_model().item_at(vertical_scrollbar().position(), aGraphicsContext);
 	}
 
-	std::pair<item_model_index::value_type, coordinate> item_view::last_visible_item(graphics_context& aGraphicsContext) const
+	std::pair<item_presentation_model_index::value_type, coordinate> item_view::last_visible_item(graphics_context& aGraphicsContext) const
 	{
 		return presentation_model().item_at(vertical_scrollbar().position() + item_display_rect().height(), aGraphicsContext);
 	}
@@ -254,7 +260,7 @@ namespace neogfx
 	{
 		scrollable_widget::focus_gained();
 		if (model().rows() > 0 && !selection_model().has_current_index())
-			selection_model().set_current_index(item_model_index(0, 0));
+			selection_model().set_current_index(item_presentation_model_index{0, 0});
 		if (editing() == boost::none && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
 			edit(selection_model().current_index());
 		begin_edit();
@@ -267,7 +273,11 @@ namespace neogfx
 		{
 			auto item = item_at(aPosition);
 			if (item != boost::none)
+			{
 				selection_model().set_current_index(*item);
+				if (presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
+					edit(*item);
+			}			
 			iMouseTracker = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.again();
@@ -278,13 +288,25 @@ namespace neogfx
 		}
 	}
 
+	void item_view::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+		auto item = item_at(aPosition);
+		if (item != boost::none)
+		{
+			selection_model().set_current_index(*item);
+			if (presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
+				edit(*item);
+		}
+	}
+
 	bool item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
 	{
 		bool handled = true;
 		if (selection_model().has_current_index())
 		{
-			item_model_index currentIndex = selection_model().current_index();
-			item_model_index newIndex = currentIndex;
+			item_presentation_model_index currentIndex = selection_model().current_index();
+			item_presentation_model_index newIndex = currentIndex;
 			switch (aScanCode)
 			{
 			case ScanCode_LEFT:
@@ -326,13 +348,13 @@ namespace neogfx
 				if ((aKeyModifiers & KeyModifier_CTRL) == 0)
 					newIndex.set_column(0);
 				else
-					newIndex = item_model_index(0, 0);
+					newIndex = item_presentation_model_index{0, 0};
 				break;
 			case ScanCode_END:
 				if ((aKeyModifiers & KeyModifier_CTRL) == 0)
 					newIndex.set_column(model().columns() - 1);
 				else
-					newIndex = item_model_index(model().rows() - 1, model().columns() - 1);
+					newIndex = item_presentation_model_index{ model().rows() - 1, model().columns() - 1 };
 				break;
 			default:
 				handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -352,7 +374,7 @@ namespace neogfx
 			case ScanCode_PAGEDOWN:
 			case ScanCode_HOME:
 			case ScanCode_END:
-				selection_model().set_current_index(item_model_index(0, 0));
+				selection_model().set_current_index(item_presentation_model_index{0, 0});
 				break;
 			default:
 				handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -462,6 +484,11 @@ namespace neogfx
 		update();
 	}
 
+	void item_view::items_sorting(const i_item_presentation_model&)
+	{
+		end_edit(true);
+	}
+
 	void item_view::items_sorted(const i_item_presentation_model&)
 	{
 		update();
@@ -539,7 +566,7 @@ namespace neogfx
 
 	void item_view::edit(const item_presentation_model_index& aItemIndex)
 	{
-		if (editing() == aItemIndex)
+		if (editing() == aItemIndex || ending_edit())
 			return;
 		end_edit(true);
 		iEditing = aItemIndex;
@@ -574,7 +601,7 @@ namespace neogfx
 
 	void item_view::begin_edit()
 	{
-		if (editing() != boost::none)
+		if (editing() != boost::none && !ending_edit())
 		{
 			auto& lineEdit = dynamic_cast<line_edit&>(editor()); // todo: refactor away this dynamic_cast
 			lineEdit.set_focus();
@@ -586,6 +613,7 @@ namespace neogfx
 	{
 		if (editing() == boost::none)
 			return;
+		neolib::scoped_flag sf{ iEndingEdit };
 		bool hadFocus = editor().has_focus();
 		if (aCommit)
 		{
@@ -607,6 +635,11 @@ namespace neogfx
 			set_focus();
 	}
 
+	bool item_view::ending_edit() const
+	{
+		return iEndingEdit;
+	}
+	
 	i_widget& item_view::editor() const
 	{
 		if (iEditor == nullptr)
@@ -664,16 +697,16 @@ namespace neogfx
 		return rect{};
 	}
 
-	optional_item_model_index item_view::item_at(const point& aPosition) const
+	optional_item_presentation_model_index item_view::item_at(const point& aPosition) const
 	{
 		if (model().rows() == 0)
-			return optional_item_model_index();
+			return optional_item_presentation_model_index{};
 		graphics_context gc(*this);
 		point adjustedPos(
 			std::min(std::max(aPosition.x, item_display_rect().left()), item_display_rect().right()),
 			std::min(std::max(aPosition.y, item_display_rect().top()), item_display_rect().bottom()));
-		item_model_index index = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), gc).first;
-		for (uint32_t col = 0; col < model().columns(index.row()); ++col) // TODO: O(n) isn't good enough if lots of columns
+		item_presentation_model_index index = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), gc).first;
+		for (uint32_t col = 0; col < presentation_model().columns(); ++col) // TODO: O(n) isn't good enough if lots of columns
 		{
 			index.set_column(col);
 			rect cellRect = cell_rect(index);
@@ -691,6 +724,6 @@ namespace neogfx
 				return index;
 			}
 		}
-		return optional_item_model_index();
+		return optional_item_presentation_model_index{};
 	}
 }

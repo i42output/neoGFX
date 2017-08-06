@@ -197,6 +197,9 @@ namespace neogfx
 					iCurrentIndex->set_row(iCurrentIndex->row() - 1);
 			}
 		}
+		void items_sorting(const i_item_presentation_model&) override
+		{
+		}
 		void items_sorted(const i_item_presentation_model&) override
 		{
 		}

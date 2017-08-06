@@ -34,52 +34,54 @@ namespace neogfx
 			neolib::callback_timer{ app::instance(), [this, &aParent](neolib::callback_timer&)
 			{
 				neolib::destroyable::destroyed_flag destroyed(*this);
-				aParent.layout().set_spacing(aParent.separator_width());
-				aParent.iSectionWidths.resize(aParent.presentation_model().columns());
 				if (iRow == 0)
+				{
+					aParent.layout().set_spacing(aParent.separator_width());
+					aParent.iSectionWidths.resize(aParent.presentation_model().columns());
 					for (auto& sw : aParent.iSectionWidths)
 						sw.second = 0.0;
-				while (aParent.layout().item_count() > aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
-					aParent.layout().remove_item_at(aParent.layout().item_count() - 1);
-				while (aParent.layout().item_count() < aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
-				{
-					aParent.layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
-				}
-				if (aParent.iButtonSinks.size() < aParent.layout().item_count())
-					aParent.iButtonSinks.resize(aParent.layout().item_count());
-				for (std::size_t i = 0; i < aParent.layout().item_count(); ++i)
-				{
-					push_button& button = aParent.layout().get_widget_at<push_button>(i);
-					if (i < aParent.presentation_model().columns())
+					while (aParent.layout().item_count() > aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
+						aParent.layout().remove_item_at(aParent.layout().item_count() - 1);
+					while (aParent.layout().item_count() < aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
 					{
-						button.text().set_text(aParent.presentation_model().column_heading_text(i));
-						if (!aParent.expand_last_column() || i != aParent.presentation_model().columns() - 1)
-							button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
-								neogfx::size_policy{neogfx::size_policy::Fixed, neogfx::size_policy::Minimum} :
-								neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Fixed});
-						else
+						aParent.layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
+					}
+					if (aParent.iButtonSinks.size() < aParent.layout().item_count())
+						aParent.iButtonSinks.resize(aParent.layout().item_count());
+					for (std::size_t i = 0; i < aParent.layout().item_count(); ++i)
+					{
+						push_button& button = aParent.layout().get_widget_at<push_button>(i);
+						if (i < aParent.presentation_model().columns())
+						{
+							button.text().set_text(aParent.presentation_model().column_heading_text(i));
+							if (!aParent.expand_last_column() || i != aParent.presentation_model().columns() - 1)
+								button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
+									neogfx::size_policy{ neogfx::size_policy::Fixed, neogfx::size_policy::Minimum } :
+									neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Fixed });
+							else
+								button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
+									neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
+									neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Fixed });
+							button.set_minimum_size(optional_size{});
+							button.set_maximum_size(optional_size{});
+							button.enable(true);
+							aParent.iButtonSinks[i] = button.clicked([&aParent, i]()
+							{
+								aParent.surface().save_mouse_cursor();
+								aParent.surface().set_mouse_cursor(mouse_system_cursor::Wait);
+								aParent.presentation_model().sort_by(i);
+								aParent.surface().restore_mouse_cursor();
+							}, aParent);
+						}
+						else if (!aParent.expand_last_column())
+						{
+							button.text().set_text(std::string());
 							button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
 								neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
-								neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Fixed });
-						button.set_minimum_size(optional_size{});
-						button.set_maximum_size(optional_size{});
-						button.enable(true);
-						aParent.iButtonSinks[i] = button.clicked([&aParent, i]()
-						{
-							aParent.surface().save_mouse_cursor();
-							aParent.surface().set_mouse_cursor(mouse_system_cursor::Wait);
-							aParent.presentation_model().sort_by(i);
-							aParent.surface().restore_mouse_cursor();
-						}, aParent);
-					}
-					else if (!aParent.expand_last_column())
-					{
-						button.text().set_text(std::string());
-						button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
-							neogfx::size_policy{neogfx::size_policy::Expanding, neogfx::size_policy::Minimum} :
-							neogfx::size_policy{neogfx::size_policy::Minimum, neogfx::size_policy::Expanding});
-						button.set_minimum_size(size{});
-						button.enable(false);
+								neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+							button.set_minimum_size(size{});
+							button.enable(false);
+						}
 					}
 				}
 				uint64_t since = app::instance().program_elapsed_ms();
@@ -290,6 +292,10 @@ namespace neogfx
 		iSectionWidths.resize(presentation_model().columns());
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
+	}
+
+	void header_view::items_sorting(const i_item_presentation_model&)
+	{
 	}
 
 	void header_view::items_sorted(const i_item_presentation_model&)

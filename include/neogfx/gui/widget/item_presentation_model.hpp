@@ -460,6 +460,7 @@ namespace neogfx
 		{
 			if (iSortOrder.empty())
 				return;
+			notify_observers(i_item_presentation_model_subscriber::NotifyItemsSorting);
 			std::sort(iRows.begin(), iRows.end(), [&](const typename container_type::value_type& aLhs, const typename container_type::value_type& aRhs) -> bool
 			{
 				for (std::size_t i = 0; i < iSortOrder.size(); ++i)
@@ -604,6 +605,9 @@ namespace neogfx
 				break;
 			case i_item_presentation_model_subscriber::NotifyItemRemoved:
 				aObserver.item_removed(*this, *static_cast<const item_presentation_model_index*>(aParameter));
+				break;
+			case i_item_presentation_model_subscriber::NotifyItemsSorting:
+				aObserver.items_sorting(*this);
 				break;
 			case i_item_presentation_model_subscriber::NotifyItemsSorted:
 				aObserver.items_sorted(*this);

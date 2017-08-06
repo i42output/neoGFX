@@ -44,10 +44,11 @@ namespace neogfx
 		virtual void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
 		virtual void item_changed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
 		virtual void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
+		virtual void items_sorting(const i_item_presentation_model& aModel) = 0;
 		virtual void items_sorted(const i_item_presentation_model& aModel) = 0;
 		virtual void model_destroyed(const i_item_presentation_model& aModel) = 0;
 	public:
-		enum notify_type { NotifyColumnInfoChanged, NotifyItemModelChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorted, NotifyModelDestroyed };
+		enum notify_type { NotifyColumnInfoChanged, NotifyItemModelChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorting, NotifyItemsSorted, NotifyModelDestroyed };
 	};
 
 	enum class item_cell_selection_flags
