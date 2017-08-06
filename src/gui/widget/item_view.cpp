@@ -620,7 +620,7 @@ namespace neogfx
 		lineEdit.set_text(presentation_model().cell_to_string(newIndex));
 		lineEdit.focus_event([this, newIndex](neogfx::focus_event fe)
 		{
-			if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
+			if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().has_focused_widget() || !surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
 				end_edit(true);
 		});
 		if (has_focus())
