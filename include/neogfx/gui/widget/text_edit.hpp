@@ -474,6 +474,7 @@ namespace neogfx
 		virtual std::pair<position_type, position_type> word_at(position_type aTextPosition) const;
 	public:
 		neogfx::cursor& cursor() const;
+		void set_cursor_position(const point& aPoint, bool aMoveAnchor = true, bool aEnableDragger = false);
 	private:
 		struct position_info
 		{

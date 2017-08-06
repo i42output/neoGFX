@@ -278,13 +278,16 @@ namespace neogfx
 				if (presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
 					edit(*item);
 			}			
-			iMouseTracker = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			if (capturing())
 			{
-				aTimer.again();
-				auto item = item_at(surface().mouse_position() - origin());
-				if (item != boost::none)
-					selection_model().set_current_index(*item);
-			}, 100);
+				iMouseTracker = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+				{
+					aTimer.again();
+					auto item = item_at(surface().mouse_position() - origin());
+					if (item != boost::none)
+						selection_model().set_current_index(*item);
+				}, 100);
+			}
 		}
 	}
 
@@ -605,7 +608,15 @@ namespace neogfx
 		{
 			auto& lineEdit = dynamic_cast<line_edit&>(editor()); // todo: refactor away this dynamic_cast
 			lineEdit.set_focus();
-			lineEdit.cursor().set_anchor(lineEdit.cursor().position()); // todo: set cursor to mouse click position
+			if (lineEdit.client_rect().contains(surface().mouse_position() - lineEdit.origin()))
+			{
+				bool enableDragger = capturing();
+				if (enableDragger)
+					release_capture();
+				lineEdit.set_cursor_position(surface().mouse_position() - lineEdit.origin(), true, enableDragger);
+			}
+			else
+				lineEdit.cursor().set_anchor(lineEdit.cursor().position());
 		}
 	}
 

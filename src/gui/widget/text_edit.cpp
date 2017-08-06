@@ -310,15 +310,7 @@ namespace neogfx
 		scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left && client_rect().contains(aPosition))
 		{
-			set_cursor_glyph_position(hit_test(aPosition), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
-			if (capturing())
-			{
-				iDragger.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
-				{
-					aTimer.again();
-					set_cursor_glyph_position(hit_test(surface().mouse_position() - origin()), false);
-				}, 250);
-			}
+			set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
 		}
 	}
 
@@ -358,7 +350,7 @@ namespace neogfx
 	{
 		scrollable_widget::mouse_moved(aPosition);
 		if (iDragger != boost::none)
-			set_cursor_glyph_position(hit_test(aPosition), false);
+			set_cursor_position(aPosition, false);
 	}
 
 	void text_edit::mouse_entered()
@@ -459,7 +451,7 @@ namespace neogfx
 				{
 					auto pos = point{ glyph_position(cursor_glyph_position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } };
 					scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
-					set_cursor_glyph_position(hit_test(pos + client_rect(false).top_left()), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+					set_cursor_position(pos + client_rect(false).top_left(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
 				}
 			}
 			break;
@@ -890,6 +882,21 @@ namespace neogfx
 	neogfx::cursor& text_edit::cursor() const
 	{
 		return iCursor;
+	}
+
+	void text_edit::set_cursor_position(const point& aPoint, bool aMoveAnchor, bool aEnableDragger)
+	{
+		set_cursor_glyph_position(hit_test(aPoint), aMoveAnchor);
+		if (aEnableDragger)
+		{
+			if (!capturing())
+				set_capture();
+			iDragger.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+			{
+				aTimer.again();
+				set_cursor_position(surface().mouse_position() - origin(), false);
+			}, 250);
+		}
 	}
 
 	text_edit::position_info text_edit::glyph_position(position_type aGlyphPosition, bool aForCursor) const
