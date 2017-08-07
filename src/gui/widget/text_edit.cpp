@@ -947,7 +947,7 @@ namespace neogfx
 					{
 						auto iterGlyph = to_glyph(iterChar - 1);
 						const auto& g = *iterGlyph;
-						if (g.direction() == text_direction::RTL || g.direction() == text_direction::Digits_RTL)
+						if (g.direction() == text_direction::RTL || g.direction() == text_direction::Digit_RTL)
 						{
 							aGlyphPosition = iterGlyph - iGlyphs.begin();
 							placeCursorToRight = (g.direction() == text_direction::RTL ? false : true);

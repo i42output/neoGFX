@@ -1123,20 +1123,28 @@ namespace neogfx
 			{
 			case text_category::LTR:
 				currentLineHasLTR = true;
-				if (currentDirection == text_direction::Digits_LTR || currentDirection == text_direction::Digits_RTL ||
+				if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::None_RTL ||
+					currentDirection == text_direction::Digit_LTR || currentDirection == text_direction::Digit_RTL ||
 					currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
 					currentDirection = text_direction::LTR;
 				break;
 			case text_category::RTL:
-				if (currentDirection == text_direction::Digits_LTR || currentDirection == text_direction::Digits_RTL ||
+				if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::None_RTL ||
+					currentDirection == text_direction::Digit_LTR || currentDirection == text_direction::Digit_RTL ||
 					currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
 					currentDirection = text_direction::RTL;
 				break;
+			case text_category::None:
+				if (currentDirection == text_direction::LTR)
+					currentDirection = text_direction::None_LTR;
+				else if (currentDirection == text_direction::RTL)
+					currentDirection = text_direction::None_RTL;
+				break;
 			case text_category::Digit:
 				if (currentDirection == text_direction::LTR)
-					currentDirection = text_direction::Digits_LTR;
+					currentDirection = text_direction::Digit_LTR;
 				else if (currentDirection == text_direction::RTL)
-					currentDirection = text_direction::Digits_RTL;
+					currentDirection = text_direction::Digit_RTL;
 				break;
 			case text_category::Emoji:
 				if (currentDirection == text_direction::LTR)
@@ -1145,26 +1153,25 @@ namespace neogfx
 					currentDirection = text_direction::Emoji_RTL;
 				break;
 			}
-			if (currentDirection == text_direction::Digits_LTR) // optimization (less runs for LTR text)
+			if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::Digit_LTR) // optimization (less runs for LTR text)
 				currentDirection = text_direction::LTR;
 			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[i]);
 			bool newRun =
 				previousFont != currentFont ||
-				(newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::Digits_RTL
-					|| previousDirection == text_direction::Emoji_RTL)) ||
+				(newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::None_RTL || previousDirection == text_direction::Digit_RTL || previousDirection == text_direction::Emoji_RTL)) ||
 				currentCategory == text_category::Mnemonic ||
 				previousCategory == text_category::Mnemonic ||
-				previousDirection != currentDirection ||
-				(previousScript != currentScript && (previousScript != HB_SCRIPT_COMMON && currentScript != HB_SCRIPT_COMMON));
+				base_text_direction(previousDirection) != base_text_direction(currentDirection) ||
+				previousScript != currentScript;
 			if (!newRun)
 			{
 				if ((currentCategory == text_category::Whitespace || currentCategory == text_category::None || currentCategory == text_category::Mnemonic) &&
-					(currentDirection == text_direction::RTL || currentDirection == text_direction::Digits_RTL || currentDirection == text_direction::Emoji_RTL))
+					(currentDirection == text_direction::RTL || currentDirection == text_direction::None_RTL || currentDirection == text_direction::Digit_RTL || currentDirection == text_direction::Emoji_RTL))
 				{
 					for (std::size_t j = i + 1; j <= lastCodePointIndex; ++j)
 					{
 						text_direction nextDirection = bidi_check(get_text_category(emojiAtlas, codePoints + j, codePoints + codePointCount), get_text_direction(emojiAtlas, codePoints + j, codePoints + codePointCount, currentDirection));
-						if (nextDirection == text_direction::RTL || nextDirection == text_direction::Digits_RTL)
+						if (nextDirection == text_direction::RTL || currentDirection == text_direction::None_RTL || nextDirection == text_direction::Digit_RTL)
 							break;
 						else if (nextDirection == text_direction::LTR || (j == lastCodePointIndex - 1 && currentLineHasLTR))
 						{
@@ -1185,8 +1192,7 @@ namespace neogfx
 			}
 			previousDirection = currentDirection;
 			previousCategory = currentCategory;
-			if (previousCategory == text_category::LTR || previousCategory == text_category::RTL || previousCategory == text_category::Mnemonic)
-				previousScript = currentScript;
+			previousScript = currentScript;
 			if (i == lastCodePointIndex)
 				runs.push_back(std::make_tuple(runStart, &codePoints[i + 1], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
 			previousFont = currentFont;
@@ -1199,10 +1205,13 @@ namespace neogfx
 			do
 			{
 				auto direction = std::get<2>(runs[i]);
-				if ((startDirection == text_direction::RTL || startDirection == text_direction::Digits_RTL || startDirection == text_direction::Emoji_RTL) &&
-					(direction == text_direction::RTL || direction == text_direction::Digits_RTL || direction == text_direction::Emoji_RTL))
+				auto nextDirection = i < runs.size() - 1 ? std::get<2>(runs[i+1]) : direction;
+				if ((startDirection == text_direction::RTL || startDirection == text_direction::Digit_RTL || startDirection == text_direction::Emoji_RTL) &&
+					(direction == text_direction::RTL || direction == text_direction::Digit_RTL || direction == text_direction::Emoji_RTL || nextDirection == text_direction::RTL))
 				{
 					auto m = runs[i];
+					if (direction == text_direction::None_RTL)
+						std::reverse(const_cast<char32_t*>(std::get<0>(m)), const_cast<char32_t*>(std::get<1>(m)));
 					runs.erase(runs.begin() + i);
 					runs.insert(runs.begin() + j, m);
 					++i;

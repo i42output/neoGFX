@@ -49,14 +49,22 @@ namespace neogfx
 
 	enum class text_direction : uint8_t
 	{
-		Invalid = 0x00,
-		LTR = 0x01,
-		RTL = 0x02,
-		Digits_LTR = 0x04, // unused
-		Digits_RTL = 0x08,
-		Emoji_LTR = 0x10,
-		Emoji_RTL = 0x20
+		Invalid =		0x00,
+		LTR =			0x01,
+		RTL =			0x02,
+		None_LTR =		0x04 | 0x01,
+		None_RTL =		0x08 | 0x02,
+		Digit_LTR =		0x10 | 0x01, // unused
+		Digit_RTL =		0x20 | 0x02,
+		Emoji_LTR =		0x40 | 0x01,
+		Emoji_RTL =		0x80 | 0x02,
+		BaseMask =		0x01 | 0x02
 	};
+
+	inline text_direction base_text_direction(text_direction aDirection)
+	{
+		return static_cast<text_direction>(static_cast<uint8_t>(aDirection) & static_cast<uint8_t>(text_direction::BaseMask));
+	}
 
 	class character_type
 	{

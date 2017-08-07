@@ -1863,9 +1863,14 @@ namespace neogfx
 			return text_direction::LTR;
 		case text_category::RTL:
 			return text_direction::RTL;
+		case text_category::None:
+			if (aExistingDirection == text_direction::RTL || aExistingDirection == text_direction::None_RTL)
+				return text_direction::None_RTL;
+			else
+				return text_direction::LTR;
 		case text_category::Digit:
-			if (aExistingDirection == text_direction::RTL || aExistingDirection == text_direction::Digits_RTL)
-				return text_direction::Digits_RTL;
+			if (aExistingDirection == text_direction::RTL || aExistingDirection == text_direction::Digit_RTL)
+				return text_direction::Digit_RTL;
 			else
 				return text_direction::LTR;
 		case text_category::Emoji:
