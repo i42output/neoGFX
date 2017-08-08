@@ -36,15 +36,16 @@ namespace neogfx
 
 	enum class text_category : uint8_t
 	{
-		Unknown = 0x00,
-		None = 0x01,
-		Whitespace = 0x02,
-		Digit = 0x04,
-		LTR = 0x08,
-		RTL = 0x10,
-		Mnemonic = 0x20,
-		Emoji = 0x40,
-		Control = 0x80
+		Unknown		= 0x00,
+		None		= 0x01,
+		Whitespace	= 0x02,
+		Digit		= 0x03,
+		LTR			= 0x04,
+		RTL			= 0x05,
+		Mark		= 0x06,
+		Mnemonic	= 0x07,
+		Emoji		= 0x08,
+		Control		= 0x09
 	};
 
 	enum class text_direction : uint8_t
