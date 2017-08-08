@@ -43,7 +43,8 @@ namespace neogfx
 		PointerFocus		= 0x00000008,
 		SloppyFocus			= 0x00000010,
 		ConsumeTabKey		= 0x10000000,
-		ConsumeReturnKey	= 0x20000000
+		ConsumeReturnKey	= 0x20000000,
+		IgnoreNonClient		= 0x40000000
 	};
 
 	enum class focus_event

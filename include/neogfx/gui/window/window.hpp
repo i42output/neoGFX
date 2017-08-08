@@ -173,7 +173,7 @@ namespace neogfx
 		neogfx::mouse_cursor native_window_mouse_cursor() const override;
 	private:
 		void init();
-		void update_click_focus(i_widget& aCandidateWidget);
+		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos);
 		void update_modality();
 		void dismiss_children(const i_widget* aClickedWidget = 0);
 		void mouse_entered();

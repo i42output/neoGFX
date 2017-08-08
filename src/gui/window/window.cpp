@@ -884,7 +884,7 @@ namespace neogfx
 	{
 		i_widget& w = widget_for_mouse_event(aPosition);
 		dismiss_children(&w);
-		update_click_focus(w);
+		update_click_focus(w, aPosition - w.origin());
 		if (w.mouse_event.trigger(native_window().current_event()))
 			w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
@@ -893,7 +893,7 @@ namespace neogfx
 	{
 		i_widget& w = widget_for_mouse_event(aPosition);
 		dismiss_children(&w);
-		update_click_focus(w);
+		update_click_focus(w, aPosition - w.origin());
 		if (w.mouse_event.trigger(native_window().current_event()))
 			w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
@@ -1085,12 +1085,15 @@ namespace neogfx
 		return widgetUnderMouse.mouse_cursor();
 	}
 
-	void window::update_click_focus(i_widget& aCandidateWidget)
+	void window::update_click_focus(i_widget& aCandidateWidget, const point& aClickPos)
 	{
 		if (aCandidateWidget.enabled() && (aCandidateWidget.focus_policy() & focus_policy::ClickFocus) == focus_policy::ClickFocus)
-			aCandidateWidget.set_focus();
+		{
+			if ((aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient || aCandidateWidget.client_rect().contains(aClickPos))
+				aCandidateWidget.set_focus();
+		}
 		else if (aCandidateWidget.has_parent())
-			update_click_focus(aCandidateWidget.parent());
+			update_click_focus(aCandidateWidget.parent(), aClickPos + aCandidateWidget.origin() - aCandidateWidget.origin());
 	}
 
 	void window::update_modality()

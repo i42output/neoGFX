@@ -28,21 +28,21 @@ namespace neogfx
 	item_view::item_view() :
 		scrollable_widget{}, iBeginningEdit{ false }, iEndingEdit {	false }
 	{
-		set_focus_policy(focus_policy::ClickTabFocus);
+		set_focus_policy(focus_policy::ClickTabFocus | focus_policy::IgnoreNonClient);
 		set_margins(neogfx::margins(0.0));
 	}
 
 	item_view::item_view(i_widget& aParent) : 
 		scrollable_widget{ aParent }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
-		set_focus_policy(focus_policy::ClickTabFocus);
+		set_focus_policy(focus_policy::ClickTabFocus | focus_policy::IgnoreNonClient);
 		set_margins(neogfx::margins(0.0));
 	}
 
 	item_view::item_view(i_layout& aLayout) :
 		scrollable_widget{ aLayout }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
-		set_focus_policy(focus_policy::ClickTabFocus);
+		set_focus_policy(focus_policy::ClickTabFocus | focus_policy::IgnoreNonClient);
 		set_margins(neogfx::margins(0.0));
 	}
 
