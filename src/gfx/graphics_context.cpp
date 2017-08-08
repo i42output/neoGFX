@@ -862,12 +862,48 @@ namespace neogfx
 				hb_ft_font_set_load_flags(iFont, aParent.is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
 				hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 				hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
-				hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun), 0, std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
+				std::vector<uint32_t> reversed;
+				if (std::get<2>(aGlyphRun) != text_direction::None_RTL)
+					hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun), 0, std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
+				else
+				{
+					reversed.reserve(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
+					for (auto ch = std::get<1>(aGlyphRun); ch != std::get<0>(aGlyphRun); --ch)
+					{
+						switch (*(ch - 1))
+						{
+						case U'(':
+							reversed.push_back(U')');
+							break;
+						case U')':
+							reversed.push_back(U'(');
+							break;
+						case U'[':
+							reversed.push_back(U']');
+							break;
+						case U']':
+							reversed.push_back(U'[');
+							break;
+						case U'{':
+							reversed.push_back(U'}');
+							break;
+						case U'}':
+							reversed.push_back(U'{');
+							break;
+						default:
+							reversed.push_back(*(ch - 1));
+						}
+					}
+					hb_buffer_add_utf32(iBuf, &*reversed.begin(), reversed.size(), 0, reversed.size());
+				}
 				hb_shape(iFont, iBuf, NULL, 0);
 				unsigned int glyphCount = 0;
 				iGlyphInfo = hb_buffer_get_glyph_infos(iBuf, &glyphCount);
 				iGlyphPos = hb_buffer_get_glyph_positions(iBuf, &glyphCount);
 				iGlyphCount = glyphCount;
+				if (std::get<2>(aGlyphRun) == text_direction::None_RTL)
+					for (uint32_t i = 0; i < iGlyphCount; ++i)
+						iGlyphInfo[i].cluster = std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun) - 1 - iGlyphInfo[i].cluster;
 			}
 			~glyphs()
 			{
@@ -1205,13 +1241,12 @@ namespace neogfx
 			do
 			{
 				auto direction = std::get<2>(runs[i]);
+				auto prevDirection = i > 1 ? std::get<2>(runs[i - 1]) : direction;
 				auto nextDirection = i < runs.size() - 1 ? std::get<2>(runs[i+1]) : direction;
 				if ((startDirection == text_direction::RTL || startDirection == text_direction::Digit_RTL || startDirection == text_direction::Emoji_RTL) &&
-					(direction == text_direction::RTL || direction == text_direction::Digit_RTL || direction == text_direction::Emoji_RTL || nextDirection == text_direction::RTL))
+					(direction == text_direction::RTL || direction == text_direction::Digit_RTL || direction == text_direction::Emoji_RTL || (prevDirection == text_direction::RTL && nextDirection == text_direction::RTL)))
 				{
 					auto m = runs[i];
-					if (direction == text_direction::None_RTL)
-						std::reverse(const_cast<char32_t*>(std::get<0>(m)), const_cast<char32_t*>(std::get<1>(m)));
 					runs.erase(runs.begin() + i);
 					runs.insert(runs.begin() + j, m);
 					++i;
