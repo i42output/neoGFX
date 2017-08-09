@@ -259,7 +259,7 @@ namespace neogfx
 	neogfx::focus_policy item_view::focus_policy() const
 	{
 		auto result = scrollable_widget::focus_policy();
-		if (editing() != boost::none)
+		if (editing() != boost::none || (selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused))
 			result |= (focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
 		return result;
 	}
@@ -337,6 +337,8 @@ namespace neogfx
 						edit(selection_model().previous_cell());
 					return true;
 				}
+				else if (selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
+					edit(selection_model().current_index());
 				break;
 			case ScanCode_LEFT:
 				if (currentIndex.column() > 0)
