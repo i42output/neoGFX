@@ -707,15 +707,15 @@ namespace neogfx
 		return *iFocusedWidget;
 	}
 
-	void window::set_focused_widget(i_widget& aWidget)
+	void window::set_focused_widget(i_widget& aWidget, focus_reason aFocusReason)
 	{
 		if (iFocusedWidget == &aWidget)
 			return;
 		i_widget* previouslyFocused = iFocusedWidget;
 		iFocusedWidget = &aWidget;
 		if (previouslyFocused != 0)
-			previouslyFocused->focus_lost();
-		iFocusedWidget->focus_gained();
+			previouslyFocused->focus_lost(aFocusReason);
+		iFocusedWidget->focus_gained(aFocusReason);
 	}
 
 	void window::release_focused_widget(i_widget& aWidget)
@@ -723,7 +723,7 @@ namespace neogfx
 		if (iFocusedWidget != &aWidget)
 			throw widget_not_focused();
 		iFocusedWidget = 0;
-		aWidget.focus_lost();
+		aWidget.focus_lost(focus_reason::Other);
 	}
 
 	bool window::is_active() const
@@ -818,7 +818,7 @@ namespace neogfx
 	void window::native_window_focus_gained()
 	{
 		if (has_focused_widget())
-			focused_widget().focus_gained();
+			focused_widget().focus_gained(focus_reason::WindowActivation);
 	}
 
 	void window::native_window_focus_lost()
@@ -838,7 +838,7 @@ namespace neogfx
 				++i;
 		}
 		if (has_focused_widget())
-			focused_widget().focus_lost();
+			focused_widget().focus_lost(focus_reason::WindowActivation);
 	}
 
 	void window::native_window_resized()
@@ -957,7 +957,7 @@ namespace neogfx
 					;
 			}
 			if ((w->focus_policy() & focus_policy::TabFocus) == focus_policy::TabFocus)
-				w->set_focus();
+				w->set_focus(focus_reason::Tab);
 		}
 		else
 		{
@@ -1089,8 +1089,10 @@ namespace neogfx
 	{
 		if (aCandidateWidget.enabled() && (aCandidateWidget.focus_policy() & focus_policy::ClickFocus) == focus_policy::ClickFocus)
 		{
-			if ((aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient || aCandidateWidget.client_rect().contains(aClickPos))
-				aCandidateWidget.set_focus();
+			bool inClientArea = aCandidateWidget.client_rect().contains(aClickPos);
+			if (inClientArea ||
+				(aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient && (!has_focused_widget() || !focused_widget().is_descendent_of(aCandidateWidget)))
+				aCandidateWidget.set_focus(inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);
 		}
 		else if (aCandidateWidget.has_parent())
 			update_click_focus(aCandidateWidget.parent(), aClickPos + aCandidateWidget.origin() - aCandidateWidget.origin());

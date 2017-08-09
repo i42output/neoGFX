@@ -24,6 +24,7 @@
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include "mouse.hpp"
 
 namespace neogfx
@@ -144,7 +145,7 @@ namespace neogfx
 		virtual void release_capture(i_widget& aWidget) = 0;
 		virtual bool has_focused_widget() const = 0;
 		virtual i_widget& focused_widget() const = 0;
-		virtual void set_focused_widget(i_widget& aWidget) = 0;
+		virtual void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) = 0;
 		virtual void release_focused_widget(i_widget& aWidget) = 0;
 	};
 

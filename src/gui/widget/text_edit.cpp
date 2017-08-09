@@ -280,9 +280,9 @@ namespace neogfx
 		return default_style().font() != boost::none ? *default_style().font() : scrollable_widget::font();
 	}
 
-	void text_edit::focus_gained()
+	void text_edit::focus_gained(focus_reason aFocusReason)
 	{
-		scrollable_widget::focus_gained();
+		scrollable_widget::focus_gained(aFocusReason);
 		app::instance().clipboard().activate(*this);
 		iCursorAnimationStartTime = app::instance().program_elapsed_ms();
 		if (iType == SingleLine && !capturing())
@@ -293,10 +293,10 @@ namespace neogfx
 		update();
 	}
 
-	void text_edit::focus_lost()
+	void text_edit::focus_lost(focus_reason aFocusReason)
 	{
 		destroyed_flag destroyed{ *this };
-		scrollable_widget::focus_lost();
+		scrollable_widget::focus_lost(aFocusReason);
 		if (destroyed)
 			return;
 		app::instance().clipboard().deactivate(*this);

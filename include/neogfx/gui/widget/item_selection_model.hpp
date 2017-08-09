@@ -118,6 +118,8 @@ namespace neogfx
 		}
 		item_presentation_model_index next_cell() const override
 		{
+			if (!has_current_index())
+				return item_presentation_model_index{ 0, 0 };
 			if (current_index().column() + 1 < presentation_model().columns())
 				return item_presentation_model_index{ current_index().row(), current_index().column() + 1 };
 			else if (current_index().row() + 1 < presentation_model().rows())
@@ -127,6 +129,8 @@ namespace neogfx
 		}
 		item_presentation_model_index previous_cell() const override
 		{
+			if (!has_current_index())
+				return item_presentation_model_index{ 0, 0 };
 			if (current_index().column() > 0)
 				return item_presentation_model_index{ current_index().row(), current_index().column() - 1 };
 			else if (current_index().row() > 0)

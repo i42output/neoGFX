@@ -39,9 +39,8 @@ namespace neogfx
 		TabFocus			= 0x00000002,
 		ClickTabFocus		= ClickFocus | TabFocus,
 		StrongFocus			= ClickTabFocus,
-		WheelFocus			= 0x00000004,
-		PointerFocus		= 0x00000008,
-		SloppyFocus			= 0x00000010,
+		WheelFocus			= 0x00000004, // todo
+		PointerFocus		= 0x00000008, // todo
 		ConsumeTabKey		= 0x10000000,
 		ConsumeReturnKey	= 0x20000000,
 		IgnoreNonClient		= 0x40000000
@@ -51,6 +50,17 @@ namespace neogfx
 	{
 		FocusGained,
 		FocusLost
+	};
+
+	enum class focus_reason
+	{
+		ClickNonClient,
+		ClickClient,
+		Tab,
+		Wheel,
+		Pointer,
+		WindowActivation,
+		Other
 	};
 
 	class i_widget : public i_widget_geometry, public i_units_context, public i_keyboard_handler
@@ -196,10 +206,10 @@ namespace neogfx
 		virtual neogfx::focus_policy focus_policy() const = 0;
 		virtual void set_focus_policy(neogfx::focus_policy aFocusPolicy) = 0;
 		virtual bool has_focus() const = 0;
-		virtual void set_focus() = 0;
+		virtual void set_focus(focus_reason aFocusReason = focus_reason::Other) = 0;
 		virtual void release_focus() = 0;
-		virtual void focus_gained() = 0;
-		virtual void focus_lost() = 0;
+		virtual void focus_gained(focus_reason aFocusReason) = 0;
+		virtual void focus_lost(focus_reason aFocusReason) = 0;
 	public:
 		virtual bool ignore_mouse_events() const = 0;
 		virtual void set_ignore_mouse_events(bool aIgnoreMouseEvents) = 0;

@@ -402,8 +402,8 @@ namespace neogfx
 	public:
 		const neogfx::font& font() const override;
 	public:
-		void focus_gained() override;
-		void focus_lost() override;
+		void focus_gained(focus_reason aFocusReason) override;
+		void focus_lost(focus_reason aFocusReason) override;
 	public:
 		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 		void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;

@@ -185,10 +185,10 @@ namespace neogfx
 		neogfx::focus_policy focus_policy() const override;
 		void set_focus_policy(neogfx::focus_policy aFocusPolicy) override;
 		bool has_focus() const override;
-		void set_focus() override;
+		void set_focus(focus_reason aFocusReason = focus_reason::Other) override;
 		void release_focus() override;
-		void focus_gained() override;
-		void focus_lost() override;
+		void focus_gained(focus_reason aFocusReason) override;
+		void focus_lost(focus_reason aFocusReason) override;
 	public:
 		bool ignore_mouse_events() const override;
 		void set_ignore_mouse_events(bool aIgnoreMouseEvents) override;

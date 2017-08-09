@@ -1189,9 +1189,9 @@ namespace neogfx
 			surface().has_focused_widget() && &surface().focused_widget() == this;
 	}
 
-	void widget::set_focus()
+	void widget::set_focus(focus_reason aFocusReason)
 	{
-		surface().set_focused_widget(*this);
+		surface().set_focused_widget(*this, aFocusReason);
 	}
 
 	void widget::release_focus()
@@ -1199,13 +1199,13 @@ namespace neogfx
 		surface().release_focused_widget(*this);
 	}
 
-	void widget::focus_gained()
+	void widget::focus_gained(focus_reason)
 	{
 		update();
 		focus_event.trigger(focus_event::FocusGained);
 	}
 
-	void widget::focus_lost()
+	void widget::focus_lost(focus_reason)
 	{
 		update();
 		focus_event.trigger(focus_event::FocusLost);

@@ -138,7 +138,7 @@ namespace neogfx
 		void release_capture(i_widget& aWidget) override;
 		bool has_focused_widget() const override;
 		i_widget& focused_widget() const override;
-		void set_focused_widget(i_widget& aWidget) override;
+		void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
 		void release_focused_widget(i_widget& aWidget) override;
 	public:
 		bool is_active() const override;
