@@ -267,10 +267,10 @@ namespace neogfx
 	void item_view::focus_gained(focus_reason aFocusReason)
 	{
 		scrollable_widget::focus_gained(aFocusReason);
+		if (model().rows() > 0 && !selection_model().has_current_index())
+			selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
 		if (aFocusReason != focus_reason::ClickNonClient)
 		{
-			if (model().rows() > 0 && !selection_model().has_current_index())
-				selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
 			if (editing() == boost::none && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
 				edit(selection_model().current_index());
 			begin_edit();
@@ -555,11 +555,13 @@ namespace neogfx
 		{
 			make_visible(*aCurrentIndex);
 			update(cell_rect(*aCurrentIndex, true));
-			auto modelIndex = presentation_model().to_item_model_index(*aCurrentIndex);
-			if (presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == boost::none)
-				edit(*aCurrentIndex);
-			else if (editing() != boost::none)
-				end_edit(true);
+			if (aPreviousIndex != boost::none)
+			{
+				if (presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == boost::none)
+					edit(*aCurrentIndex);
+				else if (editing() != boost::none)
+					end_edit(true);
+			}
 		}
 		if (aPreviousIndex != boost::none)
 			update(cell_rect(*aPreviousIndex, true));
