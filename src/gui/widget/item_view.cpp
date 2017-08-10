@@ -338,6 +338,10 @@ namespace neogfx
 					return true;
 				}
 				break;
+			case ScanCode_F2:
+				if (editing() == boost::none && selection_model().has_current_index())
+					edit(selection_model().current_index());
+				break;
 			case ScanCode_LEFT:
 				if (currentIndex.column() > 0)
 					newIndex.set_column(currentIndex.column() - 1);
@@ -408,6 +412,22 @@ namespace neogfx
 			default:
 				handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 				break;
+			}
+		}
+		return handled;
+	}
+
+	bool item_view::text_input(const std::string& aText)
+	{
+		bool handled = scrollable_widget::text_input(aText);
+		if (editing() == boost::none && selection_model().has_current_index() && aText[0] != '\n' && aText[0] != '\t')
+		{
+			edit(selection_model().current_index());
+			if (editing())
+			{
+				auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
+				lineEdit.set_text(aText);
+				handled = true;
 			}
 		}
 		return handled;
@@ -557,7 +577,7 @@ namespace neogfx
 			update(cell_rect(*aCurrentIndex, true));
 			if (aPreviousIndex != boost::none)
 			{
-				if (presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == boost::none)
+				if (editing() != boost::none && presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == boost::none)
 					edit(*aCurrentIndex);
 				else if (editing() != boost::none)
 					end_edit(true);
@@ -602,7 +622,7 @@ namespace neogfx
 
 	void item_view::edit(const item_presentation_model_index& aItemIndex)
 	{
-		if (editing() == aItemIndex || beginning_edit() || ending_edit())
+		if (editing() == aItemIndex || beginning_edit() || ending_edit() || presentation_model().cell_editable(aItemIndex) == item_cell_editable::No )
 			return;
 		neolib::scoped_flag sf{ iBeginningEdit };
 		auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
@@ -627,6 +647,11 @@ namespace neogfx
 		{
 			if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().has_focused_widget() || !surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
 				end_edit(true);
+		});
+		lineEdit.keyboard_event([this, &lineEdit, newIndex](neogfx::keyboard_event ke)
+		{
+			if (ke.type() == neogfx::keyboard_event::KeyPressed && ke.scan_code() == ScanCode_ESCAPE)
+				end_edit(false);
 		});
 		if (has_focus())
 			begin_edit();

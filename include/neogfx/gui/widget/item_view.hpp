@@ -89,6 +89,7 @@ namespace neogfx
 		void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 	protected:
 		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool text_input(const std::string& aText) override;
 	protected:
 		using scrollable_widget::scrolling_disposition;
 		child_widget_scrolling_disposition_e scrolling_disposition() const override;
