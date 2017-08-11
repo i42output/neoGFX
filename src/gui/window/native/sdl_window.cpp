@@ -594,28 +594,20 @@ namespace neogfx
 		case WM_SYSCHAR:
 			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
 			{
-				std::string buffer;
-				buffer.resize(5);
-				if (WIN_ConvertUTF32toUTF8((UINT32)wparam, &buffer[0]))
-				{
-					std::string text = buffer.c_str();
-					mapEntry->second->push_event(keyboard_event(keyboard_event::SysTextInput, text));
-				}
+				char16_t characterCode = static_cast<char16_t>(wparam);
+				std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
+				mapEntry->second->push_event(keyboard_event(keyboard_event::SysTextInput, text));
 			}
 			break;
 		case WM_CHAR:
 			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
 			{
 				// SDL doesn't send characters with ASCII value < 32 (e.g. tab) so we do it properly here...
-				std::string buffer;
-				buffer.resize(5);
-				if (WIN_ConvertUTF32toUTF8((UINT32)wparam, &buffer[0]))
-				{
-					std::string text = buffer.c_str();
-					uint8_t ch = static_cast<uint8_t>(text[0]);
-					if ((ch >= 32 && ch != 127) || ch == '\t' || ch == '\n')
-						mapEntry->second->push_event(keyboard_event(keyboard_event::TextInput, text));
-				}
+				char16_t characterCode = static_cast<char16_t>(wparam);
+				std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
+				uint8_t ch = static_cast<uint8_t>(text[0]);
+				if ((ch >= 32 && ch != 127) || ch == '\t' || ch == '\n')
+					mapEntry->second->push_event(keyboard_event(keyboard_event::TextInput, text));
 			}
 			break;
 		case WM_LBUTTONDOWN:
