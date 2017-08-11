@@ -37,7 +37,7 @@ public:
 	my_item_model()
 	{
 		set_column_name(0, "Zero");
-		set_column_name(1, "Range");
+		set_column_name(1, "Spinner");
 		set_column_name(2, "Two");
 		set_column_name(3, "Click");
 		set_column_name(4, "Four");
@@ -574,9 +574,9 @@ int main(int argc, char* argv[])
 		} 
 	
 		itemModel.set_column_min_value(0, 0);
-		itemModel.set_column_max_value(0, 99999);
+		itemModel.set_column_max_value(0, 9999);
 		itemModel.set_column_min_value(1, 0);
-		itemModel.set_column_max_value(1, 99999);
+		itemModel.set_column_max_value(1, 9999);
 		itemModel.set_column_step_value(1, 1);
 		tableView1.set_model(itemModel);
 		my_item_presentation_model ipm1{ itemModel, ng::item_cell_colour_type::Foreground };

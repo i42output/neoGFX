@@ -329,11 +329,15 @@ namespace neogfx
 			case ScanCode_RETURN:
 			case ScanCode_KP_ENTER:
 				if (editing() != boost::none)
+				{
 					end_edit(true);
+					return true;
+				}
 				break;
 			case ScanCode_TAB:
 				if (editing() != boost::none)
 				{
+					end_edit(true);
 					item_presentation_model_index originalIndex = selection_model().current_index();
 					if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
 					{
@@ -547,9 +551,9 @@ namespace neogfx
 
 	void item_view::items_sorting(const i_item_presentation_model&)
 	{
-		end_edit(true);
 		if (selection_model().has_current_index())
 			iSavedModelIndex = presentation_model().to_item_model_index(selection_model().current_index());
+		end_edit(true);
 	}
 
 	void item_view::items_sorted(const i_item_presentation_model&)
