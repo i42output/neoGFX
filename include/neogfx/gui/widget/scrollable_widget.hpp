@@ -32,7 +32,8 @@ namespace neogfx
 		{
 			DontScrollChildWidget = 0x00,
 			ScrollChildWidgetVertically = 0x01,
-			ScrollChildWidgetHorizontally = 0x02
+			ScrollChildWidgetHorizontally = 0x02,
+			DontConsiderChildWidgets = 0x08
 		};
 	protected:
 		enum usv_stage_e

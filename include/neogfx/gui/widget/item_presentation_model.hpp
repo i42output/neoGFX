@@ -351,9 +351,8 @@ namespace neogfx
 					return value;
 				}
 			case item_cell_data_type::String:
-				return aString;
 			default:
-				return item_cell_data{};
+				return aString;
 			}
 		}
 		boost::basic_format<char> cell_format(const item_presentation_model_index&) const override

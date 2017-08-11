@@ -305,12 +305,15 @@ namespace neogfx
 	void item_view::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
-		auto item = item_at(aPosition);
-		if (item != boost::none)
+		if (aButton == mouse_button::Left && item_display_rect().contains(aPosition))
 		{
-			selection_model().set_current_index(*item);
-			if (presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
-				edit(*item);
+			auto item = item_at(aPosition);
+			if (item != boost::none)
+			{
+				selection_model().set_current_index(*item);
+				if (presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
+					edit(*item);
+			}
 		}
 	}
 
@@ -331,10 +334,25 @@ namespace neogfx
 			case ScanCode_TAB:
 				if (editing() != boost::none)
 				{
+					item_presentation_model_index originalIndex = selection_model().current_index();
 					if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
-						edit(selection_model().next_cell());
+					{
+						item_presentation_model_index tryIndex = originalIndex;
+						do
+						{
+							tryIndex = selection_model().next_cell(tryIndex);
+							edit(tryIndex);
+						} while (selection_model().current_index() != tryIndex && tryIndex != originalIndex);
+					}
 					else
-						edit(selection_model().previous_cell());
+					{
+						item_presentation_model_index tryIndex = originalIndex;
+						do
+						{
+							tryIndex = selection_model().previous_cell(tryIndex);
+							edit(tryIndex);
+						} while (selection_model().current_index() != tryIndex && tryIndex != originalIndex);
+					}
 					return true;
 				}
 				break;
@@ -435,47 +453,41 @@ namespace neogfx
 
 	item_view::child_widget_scrolling_disposition_e item_view::scrolling_disposition() const
 	{
-		return DontScrollChildWidget;
+		return static_cast<child_widget_scrolling_disposition_e>(ScrollChildWidgetVertically | ScrollChildWidgetHorizontally);
 	}
 
 	void item_view::update_scrollbar_visibility(usv_stage_e aStage)
 	{
-		if (!has_model() || !has_presentation_model())
-		{
-			scrollable_widget::update_scrollbar_visibility(aStage);
-			return;
-		}
 		switch (aStage)
 		{
 		case UsvStageInit:
-		{
-			graphics_context gc(*this);
-			i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
-			vertical_scrollbar().set_maximum(units_converter(gc).to_device_units(item_total_area(gc)).cy);
-			vertical_scrollbar().set_step(font().height());
-			vertical_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cy);
-			vertical_scrollbar().set_position(oldPosition);
-			if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
-				vertical_scrollbar().show();
-			else
-				vertical_scrollbar().hide();
-			oldPosition = horizontal_scrollbar().position();
-			horizontal_scrollbar().set_maximum(units_converter(gc).to_device_units(item_total_area(gc)).cx);
-			horizontal_scrollbar().set_step(font().height());
-			horizontal_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cx);
-			horizontal_scrollbar().set_position(oldPosition);
-			if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
-				horizontal_scrollbar().show();
-			else
-				horizontal_scrollbar().hide();
-			scrollable_widget::update_scrollbar_visibility(aStage);
-		}
-		break;
+			{
+				graphics_context gc(*this);
+				i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
+				vertical_scrollbar().set_maximum(units_converter(gc).to_device_units(item_total_area(gc)).cy);
+				vertical_scrollbar().set_step(font().height());
+				vertical_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cy);
+				vertical_scrollbar().set_position(oldPosition);
+				if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
+					vertical_scrollbar().show();
+				else
+					vertical_scrollbar().hide();
+				oldPosition = horizontal_scrollbar().position();
+				horizontal_scrollbar().set_maximum(units_converter(gc).to_device_units(item_total_area(gc)).cx);
+				horizontal_scrollbar().set_step(font().height());
+				horizontal_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cx);
+				horizontal_scrollbar().set_position(oldPosition);
+				if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
+					horizontal_scrollbar().show();
+				else
+					horizontal_scrollbar().hide();
+				layout_items();
+			}
+			break;
 		case UsvStageCheckVertical1:
 		case UsvStageCheckVertical2:
 		case UsvStageCheckHorizontal:
 		case UsvStageDone:
-			scrollable_widget::update_scrollbar_visibility(aStage);
 			break;
 		default:
 			break;

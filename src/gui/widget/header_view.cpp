@@ -345,6 +345,8 @@ namespace neogfx
 
 	dimension header_view::total_width() const
 	{
+		if (!has_presentation_model())
+			return 0.0;
 		dimension result = 0.0;
 		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 		{

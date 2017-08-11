@@ -120,23 +120,33 @@ namespace neogfx
 		{
 			if (!has_current_index())
 				return item_presentation_model_index{ 0, 0 };
-			if (current_index().column() + 1 < presentation_model().columns())
-				return item_presentation_model_index{ current_index().row(), current_index().column() + 1 };
-			else if (current_index().row() + 1 < presentation_model().rows())
-				return item_presentation_model_index{ current_index().row() + 1, 0 };
 			else
-				return current_index();
+				return next_cell(current_index());
+		}
+		item_presentation_model_index next_cell(const item_presentation_model_index& aIndex) const override
+		{
+			if (aIndex.column() + 1 < presentation_model().columns())
+				return item_presentation_model_index{ aIndex.row(), aIndex.column() + 1 };
+			else if (aIndex.row() + 1 < presentation_model().rows())
+				return item_presentation_model_index{ aIndex.row() + 1, 0 };
+			else
+				return item_presentation_model_index{ 0, 0 };
 		}
 		item_presentation_model_index previous_cell() const override
 		{
 			if (!has_current_index())
 				return item_presentation_model_index{ 0, 0 };
-			if (current_index().column() > 0)
-				return item_presentation_model_index{ current_index().row(), current_index().column() - 1 };
-			else if (current_index().row() > 0)
-				return item_presentation_model_index{ current_index().row() - 1, presentation_model().columns() - 1 };
 			else
-				return current_index();
+				return previous_cell(current_index());
+		}
+		item_presentation_model_index previous_cell(const item_presentation_model_index& aIndex) const override
+		{
+			if (aIndex.column() > 0)
+				return item_presentation_model_index{ aIndex.row(), aIndex.column() - 1 };
+			else if (aIndex.row() > 0)
+				return item_presentation_model_index{ aIndex.row() - 1, presentation_model().columns() - 1 };
+			else
+				return item_presentation_model_index{ presentation_model().rows() - 1 , presentation_model().columns() - 1 };
 		}
 	public:
 		const item_selection& selection() const override

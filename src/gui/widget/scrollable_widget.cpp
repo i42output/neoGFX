@@ -416,6 +416,8 @@ namespace neogfx
 
 	void scrollable_widget::update_scrollbar_visibility(usv_stage_e aStage)
 	{
+		if ((scrolling_disposition() & DontConsiderChildWidgets) == DontConsiderChildWidgets)
+			return;
 		switch (aStage)
 		{
 		case UsvStageInit:

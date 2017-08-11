@@ -32,12 +32,16 @@ namespace neogfx
 		typedef value_type row_type;
 		typedef value_type column_type;
 	public:
+		item_index() :
+			iRow{ 0 }, iColumn{ 0 }
+		{
+		}
 		item_index(row_type aRow) :
-			iRow(aRow), iColumn(0)
+			iRow{ aRow }, iColumn{ 0 }
 		{
 		}
 		item_index(row_type aRow, column_type aColumn) :
-			iRow(aRow), iColumn(aColumn)
+			iRow{ aRow }, iColumn{ aColumn }
 		{
 		}
 	public:

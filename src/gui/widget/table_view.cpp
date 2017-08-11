@@ -108,7 +108,7 @@ namespace neogfx
 
 	size table_view::item_total_area(graphics_context& aGraphicsContext) const
 	{
-		return size(column_header().total_width(), presentation_model().total_height(aGraphicsContext));
+		return size(column_header().total_width(), has_presentation_model() ? presentation_model().total_height(aGraphicsContext) : 0.0);
 	}
 
 	size table_view::cell_spacing() const

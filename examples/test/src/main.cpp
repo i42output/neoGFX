@@ -31,16 +31,20 @@
 
 namespace ng = neogfx;
 
-class my_item_model : public ng::basic_item_model<void*, 5u>
+class my_item_model : public ng::basic_item_model<void*, 9u>
 {
 public:
 	my_item_model()
 	{
-		set_column_name(0, "One");
-		set_column_name(1, "Two");
-		set_column_name(2, "Three");
-		set_column_name(3, "Four");
-		set_column_name(4, "Five");
+		set_column_name(0, "Zero");
+		set_column_name(1, "Range");
+		set_column_name(2, "Two");
+		set_column_name(3, "Click");
+		set_column_name(4, "Four");
+		set_column_name(5, "Read Only");
+		set_column_name(6, "Six");
+		set_column_name(7, "Empty");
+		set_column_name(8, "Eight");
 	}
 };
 
@@ -553,14 +557,16 @@ int main(int argc, char* argv[])
 				app.process_events(epc);
 			#endif
 			neolib::random prng;
-			for (uint32_t col = 0; col < 5; ++col)
+			for (uint32_t col = 0; col < 9; ++col)
 			{
 				if (col == 0)
 					itemModel.insert_item(ng::item_model_index(row), row + 1);
-				else
+				else if (col == 1)
+					itemModel.insert_cell_data(ng::item_model_index(row, col), row + 1);
+				else if (col != 7)
 				{
 					std::string randomString;
-					for (uint32_t j = prng(15); j-- > 0;)
+					for (uint32_t j = prng(12); j-- > 0;)
 						randomString += static_cast<char>('A' + prng('z' - 'A'));
 					itemModel.insert_cell_data(ng::item_model_index(row, col), randomString);
 				}
@@ -569,17 +575,30 @@ int main(int argc, char* argv[])
 	
 		itemModel.set_column_min_value(0, 0);
 		itemModel.set_column_max_value(0, 99999);
-		itemModel.set_column_step_value(0, 1);
+		itemModel.set_column_min_value(1, 0);
+		itemModel.set_column_max_value(1, 99999);
+		itemModel.set_column_step_value(1, 1);
 		tableView1.set_model(itemModel);
 		my_item_presentation_model ipm1{ itemModel, ng::item_cell_colour_type::Foreground };
 		tableView1.set_presentation_model(ipm1);
 		ipm1.set_column_editable(0, ng::item_cell_editable::WhenFocused);
-		ipm1.set_column_editable(1, ng::item_cell_editable::OnInputEvent);
+		ipm1.set_column_editable(1, ng::item_cell_editable::WhenFocused);
 		ipm1.set_column_editable(2, ng::item_cell_editable::WhenFocused);
-		ipm1.set_column_editable(3, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(3, ng::item_cell_editable::OnInputEvent);
 		ipm1.set_column_editable(4, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(6, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(7, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(8, ng::item_cell_editable::WhenFocused);
 		tableView2.set_model(itemModel);
 		my_item_presentation_model ipm2{ itemModel, ng::item_cell_colour_type::Background };
+		ipm2.set_column_editable(0, ng::item_cell_editable::WhenFocused);
+		ipm2.set_column_editable(1, ng::item_cell_editable::WhenFocused);
+		ipm2.set_column_editable(2, ng::item_cell_editable::WhenFocused);
+		ipm2.set_column_editable(3, ng::item_cell_editable::OnInputEvent);
+		ipm2.set_column_editable(4, ng::item_cell_editable::WhenFocused);
+		ipm2.set_column_editable(6, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(7, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(8, ng::item_cell_editable::WhenFocused);
 		tableView2.set_presentation_model(ipm2);
 		tableView2.column_header().set_expand_last_column(true);
 		tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)
