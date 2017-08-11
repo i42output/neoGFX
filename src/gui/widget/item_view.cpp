@@ -357,6 +357,12 @@ namespace neogfx
 							edit(tryIndex);
 						} while (selection_model().current_index() != tryIndex && tryIndex != originalIndex);
 					}
+					if (editing() != boost::none)
+					{
+						auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
+						lineEdit.cursor().set_anchor(0);
+						lineEdit.cursor().set_position(lineEdit.text().size(), false);
+					}
 					return true;
 				}
 				break;
@@ -666,7 +672,7 @@ namespace neogfx
 		});
 		lineEdit.keyboard_event([this, &lineEdit, newIndex](neogfx::keyboard_event ke)
 		{
-			if (ke.type() == neogfx::keyboard_event::KeyPressed && ke.scan_code() == ScanCode_ESCAPE)
+			if (ke.type() == neogfx::keyboard_event::KeyPressed && ke.scan_code() == ScanCode_ESCAPE && lineEdit.cursor().position() == lineEdit.cursor().anchor())
 				end_edit(false);
 		});
 		if (has_focus())
