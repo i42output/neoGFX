@@ -317,7 +317,7 @@ namespace neogfx
 				}
 			case item_cell_data_type::Int32:
 				{
-					int32_t value;
+					int32_t value = (cellDataInfo.min != boost::none ? static_variant_cast<int32_t>(cellDataInfo.min) : 0);
 					std::istringstream(aString) >> value;
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<int32_t>(cellDataInfo.min));
@@ -327,7 +327,7 @@ namespace neogfx
 				}
 			case item_cell_data_type::UInt32:
 				{
-					uint32_t value;
+					uint32_t value = (cellDataInfo.min != boost::none ? static_variant_cast<uint32_t>(cellDataInfo.min) : 0u);
 					std::istringstream(aString) >> value;
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<uint32_t>(cellDataInfo.min));
@@ -337,7 +337,7 @@ namespace neogfx
 				}
 			case item_cell_data_type::Int64:
 				{
-					int64_t value;
+					int64_t value = (cellDataInfo.min != boost::none ? static_variant_cast<int64_t>(cellDataInfo.min) : 0ll);
 					std::istringstream(aString) >> value;
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<int64_t>(cellDataInfo.min));
@@ -347,7 +347,7 @@ namespace neogfx
 				}
 			case item_cell_data_type::UInt64:
 				{
-					uint64_t value;
+					uint64_t value = (cellDataInfo.min != boost::none ? static_variant_cast<uint64_t>(cellDataInfo.min) : 0ull);
 					std::istringstream(aString) >> value;
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<uint64_t>(cellDataInfo.min));
@@ -357,7 +357,7 @@ namespace neogfx
 				}
 			case item_cell_data_type::Float:
 				{
-					float value;
+					float value = (cellDataInfo.min != boost::none ? static_variant_cast<float>(cellDataInfo.min) : 0.0f);
 					std::istringstream(aString) >> value;
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<float>(cellDataInfo.min));
@@ -367,7 +367,7 @@ namespace neogfx
 				}
 			case item_cell_data_type::Double:
 				{
-					double value;
+					double value = (cellDataInfo.min != boost::none ? static_variant_cast<double>(cellDataInfo.min) : 0.0);
 					std::istringstream(aString) >> value;
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<double>(cellDataInfo.min));
