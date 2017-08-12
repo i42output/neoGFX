@@ -63,6 +63,7 @@ namespace neogfx
 		virtual colour hover_colour() const;
 		virtual void set_hover_colour(const optional_colour& aHoverColour = optional_colour());
 		virtual void animate();
+		virtual bool finished_animation() const;
 		virtual colour animation_colour() const;
 		virtual colour animation_colour(uint32_t aAnimationFrame) const;
 	private:

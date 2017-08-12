@@ -121,7 +121,7 @@ namespace neogfx
 	}
 
 	template <typename T>
-	const std::string& basic_spin_box<T>::valid_text_characters() const
+	inline const std::string& basic_spin_box<T>::valid_text_characters() const
 	{
 		if (std::is_integral<T>::value)
 		{
