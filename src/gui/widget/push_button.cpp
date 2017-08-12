@@ -211,14 +211,16 @@ namespace neogfx
 	void push_button::mouse_entered()
 	{
 		button::mouse_entered();
-		iAnimator.again_if();
+		if (perform_hover_animation())
+			iAnimator.again_if();
 		update();
 	}
 
 	void push_button::mouse_left()
 	{
 		button::mouse_left();
-		iAnimator.again_if();
+		if (perform_hover_animation())
+			iAnimator.again_if();
 		update();
 	}
 
@@ -273,6 +275,11 @@ namespace neogfx
 	colour push_button::border_mid_colour() const
 	{
 		return animation_colour().darker(0x20);
+	}
+
+	bool push_button::perform_hover_animation() const
+	{
+		return true;
 	}
 
 	bool push_button::has_hover_colour() const
@@ -335,7 +342,7 @@ namespace neogfx
 			else
 				faceColour.lighten(0x40);
 		}
-		return (enabled() && entered()) || aAnimationFrame > 0 ? gradient(faceColour, hover_colour()).at(static_cast<coordinate>(aAnimationFrame), 0, static_cast<coordinate>(kMaxAnimationFrame)) : faceColour;
+		return (enabled() && entered() && perform_hover_animation()) || aAnimationFrame > 0 ? gradient(faceColour, hover_colour()).at(static_cast<coordinate>(aAnimationFrame), 0, static_cast<coordinate>(kMaxAnimationFrame)) : faceColour;
 	}
 }
 

@@ -55,6 +55,7 @@ namespace neogfx
 		rect path_bounding_rect() const override;
 		bool spot_colour() const override;
 		colour border_mid_colour() const override;
+		bool perform_hover_animation() const override;
 	protected:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 		void handle_clicked() override;

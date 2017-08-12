@@ -58,12 +58,13 @@ namespace neogfx
 		virtual neogfx::path path() const;
 		virtual bool spot_colour() const;
 		virtual colour border_mid_colour() const;
-		bool has_hover_colour() const;
-		colour hover_colour() const;
-		void set_hover_colour(const optional_colour& aHoverColour = optional_colour());
-		void animate();
-		colour animation_colour() const;
-		colour animation_colour(uint32_t aAnimationFrame) const;
+		virtual bool perform_hover_animation() const;
+		virtual bool has_hover_colour() const;
+		virtual colour hover_colour() const;
+		virtual void set_hover_colour(const optional_colour& aHoverColour = optional_colour());
+		virtual void animate();
+		virtual colour animation_colour() const;
+		virtual colour animation_colour(uint32_t aAnimationFrame) const;
 	private:
 		neolib::callback_timer iAnimator;
 		uint32_t iAnimationFrame;

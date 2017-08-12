@@ -264,6 +264,11 @@ namespace neogfx
 		return tabPage.background_colour();
 	}
 
+	bool tab_button::perform_hover_animation() const
+	{
+		return push_button::perform_hover_animation() && !is_selected();
+	}
+
 	size tab_button::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
