@@ -306,19 +306,35 @@ namespace neogfx
 		}
 		item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const override
 		{
+			bool error = false;
+			return string_to_cell_data(aIndex, aString, error);
+		}
+		item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString, bool& aError) const override
+		{
+			aError = false;
 			auto const& cellDataInfo = item_model().cell_data_info(to_item_model_index(aIndex));
+			std::istringstream input{ aString };
+			std::string guff;
 			switch (cellDataInfo.type)
 			{
 			case item_cell_data_type::Bool:
 				{
 					bool value;
-					std::istringstream(aString) >> value;
+					if (!(input >> value) || (input >> guff))
+					{
+						aError = true;
+						return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
+					}
 					return value;
 				}
 			case item_cell_data_type::Int32:
 				{
-					int32_t value = (cellDataInfo.min != boost::none ? static_variant_cast<int32_t>(cellDataInfo.min) : 0);
-					std::istringstream(aString) >> value;
+					int32_t value;
+					if (!(input >> value) || (input >> guff))
+					{
+						aError = true;
+						return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
+					}
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<int32_t>(cellDataInfo.min));
 					if (cellDataInfo.max != boost::none)
@@ -327,8 +343,12 @@ namespace neogfx
 				}
 			case item_cell_data_type::UInt32:
 				{
-					uint32_t value = (cellDataInfo.min != boost::none ? static_variant_cast<uint32_t>(cellDataInfo.min) : 0u);
-					std::istringstream(aString) >> value;
+					uint32_t value;
+					if (!(input >> value) || (input >> guff))
+					{
+						aError = true;
+						return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
+					}
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<uint32_t>(cellDataInfo.min));
 					if (cellDataInfo.max != boost::none)
@@ -337,8 +357,12 @@ namespace neogfx
 				}
 			case item_cell_data_type::Int64:
 				{
-					int64_t value = (cellDataInfo.min != boost::none ? static_variant_cast<int64_t>(cellDataInfo.min) : 0ll);
-					std::istringstream(aString) >> value;
+					int64_t value;
+					if (!(input >> value) || (input >> guff))
+					{
+						aError = true;
+						return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
+					}
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<int64_t>(cellDataInfo.min));
 					if (cellDataInfo.max != boost::none)
@@ -347,8 +371,12 @@ namespace neogfx
 				}
 			case item_cell_data_type::UInt64:
 				{
-					uint64_t value = (cellDataInfo.min != boost::none ? static_variant_cast<uint64_t>(cellDataInfo.min) : 0ull);
-					std::istringstream(aString) >> value;
+					uint64_t value;
+					if (!(input >> value) || (input >> guff))
+					{
+						aError = true;
+						return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
+					}
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<uint64_t>(cellDataInfo.min));
 					if (cellDataInfo.max != boost::none)
@@ -357,8 +385,12 @@ namespace neogfx
 				}
 			case item_cell_data_type::Float:
 				{
-					float value = (cellDataInfo.min != boost::none ? static_variant_cast<float>(cellDataInfo.min) : 0.0f);
-					std::istringstream(aString) >> value;
+					float value;
+					if (!(input >> value) || (input >> guff))
+					{
+						aError = true;
+						return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
+					}
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<float>(cellDataInfo.min));
 					if (cellDataInfo.max != boost::none)
@@ -367,8 +399,12 @@ namespace neogfx
 				}
 			case item_cell_data_type::Double:
 				{
-					double value = (cellDataInfo.min != boost::none ? static_variant_cast<double>(cellDataInfo.min) : 0.0);
-					std::istringstream(aString) >> value;
+					double value;
+					if (!(input >> value) || (input >> guff))
+					{
+						aError = true;
+						return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
+					}
 					if (cellDataInfo.min != boost::none)
 						value = std::max(value, static_variant_cast<double>(cellDataInfo.min));
 					if (cellDataInfo.max != boost::none)

@@ -708,11 +708,15 @@ namespace neogfx
 			auto modelIndex = presentation_model().to_item_model_index(*editing());
 			auto lineEdit = dynamic_cast<line_edit*>(&editor()); // todo: refactor away this dynamic_cast
 			item_cell_data cellData;
+			bool error = false;
 			if (lineEdit)
-				cellData = presentation_model().string_to_cell_data(*editing(), lineEdit->text());
+				cellData = presentation_model().string_to_cell_data(*editing(), lineEdit->text(), error);
 			iEditing = boost::none;
 			iEditor = nullptr;
-			model().update_cell_data(modelIndex, cellData);
+			if (!error)
+				model().update_cell_data(modelIndex, cellData);
+			else
+				app::instance().basic_services().system_beep();
 		}
 		else
 		{

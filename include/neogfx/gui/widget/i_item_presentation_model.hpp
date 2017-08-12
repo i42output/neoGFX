@@ -136,6 +136,7 @@ namespace neogfx
 		virtual item_cell_editable cell_editable(const item_presentation_model_index& aIndex) const = 0;
 		virtual std::string cell_to_string(const item_presentation_model_index& aIndex) const = 0;
 		virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString) const = 0;
+		virtual item_cell_data string_to_cell_data(const item_presentation_model_index& aIndex, const std::string& aString, bool& aError) const = 0;
 		virtual boost::basic_format<char> cell_format(const item_presentation_model_index& aIndex) const = 0;
 		virtual optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const = 0;
 		virtual optional_font cell_font(const item_presentation_model_index& aIndex) const = 0;
