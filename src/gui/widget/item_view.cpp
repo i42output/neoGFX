@@ -22,6 +22,7 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/item_view.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
+#include <neogfx/gui/widget/spin_box.hpp>
 
 namespace neogfx
 {
@@ -357,11 +358,10 @@ namespace neogfx
 							edit(tryIndex);
 						} while (selection_model().current_index() != tryIndex && tryIndex != originalIndex);
 					}
-					if (editing() != boost::none)
+					if (editing() != boost::none && editor_has_text_edit())
 					{
-						auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
-						lineEdit.cursor().set_anchor(0);
-						lineEdit.cursor().set_position(lineEdit.text().size(), false);
+						editor_text_edit().cursor().set_anchor(0);
+						editor_text_edit().cursor().set_position(editor_text_edit().text().size(), false);
 					}
 					return true;
 				}
@@ -451,10 +451,9 @@ namespace neogfx
 		if (editing() == boost::none && selection_model().has_current_index() && aText[0] != '\n' && aText[0] != '\t')
 		{
 			edit(selection_model().current_index());
-			if (editing())
+			if (editing() && editor_has_text_edit())
 			{
-				auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
-				lineEdit.set_text(aText);
+				editor_text_edit().set_text(aText);
 				handled = true;
 			}
 		}
@@ -653,47 +652,50 @@ namespace neogfx
 		if (!selection_model().has_current_index() || selection_model().current_index() != newIndex)
 			selection_model().set_current_index(newIndex);
 		iEditing = newIndex;
-		iEditor = std::make_shared<line_edit>(*this);
-		auto& lineEdit = dynamic_cast<line_edit&>(*iEditor); // todo: refactor away this dynamic_cast
-		lineEdit.set_style(frame_style::NoFrame);
-		lineEdit.move(cell_rect(newIndex).position());
-		lineEdit.resize(cell_rect(newIndex).extents());
-		lineEdit.set_margins(cell_margins());
-		optional_colour textColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Foreground);
-		if (textColour == boost::none)
-			textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
-		optional_colour backgroundColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Background);
-		lineEdit.set_default_style(line_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != boost::none ? line_edit::style::colour_type{ *backgroundColour } : line_edit::style::colour_type{} });
-		lineEdit.set_text(presentation_model().cell_to_string(newIndex));
-		lineEdit.focus_event([this, newIndex](neogfx::focus_event fe)
+		iEditor = std::make_shared<item_editor<line_edit>>(*this);
+		if (editor_has_text_edit())
 		{
-			if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().has_focused_widget() || !surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
-				end_edit(true);
-		});
-		lineEdit.keyboard_event([this, &lineEdit, newIndex](neogfx::keyboard_event ke)
-		{
-			if (ke.type() == neogfx::keyboard_event::KeyPressed && ke.scan_code() == ScanCode_ESCAPE && lineEdit.cursor().position() == lineEdit.cursor().anchor())
-				end_edit(false);
-		});
+			auto& textEdit = editor_text_edit();
+			textEdit.set_style(frame_style::NoFrame);
+			textEdit.move(cell_rect(newIndex).position());
+			textEdit.resize(cell_rect(newIndex).extents());
+			textEdit.set_margins(cell_margins());
+			optional_colour textColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Foreground);
+			if (textColour == boost::none)
+				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
+			optional_colour backgroundColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Background);
+			textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != boost::none ? text_edit::style::colour_type{ *backgroundColour } : text_edit::style::colour_type{} });
+			textEdit.set_text(presentation_model().cell_to_string(newIndex));
+			textEdit.focus_event([this, newIndex](neogfx::focus_event fe)
+			{
+				if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().has_focused_widget() || !surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
+					end_edit(true);
+			});
+			textEdit.keyboard_event([this, &textEdit, newIndex](neogfx::keyboard_event ke)
+			{
+				if (ke.type() == neogfx::keyboard_event::KeyPressed && ke.scan_code() == ScanCode_ESCAPE && textEdit.cursor().position() == textEdit.cursor().anchor())
+					end_edit(false);
+			});
+		}
 		if (has_focus())
 			begin_edit();
 	}
 
 	void item_view::begin_edit()
 	{
-		if (editing() != boost::none && !ending_edit())
+		if (editing() != boost::none && !ending_edit() && editor_has_text_edit())
 		{
-			auto& lineEdit = dynamic_cast<line_edit&>(editor()); // todo: refactor away this dynamic_cast
-			lineEdit.set_focus();
-			if (lineEdit.client_rect().contains(surface().mouse_position() - lineEdit.origin()))
+			auto& textEdit = editor_text_edit();
+			textEdit.set_focus();
+			if (textEdit.client_rect().contains(surface().mouse_position() - textEdit.origin()))
 			{
 				bool enableDragger = capturing();
 				if (enableDragger)
 					release_capture();
-				lineEdit.set_cursor_position(surface().mouse_position() - lineEdit.origin(), true, enableDragger);
+				textEdit.set_cursor_position(surface().mouse_position() - textEdit.origin(), true, enableDragger);
 			}
 			else
-				lineEdit.cursor().set_anchor(lineEdit.cursor().position());
+				textEdit.cursor().set_anchor(textEdit.cursor().position());
 		}
 	}
 
@@ -706,11 +708,10 @@ namespace neogfx
 		if (aCommit)
 		{
 			auto modelIndex = presentation_model().to_item_model_index(*editing());
-			auto lineEdit = dynamic_cast<line_edit*>(&editor()); // todo: refactor away this dynamic_cast
 			item_cell_data cellData;
 			bool error = false;
-			if (lineEdit)
-				cellData = presentation_model().string_to_cell_data(*editing(), lineEdit->text(), error);
+			if (editor_has_text_edit())
+				cellData = presentation_model().string_to_cell_data(*editing(), editor_text_edit().text(), error);
 			iEditing = boost::none;
 			iEditor = nullptr;
 			if (!error)
@@ -741,7 +742,17 @@ namespace neogfx
 	{
 		if (iEditor == nullptr)
 			throw no_editor();
-		return *iEditor;
+		return iEditor->as_widget();
+	}
+
+	bool item_view::editor_has_text_edit() const
+	{
+		return iEditor->has_text_edit();
+	}
+
+	text_edit& item_view::editor_text_edit() const
+	{
+		return iEditor->text_edit();
 	}
 
 	void item_view::header_view_updated(header_view&)

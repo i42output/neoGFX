@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include "scrollable_widget.hpp"
 #include "header_view.hpp"
+#include "item_editor.hpp"
 #include "i_item_model.hpp"
 #include "i_item_presentation_model.hpp"
 #include "i_item_selection_model.hpp"
@@ -62,6 +63,8 @@ namespace neogfx
 		bool beginning_edit() const;
 		bool ending_edit() const;
 		i_widget& editor() const;
+		bool editor_has_text_edit() const;
+		text_edit& editor_text_edit() const;
 	protected:
 		void header_view_updated(header_view& aHeaderView) override;
 		neogfx::margins cell_margins() const override;
@@ -127,7 +130,7 @@ namespace neogfx
 		std::shared_ptr<i_item_selection_model> iSelectionModel;
 		boost::optional<std::shared_ptr<neolib::callback_timer>> iMouseTracker;
 		optional_item_presentation_model_index iEditing;
-		std::shared_ptr<i_widget> iEditor;
+		std::shared_ptr<i_item_editor> iEditor;
 		bool iBeginningEdit;
 		bool iEndingEdit;
 		optional_item_model_index iSavedModelIndex;

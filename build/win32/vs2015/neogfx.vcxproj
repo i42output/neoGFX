@@ -196,6 +196,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\cursor.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_editor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\drop_list.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\framed_widget.hpp" />
