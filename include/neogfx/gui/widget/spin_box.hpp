@@ -113,6 +113,12 @@ namespace neogfx
 
 namespace neogfx
 {
-	typedef basic_spin_box<int32_t> spin_box;
+	typedef basic_spin_box<int32_t> int32_spin_box;
+	typedef basic_spin_box<uint32_t> uint32_spin_box;
+	typedef basic_spin_box<int64_t> int64_spin_box;
+	typedef basic_spin_box<uint64_t> uint64_spin_box;
+	typedef basic_spin_box<float> float_spin_box;
 	typedef basic_spin_box<double> double_spin_box;
+
+	typedef int32_spin_box spin_box;
 }

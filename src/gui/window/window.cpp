@@ -978,15 +978,24 @@ namespace neogfx
 				w = &w->parent();
 				if (!can_consume(check))
 					return true;
+				destroyed_flag parentDestroyed{ w->as_destroyable() };
 				destroyed_flag destroyed{ check.as_destroyable() };
 				if (!check.keyboard_event.trigger(native_window().current_event()))
-					return true;
+					return false;
 				if (destroyed)
-					return true;
+				{
+					if (parentDestroyed)
+						w = nullptr;
+					return false;
+				}
 				if (!check.key_pressed(aScanCode, aKeyCode, aKeyModifiers))
 					return true;
 				if (destroyed)
-					return true;
+				{
+					if (parentDestroyed)
+						w = nullptr;
+					return false;
+				}
 				return false;
 			};
 			if (aScanCode != ScanCode_TAB || !can_consume(*start) || reject(start))
@@ -996,6 +1005,8 @@ namespace neogfx
 					i_widget* w = &focused_widget();
 					while (reject(w))
 						;
+					if (w == nullptr)
+						return;
 					destroyed_flag destroyed{ *this };
 					if (w == this && can_consume(*this) && keyboard_event.trigger(native_window().current_event()) && !destroyed)
 						key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -1094,7 +1105,7 @@ namespace neogfx
 				(aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient && (!has_focused_widget() || !focused_widget().is_descendent_of(aCandidateWidget)))
 				aCandidateWidget.set_focus(inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);
 		}
-		else if (aCandidateWidget.has_parent())
+		else if (aCandidateWidget.has_parent() && (!has_focused_widget() || !focused_widget().is_descendent_of(aCandidateWidget)))
 			update_click_focus(aCandidateWidget.parent(), aClickPos + aCandidateWidget.origin() - aCandidateWidget.origin());
 	}
 

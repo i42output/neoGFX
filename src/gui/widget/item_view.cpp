@@ -274,7 +274,6 @@ namespace neogfx
 		{
 			if (editing() == boost::none && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
 				edit(selection_model().current_index());
-			begin_edit();
 		}
 	}
 
@@ -648,18 +647,65 @@ namespace neogfx
 		neolib::scoped_flag sf{ iBeginningEdit };
 		auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
 		end_edit(true);
+		auto const& cellDataInfo = model().cell_data_info(modelIndex);
+		if (cellDataInfo.step == boost::none)
+			iEditor = std::make_shared<item_editor<line_edit>>(*this);
+		else
+		{
+			switch (model().cell_data_info(presentation_model().to_item_model_index(aItemIndex)).type)
+			{
+			case item_cell_data_type::Int32:
+				iEditor = std::make_shared<item_editor<basic_spin_box<int32_t>>>(*this);
+				static_cast<basic_spin_box<int32_t>&>(editor()).set_step(static_variant_cast<int32_t>(cellDataInfo.step));
+				static_cast<basic_spin_box<int32_t>&>(editor()).set_minimum(static_variant_cast<int32_t>(cellDataInfo.min));
+				static_cast<basic_spin_box<int32_t>&>(editor()).set_maximum(static_variant_cast<int32_t>(cellDataInfo.max));
+				break;
+			case item_cell_data_type::UInt32:
+				iEditor = std::make_shared<item_editor<basic_spin_box<uint32_t>>>(*this);
+				static_cast<basic_spin_box<uint32_t>&>(editor()).set_step(static_variant_cast<uint32_t>(cellDataInfo.step));
+				static_cast<basic_spin_box<uint32_t>&>(editor()).set_minimum(static_variant_cast<uint32_t>(cellDataInfo.min));
+				static_cast<basic_spin_box<uint32_t>&>(editor()).set_maximum(static_variant_cast<uint32_t>(cellDataInfo.max));
+				break;
+			case item_cell_data_type::Int64:
+				iEditor = std::make_shared<item_editor<basic_spin_box<int64_t>>>(*this);
+				static_cast<basic_spin_box<int64_t>&>(editor()).set_step(static_variant_cast<int64_t>(cellDataInfo.step));
+				static_cast<basic_spin_box<int64_t>&>(editor()).set_minimum(static_variant_cast<int64_t>(cellDataInfo.min));
+				static_cast<basic_spin_box<int64_t>&>(editor()).set_maximum(static_variant_cast<int64_t>(cellDataInfo.max));
+				break;
+			case item_cell_data_type::UInt64:
+				iEditor = std::make_shared<item_editor<basic_spin_box<uint64_t>>>(*this);
+				static_cast<basic_spin_box<uint64_t>&>(editor()).set_step(static_variant_cast<uint64_t>(cellDataInfo.step));
+				static_cast<basic_spin_box<uint64_t>&>(editor()).set_minimum(static_variant_cast<uint64_t>(cellDataInfo.min));
+				static_cast<basic_spin_box<uint64_t>&>(editor()).set_maximum(static_variant_cast<uint64_t>(cellDataInfo.max));
+				break;
+			case item_cell_data_type::Float:
+				iEditor = std::make_shared<item_editor<basic_spin_box<float>>>(*this);
+				static_cast<basic_spin_box<float>&>(editor()).set_step(static_variant_cast<float>(cellDataInfo.step));
+				static_cast<basic_spin_box<float>&>(editor()).set_minimum(static_variant_cast<float>(cellDataInfo.min));
+				static_cast<basic_spin_box<float>&>(editor()).set_maximum(static_variant_cast<float>(cellDataInfo.max));
+				break;
+			case item_cell_data_type::Double:
+				iEditor = std::make_shared<item_editor<basic_spin_box<double>>>(*this);
+				static_cast<basic_spin_box<double>&>(editor()).set_step(static_variant_cast<double>(cellDataInfo.step));
+				static_cast<basic_spin_box<double>&>(editor()).set_minimum(static_variant_cast<double>(cellDataInfo.min));
+				static_cast<basic_spin_box<double>&>(editor()).set_maximum(static_variant_cast<double>(cellDataInfo.max));
+				break;
+			default:
+				throw unknown_editor_type();
+			}
+		}
 		auto newIndex = presentation_model().from_item_model_index(modelIndex);
 		if (!selection_model().has_current_index() || selection_model().current_index() != newIndex)
 			selection_model().set_current_index(newIndex);
 		iEditing = newIndex;
-		iEditor = std::make_shared<item_editor<line_edit>>(*this);
+		editor().set_margins(cell_margins());
+		editor().move(cell_rect(newIndex).position());
+		editor().resize(cell_rect(newIndex).extents());
 		if (editor_has_text_edit())
 		{
 			auto& textEdit = editor_text_edit();
-			textEdit.set_style(frame_style::NoFrame);
-			textEdit.move(cell_rect(newIndex).position());
-			textEdit.resize(cell_rect(newIndex).extents());
-			textEdit.set_margins(cell_margins());
+			if (&editor() != &textEdit)
+				textEdit.set_margins(neogfx::margins{});
 			optional_colour textColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Foreground);
 			if (textColour == boost::none)
 				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
@@ -677,8 +723,7 @@ namespace neogfx
 					end_edit(false);
 			});
 		}
-		if (has_focus())
-			begin_edit();
+		begin_edit();
 	}
 
 	void item_view::begin_edit()

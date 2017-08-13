@@ -33,6 +33,7 @@ namespace neogfx
 	{
 	public:
 		struct no_editor : std::logic_error { no_editor() : std::logic_error("neogfx::item_view::no_editor") {} };
+		struct unknown_editor_type : std::logic_error { unknown_editor_type() : std::logic_error("neogfx::item_view::unknown_editor_type") {} };
 	public:
 		item_view();
 		item_view(i_widget& aParent);

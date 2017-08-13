@@ -116,12 +116,12 @@ namespace neogfx
 		iSecondaryLayout.set_margins(neogfx::margins{});
 		iSecondaryLayout.set_spacing(size{});
 		iStepUpButton.set_margins(neogfx::margins{});
-		iStepUpButton.set_minimum_size(size{15, 8});
+		iStepUpButton.set_minimum_size(size{15, 7});
 		iStepUpButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iStepUpButton.clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepUpButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepDownButton.set_margins(neogfx::margins{});
-		iStepDownButton.set_minimum_size(size{15, 8});
+		iStepDownButton.set_minimum_size(size{15, 7});
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iStepDownButton.clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepDownButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);

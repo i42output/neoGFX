@@ -44,11 +44,11 @@ namespace neogfx
 	{
 	public:
 		item_editor(item_view& aParent) :
-			iEditorWidget{ std::make_shared<EditorWidget>(aParent) } {}
+			iEditorWidget{ std::make_shared<EditorWidget>(aParent) } { init(); }
 		item_editor(EditorWidget& aEditorWidget) :
-			iEditorWidget{ std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aEditorWidget) } {}
+			iEditorWidget{ std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aEditorWidget) } { init(); }
 		item_editor(std::shared_ptr<EditorWidget> aEditorWidget) :
-			iEditorWidget{ std::shared_ptr<i_widget>(aEditorWidget) } {}
+			iEditorWidget{ std::shared_ptr<i_widget>(aEditorWidget) } { init(); }
 	public:
 		const i_widget& as_widget() const override
 		{
@@ -60,6 +60,11 @@ namespace neogfx
 		}
 		bool has_text_edit() const override;
 		neogfx::text_edit& text_edit() const override;
+	protected:
+		void init()
+		{
+			static_cast<framed_widget&>(as_widget()).set_style(frame_style::NoFrame);
+		}
 	private:
 		std::shared_ptr<i_widget> iEditorWidget;
 	};
@@ -89,14 +94,74 @@ namespace neogfx
 	}
 
 	template <>
-	inline bool item_editor<spin_box>::has_text_edit() const
+	inline bool item_editor<basic_spin_box<int32_t>>::has_text_edit() const
 	{
 		return true;
 	}
 
 	template <>
-	inline text_edit& item_editor<spin_box>::text_edit() const
+	inline text_edit& item_editor<basic_spin_box<int32_t>>::text_edit() const
 	{
-		return static_cast<spin_box&>(*iEditorWidget).text_box();
+		return static_cast<basic_spin_box<int32_t>&>(*iEditorWidget).text_box();
+	}
+
+	template <>
+	inline bool item_editor<basic_spin_box<uint32_t>>::has_text_edit() const
+	{
+		return true;
+	}
+
+	template <>
+	inline text_edit& item_editor<basic_spin_box<uint32_t>>::text_edit() const
+	{
+		return static_cast<basic_spin_box<uint32_t>&>(*iEditorWidget).text_box();
+	}
+
+	template <>
+	inline bool item_editor<basic_spin_box<int64_t>>::has_text_edit() const
+	{
+		return true;
+	}
+
+	template <>
+	inline text_edit& item_editor<basic_spin_box<int64_t>>::text_edit() const
+	{
+		return static_cast<basic_spin_box<int64_t>&>(*iEditorWidget).text_box();
+	}
+
+	template <>
+	inline bool item_editor<basic_spin_box<uint64_t>>::has_text_edit() const
+	{
+		return true;
+	}
+
+	template <>
+	inline text_edit& item_editor<basic_spin_box<uint64_t>>::text_edit() const
+	{
+		return static_cast<basic_spin_box<uint64_t>&>(*iEditorWidget).text_box();
+	}
+
+	template <>
+	inline bool item_editor<basic_spin_box<float>>::has_text_edit() const
+	{
+		return true;
+	}
+
+	template <>
+	inline text_edit& item_editor<basic_spin_box<float>>::text_edit() const
+	{
+		return static_cast<basic_spin_box<float>&>(*iEditorWidget).text_box();
+	}
+
+	template <>
+	inline bool item_editor<basic_spin_box<double>>::has_text_edit() const
+	{
+		return true;
+	}
+
+	template <>
+	inline text_edit& item_editor<basic_spin_box<double>>::text_edit() const
+	{
+		return static_cast<basic_spin_box<double>&>(*iEditorWidget).text_box();
 	}
 }
