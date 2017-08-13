@@ -528,7 +528,7 @@ namespace neogfx
 					auto col = iSortOrder[i].first;
 					const auto& v1 = item_model().cell_data(item_model_index{ aLhs.first, iColumns[col].modelColumn });
 					const auto& v2 = item_model().cell_data(item_model_index{ aRhs.first, iColumns[col].modelColumn });
-					if (v1.is<std::string>())
+					if (v1.is<std::string>() && v2.is<std::string>())
 					{
 						std::string s1 = boost::to_upper_copy<std::string>(v1);
 						std::string s2 = boost::to_upper_copy<std::string>(v2);
