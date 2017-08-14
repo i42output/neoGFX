@@ -68,9 +68,11 @@ namespace neogfx
 		void set_image(const i_image& aText);
 		void set_aspect_ratio(aspect_ratio aAspectRatio);
 		void set_placement(cardinal_placement aPlacement);
+		void set_snap(dimension aSnap);
 	private:
 		texture iTexture;
 		aspect_ratio iAspectRatio;
 		cardinal_placement iPlacement;
+		dimension iSnap;
 	};
 }

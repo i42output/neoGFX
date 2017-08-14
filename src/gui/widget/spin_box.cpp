@@ -118,12 +118,14 @@ namespace neogfx
 		iStepUpButton.set_margins(neogfx::margins{});
 		iStepUpButton.set_minimum_size(size{15, 7});
 		iStepUpButton.label().image().set_minimum_size(size{ 3.0, 3.0 });
+		iStepUpButton.label().image().set_snap(2.0); // up and down buttons want to draw arrow texture at same size so use a snap of 2 pixels
 		iStepUpButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iStepUpButton.clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepUpButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepDownButton.set_margins(neogfx::margins{});
 		iStepDownButton.set_minimum_size(size{15, 7});
 		iStepDownButton.label().image().set_minimum_size(size{ 3.0, 3.0 });
+		iStepDownButton.label().image().set_snap(2.0);
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iStepDownButton.clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepDownButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);

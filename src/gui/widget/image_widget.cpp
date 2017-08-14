@@ -24,42 +24,42 @@
 namespace neogfx
 {
 	image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
+		iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
+		iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget(aParent), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
+		widget(aParent), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget(aParent), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
+		widget(aParent), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget(aLayout), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
+		widget(aLayout), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget(aLayout), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement)
+		widget(aLayout), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
@@ -154,6 +154,17 @@ namespace neogfx
 				break;
 			}
 		}
+		// "Snap" feature: after layout to avoid unsightly gaps between widgets some widgets will be 1 pixel larger than others with same content so a snap of 2.0 pixels will fix this (for e.g. see spin_box.cpp)...
+		if (iSnap != 1.0) 
+		{
+			double f, i;
+			f = std::fmod(placementRect.cx, iSnap);
+			std::modf(placementRect.cx, &i);
+			placementRect.cx = i + ((f < iSnap / 2.0) ? 0.0 : iSnap);
+			f = std::fmod(placementRect.cy, iSnap);
+			std::modf(placementRect.cy, &i);
+			placementRect.cy = i + ((f < iSnap / 2.0) ? 0.0 : iSnap);
+		}
 		switch (iPlacement)
 		{
 		case cardinal_placement::NorthWest:
@@ -226,6 +237,15 @@ namespace neogfx
 		if (iPlacement != aPlacement)
 		{
 			iPlacement = aPlacement;
+			update();
+		}
+	}
+
+	void image_widget::set_snap(dimension aSnap)
+	{
+		if (iSnap != aSnap)
+		{
+			iSnap = aSnap;
 			update();
 		}
 	}
