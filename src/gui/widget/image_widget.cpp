@@ -160,25 +160,25 @@ namespace neogfx
 			placementRect.position() = point{};
 			break;
 		case cardinal_placement::North:
-			placementRect.position() = point{ std::floor((client_rect().width() - placementRect.cx) / 2.0), 0.0 };
+			placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, 0.0 };
 			break;
 		case cardinal_placement::NorthEast:
 			placementRect.position() = point{ client_rect().width() - placementRect.width(), 0.0 };
 			break;
 		case cardinal_placement::West:
-			placementRect.position() = point{ 0.0, std::floor((client_rect().height() - placementRect.cy) / 2.0) };
+			placementRect.position() = point{ 0.0, (client_rect().height() - placementRect.cy) / 2.0 };
 			break;
 		case cardinal_placement::Centre:
-			placementRect.position() = point{ std::floor((client_rect().width() - placementRect.cx) / 2.0), std::floor((client_rect().height() - placementRect.cy) / 2.0) };
+			placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, (client_rect().height() - placementRect.cy) / 2.0 };
 			break;
 		case cardinal_placement::East:
-			placementRect.position() = point{ client_rect().width() - placementRect.width(), std::floor((client_rect().height() - placementRect.cy) / 2.0) };
+			placementRect.position() = point{ client_rect().width() - placementRect.width(), (client_rect().height() - placementRect.cy) / 2.0 };
 			break;
 		case cardinal_placement::SouthWest:
 			placementRect.position() = point{ 0.0, client_rect().height() - placementRect.height() };
 			break;
 		case cardinal_placement::South:
-			placementRect.position() = point{ std::floor((client_rect().width() - placementRect.cx) / 2.0), client_rect().height() - placementRect.height() };
+			placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, client_rect().height() - placementRect.height() };
 			break;
 		case cardinal_placement::SouthEast:
 			placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };

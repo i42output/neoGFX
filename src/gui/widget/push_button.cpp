@@ -25,7 +25,7 @@
 namespace neogfx
 {
 	push_button::push_button(const std::string& aText, push_button_style aStyle) :
-		button(aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
+		button(aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false), 
 		iAnimationFrame(0),
 		iStyle(aStyle)
@@ -40,7 +40,7 @@ namespace neogfx
 	}
 	
 	push_button::push_button(i_widget& aParent, const std::string& aText, push_button_style aStyle) :
-		button(aParent, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
+		button(aParent, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false), 
 		iAnimationFrame(0),
 		iStyle(aStyle)
@@ -55,7 +55,7 @@ namespace neogfx
 	}
 
 	push_button::push_button(i_layout& aLayout, const std::string& aText, push_button_style aStyle) :
-		button(aLayout, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
+		button(aLayout, aText, (aStyle == push_button_style::Normal || aStyle == push_button_style::ButtonBox || aStyle == push_button_style::SpinBox ? alignment::Centre : alignment::Left) | alignment::VCentre),
 		iAnimator(app::instance(), [this](neolib::callback_timer&){ animate(); }, 20, false),
 		iAnimationFrame(0),
 		iStyle(aStyle)
