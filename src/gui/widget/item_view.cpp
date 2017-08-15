@@ -208,6 +208,17 @@ namespace neogfx
 		return presentation_model().item_at(vertical_scrollbar().position() + item_display_rect().height(), aGraphicsContext);
 	}
 
+	void item_view::layout_items_completed()
+	{
+		scrollable_widget::layout_items_completed();
+		if (editing() != boost::none)
+		{
+			editor().set_margins(cell_margins());
+			editor().move(cell_rect(*editing()).position());
+			editor().resize(cell_rect(*editing()).extents());
+		}
+	}
+
 	size_policy item_view::size_policy() const
 	{
 		if (has_size_policy())

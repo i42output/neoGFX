@@ -81,6 +81,8 @@ namespace neogfx
 		std::pair<item_model_index::value_type, coordinate> first_visible_item(graphics_context& aGraphicsContext) const;
 		std::pair<item_model_index::value_type, coordinate> last_visible_item(graphics_context& aGraphicsContext) const;
 	protected:
+		void layout_items_completed() override;
+	protected:
 		neogfx::size_policy size_policy() const override;
 	protected:
 		void paint(graphics_context& aGraphicsContext) const override;
