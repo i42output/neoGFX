@@ -311,17 +311,21 @@ int main(int argc, char* argv[])
 		ng::line_edit lineEditPassword(layoutLineEdits);
 		lineEditPassword.set_text("Password");
 		lineEditPassword.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
-		ng::spin_box spinBox(layoutLineEdits);
-		spinBox.set_minimum(20);
-		spinBox.set_maximum(100);
-		spinBox.set_step(5);
-		ng::slider slider(layoutLineEdits);
-		slider.set_minimum(20);
-		slider.set_maximum(100);
-		slider.set_step(5);
+		ng::double_spin_box spinBox(layoutLineEdits);
+		spinBox.set_minimum(4.0);
+		spinBox.set_maximum(72.0);
+		spinBox.set_step(0.25);
+		ng::double_slider slider(layoutLineEdits);
+		slider.set_minimum(4.0);
+		slider.set_maximum(72.0);
+		slider.set_step(0.25);
 		spinBox.value_changed([&slider, &spinBox]() {slider.set_value(spinBox.value()); });
-		slider.value_changed([&slider, &spinBox]() {spinBox.set_value(slider.value()); });
-		slider.set_value(spinBox.value());
+		slider.value_changed([&slider, &spinBox, &app]() 
+		{
+			spinBox.set_value(slider.value()); 
+			app.current_style().set_font_info(app.current_style().font_info().with_size(slider.value()));
+		});
+		slider.set_value(static_cast<int32_t>(app.current_style().font_info().size()));
 		ng::double_spin_box doubleSpinBox(layoutLineEdits);
 		doubleSpinBox.set_minimum(-10);
 		doubleSpinBox.set_maximum(20);
@@ -435,20 +439,9 @@ int main(int argc, char* argv[])
 				app.change_style("Default");
 		});
 		button9.set_foreground_colour(ng::colour::Aquamarine);
-		ng::horizontal_layout layout6(layout4);
-		ng::push_button buttonMinus(layout6, "-");
-		ng::push_button buttonPlus(layout6, "+");
 		ng::horizontal_layout layout7(layout4);
 		ng::check_box buttonKerning(layout7, "kern");
 		ng::check_box buttonSubpixel(layout7, "subpix");
-		buttonMinus.clicked([&app]()
-		{
-			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() - 0.1f));
-		});
-		buttonPlus.clicked([&app]()
-		{
-			app.current_style().set_font_info(app.current_style().font_info().with_size(app.current_style().font_info().size() + 0.1f));
-		});
 		buttonKerning.toggled([&app, &buttonKerning]()
 		{
 			auto fi = app.current_style().font_info();
