@@ -287,8 +287,11 @@ namespace neogfx
 		iCursorAnimationStartTime = app::instance().program_elapsed_ms();
 		if (iType == SingleLine && !capturing())
 		{
-			cursor().set_anchor(0);
-			cursor().set_position(iText.size(), false);
+			if (aFocusReason != focus_reason::WindowActivation)
+			{
+				cursor().set_anchor(0);
+				cursor().set_position(iText.size(), false);
+			}
 		}
 		update();
 	}
