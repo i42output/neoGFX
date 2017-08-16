@@ -285,13 +285,10 @@ namespace neogfx
 		scrollable_widget::focus_gained(aFocusReason);
 		app::instance().clipboard().activate(*this);
 		iCursorAnimationStartTime = app::instance().program_elapsed_ms();
-		if (iType == SingleLine && !capturing())
+		if (iType == SingleLine && aFocusReason == focus_reason::Tab)
 		{
-			if (aFocusReason != focus_reason::WindowActivation)
-			{
-				cursor().set_anchor(0);
-				cursor().set_position(iText.size(), false);
-			}
+			cursor().set_anchor(0);
+			cursor().set_position(iText.size(), false);
 		}
 		update();
 	}
