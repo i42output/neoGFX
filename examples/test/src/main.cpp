@@ -584,14 +584,6 @@ int main(int argc, char* argv[])
 		ipm1.set_column_editable(8, ng::item_cell_editable::WhenFocused);
 		tableView2.set_model(itemModel);
 		my_item_presentation_model ipm2{ itemModel, ng::item_cell_colour_type::Background };
-		ipm2.set_column_editable(0, ng::item_cell_editable::WhenFocused);
-		ipm2.set_column_editable(1, ng::item_cell_editable::WhenFocused);
-		ipm2.set_column_editable(2, ng::item_cell_editable::WhenFocused);
-		ipm2.set_column_editable(3, ng::item_cell_editable::OnInputEvent);
-		ipm2.set_column_editable(4, ng::item_cell_editable::WhenFocused);
-		ipm2.set_column_editable(6, ng::item_cell_editable::WhenFocused);
-		ipm1.set_column_editable(7, ng::item_cell_editable::WhenFocused);
-		ipm1.set_column_editable(8, ng::item_cell_editable::WhenFocused);
 		tableView2.set_presentation_model(ipm2);
 		tableView2.column_header().set_expand_last_column(true);
 		tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)

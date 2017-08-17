@@ -394,7 +394,7 @@ namespace neogfx
 				dimension available = element_geometry(aContext, ElementDownButton).top() - 1.0 - g.y;
 				if ((maximum() - minimum()) != 0.0)
 				{
-					g.cy = std::ceil(available * static_cast<dimension>(page() / (maximum() - minimum())));
+					g.cy = available * static_cast<dimension>(page() / (maximum() - minimum()));
 					units_converter uc(aContext);
 					uc.set_units(UnitsMillimetres);
 					dimension s = std::ceil(uc.to_device_units(2.0));
@@ -404,13 +404,15 @@ namespace neogfx
 						available -= (s - g.cy);
 						g.cy = s;
 					}
-					g.y += std::ceil(static_cast<dimension>(position() / (maximum() - minimum())) * available);
+					g.y += static_cast<dimension>(position() / (maximum() - minimum())) * available;
 				}
 				else
 				{
 					g.y = 0;
 					g.cy = 0.0;
 				}
+				g.y = std::ceil(g.y);
+				g.cy = std::ceil(g.cy);
 			}
 			else
 			{
@@ -418,7 +420,7 @@ namespace neogfx
 				dimension available = element_geometry(aContext, ElementRightButton).left() - 1.0 - g.x;
 				if ((maximum() - minimum()) != 0.0)
 				{
-					g.cx = std::ceil(available * static_cast<dimension>(page() / (maximum() - minimum())));
+					g.cx = available * static_cast<dimension>(page() / (maximum() - minimum()));
 					units_converter uc(aContext);
 					uc.set_units(UnitsMillimetres);
 					dimension s = std::ceil(uc.to_device_units(2.0));
@@ -428,13 +430,15 @@ namespace neogfx
 						available -= (s - g.cx);
 						g.cx = s;
 					}
-					g.x += std::ceil(static_cast<dimension>(position() / (maximum() - minimum())) * available);
+					g.x += static_cast<dimension>(position() / (maximum() - minimum())) * available;
 				}
 				else
 				{
 					g.x = 0;
 					g.cx = 0.0;
 				}
+				g.x = std::ceil(g.x);
+				g.cx = std::ceil(g.cx);
 			}
 			break;
 		}

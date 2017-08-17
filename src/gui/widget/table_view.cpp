@@ -88,11 +88,13 @@ namespace neogfx
 	void table_view::model_changed()
 	{
 		column_header().set_model(model());
+		update_scrollbar_visibility();
 	}
 
 	void table_view::presentation_model_changed()
 	{
 		column_header().set_presentation_model(presentation_model());
+		update_scrollbar_visibility();
 	}
 
 	void table_view::selection_model_changed()
