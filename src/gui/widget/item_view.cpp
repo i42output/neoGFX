@@ -709,12 +709,16 @@ namespace neogfx
 		if (!selection_model().has_current_index() || selection_model().current_index() != newIndex)
 			selection_model().set_current_index(newIndex);
 		iEditing = newIndex;
+		if (presentation_model().cell_colour(newIndex, item_cell_colour_type::Background) != optional_colour{})
+			editor().set_background_colour(presentation_model().cell_colour(newIndex, item_cell_colour_type::Background));
 		editor().set_margins(cell_margins());
 		editor().move(cell_rect(newIndex).position());
 		editor().resize(cell_rect(newIndex).extents());
 		if (editor_has_text_edit())
 		{
 			auto& textEdit = editor_text_edit();
+			if (presentation_model().cell_colour(newIndex, item_cell_colour_type::Background) != optional_colour{})
+				textEdit.set_background_colour(presentation_model().cell_colour(newIndex, item_cell_colour_type::Background));
 			if (&editor() != &textEdit)
 				textEdit.set_margins(neogfx::margins{});
 			optional_colour textColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Foreground);
