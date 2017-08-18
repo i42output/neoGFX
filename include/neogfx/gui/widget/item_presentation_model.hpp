@@ -472,10 +472,7 @@ namespace neogfx
 		}
 		void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction()) override
 		{
-			auto newOrder = sort_order{ aColumnIndex, aSortDirection == boost::none ? SortAscending : *aSortDirection };
-			if (sorting_by() == newOrder)
-				return;
-			iSortOrder.push_front(newOrder);
+			iSortOrder.push_front(sort_order{ aColumnIndex, aSortDirection == boost::none ? SortAscending : *aSortDirection });
 			for (auto i = std::next(iSortOrder.begin()); i != iSortOrder.end(); ++i)
 			{
 				if (i->first == aColumnIndex)
