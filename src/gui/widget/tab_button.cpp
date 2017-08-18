@@ -242,7 +242,7 @@ namespace neogfx
 
 	rect tab_button::path_bounding_rect() const
 	{
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		rect result = push_button::path_bounding_rect();
 		if (is_deselected())
 			result.deflate(as_units(*this, UnitsMillimetres, delta(0.0, 25.4/96.0)).ceil() * delta(0.0, 2.0));
@@ -273,7 +273,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return push_button::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		return convert_units(*this, su.saved_units(), push_button::minimum_size(aAvailableSpace) + as_units(*this, UnitsMillimetres, size(25.4/96.0, 25.4/96.0)).ceil() * size(4.0, 4.0));
 	}
 

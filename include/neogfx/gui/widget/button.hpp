@@ -34,6 +34,7 @@ namespace neogfx
 		event<> pressed;
 		event<> clicked;
 		event<> double_clicked;
+		event<> right_clicked;
 		event<> released;
 	public:
 		event<> toggled;

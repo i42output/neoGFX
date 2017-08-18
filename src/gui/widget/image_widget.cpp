@@ -76,7 +76,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		size result = iTexture.extents();
 		return convert_units(*this, su.saved_units(), result);
 	}
@@ -85,8 +85,8 @@ namespace neogfx
 	{
 		if (iTexture.is_empty())
 			return;
-		scoped_units su(*this, UnitsPixels);
-		rect placementRect(point{}, iTexture.extents());
+		scoped_units su{ *this, UnitsPixels };
+		rect placementRect{ point{}, iTexture.extents() };
 		if (iAspectRatio == aspect_ratio::Stretch)
 		{
 			placementRect.cx = client_rect().width();
@@ -115,7 +115,7 @@ namespace neogfx
 				}
 				break;
 			case aspect_ratio::KeepExpanding:
-				if (placementRect.height() > client_rect().height())
+				if (placementRect.height() != client_rect().height())
 				{
 					placementRect.cy = client_rect().height();
 					placementRect.cx = placementRect.cy * iTexture.extents().cx / iTexture.extents().cy;
@@ -146,7 +146,7 @@ namespace neogfx
 				}
 				break;
 			case aspect_ratio::KeepExpanding:
-				if (placementRect.width() > client_rect().width())
+				if (placementRect.width() != client_rect().width())
 				{
 					placementRect.cx = client_rect().width();
 					placementRect.cy = placementRect.cx * iTexture.extents().cy / iTexture.extents().cx;

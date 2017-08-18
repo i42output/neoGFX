@@ -41,6 +41,6 @@ namespace neogfx
 		i_widget* iParent;
 		point iPosition;
 		window_style iStyle;
-		std::unique_ptr<popup_menu> iWidget;
+		static std::unique_ptr<popup_menu> sWidget;
 	};
 }

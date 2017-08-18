@@ -26,19 +26,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	menu_item_widget::menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem) :
-		iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortcutText(iLayout)
+		iMenu{ aMenu }, iMenuItem{ aMenuItem }, iLayout{ *this }, iIcon{ iLayout, texture{}, aspect_ratio::Keep }, iText{ iLayout }, iSpacer{ iLayout }, iShortcutText{ iLayout }
 	{
 		init();
 	}
 
 	menu_item_widget::menu_item_widget(i_widget& aParent, i_menu& aMenu, i_menu_item& aMenuItem) :
-		widget(aParent), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortcutText(iLayout)
+		widget{ aParent }, iMenu{ aMenu }, iMenuItem{ aMenuItem }, iLayout{ *this }, iIcon{ iLayout, texture{}, aspect_ratio::Keep }, iText{ iLayout }, iSpacer{ iLayout }, iShortcutText{ iLayout }
 	{
 		init();
 	}
 
 	menu_item_widget::menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem) :
-		widget(aLayout), iMenu(aMenu), iMenuItem(aMenuItem), iLayout(*this), iIcon(iLayout, texture{}), iText(iLayout), iSpacer(iLayout), iShortcutText(iLayout)
+		widget{ aLayout }, iMenu{ aMenu }, iMenuItem{ aMenuItem }, iLayout{ *this }, iIcon{ iLayout, texture{}, aspect_ratio::Keep }, iText{ iLayout }, iSpacer{ iLayout }, iShortcutText{ iLayout }
 	{
 		init();
 	}
@@ -240,6 +240,22 @@ namespace neogfx
 			auto action_changed = [this]()
 			{
 				iIcon.set_image(menu_item().action().is_unchecked() ? menu_item().action().image() : menu_item().action().checked_image());
+				if (iIcon.image().is_empty() && menu_item().action().is_checked())
+				{
+					const uint8_t sTickPattern[8][16]
+					{
+						{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+						{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 },
+						{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+						{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+						{ 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+						{ 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+						{ 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
+						{ 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 }
+					};
+					colour ink = app::instance().current_style().palette().text_colour();
+					iIcon.set_image(image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { 0, colour{} },{ 1, ink } } });
+				}
 				if (!iIcon.image().is_empty())
 					iIcon.set_fixed_size(size{ iIconSize, iIconSize });
 				else if (menu().type() == i_menu::MenuBar)

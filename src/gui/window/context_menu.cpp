@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+	std::unique_ptr<popup_menu> context_menu::sWidget;
+
 	context_menu::context_menu(const point& aPosition, window_style aStyle)
 		: iMenu{ new neogfx::menu{} }, iParent{ nullptr }, iPosition{ aPosition }, iStyle{ aStyle }
 	{
@@ -45,9 +47,9 @@ namespace neogfx
 
 	popup_menu& context_menu::root_widget()
 	{
-		if (iWidget == nullptr)
+		if (sWidget == nullptr)
 			throw widget_not_created_yet();
-		return *iWidget;
+		return *sWidget;
 	}
 
 	void context_menu::exec()
@@ -58,13 +60,16 @@ namespace neogfx
 		{
 			finished = true;
 		});
-		iWidget = iParent != nullptr ?
+		if (sWidget != nullptr)
+			sWidget = nullptr;
+		sWidget = (iParent != nullptr ?
 			std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
-			std::make_unique<popup_menu>(iPosition, menu(), iStyle);
+			std::make_unique<popup_menu>(iPosition, menu(), iStyle));
 		app::event_processing_context epc(app::instance(), "neogfx::context_menu");
 		while (!finished)
 		{
 			app::instance().process_events(epc);
 		}
+		sWidget = nullptr;
 	}
 }

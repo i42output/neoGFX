@@ -26,6 +26,7 @@
 #include <neolib/vecarray.hpp>
 #include <neolib/segmented_array.hpp>
 #include <neolib/observable.hpp>
+#include <neolib/raii.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/app/app.hpp>
 #include "item_model.hpp"
@@ -87,21 +88,21 @@ namespace neogfx
 		{
 			if (iItemModel == &aItemModel)
 				return;
-			iInitializing = true;
-			iItemModel = &aItemModel;
-			item_model().subscribe(*this);
-			reset_maps();
-			reset_meta();
-			reset_sort();
-			iColumns.clear();
-			for (item_model_index::column_type col = 0; col < item_model().columns(); ++col)
-				iColumns.push_back(column_info{ col });
-			iRows.clear();
-			for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
-				item_added(item_model(), item_model_index{ row });
-			iInitializing = false;
+			{
+				neolib::scoped_flag sf{ iInitializing };
+				iItemModel = &aItemModel;
+				item_model().subscribe(*this);
+				iColumns.clear();
+				for (item_model_index::column_type col = 0; col < item_model().columns(); ++col)
+					iColumns.push_back(column_info{ col });
+				iRows.clear();
+				for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
+					item_added(item_model(), item_model_index{ row });
+				reset_maps();
+				reset_meta();
+				reset_sort();
+			}
 			notify_observers(i_item_presentation_model_subscriber::NotifyItemModelChanged);
-			sort();
 		}
 		item_model_index to_item_model_index(const item_presentation_model_index& aIndex) const override
 		{
@@ -471,7 +472,10 @@ namespace neogfx
 		}
 		void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction()) override
 		{
-			iSortOrder.push_front(sort_order(aColumnIndex, aSortDirection == boost::none ? SortAscending : *aSortDirection));
+			auto newOrder = sort_order{ aColumnIndex, aSortDirection == boost::none ? SortAscending : *aSortDirection };
+			if (sorting_by() == newOrder)
+				return;
+			iSortOrder.push_front(newOrder);
 			for (auto i = std::next(iSortOrder.begin()); i != iSortOrder.end(); ++i)
 			{
 				if (i->first == aColumnIndex)
@@ -492,7 +496,17 @@ namespace neogfx
 		void reset_sort() override
 		{
 			iSortOrder.clear();
-			sort_by(0, SortAscending);
+			{
+				neolib::scoped_flag sf{ iInitializing };
+				reset_maps();
+				reset_meta();
+				reset_position_meta(0);
+				iRows.clear();
+				if (has_item_model())
+					for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
+						item_added(item_model(), item_model_index{ row });
+			}
+			notify_observers(i_item_presentation_model_subscriber::NotifyItemsSorted);
 		}
 	public:
 		virtual void subscribe(i_item_presentation_model_subscriber& aSubscriber)
@@ -562,6 +576,8 @@ namespace neogfx
 			if (!iInitializing)
 			{
 				notify_observers(i_item_presentation_model_subscriber::NotifyItemAdded, item_presentation_model_index{ iRows.size() - 1, 0 });
+				reset_maps();
+				reset_position_meta(0);
 				sort();
 			}
 		}
@@ -573,6 +589,8 @@ namespace neogfx
 				cellMeta.text = boost::none;
 				cellMeta.extents = boost::none;
 				notify_observers(i_item_presentation_model_subscriber::NotifyItemChanged, from_item_model_index(aItemIndex));
+				reset_maps();
+				reset_position_meta(0);
 				sort();
 			}
 		}

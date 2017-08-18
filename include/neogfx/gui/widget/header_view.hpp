@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gui/window/context_menu.hpp>
 #include "splitter.hpp"
 #include "i_item_model.hpp"
 #include "i_item_presentation_model.hpp"
@@ -72,7 +73,7 @@ namespace neogfx
 	public:
 		void panes_resized() override;
 		void reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane = boost::optional<uint32_t>()) override;
-	private:
+	protected:
 		void column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex) override;
 		void item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel) override;
 		void item_added(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
@@ -86,7 +87,7 @@ namespace neogfx
 	private:
 		i_owner& iOwner;
 		sink iSink;
-		std::vector<sink> iButtonSinks;
+		std::vector<std::array<sink, 2>> iButtonSinks;
 		type_e iType;
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;

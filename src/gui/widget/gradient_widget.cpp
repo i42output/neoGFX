@@ -170,7 +170,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		return convert_units(*this, su.saved_units(), size(CONTROL_HEIGHT * 3, CONTROL_HEIGHT));
 	}
 

@@ -185,6 +185,11 @@ namespace neogfx
 					released.trigger();
 			}
 		}
+		else if (aButton == mouse_button::Right)
+		{
+			if (wasCapturing && client_rect().contains(aPosition))
+				right_clicked.trigger();
+		}
 	}
 
 	bool button::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)

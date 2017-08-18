@@ -27,11 +27,7 @@ namespace neogfx
 	async_event_queue::async_event_queue(neolib::io_task& aIoTask) : iTimer{ aIoTask,
 		[this](neolib::callback_timer& aTimer)
 	{
-		event_list events;
-		events.swap(iEvents);
-		for (auto& e : events)
-			if (!e.second.second)
-				e.second.first();
+		publish_events();
 		if (!iEvents.empty() && !aTimer.waiting())
 			aTimer.again();
 	}, 10, false }
@@ -67,11 +63,24 @@ namespace neogfx
 		auto events = iEvents.equal_range(aEvent);
 		if (events.first == events.second)
 			throw event_not_found();
+		event_list toPublish{ events.first, events.second };
 		iEvents.erase(events.first, events.second);
+		for (auto& e : toPublish)
+			if (!e.second.second)
+				e.second.first();
 	}
 
 	bool async_event_queue::has(const void* aEvent) const
 	{
 		return iEvents.find(aEvent) != iEvents.end();
+	}
+
+	void async_event_queue::publish_events()
+	{
+		event_list toPublish;
+		toPublish.swap(iEvents);
+		for (auto& e : toPublish)
+			if (!e.second.second)
+				e.second.first();
 	}
 }

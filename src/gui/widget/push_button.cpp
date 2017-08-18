@@ -114,7 +114,7 @@ namespace neogfx
 		colour faceColour = animation_colour();
 		colour borderColour = border_mid_colour().darker(0x40);
 		colour innerBorderColour = border_mid_colour().lighter(capturing() ? 0x20 : 0x40);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		neogfx::path outline = path();
 		dimension penWidth = device_metrics().horizontal_dpi() / 96;
 		switch (iStyle)

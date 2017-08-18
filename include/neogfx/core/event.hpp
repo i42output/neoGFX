@@ -86,6 +86,7 @@ namespace neogfx
 		void add(const void* aEvent, callback aCallback, neolib::destroyable::destroyed_flag aDestroyedFlag);
 		void remove(const void* aEvent);
 		bool has(const void* aEvent) const;
+		void publish_events();
 	private:
 		static async_event_queue* sInstance;
 		neolib::callback_timer iTimer;

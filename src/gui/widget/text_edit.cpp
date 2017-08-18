@@ -210,7 +210,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return scrollable_widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		auto result = scrollable_widget::minimum_size(aAvailableSpace);
 		if (iHint.empty())
 			result += size{ font().height() };
@@ -231,7 +231,7 @@ namespace neogfx
 	{
 		if (iType == MultiLine || has_maximum_size())
 			return scrollable_widget::maximum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		auto result = scrollable_widget::maximum_size(aAvailableSpace);
 		result.cy = minimum_size(aAvailableSpace).cy;
 		return convert_units(*this, su.saved_units(), result);
@@ -1621,7 +1621,7 @@ namespace neogfx
 
 	void text_edit::make_cursor_visible(bool aForcePreviewScroll)
 	{
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		auto p = glyph_position(cursor_glyph_position(), true);
 		auto e = (p.line != p.column->lines().end() ? 
 			size{ p.glyph != p.lineEnd ? p.glyph->advance().cx : 0.0, p.line->extents.cy } : 

@@ -175,7 +175,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
 		result += size{ 32, 256 };
 		return result;
@@ -203,7 +203,7 @@ namespace neogfx
 	void colour_dialog::x_picker::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		rect cr = client_rect(false);
 		if (iParent.current_channel() == ChannelAlpha)
 			draw_alpha_background(aGraphicsContext, cr);
@@ -404,7 +404,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
 		result += size{ 256, 256 };
 		return result;
@@ -617,7 +617,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsPixels);
+		scoped_units su{ *this, UnitsPixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
 		result += size{ 60, 80 };
 		return result;
