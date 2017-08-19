@@ -452,6 +452,7 @@ namespace neogfx
 		void set_default_style(const style& aDefaultStyle, bool aPersist = false);
 		colour default_text_colour() const;
 	public:
+		void clear();
 		std::string text() const;
 		std::size_t set_text(const std::string& aText);
 		std::size_t set_text(const std::string& aText, const style& aStyle);

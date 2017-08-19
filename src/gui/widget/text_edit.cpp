@@ -1070,6 +1070,16 @@ namespace neogfx
 		return std::make_pair(start, end);
 	}
 
+	void text_edit::clear()
+	{
+		cursor().set_position(0);
+		iText.clear();
+		iGlyphs.clear();
+		iGlyphParagraphs.clear();
+		for (std::size_t i = 0; i < iGlyphColumns.size(); ++i)
+			iGlyphColumns[i].lines().clear();
+	}
+
 	std::string text_edit::text() const
 	{
 		return std::string(iText.begin(), iText.end());
@@ -1082,9 +1092,7 @@ namespace neogfx
 
 	std::size_t text_edit::set_text(const std::string& aText, const style& aStyle)
 	{
-		cursor().set_position(0);
-		iText.clear();
-		iGlyphs.clear();
+		clear();
 		return insert_text(aText, aStyle, true);
 	}
 
