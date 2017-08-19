@@ -764,7 +764,7 @@ namespace neogfx
 		if (editing() == boost::none)
 			return;
 		neolib::scoped_flag sf{ iEndingEdit };
-		bool hadFocus = editor().has_focus();
+		bool hadFocus = (editor().has_focus() || (surface().has_focused_widget() && surface().focused_widget().is_descendent_of(editor())));
 		if (aCommit)
 		{
 			auto modelIndex = presentation_model().to_item_model_index(*editing());
