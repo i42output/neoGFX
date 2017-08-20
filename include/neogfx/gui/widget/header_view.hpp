@@ -41,7 +41,6 @@ namespace neogfx
 		{
 		public:
 			virtual void header_view_updated(header_view& aHeaderView) = 0;
-			virtual neogfx::margins cell_margins() const = 0;
 		};
 	public:
 		header_view(i_owner& aOwner, type_e aType = HorizontalHeader);

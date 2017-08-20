@@ -213,7 +213,7 @@ namespace neogfx
 		scrollable_widget::layout_items_completed();
 		if (editing() != boost::none)
 		{
-			editor().set_margins(cell_margins());
+			editor().set_margins(presentation_model().cell_margins(*this));
 			editor().move(cell_rect(*editing()).position());
 			editor().resize(cell_rect(*editing()).extents());
 		}
@@ -255,10 +255,14 @@ namespace neogfx
 					aGraphicsContext.scissor_off();
 				}
 				aGraphicsContext.scissor_on(clipRect.intersection(cellRect));
-				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(cell_margins().left, cell_margins().top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), f, *textColour);
+				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(presentation_model().cell_margins(*this).left, presentation_model().cell_margins(*this).top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), f, *textColour);
 				aGraphicsContext.scissor_off();
 				if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
+				{
+					aGraphicsContext.scissor_on(clipRect.intersection(cellBackgroundRect));
 					aGraphicsContext.draw_focus_rect(cellBackgroundRect);
+					aGraphicsContext.scissor_off();
+				}
 			}
 		}
 	}
@@ -484,7 +488,7 @@ namespace neogfx
 				graphics_context gc(*this);
 				i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
 				vertical_scrollbar().set_maximum(units_converter(gc).to_device_units(item_total_area(gc)).cy);
-				vertical_scrollbar().set_step(font().height());
+				vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy : 0.0));
 				vertical_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cy);
 				vertical_scrollbar().set_position(oldPosition);
 				if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
@@ -493,7 +497,7 @@ namespace neogfx
 					vertical_scrollbar().hide();
 				oldPosition = horizontal_scrollbar().position();
 				horizontal_scrollbar().set_maximum(units_converter(gc).to_device_units(item_total_area(gc)).cx);
-				horizontal_scrollbar().set_step(font().height());
+				horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy : 0.0));
 				horizontal_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cx);
 				horizontal_scrollbar().set_position(oldPosition);
 				if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
@@ -711,7 +715,7 @@ namespace neogfx
 		iEditing = newIndex;
 		if (presentation_model().cell_colour(newIndex, item_cell_colour_type::Background) != optional_colour{})
 			editor().set_background_colour(presentation_model().cell_colour(newIndex, item_cell_colour_type::Background));
-		editor().set_margins(cell_margins());
+		editor().set_margins(presentation_model().cell_margins(*this));
 		editor().move(cell_rect(newIndex).position());
 		editor().resize(cell_rect(newIndex).extents());
 		if (editor_has_text_edit())
@@ -824,11 +828,6 @@ namespace neogfx
 			editor().move(cell_rect(*editing()).position());
 			editor().resize(cell_rect(*editing()).extents());
 		}
-	}
-
-	neogfx::margins item_view::cell_margins() const
-	{
-		return units_converter(*this).from_device_units(neogfx::margins(1.0, 0.0, 1.0, 0.0));
 	}
 
 	rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground) const

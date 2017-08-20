@@ -68,7 +68,6 @@ namespace neogfx
 		text_edit& editor_text_edit() const;
 	protected:
 		void header_view_updated(header_view& aHeaderView) override;
-		neogfx::margins cell_margins() const override;
 	protected:
 		virtual void model_changed() = 0;
 		virtual void presentation_model_changed() = 0;

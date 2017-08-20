@@ -453,8 +453,8 @@ namespace neogfx
 		bool updated = false;
 		for (uint32_t col = 0; col < presentation_model().columns(item_presentation_model_index{ aRow }); ++col)
 		{
-			dimension headingWidth = presentation_model().column_heading_extents(col, aGc).cx + iOwner.cell_margins().size().cx * 2.0;
-			dimension cellWidth = presentation_model().cell_extents(item_presentation_model_index{ aRow, col }, aGc).cx + iOwner.cell_margins().size().cx * 2.0;
+			dimension headingWidth = presentation_model().column_heading_extents(col, aGc).cx + presentation_model().cell_margins(*this).size().cx * 2.0;
+			dimension cellWidth = presentation_model().cell_extents(item_presentation_model_index{ aRow, col }, aGc).cx + presentation_model().cell_margins(*this).size().cx * 2.0;
 			dimension oldSectionWidth = iSectionWidths[col].second;
 			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
 			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col, true))

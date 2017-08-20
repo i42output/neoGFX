@@ -190,6 +190,21 @@ namespace neogfx
 			else
 				iCellSpacing = units_converter(aUnitsContext).to_device_units(*aSpacing);
 		}
+		neogfx::margins cell_margins(const i_units_context& aUnitsContext) const override
+		{
+			if (iCellMargins == boost::none)
+			{
+				return units_converter(aUnitsContext).from_device_units(neogfx::margins{ 1.0, 1.0, 1.0, 1.0 });
+			}
+			return units_converter(aUnitsContext).from_device_units(*iCellMargins);
+		}
+		void set_cell_margins(const optional_margins& aMargins, const i_units_context& aUnitsContext) override
+		{
+			if (aMargins == boost::none)
+				iCellMargins = aMargins;
+			else
+				iCellMargins = units_converter(aUnitsContext).to_device_units(*aMargins);
+		}
 	public:
 		dimension item_height(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const override
 		{
@@ -212,7 +227,7 @@ namespace neogfx
 						(1 + std::count(cellString.begin(), cellString.end(), '\n')));
 				}
 			}
-			return height;
+			return height + cell_margins(aUnitsContext).size().cy;
 		}
 		double total_height(const i_units_context& aUnitsContext) const override
 		{
@@ -711,6 +726,7 @@ namespace neogfx
 	private:
 		i_item_model* iItemModel;
 		optional_size iCellSpacing;
+		optional_margins iCellMargins;
 		container_type iRows;
 		mutable row_map_type iRowMap;
 		column_info_container_type iColumns;
