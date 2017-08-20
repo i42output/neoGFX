@@ -46,12 +46,9 @@ namespace neogfx
 	protected:
 		rect item_display_rect() const override;
 		size item_total_area(graphics_context& aGraphicsContext) const override;
-		size cell_spacing() const override;
 		dimension column_width(uint32_t aColumn) const override;
 	protected:
 		child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const override;
-	protected:
-		dimension column_separator_width() const;
 	private:
 		vertical_layout iLayout;
 		header_view iColumnHeader;

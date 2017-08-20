@@ -410,12 +410,14 @@ namespace neogfx
 		return result;
 	}
 
-	void grid_layout::set_spacing(const size& aSpacing)
+	void grid_layout::set_spacing(const size& aSpacing, bool aUpdateLayout)
 	{
-		layout::set_spacing(aSpacing);
-		iRowLayout.set_spacing(aSpacing);
+		layout::set_spacing(aSpacing, false);
+		iRowLayout.set_spacing(aSpacing, false);
 		for (auto& r : iRows)
-			r->set_spacing(aSpacing);
+			r->set_spacing(aSpacing, false);
+		if (owner() != nullptr && aUpdateLayout)
+			owner()->ultimate_ancestor().layout_items(true);
 	}
 
 	void grid_layout::add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns)

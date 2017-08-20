@@ -833,14 +833,16 @@ namespace neogfx
 
 	rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground) const
 	{
-		graphics_context gc(*this);
-		coordinate y = presentation_model().item_position(aItemIndex, gc);
-		dimension h = presentation_model().item_height(aItemIndex, gc);
+		const size cellSpacing = presentation_model().cell_spacing(*this);
+		coordinate y = presentation_model().item_position(aItemIndex, *this);
+		dimension h = presentation_model().item_height(aItemIndex, *this);
 		coordinate x = 0.0;
 		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 		{
 			if (col != 0)
-				x += cell_spacing().cx;
+				x += cellSpacing.cx;
+			else
+				x += cellSpacing.cx / 2.0;
 			if (col == aItemIndex.column())
 			{
 				x -= horizontal_scrollbar().position();
@@ -848,15 +850,13 @@ namespace neogfx
 				rect result{ point{x, y} + item_display_rect().top_left(), size{ column_width(col), h } };
 				if (aBackground)
 				{
-					if (col == 0)
-						result.cx += cell_spacing().cx / 2.0;
-					else if (col == presentation_model().columns() - 1)
+					if (col == presentation_model().columns() - 1)
 					{
-						result.x -= cell_spacing().cx / 2.0;
-						result.cx += cell_spacing().cx / 2.0;
+						result.x -= cellSpacing.cx / 2.0;
+						result.cx += cellSpacing.cx / 2.0;
 					}
 					else
-						result.inflate(size{ cell_spacing().cx / 2.0, 0.0 });
+						result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
 				}
 				return result;
 			}
@@ -869,16 +869,16 @@ namespace neogfx
 	{
 		if (model().rows() == 0)
 			return optional_item_presentation_model_index{};
-		graphics_context gc(*this);
+		const size cellSpacing = presentation_model().cell_spacing(*this);
 		point adjustedPos(
 			std::min(std::max(aPosition.x, item_display_rect().left()), item_display_rect().right()),
 			std::min(std::max(aPosition.y, item_display_rect().top()), item_display_rect().bottom()));
-		item_presentation_model_index index = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), gc).first;
+		item_presentation_model_index index = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), *this).first;
 		for (uint32_t col = 0; col < presentation_model().columns(); ++col) // TODO: O(n) isn't good enough if lots of columns
 		{
 			index.set_column(col);
 			rect cellRect = cell_rect(index);
-			cellRect.extents() += cell_spacing();
+			cellRect.extents() += cellSpacing;
 			if (cellRect.contains_x(adjustedPos))
 			{
 				if (aPosition.y < item_display_rect().top() && index.row() > 0)

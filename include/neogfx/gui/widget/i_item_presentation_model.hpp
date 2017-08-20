@@ -126,10 +126,13 @@ namespace neogfx
 		virtual item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const = 0;
 		virtual void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_cell_editable aEditable) = 0;
 	public:
-		virtual dimension item_height(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
-		virtual double total_height(const graphics_context& aGraphicsContext) const = 0;
-		virtual double item_position(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
-		virtual std::pair<item_presentation_model_index::value_type, coordinate> item_at(double aPosition, const graphics_context& aGraphicsContext) const = 0;
+		virtual size cell_spacing(const i_units_context& aUnitsContext) const = 0;
+		virtual void set_cell_spacing(const optional_size& aSpacing, const i_units_context& aUnitsContext) = 0;
+	public:
+		virtual dimension item_height(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const = 0;
+		virtual double total_height(const i_units_context& aUnitsContext) const = 0;
+		virtual double item_position(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const = 0;
+		virtual std::pair<item_presentation_model_index::value_type, coordinate> item_at(double aPosition, const i_units_context& aUnitsContext) const = 0;
 	public:
 		virtual const cell_meta_type& cell_meta(const item_presentation_model_index& aIndex) const = 0;
 	public:

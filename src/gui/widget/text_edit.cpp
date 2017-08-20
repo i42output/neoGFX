@@ -241,6 +241,8 @@ namespace neogfx
 	{
 		scrollable_widget::paint(aGraphicsContext);
 		coordinate x = 0.0;
+		rect clipRect = default_clip_rect().intersection(client_rect(false));
+		aGraphicsContext.scissor_on(clipRect);
 		for (auto iterColumn = iGlyphColumns.begin(); iterColumn != iGlyphColumns.end(); ++iterColumn)
 		{
 			const auto& column = *iterColumn;
@@ -273,6 +275,7 @@ namespace neogfx
 		}
 		if (has_focus())
 			draw_cursor(aGraphicsContext);
+		aGraphicsContext.scissor_off();
 	}
 
 	const font& text_edit::font() const
@@ -1624,7 +1627,11 @@ namespace neogfx
 			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
 			glyphHeight = lineHeight = font().height();
-		update(rect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{cursor().width(), glyphHeight} });
+		rect cursorRect{
+			point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{ cursor().width(), glyphHeight } };
+		if (cursorRect.right() > client_rect(false).right())
+			cursorRect.x += (client_rect(false).right() - cursorRect.right());
+		update(cursorRect);
 	}
 
 	void text_edit::make_cursor_visible(bool aForcePreviewScroll)
@@ -1775,31 +1782,23 @@ namespace neogfx
 					elapsed < 750 ? 
 						static_cast<colour::component>((249 - (elapsed - 500) % 250) * 255 / 249) : 
 						0;
+			rect cursorRect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
+				size{ cursor().width(), glyphHeight } };
+			if (cursorRect.right() > client_rect(false).right())
+				cursorRect.x += (client_rect(false).right() - cursorRect.right());
 			if (cursor().colour().empty())
 			{
 				aGraphicsContext.push_logical_operation(logical_operation::Xor);
-				aGraphicsContext.fill_rect(
-					rect{
-						point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
-						size{ cursor().width(), glyphHeight } },
-					colour::White.with_alpha(alpha));
+				aGraphicsContext.fill_rect(cursorRect, colour::White.with_alpha(alpha));
 				aGraphicsContext.pop_logical_operation();
 			}
 			else if (cursor().colour().is<colour>())
 			{
-				aGraphicsContext.fill_rect(
-					rect{
-						point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
-						size{ cursor().width(), glyphHeight } },
-					static_variant_cast<const colour&>(cursor().colour()).with_combined_alpha(alpha));
+				aGraphicsContext.fill_rect(cursorRect, static_variant_cast<const colour&>(cursor().colour()).with_combined_alpha(alpha));
 			}
 			else if (cursor().colour().is<gradient>())
 			{
-				aGraphicsContext.fill_rect(
-					rect{
-						point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight},
-						size{ cursor().width(), glyphHeight} },
-					static_variant_cast<const gradient&>(cursor().colour()).with_combined_alpha(alpha));
+				aGraphicsContext.fill_rect(cursorRect, static_variant_cast<const gradient&>(cursor().colour()).with_combined_alpha(alpha));
 			}
 		}
 	}

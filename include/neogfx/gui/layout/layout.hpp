@@ -111,7 +111,7 @@ namespace neogfx
 		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
 	public:
 		virtual size spacing() const;
-		virtual void set_spacing(const size& aSpacing);
+		virtual void set_spacing(const size& aSpacing, bool aUpdateLayout = true);
 		virtual bool always_use_spacing() const;
 		virtual void set_always_use_spacing(bool aAlwaysUseSpacing);
 		virtual neogfx::alignment alignment() const;

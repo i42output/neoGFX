@@ -37,7 +37,7 @@ namespace neogfx
 				neolib::destroyable::destroyed_flag destroyed(*this);
 				if (iRow == 0)
 				{
-					aParent.layout().set_spacing(aParent.separator_width());
+					aParent.layout().set_spacing(aParent.separator_width(), false);
 					aParent.iSectionWidths.resize(aParent.presentation_model().columns());
 					for (auto& sw : aParent.iSectionWidths)
 						sw.second = 0.0;
@@ -52,6 +52,12 @@ namespace neogfx
 					for (std::size_t i = 0; i < aParent.layout().item_count(); ++i)
 					{
 						push_button& button = aParent.layout().get_widget_at<push_button>(i);
+						if (i == 0)
+						{
+							auto m = button.margins();
+							m.left = aParent.separator_width() / 2.0 + 1.0;
+							button.set_margins(m);
+						}
 						if (i < aParent.presentation_model().columns())
 						{
 							button.text().set_text(aParent.presentation_model().column_heading_text(i));
@@ -352,6 +358,8 @@ namespace neogfx
 	{
 		if (iSeparatorWidth != boost::none)
 			return units_converter(*this).from_device_units(*iSeparatorWidth);
+		else if (has_presentation_model())
+			return presentation_model().cell_spacing(*this).cx;
 		else
 		{
 			dimension millimetre = as_units(*this, UnitsMillimetres, 1.0);
@@ -372,12 +380,17 @@ namespace neogfx
 		return iSectionWidths.size();
 	}
 
-	dimension header_view::section_width(uint32_t aSectionIndex) const
+	dimension header_view::section_width(uint32_t aSectionIndex, bool aForHeaderButton) const
 	{
 		if (!expand_last_column() || aSectionIndex != iSectionWidths.size() - 1)
-			return units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].first != boost::none ?
+		{
+			auto result = units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].first != boost::none ?
 				*iSectionWidths[aSectionIndex].first :
 				iSectionWidths[aSectionIndex].second);
+			if (aForHeaderButton && aSectionIndex == 0)
+				result += presentation_model().cell_spacing(*this).cx / 2.0;
+			return result;
+		}
 		else
 			return layout().get_widget_at(aSectionIndex).extents().cx;
 	}
@@ -391,6 +404,8 @@ namespace neogfx
 		{
 			if (col != 0)
 				result += separator_width();
+			else
+				result += separator_width() / 2.0;
 			result += section_width(col);
 		}
 		return result;
@@ -412,6 +427,8 @@ namespace neogfx
 		{
 			dimension oldSectionWidth = section_width(col);
 			dimension newSectionWidth = layout().get_widget_at(col).extents().cx;
+			if (col == 0)
+				newSectionWidth -= presentation_model().cell_spacing(*this).cx / 2.0;
 			if (newSectionWidth != oldSectionWidth)
 				iSectionWidths[col].first = newSectionWidth;
 		}
@@ -434,16 +451,16 @@ namespace neogfx
 	void header_view::update_from_row(uint32_t aRow, bool aUpdateOwner, graphics_context& aGc)
 	{
 		bool updated = false;
-		for (uint32_t col = 0; col < presentation_model().columns(item_model_index(aRow)); ++col)
+		for (uint32_t col = 0; col < presentation_model().columns(item_presentation_model_index{ aRow }); ++col)
 		{
-			dimension headingWidth = presentation_model().column_heading_extents(col, aGc).cx + iOwner.cell_margins().size().cx * 2.0;
-			dimension cellWidth = presentation_model().cell_extents(item_model_index(aRow, col), aGc).cx + iOwner.cell_margins().size().cx * 2.0;
+			dimension headingWidth = presentation_model().column_heading_extents(col, aGc).cx + iOwner.cell_margins().size().cx * 2.0 + layout().get_widget_at(col).margins().size().cx;
+			dimension cellWidth = presentation_model().cell_extents(item_presentation_model_index{ aRow, col }, aGc).cx + iOwner.cell_margins().size().cx * 2.0;
 			dimension oldSectionWidth = iSectionWidths[col].second;
 			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
-			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col))
+			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col, true))
 			{
-				if (!expand_last_column() || col != presentation_model().columns(item_model_index(aRow)) - 1)
-					layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
+				if (!expand_last_column() || col != presentation_model().columns(item_presentation_model_index{ aRow }) - 1)
+					layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col, true), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
 				else
 					layout().get_widget_at(col).set_minimum_size(size(std::max(iSectionWidths[col].second, layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
 				updated = true;

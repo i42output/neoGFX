@@ -174,8 +174,24 @@ namespace neogfx
 				throw bad_column_index();
 			iColumns[aColumnIndex].editable = aEditable;
 		}
+		size cell_spacing(const i_units_context& aUnitsContext) const override
+		{
+			if (iCellSpacing == boost::none)
+			{
+				dimension millimetre = as_units(aUnitsContext, UnitsMillimetres, 1.0);
+				return units_converter(aUnitsContext).from_device_units(units_converter(aUnitsContext).to_device_units(size{ millimetre, millimetre }).ceil());
+			}
+			return units_converter(aUnitsContext).from_device_units(*iCellSpacing);
+		}
+		void set_cell_spacing(const optional_size& aSpacing, const i_units_context& aUnitsContext) override
+		{
+			if (aSpacing == boost::none)
+				iCellSpacing = aSpacing;
+			else
+				iCellSpacing = units_converter(aUnitsContext).to_device_units(*aSpacing);
+		}
 	public:
-		dimension item_height(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
+		dimension item_height(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const override
 		{
 			dimension height = 0.0;
 			for (uint32_t col = 0; col < iRows[aIndex.row()].second.size(); ++col)
@@ -187,28 +203,28 @@ namespace neogfx
 					iFont = font();
 				}
 				if (cell_meta(aIndex).extents != boost::none)
-					height = std::max(height, units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents).cy);
+					height = std::max(height, units_converter(aUnitsContext).from_device_units(*cell_meta(aIndex).extents).cy);
 				else
 				{
 					std::string cellString = cell_to_string(item_presentation_model_index(aIndex.row(), col));
 					const font& effectiveFont = (cellFont == boost::none ? iFont : *cellFont);
-					height = std::max(height, units_converter(aGraphicsContext).from_device_units(size(0.0, std::ceil(effectiveFont.height()))).cy *
+					height = std::max(height, units_converter(aUnitsContext).from_device_units(size(0.0, std::ceil(effectiveFont.height()))).cy *
 						(1 + std::count(cellString.begin(), cellString.end(), '\n')));
 				}
 			}
 			return height;
 		}
-		double total_height(const graphics_context& aGraphicsContext) const override
+		double total_height(const i_units_context& aUnitsContext) const override
 		{
 			if (iTotalHeight != boost::none)
 				return *iTotalHeight;
 			i_scrollbar::value_type height = 0.0;
 			for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
-				height += item_height(item_presentation_model_index(row, 0), aGraphicsContext);
+				height += item_height(item_presentation_model_index(row, 0), aUnitsContext);
 			iTotalHeight = height;
 			return *iTotalHeight;
 		}
-		double item_position(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
+		double item_position(const item_presentation_model_index& aIndex, const i_units_context& aUnitsContext) const override
 		{
 			if (iPositions[aIndex.row()] == boost::none)
 			{
@@ -225,17 +241,17 @@ namespace neogfx
 				};
 				auto i = std::lower_bound(iPositions.begin(), iPositions.end(), optional_position(), pred);
 				uint32_t row = std::distance(iPositions.begin(), i);
-				double position = (row == 0 ? 0.0 : **(std::prev(i)) + item_height(item_presentation_model_index(row - 1), aGraphicsContext));
+				double position = (row == 0 ? 0.0 : **(std::prev(i)) + item_height(item_presentation_model_index(row - 1), aUnitsContext));
 				while (row <= aIndex.row())
 				{
 					iPositions[row] = position;
-					position += item_height(item_presentation_model_index(row), aGraphicsContext);
+					position += item_height(item_presentation_model_index(row), aUnitsContext);
 					++row;
 				}
 			}
 			return *iPositions[aIndex.row()];
 		}
-		std::pair<item_presentation_model_index::row_type, coordinate> item_at(double aPosition, const graphics_context& aGraphicsContext) const override
+		std::pair<item_presentation_model_index::row_type, coordinate> item_at(double aPosition, const i_units_context& aUnitsContext) const override
 		{
 			if (iRows.size() == 0)
 				return std::pair<item_presentation_model_index::row_type, coordinate>(0, 0.0);
@@ -255,11 +271,11 @@ namespace neogfx
 			{
 				auto j = std::lower_bound(iPositions.begin(), iPositions.end(), optional_position(), pred);
 				uint32_t row = std::distance(iPositions.begin(), j);
-				double position = (row == 0 ? 0.0 : **(std::prev(j)) + item_height(item_presentation_model_index(row - 1), aGraphicsContext));
+				double position = (row == 0 ? 0.0 : **(std::prev(j)) + item_height(item_presentation_model_index(row - 1), aUnitsContext));
 				while (row < iPositions.size())
 				{
 					iPositions[row] = position;
-					position += item_height(item_presentation_model_index(row), aGraphicsContext);
+					position += item_height(item_presentation_model_index(row), aUnitsContext);
 					++row;
 				}
 				i = std::lower_bound(iPositions.begin(), iPositions.end(), aPosition, pred);
@@ -694,6 +710,7 @@ namespace neogfx
 		}
 	private:
 		i_item_model* iItemModel;
+		optional_size iCellSpacing;
 		container_type iRows;
 		mutable row_map_type iRowMap;
 		column_info_container_type iColumns;

@@ -76,7 +76,6 @@ namespace neogfx
 	protected:
 		virtual rect item_display_rect() const = 0;
 		virtual size item_total_area(graphics_context& aGraphicsContext) const = 0;
-		virtual size cell_spacing() const = 0;
 		virtual dimension column_width(uint32_t aColumn) const = 0;
 		std::pair<item_model_index::value_type, coordinate> first_visible_item(graphics_context& aGraphicsContext) const;
 		std::pair<item_model_index::value_type, coordinate> last_visible_item(graphics_context& aGraphicsContext) const;

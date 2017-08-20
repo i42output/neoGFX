@@ -442,12 +442,12 @@ namespace neogfx
 		return units_converter(*this).from_device_units(iSpacing);
 	}
 
-	void layout::set_spacing(const size& aSpacing)
+	void layout::set_spacing(const size& aSpacing, bool aUpdateLayout)
 	{
 		if (iSpacing != aSpacing)
 		{
 			iSpacing = units_converter(*this).to_device_units(aSpacing);
-			if (iOwner != nullptr)
+			if (iOwner != nullptr && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
 	}

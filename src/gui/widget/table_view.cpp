@@ -113,11 +113,6 @@ namespace neogfx
 		return size(column_header().total_width(), has_presentation_model() ? presentation_model().total_height(aGraphicsContext) : 0.0);
 	}
 
-	size table_view::cell_spacing() const
-	{
-		return size(column_separator_width(), 0.0);
-	}
-
 	dimension table_view::column_width(uint32_t aColumn) const
 	{
 		return column_header().section_width(aColumn);
@@ -129,10 +124,5 @@ namespace neogfx
 			return ScrollChildWidgetHorizontally;
 		else
 			return item_view::scrolling_disposition(aChildWidget);
-	}
-
-	dimension table_view::column_separator_width() const
-	{
-		return iColumnHeader.separator_width();
 	}
 }
