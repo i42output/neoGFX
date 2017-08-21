@@ -465,11 +465,16 @@ namespace neogfx
 		if (editing() == boost::none && selection_model().has_current_index() && aText[0] != '\n' && aText[0] != '\t')
 		{
 			edit(selection_model().current_index());
-			if (editing() && editor_has_text_edit())
+			if (editing())
 			{
-				editor_text_edit().set_text(aText);
-				handled = true;
+				if (editor_has_text_edit())
+				{
+					editor_text_edit().set_text(aText);
+					handled = true;
+				}
 			}
+			else
+				app::instance().basic_services().system_beep();
 		}
 		return handled;
 	}
