@@ -63,8 +63,8 @@ namespace neogfx
 		dimension em_size() const override;
 	public:
 		const i_device_metrics& device_metrics() const override;
-		units_e units() const override;
-		units_e set_units(units_e aUnits) const override;
+		neogfx::units units() const override;
+		neogfx::units set_units(neogfx::units aUnits) const override;
 	public:
 		void resized() override;
 	public:
@@ -181,7 +181,7 @@ namespace neogfx
 		sink iSink;
 		std::unique_ptr<i_native_window> iNativeWindow;
 		window_style iStyle;
-		mutable units_e iUnits;
+		mutable neogfx::units iUnits;
 		int32_t iCountedEnable;
 		bool iNativeWindowClosing;
 		bool iClosed;

@@ -54,13 +54,13 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return widget::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		return convert_units(*this, su.saved_units(), size{ 96, 22 });
 	}
 
 	void slider_impl::paint(graphics_context& aGraphicsContext) const
 	{
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		rect rectBarBox = bar_box();
 		colour ink = background_colour().light(0x80) ? background_colour().darker(0x80) : background_colour().lighter(0x80);
 		aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink);

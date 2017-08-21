@@ -35,9 +35,9 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return widget::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		dimension length = std::ceil(units_converter(*this).from_device_units(static_cast<const radio_button&>(parent()).text().font().height() * (2.0 / 3.0)));
-		length = std::max(length, std::ceil(as_units(*this, UnitsMillimetres, 3.0)));
+		length = std::max(length, std::ceil(as_units(*this, units::Millimetres, 3.0)));
 		return convert_units(*this, su.saved_units(), size(length, length));
 	}
 
@@ -48,7 +48,7 @@ namespace neogfx
 		
 	void radio_button::disc::paint(graphics_context& aGraphicsContext) const
 	{
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		rect discRect = client_rect();
 		colour borderColour1 = container_background_colour().mid(container_background_colour().mid(background_colour()));
 		if (borderColour1.similar_intensity(container_background_colour(), 0.03125))

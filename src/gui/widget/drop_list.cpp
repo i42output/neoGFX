@@ -73,7 +73,7 @@ namespace neogfx
 		set_size_policy(neogfx::size_policy::Minimum);
 		label().layout().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
 		auto& s = layout().add_spacer();
-		scoped_units su{ s, UnitsPixels };
+		scoped_units su{ s, units::Pixels };
 		s.set_minimum_width(std::max(0.0, 8.0 - label().layout().spacing().cx * 2));
 		layout().add_item(iDownArrow);
 		update_arrow();

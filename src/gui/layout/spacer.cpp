@@ -236,12 +236,12 @@ namespace neogfx
 		return iDeviceMetricsForwarder;
 	}
 
-	units_e spacer::units() const
+	units spacer::units() const
 	{
 		return iUnitsContext.units();
 	}
 
-	units_e spacer::set_units(units_e aUnits) const
+	units spacer::set_units(neogfx::units aUnits) const
 	{
 		return iUnitsContext.set_units(aUnits);
 	}

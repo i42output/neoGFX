@@ -33,7 +33,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aVideoMode, app::instance().name(), aStyle)), 
 		iStyle(aStyle), 
-		iUnits(UnitsPixels), 
+		iUnits(units::Pixels), 
 		iCountedEnable(0), 
 		iNativeWindowClosing(false), 
 		iClosed(false),
@@ -49,7 +49,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aVideoMode, aWindowTitle, aStyle)), 
 		iStyle(aStyle), 
-		iUnits(UnitsPixels), 
+		iUnits(units::Pixels), 
 		iCountedEnable(0), 
 		iNativeWindowClosing(false), 
 		iClosed(false),
@@ -65,7 +65,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aDimensions, app::instance().name(), aStyle)),
 		iStyle(aStyle),
-		iUnits(UnitsPixels),
+		iUnits(units::Pixels),
 		iCountedEnable(0),
 		iNativeWindowClosing(false),
 		iClosed(false),
@@ -81,7 +81,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aDimensions, aWindowTitle, aStyle)),
 		iStyle(aStyle),
-		iUnits(UnitsPixels),
+		iUnits(units::Pixels),
 		iCountedEnable(0),
 		iNativeWindowClosing(false),
 		iClosed(false),
@@ -97,7 +97,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aPosition, aDimensions, app::instance().name(), aStyle)),
 		iStyle(aStyle),
-		iUnits(UnitsPixels),
+		iUnits(units::Pixels),
 		iCountedEnable(0),
 		iNativeWindowClosing(false),
 		iClosed(false),
@@ -113,7 +113,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aPosition, aDimensions, aWindowTitle, aStyle)),
 		iStyle(aStyle),
-		iUnits(UnitsPixels),
+		iUnits(units::Pixels),
 		iCountedEnable(0),
 		iNativeWindowClosing(false),
 		iClosed(false),
@@ -129,7 +129,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, app::instance().name(), aStyle)),
 		iStyle(aStyle), 
-		iUnits(UnitsPixels), 
+		iUnits(units::Pixels), 
 		iCountedEnable(0), 
 		iNativeWindowClosing(false), 
 		iClosed(false),
@@ -146,7 +146,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, aWindowTitle, aStyle)),
 		iStyle(aStyle), 
-		iUnits(UnitsPixels), 
+		iUnits(units::Pixels), 
 		iCountedEnable(0), 
 		iNativeWindowClosing(false), 
 		iClosed(false),
@@ -163,7 +163,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aDimensions, app::instance().name(), aStyle)),
 		iStyle(aStyle),
-		iUnits(UnitsPixels),
+		iUnits(units::Pixels),
 		iCountedEnable(0),
 		iNativeWindowClosing(false),
 		iClosed(false),
@@ -180,7 +180,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle)),
 		iStyle(aStyle),
-		iUnits(UnitsPixels),
+		iUnits(units::Pixels),
 		iCountedEnable(0),
 		iNativeWindowClosing(false),
 		iClosed(false),
@@ -197,7 +197,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aPosition, aDimensions, app::instance().name(), aStyle)),
 		iStyle(aStyle),
-		iUnits(UnitsPixels),
+		iUnits(units::Pixels),
 		iCountedEnable(0),
 		iNativeWindowClosing(false),
 		iClosed(false),
@@ -214,7 +214,7 @@ namespace neogfx
 		scrollable_widget(aScrollbarStyle, aFrameStyle),
 		iNativeWindow(app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle)),
 		iStyle(aStyle),
-		iUnits(UnitsPixels),
+		iUnits(units::Pixels),
 		iCountedEnable(0),
 		iNativeWindowClosing(false),
 		iClosed(false),
@@ -303,14 +303,14 @@ namespace neogfx
 		return *iNativeWindow;
 	}
 
-	units_e window::units() const
+	units window::units() const
 	{
 		return iUnits;
 	}
 
-	units_e window::set_units(units_e aUnits) const
+	units window::set_units(neogfx::units aUnits) const
 	{
-		units_e oldUnits = iUnits;
+		neogfx::units oldUnits = iUnits;
 		iUnits = aUnits;
 		return oldUnits;
 	}

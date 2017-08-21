@@ -155,7 +155,7 @@ namespace neogfx
 		if (style() == scrollbar_style::Invisible)
 			return 0.0;
 		units_converter uc(aContext);
-		uc.set_units(UnitsMillimetres);
+		uc.set_units(units::Millimetres);
 		dimension w = std::ceil(uc.to_device_units(4.0));
 		if (style() == scrollbar_style::Menu || style() == scrollbar_style::Scroller)
 		{
@@ -172,7 +172,7 @@ namespace neogfx
 	{
 		if (style() == scrollbar_style::Invisible)
 			return;
-		scoped_units su(aGraphicsContext, UnitsPixels);
+		scoped_units su(aGraphicsContext, units::Pixels);
 		rect g = iContainer.scrollbar_geometry(aGraphicsContext, *this);
 		point oldOrigin = aGraphicsContext.origin();
 		aGraphicsContext.set_origin(point(0.0, 0.0));
@@ -304,7 +304,7 @@ namespace neogfx
 	{
 		if (style() == scrollbar_style::Invisible)
 			return rect{};
-		scoped_units su(aContext, UnitsPixels);
+		scoped_units su(aContext, units::Pixels);
 		rect g = iContainer.scrollbar_geometry(aContext, *this);
 		const dimension margin = 3.0;
 		switch (aElement)
@@ -396,7 +396,7 @@ namespace neogfx
 				{
 					g.cy = available * static_cast<dimension>(page() / (maximum() - minimum()));
 					units_converter uc(aContext);
-					uc.set_units(UnitsMillimetres);
+					uc.set_units(units::Millimetres);
 					dimension s = std::ceil(uc.to_device_units(2.0));
 					uc.set_units(uc.saved_units());
 					if (g.cy < s)
@@ -422,7 +422,7 @@ namespace neogfx
 				{
 					g.cx = available * static_cast<dimension>(page() / (maximum() - minimum()));
 					units_converter uc(aContext);
-					uc.set_units(UnitsMillimetres);
+					uc.set_units(units::Millimetres);
 					dimension s = std::ceil(uc.to_device_units(2.0));
 					uc.set_units(uc.saved_units());
 					if (g.cx < s)
@@ -479,7 +479,7 @@ namespace neogfx
 		if (clicked_element() == i_scrollbar::ElementThumb)
 		{
 			point delta = (aUpdateParams.is<point>() ? static_variant_cast<point>(aUpdateParams) : iContainer.as_widget().surface().mouse_position()) - iThumbClickedPosition;
-			scoped_units su(aContext, UnitsPixels);
+			scoped_units su(aContext, units::Pixels);
 			rect g = iContainer.scrollbar_geometry(aContext, *this);
 			if (iType == scrollbar_type::Vertical)
 			{
@@ -610,7 +610,7 @@ namespace neogfx
 			{
 				aTimer.again();
 				point delta = iContainer.as_widget().surface().mouse_position() - *iScrollTrackPosition;
-				scoped_units su(iContainer.as_widget().surface(), UnitsPixels);
+				scoped_units su(iContainer.as_widget().surface(), units::Pixels);
 				rect g = iContainer.scrollbar_geometry(iContainer.as_widget().surface(), *this);
 				if (iType == scrollbar_type::Vertical)
 				{

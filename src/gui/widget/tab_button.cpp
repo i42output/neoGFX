@@ -52,7 +52,7 @@ namespace neogfx
 	protected:
 		void paint(graphics_context& aGraphicsContext) const
 		{
-			scoped_units su{ *this, aGraphicsContext, UnitsPixels };
+			scoped_units su{ *this, aGraphicsContext, units::Pixels };
 			if (entered())
 			{
 				double radius = std::sqrt(std::pow(image().image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
@@ -242,10 +242,10 @@ namespace neogfx
 
 	rect tab_button::path_bounding_rect() const
 	{
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		rect result = push_button::path_bounding_rect();
 		if (is_deselected())
-			result.deflate(as_units(*this, UnitsMillimetres, delta(0.0, 25.4/96.0)).ceil() * delta(0.0, 2.0));
+			result.deflate(as_units(*this, units::Millimetres, delta(0.0, 25.4/96.0)).ceil() * delta(0.0, 2.0));
 		else
 			result.extents() += size(0.0, 5.0);
 		return convert_units(*this, su.saved_units(), result);
@@ -273,8 +273,8 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return push_button::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, UnitsPixels };
-		return convert_units(*this, su.saved_units(), push_button::minimum_size(aAvailableSpace) + as_units(*this, UnitsMillimetres, size(25.4/96.0, 25.4/96.0)).ceil() * size(4.0, 4.0));
+		scoped_units su{ *this, units::Pixels };
+		return convert_units(*this, su.saved_units(), push_button::minimum_size(aAvailableSpace) + as_units(*this, units::Millimetres, size(25.4/96.0, 25.4/96.0)).ceil() * size(4.0, 4.0));
 	}
 
 	void tab_button::handle_clicked()

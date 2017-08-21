@@ -170,13 +170,13 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return widget::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		return convert_units(*this, su.saved_units(), size(CONTROL_HEIGHT * 3, CONTROL_HEIGHT));
 	}
 
 	void gradient_widget::paint(graphics_context& aGraphicsContext) const
 	{
-		scoped_units su{ *this, aGraphicsContext, UnitsPixels };
+		scoped_units su{ *this, aGraphicsContext, units::Pixels };
 		rect rectContents = contents_rect();
 		color frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
 		draw_alpha_background(aGraphicsContext, rectContents);

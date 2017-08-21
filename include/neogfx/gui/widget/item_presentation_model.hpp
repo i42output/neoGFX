@@ -178,7 +178,7 @@ namespace neogfx
 		{
 			if (iCellSpacing == boost::none)
 			{
-				dimension millimetre = as_units(aUnitsContext, UnitsMillimetres, 1.0);
+				dimension millimetre = as_units(aUnitsContext, units::Millimetres, 1.0);
 				return units_converter(aUnitsContext).from_device_units(units_converter(aUnitsContext).to_device_units(size{ millimetre, millimetre }).ceil());
 			}
 			return units_converter(aUnitsContext).from_device_units(*iCellSpacing);
@@ -227,7 +227,7 @@ namespace neogfx
 						(1 + std::count(cellString.begin(), cellString.end(), '\n')));
 				}
 			}
-			return height + cell_margins(aUnitsContext).size().cy;
+			return height + cell_margins(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
 		}
 		double total_height(const i_units_context& aUnitsContext) const override
 		{

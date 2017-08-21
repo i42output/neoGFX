@@ -144,8 +144,8 @@ namespace neogfx
 		virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
 	public:
 		virtual const i_device_metrics& device_metrics() const;
-		virtual units_e units() const;
-		virtual units_e set_units(units_e aUnits) const;
+		virtual neogfx::units units() const;
+		virtual neogfx::units set_units(neogfx::units aUnits) const;
 	protected:
 		const item_list& items() const;
 		item_list& items();

@@ -182,8 +182,8 @@ namespace neogfx
 		virtual dimension em_size() const;
 		// from i_units_context
 		virtual const i_device_metrics& device_metrics() const;
-		virtual units_e units() const;
-		virtual units_e set_units(units_e aUnits) const;
+		virtual neogfx::units units() const;
+		virtual neogfx::units set_units(neogfx::units aUnits) const;
 		// helpers
 	protected:
 		static i_native_font_face& to_native_font_face(const font& aFont);

@@ -319,7 +319,7 @@ namespace neogfx
 
 	void scrollable_widget::init()
 	{
-		scoped_units su(static_cast<scrollable_widget&>(*this), UnitsCentimetres);
+		scoped_units su(static_cast<scrollable_widget&>(*this), units::Centimetres);
 		vertical_scrollbar().set_step(std::ceil(units_converter(static_cast<scrollable_widget&>(*this)).to_device_units(1.0)));
 		horizontal_scrollbar().set_step(std::ceil(units_converter(static_cast<scrollable_widget&>(*this)).to_device_units(1.0)));
 	}

@@ -651,18 +651,18 @@ namespace neogfx
 	typedef boost::optional<vector3> optional_vector3;
 	typedef boost::optional<vector4> optional_vector4;
 
-	enum units_e
+	enum class units
 	{
-		UnitsPixels,
-		UnitsPoints,
-		UnitsPicas,
-		UnitsEms,
-		UnitsMillimetres,
-		UnitsMillimeters = UnitsMillimetres,
-		UnitsCentimetres,
-		UnitsCentimeters = UnitsCentimetres,
-		UnitsInches,
-		UnitsPercentage
+		Pixels,
+		Points,
+		Picas,
+		Ems,
+		Millimetres,
+		Millimeters = units::Millimetres,
+		Centimetres,
+		Centimeters = units::Centimetres,
+		Inches,
+		Percentage
 	};
 
 	class i_device_resolution
@@ -684,8 +684,8 @@ namespace neogfx
 	{
 	public:
 		virtual const i_device_metrics& device_metrics() const = 0;
-		virtual units_e units() const = 0;
-		virtual units_e set_units(units_e aUnits) const = 0;
+		virtual neogfx::units units() const = 0;
+		virtual neogfx::units set_units(neogfx::units aUnits) const = 0;
 	};
 
 	class units_context : public i_units_context
@@ -694,11 +694,11 @@ namespace neogfx
 		units_context(const i_device_metrics& aDeviceMetrics);
 	public:
 		virtual const i_device_metrics& device_metrics() const;
-		virtual units_e units() const;
-		virtual units_e set_units(units_e aUnits) const;
+		virtual neogfx::units units() const;
+		virtual neogfx::units set_units(neogfx::units aUnits) const;
 	private:
 		const i_device_metrics& iDeviceMetrics;
-		mutable units_e iUnits;
+		mutable neogfx::units iUnits;
 	};
 
 	class units_converter
@@ -713,9 +713,9 @@ namespace neogfx
 		~units_converter();
 		// operations
 	public:
-		units_e saved_units() const;
-		units_e units() const;
-		units_e set_units(units_e aUnits) const;
+		neogfx::units saved_units() const;
+		neogfx::units units() const;
+		neogfx::units set_units(neogfx::units aUnits) const;
 	public:
 		vector2 to_device_units(const vector2& aValue) const;
 		dimension to_device_units(dimension aValue) const;
@@ -779,20 +779,20 @@ namespace neogfx
 		// attributes
 	private:
 		const i_units_context& iContext;
-		units_e iSavedUnits;
+		neogfx::units iSavedUnits;
 	};
 
 	class scoped_units
 	{
 		// construction
 	public:
-		scoped_units(const i_units_context& aUnitsContext, units_e aNewUnits) :
+		scoped_units(const i_units_context& aUnitsContext, units aNewUnits) :
 			iUnitsContext1(aUnitsContext), iUnitsContext2(aUnitsContext), iSavedUnits1(aUnitsContext.units()), iSavedUnits2(aUnitsContext.units())
 		{
 			iUnitsContext1.set_units(aNewUnits);
 			iUnitsContext2.set_units(aNewUnits);
 		}
-		scoped_units(const i_units_context& aUnitsContext1, const i_units_context& aUnitsContext2, units_e aNewUnits) :
+		scoped_units(const i_units_context& aUnitsContext1, const i_units_context& aUnitsContext2, units aNewUnits) :
 			iUnitsContext1(aUnitsContext1), iUnitsContext2(aUnitsContext2), iSavedUnits1(aUnitsContext1.units()), iSavedUnits2(aUnitsContext2.units())
 		{
 			iUnitsContext1.set_units(aNewUnits);
@@ -804,7 +804,7 @@ namespace neogfx
 		}
 		// operations
 	public:
-		units_e saved_units() const
+		units saved_units() const
 		{
 			return iSavedUnits1;
 		}
@@ -817,12 +817,12 @@ namespace neogfx
 	private:
 		const i_units_context& iUnitsContext1;
 		const i_units_context& iUnitsContext2;
-		units_e iSavedUnits1;
-		units_e iSavedUnits2;
+		units iSavedUnits1;
+		units iSavedUnits2;
 	};
 
 	template<typename T>
-	inline T as_units(const i_units_context& aSourceUnitsContext, units_e aUnits, const T& aValue)
+	inline T as_units(const i_units_context& aSourceUnitsContext, units aUnits, const T& aValue)
 	{
 		if (aSourceUnitsContext.units() == aUnits)
 			return aValue;
@@ -834,7 +834,7 @@ namespace neogfx
 	}
 
 	template<typename T>
-	inline T convert_units(const i_units_context& aSourceUnitsContext, units_e aNewUnits, const T& aValue)
+	inline T convert_units(const i_units_context& aSourceUnitsContext, units aNewUnits, const T& aValue)
 	{
 		if (aSourceUnitsContext.units() == aNewUnits)
 			return aValue;
@@ -848,7 +848,7 @@ namespace neogfx
 	{
 		if (aSourceUnitsContext.units() == aDestinationUnitsContext.units())
 		{
-			if (aSourceUnitsContext.units() != UnitsPixels ||
+			if (aSourceUnitsContext.units() != units::Pixels ||
 				(aSourceUnitsContext.device_metrics().horizontal_dpi() == aDestinationUnitsContext.device_metrics().horizontal_dpi() &&
 				aSourceUnitsContext.device_metrics().vertical_dpi() == aDestinationUnitsContext.device_metrics().vertical_dpi()))
 			{
@@ -857,9 +857,9 @@ namespace neogfx
 		}
 		T result = units_converter(aSourceUnitsContext).to_device_units(aValue);
 		{
-			scoped_units su1(aSourceUnitsContext, UnitsMillimeters);
+			scoped_units su1(aSourceUnitsContext, units::Millimeters);
 			result = units_converter(aSourceUnitsContext).from_device_units(aValue);
-			scoped_units su2(aDestinationUnitsContext, UnitsMillimeters);
+			scoped_units su2(aDestinationUnitsContext, units::Millimeters);
 			result = units_converter(aDestinationUnitsContext).to_device_units(result);
 		}
 		return units_converter(aDestinationUnitsContext).from_device_units(result);

@@ -83,7 +83,7 @@ namespace neogfx
 			push_button::paint(aGraphicsContext);
 		else
 		{
-			scoped_units su(*this, aGraphicsContext, UnitsPixels);
+			scoped_units su(*this, aGraphicsContext, units::Pixels);
 			rect line = client_rect();
 			line.deflate(0, std::floor(client_rect().height() / 6.0));
 			line.cx = 1.0;

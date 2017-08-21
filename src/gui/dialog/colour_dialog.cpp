@@ -52,8 +52,8 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su(*this, UnitsMillimetres);
-		auto result = convert_units(*this, UnitsPixels, framed_widget::minimum_size(aAvailableSpace) + size{ 4, 3.5 }).ceil();
+		scoped_units su(*this, units::Millimetres);
+		auto result = convert_units(*this, units::Pixels, framed_widget::minimum_size(aAvailableSpace) + size{ 4, 3.5 }).ceil();
 		su.restore_saved_units();
 		return units_converter(*this).from_device_units(result);
 	}
@@ -175,7 +175,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
 		result += size{ 32, 256 };
 		return result;
@@ -203,7 +203,7 @@ namespace neogfx
 	void colour_dialog::x_picker::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		rect cr = client_rect(false);
 		if (iParent.current_channel() == ChannelAlpha)
 			draw_alpha_background(aGraphicsContext, cr);
@@ -404,7 +404,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
 		result += size{ 256, 256 };
 		return result;
@@ -617,7 +617,7 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return framed_widget::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
 		result += size{ 60, 80 };
 		return result;
@@ -633,7 +633,7 @@ namespace neogfx
 	void colour_dialog::colour_selection::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
-		scoped_units su(*this, aGraphicsContext, UnitsPixels);
+		scoped_units su(*this, aGraphicsContext, units::Pixels);
 		rect cr = client_rect(false);
 		draw_alpha_background(aGraphicsContext, cr);
 		rect top = cr;
@@ -754,7 +754,7 @@ namespace neogfx
 
 	void colour_dialog::init()
 	{
-		scoped_units su(static_cast<framed_widget&>(*this), UnitsPixels);
+		scoped_units su(static_cast<framed_widget&>(*this), units::Pixels);
 		static const std::set<colour> sBasicColours
 		{
 			colour::AliceBlue, colour::AntiqueWhite, colour::Aquamarine, colour::Azure, colour::Beige, colour::Bisque, colour::Black, colour::BlanchedAlmond, 

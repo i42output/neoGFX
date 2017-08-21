@@ -52,8 +52,8 @@ namespace neogfx
 		neolib::i_destroyable& as_destroyable() override;
 	public:
 		const i_device_metrics& device_metrics() const override;
-		units_e units() const override;
-		units_e set_units(units_e aUnits) const override;
+		neogfx::units units() const override;
+		neogfx::units set_units(neogfx::units aUnits) const override;
 	public:
 		bool is_singular() const override;
 		void set_singular(bool aSingular) override;

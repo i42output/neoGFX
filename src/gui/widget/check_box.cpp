@@ -34,9 +34,9 @@ namespace neogfx
 	{
 		if (has_minimum_size())
 			return widget::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		dimension length = std::ceil(units_converter(*this).from_device_units(static_cast<const check_box&>(parent()).text().font().height() * (2.0 / 3.0)));
-		length = std::max(length, std::ceil(as_units(*this, UnitsMillimetres, 3.0)));
+		length = std::max(length, std::ceil(as_units(*this, units::Millimetres, 3.0)));
 		return convert_units(*this, su.saved_units(), size(length, length));
 	}
 
@@ -47,7 +47,7 @@ namespace neogfx
 		
 	void check_box::box::paint(graphics_context& aGraphicsContext) const
 	{
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		rect boxRect = client_rect();
 		colour hoverColour = app::instance().current_style().palette().hover_colour().same_lightness_as(
 			background_colour().dark() ?

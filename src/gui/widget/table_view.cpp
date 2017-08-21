@@ -108,9 +108,9 @@ namespace neogfx
 			size{ std::min(client_rect().width(), column_header().total_width()), client_rect().height() - (column_header().visible() ? column_header().extents().cy : 0.0) });
 	}
 
-	size table_view::item_total_area(graphics_context& aGraphicsContext) const
+	size table_view::item_total_area(const i_units_context& aUnitsContext) const
 	{
-		return size(column_header().total_width(), has_presentation_model() ? presentation_model().total_height(aGraphicsContext) : 0.0);
+		return size(column_header().total_width(), has_presentation_model() ? presentation_model().total_height(aUnitsContext) : 0.0);
 	}
 
 	dimension table_view::column_width(uint32_t aColumn) const

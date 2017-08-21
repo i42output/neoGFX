@@ -485,10 +485,10 @@ namespace neogfx
 		{
 		case UsvStageInit:
 			{
-				graphics_context gc(*this);
+				scoped_units su{ *this, units::Pixels };
 				i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
-				vertical_scrollbar().set_maximum(units_converter(gc).to_device_units(item_total_area(gc)).cy);
-				vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy : 0.0));
+				vertical_scrollbar().set_maximum(units_converter(*this).to_device_units(item_total_area(*this)).cy);
+				vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
 				vertical_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cy);
 				vertical_scrollbar().set_position(oldPosition);
 				if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
@@ -496,8 +496,8 @@ namespace neogfx
 				else
 					vertical_scrollbar().hide();
 				oldPosition = horizontal_scrollbar().position();
-				horizontal_scrollbar().set_maximum(units_converter(gc).to_device_units(item_total_area(gc)).cx);
-				horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy : 0.0));
+				horizontal_scrollbar().set_maximum(units_converter(*this).to_device_units(item_total_area(*this)).cx);
+				horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
 				horizontal_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cx);
 				horizontal_scrollbar().set_position(oldPosition);
 				if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
@@ -857,6 +857,8 @@ namespace neogfx
 					else
 						result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
 				}
+				else
+					result.deflate(size{ 0.0, cellSpacing.cy / 2.0 });
 				return result;
 			}
 			x += column_width(col);

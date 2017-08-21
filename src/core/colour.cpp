@@ -28,6 +28,16 @@
 
 namespace neogfx
 {
+	colour colour::from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha)
+	{
+		return hsl_colour{ aHue, aSaturation, aLightness, aAlpha }.to_rgb();
+	}
+
+	colour colour::from_hsv(double aHue, double aSaturation, double aValue, double aAlpha)
+	{
+		return hsv_colour{ aHue, aSaturation, aValue, aAlpha }.to_rgb();
+	}
+
 	colour::colour() : iValue{}
 	{
 	}

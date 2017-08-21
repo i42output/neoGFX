@@ -679,12 +679,12 @@ namespace neogfx
 		return iDeviceMetricsForwarder;
 	}
 
-	units_e layout::units() const
+	units layout::units() const
 	{
 		return iUnitsContext.units();
 	}
 
-	units_e layout::set_units(units_e aUnits) const
+	units layout::set_units(neogfx::units aUnits) const
 	{
 		return iUnitsContext.set_units(aUnits);
 	}

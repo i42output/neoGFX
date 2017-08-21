@@ -362,7 +362,7 @@ namespace neogfx
 			return presentation_model().cell_spacing(*this).cx;
 		else
 		{
-			dimension millimetre = as_units(*this, UnitsMillimetres, 1.0);
+			dimension millimetre = as_units(*this, units::Millimetres, 1.0);
 			return units_converter(*this).from_device_units(std::ceil(units_converter(*this).to_device_units(millimetre)));
 		}
 	}

@@ -719,6 +719,8 @@ namespace neogfx
 		colour(const std::string& aTextValue);
 		// operations
 	public:
+		static colour from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha = 1.0);
+		static colour from_hsv(double aHue, double aSaturation, double aValue, double aAlpha = 1.0);
 		static boost::optional<colour> from_name(const std::string& aName);
 		argb value() const;
 		component alpha() const;

@@ -589,12 +589,12 @@ namespace neogfx
 		return *this;
 	}
 
-	units_e graphics_context::units() const
+	units graphics_context::units() const
 	{
 		return iUnitsContext.units();
 	}
 
-	units_e graphics_context::set_units(units_e aUnits) const
+	units graphics_context::set_units(neogfx::units aUnits) const
 	{
 		return iUnitsContext.set_units(aUnits);
 	}

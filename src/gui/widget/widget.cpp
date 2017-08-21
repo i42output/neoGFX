@@ -150,12 +150,12 @@ namespace neogfx
 		return iDeviceMetricsForwarder;
 	}
 
-	units_e widget::units() const
+	units widget::units() const
 	{
 		return iUnitsContext.units();
 	}
 
-	units_e widget::set_units(units_e aUnits) const
+	units widget::set_units(neogfx::units aUnits) const
 	{
 		return iUnitsContext.set_units(aUnits);
 	}

@@ -134,7 +134,7 @@ namespace neogfx
 		}
 		else
 		{
-			scoped_units su(*this, aGraphicsContext, UnitsPixels);
+			scoped_units su(*this, aGraphicsContext, units::Pixels);
 			rect line = client_rect(false);
 			++line.y;
 			line.cy = 1.0;

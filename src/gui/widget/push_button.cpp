@@ -114,7 +114,7 @@ namespace neogfx
 		colour faceColour = animation_colour();
 		colour borderColour = border_mid_colour().darker(0x40);
 		colour innerBorderColour = border_mid_colour().lighter(capturing() ? 0x20 : 0x40);
-		scoped_units su{ *this, UnitsPixels };
+		scoped_units su{ *this, units::Pixels };
 		neogfx::path outline = path();
 		dimension penWidth = device_metrics().horizontal_dpi() / 96;
 		switch (iStyle)
@@ -161,7 +161,7 @@ namespace neogfx
 				{
 					rect topHalf = outline.bounding_rect();
 					rect bottomHalf = topHalf;
-					topHalf.cy = std::floor(topHalf.cy * 0.5 + as_units(*this, UnitsMillimetres, 1.0));
+					topHalf.cy = std::floor(topHalf.cy * 0.5 + as_units(*this, units::Millimetres, 1.0));
 					bottomHalf.y = topHalf.bottom();
 					bottomHalf.cy -= topHalf.height();
 					aGraphicsContext.fill_rect(topHalf, gradient(topHalfFrom, topHalfTo));
