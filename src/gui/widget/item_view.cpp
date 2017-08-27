@@ -328,6 +328,8 @@ namespace neogfx
 				selection_model().set_current_index(*item);
 				if (selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
 					edit(*item);
+				else
+					app::instance().basic_services().system_beep();
 			}
 		}
 	}
