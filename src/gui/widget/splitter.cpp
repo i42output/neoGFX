@@ -125,12 +125,12 @@ namespace neogfx
 			if (iType == HorizontalSplitter)
 			{
 
-				layout().get_widget_at(iTracking->first).set_fixed_size(size(
+				layout().get_widget_at(iTracking->first).set_minimum_size(size(
 					std::max(iSizeBeforeTracking.first + (aPosition.x - iTrackFrom.x), layout().spacing().cx * 3.0),
 					layout().get_widget_at(iTracking->first).minimum_size().cy), false);
 				if (app::instance().keyboard().is_key_pressed(ScanCode_LSHIFT) || app::instance().keyboard().is_key_pressed(ScanCode_RSHIFT))
 				{
-					layout().get_widget_at(iTracking->second).set_fixed_size(size(
+					layout().get_widget_at(iTracking->second).set_minimum_size(size(
 						std::max(iSizeBeforeTracking.second - (aPosition.x - iTrackFrom.x), layout().spacing().cx * 3.0),
 						layout().get_widget_at(iTracking->second).minimum_size().cy), false);
 				}

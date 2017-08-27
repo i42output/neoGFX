@@ -53,6 +53,7 @@ namespace neogfx
 	public:
 		void scroll_to(i_widget& aChild);
 	public:
+		void layout_items_started() override;
 		void layout_items_completed() override;
 	public:
 		void resized() override;

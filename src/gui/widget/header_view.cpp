@@ -432,6 +432,7 @@ namespace neogfx
 			if (newSectionWidth != oldSectionWidth)
 				iSectionWidths[col].first = newSectionWidth;
 		}
+		layout_items();
 		iOwner.header_view_updated(*this);
 	}
 
@@ -442,7 +443,7 @@ namespace neogfx
 			if (aPane != boost::none && *aPane != col)
 				continue;
 			iSectionWidths[col].first = boost::none;
-			layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy), false);
+			layout().get_widget_at(col).set_minimum_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy), false);
 		}
 		layout_items();
 		iOwner.header_view_updated(*this);
@@ -460,7 +461,7 @@ namespace neogfx
 			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col, true))
 			{
 				if (!expand_last_column() || col != presentation_model().columns(item_presentation_model_index{ aRow }) - 1)
-					layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col, true), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
+					layout().get_widget_at(col).set_minimum_size(size(std::max(section_width(col, true), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
 				else
 					layout().get_widget_at(col).set_minimum_size(size(std::max(iSectionWidths[col].second, layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
 				updated = true;

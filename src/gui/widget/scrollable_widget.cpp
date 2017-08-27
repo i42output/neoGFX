@@ -65,9 +65,24 @@ namespace neogfx
 		/* todo */
 	}
 
+	void scrollable_widget::layout_items_started()
+	{
+		bool first = !layout_items_in_progress();
+		framed_widget::layout_items_started();
+		if (first)
+		{
+			iOldScrollbarValues = std::make_pair(vertical_scrollbar().position(), horizontal_scrollbar().position());
+			vertical_scrollbar().set_position(0.0);
+			horizontal_scrollbar().set_position(0.0);
+			iOldScrollPosition = point{};
+		}
+	}
+
 	void scrollable_widget::layout_items_completed()
 	{
 		framed_widget::layout_items_completed();
+		vertical_scrollbar().set_position(iOldScrollbarValues.first);
+		horizontal_scrollbar().set_position(iOldScrollbarValues.second);
 		if (!layout_items_in_progress() && !iIgnoreScrollbarUpdates)
 			update_scrollbar_visibility();
 	}
@@ -412,6 +427,8 @@ namespace neogfx
 		}
 		vertical_scrollbar().update(*this);
 		horizontal_scrollbar().update(*this);
+		scrollbar_updated(vertical_scrollbar(), i_scrollbar::Updated);
+		scrollbar_updated(horizontal_scrollbar(), i_scrollbar::Updated);
 	}
 
 	void scrollable_widget::update_scrollbar_visibility(usv_stage_e aStage)
@@ -425,8 +442,6 @@ namespace neogfx
 				vertical_scrollbar().hide();
 			if ((scrolling_disposition() & ScrollChildWidgetHorizontally) == ScrollChildWidgetHorizontally)
 				horizontal_scrollbar().hide();
-			iOldScrollPosition = point{};
-			iOldScrollbarValues = std::make_pair(vertical_scrollbar().position(), horizontal_scrollbar().position());
 			layout_items();
 			break;
 		case UsvStageCheckVertical1:
