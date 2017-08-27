@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/observable.hpp>
+#include <neogfx/app/app.hpp>
 #include "i_item_presentation_model.hpp"
 #include "i_item_selection_model.hpp"
 
@@ -100,21 +101,100 @@ namespace neogfx
 		}
 		void set_current_index(const item_presentation_model_index& aIndex) override
 		{
-			if (iCurrentIndex == aIndex)
-				return;
-			optional_item_presentation_model_index previousIndex = iCurrentIndex;
-			iCurrentIndex = aIndex;
-			notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
-			current_index_changed.trigger(iCurrentIndex, previousIndex);
+			do_set_current_index(aIndex);
 		}
 		void unset_current_index() override
 		{
-			if (iCurrentIndex == boost::none)
-				return;
-			optional_item_presentation_model_index previousIndex = iCurrentIndex;
-			iCurrentIndex = boost::none;
-			notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
-			current_index_changed.trigger(iCurrentIndex, previousIndex);
+			do_set_current_index(optional_item_presentation_model_index{});
+		}
+		item_presentation_model_index relative_to_current_index(index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const override
+		{
+			return relative_to_index(has_current_index() ? current_index() : item_presentation_model_index{ 0, 0 }, aRelativeLocation, aSelectable, aEditable);
+		}
+		item_presentation_model_index relative_to_index(const item_presentation_model_index& aIndex, index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const override
+		{
+			item_presentation_model_index result = aIndex;
+			auto acceptable = [this, aSelectable, aEditable](item_presentation_model_index aIndex)
+			{
+				return (!aSelectable || is_selectable(aIndex)) && (!aEditable || is_editable(aIndex));
+			};
+			switch (aRelativeLocation)
+			{
+			case index_location::None:
+			case index_location::FirstCell:
+				result = item_presentation_model_index{ 0, 0 };
+				while (!acceptable(result) && (result = next_cell(result)) != item_presentation_model_index{ 0, 0 })
+					;
+				break;
+			case index_location::LastCell:
+				result = item_presentation_model_index{ presentation_model().rows() - 1 , presentation_model().columns() - 1 };
+				while (!acceptable(result) && (result = previous_cell(result)) != item_presentation_model_index{ presentation_model().rows() - 1 , presentation_model().columns() - 1 })
+					;
+				break;
+			case index_location::PreviousCell:
+				result = previous_cell();
+				while (!acceptable(result) && (result = previous_cell(result)) != previous_cell())
+					;
+				break;
+			case index_location::NextCell:
+				result = next_cell();
+				while (!acceptable(result) && (result = next_cell(result)) != next_cell())
+					;
+				break;
+			case index_location::StartOfCurrentRow:
+				result.set_column(0);
+				while (!acceptable(result) && (result += item_presentation_model_index{ 0, 1 }).column() != presentation_model().columns() - 1)
+					;
+				break;
+			case index_location::EndOfCurrentRow:
+				result.set_column(presentation_model().columns() - 1);
+				while (!acceptable(result) && (result -= item_presentation_model_index{ 0, 1 }).column() != 0)
+					;
+				break;
+			case index_location::StartOfCurrentColumn:
+				result.set_row(0);
+				while (!acceptable(result) && (result += item_presentation_model_index{ 1, 0 }).column() != presentation_model().rows() - 1)
+					;
+				break;
+			case index_location::EndOfCurrentColumn:
+				result.set_row(presentation_model().rows() - 1);
+				while (!acceptable(result) && (result -= item_presentation_model_index{ 1, 0 }).row() != 0)
+					;
+				break;
+			case index_location::CellToLeft:
+				if (result.column() > 0)
+				{
+					result -= item_presentation_model_index{ 0, 1 };
+					while (!acceptable(result) && (result -= item_presentation_model_index{ 0, 1 }).column() != 0)
+						;
+				}
+				break;
+			case index_location::CellToRight:
+				if (result.column() < presentation_model().columns() - 1)
+				{
+					result += item_presentation_model_index{ 0, 1 };
+					while (!acceptable(result) && (result += item_presentation_model_index{ 0, 1 }).column() != presentation_model().columns() - 1)
+						;
+				}
+				break;
+			case index_location::RowAbove:
+				if (result.row() > 0)
+				{
+					result -= item_presentation_model_index{ 1, 0 };
+					while (!acceptable(result) && (result -= item_presentation_model_index{ 1, 0 }).row() != 0)
+						;
+				}
+				break;
+			case index_location::RowBelow:
+				if (result.row() < presentation_model().rows() - 1)
+				{
+					result += item_presentation_model_index{ 1, 0 };
+					while (!acceptable(result) && (result += item_presentation_model_index{ 1, 0 }).row() != presentation_model().rows() - 1)
+						;
+				}
+				break;
+			}
+			return result;
 		}
 		item_presentation_model_index next_cell() const override
 		{
@@ -157,6 +237,10 @@ namespace neogfx
 		{
 			return (presentation_model().cell_meta(aIndex).selection & item_cell_selection_flags::Selected) == item_cell_selection_flags::Selected;
 		}	
+		bool is_selectable(const item_presentation_model_index& aIndex) const override
+		{
+			return !(has_presentation_model() && presentation_model().item_model().cell_data_info(presentation_model().to_item_model_index(aIndex)).unselectable);
+		}
 		void select(const item_presentation_model_index& aIndex, item_selection_operation aOperation = item_selection_operation::ClearAndSelect) override
 		{
 			/* todo */
@@ -170,6 +254,11 @@ namespace neogfx
 			(void)aOperation;
 		}
 	public:
+		bool is_editable(const item_presentation_model_index& aIndex) const override
+		{
+			return is_selectable(aIndex) && !(has_presentation_model() && presentation_model().cell_editable(aIndex) == item_cell_editable::No);
+		}
+	public:
 		void subscribe(i_item_selection_model_subscriber& aSubscriber) override
 		{
 			add_observer(aSubscriber);
@@ -177,6 +266,22 @@ namespace neogfx
 		void unsubscribe(i_item_selection_model_subscriber& aSubscriber) override
 		{
 			remove_observer(aSubscriber);
+		}
+	private:
+		void do_set_current_index(const optional_item_presentation_model_index& aNewIndex)
+		{
+			if (iCurrentIndex != aNewIndex)
+			{
+				if (aNewIndex != boost::none && !is_selectable(*aNewIndex))
+				{
+					app::instance().basic_services().system_beep();
+					return;
+				}
+				optional_item_presentation_model_index previousIndex = iCurrentIndex;
+				iCurrentIndex = aNewIndex;
+				notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
+				current_index_changed.trigger(iCurrentIndex, previousIndex);
+			}
 		}
 	private:
 		void notify_observer(i_item_selection_model_subscriber& aObserver, i_item_selection_model_subscriber::notify_type aType, const void* aParameter, const void* aParameter2) override

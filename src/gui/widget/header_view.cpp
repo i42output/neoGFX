@@ -63,12 +63,12 @@ namespace neogfx
 							button.text().set_text(aParent.presentation_model().column_heading_text(i));
 							if (!aParent.expand_last_column() || i != aParent.presentation_model().columns() - 1)
 								button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
-									neogfx::size_policy{ neogfx::size_policy::Fixed, neogfx::size_policy::Minimum } :
-									neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Fixed });
+									neogfx::size_policy{ neogfx::size_policy::Fixed, neogfx::size_policy::Expanding } :
+									neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Fixed });
 							else
 								button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
 									neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
-									neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Fixed });
+									neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 							button.set_minimum_size(optional_size{});
 							button.set_maximum_size(optional_size{});
 							button.enable(true);

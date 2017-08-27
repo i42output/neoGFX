@@ -45,6 +45,19 @@ namespace neogfx
 		{
 		}
 	public:
+		item_index& operator+=(const item_index& aRhs)
+		{
+			iRow += aRhs.iRow;
+			iColumn += aRhs.iColumn;
+			return *this;
+		}
+		item_index& operator-=(const item_index& aRhs)
+		{
+			iRow -= aRhs.iRow;
+			iColumn -= aRhs.iColumn;
+			return *this;
+		}
+	public:
 		row_type row() const
 		{
 			return iRow;

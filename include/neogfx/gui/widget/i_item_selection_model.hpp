@@ -56,6 +56,23 @@ namespace neogfx
 		ClearAndSelectColumn	= Clear | Select | Column
 	};
 
+	enum class index_location
+	{
+		None,
+		FirstCell,
+		LastCell,
+		PreviousCell,
+		NextCell,
+		StartOfCurrentRow,
+		EndOfCurrentRow,
+		StartOfCurrentColumn,
+		EndOfCurrentColumn,
+		CellToLeft,
+		CellToRight,
+		RowAbove,
+		RowBelow
+	};
+
 	class i_item_selection_model;
 
 	class i_item_selection_model_subscriber
@@ -94,6 +111,8 @@ namespace neogfx
 		virtual const item_presentation_model_index& current_index() const = 0;
 		virtual void set_current_index(const item_presentation_model_index& aIndex) = 0;
 		virtual void unset_current_index() = 0;
+		virtual item_presentation_model_index relative_to_current_index(index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const = 0;
+		virtual item_presentation_model_index relative_to_index(const item_presentation_model_index& aIndex, index_location aRelativeLocation, bool aSelectable = true, bool aEditable = false) const = 0;
 		virtual item_presentation_model_index next_cell() const = 0;
 		virtual item_presentation_model_index next_cell(const item_presentation_model_index& aIndex) const = 0;
 		virtual item_presentation_model_index previous_cell() const = 0;
@@ -101,8 +120,11 @@ namespace neogfx
 	public:
 		virtual const item_selection& selection() const = 0;
 		virtual bool is_selected(const item_presentation_model_index& aIndex) const = 0;
+		virtual bool is_selectable(const item_presentation_model_index& aIndex) const = 0;
 		virtual void select(const item_presentation_model_index& aIndex, item_selection_operation = item_selection_operation::Select) = 0;
 		virtual void select(const item_selection::range& aRange, item_selection_operation = item_selection_operation::Select) = 0;
+	public:
+		virtual bool is_editable(const item_presentation_model_index& aIndex) const = 0;
 	public:
 		virtual void subscribe(i_item_selection_model_subscriber& aSubscriber) = 0;
 		virtual void unsubscribe(i_item_selection_model_subscriber& aSubscriber) = 0;

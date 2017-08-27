@@ -41,10 +41,28 @@ public:
 		set_column_name(2, "Two");
 		set_column_name(3, "Click");
 		set_column_name(4, "Four");
-		set_column_name(5, "Read Only");
+		set_column_name(5, "Read Only/\nNon-Selectable");
 		set_column_name(6, "Six");
 		set_column_name(7, "Empty");
 		set_column_name(8, "Eight");
+	}
+public:
+	const ng::item_cell_data_info& cell_data_info(const ng::item_model_index& aIndex) const override
+	{
+		if (aIndex.column() == 4)
+		{
+			if (aIndex.row() == 4)
+			{
+				static const ng::item_cell_data_info sReadOnly = { false, true };
+				return sReadOnly;
+			}
+			if (aIndex.row() == 5)
+			{
+				static const ng::item_cell_data_info sUnselectable = { true, false };
+				return sUnselectable;
+			}
+		}
+		return ng::basic_item_model<void*, 9u>::cell_data_info(aIndex);
 	}
 };
 
@@ -565,7 +583,10 @@ int main(int argc, char* argv[])
 				}
 			}
 		} 
-	
+
+		itemModel.update_cell_data(ng::item_model_index{ 4, 4 }, "** Read Only **");
+		itemModel.update_cell_data(ng::item_model_index{ 5, 4 }, "** Unselectable **");
+
 		itemModel.set_column_min_value(0, 0);
 		itemModel.set_column_max_value(0, 9999);
 		itemModel.set_column_min_value(1, 0);

@@ -93,10 +93,37 @@ namespace neogfx
 		item_cell_choice_type<uint64_t>::type::const_iterator,
 		item_cell_choice_type<float>::type::const_iterator,
 		item_cell_choice_type<double>::type::const_iterator,
-		item_cell_choice_type<std::string>::type::const_iterator> item_cell_data;
+		item_cell_choice_type<std::string>::type::const_iterator> item_cell_data_variant;
+
+	class item_cell_data : public item_cell_data_variant
+	{
+	public:
+		item_cell_data() {}
+		item_cell_data(void* aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(bool aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(int32_t aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(uint32_t aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(int64_t aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(uint64_t aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(float aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(double aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(std::string aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<void*>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<bool>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<int32_t>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<uint32_t>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<int64_t>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<uint64_t>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<float>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<double>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(item_cell_choice_type<std::string>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+	public:
+		item_cell_data(const char* aString) : item_cell_data_variant(std::string(aString)) {}
+	};
 
 	struct item_cell_data_info
 	{
+		bool unselectable;
 		bool readOnly;
 		item_cell_data_type type;
 		item_cell_data min;

@@ -148,7 +148,7 @@ namespace neogfx
 			}
 			if (iColumns[aColumnIndex].extents != boost::none)
 				return units_converter(aGraphicsContext).from_device_units(*iColumns[aColumnIndex].extents);
-			size columnHeadingExtents = aGraphicsContext.text_extent(column_heading_text(aColumnIndex), iColumns[aColumnIndex].headingFont);
+			size columnHeadingExtents = aGraphicsContext.multiline_text_extent(column_heading_text(aColumnIndex), iColumns[aColumnIndex].headingFont);
 			iColumns[aColumnIndex].extents = units_converter(aGraphicsContext).to_device_units(columnHeadingExtents);
 			iColumns[aColumnIndex].extents->cx = std::ceil(iColumns[aColumnIndex].extents->cx);
 			iColumns[aColumnIndex].extents->cy = std::ceil(iColumns[aColumnIndex].extents->cy);
@@ -307,7 +307,10 @@ namespace neogfx
 	public:
 		item_cell_editable cell_editable(const item_presentation_model_index& aIndex) const override
 		{
-			return column_editable(aIndex.column());
+			if (!item_model().cell_data_info(to_item_model_index(aIndex)).readOnly)
+				return column_editable(aIndex.column());
+			else
+				return item_cell_editable::No;
 		}
 		std::string cell_to_string(const item_presentation_model_index& aIndex) const override
 		{

@@ -301,7 +301,7 @@ namespace neogfx
 			if (item != boost::none)
 			{
 				selection_model().set_current_index(*item);
-				if (presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
+				if (selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
 					edit(*item);
 			}			
 			if (capturing())
@@ -326,7 +326,7 @@ namespace neogfx
 			if (item != boost::none)
 			{
 				selection_model().set_current_index(*item);
-				if (presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
+				if (selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
 					edit(*item);
 			}
 		}
@@ -355,23 +355,10 @@ namespace neogfx
 					end_edit(true);
 					item_presentation_model_index originalIndex = selection_model().current_index();
 					if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
-					{
-						item_presentation_model_index tryIndex = originalIndex;
-						do
-						{
-							tryIndex = selection_model().next_cell(tryIndex);
-							edit(tryIndex);
-						} while (selection_model().current_index() != tryIndex && tryIndex != originalIndex);
-					}
+						selection_model().set_current_index(selection_model().relative_to_current_index(index_location::NextCell, true, true));
 					else
-					{
-						item_presentation_model_index tryIndex = originalIndex;
-						do
-						{
-							tryIndex = selection_model().previous_cell(tryIndex);
-							edit(tryIndex);
-						} while (selection_model().current_index() != tryIndex && tryIndex != originalIndex);
-					}
+						selection_model().set_current_index(selection_model().relative_to_current_index(index_location::PreviousCell, true, true));
+					edit(selection_model().current_index());
 					if (editing() != boost::none && editor_has_text_edit())
 					{
 						editor_text_edit().cursor().set_anchor(0);
@@ -385,20 +372,16 @@ namespace neogfx
 					edit(selection_model().current_index());
 				break;
 			case ScanCode_LEFT:
-				if (currentIndex.column() > 0)
-					newIndex.set_column(currentIndex.column() - 1);
+				newIndex = selection_model().relative_to_current_index(index_location::CellToLeft);
 				break;
 			case ScanCode_RIGHT:
-				if (currentIndex.column() < model().columns(currentIndex) - 1)
-					newIndex.set_column(currentIndex.column() + 1);
+				newIndex = selection_model().relative_to_current_index(index_location::CellToRight);
 				break;
 			case ScanCode_UP:
-				if (currentIndex.row() > 0)
-					newIndex.set_row(currentIndex.row() - 1);
+				newIndex = selection_model().relative_to_current_index(index_location::RowAbove);
 				break;
 			case ScanCode_DOWN:
-				if (currentIndex.row() < model().rows() - 1)
-					newIndex.set_row(currentIndex.row() + 1);
+				newIndex = selection_model().relative_to_current_index(index_location::RowBelow);
 				break;
 			case ScanCode_PAGEUP:
 				{
@@ -421,15 +404,15 @@ namespace neogfx
 				break;
 			case ScanCode_HOME:
 				if ((aKeyModifiers & KeyModifier_CTRL) == 0)
-					newIndex.set_column(0);
+					newIndex = selection_model().relative_to_current_index(index_location::StartOfCurrentRow);
 				else
-					newIndex = item_presentation_model_index{0, 0};
+					newIndex = selection_model().relative_to_current_index(index_location::FirstCell);
 				break;
 			case ScanCode_END:
 				if ((aKeyModifiers & KeyModifier_CTRL) == 0)
-					newIndex.set_column(model().columns() - 1);
+					newIndex = selection_model().relative_to_current_index(index_location::EndOfCurrentRow);
 				else
-					newIndex = item_presentation_model_index{ model().rows() - 1, model().columns() - 1 };
+					newIndex = selection_model().relative_to_current_index(index_location::LastCell);
 				break;
 			default:
 				handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
