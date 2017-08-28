@@ -91,7 +91,6 @@ namespace neogfx
 		scrollbar iVerticalScrollbar;
 		scrollbar iHorizontalScrollbar;
 		point iOldScrollPosition;
-		point iOldScrollbarPositions;
 		uint32_t iIgnoreScrollbarUpdates;
 	};
 }
