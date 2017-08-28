@@ -393,6 +393,7 @@ namespace neogfx
 		text_edit(i_layout& aLayout, type_e aType = MultiLine);
 		~text_edit();
 	public:
+		void moved() override;
 		void resized() override;
 	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;

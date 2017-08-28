@@ -91,7 +91,7 @@ namespace neogfx
 		scrollbar iVerticalScrollbar;
 		scrollbar iHorizontalScrollbar;
 		point iOldScrollPosition;
-		std::pair<i_scrollbar::value_type, i_scrollbar::value_type> iOldScrollbarValues;
+		point iOldScrollbarPositions;
 		uint32_t iIgnoreScrollbarUpdates;
 	};
 }

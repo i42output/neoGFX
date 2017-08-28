@@ -201,6 +201,11 @@ namespace neogfx
 			app::instance().clipboard().deactivate(*this);
 	}
 
+	void text_edit::moved()
+	{
+		scrollable_widget::moved();
+	}
+
 	void text_edit::resized()
 	{
 		scrollable_widget::resized();

@@ -67,22 +67,12 @@ namespace neogfx
 
 	void scrollable_widget::layout_items_started()
 	{
-		bool first = !layout_items_in_progress();
 		framed_widget::layout_items_started();
-		if (first)
-		{
-			iOldScrollbarValues = std::make_pair(vertical_scrollbar().position(), horizontal_scrollbar().position());
-			vertical_scrollbar().set_position(0.0);
-			horizontal_scrollbar().set_position(0.0);
-			iOldScrollPosition = point{};
-		}
 	}
 
 	void scrollable_widget::layout_items_completed()
 	{
 		framed_widget::layout_items_completed();
-		vertical_scrollbar().set_position(iOldScrollbarValues.first);
-		horizontal_scrollbar().set_position(iOldScrollbarValues.second);
 		if (!layout_items_in_progress() && !iIgnoreScrollbarUpdates)
 			update_scrollbar_visibility();
 	}
@@ -413,6 +403,11 @@ namespace neogfx
 
 	void scrollable_widget::update_scrollbar_visibility()
 	{
+		iOldScrollbarPositions = point{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
+		if ((scrolling_disposition() & ScrollChildWidgetVertically) == ScrollChildWidgetVertically)
+			vertical_scrollbar().set_position(0.0);
+		if ((scrolling_disposition() & ScrollChildWidgetHorizontally) == ScrollChildWidgetHorizontally)
+			horizontal_scrollbar().set_position(0.0);
 		{
 			neolib::scoped_counter sc(iIgnoreScrollbarUpdates);
 			update_scrollbar_visibility(UsvStageInit);
@@ -425,10 +420,10 @@ namespace neogfx
 			}
 			update_scrollbar_visibility(UsvStageDone);
 		}
-		vertical_scrollbar().update(*this);
-		horizontal_scrollbar().update(*this);
-		scrollbar_updated(vertical_scrollbar(), i_scrollbar::Updated);
-		scrollbar_updated(horizontal_scrollbar(), i_scrollbar::Updated);
+		if ((scrolling_disposition() & ScrollChildWidgetVertically) == ScrollChildWidgetVertically)
+			vertical_scrollbar().set_position(iOldScrollbarPositions.y);
+		if ((scrolling_disposition() & ScrollChildWidgetHorizontally) == ScrollChildWidgetHorizontally)
+			horizontal_scrollbar().set_position(iOldScrollbarPositions.x);
 	}
 
 	void scrollable_widget::update_scrollbar_visibility(usv_stage_e aStage)
@@ -507,14 +502,12 @@ namespace neogfx
 					vertical_scrollbar().set_minimum(0.0);
 					vertical_scrollbar().set_maximum(max.y);
 					vertical_scrollbar().set_page(units_converter(*this).to_device_units(client_rect()).height());
-					vertical_scrollbar().set_position(iOldScrollbarValues.first);
 				}
 				if ((scrolling_disposition() & ScrollChildWidgetHorizontally) == ScrollChildWidgetHorizontally)
 				{
 					horizontal_scrollbar().set_minimum(0.0);
 					horizontal_scrollbar().set_maximum(max.x);
 					horizontal_scrollbar().set_page(units_converter(*this).to_device_units(client_rect()).width());
-					horizontal_scrollbar().set_position(iOldScrollbarValues.second);
 				}
 			}
 			break;

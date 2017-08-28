@@ -211,12 +211,6 @@ namespace neogfx
 	void item_view::layout_items_completed()
 	{
 		scrollable_widget::layout_items_completed();
-		if (editing() != boost::none)
-		{
-			editor().set_margins(presentation_model().cell_margins(*this));
-			editor().move(cell_rect(*editing()).position());
-			editor().resize(cell_rect(*editing()).extents());
-		}
 	}
 
 	size_policy item_view::size_policy() const
