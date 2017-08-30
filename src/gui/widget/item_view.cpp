@@ -213,6 +213,14 @@ namespace neogfx
 		scrollable_widget::layout_items_completed();
 	}
 
+	widget_part item_view::hit_test(const point& aPosition) const
+	{
+		if (item_display_rect().contains(aPosition))
+			return widget_part::Client;
+		else
+			return widget_part::NonClient;
+	}
+
 	size_policy item_view::size_policy() const
 	{
 		if (has_size_policy())
@@ -279,7 +287,7 @@ namespace neogfx
 		scrollable_widget::focus_gained(aFocusReason);
 		if (model().rows() > 0 && !selection_model().has_current_index())
 			selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
-		if (aFocusReason != focus_reason::ClickNonClient)
+		if (aFocusReason == focus_reason::ClickClient)
 		{
 			if (editing() == boost::none && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
 				edit(selection_model().current_index());

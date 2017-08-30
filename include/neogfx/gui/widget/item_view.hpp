@@ -81,6 +81,8 @@ namespace neogfx
 	protected:
 		void layout_items_completed() override;
 	protected:
+		widget_part hit_test(const point& aPosition) const override;
+	protected:
 		neogfx::size_policy size_policy() const override;
 	protected:
 		void paint(graphics_context& aGraphicsContext) const override;

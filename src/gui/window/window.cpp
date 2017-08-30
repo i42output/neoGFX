@@ -1100,13 +1100,13 @@ namespace neogfx
 	{
 		if (aCandidateWidget.enabled() && (aCandidateWidget.focus_policy() & focus_policy::ClickFocus) == focus_policy::ClickFocus)
 		{
-			bool inClientArea = aCandidateWidget.client_rect().contains(aClickPos);
+			bool inClientArea = (aCandidateWidget.hit_test(aClickPos) == widget_part::Client);
 			if (inClientArea ||
 				(aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient && (!has_focused_widget() || !focused_widget().is_descendent_of(aCandidateWidget)))
 				aCandidateWidget.set_focus(inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);
 		}
 		else if (aCandidateWidget.has_parent() && (!has_focused_widget() || !focused_widget().is_descendent_of(aCandidateWidget)))
-			update_click_focus(aCandidateWidget.parent(), aClickPos + aCandidateWidget.origin() - aCandidateWidget.origin());
+			update_click_focus(aCandidateWidget.parent(), aClickPos + aCandidateWidget.origin() - aCandidateWidget.parent().origin());
 	}
 
 	void window::update_modality()

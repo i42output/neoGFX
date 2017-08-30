@@ -121,6 +121,7 @@ namespace neogfx
 		rect client_rect(bool aIncludeMargins = true) const override;
 		const i_widget& widget_at(const point& aPosition) const override;
 		i_widget& widget_at(const point& aPosition) override;
+		widget_part hit_test(const point& aPosition) const override;
 	public:
 		bool has_size_policy() const override;
 		neogfx::size_policy size_policy() const override;

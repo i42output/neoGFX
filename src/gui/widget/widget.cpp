@@ -754,6 +754,14 @@ namespace neogfx
 		return const_cast<i_widget&>(const_cast<const widget*>(this)->widget_at(aPosition));
 	}
 
+	widget_part widget::hit_test(const point& aPosition) const
+	{
+		if (client_rect().contains(aPosition))
+			return widget_part::Client;
+		else
+			return widget_part::NonClient;
+	}
+
 	bool widget::has_size_policy() const
 	{
 		return iSizePolicy != boost::none;

@@ -32,6 +32,34 @@ namespace neogfx
 	class i_surface;
 	class i_layout;
 
+	enum class widget_part
+	{
+		Client,
+		NonClientCaption,
+		NonClient,
+		NonClientBorder,
+		NonClientBorderLeft,
+		NonClientBorderTopLeft,
+		NonClientBorderTop,
+		NonClientBorderTopRight,
+		NonClientBorderRight,
+		NonClientBorderBottomRight,
+		NonClientBorderBottom,
+		NonClientBorderBottomLeft,
+		NonClientGrowBox,
+		NonClientCloseButton,
+		NonClientMaximizeButton,
+		NonClientMinimizeButton,
+		NonClientRestoreButton,
+		NonClientMenu,
+		NonClientSystemMenu,
+		NonClientVerticalScrollbar,
+		NonClientHorizontalScrollbar,
+		NonClientOther,
+		Nowhere,
+		NowhereError
+	};
+
 	enum class focus_policy : uint32_t
 	{
 		NoFocus				= 0x00000000,
@@ -158,6 +186,7 @@ namespace neogfx
 		virtual rect client_rect(bool aIncludeMargins = true) const = 0;
 		virtual const i_widget& widget_at(const point& aPosition) const = 0;
 		virtual i_widget& widget_at(const point& aPosition) = 0;
+		virtual widget_part hit_test(const point& aPosition) const = 0;
 	public:
 		virtual void update(bool aIncludeNonClient = false) = 0;
 		virtual void update(const rect& aUpdateRect) = 0;
