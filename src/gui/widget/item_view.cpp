@@ -521,6 +521,8 @@ namespace neogfx
 	{
 		update_scrollbar_visibility();
 		update();
+		if (editing() != boost::none && presentation_model().cell_editable(*editing()) == item_cell_editable::No)
+			end_edit(false);
 	}
 
 	void item_view::item_added(const i_item_model&, const item_model_index&)
@@ -772,6 +774,8 @@ namespace neogfx
 	{
 		if (editing() == boost::none)
 			return;
+		if (aCommit && presentation_model().cell_editable(*editing()) == item_cell_editable::No)
+			aCommit = false;
 		neolib::scoped_flag sf{ iEndingEdit };
 		bool hadFocus = (editor().has_focus() || (surface().has_focused_widget() && surface().focused_widget().is_descendent_of(editor())));
 		if (aCommit)
