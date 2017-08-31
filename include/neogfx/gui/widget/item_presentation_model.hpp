@@ -50,7 +50,7 @@ namespace neogfx
 			typename container_traits::allocator_type::template rebind<std::pair<const item_model_index::column_type, item_presentation_model_index::column_type>>::other> column_map_type;
 		struct column_info
 		{
-			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn }, editable{ item_cell_editable::No } {}
+			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn }, editable{ item_cell_editable::OnInputEvent } {}
 			item_model_index::column_type modelColumn;
 			item_cell_editable editable;
 			mutable boost::optional<std::string> headingText;
@@ -594,9 +594,10 @@ namespace neogfx
 			notify_observers(i_item_presentation_model_subscriber::NotifyItemsSorted);
 		}
 	private:
-		void column_info_changed(const i_item_model&, item_model_index::column_type) override
+		void column_info_changed(const i_item_model&, item_model_index::column_type aColumnIndex) override
 		{
 			reset_column_meta();
+			notify_observers(i_item_presentation_model_subscriber::NotifyColumnInfoChanged, from_item_model_index(item_model_index{ 0, aColumnIndex }).column());
 		}
 		void item_added(const i_item_model& aItemModel, const item_model_index& aItemIndex) override
 		{

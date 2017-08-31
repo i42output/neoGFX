@@ -27,6 +27,12 @@
 
 namespace neogfx
 {
+	enum class header_view_update_reason
+	{
+		FullUpdate,
+		PanesResized
+	};
+
 	class header_view : public splitter, private i_item_presentation_model_subscriber
 	{
 	private:
@@ -40,7 +46,7 @@ namespace neogfx
 		class i_owner
 		{
 		public:
-			virtual void header_view_updated(header_view& aHeaderView) = 0;
+			virtual void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) = 0;
 		};
 	public:
 		header_view(i_owner& aOwner, type_e aType = HorizontalHeader);
@@ -82,7 +88,7 @@ namespace neogfx
 		void items_sorted(const i_item_presentation_model& aModel) override;
 		void model_destroyed(const i_item_presentation_model& aModel) override;
 	private:
-		void update_from_row(uint32_t aRow, bool aUpdateOwner, graphics_context& aGc);
+		void update_from_row(uint32_t aRow, graphics_context& aGc);
 	private:
 		i_owner& iOwner;
 		sink iSink;

@@ -67,7 +67,7 @@ namespace neogfx
 		bool editor_has_text_edit() const;
 		text_edit& editor_text_edit() const;
 	protected:
-		void header_view_updated(header_view& aHeaderView) override;
+		void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) override;
 	protected:
 		virtual void model_changed() = 0;
 		virtual void presentation_model_changed() = 0;

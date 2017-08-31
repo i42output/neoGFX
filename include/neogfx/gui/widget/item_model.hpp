@@ -195,6 +195,24 @@ namespace neogfx
 			iColumns[aColumnIndex].name = aName;
 			notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
 		}
+		bool column_selectable(item_model_index::column_type aColumnIndex) const override
+		{
+			return !default_cell_data_info(aColumnIndex).unselectable;
+		}
+		void set_column_selectable(item_model_index::column_type aColumnIndex, bool aSelectable) override
+		{
+			default_cell_data_info(aColumnIndex).unselectable = !aSelectable;
+			notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+		}
+		bool column_read_only(item_model_index::column_type aColumnIndex) const override
+		{
+			return default_cell_data_info(aColumnIndex).readOnly;
+		}
+		void set_column_read_only(item_model_index::column_type aColumnIndex, bool aReadOnly) override
+		{
+			default_cell_data_info(aColumnIndex).readOnly = aReadOnly;
+			notify_observers(i_item_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
+		}
 		item_cell_data_type column_data_type(item_model_index::column_type aColumnIndex) const override
 		{
 			return default_cell_data_info(aColumnIndex).type;

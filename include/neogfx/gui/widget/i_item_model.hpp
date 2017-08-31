@@ -148,6 +148,10 @@ namespace neogfx
 		virtual uint32_t columns(const item_model_index& aIndex) const = 0;
 		virtual const std::string& column_name(item_model_index::column_type aColumnIndex) const = 0;
 		virtual void set_column_name(item_model_index::column_type aColumnIndex, const std::string& aName) = 0;
+		virtual bool column_selectable(item_model_index::column_type aColumnIndex) const = 0;
+		virtual void set_column_selectable(item_model_index::column_type aColumnIndex, bool aSelectable) = 0;
+		virtual bool column_read_only(item_model_index::column_type aColumnIndex) const = 0;
+		virtual void set_column_read_only(item_model_index::column_type aColumnIndex, bool aReadOnly) = 0;
 		virtual item_cell_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
 		virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_cell_data_type aType) = 0;
 		virtual const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const = 0;

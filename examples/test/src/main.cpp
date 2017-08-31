@@ -39,14 +39,31 @@ public:
 		set_column_name(0, "Zero");
 		set_column_name(1, "Spin Box");
 		set_column_name(2, "Two");
-		set_column_name(3, "Click");
+		set_column_name(3, "Three");
 		set_column_name(4, "Four");
-		set_column_name(5, "Read Only/\nNon-Selectable");
+		set_column_name(5, "Five");
 		set_column_name(6, "Six");
 		set_column_name(7, "Empty");
 		set_column_name(8, "Eight");
 	}
 public:
+	const ng::item_cell_data& cell_data(const ng::item_model_index& aIndex) const override
+	{
+		if (aIndex.column() == 4)
+		{
+			if (aIndex.row() == 4)
+			{
+				static const ng::item_cell_data sReadOnly = { "** Read Only **" };
+				return sReadOnly;
+			}
+			if (aIndex.row() == 5)
+			{
+				static const ng::item_cell_data sUnselectable = { "** Unselectable **" };
+				return sUnselectable;
+			}
+		}
+		return ng::basic_item_model<void*, 9u>::cell_data(aIndex);
+	}
 	const ng::item_cell_data_info& cell_data_info(const ng::item_model_index& aIndex) const override
 	{
 		if (aIndex.column() == 4)
@@ -546,10 +563,19 @@ int main(int argc, char* argv[])
 			else
 				tableView2.column_header().show();
 		});
-		ng::radio_button noSelection(layoutItemViews, "No selection");
-		ng::radio_button singleSelection(layoutItemViews, "Single selection");
-		ng::radio_button multipleSelection(layoutItemViews, "Multiple selection");
-		ng::radio_button extendedSelection(layoutItemViews, "Extended selection");
+		ng::horizontal_layout tableViewTweaks(layoutItemViews);
+		tableViewTweaks.set_alignment(ng::alignment::Top);
+		tableViewTweaks.add_spacer();
+		ng::vertical_layout tableViewSelection(tableViewTweaks);
+		ng::radio_button noSelection(tableViewSelection, "No selection");
+		ng::radio_button singleSelection(tableViewSelection, "Single selection");
+		ng::radio_button multipleSelection(tableViewSelection, "Multiple selection");
+		ng::radio_button extendedSelection(tableViewSelection, "Extended selection");
+		ng::group_box column5(tableViewTweaks, "Column 5");
+		ng::check_box column5ReadOnly(column5.item_layout(), "Read only");
+		ng::check_box column5Unselectable(column5.item_layout(), "Unselectable");
+		ng::vertical_spacer column5Spacer(column5.item_layout());
+		tableViewTweaks.add_spacer();
 
 		my_item_model itemModel;
 		#ifdef NDEBUG
@@ -584,8 +610,26 @@ int main(int argc, char* argv[])
 			}
 		} 
 
-		itemModel.update_cell_data(ng::item_model_index{ 4, 4 }, "** Read Only **");
-		itemModel.update_cell_data(ng::item_model_index{ 5, 4 }, "** Unselectable **");
+		auto update_column5_heading = [&]()
+		{
+			std::string heading;
+			if (itemModel.column_read_only(5))
+				heading = "Read only";
+			if (!itemModel.column_selectable(5))
+			{
+				if (!heading.empty())
+					heading += "/\n";
+				heading += "Unselectable";
+			}
+			if (heading.empty())
+				heading = "Five";
+			itemModel.set_column_name(5, heading);
+		};
+
+		column5ReadOnly.checked([&]() {	itemModel.set_column_read_only(5, true); update_column5_heading(); });
+		column5ReadOnly.unchecked([&]() { itemModel.set_column_read_only(5, false); update_column5_heading(); });
+		column5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
+		column5Unselectable.unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
 
 		itemModel.set_column_min_value(0, 0);
 		itemModel.set_column_max_value(0, 9999);
@@ -595,11 +639,8 @@ int main(int argc, char* argv[])
 		tableView1.set_model(itemModel);
 		my_item_presentation_model ipm1{ itemModel, ng::item_cell_colour_type::Foreground };
 		tableView1.set_presentation_model(ipm1);
-		ipm1.set_column_editable(0, ng::item_cell_editable::WhenFocused);
-		ipm1.set_column_editable(1, ng::item_cell_editable::WhenFocused);
-		ipm1.set_column_editable(2, ng::item_cell_editable::WhenFocused);
-		ipm1.set_column_editable(3, ng::item_cell_editable::OnInputEvent);
 		ipm1.set_column_editable(4, ng::item_cell_editable::WhenFocused);
+		ipm1.set_column_editable(5, ng::item_cell_editable::WhenFocused);
 		ipm1.set_column_editable(6, ng::item_cell_editable::WhenFocused);
 		ipm1.set_column_editable(7, ng::item_cell_editable::WhenFocused);
 		ipm1.set_column_editable(8, ng::item_cell_editable::WhenFocused);
@@ -608,11 +649,7 @@ int main(int argc, char* argv[])
 		ipm2.set_column_editable(0, ng::item_cell_editable::WhenFocused);
 		ipm2.set_column_editable(1, ng::item_cell_editable::WhenFocused);
 		ipm2.set_column_editable(2, ng::item_cell_editable::WhenFocused);
-		ipm2.set_column_editable(3, ng::item_cell_editable::OnInputEvent);
-		ipm2.set_column_editable(4, ng::item_cell_editable::WhenFocused);
-		ipm2.set_column_editable(6, ng::item_cell_editable::WhenFocused);
-		ipm2.set_column_editable(7, ng::item_cell_editable::WhenFocused);
-		ipm2.set_column_editable(8, ng::item_cell_editable::WhenFocused);
+		ipm2.set_column_editable(3, ng::item_cell_editable::WhenFocused);
 		tableView2.set_presentation_model(ipm2);
 		tableView2.column_header().set_expand_last_column(true);
 		tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)

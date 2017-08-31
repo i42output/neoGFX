@@ -134,10 +134,10 @@ namespace neogfx
 				graphics_context gc{ aParent };
 				for (uint32_t c = 0; c < 1000 && iRow < aParent.presentation_model().rows(); ++c, ++iRow)
 				{
-					aParent.update_from_row(iRow, false, gc);
+					aParent.update_from_row(iRow, gc);
 					if (c % 25 == 0 && app::instance().program_elapsed_ms() - since > 20)
 					{
-						aParent.iOwner.header_view_updated(aParent);
+						aParent.iOwner.header_view_updated(aParent, header_view_update_reason::FullUpdate);
 						app::instance().process_events(epc);
 						if (destroyed || aParent.surface().destroyed())
 							return;
@@ -145,7 +145,9 @@ namespace neogfx
 					}
 				}
 				if (iRow == aParent.presentation_model().rows())
-					aParent.iOwner.header_view_updated(aParent);
+				{
+					aParent.iOwner.header_view_updated(aParent, header_view_update_reason::FullUpdate);
+				}
 				else
 					again();
 			}, 10 },
@@ -433,7 +435,7 @@ namespace neogfx
 				iSectionWidths[col].first = newSectionWidth;
 		}
 		layout_items();
-		iOwner.header_view_updated(*this);
+		iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
 	}
 
 	void header_view::reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane)
@@ -446,10 +448,10 @@ namespace neogfx
 			layout().get_widget_at(col).set_minimum_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy), false);
 		}
 		layout_items();
-		iOwner.header_view_updated(*this);
+		iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
 	}
 
-	void header_view::update_from_row(uint32_t aRow, bool aUpdateOwner, graphics_context& aGc)
+	void header_view::update_from_row(uint32_t aRow, graphics_context& aGc)
 	{
 		bool updated = false;
 		for (uint32_t col = 0; col < presentation_model().columns(item_presentation_model_index{ aRow }); ++col)
@@ -469,7 +471,5 @@ namespace neogfx
 		}
 		if (updated)
 			layout_items();
-		if (aUpdateOwner)
-			iOwner.header_view_updated(*this);
 	}
 }

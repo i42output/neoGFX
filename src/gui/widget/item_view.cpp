@@ -211,6 +211,8 @@ namespace neogfx
 	void item_view::layout_items_completed()
 	{
 		scrollable_widget::layout_items_completed();
+		if (selection_model().has_current_index())
+			make_visible(selection_model().current_index());
 	}
 
 	widget_part item_view::hit_test(const point& aPosition) const
@@ -811,10 +813,15 @@ namespace neogfx
 		return iEditor->text_edit();
 	}
 
-	void item_view::header_view_updated(header_view&)
+	void item_view::header_view_updated(header_view&, header_view_update_reason aUpdateReason)
 	{
-		update_scrollbar_visibility();
-		update();
+		if (aUpdateReason == header_view_update_reason::FullUpdate)
+			layout_items();
+		else
+		{
+			update_scrollbar_visibility();
+			update();
+		}
 		if (editing() != boost::none)
 		{
 			editor().move(cell_rect(*editing()).position());
