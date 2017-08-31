@@ -211,8 +211,6 @@ namespace neogfx
 	void item_view::layout_items_completed()
 	{
 		scrollable_widget::layout_items_completed();
-		if (selection_model().has_current_index())
-			make_visible(selection_model().current_index());
 	}
 
 	widget_part item_view::hit_test(const point& aPosition) const
@@ -473,6 +471,14 @@ namespace neogfx
 		return static_cast<child_widget_scrolling_disposition_e>(ScrollChildWidgetVertically | ScrollChildWidgetHorizontally);
 	}
 
+	void item_view::update_scrollbar_visibility()
+	{
+		bool wasVisible = selection_model().has_current_index() && is_visible(selection_model().current_index());
+		scrollable_widget::update_scrollbar_visibility();
+		if (wasVisible)
+			make_visible(selection_model().current_index());
+	}
+
 	void item_view::update_scrollbar_visibility(usv_stage_e aStage)
 	{
 		switch (aStage)
@@ -622,6 +628,11 @@ namespace neogfx
 
 	void item_view::selection_model_destroyed(const i_item_selection_model&)
 	{
+	}
+
+	bool item_view::is_visible(const item_presentation_model_index& aItemIndex) const
+	{
+		return item_display_rect().contains(cell_rect(aItemIndex, true));
 	}
 
 	void item_view::make_visible(const item_presentation_model_index& aItemIndex)
@@ -816,7 +827,12 @@ namespace neogfx
 	void item_view::header_view_updated(header_view&, header_view_update_reason aUpdateReason)
 	{
 		if (aUpdateReason == header_view_update_reason::FullUpdate)
+		{
+			bool wasVisible = selection_model().has_current_index() && is_visible(selection_model().current_index());
 			layout_items();
+			if (wasVisible)
+				make_visible(selection_model().current_index());
+		}
 		else
 		{
 			update_scrollbar_visibility();

@@ -56,6 +56,7 @@ namespace neogfx
 		void set_selection_model(i_item_selection_model& aSelectionModel);
 		void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
 	public:
+		bool is_visible(const item_presentation_model_index& aItemIndex) const;
 		void make_visible(const item_presentation_model_index& aItemIndex);
 		const optional_item_presentation_model_index& editing() const;
 		void edit(const item_presentation_model_index& aItemIndex);
@@ -99,7 +100,7 @@ namespace neogfx
 	protected:
 		using scrollable_widget::scrolling_disposition;
 		child_widget_scrolling_disposition_e scrolling_disposition() const override;
-		using scrollable_widget::update_scrollbar_visibility;
+		void update_scrollbar_visibility() override;
 		void update_scrollbar_visibility(usv_stage_e aStage) override;
 	protected:
 		void column_info_changed(const i_item_model& aModel, item_model_index::value_type aColumnIndex) override;
