@@ -407,7 +407,7 @@ namespace neogfx
 				}, *this);
 				iButtonSinks[i][1] = button.right_clicked([&, i]()
 				{
-					context_menu menu{ surface().mouse_position() + surface().surface_position() };
+					context_menu menu{ *this, surface().mouse_position() + surface().surface_position() };
 					action sortAscending{ "Sort Ascending" };
 					action sortDescending{ "Sort Descending" };
 					action applySort{ "Apply Sort" };
