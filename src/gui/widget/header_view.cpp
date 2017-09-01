@@ -35,100 +35,13 @@ namespace neogfx
 			neolib::callback_timer{ app::instance(), [this, &aParent](neolib::callback_timer&)
 			{
 				neolib::destroyable::destroyed_flag destroyed(*this);
-				if (iRow == 0)
+				for (auto& sw : aParent.iSectionWidths)
 				{
-					aParent.layout().set_spacing(aParent.separator_width(), false);
-					aParent.iSectionWidths.resize(aParent.presentation_model().columns());
-					for (auto& sw : aParent.iSectionWidths)
-						sw.second = 0.0;
-					while (aParent.layout().item_count() > aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
-						aParent.layout().remove_item_at(aParent.layout().item_count() - 1);
-					while (aParent.layout().item_count() < aParent.presentation_model().columns() + (aParent.expand_last_column() ? 0 : 1))
-					{
-						aParent.layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
-					}
-					if (aParent.iButtonSinks.size() < aParent.layout().item_count())
-						aParent.iButtonSinks.resize(aParent.layout().item_count());
-					for (std::size_t i = 0; i < aParent.layout().item_count(); ++i)
-					{
-						push_button& button = aParent.layout().get_widget_at<push_button>(i);
-						if (i == 0)
-						{
-							auto m = button.margins();
-							m.left = aParent.separator_width() / 2.0 + 1.0;
-							button.set_margins(m);
-						}
-						if (i < aParent.presentation_model().columns())
-						{
-							button.text().set_text(aParent.presentation_model().column_heading_text(i));
-							if (!aParent.expand_last_column() || i != aParent.presentation_model().columns() - 1)
-								button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
-									neogfx::size_policy{ neogfx::size_policy::Fixed, neogfx::size_policy::Expanding } :
-									neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Fixed });
-							else
-								button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
-									neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
-									neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-							button.set_minimum_size(optional_size{});
-							button.set_maximum_size(optional_size{});
-							button.enable(true);
-							aParent.iButtonSinks[i][0] = button.clicked([&aParent, i]()
-							{
-								aParent.surface().save_mouse_cursor();
-								aParent.surface().set_mouse_cursor(mouse_system_cursor::Wait);
-								aParent.presentation_model().sort_by(i);
-								aParent.surface().restore_mouse_cursor();
-							}, aParent);
-							aParent.iButtonSinks[i][1] = button.right_clicked([&aParent, i]()
-							{
-								context_menu menu{ aParent, aParent.surface().mouse_position() + aParent.surface().surface_position() };
-								action sortAscending{ "Sort Ascending" };
-								action sortDescending{ "Sort Descending" };
-								action applySort{ "Apply Sort" };
-								action resetSort{ "Reset Sort" };
-								menu.menu().add_action(sortAscending).set_checkable(true);
-								menu.menu().add_action(sortDescending).set_checkable(true);
-								menu.menu().add_action(applySort);
-								menu.menu().add_action(resetSort);
-								if (aParent.presentation_model().sorting_by() != boost::none)
-								{
-									auto const& sortingBy = *aParent.presentation_model().sorting_by();
-									if (sortingBy.first == i)
-									{
-										if (sortingBy.second == i_item_presentation_model::SortAscending)
-											sortAscending.check();
-										else if (sortingBy.second == i_item_presentation_model::SortDescending)
-											sortDescending.check();
-									}
-								}
-								sortAscending.checked([&aParent, &sortDescending, i]()
-								{
-									aParent.presentation_model().sort_by(i, i_item_presentation_model::SortAscending);
-									sortDescending.uncheck();
-								});
-								sortDescending.checked([&aParent, &sortAscending, i]()
-								{
-									aParent.presentation_model().sort_by(i, i_item_presentation_model::SortDescending);
-									sortAscending.uncheck();
-								});
-								resetSort.triggered([&aParent]()
-								{
-									aParent.presentation_model().reset_sort();
-								});
-								menu.exec();
-							}, aParent);
-						}
-						else if (!aParent.expand_last_column())
-						{
-							button.text().set_text(std::string());
-							button.set_size_policy(aParent.iType == header_view::HorizontalHeader ?
-								neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
-								neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
-							button.set_minimum_size(size{});
-							button.enable(false);
-						}
-					}
+					sw.calculated = 0.0;
+					sw.max = 0.0;
 				}
+				if (iRow == 0)
+					aParent.update_buttons();
 				uint64_t since = app::instance().program_elapsed_ms();
 				app::event_processing_context epc(app::instance(), "neogfx::header_view::updater");
 				graphics_context gc{ aParent };
@@ -145,9 +58,7 @@ namespace neogfx
 					}
 				}
 				if (iRow == aParent.presentation_model().rows())
-				{
 					aParent.iOwner.header_view_updated(aParent, header_view_update_reason::FullUpdate);
-				}
 				else
 					again();
 			}, 10 },
@@ -308,9 +219,7 @@ namespace neogfx
 
 	void header_view::column_info_changed(const i_item_presentation_model&, item_presentation_model_index::column_type)
 	{
-		iSectionWidths.resize(presentation_model().columns());
-		iUpdater.reset();
-		iUpdater.reset(new updater(*this));
+		update_buttons();
 	}
 
 	void header_view::item_model_changed(const i_item_presentation_model&, const i_item_model&)
@@ -323,6 +232,7 @@ namespace neogfx
 	void header_view::item_added(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
 		iSectionWidths.resize(presentation_model().columns());
+		/* todo : optimize (don't do full update) */
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
@@ -330,6 +240,7 @@ namespace neogfx
 	void header_view::item_changed(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
 		iSectionWidths.resize(presentation_model().columns());
+		/* todo : optimize (don't do full update) */
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
@@ -337,6 +248,7 @@ namespace neogfx
 	void header_view::item_removed(const i_item_presentation_model&, const item_presentation_model_index&)
 	{
 		iSectionWidths.resize(presentation_model().columns());
+		/* todo : optimize (don't do full update) */
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 	}
@@ -386,9 +298,9 @@ namespace neogfx
 	{
 		if (!expand_last_column() || aSectionIndex != iSectionWidths.size() - 1)
 		{
-			auto result = units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].first != boost::none ?
-				*iSectionWidths[aSectionIndex].first :
-				iSectionWidths[aSectionIndex].second);
+			auto result = units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].manual != boost::none ?
+				*iSectionWidths[aSectionIndex].manual :
+				iSectionWidths[aSectionIndex].calculated);
 			if (aForHeaderButton && aSectionIndex == 0)
 				result += presentation_model().cell_spacing(*this).cx / 2.0;
 			return result;
@@ -432,7 +344,7 @@ namespace neogfx
 			if (col == 0)
 				newSectionWidth -= presentation_model().cell_spacing(*this).cx / 2.0;
 			if (newSectionWidth != oldSectionWidth)
-				iSectionWidths[col].first = newSectionWidth;
+				iSectionWidths[col].manual = newSectionWidth;
 		}
 		layout_items();
 		iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
@@ -444,32 +356,136 @@ namespace neogfx
 		{
 			if (aPane != boost::none && *aPane != col)
 				continue;
-			iSectionWidths[col].first = boost::none;
+			iSectionWidths[col].manual = boost::none;
 			layout().get_widget_at(col).set_minimum_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy), false);
 		}
 		layout_items();
 		iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
 	}
 
+	void header_view::update_buttons()
+	{
+		for (auto& sw : iSectionWidths)
+			sw.calculated = 0.0;
+		layout().set_spacing(separator_width(), false);
+		iSectionWidths.resize(presentation_model().columns());
+		while (layout().item_count() > presentation_model().columns() + (expand_last_column() ? 0 : 1))
+			layout().remove_item_at(layout().item_count() - 1);
+		while (layout().item_count() < presentation_model().columns() + (expand_last_column() ? 0 : 1))
+			layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
+		if (iButtonSinks.size() < layout().item_count())
+			iButtonSinks.resize(layout().item_count());
+		for (std::size_t i = 0; i < layout().item_count(); ++i)
+		{
+			push_button& button = layout().get_widget_at<push_button>(i);
+			if (i == 0)
+			{
+				auto m = button.margins();
+				m.left = separator_width() / 2.0 + 1.0;
+				button.set_margins(m);
+			}
+			if (i < presentation_model().columns())
+			{
+				button.text().set_text(presentation_model().column_heading_text(i));
+				if (!expand_last_column() || i != presentation_model().columns() - 1)
+					button.set_size_policy(iType == header_view::HorizontalHeader ?
+						neogfx::size_policy{ neogfx::size_policy::Fixed, neogfx::size_policy::Expanding } :
+						neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Fixed });
+				else
+					button.set_size_policy(iType == header_view::HorizontalHeader ?
+						neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
+						neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+				button.set_minimum_size(optional_size{});
+				button.set_maximum_size(optional_size{});
+				button.enable(true);
+				iButtonSinks[i][0] = button.clicked([&, i]()
+				{
+					surface().save_mouse_cursor();
+					surface().set_mouse_cursor(mouse_system_cursor::Wait);
+					presentation_model().sort_by(i);
+					surface().restore_mouse_cursor();
+				}, *this);
+				iButtonSinks[i][1] = button.right_clicked([&, i]()
+				{
+					context_menu menu{ surface().mouse_position() + surface().surface_position() };
+					action sortAscending{ "Sort Ascending" };
+					action sortDescending{ "Sort Descending" };
+					action applySort{ "Apply Sort" };
+					action resetSort{ "Reset Sort" };
+					menu.menu().add_action(sortAscending).set_checkable(true);
+					menu.menu().add_action(sortDescending).set_checkable(true);
+					menu.menu().add_action(applySort);
+					menu.menu().add_action(resetSort);
+					if (presentation_model().sorting_by() != boost::none)
+					{
+						auto const& sortingBy = *presentation_model().sorting_by();
+						if (sortingBy.first == i)
+						{
+							if (sortingBy.second == i_item_presentation_model::SortAscending)
+								sortAscending.check();
+							else if (sortingBy.second == i_item_presentation_model::SortDescending)
+								sortDescending.check();
+						}
+					}
+					sortAscending.checked([this, &sortDescending, i]()
+					{
+						presentation_model().sort_by(i, i_item_presentation_model::SortAscending);
+						sortDescending.uncheck();
+					});
+					sortDescending.checked([this, &sortAscending, i]()
+					{
+						presentation_model().sort_by(i, i_item_presentation_model::SortDescending);
+						sortAscending.uncheck();
+					});
+					resetSort.triggered([&]()
+					{
+						presentation_model().reset_sort();
+					});
+					menu.exec();
+				}, *this);
+			}
+			else if (!expand_last_column())
+			{
+				button.text().set_text(std::string());
+				button.set_size_policy(iType == header_view::HorizontalHeader ?
+					neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum } :
+					neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+				button.set_minimum_size(size{});
+				button.enable(false);
+			}
+		}
+		bool updated = false;
+		graphics_context gc{ *this };
+		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
+			updated = update_section_width(col, iSectionWidths[col].max, gc) || updated;
+		if (updated)
+			layout_items();
+		iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
+	}
+
 	void header_view::update_from_row(uint32_t aRow, graphics_context& aGc)
 	{
 		bool updated = false;
 		for (uint32_t col = 0; col < presentation_model().columns(item_presentation_model_index{ aRow }); ++col)
-		{
-			dimension headingWidth = presentation_model().column_heading_extents(col, aGc).cx + presentation_model().cell_margins(*this).size().cx * 2.0;
-			dimension cellWidth = presentation_model().cell_extents(item_presentation_model_index{ aRow, col }, aGc).cx + presentation_model().cell_margins(*this).size().cx * 2.0;
-			dimension oldSectionWidth = iSectionWidths[col].second;
-			iSectionWidths[col].second = std::max(iSectionWidths[col].second, units_converter(*this).to_device_units(std::max(headingWidth, cellWidth)));
-			if (section_width(col) != oldSectionWidth || layout().get_widget_at(col).minimum_size().cx != section_width(col, true))
-			{
-				if (!expand_last_column() || col != presentation_model().columns(item_presentation_model_index{ aRow }) - 1)
-					layout().get_widget_at(col).set_minimum_size(size(std::max(section_width(col, true), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
-				else
-					layout().get_widget_at(col).set_minimum_size(size(std::max(iSectionWidths[col].second, layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy));
-				updated = true;
-			}
-		}
+			updated = update_section_width(col, presentation_model().cell_extents(item_presentation_model_index{ aRow, col }, aGc) + presentation_model().cell_margins(*this).size() * 2.0, aGc) || updated;
 		if (updated)
 			layout_items();
+	}
+
+	bool header_view::update_section_width(uint32_t aColumn, const size& aCellExtents, graphics_context& aGc)
+	{
+		dimension headingWidth = presentation_model().column_heading_extents(aColumn, aGc).cx + presentation_model().cell_margins(*this).size().cx * 2.0;
+		dimension oldSectionWidth = iSectionWidths[aColumn].calculated;
+		iSectionWidths[aColumn].max = std::max(iSectionWidths[aColumn].max, units_converter(*this).to_device_units(aCellExtents.cx));
+		iSectionWidths[aColumn].calculated = std::max(iSectionWidths[aColumn].calculated, units_converter(*this).to_device_units(std::max(headingWidth, aCellExtents.cx)));
+		if (section_width(aColumn) != oldSectionWidth || layout().get_widget_at(aColumn).minimum_size().cx != section_width(aColumn, true))
+		{
+			if (!expand_last_column() || aColumn != presentation_model().columns() - 1)
+				layout().get_widget_at(aColumn).set_minimum_size(size(std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy));
+			else
+				layout().get_widget_at(aColumn).set_minimum_size(size(std::max(iSectionWidths[aColumn].calculated, layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy));
+			return true;
+		}
+		return false;
 	}
 }

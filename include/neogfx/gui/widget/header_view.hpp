@@ -48,6 +48,13 @@ namespace neogfx
 		public:
 			virtual void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) = 0;
 		};
+	private:
+		struct section_dimension
+		{
+			optional_dimension manual;
+			dimension calculated;
+			dimension max;
+		};
 	public:
 		header_view(i_owner& aOwner, type_e aType = HorizontalHeader);
 		header_view(i_widget& aParent, i_owner& aOwner, type_e aType = HorizontalHeader);
@@ -88,7 +95,9 @@ namespace neogfx
 		void items_sorted(const i_item_presentation_model& aModel) override;
 		void model_destroyed(const i_item_presentation_model& aModel) override;
 	private:
+		void update_buttons();
 		void update_from_row(uint32_t aRow, graphics_context& aGc);
+		bool update_section_width(uint32_t aColumn, const size& aCellExtents, graphics_context& aGc);
 	private:
 		i_owner& iOwner;
 		sink iSink;
@@ -98,7 +107,7 @@ namespace neogfx
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
 		bool iExpandLastColumn;
 		optional_dimension iSeparatorWidth;
-		std::vector<std::pair<optional_dimension, dimension>> iSectionWidths;
+		std::vector<section_dimension> iSectionWidths;
 		std::unique_ptr<updater> iUpdater;
 	};
 }

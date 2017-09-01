@@ -623,6 +623,8 @@ int main(int argc, char* argv[])
 			}
 			if (heading.empty())
 				heading = "Five";
+			else
+				heading = "*****" + heading + "*****";
 			itemModel.set_column_name(5, heading);
 		};
 
