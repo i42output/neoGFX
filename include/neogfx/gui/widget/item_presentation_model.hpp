@@ -108,6 +108,10 @@ namespace neogfx
 		{
 			return item_model_index{ iRows[aIndex.row()].first, iColumns[aIndex.column()].modelColumn };
 		}
+		bool have_item_model_index(const item_model_index& aIndex) const override
+		{
+			return row_map().find(aIndex.row()) != row_map().end() && column_map().find(aIndex.column()) != column_map().end();
+		}
 		item_presentation_model_index from_item_model_index(const item_model_index& aIndex) const override
 		{
 			auto index = std::make_pair(row_map().find(aIndex.row()), column_map().find(aIndex.column()));

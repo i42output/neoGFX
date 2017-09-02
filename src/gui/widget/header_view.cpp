@@ -263,11 +263,11 @@ namespace neogfx
 		iUpdater.reset(new updater(*this));
 	}
 
-	void header_view::items_filtering(const i_item_presentation_model& aModel)
+	void header_view::items_filtering(const i_item_presentation_model&)
 	{
 	}
 
-	void header_view::items_filtered(const i_item_presentation_model& aModel)
+	void header_view::items_filtered(const i_item_presentation_model&)
 	{
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
