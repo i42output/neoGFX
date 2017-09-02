@@ -116,6 +116,8 @@ namespace neogfx
 		void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) override;
 		void items_sorting(const i_item_presentation_model& aModel) override;
 		void items_sorted(const i_item_presentation_model& aModel) override;
+		void items_filtering(const i_item_presentation_model& aModel) override;
+		void items_filtered(const i_item_presentation_model& aModel) override;
 		void model_destroyed(const i_item_presentation_model& aModel) override;
 	protected:
 		void model_added(const i_item_selection_model& aSelectionModel, i_item_presentation_model& aNewModel) override;

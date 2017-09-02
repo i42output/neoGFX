@@ -585,6 +585,16 @@ namespace neogfx
 		update();
 	}
 
+	void item_view::items_filtering(const i_item_presentation_model& aModel)
+	{
+		end_edit(true);
+	}
+
+	void item_view::items_filtered(const i_item_presentation_model& aModel)
+	{
+		update();
+	}
+
 	void item_view::model_destroyed(const i_item_presentation_model&)
 	{
 		iPresentationModel = nullptr;

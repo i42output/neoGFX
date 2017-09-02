@@ -340,6 +340,12 @@ namespace neogfx
 		void items_sorted(const i_item_presentation_model&) override
 		{
 		}
+		void items_filtering(const i_item_presentation_model& aModel) override
+		{
+		}
+		void items_filtered(const i_item_presentation_model& aModel) override
+		{
+		}
 		void model_destroyed(const i_item_presentation_model& aModel) override
 		{
 			unset_current_index();

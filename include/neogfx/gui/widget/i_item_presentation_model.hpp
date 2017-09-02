@@ -46,9 +46,11 @@ namespace neogfx
 		virtual void item_removed(const i_item_presentation_model& aModel, const item_presentation_model_index& aItemIndex) = 0;
 		virtual void items_sorting(const i_item_presentation_model& aModel) = 0;
 		virtual void items_sorted(const i_item_presentation_model& aModel) = 0;
+		virtual void items_filtering(const i_item_presentation_model& aModel) = 0;
+		virtual void items_filtered(const i_item_presentation_model& aModel) = 0;
 		virtual void model_destroyed(const i_item_presentation_model& aModel) = 0;
 	public:
-		enum notify_type { NotifyColumnInfoChanged, NotifyItemModelChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorting, NotifyItemsSorted, NotifyModelDestroyed };
+		enum notify_type { NotifyColumnInfoChanged, NotifyItemModelChanged, NotifyItemAdded, NotifyItemChanged, NotifyItemRemoved, NotifyItemsSorting, NotifyItemsSorted, NotifyItemsFiltering, NotifyItemsFiltered, NotifyModelDestroyed };
 	};
 
 	enum class item_cell_selection_flags
@@ -102,8 +104,22 @@ namespace neogfx
 			SortDescending,
 		};
 		typedef boost::optional<sort_direction_e> optional_sort_direction;
-		typedef std::pair<item_presentation_model_index::value_type, sort_direction_e> sort_order;
-		typedef boost::optional<sort_order> optional_sort_order;
+		typedef std::pair<item_presentation_model_index::column_type, sort_direction_e> sort;
+		typedef boost::optional<sort> optional_sort;
+		typedef std::string filter_search_key;
+		enum filter_search_type_e
+		{
+			Value,
+			Glob,
+			Regex
+		};
+		enum case_sensitivity_e
+		{
+			CaseInsensitive,
+			CaseSensitive
+		};
+		typedef std::tuple<item_presentation_model_index::column_type, filter_search_key, filter_search_type_e, case_sensitivity_e> filter;
+		typedef boost::optional<filter> optional_filter;
 	public:
 		struct no_item_model : std::logic_error { no_item_model() : std::logic_error("neogfx::i_item_presentation_model::no_item_model") {} };
 		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_presentation_model::bad_column_index") {} };
@@ -148,9 +164,13 @@ namespace neogfx
 		virtual neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
 		virtual size cell_extents(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const = 0;
 	public:
-		virtual optional_sort_order sorting_by() const = 0;
-		virtual void sort_by(item_presentation_model_index::value_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction()) = 0;
+		virtual optional_sort sorting_by() const = 0;
+		virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) = 0;
 		virtual void reset_sort() = 0;
+	public:
+		virtual optional_filter filtering_by() const = 0;
+		virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type_e aFilterSearchType = Value, case_sensitivity_e aCaseSensitivity = CaseInsensitive) = 0;
+		virtual void reset_filter() = 0;
 	public:
 		virtual void subscribe(i_item_presentation_model_subscriber& aSubscriber) = 0;
 		virtual void unsubscribe(i_item_presentation_model_subscriber& aSubscriber) = 0;
