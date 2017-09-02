@@ -19,8 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/app.hpp>
-#include <neogfx/gui/widget/text_widget.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/widget/text_widget.hpp>
 
 namespace neogfx
 {
@@ -228,12 +229,23 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
+		iSink += app::instance().current_style_changed([this]()
+		{
+			if (!has_font())
+			{
+				iTextExtent = boost::none;
+				iGlyphTextCache = glyph_text(font());
+				if (has_parent_layout())
+					parent_layout().invalidate();
+				update();
+			}
+		});
 		iSink += app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
 			iTextExtent = boost::none;
 			iGlyphTextCache = glyph_text(font());
-			if (has_managing_layout())
-				managing_layout().layout_items(true);
+			if (has_parent_layout())
+				parent_layout().invalidate();
 			update();
 		});
 	}

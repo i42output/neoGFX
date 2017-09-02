@@ -64,8 +64,11 @@ namespace neogfx
 		virtual colour fill_colour() const;
 		virtual colour background_colour() const;
 	private:
+		void init();
+	private:
 		vertical_layout iLayout;
 		neolib::variant<label_ptr, check_box_ptr> iTitle;
 		std::shared_ptr<i_layout> iItemLayout;
+		sink iSink;
 	};
 }

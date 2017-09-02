@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 
 namespace neogfx
@@ -25,28 +26,19 @@ namespace neogfx
 	group_box::group_box(const std::string& aText) : 
 		widget(), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
 	{
-		set_margins(neogfx::margins{});
-		iLayout.set_margins(neogfx::margins{ 5.0 });
-		iLayout.set_spacing(neogfx::size{ 5.0 });
-		set_item_layout(std::make_shared<vertical_layout>());
+		init();
 	}
 
 	group_box::group_box(i_widget& aParent, const std::string& aText) :
 		widget(aParent), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
 	{
-		set_margins(neogfx::margins{});
-		iLayout.set_margins(neogfx::margins{ 5.0 });
-		iLayout.set_spacing(neogfx::size{ 5.0 });
-		set_item_layout(std::make_shared<vertical_layout>());
+		init();
 	}
 
 	group_box::group_box(i_layout& aLayout, const std::string& aText) :
 		widget(aLayout), iLayout{ *this }, iTitle{ std::make_unique<neogfx::label>(iLayout, aText) }
 	{
-		set_margins(neogfx::margins{});
-		iLayout.set_margins(neogfx::margins{ 5.0 });
-		iLayout.set_spacing(neogfx::size{ 5.0 });
-		set_item_layout(std::make_shared<vertical_layout>());
+		init();
 	}
 
 	bool group_box::is_checkable() const
@@ -164,5 +156,13 @@ namespace neogfx
 			return parent().background_colour().darker(24);
 		else
 			return parent().background_colour().lighter(24);
+	}
+
+	void group_box::init()
+	{
+		set_margins(neogfx::margins{});
+		iLayout.set_margins(neogfx::margins{ 5.0 });
+		iLayout.set_spacing(neogfx::size{ 5.0 });
+		set_item_layout(std::make_shared<vertical_layout>());
 	}
 }
