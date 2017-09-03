@@ -543,6 +543,14 @@ namespace neogfx
 		void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type_e aFilterSearchType = Value, case_sensitivity_e aCaseSensitivity = CaseInsensitive) override
 		{
 			iFilters.push_back(filter{ aColumnIndex, aFilterSearchKey, aFilterSearchType, aCaseSensitivity });
+			for (auto i = iFilters.begin(); i != std::prev(iFilters.end()); ++i)
+			{
+				if (std::get<0>(*i) == aColumnIndex)
+				{
+					iFilters.erase(i);
+					break;
+				}
+			}			
 			execute_filter();
 		}
 		void reset_filter() override

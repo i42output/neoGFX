@@ -273,10 +273,7 @@ namespace neogfx
 			if (iCurrentIndex != aNewIndex)
 			{
 				if (aNewIndex != boost::none && !is_selectable(*aNewIndex))
-				{
-					app::instance().basic_services().system_beep();
 					return;
-				}
 				optional_item_presentation_model_index previousIndex = iCurrentIndex;
 				iCurrentIndex = aNewIndex;
 				notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
