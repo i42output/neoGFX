@@ -68,60 +68,63 @@ namespace neogfx
 	}
 
 	widget::widget() :
-		iSingular(false),
-		iParent(nullptr),
-		iLinkBefore(nullptr),
-		iLinkAfter(nullptr),
-		iDeviceMetricsForwarder(*this),
-		iUnitsContext(iDeviceMetricsForwarder),
+		iSingular{ false },
+		iParent{ nullptr },
+		iSurface{ nullptr },
+		iLinkBefore{ nullptr },
+		iLinkAfter{ nullptr },
+		iDeviceMetricsForwarder{ *this },
+		iUnitsContext{ iDeviceMetricsForwarder },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress(0),
-		iVisible(true),
-		iEnabled(true),
-		iFocusPolicy(focus_policy::NoFocus),
+		iLayoutInProgress{ 0 },
+		iVisible{ true },
+		iEnabled{ true },
+		iFocusPolicy{ focus_policy::NoFocus },
 		iForegroundColour{},
 		iBackgroundColour{},
-		iIgnoreMouseEvents(false)
+		iIgnoreMouseEvents{ false }
 	{
 	}
 	
 	widget::widget(i_widget& aParent) :
-		iSingular(false),
-		iParent(nullptr),
-		iLinkBefore(nullptr),
-		iLinkAfter(nullptr),
-		iDeviceMetricsForwarder(*this),
-		iUnitsContext(iDeviceMetricsForwarder),
+		iSingular{ false },
+		iParent{ nullptr },
+		iSurface{ nullptr },
+		iLinkBefore{ nullptr },
+		iLinkAfter{ nullptr },
+		iDeviceMetricsForwarder{ *this },
+		iUnitsContext{ iDeviceMetricsForwarder },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress(0),
-		iVisible(true),
-		iEnabled(true),
-		iFocusPolicy(focus_policy::NoFocus),
+		iLayoutInProgress{ 0 },
+		iVisible{ true },
+		iEnabled{ true },
+		iFocusPolicy{ focus_policy::NoFocus },
 		iForegroundColour{},
 		iBackgroundColour{},
-		iIgnoreMouseEvents(false)
+		iIgnoreMouseEvents{ false }
 	{
 		aParent.add_widget(*this);
 	}
 
 	widget::widget(i_layout& aLayout) :
-		iSingular(false),
-		iParent(nullptr),
-		iLinkBefore(nullptr),
-		iLinkAfter(nullptr),
-		iDeviceMetricsForwarder(*this),
-		iUnitsContext(iDeviceMetricsForwarder),
+		iSingular{ false },
+		iParent{ nullptr },
+		iSurface{ nullptr },
+		iLinkBefore{ nullptr },
+		iLinkAfter{ nullptr },
+		iDeviceMetricsForwarder{ *this },
+		iUnitsContext{ iDeviceMetricsForwarder },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress(0),
-		iVisible(true),
-		iEnabled(true),
-		iFocusPolicy(focus_policy::NoFocus),
+		iLayoutInProgress{ 0 },
+		iVisible{ true },
+		iEnabled{ true },
+		iFocusPolicy{ focus_policy::NoFocus },
 		iForegroundColour{},
 		iBackgroundColour{},
-		iIgnoreMouseEvents(false)
+		iIgnoreMouseEvents{ false }
 	{
 		aLayout.add_item(*this);
 	}
@@ -201,6 +204,8 @@ namespace neogfx
 
 	void widget::set_parent(i_widget& aParent)
 	{
+		if (has_parent() && &parent() == &aParent)
+			return;
 		if (!is_root())
 		{
 			bool onSurface = has_surface();
@@ -264,17 +269,7 @@ namespace neogfx
 
 	void widget::add_widget(i_widget& aWidget)
 	{
-		if (aWidget.has_parent() && &aWidget.parent() == this)
-			return;
-		i_widget* oldParent = aWidget.has_parent() ? &aWidget.parent() : nullptr;
-		aWidget.set_parent(*this);
-		if (find_child(aWidget, false) == iChildren.end())
-			iChildren.push_back(std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aWidget));
-		if (oldParent != nullptr)
-			oldParent->remove_widget(aWidget);
-		aWidget.set_singular(false);
-		if (has_surface())
-			surface().widget_added(aWidget);
+		add_widget(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, &aWidget });
 	}
 
 	void widget::add_widget(std::shared_ptr<i_widget> aWidget)
@@ -282,21 +277,21 @@ namespace neogfx
 		if (aWidget->has_parent() && &aWidget->parent() == this)
 			return;
 		i_widget* oldParent = aWidget->has_parent() ? &aWidget->parent() : nullptr;
-		aWidget->set_parent(*this);
 		if (find_child(*aWidget, false) == iChildren.end())
 			iChildren.push_back(aWidget);
 		if (oldParent != nullptr)
 			oldParent->remove_widget(*aWidget);
+		aWidget->set_parent(*this);
 		aWidget->set_singular(false);
 		if (has_surface())
 			surface().widget_added(*aWidget);
 	}
 
-	void widget::remove_widget(i_widget& aWidget, bool aSingular)
+	std::shared_ptr<i_widget> widget::remove_widget(i_widget& aWidget, bool aSingular)
 	{
 		auto existing = find_child(aWidget, false);
 		if (existing == iChildren.end())
-			return;
+			return std::shared_ptr<i_widget>{};
 		auto keep = *existing;
 		if (aSingular)
 			keep->set_singular(true);
@@ -305,6 +300,7 @@ namespace neogfx
 			layout().remove_item(aWidget);
 		if (has_surface())
 			surface().widget_removed(aWidget);
+		return keep;
 	}
 
 	void widget::remove_widgets()
@@ -452,24 +448,21 @@ namespace neogfx
 
 	bool widget::has_surface() const
 	{
-		const i_widget* w = this;
-		while (!w->is_root() && w->has_parent())
-			w = &w->parent();
-		return w->is_surface();
+		return find_surface() != nullptr;
 	}
 
 	const i_surface& widget::surface() const
 	{
-		if (has_parent())
-			return parent().surface();
-		throw no_parent();
+		auto maybeSurface = find_surface();
+		if (maybeSurface != nullptr)
+			return *maybeSurface;
+		else
+			throw no_surface();
 	}
 
 	i_surface& widget::surface()
 	{
-		if (has_parent())
-			return parent().surface();
-		throw no_parent();
+		return const_cast<i_surface&>(const_cast<const widget*>(this)->surface());
 	}
 
 	bool widget::is_surface() const
@@ -1321,6 +1314,18 @@ namespace neogfx
 	graphics_context widget::create_graphics_context() const
 	{
 		return graphics_context(*this);
+	}
+
+	i_surface* widget::find_surface() const
+	{
+		if (iSurface != nullptr)
+			return iSurface;
+		const i_widget* w = this;
+		while (!w->is_root() && !w->is_surface() && w->has_parent(false))
+			w = &w->parent();
+		if (w->is_surface())
+			return (iSurface = const_cast<i_surface*>(&w->surface()));
+		return nullptr;
 	}
 }
 

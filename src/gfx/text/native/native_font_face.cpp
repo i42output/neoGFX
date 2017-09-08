@@ -18,6 +18,8 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <unordered_map>
+#include <boost/functional/hash.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -30,6 +32,31 @@
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 
+namespace
+{
+	typedef std::unordered_map<std::pair<FT_UInt, FT_Int32>, FT_Fixed, boost::hash<std::pair<FT_UInt, FT_Int32>>> get_advance_cache_face;
+	typedef std::unordered_map<FT_Face, get_advance_cache_face> get_advance_cache;
+	get_advance_cache sGetAdvanceCache;
+
+	extern "C"
+	{
+		FT_EXPORT(FT_Error) orig_FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance);
+		FT_EXPORT(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
+		{
+			auto entry = sGetAdvanceCache.find(face)->second.find(std::make_pair(gindex, load_flags));
+			if (entry != sGetAdvanceCache.find(face)->second.end())
+			{
+				*padvance = entry->second;
+				return FT_Err_Ok;
+			}
+			auto result = orig_FT_Get_Advance(face, gindex, load_flags, padvance);
+			if (result == FT_Err_Ok)
+				sGetAdvanceCache.find(face)->second[std::make_pair(gindex, load_flags)] = *padvance;
+			return result;
+		}
+	}
+}
+
 namespace neogfx
 {
 	native_font_face::native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
@@ -37,10 +64,12 @@ namespace neogfx
 	{
 		freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(aSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
 		freetypeCheck(FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE));
+		sGetAdvanceCache[iHandle] = get_advance_cache_face{};
 	}
 
 	native_font_face::~native_font_face()
 	{
+		sGetAdvanceCache.erase(sGetAdvanceCache.find(iHandle));
 		FT_Done_Face(iHandle);
 		if (iFallbackFont != nullptr)
 			iFallbackFont->release();

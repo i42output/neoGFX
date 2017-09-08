@@ -176,8 +176,14 @@ namespace neogfx
 		};
 	}
 
-	css::css(const std::string& aStyleSheetPath) : 
-		iStyleSheetPath{ aStyleSheetPath }
+	css::css(const std::string& aStyle) : 
+		iStyleSheet{std::make_shared<std::istringstream>(aStyle)}
+	{
+		parse();
+	}
+
+	css::css(std::istream& aStyleSheet) :
+		iStyleSheet{ std::shared_ptr<std::istream>{ std::shared_ptr<std::istream>{}, &aStyleSheet } }
 	{
 		parse();
 	}
@@ -200,7 +206,7 @@ namespace neogfx
 	void css::parse()
 	{
 		static const neolib::lexer<lexer_atom> sLexer{ scope::ScopeSelector, std::cbegin(sLexerRules), std::cend(sLexerRules) };
-		neolib::lexer<lexer_atom>::context lexerContext = sLexer.open(iStyleSheetPath);
+		neolib::lexer<lexer_atom>::context lexerContext = sLexer.use(*iStyleSheet);
 		if (!lexerContext)
 			throw failed_to_open_style_sheet();
 		std::vector<lexer_token> tokens;

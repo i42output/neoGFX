@@ -120,7 +120,8 @@ namespace neogfx
 	public:
 		struct failed_to_open_style_sheet : std::runtime_error { failed_to_open_style_sheet() : std::runtime_error("neogfx::css::failed_to_open_style_sheet") {} };
 	public:
-		css(const std::string& aStyleSheetPath);
+		css(const std::string& aStyle);
+		css(std::istream& aStyleSheet);
 	public:
 		void accept(i_visitor& aVisitor) const;
 		const rule_list& rules() const;
@@ -128,7 +129,7 @@ namespace neogfx
 	private:
 		void parse();
 	private:
-		std::string iStyleSheetPath;
+		std::shared_ptr<std::istream> iStyleSheet;
 		rule_list iRules;
 	};
 }

@@ -131,6 +131,7 @@
     <ClInclude Include="..\..\..\include\neogfx\core\geometry.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsl_colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsv_colour.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\html.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page_container.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_text_document.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\label.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\line_edit.hpp" />
@@ -313,6 +315,7 @@
     <ClCompile Include="..\..\..\src\core\geometry.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
+    <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\game\mesh.cpp" />
     <ClCompile Include="..\..\..\src\game\physical_object.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />

@@ -70,7 +70,7 @@ namespace neogfx
 		bool is_sibling_of(const i_widget& aWidget) const override;
 		void add_widget(i_widget& aWidget) override;
 		void add_widget(std::shared_ptr<i_widget> aWidget) override;
-		void remove_widget(i_widget& aWidget, bool aSingular = false) override;
+		std::shared_ptr<i_widget> remove_widget(i_widget& aWidget, bool aSingular = false) override;
 		void remove_widgets() override;
 		bool has_children() const override;
 		const widget_list& children() const override;
@@ -211,12 +211,15 @@ namespace neogfx
 	protected:
 		const i_widget& widget_for_mouse_event(const point& aPosition) const override;
 		i_widget& widget_for_mouse_event(const point& aPosition) override;
+	private:
+		i_surface* find_surface() const override;
 		// helpers
 	public:
 		using i_widget::set_size_policy;
 	private:
 		bool iSingular;
 		i_widget* iParent;
+		mutable i_surface* iSurface;
 		widget_list iChildren;
 		i_widget* iLinkBefore;
 		i_widget* iLinkAfter;

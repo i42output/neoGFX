@@ -107,6 +107,7 @@ namespace neogfx
 		typedef std::unordered_set<rect> update_rect_list;
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_widget::no_parent") {} };
+		struct no_surface : std::logic_error { no_surface() : std::logic_error("neogfx::i_widget::no_surface") {} };
 		struct no_children : std::logic_error { no_children() : std::logic_error("neogfx::i_widget::no_children") {} };
 		struct not_child : std::logic_error { not_child() : std::logic_error("neogfx::i_widget::not_child") {} };
 		struct no_update_rect : std::logic_error { no_update_rect() : std::logic_error("neogfx::i_widget::no_update_rect") {} };
@@ -137,7 +138,7 @@ namespace neogfx
 		virtual bool is_sibling_of(const i_widget& aWidget) const = 0;
 		virtual void add_widget(i_widget& aWidget) = 0;
 		virtual void add_widget(std::shared_ptr<i_widget> aWidget) = 0;
-		virtual void remove_widget(i_widget& aWidget, bool aSingular = false) = 0;
+		virtual std::shared_ptr<i_widget> remove_widget(i_widget& aWidget, bool aSingular = false) = 0;
 		virtual void remove_widgets() = 0;
 		virtual bool has_children() const = 0;
 		virtual const widget_list& children() const = 0;
@@ -255,22 +256,13 @@ namespace neogfx
 	protected:
 		virtual const i_widget& widget_for_mouse_event(const point& aPosition) const = 0;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition) = 0;
+	private:
+		virtual i_surface* find_surface() const = 0;
 		// helpers
 	public:
 		bool same_surface(const i_widget& aWidget) const
 		{
-			const i_widget* w1 = this;
-			while (!w1->is_surface() && w1->has_parent(false))
-				w1 = &w1->parent();
-			const i_widget* w2 = &aWidget;
-			while (!w2->is_surface() && w2->has_parent(false))
-				w2 = &w2->parent();
-			if (w1->is_surface() && w2->is_surface())
-				return &w1->surface() == &w2->surface();
-			else if (!w1->is_surface() && !w2->is_surface())
-				return true;
-			else
-				return false;
+			return find_surface() == aWidget.find_surface();
 		}
 		point to_window_coordinates(const point& aClientCoordinates) const
 		{
