@@ -32,16 +32,20 @@
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 
-namespace
+namespace neogfx
 {
-	typedef std::unordered_map<std::pair<FT_UInt, FT_Int32>, FT_Fixed, boost::hash<std::pair<FT_UInt, FT_Int32>>> get_advance_cache_face;
-	typedef std::unordered_map<FT_Face, get_advance_cache_face> get_advance_cache;
-	get_advance_cache sGetAdvanceCache;
-
-	extern "C"
+	namespace
 	{
-		FT_EXPORT(FT_Error) orig_FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance);
-		FT_EXPORT(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
+		typedef std::unordered_map<std::pair<FT_UInt, FT_Int32>, FT_Fixed, boost::hash<std::pair<FT_UInt, FT_Int32>>> get_advance_cache_face;
+		typedef std::unordered_map<FT_Face, get_advance_cache_face> get_advance_cache;
+		get_advance_cache sGetAdvanceCache;
+
+		extern "C"
+		{
+			FT_EXPORT(FT_Error) orig_FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance);
+		}
+
+		FT_Error neogfx_FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
 		{
 			auto cachedFace = sGetAdvanceCache.find(face);
 			if (cachedFace != sGetAdvanceCache.end())
@@ -57,13 +61,20 @@ namespace
 					cachedFace->second[std::make_pair(gindex, load_flags)] = *padvance;
 				return result;
 			}
-			return orig_FT_Get_Advance(face, gindex, load_flags, padvance);
+			auto result = orig_FT_Get_Advance(face, gindex, load_flags, padvance);
+			freetypeCheck(result);
+			return result;
+		}
+
+		extern "C"
+		{
+			FT_EXPORT(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
+			{
+				return neogfx_FT_Get_Advance(face, gindex, load_flags, padvance);
+			}
 		}
 	}
-}
 
-namespace neogfx
-{
 	native_font_face::native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
 		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle), iHasKerning(!!FT_HAS_KERNING(iHandle))
 	{
@@ -74,7 +85,8 @@ namespace neogfx
 
 	native_font_face::~native_font_face()
 	{
-		sGetAdvanceCache.erase(sGetAdvanceCache.find(iHandle));
+		if (iHandle != nullptr)
+			sGetAdvanceCache.erase(sGetAdvanceCache.find(iHandle));
 		FT_Done_Face(iHandle);
 		if (iFallbackFont != nullptr)
 			iFallbackFont->release();
@@ -187,7 +199,11 @@ namespace neogfx
 
 	void native_font_face::update_handle(void* aHandle) 
 	{ 
+		if (iHandle != nullptr)
+			sGetAdvanceCache.erase(sGetAdvanceCache.find(iHandle));
 		iHandle = static_cast<FT_Face>(aHandle);
+		if (iHandle != nullptr)
+			sGetAdvanceCache[iHandle] = get_advance_cache_face{};
 		iAuxHandle.reset();
 		if (iHandle != nullptr)
 		{

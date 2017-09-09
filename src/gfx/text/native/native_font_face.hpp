@@ -61,7 +61,7 @@ namespace neogfx
 #define freetypeCheck(x) \
 { \
 	FT_Error err = x; \
-	if (err != 0) \
+	if (err != FT_Err_Ok) \
 		throw freetype_error(getFreeTypeErrorMessage(err)); \
 }
 
