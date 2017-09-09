@@ -177,7 +177,7 @@ namespace neogfx
 			node_type* iNode;
 			contents_type iContents;
 		};
-		typedef neolib::tag_array<tag<>, char32_t, 32, 256> document_text;
+		typedef neolib::tag_array<tag<>, char32_t, 16, 256> document_text;
 		class paragraph_positioned_glyph : public glyph
 		{
 		public:

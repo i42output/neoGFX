@@ -43,16 +43,21 @@ namespace
 		FT_EXPORT(FT_Error) orig_FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance);
 		FT_EXPORT(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
 		{
-			auto entry = sGetAdvanceCache.find(face)->second.find(std::make_pair(gindex, load_flags));
-			if (entry != sGetAdvanceCache.find(face)->second.end())
+			auto cachedFace = sGetAdvanceCache.find(face);
+			if (cachedFace != sGetAdvanceCache.end())
 			{
-				*padvance = entry->second;
-				return FT_Err_Ok;
+				auto entry = cachedFace->second.find(std::make_pair(gindex, load_flags));
+				if (entry != cachedFace->second.end())
+				{
+					*padvance = entry->second;
+					return FT_Err_Ok;
+				}
+				auto result = orig_FT_Get_Advance(face, gindex, load_flags, padvance);
+				if (result == FT_Err_Ok)
+					cachedFace->second[std::make_pair(gindex, load_flags)] = *padvance;
+				return result;
 			}
-			auto result = orig_FT_Get_Advance(face, gindex, load_flags, padvance);
-			if (result == FT_Err_Ok)
-				sGetAdvanceCache.find(face)->second[std::make_pair(gindex, load_flags)] = *padvance;
-			return result;
+			return orig_FT_Get_Advance(face, gindex, load_flags, padvance);
 		}
 	}
 }

@@ -954,6 +954,7 @@ namespace neogfx
 				iGlyphsList.emplace_back(glyphs(aParent, tryFont, aGlyphRun));
 			}
 			auto g = iGlyphsList.begin();
+			iResults.reserve(g->glyph_count());
 			for (uint32_t i = 0; i < g->glyph_count();)
 			{
 				const auto& gi = g->glyph_info(i);
