@@ -699,6 +699,12 @@ namespace neogfx
 		}
 		void reset_meta() const
 		{
+			reset_cell_meta();
+			reset_column_meta();
+			reset_position_meta(0);
+		}
+		void reset_cell_meta() const
+		{
 			for (uint32_t row = 0; row < iRows.size(); ++row)
 			{
 				for (uint32_t col = 0; col < iColumns.size(); ++col)
@@ -707,8 +713,6 @@ namespace neogfx
 					cell_meta(item_presentation_model_index(row, col)).extents = boost::none;
 				}
 			}
-			reset_column_meta();
-			reset_position_meta(0);
 		}
 		void reset_column_meta() const
 		{
@@ -721,7 +725,7 @@ namespace neogfx
 		{
 			iTotalHeight = boost::none;
 			iPositions.resize(iRows.size());
-			for (std::size_t i = aFromRow; i < iPositions.size() && iPositions[i] != boost::none; ++i)
+			for (std::size_t i = aFromRow; i < iPositions.size(); ++i)
 				iPositions[i] = boost::none;
 		}
 	private:
