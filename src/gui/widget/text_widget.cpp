@@ -107,7 +107,7 @@ namespace neogfx
 		if (effectively_disabled())
 			ink.set_alpha(ink.alpha() / 2);
 		if (multi_line())
-			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, ink, alignment::Centre, true);
+			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, ink, iAlignment & neogfx::alignment::Horizontal, true);
 		else
 			aGraphicsContext.draw_text(textPosition, text(), font(), ink, true);
 	}

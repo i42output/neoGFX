@@ -83,6 +83,7 @@ namespace neogfx
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
 		layout().add_spacer();
+		text().set_alignment(alignment::Left);
 	}
 
 	check_box::check_box(i_widget& aParent, const std::string& aText, checkable_e aCheckable) :
@@ -92,6 +93,7 @@ namespace neogfx
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
 		layout().add_spacer();
+		text().set_alignment(alignment::Left);
 	}
 
 	check_box::check_box(i_layout& aLayout, const std::string& aText, checkable_e aCheckable) :
@@ -101,6 +103,7 @@ namespace neogfx
 		set_margins(neogfx::margins(0.0));
 		layout().set_margins(neogfx::margins(0.0));
 		layout().add_spacer();
+		text().set_alignment(alignment::Left);
 	}
 
 	neogfx::size_policy check_box::size_policy() const

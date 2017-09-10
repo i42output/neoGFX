@@ -355,12 +355,6 @@ int main(int argc, char* argv[])
 		slider.set_maximum(72.0);
 		slider.set_step(0.25);
 		spinBox.value_changed([&slider, &spinBox]() {slider.set_value(spinBox.value()); });
-		slider.value_changed([&slider, &spinBox, &app]() 
-		{
-			spinBox.set_value(slider.value()); 
-			app.current_style().set_font_info(app.current_style().font_info().with_size(slider.value()));
-		});
-		slider.set_value(static_cast<int32_t>(app.current_style().font_info().size()));
 		ng::double_spin_box doubleSpinBox(layoutLineEdits);
 		doubleSpinBox.set_minimum(-10);
 		doubleSpinBox.set_maximum(20);
@@ -495,7 +489,18 @@ int main(int argc, char* argv[])
 		});
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
 		ng::radio_button radio1(layout4, "Radio 1");
-		ng::radio_button radio2(layout4, "Radio 2");
+		ng::radio_button radioSliderFont(layout4, "Slider changes\nfont size");
+		slider.value_changed([&slider, &radioSliderFont, &spinBox, &app]()
+		{
+			spinBox.set_value(slider.value());
+			if (radioSliderFont.is_checked())
+				app.current_style().set_font_info(app.current_style().font_info().with_size(slider.value()));
+		});
+		radioSliderFont.checked([&slider, &app]()
+		{
+			app.current_style().set_font_info(app.current_style().font_info().with_size(slider.value()));
+		});
+		slider.set_value(static_cast<int32_t>(app.current_style().font_info().size()));
 		ng::radio_button radio3(layout4, "Radio 3");
 		radio3.disable();
 		ng::radio_button radio4(layout4, "Radio 4");
