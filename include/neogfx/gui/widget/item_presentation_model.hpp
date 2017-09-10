@@ -574,9 +574,10 @@ namespace neogfx
 			{
 				reset_meta();
 			});
-			iSink += app::instance().current_style_changed([this]()
+			iSink += app::instance().current_style_changed([this](style_aspect aAspect)
 			{
-				reset_meta();
+				if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
+					reset_meta();
 			});
 			reset_sort();
 		}

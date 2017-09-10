@@ -212,9 +212,10 @@ namespace neogfx
 		});
 
 		update_arrows();
-		iSink += app::instance().current_style_changed([this]()
+		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
 		{
-			update_arrows();
+			if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
+				update_arrows();
 		});
 	}
 

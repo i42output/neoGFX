@@ -77,7 +77,7 @@ namespace neogfx
 		s.set_minimum_width(std::max(0.0, 8.0 - label().layout().spacing().cx * 2));
 		layout().add_item(iDownArrow);
 		update_arrow();
-		iSink += app::instance().current_style_changed([this]() { update_arrow(); });
+		iSink += app::instance().current_style_changed([this](style_aspect) { update_arrow(); });
 	}
 
 	void drop_list::update_arrow()

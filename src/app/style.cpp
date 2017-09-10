@@ -29,7 +29,7 @@ namespace neogfx
 		iSpacing(2.0, 2.0),
 		iFontInfo(app::instance().rendering_engine().font_manager().default_system_font_info())
 	{
-		iPalette.changed([this]() { handle_change(); });
+		iPalette.changed([this]() { handle_change(style_aspect::Colour); });
 	}
 
 	style::style(const std::string& aName, const i_style& aOther) :
@@ -39,7 +39,7 @@ namespace neogfx
 		iPalette(aOther.palette()),
 		iFontInfo(aOther.font_info())
 	{
-		iPalette.changed([this]() { handle_change(); });
+		iPalette.changed([this]() { handle_change(style_aspect::Colour); });
 	}
 
 	style::style(const i_style& aOther) :
@@ -49,7 +49,7 @@ namespace neogfx
 		iPalette(aOther.palette()),
 		iFontInfo(aOther.font_info())
 	{
-		iPalette.changed([this]() { handle_change(); });
+		iPalette.changed([this]() { handle_change(style_aspect::Colour); });
 	}
 
 	style::style(const style& aOther) :
@@ -70,7 +70,7 @@ namespace neogfx
 			iSpacing = aOther.spacing();
 			iPalette = aOther.palette();
 			iFontInfo = aOther.font_info();
-			handle_change();
+			handle_change(style_aspect::Font);
 		}
 		return *this;
 	}
@@ -104,7 +104,7 @@ namespace neogfx
 		if (iMargins != aMargins)
 		{
 			iMargins = aMargins;
-			handle_change();
+			handle_change(style_aspect::Geometry);
 		}
 	}
 
@@ -118,7 +118,7 @@ namespace neogfx
 		if (iSpacing != aSpacing)
 		{
 			iSpacing = aSpacing;
-			handle_change();
+			handle_change(style_aspect::Geometry);
 		}
 	}
 
@@ -137,7 +137,7 @@ namespace neogfx
 		if (iPalette != aPalette)
 		{
 			iPalette = aPalette;
-			handle_change();
+			handle_change(style_aspect::Colour);
 		}
 	}
 
@@ -152,7 +152,7 @@ namespace neogfx
 		{
 			iFontInfo = aFontInfo;
 			iFont.reset();
-			handle_change();
+			handle_change(style_aspect::Font);
 		}
 	}
 
@@ -165,12 +165,12 @@ namespace neogfx
 		return *iFont;
 	}
 
-	void style::handle_change()
+	void style::handle_change(style_aspect aAspect)
 	{
-		changed.trigger();
+		changed.trigger(aAspect);
 		if (&app::instance().current_style() == this)
 		{
-			app::instance().current_style_changed.trigger();
+			app::instance().current_style_changed.trigger(aAspect);
 			app::instance().surface_manager().layout_surfaces();
 		}
 	}

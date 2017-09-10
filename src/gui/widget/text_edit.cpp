@@ -1276,7 +1276,7 @@ namespace neogfx
 	void text_edit::init()
 	{
 		iDefaultFont = app::instance().current_style().font_info();
-		iSink += app::instance().current_style_changed([this]()
+		iSink += app::instance().current_style_changed([this](style_aspect)
 		{
 			if (iDefaultFont != app::instance().current_style().font_info())
 			{

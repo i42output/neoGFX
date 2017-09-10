@@ -229,9 +229,9 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
-		iSink += app::instance().current_style_changed([this]()
+		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
 		{
-			if (!has_font())
+			if (!has_font() && (aAspect & style_aspect::Font) == style_aspect::Font)
 			{
 				iTextExtent = boost::none;
 				iGlyphTextCache = glyph_text(font());

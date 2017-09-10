@@ -764,7 +764,12 @@ namespace neogfx
 
 	void window::init()
 	{
-		iSink = native_surface().rendering_finished([this]()
+		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+		{
+			if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
+				native_surface().invalidate(surface_size());
+		});
+		iSink += native_surface().rendering_finished([this]()
 		{
 			// For some reason textures aren't rendered on initial render so render again. FBO bug to fix?
 			if (native_surface().frame_counter() < 3)

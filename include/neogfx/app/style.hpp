@@ -51,7 +51,7 @@ namespace neogfx
 		void set_font_info(const neogfx::font_info& aFontInfo) override;
 		const neogfx::font& font() const override;
 	private:
-		void handle_change();
+		void handle_change(style_aspect aAspect);
 	private:
 		std::string iName;
 		neogfx::margins iMargins;

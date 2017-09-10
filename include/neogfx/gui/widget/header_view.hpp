@@ -97,6 +97,7 @@ namespace neogfx
 		void items_filtered(const i_item_presentation_model& aModel) override;
 		void model_destroyed(const i_item_presentation_model& aModel) override;
 	private:
+		void init();
 		void update_buttons();
 		void update_from_row(uint32_t aRow, graphics_context& aGc);
 		bool update_section_width(uint32_t aColumn, const size& aCellExtents, graphics_context& aGc);

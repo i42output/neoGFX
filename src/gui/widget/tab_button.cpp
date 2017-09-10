@@ -38,7 +38,7 @@ namespace neogfx
 			push_button{ aParent.as_widget().layout() }, iParent{ aParent }
 		{
 			set_margins(neogfx::margins{ 2.0 });
-			iSink += app::instance().current_style_changed([this]() { update_textures(); });
+			iSink += app::instance().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
 			iSink += aParent.selected([this]() { update_state(); });
 			iSink += aParent.deselected([this]() { update_state(); });
 			update_textures();

@@ -78,11 +78,7 @@ namespace neogfx
 		iType{ aType },
 		iExpandLastColumn{ false }
 	{
-		iSink += app::instance().current_style_changed([this]()
-		{
-			iUpdater.reset();
-			iUpdater.reset(new updater(*this));
-		});
+		init();
 	}
 
 	header_view::header_view(i_widget& aParent, i_owner& aOwner, type_e aType) :
@@ -91,11 +87,7 @@ namespace neogfx
 		iType{ aType },
 		iExpandLastColumn{ false }
 	{
-		iSink += app::instance().current_style_changed([this]()
-		{
-			iUpdater.reset();
-			iUpdater.reset(new updater(*this));
-		});
+		init();
 	}
 
 	header_view::header_view(i_layout& aLayout, i_owner& aOwner, type_e aType) :
@@ -104,11 +96,7 @@ namespace neogfx
 		iType{ aType },
 		iExpandLastColumn{ false }
 	{
-		iSink += app::instance().current_style_changed([this]()
-		{
-			iUpdater.reset();
-			iUpdater.reset(new updater(*this));
-		});
+		init();
 	}
 
 	header_view::~header_view()
@@ -371,6 +359,18 @@ namespace neogfx
 		}
 		layout_items();
 		iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
+	}
+
+	void header_view::init()
+	{
+		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+		{
+			if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
+			{
+				iUpdater.reset();
+				iUpdater.reset(new updater(*this));
+			}
+		});
 	}
 
 	void header_view::update_buttons()

@@ -347,13 +347,13 @@ int main(int argc, char* argv[])
 		lineEditPassword.set_text("Password");
 		lineEditPassword.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::text_edit::style::colour_type()));
 		ng::double_spin_box spinBox(layoutLineEdits);
-		spinBox.set_minimum(4.0);
-		spinBox.set_maximum(72.0);
-		spinBox.set_step(0.25);
+		spinBox.set_minimum(-100.0);
+		spinBox.set_maximum(100.0);
+		spinBox.set_step(0.1);
 		ng::double_slider slider(layoutLineEdits);
-		slider.set_minimum(4.0);
-		slider.set_maximum(72.0);
-		slider.set_step(0.25);
+		slider.set_minimum(-100.0);
+		slider.set_maximum(100.0);
+		slider.set_step(0.1);
 		spinBox.value_changed([&slider, &spinBox]() {slider.set_value(spinBox.value()); });
 		ng::double_spin_box doubleSpinBox(layoutLineEdits);
 		doubleSpinBox.set_minimum(-10);
@@ -490,20 +490,33 @@ int main(int argc, char* argv[])
 		ng::push_button buttonColourPicker(layout4, "Colour Picker");
 		ng::radio_button radio1(layout4, "Radio 1");
 		ng::radio_button radioSliderFont(layout4, "Slider changes\nfont size");
-		slider.value_changed([&slider, &radioSliderFont, &spinBox, &app]()
+		radioSliderFont.checked([&slider, &app]()
+		{
+			app.current_style().set_font_info(app.current_style().font_info().with_size(slider.normalized_value() * 18.0 + 4));
+		});
+		ng::radio_button radio3(layout4, "Radio 3");
+		radio3.disable();
+		ng::radio_button radioThemeColour(layout4, "Slider changes\ntheme colour");
+		auto update_theme_colour = [&slider]()
+		{
+			auto themeColour = ng::app::instance().current_style().palette().colour().to_hsv();
+			themeColour.set_hue(slider.normalized_value() * 360.0);
+			ng::app::instance().current_style().palette().set_colour(themeColour.to_rgb());
+		};
+		slider.value_changed([update_theme_colour, &slider, &radioSliderFont, &radioThemeColour, &spinBox, &app]()
 		{
 			spinBox.set_value(slider.value());
 			if (radioSliderFont.is_checked())
-				app.current_style().set_font_info(app.current_style().font_info().with_size(slider.value()));
+				app.current_style().set_font_info(app.current_style().font_info().with_size(slider.normalized_value() * 18.0 + 4));
+			else if (radioThemeColour.is_checked())
+				update_theme_colour();
 		});
-		radioSliderFont.checked([&slider, &app]()
+		slider.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
+		radioThemeColour.checked([update_theme_colour, &slider, &app]()
 		{
-			app.current_style().set_font_info(app.current_style().font_info().with_size(slider.value()));
+			slider.set_normalized_value(ng::app::instance().current_style().palette().colour().to_hsv().hue() / 360.0);
+			update_theme_colour();
 		});
-		slider.set_value(static_cast<int32_t>(app.current_style().font_info().size()));
-		ng::radio_button radio3(layout4, "Radio 3");
-		radio3.disable();
-		ng::radio_button radio4(layout4, "Radio 4");
 
 		buttonColourPicker.clicked([&window]()
 		{

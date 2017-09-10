@@ -190,6 +190,8 @@ namespace neogfx
 	{
 		if (aText.empty())
 			return boost::optional<double>{};
+		if (aText == "-")
+			return 0.0;
 		auto range = maximum() - minimum();
 		if (range == 0)
 			return 0.0;
