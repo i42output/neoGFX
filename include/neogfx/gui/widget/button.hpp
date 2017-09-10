@@ -85,6 +85,7 @@ namespace neogfx
 	protected:
 		virtual void handle_clicked();
 	protected:
+		virtual bool can_toggle() const;
 		virtual const boost::optional<bool>& checked_state() const;
 		virtual bool set_checked_state(const boost::optional<bool>& aCheckedState);
 	protected:

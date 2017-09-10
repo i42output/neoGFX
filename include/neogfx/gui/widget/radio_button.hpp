@@ -58,6 +58,7 @@ namespace neogfx
 	protected:
 		void handle_clicked() override;
 	protected:
+		bool can_toggle() const override;
 		bool set_checked_state(const boost::optional<bool>& aCheckedState) override;
 	protected:
 		virtual const radio_button* next_radio_button() const;

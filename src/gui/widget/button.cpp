@@ -113,6 +113,8 @@ namespace neogfx
 
 	void button::toggle()
 	{
+		if (!can_toggle())
+			return;
 		if (is_checked() || is_indeterminate())
 			set_checked(false);
 		else
@@ -208,6 +210,11 @@ namespace neogfx
 		clicked.trigger();
 		if (!destroyed && iCheckable != NotCheckable)
 			toggle();
+	}
+
+	bool button::can_toggle() const
+	{
+		return true;
 	}
 
 	const boost::optional<bool>& button::checked_state() const

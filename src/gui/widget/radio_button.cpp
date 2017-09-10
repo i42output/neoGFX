@@ -178,6 +178,11 @@ namespace neogfx
 		return const_cast<radio_button*>(const_cast<const radio_button*>(this)->next_radio_button());
 	}
 
+	bool radio_button::can_toggle() const
+	{
+		return false;
+	}
+
 	bool radio_button::set_checked_state(const boost::optional<bool>& aCheckedState)
 	{
 		if (checked_state() == aCheckedState)
