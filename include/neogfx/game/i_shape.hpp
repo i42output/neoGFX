@@ -37,8 +37,8 @@ namespace neogfx
 	public:
 		virtual bool has_extents() const = 0;
 		virtual size extents() const = 0;
-		virtual const optional_effects_colour& colour() const = 0;
-		virtual void set_colour(const optional_effects_colour& aColour) = 0;
+		virtual const optional_effect_colour& colour() const = 0;
+		virtual void set_colour(const optional_effect_colour& aColour) = 0;
 		virtual const optional_texture& texture() const = 0;
 		virtual void set_texture(const optional_texture& aTexture) = 0;
 		virtual const optional_rect& texture_rect() const = 0;

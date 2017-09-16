@@ -32,9 +32,9 @@ namespace neogfx
 		
 	text_edit::style::style(
 		const optional_font& aFont,
-		const colour_type& aTextColour,
-		const colour_type& aBackgroundColour,
-		const colour_type& aTextOutlineColour) :
+		const effect_colour& aTextColour,
+		const effect_colour& aBackgroundColour,
+		const effect_colour& aTextOutlineColour) :
 		iParent(nullptr),
 		iUseCount(0),
 		iFont(aFont),
@@ -72,17 +72,17 @@ namespace neogfx
 		return iFont;
 	}
 
-	const text_edit::style::colour_type& text_edit::style::text_colour() const
+	const effect_colour& text_edit::style::text_colour() const
 	{
 		return iTextColour;
 	}
 
-	const text_edit::style::colour_type& text_edit::style::background_colour() const
+	const effect_colour& text_edit::style::background_colour() const
 	{
 		return iBackgroundColour;
 	}
 
-	const text_edit::style::colour_type& text_edit::style::text_outline_colour() const
+	const effect_colour& text_edit::style::text_outline_colour() const
 	{
 		return iTextOutlineColour;
 	}
@@ -92,17 +92,17 @@ namespace neogfx
 		iFont = aFont;
 	}
 
-	void text_edit::style::set_text_colour(const colour_type& aColour)
+	void text_edit::style::set_text_colour(const effect_colour& aColour)
 	{
 		iTextColour = aColour;
 	}
 
-	void text_edit::style::set_background_colour(const colour_type& aColour)
+	void text_edit::style::set_background_colour(const effect_colour& aColour)
 	{
 		iBackgroundColour = aColour;
 	}
 
-	void text_edit::style::set_text_outline_colour(const colour_type& aColour)
+	void text_edit::style::set_text_outline_colour(const effect_colour& aColour)
 	{
 		iTextOutlineColour = aColour;
 	}

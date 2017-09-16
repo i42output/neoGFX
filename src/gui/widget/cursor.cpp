@@ -82,12 +82,12 @@ namespace neogfx
 		}
 	}
 
-	const cursor::colour_type& cursor::colour() const
+	const effect_colour& cursor::colour() const
 	{
 		return iColour;
 	}
 
-	void cursor::set_colour(const colour_type& aColour)
+	void cursor::set_colour(const effect_colour& aColour)
 	{
 		if (iColour != aColour)
 		{

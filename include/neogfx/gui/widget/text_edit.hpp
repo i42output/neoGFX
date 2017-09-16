@@ -48,14 +48,12 @@ namespace neogfx
 		class style
 		{
 		public:
-			typedef neolib::variant<colour, gradient> colour_type;
-		public:
 			style();
 			style(
 				const optional_font& aFont,
-				const colour_type& aTextColour = colour_type{},
-				const colour_type& aBackgroundColour = colour_type{},
-				const colour_type& aTextOutlineColour = colour_type{});
+				const effect_colour& aTextColour = effect_colour{},
+				const effect_colour& aBackgroundColour = effect_colour{},
+				const effect_colour& aTextOutlineColour = effect_colour{});
 			style(
 				text_edit& aParent,
 				const style& aOther);
@@ -64,13 +62,13 @@ namespace neogfx
 			void release() const;
 		public:
 			const optional_font& font() const;
-			const colour_type& text_colour() const;
-			const colour_type& background_colour() const;
-			const colour_type& text_outline_colour() const;
+			const effect_colour& text_colour() const;
+			const effect_colour& background_colour() const;
+			const effect_colour& text_outline_colour() const;
 			void set_font(const optional_font& aFont = optional_font{});
-			void set_text_colour(const colour_type& aColour = colour_type{});
-			void set_background_colour(const colour_type& aColour = colour_type{});
-			void set_text_outline_colour(const colour_type& aColour = colour_type{});
+			void set_text_colour(const effect_colour& aColour = effect_colour{});
+			void set_background_colour(const effect_colour& aColour = effect_colour{});
+			void set_text_outline_colour(const effect_colour& aColour = effect_colour{});
 		public:
 			style& merge(const style& aOverridingStyle);
 		public:
@@ -81,9 +79,9 @@ namespace neogfx
 			text_edit* iParent;
 			mutable uint32_t iUseCount;
 			optional_font iFont;
-			colour_type iTextColour;
-			colour_type iBackgroundColour;
-			colour_type iTextOutlineColour;
+			effect_colour iTextColour;
+			effect_colour iBackgroundColour;
+			effect_colour iTextOutlineColour;
 		};
 		typedef std::set<style> style_list;
 		class column_info
