@@ -1613,30 +1613,7 @@ namespace neogfx
 
 	void text_edit::update_cursor()
 	{
-		auto cursorPos = glyph_position(cursor_glyph_position(), true);
-		dimension glyphHeight = 0.0;
-		dimension lineHeight = 0.0;
-		if (cursorPos.glyph != iGlyphs.end() && cursorPos.lineStart != cursorPos.lineEnd)
-		{
-			auto iterGlyph = cursorPos.glyph < cursorPos.lineEnd ? cursorPos.glyph : cursorPos.glyph - 1;
-			const auto& glyph = *iterGlyph;
-			if (cursorPos.glyph == cursorPos.lineEnd)
-				cursorPos.pos.x += glyph.advance().cx;
-			const auto& tagContents = iText.tag(iText.begin() + from_glyph(iterGlyph).first).contents();
-			const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
-			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
-			glyphHeight = glyphFont.height();
-			lineHeight = cursorPos.line->extents.cy;
-		}
-		else if (cursorPos.line != cursorPos.column->lines().end())
-			glyphHeight = lineHeight = cursorPos.line->extents.cy;
-		else
-			glyphHeight = lineHeight = font().height();
-		rect cursorRect{
-			point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight }, size{ cursor().width(), glyphHeight } };
-		if (cursorRect.right() > client_rect(false).right())
-			cursorRect.x += (client_rect(false).right() - cursorRect.right());
-		update(cursorRect);
+		update(cursor_rect());
 	}
 
 	void text_edit::make_cursor_visible(bool aForcePreviewScroll)
@@ -1759,6 +1736,34 @@ namespace neogfx
 
 	void text_edit::draw_cursor(const graphics_context& aGraphicsContext) const
 	{
+		if (((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
+		{
+			auto elapsed = (app::instance().program_elapsed_ms() - iCursorAnimationStartTime) % 1000;
+			colour::component alpha = 
+				elapsed < 500 ? 
+					255 : 
+					elapsed < 750 ? 
+						static_cast<colour::component>((249 - (elapsed - 500) % 250) * 255 / 249) : 
+						0;
+			if (cursor().colour().empty())
+			{
+				aGraphicsContext.push_logical_operation(logical_operation::Xor);
+				aGraphicsContext.fill_rect(cursor_rect(), colour::White.with_alpha(alpha));
+				aGraphicsContext.pop_logical_operation();
+			}
+			else if (cursor().colour().is<colour>())
+			{
+				aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const colour&>(cursor().colour()).with_combined_alpha(alpha));
+			}
+			else if (cursor().colour().is<gradient>())
+			{
+				aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursor().colour()).with_combined_alpha(alpha));
+			}
+		}
+	}
+
+	rect text_edit::cursor_rect() const
+	{
 		auto cursorGlyphIndex = cursor_glyph_position();
 		auto cursorPos = glyph_position(cursorGlyphIndex, true);
 		dimension glyphHeight = 0.0;
@@ -1778,34 +1783,11 @@ namespace neogfx
 			glyphHeight = lineHeight = cursorPos.line->extents.cy;
 		else
 			glyphHeight = lineHeight = font().height();
-		if (((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
-		{
-			auto elapsed = (app::instance().program_elapsed_ms() - iCursorAnimationStartTime) % 1000;
-			colour::component alpha = 
-				elapsed < 500 ? 
-					255 : 
-					elapsed < 750 ? 
-						static_cast<colour::component>((249 - (elapsed - 500) % 250) * 255 / 249) : 
-						0;
-			rect cursorRect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
-				size{ cursor().width(), glyphHeight } };
-			if (cursorRect.right() > client_rect(false).right())
-				cursorRect.x += (client_rect(false).right() - cursorRect.right());
-			if (cursor().colour().empty())
-			{
-				aGraphicsContext.push_logical_operation(logical_operation::Xor);
-				aGraphicsContext.fill_rect(cursorRect, colour::White.with_alpha(alpha));
-				aGraphicsContext.pop_logical_operation();
-			}
-			else if (cursor().colour().is<colour>())
-			{
-				aGraphicsContext.fill_rect(cursorRect, static_variant_cast<const colour&>(cursor().colour()).with_combined_alpha(alpha));
-			}
-			else if (cursor().colour().is<gradient>())
-			{
-				aGraphicsContext.fill_rect(cursorRect, static_variant_cast<const gradient&>(cursor().colour()).with_combined_alpha(alpha));
-			}
-		}
+		rect cursorRect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } +client_rect(false).top_left() + point{ 0.0, lineHeight - glyphHeight },
+			size{ cursor().width(), glyphHeight } };
+		if (cursorRect.right() > client_rect(false).right())
+			cursorRect.x += (client_rect(false).right() - cursorRect.right());
+		return cursorRect;
 	}
 
 	std::pair<text_edit::document_glyphs::iterator, text_edit::document_glyphs::iterator> text_edit::word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd)
@@ -1826,10 +1808,17 @@ namespace neogfx
 			result.second = result.first;
 		}
 		/* skip whitespace... */
-		while (result.first != aBegin && (result.first - 1)->is_whitespace())
-			--result.first;
-		while (result.second->is_whitespace() && result.second != aEnd)
-			++result.second;
+		if (result.first != aBegin && (result.first - 1)->is_whitespace())
+		{
+			while (result.first != aBegin && (result.first - 1)->is_whitespace())
+				--result.first;
+			result.second = result.first;
+		}
+		else if (result.first + 1 != aEnd && !(result.first + 1)->is_whitespace())
+		{
+			++result.first;
+			result.second = result.first;
+		}
 		return result;
 	}
 }
