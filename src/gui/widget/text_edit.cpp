@@ -1808,10 +1808,17 @@ namespace neogfx
 			result.second = result.first;
 		}
 		/* skip whitespace... */
+		auto savedResult = result;
 		while (result.first != aBegin && (result.first - 1)->is_whitespace())
 			--result.first;
 		while (result.second->is_whitespace() && result.second != aEnd)
 			++result.second;
+		if (std::distance(result.first, result.second) > 1)
+			result.second = result.first;
+		if (result.second != aEnd && result.second->is_line_breaking_whitespace())
+			++result.second;
+		if (result.first == result.second && result.first == aBegin)
+			result = savedResult;
 		return result;
 	}
 }
