@@ -777,7 +777,7 @@ namespace neogfx
 				{
 					if (currentPosition.line + 1 != currentPosition.column->lines().end())
 						cursor().set_position(from_glyph(iGlyphs.begin() + hit_test(point{ currentPosition.pos.x, (currentPosition.line + 1)->ypos }, false)).first, aMoveAnchor);
-					else if (currentPosition.lineEnd != iGlyphs.end() && currentPosition.lineEnd->is_whitespace() && currentPosition.lineEnd->value() == U'\n')
+					else if (currentPosition.lineEnd != iGlyphs.end() && currentPosition.lineEnd->is_line_breaking_whitespace())
 						cursor().set_position(iText.size(), aMoveAnchor);
 				}
 			}
@@ -934,7 +934,7 @@ namespace neogfx
 		{
 			if (line == lines.end())
 			{
-				if (aGlyphPosition <= lines.back().lineEnd.first || (!iGlyphs.back().is_whitespace() || iGlyphs.back().value() != U'\n'))
+				if (aGlyphPosition <= lines.back().lineEnd.first || iGlyphs.back().is_non_line_breaking_whitespace())
 					--line;
 			}
 			else if (aGlyphPosition < line->lineStart.first)
@@ -1466,7 +1466,7 @@ namespace neogfx
 			auto& paragraph = *p;
 			auto paragraphStart = paragraph.first.start();
 			auto paragraphEnd = paragraph.first.end();
-			if (paragraphStart == paragraphEnd || (paragraphStart->is_whitespace() && paragraphStart->value() == U'\n'))
+			if (paragraphStart == paragraphEnd || paragraphStart->is_line_breaking_whitespace())
 			{
 				auto lineStart = paragraphStart;
 				auto lineEnd = lineStart;
@@ -1514,7 +1514,7 @@ namespace neogfx
 						next = paragraphEnd;
 					dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().advance().cx : 0.0));
 					auto height = paragraph.first.height(lineStart, lineEnd);
-					if (lineEnd != lineStart && (lineEnd - 1)->is_whitespace() && (lineEnd - 1)->value() == U'\n')
+					if (lineEnd != lineStart && (lineEnd - 1)->is_line_breaking_whitespace())
 						--lineEnd;
 					bool rtl = false;
 					if (!first &&
@@ -1555,7 +1555,7 @@ namespace neogfx
 				auto lineStart = paragraphStart;
 				auto lineEnd = paragraphEnd;
 				auto height = paragraph.first.height(lineStart, lineEnd);
-				if (lineEnd != lineStart && (lineEnd - 1)->is_whitespace() && (lineEnd - 1)->value() == U'\n')
+				if (lineEnd != lineStart && (lineEnd - 1)->is_line_breaking_whitespace())
 					--lineEnd;
 				lines.push_back(
 					glyph_line{
@@ -1600,7 +1600,7 @@ namespace neogfx
 				break;
 			}
 		}
-		if (!iGlyphs.empty() && iGlyphs.back().is_whitespace() && iGlyphs.back().value() == U'\n')
+		if (!iGlyphs.empty() && iGlyphs.back().is_line_breaking_whitespace())
 			pos.y += font().height();
 		iTextExtents.cy = pos.y;
 	}
@@ -1652,7 +1652,7 @@ namespace neogfx
 	{
 		auto lineStart = aLine->lineStart.second;
 		auto lineEnd = aLine->lineEnd.second;
-		if (lineEnd != lineStart && (lineEnd - 1)->category() == text_category::Whitespace && (lineEnd - 1)->value() == U'\n')
+		if (lineEnd != lineStart && (lineEnd - 1)->is_line_breaking_whitespace())
 			--lineEnd;
 		{
 			bool outlinesPresent = false;
@@ -1808,17 +1808,10 @@ namespace neogfx
 			result.second = result.first;
 		}
 		/* skip whitespace... */
-		if (result.first != aBegin && (result.first - 1)->is_whitespace())
-		{
-			while (result.first != aBegin && (result.first - 1)->is_whitespace())
-				--result.first;
-			result.second = result.first;
-		}
-		else if (result.first + 1 != aEnd && !(result.first + 1)->is_whitespace())
-		{
-			++result.first;
-			result.second = result.first;
-		}
+		while (result.first != aBegin && (result.first - 1)->is_whitespace())
+			--result.first;
+		while (result.second->is_whitespace() && result.second != aEnd)
+			++result.second;
 		return result;
 	}
 }

@@ -107,7 +107,9 @@ namespace neogfx
 	public:
 		bool operator==(const glyph& aRhs) const { return iType.category == aRhs.iType.category && iValue == aRhs.iValue; }
 	public:
-		bool is_whitespace() const { return category() == text_category::Whitespace; }
+		bool is_whitespace() const { return category() == text_category::Whitespace; };
+		bool is_non_line_breaking_whitespace() const { return is_whitespace() && value() != U'\n'; }
+		bool is_line_breaking_whitespace() const { return is_whitespace() && value() == U'\n'; }
 		bool is_digit() const { return category() == text_category::Digit; }
 		bool is_emoji() const { return category() == text_category::Emoji; }
 		text_category category() const { return iType.category; }
