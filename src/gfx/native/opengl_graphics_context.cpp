@@ -659,7 +659,7 @@ namespace neogfx
 		}
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(iGradientStopPositions.size()));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nFilterSize", static_cast<int>(opengl_renderer::GRADIENT_FILTER_SIZE));
-		auto filter = gaussian_filter<float, opengl_renderer::GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
+		auto filter = static_gaussian_filter<float, opengl_renderer::GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
 		// todo: remove the following cast when gradient textures abstracted in rendering engine base class interface
 		auto& gradientTextures = static_cast<opengl_renderer&>(iRenderingEngine).gradient_textures(); 
 		glCheck(glActiveTexture(GL_TEXTURE2));
@@ -736,69 +736,150 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
 	{
+		if (aPen.colour().is<gradient>())
+		{
+			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
+			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : rect{ aFrom, aTo });
+		}
+
 		double pixelAdjust = pixel_adjust(aPen);
 		iVertexArrays.vertices().assign({ xyz{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust}, xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust} });
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ? 
+			std::array <uint8_t, 4>{{
+				static_cast<colour>(aPen.colour()).red(), 
+				static_cast<colour>(aPen.colour()).green(),
+				static_cast<colour>(aPen.colour()).blue(),
+				static_cast<colour>(aPen.colour()).alpha()}} :
+			std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
+
+		if (aPen.colour().is<gradient>())
+			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
+		if (aPen.colour().is<gradient>())
+		{
+			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
+			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aRect);
+		}
+
 		iVertexArrays.vertices() = rect_vertices(aRect, pixel_adjust(aPen), rect_type::Outline);
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+			std::array <uint8_t, 4>{{
+				static_cast<colour>(aPen.colour()).red(),
+				static_cast<colour>(aPen.colour()).green(),
+				static_cast<colour>(aPen.colour()).blue(),
+				static_cast<colour>(aPen.colour()).alpha()}} :
+			std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
+
+		if (aPen.colour().is<gradient>())
+			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
 	{
+		if (aPen.colour().is<gradient>())
+		{
+			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
+			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aRect);
+		}
+
 		double pixelAdjust = pixel_adjust(aPen);
 		iVertexArrays.vertices() = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+			std::array <uint8_t, 4>{{
+				static_cast<colour>(aPen.colour()).red(),
+				static_cast<colour>(aPen.colour()).green(),
+				static_cast<colour>(aPen.colour()).blue(),
+				static_cast<colour>(aPen.colour()).alpha()}} :
+			std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
+
+		if (aPen.colour().is<gradient>())
+			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
 	{
+		if (aPen.colour().is<gradient>())
+		{
+			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
+			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
+		}
+
 		iVertexArrays.vertices() = circle_vertices(aCentre, aRadius, aStartAngle, false);
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+			std::array <uint8_t, 4>{{
+				static_cast<colour>(aPen.colour()).red(),
+				static_cast<colour>(aPen.colour()).green(),
+				static_cast<colour>(aPen.colour()).blue(),
+				static_cast<colour>(aPen.colour()).alpha()}} :
+			std::array <uint8_t, 4>{});
 
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
+
+		if (aPen.colour().is<gradient>())
+			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
 	{
+		if (aPen.colour().is<gradient>())
+		{
+			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
+			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
+		}
+
 		iVertexArrays.vertices() = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+			std::array <uint8_t, 4>{{
+				static_cast<colour>(aPen.colour()).red(),
+				static_cast<colour>(aPen.colour()).green(),
+				static_cast<colour>(aPen.colour()).blue(),
+				static_cast<colour>(aPen.colour()).alpha()}} :
+			std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
+
+		if (aPen.colour().is<gradient>())
+			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_path(const path& aPath, const pen& aPen)
 	{
+		if (aPen.colour().is<gradient>())
+		{
+			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
+			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aPath.bounding_rect());
+		}
+
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
 		{
 			if (aPath.paths()[i].size() > 2)
@@ -808,7 +889,13 @@ namespace neogfx
 
 				iVertexArrays.vertices() = aPath.to_vertices(aPath.paths()[i]);
 				iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{{aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+					std::array <uint8_t, 4>{{
+						static_cast<colour>(aPen.colour()).red(),
+						static_cast<colour>(aPen.colour()).green(),
+						static_cast<colour>(aPen.colour()).blue(),
+						static_cast<colour>(aPen.colour()).alpha()}} :
+					std::array <uint8_t, 4>{});
 				iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, iVertexArrays.vertices().size()));
@@ -816,24 +903,42 @@ namespace neogfx
 					reset_clip();
 			}
 		}
+
+		if (aPen.colour().is<gradient>())
+			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_shape(const i_mesh& aMesh, const pen& aPen)
 	{
-		iVertexArrays.vertices().clear();
 		auto tvs = aMesh.transformed_vertices();
+
+		if (aPen.colour().is<gradient>())
+		{
+			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
+			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : bounding_rect(tvs));
+		}
+
+		iVertexArrays.vertices().clear();
 		for (auto const& v : tvs) // todo: have vertex shader do this transformation
 			iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, v.coordinates.z });
 		iVertexArrays.vertices().push_back(iVertexArrays.vertices()[0]);
 		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(),
-			std::array <uint8_t, 4>{ { aPen.colour().red(), aPen.colour().green(), aPen.colour().blue(), aPen.colour().alpha()}});
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+			std::array <uint8_t, 4>{{
+				static_cast<colour>(aPen.colour()).red(),
+				static_cast<colour>(aPen.colour()).green(),
+				static_cast<colour>(aPen.colour()).blue(),
+				static_cast<colour>(aPen.colour()).alpha()}} :
+			std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
+
+		if (aPen.colour().is<gradient>())
+			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_rect(const rect& aRect, const fill& aFill)
+	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill)
 	{
 		graphics_operation::batch batch;
 		batch.push_back(graphics_operation::fill_rect{aRect, aFill});
@@ -880,7 +985,7 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const fill& aFill)
+	void opengl_graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill)
 	{
 		if (aRect.empty())
 			return;
@@ -905,7 +1010,7 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_circle(const point& aCentre, dimension aRadius, const fill& aFill)
+	void opengl_graphics_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
 	{
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
@@ -927,7 +1032,7 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill)
+	void opengl_graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
 	{
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
@@ -948,7 +1053,7 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::fill_path(const path& aPath, const fill& aFill)
+	void opengl_graphics_context::fill_path(const path& aPath, const brush& aFill)
 	{
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
 		{
@@ -1108,7 +1213,13 @@ namespace neogfx
 				to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, glyphTexture.texture().extents().cy }),
 				to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.texture().extents().cy })
 			});
-			iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4, std::array<uint8_t, 4>{{drawOp.colour.red(), drawOp.colour.green(), drawOp.colour.blue(), drawOp.colour.alpha()}});
+			iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4,  drawOp.appearance.ink().is<colour>() ?
+				std::array <uint8_t, 4>{{
+					static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
+					static_variant_cast<const colour&>(drawOp.appearance.ink()).green(),
+					static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
+					static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
+				std::array <uint8_t, 4>{});
 			auto textureCoords = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates());
 			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
 		}
@@ -1124,6 +1235,9 @@ namespace neogfx
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 
 		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()) };
+
+		if (firstOp.appearance.ink().is<gradient>())
+			gradient_on(static_variant_cast<const gradient&>(firstOp.appearance.ink()), rect{ point{ iVertexArrays.vertices()[0][0], iVertexArrays.vertices()[0][1] }, point{ iVertexArrays.vertices()[2][0], iVertexArrays.vertices()[2][1] } });
 
 		iVertexArrays.instantiate(*this, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()));
 
@@ -1161,6 +1275,9 @@ namespace neogfx
 		}
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
+
+		if (firstOp.appearance.ink().is<gradient>())
+			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_texture(const i_mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect)

@@ -107,9 +107,9 @@ namespace neogfx
 		if (effectively_disabled())
 			ink.set_alpha(ink.alpha() / 2);
 		if (multi_line())
-			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, ink, iAlignment & neogfx::alignment::Horizontal, true);
+			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, ink, iAlignment & neogfx::alignment::Horizontal, UseGlyphTextCache);
 		else
-			aGraphicsContext.draw_text(textPosition, text(), font(), ink, true);
+			aGraphicsContext.draw_text(textPosition, text(), font(), ink, UseGlyphTextCache);
 	}
 
 	void text_widget::set_font(const optional_font& aFont)
@@ -217,12 +217,12 @@ namespace neogfx
 		if (iMultiLine)
 		{
 			if (has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::minimum_size().cx - margins().size().cx, true));
+				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::minimum_size().cx - margins().size().cx, UseGlyphTextCache));
 			else
-				return *(iTextExtent = gc.multiline_text_extent(iText, font(), true));
+				return *(iTextExtent = gc.multiline_text_extent(iText, font(), UseGlyphTextCache));
 		}
 		else
-			return *(iTextExtent = gc.text_extent(iText, font(), true));
+			return *(iTextExtent = gc.text_extent(iText, font(), UseGlyphTextCache));
 	}
 
 	void text_widget::init()

@@ -97,12 +97,12 @@ namespace neogfx
 		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen);
 		void draw_path(const path& aPath, const pen& aPen);
 		void draw_shape(const i_mesh& aMesh, const pen& aPen);
-		void fill_rect(const rect& aRect, const fill& aFill);
+		void fill_rect(const rect& aRect, const brush& aFill);
 		void fill_rect(const graphics_operation::batch& aFillRectOps);
-		void fill_rounded_rect(const rect& aRect, dimension aRadius, const fill& aFill);
-		void fill_circle(const point& aCentre, dimension aRadius, const fill& aFill);
-		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const fill& aFill);
-		void fill_path(const path& aPath, const fill& aFill);
+		void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill);
+		void fill_circle(const point& aCentre, dimension aRadius, const brush& aFill);
+		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill);
+		void fill_path(const path& aPath, const brush& aFill);
 		void fill_shape(const graphics_operation::batch& aFillShapeOps);
 		void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);
 		void draw_texture(const i_mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect);

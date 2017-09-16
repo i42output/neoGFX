@@ -169,21 +169,21 @@ namespace neogfx
 		struct fill_rect
 		{
 			rect rect;
-			fill fill;
+			brush fill;
 		};
 
 		struct fill_rounded_rect
 		{
 			rect rect;
 			dimension radius;
-			fill fill;
+			brush fill;
 		};
 
 		struct fill_circle
 		{
 			point centre;
 			dimension radius;
-			fill fill;
+			brush fill;
 		};
 
 		struct fill_arc
@@ -192,19 +192,19 @@ namespace neogfx
 			dimension radius;
 			angle startAngle;
 			angle endAngle;
-			fill fill;
+			brush fill;
 		};
 
 		struct fill_path
 		{
 			path path;
-			fill fill;
+			brush fill;
 		};
 
 		struct fill_shape
 		{
 			neogfx::mesh mesh;
-			fill fill;
+			brush fill;
 		};
 
 		struct draw_glyph
@@ -212,7 +212,7 @@ namespace neogfx
 			point point;
 			glyph glyph;
 			font font;
-			colour colour;
+			text_appearance appearance;
 		};
 
 		struct draw_texture
@@ -330,7 +330,9 @@ namespace neogfx
 				auto& right = static_variant_cast<const draw_glyph&>(aRight);
 				if (left.glyph.is_emoji() || right.glyph.is_emoji())
 					return false;
-				const i_glyph_texture& leftGlyphTexture = !left.glyph.use_fallback() ? left.font.native_font_face().glyph_texture(left.glyph) : 
+				if (left.appearance.ink().which() != right.appearance.ink().which() || !left.appearance.ink().is<colour>())
+					return false;
+				const i_glyph_texture& leftGlyphTexture = !left.glyph.use_fallback() ? left.font.native_font_face().glyph_texture(left.glyph) :
 					left.glyph.fallback_font(left.font).native_font_face().glyph_texture(left.glyph);
 				const i_glyph_texture& rightGlyphTexture = !right.glyph.use_fallback() ? right.font.native_font_face().glyph_texture(right.glyph) :
 					right.glyph.fallback_font(right.font).native_font_face().glyph_texture(right.glyph);

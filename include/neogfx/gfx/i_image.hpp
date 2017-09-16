@@ -22,12 +22,16 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/core/colour.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/app/i_resource.hpp>
 
 namespace neogfx
 {
+	enum class colour_format
+	{
+		RGBA8
+	};
+
 	class i_image : public i_resource
 	{
 	public:

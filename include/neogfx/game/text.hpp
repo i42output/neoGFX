@@ -28,18 +28,16 @@ namespace neogfx
 	class text : public shape<>
 	{
 	public:
-		text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const colour& aTextColour, neogfx::alignment aAlignment = alignment::Left, const optional_colour& aBackgroundColour = optional_colour());
+		text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
 	public:
-		const colour& text_colour() const;
-		void set_text_colour(const colour& aTextColour);
 		const std::string& value() const;
 		void set_value(const std::string& aText);
 		const neogfx::font& font() const;
 		void set_font(const neogfx::font& aFont);
+		const neogfx::text_appearance& appearance() const;
+		void set_appearance(const neogfx::text_appearance& aAppearance);
 		neogfx::alignment alignment() const;
 		void set_alignment(neogfx::alignment aAlignment);
-		const optional_colour& background_colour() const;
-		void set_background_colour(const optional_colour& aBackgroundColour);
 		const optional_dimension& border() const;
 		void set_border(const optional_dimension& aBorder);
 		const optional_margins& margins() const;
@@ -54,10 +52,10 @@ namespace neogfx
 	private:
 		std::string iText;
 		neogfx::font iFont;
+		neogfx::text_appearance iAppearance;
 		neogfx::alignment iAlignment;
 		mutable optional_size iTextExtent;
 		mutable glyph_text iGlyphTextCache;
-		optional_colour iBackgroundColour;
 		optional_dimension iBorder;
 		optional_margins iMargins;
 	};

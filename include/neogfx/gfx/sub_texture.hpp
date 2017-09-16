@@ -51,7 +51,7 @@ namespace neogfx
 		// attributes
 	private:
 		id iAtlasId;
-		i_texture& iAtlasTexture;
+		i_texture* iAtlasTexture;
 		rect iAtlasLocation;
 		size iExtents;
 	};

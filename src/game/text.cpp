@@ -22,25 +22,11 @@
 
 namespace neogfx
 {
-	text::text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const colour& aTextColour, neogfx::alignment aAlignment, const optional_colour& aBackgroundColour) :
-		shape{ aContainer }, iText{ aText }, iFont{ aFont }, iAlignment{ aAlignment }, iGlyphTextCache(aFont), iBackgroundColour{ aBackgroundColour }
+	text::text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment) :
+		shape{ aContainer }, iText{ aText }, iFont{ aFont }, iAppearance{ aAppearance }, iAlignment { aAlignment }, iGlyphTextCache(aFont)
 	{
 		set_position(aPosition);
-		add_frame(std::make_shared<neogfx::frame>(aTextColour));
-	}
-
-	const colour& text::text_colour() const
-	{
-		if (frame(0).colour() != boost::none)
-			return *frame(0).colour();
-		static const colour white = colour::White;
-		return white;
-	}
-
-	void text::set_text_colour(const colour& aTextColour)
-	{
-		for (frame_index i = 0; i < frame_count(); ++i)
-			frame(i).set_colour(aTextColour);
+		add_frame(std::make_shared<neogfx::frame>(aAppearance.ink()));
 	}
 
 	const std::string& text::value() const
@@ -69,6 +55,18 @@ namespace neogfx
 		clear_vertices_cache();
 	}
 
+	const neogfx::text_appearance& text::appearance() const
+	{
+		return iAppearance;
+	}
+
+	void text::set_appearance(const neogfx::text_appearance& aAppearance)
+	{
+		iAppearance = aAppearance;
+		for (frame_index i = 0; i < frame_count(); ++i)
+			frame(i).set_colour(aAppearance.ink());
+	}
+
 	neogfx::alignment text::alignment() const
 	{
 		return iAlignment;
@@ -77,16 +75,6 @@ namespace neogfx
 	void text::set_alignment(neogfx::alignment aAlignment)
 	{
 		iAlignment = aAlignment;
-	}
-
-	const optional_colour& text::background_colour() const
-	{
-		return iBackgroundColour;
-	}
-
-	void text::set_background_colour(const optional_colour& aBackgroundColour)
-	{
-		iBackgroundColour = aBackgroundColour;
 	}
 
 	const optional_dimension& text::border() const
@@ -142,11 +130,11 @@ namespace neogfx
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
 		auto bb = bounding_box_2d();
 		bb.position() = bb.position().ceil();
-		if (iBackgroundColour != boost::none)
-			aGraphicsContext.fill_rect(bb, *iBackgroundColour);
+		if (appearance().has_paper())
+			aGraphicsContext.fill_rect(bb, to_brush(appearance().paper()));
 		if (iBorder != boost::none)
 		{
-			aGraphicsContext.draw_rect(bb, pen(text_colour(), *iBorder));
+			aGraphicsContext.draw_rect(bb, pen{ appearance().ink(), *iBorder });
 			bb.deflate(size{*iBorder});
 		}
 		if (iMargins != boost::none)
@@ -155,8 +143,8 @@ namespace neogfx
 			bb.extents() -= size{iMargins->left + iMargins->right, iMargins->bottom + iMargins->top};
 		}
 		aGraphicsContext.draw_multiline_text(
-			aGraphicsContext.logical_coordinates().second.y < aGraphicsContext.logical_coordinates().first.y ? bb.bottom_left() : bb.top_left(), 
-			iText, font(), bb.extents().cx, text_colour(), iAlignment, true);
+			aGraphicsContext.logical_coordinates().second.y < aGraphicsContext.logical_coordinates().first.y ? bb.bottom_left() : bb.top_left(),
+			iText, font(), bb.extents().cx, appearance(), iAlignment, UseGlyphTextCache);
 	}
 
 	size text::text_extent() const
@@ -170,6 +158,6 @@ namespace neogfx
 			return *iTextExtent;
 		graphics_context gc(container().as_widget());
 		gc.set_glyph_text_cache(iGlyphTextCache);
-		return *(iTextExtent = gc.multiline_text_extent(iText, font(), true));
+		return *(iTextExtent = gc.multiline_text_extent(iText, font(), UseGlyphTextCache));
 	}
 }

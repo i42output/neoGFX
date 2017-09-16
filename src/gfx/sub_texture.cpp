@@ -25,12 +25,12 @@
 namespace neogfx
 {
 	sub_texture::sub_texture(id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents) :
-		iAtlasId(aAtlasId), iAtlasTexture(aAtlasTexture), iAtlasLocation(aAtlasLocation), iExtents(aExtents)
+		iAtlasId(aAtlasId), iAtlasTexture(&aAtlasTexture), iAtlasLocation(aAtlasLocation), iExtents(aExtents)
 	{
 	}
 
 	sub_texture::sub_texture(const i_sub_texture& aSubTexture) :
-		iAtlasId(aSubTexture.atlas_id()), iAtlasTexture(aSubTexture.atlas_texture()), iAtlasLocation(aSubTexture.atlas_location()), iExtents(aSubTexture.extents())
+		iAtlasId(aSubTexture.atlas_id()), iAtlasTexture(&aSubTexture.atlas_texture()), iAtlasLocation(aSubTexture.atlas_location()), iExtents(aSubTexture.extents())
 	{
 	}
 
@@ -94,7 +94,7 @@ namespace neogfx
 
 	i_texture& sub_texture::atlas_texture() const
 	{
-		return iAtlasTexture;
+		return *iAtlasTexture;
 	}
 
 	const rect& sub_texture::atlas_location() const

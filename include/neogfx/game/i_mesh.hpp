@@ -20,6 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/numerical.hpp>
+#include <neogfx/core/geometry.hpp>
 
 namespace neogfx
 {
@@ -42,4 +43,20 @@ namespace neogfx
 		virtual mat44 transformation_matrix() const = 0;
 		virtual vertex_list transformed_vertices() const = 0;
 	};
+
+	inline rect bounding_rect(const i_mesh::vertex_list& aVertices)
+	{
+		if (aVertices.empty())
+			return rect{};
+		point topLeft{ aVertices[0].coordinates.x, aVertices[0].coordinates.y };
+		point bottomRight = topLeft;
+		for (auto const& v : aVertices)
+		{
+			topLeft.x = std::min<coordinate>(topLeft.x, v.coordinates.x);
+			topLeft.y = std::min<coordinate>(topLeft.y, v.coordinates.y);
+			bottomRight.x = std::max<coordinate>(bottomRight.x, v.coordinates.x);
+			bottomRight.y = std::max<coordinate>(bottomRight.y, v.coordinates.y);
+		}
+		return rect{ topLeft, bottomRight };
+	}
 }

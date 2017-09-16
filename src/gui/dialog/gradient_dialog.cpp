@@ -51,7 +51,7 @@ namespace neogfx
 				point centre{ cr.centre().x + cr.width() / 2.0 * iOwner.gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * iOwner.gradient().centre()->y };
 				aGc.draw_circle(centre, 4.0, pen{ colour::White, 2.0 });
 				aGc.line_stipple_on(3, 0xAAAA);
-				aGc.draw_circle(centre, 4.0, pen{ colour::Black, 2.0 }, fill{}, to_rad(neolib::thread::program_elapsed_ms() / 10 % 100 * 3.6));
+				aGc.draw_circle(centre, 4.0, pen{ colour::Black, 2.0 }, brush{}, to_rad(neolib::thread::program_elapsed_ms() / 10 % 100 * 3.6));
 				aGc.line_stipple_off();
 			}
 		}

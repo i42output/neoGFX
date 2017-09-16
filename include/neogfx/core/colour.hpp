@@ -883,6 +883,9 @@ namespace neogfx
 		double smoothness() const;
 		void set_smoothness(double aSmoothness);
 		gradient with_smoothness(double aSmoothness) const;
+		const optional_rect& rect() const;
+		void set_rect(const optional_rect& aRect);
+		gradient with_rect(const optional_rect& aRect) const;
 	public:
 		bool operator==(const gradient& aOther) const;
 		bool operator!=(const gradient& aOther) const;
@@ -905,6 +908,7 @@ namespace neogfx
 		size_e iSize;
 		optional_point iCentre;
 		double iSmoothness;
+		optional_rect iRect;
 	};
 
 	typedef boost::optional<colour> optional_colour;
@@ -912,4 +916,7 @@ namespace neogfx
 
 	typedef colour color;
 	typedef boost::optional<color> optional_color;
+
+	typedef neolib::variant<colour, gradient> effect_colour;
+	typedef boost::optional<effect_colour> optional_effects_colour;
 }

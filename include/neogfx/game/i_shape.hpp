@@ -24,20 +24,21 @@
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/core/colour.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/game/i_object.hpp>
 #include <neogfx/game/i_mesh.hpp>
 
 namespace neogfx
 {
+	class graphics_context;
+
 	class i_frame
 	{
 	public:
 		virtual bool has_extents() const = 0;
 		virtual size extents() const = 0;
-		virtual const optional_colour& colour() const = 0;
-		virtual void set_colour(const optional_colour& aColour) = 0;
+		virtual const optional_effects_colour& colour() const = 0;
+		virtual void set_colour(const optional_effects_colour& aColour) = 0;
 		virtual const optional_texture& texture() const = 0;
 		virtual void set_texture(const optional_texture& aTexture) = 0;
 		virtual const optional_rect& texture_rect() const = 0;

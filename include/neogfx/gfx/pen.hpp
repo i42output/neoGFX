@@ -29,15 +29,15 @@ namespace neogfx
 		// construction
 	public:
 		pen() : iWidth(0) {}
-		pen(const neogfx::colour& aColour, bool aAntiAliased = true) : iColour(aColour), iWidth(1), iAntiAliased(aAntiAliased) {}
-		pen(const neogfx::colour& aColour, dimension aWidth, bool aAntiAliased = true) : iColour(aColour), iWidth(aWidth), iAntiAliased(aAntiAliased) {}
+		pen(const neogfx::effect_colour& aColour, bool aAntiAliased = true) : iColour(aColour), iWidth(1), iAntiAliased(aAntiAliased) {}
+		pen(const neogfx::effect_colour& aColour, dimension aWidth, bool aAntiAliased = true) : iColour(aColour), iWidth(aWidth), iAntiAliased(aAntiAliased) {}
 		// operations
 	public:
-		neogfx::colour colour() const { return iColour; }
+		neogfx::effect_colour colour() const { return iColour; }
 		dimension width() const { return iWidth; }
 		bool anti_aliased() const { return iAntiAliased; }
 	private:
-		neogfx::colour iColour;
+		neogfx::effect_colour iColour;
 		dimension iWidth;
 		bool iAntiAliased;
 	};

@@ -17,6 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/gfx/graphics_context.hpp>
+
 namespace neogfx
 {
 	template <typename MixinInterface>
@@ -479,7 +481,7 @@ namespace neogfx
 		}
 		else if (current_frame().colour() != boost::none)
 		{
-			aGraphicsContext.fill_shape(*this, *current_frame().colour());
+			aGraphicsContext.fill_shape(*this, to_brush(*current_frame().colour()));
 		}
 	}
 

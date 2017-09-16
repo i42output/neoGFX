@@ -29,8 +29,8 @@ namespace neogfx
 	class frame : public i_frame
 	{
 	public:
-		frame(const neogfx::colour& aColour) : iColour(aColour) {}
-		frame(const neogfx::colour& aColour, const mat33& aTransformation) : iColour(aColour), iTransformation(aTransformation) {}
+		frame(const neogfx::effect_colour& aColour) : iColour(aColour) {}
+		frame(const neogfx::effect_colour& aColour, const mat33& aTransformation) : iColour(aColour), iTransformation(aTransformation) {}
 		frame(const i_texture& aTexture) : iTexture(aTexture) {}
 		frame(const i_texture& aTexture, const mat33& aTransformation) : iTexture(aTexture), iTransformation(aTransformation) {}
 		frame(const i_texture& aTexture, const optional_rect& aTextureRect) : iTexture(aTexture), iTextureRect(aTextureRect) {}
@@ -38,8 +38,8 @@ namespace neogfx
 	public:
 		bool has_extents() const override { return iTexture != boost::none; }
 		size extents() const override { return iTextureRect != boost::none ? *iTextureRect : iTexture != boost::none ? iTexture->extents() : size{}; }
-		const optional_colour& colour() const override { return iColour; }
-		void set_colour(const optional_colour& aColour) override { iColour = aColour; }
+		const optional_effects_colour& colour() const override { return iColour; }
+		void set_colour(const optional_effects_colour& aColour) override { iColour = aColour; }
 		const optional_texture& texture() const override { return iTexture; }
 		void set_texture(const optional_texture& aTexture) override { iTexture = aTexture; }
 		const optional_rect& texture_rect() const override { return iTextureRect; }
@@ -47,7 +47,7 @@ namespace neogfx
 		const optional_mat33& transformation() const override { return iTransformation; }
 		void set_transformation(const optional_mat33& aTransformation) override { iTransformation = aTransformation; }
 	private:
-		optional_colour iColour;
+		optional_effects_colour iColour;
 		optional_texture iTexture;
 		optional_rect iTextureRect;
 		optional_mat33 iTransformation;

@@ -383,14 +383,14 @@ namespace neogfx
 		// construction
 	public:
 		basic_rect() {}
-		basic_rect(const point_type& coordinates, const size_type& dimensions) : point_type(coordinates), size_type(dimensions) {}
+		basic_rect(const point_type& coordinates, const size_type& dimensions) : point_type{ coordinates }, size_type{ dimensions } {}
 		basic_rect(const point_type& topLeft, const point_type& bottomRight) : 
-			point_type(topLeft), 
-			size_type(static_cast<CoordinateType>(bottomRight.x - topLeft.x), static_cast<CoordinateType>(bottomRight.y - topLeft.y)) {}
-		basic_rect(const size_type& dimensions) : point_type(), size_type(dimensions) {}
-		basic_rect(coordinate_type x, coordinate_type y, dimension_type cx, dimension_type cy) : point_type(x, y), size_type(cx, cy) {}
+			point_type{ std::min(topLeft.x, bottomRight.x), std::min(topLeft.y, bottomRight.y) },
+			size_type{ std::abs(static_cast<CoordinateType>(bottomRight.x - topLeft.x)), std::abs(static_cast<CoordinateType>(bottomRight.y - topLeft.y)) } {}
+		basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
+		basic_rect(coordinate_type x, coordinate_type y, dimension_type cx, dimension_type cy) : point_type{ x, y }, size_type{ cx, cy } {}
 		template <typename CoordinateType2>
-		basic_rect(const basic_rect<CoordinateType2>& other) : point_type(other), size_type(other) {}
+		basic_rect(const basic_rect<CoordinateType2>& other) : point_type{ other }, size_type{ other } {}
 		// assignment
 	public:
 		basic_rect& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }

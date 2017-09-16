@@ -22,6 +22,7 @@
 #include <chrono>
 #include <boost/optional.hpp>
 #include <neogfx/core/geometry.hpp>
+#include <neogfx/core/path.hpp>
 #include "i_shape.hpp"
 #include "i_physical_object.hpp"
 
