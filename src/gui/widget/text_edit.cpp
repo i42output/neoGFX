@@ -1792,33 +1792,25 @@ namespace neogfx
 
 	std::pair<text_edit::document_glyphs::iterator, text_edit::document_glyphs::iterator> text_edit::word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd)
 	{
-		std::pair<document_glyphs::iterator, document_glyphs::iterator> result(aFrom, aFrom);
+		std::pair<document_glyphs::iterator, document_glyphs::iterator> result{ aFrom, aFrom };
 		if (!aFrom->is_whitespace())
 		{
-			while (result.first != aBegin && !result.first->is_whitespace())
+			while (result.first != aBegin && !(result.first - 1)->is_whitespace())
 				--result.first;
-			if (!result.first->is_whitespace())
-			{
-				result.first = aFrom;
-				while (result.first != aBegin && (result.first - 1)->source() == aFrom->source())
-					--result.first;
-				result.second = result.first;
-				return result;
-			}
 			result.second = result.first;
 		}
-		/* skip whitespace... */
-		auto savedResult = result;
-		while (result.first != aBegin && (result.first - 1)->is_whitespace())
-			--result.first;
-		while (result.second->is_whitespace() && result.second != aEnd)
-			++result.second;
-		if (std::distance(result.first, result.second) > 1)
+		else 
+		{
+			while (result.first != aBegin && (result.first - 1)->is_whitespace())
+				--result.first;
+			while (result.first != aBegin && !(result.first - 1)->is_whitespace())
+				--result.first;
 			result.second = result.first;
+		}
 		if (result.second != aEnd && result.second->is_line_breaking_whitespace())
 			++result.second;
 		if (result.first == result.second && result.first == aBegin)
-			result = savedResult;
+			result = { aFrom, aFrom };
 		return result;
 	}
 }
