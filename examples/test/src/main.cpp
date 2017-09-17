@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 		app.current_style().palette().set_colour(ng::colour::Black);
 		app.change_style("Default");
 
-		ng::window window(ng::size{ 800, 700 });
+		ng::window window(ng::size{ 800, 720 });
 
 		bool showFps = false;
 		auto fpsFont = window.font().with_size(18);
@@ -486,6 +486,14 @@ int main(int argc, char* argv[])
 		ng::horizontal_layout layoutColourPickers{ layout4 };
 		ng::push_button themeColour(layoutColourPickers, "theme"); themeColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });
 		ng::push_button editColour(layoutColourPickers, "edit"); editColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });
+		ng::horizontal_layout layoutEffects{ layout4 };
+		ng::check_box editOutline{ layoutEffects, "outline" };
+		editOutline.toggled([&]()
+		{
+			auto s = textEdit.default_style();
+			s.set_text_outline_colour(editOutline.is_checked() ? ng::colour_or_gradient{ ng::colour::White } : ng::colour_or_gradient{});
+			textEdit.set_default_style(s, true);
+		});
 		ng::radio_button radio1(layout4, "Radio 1");
 		ng::radio_button radioSliderFont(layout4, "Slider changes\nfont size");
 		radioSliderFont.checked([&slider, &app]()

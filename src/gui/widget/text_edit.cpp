@@ -857,8 +857,9 @@ namespace neogfx
 	void text_edit::set_default_style(const style& aDefaultStyle, bool aPersist)
 	{
 		neogfx::font oldFont = font();
+		auto oldOutline = iDefaultStyle.text_outline_colour().empty();
 		iDefaultStyle = aDefaultStyle;
-		if (oldFont != font())
+		if (oldFont != font() || oldOutline != iDefaultStyle.text_outline_colour().empty())
 			refresh_paragraph(iText.begin(), 0);
 		iPersistDefaultStyle = aPersist;
 		update();
@@ -1474,13 +1475,14 @@ namespace neogfx
 				const auto& tagContents = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).contents();
 				const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+				auto height = paragraph.first.height(lineStart, lineEnd);
 				lines.push_back(
 					glyph_line{
 						{ p - iGlyphParagraphs.begin(), p },
 						{ lineStart - iGlyphs.begin(), lineStart },
 						{ lineEnd - iGlyphs.begin(), lineEnd },
 						pos.y,
-						{ 0.0, glyphFont.height() } });
+						{ 0.0, height } });
 				pos.y += glyphFont.height();
 			}
 			else if (iWordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
@@ -1656,7 +1658,7 @@ namespace neogfx
 			--lineEnd;
 		{
 			bool outlinesPresent = false;
-			for (uint32_t pass = 0; pass <= 2; ++pass)
+			for (uint32_t pass = 0; pass <= 1; ++pass)
 			{
 				point pos = aPoint;
 				for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
@@ -1678,39 +1680,24 @@ namespace neogfx
 								has_focus() ? 
 									app::instance().current_style().palette().selection_colour() : 
 									app::instance().current_style().palette().selection_colour().with_alpha(64));
+						if (!style.text_outline_colour().empty())
+							outlinesPresent = true;
 						break;
 					case 1:
-						if (style.text_outline_colour().empty() || glyph.is_emoji())
-						{
-							pos.x += glyph.advance().cx;
-							continue;
-						}
-						outlinesPresent = true;
-						for (uint32_t outlinePos = 0; outlinePos < 8; ++outlinePos)
-						{
-							static point sOutlinePositions[] = 
-							{
-								point{-1.0, -1.0}, point{0.0, -1.0}, point{1.0, -1.0},
-								point{-1.0, 0.0}, point{1.0, 0.0},
-								point{-1.0, 1.0}, point{0.0, 1.0}, point{1.0, 1.0},
-							};
-							aGraphicsContext.draw_glyph(sOutlinePositions[outlinePos] + pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - 1.0 }, glyph,
-								glyphFont,
-								style.text_outline_colour().is<colour>() ?
-									static_variant_cast<const colour&>(style.text_outline_colour()) : style.text_outline_colour().is<gradient>() ?
-										static_variant_cast<const gradient&>(style.text_outline_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
-										default_text_colour());
-						}
-						break;
-					case 2:
-						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0)}, glyph,
+						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0) }, glyph,
 							glyphFont,
-							selected && has_focus() ? 
-								(app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White) :
+							selected && has_focus() ?
+							text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
+							text_appearance{
 								style.text_colour().is<colour>() ?
-									static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
+									static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ?
 										static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
-										default_text_colour());
+										default_text_colour(),
+								style.text_outline_colour().is<colour>() ?
+									text_effect{text_effect::Outline, static_variant_cast<const colour&>(style.text_outline_colour())} : style.text_outline_colour().is<gradient>() ? 
+										text_effect{text_effect::Outline, static_variant_cast<const gradient&>(style.text_outline_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) /
+											std::max(client_rect(false).width(), iTextExtents.cx))} :
+										optional_text_effect{}});
 						break;
 					}
 					pos.x += glyph.advance().cx;
@@ -1775,8 +1762,6 @@ namespace neogfx
 			const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
 			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			glyphHeight = glyphFont.height();
-			if (!style.text_outline_colour().empty())
-				glyphHeight += 2.0;
 			lineHeight = cursorPos.line->extents.cy;
 		}
 		else if (cursorPos.line != cursorPos.column->lines().end())
