@@ -74,15 +74,15 @@ namespace neogfx
 		void set_position(position_type aPosition, bool aMoveAnchor = true);
 		position_type anchor() const;
 		void set_anchor(position_type aAnchor);
-		const effect_colour& colour() const;
-		void set_colour(const effect_colour& aColour);
+		const colour_or_gradient& colour() const;
+		void set_colour(const colour_or_gradient& aColour);
 		dimension width() const;
 		void set_width(dimension aWidth);
 	private:
 		i_document* iDocument;
 		position_type iPosition;
 		position_type iAnchor;
-		effect_colour iColour;
+		colour_or_gradient iColour;
 		dimension iWidth;
 	};
 }

@@ -59,7 +59,7 @@ namespace neogfx
 
 	typedef neolib::variant<colour, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
 
-	inline brush to_brush(const effect_colour& aEffectColour)
+	inline brush to_brush(const colour_or_gradient& aEffectColour)
 	{
 		if (aEffectColour.is<colour>())
 			return static_variant_cast<const colour&>(aEffectColour);
@@ -76,7 +76,7 @@ namespace neogfx
 	const glyph_text_cache_usage UseGlyphTextCache{ true };
 	const glyph_text_cache_usage DontUseGlyphTextCache{ false };
 
-	typedef effect_colour text_colour;
+	typedef colour_or_gradient text_colour;
 	typedef boost::optional<text_colour> optional_text_colour;
 
 	class text_effect

@@ -914,9 +914,11 @@ namespace neogfx
 	typedef boost::optional<colour> optional_colour;
 	typedef boost::optional<gradient> optional_gradient;
 
-	typedef colour color;
-	typedef boost::optional<color> optional_color;
+	typedef neolib::variant<colour, gradient> colour_or_gradient;
+	typedef boost::optional<colour_or_gradient> optional_colour_or_gradient;
 
-	typedef neolib::variant<colour, gradient> effect_colour;
-	typedef boost::optional<effect_colour> optional_effect_colour;
+	typedef colour color;
+	typedef optional_colour optional_color;
+	typedef colour_or_gradient color_or_gradient;
+	typedef optional_colour_or_gradient optional_color_or_gradient;
 }

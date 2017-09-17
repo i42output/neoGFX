@@ -115,9 +115,9 @@ public:
 			ng::app::instance().change_style("Keypad").
 				palette().set_colour(aNumber != 9 ? ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::colour::LightGoldenrod);
 			if (aNumber == 9)
-				iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::effect_colour{} }, true);
+				iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
 			else if (aNumber == 8)
-				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::effect_colour{}, ng::colour::White }, true);
+				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::colour_or_gradient{}, ng::colour::White }, true);
 			else if (aNumber == 0)
 				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::colour::White }, true);
 			else
@@ -128,7 +128,7 @@ public:
 							ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0x40),
 							ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0xC0),
 							ng::gradient::Horizontal},
-						ng::effect_colour{} }, true);
+						ng::colour_or_gradient{} }, true);
 		});
 	}
 private:
@@ -443,7 +443,7 @@ int main(int argc, char* argv[])
 			gw.gradient_changed([&gw, &textEdit]()
 			{
 				auto cs = textEdit.column(2);
-				cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::effect_colour{}, ng::effect_colour{}, ng::effect_colour{gw.gradient()} });
+				cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::colour_or_gradient{gw.gradient()} });
 				textEdit.set_column(2, cs);
 			}, textEdit);
 		});
@@ -545,9 +545,9 @@ int main(int argc, char* argv[])
 			if (colourPicker.exec() == ng::dialog::Accepted)
 			{
 				sInk = colourPicker.selected_colour();
-				textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::effect_colour{} }, true);
-				lineEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::effect_colour{} }, true);
-				lineEditPassword.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::effect_colour{} }, true);
+				textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+				lineEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+				lineEditPassword.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
 			}
 			*sCustomColours = colourPicker.custom_colours();
 		});
@@ -770,11 +770,11 @@ int main(int argc, char* argv[])
 		auto& tabEditor = tabContainer.add_tab_page("Editor").as_widget();
 		ng::vertical_layout layoutEditor(tabEditor);
 		ng::text_edit textEdit2(layoutEditor);
-		textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::effect_colour()));
+		textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
 		ng::push_button editorStyle1(layoutEditor, "Style 1");
 		editorStyle1.clicked([&textEdit2]()
 		{
-			textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::effect_colour()));
+			textEdit2.set_default_style(ng::text_edit::style(ng::optional_font(), ng::gradient(ng::colour::Red, ng::colour::White, ng::gradient::Horizontal), ng::colour_or_gradient()));
 		});
 		ng::push_button editorStyle2(layoutEditor, "Style 2");
 		editorStyle2.clicked([&textEdit2]()

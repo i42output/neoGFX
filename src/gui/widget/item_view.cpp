@@ -751,7 +751,7 @@ namespace neogfx
 			if (textColour == boost::none)
 				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
 			optional_colour backgroundColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Background);
-			textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != boost::none ? effect_colour{ *backgroundColour } : effect_colour{} });
+			textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != boost::none ? colour_or_gradient{ *backgroundColour } : colour_or_gradient{} });
 			textEdit.set_text(presentation_model().cell_to_string(newIndex));
 			textEdit.focus_event([this, newIndex](neogfx::focus_event fe)
 			{
