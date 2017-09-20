@@ -1279,25 +1279,6 @@ namespace neogfx
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-
-		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()) };
-
-		if (firstOp.appearance.ink().is<gradient>())
-			gradient_on(static_variant_cast<const gradient&>(firstOp.appearance.ink()), rect{ point{ iVertexArrays.vertices()[0][0], iVertexArrays.vertices()[0][1] }, point{ iVertexArrays.vertices()[2][0], iVertexArrays.vertices()[2][1] } });
-
-		iVertexArrays.instantiate(*this, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()));
-
-		const i_glyph_texture& firstGlyphTexture = !firstOp.glyph.use_fallback() ? firstOp.font.native_font_face().glyph_texture(firstOp.glyph) : firstOp.glyph.fallback_font(firstOp.font).native_font_face().glyph_texture(firstOp.glyph);
-		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
-
-		auto& shader = iRenderingEngine.active_shader_program();
-
-		bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
-		shader.set_uniform_variable("guiCoordinates", guiCoordinates);
-		shader.set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
-
-		shader.set_uniform_variable("glyphTexture", 1);
-
 		if (firstOp.glyph.subpixel())
 		{
 			glCheck(glActiveTexture(GL_TEXTURE2));
@@ -1305,27 +1286,48 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSurface.rendering_target_texture_handle())));
 			glCheck(glActiveTexture(GL_TEXTURE1));
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
-			shader.set_uniform_variable("outputTexture", 2);
 		}
+
+		if (firstOp.appearance.ink().is<gradient>())
+			gradient_on(static_variant_cast<const gradient&>(firstOp.appearance.ink()), rect{ point{ iVertexArrays.vertices()[0][0], iVertexArrays.vertices()[0][1] }, point{ iVertexArrays.vertices()[2][0], iVertexArrays.vertices()[2][1] } });
+
+		const i_glyph_texture& firstGlyphTexture = !firstOp.glyph.use_fallback() ? firstOp.font.native_font_face().glyph_texture(firstOp.glyph) : firstOp.glyph.fallback_font(firstOp.font).native_font_face().glyph_texture(firstOp.glyph);
+		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
 
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 		disable_anti_alias daa(*this);
+
+		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel())};
+
 		std::size_t index = 0;
 		for (uint32_t pass = 1; pass <= 2; ++pass)
 		{
+			auto& shader = iRenderingEngine.active_shader_program();
+
+			iVertexArrays.instantiate(*this, shader);
+
+			bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
+			shader.set_uniform_variable("guiCoordinates", guiCoordinates);
+			shader.set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
+
+			shader.set_uniform_variable("glyphTexture", 1);
+
+			if (firstOp.glyph.subpixel())
+				shader.set_uniform_variable("outputTexture", 2);
+
+			if (pass == 2 && firstOp.glyph.subpixel())
+			{
+				glCheck(glTextureBarrierNV());
+			}
+
 			for (const auto& op : aDrawGlyphOps)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(op);
 
 				if (drawOp.glyph.is_whitespace())
 					continue;
-
-				if (firstOp.glyph.subpixel())
-				{
-					glCheck(glTextureBarrierNV());
-				}
 
 				if (drawOp.appearance.has_effect() && pass == 1)
 				{
