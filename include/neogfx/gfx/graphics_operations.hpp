@@ -105,6 +105,10 @@ namespace neogfx
 			colour colour;
 		};
 
+		struct clear_depth_buffer
+		{
+		};
+
 		struct set_pixel
 		{
 			point point;
@@ -240,6 +244,7 @@ namespace neogfx
 			subpixel_rendering_on,
 			subpixel_rendering_off,
 			clear,
+			clear_depth_buffer,
 			set_pixel,
 			draw_pixel,
 			draw_line,
@@ -277,6 +282,7 @@ namespace neogfx
 			SubpixelRenderingOn,
 			SubpixelRenderingOff,
 			Clear,
+			ClearDepthBuffer,
 			SetPixel,
 			DrawPixel,
 			DrawLine,
@@ -331,6 +337,8 @@ namespace neogfx
 				if (left.glyph.is_emoji() || right.glyph.is_emoji())
 					return false;
 				if (left.appearance.ink().which() != right.appearance.ink().which() || !left.appearance.ink().is<colour>())
+					return false;
+				if (left.appearance.has_effect() != right.appearance.has_effect() || (left.appearance.has_effect() && left.appearance.effect().type() != right.appearance.effect().type()))
 					return false;
 				const i_glyph_texture& leftGlyphTexture = !left.glyph.use_fallback() ? left.font.native_font_face().glyph_texture(left.glyph) :
 					left.glyph.fallback_font(left.font).native_font_face().glyph_texture(left.glyph);

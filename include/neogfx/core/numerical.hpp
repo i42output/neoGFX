@@ -76,6 +76,8 @@ namespace neogfx
 		basic_vector(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type()); }
 		basic_vector(const basic_vector& other) : v(other.v) {}
 		basic_vector(basic_vector&& other) : v(std::move(other.v)) {}
+		template <typename T2>
+		basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
 		basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
 		basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
 	public:
@@ -171,6 +173,8 @@ namespace neogfx
 		basic_vector(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::fill(v.begin() + (values.end() - values.begin()), v.end(), value_type()); }
 		basic_vector(const basic_vector& other) : v(other.v) {}
 		basic_vector(basic_vector&& other) : v(std::move(other.v)) {}
+		template <typename T2>
+		basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
 		basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
 		basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
 	public:
@@ -289,6 +293,16 @@ namespace neogfx
 	typedef vec2_list vertex_list;
 
 	typedef boost::optional<vertex_list> optional_vertex_list;
+
+	typedef basic_vector<float, 1> vector1f;
+	typedef basic_vector<float, 2> vector2f;
+	typedef basic_vector<float, 3> vector3f;
+	typedef basic_vector<float, 4> vector4f;
+
+	typedef vector1f vec1f;
+	typedef vector2f vec2f;
+	typedef vector3f vec3f;
+	typedef vector4f vec4f;
 
 	template <typename T, uint32_t D, typename Type, bool IsScalar>
 	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)

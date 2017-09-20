@@ -179,6 +179,8 @@ namespace neogfx
 		glCheck(glEnable(GL_TEXTURE_2D));
 		glCheck(glEnable(GL_MULTISAMPLE));
 		glCheck(glEnable(GL_BLEND));
+		glCheck(glEnable(GL_DEPTH_TEST));
+		glCheck(glDepthFunc(GL_LEQUAL));
 		if (iFrameBufferSize.cx < static_cast<double>(extents().cx) || iFrameBufferSize.cy < static_cast<double>(extents().cy))
 		{
 			if (iFrameBufferSize != size{})
@@ -208,6 +210,7 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, iFrameBufferTexture));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 		}
+		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
 			throw failed_to_create_framebuffer(status);

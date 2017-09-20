@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 		app.current_style().palette().set_colour(ng::colour::Black);
 		app.change_style("Default");
 
-		ng::window window(ng::size{ 800, 720 });
+		ng::window window(ng::size{ 800, 768 });
 
 		bool showFps = false;
 		auto fpsFont = window.font().with_size(18);
@@ -486,8 +486,14 @@ int main(int argc, char* argv[])
 		ng::horizontal_layout layoutColourPickers{ layout4 };
 		ng::push_button themeColour(layoutColourPickers, "theme"); themeColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });
 		ng::push_button editColour(layoutColourPickers, "edit"); editColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });
-		ng::horizontal_layout layoutEffects{ layout4 };
-		ng::check_box editOutline{ layoutEffects, "outline" };
+		ng::widget lw{ layout4 };
+		lw.set_margins(ng::margins{});
+		ng::grid_layout layoutEffects{ lw, 2, 2 };
+		layoutEffects.set_margins(ng::margins{});
+		ng::radio_button editNormal{ layoutEffects, "normal" };
+		ng::radio_button editOutline{ layoutEffects, "outline" };
+		ng::radio_button editShadow{ layoutEffects, "shadow" };
+		ng::radio_button editGlow{ layoutEffects, "glow" };
 		editOutline.toggled([&]()
 		{
 			auto s = textEdit.default_style();
@@ -560,9 +566,9 @@ int main(int argc, char* argv[])
 			*sCustomColours = colourPicker.custom_colours();
 		});
 
-		ng::vertical_spacer spacer1(layout4);
-		ng::grid_layout keypad(4, 3, layout2);
-		keypad.set_minimum_size(ng::size(100.0, 0.0));
+		ng::vertical_spacer spacer1{ layout4 };
+		ng::grid_layout keypad{ layout2, 4, 3 };
+		keypad.set_minimum_size(ng::size{ 100.0, 0.0 });
 		keypad.set_spacing(0.0);
 		for (uint32_t row = 0; row < 3; ++row)
 			for (uint32_t col = 0; col < 3; ++col)

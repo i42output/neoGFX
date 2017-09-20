@@ -84,6 +84,7 @@ namespace neogfx
 	public:
 		enum type_e
 		{
+			None,
 			Outline,
 			Glow,
 			Shadow
@@ -107,6 +108,8 @@ namespace neogfx
 				return *iWidth;
 			switch (type())
 			{
+			case None:
+				return 0.0;
 			case Outline:
 				return 1.0;
 			default:
@@ -231,6 +234,7 @@ namespace neogfx
 		void subpixel_rendering_on() const;
 		void subpixel_rendering_off() const;
 		void clear(const colour& aColour) const;
+		void clear_depth_buffer() const;
 		void set_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const;

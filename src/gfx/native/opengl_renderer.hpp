@@ -81,6 +81,8 @@ namespace neogfx
 			void set_uniform_variable(const std::string& aName, int aValue) override;
 			void set_uniform_variable(const std::string& aName, float aValue1, float aValue2) override;
 			void set_uniform_variable(const std::string& aName, double aValue1, double aValue2) override;
+			void set_uniform_variable(const std::string& aName, const vec4f& aVector) override;
+			void set_uniform_variable(const std::string& aName, const vec4& aVector) override;
 			void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray) override;
 			void set_uniform_matrix(const std::string& aName, const mat44& aMatrix) override;
 		public:

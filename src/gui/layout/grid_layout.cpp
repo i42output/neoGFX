@@ -50,7 +50,7 @@ namespace neogfx
 		iRowLayout.set_always_use_spacing(true);
 	}
 
-	grid_layout::grid_layout(cell_coordinate aRows, cell_coordinate aColumns, i_widget& aParent) :
+	grid_layout::grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns) :
 		layout(aParent), iRowLayout(*this), iDimensions{aColumns, aRows}
 	{
 		iRowLayout.set_margins(neogfx::margins{});
@@ -58,7 +58,7 @@ namespace neogfx
 		iRowLayout.set_always_use_spacing(true);
 	}
 
-	grid_layout::grid_layout(cell_coordinate aRows, cell_coordinate aColumns, i_layout& aParent) :
+	grid_layout::grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns) :
 		layout(aParent), iRowLayout(*this), iDimensions(aColumns, aRows)
 	{
 		iRowLayout.set_margins(neogfx::margins{});

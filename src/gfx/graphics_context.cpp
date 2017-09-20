@@ -695,6 +695,11 @@ namespace neogfx
 			fill_rect(rect{ point{}, extents() }, aColour);
 	}
 
+	void graphics_context::clear_depth_buffer() const
+	{
+		iNativeGraphicsContext->enqueue(graphics_operation::clear_depth_buffer{});
+	}
+
 	glyph_text graphics_context::to_glyph_text(const string& aText, const font& aFont) const
 	{
 		return to_glyph_text(aText.begin(), aText.end(), aFont);

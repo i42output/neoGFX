@@ -180,6 +180,22 @@ namespace neogfx
 			throw shader_program_error(errorCode);
 	}
 
+	void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, const vec4f& aVector)
+	{
+		glUniform4f(uniform_location(aName), aVector[0], aVector[1], aVector[2], aVector[3]);
+		GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+			throw shader_program_error(errorCode);
+	}
+
+	void opengl_renderer::shader_program::set_uniform_variable(const std::string& aName, const vec4& aVector)
+	{
+		glUniform4d(uniform_location(aName), aVector[0], aVector[1], aVector[2], aVector[3]);
+		GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+			throw shader_program_error(errorCode);
+	}
+
 	void opengl_renderer::shader_program::set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray)
 	{
 		glUniform1fv(uniform_location(aName), aSize, aArray);
@@ -375,23 +391,68 @@ namespace neogfx
 						"in vec2 VertexTextureCoord;\n"
 						"out vec4 Color;\n"
 						"varying vec2 vGlyphTexCoord;\n"
+						"varying vec2 vOutputCoord;\n"
 						"void main()\n"
 						"{\n"
 						"	Color = VertexColor / 255.0;\n"
 						"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 						"	vGlyphTexCoord = VertexTextureCoord;\n"
+						"   vOutputCoord = VertexPosition.xy;\n"
 						"}\n"),
 					GL_VERTEX_SHADER),
 				std::make_pair(
 					std::string(
 						"#version 130\n"
 						"uniform sampler2D glyphTexture;\n"
+						"uniform vec2 glyphOrigin;\n"
+						"uniform vec2 outputExtents;\n"
+						"uniform bool guiCoordinates;\n"
+						"uniform int effect;\n"
+						"uniform int effectWidth;\n"
+						"uniform vec4 effectRect;\n"
+						"uniform vec4 glyphRect;\n"
 						"in vec4 Color;\n"
 						"out vec4 FragColor;\n"
 						"varying vec2 vGlyphTexCoord;\n"
+						"varying vec2 vOutputCoord;\n"
+						"\n"
+						"int adjust_y(float y)\n"
+						"{\n"
+						"	if (guiCoordinates)\n"
+						"		return int(outputExtents.y) - 1 - int(y);\n"
+						"	else\n"
+						"		return int(y);\n"
+						"}\n"
+						"\n"
 						"void main()\n"
 						"{\n"
-						"   float a = texture(glyphTexture, vGlyphTexCoord).a;\n"
+						"	float a = 0.0;\n"
+						"	ivec2 dtpos = ivec2(vOutputCoord.x, adjust_y(vOutputCoord.y));\n"
+						"   switch(effect)\n"
+						"   {\n"
+						"   case 0:\n"
+						"	case 1:\n"
+						"		a = texture(glyphTexture, vGlyphTexCoord).a;\n"
+						"		break;\n"
+						"   case 2:\n"/* todo */
+						"		if (dtpos.x >= effectRect.x && dtpos.x < effectRect.z && dtpos.y >= adjust_y(effectRect.y) && dtpos.y < adjust_y(effectRect.w))\n"
+						"		{\n"
+						"			for (int y = -effectWidth; y <= effectWidth; ++y)\n"
+						"			{\n"
+						"				for (int x = -effectWidth; x <= effectWidth; ++x)\n"
+						"				{\n"
+						"					ivec2 pos = ivec2(dtpos.x + x, dtpos.y + y);\n"
+						"					if (pos.x >= glyphRect.x && pos.x < glyphRect.z && pos.y >= adjust_y(glyphRect.y) && pos.y < adjust_y(glyphRect.w))\n"
+						"					{\n"
+						"						ivec2 tpos = ivec2(x, y) + ivec2(pos.x - glyphRect.x, pos.y - adjust_y(glyphRect.y));\n"
+						"						float thisAlpha = texelFetch(glyphTexture, ivec2(glyphOrigin.x + tpos.x, glyphOrigin.y - (glyphRect.w - glyphRect.y) - tpos.y - 1), 0).a;\n"
+						"						a = max(a, thisAlpha);\n"
+						"					}\n"
+						"				}\n"
+						"			}\n"
+						"		}\n"
+						"		break;\n"
+						"   }\n"
 						"	FragColor = vec4(Color.xyz, Color.a * a);\n"
 						"}\n"),
 					GL_FRAGMENT_SHADER)
@@ -426,28 +487,65 @@ namespace neogfx
 						std::string(
 							"#version 150\n"
 							"uniform sampler2D glyphTexture;\n"
+							"uniform vec2 glyphOrigin;\n"
 							"uniform sampler2DMS outputTexture;\n"
 							"uniform vec2 outputExtents;\n"
 							"uniform bool guiCoordinates;\n"
+							"uniform int effect;\n"
+							"uniform int effectWidth;\n"
+							"uniform vec4 effectRect;\n"
+							"uniform vec4 glyphRect;\n"
 							"in vec4 Color;\n"
 							"out vec4 FragColor;\n"
 							"varying vec2 vGlyphTexCoord;\n"
 							"varying vec2 vOutputCoord;\n"
+							"\n"
+							"int adjust_y(float y)\n"
+							"{\n"
+							"	if (guiCoordinates)\n"
+							"		return int(outputExtents.y) - 1 - int(y);\n"
+							"	else\n"
+							"		return int(y);\n"
+							"}\n"
 							"void main()\n"
 							"{\n"
-							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-							"	if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
-							"		FragColor = Color;\n"
-							"	else if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
-							"		FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-							"	else\n"
+							"	ivec2 dtpos = ivec2(vOutputCoord);\n"
+							"	if (guiCoordinates)\n"
+							"		dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
+							"   switch(effect)\n"
 							"   {\n"
-							"		ivec2 dtpos = ivec2(vOutputCoord);\n"
-							"		if (guiCoordinates)\n"
-							"			dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
-							"		vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
-							"		FragColor = vec4(Color.rgb * rgbAlpha.rgb * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.rgb * Color.a), 1.0);\n"
-							"   }\n"
+							"   case 0:\n"
+							"	case 1:\n"
+							"		{\n"
+							"		 	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
+							"			if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
+							"				FragColor = Color;\n"
+							"			else if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
+							"				FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+							"			else\n"
+							"			{\n"
+							"				vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
+							"				FragColor = vec4(Color.rgb * rgbAlpha.rgb * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.rgb * Color.a), 1.0);\n"
+							"			}\n"
+							"		}\n"
+							"		break;\n"
+							"   case 2:\n"/* todo */
+							"		if (dtpos.x >= effectRect.x && dtpos.x < effectRect.z && dtpos.y >= adjust_y(effectRect.y) && dtpos.y < adjust_y(effectRect.w))\n"
+							"		{\n"
+							"			for (int y = int(dtpos.y) - effectWidth; y <= int(dtpos.y) + effectWidth; ++y)\n"
+							"				for (int x = int(dtpos.x) - effectWidth; x <= int(dtpos.x) + effectWidth; ++x)\n"
+							"					if (x >= glyphRect.x && x < glyphRect.z && y >= adjust_y(glyphRect.y) && y < adjust_y(glyphRect.w))\n"
+							"					{\n"
+							"						if (texelFetch(glyphTexture, ivec2(glyphOrigin) + ivec2(x, adjust_y(glyphRect.w) - y) - ivec2(glyphRect.x, adjust_y(glyphRect.y)), 0).rgb != vec3(0.0, 0.0, 0.0))\n"
+							"						{\n"
+							"							FragColor = Color.rgba;\n"
+							"							return;\n"
+							"						}\n"
+							"					}\n"
+							"		}\n"
+							"		FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+							"		break;\n"
+							"	}\n"
 							"}\n"),
 						GL_FRAGMENT_SHADER)
 					},
@@ -479,42 +577,79 @@ namespace neogfx
 						std::string(
 							"#version 150\n"
 							"uniform sampler2D glyphTexture;\n"
+							"uniform vec2 glyphOrigin;\n"
 							"uniform sampler2DMS outputTexture;\n"
 							"uniform vec2 outputExtents;\n"
 							"uniform bool guiCoordinates;\n"
+							"uniform int effect;\n"
+							"uniform int effectWidth;\n"
+							"uniform vec4 effectRect;\n"
+							"uniform vec4 glyphRect;\n"
 							"in vec4 Color;\n"
 							"out vec4 FragColor;\n"
 							"varying vec2 vGlyphTexCoord;\n"
 							"varying vec2 vOutputCoord;\n"
+							"\n"
+							"int adjust_y(float y)\n"
+							"{\n"
+							"	if (guiCoordinates)\n"
+							"		return int(outputExtents.y) - 1 - int(y);\n"
+							"	else\n"
+							"		return int(y);\n"
+							"}\n"
 							"void main()\n"
 							"{\n"
-							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-							"	if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
-							"		FragColor = Color;\n"
-							"	else if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
-							"		FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-							"	else\n"
+							"	ivec2 dtpos = ivec2(vOutputCoord);\n"
+							"	if (guiCoordinates)\n"
+							"		dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
+							"   switch(effect)\n"
 							"   {\n"
-							"		ivec2 dtpos = ivec2(vOutputCoord);\n"
-							"		if (guiCoordinates)\n"
-							"			dtpos.y = int(outputExtents.y) - 1 - dtpos.y;\n"
-							"		vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
-							"		FragColor = vec4(Color.rgb * rgbAlpha.bgr * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.bgr * Color.a), 1.0);\n"
+							"   case 0:\n"
+							"	case 1:\n"
+							"		{\n"
+							"			vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
+							"			if (rgbAlpha.rgb == vec3(1.0, 1.0, 1.0))\n"
+							"				FragColor = Color;\n"
+							"			else if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
+							"				FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+							"			else\n"
+							"			{\n"
+							"				vec4 rgbDestination = texelFetch(outputTexture, dtpos, 0);\n"
+							"				FragColor = vec4(Color.rgb * rgbAlpha.bgr * Color.a + rgbDestination.rgb * (vec3(1.0, 1.0, 1.0) - rgbAlpha.bgr * Color.a), 1.0);\n"
+							"			}\n"
+							"		}\n"
+							"		break;\n"
+							"   case 2:\n"/* todo */
+							"		if (dtpos.x >= effectRect.x && dtpos.x < effectRect.z && dtpos.y >= adjust_y(effectRect.y) && dtpos.y < adjust_y(effectRect.w))\n"
+							"		{\n"
+							"			for (int y = int(dtpos.y) - effectWidth; y <= int(dtpos.y) + effectWidth; ++y)\n"
+							"				for (int x = int(dtpos.x) - effectWidth; x <= int(dtpos.x) + effectWidth; ++x)\n"
+							"					if (x >= glyphRect.x && x < glyphRect.z && y >= adjust_y(glyphRect.y) && y < adjust_y(glyphRect.w))\n"
+							"					{\n"
+							"						if (texelFetch(glyphTexture, ivec2(glyphOrigin) + ivec2(x, adjust_y(glyphRect.w) - y) - ivec2(glyphRect.x, adjust_y(glyphRect.y)), 0).rgb != vec3(0.0, 0.0, 0.0))\n"
+							"						{\n"
+							"							FragColor = Color.rgba;\n"
+							"							return;\n"
+							"						}\n"
+							"					}\n"
+							"		}\n"
+							"		FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+							"		break;\n"
 							"	}\n"
 							"}\n"),
 						GL_FRAGMENT_SHADER)
 					},
 					{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 			break;
-		case i_screen_metrics::SubpixelFormatRGBVertical:
-		case i_screen_metrics::SubpixelFormatBGRVertical:
+		case i_screen_metrics::SubpixelFormatRGBVertical:/* todo */
+		case i_screen_metrics::SubpixelFormatBGRVertical:/* todo */
 		default:
 			iGlyphSubpixelProgram = create_shader_program(
 				shaders
 				{
 					std::make_pair(
 						std::string(
-							"#version 130\n"
+							"#version 130\n"/* todo */
 							"uniform mat4 uProjectionMatrix;\n"
 							"in vec3 VertexPosition;\n"
 							"in vec4 VertexColor;\n"
@@ -530,8 +665,9 @@ namespace neogfx
 						GL_VERTEX_SHADER),
 					std::make_pair(
 						std::string(
-							"#version 130\n"
+							"#version 130\n"/* todo */
 							"uniform sampler2D glyphTexture;\n"
+							"uniform vec2 glyphOrigin;\n"
 							"uniform sampler2D glyphDestinationTexture;\n"
 							"uniform vec2 glyphTextureOffset;\n"
 							"uniform vec2 glyphTextureExtents;\n"

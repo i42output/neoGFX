@@ -356,6 +356,9 @@ namespace neogfx
 				for (auto& op : opBatch)
 					clear(static_variant_cast<const graphics_operation::clear&>(op).colour);
 				break;
+			case graphics_operation::operation_type::ClearDepthBuffer:
+				clear_depth_buffer();
+				break;
 			case graphics_operation::operation_type::SetPixel:
 				for (auto& op : opBatch)
 					set_pixel(static_variant_cast<const graphics_operation::set_pixel&>(op).point, static_variant_cast<const graphics_operation::set_pixel&>(op).colour);
@@ -719,6 +722,11 @@ namespace neogfx
 	{
 		disable_anti_alias daa(*this);
 		fill_rect(rendering_area(), aColour);
+	}
+
+	void opengl_graphics_context::clear_depth_buffer()
+	{
+		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
 	}
 
 	void opengl_graphics_context::set_pixel(const point& aPoint, const colour& aColour)
@@ -1192,36 +1200,74 @@ namespace neogfx
 		iVertexArrays.colours().clear();
 		iVertexArrays.texture_coords().clear();
 
-		for (const auto& op : aDrawGlyphOps)
+		for (uint32_t pass = 1; pass <= 2; ++pass)
 		{
-			auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(op);
-
-			if (drawOp.glyph.is_whitespace())
-				continue;
-
-			const i_glyph_texture& glyphTexture = !drawOp.glyph.use_fallback() ? drawOp.font.native_font_face().glyph_texture(drawOp.glyph) : drawOp.glyph.fallback_font(drawOp.font).native_font_face().glyph_texture(drawOp.glyph);
-
-			point glyphOrigin(drawOp.point.x + glyphTexture.placement().x,
-				logical_coordinates().first.y < logical_coordinates().second.y ? 
-					drawOp.point.y + (glyphTexture.placement().y + -drawOp.font.descender()) :
-					drawOp.point.y + drawOp.font.height() - (glyphTexture.placement().y + -drawOp.font.descender()) - glyphTexture.texture().extents().cy);
-
-			iVertexArrays.vertices().insert(iVertexArrays.vertices().end(),
+			for (const auto& op : aDrawGlyphOps)
 			{
-				to_shader_vertex(glyphOrigin),
-				to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, 0.0 }),
-				to_shader_vertex(glyphOrigin + point{ glyphTexture.texture().extents().cx, glyphTexture.texture().extents().cy }),
-				to_shader_vertex(glyphOrigin + point{ 0.0, glyphTexture.texture().extents().cy })
-			});
-			iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4,  drawOp.appearance.ink().is<colour>() ?
-				std::array <uint8_t, 4>{{
-					static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
-					static_variant_cast<const colour&>(drawOp.appearance.ink()).green(),
-					static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
-					static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
-				std::array <uint8_t, 4>{});
-			auto textureCoords = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates());
-			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
+				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(op);
+
+				if (drawOp.glyph.is_whitespace())
+					continue;
+
+				const i_glyph_texture& glyphTexture = !drawOp.glyph.use_fallback() ? drawOp.font.native_font_face().glyph_texture(drawOp.glyph) : drawOp.glyph.fallback_font(drawOp.font).native_font_face().glyph_texture(drawOp.glyph);
+
+				point glyphOrigin(drawOp.point.x + glyphTexture.placement().x,
+					logical_coordinates().first.y < logical_coordinates().second.y ? 
+						drawOp.point.y + (glyphTexture.placement().y + -drawOp.font.descender()) :
+						drawOp.point.y + drawOp.font.height() - (glyphTexture.placement().y + -drawOp.font.descender()) - glyphTexture.texture().extents().cy);
+
+				auto textureCoords = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates());
+
+				rect outputRect{ glyphOrigin, glyphTexture.texture().extents() };
+
+				if (drawOp.appearance.has_effect() && pass == 1)
+				{
+					if (drawOp.appearance.effect().type() == text_effect::Outline)
+					{
+						for (double y = -drawOp.appearance.effect().width(); y <= drawOp.appearance.effect().width(); y += 1.0)
+						{
+							for (double x = -drawOp.appearance.effect().width(); x <= drawOp.appearance.effect().width(); x += 1.0)
+							{
+								rect effectRect = outputRect + point{ x, y };
+				
+								iVertexArrays.vertices().insert(iVertexArrays.vertices().end(),
+								{
+									to_shader_vertex(effectRect.top_left()),
+									to_shader_vertex(effectRect.top_right()),
+									to_shader_vertex(effectRect.bottom_right()),
+									to_shader_vertex(effectRect.bottom_left())
+								});
+								iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4, drawOp.appearance.effect().colour().is<colour>() ?
+									std::array <uint8_t, 4>{ {
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green(),
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
+									std::array <uint8_t, 4>{});
+								iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
+							}
+						}
+					}
+				}
+				else if (pass == 2)
+				{
+					iVertexArrays.vertices().insert(iVertexArrays.vertices().end(),
+					{
+						to_shader_vertex(outputRect.top_left()),
+						to_shader_vertex(outputRect.top_right()),
+						to_shader_vertex(outputRect.bottom_right()),
+						to_shader_vertex(outputRect.bottom_left())
+					});
+					iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4,  drawOp.appearance.ink().is<colour>() ?
+						std::array <uint8_t, 4>{{
+							static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
+							static_variant_cast<const colour&>(drawOp.appearance.ink()).green(),
+							static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
+							static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
+						std::array <uint8_t, 4>{});
+					iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
+				}
+			}
 		}
 
 		if (iVertexArrays.vertices().empty())
@@ -1244,7 +1290,14 @@ namespace neogfx
 		const i_glyph_texture& firstGlyphTexture = !firstOp.glyph.use_fallback() ? firstOp.font.native_font_face().glyph_texture(firstOp.glyph) : firstOp.glyph.fallback_font(firstOp.font).native_font_face().glyph_texture(firstOp.glyph);
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
 
-		iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()).set_uniform_variable("glyphTexture", 1);
+		auto& shader = iRenderingEngine.active_shader_program();
+
+		bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
+		shader.set_uniform_variable("guiCoordinates", guiCoordinates);
+		shader.set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
+
+		shader.set_uniform_variable("glyphTexture", 1);
+
 		if (firstOp.glyph.subpixel())
 		{
 			glCheck(glActiveTexture(GL_TEXTURE2));
@@ -1252,25 +1305,65 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSurface.rendering_target_texture_handle())));
 			glCheck(glActiveTexture(GL_TEXTURE1));
 			glCheck(glClientActiveTexture(GL_TEXTURE1));
-			iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()).set_uniform_variable("guiCoordinates", logical_coordinates().first.y > logical_coordinates().second.y);
-			iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()).set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
-			iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel()).set_uniform_variable("outputTexture", 2);
+			shader.set_uniform_variable("outputTexture", 2);
 		}
 
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 		disable_anti_alias daa(*this);
-		if (!firstOp.glyph.subpixel())
+		std::size_t index = 0;
+		for (uint32_t pass = 1; pass <= 2; ++pass)
 		{
-			glCheck(glDrawArrays(GL_QUADS, 0, iVertexArrays.vertices().size()));
-		}
-		else
-		{
-			for (std::size_t i = 0; i < iVertexArrays.vertices().size(); i += 4)
+			for (const auto& op : aDrawGlyphOps)
 			{
-				glCheck(glTextureBarrierNV());
-				glCheck(glDrawArrays(GL_QUADS, i, 4));
+				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(op);
+
+				if (drawOp.glyph.is_whitespace())
+					continue;
+
+				if (firstOp.glyph.subpixel())
+				{
+					glCheck(glTextureBarrierNV());
+				}
+
+				if (drawOp.appearance.has_effect() && pass == 1)
+				{
+					shader.set_uniform_variable("effect", static_cast<int>(drawOp.appearance.effect().type()));
+					if (drawOp.appearance.effect().type() == text_effect::Outline)
+					{
+						GLsizei n = static_cast<GLsizei>(std::pow(drawOp.appearance.effect().width() * 2.0 + 1.0, 2.0));
+						glCheck(glDrawArrays(GL_QUADS, index, n * 4));
+						index += (n * 4);
+					}
+					else if (drawOp.appearance.effect().type() == text_effect::Glow || drawOp.appearance.effect().type() == text_effect::Shadow)
+					{
+						const i_glyph_texture& glyphTexture = !drawOp.glyph.use_fallback() ? drawOp.font.native_font_face().glyph_texture(drawOp.glyph) : drawOp.glyph.fallback_font(drawOp.font).native_font_face().glyph_texture(drawOp.glyph);
+						shader.set_uniform_variable("glyphOrigin",
+							static_cast<float>(iVertexArrays.texture_coords()[index][0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
+							static_cast<float>(iVertexArrays.texture_coords()[index][1] * glyphTexture.texture().atlas_texture().storage_extents().cy));
+
+						if (guiCoordinates)
+						{
+							shader.set_uniform_variable("effectRect", vec4f{ vec4{ iVertexArrays.vertices()[index][0], iVertexArrays.vertices()[index + 2][1] - 1.0, iVertexArrays.vertices()[index + 2][0], iVertexArrays.vertices()[index][1] - 1.0 } });
+							shader.set_uniform_variable("glyphRect", vec4f{ vec4{ iVertexArrays.vertices()[index + 4][0], iVertexArrays.vertices()[index + 4 + 2][1] - 1.0, iVertexArrays.vertices()[index + 4 + 2][0], iVertexArrays.vertices()[index + 4][1] - 1.0 } });
+						}
+						else
+						{
+							shader.set_uniform_variable("effectRect", vec4f{ vec4{ iVertexArrays.vertices()[index][0], iVertexArrays.vertices()[index][1], iVertexArrays.vertices()[index + 2][0], iVertexArrays.vertices()[index + 2][1] } });
+							shader.set_uniform_variable("glyphRect", vec4f{ vec4{ iVertexArrays.vertices()[index + 4][0], iVertexArrays.vertices()[index + 4][1], iVertexArrays.vertices()[index + 4 + 2][0], iVertexArrays.vertices()[index + 4 + 2][1] } });
+						}
+						shader.set_uniform_variable("effectWidth", static_cast<int>(drawOp.appearance.effect().width()));
+						glCheck(glDrawArrays(GL_QUADS, index, 4));
+						index += 4;
+					}
+				}
+				else if (pass == 2)
+				{
+					shader.set_uniform_variable("effect", 0);
+					glCheck(glDrawArrays(GL_QUADS, index, 4));
+					index += 4;
+				}
 			}
 		}
 
@@ -1335,9 +1428,9 @@ namespace neogfx
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 
-	opengl_graphics_context::vertex opengl_graphics_context::to_shader_vertex(const point& aPoint) const
+	opengl_graphics_context::vertex opengl_graphics_context::to_shader_vertex(const point& aPoint, coordinate aZ) const
 	{
-		return vertex{{aPoint.x, aPoint.y, 0.0}};
+		return vertex{{ aPoint.x, aPoint.y, aZ }};
 	}
 
 }

@@ -88,6 +88,7 @@ namespace neogfx
 		void subpixel_rendering_on();
 		void subpixel_rendering_off();
 		void clear(const colour& aColour);
+		void clear_depth_buffer();
 		void set_pixel(const point& aPoint, const colour& aColour);
 		void draw_pixel(const point& aPoint, const colour& aColour);
 		void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
@@ -111,7 +112,7 @@ namespace neogfx
 		void apply_logical_operation();
 		void gradient_on(const gradient& aGradient, const rect& aBoundingBox);
 		void gradient_off();
-		vertex to_shader_vertex(const point& aPoint) const;
+		vertex to_shader_vertex(const point& aPoint, coordinate aZ = 0.0) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		const i_native_surface& iSurface;
