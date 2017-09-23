@@ -53,7 +53,7 @@ namespace neogfx
 				const optional_font& aFont,
 				const colour_or_gradient& aTextColour = colour_or_gradient{},
 				const colour_or_gradient& aBackgroundColour = colour_or_gradient{},
-				const colour_or_gradient& aTextOutlineColour = colour_or_gradient{});
+				const optional_text_effect& aTextEffect = optional_text_effect{});
 			style(
 				text_edit& aParent,
 				const style& aOther);
@@ -64,11 +64,11 @@ namespace neogfx
 			const optional_font& font() const;
 			const colour_or_gradient& text_colour() const;
 			const colour_or_gradient& background_colour() const;
-			const colour_or_gradient& text_outline_colour() const;
+			const optional_text_effect& text_effect() const;
 			void set_font(const optional_font& aFont = optional_font{});
 			void set_text_colour(const colour_or_gradient& aColour = colour_or_gradient{});
 			void set_background_colour(const colour_or_gradient& aColour = colour_or_gradient{});
-			void set_text_outline_colour(const colour_or_gradient& aColour = colour_or_gradient{});
+			void set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
 		public:
 			style& merge(const style& aOverridingStyle);
 		public:
@@ -81,7 +81,7 @@ namespace neogfx
 			optional_font iFont;
 			colour_or_gradient iTextColour;
 			colour_or_gradient iBackgroundColour;
-			colour_or_gradient iTextOutlineColour;
+			optional_text_effect iTextEffect;
 		};
 		typedef std::set<style> style_list;
 		class column_info
@@ -329,8 +329,8 @@ namespace neogfx
 						const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iParent->default_style();
 						auto& glyphFont = style.font() != boost::none ? *style.font() : iParent->font();
 						dimension cy = !glyph.use_fallback() ? glyphFont.height() : glyph.fallback_font(glyphFont).height();
-						if (!style.text_outline_colour().empty())
-							cy += 2.0;
+						if (style.text_effect() != boost::none && style.text_effect()->type() == text_effect::Outline)
+							cy += (style.text_effect()->width() * 2.0);
 						if (i == glyphsStartIndex || cy != previousHeight)
 						{
 							iHeights[i] = cy;

@@ -94,6 +94,19 @@ namespace neogfx
 		{
 		}
 	public:
+		bool operator==(const text_effect& aOther) const
+		{
+			return iType == aOther.iType && iColour == aOther.iColour && iWidth == aOther.iWidth;
+		}
+		bool operator!=(const text_effect& aOther) const
+		{
+			return iType != aOther.iType || iColour != aOther.iColour || iWidth != aOther.iWidth;
+		}
+		bool operator<(const text_effect& aRhs) const
+		{
+			return std::tie(iType, iColour, iWidth) < std::tie(aRhs.iType, aRhs.iColour, aRhs.iWidth);
+		}
+	public:
 		type_e type() const
 		{
 			return iType;
@@ -109,10 +122,12 @@ namespace neogfx
 			switch (type())
 			{
 			case None:
+			default:
 				return 0.0;
 			case Outline:
 				return 1.0;
-			default:
+			case Glow:
+			case Shadow:
 				return 5.0;
 			}
 		}

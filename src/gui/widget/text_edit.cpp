@@ -34,13 +34,13 @@ namespace neogfx
 		const optional_font& aFont,
 		const colour_or_gradient& aTextColour,
 		const colour_or_gradient& aBackgroundColour,
-		const colour_or_gradient& aTextOutlineColour) :
+		const optional_text_effect& aTextEffect) :
 		iParent(nullptr),
 		iUseCount(0),
 		iFont(aFont),
 		iTextColour(aTextColour),
 		iBackgroundColour(aBackgroundColour),
-		iTextOutlineColour(aTextOutlineColour)
+		iTextEffect(aTextEffect)
 	{
 	}
 
@@ -52,7 +52,7 @@ namespace neogfx
 		iFont(aOther.iFont),
 		iTextColour(aOther.iTextColour),
 		iBackgroundColour(aOther.iBackgroundColour),
-		iTextOutlineColour(aOther.iTextOutlineColour)
+		iTextEffect(aOther.iTextEffect)
 	{
 	}
 
@@ -82,9 +82,9 @@ namespace neogfx
 		return iBackgroundColour;
 	}
 
-	const colour_or_gradient& text_edit::style::text_outline_colour() const
+	const optional_text_effect& text_edit::style::text_effect() const
 	{
-		return iTextOutlineColour;
+		return iTextEffect;
 	}
 
 	void text_edit::style::set_font(const optional_font& aFont)
@@ -102,9 +102,9 @@ namespace neogfx
 		iBackgroundColour = aColour;
 	}
 
-	void text_edit::style::set_text_outline_colour(const colour_or_gradient& aColour)
+	void text_edit::style::set_text_effect(const optional_text_effect& aEffect)
 	{
-		iTextOutlineColour = aColour;
+		iTextEffect = aEffect;
 	}
 
 	text_edit::style& text_edit::style::merge(const style& aOverridingStyle)
@@ -115,14 +115,14 @@ namespace neogfx
 			iTextColour = aOverridingStyle.text_colour();
 		if (aOverridingStyle.background_colour() != boost::none)
 			iBackgroundColour = aOverridingStyle.background_colour();
-		if (aOverridingStyle.text_outline_colour() != boost::none)
-			iTextOutlineColour = aOverridingStyle.text_outline_colour();
+		if (aOverridingStyle.text_effect() != boost::none)
+			iTextEffect = aOverridingStyle.text_effect();
 		return *this;
 	}
 
 	bool text_edit::style::operator==(const style& aRhs) const
 	{
-		return std::tie(iFont, iTextColour, iBackgroundColour, iTextOutlineColour) == std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextOutlineColour);
+		return std::tie(iFont, iTextColour, iBackgroundColour, iTextEffect) == std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextEffect);
 	}
 
 	bool text_edit::style::operator!=(const style& aRhs) const
@@ -132,7 +132,7 @@ namespace neogfx
 
 	bool text_edit::style::operator<(const style& aRhs) const
 	{
-		return std::tie(iFont, iTextColour, iBackgroundColour, iTextOutlineColour) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextOutlineColour);
+		return std::tie(iFont, iTextColour, iBackgroundColour, iTextEffect) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextEffect);
 	}
 
 	text_edit::text_edit(type_e aType) :
@@ -857,9 +857,9 @@ namespace neogfx
 	void text_edit::set_default_style(const style& aDefaultStyle, bool aPersist)
 	{
 		neogfx::font oldFont = font();
-		auto oldOutline = iDefaultStyle.text_outline_colour().empty();
+		auto oldEffect = (iDefaultStyle.text_effect() == boost::none);
 		iDefaultStyle = aDefaultStyle;
-		if (oldFont != font() || oldOutline != iDefaultStyle.text_outline_colour().empty())
+		if (oldFont != font() || oldEffect != (iDefaultStyle.text_effect() == boost::none))
 			refresh_paragraph(iText.begin(), 0);
 		iPersistDefaultStyle = aPersist;
 		update();
@@ -1657,7 +1657,7 @@ namespace neogfx
 		if (lineEnd != lineStart && (lineEnd - 1)->is_line_breaking_whitespace())
 			--lineEnd;
 		{
-			bool outlinesPresent = false;
+			dimension outlineAdjust = 0.0;
 			for (uint32_t pass = 0; pass <= 1; ++pass)
 			{
 				point pos = aPoint;
@@ -1680,24 +1680,21 @@ namespace neogfx
 								has_focus() ? 
 									app::instance().current_style().palette().selection_colour() : 
 									app::instance().current_style().palette().selection_colour().with_alpha(64));
-						if (!style.text_outline_colour().empty())
-							outlinesPresent = true;
+						if (style.text_effect() != boost::none && style.text_effect()->type() == text_effect::Outline)
+							outlineAdjust = std::max(outlineAdjust, style.text_effect()->width());
 						break;
 					case 1:
-						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - (outlinesPresent ? 1.0 : 0.0) }, glyph,
+						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - outlineAdjust }, glyph,
 							glyphFont,
 							selected && has_focus() ?
-							text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
-							text_appearance{
-								style.text_colour().is<colour>() ?
-									static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ?
-										static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
-										default_text_colour(),
-								style.text_outline_colour().is<colour>() ?
-									text_effect{text_effect::Outline, static_variant_cast<const colour&>(style.text_outline_colour())} : style.text_outline_colour().is<gradient>() ? 
-										text_effect{text_effect::Outline, static_variant_cast<const gradient&>(style.text_outline_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) /
-											std::max(client_rect(false).width(), iTextExtents.cx))} :
-										optional_text_effect{}});
+								text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
+								text_appearance{
+									style.text_colour().is<colour>() ?
+										static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ?
+											static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
+											default_text_colour(),
+									!style.background_colour().empty() ? optional_text_colour{ style.background_colour() } : optional_text_colour{},
+									style.text_effect() });
 						break;
 					}
 					pos.x += glyph.advance().cx;

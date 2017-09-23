@@ -117,7 +117,7 @@ public:
 			if (aNumber == 9)
 				iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
 			else if (aNumber == 8)
-				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::colour_or_gradient{}, ng::colour::White }, true);
+				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect::Outline, ng::colour::White } }, true);
 			else if (aNumber == 0)
 				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::colour::White }, true);
 			else
@@ -443,7 +443,7 @@ int main(int argc, char* argv[])
 			gw.gradient_changed([&gw, &textEdit]()
 			{
 				auto cs = textEdit.column(2);
-				cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::colour_or_gradient{gw.gradient()} });
+				cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect::Outline, gw.gradient() } });
 				textEdit.set_column(2, cs);
 			}, textEdit);
 		});
@@ -492,12 +492,30 @@ int main(int argc, char* argv[])
 		layoutEffects.set_margins(ng::margins{});
 		ng::radio_button editNormal{ layoutEffects, "normal" };
 		ng::radio_button editOutline{ layoutEffects, "outline" };
-		ng::radio_button editShadow{ layoutEffects, "shadow" };
 		ng::radio_button editGlow{ layoutEffects, "glow" };
-		editOutline.toggled([&]()
+		ng::radio_button editShadow{ layoutEffects, "shadow" };
+		editNormal.checked([&]()
 		{
 			auto s = textEdit.default_style();
-			s.set_text_outline_colour(editOutline.is_checked() ? ng::colour_or_gradient{ ng::colour::White } : ng::colour_or_gradient{});
+			s.set_text_effect(ng::optional_text_effect{});
+			textEdit.set_default_style(s, true);
+		});
+		editOutline.checked([&]()
+		{
+			auto s = textEdit.default_style();
+			s.set_text_effect(ng::text_effect{ ng::text_effect::Outline, ng::colour::White });
+			textEdit.set_default_style(s, true);
+		});
+		editGlow.checked([&]()
+		{
+			auto s = textEdit.default_style();
+			s.set_text_effect(ng::text_effect{ ng::text_effect::Glow, ng::colour::Orange.with_lightness(0.8) });
+			textEdit.set_default_style(s, true);
+		});
+		editShadow.checked([&]()
+		{
+			auto s = textEdit.default_style();
+			s.set_text_effect(ng::text_effect{ ng::text_effect::Shadow, ng::colour::Black });
 			textEdit.set_default_style(s, true);
 		});
 		ng::radio_button radio1(layout4, "Radio 1");
