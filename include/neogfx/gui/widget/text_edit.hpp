@@ -344,6 +344,8 @@ namespace neogfx
 				if (start != iHeights.begin() && aStart < iParent->iGlyphs.begin() + start->first)
 					--start;
 				auto stop = iHeights.lower_bound(aEnd - iParent->iGlyphs.begin());
+				if (start == stop && stop != iHeights.end())
+					++stop;
 				for (auto i = start; i != stop; ++i)
 					result = std::max(result, (*i).second);
 				return result;
