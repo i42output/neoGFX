@@ -106,10 +106,8 @@ namespace neogfx
 				else
 					set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
 			}
-			else if (bar_box().contains(aPosition))
-			{
+			else
 				set_normalized_value(normalized_value_from_position(aPosition));
-			}
 		}
 	}
 
