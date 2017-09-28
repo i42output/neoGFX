@@ -169,7 +169,12 @@ namespace neogfx
 	template <typename T>
 	inline void basic_spin_box<T>::set_normalized_value(double aValue, bool aUpdateTextBox = false)
 	{
-		aValue = std::max(0.0, std::min(1.0, aValue));
+		double const stepValue = normalized_step_value();
+		double steps = 0.0;
+		auto r = std::modf(aValue / stepValue, &steps);
+		if (r > stepValue / 2.0)
+			steps += 1.0;
+		aValue = std::max(0.0, std::min(1.0, steps * stepValue));
 		iSettingNormalizedValue = true;
 		auto range = maximum() - minimum();
 		auto denormalized = range * aValue + minimum();

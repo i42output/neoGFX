@@ -124,10 +124,14 @@ namespace neogfx
 	template <typename T>
 	inline void basic_slider<T>::set_normalized_value(double aValue)
 	{
-		aValue -= std::fmod(aValue, normalized_step_value());
-		aValue = std::max(0.0, std::min(1.0, aValue));
+		double const stepValue = normalized_step_value();
+		double steps = 0.0;
+		auto r = std::modf(aValue / stepValue, &steps);
+		if (r > stepValue / 2.0)
+			steps += 1.0;
+		aValue = std::max(0.0, std::min(1.0, steps * stepValue));
 		neolib::scoped_flag sf{ iSettingNormalizedValue };
-		auto range = maximum() - minimum();
+		auto const range = maximum() - minimum();
 		auto denormalized = range * aValue + minimum();
 		if (std::is_integral<value_type>())
 		{

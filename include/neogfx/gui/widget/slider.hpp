@@ -58,6 +58,8 @@ namespace neogfx
 		void init();
 		rect bar_box() const;
 		rect indicator_box() const;
+		double normalized_value_from_position(const point& aPosition) const;
+		point normalized_value_to_position(double aValue) const;
 	private:
 		type_e iType;
 		double iNormalizedValue;

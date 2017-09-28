@@ -55,7 +55,7 @@ namespace neogfx
 		if (has_minimum_size())
 			return widget::minimum_size(aAvailableSpace);
 		scoped_units su{ *this, units::Pixels };
-		return convert_units(*this, su.saved_units(), size{ 96, 22 });
+		return convert_units(*this, su.saved_units(), iType == Horizontal ? size{ 96, 22 } : size{ 22, 96 });
 	}
 
 	void slider_impl::paint(graphics_context& aGraphicsContext) const
@@ -64,12 +64,20 @@ namespace neogfx
 		rect rectBarBox = bar_box();
 		colour ink = background_colour().light(0x80) ? background_colour().darker(0x80) : background_colour().lighter(0x80);
 		aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink);
-		rectBarBox.deflate(size{1.0, 1.0});
+		rectBarBox.inflate(size{ 1.0, 1.0 });
 		aGraphicsContext.fill_rounded_rect(rectBarBox, 2.0, ink.mid(background_colour()));
-		rect rectValue = rectBarBox;
-		rectValue.cx = rectValue.width() * normalized_value();
+		rectBarBox.deflate(size{ 1.0, 1.0 });
+		point selection = normalized_value_to_position(normalized_value());
+		rect selectionRect = rectBarBox;
+		if (iType == Horizontal)
+			selectionRect.cx = selection.x - selectionRect.x;
+		else
+		{
+			selectionRect.cy = selectionRect.bottom() - selection.y;
+			selectionRect.y = selection.y;
+		}
 		if (normalized_value() > 0.0)
-			aGraphicsContext.fill_rounded_rect(rectValue, 2.0, app::instance().current_style().palette().selection_colour());
+			aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, app::instance().current_style().palette().selection_colour());
 		rect rectIndicator = indicator_box();
 		colour indicatorColour = foreground_colour();
 		if (iDragOffset != boost::none)
@@ -93,11 +101,14 @@ namespace neogfx
 			if (indicator_box().contains(aPosition))
 			{
 				iDragOffset = aPosition - indicator_box().centre();
-				set_normalized_value(std::max(0.0, std::min(aPosition.x - bar_box().x - iDragOffset->x, bar_box().right())) / bar_box().cx);
+				if (iType == Horizontal)
+					set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
+				else
+					set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
 			}
 			else if (bar_box().contains(aPosition))
 			{
-				set_normalized_value(std::max(0.0, std::min(aPosition.x - bar_box().x, bar_box().right())) / bar_box().cx);
+				set_normalized_value(normalized_value_from_position(aPosition));
 			}
 		}
 	}
@@ -131,7 +142,12 @@ namespace neogfx
 	{
 		widget::mouse_moved(aPosition);
 		if (iDragOffset != boost::none)
-			set_normalized_value(std::max(0.0, std::min(aPosition.x - bar_box().x - iDragOffset->x, bar_box().right())) / bar_box().cx);
+		{
+			if (iType == Horizontal)
+				set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));
+			else
+				set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
+		}
 	}
 
 	void slider_impl::set_normalized_value(double aValue)
@@ -165,16 +181,33 @@ namespace neogfx
 	rect slider_impl::bar_box() const
 	{
 		rect result = client_rect(false);
-		result.deflate(size{ std::ceil(result.height() / 2.5) });
+		result.deflate(size{ std::ceil((iType == Horizontal ? result.height() : result.width()) / 2.5) });
+		result.deflate(size{ 1.0, 1.0 });
 		return result;
 	}
 
 	rect slider_impl::indicator_box() const
 	{
-		rect rectBarBox = bar_box();
-		rect result{ point{ rectBarBox.x + rectBarBox.cx * normalized_value(), rectBarBox.centre().y}, size{} };
-		result.inflate(size{ std::ceil(client_rect(false).height() / 3.0) });
+		rect result{ normalized_value_to_position(normalized_value()), size{} };
+		result.inflate(size{ std::ceil((iType == Horizontal ? client_rect(false).height() : client_rect(false).width()) / 3.0) });
 		return result;
+	}
+
+	double slider_impl::normalized_value_from_position(const point& aPosition) const
+	{
+		if (iType == Horizontal)
+			return std::max(0.0, std::min(aPosition.x - bar_box().x, bar_box().right())) / bar_box().cx;
+		else
+			return 1.0 - std::max(0.0, std::min(aPosition.y - bar_box().y, bar_box().bottom())) / bar_box().cy;
+	}
+
+	point slider_impl::normalized_value_to_position(double aValue) const
+	{
+		const rect rectBarBox = bar_box();
+		if (iType == Horizontal)
+			return point{ rectBarBox.x + rectBarBox.cx * aValue, rectBarBox.centre().y };
+		else
+			return point{ rectBarBox.centre().x, rectBarBox.y + rectBarBox.cy * (1.0 - aValue) };
 	}
 }
 
