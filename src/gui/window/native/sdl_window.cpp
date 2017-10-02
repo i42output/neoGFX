@@ -513,6 +513,11 @@ namespace neogfx
 #endif
 	}
 
+	void sdl_window::set_transparency(double aAlpha)
+	{
+		SDL_SetWindowOpacity(iHandle, static_cast<float>(aAlpha));
+	}
+
 	bool sdl_window::is_active() const
 	{
 		return SDL_GetKeyboardFocus() == iHandle;
@@ -675,6 +680,13 @@ namespace neogfx
 				result = MA_NOACTIVATE;
 			else
 				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			break;
+		case WM_CAPTURECHANGED:
+			if (mapEntry->second->window().has_capturing_widget())
+				mapEntry->second->window().release_capture(mapEntry->second->window().capturing_widget());
+			else
+				mapEntry->second->release_capture();
+			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
 			break;
 		default:
 			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);

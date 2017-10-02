@@ -81,6 +81,13 @@ namespace neogfx
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
 		if (iSystemCacheWindowHandle == 0)
 			throw failed_to_create_system_cache_window(SDL_GetError());
+		iContext = create_context(iSystemCacheWindowHandle);
+		SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), iContext);
+		glCheck(glEnable(GL_TEXTURE_2D));
+		glCheck(glEnable(GL_MULTISAMPLE));
+		glCheck(glEnable(GL_BLEND));
+		glCheck(glEnable(GL_DEPTH_TEST));
+		glCheck(glDepthFunc(GL_LEQUAL));
 	}
 
 	sdl_renderer::~sdl_renderer()
@@ -125,7 +132,7 @@ namespace neogfx
 
 	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_native_surface& aSurface)
 	{
-		return SDL_GL_CreateContext(static_cast<SDL_Window*>(aSurface.handle()));
+		return create_context(aSurface.handle());
 	}
 
 	void sdl_renderer::destroy_context(opengl_context aContext)
@@ -199,6 +206,11 @@ namespace neogfx
 			return opengl_renderer::process_events();
 		else
 			return false;
+	}
+
+	sdl_renderer::opengl_context sdl_renderer::create_context(void* aNativeSurfaceHandle)
+	{
+		return SDL_GL_CreateContext(static_cast<SDL_Window*>(aNativeSurfaceHandle));
 	}
 
 	bool sdl_renderer::queue_events()

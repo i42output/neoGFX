@@ -154,6 +154,8 @@ int main(int argc, char* argv[])
 			output << "\t\t}" << std::endl;
 			output << "\t} sData;" << std::endl;
 			output << "}" << std::endl;
+			if (input.root().has_attribute("ref"))
+				output << "void* " << input.root().attribute_value("ref") << " = &sData;" << std::endl;
 			output << "}" << std::endl;
 		}
 	}

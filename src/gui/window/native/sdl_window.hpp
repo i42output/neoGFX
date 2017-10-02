@@ -96,6 +96,7 @@ namespace neogfx
 		bool is_visible() const override;
 		void show(bool aActivate = false) override;
 		void hide() override;
+		void set_transparency(double aAlpha) override;
 		bool is_active() const override;
 		void activate() override;
 		bool is_enabled() const override;

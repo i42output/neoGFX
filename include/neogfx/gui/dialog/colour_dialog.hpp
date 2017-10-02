@@ -163,6 +163,9 @@ namespace neogfx
 		void select_colour(const colour& aColour);
 		const custom_colour_list& custom_colours() const;
 		custom_colour_list& custom_colours();
+	protected:
+		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		neogfx::mouse_cursor mouse_cursor() const override;
 	private:
 		void init();
 		mode_e current_mode() const;
@@ -181,6 +184,7 @@ namespace neogfx
 		custom_colour_list iCustomColours;
 		custom_colour_list::iterator iCurrentCustomColour;
 		bool iUpdatingWidgets;
+		bool iScreenPickerActive;
 		vertical_layout iLayout;
 		horizontal_layout iLayout2;
 		vertical_layout iLeftLayout;
@@ -188,6 +192,7 @@ namespace neogfx
 		horizontal_layout iRightTopLayout;
 		horizontal_layout iRightBottomLayout;
 		colour_selection iColourSelection;
+		push_button iScreenPicker;
 		grid_layout iChannelLayout;
 		label iBasicColoursLabel;
 		grid_layout iBasicColoursLayout;

@@ -589,6 +589,11 @@ namespace neogfx
 			centre();
 	}
 
+	void window::set_transparency(double aAlpha)
+	{
+		native_window().set_transparency(aAlpha);
+	}
+
 	point window::mouse_position() const
 	{
 		return native_surface().mouse_position();

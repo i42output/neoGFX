@@ -57,6 +57,7 @@ namespace neogfx
 	public:
 		virtual bool process_events();
 	private:
+		opengl_context create_context(void* aNativeSurfaceHandle);
 		bool queue_events();
 	private:
 		bool iDoubleBuffering;

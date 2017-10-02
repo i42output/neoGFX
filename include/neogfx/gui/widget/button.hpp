@@ -33,6 +33,7 @@ namespace neogfx
 	public:
 		event<> pressed;
 		event<> clicked;
+		event<> async_clicked;
 		event<> double_clicked;
 		event<> right_clicked;
 		event<> released;

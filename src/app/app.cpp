@@ -18,13 +18,22 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <string>
 #include <atomic>
 #include <boost/locale.hpp> 
+#include <neogfx/gfx/image.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/app/resource_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include "../gui/window/native/i_native_window.hpp"
+
+namespace nrc
+{
+	// we need to explicitly reference the resource object here otherwise the resource object file will be omitted at link stage when linking with neoGFX (as a static .lib).
+	extern void* neogfx_icons;
+	void* ref_neogfx_icons = neogfx_icons; 
+}
 
 namespace neogfx
 {
@@ -90,18 +99,18 @@ namespace neogfx
 		iRenderingEngine{ aServiceFactory.create_rendering_engine(iProgramOptions.renderer(), iProgramOptions.double_buffering(), basic_services(), keyboard()) },
 		iSurfaceManager{ new neogfx::surface_manager(basic_services(), *iRenderingEngine) },
 		iCurrentStyle{ iStyles.begin() },
-		iActionFileNew{ add_action("&New...").set_shortcut("Ctrl+Shift+N") },
-		iActionFileOpen{ add_action("&Open...").set_shortcut("Ctrl+Shift+O") },
+		iActionFileNew{ add_action("&New...", ":/neogfx/resources/icons.naa#new.png").set_shortcut("Ctrl+Shift+N") },
+		iActionFileOpen{ add_action("&Open...", ":/neogfx/resources/icons.naa#open.png").set_shortcut("Ctrl+Shift+O") },
 		iActionFileClose{ add_action("&Close").set_shortcut("Ctrl+F4") },
 		iActionFileCloseAll{ add_action("Close All") },
-		iActionFileSave{ add_action("&Save").set_shortcut("Ctrl+S") },
+		iActionFileSave{ add_action("&Save", ":/neogfx/resources/icons.naa#save.png").set_shortcut("Ctrl+S") },
 		iActionFileSaveAll{ add_action("Save A&ll").set_shortcut("Ctrl+Shift+S") },
 		iActionFileExit{ add_action("E&xit").set_shortcut("Alt+F4") },
-		iActionUndo{ add_action("Undo").set_shortcut("Ctrl+Z") },
-		iActionRedo{ add_action("Redo").set_shortcut("Ctrl+Shift+Z") },
-		iActionCut{ add_action("Cut").set_shortcut("Ctrl+X") },
-		iActionCopy{ add_action("Copy").set_shortcut("Ctrl+C") },
-		iActionPaste{ add_action("Paste").set_shortcut("Ctrl+V") },
+		iActionUndo{ add_action("Undo", ":/neogfx/resources/icons.naa#undo.png").set_shortcut("Ctrl+Z") },
+		iActionRedo{ add_action("Redo", ":/neogfx/resources/icons.naa#redo.png").set_shortcut("Ctrl+Shift+Z") },
+		iActionCut{ add_action("Cut", ":/neogfx/resources/icons.naa#cut.png").set_shortcut("Ctrl+X") },
+		iActionCopy{ add_action("Copy", ":/neogfx/resources/icons.naa#copy.png").set_shortcut("Ctrl+C") },
+		iActionPaste{ add_action("Paste", ":/neogfx/resources/icons.naa#paste.png").set_shortcut("Ctrl+V") },
 		iActionDelete{ add_action("Delete").set_shortcut("Del") },
 		iActionSelectAll{ add_action("Select All").set_shortcut("Ctrl+A") },
 		iStandardActionManager{ *this, [this](neolib::callback_timer& aTimer)

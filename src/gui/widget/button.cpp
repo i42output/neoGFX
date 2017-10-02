@@ -208,6 +208,7 @@ namespace neogfx
 	{
 		destroyed_flag destroyed(*this);
 		clicked.trigger();
+		async_clicked.async_trigger();
 		if (!destroyed && iCheckable != NotCheckable)
 			toggle();
 	}

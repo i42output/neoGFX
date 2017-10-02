@@ -20,31 +20,43 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/colour.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 
 namespace neogfx
 {
+	class display : public i_display
+	{
+	public:
+		display(const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle);
+		~display();
+	public:
+		neogfx::rect rect() const override;
+		neogfx::rect desktop_rect() const override;
+		colour read_pixel(const point& aPosition) const override;
+	private:
+		mutable neogfx::rect iRect;
+		mutable neogfx::rect iDesktopRect;
+		void* iNativeDisplayHandle;
+	};
+
 	class sdl_basic_services : public i_basic_services
 	{
 	public:
 		sdl_basic_services(neolib::io_task& aAppThread);
 	public:
-		virtual neogfx::platform platform() const;
-		virtual neolib::io_task& app_task();
-		virtual void system_beep();
-		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const;
-		virtual uint32_t display_count() const;
-		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const;
-		virtual bool has_system_clipboard() const;
-		virtual i_native_clipboard& system_clipboard();
-		virtual bool has_system_menu_bar() const;
-		virtual i_shared_menu_bar& system_menu_bar();
-	private:
-#ifdef WIN32
-		static BOOL CALLBACK enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aThis);
-#endif
+		neogfx::platform platform() const override;
+		neolib::io_task& app_task() override;
+		void system_beep() override;
+		void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const override;
+		uint32_t display_count() const override;
+		const i_display& display(uint32_t aDisplayIndex = 0) const override;
+		bool has_system_clipboard() const override;
+		i_native_clipboard& system_clipboard() override;
+		bool has_system_menu_bar() const override;
+		i_shared_menu_bar& system_menu_bar() override;
 	private:
 		neolib::io_task& iAppTask;
-		mutable std::vector<rect> iDesktopWorkAreas;
+		mutable std::vector<std::unique_ptr<i_display>> iDisplays;
 	};
 }

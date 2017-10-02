@@ -158,7 +158,7 @@ namespace neogfx
 
 	rect surface_manager::desktop_rect(uint32_t aDisplayIndex) const
 	{
-		return iBasicServices.desktop_rect(aDisplayIndex);
+		return iBasicServices.display(aDisplayIndex).desktop_rect();
 	}
 
 	rect surface_manager::desktop_rect(const i_surface& aSurface) const

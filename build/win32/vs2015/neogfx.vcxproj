@@ -175,6 +175,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\colour_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog_button_box.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\font_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\gradient_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\flow_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\grid_layout.hpp" />
@@ -345,6 +346,7 @@
     <ClCompile Include="..\..\..\src\gui\dialog\colour_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog_button_box.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\gradient_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\flow_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\grid_layout.cpp" />
@@ -398,8 +400,24 @@
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_manager.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
+    <ClCompile Include="Debug\GeneratedFiles\icons.nrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\GeneratedFiles\icons.nrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="..\..\..\..\src\assets\neoGFX\icons.nrc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/icons.nrc.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/icons.nrc.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/icons.nrc.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/icons.nrc.cpp</Outputs>
+    </CustomBuild>
     <None Include="..\..\..\include\neogfx\core\path.inl" />
     <None Include="..\..\..\include\neogfx\game\shape.inl" />
     <None Include="..\..\..\include\neogfx\gui\layout\flow_layout.inl" />

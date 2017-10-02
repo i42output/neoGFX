@@ -47,6 +47,18 @@ namespace neogfx
 		return neogfx::size_policy::Minimum;
 	}
 
+	size toolbar::button_image_extents() const
+	{
+		if (iButtonImageExtents != boost::none)
+			return *iButtonImageExtents;
+		return size{ 32.0, 32.0 };
+	}
+
+	void toolbar::set_button_image_extents(const optional_size& aExtents)
+	{
+		iButtonImageExtents = aExtents;
+	}
+
 	uint32_t toolbar::button_count() const
 	{
 		return iButtons.size();
@@ -79,6 +91,7 @@ namespace neogfx
 		if (aButtonIndex > iButtons.size())
 			throw bad_button_index();
 		iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), aAction));
+		iButtons[aButtonIndex]->image().set_fixed_size(button_image_extents());
 	}
 
 	void toolbar::insert_separator(button_index aButtonIndex)

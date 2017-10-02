@@ -646,27 +646,29 @@ namespace neogfx
 	}
 
 	colour_dialog::colour_dialog(const colour& aCurrentColour) :
-		dialog("Select Colour", window_style::Modal | window_style::Titlebar | window_style::Close),
-		iCurrentChannel{ChannelHue},
-		iCurrentColour{aCurrentColour},
-		iSelectedColour{aCurrentColour.to_hsv()},
-		iCurrentCustomColour(iCustomColours.end()),
-		iUpdatingWidgets(false),
-		iLayout(*this),
-		iLayout2(iLayout),
-		iLeftLayout(iLayout2),
-		iRightLayout(iLayout2),
-		iRightTopLayout(iRightLayout),
-		iRightBottomLayout(iRightLayout, alignment::Left | alignment::Top),
-		iColourSelection(*this),
-		iChannelLayout(iRightBottomLayout),
+		dialog{ "Select Colour", window_style::Modal | window_style::Titlebar | window_style::Close },
+		iCurrentChannel{ ChannelHue },
+		iCurrentColour{ aCurrentColour },
+		iSelectedColour{ aCurrentColour.to_hsv() },
+		iCurrentCustomColour{ iCustomColours.end() },
+		iUpdatingWidgets{ false },
+		iScreenPickerActive{ false },
+		iLayout{ *this },
+		iLayout2{ iLayout },
+		iLeftLayout{ iLayout2 },
+		iRightLayout{ iLayout2 },
+		iRightTopLayout{ iRightLayout },
+		iRightBottomLayout{ iRightLayout, alignment::Left | alignment::Top },
+		iColourSelection{ *this },
+		iScreenPicker{ iRightBottomLayout },
+		iChannelLayout{ iRightBottomLayout },
 		iBasicColoursLabel{ iLeftLayout, "&Basic colours" },
 		iBasicColoursLayout{ iLeftLayout },
 		iSpacer{ iLeftLayout },
 		iCustomColoursLayout{ iLeftLayout },
 		iCustomColoursLabel{ iLeftLayout, "&Custom colours" },
-		iYZPicker(*this),
-		iXPicker(*this),
+		iYZPicker{ *this },
+		iXPicker{ *this },
 		iH{ *this, *this },
 		iS{ *this, *this },
 		iV{ *this, *this },
@@ -675,33 +677,35 @@ namespace neogfx
 		iB{ *this, *this },
 		iA{ *this, *this },
 		iRgb{ *this },
-		iAddToCustomColours{iRightLayout, "&Add to Custom Colours" }
+		iAddToCustomColours{ iRightLayout, "&Add to Custom Colours" }
 	{
 		init();
 	}
 
 	colour_dialog::colour_dialog(i_widget& aParent, const colour& aCurrentColour) :
-		dialog(aParent, "Select Colour", window_style::Modal | window_style::Titlebar | window_style::Close),
-		iCurrentChannel{ChannelHue},
-		iCurrentColour{aCurrentColour},
-		iSelectedColour{aCurrentColour.to_hsv()},
-		iCurrentCustomColour(iCustomColours.end()),
-		iUpdatingWidgets(false),
-		iLayout(*this),
-		iLayout2(iLayout),
-		iLeftLayout(iLayout2),
-		iRightLayout(iLayout2),
-		iRightTopLayout(iRightLayout),
-		iRightBottomLayout(iRightLayout, alignment::Left | alignment::Top),
-		iColourSelection(*this),
-		iChannelLayout(iRightBottomLayout),
-		iBasicColoursLabel{iLeftLayout, "&Basic colours"},
-		iBasicColoursLayout{iLeftLayout},
-		iSpacer{iLeftLayout},
-		iCustomColoursLayout{iLeftLayout},
-		iCustomColoursLabel{iLeftLayout, "&Custom colours"},
-		iYZPicker(*this),
-		iXPicker(*this),
+		dialog{ aParent, "Select Colour", window_style::Modal | window_style::Titlebar | window_style::Close },
+		iCurrentChannel{ChannelHue },
+		iCurrentColour{aCurrentColour },
+		iSelectedColour{aCurrentColour.to_hsv() },
+		iCurrentCustomColour{ iCustomColours.end() },
+		iUpdatingWidgets{ false },
+		iScreenPickerActive{ false },
+		iLayout{ *this },
+		iLayout2{ iLayout },
+		iLeftLayout{ iLayout2 },
+		iRightLayout{ iLayout2 },
+		iRightTopLayout{ iRightLayout },
+		iRightBottomLayout{ iRightLayout, alignment::Left | alignment::Top },
+		iColourSelection{ *this },
+		iScreenPicker{ iRightBottomLayout },
+		iChannelLayout{ iRightBottomLayout },
+		iBasicColoursLabel{ iLeftLayout, "&Basic colours" },
+		iBasicColoursLayout{ iLeftLayout},
+		iSpacer{ iLeftLayout},
+		iCustomColoursLayout{ iLeftLayout},
+		iCustomColoursLabel{ iLeftLayout, "&Custom colours" },
+		iYZPicker{ *this },
+		iXPicker{ *this },
 		iH{ *this, *this },
 		iS{ *this, *this },
 		iV{ *this, *this },
@@ -710,7 +714,7 @@ namespace neogfx
 		iB{ *this, *this },
 		iA{ *this, *this },
 		iRgb{ *this },
-		iAddToCustomColours{iRightLayout, "&Add to Custom Colours"}
+		iAddToCustomColours{ iRightLayout, "&Add to Custom Colours"}
 	{
 		init();
 	}
@@ -752,6 +756,25 @@ namespace neogfx
 		return iCustomColours;
 	}
 
+	void colour_dialog::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		if (aButton == mouse_button::Left && iScreenPickerActive)
+		{
+			iScreenPickerActive = false;
+			release_capture(*this);
+		}
+		else
+			dialog::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+	}
+
+	neogfx::mouse_cursor colour_dialog::mouse_cursor() const
+	{
+		if (iScreenPickerActive)
+			return mouse_system_cursor::Crosshair;
+		else
+			return dialog::mouse_cursor();
+	}
+
 	void colour_dialog::init()
 	{
 		scoped_units su(static_cast<framed_widget&>(*this), units::Pixels);
@@ -785,6 +808,12 @@ namespace neogfx
 		iRightTopLayout.set_spacing(16.0);
 		iRightBottomLayout.set_spacing(8.0);
 		iChannelLayout.set_spacing(8.0);
+		iScreenPicker.set_size_policy(size_policy::Minimum);
+		iSink += iScreenPicker.async_clicked([&, this]()
+		{
+			iScreenPickerActive = true;
+			set_capture(*this);
+		});
 		iH.first.label().text().set_text("&Hue:"); iH.second.set_size_policy(size_policy::Minimum); iH.second.text_box().set_hint("359.9"); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
 		iS.first.label().text().set_text("&Sat:"); iS.second.set_size_policy(size_policy::Minimum); iS.second.text_box().set_hint("100.0"); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
 		iV.first.label().text().set_text("&Val:"); iV.second.set_size_policy(size_policy::Minimum); iV.second.text_box().set_hint("100.0"); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);

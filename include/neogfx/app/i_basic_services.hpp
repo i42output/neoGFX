@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/io_task.hpp>
 #include <neogfx/core/geometry.hpp>
+#include <neogfx/core/colour.hpp>
 
 namespace neogfx
 {
@@ -34,6 +35,16 @@ namespace neogfx
 		Mac,
 		Kde,
 		Gnome
+	};
+
+	class i_display
+	{
+	public:
+		virtual ~i_display() {};
+	public:
+		virtual neogfx::rect rect() const = 0;
+		virtual neogfx::rect desktop_rect() const = 0;
+		virtual colour read_pixel(const point& aPosition) const = 0;
 	};
 
 	class i_basic_services
@@ -49,7 +60,7 @@ namespace neogfx
 		virtual void system_beep() = 0;
 		virtual void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const = 0;
 		virtual uint32_t display_count() const = 0;
-		virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const = 0;
+		virtual const i_display& display(uint32_t aDisplayIndex = 0) const = 0;
 		virtual bool has_system_clipboard() const = 0;
 		virtual i_native_clipboard& system_clipboard() = 0;
 		virtual bool has_system_menu_bar() const = 0;

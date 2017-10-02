@@ -32,7 +32,56 @@
 
 namespace neogfx
 {
-	sdl_basic_services::sdl_basic_services(neolib::io_task& aAppTask) : 
+#ifdef WIN32
+	BOOL CALLBACK enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aDisplayList)
+	{
+		rect rectDisplay;
+		MONITORINFO mi;
+		mi.cbSize = sizeof(mi);
+		GetMonitorInfo(aMonitor, &mi);
+		basic_rect<LONG> monitorRect{ basic_point<LONG>{ mi.rcMonitor.left, mi.rcMonitor.top }, basic_size<LONG>{ mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top } };
+		basic_rect<LONG> workAreaRect{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
+		reinterpret_cast<std::vector<std::unique_ptr<i_display>>*>(aDisplayList)->push_back(std::make_unique<display>(monitorRect, workAreaRect, reinterpret_cast<void*>(GetDC(NULL))));
+		return true;
+	}
+#endif
+
+	display::display(const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle) : 
+		iRect{ aRect },
+		iDesktopRect{ aDesktopRect },
+		iNativeDisplayHandle{ aNativeDisplayHandle }
+	{
+	}
+
+	display::~display()
+	{
+#ifdef WIN32
+		ReleaseDC(NULL, reinterpret_cast<HDC>(iNativeDisplayHandle));
+#endif
+	}
+
+	neogfx::rect display::rect() const
+	{
+		return iRect;
+	}
+
+	neogfx::rect display::desktop_rect() const
+	{
+		return iDesktopRect;
+	}
+
+	colour display::read_pixel(const point& aPosition) const
+	{
+#ifdef WIN32
+		auto clr = GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));
+		return colour{ GetRValue(clr), GetGValue(clr), GetBValue(clr) };
+#else
+		return colour::Black;
+		// todo
+#endif
+	}
+
+	sdl_basic_services::sdl_basic_services(neolib::io_task& aAppTask) :
 		iAppTask{ aAppTask }
 	{
 	}
@@ -74,22 +123,23 @@ namespace neogfx
 		return SDL_GetNumVideoDisplays();
 	}
 
-	rect sdl_basic_services::desktop_rect(uint32_t aDisplayIndex) const
+	const i_display& sdl_basic_services::display(uint32_t aDisplayIndex) const
 	{
-		iDesktopWorkAreas.clear();
+		iDisplays.clear();
 #ifdef WIN32
-		EnumDisplayMonitors(NULL, NULL, &enum_display_monitors_proc, reinterpret_cast<LPARAM>(this));
+		EnumDisplayMonitors(NULL, NULL, &enum_display_monitors_proc, reinterpret_cast<LPARAM>(&iDisplays));
 #else
 		for (int i = 0; i < display_count(); ++i)
 		{
 			SDL_Rect rectDisplayBounds;
 			SDL_GetDisplayBounds(i, &rectDisplayBounds);
-			iDesktopWorkAreas.push_back(rect{ point{ rectDisplayBounds.x, rectDisplayBounds.y }, size{ rectDisplayBounds.w, rectDisplayBounds.h } });
+			rect rectDisplay{ point{ rectDisplayBounds.x, rectDisplayBounds.y }, size{ rectDisplayBounds.w, rectDisplayBounds.h } }
+			iDisplays.push_back(std::make_unique<neogfx::display>(rectDisplay, rectDisplay, nullptr));
 		}
 #endif
-		if (aDisplayIndex >= iDesktopWorkAreas.size())
+		if (aDisplayIndex >= iDisplays.size())
 			throw bad_display_index();
-		return iDesktopWorkAreas[aDisplayIndex];
+		return *iDisplays[aDisplayIndex];
 	}
 
 	class sdl_clipboard : public i_native_clipboard
@@ -133,17 +183,4 @@ namespace neogfx
 	{
 		throw no_system_menu_bar();
 	}
-
-#ifdef WIN32
-	BOOL CALLBACK sdl_basic_services::enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aThis)
-	{
-		rect rectDisplay;
-		MONITORINFO mi;
-		mi.cbSize = sizeof(mi);
-		GetMonitorInfo(aMonitor, &mi);
-		basic_rect<LONG> workAreaRect{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
-		reinterpret_cast<const sdl_basic_services*>(aThis)->iDesktopWorkAreas.push_back(workAreaRect);
-		return true;
-	}
-#endif
 }

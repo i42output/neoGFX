@@ -115,11 +115,11 @@ public:
 			ng::app::instance().change_style("Keypad").
 				palette().set_colour(aNumber != 9 ? ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::colour::LightGoldenrod);
 			if (aNumber == 9)
-				iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
+				iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::colour_or_gradient{} });
 			else if (aNumber == 8)
-				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect::Outline, ng::colour::White } }, true);
+				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect::Outline, ng::colour::White } });
 			else if (aNumber == 0)
-				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::colour::White }, true);
+				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::colour::White });
 			else
 				iTextEdit.set_default_style(
 					ng::text_edit::style{
@@ -128,7 +128,7 @@ public:
 							ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0x40),
 							ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0xC0),
 							ng::gradient::Horizontal},
-						ng::colour_or_gradient{} }, true);
+						ng::colour_or_gradient{} });
 		});
 	}
 private:
@@ -181,10 +181,6 @@ int main(int argc, char* argv[])
 		muteAction.set_checkable(true);
 		muteAction.set_checked_image(":/closed/resources/caw_toolbar.naa#unmute.png");
 
-		app.action_cut().set_image(":/closed/resources/caw_toolbar.naa#cut.png");
-		app.action_copy().set_image(":/closed/resources/caw_toolbar.naa#copy.png");
-		app.action_paste().set_image(":/closed/resources/caw_toolbar.naa#paste.png");
-
 		auto& pasteAndGoAction = app.add_action("Paste and Go", ":/closed/resources/caw_toolbar.naa#paste_and_go.png").set_shortcut("Ctrl+Shift+V");
 
 		neolib::callback_timer ct{ app, [&app, &pasteAndGoAction](neolib::callback_timer& aTimer)
@@ -212,6 +208,21 @@ int main(int argc, char* argv[])
 		ng::menu_bar menu(layout0);
 
 		auto& fileMenu = menu.add_sub_menu("&File");
+		fileMenu.add_action(app.action_file_exit());
+		fileMenu.add_action(app.action_file_new());
+/*		app.action_file_new().triggered([&]()
+		{
+			neogui::new_project_dialog dialog{ mainWindow };
+			if (dialog.exec() == ng::dialog::Accepted)
+			{
+			}
+		}); */
+		fileMenu.add_action(app.action_file_open());
+		fileMenu.add_separator();
+		fileMenu.add_action(app.action_file_close());
+		fileMenu.add_separator();
+		fileMenu.add_action(app.action_file_save());
+		fileMenu.add_separator();
 		fileMenu.add_action(app.action_file_exit());
 
 		auto& editMenu = menu.add_sub_menu("&Edit");
@@ -263,6 +274,7 @@ int main(int argc, char* argv[])
 		}
 		menu.add_action(contactsAction);
 		menu.add_action(muteAction);
+		menu.add_action(app.add_action("&Xyzzy...", ":/neogfx/resources/icons.naa#eyedropper.png"));
 
 		auto& testMenu = menu.add_sub_menu("&Test");
 		testMenu.add_action(contactsAction);
@@ -285,6 +297,10 @@ int main(int argc, char* argv[])
 		auto& helpMenu = menu.add_sub_menu("&Help");
 
 		ng::toolbar toolbar(layout0);
+		toolbar.add_action(app.action_file_new());
+		toolbar.add_action(app.action_file_open());
+		toolbar.add_action(app.action_file_save());
+		toolbar.add_separator();
 		toolbar.add_action(contactsAction);
 		toolbar.add_action(addFavouriteAction);
 		toolbar.add_action(organizeFavouritesAction);
@@ -336,6 +352,16 @@ int main(int argc, char* argv[])
 		ng::text_edit textEdit(editLayout);
 		textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
 		textEdit.set_tab_stop_hint("00000000");
+		ng::slider effectWidthSlider{ editLayout, ng::slider::Vertical };
+		effectWidthSlider.set_minimum(1);
+		effectWidthSlider.set_maximum(10);
+		effectWidthSlider.set_step(1);
+		effectWidthSlider.set_value(5);
+		ng::double_slider effectAux1Slider{ editLayout, ng::slider::Vertical };
+		effectAux1Slider.set_minimum(0.1);
+		effectAux1Slider.set_maximum(10.0);
+		effectAux1Slider.set_step(0.1);
+		effectAux1Slider.set_value(1.0);
 		ng::text_edit smallTextEdit(editLayout);
 		smallTextEdit.set_maximum_width(100);
 		ng::horizontal_layout layoutLineEdits(layoutButtons);
@@ -498,25 +524,45 @@ int main(int argc, char* argv[])
 		{
 			auto s = textEdit.default_style();
 			s.set_text_effect(ng::optional_text_effect{});
-			textEdit.set_default_style(s, true);
+			textEdit.set_default_style(s);
 		});
 		editOutline.checked([&]()
 		{
 			auto s = textEdit.default_style();
 			s.set_text_effect(ng::text_effect{ ng::text_effect::Outline, ng::colour::White });
-			textEdit.set_default_style(s, true);
+			textEdit.set_default_style(s);
 		});
 		editGlow.checked([&]()
 		{
 			auto s = textEdit.default_style();
-			s.set_text_effect(ng::text_effect{ ng::text_effect::Glow, ng::colour::Orange.with_lightness(0.8) });
-			textEdit.set_default_style(s, true);
+			s.set_text_effect(ng::text_effect{ ng::text_effect::Glow, ng::colour::Orange.with_lightness(0.9) });
+			textEdit.set_default_style(s);
+		});
+		effectWidthSlider.value_changed([&]()
+		{
+			editGlow.check();
+			auto s = textEdit.default_style();
+			s.set_text_effect(ng::text_effect{ ng::text_effect::Glow, s.text_effect()->colour(), effectWidthSlider.value(), s.text_effect()->aux1() });
+			textEdit.set_default_style(s);
+			std::ostringstream oss;
+			oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
+			smallTextEdit.set_text(oss.str());
+		});
+		effectAux1Slider.value_changed([&]()
+		{
+			editGlow.check();
+			auto s = textEdit.default_style();
+			s.set_text_effect(ng::text_effect{ ng::text_effect::Glow, s.text_effect()->colour(), s.text_effect()->width(), effectAux1Slider.value() });
+			textEdit.set_default_style(s);
+			std::ostringstream oss;
+			oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
+			smallTextEdit.set_text(oss.str());
 		});
 		editShadow.checked([&]()
 		{
 			auto s = textEdit.default_style();
 			s.set_text_effect(ng::text_effect{ ng::text_effect::Shadow, ng::colour::Black });
-			textEdit.set_default_style(s, true);
+			textEdit.set_default_style(s);
 		});
 		ng::radio_button radio1(layout4, "Radio 1");
 		ng::radio_button radioSliderFont(layout4, "Slider changes\nfont size");

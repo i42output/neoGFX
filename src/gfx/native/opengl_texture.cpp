@@ -96,7 +96,7 @@ namespace neogfx
 		iHandle(0), 
 		iUri(aImage.uri())
 	{
-		GLint previousTexture;
+		GLint previousTexture = 0;
 		try
 		{
 			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
