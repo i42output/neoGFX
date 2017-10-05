@@ -327,7 +327,7 @@ namespace neogfx
 	{
 		resize_surface(widget::extents());
 		scrollable_widget::resized();
-		update();
+		update(true);
 	}
 
 	neogfx::size_policy window::size_policy() const
@@ -835,12 +835,14 @@ namespace neogfx
 
 	void window::native_window_focus_gained()
 	{
+		update(true);
 		if (has_focused_widget())
 			focused_widget().focus_gained(focus_reason::WindowActivation);
 	}
 
 	void window::native_window_focus_lost()
 	{
+		update(true);
 		for (std::size_t i = 0; i < app::instance().surface_manager().surface_count();)
 		{
 			auto& s = app::instance().surface_manager().surface(i);

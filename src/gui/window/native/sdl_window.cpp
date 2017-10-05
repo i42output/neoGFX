@@ -719,7 +719,7 @@ namespace neogfx
 				result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_NCHITTEST:
-			if (CUSTOM_DECORATION) 
+			if (CUSTOM_DECORATION && (self.window().style() & window_style::Resize) == window_style::Resize)
 			{
 				result = HTCLIENT;
 				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
@@ -822,7 +822,10 @@ namespace neogfx
 		DWORD existingStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
 		DWORD newStyle = existingStyle;
 		if ((iStyle & window_style::None) == window_style::None || (iStyle & window_style::TitleBar) == window_style::TitleBar)
+		{
 			newStyle |= WS_POPUP;
+			newStyle &= ~WS_THICKFRAME;
+		}
 		if ((iStyle & window_style::MinimizeBox) != window_style::MinimizeBox)
 			newStyle &= ~WS_MINIMIZEBOX;
 		if ((iStyle & window_style::MaximizeBox) != window_style::MaximizeBox)
@@ -971,21 +974,22 @@ namespace neogfx
 
 	margins sdl_window::border_thickness() const
 	{
-		RECT borderThickness;
-		SetRectEmpty(&borderThickness);
-		if (GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) & WS_THICKFRAME)
+		if ((window().style() & window_style::Resize) == window_style::Resize)
 		{
-			AdjustWindowRectEx(&borderThickness, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) & ~WS_CAPTION, FALSE, NULL);
+#ifdef WIN32
+			RECT borderThickness;
+			SetRectEmpty(&borderThickness);
+			AdjustWindowRectEx(&borderThickness, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) | WS_THICKFRAME & ~WS_CAPTION, FALSE, NULL);
 			borderThickness.left *= -1;
 			borderThickness.top *= -1;
+			iBorderThickness = basic_margins<LONG>{ borderThickness.left, borderThickness.top, borderThickness.right, borderThickness.bottom };
+#else
+			iBorderThickness = margins{ 6.0, 6.0, 6.0, 6.0 };
+#endif
+			return iBorderThickness;
 		}
 		else
-			SetRect(&borderThickness, 1, 1, 1, 1);
-		iBorderThickness.left = borderThickness.left;
-		iBorderThickness.top = borderThickness.top;
-		iBorderThickness.right = borderThickness.right;
-		iBorderThickness.bottom = borderThickness.bottom;
-		return iBorderThickness;
+			iBorderThickness = margins{ 1.0, 1.0, 1.0, 1.0 };
 	}
 
 	void sdl_window::push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers)
