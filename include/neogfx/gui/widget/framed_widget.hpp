@@ -60,7 +60,9 @@ namespace neogfx
 	public:
 		void set_style(frame_style aStyle);
 	protected:
+		virtual bool has_frame_colour() const;
 		virtual colour frame_colour() const;
+		virtual void set_frame_colour(const optional_colour& aFrameColour = optional_colour{});
 		virtual colour inner_frame_colour() const;
 	protected:
 		dimension line_width() const;
@@ -68,5 +70,6 @@ namespace neogfx
 	private:
 		frame_style iStyle;
 		dimension iLineWidth;
+		optional_colour iFrameColour;
 	};
 }

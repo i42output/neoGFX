@@ -21,7 +21,14 @@
 
 #include <neogfx/neogfx.hpp>
 #include <memory>
+#ifdef _WIN32
+#pragma warning( push )
+#pragma warning( disable: 4459 ) // declaration of 'name' hides global declaration
+#endif
 #include <boost/multi_array.hpp>
+#ifdef _WIN32
+#pragma warning( pop )
+#endif
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/core/path.hpp>
 #include <neogfx/game/i_shape.hpp>
@@ -89,22 +96,24 @@ namespace neogfx
 			Glow,
 			Shadow
 		};
+		typedef double auxiliary_parameter;
+		typedef boost::optional<auxiliary_parameter> optional_auxiliary_parameter;
 	public:
-		text_effect(type_e aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}) : iType{ aType }, iColour{ aColour }, iWidth{ aWidth }
+		text_effect(type_e aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) : iType{ aType }, iColour{ aColour }, iWidth{ aWidth }, iAux1{ aAux1 }
 		{
 		}
 	public:
 		bool operator==(const text_effect& aOther) const
 		{
-			return iType == aOther.iType && iColour == aOther.iColour && iWidth == aOther.iWidth;
+			return iType == aOther.iType && iColour == aOther.iColour && iWidth == aOther.iWidth && iAux1 == aOther.iAux1;
 		}
 		bool operator!=(const text_effect& aOther) const
 		{
-			return iType != aOther.iType || iColour != aOther.iColour || iWidth != aOther.iWidth;
+			return iType != aOther.iType || iColour != aOther.iColour || iWidth != aOther.iWidth || iAux1 != aOther.iAux1;
 		}
 		bool operator<(const text_effect& aRhs) const
 		{
-			return std::tie(iType, iColour, iWidth) < std::tie(aRhs.iType, aRhs.iColour, aRhs.iWidth);
+			return std::tie(iType, iColour, iWidth, iAux1) < std::tie(aRhs.iType, aRhs.iColour, aRhs.iWidth, aRhs.iAux1);
 		}
 	public:
 		type_e type() const
@@ -128,13 +137,30 @@ namespace neogfx
 				return 1.0;
 			case Glow:
 			case Shadow:
-				return 5.0;
+				return 4.0;
+			}
+		}
+		double aux1() const
+		{
+			if (iAux1 != boost::none)
+				return *iAux1;
+			switch (type())
+			{
+			case None:
+			default:
+				return 0.0;
+			case Outline:
+				return 0.0;
+			case Glow:
+			case Shadow:
+				return 1.0;
 			}
 		}
 	private:
 		type_e iType;
 		text_colour iColour;
 		optional_dimension iWidth;
+		optional_auxiliary_parameter iAux1;
 	};
 	typedef boost::optional<text_effect> optional_text_effect;
 
@@ -408,10 +434,10 @@ namespace neogfx
 	}
 
 	template <typename ValueType = double>
-	inline boost::multi_array<double, 2> dynamic_gaussian_filter(uint32_t aWidth = 5, ValueType aSigma = 1.0)
+	inline boost::multi_array<ValueType, 2> dynamic_gaussian_filter(uint32_t aWidth = 5, ValueType aSigma = 1.0)
 	{
 		const int32_t mean = static_cast<int32_t>(aWidth / 2);
-		boost::multi_array<ValueType, 2> kernel = { boost::extents[aWidth][aWidth] };
+		boost::multi_array<ValueType, 2> kernel(boost::extents[aWidth][aWidth]);
 		if (aSigma != 0)
 		{
 			ValueType sum = 0.0;

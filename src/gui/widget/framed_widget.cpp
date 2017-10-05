@@ -91,6 +91,7 @@ namespace neogfx
 		case frame_style::DashedFrame:
 			break;
 		case frame_style::SolidFrame:
+		case frame_style::WindowFrame:
 			aGraphicsContext.draw_rect(rect(point(0.0, 0.0), window_rect().extents()), pen(frame_colour(), effective_frame_width()));
 			break;
 		case frame_style::ContainerFrame:
@@ -130,12 +131,25 @@ namespace neogfx
 		}
 	}
 
+	bool framed_widget::has_frame_colour() const
+	{
+		return iFrameColour != boost::none;
+	}
+
 	colour framed_widget::frame_colour() const
 	{
-		if (iStyle != frame_style::ContainerFrame)
+		if (has_frame_colour())
+			return *iFrameColour;
+		else if (iStyle != frame_style::ContainerFrame)
 			return (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
 		else
 			return (has_foreground_colour() ? foreground_colour() : container_background_colour()).darker(0x40);
+	}
+
+	void framed_widget::set_frame_colour(const optional_colour& aFrameColour)
+	{
+		iFrameColour = aFrameColour;
+		update();
 	}
 
 	colour framed_widget::inner_frame_colour() const
@@ -161,6 +175,7 @@ namespace neogfx
 		case frame_style::DottedFrame:
 		case frame_style::DashedFrame:
 		case frame_style::SolidFrame:
+		case frame_style::WindowFrame:
 			return line_width();
 		case frame_style::ContainerFrame:
 			return line_width() * 2.0;

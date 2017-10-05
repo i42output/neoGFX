@@ -874,6 +874,12 @@
     <ClCompile Include="Debug\GeneratedFiles\icons.nrc.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="Release\GeneratedFiles\resources.nrc.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\GeneratedFiles\resources.nrc.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">
@@ -893,6 +899,9 @@
     </None>
     <None Include="..\..\..\include\neogfx\game\shape.inl">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\src\resources.nrc">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
 </Project>

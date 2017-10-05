@@ -403,9 +403,15 @@
     <ClCompile Include="Debug\GeneratedFiles\icons.nrc.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Debug\GeneratedFiles\resources.nrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Release\GeneratedFiles\icons.nrc.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\GeneratedFiles\resources.nrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -424,6 +430,13 @@
     <None Include="..\..\..\include\neogfx\gui\layout\layout.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl" />
+    <CustomBuild Include="..\..\..\src\resources.nrc">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/resources.nrc.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles/resources.nrc.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/resources.nrc.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/resources.nrc.cpp</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

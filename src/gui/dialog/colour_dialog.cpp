@@ -646,7 +646,7 @@ namespace neogfx
 	}
 
 	colour_dialog::colour_dialog(const colour& aCurrentColour) :
-		dialog{ "Select Colour", window_style::Modal | window_style::Titlebar | window_style::Close },
+		dialog{ "Select Colour", window_style::Modal | window_style::TitleBar | window_style::Close },
 		iCurrentChannel{ ChannelHue },
 		iCurrentColour{ aCurrentColour },
 		iSelectedColour{ aCurrentColour.to_hsv() },
@@ -683,7 +683,7 @@ namespace neogfx
 	}
 
 	colour_dialog::colour_dialog(i_widget& aParent, const colour& aCurrentColour) :
-		dialog{ aParent, "Select Colour", window_style::Modal | window_style::Titlebar | window_style::Close },
+		dialog{ aParent, "Select Colour", window_style::Modal | window_style::TitleBar | window_style::Close },
 		iCurrentChannel{ChannelHue },
 		iCurrentColour{aCurrentColour },
 		iSelectedColour{aCurrentColour.to_hsv() },

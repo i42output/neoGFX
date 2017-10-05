@@ -338,7 +338,9 @@ namespace neogfx
 					return false;
 				if (left.appearance.ink().which() != right.appearance.ink().which() || !left.appearance.ink().is<colour>())
 					return false;
-				if (left.appearance.has_effect() != right.appearance.has_effect() || (left.appearance.has_effect() && left.appearance.effect().type() != right.appearance.effect().type()))
+				if (left.appearance.has_effect() != right.appearance.has_effect())
+					return false;
+				if (left.appearance.has_effect() && (left.appearance.effect().type() != right.appearance.effect().type() || left.appearance.effect().width() != right.appearance.effect().width()))
 					return false;
 				const i_glyph_texture& leftGlyphTexture = !left.glyph.use_fallback() ? left.font.native_font_face().glyph_texture(left.glyph) :
 					left.glyph.fallback_font(left.font).native_font_face().glyph_texture(left.glyph);

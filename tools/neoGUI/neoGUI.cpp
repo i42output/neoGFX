@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/widget/menu_bar.hpp>
+#include <neogfx/gui/widget/toolbar.hpp>
 #include <neogfx/gui/view/view_container.hpp>
 #include <neogfx/core/css.hpp>
 #include "new_project_dialog.hpp"
@@ -38,13 +39,13 @@ int main(int argc, char* argv[])
 		app.current_style().palette().set_colour(ng::colour{ 64, 64, 64 });
 		app.current_style().set_spacing(ng::size{ 4.0 });
 
-		ng::window mainWindow(app.basic_services().display().desktop_rect() * ng::size{ 0.5, 0.5 });
+		ng::window mainWindow{ app.basic_services().display().desktop_rect() * ng::size{ 0.5, 0.5 } };
 		mainWindow.set_margins(ng::margins{});
-		ng::vertical_layout mainLayout(mainWindow);
+		ng::vertical_layout mainLayout{ mainWindow };
 		mainLayout.set_margins(ng::margins{});
 		mainLayout.set_spacing(ng::size{});
 
-		ng::menu_bar mainMenu(mainLayout);
+		ng::menu_bar mainMenu{ mainLayout };
 
 		auto& fileMenu = mainMenu.add_sub_menu("&File");
 		fileMenu.add_action(app.action_file_new());
@@ -74,8 +75,21 @@ int main(int argc, char* argv[])
 		editMenu.add_separator();
 		editMenu.add_action(app.action_select_all());
 
-		ng::horizontal_layout workspaceLayout(mainLayout);
-		ng::view_container workspace(workspaceLayout);
+		ng::toolbar toolbar{ mainLayout };
+		toolbar.set_button_image_extents(ng::size{ 16.0, 16.0 });
+		toolbar.add_action(app.action_file_new());
+		toolbar.add_action(app.action_file_open());
+		toolbar.add_action(app.action_file_save());
+		toolbar.add_separator();
+		toolbar.add_action(app.action_undo());
+		toolbar.add_action(app.action_redo());
+		toolbar.add_separator();
+		toolbar.add_action(app.action_cut());
+		toolbar.add_action(app.action_copy());
+		toolbar.add_action(app.action_paste());
+
+		ng::horizontal_layout workspaceLayout{ mainLayout };
+		ng::view_container workspace{ workspaceLayout };
 
 		workspace.view_stack().painting([&workspace](ng::graphics_context& aGc)
 		{

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <SDL.h>
 #include <SDL_mouse.h>
+#include <neogfx/core/geometry.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include "opengl_window.hpp"
@@ -35,6 +36,10 @@ namespace neogfx
 	{
 		friend class sdl_renderer;
 	public:
+		struct failed_to_install_window_creation_hook : std::runtime_error { 
+			failed_to_install_window_creation_hook(const std::string& aReason) : 
+				std::runtime_error("neogfx::sdl_window::failed_to_install_window_creation_hook, reason: " + aReason) {} 
+		};
 		struct failed_to_create_window : std::runtime_error {
 			failed_to_create_window(const std::string& aReason) :
 				std::runtime_error("neogfx::sdl_window::failed_to_create_window: Failed to create window, reason: " + aReason) {}
@@ -106,10 +111,13 @@ namespace neogfx
 		void release_capture() override;
 		bool is_destroyed() const override;
 	private:
+		static void install_creation_hook(sdl_window& aNewWindow);
+		static sdl_window* new_window();
 		void init();
 		void process_event(const SDL_Event& aEvent);
 		virtual void destroying();
 		virtual void destroyed();
+		margins border_thickness() const;
 		void push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers);
 #ifdef WIN32
 		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
@@ -121,8 +129,9 @@ namespace neogfx
 		surface_style iStyle;
 		SDL_Window* iHandle;
 		mutable void* iNativeHandle;
+		static sdl_window* sNewWindow;
 #ifdef WIN32
-		WNDPROC iSDLWindowProc;
+		static WNDPROC sSDLWindowProc;
 #endif
 		size iExtents;
 		bool iVisible;
@@ -131,6 +140,7 @@ namespace neogfx
 		std::vector<cursor_pointer> iSavedCursors;
 		bool iReady;
 		bool iDestroyed;
+		mutable margins iBorderThickness;
 		std::deque<key_modifiers_e> iMouseButtonEventExtraInfo;
 	};
 }

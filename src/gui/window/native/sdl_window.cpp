@@ -28,24 +28,53 @@
 #include "sdl_window.hpp"
 
 #ifdef WIN32
-extern "C" BOOL WIN_ConvertUTF32toUTF8(UINT32 codepoint, char * text);
-extern "C" int SDL_SendKeyboardText(const char *text);
-extern "C" void SDL_ResetMouse(void);
+#include <Windowsx.h>
+#include <Dwmapi.h>
+#include <Uxtheme.h>
+#pragma comment(lib, "Dwmapi.lib")
+#pragma comment(lib, "Uxtheme.lib")
+
+std::string GetLastErrorAsString()
+{
+	//Get the error message, if any.
+	DWORD errorMessageID = ::GetLastError();
+	if (errorMessageID == 0)
+		return std::string(); //No error message has been recorded
+
+	LPSTR messageBuffer = nullptr;
+	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+	std::string message(messageBuffer, size);
+
+	//Free the buffer.
+	LocalFree(messageBuffer);
+
+	return message;
+}
+
+extern "C"
+{
+	BOOL WIN_ConvertUTF32toUTF8(UINT32 codepoint, char * text);
+	void SDL_ResetMouse(void);
+	extern LPTSTR SDL_Appname;
+}
 #endif
 
 namespace neogfx
 {
+	sdl_window* sdl_window::sNewWindow;
+#ifdef WIN32
+	WNDPROC sdl_window::sSDLWindowProc;
+#endif
+
 	Uint32 sdl_window::convert_style(window_style aStyle)
 	{   
 		uint32_t result = 0u;
-		if ((aStyle & window_style::None) == window_style::None)
+		if ((aStyle & window_style::NativeTitleBar) != window_style::NativeTitleBar)
 			result |= SDL_WINDOW_BORDERLESS;
-		if ((aStyle & window_style::Titlebar) == window_style::Titlebar)
-			result &= ~SDL_WINDOW_BORDERLESS;
 		if ((aStyle & window_style::Resize) == window_style::Resize)
 			result |= SDL_WINDOW_RESIZABLE;
-		if ((aStyle & window_style::Close) == window_style::Close)
-			result &= ~SDL_WINDOW_BORDERLESS;
 		if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
 			result |= SDL_WINDOW_FULLSCREEN;
 		return result;
@@ -115,6 +144,7 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
+		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_UNDEFINED,
@@ -148,6 +178,7 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
+		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_CENTERED,
@@ -181,6 +212,7 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
+		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			aPosition.x,
@@ -214,6 +246,7 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
+		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_UNDEFINED,
@@ -247,6 +280,7 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
+		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			SDL_WINDOWPOS_CENTERED,
@@ -280,6 +314,7 @@ namespace neogfx
 		iReady(false),
 		iDestroyed(false)
 	{
+		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
 			aPosition.x,
@@ -586,33 +621,57 @@ namespace neogfx
 #ifdef WIN32
 	LRESULT CALLBACK sdl_window::CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		auto mapEntry = sHandleMap.find(sHandleMap[hwnd]->iNativeHandle);
-		auto wndproc = mapEntry->second->iSDLWindowProc;
-		LRESULT result;
-		switch(msg)
+		if (msg == WM_NCCREATE)
 		{
+			auto newWindow = new_window();
+			if (newWindow != nullptr)
+			{
+				sHandleMap[hwnd] = newWindow;
+				sHandleMap[hwnd]->iNativeHandle = hwnd;
+			}
+		}
+		auto wndproc = (reinterpret_cast<WNDPROC>(GetWindowLongPtr(hwnd, GWLP_WNDPROC)) == CustomWindowProc ? sSDLWindowProc : DefWindowProc);
+		auto mapEntry = sHandleMap.find(hwnd);
+		if (mapEntry == sHandleMap.end())
+			return DefWindowProc(hwnd, msg, wparam, lparam);
+		auto& self = *mapEntry->second;
+		LRESULT result;
+		bool const CUSTOM_DECORATION = (self.window().style() & window_style::TitleBar) == window_style::TitleBar;
+		switch (msg)
+		{
+		case WM_NCCREATE:
+			result = wndproc(hwnd, msg, wparam, lparam);
+			break;
+		case WM_CREATE:
+			result = wndproc(hwnd, msg, wparam, lparam);
+			if (CUSTOM_DECORATION)
+			{
+				MARGINS margins = { 0 };
+				DwmExtendFrameIntoClientArea(hwnd, &margins);
+			}
+			break;
 		case WM_PAINT:
 			ValidateRect(hwnd, NULL);
-			mapEntry->second->handle_event(window_event(window_event::Paint));
+			self.handle_event(window_event(window_event::Paint));
 			result = 0;
 			break;
 		case WM_SYSCHAR:
-			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			result = wndproc(hwnd, msg, wparam, lparam);
 			{
 				char16_t characterCode = static_cast<char16_t>(wparam);
 				std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
-				mapEntry->second->push_event(keyboard_event(keyboard_event::SysTextInput, text));
+				self.push_event(keyboard_event(keyboard_event::SysTextInput, text));
 			}
 			break;
 		case WM_CHAR:
-			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			result = wndproc(hwnd, msg, wparam, lparam);
 			{
 				// SDL doesn't send characters with ASCII value < 32 (e.g. tab) so we do it properly here...
 				char16_t characterCode = static_cast<char16_t>(wparam);
 				std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
 				uint8_t ch = static_cast<uint8_t>(text[0]);
 				if ((ch >= 32 && ch != 127) || ch == '\t' || ch == '\n')
-					mapEntry->second->push_event(keyboard_event(keyboard_event::TextInput, text));
+					self.push_event(keyboard_event(keyboard_event::TextInput, text));
 			}
 			break;
 		case WM_LBUTTONDOWN:
@@ -634,89 +693,153 @@ namespace neogfx
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
 				if (wparam & MK_CONTROL)
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CTRL);
-				mapEntry->second->push_mouse_button_event_extra_info(modifiers);
-				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+				self.push_mouse_button_event_extra_info(modifiers);
+				result = wndproc(hwnd, msg, wparam, lparam);
 			}
 			break;
 		case WM_NCLBUTTONDOWN:
 		case WM_NCRBUTTONDOWN:
 		case WM_NCMBUTTONDOWN:
-			mapEntry->second->window().native_window_dismiss_children(); // call this before default wndproc (which enters its own NC drag message loop)
-			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			self.window().native_window_dismiss_children(); // call this before default wndproc (which enters its own NC drag message loop)
+			result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_DESTROY:
 			{
-				mapEntry->second->destroying();
-				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+				self.destroying();
+				result = wndproc(hwnd, msg, wparam, lparam);
 			}
 			break;
 		case WM_ERASEBKGND:
 			result = true;
 			break;
+		case WM_NCCALCSIZE:
+			if (lparam && CUSTOM_DECORATION)
+				result = 0;
+			else
+				result = wndproc(hwnd, msg, wparam, lparam);
+			break;
+		case WM_NCHITTEST:
+			if (CUSTOM_DECORATION) 
+			{
+				result = HTCLIENT;
+				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
+				ScreenToClient(hwnd, &pt);
+				RECT rc;
+				GetClientRect(hwnd, &rc);
+				enum { left = 1, top = 2, right = 4, bottom = 8 };
+				int hit = 0;
+				if (pt.x < self.border_thickness().left) hit |= left;
+				if (pt.x > rc.right - self.border_thickness().right) hit |= right;
+				if (pt.y < self.border_thickness().top) hit |= top;
+				if (pt.y > rc.bottom - self.border_thickness().bottom) hit |= bottom;
+				if (hit & top && hit & left) result = HTTOPLEFT;
+				else if (hit & top && hit & right) result = HTTOPRIGHT;
+				else if (hit & bottom && hit & left) result = HTBOTTOMLEFT;
+				else if (hit & bottom && hit & right) result = HTBOTTOMRIGHT;
+				else if (hit & left) result = HTLEFT;
+				else if (hit & top) result = HTTOP;
+				else if (hit & right) result = HTRIGHT;
+				else if (hit & bottom) result = HTBOTTOM;
+			}		
+			else
+				result = wndproc(hwnd, msg, wparam, lparam);
+			break;
 		case WM_SIZING:
 			{
-				const RECT referenceClientRect = { 0, 0, 256, 256 };
-				RECT referenceWindowRect = referenceClientRect;
-				AdjustWindowRectEx(&referenceWindowRect, GetWindowLongPtr(hwnd, GWL_STYLE), false, GetWindowLongPtr(hwnd, GWL_EXSTYLE));
-				auto windowExtents = size {
+				self.iExtents = size{
 					static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->right - reinterpret_cast<const RECT*>(lparam)->left),
 					static_cast<dimension>(reinterpret_cast<const RECT*>(lparam)->bottom - reinterpret_cast<const RECT*>(lparam)->top) };
-				mapEntry->second->iExtents = windowExtents + size{
-					basic_size<LONG>{ referenceClientRect.right - referenceClientRect.left, referenceClientRect.bottom - referenceClientRect.top } -
-					basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
-				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
-				mapEntry->second->handle_event(window_event(window_event::Resizing, mapEntry->second->iExtents));
+				if (!CUSTOM_DECORATION)
+				{
+					const RECT referenceClientRect = { 0, 0, 256, 256 };
+					RECT referenceWindowRect = referenceClientRect;
+					AdjustWindowRectEx(&referenceWindowRect, GetWindowLongPtr(hwnd, GWL_STYLE), false, GetWindowLongPtr(hwnd, GWL_EXSTYLE));
+					self.iExtents += size{
+						basic_size<LONG>{ referenceClientRect.right - referenceClientRect.left, referenceClientRect.bottom - referenceClientRect.top } -
+						basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
+				}
+				result = wndproc(hwnd, msg, wparam, lparam);
+				self.handle_event(window_event(window_event::Resizing, self.iExtents));
 			}
 			break;
 		case WM_NCDESTROY:
 			{
-				mapEntry->second->destroyed();
+				self.destroyed();
 				sHandleMap.erase(mapEntry);
-				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+				result = wndproc(hwnd, msg, wparam, lparam);
 			}
 			break;
 		case WM_MOUSEACTIVATE:
 			if (GetWindowLongPtr(hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE)
 				result = MA_NOACTIVATE;
 			else
-				result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+				result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_CAPTURECHANGED:
-			if (mapEntry->second->window().has_capturing_widget())
-				mapEntry->second->window().release_capture(mapEntry->second->window().capturing_widget());
+			if (self.window().has_capturing_widget())
+				self.window().release_capture(self.window().capturing_widget());
 			else
-				mapEntry->second->release_capture();
-			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+				self.release_capture();
+			result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		default:
-			result = CallWindowProc(wndproc, hwnd, msg, wparam, lparam);
+			result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		}
 		return result;
 	}
 #endif
 
+	void sdl_window::install_creation_hook(sdl_window& aNewWindow)
+	{
+		sNewWindow = &aNewWindow;
+#ifdef WIN32
+		if (!sSDLWindowProc)
+		{
+			HWND sdlWindow = FindWindow(SDL_Appname, NULL);
+			if (sdlWindow == NULL)
+				throw failed_to_install_window_creation_hook("Failed to find SDL window");
+			sSDLWindowProc = reinterpret_cast<WNDPROC>(GetClassLongPtr(sdlWindow, GCLP_WNDPROC));
+			if (!SetClassLongPtr(sdlWindow, GCLP_WNDPROC, reinterpret_cast<LONG_PTR>(&CustomWindowProc)))
+				throw failed_to_install_window_creation_hook(GetLastErrorAsString());
+		}
+#endif
+	}
+
+	sdl_window* sdl_window::new_window()
+	{
+		auto newWindow = sNewWindow;
+		sNewWindow = nullptr;
+		return newWindow;
+	}
+
 	void sdl_window::init()
 	{
 		sHandleMap[native_handle()] = this;
 #ifdef WIN32
-		SetClassLongPtr(static_cast<HWND>(native_handle()), GCLP_HBRBACKGROUND, NULL);
-		iSDLWindowProc = (WNDPROC)SetWindowLongPtr(static_cast<HWND>(native_handle()), GWLP_WNDPROC, (LONG_PTR)&CustomWindowProc);
-		DWORD existingStyle = GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE);
+		HWND hwnd = static_cast<HWND>(native_handle());
+		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, NULL);
+		DWORD existingStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
 		DWORD newStyle = existingStyle;
-		if ((iStyle & window_style::None) == window_style::None)
+		if ((iStyle & window_style::None) == window_style::None || (iStyle & window_style::TitleBar) == window_style::TitleBar)
 			newStyle |= WS_POPUP;
 		if ((iStyle & window_style::MinimizeBox) != window_style::MinimizeBox)
 			newStyle &= ~WS_MINIMIZEBOX;
 		if ((iStyle & window_style::MaximizeBox) != window_style::MaximizeBox)
 			newStyle &= ~WS_MAXIMIZEBOX;
 		if (newStyle != existingStyle)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE, newStyle);
+			SetWindowLongPtr(hwnd, GWL_STYLE, newStyle);
+		DWORD existingExtendedStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+		DWORD newExtendedStyle = existingExtendedStyle;
 		if ((iStyle & window_style::NoActivate) == window_style::NoActivate)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_EXSTYLE) | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
+			newExtendedStyle |= (WS_EX_NOACTIVATE | WS_EX_TOPMOST);
+		if ((iStyle & window_style::TitleBar) == window_style::TitleBar)
+			newExtendedStyle |= WS_EX_WINDOWEDGE;
+		if (newExtendedStyle != existingExtendedStyle)
+			SetWindowLongPtr(hwnd, GWL_EXSTYLE, newExtendedStyle);
 		if (iParent != 0)
-			SetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_HWNDPARENT, reinterpret_cast<LONG>(iParent->native_handle()));
-		SetWindowPos(static_cast<HWND>(native_handle()), 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_HIDEWINDOW);
+			SetWindowLongPtr(hwnd, GWL_HWNDPARENT, reinterpret_cast<LONG>(iParent->native_handle()));
+		SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 #endif
 	}
 
@@ -844,6 +967,25 @@ namespace neogfx
 			opengl_window::destroyed();
 			iNativeHandle = 0;
 		}
+	}
+
+	margins sdl_window::border_thickness() const
+	{
+		RECT borderThickness;
+		SetRectEmpty(&borderThickness);
+		if (GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) & WS_THICKFRAME)
+		{
+			AdjustWindowRectEx(&borderThickness, GetWindowLongPtr(static_cast<HWND>(native_handle()), GWL_STYLE) & ~WS_CAPTION, FALSE, NULL);
+			borderThickness.left *= -1;
+			borderThickness.top *= -1;
+		}
+		else
+			SetRect(&borderThickness, 1, 1, 1, 1);
+		iBorderThickness.left = borderThickness.left;
+		iBorderThickness.top = borderThickness.top;
+		iBorderThickness.right = borderThickness.right;
+		iBorderThickness.bottom = borderThickness.bottom;
+		return iBorderThickness;
 	}
 
 	void sdl_window::push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers)
