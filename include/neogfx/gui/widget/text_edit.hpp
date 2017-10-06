@@ -549,5 +549,6 @@ namespace neogfx
 		neolib::callback_timer iAnimator;
 		boost::optional<neolib::callback_timer> iDragger;
 		std::unique_ptr<context_menu> iMenu;
+		bool iOutOfMemory;
 	};
 }

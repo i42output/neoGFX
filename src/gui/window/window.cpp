@@ -330,6 +330,14 @@ namespace neogfx
 		update(true);
 	}
 
+	widget_part window::hit_test(const point& aPosition) const
+	{
+		auto result = scrollable_widget::hit_test(aPosition);
+		if (result == widget_part::Client)
+			result = widget_part::NonClientCaption;
+		return result;
+	}
+
 	neogfx::size_policy window::size_policy() const
 	{
 		if (widget::has_size_policy())
@@ -944,6 +952,12 @@ namespace neogfx
 		iEnteredWidget = 0;
 		if (previousEnteredWidget != 0)
 			previousEnteredWidget->mouse_left();
+	}
+
+	widget_part window::native_window_hit_test(const point& aPosition)
+	{
+		i_widget& w = widget_for_mouse_event(aPosition);
+		return w.hit_test(aPosition - w.origin());
 	}
 
 	void window::native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)

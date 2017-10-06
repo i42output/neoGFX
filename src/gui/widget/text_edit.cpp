@@ -150,7 +150,8 @@ namespace neogfx
 		{
 			iAnimator.again();
 			animate();
-		}, 40)
+		}, 40),
+		iOutOfMemory(false)
 	{
 		init();
 	}
@@ -170,7 +171,8 @@ namespace neogfx
 		{
 			iAnimator.again();
 			animate();
-		}, 40)
+		}, 40),
+		iOutOfMemory(false)
 	{
 		init();
 	}
@@ -190,7 +192,8 @@ namespace neogfx
 		{
 			iAnimator.again();
 			animate();
-		}, 40)
+		}, 40),
+		iOutOfMemory(false)
 	{
 		init();
 	}
@@ -242,11 +245,18 @@ namespace neogfx
 		return convert_units(*this, su.saved_units(), result);
 	}
 
+	void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
+
 	void text_edit::paint(graphics_context& aGraphicsContext) const
 	{
 		scrollable_widget::paint(aGraphicsContext);
 		coordinate x = 0.0;
 		rect clipRect = default_clip_rect().intersection(client_rect(false));
+		if (iOutOfMemory)
+		{
+			draw_alpha_background(aGraphicsContext, clipRect);
+			return;
+		}
 		aGraphicsContext.scissor_on(clipRect);
 		for (auto iterColumn = iGlyphColumns.begin(); iterColumn != iGlyphColumns.end(); ++iterColumn)
 		{
@@ -1449,162 +1459,172 @@ namespace neogfx
 
 	void text_edit::refresh_lines()
 	{
-		/* simple (naive) implementation just to get things moving... */
-		for (auto& column : iGlyphColumns)
-			column.lines().clear();
-		point pos{};
-		dimension availableWidth = client_rect(false).width();
-		dimension availableHeight = client_rect(false).height();
-		bool showVerticalScrollbar = false;
-		bool showHorizontalScrollbar = false;
-		iTextExtents = size{};
-		uint32_t pass = 1;
-		auto iterColumn = iGlyphColumns.begin();
-		for (auto p = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end();)
+		try
 		{
-			auto& column = *iterColumn;
-			auto& lines = column.lines();
-			auto& paragraph = *p;
-			auto paragraphStart = paragraph.first.start();
-			auto paragraphEnd = paragraph.first.end();
-			if (paragraphStart == paragraphEnd || paragraphStart->is_line_breaking_whitespace())
+			/* simple (naive) implementation just to get things moving... */
+			iOutOfMemory = false;
+			for (auto& column : iGlyphColumns)
+				column.lines().clear();
+			point pos{};
+			dimension availableWidth = client_rect(false).width();
+			dimension availableHeight = client_rect(false).height();
+			bool showVerticalScrollbar = false;
+			bool showHorizontalScrollbar = false;
+			iTextExtents = size{};
+			uint32_t pass = 1;
+			auto iterColumn = iGlyphColumns.begin();
+			for (auto p = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end();)
 			{
-				auto lineStart = paragraphStart;
-				auto lineEnd = lineStart;
-				const auto& glyph = *lineStart;
-				const auto& tagContents = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).contents();
-				const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
-				auto& glyphFont = style.font() != boost::none ? *style.font() : font();
-				auto height = paragraph.first.height(lineStart, lineEnd);
-				lines.push_back(
-					glyph_line{
-						{ p - iGlyphParagraphs.begin(), p },
-						{ lineStart - iGlyphs.begin(), lineStart },
-						{ lineEnd - iGlyphs.begin(), lineEnd },
-						pos.y,
-						{ 0.0, height } });
-				pos.y += glyphFont.height();
-			}
-			else if (iWordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
-			{
-				auto insertionPoint = lines.end();
-				bool first = true;
-				auto next = paragraph.first.start();
-				auto lineStart = next;
-				auto lineEnd = paragraphEnd;
-				coordinate offset = 0.0;
-				while (next != paragraphEnd)
+				auto& column = *iterColumn;
+				auto& lines = column.lines();
+				auto& paragraph = *p;
+				auto paragraphStart = paragraph.first.start();
+				auto paragraphEnd = paragraph.first.end();
+				if (paragraphStart == paragraphEnd || paragraphStart->is_line_breaking_whitespace())
 				{
-					auto split = std::lower_bound(next, paragraphEnd, paragraph_positioned_glyph{ offset + availableWidth });
-					if (split != next && (split != paragraphEnd || (split - 1)->x + (split - 1)->advance().cx >= offset + availableWidth))
-						--split;
-					if (split == next)
-						++split;
-					if (split != paragraphEnd)
-					{
-						std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraphEnd);
-						lineEnd = wordBreak.first;
-						next = wordBreak.second;
-						if (wordBreak.first == wordBreak.second)
-						{
-							while (lineEnd != lineStart && (lineEnd - 1)->source() == wordBreak.first->source())
-								--lineEnd;
-							next = lineEnd;
-						}
-					}
-					else
-						next = paragraphEnd;
-					dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().advance().cx : 0.0));
+					auto lineStart = paragraphStart;
+					auto lineEnd = lineStart;
+					const auto& glyph = *lineStart;
+					const auto& tagContents = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).contents();
+					const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
+					auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 					auto height = paragraph.first.height(lineStart, lineEnd);
-					if (lineEnd != lineStart && (lineEnd - 1)->is_line_breaking_whitespace())
-						--lineEnd;
-					bool rtl = false;
-					if (!first &&
-						insertionPoint->lineStart != insertionPoint->lineEnd &&
-						lineStart != lineEnd &&
-						insertionPoint->lineStart.second->direction() == text_direction::RTL &&
-						(lineEnd - 1)->direction() == text_direction::RTL)
-						rtl = true; // todo: is this sufficient for multi-line RTL text?
-					if (!rtl)
-						insertionPoint = lines.end();
-					insertionPoint = lines.insert(insertionPoint,
+					lines.push_back(
 						glyph_line{
 							{ p - iGlyphParagraphs.begin(), p },
 							{ lineStart - iGlyphs.begin(), lineStart },
 							{ lineEnd - iGlyphs.begin(), lineEnd },
 							pos.y,
-							{ x - offset, height } });
-					if (rtl)
+							{ 0.0, height } });
+					pos.y += glyphFont.height();
+				}
+				else if (iWordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
+				{
+					auto insertionPoint = lines.end();
+					bool first = true;
+					auto next = paragraph.first.start();
+					auto lineStart = next;
+					auto lineEnd = paragraphEnd;
+					coordinate offset = 0.0;
+					while (next != paragraphEnd)
 					{
-						auto ypos = (insertionPoint + 1)->ypos;
-						for (auto i = insertionPoint; i != lines.end(); ++i)
+						auto split = std::lower_bound(next, paragraphEnd, paragraph_positioned_glyph{ offset + availableWidth });
+						if (split != next && (split != paragraphEnd || (split - 1)->x + (split - 1)->advance().cx >= offset + availableWidth))
+							--split;
+						if (split == next)
+							++split;
+						if (split != paragraphEnd)
 						{
-							i->ypos = ypos;
-							ypos += i->extents.cy;
+							std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraphEnd);
+							lineEnd = wordBreak.first;
+							next = wordBreak.second;
+							if (wordBreak.first == wordBreak.second)
+							{
+								while (lineEnd != lineStart && (lineEnd - 1)->source() == wordBreak.first->source())
+									--lineEnd;
+								next = lineEnd;
+							}
 						}
+						else
+							next = paragraphEnd;
+						dimension x = (split != iGlyphs.end() ? split->x : (lineStart != lineEnd ? iGlyphs.back().x + iGlyphs.back().advance().cx : 0.0));
+						auto height = paragraph.first.height(lineStart, lineEnd);
+						if (lineEnd != lineStart && (lineEnd - 1)->is_line_breaking_whitespace())
+							--lineEnd;
+						bool rtl = false;
+						if (!first &&
+							insertionPoint->lineStart != insertionPoint->lineEnd &&
+							lineStart != lineEnd &&
+							insertionPoint->lineStart.second->direction() == text_direction::RTL &&
+							(lineEnd - 1)->direction() == text_direction::RTL)
+							rtl = true; // todo: is this sufficient for multi-line RTL text?
+						if (!rtl)
+							insertionPoint = lines.end();
+						insertionPoint = lines.insert(insertionPoint,
+							glyph_line{
+								{ p - iGlyphParagraphs.begin(), p },
+								{ lineStart - iGlyphs.begin(), lineStart },
+								{ lineEnd - iGlyphs.begin(), lineEnd },
+								pos.y,
+								{ x - offset, height } });
+						if (rtl)
+						{
+							auto ypos = (insertionPoint + 1)->ypos;
+							for (auto i = insertionPoint; i != lines.end(); ++i)
+							{
+								i->ypos = ypos;
+								ypos += i->extents.cy;
+							}
+						}
+						pos.y += height;
+						iTextExtents.cx = std::max(iTextExtents.cx, x - offset);
+						lineStart = next;
+						if (lineStart != paragraphEnd)
+							offset = lineStart->x;
+						lineEnd = paragraphEnd;
+						first = false;
 					}
-					pos.y += height;
-					iTextExtents.cx = std::max(iTextExtents.cx, x - offset);
-					lineStart = next;
-					if (lineStart != paragraphEnd)
-						offset = lineStart->x;
-					lineEnd = paragraphEnd;
-					first = false;
-				}
-			}
-			else
-			{
-				auto lineStart = paragraphStart;
-				auto lineEnd = paragraphEnd;
-				auto height = paragraph.first.height(lineStart, lineEnd);
-				if (lineEnd != lineStart && (lineEnd - 1)->is_line_breaking_whitespace())
-					--lineEnd;
-				lines.push_back(
-					glyph_line{
-						{ p - iGlyphParagraphs.begin(), p },
-						{ lineStart - iGlyphs.begin(), lineStart },
-						{ lineEnd - iGlyphs.begin(), lineEnd },
-						pos.y,
-						{ (lineEnd - 1)->x + (lineEnd - 1)->advance().cx, height} });
-				pos.y += lines.back().extents.cy;
-				iTextExtents.cx = std::max(iTextExtents.cx, lines.back().extents.cx);
-			}
-			switch (pass)
-			{
-			case 1:
-			case 3:
-				if (!showVerticalScrollbar && pos.y >= availableHeight)
-				{
-					showVerticalScrollbar = true;
-					availableWidth -= vertical_scrollbar().width(*this);
-					lines.clear();
-					pos = point{};
-					iTextExtents = size{};
-					p = iGlyphParagraphs.begin();
-					++pass;
 				}
 				else
-					++p;
-				break;
-			case 2:
-				if (!showHorizontalScrollbar && iTextExtents.cx > availableWidth)
 				{
-					showHorizontalScrollbar = true;
-					availableHeight -= horizontal_scrollbar().width(*this);
-					lines.clear();
-					pos = point{};
-					iTextExtents = size{};
-					p = iGlyphParagraphs.begin();
-					++pass;
+					auto lineStart = paragraphStart;
+					auto lineEnd = paragraphEnd;
+					auto height = paragraph.first.height(lineStart, lineEnd);
+					if (lineEnd != lineStart && (lineEnd - 1)->is_line_breaking_whitespace())
+						--lineEnd;
+					lines.push_back(
+						glyph_line{
+							{ p - iGlyphParagraphs.begin(), p },
+							{ lineStart - iGlyphs.begin(), lineStart },
+							{ lineEnd - iGlyphs.begin(), lineEnd },
+							pos.y,
+							{ (lineEnd - 1)->x + (lineEnd - 1)->advance().cx, height} });
+					pos.y += lines.back().extents.cy;
+					iTextExtents.cx = std::max(iTextExtents.cx, lines.back().extents.cx);
 				}
-				else
-					++p;
-				break;
+				switch (pass)
+				{
+				case 1:
+				case 3:
+					if (!showVerticalScrollbar && pos.y >= availableHeight)
+					{
+						showVerticalScrollbar = true;
+						availableWidth -= vertical_scrollbar().width(*this);
+						lines.clear();
+						pos = point{};
+						iTextExtents = size{};
+						p = iGlyphParagraphs.begin();
+						++pass;
+					}
+					else
+						++p;
+					break;
+				case 2:
+					if (!showHorizontalScrollbar && iTextExtents.cx > availableWidth)
+					{
+						showHorizontalScrollbar = true;
+						availableHeight -= horizontal_scrollbar().width(*this);
+						lines.clear();
+						pos = point{};
+						iTextExtents = size{};
+						p = iGlyphParagraphs.begin();
+						++pass;
+					}
+					else
+						++p;
+					break;
+				}
 			}
+			if (!iGlyphs.empty() && iGlyphs.back().is_line_breaking_whitespace())
+				pos.y += font().height();
+			iTextExtents.cy = pos.y;
 		}
-		if (!iGlyphs.empty() && iGlyphs.back().is_line_breaking_whitespace())
-			pos.y += font().height();
-		iTextExtents.cy = pos.y;
+		catch (std::bad_alloc)
+		{
+			for (auto& column : iGlyphColumns)
+				column.lines().clear();
+			iOutOfMemory = true;
+		}
 	}
 
 	void text_edit::animate()

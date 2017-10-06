@@ -122,6 +122,11 @@ namespace neogfx
 		return true;
 	}
 
+	widget_part menu_bar::hit_test(const point& aPosition) const
+	{
+		return widget_part::NonClientMenu;
+	}
+
 	void menu_bar::init()
 	{
 		set_margins(neogfx::margins{});

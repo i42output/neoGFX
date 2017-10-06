@@ -114,6 +114,16 @@ namespace neogfx
 		return result;
 	}
 
+	widget_part scrollable_widget::hit_test(const point& aPosition) const
+	{
+		if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(*this, aPosition + origin()) != scrollbar::ElementNone)
+			return widget_part::NonClientVerticalScrollbar;
+		else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(*this, aPosition + origin()) != scrollbar::ElementNone)
+			return widget_part::NonClientHorizontalScrollbar;
+		else
+			return widget_part::Client;
+	}
+
 	void scrollable_widget::paint_non_client_after(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint_non_client_after(aGraphicsContext);

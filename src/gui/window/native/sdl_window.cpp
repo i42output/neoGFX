@@ -131,6 +131,60 @@ namespace neogfx
 		return result;
 	}
 
+#ifdef WIN32
+	LRESULT convert_widget_part(widget_part aWidgetPart)
+	{
+		switch (aWidgetPart)
+		{
+		case widget_part::NonClientCaption:
+			return HTCAPTION;
+		case widget_part::NonClientBorder:
+			return HTBORDER;
+		case widget_part::NonClientBorderLeft:
+			return HTLEFT;
+		case widget_part::NonClientBorderTopLeft:
+			return HTTOPLEFT;
+		case widget_part::NonClientBorderTop:
+			return HTTOP;
+		case widget_part::NonClientBorderTopRight:
+			return HTTOPRIGHT;
+		case widget_part::NonClientBorderRight:
+			return HTRIGHT;
+		case widget_part::NonClientBorderBottomRight:
+			return HTBOTTOMRIGHT;
+		case widget_part::NonClientBorderBottom:
+			return HTBOTTOM;
+		case widget_part::NonClientBorderBottomLeft:
+			return HTBOTTOMLEFT;
+		case widget_part::NonClientGrowBox:
+			return HTGROWBOX;
+		case widget_part::NonClientCloseButton:
+			return HTCLOSE;
+		case widget_part::NonClientMaximizeButton:
+			return HTMAXBUTTON;
+		case widget_part::NonClientMinimizeButton:
+			return HTMINBUTTON;
+		case widget_part::NonClientRestoreButton:
+			return HTMAXBUTTON;
+		case widget_part::NonClientMenu:
+			return HTMENU;
+		case widget_part::NonClientSystemMenu:
+			return HTSYSMENU;
+		case widget_part::Nowhere:
+			return HTNOWHERE;
+		case widget_part::NowhereError:
+			return HTERROR;
+		case widget_part::NonClientVerticalScrollbar:
+		case widget_part::NonClientHorizontalScrollbar:
+		case widget_part::Client:
+		case widget_part::NonClient:
+		case widget_part::NonClientOther:
+		default:
+			return HTCLIENT;
+		}
+	}
+#endif
+
 	std::map<void*, sdl_window*> sHandleMap;
 
 	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
@@ -740,6 +794,8 @@ namespace neogfx
 				else if (hit & top) result = HTTOP;
 				else if (hit & right) result = HTRIGHT;
 				else if (hit & bottom) result = HTBOTTOM;
+				if (result == HTCLIENT)
+					result = convert_widget_part(self.window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y }));
 			}		
 			else
 				result = wndproc(hwnd, msg, wparam, lparam);

@@ -69,6 +69,7 @@ namespace neogfx
 		neogfx::units set_units(neogfx::units aUnits) const override;
 	public:
 		void resized() override;
+		widget_part hit_test(const point& aPosition) const override;
 	public:
 		neogfx::size_policy size_policy() const override;
 	public:
@@ -169,6 +170,7 @@ namespace neogfx
 		void native_window_mouse_moved(const point& aPosition) override;
 		void native_window_mouse_entered() override;
 		void native_window_mouse_left() override;
+		widget_part native_window_hit_test(const point& aPosition) override;
 		void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 		void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 		void native_window_text_input(const std::string& aText) override;

@@ -36,13 +36,15 @@ namespace neogfx
 		menu_bar(i_layout& aLayout);
 		~menu_bar();
 	public:
-		virtual neogfx::size_policy size_policy() const;	
+		neogfx::size_policy size_policy() const override;	
 	public:
-		virtual bool visible() const;
+		bool visible() const override;
 	public:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool text_input(const std::string& aText);
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool text_input(const std::string& aText) override;
+	public:
+		widget_part hit_test(const point& aPosition) const override;
 	private:
 		void init();
 		void close_sub_menu(bool aClearSelection = true);

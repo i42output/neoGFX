@@ -40,7 +40,7 @@ namespace neogfx
 		toolbar(i_widget& aParent);
 		toolbar(i_layout& aLayout);
 	public:
-		virtual neogfx::size_policy size_policy() const;
+		neogfx::size_policy size_policy() const override;
 	public:
 		virtual size button_image_extents() const;
 		virtual void set_button_image_extents(const optional_size& aExtents);
