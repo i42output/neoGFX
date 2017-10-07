@@ -30,6 +30,7 @@ namespace neogfx
 	class i_rendering_engine;
 	class i_surface_manager;
 	class i_keyboard;
+	class i_clipboard;
 	class i_style;
 	class i_action;
 	class i_mnemonic;
@@ -60,7 +61,11 @@ namespace neogfx
 		virtual i_rendering_engine& rendering_engine() const = 0;
 		virtual i_surface_manager& surface_manager() const = 0;
 		virtual const i_keyboard& keyboard() const = 0;
+		virtual i_clipboard& clipboard() const = 0;
 	public:
+		virtual const i_texture& default_window_icon() const = 0;
+		virtual void set_default_window_icon(const i_texture& aIcon) = 0;
+		virtual void set_default_window_icon(const i_image& aIcon) = 0;
 		virtual const i_style& current_style() const = 0;
 		virtual i_style& current_style() = 0;
 		virtual i_style& change_style(const std::string& aStyleName) = 0;

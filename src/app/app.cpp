@@ -32,7 +32,9 @@ namespace nrc
 {
 	// we need to explicitly reference the resource object here otherwise the resource object file will be omitted at link stage when linking with neoGFX (as a static .lib).
 	extern void* neogfx_icons;
-	void* ref_neogfx_icons = neogfx_icons; 
+	extern void* neogfx_resources;
+	void* ref_neogfx_icons = neogfx_icons;
+	void* ref_neogfx_resources = neogfx_resources;
 }
 
 namespace neogfx
@@ -98,6 +100,7 @@ namespace neogfx
 		iClipboard{ new neogfx::clipboard(basic_services().system_clipboard()) },
 		iRenderingEngine{ aServiceFactory.create_rendering_engine(iProgramOptions.renderer(), iProgramOptions.double_buffering(), basic_services(), keyboard()) },
 		iSurfaceManager{ new neogfx::surface_manager(basic_services(), *iRenderingEngine) },
+		iDefaultWindowIcon{ image{ ":/neogfx/resources/icons/neoGFX.png" } },
 		iCurrentStyle{ iStyles.begin() },
 		iActionFileNew{ add_action("&New...", ":/neogfx/resources/icons.naa#new.png").set_shortcut("Ctrl+Shift+N") },
 		iActionFileOpen{ add_action("&Open...", ":/neogfx/resources/icons.naa#open.png").set_shortcut("Ctrl+Shift+O") },
@@ -292,6 +295,21 @@ namespace neogfx
 			return *iClipboard;
 		else
 			throw no_clipboard();
+	}
+
+	const i_texture& app::default_window_icon() const
+	{
+		return iDefaultWindowIcon;
+	}
+
+	void app::set_default_window_icon(const i_texture& aIcon)
+	{
+		iDefaultWindowIcon = aIcon;
+	}
+
+	void app::set_default_window_icon(const i_image& aIcon)
+	{
+		iDefaultWindowIcon = aIcon;
 	}
 
 	const i_style& app::current_style() const

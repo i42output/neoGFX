@@ -35,7 +35,7 @@ namespace neogfx
 	enum class widget_part
 	{
 		Client,
-		NonClientCaption,
+		NonClientTitleBar,
 		NonClient,
 		NonClientBorder,
 		NonClientBorderLeft,
@@ -59,6 +59,19 @@ namespace neogfx
 		Nowhere,
 		NowhereError
 	};
+
+	inline bool capture_ok(widget_part aWidgetPart)
+	{
+		switch (aWidgetPart)
+		{
+		case widget_part::Client:
+		case widget_part::NonClientVerticalScrollbar:
+		case widget_part::NonClientHorizontalScrollbar:
+			return true;
+		default:
+			return false;
+		}
+	}
 
 	enum class focus_policy : uint32_t
 	{
@@ -254,8 +267,8 @@ namespace neogfx
 	public:
 		virtual graphics_context create_graphics_context() const = 0;
 	protected:
-		virtual const i_widget& widget_for_mouse_event(const point& aPosition) const = 0;
-		virtual i_widget& widget_for_mouse_event(const point& aPosition) = 0;
+		virtual const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const = 0;
+		virtual i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) = 0;
 	private:
 		virtual i_surface* find_surface() const = 0;
 		// helpers

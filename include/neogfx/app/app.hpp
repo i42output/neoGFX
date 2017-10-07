@@ -122,53 +122,56 @@ namespace neogfx
 		~app();
 	public:
 		static app& instance();
-		virtual const std::string& name() const;
-		virtual int exec(bool aQuitWhenLastWindowClosed = true);
-		virtual bool in_exec() const;
-		virtual void quit(int aResultCode);
-		virtual i_basic_services& basic_services() const;
-		virtual i_rendering_engine& rendering_engine() const;
-		virtual i_surface_manager& surface_manager() const;
-		virtual i_keyboard& keyboard() const;
-		virtual i_clipboard& clipboard() const;
+		const std::string& name() const override;
+		int exec(bool aQuitWhenLastWindowClosed = true) override;
+		bool in_exec() const override;
+		void quit(int aResultCode) override;
+		i_basic_services& basic_services() const override;
+		i_rendering_engine& rendering_engine() const override;
+		i_surface_manager& surface_manager() const override;
+		i_keyboard& keyboard() const override;
+		i_clipboard& clipboard() const override;
 	public:
-		virtual const i_style& current_style() const;
-		virtual i_style& current_style();
-		virtual i_style& change_style(const std::string& aStyleName);
-		virtual i_style& register_style(const i_style& aStyle);
+		const i_texture& default_window_icon() const override;
+		void set_default_window_icon(const i_texture& aIcon) override;
+		void set_default_window_icon(const i_image& aIcon) override;
+		const i_style& current_style() const override;
+		i_style& current_style() override;
+		i_style& change_style(const std::string& aStyleName) override;
+		i_style& register_style(const i_style& aStyle) override;
 	public:
-		virtual i_action& action_file_new();
-		virtual i_action& action_file_open();
-		virtual i_action& action_file_close();
-		virtual i_action& action_file_close_all();
-		virtual i_action& action_file_save();
-		virtual i_action& action_file_save_all();
-		virtual i_action& action_file_exit();
-		virtual i_action& action_undo();
-		virtual i_action& action_redo();
-		virtual i_action& action_cut();
-		virtual i_action& action_copy();
-		virtual i_action& action_paste();
-		virtual i_action& action_delete();
-		virtual i_action& action_select_all();
-		virtual i_action& find_action(const std::string& aText);
-		virtual i_action& add_action(const std::string& aText);
-		virtual i_action& add_action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling = texture_sampling::Normal);
-		virtual i_action& add_action(const std::string& aText, const i_texture& aImage);
-		virtual i_action& add_action(const std::string& aText, const i_image& aImage);
-		virtual void remove_action(i_action& aAction);
-		virtual void add_mnemonic(i_mnemonic& aMnemonic);
-		virtual void remove_mnemonic(i_mnemonic& aMnemonic);
+		i_action& action_file_new() override;
+		i_action& action_file_open() override;
+		i_action& action_file_close() override;
+		i_action& action_file_close_all() override;
+		i_action& action_file_save() override;
+		i_action& action_file_save_all() override;
+		i_action& action_file_exit() override;
+		i_action& action_undo() override;
+		i_action& action_redo() override;
+		i_action& action_cut() override;
+		i_action& action_copy() override;
+		i_action& action_paste() override;
+		i_action& action_delete() override;
+		i_action& action_select_all() override;
+		i_action& find_action(const std::string& aText) override;
+		i_action& add_action(const std::string& aText) override;
+		i_action& add_action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling = texture_sampling::Normal) override;
+		i_action& add_action(const std::string& aText, const i_texture& aImage) override;
+		i_action& add_action(const std::string& aText, const i_image& aImage) override;
+		void remove_action(i_action& aAction) override;
+		void add_mnemonic(i_mnemonic& aMnemonic) override;
+		void remove_mnemonic(i_mnemonic& aMnemonic) override;
 	public:
-		virtual bool process_events(i_event_processing_context& aContext);
+		bool process_events(i_event_processing_context& aContext) override;
 	private:
-		virtual void task() {}
+		void task() override {}
 		bool do_process_events();
 	private:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool text_input(const std::string& aText);
-		virtual bool sys_text_input(const std::string& aText);
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool text_input(const std::string& aText) override;
+		bool sys_text_input(const std::string& aText) override;
 	private:
 		program_options iProgramOptions;
 		loader iLoader;
@@ -181,6 +184,7 @@ namespace neogfx
 		std::unique_ptr<i_rendering_engine> iRenderingEngine;
 		std::unique_ptr<i_surface_manager> iSurfaceManager;
 		boost::optional<int> iQuitResultCode;
+		texture iDefaultWindowIcon;
 		style_list iStyles;
 		style_list::iterator iCurrentStyle;
 		action_list iActions;

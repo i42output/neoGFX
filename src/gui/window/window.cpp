@@ -29,113 +29,65 @@
 
 namespace neogfx
 {
+	window::window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+		scrollable_widget{ aScrollbarStyle, aFrameStyle },
+		iStyle { aStyle },
+		iUnits{ units::Pixels },
+		iCountedEnable{ 0 },
+		iNativeWindowClosing{ false },
+		iClosed{ false },
+		iEnteredWidget{ 0 },
+		iCapturingWidget{ 0 },
+		iFocusedWidget{ 0 },
+		iDismissingChildren{ false }, 
+		iLayout{ *this }
+	{
+	}
+
 	window::window(const video_mode& aVideoMode, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle), 
-		iUnits(units::Pixels), 
-		iCountedEnable(0), 
-		iNativeWindowClosing(false), 
-		iClosed(false),
-		iEnteredWidget(0), 
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aVideoMode, app::instance().name(), aStyle);
 		init();
 	}
 
 	window::window(const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle), 
-		iUnits(units::Pixels), 
-		iCountedEnable(0), 
-		iNativeWindowClosing(false), 
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aVideoMode, aWindowTitle, aStyle);
 		init();
 	}
 
 	window::window(const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle),
-		iUnits(units::Pixels),
-		iCountedEnable(0),
-		iNativeWindowClosing(false),
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aDimensions, app::instance().name(), aStyle);
 		init();
 	}
 
 	window::window(const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle),
-		iUnits(units::Pixels),
-		iCountedEnable(0),
-		iNativeWindowClosing(false),
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aDimensions, aWindowTitle, aStyle);
 		init();
 	}
 
 	window::window(const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle),
-		iUnits(units::Pixels),
-		iCountedEnable(0),
-		iNativeWindowClosing(false),
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aPosition, aDimensions, app::instance().name(), aStyle);
 		init();
 	}
 
 	window::window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle),
-		iUnits(units::Pixels),
-		iCountedEnable(0),
-		iNativeWindowClosing(false),
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aPosition, aDimensions, aWindowTitle, aStyle);
 		init();
 	}
 
 	window::window(i_widget& aParent, const video_mode& aVideoMode, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle), 
-		iUnits(units::Pixels), 
-		iCountedEnable(0), 
-		iNativeWindowClosing(false), 
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, app::instance().name(), aStyle);
 		set_parent(aParent.ultimate_ancestor());
@@ -143,16 +95,7 @@ namespace neogfx
 	}
 
 	window::window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle), 
-		iUnits(units::Pixels), 
-		iCountedEnable(0), 
-		iNativeWindowClosing(false), 
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aVideoMode, aWindowTitle, aStyle);
 		set_parent(aParent.ultimate_ancestor());
@@ -160,16 +103,7 @@ namespace neogfx
 	}
 
 	window::window(i_widget& aParent, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle),
-		iUnits(units::Pixels),
-		iCountedEnable(0),
-		iNativeWindowClosing(false),
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aDimensions, app::instance().name(), aStyle);
 		set_parent(aParent.ultimate_ancestor());
@@ -177,16 +111,7 @@ namespace neogfx
 	}
 
 	window::window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle),
-		iUnits(units::Pixels),
-		iCountedEnable(0),
-		iNativeWindowClosing(false),
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle);
 		set_parent(aParent.ultimate_ancestor());
@@ -194,16 +119,7 @@ namespace neogfx
 	}
 
 	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle),
-		iUnits(units::Pixels),
-		iCountedEnable(0),
-		iNativeWindowClosing(false),
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aPosition, aDimensions, app::instance().name(), aStyle);
 		set_parent(aParent.ultimate_ancestor());
@@ -211,16 +127,7 @@ namespace neogfx
 	}
 
 	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget(aScrollbarStyle, aFrameStyle),
-		iStyle(aStyle),
-		iUnits(units::Pixels),
-		iCountedEnable(0),
-		iNativeWindowClosing(false),
-		iClosed(false),
-		iEnteredWidget(0),
-		iCapturingWidget(0),
-		iFocusedWidget(0),
-		iDismissingChildren(false)
+		window{ aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		iNativeWindow = app::instance().rendering_engine().create_window(app::instance().surface_manager(), *this, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle);
 		set_parent(aParent.ultimate_ancestor());
@@ -334,7 +241,7 @@ namespace neogfx
 	{
 		auto result = scrollable_widget::hit_test(aPosition);
 		if (result == widget_part::Client)
-			result = widget_part::NonClientCaption;
+			result = widget_part::NonClientTitleBar;
 		return result;
 	}
 
@@ -799,6 +706,8 @@ namespace neogfx
 		app::instance().surface_manager().add_surface(*this);
 		update_modality();
 		scrollable_widget::init();
+		if ((style() & window_style::TitleBar) == window_style::TitleBar)
+			iTitleBar.emplace(iLayout, app::instance().default_window_icon(), app::instance().name());
 		layout_items(true);
 	}
 
@@ -954,10 +863,24 @@ namespace neogfx
 			previousEnteredWidget->mouse_left();
 	}
 
-	widget_part window::native_window_hit_test(const point& aPosition)
+	widget_part window::native_window_hit_test(const point& aPosition) const
 	{
-		i_widget& w = widget_for_mouse_event(aPosition);
+		const i_widget& w = widget_for_mouse_event(aPosition, true);
 		return w.hit_test(aPosition - w.origin());
+	}
+
+	rect window::native_window_widget_part_rect(widget_part aWidgetPart) const
+	{
+		switch (aWidgetPart)
+		{
+		case widget_part::NonClientTitleBar:
+			if (iTitleBar != boost::none)
+				return to_client_coordinates(iTitleBar->window_rect());
+			else
+				return rect{};
+		default:
+			return rect{};
+		}
 	}
 
 	void window::native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -1126,7 +1049,7 @@ namespace neogfx
 
 	neogfx::mouse_cursor window::native_window_mouse_cursor() const
 	{
-		const i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position()) : *iCapturingWidget);
+		const i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position(), true) : *iCapturingWidget);
 		return widgetUnderMouse.mouse_cursor();
 	}
 

@@ -558,6 +558,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\font_dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\title_bar.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
@@ -566,6 +569,7 @@
     <CustomBuild Include="..\..\..\..\src\assets\neoGFX\icons.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\resources.nrc" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\app\resource.cpp">
@@ -880,6 +884,9 @@
     <ClCompile Include="Debug\GeneratedFiles\resources.nrc.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\title_bar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">
@@ -899,9 +906,6 @@
     </None>
     <None Include="..\..\..\include\neogfx\game\shape.inl">
       <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\src\resources.nrc">
-      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
 </Project>

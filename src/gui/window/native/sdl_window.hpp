@@ -142,5 +142,6 @@ namespace neogfx
 		bool iDestroyed;
 		mutable margins iBorderThickness;
 		std::deque<key_modifiers_e> iMouseButtonEventExtraInfo;
+		widget_part iClickedWidgetPart;
 	};
 }

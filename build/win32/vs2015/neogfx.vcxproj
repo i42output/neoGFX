@@ -244,6 +244,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_page_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_edit.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\title_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp" />
@@ -388,6 +389,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\tab_page_container.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\text_edit.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\text_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\title_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\toolbar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\widget.cpp" />

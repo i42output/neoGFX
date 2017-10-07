@@ -64,8 +64,8 @@ namespace neogfx
 		virtual void paint(graphics_context& aGraphicsContext) const;
 	public:
 		const texture& image() const;
-		void set_image(const i_texture& aTexture);
-		void set_image(const i_image& aText);
+		void set_image(const i_texture& aImage);
+		void set_image(const i_image& aImage);
 		void set_aspect_ratio(aspect_ratio aAspectRatio);
 		void set_placement(cardinal_placement aPlacement);
 		void set_snap(dimension aSnap);

@@ -59,7 +59,8 @@ namespace neogfx
 		virtual void native_window_mouse_moved(const point& aPosition) = 0;
 		virtual void native_window_mouse_entered() = 0;
 		virtual void native_window_mouse_left() = 0;
-		virtual widget_part native_window_hit_test(const point& aPosition) = 0;
+		virtual widget_part native_window_hit_test(const point& aPosition) const = 0;
+		virtual rect native_window_widget_part_rect(widget_part aWidgetPart) const = 0;
 		virtual void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
 		virtual void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
 		virtual void native_window_text_input(const std::string& aText) = 0;

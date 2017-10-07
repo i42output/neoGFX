@@ -33,6 +33,7 @@ namespace neogfx
 		Tab,
 		DropList,
 		SpinBox,
+		TitleBar,
 		Toolbar
 	};
 

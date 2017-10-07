@@ -99,7 +99,7 @@ namespace neogfx
 	void push_button::paint_non_client(graphics_context& aGraphicsContext) const
 	{
 		button::paint_non_client(aGraphicsContext);
-		if (iStyle == push_button_style::Toolbar && enabled() && (entered() || capturing()))
+		if ((iStyle == push_button_style::Toolbar || iStyle == push_button_style::TitleBar) && enabled() && (entered() || capturing()))
 		{
 			colour background = (capturing() && entered() ? 
 				app::instance().current_style().palette().selection_colour() : 
@@ -138,6 +138,7 @@ namespace neogfx
 		case push_button_style::ButtonBox:
 		case push_button_style::ItemViewHeader:
 		case push_button_style::Toolbar:
+		case push_button_style::TitleBar:
 			if (!capturing())
 			{
 				if (!spot_colour())

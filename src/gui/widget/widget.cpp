@@ -1233,7 +1233,7 @@ namespace neogfx
 	{
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_pressed(aButton, aPosition + position(), aKeyModifiers);
-		else if (can_capture())
+		else if (capture_ok(hit_test(aPosition)) && can_capture())
 			set_capture();
 	}
 
@@ -1241,7 +1241,7 @@ namespace neogfx
 	{
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_double_clicked(aButton, aPosition + position(), aKeyModifiers);
-		else if (can_capture())
+		else if (capture_ok(hit_test(aPosition)) && can_capture())
 			set_capture();
 	}
 
@@ -1292,12 +1292,12 @@ namespace neogfx
 		return false;
 	}
 
-	const i_widget& widget::widget_for_mouse_event(const point& aPosition) const
+	const i_widget& widget::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
 	{
 		if (client_rect().contains(aPosition))
 		{
 			const i_widget* w = &widget_at(aPosition);
-			while (w != this && (w->hidden() || w->disabled() || w->ignore_mouse_events()))
+			while (w != this && (w->hidden() || (w->disabled() && !aForHitTest) || w->ignore_mouse_events()))
 			{
 				w = &w->parent();
 			}
@@ -1307,9 +1307,9 @@ namespace neogfx
 			return *this;
 	}
 
-	i_widget& widget::widget_for_mouse_event(const point& aPosition)
+	i_widget& widget::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
 	{
-		return const_cast<i_widget&>(const_cast<const widget*>(this)->widget_for_mouse_event(aPosition));
+		return const_cast<i_widget&>(const_cast<const widget*>(this)->widget_for_mouse_event(aPosition, aForHitTest));
 	}
 
 	graphics_context widget::create_graphics_context() const

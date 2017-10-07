@@ -136,7 +136,7 @@ namespace neogfx
 	{
 		switch (aWidgetPart)
 		{
-		case widget_part::NonClientCaption:
+		case widget_part::NonClientTitleBar:
 			return HTCAPTION;
 		case widget_part::NonClientBorder:
 			return HTBORDER;
@@ -196,7 +196,8 @@ namespace neogfx
 		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iClickedWidgetPart(widget_part::Nowhere)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -230,7 +231,8 @@ namespace neogfx
 		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iClickedWidgetPart(widget_part::Nowhere)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -264,7 +266,8 @@ namespace neogfx
 		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iClickedWidgetPart(widget_part::Nowhere)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -298,7 +301,8 @@ namespace neogfx
 		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iClickedWidgetPart(widget_part::Nowhere)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -332,7 +336,8 @@ namespace neogfx
 		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iClickedWidgetPart(widget_part::Nowhere)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -366,7 +371,8 @@ namespace neogfx
 		iVisible(false),
 		iCapturingMouse(false),
 		iReady(false),
-		iDestroyed(false)
+		iDestroyed(false),
+		iClickedWidgetPart(widget_part::Nowhere)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -673,6 +679,29 @@ namespace neogfx
 	}
 
 #ifdef WIN32
+	class suppress_style
+	{
+	public:
+		suppress_style(HWND aWindow, DWORD aStyle) : 
+			iWindow{ aWindow },
+			iStyle{ aStyle }
+		{
+			DWORD style = GetWindowLongPtr(iWindow, GWL_STYLE);
+			if ((style & iStyle) == iStyle)
+				SetWindowLongPtr(iWindow, GWL_STYLE, style & ~iStyle);
+			else
+				iStyle = 0;
+		}
+		~suppress_style()
+		{
+			DWORD style = GetWindowLongPtr(iWindow, GWL_STYLE);
+			SetWindowLongPtr(iWindow, GWL_STYLE, style | iStyle);
+		}
+	private:
+		HWND iWindow;
+		DWORD iStyle;
+	};
+
 	LRESULT CALLBACK sdl_window::CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		if (msg == WM_NCCREATE)
@@ -703,6 +732,18 @@ namespace neogfx
 				MARGINS margins = { 0 };
 				DwmExtendFrameIntoClientArea(hwnd, &margins);
 			}
+			break;
+		case WM_NCACTIVATE:
+			{
+				suppress_style ss{ hwnd, WS_VISIBLE };
+				result = wndproc(hwnd, msg, wparam, lparam);
+			}
+			break;
+		case WM_NCPAINT:
+			if (CUSTOM_DECORATION)
+				result = 0;
+			else
+				result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_PAINT:
 			ValidateRect(hwnd, NULL);
@@ -755,13 +796,76 @@ namespace neogfx
 		case WM_NCRBUTTONDOWN:
 		case WM_NCMBUTTONDOWN:
 			self.window().native_window_dismiss_children(); // call this before default wndproc (which enters its own NC drag message loop)
-			result = wndproc(hwnd, msg, wparam, lparam);
+			if (CUSTOM_DECORATION)
+			{
+				switch (wparam)
+				{
+				case HTSYSMENU:
+					self.iClickedWidgetPart = widget_part::NonClientSystemMenu;
+					result = 0;
+					break;
+				case HTMINBUTTON:
+					self.iClickedWidgetPart = widget_part::NonClientMinimizeButton;
+					result = 0;
+					break;
+				case HTMAXBUTTON:
+					self.iClickedWidgetPart = widget_part::NonClientMaximizeButton;
+					result = 0;
+					break;
+				case HTCLOSE:
+					self.iClickedWidgetPart = widget_part::NonClientCloseButton;
+					result = 0;
+					break;
+				default:
+					result = wndproc(hwnd, msg, wparam, lparam);
+					break;
+				}
+			}
+			else
+				result = wndproc(hwnd, msg, wparam, lparam);
+			break;
+		case WM_NCLBUTTONUP:
+		case WM_NCRBUTTONUP:
+		case WM_NCMBUTTONUP:
+			if (CUSTOM_DECORATION)
+			{
+				switch (wparam)
+				{
+				case HTSYSMENU:
+					if (self.iClickedWidgetPart == widget_part::NonClientSystemMenu)
+					{
+						basic_rect<int> rectTitleBar = self.window().native_window_widget_part_rect(widget_part::NonClientTitleBar) + self.surface_position();
+						TrackPopupMenu(GetSystemMenu(hwnd, FALSE), TPM_LEFTALIGN, rectTitleBar.x, rectTitleBar.bottom(), 0, hwnd, NULL);
+					}
+					result = 0;
+					break;
+				case HTMINBUTTON:
+					if (self.iClickedWidgetPart == widget_part::NonClientMinimizeButton)
+						PostMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, lparam);
+					result = 0;
+					break;
+				case HTMAXBUTTON:
+					if (self.iClickedWidgetPart == widget_part::NonClientMaximizeButton)
+						PostMessage(hwnd, WM_SYSCOMMAND, IsMaximized(hwnd) ? SC_RESTORE : SC_MAXIMIZE, lparam);
+					result = 0;
+					break;
+				case HTCLOSE:
+					if (self.iClickedWidgetPart == widget_part::NonClientCloseButton)
+						PostMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, lparam);
+					result = 0;
+					break;
+				default:
+					result = wndproc(hwnd, msg, wparam, lparam);
+					break;
+				}
+			}
+			else
+				result = wndproc(hwnd, msg, wparam, lparam);
+			self.iClickedWidgetPart = widget_part::Nowhere;
 			break;
 		case WM_DESTROY:
-			{
-				self.destroying();
-				result = wndproc(hwnd, msg, wparam, lparam);
-			}
+			self.destroying();
+			result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_ERASEBKGND:
 			result = true;
@@ -880,12 +984,19 @@ namespace neogfx
 		if ((iStyle & window_style::None) == window_style::None || (iStyle & window_style::TitleBar) == window_style::TitleBar)
 		{
 			newStyle |= WS_POPUP;
-			newStyle &= ~WS_THICKFRAME;
+//			newStyle &= ~WS_THICKFRAME;
+			newStyle |= WS_SYSMENU;
+			if ((iStyle & window_style::Resize) == window_style::Resize)
+			{
+				newStyle |= WS_MINIMIZEBOX;
+				newStyle |= WS_MAXIMIZEBOX;
+			}
+			else
+			{
+				newStyle &= ~WS_MINIMIZEBOX;
+				newStyle &= ~WS_MAXIMIZEBOX;
+			}
 		}
-		if ((iStyle & window_style::MinimizeBox) != window_style::MinimizeBox)
-			newStyle &= ~WS_MINIMIZEBOX;
-		if ((iStyle & window_style::MaximizeBox) != window_style::MaximizeBox)
-			newStyle &= ~WS_MAXIMIZEBOX;
 		if (newStyle != existingStyle)
 			SetWindowLongPtr(hwnd, GWL_STYLE, newStyle);
 		DWORD existingExtendedStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
@@ -1042,10 +1153,10 @@ namespace neogfx
 #else
 			iBorderThickness = margins{ 6.0, 6.0, 6.0, 6.0 };
 #endif
-			return iBorderThickness;
 		}
 		else
 			iBorderThickness = margins{ 1.0, 1.0, 1.0, 1.0 };
+		return iBorderThickness;
 	}
 
 	void sdl_window::push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers)

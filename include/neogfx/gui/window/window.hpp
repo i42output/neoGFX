@@ -23,6 +23,8 @@
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/widget/title_bar.hpp>
 
 namespace neogfx
 {
@@ -46,6 +48,8 @@ namespace neogfx
 		window(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		~window();
+	private:
+		window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle);
 	public:
 		window_style style() const;
 		void set_style(window_style aStyle);
@@ -170,7 +174,8 @@ namespace neogfx
 		void native_window_mouse_moved(const point& aPosition) override;
 		void native_window_mouse_entered() override;
 		void native_window_mouse_left() override;
-		widget_part native_window_hit_test(const point& aPosition) override;
+		widget_part native_window_hit_test(const point& aPosition) const override;
+		rect native_window_widget_part_rect(widget_part aWidgetPart) const override;
 		void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 		void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 		void native_window_text_input(const std::string& aText) override;
@@ -195,6 +200,8 @@ namespace neogfx
 		i_widget* iFocusedWidget;
 		bool iDismissingChildren;
 		boost::optional<char32_t> iSurrogatePairPart;
+		vertical_layout iLayout;
+		boost::optional<title_bar> iTitleBar;
 	};
 
 	inline constexpr window_style operator|(window_style aLhs, window_style aRhs)

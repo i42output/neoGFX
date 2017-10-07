@@ -259,8 +259,6 @@ namespace neogfx
 
 	void opengl_renderer::initialize()
 	{
-		glCheck(glewInit());
-
 		iDefaultProgram = create_shader_program(
 			shaders
 		{

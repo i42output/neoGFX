@@ -209,8 +209,8 @@ namespace neogfx
 	public:
 		graphics_context create_graphics_context() const override;
 	protected:
-		const i_widget& widget_for_mouse_event(const point& aPosition) const override;
-		i_widget& widget_for_mouse_event(const point& aPosition) override;
+		const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const override;
+		i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
 	private:
 		i_surface* find_surface() const override;
 		// helpers

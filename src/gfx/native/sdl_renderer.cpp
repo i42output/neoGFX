@@ -88,6 +88,7 @@ namespace neogfx
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glEnable(GL_DEPTH_TEST));
 		glCheck(glDepthFunc(GL_LEQUAL));
+		glCheck(glewInit());
 	}
 
 	sdl_renderer::~sdl_renderer()
