@@ -7,5 +7,6 @@
 		<file>resources/channel_256.png</file>	
 		<file>resources/orca.png</file>
     <file>resources/explosion.png</file>
+    <file>resources/icon.png</file>
   </resource>
 </nrc>

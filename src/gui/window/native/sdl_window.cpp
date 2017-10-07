@@ -733,6 +733,11 @@ namespace neogfx
 				DwmExtendFrameIntoClientArea(hwnd, &margins);
 			}
 			break;
+		case WM_SYSCOMMAND:
+			if (wparam == SC_CLOSE)
+				self.push_event(window_event(window_event::Close));
+			result = wndproc(hwnd, msg, wparam, lparam);
+			break;
 		case WM_NCACTIVATE:
 			{
 				suppress_style ss{ hwnd, WS_VISIBLE };
@@ -877,7 +882,7 @@ namespace neogfx
 				result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_NCHITTEST:
-			if (CUSTOM_DECORATION && (self.window().style() & window_style::Resize) == window_style::Resize)
+			if (CUSTOM_DECORATION)
 			{
 				result = HTCLIENT;
 				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };

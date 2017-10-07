@@ -39,6 +39,7 @@ Feature                   | % done  |     TODO
 --------------------------|---------|-------------------------------------------------------------------------------
 Window                    | 90      |     Icon; drop shadow
 Dialog                    | 90      |     Default button
+Message Box               | 0       |
 Menu                      | 100     | 
 MDI                       | 0       |
 Tabs                      | 100     |     
@@ -63,4 +64,4 @@ File Browsers (Native)    | 0       |
 XML Resource Description  | 0       |
 Skins                     | 0       |
 
-Last updated: 25/05/2017
+Last updated: 07/10/2017

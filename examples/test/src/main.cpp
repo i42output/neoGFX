@@ -143,6 +143,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
+		app.set_default_window_icon(ng::image(":/test/resources/icon.png"));
 		app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
@@ -150,7 +151,7 @@ int main(int argc, char* argv[])
 		app.current_style().palette().set_colour(ng::colour::Black);
 		app.change_style("Default");
 
-		ng::window window(ng::size{ 800, 768 });
+		ng::window window(ng::size{ 768, 688 });
 
 		bool showFps = false;
 		auto fpsFont = window.font().with_size(18);
@@ -326,21 +327,22 @@ int main(int argc, char* argv[])
 		ng::i_widget& buttonsPage = tabContainer.add_tab_page("Buttons").as_widget();
 		ng::vertical_layout layoutButtons(buttonsPage);
 		layoutButtons.set_margins(ng::margins(8));
-		ng::push_button button0(layoutButtons, "This is the neoGFX test application.");
+		ng::horizontal_layout topButtons(layoutButtons);
+		ng::push_button button0(topButtons, "This is the neoGFX test application.");
 		button0.label().set_placement(ng::label_placement::ImageTextVertical);
 		button0.image().set_image(ng::image{ ":/test/resources/neoGFX.png" });
 		button0.image().set_minimum_size(ng::size{ 32, 32 });
 		button0.image().set_maximum_size(ng::size{ 160, std::numeric_limits<ng::dimension>::max() });
 		button0.set_size_policy(ng::size_policy::Expanding);
 		button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
-		ng::push_button button1(layoutButtons, "the,,, quick brown fox jumps over the lazy dog");
+		ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog");
+		ng::horizontal_layout international(layoutButtons);
 		button1.set_foreground_colour(ng::colour::LightGoldenrod);
-		ng::push_button button2(layoutButtons, u8"ويقفز الثعلب البني السريع فوق الكلب الكسول");
+		ng::push_button button2(international, u8"ويقفز الثعلب البني السريع فوق الكلب الكسول");
 		button2.set_foreground_colour(ng::colour::Goldenrod);
-		ng::push_button button3(layoutButtons, u8"שועל חום קפיצות מעל הכלב העצלן");
+		ng::push_button button3(international, u8"שועל חום קפיצות מעל הכלב העצלן");
 		button3.set_foreground_colour(ng::colour::DarkGoldenrod);
-		button3.set_minimum_size(ng::size(288, 64));
-		ng::push_button button4(layoutButtons, u8"请停止食用犬");
+		ng::push_button button4(international, u8"请停止食用犬");
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
@@ -481,15 +483,6 @@ int main(int argc, char* argv[])
 		});
 		ng::vertical_spacer spacerCheckboxes(layoutRadiosAndChecks);
 		ng::vertical_layout layout4(layout2);
-		ng::push_button button9(layout4, "Default/Slate\nStyle");
-		button9.clicked([&app]()
-		{
-			if (app.current_style().name() == "Default")
-				app.change_style("Slate");
-			else
-				app.change_style("Default");
-		});
-		button9.set_foreground_colour(ng::colour::Aquamarine);
 		ng::horizontal_layout layout7(layout4);
 		ng::check_box buttonKerning(layout7, "kern");
 		ng::check_box buttonSubpixel(layout7, "subpix");
@@ -631,7 +624,17 @@ int main(int argc, char* argv[])
 		});
 
 		ng::vertical_spacer spacer1{ layout4 };
-		ng::grid_layout keypad{ layout2, 4, 3 };
+		ng::vertical_layout keypadLayout{ layout2 };
+		ng::push_button button9(keypadLayout, "Default/Slate\nStyle");
+		button9.clicked([&app]()
+		{
+			if (app.current_style().name() == "Default")
+				app.change_style("Slate");
+			else
+				app.change_style("Default");
+		});
+		button9.set_foreground_colour(ng::colour::Aquamarine);
+		ng::grid_layout keypad{ keypadLayout, 4, 3 };
 		keypad.set_minimum_size(ng::size{ 100.0, 0.0 });
 		keypad.set_spacing(0.0);
 		for (uint32_t row = 0; row < 3; ++row)
