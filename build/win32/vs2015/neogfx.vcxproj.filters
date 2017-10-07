@@ -555,9 +555,6 @@
     <ClInclude Include="..\..\..\include\neogfx\core\html.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\font_dialog.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\title_bar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -867,9 +864,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\html.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Release\GeneratedFiles\icons.nrc.cpp">
