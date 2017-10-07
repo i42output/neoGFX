@@ -249,6 +249,9 @@ namespace neogfx
 			glCheck(glDeleteTextures(1, &(*iGradientTextures)[0]));
 			glCheck(glDeleteTextures(1, &(*iGradientTextures)[1]));
 			glCheck(glDeleteTextures(1, &(*iGradientTextures)[2]));
+			glCheck(glDeleteTextures(1, &(*iFilterTextures)[0]));
+			glCheck(glDeleteTextures(1, &(*iFilterTextures)[1]));
+			glCheck(glDeleteTextures(1, &(*iFilterTextures)[2]));
 		}
 	}
 
@@ -377,8 +380,8 @@ namespace neogfx
 					GL_FRAGMENT_SHADER)
 			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
 
-		iGlyphProgram = create_shader_program(
-			shaders
+			iGlyphProgram = create_shader_program(
+				shaders
 			{
 				std::make_pair(
 					std::string(
@@ -409,6 +412,7 @@ namespace neogfx
 						"uniform int effectWidth;\n"
 						"uniform vec4 effectRect;\n"
 						"uniform vec4 glyphRect;\n"
+						"uniform sampler2DRect texFilter;\n"
 						"in vec4 Color;\n"
 						"out vec4 FragColor;\n"
 						"varying vec2 vGlyphTexCoord;\n"
@@ -424,7 +428,10 @@ namespace neogfx
 						"\n"
 						"void main()\n"
 						"{\n"
+						"   float buffer[32*32];"
+						"	float filterCoefficient = 1.0;\n"
 						"	float a = 0.0;\n"
+						"	int passes = 5;\n"
 						"	ivec2 dtpos = ivec2(vOutputCoord.x, adjust_y(vOutputCoord.y));\n"
 						"   switch(effect)\n"
 						"   {\n"
@@ -435,16 +442,33 @@ namespace neogfx
 						"   case 2:\n"/* todo */
 						"		if (dtpos.x >= effectRect.x && dtpos.x < effectRect.z && dtpos.y >= adjust_y(effectRect.y) && dtpos.y < adjust_y(effectRect.w))\n"
 						"		{\n"
-						"			for (int y = -effectWidth; y <= effectWidth; ++y)\n"
+						"			if (texelFetch(texFilter, ivec2(effectWidth, effectWidth)).r == 1.0)\n"
 						"			{\n"
-						"				for (int x = -effectWidth; x <= effectWidth; ++x)\n"
+						"				a = 1.0;\n"
+						"			}\n"
+						"			else\n"
+						"			{\n"
+						"				for (int pass = 1; pass <= passes; pass += 1)\n"
 						"				{\n"
-						"					ivec2 pos = ivec2(dtpos.x + x, dtpos.y + y);\n"
-						"					if (pos.x >= glyphRect.x && pos.x < glyphRect.z && pos.y >= adjust_y(glyphRect.y) && pos.y < adjust_y(glyphRect.w))\n"
+						"					for (int y = -effectWidth; y <= effectWidth; ++y)\n"
 						"					{\n"
-						"						ivec2 tpos = ivec2(x, y) + ivec2(pos.x - glyphRect.x, pos.y - adjust_y(glyphRect.y));\n"
-						"						float thisAlpha = texelFetch(glyphTexture, ivec2(glyphOrigin.x + tpos.x, glyphOrigin.y - (glyphRect.w - glyphRect.y) - tpos.y - 1), 0).a;\n"
-						"						a = max(a, thisAlpha);\n"
+						"						for (int x = -effectWidth; x <= effectWidth; ++x)\n"
+						"						{\n"
+						"							ivec2 pos = ivec2(dtpos.x + x, dtpos.y + y);\n"
+						"							float thisAlpha = 0.0;\n"
+						"							if (pass == 1 && pos.x >= glyphRect.x && pos.x < glyphRect.z && pos.y >= adjust_y(glyphRect.y) && pos.y < adjust_y(glyphRect.w))\n"
+						"							{\n"
+						"								ivec2 tpos = ivec2(x, y) + ivec2(pos.x - glyphRect.x, pos.y - adjust_y(glyphRect.y));\n"
+						"								thisAlpha = texelFetch(glyphTexture, ivec2(glyphOrigin.x + tpos.x, glyphOrigin.y - (glyphRect.w - glyphRect.y) - tpos.y - 1), 0).a;\n"
+						"							}\n"
+						"							else if (pass > 1)\n"
+						"								thisAlpha = buffer[(y + effectWidth) * (effectWidth * 2 + 1) + x + effectWidth];\n"
+						"							float filterKernelValue = filterCoefficient * texelFetch(texFilter, ivec2(x + effectWidth, y + effectWidth)).r;\n"
+						"							float result = ((thisAlpha != 0.0 ? 1.0 : 0.0) * filterKernelValue);\n"
+						"							buffer[(y + effectWidth) * (effectWidth * 2 + 1) + x + effectWidth] = result;\n"
+						"							if (pass == passes)\n"
+						"								a += result;\n"
+						"						}\n"
 						"					}\n"
 						"				}\n"
 						"			}\n"
@@ -857,6 +881,36 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, previousTexture));
 		}
 		return *iGradientTextures;
+	}
+
+	const std::array<GLuint, 3>& opengl_renderer::filter_textures() const
+	{
+		// todo: use texture class
+		glCheck(glEnable(GL_TEXTURE_RECTANGLE));
+		if (iFilterTextures == boost::none)
+		{
+			iFilterTextures.emplace(std::array<GLuint, 3>{});
+			glCheck(glGenTextures(1, &(*iFilterTextures)[0]));
+			glCheck(glGenTextures(1, &(*iFilterTextures)[1]));
+			glCheck(glGenTextures(1, &(*iFilterTextures)[2]));
+			GLint previousTexture;
+			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE, &previousTexture));
+			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iFilterTextures)[0]));
+			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+			static const std::array<float, 32 * 32> sFilter = {};
+			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R32F, 32, 32, 0, GL_RED, GL_FLOAT, &sFilter[0]));
+			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iFilterTextures)[1]));
+			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R32F, 32, 32, 0, GL_RED, GL_FLOAT, &sFilter[0]));
+			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iFilterTextures)[2]));
+			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R32F, 32, 32, 0, GL_RED, GL_FLOAT, &sFilter[0]));
+			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, previousTexture));
+		}
+		return *iFilterTextures;
 	}
 
 	bool opengl_renderer::process_events()

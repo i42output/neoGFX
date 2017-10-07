@@ -131,6 +131,7 @@ namespace neogfx
 	public:
 		static const uint32_t GRADIENT_FILTER_SIZE = 15;
 		const std::array<GLuint, 3>& gradient_textures() const; // todo: use texture class and add to base class interface
+		const std::array<GLuint, 3>& filter_textures() const; // todo: use texture class and add to base class interface
 	public:
 		virtual bool process_events();
 	private:
@@ -150,5 +151,6 @@ namespace neogfx
 		shader_programs::iterator iGradientProgram;
 		bool iSubpixelRendering;
 		mutable boost::optional<std::array<GLuint, 3>> iGradientTextures;
+		mutable boost::optional<std::array<GLuint, 3>> iFilterTextures;
 	};
 }

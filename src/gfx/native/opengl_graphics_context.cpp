@@ -1200,6 +1200,9 @@ namespace neogfx
 		iVertexArrays.colours().clear();
 		iVertexArrays.texture_coords().clear();
 
+		uint32_t filterSize = 0;
+		double sigma = 0.0;
+
 		for (uint32_t pass = 1; pass <= 2; ++pass)
 		{
 			for (const auto& op : aDrawGlyphOps)
@@ -1246,6 +1249,40 @@ namespace neogfx
 									std::array <uint8_t, 4>{});
 								iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
 							}
+						}
+					}
+					else if (drawOp.appearance.effect().type() == text_effect::Glow)
+					{
+						rect effectRect = outputRect;
+						effectRect.inflate(size{ drawOp.appearance.effect().width() });
+
+						filterSize = static_cast<uint32_t>(drawOp.appearance.effect().width()) * 2 + 1;
+						sigma = drawOp.appearance.effect().aux1();
+
+						iVertexArrays.vertices().insert(iVertexArrays.vertices().end(),
+						{
+							to_shader_vertex(effectRect.top_left()),
+							to_shader_vertex(effectRect.top_right()),
+							to_shader_vertex(effectRect.bottom_right()),
+							to_shader_vertex(effectRect.bottom_left())
+						});
+						iVertexArrays.vertices().insert(iVertexArrays.vertices().end(),
+						{
+							to_shader_vertex(outputRect.top_left()),
+							to_shader_vertex(outputRect.top_right()),
+							to_shader_vertex(outputRect.bottom_right()),
+							to_shader_vertex(outputRect.bottom_left())
+						});
+						for (uint32_t n = 1; n <= 2; ++n)
+						{
+							iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4, drawOp.appearance.effect().colour().is<colour>() ?
+								std::array <uint8_t, 4>{ {
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green(),
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
+								std::array <uint8_t, 4>{});
+							iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
 						}
 					}
 				}
@@ -1300,6 +1337,20 @@ namespace neogfx
 		disable_anti_alias daa(*this);
 
 		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel())};
+
+		if (filterSize != 0)
+		{
+			auto filter = dynamic_gaussian_filter<float>(filterSize, static_cast<float>(sigma));
+			// todo: remove the following cast when gradient textures abstracted in rendering engine base class interface
+			auto filterTexture = static_cast<opengl_renderer&>(iRenderingEngine).filter_textures()[0];
+			glCheck(glActiveTexture(GL_TEXTURE5));
+			glCheck(glClientActiveTexture(GL_TEXTURE5));
+			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, filterTexture));
+			glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, filterSize, filterSize, GL_RED, GL_FLOAT, &filter[0][0]));
+			iRenderingEngine.active_shader_program().set_uniform_variable("texFilter", 5);
+			glCheck(glActiveTexture(GL_TEXTURE1));
+			glCheck(glClientActiveTexture(GL_TEXTURE1));
+		}
 
 		std::size_t index = 0;
 		for (uint32_t pass = 1; pass <= 2; ++pass)
@@ -1357,7 +1408,7 @@ namespace neogfx
 						}
 						shader.set_uniform_variable("effectWidth", static_cast<int>(drawOp.appearance.effect().width()));
 						glCheck(glDrawArrays(GL_QUADS, index, 4));
-						index += 4;
+						index += (4 * 2);
 					}
 				}
 				else if (pass == 2)
