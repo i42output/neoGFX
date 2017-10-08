@@ -67,7 +67,7 @@ namespace neogfx
 		{
 		public:
 			alpha_dialog(i_widget& aParent, colour::component aCurrentAlpha) :
-				dialog(aParent, "Select Alpha (Opacity Level)", window_style::Modal | window_style::TitleBar | window_style::Close), iLayout{ *this }, iLayout2{ iLayout }, iSlider{ iLayout2 }, iSpinBox{ iLayout2 }
+				dialog(aParent, "Select Alpha (Opacity Level)", window_style::Modal | window_style::TitleBar | window_style::Close), iLayout{ layout() }, iLayout2{ client_layout() }, iSlider{ iLayout2 }, iSpinBox{ iLayout2 }
 			{
 				init(aCurrentAlpha);
 			}
@@ -79,7 +79,9 @@ namespace neogfx
 		private:
 			void init(colour::component aCurrentAlpha)
 			{
-				set_margins(neogfx::margins{ 16.0 });
+				set_margins(neogfx::margins{});
+				window::client_layout().set_margins(neogfx::margins{ 16.0 });
+				window::client_layout().set_spacing(16.0);
 				iLayout.set_margins(neogfx::margins{});
 				iLayout.set_spacing(16.0);
 				iLayout2.set_margins(neogfx::margins{});
@@ -102,7 +104,7 @@ namespace neogfx
 			virtual void paint_non_client(graphics_context& aGraphicsContext) const
 			{
 				dialog::paint_non_client(aGraphicsContext);
-				auto backgroundRect = client_rect();
+				rect backgroundRect{ window::client_layout().position(), window::client_layout().extents() };
 				aGraphicsContext.scissor_on(update_rect());
 				draw_alpha_background(aGraphicsContext, backgroundRect);
 				aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));

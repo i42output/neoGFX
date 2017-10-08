@@ -34,6 +34,8 @@ namespace neogfx
 	{
 	public:
 		event<graphics_context&> paint_overlay;
+	private:
+		typedef boost::optional<title_bar> optional_title_bar;
 	public:
 		window(const video_mode& aVideoMode, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
@@ -185,6 +187,11 @@ namespace neogfx
 		void native_window_sys_text_input(const std::string& aText) override;
 		neogfx::mouse_cursor native_window_mouse_cursor() const override;
 		void native_window_title_text_changed(const std::string& aTitleText) override;
+	public:
+		virtual const i_layout& non_client_layout() const;
+		virtual i_layout& non_client_layout();
+		virtual const i_layout& client_layout() const;
+		virtual i_layout& client_layout();
 	private:
 		void init();
 		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos);
@@ -204,8 +211,9 @@ namespace neogfx
 		i_widget* iFocusedWidget;
 		bool iDismissingChildren;
 		boost::optional<char32_t> iSurrogatePairPart;
-		vertical_layout iLayout;
-		boost::optional<title_bar> iTitleBar;
+		vertical_layout iNonClientLayout;
+		optional_title_bar iTitleBar;
+		vertical_layout iClientLayout;
 	};
 
 	inline constexpr window_style operator|(window_style aLhs, window_style aRhs)

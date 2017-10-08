@@ -653,7 +653,7 @@ namespace neogfx
 		iCurrentCustomColour{ iCustomColours.end() },
 		iUpdatingWidgets{ false },
 		iScreenPickerActive{ false },
-		iLayout{ layout() },
+		iLayout{ client_layout() },
 		iLayout2{ iLayout },
 		iLeftLayout{ iLayout2 },
 		iRightLayout{ iLayout2 },
@@ -690,7 +690,7 @@ namespace neogfx
 		iCurrentCustomColour{ iCustomColours.end() },
 		iUpdatingWidgets{ false },
 		iScreenPickerActive{ false },
-		iLayout{ layout() },
+		iLayout{ client_layout() },
 		iLayout2{ iLayout },
 		iLeftLayout{ iLayout2 },
 		iRightLayout{ iLayout2 },
@@ -799,7 +799,9 @@ namespace neogfx
 			colour::SlateBlue, colour::SlateGray, colour::Snow, colour::SpringGreen, colour::SteelBlue, colour::Tan, colour::Thistle, colour::Tomato, 
 			colour::Turquoise, colour::Violet, colour::VioletRed, colour::Wheat, colour::White, colour::WhiteSmoke, colour::Yellow, colour::YellowGreen 
 		};
-		set_margins(neogfx::margins{16.0});
+		set_margins(neogfx::margins{});
+		window::client_layout().set_margins(neogfx::margins{ 16.0 });
+		window::client_layout().set_spacing(16.0);
 		iLayout.set_margins(neogfx::margins{});
 		iLayout.set_spacing(16.0);
 		iLayout2.set_margins(neogfx::margins{});

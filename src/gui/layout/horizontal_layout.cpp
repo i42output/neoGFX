@@ -43,6 +43,11 @@ namespace neogfx
 	{
 	}
 
+	horizontal_layout::horizontal_layout(horizontal_layout& aParent) :
+		horizontal_layout(static_cast<i_layout&>(aParent))
+	{
+	}
+
 	i_spacer& horizontal_layout::add_spacer()
 	{
 		auto s = std::make_shared<horizontal_spacer>();

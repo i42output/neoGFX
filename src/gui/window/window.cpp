@@ -40,7 +40,7 @@ namespace neogfx
 		iCapturingWidget{ 0 },
 		iFocusedWidget{ 0 },
 		iDismissingChildren{ false }, 
-		iLayout{ *this }
+		iNonClientLayout{ *this }
 	{
 	}
 
@@ -717,7 +717,8 @@ namespace neogfx
 		update_modality();
 		scrollable_widget::init();
 		if ((style() & window_style::TitleBar) == window_style::TitleBar)
-			iTitleBar.emplace(iLayout, app::instance().default_window_icon(), native_window().title_text());
+			iTitleBar.emplace(non_client_layout(), app::instance().default_window_icon(), native_window().title_text());
+		non_client_layout().add_item(client_layout());
 		layout_items(true);
 	}
 
@@ -1067,6 +1068,26 @@ namespace neogfx
 	{
 		if (iTitleBar != boost::none)
 			iTitleBar->title().set_text(aTitleText);
+	}
+
+	const i_layout& window::non_client_layout() const
+	{
+		return iNonClientLayout;
+	}
+
+	i_layout& window::non_client_layout()
+	{
+		return iNonClientLayout;
+	}
+
+	const i_layout& window::client_layout() const
+	{
+		return iClientLayout;
+	}
+
+	i_layout& window::client_layout()
+	{
+		return iClientLayout;
 	}
 
 	void window::update_click_focus(i_widget& aCandidateWidget, const point& aClickPos)

@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
 			}
 		});
 
-		auto& layout0 = window.layout();
+		auto& layout0 = window.client_layout();
 
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{

@@ -43,6 +43,11 @@ namespace neogfx
 	{
 	}
 
+	vertical_layout::vertical_layout(vertical_layout& aParent) :
+		vertical_layout(static_cast<i_layout&>(aParent))
+	{
+	}
+
 	i_spacer& vertical_layout::add_spacer()
 	{
 		auto s = std::make_shared<vertical_spacer>();

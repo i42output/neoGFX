@@ -102,7 +102,7 @@ namespace neogfx
 
 	gradient_dialog::gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient) :
 		dialog(aParent, "Select Gradient", window_style::Modal | window_style::TitleBar | window_style::Close),
-		iLayout{ *this }, iLayout2{ iLayout }, iLayout3{ iLayout2 }, iLayout4{ iLayout2 },
+		iLayout{ client_layout() }, iLayout2{ iLayout }, iLayout3{ iLayout2 }, iLayout4{ iLayout2 },
 		iSelectorGroupBox{ iLayout3 },
 		iGradientSelector{ *this, iSelectorGroupBox.item_layout(), aCurrentGradient },
 		iSmoothnessGroupBox{ iSelectorGroupBox.item_layout(), "Smoothness (%)" },
@@ -175,7 +175,9 @@ namespace neogfx
 
 	void gradient_dialog::init()
 	{
-		set_margins(neogfx::margins{ 16.0 });
+		set_margins(neogfx::margins{});
+		window::client_layout().set_margins(neogfx::margins{ 16.0 });
+		window::client_layout().set_spacing(16.0);
 		iLayout.set_margins(neogfx::margins{});
 		iLayout.set_spacing(16.0);
 		iLayout2.set_margins(neogfx::margins{});

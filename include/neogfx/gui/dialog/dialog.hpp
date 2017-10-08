@@ -62,9 +62,13 @@ namespace neogfx
 		virtual bool can_close() const;
 	public:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+	public:
+		virtual const i_layout& client_layout() const;
+		virtual i_layout& client_layout();
 	private:
 		void init();
 	private:
+		vertical_layout iClientLayout;
 		boost::optional<dialog_button_box> iButtonBox;
 		boost::optional<result_code_e> iResult;
 	};

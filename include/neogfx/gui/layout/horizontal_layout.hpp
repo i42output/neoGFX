@@ -31,6 +31,7 @@ namespace neogfx
 		horizontal_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
 		horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
 		horizontal_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+		horizontal_layout(horizontal_layout& aParent);
 	public:
 		using layout::add_spacer;
 		virtual i_spacer& add_spacer();

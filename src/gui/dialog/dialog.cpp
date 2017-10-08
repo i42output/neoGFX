@@ -24,73 +24,85 @@
 namespace neogfx
 {
 	dialog::dialog(window_style aStyle) :
-		window(size{}, aStyle)
+		window(size{}, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const std::string& aDialogTitle, window_style aStyle) :
-		window(size{}, aDialogTitle, aStyle)
+		window(size{}, aDialogTitle, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const size& aDimensions, window_style aStyle) :
-		window(aDimensions, aStyle)
+		window(aDimensions, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
-		window(aDimensions, aDialogTitle, aStyle)
+		window(aDimensions, aDialogTitle, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const point& aPosition, const size& aDimensions, window_style aStyle) :
-		window(aPosition, aDimensions, aStyle)
+		window(aPosition, aDimensions, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
-		window(aPosition, aDimensions, aDialogTitle, aStyle)
+		window(aPosition, aDimensions, aDialogTitle, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, window_style aStyle) :
-		window(aParent, size{}, aStyle)
+		window(aParent, size{}, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle) :
-		window(aParent, size{}, aDialogTitle, aStyle)
+		window(aParent, size{}, aDialogTitle, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const size& aDimensions, window_style aStyle) :
-		window(aParent, aDimensions, aStyle)
+		window(aParent, aDimensions, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
-		window(aParent, aDimensions, aDialogTitle, aStyle)
+		window(aParent, aDimensions, aDialogTitle, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle) :
-		window(aParent, aPosition, aDimensions, aStyle)
+		window(aParent, aPosition, aDimensions, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
-		window(aParent, aPosition, aDimensions, aDialogTitle, aStyle)
+		window(aParent, aPosition, aDimensions, aDialogTitle, aStyle),
+		iClientLayout{ window::client_layout() }
 	{
 		init();
 	}
@@ -129,9 +141,7 @@ namespace neogfx
 	{
 		if (iButtonBox == boost::none)
 		{
-			if (!has_layout())
-				set_layout(std::make_shared<vertical_layout>());
-			iButtonBox.emplace(layout());
+			iButtonBox.emplace(window::client_layout());
 			iButtonBox->accepted([this]()
 			{
 				accept();
@@ -183,6 +193,16 @@ namespace neogfx
 		default:
 			return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 		}
+	}
+
+	const i_layout& dialog::client_layout() const
+	{
+		return iClientLayout;
+	}
+
+	i_layout& dialog::client_layout()
+	{
+		return iClientLayout;
 	}
 
 	void dialog::init()

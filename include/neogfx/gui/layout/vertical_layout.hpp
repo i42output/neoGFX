@@ -29,6 +29,7 @@ namespace neogfx
 		vertical_layout(neogfx::alignment aAlignment = neogfx::alignment::Left);
 		vertical_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
 		vertical_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
+		vertical_layout(vertical_layout& aParent);
 	public:
 		using layout::add_spacer;
 		virtual i_spacer& add_spacer();
