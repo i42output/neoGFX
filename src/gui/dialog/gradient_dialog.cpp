@@ -175,9 +175,8 @@ namespace neogfx
 
 	void gradient_dialog::init()
 	{
-		set_margins(neogfx::margins{});
-		window::client_layout().set_margins(neogfx::margins{ 16.0 });
-		window::client_layout().set_spacing(16.0);
+		set_standard_layout(16.0);
+
 		iLayout.set_margins(neogfx::margins{});
 		iLayout.set_spacing(16.0);
 		iLayout2.set_margins(neogfx::margins{});

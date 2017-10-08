@@ -40,12 +40,11 @@ int main(int argc, char* argv[])
 		app.current_style().set_spacing(ng::size{ 4.0 });
 
 		ng::window mainWindow{ app.basic_services().display().desktop_rect() * ng::size{ 0.5, 0.5 } };
-		mainWindow.set_margins(ng::margins{});
-		ng::vertical_layout mainLayout{ mainWindow };
+		ng::i_layout& mainLayout = mainWindow.client_layout();
 		mainLayout.set_margins(ng::margins{});
 		mainLayout.set_spacing(ng::size{});
 
-		ng::menu_bar mainMenu{ mainLayout };
+		ng::menu_bar mainMenu{ mainWindow.menu_layout() };
 
 		auto& fileMenu = mainMenu.add_sub_menu("&File");
 		fileMenu.add_action(app.action_file_new());
@@ -75,7 +74,7 @@ int main(int argc, char* argv[])
 		editMenu.add_separator();
 		editMenu.add_action(app.action_select_all());
 
-		ng::toolbar toolbar{ mainLayout };
+		ng::toolbar toolbar{ mainWindow.toolbar_layout() };
 		toolbar.set_button_image_extents(ng::size{ 16.0, 16.0 });
 		toolbar.add_action(app.action_file_new());
 		toolbar.add_action(app.action_file_open());

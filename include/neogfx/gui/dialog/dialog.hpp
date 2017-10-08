@@ -54,6 +54,7 @@ namespace neogfx
 		virtual void accept();
 		virtual void reject();
 	public:
+		void set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox = true);
 		dialog_button_box& button_box();
 		result_code_e exec();
 	public:
@@ -65,10 +66,13 @@ namespace neogfx
 	public:
 		virtual const i_layout& client_layout() const;
 		virtual i_layout& client_layout();
+		virtual const i_layout& button_box_layout() const;
+		virtual i_layout& button_box_layout();
 	private:
 		void init();
 	private:
 		vertical_layout iClientLayout;
+		vertical_layout iButtonBoxLayout;
 		boost::optional<dialog_button_box> iButtonBox;
 		boost::optional<result_code_e> iResult;
 	};

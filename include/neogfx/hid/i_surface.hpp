@@ -154,15 +154,18 @@ namespace neogfx
 	class pause_rendering
 	{
 	public:
-		pause_rendering(i_surface& aSurface) : iSurface(aSurface)
+		pause_rendering(i_surface& aSurface) : iOkToPause{ !aSurface.destroyed() }, iSurface{ aSurface }
 		{
-			iSurface.pause_rendering();
+			if (iOkToPause)
+				iSurface.pause_rendering();
 		}
 		~pause_rendering()
 		{
-			iSurface.resume_rendering();
+			if (iOkToPause)
+				iSurface.resume_rendering();
 		}
 	private:
+		bool iOkToPause;
 		i_surface& iSurface;
 	};
 }

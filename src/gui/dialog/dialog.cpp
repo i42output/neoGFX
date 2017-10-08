@@ -25,84 +25,96 @@ namespace neogfx
 {
 	dialog::dialog(window_style aStyle) :
 		window(size{}, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const std::string& aDialogTitle, window_style aStyle) :
 		window(size{}, aDialogTitle, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const size& aDimensions, window_style aStyle) :
 		window(aDimensions, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
 		window(aDimensions, aDialogTitle, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const point& aPosition, const size& aDimensions, window_style aStyle) :
 		window(aPosition, aDimensions, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
 		window(aPosition, aDimensions, aDialogTitle, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, window_style aStyle) :
 		window(aParent, size{}, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const std::string& aDialogTitle, window_style aStyle) :
 		window(aParent, size{}, aDialogTitle, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const size& aDimensions, window_style aStyle) :
 		window(aParent, aDimensions, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
 		window(aParent, aDimensions, aDialogTitle, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle) :
 		window(aParent, aPosition, aDimensions, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
 
 	dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aDialogTitle, window_style aStyle) :
 		window(aParent, aPosition, aDimensions, aDialogTitle, aStyle),
-		iClientLayout{ window::client_layout() }
+		iClientLayout{ window::client_layout() },
+		iButtonBoxLayout{ window::client_layout() }
 	{
 		init();
 	}
@@ -137,16 +149,28 @@ namespace neogfx
 		}
 	}
 
+	void dialog::set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox)
+	{
+		set_margins(neogfx::margins{});
+		window::client_layout().set_margins(neogfx::margins{ aControlSpacing.cx, aControlSpacing.cy, aControlSpacing.cx, aControlSpacing.cy });
+		window::client_layout().set_spacing(aControlSpacing);
+		client_layout().set_margins(neogfx::margins{});
+		client_layout().set_spacing(aControlSpacing);
+		if (aCreateButtonBox)
+			button_box().layout().set_spacing(aControlSpacing);
+	}
+
 	dialog_button_box& dialog::button_box()
 	{
 		if (iButtonBox == boost::none)
 		{
-			iButtonBox.emplace(window::client_layout());
-			iButtonBox->accepted([this]()
+			iButtonBox.emplace(button_box_layout());
+			button_box().layout().set_spacing(client_layout().spacing());
+			button_box().accepted([this]()
 			{
 				accept();
 			});
-			iButtonBox->rejected([this]()
+			button_box().rejected([this]()
 			{
 				reject();
 			});
@@ -205,7 +229,18 @@ namespace neogfx
 		return iClientLayout;
 	}
 
+	const i_layout& dialog::button_box_layout() const
+	{
+		return iButtonBoxLayout;
+	}
+
+	i_layout& dialog::button_box_layout()
+	{
+		return iButtonBoxLayout;
+	}
+
 	void dialog::init()
 	{
+		set_standard_layout(app::instance().current_style().spacing(), false);
 	}
 }

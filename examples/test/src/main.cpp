@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
 			app.clipboard().paste();
 		});
 
-		ng::menu_bar menu(layout0);
+		ng::menu_bar menu(window.menu_layout());
 
 		auto& fileMenu = menu.add_sub_menu("&File");
 		fileMenu.add_action(app.action_file_exit());
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
 
 		auto& helpMenu = menu.add_sub_menu("&Help");
 
-		ng::toolbar toolbar(layout0);
+		ng::toolbar toolbar(window.toolbar_layout());
 		toolbar.add_action(app.action_file_new());
 		toolbar.add_action(app.action_file_open());
 		toolbar.add_action(app.action_file_save());

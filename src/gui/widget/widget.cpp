@@ -34,6 +34,9 @@ namespace neogfx
 			pause_rendering(aSurface), neolib::callback_timer(aIoTask, aCallback, 0)
 		{
 		}
+		~layout_timer()
+		{
+		}
 	};
 
 

@@ -31,7 +31,7 @@ namespace neogfx
 {
 	window::window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aScrollbarStyle, aFrameStyle },
-		iStyle { aStyle },
+		iStyle{ aStyle },
 		iUnits{ units::Pixels },
 		iCountedEnable{ 0 },
 		iNativeWindowClosing{ false },
@@ -39,8 +39,13 @@ namespace neogfx
 		iEnteredWidget{ 0 },
 		iCapturingWidget{ 0 },
 		iFocusedWidget{ 0 },
-		iDismissingChildren{ false }, 
-		iNonClientLayout{ *this }
+		iDismissingChildren{ false },
+		iNonClientLayout{ *this },
+		iTitleBarLayout{ iNonClientLayout },
+		iMenuLayout{ iNonClientLayout },
+		iToolbarLayout{ iNonClientLayout },
+		iClientLayout{ iNonClientLayout },
+		iStatusBarLayout{ iNonClientLayout }
 	{
 	}
 
@@ -702,24 +707,29 @@ namespace neogfx
 
 	void window::init()
 	{
+		app::instance().surface_manager().add_surface(*this);
+		update_modality();
+		scrollable_widget::init();
+
+		if ((style() & window_style::TitleBar) == window_style::TitleBar)
+			iTitleBar.emplace(title_bar_layout(), app::instance().default_window_icon(), native_window().title_text());
+
+		set_margins(neogfx::margins{});
+		iNonClientLayout.set_margins(neogfx::margins{});
+		iNonClientLayout.set_spacing(0.0);
+		iTitleBarLayout.set_margins(neogfx::margins{});
+		iMenuLayout.set_margins(neogfx::margins{});
+		iToolbarLayout.set_margins(neogfx::margins{});
+		iClientLayout.set_margins(neogfx::optional_margins{});
+		iStatusBarLayout.set_margins(neogfx::margins{});
+
+		layout_items(true);
+
 		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
 		{
 			if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
 				native_surface().invalidate(surface_size());
 		});
-		iSink += native_surface().rendering_finished([this]()
-		{
-			// For some reason textures aren't rendered on initial render so render again. FBO bug to fix?
-			if (native_surface().frame_counter() < 3)
-				invalidate_surface(rect{point{}, surface_size()}, false);
-		});
-		app::instance().surface_manager().add_surface(*this);
-		update_modality();
-		scrollable_widget::init();
-		if ((style() & window_style::TitleBar) == window_style::TitleBar)
-			iTitleBar.emplace(non_client_layout(), app::instance().default_window_icon(), native_window().title_text());
-		non_client_layout().add_item(client_layout());
-		layout_items(true);
 	}
 
 	bool window::native_window_can_close() const
@@ -1080,6 +1090,36 @@ namespace neogfx
 		return iNonClientLayout;
 	}
 
+	const i_layout& window::title_bar_layout() const
+	{
+		return iTitleBarLayout;
+	}
+
+	i_layout& window::title_bar_layout()
+	{
+		return iTitleBarLayout;
+	}
+
+	const i_layout& window::menu_layout() const
+	{
+		return iMenuLayout;
+	}
+
+	i_layout& window::menu_layout()
+	{
+		return iMenuLayout;
+	}
+
+	const i_layout& window::toolbar_layout() const
+	{
+		return iToolbarLayout;
+	}
+
+	i_layout& window::toolbar_layout()
+	{
+		return iToolbarLayout;
+	}
+
 	const i_layout& window::client_layout() const
 	{
 		return iClientLayout;
@@ -1088,6 +1128,16 @@ namespace neogfx
 	i_layout& window::client_layout()
 	{
 		return iClientLayout;
+	}
+
+	const i_layout& window::status_bar_layout() const
+	{
+		return iStatusBarLayout;
+	}
+
+	i_layout& window::status_bar_layout()
+	{
+		return iStatusBarLayout;
 	}
 
 	void window::update_click_focus(i_widget& aCandidateWidget, const point& aClickPos)

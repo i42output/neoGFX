@@ -40,6 +40,7 @@ namespace neogfx
 			failed_to_create_framebuffer(GLenum aErrorCode) : 
 				std::runtime_error("neogfx::opengl_window::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + glErrorString(aErrorCode)) {} };
 		struct busy_rendering : std::logic_error { busy_rendering() : std::logic_error("neogfx::opengl_window::busy_rendering") {} };
+		struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::opengl_window::bad_pause_count") {} };
 	public:
 		opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow);
 		~opengl_window();

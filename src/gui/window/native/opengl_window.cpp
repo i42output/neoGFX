@@ -244,6 +244,8 @@ namespace neogfx
 
 	void opengl_window::resume()
 	{
+		if (iPaused == 0)
+			throw bad_pause_count();
 		--iPaused;
 	}
 

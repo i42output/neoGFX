@@ -27,6 +27,7 @@ namespace neogfx
 		scrollable_widget{ aLayout, scrollbar_style::Normal, frame_style::NoFrame }, iLayout{ *this }, iParent{ aParent }
 	{
 		set_margins(neogfx::margins{});
+		iLayout.set_margins(neogfx::margins{});
 	}
 
 	view_container::view_container(i_widget& aParent, view_container_style aStyle) :

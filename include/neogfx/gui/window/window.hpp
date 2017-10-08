@@ -190,8 +190,16 @@ namespace neogfx
 	public:
 		virtual const i_layout& non_client_layout() const;
 		virtual i_layout& non_client_layout();
+		virtual const i_layout& title_bar_layout() const;
+		virtual i_layout& title_bar_layout();
+		virtual const i_layout& menu_layout() const;
+		virtual i_layout& menu_layout();
+		virtual const i_layout& toolbar_layout() const;
+		virtual i_layout& toolbar_layout();
 		virtual const i_layout& client_layout() const;
 		virtual i_layout& client_layout();
+		virtual const i_layout& status_bar_layout() const;
+		virtual i_layout& status_bar_layout();
 	private:
 		void init();
 		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos);
@@ -212,8 +220,12 @@ namespace neogfx
 		bool iDismissingChildren;
 		boost::optional<char32_t> iSurrogatePairPart;
 		vertical_layout iNonClientLayout;
-		optional_title_bar iTitleBar;
+		vertical_layout iTitleBarLayout;
+		vertical_layout iMenuLayout;
+		vertical_layout iToolbarLayout;
 		vertical_layout iClientLayout;
+		vertical_layout iStatusBarLayout;
+		optional_title_bar iTitleBar;
 	};
 
 	inline constexpr window_style operator|(window_style aLhs, window_style aRhs)

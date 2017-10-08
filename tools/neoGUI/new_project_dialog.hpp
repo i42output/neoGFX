@@ -41,7 +41,7 @@ namespace neogui
 		new_project_dialog(i_widget& aParent) :
 			dialog{ aParent, "New Project", neogfx::window_style::Modal | neogfx::window_style::TitleBar | neogfx::window_style::Close },
 			iNamingConvention{ naming_convention::NeoGfx },
-			iLayout0{ *this }, iLayout01{ iLayout0 }, iLayout1{ iLayout01 }, iLayout2{ iLayout01 }, 
+			iLayout0{ client_layout() }, iLayout01{ iLayout0 }, iLayout1{ iLayout01 }, iLayout2{ iLayout01 }, 
 			iType{ iLayout1, "Project Type" }, iDefaults{ iLayout2, "Project Defaults" },
 			iNewMVCApp{ iType.item_layout(), "MVC (model-view-controller) app" },
 			iNewDialogApp{ iType.item_layout(), "Dialog app" },
