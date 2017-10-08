@@ -857,7 +857,10 @@ namespace neogfx
 					{
 						self.iSystemMenuOpen = true;
 						basic_rect<int> rectTitleBar = self.window().native_window_widget_part_rect(widget_part::NonClientTitleBar) + self.surface_position();
-						TrackPopupMenu(GetSystemMenu(hwnd, FALSE), TPM_LEFTALIGN, rectTitleBar.x, rectTitleBar.bottom(), 0, hwnd, NULL);
+						auto sysMenu = GetSystemMenu(hwnd, FALSE);
+						auto cmd = TrackPopupMenu(sysMenu, TPM_LEFTALIGN | TPM_RETURNCMD, rectTitleBar.x, rectTitleBar.bottom(), 0, hwnd, NULL);
+						if (cmd != 0)
+							PostMessage(hwnd, WM_SYSCOMMAND, cmd, lparam);
 						self.iSystemMenuOpen = false;
 					}
 					else if (self.iClickedWidgetPart == widget_part::Nowhere)
