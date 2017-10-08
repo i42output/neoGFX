@@ -24,85 +24,85 @@
 
 namespace neogfx
 {
-	label::label(bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, aText, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(const std::string& aText, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, aText, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(const i_texture& aTexture, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(const i_texture& aTexture, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(const i_image& aImage, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(const i_image& aImage, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(i_widget& aParent, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture() }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(i_widget& aParent, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(i_widget& aParent, const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture() }, iText{ iLayout, aText, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(i_widget& aParent, const std::string& aText, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, aText, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(i_widget& aParent, const i_texture& aTexture, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(i_widget& aParent, const i_texture& aTexture, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(i_widget& aParent, const i_image& aImage, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(i_widget& aParent, const i_image& aImage, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(i_layout& aLayout, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture() }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(i_layout& aLayout, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(i_layout& aLayout, const std::string& aText, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture() }, iText{ iLayout, aText, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(i_layout& aLayout, const std::string& aText, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, aText, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(i_layout& aLayout, const i_texture& aTexture, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(i_layout& aLayout, const i_texture& aTexture, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
 	}
 
-	label::label(i_layout& aLayout, const i_image& aImage, bool aMultiLine, alignment aAlignment, label_placement aPlacement) :
-		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aMultiLine }, iCentreSpacer{ nullptr }
+	label::label(i_layout& aLayout, const i_image& aImage, label_type aType, alignment aAlignment, label_placement aPlacement) :
+		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
 		init();
