@@ -197,7 +197,8 @@ namespace neogfx
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false),
-		iClickedWidgetPart(widget_part::Nowhere)
+		iClickedWidgetPart(widget_part::Nowhere),
+		iSystemMenuOpen(false)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -232,7 +233,8 @@ namespace neogfx
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false),
-		iClickedWidgetPart(widget_part::Nowhere)
+		iClickedWidgetPart(widget_part::Nowhere),
+		iSystemMenuOpen(false)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -267,7 +269,8 @@ namespace neogfx
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false),
-		iClickedWidgetPart(widget_part::Nowhere)
+		iClickedWidgetPart(widget_part::Nowhere),
+		iSystemMenuOpen(false)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -302,7 +305,8 @@ namespace neogfx
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false),
-		iClickedWidgetPart(widget_part::Nowhere)
+		iClickedWidgetPart(widget_part::Nowhere),
+		iSystemMenuOpen(false)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -337,7 +341,8 @@ namespace neogfx
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false),
-		iClickedWidgetPart(widget_part::Nowhere)
+		iClickedWidgetPart(widget_part::Nowhere),
+		iSystemMenuOpen(false)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -372,7 +377,8 @@ namespace neogfx
 		iCapturingMouse(false),
 		iReady(false),
 		iDestroyed(false),
-		iClickedWidgetPart(widget_part::Nowhere)
+		iClickedWidgetPart(widget_part::Nowhere),
+		iSystemMenuOpen(false)
 	{
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
@@ -849,9 +855,13 @@ namespace neogfx
 				case HTSYSMENU:
 					if (self.iClickedWidgetPart == widget_part::NonClientSystemMenu)
 					{
+						self.iSystemMenuOpen = true;
 						basic_rect<int> rectTitleBar = self.window().native_window_widget_part_rect(widget_part::NonClientTitleBar) + self.surface_position();
 						TrackPopupMenu(GetSystemMenu(hwnd, FALSE), TPM_LEFTALIGN, rectTitleBar.x, rectTitleBar.bottom(), 0, hwnd, NULL);
+						self.iSystemMenuOpen = false;
 					}
+					else if (self.iClickedWidgetPart == widget_part::Nowhere)
+						PostMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, lparam);
 					result = 0;
 					break;
 				case HTMINBUTTON:
@@ -877,6 +887,23 @@ namespace neogfx
 			else
 				result = wndproc(hwnd, msg, wparam, lparam);
 			self.iClickedWidgetPart = widget_part::Nowhere;
+			break;
+		case WM_NCLBUTTONDBLCLK:
+			if (CUSTOM_DECORATION)
+			{
+				switch (wparam)
+				{
+				case HTSYSMENU:
+					PostMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, lparam);
+					result = 0;
+					break;
+				default:
+					result = wndproc(hwnd, msg, wparam, lparam);
+					break;
+				}
+			}
+			else
+				result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_DESTROY:
 			self.destroying();
