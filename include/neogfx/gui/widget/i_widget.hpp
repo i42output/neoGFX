@@ -36,6 +36,7 @@ namespace neogfx
 	{
 		Client,
 		NonClientTitleBar,
+		NonClientGrab,
 		NonClient,
 		NonClientBorder,
 		NonClientBorderLeft,

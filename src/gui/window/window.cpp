@@ -246,7 +246,7 @@ namespace neogfx
 	{
 		auto result = scrollable_widget::hit_test(aPosition);
 		if (result == widget_part::Client)
-			result = widget_part::NonClientTitleBar;
+			result = widget_part::NonClientGrab;
 		return result;
 	}
 

@@ -137,6 +137,7 @@ namespace neogfx
 		switch (aWidgetPart)
 		{
 		case widget_part::NonClientTitleBar:
+		case widget_part::NonClientGrab:
 			return HTCAPTION;
 		case widget_part::NonClientBorder:
 			return HTBORDER;
@@ -821,6 +822,14 @@ namespace neogfx
 			{
 				switch (wparam)
 				{
+				case HTCAPTION:
+					{
+						POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
+						ScreenToClient(hwnd, &pt);
+						self.iClickedWidgetPart = self.window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y });
+					}
+					result = wndproc(hwnd, msg, wparam, lparam);
+					break;
 				case HTSYSMENU:
 					self.iClickedWidgetPart = widget_part::NonClientSystemMenu;
 					result = 0;
@@ -852,13 +861,23 @@ namespace neogfx
 			{
 				switch (wparam)
 				{
+				case HTCAPTION:
+					if (msg == WM_NCRBUTTONUP && self.iClickedWidgetPart == widget_part::NonClientTitleBar)
+					{
+						self.iSystemMenuOpen = true;
+						auto cmd = TrackPopupMenu(GetSystemMenu(hwnd, FALSE), TPM_LEFTALIGN | TPM_RETURNCMD, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam), 0, hwnd, NULL);
+						if (cmd != 0)
+							PostMessage(hwnd, WM_SYSCOMMAND, cmd, lparam);
+						self.iSystemMenuOpen = false;
+					}
+					result = 0;
+					break;
 				case HTSYSMENU:
 					if (self.iClickedWidgetPart == widget_part::NonClientSystemMenu)
 					{
 						self.iSystemMenuOpen = true;
 						basic_rect<int> rectTitleBar = self.window().native_window_widget_part_rect(widget_part::NonClientTitleBar) + self.surface_position();
-						auto sysMenu = GetSystemMenu(hwnd, FALSE);
-						auto cmd = TrackPopupMenu(sysMenu, TPM_LEFTALIGN | TPM_RETURNCMD, rectTitleBar.x, rectTitleBar.bottom(), 0, hwnd, NULL);
+						auto cmd = TrackPopupMenu(GetSystemMenu(hwnd, FALSE), TPM_LEFTALIGN | TPM_RETURNCMD, rectTitleBar.x, rectTitleBar.bottom(), 0, hwnd, NULL);
 						if (cmd != 0)
 							PostMessage(hwnd, WM_SYSCOMMAND, cmd, lparam);
 						self.iSystemMenuOpen = false;
