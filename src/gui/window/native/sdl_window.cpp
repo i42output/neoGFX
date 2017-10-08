@@ -678,6 +678,11 @@ namespace neogfx
 		return iDestroyed;
 	}
 
+	void sdl_window::set_title_text(const std::string& aTitleText)
+	{
+		SDL_SetWindowTitle(iHandle, aTitleText.c_str());
+	}
+
 #ifdef WIN32
 	class suppress_style
 	{
@@ -735,7 +740,7 @@ namespace neogfx
 			break;
 		case WM_SYSCOMMAND:
 			if (wparam == SC_CLOSE)
-				self.push_event(window_event(window_event::Close));
+				self.push_event(window_event{ window_event::Close });
 			result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_NCACTIVATE:
@@ -743,6 +748,11 @@ namespace neogfx
 				suppress_style ss{ hwnd, WS_VISIBLE };
 				result = wndproc(hwnd, msg, wparam, lparam);
 			}
+			break;
+		case WM_SETTEXT:
+			result = wndproc(hwnd, msg, wparam, lparam);
+			self.native_window::set_title_text(SDL_GetWindowTitle(self.iHandle));
+			self.handle_event(window_event{ window_event::TitleTextChanged });
 			break;
 		case WM_NCPAINT:
 			if (CUSTOM_DECORATION)
@@ -981,6 +991,7 @@ namespace neogfx
 	void sdl_window::init()
 	{
 		sHandleMap[native_handle()] = this;
+		native_window::set_title_text(SDL_GetWindowTitle(iHandle));
 #ifdef WIN32
 		HWND hwnd = static_cast<HWND>(native_handle());
 		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, NULL);
@@ -989,17 +1000,18 @@ namespace neogfx
 		if ((iStyle & window_style::None) == window_style::None || (iStyle & window_style::TitleBar) == window_style::TitleBar)
 		{
 			newStyle |= WS_POPUP;
-//			newStyle &= ~WS_THICKFRAME;
 			newStyle |= WS_SYSMENU;
 			if ((iStyle & window_style::Resize) == window_style::Resize)
 			{
 				newStyle |= WS_MINIMIZEBOX;
 				newStyle |= WS_MAXIMIZEBOX;
+				newStyle |= WS_THICKFRAME;
 			}
 			else
 			{
 				newStyle &= ~WS_MINIMIZEBOX;
 				newStyle &= ~WS_MAXIMIZEBOX;
+				newStyle &= ~WS_THICKFRAME;
 			}
 		}
 		if (newStyle != existingStyle)

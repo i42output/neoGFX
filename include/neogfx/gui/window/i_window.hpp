@@ -38,6 +38,9 @@ namespace neogfx
 		virtual const i_native_window& native_window() const = 0;
 		virtual i_native_window& native_window() = 0;
 	public:
+		virtual const std::string& title_text() const = 0;
+		virtual void set_title_text(const std::string& aTitleText) = 0;
+	public:
 		virtual bool is_active() const = 0;
 		virtual void activate() = 0;
 		virtual void counted_enable(bool aEnable) = 0;
@@ -66,5 +69,6 @@ namespace neogfx
 		virtual void native_window_text_input(const std::string& aText) = 0;
 		virtual void native_window_sys_text_input(const std::string& aText) = 0;
 		virtual neogfx::mouse_cursor native_window_mouse_cursor() const = 0;
+		virtual void native_window_title_text_changed(const std::string& aTitleText) = 0;
 	};
 }

@@ -133,8 +133,10 @@ namespace neogfx
 			iTextExtent = boost::none;
 			iGlyphTextCache = glyph_text(font());
 			text_changed.trigger();
+			if (has_parent_layout())
+				parent_layout().invalidate();
 			if (oldSize != minimum_size() && has_managing_layout())
-				managing_layout().layout_items(true);
+				managing_layout().layout_items();
 			update();
 		}
 	}

@@ -654,6 +654,16 @@ namespace neogfx
 		aWidget.focus_lost(focus_reason::Other);
 	}
 
+	const std::string& window::title_text() const
+	{
+		return native_window().title_text();
+	}
+
+	void window::set_title_text(const std::string& aTitleText)
+	{
+		native_window().set_title_text(aTitleText);
+	}
+
 	bool window::is_active() const
 	{
 		return iNativeWindow && native_window().is_active();
@@ -707,7 +717,7 @@ namespace neogfx
 		update_modality();
 		scrollable_widget::init();
 		if ((style() & window_style::TitleBar) == window_style::TitleBar)
-			iTitleBar.emplace(iLayout, app::instance().default_window_icon(), app::instance().name());
+			iTitleBar.emplace(iLayout, app::instance().default_window_icon(), native_window().title_text());
 		layout_items(true);
 	}
 
@@ -1051,6 +1061,12 @@ namespace neogfx
 	{
 		const i_widget& widgetUnderMouse = (iCapturingWidget == 0 ? widget_for_mouse_event(native_surface().mouse_position(), true) : *iCapturingWidget);
 		return widgetUnderMouse.mouse_cursor();
+	}
+
+	void window::native_window_title_text_changed(const std::string& aTitleText)
+	{
+		if (iTitleBar != boost::none)
+			iTitleBar->title().set_text(aTitleText);
 	}
 
 	void window::update_click_focus(i_widget& aCandidateWidget, const point& aClickPos)

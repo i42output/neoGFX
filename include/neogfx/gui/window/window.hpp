@@ -149,6 +149,9 @@ namespace neogfx
 		void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
 		void release_focused_widget(i_widget& aWidget) override;
 	public:
+		const std::string& title_text() const override;
+		void set_title_text(const std::string& aTitleText) override;
+	public:
 		bool is_active() const override;
 		void activate() override;
 		void counted_enable(bool aEnable) override;
@@ -181,6 +184,7 @@ namespace neogfx
 		void native_window_text_input(const std::string& aText) override;
 		void native_window_sys_text_input(const std::string& aText) override;
 		neogfx::mouse_cursor native_window_mouse_cursor() const override;
+		void native_window_title_text_changed(const std::string& aTitleText) override;
 	private:
 		void init();
 		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos);

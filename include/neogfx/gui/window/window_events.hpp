@@ -41,7 +41,8 @@ namespace neogfx
 			Enter,
 			Leave,
 			FocusGained,
-			FocusLost
+			FocusLost,
+			TitleTextChanged
 		};
 	public:
 		window_event(type_e aType, const parameter_type& aParameter = parameter_type()) :

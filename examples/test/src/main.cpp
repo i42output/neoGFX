@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
 			}
 		});
 
-		ng::vertical_layout layout0(window);
+		auto& layout0 = window.layout();
 
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{
@@ -343,6 +343,7 @@ int main(int argc, char* argv[])
 		ng::push_button button3(international, u8"שועל חום קפיצות מעל הכלב העצלן");
 		button3.set_foreground_colour(ng::colour::DarkGoldenrod);
 		ng::push_button button4(international, u8"请停止食用犬");
+		button4.clicked([&window]() { window.set_title_text(u8"请停止食用犬"); });
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");

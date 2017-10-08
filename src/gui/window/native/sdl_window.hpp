@@ -110,6 +110,7 @@ namespace neogfx
 		void set_capture() override;
 		void release_capture() override;
 		bool is_destroyed() const override;
+		void set_title_text(const std::string& aTitleText) override;
 	private:
 		static void install_creation_hook(sdl_window& aNewWindow);
 		static sdl_window* new_window();

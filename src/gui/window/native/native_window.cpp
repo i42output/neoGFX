@@ -147,6 +147,9 @@ namespace neogfx
 			case window_event::FocusLost:
 				window().native_window_focus_lost();
 				break;
+			case window_event::TitleTextChanged:
+				window().native_window_title_text_changed(title_text());
+				break;
 			default:
 				/* do nothing */
 				break;
@@ -232,6 +235,16 @@ namespace neogfx
 			if (surface_manager().surface(i).native_surface().can_render())
 				++surfacesThatCanRender;
 		return surfacesThatCanRender == 1 && can_render();
+	}
+
+	const std::string& native_window::title_text() const
+	{
+		return iTitleText;
+	}
+
+	void native_window::set_title_text(const std::string& aTitleText)
+	{
+		iTitleText = aTitleText;
 	}
 
 	i_rendering_engine& native_window::rendering_engine() const
