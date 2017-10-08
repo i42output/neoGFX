@@ -29,10 +29,10 @@ namespace neogfx
 		iIcon{ iLayout, app::instance().default_window_icon() },
 		iTitle{ iLayout, aTitle },
 		iSpacer{ iLayout },
-		iMinimizeButton{ iLayout, "Mi", push_button_style::TitleBar },
-		iMaximizeButton{ iLayout, "Ma", push_button_style::TitleBar },
-		iRestoreButton{ iLayout, "Re", push_button_style::TitleBar },
-		iCloseButton{ iLayout, "Cl", push_button_style::TitleBar }
+		iMinimizeButton{ iLayout, push_button_style::TitleBar },
+		iMaximizeButton{ iLayout, push_button_style::TitleBar },
+		iRestoreButton{ iLayout, push_button_style::TitleBar },
+		iCloseButton{ iLayout, push_button_style::TitleBar }
 	{
 		init();
 	}
@@ -43,10 +43,10 @@ namespace neogfx
 		iIcon{ iLayout, aIcon },
 		iTitle{ iLayout, aTitle },
 		iSpacer{ iLayout },
-		iMinimizeButton{ iLayout, "Mi", push_button_style::TitleBar },
-		iMaximizeButton{ iLayout, "Ma", push_button_style::TitleBar },
-		iRestoreButton{ iLayout, "Re", push_button_style::TitleBar },
-		iCloseButton{ iLayout, "Cl", push_button_style::TitleBar }
+		iMinimizeButton{ iLayout, push_button_style::TitleBar },
+		iMaximizeButton{ iLayout, push_button_style::TitleBar },
+		iRestoreButton{ iLayout, push_button_style::TitleBar },
+		iCloseButton{ iLayout, push_button_style::TitleBar }
 	{
 		init();
 	}
@@ -57,10 +57,10 @@ namespace neogfx
 		iIcon{ iLayout, aIcon },
 		iTitle{ iLayout, aTitle },
 		iSpacer{ iLayout },
-		iMinimizeButton{ iLayout, "Mi", push_button_style::TitleBar },
-		iMaximizeButton{ iLayout, "Ma", push_button_style::TitleBar },
-		iRestoreButton{ iLayout, "Re", push_button_style::TitleBar },
-		iCloseButton{ iLayout, "Cl", push_button_style::TitleBar }
+		iMinimizeButton{ iLayout, push_button_style::TitleBar },
+		iMaximizeButton{ iLayout, push_button_style::TitleBar },
+		iRestoreButton{ iLayout, push_button_style::TitleBar },
+		iCloseButton{ iLayout, push_button_style::TitleBar }
 	{
 		init();
 	}
@@ -71,10 +71,10 @@ namespace neogfx
 		iIcon{ iLayout, app::instance().default_window_icon() },
 		iTitle{ iLayout, aTitle },
 		iSpacer{ iLayout },
-		iMinimizeButton{ iLayout, "Mi", push_button_style::TitleBar },
-		iMaximizeButton{ iLayout, "Ma", push_button_style::TitleBar },
-		iRestoreButton{ iLayout, "Re", push_button_style::TitleBar },
-		iCloseButton{ iLayout, "Cl", push_button_style::TitleBar }
+		iMinimizeButton{ iLayout, push_button_style::TitleBar },
+		iMaximizeButton{ iLayout, push_button_style::TitleBar },
+		iRestoreButton{ iLayout, push_button_style::TitleBar },
+		iCloseButton{ iLayout, push_button_style::TitleBar }
 	{
 		init();
 	}
@@ -85,10 +85,10 @@ namespace neogfx
 		iIcon{ iLayout, aIcon },
 		iTitle{ iLayout, aTitle },
 		iSpacer{ iLayout },
-		iMinimizeButton{ iLayout, "Mi", push_button_style::TitleBar },
-		iMaximizeButton{ iLayout, "Ma", push_button_style::TitleBar },
-		iRestoreButton{ iLayout, "Re", push_button_style::TitleBar },
-		iCloseButton{ iLayout, "Cl", push_button_style::TitleBar }
+		iMinimizeButton{ iLayout, push_button_style::TitleBar },
+		iMaximizeButton{ iLayout, push_button_style::TitleBar },
+		iRestoreButton{ iLayout, push_button_style::TitleBar },
+		iCloseButton{ iLayout, push_button_style::TitleBar }
 	{
 		init();
 	}
@@ -99,10 +99,10 @@ namespace neogfx
 		iIcon{ iLayout, aIcon },
 		iTitle{ iLayout, aTitle },
 		iSpacer{ iLayout },
-		iMinimizeButton{ iLayout, "Mi", push_button_style::TitleBar },
-		iMaximizeButton{ iLayout, "Ma", push_button_style::TitleBar },
-		iRestoreButton{ iLayout, "Re", push_button_style::TitleBar },
-		iCloseButton{ iLayout, "Cl", push_button_style::TitleBar }
+		iMinimizeButton{ iLayout, push_button_style::TitleBar },
+		iMaximizeButton{ iLayout, push_button_style::TitleBar },
+		iRestoreButton{ iLayout, push_button_style::TitleBar },
+		iCloseButton{ iLayout, push_button_style::TitleBar }
 	{
 		init();
 	}
@@ -151,5 +151,101 @@ namespace neogfx
 		iMaximizeButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iRestoreButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iCloseButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
+		iSink += app::instance().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
+		update_textures();
+	}
+
+	void title_bar::update_textures()
+	{
+		auto ink = app::instance().current_style().palette().text_colour();
+		auto paper = background_colour();
+		const uint8_t sMinimizeTexturePattern[10][10]
+		{
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+		};
+		const uint8_t sMaximizeTexturePattern[10][10]
+		{
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+		};
+		const uint8_t sRestoreTexturePattern[10][10]
+		{
+			{ 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 },
+			{ 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 },
+			{ 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 0, 0, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 1, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
+			{ 1, 0, 0, 0, 0, 0, 1, 0, 0, 0 },
+			{ 1, 0, 0, 0, 0, 0, 1, 0, 0, 0 },
+			{ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 }
+		};
+		const uint8_t sCloseTexturePattern[10][10]
+		{
+			{ 1, 2, 0, 0, 0, 0, 0, 0, 2, 1 },
+			{ 2, 1, 2, 0, 0, 0, 0, 2, 1, 2 },
+			{ 0, 2, 1, 2, 0, 0, 2, 1, 2, 0 },
+			{ 0, 0, 2, 1, 2, 2, 1, 2, 0, 0 },
+			{ 0, 0, 0, 2, 1, 1, 2, 0, 0, 0 },
+			{ 0, 0, 0, 2, 1, 1, 2, 0, 0, 0 },
+			{ 0, 0, 2, 1, 2, 2, 1, 2, 0, 0 },
+			{ 0, 2, 1, 2, 0, 0, 2, 1, 2, 0 },
+			{ 2, 1, 2, 0, 0, 0, 0, 2, 1, 2 },
+			{ 1, 2, 0, 0, 0, 0, 0, 0, 2, 1 }
+		};
+		if (iTextures[TextureMinimize] == boost::none || iTextures[TextureMinimize]->first != ink)
+		{
+			iTextures[TextureMinimize] = std::make_pair(
+				ink,
+				neogfx::image{
+				"neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
+				sMinimizeTexturePattern,{ { 0, colour{} },{ 1, ink },{ 2, ink.with_alpha(0x80) } } });
+		}
+		if (iTextures[TextureMaximize] == boost::none || iTextures[TextureMaximize]->first != ink)
+		{
+			iTextures[TextureMaximize] = std::make_pair(
+				ink,
+				neogfx::image{
+				"neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
+				sMaximizeTexturePattern,{ { 0, colour{} },{ 1, ink },{ 2, ink.with_alpha(0x80) } } });
+		}
+		if (iTextures[TextureRestore] == boost::none || iTextures[TextureRestore]->first != ink)
+		{
+			iTextures[TextureRestore] = std::make_pair(
+				ink,
+				neogfx::image{
+				"neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
+				sRestoreTexturePattern,{ { 0, colour{} },{ 1, ink },{ 2, ink.with_alpha(0x80) } } });
+		}
+		if (iTextures[TextureClose] == boost::none || iTextures[TextureClose]->first != ink)
+		{
+			iTextures[TextureClose] = std::make_pair(
+				ink,
+				neogfx::image{
+				"neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
+				sCloseTexturePattern, { { 0, colour{} },{ 1, ink },{ 2, ink.with_alpha(0x80) } } });
+		}
+		iMinimizeButton.image().set_image(iTextures[TextureMinimize]->second);
+		iMaximizeButton.image().set_image(iTextures[TextureMaximize]->second);
+		iRestoreButton.image().set_image(iTextures[TextureRestore]->second);
+		iCloseButton.image().set_image(iTextures[TextureClose]->second);
 	}
 }

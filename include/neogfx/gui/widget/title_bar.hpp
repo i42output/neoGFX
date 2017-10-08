@@ -41,6 +41,14 @@ namespace neogfx
 				return WidgetPart;
 			}
 		};
+	private:
+		enum texture_index_e
+		{
+			TextureMinimize,
+			TextureMaximize,
+			TextureRestore,
+			TextureClose
+		};
 	public:
 		title_bar(i_widget& aParent, const std::string& aTitle = std::string{});
 		title_bar(i_widget& aParent, const i_texture& aIcon, const std::string& aTitle = std::string{});
@@ -59,6 +67,7 @@ namespace neogfx
 		widget_part hit_test(const point& aPosition) const override;
 	private:
 		void init();
+		void update_textures();
 	private:
 		horizontal_layout iLayout;
 		non_client_item<image_widget, widget_part::NonClientSystemMenu> iIcon;
@@ -68,5 +77,7 @@ namespace neogfx
 		non_client_item<push_button, widget_part::NonClientMaximizeButton> iMaximizeButton;
 		non_client_item<push_button, widget_part::NonClientMaximizeButton> iRestoreButton;
 		non_client_item<push_button, widget_part::NonClientCloseButton> iCloseButton;
+		sink iSink;
+		mutable boost::optional<std::pair<colour, texture>> iTextures[4];
 	};
 }
