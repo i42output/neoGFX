@@ -41,6 +41,11 @@ namespace neogfx
 		iSurfaceManager.display_error_message(*this, aTitle, aMessage);
 	}
 
+	bool native_window::events_queued() const
+	{
+		return !iEventQueue.empty();
+	}
+
 	void native_window::push_event(const native_event& aEvent)
 	{
 		if (aEvent.is<window_event>())

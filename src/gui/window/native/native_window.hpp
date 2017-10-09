@@ -36,6 +36,7 @@ namespace neogfx
 		virtual ~native_window();
 	public:
 		void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
+		bool events_queued() const override;
 		void push_event(const native_event& aEvent) override;
 		bool pump_event() override;
 		void handle_event(const native_event& aEvent) override;

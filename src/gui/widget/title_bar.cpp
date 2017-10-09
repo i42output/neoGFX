@@ -152,7 +152,51 @@ namespace neogfx
 		iRestoreButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iCloseButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iSink += app::instance().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
+		auto update_widgets = [this]()
+		{
+			if (surface().surface_type() == surface_type::Window)
+			{
+				auto& w = static_cast<i_window&>(surface());
+				bool isEnabled = w.window_enabled();
+				bool isActive = w.is_active();
+				bool isIconic = w.is_iconic();
+				bool isMaximized = w.is_maximized();
+				bool isRestored = w.is_restored();
+				icon().enable(isActive);
+				title().enable(isActive);
+				iMinimizeButton.enable(!isIconic && isEnabled);
+				iMaximizeButton.enable(!isMaximized && isEnabled);
+				iRestoreButton.enable(!isRestored && isEnabled);
+				iCloseButton.enable(isEnabled);
+				iMinimizeButton.show(!isIconic && (w.style() & window_style::MinimizeBox) == window_style::MinimizeBox);
+				iMaximizeButton.show(!isMaximized && (w.style() & window_style::MaximizeBox) == window_style::MaximizeBox);
+				iRestoreButton.show(!isRestored && (w.style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid);
+				managing_layout().layout_items(true);
+				update(true);
+			}
+		};
+		if (surface().surface_type() == surface_type::Window)
+		{
+			iSink += static_cast<i_window&>(surface()).window_event([this, update_widgets](neogfx::window_event& e)
+			{
+				switch (e.type())
+				{
+				case neogfx::window_event::Enabled:
+				case neogfx::window_event::Disabled:
+				case neogfx::window_event::FocusGained:
+				case neogfx::window_event::FocusLost:
+				case neogfx::window_event::Iconized:
+				case neogfx::window_event::Maximized:
+				case neogfx::window_event::Restored:
+					update_widgets();
+					break;
+				default:
+					break;
+				}
+			});
+		}
 		update_textures();
+		update_widgets();
 	}
 
 	void title_bar::update_textures()

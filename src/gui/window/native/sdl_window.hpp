@@ -104,6 +104,12 @@ namespace neogfx
 		void set_transparency(double aAlpha) override;
 		bool is_active() const override;
 		void activate() override;
+		bool is_iconic() const override;
+		void iconize() override;
+		bool is_maximized() const override;
+		void maximize() override;
+		bool is_restored() const override;
+		void restore() override;
 		bool is_enabled() const override;
 		void enable(bool aEnable) override;
 		bool is_capturing() const override;

@@ -203,7 +203,14 @@ namespace neogfx
 
 	bool sdl_renderer::process_events()
 	{
-		if (queue_events())
+		bool eventsAlreadyQueued = false;
+		for (std::size_t s = 0; !eventsAlreadyQueued && s < app::instance().surface_manager().surface_count(); ++s)
+		{
+			auto& surface = app::instance().surface_manager().surface(s);
+			if (surface.surface_type() == surface_type::Window && static_cast<i_native_window&>(surface.native_surface()).events_queued())
+				eventsAlreadyQueued = true;
+		}
+		if (queue_events() || eventsAlreadyQueued)
 			return opengl_renderer::process_events();
 		else
 			return false;

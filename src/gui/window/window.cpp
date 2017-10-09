@@ -687,7 +687,45 @@ namespace neogfx
 			native_window().activate();
 	}
 
-	void window::counted_enable(bool aEnable)
+	bool window::is_iconic() const
+	{
+		return iNativeWindow && native_window().is_iconic();
+	}
+
+	void window::iconize()
+	{
+		if (iNativeWindow)
+			native_window().iconize();
+	}
+
+	bool window::is_maximized() const
+	{
+		return iNativeWindow && native_window().is_maximized();
+	}
+
+	void window::maximize()
+	{
+		if (iNativeWindow)
+			native_window().maximize();
+	}
+
+	bool window::is_restored() const
+	{
+		return iNativeWindow && native_window().is_restored();
+	}
+
+	void window::restore()
+	{
+		if (iNativeWindow)
+			native_window().restore();
+	}
+
+	bool window::window_enabled() const
+	{
+		return iNativeWindow && native_window().is_enabled();
+	}
+
+	void window::counted_window_enable(bool aEnable)
 	{
 		if (aEnable)
 			++iCountedEnable;
@@ -1169,9 +1207,9 @@ namespace neogfx
 			{
 				window& windowSurface = static_cast<window&>(surface);
 				if ((iStyle & window_style::ApplicationModal) == window_style::ApplicationModal)
-					windowSurface.counted_enable(!iNativeWindow || iNativeWindowClosing);
+					windowSurface.counted_window_enable(!iNativeWindow || iNativeWindowClosing);
 				else if ((iStyle & window_style::Modal) == window_style::Modal && windowSurface.is_ancestor_of(*this, false))
-					windowSurface.counted_enable(!iNativeWindow || iNativeWindowClosing);
+					windowSurface.counted_window_enable(!iNativeWindow || iNativeWindowClosing);
 			}
 		}
 	}

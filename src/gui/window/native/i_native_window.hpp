@@ -41,6 +41,7 @@ namespace neogfx
 		virtual ~i_native_window() {}
 	public:
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
+		virtual bool events_queued() const = 0;
 		virtual void push_event(const native_event& aEvent) = 0;
 		virtual bool pump_event() = 0;
 		virtual void handle_event(const native_event& aNativeEvent) = 0;
@@ -55,6 +56,12 @@ namespace neogfx
 		virtual void set_transparency(double aAlpha) = 0;
 		virtual bool is_active() const = 0;
 		virtual void activate() = 0;
+		virtual bool is_iconic() const = 0;
+		virtual void iconize() = 0;
+		virtual bool is_maximized() const = 0;
+		virtual void maximize() = 0;
+		virtual bool is_restored() const = 0;
+		virtual void restore() = 0;
 		virtual bool is_enabled() const = 0;
 		virtual void enable(bool aEnable) = 0;
 		virtual bool is_capturing() const = 0;

@@ -635,6 +635,36 @@ namespace neogfx
 #endif
 	}
 
+	bool sdl_window::is_iconic() const
+	{
+		return (SDL_GetWindowFlags(iHandle) & SDL_WINDOW_MINIMIZED) == SDL_WINDOW_MINIMIZED;
+	}
+
+	void sdl_window::iconize()
+	{
+		SDL_MinimizeWindow(iHandle);
+	}
+
+	bool sdl_window::is_maximized() const
+	{
+		return (SDL_GetWindowFlags(iHandle) & SDL_WINDOW_MAXIMIZED) == SDL_WINDOW_MAXIMIZED;
+	}
+
+	void sdl_window::maximize()
+	{
+		SDL_MaximizeWindow(iHandle);
+	}
+
+	bool sdl_window::is_restored() const
+	{
+		return !is_iconic() && !is_maximized();
+	}
+
+	void sdl_window::restore()
+	{
+		SDL_RestoreWindow(iHandle);
+	}
+
 	bool sdl_window::is_enabled() const
 	{
 #ifdef WIN32
@@ -647,7 +677,15 @@ namespace neogfx
 	void sdl_window::enable(bool aEnable)
 	{
 #ifdef WIN32
+		bool wasEnabled = (IsWindowEnabled(static_cast<HWND>(native_handle())) == TRUE);
 		EnableWindow(static_cast<HWND>(native_handle()), aEnable);
+		if (wasEnabled != aEnable)
+		{
+			if (aEnable)
+				push_event(window_event(window_event::Enabled));
+			else
+				push_event(window_event(window_event::Disabled));
+		}
 #endif
 	}
 
@@ -1098,14 +1136,17 @@ namespace neogfx
 				push_event(window_event(window_event::SizeChanged, iExtents));
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:
+				push_event(window_event(window_event::Iconized));
 				invalidate(surface_size());
 				render(true);
 				break;
 			case SDL_WINDOWEVENT_MAXIMIZED:
+				push_event(window_event(window_event::Maximized));
 				invalidate(surface_size());
 				render(true);
 				break;
 			case SDL_WINDOWEVENT_RESTORED:
+				push_event(window_event(window_event::Restored));
 				invalidate(surface_size());
 				render(true);
 				break;

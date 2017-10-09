@@ -43,7 +43,14 @@ namespace neogfx
 	public:
 		virtual bool is_active() const = 0;
 		virtual void activate() = 0;
-		virtual void counted_enable(bool aEnable) = 0;
+		virtual bool is_iconic() const = 0;
+		virtual void iconize() = 0;
+		virtual bool is_maximized() const = 0;
+		virtual void maximize() = 0;
+		virtual bool is_restored() const = 0;
+		virtual void restore() = 0;
+		virtual bool window_enabled() const = 0;
+		virtual void counted_window_enable(bool aEnable) = 0;
 	public:
 		virtual bool native_window_can_close() const = 0;
 		virtual void native_window_closing() = 0;

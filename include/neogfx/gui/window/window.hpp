@@ -158,7 +158,14 @@ namespace neogfx
 	public:
 		bool is_active() const override;
 		void activate() override;
-		void counted_enable(bool aEnable) override;
+		bool is_iconic() const override;
+		void iconize() override;
+		bool is_maximized() const override;
+		void maximize() override;
+		bool is_restored() const override;
+		void restore() override;
+		bool window_enabled() const override;
+		void counted_window_enable(bool aEnable) override;
 	public:
 		const i_surface& surface() const override;
 		i_surface& surface() override;
