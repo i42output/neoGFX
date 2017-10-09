@@ -659,6 +659,13 @@ namespace neogfx
 		aWidget.focus_lost(focus_reason::Other);
 	}
 
+	window::child_widget_scrolling_disposition_e window::scrolling_disposition(const i_widget& aChildWidget) const
+	{
+		if (iTitleBar != boost::none && &aChildWidget == &*iTitleBar)
+			return DontScrollChildWidget;
+		return scrollable_widget::scrolling_disposition(aChildWidget);
+	}
+
 	const std::string& window::title_text() const
 	{
 		return native_window().title_text();

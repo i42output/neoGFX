@@ -151,6 +151,8 @@ namespace neogfx
 		void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
 		void release_focused_widget(i_widget& aWidget) override;
 	public:
+		child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const override;
+	public:
 		const std::string& title_text() const override;
 		void set_title_text(const std::string& aTitleText) override;
 	public:
