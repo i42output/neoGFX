@@ -106,6 +106,7 @@ namespace neogfx
 		void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) override;
 		bool has_invalidated_area() const override;
 		const rect& invalidated_area() const override;
+		rect validate() override;
 		bool has_rendering_priority() const override;
 		void render_surface() override;
 		void pause_rendering() override;

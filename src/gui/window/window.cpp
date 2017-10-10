@@ -406,6 +406,11 @@ namespace neogfx
 		return native_surface().invalidated_area();
 	}
 
+	rect window::validate()
+	{
+		return native_surface().validate();
+	}
+
 	bool window::has_rendering_priority() const
 	{
 		return is_active();

@@ -110,7 +110,7 @@ namespace neogfx
 		neogfx::logical_coordinate_system logical_coordinate_system() const override;
 		point position() const override;
 		void set_position(const point& aPosition) override;
-		point origin(bool aNonClient = false) const override;
+		point origin() const override;
 		void move(const point& aPosition) override;
 		void moved() override;
 		size extents() const override;

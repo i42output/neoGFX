@@ -99,10 +99,13 @@ namespace neogfx
 
 	void opengl_window::invalidate(const rect& aInvalidatedRect)
 	{
-		//std::cerr << "invalidate: " << aInvalidatedRect << std::endl;
-		if (aInvalidatedRect.cx != 0.0 && aInvalidatedRect.cy != 0.0 &&
-			iInvalidatedRects.find(aInvalidatedRect) == iInvalidatedRects.end())
-			iInvalidatedRects.insert(aInvalidatedRect);
+		if (aInvalidatedRect.cx != 0.0 && aInvalidatedRect.cy != 0.0)
+		{
+			if (!has_invalidated_area())
+				iInvalidatedArea = aInvalidatedRect.ceil();
+			else
+				iInvalidatedArea = invalidated_area().combine(aInvalidatedRect).ceil();
+		}
 	}
 
 	bool opengl_window::has_invalidated_area() const
@@ -114,6 +117,17 @@ namespace neogfx
 	{
 		if (has_invalidated_area())
 			return *iInvalidatedArea;
+		throw no_invalidated_area();
+	}
+
+	rect opengl_window::validate()
+	{
+		if (has_invalidated_area())
+		{
+			rect validatedArea = invalidated_area();
+			iInvalidatedArea = boost::none;
+			return validatedArea;
+		}
 		throw no_invalidated_area();
 	}
 
@@ -141,27 +155,16 @@ namespace neogfx
 				return;
 		}
 
-		if (iInvalidatedRects.empty())
+		if (!has_invalidated_area())
 			return;
 
-		iInvalidatedArea = *iInvalidatedRects.begin();
-		for (const auto& ir : iInvalidatedRects)
+		if (invalidated_area().cx <= 0.0 || invalidated_area().cy <= 0.0)
 		{
-			*iInvalidatedArea = iInvalidatedArea->combine(ir);
-		}
-		iInvalidatedRects.clear();
-		iInvalidatedArea->cx = std::min(iInvalidatedArea->cx, surface_size().cx - iInvalidatedArea->x);
-		iInvalidatedArea->cy = std::min(iInvalidatedArea->cy, surface_size().cy - iInvalidatedArea->y);
-
-		iInvalidatedArea = iInvalidatedArea->ceil();
-
-		if (iInvalidatedArea->cx <= 0.0 || iInvalidatedArea->cy <= 0.0)
-		{
-			iInvalidatedArea = boost::none;
+			validate();
 			return;
 		}
 
-		//std::cerr << "invalidated: " << *iInvalidatedArea << std::endl;
+		//std::cerr << "to render: " << rectToRender << std::endl;
 
 		++iFrameCounter;
 
@@ -226,9 +229,8 @@ namespace neogfx
 
 		display();
 
-		iInvalidatedArea = boost::none;
-
 		iRendering = false;
+		validate();
 
 		rendering_finished.trigger();
 

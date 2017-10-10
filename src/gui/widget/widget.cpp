@@ -670,10 +670,10 @@ namespace neogfx
 		move(aPosition);
 	}
 
-	point widget::origin(bool) const
+	point widget::origin() const
 	{
 		if (has_parent())
-			return position() + parent().origin(false);
+			return position() + parent().origin();
 		else
 			return point{};
 	}
@@ -682,9 +682,9 @@ namespace neogfx
 	{
 		if (iPosition != units_converter(*this).to_device_units(aPosition))
 		{
-			update();
+			update(true);
 			iPosition = units_converter(*this).to_device_units(aPosition);
-			update();
+			update(true);
 			moved();
 		}
 	}
@@ -723,7 +723,7 @@ namespace neogfx
 
 	rect widget::window_rect() const
 	{
-		return rect{origin(true), extents()};
+		return rect{origin(), extents()};
 	}
 
 	rect widget::client_rect(bool aIncludeMargins) const
@@ -931,7 +931,7 @@ namespace neogfx
 		const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
 		aGraphicsContext.set_extents(extents());
-		aGraphicsContext.set_origin(origin(true));
+		aGraphicsContext.set_origin(origin());
 		aGraphicsContext.scissor_on(nonClientClipRect);
 		paint_non_client(aGraphicsContext);
 		aGraphicsContext.scissor_off();
@@ -956,7 +956,7 @@ namespace neogfx
 		}
 
 		aGraphicsContext.set_extents(extents());
-		aGraphicsContext.set_origin(origin(true));
+		aGraphicsContext.set_origin(origin());
 		aGraphicsContext.scissor_on(nonClientClipRect);
 		paint_non_client_after(aGraphicsContext);
 		aGraphicsContext.scissor_off();
