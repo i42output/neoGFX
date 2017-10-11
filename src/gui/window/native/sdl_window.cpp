@@ -785,8 +785,11 @@ namespace neogfx
 			break;
 		case WM_SYSCOMMAND:
 			result = wndproc(hwnd, msg, wparam, lparam);
-			if (wparam == SC_CLOSE)
-				self.handle_event(window_event{ window_event::Close });
+			if (CUSTOM_DECORATION)
+			{
+				if (wparam == SC_CLOSE)
+					self.handle_event(window_event{ window_event::Close });
+			}
 			break;
 		case WM_NCACTIVATE:
 			{

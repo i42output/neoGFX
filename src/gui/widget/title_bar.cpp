@@ -168,11 +168,15 @@ namespace neogfx
 				iMaximizeButton.enable(!isMaximized && isEnabled);
 				iRestoreButton.enable(!isRestored && isEnabled);
 				iCloseButton.enable(isEnabled);
-				iMinimizeButton.show(!isIconic && (w.style() & window_style::MinimizeBox) == window_style::MinimizeBox);
-				iMaximizeButton.show(!isMaximized && (w.style() & window_style::MaximizeBox) == window_style::MaximizeBox);
-				iRestoreButton.show(!isRestored && (w.style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid);
-				managing_layout().layout_items(true);
-				update(true);
+				bool layoutChanged = false;
+				layoutChanged = iMinimizeButton.show(!isIconic && (w.style() & window_style::MinimizeBox) == window_style::MinimizeBox) || layoutChanged;
+				layoutChanged = iMaximizeButton.show(!isMaximized && (w.style() & window_style::MaximizeBox) == window_style::MaximizeBox) || layoutChanged;
+				layoutChanged = iRestoreButton.show(!isRestored && (w.style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid) || layoutChanged;
+				if (layoutChanged)
+				{
+					managing_layout().layout_items(true);
+					update(true);
+				}
 			}
 		};
 		if (surface().surface_type() == surface_type::Window)

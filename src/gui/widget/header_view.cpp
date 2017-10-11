@@ -263,7 +263,7 @@ namespace neogfx
 
 	void header_view::model_destroyed(const i_item_presentation_model&)
 	{
-		iModel.reset();
+		iPresentationModel.reset();
 	}
 
 	dimension header_view::separator_width() const

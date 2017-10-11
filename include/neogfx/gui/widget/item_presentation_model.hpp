@@ -72,6 +72,7 @@ namespace neogfx
 		{
 			if (has_item_model())
 				item_model().unsubscribe(*this);
+			notify_observers(i_item_presentation_model_subscriber::NotifyModelDestroyed);
 		}
 	public:
 		bool has_item_model() const override

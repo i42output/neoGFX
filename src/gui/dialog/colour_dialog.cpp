@@ -841,7 +841,6 @@ namespace neogfx
 			iCustomColoursLayout.add_item(std::make_shared<colour_box>(*this, *customColour, customColour));
 		button_box().add_button(dialog_button_box::Ok);
 		button_box().add_button(dialog_button_box::Cancel);
-		centre_on_parent();
 		iSink += iH.first.checked([this]() { set_current_channel(ChannelHue); });
 		iSink += iS.first.checked([this]() { set_current_channel(ChannelSaturation); });
 		iSink += iV.first.checked([this]() { set_current_channel(ChannelValue); });
@@ -880,6 +879,7 @@ namespace neogfx
 			update();
 		});
 
+		centre_on_parent();
 		update_widgets(*this);
 	}
 

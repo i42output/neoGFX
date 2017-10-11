@@ -166,7 +166,7 @@ namespace neogfx
 	{
 		if (!visible())
 			return size{};
-		if (iLayoutId.first == iParent.layout_id())
+		if (iLayoutId.first == iParent.layout_id() && iLayoutId.first != -1)
 			return iMinimumSize;
 		else
 		{

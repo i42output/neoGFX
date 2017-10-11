@@ -507,15 +507,16 @@ namespace neogfx
 			resize(minimum_size());
 			rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
 			rect parentRect{ parent_surface().surface_position(), parent_surface().surface_size() };
-			point position = point{ (parentRect.extents() - surface_size()) / 2.0 } + parentRect.top_left();
+			rect ourRect{ surface().surface_position(), surface().surface_size() };
+			point position = point{ (parentRect.extents() - ourRect.extents()) / 2.0 } + parentRect.top_left();
 			if (position.x < 0.0)
 				position.x = 0.0;
 			if (position.y < 0.0)
 				position.y = 0.0;
-			if (position.x + surface_size().cx > desktopRect.right())
-				position.x = desktopRect.right() - surface_size().cx;
-			if (position.y + surface_size().cy > desktopRect.bottom())
-				position.y = desktopRect.bottom() - surface_size().cy;
+			if (position.x + ourRect.cx > desktopRect.right())
+				position.x = desktopRect.right() - ourRect.cx;
+			if (position.y + ourRect.cy > desktopRect.bottom())
+				position.y = desktopRect.bottom() - ourRect.cy;
 			move_surface(position);
 		}
 		else
@@ -573,16 +574,20 @@ namespace neogfx
 		layout_items(true);
 	}
 
-	void window::show(bool aVisible)
+	bool window::show(bool aVisible)
 	{
-		widget::show(aVisible);
-		if (!destroyed())
+		if (widget::show(aVisible))
 		{
-			if (aVisible)
-				native_window().show();
-			else
-				native_window().hide();
+			if (!destroyed())
+			{
+				if (aVisible)
+					native_window().show();
+				else
+					native_window().hide();
+			}
+			return true;
 		}
+		return false;
 	}
 
 	bool window::requires_owner_focus() const

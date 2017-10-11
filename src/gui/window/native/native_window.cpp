@@ -83,10 +83,14 @@ namespace neogfx
 
 	void native_window::handle_event(const native_event& aEvent)
 	{
+		neolib::destroyed_flag destroyed{ *this };
 		neolib::scoped_counter sc{ iProcessingEvent };
 		iCurrentEvent = aEvent;
 		handle_event();
-		iCurrentEvent = boost::none;
+		if (!destroyed)
+			iCurrentEvent = boost::none;
+		else
+			sc.ignore();
 	}
 
 	native_window::native_event& native_window::current_event()
@@ -98,9 +102,14 @@ namespace neogfx
 
 	void native_window::handle_event()
 	{
+		neolib::destroyed_flag destroyed{ *this };
 		neolib::scoped_counter sc{ iProcessingEvent };
 		if (!filter_event.trigger(iCurrentEvent))
+		{
+			if (destroyed)
+				sc.ignore();
 			return;
+		}
 		if (iCurrentEvent.is<window_event>())
 		{
 			auto& windowEvent = static_variant_cast<window_event&>(iCurrentEvent);
@@ -224,6 +233,8 @@ namespace neogfx
 				break;
 			}
 		}
+		if (destroyed)
+			sc.ignore();
 	}
 
 	bool native_window::processing_event() const

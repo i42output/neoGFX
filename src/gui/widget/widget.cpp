@@ -1071,7 +1071,7 @@ namespace neogfx
 		return !effectively_visible();
 	}
 
-	void widget::show(bool aVisible)
+	bool widget::show(bool aVisible)
 	{
 		if (iVisible != aVisible)
 		{
@@ -1089,17 +1089,19 @@ namespace neogfx
 			}
 			else
 				update();
+			return true;
 		}
+		return false;
 	}
 
-	void widget::show()
+	bool widget::show()
 	{
-		show(true);
+		return show(true);
 	}
 
-	void widget::hide()
+	bool widget::hide()
 	{
-		show(false);
+		return show(false);
 	}
 
 	bool widget::enabled() const
@@ -1122,23 +1124,25 @@ namespace neogfx
 		return !effectively_enabled();
 	}
 
-	void widget::enable(bool aEnable)
+	bool widget::enable(bool aEnable)
 	{
 		if (iEnabled != aEnable)
 		{
 			iEnabled = aEnable;
 			update();
+			return true;
 		}
+		return false;
 	}
 
-	void widget::enable()
+	bool widget::enable()
 	{
-		enable(true);
+		return enable(true);
 	}
 
-	void widget::disable()
+	bool widget::disable()
 	{
-		enable(false);
+		return enable(false);
 	}
 
 	bool widget::entered() const

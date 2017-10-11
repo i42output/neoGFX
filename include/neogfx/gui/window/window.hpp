@@ -138,7 +138,7 @@ namespace neogfx
 		void widget_added(i_widget& aWidget) override;
 		void widget_removed(i_widget& aWidget) override;
 	public:
-		void show(bool aVisible) override;
+		bool show(bool aVisible) override;
 		using scrollable_widget::show;
 		bool requires_owner_focus() const override;
 		bool has_entered_widget() const override;
