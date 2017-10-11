@@ -576,18 +576,15 @@ namespace neogfx
 
 	bool window::show(bool aVisible)
 	{
-		if (widget::show(aVisible))
+		bool result = widget::show(aVisible);
+		if (!destroyed())
 		{
-			if (!destroyed())
-			{
-				if (aVisible)
-					native_window().show();
-				else
-					native_window().hide();
-			}
-			return true;
+			if (aVisible)
+				native_window().show();
+			else
+				native_window().hide();
 		}
-		return false;
+		return result;
 	}
 
 	bool window::requires_owner_focus() const
