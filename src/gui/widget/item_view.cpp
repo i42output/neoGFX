@@ -218,7 +218,13 @@ namespace neogfx
 		if (item_display_rect().contains(aPosition))
 			return widget_part::Client;
 		else
-			return widget_part::NonClient;
+		{
+			auto result = scrollable_widget::hit_test(aPosition);
+			if (result != widget_part::Client)
+				return result;
+			else
+				return widget_part::NonClient;
+		}
 	}
 
 	size_policy item_view::size_policy() const
