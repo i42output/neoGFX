@@ -185,13 +185,13 @@ namespace neogfx
 			{
 				switch (e.type())
 				{
-				case neogfx::window_event::Enabled:
-				case neogfx::window_event::Disabled:
-				case neogfx::window_event::FocusGained:
-				case neogfx::window_event::FocusLost:
-				case neogfx::window_event::Iconized:
-				case neogfx::window_event::Maximized:
-				case neogfx::window_event::Restored:
+				case window_event_type::Enabled:
+				case window_event_type::Disabled:
+				case window_event_type::FocusGained:
+				case window_event_type::FocusLost:
+				case window_event_type::Iconized:
+				case window_event_type::Maximized:
+				case window_event_type::Restored:
 					update_widgets();
 					break;
 				default:

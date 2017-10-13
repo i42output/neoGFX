@@ -766,7 +766,7 @@ namespace neogfx
 			});
 			textEdit.keyboard_event([this, &textEdit, newIndex](neogfx::keyboard_event ke)
 			{
-				if (ke.type() == neogfx::keyboard_event::KeyPressed && ke.scan_code() == ScanCode_ESCAPE && textEdit.cursor().position() == textEdit.cursor().anchor())
+				if (ke.type() == neogfx::keyboard_event_type::KeyPressed && ke.scan_code() == ScanCode_ESCAPE && textEdit.cursor().position() == textEdit.cursor().anchor())
 					end_edit(false);
 			});
 		}

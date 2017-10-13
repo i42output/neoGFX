@@ -682,9 +682,9 @@ namespace neogfx
 		if (wasEnabled != aEnable)
 		{
 			if (aEnable)
-				push_event(window_event(window_event::Enabled));
+				push_event(window_event(window_event_type::Enabled));
 			else
-				push_event(window_event(window_event::Disabled));
+				push_event(window_event(window_event_type::Disabled));
 		}
 #endif
 	}
@@ -788,7 +788,7 @@ namespace neogfx
 			if (CUSTOM_DECORATION)
 			{
 				if (wparam == SC_CLOSE)
-					self.handle_event(window_event{ window_event::Close });
+					self.handle_event(window_event{ window_event_type::Close });
 			}
 			break;
 		case WM_NCACTIVATE:
@@ -800,7 +800,7 @@ namespace neogfx
 		case WM_SETTEXT:
 			result = wndproc(hwnd, msg, wparam, lparam);
 			self.native_window::set_title_text(SDL_GetWindowTitle(self.iHandle));
-			self.handle_event(window_event{ window_event::TitleTextChanged });
+			self.handle_event(window_event{ window_event_type::TitleTextChanged });
 			break;
 		case WM_NCPAINT:
 			if (CUSTOM_DECORATION)
@@ -810,7 +810,7 @@ namespace neogfx
 			break;
 		case WM_PAINT:
 			ValidateRect(hwnd, NULL);
-			self.handle_event(window_event(window_event::Paint));
+			self.handle_event(window_event(window_event_type::Paint));
 			result = 0;
 			break;
 		case WM_SYSCHAR:
@@ -818,7 +818,7 @@ namespace neogfx
 			{
 				char16_t characterCode = static_cast<char16_t>(wparam);
 				std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
-				self.push_event(keyboard_event(keyboard_event::SysTextInput, text));
+				self.push_event(keyboard_event(keyboard_event_type::SysTextInput, text));
 			}
 			break;
 		case WM_CHAR:
@@ -829,7 +829,7 @@ namespace neogfx
 				std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
 				uint8_t ch = static_cast<uint8_t>(text[0]);
 				if ((ch >= 32 && ch != 127) || ch == '\t' || ch == '\n')
-					self.push_event(keyboard_event(keyboard_event::TextInput, text));
+					self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
 			}
 			break;
 		case WM_LBUTTONDOWN:
@@ -1024,7 +1024,7 @@ namespace neogfx
 						basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
 				}
 				result = wndproc(hwnd, msg, wparam, lparam);
-				self.handle_event(window_event(window_event::Resizing, self.iExtents));
+				self.handle_event(window_event(window_event_type::Resizing, self.iExtents));
 			}
 			break;
 		case WM_NCDESTROY:
@@ -1128,44 +1128,44 @@ namespace neogfx
 			switch (aEvent.window.event)
 			{
 			case SDL_WINDOWEVENT_CLOSE:
-				push_event(window_event(window_event::Close));
+				push_event(window_event(window_event_type::Close));
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
 				iExtents = basic_size<decltype(aEvent.window.data1)>{ aEvent.window.data1, aEvent.window.data2 };
-				push_event(window_event(window_event::Resized, iExtents));
+				push_event(window_event(window_event_type::Resized, iExtents));
 				break;
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
 				iExtents = basic_size<decltype(aEvent.window.data1)>{ aEvent.window.data1, aEvent.window.data2 };
-				push_event(window_event(window_event::SizeChanged, iExtents));
+				push_event(window_event(window_event_type::SizeChanged, iExtents));
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:
-				push_event(window_event(window_event::Iconized));
+				push_event(window_event(window_event_type::Iconized));
 				invalidate(surface_size());
 				render(true);
 				break;
 			case SDL_WINDOWEVENT_MAXIMIZED:
-				push_event(window_event(window_event::Maximized));
+				push_event(window_event(window_event_type::Maximized));
 				invalidate(surface_size());
 				render(true);
 				break;
 			case SDL_WINDOWEVENT_RESTORED:
-				push_event(window_event(window_event::Restored));
+				push_event(window_event(window_event_type::Restored));
 				invalidate(surface_size());
 				render(true);
 				break;
 			case SDL_WINDOWEVENT_ENTER:
-				push_event(window_event(window_event::Enter));
+				push_event(window_event(window_event_type::Enter));
 				break;
 			case SDL_WINDOWEVENT_LEAVE:
-				push_event(window_event(window_event::Leave));
+				push_event(window_event(window_event_type::Leave));
 				break;
 			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				push_event(window_event(window_event::FocusGained));
+				push_event(window_event(window_event_type::FocusGained));
 				break;
 			case SDL_WINDOWEVENT_FOCUS_LOST:
 				SDL_ResetMouse();
 				iMouseButtonEventExtraInfo.clear();
-				push_event(window_event(window_event::FocusLost));
+				push_event(window_event(window_event_type::FocusLost));
 				break;
 			case SDL_WINDOWEVENT_EXPOSED:
 				invalidate(surface_size());
@@ -1176,7 +1176,7 @@ namespace neogfx
 		case SDL_MOUSEWHEEL:
 			push_event(
 				mouse_event(
-					mouse_event::WheelScrolled,
+					mouse_event_type::WheelScrolled,
 					static_cast<mouse_wheel>(
 						(aEvent.wheel.y != 0 ? mouse_wheel::Vertical : mouse_wheel::None) | (aEvent.wheel.x != 0 ? mouse_wheel::Horizontal : mouse_wheel::None)),
 					delta(static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y))));
@@ -1187,7 +1187,7 @@ namespace neogfx
 				if (aEvent.button.clicks == 1)
 					push_event(
 						mouse_event(
-							mouse_event::ButtonPressed,
+							mouse_event_type::ButtonPressed,
 							convert_mouse_button(aEvent.button.button),
 							point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
 							iMouseButtonEventExtraInfo.front()));
@@ -1195,7 +1195,7 @@ namespace neogfx
 				else
 					push_event(
 						mouse_event(
-							mouse_event::ButtonDoubleClicked,
+							mouse_event_type::ButtonDoubleClicked,
 							convert_mouse_button(aEvent.button.button),
 							point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
 							iMouseButtonEventExtraInfo.front()));
@@ -1207,7 +1207,7 @@ namespace neogfx
 			{
 				push_event(
 					mouse_event(
-						mouse_event::ButtonReleased,
+						mouse_event_type::ButtonReleased,
 						convert_mouse_button(aEvent.button.button),
 						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
 						iMouseButtonEventExtraInfo.front()));
@@ -1215,13 +1215,13 @@ namespace neogfx
 			break;
 		case SDL_MOUSEMOTION:
 			update_mouse_cursor();
-			push_event(mouse_event(mouse_event::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
+			push_event(mouse_event(mouse_event_type::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
 			break;
 		case SDL_KEYDOWN:
-			push_event(keyboard_event(keyboard_event::KeyPressed, static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod)));
+			push_event(keyboard_event(keyboard_event_type::KeyPressed, static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod)));
 			break;
 		case SDL_KEYUP:
-			push_event(keyboard_event(keyboard_event::KeyReleased, static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod)));
+			push_event(keyboard_event(keyboard_event_type::KeyReleased, static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod)));
 			break;
 		case SDL_TEXTEDITING:
 			/* todo */

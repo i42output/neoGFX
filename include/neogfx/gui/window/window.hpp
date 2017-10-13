@@ -189,6 +189,11 @@ namespace neogfx
 		void native_window_mouse_moved(const point& aPosition) override;
 		void native_window_mouse_entered() override;
 		void native_window_mouse_left() override;
+		void native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
+		void native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition) override;
+		void native_window_non_client_mouse_moved(const point& aPosition) override;
 		widget_part native_window_hit_test(const point& aPosition) const override;
 		rect native_window_widget_part_rect(widget_part aWidgetPart) const override;
 		void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;

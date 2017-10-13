@@ -94,8 +94,8 @@ namespace neogfx
 				iSpinBox.value_changed([this]() {iSlider.set_value(iSpinBox.value()); update(); });
 				iSlider.value_changed([this]() {iSpinBox.set_value(iSlider.value()); });
 				iSlider.set_value(aCurrentAlpha);
-				button_box().add_button(dialog_button_box::Ok);
-				button_box().add_button(dialog_button_box::Cancel);
+				button_box().add_button(standard_button::Ok);
+				button_box().add_button(standard_button::Cancel);
 				centre_on_parent();
 			}
 		private:

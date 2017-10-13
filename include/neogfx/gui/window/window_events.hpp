@@ -27,35 +27,36 @@
 
 namespace neogfx
 {
+	enum class window_event_type
+	{
+		Paint,
+		Close,
+		Enabled,
+		Disabled,
+		Resizing,
+		Resized,
+		SizeChanged,
+		Maximized,
+		Iconized,
+		Restored,
+		Enter,
+		Leave,
+		FocusGained,
+		FocusLost,
+		TitleTextChanged
+	};
+
 	class window_event
 	{
 	public:
 		typedef neolib::variant<neogfx::size> parameter_type;
-		enum type_e
-		{
-			Paint,
-			Close,
-			Enabled,
-			Disabled,
-			Resizing,
-			Resized,
-			SizeChanged,
-			Maximized,
-			Iconized,
-			Restored,
-			Enter,
-			Leave,
-			FocusGained,
-			FocusLost,
-			TitleTextChanged
-		};
 	public:
-		window_event(type_e aType, const parameter_type& aParameter = parameter_type()) :
+		window_event(window_event_type aType, const parameter_type& aParameter = parameter_type()) :
 			iType(aType), iParameter(aParameter)
 		{
 		}
 	public:
-		type_e type() const
+		window_event_type type() const
 		{
 			return iType;
 		}
@@ -68,29 +69,37 @@ namespace neogfx
 			static_variant_cast<neogfx::size&>(iParameter) = aSize;;
 		}
 	private:
-		type_e iType;
+		window_event_type iType;
 		parameter_type iParameter;
 	};
 
-	class mouse_event
+	enum class mouse_event_location
+	{
+		Client,
+		NonClient
+	};
+
+	enum class mouse_event_type
+	{
+		WheelScrolled,
+		ButtonPressed,
+		ButtonDoubleClicked,
+		ButtonReleased,
+		Moved
+	};
+
+	template <mouse_event_location Location>
+	class basic_mouse_event
 	{
 	public:
 		typedef neolib::variant<neogfx::mouse_wheel, neogfx::delta, neogfx::mouse_button, neogfx::point, neogfx::key_modifiers_e> parameter_type;
-		enum type_e
-		{
-			WheelScrolled,
-			ButtonPressed,
-			ButtonDoubleClicked,
-			ButtonReleased,
-			Moved
-		};
 	public:
-		mouse_event(type_e aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
+		basic_mouse_event(mouse_event_type aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
 			iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
 		{
 		}
 	public:
-		type_e type() const
+		mouse_event_type type() const
 		{
 			return iType;
 		}
@@ -108,37 +117,41 @@ namespace neogfx
 		}
 		neogfx::point position() const
 		{
-			return static_variant_cast<neogfx::point>(iType != Moved ? iParameter2 : iParameter1);
+			return static_variant_cast<neogfx::point>(iType != mouse_event_type::Moved ? iParameter2 : iParameter1);
 		}
 		neogfx::key_modifiers_e key_modifiers() const
 		{
 			return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
 		}
 	private:
-		type_e iType;
+		mouse_event_type iType;
 		parameter_type iParameter1;
 		parameter_type iParameter2;
 		parameter_type iParameter3;
+	};
+
+	typedef basic_mouse_event<mouse_event_location::Client> mouse_event;
+	typedef basic_mouse_event<mouse_event_location::NonClient> non_client_mouse_event;
+
+	enum class keyboard_event_type
+	{
+		KeyPressed,
+		KeyReleased,
+		TextInput,
+		SysTextInput
 	};
 
 	class keyboard_event
 	{
 	public:
 		typedef neolib::variant<neogfx::scan_code_e, neogfx::key_code_e, neogfx::key_modifiers_e, std::string> parameter_type;
-		enum type_e
-		{
-			KeyPressed,
-			KeyReleased,
-			TextInput,
-			SysTextInput
-		};
 	public:
-		keyboard_event(type_e aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
+		keyboard_event(keyboard_event_type aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
 			iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
 		{
 		}
 	public:
-		type_e type() const
+		keyboard_event_type type() const
 		{
 			return iType;
 		}
@@ -159,7 +172,7 @@ namespace neogfx
 			return static_variant_cast<std::string>(iParameter1);
 		}
 	private:
-		type_e iType;
+		keyboard_event_type iType;
 		parameter_type iParameter1;
 		parameter_type iParameter2;
 		parameter_type iParameter3;

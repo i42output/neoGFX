@@ -53,8 +53,8 @@ namespace neogfx
 			const auto& windowEvent = static_variant_cast<const window_event&>(aEvent);
 			switch (windowEvent.type())
 			{
-			case window_event::Resized:
-			case window_event::SizeChanged:
+			case window_event_type::Resized:
+			case window_event_type::SizeChanged:
 				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
 				{
 					if (e->is<window_event>() && static_variant_cast<const window_event&>(*e).type() == windowEvent.type())
@@ -117,14 +117,14 @@ namespace neogfx
 				return;
 			switch (windowEvent.type())
 			{
-			case window_event::Paint:
+			case window_event_type::Paint:
 				invalidate(surface_size());
 				render(true);
 				break;
-			case window_event::Close:
+			case window_event_type::Close:
 				close();
 				break;
-			case window_event::Resizing:
+			case window_event_type::Resizing:
 				window().native_window_resized();
 				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
 				{
@@ -132,8 +132,8 @@ namespace neogfx
 					{
 						switch (static_variant_cast<const window_event&>(*e).type())
 						{
-						case window_event::Resized:
-						case window_event::SizeChanged:
+						case window_event_type::Resized:
+						case window_event_type::SizeChanged:
 							e = iEventQueue.erase(e);
 							break;
 						default:
@@ -143,25 +143,25 @@ namespace neogfx
 					}
 				}
 				break;
-			case window_event::Resized:
+			case window_event_type::Resized:
 				window().native_window_resized();
 				break;
-			case window_event::SizeChanged:
+			case window_event_type::SizeChanged:
 				window().native_window_resized();
 				break;
-			case window_event::Enter:
+			case window_event_type::Enter:
 				window().native_window_mouse_entered();
 				break;
-			case window_event::Leave:
+			case window_event_type::Leave:
 				window().native_window_mouse_left();
 				break;
-			case window_event::FocusGained:
+			case window_event_type::FocusGained:
 				window().native_window_focus_gained();
 				break;
-			case window_event::FocusLost:
+			case window_event_type::FocusLost:
 				window().native_window_focus_lost();
 				break;
-			case window_event::TitleTextChanged:
+			case window_event_type::TitleTextChanged:
 				window().native_window_title_text_changed(title_text());
 				break;
 			default:
@@ -174,19 +174,19 @@ namespace neogfx
 			const auto& mouseEvent = static_variant_cast<const mouse_event&>(iCurrentEvent);
 			switch (mouseEvent.type())
 			{
-			case mouse_event::WheelScrolled:
+			case mouse_event_type::WheelScrolled:
 				window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
 				break;
-			case mouse_event::ButtonPressed:
+			case mouse_event_type::ButtonPressed:
 				window().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
 				break;
-			case mouse_event::ButtonDoubleClicked:
+			case mouse_event_type::ButtonDoubleClicked:
 				window().native_window_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
 				break;
-			case mouse_event::ButtonReleased:
+			case mouse_event_type::ButtonReleased:
 				window().native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
 				break;
-			case mouse_event::Moved:
+			case mouse_event_type::Moved:
 				window().native_window_mouse_moved(mouseEvent.position());
 				break;
 			default:
@@ -200,28 +200,28 @@ namespace neogfx
 			const auto& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
 			switch (keyboardEvent.type())
 			{
-			case keyboard_event::KeyPressed:
+			case keyboard_event_type::KeyPressed:
 				if (!keyboard.grabber().key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
 				{
 					keyboard.key_pressed.trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 					window().native_window_key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 				}
 				break;
-			case keyboard_event::KeyReleased:
+			case keyboard_event_type::KeyReleased:
 				if (!keyboard.grabber().key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
 				{
 					keyboard.key_released.trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 					window().native_window_key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
 				}
 				break;
-			case keyboard_event::TextInput:
+			case keyboard_event_type::TextInput:
 				if (!keyboard.grabber().text_input(keyboardEvent.text()))
 				{
 					keyboard.text_input.trigger(keyboardEvent.text());
 					window().native_window_text_input(keyboardEvent.text());
 				}
 				break;
-			case keyboard_event::SysTextInput:
+			case keyboard_event_type::SysTextInput:
 				if (!keyboard.grabber().sys_text_input(keyboardEvent.text()))
 				{
 					keyboard.sys_text_input.trigger(keyboardEvent.text());

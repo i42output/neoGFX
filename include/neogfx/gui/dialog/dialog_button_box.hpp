@@ -28,52 +28,62 @@
 
 namespace neogfx
 {
+	enum class standard_button : uint32_t
+	{
+		Custom			= 0x00001,
+		Ok				= 0x00002,
+		Cancel			= 0x00004,
+		Close			= 0x00008,
+		Discard			= 0x00010,
+		Apply			= 0x00020,
+		Reset			= 0x00040,
+		RestoreDefaults	= 0x00080,
+		Yes				= 0x00100,
+		No				= 0x00200,
+		YesToAll		= 0x00400,
+		NoToAll			= 0x00800,
+		Abort			= 0x01000,
+		Retry			= 0x02000,
+		Ignore			= 0x04000,
+		Open			= 0x08000,
+		Save			= 0x10000,
+		SaveAll			= 0x20000,
+		Help			= 0x40000
+	};
+
+	inline constexpr standard_button operator|(standard_button aLhs, standard_button aRhs)
+	{
+		return static_cast<standard_button>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr standard_button operator&(standard_button aLhs, standard_button aRhs)
+	{
+		return static_cast<standard_button>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
+	enum class button_role
+	{
+		InvalidRole,
+		AcceptRole,
+		RejectRole,
+		DestructiveRole,
+		ActionRole,
+		ApplyRole,
+		ResetRole,
+		YesRole,
+		NoRole,
+		HelpRole
+	};
+
 	class dialog_button_box : public widget
 	{
 	public:
 		event<> accepted;
 		event<> rejected;
 	public:
-		enum standard_button_e
-		{
-			Custom,
-			Ok,
-			Cancel,
-			Close,
-			Discard,
-			Apply,
-			Reset,
-			RestoreDefaults,
-			Yes,
-			No,
-			YesToAll,
-			NoToAll,
-			Abort,
-			Retry,
-			Ignore,
-			Open,
-			Save,
-			SaveAll,
-			Help
-		};
-	public:
-		event<standard_button_e> clicked;
-	public:
-		enum button_role_e
-		{
-			InvalidRole,
-			AcceptRole,
-			RejectRole,
-			DestructiveRole,
-			ActionRole,
-			ApplyRole,
-			ResetRole,
-			YesRole,
-			NoRole,
-			HelpRole
-		};
+		event<standard_button> clicked;
 	private:
-		typedef std::pair<standard_button_e, button_role_e> button_key;
+		typedef std::pair<standard_button, button_role> button_key;
 		struct button_sorter
 		{
 			bool operator()(const button_key& aLhs, const button_key& aRhs) const;
@@ -86,8 +96,8 @@ namespace neogfx
 		dialog_button_box(i_layout& aLayout);
 		~dialog_button_box();
 	public:
-		push_button& button(standard_button_e aStandardButton) const;
-		void add_button(standard_button_e aStandardButton);
+		push_button& button(standard_button aStandardButton) const;
+		void add_button(standard_button aStandardButton);
 		void clear();
 	private:
 		void init();

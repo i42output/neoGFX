@@ -32,7 +32,7 @@ namespace neogfx
 	class i_native_window : public i_native_surface, public i_device_metrics
 	{
 	public:
-		typedef neolib::variant<window_event, mouse_event, keyboard_event> native_event;
+		typedef neolib::variant<window_event, mouse_event, non_client_mouse_event, keyboard_event> native_event;
 	public:
 		event<native_event&> filter_event;
 	public:

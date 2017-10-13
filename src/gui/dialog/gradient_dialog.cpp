@@ -247,8 +247,8 @@ namespace neogfx
 		iPreview->set_margins(neogfx::margins{});
 		iPreview->set_fixed_size(size{ std::ceil(256.0 * 16.0 / 9.0), 256.0 });
 
-		button_box().add_button(dialog_button_box::Ok);
-		button_box().add_button(dialog_button_box::Cancel);
+		button_box().add_button(standard_button::Ok);
+		button_box().add_button(standard_button::Cancel);
 		
 		update_widgets();
 

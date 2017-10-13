@@ -776,7 +776,7 @@ int main(int argc, char* argv[])
 		tableView2.column_header().set_expand_last_column(true);
 		tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)
 		{
-			if (ke.type() == ng::keyboard_event::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && tableView1.model().rows() > 0 && tableView1.selection_model().has_current_index())
+			if (ke.type() == ng::keyboard_event_type::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && tableView1.model().rows() > 0 && tableView1.selection_model().has_current_index())
 				tableView1.model().remove_item(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
 		});
 

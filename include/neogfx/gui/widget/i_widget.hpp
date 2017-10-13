@@ -113,6 +113,7 @@ namespace neogfx
 		event<> size_changed;
 		event<graphics_context&> painting;
 		event<const neogfx::mouse_event&> mouse_event;
+		event<const neogfx::non_client_mouse_event&> non_client_mouse_event;
 		event<const neogfx::keyboard_event&> keyboard_event;
 		event<neogfx::focus_event> focus_event;
 	public:
@@ -264,6 +265,11 @@ namespace neogfx
 		virtual void mouse_moved(const point& aPosition) = 0;
 		virtual void mouse_entered() = 0;
 		virtual void mouse_left() = 0;
+		virtual void non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) = 0;
+		virtual void non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
+		virtual void non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
+		virtual void non_client_mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
+		virtual void non_client_mouse_moved(const point& aPosition) = 0;
 		virtual neogfx::mouse_cursor mouse_cursor() const = 0;
 	public:
 		virtual graphics_context create_graphics_context() const = 0;

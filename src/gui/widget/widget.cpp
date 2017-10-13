@@ -1272,6 +1272,26 @@ namespace neogfx
 	{
 	}
 
+	void widget::non_client_mouse_wheel_scrolled(mouse_wheel, delta)
+	{
+	}
+
+	void widget::non_client_mouse_button_pressed(mouse_button, const point&, key_modifiers_e)
+	{
+	}
+
+	void widget::non_client_mouse_button_double_clicked(mouse_button, const point&, key_modifiers_e)
+	{
+	}
+
+	void widget::non_client_mouse_button_released(mouse_button, const point&)
+	{
+	}
+
+	void widget::non_client_mouse_moved(const point&)
+	{
+	}
+
 	neogfx::mouse_cursor widget::mouse_cursor() const
 	{
 		if (has_parent())
