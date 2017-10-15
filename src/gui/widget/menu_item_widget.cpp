@@ -293,7 +293,7 @@ namespace neogfx
 				{
 					iSubMenuOpener = std::make_unique<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
 					{
-						destroyed_flag destroyed(*this);
+						destroyed_flag destroyed{ *this };
 						if (!menu_item().sub_menu().is_open())
 							menu().open_sub_menu.trigger(menu_item().sub_menu());
 						if (!destroyed)
@@ -311,7 +311,7 @@ namespace neogfx
 
 	void menu_item_widget::select_item(bool aSelectAnySubMenuItem)
 	{
-		destroyed_flag destroyed(*this);
+		destroyed_flag destroyed{ *this };
 		if (!menu_item().available())
 			return;
 		if (menu_item().type() == i_menu_item::Action)

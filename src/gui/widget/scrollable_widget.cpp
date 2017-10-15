@@ -121,7 +121,7 @@ namespace neogfx
 		else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(*this, aPosition + origin()) != scrollbar::ElementNone)
 			return widget_part::NonClientHorizontalScrollbar;
 		else
-			return widget_part::Client;
+			return widget::hit_test(aPosition);
 	}
 
 	void scrollable_widget::paint_non_client_after(graphics_context& aGraphicsContext) const

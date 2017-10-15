@@ -34,7 +34,7 @@ namespace neogfx
 		updater(header_view& aParent) :
 			neolib::callback_timer{ app::instance(), [this, &aParent](neolib::callback_timer&)
 			{
-				neolib::destroyable::destroyed_flag destroyed(*this);
+				neolib::destroyable::destroyed_flag destroyed{ *this };
 				for (auto& sw : aParent.iSectionWidths)
 				{
 					sw.calculated = 0.0;

@@ -55,7 +55,6 @@ std::string GetLastErrorAsString()
 
 extern "C"
 {
-	BOOL WIN_ConvertUTF32toUTF8(UINT32 codepoint, char * text);
 	void SDL_ResetMouse(void);
 	extern LPTSTR SDL_Appname;
 }
@@ -188,14 +187,16 @@ namespace neogfx
 
 	std::map<void*, sdl_window*> sHandleMap;
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
+	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
+		iBasicServices(aBasicServices),
 		iParent(0),
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
 		iVisible(false),
 		iCapturingMouse(false),
+		iNonClientCapturing(false),
 		iReady(false),
 		iDestroyed(false),
 		iClickedWidgetPart(widget_part::Nowhere),
@@ -204,8 +205,8 @@ namespace neogfx
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
-			SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
+			0,
+			0,
 			aVideoMode.width(),
 			aVideoMode.height(),
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
@@ -224,14 +225,16 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
+		iBasicServices(aBasicServices),
 		iParent(0),
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
 		iVisible(false),
 		iCapturingMouse(false),
+		iNonClientCapturing(false),
 		iReady(false),
 		iDestroyed(false),
 		iClickedWidgetPart(widget_part::Nowhere),
@@ -260,14 +263,16 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
+		iBasicServices(aBasicServices),
 		iParent(0),
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
 		iVisible(false),
 		iCapturingMouse(false),
+		iNonClientCapturing(false),
 		iReady(false),
 		iDestroyed(false),
 		iClickedWidgetPart(widget_part::Nowhere),
@@ -296,14 +301,16 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
+	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
+		iBasicServices(aBasicServices),
 		iParent(&aParent),
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
 		iVisible(false),
 		iCapturingMouse(false),
+		iNonClientCapturing(false),
 		iReady(false),
 		iDestroyed(false),
 		iClickedWidgetPart(widget_part::Nowhere),
@@ -312,8 +319,8 @@ namespace neogfx
 		install_creation_hook(*this);
 		iHandle = SDL_CreateWindow(
 			aWindowTitle.c_str(),
-			SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
+			0,
+			0,
 			aVideoMode.width(),
 			aVideoMode.height(),
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
@@ -332,14 +339,16 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
+		iBasicServices(aBasicServices),
 		iParent(&aParent),
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
 		iVisible(false),
 		iCapturingMouse(false),
+		iNonClientCapturing(false),
 		iReady(false),
 		iDestroyed(false),
 		iClickedWidgetPart(widget_part::Nowhere),
@@ -368,14 +377,16 @@ namespace neogfx
 		iReady = true;
 	}
 
-	sdl_window::sdl_window(i_basic_services&, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
+	sdl_window::sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle) :
 		opengl_window(aRenderingEngine, aSurfaceManager, aWindow),
+		iBasicServices(aBasicServices),
 		iParent(&aParent),
 		iStyle(aStyle),
 		iHandle(0),
 		iNativeHandle(0),
 		iVisible(false),
 		iCapturingMouse(false),
+		iNonClientCapturing(false),
 		iReady(false),
 		iDestroyed(false),
 		iClickedWidgetPart(widget_part::Nowhere),
@@ -466,19 +477,12 @@ namespace neogfx
 	point sdl_window::mouse_position() const
 	{
 		int x, y;
-		SDL_Window* mouseFocus = SDL_GetMouseFocus();
-		SDL_GetMouseState(&x, &y);
-		if (mouseFocus != 0)
-		{
-			int mfx, mfy;
-			SDL_GetWindowPosition(mouseFocus, &mfx, &mfy);
-			x += mfx;
-			y += mfy;
-			SDL_GetWindowPosition(iHandle, &mfx, &mfy);
-			x -= mfx;
-			y -= mfy;
-		}
-		return point(static_cast<coordinate>(x), static_cast<coordinate>(y));
+		SDL_GetGlobalMouseState(&x, &y);
+		int mfx, mfy;
+		SDL_GetWindowPosition(iHandle, &mfx, &mfy);
+		x -= mfx;
+		y -= mfy;
+		return basic_point<int>{ x, y };
 	}
 
 	bool sdl_window::is_mouse_button_pressed(mouse_button aButton) const
@@ -699,6 +703,7 @@ namespace neogfx
 		if (!iCapturingMouse)
 		{
 			iCapturingMouse = true; 
+			iNonClientCapturing = false;
 			SDL_CaptureMouse(SDL_TRUE);
 #ifdef WIN32
 			SetCapture(static_cast<HWND>(native_handle()));
@@ -714,6 +719,30 @@ namespace neogfx
 			SDL_CaptureMouse(SDL_FALSE);
 #ifdef WIN32
 			ReleaseCapture();
+#endif
+		}
+	}
+
+	void sdl_window::non_client_set_capture()
+	{
+		if (!iCapturingMouse)
+		{
+			iCapturingMouse = true;
+			iNonClientCapturing = true;
+#ifndef WIN32
+			SDL_CaptureMouse(SDL_TRUE);
+#endif
+		}
+	}
+
+	void sdl_window::non_client_release_capture()
+	{
+		if (iCapturingMouse)
+		{
+			iCapturingMouse = false;
+			iNonClientCapturing = false;
+#ifndef WIN32
+			SDL_CaptureMouse(SDL_FALSE);
 #endif
 		}
 	}
@@ -832,6 +861,12 @@ namespace neogfx
 					self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
 			}
 			break;
+		case WM_SETCURSOR:
+			if (!self.iNonClientCapturing)
+				result = wndproc(hwnd, msg, wparam, lparam);
+			else
+				result = TRUE;
+			break;
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
 		case WM_MBUTTONDOWN:
@@ -851,6 +886,8 @@ namespace neogfx
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
 				if (wparam & MK_CONTROL)
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CTRL);
+				if (GetKeyState(VK_MENU) >> 1)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_ALT);
 				self.push_mouse_button_event_extra_info(modifiers);
 				result = wndproc(hwnd, msg, wparam, lparam);
 			}
@@ -1051,6 +1088,80 @@ namespace neogfx
 			result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		}
+		switch (msg)
+		{
+		case WM_NCMOUSEMOVE:
+		case WM_NCLBUTTONDOWN:
+		case WM_NCLBUTTONUP:
+		case WM_NCLBUTTONDBLCLK:
+		case WM_NCRBUTTONDOWN:
+		case WM_NCRBUTTONUP:
+		case WM_NCRBUTTONDBLCLK:
+		case WM_NCMBUTTONDOWN:
+		case WM_NCMBUTTONUP:
+		case WM_NCMBUTTONDBLCLK:
+		case WM_NCXBUTTONDOWN:
+		case WM_NCXBUTTONUP:
+		case WM_NCXBUTTONDBLCLK:
+			if (CUSTOM_DECORATION)
+			{
+				key_modifiers_e modifiers = KeyModifier_NONE;
+				if (GetKeyState(VK_SHIFT) >> 1)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
+				if (GetKeyState(VK_CONTROL) >> 1)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CTRL);
+				if (GetKeyState(VK_MENU) >> 1)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_ALT);
+				POINT winPt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
+				ScreenToClient(hwnd, &winPt);
+				point pt{ basic_point<LONG>{winPt.x, winPt.y} };
+				switch (msg)
+				{
+				case WM_NCMOUSEMOVE:
+					if (!self.non_client_entered())
+						self.push_event(window_event{ window_event_type::NonClientEnter });
+					self.push_event(non_client_mouse_event{ mouse_event_type::Moved, pt, modifiers });
+					break;
+				case WM_NCLBUTTONDOWN:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Left, pt, modifiers });
+					break;
+				case WM_NCLBUTTONUP:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Left, pt, modifiers });
+					break;
+				case WM_NCLBUTTONDBLCLK:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Left, pt, modifiers });
+					break;
+				case WM_NCRBUTTONDOWN:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Right, pt, modifiers });
+					break;
+				case WM_NCRBUTTONUP:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Right, pt, modifiers });
+					break;
+				case WM_NCRBUTTONDBLCLK:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Right, pt, modifiers });
+					break;
+				case WM_NCMBUTTONDOWN:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Middle, pt, modifiers });
+					break;
+				case WM_NCMBUTTONUP:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Middle, pt, modifiers });
+					break;
+				case WM_NCMBUTTONDBLCLK:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Middle, pt, modifiers });
+					break;
+				case WM_NCXBUTTONDOWN:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					break;
+				case WM_NCXBUTTONUP:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					break;
+				case WM_NCXBUTTONDBLCLK:
+					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					break;
+				}
+			}
+			break;
+		}
 		return result;
 	}
 #endif
@@ -1174,12 +1285,16 @@ namespace neogfx
 			}
 			break;
 		case SDL_MOUSEWHEEL:
-			push_event(
-				mouse_event(
-					mouse_event_type::WheelScrolled,
-					static_cast<mouse_wheel>(
-						(aEvent.wheel.y != 0 ? mouse_wheel::Vertical : mouse_wheel::None) | (aEvent.wheel.x != 0 ? mouse_wheel::Horizontal : mouse_wheel::None)),
-					delta(static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y))));
+			if (!iMouseButtonEventExtraInfo.empty())
+			{
+				push_event(
+					mouse_event(
+						mouse_event_type::WheelScrolled,
+						static_cast<mouse_wheel>(
+							(aEvent.wheel.y != 0 ? mouse_wheel::Vertical : mouse_wheel::None) | (aEvent.wheel.x != 0 ? mouse_wheel::Horizontal : mouse_wheel::None)),
+						delta{ static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y) },
+						iMouseButtonEventExtraInfo.front()));
+			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			if (!iMouseButtonEventExtraInfo.empty())
@@ -1214,8 +1329,11 @@ namespace neogfx
 			}
 			break;
 		case SDL_MOUSEMOTION:
-			update_mouse_cursor();
-			push_event(mouse_event(mouse_event_type::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
+			if (!iNonClientCapturing)
+			{
+				update_mouse_cursor();
+				push_event(mouse_event(mouse_event_type::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
+			}
 			break;
 		case SDL_KEYDOWN:
 			push_event(keyboard_event(keyboard_event_type::KeyPressed, static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod)));

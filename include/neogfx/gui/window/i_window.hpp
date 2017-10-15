@@ -52,6 +52,7 @@ namespace neogfx
 		virtual bool window_enabled() const = 0;
 		virtual void counted_window_enable(bool aEnable) = 0;
 	public:
+		virtual bool current_event_is_non_client() const = 0;
 		virtual bool native_window_can_close() const = 0;
 		virtual void native_window_closing() = 0;
 		virtual void native_window_closed() = 0;
@@ -67,13 +68,13 @@ namespace neogfx
 		virtual void native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
 		virtual void native_window_mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
 		virtual void native_window_mouse_moved(const point& aPosition) = 0;
-		virtual void native_window_mouse_entered() = 0;
-		virtual void native_window_mouse_left() = 0;
 		virtual void native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) = 0;
 		virtual void native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
 		virtual void native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
 		virtual void native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
 		virtual void native_window_non_client_mouse_moved(const point& aPosition) = 0;
+		virtual void native_window_mouse_entered() = 0;
+		virtual void native_window_mouse_left() = 0;
 		virtual widget_part native_window_hit_test(const point& aPosition) const = 0;
 		virtual rect native_window_widget_part_rect(widget_part aWidgetPart) const = 0;
 		virtual void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;

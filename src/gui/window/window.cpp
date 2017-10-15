@@ -292,7 +292,7 @@ namespace neogfx
 		if (has_layout())
 			layout().remove_items();
 		remove_widgets();
-		destroyed_flag destroyed(*this);
+		destroyed_flag destroyed{ *this };
 		if (!window::destroyed())
 			native_surface().close();
 		else
@@ -357,6 +357,21 @@ namespace neogfx
 	void window::dismiss()
 	{
 		close();
+	}
+
+	bool window::is_window() const
+	{
+		return true;
+	}
+
+	const i_window& window::as_window() const
+	{
+		return *this;
+	}
+
+	i_window& window::as_window()
+	{
+		return *this;
 	}
 
 	surface_type window::surface_type() const
@@ -587,6 +602,11 @@ namespace neogfx
 		return result;
 	}
 
+	bool window::current_event_is_non_client() const
+	{
+		return native_window().has_current_event() && native_window().current_event().is<neogfx::non_client_mouse_event>();
+	}
+
 	bool window::requires_owner_focus() const
 	{
 		return (iStyle & window_style::RequiresOwnerFocus) == window_style::RequiresOwnerFocus;
@@ -632,6 +652,27 @@ namespace neogfx
 		if (iCapturingWidget != &aWidget)
 			throw widget_not_capturing();
 		native_window().release_capture();
+		iCapturingWidget = 0;
+		aWidget.released();
+		mouse_entered();
+	}
+
+	void window::non_client_set_capture(i_widget& aWidget)
+	{
+		if (iCapturingWidget != &aWidget)
+		{
+			iCapturingWidget = &aWidget;
+			native_window().non_client_set_capture();
+			aWidget.captured();
+			mouse_entered();
+		}
+	}
+
+	void window::non_client_release_capture(i_widget& aWidget)
+	{
+		if (iCapturingWidget != &aWidget)
+			throw widget_not_capturing();
+		native_window().non_client_release_capture();
 		iCapturingWidget = 0;
 		aWidget.released();
 		mouse_entered();
@@ -807,7 +848,7 @@ namespace neogfx
 			iNativeWindowClosing = true;
 			update_modality();
 		}
-		destroyed_flag destroyed(*this);
+		destroyed_flag destroyed{ *this };
 		{
 			auto ptr = std::move(iNativeWindow);
 		}
@@ -923,6 +964,44 @@ namespace neogfx
 			w.mouse_moved(aPosition - w.origin());
 	}
 
+	void window::native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
+	{
+		i_widget& w = widget_for_mouse_event(native_surface().mouse_position());
+		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+			widget_for_mouse_event(native_surface().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
+	}
+
+	void window::native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		i_widget& w = widget_for_mouse_event(aPosition);
+		dismiss_children(&w);
+		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+			w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
+	}
+
+	void window::native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+	{
+		i_widget& w = widget_for_mouse_event(aPosition);
+		dismiss_children(&w);
+		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+			w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
+	}
+
+	void window::native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition)
+	{
+		i_widget& w = (iCapturingWidget == 0 ? widget_for_mouse_event(aPosition) : *iCapturingWidget);
+		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+			w.mouse_button_released(aButton, aPosition - w.origin());
+	}
+
+	void window::native_window_non_client_mouse_moved(const point& aPosition)
+	{
+		mouse_entered();
+		i_widget& w = (iCapturingWidget == 0 ? widget_for_mouse_event(aPosition) : *iCapturingWidget);
+		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+			w.mouse_moved(aPosition - w.origin());
+	}
+
 	void window::native_window_mouse_entered()
 	{
 		mouse_entered();
@@ -934,43 +1013,6 @@ namespace neogfx
 		iEnteredWidget = 0;
 		if (previousEnteredWidget != 0)
 			previousEnteredWidget->mouse_left();
-	}
-
-	void window::native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
-	{
-		i_widget& w = widget_for_mouse_event(native_surface().mouse_position());
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
-			widget_for_mouse_event(native_surface().mouse_position()).non_client_mouse_wheel_scrolled(aWheel, aDelta);
-	}
-
-	void window::native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
-	{
-		i_widget& w = widget_for_mouse_event(aPosition);
-		dismiss_children(&w);
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
-			w.non_client_mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
-	}
-
-	void window::native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
-	{
-		i_widget& w = widget_for_mouse_event(aPosition);
-		dismiss_children(&w);
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
-			w.non_client_mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
-	}
-
-	void window::native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition)
-	{
-		i_widget& w = (iCapturingWidget == 0 ? widget_for_mouse_event(aPosition) : *iCapturingWidget);
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
-			w.non_client_mouse_button_released(aButton, aPosition - w.origin());
-	}
-
-	void window::native_window_non_client_mouse_moved(const point& aPosition)
-	{
-		i_widget& w = (iCapturingWidget == 0 ? widget_for_mouse_event(aPosition) : *iCapturingWidget);
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
-			w.non_client_mouse_moved(aPosition - w.origin());
 	}
 
 	widget_part window::native_window_hit_test(const point& aPosition) const

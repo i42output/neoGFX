@@ -233,7 +233,7 @@ namespace neogfx
 			update();
 			if (wasCapturing)
 			{
-				destroyed_flag destroyed(*this);
+				destroyed_flag destroyed{ *this };
 				if (client_rect().contains(aPosition))
 					handle_clicked();
 				if (!destroyed)
@@ -259,7 +259,7 @@ namespace neogfx
 
 	void button::handle_clicked()
 	{
-		destroyed_flag destroyed(*this);
+		destroyed_flag destroyed{ *this };
 		clicked.trigger();
 		async_clicked.async_trigger();
 		if (!destroyed && iCheckable != NotCheckable)

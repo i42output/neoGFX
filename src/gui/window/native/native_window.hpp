@@ -41,7 +41,8 @@ namespace neogfx
 		void push_event(const native_event& aEvent) override;
 		bool pump_event() override;
 		void handle_event(const native_event& aEvent) override;
-		native_event& current_event() override;
+		bool has_current_event() const override;
+		const native_event& current_event() const override;
 		void handle_event() override;
 		bool processing_event() const override;
 		bool has_rendering_priority() const override;
@@ -50,6 +51,20 @@ namespace neogfx
 	public:
 		i_rendering_engine& rendering_engine() const;
 		i_surface_manager& surface_manager() const;
+	public:
+		bool non_client_entered() const;
+	private:
+		template <typename EventCategory, typename EventType>
+		event_queue::const_iterator find_event(EventType aEventType) const
+		{
+			for (auto e = iEventQueue.end(); e != iEventQueue.begin();)
+			{
+				--e;
+				if (e->is<EventCategory>() && static_variant_cast<const EventCategory&>(*e).type() == aEventType)
+					return e;
+			}
+			return iEventQueue.end();
+		}
 	private:
 		i_rendering_engine& iRenderingEngine;
 		i_surface_manager& iSurfaceManager;
@@ -57,5 +72,7 @@ namespace neogfx
 		native_event iCurrentEvent;
 		uint32_t iProcessingEvent;
 		std::string iTitleText;
+		bool iNonClientEntered;
+		neolib::callback_timer iUpdater;
 	};
 }

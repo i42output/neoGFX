@@ -179,8 +179,10 @@ namespace neogfx
 		bool entered() const override;
 		bool can_capture() const override;
 		bool capturing() const override;
-		void set_capture() override;
-		void release_capture() override;
+		void set_capture(capture_reason aReason = capture_reason::Other) override;
+		void release_capture(capture_reason aReason = capture_reason::Other) override;
+		void non_client_set_capture() override;
+		void non_client_release_capture() override;
 		void captured() override;
 		void released() override;
 		neogfx::focus_policy focus_policy() const override;
@@ -200,11 +202,6 @@ namespace neogfx
 		void mouse_moved(const point& aPosition) override;
 		void mouse_entered() override;
 		void mouse_left() override;
-		void non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
-		void non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-		void non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-		void non_client_mouse_button_released(mouse_button aButton, const point& aPosition) override;
-		void non_client_mouse_moved(const point& aPosition) override;
 		neogfx::mouse_cursor mouse_cursor() const override;
 	public:
 		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;

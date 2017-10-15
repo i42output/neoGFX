@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <iterator>
 #include <neolib/raii.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -27,7 +28,22 @@
 namespace neogfx
 {
 	native_window::native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager) :
-		iRenderingEngine(aRenderingEngine), iSurfaceManager(aSurfaceManager), iProcessingEvent{ 0u }
+		iRenderingEngine{ aRenderingEngine },
+		iSurfaceManager{ aSurfaceManager },
+		iProcessingEvent{ 0u },
+		iNonClientEntered{ false },
+		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			if (non_client_entered() && window().native_window_hit_test(mouse_position()) == widget_part::Nowhere)
+			{
+				auto e1 = find_event<window_event>(window_event_type::NonClientLeave);
+				auto e2 = find_event<window_event>(window_event_type::NonClientEnter);
+				if (e1 == iEventQueue.end() || (e2 != iEventQueue.end() && 
+					std::distance(iEventQueue.cbegin(), e1) < std::distance(iEventQueue.cbegin(), e2)))
+					push_event(window_event{ window_event_type::NonClientLeave });
+			}
+		}, 10 }
 	{
 
 	}
@@ -93,7 +109,12 @@ namespace neogfx
 			sc.ignore();
 	}
 
-	native_window::native_event& native_window::current_event()
+	bool native_window::has_current_event() const
+	{
+		return iCurrentEvent != boost::none;
+	}
+
+	const native_window::native_event& native_window::current_event() const
 	{
 		if (iCurrentEvent != boost::none)
 			return iCurrentEvent;
@@ -150,9 +171,18 @@ namespace neogfx
 				window().native_window_resized();
 				break;
 			case window_event_type::Enter:
+				iNonClientEntered = false;
 				window().native_window_mouse_entered();
 				break;
 			case window_event_type::Leave:
+				window().native_window_mouse_left();
+				break;
+			case window_event_type::NonClientEnter:
+				iNonClientEntered = true;
+				window().native_window_mouse_entered();
+				break;
+			case window_event_type::NonClientLeave:
+				iNonClientEntered = false;
 				window().native_window_mouse_left();
 				break;
 			case window_event_type::FocusGained:
@@ -188,6 +218,31 @@ namespace neogfx
 				break;
 			case mouse_event_type::Moved:
 				window().native_window_mouse_moved(mouseEvent.position());
+				break;
+			default:
+				/* do nothing */
+				break;
+			}
+		}
+		else if (iCurrentEvent.is<non_client_mouse_event>())
+		{
+			const auto& mouseEvent = static_variant_cast<const non_client_mouse_event&>(iCurrentEvent);
+			switch (mouseEvent.type())
+			{
+			case mouse_event_type::WheelScrolled:
+				window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
+				break;
+			case mouse_event_type::ButtonPressed:
+				window().native_window_non_client_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+				break;
+			case mouse_event_type::ButtonDoubleClicked:
+				window().native_window_non_client_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+				break;
+			case mouse_event_type::ButtonReleased:
+				window().native_window_non_client_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
+				break;
+			case mouse_event_type::Moved:
+				window().native_window_non_client_mouse_moved(mouseEvent.position());
 				break;
 			default:
 				/* do nothing */
@@ -271,5 +326,10 @@ namespace neogfx
 	i_surface_manager& native_window::surface_manager() const
 	{
 		return iSurfaceManager;
+	}
+
+	bool native_window::non_client_entered() const
+	{
+		return iNonClientEntered;
 	}
 }

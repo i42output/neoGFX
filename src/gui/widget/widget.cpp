@@ -754,8 +754,10 @@ namespace neogfx
 	{
 		if (client_rect().contains(aPosition))
 			return widget_part::Client;
-		else
+		else if (to_client_coordinates(window_rect()).contains(aPosition))
 			return widget_part::NonClient;
+		else
+			return widget_part::Nowhere;
 	}
 
 	bool widget::has_size_policy() const
@@ -1160,17 +1162,55 @@ namespace neogfx
 		return surface().has_capturing_widget() && &surface().capturing_widget() == this;
 	}
 
-	void widget::set_capture()
+	void widget::set_capture(capture_reason aReason)
 	{
 		if (can_capture())
-			surface().set_capture(*this);
+		{
+			switch (aReason)
+			{
+			case capture_reason::MouseEvent:
+				if (!has_surface() || surface().destroyed() || !surface().is_window() || !surface().as_window().current_event_is_non_client())
+					surface().set_capture(*this);
+				else
+					surface().non_client_set_capture(*this);
+				break;
+			default:
+				surface().set_capture(*this);
+				break;
+			}
+		}
 		else
 			throw widget_cannot_capture();
 	}
 
-	void widget::release_capture()
+	void widget::release_capture(capture_reason aReason)
 	{
-		surface().release_capture(*this);
+		switch (aReason)
+		{
+		case capture_reason::MouseEvent:
+			if (!has_surface() || surface().destroyed() || !surface().is_window() || !surface().as_window().current_event_is_non_client())
+				surface().release_capture(*this);
+			else
+				surface().non_client_release_capture(*this);
+			break;
+		default:
+			surface().set_capture(*this);
+			break;
+		}
+		
+	}
+
+	void widget::non_client_set_capture()
+	{
+		if (can_capture())
+			surface().non_client_set_capture(*this);
+		else
+			throw widget_cannot_capture();
+	}
+
+	void widget::non_client_release_capture()
+	{
+		surface().non_client_release_capture(*this);
 	}
 
 	void widget::captured()
@@ -1241,7 +1281,7 @@ namespace neogfx
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_pressed(aButton, aPosition + position(), aKeyModifiers);
 		else if (capture_ok(hit_test(aPosition)) && can_capture())
-			set_capture();
+			set_capture(capture_reason::MouseEvent);
 	}
 
 	void widget::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -1249,7 +1289,7 @@ namespace neogfx
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_double_clicked(aButton, aPosition + position(), aKeyModifiers);
 		else if (capture_ok(hit_test(aPosition)) && can_capture())
-			set_capture();
+			set_capture(capture_reason::MouseEvent);
 	}
 
 	void widget::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -1257,7 +1297,7 @@ namespace neogfx
 		if (aButton == mouse_button::Middle && has_parent())
 			parent().mouse_button_released(aButton, aPosition + position());
 		else if (capturing())
-			release_capture();
+			release_capture(capture_reason::MouseEvent);
 	}
 
 	void widget::mouse_moved(const point&)
@@ -1269,26 +1309,6 @@ namespace neogfx
 	}
 
 	void widget::mouse_left()
-	{
-	}
-
-	void widget::non_client_mouse_wheel_scrolled(mouse_wheel, delta)
-	{
-	}
-
-	void widget::non_client_mouse_button_pressed(mouse_button, const point&, key_modifiers_e)
-	{
-	}
-
-	void widget::non_client_mouse_button_double_clicked(mouse_button, const point&, key_modifiers_e)
-	{
-	}
-
-	void widget::non_client_mouse_button_released(mouse_button, const point&)
-	{
-	}
-
-	void widget::non_client_mouse_moved(const point&)
 	{
 	}
 

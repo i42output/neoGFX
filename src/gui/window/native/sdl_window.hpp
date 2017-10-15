@@ -115,6 +115,8 @@ namespace neogfx
 		bool is_capturing() const override;
 		void set_capture() override;
 		void release_capture() override;
+		void non_client_set_capture() override;
+		void non_client_release_capture() override;
 		bool is_destroyed() const override;
 		void set_title_text(const std::string& aTitleText) override;
 	private:
@@ -132,6 +134,7 @@ namespace neogfx
 	private:
 		virtual void display();
 	private:
+		i_basic_services& iBasicServices;
 		sdl_window* iParent;
 		surface_style iStyle;
 		SDL_Window* iHandle;
@@ -143,6 +146,7 @@ namespace neogfx
 		size iExtents;
 		bool iVisible;
 		bool iCapturingMouse;
+		bool iNonClientCapturing;
 		cursor_pointer iCurrentCursor;
 		std::vector<cursor_pointer> iSavedCursors;
 		bool iReady;

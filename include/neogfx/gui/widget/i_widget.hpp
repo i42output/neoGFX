@@ -68,6 +68,10 @@ namespace neogfx
 		case widget_part::Client:
 		case widget_part::NonClientVerticalScrollbar:
 		case widget_part::NonClientHorizontalScrollbar:
+		case widget_part::NonClientCloseButton:
+		case widget_part::NonClientMaximizeButton:
+		case widget_part::NonClientMinimizeButton:
+		case widget_part::NonClientRestoreButton: 
 			return true;
 		default:
 			return false;
@@ -102,6 +106,12 @@ namespace neogfx
 		Wheel,
 		Pointer,
 		WindowActivation,
+		Other
+	};
+
+	enum class capture_reason
+	{
+		MouseEvent,
 		Other
 	};
 
@@ -244,8 +254,10 @@ namespace neogfx
 		virtual bool entered() const = 0;
 		virtual bool can_capture() const = 0;
 		virtual bool capturing() const = 0;
-		virtual void set_capture() = 0;
-		virtual void release_capture() = 0;
+		virtual void set_capture(capture_reason aReason = capture_reason::Other) = 0;
+		virtual void release_capture(capture_reason aReason = capture_reason::Other) = 0;
+		virtual void non_client_set_capture() = 0;
+		virtual void non_client_release_capture() = 0;
 		virtual void captured() = 0;
 		virtual void released() = 0;
 		virtual neogfx::focus_policy focus_policy() const = 0;
@@ -265,11 +277,6 @@ namespace neogfx
 		virtual void mouse_moved(const point& aPosition) = 0;
 		virtual void mouse_entered() = 0;
 		virtual void mouse_left() = 0;
-		virtual void non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) = 0;
-		virtual void non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
-		virtual void non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
-		virtual void non_client_mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
-		virtual void non_client_mouse_moved(const point& aPosition) = 0;
 		virtual neogfx::mouse_cursor mouse_cursor() const = 0;
 	public:
 		virtual graphics_context create_graphics_context() const = 0;

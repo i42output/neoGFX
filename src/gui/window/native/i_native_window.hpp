@@ -45,7 +45,8 @@ namespace neogfx
 		virtual void push_event(const native_event& aEvent) = 0;
 		virtual bool pump_event() = 0;
 		virtual void handle_event(const native_event& aNativeEvent) = 0;
-		virtual native_event& current_event() = 0;
+		virtual bool has_current_event() const = 0;
+		virtual const native_event& current_event() const = 0;
 		virtual void handle_event() = 0;
 		virtual bool processing_event() const = 0;
 		virtual i_window& window() const = 0;
@@ -67,6 +68,8 @@ namespace neogfx
 		virtual bool is_capturing() const = 0;
 		virtual void set_capture() = 0;
 		virtual void release_capture() = 0;
+		virtual void non_client_set_capture() = 0;
+		virtual void non_client_release_capture() = 0;
 		virtual bool is_destroyed() const = 0;
 		virtual bool has_rendering_priority() const = 0;
 		virtual const std::string& title_text() const = 0;

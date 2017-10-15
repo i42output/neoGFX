@@ -168,7 +168,7 @@ namespace neogfx
 		{
 			if (!has_instance()) // no instance means no subscribers so no point triggering.
 				return true;
-			destroyed_flag destroyed(*this);
+			destroyed_flag destroyed{ *this };
 			for (auto i = instance().handlers.begin(); i != instance().handlers.end(); ++i)
 				instance().notifications.push_back(i);
 			while (!instance().notifications.empty())

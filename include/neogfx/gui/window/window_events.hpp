@@ -41,6 +41,8 @@ namespace neogfx
 		Restored,
 		Enter,
 		Leave,
+		NonClientEnter,
+		NonClientLeave,
 		FocusGained,
 		FocusLost,
 		TitleTextChanged
@@ -121,7 +123,7 @@ namespace neogfx
 		}
 		neogfx::key_modifiers_e key_modifiers() const
 		{
-			return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
+			return static_variant_cast<neogfx::key_modifiers_e>(iType != mouse_event_type::Moved ? iParameter3 : iParameter2);
 		}
 	private:
 		mouse_event_type iType;

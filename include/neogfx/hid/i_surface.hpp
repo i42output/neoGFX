@@ -30,6 +30,7 @@
 namespace neogfx
 {
 	class i_widget;
+	class i_window;
 
 	enum class surface_type
 	{
@@ -79,6 +80,7 @@ namespace neogfx
 		};
 	public:
 		struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_surface::no_native_surface") {} };
+		struct not_a_window : std::logic_error { not_a_window() : std::logic_error("neogfx::i_surface::not_a_window") {} };
 	public:
 		virtual ~i_surface() {}
 	public:
@@ -97,6 +99,10 @@ namespace neogfx
 		virtual dismissal_type_e dismissal_type() const = 0;
 		virtual bool dismissed() const = 0;
 		virtual void dismiss() = 0;
+	public:
+		virtual bool is_window() const = 0;
+		virtual const i_window& as_window() const = 0;
+		virtual i_window& as_window() = 0;
 	public:
 		virtual neogfx::surface_type surface_type() const = 0;
 		virtual surface_style style() const = 0;
@@ -146,6 +152,8 @@ namespace neogfx
 		virtual i_widget& capturing_widget() const = 0;
 		virtual void set_capture(i_widget& aWidget) = 0;
 		virtual void release_capture(i_widget& aWidget) = 0;
+		virtual void non_client_set_capture(i_widget& aWidget) = 0;
+		virtual void non_client_release_capture(i_widget& aWidget) = 0;
 		virtual bool has_focused_widget() const = 0;
 		virtual i_widget& focused_widget() const = 0;
 		virtual void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) = 0;
