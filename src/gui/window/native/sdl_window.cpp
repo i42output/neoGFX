@@ -702,7 +702,7 @@ namespace neogfx
 	{
 		if (!iCapturingMouse)
 		{
-			iCapturingMouse = true; 
+			iCapturingMouse = true;
 			iNonClientCapturing = false;
 			SDL_CaptureMouse(SDL_TRUE);
 #ifdef WIN32
@@ -716,6 +716,7 @@ namespace neogfx
 		if (iCapturingMouse)
 		{
 			iCapturingMouse = false;
+			iNonClientCapturing = false;
 			SDL_CaptureMouse(SDL_FALSE);
 #ifdef WIN32
 			ReleaseCapture();
@@ -799,6 +800,80 @@ namespace neogfx
 		auto& self = *mapEntry->second;
 		LRESULT result;
 		bool const CUSTOM_DECORATION = (self.window().style() & window_style::TitleBar) == window_style::TitleBar;
+		switch (msg)
+		{
+		case WM_NCMOUSEMOVE:
+		case WM_NCLBUTTONDOWN:
+		case WM_NCLBUTTONUP:
+		case WM_NCLBUTTONDBLCLK:
+		case WM_NCRBUTTONDOWN:
+		case WM_NCRBUTTONUP:
+		case WM_NCRBUTTONDBLCLK:
+		case WM_NCMBUTTONDOWN:
+		case WM_NCMBUTTONUP:
+		case WM_NCMBUTTONDBLCLK:
+		case WM_NCXBUTTONDOWN:
+		case WM_NCXBUTTONUP:
+		case WM_NCXBUTTONDBLCLK:
+			if (CUSTOM_DECORATION)
+			{
+				key_modifiers_e modifiers = KeyModifier_NONE;
+				if (GetKeyState(VK_SHIFT) >> 1)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
+				if (GetKeyState(VK_CONTROL) >> 1)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CTRL);
+				if (GetKeyState(VK_MENU) >> 1)
+					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_ALT);
+				POINT winPt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
+				ScreenToClient(hwnd, &winPt);
+				point pt{ basic_point<LONG>{winPt.x, winPt.y} };
+				switch (msg)
+				{
+				case WM_NCMOUSEMOVE:
+					if (!self.non_client_entered())
+						self.push_event(window_event{ window_event_type::NonClientEnter });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::Moved, pt, modifiers });
+					break;
+				case WM_NCLBUTTONDOWN:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Left, pt, modifiers });
+					break;
+				case WM_NCLBUTTONUP:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Left, pt, modifiers });
+					break;
+				case WM_NCLBUTTONDBLCLK:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Left, pt, modifiers });
+					break;
+				case WM_NCRBUTTONDOWN:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Right, pt, modifiers });
+					break;
+				case WM_NCRBUTTONUP:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Right, pt, modifiers });
+					break;
+				case WM_NCRBUTTONDBLCLK:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Right, pt, modifiers });
+					break;
+				case WM_NCMBUTTONDOWN:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Middle, pt, modifiers });
+					break;
+				case WM_NCMBUTTONUP:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Middle, pt, modifiers });
+					break;
+				case WM_NCMBUTTONDBLCLK:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Middle, pt, modifiers });
+					break;
+				case WM_NCXBUTTONDOWN:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					break;
+				case WM_NCXBUTTONUP:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					break;
+				case WM_NCXBUTTONDBLCLK:
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					break;
+				}
+			}
+			break;
+		}
 		switch (msg)
 		{
 		case WM_NCCREATE:
@@ -1046,6 +1121,13 @@ namespace neogfx
 			else
 				result = wndproc(hwnd, msg, wparam, lparam);
 			break;
+		case WM_NCMOUSELEAVE:
+			if (self.window().has_capturing_widget())
+				self.window().release_capture(self.window().capturing_widget());
+			else
+				self.release_capture();
+			result = wndproc(hwnd, msg, wparam, lparam);
+			break;
 		case WM_SIZING:
 			{
 				self.iExtents = size{
@@ -1086,80 +1168,6 @@ namespace neogfx
 			break;
 		default:
 			result = wndproc(hwnd, msg, wparam, lparam);
-			break;
-		}
-		switch (msg)
-		{
-		case WM_NCMOUSEMOVE:
-		case WM_NCLBUTTONDOWN:
-		case WM_NCLBUTTONUP:
-		case WM_NCLBUTTONDBLCLK:
-		case WM_NCRBUTTONDOWN:
-		case WM_NCRBUTTONUP:
-		case WM_NCRBUTTONDBLCLK:
-		case WM_NCMBUTTONDOWN:
-		case WM_NCMBUTTONUP:
-		case WM_NCMBUTTONDBLCLK:
-		case WM_NCXBUTTONDOWN:
-		case WM_NCXBUTTONUP:
-		case WM_NCXBUTTONDBLCLK:
-			if (CUSTOM_DECORATION)
-			{
-				key_modifiers_e modifiers = KeyModifier_NONE;
-				if (GetKeyState(VK_SHIFT) >> 1)
-					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
-				if (GetKeyState(VK_CONTROL) >> 1)
-					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CTRL);
-				if (GetKeyState(VK_MENU) >> 1)
-					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_ALT);
-				POINT winPt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
-				ScreenToClient(hwnd, &winPt);
-				point pt{ basic_point<LONG>{winPt.x, winPt.y} };
-				switch (msg)
-				{
-				case WM_NCMOUSEMOVE:
-					if (!self.non_client_entered())
-						self.push_event(window_event{ window_event_type::NonClientEnter });
-					self.push_event(non_client_mouse_event{ mouse_event_type::Moved, pt, modifiers });
-					break;
-				case WM_NCLBUTTONDOWN:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Left, pt, modifiers });
-					break;
-				case WM_NCLBUTTONUP:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Left, pt, modifiers });
-					break;
-				case WM_NCLBUTTONDBLCLK:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Left, pt, modifiers });
-					break;
-				case WM_NCRBUTTONDOWN:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Right, pt, modifiers });
-					break;
-				case WM_NCRBUTTONUP:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Right, pt, modifiers });
-					break;
-				case WM_NCRBUTTONDBLCLK:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Right, pt, modifiers });
-					break;
-				case WM_NCMBUTTONDOWN:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Middle, pt, modifiers });
-					break;
-				case WM_NCMBUTTONUP:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Middle, pt, modifiers });
-					break;
-				case WM_NCMBUTTONDBLCLK:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Middle, pt, modifiers });
-					break;
-				case WM_NCXBUTTONDOWN:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
-					break;
-				case WM_NCXBUTTONUP:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
-					break;
-				case WM_NCXBUTTONDBLCLK:
-					self.push_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
-					break;
-				}
-			}
 			break;
 		}
 		return result;
@@ -1329,11 +1337,8 @@ namespace neogfx
 			}
 			break;
 		case SDL_MOUSEMOTION:
-			if (!iNonClientCapturing)
-			{
-				update_mouse_cursor();
-				push_event(mouse_event(mouse_event_type::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
-			}
+			update_mouse_cursor();
+			push_event(mouse_event(mouse_event_type::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
 			break;
 		case SDL_KEYDOWN:
 			push_event(keyboard_event(keyboard_event_type::KeyPressed, static_cast<scan_code_e>(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod)));
