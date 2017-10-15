@@ -73,7 +73,7 @@ namespace neogfx
 		if (iGlyphTextCache.font() != font())
 		{
 			iTextExtent = boost::none;
-			iGlyphTextCache = glyph_text(font());
+			iGlyphTextCache = glyph_text{ font() };
 		}
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
 		size textSize = text_extent();
@@ -131,7 +131,7 @@ namespace neogfx
 			size oldSize = minimum_size();
 			iText = aText;
 			iTextExtent = boost::none;
-			iGlyphTextCache = glyph_text(font());
+			iGlyphTextCache = glyph_text{ font() };
 			text_changed.trigger();
 			if (has_parent_layout())
 				parent_layout().invalidate();
@@ -207,14 +207,14 @@ namespace neogfx
 		if (iGlyphTextCache.font() != font())
 		{
 			iTextExtent = boost::none;
-			iGlyphTextCache = glyph_text(font());
+			iGlyphTextCache = glyph_text{ font() };
 		}
 		if (iTextExtent != boost::none)
 			return *iTextExtent;
 		if (!has_surface())
 			return size{};
-		graphics_context gc(*this);
-		scoped_mnemonics sm(gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT));
+		graphics_context gc{ *this };
+		scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
 		gc.set_glyph_text_cache(iGlyphTextCache);
 		if (iMultiLine)
 		{
@@ -229,14 +229,14 @@ namespace neogfx
 
 	void text_widget::init()
 	{
-		set_margins(neogfx::margins(0.0));
+		set_margins(neogfx::margins{ 0.0 });
 		set_ignore_mouse_events(true);
 		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
 		{
 			if (!has_font() && (aAspect & style_aspect::Font) == style_aspect::Font)
 			{
 				iTextExtent = boost::none;
-				iGlyphTextCache = glyph_text(font());
+				iGlyphTextCache = glyph_text{ font() };
 				if (has_parent_layout())
 					parent_layout().invalidate();
 				update();
@@ -245,7 +245,7 @@ namespace neogfx
 		iSink += app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
 			iTextExtent = boost::none;
-			iGlyphTextCache = glyph_text(font());
+			iGlyphTextCache = glyph_text{ font() };
 			if (has_parent_layout())
 				parent_layout().invalidate();
 			update();
