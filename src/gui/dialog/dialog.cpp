@@ -125,12 +125,12 @@ namespace neogfx
 
 	void dialog::accept()
 	{
-		if (iResult != Accepted)
+		if (result() != dialog_result::Accepted)
 		{
 			bool canAccept = true;
 			try_accept.trigger(canAccept);
 			if (canAccept)
-				iResult = Accepted;
+				set_result(dialog_result::Accepted);
 			else
 				app::instance().basic_services().system_beep();
 		}
@@ -138,15 +138,27 @@ namespace neogfx
 
 	void dialog::reject()
 	{
-		if (iResult != Rejected)
+		if (result() != dialog_result::Rejected)
 		{
 			bool canReject = true;
 			try_reject.trigger(canReject);
 			if (canReject)
-				iResult = Rejected;
+				set_result(dialog_result::Rejected);
 			else
 				app::instance().basic_services().system_beep();
 		}
+	}
+
+	dialog_result dialog::result() const
+	{
+		if (iResult != boost::none)
+			return *iResult;
+		return dialog_result::NoResult;
+	}
+
+	void dialog::set_result(dialog_result aResult)
+	{
+		iResult = aResult;
 	}
 
 	void dialog::set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox)
@@ -178,14 +190,14 @@ namespace neogfx
 		return *iButtonBox;
 	}
 
-	dialog::result_code_e dialog::exec()
+	dialog_result dialog::exec()
 	{
 		app::event_processing_context epc(app::instance(), "neogfx::dialog");
 		while (iResult == boost::none)
 		{
 			app::instance().process_events(epc);
-			if (surface().destroyed() && iResult == boost::none)
-				iResult = Rejected;
+			if (surface().destroyed() && result() == dialog_result::NoResult)
+				set_result(dialog_result::Rejected);
 		}
 		return *iResult;
 	}

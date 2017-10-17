@@ -96,11 +96,15 @@ namespace neogfx
 		dialog_button_box(i_layout& aLayout);
 		~dialog_button_box();
 	public:
+		standard_button button_with_role(button_role aButtonRole) const;
 		push_button& button(standard_button aStandardButton) const;
 		void add_button(standard_button aStandardButton);
+		void add_buttons(standard_button aStandardButtons);
 		void clear();
 	private:
 		void init();
+	private:
+		static bool similar_role(button_role aButtonRole1, button_role aButtonRole2);
 	private:
 		horizontal_layout iLayout;
 		horizontal_spacer iSpacer;

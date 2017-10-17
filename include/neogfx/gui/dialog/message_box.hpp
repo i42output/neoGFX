@@ -27,8 +27,10 @@ namespace neogfx
 	class message_box : public dialog
 	{
 	public:
-		message_box(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
-		message_box(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+		struct no_response : std::logic_error { no_response() : std::logic_error("neogfx::message_box::no_response") {} };
+	public:
+		message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
+		message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
 	public:
 		static standard_button information(const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
 		static standard_button information(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons = standard_button::Ok | standard_button::Cancel);
@@ -49,6 +51,12 @@ namespace neogfx
 		text_widget& text();
 		const text_widget& detailed_text() const;
 		text_widget& detailed_text();
+	public:
+		bool has_response() const;
+		standard_button response() const;
+		void set_response(standard_button aResponse);
+	public:
+		dialog_result exec() override;
 	private:
 		void init();
 	private:
@@ -57,5 +65,6 @@ namespace neogfx
 		vertical_layout iLayout2;
 		text_widget iText;
 		text_widget iDetailedText;
+		boost::optional<standard_button> iResponse;
 	};
 }

@@ -598,7 +598,7 @@ int main(int argc, char* argv[])
 			}
 			ng::colour_dialog colourPicker(window, ng::app::instance().change_style("Keypad").palette().colour());
 			colourPicker.custom_colours() = *sCustomColours;
-			if (colourPicker.exec() == ng::dialog::Accepted)
+			if (colourPicker.exec() == ng::dialog_result::Accepted)
 				ng::app::instance().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
 			*sCustomColours = colourPicker.custom_colours();
 		});
@@ -614,7 +614,7 @@ int main(int argc, char* argv[])
 			static ng::colour sInk = ng::app::instance().current_style().palette().text_colour();
 			ng::colour_dialog colourPicker(window, sInk);
 			colourPicker.custom_colours() = *sCustomColours;
-			if (colourPicker.exec() == ng::dialog::Accepted)
+			if (colourPicker.exec() == ng::dialog_result::Accepted)
 			{
 				sInk = colourPicker.selected_colour();
 				textEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);

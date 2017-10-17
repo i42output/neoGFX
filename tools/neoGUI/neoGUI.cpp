@@ -51,8 +51,9 @@ int main(int argc, char* argv[])
 		app.action_file_new().triggered([&]()
 		{
 			neogui::new_project_dialog dialog{ mainWindow };
-			if (dialog.exec() == ng::dialog::Accepted)
+			if (dialog.exec() == ng::dialog_result::Accepted)
 			{
+				// todo
 			}
 		});
 		fileMenu.add_action(app.action_file_open());

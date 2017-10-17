@@ -558,6 +558,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\title_bar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\message_box.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
@@ -879,6 +882,9 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\title_bar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\dialog\message_box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -63,8 +63,8 @@ namespace neogui
 			iSpacer1{ iLayout1 },
 			iSpacer2{ iLayout2 }
 		{
-			button_box().add_button(neogfx::dialog_button_box::Ok);
-			button_box().add_button(neogfx::dialog_button_box::Cancel);
+			button_box().add_button(neogfx::standard_button::Ok);
+			button_box().add_button(neogfx::standard_button::Cancel);
 			iNew2DGame.enable(false);
 			iNew25DGame.enable(false);
 			iNew3DGame.enable(false);

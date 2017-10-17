@@ -25,17 +25,19 @@
 
 namespace neogfx
 {
+	enum class dialog_result
+	{
+		NoResult,
+		Accepted,
+		Rejected,
+		Other
+	};
+
 	class dialog : public window
 	{
 	public:
 		event<bool&> try_accept;
 		event<bool&> try_reject;
-	public:
-		enum result_code_e
-		{
-			Accepted,
-			Rejected
-		};
 	public:
 		dialog(window_style aStyle = window_style::Default);
 		dialog(const std::string& aDialogTitle, window_style aStyle = window_style::Default);
@@ -53,10 +55,13 @@ namespace neogfx
 	public:
 		virtual void accept();
 		virtual void reject();
+		virtual dialog_result result() const;
+		virtual void set_result(dialog_result aResult);
 	public:
 		void set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox = true);
 		dialog_button_box& button_box();
-		result_code_e exec();
+	public:
+		virtual dialog_result exec();
 	public:
 		virtual neogfx::size_policy size_policy() const;
 	public:
@@ -74,6 +79,6 @@ namespace neogfx
 		vertical_layout iClientLayout;
 		vertical_layout iButtonBoxLayout;
 		boost::optional<dialog_button_box> iButtonBox;
-		boost::optional<result_code_e> iResult;
+		boost::optional<dialog_result> iResult;
 	};
 }

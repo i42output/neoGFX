@@ -54,6 +54,17 @@ namespace neogfx
 	{
 	}
 
+	standard_button dialog_button_box::button_with_role(button_role aButtonRole) const
+	{
+		for (auto& button : iButtons)
+			if (button.first.second == aButtonRole)
+				return button.first.first;
+		for (auto& button : iButtons)
+			if (similar_role(button.first.second, aButtonRole))
+				return button.first.first;
+		return iButtons.begin()->first.first;
+	}
+
 	push_button& dialog_button_box::button(standard_button aStandardButton) const
 	{
 		for (auto& button : iButtons)
@@ -108,6 +119,18 @@ namespace neogfx
 			iLayout.add_item(*button.second);
 	}
 
+	void dialog_button_box::add_buttons(standard_button aStandardButtons)
+	{
+		uint32_t buttons = static_cast<uint32_t>(aStandardButtons);
+		uint32_t bit = 0;
+		while (bit < 32)
+		{
+			auto button = buttons & (1 << bit++);
+			if (button != 0)
+				add_button(static_cast<standard_button>(button));
+		}
+	}
+
 	void dialog_button_box::clear()
 	{
 		iLayout.remove_items();
@@ -118,5 +141,40 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{});
+	}
+
+	bool dialog_button_box::similar_role(button_role aButtonRole1, button_role aButtonRole2)
+	{
+		switch (aButtonRole1)
+		{
+		case button_role::AcceptRole:
+		case button_role::YesRole:
+			switch (aButtonRole2)
+			{
+			case button_role::AcceptRole:
+			case button_role::YesRole:
+				return true;
+			default:
+				return false;
+			}
+		case button_role::RejectRole:
+		case button_role::NoRole:
+			switch (aButtonRole2)
+			{
+			case button_role::RejectRole:
+			case button_role::NoRole:
+				return true;
+			default:
+				return false;
+			}
+		case button_role::InvalidRole:
+		case button_role::DestructiveRole:
+		case button_role::ActionRole:
+		case button_role::ApplyRole:
+		case button_role::ResetRole:
+		case button_role::HelpRole:
+		default:
+			return false;
+		}
 	}
 }

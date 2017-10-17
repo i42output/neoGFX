@@ -260,7 +260,7 @@ namespace neogfx
 			{
 				auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
 				colour_dialog cd{ *this, stop.second };
-				if (cd.exec() == dialog::Accepted)
+				if (cd.exec() == dialog_result::Accepted)
 				{
 					stop.second = cd.selected_colour();
 					update();
@@ -271,7 +271,7 @@ namespace neogfx
 			{
 				auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
 				alpha_dialog ad{ *this, stop.second };
-				if (ad.exec() == dialog::Accepted)
+				if (ad.exec() == dialog_result::Accepted)
 				{
 					stop.second = ad.selected_alpha();
 					update();
@@ -290,7 +290,7 @@ namespace neogfx
 			moreAction->triggered([this]()
 			{
 				gradient_dialog gd{ *this, gradient() };
-				if (gd.exec() == dialog::Accepted)
+				if (gd.exec() == dialog_result::Accepted)
 					set_gradient(gd.gradient());
 			});
 			auto stopIter = stop_at(aPosition);
@@ -304,7 +304,7 @@ namespace neogfx
 					{
 						auto& stop = *iter;
 						colour_dialog cd{ *this, stop.second };
-						if (cd.exec() == dialog::Accepted)
+						if (cd.exec() == dialog_result::Accepted)
 						{
 							stop.second = cd.selected_colour();
 							update();
@@ -359,7 +359,7 @@ namespace neogfx
 					{
 						auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
 						alpha_dialog ad{ ultimate_ancestor(), stop.second };
-						if (ad.exec() == dialog::Accepted)
+						if (ad.exec() == dialog_result::Accepted)
 						{
 							stop.second = ad.selected_alpha();
 							update();
