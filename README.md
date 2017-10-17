@@ -37,12 +37,12 @@ v1.20   | Winter 2018   | macOS support
 
 Feature                   | % done  |     TODO
 --------------------------|---------|-------------------------------------------------------------------------------
-Window                    | 90      |     Icon; drop shadow
+Window                    | 95      |     Drop shadow
 Dialog                    | 90      |     Default button
-Message Box               | 0       |
+Message Box               | 75      |
 Menu                      | 100     | 
 MDI                       | 0       |
-Tabs                      | 100     |     
+Tabs                      | 90      |     Tabs below and on the side
 Toolbars                  | 90      |     Drop-down button support
 Layout Managers           | 95      |     Need to fully support size policies
 Label                     | 100     |     
@@ -50,7 +50,7 @@ Button                    | 100     |
 Table View                | 85      |     Selection; icon
 Tree View                 | 0       |
 List View                 | 0       |
-Text Edit                 | 85      |     Columns; inline images and emoji; undo/redo
+Text Edit                 | 85      |     Columns; rich text (HTML); undo/redo
 Line Edit                 | 100     |     
 Spin Box                  | 100     |
 Slider                    | 90      |     Keyboard
@@ -64,4 +64,4 @@ File Browsers (Native)    | 0       |
 XML Resource Description  | 0       |
 Skins                     | 0       |
 
-Last updated: 07/10/2017
+Last updated: 17/10/2017
