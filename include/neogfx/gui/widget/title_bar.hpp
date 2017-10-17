@@ -40,6 +40,10 @@ namespace neogfx
 			{
 				return WidgetPart;
 			}
+			bool ignore_non_client_mouse_events() const override
+			{
+				return false;
+			}
 		};
 	private:
 		enum texture_index_e

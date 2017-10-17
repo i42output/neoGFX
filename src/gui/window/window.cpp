@@ -967,7 +967,7 @@ namespace neogfx
 	void window::native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
 		i_widget& w = widget_for_mouse_event(native_surface().mouse_position());
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
 			widget_for_mouse_event(native_surface().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
@@ -975,7 +975,7 @@ namespace neogfx
 	{
 		i_widget& w = widget_for_mouse_event(aPosition);
 		dismiss_children(&w);
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
 			w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
@@ -983,14 +983,14 @@ namespace neogfx
 	{
 		i_widget& w = widget_for_mouse_event(aPosition);
 		dismiss_children(&w);
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
 			w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void window::native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		i_widget& w = (iCapturingWidget == 0 ? widget_for_mouse_event(aPosition) : *iCapturingWidget);
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
 			w.mouse_button_released(aButton, aPosition - w.origin());
 	}
 
@@ -998,7 +998,7 @@ namespace neogfx
 	{
 		mouse_entered();
 		i_widget& w = (iCapturingWidget == 0 ? widget_for_mouse_event(aPosition) : *iCapturingWidget);
-		if (w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
 			w.mouse_moved(aPosition - w.origin());
 	}
 

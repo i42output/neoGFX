@@ -86,7 +86,8 @@ namespace neogfx
 		iFocusPolicy{ focus_policy::NoFocus },
 		iForegroundColour{},
 		iBackgroundColour{},
-		iIgnoreMouseEvents{ false }
+		iIgnoreMouseEvents{ false },
+		iIgnoreNonClientMouseEvents{ true }
 	{
 	}
 	
@@ -106,7 +107,8 @@ namespace neogfx
 		iFocusPolicy{ focus_policy::NoFocus },
 		iForegroundColour{},
 		iBackgroundColour{},
-		iIgnoreMouseEvents{ false }
+		iIgnoreMouseEvents{ false },
+		iIgnoreNonClientMouseEvents{ true }
 	{
 		aParent.add_widget(*this);
 	}
@@ -127,7 +129,8 @@ namespace neogfx
 		iFocusPolicy{ focus_policy::NoFocus },
 		iForegroundColour{},
 		iBackgroundColour{},
-		iIgnoreMouseEvents{ false }
+		iIgnoreMouseEvents{ false },
+		iIgnoreNonClientMouseEvents{ true }
 	{
 		aLayout.add_item(*this);
 	}
@@ -1169,7 +1172,7 @@ namespace neogfx
 			switch (aReason)
 			{
 			case capture_reason::MouseEvent:
-				if (!has_surface() || surface().destroyed() || !surface().is_window() || !surface().as_window().current_event_is_non_client())
+				if (!mouse_event_is_non_client())
 					surface().set_capture(*this);
 				else
 					surface().non_client_set_capture(*this);
@@ -1188,7 +1191,7 @@ namespace neogfx
 		switch (aReason)
 		{
 		case capture_reason::MouseEvent:
-			if (!has_surface() || surface().destroyed() || !surface().is_window() || !surface().as_window().current_event_is_non_client())
+			if (!mouse_event_is_non_client())
 				surface().release_capture(*this);
 			else
 				surface().non_client_release_capture(*this);
@@ -1270,6 +1273,24 @@ namespace neogfx
 		iIgnoreMouseEvents = aIgnoreMouseEvents;
 	}
 
+	bool widget::ignore_non_client_mouse_events() const
+	{
+		return iIgnoreNonClientMouseEvents;
+	}
+
+	void widget::set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents)
+	{
+		iIgnoreNonClientMouseEvents = aIgnoreNonClientMouseEvents;
+	}
+
+	bool widget::mouse_event_is_non_client() const
+	{
+		if (!has_surface() || surface().destroyed() || !surface().is_window() || !surface().as_window().current_event_is_non_client())
+			return false;
+		else
+			return true;
+	}
+
 	void widget::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
 		if (has_parent())
@@ -1344,7 +1365,7 @@ namespace neogfx
 		if (client_rect().contains(aPosition))
 		{
 			const i_widget* w = &widget_at(aPosition);
-			while (w != this && (w->hidden() || (w->disabled() && !aForHitTest) || w->ignore_mouse_events()))
+			while (w != this && (w->hidden() || (w->disabled() && !aForHitTest) || (!mouse_event_is_non_client() && w->ignore_mouse_events()) || (mouse_event_is_non_client() && w->ignore_non_client_mouse_events())))
 			{
 				w = &w->parent();
 			}
