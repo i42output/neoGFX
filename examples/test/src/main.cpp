@@ -28,6 +28,7 @@
 #include <neogfx/gui/widget/gradient_widget.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
+#include <neogfx/gui/dialog/message_box.hpp>
 
 namespace ng = neogfx;
 
@@ -664,6 +665,8 @@ int main(int argc, char* argv[])
 
 		app.surface_manager().surface(0).save_mouse_cursor();
 		app.surface_manager().surface(0).set_mouse_cursor(ng::mouse_system_cursor::Wait);
+
+		ng::i_widget& messageBoxesPage = tabContainer.add_tab_page("Message Boxes").as_widget();
 
 		ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").as_widget();
 		ng::vertical_layout layoutItemViews(itemViewsPage);

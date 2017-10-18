@@ -30,25 +30,28 @@ namespace neogfx
 {
 	enum class standard_button : uint32_t
 	{
-		Custom			= 0x00001,
-		Ok				= 0x00002,
-		Cancel			= 0x00004,
-		Close			= 0x00008,
-		Discard			= 0x00010,
-		Apply			= 0x00020,
-		Reset			= 0x00040,
-		RestoreDefaults	= 0x00080,
-		Yes				= 0x00100,
-		No				= 0x00200,
-		YesToAll		= 0x00400,
-		NoToAll			= 0x00800,
-		Abort			= 0x01000,
-		Retry			= 0x02000,
-		Ignore			= 0x04000,
-		Open			= 0x08000,
-		Save			= 0x10000,
-		SaveAll			= 0x20000,
-		Help			= 0x40000
+		Ok				= 0x00000001,
+		Cancel			= 0x00000002,
+		Close			= 0x00000004,
+		Discard			= 0x00000008,
+		Apply			= 0x00000010,
+		Reset			= 0x00000020,
+		RestoreDefaults	= 0x00000040,
+		Yes				= 0x00000080,
+		No				= 0x00000100,
+		YesToAll		= 0x00000200,
+		NoToAll			= 0x00000400,
+		Abort			= 0x00000800,
+		Retry			= 0x00001000,
+		Ignore			= 0x00002000,
+		Open			= 0x00004000,
+		Save			= 0x00008000,
+		SaveAll			= 0x00010000,
+		Help			= 0x00020000,
+		Custom1			= 0x10000000,
+		Custom2			= 0x20000000,
+		Custom3			= 0x40000000,
+		Custom4			= 0x80000000
 	};
 
 	inline constexpr standard_button operator|(standard_button aLhs, standard_button aRhs)
@@ -99,6 +102,7 @@ namespace neogfx
 		standard_button button_with_role(button_role aButtonRole) const;
 		push_button& button(standard_button aStandardButton) const;
 		void add_button(standard_button aStandardButton);
+		void add_button(standard_button aStandardButton, button_role aButtonRole, const std::string& aButtonText);
 		void add_buttons(standard_button aStandardButtons);
 		void clear();
 	private:

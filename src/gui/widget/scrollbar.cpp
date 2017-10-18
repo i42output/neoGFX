@@ -497,7 +497,7 @@ namespace neogfx
 			}
 			iContainer.scrollbar_updated(*this, Updated);
 		}
-		if (clicked_element() == i_scrollbar::ElementNone)
+		if (clicked_element() == i_scrollbar::ElementNone && iContainer.as_widget().entered())
 			hover_element(element_at(aContext, iContainer.as_widget().surface().mouse_position()));
 		else
 			unhover_element();

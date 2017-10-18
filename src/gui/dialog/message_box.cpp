@@ -187,6 +187,14 @@ namespace neogfx
 
 	void message_box::init()
 	{
+		set_standard_layout(16.0);
+		iLayout1.set_margins(neogfx::margins{});
+		iLayout1.set_spacing(16.0);
+		iLayout2.set_margins(neogfx::margins{});
+		iLayout2.set_spacing(16.0);
+
+		centre_on_parent();
+
 		button_box().clicked([this](standard_button aButton)
 		{
 			set_response(aButton);
