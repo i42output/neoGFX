@@ -75,33 +75,8 @@ namespace neogfx
 
 	void dialog_button_box::add_button(standard_button aStandardButton)
 	{
-		static const std::map<standard_button, std::pair<button_role, std::string>> sButtonDetails
-		{
-			{ standard_button::Ok,					{ button_role::AcceptRole, "OK"} },
-			{ standard_button::Cancel,				{ button_role::RejectRole, "Cancel"} },
-			{ standard_button::Close,				{ button_role::RejectRole, "Close"} },
-			{ standard_button::Discard,				{ button_role::DestructiveRole, "Discard"} },
-			{ standard_button::Apply,				{ button_role::ApplyRole, "Apply"} },
-			{ standard_button::Reset,				{ button_role::ResetRole, "Reset"} },
-			{ standard_button::RestoreDefaults,		{ button_role::ResetRole, "Restore Defaults"} },
-			{ standard_button::Yes,					{ button_role::YesRole, "Yes"} },
-			{ standard_button::No,					{ button_role::NoRole, "No"} },
-			{ standard_button::YesToAll,			{ button_role::YesRole, "Yes To All"} },
-			{ standard_button::NoToAll,				{ button_role::NoRole, "No To All"} },
-			{ standard_button::Abort,				{ button_role::RejectRole, "Abort"} },
-			{ standard_button::Retry,				{ button_role::AcceptRole, "Retry"} },
-			{ standard_button::Ignore,				{ button_role::AcceptRole, "Ignore"} },
-			{ standard_button::Open,				{ button_role::AcceptRole, "Open"} },
-			{ standard_button::Save,				{ button_role::AcceptRole, "Save"} },
-			{ standard_button::SaveAll,				{ button_role::AcceptRole, "Save All"} },
-			{ standard_button::Help,				{ button_role::HelpRole, "Help"} },
-			{ standard_button::Custom1,				{ button_role::InvalidRole, "" } },
-			{ standard_button::Custom2,				{ button_role::InvalidRole, "" } },
-			{ standard_button::Custom3,				{ button_role::InvalidRole, "" } },
-			{ standard_button::Custom4,				{ button_role::InvalidRole, "" } }
-		};
-		auto bi = sButtonDetails.find(aStandardButton);
-		add_button(bi->first, bi->second.first, bi->second.second);
+		auto bd = standard_button_details(aStandardButton);
+		add_button(aStandardButton, bd.first, bd.second);
 	}
 
 	void dialog_button_box::add_button(standard_button aStandardButton, button_role aButtonRole, const std::string& aButtonText)
@@ -143,6 +118,39 @@ namespace neogfx
 	{
 		iLayout.remove_items();
 		iButtons.clear();
+	}
+
+	dialog_button_box::button_details dialog_button_box::standard_button_details(standard_button aStandardButton)
+	{
+		static const std::map<standard_button, button_details> sStandardButtonDetails
+		{
+			{ standard_button::Ok,					{ button_role::AcceptRole, "OK"} },
+			{ standard_button::Cancel,				{ button_role::RejectRole, "Cancel"} },
+			{ standard_button::Close,				{ button_role::RejectRole, "Close"} },
+			{ standard_button::Discard,				{ button_role::DestructiveRole, "Discard"} },
+			{ standard_button::Apply,				{ button_role::ApplyRole, "Apply"} },
+			{ standard_button::Reset,				{ button_role::ResetRole, "Reset"} },
+			{ standard_button::RestoreDefaults,		{ button_role::ResetRole, "Restore Defaults"} },
+			{ standard_button::Yes,					{ button_role::YesRole, "Yes"} },
+			{ standard_button::No,					{ button_role::NoRole, "No"} },
+			{ standard_button::YesToAll,			{ button_role::YesRole, "Yes To All"} },
+			{ standard_button::NoToAll,				{ button_role::NoRole, "No To All"} },
+			{ standard_button::Abort,				{ button_role::RejectRole, "Abort"} },
+			{ standard_button::Retry,				{ button_role::AcceptRole, "Retry"} },
+			{ standard_button::Ignore,				{ button_role::AcceptRole, "Ignore"} },
+			{ standard_button::Open,				{ button_role::AcceptRole, "Open"} },
+			{ standard_button::Save,				{ button_role::AcceptRole, "Save"} },
+			{ standard_button::SaveAll,				{ button_role::AcceptRole, "Save All"} },
+			{ standard_button::Help,				{ button_role::HelpRole, "Help"} },
+			{ standard_button::Custom1,				{ button_role::InvalidRole, "" } },
+			{ standard_button::Custom2,				{ button_role::InvalidRole, "" } },
+			{ standard_button::Custom3,				{ button_role::InvalidRole, "" } },
+			{ standard_button::Custom4,				{ button_role::InvalidRole, "" } }
+		};
+		auto bd = sStandardButtonDetails.find(aStandardButton);
+		if (bd != sStandardButtonDetails.end())
+			return bd->second;
+		return button_details{ button_role::InvalidRole, "" };
 	}
 
 	void dialog_button_box::init()

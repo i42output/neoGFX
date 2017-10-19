@@ -85,6 +85,8 @@ namespace neogfx
 		event<> rejected;
 	public:
 		event<standard_button> clicked;
+	public:
+		typedef std::pair<button_role, std::string> button_details;
 	private:
 		typedef std::pair<standard_button, button_role> button_key;
 		struct button_sorter
@@ -105,6 +107,8 @@ namespace neogfx
 		void add_button(standard_button aStandardButton, button_role aButtonRole, const std::string& aButtonText);
 		void add_buttons(standard_button aStandardButtons);
 		void clear();
+	public:
+		static button_details standard_button_details(standard_button aStandardButton);
 	private:
 		void init();
 	private:
