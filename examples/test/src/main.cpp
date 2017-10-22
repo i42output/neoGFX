@@ -692,11 +692,14 @@ int main(int argc, char* argv[])
 		ng::group_box messageBoxTextGroup{ messageBoxesPageLayout1, "Text" };
 		ng::label messageBoxTitleLabel{ messageBoxTextGroup.item_layout(), "Title:" };
 		ng::line_edit messageBoxTitle{ messageBoxTextGroup.item_layout() };
+		messageBoxTitle.set_text("neoGFX Message Box Test");
 		ng::label messageBoxTextLabel{ messageBoxTextGroup.item_layout(), "Text:" };
 		ng::text_edit messageBoxText{ messageBoxTextGroup.item_layout() };
+		messageBoxText.set_text("This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line");
 		messageBoxText.set_minimum_size(ng::size{ 256, 128 });
 		ng::label messageBoxDetailedTextLabel{ messageBoxTextGroup.item_layout(), "Detailed Text:" };
 		ng::text_edit messageBoxDetailedText{ messageBoxTextGroup.item_layout() };
+		messageBoxDetailedText.set_text("This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank.");
 		messageBoxDetailedText.set_minimum_size(ng::size{ 256, 128 });
 		ng::push_button openMessageBox{ messageBoxesPageLayout1, "Open Message Box" };
 		openMessageBox.set_size_policy(ng::size_policy::Minimum);
