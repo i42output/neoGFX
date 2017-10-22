@@ -140,6 +140,10 @@ void create_game(ng::i_layout& aLayout);
 
 int main(int argc, char* argv[])
 {
+	/* Yes this is an 800 line (and counting) function and whilst in general such long functions are
+	egregious this function is a special case: it is test code which mostly just creates widgets. 
+	I might break it up at a later date when I create a proper test suite. */
+
 	ng::app app(argc, argv, "neoGFX Test App");
 
 	try
