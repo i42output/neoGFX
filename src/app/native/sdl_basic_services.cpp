@@ -145,19 +145,20 @@ namespace neogfx
 	class sdl_clipboard : public i_native_clipboard
 	{
 	public:
-		virtual bool has_text() const
+		bool has_text() const override
 		{
 			return SDL_HasClipboardText() == SDL_TRUE;
 		}
-		virtual std::string text() const
+		std::string text() const override
 		{
 			char* clipboardText = SDL_GetClipboardText();
 			if (clipboardText == NULL)
 				return std::string{};
-			else
-				return std::string{clipboardText};
+			std::string result{ clipboardText };
+			SDL_free(clipboardText);
+			return result;
 		}
-		virtual void set_text(const std::string& aText)
+		void set_text(const std::string& aText) override
 		{
 			SDL_SetClipboardText(aText.c_str());
 		}
