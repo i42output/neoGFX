@@ -62,6 +62,8 @@ Colour Gradient Selector  | 100     |
 Colour Picker             | 100     |
 File Browsers (Native)    | 0       |
 XML Resource Description  | 0       |
+i18n                      | 0       |
+l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
 Last updated: 22/10/2017
