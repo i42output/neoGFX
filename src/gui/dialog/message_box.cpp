@@ -181,7 +181,7 @@ namespace neogfx
 	{
 		auto result = dialog::exec();
 		if (!has_response())
-			set_response(button_box().button_with_role(button_role::RejectRole));
+			set_response(button_box().button_with_role(button_role::Reject));
 		return result;
 	}
 

@@ -27,10 +27,10 @@ namespace neogfx
 	{
 		static const std::map<platform, std::vector<button_role>> sRoleOrder
 		{
-			{ platform::Windows, { button_role::ResetRole, button_role::YesRole, button_role::AcceptRole, button_role::DestructiveRole, button_role::NoRole, button_role::ActionRole, button_role::RejectRole, button_role::ApplyRole, button_role::HelpRole } },
-			{ platform::Mac, { button_role::HelpRole, button_role::ResetRole, button_role::ApplyRole, button_role::ActionRole, button_role::DestructiveRole, button_role::RejectRole, button_role::AcceptRole, button_role::NoRole, button_role::YesRole } },
-			{ platform::Kde, { button_role::HelpRole, button_role::ResetRole, button_role::YesRole, button_role::NoRole, button_role::ActionRole, button_role::AcceptRole, button_role::ApplyRole, button_role::DestructiveRole, button_role::RejectRole } },
-			{ platform::Gnome, { button_role::HelpRole, button_role::ResetRole, button_role::ActionRole, button_role::ApplyRole, button_role::DestructiveRole, button_role::RejectRole, button_role::AcceptRole, button_role::NoRole, button_role::YesRole } }
+			{ platform::Windows, { button_role::Reset, button_role::Yes, button_role::Accept, button_role::Destructive, button_role::No, button_role::Action, button_role::Reject, button_role::Apply, button_role::Help } },
+			{ platform::Mac, { button_role::Help, button_role::Reset, button_role::Apply, button_role::Action, button_role::Destructive, button_role::Reject, button_role::Accept, button_role::No, button_role::Yes } },
+			{ platform::Kde, { button_role::Help, button_role::Reset, button_role::Yes, button_role::No, button_role::Action, button_role::Accept, button_role::Apply, button_role::Destructive, button_role::Reject } },
+			{ platform::Gnome, { button_role::Help, button_role::Reset, button_role::Action, button_role::Apply, button_role::Destructive, button_role::Reject, button_role::Accept, button_role::No, button_role::Yes } }
 		};
 		static const auto& sPlatformSpecific = sRoleOrder.find(app::instance().basic_services().platform())->second;
 		auto left = std::find(sPlatformSpecific.begin(), sPlatformSpecific.end(), aLhs.second);
@@ -84,12 +84,12 @@ namespace neogfx
 		auto newButton = iButtons.emplace(std::make_pair(aStandardButton, aButtonRole), std::make_unique<push_button>(*this, aButtonText, push_button_style::ButtonBox));
 		switch (newButton->first.second)
 		{
-		case button_role::AcceptRole:
-		case button_role::YesRole:
+		case button_role::Accept:
+		case button_role::Yes:
 			newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); accepted.trigger(); });
 			break;
-		case button_role::RejectRole:
-		case button_role::NoRole:
+		case button_role::Reject:
+		case button_role::No:
 			newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); rejected.trigger(); });
 			break;
 		default:
@@ -124,33 +124,33 @@ namespace neogfx
 	{
 		static const std::map<standard_button, button_details> sStandardButtonDetails
 		{
-			{ standard_button::Ok,					{ button_role::AcceptRole, "OK"} },
-			{ standard_button::Cancel,				{ button_role::RejectRole, "Cancel"} },
-			{ standard_button::Close,				{ button_role::RejectRole, "Close"} },
-			{ standard_button::Discard,				{ button_role::DestructiveRole, "Discard"} },
-			{ standard_button::Apply,				{ button_role::ApplyRole, "Apply"} },
-			{ standard_button::Reset,				{ button_role::ResetRole, "Reset"} },
-			{ standard_button::RestoreDefaults,		{ button_role::ResetRole, "Restore Defaults"} },
-			{ standard_button::Yes,					{ button_role::YesRole, "Yes"} },
-			{ standard_button::No,					{ button_role::NoRole, "No"} },
-			{ standard_button::YesToAll,			{ button_role::YesRole, "Yes To All"} },
-			{ standard_button::NoToAll,				{ button_role::NoRole, "No To All"} },
-			{ standard_button::Abort,				{ button_role::RejectRole, "Abort"} },
-			{ standard_button::Retry,				{ button_role::AcceptRole, "Retry"} },
-			{ standard_button::Ignore,				{ button_role::AcceptRole, "Ignore"} },
-			{ standard_button::Open,				{ button_role::AcceptRole, "Open"} },
-			{ standard_button::Save,				{ button_role::AcceptRole, "Save"} },
-			{ standard_button::SaveAll,				{ button_role::AcceptRole, "Save All"} },
-			{ standard_button::Help,				{ button_role::HelpRole, "Help"} },
-			{ standard_button::Custom1,				{ button_role::InvalidRole, "" } },
-			{ standard_button::Custom2,				{ button_role::InvalidRole, "" } },
-			{ standard_button::Custom3,				{ button_role::InvalidRole, "" } },
-			{ standard_button::Custom4,				{ button_role::InvalidRole, "" } }
+			{ standard_button::Ok,					{ button_role::Accept, "OK"} },
+			{ standard_button::Cancel,				{ button_role::Reject, "Cancel"} },
+			{ standard_button::Close,				{ button_role::Reject, "Close"} },
+			{ standard_button::Discard,				{ button_role::Destructive, "Discard"} },
+			{ standard_button::Apply,				{ button_role::Apply, "Apply"} },
+			{ standard_button::Reset,				{ button_role::Reset, "Reset"} },
+			{ standard_button::RestoreDefaults,		{ button_role::Reset, "Restore Defaults"} },
+			{ standard_button::Yes,					{ button_role::Yes, "Yes"} },
+			{ standard_button::No,					{ button_role::No, "No"} },
+			{ standard_button::YesToAll,			{ button_role::Yes, "Yes To All"} },
+			{ standard_button::NoToAll,				{ button_role::No, "No To All"} },
+			{ standard_button::Abort,				{ button_role::Reject, "Abort"} },
+			{ standard_button::Retry,				{ button_role::Accept, "Retry"} },
+			{ standard_button::Ignore,				{ button_role::Accept, "Ignore"} },
+			{ standard_button::Open,				{ button_role::Accept, "Open"} },
+			{ standard_button::Save,				{ button_role::Accept, "Save"} },
+			{ standard_button::SaveAll,				{ button_role::Accept, "Save All"} },
+			{ standard_button::Help,				{ button_role::Help, "Help"} },
+			{ standard_button::Custom1,				{ button_role::Invalid, "" } },
+			{ standard_button::Custom2,				{ button_role::Invalid, "" } },
+			{ standard_button::Custom3,				{ button_role::Invalid, "" } },
+			{ standard_button::Custom4,				{ button_role::Invalid, "" } }
 		};
 		auto bd = sStandardButtonDetails.find(aStandardButton);
 		if (bd != sStandardButtonDetails.end())
 			return bd->second;
-		return button_details{ button_role::InvalidRole, "" };
+		return button_details{ button_role::Invalid, "" };
 	}
 
 	void dialog_button_box::init()
@@ -163,32 +163,32 @@ namespace neogfx
 	{
 		switch (aButtonRole1)
 		{
-		case button_role::AcceptRole:
-		case button_role::YesRole:
+		case button_role::Accept:
+		case button_role::Yes:
 			switch (aButtonRole2)
 			{
-			case button_role::AcceptRole:
-			case button_role::YesRole:
+			case button_role::Accept:
+			case button_role::Yes:
 				return true;
 			default:
 				return false;
 			}
-		case button_role::RejectRole:
-		case button_role::NoRole:
+		case button_role::Reject:
+		case button_role::No:
 			switch (aButtonRole2)
 			{
-			case button_role::RejectRole:
-			case button_role::NoRole:
+			case button_role::Reject:
+			case button_role::No:
 				return true;
 			default:
 				return false;
 			}
-		case button_role::InvalidRole:
-		case button_role::DestructiveRole:
-		case button_role::ActionRole:
-		case button_role::ApplyRole:
-		case button_role::ResetRole:
-		case button_role::HelpRole:
+		case button_role::Invalid:
+		case button_role::Destructive:
+		case button_role::Action:
+		case button_role::Apply:
+		case button_role::Reset:
+		case button_role::Help:
 		default:
 			return false;
 		}

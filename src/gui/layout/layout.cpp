@@ -635,9 +635,10 @@ namespace neogfx
 
 	size layout::minimum_size(const optional_size&) const
 	{
-		return has_minimum_size() ?
-			units_converter(*this).from_device_units(*iMinimumSize) :
-			size{};
+		if (has_minimum_size())
+			return units_converter(*this).from_device_units(*iMinimumSize);
+		else
+			return size{};
 	}
 
 	void layout::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)

@@ -66,16 +66,16 @@ namespace neogfx
 
 	enum class button_role
 	{
-		InvalidRole,
-		AcceptRole,
-		RejectRole,
-		DestructiveRole,
-		ActionRole,
-		ApplyRole,
-		ResetRole,
-		YesRole,
-		NoRole,
-		HelpRole
+		Invalid,
+		Accept,
+		Reject,
+		Destructive,
+		Action,
+		Apply,
+		Reset,
+		Yes,
+		No,
+		Help
 	};
 
 	class dialog_button_box : public widget

@@ -815,11 +815,12 @@ namespace neogfx
 
 	size widget::minimum_size(const optional_size& aAvailableSpace) const
 	{
-		return has_minimum_size() ?
-			units_converter(*this).from_device_units(*iMinimumSize) :
-			has_layout() ?
-				layout().minimum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size() :
-				margins().size();
+		if (has_minimum_size())
+			return units_converter(*this).from_device_units(*iMinimumSize);
+		else if (has_layout())
+			return layout().minimum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size();
+		else
+			return margins().size();
 	}
 
 	void widget::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
@@ -840,13 +841,14 @@ namespace neogfx
 
 	size widget::maximum_size(const optional_size& aAvailableSpace) const
 	{
-		return size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed ?
-			minimum_size(aAvailableSpace) :
-			has_maximum_size() ?
-				units_converter(*this).from_device_units(*iMaximumSize) :
-				has_layout() ?
-					layout().maximum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size() :
-					size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+		if (size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed)
+			return minimum_size(aAvailableSpace);
+		else if (has_maximum_size())
+			return units_converter(*this).from_device_units(*iMaximumSize);
+		else if (has_layout())
+			return layout().maximum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size();
+		else
+			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
 	}
 
 	void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)

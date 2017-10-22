@@ -88,6 +88,7 @@ namespace neogfx
 		void set_spacing(const size& aSpacing, bool aUpdateLayout = true) override;
 		void add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
 		void add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
+		void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
 	public:
 		void layout_items(const point& aPosition, const size& aSize) override;
 	private:

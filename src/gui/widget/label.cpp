@@ -28,6 +28,7 @@ namespace neogfx
 		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -35,6 +36,7 @@ namespace neogfx
 		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, aText, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -42,6 +44,7 @@ namespace neogfx
 		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -49,6 +52,7 @@ namespace neogfx
 		widget{}, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -56,6 +60,7 @@ namespace neogfx
 		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -63,6 +68,7 @@ namespace neogfx
 		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, aText, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -70,6 +76,7 @@ namespace neogfx
 		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -77,6 +84,7 @@ namespace neogfx
 		widget{ aParent }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -84,6 +92,7 @@ namespace neogfx
 		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -91,6 +100,7 @@ namespace neogfx
 		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, neogfx::texture{} }, iText{ iLayout, aText, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -98,6 +108,7 @@ namespace neogfx
 		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aTexture }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 
@@ -105,6 +116,7 @@ namespace neogfx
 		widget{ aLayout }, iAlignment{ aAlignment }, iPlacement{ aPlacement }, iLayout{ *this }, iImage{ iLayout, aImage }, iText{ iLayout, std::string{}, aType == label_type::MultiLine }, iCentreSpacer{ nullptr }
 	{
 		iLayout.set_alignment(aAlignment);
+		iText.set_alignment(aAlignment);
 		init();
 	}
 

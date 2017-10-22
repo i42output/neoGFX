@@ -432,6 +432,14 @@ namespace neogfx
 			owner()->ultimate_ancestor().layout_items(true);
 	}
 
+	void grid_layout::set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout)
+	{
+		layout::set_alignment(aAlignment, aUpdateLayout);
+		iRowLayout.set_alignment(alignment(), aUpdateLayout);
+		for (auto& r : iRows)
+			r->set_alignment(alignment(), aUpdateLayout);
+	}
+
 	void grid_layout::layout_items(const point& aPosition, const size& aSize)
 	{
 		if (!enabled())
@@ -649,6 +657,7 @@ namespace neogfx
 			iRows.back()->set_always_use_spacing(true);
 			iRows.back()->set_margins(neogfx::margins{});
 			iRows.back()->set_spacing(spacing());
+			iRows.back()->set_alignment(alignment());
 		}
 		return *iRows[aRow];
 	}

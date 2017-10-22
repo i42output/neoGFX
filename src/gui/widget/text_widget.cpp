@@ -90,6 +90,8 @@ namespace neogfx
 		case neogfx::alignment::Right:
 			textPosition.x = std::floor((client_rect().width() - textSize.cx));
 			break;
+		default:
+			break;
 		}
 		switch (iAlignment & neogfx::alignment::Vertical)
 		{
@@ -101,6 +103,8 @@ namespace neogfx
 			break;
 		case neogfx::alignment::Bottom:
 			textPosition.y = std::floor((client_rect().height() - textSize.cy));
+			break;
+		default:
 			break;
 		}
 		colour ink = text_colour();

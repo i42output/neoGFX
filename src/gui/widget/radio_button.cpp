@@ -80,7 +80,7 @@ namespace neogfx
 		layout().add_spacer();
 		if (!any_siblings_on())
 			set_on();
-		text().set_alignment(alignment::Left);
+		text().set_alignment(alignment::Left | alignment::VCentre);
 	}
 
 	radio_button::radio_button(i_widget& aParent, const std::string& aText) :
@@ -92,7 +92,7 @@ namespace neogfx
 		layout().add_spacer();
 		if (!any_siblings_on())
 			set_on();
-		text().set_alignment(alignment::Left);
+		text().set_alignment(alignment::Left | alignment::VCentre);
 	}
 
 	radio_button::radio_button(i_layout& aLayout, const std::string& aText) :
@@ -104,7 +104,7 @@ namespace neogfx
 		layout().add_spacer();
 		if (!any_siblings_on())
 			set_on();
-		text().set_alignment(alignment::Left);
+		text().set_alignment(alignment::Left | alignment::VCentre);
 	}
 
 	bool radio_button::is_on() const

@@ -153,6 +153,7 @@ int main(int argc, char* argv[])
 		app.change_style("Default");
 
 		ng::window window(ng::size{ 768, 688 });
+		auto& layout0 = window.client_layout();
 
 		bool showFps = false;
 		auto fpsFont = window.font().with_size(18);
@@ -166,8 +167,6 @@ int main(int argc, char* argv[])
 				aGc.draw_text(ng::point{ 100, 100 }, oss.str(), fpsFont, ng::colour::White);
 			}
 		});
-
-		auto& layout0 = window.client_layout();
 
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{
@@ -212,13 +211,6 @@ int main(int argc, char* argv[])
 		auto& fileMenu = menu.add_sub_menu("&File");
 		fileMenu.add_action(app.action_file_exit());
 		fileMenu.add_action(app.action_file_new());
-/*		app.action_file_new().triggered([&]()
-		{
-			neogui::new_project_dialog dialog{ mainWindow };
-			if (dialog.exec() == ng::dialog::Accepted)
-			{
-			}
-		}); */
 		fileMenu.add_action(app.action_file_open());
 		fileMenu.add_separator();
 		fileMenu.add_action(app.action_file_close());
@@ -661,12 +653,45 @@ int main(int argc, char* argv[])
 			}
 		}, 16);
 
+		ng::i_widget& messageBoxesPage = tabContainer.add_tab_page("Message Boxes").as_widget();
+		ng::horizontal_layout messageBoxesPageLayout1{ messageBoxesPage };
+		ng::group_box messageBoxIcons{ messageBoxesPageLayout1, "Icons" };
+		ng::radio_button messageBoxIconInformation{ messageBoxIcons.item_layout(), "Information" }; 
+		ng::radio_button messageBoxIconQuestion{ messageBoxIcons.item_layout(), "Question" }; 
+		ng::radio_button messageBoxIconWarning{ messageBoxIcons.item_layout(), "Warning" }; 
+		ng::radio_button messageBoxIconStop{ messageBoxIcons.item_layout(), "Stop" }; 
+		ng::radio_button messageBoxIconError{ messageBoxIcons.item_layout(), "Error" }; 
+		ng::radio_button messageBoxIconCritical{ messageBoxIcons.item_layout(), "Critical" }; 
+		messageBoxIconInformation.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#information.png" }); 
+		messageBoxIconQuestion.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#question.png" });
+		messageBoxIconWarning.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#warning.png" });
+		messageBoxIconStop.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#stop.png" });
+		messageBoxIconError.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#error.png" });
+		messageBoxIconCritical.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#critical.png" });
+		messageBoxIconInformation.label().image().set_extents(ng::size{ 24.0 });
+		messageBoxIconQuestion.label().image().set_extents(ng::size{ 24.0 });
+		messageBoxIconWarning.label().image().set_extents(ng::size{ 24.0 });
+		messageBoxIconStop.label().image().set_extents(ng::size{ 24.0 });
+		messageBoxIconError.label().image().set_extents(ng::size{ 24.0 });
+		messageBoxIconCritical.label().image().set_extents(ng::size{ 24.0 });
+		ng::group_box messageBoxButtons{ messageBoxesPageLayout1, "Buttons" };
+		uint32_t standardButton = 1;
+		while (standardButton != 0)
+		{
+			auto bd = ng::dialog_button_box::standard_button_details(static_cast<ng::standard_button>(standardButton));
+			if (bd.first != ng::button_role::Invalid)
+			{
+				auto b = std::make_shared<ng::check_box>(bd.second);
+				messageBoxButtons.item_layout().add_item(b);
+			}
+			standardButton <<= 1;
+		}
+		ng::group_box messageBoxText{ messageBoxesPageLayout1, "Text" };
+
 		// Item Views
 
 		app.surface_manager().surface(0).save_mouse_cursor();
 		app.surface_manager().surface(0).set_mouse_cursor(ng::mouse_system_cursor::Wait);
-
-		ng::i_widget& messageBoxesPage = tabContainer.add_tab_page("Message Boxes").as_widget();
 
 		ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").as_widget();
 		ng::vertical_layout layoutItemViews(itemViewsPage);

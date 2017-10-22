@@ -24,14 +24,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	tab_page_container::default_tab_page::default_tab_page(i_widget& aParent, i_tab& aTab) : 
-		scrollable_widget(aParent, scrollbar_style::Normal, frame_style::ContainerFrame), iTab(aTab)
+	tab_page_container::default_tab_page::default_tab_page(i_widget& aParent, i_tab& aTab) :
+		scrollable_widget{ aParent, scrollbar_style::Normal, frame_style::ContainerFrame }, iTab{ aTab }
 	{
 	}
 
 	tab_page_container::default_tab_page::default_tab_page(i_layout& aLayout, i_tab& aTab) :
-		scrollable_widget(aLayout, scrollbar_style::Normal, frame_style::ContainerFrame), iTab(aTab)
+		scrollable_widget{ aLayout, scrollbar_style::Normal, frame_style::ContainerFrame }, iTab{ aTab }
 	{
+	}
+
+	neogfx::size_policy tab_page_container::default_tab_page::size_policy() const
+	{
+		if (has_size_policy())
+			return scrollable_widget::size_policy();
+		else
+			return neogfx::size_policy::Expanding;
 	}
 
 	size tab_page_container::default_tab_page::minimum_size(const optional_size& aAvailableSpace) const
@@ -40,6 +48,14 @@ namespace neogfx
 			return scrollable_widget::minimum_size(aAvailableSpace);
 		else
 			return size{};
+	}
+
+	size tab_page_container::default_tab_page::maximum_size(const optional_size& aAvailableSpace) const
+	{
+		if (has_maximum_size() || size_policy() != neogfx::size_policy::Expanding)
+			return scrollable_widget::maximum_size(aAvailableSpace);
+		else
+			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
 	}
 
 	bool tab_page_container::default_tab_page::transparent_background() const

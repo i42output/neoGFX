@@ -130,10 +130,10 @@ namespace neogfx
 		size weight() const override;
 		void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
 		bool has_minimum_size() const override;
-		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
 		void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
 		bool has_maximum_size() const override;
-		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
 		void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
 		bool has_margins() const override;
 		neogfx::margins margins() const override;
@@ -153,10 +153,10 @@ namespace neogfx
 	public:
 		bool has_foreground_colour() const override;
 		colour foreground_colour() const override;
-		void set_foreground_colour(const optional_colour& aForegroundColour = optional_colour()) override;
+		void set_foreground_colour(const optional_colour& aForegroundColour = optional_colour{}) override;
 		bool has_background_colour() const override;
 		colour background_colour() const override;
-		void set_background_colour(const optional_colour& aBackgroundColour = optional_colour()) override;
+		void set_background_colour(const optional_colour& aBackgroundColour = optional_colour{}) override;
 		colour container_background_colour() const override;
 		bool has_font() const override;
 		const neogfx::font& font() const override;

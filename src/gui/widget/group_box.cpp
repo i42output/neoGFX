@@ -158,11 +158,23 @@ namespace neogfx
 			return parent().background_colour().lighter(24);
 	}
 
+	class group_box_item_layout : public vertical_layout
+	{
+	public:
+		size minimum_size(const optional_size& aAvailableSpace) const override
+		{
+			auto result = vertical_layout::minimum_size(aAvailableSpace);
+			if (result == size{})
+				result = size{ 10.0, 10.0 };
+			return result;
+		}
+	};
+
 	void group_box::init()
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{ 5.0 });
 		iLayout.set_spacing(neogfx::size{ 5.0 });
-		set_item_layout(std::make_shared<vertical_layout>());
+		set_item_layout(std::make_shared<group_box_item_layout>());
 	}
 }

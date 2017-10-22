@@ -39,7 +39,9 @@ namespace neogfx
 			default_tab_page(i_widget& aParent, i_tab& aTab);
 			default_tab_page(i_layout& aLayout, i_tab& aTab);
 		public:
+			neogfx::size_policy size_policy() const override;
 			size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+			size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 		public:
 			bool transparent_background() const override;
 			void paint_non_client(graphics_context& aGraphicsContext) const override;
