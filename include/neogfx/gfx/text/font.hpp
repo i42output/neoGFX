@@ -92,6 +92,7 @@ namespace neogfx
 		virtual void enable_kerning();
 		virtual void disable_kerning();
 	public:
+		font_info with_style(style_e aStyle) const;
 		font_info with_size(point_size aSize) const;
 	public:
 		bool operator==(const font_info& aRhs) const;

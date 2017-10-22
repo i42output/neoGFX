@@ -23,14 +23,20 @@
 
 namespace neogfx
 {
+	enum class text_widget_type
+	{
+		SingleLine,
+		MultiLine
+	};
+
 	class text_widget : public widget
 	{
 	public:
 		event<> text_changed;
 	public:
-		text_widget(const std::string& aText = std::string(), bool aMultiLine = false);
-		text_widget(i_widget& aParent, const std::string& aText = std::string(), bool aMultiLine = false);
-		text_widget(i_layout& aLayout, const std::string& aText = std::string(), bool aMultiLine = false);
+		text_widget(const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine);
+		text_widget(i_widget& aParent, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine);
+		text_widget(i_layout& aLayout, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine);
 		~text_widget();
 	public:
 		virtual neogfx::size_policy size_policy() const;
@@ -57,7 +63,7 @@ namespace neogfx
 		std::string iText;
 		mutable glyph_text iGlyphTextCache;
 		mutable optional_size iTextExtent;
-		bool iMultiLine;
+		text_widget_type iType;
 		neogfx::alignment iAlignment;
 		optional_colour iTextColour;
 	};

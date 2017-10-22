@@ -22,112 +22,182 @@
 
 namespace neogfx
 {
-	message_box::message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons) :
+	message_box::message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
 		dialog{ aTitle, window_style::TitleBar | window_style::Close },
 		iLayout1{ client_layout() },
 		iIcon{ iLayout1, aIcon },
 		iLayout2{ iLayout1 },
-		iText{ iLayout2, aText },
-		iDetailedText{ iLayout2, std::string{} }
+		iText{ iLayout2, aText, text_widget_type::MultiLine },
+		iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine }
 	{
 		button_box().add_buttons(aButtons);
 		init();
 	}
 
-	message_box::message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons) :
+	message_box::message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
 		dialog{ aParent, aTitle, window_style::TitleBar | window_style::Close },
 		iLayout1{ client_layout() },
 		iIcon{ iLayout1, aIcon },
 		iLayout2{ iLayout1 },
-		iText{ iLayout2, aText },
-		iDetailedText{ iLayout2, std::string{} }
+		iText{ iLayout2, aText, text_widget_type::MultiLine },
+		iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine }
 	{
 		button_box().add_buttons(aButtons);
 		init();
 	}
 
-	standard_button message_box::information(const std::string& aTitle, const std::string& aText, standard_button aButtons)
+	message_box::message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons) :
+		message_box{ aTitle, aIcon, aText, std::string{}, aButtons }
 	{
-		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aButtons };
+	}
+
+	message_box::message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, standard_button aButtons) :
+		message_box{ aParent, aTitle, aIcon, aText, std::string{}, aButtons }
+	{
+	}
+
+	standard_button message_box::information(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aDetailedText, aButtons };
 		mb.exec();
 		return mb.response();
+	}
+
+	standard_button message_box::information(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::question(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#question.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::question(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#question.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::warning(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::stop(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#stop.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#stop.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::error(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#error.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::error(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#error.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::critical(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#critical.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
+	{
+		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#critical.png" }, aText, aDetailedText, aButtons };
+		mb.exec();
+		return mb.response();
+	}
+
+	standard_button message_box::information(const std::string& aTitle, const std::string& aText, standard_button aButtons)
+	{
+		return information(aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::information(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return information(aParent, aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::question(const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#question.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return question(aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::question(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#question.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return question(aParent, aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::warning(const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return warning(aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::warning(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return warning(aParent, aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::stop(const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#stop.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return stop(aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::stop(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#stop.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return stop(aParent, aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::error(const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#error.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return error(aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::error(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#error.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return error(aParent, aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::critical(const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#critical.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return critical(aTitle, aText, std::string{}, aButtons);
 	}
 
 	standard_button message_box::critical(i_widget& aParent, const std::string& aTitle, const std::string& aText, standard_button aButtons)
 	{
-		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#critical.png" }, aText, aButtons };
-		mb.exec();
-		return mb.response();
+		return critical(aParent, aTitle, aText, std::string{}, aButtons);
 	}
 
 	const image_widget& message_box::icon() const
@@ -190,9 +260,15 @@ namespace neogfx
 		set_standard_layout(16.0);
 		iLayout1.set_margins(neogfx::margins{});
 		iLayout1.set_spacing(16.0);
+		iLayout2.set_alignment(neogfx::alignment::Left);
 		iLayout2.set_margins(neogfx::margins{});
-		iLayout2.set_spacing(16.0);
+		iLayout2.set_spacing(8.0);
 
+		text().set_alignment(neogfx::alignment::Left);
+		detailed_text().set_alignment(neogfx::alignment::Left);
+		font_info normalFont = text().font();
+		text().set_font(neogfx::font{ normalFont.with_style(font_info::Bold) });
+	
 		centre_on_parent();
 
 		button_box().clicked([this](standard_button aButton)

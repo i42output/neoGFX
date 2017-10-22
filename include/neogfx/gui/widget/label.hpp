@@ -44,11 +44,7 @@ namespace neogfx
 		ImageSpacerTextVertical
 	};
 
-	enum class label_type
-	{
-		SingleLine,
-		MultiLine
-	};
+	typedef text_widget_type label_type;
 
 	class label : public widget
 	{

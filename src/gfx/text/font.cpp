@@ -174,6 +174,11 @@ namespace neogfx
 		iKerning = false;
 	}
 
+	font_info font_info::with_style(style_e aStyle) const
+	{
+		return font_info(iFamilyName, aStyle, optional_style_name{}, iSize);
+	}
+
 	font_info font_info::with_size(point_size aSize) const
 	{
 		return font_info(iFamilyName, iStyle, iStyleName, aSize);

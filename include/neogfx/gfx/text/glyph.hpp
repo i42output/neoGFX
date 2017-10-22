@@ -197,6 +197,8 @@ namespace neogfx
 	public:
 		static neogfx::size extents(const font& aFont, const_iterator aBegin, const_iterator aEnd)
 		{
+			if (aBegin == aEnd)
+				return neogfx::size{ 0.0, aFont.height() };
 			neogfx::size result;
 			bool usingNormal = false;
 			bool usingFallback = false;

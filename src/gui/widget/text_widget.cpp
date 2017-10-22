@@ -25,20 +25,20 @@
 
 namespace neogfx
 {
-	text_widget::text_widget(const std::string& aText, bool aMultiLine) : 
-		widget(), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
+	text_widget::text_widget(const std::string& aText, text_widget_type aType) :
+		widget{}, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
 	{
 		init();
 	}
 
-	text_widget::text_widget(i_widget& aParent, const std::string& aText, bool aMultiLine) :
-		widget(aParent), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
+	text_widget::text_widget(i_widget& aParent, const std::string& aText, text_widget_type aType) :
+		widget{ aParent }, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
 	{
 		init();
 	}
 
-	text_widget::text_widget(i_layout& aLayout, const std::string& aText, bool aMultiLine) :
-		widget(aLayout), iText(aText), iGlyphTextCache(font()), iMultiLine(aMultiLine), iAlignment(neogfx::alignment::Centre | neogfx::alignment::VCentre)
+	text_widget::text_widget(i_layout& aLayout, const std::string& aText, text_widget_type aType) :
+		widget{ aLayout }, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
 	{
 		init();
 	}
@@ -147,7 +147,7 @@ namespace neogfx
 
 	bool text_widget::multi_line() const
 	{
-		return iMultiLine;
+		return iType == text_widget_type::MultiLine;
 	}
 
 	neogfx::alignment text_widget::alignment() const
@@ -220,7 +220,7 @@ namespace neogfx
 		graphics_context gc{ *this };
 		scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
 		gc.set_glyph_text_cache(iGlyphTextCache);
-		if (iMultiLine)
+		if (multi_line())
 		{
 			if (has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
 				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::minimum_size().cx - margins().size().cx, UseGlyphTextCache));

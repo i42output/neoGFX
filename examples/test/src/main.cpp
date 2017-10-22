@@ -655,26 +655,27 @@ int main(int argc, char* argv[])
 
 		ng::i_widget& messageBoxesPage = tabContainer.add_tab_page("Message Boxes").as_widget();
 		ng::horizontal_layout messageBoxesPageLayout1{ messageBoxesPage };
-		ng::group_box messageBoxIcons{ messageBoxesPageLayout1, "Icons" };
-		ng::radio_button messageBoxIconInformation{ messageBoxIcons.item_layout(), "Information" }; 
-		ng::radio_button messageBoxIconQuestion{ messageBoxIcons.item_layout(), "Question" }; 
-		ng::radio_button messageBoxIconWarning{ messageBoxIcons.item_layout(), "Warning" }; 
-		ng::radio_button messageBoxIconStop{ messageBoxIcons.item_layout(), "Stop" }; 
-		ng::radio_button messageBoxIconError{ messageBoxIcons.item_layout(), "Error" }; 
-		ng::radio_button messageBoxIconCritical{ messageBoxIcons.item_layout(), "Critical" }; 
+		ng::group_box messageBoxIconsGroup{ messageBoxesPageLayout1, "Icons" };
+		ng::radio_button messageBoxIconInformation{ messageBoxIconsGroup.item_layout(), "Information" };
+		ng::radio_button messageBoxIconQuestion{ messageBoxIconsGroup.item_layout(), "Question" };
+		ng::radio_button messageBoxIconWarning{ messageBoxIconsGroup.item_layout(), "Warning" };
+		ng::radio_button messageBoxIconStop{ messageBoxIconsGroup.item_layout(), "Stop" };
+		ng::radio_button messageBoxIconError{ messageBoxIconsGroup.item_layout(), "Error" };
+		ng::radio_button messageBoxIconCritical{ messageBoxIconsGroup.item_layout(), "Critical" };
 		messageBoxIconInformation.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#information.png" }); 
 		messageBoxIconQuestion.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#question.png" });
 		messageBoxIconWarning.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#warning.png" });
 		messageBoxIconStop.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#stop.png" });
 		messageBoxIconError.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#error.png" });
 		messageBoxIconCritical.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#critical.png" });
-		messageBoxIconInformation.label().image().set_extents(ng::size{ 24.0 });
-		messageBoxIconQuestion.label().image().set_extents(ng::size{ 24.0 });
-		messageBoxIconWarning.label().image().set_extents(ng::size{ 24.0 });
-		messageBoxIconStop.label().image().set_extents(ng::size{ 24.0 });
-		messageBoxIconError.label().image().set_extents(ng::size{ 24.0 });
-		messageBoxIconCritical.label().image().set_extents(ng::size{ 24.0 });
-		ng::group_box messageBoxButtons{ messageBoxesPageLayout1, "Buttons" };
+		messageBoxIconInformation.label().image().set_fixed_size(ng::size{ 24.0 });
+		messageBoxIconQuestion.label().image().set_fixed_size(ng::size{ 24.0 });
+		messageBoxIconWarning.label().image().set_fixed_size(ng::size{ 24.0 });
+		messageBoxIconStop.label().image().set_fixed_size(ng::size{ 24.0 });
+		messageBoxIconError.label().image().set_fixed_size(ng::size{ 24.0 });
+		messageBoxIconCritical.label().image().set_fixed_size(ng::size{ 24.0 });
+		ng::group_box messageBoxButtonsGroup{ messageBoxesPageLayout1, "Buttons" };
+		uint32_t standardButtons = 0;
 		uint32_t standardButton = 1;
 		while (standardButton != 0)
 		{
@@ -682,11 +683,41 @@ int main(int argc, char* argv[])
 			if (bd.first != ng::button_role::Invalid)
 			{
 				auto b = std::make_shared<ng::check_box>(bd.second);
-				messageBoxButtons.item_layout().add_item(b);
+				messageBoxButtonsGroup.item_layout().add_item(b);
+				b->checked([&standardButtons, standardButton]() { standardButtons |= standardButton; });
+				b->unchecked([&standardButtons, standardButton]() { standardButtons &= ~standardButton; });
 			}
 			standardButton <<= 1;
 		}
-		ng::group_box messageBoxText{ messageBoxesPageLayout1, "Text" };
+		ng::group_box messageBoxTextGroup{ messageBoxesPageLayout1, "Text" };
+		ng::label messageBoxTitleLabel{ messageBoxTextGroup.item_layout(), "Title:" };
+		ng::line_edit messageBoxTitle{ messageBoxTextGroup.item_layout() };
+		ng::label messageBoxTextLabel{ messageBoxTextGroup.item_layout(), "Text:" };
+		ng::text_edit messageBoxText{ messageBoxTextGroup.item_layout() };
+		messageBoxText.set_minimum_size(ng::size{ 256, 128 });
+		ng::label messageBoxDetailedTextLabel{ messageBoxTextGroup.item_layout(), "Detailed Text:" };
+		ng::text_edit messageBoxDetailedText{ messageBoxTextGroup.item_layout() };
+		messageBoxDetailedText.set_minimum_size(ng::size{ 256, 128 });
+		ng::push_button openMessageBox{ messageBoxesPageLayout1, "Open Message Box" };
+		openMessageBox.set_size_policy(ng::size_policy::Minimum);
+		ng::label messageBoxResult{ messageBoxesPageLayout1 };
+		openMessageBox.clicked([&]()
+		{
+			ng::standard_button result;
+			if (messageBoxIconInformation.is_checked())
+				result = ng::message_box::information(messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+			else if (messageBoxIconQuestion.is_checked())
+				result = ng::message_box::question(messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+			else if (messageBoxIconWarning.is_checked())
+				result = ng::message_box::warning(messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+			else if (messageBoxIconStop.is_checked())
+				result = ng::message_box::stop(messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+			else if (messageBoxIconError.is_checked())
+				result = ng::message_box::error(messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+			else if (messageBoxIconCritical.is_checked())
+				result = ng::message_box::critical(messageBoxTitle.text(), messageBoxText.text(), messageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+			messageBoxResult.text().set_text("Result = " + ng::dialog_button_box::standard_button_details(result).second);
+		});
 
 		// Item Views
 
