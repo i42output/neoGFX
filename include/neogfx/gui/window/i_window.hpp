@@ -30,6 +30,18 @@ namespace neogfx
 
 	typedef surface_style window_style;
 
+	struct window_placement
+	{
+		enum state_e
+		{
+			Iconized,
+			Restored,
+			Maximized
+		} state;
+		rect iconizedGeometry;
+		rect restoredGeometry;
+	};
+
 	class i_window : public i_surface
 	{
 	public:
@@ -49,6 +61,8 @@ namespace neogfx
 		virtual void maximize() = 0;
 		virtual bool is_restored() const = 0;
 		virtual void restore() = 0;
+		virtual window_placement placement() const = 0;
+		virtual void set_placement(const window_placement& aPlacement) = 0;
 		virtual bool window_enabled() const = 0;
 		virtual void counted_window_enable(bool aEnable) = 0;
 	public:

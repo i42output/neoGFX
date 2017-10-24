@@ -418,7 +418,7 @@ namespace neogfx
 		bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 		bool text_input(const std::string& aText) override;
 	public:
-		child_widget_scrolling_disposition_e scrolling_disposition() const override;
+		neogfx::scrolling_disposition scrolling_disposition() const override;
 		using scrollable_widget::update_scrollbar_visibility;
 		void update_scrollbar_visibility(usv_stage_e aStage) override;
 	protected:

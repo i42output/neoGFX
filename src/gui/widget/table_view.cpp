@@ -118,10 +118,10 @@ namespace neogfx
 		return column_header().section_width(aColumn);
 	}
 
-	table_view::child_widget_scrolling_disposition_e table_view::scrolling_disposition(const i_widget& aChildWidget) const
+	scrolling_disposition table_view::scrolling_disposition(const i_widget& aChildWidget) const
 	{
 		if (&aChildWidget == &column_header())
-			return ScrollChildWidgetHorizontally;
+			return neogfx::scrolling_disposition::ScrollChildWidgetHorizontally;
 		else
 			return item_view::scrolling_disposition(aChildWidget);
 	}

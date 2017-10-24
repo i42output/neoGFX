@@ -32,7 +32,6 @@ namespace neogfx
 	window::window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aScrollbarStyle, aFrameStyle },
 		iStyle{ aStyle },
-		iUnits{ units::Pixels },
 		iCountedEnable{ 0 },
 		iNativeWindowClosing{ false },
 		iClosed{ false },
@@ -225,14 +224,12 @@ namespace neogfx
 
 	units window::units() const
 	{
-		return iUnits;
+		return scrollable_widget::units();
 	}
 
 	units window::set_units(neogfx::units aUnits) const
 	{
-		neogfx::units oldUnits = iUnits;
-		iUnits = aUnits;
-		return oldUnits;
+		return scrollable_widget::set_units(aUnits);
 	}
 
 	void window::resized()
@@ -707,10 +704,10 @@ namespace neogfx
 		aWidget.focus_lost(focus_reason::Other);
 	}
 
-	window::child_widget_scrolling_disposition_e window::scrolling_disposition(const i_widget& aChildWidget) const
+	scrolling_disposition window::scrolling_disposition(const i_widget& aChildWidget) const
 	{
 		if (iTitleBar != boost::none && &aChildWidget == &*iTitleBar)
-			return DontScrollChildWidget;
+			return neogfx::scrolling_disposition::DontScrollChildWidget;
 		return scrollable_widget::scrolling_disposition(aChildWidget);
 	}
 
@@ -766,6 +763,16 @@ namespace neogfx
 	{
 		if (iNativeWindow)
 			native_window().restore();
+	}
+
+	window_placement window::placement() const
+	{
+		return window_placement{}; // todo
+	}
+
+	void window::set_placement(const window_placement& aPlacement)
+	{
+		// todo
 	}
 
 	bool window::window_enabled() const

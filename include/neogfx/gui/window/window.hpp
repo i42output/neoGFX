@@ -158,7 +158,7 @@ namespace neogfx
 		void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
 		void release_focused_widget(i_widget& aWidget) override;
 	public:
-		child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const override;
+		neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
 	public:
 		const std::string& title_text() const override;
 		void set_title_text(const std::string& aTitleText) override;
@@ -171,6 +171,8 @@ namespace neogfx
 		void maximize() override;
 		bool is_restored() const override;
 		void restore() override;
+		window_placement placement() const override;
+		void set_placement(const window_placement& aPlacement) override;
 		bool window_enabled() const override;
 		void counted_window_enable(bool aEnable) override;
 	public:
@@ -232,7 +234,6 @@ namespace neogfx
 		sink iSink;
 		std::unique_ptr<i_native_window> iNativeWindow;
 		window_style iStyle;
-		mutable neogfx::units iUnits;
 		int32_t iCountedEnable;
 		bool iNativeWindowClosing;
 		bool iClosed;

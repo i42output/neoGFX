@@ -508,9 +508,9 @@ namespace neogfx
 		return true;
 	}
 
-	text_edit::child_widget_scrolling_disposition_e text_edit::scrolling_disposition() const
+	scrolling_disposition text_edit::scrolling_disposition() const
 	{
-		return DontScrollChildWidget;
+		return neogfx::scrolling_disposition::DontScrollChildWidget;
 	}
 
 	void text_edit::update_scrollbar_visibility(usv_stage_e aStage)

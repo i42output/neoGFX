@@ -99,7 +99,7 @@ namespace neogfx
 		bool text_input(const std::string& aText) override;
 	protected:
 		using scrollable_widget::scrolling_disposition;
-		child_widget_scrolling_disposition_e scrolling_disposition() const override;
+		neogfx::scrolling_disposition scrolling_disposition() const override;
 		void update_scrollbar_visibility() override;
 		void update_scrollbar_visibility(usv_stage_e aStage) override;
 	protected:

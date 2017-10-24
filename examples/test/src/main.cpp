@@ -500,6 +500,7 @@ int main(int argc, char* argv[])
 			else
 				app.rendering_engine().subpixel_rendering_off();
 		});
+		buttonSubpixel.check();
 		ng::horizontal_layout layoutColourPickers{ layout4 };
 		ng::push_button themeColour(layoutColourPickers, "theme"); themeColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });
 		ng::push_button editColour(layoutColourPickers, "edit"); editColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });

@@ -48,7 +48,7 @@ namespace neogfx
 		size item_total_area(const i_units_context& aUnitsContext) const override;
 		dimension column_width(uint32_t aColumn) const override;
 	protected:
-		child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const override;
+		neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
 	private:
 		vertical_layout iLayout;
 		header_view iColumnHeader;

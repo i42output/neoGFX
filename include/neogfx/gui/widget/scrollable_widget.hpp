@@ -25,16 +25,26 @@
 
 namespace neogfx
 {
+	enum class scrolling_disposition : uint32_t
+	{
+		DontScrollChildWidget = 0x00,
+		ScrollChildWidgetVertically = 0x01,
+		ScrollChildWidgetHorizontally = 0x02,
+		DontConsiderChildWidgets = 0x08
+	};
+
+	inline constexpr scrolling_disposition operator|(scrolling_disposition aLhs, scrolling_disposition aRhs)
+	{
+		return static_cast<scrolling_disposition>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr scrolling_disposition operator&(scrolling_disposition aLhs, scrolling_disposition aRhs)
+	{
+		return static_cast<scrolling_disposition>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
 	class scrollable_widget : public framed_widget, private i_scrollbar_container
 	{
-	public:
-		enum child_widget_scrolling_disposition_e
-		{
-			DontScrollChildWidget = 0x00,
-			ScrollChildWidgetVertically = 0x01,
-			ScrollChildWidgetHorizontally = 0x02,
-			DontConsiderChildWidgets = 0x08
-		};
 	protected:
 		enum usv_stage_e
 		{
@@ -76,8 +86,8 @@ namespace neogfx
 		virtual i_scrollbar& vertical_scrollbar();
 		virtual const i_scrollbar& horizontal_scrollbar() const;
 		virtual i_scrollbar& horizontal_scrollbar();
-		virtual child_widget_scrolling_disposition_e scrolling_disposition() const;
-		virtual child_widget_scrolling_disposition_e scrolling_disposition(const i_widget& aChildWidget) const;
+		virtual neogfx::scrolling_disposition scrolling_disposition() const;
+		virtual neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const;
 	private:
 		rect scrollbar_geometry(const i_units_context& aContext, const i_scrollbar& aScrollbar) const override;
 		void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) override;

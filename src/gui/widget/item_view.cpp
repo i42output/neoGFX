@@ -472,9 +472,9 @@ namespace neogfx
 		return handled;
 	}
 
-	item_view::child_widget_scrolling_disposition_e item_view::scrolling_disposition() const
+	scrolling_disposition item_view::scrolling_disposition() const
 	{
-		return static_cast<child_widget_scrolling_disposition_e>(ScrollChildWidgetVertically | ScrollChildWidgetHorizontally);
+		return neogfx::scrolling_disposition::ScrollChildWidgetVertically | neogfx::scrolling_disposition::ScrollChildWidgetHorizontally;
 	}
 
 	void item_view::update_scrollbar_visibility()
