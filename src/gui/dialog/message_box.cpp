@@ -58,14 +58,14 @@ namespace neogfx
 
 	standard_button message_box::information(const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
 	{
-		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aDetailedText, aButtons };
+		message_box mb{ aTitle, image{ ":/neogfx/resources/icons.naa#information.png" }, aText, aDetailedText, aButtons };
 		mb.exec();
 		return mb.response();
 	}
 
 	standard_button message_box::information(i_widget& aParent, const std::string& aTitle, const std::string& aText, const std::string& aDetailedText, standard_button aButtons)
 	{
-		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#warning.png" }, aText, aDetailedText, aButtons };
+		message_box mb{ aParent, aTitle, image{ ":/neogfx/resources/icons.naa#information.png" }, aText, aDetailedText, aButtons };
 		mb.exec();
 		return mb.response();
 	}

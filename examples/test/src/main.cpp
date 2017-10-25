@@ -333,6 +333,7 @@ int main(int argc, char* argv[])
 		button0.set_size_policy(ng::size_policy::Expanding);
 		button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
 		ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog");
+		ng::push_button buttonGenerateUuid(topButtons, "Generate UUID");
 		ng::horizontal_layout international(layoutButtons);
 		button1.set_foreground_colour(ng::colour::LightGoldenrod);
 		ng::push_button button2(international, u8"ويقفز الثعلب البني السريع فوق الكلب الكسول");
@@ -350,6 +351,7 @@ int main(int argc, char* argv[])
 		dropList2.set_editable(true);
 		ng::horizontal_layout editLayout(layoutButtons);
 		ng::text_edit textEdit(editLayout);
+		buttonGenerateUuid.clicked([&textEdit]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
 		textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
 		textEdit.set_tab_stop_hint("00000000");
 		ng::slider effectWidthSlider{ editLayout, ng::slider::Vertical };

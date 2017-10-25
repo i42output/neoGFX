@@ -197,3 +197,5 @@
 /3rdparty/freetype/freetype-2.8/lib/freetype.lib
 /3rdparty/freetype/freetype-2.8/lib/freetyped.lib
 /examples/test/build/win32/vs2015/test.aps
+/doxygen.zip
+/doxygen/html
