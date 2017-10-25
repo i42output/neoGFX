@@ -45,7 +45,7 @@ namespace neogfx
 
 	typedef window_style surface_style;
 
-	class i_surface : public i_device_metrics, public i_units_context
+	class i_surface : public i_device_metrics
 	{
 	public:
 		event<const i_widget*> dismissing_children;

@@ -610,18 +610,18 @@ namespace neogfx
 			{
 				aTimer.again();
 				point delta = iContainer.as_widget().surface().mouse_position() - *iScrollTrackPosition;
-				scoped_units su(iContainer.as_widget().surface(), units::Pixels);
-				rect g = iContainer.scrollbar_geometry(iContainer.as_widget().surface(), *this);
+				scoped_units su(iContainer.as_widget(), units::Pixels);
+				rect g = iContainer.scrollbar_geometry(iContainer.as_widget(), *this);
 				if (iType == scrollbar_type::Vertical)
 				{
-					g.y = element_geometry(iContainer.as_widget().surface(), ElementUpButton).bottom() + 1.0;
-					g.cy = element_geometry(iContainer.as_widget().surface(), ElementDownButton).top() - 1.0 - g.y;
+					g.y = element_geometry(iContainer.as_widget(), ElementUpButton).bottom() + 1.0;
+					g.cy = element_geometry(iContainer.as_widget(), ElementDownButton).top() - 1.0 - g.y;
 					set_position(position() + static_cast<value_type>(delta.y * 0.25f / g.height()) * (maximum() - minimum()));
 				}
 				else
 				{
-					g.x = element_geometry(iContainer.as_widget().surface(), ElementUpButton).right() + 1.0;
-					g.cx = element_geometry(iContainer.as_widget().surface(), ElementDownButton).left() - 1.0 - g.x;
+					g.x = element_geometry(iContainer.as_widget(), ElementUpButton).right() + 1.0;
+					g.cx = element_geometry(iContainer.as_widget(), ElementDownButton).left() - 1.0 - g.x;
 					set_position(position() + static_cast<value_type>(delta.x * 0.25f / g.width()) * (maximum() - minimum()));
 				}
 			}, 50);
