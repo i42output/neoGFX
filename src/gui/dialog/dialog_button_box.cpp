@@ -120,6 +120,19 @@ namespace neogfx
 		iButtons.clear();
 	}
 
+	bool dialog_button_box::has_reject_role(standard_button aStandardButtons)
+	{
+		uint32_t buttons = static_cast<uint32_t>(aStandardButtons);
+		uint32_t bit = 0;
+		while (bit < 32)
+		{
+			auto button = buttons & (1 << bit++);
+			if (button != 0 && standard_button_details(static_cast<standard_button>(button)).first == button_role::Reject)
+				return true;
+		}
+		return false;
+	}
+
 	dialog_button_box::button_details dialog_button_box::standard_button_details(standard_button aStandardButton)
 	{
 		static const std::map<standard_button, button_details> sStandardButtonDetails

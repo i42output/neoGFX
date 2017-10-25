@@ -21,7 +21,7 @@
 #include <neogfx/neogfx.hpp>
 #include <string>
 #include <neogfx/hid/video_mode.hpp>
-#include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/gui/window/i_surface_window.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/title_bar.hpp>
@@ -30,7 +30,7 @@ namespace neogfx
 {
 	class i_native_window;
 
-	class window : public i_window, public scrollable_widget
+	class window : public i_surface_window, public scrollable_widget
 	{
 	public:
 		event<graphics_context&> paint_overlay;
@@ -98,8 +98,8 @@ namespace neogfx
 		void dismiss() override;
 	public:
 		bool is_window() const override;
-		const i_window& as_window() const override;
-		i_window& as_window() override;
+		const i_surface_window& as_window() const override;
+		i_surface_window& as_window() override;
 	public:
 		neogfx::surface_type surface_type() const override;
 		neogfx::logical_coordinate_system logical_coordinate_system() const override;
@@ -212,18 +212,21 @@ namespace neogfx
 		neogfx::mouse_cursor native_window_mouse_cursor() const override;
 		void native_window_title_text_changed(const std::string& aTitleText) override;
 	public:
-		virtual const i_layout& non_client_layout() const;
-		virtual i_layout& non_client_layout();
-		virtual const i_layout& title_bar_layout() const;
-		virtual i_layout& title_bar_layout();
-		virtual const i_layout& menu_layout() const;
-		virtual i_layout& menu_layout();
-		virtual const i_layout& toolbar_layout() const;
-		virtual i_layout& toolbar_layout();
-		virtual const i_layout& client_layout() const;
-		virtual i_layout& client_layout();
-		virtual const i_layout& status_bar_layout() const;
-		virtual i_layout& status_bar_layout();
+		const i_layout& non_client_layout() const override;
+		i_layout& non_client_layout() override;
+		const i_layout& title_bar_layout() const override;
+		i_layout& title_bar_layout() override;
+		const i_layout& menu_layout() const override;
+		i_layout& menu_layout() override;
+		const i_layout& toolbar_layout() const override;
+		i_layout& toolbar_layout() override;
+		const i_layout& client_layout() const override;
+		i_layout& client_layout() override;
+		const i_layout& status_bar_layout() const override;
+		i_layout& status_bar_layout() override;
+	public:
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
 	private:
 		void init();
 		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos);
@@ -250,14 +253,4 @@ namespace neogfx
 		vertical_layout iStatusBarLayout;
 		optional_title_bar iTitleBar;
 	};
-
-	inline constexpr window_style operator|(window_style aLhs, window_style aRhs)
-	{
-		return static_cast<window_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-	}
-
-	inline constexpr window_style operator&(window_style aLhs, window_style aRhs)
-	{
-		return static_cast<window_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-	}
 }

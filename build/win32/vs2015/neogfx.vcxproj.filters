@@ -93,9 +93,6 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\surface_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\window\i_window.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\app\i_mnemonic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -571,6 +568,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nested_window_container.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\i_surface_window.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -108,6 +108,7 @@ namespace neogfx
 		void add_buttons(standard_button aStandardButtons);
 		void clear();
 	public:
+		static bool has_reject_role(standard_button aStandardButtons);
 		static button_details standard_button_details(standard_button aStandardButton);
 	private:
 		void init();

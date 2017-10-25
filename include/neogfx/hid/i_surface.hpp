@@ -25,12 +25,13 @@
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_window.hpp>
 #include "mouse.hpp"
 
 namespace neogfx
 {
 	class i_widget;
-	class i_window;
+	class i_surface_window;
 
 	enum class surface_type
 	{
@@ -42,29 +43,7 @@ namespace neogfx
 	class i_rendering_engine;
 	class i_native_surface;
 
-	enum class surface_style : uint32_t
-	{
-		Invalid =				0x00000000,
-		None =					0x00000001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
-		TitleBar =				0x00000002,	// The window has a titlebar
-		NativeTitleBar =		0x00000004,	// The window has a native titlebar
-		MinimizeBox =			0x00000008,
-		MaximizeBox =			0x00000010,
-		Resize =				0x00000020,	// The window can be resized and has a maximize button
-		Close =					0x00000040,	// The window has a close button
-		Fullscreen =			0x00000080,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
-		Modal =					0x00001000,
-		ApplicationModal =		0x00002000,
-		NoActivate =			0x00004000,
-		RequiresOwnerFocus =	0x00008000,
-		DismissOnOwnerClick =	0x00010000,
-		DismissOnParentClick =	0x00020000,
-		HideOnOwnerClick =		0x00040000,
-		HideOnParentClick =		0x00080000,
-		InitiallyHidden =		0x00100000,
-		Weak =					0x10000000,
-		Default = TitleBar | MinimizeBox | MaximizeBox | Resize | Close
-	};
+	typedef window_style surface_style;
 
 	class i_surface : public i_device_metrics, public i_units_context
 	{
@@ -101,8 +80,8 @@ namespace neogfx
 		virtual void dismiss() = 0;
 	public:
 		virtual bool is_window() const = 0;
-		virtual const i_window& as_window() const = 0;
-		virtual i_window& as_window() = 0;
+		virtual const i_surface_window& as_window() const = 0;
+		virtual i_surface_window& as_window() = 0;
 	public:
 		virtual neogfx::surface_type surface_type() const = 0;
 		virtual surface_style style() const = 0;

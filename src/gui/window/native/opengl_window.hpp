@@ -42,7 +42,7 @@ namespace neogfx
 		struct busy_rendering : std::logic_error { busy_rendering() : std::logic_error("neogfx::opengl_window::busy_rendering") {} };
 		struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::opengl_window::bad_pause_count") {} };
 	public:
-		opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow);
+		opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow);
 		~opengl_window();
 	public:
 		neogfx::logical_coordinate_system logical_coordinate_system() const override;
@@ -72,13 +72,13 @@ namespace neogfx
 		dimension vertical_dpi() const override;
 		dimension em_size() const override;
 	protected:
-		i_window& window() const override;
+		i_surface_window& window() const override;
 		void destroying();
 		void destroyed();
 	private:
 		virtual void display() = 0;
 	private:
-		i_window& iWindow;
+		i_surface_window& iWindow;
 		size iPixelDensityDpi;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable std::pair<vec2, vec2> iLogicalCoordinates;

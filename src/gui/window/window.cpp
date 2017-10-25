@@ -361,12 +361,12 @@ namespace neogfx
 		return true;
 	}
 
-	const i_window& window::as_window() const
+	const i_surface_window& window::as_window() const
 	{
 		return *this;
 	}
 
-	i_window& window::as_window()
+	i_surface_window& window::as_window()
 	{
 		return *this;
 	}
@@ -812,7 +812,7 @@ namespace neogfx
 		scrollable_widget::init();
 
 		if ((style() & window_style::TitleBar) == window_style::TitleBar)
-			iTitleBar.emplace(title_bar_layout(), app::instance().default_window_icon(), native_window().title_text());
+			iTitleBar.emplace(*this, title_bar_layout(), app::instance().default_window_icon(), native_window().title_text());
 
 		set_margins(neogfx::margins{});
 		iNonClientLayout.set_margins(neogfx::margins{});
@@ -1276,6 +1276,16 @@ namespace neogfx
 	i_layout& window::status_bar_layout()
 	{
 		return iStatusBarLayout;
+	}
+
+	const i_widget& window::as_widget() const
+	{
+		return *this;
+	}
+
+	i_widget& window::as_widget()
+	{
+		return *this;
 	}
 
 	void window::update_click_focus(i_widget& aCandidateWidget, const point& aClickPos)

@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-	class i_window;
+	class i_surface_window;
 
 	class i_native_window : public i_native_surface, public i_device_metrics
 	{
@@ -49,7 +49,7 @@ namespace neogfx
 		virtual const native_event& current_event() const = 0;
 		virtual void handle_event() = 0;
 		virtual bool processing_event() const = 0;
-		virtual i_window& window() const = 0;
+		virtual i_surface_window& window() const = 0;
 		virtual void close() = 0;
 		virtual bool is_visible() const = 0;
 		virtual void show(bool aActivate = false) = 0;

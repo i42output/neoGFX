@@ -224,7 +224,8 @@ namespace neogfx
 			accept();
 			return true;
 		case ScanCode_ESCAPE:
-			reject();
+			if ((style() & window_style::Close) == window_style::Close)
+				reject();
 			return true;
 		default:
 			return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);

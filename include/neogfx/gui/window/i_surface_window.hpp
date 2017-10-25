@@ -1,4 +1,4 @@
-// i_window.hpp
+// i_surface_window.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2016 Leigh Johnston
@@ -22,49 +22,17 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
-#include <neogfx/gui/window/window_events.hpp>
+#include <neogfx/gui/widget/i_window.hpp>
 
 namespace neogfx
 {
 	class i_native_window;
 
-	typedef surface_style window_style;
-
-	struct window_placement
+	class i_surface_window : public i_surface, public i_window
 	{
-		enum state_e
-		{
-			Iconized,
-			Restored,
-			Maximized
-		} state;
-		rect iconizedGeometry;
-		rect restoredGeometry;
-	};
-
-	class i_window : public i_surface
-	{
-	public:
-		event<window_event&> window_event;
 	public:
 		virtual const i_native_window& native_window() const = 0;
 		virtual i_native_window& native_window() = 0;
-	public:
-		virtual const std::string& title_text() const = 0;
-		virtual void set_title_text(const std::string& aTitleText) = 0;
-	public:
-		virtual bool is_active() const = 0;
-		virtual void activate() = 0;
-		virtual bool is_iconic() const = 0;
-		virtual void iconize() = 0;
-		virtual bool is_maximized() const = 0;
-		virtual void maximize() = 0;
-		virtual bool is_restored() const = 0;
-		virtual void restore() = 0;
-		virtual window_placement placement() const = 0;
-		virtual void set_placement(const window_placement& aPlacement) = 0;
-		virtual bool window_enabled() const = 0;
-		virtual void counted_window_enable(bool aEnable) = 0;
 	public:
 		virtual bool current_event_is_non_client() const = 0;
 		virtual bool native_window_can_close() const = 0;
@@ -97,5 +65,8 @@ namespace neogfx
 		virtual void native_window_sys_text_input(const std::string& aText) = 0;
 		virtual neogfx::mouse_cursor native_window_mouse_cursor() const = 0;
 		virtual void native_window_title_text_changed(const std::string& aTitleText) = 0;
+	public:
+		virtual window_style style() const = 0;
+		virtual void set_style(window_style aStyle) = 0;
 	};
 }

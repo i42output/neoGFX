@@ -23,8 +23,9 @@
 
 namespace neogfx
 {
-	title_bar::title_bar(i_widget& aParent, const std::string& aTitle) :
-		widget{ aParent },
+	title_bar::title_bar(i_window& aWindow, const std::string& aTitle) :
+		widget{ aWindow.as_widget() },
+		iWindow{ aWindow },
 		iLayout{ *this },
 		iIcon{ iLayout, app::instance().default_window_icon() },
 		iTitle{ iLayout, aTitle },
@@ -37,8 +38,9 @@ namespace neogfx
 		init();
 	}
 
-	title_bar::title_bar(i_widget& aParent, const i_texture& aIcon, const std::string& aTitle) :
-		widget{ aParent },
+	title_bar::title_bar(i_window& aWindow, const i_texture& aIcon, const std::string& aTitle) :
+		widget{ aWindow.as_widget() },
+		iWindow{ aWindow },
 		iLayout{ *this },
 		iIcon{ iLayout, aIcon },
 		iTitle{ iLayout, aTitle },
@@ -51,8 +53,9 @@ namespace neogfx
 		init();
 	}
 
-	title_bar::title_bar(i_widget& aParent, const i_image& aIcon, const std::string& aTitle) :
-		widget{ aParent },
+	title_bar::title_bar(i_window& aWindow, const i_image& aIcon, const std::string& aTitle) :
+		widget{ aWindow.as_widget() },
+		iWindow{ aWindow },
 		iLayout{ *this },
 		iIcon{ iLayout, aIcon },
 		iTitle{ iLayout, aTitle },
@@ -65,8 +68,9 @@ namespace neogfx
 		init();
 	}
 
-	title_bar::title_bar(i_layout& aLayout, const std::string& aTitle) :
+	title_bar::title_bar(i_window& aWindow, i_layout& aLayout, const std::string& aTitle) :
 		widget{ aLayout },
+		iWindow{ aWindow },
 		iLayout{ *this },
 		iIcon{ iLayout, app::instance().default_window_icon() },
 		iTitle{ iLayout, aTitle },
@@ -79,8 +83,9 @@ namespace neogfx
 		init();
 	}
 
-	title_bar::title_bar(i_layout& aLayout, const i_texture& aIcon, const std::string& aTitle) :
+	title_bar::title_bar(i_window& aWindow, i_layout& aLayout, const i_texture& aIcon, const std::string& aTitle) :
 		widget{ aLayout },
+		iWindow{ aWindow },
 		iLayout{ *this },
 		iIcon{ iLayout, aIcon },
 		iTitle{ iLayout, aTitle },
@@ -93,8 +98,9 @@ namespace neogfx
 		init();
 	}
 
-	title_bar::title_bar(i_layout& aLayout, const i_image& aIcon, const std::string& aTitle) :
+	title_bar::title_bar(i_window& aWindow, i_layout& aLayout, const i_image& aIcon, const std::string& aTitle) :
 		widget{ aLayout },
+		iWindow{ aWindow },
 		iLayout{ *this },
 		iIcon{ iLayout, aIcon },
 		iTitle{ iLayout, aTitle },
@@ -154,51 +160,45 @@ namespace neogfx
 		iSink += app::instance().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
 		auto update_widgets = [this]()
 		{
-			if (surface().surface_type() == surface_type::Window)
+			bool isEnabled = iWindow.window_enabled();
+			bool isActive = iWindow.is_active();
+			bool isIconic = iWindow.is_iconic();
+			bool isMaximized = iWindow.is_maximized();
+			bool isRestored = iWindow.is_restored();
+			icon().enable(isActive);
+			title().enable(isActive);
+			iMinimizeButton.enable(!isIconic && isEnabled);
+			iMaximizeButton.enable(!isMaximized && isEnabled);
+			iRestoreButton.enable(!isRestored && isEnabled);
+			iCloseButton.enable(isEnabled);
+			bool layoutChanged = false;
+			layoutChanged = iMinimizeButton.show(!isIconic && (iWindow.style() & window_style::MinimizeBox) == window_style::MinimizeBox) || layoutChanged;
+			layoutChanged = iMaximizeButton.show(!isMaximized && (iWindow.style() & window_style::MaximizeBox) == window_style::MaximizeBox) || layoutChanged;
+			layoutChanged = iRestoreButton.show(!isRestored && (iWindow.style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid) || layoutChanged;
+			layoutChanged = iCloseButton.show((iWindow.style() & window_style::Close) != window_style::Invalid) || layoutChanged;
+			if (layoutChanged)
 			{
-				auto& w = static_cast<i_window&>(surface());
-				bool isEnabled = w.window_enabled();
-				bool isActive = w.is_active();
-				bool isIconic = w.is_iconic();
-				bool isMaximized = w.is_maximized();
-				bool isRestored = w.is_restored();
-				icon().enable(isActive);
-				title().enable(isActive);
-				iMinimizeButton.enable(!isIconic && isEnabled);
-				iMaximizeButton.enable(!isMaximized && isEnabled);
-				iRestoreButton.enable(!isRestored && isEnabled);
-				iCloseButton.enable(isEnabled);
-				bool layoutChanged = false;
-				layoutChanged = iMinimizeButton.show(!isIconic && (w.style() & window_style::MinimizeBox) == window_style::MinimizeBox) || layoutChanged;
-				layoutChanged = iMaximizeButton.show(!isMaximized && (w.style() & window_style::MaximizeBox) == window_style::MaximizeBox) || layoutChanged;
-				layoutChanged = iRestoreButton.show(!isRestored && (w.style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid) || layoutChanged;
-				if (layoutChanged)
-				{
-					managing_layout().layout_items(true);
-					update(true);
-				}
+				managing_layout().layout_items(true);
+				update(true);
 			}
 		};
-		if (surface().surface_type() == surface_type::Window)
+		iSink += iWindow.window_event([this, update_widgets](neogfx::window_event& e)
 		{
-			iSink += static_cast<i_window&>(surface()).window_event([this, update_widgets](neogfx::window_event& e)
+			switch (e.type())
 			{
-				switch (e.type())
-				{
-				case window_event_type::Enabled:
-				case window_event_type::Disabled:
-				case window_event_type::FocusGained:
-				case window_event_type::FocusLost:
-				case window_event_type::Iconized:
-				case window_event_type::Maximized:
-				case window_event_type::Restored:
-					update_widgets();
-					break;
-				default:
-					break;
-				}
-			});
-		}
+			case window_event_type::Enabled:
+			case window_event_type::Disabled:
+			case window_event_type::FocusGained:
+			case window_event_type::FocusLost:
+			case window_event_type::Iconized:
+			case window_event_type::Maximized:
+			case window_event_type::Restored:
+				update_widgets();
+				break;
+			default:
+				break;
+			}
+		});
 		update_textures();
 		update_widgets();
 	}

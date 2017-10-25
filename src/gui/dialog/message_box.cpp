@@ -23,7 +23,7 @@
 namespace neogfx
 {
 	message_box::message_box(const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
-		dialog{ aTitle, window_style::Modal | window_style::TitleBar | window_style::Close },
+		dialog{ aTitle, window_style::Modal | window_style::TitleBar | (dialog_button_box::has_reject_role(aButtons) ? window_style::Close : window_style::Invalid)},
 		iLayout1{ client_layout() },
 		iIcon{ iLayout1, aIcon },
 		iLayout2{ iLayout1 },
@@ -35,7 +35,7 @@ namespace neogfx
 	}
 
 	message_box::message_box(i_widget& aParent, const std::string& aTitle, const image& aIcon, const std::string& aText, const std::string& aDetailedText, standard_button aButtons) :
-		dialog{ aParent, aTitle, window_style::Modal | window_style::TitleBar | window_style::Close },
+		dialog{ aParent, aTitle, window_style::Modal | window_style::TitleBar | (dialog_button_box::has_reject_role(aButtons) ? window_style::Close : window_style::Invalid) },
 		iLayout1{ client_layout() },
 		iIcon{ iLayout1, aIcon },
 		iLayout2{ iLayout1 },

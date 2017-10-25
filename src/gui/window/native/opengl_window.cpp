@@ -27,7 +27,7 @@
 
 namespace neogfx
 {
-	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_window& aWindow) :
+	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow) :
 		native_window(aRenderingEngine, aSurfaceManager),
 		iWindow(aWindow),
 		iLogicalCoordinateSystem(neogfx::logical_coordinate_system::AutomaticGui),
@@ -291,7 +291,7 @@ namespace neogfx
 		return 0;
 	}
 
-	i_window& opengl_window::window() const
+	i_surface_window& opengl_window::window() const
 	{
 		return iWindow;
 	}
