@@ -213,7 +213,6 @@ int main(int argc, char* argv[])
 		ng::menu_bar menu(window.menu_layout());
 
 		auto& fileMenu = menu.add_sub_menu("&File");
-		fileMenu.add_action(app.action_file_exit());
 		fileMenu.add_action(app.action_file_new());
 		fileMenu.add_action(app.action_file_open());
 		fileMenu.add_separator();
@@ -659,6 +658,12 @@ int main(int argc, char* argv[])
 				button6.set_foreground_colour(randomColour);
 			}
 		}, 16);
+
+		ng::i_widget& mdiPage = tabContainer.add_tab_page("MDI").as_widget();
+		app.action_file_new().triggered([&]()
+		{
+
+		});
 
 		ng::i_widget& messageBoxesPage = tabContainer.add_tab_page("Message Boxes").as_widget();
 		ng::horizontal_layout messageBoxesPageLayout1{ messageBoxesPage };

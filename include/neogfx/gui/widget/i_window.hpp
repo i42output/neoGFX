@@ -24,6 +24,9 @@
 
 namespace neogfx
 {
+	class i_widget;
+	class i_layout;
+
 	enum class window_style : uint32_t
 	{
 		Invalid =				0x00000000,

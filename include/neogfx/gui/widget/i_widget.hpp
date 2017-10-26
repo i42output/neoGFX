@@ -24,7 +24,7 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
-#include <neogfx/gui/window/window_events.hpp>
+#include <neogfx/gui/widget/i_window.hpp>
 #include <neogfx/gui/layout/i_widget_geometry.hpp>
 
 namespace neogfx
@@ -132,6 +132,7 @@ namespace neogfx
 		typedef std::unordered_set<rect> update_rect_list;
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_widget::no_parent") {} };
+		struct no_root : std::logic_error { no_root() : std::logic_error("neogfx::i_widget::no_root") {} };
 		struct no_surface : std::logic_error { no_surface() : std::logic_error("neogfx::i_widget::no_surface") {} };
 		struct no_children : std::logic_error { no_children() : std::logic_error("neogfx::i_widget::no_children") {} };
 		struct not_child : std::logic_error { not_child() : std::logic_error("neogfx::i_widget::not_child") {} };
@@ -150,6 +151,9 @@ namespace neogfx
 	public:
 		virtual bool is_singular() const = 0;
 		virtual void set_singular(bool aSingular) = 0;
+		virtual bool has_root() const = 0;
+		virtual const i_window& root() const = 0;
+		virtual i_window& root() = 0;
 		virtual bool is_root() const = 0;
 		virtual bool has_parent(bool aSameSurface = true) const = 0;
 		virtual const i_widget& parent() const = 0;
@@ -287,7 +291,10 @@ namespace neogfx
 		virtual const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const = 0;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) = 0;
 	private:
-		virtual i_surface* find_surface() const = 0;
+		virtual const i_surface* find_surface() const = 0;
+		virtual i_surface* find_surface() = 0;
+		virtual const i_window* find_root() const = 0;
+		virtual i_window* find_root() = 0;
 		// helpers
 	public:
 		bool same_surface(const i_widget& aWidget) const

@@ -74,6 +74,7 @@ namespace neogfx
 		iSingular{ false },
 		iParent{ nullptr },
 		iSurface{ nullptr },
+		iRoot { nullptr },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
 		iDeviceMetricsForwarder{ *this },
@@ -95,6 +96,7 @@ namespace neogfx
 		iSingular{ false },
 		iParent{ nullptr },
 		iSurface{ nullptr },
+		iRoot{ nullptr },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
 		iDeviceMetricsForwarder{ *this },
@@ -117,6 +119,7 @@ namespace neogfx
 		iSingular{ false },
 		iParent{ nullptr },
 		iSurface{ nullptr },
+		iRoot{ nullptr },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
 		iDeviceMetricsForwarder{ *this },
@@ -182,6 +185,24 @@ namespace neogfx
 			if (iSingular)
 				iParent = nullptr;
 		}
+	}
+
+	bool widget::has_root() const
+	{
+		return find_root() != nullptr;
+	}
+
+	const i_window& widget::root() const
+	{
+		auto existingRoot = find_root();
+		if (existingRoot != nullptr)
+			return *existingRoot;
+		throw no_root();
+	}
+
+	i_window& widget::root()
+	{
+		return const_cast<i_window&>(const_cast<const widget*>(this)->root());
 	}
 
 	bool widget::is_root() const
@@ -459,11 +480,10 @@ namespace neogfx
 
 	const i_surface& widget::surface() const
 	{
-		auto maybeSurface = find_surface();
-		if (maybeSurface != nullptr)
-			return *maybeSurface;
-		else
-			throw no_surface();
+		auto existingSurface = find_surface();
+		if (existingSurface != nullptr)
+			return *existingSurface;
+		throw no_surface();
 	}
 
 	i_surface& widget::surface()
@@ -1387,16 +1407,38 @@ namespace neogfx
 		return graphics_context(*this);
 	}
 
-	i_surface* widget::find_surface() const
+	const i_surface* widget::find_surface() const
 	{
 		if (iSurface != nullptr)
 			return iSurface;
 		const i_widget* w = this;
-		while (!w->is_root() && !w->is_surface() && w->has_parent(false))
+		while (!w->is_surface() && w->has_parent(false))
 			w = &w->parent();
 		if (w->is_surface())
-			return (iSurface = const_cast<i_surface*>(&w->surface()));
+			return (iSurface = &w->surface());
 		return nullptr;
+	}
+
+	i_surface* widget::find_surface()
+	{
+		return const_cast<i_surface*>(const_cast<const widget*>(this)->find_surface());
+	}
+
+	const i_window* widget::find_root() const
+	{
+		if (iRoot != nullptr)
+			return iRoot;
+		const i_widget* w = this;
+		while (!w->is_root() && w->has_parent(true))
+			w = &w->parent();
+		if (w->is_root())
+			return (iRoot = &w->root());
+		return nullptr;
+	}
+
+	i_window* widget::find_root()
+	{
+		return const_cast<i_window*>(const_cast<const widget*>(this)->find_root());
 	}
 }
 

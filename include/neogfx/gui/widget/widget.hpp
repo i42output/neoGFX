@@ -57,6 +57,9 @@ namespace neogfx
 	public:
 		bool is_singular() const override;
 		void set_singular(bool aSingular) override;
+		bool has_root() const override;
+		const i_window& root() const override;
+		i_window& root() override;
 		bool is_root() const override;
 		bool has_parent(bool aSameSurface = true) const override;
 		const i_widget& parent() const override;
@@ -217,14 +220,18 @@ namespace neogfx
 		const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const override;
 		i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
 	private:
-		i_surface* find_surface() const override;
+		const i_surface* find_surface() const override;
+		i_surface* find_surface() override;
+		const i_window* find_root() const override;
+		i_window* find_root() override;
 		// helpers
 	public:
 		using i_widget::set_size_policy;
 	private:
 		bool iSingular;
 		i_widget* iParent;
-		mutable i_surface* iSurface;
+		mutable const i_surface* iSurface;
+		mutable const i_window* iRoot;
 		widget_list iChildren;
 		i_widget* iLinkBefore;
 		i_widget* iLinkAfter;
