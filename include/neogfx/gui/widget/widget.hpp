@@ -154,6 +154,10 @@ namespace neogfx
 		void paint(graphics_context& aGraphicsContext) const override;
 		void paint_non_client_after(graphics_context& aGraphicsContext) const override;
 	public:
+		double opacity() const override;
+		void set_opacity(double aOpacity) override;
+		double transparency() const override;
+		void set_transparency(double aTransparency) override;
 		bool has_foreground_colour() const override;
 		colour foreground_colour() const override;
 		void set_foreground_colour(const optional_colour& aForegroundColour = optional_colour{}) override;
@@ -251,6 +255,7 @@ namespace neogfx
 		bool iVisible;
 		bool iEnabled;
 		neogfx::focus_policy iFocusPolicy;
+		double iOpacity;
 		optional_colour iForegroundColour;
 		optional_colour iBackgroundColour;
 		optional_font iFont;

@@ -129,7 +129,10 @@ namespace neogfx
 		void resize_surface(const size& aSize) override;
 		void centre() override;
 		void centre_on_parent() override;
-		void set_transparency(double aAlpha) override;
+		double surface_opacity() const override;
+		void set_surface_opacity(double aOpacity) override;
+		double surface_transparency() const override;
+		void set_surface_transparency(double aTransparency) override;
 	public:
 		point mouse_position() const override;
 		bool is_mouse_button_pressed(mouse_button aButton) const override;

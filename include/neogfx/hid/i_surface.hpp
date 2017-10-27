@@ -111,7 +111,10 @@ namespace neogfx
 		virtual void resize_surface(const size& aSize) = 0;
 		virtual void centre() = 0;
 		virtual void centre_on_parent() = 0;
-		virtual void set_transparency(double aAlpha) = 0;
+		virtual double surface_opacity() const = 0;
+		virtual void set_surface_opacity(double aOpacity) = 0;
+		virtual double surface_transparency() const = 0;
+		virtual void set_surface_transparency(double aTransparency) = 0;
 	public:
 		virtual point mouse_position() const = 0;
 		virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;

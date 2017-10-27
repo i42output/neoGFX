@@ -54,7 +54,10 @@ namespace neogfx
 		virtual bool is_visible() const = 0;
 		virtual void show(bool aActivate = false) = 0;
 		virtual void hide() = 0;
-		virtual void set_transparency(double aAlpha) = 0;
+		virtual double opacity() const = 0;
+		virtual void set_opacity(double aOpacity) = 0;
+		virtual double transparency() const = 0;
+		virtual void set_transparency(double aTransparency) = 0;
 		virtual bool is_active() const = 0;
 		virtual void activate() = 0;
 		virtual bool is_iconic() const = 0;

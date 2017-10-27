@@ -230,6 +230,10 @@ namespace neogfx
 		virtual void paint_non_client_after(graphics_context& aGraphicsContext) const = 0;
 		virtual void paint(graphics_context& aGraphicsContext) const = 0;
 	public:
+		virtual double opacity() const = 0;
+		virtual void set_opacity(double aOpacity) = 0;
+		virtual double transparency() const = 0;
+		virtual void set_transparency(double aTransparency) = 0;
 		virtual bool has_foreground_colour() const = 0;
 		virtual colour foreground_colour() const = 0;
 		virtual void set_foreground_colour(const optional_colour& aForegroundColour = optional_colour{}) = 0;

@@ -535,9 +535,24 @@ namespace neogfx
 			centre();
 	}
 
-	void window::set_transparency(double aAlpha)
+	double window::surface_opacity() const
 	{
-		native_window().set_transparency(aAlpha);
+		return native_window().opacity();
+	}
+
+	void window::set_surface_opacity(double aOpacity)
+	{
+		native_window().set_opacity(aOpacity);
+	}
+
+	double window::surface_transparency() const
+	{
+		return native_window().transparency();
+	}
+
+	void window::set_surface_transparency(double aTransparency)
+	{
+		native_window().set_transparency(aTransparency);
 	}
 
 	point window::mouse_position() const

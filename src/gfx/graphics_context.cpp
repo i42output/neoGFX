@@ -74,6 +74,7 @@ namespace neogfx
 		iExtents{ aSurface.extents() },
 		iLogicalCoordinateSystem{ iSurface.logical_coordinate_system() },
 		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iOpacity{ 1.0 },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -89,6 +90,7 @@ namespace neogfx
 		iExtents{ aSurface.extents() },
 		iLogicalCoordinateSystem{ iSurface.logical_coordinate_system() },
 		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iOpacity{ 1.0 },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -104,6 +106,7 @@ namespace neogfx
 		iExtents{ aWidget.extents() },
 		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
 		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iOpacity{ 1.0 },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -119,6 +122,7 @@ namespace neogfx
 		iExtents{ aOther.extents() },
 		iLogicalCoordinateSystem{ aOther.logical_coordinate_system() },
 		iLogicalCoordinates{ aOther.logical_coordinates() },
+		iOpacity{ 1.0 },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -637,6 +641,17 @@ namespace neogfx
 	void graphics_context::reset_clip() const
 	{
 		iNativeGraphicsContext->enqueue(graphics_operation::reset_clip{});
+	}
+
+	double graphics_context::opacity() const
+	{
+		return iOpacity;
+	}
+
+	void graphics_context::set_opacity(double aOpacity)
+	{
+		iOpacity = aOpacity;
+		iNativeGraphicsContext->enqueue(graphics_operation::set_opacity{ aOpacity });
 	}
 
 	smoothing_mode graphics_context::smoothing_mode() const

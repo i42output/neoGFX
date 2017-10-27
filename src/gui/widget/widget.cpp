@@ -85,6 +85,7 @@ namespace neogfx
 		iVisible{ true },
 		iEnabled{ true },
 		iFocusPolicy{ focus_policy::NoFocus },
+		iOpacity{ 1.0 },
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents{ false },
@@ -107,6 +108,7 @@ namespace neogfx
 		iVisible{ true },
 		iEnabled{ true },
 		iFocusPolicy{ focus_policy::NoFocus },
+		iOpacity{ 1.0 },
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents{ false },
@@ -130,6 +132,7 @@ namespace neogfx
 		iVisible{ true },
 		iEnabled{ true },
 		iFocusPolicy{ focus_policy::NoFocus },
+		iOpacity{ 1.0 },
 		iForegroundColour{},
 		iBackgroundColour{},
 		iIgnoreMouseEvents{ false },
@@ -959,6 +962,9 @@ namespace neogfx
 
 		aGraphicsContext.set_extents(extents());
 		aGraphicsContext.set_origin(origin());
+
+		scoped_opacity sc{ aGraphicsContext, opacity() };
+
 		aGraphicsContext.scissor_on(nonClientClipRect);
 		paint_non_client(aGraphicsContext);
 		aGraphicsContext.scissor_off();
@@ -1006,6 +1012,30 @@ namespace neogfx
 
 	void widget::paint(graphics_context&) const
 	{
+	}
+
+	double widget::opacity() const
+	{
+		return iOpacity;
+	}
+
+	void widget::set_opacity(double aOpacity)
+	{
+		if (iOpacity != aOpacity)
+		{
+			iOpacity = aOpacity;
+			update(true);
+		}
+	}
+
+	double widget::transparency() const
+	{
+		return 1.0 - opacity();
+	}
+
+	void widget::set_transparency(double aTransparency)
+	{
+		set_opacity(1.0 - aTransparency);
 	}
 
 	bool widget::has_foreground_colour() const

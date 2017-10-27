@@ -619,9 +619,26 @@ namespace neogfx
 #endif
 	}
 
-	void sdl_window::set_transparency(double aAlpha)
+	double sdl_window::opacity() const
 	{
-		SDL_SetWindowOpacity(iHandle, static_cast<float>(aAlpha));
+		float result = 1.0f;
+		SDL_GetWindowOpacity(iHandle, &result);
+		return static_cast<double>(result);
+	}
+	
+	void sdl_window::set_opacity(double aOpacity)
+	{
+		SDL_SetWindowOpacity(iHandle, static_cast<float>(aOpacity));
+	}
+
+	double sdl_window::transparency() const
+	{
+		return 1.0 - opacity();
+	}
+
+	void sdl_window::set_transparency(double aTransparency) 
+	{
+		set_opacity(1.0 - aTransparency);
 	}
 
 	bool sdl_window::is_active() const

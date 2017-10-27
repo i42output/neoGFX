@@ -265,6 +265,8 @@ namespace neogfx
 		void clip_to(const rect& aRect) const;
 		void clip_to(const path& aPath, dimension aPathOutline = 0) const;
 		void reset_clip() const;
+		double opacity() const;
+		void set_opacity(double aOpacity);
 		neogfx::smoothing_mode smoothing_mode() const;
 		void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const;
 		void push_logical_operation(logical_operation aLogicalOperation) const;
@@ -355,6 +357,7 @@ namespace neogfx
 		mutable size iExtents;
 		mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable std::pair<vec2, vec2> iLogicalCoordinates;
+		mutable double iOpacity;
 		mutable neogfx::smoothing_mode iSmoothingMode;
 		mutable bool iSubpixelRendering;
 		mutable boost::optional<std::pair<bool, char>> iMnemonic;
@@ -403,6 +406,23 @@ namespace neogfx
 		graphics_context& iGc;
 		logical_coordinate_system iPreviousCoordinateSystem;
 		std::pair<vec2, vec2> iPreviousCoordinates;
+	};
+
+	class scoped_opacity
+	{
+	public:
+		scoped_opacity(graphics_context& aGc, double aOpacity) : 
+			iGc{ aGc }, iPreviousOpacity { aGc.opacity() }
+		{
+			iGc.set_opacity(iGc.opacity() * aOpacity);
+		}
+		~scoped_opacity()
+		{
+			iGc.set_opacity(iPreviousOpacity);
+		}
+	private:
+		graphics_context& iGc;
+		double iPreviousOpacity;
 	};
 
 	const std::pair<vec2, vec2>& get_logical_coordinates(const size& aSurfaceSize, logical_coordinate_system aSystem, std::pair<vec2, vec2>& aCoordinates);
