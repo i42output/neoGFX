@@ -406,6 +406,7 @@
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
+    <ClCompile Include="..\..\..\src\hid\native\sdl_keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_manager.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
     <ClCompile Include="Debug\GeneratedFiles\icons.nrc.cpp">
