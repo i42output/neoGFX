@@ -12,6 +12,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - CSS3 style sheet support with support for custom skins;
 - scripting engine (Lua);
 - sub-pixel text rendering;
+- simple window style for specifying that a window is "nested" rather than being a separate native desktop window;
 - "text_edit" widget supports multiple fonts, text colours (with optional gradient effects), colour emojis and rendering text in columns;
 - GPU shader rendered CSS3 compliant gradients with optional gaussian smoothing;
 - MVC (model-view-controller) related classes supporting robust and fast app design;
@@ -41,6 +42,7 @@ Window                    | 95      |     Drop shadow
 Dialog                    | 90      |     Default button
 Message Box               | 100     |
 Menu                      | 100     | 
+Nested windows            | 25      |     
 MDI                       | 0       |
 Tabs                      | 90      |     Tabs below and on the side
 Toolbars                  | 90      |     Drop-down button support
@@ -66,4 +68,4 @@ i18n                      | 0       |
 l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
-Last updated: 22/10/2017
+Last updated: 28/10/2017
