@@ -16,6 +16,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - "text_edit" widget supports multiple fonts, text colours (with optional gradient effects), colour emojis and rendering text in columns;
 - GPU shader rendered CSS3 compliant gradients with optional gaussian smoothing;
 - MVC (model-view-controller) related classes supporting robust and fast app design;
+- optional MDI support utilizing "nested" windows;
 - 2D (initially) game support: sprites and 2D physics;
 -flexible asset management: texture images (e.g PNGs) can be stored in .zip archives which can be optionally embedded inside the program binary accessible using simple URLs;
 - support for OpenGL, DirectX and Vulkan.
