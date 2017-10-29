@@ -30,59 +30,46 @@ namespace neogfx
 	{
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::spacer::no_parent") {} };
+		struct no_device_metrics : std::logic_error { no_device_metrics() : std::logic_error("neogfx::spacer::no_device_metrics") {} };
 		struct margins_unsupported : std::logic_error { margins_unsupported() : std::logic_error("neogfx::spacer::margins_unsupported") {} };
-	private:
-		class device_metrics_forwarder : public i_device_metrics
-		{
-		public:
-			device_metrics_forwarder(i_spacer& aOwner);
-		public:
-			virtual bool metrics_available() const;
-			virtual size extents() const;
-			virtual dimension horizontal_dpi() const;
-			virtual dimension vertical_dpi() const;
-			virtual dimension em_size() const;
-		private:
-			i_spacer& iOwner;
-		};
 	public:
 		spacer(expansion_policy_e aExpansionPolicy);
 		spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy);
 	public:
-		virtual const i_layout& parent() const;
-		virtual i_layout& parent();
-		virtual void set_parent(i_layout& aParent);
-		virtual expansion_policy_e expansion_policy() const;
-		virtual void set_expansion_policy(expansion_policy_e aExpansionPolicy);
+		bool has_parent() const override;
+		const i_layout& parent() const override;
+		i_layout& parent() override;
+		void set_parent(i_layout& aParent) override;
+		expansion_policy_e expansion_policy() const override;
+		void set_expansion_policy(expansion_policy_e aExpansionPolicy) override;
 	public:
-		virtual point position() const;
-		virtual void set_position(const point& aPosition);
-		virtual size extents() const;
-		virtual void set_extents(const size& aExtents);
-		virtual bool has_size_policy() const;
-		virtual neogfx::size_policy size_policy() const;
+		point position() const override;
+		void set_position(const point& aPosition) override;
+		size extents() const override;
+		void set_extents(const size& aExtents) override;
+		bool has_size_policy() const override;
+		neogfx::size_policy size_policy() const override;
 		using i_widget_geometry::set_size_policy;
-		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
-		virtual bool has_weight() const;
-		virtual size weight() const;
-		virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true);
-		virtual bool has_minimum_size() const;
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true);
-		virtual bool has_maximum_size() const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
+		void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
+		bool has_weight() const override;
+		size weight() const override;
+		void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
+		bool has_minimum_size() const override;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
+		bool has_maximum_size() const override;
+		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
 	public:
-		virtual neogfx::margins margins() const;
-		virtual bool has_margins() const;
-		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
+		neogfx::margins margins() const override;
+		bool has_margins() const override;
+		void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
 	public:
-		virtual const i_device_metrics& device_metrics() const;
-		virtual neogfx::units units() const;
-		virtual neogfx::units set_units(neogfx::units aUnits) const;
+		const i_device_metrics& device_metrics() const override;
+		neogfx::units units() const override;
+		neogfx::units set_units(neogfx::units aUnits) const override;
 	private:
 		i_layout* iParent;
-		device_metrics_forwarder iDeviceMetricsForwarder;
 		units_context iUnitsContext;
 		point iPosition;
 		size iExtents;

@@ -25,7 +25,7 @@ namespace neogfx
 {
 	class i_nested_window_container;
 
-	class i_nested_window : public i_window
+	class i_nested_window
 	{
 	public:
 		struct no_nested_parent : std::logic_error { no_nested_parent() : std::logic_error("neogfx::i_nested_window::no_nested_parent") {} };
@@ -35,5 +35,8 @@ namespace neogfx
 		virtual bool has_nested_parent() const = 0;
 		virtual const i_nested_window& nested_parent() const = 0;
 		virtual i_nested_window& nested_parent() = 0;
+	public:
+		virtual const i_window& as_window() const = 0;
+		virtual i_window& as_window() = 0;
 	};
 }

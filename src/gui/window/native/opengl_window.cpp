@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <numeric>
 #include <neogfx/app/app.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
 #include "opengl_window.hpp"
 #ifdef _WIN32
 #include <D2d1.h>
@@ -29,7 +30,7 @@ namespace neogfx
 {
 	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow) :
 		native_window(aRenderingEngine, aSurfaceManager),
-		iWindow(aWindow),
+		iSurfaceWindow(aWindow),
 		iLogicalCoordinateSystem(neogfx::logical_coordinate_system::AutomaticGui),
 		iFrameRate(60),
 		iFrameCounter(0),
@@ -151,7 +152,7 @@ namespace neogfx
 			if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / (has_rendering_priority() ? *iFrameRate : *iFrameRate / 10.0))
 				return;
 
-			if (!iWindow.native_window_ready_to_render())
+			if (!surface_window().native_window_ready_to_render())
 				return;
 		}
 
@@ -221,7 +222,7 @@ namespace neogfx
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 
-		glCheck(iWindow.native_window_render(invalidated_area()));
+		glCheck(surface_window().native_window_render(invalidated_area()));
 
 		glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 		glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, iFrameBuffer));
@@ -291,9 +292,9 @@ namespace neogfx
 		return 0;
 	}
 
-	i_surface_window& opengl_window::window() const
+	i_surface_window& opengl_window::surface_window() const
 	{
-		return iWindow;
+		return iSurfaceWindow;
 	}
 
 	void opengl_window::destroying()

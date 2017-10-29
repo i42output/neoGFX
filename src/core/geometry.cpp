@@ -21,15 +21,15 @@
 
 namespace neogfx
 { 
-	units_context::units_context(const i_device_metrics& aDeviceMetrics) : 
-		iDeviceMetrics(aDeviceMetrics),
-		iUnits(units::Pixels)
+	units_context::units_context(const i_units_context& aSource) :
+		iSource{ aSource },
+		iUnits{ units::Pixels }
 	{
 	}
 
 	const i_device_metrics& units_context::device_metrics() const
 	{
-		return iDeviceMetrics;
+		return iSource.device_metrics();
 	}
 
 	units units_context::units() const

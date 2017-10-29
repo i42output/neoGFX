@@ -36,10 +36,15 @@ namespace neogfx
 		event<> rendering;
 		event<> rendering_finished;
 	public:
+		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_surface::no_parent") {} };
 		struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
 		struct no_invalidated_area : std::logic_error { no_invalidated_area() : std::logic_error("neogfx::i_native_surface::no_invalidated_area") {} };
 	public:
 		virtual ~i_native_surface() {}
+	public:
+		virtual bool has_parent() const = 0;
+		virtual const i_native_surface& parent() const = 0;
+		virtual i_native_surface& parent() = 0;
 	public:
 		virtual bool pump_event() = 0;
 		virtual void close() = 0;

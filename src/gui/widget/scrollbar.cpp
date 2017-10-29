@@ -472,13 +472,13 @@ namespace neogfx
 	{
 		if (!visible())
 			return;
-		if (clicked_element() != i_scrollbar::ElementNone && clicked_element() != element_at(aContext, iContainer.as_widget().surface().mouse_position()))
+		if (clicked_element() != i_scrollbar::ElementNone && clicked_element() != element_at(aContext, iContainer.as_widget().root().mouse_position()))
 			pause();
 		else
 			resume();
 		if (clicked_element() == i_scrollbar::ElementThumb)
 		{
-			point delta = (aUpdateParams.is<point>() ? static_variant_cast<point>(aUpdateParams) : iContainer.as_widget().surface().mouse_position()) - iThumbClickedPosition;
+			point delta = (aUpdateParams.is<point>() ? static_variant_cast<point>(aUpdateParams) : iContainer.as_widget().root().mouse_position()) - iThumbClickedPosition;
 			scoped_units su(aContext, units::Pixels);
 			rect g = iContainer.scrollbar_geometry(aContext, *this);
 			if (iType == scrollbar_type::Vertical)
@@ -498,7 +498,7 @@ namespace neogfx
 			iContainer.scrollbar_updated(*this, Updated);
 		}
 		if (clicked_element() == i_scrollbar::ElementNone && iContainer.as_widget().entered())
-			hover_element(element_at(aContext, iContainer.as_widget().surface().mouse_position()));
+			hover_element(element_at(aContext, iContainer.as_widget().root().mouse_position()));
 		else
 			unhover_element();
 	}
@@ -556,7 +556,7 @@ namespace neogfx
 			}, 500);
 			break;
 		case ElementThumb:
-			iThumbClickedPosition = iContainer.as_widget().surface().mouse_position();
+			iThumbClickedPosition = iContainer.as_widget().root().mouse_position();
 			iThumbClickedValue = position();
 			break;
 		default:
@@ -605,11 +605,11 @@ namespace neogfx
 	{
 		if (iScrollTrackPosition == boost::none)
 		{
-			iScrollTrackPosition = iContainer.as_widget().surface().mouse_position();
+			iScrollTrackPosition = iContainer.as_widget().root().mouse_position();
 			iTimer = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.again();
-				point delta = iContainer.as_widget().surface().mouse_position() - *iScrollTrackPosition;
+				point delta = iContainer.as_widget().root().mouse_position() - *iScrollTrackPosition;
 				scoped_units su(iContainer.as_widget(), units::Pixels);
 				rect g = iContainer.scrollbar_geometry(iContainer.as_widget(), *this);
 				if (iType == scrollbar_type::Vertical)

@@ -691,13 +691,13 @@ namespace neogfx
 	class units_context : public i_units_context
 	{
 	public:
-		units_context(const i_device_metrics& aDeviceMetrics);
+		units_context(const i_units_context& aSource);
 	public:
 		virtual const i_device_metrics& device_metrics() const;
 		virtual neogfx::units units() const;
 		virtual neogfx::units set_units(neogfx::units aUnits) const;
 	private:
-		const i_device_metrics& iDeviceMetrics;
+		const i_units_context& iSource;
 		mutable neogfx::units iUnits;
 	};
 

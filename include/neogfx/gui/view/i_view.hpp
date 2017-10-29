@@ -39,6 +39,7 @@ namespace neogfx
 		virtual i_model& model() = 0;
 		virtual void update() = 0;
 	public:
+		virtual bool is_strong() const = 0;
 		virtual bool is_weak() const = 0;
 		virtual bool is_active() const = 0;
 		virtual void activate() = 0;

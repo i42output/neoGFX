@@ -349,7 +349,7 @@ namespace neogfx
 		iDragger = boost::none;
 		if (aButton == mouse_button::Right)
 		{
-			iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+			iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + root().window_position());
 			iMenu->menu().add_action(app::instance().action_undo());
 			iMenu->menu().add_action(app::instance().action_redo());
 			iMenu->menu().add_separator();
@@ -381,7 +381,7 @@ namespace neogfx
 
 	neogfx::mouse_cursor text_edit::mouse_cursor() const
 	{
-		return client_rect(false).contains(surface().mouse_position() - origin()) || iDragger != boost::none ? mouse_system_cursor::Ibeam : scrollable_widget::mouse_cursor();
+		return client_rect(false).contains(root().mouse_position() - origin()) || iDragger != boost::none ? mouse_system_cursor::Ibeam : scrollable_widget::mouse_cursor();
 	}
 
 	bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -922,7 +922,7 @@ namespace neogfx
 			iDragger.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.again();
-				set_cursor_position(surface().mouse_position() - origin(), false);
+				set_cursor_position(root().mouse_position() - origin(), false);
 			}, 250);
 		}
 	}

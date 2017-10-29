@@ -112,18 +112,18 @@ namespace neogfx
 		{
 			if (entered())
 				image().set_image(iTextures[TextureOnOver]->second);
-			else if (iParent.is_selected() || iParent.as_widget().entered() || (surface().has_entered_widget() && surface().entered_widget().is_descendent_of(iParent.as_widget())))
+			else if (iParent.is_selected() || iParent.as_widget().entered() || (has_root() && root().has_entered_widget() && root().entered_widget().is_descendent_of(iParent.as_widget())))
 				image().set_image(iTextures[TextureOn]->second);
 			else
 				image().set_image(iTextures[TextureOff]->second);
 		}
 	protected:
-		void mouse_entered()
+		void mouse_entered() override
 		{
 			push_button::mouse_entered();
 			update_state();
 		}
-		void mouse_left()
+		void mouse_left() override
 		{
 			push_button::mouse_left();
 			update_state();

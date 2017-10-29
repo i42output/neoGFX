@@ -761,7 +761,7 @@ namespace neogfx
 		if (aButton == mouse_button::Left && iScreenPickerActive)
 		{
 			iScreenPickerActive = false;
-			release_capture(*this);
+			surface().as_surface_window().release_capture(*this);
 		}
 		else
 			dialog::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
@@ -812,7 +812,7 @@ namespace neogfx
 		iSink += iScreenPicker.async_clicked([&, this]()
 		{
 			iScreenPickerActive = true;
-			set_capture(*this);
+			surface().as_surface_window().set_capture(*this);
 		});
 		iH.first.label().text().set_text("&Hue:"); iH.second.set_size_policy(size_policy::Minimum); iH.second.text_box().set_hint("359.9"); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
 		iS.first.label().text().set_text("&Sat:"); iS.second.set_size_policy(size_policy::Minimum); iS.second.text_box().set_hint("100.0"); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);

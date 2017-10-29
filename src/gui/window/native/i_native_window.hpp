@@ -40,6 +40,9 @@ namespace neogfx
 	public:
 		virtual ~i_native_window() {}
 	public:
+		virtual const i_native_window& parent() const = 0;
+		virtual i_native_window& parent() = 0;
+	public:
 		virtual void display_error_message(const std::string& aTitle, const std::string& aMessage) const = 0;
 		virtual bool events_queued() const = 0;
 		virtual void push_event(const native_event& aEvent) = 0;
@@ -49,7 +52,7 @@ namespace neogfx
 		virtual const native_event& current_event() const = 0;
 		virtual void handle_event() = 0;
 		virtual bool processing_event() const = 0;
-		virtual i_surface_window& window() const = 0;
+		virtual i_surface_window& surface_window() const = 0;
 		virtual void close() = 0;
 		virtual bool is_visible() const = 0;
 		virtual void show(bool aActivate = false) = 0;

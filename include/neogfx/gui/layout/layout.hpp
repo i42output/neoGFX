@@ -44,20 +44,6 @@ namespace neogfx
 			ItemTypeLayout = 0x02,
 			ItemTypeSpacer = 0x04
 		};
-	private:
-		class device_metrics_forwarder : public i_device_metrics
-		{
-		public:
-			device_metrics_forwarder(i_layout& aOwner);
-		public:
-			virtual bool metrics_available() const;
-			virtual size extents() const;
-			virtual dimension horizontal_dpi() const;
-			virtual dimension vertical_dpi() const;
-			virtual dimension em_size() const;
-		private:
-			i_layout& iOwner;
-		};
 	protected:
 		template <typename SpecializedPolicy>
 		struct common_axis_policy;
@@ -162,7 +148,6 @@ namespace neogfx
 	private:
 		mutable i_widget* iOwner;
 		i_layout* iParent;
-		device_metrics_forwarder iDeviceMetricsForwarder;
 		units_context iUnitsContext;
 		optional_margins iMargins;
 		size iSpacing;

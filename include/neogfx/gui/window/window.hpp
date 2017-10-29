@@ -19,32 +19,32 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <string>
 #include <neogfx/hid/video_mode.hpp>
-#include <neogfx/gui/window/i_surface_window.hpp>
+#include <neogfx/gui/widget/i_window.hpp>
+#include <neogfx/gui/widget/nested_window_container.hpp>
+#include <neogfx/gui/widget/i_nested_window.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/title_bar.hpp>
 
 namespace neogfx
 {
-	class i_native_window;
+	class i_window_manager;
 
-	class window : public i_surface_window, public scrollable_widget
+	class window : public i_window, public scrollable_widget
 	{
 	public:
 		event<graphics_context&> paint_overlay;
 	private:
+		class nested_details;
 		typedef boost::optional<title_bar> optional_title_bar;
 	public:
-		window(const video_mode& aVideoMode, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
-		window(const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
+		window(const video_mode& aVideoMode, window_style aStyle = window_style::Fullscreen, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
-		window(i_widget& aParent, const video_mode& aVideoMode, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
-		window(i_widget& aParent, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(i_widget& aParent, const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
@@ -57,6 +57,40 @@ namespace neogfx
 		void set_style(window_style aStyle);
 		double fps() const;
 	public:
+		const i_window_manager& window_manager() const override;
+		i_window_manager& window_manager() override;
+	public:
+		bool is_surface() const override;
+		const i_surface_window& surface() const override;
+		i_surface_window& surface() override;
+		bool has_native_surface() const override;
+		const i_native_surface& window::native_surface() const override;
+		i_native_surface& window::native_surface() override;
+		bool window::has_native_window() const override;
+		const i_native_window& window::native_window() const override;
+		i_native_window& window::native_window() override;
+	public:
+		bool has_parent_window(bool aSameSurface = true) const override;
+		const i_window& parent_window() const override;
+		i_window& parent_window()  override;
+		bool is_owner_of(const i_window& aChildWindow) const override;
+	public:
+		const i_nested_window_container& nested_container() const override;
+		i_nested_window_container& nested_container() override;
+		bool is_nested() const override;
+		const i_nested_window& as_nested() const override;
+		i_nested_window& as_nested() override;
+		bool is_nested_container() const override;
+		const i_nested_window_container& as_nested_container() const override;
+		i_nested_window_container& as_nested_container() override;
+	public:
+		bool is_strong() const override;
+		bool is_weak() const override;
+	public:
+		bool can_close() const override;
+		bool is_closed() const override;
+		void close() override;
+	public:
 		colour frame_colour() const override;
 	public:
 		bool is_root() const override;
@@ -64,11 +98,8 @@ namespace neogfx
 		bool is_managing_layout() const override;
 		void layout_items_completed() override;
 	public:
-		bool metrics_available() const override;
-		size extents() const override;
-		dimension horizontal_dpi() const override;
-		dimension vertical_dpi() const override;
-		dimension em_size() const override;
+		void widget_added(i_widget&) override;
+		void widget_removed(i_widget& aWidget) override;
 	public:
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
@@ -79,87 +110,12 @@ namespace neogfx
 	public:
 		neogfx::size_policy size_policy() const override;
 	public:
+		void render(graphics_context& aGraphicsContext) const override;
+	public:
 		colour background_colour() const override;
-	public:
-		i_rendering_engine& rendering_engine() const override;
-	public:
-		bool is_weak() const override;
-		bool can_close() const override;
-		bool is_closed() const override;
-		void close() override;
-		bool has_parent_surface() const override;
-		const i_surface& parent_surface() const override;
-		i_surface& parent_surface() override;
-		bool is_owner_of(const i_surface& aChildSurface) const override;
-		bool is_dismissing_children() const override;
-		bool can_dismiss(const i_widget* aClickedWidget) const override;
-		dismissal_type_e dismissal_type() const override;
-		bool dismissed() const override;
-		void dismiss() override;
-	public:
-		bool is_window() const override;
-		const i_surface_window& as_window() const override;
-		i_surface_window& as_window() override;
-	public:
-		neogfx::surface_type surface_type() const override;
-		neogfx::logical_coordinate_system logical_coordinate_system() const override;
-		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
-		const std::pair<vec2, vec2>& logical_coordinates() const override;
-		void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) override;
-		void layout_surface() override;
-		void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) override;
-		bool has_invalidated_area() const override;
-		const rect& invalidated_area() const override;
-		rect validate() override;
-		bool has_rendering_priority() const override;
-		void render_surface() override;
-		void pause_rendering() override;
-		void resume_rendering() override;
-		graphics_context create_graphics_context() const override;
-		graphics_context create_graphics_context(const i_widget& aWidget) const override;
-		const i_native_surface& native_surface() const override;
-		i_native_surface& native_surface() override;
-		const i_native_window& native_window() const override;
-		i_native_window& native_window() override;
-		bool destroyed() const override;
-	public:
-		point surface_position() const override;
-		void move_surface(const point& aPosition) override;
-		size surface_size() const override;
-		void resize_surface(const size& aSize) override;
-		void centre() override;
-		void centre_on_parent() override;
-		double surface_opacity() const override;
-		void set_surface_opacity(double aOpacity) override;
-		double surface_transparency() const override;
-		void set_surface_transparency(double aTransparency) override;
-	public:
-		point mouse_position() const override;
-		bool is_mouse_button_pressed(mouse_button aButton) const override;
-	public:
-		void save_mouse_cursor() override;
-		void set_mouse_cursor(mouse_system_cursor aSystemCursor) override;
-		void restore_mouse_cursor() override;
-		void update_mouse_cursor() override;
-	public:
-		void widget_added(i_widget& aWidget) override;
-		void widget_removed(i_widget& aWidget) override;
 	public:
 		bool show(bool aVisible) override;
 		using scrollable_widget::show;
-		bool requires_owner_focus() const override;
-		bool has_entered_widget() const override;
-		i_widget& entered_widget() const override;
-		bool has_capturing_widget() const override;
-		i_widget& capturing_widget() const override;
-		void set_capture(i_widget& aWidget) override;
-		void release_capture(i_widget& aWidget) override;
-		void non_client_set_capture(i_widget& aWidget) override;
-		void non_client_release_capture(i_widget& aWidget) override;
-		bool has_focused_widget() const override;
-		i_widget& focused_widget() const override;
-		void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
-		void release_focused_widget(i_widget& aWidget) override;
 	public:
 		neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
 	public:
@@ -174,46 +130,23 @@ namespace neogfx
 		void maximize() override;
 		bool is_restored() const override;
 		void restore() override;
-		window_placement placement() const override;
-		void set_placement(const window_placement& aPlacement) override;
+		point window_position() const override;
+		neogfx::window_placement window_placement() const override;
+		void set_window_placement(const neogfx::window_placement& aPlacement) override;
+		void centre() override;
+		void centre_on_parent() override;
 		bool window_enabled() const override;
 		void counted_window_enable(bool aEnable) override;
 	public:
-		const i_surface& surface() const override;
-		i_surface& surface() override;
-		bool is_surface() const override;
-	private:
-		bool current_event_is_non_client() const override;
-		bool native_window_can_close() const override;
-		void native_window_closing() override;
-		void native_window_closed() override;
-		void native_window_focus_gained() override;
-		void native_window_focus_lost() override;
-		void native_window_resized() override;
-		bool native_window_has_rendering_priority() const override;
-		bool native_window_ready_to_render() const override;
-		void native_window_render(const rect& aInvalidatedRect) const override;
-		void native_window_dismiss_children() override;
-		void native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
-		void native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-		void native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-		void native_window_mouse_button_released(mouse_button aButton, const point& aPosition) override;
-		void native_window_mouse_moved(const point& aPosition) override;
-		void native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta) override;
-		void native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-		void native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-		void native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition) override;
-		void native_window_non_client_mouse_moved(const point& aPosition) override;
-		void native_window_mouse_entered() override;
-		void native_window_mouse_left() override;
-		widget_part native_window_hit_test(const point& aPosition) const override;
-		rect native_window_widget_part_rect(widget_part aWidgetPart) const override;
-		void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-		void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-		void native_window_text_input(const std::string& aText) override;
-		void native_window_sys_text_input(const std::string& aText) override;
-		neogfx::mouse_cursor native_window_mouse_cursor() const override;
-		void native_window_title_text_changed(const std::string& aTitleText) override;
+		bool is_dismissing_children() const override;
+		bool can_dismiss(const i_widget* aClickedWidget) const override;
+		dismissal_type_e dismissal_type() const override;
+		bool dismissed() const override;
+		void dismiss() override;
+	public:
+		point mouse_position() const override;
+	public:
+		rect widget_part_rect(widget_part aWidgetPart) const override;
 	public:
 		const i_layout& non_client_layout() const override;
 		i_layout& non_client_layout() override;
@@ -228,26 +161,39 @@ namespace neogfx
 		const i_layout& status_bar_layout() const override;
 		i_layout& status_bar_layout() override;
 	public:
+		bool requires_owner_focus() const override;
+		bool has_entered_widget() const override;
+		i_widget& entered_widget() const override;
+	public:
+		bool has_focused_widget() const override;
+		i_widget& focused_widget() const override;
+		void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
+		void release_focused_widget(i_widget& aWidget) override;
+	public:
+		void update_modality() override;
+	protected:
+		void mouse_entered() override;
+		void mouse_left() override;
+	public:
 		const i_widget& as_widget() const override;
 		i_widget& as_widget() override;
+	protected:
+		void dismiss_children(const i_widget* aClickedWidget = nullptr) override;
+		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) override;
 	private:
 		void init();
-		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos);
-		void update_modality();
-		void dismiss_children(const i_widget* aClickedWidget = 0);
-		void mouse_entered();
 	private:
+		i_window_manager& iWindowManager;
+		bool iClosed;
 		sink iSink;
-		std::unique_ptr<i_native_window> iNativeWindow;
+		boost::optional<nested_window_container> iNestedWindowContainer;
+		std::unique_ptr<i_surface_window> iSurfaceWindow;
+		std::unique_ptr<i_nested_window> iNestedWindowDetails;
 		window_style iStyle;
 		int32_t iCountedEnable;
-		bool iNativeWindowClosing;
-		bool iClosed;
 		i_widget* iEnteredWidget;
-		i_widget* iCapturingWidget;
 		i_widget* iFocusedWidget;
 		bool iDismissingChildren;
-		boost::optional<char32_t> iSurrogatePairPart;
 		vertical_layout iNonClientLayout;
 		vertical_layout iTitleBarLayout;
 		vertical_layout iMenuLayout;

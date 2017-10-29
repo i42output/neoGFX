@@ -736,8 +736,8 @@ int main(int argc, char* argv[])
 
 		// Item Views
 
-		app.surface_manager().surface(0).save_mouse_cursor();
-		app.surface_manager().surface(0).set_mouse_cursor(ng::mouse_system_cursor::Wait);
+		app.window_manager().save_mouse_cursor();
+		app.window_manager().set_mouse_cursor(ng::mouse_system_cursor::Wait);
 
 		ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").as_widget();
 		ng::vertical_layout layoutItemViews(itemViewsPage);
@@ -854,7 +854,7 @@ int main(int argc, char* argv[])
 				tableView1.model().remove_item(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
 		});
 
-		app.surface_manager().surface(0).restore_mouse_cursor();
+		app.window_manager().restore_mouse_cursor();
 
 		auto& w = tabContainer.add_tab_page("Lots").as_widget();
 		ng::vertical_layout l(w);

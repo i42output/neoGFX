@@ -410,14 +410,14 @@ namespace neogfx
 				button.enable(true);
 				iButtonSinks[i][0] = button.clicked([&, i]()
 				{
-					surface().save_mouse_cursor();
-					surface().set_mouse_cursor(mouse_system_cursor::Wait);
+					root().window_manager().save_mouse_cursor();
+					root().window_manager().set_mouse_cursor(mouse_system_cursor::Wait);
 					presentation_model().sort_by(i);
-					surface().restore_mouse_cursor();
+					root().window_manager().restore_mouse_cursor();
 				}, *this);
 				iButtonSinks[i][1] = button.right_clicked([&, i]()
 				{
-					context_menu menu{ *this, surface().mouse_position() + surface().surface_position() };
+					context_menu menu{ *this, root().mouse_position() + root().window_position() };
 					action sortAscending{ "Sort Ascending" };
 					action sortDescending{ "Sort Descending" };
 					action applySort{ "Apply Sort" };

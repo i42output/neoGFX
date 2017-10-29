@@ -317,7 +317,7 @@ namespace neogfx
 				iMouseTracker = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
 				{
 					aTimer.again();
-					auto item = item_at(surface().mouse_position() - origin());
+					auto item = item_at(root().mouse_position() - origin());
 					if (item != boost::none)
 						selection_model().set_current_index(*item);
 				}, 100);
@@ -761,7 +761,7 @@ namespace neogfx
 			textEdit.set_text(presentation_model().cell_to_string(newIndex));
 			textEdit.focus_event([this, newIndex](neogfx::focus_event fe)
 			{
-				if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!surface().has_focused_widget() || !surface().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
+				if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!root().has_focused_widget() || !root().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
 					end_edit(true);
 			});
 			textEdit.keyboard_event([this, &textEdit, newIndex](neogfx::keyboard_event ke)
@@ -779,12 +779,12 @@ namespace neogfx
 		{
 			auto& textEdit = editor_text_edit();
 			textEdit.set_focus();
-			if (textEdit.client_rect().contains(surface().mouse_position() - textEdit.origin()))
+			if (textEdit.client_rect().contains(root().mouse_position() - textEdit.origin()))
 			{
 				bool enableDragger = capturing();
 				if (enableDragger)
 					release_capture();
-				textEdit.set_cursor_position(surface().mouse_position() - textEdit.origin(), true, enableDragger);
+				textEdit.set_cursor_position(root().mouse_position() - textEdit.origin(), true, enableDragger);
 			}
 			else
 				textEdit.cursor().set_anchor(textEdit.cursor().position());
@@ -798,7 +798,7 @@ namespace neogfx
 		if (aCommit && presentation_model().cell_editable(*editing()) == item_cell_editable::No)
 			aCommit = false;
 		neolib::scoped_flag sf{ iEndingEdit };
-		bool hadFocus = (editor().has_focus() || (surface().has_focused_widget() && surface().focused_widget().is_descendent_of(editor())));
+		bool hadFocus = (editor().has_focus() || (has_root() && root().has_focused_widget() && root().focused_widget().is_descendent_of(editor())));
 		if (aCommit)
 		{
 			auto modelIndex = presentation_model().to_item_model_index(*editing());

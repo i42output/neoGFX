@@ -24,7 +24,9 @@
 #include <SDL_mouse.h>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/app/i_basic_services.hpp>
-#include <neogfx/gui/window/window.hpp>
+#include <neogfx/hid/video_mode.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/gui/widget/i_window.hpp> // for window_style
 #include "opengl_window.hpp"
 
 
@@ -76,6 +78,10 @@ namespace neogfx
 		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, sdl_window& aParent, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
 		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, sdl_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
 		~sdl_window();
+	public:
+		bool has_parent() const override;
+		const i_native_window& parent() const override;
+		i_native_window& parent() override;
 	public:
 		bool initialising() const override;
 		void* handle() const override;

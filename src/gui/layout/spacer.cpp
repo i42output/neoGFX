@@ -25,59 +25,36 @@
 
 namespace neogfx
 {
-	spacer::device_metrics_forwarder::device_metrics_forwarder(i_spacer& aOwner) :
-		iOwner(aOwner)
-	{
-	}
-
-	bool spacer::device_metrics_forwarder::metrics_available() const
-	{
-		return iOwner.parent().device_metrics().metrics_available();
-	}
-
-	size spacer::device_metrics_forwarder::extents() const
-	{
-		return iOwner.parent().device_metrics().extents();
-	}
-
-	dimension spacer::device_metrics_forwarder::horizontal_dpi() const
-	{
-		return iOwner.parent().device_metrics().horizontal_dpi();
-	}
-
-	dimension spacer::device_metrics_forwarder::vertical_dpi() const
-	{
-		return iOwner.parent().device_metrics().vertical_dpi();
-	}
-
-	dimension spacer::device_metrics_forwarder::em_size() const
-	{
-		return iOwner.parent().device_metrics().em_size();
-	}
-
 	spacer::spacer(expansion_policy_e aExpansionPolicy) :
-		iParent(0), iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder), iExpansionPolicy(aExpansionPolicy)
+		iParent{ nullptr }, 
+		iUnitsContext{ *this }, 
+		iExpansionPolicy{ aExpansionPolicy }
 	{
 	}
 
 	spacer::spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy) :
-		iParent(&aParent), iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder), iExpansionPolicy(aExpansionPolicy)
+		iParent{ &aParent }, 
+		iUnitsContext{ *this },
+		iExpansionPolicy{ aExpansionPolicy }
 	{
 		aParent.add_item(*this);
 	}
 
+	bool spacer::has_parent() const
+	{
+		return iParent != nullptr;
+	}
+
 	const i_layout& spacer::parent() const
 	{
-		if (iParent == 0)
-			throw no_parent();
-		return *iParent;
+		if (has_parent())
+			return *iParent;
+		throw no_parent();
 	}
 
 	i_layout& spacer::parent()
 	{
-		if (iParent == 0)
-			throw no_parent();
-		return *iParent;
+		return const_cast<i_layout&>(const_cast<const spacer*>(this)->parent());
 	}
 
 	void spacer::set_parent(i_layout& aParent)
@@ -233,7 +210,9 @@ namespace neogfx
 
 	const i_device_metrics& spacer::device_metrics() const
 	{
-		return iDeviceMetricsForwarder;
+		if (iParent == nullptr)
+			throw no_device_metrics();
+		return iParent->device_metrics();
 	}
 
 	units spacer::units() const

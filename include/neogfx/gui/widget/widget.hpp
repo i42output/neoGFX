@@ -29,20 +29,6 @@ namespace neogfx
 {
 	class widget : public i_widget, protected neolib::destroyable
 	{
-	private:
-		class device_metrics_forwarder : public i_device_metrics
-		{
-		public:
-			device_metrics_forwarder(widget& aOwner);
-		public:
-			bool metrics_available() const override;
-			size extents() const override;
-			dimension horizontal_dpi() const override;
-			dimension vertical_dpi() const override;
-			dimension em_size() const override;
-		private:
-			widget& iOwner;
-		};
 	public:
 		widget();
 		widget(const widget&) = delete;
@@ -220,7 +206,7 @@ namespace neogfx
 		bool sys_text_input(const std::string& aText) override;
 	public:
 		graphics_context create_graphics_context() const override;
-	protected:
+	public:
 		const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const override;
 		i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
 	private:
@@ -242,7 +228,6 @@ namespace neogfx
 		std::shared_ptr<i_layout> iLayout;
 		class layout_timer;
 		std::unique_ptr<layout_timer> iLayoutTimer;
-		device_metrics_forwarder iDeviceMetricsForwarder;
 		units_context iUnitsContext;
 		point iPosition;
 		size iSize;

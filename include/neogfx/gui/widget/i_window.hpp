@@ -20,11 +20,16 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/window/window_events.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
-	class i_widget;
+	class i_native_surface;
+	class i_native_window;
+	class i_nested_window;
+	class i_nested_window_container;
 	class i_layout;
 
 	enum class window_style : uint32_t
@@ -38,7 +43,8 @@ namespace neogfx
 		MaximizeBox =			0x00000020,
 		Resize =				0x00000040,	// The window can be resized and has a maximize button
 		Close =					0x00000080,	// The window has a close button
-		Fullscreen =			0x00000100,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
+		Nested =				0x00000100,	// The window is not a native desktop window but a part of an existing one
+		Fullscreen =			0x00000200,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
 		Modal =					0x00010000,
 		ApplicationModal =		0x00020000,
 		NoActivate =			0x00040000,
@@ -76,8 +82,61 @@ namespace neogfx
 
 	class i_window
 	{
+		friend class surface_window_proxy;
 	public:
 		event<window_event&> window_event;
+		event<const i_widget*> dismissing_children;
+		event<> closed;
+	public:
+		enum dismissal_type_e
+		{
+			CannotDismiss,
+			CloseOnDismissal,
+			HideOnDismissal
+		};
+	public:
+		struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_window::no_native_surface") {} };
+		struct no_parent_window : std::logic_error { no_parent_window() : std::logic_error("neogfx::i_window::no_parent_window") {} };
+		struct not_contained : std::logic_error { not_contained() : std::logic_error("neogfx::i_window::not_contained") {} };
+		struct not_nested : std::logic_error { not_nested() : std::logic_error("neogfx::i_window::not_nested") {} };
+		struct not_nested_container : std::logic_error { not_nested_container() : std::logic_error("neogfx::i_window::not_nested_container") {} };
+	public:
+		virtual const i_window_manager& window_manager() const = 0;
+		virtual i_window_manager& window_manager() = 0;
+	public:
+		virtual bool is_surface() const = 0;
+		virtual const i_surface& surface() const = 0;
+		virtual i_surface& surface() = 0;
+		virtual bool has_native_surface() const = 0;
+		virtual const i_native_surface& native_surface() const = 0;
+		virtual i_native_surface& native_surface() = 0;
+		virtual bool has_native_window() const = 0;
+		virtual const i_native_window& native_window() const = 0;
+		virtual i_native_window& native_window() = 0;
+	public:
+		virtual bool has_parent_window(bool aSameSurface = true) const = 0;
+		virtual const i_window& parent_window() const = 0;
+		virtual i_window& parent_window() = 0;
+		virtual bool is_owner_of(const i_window& aChildWindow) const = 0;
+	public:
+		virtual const i_nested_window_container& nested_container() const = 0;
+		virtual i_nested_window_container& nested_container() = 0;
+		virtual bool is_nested() const = 0;
+		virtual const i_nested_window& as_nested() const = 0;
+		virtual i_nested_window& as_nested() = 0;
+		virtual bool is_nested_container() const = 0;
+		virtual const i_nested_window_container& as_nested_container() const = 0;
+		virtual i_nested_window_container& as_nested_container() = 0;
+	public:
+		virtual bool is_strong() const = 0;
+		virtual bool is_weak() const = 0;
+	public:
+		virtual bool can_close() const = 0;
+		virtual bool is_closed() const = 0;
+		virtual void close() = 0;
+	public:
+		virtual void widget_added(i_widget&) = 0;
+		virtual void widget_removed(i_widget& aWidget) = 0;
 	public:
 		virtual window_style style() const = 0;
 		virtual void set_style(window_style aStyle) = 0;
@@ -93,12 +152,23 @@ namespace neogfx
 		virtual void maximize() = 0;
 		virtual bool is_restored() const = 0;
 		virtual void restore() = 0;
-		virtual window_placement placement() const = 0;
-		virtual void set_placement(const window_placement& aPlacement) = 0;
+		virtual point window_position() const = 0;
+		virtual neogfx::window_placement window_placement() const = 0;
+		virtual void set_window_placement(const neogfx::window_placement& aPlacement) = 0;
 		virtual void centre() = 0;
 		virtual void centre_on_parent() = 0;
 		virtual bool window_enabled() const = 0;
 		virtual void counted_window_enable(bool aEnable) = 0;
+	public:
+		virtual bool is_dismissing_children() const = 0;
+		virtual bool can_dismiss(const i_widget* aClickedWidget) const = 0;
+		virtual dismissal_type_e dismissal_type() const = 0;
+		virtual bool dismissed() const = 0;
+		virtual void dismiss() = 0;
+	public:
+		virtual point mouse_position() const = 0;
+	public:
+		virtual rect widget_part_rect(widget_part aWidgetPart) const = 0;
 	public:
 		virtual const i_layout& non_client_layout() const = 0;
 		virtual i_layout& non_client_layout() = 0;
@@ -113,7 +183,21 @@ namespace neogfx
 		virtual const i_layout& status_bar_layout() const = 0;
 		virtual i_layout& status_bar_layout() = 0;
 	public:
+		virtual bool requires_owner_focus() const = 0;
+		virtual bool has_entered_widget() const = 0;
+		virtual i_widget& entered_widget() const = 0;
+	public:
+		virtual bool has_focused_widget() const = 0;
+		virtual i_widget& focused_widget() const = 0;
+		virtual void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) = 0;
+		virtual void release_focused_widget(i_widget& aWidget) = 0;
+	public:
+		virtual void update_modality() = 0;
+	public:
 		virtual const i_widget& as_widget() const = 0;
 		virtual i_widget& as_widget() = 0;
+	protected:
+		virtual void dismiss_children(const i_widget* aClickedWidget = nullptr) = 0;
+		virtual void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) = 0;
 	};
 }

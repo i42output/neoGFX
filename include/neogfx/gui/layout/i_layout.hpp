@@ -41,7 +41,7 @@ namespace neogfx
 		class item;
 	public:
 		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_layout::bad_item_index") {} };
-		struct no_widget : std::logic_error { no_widget() : std::logic_error("neogfx::i_layout::no_widget") {} };
+		struct no_device_metrics : std::logic_error { no_device_metrics() : std::logic_error("neogfx::i_layout::no_device_metrics") {} };
 		struct wrong_item_type : std::logic_error { wrong_item_type() : std::logic_error("neogfx::i_layout::wrong_item_type") {} };
 		struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_layout::item_not_found") {} };
 	public:

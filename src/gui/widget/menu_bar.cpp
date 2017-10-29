@@ -131,7 +131,7 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins{});
 		layout().set_margins(neogfx::margins{});
-		iSink += surface().dismissing_children([this](const i_widget* aClickedWidget)
+		iSink += root().dismissing_children([this](const i_widget* aClickedWidget)
 		{
 			if (aClickedWidget != this && (aClickedWidget == 0 || !is_ancestor_of(*aClickedWidget)))
 				clear_selection();

@@ -24,12 +24,13 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
-#include <neogfx/gui/widget/i_window.hpp>
+#include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/layout/i_widget_geometry.hpp>
 
 namespace neogfx
 {
 	class i_surface;
+	class i_window;
 	class i_layout;
 
 	enum class widget_part
@@ -139,7 +140,6 @@ namespace neogfx
 		struct no_update_rect : std::logic_error { no_update_rect() : std::logic_error("neogfx::i_widget::no_update_rect") {} };
 		struct widget_not_entered : std::logic_error { widget_not_entered() : std::logic_error("neogfx::i_widget::widget_not_entered") {} };
 		struct widget_cannot_capture : std::logic_error { widget_cannot_capture() : std::logic_error("neogfx::i_widget::widget_cannot_capture") {} };
-		struct widget_not_capturing : std::logic_error { widget_not_capturing() : std::logic_error("neogfx::i_widget::widget_not_capturing") {} };
 		struct widget_not_focused : std::logic_error { widget_not_focused() : std::logic_error("neogfx::i_widget::widget_not_focused") {} };
 		struct widget_cannot_defer_layout : std::logic_error { widget_cannot_defer_layout() : std::logic_error("neogfx::i_widget::widget_cannot_defer_layout") {} };
 		struct no_managing_layout : std::logic_error { no_managing_layout() : std::logic_error("neogfx::i_widget::no_managing_layout") {} };
@@ -291,7 +291,7 @@ namespace neogfx
 		virtual neogfx::mouse_cursor mouse_cursor() const = 0;
 	public:
 		virtual graphics_context create_graphics_context() const = 0;
-	protected:
+	public:
 		virtual const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const = 0;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) = 0;
 	private:

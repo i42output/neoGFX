@@ -26,91 +26,53 @@
 
 namespace neogfx
 {
-	layout::device_metrics_forwarder::device_metrics_forwarder(i_layout& aOwner) :
-		iOwner(aOwner)
-	{
-	}
-
-	bool layout::device_metrics_forwarder::metrics_available() const
-	{
-		return iOwner.owner() != nullptr && iOwner.owner()->device_metrics().metrics_available();
-	}
-
-	size layout::device_metrics_forwarder::extents() const
-	{
-		if (iOwner.owner() == nullptr)
-			throw no_widget();
-		return iOwner.owner()->device_metrics().extents();
-	}
-
-	dimension layout::device_metrics_forwarder::horizontal_dpi() const
-	{
-		if (iOwner.owner() == nullptr)
-			throw no_widget();
-		return iOwner.owner()->device_metrics().horizontal_dpi();
-	}
-
-	dimension layout::device_metrics_forwarder::vertical_dpi() const
-	{
-		if (iOwner.owner() == nullptr)
-			throw no_widget();
-		return iOwner.owner()->device_metrics().vertical_dpi();
-	}
-
-	dimension layout::device_metrics_forwarder::em_size() const
-	{
-		if (iOwner.owner() == nullptr)
-			throw no_widget();
-		return iOwner.owner()->device_metrics().em_size();
-	}
-
 	layout::layout(neogfx::alignment aAlignment) :
-		iOwner(0),
-		iParent(0),
-		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
-		iSpacing(app::instance().current_style().spacing()),
-		iAlwaysUseSpacing(false),
-		iAlignment(aAlignment),
-		iEnabled(true),
+		iOwner{ nullptr },
+		iParent{ nullptr },
+		iUnitsContext{ *this },
+		iSpacing{ app::instance().current_style().spacing() },
+		iAlwaysUseSpacing{ false },
+		iAlignment{ aAlignment },
+		iEnabled{ true },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutStarted(false),
-		iLayoutId(0),
-		iInvalidated(false)
+		iLayoutStarted{ false },
+		iLayoutId{ 0 },
+		iInvalidated{ false }
 	{
 	}
 
 	layout::layout(i_widget& aParent, neogfx::alignment aAlignment) :
-		iOwner(&aParent),
-		iParent(0),
-		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
-		iSpacing(app::instance().current_style().spacing()),
-		iAlwaysUseSpacing(false),
-		iAlignment(aAlignment),
-		iEnabled(true),
+		iOwner{ &aParent },
+		iParent{ nullptr },
+		iUnitsContext{ *this },
+		iSpacing{ app::instance().current_style().spacing() },
+		iAlwaysUseSpacing{ false },
+		iAlignment{ aAlignment },
+		iEnabled{ true },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutStarted(false),
-		iLayoutId(0),
-		iInvalidated(false)
+		iLayoutStarted{ false },
+		iLayoutId{ 0 },
+		iInvalidated{ false }
 	{
 		aParent.set_layout(*this);
 	}
 
 	layout::layout(i_layout& aParent, neogfx::alignment aAlignment) :
-		iOwner(aParent.owner()), 
-		iParent(&aParent),
-		iDeviceMetricsForwarder(*this), iUnitsContext(iDeviceMetricsForwarder),
-		iMargins(neogfx::margins{}),
-		iSpacing(app::instance().current_style().spacing()),
-		iAlwaysUseSpacing(false),
-		iAlignment(aAlignment),
-		iEnabled(true),
+		iOwner{ aParent.owner() },
+		iParent{ &aParent },
+		iUnitsContext{ *this },
+		iMargins{ neogfx::margins{} },
+		iSpacing{ app::instance().current_style().spacing() },
+		iAlwaysUseSpacing{ false },
+		iAlignment{ aAlignment },
+		iEnabled{ true },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutStarted(false),
-		iLayoutId(0),
-		iInvalidated(false)
+		iLayoutStarted{ false },
+		iLayoutId{ 0 },
+		iInvalidated{ false }
 	{
 		aParent.add_item(*this);
 	}
@@ -677,7 +639,9 @@ namespace neogfx
 
 	const i_device_metrics& layout::device_metrics() const
 	{
-		return iDeviceMetricsForwarder;
+		if (owner() == nullptr)
+			throw no_device_metrics();
+		return owner()->device_metrics();
 	}
 
 	units layout::units() const

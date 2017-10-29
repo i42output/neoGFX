@@ -29,6 +29,7 @@
 namespace neogfx
 {
 	class i_surface_manager;
+	class i_native_surface;
 	class i_native_window;
 	class i_native_graphics_context;
 

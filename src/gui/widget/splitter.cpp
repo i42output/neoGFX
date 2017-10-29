@@ -96,7 +96,8 @@ namespace neogfx
 				iSizeBeforeTracking = std::make_pair(
 					layout().get_widget_at(iTracking->first).minimum_size().cx, 
 					layout().get_widget_at(iTracking->second).minimum_size().cx);
-				surface().update_mouse_cursor();
+				if (has_root())
+					root().window_manager().update_mouse_cursor();
 			}
 		}
 	}
@@ -154,7 +155,7 @@ namespace neogfx
 	
 	neogfx::mouse_cursor splitter::mouse_cursor() const
 	{
-		auto s = separator_at(surface().mouse_position() - origin());
+		auto s = separator_at(root().mouse_position() - origin());
 		if (s != boost::none || iTracking != boost::none)
 			return iType == HorizontalSplitter ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
 		else

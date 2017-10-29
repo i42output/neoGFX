@@ -31,6 +31,7 @@
 namespace neogfx
 {
 	class i_widget;
+	class i_window;
 	class i_surface_window;
 
 	enum class surface_type
@@ -48,15 +49,7 @@ namespace neogfx
 	class i_surface : public i_device_metrics
 	{
 	public:
-		event<const i_widget*> dismissing_children;
 		event<> closed;
-	public:
-		enum dismissal_type_e
-		{
-			CannotDismiss,
-			CloseOnDismissal,
-			HideOnDismissal
-		};
 	public:
 		struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_surface::no_native_surface") {} };
 		struct not_a_window : std::logic_error { not_a_window() : std::logic_error("neogfx::i_surface::not_a_window") {} };
@@ -65,23 +58,20 @@ namespace neogfx
 	public:
 		virtual i_rendering_engine& rendering_engine() const = 0;
 	public:
-		virtual bool is_weak() const = 0;
-		virtual bool can_close() const = 0;
-		virtual bool is_closed() const = 0;
-		virtual void close() = 0;
 		virtual bool has_parent_surface() const = 0;
 		virtual const i_surface& parent_surface() const = 0;
 		virtual i_surface& parent_surface() = 0;
 		virtual bool is_owner_of(const i_surface& aChildSurface) const = 0;
-		virtual bool is_dismissing_children() const = 0;
-		virtual bool can_dismiss(const i_widget* aClickedWidget) const = 0;
-		virtual dismissal_type_e dismissal_type() const = 0;
-		virtual bool dismissed() const = 0;
-		virtual void dismiss() = 0;
+	public:
+		virtual bool is_strong() const = 0;
+		virtual bool is_weak() const = 0;
+		virtual bool can_close() const = 0;
+		virtual bool is_closed() const = 0;
+		virtual void close() = 0;
 	public:
 		virtual bool is_window() const = 0;
-		virtual const i_surface_window& as_window() const = 0;
-		virtual i_surface_window& as_window() = 0;
+		virtual const i_surface_window& as_surface_window() const = 0;
+		virtual i_surface_window& as_surface_window() = 0;
 	public:
 		virtual neogfx::surface_type surface_type() const = 0;
 		virtual surface_style style() const = 0;
@@ -99,8 +89,6 @@ namespace neogfx
 		virtual void render_surface() = 0;
 		virtual void pause_rendering() = 0;
 		virtual void resume_rendering() = 0;
-		virtual graphics_context create_graphics_context() const = 0;
-		virtual graphics_context create_graphics_context(const i_widget& aWidget) const = 0;
 		virtual const i_native_surface& native_surface() const = 0;
 		virtual i_native_surface& native_surface() = 0;
 		virtual bool destroyed() const = 0;
@@ -109,37 +97,10 @@ namespace neogfx
 		virtual void move_surface(const point& aPosition) = 0;
 		virtual size surface_size() const = 0;
 		virtual void resize_surface(const size& aSize) = 0;
-		virtual void centre() = 0;
-		virtual void centre_on_parent() = 0;
 		virtual double surface_opacity() const = 0;
 		virtual void set_surface_opacity(double aOpacity) = 0;
 		virtual double surface_transparency() const = 0;
 		virtual void set_surface_transparency(double aTransparency) = 0;
-	public:
-		virtual point mouse_position() const = 0;
-		virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;
-	public:
-		virtual void save_mouse_cursor() = 0;
-		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
-		virtual void restore_mouse_cursor() = 0;
-		virtual void update_mouse_cursor() = 0;
-	public:
-		virtual void widget_added(i_widget& aWidget) = 0;
-		virtual void widget_removed(i_widget& aWidget) = 0;
-	public:
-		virtual bool requires_owner_focus() const = 0;
-		virtual bool has_entered_widget() const = 0;
-		virtual i_widget& entered_widget() const = 0;
-		virtual bool has_capturing_widget() const = 0;
-		virtual i_widget& capturing_widget() const = 0;
-		virtual void set_capture(i_widget& aWidget) = 0;
-		virtual void release_capture(i_widget& aWidget) = 0;
-		virtual void non_client_set_capture(i_widget& aWidget) = 0;
-		virtual void non_client_release_capture(i_widget& aWidget) = 0;
-		virtual bool has_focused_widget() const = 0;
-		virtual i_widget& focused_widget() const = 0;
-		virtual void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) = 0;
-		virtual void release_focused_widget(i_widget& aWidget) = 0;
 	};
 
 	class pause_rendering

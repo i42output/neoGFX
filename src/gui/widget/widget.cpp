@@ -22,8 +22,7 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
-#include "../window/native/i_native_window.hpp"
-#include "../../hid/native/i_native_surface.hpp"
+#include <neogfx/hid/i_surface_window.hpp>
 
 namespace neogfx
 {
@@ -39,37 +38,6 @@ namespace neogfx
 		}
 	};
 
-
-	widget::device_metrics_forwarder::device_metrics_forwarder(widget& aOwner) :
-		iOwner(aOwner)
-	{
-	}
-
-	bool widget::device_metrics_forwarder::metrics_available() const
-	{
-		return true;
-	}
-
-	size widget::device_metrics_forwarder::extents() const
-	{
-		return iOwner.iSize;
-	}
-
-	dimension widget::device_metrics_forwarder::horizontal_dpi() const
-	{
-		return iOwner.surface().horizontal_dpi();
-	}
-
-	dimension widget::device_metrics_forwarder::vertical_dpi() const
-	{
-		return iOwner.surface().vertical_dpi();
-	}
-
-	dimension widget::device_metrics_forwarder::em_size() const
-	{
-		return static_cast<dimension>(iOwner.font().size() / 72.0 * horizontal_dpi());
-	}
-
 	widget::widget() :
 		iSingular{ false },
 		iParent{ nullptr },
@@ -77,8 +45,7 @@ namespace neogfx
 		iRoot { nullptr },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
-		iDeviceMetricsForwarder{ *this },
-		iUnitsContext{ iDeviceMetricsForwarder },
+		iUnitsContext{ *this },
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutInProgress{ 0 },
@@ -100,8 +67,7 @@ namespace neogfx
 		iRoot{ nullptr },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
-		iDeviceMetricsForwarder{ *this },
-		iUnitsContext{ iDeviceMetricsForwarder },
+		iUnitsContext{ *this },
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutInProgress{ 0 },
@@ -124,8 +90,7 @@ namespace neogfx
 		iRoot{ nullptr },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
-		iDeviceMetricsForwarder{ *this },
-		iUnitsContext{ iDeviceMetricsForwarder },
+		iUnitsContext{ *this },
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutInProgress{ 0 },
@@ -162,7 +127,7 @@ namespace neogfx
 
 	const i_device_metrics& widget::device_metrics() const
 	{
-		return iDeviceMetricsForwarder;
+		return surface();
 	}
 
 	units widget::units() const
@@ -236,17 +201,11 @@ namespace neogfx
 	{
 		if (has_parent() && &parent() == &aParent)
 			return;
-		if (!is_root())
+		if (!is_root() && has_root())
 		{
-			bool onSurface = has_surface();
-			if (onSurface && same_surface(aParent))
-			{
-				surface().widget_removed(*this);
-				onSurface = false;
-			}
+			root().widget_removed(*this);
 			iParent = &aParent;
-			if (!onSurface && has_surface())
-				surface().widget_added(*this);
+			root().widget_added(*this);
 		}
 		else
 			iParent = &aParent;
@@ -313,8 +272,8 @@ namespace neogfx
 			oldParent->remove_widget(*aWidget);
 		aWidget->set_parent(*this);
 		aWidget->set_singular(false);
-		if (has_surface())
-			surface().widget_added(*aWidget);
+		if (has_root())
+			root().widget_added(*aWidget);
 	}
 
 	std::shared_ptr<i_widget> widget::remove_widget(i_widget& aWidget, bool aSingular)
@@ -328,8 +287,8 @@ namespace neogfx
 		iChildren.erase(existing);
 		if (has_layout())
 			layout().remove_item(aWidget);
-		if (has_surface())
-			surface().widget_removed(aWidget);
+		if (has_root())
+			root().widget_removed(aWidget);
 		return keep;
 	}
 
@@ -698,7 +657,7 @@ namespace neogfx
 
 	point widget::origin() const
 	{
-		if (has_parent())
+		if (!is_root() && has_parent())
 			return position() + parent().origin();
 		else
 			return point{};
@@ -1138,10 +1097,10 @@ namespace neogfx
 				parent_layout().invalidate();
 			if (effectively_hidden())
 			{
-				if (surface().has_focused_widget() &&
-					(surface().focused_widget().is_descendent_of(*this) || &surface().focused_widget() == this))
+				if (root().has_focused_widget() &&
+					(root().focused_widget().is_descendent_of(*this) || &root().focused_widget() == this))
 				{
-					surface().release_focused_widget(surface().focused_widget());
+					root().release_focused_widget(root().focused_widget());
 				}
 			}
 			else
@@ -1204,7 +1163,7 @@ namespace neogfx
 
 	bool widget::entered() const
 	{
-		return surface().has_entered_widget() && &surface().entered_widget() == this;
+		return root().has_entered_widget() && &root().entered_widget() == this;
 	}
 
 	bool widget::can_capture() const
@@ -1214,7 +1173,7 @@ namespace neogfx
 
 	bool widget::capturing() const
 	{
-		return surface().has_capturing_widget() && &surface().capturing_widget() == this;
+		return surface().as_surface_window().has_capturing_widget() && &surface().as_surface_window().capturing_widget() == this;
 	}
 
 	void widget::set_capture(capture_reason aReason)
@@ -1225,12 +1184,12 @@ namespace neogfx
 			{
 			case capture_reason::MouseEvent:
 				if (!mouse_event_is_non_client())
-					surface().set_capture(*this);
+					surface().as_surface_window().set_capture(*this);
 				else
-					surface().non_client_set_capture(*this);
+					surface().as_surface_window().non_client_set_capture(*this);
 				break;
 			default:
-				surface().set_capture(*this);
+				surface().as_surface_window().set_capture(*this);
 				break;
 			}
 		}
@@ -1244,12 +1203,12 @@ namespace neogfx
 		{
 		case capture_reason::MouseEvent:
 			if (!mouse_event_is_non_client())
-				surface().release_capture(*this);
+				surface().as_surface_window().release_capture(*this);
 			else
-				surface().non_client_release_capture(*this);
+				surface().as_surface_window().non_client_release_capture(*this);
 			break;
 		default:
-			surface().set_capture(*this);
+			surface().as_surface_window().set_capture(*this);
 			break;
 		}
 		
@@ -1258,14 +1217,14 @@ namespace neogfx
 	void widget::non_client_set_capture()
 	{
 		if (can_capture())
-			surface().non_client_set_capture(*this);
+			surface().as_surface_window().non_client_set_capture(*this);
 		else
 			throw widget_cannot_capture();
 	}
 
 	void widget::non_client_release_capture()
 	{
-		surface().non_client_release_capture(*this);
+		surface().as_surface_window().non_client_release_capture(*this);
 	}
 
 	void widget::captured()
@@ -1288,19 +1247,17 @@ namespace neogfx
 
 	bool widget::has_focus() const
 	{
-		return has_surface() && !surface().destroyed() && surface().surface_type() == surface_type::Window &&
-			static_cast<const i_native_window&>(surface().native_surface()).is_active() &&
-			surface().has_focused_widget() && &surface().focused_widget() == this;
+		return has_root() && root().is_active() && root().has_focused_widget() && &root().focused_widget() == this;
 	}
 
 	void widget::set_focus(focus_reason aFocusReason)
 	{
-		surface().set_focused_widget(*this, aFocusReason);
+		root().set_focused_widget(*this, aFocusReason);
 	}
 
 	void widget::release_focus()
 	{
-		surface().release_focused_widget(*this);
+		root().release_focused_widget(*this);
 	}
 
 	void widget::focus_gained(focus_reason)
@@ -1337,7 +1294,7 @@ namespace neogfx
 
 	bool widget::mouse_event_is_non_client() const
 	{
-		if (!has_surface() || surface().destroyed() || !surface().is_window() || !surface().as_window().current_event_is_non_client())
+		if (!has_surface() || surface().destroyed() || !surface().is_window() || !surface().as_surface_window().current_event_is_non_client())
 			return false;
 		else
 			return true;

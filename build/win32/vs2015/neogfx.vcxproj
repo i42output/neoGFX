@@ -235,7 +235,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item_widget.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\nested_window.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\nested_window_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\radio_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.hpp" />
@@ -254,17 +254,20 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\toolbar_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\window\i_surface_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\popup_menu.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\surface_window_proxy.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window_events.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_keyboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_surface.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_surface_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_surface_window.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_window_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\keyboard.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\mouse.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\surface_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\video_mode.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hid\window_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\neogfx.hpp" />
     <ClInclude Include="..\..\..\src\app\native\i_native_clipboard.hpp" />
     <ClInclude Include="..\..\..\src\app\native\sdl_basic_services.hpp" />
@@ -290,6 +293,7 @@
     <ClInclude Include="..\..\..\src\gui\window\native\sdl_window.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\sdl_keyboard.hpp" />
+    <ClInclude Include="..\..\..\src\hid\native\sdl_window_manager.hpp" />
     <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -381,7 +385,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\menu_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\nested_window.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\nested_window_container.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp" />
@@ -404,10 +408,12 @@
     <ClCompile Include="..\..\..\src\gui\window\native\opengl_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\sdl_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\surface_window_proxy.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\sdl_keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_manager.cpp" />
+    <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
     <ClCompile Include="Debug\GeneratedFiles\icons.nrc.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

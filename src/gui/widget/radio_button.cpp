@@ -64,7 +64,7 @@ namespace neogfx
 			background_colour().darker(0x20));
 		if (parent().capturing())
 			background_colour().dark() ? hoverColour.lighten(0x20) : hoverColour.darken(0x20);
-		colour backgroundFillColour = parent().enabled() && parent().client_rect().contains(surface().mouse_position() - parent().origin()) ? hoverColour : background_colour();
+		colour backgroundFillColour = parent().enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColour : background_colour();
 		aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColour.with_alpha(effectively_enabled() ? 0xFF : 0x80));
 		discRect.deflate(1.0, 1.0);
 		if (static_cast<const radio_button&>(parent()).is_on())

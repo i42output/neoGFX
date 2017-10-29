@@ -22,19 +22,30 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
-#include <neogfx/gui/widget/i_window.hpp>
 
 namespace neogfx
 {
 	class i_native_window;
+	class i_window;
+	class i_widget;
 
-	class i_surface_window : public i_surface, public i_window
+	class i_surface_window : public i_surface
 	{
+	public:
+		struct widget_not_capturing : std::logic_error { widget_not_capturing() : std::logic_error("neogfx::i_surface_window::widget_not_capturing") {} };
 	public:
 		virtual const i_native_window& native_window() const = 0;
 		virtual i_native_window& native_window() = 0;
 	public:
+		virtual bool has_capturing_widget() const = 0;
+		virtual i_widget& capturing_widget() const = 0;
+		virtual void set_capture(i_widget& aWidget) = 0;
+		virtual void release_capture(i_widget& aWidget) = 0;
+		virtual void non_client_set_capture(i_widget& aWidget) = 0;
+		virtual void non_client_release_capture(i_widget& aWidget) = 0;
+	public:
 		virtual bool current_event_is_non_client() const = 0;
+		virtual bool is_closing() const = 0;
 		virtual bool native_window_can_close() const = 0;
 		virtual void native_window_closing() = 0;
 		virtual void native_window_closed() = 0;
@@ -68,5 +79,10 @@ namespace neogfx
 	public:
 		virtual window_style style() const = 0;
 		virtual void set_style(window_style aStyle) = 0;
+	public:
+		virtual const i_window& as_window() const = 0;
+		virtual i_window& as_window() = 0;
+		virtual const i_widget& as_widget() const = 0;
+		virtual i_widget& as_widget() = 0;
 	};
 }

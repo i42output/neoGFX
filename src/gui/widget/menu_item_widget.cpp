@@ -210,9 +210,9 @@ namespace neogfx
 	point menu_item_widget::sub_menu_position() const
 	{
 		if (menu().type() == i_menu::MenuBar)
-			return window_rect().bottom_left() + surface().surface_position();
+			return window_rect().bottom_left() + root().window_position();
 		else
-			return window_rect().top_right() + surface().surface_position();
+			return window_rect().top_right() + root().window_position();
 	}
 
 	void menu_item_widget::init()

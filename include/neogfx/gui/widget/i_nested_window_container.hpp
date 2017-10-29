@@ -31,7 +31,7 @@ namespace neogfx
 		virtual void add(i_nested_window& aWindow) = 0;
 		virtual void remove(i_nested_window& aWindow) = 0;
 	public:
-		virtual const i_widget& as_widget() const = 0;
+		virtual const i_widget& as_widget() const = 0;	
 		virtual i_widget& as_widget() = 0;
 	};
 }

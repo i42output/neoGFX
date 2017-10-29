@@ -95,7 +95,7 @@ namespace neogfx
 	bool surface_manager::any_strong_surfaces() const
 	{
 		for (auto& s : iSurfaces)
-			if (!s->is_weak())
+			if (s->is_strong())
 				return true;
 		return false;
 	}

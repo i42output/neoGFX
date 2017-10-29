@@ -421,6 +421,23 @@ namespace neogfx
 		close();
 	}
 
+	bool sdl_window::has_parent() const
+	{
+		return iParent != nullptr;
+	}
+
+	const i_native_window& sdl_window::parent() const
+	{
+		if (has_parent())
+			return *iParent;
+		throw no_parent();
+	}
+
+	i_native_window& sdl_window::parent()
+	{
+		return const_cast<i_native_window&>(const_cast<const sdl_window*>(this)->parent());
+	}
+
 	bool sdl_window::initialising() const
 	{
 		return !iReady;
@@ -555,7 +572,7 @@ namespace neogfx
 	void sdl_window::update_mouse_cursor()
 	{
 		if (iSavedCursors.empty())
-			set_mouse_cursor(window().native_window_mouse_cursor().system_cursor());
+			set_mouse_cursor(surface_window().native_window_mouse_cursor().system_cursor());
 	}
 
 	bool sdl_window::can_render() const
@@ -577,10 +594,10 @@ namespace neogfx
 	{
 		if (iHandle != 0)
 		{
-			if (window().native_window_can_close())
+			if (surface_window().native_window_can_close())
 			{
 				release_capture();
-				window().native_window_closing();
+				surface_window().native_window_closing();
 				if (!iDestroyed)
 				{
 					destroying();
@@ -590,7 +607,7 @@ namespace neogfx
 					SDL_DestroyWindow(iHandle);
 				}
 				iHandle = 0;
-				window().native_window_closed();
+				surface_window().native_window_closed();
 			}
 		}
 	}
@@ -817,7 +834,7 @@ namespace neogfx
 			return DefWindowProc(hwnd, msg, wparam, lparam);
 		auto& self = *mapEntry->second;
 		LRESULT result;
-		bool const CUSTOM_DECORATION = (self.window().style() & window_style::TitleBar) == window_style::TitleBar;
+		bool const CUSTOM_DECORATION = (self.surface_window().style() & window_style::TitleBar) == window_style::TitleBar;
 		switch (msg)
 		{
 		case WM_NCMOUSEMOVE:
@@ -988,7 +1005,7 @@ namespace neogfx
 		case WM_NCLBUTTONDOWN:
 		case WM_NCRBUTTONDOWN:
 		case WM_NCMBUTTONDOWN:
-			self.window().native_window_dismiss_children(); // call this before default wndproc (which enters its own NC drag message loop)
+			self.surface_window().native_window_dismiss_children(); // call this before default wndproc (which enters its own NC drag message loop)
 			if (CUSTOM_DECORATION)
 			{
 				switch (wparam)
@@ -997,7 +1014,7 @@ namespace neogfx
 					{
 						POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
 						ScreenToClient(hwnd, &pt);
-						self.iClickedWidgetPart = self.window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y });
+						self.iClickedWidgetPart = self.surface_window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y });
 					}
 					result = wndproc(hwnd, msg, wparam, lparam);
 					break;
@@ -1047,7 +1064,7 @@ namespace neogfx
 					if (self.iClickedWidgetPart == widget_part::NonClientSystemMenu)
 					{
 						self.iSystemMenuOpen = true;
-						basic_rect<int> rectTitleBar = self.window().native_window_widget_part_rect(widget_part::NonClientTitleBar) + self.surface_position();
+						basic_rect<int> rectTitleBar = self.surface_window().native_window_widget_part_rect(widget_part::NonClientTitleBar) + self.surface_position();
 						auto cmd = TrackPopupMenu(GetSystemMenu(hwnd, FALSE), TPM_LEFTALIGN | TPM_RETURNCMD, rectTitleBar.x, rectTitleBar.bottom(), 0, hwnd, NULL);
 						if (cmd != 0)
 							PostMessage(hwnd, WM_SYSCOMMAND, cmd, lparam);
@@ -1134,14 +1151,14 @@ namespace neogfx
 				else if (hit & right) result = HTRIGHT;
 				else if (hit & bottom) result = HTBOTTOM;
 				if (result == HTCLIENT)
-					result = convert_widget_part(self.window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y }));
+					result = convert_widget_part(self.surface_window().native_window_hit_test(basic_point<LONG>{ pt.x, pt.y }));
 			}		
 			else
 				result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_NCMOUSELEAVE:
-			if (self.window().has_capturing_widget())
-				self.window().release_capture(self.window().capturing_widget());
+			if (self.surface_window().has_capturing_widget())
+				self.surface_window().release_capture(self.surface_window().capturing_widget());
 			else
 				self.release_capture();
 			result = wndproc(hwnd, msg, wparam, lparam);
@@ -1178,8 +1195,8 @@ namespace neogfx
 				result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_CAPTURECHANGED:
-			if (self.window().has_capturing_widget())
-				self.window().release_capture(self.window().capturing_widget());
+			if (self.surface_window().has_capturing_widget())
+				self.surface_window().release_capture(self.surface_window().capturing_widget());
 			else
 				self.release_capture();
 			result = wndproc(hwnd, msg, wparam, lparam);
@@ -1392,7 +1409,7 @@ namespace neogfx
 
 	margins sdl_window::border_thickness() const
 	{
-		if ((window().style() & window_style::Resize) == window_style::Resize)
+		if ((surface_window().style() & window_style::Resize) == window_style::Resize)
 		{
 #ifdef WIN32
 			RECT borderThickness;

@@ -1,7 +1,7 @@
-// i_spacer.hpp
+// nested_window_container.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright(C) 2017 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -16,33 +16,23 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #pragma once
 
-#include <neogfx/neogfx.hpp>
-#include "i_widget_geometry.hpp"
+#include <neogfx/gui/widget/i_nested_window_container.hpp>
 
 namespace neogfx
 {
-	class i_layout;
-
-	class i_spacer : public i_widget_geometry, public i_units_context
+	class nested_window_container : public i_nested_window_container
 	{
 	public:
-		enum expansion_policy_e
-		{
-			ExpandHorizontally = 0x01,
-			ExpandVertically = 0x02
-		};
-		typedef boost::optional<size> optional_weight;
+		nested_window_container(i_widget& aWidget);
 	public:
-		virtual ~i_spacer() {}
+		void add(i_nested_window& aWindow) override;
+		void remove(i_nested_window& aWindow) override;
 	public:
-		virtual bool has_parent() const = 0;
-		virtual const i_layout& parent() const = 0;
-		virtual i_layout& parent() = 0;
-		virtual void set_parent(i_layout& aParent) = 0;
-		virtual expansion_policy_e expansion_policy() const = 0;
-		virtual void set_expansion_policy(expansion_policy_e aExpansionPolicy) = 0;
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+	private:
+		i_widget& iWidget;
 	};
 }

@@ -29,6 +29,7 @@ namespace neogfx
 	class i_basic_services;
 	class i_rendering_engine;
 	class i_surface_manager;
+	class i_window_manager;
 	class i_keyboard;
 	class i_clipboard;
 	class i_style;
@@ -60,6 +61,7 @@ namespace neogfx
 		virtual i_basic_services& basic_services() const = 0;
 		virtual i_rendering_engine& rendering_engine() const = 0;
 		virtual i_surface_manager& surface_manager() const = 0;
+		virtual i_window_manager& window_manager() const = 0;
 		virtual const i_keyboard& keyboard() const = 0;
 		virtual i_clipboard& clipboard() const = 0;
 	public:

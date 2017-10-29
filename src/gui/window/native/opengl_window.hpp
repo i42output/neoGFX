@@ -33,6 +33,8 @@
 
 namespace neogfx
 {
+	class i_surface_window;
+
 	class opengl_window : public native_window
 	{
 	public:
@@ -72,13 +74,13 @@ namespace neogfx
 		dimension vertical_dpi() const override;
 		dimension em_size() const override;
 	protected:
-		i_surface_window& window() const override;
+		i_surface_window& surface_window() const override;
 		void destroying();
 		void destroyed();
 	private:
 		virtual void display() = 0;
 	private:
-		i_surface_window& iWindow;
+		i_surface_window& iSurfaceWindow;
 		size iPixelDensityDpi;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable std::pair<vec2, vec2> iLogicalCoordinates;

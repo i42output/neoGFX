@@ -343,7 +343,7 @@ namespace neogfx
 					});
 					if (iSelection.colour_stop_count() <= 2)
 						deleteStopAction->disable();
-					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + root().window_position());
 					iMenu->menu().add_action(selectColourAction);
 					iMenu->menu().add_action(deleteStopAction);
 					iMenu->menu().add_action(splitStopAction);
@@ -377,7 +377,7 @@ namespace neogfx
 					});
 					if (iSelection.alpha_stop_count() <= 2)
 						deleteStopAction->disable();
-					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + root().window_position());
 					iMenu->menu().add_action(selectAlphaAction);
 					iMenu->menu().add_action(deleteStopAction);
 					if (!iInGradientDialog)
@@ -388,7 +388,7 @@ namespace neogfx
 			}
 			else if (!iInGradientDialog)
 			{
-				iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + surface().surface_position());
+				iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + root().window_position());
 				iMenu->menu().add_action(moreAction);
 				iMenu->exec();
 				iMenu.reset();
@@ -441,7 +441,7 @@ namespace neogfx
 	
 	neogfx::mouse_cursor gradient_widget::mouse_cursor() const
 	{
-		point mousePos = surface().mouse_position() - origin();
+		point mousePos = root().mouse_position() - origin();
 		if (contents_rect().contains(mousePos))
 		{
 			if (iCurrentColourStop != boost::none || iCurrentAlphaStop != boost::none)

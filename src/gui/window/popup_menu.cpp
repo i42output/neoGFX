@@ -63,13 +63,13 @@ namespace neogfx
 
 	bool popup_menu::can_dismiss(const i_widget* aClickedWidget) const
 	{
-		return aClickedWidget == 0 || 
-			iParentWidget == 0 || 
+		return aClickedWidget == nullptr || 
+			iParentWidget == nullptr || 
 			(iParentWidget == aClickedWidget && (style() & (window_style::DismissOnParentClick | window_style::HideOnParentClick)) != window_style::Invalid) ||
 			(iParentWidget != aClickedWidget && !iParentWidget->is_ancestor_of(*aClickedWidget));
 	}
 
-	i_surface::dismissal_type_e popup_menu::dismissal_type() const
+	i_window::dismissal_type_e popup_menu::dismissal_type() const
 	{
 		if ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick)
 			return CloseOnDismissal;
@@ -84,7 +84,7 @@ namespace neogfx
 		switch (dismissal_type())
 		{
 		case CloseOnDismissal:
-			return is_closed();
+			return surface().is_closed();
 		case HideOnDismissal:
 			return hidden();
 		default:
@@ -108,7 +108,7 @@ namespace neogfx
 
 	bool popup_menu::has_rendering_priority() const
 	{
-		return window::has_rendering_priority() || visible();
+		return surface().has_rendering_priority() || visible();
 	}
 
 	bool popup_menu::has_menu() const
@@ -185,7 +185,7 @@ namespace neogfx
 				});
 			}
 		});
-		move_surface(aPosition);
+		app::instance().window_manager().move_window(*this, aPosition);
 		resize(minimum_size());
 		update_position();
 		show();
@@ -368,41 +368,42 @@ namespace neogfx
 
 	void popup_menu::update_position()
 	{
-		rect desktopRect{ app::instance().surface_manager().desktop_rect(surface()) };
-		rect surfaceRect{ surface().surface_position(), surface().surface_size() };
-		if (surfaceRect.bottom() > desktopRect.bottom())
-			surfaceRect.position().y += (desktopRect.bottom() - surfaceRect.bottom());
-		if (surfaceRect.right() > desktopRect.right())
-			surfaceRect.position().x += (desktopRect.right() - surfaceRect.right());
-		if (has_menu() && menu().has_parent())
+		auto& wm = app::instance().window_manager();
+		rect desktopRect{ wm.desktop_rect(*this) };
+		rect ourRect{ wm.window_rect(*this) };
+		if (ourRect.bottom() > desktopRect.bottom())
+			ourRect.position().y += (desktopRect.bottom() - ourRect.bottom());
+		if (ourRect.right() > desktopRect.right())
+			ourRect.position().x += (desktopRect.right() - ourRect.right());
+		if (has_menu() && menu().has_parent() && has_parent_window())
 		{
 			if (menu().parent().type() == i_menu::MenuBar)
 			{
 				if (iParentWidget != 0)
 				{
-					rect menuBarRect = iParentWidget->window_rect() + parent_surface().surface_position();
-					if (!surfaceRect.intersection(menuBarRect).empty())
+					rect menuBarRect = iParentWidget->window_rect() + wm.window_rect(parent_window()).position();
+					if (!ourRect.intersection(menuBarRect).empty())
 					{
-						if (desktopRect.bottom() - menuBarRect.bottom() > surfaceRect.height())
-							surfaceRect.position().y = menuBarRect.bottom();
+						if (desktopRect.bottom() - menuBarRect.bottom() > ourRect.height())
+							ourRect.position().y = menuBarRect.bottom();
 						else
-							surfaceRect.position().y = menuBarRect.top() - surfaceRect.height();
+							ourRect.position().y = menuBarRect.top() - ourRect.height();
 					}
 				}
 			}
 			else
 			{
-				rect parentSurfaceRect{ parent_surface().surface_position(), parent_surface().surface_size() };
-				if (surfaceRect.intersection(parentSurfaceRect).width() > 8.0)
+				rect parentRect{ wm.window_rect(parent_window()) };
+				if (ourRect.intersection(parentRect).width() > 8.0)
 				{
-					if (parentSurfaceRect.right() + surfaceRect.width() < desktopRect.right())
-						surfaceRect.position().x = parentSurfaceRect.right();
+					if (parentRect.right() + ourRect.width() < desktopRect.right())
+						ourRect.position().x = parentRect.right();
 					else
-						surfaceRect.position().x = parentSurfaceRect.position().x - surfaceRect.width();
+						ourRect.position().x = parentRect.position().x - ourRect.width();
 				}
 			}
 		}
-		if (surfaceRect.position() != surface().surface_position())
-			surface().move_surface(surfaceRect.position());
+		if (ourRect.position() != wm.window_rect(*this).position())
+			wm.move_window(*this, ourRect.position());
 	}
 }

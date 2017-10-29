@@ -281,6 +281,14 @@ namespace neogfx
 			throw no_surface_manager();
 	}
 
+	i_window_manager& app::window_manager() const
+	{
+		if (iWindowManager)
+			return *iWindowManager;
+		else
+			throw no_window_manager();
+	}
+	
 	i_keyboard& app::keyboard() const
 	{
 		if (iKeyboard)

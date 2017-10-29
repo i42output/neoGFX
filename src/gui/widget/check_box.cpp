@@ -55,7 +55,7 @@ namespace neogfx
 				background_colour().darker(0x20));
 		if (parent().capturing())
 			background_colour().dark() ? hoverColour.lighten(0x20) : hoverColour.darken(0x20);
-		colour fillColour = parent().enabled() && parent().client_rect().contains(surface().mouse_position() - parent().origin()) ? hoverColour : background_colour();
+		colour fillColour = parent().enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColour : background_colour();
 		aGraphicsContext.fill_rect(boxRect, fillColour.with_alpha(effectively_enabled() ? 0xFF : 0x80));
 		colour borderColour1 = container_background_colour().mid(container_background_colour().mid(background_colour()));
 		if (borderColour1.similar_intensity(container_background_colour(), 0.03125))

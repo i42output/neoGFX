@@ -30,6 +30,7 @@
 #include <neogfx/app/i_service_factory.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/hid/keyboard.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
@@ -111,6 +112,7 @@ namespace neogfx
 		struct no_basic_services : std::logic_error { no_basic_services() : std::logic_error("neogfx::app::no_basic_services") {} };
 		struct no_renderer : std::logic_error { no_renderer() : std::logic_error("neogfx::app::no_renderer") {} };
 		struct no_surface_manager : std::logic_error { no_surface_manager() : std::logic_error("neogfx::app::no_surface_manager") {} };
+		struct no_window_manager : std::logic_error { no_window_manager() : std::logic_error("neogfx::app::no_window_manager") {} };
 		struct no_keyboard : std::logic_error { no_keyboard() : std::logic_error("neogfx::app::no_keyboard") {} };
 		struct no_clipboard : std::logic_error { no_clipboard() : std::logic_error("neogfx::app::no_clipboard") {} };
 		struct action_not_found : std::runtime_error { action_not_found() : std::runtime_error("neogfx::app::action_not_found") {} };
@@ -129,6 +131,7 @@ namespace neogfx
 		i_basic_services& basic_services() const override;
 		i_rendering_engine& rendering_engine() const override;
 		i_surface_manager& surface_manager() const override;
+		i_window_manager& window_manager() const override;
 		i_keyboard& keyboard() const override;
 		i_clipboard& clipboard() const override;
 	public:
@@ -183,6 +186,7 @@ namespace neogfx
 		std::unique_ptr<i_clipboard> iClipboard;
 		std::unique_ptr<i_rendering_engine> iRenderingEngine;
 		std::unique_ptr<i_surface_manager> iSurfaceManager;
+		std::unique_ptr<i_window_manager> iWindowManager;
 		boost::optional<int> iQuitResultCode;
 		texture iDefaultWindowIcon;
 		style_list iStyles;

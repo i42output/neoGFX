@@ -1,7 +1,7 @@
-// i_spacer.hpp
+// sdl_window_manager.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright(C) 2017 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,29 +20,23 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_widget_geometry.hpp"
+#include <neogfx/hid/window_manager.hpp>
 
 namespace neogfx
 {
-	class i_layout;
-
-	class i_spacer : public i_widget_geometry, public i_units_context
+	class sdl_window_manager : public window_manager
 	{
 	public:
-		enum expansion_policy_e
-		{
-			ExpandHorizontally = 0x01,
-			ExpandVertically = 0x02
-		};
-		typedef boost::optional<size> optional_weight;
+		sdl_window_manager();
+		~sdl_window_manager();
 	public:
-		virtual ~i_spacer() {}
+		point mouse_position() const override;
+		point mouse_position(const i_window& aWindow) const override;
+		bool is_mouse_button_pressed(mouse_button aButton) const override;
 	public:
-		virtual bool has_parent() const = 0;
-		virtual const i_layout& parent() const = 0;
-		virtual i_layout& parent() = 0;
-		virtual void set_parent(i_layout& aParent) = 0;
-		virtual expansion_policy_e expansion_policy() const = 0;
-		virtual void set_expansion_policy(expansion_policy_e aExpansionPolicy) = 0;
+		void save_mouse_cursor() override;
+		void set_mouse_cursor(mouse_system_cursor aSystemCursor) override;
+		void restore_mouse_cursor() override;
+		void update_mouse_cursor() override;
 	};
 }
