@@ -84,11 +84,17 @@ namespace neogfx
 
 	void window_manager::move_window(i_window& aWindow, const point& aPosition)
 	{
-		// todo
+		if ((aWindow.style() & window_style::Nested) != window_style::Nested || !aWindow.has_parent_window())
+			aWindow.surface().move_surface(aPosition);
+		else
+			aWindow.as_widget().move(aPosition);
 	}
 
 	void window_manager::resize_window(i_window& aWindow, const size& aExtents)
 	{
-		// todo
+		if ((aWindow.style() & window_style::Nested) != window_style::Nested || !aWindow.has_parent_window())
+			aWindow.surface().resize_surface(aExtents);
+		else
+			aWindow.as_widget().resize(aExtents);
 	}
 }
