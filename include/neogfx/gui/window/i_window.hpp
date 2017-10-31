@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/window/window_events.hpp>
+#include <neogfx/gui/window/window_bits.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
@@ -32,56 +34,9 @@ namespace neogfx
 	class i_nested_window_container;
 	class i_layout;
 
-	enum class window_style : uint32_t
-	{
-		Invalid =				0x00000000,
-		None =					0x00000001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
-		TitleBar =				0x00000002,	// The window has a titlebar
-		NativeTitleBar =		0x00000004,	// The window has a native titlebar
-		SystemMenu =			0x00000008,
-		MinimizeBox =			0x00000010,
-		MaximizeBox =			0x00000020,
-		Resize =				0x00000040,	// The window can be resized and has a maximize button
-		Close =					0x00000080,	// The window has a close button
-		Nested =				0x00000100,	// The window is not a native desktop window but a part of an existing one
-		Fullscreen =			0x00000200,	// The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
-		Modal =					0x00010000,
-		ApplicationModal =		0x00020000,
-		NoActivate =			0x00040000,
-		RequiresOwnerFocus =	0x00080000,
-		DismissOnOwnerClick =	0x00100000,
-		DismissOnParentClick =	0x00200000,
-		HideOnOwnerClick =		0x00400000,
-		HideOnParentClick =		0x00800000,
-		InitiallyHidden =		0x01000000,
-		Weak =					0x10000000,
-		Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close
-	};
-
-	inline constexpr window_style operator|(window_style aLhs, window_style aRhs)
-	{
-		return static_cast<window_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-	}
-
-	inline constexpr window_style operator&(window_style aLhs, window_style aRhs)
-	{
-		return static_cast<window_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-	}
-
-	struct window_placement
-	{
-		enum state_e
-		{
-			Iconized,
-			Restored,
-			Maximized
-		} state;
-		rect iconizedGeometry;
-		rect restoredGeometry;
-	};
-
 	class i_window
 	{
+		friend class window;
 		friend class surface_window_proxy;
 	public:
 		event<window_event&> window_event;
@@ -105,6 +60,7 @@ namespace neogfx
 		virtual i_window_manager& window_manager() = 0;
 	public:
 		virtual bool is_surface() const = 0;
+		virtual bool has_surface() const = 0;
 		virtual const i_surface& surface() const = 0;
 		virtual i_surface& surface() = 0;
 		virtual bool has_native_surface() const = 0;
@@ -191,13 +147,31 @@ namespace neogfx
 		virtual i_widget& focused_widget() const = 0;
 		virtual void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) = 0;
 		virtual void release_focused_widget(i_widget& aWidget) = 0;
-	public:
+	protected:
 		virtual void update_modality() = 0;
+		virtual void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) = 0;
+		virtual void dismiss_children(const i_widget* aClickedWidget = nullptr) = 0;
+		virtual const i_surface_window* find_surface() const = 0;
 	public:
 		virtual const i_widget& as_widget() const = 0;
 		virtual i_widget& as_widget() = 0;
-	protected:
-		virtual void dismiss_children(const i_widget* aClickedWidget = nullptr) = 0;
-		virtual void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) = 0;
+	};
+
+	class pause_rendering
+	{
+	public:
+		pause_rendering(i_window& aWindow) : iOkToPause{ aWindow.has_surface() && !aWindow.surface().destroyed() }, iWindow{ aWindow }
+		{
+			if (iOkToPause)
+				iWindow.surface().pause_rendering();
+		}
+		~pause_rendering()
+		{
+			if (iOkToPause)
+				iWindow.surface().resume_rendering();
+		}
+	private:
+		bool iOkToPause;
+		i_window& iWindow;
 	};
 }

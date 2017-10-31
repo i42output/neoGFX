@@ -24,6 +24,7 @@
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
 
 namespace neogfx
 {
@@ -33,6 +34,7 @@ namespace neogfx
 		virtual std::unique_ptr<i_basic_services> create_basic_services(neolib::io_task& aAppTask) = 0;
 		virtual std::unique_ptr<i_keyboard> create_keyboard() = 0;
 		virtual std::unique_ptr<i_rendering_engine> create_rendering_engine(renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard) = 0;
+		virtual std::unique_ptr<i_window_manager> create_window_manager() = 0;
 	};
 
 	i_service_factory& default_service_factory();

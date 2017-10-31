@@ -854,7 +854,7 @@ int main(int argc, char* argv[])
 				tableView1.model().remove_item(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
 		});
 
-		app.window_manager().restore_mouse_cursor();
+		app.window_manager().restore_mouse_cursor(window);
 
 		auto& w = tabContainer.add_tab_page("Lots").as_widget();
 		ng::vertical_layout l(w);

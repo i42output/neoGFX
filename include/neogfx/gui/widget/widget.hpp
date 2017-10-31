@@ -37,16 +37,17 @@ namespace neogfx
 		~widget();
 		neolib::i_destroyable& as_destroyable() override;
 	public:
+		bool device_metrics_available() const override;
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
 	public:
 		bool is_singular() const override;
 		void set_singular(bool aSingular) override;
+		bool is_root() const override;
 		bool has_root() const override;
 		const i_window& root() const override;
 		i_window& root() override;
-		bool is_root() const override;
 		bool has_parent(bool aSameSurface = true) const override;
 		const i_widget& parent() const override;
 		i_widget& parent() override;

@@ -26,6 +26,7 @@
 #include "../../../gfx/native/opengl.hpp"
 #include "../../../gfx/native/sdl_graphics_context.hpp"
 #include "../../../hid/native/sdl_keyboard.hpp"
+#include "../../../hid/native/sdl_mouse.hpp"
 #include "sdl_window.hpp"
 
 #ifdef WIN32
@@ -77,57 +78,6 @@ namespace neogfx
 			result |= SDL_WINDOW_RESIZABLE;
 		if ((aStyle & window_style::Fullscreen) == window_style::Fullscreen)
 			result |= SDL_WINDOW_FULLSCREEN;
-		return result;
-	}
-
-	mouse_button sdl_window::convert_mouse_button(Uint32 aButton)
-	{
-		mouse_button result = mouse_button::None;
-		if (aButton & SDL_BUTTON(SDL_BUTTON_LEFT))
-			result = static_cast<mouse_button>(result | mouse_button::Left);
-		if (aButton & SDL_BUTTON(SDL_BUTTON_RIGHT))
-			result = static_cast<mouse_button>(result | mouse_button::Right);
-		if (aButton & SDL_BUTTON(SDL_BUTTON_MIDDLE))
-			result = static_cast<mouse_button>(result | mouse_button::Middle);
-		if (aButton & SDL_BUTTON(SDL_BUTTON_X1))
-			result = static_cast<mouse_button>(result | mouse_button::X1);
-		if (aButton & SDL_BUTTON(SDL_BUTTON_X2))
-			result = static_cast<mouse_button>(result | mouse_button::X2);
-		return result;
-	}
-
-	mouse_button sdl_window::convert_mouse_button(Uint8 aButtonIndex)
-	{
-		switch (aButtonIndex)
-		{
-		case SDL_BUTTON_LEFT:
-			return mouse_button::Left;
-		case SDL_BUTTON_RIGHT:
-			return mouse_button::Right;
-		case SDL_BUTTON_MIDDLE:
-			return mouse_button::Middle;
-		case SDL_BUTTON_X1:
-			return mouse_button::X1;
-		case SDL_BUTTON_X2:
-			return mouse_button::X2;
-		default:
-			return mouse_button::Left;
-		}
-	}
-
-	Uint32 sdl_window::convert_mouse_button(mouse_button aButton)
-	{
-		Uint32 result = 0u;
-		if ((aButton & mouse_button::Left) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_LEFT);
-		if ((aButton & mouse_button::Right) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_RIGHT);
-		if ((aButton & mouse_button::Middle) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_MIDDLE);
-		if ((aButton & mouse_button::X1) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_X1);
-		if ((aButton & mouse_button::X2) != mouse_button::None)
-			result = result | SDL_BUTTON(SDL_BUTTON_X2);
 		return result;
 	}
 
@@ -490,89 +440,6 @@ namespace neogfx
 			iExtents = aSize;
 			SDL_SetWindowSize(iHandle, static_cast<int>(aSize.cx), static_cast<int>(aSize.cy));
 		}
-	}
-
-	point sdl_window::mouse_position() const
-	{
-		int x, y;
-		SDL_GetGlobalMouseState(&x, &y);
-		int mfx, mfy;
-		SDL_GetWindowPosition(iHandle, &mfx, &mfy);
-		x -= mfx;
-		y -= mfy;
-		return basic_point<int>{ x, y };
-	}
-
-	bool sdl_window::is_mouse_button_pressed(mouse_button aButton) const
-	{
-		return (aButton & convert_mouse_button(SDL_GetMouseState(0, 0))) != mouse_button::None;
-	}
-
-	void sdl_window::save_mouse_cursor()
-	{
-		iSavedCursors.push_back(cursor_pointer(cursor_pointer(), SDL_GetCursor()));
-	}
-
-	void sdl_window::set_mouse_cursor(mouse_system_cursor aSystemCursor)
-	{
-		SDL_SystemCursor sdlCursor = SDL_SYSTEM_CURSOR_ARROW;
-		switch (aSystemCursor)
-		{
-		case mouse_system_cursor::Arrow:
-			sdlCursor = SDL_SYSTEM_CURSOR_ARROW;
-			break;
-		case mouse_system_cursor::Ibeam:
-			sdlCursor = SDL_SYSTEM_CURSOR_IBEAM;
-			break;
-		case mouse_system_cursor::Wait:
-			sdlCursor = SDL_SYSTEM_CURSOR_WAIT;
-			break;
-		case mouse_system_cursor::Crosshair:
-			sdlCursor = SDL_SYSTEM_CURSOR_CROSSHAIR;
-			break;
-		case mouse_system_cursor::WaitArrow:
-			sdlCursor = SDL_SYSTEM_CURSOR_WAITARROW;
-			break;
-		case mouse_system_cursor::SizeNWSE:
-			sdlCursor = SDL_SYSTEM_CURSOR_SIZENWSE;
-			break;
-		case mouse_system_cursor::SizeNESW:
-			sdlCursor = SDL_SYSTEM_CURSOR_SIZENESW;
-			break;
-		case mouse_system_cursor::SizeWE:
-			sdlCursor = SDL_SYSTEM_CURSOR_SIZEWE;
-			break;
-		case mouse_system_cursor::SizeNS:
-			sdlCursor = SDL_SYSTEM_CURSOR_SIZENS;
-			break;
-		case mouse_system_cursor::SizeAll:
-			sdlCursor = SDL_SYSTEM_CURSOR_SIZEALL;
-			break;
-		case mouse_system_cursor::No:
-			sdlCursor = SDL_SYSTEM_CURSOR_NO;
-			break;
-		case mouse_system_cursor::Hand:
-			sdlCursor = SDL_SYSTEM_CURSOR_HAND;
-			break;
-		}
-		iCurrentCursor = cursor_pointer(cursor_pointer(), SDL_CreateSystemCursor(sdlCursor));
-		SDL_SetCursor(&*iCurrentCursor);
-	}
-
-	void sdl_window::restore_mouse_cursor()
-	{
-		if (iSavedCursors.empty())
-			throw no_cursors_saved();
-		iCurrentCursor = iSavedCursors.back();
-		iSavedCursors.pop_back();
-		SDL_SetCursor(&*iCurrentCursor);
-		update_mouse_cursor();
-	}
-
-	void sdl_window::update_mouse_cursor()
-	{
-		if (iSavedCursors.empty())
-			set_mouse_cursor(surface_window().native_window_mouse_cursor().system_cursor());
 	}
 
 	bool sdl_window::can_render() const
@@ -1372,7 +1239,7 @@ namespace neogfx
 			}
 			break;
 		case SDL_MOUSEMOTION:
-			update_mouse_cursor();
+			surface_window().as_window().window_manager().update_mouse_cursor(surface_window().as_window());
 			push_event(mouse_event(mouse_event_type::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) }));
 			break;
 		case SDL_KEYDOWN:

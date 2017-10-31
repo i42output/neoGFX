@@ -413,7 +413,7 @@ namespace neogfx
 					root().window_manager().save_mouse_cursor();
 					root().window_manager().set_mouse_cursor(mouse_system_cursor::Wait);
 					presentation_model().sort_by(i);
-					root().window_manager().restore_mouse_cursor();
+					root().window_manager().restore_mouse_cursor(root());
 				}, *this);
 				iButtonSinks[i][1] = button.right_clicked([&, i]()
 				{

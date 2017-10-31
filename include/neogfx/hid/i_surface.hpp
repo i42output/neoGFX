@@ -24,8 +24,7 @@
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
-#include <neogfx/gui/widget/i_window.hpp>
+#include <neogfx/gui/window/window_bits.hpp>
 #include "mouse.hpp"
 
 namespace neogfx
@@ -101,23 +100,5 @@ namespace neogfx
 		virtual void set_surface_opacity(double aOpacity) = 0;
 		virtual double surface_transparency() const = 0;
 		virtual void set_surface_transparency(double aTransparency) = 0;
-	};
-
-	class pause_rendering
-	{
-	public:
-		pause_rendering(i_surface& aSurface) : iOkToPause{ !aSurface.destroyed() }, iSurface{ aSurface }
-		{
-			if (iOkToPause)
-				iSurface.pause_rendering();
-		}
-		~pause_rendering()
-		{
-			if (iOkToPause)
-				iSurface.resume_rendering();
-		}
-	private:
-		bool iOkToPause;
-		i_surface& iSurface;
 	};
 }

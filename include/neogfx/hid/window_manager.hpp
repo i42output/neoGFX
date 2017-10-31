@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_window_manager.hpp>
-#include <neogfx/gui/widget/i_window.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 
 namespace neogfx
 {

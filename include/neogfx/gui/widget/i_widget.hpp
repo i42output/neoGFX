@@ -26,95 +26,13 @@
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/layout/i_widget_geometry.hpp>
+#include <neogfx/gui/widget/widget_bits.hpp>
 
 namespace neogfx
 {
 	class i_surface;
 	class i_window;
 	class i_layout;
-
-	enum class widget_part
-	{
-		Client,
-		NonClientTitleBar,
-		NonClientGrab,
-		NonClient,
-		NonClientBorder,
-		NonClientBorderLeft,
-		NonClientBorderTopLeft,
-		NonClientBorderTop,
-		NonClientBorderTopRight,
-		NonClientBorderRight,
-		NonClientBorderBottomRight,
-		NonClientBorderBottom,
-		NonClientBorderBottomLeft,
-		NonClientGrowBox,
-		NonClientCloseButton,
-		NonClientMaximizeButton,
-		NonClientMinimizeButton,
-		NonClientRestoreButton,
-		NonClientMenu,
-		NonClientSystemMenu,
-		NonClientVerticalScrollbar,
-		NonClientHorizontalScrollbar,
-		NonClientOther,
-		Nowhere,
-		NowhereError
-	};
-
-	inline bool capture_ok(widget_part aWidgetPart)
-	{
-		switch (aWidgetPart)
-		{
-		case widget_part::Client:
-		case widget_part::NonClientVerticalScrollbar:
-		case widget_part::NonClientHorizontalScrollbar:
-		case widget_part::NonClientCloseButton:
-		case widget_part::NonClientMaximizeButton:
-		case widget_part::NonClientMinimizeButton:
-		case widget_part::NonClientRestoreButton: 
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	enum class focus_policy : uint32_t
-	{
-		NoFocus				= 0x00000000,
-		ClickFocus			= 0x00000001,
-		TabFocus			= 0x00000002,
-		ClickTabFocus		= ClickFocus | TabFocus,
-		StrongFocus			= ClickTabFocus,
-		WheelFocus			= 0x00000004, // todo
-		PointerFocus		= 0x00000008, // todo
-		ConsumeTabKey		= 0x10000000,
-		ConsumeReturnKey	= 0x20000000,
-		IgnoreNonClient		= 0x40000000
-	};
-
-	enum class focus_event
-	{
-		FocusGained,
-		FocusLost
-	};
-
-	enum class focus_reason
-	{
-		ClickNonClient,
-		ClickClient,
-		Tab,
-		Wheel,
-		Pointer,
-		WindowActivation,
-		Other
-	};
-
-	enum class capture_reason
-	{
-		MouseEvent,
-		Other
-	};
 
 	class i_widget : public i_widget_geometry, public i_units_context, public i_keyboard_handler
 	{
@@ -152,9 +70,9 @@ namespace neogfx
 		virtual bool is_singular() const = 0;
 		virtual void set_singular(bool aSingular) = 0;
 		virtual bool has_root() const = 0;
+		virtual bool is_root() const = 0;
 		virtual const i_window& root() const = 0;
 		virtual i_window& root() = 0;
-		virtual bool is_root() const = 0;
 		virtual bool has_parent(bool aSameSurface = true) const = 0;
 		virtual const i_widget& parent() const = 0;
 		virtual i_widget& parent() = 0;
@@ -322,31 +240,4 @@ namespace neogfx
 			return aWindowCoordinates - window_rect().top_left();
 		}
 	};
-
-	inline focus_policy operator|(focus_policy aLhs, focus_policy aRhs)
-	{
-		return static_cast<focus_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-	}
-
-	inline focus_policy& operator|=(focus_policy& aLhs, focus_policy aRhs)
-	{
-		aLhs = static_cast<focus_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-		return aLhs;
-	}
-
-	inline focus_policy operator&(focus_policy aLhs, focus_policy aRhs)
-	{
-		return static_cast<focus_policy>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-	}
-
-	inline focus_policy& operator&=(focus_policy& aLhs, focus_policy aRhs)
-	{
-		aLhs = static_cast<focus_policy>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-		return aLhs;
-	}
-
-	inline focus_policy operator~(focus_policy aLhs)
-	{
-		return static_cast<focus_policy>(~static_cast<uint32_t>(aLhs));
-	}
 }

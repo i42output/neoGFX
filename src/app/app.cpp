@@ -100,6 +100,7 @@ namespace neogfx
 		iClipboard{ new neogfx::clipboard(basic_services().system_clipboard()) },
 		iRenderingEngine{ aServiceFactory.create_rendering_engine(iProgramOptions.renderer(), iProgramOptions.double_buffering(), basic_services(), keyboard()) },
 		iSurfaceManager{ new neogfx::surface_manager(basic_services(), *iRenderingEngine) },
+		iWindowManager{ aServiceFactory.create_window_manager() },
 		iDefaultWindowIcon{ image{ ":/neogfx/resources/icons/neoGFX.png" } },
 		iCurrentStyle{ iStyles.begin() },
 		iActionFileNew{ add_action("&New...", ":/neogfx/resources/icons.naa#new.png").set_shortcut("Ctrl+Shift+N") },

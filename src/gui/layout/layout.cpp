@@ -637,11 +637,16 @@ namespace neogfx
 		}
 	}
 
+	bool layout::device_metrics_available() const
+	{
+		return owner() != nullptr && owner()->device_metrics_available();
+	}
+
 	const i_device_metrics& layout::device_metrics() const
 	{
-		if (owner() == nullptr)
-			throw no_device_metrics();
-		return owner()->device_metrics();
+		if (device_metrics_available())
+			return owner()->device_metrics();
+		throw no_device_metrics();
 	}
 
 	units layout::units() const

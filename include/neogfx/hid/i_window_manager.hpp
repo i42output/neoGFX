@@ -51,7 +51,7 @@ namespace neogfx
 	public:
 		virtual void save_mouse_cursor() = 0;
 		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
-		virtual void restore_mouse_cursor() = 0;
-		virtual void update_mouse_cursor() = 0;
+		virtual void restore_mouse_cursor(const i_window& aWindow) = 0;
+		virtual void update_mouse_cursor(const i_window& aWindow) = 0;
 	};
 }

@@ -220,11 +220,17 @@ namespace neogfx
 		return iSurfaceWindow != nullptr;
 	}
 
+	bool window::has_surface() const
+	{
+		return find_surface() != nullptr;
+	}
+
 	const i_surface_window& window::surface() const
 	{
-		if (iSurfaceWindow == nullptr)
-			throw no_surface();
-		return *iSurfaceWindow;
+		auto result = find_surface();
+		if (result != nullptr)
+			return *result;
+		throw no_surface();
 	}
 
 	i_surface_window& window::surface()
@@ -393,6 +399,16 @@ namespace neogfx
 		return true;
 	}
 
+	const i_window& window::root() const
+	{
+		return *this;
+	}
+
+	i_window& window::root()
+	{
+		return *this;
+	}
+
 	bool window::can_defer_layout() const
 	{
 		return true;
@@ -411,9 +427,14 @@ namespace neogfx
 			mouse_entered();
 	}
 
+	bool window::device_metrics_available() const
+	{
+		return scrollable_widget::device_metrics_available();
+	}
+
 	const i_device_metrics& window::device_metrics() const
 	{
-		return surface();
+		return scrollable_widget::device_metrics();
 	}
 
 	units window::units() const
@@ -529,11 +550,11 @@ namespace neogfx
 	void window::widget_removed(i_widget& aWidget)
 	{
 		if (iEnteredWidget == &aWidget)
-			iEnteredWidget = 0;
+			iEnteredWidget = nullptr;
 		if (surface().has_capturing_widget() && &surface().capturing_widget() == &aWidget)
 			surface().release_capture(aWidget);
 		if (iFocusedWidget == &aWidget)
-			iFocusedWidget = 0;
+			iFocusedWidget = nullptr;
 		layout_items(true);
 	}
 
@@ -557,19 +578,19 @@ namespace neogfx
 
 	bool window::has_entered_widget() const
 	{
-		return iEnteredWidget != 0;
+		return iEnteredWidget != nullptr;
 	}
 
 	i_widget& window::entered_widget() const
 	{
-		if (iEnteredWidget == 0)
+		if (iEnteredWidget == nullptr)
 			throw widget_not_entered();
 		return *iEnteredWidget;
 	}
 
 	bool window::has_focused_widget() const
 	{
-		return iFocusedWidget != 0;
+		return iFocusedWidget != nullptr;
 	}
 
 	i_widget& window::focused_widget() const
@@ -583,7 +604,7 @@ namespace neogfx
 			return;
 		i_widget* previouslyFocused = iFocusedWidget;
 		iFocusedWidget = &aWidget;
-		if (previouslyFocused != 0)
+		if (previouslyFocused != nullptr)
 			previouslyFocused->focus_lost(aFocusReason);
 		iFocusedWidget->focus_gained(aFocusReason);
 	}
@@ -592,7 +613,7 @@ namespace neogfx
 	{
 		if (iFocusedWidget != &aWidget)
 			throw widget_not_focused();
-		iFocusedWidget = 0;
+		iFocusedWidget = nullptr;
 		aWidget.focus_lost(focus_reason::Other);
 	}
 
@@ -620,12 +641,19 @@ namespace neogfx
 
 	const std::string& window::title_text() const
 	{
-		return native_window().title_text();
+		return iTitleText;
 	}
 
 	void window::set_title_text(const std::string& aTitleText)
 	{
-		native_window().set_title_text(aTitleText);
+		if (iTitleText != aTitleText)
+		{
+			iTitleText = aTitleText;
+			if (iTitleBar != boost::none)
+				iTitleBar->title().set_text(iTitleText);
+			if (has_native_window())
+				native_window().set_title_text(aTitleText);
+		}
 	}
 
 	bool window::is_active() const
@@ -829,22 +857,35 @@ namespace neogfx
 	void window::mouse_entered()
 	{
 		i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
-		i_widget* previousEnteredWidget = iEnteredWidget;
-		iEnteredWidget = &widgetUnderMouse;
-		if (iEnteredWidget != previousEnteredWidget)
+		i_widget* newEnteredWidget = &widgetUnderMouse;
+		i_widget* oldEnteredWidget = iEnteredWidget;
+		if (newEnteredWidget != oldEnteredWidget)
 		{
-			if (previousEnteredWidget != nullptr)
-				previousEnteredWidget->mouse_left();
+			if (oldEnteredWidget != nullptr)
+				oldEnteredWidget->mouse_left();
+			iEnteredWidget = newEnteredWidget;
 			iEnteredWidget->mouse_entered();
 		}
 	}
 
 	void window::mouse_left()
 	{
-		i_widget* previousEnteredWidget = iEnteredWidget;
-		iEnteredWidget = nullptr;
-		if (previousEnteredWidget != nullptr && previousEnteredWidget != this)
-			previousEnteredWidget->mouse_left();
+		i_widget* oldEnteredWidget = iEnteredWidget;
+		if (oldEnteredWidget != nullptr)
+		{
+			iEnteredWidget = nullptr;
+			oldEnteredWidget->mouse_left();
+		}
+	}
+
+	const i_surface_window* window::find_surface() const
+	{
+		if (iSurfaceWindow != nullptr)
+			return &*iSurfaceWindow;
+		else if (has_parent_window())
+			return parent_window().find_surface();
+		else
+			return nullptr;
 	}
 
 	void window::dismiss_children(const i_widget* aClickedWidget)

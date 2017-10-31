@@ -97,7 +97,7 @@ namespace neogfx
 					layout().get_widget_at(iTracking->first).minimum_size().cx, 
 					layout().get_widget_at(iTracking->second).minimum_size().cx);
 				if (has_root())
-					root().window_manager().update_mouse_cursor();
+					root().window_manager().update_mouse_cursor(root());
 			}
 		}
 	}

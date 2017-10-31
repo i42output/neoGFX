@@ -331,15 +331,16 @@ namespace neogfx
 		// implementation
 		// from i_device_metrics
 	public:
-		virtual bool metrics_available() const;
-		virtual size extents() const;
-		virtual dimension horizontal_dpi() const;
-		virtual dimension vertical_dpi() const;
-		virtual dimension em_size() const;
+		bool metrics_available() const override;
+		size extents() const override;
+		dimension horizontal_dpi() const override;
+		dimension vertical_dpi() const override;
+		dimension em_size() const override;
 		// from i_units_context
-		virtual const i_device_metrics& device_metrics() const;
-		virtual neogfx::units units() const;
-		virtual neogfx::units set_units(neogfx::units aUnits) const;
+		bool device_metrics_available() const override;
+		const i_device_metrics& device_metrics() const override;
+		neogfx::units units() const override;
+		neogfx::units set_units(neogfx::units aUnits) const override;
 		// helpers
 	protected:
 		static i_native_font_face& to_native_font_face(const font& aFont);

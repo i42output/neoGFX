@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/video_mode.hpp>
-#include <neogfx/gui/widget/i_window.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/widget/nested_window_container.hpp>
 #include <neogfx/gui/widget/i_nested_window.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
@@ -61,6 +61,7 @@ namespace neogfx
 		i_window_manager& window_manager() override;
 	public:
 		bool is_surface() const override;
+		bool has_surface() const override;
 		const i_surface_window& surface() const override;
 		i_surface_window& surface() override;
 		bool has_native_surface() const override;
@@ -94,6 +95,8 @@ namespace neogfx
 		colour frame_colour() const override;
 	public:
 		bool is_root() const override;
+		const i_window& root() const override;
+		i_window& root() override;
 		bool can_defer_layout() const override;
 		bool is_managing_layout() const override;
 		void layout_items_completed() override;
@@ -101,6 +104,7 @@ namespace neogfx
 		void widget_added(i_widget&) override;
 		void widget_removed(i_widget& aWidget) override;
 	public:
+		bool device_metrics_available() const override;
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
@@ -169,17 +173,17 @@ namespace neogfx
 		i_widget& focused_widget() const override;
 		void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
 		void release_focused_widget(i_widget& aWidget) override;
-	public:
-		void update_modality() override;
 	protected:
 		void mouse_entered() override;
 		void mouse_left() override;
+	protected:
+		void update_modality() override;
+		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) override;
+		void dismiss_children(const i_widget* aClickedWidget = nullptr) override;
+		const i_surface_window* find_surface() const override;
 	public:
 		const i_widget& as_widget() const override;
 		i_widget& as_widget() override;
-	protected:
-		void dismiss_children(const i_widget* aClickedWidget = nullptr) override;
-		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) override;
 	private:
 		void init();
 	private:
@@ -190,6 +194,7 @@ namespace neogfx
 		std::unique_ptr<i_surface_window> iSurfaceWindow;
 		std::unique_ptr<i_nested_window> iNestedWindowDetails;
 		window_style iStyle;
+		std::string iTitleText;
 		int32_t iCountedEnable;
 		i_widget* iEnteredWidget;
 		i_widget* iFocusedWidget;

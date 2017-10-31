@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
+#include <neogfx/gui/widget/widget_bits.hpp>
 
 namespace neogfx
 {

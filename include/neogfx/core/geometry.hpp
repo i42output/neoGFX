@@ -683,6 +683,9 @@ namespace neogfx
 	class i_units_context
 	{
 	public:
+		struct no_device_metrics : std::logic_error { no_device_metrics() : std::logic_error("neogfx::i_units_context::no_device_metrics") {} };
+	public:
+		virtual bool device_metrics_available() const = 0;
 		virtual const i_device_metrics& device_metrics() const = 0;
 		virtual neogfx::units units() const = 0;
 		virtual neogfx::units set_units(neogfx::units aUnits) const = 0;
@@ -693,9 +696,10 @@ namespace neogfx
 	public:
 		units_context(const i_units_context& aSource);
 	public:
-		virtual const i_device_metrics& device_metrics() const;
-		virtual neogfx::units units() const;
-		virtual neogfx::units set_units(neogfx::units aUnits) const;
+		bool device_metrics_available() const override;
+		const i_device_metrics& device_metrics() const override;
+		neogfx::units units() const override;
+		neogfx::units set_units(neogfx::units aUnits) const override;
 	private:
 		const i_units_context& iSource;
 		mutable neogfx::units iUnits;

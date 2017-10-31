@@ -588,6 +588,11 @@ namespace neogfx
 		return static_cast<dimension>(iDefaultFont.size() / 72.0 * horizontal_dpi());
 	}
 
+	bool graphics_context::device_metrics_available() const
+	{
+		return device_metrics().metrics_available();
+	}
+
 	const i_device_metrics& graphics_context::device_metrics() const
 	{
 		return *this;

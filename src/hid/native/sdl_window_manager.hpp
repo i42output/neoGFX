@@ -20,12 +20,18 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <SDL.h>
+#include <SDL_mouse.h>
 #include <neogfx/hid/window_manager.hpp>
 
 namespace neogfx
 {
 	class sdl_window_manager : public window_manager
 	{
+	public:
+		struct no_cursors_saved : std::logic_error { no_cursors_saved() : std::logic_error("neogfx::sdl_window_manager::no_cursors_saved") {} };
+	private:
+		typedef std::shared_ptr<SDL_Cursor> cursor_pointer;
 	public:
 		sdl_window_manager();
 		~sdl_window_manager();
@@ -36,7 +42,10 @@ namespace neogfx
 	public:
 		void save_mouse_cursor() override;
 		void set_mouse_cursor(mouse_system_cursor aSystemCursor) override;
-		void restore_mouse_cursor() override;
-		void update_mouse_cursor() override;
+		void restore_mouse_cursor(const i_window& aWindow) override;
+		void update_mouse_cursor(const i_window& aWindow) override;
+	private:
+		cursor_pointer iCurrentCursor;
+		std::vector<cursor_pointer> iSavedCursors;
 	};
 }

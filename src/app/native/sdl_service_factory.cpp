@@ -21,6 +21,7 @@
 #include <neogfx/app/i_service_factory.hpp>
 #include "sdl_basic_services.hpp"
 #include "../../hid/native/sdl_keyboard.hpp"
+#include "../../hid/native/sdl_window_manager.hpp"
 #include "../../gfx/native/sdl_renderer.hpp"
 
 namespace neogfx
@@ -39,6 +40,10 @@ namespace neogfx
 		virtual std::unique_ptr<i_rendering_engine> create_rendering_engine(renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard)
 		{
 			return std::make_unique<sdl_renderer>(aRenderer, aDoubleBufferedWindows, aBasicServices, aKeyboard);
+		}
+		virtual std::unique_ptr<i_window_manager> create_window_manager()
+		{
+			return std::make_unique<sdl_window_manager>();
 		}
 	};
 

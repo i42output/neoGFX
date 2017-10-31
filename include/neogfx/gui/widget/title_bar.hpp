@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/widget.hpp>
-#include <neogfx/gui/widget/i_window.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
 #include <neogfx/gui/layout/spacer.hpp>

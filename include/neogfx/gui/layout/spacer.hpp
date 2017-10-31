@@ -30,7 +30,6 @@ namespace neogfx
 	{
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::spacer::no_parent") {} };
-		struct no_device_metrics : std::logic_error { no_device_metrics() : std::logic_error("neogfx::spacer::no_device_metrics") {} };
 		struct margins_unsupported : std::logic_error { margins_unsupported() : std::logic_error("neogfx::spacer::margins_unsupported") {} };
 	public:
 		spacer(expansion_policy_e aExpansionPolicy);
@@ -65,6 +64,7 @@ namespace neogfx
 		bool has_margins() const override;
 		void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
 	public:
+		bool device_metrics_available() const override;
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;

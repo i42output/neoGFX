@@ -29,8 +29,8 @@ namespace neogfx
 	class widget::layout_timer : public pause_rendering, neolib::callback_timer
 	{
 	public:
-		layout_timer(i_surface& aSurface, neolib::io_task& aIoTask, std::function<void(callback_timer&)> aCallback) :
-			pause_rendering(aSurface), neolib::callback_timer(aIoTask, aCallback, 0)
+		layout_timer(i_window& aWindow, neolib::io_task& aIoTask, std::function<void(callback_timer&)> aCallback) :
+			pause_rendering(aWindow), neolib::callback_timer(aIoTask, aCallback, 0)
 		{
 		}
 		~layout_timer()
@@ -125,9 +125,16 @@ namespace neogfx
 		return *this;
 	}
 
+	bool widget::device_metrics_available() const
+	{
+		return has_surface();
+	}
+
 	const i_device_metrics& widget::device_metrics() const
 	{
-		return surface();
+		if (device_metrics_available())
+			return surface();
+		throw no_device_metrics();
 	}
 
 	units widget::units() const
@@ -155,6 +162,11 @@ namespace neogfx
 		}
 	}
 
+	bool widget::is_root() const
+	{
+		return false;
+	}
+
 	bool widget::has_root() const
 	{
 		return find_root() != nullptr;
@@ -171,11 +183,6 @@ namespace neogfx
 	i_window& widget::root()
 	{
 		return const_cast<i_window&>(const_cast<const widget*>(this)->root());
-	}
-
-	bool widget::is_root() const
-	{
-		return false;
 	}
 
 	bool widget::has_parent(bool aSameSurface) const
@@ -609,11 +616,10 @@ namespace neogfx
 		{
 			if (!iLayoutTimer)
 			{
-				iLayoutTimer = std::make_unique<layout_timer>(surface(), app::instance(), [this](neolib::callback_timer&)
+				iLayoutTimer = std::make_unique<layout_timer>(root(), app::instance(), [this](neolib::callback_timer&)
 				{
 					auto t = std::move(iLayoutTimer);
-					if (!surface().destroyed())
-						layout_items();
+					layout_items();
 					update();
 				});
 			}
@@ -856,7 +862,7 @@ namespace neogfx
 
 	void widget::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
 	{
-		optional_margins newMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins());
+		optional_margins newMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins{});
 		if (iMargins != newMargins)
 		{
 			iMargins = newMargins;

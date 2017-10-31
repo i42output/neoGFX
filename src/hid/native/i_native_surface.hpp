@@ -61,13 +61,6 @@ namespace neogfx
 		virtual void move_surface(const point& aPosition) = 0;
 		virtual size surface_size() const = 0;
 		virtual void resize_surface(const size& aSize) = 0;
-		virtual point mouse_position() const = 0;
-		virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;
-	public:
-		virtual void save_mouse_cursor() = 0;
-		virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
-		virtual void restore_mouse_cursor() = 0;
-		virtual void update_mouse_cursor() = 0;
 	public:
 		virtual uint64_t frame_counter() const = 0;
 		virtual void limit_frame_rate(uint32_t aFps) = 0;

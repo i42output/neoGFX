@@ -208,11 +208,16 @@ namespace neogfx
 		/* do nothing */
 	}
 
+	bool spacer::device_metrics_available() const
+	{
+		return iParent != nullptr && iParent->device_metrics_available();
+	}
+
 	const i_device_metrics& spacer::device_metrics() const
 	{
-		if (iParent == nullptr)
-			throw no_device_metrics();
-		return iParent->device_metrics();
+		if (device_metrics_available())
+			return iParent->device_metrics();
+		throw no_device_metrics();
 	}
 
 	units spacer::units() const

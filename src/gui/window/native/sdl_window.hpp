@@ -26,7 +26,7 @@
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
-#include <neogfx/gui/widget/i_window.hpp> // for window_style
+#include <neogfx/gui/window/window_bits.hpp>
 #include "opengl_window.hpp"
 
 
@@ -62,14 +62,8 @@ namespace neogfx
 			failed_to_detach_from_sdl_window(const std::string& aReason) :
 				std::runtime_error("neogfx::sdl_window::failed_to_detach_from_sdl_window: Failed to detach from SDL window, reason: " + aReason) {}
 		};
-		struct no_cursors_saved : std::logic_error { no_cursors_saved() : std::logic_error("neogfx::sdl_window::no_cursors_saved") {} };
-	private:
-		typedef std::shared_ptr<SDL_Cursor> cursor_pointer;
 	public:
 		static uint32_t convert_style(window_style aStyle);
-		static mouse_button convert_mouse_button(Uint32 aButton);
-		static mouse_button convert_mouse_button(Uint8 aButtonIndex);
-		static Uint32 convert_mouse_button(mouse_button aButton);
 	public:
 		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
 		sdl_window(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default);
@@ -90,13 +84,6 @@ namespace neogfx
 		void move_surface(const point& aPosition) override;
 		size surface_size() const override;
 		void resize_surface(const size& aSize) override;
-		point mouse_position() const override;
-		bool is_mouse_button_pressed(mouse_button aButton) const override;
-	public:
-		void save_mouse_cursor() override;
-		void set_mouse_cursor(mouse_system_cursor aSystemCursor) override;
-		void restore_mouse_cursor() override;
-		void update_mouse_cursor() override;
 	public:
 		bool can_render() const override;
 	public:
@@ -156,8 +143,6 @@ namespace neogfx
 		bool iVisible;
 		bool iCapturingMouse;
 		bool iNonClientCapturing;
-		cursor_pointer iCurrentCursor;
-		std::vector<cursor_pointer> iSavedCursors;
 		bool iReady;
 		bool iDestroyed;
 		mutable margins iBorderThickness;

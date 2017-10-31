@@ -36,7 +36,8 @@ namespace neogfx
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (non_client_entered() && surface_window().native_window_hit_test(mouse_position()) == widget_part::Nowhere)
+			if (non_client_entered() && 
+				surface_window().native_window_hit_test(surface_window().as_window().window_manager().mouse_position(surface_window().as_window())) == widget_part::Nowhere)
 			{
 				auto e1 = find_event<window_event>(window_event_type::NonClientLeave);
 				auto e2 = find_event<window_event>(window_event_type::NonClientEnter);
