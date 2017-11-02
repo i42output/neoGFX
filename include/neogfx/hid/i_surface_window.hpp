@@ -33,8 +33,10 @@ namespace neogfx
 	class i_surface_window : public i_surface
 	{
 	public:
+		struct no_native_window : std::logic_error { no_native_window() : std::logic_error("neogfx::i_surface::no_native_window") {} };
 		struct widget_not_capturing : std::logic_error { widget_not_capturing() : std::logic_error("neogfx::i_surface_window::widget_not_capturing") {} };
 	public:
+		virtual bool has_native_window() const = 0;
 		virtual const i_native_window& native_window() const = 0;
 		virtual i_native_window& native_window() = 0;
 	public:

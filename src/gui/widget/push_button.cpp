@@ -368,7 +368,7 @@ namespace neogfx
 
 	void push_button::animate()
 	{
-		if (surface().destroyed()) 
+		if (!root().has_native_surface())
 			return;
 
 		if (entered())

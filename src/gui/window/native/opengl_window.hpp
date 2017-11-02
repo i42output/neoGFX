@@ -75,8 +75,10 @@ namespace neogfx
 		dimension em_size() const override;
 	protected:
 		i_surface_window& surface_window() const override;
-		void destroying();
-		void destroyed();
+		virtual void set_destroying();
+		void set_destroyed() override;
+	public:
+		neolib::i_destroyable& as_destroyable() override;
 	private:
 		virtual void display() = 0;
 	private:
@@ -94,7 +96,6 @@ namespace neogfx
 		uint64_t iLastFrameTime;
 		std::deque<double> iFpsData;
 		bool iRendering;
-		bool iDestroying;
 		uint32_t iPaused;
 	};
 }

@@ -34,7 +34,8 @@ namespace neogfx
 		updater(header_view& aParent) :
 			neolib::callback_timer{ app::instance(), [this, &aParent](neolib::callback_timer&)
 			{
-				neolib::destroyable::destroyed_flag destroyed{ *this };
+				neolib::destroyed_flag destroyed{ *this };
+				neolib::destroyed_flag surfaceDestroyed{ aParent.surface().as_destroyable() };
 				for (auto& sw : aParent.iSectionWidths)
 				{
 					sw.calculated = 0.0;
@@ -52,7 +53,7 @@ namespace neogfx
 					{
 						aParent.iOwner.header_view_updated(aParent, header_view_update_reason::FullUpdate);
 						app::instance().process_events(epc);
-						if (destroyed || aParent.surface().destroyed())
+						if (destroyed || surfaceDestroyed)
 							return;
 						since = app::instance().program_elapsed_ms();
 					}

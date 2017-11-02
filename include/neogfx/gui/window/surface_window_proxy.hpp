@@ -68,11 +68,12 @@ namespace neogfx
 		void render_surface() override;
 		void pause_rendering() override;
 		void resume_rendering() override;
+		bool has_native_surface() const override;
 		const i_native_surface& native_surface() const override;
 		i_native_surface& native_surface() override;
+		bool has_native_window() const override;
 		const i_native_window& native_window() const override;
 		i_native_window& native_window() override;
-		bool destroyed() const override;
 	public:
 		point surface_position() const override;
 		void move_surface(const point& aPosition) override;
@@ -130,10 +131,13 @@ namespace neogfx
 		i_window& as_window() override;
 		const i_widget& as_widget() const override;
 		i_widget& as_widget()  override;
+	public:
+		neolib::i_destroyable& as_destroyable() override;
 	private:
 		i_window& iWindow;
 		i_rendering_engine& iRenderingEngine;
 		std::unique_ptr<i_native_window> iNativeWindow;
+		destroyed_flag iNativeSurfaceDestroyed;
 		bool iNativeWindowClosing;
 		bool iClosed;
 		boost::optional<char32_t> iSurrogatePairPart;

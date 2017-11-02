@@ -207,6 +207,8 @@ namespace neogfx
 		for (std::size_t s = 0; !eventsAlreadyQueued && s < app::instance().surface_manager().surface_count(); ++s)
 		{
 			auto& surface = app::instance().surface_manager().surface(s);
+			if (!surface.has_native_surface())
+				continue;
 			if (surface.surface_type() == surface_type::Window && static_cast<i_native_window&>(surface.native_surface()).events_queued())
 				eventsAlreadyQueued = true;
 		}

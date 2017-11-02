@@ -34,7 +34,7 @@ namespace neogfx
 	{
 		for (auto const& s : iSurfaces)
 		{
-			if (!s->destroyed() && s->native_surface().initialising())
+			if (s->has_native_surface() && s->native_surface().initialising())
 				return true;
 		}
 		return false;
@@ -69,7 +69,7 @@ namespace neogfx
 	bool surface_manager::is_surface_attached(void* aNativeSurfaceHandle) const
 	{
 		for (auto& s : iSurfaces)
-			if (!s->destroyed() && s->native_surface().handle() == aNativeSurfaceHandle)
+			if (s->has_native_surface() && s->native_surface().handle() == aNativeSurfaceHandle)
 				return true;
 		return false;
 	}
@@ -77,7 +77,7 @@ namespace neogfx
 	i_surface& surface_manager::attached_surface(void* aNativeSurfaceHandle)
 	{
 		for (auto& s : iSurfaces)
-			if (!s->destroyed() && s->native_surface().handle() == aNativeSurfaceHandle)
+			if (s->has_native_surface() && s->native_surface().handle() == aNativeSurfaceHandle)
 				return *s;
 		throw surface_not_found();
 	}
@@ -135,9 +135,9 @@ namespace neogfx
 	{
 		for (auto i = iSurfaces.begin(); i != iSurfaces.end(); ++i)
 		{
-			if ((*i)->destroyed())
+			if (!(*i)->has_native_surface())
 				continue;
-			if ((*i)->surface_type() == surface_type::Window && static_cast<i_native_window&>((*i)->native_surface()).is_active())
+			if ((*i)->surface_type() == surface_type::Window && (*i)->as_surface_window().as_window().is_active())
 			{
 				display_error_message((*i)->native_surface(), aTitle, aMessage);
 				return;

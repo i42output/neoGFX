@@ -29,15 +29,14 @@
 namespace neogfx
 {
 	opengl_window::opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow) :
-		native_window(aRenderingEngine, aSurfaceManager),
-		iSurfaceWindow(aWindow),
-		iLogicalCoordinateSystem(neogfx::logical_coordinate_system::AutomaticGui),
-		iFrameRate(60),
-		iFrameCounter(0),
-		iLastFrameTime(0),
-		iRendering(false),
-		iDestroying(false),
-		iPaused(0)
+		native_window{ aRenderingEngine, aSurfaceManager },
+		iSurfaceWindow{ aWindow },
+		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGui },
+		iFrameRate{ 60 },
+		iFrameCounter{ 0 },
+		iLastFrameTime{ 0 },
+		iRendering{ false },
+		iPaused{ 0 }
 	{
 #ifdef _WIN32
 		ID2D1Factory* m_pDirect2dFactory;
@@ -50,6 +49,7 @@ namespace neogfx
 
 	opengl_window::~opengl_window()
 	{
+		set_destroyed();
 		if (rendering_engine().active_context_surface() == this)
 			rendering_engine().deactivate_context();
 	}
@@ -297,11 +297,10 @@ namespace neogfx
 		return iSurfaceWindow;
 	}
 
-	void opengl_window::destroying()
+	void opengl_window::set_destroying()
 	{
-		if (iDestroying)
-			return;
-		iDestroying = true;
+		destroyable::set_destroying();
+		set_destroyed();
 		if (iFrameBufferSize != size{})
 		{
 			rendering_engine().activate_context(*this);
@@ -311,7 +310,13 @@ namespace neogfx
 		}
 	}
 
-	void opengl_window::destroyed()
+	void opengl_window::set_destroyed()
 	{
+		destroyable::set_destroyed();
+	}
+
+	neolib::i_destroyable& opengl_window::as_destroyable()
+	{
+		return *this;
 	}
 }

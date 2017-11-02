@@ -192,11 +192,12 @@ namespace neogfx
 
 	dialog_result dialog::exec()
 	{
+		neolib::destroyed_flag destroyed{ surface().as_destroyable() };
 		app::event_processing_context epc(app::instance(), "neogfx::dialog");
 		while (iResult == boost::none)
 		{
 			app::instance().process_events(epc);
-			if (surface().destroyed() && result() == dialog_result::NoResult)
+			if (destroyed && result() == dialog_result::NoResult)
 				set_result(dialog_result::Rejected);
 		}
 		return *iResult;

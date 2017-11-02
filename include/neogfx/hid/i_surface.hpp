@@ -88,9 +88,9 @@ namespace neogfx
 		virtual void render_surface() = 0;
 		virtual void pause_rendering() = 0;
 		virtual void resume_rendering() = 0;
+		virtual bool has_native_surface() const = 0;
 		virtual const i_native_surface& native_surface() const = 0;
 		virtual i_native_surface& native_surface() = 0;
-		virtual bool destroyed() const = 0;
 	public:
 		virtual point surface_position() const = 0;
 		virtual void move_surface(const point& aPosition) = 0;
@@ -100,5 +100,7 @@ namespace neogfx
 		virtual void set_surface_opacity(double aOpacity) = 0;
 		virtual double surface_transparency() const = 0;
 		virtual void set_surface_transparency(double aTransparency) = 0;
+	public:
+		virtual neolib::i_destroyable& as_destroyable() = 0;
 	};
 }

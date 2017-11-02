@@ -184,6 +184,8 @@ namespace neogfx
 	public:
 		const i_widget& as_widget() const override;
 		i_widget& as_widget() override;
+	public:
+		neolib::i_destroyable& as_destroyable() override;
 	private:
 		void init();
 	private:
@@ -206,5 +208,6 @@ namespace neogfx
 		vertical_layout iClientLayout;
 		vertical_layout iStatusBarLayout;
 		optional_title_bar iTitleBar;
+		boost::optional<destroyed_flag> iSurfaceDestroyed;
 	};
 }

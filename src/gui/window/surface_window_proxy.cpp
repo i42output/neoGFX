@@ -29,6 +29,7 @@ namespace neogfx
 		iWindow{ aWindow }, 
 		iRenderingEngine{ app::instance().rendering_engine() },
 		iNativeWindow{ aNativeWindowCreator(*this) },
+		iNativeSurfaceDestroyed{ iNativeWindow->as_destroyable() },
 		iClosed{ false },
 		iCapturingWidget{ nullptr }
 	{
@@ -37,8 +38,9 @@ namespace neogfx
 
 	surface_window_proxy::~surface_window_proxy()
 	{
-		close();
+		destroyable::set_destroyed();
 		app::instance().surface_manager().remove_surface(*this);
+		close();
 	}
 
 	window_style surface_window_proxy::style() const
@@ -106,7 +108,7 @@ namespace neogfx
 		if (iClosed)
 			return;
 		destroyed_flag destroyed{ *this };
-		if (!surface_window_proxy::destroyed())
+		if (has_native_surface())
 			native_surface().close();
 		else
 		{
@@ -221,49 +223,54 @@ namespace neogfx
 
 	void surface_window_proxy::render_surface()
 	{
-		if (!destroyed())
+		if (has_native_surface())
 			native_surface().render();
 	}
 
 	void surface_window_proxy::pause_rendering()
 	{
-		if (!destroyed())
+		if (has_native_surface())
 			native_surface().pause();
 	}
 
 	void surface_window_proxy::resume_rendering()
 	{
-		if (!destroyed())
+		if (has_native_surface())
 			native_surface().resume();
+	}
+
+	bool surface_window_proxy::has_native_surface() const
+	{
+		return iNativeWindow != nullptr && !iNativeSurfaceDestroyed;
 	}
 
 	const i_native_surface& surface_window_proxy::native_surface() const
 	{
-		if (iNativeWindow == nullptr)
-			throw no_native_surface();
-		return *iNativeWindow;
+		if (has_native_surface())
+			return *iNativeWindow;
+		throw no_native_surface();
 	}
 
 	i_native_surface& surface_window_proxy::native_surface()
 	{
-		if (iNativeWindow == nullptr)
-			throw no_native_surface();
-		return *iNativeWindow;
+		return const_cast<i_native_surface&>(const_cast<const surface_window_proxy*>(this)->native_surface());
+	}
+
+	bool surface_window_proxy::has_native_window() const
+	{
+		return has_native_surface();
 	}
 
 	const i_native_window& surface_window_proxy::native_window() const
 	{
-		return static_cast<const i_native_window&>(native_surface());
+		if (has_native_window())
+			return static_cast<const i_native_window&>(native_surface());
+		throw no_native_window();
 	}
 
 	i_native_window& surface_window_proxy::native_window()
 	{
-		return static_cast<i_native_window&>(native_surface());
-	}
-
-	bool surface_window_proxy::destroyed() const
-	{
-		return !iNativeWindow || native_window().is_destroyed();
+		return const_cast<i_native_window&>(const_cast<const surface_window_proxy*>(this)->native_window());
 	}
 
 	point surface_window_proxy::surface_position() const
@@ -755,5 +762,10 @@ namespace neogfx
 	i_widget& surface_window_proxy::as_widget()
 	{
 		return as_window().as_widget();
+	}
+
+	neolib::i_destroyable& surface_window_proxy::as_destroyable()
+	{
+		return *this;
 	}
 }

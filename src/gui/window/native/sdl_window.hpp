@@ -113,15 +113,15 @@ namespace neogfx
 		void release_capture() override;
 		void non_client_set_capture() override;
 		void non_client_release_capture() override;
-		bool is_destroyed() const override;
 		void set_title_text(const std::string& aTitleText) override;
+	protected:
+		void set_destroying() override;
+		void set_destroyed() override;
 	private:
 		static void install_creation_hook(sdl_window& aNewWindow);
 		static sdl_window* new_window();
 		void init();
 		void process_event(const SDL_Event& aEvent);
-		virtual void destroying();
-		virtual void destroyed();
 		margins border_thickness() const;
 		void push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers);
 #ifdef WIN32
@@ -144,7 +144,6 @@ namespace neogfx
 		bool iCapturingMouse;
 		bool iNonClientCapturing;
 		bool iReady;
-		bool iDestroyed;
 		mutable margins iBorderThickness;
 		std::deque<key_modifiers_e> iMouseButtonEventExtraInfo;
 		widget_part iClickedWidgetPart;

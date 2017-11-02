@@ -873,14 +873,14 @@ namespace neogfx
 
 	void widget::update(bool aIncludeNonClient)
 	{
-		if ((!is_root() && !has_parent()) || !has_surface() || surface().destroyed() || effectively_hidden() || layout_items_in_progress())
+		if ((!is_root() && !has_parent()) || !has_root() || !root().has_native_surface() || effectively_hidden() || layout_items_in_progress())
 			return;
 		update(aIncludeNonClient ? to_client_coordinates(window_rect()) : client_rect());
 	}
 
 	void widget::update(const rect& aUpdateRect)
 	{
-		if ((!is_root() && !has_parent()) || !has_surface() || surface().destroyed() || effectively_hidden() || layout_items_in_progress())
+		if ((!is_root() && !has_parent()) || !has_root() || !root().has_native_surface() || effectively_hidden() || layout_items_in_progress())
 			return;
 		if (aUpdateRect.empty())
 			return;
@@ -1300,7 +1300,7 @@ namespace neogfx
 
 	bool widget::mouse_event_is_non_client() const
 	{
-		if (!has_surface() || surface().destroyed() || !surface().is_window() || !surface().as_surface_window().current_event_is_non_client())
+		if (!has_root() || !root().has_native_surface() || !surface().as_surface_window().current_event_is_non_client())
 			return false;
 		else
 			return true;

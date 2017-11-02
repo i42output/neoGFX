@@ -155,23 +155,17 @@ namespace neogfx
 	public:
 		virtual const i_widget& as_widget() const = 0;
 		virtual i_widget& as_widget() = 0;
+	public:
+		virtual neolib::i_destroyable& as_destroyable() = 0;
 	};
 
 	class pause_rendering
 	{
 	public:
-		pause_rendering(i_window& aWindow) : iOkToPause{ aWindow.has_surface() && !aWindow.surface().destroyed() }, iWindow{ aWindow }
-		{
-			if (iOkToPause)
-				iWindow.surface().pause_rendering();
-		}
-		~pause_rendering()
-		{
-			if (iOkToPause)
-				iWindow.surface().resume_rendering();
-		}
+		pause_rendering(i_window& aWindow);
+		~pause_rendering();
 	private:
-		bool iOkToPause;
-		i_window& iWindow;
+		i_surface* iSurface;
+		neolib::optional_destroyed_flag iSurfaceDestroyed;
 	};
 }

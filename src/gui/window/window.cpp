@@ -29,6 +29,22 @@
 
 namespace neogfx
 {
+	pause_rendering::pause_rendering(i_window& aWindow) :
+		iSurface{ aWindow.has_native_surface() ? &aWindow.surface() : nullptr }
+	{
+		if (iSurface != nullptr)
+		{
+			iSurfaceDestroyed.emplace(iSurface->as_destroyable());
+			iSurface->pause_rendering();
+		}
+	}
+
+	pause_rendering::~pause_rendering()
+	{
+		if (iSurface != nullptr && !*iSurfaceDestroyed)
+			iSurface->resume_rendering();
+	}
+
 	class window::nested_details : public i_nested_window
 	{
 	public:
@@ -185,6 +201,7 @@ namespace neogfx
 
 	window::~window()
 	{
+		destroyable::set_destroyed();
 	}
 
 	window_style window::style() const
@@ -240,7 +257,7 @@ namespace neogfx
 
 	bool window::has_native_surface() const
 	{
-		return is_surface() && !surface().destroyed();
+		return is_surface() && !*iSurfaceDestroyed;
 	}
 
 	const i_native_surface& window::native_surface() const
@@ -737,6 +754,8 @@ namespace neogfx
 
 	void window::init()
 	{
+		iSurfaceDestroyed.emplace(surface().native_surface().as_destroyable());
+
 		update_modality();
 
 		scrollable_widget::init();
@@ -756,7 +775,10 @@ namespace neogfx
 		iClientLayout.set_margins(neogfx::optional_margins{});
 		iStatusBarLayout.set_margins(neogfx::margins{});
 
-		layout_items(true);
+		if (!is_nested())
+			resize(native_surface().surface_size());
+		else
+			layout_items(true);
 
 		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
 		{
@@ -850,6 +872,11 @@ namespace neogfx
 	}
 
 	i_widget& window::as_widget()
+	{
+		return *this;
+	}
+
+	neolib::i_destroyable& window::as_destroyable()
 	{
 		return *this;
 	}
