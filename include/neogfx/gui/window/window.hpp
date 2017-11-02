@@ -137,8 +137,8 @@ namespace neogfx
 		point window_position() const override;
 		neogfx::window_placement window_placement() const override;
 		void set_window_placement(const neogfx::window_placement& aPlacement) override;
-		void centre() override;
-		void centre_on_parent() override;
+		void centre(bool aSetMinimumSize = true) override;
+		void centre_on_parent(bool aSetMinimumSize = true) override;
 		bool window_enabled() const override;
 		void counted_window_enable(bool aEnable) override;
 	public:

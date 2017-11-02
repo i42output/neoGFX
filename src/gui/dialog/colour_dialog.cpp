@@ -879,8 +879,9 @@ namespace neogfx
 			update();
 		});
 
-		centre_on_parent();
 		update_widgets(*this);
+
+		centre_on_parent();
 	}
 
 	colour_dialog::mode_e colour_dialog::current_mode() const

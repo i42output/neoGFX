@@ -123,6 +123,7 @@ namespace neogfx
 				*this, 
 				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aDimensions, app::instance().name(), aStyle); });
 		init();
+		centre_on_parent(false);
 	}
 
 	window::window(const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
@@ -133,6 +134,7 @@ namespace neogfx
 				*this, 
 				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aDimensions, aWindowTitle, aStyle); });
 		init();
+		centre_on_parent(false);
 	}
 
 	window::window(const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
@@ -164,6 +166,7 @@ namespace neogfx
 				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, app::instance().name(), aStyle); });
 		set_parent(aParent.root().as_widget());
 		init();
+		centre_on_parent(false);
 	}
 
 	window::window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
@@ -175,6 +178,7 @@ namespace neogfx
 				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle); });
 		set_parent(aParent.root().as_widget());
 		init();
+		centre_on_parent(false);
 	}
 
 	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
@@ -529,18 +533,22 @@ namespace neogfx
 		close();
 	}
 
-	void window::centre()
+	void window::centre(bool aSetMinimumSize)
 	{
-		window_manager().resize_window(*this, minimum_size());
+		layout_items();
+		if (aSetMinimumSize)
+			window_manager().resize_window(*this, minimum_size());
 		rect desktopRect{ window_manager().desktop_rect(*this) };
 		window_manager().move_window(*this, (desktopRect.extents() - window_manager().window_rect(*this).extents()) / 2.0);
 	}
 
-	void window::centre_on_parent()
+	void window::centre_on_parent(bool aSetMinimumSize)
 	{
-		if (has_parent_window())
+		if (has_parent_window(false))
 		{
-			window_manager().resize_window(*this, minimum_size());
+			layout_items();
+			if (aSetMinimumSize)
+				window_manager().resize_window(*this, minimum_size());
 			rect desktopRect{ window_manager().desktop_rect(*this) };
 			rect parentRect{ window_manager().window_rect(parent_window()) };
 			rect ourRect{ window_manager().window_rect(*this) };
@@ -556,7 +564,7 @@ namespace neogfx
 			window_manager().move_window(*this, position);
 		}
 		else
-			centre();
+			centre(aSetMinimumSize);
 	}
 
 	void window::widget_added(i_widget&)

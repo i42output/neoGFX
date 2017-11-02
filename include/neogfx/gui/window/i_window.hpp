@@ -111,8 +111,8 @@ namespace neogfx
 		virtual point window_position() const = 0;
 		virtual neogfx::window_placement window_placement() const = 0;
 		virtual void set_window_placement(const neogfx::window_placement& aPlacement) = 0;
-		virtual void centre() = 0;
-		virtual void centre_on_parent() = 0;
+		virtual void centre(bool aSetMinimumSize = true) = 0;
+		virtual void centre_on_parent(bool aSetMinimumSize = true) = 0;
 		virtual bool window_enabled() const = 0;
 		virtual void counted_window_enable(bool aEnable) = 0;
 	public:
