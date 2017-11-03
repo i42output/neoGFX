@@ -103,6 +103,7 @@ namespace neogfx
 		iClientLayout{ iNonClientLayout },
 		iStatusBarLayout{ iNonClientLayout }
 	{
+		window_manager().add_window(*this);
 	}
 
 	window::window(const video_mode& aVideoMode, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
@@ -205,6 +206,8 @@ namespace neogfx
 
 	window::~window()
 	{
+		update_modality(true);
+		window_manager().remove_window(*this);
 		destroyable::set_destroyed();
 	}
 
@@ -642,7 +645,7 @@ namespace neogfx
 		aWidget.focus_lost(focus_reason::Other);
 	}
 
-	void window::update_modality()
+	void window::update_modality(bool aEnableAncestors)
 	{
 		for (std::size_t i = 0; i < window_manager().window_count(); ++i)
 		{
@@ -650,11 +653,13 @@ namespace neogfx
 			if (&w != this)
 			{
 				if ((iStyle & window_style::ApplicationModal) == window_style::ApplicationModal)
-					w.counted_window_enable(is_surface() && (!has_native_surface() || surface().as_surface_window().is_closing()));
+					w.counted_window_enable(aEnableAncestors);
 				else if ((iStyle & window_style::Modal) == window_style::Modal && w.as_widget().is_ancestor_of(*this, false))
-					w.counted_window_enable(is_surface() && (!has_native_surface() || surface().as_surface_window().is_closing()));
+					w.counted_window_enable(aEnableAncestors);
 			}
 		}
+		if (aEnableAncestors && has_parent_window(false) && (style() & window_style::NoActivate) != window_style::NoActivate)
+			parent_window().activate();
 	}
 
 	scrolling_disposition window::scrolling_disposition(const i_widget& aChildWidget) const
@@ -764,12 +769,10 @@ namespace neogfx
 	{
 		iSurfaceDestroyed.emplace(surface().native_surface().as_destroyable());
 
-		update_modality();
-
-		scrollable_widget::init();
-
 		if ((style() & window_style::Nested) == window_style::Nested)
 			iNestedWindowDetails = std::make_unique<nested_details>(*this);
+
+		update_modality(false);
 
 		if ((style() & window_style::TitleBar) == window_style::TitleBar)
 			iTitleBar.emplace(*this, title_bar_layout(), app::instance().default_window_icon(), native_window().title_text());

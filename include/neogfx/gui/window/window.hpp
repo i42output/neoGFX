@@ -177,7 +177,7 @@ namespace neogfx
 		void mouse_entered() override;
 		void mouse_left() override;
 	protected:
-		void update_modality() override;
+		void update_modality(bool aEnableAncestors) override;
 		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) override;
 		void dismiss_children(const i_widget* aClickedWidget = nullptr) override;
 		const i_surface_window* find_surface() const override;

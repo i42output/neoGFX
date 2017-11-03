@@ -384,30 +384,18 @@ namespace neogfx
 
 	void surface_window_proxy::native_window_closing()
 	{
-		if (!iNativeWindowClosing)
-		{
-			iNativeWindowClosing = true;
-			as_window().update_modality();
-		}
-		if (as_window().has_parent_window(false) && (style() & window_style::NoActivate) != window_style::NoActivate)
-			as_window().parent_window().activate();
+		iNativeWindowClosing = true;
 	}
 
 	void surface_window_proxy::native_window_closed()
 	{
-		if (!iNativeWindowClosing)
-		{
-			iNativeWindowClosing = true;
-			as_window().update_modality();
-		}
+		iNativeWindowClosing = true;
 		destroyed_flag destroyed{ *this };
 		{
 			auto ptr = std::move(iNativeWindow);
 		}
 		if (destroyed)
 			return;
-		if (as_window().has_parent_window(false) && (style() & window_style::NoActivate) != window_style::NoActivate)
-			as_window().parent_window().activate();
 		if (!iClosed)
 		{
 			iClosed = true;

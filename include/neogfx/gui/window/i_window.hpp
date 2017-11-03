@@ -148,7 +148,7 @@ namespace neogfx
 		virtual void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) = 0;
 		virtual void release_focused_widget(i_widget& aWidget) = 0;
 	protected:
-		virtual void update_modality() = 0;
+		virtual void update_modality(bool aEnableAncestors) = 0;
 		virtual void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) = 0;
 		virtual void dismiss_children(const i_widget* aClickedWidget = nullptr) = 0;
 		virtual const i_surface_window* find_surface() const = 0;
