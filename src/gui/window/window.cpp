@@ -22,7 +22,7 @@
 #include <neolib/string_utils.hpp>
 #include <neolib/raii.hpp>
 #include <neogfx/app/app.hpp>
-#include <neogfx/gui/window/surface_window_proxy.hpp>
+#include <neogfx/hid/surface_window_proxy.hpp>
 #include "native/i_native_window.hpp"
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/window/window.hpp>

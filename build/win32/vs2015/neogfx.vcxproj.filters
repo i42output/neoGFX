@@ -570,9 +570,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\nested_window_container.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\window\surface_window_proxy.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\hid\i_window_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -595,6 +592,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window_bits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\surface_window_proxy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -929,13 +929,13 @@
     <ClCompile Include="..\..\..\src\gui\widget\nested_window_container.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\window\surface_window_proxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\hid\native\sdl_window_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\surface_window_proxy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

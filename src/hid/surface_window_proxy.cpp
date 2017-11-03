@@ -19,9 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/app.hpp>
-#include <neogfx/gui/window/surface_window_proxy.hpp>
-#include "native/i_native_window.hpp"
-#include "../../hid/native/i_native_surface.hpp"
+#include <neogfx/hid/surface_window_proxy.hpp>
+#include "../gui/window/native/i_native_window.hpp"
+#include "native/i_native_surface.hpp"
 
 namespace neogfx
 {
