@@ -362,8 +362,7 @@ namespace neogfx
 
 	sdl_window::~sdl_window()
 	{
-		set_destroyed();
-		close();
+		close(true);
 	}
 
 	bool sdl_window::has_parent() const
@@ -452,25 +451,16 @@ namespace neogfx
 		return std::unique_ptr<i_native_graphics_context>(new sdl_graphics_context(rendering_engine(), *this, aWidget));
 	}
 
-	void sdl_window::close()
+	void sdl_window::close(bool aForce)
 	{
-		if (iHandle != 0)
+		if (iHandle != 0 && is_alive() && (aForce || surface_window().native_window_can_close()))
 		{
-			if (surface_window().native_window_can_close())
-			{
-				release_capture();
-				surface_window().native_window_closing();
-				if (!is_destroying())
-				{
-					set_destroying();
 #ifdef WIN32
-					DestroyWindow(static_cast<HWND>(native_handle()));
+			DestroyWindow(static_cast<HWND>(native_handle()));
+#else
+			// todo
+			SDL_DestroyWindow(iHandle);
 #endif
-					SDL_DestroyWindow(iHandle);
-				}
-				iHandle = 0;
-				surface_window().native_window_closed();
-			}
 		}
 	}
 
@@ -780,12 +770,15 @@ namespace neogfx
 			}
 			break;
 		case WM_SYSCOMMAND:
-			result = wndproc(hwnd, msg, wparam, lparam);
 			if (CUSTOM_DECORATION)
 			{
 				if (wparam == SC_CLOSE)
+				{
 					self.handle_event(window_event{ window_event_type::Close });
+					return 0;
+				}
 			}
+			result = wndproc(hwnd, msg, wparam, lparam);
 			break;
 		case WM_NCACTIVATE:
 			{
@@ -1252,15 +1245,15 @@ namespace neogfx
 	void sdl_window::set_destroying()
 	{
 		opengl_window::set_destroying();
+		release_capture();
+		surface_window().native_window_closing();
 	}
 		
 	void sdl_window::set_destroyed()
 	{
-		if (!is_destroyed())
-		{
-			opengl_window::set_destroyed();
-			iNativeHandle = 0;
-		}
+		opengl_window::set_destroyed();
+		iNativeHandle = 0;
+		surface_window().native_window_closed();
 	}
 
 	margins sdl_window::border_thickness() const

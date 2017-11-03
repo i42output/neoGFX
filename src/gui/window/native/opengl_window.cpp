@@ -300,7 +300,6 @@ namespace neogfx
 	void opengl_window::set_destroying()
 	{
 		destroyable::set_destroying();
-		set_destroyed();
 		if (iFrameBufferSize != size{})
 		{
 			rendering_engine().activate_context(*this);

@@ -38,8 +38,6 @@ namespace neogfx
 
 	surface_window_proxy::~surface_window_proxy()
 	{
-		destroyable::set_destroyed();
-		app::instance().surface_manager().remove_surface(*this);
 		close();
 	}
 
@@ -118,6 +116,7 @@ namespace neogfx
 			return;
 		iClosed = true;
 		closed.trigger();
+		set_destroyed();
 	}
 
 	bool surface_window_proxy::has_parent_surface() const
@@ -385,6 +384,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_closing()
 	{
 		iNativeWindowClosing = true;
+		app::instance().surface_manager().remove_surface(*this);
 	}
 
 	void surface_window_proxy::native_window_closed()
@@ -400,6 +400,7 @@ namespace neogfx
 		{
 			iClosed = true;
 			closed.trigger();
+			set_destroyed();
 		}
 	}
 

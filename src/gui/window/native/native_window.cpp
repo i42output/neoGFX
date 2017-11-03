@@ -305,7 +305,7 @@ namespace neogfx
 			return true;
 		uint32_t surfacesThatCanRender = 0;
 		for (std::size_t i = 0; i < surface_manager().surface_count(); ++i)
-			if (surface_manager().surface(i).native_surface().can_render())
+			if (surface_manager().surface(i).has_native_surface() && surface_manager().surface(i).native_surface().can_render())
 				++surfacesThatCanRender;
 		return surfacesThatCanRender == 1 && can_render();
 	}
