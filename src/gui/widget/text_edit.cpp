@@ -1033,23 +1033,20 @@ namespace neogfx
 		point adjusted = aAdjustForScrollPosition ?
 			point{ aPoint - client_rect(false).top_left() } + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } :
 			aPoint;
-		if (adjusted.y < 0.0)
-			adjusted.y = 0.0;
-		if (adjusted.x < 0.0)
-			adjusted.x = 0.0;
+		adjusted = adjusted.max(point{});
 		auto iterColumn = iGlyphColumns.begin();
 		for (; iterColumn != iGlyphColumns.end(); ++iterColumn)
 		{
 			if (adjusted.x < iterColumn->width())
 				break;
 			adjusted.x -= iterColumn->width();
+			adjusted = adjusted.max(point{});
 		}
 		if (iterColumn == iGlyphColumns.end())
 			--iterColumn;
 		const auto& column = *iterColumn;
 		adjusted.x -= column.margins().left;
-		if (adjusted.x < 0.0)
-			adjusted.x = 0.0;
+		adjusted = adjusted.max(point{});
 		const auto& lines = column.lines();
 		auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, adjusted.y, {} },
 			[](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
@@ -1067,6 +1064,7 @@ namespace neogfx
 			else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
 				alignmentAdjust.dx = (std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx) / 2.0;
 			adjusted.x -= alignmentAdjust.dx;
+			adjusted = adjusted.max(point{});
 			auto lineStart = (line != lines.end() ? line->lineStart.first : iGlyphs.size());
 			auto lineEnd = (line != lines.end() ? line->lineEnd.first : iGlyphs.size());
 			auto lineStartX = line->lineStart.second->x;

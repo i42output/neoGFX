@@ -722,10 +722,7 @@ namespace neogfx
 	{
 		iCentre = aCentre;
 		if (iCentre != optional_point{})
-		{
-			iCentre->x = std::max(-1.0, std::min(1.0, iCentre->x));
-			iCentre->y = std::max(-1.0, std::min(1.0, iCentre->y));
-		}
+			iCentre = iCentre->min(point{ 1.0, 1.0 }).max(point{ -1.0, -1.0 });
 	}
 
 	gradient gradient::with_centre(const optional_point& aCentre) const

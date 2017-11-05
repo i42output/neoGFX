@@ -80,8 +80,7 @@ namespace neogfx
 		{
 			auto cr = client_rect(false);
 			point centre{ aPosition.x / cr.width() * 2.0 - 1.0, aPosition.y / cr.height() * 2.0 - 1.0 };
-			centre.x = std::max(-1.0, std::min(1.0, centre.x));
-			centre.y = std::max(-1.0, std::min(1.0, centre.y));
+			centre = centre.max(point{ -1.0, -1.0 }).min(point{ 1.0, 1.0 });
 			iOwner.gradient_selector().set_gradient(iOwner.gradient().with_centre(centre));
 		}
 	private:

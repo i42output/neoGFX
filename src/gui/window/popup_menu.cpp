@@ -223,8 +223,7 @@ namespace neogfx
 	{
 		size result = window::minimum_size(aAvailableSpace);
 		rect desktopRect = app::instance().surface_manager().desktop_rect(surface());
-		result.cx = std::min(result.cx, desktopRect.cx);
-		result.cy = std::min(result.cy, desktopRect.cy);
+		result = result.min(desktopRect.extents());
 		return result;
 	}
 	

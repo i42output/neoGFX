@@ -260,7 +260,7 @@ namespace neogfx
 
 	colour_dialog::representations colour_dialog::x_picker::colour_at_position(const point& aCursorPos) const
 	{
-		point pos{ std::max(std::min(aCursorPos.x, 255.0), 0.0), std::max(std::min(aCursorPos.y, 255.0), 0.0) };
+		point pos = aCursorPos.min(point{ 255.0, 255.0 }).max(point{ 0.0, 0.0 });
 		switch (iParent.current_channel())
 		{
 		case ChannelHue:

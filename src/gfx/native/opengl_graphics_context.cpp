@@ -1072,10 +1072,8 @@ namespace neogfx
 				point max = min;
 				for (auto const& pt : aPath.paths()[i])
 				{
-					min.x = std::min(min.x, pt.x);
-					max.x = std::max(max.x, pt.x);
-					min.y = std::min(min.y, pt.y);
-					max.y = std::max(max.y, pt.y);
+					min = min.min(pt);
+					max = max.max(pt);
 				}
 
 				if (aFill.is<gradient>())

@@ -69,10 +69,7 @@ namespace neogfx
 	{
 		size result{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
 		for (const auto& item : items())
-		{
-			result.cx = std::min(result.cx, item.maximum_size(aAvailableSpace).cx);
-			result.cy = std::min(result.cy, item.maximum_size(aAvailableSpace).cy);
-		}
+			result = result.min(item.maximum_size(aAvailableSpace));
 		if (result.cx != std::numeric_limits<size::dimension_type>::max())
 			result.cx += (margins().left + margins().right);
 		if (result.cy != std::numeric_limits<size::dimension_type>::max())

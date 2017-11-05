@@ -911,9 +911,7 @@ namespace neogfx
 		if (model().rows() == 0)
 			return optional_item_presentation_model_index{};
 		const size cellSpacing = presentation_model().cell_spacing(*this);
-		point adjustedPos(
-			std::min(std::max(aPosition.x, item_display_rect().left()), item_display_rect().right()),
-			std::min(std::max(aPosition.y, item_display_rect().top()), item_display_rect().bottom()));
+		point adjustedPos = aPosition.max(item_display_rect().top_left()).min(item_display_rect().bottom_right());
 		item_presentation_model_index index = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), *this).first;
 		for (uint32_t col = 0; col < presentation_model().columns(); ++col) // TODO: O(n) isn't good enough if lots of columns
 		{

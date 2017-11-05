@@ -63,6 +63,8 @@ namespace neogfx
 		basic_delta operator-() const { return basic_delta(-dx, -dy); }
 		basic_delta ceil() const { return basic_delta(std::ceil(dx), std::ceil(dy)); }
 		basic_delta floor() const { return basic_delta(std::floor(dx), std::floor(dy)); }
+		basic_delta min(const basic_delta& other) const { return basic_delta{ std::min(dx, other.dx), std::min(dy, other.dy) }; }
+		basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy) }; }
 		// attributes
 	public:
 		coordinate_type dx;
@@ -144,6 +146,8 @@ namespace neogfx
 		basic_size& operator/=(const dimension_type other) { cx /= other; cy /= other; return *this; }
 		basic_size ceil() const { return basic_size(std::ceil(cx), std::ceil(cy)); }
 		basic_size floor() const { return basic_size(std::floor(cx), std::floor(cy)); }
+		basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
+		basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
 		// attributes
 	public:
 		dimension_type cx;
@@ -258,6 +262,8 @@ namespace neogfx
 		basic_point operator-() const { return basic_point(-x, -y); }
 		basic_point ceil() const { return basic_point(std::ceil(x), std::ceil(y)); }
 		basic_point floor() const { return basic_point(std::floor(x), std::floor(y)); }
+		basic_point min(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::min(y, other.y) }; }
+		basic_point max(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::max(y, other.y) }; }
 		// attributes
 	public:
 		coordinate_type x;
@@ -432,19 +438,15 @@ namespace neogfx
 		basic_rect& deflate(CoordinateType dx, CoordinateType dy) { return inflate(-dx, -dy); }
 		basic_rect intersection(const basic_rect& other) const
 		{
-			point_type topLeft(std::max(left(), other.left()), std::max(top(), other.top()));
-			point_type bottomRight(std::min(right(), other.right()), std::min(bottom(), other.bottom()));
-			basic_rect candidate(topLeft, bottomRight);
+			basic_rect candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
 			if (contains(candidate.centre()) && other.contains(candidate.centre()))
 				return candidate;
 			else
-				return basic_rect();
+				return basic_rect{};
 		}
 		basic_rect combine(const basic_rect& other) const
 		{
-			point_type topLeft(std::min(left(), other.left()), std::min(top(), other.top()));
-			point_type bottomRight(std::max(right(), other.right()), std::max(bottom(), other.bottom()));
-			return basic_rect(topLeft, bottomRight);
+			return basic_rect{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
 		}
 		basic_rect ceil() const { return basic_rect(point_type::ceil(), size_type::ceil()); }
 		basic_rect floor() const { return basic_rect(point_type::floor(), size_type::floor()); }
