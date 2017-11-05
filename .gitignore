@@ -199,3 +199,11 @@
 /examples/test/build/win32/vs2015/test.aps
 /doxygen.zip
 /doxygen/html
+/examples/games/video_poker/build/win32/vs2015/.vs
+Release
+Debug
+/examples/games/video_poker/build/win32/vs2015/Release
+/examples/games/video_poker/build/win32/vs2015/Debug
+/examples/games/video_poker/build/win32/vs2015/video_poker.VC.opendb
+/examples/games/video_poker/build/win32/vs2015/video_poker.sdf
+/examples/games/video_poker/build/win32/vs2015/video_poker.vcxproj.user
