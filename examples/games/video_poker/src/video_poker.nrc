@@ -1,6 +1,6 @@
 <nrc>
 	<resource prefix="video_poker">
 		<file>resources/neoGFX.png</file>
-    <file>resources/king.png</file>
+    <file>resources/icon.png</file>
   </resource>
 </nrc>

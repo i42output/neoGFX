@@ -55,7 +55,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DevDirNeogfx)\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\dev\neogfx\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -76,7 +76,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DevDirNeogfx)\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\dev\neogfx\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirNeolib)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -115,6 +115,10 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\common\include\card_games\card.hpp" />
+    <ClInclude Include="..\..\..\..\common\include\card_games\deck.hpp" />
+    <ClInclude Include="..\..\..\..\common\include\card_games\default_game_traits.hpp" />
+    <ClInclude Include="..\..\..\..\common\include\card_games\hand.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

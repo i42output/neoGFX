@@ -1,6 +1,7 @@
 ﻿#include <neolib/neolib.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/window/window.hpp>
+#include <card_games/deck.hpp>
 
 namespace ng = neogfx;
 
@@ -10,12 +11,14 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		app.set_default_window_icon(ng::image(":/video_poker/resources/king.png"));
+		app.set_default_window_icon(ng::image(":/video_poker/resources/icon.png"));
 		app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 
 		ng::window window(ng::size{ 768, 688 });
 		auto& layout0 = window.client_layout();
+
+		neogames::card_games::deck deck;
 
 		return app.exec();
 	}
