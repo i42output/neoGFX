@@ -18,16 +18,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <cstdint>
 #include <type_traits>
 
 namespace neogames
 {
 	namespace card_games
 	{
-		struct default_game_traits
+		struct poker_game_traits
 		{
+			static const uint32_t hand_size = 5;
 			typedef std::true_type ace_high;
 			typedef std::false_type jokers_present;
 		};
+
+		typedef poker_game_traits default_game_traits;
 	}
 }

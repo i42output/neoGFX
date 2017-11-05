@@ -59,7 +59,7 @@ namespace neogames
 			{
 				Red,
 				Black
-			};
+			};		
 		public:
 			basic_card(value aValue, suit aSuit) :
 				iValue{ aValue }, iSuit{ aSuit }

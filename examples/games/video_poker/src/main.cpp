@@ -1,7 +1,9 @@
 ﻿#include <neolib/neolib.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/window/window.hpp>
+#include <card_games/card.hpp>
 #include <card_games/deck.hpp>
+#include <card_games/hand.hpp>
 
 namespace ng = neogfx;
 
@@ -20,6 +22,8 @@ int main(int argc, char* argv[])
 
 		neogames::card_games::deck deck;
 		deck.shuffle();
+		neogames::card_games::hand hand;
+		deck.deal_hand(hand);
 
 		return app.exec();
 	}

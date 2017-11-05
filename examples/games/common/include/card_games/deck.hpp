@@ -27,14 +27,15 @@ namespace neogames
 {
 	namespace card_games
 	{
-		template <typename CardType>
+		template <typename GameTraits>
 		class basic_deck
 		{
 		public:
-			typedef CardType card_type;
-			typedef typename card_type::game_traits game_traits;
+			typedef typename GameTraits game_traits;
+			typedef basic_card<game_traits> card_type;
 			typedef typename card_type::value card_value;
 			typedef typename card_type::suit card_suit;
+		private:
 			typedef std::vector<card_type> cards;
 		public:
 			struct deck_empty : std::runtime_error { deck_empty() : std::runtime_error("neogames::card_games::basic_deck::deck_empty") {} };
@@ -109,26 +110,28 @@ namespace neogames
 			{
 				if (iCards.empty())
 					throw deck_empty();
-				auto c = iCards.back();
+				auto newCard = iCards.back();
 				iCards.pop_back();
+				return newCard;
+			}
+		public:
+			template <typename HandType>
+			void deal_hand(HandType& aHand)
+			{
+				for (uint32_t i = 0; i < game_traits::hand_size; ++i)
+					aHand.pick(*this);
 			}
 			template <typename HandIter>
 			void deal_hands(HandIter aFirstHand, HandIter aLastHand)
 			{
-				bool allHandsDelt = false;
-				while (!allHandsDelt)
-				{
-					allHandsDelt = true;
+				for (uint32_t i = 0; i < game_traits::hand_size; ++i)
 					for (auto hand = aFirstHand; hand != aLastHand; ++hand)
-						if (hand->take(deal_card()) && !hand->dealt())
-							allHandsDelt = false;
-				}
-
+						hand->pick(*this);
 			}
 		private:
 			cards iCards;
 		};
 
-		typedef basic_deck<card> deck;
+		typedef basic_deck<default_game_traits> deck;
 	}
 }
