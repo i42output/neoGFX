@@ -103,7 +103,8 @@ namespace neogfx
 			iValue = aValue;
 			if (!iSettingNormalizedValue)
 				spin_box_impl::set_normalized_value(normalized_value(), true);
-			value_changed.trigger();
+			if (!text().empty() || normalized_value() != 0.0)
+				value_changed.trigger();
 		}
 	}
 

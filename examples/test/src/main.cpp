@@ -365,6 +365,7 @@ int main(int argc, char* argv[])
 		effectAux1Slider.set_value(1.0);
 		ng::text_edit smallTextEdit(editLayout);
 		smallTextEdit.set_maximum_width(100);
+		smallTextEdit.set_alignment(ng::alignment::Right);
 		ng::horizontal_layout layoutLineEdits(layoutButtons);
 		ng::line_edit lineEdit(layoutLineEdits);
 		lineEdit.set_text("Line edit");

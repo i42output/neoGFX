@@ -43,6 +43,7 @@ namespace neogfx
 		typedef std::vector<std::pair<cell_coordinates, cell_coordinates>> span_list;
 	public:
 		grid_layout();
+		grid_layout(cell_coordinate aRows, cell_coordinate aColumns);
 		grid_layout(i_widget& aParent);
 		grid_layout(i_layout& aParent);
 		grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns);

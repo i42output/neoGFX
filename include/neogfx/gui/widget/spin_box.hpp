@@ -44,6 +44,7 @@ namespace neogfx
 	public:
 		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
 	public:
+		const std::string& text();
 		line_edit& text_box();
 	public:
 		virtual const std::string& valid_text_characters() const = 0;

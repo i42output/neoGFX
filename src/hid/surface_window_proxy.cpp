@@ -496,7 +496,10 @@ namespace neogfx
 		as_widget().mouse_entered();
 		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
 		if (w.mouse_event.trigger(native_window().current_event()))
-			w.mouse_moved(aPosition - w.origin());
+		{
+			point widgetPos = aPosition - w.origin();
+			w.mouse_moved(widgetPos);
+		}
 	}
 
 	void surface_window_proxy::native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)

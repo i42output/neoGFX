@@ -413,8 +413,15 @@ namespace neogfx
 	point sdl_window::surface_position() const
 	{
 		int x, y;
+#ifdef WIN32
+		RECT rc;
+		GetWindowRect(static_cast<HWND>(native_handle()), &rc);
+		x = rc.left;
+		y = rc.top;
+#else
 		SDL_GetWindowPosition(iHandle, &x, &y);
-		return point(static_cast<coordinate>(x), static_cast<coordinate>(y));
+#endif
+		return basic_point<int>{ x, y };
 	}
 
 	void sdl_window::move_surface(const point& aPosition)

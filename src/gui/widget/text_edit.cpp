@@ -261,6 +261,8 @@ namespace neogfx
 		for (auto iterColumn = iGlyphColumns.begin(); iterColumn != iGlyphColumns.end(); ++iterColumn)
 		{
 			const auto& column = *iterColumn;
+			auto columnWidth = iGlyphColumns.size() == 1 ? std::max(iTextExtents.cx, client_rect(false).width()) : column.width();
+			auto columnMargins = iGlyphColumns.size() == 1 ? neogfx::margins{} : column.margins();
 			const auto& lines = column.lines();
 			auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, vertical_scrollbar().position(), {} },
 				[](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
@@ -277,13 +279,13 @@ namespace neogfx
 				if (linePos.y > client_rect(false).bottom() || linePos.y > update_rect().bottom())
 					break;
 				auto textDirection = glyph_text_direction(paintLine->lineStart.second, paintLine->lineEnd.second);
-				if (iAlignment == alignment::Left && textDirection == text_direction::RTL ||
-					iAlignment == alignment::Right && textDirection == text_direction::LTR)
-					linePos.x += column.width() - column.margins().right - aGraphicsContext.from_device_units(size{ paintLine->extents.cx, 0 }).cx;
-				else if (iAlignment == alignment::Centre)
-					linePos.x += std::ceil((column.width() - aGraphicsContext.from_device_units(size{ paintLine->extents.cx, 0 }).cx) / 2);
+				if (((iAlignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
+					((iAlignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+					linePos.x += aGraphicsContext.from_device_units(size{ columnWidth - columnMargins.right - paintLine->extents.cx, 0.0 }).cx;
+				else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
+					linePos.x += std::ceil((aGraphicsContext.from_device_units(size{ columnWidth - paintLine->extents.cx, 0.0 }).cx) / 2.0);
 				else
-					linePos.x += column.margins().left;
+					linePos.x += columnMargins.left;
 				draw_glyphs(aGraphicsContext, linePos, column, paintLine);
 			}
 			x += column.width();
@@ -327,9 +329,7 @@ namespace neogfx
 	{
 		scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left && client_rect().contains(aPosition))
-		{
 			set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
-		}
 	}
 
 	void text_edit::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -978,6 +978,13 @@ namespace neogfx
 			}
 			if (aGlyphPosition >= lineStart && aGlyphPosition <= lineEnd)
 			{
+				delta alignmentAdjust = 0.0;
+				auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
+				if (((iAlignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
+					((iAlignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+					alignmentAdjust.dx = std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx;
+				else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
+					alignmentAdjust.dx = (std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx) / 2.0;
 				if (lineStart != lineEnd)
 				{
 					auto iterGlyph = iGlyphs.begin() + aGlyphPosition;
@@ -985,16 +992,22 @@ namespace neogfx
 					point linePos{ glyph.x - line->lineStart.second->x, line->ypos };
 					if (placeCursorToRight)
 						linePos.x += glyph.advance().cx;
-					return position_info{ iterGlyph, column, line, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, linePos };
+					return position_info{ iterGlyph, column, line, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, linePos + alignmentAdjust };
 				}
 				else
-					return position_info{ line->lineStart.second, column, line, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, point{ 0.0, line->ypos } };
+					return position_info{ line->lineStart.second, column, line, iGlyphs.begin() + lineStart, iGlyphs.begin() + lineEnd, point{ 0.0, line->ypos } + alignmentAdjust };
 			}
 		}
 		point pos;
 		if (!lines.empty())
 		{
 			pos.x = 0.0;
+			auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
+			if (((iAlignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
+				((iAlignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+				pos.x = std::max(iTextExtents.cx, client_rect(false).cx);
+			else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
+				pos.x = std::max(iTextExtents.cx, client_rect(false).cx) / 2.0;
 			pos.y = lines.back().ypos + lines.back().extents.cy;
 		}
 		return position_info{ iGlyphs.end(), column, lines.end(), iGlyphs.end(), iGlyphs.end(), pos };
@@ -1046,6 +1059,14 @@ namespace neogfx
 		{
 			if (line != lines.begin() && adjusted.y < line->ypos)
 				--line;
+			delta alignmentAdjust = 0.0;
+			auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
+			if (((iAlignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
+				((iAlignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+				alignmentAdjust.dx = std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx;
+			else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
+				alignmentAdjust.dx = (std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx) / 2.0;
+			adjusted.x -= alignmentAdjust.dx;
 			auto lineStart = (line != lines.end() ? line->lineStart.first : iGlyphs.size());
 			auto lineEnd = (line != lines.end() ? line->lineEnd.first : iGlyphs.size());
 			auto lineStartX = line->lineStart.second->x;

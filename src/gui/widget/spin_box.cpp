@@ -93,6 +93,11 @@ namespace neogfx
 			return framed_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 	}
 
+	const std::string& spin_box_impl::text()
+	{
+		return iText;
+	}
+
 	line_edit& spin_box_impl::text_box()
 	{
 		return iTextBox;

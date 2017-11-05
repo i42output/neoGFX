@@ -34,6 +34,14 @@ namespace neogfx
 		iRowLayout.set_always_use_spacing(true);
 	}
 
+	grid_layout::grid_layout(cell_coordinate aRows, cell_coordinate aColumns) :
+		layout(), iRowLayout(*this), iDimensions{ aColumns, aRows }
+	{
+		iRowLayout.set_margins(neogfx::margins{});
+		iRowLayout.set_spacing(spacing());
+		iRowLayout.set_always_use_spacing(true);
+	}
+
 	grid_layout::grid_layout(i_widget& aParent) :
 		layout(aParent), iRowLayout(*this)
 	{

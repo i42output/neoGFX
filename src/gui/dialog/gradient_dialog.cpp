@@ -135,7 +135,7 @@ namespace neogfx
 		iShapeEllipseRadioButton{ iShapeGroupBox.item_layout(), "Ellipse" },
 		iShapeCircleRadioButton{ iShapeGroupBox.item_layout(), "Circle" },
 		iCentreGroupBox{ iLayout5, "Centre" },
-		iXCentre{ iCentreGroupBox.with_item_layout<grid_layout>(), "X:" },
+		iXCentre{ iCentreGroupBox.with_item_layout<grid_layout>(2, 2), "X:" },
 		iXCentreSpinBox { iCentreGroupBox.item_layout() },
 		iYCentre{ iCentreGroupBox.item_layout(), "Y:" },
 		iYCentreSpinBox { iCentreGroupBox.item_layout() },
@@ -204,10 +204,14 @@ namespace neogfx
 		iXCentreSpinBox.set_maximum(1.0);
 		iXCentreSpinBox.set_step(0.001);
 		iXCentreSpinBox.set_format("%.3f");
+		iXCentreSpinBox.text_box().set_alignment(alignment::Right);
+		iXCentreSpinBox.text_box().set_hint("-0.000");
 		iYCentreSpinBox.set_minimum(-1.0);
 		iYCentreSpinBox.set_maximum(1.0);
 		iYCentreSpinBox.set_step(0.001);
 		iYCentreSpinBox.set_format("%.3f");
+		iYCentreSpinBox.text_box().set_alignment(alignment::Right);
+		iYCentreSpinBox.text_box().set_hint("-0.000");
 
 		iGradientSelector.set_fixed_size(size{ 256.0, iGradientSelector.minimum_size().cy });
 
@@ -252,6 +256,7 @@ namespace neogfx
 		
 		update_widgets();
 
+		layout().invalidate();
 		centre_on_parent();
 	}
 
@@ -279,8 +284,9 @@ namespace neogfx
 		iSizeFarthestCornerRadioButton.set_checked(gradient().size() == gradient::FarthestCorner);
 		iShapeEllipseRadioButton.set_checked(gradient().shape() == gradient::Ellipse);
 		iShapeCircleRadioButton.set_checked(gradient().shape() == gradient::Circle);
-		iCentreGroupBox.check_box().set_checked(gradient().centre() != optional_point{});
-		if (gradient().centre() != optional_point{})
+		bool specifyCentre = (gradient().centre() != optional_point{});
+		iCentreGroupBox.check_box().set_checked(specifyCentre);
+		if (specifyCentre)
 		{
 			iXCentreSpinBox.set_value(gradient().centre()->x);
 			iYCentreSpinBox.set_value(gradient().centre()->y);
@@ -290,10 +296,10 @@ namespace neogfx
 			iXCentreSpinBox.text_box().set_text("");
 			iYCentreSpinBox.text_box().set_text("");
 		}
-		iXCentre.enable(gradient().centre() != optional_point{});
-		iXCentreSpinBox.enable(gradient().centre() != optional_point{});
-		iYCentre.enable(gradient().centre() != optional_point{});
-		iYCentreSpinBox.enable(gradient().centre() != optional_point{});
+		iXCentre.enable(specifyCentre);
+		iXCentreSpinBox.enable(specifyCentre);
+		iYCentre.enable(specifyCentre);
+		iYCentreSpinBox.enable(specifyCentre);
 		switch (gradient().direction())
 		{
 		case gradient::Vertical:
