@@ -167,5 +167,6 @@ namespace neogfx
 	private:
 		i_surface* iSurface;
 		neolib::optional_destroyed_flag iSurfaceDestroyed;
+		neolib::optional_destroyed_flag iWindowDestroyed;
 	};
 }

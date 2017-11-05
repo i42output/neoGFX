@@ -36,6 +36,7 @@ namespace neogfx
 	public:
 		virtual void add_window(i_window& aWindow) = 0;
 		virtual void remove_window(i_window& aWindow) = 0;
+		virtual bool has_window(i_window& aWindow) const = 0;
 		virtual std::size_t window_count() const = 0;
 		virtual i_window& window(std::size_t aIndex) = 0;
 		virtual bool any_strong_windows() const = 0;

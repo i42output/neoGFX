@@ -46,6 +46,11 @@ namespace neogfx
 		iWindows.erase(existing);
 	}
 
+	bool window_manager::has_window(i_window& aWindow) const
+	{
+		return iWindows.find(&aWindow) != iWindows.end();
+	}
+
 	std::size_t window_manager::window_count() const
 	{
 		return iWindows.size();

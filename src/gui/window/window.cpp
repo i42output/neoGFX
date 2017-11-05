@@ -30,18 +30,19 @@
 namespace neogfx
 {
 	pause_rendering::pause_rendering(i_window& aWindow) :
-		iSurface{ aWindow.has_native_surface() ? &aWindow.surface() : nullptr }
+		iSurface{ app::instance().window_manager().has_window(aWindow) && aWindow.has_native_surface() ? &aWindow.surface() : nullptr }
 	{
 		if (iSurface != nullptr)
 		{
 			iSurfaceDestroyed.emplace(iSurface->as_destroyable());
+			iWindowDestroyed.emplace(aWindow.as_destroyable());
 			iSurface->pause_rendering();
 		}
 	}
 
 	pause_rendering::~pause_rendering()
 	{
-		if (iSurface != nullptr && !*iSurfaceDestroyed)
+		if (iSurface != nullptr && !*iWindowDestroyed && !*iSurfaceDestroyed)
 			iSurface->resume_rendering();
 	}
 

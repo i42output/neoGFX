@@ -47,6 +47,7 @@ namespace neogfx
 	public:
 		void add_window(i_window& aWindow) override;
 		void remove_window(i_window& aWindow) override;
+		bool has_window(i_window& aWindow) const override;
 		std::size_t window_count() const override;
 		i_window& window(std::size_t aIndex) override;
 		bool any_strong_windows() const override;

@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
 		auto& layout0 = window.client_layout();
 
 		neogames::card_games::deck deck;
+		deck.shuffle();
 
 		return app.exec();
 	}

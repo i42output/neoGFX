@@ -1,45 +1,30 @@
-﻿#include <type_traits>
-#include <cstdint>
+﻿/*
+neogfx C++ GUI Library - Examples
+Copyright(C) 2017 Leigh Johnston
+
+This program is free software: you can redistribute it and / or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#pragma once
 
 namespace neogames
 {
-	struct default_card_game_traits
+	namespace card_games
 	{
-		typedef std::true_type ace_high;
-		typedef std::false_type jokers_present;
-	};
-
-	template <typename CardGameTraits>
-	class basic_playing_card
-	{
-	public:
-		typedef CardGameTraits card_game_traits;
-	public:
-		enum class value : uint32_t
+		class hand
 		{
-			Joker	= 0,
-			Ace		= card_game_traits::ace_high::value ? King + 1 : 1
-			Two		= 2,
-			Three	= 3,
-			Four	= 4,
-			Five	= 5,
-			Six		= 6,
-			Seven	= 7,
-			Eight	= 8,
-			Nine	= 9,
-			Ten		= 10,
-			Jack	= 11,
-			Queen	= 12,
-			King	= 13,
+			// todo
 		};
-		enum class suite : uint32_t
-		{
-			Club	= 1,
-			Diamond	= 2,
-			Heart	= 3,
-			Spade	= 4
-		};
-	};
-
-	typedef basic_playing_card<default_card_game_traits> playing_card;
+	}
 }
