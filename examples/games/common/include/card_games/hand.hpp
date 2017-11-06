@@ -18,7 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <vector>
+#include <array>
+#include <boost/optional.hpp>
 #include <card_games/card.hpp>
 #include <card_games/deck.hpp>
 
@@ -34,16 +35,21 @@ namespace neogames
 			typedef basic_card<game_traits> card_type;
 			typedef basic_deck<game_traits> deck_type;
 		private:
-			typedef std::vector<card_type> cards;
+			typedef boost::optional<card_type> optional_card;
+			typedef std::array<optional_card, game_traits::hand_size> cards;
 		public:
 			basic_hand()
 			{
-				iCards.reserve(game_traits::hand_size);
 			}
 		public:
 			void pick(deck_type& aDeck)
 			{
-				iCards.push_back(aDeck.deal_card());
+				for (auto& slot : iCards)
+					if (!slot)
+					{
+						slot = aDeck.deal_card();
+						break;
+					}
 			}
 		private:
 			cards iCards;

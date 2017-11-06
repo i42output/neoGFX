@@ -1,9 +1,7 @@
 ﻿#include <neolib/neolib.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/window/window.hpp>
-#include <card_games/card.hpp>
-#include <card_games/deck.hpp>
-#include <card_games/hand.hpp>
+#include <video_poker/poker.hpp>
 
 namespace ng = neogfx;
 
@@ -20,10 +18,14 @@ int main(int argc, char* argv[])
 		ng::window window(ng::size{ 768, 688 });
 		auto& layout0 = window.client_layout();
 
-		neogames::card_games::deck deck;
+		// todo
+
+		video_poker::deck deck;
 		deck.shuffle();
-		neogames::card_games::hand hand;
+		video_poker::hand hand;
 		deck.deal_hand(hand);
+
+		auto result = video_poker::to_poker_hand(hand);
 
 		return app.exec();
 	}
