@@ -57,8 +57,8 @@ namespace neogames
 				if (aSlotIndex >= iCards.size())
 					throw bad_slot_index();
 				if (have_card_at(aSlotIndex))
-					return iCards[aSlotIndex];
-				throw no_card_in_slot;
+					return *iCards[aSlotIndex];
+				throw no_card_in_slot();
 			}
 			bool fully_dealt() const
 			{

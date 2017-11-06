@@ -1,6 +1,7 @@
 ﻿#include <neolib/neolib.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/window/window.hpp>
+#include <neogfx/gui/dialog/message_box.hpp>
 #include <video_poker/poker.hpp>
 
 namespace ng = neogfx;
@@ -20,12 +21,23 @@ int main(int argc, char* argv[])
 
 		// todo
 
-		video_poker::deck deck;
-		deck.shuffle();
-		video_poker::hand hand;
-		deck.deal_hand(hand);
+		for (;;)
+		{
+			video_poker::deck deck;
+			deck.shuffle();
+			video_poker::hand hand;
+			deck.deal_hand(hand);
+			auto result = video_poker::to_poker_hand(hand);
 
-		auto result = video_poker::to_poker_hand(hand);
+			std::string resultDisplay;
+			for (uint32_t i = 0; i < video_poker::hand::game_traits::hand_size; ++i)
+				resultDisplay += (hand.card_at(i).to_string() + "\n");
+
+			resultDisplay += ("\n" + video_poker::to_string(result));
+
+			if (ng::message_box::information(window, "Game Result", resultDisplay, ng::standard_button::Ok | ng::standard_button::Close) == ng::standard_button::Close)
+				break;
+		}
 
 		return app.exec();
 	}

@@ -59,7 +59,7 @@ namespace neogames
 			{
 				Red,
 				Black
-			};		
+			};
 		public:
 			basic_card(value aValue, suit aSuit) :
 				iValue{ aValue }, iSuit{ aSuit }
@@ -69,6 +69,79 @@ namespace neogames
 			operator value() const { return iValue; }
 			operator suit() const { return iSuit; }
 			operator colour() const { return iSuit == Club || iSuit == Spade ? colour::Black : colour::Red; }
+		public:
+			std::string to_string() const
+			{
+				return to_string(iValue) + " of " + to_string(iSuit) + "s";
+			}
+		public:
+			bool operator==(const basic_card& aOther) const
+			{
+				return iValue == aOther.iValue && iSuit == aOther.iSuit;
+			}
+			bool operator!=(const basic_card& aOther) const
+			{
+				return !(*this == aOther);
+			}
+			bool operator<(const basic_card& aRhs) const
+			{
+				return std::tie(iValue, iSuit) < std::tie(aRhs.iValue, aRhs.iSuit);
+			}
+		public:
+			static std::string to_string(value aValue)
+			{
+				switch (aValue)
+				{
+				case value::Joker:
+					return "Joker";
+				case value::Two:
+					return "2";
+				case value::Three:
+					return "3";
+				case value::Four:
+					return "4";
+				case value::Five:
+					return "5";
+				case value::Six:
+					return "6";
+				case value::Seven:
+					return "7";
+				case value::Eight:
+					return "8";
+				case value::Nine:
+					return "9";
+				case value::Ten:
+					return "10";
+				case value::Jack:
+					return "Jack";
+				case value::Queen:
+					return "Queen";
+				case value::King:
+					return "King";
+				case value::Ace:
+					return "Ace";
+				default:
+					return "???";
+				}
+			}
+			static std::string to_string(suit aSuit)
+			{
+				switch (aSuit)
+				{
+				case suit::Joker:
+					return "Joker";
+				case suit::Club:
+					return "Club";
+				case suit::Diamond:
+					return "Diamond";
+				case suit::Heart:
+					return "Heart";
+				case suit::Spade:
+					return "Spade";
+				default:
+					return "???";
+				}
+			}
 		private:
 			value iValue;
 			suit iSuit;
