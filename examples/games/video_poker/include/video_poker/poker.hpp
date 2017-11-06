@@ -95,22 +95,27 @@ namespace video_poker
 	inline poker_hand to_poker_hand(const basic_hand<GameTraits>& aHand)
 	{
 		typedef basic_card<GameTraits> card_type;
-		std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<typename card_type::value, uint32_t>>> valueMap;
-		for (uint32_t i = 0; i < GameTraits::hand_size; ++i)
-			++valueMap[aHand.card_at(i)];
-		std::multiset<uint32_t, std::greater<uint32_t>, boost::fast_pool_allocator<uint32_t>> values;
-		for (auto& vme : valueMap)
-			values.insert(vme.second);
+
+		std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<typename card_type::value, uint32_t>>> valueCounter;
+		for (uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
+			++valueCounter[aHand.card_at(cardIndex)];
+
+		std::multiset<uint32_t, std::greater<uint32_t>, boost::fast_pool_allocator<uint32_t>> valueCounts;
+		for (auto& valueCount : valueCounter)
+			valueCounts.insert(valueCount.second);
+
 		boost::optional<poker_hand> result;
-		bool possibleStraight = (valueMap.size() == GameTraits::hand_size);
-		for (auto i = std::next(valueMap.begin()); possibleStraight && i != valueMap.end(); ++i)
-			if (static_cast<uint32_t>(std::prev(i)->first) - static_cast<uint32_t>(i->first) != 1)
+
+		bool possibleStraight = (valueCounter.size() == GameTraits::hand_size);
+		for (auto iterValueCounter = std::next(valueCounter.begin()); possibleStraight && iterValueCounter != valueCounter.end(); ++iterValueCounter)
+			if (static_cast<uint32_t>(std::prev(iterValueCounter)->first) - static_cast<uint32_t>(iterValueCounter->first) != 1)
 				possibleStraight = false;
 		if (possibleStraight)
 			result = poker_hand::Straight;
+
 		if (result == boost::none)
 		{
-			static const std::vector<std::pair<std::vector<uint32_t>, poker_hand>> sValueTable
+			static const std::vector<std::pair<std::vector<uint32_t>, poker_hand>> sValueHandTable
 			{
 				{ { 4 }, poker_hand::FourOfAKind },
 				{ { 3, 2 }, poker_hand::FullHouse },
@@ -119,24 +124,25 @@ namespace video_poker
 				{ { 2 }, poker_hand::Pair },
 				{ { 1 }, poker_hand::HighCard }
 			};
-			for (auto vte = sValueTable.begin(); vte != sValueTable.end(); ++vte)
-				if (vte->first.size() <= values.size() && std::equal(vte->first.begin(), vte->first.end(), values.begin()))
+			for (auto iterValueHand = sValueHandTable.begin(); iterValueHand != sValueHandTable.end(); ++iterValueHand)
+				if (iterValueHand->first.size() <= valueCounts.size() && std::equal(iterValueHand->first.begin(), iterValueHand->first.end(), valueCounts.begin()))
 				{
-					result = vte->second;
+					result = iterValueHand->second;
 					break;
 				}
 		}
+
 		if (*result == poker_hand::HighCard || *result == poker_hand::Straight)
 		{
 			bool possibleFlush = true;
-			for (uint32_t i = 1; possibleFlush && i < GameTraits::hand_size; ++i)
-				if (static_cast<card_type::suit>(aHand.card_at(i - 1)) != static_cast<card_type::suit>(aHand.card_at(i)))
+			for (uint32_t cardIndex = 1; possibleFlush && cardIndex < GameTraits::hand_size; ++cardIndex)
+				if (static_cast<card_type::suit>(aHand.card_at(cardIndex - 1)) != static_cast<card_type::suit>(aHand.card_at(cardIndex)))
 				possibleFlush = false;
 			if (possibleFlush)
 			{
 				if (*result == poker_hand::Straight)
 				{
-					if (valueMap.begin()->first == card_type::value::Ace)
+					if (valueCounter.begin()->first == card_type::value::Ace)
 						result = poker_hand::RoyalFlush;
 					else
 						result = poker_hand::StraightFlush;
@@ -145,6 +151,7 @@ namespace video_poker
 					result = poker_hand::Flush;
 			}
 		}
+
 		return *result;
 	}
 }
