@@ -37,19 +37,52 @@ namespace neogames
 		private:
 			typedef boost::optional<card_type> optional_card;
 			typedef std::array<optional_card, game_traits::hand_size> cards;
+			typedef typename cards::size_type size_type;
+		public:
+			struct no_card_in_slot : std::logic_error { no_card_in_slot() : std::logic_error("neogames::card_games::basic_hand::no_card_in_slot") {} };
+			struct bad_slot_index : std::logic_error { bad_slot_index() : std::logic_error("neogames::card_games::basic_hand::bad_slot_index") {} };
 		public:
 			basic_hand()
 			{
 			}
 		public:
-			void pick(deck_type& aDeck)
+			bool have_card_at(size_type aSlotIndex) const
+			{
+				if (aSlotIndex >= iCards.size())
+					throw bad_slot_index();
+				return iCards[aSlotIndex] != boost::none;
+			}
+			card_type card_at(size_type aSlotIndex) const
+			{
+				if (aSlotIndex >= iCards.size())
+					throw bad_slot_index();
+				if (have_card_at(aSlotIndex))
+					return iCards[aSlotIndex];
+				throw no_card_in_slot;
+			}
+			bool fully_dealt() const
+			{
+				size_type totalDealt = 0;
+				for (auto& slot : iCards)
+					if (slot)
+						++totalDealt;
+				return totalDealt == iCards.size();
+			}
+			bool pick(deck_type& aDeck)
 			{
 				for (auto& slot : iCards)
 					if (!slot)
 					{
 						slot = aDeck.deal_card();
-						break;
+						return true;
 					}
+				return false;
+			}
+			void discard(size_type aSlotIndex)
+			{
+				if (aSlotIndex >= iCards.size())
+					throw bad_slot_index();
+				iCards[aSlotIndex] = boost::none;
 			}
 		private:
 			cards iCards;

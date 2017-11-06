@@ -118,7 +118,7 @@ namespace neogames
 			template <typename HandType>
 			void deal_hand(HandType& aHand)
 			{
-				for (uint32_t i = 0; i < game_traits::hand_size; ++i)
+				while (!aHand.fully_dealt())
 					aHand.pick(*this);
 			}
 			template <typename HandIter>
