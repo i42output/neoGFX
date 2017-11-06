@@ -126,7 +126,7 @@ namespace video_poker
 					break;
 				}
 		}
-		if (*result < poker_hand::ThreeOfAKind || *result == poker_hand::Straight)
+		if (*result == poker_hand::HighCard || *result == poker_hand::Straight)
 		{
 			bool possibleFlush = true;
 			for (uint32_t i = 1; possibleFlush && i < GameTraits::hand_size; ++i)

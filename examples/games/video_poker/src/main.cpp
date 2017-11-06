@@ -21,6 +21,9 @@ int main(int argc, char* argv[])
 
 		// todo
 
+		video_poker::poker_hand test = video_poker::poker_hand::HighCard;
+		int go = 0;
+
 		for (;;)
 		{
 			video_poker::deck deck;
@@ -28,6 +31,17 @@ int main(int argc, char* argv[])
 			video_poker::hand hand;
 			deck.deal_hand(hand);
 			auto result = video_poker::to_poker_hand(hand);
+
+			if (result != test)
+				continue;
+
+			if (++go == 3)
+			{
+				if (test == video_poker::poker_hand::RoyalFlush)
+					break;
+				test = static_cast<video_poker::poker_hand>(static_cast<uint32_t>(test) + 1);
+				go = 0;
+			}
 
 			std::string resultDisplay;
 			for (uint32_t i = 0; i < video_poker::hand::game_traits::hand_size; ++i)
