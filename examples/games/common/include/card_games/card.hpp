@@ -94,7 +94,7 @@ namespace neogames
 				{
 				case value::Joker:
 					return "Joker";
-				case value::Two:
+				case value::Two: // you are thinking that I should be using switch case fall through and boost::lexical_cast or some such for the numbers, right? wrong. think symmetry (and performance).
 					return "2";
 				case value::Three:
 					return "3";
