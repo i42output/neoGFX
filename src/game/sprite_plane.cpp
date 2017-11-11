@@ -76,7 +76,7 @@ namespace neogfx
 		sort_shapes();
 		for (auto s : iRenderBuffer)
 		{
-			if (s->destroyed())
+			if (s->killed())
 				continue;
 			if (s->bounding_box_2d().intersection(client_rect()).empty())
 				continue;
@@ -247,12 +247,12 @@ namespace neogfx
 		{
 			std::stable_sort(iRenderBuffer.begin(), iRenderBuffer.end(), [this](i_shape* left, i_shape* right) -> bool
 			{
-				if (left->destroyed() != right->destroyed())
-					return left->destroyed() < right->destroyed();
+				if (left->killed() != right->killed())
+					return left->killed() < right->killed();
 				else
 					return left->position().z < right->position().z;
 			});
-			while (!iRenderBuffer.empty() && iRenderBuffer.back()->destroyed())
+			while (!iRenderBuffer.empty() && iRenderBuffer.back()->killed())
 				iRenderBuffer.pop_back();
 		}
 	}
@@ -264,8 +264,8 @@ namespace neogfx
 			sort_shapes();
 			std::stable_sort(iObjects.begin(), iObjects.end(), [this](const object_pointer& left, const object_pointer& right) -> bool
 			{
-				if (left->destroyed() != right->destroyed())
-					return left->destroyed() < right->destroyed();
+				if (left->killed() != right->killed())
+					return left->killed() < right->killed();
 				else if (left->category() == object_category::Shape || right->category() == object_category::Shape)
 				{
 					if (left->category() != right->category())
@@ -280,7 +280,7 @@ namespace neogfx
 					return leftObject.mass() > rightObject.mass();
 				}
 			});
-			while (!iObjects.empty() && iObjects.back()->destroyed())
+			while (!iObjects.empty() && iObjects.back()->killed())
 				iObjects.pop_back();
 			iNeedsSorting = false;
 		}
@@ -336,7 +336,7 @@ namespace neogfx
 			}
 			for (auto& i1 : iObjects)
 			{
-				if (i1->destroyed())
+				if (i1->killed())
 				{
 					iNeedsSorting = true;
 					continue;
@@ -346,7 +346,7 @@ namespace neogfx
 				i_physical_object& o1 = static_cast<i_physical_object&>(*i1);
 				for (auto& i2 : iObjects)
 				{
-					if (i2->destroyed())
+					if (i2->killed())
 					{
 						iNeedsSorting = true;
 						continue;

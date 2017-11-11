@@ -24,37 +24,37 @@
 namespace neogfx
 {
 	sprite::sprite() :
-		iCollisionMask{ 0ull }, iDestroyed { false }
+		iCollisionMask{ 0ull }, iKilled { false }
 	{
 	}
 
 	sprite::sprite(const colour& aColour) :
 		shape{ aColour },
-		iCollisionMask{ 0ull }, iDestroyed{ false }
+		iCollisionMask{ 0ull }, iKilled{ false }
 	{
 	}
 
 	sprite::sprite(const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
 		shape{ aTexture, aAnimationInfo },
-		iCollisionMask{ 0ull }, iDestroyed{ false }
+		iCollisionMask{ 0ull }, iKilled{ false }
 	{
 	}
 
 	sprite::sprite(const i_image& aImage, const optional_animation_info& aAnimationInfo) :
 		shape{ aImage, aAnimationInfo },
-		iCollisionMask{ 0ull }, iDestroyed{ false }
+		iCollisionMask{ 0ull }, iKilled{ false }
 	{
 	}
 
 	sprite::sprite(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
 		shape{ aTexture, aTextureRect, aAnimationInfo },
-		iCollisionMask{ 0ull }, iDestroyed{ false }
+		iCollisionMask{ 0ull }, iKilled{ false }
 	{
 	}
 
 	sprite::sprite(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
 		shape{ aImage, aTextureRect, aAnimationInfo },
-		iCollisionMask{ 0ull }, iDestroyed{ false }
+		iCollisionMask{ 0ull }, iKilled{ false }
 	{
 	}
 
@@ -62,7 +62,7 @@ namespace neogfx
 		shape{ aOther },
 		physical_object{ aOther },
 		iPath{ aOther.iPath },
-		iCollisionMask{ 0ull }, iDestroyed{ false }
+		iCollisionMask{ 0ull }, iKilled{ false }
 	{
 	}
 
@@ -81,14 +81,19 @@ namespace neogfx
 		iCollisionMask = aMask;
 	}
 
-	bool sprite::destroyed() const
+	bool sprite::killed() const
 	{
-		return iDestroyed;
+		return iKilled;
+	}
+
+	void sprite::kill()
+	{
+		iKilled = true;
 	}
 
 	void sprite::animation_finished()
 	{
-		destroy();
+		kill();
 	}
 
 	vec3 sprite::origin() const
@@ -192,10 +197,5 @@ namespace neogfx
 	void sprite::clear_aabb_cache()
 	{
 		iAabb = boost::none;
-	}
-
-	void sprite::destroy()
-	{
-		iDestroyed = true;
 	}
 }

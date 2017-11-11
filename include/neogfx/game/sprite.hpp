@@ -46,7 +46,8 @@ namespace neogfx
 		object_category category() const override;
 		uint64_t collision_mask() const override;
 		void set_collision_mask(uint64_t aMask) override;
-		bool destroyed() const override;
+		bool killed() const override;
+		void kill() override;
 		// geometry
 	public:
 		void animation_finished() override;
@@ -72,15 +73,14 @@ namespace neogfx
 		// physical object
 	public:
 		aabb_type aabb() const override;
-		void clear_aabb_cache() override;
 		// own
-	public:
-		void destroy();
+	private:
+		void clear_aabb_cache();
 		// attributes
 	private:
 		optional_path iPath;
 		uint64_t iCollisionMask;
 		mutable boost::optional<aabb_type> iAabb;
-		bool iDestroyed;
+		bool iKilled;
 	};
 }

@@ -48,7 +48,7 @@ public:
 	{
 		bool updated = physical_object::update(aNow, aForce);
 		if (updated && bounding_box_2d().intersection(iWorld.client_rect()).empty())
-			destroy();
+			kill();
 		return updated;
 	}
 	void collided(const i_physical_object& aOther) override
@@ -65,7 +65,7 @@ public:
 		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
 		explosion->set_extents(ng::vec2{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
 		iWorld.add_sprite(explosion);
-		destroy();
+		kill();
 	}
 private:
 	ng::sprite_plane& iWorld;

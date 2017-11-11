@@ -63,8 +63,8 @@ namespace neogfx
 		using i_physical_object::set_spin_degrees;
 		void set_mass(scalar aMass) override;
 	public:
+		void clear_vertices_cache() override;
 		aabb_type aabb() const override;
-		void clear_aabb_cache() override;
 		bool has_collided(const i_physical_object& aOther) const override;
 		void collided(const i_physical_object& aOther) override;
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;

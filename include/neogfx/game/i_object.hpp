@@ -42,6 +42,7 @@ namespace neogfx
 	public:
 		virtual object_category category() const = 0;
 		virtual const object_type& type() const { static object_type sNullTypeId = {}; return sNullTypeId; }
-		virtual bool destroyed() const { return false; }
+		virtual bool killed() const { return false; }
+		virtual void kill() {}
 	};
 }

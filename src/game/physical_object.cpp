@@ -131,14 +131,14 @@ namespace neogfx
 		current_physics().iMass = aMass;
 	}
 
+	void physical_object::clear_vertices_cache()
+	{
+		/* do nothing */
+	}
+
 	physical_object::aabb_type physical_object::aabb() const
 	{
 		return aabb_type{ position() + origin(), position() + origin() };
-	}
-
-	void physical_object::clear_aabb_cache()
-	{
-		/* do nothing */
 	}
 
 	bool physical_object::has_collided(const i_physical_object& aOther) const
@@ -173,7 +173,7 @@ namespace neogfx
 		}
 		iTimeOfLastUpdate = aNow;
 		if (updated)
-			clear_aabb_cache();
+			clear_vertices_cache();
 		return updated;
 	}
 

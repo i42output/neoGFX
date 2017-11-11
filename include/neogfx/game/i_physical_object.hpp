@@ -64,8 +64,8 @@ namespace neogfx
 		virtual void set_mass(scalar aMass) = 0;
 		// object
 	public:
+		virtual void clear_vertices_cache() = 0;
 		virtual aabb_type aabb() const = 0;
-		virtual void clear_aabb_cache() = 0;
 		virtual uint64_t collision_mask() const { return 0ull; }
 		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
 		virtual bool has_collided(const i_physical_object& aOther) const = 0;
