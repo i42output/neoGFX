@@ -41,6 +41,8 @@ namespace neogfx
 		physical_object(const physical_object& aOther);
 	public:
 		object_category category() const override;
+		const i_shape& as_shape() const override;
+		i_shape& as_shape() override;
 	public:
 		vec3 origin() const override;
 		vec3 position() const override;
@@ -66,7 +68,7 @@ namespace neogfx
 		void clear_vertices_cache() override;
 		aabb_type aabb() const override;
 		bool has_collided(const i_physical_object& aOther) const override;
-		void collided(const i_physical_object& aOther) override;
+		void collided(i_physical_object& aOther) override;
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;
 		const optional_time_interval& update_time() const override;
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;

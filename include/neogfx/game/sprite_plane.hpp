@@ -43,6 +43,7 @@ namespace neogfx
 	public:
 		typedef std::shared_ptr<i_object> object_pointer;
 		typedef std::vector<object_pointer> object_list;
+		typedef std::vector<i_shape*> shape_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
@@ -86,6 +87,7 @@ namespace neogfx
 	public:
 		void reserve(std::size_t aCapacity);
 		const object_list& objects() const;
+		void add_object(std::shared_ptr<i_object> aObject);
 	private:
 		void sort_shapes() const;
 		void sort_objects();
@@ -99,9 +101,11 @@ namespace neogfx
 		optional_step_time_interval iPhysicsTime;
 		step_time_interval iStepInterval;
 		object_list iObjects;
-		mutable std::vector<i_shape*> iRenderBuffer;
+		object_list iNewObjects;
+		mutable shape_list iRenderBuffer;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
 		mutable bool iWaitForRender;
+		bool iUpdatingObjects;
 	};
 }

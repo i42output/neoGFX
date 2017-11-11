@@ -71,6 +71,16 @@ namespace neogfx
 		return object_category::Sprite;
 	}
 
+	const i_shape& sprite::as_shape() const
+	{
+		return *this;
+	}
+
+	i_shape& sprite::as_shape()
+	{
+		return *this;
+	}
+
 	uint64_t sprite::collision_mask() const
 	{
 		return iCollisionMask;

@@ -95,6 +95,8 @@ namespace neogfx
 		// object
 	public:
 		object_category category() const override;
+		const i_shape& as_shape() const override;
+		i_shape& as_shape() override;
 		// mesh
 	public:
 		vertex_list_pointer vertices() const override;

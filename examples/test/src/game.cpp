@@ -22,6 +22,17 @@ const uint8_t sSpaceshipImagePattern[9][9]
 	{ 0, 1, 0, 0, 0, 0, 0, 1, 0 },
 };
 
+void create_target(ng::sprite_plane& aWorld)
+{
+	auto target = std::make_shared<ng::sprite>(ng::colour::from_hsl(static_cast<ng::scalar>(std::rand() % 360), 1.0, 0.75));
+	aWorld.add_sprite(target);
+	target->set_position(ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), 0.0 });
+	auto w = static_cast<ng::scalar>(std::rand() % 40) + 10.0;
+	target->set_extents(ng::vec2{ w, w });
+	target->set_mass(1.0);
+	target->set_spin_degrees(360.0);
+}
+
 class missile : public ng::sprite
 {
 public:
@@ -51,7 +62,7 @@ public:
 			kill();
 		return updated;
 	}
-	void collided(const i_physical_object& aOther) override
+	void collided(i_physical_object& aOther) override
 	{
 		iScore.first += 250;
 		std::ostringstream oss;
@@ -66,6 +77,8 @@ public:
 		explosion->set_extents(ng::vec2{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
 		iWorld.add_sprite(explosion);
 		kill();
+		aOther.kill();
+		create_target(iWorld);
 	}
 private:
 	ng::sprite_plane& iWorld;
@@ -109,13 +122,11 @@ void create_game(ng::i_layout& aLayout)
 	shipInfo->set_margins(ng::margins(2.0));
 	shipInfo->set_tag_of(spaceshipSprite, ng::vec3{ 18.0, 18.0, 0.0 });
 	spritePlane->add_shape(shipInfo);
-	auto target = std::make_shared<ng::sprite>(ng::colour::Goldenrod);
-	spritePlane->add_sprite(target);
-	target->set_position(ng::vec3{ 250.0, 250.0, 0.0 });
-	target->set_extents(ng::vec2{ 25.0, 25.0 });
-	target->set_mass(1.0);
-	target->set_spin_degrees(360.0);
-	spritePlane->sprites_painted([spritePlane, target](ng::graphics_context& aGraphicsContext)
+	for (int i = 0; i < 50; ++i)
+	{
+		create_target(*spritePlane);
+	}
+	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 	});

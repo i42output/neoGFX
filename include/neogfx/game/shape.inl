@@ -126,6 +126,18 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
+	inline const i_shape& shape<MixinInterface>::as_shape() const
+	{
+		return *this;
+	}
+
+	template <typename MixinInterface>
+	inline i_shape& shape<MixinInterface>::as_shape()
+	{
+		return *this;
+	}
+
+	template <typename MixinInterface>
 	inline vertex_list_pointer shape<MixinInterface>::vertices() const
 	{
 		if (iVertices == nullptr)

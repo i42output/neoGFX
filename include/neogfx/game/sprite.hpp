@@ -44,6 +44,8 @@ namespace neogfx
 		// object
 	public:
 		object_category category() const override;
+		const i_shape& as_shape() const override;
+		i_shape& as_shape() override;
 		uint64_t collision_mask() const override;
 		void set_collision_mask(uint64_t aMask) override;
 		bool killed() const override;

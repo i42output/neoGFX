@@ -69,7 +69,7 @@ namespace neogfx
 		virtual uint64_t collision_mask() const { return 0ull; }
 		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
 		virtual bool has_collided(const i_physical_object& aOther) const = 0;
-		virtual void collided(const i_physical_object& aOther) = 0;
+		virtual void collided(i_physical_object& aOther) = 0;
 		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
 		virtual const optional_time_interval& update_time() const = 0;
 		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;

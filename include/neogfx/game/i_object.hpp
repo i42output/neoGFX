@@ -33,14 +33,19 @@ namespace neogfx
 
 	typedef neolib::uuid object_type;
 
+	class i_shape;
+
 	class i_object
 	{
 	public:
+		struct not_a_shape : std::logic_error { not_a_shape() : std::logic_error("neogfx::i_object::not_a_shape") {} };
 		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_object::not_implemented") {} };
 	public:
 		virtual ~i_object() {}
 	public:
 		virtual object_category category() const = 0;
+		virtual const i_shape& as_shape() const = 0;
+		virtual i_shape& as_shape() = 0;
 		virtual const object_type& type() const { static object_type sNullTypeId = {}; return sNullTypeId; }
 		virtual bool killed() const { return false; }
 		virtual void kill() {}

@@ -41,6 +41,16 @@ namespace neogfx
 		return object_category::PhysicalObject;
 	}
 
+	const i_shape& physical_object::as_shape() const
+	{
+		throw not_a_shape();
+	}
+
+	i_shape& physical_object::as_shape()
+	{
+		throw not_a_shape();
+	}
+
 	vec3 physical_object::origin() const
 	{
 		return iOrigin;
@@ -155,7 +165,7 @@ namespace neogfx
 		return true;
 	}
 
-	void physical_object::collided(const i_physical_object&)
+	void physical_object::collided(i_physical_object&)
 	{
 		/* default behaviour: do nothing */
 	}

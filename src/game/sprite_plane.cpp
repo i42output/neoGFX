@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <numeric>
 #include <chrono>
+#include <neolib/raii.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/game/sprite_plane.hpp>
 #include "../hid/native/i_native_surface.hpp"
@@ -33,7 +34,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -45,7 +46,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -57,7 +58,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -103,42 +104,32 @@ namespace neogfx
 
 	void sprite_plane::add_sprite(i_sprite& aObject)
 	{
-		iObjects.push_back(std::shared_ptr<i_object>(std::shared_ptr<i_object>(), &aObject.physics())); // todo: using aliasing ctor here; not quite happy with the i_object based class hierarchy at present
-		iRenderBuffer.push_back(static_cast<i_shape*>(&aObject));
-		iNeedsSorting = true;
+		add_object(std::shared_ptr<i_object>(std::shared_ptr<i_object>(), &aObject.physics())); // todo: using aliasing ctor here; not quite happy with the i_object based class hierarchy at present
 	}
 
 	void sprite_plane::add_sprite(std::shared_ptr<i_sprite> aObject)
 	{
-		iObjects.push_back(std::shared_ptr<i_object>(aObject, &aObject->physics())); // todo: using aliasing ctor here; not quite happy with the i_object based class hierarchy at present
-		iRenderBuffer.push_back(static_cast<i_shape*>(&*aObject));
-		iNeedsSorting = true;
+		add_object(std::shared_ptr<i_object>(aObject, &aObject->physics())); // todo: using aliasing ctor here; not quite happy with the i_object based class hierarchy at present
 	}
 
 	void sprite_plane::add_physical_object(i_physical_object& aObject)
 	{
-		iObjects.push_back(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
-		iNeedsSorting = true;
+		add_object(std::shared_ptr<i_physical_object>(std::shared_ptr<i_physical_object>(), &aObject));
 	}
 
 	void sprite_plane::add_physical_object(std::shared_ptr<i_physical_object> aObject)
 	{
-		iObjects.push_back(aObject);
-		iNeedsSorting = true;
+		add_object(aObject);
 	}
 
 	void sprite_plane::add_shape(i_shape& aObject)
 	{
-		iObjects.push_back(std::shared_ptr<i_shape>(std::shared_ptr<i_shape>(), &aObject));
-		iRenderBuffer.push_back(&aObject);
-		iNeedsSorting = true;
+		add_object(std::shared_ptr<i_shape>(std::shared_ptr<i_shape>(), &aObject));
 	}
 
 	void sprite_plane::add_shape(std::shared_ptr<i_shape> aObject)
 	{
-		iObjects.push_back(aObject);
-		iRenderBuffer.push_back(&*aObject);
-		iNeedsSorting = true;
+		add_object(aObject);
 	}
 
 	i_sprite& sprite_plane::create_sprite()
@@ -241,6 +232,19 @@ namespace neogfx
 		return iObjects;
 	}
 
+	void sprite_plane::add_object(std::shared_ptr<i_object> aObject)
+	{
+		if (iUpdatingObjects)
+			iNewObjects.push_back(aObject);
+		else
+		{
+			iObjects.push_back(aObject);
+			if (aObject->category() == object_category::Sprite || aObject->category() == object_category::Shape)
+				iRenderBuffer.push_back(&aObject->as_shape());
+			iNeedsSorting = true;
+		}
+	}
+
 	void sprite_plane::sort_shapes() const
 	{
 		if (iNeedsSorting && iEnableZSorting)
@@ -296,6 +300,7 @@ namespace neogfx
 			iPhysicsTime = now;
 		if (*iPhysicsTime == now)
 			return false;
+		neolib::scoped_flag updating{ iUpdatingObjects };
 		bool updated = false;
 		while (*iPhysicsTime <= now)
 		{
@@ -373,6 +378,17 @@ namespace neogfx
 		}
 		if (updated)
 			iWaitForRender = true;
+		if (!iNewObjects.empty())
+		{
+			for (auto& o : iNewObjects)
+			{
+				iObjects.push_back(o);
+				if (o->category() == object_category::Sprite || o->category() == object_category::Shape)
+					iRenderBuffer.push_back(&o->as_shape());
+			}
+			iNewObjects.clear();
+			iNeedsSorting = true;
+		}
 		return updated;
 	}
 }
