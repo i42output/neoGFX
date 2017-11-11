@@ -29,13 +29,14 @@ namespace neogfx
 	private:
 		enum texture_index_e
 		{
-			TextureOff,
+			Unknown = -1,
+			TextureOff = 0,
 			TextureOn,
 			TextureOnOver
 		};
 	public:
 		close_button(i_tab& aParent) :
-			push_button{ aParent.as_widget().layout() }, iParent{ aParent }
+			push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater { app::instance(), [this](neolib::callback_timer& aTimer) { aTimer.again(); update_appearance(); }, 20 }
 		{
 			set_margins(neogfx::margins{ 2.0 });
 			iSink += app::instance().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
@@ -106,16 +107,20 @@ namespace neogfx
 						"neogfx::tab_button::close_button::iTextures[TextureOnOver]::" + paper.to_string(),
 						sTexture, { { 0, colour{} }, { 1, paper }, { 2, paper.with_alpha(0x80) } } });
 			}
+			iTextureState = Unknown;
 			update_appearance();
 		}
 		void update_appearance()
 		{
+			auto oldState = iTextureState;
 			if (entered())
-				image().set_image(iTextures[TextureOnOver]->second);
+				iTextureState = TextureOnOver;
 			else if (iParent.is_selected() || iParent.as_widget().entered() || (has_root() && root().has_entered_widget() && root().entered_widget().is_descendent_of(iParent.as_widget())))
-				image().set_image(iTextures[TextureOn]->second);
+				iTextureState = TextureOn;
 			else
-				image().set_image(iTextures[TextureOff]->second);
+				iTextureState = TextureOff;
+			if (iTextureState != oldState)
+				image().set_image(iTextures[iTextureState]->second);
 		}
 	protected:
 		void mouse_entered() override
@@ -132,6 +137,8 @@ namespace neogfx
 		i_tab& iParent;
 		sink iSink;
 		mutable boost::optional<std::pair<colour, texture>> iTextures[3];
+		texture_index_e iTextureState;
+		neolib::callback_timer iUpdater;
 	};
 
 	tab_button::tab_button(i_tab_container& aContainer, const std::string& aText, bool aClosable) :
