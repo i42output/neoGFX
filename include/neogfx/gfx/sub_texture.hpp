@@ -35,19 +35,20 @@ namespace neogfx
 		~sub_texture();
 		// operations
 	public:
-		virtual type_e type() const;
-		virtual texture_sampling sampling() const;
-		virtual bool is_empty() const;
-		virtual size extents() const;
-		virtual size storage_extents() const;
-		virtual void set_pixels(const rect& aRect, const void* aPixelData);
-		virtual void set_pixels(const i_image& aImage);
+		type_e type() const override;
+		const i_sub_texture& as_sub_texture() const override;
+		texture_sampling sampling() const override;
+		bool is_empty() const override;
+		size extents() const override;
+		size storage_extents() const override;
+		void set_pixels(const rect& aRect, const void* aPixelData) override;
+		void set_pixels(const i_image& aImage) override;
 	public:
-		virtual std::shared_ptr<i_native_texture> native_texture() const;
+		std::shared_ptr<i_native_texture> native_texture() const override;
 	public:
-		virtual id atlas_id() const;
-		virtual i_texture& atlas_texture() const;
-		virtual const rect& atlas_location() const;
+		id atlas_id() const override;
+		i_texture& atlas_texture() const override;
+		const rect& atlas_location() const override;
 		// attributes
 	private:
 		id iAtlasId;

@@ -20,9 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <vector>
 #include <boost/optional.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/sub_texture.hpp>
 
 namespace neogfx
 {
@@ -37,21 +39,42 @@ namespace neogfx
 		texture(const neogfx::size& aExtents, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
 		texture(const i_texture& aTexture);
 		texture(const i_image& aImage);
+		texture(const i_sub_texture& aSubTexture);
 		~texture();
 		// operations
 	public:
-		virtual type_e type() const;
-		virtual texture_sampling sampling() const;
-		virtual bool is_empty() const;
-		virtual size extents() const;
-		virtual size storage_extents() const;
-		virtual void set_pixels(const rect& aRect, const void* aPixelData);
+		type_e type() const override;
+		const i_sub_texture& as_sub_texture() const override;
+		texture_sampling sampling() const override;
+		bool is_empty() const override;
+		size extents() const override;
+		size storage_extents() const override;
+		void set_pixels(const rect& aRect, const void* aPixelData) override;
+		void set_pixels(const i_image& aImage) override;
 	public:
-		virtual std::shared_ptr<i_native_texture> native_texture() const;
+		virtual std::shared_ptr<i_native_texture> native_texture() const override;
 		// attributes
 	private:
 		std::shared_ptr<i_native_texture> iNativeTexture;
+		optional_sub_texture iSubTexture;
 	};
 
 	typedef boost::optional<texture> optional_texture;
+
+	typedef std::pair<texture, optional_rect> texture_source;
+	typedef std::vector<texture_source> texture_list;
+	typedef boost::optional<texture_list> optional_texture_list;
+	typedef texture_list::size_type texture_index;
+	typedef std::shared_ptr<texture_list> texture_list_pointer;
+
+	inline texture_list_pointer to_texture_list_pointer(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect{})
+	{
+		return texture_list_pointer{ new texture_list{ texture_source{ aTexture, aTextureRect } } };
+	}
+
+	inline texture_list_pointer to_texture_list_pointer(texture_list& aTextureList, const i_texture& aTexture, const optional_rect& aTextureRect)
+	{
+		aTextureList.assign(1, texture_source{ aTexture, aTextureRect });
+		return texture_list_pointer{ texture_list_pointer{}, &aTextureList };
+	}
 }

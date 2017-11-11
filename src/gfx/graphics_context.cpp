@@ -851,9 +851,14 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const i_shape& aShape, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
+		draw_textures(aShape, to_texture_list_pointer(aTexture, aTextureRect), aColour, aShaderEffect);
+	}
+
+	void graphics_context::draw_textures(const i_shape& aShape, texture_list_pointer aTextures, const optional_colour& aColour, shader_effect aShaderEffect) const
+	{
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
 		iNativeGraphicsContext->enqueue(
-			graphics_operation::draw_texture{
+			graphics_operation::draw_textures{
 				mesh{
 					aShape,
 					mat44{
@@ -861,8 +866,7 @@ namespace neogfx
 						{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
 						{ 0.0, 0.0, 1.0, 0.0 },
 						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },	
-				aTexture,
-				aTextureRect,
+				aTextures,
 				aColour,
 				aShaderEffect});	
 	}

@@ -31,25 +31,24 @@ namespace neogfx
 	public:
 		frame(const colour_or_gradient& aColour) : iColour(aColour) {}
 		frame(const colour_or_gradient& aColour, const mat33& aTransformation) : iColour(aColour), iTransformation(aTransformation) {}
-		frame(const i_texture& aTexture) : iTexture(aTexture) {}
-		frame(const i_texture& aTexture, const mat33& aTransformation) : iTexture(aTexture), iTransformation(aTransformation) {}
-		frame(const i_texture& aTexture, const optional_rect& aTextureRect) : iTexture(aTexture), iTextureRect(aTextureRect) {}
-		frame(const i_texture& aTexture, const optional_rect& aTextureRect, const mat33& aTransformation) : iTexture(aTexture), iTextureRect(aTextureRect), iTransformation(aTransformation) {}
+		frame(const i_texture& aTexture) : iTextures{ to_texture_list_pointer(aTexture) } {}
+		frame(const i_texture& aTexture, const mat33& aTransformation) : iTextures{ to_texture_list_pointer(aTexture) }, iTransformation(aTransformation) {}
+		frame(const i_texture& aTexture, const optional_rect& aTextureRect) : iTextures{ to_texture_list_pointer(aTexture, aTextureRect) } {}
+		frame(const i_texture& aTexture, const optional_rect& aTextureRect, const mat33& aTransformation) : iTextures{ to_texture_list_pointer(aTexture, aTextureRect) }, iTransformation(aTransformation) {}
+		frame(texture_list_pointer aTextures) : iTextures{ aTextures } {}
+		frame(texture_list_pointer aTextures, const mat33& aTransformation) : iTextures{ aTextures }, iTransformation(aTransformation) {}
 	public:
-		bool has_extents() const override { return iTexture != boost::none; }
-		size extents() const override { return iTextureRect != boost::none ? *iTextureRect : iTexture != boost::none ? iTexture->extents() : size{}; }
+		bool has_extents() const override { return iTextures != nullptr && !iTextures->empty(); }
+		size extents() const override { return has_extents() ? (*iTextures)[0].second != boost::none ? *(*iTextures)[0].second : (*iTextures)[0].first.extents() : size{}; }
 		const optional_colour_or_gradient& colour() const override { return iColour; }
 		void set_colour(const optional_colour_or_gradient& aColour) override { iColour = aColour; }
-		const optional_texture& texture() const override { return iTexture; }
-		void set_texture(const optional_texture& aTexture) override { iTexture = aTexture; }
-		const optional_rect& texture_rect() const override { return iTextureRect; }
-		void set_texture_rect(const optional_rect& aTextureRect) override { iTextureRect = aTextureRect; }
+		texture_list_pointer textures() const override { return iTextures; }
+		void set_textures(texture_list_pointer aTextures) override { iTextures = aTextures; }
 		const optional_mat33& transformation() const override { return iTransformation; }
 		void set_transformation(const optional_mat33& aTransformation) override { iTransformation = aTransformation; }
 	private:
 		optional_colour_or_gradient iColour;
-		optional_texture iTexture;
-		optional_rect iTextureRect;
+		texture_list_pointer iTextures;
 		optional_mat33 iTransformation;
 	};
 
@@ -58,12 +57,6 @@ namespace neogfx
 	{
 	private:
 		typedef std::vector<std::shared_ptr<i_frame>> frame_list;
-	public:
-		typedef i_mesh::triangle triangle;
-		typedef i_mesh::vertex_list vertex_list;
-		typedef i_mesh::vertex_index vertex_index;
-		typedef i_mesh::face face;
-		typedef i_mesh::face_list face_list;
 	public:
 		typedef i_shape::frame_index frame_index;
 		typedef i_shape::time_interval time_interval;
@@ -74,8 +67,12 @@ namespace neogfx
 	public:
 		struct animation_info
 		{
-			point sheetOffset;
-			size extents;
+			struct texture_sheet_item
+			{
+				point offset;
+				size extents;
+			};
+			std::vector<texture_sheet_item> items;
 			uint32_t count;
 			time_interval time;
 			bool repeat;
@@ -100,10 +97,16 @@ namespace neogfx
 		object_category category() const override;
 		// mesh
 	public:
-		const vertex_list& vertices() const override;
-		const face_list& faces() const override;
+		vertex_list_pointer vertices() const override;
+		texture_list_pointer textures() const override;
+		face_list_pointer faces() const override;
 		mat44 transformation_matrix() const override;
-		vertex_list transformed_vertices() const override;
+		const vertex_list& transformed_vertices() const override;
+	public:
+		void set_vertices(vertex_list_pointer aVertices) override;
+		void set_textures(texture_list_pointer aTextures) override;
+		void set_faces(face_list_pointer aFaces) override;
+	public:
 		// container
 	public:
 		const i_shape_container& container() const override;
@@ -126,7 +129,6 @@ namespace neogfx
 		void replace_frame(frame_index aFrameIndex, i_frame& aFrame) override;
 		void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame) override;
 		void remove_frame(frame_index aFrameIndex) override;
-		void set_texture_rect_for_all_frames(const optional_rect& aTextureRect) override;
 		// geometry
 	public:
 		const animation_frames& animation() const override;
@@ -165,7 +167,8 @@ namespace neogfx
 		using i_shape::set_extents;
 		// implementation
 	private:
-		void init_from_texture(const i_texture& aTexture, const optional_rect& aTextureRect, const optional_animation_info& aAnimationInfo);
+		void init_frames(const i_texture& aTexture, const optional_rect& aTextureRect, const optional_animation_info& aAnimationInfo);
+		void init_frames(texture_list_pointer aTextures, const optional_animation_info& aAnimationInfo);
 		// attributes
 	private:
 		i_shape_container* iContainer;
@@ -180,8 +183,9 @@ namespace neogfx
 		optional_vec3 iExtents;
 		optional_mat44 iTransformationMatrix;
 		std::pair<i_shape*, vec3> iTagOf;
-		mutable boost::optional<vertex_list> iVertices;
-		mutable face_list iFaces;
+		mutable vertex_list_pointer iVertices;
+		mutable face_list_pointer iFaces;
+		mutable vertex_list iTransformedVertices;
 	};
 }
 

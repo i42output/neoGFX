@@ -224,11 +224,10 @@ namespace neogfx
 			text_appearance appearance;
 		};
 
-		struct draw_texture
+		struct draw_textures
 		{
 			neogfx::mesh mesh;
-			texture texture;
-			rect textureRect;
+			texture_list_pointer textures;
 			optional_colour colour;
 			shader_effect shaderEffect;
 		};
@@ -267,7 +266,7 @@ namespace neogfx
 			fill_path,
 			fill_shape,
 			draw_glyph,
-			draw_texture
+			draw_textures
 		> operation;
 
 		enum operation_type
@@ -306,7 +305,7 @@ namespace neogfx
 			FillPath,
 			FillShape,
 			DrawGlyph,
-			DrawTexture
+			DrawTextures
 		};
 
 		bool inline batchable(const operation& aLeft, const operation& aRight)
@@ -356,11 +355,11 @@ namespace neogfx
 				return leftGlyphTexture.texture().native_texture()->handle() == rightGlyphTexture.texture().native_texture()->handle() &&
 					left.glyph.subpixel() == right.glyph.subpixel();
 			}
-			case operation_type::DrawTexture:
+			case operation_type::DrawTextures:
 			{
-				auto& left = static_variant_cast<const draw_texture&>(aLeft);
-				auto& right = static_variant_cast<const draw_texture&>(aRight);
-				return left.texture.native_texture()->handle() == right.texture.native_texture()->handle() && left.shaderEffect == right.shaderEffect;
+				auto& left = static_variant_cast<const draw_textures&>(aLeft);
+				auto& right = static_variant_cast<const draw_textures&>(aRight);
+				return left.shaderEffect == right.shaderEffect;
 			}
 			default:
 				return false;

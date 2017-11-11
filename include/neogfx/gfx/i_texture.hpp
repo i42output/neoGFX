@@ -33,6 +33,9 @@ namespace neogfx
 		Multisample
 	};
 
+	class i_sub_texture;
+	class i_image;
+
 	class i_texture
 	{
 	public:
@@ -43,15 +46,18 @@ namespace neogfx
 		};
 	public:
 		struct texture_empty : std::logic_error { texture_empty() : std::logic_error("neogfx::i_texture::texture_empty") {} };
+		struct not_sub_texture : std::logic_error { not_sub_texture() : std::logic_error("neogfx::i_texture::not_sub_texture") {} };
 	public:
 		virtual ~i_texture() {}
 	public:
 		virtual type_e type() const = 0;
+		virtual const i_sub_texture& as_sub_texture() const = 0;
 		virtual texture_sampling sampling() const = 0;
 		virtual bool is_empty() const = 0;
 		virtual size extents() const = 0;
 		virtual size storage_extents() const = 0;
 		virtual void set_pixels(const rect& aRect, const void* aPixelData) = 0;
+		virtual void set_pixels(const i_image& aImage) = 0;
 	public:
 		virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
 	};

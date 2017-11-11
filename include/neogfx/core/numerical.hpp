@@ -290,10 +290,6 @@ namespace neogfx
 	typedef boost::optional<vec2_list> optional_vec2_list;
 	typedef boost::optional<vec3_list> optional_vec3_list;
 
-	typedef vec2_list vertex_list;
-
-	typedef boost::optional<vertex_list> optional_vertex_list;
-
 	typedef basic_vector<float, 1> vector1f;
 	typedef basic_vector<float, 2> vector2f;
 	typedef basic_vector<float, 3> vector3f;

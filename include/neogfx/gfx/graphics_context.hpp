@@ -328,6 +328,7 @@ namespace neogfx
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const i_shape& aMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_textures(const i_shape& aMap, texture_list_pointer aTextures, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		// implementation
 		// from i_device_metrics
 	public:

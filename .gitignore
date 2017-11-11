@@ -207,3 +207,4 @@ Debug
 /examples/games/video_poker/build/win32/vs2015/video_poker.VC.opendb
 /examples/games/video_poker/build/win32/vs2015/video_poker.sdf
 /examples/games/video_poker/build/win32/vs2015/video_poker.vcxproj.user
+/build/win32/vs2015/neogfx.vcxproj.user

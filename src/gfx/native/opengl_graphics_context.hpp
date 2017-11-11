@@ -54,8 +54,6 @@ namespace neogfx
 			{
 			}
 		};
-		typedef xyz vertex;
-		typedef xy texture_vertex;
 	public:
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface);
 		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget);
@@ -105,14 +103,14 @@ namespace neogfx
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill);
 		void fill_path(const path& aPath, const brush& aFill);
 		void fill_shape(const graphics_operation::batch& aFillShapeOps);
-		void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);
-		void draw_texture(const i_mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect);
+		void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
+		void draw_textures(const i_mesh& aMesh, texture_list_pointer aTextures, const optional_colour& aColour, shader_effect aShaderEffect);
 	private:
 		void apply_scissor();
 		void apply_logical_operation();
 		void gradient_on(const gradient& aGradient, const rect& aBoundingBox);
 		void gradient_off();
-		vertex to_shader_vertex(const point& aPoint, coordinate aZ = 0.0) const;
+		xyz to_shader_vertex(const point& aPoint, coordinate aZ = 0.0) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
 		const i_native_surface& iSurface;

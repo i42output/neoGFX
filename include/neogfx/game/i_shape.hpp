@@ -39,10 +39,8 @@ namespace neogfx
 		virtual size extents() const = 0;
 		virtual const optional_colour_or_gradient& colour() const = 0;
 		virtual void set_colour(const optional_colour_or_gradient& aColour) = 0;
-		virtual const optional_texture& texture() const = 0;
-		virtual void set_texture(const optional_texture& aTexture) = 0;
-		virtual const optional_rect& texture_rect() const = 0;
-		virtual void set_texture_rect(const optional_rect& aTextureRect) = 0;
+		virtual texture_list_pointer textures() const = 0;
+		virtual void set_textures(texture_list_pointer aTextures) = 0;
 		virtual const optional_mat33& transformation() const = 0;
 		virtual void set_transformation(const optional_mat33& aTransformation) = 0;
 	};
@@ -96,7 +94,6 @@ namespace neogfx
 		virtual void replace_frame(frame_index aFrameIndex, i_frame& aFrame) = 0;
 		virtual void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame) = 0;
 		virtual void remove_frame(frame_index aFrameIndex) = 0;
-		virtual void set_texture_rect_for_all_frames(const optional_rect& aTextureRect) = 0;
 		// geometry
 	public:
 		virtual const animation_frames& animation() const = 0;

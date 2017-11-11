@@ -96,7 +96,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\neopede\src\game.cpp" />
+    <ClCompile Include="..\..\..\src\game.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="Debug\GeneratedFiles\test.nrc.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

@@ -50,6 +50,9 @@
     <ClInclude Include="..\..\..\include\video_poker\poker.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\common\include\card_games\card_shape.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="video_poker.rc">

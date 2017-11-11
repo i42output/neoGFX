@@ -61,6 +61,9 @@ namespace neogames
 				Black
 			};
 		public:
+			struct bad_value : std::logic_error { bad_value() : std::logic_error("neogames::basic_card::bad_value") {} };
+			struct bad_suit : std::logic_error { bad_suit() : std::logic_error("neogames::basic_card::bad_suit") {} };
+		public:
 			basic_card(value aValue, suit aSuit) :
 				iValue{ aValue }, iSuit{ aSuit }
 			{
@@ -88,59 +91,44 @@ namespace neogames
 				return std::tie(iValue, iSuit) < std::tie(aRhs.iValue, aRhs.iSuit);
 			}
 		public:
-			static std::string to_string(value aValue)
+			static const std::string& to_string(value aValue)
 			{
-				switch (aValue)
+				static const std::unordered_map<value, std::string> sValueStrings
 				{
-				case value::Joker:
-					return "Joker";
-				case value::Two: // you are thinking that I should be using switch case fall through and boost::lexical_cast or some such for the numbers, right? wrong. think symmetry (and performance).
-					return "2";
-				case value::Three:
-					return "3";
-				case value::Four:
-					return "4";
-				case value::Five:
-					return "5";
-				case value::Six:
-					return "6";
-				case value::Seven:
-					return "7";
-				case value::Eight:
-					return "8";
-				case value::Nine:
-					return "9";
-				case value::Ten:
-					return "10";
-				case value::Jack:
-					return "Jack";
-				case value::Queen:
-					return "Queen";
-				case value::King:
-					return "King";
-				case value::Ace:
-					return "Ace";
-				default:
-					return "???";
-				}
+					{ value::Joker, "Joker" },
+					{ value::Two, "2" },
+					{ value::Three, "3" },
+					{ value::Four, "4" },
+					{ value::Five, "5" },
+					{ value::Six, "6" },
+					{ value::Seven, "7" },
+					{ value::Eight, "8" },
+					{ value::Nine, "9" },
+					{ value::Ten, "10" },
+					{ value::Jack, "Jack" },
+					{ value::Queen, "Queen" },
+					{ value::King, "King" },
+					{ value::Ace, "Ace" }
+				};
+				auto result = sValueStrings.find(aValue);
+				if (result != sValueStrings.end())
+					return result->second;
+				throw bad_value();
 			}
-			static std::string to_string(suit aSuit)
+			static const std::string& to_string(suit aSuit)
 			{
-				switch (aSuit)
+				static const std::unordered_map<suit, std::string> sSuitStrings
 				{
-				case suit::Joker:
-					return "Joker";
-				case suit::Club:
-					return "Club";
-				case suit::Diamond:
-					return "Diamond";
-				case suit::Heart:
-					return "Heart";
-				case suit::Spade:
-					return "Spade";
-				default:
-					return "???";
-				}
+					{ suit::Joker, "Joker" },
+					{ suit::Club, "Club" },
+					{ suit::Diamond, "Diamond" },
+					{ suit::Heart, "Heart" },
+					{ suit::Spade, "Spade" }
+				};
+				auto result = sSuitStrings.find(aSuit);
+				if (result != sSuitStrings.end())
+					return result->second;
+				throw bad_suit();
 			}
 		private:
 			value iValue;

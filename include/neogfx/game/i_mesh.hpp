@@ -2,17 +2,17 @@
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -21,30 +21,46 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometry.hpp>
+#include <neogfx/gfx/texture.hpp>
 
 namespace neogfx
 {
+	struct vertex
+	{
+		vec3 coordinates;
+		vec2 textureCoordinates;
+	};
+	typedef std::vector<vertex> vertex_list;
+	typedef boost::optional<vertex_list> optional_vertex_list;
+	typedef vertex_list::size_type vertex_index;
+	typedef std::shared_ptr<vertex_list> vertex_list_pointer;
+
+	struct face
+	{
+		std::array<vertex_index, 3> vertices;
+		texture_index texture;
+	};
+	typedef std::vector<face> face_list;
+	typedef boost::optional<face_list> optional_face_list;
+	typedef std::shared_ptr<face_list> face_list_pointer;
+
 	class i_mesh
 	{
 	public:
-		typedef std::array<vec3, 3> triangle;
-		struct vertex
-		{
-			vec3 coordinates;
-			vec2 textureCoordinates;
-		};
-		typedef std::vector<vertex> vertex_list;
-		typedef vertex_list::size_type vertex_index;
-		typedef std::array<vertex_index, 3> face;
-		typedef std::vector<face> face_list;
+		struct no_textures : std::logic_error { no_textures() : std::logic_error("neogfx::i_mesh::no_textures") {} };
 	public:
-		virtual const vertex_list& vertices() const = 0;
-		virtual const face_list& faces() const = 0;
+		virtual vertex_list_pointer vertices() const = 0;
+		virtual texture_list_pointer textures() const = 0;
+		virtual face_list_pointer faces() const = 0;
 		virtual mat44 transformation_matrix() const = 0;
-		virtual vertex_list transformed_vertices() const = 0;
+		virtual const vertex_list& transformed_vertices() const = 0;
+	public:
+		virtual void set_vertices(vertex_list_pointer aVertices) = 0;
+		virtual void set_textures(texture_list_pointer aTextures) = 0;
+		virtual void set_faces(face_list_pointer aFaces) = 0;
 	};
 
-	inline rect bounding_rect(const i_mesh::vertex_list& aVertices)
+	inline rect bounding_rect(const vertex_list& aVertices)
 	{
 		if (aVertices.empty())
 			return rect{};

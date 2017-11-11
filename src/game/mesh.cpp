@@ -47,12 +47,17 @@ namespace neogfx
 	{
 	}
 
-	const mesh::vertex_list& mesh::vertices() const
+	vertex_list_pointer mesh::vertices() const
 	{
 		return iVertices;
 	}
 
-	const mesh::face_list& mesh::faces() const
+	texture_list_pointer mesh::textures() const
+	{
+		return iTextures;
+	}
+
+	face_list_pointer mesh::faces() const
 	{
 		return iFaces;
 	}
@@ -62,12 +67,27 @@ namespace neogfx
 		return iTransformationMatrix;
 	}
 
-	mesh::vertex_list mesh::transformed_vertices() const
+	const vertex_list& mesh::transformed_vertices() const
 	{
-		mesh::vertex_list result;
-		result.reserve(iVertices.size());
-		for (auto const& v : iVertices)
-			result.push_back(vertex{ (transformation_matrix() * vec4{ v.coordinates.x, v.coordinates.y, v.coordinates.z, 1.0 }).xyz, v.textureCoordinates });
-		return result;
+		iTransformedVertices.reserve(iVertices->size());
+		iTransformedVertices.clear();
+		for (auto const& v : *iVertices)
+			iTransformedVertices.push_back(vertex{ (transformation_matrix() * vec4{ v.coordinates.x, v.coordinates.y, v.coordinates.z, 1.0 }).xyz, v.textureCoordinates });
+		return iTransformedVertices;
+	}
+
+	void mesh::set_vertices(vertex_list_pointer aVertices)
+	{
+		iVertices = aVertices;
+	}
+
+	void mesh::set_textures(texture_list_pointer aTextures)
+	{
+		iTextures = aTextures;
+	}
+
+	void mesh::set_faces(face_list_pointer aFaces)
+	{
+		iFaces = aFaces;
 	}
 }

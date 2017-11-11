@@ -30,17 +30,23 @@ namespace neogfx
 	}
 
 	texture::texture(const neogfx::size& aExtents, texture_sampling aSampling, const optional_colour& aColour) :
-		iNativeTexture(app::instance().rendering_engine().texture_manager().create_texture(aExtents, aSampling, aColour))
+		iNativeTexture{ app::instance().rendering_engine().texture_manager().create_texture(aExtents, aSampling, aColour) }
 	{
 	}
 
 	texture::texture(const i_texture& aTexture) :
-		iNativeTexture(!aTexture.is_empty() ? aTexture.native_texture() : std::shared_ptr<i_native_texture>())
+		iNativeTexture{ !aTexture.is_empty() ? aTexture.native_texture() : std::shared_ptr<i_native_texture>() }
 	{
 	}
 
 	texture::texture(const i_image& aImage) :
-		iNativeTexture(app::instance().rendering_engine().texture_manager().create_texture(aImage))
+		iNativeTexture{ app::instance().rendering_engine().texture_manager().create_texture(aImage) }
+	{
+	}
+
+	texture::texture(const i_sub_texture& aSubTexture) :
+		iNativeTexture{ !aSubTexture.atlas_texture().is_empty() ? aSubTexture.atlas_texture().native_texture() : std::shared_ptr<i_native_texture>() },
+		iSubTexture{ aSubTexture }
 	{
 	}
 
@@ -51,6 +57,13 @@ namespace neogfx
 	i_texture::type_e texture::type() const
 	{
 		return Texture;
+	}
+
+	const i_sub_texture& texture::as_sub_texture() const
+	{
+		if (iSubTexture != boost::none)
+			return *iSubTexture;
+		throw not_sub_texture();
 	}
 
 	texture_sampling texture::sampling() const
@@ -82,6 +95,11 @@ namespace neogfx
 	void texture::set_pixels(const rect& aRect, const void* aPixelData)
 	{
 		native_texture()->set_pixels(aRect, aPixelData);
+	}
+
+	void texture::set_pixels(const i_image& aImage)
+	{
+		set_pixels(rect{ point{}, aImage.extents() }, aImage.cdata());
 	}
 
 	std::shared_ptr<i_native_texture> texture::native_texture() const
