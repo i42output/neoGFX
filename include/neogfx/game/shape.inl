@@ -506,8 +506,7 @@ namespace neogfx
 	template <typename MixinInterface>
 	inline void shape<MixinInterface>::init_frames(const i_texture& aTexture, const optional_rect& aTextureRect, const optional_animation_info& aAnimationInfo)
 	{
-		texture_list textureList;
-		init_frames(to_texture_list_pointer(textureList, aTexture, aTextureRect), aAnimationInfo);
+		init_frames(to_texture_list_pointer(aTexture, aTextureRect), aAnimationInfo);
 	}
 
 	template <typename MixinInterface>
