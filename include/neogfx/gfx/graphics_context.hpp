@@ -170,8 +170,15 @@ namespace neogfx
 		struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_appearance::no_paper") {} };
 		struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
 	public:
-		template <typename InkType, typename PaperType = optional_text_colour>
-		text_appearance(const InkType& aInk, const PaperType& aPaper = PaperType{}, const optional_text_effect& aEffect = optional_text_effect{}) :
+		template <typename InkType, typename PaperType>
+		text_appearance(const InkType& aInk, const PaperType& aPaper, const optional_text_effect& aEffect) :
+			iInk{ aInk },
+			iPaper{ aPaper },
+			iEffect{ aEffect }
+		{
+		}
+		template <typename InkType, typename PaperType>
+		text_appearance(const InkType& aInk, const PaperType& aPaper, const text_effect& aEffect) :
 			iInk{ aInk },
 			iPaper{ aPaper },
 			iEffect{ aEffect }
@@ -181,6 +188,23 @@ namespace neogfx
 		text_appearance(const InkType& aInk, const optional_text_effect& aEffect) :
 			iInk{ aInk },
 			iEffect{ aEffect }
+		{
+		}
+		template <typename InkType>
+		text_appearance(const InkType& aInk, const text_effect& aEffect) :
+			iInk{ aInk },
+			iEffect{ aEffect }
+		{
+		}
+		template <typename InkType, typename PaperType>
+		text_appearance(const InkType& aInk, const PaperType& aPaper) :
+			iInk{ aInk },
+			iPaper{ aPaper }
+		{
+		}
+		template <typename InkType>
+		text_appearance(const InkType& aInk) :
+			iInk{ aInk }
 		{
 		}
 	public:
