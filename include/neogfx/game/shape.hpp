@@ -185,6 +185,8 @@ namespace neogfx
 		optional_vec3 iExtents;
 		optional_mat44 iTransformationMatrix;
 		std::pair<i_shape*, vec3> iTagOf;
+		mutable vertex_list_pointer iDefaultVertices;
+		mutable face_list_pointer iDefaultFaces;
 		mutable vertex_list_pointer iVertices;
 		mutable face_list_pointer iFaces;
 		mutable vertex_list iTransformedVertices;

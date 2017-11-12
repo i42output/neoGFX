@@ -140,16 +140,20 @@ namespace neogfx
 	template <typename MixinInterface>
 	inline vertex_list_pointer shape<MixinInterface>::vertices() const
 	{
-		if (iVertices == nullptr)
+		if (iVertices != nullptr)
+			return iVertices;
+		if (iDefaultVertices == nullptr)
+			iDefaultVertices = std::make_shared<vertex_list>();
+		if (iDefaultVertices->empty())
 		{
 			auto r = bounding_box_2d(false);
-			iVertices = vertex_list_pointer(new vertex_list
+			iDefaultVertices->assign(
 				{ vertex{ r.top_left().to_vec3(), vec2{ 0.0, 0.0 } },
 				vertex{ r.top_right().to_vec3(), vec2{ 1.0, 0.0 } },
 				vertex{ r.bottom_right().to_vec3(), vec2{ 1.0, 1.0 } },
 				vertex{ r.bottom_left().to_vec3(), vec2{ 0.0, 1.0 } } });
 		}
-		return iVertices;
+		return iDefaultVertices;
 	}
 
 	template <typename MixinInterface>
@@ -161,9 +165,13 @@ namespace neogfx
 	template <typename MixinInterface>
 	inline face_list_pointer shape<MixinInterface>::faces() const
 	{
-		if (iFaces == nullptr)
-			iFaces = face_list_pointer(new face_list{ face{ 0, 1, 2 }, face{ 0, 3, 2 } });
-		return iFaces;
+		if (iFaces != nullptr)
+			return iFaces;
+		if (iDefaultFaces == nullptr)
+			iDefaultFaces = std::make_shared<face_list>();
+		if (iDefaultFaces->empty())
+			iDefaultFaces->assign({ face{ 0, 1, 2 }, face{ 0, 3, 2 } });
+		return iDefaultFaces;
 	}
 
 	template <typename MixinInterface>
@@ -512,6 +520,8 @@ namespace neogfx
 	template <typename MixinInterface>
 	inline void shape<MixinInterface>::clear_vertices_cache()
 	{
+		if (iDefaultVertices != nullptr)
+			iDefaultVertices->clear();
 		iTransformedVertices.clear();
 	}
 

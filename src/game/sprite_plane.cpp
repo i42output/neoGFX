@@ -247,7 +247,7 @@ namespace neogfx
 		{
 			auto& physicalObject = static_cast<i_physical_object&>(*aObject);
 			iCollisionTree.insert(physicalObject, to_rect(physicalObject.aabb())); // todo
-		}
+		} 
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::Shape)
 			iRenderBuffer.push_back(&aObject->as_shape());
 		iNeedsSorting = true;

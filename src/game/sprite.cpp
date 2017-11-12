@@ -132,14 +132,14 @@ namespace neogfx
 	
 	void sprite::set_origin(const vec3& aOrigin)
 	{
-		shape::set_origin(aOrigin);
 		physical_object::set_origin(aOrigin);
+		shape::set_origin(aOrigin);
 	}
 	
 	void sprite::set_position(const vec3& aPosition)
 	{
-		shape::set_position(aPosition);
 		physical_object::set_position(aPosition);
+		shape::set_position(aPosition);
 	}
 
 	void sprite::set_path(const optional_path& aPath)
