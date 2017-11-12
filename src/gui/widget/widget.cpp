@@ -829,10 +829,10 @@ namespace neogfx
 
 	size widget::maximum_size(const optional_size& aAvailableSpace) const
 	{
-		if (size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed)
-			return minimum_size(aAvailableSpace);
-		else if (has_maximum_size())
+		if (has_maximum_size())
 			return units_converter(*this).from_device_units(*iMaximumSize);
+		else if (size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed)
+			return minimum_size(aAvailableSpace);
 		else if (has_layout())
 			return layout().maximum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size();
 		else

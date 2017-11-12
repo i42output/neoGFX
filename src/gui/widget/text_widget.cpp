@@ -222,8 +222,10 @@ namespace neogfx
 		gc.set_glyph_text_cache(iGlyphTextCache);
 		if (multi_line())
 		{
-			if (has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
+			if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
 				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::minimum_size().cx - margins().size().cx, UseGlyphTextCache));
+			else if (widget::has_maximum_size() && widget::maximum_size().cx != std::numeric_limits<size::dimension_type>::max())
+				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::maximum_size().cx - margins().size().cx, UseGlyphTextCache));
 			else
 				return *(iTextExtent = gc.multiline_text_extent(iText, font(), UseGlyphTextCache));
 		}

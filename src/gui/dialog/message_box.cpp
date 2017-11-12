@@ -264,6 +264,10 @@ namespace neogfx
 		iLayout2.set_margins(neogfx::margins{});
 		iLayout2.set_spacing(8.0);
 
+		size maxTextSize{ app::instance().window_manager().desktop_rect(root()).width() / 3.0, std::numeric_limits<size::dimension_type>::max() };
+		text().set_maximum_size(maxTextSize);
+		detailed_text().set_maximum_size(maxTextSize);
+
 		text().set_alignment(neogfx::alignment::Left);
 		detailed_text().set_alignment(neogfx::alignment::Left);
 		font_info normalFont = text().font();
