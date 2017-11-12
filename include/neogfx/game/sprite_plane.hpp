@@ -23,6 +23,7 @@
 #include <neolib/timer.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include "sprite.hpp"
+#include "quad_tree.hpp"
 
 namespace neogfx
 {
@@ -47,6 +48,7 @@ namespace neogfx
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
+		typedef quad_tree<i_physical_object> collision_tree;
 	public:
 		sprite_plane();
 		sprite_plane(i_widget& aParent);
@@ -89,6 +91,7 @@ namespace neogfx
 		const object_list& objects() const;
 		void add_object(std::shared_ptr<i_object> aObject);
 	private:
+		void do_add_object(std::shared_ptr<i_object> aObject);
 		void sort_shapes() const;
 		void sort_objects();
 		bool update_objects();
@@ -107,5 +110,6 @@ namespace neogfx
 		simple_object_list iSimpleObjects;
 		mutable bool iWaitForRender;
 		bool iUpdatingObjects;
+		collision_tree iCollisionTree;
 	};
 }

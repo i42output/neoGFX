@@ -237,12 +237,20 @@ namespace neogfx
 		if (iUpdatingObjects)
 			iNewObjects.push_back(aObject);
 		else
+			do_add_object(aObject);
+	}
+
+	void sprite_plane::do_add_object(std::shared_ptr<i_object> aObject)
+	{
+		iObjects.push_back(aObject);
+		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::PhysicalObject)
 		{
-			iObjects.push_back(aObject);
-			if (aObject->category() == object_category::Sprite || aObject->category() == object_category::Shape)
-				iRenderBuffer.push_back(&aObject->as_shape());
-			iNeedsSorting = true;
+			auto& physicalObject = static_cast<i_physical_object&>(*aObject);
+			iCollisionTree.insert(physicalObject, to_rect(physicalObject.aabb())); // todo
 		}
+		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::Shape)
+			iRenderBuffer.push_back(&aObject->as_shape());
+		iNeedsSorting = true;
 	}
 
 	void sprite_plane::sort_shapes() const
@@ -285,7 +293,11 @@ namespace neogfx
 				}
 			});
 			while (!iObjects.empty() && iObjects.back()->killed())
+			{
+				if (iObjects.back()->category() == object_category::Sprite || iObjects.back()->category() == object_category::PhysicalObject)
+					iCollisionTree.erase(iCollisionTree.find(static_cast<i_physical_object&>(*iObjects.back())));
 				iObjects.pop_back();
+			}
 			iNeedsSorting = false;
 		}
 	}
@@ -381,13 +393,8 @@ namespace neogfx
 		if (!iNewObjects.empty())
 		{
 			for (auto& o : iNewObjects)
-			{
-				iObjects.push_back(o);
-				if (o->category() == object_category::Sprite || o->category() == object_category::Shape)
-					iRenderBuffer.push_back(&o->as_shape());
-			}
+				do_add_object(o);
 			iNewObjects.clear();
-			iNeedsSorting = true;
 		}
 		return updated;
 	}

@@ -109,10 +109,10 @@ void create_game(ng::i_layout& aLayout)
 	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 0.0 });
 	auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ *spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::colour::White });
 	score->second.set_value("000000");
-	score->second.set_position(ng::vec2{ 0.0, 0.0 });
+	score->second.set_position(ng::vec3{ 0.0, 0.0, 1.0 });
 	auto positionScore = [spritePlane, score]()
 	{
-		score->second.set_position(ng::point{ spritePlane->extents().cx - 256.0, spritePlane->extents().cy - 40 });
+		score->second.set_position(ng::vec3{ spritePlane->extents().cx - 256.0, spritePlane->extents().cy - 40, 1.0 });
 	};
 	spritePlane->size_changed(positionScore);
 	positionScore();
@@ -120,7 +120,7 @@ void create_game(ng::i_layout& aLayout)
 	auto shipInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{}, "", ng::font("SnareDrum One NBP", "Regular", 24.0), ng::colour::White);
 	shipInfo->set_border(1.0);
 	shipInfo->set_margins(ng::margins(2.0));
-	shipInfo->set_tag_of(spaceshipSprite, ng::vec3{ 18.0, 18.0, 0.0 });
+	shipInfo->set_tag_of(spaceshipSprite, ng::vec3{ 18.0, 18.0, 1.0 });
 	spritePlane->add_shape(shipInfo);
 	for (int i = 0; i < 50; ++i)
 	{

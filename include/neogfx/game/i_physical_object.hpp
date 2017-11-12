@@ -93,6 +93,11 @@ namespace neogfx
 		}
 	};
 
+	inline rect to_rect(const i_physical_object::aabb_type& aAabb)
+	{
+		return rect{ point{aAabb.min.x, aAabb.min.y}, point{ aAabb.max.x, aAabb.max.y } };
+	}
+
 	inline i_physical_object::step_time_interval to_step_time(i_physical_object::time_interval aTime, i_physical_object::step_time_interval aStepInterval)
 	{
 		auto ms = static_cast<i_physical_object::step_time_interval>(aTime * 1000.0);
