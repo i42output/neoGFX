@@ -30,11 +30,6 @@ namespace neogfx
 	{
 		// types
 	public:
-		struct aabb_type
-		{
-			vec3 min;
-			vec3 max;
-		};
 		typedef scalar time_interval;
 		typedef boost::optional<time_interval> optional_time_interval;
 		typedef int64_t step_time_interval;
@@ -65,7 +60,7 @@ namespace neogfx
 		// object
 	public:
 		virtual void clear_vertices_cache() = 0;
-		virtual aabb_type aabb() const = 0;
+		virtual neogfx::aabb aabb() const = 0;
 		virtual uint64_t collision_mask() const { return 0ull; }
 		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
 		virtual bool has_collided(const i_physical_object& aOther) const = 0;
@@ -93,7 +88,7 @@ namespace neogfx
 		}
 	};
 
-	inline rect to_rect(const i_physical_object::aabb_type& aAabb)
+	inline rect to_rect(const aabb& aAabb)
 	{
 		return rect{ point{aAabb.min.x, aAabb.min.y}, point{ aAabb.max.x, aAabb.max.y } };
 	}

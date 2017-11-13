@@ -597,7 +597,7 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\surface_window_proxy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\quad_tree.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\aabb_tree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

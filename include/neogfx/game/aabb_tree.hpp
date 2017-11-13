@@ -1,4 +1,4 @@
-// quad_tree.hpp
+// aabb_tree.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -21,12 +21,12 @@
 #include <neogfx/neogfx.hpp>
 #include <unordered_map>
 #include <boost/pool/pool_alloc.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/numerical.hpp>
 
 namespace neogfx
 {
 	template <typename T, typename Allocator = boost::fast_pool_allocator<T>>
-	class quad_tree
+	class aabb_tree
 	{
 	public:
 		typedef T value_type;
@@ -36,12 +36,12 @@ namespace neogfx
 		typedef typename std::allocator_traits<Allocator>::pointer pointer;
 		typedef typename std::allocator_traits<Allocator>::const_pointer const_pointer;
 	private:
-		typedef std::unordered_map<pointer, rect, std::hash<pointer>, std::equal_to<pointer>, typename allocator_type::template rebind<std::pair<pointer, rect>>::other> item_list;
+		typedef std::unordered_map<pointer, aabb, std::hash<pointer>, std::equal_to<pointer>, typename allocator_type::template rebind<std::pair<pointer, rect>>::other> item_list; // todo
 	public:
 		typedef typename item_list::iterator iterator;
 		typedef typename item_list::const_iterator const_iterator;
 	public:
-		quad_tree(const rect& aSpace = rect{ point{}, size{ 3840.0, 2160.0 } }) : iSpace{ aSpace }
+		aabb_tree()
 		{
 		}
 	public:
@@ -63,23 +63,23 @@ namespace neogfx
 		{
 			return iItems.find(&aItem);
 		}
-		iterator find(const point& aPoint)
+		iterator find(const vec3& aPoint)
 		{
 			// todo
 			return iItems.end();
 		}
-		iterator find(const rect& aRect)
+		iterator find(const aabb& aAabb)
 		{
 			// todo
 			return iItems.end();
 		}
 	public:
-		iterator insert(reference aItem, const rect& aRect)
+		iterator insert(reference aItem, const aabb& aAabb)
 		{
 			// todo
-			return iItems.insert(std::make_pair(&aItem, aRect)).first;
+			return iItems.insert(std::make_pair(&aItem, aAabb)).first;
 		}
-		void update(const_reference aItem, const rect& aNewRect)
+		void update(const_reference aItem, const aabb& aNewAabb)
 		{
 			// todo
 		}
@@ -89,7 +89,6 @@ namespace neogfx
 			iItems.erase(aItem);
 		}
 	private:
-		rect iSpace;
 		item_list iItems;
 	};
 }

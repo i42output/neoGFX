@@ -66,7 +66,7 @@ namespace neogfx
 		void set_mass(scalar aMass) override;
 	public:
 		void clear_vertices_cache() override;
-		aabb_type aabb() const override;
+		neogfx::aabb aabb() const override;
 		bool has_collided(const i_physical_object& aOther) const override;
 		void collided(i_physical_object& aOther) override;
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;

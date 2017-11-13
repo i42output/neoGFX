@@ -178,7 +178,7 @@ namespace neogfx
 		physical_object::set_update_time(aLastUpdateTime);
 	}
 
-	sprite::aabb_type sprite::aabb() const
+	aabb sprite::aabb() const
 	{
 		if (iAabb == boost::none)
 		{
@@ -199,7 +199,7 @@ namespace neogfx
 				yMax = std::max<coordinate>(yMax, v.coordinates.y);
 				zMax = std::max<coordinate>(zMax, v.coordinates.z);
 			}
-			iAabb = aabb_type{ vec3{ xMin, yMin, zMin }, vec3{ xMax, yMax, zMax } };
+			iAabb = neogfx::aabb{ vec3{ xMin, yMin, zMin }, vec3{ xMax, yMax, zMax } };
 		}
 		return *iAabb;
 	}

@@ -74,7 +74,7 @@ namespace neogfx
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
 		// physical object
 	public:
-		aabb_type aabb() const override;
+		neogfx::aabb aabb() const override;
 		// own
 	private:
 		void clear_aabb_cache();
@@ -82,7 +82,7 @@ namespace neogfx
 	private:
 		optional_path iPath;
 		uint64_t iCollisionMask;
-		mutable boost::optional<aabb_type> iAabb;
+		mutable optional_aabb iAabb;
 		bool iKilled;
 	};
 }

@@ -300,6 +300,14 @@ namespace neogfx
 	typedef vector3f vec3f;
 	typedef vector4f vec4f;
 
+	struct aabb
+	{
+		vec3 min;
+		vec3 max;
+	};
+
+	typedef boost::optional<aabb> optional_aabb;
+
 	template <typename T, uint32_t D, typename Type, bool IsScalar>
 	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{

@@ -146,9 +146,9 @@ namespace neogfx
 		/* do nothing */
 	}
 
-	physical_object::aabb_type physical_object::aabb() const
+	aabb physical_object::aabb() const
 	{
-		return aabb_type{ position() + origin(), position() + origin() };
+		return neogfx::aabb{ position() + origin(), position() + origin() };
 	}
 
 	bool physical_object::has_collided(const i_physical_object& aOther) const
