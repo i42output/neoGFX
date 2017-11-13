@@ -22,6 +22,7 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <SDL_mouse.h>
+#include <SDL_keyboard.h>
 #include <neogfx/app/app.hpp>
 #include "../../../gfx/native/opengl.hpp"
 #include "../../../gfx/native/sdl_graphics_context.hpp"
@@ -592,13 +593,38 @@ namespace neogfx
 		return iCapturingMouse;
 	}
 
+	// If window being captured doesn't have SDL "keyboard focus" then SDL SDL_CaptureMouse will behave badly.
+	class focus_hack
+	{
+	public:
+		focus_hack(sdl_window& aWindow) : iWindow{ aWindow }
+		{
+			iFocusWindow = sKeyboardFocus;
+			sKeyboardFocus = static_cast<SDL_Window*>(iWindow.handle());
+		}
+		~focus_hack()
+		{
+			sKeyboardFocus = iFocusWindow;
+		}
+	private:
+		static SDL_Window*& sKeyboardFocus;
+		sdl_window& iWindow;
+		SDL_Window* iFocusWindow;
+	};
+
+	// Serious hack this that may tie us to specific SDL version; can't think of a non-hacky alternative...
+	SDL_Window*& focus_hack::sKeyboardFocus = *reinterpret_cast<SDL_Window**>(const_cast<Uint8*>(SDL_GetKeyboardState(0)) - sizeof(Uint16) - sizeof(SDL_Window*));
+
 	void sdl_window::set_capture()
 	{
 		if (!iCapturingMouse)
 		{
 			iCapturingMouse = true;
 			iNonClientCapturing = false;
-			SDL_CaptureMouse(SDL_TRUE);
+			{
+				focus_hack fh{ *this };
+				SDL_CaptureMouse(SDL_TRUE);
+			}
 #ifdef WIN32
 			SetCapture(static_cast<HWND>(native_handle()));
 #endif
@@ -611,10 +637,13 @@ namespace neogfx
 		{
 			iCapturingMouse = false;
 			iNonClientCapturing = false;
-			SDL_CaptureMouse(SDL_FALSE);
 #ifdef WIN32
 			ReleaseCapture();
 #endif
+			{
+				focus_hack fh{ *this };
+				SDL_CaptureMouse(SDL_FALSE);
+			}
 		}
 	}
 
@@ -625,7 +654,10 @@ namespace neogfx
 			iCapturingMouse = true;
 			iNonClientCapturing = true;
 #ifndef WIN32
-			SDL_CaptureMouse(SDL_TRUE);
+			{
+				focus_hack fh{ *this };
+				SDL_CaptureMouse(SDL_TRUE);
+			}
 #endif
 		}
 	}
@@ -637,7 +669,10 @@ namespace neogfx
 			iCapturingMouse = false;
 			iNonClientCapturing = false;
 #ifndef WIN32
-			SDL_CaptureMouse(SDL_FALSE);
+			{
+				focus_hack fh{ *this };
+				SDL_CaptureMouse(SDL_FALSE);
+			}
 #endif
 		}
 	}
@@ -1215,6 +1250,7 @@ namespace neogfx
 							point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
 							iMouseButtonEventExtraInfo.front() });
 				iMouseButtonEventExtraInfo.pop_front();
+				std::cout << "SDL_MOUSEBUTTONDOWN (" << this << "): " << point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) } << std::endl;
 			}
 			break;
 		case SDL_MOUSEBUTTONUP:
@@ -1226,11 +1262,13 @@ namespace neogfx
 						convert_mouse_button(aEvent.button.button),
 						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
 						iMouseButtonEventExtraInfo.front() });
+				std::cout << "SDL_MOUSEBUTTONUP (" << this << "): " << point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) } << std::endl;
 			}
 			break;
 		case SDL_MOUSEMOTION:
 			surface_window().as_window().window_manager().update_mouse_cursor(surface_window().as_window());
 			push_event(mouse_event{ mouse_event_type::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) } });
+			std::cout << "SDL_MOUSEMOTION (" << this << "): " << point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) } << std::endl;
 			break;
 		case SDL_KEYDOWN:
 			push_event(keyboard_event{ keyboard_event_type::KeyPressed, sdl_keyboard::from_sdl_scan_code(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod) });

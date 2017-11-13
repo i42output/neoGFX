@@ -255,17 +255,17 @@ int main(int argc, char* argv[])
 		auto& subMenu3 = favouritesMenu.add_sub_menu("Marvel Characters");
 		subMenu3.set_image(":/closed/resources/caw_toolbar.naa#folder.png");
 		favouritesMenu.add_separator();
+		neolib::random menuPrng{ 0 };
 		for (int i = 1; i <= 5; ++i)
 		{
-			auto& sm = favouritesMenu.add_sub_menu("More" + boost::lexical_cast<std::string>(i));
+			auto& sm = favouritesMenu.add_sub_menu("More_" + boost::lexical_cast<std::string>(i));
 			for (int j = 1; j <= 5; ++j)
 			{
-				auto& sm2 = sm.add_sub_menu("More" + boost::lexical_cast<std::string>(j));
-				neolib::random prng;
-				int n = prng(100);
+				auto& sm2 = sm.add_sub_menu("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j));
+				int n = menuPrng(100);
 				for (int k = 1; k < n; ++k)
 				{
-					sm2.add_action(app.add_action("More" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.naa#favourite.png"));
+					sm2.add_action(app.add_action("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.naa#favourite.png"));
 				}
 			}
 		}

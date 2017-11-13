@@ -797,6 +797,8 @@ namespace neogfx
 			if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
 				surface().native_surface().invalidate(surface().surface_size());
 		});
+
+		init_scrollbars();
 	}
 
 	point window::mouse_position() const

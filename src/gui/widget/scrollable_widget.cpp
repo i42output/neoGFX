@@ -26,33 +26,33 @@
 namespace neogfx
 {
 	scrollable_widget::scrollable_widget(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		framed_widget(aFrameStyle),
-		iVerticalScrollbar(*this, scrollbar_type::Vertical, aScrollbarStyle),
-		iHorizontalScrollbar(*this, scrollbar_type::Horizontal, aScrollbarStyle),
-		iIgnoreScrollbarUpdates(0)
+		framed_widget{ aFrameStyle },
+		iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
+		iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+		iIgnoreScrollbarUpdates{ 0 }
 	{
 		if (has_surface())
-			init();
+			init_scrollbars();
 	}
 	
 	scrollable_widget::scrollable_widget(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		framed_widget(aParent, aFrameStyle),
-		iVerticalScrollbar(*this, scrollbar_type::Vertical, aScrollbarStyle),
-		iHorizontalScrollbar(*this, scrollbar_type::Horizontal, aScrollbarStyle),
-		iIgnoreScrollbarUpdates(0)
+		framed_widget{ aParent, aFrameStyle },
+		iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
+		iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+		iIgnoreScrollbarUpdates{ 0 }
 	{
 		if (has_surface())
-			init();
+			init_scrollbars();
 	}
 	
 	scrollable_widget::scrollable_widget(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		framed_widget(aLayout, aFrameStyle),
-		iVerticalScrollbar(*this, scrollbar_type::Vertical, aScrollbarStyle),
-		iHorizontalScrollbar(*this, scrollbar_type::Horizontal, aScrollbarStyle),
-		iIgnoreScrollbarUpdates(0)
+		framed_widget{ aLayout, aFrameStyle },
+		iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
+		iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+		iIgnoreScrollbarUpdates{ 0 }
 	{
 		if (has_surface())
-			init();
+			init_scrollbars();
 	}
 	
 	scrollable_widget::~scrollable_widget()
@@ -332,7 +332,7 @@ namespace neogfx
 		return iHorizontalScrollbar;
 	}
 
-	void scrollable_widget::init()
+	void scrollable_widget::init_scrollbars()
 	{
 		scoped_units su(static_cast<scrollable_widget&>(*this), units::Centimetres);
 		vertical_scrollbar().set_step(std::ceil(units_converter(static_cast<scrollable_widget&>(*this)).to_device_units(1.0)));

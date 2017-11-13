@@ -97,7 +97,7 @@ namespace neogfx
 		virtual void update_scrollbar_visibility();
 		virtual void update_scrollbar_visibility(usv_stage_e aStage);
 	protected:
-		void init();
+		void init_scrollbars();
 	private:
 		scrollbar iVerticalScrollbar;
 		scrollbar iHorizontalScrollbar;
