@@ -246,7 +246,7 @@ namespace neogfx
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::PhysicalObject)
 		{
 			auto& physicalObject = static_cast<i_physical_object&>(*aObject);
-			iCollisionTree.insert(physicalObject, to_rect(physicalObject.aabb())); // todo
+			iBroadPhaseCollisionTree.insert(physicalObject, physicalObject.aabb());
 		} 
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::Shape)
 			iRenderBuffer.push_back(&aObject->as_shape());
@@ -295,7 +295,7 @@ namespace neogfx
 			while (!iObjects.empty() && iObjects.back()->killed())
 			{
 				if (iObjects.back()->category() == object_category::Sprite || iObjects.back()->category() == object_category::PhysicalObject)
-					iCollisionTree.erase(iCollisionTree.find(static_cast<i_physical_object&>(*iObjects.back())));
+					iBroadPhaseCollisionTree.erase(iBroadPhaseCollisionTree.find(static_cast<i_physical_object&>(*iObjects.back())));
 				iObjects.pop_back();
 			}
 			iNeedsSorting = false;
