@@ -593,7 +593,7 @@ namespace neogfx
 		return iCapturingMouse;
 	}
 
-	// If window being captured doesn't have SDL "keyboard focus" then SDL SDL_CaptureMouse will behave badly.
+	// If window being captured doesn't have SDL "keyboard focus" then SDL_CaptureMouse will behave badly.
 	class focus_hack
 	{
 	public:
@@ -612,7 +612,7 @@ namespace neogfx
 		SDL_Window* iFocusWindow;
 	};
 
-	// Serious hack this that may tie us to specific SDL version; can't think of a non-hacky alternative...
+	// Serious hack this that may tie us to specific SDL version; can't think of a non-hacky alternative that doesn't involve forking SDL or bypassing SDL mouse events...
 	SDL_Window*& focus_hack::sKeyboardFocus = *reinterpret_cast<SDL_Window**>(const_cast<Uint8*>(SDL_GetKeyboardState(0)) - sizeof(Uint16) - sizeof(SDL_Window*));
 
 	void sdl_window::set_capture()
