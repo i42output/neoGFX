@@ -310,6 +310,12 @@ namespace neogfx
 		vec3 max;
 	};
 
+	inline bool operator<(const aabb& left, const aabb& right)
+	{
+		return std::tie(left.min.z, left.min.y, left.min.x, left.max.z, left.max.y, left.max.x) <
+			std::tie(right.min.z, right.min.y, right.min.x, right.max.z, right.max.y, right.max.x);
+	}
+
 	typedef boost::optional<aabb> optional_aabb;
 
 	inline aabb aabb_union(const aabb& left, const aabb& right)

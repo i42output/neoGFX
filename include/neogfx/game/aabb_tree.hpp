@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <map>
 #include <unordered_map>
 #include <boost/pool/pool_alloc.hpp>
 #include <neogfx/core/numerical.hpp>
@@ -36,7 +37,8 @@ namespace neogfx
 		typedef typename std::allocator_traits<Allocator>::pointer pointer;
 		typedef typename std::allocator_traits<Allocator>::const_pointer const_pointer;
 	private:
-		typedef std::unordered_map<pointer, aabb, std::hash<pointer>, std::equal_to<pointer>, typename allocator_type::template rebind<std::pair<pointer, rect>>::other> item_list; // todo
+		typedef std::multimap<aabb, pointer, std::less<aabb>, typename allocator_type::template rebind<std::pair<const aabb, pointer>>::other> item_list;
+		typedef std::unordered_map<pointer, typename item_list::iterator, std::hash<pointer>, std::equal_to<pointer>, typename allocator_type::template rebind<std::pair<const pointer, typename item_list::iterator>>::other> reverse_item_map;
 	public:
 		typedef typename item_list::iterator iterator;
 		typedef typename item_list::const_iterator const_iterator;
@@ -44,7 +46,7 @@ namespace neogfx
 		class node
 		{
 		public:
-			node() : iParent{ nullptr }, iLeft{ nullptr }, iRight{ nullptr }, iAabb{}, iData{ nullptr }
+			node(aabb_tree& aTree) : iParent{ nullptr }, iLeft{ nullptr }, iRight{ nullptr }, iAabb{}, iItem{ aTree.end() }
 			{
 			}
 		public:
@@ -94,30 +96,54 @@ namespace neogfx
 			node* iLeft;
 			node* iRight;
 			neogfx::aabb iAabb;
-			pointer iData;
+			iterator iItem;
 		};
 	public:
 		aabb_tree()
 		{
 		}
 	public:
+		const_iterator begin() const
+		{
+			return iItems.begin();
+		}
+		const_iterator cbegin() const
+		{
+			return iItems.begin();
+		}
+		iterator begin()
+		{
+			return iItems.begin();
+		}
+		const_iterator end() const
+		{
+			return iItems.end();
+		}
+		const_iterator cend() const
+		{
+			return iItems.end();
+		}
+		iterator end()
+		{
+			return iItems.end();
+		}
+	public:
 		const_iterator find(reference aItem) const
 		{
-			return iItems.find(&aItem);
+			return iReverseItemMap.find(&aItem)->second;
 		}
-		const_iterator find(const point& aPoint) const
+		const_iterator find(const vec3& aPoint) const
 		{
 			// todo
 			return iItems.end();
 		}
-		const_iterator find(const rect& aRect) const
+		const_iterator find(const aabb& aAabb) const
 		{
-			// todo
-			return iItems.end();
+			return iItems.find(aAabb);
 		}
 		iterator find(reference aItem)
 		{
-			return iItems.find(&aItem);
+			return iReverseItemMap.find(&aItem)->second;
 		}
 		iterator find(const vec3& aPoint)
 		{
@@ -126,14 +152,14 @@ namespace neogfx
 		}
 		iterator find(const aabb& aAabb)
 		{
-			// todo
-			return iItems.end();
+			return iItems.find(aAabb);
 		}
 	public:
 		iterator insert(reference aItem, const aabb& aAabb)
 		{
-			// todo
-			return iItems.insert(std::make_pair(&aItem, aAabb)).first;
+			auto newItem = iItems.insert(std::make_pair(aAabb, &aItem));
+			iReverseItemMap[&aItem] = newItem;
+			return newItem;
 		}
 		void update(const_reference aItem, const aabb& aNewAabb)
 		{
@@ -142,9 +168,11 @@ namespace neogfx
 		void erase(iterator aItem)
 		{
 			// todo
+			iReverseItemMap.erase(aItem->second);
 			iItems.erase(aItem);
 		}
 	private:
 		item_list iItems;
+		reverse_item_map iReverseItemMap;
 	};
 }
