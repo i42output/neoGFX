@@ -40,6 +40,62 @@ namespace neogfx
 	public:
 		typedef typename item_list::iterator iterator;
 		typedef typename item_list::const_iterator const_iterator;
+	private:
+		class node
+		{
+		public:
+			node() : iParent{ nullptr }, iLeft{ nullptr }, iRight{ nullptr }, iAabb{}, iData{ nullptr }
+			{
+			}
+		public:
+			bool is_leaf() const
+			{
+				return iLeft == nullptr;
+			}
+			void set_branch(node* aLeft, node* aRight)
+			{
+				iLeft->iParent = this;
+				iRight->iParent = this;
+				iLeft = aLeft;
+				iRight = aRIght;
+			}
+			void set_leaf(const neogfx::aabb& aAabb, pointer aData)
+			{
+				iAabb = aAabb;
+				iData = aData;
+				iLeft = nullptr;
+				iRight = nullptr;
+			}
+			void update(float aMultiplier, float aMinimum)
+			{
+				if (is_leaf())
+				{
+					// make fat AABB
+					const vec3 marginVec{ ((aabb().max - aabb().min) * aMultiplier).max(vec3{ aMinimum, aMinimum, aMinimum }) };
+					iAabb = neogfx::aabb{ aabb().min - marginVec, aabb().max + marginVec };
+				}
+				else // make union of child AABBs of child nodes
+					iAabb = aabb_union(iLeft->aabb(), iRight->aabb());
+			}
+			node* sibling() const
+			{
+				return this == iParent->iLeft ? iParent->iRight : iParent->iLeft;
+			}
+			const neogfx::aabb& aabb() const
+			{
+				return iAabb;
+			}
+			pointer data() const
+			{
+				return iData;
+			}
+		private:
+			node* iParent;
+			node* iLeft;
+			node* iRight;
+			neogfx::aabb iAabb;
+			pointer iData;
+		};
 	public:
 		aabb_tree()
 		{

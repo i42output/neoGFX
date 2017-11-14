@@ -103,6 +103,8 @@ namespace neogfx
 		basic_vector operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
 		scalar magnitude() const { scalar ss = 0; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
 		basic_vector normalized() const { basic_vector result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
+		basic_vector min(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
+		basic_vector max(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
 	public:
 		union
 		{
@@ -204,6 +206,8 @@ namespace neogfx
 		basic_vector operator-() const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result.v[index] = -v[index]; return result; }
 		scalar magnitude() const { scalar ss = 0; for (uint32_t index = 0; index < Size; ++index) ss += (v[index] * v[index]); return std::sqrt(ss); }
 		basic_vector normalized() const { basic_vector result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
+		basic_vector min(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
+		basic_vector max(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
 	public:
 		array_type v;
 	};
@@ -307,6 +311,11 @@ namespace neogfx
 	};
 
 	typedef boost::optional<aabb> optional_aabb;
+
+	inline aabb aabb_union(const aabb& left, const aabb& right)
+	{
+		return aabb{ left.min.min(right.min), left.max.max(right.max) };
+	}
 
 	template <typename T, uint32_t D, typename Type, bool IsScalar>
 	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)

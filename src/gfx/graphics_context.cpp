@@ -402,7 +402,7 @@ namespace neogfx
 				result.cx = std::max(result.cx, lineExtent.cx);
 				result.cy += lineExtent.cy;
 			}
-			else
+			else if (i->first != i->second)
 			{
 				glyph_text::const_iterator next = i->first;
 				glyph_text::const_iterator lineStart = next;
@@ -442,6 +442,8 @@ namespace neogfx
 					}
 				}
 			}
+			else
+				result.cy += aFont.height();
 		}
 		if (result.cy == 0)
 			result.cy = from_device_units(size(0, aFont.height())).cy;
