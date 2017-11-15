@@ -91,6 +91,8 @@ namespace neogfx
 		void reserve(std::size_t aCapacity);
 		const object_list& objects() const;
 		void add_object(std::shared_ptr<i_object> aObject);
+	public:
+		const broad_phase_collision_tree& collision_tree() const;
 	private:
 		void do_add_object(std::shared_ptr<i_object> aObject);
 		void sort_shapes() const;

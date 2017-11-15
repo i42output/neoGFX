@@ -131,6 +131,8 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
+		aGraphicsContext.draw_text(ng::point(0.0, 100.0), "Collision Tree Depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().depth()), spritePlane->font(), ng::text_appearance{ ng::colour::Goldenrod, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
+		aGraphicsContext.draw_text(ng::point(0.0, 132.0), "Collision Tree Size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().count()), spritePlane->font(), ng::text_appearance{ ng::colour::Goldenrod, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
 	});
 	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
 	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)

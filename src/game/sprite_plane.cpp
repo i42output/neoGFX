@@ -34,7 +34,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iBroadPhaseCollisionTree{ 0.0 }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -46,7 +46,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iBroadPhaseCollisionTree{ 0.0 }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -58,7 +58,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iBroadPhaseCollisionTree{ 0.0 }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -238,6 +238,11 @@ namespace neogfx
 			iNewObjects.push_back(aObject);
 		else
 			do_add_object(aObject);
+	}
+
+	const sprite_plane::broad_phase_collision_tree& sprite_plane::collision_tree() const
+	{
+		return iBroadPhaseCollisionTree;
 	}
 
 	void sprite_plane::do_add_object(std::shared_ptr<i_object> aObject)

@@ -28,6 +28,7 @@
 
 namespace neogfx
 {
+	// todo: replace naive balancing mechanism with something better.
 	template <typename Allocator = boost::fast_pool_allocator<i_collidable>>
 	class aabb_tree
 	{
@@ -43,6 +44,9 @@ namespace neogfx
 		{
 		public:
 			node(aabb_tree& aTree) : iTree{ aTree }, iParent { nullptr }, iLeft{ nullptr }, iRight{ nullptr }, iAabb{}, iData{ nullptr }, iChildrenCrossed{ false }
+			{
+			}
+			~node()
 			{
 			}
 		public:
@@ -135,11 +139,14 @@ namespace neogfx
 		};
 		typedef typename allocator_type::template rebind<node>::other node_allocator;
 	public:
-		aabb_tree(scalar aFatMarginMultiplier = 0.2, scalar aFatMinimumMargin = 32.0, const allocator_type& aAllocator = allocator_type{}) :
+		aabb_tree(scalar aFatMarginMultiplier = 0.0, scalar aFatMinimumMargin = 32.0, const allocator_type& aAllocator = allocator_type{}) :
 			iAllocator{ aAllocator },
 			iFatMarginMultiplier{ aFatMarginMultiplier },
 			iFatMinimumMargin {	aFatMinimumMargin, aFatMinimumMargin, aFatMinimumMargin	},
-			iRoot{ nullptr }
+			iRoot{ nullptr },
+			iCount{ 0 },
+			iTotalDepth{ 0 },
+			iCurrentDepth{ 0 }
 		{
 		}
 	public:
@@ -153,6 +160,8 @@ namespace neogfx
 			if (iRoot && !iRoot->is_leaf())
 			{
 				clear_children_cross_flag_helper(iRoot);
+				iTotalDepth = 0;
+				iCurrentDepth = 0;
 				collisions_helper(aCollisionAction, iRoot->left(), iRoot->right());
 			}
 		}
@@ -272,6 +281,15 @@ namespace neogfx
 			static_cast<node*>(aItem)->set_data(nullptr);
 			remove_node(static_cast<node*>(aItem));
 		}
+	public:
+		uint32_t count() const
+		{
+			return iCount;
+		}
+		uint32_t depth() const
+		{
+			return iTotalDepth;
+		}
 	private:
 		void clear_children_cross_flag_helper(node* aNode) const
 		{
@@ -283,7 +301,7 @@ namespace neogfx
 			}
 		}
 		template <typename CollisionAction>
-		void cross_children(CollisionAction aCollisionAction, node* aNode) const
+		void cross_children(const CollisionAction& aCollisionAction, node* aNode) const
 		{
 			if (!aNode->children_crossed())
 			{
@@ -292,8 +310,10 @@ namespace neogfx
 			}
 		}
 		template <typename CollisionAction>
-		void collisions_helper(CollisionAction aCollisionAction, node* aNode0, node* aNode1) const
+		void collisions_helper(const CollisionAction& aCollisionAction, node* aNode0, node* aNode1) const
 		{
+			neolib::scoped_counter sc{ iCurrentDepth };
+			iTotalDepth = std::max(iTotalDepth, iCurrentDepth);
 			if (aNode0->is_leaf())
 			{
 				// 2 leaves, check proxies instead of fat AABBs
@@ -440,12 +460,14 @@ namespace neogfx
 		}
 		node* create_node()
 		{
+			++iCount;
 			node* newNode = iAllocator.allocate(1);
 			iAllocator.construct(newNode, *this);
 			return newNode;
 		}
 		void destroy_node(node* aNode)
 		{
+			--iCount;
 			iAllocator.destroy(aNode);
 			iAllocator.deallocate(aNode, 1);
 		}
@@ -455,5 +477,8 @@ namespace neogfx
 		vec3 iFatMinimumMargin;
 		node* iRoot;
 		std::vector<node*> iInvalidNodes;
+		uint32_t iCount;
+		mutable uint32_t iTotalDepth;
+		mutable uint32_t iCurrentDepth;
 	};
 }

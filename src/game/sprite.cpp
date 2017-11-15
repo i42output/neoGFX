@@ -187,24 +187,16 @@ namespace neogfx
 	{
 		if (iAabb == boost::none)
 		{
-			auto tvs = transformed_vertices();
-			auto iv = tvs[0];
-			coordinate xMin = iv.coordinates.x;
-			coordinate yMin = iv.coordinates.y;
-			coordinate zMin = iv.coordinates.z;
-			coordinate xMax = iv.coordinates.x;
-			coordinate yMax = iv.coordinates.y;
-			coordinate zMax = iv.coordinates.z;
+			const auto& tvs = transformed_vertices();
+			const auto& iv = tvs[0];
+			vec3 min = iv.coordinates;
+			vec3 max = min;
 			for (const auto& v : tvs)
 			{
-				xMin = std::min<coordinate>(xMin, v.coordinates.x);
-				yMin = std::min<coordinate>(yMin, v.coordinates.y);
-				zMin = std::min<coordinate>(zMin, v.coordinates.z);
-				xMax = std::max<coordinate>(xMax, v.coordinates.x);
-				yMax = std::max<coordinate>(yMax, v.coordinates.y);
-				zMax = std::max<coordinate>(zMax, v.coordinates.z);
+				min = min.min(v.coordinates);
+				max = max.max(v.coordinates);
 			}
-			iAabb.emplace(vec3{ xMin, yMin, zMin }, vec3{ xMax, yMax, zMax });
+			iAabb.emplace(min, max);
 		}
 		return *iAabb;
 	}
