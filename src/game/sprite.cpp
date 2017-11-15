@@ -149,8 +149,13 @@ namespace neogfx
 
 	void sprite::clear_vertices_cache()
 	{
+		physical_object::clear_vertices_cache();
 		shape::clear_vertices_cache();
-		clear_aabb_cache();
+	}
+
+	void sprite::clear_aabb_cache()
+	{
+		iAabb = boost::none;
 	}
 
 	const i_physical_object& sprite::physics() const
@@ -178,7 +183,7 @@ namespace neogfx
 		physical_object::set_update_time(aLastUpdateTime);
 	}
 
-	aabb sprite::aabb() const
+	const aabb& sprite::aabb() const
 	{
 		if (iAabb == boost::none)
 		{
@@ -199,13 +204,8 @@ namespace neogfx
 				yMax = std::max<coordinate>(yMax, v.coordinates.y);
 				zMax = std::max<coordinate>(zMax, v.coordinates.z);
 			}
-			iAabb = neogfx::aabb{ vec3{ xMin, yMin, zMin }, vec3{ xMax, yMax, zMax } };
+			iAabb.emplace(vec3{ xMin, yMin, zMin }, vec3{ xMax, yMax, zMax });
 		}
 		return *iAabb;
-	}
-
-	void sprite::clear_aabb_cache()
-	{
-		iAabb = boost::none;
 	}
 }

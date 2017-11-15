@@ -147,12 +147,13 @@ namespace neogfx
 		{
 			do_update();
 		}
-		void collisions(std::function<bool(reference, reference)> aColliderPredicate, std::function<void(reference, reference)> aColliderAction) const
+		template <typename CollisionAction>
+		void collisions(CollisionAction aCollisionAction) const
 		{
 			if (iRoot && !iRoot->is_leaf())
 			{
 				clear_children_cross_flag_helper(iRoot);
-				collisions_helper(aColliderPredicate, aColliderAction, iRoot->left(), iRoot->right());
+				collisions_helper(aCollisionAction, iRoot->left(), iRoot->right());
 			}
 		}
 		template <typename ResultContainer>
@@ -281,47 +282,49 @@ namespace neogfx
 				clear_children_cross_flag_helper(aNode->right());
 			}
 		}
-		void cross_children(const std::function<bool(reference, reference)>& aColliderPredicate, const std::function<void(reference, reference)>& aColliderAction, node* aNode) const
+		template <typename CollisionAction>
+		void cross_children(CollisionAction aCollisionAction, node* aNode) const
 		{
 			if (!aNode->children_crossed())
 			{
-				collisions_helper(aColliderPredicate, aColliderAction, aNode->left(), aNode->right());
+				collisions_helper(aCollisionAction, aNode->left(), aNode->right());
 				aNode->set_children_crossed(true);
 			}
 		}
-		void collisions_helper(const std::function<bool(reference, reference)>& aColliderPredicate, const std::function<void(reference, reference)>& aColliderAction, node* aNode0, node* aNode1) const
+		template <typename CollisionAction>
+		void collisions_helper(CollisionAction aCollisionAction, node* aNode0, node* aNode1) const
 		{
 			if (aNode0->is_leaf())
 			{
 				// 2 leaves, check proxies instead of fat AABBs
 				if (aNode1->is_leaf())
 				{
-					if (aColliderPredicate(*aNode0->data(), *aNode1->data()))
-						aColliderAction(*aNode0->data(), *aNode1->data());
+					if (aNode0->data()->has_collided(*aNode1->data()))
+						aCollisionAction(*aNode0->data(), *aNode1->data());
 				}
 				// 1 branch / 1 leaf
 				else
 				{
-					cross_children(aColliderPredicate, aColliderAction, aNode1);
-					collisions_helper(aColliderPredicate, aColliderAction, aNode0, aNode1->left());
-					collisions_helper(aColliderPredicate, aColliderAction, aNode0, aNode1->right());
+					cross_children(aCollisionAction, aNode1);
+					collisions_helper(aCollisionAction, aNode0, aNode1->left());
+					collisions_helper(aCollisionAction, aNode0, aNode1->right());
 				}
 			}
 			else if (aNode1->is_leaf())
 			{
-				cross_children(aColliderPredicate, aColliderAction, aNode0);
-				collisions_helper(aColliderPredicate, aColliderAction, aNode0->left(), aNode1);
-				collisions_helper(aColliderPredicate, aColliderAction, aNode0->right(), aNode1);
+				cross_children(aCollisionAction, aNode0);
+				collisions_helper(aCollisionAction, aNode0->left(), aNode1);
+				collisions_helper(aCollisionAction, aNode0->right(), aNode1);
 			}
 			// 2 branches
 			else
 			{
-				cross_children(aColliderPredicate, aColliderAction, aNode0);
-				cross_children(aColliderPredicate, aColliderAction, aNode1);
-				collisions_helper(aColliderPredicate, aColliderAction, aNode0->left(), aNode1->left());
-				collisions_helper(aColliderPredicate, aColliderAction, aNode0->left(), aNode1->right());
-				collisions_helper(aColliderPredicate, aColliderAction, aNode0->right(), aNode1->left());
-				collisions_helper(aColliderPredicate, aColliderAction, aNode0->right(), aNode1->right());
+				cross_children(aCollisionAction, aNode0);
+				cross_children(aCollisionAction, aNode1);
+				collisions_helper(aCollisionAction, aNode0->left(), aNode1->left());
+				collisions_helper(aCollisionAction, aNode0->left(), aNode1->right());
+				collisions_helper(aCollisionAction, aNode0->right(), aNode1->left());
+				collisions_helper(aCollisionAction, aNode0->right(), aNode1->right());
 			}
 		}
 		vec3 fat_margin(const aabb& aAabb) const

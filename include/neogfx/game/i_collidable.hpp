@@ -1,7 +1,7 @@
 // i_collidable.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright(C) 2017 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -28,13 +28,15 @@ namespace neogfx
 	public:
 		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_collidable::not_implemented") {} };
 	public:
-		virtual neogfx::aabb aabb() const = 0;
+		virtual const neogfx::aabb& aabb() const = 0;
 		virtual void* collision_tree_link() const = 0;
 		virtual void set_collision_tree_link(void* aLink) = 0;
 		virtual uint64_t collision_mask() const { return 0ull; }
 		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
 		virtual bool has_collided(const i_collidable& aOther) const = 0;
 		virtual void collided(i_collidable& aOther) = 0;
+	public:
+		virtual void clear_aabb_cache() = 0;
 	public:
 		template <typename T> const T& as() const { return static_cast<const T&>(*this); }
 		template <typename T> T& as() { return static_cast<T&>(*this); }

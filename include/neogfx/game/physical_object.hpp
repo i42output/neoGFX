@@ -66,7 +66,8 @@ namespace neogfx
 		void set_mass(scalar aMass) override;
 	public:
 		void clear_vertices_cache() override;
-		neogfx::aabb aabb() const override;
+		void clear_aabb_cache() override;
+		const neogfx::aabb& aabb() const override;
 		void* collision_tree_link() const override;
 		void set_collision_tree_link(void* aLink) override;
 		bool has_collided(const i_collidable& aOther) const override;
@@ -85,6 +86,7 @@ namespace neogfx
 		optional_time_interval iTimeOfLastUpdate;
 		mutable optional_physics iCurrentPhysics;
 		mutable optional_physics iNextPhysics;
+		mutable optional_aabb iAabb;
 		void* iCollisionTreeLink;
 	};
 }

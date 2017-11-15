@@ -34,7 +34,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iBroadPhaseCollisionTree{ 0.0 }
 	{
 	}
 
@@ -46,7 +46,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iBroadPhaseCollisionTree{ 0.0 }
 	{
 	}
 
@@ -58,7 +58,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iBroadPhaseCollisionTree{ 0.0 }
 	{
 	}
 
@@ -364,10 +364,6 @@ namespace neogfx
 			}
 			iBroadPhaseCollisionTree.update();
 			iBroadPhaseCollisionTree.collisions(
-				[](i_collidable& o1, i_collidable& o2) 
-				{ 
-					return !o1.as<i_physical_object>().killed() && !o2.as<i_physical_object>().killed() && o1.has_collided(o2);
-				},
 				[this](i_collidable& o1, i_collidable& o2)
 				{
 					o1.collided(o2);

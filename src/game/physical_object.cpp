@@ -144,12 +144,22 @@ namespace neogfx
 
 	void physical_object::clear_vertices_cache()
 	{
-		/* do nothing */
+		clear_aabb_cache();
 	}
 
-	aabb physical_object::aabb() const
+	void physical_object::clear_aabb_cache()
 	{
-		return neogfx::aabb{ position() + origin(), position() + origin() };
+		iAabb = boost::none;
+	}
+
+	const aabb& physical_object::aabb() const
+	{
+		if (iAabb == boost::none)
+		{
+			const auto pos = position() + origin();
+			iAabb.emplace(pos, pos);
+		}
+		return *iAabb;
 	}
 
 	void* physical_object::collision_tree_link() const
@@ -166,11 +176,13 @@ namespace neogfx
 	{
 		if ((collision_mask() & aOther.collision_mask()) != 0ull)
 			return false;
-		auto aabbLeft = aabb();
-		auto aabbRight = aOther.aabb();
-		if (aabbLeft.min.x > aabbRight.max.x || aabbLeft.max.x < aabbRight.min.x ||
-			aabbLeft.min.y > aabbRight.max.y || aabbLeft.max.y < aabbRight.min.y ||
-			aabbLeft.min.z > aabbRight.max.z || aabbLeft.max.z < aabbRight.min.z)
+		if (killed() || static_cast<const i_physical_object&>(aOther).killed())
+			return false;
+		const auto& aabbLeft = aabb();
+		const auto& aabbRight = aOther.aabb();
+		if (aabbLeft.min[0] > aabbRight.max[0] || aabbLeft.max[0] < aabbRight.min[0] ||
+			aabbLeft.min[1] > aabbRight.max[1] || aabbLeft.max[1] < aabbRight.min[1] ||
+			aabbLeft.min[2] > aabbRight.max[2] || aabbLeft.max[2] < aabbRight.min[2])
 			return false;
 		// todo: we *might* have collided; now do 2D SAT test to find out if we have actaully collided...
 		return true;

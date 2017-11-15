@@ -65,6 +65,7 @@ namespace neogfx
 		// updates
 	public:
 		void clear_vertices_cache() override;
+		void clear_aabb_cache() override;
 		// physics
 	public:
 		const i_physical_object& physics() const override;
@@ -74,10 +75,7 @@ namespace neogfx
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
 		// physical object
 	public:
-		neogfx::aabb aabb() const override;
-		// own
-	private:
-		void clear_aabb_cache();
+		const neogfx::aabb& aabb() const override;
 		// attributes
 	private:
 		optional_path iPath;

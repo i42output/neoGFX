@@ -82,7 +82,7 @@ namespace neogfx
 		basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
 	public:
 		static uint32_t size() { return Size; }
-		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
+		value_type operator[](uint32_t aIndex) const { return v[aIndex]; }
 		value_type& operator[](uint32_t aIndex) { return v[aIndex]; }
 		const_iterator begin() const { return v.begin(); }
 		const_iterator end() const { return v.end(); }
@@ -787,6 +787,8 @@ namespace neogfx
 	{
 		vec3 min;
 		vec3 max;
+		aabb() : min{}, max{} {}
+		aabb(const vec3& aMin, const vec3& aMax) : min{ aMin }, max{ aMax } {}
 	};
 
 	inline bool operator<(const aabb& left, const aabb& right)
