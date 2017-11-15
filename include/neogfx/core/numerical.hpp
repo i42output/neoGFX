@@ -304,25 +304,6 @@ namespace neogfx
 	typedef vector3f vec3f;
 	typedef vector4f vec4f;
 
-	struct aabb
-	{
-		vec3 min;
-		vec3 max;
-	};
-
-	inline bool operator<(const aabb& left, const aabb& right)
-	{
-		return std::tie(left.min.z, left.min.y, left.min.x, left.max.z, left.max.y, left.max.x) <
-			std::tie(right.min.z, right.min.y, right.min.x, right.max.z, right.max.y, right.max.x);
-	}
-
-	typedef boost::optional<aabb> optional_aabb;
-
-	inline aabb aabb_union(const aabb& left, const aabb& right)
-	{
-		return aabb{ left.min.min(right.min), left.max.max(right.max) };
-	}
-
 	template <typename T, uint32_t D, typename Type, bool IsScalar>
 	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{
@@ -800,5 +781,35 @@ namespace neogfx
 		}
 		aStream << "]";
 		return aStream;
+	}
+
+	struct aabb
+	{
+		vec3 min;
+		vec3 max;
+	};
+
+	inline bool operator<(const aabb& left, const aabb& right)
+	{
+		return std::tie(left.min.z, left.min.y, left.min.x, left.max.z, left.max.y, left.max.x) <
+			std::tie(right.min.z, right.min.y, right.min.x, right.max.z, right.max.y, right.max.x);
+	}
+
+	typedef boost::optional<aabb> optional_aabb;
+
+	inline aabb aabb_union(const aabb& left, const aabb& right)
+	{
+		return aabb{ left.min.min(right.min), left.max.max(right.max) };
+	}
+
+	inline scalar aabb_volume(const aabb& a)
+	{
+		auto extents = a.max - a.min;
+		return extents.x * extents.y * (static_cast<scalar>(extents.z) != 0.0 ? extents.z : 1.0);
+	}
+
+	inline bool aabb_contains(const aabb& outer, const aabb& inner)
+	{
+		return inner.min >= outer.min && inner.max <= outer.max;
 	}
 }

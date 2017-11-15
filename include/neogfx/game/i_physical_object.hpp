@@ -23,10 +23,11 @@
 #include <boost/optional.hpp>
 #include <neogfx/core/geometry.hpp>
 #include "i_object.hpp"
+#include "i_collidable.hpp"
 
 namespace neogfx
 {
-	class i_physical_object : public i_object
+	class i_physical_object : public i_object, public i_collidable
 	{
 		// types
 	public:
@@ -60,11 +61,6 @@ namespace neogfx
 		// object
 	public:
 		virtual void clear_vertices_cache() = 0;
-		virtual neogfx::aabb aabb() const = 0;
-		virtual uint64_t collision_mask() const { return 0ull; }
-		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
-		virtual bool has_collided(const i_physical_object& aOther) const = 0;
-		virtual void collided(i_physical_object& aOther) = 0;
 		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
 		virtual const optional_time_interval& update_time() const = 0;
 		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;

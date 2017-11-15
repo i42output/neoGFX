@@ -246,7 +246,7 @@ namespace neogfx
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::PhysicalObject)
 		{
 			auto& physicalObject = static_cast<i_physical_object&>(*aObject);
-			iBroadPhaseCollisionTree.insert(physicalObject, physicalObject.aabb());
+			iBroadPhaseCollisionTree.insert(physicalObject);
 		} 
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::Shape)
 			iRenderBuffer.push_back(&aObject->as_shape());
@@ -325,6 +325,11 @@ namespace neogfx
 					vec3 totalForce;
 					if (i1->category() == object_category::Shape)
 						break;
+					if (i1->killed())
+					{
+						iNeedsSorting = true;
+						continue;
+					}
 					i_physical_object& o1 = static_cast<i_physical_object&>(*i1);
 					if (o1.mass() == 0.0)
 						break;
@@ -334,6 +339,11 @@ namespace neogfx
 					{
 						if (i2->category() == object_category::Shape)
 							break;
+						if (i2->killed())
+						{
+							iNeedsSorting = true;
+							continue;
+						}
 						i_physical_object& o2 = static_cast<i_physical_object&>(*i2);
 						if (&o2 == &o1)
 							continue;
@@ -348,39 +358,22 @@ namespace neogfx
 						else
 							break;
 					}
-					updated = (o1.update(from_step_time(*iPhysicsTime), totalForce) || updated);
+					bool o1updated = o1.update(from_step_time(*iPhysicsTime), totalForce);
+					updated = (o1updated || updated);
 				}
 			}
-			for (auto& i1 : iObjects)
-			{
-				if (i1->killed())
+			iBroadPhaseCollisionTree.update();
+			iBroadPhaseCollisionTree.collisions(
+				[](i_collidable& o1, i_collidable& o2) 
+				{ 
+					return !o1.as<i_physical_object>().killed() && !o2.as<i_physical_object>().killed() && o1.has_collided(o2);
+				},
+				[this](i_collidable& o1, i_collidable& o2)
 				{
-					iNeedsSorting = true;
-					continue;
-				}
-				if (i1->category() == object_category::Shape)
-					break;
-				i_physical_object& o1 = static_cast<i_physical_object&>(*i1);
-				for (auto& i2 : iObjects)
-				{
-					if (i2->killed())
-					{
-						iNeedsSorting = true;
-						continue;
-					}
-					if (i2->category() == object_category::Shape)
-						break;
-					i_physical_object& o2 = static_cast<i_physical_object&>(*i2);
-					if (&o2 == &o1)
-						continue;
-					if (&o1 < &o2 && o1.has_collided(o2))
-					{
-						o1.collided(o2);
-						o2.collided(o1);
-						object_collision.trigger(o1, o2);
-					}
-				}
-			}
+					o1.collided(o2);
+					o2.collided(o1);
+					object_collision.trigger(o1.as<i_physical_object>(), o2.as<i_physical_object>());
+				});
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();
 		}

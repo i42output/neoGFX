@@ -24,7 +24,7 @@
 namespace neogfx
 {
 	physical_object::physical_object() :
-		iOrigin{}
+		iOrigin{}, iCollisionTreeLink{ nullptr }
 	{
 	}
 
@@ -32,7 +32,8 @@ namespace neogfx
 		iOrigin(aOther.iOrigin),
 		iTimeOfLastUpdate(aOther.iTimeOfLastUpdate),
 		iCurrentPhysics(aOther.iCurrentPhysics),
-		iNextPhysics(aOther.iNextPhysics)
+		iNextPhysics(aOther.iNextPhysics),
+		iCollisionTreeLink{ nullptr }
 	{
 	}
 
@@ -151,7 +152,17 @@ namespace neogfx
 		return neogfx::aabb{ position() + origin(), position() + origin() };
 	}
 
-	bool physical_object::has_collided(const i_physical_object& aOther) const
+	void* physical_object::collision_tree_link() const
+	{
+		return iCollisionTreeLink;
+	}
+
+	void physical_object::set_collision_tree_link(void* aLink)
+	{
+		iCollisionTreeLink = aLink;
+	}
+
+	bool physical_object::has_collided(const i_collidable& aOther) const
 	{
 		if ((collision_mask() & aOther.collision_mask()) != 0ull)
 			return false;
@@ -165,7 +176,7 @@ namespace neogfx
 		return true;
 	}
 
-	void physical_object::collided(i_physical_object&)
+	void physical_object::collided(i_collidable&)
 	{
 		/* default behaviour: do nothing */
 	}

@@ -26,6 +26,7 @@ void create_target(ng::sprite_plane& aWorld)
 {
 	auto target = std::make_shared<ng::sprite>(ng::colour::from_hsl(static_cast<ng::scalar>(std::rand() % 360), 1.0, 0.75));
 	aWorld.add_sprite(target);
+	target->set_collision_mask(2ull);
 	target->set_position(ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), 0.0 });
 	auto w = static_cast<ng::scalar>(std::rand() % 40) + 10.0;
 	target->set_extents(ng::vec2{ w, w });
@@ -62,8 +63,9 @@ public:
 			kill();
 		return updated;
 	}
-	void collided(i_physical_object& aOther) override
+	void collided(i_collidable& aOther) override
 	{
+		auto& other = aOther.as<ng::i_physical_object>();
 		iScore.first += 250;
 		std::ostringstream oss;
 		oss << std::setfill('0') << std::setw(6) << iScore.first;
@@ -77,7 +79,7 @@ public:
 		explosion->set_extents(ng::vec2{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
 		iWorld.add_sprite(explosion);
 		kill();
-		aOther.kill();
+		other.kill();
 		create_target(iWorld);
 	}
 private:
