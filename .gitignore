@@ -208,3 +208,5 @@ Debug
 /examples/games/video_poker/build/win32/vs2015/video_poker.sdf
 /examples/games/video_poker/build/win32/vs2015/video_poker.vcxproj.user
 /build/win32/vs2015/neogfx.vcxproj.user
+/3rdparty/glew/glew-1.13.0/lib/glew32.lib
+/3rdparty/glew/glew-1.13.0/lib/glew32d.lib

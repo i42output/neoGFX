@@ -791,6 +791,16 @@ namespace neogfx
 		aabb(const vec3& aMin, const vec3& aMax) : min{ aMin }, max{ aMax } {}
 	};
 
+	inline bool operator==(const aabb& left, const aabb& right)
+	{
+		return left.min == right.min && left.max == right.max;
+	}
+
+	inline bool operator!=(const aabb& left, const aabb& right)
+	{
+		return !(left == right);
+	}
+
 	inline bool operator<(const aabb& left, const aabb& right)
 	{
 		return std::tie(left.min.z, left.min.y, left.min.x, left.max.z, left.max.y, left.max.x) <

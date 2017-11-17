@@ -60,8 +60,9 @@ namespace neogfx
 				iData = &aData;
 				data()->set_collision_tree_link(this);
 			}
-			void update()
+			bool update()
 			{
+				auto oldAabb = iAabb;
 				if (is_leaf())
 				{
 					// make fat AABB
@@ -70,6 +71,7 @@ namespace neogfx
 				}
 				else // make union of child AABBs of child nodes
 					iAabb = aabb_union(left()->aabb(), right()->aabb());
+				return iAabb != oldAabb;
 			}
 			node* parent() const
 			{
@@ -377,28 +379,33 @@ namespace neogfx
 				else
 				{
 					// grab all nodes
-					iNodeCache.clear();
+					iInvalidNodes.clear();
 					do_update_helper(root_node());
 
 					// re-insert all nodes
-					clear();
-					for (node* n : iNodeCache)
+					for (node* n : iInvalidNodes)
+					{
+						delete_node(n);
 						insert_node(n);
+					}
 
-					iNodeCache.clear();
+					iInvalidNodes.clear();
 					do_update_helper(root_node());
 				}
 			}
 		}
-		void do_update_helper(red_black_node* aNode)
+		bool do_update_helper(red_black_node* aNode)
 		{
+			bool invalid = false;
 			node* n = static_cast<node*>(aNode);
 			if (n->has_left())
-				do_update_helper(n->left());
+				invalid = do_update_helper(n->left()) || invalid;
 			if (n->has_right())
-				do_update_helper(n->right());
-			n->update();
-			iNodeCache.push_back(n);
+				invalid = do_update_helper(n->right()) || invalid;
+			invalid = n->update() || invalid;
+			if (invalid)
+				iInvalidNodes.push_back(n);
+			return invalid;
 		}
 		node* create_node()
 		{
@@ -417,7 +424,7 @@ namespace neogfx
 		node_allocator iAllocator;
 		scalar iFatMarginMultiplier;
 		vec3 iFatMinimumMargin;
-		std::vector<node*> iNodeCache;
+		std::vector<node*> iInvalidNodes;
 		uint32_t iCount;
 		mutable uint32_t iTotalDepth;
 		mutable uint32_t iCurrentDepth;
