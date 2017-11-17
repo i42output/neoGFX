@@ -74,7 +74,7 @@ public:
 		auto explosion = std::allocate_shared<ng::sprite, boost::fast_pool_allocator<sprite>>(
 			alloc, *iExplosion, ng::sprite::animation_info{ { { ng::point{}, ng::size{ 60.0, 60.0 } } }, 12, 0.040, false });
 		static neolib::basic_random<double> r;
-		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), 1.0 });
+		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), -0.1 });
 		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
 		explosion->set_extents(ng::vec2{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
 		iWorld.add_sprite(explosion);
@@ -97,7 +97,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->enable_z_sorting(true);
 	for (uint32_t i = 0; i < 1000; ++i)
 		spritePlane->add_shape(std::make_shared<ng::rectangle>(
-			ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -(static_cast<ng::scalar>(std::rand() % 32)) / 32.0 },
+			ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -1.0 + 0.5 * (static_cast<ng::scalar>(std::rand() % 32)) / 32.0 },
 			ng::vec2{ static_cast<ng::scalar>(std::rand() % 64), static_cast<ng::scalar>(std::rand() % 64) },
 			ng::colour{ std::rand() % 64, std::rand() % 64, std::rand() % 64 }.lighter(0x40)));
 	//spritePlane->set_uniform_gravity();
@@ -128,11 +128,11 @@ void create_game(ng::i_layout& aLayout)
 	{
 		create_target(*spritePlane);
 	}
+	auto debugInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane->font().with_size(spritePlane->font().size() * 0.75), ng::text_appearance{ ng::colour::PaleVioletRed1, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
+	spritePlane->add_shape(debugInfo);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
-		aGraphicsContext.draw_text(ng::point(0.0, 100.0), "Collision Tree Depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().depth()), spritePlane->font(), ng::text_appearance{ ng::colour::Goldenrod, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
-		aGraphicsContext.draw_text(ng::point(0.0, 132.0), "Collision Tree Size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().count()), spritePlane->font(), ng::text_appearance{ ng::colour::Goldenrod, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
 	});
 	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
 	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)
@@ -163,5 +163,12 @@ void create_game(ng::i_layout& aLayout)
 		oss << "VELOCITY:  " << spaceshipSprite.physics().velocity().magnitude() << " m/s" << "\n";
 		oss << "ACCELERATION:  " << spaceshipSprite.physics().acceleration().magnitude() << " m/s/s";
 		shipInfo->set_value(oss.str());
+	});
+
+	spritePlane->physics_applied([debugInfo, spritePlane](ng::sprite_plane::step_time_interval)
+	{
+		debugInfo->set_value(
+			"AABB Collision Tree Size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().count()) + "\n" +
+			"AABB Collision Tree Depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().depth()));
 	});
 }
