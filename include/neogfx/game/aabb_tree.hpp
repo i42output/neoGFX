@@ -23,14 +23,14 @@
 #include <unordered_set>
 #include <queue>
 #include <boost/pool/pool_alloc.hpp>
+#include <neolib/red_black_tree.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/game/i_collidable.hpp>
 
 namespace neogfx
 {
-	// todo: replace naive balancing mechanism with something better.
 	template <typename Allocator = boost::fast_pool_allocator<i_collidable>>
-	class aabb_tree
+	class aabb_tree : private neolib::red_black_tree
 	{
 	public:
 		typedef Allocator allocator_type;
@@ -40,10 +40,11 @@ namespace neogfx
 		typedef const void* const_iterator; // todo
 		typedef void* iterator; // todo
 	private:
-		class node
+		typedef red_black_tree::node red_black_node;
+		class node : public red_black_node
 		{
 		public:
-			node(aabb_tree& aTree) : iTree{ aTree }, iParent { nullptr }, iLeft{ nullptr }, iRight{ nullptr }, iAabb{}, iData{ nullptr }, iChildrenCrossed{ false }
+			node(aabb_tree& aTree) : iTree{ aTree }, iAabb{}, iData{ nullptr }, iChildrenCrossed{ false }
 			{
 			}
 			~node()
@@ -52,22 +53,12 @@ namespace neogfx
 		public:
 			bool is_leaf() const
 			{
-				return iLeft == nullptr;
-			}
-			void set_branch(node* aLeft, node* aRight)
-			{
-				iLeft = aLeft;
-				iRight = aRight;
-				iLeft->iParent = this;
-				iRight->iParent = this;
-				iData = nullptr;
+				return !has_left() || !has_right();
 			}
 			void set_leaf(i_collidable& aData)
 			{
-				iLeft = nullptr;
-				iRight = nullptr;
 				iData = &aData;
-				iData->set_collision_tree_link(this);
+				data()->set_collision_tree_link(this);
 			}
 			void update()
 			{
@@ -78,39 +69,33 @@ namespace neogfx
 					iAabb = neogfx::aabb{ data()->aabb().min - marginVec, data()->aabb().max + marginVec };
 				}
 				else // make union of child AABBs of child nodes
-					iAabb = aabb_union(iLeft->aabb(), iRight->aabb());
+					iAabb = aabb_union(left()->aabb(), right()->aabb());
 			}
 			node* parent() const
 			{
-				return iParent;
-			}
-			node*& parent()
-			{
-				return iParent;
+				return static_cast<node*>(red_black_node::parent());
 			}
 			node* left() const
 			{
-				return iLeft;
-			}
-			node*& left()
-			{
-				return iLeft;
+				return static_cast<node*>(red_black_node::left());
 			}
 			node* right() const
 			{
-				return iRight;
-			}
-			node*& right()
-			{
-				return iRight;
+				return static_cast<node*>(red_black_node::right());
 			}
 			node* sibling() const
 			{
-				return this == iParent->iLeft ? iParent->iRight : iParent->iLeft;
+				return static_cast<node*>(red_black_node::sibling());
 			}
 			const neogfx::aabb& aabb() const
 			{
-				return iAabb;
+				if (iAabb != boost::none)
+					return *iAabb;
+				return data()->aabb();
+			}
+			void set_aabb(const neogfx::aabb& aAabb)
+			{
+				iAabb = aAabb;
 			}
 			i_collidable* data() const
 			{
@@ -130,10 +115,7 @@ namespace neogfx
 			}
 		private:
 			aabb_tree& iTree;
-			node* iParent;
-			node* iLeft;
-			node* iRight;
-			neogfx::aabb iAabb;
+			optional_aabb iAabb;
 			i_collidable* iData;
 			mutable bool iChildrenCrossed;
 		};
@@ -143,7 +125,6 @@ namespace neogfx
 			iAllocator{ aAllocator },
 			iFatMarginMultiplier{ aFatMarginMultiplier },
 			iFatMinimumMargin {	aFatMinimumMargin, aFatMinimumMargin, aFatMinimumMargin	},
-			iRoot{ nullptr },
 			iCount{ 0 },
 			iTotalDepth{ 0 },
 			iCurrentDepth{ 0 }
@@ -157,26 +138,25 @@ namespace neogfx
 		template <typename CollisionAction>
 		void collisions(CollisionAction aCollisionAction) const
 		{
-			if (iRoot && !iRoot->is_leaf())
+			if (root_node() != nil_node() && !root_node()->is_leaf())
 			{
-				clear_children_cross_flag_helper(iRoot);
+				clear_children_cross_flag_helper(root_node());
 				iTotalDepth = 0;
 				iCurrentDepth = 0;
-				collisions_helper(aCollisionAction, iRoot->left(), iRoot->right());
+				collisions_helper(aCollisionAction, root_node()->left(), root_node()->right());
 			}
 		}
 		template <typename ResultContainer>
 		const_reference pick(const vec3& aPoint, std::function<bool(reference, const vec3& aPoint)> aColliderPredicate, ResultContainer& aResult) const
 		{
 			std::queue<node*> q;
-			if (iRoot)
-				q.push(m_root);
+			if (root_node() != nil_node())
+				q.push(root_node());
 
 			while (!q.empty())
 			{
 				node& n = *q.front();
 				q.pop();
-
 				if (n.is_leaf())
 				{
 					if (aColliderPredicate(*n->data()->second.first, aPoint))
@@ -184,8 +164,12 @@ namespace neogfx
 				}
 				else
 				{
-					q.push(n.left());
-					q.push(n.right());
+					red_black_node* left = n.left();
+					red_black_node* right = n.right();
+					if (!left->is_nil())
+						q.push(n.left());
+					if (!right->is_nil())
+						q.push(n.right());
 				}
 			}
 		}
@@ -257,23 +241,10 @@ namespace neogfx
 	public:
 		iterator insert(reference aItem)
 		{
-			if (iRoot)
-			{
-				// not first node, insert node to tree
-				node* newNode = create_node();
-				newNode->set_leaf(aItem);
-				newNode->update();
-				insert_node(newNode, iRoot);
-				return newNode;
-			}
-			else
-			{
-				// first node, make root
-				iRoot = create_node();
-				iRoot->set_leaf(aItem);
-				iRoot->update();
-				return iRoot;
-			}
+			node* newNode = create_node();
+			newNode->set_leaf(aItem);
+			insert_node(newNode);
+			return newNode;
 		}
 		void erase(iterator aItem)
 		{
@@ -290,173 +261,144 @@ namespace neogfx
 		{
 			return iTotalDepth;
 		}
+	protected:
+		node* root_node() const
+		{
+			return static_cast<node*>(red_black_tree::root_node());
+		}
 	private:
-		void clear_children_cross_flag_helper(node* aNode) const
+		void clear_children_cross_flag_helper(red_black_node* aNode) const
 		{
-			aNode->set_children_crossed(false);
-			if (!aNode->is_leaf())
+			if (aNode->is_nil())
+				return;
+			node* n = static_cast<node*>(aNode);
+			n->set_children_crossed(false);
+			if (!n->is_leaf())
 			{
-				clear_children_cross_flag_helper(aNode->left());
-				clear_children_cross_flag_helper(aNode->right());
+				clear_children_cross_flag_helper(n->left());
+				clear_children_cross_flag_helper(n->right());
 			}
 		}
 		template <typename CollisionAction>
-		void cross_children(const CollisionAction& aCollisionAction, node* aNode) const
+		void cross_children(const CollisionAction& aCollisionAction, red_black_node* aNode) const
 		{
-			if (!aNode->children_crossed())
+			if (aNode->is_nil())
+				return;
+			node* n = static_cast<node*>(aNode);
+			if (!n->children_crossed())
 			{
-				collisions_helper(aCollisionAction, aNode->left(), aNode->right());
-				aNode->set_children_crossed(true);
+				collisions_helper(aCollisionAction, n->left(), n->right());
+				n->set_children_crossed(true);
 			}
 		}
 		template <typename CollisionAction>
-		void collisions_helper(const CollisionAction& aCollisionAction, node* aNode0, node* aNode1) const
+		void collisions_helper(const CollisionAction& aCollisionAction, red_black_node* aNode0, red_black_node* aNode1) const
 		{
+			if (aNode0->is_nil() || aNode1->is_nil())
+				return;
+			node* n0 = static_cast<node*>(aNode0);
+			node* n1 = static_cast<node*>(aNode1);
 			neolib::scoped_counter sc{ iCurrentDepth };
 			iTotalDepth = std::max(iTotalDepth, iCurrentDepth);
-			if (aNode0->is_leaf())
+			if (n0->is_leaf())
 			{
 				// 2 leaves, check proxies instead of fat AABBs
-				if (aNode1->is_leaf())
+				if (n1->is_leaf())
 				{
-					if (aNode0->data()->has_collided(*aNode1->data()))
-						aCollisionAction(*aNode0->data(), *aNode1->data());
+					if (n0->data()->has_collided(*n1->data()))
+						aCollisionAction(*n0->data(), *n1->data());
 				}
 				// 1 branch / 1 leaf
 				else
 				{
-					cross_children(aCollisionAction, aNode1);
-					collisions_helper(aCollisionAction, aNode0, aNode1->left());
-					collisions_helper(aCollisionAction, aNode0, aNode1->right());
+					cross_children(aCollisionAction, n1);
+					collisions_helper(aCollisionAction, n0, n1->left());
+					collisions_helper(aCollisionAction, n0, n1->right());
 				}
 			}
-			else if (aNode1->is_leaf())
+			else if (n1->is_leaf())
 			{
-				cross_children(aCollisionAction, aNode0);
-				collisions_helper(aCollisionAction, aNode0->left(), aNode1);
-				collisions_helper(aCollisionAction, aNode0->right(), aNode1);
+				cross_children(aCollisionAction, n0);
+				collisions_helper(aCollisionAction, n0->left(), n1);
+				collisions_helper(aCollisionAction, n0->right(), n1);
 			}
 			// 2 branches
 			else
 			{
-				cross_children(aCollisionAction, aNode0);
-				cross_children(aCollisionAction, aNode1);
-				collisions_helper(aCollisionAction, aNode0->left(), aNode1->left());
-				collisions_helper(aCollisionAction, aNode0->left(), aNode1->right());
-				collisions_helper(aCollisionAction, aNode0->right(), aNode1->left());
-				collisions_helper(aCollisionAction, aNode0->right(), aNode1->right());
+				cross_children(aCollisionAction, n0);
+				cross_children(aCollisionAction, n1);
+				collisions_helper(aCollisionAction, n0->left(), n1->left());
+				collisions_helper(aCollisionAction, n0->left(), n1->right());
+				collisions_helper(aCollisionAction, n0->right(), n1->left());
+				collisions_helper(aCollisionAction, n0->right(), n1->right());
 			}
 		}
 		vec3 fat_margin(const aabb& aAabb) const
 		{
 			return ((aAabb.max - aAabb.min) * iFatMarginMultiplier).max(iFatMinimumMargin);
 		}
-		void insert_node(node* aNode, node*& aParent)
+		void insert_node(node* aNode, node* aParent = nullptr)
 		{
-			node *p = aParent;
-			if (p->is_leaf())
-			{
-				// parent is leaf, simply split
-				node *newParent = create_node();
-				newParent->parent() = p->parent();
-				newParent->set_branch(aNode, p);
-				aParent = newParent;
-			}
+			if (aParent == nullptr && root_node() != nil_node())
+				aParent = root_node();
+
+			if (aParent == nullptr)
+				red_black_tree::insert_node(aNode, [](red_black_node*, red_black_node*) { return true; });
+			else if (aParent->is_leaf())
+				red_black_tree::insert_node(aNode, [](red_black_node*, red_black_node* x) { return !x->has_left(); }, aParent);
 			else
 			{
 				// parent is branch, compute volume differences 
 				// between pre-insert and post-insert
-				const aabb& aabb0 = p->left()->aabb();
-				const aabb& aabb1 = p->right()->aabb();
+				const aabb& aabb0 = aParent->left()->aabb();
+				const aabb& aabb1 = aParent->right()->aabb();
 				const scalar volumeDiff0 = aabb_volume(aabb_union(aabb0, aNode->aabb())) - aabb_volume(aabb0);
 				const scalar volumeDiff1 = aabb_volume(aabb_union(aabb1, aNode->aabb())) - aabb_volume(aabb1);
 
 				// insert to the child that gives less volume increase
 				if (volumeDiff0 < volumeDiff1)
-					insert_node(aNode, p->left());
+					insert_node(aNode, aParent->left());
 				else
-					insert_node(aNode, p->right());
+					insert_node(aNode, aParent->right());
+				return;
 			}
-
-			// update parent AABB
-			// (propagates back up the recursion stack)
-			aParent->update();
 		}
 		void remove_node(node* aNode)
 		{
-			node* parent = aNode->parent();
-			if (parent) // node is not root
-			{
-				if (parent->parent()) // if there's a grandparent
-				{
-					// update links
-					node* sibling = aNode->sibling();
-					sibling->parent() = parent->parent();
-					(parent == parent->parent()->left() ? parent->parent()->left() : parent->parent()->right()) = sibling;
-				}
-				else // no grandparent
-				{
-					// make sibling root
-					node* sibling = aNode->sibling();
-					iRoot = sibling;
-					sibling->parent() = nullptr;
-				}
-				destroy_node(aNode);
-				destroy_node(parent);
-			}
-			else // node is root
-			{
-				iRoot = nullptr;
-				destroy_node(aNode);
-			}
+			red_black_tree::delete_node(aNode);
+			destroy_node(aNode);
 		}
 		void do_update()
 		{
-			if (iRoot)
+			if (red_black_tree::root_node() != nil_node())
 			{
-				if (iRoot->is_leaf())
-					iRoot->update();
+				if (root_node()->is_leaf())
+					root_node()->update();
 				else
 				{
-					// grab all invalid nodes
-					iInvalidNodes.clear();
-					do_update_helper(iRoot);
+					// grab all nodes
+					iNodeCache.clear();
+					do_update_helper(root_node());
 
-					// re-insert all invalid nodes
-					for (node* n : iInvalidNodes)
-					{
-						// grab parent link
-						node* parent = n->parent();
-						node* sibling = n->sibling();
-						node*& parentLink = parent->parent() ? (parent == parent->parent()->left() ? parent->parent()->left() : parent->parent()->right()) : iRoot;
+					// re-insert all nodes
+					clear();
+					for (node* n : iNodeCache)
+						insert_node(n);
 
-						// replace parent with sibling
-						sibling->parent() =	parent->parent() ? parent->parent() : nullptr; // root has null parent
-						parentLink = sibling;
-						destroy_node(parent);
-
-						// re-insert node
-						n->update();
-						insert_node(n, iRoot);
-					}
-					iInvalidNodes.clear();
+					iNodeCache.clear();
+					do_update_helper(root_node());
 				}
 			}
 		}
-		void do_update_helper(node* aNode)
+		void do_update_helper(red_black_node* aNode)
 		{
-			if (aNode->is_leaf())
-			{
-				// check if fat AABB doesn't 
-				// contain the collider's AABB anymore
-				if (!aabb_contains(aNode->aabb(), aNode->data()->aabb()))
-					iInvalidNodes.push_back(aNode);
-			}
-			else
-			{
-				do_update_helper(aNode->left());
-				do_update_helper(aNode->right());
-			}
+			node* n = static_cast<node*>(aNode);
+			if (n->has_left())
+				do_update_helper(n->left());
+			if (n->has_right())
+				do_update_helper(n->right());
+			n->update();
+			iNodeCache.push_back(n);
 		}
 		node* create_node()
 		{
@@ -475,8 +417,7 @@ namespace neogfx
 		node_allocator iAllocator;
 		scalar iFatMarginMultiplier;
 		vec3 iFatMinimumMargin;
-		node* iRoot;
-		std::vector<node*> iInvalidNodes;
+		std::vector<node*> iNodeCache;
 		uint32_t iCount;
 		mutable uint32_t iTotalDepth;
 		mutable uint32_t iCurrentDepth;
