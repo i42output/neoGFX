@@ -754,9 +754,22 @@ namespace neogfx
 
 	void graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const
 	{
-		iNativeGraphicsContext->enqueue(graphics_operation::draw_glyph{ to_device_units(aPoint) + iOrigin, aGlyph, aFont, aAppearance });
-		if (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic()))
-			draw_glyph_underline(aPoint, aGlyph, aFont, aAppearance);
+		try
+		{
+			iNativeGraphicsContext->enqueue(graphics_operation::draw_glyph{ to_device_units(aPoint) + iOrigin, aGlyph, aFont, aAppearance });
+			if (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic()))
+				draw_glyph_underline(aPoint, aGlyph, aFont, aAppearance);
+		}
+		catch (const freetype_error& fe)
+		{
+			// do nothing except report error
+			thread_local bool sReported;
+			if (!sReported)
+			{
+				sReported = true;
+				std::cerr << "FreeType error in draw_glyph(): " << fe.what() << ", ignoring further errors." << std::endl;
+			}
+		}
 	}
 
 	void graphics_context::draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const

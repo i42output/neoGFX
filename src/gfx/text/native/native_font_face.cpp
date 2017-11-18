@@ -230,8 +230,23 @@ namespace neogfx
 		if (existingGlyph != iGlyphs.end())
 			return existingGlyph->second;
 
-		freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), aGlyph.subpixel() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL));
-		freetypeCheck(FT_Render_Glyph(iHandle->glyph, aGlyph.subpixel() ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL));
+		try
+		{
+			freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), aGlyph.subpixel() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL));
+		}
+		catch (freetype_error fe)
+		{
+			throw freetype_load_glyph_error(fe.what());
+		}
+		try
+		{
+			freetypeCheck(FT_Render_Glyph(iHandle->glyph, aGlyph.subpixel() ? FT_RENDER_MODE_LCD : FT_RENDER_MODE_NORMAL));
+		}
+		catch (freetype_error fe)
+		{
+			throw freetype_render_glyph_error(fe.what());
+		}
+
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
 
 		auto& subTexture = iRenderingEngine.font_manager().glyph_atlas().create_sub_texture(

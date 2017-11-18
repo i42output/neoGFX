@@ -46,8 +46,8 @@
 
 namespace neogfx
 {
-	struct freetype_error : std::runtime_error { freetype_error(const std::string& aError) : std::runtime_error("neogfx::freetype_error: " + aError) {} };
-	inline const char* getFreeTypeErrorMessage(FT_Error err)
+	struct freetype_error : std::runtime_error { freetype_error(const std::string& aError) : std::runtime_error(aError) {} };
+	inline std::string getFreeTypeErrorMessage(FT_Error err)
 	{
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  case e: return s;
@@ -62,7 +62,7 @@ namespace neogfx
 { \
 	FT_Error err = x; \
 	if (err != FT_Err_Ok) \
-		throw freetype_error(getFreeTypeErrorMessage(err)); \
+		throw freetype_error("neoGFX FreeType error: " + getFreeTypeErrorMessage(err)); \
 }
 
 namespace neogfx
@@ -93,6 +93,9 @@ namespace neogfx
 				hb_buffer_destroy(buf);
 			}
 		};
+	public:
+		struct freetype_load_glyph_error : freetype_error { freetype_load_glyph_error(const std::string& aError) : freetype_error(aError) {} };
+		struct freetype_render_glyph_error : freetype_error { freetype_render_glyph_error(const std::string& aError) : freetype_error(aError) {} };
 	public:
 		native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle);
 		~native_font_face();
