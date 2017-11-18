@@ -144,7 +144,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\i_sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\mesh.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\physical_object.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\aabb_tree.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\aabb_redblacktree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\shape.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\sprite.hpp" />

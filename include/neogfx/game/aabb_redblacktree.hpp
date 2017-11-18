@@ -1,4 +1,4 @@
-// aabb_tree.hpp
+// aabb_redblacktree.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -30,7 +30,7 @@
 namespace neogfx
 {
 	template <typename Allocator = boost::fast_pool_allocator<i_collidable>>
-	class aabb_tree : private neolib::red_black_tree
+	class aabb_redblacktree : private neolib::red_black_tree
 	{
 	public:
 		typedef Allocator allocator_type;
@@ -44,7 +44,7 @@ namespace neogfx
 		class node : public red_black_node
 		{
 		public:
-			node(aabb_tree& aTree) : iTree{ aTree }, iAabb{}, iData{ nullptr }, iChildrenCrossed{ false }
+			node(aabb_redblacktree& aTree) : iTree{ aTree }, iAabb{}, iData{ nullptr }, iChildrenCrossed{ false }
 			{
 			}
 			~node()
@@ -116,14 +116,14 @@ namespace neogfx
 				iChildrenCrossed = aChildrenCrossed;
 			}
 		private:
-			aabb_tree& iTree;
+			aabb_redblacktree& iTree;
 			optional_aabb iAabb;
 			i_collidable* iData;
 			mutable bool iChildrenCrossed;
 		};
 		typedef typename allocator_type::template rebind<node>::other node_allocator;
 	public:
-		aabb_tree(scalar aFatMarginMultiplier = 0.0, scalar aFatMinimumMargin = 32.0, const allocator_type& aAllocator = allocator_type{}) :
+		aabb_redblacktree(scalar aFatMarginMultiplier = 0.0, scalar aFatMinimumMargin = 32.0, const allocator_type& aAllocator = allocator_type{}) :
 			iAllocator{ aAllocator },
 			iFatMarginMultiplier{ aFatMarginMultiplier },
 			iFatMinimumMargin {	aFatMinimumMargin, aFatMinimumMargin, aFatMinimumMargin	},
@@ -178,38 +178,38 @@ namespace neogfx
 		template <typename ResultContainer>
 		reference pick(const vec3& aPoint, std::function<bool(reference, const vec3& aPoint)> aColliderPredicate, ResultContainer& aResult)
 		{
-			return const_cast<reference>(const_cast<const aabb_tree*>(this)->pick(aPoint, aColliderPredicate, aResult));
+			return const_cast<reference>(const_cast<const aabb_redblacktree*>(this)->pick(aPoint, aColliderPredicate, aResult));
 		}
 	public:
 		const_iterator begin() const
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 		const_iterator cbegin() const
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 		iterator begin()
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 		const_iterator end() const
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 		const_iterator cend() const
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 		iterator end()
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 	public:
 		const_iterator find(const_reference aItem) const
@@ -219,12 +219,12 @@ namespace neogfx
 		const_iterator find(const vec3& aPoint) const
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 		const_iterator find(const aabb& aAabb) const
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 		iterator find(reference aItem)
 		{
@@ -233,12 +233,12 @@ namespace neogfx
 		iterator find(const vec3& aPoint)
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 		iterator find(const aabb& aAabb)
 		{
 			// todo
-			throw std::logic_error("neogfx::aabb_tree::not_yet_implemented");
+			throw std::logic_error("neogfx::aabb_redblacktree::not_yet_implemented");
 		}
 	public:
 		iterator insert(reference aItem)

@@ -597,10 +597,10 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\surface_window_proxy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\aabb_tree.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\i_collidable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\i_collidable.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\aabb_redblacktree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
