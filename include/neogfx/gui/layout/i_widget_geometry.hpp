@@ -33,7 +33,7 @@ namespace neogfx
 			Minimum,
 			Maximum,
 			Expanding,
-			ExpandingMaintainingAspectRatio,
+			ExpandingMaintainingAspectRatio, // todo: not yet working
 			Manual
 		};
 	public:

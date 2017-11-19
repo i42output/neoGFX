@@ -99,6 +99,23 @@ namespace neogfx
 		virtual void validate() = 0;
 		// helpers
 	public:
+		template <typename ItemType, typename... Args>
+		ItemType& emplace_item(Args&&... args)
+		{
+			auto newItem = std::make_shared<ItemType>(args...);
+			add_item(newItem);
+			return *newItem;
+		}
+		template <typename ItemType, typename... Args>
+		ItemType& emplace_item_at(item_index aPosition, Args&&... args)
+		{
+			auto newItem = std::make_shared<ItemType>(args...);
+			add_item(newItem);
+			if (aPosition < item_count())
+				remove_item_at(aPosition);
+			add_item_at(aPosition, newItem);
+			return *newItem;
+		}
 		template <typename ItemType>
 		void replace_item_at(item_index aPosition, ItemType&& aItem)
 		{

@@ -222,6 +222,14 @@ namespace neogfx
 		virtual i_window* find_root() = 0;
 		// helpers
 	public:
+		template <typename WidgetType, typename... Args>
+		WidgetType& emplace_widget(Args&&... args)
+		{
+			auto newWidget = std::make_shared<WidgetType>(args...);
+			add_widget(newWidget);
+			return *newWidget;
+		}
+	public:
 		bool same_surface(const i_widget& aWidget) const
 		{
 			return find_surface() == aWidget.find_surface();
