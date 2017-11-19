@@ -646,9 +646,21 @@ namespace neogfx
 			update();
 	}
 
+	bool widget::has_logical_coordinate_system() const
+	{
+		return iLogicalCoordinateSystem != boost::none;
+	}
+
 	logical_coordinate_system widget::logical_coordinate_system() const
 	{
+		if (has_logical_coordinate_system())
+			return *iLogicalCoordinateSystem;
 		return neogfx::logical_coordinate_system::AutomaticGui;
+	}
+
+	void widget::set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem)
+	{
+		iLogicalCoordinateSystem = aLogicalCoordinateSystem;
 	}
 
 	point widget::position() const
@@ -943,6 +955,7 @@ namespace neogfx
 		scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
 		painting.trigger(aGraphicsContext);
 		paint(aGraphicsContext);
+		painted.trigger(aGraphicsContext);
 		aGraphicsContext.scissor_off();
 
 		for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)

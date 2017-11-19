@@ -257,8 +257,23 @@ namespace neogfx
 		{
 			if (!item.visible())
 				continue;
-			size s{0.0, std::min(std::max(AxisPolicy::cy(item.minimum_size(availableSize)), AxisPolicy::cy(availableSize)), AxisPolicy::cy(item.maximum_size(availableSize)))};
+			auto itemMinSize = item.minimum_size(availableSize);
+			auto itemMaxSize = item.maximum_size(availableSize);
+			size s{0.0, std::min(std::max(AxisPolicy::cy(itemMinSize), AxisPolicy::cy(availableSize)), AxisPolicy::cy(itemMaxSize))};
 			std::swap(s.cx, AxisPolicy::cx(s));
+			auto check_aspect_ratio = [&]()
+			{
+				if (item.size_policy().maintain_aspect_ratio())
+				{
+					auto cx = AxisPolicy::cx(itemMinSize);
+					auto cy = AxisPolicy::cy(itemMinSize);
+					if (cx < cy)
+						AxisPolicy::cy(s) = std::ceil(AxisPolicy::cx(s) * (cy / cx));
+					else
+						AxisPolicy::cx(s) = std::ceil(AxisPolicy::cy(s) * (cx / cy));
+				}
+			};
+			check_aspect_ratio();
 			point alignmentAdjust;
 			switch (alignment() & AxisPolicy::AlignmentMask)
 			{
@@ -280,9 +295,9 @@ namespace neogfx
 				AxisPolicy::y(alignmentAdjust) = 0.0;
 			auto disposition = itemDispositions[&item];
 			if (disposition == FixedSize)
-				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size(availableSize));
+				AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
 			else if (disposition == TooSmall)
-				AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum ? item.minimum_size(availableSize) : item.maximum_size(availableSize));
+				AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum ? itemMinSize : itemMaxSize);
 			else if (disposition == Weighted && leftover > 0.0)
 			{
 				uint32_t bit = bitsLeft != 0 ? bits() : 0;
@@ -290,7 +305,8 @@ namespace neogfx
 				previousBit = bit;
 			}
 			else
-				AxisPolicy::cx(s) = AxisPolicy::cx(item.minimum_size(availableSize));
+				AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
+			check_aspect_ratio();
 			item.layout(nextPos + alignmentAdjust, s);
 			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(s) == 0.0 || AxisPolicy::cy(s) == 0.0))
 				continue;

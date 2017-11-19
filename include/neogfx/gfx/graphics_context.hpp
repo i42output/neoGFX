@@ -29,6 +29,7 @@
 #ifdef _WIN32
 #pragma warning( pop )
 #endif
+#include <boost/optional.hpp>
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/core/path.hpp>
 #include <neogfx/game/i_shape.hpp>
@@ -45,6 +46,8 @@ namespace neogfx
 		AutomaticGui,
 		AutomaticGame
 	};
+
+	typedef boost::optional<logical_coordinate_system> optional_logical_coordinate_system;
 
 	enum class smoothing_mode
 	{

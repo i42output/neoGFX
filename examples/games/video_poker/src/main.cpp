@@ -2,7 +2,9 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
+#include <neogfx/game/sprite_plane.hpp>
 #include <video_poker/poker.hpp>
+#include <video_poker/table.hpp>
 
 namespace ng = neogfx;
 
@@ -17,7 +19,12 @@ int main(int argc, char* argv[])
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 
 		ng::window window(ng::size{ 768, 688 });
-		auto& layout0 = window.client_layout();
+
+		ng::sprite_plane spritePlane{ window.client_layout() };
+		spritePlane.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
+		ng::vertical_layout spritePlaneLayout{ spritePlane };
+		
+		video_poker::table table{ spritePlaneLayout, spritePlane };
 
 		// todo
 

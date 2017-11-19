@@ -41,6 +41,7 @@ namespace neogfx
 		event<> position_changed;
 		event<> size_changed;
 		event<graphics_context&> painting;
+		event<graphics_context&> painted;
 		event<const neogfx::mouse_event&> mouse_event;
 		event<const neogfx::non_client_mouse_event&> non_client_mouse_event;
 		event<const neogfx::keyboard_event&> keyboard_event;
@@ -122,7 +123,9 @@ namespace neogfx
 		virtual bool layout_items_in_progress() const = 0;
 		virtual void layout_items_completed() = 0;
 	public:
+		virtual bool has_logical_coordinate_system() const = 0;
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
+		virtual void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) = 0;
 		virtual point position() const = 0;
 		virtual point origin() const = 0;
 		virtual void move(const point& aPosition) = 0;

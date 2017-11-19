@@ -26,17 +26,17 @@
 
 namespace neogfx
 {
-	class frame : public i_frame
+	class shape_frame : public i_shape_frame
 	{
 	public:
-		frame(const colour_or_gradient& aColour) : iColour(aColour) {}
-		frame(const colour_or_gradient& aColour, const mat33& aTransformation) : iColour(aColour), iTransformation(aTransformation) {}
-		frame(const i_texture& aTexture) : iTextures{ to_texture_list_pointer(aTexture) } {}
-		frame(const i_texture& aTexture, const mat33& aTransformation) : iTextures{ to_texture_list_pointer(aTexture) }, iTransformation(aTransformation) {}
-		frame(const i_texture& aTexture, const optional_rect& aTextureRect) : iTextures{ to_texture_list_pointer(aTexture, aTextureRect) } {}
-		frame(const i_texture& aTexture, const optional_rect& aTextureRect, const mat33& aTransformation) : iTextures{ to_texture_list_pointer(aTexture, aTextureRect) }, iTransformation(aTransformation) {}
-		frame(texture_list_pointer aTextures) : iTextures{ aTextures } {}
-		frame(texture_list_pointer aTextures, const mat33& aTransformation) : iTextures{ aTextures }, iTransformation(aTransformation) {}
+		shape_frame(const colour_or_gradient& aColour) : iColour(aColour) {}
+		shape_frame(const colour_or_gradient& aColour, const mat33& aTransformation) : iColour(aColour), iTransformation(aTransformation) {}
+		shape_frame(const i_texture& aTexture) : iTextures{ to_texture_list_pointer(aTexture) } {}
+		shape_frame(const i_texture& aTexture, const mat33& aTransformation) : iTextures{ to_texture_list_pointer(aTexture) }, iTransformation(aTransformation) {}
+		shape_frame(const i_texture& aTexture, const optional_rect& aTextureRect) : iTextures{ to_texture_list_pointer(aTexture, aTextureRect) } {}
+		shape_frame(const i_texture& aTexture, const optional_rect& aTextureRect, const mat33& aTransformation) : iTextures{ to_texture_list_pointer(aTexture, aTextureRect) }, iTransformation(aTransformation) {}
+		shape_frame(texture_list_pointer aTextures) : iTextures{ aTextures } {}
+		shape_frame(texture_list_pointer aTextures, const mat33& aTransformation) : iTextures{ aTextures }, iTransformation(aTransformation) {}
 	public:
 		bool has_extents() const override { return iTextures != nullptr && !iTextures->empty(); }
 		size extents() const override { return has_extents() ? (*iTextures)[0].second != boost::none ? *(*iTextures)[0].second : (*iTextures)[0].first.extents() : size{}; }
@@ -56,7 +56,7 @@ namespace neogfx
 	class shape : public MixinInterface
 	{
 	private:
-		typedef std::vector<std::shared_ptr<i_frame>> frame_list;
+		typedef std::vector<std::shared_ptr<i_shape_frame>> frame_list;
 	public:
 		typedef i_shape::frame_index frame_index;
 		typedef i_shape::time_interval time_interval;
@@ -124,12 +124,12 @@ namespace neogfx
 		// animation
 	public:
 		frame_index frame_count() const override;
-		const i_frame& frame(frame_index aFrameIndex) const override;
-		i_frame& frame(frame_index aFrameIndex) override;
-		void add_frame(i_frame& aFrame) override;
-		void add_frame(std::shared_ptr<i_frame> aFrame) override;
-		void replace_frame(frame_index aFrameIndex, i_frame& aFrame) override;
-		void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame) override;
+		const i_shape_frame& shape_frame(frame_index aFrameIndex) const override;
+		i_shape_frame& shape_frame(frame_index aFrameIndex) override;
+		void add_frame(i_shape_frame& aFrame) override;
+		void add_frame(std::shared_ptr<i_shape_frame> aFrame) override;
+		void replace_frame(frame_index aFrameIndex, i_shape_frame& aFrame) override;
+		void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_shape_frame> aFrame) override;
 		void remove_frame(frame_index aFrameIndex) override;
 		// geometry
 	public:
@@ -139,8 +139,8 @@ namespace neogfx
 		bool has_animation_finished() const override;
 		void animation_finished() override;
 		frame_index current_frame_index() const override;
-		const i_frame& current_frame() const override;
-		i_frame& current_frame();
+		const i_shape_frame& current_frame() const override;
+		i_shape_frame& current_frame();
 		vec3 origin() const override;
 		vec3 position() const override;
 		vec3 extents() const override;

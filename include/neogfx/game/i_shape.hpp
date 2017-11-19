@@ -32,7 +32,7 @@ namespace neogfx
 {
 	class graphics_context;
 
-	class i_frame
+	class i_shape_frame
 	{
 	public:
 		virtual bool has_extents() const = 0;
@@ -87,12 +87,12 @@ namespace neogfx
 		// animation
 	public:
 		virtual frame_index frame_count() const = 0;
-		virtual const i_frame& frame(frame_index aFrameIndex) const = 0;
-		virtual i_frame& frame(frame_index aFrameIndex) = 0;
-		virtual void add_frame(i_frame& aFrame) = 0;
-		virtual void add_frame(std::shared_ptr<i_frame> aFrame) = 0;
-		virtual void replace_frame(frame_index aFrameIndex, i_frame& aFrame) = 0;
-		virtual void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame) = 0;
+		virtual const i_shape_frame& shape_frame(frame_index aFrameIndex) const = 0;
+		virtual i_shape_frame& shape_frame(frame_index aFrameIndex) = 0;
+		virtual void add_frame(i_shape_frame& aFrame) = 0;
+		virtual void add_frame(std::shared_ptr<i_shape_frame> aFrame) = 0;
+		virtual void replace_frame(frame_index aFrameIndex, i_shape_frame& aFrame) = 0;
+		virtual void replace_frame(frame_index aFrameIndex, std::shared_ptr<i_shape_frame> aFrame) = 0;
 		virtual void remove_frame(frame_index aFrameIndex) = 0;
 		// geometry
 	public:
@@ -102,8 +102,8 @@ namespace neogfx
 		virtual bool has_animation_finished() const = 0;
 		virtual void animation_finished() = 0;
 		virtual frame_index current_frame_index() const = 0;
-		virtual const i_frame& current_frame() const = 0;
-		virtual i_frame& current_frame() = 0;
+		virtual const i_shape_frame& current_frame() const = 0;
+		virtual i_shape_frame& current_frame() = 0;
 		virtual vec3 origin() const = 0;
 		virtual vec3 position() const = 0;
 		virtual vec3 extents() const = 0;

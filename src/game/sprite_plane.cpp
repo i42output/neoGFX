@@ -73,6 +73,8 @@ namespace neogfx
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
 	{	
+		if (has_children())
+			widget::paint(aGraphicsContext);
 		painting_sprites.trigger(aGraphicsContext);
 		sort_shapes();
 		for (auto s : iRenderBuffer)

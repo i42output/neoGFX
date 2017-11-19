@@ -26,7 +26,7 @@ namespace neogfx
 		shape{ aContainer }, iText{ aText }, iFont{ aFont }, iAppearance{ aAppearance }, iAlignment { aAlignment }, iGlyphTextCache(aFont)
 	{
 		set_position(aPosition);
-		add_frame(std::make_shared<neogfx::frame>(aAppearance.ink()));
+		add_frame(std::make_shared<neogfx::shape_frame>(aAppearance.ink()));
 	}
 
 	const std::string& text::value() const
@@ -64,7 +64,7 @@ namespace neogfx
 	{
 		iAppearance = aAppearance;
 		for (frame_index i = 0; i < frame_count(); ++i)
-			frame(i).set_colour(aAppearance.ink());
+			shape_frame(i).set_colour(aAppearance.ink());
 	}
 
 	neogfx::alignment text::alignment() const

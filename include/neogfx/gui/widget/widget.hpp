@@ -97,7 +97,9 @@ namespace neogfx
 		bool layout_items_in_progress() const override;
 		void layout_items_completed() override;
 	public:
+		bool has_logical_coordinate_system() const override;
 		neogfx::logical_coordinate_system logical_coordinate_system() const override;
+		void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) override;
 		point position() const override;
 		void set_position(const point& aPosition) override;
 		point origin() const override;
@@ -230,6 +232,7 @@ namespace neogfx
 		class layout_timer;
 		std::unique_ptr<layout_timer> iLayoutTimer;
 		units_context iUnitsContext;
+		optional_logical_coordinate_system iLogicalCoordinateSystem;
 		point iPosition;
 		size iSize;
 		optional_margins iMargins;

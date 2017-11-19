@@ -33,6 +33,7 @@ namespace neogfx
 			Minimum,
 			Maximum,
 			Expanding,
+			ExpandingMaintainingAspectRatio,
 			Manual
 		};
 	public:
@@ -56,11 +57,21 @@ namespace neogfx
 	public:
 		size_policy_e horizontal_size_policy() const
 		{
-			return iHorizontalSizePolicy;
+			if (iHorizontalSizePolicy == ExpandingMaintainingAspectRatio)
+				return Expanding;
+			else
+				return iHorizontalSizePolicy;
 		}
 		size_policy_e vertical_size_policy() const
 		{
-			return iVerticalSizePolicy;
+			if (iVerticalSizePolicy == ExpandingMaintainingAspectRatio)
+				return Expanding;
+			else
+				return iVerticalSizePolicy;
+		}
+		bool maintain_aspect_ratio() const
+		{
+			return iHorizontalSizePolicy == ExpandingMaintainingAspectRatio || iVerticalSizePolicy == ExpandingMaintainingAspectRatio;
 		}
 		void set_size_policy(size_policy_e aSizePolicy)
 		{

@@ -31,7 +31,7 @@ namespace neogfx
 	inline shape<MixinInterface>::shape(const colour& aColour) :
 		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
-		iFrames.push_back(std::make_shared<neogfx::frame>(aColour));
+		iFrames.push_back(std::make_shared<neogfx::shape_frame>(aColour));
 	}
 
 	template <typename MixinInterface>
@@ -72,7 +72,7 @@ namespace neogfx
 	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const colour& aColour) :
 		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }
 	{
-		iFrames.push_back(std::make_shared<neogfx::frame>(aColour));
+		iFrames.push_back(std::make_shared<neogfx::shape_frame>(aColour));
 	}
 
 	template <typename MixinInterface>
@@ -159,7 +159,7 @@ namespace neogfx
 	template <typename MixinInterface>
 	inline texture_list_pointer shape<MixinInterface>::textures() const
 	{
-		return frame(0).textures();
+		return shape_frame(0).textures();
 	}
 
 	template <typename MixinInterface>
@@ -279,7 +279,7 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline const i_frame& shape<MixinInterface>::frame(frame_index aFrameIndex) const
+	inline const i_shape_frame& shape<MixinInterface>::shape_frame(frame_index aFrameIndex) const
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
@@ -287,7 +287,7 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline i_frame& shape<MixinInterface>::frame(frame_index aFrameIndex)
+	inline i_shape_frame& shape<MixinInterface>::shape_frame(frame_index aFrameIndex)
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
@@ -295,27 +295,27 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::add_frame(i_frame& aFrame)
+	inline void shape<MixinInterface>::add_frame(i_shape_frame& aFrame)
 	{
-		iFrames.push_back(std::shared_ptr<i_frame>(std::shared_ptr<i_frame>(), &aFrame));
+		iFrames.push_back(std::shared_ptr<i_shape_frame>(std::shared_ptr<i_shape_frame>(), &aFrame));
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::add_frame(std::shared_ptr<i_frame> aFrame)
+	inline void shape<MixinInterface>::add_frame(std::shared_ptr<i_shape_frame> aFrame)
 	{
 		iFrames.push_back(aFrame);
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::replace_frame(frame_index aFrameIndex, i_frame& aFrame)
+	inline void shape<MixinInterface>::replace_frame(frame_index aFrameIndex, i_shape_frame& aFrame)
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
-		iFrames[aFrameIndex] = std::shared_ptr<i_frame>(std::shared_ptr<i_frame>(), &aFrame);
+		iFrames[aFrameIndex] = std::shared_ptr<i_shape_frame>(std::shared_ptr<i_shape_frame>(), &aFrame);
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::replace_frame(frame_index aFrameIndex, std::shared_ptr<i_frame> aFrame)
+	inline void shape<MixinInterface>::replace_frame(frame_index aFrameIndex, std::shared_ptr<i_shape_frame> aFrame)
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
@@ -372,15 +372,15 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline const i_frame& shape<MixinInterface>::current_frame() const
+	inline const i_shape_frame& shape<MixinInterface>::current_frame() const
 	{
-		return frame(current_frame_index());
+		return shape_frame(current_frame_index());
 	}
 
 	template <typename MixinInterface>
-	inline i_frame& shape<MixinInterface>::current_frame()
+	inline i_shape_frame& shape<MixinInterface>::current_frame()
 	{
-		return frame(current_frame_index());
+		return shape_frame(current_frame_index());
 	}
 
 	template <typename MixinInterface>
@@ -536,13 +536,13 @@ namespace neogfx
 	{
 		if (aAnimationInfo == boost::none)
 		{
-			iFrames.push_back(std::make_shared<neogfx::frame>(aTextures));
+			iFrames.push_back(std::make_shared<neogfx::shape_frame>(aTextures));
 		}
 		else
 		{
 			iFrames.reserve(aAnimationInfo->count);
 			for (std::size_t i = 0; i < aAnimationInfo->count; ++i)
-				iFrames.push_back(std::make_shared<neogfx::frame>(std::make_shared<texture_list>()));
+				iFrames.push_back(std::make_shared<neogfx::shape_frame>(std::make_shared<texture_list>()));
 			std::vector<point> pos;
 			pos.reserve(aTextures->size());
 			for (std::size_t i = 0; i < aTextures->size(); ++i)

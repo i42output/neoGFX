@@ -96,7 +96,9 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\card_space.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\table.cpp" />
     <ClCompile Include="Debug\GeneratedFiles\video_poker.nrc.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -120,7 +122,9 @@
     <ClInclude Include="..\..\..\..\common\include\card_games\deck.hpp" />
     <ClInclude Include="..\..\..\..\common\include\card_games\default_game_traits.hpp" />
     <ClInclude Include="..\..\..\..\common\include\card_games\hand.hpp" />
+    <ClInclude Include="..\..\..\include\video_poker\card_space.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\poker.hpp" />
+    <ClInclude Include="..\..\..\include\video_poker\table.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
