@@ -81,7 +81,7 @@ namespace neogfx
 	{
 		iOwner = aOwner;
 		if (iPointerWrapper.is<widget_pointer>())
-			iOwner->add_widget(static_variant_cast<widget_pointer&>(iPointerWrapper));
+			iOwner->add(static_variant_cast<widget_pointer&>(iPointerWrapper));
 		else if (iPointerWrapper.is<layout_pointer>())
 			static_variant_cast<layout_pointer&>(iPointerWrapper)->set_owner(aOwner);
 	}

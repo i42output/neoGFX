@@ -91,7 +91,7 @@ private:
 void create_game(ng::i_layout& aLayout)
 {
 	auto spritePlane = std::make_shared<ng::sprite_plane>();
-	aLayout.add_item(spritePlane);
+	aLayout.add(spritePlane);
 	spritePlane->set_font(ng::font(spritePlane->font(), ng::font::Bold, 28));
 	spritePlane->set_background_colour(ng::colour::Black);
 	spritePlane->enable_z_sorting(true);

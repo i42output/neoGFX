@@ -46,7 +46,7 @@ namespace neogfx
 		virtual void set_image(const std::string& aUri);
 		virtual void set_image(const i_image& aImage);
 		virtual void set_image(const i_texture& aTexture);
-		virtual uint32_t item_count() const;
+		virtual uint32_t count() const;
 		virtual const i_menu_item& item_at(item_index aItemIndex) const;
 		virtual i_menu_item& item_at(item_index aItemIndex);
 		virtual i_menu& add_sub_menu(const std::string& aSubMenuTitle);
@@ -57,9 +57,9 @@ namespace neogfx
 		virtual void insert_action_at(item_index aItemIndex, i_action& aAction);
 		virtual void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction);
 		virtual void insert_separator_at(item_index aItemIndex);
-		virtual void remove_item_at(item_index aItemIndex);
-		virtual item_index find_item(const i_menu_item& aItem) const;
-		virtual item_index find_item(const i_menu& aSubMenu) const;
+		virtual void remove_at(item_index aItemIndex);
+		virtual item_index find(const i_menu_item& aItem) const;
+		virtual item_index find(const i_menu& aSubMenu) const;
 		virtual bool has_selected_item() const;
 		virtual item_index selected_item() const;
 		virtual void select_item_at(item_index aItemIndex, bool aSelectAnySubMenuItem = true);

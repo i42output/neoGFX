@@ -76,7 +76,7 @@ namespace neogfx
 
 	void menu_item_widget::paint_non_client(graphics_context& aGraphicsContext) const
 	{
-		if (menu().has_selected_item() && menu().selected_item() == (menu().find_item(menu_item())))
+		if (menu().has_selected_item() && menu().selected_item() == (menu().find(menu_item())))
 		{
 			bool openSubMenu = (menu_item().type() == i_menu_item::SubMenu && menu_item().sub_menu().is_open());
 			colour background;
@@ -156,14 +156,14 @@ namespace neogfx
 		widget::mouse_entered();
 		update();
 		if (menu_item().available())
-			menu().select_item_at(menu().find_item(menu_item()));
+			menu().select_item_at(menu().find(menu_item()));
 	}
 
 	void menu_item_widget::mouse_left()
 	{
 		widget::mouse_left();
 		update();
-		if (menu().has_selected_item() && menu().selected_item() == (menu().find_item(menu_item())) &&
+		if (menu().has_selected_item() && menu().selected_item() == (menu().find(menu_item())) &&
 			(menu_item().type() == i_menu_item::Action || (!menu_item().sub_menu().is_open() && !iSubMenuOpener)))
 			menu().clear_selection();
 	}
@@ -340,7 +340,7 @@ namespace neogfx
 		{
 			if (!menu_item().sub_menu().is_open())
 			{
-				menu().select_item_at(menu().find_item(menu_item()), aSelectAnySubMenuItem);
+				menu().select_item_at(menu().find(menu_item()), aSelectAnySubMenuItem);
 				if (destroyed)
 					return;
 				menu().open_sub_menu.trigger(menu_item().sub_menu());

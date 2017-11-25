@@ -37,7 +37,7 @@ namespace neogfx
 		iUnitsContext{ *this },
 		iExpansionPolicy{ aExpansionPolicy }
 	{
-		aParent.add_item(*this);
+		aParent.add(*this);
 	}
 
 	bool spacer::has_parent() const

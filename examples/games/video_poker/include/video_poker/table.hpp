@@ -43,6 +43,7 @@ namespace video_poker
 	public:
 		neogfx::sprite_plane& iSpritePlane;
 		neogfx::vertical_layout iMainLayout;
+		neogfx::label iTitle;
 		neogfx::vertical_spacer iSpacer1;
 		neogfx::horizontal_layout iSpacesLayout;
 		neogfx::horizontal_spacer iSpacer2;

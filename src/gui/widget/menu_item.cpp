@@ -76,7 +76,7 @@ namespace neogfx
 	{
 		if (type() == Action && (action().is_separator() || action().is_disabled()))
 			return false;
-		if (type() == SubMenu && sub_menu().item_count() == 0)
+		if (type() == SubMenu && sub_menu().count() == 0)
 			return false;
 		return true;
 	}

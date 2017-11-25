@@ -381,7 +381,7 @@ namespace neogfx
 		{
 			return append_item(aParent, value_type(), aCellData);
 		}
-		void remove_item(i_item_model::const_iterator aPosition) override
+		void remove(i_item_model::const_iterator aPosition) override
 		{
 			notify_observers(i_item_model_subscriber::NotifyItemRemoved, iterator_to_index(aPosition));
 			iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>());

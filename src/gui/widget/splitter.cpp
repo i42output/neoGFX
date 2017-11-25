@@ -177,7 +177,7 @@ namespace neogfx
 
 	boost::optional<std::pair<std::size_t, std::size_t>> splitter::separator_at(const point& aPosition) const
 	{
-		for (std::size_t i = 1; i < layout().item_count(); ++i)
+		for (std::size_t i = 1; i < layout().count(); ++i)
 		{
 			rect r1(layout().get_widget_at(i - 1).position(), layout().get_widget_at(i - 1).extents());
 			rect r2(layout().get_widget_at(i).position(), layout().get_widget_at(i).extents());

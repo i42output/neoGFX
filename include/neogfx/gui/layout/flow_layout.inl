@@ -171,26 +171,26 @@ namespace neogfx
 				AxisPolicy::x(pos) += AxisPolicy::cx(spacing());
 			if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize) > AxisPolicy::cx(availableSpace))
 			{
-				rows.add_item(std::make_shared<typename AxisPolicy::major_layout>());
-				rows.get_layout_at(rows.item_count() - 1).set_size_policy(size_policy::Minimum);
-				rows.get_layout_at(rows.item_count() - 1).add_item(item);
+				rows.add(std::make_shared<typename AxisPolicy::major_layout>());
+				rows.get_layout_at(rows.count() - 1).set_size_policy(size_policy::Minimum);
+				rows.get_layout_at(rows.count() - 1).add(item);
 				AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
 			}
 			else
 			{
-				if (rows.item_count() == 0)
+				if (rows.count() == 0)
 				{
-					rows.add_item(std::make_shared<typename AxisPolicy::major_layout>());
-					rows.get_layout_at(rows.item_count() - 1).set_size_policy(size_policy::Minimum);
+					rows.add(std::make_shared<typename AxisPolicy::major_layout>());
+					rows.get_layout_at(rows.count() - 1).set_size_policy(size_policy::Minimum);
 				}
-				rows.get_layout_at(rows.item_count() - 1).add_item(item);
+				rows.get_layout_at(rows.count() - 1).add(item);
 				AxisPolicy::x(pos) += AxisPolicy::cx(itemMinimumSize);
 			}
 			previousNonZeroSize = true;
 		}
 		rows.set_margins(neogfx::margins{});
 		rows.set_spacing(spacing());
-		for (uint32_t i = 0; i < rows.item_count(); ++i)
+		for (uint32_t i = 0; i < rows.count(); ++i)
 		{
 			rows.get_layout_at(i).set_margins(neogfx::margins{});
 			rows.get_layout_at(i).set_spacing(spacing());

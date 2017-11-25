@@ -26,7 +26,8 @@ namespace video_poker
 	table::table(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane) :
 		neogfx::widget{ aLayout },
 		iSpritePlane{ aSpritePlane },
-		iMainLayout{ *this },
+		iMainLayout{ *this, neogfx::alignment::Centre },
+		iTitle{ iMainLayout, "VIDEO POKER" },
 		iSpacer1{ iMainLayout },
 		iSpacesLayout{ iMainLayout },
 		iSpacer2{ iSpacesLayout },
@@ -45,17 +46,19 @@ namespace video_poker
 		iStake{ iInfoBarLayout, "Stake: " },
 		iStakeValue{ iInfoBarLayout, u8"£0" }
 	{
+		iTitle.text().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
+		iTitle.text().set_text_colour(neogfx::color::Green);
 		iSpacer1.set_weight(neogfx::size{ 0.5 });
 		iSpacer2.set_weight(neogfx::size{ 0.25 });
 		iSpacer3.set_weight(neogfx::size{ 0.25 });
 		iSpacer4.set_weight(neogfx::size{ 0.5 });
-		iCredits.text().set_font(neogfx::font{ "Exo 2", "Black", 18.0 });
+		iCredits.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
 		iCredits.text().set_text_colour(neogfx::color::Yellow);
-		iCreditsValue.text().set_font(neogfx::font{ "Exo 2", "Black", 18.0 });
+		iCreditsValue.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
 		iCreditsValue.text().set_text_colour(neogfx::color::White);
-		iStake.text().set_font(neogfx::font{ "Exo 2", "Black", 18.0 });
+		iStake.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
 		iStake.text().set_text_colour(neogfx::color::Yellow);
-		iStakeValue.text().set_font(neogfx::font{ "Exo 2", "Black", 18.0 });
+		iStakeValue.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
 		iStakeValue.text().set_text_colour(neogfx::color::White);
 	}
 }

@@ -33,22 +33,23 @@ namespace neogfx
 			Minimum,
 			Maximum,
 			Expanding,
-			ExpandingMaintainingAspectRatio, // todo: not yet working
 			Manual
 		};
 	public:
-		size_policy(size_policy_e aSizePolicy) :
-			iHorizontalSizePolicy(aSizePolicy), iVerticalSizePolicy(aSizePolicy)
+		struct no_aspect_ratio : std::logic_error { no_aspect_ratio() : std::logic_error("neogfx::size_policy::no_aspect_ratio") {} };
+	public:
+		size_policy(size_policy_e aSizePolicy, const optional_size& aAspectRatio = optional_size{}) :
+			iHorizontalSizePolicy{ aSizePolicy }, iVerticalSizePolicy{ aSizePolicy }, iAspectRatio{ aAspectRatio }
 		{
 		}
-		size_policy(size_policy_e aHorizontalSizePolicy, size_policy_e aVerticalSizePolicy) :
-			iHorizontalSizePolicy(aHorizontalSizePolicy), iVerticalSizePolicy(aVerticalSizePolicy)
+		size_policy(size_policy_e aHorizontalSizePolicy, size_policy_e aVerticalSizePolicy, const optional_size& aAspectRatio = optional_size{}) :
+			iHorizontalSizePolicy{ aHorizontalSizePolicy }, iVerticalSizePolicy{ aVerticalSizePolicy }, iAspectRatio{ aAspectRatio }
 		{
 		}
 	public:
 		bool operator==(const size_policy& aRhs) const
 		{
-			return iHorizontalSizePolicy == aRhs.iHorizontalSizePolicy && iVerticalSizePolicy == aRhs.iVerticalSizePolicy;
+			return iHorizontalSizePolicy == aRhs.iHorizontalSizePolicy && iVerticalSizePolicy == aRhs.iVerticalSizePolicy && iAspectRatio == aRhs.iAspectRatio;
 		}
 		bool operator!=(const size_policy& aRhs) const
 		{
@@ -57,21 +58,11 @@ namespace neogfx
 	public:
 		size_policy_e horizontal_size_policy() const
 		{
-			if (iHorizontalSizePolicy == ExpandingMaintainingAspectRatio)
-				return Expanding;
-			else
-				return iHorizontalSizePolicy;
+			return iHorizontalSizePolicy;
 		}
 		size_policy_e vertical_size_policy() const
 		{
-			if (iVerticalSizePolicy == ExpandingMaintainingAspectRatio)
-				return Expanding;
-			else
-				return iVerticalSizePolicy;
-		}
-		bool maintain_aspect_ratio() const
-		{
-			return iHorizontalSizePolicy == ExpandingMaintainingAspectRatio || iVerticalSizePolicy == ExpandingMaintainingAspectRatio;
+			return iVerticalSizePolicy;
 		}
 		void set_size_policy(size_policy_e aSizePolicy)
 		{
@@ -86,9 +77,24 @@ namespace neogfx
 		{
 			iVerticalSizePolicy = aVerticalSizePolicy;
 		}
+		bool maintain_aspect_ratio() const
+		{
+			return iAspectRatio != boost::none;
+		}
+		size aspect_ratio() const
+		{
+			if (maintain_aspect_ratio())
+				return *iAspectRatio;
+			throw no_aspect_ratio();
+		}
+		void set_aspect_ratio(const optional_size& aAspectRatio)
+		{
+			iAspectRatio = aAspectRatio;
+		}
 	private:
 		size_policy_e iHorizontalSizePolicy;
 		size_policy_e iVerticalSizePolicy;
+		optional_size iAspectRatio;
 	};
 
 	typedef boost::optional<size_policy> optional_size_policy;
@@ -122,9 +128,17 @@ namespace neogfx
 		{
 			set_size_policy(neogfx::size_policy{aSizePolicy}, aUpdateLayout);
 		}
+		void set_size_policy(neogfx::size_policy::size_policy_e aSizePolicy, const size& aAspectRatio, bool aUpdateLayout = true)
+		{
+			set_size_policy(neogfx::size_policy{ aSizePolicy, aAspectRatio }, aUpdateLayout);
+		}
 		void set_size_policy(neogfx::size_policy::size_policy_e aHorizontalSizePolicy, neogfx::size_policy::size_policy_e aVerticalSizePolicy, bool aUpdateLayout = true)
 		{
 			set_size_policy(neogfx::size_policy{aHorizontalSizePolicy, aVerticalSizePolicy}, aUpdateLayout);
+		}
+		void set_size_policy(neogfx::size_policy::size_policy_e aHorizontalSizePolicy, neogfx::size_policy::size_policy_e aVerticalSizePolicy, const size& aAspectRatio, bool aUpdateLayout = true)
+		{
+			set_size_policy(neogfx::size_policy{ aHorizontalSizePolicy, aVerticalSizePolicy, aAspectRatio }, aUpdateLayout);
 		}
 		void set_fixed_size(const size& aSize, bool aUpdateLayout = true)
 		{

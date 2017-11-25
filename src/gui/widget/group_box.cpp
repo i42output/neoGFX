@@ -55,12 +55,12 @@ namespace neogfx
 			if (aCheckable)
 			{
 				iTitle = std::make_unique<neogfx::check_box>(text);
-				iLayout.add_item_at(0, *static_variant_cast<check_box_ptr&>(iTitle));
+				iLayout.add_at(0, *static_variant_cast<check_box_ptr&>(iTitle));
 			}
 			else
 			{
 				iTitle = std::make_unique<neogfx::label>(text);
-				iLayout.add_item_at(0, *static_variant_cast<label_ptr&>(iTitle));
+				iLayout.add_at(0, *static_variant_cast<label_ptr&>(iTitle));
 			}
 		}
 	}
@@ -98,19 +98,19 @@ namespace neogfx
 	void group_box::set_item_layout(i_layout& aItemLayout)
 	{
 		if (iItemLayout != nullptr)
-			iLayout.remove_item(*iItemLayout);
+			iLayout.remove(*iItemLayout);
 		iItemLayout = std::shared_ptr<i_layout>(std::shared_ptr<i_layout>(), &aItemLayout);
 		if (aItemLayout.parent() != &iLayout)
-			iLayout.add_item(iItemLayout);
+			iLayout.add(iItemLayout);
 	}
 
 	void group_box::set_item_layout(std::shared_ptr<i_layout> aItemLayout)
 	{
 		if (iItemLayout != nullptr)
-			iLayout.remove_item(*iItemLayout);
+			iLayout.remove(*iItemLayout);
 		iItemLayout = aItemLayout;
 		if (aItemLayout->parent() != &iLayout)
-			iLayout.add_item(iItemLayout);
+			iLayout.add(iItemLayout);
 	}
 
 	const i_layout& group_box::item_layout() const

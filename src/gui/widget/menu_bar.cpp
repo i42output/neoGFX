@@ -44,7 +44,7 @@ namespace neogfx
 	{
 		close_sub_menu();
 		iOpenSubMenu.reset();
-		remove_widgets();
+		remove_all();
 	}
 
 	size_policy menu_bar::size_policy() const
@@ -138,16 +138,16 @@ namespace neogfx
 		});
 		iSink += item_added([this](item_index aItemIndex)
 		{
-			layout().add_item_at(aItemIndex, std::make_shared<menu_item_widget>(*this, item_at(aItemIndex)));
+			layout().add_at(aItemIndex, std::make_shared<menu_item_widget>(*this, item_at(aItemIndex)));
 		});
 		iSink += item_removed([this](item_index aItemIndex)
 		{
 			if (layout().is_widget_at(aItemIndex))
 			{
 				i_widget& w = layout().get_widget_at(aItemIndex);
-				w.parent().remove_widget(w);
+				w.parent().remove(w);
 			}
-			layout().remove_item_at(aItemIndex);
+			layout().remove_at(aItemIndex);
 		});
 		iSink += item_selected([this](i_menu_item& aMenuItem)
 		{
@@ -172,7 +172,7 @@ namespace neogfx
 		});
 		iSink += open_sub_menu([this](i_menu& aSubMenu)
 		{
-			auto& itemWidget = layout().get_widget_at<menu_item_widget>(find_item(aSubMenu));
+			auto& itemWidget = layout().get_widget_at<menu_item_widget>(find(aSubMenu));
 			close_sub_menu(false);
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 				app::instance().keyboard().grab_keyboard(*this);

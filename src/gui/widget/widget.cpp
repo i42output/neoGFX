@@ -80,7 +80,7 @@ namespace neogfx
 		iIgnoreMouseEvents{ false },
 		iIgnoreNonClientMouseEvents{ true }
 	{
-		aParent.add_widget(*this);
+		aParent.add(*this);
 	}
 
 	widget::widget(i_layout& aLayout) :
@@ -103,7 +103,7 @@ namespace neogfx
 		iIgnoreMouseEvents{ false },
 		iIgnoreNonClientMouseEvents{ true }
 	{
-		aLayout.add_item(*this);
+		aLayout.add(*this);
 	}
 
 	widget::~widget()
@@ -111,13 +111,13 @@ namespace neogfx
 		unlink();
 		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().ungrab_keyboard(*this);
-		remove_widgets();
+		remove_all();
 		{
 			auto layout = iLayout;
 			iLayout.reset();
 		}
 		if (has_parent())
-			parent().remove_widget(*this);
+			parent().remove(*this);
 	}
 
 	neolib::i_destroyable& widget::as_destroyable()
@@ -263,29 +263,29 @@ namespace neogfx
 		return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
 	}
 
-	void widget::add_widget(i_widget& aWidget)
+	void widget::add(i_widget& aChild)
 	{
-		add_widget(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, &aWidget });
+		add(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, &aChild });
 	}
 
-	void widget::add_widget(std::shared_ptr<i_widget> aWidget)
+	void widget::add(std::shared_ptr<i_widget> aChild)
 	{
-		if (aWidget->has_parent() && &aWidget->parent() == this)
+		if (aChild->has_parent() && &aChild->parent() == this)
 			return;
-		i_widget* oldParent = aWidget->has_parent() ? &aWidget->parent() : nullptr;
-		if (find_child(*aWidget, false) == iChildren.end())
-			iChildren.push_back(aWidget);
+		i_widget* oldParent = aChild->has_parent() ? &aChild->parent() : nullptr;
+		if (find(*aChild, false) == iChildren.end())
+			iChildren.push_back(aChild);
 		if (oldParent != nullptr)
-			oldParent->remove_widget(*aWidget);
-		aWidget->set_parent(*this);
-		aWidget->set_singular(false);
+			oldParent->remove(*aChild);
+		aChild->set_parent(*this);
+		aChild->set_singular(false);
 		if (has_root())
-			root().widget_added(*aWidget);
+			root().widget_added(*aChild);
 	}
 
-	std::shared_ptr<i_widget> widget::remove_widget(i_widget& aWidget, bool aSingular)
+	std::shared_ptr<i_widget> widget::remove(i_widget& aChild, bool aSingular)
 	{
-		auto existing = find_child(aWidget, false);
+		auto existing = find(aChild, false);
 		if (existing == iChildren.end())
 			return std::shared_ptr<i_widget>{};
 		auto keep = *existing;
@@ -293,16 +293,16 @@ namespace neogfx
 			keep->set_singular(true);
 		iChildren.erase(existing);
 		if (has_layout())
-			layout().remove_item(aWidget);
+			layout().remove(aChild);
 		if (has_root())
-			root().widget_removed(aWidget);
+			root().widget_removed(aChild);
 		return keep;
 	}
 
-	void widget::remove_widgets()
+	void widget::remove_all()
 	{
 		while (!iChildren.empty())
-			remove_widget(*iChildren.back(), true);
+			remove(*iChildren.back(), true);
 	}
 
 	bool widget::has_children() const
@@ -315,33 +315,33 @@ namespace neogfx
 		return iChildren;
 	}
 
-	widget::widget_list::const_iterator widget::last_child() const
+	widget::widget_list::const_iterator widget::last() const
 	{
 		if (!has_children())
 		{
 			if (has_parent())
-				return parent().find_child(*this);
+				return parent().find(*this);
 			else
 				throw no_children();
 		}
 		else
-			return iChildren.back()->last_child();
+			return iChildren.back()->last();
 	}
 
-	widget::widget_list::iterator widget::last_child()
+	widget::widget_list::iterator widget::last()
 	{
 		if (!has_children())
 		{
 			if (has_parent())
-				return parent().find_child(*this);
+				return parent().find(*this);
 			else
 				throw no_children();
 		}
 		else
-			return iChildren.back()->last_child();
+			return iChildren.back()->last();
 	}
 
-	widget::widget_list::const_iterator widget::find_child(const i_widget& aChild, bool aThrowIfNotFound) const
+	widget::widget_list::const_iterator widget::find(const i_widget& aChild, bool aThrowIfNotFound) const
 	{
 		for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
 			if (&**i == &aChild)
@@ -352,7 +352,7 @@ namespace neogfx
 			return iChildren.end();
 	}
 
-	widget::widget_list::iterator widget::find_child(const i_widget& aChild, bool aThrowIfNotFound)
+	widget::widget_list::iterator widget::find(const i_widget& aChild, bool aThrowIfNotFound)
 	{
 		for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
 			if (&**i == &aChild)
@@ -369,14 +369,14 @@ namespace neogfx
 			return *iLinkBefore;
 		if (has_parent())
 		{
-			auto me = parent().find_child(*this);
+			auto me = parent().find(*this);
 			if (me != parent().children().begin())
-				return **(*(me - 1))->last_child();
+				return **(*(me - 1))->last();
 			else
 				return parent();
 		}
 		else if (has_children())
-			return **last_child();
+			return **last();
 		else
 			return *this;
 	}
@@ -394,15 +394,15 @@ namespace neogfx
 			return *iChildren.front();
 		if (has_parent())
 		{
-			auto me = parent().find_child(*this);
+			auto me = parent().find(*this);
 			if (me + 1 != parent().children().end())
 				return *(*(me + 1));
 			else if (parent().has_parent())
 			{
-				auto myParent = parent().parent().find_child(parent());
+				auto myParent = parent().parent().find(parent());
 				while ((*myParent)->has_parent() && (*myParent)->parent().has_parent() &&
 					myParent + 1 == (*myParent)->parent().children().end())
-					myParent = (*myParent)->parent().parent().find_child((*myParent)->parent());
+					myParent = (*myParent)->parent().parent().find((*myParent)->parent());
 				if ((*myParent)->has_parent() && myParent + 1 != (*myParent)->parent().children().end())
 					return **(myParent + 1);
 				else if ((*(myParent))->has_parent())
@@ -475,7 +475,7 @@ namespace neogfx
 		iLayout = std::shared_ptr<i_layout>(std::shared_ptr<i_layout>(), &aLayout);
 		iLayout->set_owner(this);
 		for (auto& c : iChildren)
-			iLayout->add_item(c);
+			iLayout->add(c);
 	}
 
 	void widget::set_layout(std::shared_ptr<i_layout> aLayout)
@@ -485,7 +485,7 @@ namespace neogfx
 		{
 			iLayout->set_owner(this);
 			for (auto& c : iChildren)
-				iLayout->add_item(c);
+				iLayout->add(c);
 		}
 	}
 

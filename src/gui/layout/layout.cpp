@@ -74,14 +74,14 @@ namespace neogfx
 		iLayoutId{ 0 },
 		iInvalidated{ false }
 	{
-		aParent.add_item(*this);
+		aParent.add(*this);
 	}
 
 	layout::~layout()
 	{
-		remove_items();
+		remove_all();
 		if (iParent != nullptr)
-			iParent->remove_item(*this);
+			iParent->remove(*this);
 		if (owner() && owner()->has_layout() && &owner()->layout() == this)
 			owner()->set_layout(nullptr);
 	}
@@ -111,7 +111,7 @@ namespace neogfx
 		iParent = aParent;
 	}
 
-	void layout::add_item(i_widget& aWidget)
+	void layout::add(i_widget& aWidget)
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
@@ -121,7 +121,7 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
-	void layout::add_item_at(item_index aPosition, i_widget& aWidget)
+	void layout::add_at(item_index aPosition, i_widget& aWidget)
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
@@ -133,7 +133,7 @@ namespace neogfx
 			i->set_owner(iOwner);
 	}
 
-	void layout::add_item(std::shared_ptr<i_widget> aWidget)
+	void layout::add(std::shared_ptr<i_widget> aWidget)
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
@@ -143,7 +143,7 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
-	void layout::add_item_at(item_index aPosition, std::shared_ptr<i_widget> aWidget)
+	void layout::add_at(item_index aPosition, std::shared_ptr<i_widget> aWidget)
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
@@ -155,7 +155,7 @@ namespace neogfx
 			i->set_owner(iOwner);
 	}
 
-	void layout::add_item(i_layout& aLayout)
+	void layout::add(i_layout& aLayout)
 	{
 		invalidate();
 		iItems.push_back(item(*this, aLayout));
@@ -164,7 +164,7 @@ namespace neogfx
 		aLayout.set_parent(this);
 	}
 
-	void layout::add_item_at(item_index aPosition, i_layout& aLayout)
+	void layout::add_at(item_index aPosition, i_layout& aLayout)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
@@ -175,7 +175,7 @@ namespace neogfx
 		aLayout.set_parent(this);
 	}
 
-	void layout::add_item(std::shared_ptr<i_layout> aLayout)
+	void layout::add(std::shared_ptr<i_layout> aLayout)
 	{
 		invalidate();
 		iItems.push_back(item(*this, aLayout));
@@ -184,7 +184,7 @@ namespace neogfx
 		aLayout->set_parent(this);
 	}
 
-	void layout::add_item_at(item_index aPosition, std::shared_ptr<i_layout> aLayout)
+	void layout::add_at(item_index aPosition, std::shared_ptr<i_layout> aLayout)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
@@ -195,7 +195,7 @@ namespace neogfx
 		aLayout->set_parent(this);
 	}
 
-	void layout::add_item(i_spacer& aSpacer)
+	void layout::add(i_spacer& aSpacer)
 	{
 		invalidate();
 		iItems.push_back(item(*this, aSpacer));
@@ -204,7 +204,7 @@ namespace neogfx
 		aSpacer.set_parent(*this);
 	}
 
-	void layout::add_item_at(item_index aPosition, i_spacer& aSpacer)
+	void layout::add_at(item_index aPosition, i_spacer& aSpacer)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
@@ -215,7 +215,7 @@ namespace neogfx
 		aSpacer.set_parent(*this);
 	}
 
-	void layout::add_item(std::shared_ptr<i_spacer> aSpacer)
+	void layout::add(std::shared_ptr<i_spacer> aSpacer)
 	{
 		invalidate();
 		iItems.push_back(item(*this, aSpacer));
@@ -224,7 +224,7 @@ namespace neogfx
 		aSpacer->set_parent(*this);
 	}
 
-	void layout::add_item_at(item_index aPosition, std::shared_ptr<i_spacer> aSpacer)
+	void layout::add_at(item_index aPosition, std::shared_ptr<i_spacer> aSpacer)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
@@ -235,7 +235,7 @@ namespace neogfx
 		aSpacer->set_parent(*this);
 	}
 
-	void layout::add_item(const item& aItem)
+	void layout::add(const item& aItem)
 	{
 		invalidate();
 		iItems.push_back(aItem);
@@ -243,52 +243,52 @@ namespace neogfx
 			iItems.back().set_owner(iOwner);
 	}
 
-	void layout::remove_item_at(item_index aIndex)
+	void layout::remove_at(item_index aIndex)
 	{
-		remove_item(std::next(iItems.begin(), aIndex));
+		remove(std::next(iItems.begin(), aIndex));
 	}
 
-	bool layout::remove_item(i_layout& aItem)
+	bool layout::remove(i_layout& aItem)
 	{
 		for (auto i = items().begin(); i != items().end(); ++i)
 			if (i->get().is<item::layout_pointer>() && &aItem == &*static_variant_cast<item::layout_pointer&>(i->get()))
 			{
-				remove_item(i);
+				remove(i);
 				return true;
 			}
 		return false;
 	}
 
-	bool layout::remove_item(i_widget& aItem)
+	bool layout::remove(i_widget& aItem)
 	{
 		for (auto i = items().begin(); i != items().end(); ++i)
 			if (i->get().is<item::widget_pointer>() && &aItem == &*static_variant_cast<item::widget_pointer&>(i->get()))
 			{
-				remove_item(i);
+				remove(i);
 				return true;
 			}
 		for (auto i = items().begin(); i != items().end(); ++i)
 			if (i->get().is<item::layout_pointer>())
 			{
-				if (static_variant_cast<item::layout_pointer&>(i->get())->remove_item(aItem))
+				if (static_variant_cast<item::layout_pointer&>(i->get())->remove(aItem))
 					return true;
 			}
 		return false;
 	}
 
-	void layout::remove_items()
+	void layout::remove_all()
 	{
 		invalidate();
 		item_list toRemove;
 		toRemove.splice(toRemove.begin(), items());
 	}
 
-	layout::item_index layout::item_count() const
+	layout::item_index layout::count() const
 	{
 		return iItems.size();
 	}
 
-	layout::optional_item_index layout::find_item(i_layout& aItem) const
+	layout::optional_item_index layout::find(i_layout& aItem) const
 	{
 		for (auto i = iItems.begin(); i != iItems.end(); ++i)
 		{
@@ -299,7 +299,7 @@ namespace neogfx
 		return optional_item_index();
 	}
 
-	layout::optional_item_index layout::find_item(i_widget& aItem) const
+	layout::optional_item_index layout::find(i_widget& aItem) const
 	{
 		for (auto i = iItems.begin(); i != iItems.end(); ++i)
 		{
@@ -310,7 +310,7 @@ namespace neogfx
 		return optional_item_index();
 	}
 
-	layout::optional_item_index layout::find_item(const layout_item& aItem) const
+	layout::optional_item_index layout::find(const layout_item& aItem) const
 	{
 		for (auto i = iItems.begin(); i != iItems.end(); ++i)
 		{
@@ -678,7 +678,7 @@ namespace neogfx
 		return count;
 	}
 
-	void layout::remove_item(item_list::const_iterator aItem)
+	void layout::remove(item_list::const_iterator aItem)
 	{
 		invalidate();
 		item_list toRemove;

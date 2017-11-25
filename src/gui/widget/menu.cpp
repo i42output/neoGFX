@@ -87,14 +87,14 @@ namespace neogfx
 		menu_changed.trigger();
 	}
 
-	uint32_t menu::item_count() const
+	uint32_t menu::count() const
 	{
 		return iItems.size();
 	}
 
 	const i_menu_item& menu::item_at(item_index aItemIndex) const
 	{
-		if (aItemIndex >= item_count())
+		if (aItemIndex >= count())
 			throw bad_item_index();
 		return *iItems[aItemIndex];
 	}
@@ -106,24 +106,24 @@ namespace neogfx
 
 	i_menu& menu::add_sub_menu(const std::string& aSubMenuTitle)
 	{
-		return insert_sub_menu_at(item_count(), aSubMenuTitle);
+		return insert_sub_menu_at(count(), aSubMenuTitle);
 	}
 
 	i_action& menu::add_action(i_action& aAction)
 	{
-		insert_action_at(item_count(), aAction);
+		insert_action_at(count(), aAction);
 		return aAction;
 	}
 
 	i_action& menu::add_action(std::shared_ptr<i_action> aAction)
 	{
-		insert_action_at(item_count(), aAction);
+		insert_action_at(count(), aAction);
 		return *aAction;
 	}
 
 	void menu::add_separator()
 	{
-		insert_separator_at(item_count());
+		insert_separator_at(count());
 	}
 
 	i_menu& menu::insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuTitle)
@@ -158,15 +158,15 @@ namespace neogfx
 		insert_action_at(aItemIndex, iSeparator);
 	}
 
-	void menu::remove_item_at(item_index aItemIndex)
+	void menu::remove_at(item_index aItemIndex)
 	{
-		if (aItemIndex >= item_count())
+		if (aItemIndex >= count())
 			throw bad_item_index();
 		iItems.erase(iItems.begin() + aItemIndex);
 		item_removed.trigger(aItemIndex);
 	}
 
-	menu::item_index menu::find_item(const i_menu_item& aItem) const
+	menu::item_index menu::find(const i_menu_item& aItem) const
 	{
 		for (item_index i = 0; i < iItems.size(); ++i)
 			if (&*iItems[i] == &aItem)
@@ -174,7 +174,7 @@ namespace neogfx
 		throw item_not_found();
 	}
 
-	menu::item_index menu::find_item(const i_menu& aSubMenu) const
+	menu::item_index menu::find(const i_menu& aSubMenu) const
 	{
 		for (item_index i = 0; i < iItems.size(); ++i)
 			if (iItems[i]->type() == i_menu_item::SubMenu && &iItems[i]->sub_menu() == &aSubMenu)
@@ -237,7 +237,7 @@ namespace neogfx
 
 	menu::item_index menu::first_available_item() const
 	{
-		for (item_index i = 0; i < item_count(); ++i)
+		for (item_index i = 0; i < count(); ++i)
 			if (item_at(i).available())
 				return i;
 		throw no_available_items();
@@ -245,14 +245,14 @@ namespace neogfx
 
 	menu::item_index menu::previous_available_item(item_index aCurrentIndex) const
 	{
-		if (aCurrentIndex >= item_count())
+		if (aCurrentIndex >= count())
 			throw bad_item_index();
 		auto previous = [this](item_index aCurrent) -> item_index
 		{
 			if (aCurrent > 0)
 				return aCurrent - 1;
 			else
-				return item_count() - 1;
+				return count() - 1;
 		};
 		for (item_index previousIndex = previous(aCurrentIndex); previousIndex != aCurrentIndex; previousIndex = previous(previousIndex))
 			if (item_at(previousIndex).available())
@@ -262,11 +262,11 @@ namespace neogfx
 
 	menu::item_index menu::next_available_item(item_index aCurrentIndex) const
 	{
-		if (aCurrentIndex >= item_count())
+		if (aCurrentIndex >= count())
 			throw bad_item_index();
 		auto next = [this](item_index aCurrent) -> item_index
 		{
-			if (aCurrent < item_count() - 1)
+			if (aCurrent < count() - 1)
 				return aCurrent + 1;
 			else
 				return 0;

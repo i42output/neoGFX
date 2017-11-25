@@ -54,25 +54,25 @@ namespace neogfx
 		cell_coordinates dimensions() const;
 		void set_dimensions(cell_coordinate aRows, cell_coordinate aColumns);
 		bool is_item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
-		void add_item(i_widget& aWidget) override;
-		void add_item(std::shared_ptr<i_widget> aWidget) override;
-		void add_item(i_layout& aLayout) override;
-		void add_item(std::shared_ptr<i_layout> aLayout) override;
+		void add(i_widget& aWidget) override;
+		void add(std::shared_ptr<i_widget> aWidget) override;
+		void add(i_layout& aLayout) override;
+		void add(std::shared_ptr<i_layout> aLayout) override;
 		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget);
 		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget);
 		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout);
 		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout);
 		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer);
 		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_spacer> aSpacer);
-		using layout::add_item_at;
+		using layout::add_at;
 		virtual i_spacer& add_spacer() override;
 		virtual i_spacer& add_spacer_at(item_index aPosition) override;
 		virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		void remove_item_at(item_index aIndex) override;
-		bool remove_item(i_layout& aItem) override;
-		bool remove_item(i_widget& aItem) override;
+		void remove_at(item_index aIndex) override;
+		bool remove(i_layout& aItem) override;
+		bool remove(i_widget& aItem) override;
 		virtual void remove_item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		void remove_items() override;
+		void remove_all() override;
 		i_widget& get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		template <typename WidgetT>
 		WidgetT& get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)

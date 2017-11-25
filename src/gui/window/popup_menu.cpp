@@ -132,18 +132,18 @@ namespace neogfx
 			iOpenSubMenu = std::make_unique<popup_menu>(*this, point{});
 		if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().grab_keyboard(*this);
-		for (i_menu::item_index i = 0; i < menu().item_count(); ++i)
-			iLayout.add_item(std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(i)));
+		for (i_menu::item_index i = 0; i < menu().count(); ++i)
+			iLayout.add(std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(i)));
 		layout_items();
 		menu().open();
 		iSink += menu().item_added([this](i_menu::item_index aIndex)
 		{
-			iLayout.add_item_at(aIndex, std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(aIndex)));
+			iLayout.add_at(aIndex, std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(aIndex)));
 			layout_items();
 		});
 		iSink += menu().item_removed([this](i_menu::item_index aIndex)
 		{
-			iLayout.remove_item_at(aIndex);
+			iLayout.remove_at(aIndex);
 			layout_items();
 		});
 		iSink += menu().item_changed([this](i_menu::item_index)
@@ -162,15 +162,15 @@ namespace neogfx
 					iOpenSubMenu->menu().close();
 				}
 			}
-			scroll_to(layout().get_widget_at<menu_item_widget>(menu().find_item(aMenuItem)));
+			scroll_to(layout().get_widget_at<menu_item_widget>(menu().find(aMenuItem)));
 			update();
 		});
 		iSink += menu().open_sub_menu([this](i_menu& aSubMenu)
 		{
-			if (!iOpeningSubMenu && aSubMenu.item_count() > 0)
+			if (!iOpeningSubMenu && aSubMenu.count() > 0)
 			{
 				neolib::scoped_flag sf{ iOpeningSubMenu };
-				auto& itemWidget = layout().get_widget_at<menu_item_widget>(menu().find_item(aSubMenu));
+				auto& itemWidget = layout().get_widget_at<menu_item_widget>(menu().find(aSubMenu));
 				close_sub_menu();
 				iOpenSubMenu->set_menu(aSubMenu, itemWidget.sub_menu_position());
 				iSink2 += iOpenSubMenu->menu().closed([this]()
@@ -201,7 +201,7 @@ namespace neogfx
 		iSink2 = sink{};
 		iMenu = nullptr;
 		hide();
-		iLayout.remove_items();
+		iLayout.remove_all();
 		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().ungrab_keyboard(*this);
 	}

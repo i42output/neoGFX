@@ -263,7 +263,7 @@ namespace neogfx
 
 	void label::handle_placement_change()
 	{
-		iLayout.remove_items();
+		iLayout.remove_all();
 		iCentreSpacer = nullptr;
 
 		switch (effective_placement())

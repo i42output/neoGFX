@@ -823,22 +823,22 @@ namespace neogfx
 		iA.first.label().text().set_text("&Alpha:"); iA.second.set_size_policy(size_policy::Minimum); iA.second.text_box().set_hint("255"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
 		iRgb.set_size_policy(size_policy::Minimum); iRgb.set_hint("#000000"); 
 		iChannelLayout.set_dimensions(4, 4);
-		iChannelLayout.add_item(iH.first); iChannelLayout.add_item(iH.second);
-		iChannelLayout.add_item(iR.first); iChannelLayout.add_item(iR.second);
-		iChannelLayout.add_item(iS.first); iChannelLayout.add_item(iS.second);
-		iChannelLayout.add_item(iG.first); iChannelLayout.add_item(iG.second);
-		iChannelLayout.add_item(iV.first); iChannelLayout.add_item(iV.second);
-		iChannelLayout.add_item(iB.first); iChannelLayout.add_item(iB.second);
+		iChannelLayout.add(iH.first); iChannelLayout.add(iH.second);
+		iChannelLayout.add(iR.first); iChannelLayout.add(iR.second);
+		iChannelLayout.add(iS.first); iChannelLayout.add(iS.second);
+		iChannelLayout.add(iG.first); iChannelLayout.add(iG.second);
+		iChannelLayout.add(iV.first); iChannelLayout.add(iV.second);
+		iChannelLayout.add(iB.first); iChannelLayout.add(iB.second);
 		iChannelLayout.add_span(grid_layout::cell_coordinates{ 0, 3 }, grid_layout::cell_coordinates{ 1, 3 });
-		iChannelLayout.add_item(iRgb); iChannelLayout.add_spacer().set_size_policy(size_policy::Minimum);
-		iChannelLayout.add_item(iA.first); iChannelLayout.add_item(iA.second);
+		iChannelLayout.add(iRgb); iChannelLayout.add_spacer().set_size_policy(size_policy::Minimum);
+		iChannelLayout.add(iA.first); iChannelLayout.add(iA.second);
 		iBasicColoursLayout.set_dimensions(12, 12);
 		for (auto const& basicColour : sBasicColours)
-			iBasicColoursLayout.add_item(std::make_shared<colour_box>(*this, basicColour));
+			iBasicColoursLayout.add(std::make_shared<colour_box>(*this, basicColour));
 		iCustomColoursLayout.set_dimensions(2, 12);
 		std::fill(iCustomColours.begin(), iCustomColours.end(), colour::White);
 		for (auto customColour = iCustomColours.begin(); customColour != iCustomColours.end(); ++customColour)
-			iCustomColoursLayout.add_item(std::make_shared<colour_box>(*this, *customColour, customColour));
+			iCustomColoursLayout.add(std::make_shared<colour_box>(*this, *customColour, customColour));
 		button_box().add_button(standard_button::Ok);
 		button_box().add_button(standard_button::Cancel);
 		iSink += iH.first.checked([this]() { set_current_channel(ChannelHue); });

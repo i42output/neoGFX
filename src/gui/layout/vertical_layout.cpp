@@ -51,14 +51,14 @@ namespace neogfx
 	i_spacer& vertical_layout::add_spacer()
 	{
 		auto s = std::make_shared<vertical_spacer>();
-		add_item(s);
+		add(s);
 		return *s;
 	}
 
 	i_spacer& vertical_layout::add_spacer_at(item_index aPosition)
 	{
 		auto s = std::make_shared<vertical_spacer>();
-		add_item_at(aPosition, s);
+		add_at(aPosition, s);
 		return *s;
 	}
 

@@ -380,13 +380,13 @@ namespace neogfx
 			sw.calculated = 0.0;
 		layout().set_spacing(separator_width(), false);
 		iSectionWidths.resize(presentation_model().columns());
-		while (layout().item_count() > presentation_model().columns() + (expand_last_column() ? 0 : 1))
-			layout().remove_item_at(layout().item_count() - 1);
-		while (layout().item_count() < presentation_model().columns() + (expand_last_column() ? 0 : 1))
-			layout().add_item(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
-		if (iButtonSinks.size() < layout().item_count())
-			iButtonSinks.resize(layout().item_count());
-		for (std::size_t i = 0; i < layout().item_count(); ++i)
+		while (layout().count() > presentation_model().columns() + (expand_last_column() ? 0 : 1))
+			layout().remove_at(layout().count() - 1);
+		while (layout().count() < presentation_model().columns() + (expand_last_column() ? 0 : 1))
+			layout().add(std::make_shared<push_button>("", push_button_style::ItemViewHeader));
+		if (iButtonSinks.size() < layout().count())
+			iButtonSinks.resize(layout().count());
+		for (std::size_t i = 0; i < layout().count(); ++i)
 		{
 			push_button& button = layout().get_widget_at<push_button>(i);
 			if (i == 0)

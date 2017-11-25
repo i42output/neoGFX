@@ -400,8 +400,8 @@ namespace neogfx
 		if (iClosed)
 			return;
 		if (has_layout())
-			layout().remove_items();
-		remove_widgets();
+			layout().remove_all();
+		remove_all();
 		destroyed_flag destroyed{ *this };
 		if (is_surface())
 			surface().close();

@@ -402,7 +402,7 @@ int main(int argc, char* argv[])
 		neolib::random prng{ 3 };
 		for (uint32_t i = 0; i < 10; ++i)
 		{
-			auto& button = layout3.emplace_item<ng::push_button>(std::string(1, 'A' + i));
+			auto& button = layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
 			ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
 			button.set_foreground_colour(randomColour);
 		}
@@ -694,7 +694,7 @@ int main(int argc, char* argv[])
 			auto bd = ng::dialog_button_box::standard_button_details(static_cast<ng::standard_button>(standardButton));
 			if (bd.first != ng::button_role::Invalid)
 			{
-				auto& button = messageBoxButtonsGroup.item_layout().emplace_item<ng::check_box>(bd.second);
+				auto& button = messageBoxButtonsGroup.item_layout().emplace<ng::check_box>(bd.second);
 				button.checked([&standardButtons, standardButton]() { standardButtons |= standardButton; });
 				button.unchecked([&standardButtons, standardButton]() { standardButtons &= ~standardButton; });
 			}
@@ -850,7 +850,7 @@ int main(int argc, char* argv[])
 		tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)
 		{
 			if (ke.type() == ng::keyboard_event_type::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && tableView1.model().rows() > 0 && tableView1.selection_model().has_current_index())
-				tableView1.model().remove_item(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
+				tableView1.model().remove(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
 		});
 
 		app.window_manager().restore_mouse_cursor(window);
@@ -862,7 +862,7 @@ int main(int argc, char* argv[])
 		#else
 		for (int i = 0; i < 100; ++i)
 		#endif
-		l.emplace_item<ng::push_button>(boost::lexical_cast<std::string>(i));
+		l.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
 		auto& w2 = tabContainer.add_tab_page("Images").as_widget();
 		ng::horizontal_layout l2(w2);
 		ng::vertical_layout l3(l2);

@@ -84,16 +84,16 @@ namespace neogfx
 		virtual bool is_ancestor_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
 		virtual bool is_descendent_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
 		virtual bool is_sibling_of(const i_widget& aWidget) const = 0;
-		virtual void add_widget(i_widget& aWidget) = 0;
-		virtual void add_widget(std::shared_ptr<i_widget> aWidget) = 0;
-		virtual std::shared_ptr<i_widget> remove_widget(i_widget& aWidget, bool aSingular = false) = 0;
-		virtual void remove_widgets() = 0;
+		virtual void add(i_widget& aChild) = 0;
+		virtual void add(std::shared_ptr<i_widget> aChild) = 0;
+		virtual std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) = 0;
+		virtual void remove_all() = 0;
 		virtual bool has_children() const = 0;
 		virtual const widget_list& children() const = 0;
-		virtual widget_list::const_iterator last_child() const = 0;
-		virtual widget_list::iterator last_child() = 0;
-		virtual widget_list::const_iterator find_child(const i_widget& aChild, bool aThrowIfNotFound = true) const = 0;
-		virtual widget_list::iterator find_child(const i_widget& aChild, bool aThrowIfNotFound = true) = 0;
+		virtual widget_list::const_iterator last() const = 0;
+		virtual widget_list::iterator last() = 0;
+		virtual widget_list::const_iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) const = 0;
+		virtual widget_list::iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) = 0;
 		virtual const i_widget& before() const = 0;
 		virtual i_widget& before() = 0;
 		virtual const i_widget& after() const = 0;
@@ -223,10 +223,10 @@ namespace neogfx
 		// helpers
 	public:
 		template <typename WidgetType, typename... Args>
-		WidgetType& emplace_widget(Args&&... args)
+		WidgetType& emplace(Args&&... args)
 		{
 			auto newWidget = std::make_shared<WidgetType>(args...);
-			add_widget(newWidget);
+			add(newWidget);
 			return *newWidget;
 		}
 	public:

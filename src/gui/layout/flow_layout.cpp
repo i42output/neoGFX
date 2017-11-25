@@ -41,7 +41,7 @@ namespace neogfx
 
 	i_spacer& flow_layout::add_spacer()
 	{
-		return add_spacer_at(item_count());
+		return add_spacer_at(count());
 	}
 
 	i_spacer& flow_layout::add_spacer_at(item_index aPosition)
@@ -49,13 +49,13 @@ namespace neogfx
 		if (iFlowDirection == FlowDirectionHorizontal)
 		{
 			auto s = std::make_shared<horizontal_spacer>();
-			add_item_at(aPosition, s);
+			add_at(aPosition, s);
 			return *s;
 		}
 		else
 		{
 			auto s = std::make_shared<vertical_spacer>();
-			add_item_at(aPosition, s);
+			add_at(aPosition, s);
 			return *s;
 		}
 	}

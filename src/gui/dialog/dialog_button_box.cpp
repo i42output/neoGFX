@@ -96,10 +96,10 @@ namespace neogfx
 			newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); });
 			break;
 		}
-		iLayout.remove_items();
-		iLayout.add_item(iSpacer);
+		iLayout.remove_all();
+		iLayout.add(iSpacer);
 		for (auto& button : iButtons)
-			iLayout.add_item(*button.second);
+			iLayout.add(*button.second);
 	}
 
 	void dialog_button_box::add_buttons(standard_button aStandardButtons)
@@ -116,7 +116,7 @@ namespace neogfx
 
 	void dialog_button_box::clear()
 	{
-		iLayout.remove_items();
+		iLayout.remove_all();
 		iButtons.clear();
 	}
 

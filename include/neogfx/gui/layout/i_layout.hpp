@@ -50,29 +50,29 @@ namespace neogfx
 		virtual void set_owner(i_widget* aOwner) = 0;
 		virtual i_layout* parent() const = 0;
 		virtual void set_parent(i_layout* aParent) = 0;
-		virtual void add_item(i_widget& aWidget) = 0;
-		virtual void add_item_at(item_index aPosition, i_widget& aWidget) = 0;
-		virtual void add_item(std::shared_ptr<i_widget> aWidget) = 0;
-		virtual void add_item_at(item_index aPosition, std::shared_ptr<i_widget> aWidget) = 0;
-		virtual void add_item(i_layout& aLayout) = 0;
-		virtual void add_item_at(item_index aPosition, i_layout& aLayout) = 0;
-		virtual void add_item(std::shared_ptr<i_layout> aLayout) = 0;
-		virtual void add_item_at(item_index aPosition, std::shared_ptr<i_layout> aLayout) = 0;
-		virtual void add_item(i_spacer& aSpacer) = 0;
-		virtual void add_item_at(item_index aPosition, i_spacer& aSpacer) = 0;
-		virtual void add_item(std::shared_ptr<i_spacer> aSpacer) = 0;
-		virtual void add_item_at(item_index aPosition, std::shared_ptr<i_spacer> aSpacer) = 0;
-		virtual void add_item(const	layout_item& aItem) = 0;
+		virtual void add(i_widget& aWidget) = 0;
+		virtual void add_at(item_index aPosition, i_widget& aWidget) = 0;
+		virtual void add(std::shared_ptr<i_widget> aWidget) = 0;
+		virtual void add_at(item_index aPosition, std::shared_ptr<i_widget> aWidget) = 0;
+		virtual void add(i_layout& aLayout) = 0;
+		virtual void add_at(item_index aPosition, i_layout& aLayout) = 0;
+		virtual void add(std::shared_ptr<i_layout> aLayout) = 0;
+		virtual void add_at(item_index aPosition, std::shared_ptr<i_layout> aLayout) = 0;
+		virtual void add(i_spacer& aSpacer) = 0;
+		virtual void add_at(item_index aPosition, i_spacer& aSpacer) = 0;
+		virtual void add(std::shared_ptr<i_spacer> aSpacer) = 0;
+		virtual void add_at(item_index aPosition, std::shared_ptr<i_spacer> aSpacer) = 0;
+		virtual void add(const	layout_item& aItem) = 0;
 		virtual i_spacer& add_spacer() = 0;
 		virtual i_spacer& add_spacer_at(item_index aPosition) = 0;
-		virtual void remove_item_at(item_index aIndex) = 0;
-		virtual bool remove_item(i_layout& aItem) = 0;
-		virtual bool remove_item(i_widget& aItem) = 0;
-		virtual void remove_items() = 0;
-		virtual item_index item_count() const = 0;
-		virtual optional_item_index find_item(i_layout& aItem) const = 0;
-		virtual optional_item_index find_item(i_widget& aItem) const = 0;
-		virtual optional_item_index find_item(const layout_item& aItem) const = 0;
+		virtual void remove_at(item_index aIndex) = 0;
+		virtual bool remove(i_layout& aItem) = 0;
+		virtual bool remove(i_widget& aItem) = 0;
+		virtual void remove_all() = 0;
+		virtual item_index count() const = 0;
+		virtual optional_item_index find(i_layout& aItem) const = 0;
+		virtual optional_item_index find(i_widget& aItem) const = 0;
+		virtual optional_item_index find(const layout_item& aItem) const = 0;
 		virtual bool is_widget_at(item_index aIndex) const = 0;
 		virtual const i_widget_geometry& get_item_at(item_index aIndex) const = 0;
 		virtual i_widget_geometry& get_item_at(item_index aIndex) = 0;
@@ -100,28 +100,28 @@ namespace neogfx
 		// helpers
 	public:
 		template <typename ItemType, typename... Args>
-		ItemType& emplace_item(Args&&... args)
+		ItemType& emplace(Args&&... args)
 		{
 			auto newItem = std::make_shared<ItemType>(args...);
-			add_item(newItem);
+			add(newItem);
 			return *newItem;
 		}
 		template <typename ItemType, typename... Args>
-		ItemType& emplace_item_at(item_index aPosition, Args&&... args)
+		ItemType& emplace_at(item_index aPosition, Args&&... args)
 		{
 			auto newItem = std::make_shared<ItemType>(args...);
-			add_item(newItem);
-			if (aPosition < item_count())
-				remove_item_at(aPosition);
-			add_item_at(aPosition, newItem);
+			add(newItem);
+			if (aPosition < count())
+				remove_at(aPosition);
+			add_at(aPosition, newItem);
 			return *newItem;
 		}
 		template <typename ItemType>
 		void replace_item_at(item_index aPosition, ItemType&& aItem)
 		{
-			if (aPosition < item_count())
-				remove_item_at(aPosition);
-			add_item_at(aPosition, aItem);
+			if (aPosition < count())
+				remove_at(aPosition);
+			add_at(aPosition, aItem);
 		}
 		template <typename WidgetT>
 		const WidgetT& get_widget_at(item_index aIndex) const
