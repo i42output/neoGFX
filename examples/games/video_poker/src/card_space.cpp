@@ -36,7 +36,7 @@ namespace video_poker
 	neogfx::size card_widget::minimum_size(const neogfx::optional_size& aAvailableSpace) const
 	{
 		neogfx::scoped_units su(*this, neogfx::units::Millimetres);
-		auto minSize = convert_units(*this, neogfx::units::Pixels, kBridgeCardSize * 0.25);
+		auto minSize = convert_units(*this, neogfx::units::Pixels, kBridgeCardSize * 0.5);
 		su.restore_saved_units();
 		minSize = neogfx::units_converter(*this).from_device_units(minSize);
 		return minSize.ceil();
@@ -44,7 +44,7 @@ namespace video_poker
 
 	neogfx::size card_widget::maximum_size(const neogfx::optional_size& aAvailableSpace) const
 	{
-		return minimum_size(aAvailableSpace) / 0.25;
+		return (minimum_size(aAvailableSpace) / 0.5).ceil();
 	}
 		
 	void card_widget::paint(neogfx::graphics_context& aGraphicsContext) const
@@ -63,10 +63,15 @@ namespace video_poker
 		iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " }
 	{
 		set_size_policy(neogfx::size_policy::ExpandingNoBits);
+		iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
 		iHoldButton.set_size_policy(neogfx::size_policy::Minimum);
 		iHoldButton.set_foreground_colour(neogfx::color::Black);
 		iHoldButton.text().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
-		iHoldButton.text().set_text_colour(neogfx::color::White);
+		iHoldButton.text().set_text_appearance(neogfx::text_appearance{ neogfx::color::White, neogfx::text_effect{ neogfx::text_effect::Outline, neogfx::colour::Black.with_alpha(128) } });
+		iHoldButton.set_checkable();
+		auto update_hold = [this]() { iHoldButton.set_foreground_colour(iHoldButton.is_checked() ? neogfx::colour::LightYellow1 : neogfx::colour::Black.with_alpha(128)); };
+		iHoldButton.toggled(update_hold);
+		update_hold();
 	}
 
 	bool card_space::has_card() const

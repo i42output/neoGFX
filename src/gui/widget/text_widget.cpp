@@ -107,13 +107,13 @@ namespace neogfx
 		default:
 			break;
 		}
-		colour ink = text_colour();
+		auto appearance = text_appearance();
 		if (effectively_disabled())
-			ink.set_alpha(ink.alpha() / 2);
+			appearance = appearance.with_alpha(appearance.ink().alpha() / 2);
 		if (multi_line())
-			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, ink, iAlignment & neogfx::alignment::Horizontal, UseGlyphTextCache);
+			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal, UseGlyphTextCache);
 		else
-			aGraphicsContext.draw_text(textPosition, text(), font(), ink, UseGlyphTextCache);
+			aGraphicsContext.draw_text(textPosition, text(), font(), appearance, UseGlyphTextCache);
 	}
 
 	void text_widget::set_font(const optional_font& aFont)
@@ -167,13 +167,13 @@ namespace neogfx
 
 	bool text_widget::has_text_colour() const
 	{
-		return iTextColour != boost::none;
+		return has_text_appearance() && text_appearance().ink() != boost::none && text_appearance().ink().is<colour>();
 	}
 
 	colour text_widget::text_colour() const
 	{
 		if (has_text_colour())
-			return *iTextColour;
+			return static_variant_cast<colour>(iTextAppearance->ink());
 		optional_colour textColour;
 		const i_widget* w = 0;
 		do
@@ -185,7 +185,7 @@ namespace neogfx
 			if (w->has_background_colour())
 			{
 				textColour = w->background_colour().to_hsl().lightness() >= 0.5f ? colour::Black : colour::White;
-				break; 
+				break;
 			}
 			else if (w->has_foreground_colour())
 			{
@@ -195,14 +195,33 @@ namespace neogfx
 		} while (w->has_parent());
 		colour defaultTextColour = app::instance().current_style().palette().text_colour();
 		if (textColour == boost::none || textColour->similar_intensity(defaultTextColour))
-			return defaultTextColour;
-		else
-			return *textColour;
+			textColour = defaultTextColour;
+		return *textColour;
 	}
 
 	void text_widget::set_text_colour(const optional_colour& aTextColour)
 	{
-		iTextColour = aTextColour;
+		if (has_text_appearance())
+			set_text_appearance(neogfx::text_appearance{ aTextColour != boost::none ? *aTextColour : neogfx::text_colour{}, iTextAppearance->paper(), iTextAppearance->effect() });
+		else
+			set_text_appearance(neogfx::text_appearance{ aTextColour != boost::none ? *aTextColour : neogfx::text_colour{} });
+	}
+
+	bool text_widget::has_text_appearance() const
+	{
+		return iTextAppearance != boost::none;
+	}
+
+	text_appearance text_widget::text_appearance() const
+	{
+		if (has_text_appearance())
+			return *iTextAppearance;
+		return neogfx::text_appearance{ text_colour() };
+	}
+
+	void text_widget::set_text_appearance(const optional_text_appearance& aTextAppearance)
+	{
+		iTextAppearance = aTextAppearance;
 		update();
 	}
 

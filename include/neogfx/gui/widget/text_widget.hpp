@@ -54,6 +54,9 @@ namespace neogfx
 		bool has_text_colour() const;
 		colour text_colour() const;
 		void set_text_colour(const optional_colour& aTextColour);
+		bool has_text_appearance() const;
+		neogfx::text_appearance text_appearance() const;
+		void set_text_appearance(const optional_text_appearance& aTextAppearance);
 	protected:
 		size text_extent() const;
 	private:
@@ -65,6 +68,6 @@ namespace neogfx
 		mutable optional_size iTextExtent;
 		text_widget_type iType;
 		neogfx::alignment iAlignment;
-		optional_colour iTextColour;
+		optional_text_appearance iTextAppearance;
 	};
 }

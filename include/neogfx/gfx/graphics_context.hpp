@@ -86,7 +86,31 @@ namespace neogfx
 	const glyph_text_cache_usage UseGlyphTextCache{ true };
 	const glyph_text_cache_usage DontUseGlyphTextCache{ false };
 
-	typedef colour_or_gradient text_colour;
+	class text_colour : public colour_or_gradient
+	{
+	public:
+		using colour_or_gradient::colour_or_gradient;
+	public:
+		using colour_or_gradient::operator==;
+		using colour_or_gradient::operator!=;
+	public:
+		colour::component alpha() const
+		{
+			if (is<colour>())
+				return static_variant_cast<const colour&>(*this).alpha();
+			else
+				return 255;
+		}
+		text_colour with_alpha(colour::component aAlpha) const
+		{
+			if (is<colour>())
+				return static_variant_cast<const colour&>(*this).with_alpha(aAlpha);
+			else if (is<gradient>())
+				return static_variant_cast<const gradient&>(*this).with_combined_alpha(aAlpha);
+			else
+				return text_colour{};
+		}
+	};
 	typedef boost::optional<text_colour> optional_text_colour;
 
 	class text_effect
@@ -235,11 +259,18 @@ namespace neogfx
 				return *iEffect;
 			throw no_effect();
 		}
+	public:
+		text_appearance with_alpha(colour::component aAlpha) const
+		{
+			return text_appearance{ iInk.with_alpha(aAlpha), iPaper != boost::none ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect };
+		}
 	private:
 		text_colour iInk;
 		optional_text_colour iPaper;
 		optional_text_effect iEffect;
 	};
+
+	typedef boost::optional<text_appearance> optional_text_appearance;
 
 	class i_surface;
 	class i_texture;
