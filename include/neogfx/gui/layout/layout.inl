@@ -63,8 +63,8 @@ namespace neogfx
 		static size::dimension_type& cy(size& aSize) { return aSize.cy; }
 		static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
 		static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
-		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.horizontal_size_policy(); }
-		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.vertical_size_policy(); }
+		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.horizontal_size_policy(aIgnoreBits); }
+		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.vertical_size_policy(aIgnoreBits); }
 	};
 
 	template <typename Layout>
@@ -84,8 +84,8 @@ namespace neogfx
 		static size::dimension_type& cy(size& aSize) { return aSize.cx; }
 		static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
 		static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
-		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.vertical_size_policy(); }
-		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy) { return aSizePolicy.horizontal_size_policy(); }
+		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreNoBits = true) { return aSizePolicy.vertical_size_policy(aIgnoreNoBits); }
+		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreNoBits = true) { return aSizePolicy.horizontal_size_policy(aIgnoreNoBits); }
 	};
 
 	namespace
@@ -95,11 +95,20 @@ namespace neogfx
 			if (aSizePolicy.maintain_aspect_ratio())
 			{
 				const auto& aspectRatio = aSizePolicy.aspect_ratio();
-				auto min = std::min(aSize.cx, aSize.cy);
 				if (aspectRatio.cx < aspectRatio.cy)
-					return size{ min, min * (aspectRatio.cy / aspectRatio.cx) }.ceil();
-				else
-					return size{ min * (aspectRatio.cx / aspectRatio.cy), min }.ceil();
+				{
+					size result{ aSize.cx, aSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+					if (result.cy > aSize.cy)
+						result = size{ aSize.cy * (aspectRatio.cx / aspectRatio.cy), aSize.cy };
+					return result;
+				}
+				else // (aspectRatio.cx >= aspectRatio.cy)
+				{
+					size result{ aSize.cy * (aspectRatio.cx / aspectRatio.cy), aSize.cy };
+					if (result.cx > aSize.cx)
+						result = size{ aSize.cx, aSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+					return result;
+				}
 			}
 			return aSize;
 		}
@@ -107,10 +116,16 @@ namespace neogfx
 		template <typename AxisPolicy>
 		inline size::dimension_type weighted_size(const neogfx::layout_item& aItem, const size& aTotalExpanderWeight, const size::dimension_type aLeftover, const size& aAvailableSize)
 		{
-			size aspectCheckSize;
-			AxisPolicy::cx(aspectCheckSize) = AxisPolicy::cx(aItem.weight()) / AxisPolicy::cx(aTotalExpanderWeight) * aLeftover;
-			AxisPolicy::cy(aspectCheckSize) = AxisPolicy::cy(aItem.maximum_size(aAvailableSize));
-			return AxisPolicy::cx(fix_aspect_ratio(aItem.size_policy(), aspectCheckSize));
+			auto guess = AxisPolicy::cx(aItem.weight()) / AxisPolicy::cx(aTotalExpanderWeight) * aLeftover;
+			if (!aItem.size_policy().maintain_aspect_ratio())
+				return std::floor(guess);
+			else
+			{
+				size aspectCheckSize;
+				AxisPolicy::cx(aspectCheckSize) = guess;
+				AxisPolicy::cy(aspectCheckSize) = AxisPolicy::cy(aItem.maximum_size(aAvailableSize));
+				return std::floor(AxisPolicy::cx(fix_aspect_ratio(aItem.size_policy(), aspectCheckSize)));
+			}
 		}
 	}
 
@@ -253,7 +268,14 @@ namespace neogfx
 				auto maxSize = AxisPolicy::cx(item.maximum_size(availableSize));
 				auto weightedSize = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
 				if (minSize < weightedSize && maxSize > weightedSize)
+				{
 					disposition = Weighted;
+					if (AxisPolicy::size_policy_x(item.size_policy(), false) == neogfx::size_policy::ExpandingNoBits)
+					{
+						if (--itemsUsingLeftover == 0)
+							break;
+					}
+				}
 				else
 				{
 					disposition = maxSize <= weightedSize ? TooSmall : Unweighted;
@@ -271,7 +293,7 @@ namespace neogfx
 		if (AxisPolicy::cx(totalExpanderWeight) > 0.0)
 			for (const auto& item : items())
 				if (item.visible() && itemDispositions[&item] == Weighted)
-					weightedAmount += std::floor(weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize));
+					weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
 		uint32_t bitsLeft = 0;
 		if (itemsUsingLeftover > 0)
 			bitsLeft = static_cast<int32_t>(leftover - weightedAmount);
@@ -295,8 +317,10 @@ namespace neogfx
 				AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(item.size_policy()) == neogfx::size_policy::Minimum ? itemMinSize : itemMaxSize);
 			else if (disposition == Weighted && leftover > 0.0)
 			{
-				uint32_t bit = bitsLeft != 0 ? bits() : 0;
-				AxisPolicy::cx(s) = std::floor(weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize)) + static_cast<size::dimension_type>(bit - previousBit);
+				uint32_t bit = 0;
+				if (AxisPolicy::size_policy_x(item.size_policy(), false) != neogfx::size_policy::ExpandingNoBits)
+					bit = (bitsLeft != 0 ? bits() : 0);
+				AxisPolicy::cx(s) = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize) + static_cast<size::dimension_type>(bit - previousBit);
 				previousBit = bit;
 			}
 			else

@@ -33,6 +33,7 @@ namespace neogfx
 			Minimum,
 			Maximum,
 			Expanding,
+			ExpandingNoBits, // leftover pixels (bits) are unwanted to ensure siblings are the same (pixel perfect) size after weighting
 			Manual
 		};
 	public:
@@ -56,13 +57,17 @@ namespace neogfx
 			return !(*this == aRhs);
 		}
 	public:
-		size_policy_e horizontal_size_policy() const
+		size_policy_e horizontal_size_policy(bool aIgnoreNoBits = true) const
 		{
-			return iHorizontalSizePolicy;
+			if (iHorizontalSizePolicy != ExpandingNoBits)
+				return iHorizontalSizePolicy;
+			return aIgnoreNoBits ? Expanding : ExpandingNoBits;
 		}
-		size_policy_e vertical_size_policy() const
+		size_policy_e vertical_size_policy(bool aIgnoreNoBits = true) const
 		{
-			return iVerticalSizePolicy;
+			if (iVerticalSizePolicy != ExpandingNoBits)
+				return iVerticalSizePolicy;
+			return aIgnoreNoBits ? Expanding : ExpandingNoBits;
 		}
 		void set_size_policy(size_policy_e aSizePolicy)
 		{

@@ -31,10 +31,6 @@ namespace video_poker
 	{
 		set_margins(neogfx::margins{});
 		set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
-		painted([this](neogfx::graphics_context& aGc)
-		{
-			aGc.draw_rect(client_rect(), neogfx::pen{ neogfx::colour::Red });
-		});
 	}
 
 	neogfx::size card_widget::minimum_size(const neogfx::optional_size& aAvailableSpace) const
@@ -66,14 +62,11 @@ namespace video_poker
 		iCardWidget{ iVerticalLayout }, 
 		iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " }
 	{
+		set_size_policy(neogfx::size_policy::ExpandingNoBits);
 		iHoldButton.set_size_policy(neogfx::size_policy::Minimum);
 		iHoldButton.set_foreground_colour(neogfx::color::Black);
 		iHoldButton.text().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
 		iHoldButton.text().set_text_colour(neogfx::color::White);
-		painted([this](neogfx::graphics_context& aGc)
-		{
-			aGc.draw_rect(client_rect(), neogfx::pen{ neogfx::colour::White });
-		});
 	}
 
 	bool card_space::has_card() const
