@@ -308,8 +308,8 @@ namespace neogfx
 				continue;
 			auto itemMinSize = item.minimum_size(availableSize);
 			auto itemMaxSize = item.maximum_size(availableSize);
-			size s{0.0, std::min(std::max(AxisPolicy::cy(itemMinSize), AxisPolicy::cy(availableSize)), AxisPolicy::cy(itemMaxSize))};
-			std::swap(s.cx, AxisPolicy::cx(s));
+			size s;
+			AxisPolicy::cy(s) = std::min(std::max(AxisPolicy::cy(itemMinSize), AxisPolicy::cy(availableSize)), AxisPolicy::cy(itemMaxSize));
 			auto disposition = itemDispositions[&item];
 			if (disposition == FixedSize)
 				AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
@@ -351,6 +351,20 @@ namespace neogfx
 			AxisPolicy::x(nextPos) += AxisPolicy::cx(s);
 			if (!item.get().is<item::spacer_pointer>() || iAlwaysUseSpacing)
 				AxisPolicy::x(nextPos) += AxisPolicy::cx(spacing());
+		}
+		point lastPos = aPosition + aSize;
+		lastPos.x -= margins().right;
+		lastPos.y -= margins().bottom;
+		if (AxisPolicy::x(nextPos) < AxisPolicy::x(lastPos))
+		{
+			size adjust;
+			AxisPolicy::cx(adjust) = std::floor((AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos)) / 2.0);
+			for (auto& item : items())
+			{
+				if (!item.visible())
+					continue;
+				item.set_position(item.position() + adjust);
+			}
 		}
 	}
 }

@@ -48,10 +48,10 @@ namespace video_poker
 	{
 		iTitle.text().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
 		iTitle.text().set_text_colour(neogfx::color::Green);
-		iSpacer1.set_weight(neogfx::size{ 0.5 });
+		iSpacer1.set_weight(neogfx::size{ 0.1 });
 		iSpacer2.set_weight(neogfx::size{ 0.25 });
 		iSpacer3.set_weight(neogfx::size{ 0.25 });
-		iSpacer4.set_weight(neogfx::size{ 0.5 });
+		iSpacer4.set_weight(neogfx::size{ 0.1 });
 		iCredits.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
 		iCredits.text().set_text_colour(neogfx::color::Yellow);
 		iCreditsValue.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });

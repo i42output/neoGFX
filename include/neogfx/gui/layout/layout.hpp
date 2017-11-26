@@ -119,6 +119,7 @@ namespace neogfx
 		bool has_size_policy() const override;
 		neogfx::size_policy size_policy() const override;
 		void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
+		using i_layout::set_size_policy;
 		bool has_weight() const override;
 		size weight() const override;
 		void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
