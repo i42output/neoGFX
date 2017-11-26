@@ -58,7 +58,7 @@ namespace video_poker
 	card_space::card_space(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane) :
 		widget{ aLayout },
 		iSpritePlane{ aSpritePlane }, 
-		iVerticalLayout{ *this, neogfx::alignment::Centre }, 
+		iVerticalLayout{ *this, neogfx::alignment::Centre | neogfx::alignment::VCentre },
 		iCardWidget{ iVerticalLayout }, 
 		iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " }
 	{

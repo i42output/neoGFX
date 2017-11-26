@@ -53,6 +53,7 @@ namespace neogfx
 		typedef horizontal_layout major_layout;
 		typedef vertical_layout minor_layout;
 		static const neogfx::alignment AlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCentre | neogfx::alignment::Bottom;
+		static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Left | neogfx::alignment::Centre | neogfx::alignment::Right;
 		static const point::coordinate_type& x(const point& aPoint) { return aPoint.x; }
 		static point::coordinate_type& x(point& aPoint) { return aPoint.x; }
 		static const point::coordinate_type& y(const point& aPoint) { return aPoint.y; }
@@ -74,6 +75,7 @@ namespace neogfx
 		typedef vertical_layout major_layout;
 		typedef horizontal_layout minor_layout;
 		static const neogfx::alignment AlignmentMask = neogfx::alignment::Left | neogfx::alignment::Centre | neogfx::alignment::Right;
+		static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCentre | neogfx::alignment::Bottom;
 		static const point::coordinate_type& x(const point& aPoint) { return aPoint.y; }
 		static point::coordinate_type& x(point& aPoint) { return aPoint.y; }
 		static const point::coordinate_type& y(const point& aPoint) { return aPoint.x; }
@@ -358,7 +360,22 @@ namespace neogfx
 		if (AxisPolicy::x(nextPos) < AxisPolicy::x(lastPos))
 		{
 			size adjust;
-			AxisPolicy::cx(adjust) = std::floor((AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos)) / 2.0);
+			switch (alignment() & AxisPolicy::InlineAlignmentMask)
+			{
+			case alignment::Left:
+			case alignment::Top:
+			default:
+				AxisPolicy::cx(adjust) = 0.0;
+				break;
+			case alignment::Right:
+			case alignment::Bottom:
+				AxisPolicy::cx(adjust) = AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos);
+				break;
+			case alignment::Centre:
+			case alignment::VCentre:
+				AxisPolicy::cx(adjust) = std::floor((AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos)) / 2.0);
+				break;
+			}
 			for (auto& item : items())
 			{
 				if (!item.visible())
