@@ -1110,7 +1110,15 @@ namespace neogfx
 	{
 		if (iVisible != aVisible)
 		{
+			bool isEntered = entered();
 			iVisible = aVisible;
+			if (!visible() && isEntered)
+			{
+				if (!is_root())
+					root().as_widget().mouse_entered();
+				else
+					mouse_left();
+			}
 			visibility_changed.trigger();
 			if (has_parent_layout())
 				parent_layout().invalidate();
@@ -1163,7 +1171,15 @@ namespace neogfx
 	{
 		if (iEnabled != aEnable)
 		{
+			bool isEntered = entered();
 			iEnabled = aEnable;
+			if (!enabled() && isEntered)
+			{
+				if (!is_root())
+					root().as_widget().mouse_entered();
+				else
+					mouse_left();
+			}
 			update();
 			return true;
 		}

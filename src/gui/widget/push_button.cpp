@@ -371,7 +371,7 @@ namespace neogfx
 		if (!root().has_native_surface())
 			return;
 
-		if (entered())
+		if (entered() && enabled())
 		{
 			if (iAnimationFrame < kMaxAnimationFrame)
 			{
