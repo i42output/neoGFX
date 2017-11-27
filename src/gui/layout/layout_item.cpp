@@ -171,6 +171,24 @@ namespace neogfx
 		else
 		{
 			iMinimumSize = wrapped_geometry().minimum_size(aAvailableSpace);
+			if (size_policy().maintain_aspect_ratio())
+			{
+				const auto& aspectRatio = size_policy().aspect_ratio();
+				if (aspectRatio.cx < aspectRatio.cy)
+				{
+					if (iMinimumSize.cx < iMinimumSize.cy)
+						iMinimumSize = size{ iMinimumSize.cx, iMinimumSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+					else
+						iMinimumSize = size{ iMinimumSize.cy * (aspectRatio.cx / aspectRatio.cy), iMinimumSize.cy };
+				}
+				else
+				{
+					if (iMinimumSize.cx < iMinimumSize.cy)
+						iMinimumSize = size{ iMinimumSize.cy * (aspectRatio.cx / aspectRatio.cy), iMinimumSize.cy };
+					else
+						iMinimumSize = size{ iMinimumSize.cx, iMinimumSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+				}
+			}
 			iLayoutId.first = iParent.layout_id();
 			return iMinimumSize;
 		}

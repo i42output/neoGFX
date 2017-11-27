@@ -60,14 +60,17 @@ namespace video_poker
 		iSpacer2.set_weight(neogfx::size{ 0.25 });
 		iSpacer3.set_weight(neogfx::size{ 0.25 });
 		iSpacer4.set_weight(neogfx::size{ 0.1 });
+		iBetMinus.set_size_policy(neogfx::size_policy::Minimum, neogfx::size{ 1.0 });
 		iBetMinus.set_weight(neogfx::size{});
 		iBetMinus.set_foreground_colour(neogfx::colour::White);
 		iBetMinus.text().set_text_colour(neogfx::colour::Black);
 		iBetMinus.text().set_font(neogfx::font{ "Exo 2", "Black", 24.0 });
+		iBetPlus.set_size_policy(neogfx::size_policy::Minimum, neogfx::size{ 1.0 });
 		iBetPlus.set_weight(neogfx::size{});
 		iBetPlus.set_foreground_colour(neogfx::colour::White);
 		iBetPlus.text().set_text_colour(neogfx::colour::Black);
 		iBetPlus.text().set_font(neogfx::font{ "Exo 2", "Black", 24.0 });
+		iDeal.set_size_policy(neogfx::size_policy::Minimum, neogfx::size{ 1.0 });
 		iDeal.set_weight(neogfx::size{});
 		iDeal.set_foreground_colour(neogfx::colour::White);
 		iDeal.text().set_text_colour(neogfx::colour::Black);
