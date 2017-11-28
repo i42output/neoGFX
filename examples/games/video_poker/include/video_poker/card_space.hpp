@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/sprite_plane.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 #include <card_games/card.hpp>
+#include <video_poker/i_table.hpp>
 
 namespace video_poker
 {
@@ -39,8 +40,15 @@ namespace video_poker
 	public:
 		neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
 		neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
+	public:
+		bool has_card() const;
+		const video_poker::card& card() const;
+		void set_card(const video_poker::card& aCard);
+		void clear_card();
 	protected:
 		void paint(neogfx::graphics_context& aGraphicsContext) const override;
+	private:
+		const video_poker::card* iCard;
 	};
 
 	class card_space : neogfx::widget
@@ -48,17 +56,21 @@ namespace video_poker
 	public:
 		struct no_card : std::runtime_error { no_card() : std::runtime_error("video_poker::card_space::no_card") {} };
 	public:
-		card_space(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane);
+		card_space(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane, i_table& aTable);
 	public:
 		bool has_card() const;
 		const video_poker::card& card() const;
-		void set_card(const video_poker::card& aCard);
+		video_poker::card& card();
+		void set_card(video_poker::card& aCard);
 		void clear_card();
+	private:
+		void update_widgets();
 	public:
 		neogfx::sprite_plane& iSpritePlane;
+		i_table& iTable;
 		neogfx::vertical_layout iVerticalLayout;
 		card_widget iCardWidget;
-		boost::optional<video_poker::card> iCard;
 		neogfx::push_button iHoldButton;
+		video_poker::card* iCard;
 	};
 }

@@ -133,14 +133,19 @@ namespace neogfx
 		}
 		event(const event&)
 		{
+			// do nothing.
 		}
 		~event()
 		{
-			if (async_event_queue::instance().has(*this))
-				async_event_queue::instance().remove(*this);
-			if (iInstanceData != boost::none)
-				instance_list().erase(*iInstanceData);
+			clear();
 		}
+	public:
+		event& operator=(const event&)
+		{
+			clear();
+			return *this;
+		}
+	public:
 		event_trigger_type trigger_type() const
 		{
 			return instance().triggerType;
@@ -254,6 +259,16 @@ namespace neogfx
 			return unsubscribe(static_cast<const void*>(&aUniqueIdObject));
 		}
 	private:
+		void clear()
+		{
+			if (async_event_queue::instance().has(*this))
+				async_event_queue::instance().remove(*this);
+			if (iInstanceData != boost::none)
+			{
+				instance_list().erase(*iInstanceData);
+				iInstanceData = boost::none;
+			}
+		}
 		void unsubscribe(handle aHandle) const
 		{
 			instance().notifications.erase(std::remove(instance().notifications.begin(), instance().notifications.end(), aHandle.iHandler), instance().notifications.end());

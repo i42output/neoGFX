@@ -39,15 +39,16 @@ namespace neogfx
 		text_widget(i_layout& aLayout, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine);
 		~text_widget();
 	public:
-		virtual neogfx::size_policy size_policy() const;
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		neogfx::size_policy size_policy() const override;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		void paint(graphics_context& aGraphicsContext) const override;
 	public:
-		virtual void set_font(const optional_font& aFont);
+		void set_font(const optional_font& aFont) override;
 	public:
 		const std::string& text() const;
 		void set_text(const std::string& aText);
+		void set_size_hint(const std::string& aSizeHint);
 		bool multi_line() const;
 		neogfx::alignment alignment() const;
 		void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true);
@@ -59,6 +60,7 @@ namespace neogfx
 		void set_text_appearance(const optional_text_appearance& aTextAppearance);
 	protected:
 		size text_extent() const;
+		size size_hint_extent() const;
 	private:
 		void init();
 	private:
@@ -66,6 +68,8 @@ namespace neogfx
 		std::string iText;
 		mutable glyph_text iGlyphTextCache;
 		mutable optional_size iTextExtent;
+		std::string iSizeHint;
+		mutable optional_size iSizeHintExtent;
 		text_widget_type iType;
 		neogfx::alignment iAlignment;
 		optional_text_appearance iTextAppearance;

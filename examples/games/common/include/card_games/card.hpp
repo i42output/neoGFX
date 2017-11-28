@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <neogfx/core/event.hpp>
 #include <card_games/default_game_traits.hpp>
 
 namespace neogames
@@ -27,6 +28,8 @@ namespace neogames
 		template <typename GameTraits>
 		class basic_card
 		{
+		public:
+			neogfx::event<basic_card&> changed;
 		public:
 			typedef GameTraits game_traits;
 		public:
@@ -65,13 +68,36 @@ namespace neogames
 			struct bad_suit : std::logic_error { bad_suit() : std::logic_error("neogames::basic_card::bad_suit") {} };
 		public:
 			basic_card(value aValue, suit aSuit) :
-				iValue{ aValue }, iSuit{ aSuit }
+				iValue{ aValue }, iSuit{ aSuit }, iDiscarded{ false }
 			{
 			}
 		public:
-			operator value() const { return iValue; }
-			operator suit() const { return iSuit; }
-			operator colour() const { return iSuit == Club || iSuit == Spade ? colour::Black : colour::Red; }
+			operator value() const 
+			{ 
+				return iValue; 
+			}
+			operator suit() const 
+			{ 
+				return iSuit; 
+			}
+			operator colour() const 
+			{ 
+				return iSuit == Club || iSuit == Spade ? colour::Black : colour::Red; 
+			}
+			bool discarded() const
+			{
+				return iDiscarded;
+			}
+			void discard()
+			{
+				iDiscarded = true;
+				changed.trigger(*this);
+			}
+			void undiscard()
+			{
+				iDiscarded = false;
+				changed.trigger(*this);
+			}
 		public:
 			std::string to_string() const
 			{
@@ -133,6 +159,7 @@ namespace neogames
 		private:
 			value iValue;
 			suit iSuit;
+			bool iDiscarded;
 		};
 
 		typedef basic_card<default_game_traits> card;

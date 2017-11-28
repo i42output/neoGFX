@@ -27,7 +27,8 @@ namespace video_poker
 	}
 
 	card_widget::card_widget(neogfx::i_layout& aLayout) :
-		widget{ aLayout }
+		widget{ aLayout },
+		iCard{ nullptr }
 	{
 		set_margins(neogfx::margins{});
 		set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
@@ -53,14 +54,42 @@ namespace video_poker
 		aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::colour::DarkGreen);
 		rect.deflate(neogfx::size{ 4.0 });
 		aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, background_colour());
+
+		if (has_card())
+			aGraphicsContext.draw_text(client_rect().position(), card().to_string(), font(), neogfx::colour::White); // todo: delete this
 	}
 
-	card_space::card_space(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane) :
+	bool card_widget::has_card() const
+	{
+		return iCard != nullptr;
+	}
+
+	const card& card_widget::card() const
+	{
+		return *iCard;
+	}
+
+	void card_widget::set_card(const video_poker::card& aCard)
+	{
+		iCard = &aCard;
+		iCard->changed([this](video_poker::card&) { update(); });
+		update();
+	}
+
+	void card_widget::clear_card()
+	{
+		iCard = nullptr;
+		update();
+	}
+
+	card_space::card_space(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane, i_table& aTable) :
 		widget{ aLayout },
 		iSpritePlane{ aSpritePlane }, 
+		iTable{ aTable },
 		iVerticalLayout{ *this, neogfx::alignment::Centre | neogfx::alignment::VCentre },
 		iCardWidget{ iVerticalLayout }, 
-		iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " }
+		iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " },
+		iCard{ nullptr }
 	{
 		set_size_policy(neogfx::size_policy::ExpandingNoBits);
 		iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
@@ -69,14 +98,25 @@ namespace video_poker
 		iHoldButton.text().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
 		iHoldButton.text().set_text_appearance(neogfx::text_appearance{ neogfx::color::White, neogfx::text_effect{ neogfx::text_effect::Outline, neogfx::colour::Black.with_alpha(128) } });
 		iHoldButton.set_checkable();
-		auto update_hold = [this]() { iHoldButton.set_foreground_colour(iHoldButton.is_checked() ? neogfx::colour::LightYellow1 : neogfx::colour::Black.with_alpha(128)); };
+		auto update_hold = [this]() 
+		{ 
+			if (has_card())
+			{
+				if (iHoldButton.is_checked())
+					card().undiscard();
+				else
+					card().discard();
+				update_widgets();
+			}
+		};
 		iHoldButton.toggled(update_hold);
-		update_hold();
+		iTable.state_changed([this](table_state) { update_widgets(); });
+		update_widgets();
 	}
 
 	bool card_space::has_card() const
 	{
-		return iCard != boost::none;
+		return iCard != nullptr;
 	}
 
 	const video_poker::card& card_space::card() const
@@ -86,13 +126,32 @@ namespace video_poker
 		throw no_card();
 	}
 
-	void card_space::set_card(const video_poker::card& aCard)
+	video_poker::card& card_space::card()
 	{
-		iCard = aCard;
+		if (has_card())
+			return *iCard;
+		throw no_card();
+	}
+
+	void card_space::set_card(video_poker::card& aCard)
+	{
+		iCard = &aCard;
+		iCardWidget.set_card(aCard);
+		iCard->changed([this](video_poker::card&) { update_widgets(); });
+		update_widgets();
 	}
 
 	void card_space::clear_card()
 	{
-		iCard = boost::none;
+		iCard = nullptr;
+		iCardWidget.clear_card();
+		update_widgets();
+	}
+
+	void card_space::update_widgets()
+	{
+		iHoldButton.set_foreground_colour(has_card() && !card().discarded() && iTable.state() != table_state::DealtSecond ? neogfx::colour::LightYellow1 : neogfx::colour::Black.with_alpha(128));
+		iHoldButton.enable(has_card() && iTable.state() != table_state::DealtSecond);
+		iHoldButton.set_checked(has_card() && !card().discarded() && iTable.state() != table_state::DealtSecond);
 	}
 }

@@ -60,7 +60,8 @@ namespace neogfx
 			return widget::minimum_size(aAvailableSpace);
 		else
 		{
-			size result = units_converter(*this).to_device_units(text_extent() + margins().size());
+			size extent = text_extent().max(size_hint_extent());
+			size result = units_converter(*this).to_device_units(extent + margins().size());
 			result.cx = std::ceil(result.cx);
 			result.cy = std::ceil(result.cy);
 			return units_converter(*this).from_device_units(result);
@@ -120,6 +121,7 @@ namespace neogfx
 	{
 		widget::set_font(aFont);
 		iTextExtent = boost::none;
+		iSizeHintExtent = boost::none;
 		iGlyphTextCache = glyph_text(font());
 	}
 
@@ -142,6 +144,20 @@ namespace neogfx
 			if (oldSize != minimum_size() && has_managing_layout())
 				managing_layout().layout_items();
 			update();
+		}
+	}
+
+	void text_widget::set_size_hint(const std::string& aSizeHint)
+	{
+		if (iSizeHint != aSizeHint)
+		{
+			size oldSize = minimum_size();
+			iSizeHint = aSizeHint;
+			iSizeHintExtent = boost::none;
+			if (has_parent_layout())
+				parent_layout().invalidate();
+			if (oldSize != minimum_size() && has_managing_layout())
+				managing_layout().layout_items();
 		}
 	}
 
@@ -230,6 +246,7 @@ namespace neogfx
 		if (iGlyphTextCache.font() != font())
 		{
 			iTextExtent = boost::none;
+			iSizeHintExtent = boost::none;
 			iGlyphTextCache = glyph_text{ font() };
 		}
 		if (iTextExtent != boost::none)
@@ -250,6 +267,35 @@ namespace neogfx
 		}
 		else
 			return *(iTextExtent = gc.text_extent(iText, font(), UseGlyphTextCache));
+	}
+
+	size text_widget::size_hint_extent() const
+	{
+		if (iSizeHint.empty())
+			return size{};
+		if (iGlyphTextCache.font() != font())
+		{
+			iTextExtent = boost::none;
+			iSizeHintExtent = boost::none;
+			iGlyphTextCache = glyph_text{ font() };
+		}
+		if (iSizeHintExtent != boost::none)
+			return *iSizeHintExtent;
+		if (!has_surface())
+			return size{};
+		graphics_context gc{ *this };
+		scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
+		if (multi_line())
+		{
+			if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
+				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), widget::minimum_size().cx - margins().size().cx, DontUseGlyphTextCache));
+			else if (widget::has_maximum_size() && widget::maximum_size().cx != std::numeric_limits<size::dimension_type>::max())
+				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), widget::maximum_size().cx - margins().size().cx, DontUseGlyphTextCache));
+			else
+				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), DontUseGlyphTextCache));
+		}
+		else
+			return *(iSizeHintExtent = gc.text_extent(iSizeHint, font(), DontUseGlyphTextCache));
 	}
 
 	void text_widget::init()

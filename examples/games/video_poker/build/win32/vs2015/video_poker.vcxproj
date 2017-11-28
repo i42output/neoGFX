@@ -123,6 +123,7 @@
     <ClInclude Include="..\..\..\..\common\include\card_games\default_game_traits.hpp" />
     <ClInclude Include="..\..\..\..\common\include\card_games\hand.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\card_space.hpp" />
+    <ClInclude Include="..\..\..\include\video_poker\i_table.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\poker.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\table.hpp" />
     <ClInclude Include="resource.h" />

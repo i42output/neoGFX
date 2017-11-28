@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <neogfx/game/shape.hpp>
 #include <card_games/card.hpp>
 
 namespace neogames
@@ -25,10 +26,29 @@ namespace neogames
 	namespace card_games
 	{
 		template <typename GameTraits>
-		class basic_card_shape
+		class basic_card_shape : public neogfx::shape<>
 		{
+			// types
 		public:
 			typedef GameTraits game_traits;
+			typedef basic_card<game_traits> card_type;
+			// construction
+		public:
+			basic_card_shape(const card_type& aCard) :
+				iCard{ aCard }
+			{
+			}
+			// rendering
+		public:
+			void paint(neogfx::graphics_context& aGraphicsContext) const override
+			{
+				neogfx::shape<>::paint(aGraphicsContext);
+				auto rect = bounding_box_2d();
+				// todo
+			}
+			// attributes
+		private:
+			card_type iCard;
 		};
 
 		typedef basic_card_shape<default_game_traits> card_shape;

@@ -128,6 +128,12 @@ namespace neogames
 					for (auto hand = aFirstHand; hand != aLastHand; ++hand)
 						hand->pick(*this);
 			}
+			template <typename HandType>
+			void exchange_cards(HandType& aHand)
+			{
+				while (aHand.pick(*this))
+					;
+			}
 		private:
 			cards iCards;
 		};

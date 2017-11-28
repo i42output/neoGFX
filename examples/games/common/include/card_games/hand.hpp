@@ -52,7 +52,7 @@ namespace neogames
 					throw bad_slot_index();
 				return iCards[aSlotIndex] != boost::none;
 			}
-			card_type card_at(size_type aSlotIndex) const
+			const card_type& card_at(size_type aSlotIndex) const
 			{
 				if (aSlotIndex >= iCards.size())
 					throw bad_slot_index();
@@ -60,18 +60,22 @@ namespace neogames
 					return *iCards[aSlotIndex];
 				throw no_card_in_slot();
 			}
+			card_type& card_at(size_type aSlotIndex)
+			{
+				return const_cast<card_type&>(const_cast<const basic_hand*>(this)->card_at(aSlotIndex));
+			}
 			bool fully_dealt() const
 			{
 				size_type totalDealt = 0;
 				for (auto& slot : iCards)
-					if (slot)
+					if (slot && !slot->discarded())
 						++totalDealt;
 				return totalDealt == iCards.size();
 			}
 			bool pick(deck_type& aDeck)
 			{
 				for (auto& slot : iCards)
-					if (!slot)
+					if (!slot || slot->discarded())
 					{
 						slot = aDeck.deal_card();
 						return true;

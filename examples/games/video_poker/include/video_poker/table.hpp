@@ -29,24 +29,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/sprite_plane.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
+#include <card_games/deck.hpp>
+#include <card_games/hand.hpp>
 #include <video_poker/card_space.hpp>
+#include <video_poker/i_table.hpp>
 
 namespace video_poker
 {
 	using namespace neogames::card_games;
 
-	class table : public neogfx::widget
+	class table : public neogfx::widget, public i_table
 	{
 	private:
 		typedef std::shared_ptr<card_space> card_space_pointer;
 	public:
 		table(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane);
+	public:
+		table_state state() const override;
 	private:
 		void bet(int32_t aBet);
+		void deal();
+		void change_state(table_state aNewState);
 		void update_widgets();
 	private:
+		table_state iState;
 		int32_t iCredits;
 		int32_t iStake;
+		boost::optional<deck> iDeck;
+		boost::optional<hand> iHand;
 		neogfx::sprite_plane& iSpritePlane;
 		neogfx::vertical_layout iMainLayout;
 		neogfx::label iLabelTitle;
@@ -59,6 +69,7 @@ namespace video_poker
 		neogfx::horizontal_layout iGambleLayout;
 		neogfx::push_button iBetMinus;
 		neogfx::push_button iBetPlus;
+		neogfx::push_button iBetMax;
 		neogfx::horizontal_spacer iSpacerGamble;
 		neogfx::push_button iDeal;
 		neogfx::horizontal_layout iInfoBarLayout;

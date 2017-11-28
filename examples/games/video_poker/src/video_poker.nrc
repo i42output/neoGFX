@@ -2,5 +2,13 @@
 	<resource prefix="video_poker">
 		<file>resources/neoGFX.png</file>
     <file>resources/icon.png</file>
+    <file>resources/club.png</file>
+    <file>resources/spade.png</file>
+    <file>resources/diamond.png</file>
+    <file>resources/heart.png</file>
+    <file>resources/jack.png</file>
+    <file>resources/queen.png</file>
+    <file>resources/king.png</file>
+    <file>resources/joker.png</file>
   </resource>
 </nrc>
