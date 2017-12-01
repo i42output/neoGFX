@@ -26,7 +26,8 @@ namespace video_poker
 	{
 		TakeBet,
 		DealtFirst,
-		DealtSecond
+		DealtSecond,
+		GameOver
 	};
 
 	class i_table

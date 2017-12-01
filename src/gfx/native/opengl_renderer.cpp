@@ -238,7 +238,7 @@ namespace neogfx
 		iRenderer{aRenderer},
 		iFontManager{*this, iScreenMetrics},
 		iActiveProgram{iShaderPrograms.end()},
-		iSubpixelRendering{false}
+		iSubpixelRendering{true}
 	{
 	}
 

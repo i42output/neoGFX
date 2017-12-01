@@ -101,8 +101,10 @@ namespace video_poker
 
 	void table::bet(int32_t aBet)
 	{
-		aBet = std::min(aBet, MAX_BET - iStake);
-		if ((aBet > 0 && iCredits > 0) || (aBet < 0 && iStake > 0))
+		const int32_t minBet = -iStake;
+		const int32_t maxBet = std::min(iCredits, MAX_BET - iStake);
+		aBet = std::max(minBet, std::min(maxBet, aBet));
+		if (aBet != 0)
 		{
 			iCredits -= aBet;
 			iStake += aBet;
@@ -151,7 +153,7 @@ namespace video_poker
 					iStake = 0;
 					bet(lastStake);
 					/* todo win/lose animation */
-					change_state(table_state::TakeBet);
+					change_state(iCredits + iStake > 0 ? table_state::TakeBet : table_state::GameOver);
 				}
 				break;
 			default:

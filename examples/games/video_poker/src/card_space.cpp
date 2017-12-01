@@ -56,7 +56,7 @@ namespace video_poker
 		aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, background_colour());
 
 		if (has_card())
-			aGraphicsContext.draw_text(client_rect().position(), card().to_string(), font(), neogfx::colour::White); // todo: delete this
+			aGraphicsContext.draw_text(client_rect().position(), card().to_string(), font().with_size(18.0), neogfx::colour::White); // todo: delete this
 	}
 
 	bool card_widget::has_card() const
@@ -150,8 +150,8 @@ namespace video_poker
 
 	void card_space::update_widgets()
 	{
-		iHoldButton.set_foreground_colour(has_card() && !card().discarded() && iTable.state() != table_state::DealtSecond ? neogfx::colour::LightYellow1 : neogfx::colour::Black.with_alpha(128));
-		iHoldButton.enable(has_card() && iTable.state() != table_state::DealtSecond);
-		iHoldButton.set_checked(has_card() && !card().discarded() && iTable.state() != table_state::DealtSecond);
+		iHoldButton.set_foreground_colour(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst ? neogfx::colour::LightYellow1 : neogfx::colour::Black.with_alpha(128));
+		iHoldButton.enable(has_card() && iTable.state() == table_state::DealtFirst);
+		iHoldButton.set_checked(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst);
 	}
 }
