@@ -17,18 +17,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gui/dialog/message_box.hpp>
 #include <video_poker/table.hpp>
+#include <video_poker/poker.hpp>
 
 namespace video_poker
 {
 	using namespace neogames::card_games;
 
+	const int32_t STARTING_CREDITS = 10;
 	const int32_t MAX_BET = 5;
+
+	const std::map<poker_hand, int32_t> PAY_TABLE = 
+	{
+		{ Pair, 1 },
+		{ TwoPair, 2 },
+		{ ThreeOfAKind, 3 },
+		{ Straight, 4 },
+		{ Flush, 6 },
+		{ FullHouse, 9 },
+		{ FourOfAKind, 25 },
+		{ StraightFlush, 50 },
+		{ RoyalFlush, 250 }
+	};
 
 	table::table(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane) :
 		neogfx::widget{ aLayout },
 		iState{ table_state::TakeBet },
-		iCredits{ 10 },
+		iCredits{ STARTING_CREDITS },
 		iStake{ 0 },
 		iSpritePlane{ aSpritePlane },
 		iMainLayout{ *this, neogfx::alignment::Centre },
@@ -136,7 +152,12 @@ namespace video_poker
 			change_state(table_state::DealtSecond);
 			break;
 		}
-		update_widgets();
+	}
+
+	void table::win(int32_t aWinnings)
+	{
+		// todo: win animation and sound
+		iCredits += aWinnings;
 	}
 
 	void table::change_state(table_state aNewState)
@@ -149,6 +170,9 @@ namespace video_poker
 			{
 			case table_state::DealtSecond:
 				{
+					auto w = PAY_TABLE.find(video_poker::to_poker_hand(*iHand));
+					if (w != PAY_TABLE.end() && (w->first != video_poker::poker_hand::Pair || most_frequent_card(*iHand) >= card::value::Jack))
+						win(w->second * iStake);
 					auto lastStake = iStake;
 					iStake = 0;
 					bet(lastStake);
@@ -156,10 +180,18 @@ namespace video_poker
 					change_state(iCredits + iStake > 0 ? table_state::TakeBet : table_state::GameOver);
 				}
 				break;
+			case table_state::GameOver:
+				if (neogfx::message_box::question(*this, "Out Of Credits - Game Over", "You have run out of credits!\n\nPlay again?", neogfx::standard_button::Yes | neogfx::standard_button::No) == neogfx::standard_button::Yes)
+				{
+					iCredits = STARTING_CREDITS;
+					change_state(table_state::TakeBet);
+				}
+				break;
 			default:
 				// do nothing
 				break;
 			}
+			update_widgets();
 		}
 	}
 

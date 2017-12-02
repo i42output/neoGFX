@@ -26,40 +26,6 @@ int main(int argc, char* argv[])
 		
 		video_poker::table table{ spritePlaneLayout, spritePlane };
 
-		// todo
-
-		video_poker::poker_hand test = video_poker::poker_hand::HighCard;
-		int go = 0;
-
-		for (;;)
-		{
-			video_poker::deck deck;
-			deck.shuffle();
-			video_poker::hand hand;
-			deck.deal_hand(hand);
-			auto result = video_poker::to_poker_hand(hand);
-
-			if (result != test)
-				continue;
-
-			if (++go == 3)
-			{
-				if (test == video_poker::poker_hand::RoyalFlush)
-					break;
-				test = static_cast<video_poker::poker_hand>(static_cast<uint32_t>(test) + 1);
-				go = 0;
-			}
-
-			std::string resultDisplay;
-			for (uint32_t i = 0; i < video_poker::hand::game_traits::hand_size; ++i)
-				resultDisplay += (hand.card_at(i).to_string() + "\n");
-
-			resultDisplay += ("\n" + video_poker::to_string(result));
-
-			if (ng::message_box::information(window, "Game Result", resultDisplay, ng::standard_button::Ok | ng::standard_button::Close) == ng::standard_button::Close)
-				break;
-		}
-
 		return app.exec();
 	}
 	catch (std::exception& e)

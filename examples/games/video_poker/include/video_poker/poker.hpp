@@ -154,4 +154,18 @@ namespace video_poker
 
 		return *result;
 	}
+
+	template <typename GameTraits>
+	inline typename basic_card<GameTraits>::value most_frequent_card(const basic_hand<GameTraits>& aHand)
+	{
+		typedef basic_card<GameTraits> card_type;
+		std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<typename card_type::value, uint32_t>>> valueCounter;
+		for (uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
+			++valueCounter[aHand.card_at(cardIndex)];
+		std::pair<typename card_type::value, uint32_t> mostFrequent;
+		for (const auto& v : valueCounter)
+			if (v.second > mostFrequent.second)
+				mostFrequent = v;
+		return mostFrequent.first;
+	}
 }
