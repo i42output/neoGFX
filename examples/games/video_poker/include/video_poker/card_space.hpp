@@ -37,18 +37,24 @@ namespace video_poker
 	{
 	public:
 		card_widget(neogfx::i_layout& aLayout);
-	public:
+	protected:
 		neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
 		neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
-	public:
-		bool has_card() const;
-		const video_poker::card& card() const;
-		void set_card(const video_poker::card& aCard);
-		void clear_card();
+	protected:
+		void mouse_button_pressed(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
+		void mouse_button_double_clicked(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
 	protected:
 		void paint(neogfx::graphics_context& aGraphicsContext) const override;
+	public:
+		bool has_card() const;
+		video_poker::card& card() const;
+		void set_card(video_poker::card& aCard);
+		void clear_card();
 	private:
-		const video_poker::card* iCard;
+		void toggle_hold();
+	private:
+		video_poker::card* iCard;
+		neogfx::sink iSink;
 	};
 
 	class card_space : neogfx::widget
@@ -72,5 +78,6 @@ namespace video_poker
 		card_widget iCardWidget;
 		neogfx::push_button iHoldButton;
 		video_poker::card* iCard;
+		neogfx::sink iSink;
 	};
 }

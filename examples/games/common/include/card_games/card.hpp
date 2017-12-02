@@ -30,6 +30,7 @@ namespace neogames
 		{
 		public:
 			neogfx::event<basic_card&> changed;
+			neogfx::event<basic_card&> destroyed;
 		public:
 			typedef GameTraits game_traits;
 		public:
@@ -70,6 +71,10 @@ namespace neogames
 			basic_card(value aValue, suit aSuit) :
 				iValue{ aValue }, iSuit{ aSuit }, iDiscarded{ false }
 			{
+			}
+			~basic_card()
+			{
+				destroyed.trigger(*this);
 			}
 		public:
 			operator value() const 

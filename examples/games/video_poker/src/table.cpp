@@ -166,6 +166,7 @@ namespace video_poker
 		{
 			iState = aNewState;
 			state_changed.trigger(iState);
+			update_widgets();
 			switch (iState)
 			{
 			case table_state::DealtSecond:
@@ -184,14 +185,16 @@ namespace video_poker
 				if (neogfx::message_box::question(*this, "Out Of Credits - Game Over", "You have run out of credits!\n\nPlay again?", neogfx::standard_button::Yes | neogfx::standard_button::No) == neogfx::standard_button::Yes)
 				{
 					iCredits = STARTING_CREDITS;
+					iHand.emplace();
 					change_state(table_state::TakeBet);
 				}
+				else
+					neogfx::app::instance().quit();
 				break;
 			default:
 				// do nothing
 				break;
 			}
-			update_widgets();
 		}
 	}
 

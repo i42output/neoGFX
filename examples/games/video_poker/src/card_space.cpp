@@ -47,6 +47,18 @@ namespace video_poker
 	{
 		return (minimum_size(aAvailableSpace) / 0.5).ceil();
 	}
+
+	void card_widget::mouse_button_pressed(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
+	{
+		neogfx::widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+		toggle_hold();
+	}
+
+	void card_widget::mouse_button_double_clicked(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
+	{
+		neogfx::widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+		toggle_hold();
+	}
 		
 	void card_widget::paint(neogfx::graphics_context& aGraphicsContext) const
 	{
@@ -64,15 +76,15 @@ namespace video_poker
 		return iCard != nullptr;
 	}
 
-	const card& card_widget::card() const
+	card& card_widget::card() const
 	{
 		return *iCard;
 	}
 
-	void card_widget::set_card(const video_poker::card& aCard)
+	void card_widget::set_card(video_poker::card& aCard)
 	{
 		iCard = &aCard;
-		iCard->changed([this](video_poker::card&) { update(); });
+		iSink += iCard->changed([this](video_poker::card&) { update(); });
 		update();
 	}
 
@@ -80,6 +92,17 @@ namespace video_poker
 	{
 		iCard = nullptr;
 		update();
+	}
+
+	void card_widget::toggle_hold()
+	{
+		if (has_card())
+		{
+			if (!card().discarded())
+				card().discard();
+			else
+				card().undiscard();
+		}
 	}
 
 	card_space::card_space(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane, i_table& aTable) :
@@ -136,8 +159,9 @@ namespace video_poker
 	void card_space::set_card(video_poker::card& aCard)
 	{
 		iCard = &aCard;
-		iCardWidget.set_card(aCard);
-		iCard->changed([this](video_poker::card&) { update_widgets(); });
+		iCardWidget.set_card(card());
+		iSink += card().changed([this](video_poker::card&) { update_widgets(); });
+		iSink += card().destroyed([this](video_poker::card&) { clear_card(); });
 		update_widgets();
 	}
 
@@ -150,6 +174,7 @@ namespace video_poker
 
 	void card_space::update_widgets()
 	{
+		iCardWidget.enable(has_card() && iTable.state() == table_state::DealtFirst);
 		iHoldButton.set_foreground_colour(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst ? neogfx::colour::LightYellow1 : neogfx::colour::Black.with_alpha(128));
 		iHoldButton.enable(has_card() && iTable.state() == table_state::DealtFirst);
 		iHoldButton.set_checked(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst);
