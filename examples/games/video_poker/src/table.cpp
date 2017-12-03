@@ -113,6 +113,10 @@ namespace video_poker
 		iValueTextures.emplace(card::value::Joker, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position(), neogfx::size{36.0, 36.0} } });
 		for (auto v = card::value::Two; v <= card::value::Ace; v = static_cast<card::value>(static_cast<uint32_t>(v) + 1))
 			iValueTextures.emplace(v, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position() + neogfx::point{0.0, (static_cast<uint32_t>(v) - 1) * 36.0}, neogfx::size{ 36.0, 36.0 } } });
+		iSuitTextures.emplace(card::suit::Club, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/club.png" }));
+		iSuitTextures.emplace(card::suit::Diamond, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/diamond.png" }));
+		iSuitTextures.emplace(card::suit::Spade, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/spade.png" }));
+		iSuitTextures.emplace(card::suit::Heart, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/heart.png" }));
 		update_widgets();
 	}
 
@@ -136,7 +140,10 @@ namespace video_poker
 
 	const neogfx::i_texture& table::suit_texture(const card& aCard) const
 	{
-		throw "todo";
+		auto st = iSuitTextures.find(aCard);
+		if (st != iSuitTextures.end())
+			return st->second;
+		throw texture_not_found();
 	}
 
 	const neogfx::i_texture& table::face_texture(const card& aCard) const

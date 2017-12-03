@@ -88,5 +88,6 @@ namespace video_poker
 		neogfx::label iLabelStakeValue;
 		std::unique_ptr<neogfx::i_texture_atlas> iTextures;
 		std::map<card::value, neogfx::sub_texture> iValueTextures;
+		std::map<card::suit, neogfx::sub_texture> iSuitTextures;
 	};
 }
