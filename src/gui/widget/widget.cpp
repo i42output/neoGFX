@@ -1080,10 +1080,13 @@ namespace neogfx
 
 	void widget::set_font(const optional_font& aFont)
 	{
-		iFont = aFont;
-		if (has_managing_layout())
-			managing_layout().layout_items(true);
-		update();
+		if (iFont != aFont)
+		{
+			iFont = aFont;
+			if (has_managing_layout())
+				managing_layout().layout_items(true);
+			update();
+		}
 	}
 
 	bool widget::visible() const

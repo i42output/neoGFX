@@ -28,7 +28,7 @@ namespace neogfx
 		iIcon{ iLayout1, aIcon },
 		iLayout2{ iLayout1 },
 		iText{ iLayout2, aText, text_widget_type::MultiLine },
-		iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine }
+		iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine, text_widget_flags::HideOnEmpty }
 	{
 		button_box().add_buttons(aButtons);
 		init();
@@ -40,7 +40,7 @@ namespace neogfx
 		iIcon{ iLayout1, aIcon },
 		iLayout2{ iLayout1 },
 		iText{ iLayout2, aText, text_widget_type::MultiLine },
-		iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine }
+		iDetailedText{ iLayout2, aDetailedText, text_widget_type::MultiLine, text_widget_flags::HideOnEmpty }
 	{
 		button_box().add_buttons(aButtons);
 		init();

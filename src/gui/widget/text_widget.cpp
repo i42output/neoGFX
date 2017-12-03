@@ -25,20 +25,21 @@
 
 namespace neogfx
 {
-	text_widget::text_widget(const std::string& aText, text_widget_type aType) :
-		widget{}, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
+	text_widget::text_widget(const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
+		widget{}, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iFlags{ aFlags }, iAlignment {	neogfx::alignment::Centre | neogfx::alignment::VCentre
+	}
 	{
 		init();
 	}
 
-	text_widget::text_widget(i_widget& aParent, const std::string& aText, text_widget_type aType) :
-		widget{ aParent }, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
+	text_widget::text_widget(i_widget& aParent, const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
+		widget{ aParent }, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
 	{
 		init();
 	}
 
-	text_widget::text_widget(i_layout& aLayout, const std::string& aText, text_widget_type aType) :
-		widget{ aLayout }, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
+	text_widget::text_widget(i_layout& aLayout, const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
+		widget{ aLayout }, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
 	{
 		init();
 	}
@@ -60,8 +61,10 @@ namespace neogfx
 			return widget::minimum_size(aAvailableSpace);
 		else
 		{
-			size extent = text_extent().max(size_hint_extent());
-			size result = units_converter(*this).to_device_units(extent + margins().size());
+			size extent = units_converter(*this).to_device_units(text_extent().max(size_hint_extent()));
+			if (extent.cx == 0.0 && extent.cy != 0.0)
+				extent.cx = 1.0;
+			size result = extent + units_converter(*this).to_device_units(margins().size());
 			result.cx = std::ceil(result.cx);
 			result.cy = std::ceil(result.cy);
 			return units_converter(*this).from_device_units(result);
@@ -123,6 +126,13 @@ namespace neogfx
 		iTextExtent = boost::none;
 		iSizeHintExtent = boost::none;
 		iGlyphTextCache = glyph_text(font());
+	}
+
+	bool text_widget::visible() const
+	{
+		if (iText.empty() && (iFlags & text_widget_flags::HideOnEmpty) == text_widget_flags::HideOnEmpty)
+			return false;
+		return widget::visible();
 	}
 
 	const std::string& text_widget::text() const
@@ -271,8 +281,6 @@ namespace neogfx
 
 	size text_widget::size_hint_extent() const
 	{
-		if (iSizeHint.empty())
-			return size{};
 		if (iGlyphTextCache.font() != font())
 		{
 			iTextExtent = boost::none;
@@ -307,6 +315,7 @@ namespace neogfx
 			if (!has_font() && (aAspect & style_aspect::Font) == style_aspect::Font)
 			{
 				iTextExtent = boost::none;
+				iSizeHintExtent = boost::none;
 				iGlyphTextCache = glyph_text{ font() };
 				if (has_parent_layout())
 					parent_layout().invalidate();
@@ -316,6 +325,7 @@ namespace neogfx
 		iSink += app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
 			iTextExtent = boost::none;
+			iSizeHintExtent = boost::none;
 			iGlyphTextCache = glyph_text{ font() };
 			if (has_parent_layout())
 				parent_layout().invalidate();

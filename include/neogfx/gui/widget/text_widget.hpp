@@ -29,14 +29,30 @@ namespace neogfx
 		MultiLine
 	};
 
+	enum class text_widget_flags
+	{
+		None = 0x00,
+		HideOnEmpty = 0x01
+	};
+
+	inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)
+	{
+		return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr text_widget_flags operator&(text_widget_flags aLhs, text_widget_flags aRhs)
+	{
+		return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
 	class text_widget : public widget
 	{
 	public:
 		event<> text_changed;
 	public:
-		text_widget(const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine);
-		text_widget(i_widget& aParent, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine);
-		text_widget(i_layout& aLayout, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine);
+		text_widget(const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+		text_widget(i_widget& aParent, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+		text_widget(i_layout& aLayout, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
 		~text_widget();
 	public:
 		neogfx::size_policy size_policy() const override;
@@ -45,6 +61,8 @@ namespace neogfx
 		void paint(graphics_context& aGraphicsContext) const override;
 	public:
 		void set_font(const optional_font& aFont) override;
+	public:
+		bool visible() const override;
 	public:
 		const std::string& text() const;
 		void set_text(const std::string& aText);
@@ -71,6 +89,7 @@ namespace neogfx
 		std::string iSizeHint;
 		mutable optional_size iSizeHintExtent;
 		text_widget_type iType;
+		text_widget_flags iFlags;
 		neogfx::alignment iAlignment;
 		optional_text_appearance iTextAppearance;
 	};
