@@ -23,6 +23,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
 #include <neogfx/game/rectangle.hpp>
+#include <neogfx/game/shapes.hpp>
 #include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
@@ -89,88 +90,6 @@ namespace neogfx
 			}
 			return result;
 		};
-
-		inline std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
-		{
-			std::vector<xyz> result;
-			angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
-			uint32_t segments = static_cast<uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
-			angle theta = arc / static_cast<angle>(segments);
-			result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
-			if (aIncludeCentre)
-			{
-				result.push_back(xyz{ aCentre.x, aCentre.y });
-			}
-			auto c = std::cos(theta);
-			auto s = std::sin(theta);
-			auto startCoordinate = mat22{ { std::cos(aStartAngle), std::sin(aStartAngle) },{ -std::sin(aStartAngle), std::cos(aStartAngle) } } *
-				vec2{ aRadius, 0.0 };
-			coordinate x = startCoordinate.x;
-			coordinate y = startCoordinate.y;
-			for (uint32_t i = 0; i < segments; ++i)
-			{
-				result.push_back(xyz{ x + aCentre.x, y + aCentre.y });
-				coordinate t = x;
-				x = c * x - s * y;
-				y = s * t + c * y;
-			}
-			return result;
-		}
-
-		inline std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre)
-		{
-			auto result = arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aIncludeCentre);
-			result.push_back(result[aIncludeCentre ? 1 : 0]);
-			return result;
-		}
-
-		inline std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre)
-		{
-			std::vector<xyz> result;
-			auto topLeft = arc_vertices(
-				aRect.top_left() + point{ aRadius, aRadius },
-				aRadius,
-				boost::math::constants::pi<coordinate>(),
-				boost::math::constants::pi<coordinate>() * 1.5,
-				false);
-			auto topRight = arc_vertices(
-				aRect.top_right() + point{ -aRadius, aRadius },
-				aRadius,
-				boost::math::constants::pi<coordinate>() * 1.5,
-				boost::math::constants::pi<coordinate>() * 2.0,
-				false);
-			auto bottomRight = arc_vertices(
-				aRect.bottom_right() + point{ -aRadius, -aRadius },
-				aRadius,
-				0.0,
-				boost::math::constants::pi<coordinate>() * 0.5,
-				false);
-			auto bottomLeft = arc_vertices(
-				aRect.bottom_left() + point{ aRadius, -aRadius },
-				aRadius,
-				boost::math::constants::pi<coordinate>() * 0.5,
-				boost::math::constants::pi<coordinate>(),
-				false);
-			result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aIncludeCentre ? 9 : 8));
-			if (aIncludeCentre)
-			{
-				result.push_back(xyz{ aRect.centre().x, aRect.centre().y });
-			}
-			result.insert(result.end(), xyz{ (aRect.top_left() + point{ 0.0, aRadius }).x, (aRect.top_left() + point{ 0.0, aRadius }).y });
-			result.insert(result.end(), topLeft.begin(), topLeft.end());
-			result.insert(result.end(), xyz{ (aRect.top_left() + point{ aRadius, 0.0 }).x, (aRect.top_left() + point{ aRadius, 0.0 }).y });
-			result.insert(result.end(), xyz{ (aRect.top_right() + point{ -aRadius, 0.0 }).x, (aRect.top_right() + point{ -aRadius, 0.0 }).y });
-			result.insert(result.end(), topRight.begin(), topRight.end());
-			result.insert(result.end(), xyz{ (aRect.top_right() + point{ 0.0, aRadius }).x, (aRect.top_right() + point{ 0.0, aRadius }).y });
-			result.insert(result.end(), xyz{ (aRect.bottom_right() + point{ 0.0, -aRadius }).x, (aRect.bottom_right() + point{ 0.0, -aRadius }).y });
-			result.insert(result.end(), bottomRight.begin(), bottomRight.end());
-			result.insert(result.end(), xyz{ (aRect.bottom_right() + point{ -aRadius, 0.0 }).x, (aRect.bottom_right() + point{ -aRadius, 0.0 }).y });
-			result.insert(result.end(), xyz{ (aRect.bottom_left() + point{ aRadius, 0.0 }).x, (aRect.bottom_left() + point{ aRadius, 0.0 }).y });
-			result.insert(result.end(), bottomLeft.begin(), bottomLeft.end());
-			result.insert(result.end(), xyz{ (aRect.bottom_left() + point{ 0.0, -aRadius }).x, (aRect.bottom_left() + point{ 0.0, -aRadius }).y });
-			result.push_back(result[aIncludeCentre ? 1 : 0]);
-			return result;
-		}
 
 		inline double pixel_adjust(const dimension aWidth)
 		{
@@ -454,7 +373,7 @@ namespace neogfx
 				for (auto& op : opBatch)
 				{
 					const auto& args = static_variant_cast<const graphics_operation::draw_textures&>(op);
-					draw_textures(args.mesh, args.textures, args.colour, args.shaderEffect);
+					draw_textures(args.mesh, args.colour, args.shaderEffect);
 				}
 				break;
 			}
@@ -1130,7 +1049,7 @@ namespace neogfx
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(op);
 			auto tvs = drawOp.mesh.transformed_vertices(); // todo: have vertex shader do this transformation
-			for (auto const& f : *drawOp.mesh.faces())
+			for (auto const& f : drawOp.mesh.faces())
 			{
 				for (auto vi : f.vertices)
 				{
@@ -1187,7 +1106,8 @@ namespace neogfx
 			rectangle r{ firstOp.point.to_vec3(), size{ firstOp.font.height(), firstOp.font.height() }.to_vec2() };
 			r.set_position(r.position() + vec3{ r.extents().x, r.extents().y, 0.0 } / 2.0);
 			texture_list textureList;
-			draw_textures(r, to_texture_list_pointer(textureList, emojiTexture, rect{ emojiTexture.atlas_location(), emojiTexture.extents() }), optional_colour{}, shader_effect::None);
+			r.set_textures(to_texture_list_pointer(textureList, emojiTexture, rect{ emojiTexture.atlas_location(), emojiTexture.extents() }));
+			draw_textures(r, optional_colour{}, shader_effect::None);
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 			return;
@@ -1372,11 +1292,11 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::draw_textures(const i_mesh& aMesh, texture_list_pointer aTextures, const optional_colour& aColour, shader_effect aShaderEffect)
+	void opengl_graphics_context::draw_textures(const i_mesh& aMesh, const optional_colour& aColour, shader_effect aShaderEffect)
 	{
-		auto face_cmp = [aTextures](const face& aLhs, const face& aRhs) { return (*aTextures)[aLhs.texture].first->native_texture()->handle() < (*aTextures)[aRhs.texture].first->native_texture()->handle(); };
-		if (!std::is_sorted(aMesh.faces()->begin(), aMesh.faces()->end(), face_cmp))
-			std::sort(aMesh.faces()->begin(), aMesh.faces()->end(), face_cmp);
+		auto face_cmp = [&aMesh](const face& aLhs, const face& aRhs) { return (*aMesh.textures())[aLhs.texture].first->native_texture()->handle() < (*aMesh.textures())[aRhs.texture].first->native_texture()->handle(); };
+		if (!std::is_sorted(aMesh.faces().begin(), aMesh.faces().end(), face_cmp))
+			std::sort(aMesh.faces().begin(), aMesh.faces().end(), face_cmp);
 
 		colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
 		if (aColour != boost::none)
@@ -1400,9 +1320,9 @@ namespace neogfx
 		GLuint textureHandle = 0;
 		bool first = true;
 		bool newTexture = false;
-		for (auto const& f : *aMesh.faces())
+		for (auto const& f : aMesh.faces())
 		{
-			auto const& texture = *(*aTextures)[f.texture].first;
+			auto const& texture = *(*aMesh.textures())[f.texture].first;
 
 			if (first || textureHandle != reinterpret_cast<GLuint>(texture.native_texture()->handle()))
 			{
@@ -1416,7 +1336,7 @@ namespace neogfx
 					iRenderingEngine.active_shader_program().set_uniform_variable("tex", 1);
 			}
 
-			auto textureRect = (*aTextures)[f.texture].second ? *(*aTextures)[f.texture].second : rect{ point{ 0.0, 0.0 }, texture.extents() };
+			auto textureRect = (*aMesh.textures())[f.texture].second ? *(*aMesh.textures())[f.texture].second : rect{ point{ 0.0, 0.0 }, texture.extents() };
 
 			if (texture.type() == i_texture::SubTexture)
 				textureRect.position() += texture.as_sub_texture().atlas_location().top_left();

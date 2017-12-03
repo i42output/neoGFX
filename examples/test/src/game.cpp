@@ -104,7 +104,7 @@ void create_game(ng::i_layout& aLayout)
 	//spritePlane->set_gravitational_constant(0.0);
 	//spritePlane->create_earth();
 	spritePlane->reserve(10000);
-	auto& spaceshipSprite = spritePlane->create_sprite(ng::image(sSpaceshipImagePattern, { { 0, ng::colour() },{ 1, ng::colour::LightGoldenrod },{ 2, ng::colour::DarkGoldenrod4 } }));
+	auto& spaceshipSprite = spritePlane->create_sprite(ng::image{ sSpaceshipImagePattern, { { 0, ng::colour() },{ 1, ng::colour::LightGoldenrod },{ 2, ng::colour::DarkGoldenrod4 } } });
 	spaceshipSprite.physics().set_collision_mask(1ull);
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });

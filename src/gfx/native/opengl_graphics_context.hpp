@@ -104,7 +104,7 @@ namespace neogfx
 		void fill_path(const path& aPath, const brush& aFill);
 		void fill_shape(const graphics_operation::batch& aFillShapeOps);
 		void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
-		void draw_textures(const i_mesh& aMesh, texture_list_pointer aTextures, const optional_colour& aColour, shader_effect aShaderEffect);
+		void draw_textures(const i_mesh& aMesh, const optional_colour& aColour, shader_effect aShaderEffect);
 	private:
 		void apply_scissor();
 		void apply_logical_operation();

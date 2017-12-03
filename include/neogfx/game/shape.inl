@@ -159,18 +159,22 @@ namespace neogfx
 	template <typename MixinInterface>
 	inline texture_list_pointer shape<MixinInterface>::textures() const
 	{
-		return shape_frame(0).textures();
+		if (frame_count() > 0)
+			return shape_frame(0).textures();
+		else
+			return texture_list_pointer{};
 	}
 
 	template <typename MixinInterface>
-	inline face_list_pointer shape<MixinInterface>::faces() const
+	inline face_list shape<MixinInterface>::faces() const
 	{
-		if (iFaces != nullptr)
+		if (!iFaces.empty())
 			return iFaces;
-		if (iDefaultFaces == nullptr)
-			iDefaultFaces = std::make_shared<face_list>();
-		if (iDefaultFaces->empty())
-			iDefaultFaces->assign({ face{ 0, 1, 2 }, face{ 0, 3, 2 } });
+		if (iDefaultFaces.empty())
+		{
+			iDefaultFaces = std::make_shared<face_list::container>();
+			iDefaultFaces.faces().assign({ face{ 0, 1, 2 }, face{ 0, 3, 2 } });
+		}
 		return iDefaultFaces;
 	}
 
@@ -207,7 +211,7 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_faces(face_list_pointer aFaces)
+	inline void shape<MixinInterface>::set_faces(face_list aFaces)
 	{
 		iFaces = aFaces;
 	}

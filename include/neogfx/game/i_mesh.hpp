@@ -40,9 +40,78 @@ namespace neogfx
 		std::array<vertex_index, 3> vertices;
 		texture_index texture;
 	};
-	typedef std::vector<face> face_list;
-	typedef boost::optional<face_list> optional_face_list;
-	typedef std::shared_ptr<face_list> face_list_pointer;
+
+	class face_list
+	{
+	public:
+		struct no_container : std::logic_error { no_container() : std::logic_error("neogfx::face_list::no_container") {} };
+	public:
+		typedef std::vector<face> container;
+		typedef std::shared_ptr<container> container_pointer;
+		typedef container::const_iterator const_iterator;
+		typedef container::iterator iterator;
+	public:
+		face_list()
+		{
+		}
+		face_list(container_pointer aFaces) :
+			iFaces{ aFaces }
+		{
+		}
+		face_list(container_pointer aFaces, iterator aBegin, iterator aEnd) :
+			iFaces{ aFaces }, iBegin{ aBegin }, iEnd{ aEnd }
+		{
+		}
+	public:
+		bool empty() const
+		{
+			return iFaces == nullptr || iFaces->empty();
+		}
+		const_iterator cbegin() const
+		{
+			if (iFaces == nullptr)
+				throw no_container();
+			return iBegin != boost::none ? *iBegin : iFaces->cbegin();
+		}
+		const_iterator begin() const
+		{
+			return cbegin();
+		}
+		iterator begin()
+		{
+			if (iFaces == nullptr)
+				throw no_container();
+			return iBegin != boost::none ? *iBegin : iFaces->begin();
+		}
+		const_iterator cend() const
+		{
+			if (iFaces == nullptr)
+				throw no_container();
+			return iEnd != boost::none ? *iEnd : iFaces->cend();
+		}
+		const_iterator end() const
+		{
+			return cend();
+		}
+		iterator end()
+		{
+			if (iFaces == nullptr)
+				throw no_container();
+			return iEnd != boost::none ? *iEnd : iFaces->end();
+		}
+		const container& faces() const
+		{
+			return *iFaces;
+		}
+		container& faces()
+		{
+			return *iFaces;
+		}
+	private:
+		container_pointer iFaces;
+		boost::optional<iterator> iBegin;
+		boost::optional<iterator> iEnd;
+	};
 
 	class i_mesh
 	{
@@ -51,13 +120,13 @@ namespace neogfx
 	public:
 		virtual vertex_list_pointer vertices() const = 0;
 		virtual texture_list_pointer textures() const = 0;
-		virtual face_list_pointer faces() const = 0;
+		virtual face_list faces() const = 0;
 		virtual mat44 transformation_matrix() const = 0;
 		virtual const vertex_list& transformed_vertices() const = 0;
 	public:
 		virtual void set_vertices(vertex_list_pointer aVertices) = 0;
 		virtual void set_textures(texture_list_pointer aTextures) = 0;
-		virtual void set_faces(face_list_pointer aFaces) = 0;
+		virtual void set_faces(face_list aFaces) = 0;
 	};
 
 	inline rect bounding_rect(const vertex_list& aVertices)

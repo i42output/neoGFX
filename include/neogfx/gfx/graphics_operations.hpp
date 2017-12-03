@@ -227,7 +227,6 @@ namespace neogfx
 		struct draw_textures
 		{
 			neogfx::mesh mesh;
-			texture_list_pointer textures;
 			optional_colour colour;
 			shader_effect shaderEffect;
 		};

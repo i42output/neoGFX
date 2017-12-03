@@ -872,18 +872,15 @@ namespace neogfx
 	void graphics_context::draw_textures(const i_shape& aShape, texture_list_pointer aTextures, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-		iNativeGraphicsContext->enqueue(
-			graphics_operation::draw_textures{
-				mesh{
-					aShape,
-					mat44{
-						{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
-						{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
-						{ 0.0, 0.0, 1.0, 0.0 },
-						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },	
-				aTextures,
-				aColour,
-				aShaderEffect});	
+		neogfx::mesh mesh{
+			aShape,
+			mat44{
+				{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+				{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+				{ 0.0, 0.0, 1.0, 0.0 },
+				{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } };
+		mesh.set_textures(aTextures);
+		iNativeGraphicsContext->enqueue(graphics_operation::draw_textures{mesh,	aColour, aShaderEffect});	
 	}
 
 	class graphics_context::glyph_shapes

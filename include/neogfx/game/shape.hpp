@@ -101,13 +101,13 @@ namespace neogfx
 	public:
 		vertex_list_pointer vertices() const override;
 		texture_list_pointer textures() const override;
-		face_list_pointer faces() const override;
+		face_list faces() const override;
 		mat44 transformation_matrix() const override;
 		const vertex_list& transformed_vertices() const override;
 	public:
 		void set_vertices(vertex_list_pointer aVertices) override;
 		void set_textures(texture_list_pointer aTextures) override;
-		void set_faces(face_list_pointer aFaces) override;
+		void set_faces(face_list aFaces) override;
 	public:
 		// container
 	public:
@@ -186,9 +186,9 @@ namespace neogfx
 		optional_mat44 iTransformationMatrix;
 		std::pair<i_shape*, vec3> iTagOf;
 		mutable vertex_list_pointer iDefaultVertices;
-		mutable face_list_pointer iDefaultFaces;
+		mutable face_list iDefaultFaces;
 		mutable vertex_list_pointer iVertices;
-		mutable face_list_pointer iFaces;
+		mutable face_list iFaces;
 		mutable vertex_list iTransformedVertices;
 	};
 }

@@ -28,22 +28,22 @@ namespace neogfx
 	}
 
 	mesh::mesh(const i_mesh& aMesh) : 
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() }
+		iVertices{ aMesh.vertices() }, iTextures{ aMesh.textures() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() }
 	{
 	}
 
 	mesh::mesh(const i_mesh& aMesh, const mat44& aTransformationMatrix) :
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aTransformationMatrix * aMesh.transformation_matrix() }
+		iVertices{ aMesh.vertices() }, iTextures{ aMesh.textures() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aTransformationMatrix * aMesh.transformation_matrix() }
 	{
 	}
 
 	mesh::mesh(const mesh& aMesh) :
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() }
+		iVertices{ aMesh.vertices() }, iTextures{ aMesh.textures() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aMesh.transformation_matrix() }
 	{
 	}
 
 	mesh::mesh(const mesh& aMesh, const mat44& aTransformationMatrix) :
-		iVertices{ aMesh.vertices() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aTransformationMatrix * aMesh.transformation_matrix() }
+		iVertices{ aMesh.vertices() }, iTextures{ aMesh.textures() }, iFaces{ aMesh.faces() }, iTransformationMatrix{ aTransformationMatrix * aMesh.transformation_matrix() }
 	{
 	}
 
@@ -57,7 +57,7 @@ namespace neogfx
 		return iTextures;
 	}
 
-	face_list_pointer mesh::faces() const
+	face_list mesh::faces() const
 	{
 		return iFaces;
 	}
@@ -86,7 +86,7 @@ namespace neogfx
 		iTextures = aTextures;
 	}
 
-	void mesh::set_faces(face_list_pointer aFaces)
+	void mesh::set_faces(face_list aFaces)
 	{
 		iFaces = aFaces;
 	}

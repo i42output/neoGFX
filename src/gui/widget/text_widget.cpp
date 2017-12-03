@@ -62,8 +62,6 @@ namespace neogfx
 		else
 		{
 			size extent = units_converter(*this).to_device_units(text_extent().max(size_hint_extent()));
-			if (extent.cx == 0.0 && extent.cy != 0.0)
-				extent.cx = 1.0;
 			size result = extent + units_converter(*this).to_device_units(margins().size());
 			result.cx = std::ceil(result.cx);
 			result.cy = std::ceil(result.cy);

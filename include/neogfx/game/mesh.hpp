@@ -34,17 +34,17 @@ namespace neogfx
 	public:
 		vertex_list_pointer vertices() const override;
 		texture_list_pointer textures() const override;
-		face_list_pointer faces() const override;
+		face_list faces() const override;
 		mat44 transformation_matrix() const override;
 		const vertex_list& transformed_vertices() const override;
 	public:
 		void set_vertices(vertex_list_pointer aVertices) override;
 		void set_textures(texture_list_pointer aTextures) override;
-		void set_faces(face_list_pointer aFaces) override;
+		void set_faces(face_list aFaces) override;
 	private:
 		vertex_list_pointer iVertices;
 		texture_list_pointer iTextures;
-		face_list_pointer iFaces;
+		face_list iFaces;
 		mat44 iTransformationMatrix;
 		mutable vertex_list iTransformedVertices;
 	};
