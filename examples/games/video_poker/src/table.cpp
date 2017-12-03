@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
+#include <neogfx/gfx/i_texture_manager.hpp>
 #include <video_poker/table.hpp>
 #include <video_poker/poker.hpp>
 
@@ -107,12 +108,40 @@ namespace video_poker
 		iBetMax.clicked([this]() { bet(MAX_BET); });
 		iDeal.clicked([this]() { deal(); });
 
+		iTextures = neogfx::app::instance().rendering_engine().texture_manager().create_texture_atlas();
+		auto& valueTextures = iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/values.png" });
+		iValueTextures.emplace(card::value::Joker, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position(), neogfx::size{36.0, 36.0} } });
+		for (auto v = card::value::Two; v <= card::value::Ace; v = static_cast<card::value>(static_cast<uint32_t>(v) + 1))
+			iValueTextures.emplace(v, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position() + neogfx::point{0.0, (static_cast<uint32_t>(v) - 1) * 36.0}, neogfx::size{ 36.0, 36.0 } } });
 		update_widgets();
 	}
 
 	table_state table::state() const
 	{
 		return iState;
+	}
+
+	const i_card_textures& table::textures() const
+	{
+		return *this;
+	}
+
+	const neogfx::i_texture& table::value_texture(const card& aCard) const
+	{
+		auto vt = iValueTextures.find(aCard);
+		if (vt != iValueTextures.end())
+			return vt->second;
+		throw texture_not_found();
+	}
+
+	const neogfx::i_texture& table::suit_texture(const card& aCard) const
+	{
+		throw "todo";
+	}
+
+	const neogfx::i_texture& table::face_texture(const card& aCard) const
+	{
+		throw "todo";
 	}
 
 	void table::bet(int32_t aBet)

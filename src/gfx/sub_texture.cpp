@@ -34,6 +34,11 @@ namespace neogfx
 	{
 	}
 
+	sub_texture::sub_texture(const i_sub_texture& aSubTexture, const rect& aAtlasLocation) :
+		iAtlasId(aSubTexture.atlas_id()), iAtlasTexture(&aSubTexture.atlas_texture()), iAtlasLocation(aAtlasLocation), iExtents(aAtlasLocation.extents())
+	{
+	}
+
 	sub_texture::~sub_texture()
 	{
 	}

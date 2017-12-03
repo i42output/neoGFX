@@ -39,7 +39,7 @@ namespace neogfx
 		shape_frame(texture_list_pointer aTextures, const mat33& aTransformation) : iTextures{ aTextures }, iTransformation(aTransformation) {}
 	public:
 		bool has_extents() const override { return iTextures != nullptr && !iTextures->empty(); }
-		size extents() const override { return has_extents() ? (*iTextures)[0].second != boost::none ? *(*iTextures)[0].second : (*iTextures)[0].first.extents() : size{}; }
+		size extents() const override { return has_extents() ? (*iTextures)[0].second != boost::none ? *(*iTextures)[0].second : (*iTextures)[0].first->extents() : size{}; }
 		const optional_colour_or_gradient& colour() const override { return iColour; }
 		void set_colour(const optional_colour_or_gradient& aColour) override { iColour = aColour; }
 		texture_list_pointer textures() const override { return iTextures; }

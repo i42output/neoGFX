@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/sprite_plane.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
+#include <neogfx/gfx/texture_atlas.hpp>
 #include <card_games/deck.hpp>
 #include <card_games/hand.hpp>
 #include <video_poker/card_space.hpp>
@@ -38,7 +39,7 @@ namespace video_poker
 {
 	using namespace neogames::card_games;
 
-	class table : public neogfx::widget, public i_table
+	class table : public neogfx::widget, public i_table, private i_card_textures
 	{
 	private:
 		typedef std::shared_ptr<card_space> card_space_pointer;
@@ -46,6 +47,12 @@ namespace video_poker
 		table(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane);
 	public:
 		table_state state() const override;
+	public:
+		const i_card_textures& textures() const override;
+	private:
+		const neogfx::i_texture& value_texture(const card& aCard) const override;
+		const neogfx::i_texture& suit_texture(const card& aCard) const override;
+		const neogfx::i_texture& face_texture(const card& aCard) const override;
 	private:
 		void bet(int32_t aBet);
 		void deal();
@@ -79,5 +86,7 @@ namespace video_poker
 		neogfx::horizontal_spacer iSpacer5;
 		neogfx::label iLabelStake;
 		neogfx::label iLabelStakeValue;
+		std::unique_ptr<neogfx::i_texture_atlas> iTextures;
+		std::map<card::value, neogfx::sub_texture> iValueTextures;
 	};
 }

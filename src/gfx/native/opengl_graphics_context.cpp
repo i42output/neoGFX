@@ -1374,7 +1374,7 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_textures(const i_mesh& aMesh, texture_list_pointer aTextures, const optional_colour& aColour, shader_effect aShaderEffect)
 	{
-		auto face_cmp = [aTextures](const face& aLhs, const face& aRhs) { return (*aTextures)[aLhs.texture].first.native_texture()->handle() < (*aTextures)[aRhs.texture].first.native_texture()->handle(); };
+		auto face_cmp = [aTextures](const face& aLhs, const face& aRhs) { return (*aTextures)[aLhs.texture].first->native_texture()->handle() < (*aTextures)[aRhs.texture].first->native_texture()->handle(); };
 		if (!std::is_sorted(aMesh.faces()->begin(), aMesh.faces()->end(), face_cmp))
 			std::sort(aMesh.faces()->begin(), aMesh.faces()->end(), face_cmp);
 
@@ -1402,7 +1402,7 @@ namespace neogfx
 		bool newTexture = false;
 		for (auto const& f : *aMesh.faces())
 		{
-			auto const& texture = (*aTextures)[f.texture].first;
+			auto const& texture = *(*aTextures)[f.texture].first;
 
 			if (first || textureHandle != reinterpret_cast<GLuint>(texture.native_texture()->handle()))
 			{

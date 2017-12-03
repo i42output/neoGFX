@@ -60,8 +60,8 @@ namespace neogfx
 	};
 
 	typedef boost::optional<texture> optional_texture;
-
-	typedef std::pair<texture, optional_rect> texture_source;
+	typedef std::shared_ptr<const i_texture> texture_pointer;
+	typedef std::pair<texture_pointer, optional_rect> texture_source;
 	typedef std::vector<texture_source> texture_list;
 	typedef boost::optional<texture_list> optional_texture_list;
 	typedef texture_list::size_type texture_index;
@@ -69,10 +69,21 @@ namespace neogfx
 
 	inline texture_list_pointer to_texture_list_pointer(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect{})
 	{
+		return texture_list_pointer{ new texture_list{ texture_source{ texture_pointer{ texture_pointer{}, &aTexture}, aTextureRect } } };
+	}
+
+	inline texture_list_pointer to_texture_list_pointer(texture_pointer aTexture, const optional_rect& aTextureRect = optional_rect{})
+	{
 		return texture_list_pointer{ new texture_list{ texture_source{ aTexture, aTextureRect } } };
 	}
 
 	inline texture_list_pointer to_texture_list_pointer(texture_list& aTextureList, const i_texture& aTexture, const optional_rect& aTextureRect)
+	{
+		aTextureList.assign(1, texture_source{ texture_pointer{ texture_pointer{}, &aTexture }, aTextureRect });
+		return texture_list_pointer{ texture_list_pointer{}, &aTextureList };
+	}
+
+	inline texture_list_pointer to_texture_list_pointer(texture_list& aTextureList, texture_pointer aTexture, const optional_rect& aTextureRect)
 	{
 		aTextureList.assign(1, texture_source{ aTexture, aTextureRect });
 		return texture_list_pointer{ texture_list_pointer{}, &aTextureList };

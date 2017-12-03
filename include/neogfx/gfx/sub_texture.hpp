@@ -32,6 +32,7 @@ namespace neogfx
 	public:
 		sub_texture(id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents);
 		sub_texture(const i_sub_texture& aSubTexture);
+		sub_texture(const i_sub_texture& aSubTexture, const rect& aAtlasLocation);
 		~sub_texture();
 		// operations
 	public:

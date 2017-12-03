@@ -122,6 +122,7 @@
     <ClInclude Include="..\..\..\..\common\include\card_games\deck.hpp" />
     <ClInclude Include="..\..\..\..\common\include\card_games\default_game_traits.hpp" />
     <ClInclude Include="..\..\..\..\common\include\card_games\hand.hpp" />
+    <ClInclude Include="..\..\..\..\common\include\card_games\i_card_textures.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\card_space.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\i_table.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\poker.hpp" />

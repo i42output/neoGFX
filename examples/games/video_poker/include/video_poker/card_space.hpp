@@ -36,7 +36,7 @@ namespace video_poker
 	class card_widget : public neogfx::widget
 	{
 	public:
-		card_widget(neogfx::i_layout& aLayout);
+		card_widget(neogfx::i_layout& aLayout, const i_card_textures& aCardTextures);
 	protected:
 		neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
 		neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
@@ -53,6 +53,7 @@ namespace video_poker
 	private:
 		void toggle_hold();
 	private:
+		const i_card_textures& iCardTextures;
 		video_poker::card* iCard;
 		neogfx::sink iSink;
 	};

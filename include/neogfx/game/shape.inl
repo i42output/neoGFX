@@ -554,8 +554,8 @@ namespace neogfx
 				for (texture_list::size_type textureSourceIndex = 0; textureSourceIndex < aTextures->size(); ++textureSourceIndex)
 				{
 					auto const& textureSource = (*aTextures)[textureSourceIndex];
-					auto sheetRect = textureSource.second ? *textureSource.second : rect{ point{}, textureSource.first.extents() };
-					iFrames[frameIndex]->textures()->push_back(texture_source(textureSource.first, rect{ pos[textureSourceIndex], aAnimationInfo->items[textureSourceIndex].extents }));
+					auto sheetRect = textureSource.second ? *textureSource.second : rect{ point{}, textureSource.first->extents() };
+					iFrames[frameIndex]->textures()->push_back(texture_source{ textureSource.first, rect{ pos[textureSourceIndex], aAnimationInfo->items[textureSourceIndex].extents } });
 					pos[textureSourceIndex].x += aAnimationInfo->items[textureSourceIndex].extents.cx;
 					if (pos[textureSourceIndex].x >= sheetRect.right())
 					{

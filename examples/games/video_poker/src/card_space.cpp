@@ -26,8 +26,9 @@ namespace video_poker
 		const neogfx::size kBridgeCardSize{ 57.15, 88.9 };
 	}
 
-	card_widget::card_widget(neogfx::i_layout& aLayout) :
+	card_widget::card_widget(neogfx::i_layout& aLayout, const i_card_textures& aCardTextures) :
 		widget{ aLayout },
+		iCardTextures{ aCardTextures },
 		iCard{ nullptr }
 	{
 		set_margins(neogfx::margins{});
@@ -66,9 +67,18 @@ namespace video_poker
 		aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::colour::DarkGreen);
 		rect.deflate(neogfx::size{ 4.0 });
 		aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, background_colour());
+		rect.inflate(neogfx::size{ 4.0 });
 
 		if (has_card())
-			aGraphicsContext.draw_text(client_rect().position(), card().to_string(), font().with_size(18.0), neogfx::colour::White); // todo: delete this
+		{
+			// todo: use a sprite to render card
+			aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::colour::White);
+			const neogfx::colour suitColour = (card() == card::suit::Diamond || card() == card::suit::Heart ? 
+				neogfx::colour::Red : neogfx::colour::Black);
+			aGraphicsContext.draw_text(client_rect().position(), card().to_string(), font().with_size(18.0), suitColour);
+			const auto& valueTexture = iCardTextures.value_texture(card());
+			aGraphicsContext.draw_texture(client_rect().centre() - (valueTexture.extents() / 2.0), valueTexture, suitColour);
+		}
 	}
 
 	bool card_widget::has_card() const
@@ -110,7 +120,7 @@ namespace video_poker
 		iSpritePlane{ aSpritePlane }, 
 		iTable{ aTable },
 		iVerticalLayout{ *this, neogfx::alignment::Centre | neogfx::alignment::VCentre },
-		iCardWidget{ iVerticalLayout }, 
+		iCardWidget{ iVerticalLayout, aTable.textures() }, 
 		iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " },
 		iCard{ nullptr }
 	{

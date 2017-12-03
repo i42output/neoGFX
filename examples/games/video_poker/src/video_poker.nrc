@@ -10,5 +10,6 @@
     <file>resources/queen.png</file>
     <file>resources/king.png</file>
     <file>resources/joker.png</file>
+    <file>resources/values.png</file>
   </resource>
 </nrc>

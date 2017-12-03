@@ -26,32 +26,18 @@ namespace neogames
 	namespace card_games
 	{
 		template <typename GameTraits>
-		class basic_card_shape : public neogfx::shape<>
+		class i_basic_card_textures
 		{
-			// types
 		public:
-			typedef GameTraits game_traits;
-			typedef basic_card<game_traits> card_type;
-			// construction
+			typedef basic_card<GameTraits> card_type;
 		public:
-			basic_card_shape(const i_card_textures& aCardTextures, const card_type& aCard) :
-				iCardTextures{ aCardTextures }, iCard {	aCard }
-			{
-			}
-			// rendering
+			struct texture_not_found : std::logic_error { texture_not_found() : std::logic_error("neogames::card_games::i_basic_card_textures::texture_not_found") {} };
 		public:
-			void paint(neogfx::graphics_context& aGraphicsContext) const override
-			{
-				neogfx::shape<>::paint(aGraphicsContext);
-				auto rect = bounding_box_2d();
-				// todo
-			}
-			// attributes
-		private:
-			const i_card_textures& iCardTextures;
-			card_type iCard;
+			virtual const neogfx::i_texture& value_texture(const card_type& aCard) const = 0;
+			virtual const neogfx::i_texture& suit_texture(const card_type& aCard) const = 0;
+			virtual const neogfx::i_texture& face_texture(const card_type& aCard) const = 0;
 		};
 
-		typedef basic_card_shape<default_game_traits> card_shape;
+		typedef i_basic_card_textures<default_game_traits> i_card_textures;
 	}
 }
