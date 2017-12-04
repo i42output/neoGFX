@@ -151,6 +151,8 @@ namespace video_poker
 
 	const neogfx::i_texture& table::face_texture(const card& aCard) const
 	{
+		if (aCard == card::value::Ace)
+			return suit_texture(aCard);
 		auto ft = iFaceTextures.find(aCard);
 		if (ft != iFaceTextures.end())
 			return ft->second;

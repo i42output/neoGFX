@@ -97,6 +97,8 @@ namespace neogames
 				case value::Queen:
 				case value::King:
 					return true;
+				case value::Ace:
+					return value::Ace > value::King;
 				default:
 					return false;
 				}
