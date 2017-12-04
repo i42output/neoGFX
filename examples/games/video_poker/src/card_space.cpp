@@ -77,7 +77,7 @@ namespace video_poker
 			{
 				auto faceRect = rect;
 				faceRect.deflate(neogfx::size{ 9.0 });
-				aGraphicsContext.draw_texture(faceRect, iCardTextures.face_texture(card()), neogfx::colour::AliceBlue, neogfx::shader_effect::Colourize);
+				aGraphicsContext.draw_texture(faceRect, iCardTextures.face_texture(card()), neogfx::colour::LightBlue, neogfx::shader_effect::ColourizeSpot);
 			}
 			const neogfx::colour suitColour = (card() == card::suit::Diamond || card() == card::suit::Heart ?
 				neogfx::colour{ 213, 0, 0 } : neogfx::colour::Black);

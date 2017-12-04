@@ -63,9 +63,16 @@ namespace neogfx
 
 	enum class shader_effect
 	{
-		None,
-		Colourize,
-		Monochrome
+		None				= 0,
+		Colourize			= 1,
+		ColourizeAverage	= Colourize,
+		Colorize			= Colourize,
+		ColorizeAverage		= ColourizeAverage,
+		ColourizeMaximum	= 2,
+		ColorizeMaximum		= ColourizeMaximum,
+		ColourizeSpot		= 3,
+		ColorizeSpot		= ColourizeSpot,
+		Monochrome			= 4
 	};
 
 	typedef neolib::variant<colour, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
