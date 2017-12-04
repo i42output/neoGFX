@@ -64,6 +64,7 @@ namespace neogfx
 	enum class shader_effect
 	{
 		None,
+		Colourize,
 		Monochrome
 	};
 

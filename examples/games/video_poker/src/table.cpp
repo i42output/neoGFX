@@ -117,6 +117,9 @@ namespace video_poker
 		iSuitTextures.emplace(card::suit::Diamond, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/diamond.png" }));
 		iSuitTextures.emplace(card::suit::Spade, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/spade.png" }));
 		iSuitTextures.emplace(card::suit::Heart, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/heart.png" }));
+		iFaceTextures.emplace(card::value::Jack, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/jack.png" }));
+		iFaceTextures.emplace(card::value::Queen, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/queen.png" }));
+		iFaceTextures.emplace(card::value::King, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/king.png" }));
 		update_widgets();
 	}
 
@@ -148,7 +151,10 @@ namespace video_poker
 
 	const neogfx::i_texture& table::face_texture(const card& aCard) const
 	{
-		throw "todo";
+		auto ft = iFaceTextures.find(aCard);
+		if (ft != iFaceTextures.end())
+			return ft->second;
+		throw texture_not_found();
 	}
 
 	void table::bet(int32_t aBet)

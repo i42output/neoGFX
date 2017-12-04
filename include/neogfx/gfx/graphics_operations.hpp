@@ -315,6 +315,7 @@ namespace neogfx
 			{
 			case operation_type::SetPixel:
 			case operation_type::DrawPixel:
+			case operation_type::DrawTextures:
 				return true;
 			case operation_type::DrawLine:
 			{
@@ -353,12 +354,6 @@ namespace neogfx
 					right.glyph.fallback_font(right.font).native_font_face().glyph_texture(right.glyph);
 				return leftGlyphTexture.texture().native_texture()->handle() == rightGlyphTexture.texture().native_texture()->handle() &&
 					left.glyph.subpixel() == right.glyph.subpixel();
-			}
-			case operation_type::DrawTextures:
-			{
-				auto& left = static_variant_cast<const draw_textures&>(aLeft);
-				auto& right = static_variant_cast<const draw_textures&>(aRight);
-				return left.shaderEffect == right.shaderEffect;
 			}
 			default:
 				return false;

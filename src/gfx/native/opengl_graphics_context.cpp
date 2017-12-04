@@ -370,10 +370,13 @@ namespace neogfx
 				draw_glyph(opBatch);
 				break;
 			case graphics_operation::operation_type::DrawTextures:
-				for (auto& op : opBatch)
 				{
-					const auto& args = static_variant_cast<const graphics_operation::draw_textures&>(op);
-					draw_textures(args.mesh, args.colour, args.shaderEffect);
+					use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.texture_shader_program() };
+					for (auto& op : opBatch)
+					{
+						const auto& args = static_variant_cast<const graphics_operation::draw_textures&>(op);
+						draw_textures(args.mesh, args.colour, args.shaderEffect);
+					}
 				}
 				break;
 			}
@@ -1304,9 +1307,8 @@ namespace neogfx
 
 		auto transformedVertices = aMesh.transformed_vertices(); // todo: have vertex shader do this transformation
 
-		use_shader_program usp{ *this, iRenderingEngine, aShaderEffect == shader_effect::Monochrome ?
-			iRenderingEngine.monochrome_shader_program() :
-			iRenderingEngine.texture_shader_program() };
+		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.texture_shader_program() };
+		iRenderingEngine.active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
 
 		glCheck(glActiveTexture(GL_TEXTURE1));
 		glCheck(glClientActiveTexture(GL_TEXTURE1));

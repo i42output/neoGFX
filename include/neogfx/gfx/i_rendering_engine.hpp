@@ -119,8 +119,6 @@ namespace neogfx
 		virtual i_shader_program& default_shader_program() = 0;
 		virtual const i_shader_program& texture_shader_program() const = 0;
 		virtual i_shader_program& texture_shader_program() = 0;
-		virtual const i_shader_program& monochrome_shader_program() const = 0;
-		virtual i_shader_program& monochrome_shader_program() = 0;
 		virtual const i_shader_program& glyph_shader_program(bool aSubpixel) const = 0;
 		virtual i_shader_program& glyph_shader_program(bool aSubpixel) = 0;
 		virtual const i_shader_program& gradient_shader_program() const = 0;

@@ -310,49 +310,30 @@ namespace neogfx
 			std::make_pair(
 				std::string(
 					"#version 130\n"
-					"uniform sampler2D tex;"
+					"uniform sampler2D tex;\n"
+					"uniform int effect;\n"
 					"in vec4 Color;\n"
 					"out vec4 FragColor;\n"
 					"varying vec2 vTexCoord;\n"
 					"void main()\n"
 					"{\n"
-					"	FragColor = texture(tex, vTexCoord).rgba * Color;\n"
+					"	switch(effect)\n"
+					"	{\n"
+					"	case 0:\n"
+					"		FragColor = texture(tex, vTexCoord).rgba * Color;\n"
+					"		break;\n"
+					"	case 1:\n"
+					"		FragColor = texture(tex, vTexCoord).aaaa * Color;\n"
+					"		break;\n"
+					"	case 2:\n"
+					"		{\n"
+					"			float gray = dot(Color.rgb * texture(tex, vTexCoord).rgb, vec3(0.299, 0.587, 0.114));\n"
+					"			FragColor = vec4(gray, gray, gray, Color.a * texture(tex, vTexCoord).a) * vec4(Color.rgb, 1.0);\n"
+					"		}\n"
+					"		break;\n"
+					"	}\n"
 					"}\n"),
 				GL_FRAGMENT_SHADER) 
-			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-
-		iMonochromeProgram = create_shader_program(
-			shaders
-			{
-				std::make_pair(
-					std::string(
-						"#version 130\n"
-						"uniform mat4 uProjectionMatrix;\n"
-						"in vec3 VertexPosition;\n"
-						"in vec4 VertexColor;\n"
-						"in vec2 VertexTextureCoord;\n"
-						"out vec4 Color;\n"
-						"varying vec2 vTexCoord;\n"
-						"void main()\n"
-						"{\n"
-						"	Color = VertexColor / 255.0;\n"
-						"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
-						"	vTexCoord = VertexTextureCoord;\n"
-						"}\n"),
-					GL_VERTEX_SHADER),
-				std::make_pair(
-					std::string(
-						"#version 130\n"
-						"uniform sampler2D tex;"
-						"in vec4 Color;\n"
-						"out vec4 FragColor;\n"
-						"varying vec2 vTexCoord;\n"
-						"void main()\n"
-						"{\n"
-						"	float gray = dot(Color.rgb * texture(tex, vTexCoord).rgb, vec3(0.299, 0.587, 0.114));\n"
-						"	FragColor = vec4(gray, gray, gray, Color.a * texture(tex, vTexCoord).a);\n"
-						"}\n"),
-					GL_FRAGMENT_SHADER) 
 			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
 
 		iGradientProgram = create_shader_program(
@@ -772,16 +753,6 @@ namespace neogfx
 	opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program()
 	{
 		return *iTextureProgram;
-	}
-
-	const opengl_renderer::i_shader_program& opengl_renderer::monochrome_shader_program() const
-	{
-		return *iMonochromeProgram;
-	}
-
-	opengl_renderer::i_shader_program& opengl_renderer::monochrome_shader_program()
-	{
-		return *iMonochromeProgram;
 	}
 
 	const opengl_renderer::i_shader_program& opengl_renderer::gradient_shader_program() const

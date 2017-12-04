@@ -118,8 +118,6 @@ namespace neogfx
 		virtual i_shader_program& default_shader_program();
 		virtual const i_shader_program& texture_shader_program() const;
 		virtual i_shader_program& texture_shader_program();
-		virtual const i_shader_program& monochrome_shader_program() const;
-		virtual i_shader_program& monochrome_shader_program();
 		virtual const i_shader_program& glyph_shader_program(bool aSubpixel) const;
 		virtual i_shader_program& glyph_shader_program(bool aSubpixel);
 		virtual const i_shader_program& gradient_shader_program() const;
@@ -144,7 +142,6 @@ namespace neogfx
 		shader_programs::iterator iActiveProgram;
 		shader_programs::iterator iDefaultProgram;
 		shader_programs::iterator iTextureProgram;
-		shader_programs::iterator iMonochromeProgram;
 		shader_programs::iterator iGlyphProgram;
 		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;

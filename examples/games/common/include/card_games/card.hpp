@@ -89,6 +89,18 @@ namespace neogames
 			{ 
 				return iSuit == Club || iSuit == Spade ? colour::Black : colour::Red; 
 			}
+			bool is_face_card() const
+			{
+				switch (iValue)
+				{
+				case value::Jack:
+				case value::Queen:
+				case value::King:
+					return true;
+				default:
+					return false;
+				}
+			}
 			bool discarded() const
 			{
 				return iDiscarded;

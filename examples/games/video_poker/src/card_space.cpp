@@ -73,7 +73,13 @@ namespace video_poker
 		{
 			// todo: use a sprite to render card
 			aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::colour::White);
-			const neogfx::colour suitColour = (card() == card::suit::Diamond || card() == card::suit::Heart ? 
+			if (card().is_face_card())
+			{
+				auto faceRect = rect;
+				faceRect.deflate(neogfx::size{ 9.0 });
+				aGraphicsContext.draw_texture(faceRect, iCardTextures.face_texture(card()), neogfx::colour::AliceBlue, neogfx::shader_effect::Colourize);
+			}
+			const neogfx::colour suitColour = (card() == card::suit::Diamond || card() == card::suit::Heart ?
 				neogfx::colour{ 213, 0, 0 } : neogfx::colour::Black);
 			const auto& valueTexture = iCardTextures.value_texture(card());
 			aGraphicsContext.draw_texture(client_rect().centre() - (valueTexture.extents() / 2.0) + neogfx::point{ 0.0, -18.0 }, valueTexture, suitColour);
