@@ -40,8 +40,10 @@ namespace neogfx
 		event<> visibility_changed;
 		event<> position_changed;
 		event<> size_changed;
+		event<> layout_completed;
 		event<graphics_context&> painting;
 		event<graphics_context&> painted;
+		event<graphics_context&> children_painted;
 		event<const neogfx::mouse_event&> mouse_event;
 		event<const neogfx::non_client_mouse_event&> non_client_mouse_event;
 		event<const neogfx::keyboard_event&> keyboard_event;

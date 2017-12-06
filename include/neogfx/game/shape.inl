@@ -146,7 +146,7 @@ namespace neogfx
 			iDefaultVertices = std::make_shared<vertex_list>();
 		if (iDefaultVertices->empty())
 		{
-			auto r = bounding_box_2d(false);
+			auto r = bounding_box_2d(false).with_centred_origin();
 			iDefaultVertices->assign(
 				{ vertex{ r.top_left().to_vec3(), vec2{ 0.0, 0.0 } },
 				vertex{ r.top_right().to_vec3(), vec2{ 1.0, 0.0 } },
@@ -206,8 +206,11 @@ namespace neogfx
 	template <typename MixinInterface>
 	inline void shape<MixinInterface>::set_textures(texture_list_pointer aTextures)
 	{
-		for (auto& f : iFrames)
-			f->set_textures(aTextures);
+		if (iFrames.empty())
+			iFrames.push_back(std::make_shared<neogfx::shape_frame>(aTextures));
+		else
+			for (auto& f : iFrames)
+				f->set_textures(aTextures);
 	}
 
 	template <typename MixinInterface>

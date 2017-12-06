@@ -68,13 +68,14 @@ namespace neogfx
 
 	logical_coordinate_system sprite_plane::logical_coordinate_system() const
 	{
+		if (widget::has_logical_coordinate_system())
+			return widget::logical_coordinate_system();
 		return neogfx::logical_coordinate_system::AutomaticGame;
 	}
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
 	{	
-		if (has_children())
-			widget::paint(aGraphicsContext);
+		aGraphicsContext.clear_depth_buffer();
 		painting_sprites.trigger(aGraphicsContext);
 		sort_shapes();
 		for (auto s : iRenderBuffer)
@@ -262,14 +263,16 @@ namespace neogfx
 
 	void sprite_plane::sort_shapes() const
 	{
-		if (iNeedsSorting && iEnableZSorting)
+		if (iNeedsSorting)
 		{
 			std::stable_sort(iRenderBuffer.begin(), iRenderBuffer.end(), [this](i_shape* left, i_shape* right) -> bool
 			{
 				if (left->killed() != right->killed())
 					return left->killed() < right->killed();
-				else
+				else if (iEnableZSorting)
 					return left->position().z < right->position().z;
+				else
+					return false;
 			});
 			while (!iRenderBuffer.empty() && iRenderBuffer.back()->killed())
 				iRenderBuffer.pop_back();

@@ -17,6 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/neogfx.hpp>
+#include <neolib/string_utils.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #ifdef u8
 #undef u8
@@ -988,11 +990,23 @@ namespace neogfx
 		glyph_shapes(const graphics_context& aParent, const font& aFont, const glyph_text_data::glyph_run& aGlyphRun)
 		{
 			font tryFont = aFont;
-			iGlyphsList.emplace_back(glyphs(aParent, tryFont, aGlyphRun));
-			while (iGlyphsList.back().needs_fallback_font() && tryFont.has_fallback())
+			iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
+			while (iGlyphsList.back().needs_fallback_font())
 			{
-				tryFont = tryFont.fallback();
-				iGlyphsList.emplace_back(glyphs(aParent, tryFont, aGlyphRun));
+				if (tryFont.has_fallback())
+				{
+					tryFont = tryFont.fallback();
+					iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
+				}
+				else
+				{
+					std::u32string lastResort{ std::get<0>(aGlyphRun), std::get<1>(aGlyphRun) };
+					for (uint32_t i = 0; i < iGlyphsList.back().glyph_count(); ++i)
+						if (iGlyphsList.back().glyph_info(i).codepoint == 0)
+							lastResort[iGlyphsList.back().glyph_info(i).cluster] = neolib::INVALID_CHAR32; // replacement character
+					iGlyphsList.emplace_back(glyphs{ aParent, aFont, glyph_text_data::glyph_run{&*lastResort.begin(), &*lastResort.end(), std::get<2>(aGlyphRun), std::get<3>(aGlyphRun), std::get<4>(aGlyphRun) } });
+					break;
+				}
 			}
 			auto g = iGlyphsList.begin();
 			iResults.reserve(g->glyph_count());

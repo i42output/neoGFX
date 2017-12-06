@@ -134,6 +134,7 @@ namespace neogfx
 		bool empty() const { return cx == 0 || cy == 0; }
 		bool operator==(const basic_size& other) const { return cx == other.cx && cy == other.cy; }
 		bool operator!=(const basic_size& other) const { return !operator==(other); }
+		basic_size operator-() const { return basic_size{ -cx, -cy }; }
 		basic_size& operator+=(const basic_size& other) { cx += other.cx; cy += other.cy; return *this; }
 		basic_size& operator+=(const basic_delta<CoordinateType>& other) { cx += other.dx; cy += other.dy; return *this; }
 		basic_size& operator+=(const dimension_type other) { cx += other; cy += other; return *this; }
@@ -248,7 +249,7 @@ namespace neogfx
 		// operations
 	public:
 		basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ x, y }; }
-		basic_vector<coordinate_type, 3> to_vec3() const { return basic_vector<coordinate_type, 3>{ x, y, 0.0 }; }
+		basic_vector<coordinate_type, 3> to_vec3(coordinate_type z = 0.0) const { return basic_vector<coordinate_type, 3>{ x, y, z }; }
 		bool operator==(const basic_point& other) const { return x == other.x && y == other.y; }
 		bool operator!=(const basic_point& other) const { return !operator==(other); }
 		basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; return *this; }
@@ -447,6 +448,10 @@ namespace neogfx
 		basic_rect combine(const basic_rect& other) const
 		{
 			return basic_rect{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
+		}
+		basic_rect with_centred_origin() const
+		{
+			return basic_rect{ point_type{ -extents() / 2.0 }, extents() };
 		}
 		basic_rect ceil() const { return basic_rect(point_type::ceil(), size_type::ceil()); }
 		basic_rect floor() const { return basic_rect(point_type::floor(), size_type::floor()); }

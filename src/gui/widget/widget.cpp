@@ -643,7 +643,10 @@ namespace neogfx
 	void widget::layout_items_completed()
 	{
 		if (--iLayoutInProgress == 0)
+		{
+			layout_completed.trigger();
 			update();
+		}
 	}
 
 	bool widget::has_logical_coordinate_system() const
@@ -951,12 +954,10 @@ namespace neogfx
 		aGraphicsContext.set_extents(client_rect().extents());
 		aGraphicsContext.set_origin(origin());
 		aGraphicsContext.scissor_on(clipRect);
-		aGraphicsContext.clear_depth_buffer();
 		scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
 		painting.trigger(aGraphicsContext);
 		paint(aGraphicsContext);
 		painted.trigger(aGraphicsContext);
-		aGraphicsContext.scissor_off();
 
 		for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
 		{
@@ -965,6 +966,10 @@ namespace neogfx
 			if (!intersection.empty())
 				c->render(aGraphicsContext);
 		}
+
+		children_painted.trigger(aGraphicsContext);
+
+		aGraphicsContext.scissor_off();
 
 		aGraphicsContext.set_extents(extents());
 		aGraphicsContext.set_origin(origin());

@@ -39,6 +39,20 @@ namespace neogfx
 	private:
 		class nested_details;
 		typedef boost::optional<title_bar> optional_title_bar;
+		class client : public scrollable_widget
+		{
+		public:
+			client(i_layout& aLayout, scrollbar_style aScrollbarStyle);
+		protected:
+			bool can_defer_layout() const override;
+			bool is_managing_layout() const override;
+		protected:
+			size minimum_size(const optional_size& aAvailableSpace) const override;
+		protected:
+			colour background_colour() const override;
+		private:
+			vertical_layout iLayout;
+		};
 	public:
 		window(const video_mode& aVideoMode, window_style aStyle = window_style::Fullscreen, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
@@ -205,7 +219,8 @@ namespace neogfx
 		vertical_layout iTitleBarLayout;
 		vertical_layout iMenuLayout;
 		vertical_layout iToolbarLayout;
-		vertical_layout iClientLayout;
+		client iClient;
+		i_layout& iClientLayout;
 		vertical_layout iStatusBarLayout;
 		optional_title_bar iTitleBar;
 		boost::optional<destroyed_flag> iSurfaceDestroyed;

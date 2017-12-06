@@ -88,6 +88,37 @@ namespace neogfx
 		i_window& iSurrogate;
 	};
 
+	window::client::client(i_layout& aLayout, scrollbar_style aScrollbarStyle) : 
+		scrollable_widget(aLayout, aScrollbarStyle, frame_style::NoFrame),
+		iLayout(*this)
+	{
+		set_margins(neogfx::margins{});
+		iLayout.set_margins(neogfx::margins{});
+	}
+
+	bool window::client::can_defer_layout() const
+	{
+		return true;
+	}
+
+	bool window::client::is_managing_layout() const
+	{
+		return true;
+	}
+
+	size window::client::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		if (has_minimum_size() || (static_cast<const window&>(parent()).style() & window_style::Resize) != window_style::Resize)
+			return scrollable_widget::minimum_size(aAvailableSpace);
+		else
+			return size{};
+	}
+
+	colour window::client::background_colour() const
+	{
+		return parent().background_colour();
+	}
+
 	window::window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aScrollbarStyle, aFrameStyle },
 		iWindowManager{ app::instance().window_manager() },
@@ -101,7 +132,8 @@ namespace neogfx
 		iTitleBarLayout{ iNonClientLayout },
 		iMenuLayout{ iNonClientLayout },
 		iToolbarLayout{ iNonClientLayout },
-		iClientLayout{ iNonClientLayout },
+		iClient{ iNonClientLayout, aScrollbarStyle },
+		iClientLayout{ iClient.layout() },
 		iStatusBarLayout{ iNonClientLayout }
 	{
 		window_manager().add_window(*this);
