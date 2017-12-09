@@ -109,9 +109,9 @@ namespace neogfx
 	class opengl_standard_vertex_arrays
 	{
 	public:
-		typedef std::vector<std::array<double, 3>> vertex_array;
+		typedef std::vector<vec3> vertex_array;
 		typedef std::vector<std::array<uint8_t, 4>> colour_array;
-		typedef std::vector<std::array<double, 2>> texture_coord_array;
+		typedef std::vector<vec2> texture_coord_array;
 	private:
 		class buffer_instance
 		{
@@ -168,7 +168,7 @@ namespace neogfx
 		{
 		}
 	public:
-		std::vector<std::array<double, 3>>& vertices()
+		std::vector<vec3>& vertices()
 		{
 			return iVertices;
 		}
@@ -176,7 +176,7 @@ namespace neogfx
 		{
 			return iColours;
 		}
-		std::vector<std::array<double, 2>>& texture_coords()
+		std::vector<vec2>& texture_coords()
 		{
 			return iTextureCoords;
 		}
@@ -190,12 +190,14 @@ namespace neogfx
 			}
 			void* data;
 			glCheck(data = glMapNamedBuffer(buffers().position_buffer().handle(), GL_WRITE_ONLY));
+			// todo: formally this is UB as vertex is non-POD so change to use std::copy
 			std::memcpy(data, &vertices()[0][0], vertices().size() * sizeof(vertices()[0]));
 			glCheck(glUnmapNamedBuffer(buffers().position_buffer().handle()));
 			glCheck(data = glMapNamedBuffer(buffers().colour_buffer().handle(), GL_WRITE_ONLY));
 			std::memcpy(data, &colours()[0][0], colours().size() * sizeof(colours()[0]));
 			glCheck(glUnmapNamedBuffer(buffers().colour_buffer().handle()));
 			glCheck(data = glMapNamedBuffer(buffers().texture_coord_buffer().handle(), GL_WRITE_ONLY));
+			// todo: formally this is UB as texture coordinates are non-POD so change to use std::copy
 			std::memcpy(data, &texture_coords()[0][0], texture_coords().size() * sizeof(texture_coords()[0]));
 			glCheck(glUnmapNamedBuffer(buffers().texture_coord_buffer().handle()));
 			if (iInstance.get() == nullptr || iShaderProgram != &aShaderProgram)
@@ -216,9 +218,9 @@ namespace neogfx
 		i_rendering_engine::i_shader_program* iShaderProgram;
 		std::unique_ptr<buffer_instance> iBufferInstance;
 		std::unique_ptr<instance> iInstance;
-		std::vector<std::array<double, 3>> iVertices;
+		std::vector<vec3> iVertices;
 		std::vector<std::array<uint8_t, 4>> iColours;
-		std::vector<std::array<double, 2>> iTextureCoords;
+		std::vector<vec2> iTextureCoords;
 	};
 
 	class use_shader_program

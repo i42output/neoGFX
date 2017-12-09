@@ -17,22 +17,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+#include <card_games/card_sprite.hpp>
 #include <video_poker/card_space.hpp>
 
 namespace video_poker
 {
-	namespace
-	{
-		const neogfx::size kBridgeCardSize{ 57.15, 88.9 };
-	}
-
-	card_widget::card_widget(neogfx::i_layout& aLayout, const i_card_textures& aCardTextures) :
+	card_widget::card_widget(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane, const i_card_textures& aCardTextures) :
 		widget{ aLayout },
+		iSpritePlane{ aSpritePlane },
 		iCardTextures{ aCardTextures },
 		iCard{ nullptr }
 	{
 		set_margins(neogfx::margins{});
 		set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
+		iSpritePlane.layout_completed([this]() { update_sprite_geometry(); });
 	}
 
 	neogfx::size card_widget::minimum_size(const neogfx::optional_size& aAvailableSpace) const
@@ -67,25 +65,6 @@ namespace video_poker
 		aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::colour::DarkGreen);
 		rect.deflate(neogfx::size{ 4.0 });
 		aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, background_colour());
-		rect.inflate(neogfx::size{ 4.0 });
-
-		if (has_card())
-		{
-			// todo: use a sprite to render card
-			aGraphicsContext.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::colour::White);
-			if (card().is_face_card())
-			{
-				auto faceRect = rect;
-				faceRect.deflate(neogfx::size{ 9.0 });
-				aGraphicsContext.draw_texture(faceRect, iCardTextures.face_texture(card()), neogfx::colour::LightBlue, neogfx::shader_effect::ColourizeSpot);
-			}
-			const neogfx::colour suitColour = (card() == card::suit::Diamond || card() == card::suit::Heart ?
-				neogfx::colour{ 213, 0, 0 } : neogfx::colour::Black);
-			const auto& valueTexture = iCardTextures.value_texture(card());
-			aGraphicsContext.draw_texture(client_rect().centre() - (valueTexture.extents() / 2.0) + neogfx::point{ 0.0, -18.0 }, valueTexture, suitColour);
-			const auto& suitTexture = iCardTextures.suit_texture(card());
-			aGraphicsContext.draw_texture(neogfx::rect{ (client_rect().centre() - (neogfx::size{36.0} / 2.0)) + neogfx::point{ 0.0, 48.0 } + neogfx::point{ 0.0, -18.0 }, neogfx::size{36.0} }, suitTexture);
-		}
 	}
 
 	bool card_widget::has_card() const
@@ -101,14 +80,35 @@ namespace video_poker
 	void card_widget::set_card(video_poker::card& aCard)
 	{
 		iCard = &aCard;
-		iSink += iCard->changed([this](video_poker::card&) { update(); });
+		iSink += card().changed([this](video_poker::card&) { update(); });
+		if (iCardSprite != nullptr)
+			iCardSprite->kill();
+		iCardSprite = std::make_shared<card_sprite>(iCardTextures, aCard);
+		iSpritePlane.add_sprite(iCardSprite);
+		update_sprite_geometry();
 		update();
 	}
 
 	void card_widget::clear_card()
 	{
 		iCard = nullptr;
+		if (iCardSprite != nullptr)
+		{
+			iCardSprite->kill();
+			iCardSprite = nullptr;
+		}
 		update();
+	}
+
+	void card_widget::update_sprite_geometry()
+	{
+		if (iCardSprite != nullptr)
+		{
+			auto xy = iSpritePlane.to_client_coordinates(to_window_coordinates(client_rect().centre()));
+			iCardSprite->set_position(neogfx::vec3{ xy.x, xy.y, 1.0 });
+			iCardSprite->set_extents(extents());
+			update();
+		}
 	}
 
 	void card_widget::toggle_hold()
@@ -127,7 +127,7 @@ namespace video_poker
 		iSpritePlane{ aSpritePlane }, 
 		iTable{ aTable },
 		iVerticalLayout{ *this, neogfx::alignment::Centre | neogfx::alignment::VCentre },
-		iCardWidget{ iVerticalLayout, aTable.textures() }, 
+		iCardWidget{ iVerticalLayout, aSpritePlane, aTable.textures() },
 		iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " },
 		iCard{ nullptr }
 	{

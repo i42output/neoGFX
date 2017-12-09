@@ -895,7 +895,7 @@ namespace neogfx
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(op);
 			auto rv = rect_vertices(drawOp.rect, 0.0, rect_type::Filled);
 			iVertexArrays.vertices().insert(iVertexArrays.vertices().end(), rv.begin(), rv.end());
-			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), 6, std::array<double, 2>{});
+			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), 6, vec2{});
 			auto c = drawOp.fill.is<colour>() ?
 				std::array<uint8_t, 4>{{
 						static_variant_cast<const colour&>(drawOp.fill).red(),

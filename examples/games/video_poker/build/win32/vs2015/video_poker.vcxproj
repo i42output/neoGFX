@@ -118,7 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\common\include\card_games\card.hpp" />
-    <ClInclude Include="..\..\..\..\common\include\card_games\card_shape.hpp" />
+    <ClInclude Include="..\..\..\..\common\include\card_games\card_sprite.hpp" />
     <ClInclude Include="..\..\..\..\common\include\card_games\deck.hpp" />
     <ClInclude Include="..\..\..\..\common\include\card_games\default_game_traits.hpp" />
     <ClInclude Include="..\..\..\..\common\include\card_games\hand.hpp" />

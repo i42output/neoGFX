@@ -139,6 +139,9 @@ namespace neogfx
 		virtual const i_layout& status_bar_layout() const = 0;
 		virtual i_layout& status_bar_layout() = 0;
 	public:
+		virtual const i_widget& client_widget() const = 0;
+		virtual i_widget& client_widget() = 0;
+	public:
 		virtual bool requires_owner_focus() const = 0;
 		virtual bool has_entered_widget() const = 0;
 		virtual i_widget& entered_widget() const = 0;

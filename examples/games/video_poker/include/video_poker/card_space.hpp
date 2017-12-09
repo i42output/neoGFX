@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/game/sprite_plane.hpp>
+#include <neogfx/game/sprite.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 #include <card_games/card.hpp>
 #include <video_poker/i_table.hpp>
@@ -36,7 +37,7 @@ namespace video_poker
 	class card_widget : public neogfx::widget
 	{
 	public:
-		card_widget(neogfx::i_layout& aLayout, const i_card_textures& aCardTextures);
+		card_widget(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane, const i_card_textures& aCardTextures);
 	protected:
 		neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
 		neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
@@ -51,11 +52,14 @@ namespace video_poker
 		void set_card(video_poker::card& aCard);
 		void clear_card();
 	private:
+		void update_sprite_geometry();
 		void toggle_hold();
 	private:
+		neogfx::sprite_plane& iSpritePlane;
 		const i_card_textures& iCardTextures;
-		video_poker::card* iCard;
 		neogfx::sink iSink;
+		video_poker::card* iCard;
+		std::shared_ptr<neogfx::i_sprite> iCardSprite;
 	};
 
 	class card_space : neogfx::widget

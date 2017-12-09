@@ -33,8 +33,8 @@ namespace neogfx
 	typedef coordinate_value_type dimension;
 	typedef coordinate_value_type coordinate_delta;
 
-	typedef std::array<coordinate, 2> xy;
-	typedef std::array<coordinate, 3> xyz;
+	typedef vec2 xy;
+	typedef vec3 xyz;
 
 	template <typename CoordinateType>
 	class basic_delta 

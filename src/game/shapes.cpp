@@ -22,13 +22,15 @@
 
 namespace neogfx
 {
-	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre)
+	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre, uint32_t aArcSegments)
 	{
 		std::vector<xyz> result;
 		angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
-		uint32_t segments = static_cast<uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
-		angle theta = arc / static_cast<angle>(segments);
-		result.reserve((segments + (aIncludeCentre ? 2 : 1)) * 2);
+		uint32_t arcSegments = aArcSegments;
+		if (arcSegments == 0)
+			arcSegments = static_cast<uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
+		angle theta = arc / static_cast<angle>(arcSegments);
+		result.reserve((arcSegments + (aIncludeCentre ? 2 : 1)) * 2);
 		if (aIncludeCentre)
 		{
 			result.push_back(xyz{ aCentre.x, aCentre.y });
@@ -39,7 +41,7 @@ namespace neogfx
 			vec2{ aRadius, 0.0 };
 		coordinate x = startCoordinate.x;
 		coordinate y = startCoordinate.y;
-		for (uint32_t i = 0; i < segments; ++i)
+		for (uint32_t i = 0; i < arcSegments; ++i)
 		{
 			result.push_back(xyz{ x + aCentre.x, y + aCentre.y });
 			coordinate t = x;
@@ -49,14 +51,14 @@ namespace neogfx
 		return result;
 	}
 
-	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre)
+	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre, uint32_t aArcSegments)
 	{
-		auto result = arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aIncludeCentre);
+		auto result = arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aIncludeCentre, aArcSegments);
 		result.push_back(result[aIncludeCentre ? 1 : 0]);
 		return result;
 	}
 
-	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre)
+	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre, uint32_t aArcSegments)
 	{
 		std::vector<xyz> result;
 		auto topLeft = arc_vertices(
@@ -64,25 +66,25 @@ namespace neogfx
 			aRadius,
 			boost::math::constants::pi<coordinate>(),
 			boost::math::constants::pi<coordinate>() * 1.5,
-			false);
+			false, aArcSegments);
 		auto topRight = arc_vertices(
 			aRect.top_right() + point{ -aRadius, aRadius },
 			aRadius,
 			boost::math::constants::pi<coordinate>() * 1.5,
 			boost::math::constants::pi<coordinate>() * 2.0,
-			false);
+			false, aArcSegments);
 		auto bottomRight = arc_vertices(
 			aRect.bottom_right() + point{ -aRadius, -aRadius },
 			aRadius,
 			0.0,
 			boost::math::constants::pi<coordinate>() * 0.5,
-			false);
+			false, aArcSegments);
 		auto bottomLeft = arc_vertices(
 			aRect.bottom_left() + point{ aRadius, -aRadius },
 			aRadius,
 			boost::math::constants::pi<coordinate>() * 0.5,
 			boost::math::constants::pi<coordinate>(),
-			false);
+			false, aArcSegments);
 		result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aIncludeCentre ? 9 : 8));
 		if (aIncludeCentre)
 		{

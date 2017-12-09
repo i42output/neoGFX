@@ -88,7 +88,22 @@ namespace neogfx
 		i_window& iSurrogate;
 	};
 
-	window::client::client(i_layout& aLayout, scrollbar_style aScrollbarStyle) : 
+	class window::client : public scrollable_widget
+	{
+	public:
+		client(i_layout& aLayout, scrollbar_style aScrollbarStyle);
+	protected:
+		bool can_defer_layout() const override;
+		bool is_managing_layout() const override;
+	protected:
+		size minimum_size(const optional_size& aAvailableSpace) const override;
+	protected:
+		colour background_colour() const override;
+	private:
+		vertical_layout iLayout;
+	};
+
+	window::client::client(i_layout& aLayout, scrollbar_style aScrollbarStyle) :
 		scrollable_widget(aLayout, aScrollbarStyle, frame_style::NoFrame),
 		iLayout(*this)
 	{
@@ -132,8 +147,8 @@ namespace neogfx
 		iTitleBarLayout{ iNonClientLayout },
 		iMenuLayout{ iNonClientLayout },
 		iToolbarLayout{ iNonClientLayout },
-		iClient{ iNonClientLayout, aScrollbarStyle },
-		iClientLayout{ iClient.layout() },
+		iClientWidget{ std::make_unique<client>(iNonClientLayout, aScrollbarStyle) },
+		iClientLayout{ iClientWidget->layout() },
 		iStatusBarLayout{ iNonClientLayout }
 	{
 		window_manager().add_window(*this);
@@ -850,6 +865,16 @@ namespace neogfx
 		default:
 			return rect{};
 		}
+	}
+
+	const i_widget& window::client_widget() const
+	{
+		return *iClientWidget;
+	}
+
+	i_widget& window::client_widget()
+	{
+		return *iClientWidget;
 	}
 
 	const i_layout& window::non_client_layout() const

@@ -10,7 +10,7 @@ namespace ng = neogfx;
 
 int main(int argc, char* argv[])
 {
-	ng::app app(argc, argv, "neoGFX Example Game: Video Poker");
+	ng::app app(argc, argv, "neoGFX Sample Application - Video Poker");
 
 	try
 	{

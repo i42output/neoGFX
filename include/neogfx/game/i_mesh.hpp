@@ -101,14 +101,20 @@ namespace neogfx
 		}
 		const container& faces() const
 		{
+			if (iFaces == nullptr)
+				iFaces = std::make_shared<container>();
 			return *iFaces;
 		}
 		container& faces()
 		{
+			if (iFaces == nullptr)
+				iFaces = std::make_shared<container>();
+			iBegin = boost::none;
+			iEnd = boost::none;
 			return *iFaces;
 		}
 	private:
-		container_pointer iFaces;
+		mutable container_pointer iFaces;
 		boost::optional<iterator> iBegin;
 		boost::optional<iterator> iEnd;
 	};
