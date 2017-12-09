@@ -67,10 +67,14 @@ namespace neogfx
 	typedef texture_list::size_type texture_index;
 	typedef std::shared_ptr<texture_list> texture_list_pointer;
 
+	inline texture_pointer to_texture_pointer(const i_texture& aTexture)
+	{
+		return (aTexture.type() == i_texture::Texture ? static_cast<texture_pointer>(std::make_shared<texture>(aTexture)) : static_cast<texture_pointer>(std::make_shared<sub_texture>(aTexture.as_sub_texture())));
+	}
+
 	inline texture_list_pointer to_texture_list_pointer(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect{})
 	{
-		auto tp = (aTexture.type() == i_texture::Texture ? static_cast<texture_pointer>(std::make_shared<texture>(aTexture)) : static_cast<texture_pointer>(std::make_shared<sub_texture>(aTexture.as_sub_texture())));
-		return std::make_shared<texture_list>(1, texture_source{ tp, aTextureRect });
+		return std::make_shared<texture_list>(1, texture_source{ to_texture_pointer(aTexture), aTextureRect });
 	}
 
 	inline texture_list_pointer to_texture_list_pointer(texture_pointer aTexture, const optional_rect& aTextureRect = optional_rect{})
@@ -80,8 +84,7 @@ namespace neogfx
 
 	inline texture_list_pointer to_texture_list_pointer(texture_list& aTextureList, const i_texture& aTexture, const optional_rect& aTextureRect)
 	{
-		auto tp = (aTexture.type() == i_texture::Texture ? static_cast<texture_pointer>(std::make_shared<texture>(aTexture)) : static_cast<texture_pointer>(std::make_shared<sub_texture>(aTexture.as_sub_texture())));
-		aTextureList.assign(1, texture_source{ tp, aTextureRect });
+		aTextureList.assign(1, texture_source{ to_texture_pointer(aTexture), aTextureRect });
 		return texture_list_pointer{ texture_list_pointer{}, &aTextureList };
 	}
 

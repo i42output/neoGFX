@@ -35,6 +35,8 @@ namespace neogfx
 		vertex_list_pointer vertices() const override;
 		texture_list_pointer textures() const override;
 		face_list faces() const override;
+		face_list active_faces() const override;
+		void activate_faces(face_list aActiveFaces) const override;
 		mat44 transformation_matrix() const override;
 		const vertex_list& transformed_vertices() const override;
 	public:
@@ -47,5 +49,6 @@ namespace neogfx
 		face_list iFaces;
 		mat44 iTransformationMatrix;
 		mutable vertex_list iTransformedVertices;
+		mutable face_list iActiveFaces;
 	};
 }

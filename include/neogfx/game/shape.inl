@@ -169,13 +169,27 @@ namespace neogfx
 	inline face_list shape<MixinInterface>::faces() const
 	{
 		if (!iFaces.empty())
-			return iFaces;
+		{
+			return iActiveFaces.empty() ? iFaces : iActiveFaces;
+		}
 		if (iDefaultFaces.empty())
 		{
 			iDefaultFaces = std::make_shared<face_list::container>();
 			iDefaultFaces.faces().assign({ face{ 0, 1, 2 }, face{ 0, 3, 2 } });
 		}
 		return iDefaultFaces;
+	}
+
+	template <typename MixinInterface>
+	inline face_list shape<MixinInterface>::active_faces() const
+	{
+		return iActiveFaces;
+	}
+
+	template <typename MixinInterface>
+	inline void shape<MixinInterface>::activate_faces(face_list aActiveFaces) const
+	{
+		iActiveFaces = aActiveFaces;
 	}
 
 	template <typename MixinInterface>

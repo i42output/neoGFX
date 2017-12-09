@@ -58,39 +58,6 @@ namespace neogfx
 			return path_shape_to_gl_mode(aPath.shape());
 		}
 
-		enum class rect_type
-		{
-			Filled,
-			Outline
-		};
-
-		inline std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, rect_type aType)
-		{
-			std::vector<xyz> result;
-			result.reserve(16);
-			if (aType == rect_type::Filled) // fill
-			{
-				result.push_back(xyz{ aRect.centre().x, aRect.centre().y });
-				result.push_back(xyz{ aRect.top_left().x, aRect.top_left().y });
-				result.push_back(xyz{ aRect.top_right().x, aRect.top_right().y });
-				result.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y });
-				result.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y });
-				result.push_back(xyz{ aRect.top_left().x, aRect.top_left().y });
-			}
-			else // draw (outline)
-			{
-				result.push_back(xyz{ aRect.top_left().x, aRect.top_left().y + aPixelAdjust });
-				result.push_back(xyz{ aRect.top_right().x, aRect.top_right().y + aPixelAdjust });
-				result.push_back(xyz{ aRect.top_right().x - aPixelAdjust, aRect.top_right().y });
-				result.push_back(xyz{ aRect.bottom_right().x - aPixelAdjust, aRect.bottom_right().y });
-				result.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y - aPixelAdjust });
-				result.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y - aPixelAdjust });
-				result.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y });
-				result.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y });
-			}
-			return result;
-		};
-
 		inline double pixel_adjust(const dimension aWidth)
 		{
 			return static_cast<uint32_t>(aWidth) % 2 == 1 ? 0.5 : 0.0;
@@ -893,7 +860,7 @@ namespace neogfx
 		for (const auto& op : aFillRectOps)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(op);
-			auto rv = rect_vertices(drawOp.rect, 0.0, rect_type::Filled);
+			auto rv = rect_vertices(drawOp.rect, 0.0, rect_type::FilledTriangleFan);
 			iVertexArrays.vertices().insert(iVertexArrays.vertices().end(), rv.begin(), rv.end());
 			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), 6, vec2{});
 			auto c = drawOp.fill.is<colour>() ?

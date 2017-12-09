@@ -59,7 +59,17 @@ namespace neogfx
 
 	face_list mesh::faces() const
 	{
-		return iFaces;
+		return iActiveFaces.empty() ? iFaces : iActiveFaces;
+	}
+
+	face_list mesh::active_faces() const
+	{
+		return iActiveFaces;
+	}
+
+	void mesh::activate_faces(face_list aActiveFaces) const
+	{
+		iActiveFaces = aActiveFaces;
 	}
 
 	mat44 mesh::transformation_matrix() const

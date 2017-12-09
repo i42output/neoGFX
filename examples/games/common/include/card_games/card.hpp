@@ -87,7 +87,7 @@ namespace neogames
 			}
 			operator colour() const 
 			{ 
-				return iSuit == Club || iSuit == Spade ? colour::Black : colour::Red; 
+				return iSuit == suit::Club || iSuit == suit::Spade ? colour::Black : colour::Red;
 			}
 			bool is_face_card() const
 			{

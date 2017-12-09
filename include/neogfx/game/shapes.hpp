@@ -24,6 +24,15 @@
 
 namespace neogfx
 {
+	enum class rect_type
+	{
+		FilledTriangleFan,
+		FilledTriangles,
+		Outline
+	};
+
+	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, rect_type aType);
+
 	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre, uint32_t aArcSegments = 0);
 	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre, uint32_t aArcSegments = 0);
 	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre, uint32_t aArcSegments = 0);

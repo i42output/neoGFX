@@ -44,15 +44,39 @@ namespace neogames
 			basic_card_sprite(const i_card_textures& aCardTextures, const card_type& aCard) :
 				sprite{ neogfx::colour::White }, iCardTextures { aCardTextures }, iCard{ aCard }
 			{
+				// We could have a separate texture for each of the 52 cards but instead we build the
+				// card mesh up here using texture atlas textures.
+
 				auto vlp = std::make_shared<neogfx::vertex_list>();
-				auto cardVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, true, 20);
-				vlp->reserve(cardVertices.end() - cardVertices.begin());
-				for (const auto& v : cardVertices)
-					vlp->push_back(neogfx::vertex{ v });
-				set_vertices(vlp);
 				neogfx::face_list faceList;
-				for (neogfx::vertex_index vi = 1; vi + 1 < cardVertices.size(); ++vi)
-					faceList.faces().push_back(neogfx::face{ {0, vi, vi + 1} });
+
+				// Card background shape...
+				auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, true, 20);
+				vlp->reserve(cardBackgroundVertices.end() - cardBackgroundVertices.begin() + 28 * 3);
+				neogfx::add_faces(vlp, faceList, cardBackgroundVertices);
+				iCardBackgroundFaces = faceList.faces().size();
+
+				auto tlp = std::make_shared<neogfx::texture_list>();
+
+				auto aabb = neogfx::bounding_rect(*vlp);
+				aabb.deflate(neogfx::size{ 0.025, 0.05 });
+
+				// Card value textures...
+				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left(), neogfx::size{ 0.2 } }, iCardTextures.value_texture(iCard));
+				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 }, neogfx::size{ 0.2 } }, iCardTextures.value_texture(iCard), true);
+				iCardValueFaces = faceList.faces().size();
+				
+				// Card suit textures under card value textures...
+				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, iCardTextures.suit_texture(iCard));
+				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } + neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, iCardTextures.suit_texture(iCard), true);
+
+				auto faceTextureRects = face_texture_rects(aabb);
+				for (const auto& r : faceTextureRects)
+					neogfx::add_faces(vlp, tlp, faceList, r, iCardTextures.face_texture(iCard));
+
+				// Finish up...
+				set_vertices(vlp);
+				set_textures(tlp);
 				set_faces(faceList);
 			}
 			// geometry
@@ -65,12 +89,42 @@ namespace neogames
 		protected:
 			void paint(neogfx::graphics_context& aGraphicsContext) const override
 			{
-				sprite::paint(aGraphicsContext);
+				{
+					neogfx::scoped_faces sf{ *this, faces().begin(), faces().begin() + iCardBackgroundFaces };
+					aGraphicsContext.fill_shape(*this, neogfx::to_brush(*current_frame().colour()));
+				}
+				{
+					neogfx::scoped_faces sf{ *this, faces().begin() + iCardBackgroundFaces, faces().begin() + iCardValueFaces };
+					aGraphicsContext.draw_textures(*this, textures(), iCard == card_type::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
+				}
+				{
+					neogfx::scoped_faces sf{ *this, faces().begin() + iCardValueFaces, faces().end() };
+					aGraphicsContext.draw_textures(*this, textures());
+				}
+			}
+		private:
+			std::vector<neogfx::rect> face_texture_rects(const neogfx::rect& aAabb)
+			{
+				std::vector<neogfx::rect> result;
+				if (iCard >= card_type::value::Jack)
+				{
+					auto faceRect = aAabb;
+					faceRect.deflate(neogfx::size{ 0.1 });
+					faceRect.deflate(neogfx::size{ 0.0, (faceRect.cy - faceRect.cx) / 2.0 });
+					result.push_back(faceRect);
+				}
+				else
+				{
+					// todo
+				}
+				return result;
 			}
 			// attributes
 		private:
 			const i_card_textures& iCardTextures;
 			card_type iCard;
+			std::size_t iCardBackgroundFaces;
+			std::size_t iCardValueFaces;
 		};
 
 		typedef basic_card_sprite<default_game_traits> card_sprite;
