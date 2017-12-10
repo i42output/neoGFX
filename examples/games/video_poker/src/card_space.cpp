@@ -80,7 +80,7 @@ namespace video_poker
 	void card_widget::set_card(video_poker::card& aCard)
 	{
 		iCard = &aCard;
-		iSink += card().changed([this](video_poker::card&) { update(); });
+		iSink += card().changed([this](video_poker::card&) { update_sprite_geometry();  update(); });
 		if (iCardSprite != nullptr)
 			iCardSprite->kill();
 		iCardSprite = std::make_shared<card_sprite>(iCardTextures, aCard);
@@ -105,8 +105,11 @@ namespace video_poker
 		if (iCardSprite != nullptr)
 		{
 			auto xy = iSpritePlane.to_client_coordinates(to_window_coordinates(client_rect().centre()));
+			if (iCard->discarded())
+				xy += neogfx::point{ -8.0, -16.0 };
 			iCardSprite->set_position(neogfx::vec3{ xy.x, xy.y, 1.0 });
 			iCardSprite->set_extents(extents());
+			iSpritePlane.update();
 			update();
 		}
 	}
@@ -140,7 +143,7 @@ namespace video_poker
 		iHoldButton.set_checkable();
 		auto update_hold = [this]() 
 		{ 
-			if (has_card())
+			if (has_card() && iTable.state() == table_state::DealtFirst)
 			{
 				if (iHoldButton.is_checked())
 					card().undiscard();

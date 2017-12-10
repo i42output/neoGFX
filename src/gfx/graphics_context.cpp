@@ -1004,7 +1004,7 @@ namespace neogfx
 					for (uint32_t i = 0; i < iGlyphsList.back().glyph_count(); ++i)
 						if (iGlyphsList.back().glyph_info(i).codepoint == 0)
 							lastResort[iGlyphsList.back().glyph_info(i).cluster] = neolib::INVALID_CHAR32; // replacement character
-					iGlyphsList.emplace_back(glyphs{ aParent, aFont, glyph_text_data::glyph_run{&*lastResort.begin(), &*lastResort.end(), std::get<2>(aGlyphRun), std::get<3>(aGlyphRun), std::get<4>(aGlyphRun) } });
+					iGlyphsList.emplace_back(glyphs{ aParent, aFont, glyph_text_data::glyph_run{&lastResort[0], &lastResort[0] + lastResort.size(), std::get<2>(aGlyphRun), std::get<3>(aGlyphRun), std::get<4>(aGlyphRun) } });
 					break;
 				}
 			}
