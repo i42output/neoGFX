@@ -70,9 +70,9 @@ namespace neogames
 				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, iCardTextures.suit_texture(iCard));
 				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } + neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, iCardTextures.suit_texture(iCard), true);
 
-				auto faceTextureRects = face_texture_rects(aabb);
+				auto faceTextureRects = face_texture_rects(aabb, iCard);
 				for (const auto& r : faceTextureRects)
-					neogfx::add_faces(vlp, tlp, faceList, r, iCardTextures.face_texture(iCard));
+					neogfx::add_faces(vlp, tlp, faceList, r.first, iCardTextures.face_texture(iCard), r.second);
 
 				// Finish up...
 				set_vertices(vlp);
@@ -103,19 +103,73 @@ namespace neogames
 				}
 			}
 		private:
-			std::vector<neogfx::rect> face_texture_rects(const neogfx::rect& aAabb)
+			std::vector<std::pair<neogfx::rect, bool>> face_texture_rects(const neogfx::rect& aAabb, typename card_type::value aValue)
 			{
-				std::vector<neogfx::rect> result;
-				if (iCard >= card_type::value::Jack)
+				std::vector<std::pair<neogfx::rect, bool>> result;
+				auto faceRect = aAabb;
+				faceRect.deflate(neogfx::size{ 0.1 });
+				if (aValue >= card_type::value::Jack)
 				{
-					auto faceRect = aAabb;
-					faceRect.deflate(neogfx::size{ 0.1 });
 					faceRect.deflate(neogfx::size{ 0.0, (faceRect.cy - faceRect.cx) / 2.0 });
-					result.push_back(faceRect);
+					result.push_back(std::make_pair(faceRect, false));
 				}
 				else
 				{
-					// todo
+					faceRect.deflate(neogfx::size{ 0.1, 0.0 });
+					switch (aValue)
+					{
+					case card_type::value::Two:
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.top() }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.bottom() - 0.2 }, neogfx::size{ 0.2 } }, true));
+						break;
+					case card_type::value::Three:
+						result = face_texture_rects(aAabb, card_type::value::Two);
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
+						break;
+					case card_type::value::Four:
+						result.push_back(std::make_pair(neogfx::rect{ faceRect.top_left(), neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ faceRect.top_right() + neogfx::delta{ -0.2, 0.0 }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ faceRect.bottom_left() + neogfx::delta{ 0.0, -0.2 }, neogfx::size{ 0.2 } }, true));
+						result.push_back(std::make_pair(neogfx::rect{ faceRect.bottom_right() + neogfx::delta{ -0.2, -0.2 }, neogfx::size{ 0.2 } }, true));
+						break;
+					case card_type::value::Five:
+						result = face_texture_rects(aAabb, card_type::value::Four);
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
+						break;
+					case card_type::value::Six:
+						result = face_texture_rects(aAabb, card_type::value::Four);
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
+						break;
+					case card_type::value::Seven:
+						result = face_texture_rects(aAabb, card_type::value::Six);
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.top() + faceRect.cy * 2.0 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
+						break;
+					case card_type::value::Eight:
+						result = face_texture_rects(aAabb, card_type::value::Seven);
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.bottom() - faceRect.cy * 2.0 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
+						break;
+					case card_type::value::Nine:
+						result = face_texture_rects(aAabb, card_type::value::Four);
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.top() + faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.top() + faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.bottom() - faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.bottom() - faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
+						break;
+					case card_type::value::Ten:
+						result = face_texture_rects(aAabb, card_type::value::Four);
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.top() + faceRect.cy * 1.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.top() + faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.top() + faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.bottom() - faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.bottom() - faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
+						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.bottom() - faceRect.cy * 1.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
+						break;
+					default:
+						// do nothing
+						break;
+					}
 				}
 				return result;
 			}
