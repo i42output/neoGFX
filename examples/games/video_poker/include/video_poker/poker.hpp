@@ -112,7 +112,7 @@ namespace video_poker
 			if (static_cast<uint32_t>(std::prev(iterHand)->first) - static_cast<uint32_t>(iterHand->first) != 1)
 				gotStraight = false;
 		// Check for straight when Ace is low.
-		if (card_type::game_traits::ace_high::value && possibleStraight && !gotStraight && valueCounter.find(card_type::value::Ace) != valueCounter.end())
+		if (card_type::game_traits::ace_high::value && possibleStraight && !gotStraight && aHand.contains(card_type::value::Ace))
 		{
 			auto aceLowHand = valueCounter;
 			aceLowHand.erase(aceLowHand.find(card_type::value::Ace));
@@ -154,7 +154,7 @@ namespace video_poker
 			{
 				if (*result == poker_hand::Straight)
 				{
-					if (valueCounter.begin()->first == card_type::value::Ace)
+					if (aHand.contains(card_type::value::Ace) && !aHand.contains(card_type::value::Two)) // Straight with an Ace (not a low Ace)
 						result = poker_hand::RoyalFlush;
 					else
 						result = poker_hand::StraightFlush;

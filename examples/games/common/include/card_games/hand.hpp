@@ -64,6 +64,13 @@ namespace neogames
 			{
 				return const_cast<card_type&>(const_cast<const basic_hand*>(this)->card_at(aSlotIndex));
 			}
+			bool contains(typename card_type::value aCardValue) const
+			{
+				for (auto& slot : iCards)
+					if (slot && *slot == aCardValue)
+						return true;
+				return false;
+			}
 			bool fully_dealt() const
 			{
 				size_type totalDealt = 0;
