@@ -37,6 +37,7 @@ namespace neogames
 			enum class value : uint32_t
 			{
 				Joker	= 0,
+				LowAce	= 1,
 				Two		= 2,
 				Three	= 3,
 				Four	= 4,
