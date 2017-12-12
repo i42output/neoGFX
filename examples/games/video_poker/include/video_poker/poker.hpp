@@ -107,23 +107,26 @@ namespace video_poker
 		boost::optional<poker_hand> result;
 
 		bool possibleStraight = (valueCounter.size() == GameTraits::hand_size);
-		bool gotStraight = possibleStraight;
-		for (auto iterHand = std::next(valueCounter.begin()); possibleStraight && gotStraight && iterHand != valueCounter.end(); ++iterHand)
-			if (static_cast<uint32_t>(std::prev(iterHand)->first) - static_cast<uint32_t>(iterHand->first) != 1)
-				gotStraight = false;
-		// Check for straight when Ace is low.
-		if (card_type::game_traits::ace_high::value && possibleStraight && !gotStraight && aHand.contains(card_type::value::Ace))
+		if (possibleStraight)
 		{
-			auto aceLowHand = valueCounter;
-			aceLowHand.erase(aceLowHand.find(card_type::value::Ace));
-			aceLowHand[card_type::value::LowAce] = 1;
-			gotStraight = possibleStraight;
-			for (auto iterHand = std::next(aceLowHand.begin()); possibleStraight && gotStraight && iterHand != aceLowHand.end(); ++iterHand)
-				if (static_cast<uint32_t>(std::prev(iterHand)->first) - static_cast<uint32_t>(iterHand->first) != 1)
-					gotStraight = false;
+			auto is_straight = [](const auto& aHandValues)
+			{
+				for (auto iterHand = std::next(aHandValues.begin()); iterHand != aHandValues.end(); ++iterHand)
+					if (static_cast<uint32_t>(std::prev(iterHand)->first) - static_cast<uint32_t>(iterHand->first) != 1)
+						return false;
+				return true;
+			};
+			if (is_straight(valueCounter))
+				result = poker_hand::Straight;
+			else if (card_type::game_traits::ace_high::value && aHand.contains(card_type::value::Ace)) // Check for straight when Ace is low.
+			{
+				auto aceLowHand = valueCounter;
+				aceLowHand.erase(aceLowHand.find(card_type::value::Ace));
+				aceLowHand[card_type::value::LowAce] = 1;
+				if (is_straight(aceLowHand))
+					result = poker_hand::Straight;
+			}
 		}
-		if (gotStraight)
-			result = poker_hand::Straight;
 
 		if (result == boost::none)
 		{
