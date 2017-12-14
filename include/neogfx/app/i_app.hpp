@@ -32,6 +32,7 @@ namespace neogfx
 	class i_window_manager;
 	class i_keyboard;
 	class i_clipboard;
+	class i_widget;
 	class i_style;
 	class i_action;
 	class i_mnemonic;

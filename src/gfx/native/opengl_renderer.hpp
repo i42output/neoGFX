@@ -32,6 +32,21 @@ GLenum glCheckError(const char* file, unsigned int line);
 
 namespace neogfx
 {
+	class frame_counter
+	{
+	public:
+		frame_counter(uint32_t aDuration);
+	public:
+		uint32_t counter() const;
+	public:
+		void add(i_widget& aWidget);
+		void remove(i_widget& aWidget);
+	private:
+		neolib::callback_timer iTimer;
+		uint32_t iCounter;
+		std::vector<i_widget*> iWidgets;
+	};
+
 	namespace detail
 	{
 		class screen_metrics : public i_screen_metrics
@@ -104,33 +119,37 @@ namespace neogfx
 		opengl_renderer(neogfx::renderer aRenderer);
 		~opengl_renderer();
 	public:
-		virtual neogfx::renderer renderer() const;
-		virtual void initialize();
-		virtual const i_screen_metrics& screen_metrics() const;
-		virtual i_font_manager& font_manager();
-		virtual i_texture_manager& texture_manager();
-		virtual bool shader_program_active() const;
-		virtual void activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram);
-		virtual void deactivate_shader_program();
-		virtual const i_shader_program& active_shader_program() const;
-		virtual i_shader_program& active_shader_program();
-		virtual const i_shader_program& default_shader_program() const;
-		virtual i_shader_program& default_shader_program();
-		virtual const i_shader_program& texture_shader_program() const;
-		virtual i_shader_program& texture_shader_program();
-		virtual const i_shader_program& glyph_shader_program(bool aSubpixel) const;
-		virtual i_shader_program& glyph_shader_program(bool aSubpixel);
-		virtual const i_shader_program& gradient_shader_program() const;
-		virtual i_shader_program& gradient_shader_program();
+		neogfx::renderer renderer() const override;
+		void initialize() override;
+		const i_screen_metrics& screen_metrics() const override;
+		i_font_manager& font_manager() override;
+		i_texture_manager& texture_manager() override;
+		bool shader_program_active() const override;
+		void activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram) override;
+		void deactivate_shader_program() override;
+		const i_shader_program& active_shader_program() const override;
+		i_shader_program& active_shader_program() override;
+		const i_shader_program& default_shader_program() const override;
+		i_shader_program& default_shader_program() override;
+		const i_shader_program& texture_shader_program() const override;
+		i_shader_program& texture_shader_program() override;
+		const i_shader_program& glyph_shader_program(bool aSubpixel) const override;
+		i_shader_program& glyph_shader_program(bool aSubpixel) override;
+		const i_shader_program& gradient_shader_program() const override;
+		i_shader_program& gradient_shader_program() override;
 	public:
-		virtual bool is_subpixel_rendering_on() const;
-		virtual void subpixel_rendering_on();
-		virtual void subpixel_rendering_off();
+		bool is_subpixel_rendering_on() const override;
+		void subpixel_rendering_on() override;
+		void subpixel_rendering_off() override;
 	public:
 		static const uint32_t GRADIENT_FILTER_SIZE = 15;
 		const std::array<GLuint, 3>& gradient_textures() const; // todo: use texture class and add to base class interface
 	public:
-		virtual bool process_events();
+		bool process_events() override;
+	public:
+		void register_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
+		void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
+		uint32_t frame_counter(uint32_t aDuration) const override;
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
@@ -147,5 +166,6 @@ namespace neogfx
 		shader_programs::iterator iGradientProgram;
 		bool iSubpixelRendering;
 		mutable boost::optional<std::array<GLuint, 3>> iGradientTextures;
+		std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
 	};
 }

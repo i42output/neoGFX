@@ -131,5 +131,9 @@ namespace neogfx
 		virtual void render_now() = 0;
 	public:
 		virtual bool process_events() = 0;
+	public:
+		virtual void register_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;
+		virtual void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;
+		virtual uint32_t frame_counter(uint32_t aDuration) const = 0;
 	};
 }

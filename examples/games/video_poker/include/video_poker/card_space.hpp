@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 #include <card_games/card.hpp>
+#include <video_poker/flashing_button.hpp>
 #include <video_poker/i_table.hpp>
 
 namespace video_poker
@@ -81,7 +82,7 @@ namespace video_poker
 		i_table& iTable;
 		neogfx::vertical_layout iVerticalLayout;
 		card_widget iCardWidget;
-		neogfx::push_button iHoldButton;
+		flashing_button iHoldButton;
 		video_poker::card* iCard;
 		neogfx::sink iSink;
 	};

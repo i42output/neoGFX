@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gfx/texture_atlas.hpp>
 #include <card_games/deck.hpp>
 #include <card_games/hand.hpp>
+#include <video_poker/flashing_button.hpp>
 #include <video_poker/card_space.hpp>
 #include <video_poker/i_table.hpp>
 
@@ -75,11 +76,11 @@ namespace video_poker
 		neogfx::horizontal_spacer iSpacer3;
 		neogfx::vertical_spacer iSpacer4;
 		neogfx::horizontal_layout iGambleLayout;
-		neogfx::push_button iBetMinus;
-		neogfx::push_button iBetPlus;
-		neogfx::push_button iBetMax;
+		flashing_button iBetMinus;
+		flashing_button iBetPlus;
+		flashing_button iBetMax;
 		neogfx::horizontal_spacer iSpacerGamble;
-		neogfx::push_button iDeal;
+		flashing_button iDeal;
 		neogfx::horizontal_layout iInfoBarLayout;
 		neogfx::label iLabelCredits;
 		neogfx::label iLabelCreditsValue;
