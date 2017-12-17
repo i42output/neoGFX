@@ -1,4 +1,4 @@
-// i_service_factory.hpp
+// sdl_audio.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -16,28 +16,27 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/io_task.hpp>
-#include <neogfx/app/i_basic_services.hpp>
-#include <neogfx/hid/i_keyboard.hpp>
-#include <neogfx/gfx/i_rendering_engine.hpp>
-#include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/audio/i_audio.hpp>
+#include <neogfx/audio/i_audio_device.hpp>
 
 namespace neogfx
 {
-	class i_service_factory
+	class sdl_audio : public i_audio
 	{
 	public:
-		virtual std::unique_ptr<i_basic_services> create_basic_services(neolib::io_task& aAppTask) = 0;
-		virtual std::unique_ptr<i_keyboard> create_keyboard() = 0;
-		virtual std::unique_ptr<i_rendering_engine> create_rendering_engine(renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard) = 0;
-		virtual std::unique_ptr<i_window_manager> create_window_manager() = 0;
-		virtual std::unique_ptr<i_audio> create_audio() = 0;
+		sdl_audio();
+		~sdl_audio();
+	public:
+		void initialize(bool aOpenDefaultPlaybackDevice = true) override;
+		void uninitialize() override;
+		bool have_audio_playback_device() const override;
+		uint32_t audio_playback_device_count() const override;
+		i_audio_playback_device& audio_playback_device(uint32_t aDeviceIndex) override;
+	private:
+		bool iInitialized;
+		std::vector<std::unique_ptr<i_audio_playback_device>> iAudioPlaybackDevices;
 	};
-
-	i_service_factory& default_service_factory();
 }

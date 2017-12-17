@@ -34,10 +34,11 @@
 #include <neogfx/hid/keyboard.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/audio/i_audio.hpp>
 #include <neogfx/app/style.hpp>
-#include "clipboard.hpp"
-#include "action.hpp"
-#include "i_mnemonic.hpp"
+#include <neogfx/app/clipboard.hpp>
+#include <neogfx/app/action.hpp>
+#include <neogfx/app/i_mnemonic.hpp>
 
 namespace neogfx
 {
@@ -115,6 +116,7 @@ namespace neogfx
 		struct no_window_manager : std::logic_error { no_window_manager() : std::logic_error("neogfx::app::no_window_manager") {} };
 		struct no_keyboard : std::logic_error { no_keyboard() : std::logic_error("neogfx::app::no_keyboard") {} };
 		struct no_clipboard : std::logic_error { no_clipboard() : std::logic_error("neogfx::app::no_clipboard") {} };
+		struct no_audio : std::logic_error { no_audio() : std::logic_error("neogfx::app::no_audio") {} };
 		struct action_not_found : std::runtime_error { action_not_found() : std::runtime_error("neogfx::app::action_not_found") {} };
 		struct style_not_found : std::runtime_error { style_not_found() : std::runtime_error("neogfx::app::style_not_found") {} };
 		struct style_exists : std::runtime_error { style_exists() : std::runtime_error("neogfx::app::style_exists") {} };
@@ -134,6 +136,7 @@ namespace neogfx
 		i_window_manager& window_manager() const override;
 		i_keyboard& keyboard() const override;
 		i_clipboard& clipboard() const override;
+		i_audio& audio() const override;
 	public:
 		const i_texture& default_window_icon() const override;
 		void set_default_window_icon(const i_texture& aIcon) override;
@@ -187,6 +190,7 @@ namespace neogfx
 		std::unique_ptr<i_rendering_engine> iRenderingEngine;
 		std::unique_ptr<i_surface_manager> iSurfaceManager;
 		std::unique_ptr<i_window_manager> iWindowManager;
+		std::unique_ptr<i_audio> iAudio;
 		boost::optional<int> iQuitResultCode;
 		texture iDefaultWindowIcon;
 		style_list iStyles;

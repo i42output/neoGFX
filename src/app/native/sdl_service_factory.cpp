@@ -23,6 +23,7 @@
 #include "../../hid/native/sdl_keyboard.hpp"
 #include "../../hid/native/sdl_window_manager.hpp"
 #include "../../gfx/native/sdl_renderer.hpp"
+#include "../../audio/native/sdl_audio.hpp"
 
 namespace neogfx
 {
@@ -44,6 +45,10 @@ namespace neogfx
 		virtual std::unique_ptr<i_window_manager> create_window_manager()
 		{
 			return std::make_unique<sdl_window_manager>();
+		}
+		virtual std::unique_ptr<i_audio> create_audio()
+		{
+			return std::make_unique<sdl_audio>();
 		}
 	};
 

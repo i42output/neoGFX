@@ -32,6 +32,7 @@ namespace neogfx
 	class i_window_manager;
 	class i_keyboard;
 	class i_clipboard;
+	class i_audio;
 	class i_widget;
 	class i_style;
 	class i_action;
@@ -65,6 +66,7 @@ namespace neogfx
 		virtual i_window_manager& window_manager() const = 0;
 		virtual const i_keyboard& keyboard() const = 0;
 		virtual i_clipboard& clipboard() const = 0;
+		virtual i_audio& audio() const = 0;
 	public:
 		virtual const i_texture& default_window_icon() const = 0;
 		virtual void set_default_window_icon(const i_texture& aIcon) = 0;

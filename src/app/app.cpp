@@ -101,6 +101,7 @@ namespace neogfx
 		iRenderingEngine{ aServiceFactory.create_rendering_engine(iProgramOptions.renderer(), iProgramOptions.double_buffering(), basic_services(), keyboard()) },
 		iSurfaceManager{ new neogfx::surface_manager(basic_services(), *iRenderingEngine) },
 		iWindowManager{ aServiceFactory.create_window_manager() },
+		iAudio{ aServiceFactory.create_audio() },
 		iDefaultWindowIcon{ image{ ":/neogfx/resources/icons/neoGFX.png" } },
 		iCurrentStyle{ iStyles.begin() },
 		iActionFileNew{ add_action("&New...", ":/neogfx/resources/icons.naa#new.png").set_shortcut("Ctrl+Shift+N") },
@@ -304,6 +305,14 @@ namespace neogfx
 			return *iClipboard;
 		else
 			throw no_clipboard();
+	}
+
+	i_audio& app::audio() const
+	{
+		if (iAudio)
+			return *iAudio;
+		else
+			throw no_audio();
 	}
 
 	const i_texture& app::default_window_icon() const
