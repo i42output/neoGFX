@@ -1,4 +1,4 @@
-// sdl_audio_playback_device.hpp
+// audio_device.cpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -16,26 +16,35 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <SDL.h>
-#include <neogfx/audio/audio_playback_device.hpp>
-#include "sdl_audio_device.hpp"
+#include <neogfx/audio/audio_device.hpp>
 
 namespace neogfx
 {
-	class sdl_audio_playback_device : public audio_playback_device, private sdl_audio_device
+	audio_device::audio_device(const std::string& aName) : 
+		iName{ aName }
 	{
-	public:
-		sdl_audio_playback_device(const std::string& aName);
-	public:
-		const std::string& name() const override;
-	public:
-		bool is_open() const override;
-		void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) override;
-		void close() override;
-	public:
-		const audio_spec& spec() const override;
-	};
+	}
+
+	audio_device::~audio_device()
+	{
+	}
+
+	const std::string& audio_device::name() const
+	{
+		return iName;
+	}
+
+	const audio_spec& audio_device::spec() const
+	{
+		if (!is_open())
+			throw not_open();
+		return *iSpec;
+	}
+
+	void audio_device::set_spec(const optional_audio_spec& aSpec)
+	{
+		iSpec = aSpec;
+	}
 }

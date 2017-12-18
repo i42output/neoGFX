@@ -1,4 +1,4 @@
-// sdl_audio_playback_device.hpp
+// audio_playback_device.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -19,23 +19,26 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <SDL.h>
-#include <neogfx/audio/audio_playback_device.hpp>
-#include "sdl_audio_device.hpp"
+#include <neogfx/audio/i_audio_playback_device.hpp>
 
 namespace neogfx
 {
-	class sdl_audio_playback_device : public audio_playback_device, private sdl_audio_device
+	class audio_playback_device : public i_audio_playback_device
 	{
 	public:
-		sdl_audio_playback_device(const std::string& aName);
+		audio_playback_device();
 	public:
-		const std::string& name() const override;
+		i_audio_sample& load_sample(const std::string& aUri) override;
+		i_audio_sample& create_sample(double aDuration) override;
+		void destroy_sample(i_audio_sample& aSample) override;
 	public:
-		bool is_open() const override;
-		void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) override;
-		void close() override;
+		i_audio_track& create_track() override;
+		void destroy_track(i_audio_track& aTrack) override;
 	public:
-		const audio_spec& spec() const override;
+		i_audio_beeper& beeper() override;
+	private:
+		std::vector<std::shared_ptr<i_audio_sample>> iSamples;
+		std::vector<std::shared_ptr<i_audio_track>> iTracks;
+		std::unique_ptr<i_audio_beeper> iBeeper;
 	};
 }

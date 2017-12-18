@@ -28,10 +28,13 @@ namespace neogfx
 	public:
 		typedef uint32_t frame_index;
 	public:
+		struct unsupported_operation : std::logic_error { unsupported_operation() : std::logic_error("neogfx::i_audio_sample::unsupported_operation") {} };
+	public:
 		virtual const audio_spec& spec() const = 0;
 		virtual frame_index total_frames() const = 0;
 	public:
 		virtual frame_index read(frame_index aPosition, void* aBuffer, frame_index aBufferSize) const = 0;
 		virtual frame_index write(frame_index aPosition, const void* aBuffer, frame_index aBufferSize) = 0;
+		virtual void clear() = 0;
 	};
 }

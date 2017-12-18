@@ -103,32 +103,23 @@ namespace neogfx
 		}
 	}
 
-	template <typename Interface>
-	sdl_audio_device<Interface>::sdl_audio_device(const std::string& aName) : iName{ aName }, iId{ 0 }
+	sdl_audio_device::sdl_audio_device(const std::string& aName) : 
+		audio_device{ aName }, iId{ 0 }
 	{
 	}
 
-	template <typename Interface>
-	sdl_audio_device<Interface>::~sdl_audio_device()
+	sdl_audio_device::~sdl_audio_device()
 	{
 		if (is_open())
 			close();
 	}
 
-	template <typename Interface>
-	const std::string& sdl_audio_device<Interface>::name() const
-	{
-		return iName;
-	}
-
-	template <typename Interface>
-	bool sdl_audio_device<Interface>::is_open() const
+	bool sdl_audio_device::is_open() const
 	{
 		return iId != 0;
 	}
 
-	template <typename Interface>
-	void sdl_audio_device<Interface>::open(const audio_spec& aAudioSpec, audio_spec_requirements aRequirements)
+	void sdl_audio_device::open(const audio_spec& aAudioSpec, audio_spec_requirements aRequirements)
 	{
 		if (is_open())
 			throw already_open();
@@ -145,32 +136,20 @@ namespace neogfx
 			this
 		};
 		SDL_AudioSpec obtained = {};
-		iId = SDL_OpenAudioDevice(iName.c_str(), 0, &desired, &obtained, convert_requirements(aRequirements));
-		iSpec = audio_spec{ obtained.freq, convert_format(obtained.format), obtained.channels, obtained.samples, obtained.size, obtained.silence};
+		iId = SDL_OpenAudioDevice(name().c_str(), 0, &desired, &obtained, convert_requirements(aRequirements));
+		set_spec(audio_spec{ obtained.freq, convert_format(obtained.format), obtained.channels, obtained.samples, obtained.size, obtained.silence });
 	}
 
-	template <typename Interface>
-	void sdl_audio_device<Interface>::close()
+	void sdl_audio_device::close()
 	{
 		if (!is_open())
 			throw not_open();
 		SDL_CloseAudioDevice(iId);
 		iId = 0;
-		iSpec = boost::none;
+		set_spec(boost::none);
 	}
 
-	template <typename Interface>
-	const audio_spec& sdl_audio_device<Interface>::spec() const
-	{
-		if (!is_open())
-			throw not_open();
-		return *iSpec;
-	}
-
-	template <typename Interface>
-	void sdl_audio_device<Interface>::callback(void *userdata, Uint8* stream, int len)
+	void sdl_audio_device::callback(void *userdata, Uint8* stream, int len)
 	{
 	}
-
-	template class sdl_audio_device<i_audio_playback_device>;
 }

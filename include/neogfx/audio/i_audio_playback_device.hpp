@@ -21,20 +21,21 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/audio/i_audio_device.hpp>
 #include <neogfx/audio/i_audio_sample.hpp>
-#include <neogfx/audio/i_audio_beeper_sample.hpp>
 #include <neogfx/audio/i_audio_track.hpp>
+#include <neogfx/audio/i_audio_beeper.hpp>
 
 namespace neogfx
 {
-	class i_audio_playback_device : public i_audio_device, public i_audio_beeper
+	class i_audio_playback_device : public i_audio_device
 	{
 	public:
 		virtual i_audio_sample& load_sample(const std::string& aUri) = 0;
 		virtual i_audio_sample& create_sample(double aDuration) = 0;
-		virtual i_audio_beeper_sample& create_beeper_sample() = 0;
 		virtual void destroy_sample(i_audio_sample& aSample) = 0;
 	public:
 		virtual i_audio_track& create_track() = 0;
 		virtual void destroy_track(i_audio_track& aTrack) = 0;
+	public:
+		virtual i_audio_beeper& beeper() = 0;
 	};
 }

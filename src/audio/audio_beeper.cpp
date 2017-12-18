@@ -1,4 +1,4 @@
-// sdl_audio.hpp
+// audio_beeper.cpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -18,39 +18,43 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/audio/audio_track.hpp>
 #include <neogfx/audio/audio_beeper.hpp>
-#include "sdl_audio_playback_device.hpp"
 
 namespace neogfx
 {
-	sdl_audio_playback_device::sdl_audio_playback_device(const std::string& aName) : 
-		sdl_audio_device{ aName }
+	audio_beeper::audio_beeper(i_audio_playback_device& aDevice) : 
+		iDevice{ aDevice }, iTrack{ aDevice.create_track() }, iSample{ aDevice.spec() }
 	{
+		iTrack.add_sample(iSample);
 	}
 
-	const std::string& sdl_audio_playback_device::name() const
+	void audio_beeper::beep(double aDuration, double aFrequency)
 	{
-		return sdl_audio_device::name();
+		iSample.beep(aDuration, aFrequency);
 	}
 
-	bool sdl_audio_playback_device::is_open() const
+	void audio_beeper::beep(const envelope& aEnvelope, double aFrequency)
 	{
-		return sdl_audio_device::is_open();
+		iSample.beep(aEnvelope, aFrequency);
 	}
 
-	void sdl_audio_playback_device::open(const audio_spec& aAudioSpec, audio_spec_requirements aRequirements)
+	void audio_beeper::silence(double aDuration)
 	{
-		sdl_audio_device::open(aAudioSpec, aRequirements);
+		iSample.silence(aDuration);
 	}
 
-	void sdl_audio_playback_device::close()
+	void audio_beeper::repeat_start(uint32_t aRepeatCount)
 	{
-		sdl_audio_device::close();
+		iSample.repeat_start(aRepeatCount);
 	}
 
-	const audio_spec& sdl_audio_playback_device::spec() const
+	void audio_beeper::repeat_end()
 	{
-		return sdl_audio_device::spec();
+		iSample.repeat_end();
+	}
+
+	void audio_beeper::clear()
+	{
+		iSample.clear();
 	}
 }

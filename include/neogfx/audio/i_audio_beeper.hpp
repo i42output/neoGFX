@@ -38,5 +38,6 @@ namespace neogfx
 		virtual void silence(double aDuration) = 0;
 		virtual void repeat_start(uint32_t aRepeatCount) = 0;
 		virtual void repeat_end() = 0;
+		virtual void clear() = 0;
 	};
 }

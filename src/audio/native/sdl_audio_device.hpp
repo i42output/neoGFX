@@ -20,29 +20,22 @@
 
 #include <neogfx/neogfx.hpp>
 #include <SDL.h>
-#include <neogfx/audio/i_audio_playback_device.hpp>
+#include <neogfx/audio/audio_device.hpp>
 
 namespace neogfx
 {
-	template <typename Interface = i_audio_playback_device>
-	class sdl_audio_device : public Interface
+	class sdl_audio_device : public audio_device
 	{
 	public:
 		sdl_audio_device(const std::string& aName);
 		~sdl_audio_device();
 	public:
-		const std::string& name() const override;
-	public:
 		bool is_open() const override;
 		void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) override;
 		void close() override;
-	public:
-		const audio_spec& spec() const override;
 	private:
 		static void callback(void *userdata, Uint8* stream, int len);
 	private:
-		std::string iName;
 		SDL_AudioDeviceID iId;
-		optional_audio_spec iSpec;
 	};
 }

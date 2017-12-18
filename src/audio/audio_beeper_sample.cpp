@@ -46,8 +46,7 @@ namespace neogfx
 
 	audio_beeper_sample::frame_index audio_beeper_sample::write(frame_index aPosition, const void* aBuffer, frame_index aBufferSize)
 	{
-		// todo
-		throw std::logic_error("audio_beeper_sample::write: not implemented");
+		throw unsupported_operation();
 	}
 
 	void audio_beeper_sample::beep(double aDuration, double aFrequency)
@@ -75,6 +74,12 @@ namespace neogfx
 	}
 
 	void audio_beeper_sample::repeat_end()
+	{
+		// todo
+		throw std::logic_error("audio_beeper_sample::repeat_end: not implemented");
+	}
+
+	void audio_beeper_sample::clear()
 	{
 		// todo
 		throw std::logic_error("audio_beeper_sample::repeat_end: not implemented");

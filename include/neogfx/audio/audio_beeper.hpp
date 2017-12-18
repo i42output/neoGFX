@@ -1,4 +1,4 @@
-// sdl_audio_playback_device.hpp
+// audio_beeper.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -19,23 +19,26 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <SDL.h>
-#include <neogfx/audio/audio_playback_device.hpp>
-#include "sdl_audio_device.hpp"
+#include <neogfx/audio/i_audio_playback_device.hpp>
+#include <neogfx/audio/i_audio_beeper.hpp>
+#include <neogfx/audio/audio_beeper_sample.hpp>
 
 namespace neogfx
 {
-	class sdl_audio_playback_device : public audio_playback_device, private sdl_audio_device
+	class audio_beeper : public i_audio_beeper
 	{
 	public:
-		sdl_audio_playback_device(const std::string& aName);
+		audio_beeper(i_audio_playback_device& aDevice);
 	public:
-		const std::string& name() const override;
-	public:
-		bool is_open() const override;
-		void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) override;
-		void close() override;
-	public:
-		const audio_spec& spec() const override;
+		void beep(double aDuration, double aFrequency) override;
+		void beep(const envelope& aEnvelope, double aFrequency) override;
+		void silence(double aDuration) override;
+		void repeat_start(uint32_t aRepeatCount) override;
+		void repeat_end() override;
+		void clear() override;
+	private:
+		i_audio_playback_device& iDevice;
+		i_audio_track& iTrack;
+		audio_beeper_sample iSample;
 	};
 }

@@ -1,4 +1,4 @@
-// sdl_audio_playback_device.hpp
+// audio_device.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -19,23 +19,23 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <SDL.h>
-#include <neogfx/audio/audio_playback_device.hpp>
-#include "sdl_audio_device.hpp"
+#include <neogfx/audio/i_audio_device.hpp>
 
 namespace neogfx
 {
-	class sdl_audio_playback_device : public audio_playback_device, private sdl_audio_device
+	class audio_device : public i_audio_device
 	{
 	public:
-		sdl_audio_playback_device(const std::string& aName);
+		audio_device(const std::string& aName);
+		~audio_device();
 	public:
 		const std::string& name() const override;
 	public:
-		bool is_open() const override;
-		void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) override;
-		void close() override;
-	public:
 		const audio_spec& spec() const override;
+	protected:
+		void set_spec(const optional_audio_spec& aSpec);
+	private:
+		std::string iName;
+		optional_audio_spec iSpec;
 	};
 }

@@ -126,8 +126,10 @@
     <ClInclude Include="..\..\..\include\neogfx\app\resource_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_beeper_sample.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\audio\audio_playback_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_spec.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_track.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\audio\audio_beeper.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_beeper.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_beeper_sample.hpp" />
@@ -339,7 +341,10 @@
     <ClCompile Include="..\..\..\src\app\resource.cpp" />
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
     <ClCompile Include="..\..\..\src\app\style.cpp" />
+    <ClCompile Include="..\..\..\src\audio\audio_beeper.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_beeper_sample.cpp" />
+    <ClCompile Include="..\..\..\src\audio\audio_device.cpp" />
+    <ClCompile Include="..\..\..\src\audio\audio_playback_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_track.cpp" />
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio.cpp" />
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio_device.cpp" />

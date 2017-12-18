@@ -40,6 +40,7 @@ namespace neogfx
 		void silence(double aDuration) override;
 		void repeat_start(uint32_t aRepeatCount) override;
 		void repeat_end() override;
+		void clear() override;
 	private:
 		audio_spec iSpec;
 	};
