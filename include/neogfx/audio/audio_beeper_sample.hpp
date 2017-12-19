@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/variant.hpp>
 #include <neogfx/audio/audio_spec.hpp>
 #include <neogfx/audio/i_audio_beeper_sample.hpp>
 
@@ -26,6 +27,13 @@ namespace neogfx
 {
 	class audio_beeper_sample : public i_audio_beeper_sample
 	{
+	private:
+		struct item_beep { double duration; double frequency; };
+		struct item_envelope { neogfx::envelope envelope; double frequency; };
+		struct item_silence { double duration; };
+		struct item_repeat_start { uint32_t repeatCount; };
+		struct item_repeat_end {};
+		typedef neolib::variant<item_beep, item_envelope, item_silence, item_repeat_start, item_repeat_end> value_type;
 	public:
 		audio_beeper_sample(const audio_spec& aSpec);
 	public:
@@ -43,5 +51,6 @@ namespace neogfx
 		void clear() override;
 	private:
 		audio_spec iSpec;
+		std::vector<value_type> iItems;
 	};
 }

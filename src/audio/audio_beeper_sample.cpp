@@ -35,13 +35,13 @@ namespace neogfx
 	audio_beeper_sample::frame_index audio_beeper_sample::total_frames() const
 	{
 		// todo
-		throw std::logic_error("audio_beeper_sample::total_frames: not implemented");
+		return 0;
 	}
 
 	audio_beeper_sample::frame_index audio_beeper_sample::read(frame_index aPosition, void* aBuffer, frame_index aBufferSize) const
 	{
 		// todo
-		throw std::logic_error("audio_beeper_sample::read: not implemented");
+		return 0;
 	}
 
 	audio_beeper_sample::frame_index audio_beeper_sample::write(frame_index aPosition, const void* aBuffer, frame_index aBufferSize)
@@ -51,37 +51,31 @@ namespace neogfx
 
 	void audio_beeper_sample::beep(double aDuration, double aFrequency)
 	{
-		// todo
-		throw std::logic_error("audio_beeper_sample::beep: not implemented");
+		iItems.push_back(item_beep{ aDuration, aFrequency });
 	}
 
 	void audio_beeper_sample::beep(const envelope& aEnvelope, double aFrequency)
 	{
-		// todo
-		throw std::logic_error("audio_beeper_sample::beep: not implemented");
+		iItems.push_back(item_envelope{ aEnvelope, aFrequency });
 	}
 
 	void audio_beeper_sample::silence(double aDuration)
 	{
-		// todo
-		throw std::logic_error("audio_beeper_sample::silence: not implemented");
+		iItems.push_back(item_silence{ aDuration });
 	}
 
 	void audio_beeper_sample::repeat_start(uint32_t aRepeatCount)
 	{
-		// todo
-		throw std::logic_error("audio_beeper_sample::repeat_start: not implemented");
+		iItems.push_back(item_repeat_start{ aRepeatCount });
 	}
 
 	void audio_beeper_sample::repeat_end()
 	{
-		// todo
-		throw std::logic_error("audio_beeper_sample::repeat_end: not implemented");
+		iItems.push_back(item_repeat_end{});
 	}
 
 	void audio_beeper_sample::clear()
 	{
-		// todo
-		throw std::logic_error("audio_beeper_sample::repeat_end: not implemented");
+		iItems.clear();
 	}
 }
