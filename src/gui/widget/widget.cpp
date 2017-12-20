@@ -935,6 +935,12 @@ namespace neogfx
 			return;
 		if (!requires_update())
 			return;
+
+		static int n = 0;
+		if (is_root())
+			n = 0;
+		else
+			++n;
 		
 		const rect updateRect = update_rect();
 
@@ -976,6 +982,9 @@ namespace neogfx
 		aGraphicsContext.scissor_on(nonClientClipRect);
 		paint_non_client_after(aGraphicsContext);
 		aGraphicsContext.scissor_off();
+
+		if (is_root())
+			std::cout << n << std::endl;
 	}
 
 	bool widget::transparent_background() const

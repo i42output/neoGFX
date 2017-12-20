@@ -48,6 +48,8 @@ namespace neogfx
 	class i_surface : public i_device_metrics
 	{
 	public:
+		event<> rendering;
+		event<> rendering_finished;
 		event<> closed;
 	public:
 		struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_surface::no_native_surface") {} };

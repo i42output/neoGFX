@@ -172,7 +172,7 @@ namespace neogfx
 		iRendering = true;
 		iLastFrameTime = now;
 
-		rendering.trigger();
+		surface_window().rendering.trigger();
 
 		rendering_engine().activate_context(*this);
 
@@ -233,7 +233,7 @@ namespace neogfx
 		iRendering = false;
 		validate();
 
-		rendering_finished.trigger();
+		surface_window().rendering_finished.trigger();
 
 		iFpsData.push_back(1000.0 / (app::instance().program_elapsed_ms() - now));
 		if (iFpsData.size() > 25)

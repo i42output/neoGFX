@@ -33,9 +33,6 @@ namespace neogfx
 	class i_native_surface
 	{
 	public:
-		event<> rendering;
-		event<> rendering_finished;
-	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_surface::no_parent") {} };
 		struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
 		struct no_invalidated_area : std::logic_error { no_invalidated_area() : std::logic_error("neogfx::i_native_surface::no_invalidated_area") {} };

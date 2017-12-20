@@ -172,6 +172,12 @@ int main(int argc, char* argv[])
 			}
 		});
 
+		window.surface().rendering_finished([&showFps, &window]()
+		{
+			if (showFps)
+				window.update();
+		});
+		
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{
 			ng::app::instance().change_style("Keypad").palette().set_colour(ng::colour::LightGoldenrod);
