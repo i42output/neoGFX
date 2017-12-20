@@ -55,7 +55,7 @@ namespace neogfx
 			result.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y });
 			result.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y });
 		}
-		return result;
+		return std::move(result);
 	};
 
 	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre, uint32_t aArcSegments)

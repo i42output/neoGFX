@@ -102,7 +102,7 @@ namespace neogfx
 			virtual void paint_non_client(graphics_context& aGraphicsContext) const
 			{
 				dialog::paint_non_client(aGraphicsContext);
-				rect backgroundRect{ window::client_layout().position(), window::client_layout().extents() };
+				rect backgroundRect{ window::client_widget().position(), window::client_widget().extents() };
 				aGraphicsContext.scissor_on(update_rect());
 				draw_alpha_background(aGraphicsContext, backgroundRect);
 				aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));

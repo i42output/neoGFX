@@ -98,7 +98,7 @@ namespace neogfx
 	protected:
 		size minimum_size(const optional_size& aAvailableSpace) const override;
 	protected:
-		colour background_colour() const override;
+		bool transparent_background() const override;
 	private:
 		vertical_layout iLayout;
 	};
@@ -129,9 +129,9 @@ namespace neogfx
 			return size{};
 	}
 
-	colour window::client::background_colour() const
+	bool window::client::transparent_background() const
 	{
-		return parent().background_colour();
+		return true;
 	}
 
 	window::window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :

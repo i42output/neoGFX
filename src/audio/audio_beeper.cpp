@@ -33,7 +33,7 @@ namespace neogfx
 		iSample.beep(aDuration, aFrequency);
 	}
 
-	void audio_beeper::beep(const envelope& aEnvelope, double aFrequency)
+	void audio_beeper::beep(const audio_envelope& aEnvelope, double aFrequency)
 	{
 		iSample.beep(aEnvelope, aFrequency);
 	}

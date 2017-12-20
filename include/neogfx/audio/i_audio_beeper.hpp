@@ -22,7 +22,7 @@
 
 namespace neogfx
 {
-	struct envelope
+	struct audio_envelope
 	{
 		double attack;
 		double decay;
@@ -34,7 +34,7 @@ namespace neogfx
 	{
 	public:
 		virtual void beep(double aDuration, double aFrequency) = 0;
-		virtual void beep(const envelope& aEnvelope, double aFrequency) = 0;
+		virtual void beep(const audio_envelope& aEnvelope, double aFrequency) = 0;
 		virtual void silence(double aDuration) = 0;
 		virtual void repeat_start(uint32_t aRepeatCount) = 0;
 		virtual void repeat_end() = 0;

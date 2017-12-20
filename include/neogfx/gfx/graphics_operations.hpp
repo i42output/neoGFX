@@ -360,7 +360,7 @@ namespace neogfx
 			}
 		}
 
-		typedef neolib::vecarray<operation, 1, -1> batch;
+		typedef neolib::vecarray<operation, 8, -1> batch;
 
 		typedef std::deque<batch> queue;
 	}

@@ -29,7 +29,7 @@ namespace neogfx
 	{
 	private:
 		struct item_beep { double duration; double frequency; };
-		struct item_envelope { neogfx::envelope envelope; double frequency; };
+		struct item_envelope { audio_envelope envelope; double frequency; };
 		struct item_silence { double duration; };
 		struct item_repeat_start { uint32_t repeatCount; };
 		struct item_repeat_end {};
@@ -44,7 +44,7 @@ namespace neogfx
 		frame_index write(frame_index aPosition, const void* aBuffer, frame_index aBufferSize) override;
 	public:
 		void beep(double aDuration, double aFrequency) override;
-		void beep(const envelope& aEnvelope, double aFrequency) override;
+		void beep(const audio_envelope& aEnvelope, double aFrequency) override;
 		void silence(double aDuration) override;
 		void repeat_start(uint32_t aRepeatCount) override;
 		void repeat_end() override;

@@ -54,7 +54,7 @@ namespace neogfx
 		iItems.push_back(item_beep{ aDuration, aFrequency });
 	}
 
-	void audio_beeper_sample::beep(const envelope& aEnvelope, double aFrequency)
+	void audio_beeper_sample::beep(const audio_envelope& aEnvelope, double aFrequency)
 	{
 		iItems.push_back(item_envelope{ aEnvelope, aFrequency });
 	}

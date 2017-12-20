@@ -31,7 +31,7 @@ namespace neogfx
 		audio_beeper(i_audio_playback_device& aDevice);
 	public:
 		void beep(double aDuration, double aFrequency) override;
-		void beep(const envelope& aEnvelope, double aFrequency) override;
+		void beep(const audio_envelope& aEnvelope, double aFrequency) override;
 		void silence(double aDuration) override;
 		void repeat_start(uint32_t aRepeatCount) override;
 		void repeat_end() override;
