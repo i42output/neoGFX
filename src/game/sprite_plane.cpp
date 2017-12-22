@@ -200,7 +200,7 @@ namespace neogfx
 	i_physical_object& sprite_plane::create_earth()
 	{
 		auto& earth = create_physical_object();
-		earth.set_position({ 0.0, -6371000.0, 0.0 });
+		earth.set_position(vec3{ 0.0, -6371000.0, 0.0 });
 		earth.set_mass(5.972e24);
 		return earth;
 	}

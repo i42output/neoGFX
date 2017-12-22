@@ -1491,11 +1491,15 @@ namespace neogfx
 		switch (aSystem)
 		{
 		case neogfx::logical_coordinate_system::Specified:
-			return aCoordinates;
+			break;
 		case neogfx::logical_coordinate_system::AutomaticGui:
-			return aCoordinates = std::make_pair<vec2, vec2>({ 0.0, aSurfaceSize.cy }, { aSurfaceSize.cx, 0.0 });
+			aCoordinates.first = vec2{ 0.0, aSurfaceSize.cy };
+			aCoordinates.second = vec2{ aSurfaceSize.cx, 0.0 };
+			break;
 		case neogfx::logical_coordinate_system::AutomaticGame:
-			return aCoordinates = std::make_pair<vec2, vec2>({ 0.0, 0.0 }, { aSurfaceSize.cx, aSurfaceSize.cy });
+			aCoordinates.first = vec2{ 0.0, 0.0 };
+			aCoordinates.second = vec2{ aSurfaceSize.cx, aSurfaceSize.cy };
+			break;
 		}
 		return aCoordinates;
 	}

@@ -65,38 +65,69 @@ namespace neogfx
 		return font_info::WeightNormal;
 	}
 
-	font_info::font_info() :
+	class font_info::instance
+	{
+		friend class font_info;
+	public:
+		instance();
+		instance(const std::string& aFamilyName, style_e aStyle, point_size aSize);
+		instance(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize);
+		instance(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize);
+		instance(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
+		instance(const instance& aOther);
+		~instance();
+	public:
+		instance& operator=(const instance& aOther);
+	private:
+		std::string iFamilyName;
+		optional_style iStyle;
+		optional_style_name iStyleName;
+		bool iUnderline;
+		weight_e iWeight;
+		point_size iSize;
+		bool iKerning;
+	};
+
+	font_info::instance::instance() :
 		iSize{}, iUnderline{ false }, iWeight{ WeightNormal }, iKerning{ false }
 	{
 	}
 
-	font_info::font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
+	font_info::instance::instance(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
 		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style(aStyle) }, iSize{ aSize }, iKerning{ false }
 	{
 	}
 
-	font_info::font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
+	font_info::instance::instance(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
 		iFamilyName{ aFamilyName }, iStyleName{ aStyleName }, iUnderline(false), iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ false }
 	{
-
 	}
 
-	font_info::font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
+	font_info::instance::instance(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
 		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iStyleName{ aStyleName }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ false }
 	{
-
 	}
 
-	font_info::font_info(const font_info& aOther) :
+	font_info::instance::instance(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
+		iFamilyName{ aFamilyName },
+		iStyle{ aStyle },
+		iStyleName{ aStyleName },
+		iUnderline{ false },
+		iWeight{ aStyleName != boost::none ? weight_from_style_name(*aStyleName) : aStyle != boost::none ? weight_from_style(*aStyle) :	WeightNormal },
+		iSize{ aSize },
+		iKerning{ true }
+	{
+	}
+	font_info::instance::instance(const font_info::instance& aOther) :
 		iFamilyName{ aOther.iFamilyName }, iStyle{ aOther.iStyle }, iStyleName{ aOther.iStyleName }, iUnderline{ aOther.iUnderline }, iWeight{ aOther.iWeight }, iSize{ aOther.iSize }, iKerning{ aOther.iKerning }
 	{
 	}
 
-	font_info::~font_info()
+	font_info::instance::~instance()
 	{
 	}
 
-	font_info& font_info::operator=(const font_info& aOther)
+	font_info::instance& font_info::instance::operator=(const instance& aOther)
 	{
 		iFamilyName = aOther.iFamilyName;
 		iStyle = aOther.iStyle;
@@ -108,105 +139,145 @@ namespace neogfx
 		return *this;
 	}
 
+	font_info::font_info() :
+		iInstance{ std::make_shared<instance>() }
+	{
+	}
+
+	font_info::font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
+		iInstance{ std::make_shared<instance>(aFamilyName, aStyle, aSize) }
+	{
+	}
+
+	font_info::font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
+		iInstance{ std::make_shared<instance>(aFamilyName, aStyleName, aSize) }
+	{
+
+	}
+
+	font_info::font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
+		iInstance{ std::make_shared<instance>(aFamilyName, aStyle, aStyleName, aSize) }
+	{
+
+	}
+
+	font_info::font_info(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
+		iInstance{ std::make_shared<instance>(aFamilyName, aStyle, aStyleName, aSize) }
+	{
+	}
+
+	font_info::font_info(const font_info& aOther) :
+		iInstance{ aOther.iInstance }
+	{
+	}
+
+	font_info::~font_info()
+	{
+	}
+
+	font_info& font_info::operator=(const font_info& aOther)
+	{
+		iInstance = aOther.iInstance;
+		return *this;
+	}
+
 	const std::string& font_info::family_name() const
 	{
-		return iFamilyName;
+		return iInstance->iFamilyName;
 	}
 
 	bool font_info::style_available() const
 	{
-		return iStyle != boost::none;
+		return iInstance->iStyle != boost::none;
 	}
 
 	font_info::style_e font_info::style() const
 	{
 		if (style_available())
-			return *iStyle;
+			return *iInstance->iStyle;
 		else
 			throw unknown_style();
 	}
 
 	bool font_info::style_name_available() const
 	{
-		return iStyleName != boost::none;
+		return iInstance->iStyleName != boost::none;
 	}
 
 	const std::string& font_info::style_name() const
 	{
 		if (style_name_available())
-			return *iStyleName;
+			return *iInstance->iStyleName;
 		else
 			throw unknown_style_name();
 	}
 
 	bool font_info::underline() const
 	{
-		return iUnderline || (font_info::style_available() && (font_info::style() & Underline) == Underline);
+		return iInstance->iUnderline || (font_info::style_available() && (font_info::style() & Underline) == Underline);
 	}
 
 	void font_info::set_underline(bool aUnderline)
 	{
-		iUnderline = aUnderline;
+		if (iInstance->iUnderline != aUnderline)
+		{
+			iInstance = std::make_shared<instance>(*iInstance);
+			iInstance->iUnderline = aUnderline;
+		}
 	}
 
 	font_info::weight_e font_info::weight() const
 	{
-		return iWeight;
+		return iInstance->iWeight;
 	}
 
 	font::point_size font_info::size() const
 	{
-		return iSize;
+		return iInstance->iSize;
 	}
 
 	bool font_info::kerning() const
 	{
-		return iKerning;
+		return iInstance->iKerning;
 	}
 
 	void font_info::enable_kerning()
 	{
-		iKerning = true;
+		if (iInstance->iKerning != true)
+		{
+			iInstance = std::make_shared<instance>(*iInstance);
+			iInstance->iKerning = true;
+		}
 	}
 
 	void font_info::disable_kerning()
 	{
-		iKerning = false;
+		if (iInstance->iKerning != false)
+		{
+			iInstance = std::make_shared<instance>(*iInstance);
+			iInstance->iKerning = false;
+		}
 	}
 
 	font_info font_info::with_style(style_e aStyle) const
 	{
-		return font_info(iFamilyName, aStyle, optional_style_name{}, iSize);
+		return font_info(iInstance->iFamilyName, aStyle, optional_style_name{}, iInstance->iSize);
 	}
 
 	font_info font_info::with_size(point_size aSize) const
 	{
-		return font_info(iFamilyName, iStyle, iStyleName, aSize);
+		return font_info(iInstance->iFamilyName, iInstance->iStyle, iInstance->iStyleName, aSize);
 	}
 
 	bool font_info::operator==(const font_info& aRhs) const
 	{
-		return iFamilyName == aRhs.iFamilyName &&
-			iStyle == aRhs.iStyle &&
-			iStyleName == aRhs.iStyleName &&
-			iUnderline == aRhs.iUnderline &&
-			iSize == aRhs.iSize &&
-			iKerning == aRhs.iKerning;
-	}
-
-	font_info::font_info(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
-		iFamilyName{ aFamilyName },
-		iStyle{ aStyle },
-		iStyleName{ aStyleName },
-		iUnderline{ false },
-		iWeight{ aStyleName != boost::none ?
-			weight_from_style_name(*aStyleName) :
-			aStyle != boost::none ?
-				weight_from_style(*aStyle) :
-				WeightNormal },
-		iSize{ aSize },
-		iKerning{ true }
-	{
+		return iInstance == aRhs.iInstance ||
+			(iInstance->iFamilyName == aRhs.iInstance->iFamilyName &&
+				iInstance->iStyle == aRhs.iInstance->iStyle &&
+				iInstance->iStyleName == aRhs.iInstance->iStyleName &&
+				iInstance->iUnderline == aRhs.iInstance->iUnderline &&
+				iInstance->iSize == aRhs.iInstance->iSize &&
+				iInstance->iKerning == aRhs.iInstance->iKerning);
 	}
 
 	bool font_info::operator!=(const font_info& aRhs) const
@@ -216,9 +287,9 @@ namespace neogfx
 
 	bool font_info::operator<(const font_info& aRhs) const
 	{
-		return std::tie(iFamilyName, iStyle, iStyleName, iUnderline, iSize, iKerning) < std::tie(aRhs.iFamilyName, aRhs.iStyle, aRhs.iStyleName, aRhs.iUnderline, aRhs.iSize, aRhs.iKerning);
+		return std::tie(iInstance->iFamilyName, iInstance->iStyle, iInstance->iStyleName, iInstance->iUnderline, iInstance->iSize, iInstance->iKerning) < 
+			std::tie(aRhs.iInstance->iFamilyName, aRhs.iInstance->iStyle, aRhs.iInstance->iStyleName, aRhs.iInstance->iUnderline, aRhs.iInstance->iSize, aRhs.iInstance->iKerning);
 	}
-
 
 	class font::instance
 	{
@@ -466,6 +537,22 @@ namespace neogfx
 		}
 		else
 			return 0.0;
+	}
+
+	bool font::operator==(const font& aRhs) const
+	{
+		return iInstance->native_font_face().handle() == aRhs.iInstance->native_font_face().handle() &&
+			underline() == aRhs.underline() && kerning() == aRhs.kerning();
+	}
+
+	bool font::operator!=(const font& aRhs) const
+	{
+		return !(*this == aRhs);
+	}
+
+	bool font::operator<(const font& aRhs) const
+	{
+		return font_info::operator<(aRhs);
 	}
 
 	i_native_font_face& font::native_font_face() const

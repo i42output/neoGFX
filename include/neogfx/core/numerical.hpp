@@ -69,17 +69,24 @@ namespace neogfx
 		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2, Type> type; };
 	public:
 		basic_vector() : v{} {}
-		explicit basic_vector(value_type value) : v{{value}} {}
+		template <typename SFINAE = void>
+		explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type* = 0) : v{ {x} } {}
+		template <typename SFINAE = void>
+		explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type* = 0) : v{ {x, y} } {}
+		template <typename SFINAE = void>
+		explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type* = 0) : v{ {x, y, z} } {}
+		template <typename SFINAE = void>
+		explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type* = 0) : v{ { x, y, z, w } } {}
 		template <typename... Arguments>
 		explicit basic_vector(value_type value, Arguments... aArguments) : v{{value, aArguments...}} {}
-		basic_vector(const array_type& a) : v(a) {}
-		basic_vector(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type()); }
-		basic_vector(const basic_vector& other) : v(other.v) {}
-		basic_vector(basic_vector&& other) : v(std::move(other.v)) {}
+		basic_vector(const array_type& v) : v{ v } {}
+		basic_vector(const basic_vector& other) : v{ other.v } {}
+		basic_vector(basic_vector&& other) : v{ std::move(other.v) } {}
 		template <typename T2>
 		basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
 		basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
 		basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
+		basic_vector& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
 	public:
 		static uint32_t size() { return Size; }
 		value_type operator[](uint32_t aIndex) const { return v[aIndex]; }
@@ -167,18 +174,26 @@ namespace neogfx
 		template <uint32_t Size2> struct rebind { typedef basic_vector<T, Size2, Type> type; };
 	public:
 		basic_vector() : v{} {}
-		explicit basic_vector(value_type value) : v{{value}} {}
+		template <typename SFINAE = void>
+		explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type* = 0) : v{ { x } } {}
+		template <typename SFINAE = void>
+		explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type* = 0) : v{ { x, y } } {}
+		template <typename SFINAE = void>
+		explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type* = 0) : v{ { x, y, z } } {}
+		template <typename SFINAE = void>
+		explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type* = 0) : v{ { x, y, z, w } } {}
 		template <typename... Arguments>
 		explicit basic_vector(const value_type& value, Arguments&&... aArguments) : v{{value, std::forward<Arguments>(aArguments)...}} {}
 		template <typename... Arguments>
 		explicit basic_vector(value_type&& value, Arguments&&... aArguments) : v{{std::move(value), std::forward<Arguments>(aArguments)...}} {}
-		basic_vector(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::fill(v.begin() + (values.end() - values.begin()), v.end(), value_type()); }
-		basic_vector(const basic_vector& other) : v(other.v) {}
-		basic_vector(basic_vector&& other) : v(std::move(other.v)) {}
+		basic_vector(const array_type& v) : v{ v } {}
+		basic_vector(const basic_vector& other) : v{ other.v } {}
+		basic_vector(basic_vector&& other) : v{ std::move(other.v) } {}
 		template <typename T2>
 		basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
 		basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
 		basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
+		basic_vector& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
 	public:
 		static uint32_t size() { return Size; }
 		const value_type& operator[](uint32_t aIndex) const { return v[aIndex]; }
@@ -507,7 +522,7 @@ namespace neogfx
 		typedef typename basic_vector<T, Columns>::input_reference_type input_reference_type;
 	public:
 		basic_matrix() : m{{}} {}
-		basic_matrix(std::initializer_list<column_type> aColumns) { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
+		basic_matrix(std::initializer_list<std::initializer_list<value_type>> aColumns) { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
 		basic_matrix(const basic_matrix& other) : m{other.m} {}
 		basic_matrix(basic_matrix&& other) : m{std::move(other.m)} {}
 		template <typename T2>

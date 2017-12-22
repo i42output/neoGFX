@@ -250,5 +250,6 @@ namespace neogfx
 		optional_font iFont;
 		bool iIgnoreMouseEvents;
 		bool iIgnoreNonClientMouseEvents;
+		mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
 	};
 }

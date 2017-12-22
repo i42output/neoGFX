@@ -138,7 +138,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
-		spaceshipSprite.physics().set_acceleration({
+		spaceshipSprite.physics().set_acceleration(ng::vec3{
 			keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
 			keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0 });
 		if (keyboard.is_key_pressed(ng::ScanCode_X))

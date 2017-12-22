@@ -69,11 +69,15 @@ namespace neogfx
 		switch (iLogicalCoordinateSystem)
 		{
 		case neogfx::logical_coordinate_system::Specified:
-			return iLogicalCoordinates;
+			break;
 		case neogfx::logical_coordinate_system::AutomaticGui:
-			return iLogicalCoordinates = std::make_pair<vec2, vec2>({ 0.0, extents().cy }, { extents().cx, 0.0 });
+			iLogicalCoordinates.first = vec2{ 0.0, extents().cy };
+			iLogicalCoordinates.second = vec2{ extents().cx, 0.0 };
+			break;
 		case neogfx::logical_coordinate_system::AutomaticGame:
-			return iLogicalCoordinates = std::make_pair<vec2, vec2>({ 0.0, 0.0 }, { extents().cx, extents().cy });
+			iLogicalCoordinates.first = vec2{ 0.0, 0.0 };
+			iLogicalCoordinates.second = vec2{ extents().cx, extents().cy };
+			break;
 		}
 		return iLogicalCoordinates;
 	}

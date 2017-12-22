@@ -212,6 +212,7 @@ namespace neogfx
 		i_action& iActionSelectAll;
 		neolib::callback_timer iStandardActionManager;
 		mnemonic_list iMnemonics;
-		std::unique_ptr<event_processing_context> iContext;
+		event_processing_context iAppContext;
+		event_processing_context iAppMessageQueueContext;
 	};
 }

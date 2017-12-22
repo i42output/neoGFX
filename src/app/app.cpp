@@ -70,8 +70,13 @@ namespace neogfx
 	}
 
 	app::event_processing_context::event_processing_context(app& aParent, const std::string& aName) :
-		iContext(aParent.message_queue()),
-		iName(aName)
+		iContext{ aParent.have_message_queue() ? 
+			aParent.message_queue() : 
+			aParent.create_message_queue([this, &aParent]() 
+			{ 
+				return aParent.process_events(aParent.iAppMessageQueueContext); 
+			}) },
+		iName{ aName }
 	{
 	}
 
@@ -163,17 +168,10 @@ namespace neogfx
 				iActionDelete.disable();
 				iActionSelectAll.disable();
 			}
-		}, 100 }
+		}, 100 },
+		iAppContext{ *this, "neogfx::app::iAppContext" },
+		iAppMessageQueueContext{ *this, "neogfx::app::iAppMessageQueueContext" }
 	{
-		create_message_queue([this]() -> bool 
-		{ 
-			auto result = process_events(*iContext); 
-			rendering_engine().render_now();
-			return result;
-		});
-
-		iContext = std::make_unique<event_processing_context>(*this, "neogfx::app");
-
 		iKeyboard->grab_keyboard(*this);
 
 		style whiteStyle("Default");
@@ -230,7 +228,7 @@ namespace neogfx
 			surface_manager().invalidate_surfaces();
 			iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
 			while (!iQuitResultCode.is_initialized())
-				process_events(*iContext);
+				process_events(iAppContext);
 			return *iQuitResultCode;
 		}
 		catch (std::exception& e)
@@ -496,7 +494,7 @@ namespace neogfx
 			iMnemonics.erase(n);
 	}
 
-	bool app::process_events(i_event_processing_context&)
+	bool app::process_events(i_event_processing_context& aContext)
 	{
 		if (rendering_engine().creating_window() || surface_manager().initialising_surface())
 			return false;

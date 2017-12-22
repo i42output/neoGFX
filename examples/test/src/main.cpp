@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 		ng::window window(ng::size{ 768, 688 });
 		auto& layout0 = window.client_layout();
 
-		bool showFps = false;
+		bool showFps = true;
 		auto fpsFont = window.font().with_size(18);
 		window.paint_overlay([&showFps, &window, fpsFont](ng::graphics_context& aGc)
 		{
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
 				std::ostringstream oss;
 				oss << window.fps() << " FPS";
 				aGc.fill_rect(ng::rect{ 100, 100, 128, 32 }, ng::colour::DarkBlue);
-				aGc.draw_text(ng::point{ 100, 100 }, oss.str(), fpsFont, ng::colour::White);
+				aGc.draw_text(ng::point{ 100, 100 }, oss.str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
 			}
 		});
 

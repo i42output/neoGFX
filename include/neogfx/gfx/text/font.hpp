@@ -68,6 +68,8 @@ namespace neogfx
 	private:
 		typedef boost::optional<style_e> optional_style;
 		typedef boost::optional<std::string> optional_style_name;
+	private:
+		class instance;
 	public:
 		font_info();
 		font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize);
@@ -102,13 +104,7 @@ namespace neogfx
 		static weight_e weight_from_style(font_info::style_e aStyle);
 		static weight_e weight_from_style_name(std::string aStyleName);
 	private:
-		std::string iFamilyName;
-		optional_style iStyle;
-		optional_style_name iStyleName;
-		bool iUnderline;
-		weight_e iWeight;
-		point_size iSize;
-		bool iKerning;
+		mutable std::shared_ptr<instance> iInstance;
 	};
 
 	class font : public font_info
@@ -154,6 +150,10 @@ namespace neogfx
 		dimension line_spacing() const;
 		using font_info::kerning;
 		dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
+	public:
+		bool operator==(const font& aRhs) const;
+		bool operator!=(const font& aRhs) const;
+		bool operator<(const font& aRhs) const;
 	public:
 		i_native_font_face& native_font_face() const;
 		// attributes

@@ -916,12 +916,15 @@ namespace neogfx
 
 	rect widget::default_clip_rect(bool aIncludeNonClient) const
 	{
+		auto& cachedRect = (aIncludeNonClient ? iDefaultClipRect.first : iDefaultClipRect.second);
+		if (cachedRect != boost::none)
+			return *cachedRect;
 		rect clipRect = to_client_coordinates(window_rect());
 		if (!aIncludeNonClient)
 			clipRect = clipRect.intersection(client_rect());
 		if (has_parent() && !is_root())
 			clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect())));
-		return clipRect;
+		return *(cachedRect = clipRect);
 	}
 
 	bool widget::ready_to_render() const
@@ -935,6 +938,8 @@ namespace neogfx
 			return;
 		if (!requires_update())
 			return;
+
+		iDefaultClipRect = std::make_pair(boost::none, boost::none);
 
 		const rect updateRect = update_rect();
 

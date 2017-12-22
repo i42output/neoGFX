@@ -1050,17 +1050,18 @@ namespace neogfx
 		std::vector<vec2> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates)
 		{
 			std::vector<vec2> result;
+			result.reserve(4);
 			rect normalizedRect = aTextureRect / aTextureStorageSize;
-			result.push_back(vec2{ normalizedRect.top_left().x, normalizedRect.top_left().y });
-			result.push_back(vec2{ normalizedRect.top_right().x, normalizedRect.top_right().y });
-			result.push_back(vec2{ normalizedRect.bottom_right().x, normalizedRect.bottom_right().y });
-			result.push_back(vec2{ normalizedRect.bottom_left().x, normalizedRect.bottom_left().y });
+			result.emplace_back(normalizedRect.top_left().x, normalizedRect.top_left().y);
+			result.emplace_back(normalizedRect.top_right().x, normalizedRect.top_right().y);
+			result.emplace_back(normalizedRect.bottom_right().x, normalizedRect.bottom_right().y);
+			result.emplace_back(normalizedRect.bottom_left().x, normalizedRect.bottom_left().y);
 			if (aLogicalCoordinates.first.y < aLogicalCoordinates.second.y)
 			{
 				std::swap(result[0][1], result[2][1]);
 				std::swap(result[1][1], result[3][1]);
 			}
-			return result;
+			return std::move(result);
 		}
 	}
 
