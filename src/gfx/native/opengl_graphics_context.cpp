@@ -167,6 +167,20 @@ namespace neogfx
 
 	void opengl_graphics_context::flush()
 	{
+		/*
+		std::map<graphics_operation::operation_type, std::pair<int, int>> debug;
+		for (auto& i : iQueue)
+		{
+			auto op = static_cast<graphics_operation::operation_type>(i.front().which());
+			debug[op].first++;
+			debug[op].second += i.size();
+		}
+		std::cout << "---" << std::endl;
+		for (auto& d : debug)
+		{
+			std::cout << to_string(d.first) << ": " << d.second.first << ", " << d.second.second << std::endl;
+		}
+		std::cout << "---" << std::endl; */
 		while (!iQueue.empty())
 		{
 			const auto& opBatch = iQueue.front();
@@ -838,7 +852,8 @@ namespace neogfx
 
 	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill)
 	{
-		graphics_operation::batch batch;
+		thread_local graphics_operation::batch batch;
+		batch.clear();
 		batch.push_back(graphics_operation::fill_rect{aRect, aFill});
 		fill_rect(batch);
 	}

@@ -212,8 +212,11 @@ namespace neogfx
 
 	void graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
 	{
-		iLogicalCoordinateSystem = aSystem;
-		iNativeGraphicsContext->enqueue(graphics_operation::set_logical_coordinate_system{ aSystem });
+		if (iLogicalCoordinateSystem != aSystem)
+		{
+			iLogicalCoordinateSystem = aSystem;
+			iNativeGraphicsContext->enqueue(graphics_operation::set_logical_coordinate_system{ aSystem });
+		}
 	}
 
 	const std::pair<vec2, vec2>& graphics_context::logical_coordinates() const
@@ -223,8 +226,11 @@ namespace neogfx
 
 	void graphics_context::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const
 	{
-		iLogicalCoordinates = aCoordinates;
-		iNativeGraphicsContext->enqueue(graphics_operation::set_logical_coordinates{ aCoordinates });
+		if (iLogicalCoordinates != aCoordinates)
+		{
+			iLogicalCoordinates = aCoordinates;
+			iNativeGraphicsContext->enqueue(graphics_operation::set_logical_coordinates{ aCoordinates });
+		}
 	}
 
 	void graphics_context::set_default_font(const font& aDefaultFont) const
@@ -659,8 +665,11 @@ namespace neogfx
 
 	void graphics_context::set_opacity(double aOpacity)
 	{
-		iOpacity = aOpacity;
-		iNativeGraphicsContext->enqueue(graphics_operation::set_opacity{ aOpacity });
+		if (iOpacity != aOpacity)
+		{
+			iOpacity = aOpacity;
+			iNativeGraphicsContext->enqueue(graphics_operation::set_opacity{ aOpacity });
+		}
 	}
 
 	smoothing_mode graphics_context::smoothing_mode() const
@@ -670,8 +679,11 @@ namespace neogfx
 
 	void graphics_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const
 	{
-		iSmoothingMode = aSmoothingMode;
-		iNativeGraphicsContext->enqueue(graphics_operation::set_smoothing_mode{ aSmoothingMode });
+		if (iSmoothingMode != aSmoothingMode)
+		{
+			iSmoothingMode = aSmoothingMode;
+			iNativeGraphicsContext->enqueue(graphics_operation::set_smoothing_mode{ aSmoothingMode });
+		}
 	}
 
 	void graphics_context::push_logical_operation(logical_operation aLogicalOperation) const
@@ -701,14 +713,20 @@ namespace neogfx
 
 	void graphics_context::subpixel_rendering_on() const
 	{
-		iSubpixelRendering = true;
-		iNativeGraphicsContext->enqueue(graphics_operation::subpixel_rendering_on{});
+		if (iSubpixelRendering != true)
+		{
+			iSubpixelRendering = true;
+			iNativeGraphicsContext->enqueue(graphics_operation::subpixel_rendering_on{});
+		}
 	}
 
 	void graphics_context::subpixel_rendering_off() const
 	{
-		iSubpixelRendering = false;
-		iNativeGraphicsContext->enqueue(graphics_operation::subpixel_rendering_off{});
+		if (iSubpixelRendering != false)
+		{
+			iSubpixelRendering = false;
+			iNativeGraphicsContext->enqueue(graphics_operation::subpixel_rendering_off{});
+		}
 	}
 
 	void graphics_context::clear(const colour& aColour) const

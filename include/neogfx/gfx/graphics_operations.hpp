@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #include <neolib/variant.hpp>
 #include <neolib/vecarray.hpp>
 #include <neogfx/core/geometry.hpp>
@@ -307,6 +308,49 @@ namespace neogfx
 			DrawTextures
 		};
 
+		inline std::string to_string(operation_type aOpType)
+		{
+			switch (aOpType)
+			{
+			case Invalid: return "Invalid";
+			case SetLogicalCoordinateSystem: return "SetLogicalCoordinateSystem";
+			case SetLogicalCoordinates: return "SetLogicalCoordinates";
+			case ScissorOn: return "ScissorOn";
+			case ScissorOff: return "ScissorOff";
+			case ClipToRect: return "ClipToRect";
+			case ClipToPath: return "ClipToPath";
+			case ResetClip: return "ResetClip";
+			case SetOpacity: return "SetOpacity";
+			case SetSmoothingMode: return "SetSmoothingMode";
+			case PushLogicalOperation: return "PushLogicalOperation";
+			case PopLogicalOperation: return "PopLogicalOperation";
+			case LineStippleOn: return "LineStippleOn";
+			case LineStippleOff: return "LineStippleOff";
+			case SubpixelRenderingOn: return "SubpixelRenderingOn";
+			case SubpixelRenderingOff: return "SubpixelRenderingOff";
+			case Clear: return "Clear";
+			case ClearDepthBuffer: return "ClearDepthBuffer";
+			case SetPixel: return "SetPixel";
+			case DrawPixel: return "DrawPixel";
+			case DrawLine: return "DrawLine";
+			case DrawRect: return "DrawRect";
+			case DrawRoundedRect: return "DrawRoundedRect";
+			case DrawCircle: return "DrawCircle";
+			case DrawArc: return "DrawArc";
+			case DrawPath: return "DrawPath";
+			case DrawShape: return "DrawShape";
+			case FillRect: return "FillRect";
+			case FillRoundedRect: return "FillRoundedRect";
+			case FillCircle: return "FillCircle";
+			case FillArc: return "FillArc";
+			case FillPath: return "FillPath";
+			case FillShape: return "FillShape";
+			case DrawGlyph: return "DrawGlyph";
+			case DrawTextures: return "DrawTextures";
+			default: return "";
+			}
+		}
+
 		bool inline batchable(const operation& aLeft, const operation& aRight)
 		{
 			if (aLeft.which() != aRight.which())
@@ -362,6 +406,6 @@ namespace neogfx
 
 		typedef neolib::vecarray<operation, 8, -1> batch;
 
-		typedef std::deque<batch> queue;
+		typedef std::deque<batch, boost::fast_pool_allocator<batch>> queue;
 	}
 }
