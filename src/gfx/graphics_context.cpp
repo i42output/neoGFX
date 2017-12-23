@@ -758,7 +758,8 @@ namespace neogfx
 	{
 		try
 		{
-			iNativeGraphicsContext->enqueue(graphics_operation::draw_glyph{ to_device_units(aPoint) + iOrigin, aGlyph, aFont, aAppearance });
+			if (!aGlyph.is_whitespace())
+				iNativeGraphicsContext->enqueue(graphics_operation::draw_glyph{ to_device_units(aPoint) + iOrigin, aGlyph, aFont, aAppearance });
 			if (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic()))
 				draw_glyph_underline(aPoint, aGlyph, aFont, aAppearance);
 		}

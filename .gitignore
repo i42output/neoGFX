@@ -211,3 +211,4 @@ Debug
 /3rdparty/glew/glew-1.13.0/lib/glew32.lib
 /3rdparty/glew/glew-1.13.0/lib/glew32d.lib
 /examples/games/video_poker/build/win32/vs2015/video_poker.aps
+/tools/nrc/build/win32/vs2015/nrc.vcxproj.user

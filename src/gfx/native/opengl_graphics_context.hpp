@@ -72,7 +72,7 @@ namespace neogfx
 		void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const;
 		void scissor_on(const rect& aRect);
 		void scissor_off();
-		optional_rect scissor_rect() const;
+		const optional_rect& scissor_rect() const;
 		void clip_to(const rect& aRect);
 		void clip_to(const path& aPath, dimension aPathOutline);
 		void reset_clip();
@@ -124,6 +124,7 @@ namespace neogfx
 		std::list<use_shader_program> iShaderProgramStack;
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;
+		mutable optional_rect iScissorRect;
 		GLint iPreviousTexture;
 		bool iLineStippleActive;
 		std::vector<float> iGradientStopPositions;
