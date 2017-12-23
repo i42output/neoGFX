@@ -81,16 +81,21 @@ namespace neogfx
 			return static_variant_cast<check_box_ptr&>(iTitle)->label();
 	}
 
+	bool group_box::has_check_box() const
+	{
+		return iTitle.is<check_box_ptr>();
+	}
+
 	const check_box& group_box::check_box() const
 	{
-		if (iTitle.is<check_box_ptr>())
+		if (has_check_box())
 			return *static_variant_cast<const check_box_ptr&>(iTitle);
 		throw not_checkable();
 	}
 
 	check_box& group_box::check_box()
 	{
-		if (iTitle.is<check_box_ptr>())
+		if (has_check_box())
 			return *static_variant_cast<check_box_ptr&>(iTitle);
 		throw not_checkable();
 	}

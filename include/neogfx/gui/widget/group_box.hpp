@@ -43,6 +43,7 @@ namespace neogfx
 		void set_checkable(bool aCheckable);
 		const neogfx::label& label() const;
 		neogfx::label& label();
+		bool has_check_box() const;
 		const neogfx::check_box& check_box() const;
 		neogfx::check_box& check_box();
 		void set_item_layout(i_layout& aItemLayout);

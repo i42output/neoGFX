@@ -159,7 +159,8 @@ int main(int argc, char* argv[])
 		ng::window window(ng::size{ 768, 688 });
 		auto& layout0 = window.client_layout();
 
-		bool showFps = true;
+		bool showFps = false;
+		bool fullRefresh = false;
 		auto fpsFont = window.font().with_size(18);
 		window.paint_overlay([&showFps, &window, fpsFont](ng::graphics_context& aGc)
 		{
@@ -172,9 +173,9 @@ int main(int argc, char* argv[])
 			}
 		});
 
-		window.surface().rendering_finished([&showFps, &window]()
+		window.surface().rendering_finished([&fullRefresh, &window]()
 		{
-			if (showFps)
+			if (fullRefresh)
 				window.update();
 		});
 		
@@ -458,10 +459,12 @@ int main(int argc, char* argv[])
 		});
 		ng::check_box columns(layoutRadiosAndChecks, "Columns");
 		ng::check_box groupBoxCheckable(layoutRadiosAndChecks, "Group Box Checkable");
-		groupBoxCheckable.checked([&showFps, &groupBox]()
+		groupBoxCheckable.checked([&showFps, &fullRefresh, &groupBox]()
 		{
 			showFps = true;
 			groupBox.set_checkable(true);
+			groupBox.check_box().checked([&fullRefresh]() { fullRefresh = true; });
+			groupBox.check_box().unchecked([&fullRefresh]() { fullRefresh = false; });
 		});
 		groupBoxCheckable.unchecked([&showFps, &groupBox]()
 		{
