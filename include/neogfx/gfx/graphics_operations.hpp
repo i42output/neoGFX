@@ -404,7 +404,7 @@ namespace neogfx
 			}
 		}
 
-		typedef neolib::vecarray<operation, 8, -1> batch;
+		typedef neolib::vecarray<operation, 16, -1, neolib::nocheck> batch;
 
 		typedef std::deque<batch, boost::fast_pool_allocator<batch>> queue;
 	}

@@ -180,7 +180,9 @@ namespace neogfx
 		{
 			std::cout << to_string(d.first) << ": " << d.second.first << ", " << d.second.second << std::endl;
 		}
-		std::cout << "---" << std::endl; */
+		std::cout << "---" << std::endl;
+		*/
+
 		while (!iQueue.empty())
 		{
 			const auto& opBatch = iQueue.front();
