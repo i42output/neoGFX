@@ -861,7 +861,7 @@ namespace neogfx
 		for (const auto& op : aFillRectOps)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(op);
-			auto rv = rect_vertices(drawOp.rect, 0.0, rect_type::FilledTriangleFan);
+			auto rv = rect_vertices(drawOp.rect, 0.0, rect_type::FilledTriangles);
 			iVertexArrays.vertices().insert(iVertexArrays.vertices().end(), rv.begin(), rv.end());
 			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), 6, vec2{});
 			auto c = drawOp.fill.is<colour>() ?
@@ -876,8 +876,7 @@ namespace neogfx
 
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		for (std::size_t i = 0; i < iVertexArrays.vertices().size(); i += 6)
-			glCheck(glDrawArrays(GL_TRIANGLE_FAN, i, 6));
+		glCheck(glDrawArrays(GL_TRIANGLES, 0, iVertexArrays.vertices().size()));
 
 		if (firstOp.fill.is<gradient>())
 			gradient_off();
