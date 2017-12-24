@@ -55,6 +55,7 @@ namespace neogfx
 		opengl_buffer(std::size_t aSize) :
 			iSize{ aSize }, iMemory{ nullptr }
 		{
+			glCheck(glFinish());
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			glCheck(glGenBuffers(1, &iHandle));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
@@ -225,9 +226,9 @@ namespace neogfx
 		opengl_standard_vertex_arrays() :
 			iShaderProgram{ nullptr }
 		{
-			vertices().reserve(32);
-			colours().reserve(32);
-			texture_coords().reserve(32);
+			vertices().reserve(1024);
+			colours().reserve(1024);
+			texture_coords().reserve(1024);
 		}
 	public:
 		vertex_array& vertices()
