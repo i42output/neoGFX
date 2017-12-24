@@ -83,7 +83,7 @@ namespace neogfx
 			throw failed_to_create_system_cache_window(SDL_GetError());
 		iContext = create_context(iSystemCacheWindowHandle);
 		SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), iContext);
-		SDL_GL_SetSwapInterval(1);
+		//SDL_GL_SetSwapInterval(1);
 		glCheck(glEnable(GL_TEXTURE_2D));
 		glCheck(glEnable(GL_MULTISAMPLE));
 		glCheck(glEnable(GL_BLEND));
