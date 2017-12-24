@@ -55,7 +55,6 @@ namespace neogfx
 		opengl_buffer(std::size_t aSize) :
 			iSize{ aSize }, iMemory{ nullptr }
 		{
-			glCheck(glFinish());
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			glCheck(glGenBuffers(1, &iHandle));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
@@ -211,12 +210,19 @@ namespace neogfx
 				const opengl_buffer<vertex_array::value_type>& aPositionBuffer, 
 				const opengl_buffer<colour_array::value_type>& aColourBuffer, 
 				const opengl_buffer<texture_coord_array::value_type>& aTextureCoordBuffer) :
+				iCapacity{ aPositionBuffer.size() },
 				iVertexPositionAttribArray{ aPositionBuffer, aShaderProgram, "VertexPosition" },
 				iVertexColorAttribArray{ aColourBuffer, aShaderProgram, "VertexColor" },
 				iVertexTextureCoordAttribArray{ aTextureCoordBuffer, aShaderProgram, "VertexTextureCoord" }
 			{
 			}
+		public:
+			std::size_t capacity() const
+			{
+				return iCapacity;
+			}
 		private:
+			std::size_t iCapacity;
 			opengl_vertex_array iVao;
 			opengl_vertex_attrib_array<vertex_array::value_type> iVertexPositionAttribArray;
 			opengl_vertex_attrib_array<colour_array::value_type> iVertexColorAttribArray;
@@ -226,9 +232,9 @@ namespace neogfx
 		opengl_standard_vertex_arrays() :
 			iShaderProgram{ nullptr }
 		{
-			vertices().reserve(1024);
-			colours().reserve(1024);
-			texture_coords().reserve(1024);
+			vertices().reserve(4096);
+			colours().reserve(4096);
+			texture_coords().reserve(4096);
 		}
 	public:
 		vertex_array& vertices()
@@ -245,7 +251,7 @@ namespace neogfx
 		}
 		void instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
 		{
-			if (iInstance.get() == nullptr || iShaderProgram != &aShaderProgram)
+			if (iInstance.get() == nullptr || iInstance->capacity() != iVertices.capacity() || iShaderProgram != &aShaderProgram)
 			{
 				iShaderProgram = &aShaderProgram;
 				iInstance.reset();
