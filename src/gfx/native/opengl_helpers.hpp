@@ -49,15 +49,16 @@ namespace neogfx
 	class opengl_buffer
 	{
 	public:
-		typedef T value_type;
+		typedef T item_type;
+		typedef typename item_type::value_type value_type;
 	public:
-		opengl_buffer(std::size_t aSize, std::size_t aElementSize) :
-			iSize{ aSize }, iElementSize { aElementSize	}
+		opengl_buffer(std::size_t aSize) :
+			iSize{ aSize }, iMemory{ nullptr }
 		{
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			glCheck(glGenBuffers(1, &iHandle));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
-			glCheck(glBufferData(GL_ARRAY_BUFFER, iSize * iElementSize * sizeof(value_type), nullptr, GL_DYNAMIC_DRAW));
+			glCheck(glBufferStorage(GL_ARRAY_BUFFER, size() * sizeof(T), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT));
 		}
 		~opengl_buffer()
 		{
@@ -69,34 +70,121 @@ namespace neogfx
 		{
 			return iSize;
 		}
-		std::size_t element_size() const
+		std::size_t arity() const
 		{
-			return iElementSize;
+			return sizeof(item_type) / sizeof(value_type);
 		}
 		GLuint handle() const
 		{
 			return iHandle;
 		}
+		value_type* map()
+		{
+			if (iMemory == nullptr)
+			{
+				glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, size() * sizeof(T), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT)));
+			}
+			return iMemory;
+		}
+		void unmap()
+		{
+			if (iMemory != nullptr)
+			{
+				glCheck(glUnmapNamedBuffer(handle()));
+				iMemory = nullptr;
+			}
+		}
 	private:
 		const std::size_t iSize;
-		const std::size_t iElementSize;
 		GLint iPreviousBindingHandle;
 		GLuint iHandle;
+		value_type* iMemory;
+	};
+
+	template <typename T>
+	class opengl_buffer_allocator_arena
+	{
+	public:
+		typedef opengl_buffer<T> buffer_type;
+		typedef std::unique_ptr<buffer_type> buffer_pointer;
+		typedef std::map<void*, buffer_pointer> arena_map_type;
+	public:
+		static arena_map_type& arena_map()
+		{
+			thread_local arena_map_type tArenaMap;
+			return tArenaMap;
+		}
+	};
+
+	template <typename T, typename OriginalType = T>
+	class opengl_buffer_allocator : public std::allocator<T>, private opengl_buffer_allocator_arena<OriginalType>
+	{
+		template <typename, typename>
+		friend class opengl_buffer_allocator;
+	public:
+		template<class Other>
+		struct rebind
+		{	
+			typedef opengl_buffer_allocator<Other, OriginalType> other;
+		};
+	private:
+		typedef opengl_buffer_allocator_arena<OriginalType>::buffer_type buffer_type;
+		typedef opengl_buffer_allocator_arena<OriginalType>::buffer_pointer buffer_pointer;
+	public:
+		struct no_opengl_buffer : std::logic_error { no_opengl_buffer() : std::logic_error{ "neogfx::opengl_buffer_allocator::no_opengl_buffer" } {} };
+		struct arena_not_found : std::logic_error { arena_not_found() : std::logic_error{ "neogfx::opengl_buffer_allocator::arena_not_found" } {} };
+	private:
+		using opengl_buffer_allocator_arena<OriginalType>::arena_map;
+	public:
+		opengl_buffer_allocator()
+		{
+		}
+		opengl_buffer_allocator(const opengl_buffer_allocator<T, OriginalType>&)
+		{
+		}
+		template <typename T2>
+		opengl_buffer_allocator(const opengl_buffer_allocator<T2, OriginalType>&)
+		{
+		}
+	public:
+		void deallocate(pointer aPointer, size_type)
+		{
+			auto existingArena = arena_map().find(aPointer);
+			if (existingArena == arena_map().end())
+				throw arena_not_found();
+			arena_map().erase(existingArena);
+		}
+		pointer allocate(size_type aCount)
+		{	
+			buffer_pointer newBuffer = std::make_unique<buffer_type>(aCount);
+			auto iterNewBuffer = arena_map().emplace(newBuffer->map(), std::move(newBuffer)).first;
+			return static_cast<pointer>(iterNewBuffer->first);
+		}
+		pointer allocate(size_type aCount, const void *)
+		{
+			return allocate(aCount);
+		}
+	public:
+		static buffer_type& buffer(void* aMemory)
+		{
+			return *arena_map().find(aMemory)->second;
+		}
 	};
 
 	template <typename T>
 	class opengl_vertex_attrib_array
 	{
 	public:
-		typedef T value_type;
+		typedef T item_type;
+		typedef typename item_type::value_type value_type;
 	public:
-		opengl_vertex_attrib_array(opengl_buffer<value_type>& aBuffer, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
+		opengl_vertex_attrib_array(const opengl_buffer<T>& aBuffer, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
 		{
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			GLuint index = reinterpret_cast<GLuint>(aShaderProgram.variable(aVariableName));
 			glCheck(glEnableVertexAttribArray(index));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
-			glCheck(glVertexAttribPointer(index, aBuffer.element_size(), std::is_same<value_type, double>() ? GL_DOUBLE : GL_UNSIGNED_BYTE, GL_FALSE, 0, 0));
+			glCheck(glVertexAttribPointer(index, aBuffer.arity(), std::is_same<value_type, double>() ? GL_DOUBLE : GL_UNSIGNED_BYTE, GL_FALSE, 0, 0));
 		}
 		~opengl_vertex_attrib_array()
 		{
@@ -109,47 +197,19 @@ namespace neogfx
 	class opengl_standard_vertex_arrays
 	{
 	public:
-		typedef std::vector<vec3> vertex_array;
-		typedef std::vector<std::array<uint8_t, 4>> colour_array;
-		typedef std::vector<vec2> texture_coord_array;
+		// Formally this is being far too clever for one's own good as formally this is UB (Undefined Behaviour)
+		// as I am treating non-POD (vec3) as POD (by mapping it to OpenGL). May need to rethink this...
+		typedef std::vector<vec3, opengl_buffer_allocator<vec3>> vertex_array;
+		typedef std::vector<std::array<uint8_t, 4>, opengl_buffer_allocator<std::array<uint8_t, 4>>> colour_array;
+		typedef std::vector<vec2, opengl_buffer_allocator<vec2>> texture_coord_array;
 	private:
-		class buffer_instance
-		{
-		public:
-			buffer_instance(std::size_t aSize) :
-				iSize{ aSize },
-				iPositionBuffer{ aSize, 3 },
-				iColourBuffer{ aSize, 4 },
-				iTextureCoordBuffer{ aSize, 2 }
-			{
-			}
-		public:
-			std::size_t size() const
-			{
-				return iSize;
-			}
-			opengl_buffer<double>& position_buffer()
-			{ 
-				return iPositionBuffer; 
-			}
-			opengl_buffer<uint8_t>& colour_buffer()
-			{
-				return iColourBuffer;
-			}
-			opengl_buffer<double>& texture_coord_buffer()
-			{
-				return iTextureCoordBuffer;
-			}
-		private:
-			std::size_t iSize;
-			opengl_buffer<double> iPositionBuffer;
-			opengl_buffer<uint8_t> iColourBuffer;
-			opengl_buffer<double> iTextureCoordBuffer;
-		};
 		class instance
 		{
 		public:
-			instance(const i_rendering_engine::i_shader_program& aShaderProgram, opengl_buffer<double>& aPositionBuffer, opengl_buffer<uint8_t>& aColourBuffer, opengl_buffer<double>& aTextureCoordBuffer) :
+			instance(const i_rendering_engine::i_shader_program& aShaderProgram, 
+				const opengl_buffer<vertex_array::value_type>& aPositionBuffer, 
+				const opengl_buffer<colour_array::value_type>& aColourBuffer, 
+				const opengl_buffer<texture_coord_array::value_type>& aTextureCoordBuffer) :
 				iVertexPositionAttribArray{ aPositionBuffer, aShaderProgram, "VertexPosition" },
 				iVertexColorAttribArray{ aColourBuffer, aShaderProgram, "VertexColor" },
 				iVertexTextureCoordAttribArray{ aTextureCoordBuffer, aShaderProgram, "VertexTextureCoord" }
@@ -157,70 +217,52 @@ namespace neogfx
 			}
 		private:
 			opengl_vertex_array iVao;
-			opengl_vertex_attrib_array<double> iVertexPositionAttribArray;
-			opengl_vertex_attrib_array<uint8_t> iVertexColorAttribArray;
-			opengl_vertex_attrib_array<double> iVertexTextureCoordAttribArray;
+			opengl_vertex_attrib_array<vertex_array::value_type> iVertexPositionAttribArray;
+			opengl_vertex_attrib_array<colour_array::value_type> iVertexColorAttribArray;
+			opengl_vertex_attrib_array<texture_coord_array::value_type> iVertexTextureCoordAttribArray;
 		};
 	public:
 		opengl_standard_vertex_arrays() :
-			iShaderProgram{ nullptr },
-			iBufferInstance{ std::make_unique<buffer_instance>(32) }
+			iShaderProgram{ nullptr }
 		{
+			vertices().reserve(32);
+			colours().reserve(32);
+			texture_coords().reserve(32);
 		}
 	public:
-		std::vector<vec3>& vertices()
+		vertex_array& vertices()
 		{
 			return iVertices;
 		}
-		std::vector<std::array<uint8_t, 4>>& colours()
+		colour_array& colours()
 		{
 			return iColours;
 		}
-		std::vector<vec2>& texture_coords()
+		texture_coord_array& texture_coords()
 		{
 			return iTextureCoords;
 		}
 		void instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
 		{
-			if (buffers().size() < vertices().size())
-			{
-				iInstance.reset();
-				iBufferInstance.reset();
-				iBufferInstance = std::make_unique<buffer_instance>(vertices().size() * 2);
-			}
-			void* data;
-			glCheck(data = glMapNamedBuffer(buffers().position_buffer().handle(), GL_WRITE_ONLY));
-			// todo: formally this is UB as vertex is non-POD so change to use std::copy
-			std::memcpy(data, &vertices()[0][0], vertices().size() * sizeof(vertices()[0]));
-			glCheck(glUnmapNamedBuffer(buffers().position_buffer().handle()));
-			glCheck(data = glMapNamedBuffer(buffers().colour_buffer().handle(), GL_WRITE_ONLY));
-			std::memcpy(data, &colours()[0][0], colours().size() * sizeof(colours()[0]));
-			glCheck(glUnmapNamedBuffer(buffers().colour_buffer().handle()));
-			glCheck(data = glMapNamedBuffer(buffers().texture_coord_buffer().handle(), GL_WRITE_ONLY));
-			// todo: formally this is UB as texture coordinates are non-POD so change to use std::copy
-			std::memcpy(data, &texture_coords()[0][0], texture_coords().size() * sizeof(texture_coords()[0]));
-			glCheck(glUnmapNamedBuffer(buffers().texture_coord_buffer().handle()));
 			if (iInstance.get() == nullptr || iShaderProgram != &aShaderProgram)
 			{
 				iShaderProgram = &aShaderProgram;
 				iInstance.reset();
-				iInstance = std::make_unique<instance>(aShaderProgram, buffers().position_buffer(), buffers().colour_buffer(), buffers().texture_coord_buffer());
+				iInstance = std::make_unique<instance>(
+					aShaderProgram, 
+					vertex_array::allocator_type::buffer(&iVertices[0]),
+					colour_array::allocator_type::buffer(&iColours[0]),
+					texture_coord_array::allocator_type::buffer(&iTextureCoords[0]));
 			}
 			if (iShaderProgram->has_projection_matrix())
 				iShaderProgram->set_projection_matrix(aGraphicsContext);
 		}
 	private:
-		buffer_instance& buffers()
-		{
-			return *iBufferInstance;
-		}
-	private:
 		i_rendering_engine::i_shader_program* iShaderProgram;
-		std::unique_ptr<buffer_instance> iBufferInstance;
 		std::unique_ptr<instance> iInstance;
-		std::vector<vec3> iVertices;
-		std::vector<std::array<uint8_t, 4>> iColours;
-		std::vector<vec2> iTextureCoords;
+		vertex_array iVertices;
+		colour_array iColours;
+		texture_coord_array iTextureCoords;
 	};
 
 	class use_shader_program

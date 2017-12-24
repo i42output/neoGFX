@@ -450,12 +450,13 @@ namespace neogfx
 		{
 			if (aPath.paths()[i].size() > 2)
 			{
-				iVertexArrays.vertices() = aPath.to_vertices(aPath.paths()[i]);
-				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {0xFF, 0xFF, 0xFF, 0xFF}});
-				iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+				auto vertices = aPath.to_vertices(aPath.paths()[i]);
+				iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+				iVertexArrays.colours().assign(vertices.size(), std::array <uint8_t, 4>{ {0xFF, 0xFF, 0xFF, 0xFF}});
+				iVertexArrays.texture_coords().resize(vertices.size());
 				iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath), 0, iVertexArrays.vertices().size()));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath), 0, vertices.size()));
 			}
 		}
 		if (aPathOutline != 0)
@@ -467,12 +468,13 @@ namespace neogfx
 			{
 				if (innerPath.paths()[i].size() > 2)
 				{
-					iVertexArrays.vertices() = aPath.to_vertices(innerPath.paths()[i]);
-					iVertexArrays.colours().assign(iVertexArrays.vertices().size(), std::array <uint8_t, 4>{ {0xFF, 0xFF, 0xFF, 0xFF}});
-					iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+					auto vertices = aPath.to_vertices(innerPath.paths()[i]);
+					iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+					iVertexArrays.colours().assign(vertices.size(), std::array <uint8_t, 4>{ {0xFF, 0xFF, 0xFF, 0xFF}});
+					iVertexArrays.texture_coords().resize(vertices.size());
 					iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-					glCheck(glDrawArrays(path_shape_to_gl_mode(innerPath), 0, iVertexArrays.vertices().size()));
+					glCheck(glDrawArrays(path_shape_to_gl_mode(innerPath), 0, vertices.size()));
 				}
 			}
 		}
@@ -684,9 +686,10 @@ namespace neogfx
 			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aRect);
 		}
 
-		iVertexArrays.vertices() = rect_vertices(aRect, pixel_adjust(aPen), rect_type::Outline);
-		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+		auto vertices = rect_vertices(aRect, pixel_adjust(aPen), rect_type::Outline);
+		iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+		iVertexArrays.texture_coords().resize(vertices.size());
+		iVertexArrays.colours().assign(vertices.size(), aPen.colour().is<colour>() ?
 			std::array <uint8_t, 4>{{
 				static_cast<colour>(aPen.colour()).red(),
 				static_cast<colour>(aPen.colour()).green(),
@@ -696,7 +699,7 @@ namespace neogfx
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 
 		if (aPen.colour().is<gradient>())
@@ -712,9 +715,10 @@ namespace neogfx
 		}
 
 		double pixelAdjust = pixel_adjust(aPen);
-		iVertexArrays.vertices() = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
-		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+		auto vertices = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
+		iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+		iVertexArrays.texture_coords().resize(vertices.size());
+		iVertexArrays.colours().assign(vertices.size(), aPen.colour().is<colour>() ?
 			std::array <uint8_t, 4>{{
 				static_cast<colour>(aPen.colour()).red(),
 				static_cast<colour>(aPen.colour()).green(),
@@ -724,7 +728,7 @@ namespace neogfx
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 
 		if (aPen.colour().is<gradient>())
@@ -739,9 +743,10 @@ namespace neogfx
 			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 		}
 
-		iVertexArrays.vertices() = circle_vertices(aCentre, aRadius, aStartAngle, false);
-		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, false);
+		iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+		iVertexArrays.texture_coords().resize(vertices.size());
+		iVertexArrays.colours().assign(vertices.size(), aPen.colour().is<colour>() ?
 			std::array <uint8_t, 4>{{
 				static_cast<colour>(aPen.colour()).red(),
 				static_cast<colour>(aPen.colour()).green(),
@@ -752,7 +757,7 @@ namespace neogfx
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 
 		if (aPen.colour().is<gradient>())
@@ -767,9 +772,10 @@ namespace neogfx
 			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
 		}
 
-		iVertexArrays.vertices() = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));
-		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));;
+		iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+		iVertexArrays.texture_coords().resize(vertices.size());
+		iVertexArrays.colours().assign(vertices.size(), aPen.colour().is<colour>() ?
 			std::array <uint8_t, 4>{{
 				static_cast<colour>(aPen.colour()).red(),
 				static_cast<colour>(aPen.colour()).green(),
@@ -779,7 +785,7 @@ namespace neogfx
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
 		glCheck(glLineWidth(1.0f));
 
 		if (aPen.colour().is<gradient>())
@@ -801,9 +807,10 @@ namespace neogfx
 				if (aPath.shape() == path::ConvexPolygon)
 					clip_to(aPath, aPen.width());
 
-				iVertexArrays.vertices() = aPath.to_vertices(aPath.paths()[i]);
-				iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
+				auto vertices = aPath.to_vertices(aPath.paths()[i]);
+				iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+				iVertexArrays.texture_coords().resize(vertices.size());
+				iVertexArrays.colours().assign(vertices.size(), aPen.colour().is<colour>() ?
 					std::array <uint8_t, 4>{{
 						static_cast<colour>(aPen.colour()).red(),
 						static_cast<colour>(aPen.colour()).green(),
@@ -812,7 +819,7 @@ namespace neogfx
 					std::array <uint8_t, 4>{});
 				iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, iVertexArrays.vertices().size()));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size()));
 				if (aPath.shape() == path::ConvexPolygon)
 					reset_clip();
 			}
@@ -907,9 +914,10 @@ namespace neogfx
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
 
-		iVertexArrays.vertices() = rounded_rect_vertices(aRect, aRadius, true);
-		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
+		iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+		iVertexArrays.texture_coords().resize(vertices.size());
+		iVertexArrays.colours().assign(vertices.size(), aFill.is<colour>() ?
 			std::array <uint8_t, 4>{ {
 					static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -918,7 +926,7 @@ namespace neogfx
 			std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 
 		if (aFill.is<gradient>())
 			gradient_off();
@@ -929,9 +937,10 @@ namespace neogfx
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
-		iVertexArrays.vertices() = circle_vertices(aCentre, aRadius, 0.0, true);
-		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+		auto vertices = circle_vertices(aCentre, aRadius, 0.0, true);
+		iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+		iVertexArrays.texture_coords().resize(vertices.size());
+		iVertexArrays.colours().assign(vertices.size(), aFill.is<colour>() ?
 			std::array <uint8_t, 4>{ {
 					static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -940,7 +949,7 @@ namespace neogfx
 			std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 
 		if (aFill.is<gradient>())
 			gradient_off();
@@ -950,10 +959,11 @@ namespace neogfx
 	{
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
-		
-		iVertexArrays.vertices() = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
-		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
-		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+
+		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
+		iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+		iVertexArrays.texture_coords().resize(vertices.size());
+		iVertexArrays.colours().assign(vertices.size(), aFill.is<colour>() ?
 			std::array <uint8_t, 4>{ {
 					static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -962,7 +972,7 @@ namespace neogfx
 			std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size()));
 		if (aFill.is<gradient>())
 			gradient_off();
 	}
@@ -985,18 +995,19 @@ namespace neogfx
 				if (aFill.is<gradient>())
 					gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
 
-				iVertexArrays.vertices() = aPath.to_vertices(aPath.paths()[i]);
-				iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aFill.is<colour>() ?
+				auto vertices = aPath.to_vertices(aPath.paths()[i]);
+				iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
+				iVertexArrays.colours().assign(vertices.size(), aFill.is<colour>() ?
 					std::array <uint8_t, 4>{ {
 							static_variant_cast<const colour&>(aFill).red(),
 								static_variant_cast<const colour&>(aFill).green(),
 								static_variant_cast<const colour&>(aFill).blue(),
 								static_variant_cast<const colour&>(aFill).alpha()}} :
 					std::array <uint8_t, 4>{});
-				iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+				iVertexArrays.texture_coords().resize(vertices.size());
 				iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, iVertexArrays.vertices().size()));
+				glCheck(glDrawArrays(path_shape_to_gl_mode(aPath.shape()), 0, vertices.size()));
 
 				reset_clip();
 
