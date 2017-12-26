@@ -50,6 +50,8 @@ namespace neogfx
 	template <typename T, uint32_t Size, typename Type = column_vector, bool IsScalar=std::is_scalar<T>::value>
 	class basic_vector;
 
+	
+
 	/* todo: specializations that use SIMD intrinsics. */
 	template <typename T, uint32_t _Size, typename Type>
 	class basic_vector<T, _Size, Type, true>

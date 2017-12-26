@@ -47,7 +47,7 @@ namespace neogfx
 		virtual const i_shape& as_shape() const = 0;
 		virtual i_shape& as_shape() = 0;
 		virtual const object_type& type() const { static object_type sNullTypeId = {}; return sNullTypeId; }
-		virtual bool killed() const { return false; }
-		virtual void kill() {}
+		virtual bool killed() const = 0;
+		virtual void kill() = 0;
 	};
 }

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/text.hpp>
 
 namespace neogfx
@@ -128,23 +129,21 @@ namespace neogfx
 			iGlyphTextCache = glyph_text(font());
 		}
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
-		auto bb = bounding_box_2d();
-		bb.position() = bb.position().ceil();
+		auto bb2d = bounding_box_2d();
+		bb2d.position() = bb2d.position().ceil();
+		rectangle bb3d{ vec3{ bb2d.x, bb2d.y, position().y }, bb2d.extents().to_vec2() };
+		bb2d.deflate(size{ *iBorder });
 		if (appearance().has_paper())
-			aGraphicsContext.fill_rect(bb, to_brush(appearance().paper()));
+			aGraphicsContext.fill_shape(bb3d, to_brush(appearance().paper()));
 		if (iBorder != boost::none)
-		{
-			aGraphicsContext.draw_rect(bb, pen{ appearance().ink(), *iBorder });
-			bb.deflate(size{*iBorder});
-		}
+			aGraphicsContext.draw_shape(bb3d, pen{ appearance().ink(), *iBorder });
 		if (iMargins != boost::none)
 		{
-			bb.position() += point{iMargins->left, iMargins->right};
-			bb.extents() -= size{iMargins->left + iMargins->right, iMargins->bottom + iMargins->top};
+			bb2d.position() += point{iMargins->left, iMargins->right};
+			bb2d.extents() -= size{iMargins->left + iMargins->right, iMargins->bottom + iMargins->top};
 		}
-		aGraphicsContext.draw_multiline_text(
-			aGraphicsContext.logical_coordinates().second.y < aGraphicsContext.logical_coordinates().first.y ? bb.bottom_left() : bb.top_left(),
-			iText, font(), bb.extents().cx, appearance(), iAlignment, UseGlyphTextCache);
+		auto pos = aGraphicsContext.logical_coordinates().second.y < aGraphicsContext.logical_coordinates().first.y ? bb2d.bottom_left() : bb2d.top_left();
+		aGraphicsContext.draw_multiline_text(vec3{pos.x, pos.y, position().z}, iText, font(), bb2d.extents().cx, appearance(), iAlignment, UseGlyphTextCache);
 	}
 
 	size text::text_extent() const

@@ -43,6 +43,8 @@ namespace neogfx
 		object_category category() const override;
 		const i_shape& as_shape() const override;
 		i_shape& as_shape() override;
+		bool killed() const override;
+		void kill() override;
 	public:
 		vec3 origin() const override;
 		vec3 position() const override;
@@ -88,5 +90,6 @@ namespace neogfx
 		mutable optional_physics iNextPhysics;
 		mutable optional_aabb iAabb;
 		void* iCollisionTreeLink;
+		bool iKilled;
 	};
 }

@@ -24,37 +24,37 @@
 namespace neogfx
 {
 	sprite::sprite() :
-		iCollisionMask{ 0ull }, iKilled { false }
+		iCollisionMask{ 0ull }
 	{
 	}
 
 	sprite::sprite(const colour& aColour) :
 		shape{ aColour },
-		iCollisionMask{ 0ull }, iKilled{ false }
+		iCollisionMask{ 0ull }
 	{
 	}
 
 	sprite::sprite(const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
 		shape{ aTexture, aAnimationInfo },
-		iCollisionMask{ 0ull }, iKilled{ false }
+		iCollisionMask{ 0ull }
 	{
 	}
 
 	sprite::sprite(const i_image& aImage, const optional_animation_info& aAnimationInfo) :
 		shape{ aImage, aAnimationInfo },
-		iCollisionMask{ 0ull }, iKilled{ false }
+		iCollisionMask{ 0ull }
 	{
 	}
 
 	sprite::sprite(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
 		shape{ aTexture, aTextureRect, aAnimationInfo },
-		iCollisionMask{ 0ull }, iKilled{ false }
+		iCollisionMask{ 0ull }
 	{
 	}
 
 	sprite::sprite(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
 		shape{ aImage, aTextureRect, aAnimationInfo },
-		iCollisionMask{ 0ull }, iKilled{ false }
+		iCollisionMask{ 0ull }
 	{
 	}
 
@@ -62,7 +62,7 @@ namespace neogfx
 		shape{ aOther },
 		physical_object{ aOther },
 		iPath{ aOther.iPath },
-		iCollisionMask{ 0ull }, iKilled{ false }
+		iCollisionMask{ 0ull }
 	{
 	}
 
@@ -93,12 +93,13 @@ namespace neogfx
 
 	bool sprite::killed() const
 	{
-		return iKilled;
+		return physical_object::killed() || shape<i_sprite>::killed();
 	}
 
 	void sprite::kill()
 	{
-		iKilled = true;
+		physical_object::kill();
+		shape<i_sprite>::kill();
 	}
 
 	void sprite::animation_finished()

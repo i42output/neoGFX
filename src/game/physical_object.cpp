@@ -24,7 +24,7 @@
 namespace neogfx
 {
 	physical_object::physical_object() :
-		iOrigin{}, iCollisionTreeLink{ nullptr }
+		iOrigin{}, iCollisionTreeLink{ nullptr }, iKilled{ false }
 	{
 	}
 
@@ -33,7 +33,8 @@ namespace neogfx
 		iTimeOfLastUpdate(aOther.iTimeOfLastUpdate),
 		iCurrentPhysics(aOther.iCurrentPhysics),
 		iNextPhysics(aOther.iNextPhysics),
-		iCollisionTreeLink{ nullptr }
+		iCollisionTreeLink{ nullptr },
+		iKilled{ false }
 	{
 	}
 
@@ -50,6 +51,16 @@ namespace neogfx
 	i_shape& physical_object::as_shape()
 	{
 		throw not_a_shape();
+	}
+
+	bool physical_object::killed() const
+	{
+		return iKilled;
+	}
+
+	void physical_object::kill()
+	{
+		iKilled = true;
 	}
 
 	vec3 physical_object::origin() const

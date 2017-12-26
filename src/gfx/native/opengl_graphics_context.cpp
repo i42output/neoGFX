@@ -1102,7 +1102,7 @@ namespace neogfx
 			use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 			auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
-			rectangle r{ firstOp.point.to_vec3(), size{ firstOp.font.height(), firstOp.font.height() }.to_vec2() };
+			rectangle r{ firstOp.point, size{ firstOp.font.height(), firstOp.font.height() }.to_vec2() };
 			r.set_position(r.position() + vec3{ r.extents().x, r.extents().y, 0.0 } / 2.0);
 			r.set_textures(to_texture_list_pointer(emojiTexture));
 			draw_textures(r, optional_colour{}, shader_effect::None);
@@ -1123,14 +1123,16 @@ namespace neogfx
 
 				const i_glyph_texture& glyphTexture = !drawOp.glyph.use_fallback() ? drawOp.font.native_font_face().glyph_texture(drawOp.glyph) : drawOp.glyph.fallback_font(drawOp.font).native_font_face().glyph_texture(drawOp.glyph);
 
-				point glyphOrigin(drawOp.point.x + glyphTexture.placement().x,
+				vec3 glyphOrigin(
+					drawOp.point.x + glyphTexture.placement().x,
 					logical_coordinates().first.y < logical_coordinates().second.y ? 
 						drawOp.point.y + (glyphTexture.placement().y + -drawOp.font.descender()) :
-						drawOp.point.y + drawOp.font.height() - (glyphTexture.placement().y + -drawOp.font.descender()) - glyphTexture.texture().extents().cy);
+						drawOp.point.y + drawOp.font.height() - (glyphTexture.placement().y + -drawOp.font.descender()) - glyphTexture.texture().extents().cy,
+					drawOp.point.z);
 
 				auto textureCoords = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates());
 
-				rect outputRect{ glyphOrigin, glyphTexture.texture().extents() };
+				rect outputRect{ point{glyphOrigin}, glyphTexture.texture().extents() };
 
 				if (drawOp.appearance.has_effect() && pass == 1)
 				{
@@ -1141,14 +1143,10 @@ namespace neogfx
 							for (double x = -drawOp.appearance.effect().width(); x <= drawOp.appearance.effect().width(); x += 1.0)
 							{
 								rect effectRect = outputRect + point{ x, y };
-				
-								iVertexArrays.vertices().insert(iVertexArrays.vertices().end(),
-								{
-									to_shader_vertex(effectRect.top_left()),
-									to_shader_vertex(effectRect.top_right()),
-									to_shader_vertex(effectRect.bottom_right()),
-									to_shader_vertex(effectRect.bottom_left())
-								});
+								iVertexArrays.vertices().push_back(effectRect.top_left().to_vec3(glyphOrigin.z));
+								iVertexArrays.vertices().push_back(effectRect.top_right().to_vec3(glyphOrigin.z));
+								iVertexArrays.vertices().push_back(effectRect.bottom_right().to_vec3(glyphOrigin.z));
+								iVertexArrays.vertices().push_back(effectRect.bottom_left().to_vec3(glyphOrigin.z));
 								iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4, drawOp.appearance.effect().colour().is<colour>() ?
 									std::array <uint8_t, 4>{ {
 										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
@@ -1163,13 +1161,10 @@ namespace neogfx
 				}
 				else if (pass == 2)
 				{
-					iVertexArrays.vertices().insert(iVertexArrays.vertices().end(),
-					{
-						to_shader_vertex(outputRect.top_left()),
-						to_shader_vertex(outputRect.top_right()),
-						to_shader_vertex(outputRect.bottom_right()),
-						to_shader_vertex(outputRect.bottom_left())
-					});
+					iVertexArrays.vertices().push_back(outputRect.top_left().to_vec3(glyphOrigin.z));
+					iVertexArrays.vertices().push_back(outputRect.top_right().to_vec3(glyphOrigin.z));
+					iVertexArrays.vertices().push_back(outputRect.bottom_right().to_vec3(glyphOrigin.z));
+					iVertexArrays.vertices().push_back(outputRect.bottom_left().to_vec3(glyphOrigin.z));
 					iVertexArrays.colours().insert(iVertexArrays.colours().end(), 4,  drawOp.appearance.ink().is<colour>() ?
 						std::array <uint8_t, 4>{{
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
@@ -1356,7 +1351,7 @@ namespace neogfx
 			{
 				auto const& v = transformedVertices[vi];
 				iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, v.coordinates.z });
-				iVertexArrays.texture_coords().push_back((tv[0] + (tv[2] - tv[0]) * *v.textureCoordinates.xy).v);
+				iVertexArrays.texture_coords().push_back((tv[0] + (tv[2] - tv[0]) * ~v.textureCoordinates.xy).v);
 				iVertexArrays.colours().push_back(std::array<uint8_t, 4>{ {colourizationColour.red(), colourizationColour.green(), colourizationColour.blue(), colourizationColour.alpha()}});
 			}
 

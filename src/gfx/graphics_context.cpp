@@ -473,10 +473,20 @@ namespace neogfx
 
 	void graphics_context::draw_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage) const
 	{
-		draw_text(aPoint, aText.begin(), aText.end(), aFont, aAppearance, aCacheUsage);
+		draw_text(aPoint.to_vec3(), aText, aFont, aAppearance, aCacheUsage);
 	}
 
 	void graphics_context::draw_text(const point& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage) const
+	{
+		draw_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aAppearance, aCacheUsage);
+	}
+
+	void graphics_context::draw_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage) const
+	{
+		draw_text(aPoint, aText.begin(), aText.end(), aFont, aAppearance, aCacheUsage);
+	}
+
+	void graphics_context::draw_text(const vec3& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage) const
 	{
 		const auto& glyphText = aCacheUsage.use && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aTextBegin, aTextEnd, aFont);
 		if (aCacheUsage.use && iGlyphTextCache->empty())
@@ -486,10 +496,20 @@ namespace neogfx
 
 	void graphics_context::draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment, const glyph_text_cache_usage& aCacheUsage) const
 	{
-		draw_multiline_text(aPoint, aText, aFont, 0, aAppearance, aAlignment, aCacheUsage);
+		draw_multiline_text(aPoint.to_vec3(), aText, aFont, aAppearance, aAlignment, aCacheUsage);
 	}
 
 	void graphics_context::draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment, const glyph_text_cache_usage& aCacheUsage) const
+	{
+		draw_multiline_text(aPoint.to_vec3(), aText, aFont, aMaxWidth, aAppearance, aAlignment, aCacheUsage);
+	}
+		
+	void graphics_context::draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment, const glyph_text_cache_usage& aCacheUsage) const
+	{
+		draw_multiline_text(aPoint, aText, aFont, 0, aAppearance, aAlignment, aCacheUsage);
+	}
+
+	void graphics_context::draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment, const glyph_text_cache_usage& aCacheUsage) const
 	{
 		const auto& glyphText = aCacheUsage.use && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aText.begin(), aText.end(), aFont);
 		if (aCacheUsage.use && iGlyphTextCache->empty())
@@ -500,13 +520,13 @@ namespace neogfx
 		std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
 		neolib::tokens(glyphText.cbegin(), glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
 		size textExtent = multiline_text_extent(aText, aFont, aMaxWidth, aCacheUsage);
-		point pos = aPoint;
+		vec3 pos = aPoint;
 		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
 		{
 			const auto& line = (logical_coordinates().first.y > logical_coordinates().second.y ? *i : *(lines.rbegin() + (i - lines.begin())));
 			if (aMaxWidth == 0)
 			{
-				point linePos = pos;
+				vec3 linePos = pos;
 				size lineExtent = from_device_units(glyph_text::extents(aFont, line.first, line.second));
 				if (glyph_text_direction(line.first, line.second) == text_direction::RTL)
 					linePos.x += textExtent.cx - lineExtent.cx;
@@ -544,7 +564,7 @@ namespace neogfx
 					}
 					if (gotLine || next == line.second)
 					{
-						point linePos = pos;
+						vec3 linePos = pos;
 						if (aAlignment == alignment::Left && glyph_text_direction(lineStart, next) == text_direction::RTL ||
 							aAlignment == alignment::Right && glyph_text_direction(lineStart, next) == text_direction::LTR)
 							linePos.x += textExtent.cx - from_device_units(size(lineWidth, 0)).cx;
@@ -565,10 +585,20 @@ namespace neogfx
 
 	void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, const font& aFont, const text_appearance& aAppearance) const
 	{
-		draw_glyph_text(aPoint, aText.cbegin(), aText.cend(), aFont, aAppearance);
+		draw_glyph_text(aPoint.to_vec3(), aText, aFont, aAppearance);
 	}
 
 	void graphics_context::draw_glyph_text(const point& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const
+	{
+		draw_glyph_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aAppearance);
+	}
+
+	void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const font& aFont, const text_appearance& aAppearance) const
+	{
+		draw_glyph_text(aPoint, aText.cbegin(), aText.cend(), aFont, aAppearance);
+	}
+
+	void graphics_context::draw_glyph_text(const vec3& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const
 	{
 		neogfx::draw_glyph_text(*this, aPoint, aTextBegin, aTextEnd, aFont, aAppearance);
 	}
@@ -774,10 +804,15 @@ namespace neogfx
 
 	void graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const
 	{
+		draw_glyph(aPoint.to_vec3(), aGlyph, aFont, aAppearance);
+	}
+
+	void graphics_context::draw_glyph(const vec3& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const
+	{
 		try
 		{
 			if (!aGlyph.is_whitespace())
-				iNativeGraphicsContext->enqueue(graphics_operation::draw_glyph{ to_device_units(aPoint) + iOrigin, aGlyph, aFont, aAppearance });
+				iNativeGraphicsContext->enqueue(graphics_operation::draw_glyph{ (to_device_units(point{aPoint}) + iOrigin).to_vec3() + vec3{0.0, 0.0, aPoint.z}, aGlyph, aFont, aAppearance });
 			if (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic()))
 				draw_glyph_underline(aPoint, aGlyph, aFont, aAppearance);
 		}
@@ -795,13 +830,18 @@ namespace neogfx
 
 	void graphics_context::draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const
 	{
+		draw_glyph_underline(aPoint.to_vec3(), aGlyph, aFont, aAppearance);
+	}
+
+	void graphics_context::draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const
+	{
 		auto yLine = logical_coordinates().first.y > logical_coordinates().second.y ?
 			(aFont.height() + aFont.descender()) - std::ceil(aFont.native_font_face().underline_position()) :
 			-aFont.descender() + std::ceil(aFont.native_font_face().underline_position());
 		const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ? aFont.native_font_face().glyph_texture(aGlyph) : aGlyph.fallback_font(aFont).native_font_face().glyph_texture(aGlyph);
 		draw_line(
-			aPoint + point{ glyphTexture.placement().x, yLine },
-			aPoint + point{ glyphTexture.placement().x + glyphTexture.texture().extents().cx, yLine },
+			aPoint + vec3{ glyphTexture.placement().x, yLine },
+			aPoint + vec3{ glyphTexture.placement().x + glyphTexture.texture().extents().cx, yLine },
 			pen{ aAppearance.ink(), std::ceil(aFont.native_font_face().underline_thickness()) });
 	}
 

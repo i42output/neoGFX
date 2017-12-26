@@ -97,6 +97,8 @@ namespace neogfx
 		object_category category() const override;
 		const i_shape& as_shape() const override;
 		i_shape& as_shape() override;
+		bool killed() const override;
+		void kill() override;
 		// mesh
 	public:
 		vertex_list_pointer vertices() const override;
@@ -193,6 +195,7 @@ namespace neogfx
 		mutable face_list iFaces;
 		mutable vertex_list iTransformedVertices;
 		mutable face_list iActiveFaces;
+		bool iKilled;
 	};
 }
 

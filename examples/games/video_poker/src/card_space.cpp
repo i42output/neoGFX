@@ -107,7 +107,7 @@ namespace video_poker
 			auto xy = iSpritePlane.to_client_coordinates(to_window_coordinates(client_rect().centre()));
 			if (iCard->discarded())
 				xy += neogfx::point{ -8.0, -16.0 };
-			iCardSprite->set_position(neogfx::vec3{ xy.x, xy.y, 1.0 });
+			iCardSprite->set_position(neogfx::vec3{ xy.x, xy.y, 0.9 });
 			iCardSprite->set_extents(extents());
 			iSpritePlane.update();
 			update();

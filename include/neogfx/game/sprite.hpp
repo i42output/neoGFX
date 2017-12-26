@@ -81,6 +81,5 @@ namespace neogfx
 		optional_path iPath;
 		uint64_t iCollisionMask;
 		mutable optional_aabb iAabb;
-		bool iKilled;
 	};
 }
