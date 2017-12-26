@@ -67,7 +67,7 @@ namespace video_poker
 				(iParent.extents().cx - extents()[0]) / 2.0,
 				iParent.extents().cy - (iParent.extents().cy * elapsed),
 				1.0 });
-			set_appearance(appearance().with_alpha(elapsed < 0.5 ? 1.0 : (1.0 - elapsed) * 2.0));
+			set_appearance(appearance().with_alpha(elapsed < 0.75 ? 1.0 : (1.0 - elapsed) * 4.0));
 			if (elapsed >= 1.0)
 				kill();
 			return true;
