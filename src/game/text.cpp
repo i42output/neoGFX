@@ -132,11 +132,13 @@ namespace neogfx
 		auto bb2d = bounding_box_2d();
 		bb2d.position() = bb2d.position().ceil();
 		rectangle bb3d{ vec3{ bb2d.x, bb2d.y, position().y }, bb2d.extents().to_vec2() };
-		bb2d.deflate(size{ *iBorder });
 		if (appearance().has_paper())
 			aGraphicsContext.fill_shape(bb3d, to_brush(appearance().paper()));
 		if (iBorder != boost::none)
+		{
 			aGraphicsContext.draw_shape(bb3d, pen{ appearance().ink(), *iBorder });
+			bb2d.deflate(size{ *iBorder });
+		}
 		if (iMargins != boost::none)
 		{
 			bb2d.position() += point{iMargins->left, iMargins->right};

@@ -329,6 +329,8 @@ namespace neogfx
 		point from_device_units(const point& aValue) const;
 		rect from_device_units(const rect& aValue) const;
 		path from_device_units(const path& aValue) const;
+		int32_t layer() const;
+		void set_layer(int32_t aLayer);
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const;
 		const std::pair<vec2, vec2>& logical_coordinates() const;
