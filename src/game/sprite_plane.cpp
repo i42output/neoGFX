@@ -90,6 +90,17 @@ namespace neogfx
 		iWaitForRender = false;
 	}
 
+	void sprite_plane::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e)
+	{
+		if (aButton == mouse_button::Left)
+		{
+			std::vector<i_collidable*> picked;
+			collision_tree().pick(aPosition.to_vec2(), picked);
+			for (auto p : picked)
+				object_clicked.trigger(p->as<i_physical_object>());
+		}
+	}
+
 	const i_widget& sprite_plane::as_widget() const
 	{
 		return *this;
@@ -305,7 +316,7 @@ namespace neogfx
 			while (!iObjects.empty() && iObjects.back()->killed())
 			{
 				if (iObjects.back()->category() == object_category::Sprite || iObjects.back()->category() == object_category::PhysicalObject)
-					iBroadPhaseCollisionTree.erase(iBroadPhaseCollisionTree.find(static_cast<i_physical_object&>(*iObjects.back())));
+					iBroadPhaseCollisionTree.remove(static_cast<i_physical_object&>(*iObjects.back()));
 				iObjects.pop_back();
 			}
 			iNeedsSorting = false;

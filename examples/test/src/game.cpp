@@ -133,6 +133,14 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
+		if (ng::app::instance().keyboard().is_key_pressed(ng::ScanCode_C))
+			spritePlane->collision_tree().visit_aabbs([&aGraphicsContext](const neogfx::aabb& aAabb)
+			{
+				ng::rect aabb{ ng::point{ aAabb.min }, ng::point{ aAabb.max } };
+				aGraphicsContext.draw_rect(aabb, ng::pen{ ng::colour::Blue });
+				aGraphicsContext.draw_line(aabb.top_left(), aabb.bottom_right(), ng::pen{ ng::colour::Blue });
+				aGraphicsContext.draw_line(aabb.top_right(), aabb.bottom_left(), ng::pen{ ng::colour::Blue });
+			});
 	});
 	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
 	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)

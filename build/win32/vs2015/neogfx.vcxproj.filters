@@ -600,9 +600,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\i_collidable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\aabb_redblacktree.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\shapes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -649,6 +646,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_playback_device.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\aabb_octree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

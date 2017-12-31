@@ -65,7 +65,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
-      <AdditionalOptions>/bigobj /MP2 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,7 +90,7 @@
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
-      <AdditionalOptions>/bigobj /MP2 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -156,7 +156,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\i_sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\mesh.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\physical_object.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\aabb_redblacktree.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\aabb_octree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\shape.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\shapes.hpp" />

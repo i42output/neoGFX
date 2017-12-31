@@ -24,7 +24,9 @@
 namespace neogfx
 {
 	physical_object::physical_object() :
-		iOrigin{}, iCollisionTreeLink{ nullptr }, iKilled{ false }
+		iOrigin{}, 
+		iKilled{ false }, 
+		iCollisionUpdateId{ 0 }
 	{
 	}
 
@@ -33,8 +35,8 @@ namespace neogfx
 		iTimeOfLastUpdate(aOther.iTimeOfLastUpdate),
 		iCurrentPhysics(aOther.iCurrentPhysics),
 		iNextPhysics(aOther.iNextPhysics),
-		iCollisionTreeLink{ nullptr },
-		iKilled{ false }
+		iKilled{ false }, 
+		iCollisionUpdateId{ 0 }
 	{
 	}
 
@@ -173,27 +175,16 @@ namespace neogfx
 		return *iAabb;
 	}
 
-	void* physical_object::collision_tree_link() const
+	bool physical_object::collidable() const
 	{
-		return iCollisionTreeLink;
-	}
-
-	void physical_object::set_collision_tree_link(void* aLink)
-	{
-		iCollisionTreeLink = aLink;
+		return !killed();
 	}
 
 	bool physical_object::has_collided(const i_collidable& aOther) const
 	{
+		if (!collidable() || !aOther.collidable())
+			return false;
 		if ((collision_mask() & aOther.collision_mask()) != 0ull)
-			return false;
-		if (killed() || static_cast<const i_physical_object&>(aOther).killed())
-			return false;
-		const auto& aabbLeft = aabb();
-		const auto& aabbRight = aOther.aabb();
-		if (aabbLeft.min[0] > aabbRight.max[0] || aabbLeft.max[0] < aabbRight.min[0] ||
-			aabbLeft.min[1] > aabbRight.max[1] || aabbLeft.max[1] < aabbRight.min[1] ||
-			aabbLeft.min[2] > aabbRight.max[2] || aabbLeft.max[2] < aabbRight.min[2])
 			return false;
 		// todo: we *might* have collided; now do 2D SAT test to find out if we have actaully collided...
 		return true;
@@ -202,6 +193,16 @@ namespace neogfx
 	void physical_object::collided(i_collidable&)
 	{
 		/* default behaviour: do nothing */
+	}
+
+	uint32_t physical_object::collision_update_id() const
+	{
+		return iCollisionUpdateId;
+	}
+
+	void physical_object::set_collision_update_id(uint32_t aCollisionUpdateId)
+	{
+		iCollisionUpdateId = aCollisionUpdateId;
 	}
 
 	bool physical_object::update(const optional_time_interval& aNow, const vec3& aForce)

@@ -24,7 +24,7 @@
 #include <neolib/timer.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include "sprite.hpp"
-#include "aabb_redblacktree.hpp"
+#include "aabb_octree.hpp"
 
 namespace neogfx
 {
@@ -38,6 +38,7 @@ namespace neogfx
 		event<graphics_context&> painting_sprites;
 		event<graphics_context&> sprites_painted;
 		event<i_object&, i_object&> object_collision;
+		event<i_object&> object_clicked;
 	public:
 		typedef i_physical_object::time_interval time_interval;
 		typedef i_physical_object::optional_time_interval optional_time_interval;
@@ -49,7 +50,7 @@ namespace neogfx
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
-		typedef aabb_redblacktree<> broad_phase_collision_tree;
+		typedef aabb_octree<> broad_phase_collision_tree;
 	public:
 		sprite_plane();
 		sprite_plane(i_widget& aParent);
@@ -58,6 +59,8 @@ namespace neogfx
 	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
 		virtual void paint(graphics_context& aGraphicsContext) const;
+	public:
+		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 	public:
 		virtual const i_widget& as_widget() const;
 		virtual i_widget& as_widget();
@@ -113,6 +116,7 @@ namespace neogfx
 		simple_object_list iSimpleObjects;
 		mutable bool iWaitForRender;
 		bool iUpdatingObjects;
+		object_list::iterator iLastCollidable;
 		broad_phase_collision_tree iBroadPhaseCollisionTree;
 	};
 }

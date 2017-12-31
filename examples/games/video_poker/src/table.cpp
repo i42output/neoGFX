@@ -109,6 +109,7 @@ namespace video_poker
 		iLabelStake{ iInfoBarLayout, "Stake: " },
 		iLabelStakeValue{ iInfoBarLayout, "" }
 	{
+		set_ignore_mouse_events(true);
 		iMainLayout.set_spacing(neogfx::size{ 16.0 });
 		iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
 		iLabelTitle.text().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
