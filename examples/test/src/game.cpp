@@ -176,7 +176,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->physics_applied([debugInfo, spritePlane](ng::sprite_plane::step_time_interval)
 	{
 		debugInfo->set_value(
-			"AABB Collision Tree Size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().count()) + "\n" +
-			"AABB Collision Tree Depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().depth()));
+			"Collision tree (octree) size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().count()) + "\n" +
+			"Collision tree (octree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().depth()));
 	});
 }
