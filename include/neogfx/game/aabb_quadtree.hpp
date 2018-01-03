@@ -297,27 +297,18 @@ namespace neogfx
 		{
 			return iMinimumQuadrantSize;
 		}
-		void full_update()
+		template <typename IterObject>
+		void full_update(IterObject aStart, IterObject aEnd)
 		{
-			if (++iCollisionUpdateId == 0)
-				iCollisionUpdateId = 1;
-			std::vector<i_collidable*> objects;
-			objects.reserve(count() * BucketSize);
-			iRootNode.visit_objects([this, &objects](i_collidable* aObject)
-			{
-				if (aObject->collision_update_id() != iCollisionUpdateId)
-				{
-					aObject->set_collision_update_id(iCollisionUpdateId);
-					objects.push_back(aObject);
-				}
-			});
 			iRootNode.~node();
 			new(&iRootNode) node{ *this, iRootAabb };
-			for (auto o : objects)
-				iRootNode.add_object(*o);
+			for (IterObject o = aStart; o != aEnd; ++o)
+				iRootNode.add_object((**o).as_collidable());
+			for (IterObject o = aStart; o != aEnd; ++o)
+				(**o).as_collidable().save_aabb();
 		}
 		template <typename IterObject>
-		void update_objects(IterObject aStart, IterObject aEnd)
+		void dynamic_update(IterObject aStart, IterObject aEnd)
 		{
 			for (IterObject o = aStart; o != aEnd; ++o)
 				iRootNode.update_object((**o).as_collidable());
