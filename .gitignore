@@ -213,3 +213,6 @@ Debug
 /examples/games/video_poker/build/win32/vs2015/video_poker.aps
 /tools/nrc/build/win32/vs2015/nrc.vcxproj.user
 /examples/test/build/win32/vs2015/My Amplifier Results - test
+/build/win32/vs2015/My Amplifier Results - neoGFX/*.amplxeproj
+/examples/games/video_poker/build/win32/vs2015/My Amplifier Results - video_poker/*.amplxeproj
+/tools/neoGUI/My Amplifier Results - neoGUI/*.amplxeproj
