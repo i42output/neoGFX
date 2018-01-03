@@ -25,7 +25,7 @@ namespace neogfx
 {
 	physical_object::physical_object() :
 		iOrigin{}, 
-		iKilled{ false }, 
+		iKilled{ false },
 		iCollisionUpdateId{ 0 }
 	{
 	}
@@ -53,6 +53,26 @@ namespace neogfx
 	i_shape& physical_object::as_shape()
 	{
 		throw not_a_shape();
+	}
+
+	const i_collidable& physical_object::as_collidable() const
+	{
+		return *this;
+	}
+
+	i_collidable& physical_object::as_collidable()
+	{
+		return *this;
+	}
+
+	const i_physical_object& physical_object::as_physical_object() const
+	{
+		return *this;
+	}
+
+	i_physical_object& physical_object::as_physical_object()
+	{
+		return *this;
 	}
 
 	bool physical_object::killed() const
@@ -162,7 +182,11 @@ namespace neogfx
 
 	void physical_object::clear_aabb_cache()
 	{
-		iAabb = boost::none;
+		if (iAabb != boost::none)
+		{
+			iSavedAabb = iAabb;
+			iAabb = boost::none;
+		}
 	}
 
 	const aabb& physical_object::aabb() const
@@ -173,6 +197,23 @@ namespace neogfx
 			iAabb.emplace(pos, pos);
 		}
 		return *iAabb;
+	}
+
+	const neogfx::aabb& physical_object::saved_aabb() const
+	{
+		if (iSavedAabb == boost::none)
+			iSavedAabb = aabb();
+		return *iSavedAabb;
+	}
+
+	void physical_object::save_aabb()
+	{
+		iSavedAabb = aabb();
+	}
+
+	void physical_object::clear_saved_aabb()
+	{
+		iSavedAabb = boost::none;
 	}
 
 	bool physical_object::collidable() const

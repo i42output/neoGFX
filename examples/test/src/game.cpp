@@ -26,7 +26,7 @@ void create_target(ng::sprite_plane& aWorld)
 {
 	auto target = std::make_shared<ng::sprite>(ng::colour::from_hsl(static_cast<ng::scalar>(std::rand() % 360), 1.0, 0.75));
 	aWorld.add_sprite(target);
-	target->set_collision_mask(2ull);
+	target->set_collision_mask(0x2ull);
 	target->set_position(ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), 0.0 });
 	auto w = static_cast<ng::scalar>(std::rand() % 40) + 10.0;
 	target->set_extents(ng::vec2{ w, w });
@@ -40,7 +40,7 @@ public:
 	missile(ng::sprite_plane& aWorld, const ng::i_sprite& aParent, std::pair<uint32_t, ng::text>& aScore, std::shared_ptr<ng::texture> aExplosion, ng::angle aAngle) :
 		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }, iScore(aScore), iExplosion(aExplosion)
 	{
-		set_collision_mask(1ull);
+		set_collision_mask(0x1ull);
 		shape::set_extents(ng::vec2{ 3.0, 3.0 });
 		ng::vec3 relativePos = aParent.physics().origin();
 		relativePos[1] += 18.0;
@@ -73,6 +73,7 @@ public:
 		static boost::fast_pool_allocator<ng::sprite> alloc;
 		auto explosion = std::allocate_shared<ng::sprite, boost::fast_pool_allocator<sprite>>(
 			alloc, *iExplosion, ng::sprite::animation_info{ { { ng::point{}, ng::size{ 60.0, 60.0 } } }, 12, 0.040, false });
+		explosion->set_collision_mask(0x4ull);
 		static neolib::basic_random<double> r;
 		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), -0.1 });
 		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
@@ -80,7 +81,8 @@ public:
 		iWorld.add_sprite(explosion);
 		kill();
 		other.kill();
-		create_target(iWorld);
+		if (other.collision_mask() != 0x4ull)
+			create_target(iWorld);
 	}
 private:
 	ng::sprite_plane& iWorld;
@@ -128,18 +130,16 @@ void create_game(ng::i_layout& aLayout)
 	{
 		create_target(*spritePlane);
 	}
-	auto debugInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane->font().with_size(spritePlane->font().size() * 0.75), ng::text_appearance{ ng::colour::PaleVioletRed1, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
+	auto debugInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane->font().with_size(spritePlane->font().size() * 0.75), ng::text_appearance{ ng::colour::Yellow, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
 	spritePlane->add_shape(debugInfo);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
 		if (ng::app::instance().keyboard().is_key_pressed(ng::ScanCode_C))
-			spritePlane->collision_tree().visit_aabbs([&aGraphicsContext](const neogfx::aabb& aAabb)
+			spritePlane->collision_tree_2d().visit_aabbs([&aGraphicsContext](const neogfx::aabb_2d& aAabb)
 			{
 				ng::rect aabb{ ng::point{ aAabb.min }, ng::point{ aAabb.max } };
 				aGraphicsContext.draw_rect(aabb, ng::pen{ ng::colour::Blue });
-				aGraphicsContext.draw_line(aabb.top_left(), aabb.bottom_right(), ng::pen{ ng::colour::Blue });
-				aGraphicsContext.draw_line(aabb.top_right(), aabb.bottom_left(), ng::pen{ ng::colour::Blue });
 			});
 	});
 	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
@@ -176,7 +176,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->physics_applied([debugInfo, spritePlane](ng::sprite_plane::step_time_interval)
 	{
 		debugInfo->set_value(
-			"Collision tree (octree) size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().count()) + "\n" +
-			"Collision tree (octree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree().depth()));
+			"Collision tree (quadtree) size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().count()) + "\n" +
+			"Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().depth()));
 	});
 }

@@ -81,6 +81,26 @@ namespace neogfx
 		return *this;
 	}
 
+	const i_collidable& sprite::as_collidable() const
+	{
+		return *this;
+	}
+
+	i_collidable& sprite::as_collidable()
+	{
+		return *this;
+	}
+
+	const i_physical_object& sprite::as_physical_object() const
+	{
+		return *this;
+	}
+
+	i_physical_object& sprite::as_physical_object()
+	{
+		return *this;
+	}
+
 	uint64_t sprite::collision_mask() const
 	{
 		return iCollisionMask;

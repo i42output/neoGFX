@@ -139,6 +139,30 @@ namespace neogfx
 	}
 
 	template <typename MixinInterface>
+	inline const i_collidable& shape<MixinInterface>::as_collidable() const
+	{
+		throw not_a_collidable();
+	}
+
+	template <typename MixinInterface>
+	inline i_collidable& shape<MixinInterface>::as_collidable()
+	{
+		throw not_a_collidable();
+	}
+
+	template <typename MixinInterface>
+	inline const i_physical_object& shape<MixinInterface>::as_physical_object() const
+	{
+		throw not_a_physical_object();
+	}
+
+	template <typename MixinInterface>
+	inline i_physical_object& shape<MixinInterface>::as_physical_object()
+	{
+		throw not_a_physical_object();
+	}
+
+	template <typename MixinInterface>
 	inline bool shape<MixinInterface>::killed() const
 	{
 		return iKilled;

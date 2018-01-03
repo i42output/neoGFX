@@ -29,6 +29,9 @@ namespace neogfx
 		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_collidable::not_implemented") {} };
 	public:
 		virtual const neogfx::aabb& aabb() const = 0;
+		virtual const neogfx::aabb& saved_aabb() const = 0;
+		virtual void save_aabb() = 0;
+		virtual void clear_saved_aabb() = 0;
 		virtual bool collidable() const = 0;
 		virtual uint64_t collision_mask() const { return 0ull; }
 		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }

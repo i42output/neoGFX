@@ -24,6 +24,7 @@
 #include <neolib/timer.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include "sprite.hpp"
+#include "aabb_quadtree.hpp"
 #include "aabb_octree.hpp"
 
 namespace neogfx
@@ -47,10 +48,11 @@ namespace neogfx
 		typedef std::shared_ptr<i_object> object_pointer;
 		typedef std::vector<object_pointer> object_list;
 		typedef std::vector<i_shape*> shape_list;
+		typedef aabb_quadtree<> broad_phase_collision_tree_2d;
+		typedef aabb_octree<> broad_phase_collision_tree_3d;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
-		typedef aabb_octree<> broad_phase_collision_tree;
 	public:
 		sprite_plane();
 		sprite_plane(i_widget& aParent);
@@ -95,7 +97,12 @@ namespace neogfx
 		const object_list& objects() const;
 		void add_object(std::shared_ptr<i_object> aObject);
 	public:
-		const broad_phase_collision_tree& collision_tree() const;
+		bool is_collision_tree_2d() const;
+		bool is_collision_tree_3d() const;
+		const broad_phase_collision_tree_2d& collision_tree_2d() const;
+		broad_phase_collision_tree_2d& collision_tree_2d();
+		const broad_phase_collision_tree_3d& collision_tree_3d() const;
+		broad_phase_collision_tree_3d& collision_tree_3d();
 	private:
 		void do_add_object(std::shared_ptr<i_object> aObject);
 		void sort_shapes() const;
@@ -117,6 +124,7 @@ namespace neogfx
 		mutable bool iWaitForRender;
 		bool iUpdatingObjects;
 		object_list::iterator iLastCollidable;
-		broad_phase_collision_tree iBroadPhaseCollisionTree;
+		mutable boost::optional<broad_phase_collision_tree_2d> iBroadPhaseCollisionTree2d;
+		mutable boost::optional<broad_phase_collision_tree_3d> iBroadPhaseCollisionTree3d;
 	};
 }

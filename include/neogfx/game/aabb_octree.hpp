@@ -68,17 +68,40 @@ namespace neogfx
 				iTree.destroy_node(iChildren[1][0][1]);
 				iTree.destroy_node(iChildren[1][1][0]);
 				iTree.destroy_node(iChildren[1][1][1]);
+				if (has_parent())
+				{
+					if (parent().iChildren[0][0][0] == this)
+						parent().iChildren[0][0][0] = nullptr;
+					if (parent().iChildren[0][0][1] == this)
+						parent().iChildren[0][0][1] = nullptr;
+					if (parent().iChildren[0][1][0] == this)
+						parent().iChildren[0][1][0] = nullptr;
+					if (parent().iChildren[0][1][1] == this)
+						parent().iChildren[0][1][1] = nullptr;
+					if (parent().iChildren[1][0][0] == this)
+						parent().iChildren[1][0][0] = nullptr;
+					if (parent().iChildren[1][0][1] == this)
+						parent().iChildren[1][0][1] = nullptr;
+					if (parent().iChildren[1][1][0] == this)
+						parent().iChildren[1][1][0] = nullptr;
+					if (parent().iChildren[1][1][1] == this)
+						parent().iChildren[1][1][1] = nullptr;
+				}
 			}
 		public:
 			bool has_parent() const
 			{
 				return iParent != nullptr;
 			}
-			node* parent() const
+			const node& parent() const
 			{
 				if (has_parent())
 					return *iParent;
 				throw no_parent();
+			}
+			node& parent()
+			{
+				return const_cast<node&>(const_cast<const node*>(this)->parent());
 			}
 			const neogfx::aabb& aabb() const
 			{
@@ -86,9 +109,9 @@ namespace neogfx
 			}
 			void add_object(i_collidable& aObject)
 			{
-				neolib::scoped_counter sc{ iTree.iCurrentDepth };
-				iTree.iTotalDepth = std::max(iTree.iTotalDepth, iTree.iCurrentDepth);
-				iObjects.push_back(&aObject);
+				auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
+				if (existing == iObjects.end())
+					iObjects.push_back(&aObject);
 				if (iObjects.size() > BucketSize && (iAabb.max - iAabb.min).min() > iTree.minimum_octant_size())
 					split();
 			}
@@ -97,26 +120,107 @@ namespace neogfx
 				auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
 				if (existing != iObjects.end())
 					iObjects.erase(existing);
-				if (has_child<0, 0, 0>() && aabb_intersects(iOctants[0][0][0], aObject.aabb()))
+				if (has_child<0, 0, 0>())
 					child<0, 0, 0>().remove_object(aObject);
-				if (has_child<0, 0, 1>() && aabb_intersects(iOctants[0][0][1], aObject.aabb()))
+				if (has_child<0, 0, 1>())
 					child<0, 0, 1>().remove_object(aObject);
-				if (has_child<0, 1, 0>() && aabb_intersects(iOctants[0][1][0], aObject.aabb()))
+				if (has_child<0, 1, 0>())
 					child<0, 1, 0>().remove_object(aObject);
-				if (has_child<0, 1, 1>() && aabb_intersects(iOctants[0][1][1], aObject.aabb()))
+				if (has_child<0, 1, 1>())
 					child<0, 1, 1>().remove_object(aObject);
-				if (has_child<1, 0, 0>() && aabb_intersects(iOctants[1][0][0], aObject.aabb()))
+				if (has_child<1, 0, 0>())
 					child<1, 0, 0>().remove_object(aObject);
-				if (has_child<1, 0, 1>() && aabb_intersects(iOctants[1][0][1], aObject.aabb()))
+				if (has_child<1, 0, 1>())
 					child<1, 0, 1>().remove_object(aObject);
-				if (has_child<1, 1, 0>() && aabb_intersects(iOctants[1][1][0], aObject.aabb()))
+				if (has_child<1, 1, 0>())
 					child<1, 1, 0>().remove_object(aObject);
-				if (has_child<1, 1, 1>() && aabb_intersects(iOctants[1][1][1], aObject.aabb()))
+				if (has_child<1, 1, 1>())
 					child<1, 1, 1>().remove_object(aObject);
+				if (empty())
+					iTree.destroy_node(this);
+			}
+			void remove_object(i_collidable& aObject, const neogfx::aabb& aAabb)
+			{
+				auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
+				if (existing != iObjects.end())
+					iObjects.erase(existing);
+				if (has_child<0, 0, 0>() && aabb_intersects(iOctants[0][0][0], aAabb))
+					child<0, 0, 0>().remove_object(aObject);
+				if (has_child<0, 0, 1>() && aabb_intersects(iOctants[0][0][1], aAabb))
+					child<0, 0, 1>().remove_object(aObject);
+				if (has_child<0, 1, 0>() && aabb_intersects(iOctants[0][1][0], aAabb))
+					child<0, 1, 0>().remove_object(aObject);
+				if (has_child<0, 1, 1>() && aabb_intersects(iOctants[0][1][1], aAabb))
+					child<0, 1, 1>().remove_object(aObject);
+				if (has_child<1, 0, 0>() && aabb_intersects(iOctants[1][0][0], aAabb))
+					child<1, 0, 0>().remove_object(aObject);
+				if (has_child<1, 0, 1>() && aabb_intersects(iOctants[1][0][1], aAabb))
+					child<1, 0, 1>().remove_object(aObject);
+				if (has_child<1, 1, 0>() && aabb_intersects(iOctants[1][1][0], aAabb))
+					child<1, 1, 0>().remove_object(aObject);
+				if (has_child<1, 1, 1>() && aabb_intersects(iOctants[1][1][1], aAabb))
+					child<1, 1, 1>().remove_object(aObject);
+				if (empty())
+					iTree.destroy_node(this);
+			}
+			void update_object(i_collidable& aObject)
+			{
+				const auto& currentAabb = aObject.aabb();
+				const auto& savedAabb = aObject.saved_aabb();
+				if (currentAabb == savedAabb)
+					return;
+				if (aabb_intersects(savedAabb, iAabb) && !aabb_intersects(currentAabb, iAabb))
+				{
+					remove_object(aObject, savedAabb);
+					if (has_child<0, 0, 0>())
+						child<0, 0, 0>().update_object(aObject);
+					if (has_child<0, 0, 1>())
+						child<0, 0, 1>().update_object(aObject);
+					if (has_child<0, 1, 0>())
+						child<0, 1, 0>().update_object(aObject);
+					if (has_child<0, 1, 1>())
+						child<0, 1, 1>().update_object(aObject);
+					if (has_child<1, 0, 0>())
+						child<1, 0, 0>().update_object(aObject);
+					if (has_child<1, 0, 1>())
+						child<1, 0, 1>().update_object(aObject);
+					if (has_child<1, 1, 0>())
+						child<1, 1, 0>().update_object(aObject);
+					if (has_child<1, 1, 1>())
+						child<1, 1, 1>().update_object(aObject);
+				}
+				if (!aabb_intersects(savedAabb, iAabb) && aabb_intersects(currentAabb, iAabb))
+					add_object(aObject);
+			}
+			bool empty() const
+			{
+				bool result = iObjects.empty();
+				if (has_child<0, 0, 0>())
+					result = child<0, 0, 0>().empty() && result;
+				if (has_child<0, 0, 1>())
+					result = child<0, 0, 1>().empty() && result;
+				if (has_child<0, 1, 0>())
+					result = child<0, 1, 0>().empty() && result;
+				if (has_child<0, 1, 1>())
+					result = child<0, 1, 1>().empty() && result;
+				if (has_child<1, 0, 0>())
+					result = child<1, 0, 0>().empty() && result;
+				if (has_child<1, 0, 1>())
+					result = child<1, 0, 1>().empty() && result;
+				if (has_child<1, 1, 0>())
+					result = child<1, 1, 0>().empty() && result;
+				if (has_child<1, 1, 1>())
+					result = child<1, 1, 1>().empty() && result;
+				return result;
 			}
 			const object_list& objects() const
 			{
 				return iObjects;
+			}
+			template <typename Visitor>
+			void visit(const i_collidable& aCandidate, const Visitor& aVisitor) const
+			{
+				visit(aCandidate.aabb(), aVisitor, &aCandidate);
 			}
 			template <typename Visitor>
 			void visit(const vec3& aPoint, const Visitor& aVisitor) const
@@ -129,11 +233,15 @@ namespace neogfx
 				visit(neogfx::aabb_2d{ aPoint, aPoint }, aVisitor);
 			}
 			template <typename Visitor>
-			void visit(const neogfx::aabb& aAabb, const Visitor& aVisitor) const
+			void visit(const neogfx::aabb& aAabb, const Visitor& aVisitor, const i_collidable* aCandidate = nullptr) const
 			{
-				for (auto o : objects())
-					if (aabb_intersects(aAabb, o->aabb()))
-						aVisitor(o);
+				if (aCandidate != nullptr && !aCandidate->collidable())
+					return;
+				neolib::scoped_counter sc{ iTree.iCurrentDepth };
+				iTree.iTotalDepth = std::max(iTree.iTotalDepth, iTree.iCurrentDepth);
+				for (auto o = objects().begin(); (aCandidate == nullptr || aCandidate->collidable()) && o != objects().end(); ++o)
+					if (aabb_intersects(aAabb, (**o).aabb()))
+						aVisitor(*o);
 				if (has_child<0, 0, 0>() && aabb_intersects(iOctants[0][0][0], aAabb))
 					child<0, 0, 0>().visit(aAabb, aVisitor);
 				if (has_child<0, 0, 1>() && aabb_intersects(iOctants[0][0][1], aAabb))
@@ -224,21 +332,21 @@ namespace neogfx
 				const auto& max = iAabb.max;
 				const auto& centre = (min + max) / 2.0;
 				iOctants[0][0][0] = neogfx::aabb{ min, centre };
-				iOctants[0][0][1] = neogfx::aabb{ vec3{ min.x, min.y, centre.z }, vec3{ centre.x, centre.y, max.z } };
 				iOctants[0][1][0] = neogfx::aabb{ vec3{ min.x, centre.y, min.z }, vec3{ centre.x, max.y, centre.z } };
-				iOctants[0][1][1] = neogfx::aabb{ vec3{ min.x, centre.y, centre.z }, vec3{ centre.x, max.y, max.z } };
 				iOctants[1][0][0] = neogfx::aabb{ vec3{ centre.x, min.y, min.z }, vec3{ max.x, centre.y, centre.z } };
-				iOctants[1][0][1] = neogfx::aabb{ vec3{ centre.x, min.y, centre.z }, vec3{ max.x, centre.y, max.z } };
 				iOctants[1][1][0] = neogfx::aabb{ vec3{ centre.x, centre.y, min.z }, vec3{ max.x, max.y, centre.z } };
+				iOctants[0][0][1] = neogfx::aabb{ vec3{ min.x, min.y, centre.z }, vec3{ centre.x, centre.y, max.z } };
+				iOctants[0][1][1] = neogfx::aabb{ vec3{ min.x, centre.y, centre.z }, vec3{ centre.x, max.y, max.z } };
+				iOctants[1][0][1] = neogfx::aabb{ vec3{ centre.x, min.y, centre.z }, vec3{ max.x, centre.y, max.z } };
 				iOctants[1][1][1] = neogfx::aabb{ vec3{ centre.x, centre.y, centre.z }, vec3{ max.x, max.y, max.z } };
-				iOctants2d[0][0][0] = neogfx::aabb_2d{ min.xy, centre.xy };
-				iOctants2d[0][0][1] = neogfx::aabb_2d{ min.xy, centre.xy };
-				iOctants2d[0][1][0] = neogfx::aabb_2d{ vec2{ min.x, centre.y }, vec2{ centre.x, max.y } };
-				iOctants2d[0][1][1] = neogfx::aabb_2d{ vec2{ min.x, centre.y }, vec2{ centre.x, max.y } };
-				iOctants2d[1][0][0] = neogfx::aabb_2d{ vec2{ centre.x, min.y }, vec2{ max.x, centre.y } };
-				iOctants2d[1][0][1] = neogfx::aabb_2d{ vec2{ centre.x, min.y }, vec2{ max.x, centre.y } };
-				iOctants2d[1][1][0] = neogfx::aabb_2d{ vec2{ centre.x, centre.y }, vec2{ max.x, max.y } };
-				iOctants2d[1][1][1] = neogfx::aabb_2d{ vec2{ centre.x, centre.y }, vec2{ max.x, max.y } };
+				iOctants2d[0][0][0] = aabb_2d{ ~min.xy, ~centre.xy };
+				iOctants2d[0][1][0] = aabb_2d{ vec2{ min.x, centre.y }, vec2{ centre.x, max.y } };
+				iOctants2d[1][0][0] = aabb_2d{ vec2{ centre.x, min.y }, vec2{ max.x, centre.y } };
+				iOctants2d[1][1][0] = aabb_2d{ ~centre.xy, ~max.xy };
+				iOctants2d[0][0][1] = aabb_2d{ ~min.xy, ~centre.xy};
+				iOctants2d[0][1][1] = aabb_2d{ vec2{ min.x, centre.y }, vec2{ centre.x, max.y } };
+				iOctants2d[1][0][1] = aabb_2d{ vec2{ centre.x, min.y }, vec2{ max.x, centre.y } };
+				iOctants2d[1][1][1] = aabb_2d{ ~centre.xy, ~max.xy };
 			}
 			template <std::size_t X, std::size_t Y, std::size_t Z>
 			node& child() const
@@ -302,39 +410,41 @@ namespace neogfx
 		{
 			return iMinimumOctantSize;
 		}
-		void update()
+		void start_update()
 		{
 			iTotalDepth = 0;
-			if (++iCollisionUpdateId == 0)
-				iCollisionUpdateId = 1;
-			std::vector<i_collidable*> objects;
-			objects.reserve(count() * BucketSize);
-			iRootNode.visit_objects([this, &objects](i_collidable* aObject) 
-			{
-				if (aObject->collision_update_id() != iCollisionUpdateId)
-				{
-					aObject->set_collision_update_id(iCollisionUpdateId);
-					objects.push_back(aObject);
-				}
-			});
-			iRootNode.~node();
-			new(&iRootNode) node{ *this, iRootAabb };
-			for (auto o : objects)
-				iRootNode.add_object(*o);
 		}
-		template <typename CollisionAction>
-		void collisions(CollisionAction aCollisionAction) const
+		template <typename IterObject>
+		void update_objects(IterObject aStart, IterObject aEnd)
 		{
-			iRootNode.visit_objects(
-				[this, &aCollisionAction](i_collidable* aCandidate) 
+			for (IterObject o = aStart; o != aEnd; ++o)
+				iRootNode.update_object((**o).as_collidable());
+			for (IterObject o = aStart; o != aEnd; ++o)
+				(**o).as_collidable().save_aabb();
+		}
+		template <typename IterObject, typename CollisionAction>
+		void collisions(IterObject aStart, IterObject aEnd, CollisionAction aCollisionAction) const
+		{
+			for (IterObject o = aStart; o != aEnd; ++o)
+			{
+				auto& candidate = (**o).as_collidable();
+				if (!candidate.collidable())
+					continue;
+				if (++iCollisionUpdateId == 0)
+					iCollisionUpdateId = 1;
+				iRootNode.visit(candidate, [this, &candidate, &aCollisionAction](i_collidable* aHit)
 				{
-					if (aCandidate->collidable())
-						iRootNode.visit(aCandidate->aabb(), [this, &aCollisionAction, aCandidate](i_collidable* aHit)
+					if (std::less<i_collidable*>{}(&candidate, aHit) && aHit->collidable())
+					{
+						if (aHit->collision_update_id() != iCollisionUpdateId)
 						{
-							if (aCandidate < aHit && aCandidate->has_collided(*aHit))
-								aCollisionAction(*aCandidate, *aHit);
-						});
+							aHit->set_collision_update_id(iCollisionUpdateId);
+							if (candidate.has_collided(*aHit))
+								aCollisionAction(candidate, *aHit);
+						}
+					}
 				});
+			}
 		}
 		template <typename ResultContainer>
 		void pick(const vec3& aPoint, ResultContainer& aResult, std::function<bool(reference, const vec3& aPoint)> aColliderPredicate = [](reference, const vec3&) { return true; }) const
@@ -352,6 +462,7 @@ namespace neogfx
 			{
 				if (aColliderPredicate(*aMatch, aPoint))
 					aResult.insert(aResult.end(), aMatch);
+				return true;
 			});
 		}
 		template <typename Visitor>
@@ -377,8 +488,8 @@ namespace neogfx
 		{
 			return iTotalDepth;
 		}
-	protected:
-		node& root_node() const
+	public:
+		const node& root_node() const
 		{
 			return iRootNode;
 		}
@@ -390,14 +501,13 @@ namespace neogfx
 			iAllocator.construct(newNode, aParent, aAabb);
 			return newNode;
 		}
-		void destroy_node(node*& aNode)
+		void destroy_node(node* aNode)
 		{
-			if (aNode != nullptr)
+			if (aNode != nullptr && aNode != &iRootNode)
 			{
 				--iCount;
 				iAllocator.destroy(aNode);
 				iAllocator.deallocate(aNode, 1);
-				aNode = nullptr;
 			}
 		}
 	private:

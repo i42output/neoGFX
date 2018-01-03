@@ -869,7 +869,7 @@ namespace neogfx
 		vec2 max;
 		aabb_2d() : min{}, max{} {}
 		aabb_2d(const vec2& aMin, const vec2& aMax) : min{ aMin }, max{ aMax } {}
-		aabb_2d(const aabb& aAabb) : min{ aAabb.min.xy }, max{ aAabb.max.xy } {}
+		aabb_2d(const aabb& aAabb) : min{ ~aAabb.min.xy }, max{ ~aAabb.max.xy } {}
 	};
 
 	inline bool operator==(const aabb_2d& left, const aabb_2d& right)

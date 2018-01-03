@@ -1,4 +1,5 @@
 ﻿#include <neolib/neolib.hpp>
+#include <csignal>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <neolib/random.hpp>
@@ -138,8 +139,26 @@ private:
 
 void create_game(ng::i_layout& aLayout);
 
+void signal_handler(int signal)
+{
+	if (signal == SIGABRT) {
+		std::cerr << "SIGABRT received\n";
+	}
+	else {
+		std::cerr << "Unexpected signal " << signal << " received\n";
+	}
+	std::_Exit(EXIT_FAILURE);
+}
+
 int main(int argc, char* argv[])
 {
+	auto previous_handler = std::signal(SIGABRT, signal_handler);
+	if (previous_handler == SIG_ERR) 
+	{
+		std::cerr << "SIGABRT handler setup failed\n";
+		return EXIT_FAILURE;
+	}
+
 	/* Yes this is an 800 line (and counting) function and whilst in general such long functions are
 	egregious this function is a special case: it is test code which mostly just creates widgets. 
 	I might break it up at a later date when I create a proper test suite. */
