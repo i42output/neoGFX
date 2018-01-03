@@ -85,6 +85,12 @@ namespace neogames
 			{
 				return neogfx::mat44{ { extents()[0], 0.0, 0.0, 0.0 },{ 0.0, extents()[1] * kBridgeCardSize.cx / kBridgeCardSize.cy, 0.0, 0.0 },{ 0.0, 0.0, 1.0, 0.0 },{ position().x, position().y, position().z, 1.0 } };
 			}
+			// updates
+		protected:
+			bool update(const optional_time_interval&, const neogfx::vec3&)
+			{
+				return true;
+			}
 			// rendering
 		protected:
 			void paint(neogfx::graphics_context& aGraphicsContext) const override

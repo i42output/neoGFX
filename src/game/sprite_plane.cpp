@@ -90,6 +90,20 @@ namespace neogfx
 		iWaitForRender = false;
 	}
 
+	void sprite_plane::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e)
+	{
+		if (aButton == mouse_button::Left)
+		{
+			std::vector<i_collidable*> picked;
+			if (is_collision_tree_2d())
+				collision_tree_2d().pick(aPosition.to_vec2(), picked);
+			else
+				collision_tree_3d().pick(aPosition.to_vec2(), picked);
+			for (auto p : picked)
+				object_clicked.trigger(p->as<i_physical_object>());
+		}
+	}
+
 	const i_widget& sprite_plane::as_widget() const
 	{
 		return *this;
@@ -243,19 +257,59 @@ namespace neogfx
 			do_add_object(aObject);
 	}
 
-	const sprite_plane::broad_phase_collision_tree& sprite_plane::collision_tree() const
+	bool sprite_plane::is_collision_tree_2d() const
 	{
-		return iBroadPhaseCollisionTree;
+		return iBroadPhaseCollisionTree2d != boost::none || iBroadPhaseCollisionTree3d == boost::none;
+	}
+
+	bool sprite_plane::is_collision_tree_3d() const 
+	{
+		return iBroadPhaseCollisionTree3d != boost::none;
+	}
+	
+	const sprite_plane::broad_phase_collision_tree_2d& sprite_plane::collision_tree_2d() const
+	{
+		if (iBroadPhaseCollisionTree2d == boost::none)
+		{
+			iBroadPhaseCollisionTree2d.emplace();
+			iBroadPhaseCollisionTree3d = boost::none;
+			for (auto o : iObjects)
+				if (o->category() == object_category::Sprite || o->category() == object_category::PhysicalObject)
+					iBroadPhaseCollisionTree2d->insert(o->as_physical_object());
+		}
+		return *iBroadPhaseCollisionTree2d;
+	}
+
+	sprite_plane::broad_phase_collision_tree_2d& sprite_plane::collision_tree_2d()
+	{
+		return const_cast<broad_phase_collision_tree_2d&>(const_cast<const sprite_plane*>(this)->collision_tree_2d());
+	}
+
+	const sprite_plane::broad_phase_collision_tree_3d& sprite_plane::collision_tree_3d() const
+	{
+		if (iBroadPhaseCollisionTree3d == boost::none)
+		{
+			iBroadPhaseCollisionTree3d.emplace();
+			iBroadPhaseCollisionTree2d = boost::none;
+			for (auto o : iObjects)
+				if (o->category() == object_category::Sprite || o->category() == object_category::PhysicalObject)
+					iBroadPhaseCollisionTree3d->insert(o->as_physical_object());
+		}
+		return *iBroadPhaseCollisionTree3d;
+	}
+
+	sprite_plane::broad_phase_collision_tree_3d& sprite_plane::collision_tree_3d()
+	{
+		return const_cast<broad_phase_collision_tree_3d&>(const_cast<const sprite_plane*>(this)->collision_tree_3d());
 	}
 
 	void sprite_plane::do_add_object(std::shared_ptr<i_object> aObject)
 	{
 		iObjects.push_back(aObject);
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::PhysicalObject)
-		{
-			auto& physicalObject = static_cast<i_physical_object&>(*aObject);
-			iBroadPhaseCollisionTree.insert(physicalObject);
-		} 
+			is_collision_tree_2d() ? 
+				collision_tree_2d().insert(aObject->as_physical_object()) : 
+				collision_tree_3d().insert(aObject->as_physical_object());
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::Shape)
 			iRenderBuffer.push_back(&aObject->as_shape());
 		iNeedsSorting = true;
@@ -297,15 +351,17 @@ namespace neogfx
 				}
 				else
 				{
-					const i_physical_object& leftObject = static_cast<const i_physical_object&>(*left);
-					const i_physical_object& rightObject = static_cast<const i_physical_object&>(*right);
+					const i_physical_object& leftObject = (*left).as_physical_object();
+					const i_physical_object& rightObject = (*right).as_physical_object();
 					return leftObject.mass() > rightObject.mass();
 				}
 			});
 			while (!iObjects.empty() && iObjects.back()->killed())
 			{
 				if (iObjects.back()->category() == object_category::Sprite || iObjects.back()->category() == object_category::PhysicalObject)
-					iBroadPhaseCollisionTree.erase(iBroadPhaseCollisionTree.find(static_cast<i_physical_object&>(*iObjects.back())));
+					is_collision_tree_2d() ? 
+						collision_tree_2d().remove(iObjects.back()->as_collidable()) :
+						collision_tree_3d().remove(iObjects.back()->as_collidable());
 				iObjects.pop_back();
 			}
 			iNeedsSorting = false;
@@ -328,6 +384,7 @@ namespace neogfx
 		{
 			applying_physics.trigger(*iPhysicsTime);
 			sort_objects();
+			std::size_t collidableObjects = 0;
 			if (iG != 0.0)
 			{
 				for (auto& i1 : iObjects)
@@ -335,12 +392,13 @@ namespace neogfx
 					vec3 totalForce;
 					if (i1->category() == object_category::Shape)
 						break;
+					++collidableObjects;
 					if (i1->killed())
 					{
 						iNeedsSorting = true;
 						continue;
 					}
-					i_physical_object& o1 = static_cast<i_physical_object&>(*i1);
+					i_physical_object& o1 = (*i1).as_physical_object();
 					if (o1.mass() == 0.0)
 						break;
 					if (iUniformGravity != boost::none)
@@ -354,7 +412,7 @@ namespace neogfx
 							iNeedsSorting = true;
 							continue;
 						}
-						i_physical_object& o2 = static_cast<i_physical_object&>(*i2);
+						i_physical_object& o2 = (*i2).as_physical_object();
 						if (&o2 == &o1)
 							continue;
 						if (o2.mass() == 0.0)
@@ -372,14 +430,23 @@ namespace neogfx
 					updated = (o1updated || updated);
 				}
 			}
-			iBroadPhaseCollisionTree.update();
-			iBroadPhaseCollisionTree.collisions(
-				[this](i_collidable& o1, i_collidable& o2)
+			auto process_collisions = [this, collidableObjects](auto& tree)
+			{
+				// todo: dynamic update not yet working; do full update for now...
+				//tree.dynamic_update(iObjects.begin(), iObjects.begin() + collidableObjects);
+				tree.full_update(iObjects.begin(), iObjects.begin() + collidableObjects);
+				tree.collisions(iObjects.begin(), iObjects.begin() + collidableObjects,
+					[this](i_collidable& o1, i_collidable& o2)
 				{
 					o1.collided(o2);
 					o2.collided(o1);
 					object_collision.trigger(o1.as<i_physical_object>(), o2.as<i_physical_object>());
 				});
+			};
+			if (is_collision_tree_2d())
+				process_collisions(collision_tree_2d());
+			else
+				process_collisions(collision_tree_3d());
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();
 		}

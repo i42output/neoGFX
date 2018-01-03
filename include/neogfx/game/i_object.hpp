@@ -34,11 +34,15 @@ namespace neogfx
 	typedef neolib::uuid object_type;
 
 	class i_shape;
+	class i_collidable;
+	class i_physical_object;
 
 	class i_object
 	{
 	public:
 		struct not_a_shape : std::logic_error { not_a_shape() : std::logic_error("neogfx::i_object::not_a_shape") {} };
+		struct not_a_collidable : std::logic_error { not_a_collidable() : std::logic_error("neogfx::i_object::not_a_collidable") {} };
+		struct not_a_physical_object : std::logic_error { not_a_physical_object() : std::logic_error("neogfx::i_object::not_a_physical_object") {} };
 		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_object::not_implemented") {} };
 	public:
 		virtual ~i_object() {}
@@ -46,8 +50,12 @@ namespace neogfx
 		virtual object_category category() const = 0;
 		virtual const i_shape& as_shape() const = 0;
 		virtual i_shape& as_shape() = 0;
+		virtual const i_collidable& as_collidable() const = 0;
+		virtual i_collidable& as_collidable() = 0;
+		virtual const i_physical_object& as_physical_object() const = 0;
+		virtual i_physical_object& as_physical_object() = 0;
 		virtual const object_type& type() const { static object_type sNullTypeId = {}; return sNullTypeId; }
-		virtual bool killed() const { return false; }
-		virtual void kill() {}
+		virtual bool killed() const = 0;
+		virtual void kill() = 0;
 	};
 }

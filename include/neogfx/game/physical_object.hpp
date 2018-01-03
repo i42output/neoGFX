@@ -43,6 +43,12 @@ namespace neogfx
 		object_category category() const override;
 		const i_shape& as_shape() const override;
 		i_shape& as_shape() override;
+		const i_collidable& as_collidable() const override;
+		i_collidable& as_collidable() override;
+		const i_physical_object& as_physical_object() const override;
+		i_physical_object& as_physical_object() override;
+		bool killed() const override;
+		void kill() override;
 	public:
 		vec3 origin() const override;
 		vec3 position() const override;
@@ -66,12 +72,20 @@ namespace neogfx
 		void set_mass(scalar aMass) override;
 	public:
 		void clear_vertices_cache() override;
-		void clear_aabb_cache() override;
+	public:
 		const neogfx::aabb& aabb() const override;
-		void* collision_tree_link() const override;
-		void set_collision_tree_link(void* aLink) override;
+		const neogfx::aabb& saved_aabb() const override;
+		void save_aabb() override;
+		void clear_saved_aabb() override;
+		bool collidable() const override;
 		bool has_collided(const i_collidable& aOther) const override;
 		void collided(i_collidable& aOther) override;
+	public:
+		uint32_t collision_update_id() const override;
+		void set_collision_update_id(uint32_t aCollisionUpdateId) override;
+	public:
+		void clear_aabb_cache() override;
+	public:
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;
 		const optional_time_interval& update_time() const override;
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
@@ -87,6 +101,8 @@ namespace neogfx
 		mutable optional_physics iCurrentPhysics;
 		mutable optional_physics iNextPhysics;
 		mutable optional_aabb iAabb;
-		void* iCollisionTreeLink;
+		mutable optional_aabb iSavedAabb;
+		bool iKilled;
+		uint32_t iCollisionUpdateId;
 	};
 }

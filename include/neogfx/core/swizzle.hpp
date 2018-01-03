@@ -40,12 +40,24 @@ namespace neogfx
 		};
 	}
 
+	template <typename V, uint32_t S>
+	struct swizzle_rebind
+	{
+		typedef typename V::template rebind<S>::type type;
+	};
+
+	template <typename V>
+	struct swizzle_rebind<V, 1>
+	{
+		typedef typename V::value_type type;
+	};
+
 	template <typename V, uint32_t S, uint32_t... Indexes>
 	struct swizzle
 	{
 	public:
 		typedef V vector_type;
-		typedef typename vector_type::template rebind<S>::type sizzled_vector_type;
+		typedef typename swizzle_rebind<V, S>::type sizzled_vector_type;
 		typedef typename vector_type::value_type value_type;
 		typedef typename vector_type::array_type array_type;
 	private:
@@ -61,17 +73,35 @@ namespace neogfx
 			assign(std::begin(aRhs.v), &v[Indexes]...);
 			return *this;
 		}
-		sizzled_vector_type operator*() const
+		template <typename SFINAE = sizzled_vector_type>
+		typename std::enable_if<S != 1, SFINAE>::type operator~() const
 		{
 			static_assert(detail::greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
 			return sizzled_vector_type(v[Indexes]...);
 		}
-		operator sizzled_vector_type() const 
-		{ 
-			return **this;
+		template <typename SFINAE = sizzled_vector_type>
+		typename const std::enable_if<S == 1, SFINAE>::type& operator~() const
+		{
+			return v[first<Indexes...>::value];
 		}
-		template <uint32_t S2 = S>
-		operator typename std::enable_if<S2 == 1, value_type>::type() const
+		template <typename SFINAE = sizzled_vector_type>
+		typename std::enable_if<S == 1, SFINAE>::type& operator~()
+		{
+			return v[first<Indexes...>::value];
+		}
+		template <typename SFINAE = sizzled_vector_type>
+		operator typename std::enable_if<S != 1, SFINAE>::type() const
+		{
+			static_assert(detail::greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
+			return sizzled_vector_type(v[Indexes]...);
+		}
+		template <typename SFINAE = sizzled_vector_type>
+		operator const typename std::enable_if<S == 1, SFINAE>::type&() const
+		{
+			return v[first<Indexes...>::value];
+		}
+		template <typename SFINAE = sizzled_vector_type>
+		operator  typename std::enable_if<S == 1, SFINAE>::type&()
 		{
 			return v[first<Indexes...>::value];
 		}
@@ -97,10 +127,34 @@ namespace neogfx
 		return static_cast<typename V::value_type>(aLhs) + static_cast<typename V::value_type>(aRhs);
 	}
 
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type operator+(const swizzle<V, S, Index1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) + aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type operator+(const typename V::value_type& aLhs, const swizzle<V, S, Index1>& aRhs)
+	{
+		return aLhs + static_cast<typename V::value_type>(aRhs);
+	}
+
 	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
 	inline typename V::value_type operator-(const swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
 	{
 		return static_cast<typename V::value_type>(aLhs) - static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type operator-(const swizzle<V, S, Index1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) - aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type operator-(const typename V::value_type& aLhs, const swizzle<V, S, Index1>& aRhs)
+	{
+		return aLhs - static_cast<typename V::value_type>(aRhs);
 	}
 
 	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
@@ -109,69 +163,237 @@ namespace neogfx
 		return static_cast<typename V::value_type>(aLhs) * static_cast<typename V::value_type>(aRhs);
 	}
 
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type operator*(const swizzle<V, S, Index1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) * aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type operator*(const typename V::value_type& aLhs, const swizzle<V, S, Index1>& aRhs)
+	{
+		return aLhs * static_cast<typename V::value_type>(aRhs);
+	}
+
 	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
 	inline typename V::value_type operator/(const swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
 	{
 		return static_cast<typename V::value_type>(aLhs) / static_cast<typename V::value_type>(aRhs);
 	}
 
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type operator/(const swizzle<V, S, Index1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) / aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type operator/(const typename V::value_type& aLhs, const swizzle<V, S, Index1>& aRhs)
+	{
+		return aLhs / static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
+	inline typename V::value_type& operator+=(swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
+	{
+		return static_cast<typename V::value_type&>(aLhs) += static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type& operator+=(swizzle<V, S, Index1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type&>(aLhs) += aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type& operator+=(typename V::value_type& aLhs, const swizzle<V, S, Index1>& aRhs)
+	{
+		return aLhs += static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
+	inline typename V::value_type& operator-=(swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
+	{
+		return static_cast<typename V::value_type&>(aLhs) -= static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type& operator-=(swizzle<V, S, Index1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type&>(aLhs) -= aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type& operator-=(typename V::value_type& aLhs, const swizzle<V, S, Index1>& aRhs)
+	{
+		return aLhs -= static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
+	inline typename V::value_type& operator*=(swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
+	{
+		return static_cast<typename V::value_type&>(aLhs) *= static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type& operator*=(swizzle<V, S, Index1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type&>(aLhs) *= aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type& operator*=(typename V::value_type& aLhs, const swizzle<V, S, Index1>& aRhs)
+	{
+		return aLhs *= static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1, uint32_t Index2>
+	inline typename V::value_type& operator/=(swizzle<V, S, Index1>& aLhs, const swizzle<V, S, Index2>& aRhs)
+	{
+		return static_cast<typename V::value_type&>(aLhs) /= static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type& operator/=(swizzle<V, S, Index1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type&>(aLhs) /= aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Index1>
+	inline typename V::value_type& operator/=(typename V::value_type& aLhs, const swizzle<V, S, Index1>& aRhs)
+	{
+		return aLhs /= static_cast<typename V::value_type>(aRhs);
+	}
+
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline typename swizzle<V, S, Indexes1...>::sizzled_vector_type operator+(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs + *aRhs;
+		return ~aLhs + ~aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline typename swizzle<V, S, Indexes1...>::sizzled_vector_type operator-(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs - *aRhs;
+		return ~aLhs - ~aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline typename swizzle<V, S, Indexes1...>::sizzled_vector_type operator*(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs * *aRhs;
+		return ~aLhs * ~aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline typename swizzle<V, S, Indexes1...>::sizzled_vector_type operator/(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs / *aRhs;
+		return ~aLhs / ~aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline bool operator<(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs < *aRhs;
+		return ~aLhs < ~aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator<(const typename V::value_type& aLhs, const swizzle<V, S, Indexes1>& aRhs)
+	{
+		return aLhs < static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator<(const swizzle<V, S, Indexes1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) < aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline bool operator<=(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs <= *aRhs;
+		return ~aLhs <= ~aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator<=(const typename V::value_type& aLhs, const swizzle<V, S, Indexes1>& aRhs)
+	{
+		return aLhs <= static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator<=(const swizzle<V, S, Indexes1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) <= aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline bool operator>(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs > *aRhs;
+		return ~aLhs > ~aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator>(const typename V::value_type& aLhs, const swizzle<V, S, Indexes1>& aRhs)
+	{
+		return aLhs > static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator>(const swizzle<V, S, Indexes1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) > aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline bool operator>=(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs >= *aRhs;
+		return ~aLhs >= ~aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator>=(const typename V::value_type& aLhs, const swizzle<V, S, Indexes1>& aRhs)
+	{
+		return aLhs >= static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator>=(const swizzle<V, S, Indexes1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) >= aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline bool operator==(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs == *aRhs;
+		return ~aLhs == ~aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator==(const typename V::value_type& aLhs, const swizzle<V, S, Indexes1>& aRhs)
+	{
+		return aLhs == static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator==(const swizzle<V, S, Indexes1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) == aRhs;
 	}
 
 	template <typename V, uint32_t S, uint32_t... Indexes1, uint32_t... Indexes2>
 	inline bool operator!=(const swizzle<V, S, Indexes1...>& aLhs, const swizzle<V, S, Indexes2...>& aRhs)
 	{
-		return *aLhs != *aRhs;
+		return ~aLhs != ~aRhs;
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator!=(const typename V::value_type& aLhs, const swizzle<V, S, Indexes1>& aRhs)
+	{
+		return aLhs != static_cast<typename V::value_type>(aRhs);
+	}
+
+	template <typename V, uint32_t S, uint32_t Indexes1>
+	inline bool operator!=(const swizzle<V, S, Indexes1>& aLhs, const typename V::value_type& aRhs)
+	{
+		return static_cast<typename V::value_type>(aLhs) != aRhs;
 	}
 }

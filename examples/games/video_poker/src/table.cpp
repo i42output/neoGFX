@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
+#include <neogfx/game/text.hpp>
 #include <video_poker/table.hpp>
 #include <video_poker/poker.hpp>
 
@@ -40,6 +41,40 @@ namespace video_poker
 		{ FourOfAKind, 25 },
 		{ StraightFlush, 50 },
 		{ RoyalFlush, 250 }
+	};
+
+	class outcome : public neogfx::text
+	{
+	public:
+		outcome(neogfx::sprite_plane& aParent, const std::string& aOutcome, const neogfx::colour& aColour) :
+			text{
+				aParent,
+				neogfx::vec3{},
+				aOutcome,
+				neogfx::font{ "Exo 2", "Black", 48.0 },
+				neogfx::text_appearance{aColour, neogfx::text_effect{ neogfx::text_effect::Outline, neogfx::colour::Black } },
+				neogfx::alignment::Centre},
+			iParent{ aParent },
+			iStartTime{ neogfx::app::instance().program_elapsed_ms() }
+		{
+			update(0);
+		}
+	private:
+		bool update(time_interval) override
+		{
+			auto elapsed = std::min(1.0, (neogfx::app::instance().program_elapsed_ms() - iStartTime) / 2500.0);
+			set_position(neogfx::vec3{
+				(iParent.extents().cx - extents()[0]) / 2.0,
+				iParent.extents().cy - (iParent.extents().cy * elapsed),
+				1.0 });
+			set_appearance(appearance().with_alpha(elapsed < 0.75 ? 1.0 : (1.0 - elapsed) * 4.0));
+			if (elapsed >= 1.0)
+				kill();
+			return true;
+		}
+	private:
+		neogfx::sprite_plane& iParent;
+		uint64_t iStartTime;
 	};
 
 	table::table(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane) :
@@ -74,6 +109,7 @@ namespace video_poker
 		iLabelStake{ iInfoBarLayout, "Stake: " },
 		iLabelStakeValue{ iInfoBarLayout, "" }
 	{
+		set_ignore_mouse_events(true);
 		iMainLayout.set_spacing(neogfx::size{ 16.0 });
 		iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
 		iLabelTitle.text().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
@@ -201,8 +237,19 @@ namespace video_poker
 
 	void table::win(int32_t aWinnings)
 	{
-		// todo: win animation and sound
+		iSpritePlane.add_shape(std::make_shared<outcome>(
+			iSpritePlane, 
+			to_string(video_poker::to_poker_hand(*iHand)) + u8"\nWIN £" + boost::lexical_cast<std::string>(aWinnings) + "!",
+			neogfx::colour::Goldenrod.with_lightness(0.8)));
 		iCredits += aWinnings;
+	}
+
+	void table::no_win()
+	{
+		iSpritePlane.add_shape(std::make_shared<outcome>(
+			iSpritePlane,
+			"No Win",
+			neogfx::colour::Blue.with_lightness(0.8)));
 	}
 
 	void table::change_state(table_state aNewState)
@@ -219,6 +266,8 @@ namespace video_poker
 					auto w = PAY_TABLE.find(video_poker::to_poker_hand(*iHand));
 					if (w != PAY_TABLE.end() && (w->first != video_poker::poker_hand::Pair || most_frequent_card(*iHand) >= card::value::Jack))
 						win(w->second * iStake);
+					else
+						no_win();
 					auto lastStake = iStake;
 					iStake = 0;
 					bet(lastStake);

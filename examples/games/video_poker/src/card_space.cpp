@@ -30,7 +30,13 @@ namespace video_poker
 	{
 		set_margins(neogfx::margins{});
 		set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
+		set_ignore_mouse_events(true);
 		iSpritePlane.layout_completed([this]() { update_sprite_geometry(); });
+		iSpritePlane.object_clicked([this](neogfx::i_object& aObject) 
+		{ 
+			if (&aObject.as_shape() == &*iCardSprite) 
+				toggle_hold(); 
+		});
 	}
 
 	neogfx::size card_widget::minimum_size(const neogfx::optional_size& aAvailableSpace) const
@@ -45,18 +51,6 @@ namespace video_poker
 	neogfx::size card_widget::maximum_size(const neogfx::optional_size& aAvailableSpace) const
 	{
 		return (minimum_size(aAvailableSpace) / 0.5).ceil();
-	}
-
-	void card_widget::mouse_button_pressed(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
-	{
-		neogfx::widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-		toggle_hold();
-	}
-
-	void card_widget::mouse_button_double_clicked(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
-	{
-		neogfx::widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
-		toggle_hold();
 	}
 		
 	void card_widget::paint(neogfx::graphics_context& aGraphicsContext) const
@@ -107,7 +101,7 @@ namespace video_poker
 			auto xy = iSpritePlane.to_client_coordinates(to_window_coordinates(client_rect().centre()));
 			if (iCard->discarded())
 				xy += neogfx::point{ -8.0, -16.0 };
-			iCardSprite->set_position(neogfx::vec3{ xy.x, xy.y, 1.0 });
+			iCardSprite->set_position(neogfx::vec3{ xy.x, xy.y, 0.9 });
 			iCardSprite->set_extents(extents());
 			iSpritePlane.update();
 			update();
@@ -136,6 +130,7 @@ namespace video_poker
 	{
 		set_size_policy(neogfx::size_policy::ExpandingNoBits);
 		iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
+		set_ignore_mouse_events(true);
 		iHoldButton.set_size_policy(neogfx::size_policy::Minimum);
 		iHoldButton.set_foreground_colour(neogfx::color::Black);
 		iHoldButton.text().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });

@@ -219,7 +219,7 @@ namespace neogfx
 
 		struct draw_glyph
 		{
-			point point;
+			vec3 point;
 			glyph glyph;
 			font font;
 			text_appearance appearance;

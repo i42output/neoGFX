@@ -58,6 +58,7 @@ namespace video_poker
 		void bet(int32_t aBet);
 		void deal();
 		void win(int32_t aWinnings);
+		void no_win();
 		void change_state(table_state aNewState);
 		void update_widgets();
 	private:

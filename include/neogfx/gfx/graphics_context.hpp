@@ -191,6 +191,14 @@ namespace neogfx
 				return 1.0;
 			}
 		}
+		text_effect with_alpha(colour::component aAlpha) const
+		{
+			return text_effect{ iType, iColour.with_alpha(aAlpha), iWidth, iAux1 };
+		}
+		text_effect with_alpha(double aAlpha) const
+		{
+			return with_alpha(static_cast<colour::component>(aAlpha * 255));
+		}
 	private:
 		type_e iType;
 		text_colour iColour;
@@ -270,7 +278,11 @@ namespace neogfx
 	public:
 		text_appearance with_alpha(colour::component aAlpha) const
 		{
-			return text_appearance{ iInk.with_alpha(aAlpha), iPaper != boost::none ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect };
+			return text_appearance{ iInk.with_alpha(aAlpha), iPaper != boost::none ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect != boost::none ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
+		}
+		text_appearance with_alpha(double aAlpha) const
+		{
+			return with_alpha(static_cast<colour::component>(aAlpha * 255));
 		}
 	private:
 		text_colour iInk;
@@ -317,6 +329,8 @@ namespace neogfx
 		point from_device_units(const point& aValue) const;
 		rect from_device_units(const rect& aValue) const;
 		path from_device_units(const path& aValue) const;
+		int32_t layer() const;
+		void set_layer(int32_t aLayer);
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const;
 		const std::pair<vec2, vec2>& logical_coordinates() const;
@@ -374,12 +388,20 @@ namespace neogfx
 		bool is_text_right_to_left(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		void draw_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		void draw_text(const point& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
+		void draw_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
+		void draw_text(const vec3& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
+		void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
+		void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		void draw_glyph_text(const point& aPoint, const glyph_text& aText, const font& aFont, const text_appearance& aAppearance) const;
 		void draw_glyph_text(const point& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const;
+		void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const font& aFont, const text_appearance& aAppearance) const;
+		void draw_glyph_text(const vec3& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const;
 		void draw_glyph(const point& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const;
+		void draw_glyph(const vec3& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const;
 		void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const;
+		void draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const font& aFont, const text_appearance& aAppearance) const;
 		void set_glyph_text_cache(glyph_text& aGlyphTextCache) const;
 		void reset_glyph_text_cache() const;
 		void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const;
@@ -436,12 +458,12 @@ namespace neogfx
 	};
 
 	template <typename Iter>
-	inline void draw_glyph_text(const graphics_context& aGraphicsContext, const point& aPoint, Iter aTextBegin, Iter aTextEnd, const font& aFont, const text_appearance& aAppearance)
+	inline void draw_glyph_text(const graphics_context& aGraphicsContext, const vec3& aPoint, Iter aTextBegin, Iter aTextEnd, const font& aFont, const text_appearance& aAppearance)
 	{
-		point pos = aPoint;
+		vec3 pos = aPoint;
 		for (Iter i = aTextBegin; i != aTextEnd; ++i)
 		{
-			aGraphicsContext.draw_glyph(pos + i->offset(), *i, aFont, aAppearance);
+			aGraphicsContext.draw_glyph(pos + i->offset().to_vec3(), *i, aFont, aAppearance);
 			pos.x += i->advance().cx;
 		}
 	}

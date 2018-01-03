@@ -112,6 +112,7 @@ namespace neogfx
 		basic_vector normalized() const { basic_vector result; scalar m = magnitude(); for (uint32_t index = 0; index < Size; ++index) result.v[index] = v[index] / m; return result; }
 		basic_vector min(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::min(v[index], right.v[index]); return result; }
 		basic_vector max(const basic_vector& right) const { basic_vector result; for (uint32_t index = 0; index < Size; ++index) result[index] = std::max(v[index], right.v[index]); return result; }
+		value_type min() const { value_type result = v[0]; for (uint32_t index = 1; index < Size; ++index) result = std::min(v[index], result); return result; }
 	public:
 		union
 		{
@@ -838,5 +839,88 @@ namespace neogfx
 	inline bool aabb_contains(const aabb& outer, const aabb& inner)
 	{
 		return inner.min >= outer.min && inner.max <= outer.max;
+	}
+
+	inline bool aabb_contains(const aabb& outer, const vec3& point)
+	{
+		return point >= outer.min && point <= outer.max;
+	}
+
+	inline bool aabb_intersects(const aabb& first, const aabb& second)
+	{
+		if (first.max.x < second.min.x)
+			return false;
+		if (first.min.x > second.max.x)
+			return false;
+		if (first.max.y < second.min.y)
+			return false;
+		if (first.min.y > second.max.y)
+			return false;
+		if (first.max.z < second.min.z)
+			return false;
+		if (first.min.z > second.max.z)
+			return false;
+		return true;
+	}
+
+	struct aabb_2d
+	{
+		vec2 min;
+		vec2 max;
+		aabb_2d() : min{}, max{} {}
+		aabb_2d(const vec2& aMin, const vec2& aMax) : min{ aMin }, max{ aMax } {}
+		aabb_2d(const aabb& aAabb) : min{ ~aAabb.min.xy }, max{ ~aAabb.max.xy } {}
+	};
+
+	inline bool operator==(const aabb_2d& left, const aabb_2d& right)
+	{
+		return left.min == right.min && left.max == right.max;
+	}
+
+	inline bool operator!=(const aabb_2d& left, const aabb_2d& right)
+	{
+		return !(left == right);
+	}
+
+	inline bool operator<(const aabb_2d& left, const aabb_2d& right)
+	{
+		return std::tie(left.min.y, left.min.x, left.max.y, left.max.x) <
+			std::tie(right.min.y, right.min.x, right.max.y, right.max.x);
+	}
+
+	typedef boost::optional<aabb_2d> optional_aabb_2d;
+
+	inline aabb_2d aabb_union(const aabb_2d& left, const aabb_2d& right)
+	{
+		return aabb_2d{ left.min.min(right.min), left.max.max(right.max) };
+	}
+
+	inline scalar aabb_volume(const aabb_2d& a)
+	{
+		auto extents = a.max - a.min;
+		return extents.x * extents.y;
+	}
+
+	inline bool aabb_contains(const aabb_2d& outer, const aabb_2d& inner)
+	{
+		return inner.min >= outer.min && inner.max <= outer.max;
+	}
+
+	inline bool aabb_contains(const aabb_2d& outer, const vec2& point)
+	{
+		return point >= outer.min && point <= outer.max;
+	}
+
+	inline bool aabb_intersects(const aabb_2d& first, const aabb_2d& second)
+	{
+		if (first.max.x < second.min.x)
+			return false;
+		if (first.min.x > second.max.x)
+			return false;
+		if (first.max.y < second.min.y)
+			return false;
+		if (first.min.y > second.max.y)
+			return false;
+		return true;
 	}
 }

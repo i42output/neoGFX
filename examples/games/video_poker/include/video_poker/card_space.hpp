@@ -43,9 +43,6 @@ namespace video_poker
 		neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
 		neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = neogfx::optional_size{}) const override;
 	protected:
-		void mouse_button_pressed(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
-		void mouse_button_double_clicked(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
-	protected:
 		void paint(neogfx::graphics_context& aGraphicsContext) const override;
 	public:
 		bool has_card() const;
