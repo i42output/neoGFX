@@ -73,7 +73,7 @@ public:
 		static boost::fast_pool_allocator<ng::sprite> alloc;
 		auto explosion = std::allocate_shared<ng::sprite, boost::fast_pool_allocator<sprite>>(
 			alloc, *iExplosion, ng::sprite::animation_info{ { { ng::point{}, ng::size{ 60.0, 60.0 } } }, 12, 0.040, false });
-		explosion->set_collision_mask(0x4ull);
+		explosion->set_collision_mask(0x1ull);
 		static neolib::basic_random<double> r;
 		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), -0.1 });
 		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
@@ -107,7 +107,7 @@ void create_game(ng::i_layout& aLayout)
 	//spritePlane->create_earth();
 	spritePlane->reserve(10000);
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image{ sSpaceshipImagePattern, { { 0, ng::colour() },{ 1, ng::colour::LightGoldenrod },{ 2, ng::colour::DarkGoldenrod4 } } });
-	spaceshipSprite.physics().set_collision_mask(1ull);
+	spaceshipSprite.physics().set_collision_mask(0x1ull);
 	spaceshipSprite.physics().set_mass(1.0);
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
 	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 0.0 });

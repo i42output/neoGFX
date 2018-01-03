@@ -237,8 +237,6 @@ namespace neogfx
 			{
 				if (aCandidate != nullptr && !aCandidate->collidable())
 					return;
-				neolib::scoped_counter sc{ iTree.iCurrentDepth };
-				iTree.iTotalDepth = std::max(iTree.iTotalDepth, iTree.iCurrentDepth);
 				for (auto o = objects().begin(); (aCandidate == nullptr || aCandidate->collidable()) && o != objects().end(); ++o)
 					if (aabb_intersects(aAabb, (**o).aabb()))
 						aVisitor(*o);
@@ -285,6 +283,13 @@ namespace neogfx
 			template <typename Visitor>
 			void visit_objects(const Visitor& aVisitor) const
 			{
+				if (!has_parent())
+				{
+					iTree.iCurrentDepth = 0;
+					iTree.iTotalDepth = 0;
+				}
+				neolib::scoped_counter sc{ iTree.iCurrentDepth };
+				iTree.iTotalDepth = std::max(iTree.iTotalDepth, iTree.iCurrentDepth);
 				for (auto o : iObjects)
 					aVisitor(o);
 				if (has_child<0, 0, 0>())
@@ -410,9 +415,24 @@ namespace neogfx
 		{
 			return iMinimumOctantSize;
 		}
-		void start_update()
+		void full_update()
 		{
-			iTotalDepth = 0;
+			if (++iCollisionUpdateId == 0)
+				iCollisionUpdateId = 1;
+			std::vector<i_collidable*> objects;
+			objects.reserve(count() * BucketSize);
+			iRootNode.visit_objects([this, &objects](i_collidable* aObject) 
+			{
+				if (aObject->collision_update_id() != iCollisionUpdateId)
+				{
+					aObject->set_collision_update_id(iCollisionUpdateId);
+					objects.push_back(aObject);
+				}
+			});
+			iRootNode.~node();
+			new(&iRootNode) node{ *this, iRootAabb };
+			for (auto o : objects)
+				iRootNode.add_object(*o);
 		}
 		template <typename IterObject>
 		void update_objects(IterObject aStart, IterObject aEnd)

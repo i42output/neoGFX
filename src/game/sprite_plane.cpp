@@ -432,8 +432,8 @@ namespace neogfx
 			}
 			auto process_collisions = [this, collidableObjects](auto& tree)
 			{
-				tree.start_update();
-				tree.update_objects(iObjects.begin(), iObjects.begin() + collidableObjects);
+				tree.full_update();
+				//tree.update_objects(iObjects.begin(), iObjects.begin() + collidableObjects);
 				tree.collisions(iObjects.begin(), iObjects.begin() + collidableObjects,
 					[this](i_collidable& o1, i_collidable& o2)
 				{
