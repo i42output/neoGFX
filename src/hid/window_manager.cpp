@@ -35,12 +35,13 @@ namespace neogfx
 
 	void window_manager::add_window(i_window& aWindow)
 	{
-		iWindows.insert(&aWindow);
+		iWindows.push_back(&aWindow);
+		std::sort(iWindows.begin(), iWindows.end(), window_sorter{});
 	}
 
 	void window_manager::remove_window(i_window& aWindow)
 	{
-		auto existing = iWindows.find(&aWindow);
+		auto existing = std::find(iWindows.begin(), iWindows.end(), &aWindow);
 		if (existing == iWindows.end())
 			throw window_not_found();
 		iWindows.erase(existing);
@@ -48,7 +49,8 @@ namespace neogfx
 
 	bool window_manager::has_window(i_window& aWindow) const
 	{
-		return iWindows.find(&aWindow) != iWindows.end();
+		auto query = std::find(iWindows.begin(), iWindows.end(), &aWindow);
+		return query != iWindows.end();
 	}
 
 	std::size_t window_manager::window_count() const

@@ -179,4 +179,8 @@ void create_game(ng::i_layout& aLayout)
 			"Collision tree (quadtree) size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().count()) + "\n" +
 			"Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().depth()));
 	});
+
+#ifndef NDEBUG
+	spritePlane->pause_physics_while_not_rendering(true);
+#endif
 }

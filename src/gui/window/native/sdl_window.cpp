@@ -801,7 +801,12 @@ namespace neogfx
 		switch (msg)
 		{
 		case WM_NCCREATE:
-			result = wndproc(hwnd, msg, wparam, lparam);
+			{
+				auto cs = reinterpret_cast<CREATESTRUCT*>(lparam);
+				if (sHandleMap[hwnd]->has_parent())
+					cs->hwndParent = reinterpret_cast<HWND>(sHandleMap[hwnd]->parent().native_handle());
+				result = wndproc(hwnd, msg, wparam, lparam);
+			}
 			break;
 		case WM_CREATE:
 			result = wndproc(hwnd, msg, wparam, lparam);

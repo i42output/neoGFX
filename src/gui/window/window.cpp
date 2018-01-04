@@ -364,7 +364,7 @@ namespace neogfx
 		const i_window* w = &aChildWindow;
 		if (w == this)
 			return false;
-		while (w->has_parent_window())
+		while (w->has_parent_window(false))
 		{
 			w = &w->parent_window();
 			if (w == this)

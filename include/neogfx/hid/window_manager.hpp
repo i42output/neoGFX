@@ -37,10 +37,10 @@ namespace neogfx
 				else if (right->is_owner_of(*left))
 					return false;
 				else
-					return left < right;
+					return std::less<i_window*>{}(left, right);
 			}
 		};
-		typedef std::set<i_window*, window_sorter> window_list;
+		typedef std::vector<i_window*> window_list;
 	public:
 		window_manager();
 		~window_manager();
