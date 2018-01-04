@@ -34,7 +34,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iPausePhysicsWhileNotRendering{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -46,7 +46,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iPausePhysicsWhileNotRendering{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -58,7 +58,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iPausePhysicsWhileNotRendering{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
 	{
 	}
 
@@ -112,6 +112,11 @@ namespace neogfx
 	i_widget& sprite_plane::as_widget()
 	{
 		return *this;
+	}
+
+	void sprite_plane::pause_physics_while_not_rendering(bool aPausePhysicsWhileNotRendering)
+	{
+		iPausePhysicsWhileNotRendering = aPausePhysicsWhileNotRendering;
 	}
 
 	void sprite_plane::enable_z_sorting(bool aEnableZSorting)
@@ -384,7 +389,6 @@ namespace neogfx
 		{
 			applying_physics.trigger(*iPhysicsTime);
 			sort_objects();
-			std::size_t collidableObjects = 0;
 			if (iG != 0.0)
 			{
 				for (auto& i1 : iObjects)
@@ -392,7 +396,6 @@ namespace neogfx
 					vec3 totalForce;
 					if (i1->category() == object_category::Shape)
 						break;
-					++collidableObjects;
 					if (i1->killed())
 					{
 						iNeedsSorting = true;
@@ -430,12 +433,12 @@ namespace neogfx
 					updated = (o1updated || updated);
 				}
 			}
-			auto process_collisions = [this, collidableObjects](auto& tree)
+			auto process_collisions = [this](auto& tree)
 			{
 				// todo: dynamic update not yet working; do full update for now...
-				//tree.dynamic_update(iObjects.begin(), iObjects.begin() + collidableObjects);
-				tree.full_update(iObjects.begin(), iObjects.begin() + collidableObjects);
-				tree.collisions(iObjects.begin(), iObjects.begin() + collidableObjects,
+				//tree.dynamic_update(iObjects.begin(), iObjects.end());
+				tree.full_update(iObjects.begin(), iObjects.end());
+				tree.collisions(iObjects.begin(), iObjects.end(),
 					[this](i_collidable& o1, i_collidable& o2)
 				{
 					o1.collided(o2);
@@ -447,6 +450,12 @@ namespace neogfx
 				process_collisions(collision_tree_2d());
 			else
 				process_collisions(collision_tree_3d());
+			if (!iNewObjects.empty())
+			{
+				for (auto& o : iNewObjects)
+					do_add_object(o);
+				iNewObjects.clear();
+			}
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();
 		}
@@ -454,14 +463,8 @@ namespace neogfx
 		{
 			updated = s->update(from_step_time(now)) || updated;
 		}
-		if (updated)
+		if (updated && iPausePhysicsWhileNotRendering)
 			iWaitForRender = true;
-		if (!iNewObjects.empty())
-		{
-			for (auto& o : iNewObjects)
-				do_add_object(o);
-			iNewObjects.clear();
-		}
 		return updated;
 	}
 }

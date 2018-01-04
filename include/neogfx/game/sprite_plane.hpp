@@ -67,6 +67,7 @@ namespace neogfx
 		virtual const i_widget& as_widget() const;
 		virtual i_widget& as_widget();
 	public:
+		void pause_physics_while_not_rendering(bool aPausePhysicsWhileNotRendering);
 		void enable_z_sorting(bool aEnableZSorting);
 	public:
 		void add_sprite(i_sprite& aObject);
@@ -110,6 +111,7 @@ namespace neogfx
 		bool update_objects();
 	private:
 		neolib::callback_timer iUpdater;
+		bool iPausePhysicsWhileNotRendering;
 		bool iEnableZSorting;
 		bool iNeedsSorting;
 		scalar iG;

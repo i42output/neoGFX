@@ -298,27 +298,34 @@ namespace neogfx
 			return iMinimumQuadrantSize;
 		}
 		template <typename IterObject>
-		void full_update(IterObject aStart, IterObject aEnd)
+		IterObject full_update(IterObject aStart, IterObject aEnd)
 		{
 			iRootNode.~node();
 			new(&iRootNode) node{ *this, iRootAabb };
-			for (IterObject o = aStart; o != aEnd; ++o)
+			IterObject o;
+			for (o = aStart; o != aEnd && (**o).category() != object_category::Shape; ++o)
+			{
 				iRootNode.add_object((**o).as_collidable());
-			for (IterObject o = aStart; o != aEnd; ++o)
 				(**o).as_collidable().save_aabb();
+			}
+			return o;
 		}
 		template <typename IterObject>
-		void dynamic_update(IterObject aStart, IterObject aEnd)
+		IterObject dynamic_update(IterObject aStart, IterObject aEnd)
 		{
-			for (IterObject o = aStart; o != aEnd; ++o)
+			IterObject o;
+			for (o = aStart; o != aEnd && (**o).category() != object_category::Shape; ++o)
+			{
 				iRootNode.update_object((**o).as_collidable());
-			for (IterObject o = aStart; o != aEnd; ++o)
 				(**o).as_collidable().save_aabb();
+			}
+			return o;
 		}
 		template <typename IterObject, typename CollisionAction>
-		void collisions(IterObject aStart, IterObject aEnd, CollisionAction aCollisionAction) const
+		IterObject collisions(IterObject aStart, IterObject aEnd, CollisionAction aCollisionAction) const
 		{
-			for (IterObject o = aStart; o != aEnd; ++o)
+			IterObject o;
+			for (o = aStart; o != aEnd && (**o).category() != object_category::Shape; ++o)
 			{
 				auto& candidate = (**o).as_collidable();
 				if (!candidate.collidable())
@@ -338,6 +345,7 @@ namespace neogfx
 					}
 				});
 			}
+			return o;
 		}
 		template <typename ResultContainer>
 		void pick(const vec2& aPoint, ResultContainer& aResult, std::function<bool(reference, const vec2& aPoint)> aColliderPredicate = [](reference, const vec2&) { return true; }) const
