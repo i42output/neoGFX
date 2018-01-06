@@ -460,7 +460,7 @@ namespace neogfx
 						"	case 1:\n"
 						"		{\n"
 						"			vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
-						"			if (rgbAlpha.rgb == vec3(0.0, 0.0, 0.0))\n"
+						"			if (rgbAlpha.a == 0.0)\n"
 						"				discard;\n"						
 						"			a = rgbAlpha.a;\n"
 						"		}\n"
