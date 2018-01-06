@@ -1298,6 +1298,9 @@ namespace neogfx
 		
 	void sdl_window::set_destroyed()
 	{
+#ifdef WIN32
+		SDL_DestroyWindow(iHandle);
+#endif
 		opengl_window::set_destroyed();
 		iNativeHandle = 0;
 		surface_window().native_window_closed();
