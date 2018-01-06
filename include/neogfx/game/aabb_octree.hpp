@@ -50,12 +50,14 @@ namespace neogfx
 			struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::aabb_octree::node::no_parent" } {} };
 			struct no_children : std::logic_error { no_children() : std::logic_error{ "neogfx::aabb_octree::node::no_children" } {} };
 		public:
-			node(aabb_octree& aTree, const aabb& aAabb) : iTree{ aTree }, iParent{ nullptr }, iAabb{ aAabb }, iChildren {}
+			node(aabb_octree& aTree, const aabb& aAabb) : iTree{ aTree }, iParent{ nullptr }, iDepth{ 1 }, iAabb{ aAabb }, iChildren {}
 			{
+				iTree.iDepth = std::max(iTree.iDepth, iDepth);
 				populate_octants();
 			}
-			node(const node& aParent, const aabb& aAabb) : iTree{ aParent.iTree }, iParent{ &aParent }, iAabb { aAabb }, iChildren{}
+			node(const node& aParent, const aabb& aAabb) : iTree{ aParent.iTree }, iParent{ &aParent }, iDepth{ aParent.iDepth + 1 }, iAabb { aAabb }, iChildren{}
 			{
+				iTree.iDepth = std::max(iTree.iDepth, iDepth);
 				populate_octants();
 			}
 			~node()
@@ -103,12 +105,17 @@ namespace neogfx
 			{
 				return const_cast<node&>(const_cast<const node*>(this)->parent());
 			}
+			uint32_t depth() const
+			{
+				return iDepth;
+			}
 			const neogfx::aabb& aabb() const
 			{
 				return iAabb;
 			}
 			void add_object(i_collidable& aObject)
 			{
+				iTree.iDepth = std::max(iTree.iDepth, iDepth);
 				auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
 				if (existing == iObjects.end())
 					iObjects.push_back(&aObject);
@@ -165,6 +172,7 @@ namespace neogfx
 			}
 			void update_object(i_collidable& aObject)
 			{
+				iTree.iDepth = std::max(iTree.iDepth, iDepth);
 				const auto& currentAabb = aObject.aabb();
 				const auto& savedAabb = aObject.saved_aabb();
 				if (currentAabb == savedAabb)
@@ -283,13 +291,6 @@ namespace neogfx
 			template <typename Visitor>
 			void visit_objects(const Visitor& aVisitor) const
 			{
-				if (!has_parent())
-				{
-					iTree.iCurrentDepth = 0;
-					iTree.iTotalDepth = 0;
-				}
-				neolib::scoped_counter sc{ iTree.iCurrentDepth };
-				iTree.iTotalDepth = std::max(iTree.iTotalDepth, iTree.iCurrentDepth);
 				for (auto o : iObjects)
 					aVisitor(o);
 				if (has_child<0, 0, 0>())
@@ -391,6 +392,7 @@ namespace neogfx
 		private:
 			aabb_octree& iTree;
 			const node* iParent;
+			uint32_t iDepth;
 			neogfx::aabb iAabb;
 			octants iOctants;
 			octants_2d iOctants2d;
@@ -403,8 +405,7 @@ namespace neogfx
 			iAllocator{ aAllocator },
 			iRootAabb{ aRootAabb },
 			iCount{ 0 },
-			iTotalDepth{ 0 },
-			iCurrentDepth{ 0 },
+			iDepth{ 0 },
 			iRootNode{ *this, aRootAabb },
 			iMinimumOctantSize{ aMinimumOctantSize },
 			iCollisionUpdateId{ 0 }
@@ -418,6 +419,7 @@ namespace neogfx
 		template <typename IterObject>
 		IterObject full_update(IterObject aStart, IterObject aEnd)
 		{
+			iDepth = 0;
 			iRootNode.~node();
 			new(&iRootNode) node{ *this, iRootAabb };
 			IterObject o;
@@ -431,6 +433,7 @@ namespace neogfx
 		template <typename IterObject>
 		IterObject dynamic_update(IterObject aStart, IterObject aEnd)
 		{
+			iDepth = 0;
 			IterObject o;
 			for (o = aStart; o != aEnd && (**o).category() != object_category::Shape; ++o)
 			{
@@ -505,7 +508,7 @@ namespace neogfx
 		}
 		uint32_t depth() const
 		{
-			return iTotalDepth;
+			return iDepth;
 		}
 	public:
 		const node& root_node() const
@@ -534,8 +537,7 @@ namespace neogfx
 		aabb iRootAabb;
 		dimension iMinimumOctantSize;
 		uint32_t iCount;
-		mutable uint32_t iTotalDepth;
-		mutable uint32_t iCurrentDepth;
+		mutable uint32_t iDepth;
 		node iRootNode;
 		mutable uint32_t iCollisionUpdateId;
 	};
