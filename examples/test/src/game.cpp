@@ -130,7 +130,7 @@ void create_game(ng::i_layout& aLayout)
 	{
 		create_target(*spritePlane);
 	}
-	auto debugInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane->font().with_size(spritePlane->font().size() * 0.75), ng::text_appearance{ ng::colour::Yellow, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
+	auto debugInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane->font().with_size(spritePlane->font().size() * 0.75), ng::text_appearance{ ng::colour::Yellow.with_lightness(0.9), ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
 	spritePlane->add_shape(debugInfo);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
@@ -166,7 +166,10 @@ void create_game(ng::i_layout& aLayout)
 				}
 			}
 		}
-
+		if (keyboard.is_key_pressed(ng::ScanCode_D))
+			spritePlane->enable_dynamic_update(true);
+		else if (keyboard.is_key_pressed(ng::ScanCode_F))
+			spritePlane->enable_dynamic_update(false);
 		std::ostringstream oss;
 		oss << "VELOCITY:  " << spaceshipSprite.physics().velocity().magnitude() << " m/s" << "\n";
 		oss << "ACCELERATION:  " << spaceshipSprite.physics().acceleration().magnitude() << " m/s/s";
@@ -177,7 +180,9 @@ void create_game(ng::i_layout& aLayout)
 	{
 		debugInfo->set_value(
 			"Collision tree (quadtree) size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().count()) + "\n" +
-			"Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().depth()));
+			"Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().depth()) + "\n" +
+			"Collision tree (quadtree) update type: " + (spritePlane->dynamic_update_enabled() ? "dynamic" : "full") + "\n" +
+			"Physics update time: " + boost::lexical_cast<std::string>(spritePlane->update_time()) + " us");
 	});
 
 #ifndef NDEBUG

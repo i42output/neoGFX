@@ -68,6 +68,8 @@ namespace neogfx
 		virtual i_widget& as_widget();
 	public:
 		void pause_physics_while_not_rendering(bool aPausePhysicsWhileNotRendering);
+		bool dynamic_update_enabled() const;
+		void enable_dynamic_update(bool aEnableDynamicUpdate);
 		void enable_z_sorting(bool aEnableZSorting);
 	public:
 		void add_sprite(i_sprite& aObject);
@@ -104,6 +106,8 @@ namespace neogfx
 		broad_phase_collision_tree_2d& collision_tree_2d();
 		const broad_phase_collision_tree_3d& collision_tree_3d() const;
 		broad_phase_collision_tree_3d& collision_tree_3d();
+	public:
+		uint64_t update_time() const;
 	private:
 		void do_add_object(std::shared_ptr<i_object> aObject);
 		void sort_shapes() const;
@@ -112,6 +116,7 @@ namespace neogfx
 	private:
 		neolib::callback_timer iUpdater;
 		bool iPausePhysicsWhileNotRendering;
+		bool iEnableDynamicUpdate;
 		bool iEnableZSorting;
 		bool iNeedsSorting;
 		scalar iG;
@@ -128,5 +133,6 @@ namespace neogfx
 		object_list::iterator iLastCollidable;
 		mutable boost::optional<broad_phase_collision_tree_2d> iBroadPhaseCollisionTree2d;
 		mutable boost::optional<broad_phase_collision_tree_3d> iBroadPhaseCollisionTree3d;
+		uint64_t iUpdateTime;
 	};
 }

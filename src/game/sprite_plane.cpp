@@ -34,7 +34,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iPausePhysicsWhileNotRendering{ false }, iEnableDynamicUpdate{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iUpdateTime{ 0ull }
 	{
 	}
 
@@ -46,7 +46,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iPausePhysicsWhileNotRendering{ false }, iEnableDynamicUpdate{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iUpdateTime{ 0ull }
 	{
 	}
 
@@ -58,7 +58,7 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }
+		iPausePhysicsWhileNotRendering{ false }, iEnableDynamicUpdate{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iUpdateTime{ 0ull }
 	{
 	}
 
@@ -117,6 +117,16 @@ namespace neogfx
 	void sprite_plane::pause_physics_while_not_rendering(bool aPausePhysicsWhileNotRendering)
 	{
 		iPausePhysicsWhileNotRendering = aPausePhysicsWhileNotRendering;
+	}
+
+	bool sprite_plane::dynamic_update_enabled() const
+	{
+		return iEnableDynamicUpdate;
+	}
+
+	void sprite_plane::enable_dynamic_update(bool aEnableDynamicUpdate)
+	{
+		iEnableDynamicUpdate = aEnableDynamicUpdate;
 	}
 
 	void sprite_plane::enable_z_sorting(bool aEnableZSorting)
@@ -377,6 +387,7 @@ namespace neogfx
 	{
 		if (iWaitForRender)
 			return false;
+		iUpdateTime = 0ull;
 		auto nowClock = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
 		auto now = to_step_time(nowClock.count() * .001, physics_step_interval());
 		if (!iPhysicsTime)
@@ -387,6 +398,7 @@ namespace neogfx
 		bool updated = false;
 		while (*iPhysicsTime <= now)
 		{
+			auto updateStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch());
 			applying_physics.trigger(*iPhysicsTime);
 			sort_objects();
 			if (iG != 0.0)
@@ -435,9 +447,10 @@ namespace neogfx
 			}
 			auto process_collisions = [this](auto& tree)
 			{
-				// todo: dynamic update not yet working; do full update for now...
-				//tree.dynamic_update(iObjects.begin(), iObjects.end());
-				tree.full_update(iObjects.begin(), iObjects.end());
+				if (dynamic_update_enabled())
+					tree.dynamic_update(iObjects.begin(), iObjects.end());
+				else
+					tree.full_update(iObjects.begin(), iObjects.end());
 				tree.collisions(iObjects.begin(), iObjects.end(),
 					[this](i_collidable& o1, i_collidable& o2)
 				{
@@ -456,15 +469,19 @@ namespace neogfx
 					do_add_object(o);
 				iNewObjects.clear();
 			}
+			iUpdateTime = (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()) - updateStartTime).count();
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();
 		}
 		for (auto& s : iRenderBuffer)
-		{
 			updated = s->update(from_step_time(now)) || updated;
-		}
 		if (updated && iPausePhysicsWhileNotRendering)
 			iWaitForRender = true;
 		return updated;
+	}
+
+	uint64_t sprite_plane::update_time() const
+	{
+		return iUpdateTime;
 	}
 }
