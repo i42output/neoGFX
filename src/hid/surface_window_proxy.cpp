@@ -217,7 +217,7 @@ namespace neogfx
 
 	bool surface_window_proxy::has_rendering_priority() const
 	{
-		return as_window().is_active();
+		return as_window().has_rendering_priority();
 	}
 
 	void surface_window_proxy::render_surface()

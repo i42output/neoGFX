@@ -40,7 +40,7 @@ namespace neogfx
 		typedef const void* const_iterator; // todo
 		typedef void* iterator; // todo
 	private:
-		class node : private neolib::destroyable
+		class node : public neolib::destroyable
 		{
 		private:
 			typedef neolib::vecarray<i_collidable*, BucketSize, -1> object_list;
@@ -65,21 +65,21 @@ namespace neogfx
 			{
 				set_destroying();
 				if (has_child<0, 0, 0>())
-					iTree.destroy_node(child<0, 0, 0>());
+					remove_child<0, 0, 0>();
 				if (has_child<0, 1, 0>())
-					iTree.destroy_node(child<0, 1, 0>());
+					remove_child<0, 1, 0>();
 				if (has_child<1, 0, 0>())
-					iTree.destroy_node(child<1, 0, 0>());
+					remove_child<1, 0, 0>();
 				if (has_child<1, 1, 0>())
-					iTree.destroy_node(child<1, 1, 0>());
+					remove_child<1, 1, 0>();
 				if (has_child<0, 0, 1>())
-					iTree.destroy_node(child<0, 0, 1>());
+					remove_child<0, 0, 1>();
 				if (has_child<0, 1, 1>())
-					iTree.destroy_node(child<0, 1, 1>());
+					remove_child<0, 1, 1>();
 				if (has_child<1, 0, 1>())
-					iTree.destroy_node(child<1, 0, 1>());
+					remove_child<1, 0, 1>();
 				if (has_child<1, 1, 1>())
-					iTree.destroy_node(child<1, 1, 1>());
+					remove_child<1, 1, 1>();
 				if (has_parent())
 					parent().unsplit(this);
 			}
@@ -139,50 +139,33 @@ namespace neogfx
 			}
 			void remove_object(i_collidable& aObject)
 			{
-				auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
-				if (existing != iObjects.end())
-					iObjects.erase(existing);
-				if (has_child<0, 0, 0>())
-					child<0, 0, 0>().remove_object(aObject);
-				if (has_child<0, 0, 1>())
-					child<0, 0, 1>().remove_object(aObject);
-				if (has_child<0, 1, 0>())
-					child<0, 1, 0>().remove_object(aObject);
-				if (has_child<0, 1, 1>())
-					child<0, 1, 1>().remove_object(aObject);
-				if (has_child<1, 0, 0>())
-					child<1, 0, 0>().remove_object(aObject);
-				if (has_child<1, 0, 1>())
-					child<1, 0, 1>().remove_object(aObject);
-				if (has_child<1, 1, 0>())
-					child<1, 1, 0>().remove_object(aObject);
-				if (has_child<1, 1, 1>())
-					child<1, 1, 1>().remove_object(aObject);
-				if (empty() && is_alive())
-					iTree.destroy_node(*this);
+				remove_object(aObject, aabb_union(aObject.aabb(), aObject.saved_aabb()));
 			}
 			void remove_object(i_collidable& aObject, const neogfx::aabb& aAabb)
 			{
-				auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
-				if (existing != iObjects.end())
-					iObjects.erase(existing);
+				if (!aObject.collidable() || !aabb_intersects(aObject.aabb(), iAabb))
+				{
+					auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
+					if (existing != iObjects.end())
+						iObjects.erase(existing);
+				}
 				if (has_child<0, 0, 0>() && aabb_intersects(iOctants[0][0][0], aAabb))
-					child<0, 0, 0>().remove_object(aObject);
+					child<0, 0, 0>().remove_object(aObject, aAabb);
 				if (has_child<0, 0, 1>() && aabb_intersects(iOctants[0][0][1], aAabb))
-					child<0, 0, 1>().remove_object(aObject);
+					child<0, 0, 1>().remove_object(aObject, aAabb);
 				if (has_child<0, 1, 0>() && aabb_intersects(iOctants[0][1][0], aAabb))
-					child<0, 1, 0>().remove_object(aObject);
+					child<0, 1, 0>().remove_object(aObject, aAabb);
 				if (has_child<0, 1, 1>() && aabb_intersects(iOctants[0][1][1], aAabb))
-					child<0, 1, 1>().remove_object(aObject);
+					child<0, 1, 1>().remove_object(aObject, aAabb);
 				if (has_child<1, 0, 0>() && aabb_intersects(iOctants[1][0][0], aAabb))
-					child<1, 0, 0>().remove_object(aObject);
+					child<1, 0, 0>().remove_object(aObject, aAabb);
 				if (has_child<1, 0, 1>() && aabb_intersects(iOctants[1][0][1], aAabb))
-					child<1, 0, 1>().remove_object(aObject);
+					child<1, 0, 1>().remove_object(aObject, aAabb);
 				if (has_child<1, 1, 0>() && aabb_intersects(iOctants[1][1][0], aAabb))
-					child<1, 1, 0>().remove_object(aObject);
+					child<1, 1, 0>().remove_object(aObject, aAabb);
 				if (has_child<1, 1, 1>() && aabb_intersects(iOctants[1][1][1], aAabb))
-					child<1, 1, 1>().remove_object(aObject);
-				if (empty() && is_alive())
+					child<1, 1, 1>().remove_object(aObject, aAabb);
+				if (empty())
 					iTree.destroy_node(*this);
 			}
 			void update_object(i_collidable& aObject)
@@ -194,7 +177,7 @@ namespace neogfx
 					return;
 				if (aabb_intersects(currentAabb, iAabb))
 					add_object(aObject);
-				else if (aabb_intersects(savedAabb, iAabb))
+				if (aabb_intersects(savedAabb, iAabb))
 					remove_object(aObject, savedAabb);
 			}
 			bool empty() const
@@ -376,7 +359,9 @@ namespace neogfx
 					return true;
 				if ((*iChildren)[X][Y][Z] == aDestroyedNode || aDestroyedNode == nullptr)
 				{
+					auto n = (*iChildren)[X][Y][Z];
 					(*iChildren)[X][Y][Z] = nullptr;
+					iTree.destroy_node(*n);
 					return true;
 				}
 				return false;
@@ -429,7 +414,7 @@ namespace neogfx
 					haveChildren = true;
 				if (!haveChildren)
 					iChildren = boost::none;
-				if (empty() && is_alive())
+				if (empty())
 					iTree.destroy_node(*this);
 			}
 		private:
@@ -568,7 +553,7 @@ namespace neogfx
 		}
 		void destroy_node(node& aNode)
 		{
-			if (&aNode != &iRootNode)
+			if (&aNode != &iRootNode && aNode.is_alive())
 			{
 				--iCount;
 				iAllocator.destroy(&aNode);

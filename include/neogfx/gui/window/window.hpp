@@ -149,6 +149,8 @@ namespace neogfx
 		bool dismissed() const override;
 		void dismiss() override;
 	public:
+		bool has_rendering_priority() const override;
+	public:
 		point mouse_position() const override;
 	public:
 		rect widget_part_rect(widget_part aWidgetPart) const override;

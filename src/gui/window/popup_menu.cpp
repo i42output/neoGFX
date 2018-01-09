@@ -108,7 +108,7 @@ namespace neogfx
 
 	bool popup_menu::has_rendering_priority() const
 	{
-		return surface().has_rendering_priority() || visible();
+		return window::has_rendering_priority() || visible();
 	}
 
 	bool popup_menu::has_menu() const
@@ -239,11 +239,6 @@ namespace neogfx
 		return app::instance().current_style().palette().colour().dark() ?
 			app::instance().current_style().palette().colour().darker(0x40) :
 			app::instance().current_style().palette().colour().lighter(0x40);
-	}
-
-	void popup_menu::set_capture()
-	{
-		/* do nothing */
 	}
 
 	bool popup_menu::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)

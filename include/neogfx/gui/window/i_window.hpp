@@ -122,6 +122,8 @@ namespace neogfx
 		virtual bool dismissed() const = 0;
 		virtual void dismiss() = 0;
 	public:
+		virtual bool has_rendering_priority() const = 0;
+	public:
 		virtual point mouse_position() const = 0;
 	public:
 		virtual rect widget_part_rect(widget_part aWidgetPart) const = 0;

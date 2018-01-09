@@ -848,6 +848,11 @@ namespace neogfx
 		init_scrollbars();
 	}
 
+	bool window::has_rendering_priority() const
+	{
+		return is_active();
+	}
+
 	point window::mouse_position() const
 	{
 		return window_manager().mouse_position(*this);

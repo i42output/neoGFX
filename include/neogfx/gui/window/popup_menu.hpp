@@ -44,26 +44,24 @@ namespace neogfx
 		void set_menu(i_menu& aMenu, const point& aPosition = point{});
 		void clear_menu();
 	public:
-		virtual void resized();
+		void resized() override;
 	public:
-		virtual bool can_dismiss(const i_widget* aClickedWidget) const;
-		virtual dismissal_type_e dismissal_type() const;
-		virtual bool dismissed() const;
-		virtual void dismiss();
+		bool can_dismiss(const i_widget* aClickedWidget) const override;
+		dismissal_type_e dismissal_type() const override;
+		bool dismissed() const override;
+		void dismiss() override;
 	public:
-		virtual bool has_rendering_priority() const;
+		bool has_rendering_priority() const override;
 	public:
-		virtual neogfx::size_policy size_policy() const;	
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		neogfx::size_policy size_policy() const override;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
-		virtual colour background_colour() const;
+		colour background_colour() const override;
 	public:
-		virtual void set_capture();
-	public:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool text_input(const std::string& aText);
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool text_input(const std::string& aText) override;
 	private:
 		void init();
 		void close_sub_menu();

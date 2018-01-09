@@ -183,10 +183,7 @@ namespace neogfx
 	void physical_object::clear_aabb_cache()
 	{
 		if (iAabb != boost::none)
-		{
-			iSavedAabb = iAabb;
 			iAabb = boost::none;
-		}
 	}
 
 	const aabb& physical_object::aabb() const
