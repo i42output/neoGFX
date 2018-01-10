@@ -294,15 +294,15 @@ namespace neogfx
 
 	bool window::has_surface() const
 	{
-		return find_surface() != nullptr;
+		return widget::has_surface();
 	}
 
 	const i_surface_window& window::surface() const
 	{
-		auto result = find_surface();
-		if (result != nullptr)
-			return *result;
-		throw no_surface();
+		if (is_surface())
+			return *iSurfaceWindow;
+		else
+			return static_cast<const i_surface_window&>(widget::surface());
 	}
 
 	i_surface_window& window::surface()

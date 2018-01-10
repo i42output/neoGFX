@@ -890,7 +890,7 @@ int main(int argc, char* argv[])
 		#else
 		for (int i = 0; i < 100; ++i)
 		#endif
-		l.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
+			l.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
 		auto& w2 = tabContainer.add_tab_page("Images").as_widget();
 		ng::horizontal_layout l2(w2);
 		ng::vertical_layout l3(l2);

@@ -158,7 +158,10 @@ namespace neogfx
 		{
 			iSingular = aSingular;
 			if (iSingular)
+			{
+				find_surface(); // may need surface during destruction of children
 				iParent = nullptr;
+			}
 		}
 	}
 
@@ -444,12 +447,15 @@ namespace neogfx
 
 	bool widget::has_surface() const
 	{
-		return find_surface() != nullptr;
+		if (iSurface != nullptr)
+			return true;
+		else
+			return find_surface() != nullptr;
 	}
 
 	const i_surface& widget::surface() const
 	{
-		auto existingSurface = find_surface();
+		auto existingSurface = (iSurface != nullptr ? iSurface : find_surface());
 		if (existingSurface != nullptr)
 			return *existingSurface;
 		throw no_surface();
@@ -1449,8 +1455,8 @@ namespace neogfx
 		const i_widget* w = this;
 		while (!w->is_surface() && w->has_parent(false))
 			w = &w->parent();
-		if (w->is_surface())
-			return (iSurface = &w->surface());
+		if (w->is_surface() || (w != this && w->has_surface()))
+ 			return (iSurface = &w->surface());
 		return nullptr;
 	}
 
