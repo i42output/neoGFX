@@ -27,7 +27,7 @@ namespace neogfx
 	enum class window_style : uint32_t
 	{
 		Invalid =				0x00000000,
-		None =					0x00000001,	// No decoration at all(useful for splash screens, for example); this style cannot be combined with others
+		NoDecoration =			0x00000001,	// No decoration at all (useful for splash screens, for example); this style cannot be combined with others
 		TitleBar =				0x00000002,	// The window has a titlebar
 		NativeTitleBar =		0x00000004,	// The window has a native titlebar
 		SystemMenu =			0x00000008,
@@ -46,7 +46,8 @@ namespace neogfx
 		HideOnOwnerClick =		0x00400000,
 		HideOnParentClick =		0x00800000,
 		InitiallyHidden =		0x01000000,
-		Weak =					0x10000000,
+		DropShadow =			0x02000000,
+		Weak =					0x80000000,
 		Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close
 	};
 

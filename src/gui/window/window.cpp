@@ -344,7 +344,7 @@ namespace neogfx
 
 	bool window::has_parent_window(bool aSameSurface) const
 	{
-		return has_parent(aSameSurface);
+		return has_parent(aSameSurface) && parent().is_root();
 	}
 
 	const i_window& window::parent_window() const
@@ -637,7 +637,7 @@ namespace neogfx
 	bool window::show(bool aVisible)
 	{
 		bool result = widget::show(aVisible);
-		if (has_native_surface())
+		if (result && has_native_surface())
 		{
 			if (aVisible)
 				native_window().show();
@@ -816,6 +816,9 @@ namespace neogfx
 	void window::init()
 	{
 		iSurfaceDestroyed.emplace(surface().native_surface().as_destroyable());
+
+		if ((style() & window_style::InitiallyHidden) == window_style::InitiallyHidden)
+			hide();
 
 		if ((style() & window_style::Nested) == window_style::Nested)
 			iNestedWindowDetails = std::make_unique<nested_details>(*this);

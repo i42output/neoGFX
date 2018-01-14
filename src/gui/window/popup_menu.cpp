@@ -26,27 +26,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
 	popup_menu::popup_menu(const point& aPosition, i_menu& aMenu, window_style aStyle) :
-		window(aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame), iParentWidget(0), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+		window{ aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
+		iParentWidget{ 0 }, 
+		iMenu{ nullptr }, 
+		iLayout{ *this }, 
+		iOpeningSubMenu{ false }
 	{
 		init();
 		set_menu(aMenu, aPosition);
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, i_menu& aMenu, window_style aStyle) :
-		window(aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame), iParentWidget(&aParent), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+		window{ aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
+		iParentWidget{ &aParent }, 
+		iMenu{ nullptr }, 
+		iLayout{ *this }, 
+		iOpeningSubMenu{ false }
 	{
 		init();
 		set_menu(aMenu, aPosition);
 	}
 
 	popup_menu::popup_menu(const point& aPosition, window_style aStyle) :
-		window(aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame), iParentWidget(0), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+		window{ aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
+		iParentWidget{ 0 }, 
+		iMenu{ nullptr }, 
+		iLayout{ *this }, 
+		iOpeningSubMenu{ false }
 	{
 		init();
 	}
 
 	popup_menu::popup_menu(i_widget& aParent, const point& aPosition, window_style aStyle) :
-		window(aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame), iParentWidget(&aParent), iMenu(nullptr), iLayout(*this), iOpeningSubMenu(false)
+		window{ aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
+		iParentWidget{ &aParent }, 
+		iMenu{ nullptr }, 
+		iLayout{ *this }, 
+		iOpeningSubMenu{ false }
 	{
 		init();
 	}
@@ -369,7 +385,7 @@ namespace neogfx
 			ourRect.position().y += (desktopRect.bottom() - ourRect.bottom());
 		if (ourRect.right() > desktopRect.right())
 			ourRect.position().x += (desktopRect.right() - ourRect.right());
-		if (has_menu() && menu().has_parent() && has_parent_window())
+		if (has_menu() && menu().has_parent() && has_parent_window(false))
 		{
 			if (menu().parent().type() == i_menu::MenuBar)
 			{

@@ -654,6 +654,9 @@
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\list_view.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
@@ -1021,6 +1024,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\audio\audio_device.cpp">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\list_view.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

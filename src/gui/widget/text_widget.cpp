@@ -63,8 +63,11 @@ namespace neogfx
 		{
 			size extent = units_converter(*this).to_device_units(text_extent().max(size_hint_extent()));
 			size result = extent + units_converter(*this).to_device_units(margins().size());
-			result.cx = std::ceil(result.cx);
-			result.cy = std::ceil(result.cy);
+			if (has_maximum_size())
+			{
+				result.cx = std::min(std::ceil(result.cx), maximum_size().cx);
+				result.cy = std::min(std::ceil(result.cy), maximum_size().cy);
+			}
 			return units_converter(*this).from_device_units(result);
 		}
 	}

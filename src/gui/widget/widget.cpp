@@ -624,9 +624,12 @@ namespace neogfx
 			{
 				iLayoutTimer = std::make_unique<layout_timer>(root(), app::instance(), [this](neolib::callback_timer&)
 				{
-					auto t = std::move(iLayoutTimer);
-					layout_items();
-					update();
+					if (root().has_native_window())
+					{
+						auto t = std::move(iLayoutTimer);
+						layout_items();
+						update();
+					}
 				});
 			}
 		}

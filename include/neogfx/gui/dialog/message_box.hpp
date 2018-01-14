@@ -71,6 +71,8 @@ namespace neogfx
 		void set_response(standard_button aResponse);
 	public:
 		dialog_result exec() override;
+	protected:
+		size maximum_size(const optional_size& aAvailableSpace = optional_size{}) const override;
 	private:
 		void init();
 	private:

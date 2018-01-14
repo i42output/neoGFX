@@ -255,6 +255,13 @@ namespace neogfx
 		return result;
 	}
 
+	size message_box::maximum_size(const optional_size& aAvailableSpace) const
+	{
+		if (dialog::has_maximum_size())
+			return dialog::maximum_size(aAvailableSpace);
+		return (app::instance().window_manager().desktop_rect(root()) / 2.0).ceil();
+	}
+
 	void message_box::init()
 	{
 		set_standard_layout(16.0);

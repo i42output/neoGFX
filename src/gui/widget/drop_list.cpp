@@ -24,26 +24,185 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+	drop_list_popup::drop_list_popup(drop_list& aDropList) :
+		window{ 
+			aDropList,
+			aDropList.window_rect().bottom_left() + aDropList.root().window_position(),
+			aDropList.window_rect().extents(),
+			window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::HideOnOwnerClick | window_style::InitiallyHidden | window_style::DropShadow },
+		iDropList{ aDropList },
+		iView{ client_widget(), scrollbar_style::Normal, frame_style::NoFrame }
+	{
+		resize(minimum_size());
+	}
+
+	const list_view& drop_list_popup::view() const
+	{
+		return iView;
+	}
+
+	list_view& drop_list_popup::view()
+	{
+		return iView;
+	}
+
+	colour drop_list_popup::frame_colour() const
+	{
+		if (window::has_frame_colour())
+			return window::frame_colour();
+		return (background_colour().dark() ? background_colour().darker(0x20) : background_colour().lighter(0x20));
+	}
+
+	size_policy drop_list_popup::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		return neogfx::size_policy::Minimum;
+	}
+
+	size drop_list_popup::minimum_size(const optional_size&) const
+	{
+		// todo
+		return size{ 100.0, 100.0 };
+	}
+
+	bool drop_list_popup::can_dismiss(const i_widget*) const
+	{
+		return true;
+	}
+
+	window::dismissal_type_e drop_list_popup::dismissal_type() const
+	{
+		return HideOnDismissal;
+	}
+
+	bool drop_list_popup::dismissed() const
+	{
+		return hidden();
+	}
+
+	void drop_list_popup::dismiss()
+	{
+		hide();
+	}
+
+	drop_list::popup_proxy::popup_proxy(drop_list& aDropList) :
+		iDropList{ aDropList }
+	{
+	}
+
+	drop_list_popup& drop_list::popup_proxy::popup() const
+	{
+		if (iPopup == boost::none)
+			iPopup.emplace(iDropList);
+		return *iPopup;
+	}
+
 	drop_list::drop_list() :
-		push_button{ "Drop list widget", push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }
+		push_button{ push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }, iPopupProxy{ *this }
 	{
 		init();
 	}
 
 	drop_list::drop_list(i_widget& aParent) :
-		push_button{ aParent, "Drop list widget", push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }
+		push_button{ aParent, push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }, iPopupProxy{ *this }
 	{
 		init();
 	}
 
 	drop_list::drop_list(i_layout& aLayout) :
-		push_button{ aLayout, "Drop list widget", push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }
+		push_button{ aLayout, push_button_style::DropList }, iEditable{ false }, iDownArrow{ texture{} }, iPopupProxy{ *this }
 	{
 		init();
 	}
 
 	drop_list::~drop_list()
 	{
+	}
+
+	bool drop_list::has_model() const
+	{
+		return view().has_model();
+	}
+
+	const i_item_model& drop_list::model() const
+	{
+		return view().model();
+	}
+
+	i_item_model& drop_list::model()
+	{
+		return view().model();
+	}
+
+	void drop_list::set_model(i_item_model& aModel)
+	{
+		view().set_model(aModel);
+	}
+
+	void drop_list::set_model(std::shared_ptr<i_item_model> aModel)
+	{
+		view().set_model(aModel);
+	}
+
+	bool drop_list::has_presentation_model() const
+	{
+		return view().has_presentation_model();
+	}
+
+	const i_item_presentation_model& drop_list::presentation_model() const
+	{
+		return view().presentation_model();
+	}
+
+	i_item_presentation_model& drop_list::presentation_model()
+	{
+		return view().presentation_model();
+	}
+
+	void drop_list::set_presentation_model(i_item_presentation_model& aPresentationModel)
+	{
+		return view().set_presentation_model(aPresentationModel);
+	}
+
+	void drop_list::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
+	{
+		return view().set_presentation_model(aPresentationModel);
+	}
+
+	bool drop_list::has_selection_model() const
+	{
+		return view().has_selection_model();
+	}
+
+	const i_item_selection_model& drop_list::selection_model() const
+	{
+		return view().selection_model();
+	}
+
+	i_item_selection_model& drop_list::selection_model()
+	{
+		return view().selection_model();
+	}
+
+	void drop_list::set_selection_model(i_item_selection_model& aSelectionModel)
+	{
+		view().set_selection_model(aSelectionModel);
+	}
+
+	void drop_list::set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel)
+	{
+		view().set_selection_model(aSelectionModel);
+	}
+
+	drop_list_popup& drop_list::popup() const
+	{
+		return iPopupProxy.popup();
+	}
+
+	list_view& drop_list::view() const
+	{
+		return popup().view();
 	}
 
 	bool drop_list::editable() const
@@ -66,6 +225,13 @@ namespace neogfx
 
 	void drop_list::handle_clicked()
 	{
+		if (view().effectively_hidden())
+		{
+			app::instance().window_manager().move_window(popup(), window_rect().bottom_left() + root().window_position());
+			popup().show();
+		}
+		else
+			popup().hide();
 	}
 
 	void drop_list::init()

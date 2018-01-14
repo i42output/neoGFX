@@ -26,22 +26,22 @@
 
 namespace neogfx
 {
-	item_view::item_view() :
-		scrollable_widget{}, iBeginningEdit{ false }, iEndingEdit {	false }
+	item_view::item_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+		scrollable_widget{ aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit {	false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));
 	}
 
-	item_view::item_view(i_widget& aParent) : 
-		scrollable_widget{ aParent }, iBeginningEdit{ false }, iEndingEdit{ false }
+	item_view::item_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+		scrollable_widget{ aParent, aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));
 	}
 
-	item_view::item_view(i_layout& aLayout) :
-		scrollable_widget{ aLayout }, iBeginningEdit{ false }, iEndingEdit{ false }
+	item_view::item_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+		scrollable_widget{ aLayout, aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins(0.0));

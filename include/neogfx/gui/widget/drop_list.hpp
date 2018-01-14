@@ -20,17 +20,73 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "push_button.hpp"
+#include <neogfx/gui/window/window.hpp>
+#include <neogfx/gui/widget/list_view.hpp>
+#include <neogfx/gui/widget/push_button.hpp>
 
 namespace neogfx
 {
+	class drop_list;
+
+	class drop_list_popup : public window
+	{
+	public:
+		drop_list_popup(drop_list& aDropList);
+	public:
+		const list_view& view() const;
+		list_view& view();
+	protected:
+		colour frame_colour() const override;
+	protected:
+		neogfx::size_policy size_policy() const override;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+	protected:
+		bool can_dismiss(const i_widget*) const override;
+		dismissal_type_e dismissal_type() const override;
+		bool dismissed() const override;
+		void dismiss() override;
+	private:
+		drop_list& iDropList;
+		list_view iView;
+	};
+
 	class drop_list : public push_button
 	{
+	private:
+		class popup_proxy
+		{
+		public:
+			popup_proxy(drop_list& aDropList);
+		public:
+			drop_list_popup& popup() const;
+		private:
+			drop_list& iDropList;
+			mutable boost::optional<drop_list_popup> iPopup;
+		};
 	public:
 		drop_list();
 		drop_list(i_widget& aParent);
 		drop_list(i_layout& aLayout);
 		~drop_list();
+	public:
+		bool has_model() const;
+		const i_item_model& model() const;
+		i_item_model& model();
+		void set_model(i_item_model& aModel);
+		void set_model(std::shared_ptr<i_item_model> aModel);
+		bool has_presentation_model() const;
+		const i_item_presentation_model& presentation_model() const;
+		i_item_presentation_model& presentation_model();
+		void set_presentation_model(i_item_presentation_model& aPresentationModel);
+		void set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel);
+		bool has_selection_model() const;
+		const i_item_selection_model& selection_model() const;
+		i_item_selection_model& selection_model();
+		void set_selection_model(i_item_selection_model& aSelectionModel);
+		void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
+	public:
+		drop_list_popup& popup() const;
+		list_view& view() const;
 	public:
 		bool editable() const;
 		void set_editable(bool aEditable);
@@ -46,5 +102,6 @@ namespace neogfx
 		bool iEditable;
 		mutable boost::optional<std::pair<colour, texture>> iDownArrowTexture;
 		image_widget iDownArrow;
+		popup_proxy iPopupProxy;
 	};
 }

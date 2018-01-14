@@ -1,7 +1,7 @@
-// table_view.cpp
+// list_view.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright(C) 2018 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -18,17 +18,16 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/table_view.hpp>
+#include <neogfx/gui/widget/list_view.hpp>
 #include <neogfx/gui/widget/item_selection_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 
 namespace neogfx
 {
-	table_view::table_view() :
-		item_view{},
+	list_view::list_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+		item_view{ aScrollbarStyle, aFrameStyle },
 		iLayout{ *this },
-		iColumnHeader{ iLayout, *this },
 		iSpacer{ iLayout }
 	{
 		layout().set_margins(neogfx::margins(0.0));
@@ -37,10 +36,9 @@ namespace neogfx
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
 	}
 
-	table_view::table_view(i_widget& aParent) : 
-		item_view{ aParent },
+	list_view::list_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+		item_view{ aParent, aScrollbarStyle, aFrameStyle },
 		iLayout{ *this },
-		iColumnHeader{ iLayout, *this },
 		iSpacer{ iLayout }
 	{
 		layout().set_margins(neogfx::margins(0.0));
@@ -49,10 +47,9 @@ namespace neogfx
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
 	}
 
-	table_view::table_view(i_layout& aLayout) :
-		item_view{ aLayout },
+	list_view::list_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+		item_view{ aLayout, aScrollbarStyle, aFrameStyle },
 		iLayout{ *this },
-		iColumnHeader{ iLayout, *this },
 		iSpacer{ iLayout }
 	{
 		layout().set_margins(neogfx::margins(0.0));
@@ -61,68 +58,51 @@ namespace neogfx
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
 	}
 
-	table_view::~table_view()
+	list_view::~list_view()
 	{
 	}
 
-	bool table_view::can_defer_layout() const
+	bool list_view::can_defer_layout() const
 	{
 		return true;
 	}
 
-	bool table_view::is_managing_layout() const
+	bool list_view::is_managing_layout() const
 	{
 		return true;
 	}
 
-	const header_view& table_view::column_header() const
+	void list_view::model_changed()
 	{
-		return iColumnHeader;
-	}
-
-	header_view& table_view::column_header()
-	{
-		return iColumnHeader;
-	}
-
-	void table_view::model_changed()
-	{
-		column_header().set_model(model());
 		update_scrollbar_visibility();
 	}
 
-	void table_view::presentation_model_changed()
+	void list_view::presentation_model_changed()
 	{
-		column_header().set_presentation_model(presentation_model());
 		update_scrollbar_visibility();
 	}
 
-	void table_view::selection_model_changed()
+	void list_view::selection_model_changed()
 	{
 	}
 
-	rect table_view::item_display_rect() const
+	rect list_view::item_display_rect() const
 	{
-		return rect(
-			client_rect().top_left() + point{ 0.0, column_header().visible() ? column_header().extents().cy : 0.0 },
-			size{ std::min(client_rect().width(), column_header().total_width()), client_rect().height() - (column_header().visible() ? column_header().extents().cy : 0.0) });
+		return client_rect();
 	}
 
-	size table_view::item_total_area(const i_units_context& aUnitsContext) const
+	size list_view::item_total_area(const i_units_context& aUnitsContext) const
 	{
-		return size(column_header().total_width(), has_presentation_model() ? presentation_model().total_height(aUnitsContext) : 0.0);
+		return size(client_rect().width(), has_presentation_model() ? presentation_model().total_height(aUnitsContext) : 0.0);
 	}
 
-	dimension table_view::column_width(uint32_t aColumn) const
+	dimension list_view::column_width(uint32_t) const
 	{
-		return column_header().section_width(aColumn);
+		return client_rect().width();
 	}
 
-	scrolling_disposition table_view::scrolling_disposition(const i_widget& aChildWidget) const
+	scrolling_disposition list_view::scrolling_disposition(const i_widget& aChildWidget) const
 	{
-		if (&aChildWidget == &column_header())
-			return neogfx::scrolling_disposition::ScrollChildWidgetHorizontally;
-		else
-			return item_view::scrolling_disposition(aChildWidget);
+		return item_view::scrolling_disposition(aChildWidget);
 	}
 }

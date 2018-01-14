@@ -1136,9 +1136,13 @@ namespace neogfx
 #ifdef WIN32
 		HWND hwnd = static_cast<HWND>(native_handle());
 		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, NULL);
+//		if ((iStyle & window_style::DropShadow) == window_style::DropShadow)
+//			SetClassLongPtr(hwnd, GCL_STYLE, GetClassLongPtr(hwnd, GCL_STYLE) | CS_DROPSHADOW); // doesn't work well with OpenGL
 		DWORD existingStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
 		DWORD newStyle = existingStyle;
-		if ((iStyle & window_style::None) == window_style::None || (iStyle & window_style::TitleBar) == window_style::TitleBar)
+		if ((iStyle & window_style::DropShadow) == window_style::DropShadow)
+			newStyle |= WS_EX_TOPMOST;
+		if ((iStyle & window_style::NoDecoration) == window_style::NoDecoration || (iStyle & window_style::TitleBar) == window_style::TitleBar)
 		{
 			newStyle |= WS_POPUP;
 			newStyle |= WS_SYSMENU;

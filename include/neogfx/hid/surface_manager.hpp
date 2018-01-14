@@ -38,10 +38,10 @@ namespace neogfx
 			{
 				if (left->is_owner_of(*right))
 					return true;
-				else if (right->is_owner_of(*left))
+				else if (right->is_owner_of(*left)) 
 					return false;
 				else
-					return left < right;
+					return std::less<i_surface*>{}(left, right);
 			}
 		};
 		typedef std::set<i_surface*, surface_sorter> surface_list;

@@ -245,6 +245,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\label.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\line_edit.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\list_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\mdi_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_bar.hpp" />
@@ -412,6 +413,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\item_view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\label.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\line_edit.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\list_view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item.cpp" />
