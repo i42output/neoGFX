@@ -609,118 +609,151 @@ namespace neogfx
 	class key_sequence
 	{
 	public:
-		key_sequence(const std::string& aSequence) : iText(aSequence), iKeyCode(KeyCode_UNKNOWN)
+		enum class match
 		{
-			neolib::vecarray<neolib::ci_string, 5> bits;
-			neolib::tokens(neolib::make_ci_string(aSequence), neolib::ci_string("+"), bits, bits.max_size(), false);
-			for (std::size_t i = 0; i < bits.size(); ++i)
+			No,
+			Partial,
+			Full,
+		};
+	private:
+		typedef std::pair<key_code_e, std::set<key_modifiers_e>> combo_type;
+		typedef std::vector<combo_type> sequence_type;
+	public:
+		key_sequence(const std::string& aSequence) : iText{ aSequence }
+		{
+			std::vector<neolib::ci_string> sequenceBits;
+			neolib::tokens(neolib::make_ci_string(aSequence), neolib::ci_string(", "), sequenceBits);
+			for (const auto& combo : sequenceBits)
 			{
-				if (i < bits.size() - 1)
+				combo_type nextCombo;
+				neolib::vecarray<neolib::ci_string, 5> comboBits;
+				neolib::tokens(combo, neolib::ci_string("+"), comboBits, comboBits.max_size(), false);
+				for (std::size_t i = 0; i < comboBits.size(); ++i)
 				{
-					if (bits[i] == "Ctrl")
-						iKeyModifiers.insert(KeyModifier_CTRL);
-					else if (bits[i] == "Alt")
-						iKeyModifiers.insert(KeyModifier_ALT);
-					else if (bits[i] == "Shift")
-						iKeyModifiers.insert(KeyModifier_SHIFT);
-				}
-				else
-				{
-					static const std::map<neolib::ci_string, key_code_e> sKeyNames
+					if (i < comboBits.size() - 1)
 					{
-						{ "Esc", KeyCode_ESCAPE },
-						{ "Escape", KeyCode_ESCAPE },
-						{ "Return", KeyCode_RETURN },
-						{ "Enter", KeyCode_KP_ENTER },
-						{ "Tab", KeyCode_TAB },
-						{ "Space", KeyCode_SPACE },
-						{ "Backspace", KeyCode_BACKSPACE },
-						{ "Ins", KeyCode_INSERT },
-						{ "Insert", KeyCode_INSERT },
-						{ "Del", KeyCode_DELETE },
-						{ "Delete", KeyCode_DELETE },
-						{ "Home", KeyCode_HOME },
-						{ "End", KeyCode_END },
-						{ "Up", KeyCode_UP },
-						{ "Arrow Up", KeyCode_UP },
-						{ "Down", KeyCode_DOWN },
-						{ "Arrow Down", KeyCode_DOWN },
-						{ "Left", KeyCode_LEFT },
-						{ "Arrow Left", KeyCode_LEFT },
-						{ "Right", KeyCode_RIGHT },
-						{ "Arrow Right", KeyCode_RIGHT },
-						{ "PgUp", KeyCode_PAGEUP },
-						{ "Page Up", KeyCode_PAGEUP },
-						{ "PgDn", KeyCode_PAGEDOWN },
-						{ "PgDown", KeyCode_PAGEDOWN },
-						{ "Page Down", KeyCode_PAGEDOWN },
-						{ "F1", KeyCode_F1 },
-						{ "F2", KeyCode_F2 },
-						{ "F3", KeyCode_F3 },
-						{ "F4", KeyCode_F4 },
-						{ "F5", KeyCode_F5 },
-						{ "F6", KeyCode_F6 },
-						{ "F7", KeyCode_F7 },
-						{ "F8", KeyCode_F8 },
-						{ "F9", KeyCode_F9 },
-						{ "F10", KeyCode_F10 },
-						{ "F11", KeyCode_F11 },
-						{ "F12", KeyCode_F12 },
-						{ "F13", KeyCode_F13 },
-						{ "F14", KeyCode_F14 },
-						{ "F15", KeyCode_F15 },
-						{ "F16", KeyCode_F16 },
-						{ "F17", KeyCode_F17 },
-						{ "F18", KeyCode_F18 },
-						{ "F19", KeyCode_F19 },
-						{ "F20", KeyCode_F20 },
-						{ "F21", KeyCode_F21 },
-						{ "F22", KeyCode_F22 },
-						{ "F23", KeyCode_F23 },
-						{ "F24", KeyCode_F24 }
-					};
-					if (!bits[i].empty())
-					{
-						auto name = sKeyNames.find(bits[i]);
-						if (name == sKeyNames.end())
-							iKeyCode = static_cast<key_code_e>(neolib::to_lower(neolib::make_string(bits[i]))[0]);
-						else
-							iKeyCode = name->second;
+						if (comboBits[i] == "Ctrl")
+							nextCombo.second.insert(KeyModifier_CTRL);
+						else if (comboBits[i] == "Alt")
+							nextCombo.second.insert(KeyModifier_ALT);
+						else if (comboBits[i] == "Shift")
+							nextCombo.second.insert(KeyModifier_SHIFT);
 					}
 					else
-						iKeyCode = KeyCode_PLUS;
+					{
+						static const std::map<neolib::ci_string, key_code_e> sKeyNames
+						{
+							{ "Esc", KeyCode_ESCAPE },
+							{ "Escape", KeyCode_ESCAPE },
+							{ "Return", KeyCode_RETURN },
+							{ "Enter", KeyCode_KP_ENTER },
+							{ "Tab", KeyCode_TAB },
+							{ "Space", KeyCode_SPACE },
+							{ "Backspace", KeyCode_BACKSPACE },
+							{ "Ins", KeyCode_INSERT },
+							{ "Insert", KeyCode_INSERT },
+							{ "Del", KeyCode_DELETE },
+							{ "Delete", KeyCode_DELETE },
+							{ "Home", KeyCode_HOME },
+							{ "End", KeyCode_END },
+							{ "Up", KeyCode_UP },
+							{ "Arrow Up", KeyCode_UP },
+							{ "Down", KeyCode_DOWN },
+							{ "Arrow Down", KeyCode_DOWN },
+							{ "Left", KeyCode_LEFT },
+							{ "Arrow Left", KeyCode_LEFT },
+							{ "Right", KeyCode_RIGHT },
+							{ "Arrow Right", KeyCode_RIGHT },
+							{ "PgUp", KeyCode_PAGEUP },
+							{ "Page Up", KeyCode_PAGEUP },
+							{ "PgDn", KeyCode_PAGEDOWN },
+							{ "PgDown", KeyCode_PAGEDOWN },
+							{ "Page Down", KeyCode_PAGEDOWN },
+							{ "F1", KeyCode_F1 },
+							{ "F2", KeyCode_F2 },
+							{ "F3", KeyCode_F3 },
+							{ "F4", KeyCode_F4 },
+							{ "F5", KeyCode_F5 },
+							{ "F6", KeyCode_F6 },
+							{ "F7", KeyCode_F7 },
+							{ "F8", KeyCode_F8 },
+							{ "F9", KeyCode_F9 },
+							{ "F10", KeyCode_F10 },
+							{ "F11", KeyCode_F11 },
+							{ "F12", KeyCode_F12 },
+							{ "F13", KeyCode_F13 },
+							{ "F14", KeyCode_F14 },
+							{ "F15", KeyCode_F15 },
+							{ "F16", KeyCode_F16 },
+							{ "F17", KeyCode_F17 },
+							{ "F18", KeyCode_F18 },
+							{ "F19", KeyCode_F19 },
+							{ "F20", KeyCode_F20 },
+							{ "F21", KeyCode_F21 },
+							{ "F22", KeyCode_F22 },
+							{ "F23", KeyCode_F23 },
+							{ "F24", KeyCode_F24 }
+						};
+						if (!comboBits[i].empty())
+						{
+							auto name = sKeyNames.find(comboBits[i]);
+							if (name == sKeyNames.end())
+								nextCombo.first = static_cast<key_code_e>(neolib::to_lower(neolib::make_string(comboBits[i]))[0]);
+							else
+								nextCombo.first = name->second;
+						}
+						else
+							nextCombo.first = KeyCode_PLUS;
+					}
 				}
+				iSequence.push_back(nextCombo);
 			}
 		}
 	public:
 		bool operator==(const key_sequence& aRhs) const
 		{
-			return iKeyCode == aRhs.iKeyCode && iKeyModifiers == aRhs.iKeyModifiers;
+			return iSequence == aRhs.iSequence;
 		}
 		bool operator!=(const key_sequence& aRhs) const
 		{
 			return !(*this == aRhs);
 		}
 	public:
-		bool matches(key_code_e aKeyCode, key_modifiers_e aKeyModifiers) const
+		template <typename Iter> // iterator to std::pair<key_code_e, key_modifiers_e>
+		match matches(Iter aFirst, Iter aLast) const
 		{
-			if (iKeyCode != aKeyCode)
-				return false;
-			for (auto m : iKeyModifiers)
-				if ((aKeyModifiers & m) != 0)
-					aKeyModifiers = static_cast<key_modifiers_e>(aKeyModifiers & ~m);
-				else
-					return false;
-			return (aKeyModifiers & ~KeyModifier_LOCKS) == 0;
+			std::size_t index = 0;
+			for (Iter next = aFirst; next != aLast; ++next, ++index)
+				if (matches(index, next->first, next->second) == match::No)
+					return match::No;
+			return (index == iSequence.size() ? match::Full : match::Partial);
+		}
+		match matches(key_code_e aKeyCode, key_modifiers_e aKeyModifiers) const
+		{
+			return matches(0, aKeyCode, aKeyModifiers);
 		}
 		const std::string as_text() const
 		{
 			return iText;
 		}
 	private:
+		match matches(std::size_t aIndex, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) const
+		{
+			if (iSequence[aIndex].first != aKeyCode)
+				return match::No;
+			for (auto m : iSequence[aIndex].second)
+				if ((aKeyModifiers & m) != 0)
+					aKeyModifiers = static_cast<key_modifiers_e>(aKeyModifiers & ~m);
+				else
+					return match::No;
+			if ((aKeyModifiers & ~KeyModifier_LOCKS) == 0)
+				return (iSequence.size() == 1 ? match::Full : match::Partial);
+			else
+				return match::No;
+		}
+	private:
 		std::string iText;
-		key_code_e iKeyCode;
-		std::set<key_modifiers_e> iKeyModifiers;
+		sequence_type iSequence;
 	};
 
 	typedef boost::optional<key_sequence> optional_key_sequence;

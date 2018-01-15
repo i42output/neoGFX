@@ -494,7 +494,7 @@ namespace neogfx
 			iMnemonics.erase(n);
 	}
 
-	bool app::process_events(i_event_processing_context& aContext)
+	bool app::process_events(i_event_processing_context&)
 	{
 		if (rendering_engine().creating_window() || surface_manager().initialising_surface())
 			return false;
@@ -549,22 +549,33 @@ namespace neogfx
 		if (aScanCode == ScanCode_LALT || aScanCode == ScanCode_RALT)
 			for (auto& m : iMnemonics)
 				m->mnemonic_widget().update();
+		bool partialMatches = false;
+		iKeySequence.push_back(std::make_pair(aKeyCode, aKeyModifiers));
 		for (auto& a : iActions)
-			if (a.second.is_enabled() && a.second.shortcut() != boost::none && a.second.shortcut()->matches(aKeyCode, aKeyModifiers))
+			if (a.second.is_enabled() && a.second.shortcut() != boost::none)
 			{
-				if (keyboard().is_front_grabber(*this))
+				auto matchResult = a.second.shortcut()->matches(iKeySequence.begin(), iKeySequence.end());
+				if (matchResult == key_sequence::match::Full)
 				{
-					a.second.triggered.trigger();
-					if (a.second.is_checkable())
-						a.second.toggle();
-					return true;
+					iKeySequence.clear();
+					if (keyboard().is_front_grabber(*this))
+					{
+						a.second.triggered.trigger();
+						if (a.second.is_checkable())
+							a.second.toggle();
+						return true;
+					}
+					else
+					{
+						basic_services().system_beep();
+						return false;
+					}
 				}
-				else
-				{
-					basic_services().system_beep();
-					return false;
-				}
+				else if (matchResult == key_sequence::match::Partial)
+					partialMatches = true;
 			}
+		if (!partialMatches)
+			iKeySequence.clear();
 		return false;
 	}
 

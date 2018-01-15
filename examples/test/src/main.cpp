@@ -300,6 +300,14 @@ int main(int argc, char* argv[])
 		menu.add_action(app.add_action("&Xyzzy...", ":/neogfx/resources/icons.naa#eyedropper.png"));
 
 		auto& testMenu = menu.add_sub_menu("&Test");
+		testMenu.add_action(app.add_action("Emacs style sequence #1")).set_shortcut("Ctrl+K, Ctrl+B").triggered([&]()
+			{
+				ng::message_box::information(window, "Emacs style sequence #1", "Ctrl+K, Ctrl+B");
+			});
+		testMenu.add_action(app.add_action("Emacs style sequence #2")).set_shortcut("Ctrl+K, Ctrl+K").triggered([&]()
+			{
+				ng::message_box::information(window, "Emacs style sequence #2", "Ctrl+K, Ctrl+K");
+			});
 		testMenu.add_action(contactsAction);
 		testMenu.add_action(muteAction);
 		testMenu.add_action(muteAction);
@@ -370,10 +378,23 @@ int main(int argc, char* argv[])
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
-		ng::horizontal_layout dropListLayout(layoutButtons);
+/*		ng::horizontal_layout dropListLayout(layoutButtons);
 		ng::drop_list dropList(dropListLayout);
+		dropList.model().insert_item(dropList.model().end(), "Red");
+		dropList.model().insert_item(dropList.model().end(), "Green");
+		dropList.model().insert_item(dropList.model().end(), "Blue");
 		ng::drop_list dropList2(dropListLayout);
+		dropList2.model().insert_item(dropList2.model().end(), "Square");
+		dropList2.model().insert_item(dropList2.model().end(), "Triangle");
+		dropList2.model().insert_item(dropList2.model().end(), "Circle");
 		dropList2.set_editable(true);
+		ng::drop_list dropList3(dropListLayout);
+		for (int32_t i = 1; i <= 100; ++i)
+			dropList3.model().insert_item(dropList3.model().end(), i);
+		ng::drop_list dropList4(dropListLayout);
+		for (int32_t i = 1; i <= 100; ++i)
+			dropList4.model().insert_item(dropList4.model().end(), i);
+		dropList4.set_editable(true); */
 		ng::horizontal_layout editLayout(layoutButtons);
 		ng::text_edit textEdit(editLayout);
 		buttonGenerateUuid.clicked([&textEdit]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });

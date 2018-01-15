@@ -214,5 +214,6 @@ namespace neogfx
 		mnemonic_list iMnemonics;
 		event_processing_context iAppContext;
 		event_processing_context iAppMessageQueueContext;
+		std::vector<std::pair<key_code_e, key_modifiers_e>> iKeySequence;
 	};
 }
