@@ -301,17 +301,23 @@ namespace neogfx
 	{
 		// types
 	public:
+		enum class type
+		{
+			Attached,
+			Unattached
+		};
 	private:
 		friend class generic_surface;
 		class glyph_shapes;
 		// exceptions
 	public:
+		struct unattached : std::logic_error { unattached() : std::logic_error("neogfx::graphics_context::unattached") {} };
 		struct password_not_set : std::logic_error { password_not_set() : std::logic_error("neogfx::graphics_context::password_not_set") {} };
 		// construction
 	public:
-		graphics_context(const i_surface& aSurface);
-		graphics_context(const i_surface& aSurface, const font& aDefaultFont);
-		graphics_context(const i_widget& aWidget);
+		graphics_context(const i_surface& aSurface, type aType = type::Attached);
+		graphics_context(const i_surface& aSurface, const font& aDefaultFont, type aType = type::Attached);
+		graphics_context(const i_widget& aWidget, type aType = type::Attached);
 		graphics_context(const graphics_context& aOther);
 		virtual ~graphics_context();
 	public:
@@ -430,6 +436,8 @@ namespace neogfx
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
+	protected:
+		i_native_graphics_context& native_context() const;
 		// helpers
 	protected:
 		static i_native_font_face& to_native_font_face(const font& aFont);

@@ -227,7 +227,7 @@ namespace neogfx
 			if (iHintedSize == boost::none || iHintedSize->first != font())
 			{
 				iHintedSize.emplace(font(), size{});
-				graphics_context gc(*this);
+				graphics_context gc{ *this, graphics_context::type::Unattached };
 				iHintedSize->second = gc.text_extent(iHint, font());
 			}
 			result += iHintedSize->second;
@@ -1279,7 +1279,8 @@ namespace neogfx
 	{
 		if (iCalculatedTabStops == boost::none || iCalculatedTabStops->first != font())
 			iCalculatedTabStops = std::make_pair(font(), (iTabStops != boost::none ?
-				*iTabStops : graphics_context(*this).text_extent(iTabStopHint, font()).cx));
+				*iTabStops : 
+				graphics_context{ *this, graphics_context::type::Unattached }.text_extent(iTabStopHint, font()).cx));
 		return iCalculatedTabStops->second;
 	}
 
@@ -1389,7 +1390,7 @@ namespace neogfx
 	{
 		/* simple (naive) implementation just to get things moving (so just refresh everything) ... */
 		(void)aWhere;
-		graphics_context gc(*this);
+		graphics_context gc{ *this, graphics_context::type::Unattached };
 		if (password())
 			gc.set_password(true, iPasswordMask.empty() ? "\xE2\x97\x8F" : iPasswordMask);
 		iGlyphs.clear();

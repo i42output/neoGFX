@@ -26,6 +26,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+	class drop_list_view : public list_view
+	{
+		friend class drop_list_popup;
+	public:
+		drop_list_view(i_layout& aLayout);
+		~drop_list_view();
+	protected:
+		colour background_colour() const override;
+	};
+	
 	class drop_list;
 
 	class drop_list_popup : public window
@@ -38,6 +48,8 @@ namespace neogfx
 	protected:
 		colour frame_colour() const override;
 	protected:
+		bool has_rendering_priority() const override;
+	protected:
 		neogfx::size_policy size_policy() const override;
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	protected:
@@ -47,7 +59,7 @@ namespace neogfx
 		void dismiss() override;
 	private:
 		drop_list& iDropList;
-		list_view iView;
+		drop_list_view iView;
 	};
 
 	class drop_list : public push_button

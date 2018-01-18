@@ -141,7 +141,7 @@ namespace neogfx
 		{
 			if (iStandardButtonWidth == boost::none || iStandardButtonWidth->first != label().text().font())
 			{
-				graphics_context gc(*this);
+				graphics_context gc{ *this, graphics_context::type::Unattached };
 				iStandardButtonWidth.emplace(label().text().font(), gc.text_extent("#StdButton", label().text().font()));
 				iStandardButtonWidth->second.cx += (result.cx - label().text().minimum_size(aAvailableSpace).cx);
 			}

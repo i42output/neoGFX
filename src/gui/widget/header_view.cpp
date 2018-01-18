@@ -45,7 +45,7 @@ namespace neogfx
 					aParent.update_buttons();
 				uint64_t since = app::instance().program_elapsed_ms();
 				app::event_processing_context epc(app::instance(), "neogfx::header_view::updater");
-				graphics_context gc{ aParent };
+				graphics_context gc{ aParent, graphics_context::type::Unattached };
 				for (uint32_t c = 0; c < 1000 && iRow < aParent.presentation_model().rows(); ++c, ++iRow)
 				{
 					aParent.update_from_row(iRow, gc);
@@ -466,7 +466,7 @@ namespace neogfx
 			}
 		}
 		bool updated = false;
-		graphics_context gc{ *this };
+		graphics_context gc{ *this, graphics_context::type::Unattached };
 		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 			updated = update_section_width(col, iSectionWidths[col].max, gc) || updated;
 		if (updated)

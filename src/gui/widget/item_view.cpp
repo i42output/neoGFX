@@ -30,21 +30,21 @@ namespace neogfx
 		scrollable_widget{ aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit {	false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
-		set_margins(neogfx::margins(0.0));
+		set_margins(neogfx::margins{});
 	}
 
 	item_view::item_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aParent, aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
-		set_margins(neogfx::margins(0.0));
+		set_margins(neogfx::margins{});
 	}
 
 	item_view::item_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aLayout, aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
-		set_margins(neogfx::margins(0.0));
+		set_margins(neogfx::margins{});
 	}
 
 	item_view::~item_view()
@@ -395,7 +395,7 @@ namespace neogfx
 				break;
 			case ScanCode_PAGEUP:
 				{
-					graphics_context gc(*this);
+					graphics_context gc{ *this, graphics_context::type::Unattached };
 					newIndex.set_row(
 						iPresentationModel->item_at(
 							iPresentationModel->item_position(currentIndex, gc) - 
@@ -405,7 +405,7 @@ namespace neogfx
 				break;
 			case ScanCode_PAGEDOWN:
 				{
-					graphics_context gc(*this);
+					graphics_context gc{ *this, graphics_context::type::Unattached };
 					newIndex.set_row(
 						iPresentationModel->item_at(
 							iPresentationModel->item_position(currentIndex, gc) + 
@@ -493,18 +493,18 @@ namespace neogfx
 			{
 				scoped_units su{ *this, units::Pixels };
 				i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
-				vertical_scrollbar().set_maximum(units_converter(*this).to_device_units(item_total_area(*this)).cy);
+				vertical_scrollbar().set_maximum(units_converter(*this).to_device_units(total_item_area(*this)).cy);
 				vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
-				vertical_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cy);
+				vertical_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cy, 0.0));
 				vertical_scrollbar().set_position(oldPosition);
 				if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
 					vertical_scrollbar().show();
 				else
 					vertical_scrollbar().hide();
 				oldPosition = horizontal_scrollbar().position();
-				horizontal_scrollbar().set_maximum(units_converter(*this).to_device_units(item_total_area(*this)).cx);
+				horizontal_scrollbar().set_maximum(units_converter(*this).to_device_units(total_item_area(*this)).cx);
 				horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
-				horizontal_scrollbar().set_page(units_converter(*this).to_device_units(item_display_rect()).cx);
+				horizontal_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cx, 0.0));
 				horizontal_scrollbar().set_position(oldPosition);
 				if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
 					horizontal_scrollbar().show();
@@ -660,7 +660,7 @@ namespace neogfx
 
 	void item_view::make_visible(const item_presentation_model_index& aItemIndex)
 	{
-		graphics_context gc(*this);
+		graphics_context gc{ *this, graphics_context::type::Unattached };
 		rect cellRect = cell_rect(aItemIndex, true);
 		if (cellRect.height() < item_display_rect().height() || cellRect.intersection(item_display_rect()).height() == 0.0)
 		{

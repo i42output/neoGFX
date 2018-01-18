@@ -157,7 +157,7 @@ namespace neogfx
 		}
 		if (iTextExtent != boost::none)
 			return *iTextExtent;
-		graphics_context gc(container().as_widget());
+		graphics_context gc{ container().as_widget(), graphics_context::type::Unattached };
 		gc.set_glyph_text_cache(iGlyphTextCache);
 		return *(iTextExtent = gc.multiline_text_extent(iText, font(), UseGlyphTextCache));
 	}

@@ -30,7 +30,7 @@ namespace neogfx
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
-		layout().set_margins(neogfx::margins(0.0));
+		layout().set_margins(neogfx::margins{});
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
@@ -41,7 +41,7 @@ namespace neogfx
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
-		layout().set_margins(neogfx::margins(0.0));
+		layout().set_margins(neogfx::margins{});
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
@@ -52,7 +52,7 @@ namespace neogfx
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
-		layout().set_margins(neogfx::margins(0.0));
+		layout().set_margins(neogfx::margins{});
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
@@ -91,14 +91,19 @@ namespace neogfx
 		return client_rect();
 	}
 
-	size list_view::item_total_area(const i_units_context& aUnitsContext) const
+	size list_view::total_item_area(const i_units_context& aUnitsContext) const
 	{
-		return size(client_rect().width(), has_presentation_model() ? presentation_model().total_height(aUnitsContext) : 0.0);
+		return has_presentation_model() ?
+			size{ 
+				column_width(0) + presentation_model().cell_spacing(*this).cx,
+				presentation_model().total_height(aUnitsContext)} : 
+			size{};
 	}
 
 	dimension list_view::column_width(uint32_t) const
 	{
-		return client_rect().width();
+		return has_presentation_model() ? 
+			presentation_model().column_width(0, graphics_context{ *this, graphics_context::type::Unattached }) : 0.0;
 	}
 
 	scrolling_disposition list_view::scrolling_disposition(const i_widget& aChildWidget) const

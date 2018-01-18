@@ -24,6 +24,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+	drop_list_view::drop_list_view(i_layout& aLayout) :
+		list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame }
+	{
+		set_margins(neogfx::optional_margins{});
+	}
+
+	drop_list_view::~drop_list_view()
+	{
+	}
+
+	colour drop_list_view::background_colour() const
+	{
+		auto backgroundColour = item_view::background_colour();
+		if (item_view::has_background_colour())
+			return backgroundColour;
+		else
+			return backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
+	}
+
 	drop_list_popup::drop_list_popup(drop_list& aDropList) :
 		window{ 
 			aDropList,
@@ -31,8 +50,9 @@ namespace neogfx
 			aDropList.window_rect().extents(),
 			window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::HideOnOwnerClick | window_style::InitiallyHidden | window_style::DropShadow },
 		iDropList{ aDropList },
-		iView{ client_widget(), scrollbar_style::Normal, frame_style::NoFrame }
+		iView{ client_layout() }
 	{
+		client_layout().set_margins(neogfx::margins{});
 		resize(minimum_size());
 	}
 
@@ -50,20 +70,32 @@ namespace neogfx
 	{
 		if (window::has_frame_colour())
 			return window::frame_colour();
-		return (background_colour().dark() ? background_colour().darker(0x20) : background_colour().lighter(0x20));
+		auto backgroundColour = iView.background_colour();
+		return backgroundColour.dark() ? backgroundColour.darker(0x10) : backgroundColour.lighter(0x10);
+	}
+
+	bool drop_list_popup::has_rendering_priority() const
+	{
+		return window::has_rendering_priority() || visible();
 	}
 
 	size_policy drop_list_popup::size_policy() const
 	{
-		if (widget::has_size_policy())
-			return widget::size_policy();
+		if (window::has_size_policy())
+			return window::size_policy();
 		return neogfx::size_policy::Minimum;
 	}
 
 	size drop_list_popup::minimum_size(const optional_size&) const
 	{
-		// todo
-		return size{ 100.0, 100.0 };
+		if (window::has_minimum_size())
+			return window::minimum_size();
+		auto totalArea = iView.total_item_area(*this);
+		auto minimumSize = size{ effective_frame_width() * 2.0 } + margins().size() + totalArea;
+		minimumSize.cy = std::min(minimumSize.cy, parent().root().as_widget().extents().cy / 2.0);
+		if (minimumSize.cy - (effective_frame_width() * 2.0 + margins().size().cy) < totalArea.cy)
+			minimumSize.cx += vertical_scrollbar().width(*this);
+		return minimumSize;
 	}
 
 	bool drop_list_popup::can_dismiss(const i_widget*) const

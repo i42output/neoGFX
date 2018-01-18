@@ -1448,7 +1448,7 @@ namespace neogfx
 
 	graphics_context widget::create_graphics_context() const
 	{
-		return graphics_context(*this);
+		return graphics_context{ *this };
 	}
 
 	const i_surface* widget::find_surface() const

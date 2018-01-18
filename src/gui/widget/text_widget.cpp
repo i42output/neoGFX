@@ -264,7 +264,7 @@ namespace neogfx
 			return *iTextExtent;
 		if (!has_surface())
 			return size{};
-		graphics_context gc{ *this };
+		graphics_context gc{ *this, graphics_context::type::Unattached };
 		scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
 		gc.set_glyph_text_cache(iGlyphTextCache);
 		if (multi_line())
@@ -292,7 +292,7 @@ namespace neogfx
 			return *iSizeHintExtent;
 		if (!has_surface())
 			return size{};
-		graphics_context gc{ *this };
+		graphics_context gc{ *this, graphics_context::type::Unattached };
 		scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
 		if (multi_line())
 		{

@@ -31,7 +31,7 @@ namespace neogfx
 		iColumnHeader{ iLayout, *this },
 		iSpacer{ iLayout }
 	{
-		layout().set_margins(neogfx::margins(0.0));
+		layout().set_margins(neogfx::margins{});
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
@@ -43,7 +43,7 @@ namespace neogfx
 		iColumnHeader{ iLayout, *this },
 		iSpacer{ iLayout }
 	{
-		layout().set_margins(neogfx::margins(0.0));
+		layout().set_margins(neogfx::margins{});
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
@@ -55,7 +55,7 @@ namespace neogfx
 		iColumnHeader{ iLayout, *this },
 		iSpacer{ iLayout }
 	{
-		layout().set_margins(neogfx::margins(0.0));
+		layout().set_margins(neogfx::margins{});
 		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
 		set_model(std::shared_ptr<i_item_model>(new item_model()));
@@ -108,7 +108,7 @@ namespace neogfx
 			size{ std::min(client_rect().width(), column_header().total_width()), client_rect().height() - (column_header().visible() ? column_header().extents().cy : 0.0) });
 	}
 
-	size table_view::item_total_area(const i_units_context& aUnitsContext) const
+	size table_view::total_item_area(const i_units_context& aUnitsContext) const
 	{
 		return size(column_header().total_width(), has_presentation_model() ? presentation_model().total_height(aUnitsContext) : 0.0);
 	}

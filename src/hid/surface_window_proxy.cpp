@@ -449,7 +449,7 @@ namespace neogfx
 
 	void surface_window_proxy::native_window_render(const rect&) const
 	{
-		graphics_context gc(*this);
+		graphics_context gc{ *this };
 		as_widget().render(gc);
 		gc.flush();
 	}

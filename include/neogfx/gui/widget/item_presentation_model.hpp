@@ -53,9 +53,10 @@ namespace neogfx
 			column_info(item_model_index::column_type aModelColumn) : modelColumn{ aModelColumn }, editable{ item_cell_editable::OnInputEvent } {}
 			item_model_index::column_type modelColumn;
 			item_cell_editable editable;
+			mutable optional_dimension width;
 			mutable boost::optional<std::string> headingText;
 			mutable font headingFont;
-			mutable optional_size extents;
+			mutable optional_size headingExtents;
 		};
 		typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
 	public:
@@ -133,6 +134,17 @@ namespace neogfx
 		{
 			return iRows[aIndex.row()].second.size();
 		}
+		dimension column_width(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext) const override
+		{
+			if (iColumns.size() < aColumnIndex + 1)
+				return 0.0;
+			if (iColumns[aColumnIndex].width != boost::none)
+				return *iColumns[aColumnIndex].width + cell_margins(aGraphicsContext).size().cx;
+			iColumns[aColumnIndex].width = 0.0;
+			for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
+				iColumns[aColumnIndex].width = std::max(*iColumns[aColumnIndex].width, cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGraphicsContext).cx);
+			return *iColumns[aColumnIndex].width + cell_margins(aGraphicsContext).size().cx;
+		}
 		const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
 		{
 			if (iColumns.size() < aColumnIndex + 1)
@@ -149,22 +161,22 @@ namespace neogfx
 			if (iColumns[aColumnIndex].headingFont != font())
 			{
 				iColumns[aColumnIndex].headingFont = font();
-				iColumns[aColumnIndex].extents = boost::none;
+				iColumns[aColumnIndex].headingExtents = boost::none;
 			}
-			if (iColumns[aColumnIndex].extents != boost::none)
-				return units_converter(aGraphicsContext).from_device_units(*iColumns[aColumnIndex].extents);
+			if (iColumns[aColumnIndex].headingExtents != boost::none)
+				return units_converter(aGraphicsContext).from_device_units(*iColumns[aColumnIndex].headingExtents);
 			size columnHeadingExtents = aGraphicsContext.multiline_text_extent(column_heading_text(aColumnIndex), iColumns[aColumnIndex].headingFont);
-			iColumns[aColumnIndex].extents = units_converter(aGraphicsContext).to_device_units(columnHeadingExtents);
-			iColumns[aColumnIndex].extents->cx = std::ceil(iColumns[aColumnIndex].extents->cx);
-			iColumns[aColumnIndex].extents->cy = std::ceil(iColumns[aColumnIndex].extents->cy);
-			return units_converter(aGraphicsContext).from_device_units(*iColumns[aColumnIndex].extents);
+			iColumns[aColumnIndex].headingExtents = units_converter(aGraphicsContext).to_device_units(columnHeadingExtents);
+			iColumns[aColumnIndex].headingExtents->cx = std::ceil(iColumns[aColumnIndex].headingExtents->cx);
+			iColumns[aColumnIndex].headingExtents->cy = std::ceil(iColumns[aColumnIndex].headingExtents->cy);
+			return units_converter(aGraphicsContext).from_device_units(*iColumns[aColumnIndex].headingExtents);
 		}
 		void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, const std::string& aHeadingText) override
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				throw bad_column_index();
 			iColumns[aColumnIndex].headingText = aHeadingText;
-			iColumns[aColumnIndex].extents = boost::none;
+			iColumns[aColumnIndex].headingExtents = boost::none;
 			notify_observers(i_item_presentation_model_subscriber::NotifyColumnInfoChanged, aColumnIndex);
 		}
 		item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const override
@@ -647,10 +659,20 @@ namespace neogfx
 		{
 			if (!iInitializing)
 			{
+				bool newColumns = false;
+				for (item_model_index::column_type col = iColumns.size(); col < item_model().columns(); ++col)
+				{
+					iColumns.push_back(column_info{ col });
+					newColumns = true;
+				}
+				if (newColumns)
+					for (auto& row : iRows)
+						row.second.resize(item_model().columns());
 				auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
 				cellMeta.text = boost::none;
 				cellMeta.extents = boost::none;
 				notify_observers(i_item_presentation_model_subscriber::NotifyItemChanged, from_item_model_index(aItemIndex));
+				iColumns[aItemIndex.column()].width = boost::none;
 				reset_maps();
 				reset_position_meta(0);
 				execute_sort();
@@ -720,7 +742,8 @@ namespace neogfx
 		{
 			for (uint32_t col = 0; col < iColumns.size(); ++col)
 			{
-				iColumns[col].extents = boost::none;
+				iColumns[col].width = boost::none;
+				iColumns[col].headingExtents = boost::none;
 			}
 		}
 		void reset_position_meta(item_presentation_model_index::row_type aFromRow) const

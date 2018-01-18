@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(ng::size(128, 64));
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
-/*		ng::horizontal_layout dropListLayout(layoutButtons);
+		ng::horizontal_layout dropListLayout(layoutButtons);
 		ng::drop_list dropList(dropListLayout);
 		dropList.model().insert_item(dropList.model().end(), "Red");
 		dropList.model().insert_item(dropList.model().end(), "Green");
@@ -390,11 +390,11 @@ int main(int argc, char* argv[])
 		dropList2.set_editable(true);
 		ng::drop_list dropList3(dropListLayout);
 		for (int32_t i = 1; i <= 100; ++i)
-			dropList3.model().insert_item(dropList3.model().end(), i);
+			dropList3.model().insert_item(dropList3.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
 		ng::drop_list dropList4(dropListLayout);
 		for (int32_t i = 1; i <= 100; ++i)
-			dropList4.model().insert_item(dropList4.model().end(), i);
-		dropList4.set_editable(true); */
+			dropList4.model().insert_item(dropList4.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
+		dropList4.set_editable(true);
 		ng::horizontal_layout editLayout(layoutButtons);
 		ng::text_edit textEdit(editLayout);
 		buttonGenerateUuid.clicked([&textEdit]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });

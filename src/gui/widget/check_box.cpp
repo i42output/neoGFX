@@ -26,7 +26,7 @@ namespace neogfx
 	check_box::box::box(check_box& aParent)
 	{
 		aParent.layout().add_at(0, *this);
-		set_margins(neogfx::margins(0.0));
+		set_margins(neogfx::margins{});
 		set_ignore_mouse_events(true);
 	}
 
