@@ -26,10 +26,10 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 
 Version | ETA           | Features
 --------|---------------|---------------------------------------------------
-v0.99   | Winter 2017   | Windows OpenGL; widget library feature complete; GUI designer tool
-v1.00   | Spring 2018   | Linux OpenGL; Vulkan; scripting engine
-v1.10   | Summer 2018   | Android support; physics engine
-v1.20   | Winter 2018   | macOS support
+v0.99   | Spring 2018   | Windows OpenGL; widget library feature complete; GUI designer tool
+v1.00   | Summer 2018   | Linux OpenGL; Vulkan; scripting engine
+v1.10   | Winter 2018   | Android support; physics engine
+v1.20   | Summer 2019   | macOS support
 
 # Implementation Progress
 
@@ -52,15 +52,16 @@ Label                     | 100     |
 Button                    | 100     |     
 Table View                | 85      |     Selection; icon
 Tree View                 | 0       |
-List View                 | 0       |
+List View                 | 50      |
 Text Edit                 | 85      |     Columns; rich text (HTML); undo/redo
 Line Edit                 | 100     |     
 Spin Box                  | 100     |
 Slider                    | 90      |     Keyboard
 Check Box                 | 100     |     
 Radio Button              | 100     |
-Combo Box                 | 0       |
+Combo Box                 | 25      |
 Group Box                 | 100     |
+Tool Tips                 | 0       |
 Colour Gradient Selector  | 100     |
 Colour Picker             | 100     |
 File Browsers (Native)    | 0       |
@@ -69,4 +70,4 @@ i18n                      | 0       |
 l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
-Last updated: 28/10/2017
+Last updated: 18/01/2018
