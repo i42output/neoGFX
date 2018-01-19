@@ -276,6 +276,12 @@ namespace neogfx
 					return;
 				optional_item_presentation_model_index previousIndex = iCurrentIndex;
 				iCurrentIndex = aNewIndex;
+				if (previousIndex != boost::none)
+					presentation_model().cell_meta(*previousIndex).selection = 
+						presentation_model().cell_meta(*previousIndex).selection & ~item_cell_selection_flags::Current;
+				if (iCurrentIndex != boost::none)
+					presentation_model().cell_meta(*iCurrentIndex).selection = 
+						presentation_model().cell_meta(*iCurrentIndex).selection | item_cell_selection_flags::Current;
 				notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
 				current_index_changed.trigger(iCurrentIndex, previousIndex);
 			}

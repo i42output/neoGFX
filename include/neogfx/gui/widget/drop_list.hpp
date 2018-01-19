@@ -34,7 +34,7 @@ namespace neogfx
 		~drop_list_view();
 	public:
 		using list_view::total_item_area;
-	protected:
+	public:
 		colour background_colour() const override;
 	};
 	

@@ -20,14 +20,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
 
 namespace neogfx
 {
+	class drop_list_presentation_model : public item_presentation_model
+	{
+	public:
+		drop_list_presentation_model(drop_list_view& aView) : item_presentation_model{}, iView{ aView }
+		{
+		}
+	public:
+		optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const override
+		{
+			if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+			{
+				auto backgroundColour = iView.background_colour().dark() ? colour::Black : colour::White;
+				if (backgroundColour == iView.background_colour())
+					backgroundColour = backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
+				return backgroundColour;
+			}
+			else
+				item_presentation_model::cell_colour(aIndex, aColourType);
+		}
+	private:
+		drop_list_view& iView;
+	};
+
 	drop_list_view::drop_list_view(i_layout& aLayout) :
 		list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame }
 	{
 		set_margins(neogfx::optional_margins{});
+		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new drop_list_presentation_model{ *this }));
+		presentation_model().set_cell_margins(neogfx::margins{ 4.0, 2.0 }, *this);
 	}
 
 	drop_list_view::~drop_list_view()

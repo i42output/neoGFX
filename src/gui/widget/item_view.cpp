@@ -893,6 +893,7 @@ namespace neogfx
 					{
 						result.x -= cellSpacing.cx / 2.0;
 						result.cx += cellSpacing.cx / 2.0;
+						result.cx += (item_display_rect().right() - result.right());
 					}
 					else
 						result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
