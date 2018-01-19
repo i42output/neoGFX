@@ -32,6 +32,8 @@ namespace neogfx
 	public:
 		drop_list_view(i_layout& aLayout);
 		~drop_list_view();
+	public:
+		using list_view::total_item_area;
 	protected:
 		colour background_colour() const override;
 	};
@@ -43,12 +45,15 @@ namespace neogfx
 	public:
 		drop_list_popup(drop_list& aDropList);
 	public:
-		const list_view& view() const;
-		list_view& view();
+		const drop_list_view& view() const;
+		drop_list_view& view();
 	protected:
 		colour frame_colour() const override;
 	protected:
 		bool has_rendering_priority() const override;
+	public:
+		using window::show;
+		bool show(bool aVisible) override;
 	protected:
 		neogfx::size_policy size_policy() const override;
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
@@ -98,11 +103,11 @@ namespace neogfx
 		void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
 	public:
 		drop_list_popup& popup() const;
-		list_view& view() const;
+		drop_list_view& view() const;
 	public:
 		bool editable() const;
 		void set_editable(bool aEditable);
-	protected:
+	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	protected:
 		void handle_clicked() override;

@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
-#include "item_view.hpp"
+#include <neogfx/gui/widget/item_view.hpp>
 
 namespace neogfx
 {

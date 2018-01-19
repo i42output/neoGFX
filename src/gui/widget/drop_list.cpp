@@ -36,11 +36,9 @@ namespace neogfx
 
 	colour drop_list_view::background_colour() const
 	{
-		auto backgroundColour = item_view::background_colour();
-		if (item_view::has_background_colour())
-			return backgroundColour;
-		else
-			return backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
+		if (list_view::has_background_colour())
+			return list_view::background_colour();
+		return app::instance().current_style().palette().colour();
 	}
 
 	drop_list_popup::drop_list_popup(drop_list& aDropList) :
@@ -53,15 +51,14 @@ namespace neogfx
 		iView{ client_layout() }
 	{
 		client_layout().set_margins(neogfx::margins{});
-		resize(minimum_size());
 	}
 
-	const list_view& drop_list_popup::view() const
+	const drop_list_view& drop_list_popup::view() const
 	{
 		return iView;
 	}
 
-	list_view& drop_list_popup::view()
+	drop_list_view& drop_list_popup::view()
 	{
 		return iView;
 	}
@@ -70,13 +67,26 @@ namespace neogfx
 	{
 		if (window::has_frame_colour())
 			return window::frame_colour();
-		auto backgroundColour = iView.background_colour();
-		return backgroundColour.dark() ? backgroundColour.darker(0x10) : backgroundColour.lighter(0x10);
+		auto viewBackgroundColour = iView.background_colour();
+		auto backgroundColour = viewBackgroundColour.dark() ? viewBackgroundColour.darker(0x20) : viewBackgroundColour.lighter(0x20);
+		if (backgroundColour == viewBackgroundColour)
+			backgroundColour = viewBackgroundColour.dark() ? viewBackgroundColour.lighter(0x20) : viewBackgroundColour.darker(0x20);
+		return backgroundColour;
 	}
 
 	bool drop_list_popup::has_rendering_priority() const
 	{
 		return window::has_rendering_priority() || visible();
+	}
+
+	bool drop_list_popup::show(bool aVisible)
+	{
+		if (aVisible)
+		{
+			surface().move_surface(iDropList.window_rect().top_left() + iDropList.root().window_position());
+			resize(minimum_size());
+		}
+		return window::show(aVisible);
 	}
 
 	size_policy drop_list_popup::size_policy() const
@@ -95,6 +105,7 @@ namespace neogfx
 		minimumSize.cy = std::min(minimumSize.cy, parent().root().as_widget().extents().cy / 2.0);
 		if (minimumSize.cy - (effective_frame_width() * 2.0 + margins().size().cy) < totalArea.cy)
 			minimumSize.cx += vertical_scrollbar().width(*this);
+		minimumSize.cx = std::max(minimumSize.cx, iDropList.minimum_size().cx);
 		return minimumSize;
 	}
 
@@ -232,7 +243,7 @@ namespace neogfx
 		return iPopupProxy.popup();
 	}
 
-	list_view& drop_list::view() const
+	drop_list_view& drop_list::view() const
 	{
 		return popup().view();
 	}
@@ -252,7 +263,12 @@ namespace neogfx
 
 	size drop_list::minimum_size(const optional_size& aAvailableSpace) const
 	{
-		return push_button::minimum_size(aAvailableSpace);
+		auto minimumSize = push_button::minimum_size(aAvailableSpace);
+		if (push_button::has_minimum_size())
+			return minimumSize;
+		minimumSize.cx -= text().minimum_size().cx;
+		minimumSize.cx += view().total_item_area(*this).cx;
+		return minimumSize;
 	}
 
 	void drop_list::handle_clicked()
