@@ -164,6 +164,10 @@ namespace neogfx
 		virtual neolib::i_destroyable& as_destroyable() = 0;
 	};
 
+	rect corrected_popup_rect(i_window& aPopup, rect aPopupRect);
+	rect corrected_popup_rect(i_window& aPopup);
+	void correct_popup_rect(i_window& aPopup);
+
 	class pause_rendering
 	{
 	public:

@@ -34,12 +34,15 @@ namespace neogfx
 	{
 	public:
 		struct no_native_window : std::logic_error { no_native_window() : std::logic_error("neogfx::i_surface::no_native_window") {} };
+		struct widget_not_clicked : std::logic_error { widget_not_clicked() : std::logic_error("neogfx::i_surface_window::widget_not_clicked") {} };
 		struct widget_not_capturing : std::logic_error { widget_not_capturing() : std::logic_error("neogfx::i_surface_window::widget_not_capturing") {} };
 	public:
 		virtual bool has_native_window() const = 0;
 		virtual const i_native_window& native_window() const = 0;
 		virtual i_native_window& native_window() = 0;
 	public:
+		virtual bool has_clicked_widget() const = 0;
+		virtual i_widget& clicked_widget() const = 0;
 		virtual bool has_capturing_widget() const = 0;
 		virtual i_widget& capturing_widget() const = 0;
 		virtual void set_capture(i_widget& aWidget) = 0;

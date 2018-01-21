@@ -84,6 +84,8 @@ namespace neogfx
 		double surface_transparency() const override;
 		void set_surface_transparency(double aTransparency) override;
 	public:
+		bool has_clicked_widget() const override;
+		i_widget& clicked_widget() const override;
 		bool has_capturing_widget() const override;
 		i_widget& capturing_widget() const override;
 		void set_capture(i_widget& aWidget) override;
@@ -142,5 +144,6 @@ namespace neogfx
 		bool iClosed;
 		boost::optional<char32_t> iSurrogatePairPart;
 		i_widget* iCapturingWidget;
+		i_widget* iClickedWidget;
 	};
 }

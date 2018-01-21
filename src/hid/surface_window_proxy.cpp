@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/raii.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_window_proxy.hpp>
 #include "../gui/window/native/i_native_window.hpp"
@@ -31,7 +32,8 @@ namespace neogfx
 		iNativeWindow{ aNativeWindowCreator(*this) },
 		iNativeSurfaceDestroyed{ iNativeWindow->as_destroyable() },
 		iClosed{ false },
-		iCapturingWidget{ nullptr }
+		iCapturingWidget{ nullptr },
+		iClickedWidget{ nullptr }
 	{
 		app::instance().surface_manager().add_surface(*this);
 	}
@@ -312,6 +314,18 @@ namespace neogfx
 		native_window().set_transparency(aTransparency);
 	}
 
+	bool surface_window_proxy::has_clicked_widget() const
+	{
+		return iClickedWidget != nullptr;
+	}
+
+	i_widget& surface_window_proxy::clicked_widget() const
+	{
+		if (iClickedWidget == nullptr)
+			throw widget_not_clicked();
+		return *iClickedWidget;
+	}
+
 	bool surface_window_proxy::has_capturing_widget() const
 	{
 		return iCapturingWidget != nullptr;
@@ -469,6 +483,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		i_widget& w = as_widget().widget_for_mouse_event(aPosition);
+		neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
 		as_window().dismiss_children(&w);
 		as_window().update_click_focus(w, aPosition - w.origin());
 		if (w.mouse_event.trigger(native_window().current_event()))
@@ -478,6 +493,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
 		i_widget& w = as_widget().widget_for_mouse_event(aPosition);
+		neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
 		as_window().dismiss_children(&w);
 		as_window().update_click_focus(w, aPosition - w.origin());
 		if (w.mouse_event.trigger(native_window().current_event()))

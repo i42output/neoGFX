@@ -95,7 +95,7 @@ namespace neogfx
 	{
 		return has_presentation_model() ?
 			size{ 
-				column_width(0) + presentation_model().cell_spacing(*this).cx,
+				column_width(0) + (column_width(0) > 0 ? presentation_model().cell_spacing(*this).cx : 0.0),
 				presentation_model().total_height(aUnitsContext)} : 
 			size{};
 	}

@@ -29,6 +29,39 @@
 
 namespace neogfx
 {
+	rect corrected_popup_rect(i_window& aPopup, rect aPopupRect)
+	{
+		auto desktopRect = app::instance().window_manager().desktop_rect(aPopup);
+		if (aPopupRect.x < desktopRect.x)
+			aPopupRect.x += (desktopRect.x - aPopupRect.x);
+		if (aPopupRect.y < desktopRect.y)
+			aPopupRect.y += (desktopRect.y - aPopupRect.y);
+		if (aPopupRect.right() > desktopRect.right())
+			aPopupRect.position().x += (desktopRect.right() - aPopupRect.right());
+		if (aPopupRect.bottom() > desktopRect.bottom())
+			aPopupRect.position().y += (desktopRect.bottom() - aPopupRect.bottom());
+		aPopupRect.x = std::max(aPopupRect.x, desktopRect.x);
+		aPopupRect.y = std::max(aPopupRect.y, desktopRect.y);
+		if (aPopupRect.right() > desktopRect.right())
+			aPopupRect.cx += (desktopRect.right() - aPopupRect.right());
+		if (aPopupRect.bottom() > desktopRect.bottom())
+			aPopupRect.cy += (desktopRect.bottom() - aPopupRect.bottom());
+		return aPopupRect;
+	}
+
+	rect corrected_popup_rect(i_window& aPopup)
+	{
+		return corrected_popup_rect(aPopup, app::instance().window_manager().window_rect(aPopup));
+	}
+
+	void correct_popup_rect(i_window& aPopup)
+	{
+		auto correctedRect = corrected_popup_rect(aPopup);
+		auto& wm = app::instance().window_manager();
+		wm.move_window(aPopup, correctedRect.position());
+		wm.resize_window(aPopup, correctedRect.extents());
+	}
+
 	pause_rendering::pause_rendering(i_window& aWindow) :
 		iSurface{ app::instance().window_manager().has_window(aWindow) && aWindow.has_native_surface() ? &aWindow.surface() : nullptr }
 	{

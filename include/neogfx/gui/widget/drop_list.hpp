@@ -26,20 +26,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+	class drop_list;
+
 	class drop_list_view : public list_view
 	{
 		friend class drop_list_popup;
 	public:
-		drop_list_view(i_layout& aLayout);
+		drop_list_view(i_layout& aLayout, drop_list& aDropList);
 		~drop_list_view();
 	public:
 		using list_view::total_item_area;
+	protected:
+		void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) override;
 	public:
 		colour background_colour() const override;
+	private:
+		drop_list& iDropList;
 	};
 	
-	class drop_list;
-
 	class drop_list_popup : public window
 	{
 	public:

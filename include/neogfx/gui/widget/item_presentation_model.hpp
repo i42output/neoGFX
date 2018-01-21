@@ -134,16 +134,16 @@ namespace neogfx
 		{
 			return iRows[aIndex.row()].second.size();
 		}
-		dimension column_width(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext) const override
+		dimension column_width(item_presentation_model_index::value_type aColumnIndex, const graphics_context& aGraphicsContext, bool aIncludeMargins = true) const override
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				return 0.0;
 			if (iColumns[aColumnIndex].width != boost::none)
-				return *iColumns[aColumnIndex].width + cell_margins(aGraphicsContext).size().cx;
+				return *iColumns[aColumnIndex].width + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
 			iColumns[aColumnIndex].width = 0.0;
 			for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
 				iColumns[aColumnIndex].width = std::max(*iColumns[aColumnIndex].width, cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGraphicsContext).cx);
-			return *iColumns[aColumnIndex].width + cell_margins(aGraphicsContext).size().cx;
+			return *iColumns[aColumnIndex].width + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
 		}
 		const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
 		{

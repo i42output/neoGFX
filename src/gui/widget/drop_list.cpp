@@ -32,6 +32,11 @@ namespace neogfx
 		{
 		}
 	public:
+		item_cell_editable column_editable(item_presentation_model_index::value_type) const override
+		{
+			return item_cell_editable::No;
+		}
+	public:	
 		optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const override
 		{
 			if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
@@ -42,22 +47,34 @@ namespace neogfx
 				return backgroundColour;
 			}
 			else
-				item_presentation_model::cell_colour(aIndex, aColourType);
+				return item_presentation_model::cell_colour(aIndex, aColourType);
 		}
 	private:
 		drop_list_view& iView;
 	};
 
-	drop_list_view::drop_list_view(i_layout& aLayout) :
-		list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame }
+	drop_list_view::drop_list_view(i_layout& aLayout, drop_list& aDropList) :
+		list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame },
+		iDropList{ aDropList }
 	{
 		set_margins(neogfx::optional_margins{});
 		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new drop_list_presentation_model{ *this }));
-		presentation_model().set_cell_margins(neogfx::margins{ 4.0, 2.0 }, *this);
+		presentation_model().set_cell_margins(neogfx::margins{ 3.0, 3.0 }, *this);
 	}
 
 	drop_list_view::~drop_list_view()
 	{
+	}
+
+	void drop_list_view::current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
+	{
+		list_view::current_index_changed(aSelectionModel, aCurrentIndex, aPreviousIndex);
+		std::string text;
+		if (aCurrentIndex != boost::none)
+			text = presentation_model().cell_to_string(*aCurrentIndex);
+		iDropList.text().set_text(text);
+		if (surface().as_surface_window().has_clicked_widget() && &surface().as_surface_window().clicked_widget() == this)
+			root().as_widget().hide();
 	}
 
 	colour drop_list_view::background_colour() const
@@ -74,7 +91,7 @@ namespace neogfx
 			aDropList.window_rect().extents(),
 			window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::HideOnOwnerClick | window_style::InitiallyHidden | window_style::DropShadow },
 		iDropList{ aDropList },
-		iView{ client_layout() }
+		iView{ client_layout(), aDropList }
 	{
 		client_layout().set_margins(neogfx::margins{});
 	}
@@ -107,10 +124,24 @@ namespace neogfx
 
 	bool drop_list_popup::show(bool aVisible)
 	{
-		if (aVisible)
+		if (aVisible && !visible())
 		{
-			surface().move_surface(iDropList.window_rect().top_left() + iDropList.root().window_position());
 			resize(minimum_size());
+			point currentItemPos;
+			if (view().presentation_model().rows() > 0 && view().presentation_model().columns() > 0)
+			{
+				auto index = (view().selection_model().has_current_index() ?
+					view().selection_model().current_index() :
+					item_presentation_model_index{ 0, 0 });
+				view().make_visible(index);
+				currentItemPos.y += view().cell_rect(index).y;
+				currentItemPos.y += view().presentation_model().cell_margins(*this).top;
+				currentItemPos.y += view().presentation_model().cell_spacing(*this).cy / 2.0;
+				currentItemPos.y -= effective_frame_width();
+			}
+			surface().move_surface(-currentItemPos + 
+				point{ iDropList.window_rect().x, iDropList.text().window_rect().top_left().y } + iDropList.root().window_position());
+			correct_popup_rect(*this);
 		}
 		return window::show(aVisible);
 	}
@@ -293,7 +324,7 @@ namespace neogfx
 		if (push_button::has_minimum_size())
 			return minimumSize;
 		minimumSize.cx -= text().minimum_size().cx;
-		minimumSize.cx += view().total_item_area(*this).cx;
+		minimumSize.cx += view().presentation_model().column_width(0, graphics_context{ *this, graphics_context::type::Unattached }, false);
 		return minimumSize;
 	}
 
