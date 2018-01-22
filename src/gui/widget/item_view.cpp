@@ -466,8 +466,6 @@ namespace neogfx
 					handled = true;
 				}
 			}
-			else
-				app::instance().basic_services().system_beep();
 		}
 		return handled;
 	}

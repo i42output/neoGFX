@@ -38,6 +38,10 @@ namespace neogfx
 		using list_view::total_item_area;
 	protected:
 		void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) override;
+	protected:
+		void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+	protected:
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 	public:
 		colour background_colour() const override;
 	private:
@@ -48,6 +52,7 @@ namespace neogfx
 	{
 	public:
 		drop_list_popup(drop_list& aDropList);
+		~drop_list_popup();
 	public:
 		const drop_list_view& view() const;
 		drop_list_view& view();
@@ -73,6 +78,8 @@ namespace neogfx
 
 	class drop_list : public push_button
 	{
+	public:
+		event<> selection_changed;
 	private:
 		class popup_proxy
 		{
@@ -108,6 +115,8 @@ namespace neogfx
 	public:
 		drop_list_popup& popup() const;
 		drop_list_view& view() const;
+		void accept_selection();
+		void cancel_selection();
 	public:
 		bool editable() const;
 		void set_editable(bool aEditable);
@@ -124,5 +133,6 @@ namespace neogfx
 		mutable boost::optional<std::pair<colour, texture>> iDownArrowTexture;
 		image_widget iDownArrow;
 		popup_proxy iPopupProxy;
+		optional_item_model_index iSavedSelection;
 	};
 }

@@ -73,8 +73,45 @@ namespace neogfx
 		if (aCurrentIndex != boost::none)
 			text = presentation_model().cell_to_string(*aCurrentIndex);
 		iDropList.text().set_text(text);
-		if (surface().as_surface_window().has_clicked_widget() && &surface().as_surface_window().clicked_widget() == this)
-			root().as_widget().hide();
+	}
+
+	void drop_list_view::mouse_button_released(mouse_button aButton, const point& aPosition)
+	{
+		bool wasCapturing = capturing();
+		list_view::mouse_button_released(aButton, aPosition);
+		if (aButton == mouse_button::Left && wasCapturing)
+		{
+			if (selection_model().has_current_index())
+			{
+				auto item = item_at(aPosition);
+				if (item != boost::none && cell_rect(*item).contains(aPosition) &&
+					item->row() == presentation_model().to_item_model_index(selection_model().current_index()).row())
+					iDropList.accept_selection();
+			}
+		}
+	}
+
+	bool drop_list_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+	{
+		bool handled = false;
+		switch (aScanCode)
+		{
+		case ScanCode_ESCAPE:
+			iDropList.cancel_selection();
+			handled = true;
+			break;
+		case ScanCode_RETURN:
+			if (selection_model().has_current_index())
+				iDropList.accept_selection();
+			else
+				app::instance().basic_services().system_beep();
+			handled = true;
+			break;
+		default:
+			handled = list_view::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			break;
+		}
+		return handled;
 	}
 
 	colour drop_list_view::background_colour() const
@@ -94,6 +131,10 @@ namespace neogfx
 		iView{ client_layout(), aDropList }
 	{
 		client_layout().set_margins(neogfx::margins{});
+	}
+
+	drop_list_popup::~drop_list_popup()
+	{
 	}
 
 	const drop_list_view& drop_list_popup::view() const
@@ -142,6 +183,13 @@ namespace neogfx
 			surface().move_surface(-currentItemPos + 
 				point{ iDropList.window_rect().x, iDropList.text().window_rect().top_left().y } + iDropList.root().window_position());
 			correct_popup_rect(*this);
+			if (!app::instance().keyboard().is_keyboard_grabbed_by(view()))
+				app::instance().keyboard().grab_keyboard(view());
+		}
+		else if (!aVisible)
+		{
+			if (app::instance().keyboard().is_keyboard_grabbed_by(view()))
+				app::instance().keyboard().ungrab_keyboard(view());
 		}
 		return window::show(aVisible);
 	}
@@ -184,6 +232,8 @@ namespace neogfx
 	void drop_list_popup::dismiss()
 	{
 		hide();
+		if (app::instance().keyboard().is_keyboard_grabbed_by(view()))
+			app::instance().keyboard().ungrab_keyboard(view());
 	}
 
 	drop_list::popup_proxy::popup_proxy(drop_list& aDropList) :
@@ -305,6 +355,26 @@ namespace neogfx
 		return popup().view();
 	}
 
+	void drop_list::accept_selection()
+	{
+		popup().root().as_widget().hide();
+		optional_item_model_index newSelection = (selection_model().has_current_index() ?
+			presentation_model().to_item_model_index(selection_model().current_index()) : optional_item_model_index{});
+		if (iSavedSelection != newSelection)
+			selection_changed.async_trigger();
+		iSavedSelection = boost::none;
+	}
+
+	void drop_list::cancel_selection()
+	{
+		popup().root().as_widget().hide();
+		if (iSavedSelection != boost::none)
+			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
+		else
+			selection_model().unset_current_index();
+		iSavedSelection = boost::none;
+	}
+
 	bool drop_list::editable() const
 	{
 		return iEditable;
@@ -333,6 +403,8 @@ namespace neogfx
 		if (view().effectively_hidden())
 		{
 			app::instance().window_manager().move_window(popup(), window_rect().bottom_left() + root().window_position());
+			if (selection_model().has_current_index())
+				iSavedSelection = selection_model().current_index();
 			popup().show();
 		}
 		else

@@ -69,8 +69,6 @@ namespace neogfx
 
 	popup_menu::~popup_menu()
 	{
-		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
-			app::instance().keyboard().ungrab_keyboard(*this);
 		close_sub_menu();
 		iOpenSubMenu.reset();
 		if (has_menu() && menu().is_open())
