@@ -477,7 +477,8 @@ namespace neogfx
 
 	void item_view::update_scrollbar_visibility()
 	{
-		bool wasVisible = selection_model().has_current_index() && is_visible(selection_model().current_index());
+		bool wasVisible = has_presentation_model() && has_selection_model() &&
+			selection_model().has_current_index() && is_visible(selection_model().current_index());
 		scrollable_widget::update_scrollbar_visibility();
 		if (wasVisible)
 			make_visible(selection_model().current_index());
@@ -495,7 +496,7 @@ namespace neogfx
 				vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
 				vertical_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cy, 0.0));
 				vertical_scrollbar().set_position(oldPosition);
-				if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
+				if (vertical_scrollbar().page() > 0 && vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
 					vertical_scrollbar().show();
 				else
 					vertical_scrollbar().hide();
@@ -504,7 +505,7 @@ namespace neogfx
 				horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
 				horizontal_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cx, 0.0));
 				horizontal_scrollbar().set_position(oldPosition);
-				if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
+				if (horizontal_scrollbar().page() > 0 && horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
 					horizontal_scrollbar().show();
 				else
 					horizontal_scrollbar().hide();

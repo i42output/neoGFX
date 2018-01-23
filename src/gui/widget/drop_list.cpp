@@ -20,7 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/gui/widget/item_selection_model.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
 
 namespace neogfx
@@ -28,7 +30,7 @@ namespace neogfx
 	class drop_list_presentation_model : public item_presentation_model
 	{
 	public:
-		drop_list_presentation_model(drop_list_view& aView) : item_presentation_model{}, iView{ aView }
+		drop_list_presentation_model(drop_list& aDropList) : item_presentation_model{}, iDropList{ aDropList }
 		{
 		}
 	public:
@@ -41,8 +43,8 @@ namespace neogfx
 		{
 			if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
 			{
-				auto backgroundColour = iView.background_colour().dark() ? colour::Black : colour::White;
-				if (backgroundColour == iView.background_colour())
+				auto backgroundColour = iDropList.view().background_colour().dark() ? colour::Black : colour::White;
+				if (backgroundColour == iDropList.view().background_colour())
 					backgroundColour = backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
 				return backgroundColour;
 			}
@@ -50,16 +52,18 @@ namespace neogfx
 				return item_presentation_model::cell_colour(aIndex, aColourType);
 		}
 	private:
-		drop_list_view& iView;
+		drop_list& iDropList;
 	};
 
 	drop_list_view::drop_list_view(i_layout& aLayout, drop_list& aDropList) :
-		list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame },
+		list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame, false },
 		iDropList{ aDropList }
 	{
 		set_margins(neogfx::optional_margins{});
-		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new drop_list_presentation_model{ *this }));
-		presentation_model().set_cell_margins(neogfx::margins{ 3.0, 3.0 }, *this);
+		set_selection_model(aDropList.selection_model());
+		set_presentation_model(aDropList.presentation_model());
+		set_model(aDropList.model());
+		parent().resize(parent().minimum_size());
 	}
 
 	drop_list_view::~drop_list_view()
@@ -126,7 +130,7 @@ namespace neogfx
 			aDropList,
 			aDropList.window_rect().bottom_left() + aDropList.root().window_position(),
 			aDropList.window_rect().extents(),
-			window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::HideOnOwnerClick | window_style::InitiallyHidden | window_style::DropShadow },
+			window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::DismissOnOwnerClick | window_style::InitiallyHidden | window_style::DropShadow },
 		iDropList{ aDropList },
 		iView{ client_layout(), aDropList }
 	{
@@ -221,19 +225,19 @@ namespace neogfx
 
 	window::dismissal_type_e drop_list_popup::dismissal_type() const
 	{
-		return HideOnDismissal;
+		return CloseOnDismissal;
 	}
 
 	bool drop_list_popup::dismissed() const
 	{
-		return hidden();
+		return surface().is_closed();
 	}
 
 	void drop_list_popup::dismiss()
 	{
-		hide();
 		if (app::instance().keyboard().is_keyboard_grabbed_by(view()))
 			app::instance().keyboard().ungrab_keyboard(view());
+		close();
 	}
 
 	drop_list::popup_proxy::popup_proxy(drop_list& aDropList) :
@@ -241,10 +245,18 @@ namespace neogfx
 	{
 	}
 
+	bool drop_list::popup_proxy::popup_created() const
+	{
+		return iPopup != boost::none;
+	}
+
 	drop_list_popup& drop_list::popup_proxy::popup() const
 	{
 		if (iPopup == boost::none)
+		{
 			iPopup.emplace(iDropList);
+			iPopup->closed([this]() { iPopup = boost::none; });
+		}
 		return *iPopup;
 	}
 
@@ -272,82 +284,119 @@ namespace neogfx
 
 	bool drop_list::has_model() const
 	{
-		return view().has_model();
+		if (iModel)
+			return true;
+		else
+			return false;
 	}
 
 	const i_item_model& drop_list::model() const
 	{
-		return view().model();
+		return *iModel;
 	}
 
 	i_item_model& drop_list::model()
 	{
-		return view().model();
+		return *iModel;
 	}
 
 	void drop_list::set_model(i_item_model& aModel)
 	{
-		view().set_model(aModel);
+		iModel = std::shared_ptr<i_item_model>(std::shared_ptr<i_item_model>(), &aModel);
+		if (has_model())
+		{
+			if (has_presentation_model())
+				presentation_model().set_item_model(aModel);
+		}
+		update();
 	}
 
 	void drop_list::set_model(std::shared_ptr<i_item_model> aModel)
 	{
-		view().set_model(aModel);
+		iModel = aModel;
+		if (has_model())
+		{
+			if (has_presentation_model())
+				presentation_model().set_item_model(*aModel);
+		}
+		update();
 	}
 
 	bool drop_list::has_presentation_model() const
 	{
-		return view().has_presentation_model();
+		if (iPresentationModel)
+			return true;
+		else
+			return false;
 	}
 
 	const i_item_presentation_model& drop_list::presentation_model() const
 	{
-		return view().presentation_model();
+		return *iPresentationModel;
 	}
 
 	i_item_presentation_model& drop_list::presentation_model()
 	{
-		return view().presentation_model();
+		return *iPresentationModel;
 	}
 
 	void drop_list::set_presentation_model(i_item_presentation_model& aPresentationModel)
 	{
-		return view().set_presentation_model(aPresentationModel);
+		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
+		if (has_model())
+			presentation_model().set_item_model(model());
+		if (has_selection_model())
+			selection_model().set_presentation_model(aPresentationModel);
+		update();
 	}
 
 	void drop_list::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
 	{
-		return view().set_presentation_model(aPresentationModel);
+		iPresentationModel = aPresentationModel;
+		if (has_presentation_model() && has_model())
+			presentation_model().set_item_model(model());
+		if (has_presentation_model() && has_selection_model())
+			selection_model().set_presentation_model(*aPresentationModel);
+		update();
 	}
 
 	bool drop_list::has_selection_model() const
 	{
-		return view().has_selection_model();
+		if (iSelectionModel)
+			return true;
+		else
+			return false;
 	}
 
 	const i_item_selection_model& drop_list::selection_model() const
 	{
-		return view().selection_model();
+		return *iSelectionModel;
 	}
 
 	i_item_selection_model& drop_list::selection_model()
 	{
-		return view().selection_model();
+		return *iSelectionModel;
 	}
 
 	void drop_list::set_selection_model(i_item_selection_model& aSelectionModel)
 	{
-		view().set_selection_model(aSelectionModel);
+		iSelectionModel = std::shared_ptr<i_item_selection_model>(std::shared_ptr<i_item_selection_model>(), &aSelectionModel);
+		if (has_presentation_model())
+			selection_model().set_presentation_model(presentation_model());
+		update();
 	}
 
 	void drop_list::set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel)
 	{
-		view().set_selection_model(aSelectionModel);
+		iSelectionModel = aSelectionModel;
+		if (has_presentation_model() && has_selection_model())
+			selection_model().set_presentation_model(presentation_model());
+		update();
 	}
 
-	drop_list_popup& drop_list::popup() const
+	bool drop_list::view_created() const
 	{
-		return iPopupProxy.popup();
+		return iPopupProxy.popup_created();
 	}
 
 	drop_list_view& drop_list::view() const
@@ -355,9 +404,14 @@ namespace neogfx
 		return popup().view();
 	}
 
+	drop_list_popup& drop_list::popup() const
+	{
+		return iPopupProxy.popup();
+	}
+
 	void drop_list::accept_selection()
 	{
-		popup().root().as_widget().hide();
+		popup().dismiss();
 		optional_item_model_index newSelection = (selection_model().has_current_index() ?
 			presentation_model().to_item_model_index(selection_model().current_index()) : optional_item_model_index{});
 		if (iSavedSelection != newSelection)
@@ -367,7 +421,7 @@ namespace neogfx
 
 	void drop_list::cancel_selection()
 	{
-		popup().root().as_widget().hide();
+		popup().dismiss();
 		if (iSavedSelection != boost::none)
 			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
 		else
@@ -394,7 +448,7 @@ namespace neogfx
 		if (push_button::has_minimum_size())
 			return minimumSize;
 		minimumSize.cx -= text().minimum_size().cx;
-		minimumSize.cx += view().presentation_model().column_width(0, graphics_context{ *this, graphics_context::type::Unattached }, false);
+		minimumSize.cx += presentation_model().column_width(0, graphics_context{ *this, graphics_context::type::Unattached }, false);
 		return minimumSize;
 	}
 
@@ -408,11 +462,15 @@ namespace neogfx
 			popup().show();
 		}
 		else
-			popup().hide();
+			popup().dismiss();
 	}
 
 	void drop_list::init()
 	{
+		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model{}));
+		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new drop_list_presentation_model{ *this }));
+		set_model(std::shared_ptr<i_item_model>(new item_model{}));
+
 		set_size_policy(neogfx::size_policy::Minimum);
 		label().layout().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
 		auto& s = layout().add_spacer();
@@ -421,6 +479,8 @@ namespace neogfx
 		layout().add(iDownArrow);
 		update_arrow();
 		iSink += app::instance().current_style_changed([this](style_aspect) { update_arrow(); });
+
+		presentation_model().set_cell_margins(neogfx::margins{ 3.0, 3.0 }, *this);
 	}
 
 	void drop_list::update_arrow()

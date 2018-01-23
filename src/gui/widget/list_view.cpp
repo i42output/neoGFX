@@ -25,37 +25,46 @@
 
 namespace neogfx
 {
-	list_view::list_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+	list_view::list_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
 		item_view{ aScrollbarStyle, aFrameStyle },
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
 		layout().set_margins(neogfx::margins{});
-		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-		set_model(std::shared_ptr<i_item_model>(new item_model()));
+		if (aCreateDefaultModels)
+		{
+			set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
+			set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
+			set_model(std::shared_ptr<i_item_model>(new item_model()));
+		}
 	}
 
-	list_view::list_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+	list_view::list_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
 		item_view{ aParent, aScrollbarStyle, aFrameStyle },
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
 		layout().set_margins(neogfx::margins{});
-		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-		set_model(std::shared_ptr<i_item_model>(new item_model()));
+		if (aCreateDefaultModels)
+		{
+			set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
+			set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
+			set_model(std::shared_ptr<i_item_model>(new item_model()));
+		}
 	}
 
-	list_view::list_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+	list_view::list_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle, bool aCreateDefaultModels) :
 		item_view{ aLayout, aScrollbarStyle, aFrameStyle },
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
 		layout().set_margins(neogfx::margins{});
-		set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
-		set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
-		set_model(std::shared_ptr<i_item_model>(new item_model()));
+		if (aCreateDefaultModels)
+		{
+			set_selection_model(std::shared_ptr<i_item_selection_model>(new item_selection_model()));
+			set_presentation_model(std::shared_ptr<i_item_presentation_model>(new item_presentation_model()));
+			set_model(std::shared_ptr<i_item_model>(new item_model()));
+		}
 	}
 
 	list_view::~list_view()

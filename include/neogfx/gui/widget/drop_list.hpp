@@ -66,7 +66,7 @@ namespace neogfx
 	protected:
 		neogfx::size_policy size_policy() const override;
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-	protected:
+	public:
 		bool can_dismiss(const i_widget*) const override;
 		dismissal_type_e dismissal_type() const override;
 		bool dismissed() const override;
@@ -86,6 +86,7 @@ namespace neogfx
 		public:
 			popup_proxy(drop_list& aDropList);
 		public:
+			bool popup_created() const;
 			drop_list_popup& popup() const;
 		private:
 			drop_list& iDropList;
@@ -113,8 +114,9 @@ namespace neogfx
 		void set_selection_model(i_item_selection_model& aSelectionModel);
 		void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
 	public:
-		drop_list_popup& popup() const;
+		bool view_created() const;
 		drop_list_view& view() const;
+		drop_list_popup& popup() const;
 		void accept_selection();
 		void cancel_selection();
 	public:
@@ -128,6 +130,9 @@ namespace neogfx
 		void init();
 		void update_arrow();
 	private:
+		std::shared_ptr<i_item_model> iModel;
+		std::shared_ptr<i_item_presentation_model> iPresentationModel;
+		std::shared_ptr<i_item_selection_model> iSelectionModel;
 		sink iSink;
 		bool iEditable;
 		mutable boost::optional<std::pair<colour, texture>> iDownArrowTexture;

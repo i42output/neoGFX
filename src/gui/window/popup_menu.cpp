@@ -108,6 +108,8 @@ namespace neogfx
 
 	void popup_menu::dismiss()
 	{
+		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
+			app::instance().keyboard().ungrab_keyboard(*this);
 		if ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick)
 			close();
 		else if ((style() & window_style::HideOnOwnerClick) == window_style::HideOnOwnerClick)
@@ -116,8 +118,6 @@ namespace neogfx
 			if (has_menu() && menu().is_open())
 				menu().close();
 		}
-		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
-			app::instance().keyboard().ungrab_keyboard(*this);
 	}
 
 	bool popup_menu::has_rendering_priority() const
