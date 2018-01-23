@@ -411,21 +411,21 @@ namespace neogfx
 
 	void drop_list::accept_selection()
 	{
-		popup().dismiss();
 		optional_item_model_index newSelection = (selection_model().has_current_index() ?
 			presentation_model().to_item_model_index(selection_model().current_index()) : optional_item_model_index{});
 		if (iSavedSelection != newSelection)
 			selection_changed.async_trigger();
+		popup().dismiss();
 		iSavedSelection = boost::none;
 	}
 
 	void drop_list::cancel_selection()
 	{
-		popup().dismiss();
 		if (iSavedSelection != boost::none)
 			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
 		else
 			selection_model().unset_current_index();
+		popup().dismiss();
 		iSavedSelection = boost::none;
 	}
 
