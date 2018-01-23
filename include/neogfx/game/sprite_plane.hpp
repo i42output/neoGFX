@@ -23,9 +23,10 @@
 #include <boost/functional/hash.hpp>
 #include <neolib/timer.hpp>
 #include <neogfx/gui/widget/widget.hpp>
-#include "sprite.hpp"
-#include "aabb_quadtree.hpp"
-#include "aabb_octree.hpp"
+#include <neogfx/game/chrono.hpp>
+#include <neogfx/game/sprite.hpp>
+#include <neogfx/game/aabb_quadtree.hpp>
+#include <neogfx/game/aabb_octree.hpp>
 
 namespace neogfx
 {

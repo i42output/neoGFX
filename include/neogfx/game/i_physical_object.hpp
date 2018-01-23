@@ -22,6 +22,7 @@
 #include <chrono>
 #include <boost/optional.hpp>
 #include <neogfx/core/geometry.hpp>
+#include <neogfx/game/chrono.hpp>
 #include "i_object.hpp"
 #include "i_collidable.hpp"
 
@@ -91,8 +92,8 @@ namespace neogfx
 
 	inline i_physical_object::step_time_interval to_step_time(i_physical_object::time_interval aTime, i_physical_object::step_time_interval aStepInterval)
 	{
-		auto ms = static_cast<i_physical_object::step_time_interval>(aTime * 1000.0);
-		return ms - (ms % aStepInterval);
+		auto fs = chrono::to_flicks(aTime).count();
+		return fs - (fs % aStepInterval);
 	}
 
 	inline i_physical_object::step_time_interval to_step_time(const i_physical_object::optional_time_interval& aTime, i_physical_object::step_time_interval aStepInterval)
@@ -105,6 +106,6 @@ namespace neogfx
 
 	inline i_physical_object::time_interval from_step_time(i_physical_object::step_time_interval aStepTime)
 	{
-		return aStepTime / 1000.0;
+		return chrono::to_seconds(chrono::flicks{ aStepTime });
 	}
 }

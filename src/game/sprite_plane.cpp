@@ -34,7 +34,15 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, iEnableDynamicUpdate{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iUpdateTime{ 0ull }
+		iPausePhysicsWhileNotRendering{ false }, 
+		iEnableDynamicUpdate{ false }, 
+		iEnableZSorting{ false }, 
+		iNeedsSorting{ false }, 
+		iG{ 6.67408e-11 }, 
+		iStepInterval{ chrono::to_flicks(0.010).count() }, 
+		iWaitForRender{ false }, 
+		iUpdatingObjects{ false }, 
+		iUpdateTime{ 0ull }
 	{
 	}
 
@@ -46,7 +54,14 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, iEnableDynamicUpdate{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iUpdateTime{ 0ull }
+		iPausePhysicsWhileNotRendering{ false }, 
+		iEnableDynamicUpdate{ false }, 
+		iEnableZSorting{ false }, 
+		iNeedsSorting{ false }, iG{ 6.67408e-11 }, 
+		iStepInterval{ chrono::to_flicks(0.010).count() }, 
+		iWaitForRender{ false }, 
+		iUpdatingObjects{ false }, 
+		iUpdateTime{ 0ull }
 	{
 	}
 
@@ -58,7 +73,15 @@ namespace neogfx
 			if (update_objects())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, iEnableDynamicUpdate{ false }, iEnableZSorting{ false }, iNeedsSorting{ false }, iG{ 6.67408e-11 }, iStepInterval{ 10 }, iWaitForRender{ false }, iUpdatingObjects{ false }, iUpdateTime{ 0ull }
+		iPausePhysicsWhileNotRendering{ false }, 
+		iEnableDynamicUpdate{ false }, 
+		iEnableZSorting{ false }, 
+		iNeedsSorting{ false }, 
+		iG{ 6.67408e-11 }, 
+		iStepInterval{ chrono::to_flicks(0.010).count() }, 
+		iWaitForRender{ false }, 
+		iUpdatingObjects{ false }, 
+		iUpdateTime{ 0ull }
 	{
 	}
 
@@ -388,8 +411,8 @@ namespace neogfx
 		if (iWaitForRender)
 			return false;
 		iUpdateTime = 0ull;
-		auto nowClock = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
-		auto now = to_step_time(nowClock.count() * .001, physics_step_interval());
+		auto nowClock = std::chrono::duration_cast<chrono::flicks>(std::chrono::steady_clock::now().time_since_epoch());
+		auto now = to_step_time(chrono::to_seconds(nowClock), physics_step_interval());
 		if (!iPhysicsTime)
 			iPhysicsTime = now;
 		if (*iPhysicsTime == now)

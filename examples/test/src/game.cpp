@@ -6,6 +6,7 @@
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/game/sprite_plane.hpp>
 #include <neogfx/game/text.hpp>
+#include <neogfx/game/chrono.hpp>
 
 namespace ng = neogfx;
 
@@ -157,7 +158,8 @@ void create_game(ng::i_layout& aLayout)
 			spaceshipSprite.physics().set_spin_degrees(0.0);
 		if (keyboard.is_key_pressed(ng::ScanCode_SPACE))
 		{
-			if ((aPhysicsStepTime / 10) % 2 == 0 && (aPhysicsStepTime / 100) % 2 == 0)
+			auto stepTime_ms = static_cast<decltype(aPhysicsStepTime)>(ng::chrono::to_milliseconds(ng::chrono::flicks{ aPhysicsStepTime }));
+			if ((stepTime_ms / 10) % 2 == 0 && (stepTime_ms / 100) % 2 == 0)
 			{
 				for (double a = -30.0; a <= 30.0; a += 10.0)
 				{
