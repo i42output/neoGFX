@@ -124,6 +124,8 @@ namespace neogfx
 		void process_event(const SDL_Event& aEvent);
 		margins border_thickness() const;
 		void push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers);
+		void raw_input_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers);
+		key_modifiers_e pop_mouse_button_event_extra_info();
 #ifdef WIN32
 		static LRESULT CALLBACK CustomWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 #endif
@@ -146,6 +148,7 @@ namespace neogfx
 		bool iReady;
 		mutable margins iBorderThickness;
 		std::deque<key_modifiers_e> iMouseButtonEventExtraInfo;
+		key_modifiers_e iRawInputMouseButtonEventExtraInfo;
 		widget_part iClickedWidgetPart;
 		bool iSystemMenuOpen;
 	};

@@ -150,6 +150,7 @@ namespace neogfx
 		iCapturingMouse(false),
 		iNonClientCapturing(false),
 		iReady(false),
+		iRawInputMouseButtonEventExtraInfo{},
 		iClickedWidgetPart(widget_part::Nowhere),
 		iSystemMenuOpen(false)
 	{
@@ -187,6 +188,7 @@ namespace neogfx
 		iCapturingMouse(false),
 		iNonClientCapturing(false),
 		iReady(false),
+		iRawInputMouseButtonEventExtraInfo{},
 		iClickedWidgetPart(widget_part::Nowhere),
 		iSystemMenuOpen(false)
 	{
@@ -224,6 +226,7 @@ namespace neogfx
 		iCapturingMouse(false),
 		iNonClientCapturing(false),
 		iReady(false),
+		iRawInputMouseButtonEventExtraInfo{},
 		iClickedWidgetPart(widget_part::Nowhere),
 		iSystemMenuOpen(false)
 	{
@@ -261,6 +264,7 @@ namespace neogfx
 		iCapturingMouse(false),
 		iNonClientCapturing(false),
 		iReady(false),
+		iRawInputMouseButtonEventExtraInfo{},
 		iClickedWidgetPart(widget_part::Nowhere),
 		iSystemMenuOpen(false)
 	{
@@ -298,6 +302,7 @@ namespace neogfx
 		iCapturingMouse(false),
 		iNonClientCapturing(false),
 		iReady(false),
+		iRawInputMouseButtonEventExtraInfo{},
 		iClickedWidgetPart(widget_part::Nowhere),
 		iSystemMenuOpen(false)
 	{
@@ -335,6 +340,7 @@ namespace neogfx
 		iCapturingMouse(false),
 		iNonClientCapturing(false),
 		iReady(false),
+		iRawInputMouseButtonEventExtraInfo{},
 		iClickedWidgetPart(widget_part::Nowhere),
 		iSystemMenuOpen(false)
 	{
@@ -887,6 +893,7 @@ namespace neogfx
 		case WM_MBUTTONUP:
 		case WM_XBUTTONUP:
 		case WM_MOUSEWHEEL:
+		case WM_INPUT:
 			{
 				key_modifiers_e modifiers = KeyModifier_NONE;
 				if (wparam & MK_SHIFT)
@@ -895,7 +902,10 @@ namespace neogfx
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CTRL);
 				if (GetKeyState(VK_MENU) >> 1)
 					modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_ALT);
-				self.push_mouse_button_event_extra_info(modifiers);
+				if (msg != WM_INPUT)
+					self.push_mouse_button_event_extra_info(modifiers);
+				else
+					self.raw_input_mouse_button_event_extra_info(modifiers);
 				result = wndproc(hwnd, msg, wparam, lparam);
 			}
 			break;
@@ -1229,48 +1239,38 @@ namespace neogfx
 			}
 			break;
 		case SDL_MOUSEWHEEL:
-			if (!iMouseButtonEventExtraInfo.empty())
-			{
-				push_event(
-					mouse_event{
-						mouse_event_type::WheelScrolled,
-						static_cast<mouse_wheel>(
-							(aEvent.wheel.y != 0 ? mouse_wheel::Vertical : mouse_wheel::None) | (aEvent.wheel.x != 0 ? mouse_wheel::Horizontal : mouse_wheel::None)),
-						delta{ static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y) },
-						iMouseButtonEventExtraInfo.front() });
-			}
+			push_event(
+				mouse_event{
+					mouse_event_type::WheelScrolled,
+					static_cast<mouse_wheel>(
+						(aEvent.wheel.y != 0 ? mouse_wheel::Vertical : mouse_wheel::None) | (aEvent.wheel.x != 0 ? mouse_wheel::Horizontal : mouse_wheel::None)),
+					delta{ static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y) },
+					pop_mouse_button_event_extra_info() });
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			if (!iMouseButtonEventExtraInfo.empty())
-			{
-				if (aEvent.button.clicks == 1)
-					push_event(
-						mouse_event{
-							mouse_event_type::ButtonPressed,
-							convert_mouse_button(aEvent.button.button),
-							point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
-							iMouseButtonEventExtraInfo.front() });
-
-				else
-					push_event(
-						mouse_event{
-							mouse_event_type::ButtonDoubleClicked,
-							convert_mouse_button(aEvent.button.button),
-							point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
-							iMouseButtonEventExtraInfo.front() });
-				iMouseButtonEventExtraInfo.pop_front();
-			}
-			break;
-		case SDL_MOUSEBUTTONUP:
-			if (!iMouseButtonEventExtraInfo.empty())
-			{
+			if (aEvent.button.clicks == 1)
 				push_event(
 					mouse_event{
-						mouse_event_type::ButtonReleased,
+						mouse_event_type::ButtonPressed,
 						convert_mouse_button(aEvent.button.button),
 						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
-						iMouseButtonEventExtraInfo.front() });
-			}
+						pop_mouse_button_event_extra_info() });
+
+			else
+				push_event(
+					mouse_event{
+						mouse_event_type::ButtonDoubleClicked,
+						convert_mouse_button(aEvent.button.button),
+						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+						pop_mouse_button_event_extra_info() });
+			break;
+		case SDL_MOUSEBUTTONUP:
+			push_event(
+				mouse_event{
+					mouse_event_type::ButtonReleased,
+					convert_mouse_button(aEvent.button.button),
+					point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+					pop_mouse_button_event_extra_info() });
 			break;
 		case SDL_MOUSEMOTION:
 			surface_window().as_window().window_manager().update_mouse_cursor(surface_window().as_window());
@@ -1333,6 +1333,23 @@ namespace neogfx
 	void sdl_window::push_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers)
 	{
 		iMouseButtonEventExtraInfo.push_back(aKeyModifiers);
+	}
+
+	void sdl_window::raw_input_mouse_button_event_extra_info(key_modifiers_e aKeyModifiers)
+	{
+		iRawInputMouseButtonEventExtraInfo = aKeyModifiers;
+	}
+
+	key_modifiers_e sdl_window::pop_mouse_button_event_extra_info()
+	{
+		if (!iMouseButtonEventExtraInfo.empty())
+		{
+			auto next = iMouseButtonEventExtraInfo.front();
+			iMouseButtonEventExtraInfo.pop_front();
+			return next;
+		}
+		else
+			return iRawInputMouseButtonEventExtraInfo;
 	}
 
 	void sdl_window::display()
