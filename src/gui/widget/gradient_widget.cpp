@@ -178,7 +178,7 @@ namespace neogfx
 	{
 		scoped_units su{ *this, aGraphicsContext, units::Pixels };
 		rect rectContents = contents_rect();
-		color frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
+		colour frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
 		draw_alpha_background(aGraphicsContext, rectContents);
 		neogfx::gradient selection = iSelection;
 		selection.set_direction(gradient::Horizontal);
@@ -535,7 +535,7 @@ namespace neogfx
 		};
 		colour transparentColour{ 255, 255, 255, 0 };
 		colour backgroundColour = background_colour();
-		color frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
+		colour frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
 		image stopGlyph{
 			stopGlpyhPattern,
 			{
@@ -577,7 +577,7 @@ namespace neogfx
 		};
 		colour transparentColour{ 255, 255, 255, 0 };
 		colour backgroundColour = background_colour();
-		color frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
+		colour frameColour = (background_colour().dark() ? background_colour().lighter(0x60) : background_colour().darker(0x60));
 		image stopGlyph{
 			stopGlpyhPattern,
 			{

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/colour.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
@@ -210,22 +211,5 @@ namespace neogfx
 		std::pair<radio_button, spin_box> iA;
 		line_edit iRgb;
 		push_button iAddToCustomColours;
-	};
-
-	/// The pesky US spelling variant
-	class color_dialog : public colour_dialog
-	{
-	public:
-		typedef custom_colour_list custom_color_list;
-	public:
-		color_dialog(const color& aCurrentColor = color::Black) : colour_dialog(aCurrentColor) {}
-		color_dialog(i_widget& aParent, const color& aCurrentColor = color::Black) : colour_dialog(aParent, aCurrentColor) {}
-	public:
-		colour current_color() const { return current_colour(); }
-		colour selected_color() const { return selected_colour(); }
-		hsv_color selected_color_as_hsv() const { return selected_colour_as_hsv(); }
-		void select_color(const color& aColor) { select_colour(aColor); }
-		const custom_color_list& custom_colors() const { return custom_colours(); }
-		custom_color_list& custom_colors() { return custom_colours(); }
 	};
 }

@@ -137,11 +137,14 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_playback_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_sample.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\css.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\geometry.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\hsl_color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsl_colour.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\hsv_color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsv_colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\html.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
@@ -190,6 +193,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\skyline_bin_pack.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\color_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\colour_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog_button_box.hpp" />

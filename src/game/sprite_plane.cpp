@@ -28,10 +28,11 @@
 namespace neogfx
 {
 	sprite_plane::sprite_plane() : 
+		iUpdateFunction{ [this]() -> bool { return update_objects(); } },
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (update_objects())
+			if (iUpdateFunction())
 				update();
 		}, 10 },
 		iPausePhysicsWhileNotRendering{ false }, 
@@ -48,10 +49,11 @@ namespace neogfx
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
 		widget{ aParent }, 
+		iUpdateFunction{ [this]() -> bool { return update_objects(); } },
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (update_objects())
+			if (iUpdateFunction())
 				update();
 		}, 10 },
 		iPausePhysicsWhileNotRendering{ false }, 
@@ -67,10 +69,11 @@ namespace neogfx
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
 		widget{ aLayout }, 
+		iUpdateFunction{ [this]() -> bool { return update_objects(); } },
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (update_objects())
+			if (iUpdateFunction())
 				update();
 		}, 10 },
 		iPausePhysicsWhileNotRendering{ false }, 
@@ -98,6 +101,8 @@ namespace neogfx
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
 	{	
+		iWaitForRender = false;
+		iUpdateFunction();
 		aGraphicsContext.clear_depth_buffer();
 		painting_sprites.trigger(aGraphicsContext);
 		sort_shapes();
@@ -109,8 +114,8 @@ namespace neogfx
 				continue;
 			s->paint(aGraphicsContext);
 		}
+		aGraphicsContext.flush();
 		sprites_painted.trigger(aGraphicsContext);
-		iWaitForRender = false;
 	}
 
 	void sprite_plane::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e)

@@ -98,7 +98,7 @@ public:
 	{
 		neolib::basic_random<double> prng{ (to_item_model_index(aIndex).row() << 16) + to_item_model_index(aIndex).column() }; // use seed to make random colour based on row/index
 		if (aColourType == iColourType)
-			return ng::hsv_color{prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
+			return ng::hsv_colour{prng(0.0, 360.0), prng(0.0, 1.0), prng(0.75, 1.0) }.to_rgb();
 		else
 			return iColourType == ng::item_cell_colour_type::Foreground ? ng::optional_colour{} : ng::colour::Black;
 	}
@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
 		ng::i_action& colourAction = app.add_action("Colour Dialog...");
 		colourAction.triggered([&window]()
 		{
-			ng::color_dialog cd(window);
+			ng::colour_dialog cd(window);
 			cd.exec();
 		});
 		testMenu.add_action(colourAction);

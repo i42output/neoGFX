@@ -558,7 +558,7 @@ namespace neogfx
 
 	colour gradient::at(double aPos) const
 	{
-		color result = colour_at(aPos);
+		colour result = colour_at(aPos);
 		return result.with_combined_alpha(alpha_at(aPos));
 	}
 

@@ -115,6 +115,7 @@ namespace neogfx
 		void sort_objects();
 		bool update_objects();
 	private:
+		mutable std::function<bool()> iUpdateFunction;
 		neolib::callback_timer iUpdater;
 		bool iPausePhysicsWhileNotRendering;
 		bool iEnableDynamicUpdate;

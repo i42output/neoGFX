@@ -61,6 +61,4 @@ namespace neogfx
 		double iValue;
 		double iAlpha;
 	};
-
-	typedef hsv_colour hsv_color;
 }

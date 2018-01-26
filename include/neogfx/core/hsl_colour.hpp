@@ -59,6 +59,4 @@ namespace neogfx
 		double iLightness;
 		double iAlpha;
 	};
-
-	typedef hsl_colour hsl_color;
 }

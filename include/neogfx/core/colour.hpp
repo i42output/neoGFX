@@ -22,9 +22,9 @@
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
 #include <neolib/variant.hpp>
-#include "geometry.hpp"
-#include "hsl_colour.hpp"
-#include "hsv_colour.hpp"
+#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/hsl_colour.hpp>
+#include <neogfx/core/hsv_colour.hpp>
 
 namespace neogfx
 {
@@ -916,9 +916,4 @@ namespace neogfx
 
 	typedef neolib::variant<colour, gradient> colour_or_gradient;
 	typedef boost::optional<colour_or_gradient> optional_colour_or_gradient;
-
-	typedef colour color;
-	typedef optional_colour optional_color;
-	typedef colour_or_gradient color_or_gradient;
-	typedef optional_colour_or_gradient optional_color_or_gradient;
 }
