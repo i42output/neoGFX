@@ -1,4 +1,4 @@
-// hsl_colour.hpp
+// hsl_color.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2018 Leigh Johnston
