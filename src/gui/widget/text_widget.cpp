@@ -211,12 +211,12 @@ namespace neogfx
 				w = &w->parent();
 			if (w->has_background_colour())
 			{
-				textColour = w->background_colour().to_hsl().lightness() >= 0.5f ? colour::Black : colour::White;
+				textColour = w->background_colour().luma() >= 0.5 ? colour::Black : colour::White;
 				break;
 			}
 			else if (w->has_foreground_colour())
 			{
-				textColour = w->foreground_colour().to_hsl().lightness() >= 0.5f ? colour::Black : colour::White;
+				textColour = w->foreground_colour().luma() >= 0.5 ? colour::Black : colour::White;
 				break;
 			}
 		} while (w->has_parent());

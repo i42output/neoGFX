@@ -747,10 +747,11 @@ namespace neogfx
 		hsl_colour to_hsl() const;
 		hsv_colour to_hsv() const;
 		double intensity() const;
+		double luma() const;
 		bool similar_intensity(const colour& aOther, double aThreshold = 0.5);
 		colour mid(const colour& aOther) const;
-		bool light(double aLightIntensity = 0.70) const;
-		bool dark(double aDarkIntensity = 0.30) const;
+		bool light(double aThreshold = 0.50) const;
+		bool dark(double aThreshold = 0.50) const;
 		colour& lighten(component aDelta);
 		colour& darken(component aDelta);
 		colour lighter(component aDelta) const;

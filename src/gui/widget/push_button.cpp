@@ -191,10 +191,11 @@ namespace neogfx
 			break;
 		}
 		aGraphicsContext.clip_to(outline);
-		colour topHalfFrom = faceColour.same_lightness_as(colour::White);
-		colour topHalfTo = faceColour;
-		colour bottomHalfFrom = faceColour.to_hsl().lighter(-0.125).to_rgb();
-		colour bottomHalfTo = faceColour;
+		const double colourOffset = 0.2;
+		colour colourStart = faceColour;
+		colour colourEnd = colourStart.to_hsl().lighter(-colourOffset).to_rgb();
+		if (colourStart.to_hsl().lightness() - colourEnd.to_hsl().lightness() < colourOffset)
+			colourStart = colourEnd.with_lightness(colourEnd.to_hsl().lightness() + colourOffset);
 		switch(iStyle)
 		{
 		case push_button_style::Normal:
@@ -204,12 +205,22 @@ namespace neogfx
 		case push_button_style::TitleBar:
 			if (!spot_colour())
 			{
+				colourStart = colourStart.with_lightness(colourStart.to_hsl().lightness() + 0.1);
+				const double transitionOffset = 0.02;
 				aGraphicsContext.fill_rect(outline.bounding_rect(),
 					gradient{ gradient::colour_stop_list{
-						gradient::colour_stop{ 0.0, topHalfFrom },
-						gradient::colour_stop{ !capturing() ? 0.48 : 0.54, topHalfTo },
-						gradient::colour_stop{ !capturing() ? 0.52 : 0.58, bottomHalfFrom },
-						gradient::colour_stop{ 1.0, bottomHalfTo } } });
+						gradient::colour_stop{
+							0.0,
+							colourStart },
+						gradient::colour_stop{
+							!capturing() ? 0.5 - transitionOffset : 0.5 + transitionOffset * 2.0,
+							colourEnd.to_hsl().lighter(colourOffset * 0.6).to_rgb() },
+						gradient::colour_stop{
+							!capturing() ? 0.5 + transitionOffset : 0.5 + transitionOffset * 4.0,
+							colourEnd.to_hsl().lighter(colourOffset * 0.2).to_rgb() },
+						gradient::colour_stop{
+							1.0,
+							colourEnd } } });
 			}
 			else
 			{
@@ -221,7 +232,7 @@ namespace neogfx
 		case push_button_style::SpinBox:
 			if (!spot_colour())
 			{
-				aGraphicsContext.fill_rect(outline.bounding_rect(), gradient{ topHalfTo, bottomHalfFrom });
+				aGraphicsContext.fill_rect(outline.bounding_rect(), gradient{ colourStart, colourEnd });
 			}
 			else
 			{

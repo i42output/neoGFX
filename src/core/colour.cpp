@@ -209,7 +209,12 @@ namespace neogfx
 
 	double colour::intensity() const
 	{ 
-		return to_hsv().brightness();
+		return (red<double>() + green<double>() + blue<double>()) / 3.0;
+	}
+
+	double colour::luma() const
+	{
+		return red<double>() * 0.21 + green<double>() * 0.72 + blue<double>() * 0.07;
 	}
 
 	bool colour::similar_intensity(const colour& aOther, double aThreshold)
@@ -226,14 +231,14 @@ namespace neogfx
 			static_cast<component>((alpha<double>() + aOther.alpha<double>()) / 2.0 * 0xFF));
 	}
 
-	bool colour::light(double aLightIntensity) const
+	bool colour::light(double aThreshold) const
 	{ 
-		return intensity() >= aLightIntensity;
+		return to_hsl().lightness() >= aThreshold;
 	}
 
-	bool colour::dark(double aDarkIntensity) const
+	bool colour::dark(double aThreshold) const
 	{ 
-		return intensity() <= aDarkIntensity;
+		return to_hsl().lightness() < aThreshold;
 	}
 
 	colour& colour::lighten(component aDelta) 
@@ -286,7 +291,7 @@ namespace neogfx
 	colour colour::with_lightness(double aLightness) const
 	{
 		hsl_colour temp = to_hsl();
-		temp.set_lightness(aLightness);
+		temp.set_lightness(std::min(aLightness, 1.0));
 		return temp.to_rgb();
 	}
 
