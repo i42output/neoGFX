@@ -202,39 +202,18 @@ namespace neogfx
 		case push_button_style::ItemViewHeader:
 		case push_button_style::Toolbar:
 		case push_button_style::TitleBar:
-			if (!capturing())
+			if (!spot_colour())
 			{
-				if (!spot_colour())
-				{
-					rect topHalf = outline.bounding_rect();
-					rect bottomHalf = topHalf;
-					topHalf.cy = std::floor(topHalf.cy * 0.5);
-					bottomHalf.y = topHalf.bottom();
-					bottomHalf.cy -= topHalf.height();
-					aGraphicsContext.fill_rect(topHalf, gradient(topHalfFrom, topHalfTo));
-					aGraphicsContext.fill_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
-				}
-				else
-				{
-					aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
-				}
+				aGraphicsContext.fill_rect(outline.bounding_rect(),
+					gradient{ gradient::colour_stop_list{
+						gradient::colour_stop{ 0.0, topHalfFrom },
+						gradient::colour_stop{ !capturing() ? 0.48 : 0.54, topHalfTo },
+						gradient::colour_stop{ !capturing() ? 0.52 : 0.58, bottomHalfFrom },
+						gradient::colour_stop{ 1.0, bottomHalfTo } } });
 			}
-			else 
+			else
 			{
-				if (!spot_colour())
-				{
-					rect topHalf = outline.bounding_rect();
-					rect bottomHalf = topHalf;
-					topHalf.cy = std::floor(topHalf.cy * 0.5 + as_units(*this, units::Millimetres, 1.0));
-					bottomHalf.y = topHalf.bottom();
-					bottomHalf.cy -= topHalf.height();
-					aGraphicsContext.fill_rect(topHalf, gradient(topHalfFrom, topHalfTo));
-					aGraphicsContext.fill_rect(bottomHalf, gradient(bottomHalfFrom, bottomHalfTo));
-				}
-				else
-				{
-					aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
-				}
+				aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
 			}
 			break;
 		case push_button_style::Tab:
@@ -242,7 +221,7 @@ namespace neogfx
 		case push_button_style::SpinBox:
 			if (!spot_colour())
 			{
-				aGraphicsContext.fill_rect(outline.bounding_rect(), gradient(topHalfTo, bottomHalfFrom));
+				aGraphicsContext.fill_rect(outline.bounding_rect(), gradient{ topHalfTo, bottomHalfFrom });
 			}
 			else
 			{
