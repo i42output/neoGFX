@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/list_view.hpp>
-#include <neogfx/gui/widget/push_button.hpp>
 
 namespace neogfx
 {
@@ -76,10 +75,24 @@ namespace neogfx
 		drop_list_view iView;
 	};
 
-	class drop_list : public push_button
+	class drop_list : public widget
 	{
 	public:
 		event<> selection_changed;
+	public:
+		class i_input_widget
+		{
+		public:
+			virtual ~i_input_widget() {}
+		public:
+			virtual const i_widget& as_widget() const = 0;
+			virtual i_widget& as_widget() = 0;
+		public:
+			virtual bool editable() const = 0;
+			virtual const i_widget& text_widget() const = 0;
+			virtual i_widget& text_widget() = 0;
+			virtual void set_text(const std::string& aText) = 0;
+		};
 	private:
 		class popup_proxy
 		{
@@ -122,14 +135,18 @@ namespace neogfx
 	public:
 		bool editable() const;
 		void set_editable(bool aEditable);
+		const i_input_widget& input_widget() const;
+		i_input_widget& input_widget();
 	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
-	protected:
-		void handle_clicked() override;
 	private:
 		void init();
+		void update_input_widget();
 		void update_arrow();
+		void handle_clicked();
 	private:
+		horizontal_layout iLayout;
+		std::unique_ptr<i_input_widget> iInputWidget;
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
 		std::shared_ptr<i_item_selection_model> iSelectionModel;
