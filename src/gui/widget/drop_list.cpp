@@ -187,7 +187,7 @@ namespace neogfx
 				currentItemPos.y -= effective_frame_width();
 			}
 			surface().move_surface(-currentItemPos + 
-				point{ iDropList.window_rect().x, iDropList.input_widget().as_widget().window_rect().top_left().y } + iDropList.root().window_position());
+				point{ iDropList.window_rect().x, iDropList.input_widget().text_widget().window_rect().top_left().y } + iDropList.root().window_position());
 			correct_popup_rect(*this);
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(view()))
 				app::instance().keyboard().grab_keyboard(view());
@@ -542,14 +542,17 @@ namespace neogfx
 			inputWidget.clicked([this]() { handle_clicked(); });
 
 			inputWidget.set_size_policy(size_policy::Expanding);
-			inputWidget.label().layout().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
+			
+			auto& inputLabelLayout = inputWidget.label().layout();
+			inputLabelLayout.set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
 			auto& s1 = inputWidget.layout().add_spacer();
-			scoped_units su1{ s1, units::Pixels };
-			s1.set_minimum_width(label().layout().spacing().cx);
+			scoped_units su1{ s1, inputLabelLayout, units::Pixels };
+			s1.set_minimum_width(inputLabelLayout.spacing().cx);
 			inputWidget.layout().add(iDownArrow);
 			auto& s2 = inputWidget.layout().add_spacer();
-			scoped_units su2{ s2, units::Pixels };
-			s2.set_fixed_size(size{ label().layout().spacing().cx, 0.0 });
+			scoped_units su2{ s2, inputLabelLayout, units::Pixels };
+			s2.set_fixed_size(size{ inputLabelLayout.spacing().cx, 0.0 });
+			
 			update_arrow();
 		}
 	}
