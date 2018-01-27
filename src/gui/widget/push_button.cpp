@@ -206,21 +206,16 @@ namespace neogfx
 			if (!spot_colour())
 			{
 				colourStart = colourStart.with_lightness(colourStart.to_hsl().lightness() + 0.1);
-				const double transitionOffset = 0.02;
+				const double transitionHeight = 0.04;
+				const double transitionStart = 0.5 - transitionHeight / 2.0 +
+					(!capturing() ? 0.0 : (as_units(*this, units::Millimetres, 1.0) / outline.bounding_rect().height()));
+				const double transitionEnd = transitionStart + transitionHeight;
 				aGraphicsContext.fill_rect(outline.bounding_rect(),
 					gradient{ gradient::colour_stop_list{
-						gradient::colour_stop{
-							0.0,
-							colourStart },
-						gradient::colour_stop{
-							!capturing() ? 0.5 - transitionOffset : 0.5 + transitionOffset * 2.0,
-							colourEnd.to_hsl().lighter(colourOffset * 0.6).to_rgb() },
-						gradient::colour_stop{
-							!capturing() ? 0.5 + transitionOffset : 0.5 + transitionOffset * 4.0,
-							colourEnd.to_hsl().lighter(colourOffset * 0.2).to_rgb() },
-						gradient::colour_stop{
-							1.0,
-							colourEnd } } });
+						gradient::colour_stop{ 0.0, colourStart },
+						gradient::colour_stop{ transitionStart, colourEnd.to_hsl().lighter(colourOffset * 0.6).to_rgb() },
+						gradient::colour_stop{ transitionEnd, colourEnd.to_hsl().lighter(colourOffset * 0.2).to_rgb() },
+						gradient::colour_stop{ 1.0, colourEnd } } });
 			}
 			else
 			{
