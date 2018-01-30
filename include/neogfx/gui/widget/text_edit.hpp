@@ -421,7 +421,7 @@ namespace neogfx
 		neogfx::scrolling_disposition scrolling_disposition() const override;
 		using scrollable_widget::update_scrollbar_visibility;
 		void update_scrollbar_visibility(usv_stage_e aStage) override;
-	protected:
+	public:
 		colour frame_colour() const override;
 	public:
 		bool can_undo() const override;

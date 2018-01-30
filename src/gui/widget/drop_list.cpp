@@ -228,7 +228,10 @@ namespace neogfx
 
 	void drop_list_popup::update_placement()
 	{
+		// First stab at sizing ourselves...
 		resize(minimum_size());
+		
+		// Workout ideal position whereby text for current item in drop list popup view is at same position as text in drop button or line edit...
 		point currentItemPos;
 		if (view().presentation_model().rows() > 0 && view().presentation_model().columns() > 0)
 		{
@@ -241,10 +244,22 @@ namespace neogfx
 			currentItemPos += view().presentation_model().cell_spacing(*this) / 2.0;
 			currentItemPos -= point{ effective_frame_width(), effective_frame_width() };
 		}
-		point dropListPos{ iDropList.input_widget().text_widget().window_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };
-		surface().move_surface(-currentItemPos + dropListPos);
-		resize(extents() + size{ dropListPos.x + iDropList.extents().cx - surface().surface_position().x - extents().cx + currentItemPos.x * 2.0, 0.0 });
-		correct_popup_rect(*this);
+		point inputWidgetPos{ iDropList.window_rect().top_left() + iDropList.root().window_position() };
+		point textWidgetPos{ iDropList.input_widget().text_widget().window_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };
+		point popupPos = -currentItemPos + textWidgetPos;
+		
+		// Popup goes below line edit if editable or on top of drop button if not...
+		if (iDropList.editable())
+			popupPos.y = inputWidgetPos.y + iDropList.extents().cy;
+		surface().move_surface(popupPos);
+		resize(extents() + size{ textWidgetPos.x + iDropList.extents().cx - surface().surface_position().x - extents().cx + currentItemPos.x * 2.0, 0.0 });
+		
+		// Check we are not out of bounds of desktop window and correct if we are...
+		auto correctedRect = corrected_popup_rect(*this);
+		if (iDropList.editable() && correctedRect.y < inputWidgetPos.y)
+			correctedRect.y = inputWidgetPos.y - extents().cy;
+		surface().move_surface(correctedRect.top_left());
+		resize(correctedRect.extents());
 	}
 
 	drop_list::popup_proxy::popup_proxy(drop_list& aDropList) :
@@ -339,6 +354,11 @@ namespace neogfx
 			void set_text(const std::string& aText) override
 			{
 				iEditor.set_text(aText);
+			}
+		protected:
+			colour frame_colour() const override
+			{
+				return iEditor.frame_colour();
 			}
 		private:
 			horizontal_layout iLayout;
