@@ -216,3 +216,13 @@ Debug
 /build/win32/vs2015/My Amplifier Results - neoGFX/*.amplxeproj
 /examples/games/video_poker/build/win32/vs2015/My Amplifier Results - video_poker/*.amplxeproj
 /tools/neoGUI/My Amplifier Results - neoGUI/*.amplxeproj
+/build/win32/vs2017/neogfx.vcxproj.user
+/build/win32/vs2017/.vs
+/build/win32/vs2017/Debug
+/build/win32/vs2017/Release
+/examples/test/build/win32/vs2017/test.vcxproj.user
+/examples/test/build/win32/vs2017/.vs
+/examples/test/build/win32/vs2017/Debug
+/examples/test/build/win32/vs2017/Release
+/tools/glsl2hpp/build/win32/vs2017/glsl2hpp.vcxproj.user
+/tools/nrc/build/win32/vs2017/nrc.vcxproj.user

@@ -358,7 +358,7 @@ namespace neogfx
 
 	gradient::gradient() :
 		iColourStops{{0.0, colour::Black}, {1.0, colour::Black}},
-		iAlphaStops{{0.0, 255}, {1.0, 255}},
+		iAlphaStops{{0.0, 255_u8}, {1.0, 255_u8}},
 		iDirection(Horizontal),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
@@ -369,7 +369,7 @@ namespace neogfx
 
 	gradient::gradient(const colour& aColour, direction_e aDirection) :
 		iColourStops{{0.0, aColour}, {1.0, aColour}},
-		iAlphaStops{{0.0, 255}, {1.0, 255}},
+		iAlphaStops{{0.0, 255_u8}, {1.0, 255_u8}},
 		iDirection(aDirection),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
@@ -380,7 +380,7 @@ namespace neogfx
 
 	gradient::gradient(const colour& aColour1, const colour& aColour2, direction_e aDirection) :
 		iColourStops{{0.0, aColour1}, {1.0, aColour2}},
-		iAlphaStops{{0.0, 255}, {1.0, 255}},
+		iAlphaStops{{0.0, 255_u8}, {1.0, 255_u8}},
 		iDirection(aDirection),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
@@ -391,7 +391,7 @@ namespace neogfx
 
 	gradient::gradient(const colour_stop_list& aColourStops, direction_e aDirection) :
 		iColourStops{!aColourStops.empty() ? aColourStops : colour_stop_list{{0.0, colour::Black}, {1.0, colour::Black}}},
-		iAlphaStops{{{0.0, 255}, {1.0, 255}}},
+		iAlphaStops{{{0.0, 255_u8}, {1.0, 255_u8}}},
 		iDirection(aDirection),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
@@ -403,7 +403,7 @@ namespace neogfx
 
 	gradient::gradient(const colour_stop_list& aColourStops, const alpha_stop_list& aAlphaStops, direction_e aDirection) :
 		iColourStops{!aColourStops.empty() ? aColourStops : colour_stop_list{{0.0, colour::Black}, {1.0, colour::Black}}},
-		iAlphaStops{!aAlphaStops.empty() ? aAlphaStops : alpha_stop_list{{0.0, 255}, {1.0, 255}}},
+		iAlphaStops{!aAlphaStops.empty() ? aAlphaStops : alpha_stop_list{{0.0, 255_u8}, {1.0, 255_u8}}},
 		iDirection(aDirection),
 		iOrientation(TopLeft),
 		iShape(Ellipse),
@@ -493,7 +493,7 @@ namespace neogfx
 
 	gradient::alpha_stop_list::iterator gradient::find_alpha_stop(double aPos, bool aToInsert)
 	{
-		auto alphaStop = std::lower_bound(alpha_stops().begin(), alpha_stops().end(), alpha_stop{ aPos, 255 },
+		auto alphaStop = std::lower_bound(alpha_stops().begin(), alpha_stops().end(), alpha_stop{ aPos, 255_u8 },
 			[](const alpha_stop& aLeft, const alpha_stop& aRight)
 		{
 			return aLeft.first < aRight.first;
@@ -606,7 +606,7 @@ namespace neogfx
 
 	colour::component gradient::alpha_at(double aPos) const
 	{
-		auto alphaStop = std::lower_bound(alpha_stops().begin(), alpha_stops().end(), alpha_stop{ aPos, 255 },
+		auto alphaStop = std::lower_bound(alpha_stops().begin(), alpha_stops().end(), alpha_stop{ aPos, 255_u8 },
 			[](const alpha_stop& aLeft, const alpha_stop& aRight)
 		{
 			return aLeft.first < aRight.first;
@@ -839,7 +839,7 @@ namespace neogfx
 		}
 		if (alpha_stops().empty())
 		{
-			alpha_stops().assign({ { 0.0, 255 }, { 1.0, 255 } });
+			alpha_stops().assign({ { 0.0, 255_u8 }, { 1.0, 255_u8 } });
 		}
 		else if (alpha_stops().size() == 1)
 		{

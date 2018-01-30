@@ -539,12 +539,12 @@ namespace neogfx
 		image stopGlyph{
 			stopGlpyhPattern,
 			{
-				{0, transparentColour},
-				{1, frameColour},
-				{2, frameColour.mid(backgroundColour)},
-				{3, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour()},
-				{4, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40)},
-				{9, aColourStop.second}} };
+				{0_u8, transparentColour},
+				{1_u8, frameColour},
+				{2_u8, frameColour.mid(backgroundColour)},
+				{3_u8, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour()},
+				{4_u8, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40)},
+				{9_u8, aColourStop.second}} };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())
 			stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
@@ -581,12 +581,12 @@ namespace neogfx
 		image stopGlyph{
 			stopGlpyhPattern,
 			{
-				{ 0, transparentColour },
-				{ 1, frameColour },
-				{ 2, frameColour.mid(backgroundColour) },
-				{ 3, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour() },
-				{ 4, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40) },
-				{ 9, colour::White.with_alpha(aAlphaStop.second) } } };
+				{ 0_u8, transparentColour },
+				{ 1_u8, frameColour },
+				{ 2_u8, frameColour.mid(backgroundColour) },
+				{ 3_u8, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour() },
+				{ 4_u8, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40) },
+				{ 9_u8, colour::White.with_alpha(aAlphaStop.second) } } };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())
 			stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;

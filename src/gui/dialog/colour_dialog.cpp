@@ -122,7 +122,7 @@ namespace neogfx
 	colour_dialog::x_picker::cursor_widget::cursor_widget(x_picker& aParent, type_e aType) :
 		image_widget(
 			aParent.iParent.client_widget(),
-			neogfx::image{ aType == LeftCursor ? sLeftXPickerCursorImage : sRightXPickerCursorImage, { { 0, colour{} }, { 1, colour::Black } , { 2, colour::White } } }),
+			neogfx::image{ aType == LeftCursor ? sLeftXPickerCursorImage : sRightXPickerCursorImage, { { 0_u8, colour{} }, { 1_u8, colour::Black } , { 2_u8, colour::White } } }),
 		iParent(aParent)
 	{
 		set_ignore_mouse_events(false);

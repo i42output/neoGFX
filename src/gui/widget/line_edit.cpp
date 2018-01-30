@@ -22,18 +22,18 @@
 
 namespace neogfx
 {
-	line_edit::line_edit() :
-		text_edit(SingleLine)
+	line_edit::line_edit(frame_style aFrameStyle) :
+		text_edit{ SingleLine, aFrameStyle }
 	{
 	}
 
-	line_edit::line_edit(i_widget& aParent) :
-		text_edit(aParent, SingleLine)
+	line_edit::line_edit(i_widget& aParent, frame_style aFrameStyle) :
+		text_edit{ aParent, SingleLine, aFrameStyle }
 	{
 	}
 
-	line_edit::line_edit(i_layout& aLayout) :
-		text_edit(aLayout, SingleLine)
+	line_edit::line_edit(i_layout& aLayout, frame_style aFrameStyle) :
+		text_edit{ aLayout, SingleLine, aFrameStyle }
 	{
 	}
 }

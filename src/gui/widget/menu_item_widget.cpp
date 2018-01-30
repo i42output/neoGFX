@@ -124,7 +124,7 @@ namespace neogfx
 						{ 0, 1, 0, 0, 0, 0 },
 						{ 0, 0, 0, 0, 0, 0 },
 					};
-					iSubMenuArrow = std::make_pair(ink, image{ "neogfx::menu_item_widget::" + ink.to_string(), sArrowImagePattern, { { 0, colour{} },{ 1, ink } } });
+					iSubMenuArrow = std::make_pair(ink, image{ "neogfx::menu_item_widget::" + ink.to_string(), sArrowImagePattern, { { 0_u8, colour{} },{ 1_u8, ink } } });
 				}
 				rect rect = client_rect(false);
 				aGraphicsContext.draw_texture(
@@ -254,7 +254,7 @@ namespace neogfx
 						{ 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 }
 					};
 					colour ink = app::instance().current_style().palette().text_colour();
-					iIcon.set_image(image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { 0, colour{} },{ 1, ink } } });
+					iIcon.set_image(image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { 0_u8, colour{} },{ 1_u8, ink } } });
 				}
 				if (!iIcon.image().is_empty())
 					iIcon.set_fixed_size(size{ iIconSize, iIconSize });

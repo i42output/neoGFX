@@ -20,24 +20,9 @@
 #pragma once
 
 #include <neolib/neolib.hpp>
+#include <neolib/stdint.hpp>
 
 namespace neogfx
 {
-	inline const void*& debug()
-	{
-		static const void* sObject;
-		return sObject;
-	}
-
-	template <typename T>
-	inline void set_debug(const T* aObject)
-	{
-		debug() = aObject;
-	}
-
-	template <typename T>
-	inline void set_debug(const T& aObject)
-	{
-		debug() = &aObject;
-	}
+	using namespace neolib::stdint_suffix;
 }

@@ -265,7 +265,7 @@ namespace neogfx
 				ink,
 				neogfx::image{
 				"neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
-				sMinimizeTexturePattern,{ { 0, colour{} },{ 1, ink },{ 2, ink.with_alpha(0x80) } } });
+				sMinimizeTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureMaximize] == boost::none || iTextures[TextureMaximize]->first != ink)
 		{
@@ -273,7 +273,7 @@ namespace neogfx
 				ink,
 				neogfx::image{
 				"neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
-				sMaximizeTexturePattern,{ { 0, colour{} },{ 1, ink },{ 2, ink.with_alpha(0x80) } } });
+				sMaximizeTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureRestore] == boost::none || iTextures[TextureRestore]->first != ink)
 		{
@@ -281,7 +281,7 @@ namespace neogfx
 				ink,
 				neogfx::image{
 				"neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
-				sRestoreTexturePattern,{ { 0, colour{} },{ 1, ink },{ 2, ink.with_alpha(0x80) } } });
+				sRestoreTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureClose] == boost::none || iTextures[TextureClose]->first != ink)
 		{
@@ -289,7 +289,7 @@ namespace neogfx
 				ink,
 				neogfx::image{
 				"neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
-				sCloseTexturePattern, { { 0, colour{} },{ 1, ink },{ 2, ink.with_alpha(0x80) } } });
+				sCloseTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		iMinimizeButton.image().set_image(iTextures[TextureMinimize]->second);
 		iMaximizeButton.image().set_image(iTextures[TextureMaximize]->second);

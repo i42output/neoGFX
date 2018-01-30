@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 		app.register_style(ng::style("Keypad")).set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 		app.change_style("Keypad");
 		app.current_style().palette().set_colour(ng::colour::Black);
-		app.change_style("Default");
+		app.change_style("Slate");
 
 		ng::window window(ng::size{ 768, 688 });
 		auto& layout0 = window.client_layout();
@@ -387,14 +387,20 @@ int main(int argc, char* argv[])
 		dropList2.model().insert_item(dropList2.model().end(), "Square");
 		dropList2.model().insert_item(dropList2.model().end(), "Triangle");
 		dropList2.model().insert_item(dropList2.model().end(), "Circle");
-		dropList2.set_editable(true);
 		ng::drop_list dropList3(dropListLayout);
 		for (int32_t i = 1; i <= 100; ++i)
 			dropList3.model().insert_item(dropList3.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
 		ng::drop_list dropList4(dropListLayout);
 		for (int32_t i = 1; i <= 100; ++i)
 			dropList4.model().insert_item(dropList4.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
-		dropList4.set_editable(true);
+		ng::check_box toggleEditable{ dropListLayout, "Toggle Editable" };
+		toggleEditable.toggled([&]()
+		{
+			dropList.set_editable(!dropList.editable());
+			dropList2.set_editable(!dropList2.editable());
+			dropList3.set_editable(!dropList3.editable());
+			dropList4.set_editable(!dropList4.editable());
+		});
 		ng::horizontal_layout editLayout(layoutButtons);
 		ng::text_edit textEdit(editLayout);
 		buttonGenerateUuid.clicked([&textEdit]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });

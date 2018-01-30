@@ -61,11 +61,10 @@ namespace neogfx
 		list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame, false },
 		iDropList{ aDropList }
 	{
-		set_margins(neogfx::optional_margins{});
+		set_margins(neogfx::margins{});
 		set_selection_model(aDropList.selection_model());
 		set_presentation_model(aDropList.presentation_model());
 		set_model(aDropList.model());
-		parent().resize(parent().minimum_size());
 	}
 
 	drop_list_view::~drop_list_view()
@@ -90,8 +89,7 @@ namespace neogfx
 			if (selection_model().has_current_index())
 			{
 				auto item = item_at(aPosition);
-				if (item != boost::none && cell_rect(*item).contains(aPosition) &&
-					item->row() == presentation_model().to_item_model_index(selection_model().current_index()).row())
+				if (item != boost::none && row_rect(*item).contains(aPosition) && item->row() == selection_model().current_index().row())
 					iDropList.accept_selection();
 			}
 		}
@@ -137,6 +135,7 @@ namespace neogfx
 		iView{ client_layout(), aDropList }
 	{
 		client_layout().set_margins(neogfx::margins{});
+		update_placement();
 	}
 
 	drop_list_popup::~drop_list_popup()
@@ -173,22 +172,7 @@ namespace neogfx
 	{
 		if (aVisible && !visible())
 		{
-			resize(minimum_size());
-			point currentItemPos;
-			if (view().presentation_model().rows() > 0 && view().presentation_model().columns() > 0)
-			{
-				auto index = (view().selection_model().has_current_index() ?
-					view().selection_model().current_index() :
-					item_presentation_model_index{ 0, 0 });
-				view().make_visible(index);
-				currentItemPos.y += view().cell_rect(index).y;
-				currentItemPos.y += view().presentation_model().cell_margins(*this).top;
-				currentItemPos.y += view().presentation_model().cell_spacing(*this).cy / 2.0;
-				currentItemPos.y -= effective_frame_width();
-			}
-			surface().move_surface(-currentItemPos + 
-				point{ iDropList.window_rect().x, iDropList.input_widget().text_widget().window_rect().top_left().y } + iDropList.root().window_position());
-			correct_popup_rect(*this);
+			update_placement();
 			if (!app::instance().keyboard().is_keyboard_grabbed_by(view()))
 				app::instance().keyboard().grab_keyboard(view());
 		}
@@ -212,7 +196,7 @@ namespace neogfx
 		if (window::has_minimum_size())
 			return window::minimum_size();
 		auto totalArea = iView.total_item_area(*this);
-		auto minimumSize = size{ effective_frame_width() * 2.0 } + margins().size() + totalArea;
+		auto minimumSize = size{ effective_frame_width() * 2.0 } + margins().size() + totalArea + iView.margins().size();
 		minimumSize.cy = std::min(minimumSize.cy, parent().root().as_widget().extents().cy / 2.0);
 		if (minimumSize.cy - (effective_frame_width() * 2.0 + margins().size().cy) < totalArea.cy)
 			minimumSize.cx += vertical_scrollbar().width(*this);
@@ -240,6 +224,27 @@ namespace neogfx
 		if (app::instance().keyboard().is_keyboard_grabbed_by(view()))
 			app::instance().keyboard().ungrab_keyboard(view());
 		close();
+	}
+
+	void drop_list_popup::update_placement()
+	{
+		resize(minimum_size());
+		point currentItemPos;
+		if (view().presentation_model().rows() > 0 && view().presentation_model().columns() > 0)
+		{
+			auto index = (view().selection_model().has_current_index() ?
+				view().selection_model().current_index() :
+				item_presentation_model_index{ 0, 0 });
+			view().make_visible(index);
+			currentItemPos += view().cell_rect(index).top_left();
+			currentItemPos += view().presentation_model().cell_margins(*this).top_left();
+			currentItemPos += view().presentation_model().cell_spacing(*this) / 2.0;
+			currentItemPos -= point{ effective_frame_width(), effective_frame_width() };
+		}
+		point dropListPos{ iDropList.input_widget().text_widget().window_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };
+		surface().move_surface(-currentItemPos + dropListPos);
+		resize(extents() + size{ dropListPos.x + iDropList.extents().cx - surface().surface_position().x - extents().cx + currentItemPos.x * 2.0, 0.0 });
+		correct_popup_rect(*this);
 	}
 
 	drop_list::popup_proxy::popup_proxy(drop_list& aDropList) :
@@ -297,6 +302,47 @@ namespace neogfx
 			{
 				return text().set_text(aText);
 			}
+		};
+
+		class editable_input_widget : public framed_widget, public drop_list::i_input_widget
+		{
+		public:
+			editable_input_widget(i_layout& aLayout) :
+				framed_widget{ aLayout, frame_style::SolidFrame },
+				iLayout{ *this },
+				iEditor{ iLayout, frame_style::NoFrame }
+			{
+				set_margins(neogfx::margins{});
+			}
+		public:
+			const i_widget& as_widget() const override
+			{
+				return *this;
+			}
+			i_widget& as_widget() override
+			{
+				return *this;
+			}
+		public:
+			bool editable() const override
+			{
+				return true;
+			}
+			const i_widget& text_widget() const override
+			{
+				return iEditor;
+			}
+			i_widget& text_widget() override
+			{
+				return iEditor;
+			}
+			void set_text(const std::string& aText) override
+			{
+				iEditor.set_text(aText);
+			}
+		private:
+			horizontal_layout iLayout;
+			line_edit iEditor;
 		};
 	}
 
@@ -510,6 +556,7 @@ namespace neogfx
 		if (widget::has_minimum_size())
 			return minimumSize;
 		minimumSize.cx -= input_widget().text_widget().minimum_size().cx;
+		minimumSize.cx += input_widget().text_widget().margins().size().cx;
 		minimumSize.cx += presentation_model().column_width(0, graphics_context{ *this, graphics_context::type::Unattached }, false);
 		return minimumSize;
 	}
@@ -534,6 +581,8 @@ namespace neogfx
 
 	void drop_list::update_input_widget()
 	{
+		bool changed = false;
+
 		if (!editable() && (iInputWidget == nullptr || iInputWidget->editable()))
 		{
 			iInputWidget = std::make_unique<non_editable_input_widget>(iLayout);
@@ -552,8 +601,38 @@ namespace neogfx
 			auto& s2 = inputWidget.layout().add_spacer();
 			scoped_units su2{ s2, inputLabelLayout, units::Pixels };
 			s2.set_fixed_size(size{ inputLabelLayout.spacing().cx, 0.0 });
-			
+
+			changed = true;
+		}
+		else if (editable() && (iInputWidget == nullptr || !iInputWidget->editable()))
+		{
+			iInputWidget = std::make_unique<editable_input_widget>(iLayout);
+			auto& inputWidget = static_cast<editable_input_widget&>(iInputWidget->as_widget());
+
+			inputWidget.mouse_event([&inputWidget, this](const neogfx::mouse_event& aEvent)
+			{
+				if (aEvent.type() == mouse_event_type::ButtonReleased &&
+					aEvent.mouse_button() == mouse_button::Left &&
+					inputWidget.client_rect().contains(aEvent.position() - window_rect().top_left()) &&
+					inputWidget.capturing())
+					handle_clicked();
+			});
+
+			inputWidget.set_size_policy(size_policy::Expanding);
+
+			inputWidget.layout().add(iDownArrow);
+
+			changed = true;
+		}
+
+		if (changed)
+		{
 			update_arrow();
+
+			std::string text;
+			if (selection_model().has_current_index())
+				text = presentation_model().cell_to_string(selection_model().current_index());
+			input_widget().set_text(text);
 		}
 	}
 
@@ -569,7 +648,7 @@ namespace neogfx
 				{ 0, 0, 1, 1, 1, 1, 0, 0 },
 				{ 0, 0, 0, 1, 1, 0, 0, 0 },
 			};
-			iDownArrowTexture = std::make_pair(ink, neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern,{ { 0, colour{} },{ 1, ink } } });
+			iDownArrowTexture = std::make_pair(ink, neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { 0_u8, colour{} }, { 1_u8, ink } } });
 		}
 		iDownArrow.set_image(iDownArrowTexture->second);
 	}

@@ -168,7 +168,7 @@ namespace neogfx
 	}
 
 	template <typename T>
-	inline void basic_spin_box<T>::set_normalized_value(double aValue, bool aUpdateTextBox = false)
+	inline void basic_spin_box<T>::set_normalized_value(double aValue, bool aUpdateTextBox)
 	{
 		double const stepValue = normalized_step_value();
 		double steps = 0.0;

@@ -25,8 +25,8 @@
 namespace neogfx
 {
 	text_edit::style::style() :
-		iParent(nullptr),
-		iUseCount(0)
+		iParent{ nullptr },
+		iUseCount{ 0 }
 	{
 	}
 		
@@ -35,24 +35,24 @@ namespace neogfx
 		const colour_or_gradient& aTextColour,
 		const colour_or_gradient& aBackgroundColour,
 		const optional_text_effect& aTextEffect) :
-		iParent(nullptr),
-		iUseCount(0),
-		iFont(aFont),
-		iTextColour(aTextColour),
-		iBackgroundColour(aBackgroundColour),
-		iTextEffect(aTextEffect)
+		iParent{ nullptr },
+		iUseCount{ 0 },
+		iFont{ aFont },
+		iTextColour{ aTextColour },
+		iBackgroundColour{ aBackgroundColour },
+		iTextEffect{ aTextEffect }
 	{
 	}
 
 	text_edit::style::style(
 		text_edit& aParent,
 		const style& aOther) : 
-		iParent(&aParent), 
-		iUseCount(0),
-		iFont(aOther.iFont),
-		iTextColour(aOther.iTextColour),
-		iBackgroundColour(aOther.iBackgroundColour),
-		iTextEffect(aOther.iTextEffect)
+		iParent{ &aParent },
+		iUseCount{ 0 },
+		iFont{ aOther.iFont },
+		iTextColour{ aOther.iTextColour },
+		iBackgroundColour{ aOther.iBackgroundColour },
+		iTextEffect{ aOther.iTextEffect }
 	{
 	}
 
@@ -135,65 +135,65 @@ namespace neogfx
 		return std::tie(iFont, iTextColour, iBackgroundColour, iTextEffect) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextEffect);
 	}
 
-	text_edit::text_edit(type_e aType) :
-		scrollable_widget(aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible), 
-		iType(aType),
-		iReadOnly(false),
-		iWordWrap(aType == MultiLine),
-		iPassword(false),
-		iAlignment(neogfx::alignment::Left|neogfx::alignment::Top),
-		iPersistDefaultStyle(false),
-		iGlyphColumns(1),
-		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
-		iTabStopHint("0000"),
-		iAnimator(app::instance(), [this](neolib::callback_timer&)
+	text_edit::text_edit(type_e aType, frame_style aFrameStyle) :
+		scrollable_widget{ aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+		iType{ aType },
+		iReadOnly{ false },
+		iWordWrap{ aType == MultiLine },
+		iPassword{ false },
+		iAlignment{ neogfx::alignment::Left | neogfx::alignment::Top },
+		iPersistDefaultStyle{ false },
+		iGlyphColumns{ 1 },
+		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
+		iTabStopHint{ "0000" },
+		iAnimator{ app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
 			animate();
-		}, 40),
-		iOutOfMemory(false)
+		}, 40 },
+		iOutOfMemory{ false }
 	{
 		init();
 	}
 
-	text_edit::text_edit(i_widget& aParent, type_e aType) :
-		scrollable_widget(aParent, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible),
-		iType(aType),
-		iReadOnly(false),
-		iWordWrap(aType == MultiLine),
-		iPassword(false),
-		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
-		iPersistDefaultStyle(false),
-		iGlyphColumns(1),
-		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
-		iTabStopHint("0000"),
-		iAnimator(app::instance(), [this](neolib::callback_timer&)
+	text_edit::text_edit(i_widget& aParent, type_e aType, frame_style aFrameStyle) :
+		scrollable_widget{ aParent, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+		iType{ aType },
+		iReadOnly{ false },
+		iWordWrap{ aType == MultiLine },
+		iPassword{ false },
+		iAlignment{ neogfx::alignment::Left | neogfx::alignment::Top },
+		iPersistDefaultStyle{ false },
+		iGlyphColumns{ 1 },
+		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
+		iTabStopHint{ "0000" },
+		iAnimator{ app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
 			animate();
-		}, 40),
-		iOutOfMemory(false)
+		}, 40 },
+		iOutOfMemory{ false }
 	{
 		init();
 	}
 
-	text_edit::text_edit(i_layout& aLayout, type_e aType) :
-		scrollable_widget(aLayout, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible),
-		iType(aType),
-		iReadOnly(false),
-		iWordWrap(aType == MultiLine),
-		iPassword(false),
-		iAlignment(neogfx::alignment::Left | neogfx::alignment::Top),
-		iPersistDefaultStyle(false),
-		iGlyphColumns(1),
-		iCursorAnimationStartTime(app::instance().program_elapsed_ms()),
-		iTabStopHint("0000"),
-		iAnimator(app::instance(), [this](neolib::callback_timer&)
+	text_edit::text_edit(i_layout& aLayout, type_e aType, frame_style aFrameStyle) :
+		scrollable_widget{ aLayout, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+		iType{ aType },
+		iReadOnly{ false },
+		iWordWrap{ aType == MultiLine },
+		iPassword{ false },
+		iAlignment{ neogfx::alignment::Left | neogfx::alignment::Top },
+		iPersistDefaultStyle{ false },
+		iGlyphColumns{ 1 },
+		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
+		iTabStopHint{ "0000" },
+		iAnimator{ app::instance(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
 			animate();
-		}, 40),
-		iOutOfMemory(false)
+		}, 40 },
+		iOutOfMemory{ false }
 	{
 		init();
 	}

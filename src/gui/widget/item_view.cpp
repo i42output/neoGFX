@@ -869,6 +869,14 @@ namespace neogfx
 		}
 	}
 
+	rect item_view::row_rect(const item_presentation_model_index& aItemIndex) const
+	{
+		rect result = item_display_rect();
+		result.y = presentation_model().item_position(aItemIndex, *this) - vertical_scrollbar().position();
+		result.cy = presentation_model().item_height(aItemIndex, *this);
+		return result;
+	}
+
 	rect item_view::cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground) const
 	{
 		const size cellSpacing = presentation_model().cell_spacing(*this);
@@ -906,13 +914,14 @@ namespace neogfx
 		return rect{};
 	}
 
-	optional_item_presentation_model_index item_view::item_at(const point& aPosition) const
+	optional_item_presentation_model_index item_view::item_at(const point& aPosition, bool aIncludeEntireRow) const
 	{
 		if (model().rows() == 0)
 			return optional_item_presentation_model_index{};
 		const size cellSpacing = presentation_model().cell_spacing(*this);
 		point adjustedPos = aPosition.max(item_display_rect().top_left()).min(item_display_rect().bottom_right());
-		item_presentation_model_index index = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), *this).first;
+		item_presentation_model_index rowIndex = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), *this).first;
+		item_presentation_model_index index = rowIndex;
 		for (uint32_t col = 0; col < presentation_model().columns(); ++col) // TODO: O(n) isn't good enough if lots of columns
 		{
 			index.set_column(col);
@@ -931,6 +940,6 @@ namespace neogfx
 				return index;
 			}
 		}
-		return optional_item_presentation_model_index{};
+		return aIncludeEntireRow ? rowIndex : optional_item_presentation_model_index{};
 	}
 }

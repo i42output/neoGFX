@@ -97,7 +97,7 @@ namespace neogfx
 
 	rect list_view::item_display_rect() const
 	{
-		return client_rect();
+		return client_rect(false);
 	}
 
 	size list_view::total_item_area(const i_units_context& aUnitsContext) const

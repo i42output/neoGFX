@@ -89,7 +89,7 @@ namespace neogfx
 					ink,
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOff]::" + ink.to_string(),
-						sTexture,{ { 0, colour{} },{ 1, ink.with_alpha(0x60) },{ 2, ink.with_alpha(0x30) } } });
+						sTexture,{ { 0_u8, colour{} },{ 1_u8, ink.with_alpha(0x60) },{ 2_u8, ink.with_alpha(0x30) } } });
 			}
 			if (iTextures[TextureOn] == boost::none || iTextures[TextureOn]->first != ink)
 			{
@@ -97,7 +97,7 @@ namespace neogfx
 					ink,
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOn]::" + ink.to_string(),
-						sTexture, { { 0, colour{} }, { 1, ink }, { 2, ink.with_alpha(0x80) } } });
+						sTexture, { { 0_u8, colour{} }, { 1_u8, ink }, { 2_u8, ink.with_alpha(0x80) } } });
 			}
 			if (iTextures[TextureOnOver] == boost::none || iTextures[TextureOnOver]->first != ink)
 			{
@@ -105,7 +105,7 @@ namespace neogfx
 					ink,
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOnOver]::" + paper.to_string(),
-						sTexture, { { 0, colour{} }, { 1, paper }, { 2, paper.with_alpha(0x80) } } });
+						sTexture, { { 0_u8, colour{} }, { 1_u8, paper }, { 2_u8, paper.with_alpha(0x80) } } });
 			}
 			iTextureState = Unknown;
 			update_appearance();

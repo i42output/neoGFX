@@ -71,6 +71,8 @@ namespace neogfx
 		bool dismissed() const override;
 		void dismiss() override;
 	private:
+		void update_placement();
+	private:
 		drop_list& iDropList;
 		drop_list_view iView;
 	};

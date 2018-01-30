@@ -103,9 +103,10 @@ namespace neogfx
 
 	rect table_view::item_display_rect() const
 	{
+		auto clientRect = client_rect(false);
 		return rect(
-			client_rect().top_left() + point{ 0.0, column_header().visible() ? column_header().extents().cy : 0.0 },
-			size{ std::min(client_rect().width(), column_header().total_width()), client_rect().height() - (column_header().visible() ? column_header().extents().cy : 0.0) });
+			clientRect.top_left() + point{ 0.0, column_header().visible() ? column_header().extents().cy : 0.0 },
+			size{ std::min(clientRect.width(), column_header().total_width()), clientRect.height() - (column_header().visible() ? column_header().extents().cy : 0.0) });
 	}
 
 	size table_view::total_item_area(const i_units_context& aUnitsContext) const

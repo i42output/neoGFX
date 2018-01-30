@@ -232,7 +232,7 @@ namespace neogfx
 				aGraphicsContext.fill_rect(fadeRect, gradient
 				{
 					gradient::colour_stop_list{ { 0.0, backgroundColour }, { 1.0, backgroundColour } },
-					gradient::alpha_stop_list{ { 0.0, 0xFF }, { 1.0, 0x00} },
+					gradient::alpha_stop_list{ { 0.0, 0xFF_u8 }, { 1.0, 0x00_u8 } },
 					type() == scrollbar_type::Vertical ? gradient::Vertical : gradient::Horizontal
 				});
 			}
@@ -252,7 +252,7 @@ namespace neogfx
 				aGraphicsContext.fill_rect(fadeRect, gradient
 				{
 					gradient::colour_stop_list{ { 0.0, backgroundColour }, { 1.0, backgroundColour } },
-					gradient::alpha_stop_list{ { 0.0, 0x00 },{ 1.0, 0xFF } },
+					gradient::alpha_stop_list{ { 0.0, 0x00_u8 },{ 1.0, 0xFF_u8 } },
 					type() == scrollbar_type::Vertical ? gradient::Vertical : gradient::Horizontal
 				});
 			}

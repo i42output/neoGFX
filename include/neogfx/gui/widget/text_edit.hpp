@@ -388,9 +388,9 @@ namespace neogfx
 	public:
 		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::text_edit::bad_column_index") {} }; 
 	public:
-		text_edit(type_e aType = MultiLine);
-		text_edit(i_widget& aParent, type_e aType = MultiLine);
-		text_edit(i_layout& aLayout, type_e aType = MultiLine);
+		text_edit(type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
+		text_edit(i_widget& aParent, type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
+		text_edit(i_layout& aLayout, type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
 		~text_edit();
 	public:
 		void moved() override;

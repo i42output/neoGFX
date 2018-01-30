@@ -27,8 +27,8 @@ namespace neogfx
 	class line_edit : public text_edit
 	{
 	public:
-		line_edit();
-		line_edit(i_widget& aParent);
-		line_edit(i_layout& aLayout);
+		line_edit(frame_style aFrameStyle = frame_style::SolidFrame);
+		line_edit(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame);
+		line_edit(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame);
 	};
 }

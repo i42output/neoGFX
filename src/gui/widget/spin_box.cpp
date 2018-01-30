@@ -237,7 +237,7 @@ namespace neogfx
 				{ 0, 1, 1, 1, 1, 1, 1, 1, 0 },
 				{ 1, 1, 1, 1, 1, 1, 1, 1, 1 },
 			};
-			iUpArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { 0, colour{} },{ 1, ink } } });
+			iUpArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { 0_u8, colour{} },{ 1_u8, ink } } });
 		}
 		if (iDownArrow == boost::none || iDownArrow->first != ink)
 		{
@@ -249,7 +249,7 @@ namespace neogfx
 				{ 0, 0, 0, 1, 1, 1, 0, 0, 0 },
 				{ 0, 0, 0, 0, 1, 0, 0, 0, 0 },
 			};
-			iDownArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { 0, colour{} },{ 1, ink } } });
+			iDownArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { 0_u8, colour{} },{ 1_u8, ink } } });
 		}
 		iStepUpButton.label().set_placement(label_placement::ImageVertical);
 		iStepDownButton.label().set_placement(label_placement::ImageVertical);
