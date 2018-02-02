@@ -59,15 +59,16 @@ Spin Box                  | 100     |
 Slider                    | 90      |     Keyboard
 Check Box                 | 100     |     
 Radio Button              | 100     |
-Combo Box                 | 50      |
+Combo Box                 | 75      |
 Group Box                 | 100     |
 Tool Tips                 | 0       |
 Colour Gradient Selector  | 100     |
 Colour Picker             | 100     |
 File Browsers (Native)    | 0       |
+Drag and drop             | 10      |
 XML Resource Description  | 0       |
 i18n                      | 0       |
 l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
-Last updated: 23/01/2018
+Last updated: 02/02/2018
