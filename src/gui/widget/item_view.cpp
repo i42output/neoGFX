@@ -291,13 +291,16 @@ namespace neogfx
 	void item_view::focus_gained(focus_reason aFocusReason)
 	{
 		scrollable_widget::focus_gained(aFocusReason);
-		if (model().rows() > 0 && !selection_model().has_current_index())
-			selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
 		if (aFocusReason == focus_reason::ClickClient)
 		{
+			auto item = item_at(root().mouse_position() - origin());
+			if (item != boost::none)
+				selection_model().set_current_index(*item);
 			if (editing() == boost::none && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
 				edit(selection_model().current_index());
 		}
+		else if (model().rows() > 0 && !selection_model().has_current_index())
+			selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
 	}
 
 	void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
