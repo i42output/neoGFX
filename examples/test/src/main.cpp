@@ -403,7 +403,11 @@ int main(int argc, char* argv[])
 		});
 		ng::horizontal_layout editLayout(layoutButtons);
 		ng::text_edit textEdit(editLayout);
-		buttonGenerateUuid.clicked([&textEdit]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
+		buttonGenerateUuid.clicked([&]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
+		dropList.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != boost::none ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
+		dropList2.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != boost::none ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
+		dropList3.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != boost::none ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
+		dropList4.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != boost::none ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
 		textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
 		textEdit.set_tab_stop_hint("00000000");
 		ng::slider effectWidthSlider{ editLayout, ng::slider::Vertical };

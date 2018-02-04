@@ -80,7 +80,7 @@ namespace neogfx
 	class drop_list : public widget
 	{
 	public:
-		event<> selection_changed;
+		event<optional_item_model_index> selection_changed;
 	public:
 		class i_input_widget
 		{
@@ -95,6 +95,8 @@ namespace neogfx
 			virtual i_widget& text_widget() = 0;
 			virtual void set_text(const std::string& aText) = 0;
 		};
+	public:
+		struct no_selection : std::runtime_error { no_selection() : std::runtime_error("neogfx::drop_list::no_selection") {} };
 	private:
 		class popup_proxy
 		{
@@ -129,6 +131,9 @@ namespace neogfx
 		void set_selection_model(i_item_selection_model& aSelectionModel);
 		void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
 	public:
+		bool has_selection() const;
+		const item_model_index& selection() const;
+	public:
 		bool view_created() const;
 		drop_list_view& view() const;
 		drop_list_popup& popup() const;
@@ -158,5 +163,6 @@ namespace neogfx
 		image_widget iDownArrow;
 		popup_proxy iPopupProxy;
 		optional_item_model_index iSavedSelection;
+		optional_item_model_index iSelection;
 	};
 }

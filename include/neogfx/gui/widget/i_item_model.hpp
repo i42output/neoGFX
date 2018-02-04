@@ -99,26 +99,53 @@ namespace neogfx
 	{
 	public:
 		item_cell_data() {}
-		item_cell_data(void* aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(bool aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(int32_t aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(uint32_t aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(int64_t aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(uint64_t aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(float aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(double aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(std::string aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<void*>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<bool>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<int32_t>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<uint32_t>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<int64_t>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<uint64_t>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<float>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<double>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
-		item_cell_data(item_cell_choice_type<std::string>::type::const_iterator aValue) : item_cell_data_variant(aValue) {}
+		item_cell_data(void* aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(bool aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(int32_t aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(uint32_t aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(int64_t aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(uint64_t aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(float aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(double aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(std::string aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<void*>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<bool>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<int32_t>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<uint32_t>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<int64_t>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<uint64_t>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<float>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<double>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data(item_cell_choice_type<std::string>::type::const_iterator aValue) : item_cell_data_variant{ aValue } {}
 	public:
-		item_cell_data(const char* aString) : item_cell_data_variant(std::string(aString)) {}
+		item_cell_data(const char* aString) : item_cell_data_variant(std::string{ aString }) {}
+	public:
+		std::string to_string() const
+		{
+			switch (which())
+			{
+			case 0:
+				return "";
+			case item_cell_data::type_id<bool>::value:
+				return (boost::basic_format<char>{"%1%"} % static_variant_cast<bool>(*this)).str();
+			case item_cell_data::type_id<int32_t>::value:
+				return (boost::basic_format<char>{"%1%"} % static_variant_cast<int32_t>(*this)).str();
+			case item_cell_data::type_id<uint32_t>::value:
+				return (boost::basic_format<char>{"%1%"} % static_variant_cast<uint32_t>(*this)).str();
+			case item_cell_data::type_id<int64_t>::value:
+				return (boost::basic_format<char>{"%1%"} % static_variant_cast<int64_t>(*this)).str();
+			case item_cell_data::type_id<uint64_t>::value:
+				return (boost::basic_format<char>{"%1%"} % static_variant_cast<uint64_t>(*this)).str();
+			case item_cell_data::type_id<float>::value:
+				return (boost::basic_format<char>{"%1%"} % static_variant_cast<float>(*this)).str();
+			case item_cell_data::type_id<double>::value:
+				return (boost::basic_format<char>{"%1%"} % static_variant_cast<double>(*this)).str();
+			case item_cell_data::type_id<std::string>::value:
+				return (boost::basic_format<char>{"%1%"} % static_variant_cast<const std::string&>(*this)).str();
+			default:
+				return "";
+			}
+		}
 	};
 
 	struct item_cell_data_info

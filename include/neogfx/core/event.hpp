@@ -154,7 +154,8 @@ namespace neogfx
 		{
 			instance().triggerType = aTriggerType;
 		}
-		bool trigger(Arguments... aArguments) const
+		template<class... Ts>
+		bool trigger(Ts&&... aArguments) const
 		{
 			if (!has_instance()) // no instance means no subscribers so no point triggering.
 				return true;
@@ -163,13 +164,14 @@ namespace neogfx
 			case event_trigger_type::Default:
 			case event_trigger_type::Synchronous:
 			default:
-				return sync_trigger(aArguments...);
+				return sync_trigger(std::forward<Ts>(aArguments)...);
 			case event_trigger_type::Asynchronous:
-				async_trigger(aArguments...);
+				async_trigger(std::forward<Ts>(aArguments)...);
 				return true;
 			}
 		}
-		bool sync_trigger(Arguments... aArguments) const
+		template<class... Ts>
+		bool sync_trigger(Ts&&... aArguments) const
 		{
 			if (!has_instance()) // no instance means no subscribers so no point triggering.
 				return true;
@@ -180,7 +182,7 @@ namespace neogfx
 			{
 				auto i = instance().notifications.front();
 				instance().notifications.pop_front();
-				i->iHandlerCallback(aArguments...);
+				i->iHandlerCallback(std::forward<Ts>(aArguments)...);
 				if (destroyed)
 					return false;
 				if (instance().accepted)
@@ -192,11 +194,12 @@ namespace neogfx
 			}
 			return true;
 		}
-		void async_trigger(Arguments... aArguments) const
+		template<class... Ts>
+		void async_trigger(Ts&&... aArguments) const
 		{
 			if (!has_instance()) // no instance means no subscribers so no point triggering.
 				return;
-			async_event_queue::instance().add(*this, [&]() { sync_trigger(aArguments...); });
+			async_event_queue::instance().add(*this, [this, &aArguments...]() { sync_trigger(std::forward<Ts>(aArguments)...); });
 		}
 		void accept() const
 		{

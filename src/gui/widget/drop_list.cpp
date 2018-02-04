@@ -511,6 +511,18 @@ namespace neogfx
 		update();
 	}
 
+	bool drop_list::has_selection() const
+	{
+		return iSelection != boost::none;
+	}
+
+	const item_model_index& drop_list::selection() const
+	{
+		if (has_selection())
+			return *iSelection;
+		throw no_selection();
+	}
+
 	bool drop_list::view_created() const
 	{
 		return iPopupProxy.popup_created();
@@ -531,7 +543,10 @@ namespace neogfx
 		optional_item_model_index newSelection = (selection_model().has_current_index() ?
 			presentation_model().to_item_model_index(selection_model().current_index()) : optional_item_model_index{});
 		if (iSavedSelection != newSelection)
-			selection_changed.async_trigger();
+		{
+			iSelection = newSelection;
+			selection_changed.async_trigger(iSelection);
+		}
 		popup().dismiss();
 		iSavedSelection = boost::none;
 	}
@@ -679,7 +694,7 @@ namespace neogfx
 		{
 			app::instance().window_manager().move_window(popup(), window_rect().bottom_left() + root().window_position());
 			if (selection_model().has_current_index())
-				iSavedSelection = selection_model().current_index();
+				iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
 			popup().show();
 		}
 		else
