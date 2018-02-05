@@ -77,24 +77,32 @@ namespace neogfx
 		drop_list_view iView;
 	};
 
-	class drop_list : public widget
+	class i_drop_list_input_widget
+	{
+	public:
+		class i_visitor
+		{
+		public:
+			virtual void visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget) = 0;
+		};
+	public:
+		virtual ~i_drop_list_input_widget() {}
+	public:
+		virtual void accept(i_visitor& aVisitor) = 0;
+	public:
+		virtual const i_widget& as_widget() const = 0;
+		virtual i_widget& as_widget() = 0;
+	public:
+		virtual bool editable() const = 0;
+		virtual const i_widget& text_widget() const = 0;
+		virtual i_widget& text_widget() = 0;
+		virtual void set_text(const std::string& aText) = 0;
+	};
+
+	class drop_list : public widget, private i_drop_list_input_widget::i_visitor
 	{
 	public:
 		event<optional_item_model_index> selection_changed;
-	public:
-		class i_input_widget
-		{
-		public:
-			virtual ~i_input_widget() {}
-		public:
-			virtual const i_widget& as_widget() const = 0;
-			virtual i_widget& as_widget() = 0;
-		public:
-			virtual bool editable() const = 0;
-			virtual const i_widget& text_widget() const = 0;
-			virtual i_widget& text_widget() = 0;
-			virtual void set_text(const std::string& aText) = 0;
-		};
 	public:
 		struct no_selection : std::runtime_error { no_selection() : std::runtime_error("neogfx::drop_list::no_selection") {} };
 	private:
@@ -142,10 +150,12 @@ namespace neogfx
 	public:
 		bool editable() const;
 		void set_editable(bool aEditable);
-		const i_input_widget& input_widget() const;
-		i_input_widget& input_widget();
+		const i_drop_list_input_widget& input_widget() const;
+		i_drop_list_input_widget& input_widget();
 	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+	private:
+		void visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget) override;
 	private:
 		void init();
 		void update_input_widget();
@@ -153,7 +163,7 @@ namespace neogfx
 		void handle_clicked();
 	private:
 		horizontal_layout iLayout;
-		std::unique_ptr<i_input_widget> iInputWidget;
+		std::unique_ptr<i_drop_list_input_widget> iInputWidget;
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
 		std::shared_ptr<i_item_selection_model> iSelectionModel;

@@ -284,12 +284,17 @@ namespace neogfx
 
 	namespace
 	{
-		class non_editable_input_widget : public push_button, public drop_list::i_input_widget
+		class non_editable_input_widget : public push_button, public i_drop_list_input_widget
 		{
 		public:
 			non_editable_input_widget(i_layout& aLayout) :
 				push_button{ aLayout, push_button_style::DropList }
 			{
+			}
+		public:
+			void accept(i_drop_list_input_widget::i_visitor&) override
+			{
+				/* do nothing */
 			}
 		public:
 			const i_widget& as_widget() const override
@@ -319,7 +324,7 @@ namespace neogfx
 			}
 		};
 
-		class editable_input_widget : public framed_widget, public drop_list::i_input_widget
+		class editable_input_widget : public framed_widget, public i_drop_list_input_widget
 		{
 		public:
 			editable_input_widget(i_layout& aLayout) :
@@ -328,6 +333,11 @@ namespace neogfx
 				iEditor{ iLayout, frame_style::NoFrame }
 			{
 				set_margins(neogfx::margins{});
+			}
+		public:
+			void accept(i_drop_list_input_widget::i_visitor& aVisitor) override
+			{
+				aVisitor.visit(*this, iEditor);
 			}
 		public:
 			const i_widget& as_widget() const override
@@ -559,6 +569,11 @@ namespace neogfx
 			selection_model().unset_current_index();
 		popup().dismiss();
 		iSavedSelection = boost::none;
+
+		std::string text;
+		if (iSelection)
+			text = model().cell_data(*iSelection).to_string();
+		input_widget().set_text(text);
 	}
 
 	bool drop_list::editable() const
@@ -575,12 +590,12 @@ namespace neogfx
 		}
 	}
 
-	const drop_list::i_input_widget& drop_list::input_widget() const
+	const i_drop_list_input_widget& drop_list::input_widget() const
 	{
 		return *iInputWidget;
 	}
 
-	drop_list::i_input_widget& drop_list::input_widget()
+	i_drop_list_input_widget& drop_list::input_widget()
 	{
 		return *iInputWidget;
 	}
@@ -594,6 +609,54 @@ namespace neogfx
 		minimumSize.cx += input_widget().text_widget().margins().size().cx;
 		minimumSize.cx += presentation_model().column_width(0, graphics_context{ *this, graphics_context::type::Unattached }, false);
 		return minimumSize;
+	}
+
+	void drop_list::visit(i_drop_list_input_widget&, line_edit& aTextWidget)
+	{
+		aTextWidget.text_changed([this, &aTextWidget]()
+		{
+			if (aTextWidget.has_focus())
+			{
+				if (!aTextWidget.text().empty())
+				{
+					presentation_model().filter_by(0, aTextWidget.text());
+					if (iSavedSelection == boost::none && selection_model().has_current_index())
+						iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
+					popup().show();
+				}
+				else if (popup().effectively_visible())
+					cancel_selection();
+			}
+		});
+		aTextWidget.keyboard_event([this](const neogfx::keyboard_event& aEvent)
+		{
+			if (aEvent.type() == keyboard_event_type::KeyPressed)
+			{
+				switch (aEvent.scan_code())
+				{
+				case neogfx::ScanCode_DOWN:
+					if (view().effectively_hidden())
+					{
+						if (selection_model().has_current_index())
+							iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
+						popup().show();
+					}
+					break;
+				case neogfx::ScanCode_RETURN:
+					if (view().effectively_visible())
+					{
+						accept_selection();
+					}
+					break;
+				case neogfx::ScanCode_ESCAPE:
+					if (view().effectively_visible())
+					{
+						cancel_selection();
+					}
+					break;
+				}
+			}
+		});
 	}
 
 	void drop_list::init()
@@ -664,6 +727,8 @@ namespace neogfx
 		{
 			update_arrow();
 
+			input_widget().accept(*this);
+
 			std::string text;
 			if (selection_model().has_current_index())
 				text = presentation_model().cell_to_string(selection_model().current_index());
@@ -692,7 +757,6 @@ namespace neogfx
 	{
 		if (view().effectively_hidden())
 		{
-			app::instance().window_manager().move_window(popup(), window_rect().bottom_left() + root().window_position());
 			if (selection_model().has_current_index())
 				iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
 			popup().show();

@@ -493,6 +493,7 @@ namespace neogfx
 		void set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor = true);
 	private:
 		void init();
+		std::size_t do_insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
 		void delete_any_selection();
 		std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
 		bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
@@ -525,6 +526,7 @@ namespace neogfx
 		mutable neogfx::cursor iCursor;
 		style_list iStyles;
 		std::u32string iNormalizedTextBuffer;
+		document_text iPreviousText;
 		document_text iText;
 		document_glyphs iGlyphs;
 		glyph_paragraphs iGlyphParagraphs;

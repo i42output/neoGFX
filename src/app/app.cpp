@@ -181,6 +181,8 @@ namespace neogfx
 		register_style(slateStyle);
 
 		iActionFileExit.triggered([this]() { quit(0); });
+		iActionUndo.triggered([this]() { clipboard().active_sink().undo(clipboard()); });
+		iActionRedo.triggered([this]() { clipboard().active_sink().redo(clipboard()); });
 		iActionCut.triggered([this]() { clipboard().cut(); });
 		iActionCopy.triggered([this]() { clipboard().copy(); });
 		iActionPaste.triggered([this]() { clipboard().paste(); });

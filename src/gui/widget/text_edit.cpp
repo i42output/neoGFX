@@ -583,14 +583,12 @@ namespace neogfx
 
 	bool text_edit::can_undo() const
 	{
-		/* todo */
-		return false;
+		return iPreviousText != iText;
 	}
 
 	bool text_edit::can_redo() const
 	{
-		/* todo */
-		return false;
+		return iPreviousText != iText;
 	}
 
 	bool text_edit::can_cut() const
@@ -618,14 +616,21 @@ namespace neogfx
 		return !iText.empty();
 	}
 
-	void text_edit::undo(i_clipboard& aClipboard)
+	void text_edit::undo(i_clipboard&)
 	{
-		/* todo */
+		// todo: more intelligent undo
+		iText.swap(iPreviousText);
+		refresh_paragraph(iText.begin(), 0);
+		update();
+		cursor().set_position(iText.size());
+		if (iPreviousText != iText)
+			text_changed.trigger();
 	}
 
 	void text_edit::redo(i_clipboard& aClipboard)
 	{
-		/* todo */
+		// todo: more intelligent redo
+		undo(aClipboard);
 	}
 
 	void text_edit::cut(i_clipboard& aClipboard)
@@ -1120,7 +1125,8 @@ namespace neogfx
 
 	std::string text_edit::text() const
 	{
-		return std::string(iText.begin(), iText.end());
+		std::u32string u32text{ iText.begin(), iText.end() };
+		return neolib::utf32_to_utf8(u32text);
 	}
 
 	std::size_t text_edit::set_text(const std::string& aText)
@@ -1130,46 +1136,17 @@ namespace neogfx
 
 	std::size_t text_edit::set_text(const std::string& aText, const style& aStyle)
 	{
-		clear();
-		return insert_text(aText, aStyle, true);
+		return do_insert_text(aText, aStyle, true, true);
 	}
 
 	std::size_t text_edit::insert_text(const std::string& aText, bool aMoveCursor)
 	{
-		return insert_text(aText, default_style(), aMoveCursor);
+		return do_insert_text(aText, default_style(), aMoveCursor, false);
 	}
 
 	std::size_t text_edit::insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor)
 	{
-		bool accept = true;
-		text_filter.trigger(aText, accept);
-		if (!accept)
-			return 0;
-
-		std::u32string text = neolib::utf8_to_utf32(aText);
-		if (iNormalizedTextBuffer.capacity() < text.size())
-			iNormalizedTextBuffer.reserve(text.size());
-		iNormalizedTextBuffer.clear();
-		for (auto ch : text)
-			if (ch != U'\r')
-				iNormalizedTextBuffer.push_back(ch);
-		auto eos = iNormalizedTextBuffer.size();
-		if (iType == SingleLine)
-		{
-			auto eol = iNormalizedTextBuffer.find(U'\n');
-			if (eol != std::u32string::npos)
-				eos = eol;
-		}
-		auto s = (&aStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end());
-		auto insertionPoint = iText.begin() + cursor().position();
-		insertionPoint = iText.insert(s != iStyles.end() ? document_text::tag_type{ static_cast<style_list::const_iterator>(s) } : document_text::tag_type{ nullptr },
-			insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
-		refresh_paragraph(insertionPoint, eos);
-		update();
-		if (aMoveCursor)
-			cursor().set_position(insertionPoint - iText.begin() + eos);
-		text_changed.trigger();
-		return eos;
+		return do_insert_text(aText, aStyle, aMoveCursor, false);
 	}
 
 	void text_edit::delete_text(position_type aStart, position_type aEnd)
@@ -1179,9 +1156,11 @@ namespace neogfx
 		auto eraseBegin = iText.begin() + aStart;
 		auto eraseEnd = iText.begin() + aEnd;
 		auto eraseAmount = eraseEnd - eraseBegin;
+		iPreviousText = iText;
 		refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
 		update();
-		text_changed.trigger();
+		if (iPreviousText != iText)
+			text_changed.trigger();
 	}
 
 	std::pair<text_edit::position_type, text_edit::position_type> text_edit::related_glyphs(position_type aGlyphPosition) const
@@ -1338,6 +1317,45 @@ namespace neogfx
 		{
 			update();
 		});
+	}
+
+	std::size_t text_edit::do_insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
+	{
+		bool accept = true;
+		text_filter.trigger(aText, accept);
+		if (!accept)
+			return 0;
+
+		iPreviousText = iText;
+
+		if (aClearFirst)
+			iText.clear();
+
+		std::u32string text = neolib::utf8_to_utf32(aText);
+		if (iNormalizedTextBuffer.capacity() < text.size())
+			iNormalizedTextBuffer.reserve(text.size());
+		iNormalizedTextBuffer.clear();
+		for (auto ch : text)
+			if (ch != U'\r')
+				iNormalizedTextBuffer.push_back(ch);
+		auto eos = iNormalizedTextBuffer.size();
+		if (iType == SingleLine)
+		{
+			auto eol = iNormalizedTextBuffer.find(U'\n');
+			if (eol != std::u32string::npos)
+				eos = eol;
+		}
+		auto s = (&aStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end());
+		auto insertionPoint = iText.begin() + cursor().position();
+		insertionPoint = iText.insert(s != iStyles.end() ? document_text::tag_type{ static_cast<style_list::const_iterator>(s) } : document_text::tag_type{ nullptr },
+			insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
+		refresh_paragraph(insertionPoint, eos);
+		update();
+		if (aMoveCursor)
+			cursor().set_position(insertionPoint - iText.begin() + eos);
+		if (iPreviousText != iText)
+			text_changed.trigger();
+		return eos;
 	}
 
 	void text_edit::delete_any_selection()
