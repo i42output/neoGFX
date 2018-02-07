@@ -60,11 +60,11 @@ namespace neogfx
 		};
 		typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
 	public:
-		basic_item_presentation_model() : iItemModel{ 0 }, iInitializing{ false }
+		basic_item_presentation_model() : iItemModel{ 0 }, iInitializing{ false }, iFiltering{ false }
 		{
 			init();
 		}
-		basic_item_presentation_model(i_item_model& aItemModel) : iItemModel{ 0 }, iInitializing{ false }
+		basic_item_presentation_model(i_item_model& aItemModel) : iItemModel{ 0 }, iInitializing{ false }, iFiltering{ false }
 		{
 			init();
 			set_item_model(aItemModel);
@@ -76,6 +76,10 @@ namespace neogfx
 			notify_observers(i_item_presentation_model_subscriber::NotifyModelDestroyed);
 		}
 	public:
+		bool initializing() const override
+		{
+			return iInitializing;
+		}
 		bool has_item_model() const override
 		{
 			return iItemModel != 0;
@@ -546,6 +550,10 @@ namespace neogfx
 			iSortOrder.clear();
 			execute_sort();
 		}
+		bool filtering() const override
+		{
+			return iFiltering;
+		}
 		optional_filter filtering_by() const override
 		{
 			if (!iFilters.empty())
@@ -631,8 +639,39 @@ namespace neogfx
 		}
 		void execute_filter()
 		{
+			neolib::scoped_flag sf1{ iInitializing };
+			neolib::scoped_flag sf2{ iFiltering };
 			notify_observers(i_item_presentation_model_subscriber::NotifyItemsFiltering);
-			/* todo */
+			iRows.clear();
+			for (item_model_index::row_type row = 0; row < item_model().rows(); ++row)
+			{
+				bool matches = true;
+				for (const auto& filter : iFilters)
+				{
+					const auto& origValue = item_model().cell_data(item_model_index{ row, iColumns[std::get<0>(filter)].modelColumn }).to_string();
+					const auto& value = (std::get<3>(filter) == CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue));
+					const auto& origKey = std::get<1>(filter);
+					const auto& key = (std::get<3>(filter) == CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey));
+					switch (std::get<2>(filter))
+					{
+					case Prefix:
+						if (value.size() < key.size() || value.substr(0, key.size()) != key)
+							matches = false;
+						break;
+					case Glob:
+						// todo
+						break;
+					case Regex:
+						// todo
+						break;
+					}
+				}
+				if (matches)
+					item_added(item_model(), item_model_index{ row });
+			}
+			reset_maps();
+			reset_meta();
+			execute_sort();
 			notify_observers(i_item_presentation_model_subscriber::NotifyItemsFiltered);
 		}
 	private:
@@ -805,6 +844,7 @@ namespace neogfx
 		std::vector<filter> iFilters;
 		sink iSink;
 		bool iInitializing;
+		bool iFiltering;
 	};
 
 	typedef basic_item_presentation_model<item_model> item_presentation_model;

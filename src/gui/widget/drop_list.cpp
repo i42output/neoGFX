@@ -59,7 +59,8 @@ namespace neogfx
 
 	drop_list_view::drop_list_view(i_layout& aLayout, drop_list& aDropList) :
 		list_view{ aLayout, scrollbar_style::Normal, frame_style::NoFrame, false },
-		iDropList{ aDropList }
+		iDropList{ aDropList },
+		iChangingText{ false }
 	{
 		set_margins(neogfx::margins{});
 		set_selection_model(aDropList.selection_model());
@@ -71,13 +72,27 @@ namespace neogfx
 	{
 	}
 
+	bool drop_list_view::changing_text() const
+	{
+		return iChangingText;
+	}
+
+	void drop_list_view::items_filtered(const i_item_presentation_model&)
+	{
+		iDropList.popup().update_placement();
+	}
+
 	void drop_list_view::current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
 	{
 		list_view::current_index_changed(aSelectionModel, aCurrentIndex, aPreviousIndex);
-		std::string text;
-		if (aCurrentIndex != boost::none)
-			text = presentation_model().cell_to_string(*aCurrentIndex);
-		iDropList.input_widget().set_text(text);
+		if (!presentation_model().filtering() && !iDropList.handling_text_change())
+		{
+			neolib::scoped_flag sf{ iChangingText };
+			std::string text;
+			if (aCurrentIndex != boost::none)
+				text = presentation_model().cell_to_string(*aCurrentIndex);
+			iDropList.input_widget().set_text(text);
+		}
 	}
 
 	void drop_list_view::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -110,6 +125,18 @@ namespace neogfx
 			else
 				app::instance().basic_services().system_beep();
 			handled = true;
+			break;
+		case ScanCode_LEFT:
+		case ScanCode_RIGHT:
+			handled = false;
+			break;
+		case ScanCode_DOWN:
+			handled = list_view::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+			if (!handled && !selection_model().has_current_index() && presentation_model().rows() > 0)
+			{
+				selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
+				handled = true;
+			}
 			break;
 		default:
 			handled = list_view::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -252,7 +279,10 @@ namespace neogfx
 		if (iDropList.editable())
 			popupPos.y = inputWidgetPos.y + iDropList.extents().cy;
 		surface().move_surface(popupPos);
-		resize(extents() + size{ textWidgetPos.x + iDropList.extents().cx - surface().surface_position().x - extents().cx + currentItemPos.x * 2.0, 0.0 });
+		size popupExtents = extents() + size{ textWidgetPos.x + iDropList.extents().cx - surface().surface_position().x - extents().cx + currentItemPos.x * 2.0, 0.0 };
+		popupExtents.cx = std::max(popupExtents.cx, iDropList.extents().cx);
+		popupExtents.cy = std::max(popupExtents.cy, iDropList.extents().cy);
+		resize(popupExtents);
 		
 		// Check we are not out of bounds of desktop window and correct if we are...
 		auto correctedRect = corrected_popup_rect(*this);
@@ -312,15 +342,19 @@ namespace neogfx
 			}
 			const i_widget& text_widget() const override
 			{
-				return text();
+				return push_button::text();
 			}
 			i_widget& text_widget() override
 			{
-				return text();
+				return push_button::text();
+			}
+			std::string text() const override
+			{
+				return push_button::text().text();
 			}
 			void set_text(const std::string& aText) override
 			{
-				return text().set_text(aText);
+				return push_button::text().set_text(aText);
 			}
 		};
 
@@ -361,6 +395,10 @@ namespace neogfx
 			{
 				return iEditor;
 			}
+			std::string text() const override
+			{
+				return iEditor.text();
+			}
 			void set_text(const std::string& aText) override
 			{
 				iEditor.set_text(aText);
@@ -380,7 +418,8 @@ namespace neogfx
 		iLayout{ *this },
 		iEditable{ false }, 
 		iDownArrow{ texture{} }, 
-		iPopupProxy{ *this } 
+		iPopupProxy{ *this },
+		iHandlingTextChange{ false }
 	{
 		init();
 	}
@@ -390,7 +429,8 @@ namespace neogfx
 		iLayout{ *this },
 		iEditable{ false }, 
 		iDownArrow{ texture{} }, 
-		iPopupProxy{ *this } 
+		iPopupProxy{ *this },
+		iHandlingTextChange{ false }
 	{
 		init();
 	}
@@ -400,7 +440,8 @@ namespace neogfx
 		iLayout{ *this },
 		iEditable{ false }, 
 		iDownArrow{ texture{} }, 
-		iPopupProxy{ *this } 
+		iPopupProxy{ *this },
+		iHandlingTextChange{ false }
 	{
 		init();
 	}
@@ -538,6 +579,22 @@ namespace neogfx
 		return iPopupProxy.popup_created();
 	}
 
+	void drop_list::show_view()
+	{
+		popup().show();
+		if (editable())
+		{
+			presentation_model().filter_by(0, input_widget().text());
+			if (iSavedSelection == boost::none && selection_model().has_current_index())
+				iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
+		}
+	}
+
+	void drop_list::hide_view()
+	{
+		popup().dismiss();
+	}
+
 	drop_list_view& drop_list::view() const
 	{
 		return popup().view();
@@ -552,22 +609,44 @@ namespace neogfx
 	{
 		optional_item_model_index newSelection = (selection_model().has_current_index() ?
 			presentation_model().to_item_model_index(selection_model().current_index()) : optional_item_model_index{});
+
+		hide_view();
+		presentation_model().reset_filter();
+
+		if (newSelection != boost::none)
+			selection_model().set_current_index(presentation_model().from_item_model_index(*newSelection));
+		else
+			selection_model().unset_current_index();
+
 		if (iSavedSelection != newSelection)
 		{
 			iSelection = newSelection;
 			selection_changed.async_trigger(iSelection);
 		}
-		popup().dismiss();
 		iSavedSelection = boost::none;
 	}
 
 	void drop_list::cancel_selection()
 	{
-		if (iSavedSelection != boost::none)
+		bool restoreSavedSelection = false;
+		if (view_created())
+		{
+			restoreSavedSelection = true;
+			hide_view();
+		}
+		presentation_model().reset_filter();
+
+		if (iSavedSelection != boost::none && restoreSavedSelection)
 			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
 		else
+		{
 			selection_model().unset_current_index();
-		popup().dismiss();
+			if (iSelection != boost::none)
+			{
+				iSelection = boost::none;
+				selection_changed.async_trigger(iSelection);
+			}
+		}
 		iSavedSelection = boost::none;
 
 		std::string text;
@@ -600,6 +679,11 @@ namespace neogfx
 		return *iInputWidget;
 	}
 
+	bool drop_list::handling_text_change() const
+	{
+		return iHandlingTextChange;
+	}
+
 	size drop_list::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		auto minimumSize = widget::minimum_size(aAvailableSpace);
@@ -615,17 +699,17 @@ namespace neogfx
 	{
 		aTextWidget.text_changed([this, &aTextWidget]()
 		{
-			if (aTextWidget.has_focus())
+			neolib::scoped_flag sf{ iHandlingTextChange };
+			if (aTextWidget.has_focus() && (!view_created() || !view().changing_text()))
 			{
 				if (!aTextWidget.text().empty())
+					show_view();
+				else
 				{
-					presentation_model().filter_by(0, aTextWidget.text());
-					if (iSavedSelection == boost::none && selection_model().has_current_index())
-						iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
-					popup().show();
-				}
-				else if (popup().effectively_visible())
+					if (view_created())
+						hide_view();
 					cancel_selection();
+				}
 			}
 		});
 		aTextWidget.keyboard_event([this](const neogfx::keyboard_event& aEvent)
@@ -634,25 +718,20 @@ namespace neogfx
 			{
 				switch (aEvent.scan_code())
 				{
-				case neogfx::ScanCode_DOWN:
-					if (view().effectively_hidden())
+				case ScanCode_DOWN:
+					if (!view_created())
 					{
 						if (selection_model().has_current_index())
 							iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
-						popup().show();
+						show_view();
 					}
 					break;
-				case neogfx::ScanCode_RETURN:
-					if (view().effectively_visible())
-					{
+				case ScanCode_RETURN:
+					if (view_created())
 						accept_selection();
-					}
 					break;
-				case neogfx::ScanCode_ESCAPE:
-					if (view().effectively_visible())
-					{
-						cancel_selection();
-					}
+				case ScanCode_ESCAPE:
+					cancel_selection();
 					break;
 				}
 			}
@@ -713,7 +792,10 @@ namespace neogfx
 					aEvent.mouse_button() == mouse_button::Left &&
 					inputWidget.client_rect().contains(aEvent.position() - window_rect().top_left()) &&
 					inputWidget.capturing())
+				{
+					inputWidget.text_widget().set_focus();
 					handle_clicked();
+				}
 			});
 
 			inputWidget.set_size_policy(size_policy::Expanding);
@@ -755,13 +837,13 @@ namespace neogfx
 
 	void drop_list::handle_clicked()
 	{
-		if (view().effectively_hidden())
+		if (!view_created())
 		{
 			if (selection_model().has_current_index())
 				iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
-			popup().show();
+			show_view();
 		}
 		else
-			popup().dismiss();
+			hide_view();
 	}
 }

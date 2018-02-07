@@ -109,7 +109,7 @@ namespace neogfx
 		typedef std::string filter_search_key;
 		enum filter_search_type_e
 		{
-			Value,
+			Prefix,
 			Glob,
 			Regex
 		};
@@ -127,6 +127,7 @@ namespace neogfx
 	public:
 		virtual ~i_item_presentation_model() {}
 	public:
+		virtual bool initializing() const = 0;
 		virtual bool has_item_model() const = 0;
 		virtual i_item_model& item_model() const = 0;
 		virtual void set_item_model(i_item_model& aItemModel) = 0;
@@ -170,8 +171,9 @@ namespace neogfx
 		virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) = 0;
 		virtual void reset_sort() = 0;
 	public:
+		virtual bool filtering() const = 0;
 		virtual optional_filter filtering_by() const = 0;
-		virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type_e aFilterSearchType = Value, case_sensitivity_e aCaseSensitivity = CaseInsensitive) = 0;
+		virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, const filter_search_key& aFilterSearchKey, filter_search_type_e aFilterSearchType = Prefix, case_sensitivity_e aCaseSensitivity = CaseInsensitive) = 0;
 		virtual void reset_filter() = 0;
 	public:
 		virtual void subscribe(i_item_presentation_model_subscriber& aSubscriber) = 0;

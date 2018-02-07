@@ -34,7 +34,11 @@ namespace neogfx
 		drop_list_view(i_layout& aLayout, drop_list& aDropList);
 		~drop_list_view();
 	public:
+		bool changing_text() const;
+	public:
 		using list_view::total_item_area;
+	protected:
+		void items_filtered(const i_item_presentation_model& aPresentationModel) override;
 	protected:
 		void current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex) override;
 	protected:
@@ -45,10 +49,12 @@ namespace neogfx
 		colour background_colour() const override;
 	private:
 		drop_list& iDropList;
+		bool iChangingText;
 	};
 	
 	class drop_list_popup : public window
 	{
+		friend class drop_list_view;
 	public:
 		drop_list_popup(drop_list& aDropList);
 		~drop_list_popup();
@@ -96,6 +102,7 @@ namespace neogfx
 		virtual bool editable() const = 0;
 		virtual const i_widget& text_widget() const = 0;
 		virtual i_widget& text_widget() = 0;
+		virtual std::string text() const = 0;
 		virtual void set_text(const std::string& aText) = 0;
 	};
 
@@ -143,6 +150,8 @@ namespace neogfx
 		const item_model_index& selection() const;
 	public:
 		bool view_created() const;
+		void show_view();
+		void hide_view();
 		drop_list_view& view() const;
 		drop_list_popup& popup() const;
 		void accept_selection();
@@ -152,6 +161,8 @@ namespace neogfx
 		void set_editable(bool aEditable);
 		const i_drop_list_input_widget& input_widget() const;
 		i_drop_list_input_widget& input_widget();
+	public:
+		bool handling_text_change() const;
 	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	private:
@@ -174,5 +185,6 @@ namespace neogfx
 		popup_proxy iPopupProxy;
 		optional_item_model_index iSavedSelection;
 		optional_item_model_index iSelection;
+		bool iHandlingTextChange;
 	};
 }

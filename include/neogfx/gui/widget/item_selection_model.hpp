@@ -339,15 +339,20 @@ namespace neogfx
 		}
 		void items_sorting(const i_item_presentation_model&) override
 		{
+			unset_current_index();
 		}
 		void items_sorted(const i_item_presentation_model&) override
 		{
 		}
 		void items_filtering(const i_item_presentation_model&) override
 		{
+			iSavedModelIndex = has_current_index() ? presentation_model().to_item_model_index(current_index()) : optional_item_model_index{};
+			unset_current_index();
 		}
-		void items_filtered(const i_item_presentation_model&) override
+		void items_filtered(const i_item_presentation_model& aModel) override
 		{
+			if (iSavedModelIndex != boost::none && aModel.rows() >= 1)
+				set_current_index(item_presentation_model_index{ 0, 0 });
 		}
 		void model_destroyed(const i_item_presentation_model& aModel) override
 		{
@@ -359,6 +364,7 @@ namespace neogfx
 		i_item_presentation_model* iModel;
 		item_selection_mode iMode;
 		optional_item_presentation_model_index iCurrentIndex;
+		optional_item_model_index iSavedModelIndex;
 		item_selection iSelection;
 	};
 }

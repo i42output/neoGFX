@@ -445,7 +445,10 @@ namespace neogfx
 			case ScanCode_PAGEDOWN:
 			case ScanCode_HOME:
 			case ScanCode_END:
-				selection_model().set_current_index(item_presentation_model_index{0, 0});
+				if (presentation_model().rows() > 0 && has_focus())
+					selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
+				else
+					handled = false;
 				break;
 			default:
 				handled = scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -587,7 +590,7 @@ namespace neogfx
 
 	void item_view::items_sorted(const i_item_presentation_model&)
 	{
-		if (iSavedModelIndex != boost::none)
+		if (iSavedModelIndex != boost::none && presentation_model().have_item_model_index(*iSavedModelIndex))
 			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
 		iSavedModelIndex = boost::none;
 		update();

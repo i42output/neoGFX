@@ -391,8 +391,14 @@ int main(int argc, char* argv[])
 		for (int32_t i = 1; i <= 100; ++i)
 			dropList3.model().insert_item(dropList3.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
 		ng::drop_list dropList4(dropListLayout);
-		for (int32_t i = 1; i <= 100; ++i)
-			dropList4.model().insert_item(dropList4.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
+		neolib::random prng;
+		for (int32_t i = 1; i <= 250; ++i)
+		{
+			std::string randomString;
+			for (uint32_t j = prng(12); j-- > 0;)
+				randomString += static_cast<char>('A' + prng('z' - 'A'));
+			dropList4.model().insert_item(dropList4.model().end(), randomString);
+		}
 		ng::check_box toggleEditable{ dropListLayout, "Toggle Editable" };
 		toggleEditable.toggled([&]()
 		{
@@ -456,7 +462,7 @@ int main(int argc, char* argv[])
 		button8.set_foreground_colour(ng::colour(255, 235, 160));
 		button8.clicked([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
 		ng::horizontal_layout layout3(layoutButtons);
-		neolib::random prng{ 3 };
+		prng.seed(3);
 		for (uint32_t i = 0; i < 10; ++i)
 		{
 			auto& button = layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
