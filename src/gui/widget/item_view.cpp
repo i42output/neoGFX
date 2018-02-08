@@ -27,21 +27,21 @@
 namespace neogfx
 {
 	item_view::item_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget{ aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit {	false }
+		scrollable_widget{ aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins{});
 	}
 
 	item_view::item_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget{ aParent, aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit{ false }
+		scrollable_widget{ aParent, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins{});
 	}
 
 	item_view::item_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		scrollable_widget{ aLayout, aScrollbarStyle, aFrameStyle }, iBeginningEdit{ false }, iEndingEdit{ false }
+		scrollable_widget{ aLayout, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins{});
@@ -317,13 +317,13 @@ namespace neogfx
 			}			
 			if (capturing())
 			{
-				iMouseTracker = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+				iMouseTracker.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
 				{
 					aTimer.again();
 					auto item = item_at(root().mouse_position() - origin());
 					if (item != boost::none)
 						selection_model().set_current_index(*item);
-				}, 100);
+				}, 20);
 			}
 		}
 	}
@@ -343,6 +343,22 @@ namespace neogfx
 					app::instance().basic_services().system_beep();
 			}
 		}
+	}
+
+	void item_view::mouse_moved(const point& aPosition)
+	{
+		scrollable_widget::mouse_moved(aPosition);
+		if (!iIgnoreNextMouseMove)
+		{
+			if (hot_tracking() && client_rect().contains(aPosition))
+			{
+				auto item = item_at(aPosition);
+				if (item != boost::none)
+					selection_model().set_current_index(*item);
+			}
+		}
+		else
+			iIgnoreNextMouseMove = false;
 	}
 
 	bool item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -656,6 +672,26 @@ namespace neogfx
 
 	void item_view::selection_model_destroyed(const i_item_selection_model&)
 	{
+	}
+
+	bool item_view::hot_tracking() const
+	{
+		return iHotTracking;
+	}
+
+	void item_view::enable_hot_tracking()
+	{
+		if (!iHotTracking)
+		{
+			iHotTracking = true;
+			if (&widget_for_mouse_event(root().mouse_position() - origin()) == this)
+				iIgnoreNextMouseMove = true;
+		}
+	}
+
+	void item_view::disable_hot_tracking()
+	{
+		iHotTracking = false;
 	}
 
 	bool item_view::is_visible(const item_presentation_model_index& aItemIndex) const

@@ -152,20 +152,7 @@ namespace neogfx
 
 	dimension scrollbar::width(const i_units_context& aContext) const
 	{
-		if (style() == scrollbar_style::Invisible)
-			return 0.0;
-		units_converter uc(aContext);
-		uc.set_units(units::Millimetres);
-		dimension w = std::ceil(uc.to_device_units(4.0));
-		if (style() == scrollbar_style::Menu || style() == scrollbar_style::Scroller)
-		{
-			const dimension margin = 3.0;
-			w -= margin * 2.0;
-		}
-		if (static_cast<uint32_t>(w) % 2 == 0)
-			++w;
-		uc.set_units(uc.saved_units());
-		return uc.from_device_units(w);
+		return width(style(), aContext);
 	}
 
 	void scrollbar::render(graphics_context& aGraphicsContext) const
@@ -635,5 +622,23 @@ namespace neogfx
 			iScrollTrackPosition.reset();
 			iTimer.reset();
 		}
+	}
+
+	dimension scrollbar::width(scrollbar_style aStyle, const i_units_context& aContext)
+	{
+		if (aStyle == scrollbar_style::Invisible)
+			return 0.0;
+		units_converter uc(aContext);
+		uc.set_units(units::Millimetres);
+		dimension w = std::ceil(uc.to_device_units(4.0));
+		if (aStyle == scrollbar_style::Menu || aStyle == scrollbar_style::Scroller)
+		{
+			const dimension margin = 3.0;
+			w -= margin * 2.0;
+		}
+		if (static_cast<uint32_t>(w) % 2 == 0)
+			++w;
+		uc.set_units(uc.saved_units());
+		return uc.from_device_units(w);
 	}
 }

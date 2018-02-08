@@ -66,6 +66,7 @@ namespace neogfx
 		set_selection_model(aDropList.selection_model());
 		set_presentation_model(aDropList.presentation_model());
 		set_model(aDropList.model());
+		enable_hot_tracking();
 	}
 
 	drop_list_view::~drop_list_view()
@@ -215,20 +216,14 @@ namespace neogfx
 	{
 		if (window::has_size_policy())
 			return window::size_policy();
-		return neogfx::size_policy::Manual;
+		return neogfx::size_policy::Minimum;
 	}
 
 	size drop_list_popup::minimum_size(const optional_size&) const
 	{
 		if (window::has_minimum_size())
 			return window::minimum_size();
-		auto totalArea = iView.total_item_area(*this);
-		auto minimumSize = size{ effective_frame_width() * 2.0 } + margins().size() + totalArea + iView.margins().size();
-		minimumSize.cy = std::min(minimumSize.cy, parent().root().as_widget().extents().cy / 2.0);
-		if (minimumSize.cy - (effective_frame_width() * 2.0 + margins().size().cy) < totalArea.cy)
-			minimumSize.cx += vertical_scrollbar().width(*this);
-		minimumSize.cx = std::max(minimumSize.cx, iDropList.minimum_size().cx);
-		return minimumSize;
+		return ideal_size();
 	}
 
 	bool drop_list_popup::can_dismiss(const i_widget*) const
@@ -251,6 +246,16 @@ namespace neogfx
 		if (app::instance().keyboard().is_keyboard_grabbed_by(view()))
 			app::instance().keyboard().ungrab_keyboard(view());
 		close();
+	}
+
+	size drop_list_popup::ideal_size() const
+	{
+		auto totalArea = iView.total_item_area(*this);
+		auto idealSize = size{ effective_frame_width() * 2.0 } + margins().size() + totalArea + iView.margins().size();
+		idealSize.cy = std::min(idealSize.cy, parent().root().as_widget().extents().cy / 2.0);
+		if (idealSize.cy - (effective_frame_width() * 2.0 + margins().size().cy) < totalArea.cy)
+			idealSize.cx += vertical_scrollbar().width(*this);
+		return idealSize.max(iDropList.minimum_size());
 	}
 
 	void drop_list_popup::update_placement()
@@ -692,7 +697,13 @@ namespace neogfx
 			return minimumSize;
 		minimumSize.cx -= input_widget().text_widget().minimum_size().cx;
 		minimumSize.cx += input_widget().text_widget().margins().size().cx;
-		minimumSize.cx += presentation_model().column_width(0, graphics_context{ *this, graphics_context::type::Unattached }, false);
+		dimension modelWidth = 0.0;
+		if (has_presentation_model())
+		{
+			graphics_context gc{ *this, graphics_context::type::Unattached };
+			modelWidth = presentation_model().column_width(0, gc);
+		}
+		minimumSize.cx += modelWidth;
 		return minimumSize;
 	}
 

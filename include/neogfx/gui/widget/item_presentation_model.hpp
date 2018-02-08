@@ -652,6 +652,8 @@ namespace neogfx
 					const auto& value = (std::get<3>(filter) == CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue));
 					const auto& origKey = std::get<1>(filter);
 					const auto& key = (std::get<3>(filter) == CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey));
+					if (key.empty())
+						continue;
 					switch (std::get<2>(filter))
 					{
 					case Prefix:
@@ -670,7 +672,8 @@ namespace neogfx
 					item_added(item_model(), item_model_index{ row });
 			}
 			reset_maps();
-			reset_meta();
+			reset_cell_meta();
+			reset_position_meta(0);
 			execute_sort();
 			notify_observers(i_item_presentation_model_subscriber::NotifyItemsFiltered);
 		}

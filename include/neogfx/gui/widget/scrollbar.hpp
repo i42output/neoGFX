@@ -64,6 +64,8 @@ namespace neogfx
 		void resume() override;
 		void track() override;
 		void untrack() override;
+	public:
+		static dimension width(scrollbar_style aStyle, const i_units_context& aContext);
 	private:
 		i_scrollbar_container& iContainer;
 		scrollbar_type iType;

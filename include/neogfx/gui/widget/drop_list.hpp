@@ -54,6 +54,7 @@ namespace neogfx
 	
 	class drop_list_popup : public window
 	{
+		friend class drop_list;
 		friend class drop_list_view;
 	public:
 		drop_list_popup(drop_list& aDropList);
@@ -77,6 +78,7 @@ namespace neogfx
 		bool dismissed() const override;
 		void dismiss() override;
 	private:
+		size ideal_size() const;
 		void update_placement();
 	private:
 		drop_list& iDropList;

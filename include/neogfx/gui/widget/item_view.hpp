@@ -56,6 +56,10 @@ namespace neogfx
 		void set_selection_model(i_item_selection_model& aSelectionModel);
 		void set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel);
 	public:
+		bool hot_tracking() const;
+		void enable_hot_tracking();
+		void disable_hot_tracking();
+	public:
 		bool is_visible(const item_presentation_model_index& aItemIndex) const;
 		void make_visible(const item_presentation_model_index& aItemIndex);
 		const optional_item_presentation_model_index& editing() const;
@@ -94,6 +98,7 @@ namespace neogfx
 	protected:
 		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 		void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+		void mouse_moved(const point& aPosition) override;
 	protected:
 		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 		bool text_input(const std::string& aText) override;
@@ -135,7 +140,9 @@ namespace neogfx
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
 		std::shared_ptr<i_item_selection_model> iSelectionModel;
-		boost::optional<std::shared_ptr<neolib::callback_timer>> iMouseTracker;
+		bool iHotTracking;
+		bool iIgnoreNextMouseMove;
+		boost::optional<neolib::callback_timer> iMouseTracker;
 		optional_item_presentation_model_index iEditing;
 		std::shared_ptr<i_item_editor> iEditor;
 		bool iBeginningEdit;
