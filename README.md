@@ -59,7 +59,7 @@ Spin Box                  | 100     |
 Slider                    | 90      |     Keyboard
 Check Box                 | 100     |     
 Radio Button              | 100     |
-Combo Box                 | 75      |
+Combo Box                 | 95      |     Glob and regex filters; review UX.
 Group Box                 | 100     |
 Tool Tips                 | 0       |
 Colour Gradient Selector  | 100     |
@@ -71,4 +71,4 @@ i18n                      | 0       |
 l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
-Last updated: 02/02/2018
+Last updated: 08/02/2018
