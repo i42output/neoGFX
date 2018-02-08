@@ -215,7 +215,7 @@ namespace neogfx
 	{
 		if (window::has_size_policy())
 			return window::size_policy();
-		return neogfx::size_policy::Minimum;
+		return neogfx::size_policy::Manual;
 	}
 
 	size drop_list_popup::minimum_size(const optional_size&) const
@@ -260,6 +260,9 @@ namespace neogfx
 		
 		// Workout ideal position whereby text for current item in drop list popup view is at same position as text in drop button or line edit...
 		point currentItemPos;
+		currentItemPos += view().presentation_model().cell_margins(*this).top_left();
+		currentItemPos += view().presentation_model().cell_spacing(*this) / 2.0;
+		currentItemPos -= point{ effective_frame_width(), effective_frame_width() };
 		if (view().presentation_model().rows() > 0 && view().presentation_model().columns() > 0)
 		{
 			auto index = (view().selection_model().has_current_index() ?
@@ -267,9 +270,6 @@ namespace neogfx
 				item_presentation_model_index{ 0, 0 });
 			view().make_visible(index);
 			currentItemPos += view().cell_rect(index).top_left();
-			currentItemPos += view().presentation_model().cell_margins(*this).top_left();
-			currentItemPos += view().presentation_model().cell_spacing(*this) / 2.0;
-			currentItemPos -= point{ effective_frame_width(), effective_frame_width() };
 		}
 		point inputWidgetPos{ iDropList.window_rect().top_left() + iDropList.root().window_position() };
 		point textWidgetPos{ iDropList.input_widget().text_widget().window_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };
@@ -278,16 +278,17 @@ namespace neogfx
 		// Popup goes below line edit if editable or on top of drop button if not...
 		if (iDropList.editable())
 			popupPos.y = inputWidgetPos.y + iDropList.extents().cy;
-		surface().move_surface(popupPos);
-		size popupExtents = extents() + size{ textWidgetPos.x + iDropList.extents().cx - surface().surface_position().x - extents().cx + currentItemPos.x * 2.0, 0.0 };
-		popupExtents.cx = std::max(popupExtents.cx, iDropList.extents().cx);
-		popupExtents.cy = std::max(popupExtents.cy, iDropList.extents().cy);
-		resize(popupExtents);
+
+		size popupExtents = extents() + size{ textWidgetPos.x + iDropList.extents().cx - popupPos.x - extents().cx + currentItemPos.x * 2.0, 0.0 };
+		popupExtents = popupExtents.max(iDropList.extents());
+
+		rect rectPopup{ popupPos, popupExtents };
 		
 		// Check we are not out of bounds of desktop window and correct if we are...
-		auto correctedRect = corrected_popup_rect(*this);
+		auto correctedRect = corrected_popup_rect(*this, rectPopup);
 		if (iDropList.editable() && correctedRect.y < inputWidgetPos.y)
 			correctedRect.y = inputWidgetPos.y - extents().cy;
+
 		surface().move_surface(correctedRect.top_left());
 		resize(correctedRect.extents());
 	}
