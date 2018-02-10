@@ -223,7 +223,7 @@ namespace neogfx
 	{
 		if (window::has_minimum_size())
 			return window::minimum_size();
-		return ideal_size();
+		return ideal_size().max(iDropList.minimum_size());
 	}
 
 	bool drop_list_popup::can_dismiss(const i_widget*) const
@@ -701,9 +701,10 @@ namespace neogfx
 		if (has_presentation_model())
 		{
 			graphics_context gc{ *this, graphics_context::type::Unattached };
-			modelWidth = presentation_model().column_width(0, gc);
+			modelWidth = presentation_model().column_width(0, gc, false);
 		}
 		minimumSize.cx += modelWidth;
+
 		return minimumSize;
 	}
 
@@ -835,12 +836,12 @@ namespace neogfx
 		auto ink = app::instance().current_style().palette().text_colour();
 		if (iDownArrowTexture == boost::none || iDownArrowTexture->first != ink)
 		{
-			const uint8_t sDownArrowImagePattern[4][8]
+			const uint8_t sDownArrowImagePattern[4][10]
 			{
-				{ 1, 1, 1, 1, 1, 1, 1, 1 },
-				{ 0, 1, 1, 1, 1, 1, 1, 0 },
-				{ 0, 0, 1, 1, 1, 1, 0, 0 },
-				{ 0, 0, 0, 1, 1, 0, 0, 0 },
+				{ 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
+				{ 0, 0, 1, 1, 1, 1, 1, 1, 0, 0 },
+				{ 0, 0, 0, 1, 1, 1, 1, 0, 0, 0 },
+				{ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 },
 			};
 			iDownArrowTexture = std::make_pair(ink, neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { 0_u8, colour{} }, { 1_u8, ink } } });
 		}

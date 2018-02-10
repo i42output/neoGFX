@@ -265,6 +265,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\slider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\spin_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\splitter.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\status_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\table_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tab_button.hpp" />

@@ -43,7 +43,7 @@ namespace neogfx
 		throw wrong_item_type();
 	}
 
-	i_spacer& stack_layout::add_spacer_at(uint32_t)
+	i_spacer& stack_layout::add_spacer_at(item_index)
 	{
 		throw wrong_item_type();
 	}
