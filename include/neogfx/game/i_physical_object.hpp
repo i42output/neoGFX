@@ -28,7 +28,7 @@
 
 namespace neogfx
 {
-	class i_physical_object : public i_object, public i_collidable
+	class i_physical_object : public virtual i_object, public i_collidable
 	{
 		// types
 	public:

@@ -1,7 +1,7 @@
-// shape.inl
+// shape.cpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2016 Leigh Johnston
+  Copyright(C) 2016-2018 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -17,94 +17,82 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/game/shape.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 
 namespace neogfx
 {
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape() :
+	shape::shape() :
 		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame { 0 }, iKilled{ false }
 	{
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(const colour& aColour) :
+	shape::shape(const colour& aColour) :
 		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		iFrames.push_back(std::make_shared<neogfx::shape_frame>(aColour));
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
+	shape::shape(const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
 		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		init_frames(aTexture, optional_rect{}, aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(const i_image& aImage, const optional_animation_info& aAnimationInfo) :
+	shape::shape(const i_image& aImage, const optional_animation_info& aAnimationInfo) :
 		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		init_frames(texture{ aImage }, optional_rect{}, aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+	shape::shape(const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
 		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		init_frames(aTexture, aTextureRect, aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+	shape::shape(const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
 		iContainer{ nullptr }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		init_frames(texture{ aImage }, aTextureRect, aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(i_shape_container& aContainer) :
+	shape::shape(i_shape_container& aContainer) :
 		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const colour& aColour) :
+	shape::shape(i_shape_container& aContainer, const colour& aColour) :
 		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		iFrames.push_back(std::make_shared<neogfx::shape_frame>(aColour));
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
+	shape::shape(i_shape_container& aContainer, const i_texture& aTexture, const optional_animation_info& aAnimationInfo) :
 		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		init_frames(aTexture, optional_rect{} , aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_image& aImage, const optional_animation_info& aAnimationInfo) :
+	shape::shape(i_shape_container& aContainer, const i_image& aImage, const optional_animation_info& aAnimationInfo) :
 		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		init_frames(texture{ aImage }, optional_rect{}, aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+	shape::shape(i_shape_container& aContainer, const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
 		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		init_frames(aTexture, aTextureRect, aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(i_shape_container& aContainer, const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
+	shape::shape(i_shape_container& aContainer, const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo) :
 		iContainer{ &aContainer }, iRepeatAnimation{ true }, iAnimationFrame{ 0 }, iCurrentFrame{ 0 }, iKilled{ false }
 	{
 		init_frames(texture{ aImage }, aTextureRect, aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline shape<MixinInterface>::shape(const shape& aOther) :
+	shape::shape(const shape& aOther) :
 		iContainer{ aOther.iContainer },
 		iFrames{ aOther.iFrames },
 		iAnimation{ aOther.iAnimation },
@@ -120,62 +108,52 @@ namespace neogfx
 	{
 	}
 
-	template <typename MixinInterface>
-	inline object_category shape<MixinInterface>::category() const
+	object_category shape::category() const
 	{
 		return object_category::Shape;
 	}
 
-	template <typename MixinInterface>
-	inline const i_shape& shape<MixinInterface>::as_shape() const
+	const i_shape& shape::as_shape() const
 	{
 		return *this;
 	}
 
-	template <typename MixinInterface>
-	inline i_shape& shape<MixinInterface>::as_shape()
+	i_shape& shape::as_shape()
 	{
 		return *this;
 	}
 
-	template <typename MixinInterface>
-	inline const i_collidable& shape<MixinInterface>::as_collidable() const
+	const i_collidable& shape::as_collidable() const
 	{
 		throw not_a_collidable();
 	}
 
-	template <typename MixinInterface>
-	inline i_collidable& shape<MixinInterface>::as_collidable()
+	i_collidable& shape::as_collidable()
 	{
 		throw not_a_collidable();
 	}
 
-	template <typename MixinInterface>
-	inline const i_physical_object& shape<MixinInterface>::as_physical_object() const
+	const i_physical_object& shape::as_physical_object() const
 	{
 		throw not_a_physical_object();
 	}
 
-	template <typename MixinInterface>
-	inline i_physical_object& shape<MixinInterface>::as_physical_object()
+	i_physical_object& shape::as_physical_object()
 	{
 		throw not_a_physical_object();
 	}
 
-	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::killed() const
+	bool shape::killed() const
 	{
 		return iKilled;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::kill()
+	void shape::kill()
 	{
 		iKilled = true;
 	}
 
-	template <typename MixinInterface>
-	inline vertex_list_pointer shape<MixinInterface>::vertices() const
+	vertex_list_pointer shape::vertices() const
 	{
 		if (iVertices != nullptr)
 			return iVertices;
@@ -193,8 +171,7 @@ namespace neogfx
 		return iDefaultVertices;
 	}
 
-	template <typename MixinInterface>
-	inline texture_list_pointer shape<MixinInterface>::textures() const
+	texture_list_pointer shape::textures() const
 	{
 		if (frame_count() > 0)
 			return shape_frame(0).textures();
@@ -202,8 +179,7 @@ namespace neogfx
 			return texture_list_pointer{};
 	}
 
-	template <typename MixinInterface>
-	inline face_list shape<MixinInterface>::faces() const
+	face_list shape::faces() const
 	{
 		if (!iFaces.empty())
 		{
@@ -217,28 +193,24 @@ namespace neogfx
 		return iDefaultFaces;
 	}
 
-	template <typename MixinInterface>
-	inline face_list shape<MixinInterface>::active_faces() const
+	face_list shape::active_faces() const
 	{
 		return iActiveFaces;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::activate_faces(face_list aActiveFaces) const
+	void shape::activate_faces(face_list aActiveFaces) const
 	{
 		iActiveFaces = aActiveFaces;
 	}
 
-	template <typename MixinInterface>
-	inline mat44 shape<MixinInterface>::transformation_matrix() const
+	mat44 shape::transformation_matrix() const
 	{
 		if (iTransformationMatrix == boost::none)
 			return mat44{ { 1.0, 0.0, 0.0, 0.0 },{ 0.0, 1.0, 0.0, 0.0 },{ 0.0, 0.0, 1.0, 0.0 }, { position().x, position().y, position().z, 1.0 } };
 		return *iTransformationMatrix;
 	}
 	
-	template <typename MixinInterface>
-	inline const vertex_list& shape<MixinInterface>::transformed_vertices() const
+	const vertex_list& shape::transformed_vertices() const
 	{
 		if (!iTransformedVertices.empty())
 			return iTransformedVertices;
@@ -248,14 +220,12 @@ namespace neogfx
 		return iTransformedVertices;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_vertices(vertex_list_pointer aVertices)
+	void shape::set_vertices(vertex_list_pointer aVertices)
 	{
 		iVertices = aVertices;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_textures(texture_list_pointer aTextures)
+	void shape::set_textures(texture_list_pointer aTextures)
 	{
 		if (iFrames.empty())
 			iFrames.push_back(std::make_shared<neogfx::shape_frame>(aTextures));
@@ -264,124 +234,107 @@ namespace neogfx
 				f->set_textures(aTextures);
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_faces(face_list aFaces)
+	void shape::set_faces(face_list aFaces)
 	{
 		iFaces = aFaces;
 	}
 
-	template <typename MixinInterface>
-	inline const i_shape_container& shape<MixinInterface>::container() const
+	const i_shape_container& shape::container() const
 	{
 		if (iContainer != nullptr)
 			return *iContainer;
 		throw no_shape_container();
 	}
 
-	template <typename MixinInterface>
-	inline i_shape_container& shape<MixinInterface>::container()
+	i_shape_container& shape::container()
 	{
 		if (iContainer != nullptr)
 			return *iContainer;
 		throw no_shape_container();
 	}
 
-	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::is_tag() const
+	bool shape::is_tag() const
 	{
 		return iTagOf.first != nullptr;
 	}
 
-	template <typename MixinInterface>
-	inline i_shape& shape<MixinInterface>::tag_of() const
+	i_shape& shape::tag_of() const
 	{
 		if (iTagOf.first == nullptr)
 			throw not_a_tag();
 		return *iTagOf.first;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_tag_of(i_shape& aTagOf, const vec3& aOffset)
+	void shape::set_tag_of(i_shape& aTagOf, const vec3& aOffset)
 	{
 		iTagOf.first = &aTagOf;
 		iTagOf.second = aOffset;
 	}
 
-	template <typename MixinInterface>
-	inline const vec3& shape<MixinInterface>::tag_offset() const
+	const vec3& shape::tag_offset() const
 	{
 		if (iTagOf.first == nullptr)
 			throw not_a_tag();
 		return iTagOf.second;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_tag_offset(const vec3& aOffset)
+	void shape::set_tag_offset(const vec3& aOffset)
 	{
 		if (iTagOf.first == nullptr)
 			throw not_a_tag();
 		iTagOf.second = aOffset;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::unset_tag_of()
+	void shape::unset_tag_of()
 	{
 		iTagOf.first = nullptr;
 		iTagOf.second = vec3{};
 	}
 
-	template <typename MixinInterface>
-	inline i_shape::frame_index shape<MixinInterface>::frame_count() const
+	i_shape::frame_index shape::frame_count() const
 	{
 		return iFrames.size();
 	}
 
-	template <typename MixinInterface>
-	inline const i_shape_frame& shape<MixinInterface>::shape_frame(frame_index aFrameIndex) const
+	const i_shape_frame& shape::shape_frame(frame_index aFrameIndex) const
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
 		return *iFrames[aFrameIndex];
 	}
 
-	template <typename MixinInterface>
-	inline i_shape_frame& shape<MixinInterface>::shape_frame(frame_index aFrameIndex)
+	i_shape_frame& shape::shape_frame(frame_index aFrameIndex)
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
 		return *iFrames[aFrameIndex];
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::add_frame(i_shape_frame& aFrame)
+	void shape::add_frame(i_shape_frame& aFrame)
 	{
 		iFrames.push_back(std::shared_ptr<i_shape_frame>(std::shared_ptr<i_shape_frame>(), &aFrame));
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::add_frame(std::shared_ptr<i_shape_frame> aFrame)
+	void shape::add_frame(std::shared_ptr<i_shape_frame> aFrame)
 	{
 		iFrames.push_back(aFrame);
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::replace_frame(frame_index aFrameIndex, i_shape_frame& aFrame)
+	void shape::replace_frame(frame_index aFrameIndex, i_shape_frame& aFrame)
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
 		iFrames[aFrameIndex] = std::shared_ptr<i_shape_frame>(std::shared_ptr<i_shape_frame>(), &aFrame);
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::replace_frame(frame_index aFrameIndex, std::shared_ptr<i_shape_frame> aFrame)
+	void shape::replace_frame(frame_index aFrameIndex, std::shared_ptr<i_shape_frame> aFrame)
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
 		iFrames[aFrameIndex] = aFrame;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::remove_frame(frame_index aFrameIndex)
+	void shape::remove_frame(frame_index aFrameIndex)
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
@@ -390,20 +343,17 @@ namespace neogfx
 			iCurrentFrame = 0;
 	}
 
-	template <typename MixinInterface>
-	inline const i_shape::animation_frames& shape<MixinInterface>::animation() const
+	const i_shape::animation_frames& shape::animation() const
 	{
 		return iAnimation;
 	}
 
-	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::repeat_animation() const
+	bool shape::repeat_animation() const
 	{
 		return iRepeatAnimation;
 	}
 
-	template <typename MixinInterface>
-	inline typename const shape<MixinInterface>::animation_frame& shape<MixinInterface>::current_animation_frame() const
+	typename const shape::animation_frame& shape::current_animation_frame() const
 	{
 		static const animation_frame sNullAnimationFrame{ 0, 0 };
 		if (!animation().empty())
@@ -412,49 +362,41 @@ namespace neogfx
 			return sNullAnimationFrame;
 	}
 
-	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::has_animation_finished() const
+	bool shape::has_animation_finished() const
 	{
 		return iAnimation.empty() || (iAnimationFrame == iAnimation.size() && !repeat_animation());
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::animation_finished()
+	void shape::animation_finished()
 	{
 	}
 
-	template <typename MixinInterface>
-	inline typename shape<MixinInterface>::frame_index shape<MixinInterface>::current_frame_index() const
+	typename shape::frame_index shape::current_frame_index() const
 	{
 		return has_animation_finished() ? iCurrentFrame : current_animation_frame().first;
 	}
 
-	template <typename MixinInterface>
-	inline const i_shape_frame& shape<MixinInterface>::current_frame() const
+	const i_shape_frame& shape::current_frame() const
 	{
 		return shape_frame(current_frame_index());
 	}
 
-	template <typename MixinInterface>
-	inline i_shape_frame& shape<MixinInterface>::current_frame()
+	i_shape_frame& shape::current_frame()
 	{
 		return shape_frame(current_frame_index());
 	}
 
-	template <typename MixinInterface>
-	inline vec3 shape<MixinInterface>::origin() const
+	vec3 shape::origin() const
 	{
 		return iOrigin;
 	}
 
-	template <typename MixinInterface>
-	inline vec3 shape<MixinInterface>::position() const
+	vec3 shape::position() const
 	{
 		return is_tag() ? tag_of().position() + tag_offset() : iPosition;
 	}
 
-	template <typename MixinInterface>
-	inline vec3 shape<MixinInterface>::extents() const
+	vec3 shape::extents() const
 	{
 		if (iExtents != boost::none)
 			return *iExtents;
@@ -464,68 +406,58 @@ namespace neogfx
 			return vec3{};
 	}
 
-	template <typename MixinInterface>
-	inline rect shape<MixinInterface>::bounding_box_2d(bool aWithPosition) const
+	rect shape::bounding_box_2d(bool aWithPosition) const
 	{
 		return rect{ point{ origin() - extents() / 2.0 + (aWithPosition ? position() : vec3{}) }, size{ extents() } };
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_animation(const animation_frames& aAnimation)
+	void shape::set_animation(const animation_frames& aAnimation)
 	{
 		iAnimation = aAnimation;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_current_frame(frame_index aFrameIndex)
+	void shape::set_current_frame(frame_index aFrameIndex)
 	{
 		if (aFrameIndex >= iFrames.size())
 			throw bad_frame_index();
 		iCurrentFrame = aFrameIndex;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_origin(const vec3& aOrigin)
+	void shape::set_origin(const vec3& aOrigin)
 	{
 		iOrigin = aOrigin;
 		clear_vertices_cache();
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_position(const vec3& aPosition)
+	void shape::set_position(const vec3& aPosition)
 	{
 		iPosition = aPosition;
 		clear_vertices_cache();
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::clear_extents()
+	void shape::clear_extents()
 	{
 		iExtents = boost::none;
 		clear_vertices_cache();
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_extents(const vec3& aExtents)
+	void shape::set_extents(const vec3& aExtents)
 	{
 		iExtents = aExtents;
 		clear_vertices_cache();
 	}
 
-	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::has_transformation_matrix() const
+	bool shape::has_transformation_matrix() const
 	{
 		return iTransformationMatrix != boost::none;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::clear_transformation_matrix()
+	void shape::clear_transformation_matrix()
 	{
 		iTransformationMatrix = boost::none;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_transformation_matrix(const mat33& aTransformationMatrix)
+	void shape::set_transformation_matrix(const mat33& aTransformationMatrix)
 	{
 		iTransformationMatrix = mat44{
 			{ aTransformationMatrix[0][0], aTransformationMatrix[0][1], aTransformationMatrix[0][2], 0.0 },
@@ -534,14 +466,12 @@ namespace neogfx
 			{ 0.0, 0.0, 0.0, 1.0 } };
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::set_transformation_matrix(const mat44& aTransformationMatrix)
+	void shape::set_transformation_matrix(const mat44& aTransformationMatrix)
 	{
 		iTransformationMatrix = aTransformationMatrix;
 	}
 	
-	template <typename MixinInterface>
-	inline bool shape<MixinInterface>::update(time_interval aNow)
+	bool shape::update(time_interval aNow)
 	{
 		bool updated = false;
 		if (iTimeOfLastUpdate == boost::none)
@@ -564,8 +494,7 @@ namespace neogfx
 		return updated;
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::paint(graphics_context& aGraphicsContext) const
+	void shape::paint(graphics_context& aGraphicsContext) const
 	{
 		if (frame_count() == 0)
 			return;
@@ -575,22 +504,19 @@ namespace neogfx
 			aGraphicsContext.fill_shape(*this, to_brush(*current_frame().colour()));
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::clear_vertices_cache()
+	void shape::clear_vertices_cache()
 	{
 		if (iDefaultVertices != nullptr)
 			iDefaultVertices->clear();
 		iTransformedVertices.clear();
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::init_frames(const i_texture& aTexture, const optional_rect& aTextureRect, const optional_animation_info& aAnimationInfo)
+	void shape::init_frames(const i_texture& aTexture, const optional_rect& aTextureRect, const optional_animation_info& aAnimationInfo)
 	{
 		init_frames(to_texture_list_pointer(aTexture, aTextureRect), aAnimationInfo);
 	}
 
-	template <typename MixinInterface>
-	inline void shape<MixinInterface>::init_frames(texture_list_pointer aTextures, const optional_animation_info& aAnimationInfo)
+	void shape::init_frames(texture_list_pointer aTextures, const optional_animation_info& aAnimationInfo)
 	{
 		if (aAnimationInfo == boost::none)
 		{

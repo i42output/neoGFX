@@ -30,7 +30,9 @@
 
 namespace nrc
 {
-	// we need to explicitly reference the resource object here otherwise the resource object file will be omitted at link stage when linking with neoGFX (as a static .lib).
+	// we need to explicitly reference the resource object here otherwise the resource object file will be omitted at link stage 
+	// when linking with neoGFX (as a static .lib).  This is because static objects are not instantiated in static libraries
+	// if they are not referenced outside of the library.
 	extern void* neogfx_icons;
 	extern void* neogfx_resources;
 	void* ref_neogfx_icons = neogfx_icons;

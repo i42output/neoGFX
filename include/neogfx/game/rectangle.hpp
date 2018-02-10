@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-	class rectangle : public shape<>
+	class rectangle : public shape
 	{
 	public:
 		rectangle(const vec3& aPosition, const vec2& aExtents);

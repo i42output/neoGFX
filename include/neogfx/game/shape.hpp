@@ -52,8 +52,7 @@ namespace neogfx
 		optional_mat33 iTransformation;
 	};
 
-	template <typename MixinInterface = i_shape>
-	class shape : public MixinInterface
+	class shape : public virtual i_shape
 	{
 	private:
 		typedef std::vector<std::shared_ptr<i_shape_frame>> frame_list;
@@ -170,11 +169,6 @@ namespace neogfx
 		// udates
 	public:
 		virtual void clear_vertices_cache();
-		// helpers
-	public:
-		using i_shape::set_origin;
-		using i_shape::set_position;
-		using i_shape::set_extents;
 		// implementation
 	private:
 		void init_frames(const i_texture& aTexture, const optional_rect& aTextureRect, const optional_animation_info& aAnimationInfo);
@@ -202,7 +196,5 @@ namespace neogfx
 		bool iKilled;
 	};
 }
-
-#include "shape.inl"
 
 #include "rectangle.hpp"

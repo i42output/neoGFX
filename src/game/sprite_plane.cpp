@@ -164,12 +164,12 @@ namespace neogfx
 
 	void sprite_plane::add_sprite(i_sprite& aObject)
 	{
-		add_object(std::shared_ptr<i_object>(std::shared_ptr<i_object>(), &aObject.physics())); // todo: using aliasing ctor here; not quite happy with the i_object based class hierarchy at present
+		add_object(std::shared_ptr<i_object>(std::shared_ptr<i_object>(), &aObject));
 	}
 
 	void sprite_plane::add_sprite(std::shared_ptr<i_sprite> aObject)
 	{
-		add_object(std::shared_ptr<i_object>(aObject, &aObject->physics())); // todo: using aliasing ctor here; not quite happy with the i_object based class hierarchy at present
+		add_object(aObject);
 	}
 
 	void sprite_plane::add_physical_object(i_physical_object& aObject)
@@ -351,7 +351,7 @@ namespace neogfx
 		iObjects.push_back(aObject);
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::PhysicalObject)
 			is_collision_tree_2d() ? 
-				collision_tree_2d().insert(aObject->as_physical_object()) : 
+				collision_tree_2d().insert(aObject->as_physical_object()) :
 				collision_tree_3d().insert(aObject->as_physical_object());
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::Shape)
 			iRenderBuffer.push_back(&aObject->as_shape());
@@ -394,8 +394,8 @@ namespace neogfx
 				}
 				else
 				{
-					const i_physical_object& leftObject = (*left).as_physical_object();
-					const i_physical_object& rightObject = (*right).as_physical_object();
+					const auto& leftObject = (*left).as_physical_object();
+					const auto& rightObject = (*right).as_physical_object();
 					return leftObject.mass() > rightObject.mass();
 				}
 			});
@@ -441,7 +441,7 @@ namespace neogfx
 						iNeedsSorting = true;
 						continue;
 					}
-					i_physical_object& o1 = (*i1).as_physical_object();
+					auto& o1 = (*i1).as_physical_object();
 					if (o1.mass() == 0.0)
 						break;
 					if (iUniformGravity != boost::none)
@@ -455,7 +455,7 @@ namespace neogfx
 							iNeedsSorting = true;
 							continue;
 						}
-						i_physical_object& o2 = (*i2).as_physical_object();
+						auto& o2 = (*i2).as_physical_object();
 						if (&o2 == &o1)
 							continue;
 						if (o2.mass() == 0.0)

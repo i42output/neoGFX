@@ -28,7 +28,7 @@
 
 namespace neogfx
 {
-	class i_sprite : public i_shape
+	class i_sprite : public virtual i_shape, public virtual i_physical_object
 	{
 		// types
 	public:
@@ -36,14 +36,21 @@ namespace neogfx
 		typedef i_physical_object::optional_time_interval optional_time_interval;
 		typedef i_physical_object::step_time_interval step_time_interval;
 		typedef i_physical_object::optional_step_time_interval optional_step_time_interval;
+		// object
+	public:
+		virtual ~i_sprite() {}
 		// physics
 	public:
-		virtual const i_physical_object& physics() const = 0;
-		virtual i_physical_object& physics() = 0;
 		virtual bool update(const optional_time_interval& aNow, const vec3& aForce) = 0;
 		virtual const optional_time_interval& update_time() const = 0;
 		virtual void set_update_time(const optional_time_interval& aLastUpdateTime) = 0;
 		// geometry
+	public:
+		virtual vec3 origin() const = 0;
+		virtual vec3 position() const = 0;
+		virtual void set_origin(const vec3& aOrigin) = 0;
+		virtual void set_position(const vec3& aPosition) = 0;
+		// physics
 	public:
 		virtual const optional_path& path() const = 0;
 		virtual void set_path(const optional_path& aPath) = 0;

@@ -113,13 +113,13 @@ namespace neogfx
 
 	bool sprite::killed() const
 	{
-		return physical_object::killed() || shape<i_sprite>::killed();
+		return physical_object::killed() || shape::killed();
 	}
 
 	void sprite::kill()
 	{
 		physical_object::kill();
-		shape<i_sprite>::kill();
+		shape::kill();
 	}
 
 	void sprite::animation_finished()
@@ -179,16 +179,6 @@ namespace neogfx
 		iAabb = boost::none;
 	}
 
-	const i_physical_object& sprite::physics() const
-	{
-		return *this;
-	}
-
-	i_physical_object& sprite::physics()
-	{
-		return *this;
-	}
-
 	bool sprite::update(const optional_time_interval& aNow, const vec3& aForce)
 	{
 		return physical_object::update(aNow, aForce);
@@ -208,7 +198,7 @@ namespace neogfx
 	{
 		if (iAabb == boost::none)
 		{
-			const auto& tvs = transformed_vertices();
+			const auto& tvs = shape::transformed_vertices();
 			const auto& iv = tvs[0];
 			vec3 min = iv.coordinates;
 			vec3 max = min;

@@ -19,13 +19,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include "i_sprite.hpp"
 #include "shape.hpp"
 #include "physical_object.hpp"
-#include "i_sprite.hpp"
 
 namespace neogfx
 {
-	class sprite : public physical_object, public shape<i_sprite>
+	class sprite : public i_sprite, public shape, public physical_object
 	{
 		// types
 	public:
@@ -62,9 +62,7 @@ namespace neogfx
 		mat44 transformation_matrix() const override;
 		const optional_path& path() const override;
 		void set_origin(const vec3& aOrigin) override;
-		using i_shape::set_origin;
 		void set_position(const vec3& aPosition) override;
-		using i_shape::set_position;
 		void set_path(const optional_path& aPath) override;
 		// updates
 	public:
@@ -72,8 +70,6 @@ namespace neogfx
 		void clear_aabb_cache() override;
 		// physics
 	public:
-		const i_physical_object& physics() const override;
-		i_physical_object& physics() override;
 		bool update(const optional_time_interval& aNow, const vec3& aForce) override;
 		const optional_time_interval& update_time() const override;
 		void set_update_time(const optional_time_interval& aLastUpdateTime) override;
@@ -87,3 +83,4 @@ namespace neogfx
 		mutable optional_aabb iAabb;
 	};
 }
+

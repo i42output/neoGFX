@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-	class physical_object : public i_physical_object
+	class physical_object : public virtual i_physical_object
 	{
 	private:
 		struct physics

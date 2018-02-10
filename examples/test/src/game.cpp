@@ -31,7 +31,7 @@ void create_target(ng::sprite_plane& aWorld)
 	target->set_collision_mask(0x2ull);
 	target->set_position(ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), 0.0 });
 	auto w = static_cast<ng::scalar>(std::rand() % 40) + 10.0;
-	target->set_extents(ng::vec2{ w, w });
+	target->set_extents(ng::vec3{ w, w });
 	target->set_mass(1.0);
 	target->set_spin_degrees(360.0);
 }
@@ -43,14 +43,14 @@ public:
 		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }, iScore(aScore), iExplosion(aExplosion)
 	{
 		set_collision_mask(0x1ull);
-		shape::set_extents(ng::vec2{ 3.0, 3.0 });
-		ng::vec3 relativePos = aParent.physics().origin();
+		shape::set_extents(ng::vec3{ 3.0, 3.0 });
+		ng::vec3 relativePos = aParent.origin();
 		relativePos[1] += 18.0;
 		auto tm = ng::without_translation(aParent.transformation_matrix());
-		physics().set_position(aParent.physics().position() + ~(tm * ng::vec4{ relativePos.x, relativePos.y, relativePos.z, 1.0 }).xyz);
-		physics().set_mass(0.016);
-		physics().set_angle_radians(aParent.physics().angle_radians() + ng::vec3{ 0.0, 0.0, ng::to_rad(aAngle) });
-		physics().set_velocity(~(transformation_matrix() * ng::vec4{ 0.0, 360.0, 0.0, 0.0 }).xyz + aParent.physics().velocity());
+		set_position(aParent.position() + ~(tm * ng::vec4{ relativePos.x, relativePos.y, relativePos.z, 1.0 }).xyz);
+		set_mass(0.016);
+		set_angle_radians(aParent.angle_radians() + ng::vec3{ 0.0, 0.0, ng::to_rad(aAngle) });
+		set_velocity(~(transformation_matrix() * ng::vec4{ 0.0, 360.0, 0.0, 0.0 }).xyz + aParent.velocity());
 	}
 public:
 	const ng::object_type& type() const override
@@ -79,7 +79,7 @@ public:
 		static neolib::basic_random<double> r;
 		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), -0.1 });
 		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
-		explosion->set_extents(ng::vec2{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
+		explosion->set_extents(ng::vec3{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
 		iWorld.add_sprite(explosion);
 		kill();
 		other.kill();
@@ -109,8 +109,8 @@ void create_game(ng::i_layout& aLayout)
 	//spritePlane->create_earth();
 	spritePlane->reserve(10000);
 	auto& spaceshipSprite = spritePlane->create_sprite(ng::image{ sSpaceshipImagePattern, { { 0_u8, ng::colour() },{ 1_u8, ng::colour::LightGoldenrod },{ 2_u8, ng::colour::DarkGoldenrod4 } } });
-	spaceshipSprite.physics().set_collision_mask(0x1ull);
-	spaceshipSprite.physics().set_mass(1.0);
+	spaceshipSprite.set_collision_mask(0x1ull);
+	spaceshipSprite.set_mass(1.0);
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
 	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 0.0 });
 	auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ *spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } } });
@@ -148,15 +148,15 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
-		spaceshipSprite.physics().set_acceleration(ng::vec3{
+		spaceshipSprite.set_acceleration(ng::vec3{
 			keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
 			keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0 });
 		if (keyboard.is_key_pressed(ng::ScanCode_X))
-			spaceshipSprite.physics().set_spin_degrees(30.0);
+			spaceshipSprite.set_spin_degrees(30.0);
 		else if (keyboard.is_key_pressed(ng::ScanCode_Z))
-			spaceshipSprite.physics().set_spin_degrees(-30.0);
+			spaceshipSprite.set_spin_degrees(-30.0);
 		else
-			spaceshipSprite.physics().set_spin_degrees(0.0);
+			spaceshipSprite.set_spin_degrees(0.0);
 		if (keyboard.is_key_pressed(ng::ScanCode_SPACE))
 		{
 			auto stepTime_ms = static_cast<decltype(aPhysicsStepTime)>(ng::chrono::to_milliseconds(ng::chrono::flicks{ aPhysicsStepTime }));
@@ -174,8 +174,8 @@ void create_game(ng::i_layout& aLayout)
 		else if (keyboard.is_key_pressed(ng::ScanCode_F))
 			spritePlane->enable_dynamic_update(false);
 		std::ostringstream oss;
-		oss << "VELOCITY:  " << spaceshipSprite.physics().velocity().magnitude() << " m/s" << "\n";
-		oss << "ACCELERATION:  " << spaceshipSprite.physics().acceleration().magnitude() << " m/s/s";
+		oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
+		oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
 		shipInfo->set_value(oss.str());
 	});
 

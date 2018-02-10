@@ -1049,6 +1049,9 @@
     <ClCompile Include="..\..\..\src\gui\widget\list_view.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\game\shape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">
@@ -1064,9 +1067,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\core\path.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\include\neogfx\game\shape.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

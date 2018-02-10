@@ -368,6 +368,7 @@
     <ClCompile Include="..\..\..\src\game\mesh.cpp" />
     <ClCompile Include="..\..\..\src\game\physical_object.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
+    <ClCompile Include="..\..\..\src\game\shape.cpp" />
     <ClCompile Include="..\..\..\src\game\shapes.cpp" />
     <ClCompile Include="..\..\..\src\game\sprite.cpp" />
     <ClCompile Include="..\..\..\src\game\sprite_plane.cpp" />
@@ -481,7 +482,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/icons.nrc.cpp</Outputs>
     </CustomBuild>
     <None Include="..\..\..\include\neogfx\core\path.inl" />
-    <None Include="..\..\..\include\neogfx\game\shape.inl" />
     <None Include="..\..\..\include\neogfx\gui\layout\flow_layout.inl" />
     <None Include="..\..\..\include\neogfx\gui\layout\layout.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />

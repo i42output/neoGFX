@@ -55,7 +55,7 @@ namespace neogfx
 		virtual i_widget& as_widget() = 0;
 	};
 
-	class i_shape : public i_object, public i_mesh
+	class i_shape : public virtual i_object, public virtual i_mesh
 	{
 		// types
 	public:

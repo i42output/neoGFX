@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-	class mesh : public i_mesh
+	class mesh : public virtual i_mesh
 	{
 	public:
 		mesh();
