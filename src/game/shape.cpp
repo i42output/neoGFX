@@ -123,14 +123,14 @@ namespace neogfx
 		return *this;
 	}
 
-	const i_collidable& shape::as_collidable() const
+	const i_collidable_object& shape::as_collidable_object() const
 	{
-		throw not_a_collidable();
+		throw not_a_collidable_object();
 	}
 
-	i_collidable& shape::as_collidable()
+	i_collidable_object& shape::as_collidable_object()
 	{
-		throw not_a_collidable();
+		throw not_a_collidable_object();
 	}
 
 	const i_physical_object& shape::as_physical_object() const

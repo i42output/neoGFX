@@ -55,12 +55,12 @@ namespace neogfx
 		throw not_a_shape();
 	}
 
-	const i_collidable& physical_object::as_collidable() const
+	const i_collidable_object& physical_object::as_collidable_object() const
 	{
 		return *this;
 	}
 
-	i_collidable& physical_object::as_collidable()
+	i_collidable_object& physical_object::as_collidable_object()
 	{
 		return *this;
 	}
@@ -218,7 +218,7 @@ namespace neogfx
 		return !killed();
 	}
 
-	bool physical_object::has_collided(const i_collidable& aOther) const
+	bool physical_object::has_collided(const i_collidable_object& aOther) const
 	{
 		if (!collidable() || !aOther.collidable())
 			return false;
@@ -228,7 +228,7 @@ namespace neogfx
 		return true;
 	}
 
-	void physical_object::collided(i_collidable&)
+	void physical_object::collided(i_collidable_object&)
 	{
 		/* default behaviour: do nothing */
 	}

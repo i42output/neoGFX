@@ -23,12 +23,11 @@
 #include <boost/optional.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/game/chrono.hpp>
-#include "i_object.hpp"
-#include "i_collidable.hpp"
+#include "i_collidable_object.hpp"
 
 namespace neogfx
 {
-	class i_physical_object : public virtual i_object, public i_collidable
+	class i_physical_object : public virtual i_collidable_object
 	{
 		// types
 	public:

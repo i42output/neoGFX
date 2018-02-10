@@ -81,12 +81,12 @@ namespace neogfx
 		return *this;
 	}
 
-	const i_collidable& sprite::as_collidable() const
+	const i_collidable_object& sprite::as_collidable_object() const
 	{
 		return *this;
 	}
 
-	i_collidable& sprite::as_collidable()
+	i_collidable_object& sprite::as_collidable_object()
 	{
 		return *this;
 	}

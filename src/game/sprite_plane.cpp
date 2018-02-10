@@ -122,13 +122,13 @@ namespace neogfx
 	{
 		if (aButton == mouse_button::Left)
 		{
-			std::vector<i_collidable*> picked;
+			std::vector<i_collidable_object*> picked;
 			if (is_collision_tree_2d())
 				collision_tree_2d().pick(aPosition.to_vec2(), picked);
 			else
 				collision_tree_3d().pick(aPosition.to_vec2(), picked);
 			for (auto p : picked)
-				object_clicked.trigger(p->as<i_physical_object>());
+				object_clicked.trigger(*p);
 		}
 	}
 
@@ -403,8 +403,8 @@ namespace neogfx
 			{
 				if (iObjects.back()->category() == object_category::Sprite || iObjects.back()->category() == object_category::PhysicalObject)
 					is_collision_tree_2d() ? 
-						collision_tree_2d().remove(iObjects.back()->as_collidable()) :
-						collision_tree_3d().remove(iObjects.back()->as_collidable());
+						collision_tree_2d().remove(iObjects.back()->as_collidable_object()) :
+						collision_tree_3d().remove(iObjects.back()->as_collidable_object());
 				iObjects.pop_back();
 			}
 			iNeedsSorting = false;
@@ -480,11 +480,11 @@ namespace neogfx
 				else
 					tree.full_update(iObjects.begin(), iObjects.end());
 				tree.collisions(iObjects.begin(), iObjects.end(),
-					[this](i_collidable& o1, i_collidable& o2)
+					[this](i_collidable_object& o1, i_collidable_object& o2)
 				{
 					o1.collided(o2);
 					o2.collided(o1);
-					object_collision.trigger(o1.as<i_physical_object>(), o2.as<i_physical_object>());
+					object_collision.trigger(o1, o2);
 				});
 			};
 			if (is_collision_tree_2d())

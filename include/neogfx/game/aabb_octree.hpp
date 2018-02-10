@@ -23,11 +23,11 @@
 #include <neolib/destroyable.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <neogfx/core/numerical.hpp>
-#include <neogfx/game/i_collidable.hpp>
+#include <neogfx/game/i_collidable_object.hpp>
 
 namespace neogfx
 {
-	template <std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<i_collidable>>
+	template <std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<i_collidable_object>>
 	class aabb_octree
 	{
 	public:
@@ -43,7 +43,7 @@ namespace neogfx
 		class node : public neolib::destroyable
 		{
 		private:
-			typedef neolib::vecarray<i_collidable*, BucketSize, -1> object_list;
+			typedef neolib::vecarray<i_collidable_object*, BucketSize, -1> object_list;
 			typedef std::array<std::array<std::array<aabb, 2>, 2>, 2> octants;
 			typedef std::array<std::array<std::array<aabb_2d, 2>, 2>, 2> octants_2d;
 			typedef std::array<std::array<std::array<node*, 2>, 2>, 2> children;
@@ -106,7 +106,7 @@ namespace neogfx
 			{
 				return iAabb;
 			}
-			void add_object(i_collidable& aObject)
+			void add_object(i_collidable_object& aObject)
 			{
 				iTree.iDepth = std::max(iTree.iDepth, iDepth);
 				if (is_split())
@@ -137,11 +137,11 @@ namespace neogfx
 						split();
 				}
 			}
-			void remove_object(i_collidable& aObject)
+			void remove_object(i_collidable_object& aObject)
 			{
 				remove_object(aObject, aabb_union(aObject.aabb(), aObject.saved_aabb()));
 			}
-			void remove_object(i_collidable& aObject, const neogfx::aabb& aAabb)
+			void remove_object(i_collidable_object& aObject, const neogfx::aabb& aAabb)
 			{
 				if (!aObject.collidable() || !aabb_intersects(aObject.aabb(), iAabb))
 				{
@@ -168,7 +168,7 @@ namespace neogfx
 				if (empty())
 					iTree.destroy_node(*this);
 			}
-			void update_object(i_collidable& aObject)
+			void update_object(i_collidable_object& aObject)
 			{
 				iTree.iDepth = std::max(iTree.iDepth, iDepth);
 				const auto& currentAabb = aObject.aabb();
@@ -206,7 +206,7 @@ namespace neogfx
 				return iObjects;
 			}
 			template <typename Visitor>
-			void visit(const i_collidable& aCandidate, const Visitor& aVisitor) const
+			void visit(const i_collidable_object& aCandidate, const Visitor& aVisitor) const
 			{
 				visit(aCandidate.aabb(), aVisitor, &aCandidate);
 			}
@@ -221,7 +221,7 @@ namespace neogfx
 				visit(neogfx::aabb_2d{ aPoint, aPoint }, aVisitor);
 			}
 			template <typename Visitor>
-			void visit(const neogfx::aabb& aAabb, const Visitor& aVisitor, const i_collidable* aCandidate = nullptr) const
+			void visit(const neogfx::aabb& aAabb, const Visitor& aVisitor, const i_collidable_object* aCandidate = nullptr) const
 			{
 				if (aCandidate != nullptr && !aCandidate->collidable())
 					return;
@@ -453,8 +453,8 @@ namespace neogfx
 			IterObject o;
 			for (o = aStart; o != aEnd && (**o).category() != object_category::Shape; ++o)
 			{
-				iRootNode.add_object((**o).as_collidable());
-				(**o).as_collidable().save_aabb();
+				iRootNode.add_object((**o).as_collidable_object());
+				(**o).as_collidable_object().save_aabb();
 			}
 			return o;
 		}
@@ -465,8 +465,8 @@ namespace neogfx
 			IterObject o;
 			for (o = aStart; o != aEnd && (**o).category() != object_category::Shape; ++o)
 			{
-				iRootNode.update_object((**o).as_collidable());
-				(**o).as_collidable().save_aabb();
+				iRootNode.update_object((**o).as_collidable_object());
+				(**o).as_collidable_object().save_aabb();
 			}
 			return o;
 		}
@@ -476,14 +476,14 @@ namespace neogfx
 			IterObject o;
 			for (o = aStart; o != aEnd && (**o).category() != object_category::Shape; ++o)
 			{
-				auto& candidate = (**o).as_collidable();
+				auto& candidate = (**o).as_collidable_object();
 				if (!candidate.collidable())
 					continue;
 				if (++iCollisionUpdateId == 0)
 					iCollisionUpdateId = 1;
-				iRootNode.visit(candidate, [this, &candidate, &aCollisionAction](i_collidable* aHit)
+				iRootNode.visit(candidate, [this, &candidate, &aCollisionAction](i_collidable_object* aHit)
 				{
-					if (std::less<i_collidable*>{}(&candidate, aHit) && aHit->collidable())
+					if (std::less<i_collidable_object*>{}(&candidate, aHit) && aHit->collidable())
 					{
 						if (aHit->collision_update_id() != iCollisionUpdateId)
 						{
@@ -499,7 +499,7 @@ namespace neogfx
 		template <typename ResultContainer>
 		void pick(const vec3& aPoint, ResultContainer& aResult, std::function<bool(reference, const vec3& aPoint)> aColliderPredicate = [](reference, const vec3&) { return true; }) const
 		{
-			iRootNode.visit(aPoint, [&](i_collidable* aMatch)
+			iRootNode.visit(aPoint, [&](i_collidable_object* aMatch)
 			{ 
 				if (aColliderPredicate(*aMatch, aPoint))
 					aResult.insert(aResult.end(), aMatch); 
@@ -508,7 +508,7 @@ namespace neogfx
 		template <typename ResultContainer>
 		void pick(const vec2& aPoint, ResultContainer& aResult, std::function<bool(reference, const vec2& aPoint)> aColliderPredicate = [](reference, const vec2&) { return true; }) const
 		{
-			iRootNode.visit(aPoint, [&](i_collidable* aMatch)
+			iRootNode.visit(aPoint, [&](i_collidable_object* aMatch)
 			{
 				if (aColliderPredicate(*aMatch, aPoint))
 					aResult.insert(aResult.end(), aMatch);

@@ -1,4 +1,4 @@
-// i_collidable.hpp
+// i_collidable_object.hpp
 /*
   neogfx C++ GUI Library
   Copyright(C) 2017 Leigh Johnston
@@ -20,13 +20,12 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/numerical.hpp>
+#include "i_object.hpp"
 
 namespace neogfx
 {
-	class i_collidable
+	class i_collidable_object : public virtual i_object
 	{
-	public:
-		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_collidable::not_implemented") {} };
 	public:
 		virtual const neogfx::aabb& aabb() const = 0;
 		virtual const neogfx::aabb& saved_aabb() const = 0;
@@ -35,15 +34,12 @@ namespace neogfx
 		virtual bool collidable() const = 0;
 		virtual uint64_t collision_mask() const { return 0ull; }
 		virtual void set_collision_mask(uint64_t) { throw not_implemented(); }
-		virtual bool has_collided(const i_collidable& aOther) const = 0;
-		virtual void collided(i_collidable& aOther) = 0;
+		virtual bool has_collided(const i_collidable_object& aOther) const = 0;
+		virtual void collided(i_collidable_object& aOther) = 0;
 	public:
 		virtual uint32_t collision_update_id() const = 0;
 		virtual void set_collision_update_id(uint32_t aCollisionCheckId) = 0;
 	public:
 		virtual void clear_aabb_cache() = 0;
-	public:
-		template <typename T> const T& as() const { return static_cast<const T&>(*this); }
-		template <typename T> T& as() { return static_cast<T&>(*this); }
 	};
 }

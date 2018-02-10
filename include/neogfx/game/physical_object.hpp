@@ -43,8 +43,8 @@ namespace neogfx
 		object_category category() const override;
 		const i_shape& as_shape() const override;
 		i_shape& as_shape() override;
-		const i_collidable& as_collidable() const override;
-		i_collidable& as_collidable() override;
+		const i_collidable_object& as_collidable_object() const override;
+		i_collidable_object& as_collidable_object() override;
 		const i_physical_object& as_physical_object() const override;
 		i_physical_object& as_physical_object() override;
 		bool killed() const override;
@@ -78,8 +78,8 @@ namespace neogfx
 		void save_aabb() override;
 		void clear_saved_aabb() override;
 		bool collidable() const override;
-		bool has_collided(const i_collidable& aOther) const override;
-		void collided(i_collidable& aOther) override;
+		bool has_collided(const i_collidable_object& aOther) const override;
+		void collided(i_collidable_object& aOther) override;
 	public:
 		uint32_t collision_update_id() const override;
 		void set_collision_update_id(uint32_t aCollisionUpdateId) override;

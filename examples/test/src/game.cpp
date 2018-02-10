@@ -65,9 +65,9 @@ public:
 			kill();
 		return updated;
 	}
-	void collided(i_collidable& aOther) override
+	void collided(i_collidable_object& aOther) override
 	{
-		auto& other = aOther.as<ng::i_physical_object>();
+		auto& other = aOther.as_physical_object();
 		iScore.first += 250;
 		std::ostringstream oss;
 		oss << std::setfill('0') << std::setw(6) << iScore.first;

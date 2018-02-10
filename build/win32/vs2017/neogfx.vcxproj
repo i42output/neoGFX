@@ -153,7 +153,7 @@
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\i_collidable.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\i_collidable_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_mesh.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_physical_object.hpp" />
