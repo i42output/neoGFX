@@ -1,7 +1,7 @@
 // mdi_window.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2017 Leigh Johnston
+  Copyright(C) 2015-present Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
