@@ -1,7 +1,7 @@
 // i_window_manager.hpp
 /*
   neogfx C++ GUI Library
-  Copyright(C) 2015-present Leigh Johnston
+  Copyright (c) 2015-present Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
