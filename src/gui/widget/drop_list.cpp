@@ -117,7 +117,7 @@ namespace neogfx
 		switch (aScanCode)
 		{
 		case ScanCode_ESCAPE:
-			iDropList.cancel_selection();
+			iDropList.cancel_and_restore_selection();
 			handled = true;
 			break;
 		case ScanCode_RETURN:
@@ -243,9 +243,14 @@ namespace neogfx
 
 	void drop_list_popup::dismiss()
 	{
+		// dismissal may be for reasons other than explicit acceptance or cancellation (e.g. clicking outside of list popup)...
+		auto* dropListForCancellation = iDropList.handling_text_change() || iDropList.accepting_selection() || iDropList.cancelling_selection() ? nullptr : &iDropList;
 		if (app::instance().keyboard().is_keyboard_grabbed_by(view()))
 			app::instance().keyboard().ungrab_keyboard(view());
 		close();
+		// 'this' will be destroyed at this point...
+		if (dropListForCancellation)
+			dropListForCancellation->cancel_and_restore_selection();
 	}
 
 	size drop_list_popup::ideal_size() const
@@ -313,7 +318,10 @@ namespace neogfx
 		if (iPopup == boost::none)
 		{
 			iPopup.emplace(iDropList);
-			iPopup->closed([this]() { iPopup = boost::none; });
+			iPopup->closed([this]() 
+			{ 		
+				iPopup = boost::none; 
+			});
 		}
 		return *iPopup;
 	}
@@ -425,7 +433,8 @@ namespace neogfx
 		iEditable{ false }, 
 		iDownArrow{ texture{} }, 
 		iPopupProxy{ *this },
-		iHandlingTextChange{ false }
+		iHandlingTextChange{ false },
+		iCancellingSelection{ false }
 	{
 		init();
 	}
@@ -436,7 +445,9 @@ namespace neogfx
 		iEditable{ false }, 
 		iDownArrow{ texture{} }, 
 		iPopupProxy{ *this },
-		iHandlingTextChange{ false }
+		iHandlingTextChange{ false },
+		iAcceptingSelection{ false },
+		iCancellingSelection{ false }
 	{
 		init();
 	}
@@ -447,6 +458,7 @@ namespace neogfx
 		iEditable{ false }, 
 		iDownArrow{ texture{} }, 
 		iPopupProxy{ *this },
+		iAcceptingSelection{ false },
 		iHandlingTextChange{ false }
 	{
 		init();
@@ -613,6 +625,8 @@ namespace neogfx
 
 	void drop_list::accept_selection()
 	{
+		neolib::scoped_flag sf{ iAcceptingSelection };
+
 		optional_item_model_index newSelection = (selection_model().has_current_index() ?
 			presentation_model().to_item_model_index(selection_model().current_index()) : optional_item_model_index{});
 
@@ -634,31 +648,12 @@ namespace neogfx
 
 	void drop_list::cancel_selection()
 	{
-		bool restoreSavedSelection = false;
-		if (view_created())
-		{
-			restoreSavedSelection = true;
-			hide_view();
-		}
-		presentation_model().reset_filter();
+		handle_cancel_selection(view_created());
+	}
 
-		if (iSavedSelection != boost::none && restoreSavedSelection)
-			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
-		else
-		{
-			selection_model().unset_current_index();
-			if (iSelection != boost::none)
-			{
-				iSelection = boost::none;
-				selection_changed.async_trigger(iSelection);
-			}
-		}
-		iSavedSelection = boost::none;
-
-		std::string text;
-		if (iSelection)
-			text = model().cell_data(*iSelection).to_string();
-		input_widget().set_text(text);
+	void drop_list::cancel_and_restore_selection()
+	{
+		handle_cancel_selection(true);
 	}
 
 	bool drop_list::editable() const
@@ -688,6 +683,16 @@ namespace neogfx
 	bool drop_list::handling_text_change() const
 	{
 		return iHandlingTextChange;
+	}
+
+	bool drop_list::accepting_selection() const
+	{
+		return iAcceptingSelection;
+	}
+
+	bool drop_list::cancelling_selection() const
+	{
+		return iCancellingSelection;
 	}
 
 	size drop_list::minimum_size(const optional_size& aAvailableSpace) const
@@ -858,5 +863,41 @@ namespace neogfx
 		}
 		else
 			hide_view();
+	}
+
+	void drop_list::handle_cancel_selection(bool aRestoreSavedSelection, bool aUpdateEditor)
+	{
+		neolib::scoped_flag sf{ iCancellingSelection };
+
+		if (view_created())
+			hide_view();
+
+		presentation_model().reset_filter();
+
+		if (aRestoreSavedSelection)
+		{
+			if (iSavedSelection != boost::none)
+				selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
+			else
+				selection_model().unset_current_index();
+		}
+		else
+		{
+			selection_model().unset_current_index();
+			if (iSelection != boost::none)
+			{
+				iSelection = boost::none;
+				selection_changed.async_trigger(iSelection);
+			}
+		}
+		iSavedSelection = boost::none;
+
+		if (!iEditable && aUpdateEditor)
+		{
+			std::string text;
+			if (iSelection)
+				text = model().cell_data(*iSelection).to_string();
+			input_widget().set_text(text);
+		}
 	}
 }

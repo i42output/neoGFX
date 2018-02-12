@@ -23,6 +23,7 @@
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/stack_layout.hpp>
 #include <neogfx/gui/widget/label.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
 
 namespace neogfx
@@ -53,6 +54,8 @@ namespace neogfx
 		public:
 			size_grip(i_layout& aLayout);
 		public:
+			neogfx::size_policy size_policy() const override;
+		public:
 			widget_part hit_test(const point&) const override;
 			bool ignore_non_client_mouse_events() const override;
 		};
@@ -76,16 +79,29 @@ namespace neogfx
 		void add_permanent_widget(std::shared_ptr<i_widget> aWidget);
 		void add_permanent_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget);
 	public:
-		virtual neogfx::size_policy size_policy() const;
-	public:
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		label& message_widget();
+		label& idle_widget();
+	protected:
+		neogfx::size_policy size_policy() const override;
+	protected:
+		void paint(graphics_context& aGraphicsContext) const override;
 	private:
+		void init();
+		void update_widgets();
+	private:
+		sink iSink;
+		style iStyle;
+		boost::optional<std::string> iMessage;
 		horizontal_layout iLayout;
 		stack_layout iNormalLayout;
-		label iMessage;
-		widget iNormalWidgetOwner;
+		label iMessageWidget;
+		widget iNormalWidgetContainer;
+		horizontal_layout iNormalWidgetContainerLayout;
+		label iIdleWidget;
+		horizontal_spacer iSpacer;
 		horizontal_layout iNormalWidgetLayout;
 		horizontal_layout iPermanentWidgetLayout;
-		boost::optional<std::string> iMessage;
+		mutable boost::optional<std::pair<colour, texture>> iSizeGripTexture;
+		size_grip iSizeGrip;
 	};
 }

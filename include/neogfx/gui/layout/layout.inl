@@ -167,7 +167,14 @@ namespace neogfx
 	size layout::do_maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
-			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+		{
+			size result;
+			if (AxisPolicy::size_policy_x(size_policy()) == neogfx::size_policy::Expanding)
+				AxisPolicy::cx(result) = std::numeric_limits<size::dimension_type>::max();
+			if (AxisPolicy::size_policy_y(size_policy()) == neogfx::size_policy::Expanding)
+				AxisPolicy::cy(result) = std::numeric_limits<size::dimension_type>::max();
+			return result;
+		}
 		auto availableSpaceForChildren = aAvailableSpace;
 		if (availableSpaceForChildren != boost::none)
 			*availableSpaceForChildren -= margins().size();

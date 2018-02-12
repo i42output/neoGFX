@@ -118,7 +118,8 @@ namespace neogfx
 			return;
 		iClosed = true;
 		closed.trigger();
-		set_destroyed();
+		if (!destroyed)
+			set_destroyed();
 	}
 
 	bool surface_window_proxy::has_parent_surface() const
@@ -414,7 +415,8 @@ namespace neogfx
 		{
 			iClosed = true;
 			closed.trigger();
-			set_destroyed();
+			if (!destroyed)
+				set_destroyed();
 		}
 	}
 

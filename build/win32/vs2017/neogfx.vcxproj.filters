@@ -1052,6 +1052,9 @@
     <ClCompile Include="..\..\..\src\game\shape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\status_bar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">

@@ -24,42 +24,42 @@
 namespace neogfx
 {
 	image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
+		iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
+		iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget(aParent), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
+		widget{ aParent }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget(aParent), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
+		widget{ aParent }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget(aLayout), iTexture(aTexture), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
+		widget{ aLayout }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget(aLayout), iTexture(aImage), iAspectRatio(aAspectRatio), iPlacement(aPlacement), iSnap(1.0)
+		widget{ aLayout }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
@@ -74,7 +74,7 @@ namespace neogfx
 
 	size image_widget::minimum_size(const optional_size& aAvailableSpace) const
 	{
-		if (has_minimum_size())
+		if (has_minimum_size() || iTexture.is_empty())
 			return widget::minimum_size(aAvailableSpace);
 		scoped_units su{ *this, units::Pixels };
 		size result = iTexture.extents();

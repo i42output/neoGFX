@@ -51,11 +51,11 @@ namespace neogfx
 	public:
 		event<> image_changed;
 	public:
-		image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+		image_widget(const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
 		image_widget(const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-		image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+		image_widget(i_widget& aParent, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
 		image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
-		image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
+		image_widget(i_layout& aLayout, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
 		image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal_placement aPlacement = cardinal_placement::Centre);
 	public:
 		virtual neogfx::size_policy size_policy() const;

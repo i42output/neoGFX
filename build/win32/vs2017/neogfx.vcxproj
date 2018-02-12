@@ -434,6 +434,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\slider.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\splitter.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\status_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\table_view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\tab_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\tab_button.cpp" />

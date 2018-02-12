@@ -50,9 +50,9 @@ namespace neogfx
 	public:
 		event<> text_changed;
 	public:
-		text_widget(const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-		text_widget(i_widget& aParent, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-		text_widget(i_layout& aLayout, const std::string& aText = std::string(), text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+		text_widget(const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+		text_widget(i_widget& aParent, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+		text_widget(i_layout& aLayout, const std::string& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
 		~text_widget();
 	public:
 		neogfx::size_policy size_policy() const override;

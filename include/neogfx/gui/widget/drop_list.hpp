@@ -158,6 +158,7 @@ namespace neogfx
 		drop_list_popup& popup() const;
 		void accept_selection();
 		void cancel_selection();
+		void cancel_and_restore_selection();
 	public:
 		bool editable() const;
 		void set_editable(bool aEditable);
@@ -165,6 +166,8 @@ namespace neogfx
 		i_drop_list_input_widget& input_widget();
 	public:
 		bool handling_text_change() const;
+		bool accepting_selection() const;
+		bool cancelling_selection() const;
 	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	private:
@@ -174,6 +177,7 @@ namespace neogfx
 		void update_input_widget();
 		void update_arrow();
 		void handle_clicked();
+		void handle_cancel_selection(bool aRestoreSavedSelection, bool aUpdateEditor = true);
 	private:
 		horizontal_layout iLayout;
 		std::unique_ptr<i_drop_list_input_widget> iInputWidget;
@@ -188,5 +192,7 @@ namespace neogfx
 		optional_item_model_index iSavedSelection;
 		optional_item_model_index iSelection;
 		bool iHandlingTextChange;
+		bool iAcceptingSelection;
+		bool iCancellingSelection;
 	};
 }
