@@ -56,5 +56,3 @@ namespace neogfx
 		flow_direction_e iFlowDirection;
 	};
 }
-
-#include "flow_layout.inl"

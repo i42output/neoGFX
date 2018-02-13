@@ -21,10 +21,20 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/layout/flow_layout.hpp>
+#include "layout.inl"
+#include "flow_layout.inl"
 
 namespace neogfx
 {
-	flow_layout::flow_layout(flow_direction_e aFlowDirection) : 
+	template size layout::do_minimum_size<layout::column_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+	template size layout::do_maximum_size<layout::column_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+	template void layout::do_layout_items<layout::column_major<flow_layout>>(const point& aPosition, const size& aSize);
+
+	template size layout::do_minimum_size<layout::row_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+	template size layout::do_maximum_size<layout::row_major<flow_layout>>(const optional_size& aAvailableSpace) const;
+	template void layout::do_layout_items<layout::row_major<flow_layout>>(const point& aPosition, const size& aSize);
+
+	flow_layout::flow_layout(flow_direction_e aFlowDirection) :
 		layout(), iFlowDirection(aFlowDirection)
 	{
 	}

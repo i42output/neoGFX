@@ -483,8 +483,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/icons.nrc.cpp</Outputs>
     </CustomBuild>
     <None Include="..\..\..\include\neogfx\core\path.inl" />
-    <None Include="..\..\..\include\neogfx\gui\layout\flow_layout.inl" />
-    <None Include="..\..\..\include\neogfx\gui\layout\layout.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl" />
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -494,6 +492,8 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/resources.nrc.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/resources.nrc.cpp</Outputs>
     </CustomBuild>
+    <None Include="..\..\..\src\gui\layout\flow_layout.inl" />
+    <None Include="..\..\..\src\gui\layout\layout.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

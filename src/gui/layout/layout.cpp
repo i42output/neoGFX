@@ -23,9 +23,18 @@
 #include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 #include <neogfx/app/app.hpp>
+#include "layout.inl"
 
 namespace neogfx
 {
+	template size layout::do_minimum_size<layout::column_major<horizontal_layout>>(const optional_size& aAvailableSpace) const;
+	template size layout::do_maximum_size<layout::column_major<horizontal_layout>>(const optional_size& aAvailableSpace) const;
+	template void layout::do_layout_items<layout::column_major<horizontal_layout>>(const point& aPosition, const size& aSize);
+
+	template size layout::do_minimum_size<layout::row_major<vertical_layout>>(const optional_size& aAvailableSpace) const;
+	template size layout::do_maximum_size<layout::row_major<vertical_layout>>(const optional_size& aAvailableSpace) const;
+	template void layout::do_layout_items<layout::row_major<vertical_layout>>(const point& aPosition, const size& aSize);
+
 	layout::layout(neogfx::alignment aAlignment) :
 		iOwner{ nullptr },
 		iParent{ nullptr },

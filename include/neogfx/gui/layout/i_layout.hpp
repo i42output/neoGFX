@@ -33,6 +33,8 @@ namespace neogfx
 	class i_layout : public i_widget_geometry, public i_units_context
 	{
 	public:
+		static i_layout* debug;
+	public:
 		event<> alignment_changed;
 	public:
 		typedef uint32_t item_index;

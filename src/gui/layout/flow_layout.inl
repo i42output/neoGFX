@@ -19,8 +19,6 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include "horizontal_layout.hpp"
-#include "vertical_layout.hpp"
 
 namespace neogfx
 {

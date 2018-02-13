@@ -20,6 +20,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <neolib/bresenham_counter.hpp>
+#include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
 
 namespace neogfx
 {
@@ -42,9 +44,6 @@ namespace neogfx
 			return result;
 		}
 	};
-
-	class horizontal_layout;
-	class vertical_layout;
 
 	template <typename Layout>
 	struct layout::column_major : common_axis_policy<column_major<Layout>>
@@ -146,13 +145,14 @@ namespace neogfx
 		{
 			if (!item.visible())
 				continue;
-			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(item.minimum_size(availableSpaceForChildren)) == 0.0 || AxisPolicy::cy(item.minimum_size(availableSpaceForChildren)) == 0.0))
+			const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
+			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(itemMinSize) == 0.0 || AxisPolicy::cy(itemMinSize) == 0.0))
 			{
 				++itemsZeroSized;
 				continue;
 			}
-			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(item.minimum_size(availableSpaceForChildren)));
-			AxisPolicy::cx(result) += AxisPolicy::cx(item.minimum_size(availableSpaceForChildren));
+			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(itemMinSize));
+			AxisPolicy::cx(result) += AxisPolicy::cx(itemMinSize);
 		}
 		AxisPolicy::cx(result) += AxisPolicy::cx(margins());
 		AxisPolicy::cy(result) += AxisPolicy::cy(margins());
@@ -166,6 +166,8 @@ namespace neogfx
 	template <typename AxisPolicy>
 	size layout::do_maximum_size(const optional_size& aAvailableSpace) const
 	{
+//		if (debug == this)
+//			_asm int 3;
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 		{
 			size result;

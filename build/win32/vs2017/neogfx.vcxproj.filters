@@ -1063,14 +1063,14 @@
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\layout\layout.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\include\neogfx\gui\layout\flow_layout.inl">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="..\..\..\include\neogfx\core\path.inl">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\src\gui\layout\flow_layout.inl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\src\gui\layout\layout.inl">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

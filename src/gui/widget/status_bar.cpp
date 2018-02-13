@@ -45,6 +45,8 @@ namespace neogfx
 		return false;
 	}
 
+	i_layout* i_layout::debug;
+
 	status_bar::status_bar(i_widget& aParent, style aStyle) :
 		widget{ aParent },
 		iStyle{ aStyle },
@@ -59,6 +61,7 @@ namespace neogfx
 		iPermanentWidgetLayout{ iLayout },
 		iSizeGrip{ iLayout }
 	{
+		i_layout::debug = &iLayout;
 		init();
 	}
 
@@ -76,6 +79,7 @@ namespace neogfx
 		iPermanentWidgetLayout{ iLayout },
 		iSizeGrip{ iLayout }
 	{
+		i_layout::debug = &iLayout;
 		init();
 	}
 

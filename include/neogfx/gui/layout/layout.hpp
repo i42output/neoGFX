@@ -168,5 +168,3 @@ namespace neogfx
 		bool iInvalidated;
 	};
 }
-
-#include "layout.inl"
