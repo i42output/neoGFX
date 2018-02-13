@@ -27,6 +27,8 @@
 
 namespace neogfx
 {
+	i_layout* i_layout::debug;
+
 	template size layout::do_minimum_size<layout::column_major<horizontal_layout>>(const optional_size& aAvailableSpace) const;
 	template size layout::do_maximum_size<layout::column_major<horizontal_layout>>(const optional_size& aAvailableSpace) const;
 	template void layout::do_layout_items<layout::column_major<horizontal_layout>>(const point& aPosition, const size& aSize);

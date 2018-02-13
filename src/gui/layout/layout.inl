@@ -190,14 +190,14 @@ namespace neogfx
 			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(item.maximum_size(availableSpaceForChildren)) == 0.0 || AxisPolicy::cy(item.maximum_size(availableSpaceForChildren)) == 0.0))
 				++itemsZeroSized;
 			const auto itemMaxSize = item.maximum_size(availableSpaceForChildren);
-			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(itemMaxSize));
+			const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
+			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), 
+				AxisPolicy::size_policy_y(size_policy()) == size_policy::Expanding || AxisPolicy::size_policy_y(size_policy()) == size_policy::Maximum ? 
+					AxisPolicy::cy(itemMaxSize) : AxisPolicy::cy(itemMinSize));
 			if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(itemMaxSize) != size::max_dimension())
 				AxisPolicy::cx(result) += AxisPolicy::cx(itemMaxSize);
-			else
-			{
+			else if (AxisPolicy::cx(itemMaxSize) == size::max_dimension())
 				AxisPolicy::cx(result) = size::max_dimension();
-				break;
-			}
 		}
 		if (AxisPolicy::cx(result) != size::max_dimension())
 		{

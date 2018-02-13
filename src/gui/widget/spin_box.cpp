@@ -61,6 +61,13 @@ namespace neogfx
 	spin_box_impl::~spin_box_impl()
 	{
 	}
+	
+	neogfx::size_policy spin_box_impl::size_policy() const
+	{
+		if (framed_widget::has_size_policy())
+			return framed_widget::size_policy();
+		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+	}
 
 	colour spin_box_impl::frame_colour() const
 	{

@@ -38,6 +38,8 @@ namespace neogfx
 		spin_box_impl(i_layout& aLayout);
 		~spin_box_impl();
 	protected:
+		neogfx::size_policy size_policy() const override;
+	protected:
 		virtual colour frame_colour() const;
 	public:
 		virtual void mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta);
