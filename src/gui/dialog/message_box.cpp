@@ -271,7 +271,7 @@ namespace neogfx
 		iLayout2.set_margins(neogfx::margins{});
 		iLayout2.set_spacing(8.0);
 
-		size maxTextSize{ app::instance().window_manager().desktop_rect(root()).width() / 3.0, std::numeric_limits<size::dimension_type>::max() };
+		size maxTextSize{ app::instance().window_manager().desktop_rect(root()).width() / 3.0, size::max_dimension() };
 		text().set_maximum_size(maxTextSize);
 		detailed_text().set_maximum_size(maxTextSize);
 

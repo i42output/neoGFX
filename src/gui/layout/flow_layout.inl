@@ -73,7 +73,7 @@ namespace neogfx
 	size flow_layout::do_maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
-			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+			return size::max_size();
 		auto availableSpaceForChildren = aAvailableSpace;
 		if (availableSpaceForChildren != boost::none)
 			*availableSpaceForChildren -= margins().size();
@@ -86,20 +86,20 @@ namespace neogfx
 			if (!item.visible())
 				continue;
 			auto itemMaximumSize = item.maximum_size(availableSpaceForChildren);
-			if (AxisPolicy::cx(itemMaximumSize) != std::numeric_limits<size::dimension_type>::max())
+			if (AxisPolicy::cx(itemMaximumSize) != size::max_dimension())
 			{
-				if (AxisPolicy::x(pos) != std::numeric_limits<size::dimension_type>::max())
+				if (AxisPolicy::x(pos) != size::max_dimension())
 				{
 					if (AxisPolicy::x(pos) + AxisPolicy::cx(itemMaximumSize) > AxisPolicy::cx(*availableSpaceForChildren))
 					{
 						AxisPolicy::x(pos) = (AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing()));
-						if (AxisPolicy::cy(itemMaximumSize) != std::numeric_limits<size::dimension_type>::max())
+						if (AxisPolicy::cy(itemMaximumSize) != size::max_dimension())
 						{
-							if (AxisPolicy::y(pos) != std::numeric_limits<size::dimension_type>::max())
+							if (AxisPolicy::y(pos) != size::max_dimension())
 								AxisPolicy::y(pos) += (AxisPolicy::cy(itemMaximumSize) + AxisPolicy::cy(spacing()));
 						}
 						else
-							AxisPolicy::y(pos) = std::numeric_limits<size::dimension_type>::max();
+							AxisPolicy::y(pos) = size::max_dimension();
 					}
 					else
 					{
@@ -108,37 +108,37 @@ namespace neogfx
 				}
 				else
 				{
-					if (AxisPolicy::cy(itemMaximumSize) != std::numeric_limits<size::dimension_type>::max())
+					if (AxisPolicy::cy(itemMaximumSize) != size::max_dimension())
 					{
-						if (AxisPolicy::y(pos) != std::numeric_limits<size::dimension_type>::max())
+						if (AxisPolicy::y(pos) != size::max_dimension())
 							AxisPolicy::y(pos) += (AxisPolicy::cy(itemMaximumSize) + AxisPolicy::cy(spacing()));
 					}
 					else
-						AxisPolicy::y(pos) = std::numeric_limits<size::dimension_type>::max();
+						AxisPolicy::y(pos) = size::max_dimension();
 				}
 			}
 			else
-				AxisPolicy::x(pos) = std::numeric_limits<size::dimension_type>::max();
+				AxisPolicy::x(pos) = size::max_dimension();
 			extent = std::max(extent, AxisPolicy::x(pos));
 		}
 		AxisPolicy::cx(result) = extent;
 		AxisPolicy::cy(result) = AxisPolicy::y(pos);
-		if (AxisPolicy::cx(result) != std::numeric_limits<size::dimension_type>::max())
+		if (AxisPolicy::cx(result) != size::max_dimension())
 		{
 			AxisPolicy::cx(result) += AxisPolicy::cx(margins());
 			if (itemsVisible > 1)
 				AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - 1));
 			AxisPolicy::cx(result) = std::min(AxisPolicy::cx(result), AxisPolicy::cx(layout::maximum_size(aAvailableSpace)));
 		}
-		if (AxisPolicy::cy(result) != std::numeric_limits<size::dimension_type>::max())
+		if (AxisPolicy::cy(result) != size::max_dimension())
 		{
 			AxisPolicy::cy(result) += AxisPolicy::cy(margins());
 			AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
 		}
 		if (AxisPolicy::cx(result) == 0.0 && AxisPolicy::size_policy_x(size_policy()) == neogfx::size_policy::Expanding)
-			AxisPolicy::cx(result) = std::numeric_limits<size::dimension_type>::max();
+			AxisPolicy::cx(result) = size::max_dimension();
 		if (AxisPolicy::cy(result) == 0.0 && AxisPolicy::size_policy_y(size_policy()) == neogfx::size_policy::Expanding)
-			AxisPolicy::cy(result) = std::numeric_limits<size::dimension_type>::max();
+			AxisPolicy::cy(result) = size::max_dimension();
 		return result;
 	}
 

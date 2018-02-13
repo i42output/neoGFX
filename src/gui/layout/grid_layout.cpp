@@ -370,9 +370,9 @@ namespace neogfx
 		}
 		result.cx += (margins().left + margins().right);
 		result.cy += (margins().top + margins().bottom);
-		if (result.cx != std::numeric_limits<size::dimension_type>::max() && visibleColumns> 0)
+		if (result.cx != size::max_dimension() && visibleColumns> 0)
 			result.cx += (spacing().cx * (visibleColumns - 1));
-		if (result.cy != std::numeric_limits<size::dimension_type>::max() && visibleRows > 0)
+		if (result.cy != size::max_dimension() && visibleRows > 0)
 			result.cy += (spacing().cy * (visibleRows - 1));
 		result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
 		result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
@@ -390,30 +390,30 @@ namespace neogfx
 		for (cell_coordinate row = 0; row < visible_rows(); ++row)
 		{
 			size::dimension_type rowMaxSize = row_maximum_size(row, availableSpaceForChildren);
-			if (rowMaxSize == std::numeric_limits<size::dimension_type>::max())
+			if (rowMaxSize == size::max_dimension())
 				result.cy = rowMaxSize;
-			else if (result.cy != std::numeric_limits<size::dimension_type>::max())
+			else if (result.cy != size::max_dimension())
 				result.cy += rowMaxSize;
 		}
 		for (cell_coordinate column = 0; column < visible_columns(); ++column)
 		{
 			size::dimension_type columnMaxSize = column_maximum_size(column, availableSpaceForChildren);
-			if (columnMaxSize == std::numeric_limits<size::dimension_type>::max())
+			if (columnMaxSize == size::max_dimension())
 				result.cx = columnMaxSize;
-			else if (result.cx != std::numeric_limits<size::dimension_type>::max())
+			else if (result.cx != size::max_dimension())
 				result.cx += columnMaxSize;
 		}
-		if (result.cx != std::numeric_limits<size::dimension_type>::max())
+		if (result.cx != size::max_dimension())
 			result.cx += (margins().left + margins().right);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max())
+		if (result.cy != size::max_dimension())
 			result.cy += (margins().top + margins().bottom);
-		if (result.cx != std::numeric_limits<size::dimension_type>::max() && visible_columns() > 0)
+		if (result.cx != size::max_dimension() && visible_columns() > 0)
 			result.cx += (spacing().cx * (visible_columns() - 1));
-		if (result.cy != std::numeric_limits<size::dimension_type>::max() && visible_rows() > 0)
+		if (result.cy != size::max_dimension() && visible_rows() > 0)
 			result.cy += (spacing().cy * (visible_rows() - 1));
-		if (result.cx != std::numeric_limits<size::dimension_type>::max())
+		if (result.cx != size::max_dimension())
 			result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max())
+		if (result.cy != size::max_dimension())
 			result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
 		return result;
 	}

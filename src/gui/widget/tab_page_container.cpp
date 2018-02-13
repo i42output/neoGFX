@@ -55,7 +55,7 @@ namespace neogfx
 		if (has_maximum_size() || size_policy() != neogfx::size_policy::Expanding)
 			return scrollable_widget::maximum_size(aAvailableSpace);
 		else
-			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+			return size::max_size();
 	}
 
 	bool tab_page_container::default_tab_page::transparent_background() const

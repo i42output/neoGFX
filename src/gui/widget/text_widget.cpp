@@ -271,7 +271,7 @@ namespace neogfx
 		{
 			if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
 				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::minimum_size().cx - margins().size().cx, UseGlyphTextCache));
-			else if (widget::has_maximum_size() && widget::maximum_size().cx != std::numeric_limits<size::dimension_type>::max())
+			else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
 				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::maximum_size().cx - margins().size().cx, UseGlyphTextCache));
 			else
 				return *(iTextExtent = gc.multiline_text_extent(iText, font(), UseGlyphTextCache));
@@ -298,7 +298,7 @@ namespace neogfx
 		{
 			if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
 				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), widget::minimum_size().cx - margins().size().cx, DontUseGlyphTextCache));
-			else if (widget::has_maximum_size() && widget::maximum_size().cx != std::numeric_limits<size::dimension_type>::max())
+			else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
 				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), widget::maximum_size().cx - margins().size().cx, DontUseGlyphTextCache));
 			else
 				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), DontUseGlyphTextCache));

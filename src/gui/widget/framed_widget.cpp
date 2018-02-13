@@ -64,9 +64,9 @@ namespace neogfx
 		size result = widget::maximum_size(aAvailableSpace);
 		if (!has_maximum_size())
 		{
-			if (result.cx != std::numeric_limits<size::dimension_type>::max())
+			if (result.cx != size::max_dimension())
 				result.cx += effective_frame_width() * 2.0;
-			if (result.cy != std::numeric_limits<size::dimension_type>::max())
+			if (result.cy != size::max_dimension())
 				result.cy += effective_frame_width() * 2.0;
 		}
 		return result;

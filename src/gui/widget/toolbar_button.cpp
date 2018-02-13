@@ -74,7 +74,7 @@ namespace neogfx
 	{
 		if (push_button::has_maximum_size() || !iAction.is_separator())
 			return push_button::maximum_size(aAvailableSpace);
-		return size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
+		return size::max_size();
 	}
 
 	void toolbar_button::paint(graphics_context& aGraphicsContext) const

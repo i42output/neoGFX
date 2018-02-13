@@ -632,7 +632,7 @@ namespace neogfx
 	{
 		return has_maximum_size() ?
 			units_converter(*this).from_device_units(*iMaximumSize) :
-			size(std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max());
+			size::max_size();
 	}
 
 	void layout::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)

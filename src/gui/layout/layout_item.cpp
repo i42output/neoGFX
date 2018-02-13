@@ -209,7 +209,7 @@ namespace neogfx
 	size layout_item::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (!visible())
-			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+			return size::max_size();
 		if (iLayoutId.second == iParent.layout_id())
 			return iMaximumSize;
 		else

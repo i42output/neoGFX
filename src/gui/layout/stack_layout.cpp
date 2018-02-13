@@ -67,16 +67,16 @@ namespace neogfx
 
 	size stack_layout::maximum_size(const optional_size& aAvailableSpace) const
 	{
-		size result{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+		size result{ size::max_size() };
 		for (const auto& item : items())
 			result = result.min(item.maximum_size(aAvailableSpace));
-		if (result.cx != std::numeric_limits<size::dimension_type>::max())
+		if (result.cx != size::max_dimension())
 			result.cx += (margins().left + margins().right);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max())
+		if (result.cy != size::max_dimension())
 			result.cy += (margins().top + margins().bottom);
-		if (result.cx != std::numeric_limits<size::dimension_type>::max())
+		if (result.cx != size::max_dimension())
 			result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
-		if (result.cy != std::numeric_limits<size::dimension_type>::max())
+		if (result.cy != size::max_dimension())
 			result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
 		return result;
 	}

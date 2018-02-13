@@ -149,6 +149,10 @@ namespace neogfx
 		basic_size floor() const { return basic_size(std::floor(cx), std::floor(cy)); }
 		basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
 		basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
+		// helpers
+	public:
+		static constexpr dimension_type max_dimension() { return std::numeric_limits<dimension_type>::max(); }
+		static constexpr basic_size max_size() { return basic_size{ max_dimension(), max_dimension() }; }
 		// attributes
 	public:
 		dimension_type cx;

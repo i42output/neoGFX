@@ -860,7 +860,7 @@ namespace neogfx
 		else if (has_layout())
 			return layout().maximum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size();
 		else
-			return size{ std::numeric_limits<size::dimension_type>::max(), std::numeric_limits<size::dimension_type>::max() };
+			return size::max_size();
 	}
 
 	void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
