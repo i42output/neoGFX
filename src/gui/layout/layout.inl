@@ -187,19 +187,18 @@ namespace neogfx
 		{
 			if (!item.visible())
 				continue;
-			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(item.maximum_size(availableSpaceForChildren)) == 0.0 || AxisPolicy::cy(item.maximum_size(availableSpaceForChildren)) == 0.0))
-				++itemsZeroSized;
-			if (result == size::max_size())
-				continue;
 			const auto itemMaxSize = item.maximum_size(availableSpaceForChildren);
-			const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
+			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(itemMaxSize) == 0.0 || AxisPolicy::cy(itemMaxSize) == 0.0))
+				++itemsZeroSized;
 			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), 
 				AxisPolicy::size_policy_y(size_policy()) == size_policy::Expanding || AxisPolicy::size_policy_y(size_policy()) == size_policy::Maximum ? 
-					AxisPolicy::cy(itemMaxSize) : AxisPolicy::cy(itemMinSize));
+					AxisPolicy::cy(itemMaxSize) : AxisPolicy::cy(item.minimum_size(availableSpaceForChildren)));
 			if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(itemMaxSize) != size::max_dimension())
 				AxisPolicy::cx(result) += AxisPolicy::cx(itemMaxSize);
 			else if (AxisPolicy::cx(itemMaxSize) == size::max_dimension())
 				AxisPolicy::cx(result) = size::max_dimension();
+			if (result == size::max_size())
+				return result;
 		}
 		if (AxisPolicy::cx(result) != size::max_dimension())
 		{
