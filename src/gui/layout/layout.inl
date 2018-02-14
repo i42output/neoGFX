@@ -189,6 +189,8 @@ namespace neogfx
 				continue;
 			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(item.maximum_size(availableSpaceForChildren)) == 0.0 || AxisPolicy::cy(item.maximum_size(availableSpaceForChildren)) == 0.0))
 				++itemsZeroSized;
+			if (result == size::max_size())
+				continue;
 			const auto itemMaxSize = item.maximum_size(availableSpaceForChildren);
 			const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
 			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), 
