@@ -31,15 +31,14 @@ namespace neogfx
 		static uint32_t items_zero_sized(layout& aLayout, const optional_size& aAvailableSpace = optional_size())
 		{
 			uint32_t result = 0;
-			if (aAvailableSpace == boost::none || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer))
+			bool noSpace = (aAvailableSpace == boost::none || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer));
+			for (const auto& item : aLayout.items())
 			{
-				for (const auto& item : aLayout.items())
-				{
-					if (!item.visible())
-						continue;
-					if (!item.get().is<item::spacer_pointer>() && (SpecializedPolicy::cx(item.minimum_size(aAvailableSpace)) == 0.0 || SpecializedPolicy::cy(item.minimum_size(aAvailableSpace)) == 0.0))
-						++result;
-				}
+				if (!item.visible())
+					continue;
+				const auto sizeTest = noSpace ? item.minimum_size(aAvailableSpace) : item.maximum_size(aAvailableSpace);
+				if (!item.get().is<item::spacer_pointer>() && (SpecializedPolicy::cx(sizeTest) == 0.0 || SpecializedPolicy::cy(sizeTest) == 0.0))
+					++result;
 			}
 			return result;
 		}

@@ -649,6 +649,12 @@ namespace neogfx
 		dimension_type bottom;
 	};
 
+	template <typename DimensionType>
+	inline basic_margins<DimensionType> operator+(const basic_margins<DimensionType>& lhs, const basic_margins<DimensionType>& rhs)
+	{
+		return basic_margins<DimensionType>{ lhs.left + rhs.left, lhs.top + rhs.top, lhs.right + rhs.right, lhs.bottom + rhs.bottom };
+	}
+		
 	typedef basic_margins<dimension> margins;
 
 	typedef boost::optional<dimension> optional_dimension;

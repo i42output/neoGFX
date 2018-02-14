@@ -1045,10 +1045,11 @@ namespace neogfx
 				GetClientRect(hwnd, &rc);
 				enum { left = 1, top = 2, right = 4, bottom = 8 };
 				int hit = 0;
-				if (pt.x < self.border_thickness().left) hit |= left;
-				if (pt.x > rc.right - self.border_thickness().right) hit |= right;
-				if (pt.y < self.border_thickness().top) hit |= top;
-				if (pt.y > rc.bottom - self.border_thickness().bottom) hit |= bottom;
+				auto margins = self.border_thickness();
+				if (pt.x < margins.left) hit |= left;
+				if (pt.x > rc.right - margins.right) hit |= right;
+				if (pt.y < margins.top) hit |= top;
+				if (pt.y > rc.bottom - margins.bottom) hit |= bottom;
 				if (hit & top && hit & left) result = HTTOPLEFT;
 				else if (hit & top && hit & right) result = HTTOPRIGHT;
 				else if (hit & bottom && hit & left) result = HTBOTTOMLEFT;
@@ -1324,6 +1325,7 @@ namespace neogfx
 #else
 			iBorderThickness = margins{ 6.0, 6.0, 6.0, 6.0 };
 #endif
+			iBorderThickness = iBorderThickness + app::instance().current_style().margins();
 		}
 		else
 			iBorderThickness = margins{ 1.0, 1.0, 1.0, 1.0 };
