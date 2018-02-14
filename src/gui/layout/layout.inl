@@ -133,6 +133,13 @@ namespace neogfx
 	template <typename AxisPolicy>
 	size layout::do_minimum_size(const optional_size& aAvailableSpace) const
 	{
+		if (debug == this)
+		{
+			std::cerr << "layout::do_minimum_size(";
+			if (aAvailableSpace != boost::none)
+				std::cerr << *aAvailableSpace;
+			std::cerr << ")" << std::endl;
+		}
 		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
 		if (itemsVisible == 0)
 			return size{};
@@ -166,8 +173,13 @@ namespace neogfx
 	template <typename AxisPolicy>
 	size layout::do_maximum_size(const optional_size& aAvailableSpace) const
 	{
-//		if (debug == this)
-//			_asm int 3;
+		if (debug == this)
+		{
+			std::cerr << "layout::do_maximum_size(";
+			if (aAvailableSpace != boost::none)
+				std::cerr << *aAvailableSpace;
+			std::cerr << ")" << std::endl;
+		}
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 		{
 			size result;
@@ -222,6 +234,8 @@ namespace neogfx
 	template <typename AxisPolicy>
 	void layout::do_layout_items(const point& aPosition, const size& aSize)
 	{
+		if (debug == this)
+			std::cerr << "layout::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 		set_position(aPosition);
 		set_extents(aSize);
 		auto itemsVisibleIncludingSpacers = items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer));

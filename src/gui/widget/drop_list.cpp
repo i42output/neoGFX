@@ -163,6 +163,8 @@ namespace neogfx
 		iView{ client_layout(), aDropList }
 	{
 		client_layout().set_margins(neogfx::margins{});
+		i_layout::debug = &client_layout();
+		client_layout().set_size_policy(neogfx::size_policy::Expanding);
 		update_placement();
 	}
 
