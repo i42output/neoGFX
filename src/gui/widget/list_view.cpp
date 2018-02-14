@@ -30,6 +30,7 @@ namespace neogfx
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
+		layout().set_size_policy(neogfx::size_policy::Expanding);
 		layout().set_margins(neogfx::margins{});
 		if (aCreateDefaultModels)
 		{
@@ -44,6 +45,7 @@ namespace neogfx
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
+		layout().set_size_policy(neogfx::size_policy::Expanding);
 		layout().set_margins(neogfx::margins{});
 		if (aCreateDefaultModels)
 		{
@@ -58,6 +60,7 @@ namespace neogfx
 		iLayout{ *this },
 		iSpacer{ iLayout }
 	{
+		layout().set_size_policy(neogfx::size_policy::Expanding);
 		layout().set_margins(neogfx::margins{});
 		if (aCreateDefaultModels)
 		{
