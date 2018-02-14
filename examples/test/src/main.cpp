@@ -178,7 +178,6 @@ int main(int argc, char* argv[])
 
 		ng::window window{ ng::size{ 768, 688 } };
 		ng::status_bar statusBar{ window.status_bar_layout() };
-		statusBar.idle_widget().text().set_text("fa_eb_fe");
 		auto& layout0 = window.client_layout();
 
 		bool showFps = false;

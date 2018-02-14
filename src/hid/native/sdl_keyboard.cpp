@@ -25,10 +25,39 @@
 
 namespace neogfx
 {
+	sdl_keyboard::sdl_keyboard()
+	{
+#ifdef _WIN32
+		BYTE kbdState[256];
+		GetKeyboardState(kbdState);
+		kbdState[VK_INSERT] = true;
+		SetKeyboardState(kbdState);
+#endif
+	}
+
 	bool sdl_keyboard::is_key_pressed(scan_code_e aScanCode) const
 	{
 		const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 		return keyboardState[to_sdl_scan_code(aScanCode)] == 1;
+	}
+
+	keyboard_locks sdl_keyboard::locks() const
+	{
+		keyboard_locks result = keyboard_locks::None;
+		auto sdlModState = SDL_GetModState();
+		if ((sdlModState & KMOD_CAPS) == KMOD_CAPS)
+			result = result | keyboard_locks::CapsLock;
+		if ((sdlModState & KMOD_NUM) == KMOD_NUM)
+			result = result | keyboard_locks::NumLock;
+#ifdef _WIN32
+		if ((GetKeyState(VK_SCROLL) & 0x0001) == 0x0001)
+			result = result | keyboard_locks::ScrollLock;
+		if ((GetKeyState(VK_INSERT) & 0x0001) == 0x0001)
+			result = result | keyboard_locks::InsertLock;
+#else
+		result = result | keyboard_locks::InsertLock;
+#endif
+		return result;
 	}
 
 	scan_code_e sdl_keyboard::from_sdl_scan_code(SDL_Scancode aScanCode)

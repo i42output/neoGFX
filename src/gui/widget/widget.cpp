@@ -266,15 +266,15 @@ namespace neogfx
 		return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
 	}
 
-	void widget::add(i_widget& aChild)
+	i_widget& widget::add(i_widget& aChild)
 	{
-		add(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, &aChild });
+		return add(std::shared_ptr<i_widget>{ std::shared_ptr<i_widget>{}, &aChild });
 	}
 
-	void widget::add(std::shared_ptr<i_widget> aChild)
+	i_widget& widget::add(std::shared_ptr<i_widget> aChild)
 	{
 		if (aChild->has_parent() && &aChild->parent() == this)
-			return;
+			return *aChild;
 		i_widget* oldParent = aChild->has_parent() ? &aChild->parent() : nullptr;
 		if (find(*aChild, false) == iChildren.end())
 			iChildren.push_back(aChild);
@@ -284,6 +284,7 @@ namespace neogfx
 		aChild->set_singular(false);
 		if (has_root())
 			root().widget_added(*aChild);
+		return *aChild;
 	}
 
 	std::shared_ptr<i_widget> widget::remove(i_widget& aChild, bool aSingular)

@@ -585,6 +585,25 @@ namespace neogfx
 		virtual bool sys_text_input(const std::string& aText) = 0;
 	};
 
+	enum class keyboard_locks : uint32_t
+	{
+		None		= 0x0000,
+		CapsLock	= 0x0001,
+		NumLock		= 0x0002,
+		ScrollLock	= 0x0004,
+		InsertLock	= 0x0008
+	};
+
+	constexpr keyboard_locks operator|(keyboard_locks aLhs, keyboard_locks aRhs)
+	{
+		return static_cast<keyboard_locks>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	constexpr keyboard_locks operator&(keyboard_locks aLhs, keyboard_locks aRhs)
+	{
+		return static_cast<keyboard_locks>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
 	class i_keyboard
 	{
 	public:
@@ -597,6 +616,7 @@ namespace neogfx
 		struct already_grabbed : std::logic_error { already_grabbed() : std::logic_error("neogfx::i_keyboard::already_grabbed") {} };
 	public:
 		virtual bool is_key_pressed(scan_code_e aScanCode) const = 0;
+		virtual keyboard_locks locks() const = 0;
 	public:
 		virtual bool is_keyboard_grabbed() const = 0;
 		virtual bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const = 0;

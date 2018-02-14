@@ -86,8 +86,8 @@ namespace neogfx
 		virtual bool is_ancestor_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
 		virtual bool is_descendent_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
 		virtual bool is_sibling_of(const i_widget& aWidget) const = 0;
-		virtual void add(i_widget& aChild) = 0;
-		virtual void add(std::shared_ptr<i_widget> aChild) = 0;
+		virtual i_widget& add(i_widget& aChild) = 0;
+		virtual i_widget& add(std::shared_ptr<i_widget> aChild) = 0;
 		virtual std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) = 0;
 		virtual void remove_all() = 0;
 		virtual bool has_children() const = 0;

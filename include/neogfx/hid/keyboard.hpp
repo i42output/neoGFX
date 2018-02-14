@@ -31,10 +31,10 @@ namespace neogfx
 	public:
 		keyboard_grabber(keyboard& aKeyboard);
 	public:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
-		virtual bool text_input(const std::string& aText);
-		virtual bool sys_text_input(const std::string& aText);
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+		bool text_input(const std::string& aText) override;
+		bool sys_text_input(const std::string& aText) override;
 	private:
 		keyboard& iKeyboard;
 	};
@@ -45,12 +45,12 @@ namespace neogfx
 	public:
 		keyboard();
 	public:
-		virtual bool is_keyboard_grabbed() const;
-		virtual bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const;
-		virtual bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const;
-		virtual void grab_keyboard(i_keyboard_handler& aKeyboardHandler);
-		virtual void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler);
-		virtual i_keyboard_handler& grabber() const;
+		bool is_keyboard_grabbed() const override;
+		bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const override;
+		bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const override;
+		void grab_keyboard(i_keyboard_handler& aKeyboardHandler) override;
+		void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler) override;
+		i_keyboard_handler& grabber() const override;
 	private:
 		mutable keyboard_grabber iGrabber;
 		std::deque<i_keyboard_handler*> iGrabs;

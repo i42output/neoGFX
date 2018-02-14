@@ -58,8 +58,8 @@ namespace neogfx
 		bool is_ancestor_of(const i_widget& aWidget, bool aSameSurface = true) const override;
 		bool is_descendent_of(const i_widget& aWidget, bool aSameSurface = true) const override;
 		bool is_sibling_of(const i_widget& aWidget) const override;
-		void add(i_widget& aChild) override;
-		void add(std::shared_ptr<i_widget> aChild) override;
+		i_widget& add(i_widget& aChild) override;
+		i_widget& add(std::shared_ptr<i_widget> aChild) override;
 		std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) override;
 		void remove_all() override;
 		bool has_children() const override;

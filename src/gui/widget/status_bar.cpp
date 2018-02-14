@@ -23,8 +23,80 @@
 
 namespace neogfx
 {
-	status_bar::size_grip::size_grip(i_layout& aLayout)
-		: image_widget{ aLayout }
+	status_bar::separator::separator() : 
+		widget{}
+	{
+	}
+
+	neogfx::size_policy status_bar::separator::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+	}
+
+	size status_bar::separator::minimum_size(const optional_size& aAvailableSpace) const
+	{
+		if (widget::has_minimum_size())
+			return widget::minimum_size(aAvailableSpace);
+		return units_converter(*this).from_device_units(size{ 2.0, 2.0 }) + margins().size();
+	}
+
+	void status_bar::separator::paint(graphics_context& aGraphicsContext) const
+	{
+		scoped_units su(*this, aGraphicsContext, units::Pixels);
+		rect line = client_rect(false);
+		line.deflate(0, std::floor(client_rect().height() / 6.0));
+		line.cx = 1.0;
+		colour ink = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().foreground_colour());
+		aGraphicsContext.fill_rect(line, ink.darker(0x40).with_alpha(0x80));
+		++line.x;
+		aGraphicsContext.fill_rect(line, ink.lighter(0x40).with_alpha(0x80));
+	}
+
+	status_bar::keyboard_lock_status::keyboard_lock_status(i_layout& aLayout) :
+		widget{ aLayout },
+		iLayout{ *this }
+	{
+		iLayout.add(std::make_shared<separator>());
+		auto insertLock = std::make_shared<label>();
+		insertLock->text().set_size_hint("Insert");
+		iLayout.add(insertLock);
+		iLayout.add(std::make_shared<separator>());
+		auto capsLock = std::make_shared<label>();
+		capsLock->text().set_size_hint("CAP");
+		iLayout.add(capsLock);
+		iLayout.add(std::make_shared<separator>());
+		auto numLock = std::make_shared<label>();
+		numLock->text().set_size_hint("NUM");
+		iLayout.add(numLock);
+		iLayout.add(std::make_shared<separator>());
+		auto scrlLock = std::make_shared<label>();
+		scrlLock->text().set_size_hint("SCRL");
+		iLayout.add(scrlLock);
+		iLayout.add(std::make_shared<separator>());
+		iUpdater = std::make_unique<neolib::callback_timer>(app::instance(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			const auto& keyboard = app::instance().keyboard();
+			insertLock->text().set_text((keyboard.locks() & keyboard_locks::InsertLock) == keyboard_locks::InsertLock ?
+				"Insert" : std::string{});
+			capsLock->text().set_text((keyboard.locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock ?
+				"CAP" : std::string{});
+			numLock->text().set_text((keyboard.locks() & keyboard_locks::NumLock) == keyboard_locks::NumLock ?
+				"NUM" : std::string{});
+			scrlLock->text().set_text((keyboard.locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock ?
+				"SCRL" : std::string{});
+		}, 100);
+	}
+
+	neogfx::size_policy status_bar::keyboard_lock_status::size_policy() const
+	{
+		return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+	}
+
+	status_bar::size_grip::size_grip(i_layout& aLayout) : 
+		image_widget{ aLayout }
 	{
 		set_ignore_mouse_events(false);
 		set_placement(cardinal_placement::SouthEast);
@@ -57,6 +129,7 @@ namespace neogfx
 		iSpacer{ iNormalWidgetContainerLayout },
 		iNormalWidgetLayout{ iNormalWidgetContainerLayout },
 		iPermanentWidgetLayout{ iLayout },
+		iKeyboardLockStatus{ iLayout },
 		iSizeGrip{ iLayout }
 	{
 		init();
@@ -74,6 +147,7 @@ namespace neogfx
 		iSpacer{ iNormalWidgetContainerLayout },
 		iNormalWidgetLayout{ iNormalWidgetContainerLayout },
 		iPermanentWidgetLayout{ iLayout },
+		iKeyboardLockStatus{ iLayout },
 		iSizeGrip{ iLayout }
 	{
 		init();
@@ -166,7 +240,7 @@ namespace neogfx
 		{
 			auto ink1 = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().foreground_colour());
 			ink1 = ink1.light() ? ink1.darker(0x40) : ink1.lighter(0x40);
-			auto ink2 = ink1.darker(0x20);
+			auto ink2 = ink1.darker(0x30);
 			if (iSizeGripTexture == boost::none || iSizeGripTexture->first != ink1)
 			{
 				const uint8_t sSizeGripTextureImagePattern[13][13]
@@ -200,6 +274,7 @@ namespace neogfx
 		iMessageWidget.text().set_text(have_message() ? message() : std::string{});
 		iMessageWidget.show(showMessage);
 		iNormalWidgetContainer.show(!showMessage);
+		iKeyboardLockStatus.show((iStyle & style::DisplayKeyboardLocks) == style::DisplayKeyboardLocks);
 		iSizeGrip.show((iStyle & style::DisplaySizeGrip) == style::DisplaySizeGrip);
 	}
 }

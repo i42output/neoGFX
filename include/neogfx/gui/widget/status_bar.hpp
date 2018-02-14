@@ -35,9 +35,8 @@ namespace neogfx
 		{
 			DisplayNone				= 0x0000,
 			DisplayMessage			= 0x0001,
-			DisplayInsertLock		= 0x0010,
-			DisplayKeyboardLocks	= 0x0020,
-			DisplaySizeGrip			= 0x0100
+			DisplayKeyboardLocks	= 0x0010,
+			DisplaySizeGrip			= 0x8000
 		};
 		friend constexpr style operator|(style aLhs, style aRhs)
 		{
@@ -49,6 +48,26 @@ namespace neogfx
 		}
 		typedef uint32_t widget_index;
 	private:
+		class separator : public widget
+		{
+		public:
+			separator();
+		public:
+			neogfx::size_policy size_policy() const override;
+			size minimum_size(const optional_size& aAvailableSpace) const override;
+		public:
+			void paint(graphics_context& aGraphicsContext) const override;
+		};
+		class keyboard_lock_status : public widget
+		{
+		public:
+			keyboard_lock_status(i_layout& aLayout);
+		public:
+			neogfx::size_policy size_policy() const override;
+		private:
+			horizontal_layout iLayout;
+			std::unique_ptr<neolib::callback_timer> iUpdater;
+		};
 		class size_grip : public image_widget
 		{
 		public:
@@ -63,8 +82,8 @@ namespace neogfx
 		struct style_conflict : std::runtime_error { style_conflict() : std::runtime_error("neogfx::status_bar::style_conflict") {} };
 		struct no_message : std::runtime_error { no_message() : std::runtime_error("neogfx::status_bar::no_message") {} };
 	public:
-		status_bar(i_widget& aParent, style aStyle = style::DisplayMessage | style::DisplayInsertLock | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
-		status_bar(i_layout& aLayout, style aStyle = style::DisplayMessage | style::DisplayInsertLock | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
+		status_bar(i_widget& aParent, style aStyle = style::DisplayMessage | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
+		status_bar(i_layout& aLayout, style aStyle = style::DisplayMessage | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
 	public:
 		bool have_message() const;
 		const std::string& message() const;
@@ -101,6 +120,7 @@ namespace neogfx
 		horizontal_spacer iSpacer;
 		horizontal_layout iNormalWidgetLayout;
 		horizontal_layout iPermanentWidgetLayout;
+		keyboard_lock_status iKeyboardLockStatus;
 		mutable boost::optional<std::pair<colour, texture>> iSizeGripTexture;
 		size_grip iSizeGrip;
 	};
