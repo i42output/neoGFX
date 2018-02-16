@@ -1,7 +1,7 @@
 ![](https://raw.githubusercontent.com/FlibbleMr/neogfx/master/neoGFX.png)
 
 # Introduction
-neoGFX is a cross-platform C++ GPU-oriented application/game framework.
+neoGFX is a cross-platform GPU-oriented C++ application/game framework.
 neoGFX is still a work in progress (incomplete) so is not yet suitable for making apps or games. Currently neogfx has only been built for and tested on Windows.
 
 # Features (at version 1.0 release)
