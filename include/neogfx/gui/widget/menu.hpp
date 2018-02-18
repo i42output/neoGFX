@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/app/action.hpp>
+#include <neogfx/app/i_help.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include "i_menu.hpp"
 
@@ -37,43 +38,43 @@ namespace neogfx
 		menu(type_e aType = Popup, const std::string& aTitle = std::string());
 		~menu();
 	public:
-		virtual bool has_parent() const;
-		virtual i_menu& parent();
-		virtual type_e type() const;
-		virtual const std::string& title() const;
-		virtual void set_title(const std::string& aTitle);
-		virtual const i_texture& image() const;
-		virtual void set_image(const std::string& aUri);
-		virtual void set_image(const i_image& aImage);
-		virtual void set_image(const i_texture& aTexture);
-		virtual uint32_t count() const;
-		virtual const i_menu_item& item_at(item_index aItemIndex) const;
-		virtual i_menu_item& item_at(item_index aItemIndex);
-		virtual i_menu& add_sub_menu(const std::string& aSubMenuTitle);
-		virtual i_action& add_action(i_action& aAction);
-		virtual i_action& add_action(std::shared_ptr<i_action> aAction);
-		virtual void add_separator();
-		virtual i_menu& insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuText);
-		virtual void insert_action_at(item_index aItemIndex, i_action& aAction);
-		virtual void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction);
-		virtual void insert_separator_at(item_index aItemIndex);
-		virtual void remove_at(item_index aItemIndex);
-		virtual item_index find(const i_menu_item& aItem) const;
-		virtual item_index find(const i_menu& aSubMenu) const;
-		virtual bool has_selected_item() const;
-		virtual item_index selected_item() const;
-		virtual void select_item_at(item_index aItemIndex, bool aSelectAnySubMenuItem = true);
-		virtual void clear_selection();
-		virtual bool has_available_items() const;
-		virtual bool item_available_at(item_index aItemIndex) const;
-		virtual item_index first_available_item() const;
-		virtual item_index previous_available_item(item_index aCurrentIndex) const;
-		virtual item_index next_available_item(item_index aCurrentIndex) const;
-		virtual bool is_open() const;
-		virtual void open();
-		virtual void close();
-		virtual bool is_modal() const;
-		virtual void set_modal(bool aModal);
+		bool has_parent() const override;
+		i_menu& parent() override;
+		type_e type() const override;
+		const std::string& title() const override;
+		void set_title(const std::string& aTitle) override;
+		const i_texture& image() const override;
+		void set_image(const std::string& aUri) override;
+		void set_image(const i_image& aImage) override;
+		void set_image(const i_texture& aTexture) override;
+		uint32_t count() const override;
+		const i_menu_item& item_at(item_index aItemIndex) const override;
+		i_menu_item& item_at(item_index aItemIndex) override;
+		i_menu& add_sub_menu(const std::string& aSubMenuTitle) override;
+		i_action& add_action(i_action& aAction) override;
+		i_action& add_action(std::shared_ptr<i_action> aAction) override;
+		void add_separator() override;
+		i_menu& insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuText) override;
+		void insert_action_at(item_index aItemIndex, i_action& aAction) override;
+		void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction) override;
+		void insert_separator_at(item_index aItemIndex) override;
+		void remove_at(item_index aItemIndex) override;
+		item_index find(const i_menu_item& aItem) const override;
+		item_index find(const i_menu& aSubMenu) const override;
+		bool has_selected_item() const override;
+		item_index selected_item() const override;
+		void select_item_at(item_index aItemIndex, bool aSelectAnySubMenuItem = true) override;
+		void clear_selection() override;
+		bool has_available_items() const override;
+		bool item_available_at(item_index aItemIndex) const override;
+		item_index first_available_item() const override;
+		item_index previous_available_item(item_index aCurrentIndex) const override;
+		item_index next_available_item(item_index aCurrentIndex) const override;
+		bool is_open() const override;
+		void open() override;
+		void close() override;
+		bool is_modal() const override;
+		void set_modal(bool aModal) override;
 	private:
 		i_menu* iParent;
 		type_e iType;

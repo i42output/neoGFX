@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/app.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gui/widget/menu_item.hpp>
 #include <neogfx/gui/widget/menu.hpp>
@@ -201,7 +202,11 @@ namespace neogfx
 		if (!item_available_at(aItemIndex))
 			throw cannot_select_item();
 		if (has_selected_item())
-			item_at(selected_item()).deselected.trigger();
+		{
+			auto selection = selected_item();
+			iSelection = boost::none;
+			item_at(selection).deselected.trigger();
+		}
 		iSelection = aItemIndex;
 		item_selected.trigger(item_at(aItemIndex));
 		item_at(aItemIndex).select(aSelectAnySubMenuItem);
@@ -217,7 +222,9 @@ namespace neogfx
 	{
 		if (has_selected_item())
 		{
+			auto selection = selected_item();
 			iSelection = boost::none;
+			item_at(selection).deselected.trigger();
 			selection_cleared.trigger();
 		}
 	}
@@ -285,7 +292,9 @@ namespace neogfx
 	void menu::open()
 	{
 		if (++iOpenCount == 1)
+		{
 			opened.trigger();
+		}
 	}
 
 	void menu::close()
@@ -309,5 +318,4 @@ namespace neogfx
 	{
 		iModal = aModal;
 	}
-
 }

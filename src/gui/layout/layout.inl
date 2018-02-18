@@ -211,14 +211,14 @@ namespace neogfx
 			if (result == size::max_size())
 				return result;
 		}
-		if (AxisPolicy::cx(result) != size::max_dimension())
+		if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(result) != 0.0)
 		{
 			AxisPolicy::cx(result) += AxisPolicy::cx(margins());
 			if (itemsVisible - itemsZeroSized > 1)
 				AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
 			AxisPolicy::cx(result) = std::min(AxisPolicy::cx(result), AxisPolicy::cx(layout::maximum_size(aAvailableSpace)));
 		}
-		if (AxisPolicy::cy(result) != size::max_dimension())
+		if (AxisPolicy::cy(result) != size::max_dimension() && AxisPolicy::cy(result) != 0.0)
 		{
 			AxisPolicy::cy(result) += AxisPolicy::cy(margins());
 			AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));

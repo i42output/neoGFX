@@ -65,8 +65,8 @@ namespace neogfx
 		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer);
 		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_spacer> aSpacer);
 		using layout::add_at;
-		virtual i_spacer& add_spacer() override;
-		virtual i_spacer& add_spacer_at(item_index aPosition) override;
+		i_spacer& add_spacer() override;
+		i_spacer& add_spacer_at(item_index aPosition) override;
 		virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		void remove_at(item_index aIndex) override;
 		bool remove(i_layout& aItem) override;

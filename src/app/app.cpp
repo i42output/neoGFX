@@ -498,6 +498,52 @@ namespace neogfx
 			iMnemonics.erase(n);
 	}
 
+	class help : public i_help
+	{
+	public:
+		bool help_active() const override
+		{
+			return !iActiveSources.empty();
+		}
+		const i_help_source& active_help() const override
+		{
+			if (help_active())
+				return *iActiveSources.back();
+			throw help_not_active();
+		}
+	public:
+		void activate(const i_help_source& aSource) override
+		{
+			std::cout << "activate(" << aSource.help_text() << ")" << std::endl;
+			iActiveSources.push_back(&aSource);
+			help_activated.trigger(aSource);
+			text_changed(aSource);
+		}
+		void deactivate(const i_help_source& aSource) override
+		{
+			std::cout << "deactivate(" << aSource.help_text() << ")" << std::endl;
+			auto existing = std::find(iActiveSources.rbegin(), iActiveSources.rend(), &aSource);
+			if (existing == iActiveSources.rend())
+				throw invalid_help_source();
+			iActiveSources.erase(existing.base() - 1);
+			help_deactivated.trigger(aSource);
+			text_changed(aSource);
+		}
+		void text_changed(const i_help_source& aSource) override
+		{
+			help_text_changed.trigger(aSource);
+		}
+	private:
+		std::vector<const i_help_source*> iActiveSources;
+	};
+
+	i_help& app::help() const
+	{
+		if (iHelp == nullptr)
+			iHelp = std::make_unique<neogfx::help>();
+		return *iHelp;
+	}
+
 	bool app::process_events(i_event_processing_context&)
 	{
 		if (rendering_engine().creating_window() || surface_manager().initialising_surface())

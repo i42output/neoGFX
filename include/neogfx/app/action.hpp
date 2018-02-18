@@ -45,7 +45,7 @@ namespace neogfx
 		virtual std::string menu_text() const;
 		virtual std::string button_text() const;
 		virtual std::string tool_tip_text() const;
-		virtual std::string statis_tip_text() const;
+		virtual std::string help_text() const;
 		virtual const i_texture& image() const;
 		virtual const i_texture& checked_image() const;
 		virtual const optional_key_sequence& shortcut() const;
@@ -60,7 +60,7 @@ namespace neogfx
 		virtual i_action& set_menu_text(const optional_text& aMenuText = optional_text());
 		virtual i_action& set_button_text(const optional_text& aButtonText = optional_text());
 		virtual i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text());
-		virtual i_action& set_statis_tip_text(const optional_text& aStatusTipText = optional_text());
+		virtual i_action& set_help_text(const optional_text& aHelpText = optional_text());
 		virtual i_action& set_image(const std::string& aUri, texture_sampling aSampling = texture_sampling::Normal);
 		virtual i_action& set_image(const i_image& aImage);
 		virtual i_action& set_image(const i_texture& aTexture);
@@ -82,7 +82,7 @@ namespace neogfx
 		optional_text iMenuText;
 		optional_text iButtonText;
 		optional_text iToolTipText;
-		optional_text iStatusTipText;
+		optional_text iHelpText;
 		texture iImage;
 		texture iCheckedTexture;
 		optional_key_sequence iShortcut;

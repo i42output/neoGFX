@@ -710,7 +710,6 @@ namespace neogfx
 			modelWidth = presentation_model().column_width(0, gc, false);
 		}
 		minimumSize.cx += modelWidth;
-
 		return minimumSize;
 	}
 

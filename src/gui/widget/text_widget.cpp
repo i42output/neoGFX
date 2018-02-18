@@ -68,6 +68,8 @@ namespace neogfx
 				result.cx = std::min(std::ceil(result.cx), maximum_size().cx);
 				result.cy = std::min(std::ceil(result.cy), maximum_size().cy);
 			}
+			if (result.cx == 0.0 && (flags() & text_widget_flags::HasSizeOnEmpty) == text_widget_flags::HasSizeOnEmpty)
+				result.cx = 1.0;
 			return units_converter(*this).from_device_units(result);
 		}
 	}
@@ -177,6 +179,16 @@ namespace neogfx
 		return iType == text_widget_type::MultiLine;
 	}
 
+	text_widget_flags text_widget::flags() const
+	{
+		return iFlags;
+	}
+	
+	void text_widget::set_flags(text_widget_flags aFlags)
+	{
+		iFlags = aFlags;
+	}
+
 	neogfx::alignment text_widget::alignment() const
 	{
 		return iAlignment;
@@ -262,7 +274,7 @@ namespace neogfx
 		}
 		if (iTextExtent != boost::none)
 			return *iTextExtent;
-		if (!has_surface())
+		else if (!has_surface())
 			return size{};
 		graphics_context gc{ *this, graphics_context::type::Unattached };
 		scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
@@ -270,14 +282,15 @@ namespace neogfx
 		if (multi_line())
 		{
 			if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::minimum_size().cx - margins().size().cx, UseGlyphTextCache));
+				iTextExtent = gc.multiline_text_extent(iText, font(), widget::minimum_size().cx - margins().size().cx, UseGlyphTextCache);
 			else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
-				return *(iTextExtent = gc.multiline_text_extent(iText, font(), widget::maximum_size().cx - margins().size().cx, UseGlyphTextCache));
+				iTextExtent = gc.multiline_text_extent(iText, font(), widget::maximum_size().cx - margins().size().cx, UseGlyphTextCache);
 			else
-				return *(iTextExtent = gc.multiline_text_extent(iText, font(), UseGlyphTextCache));
+				iTextExtent = gc.multiline_text_extent(iText, font(), UseGlyphTextCache);
 		}
 		else
-			return *(iTextExtent = gc.text_extent(iText, font(), UseGlyphTextCache));
+			iTextExtent = gc.text_extent(iText, font(), UseGlyphTextCache);
+		return *iTextExtent;
 	}
 
 	size text_widget::size_hint_extent() const
@@ -290,21 +303,25 @@ namespace neogfx
 		}
 		if (iSizeHintExtent != boost::none)
 			return *iSizeHintExtent;
-		if (!has_surface())
+		else if (!has_surface())
 			return size{};
-		graphics_context gc{ *this, graphics_context::type::Unattached };
-		scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
-		if (multi_line())
-		{
-			if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), widget::minimum_size().cx - margins().size().cx, DontUseGlyphTextCache));
-			else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
-				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), widget::maximum_size().cx - margins().size().cx, DontUseGlyphTextCache));
-			else
-				return *(iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), DontUseGlyphTextCache));
-		}
 		else
-			return *(iSizeHintExtent = gc.text_extent(iSizeHint, font(), DontUseGlyphTextCache));
+		{
+			graphics_context gc{ *this, graphics_context::type::Unattached };
+			scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
+			if (multi_line())
+			{
+				if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
+					iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), widget::minimum_size().cx - margins().size().cx, DontUseGlyphTextCache);
+				else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
+					iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), widget::maximum_size().cx - margins().size().cx, DontUseGlyphTextCache);
+				else
+					iSizeHintExtent = gc.multiline_text_extent(iSizeHint, font(), DontUseGlyphTextCache);
+			}
+			else
+				iSizeHintExtent = gc.text_extent(iSizeHint, font(), DontUseGlyphTextCache);
+		}
+		return *iSizeHintExtent;
 	}
 
 	void text_widget::init()

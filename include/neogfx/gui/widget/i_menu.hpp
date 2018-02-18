@@ -76,6 +76,7 @@ namespace neogfx
 		virtual void add_separator() = 0;
 		virtual i_menu& insert_sub_menu_at(item_index aItemIndex, const std::string& aSubMenuTitle) = 0;
 		virtual void insert_action_at(item_index aItemIndex, i_action& aAction) = 0;
+		virtual void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction) = 0;
 		virtual void insert_separator_at(item_index aItemIndex) = 0;
 		virtual void remove_at(item_index aItemIndex) = 0;
 		virtual item_index find(const i_menu_item& aItem) const = 0;

@@ -122,12 +122,12 @@ namespace neogfx
 		iStyle{ aStyle },
 		iLayout{ *this },
 		iNormalLayout{ iLayout },
-		iMessageWidget{ iNormalLayout },
-		iNormalWidgetContainer{ iNormalLayout },
-		iNormalWidgetContainerLayout{ iNormalWidgetContainer },
-		iIdleWidget{ iNormalWidgetContainerLayout, "Ready" },
-		iSpacer{ iNormalWidgetContainerLayout },
-		iNormalWidgetLayout{ iNormalWidgetContainerLayout },
+		iMessageLayout{ iNormalLayout },
+		iMessageWidget{ iMessageLayout },
+		iIdleLayout{ iNormalLayout },
+		iIdleWidget{ iIdleLayout, "Ready" },
+		iNormalWidgetContainer{ iLayout },
+		iNormalWidgetLayout{ iNormalWidgetContainer },
 		iPermanentWidgetLayout{ iLayout },
 		iKeyboardLockStatus{ iLayout },
 		iSizeGrip{ iLayout }
@@ -140,12 +140,12 @@ namespace neogfx
 		iStyle{ aStyle },
 		iLayout{ *this },
 		iNormalLayout{ iLayout },
-		iMessageWidget{ iNormalLayout },
-		iNormalWidgetContainer{ iNormalLayout },
-		iNormalWidgetContainerLayout{ iNormalWidgetContainer },
-		iIdleWidget{ iNormalWidgetContainerLayout, "Ready" },
-		iSpacer{ iNormalWidgetContainerLayout },
-		iNormalWidgetLayout{ iNormalWidgetContainerLayout },
+		iMessageLayout{ iNormalLayout },
+		iMessageWidget{ iMessageLayout },
+		iIdleLayout{ iNormalLayout },
+		iIdleWidget{ iIdleLayout, "Ready" },
+		iNormalWidgetContainer{ iLayout },
+		iNormalWidgetLayout{ iNormalWidgetContainer },
 		iPermanentWidgetLayout{ iLayout },
 		iKeyboardLockStatus{ iLayout },
 		iSizeGrip{ iLayout }
@@ -155,12 +155,14 @@ namespace neogfx
 
 	bool status_bar::have_message() const
 	{
-		return iMessage != boost::none;
+		return iMessage != boost::none || app::instance().help().help_active();
 	}
 
-	const std::string& status_bar::message() const
+	std::string status_bar::message() const
 	{
-		if (have_message())
+		if (app::instance().help().help_active())
+			return app::instance().help().active_help().help_text();
+		else if (iMessage != boost::none)
 			return *iMessage;
 		throw no_message();
 	}
@@ -232,8 +234,16 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{});
+		iLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
 		iNormalLayout.set_margins(neogfx::margins{});
-		iNormalWidgetContainerLayout.set_margins(neogfx::margins{});
+		iNormalLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+		iMessageLayout.set_margins(neogfx::margins{});
+		iMessageLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+		iMessageWidget.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+		iIdleLayout.set_margins(neogfx::margins{});
+		iIdleLayout.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+		iIdleWidget.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+		iNormalWidgetContainer.set_margins(neogfx::margins{});
 		iNormalWidgetLayout.set_margins(neogfx::margins{});
 		iPermanentWidgetLayout.set_margins(neogfx::margins{});
 		auto update_size_grip = [this](style_aspect)
@@ -265,6 +275,9 @@ namespace neogfx
 		};
 		iSink += app::instance().current_style_changed(update_size_grip);
 		update_size_grip(style_aspect::Colour);
+		iSink += app::instance().help().help_activated([this](const i_help_source&) { update_widgets();	});
+		iSink += app::instance().help().help_deactivated([this](const i_help_source&) { update_widgets(); });
+		iSink += app::instance().help().help_text_changed([this](const i_help_source&) { update_widgets(); });
 		update_widgets();
 	}
 
@@ -273,6 +286,7 @@ namespace neogfx
 		bool showMessage = (iStyle & style::DisplayMessage) == style::DisplayMessage && have_message();
 		iMessageWidget.text().set_text(have_message() ? message() : std::string{});
 		iMessageWidget.show(showMessage);
+		iIdleWidget.show(!showMessage);
 		iNormalWidgetContainer.show(!showMessage);
 		iKeyboardLockStatus.show((iStyle & style::DisplayKeyboardLocks) == style::DisplayKeyboardLocks);
 		iSizeGrip.show((iStyle & style::DisplaySizeGrip) == style::DisplaySizeGrip);

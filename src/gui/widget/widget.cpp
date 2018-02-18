@@ -831,7 +831,14 @@ namespace neogfx
 		if (has_minimum_size())
 			return units_converter(*this).from_device_units(*iMinimumSize);
 		else if (has_layout())
-			return layout().minimum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size();
+		{
+			auto result = layout().minimum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace);
+			if (result.cx != 0.0)
+				result.cx += margins().size().cx;
+			if (result.cy != 0.0)
+				result.cy += margins().size().cy;
+			return result;
+		}
 		else
 			return margins().size();
 	}
@@ -859,7 +866,14 @@ namespace neogfx
 		else if (size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed)
 			return minimum_size(aAvailableSpace);
 		else if (has_layout())
-			return layout().maximum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace) + margins().size();
+		{
+			auto result = layout().maximum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace);
+			if (result.cx != 0.0)
+				result.cx += margins().size().cx;
+			if (result.cy != 0.0)
+				result.cy += margins().size().cy;
+			return result;
+		}
 		else
 			return size::max_size();
 	}

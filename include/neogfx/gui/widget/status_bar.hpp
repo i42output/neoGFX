@@ -86,7 +86,7 @@ namespace neogfx
 		status_bar(i_layout& aLayout, style aStyle = style::DisplayMessage | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
 	public:
 		bool have_message() const;
-		const std::string& message() const;
+		std::string message() const;
 		void set_message(const std::string& aMessage);
 		void clear_message();
 		void add_normal_widget(i_widget& aWidget);
@@ -113,11 +113,11 @@ namespace neogfx
 		boost::optional<std::string> iMessage;
 		horizontal_layout iLayout;
 		stack_layout iNormalLayout;
+		horizontal_layout iMessageLayout;
 		label iMessageWidget;
-		widget iNormalWidgetContainer;
-		horizontal_layout iNormalWidgetContainerLayout;
+		horizontal_layout iIdleLayout;
 		label iIdleWidget;
-		horizontal_spacer iSpacer;
+		widget iNormalWidgetContainer;
 		horizontal_layout iNormalWidgetLayout;
 		horizontal_layout iPermanentWidgetLayout;
 		keyboard_lock_status iKeyboardLockStatus;

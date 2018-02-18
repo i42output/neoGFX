@@ -39,6 +39,7 @@
 #include <neogfx/app/clipboard.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/app/i_mnemonic.hpp>
+#include <neogfx/app/i_help.hpp>
 
 namespace neogfx
 {
@@ -169,6 +170,8 @@ namespace neogfx
 		void add_mnemonic(i_mnemonic& aMnemonic) override;
 		void remove_mnemonic(i_mnemonic& aMnemonic) override;
 	public:
+		i_help& help() const override;
+	public:
 		bool process_events(i_event_processing_context& aContext) override;
 	private:
 		void task() override {}
@@ -215,5 +218,6 @@ namespace neogfx
 		event_processing_context iAppContext;
 		event_processing_context iAppMessageQueueContext;
 		std::vector<std::pair<key_code_e, key_modifiers_e>> iKeySequence;
+		mutable std::unique_ptr<i_help> iHelp;
 	};
 }

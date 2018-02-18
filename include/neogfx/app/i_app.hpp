@@ -39,6 +39,8 @@ namespace neogfx
 	class i_mnemonic;
 	class i_image;
 
+	class i_help;
+
 	class event_processing_context;
 
 	class i_app
@@ -98,6 +100,8 @@ namespace neogfx
 		virtual void remove_action(i_action& aAction) = 0;
 		virtual void add_mnemonic(i_mnemonic& aMnemonic) = 0;
 		virtual void remove_mnemonic(i_mnemonic& aMnemonic) = 0;
+	public:
+		virtual i_help& help() const = 0;
 	public:
 		virtual bool process_events(i_event_processing_context& aContext) = 0;
 	};

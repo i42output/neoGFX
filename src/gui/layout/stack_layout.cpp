@@ -50,18 +50,19 @@ namespace neogfx
 
 	size stack_layout::minimum_size(const optional_size& aAvailableSpace) const
 	{
-		if (items_visible() == 0)
-			return size{};
 		size result;
-		for (const auto& item : items())
+		if (items_visible() != 0)
 		{
-			result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
-			result.cy = std::max(result.cy, item.minimum_size(aAvailableSpace).cy);
+			for (const auto& item : items())
+			{
+				result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
+				result.cy = std::max(result.cy, item.minimum_size(aAvailableSpace).cy);
+			}
+			result.cx += margins().size().cx;
+			result.cy += margins().size().cy;
+			result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
+			result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
 		}
-		result.cx += (margins().left + margins().right);
-		result.cy += (margins().top + margins().bottom);
-		result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
-		result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
 		return result;
 	}
 
@@ -69,11 +70,17 @@ namespace neogfx
 	{
 		size result{ size::max_size() };
 		for (const auto& item : items())
-			result = result.min(item.maximum_size(aAvailableSpace));
+		{
+			const auto& itemMaxSize = item.maximum_size(aAvailableSpace);
+			if (itemMaxSize.cx != 0.0)
+				result.cx = std::min(result.cx, itemMaxSize.cx);
+			if (itemMaxSize.cy != 0.0)
+				result.cy = std::min(result.cy, itemMaxSize.cy);
+		}
 		if (result.cx != size::max_dimension())
-			result.cx += (margins().left + margins().right);
+			result.cx += margins().size().cx;
 		if (result.cy != size::max_dimension())
-			result.cy += (margins().top + margins().bottom);
+			result.cy += margins().size().cy;
 		if (result.cx != size::max_dimension())
 			result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
 		if (result.cy != size::max_dimension())

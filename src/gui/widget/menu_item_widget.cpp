@@ -207,6 +207,25 @@ namespace neogfx
 		return iText;
 	}
 
+	bool menu_item_widget::help_active() const
+	{
+		return menu_item().type() == i_menu_item::Action &&
+			menu().has_selected_item() && menu().find(menu_item()) == menu().selected_item();
+	}
+
+	help_type menu_item_widget::help_type() const
+	{
+		return neogfx::help_type::Action;
+	}
+
+	std::string menu_item_widget::help_text() const
+	{
+		if (help_active())
+			return menu_item().action().help_text();
+		else
+			return "";
+	}
+
 	point menu_item_widget::sub_menu_position() const
 	{
 		if (menu().type() == i_menu::MenuBar)
@@ -287,7 +306,9 @@ namespace neogfx
 		}
 		iSink += menu_item().selected([this]()
 		{
-			if (menu_item().type() == i_menu_item::SubMenu && menu_item().select_any_sub_menu_item() && menu().type() == i_menu::Popup)
+			if (menu_item().type() == i_menu_item::Action)
+				app::instance().help().activate(*this);
+			else if (menu_item().type() == i_menu_item::SubMenu && menu_item().select_any_sub_menu_item() && menu().type() == i_menu::Popup)
 			{
 				if (!iSubMenuOpener)
 				{
@@ -305,6 +326,8 @@ namespace neogfx
 		});
 		iSink += menu_item().deselected([this]()
 		{
+			if (menu_item().type() == i_menu_item::Action)
+				app::instance().help().deactivate(*this);
 			iSubMenuOpener.reset();
 		});
 	}

@@ -32,7 +32,8 @@ namespace neogfx
 	enum class text_widget_flags
 	{
 		None = 0x00,
-		HideOnEmpty = 0x01
+		HideOnEmpty = 0x01,
+		HasSizeOnEmpty = 0x02
 	};
 
 	inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)
@@ -68,6 +69,8 @@ namespace neogfx
 		void set_text(const std::string& aText);
 		void set_size_hint(const std::string& aSizeHint);
 		bool multi_line() const;
+		text_widget_flags flags() const;
+		void set_flags(text_widget_flags aFlags);
 		neogfx::alignment alignment() const;
 		void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true);
 		bool has_text_colour() const;

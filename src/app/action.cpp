@@ -133,9 +133,9 @@ namespace neogfx
 			return std::string();
 	}
 
-	std::string action::statis_tip_text() const
+	std::string action::help_text() const
 	{
-		if (iStatusTipText != boost::none)
+		if (iHelpText != boost::none)
 			return *iToolTipText;
 		else if (iText != boost::none)
 			return *iText;
@@ -268,12 +268,12 @@ namespace neogfx
 		return *this;
 	}
 
-	i_action& action::set_statis_tip_text(const optional_text& aStatusTipText)
+	i_action& action::set_help_text(const optional_text& aHelpText)
 	{
-		if (iStatusTipText != aStatusTipText)
+		if (iHelpText != aHelpText)
 		{
-			iStatusTipText = aStatusTipText;
-			if (iStatusTipText != boost::none && iSeparator)
+			iHelpText = aHelpText;
+			if (iHelpText != boost::none && iSeparator)
 				iSeparator = false;
 			changed.trigger();
 		}

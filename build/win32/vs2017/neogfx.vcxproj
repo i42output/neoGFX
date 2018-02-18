@@ -113,6 +113,7 @@
     <ClInclude Include="..\..\..\include\neogfx\app\i_app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_clipboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\i_help.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_mnemonic.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_palette.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_resource.hpp" />

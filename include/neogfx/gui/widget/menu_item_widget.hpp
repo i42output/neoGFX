@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_mnemonic.hpp>
+#include <neogfx/app/i_help.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include "widget.hpp"
@@ -32,7 +33,7 @@ namespace neogfx
 {
 	class popup_menu;
 
-	class menu_item_widget : public widget, protected i_mnemonic
+	class menu_item_widget : public widget, protected i_mnemonic, private i_help_source
 	{
 	public:
 		menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);
@@ -60,6 +61,10 @@ namespace neogfx
 		std::string mnemonic() const override;
 		void mnemonic_execute() override;
 		i_widget& mnemonic_widget() override;
+	protected:
+		bool help_active() const override;
+		neogfx::help_type help_type() const override;
+		std::string help_text() const override;
 	public:
 		point sub_menu_position() const;
 	private:

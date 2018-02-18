@@ -210,7 +210,9 @@ namespace neogfx
 		if (iOpenSubMenu.get() != nullptr)
 			iOpenSubMenu->clear_menu();
 		if (has_menu() && menu().is_open())
+		{
 			menu().close();
+		}
 		iSink = sink{};
 		iSink2 = sink{};
 		iMenu = nullptr;

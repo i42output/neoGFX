@@ -354,8 +354,6 @@ namespace neogfx
 		size result;
 		uint32_t visibleColumns = visible_columns();
 		uint32_t visibleRows = visible_rows();
-		if (visibleRows == 6)
-			std::cerr << "ff" << std::endl;
 		for (cell_coordinate row = 0; row < rows(); ++row)
 		{
 			if (!is_row_visible(row))
