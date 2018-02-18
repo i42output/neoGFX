@@ -33,7 +33,7 @@ namespace neogfx
 	{
 		None = 0x00,
 		HideOnEmpty = 0x01,
-		HasSizeOnEmpty = 0x02
+		TakesSpaceWhenEmpty = 0x02
 	};
 
 	inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)

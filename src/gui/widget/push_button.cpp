@@ -401,7 +401,6 @@ namespace neogfx
 
 	void push_button::init()
 	{
-		text().set_flags(push_button::text().flags() | text_widget_flags::HasSizeOnEmpty);
 		if (iStyle == push_button_style::ItemViewHeader)
 		{
 			set_margins(neogfx::margins(1.0, 2.0));
