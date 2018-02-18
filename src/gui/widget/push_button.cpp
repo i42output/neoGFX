@@ -257,9 +257,9 @@ namespace neogfx
 		}
 	}
 
-	void push_button::mouse_entered()
+	void push_button::mouse_entered(const point& aPosition)
 	{
-		button::mouse_entered();
+		button::mouse_entered(aPosition);
 		if (perform_hover_animation() || !finished_animation())
 			iAnimator.again_if();
 		update();

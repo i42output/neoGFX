@@ -51,7 +51,7 @@ namespace neogfx
 	class window_event
 	{
 	public:
-		typedef neolib::variant<neogfx::size> parameter_type;
+		typedef neolib::variant<neogfx::size, neogfx::point> parameter_type;
 	public:
 		window_event(window_event_type aType, const parameter_type& aParameter = parameter_type()) :
 			iType(aType), iParameter(aParameter)
@@ -62,13 +62,21 @@ namespace neogfx
 		{
 			return iType;
 		}
-		neogfx::size size() const
+		neogfx::size extents() const
 		{
 			return static_variant_cast<neogfx::size>(iParameter);
 		}
-		void set_size(const neogfx::size& aSize)
+		neogfx::point position() const
 		{
-			static_variant_cast<neogfx::size&>(iParameter) = aSize;;
+			return static_variant_cast<neogfx::point>(iParameter);
+		}
+		void set_extents(const neogfx::size& aExtents)
+		{
+			static_variant_cast<neogfx::size&>(iParameter) = aExtents;
+		}
+		void set_position(const neogfx::point& aPosition)
+		{
+			static_variant_cast<neogfx::point&>(iParameter) = aPosition;
 		}
 	private:
 		window_event_type iType;

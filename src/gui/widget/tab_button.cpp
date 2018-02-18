@@ -123,9 +123,9 @@ namespace neogfx
 				image().set_image(iTextures[iTextureState]->second);
 		}
 	protected:
-		void mouse_entered() override
+		void mouse_entered(const point& aPosition) override
 		{
-			push_button::mouse_entered();
+			push_button::mouse_entered(aPosition);
 			update_state();
 		}
 		void mouse_left() override
@@ -306,9 +306,9 @@ namespace neogfx
 			push_button::update(to_client_coordinates(window_rect() + delta{ 0.0, 2.0 }));
 	}
 
-	void tab_button::mouse_entered()
+	void tab_button::mouse_entered(const point& aPosition)
 	{
-		push_button::mouse_entered();
+		push_button::mouse_entered(aPosition);
 		if (closable())
 			iCloseButton->update_state();
 	}

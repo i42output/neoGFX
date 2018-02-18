@@ -77,7 +77,7 @@ namespace neogfx
 		void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 		void mouse_button_released(mouse_button aButton, const point& aPosition) override;
 		void mouse_moved(const point& aPosition) override;
-		void mouse_entered() override;
+		void mouse_entered(const point& aPosition) override;
 		void mouse_left() override;
 	public:
 		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;

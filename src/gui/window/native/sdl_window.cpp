@@ -761,7 +761,7 @@ namespace neogfx
 				{
 				case WM_NCMOUSEMOVE:
 					if (!self.non_client_entered())
-						self.push_event(window_event{ window_event_type::NonClientEnter });
+						self.push_event(window_event{ window_event_type::NonClientEnter, pt });
 					self.handle_event(non_client_mouse_event{ mouse_event_type::Moved, pt, modifiers });
 					break;
 				case WM_NCLBUTTONDOWN:
@@ -1220,7 +1220,7 @@ namespace neogfx
 				render(true);
 				break;
 			case SDL_WINDOWEVENT_ENTER:
-				push_event(window_event{ window_event_type::Enter });
+				push_event(window_event{ window_event_type::Enter, basic_point<int>{ aEvent.window.data1, aEvent.window.data2 } });
 				break;
 			case SDL_WINDOWEVENT_LEAVE:
 				push_event(window_event{ window_event_type::Leave });

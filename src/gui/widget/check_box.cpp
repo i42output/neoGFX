@@ -122,9 +122,9 @@ namespace neogfx
 		}
 	}
 
-	void check_box::mouse_entered()
+	void check_box::mouse_entered(const point& aPosition)
 	{
-		button::mouse_entered();
+		button::mouse_entered(aPosition);
 		update();
 	}
 

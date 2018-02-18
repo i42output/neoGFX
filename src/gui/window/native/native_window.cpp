@@ -174,14 +174,14 @@ namespace neogfx
 				break;
 			case window_event_type::Enter:
 				iNonClientEntered = false;
-				surface_window().native_window_mouse_entered();
+				surface_window().native_window_mouse_entered(windowEvent.position());
 				break;
 			case window_event_type::Leave:
 				surface_window().native_window_mouse_left();
 				break;
 			case window_event_type::NonClientEnter:
 				iNonClientEntered = true;
-				surface_window().native_window_mouse_entered();
+				surface_window().native_window_mouse_entered(windowEvent.position());
 				break;
 			case window_event_type::NonClientLeave:
 				iNonClientEntered = false;

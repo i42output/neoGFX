@@ -61,7 +61,7 @@ namespace neogfx
 		void paint_non_client(graphics_context& aGraphicsContext) const override;
 		void paint(graphics_context& aGraphicsContext) const override;
 	public:
-		void mouse_entered() override;
+		void mouse_entered(const point& aPosition) override;
 		void mouse_left() override;
 	protected:
 		virtual rect path_bounding_rect() const;

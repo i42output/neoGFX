@@ -256,9 +256,9 @@ namespace neogfx
 		horizontal_scrollbar().update(*this, aPosition + origin());
 	}
 
-	void scrollable_widget::mouse_entered()
+	void scrollable_widget::mouse_entered(const point& aPosition)
 	{
-		framed_widget::mouse_entered();
+		framed_widget::mouse_entered(aPosition);
 		vertical_scrollbar().update(*this);
 		horizontal_scrollbar().update(*this);
 	}

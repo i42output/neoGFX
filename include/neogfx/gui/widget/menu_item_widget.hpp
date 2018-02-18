@@ -52,7 +52,7 @@ namespace neogfx
 	public:
 		bool can_capture() const override;
 	public:
-		void mouse_entered() override;
+		void mouse_entered(const point& aPosition) override;
 		void mouse_left() override;
 		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 		void mouse_button_released(mouse_button aButton, const point& aPosition) override;

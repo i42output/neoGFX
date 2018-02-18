@@ -1152,7 +1152,7 @@ namespace neogfx
 			if (!visible() && isEntered)
 			{
 				if (!is_root())
-					root().as_widget().mouse_entered();
+					root().as_widget().mouse_entered(root().mouse_position());
 				else
 					mouse_left();
 			}
@@ -1213,7 +1213,7 @@ namespace neogfx
 			if (!enabled() && isEntered)
 			{
 				if (!is_root())
-					root().as_widget().mouse_entered();
+					root().as_widget().mouse_entered(root().mouse_position());
 				else
 					mouse_left();
 			}
@@ -1406,7 +1406,7 @@ namespace neogfx
 	{
 	}
 
-	void widget::mouse_entered()
+	void widget::mouse_entered(const point& aPosition)
 	{
 	}
 

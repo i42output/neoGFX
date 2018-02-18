@@ -53,7 +53,7 @@ namespace neogfx
 	protected:
 		void paint(graphics_context& aGraphicsContext) const override;
 	protected:
-		void mouse_entered() override;
+		void mouse_entered(const point& aPosition) override;
 		void mouse_left() override;
 	protected:
 		void handle_clicked() override;

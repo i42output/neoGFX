@@ -180,7 +180,7 @@ namespace neogfx
 		void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
 		void release_focused_widget(i_widget& aWidget) override;
 	protected:
-		void mouse_entered() override;
+		void mouse_entered(const point& aPosition) override;
 		void mouse_left() override;
 	protected:
 		void update_modality(bool aEnableAncestors) override;

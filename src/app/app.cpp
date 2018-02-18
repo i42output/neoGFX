@@ -514,24 +514,16 @@ namespace neogfx
 	public:
 		void activate(const i_help_source& aSource) override
 		{
-			std::cout << "activate(" << aSource.help_text() << ")" << std::endl;
 			iActiveSources.push_back(&aSource);
 			help_activated.trigger(aSource);
-			text_changed(aSource);
 		}
 		void deactivate(const i_help_source& aSource) override
 		{
-			std::cout << "deactivate(" << aSource.help_text() << ")" << std::endl;
 			auto existing = std::find(iActiveSources.rbegin(), iActiveSources.rend(), &aSource);
 			if (existing == iActiveSources.rend())
 				throw invalid_help_source();
 			iActiveSources.erase(existing.base() - 1);
 			help_deactivated.trigger(aSource);
-			text_changed(aSource);
-		}
-		void text_changed(const i_help_source& aSource) override
-		{
-			help_text_changed.trigger(aSource);
 		}
 	private:
 		std::vector<const i_help_source*> iActiveSources;

@@ -529,7 +529,7 @@ namespace neogfx
 		scrollable_widget::layout_items_completed();
 		i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
 		if (iEnteredWidget != &widgetUnderMouse)
-			mouse_entered();
+			mouse_entered(mouse_position());
 	}
 
 	bool window::device_metrics_available() const
@@ -993,9 +993,9 @@ namespace neogfx
 		return *this;
 	}
 
-	void window::mouse_entered()
+	void window::mouse_entered(const point& aPosition)
 	{
-		i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
+		i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(aPosition) : surface().capturing_widget());
 		i_widget* newEnteredWidget = &widgetUnderMouse;
 		i_widget* oldEnteredWidget = iEnteredWidget;
 		if (newEnteredWidget != oldEnteredWidget)
@@ -1003,7 +1003,7 @@ namespace neogfx
 			if (oldEnteredWidget != nullptr)
 				oldEnteredWidget->mouse_left();
 			iEnteredWidget = newEnteredWidget;
-			iEnteredWidget->mouse_entered();
+			iEnteredWidget->mouse_entered(aPosition);
 		}
 	}
 

@@ -346,7 +346,7 @@ namespace neogfx
 			iCapturingWidget = &aWidget;
 			native_window().set_capture();
 			aWidget.captured();
-			as_widget().mouse_entered();
+			as_widget().mouse_entered(as_window().mouse_position());
 		}
 	}
 
@@ -357,7 +357,7 @@ namespace neogfx
 		native_window().release_capture();
 		iCapturingWidget = nullptr;
 		aWidget.released();
-		as_widget().mouse_entered();
+		as_widget().mouse_entered(as_window().mouse_position());
 	}
 
 	void surface_window_proxy::non_client_set_capture(i_widget& aWidget)
@@ -367,7 +367,7 @@ namespace neogfx
 			iCapturingWidget = &aWidget;
 			native_window().non_client_set_capture();
 			aWidget.captured();
-			as_widget().mouse_entered();
+			as_widget().mouse_entered(as_window().mouse_position());
 		}
 	}
 
@@ -378,7 +378,7 @@ namespace neogfx
 		native_window().non_client_release_capture();
 		iCapturingWidget = nullptr;
 		aWidget.released();
-		as_widget().mouse_entered();
+		as_widget().mouse_entered(as_window().mouse_position());
 	}
 
 	bool surface_window_proxy::current_event_is_non_client() const
@@ -511,7 +511,7 @@ namespace neogfx
 
 	void surface_window_proxy::native_window_mouse_moved(const point& aPosition)
 	{
-		as_widget().mouse_entered();
+		as_widget().mouse_entered(aPosition);
 		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
 		if (w.mouse_event.trigger(native_window().current_event()))
 		{
@@ -552,15 +552,15 @@ namespace neogfx
 
 	void surface_window_proxy::native_window_non_client_mouse_moved(const point& aPosition)
 	{
-		as_widget().mouse_entered();
+		as_widget().mouse_entered(aPosition);
 		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
 		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
 			w.mouse_moved(aPosition - w.origin());
 	}
 
-	void surface_window_proxy::native_window_mouse_entered()
+	void surface_window_proxy::native_window_mouse_entered(const point& aPosition)
 	{
-		as_widget().mouse_entered();
+		as_widget().mouse_entered(aPosition);
 	}
 
 	void surface_window_proxy::native_window_mouse_left()

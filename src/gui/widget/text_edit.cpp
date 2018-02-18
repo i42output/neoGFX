@@ -371,7 +371,7 @@ namespace neogfx
 			set_cursor_position(aPosition, false);
 	}
 
-	void text_edit::mouse_entered()
+	void text_edit::mouse_entered(const point& aPosition)
 	{
 	}
 

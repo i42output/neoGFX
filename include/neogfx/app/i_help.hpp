@@ -47,7 +47,6 @@ namespace neogfx
 	public:
 		event<const i_help_source&> help_activated;
 		event<const i_help_source&> help_deactivated;
-		event<const i_help_source&> help_text_changed;
 	public:
 		virtual ~i_help() {}
 	public:
@@ -56,6 +55,5 @@ namespace neogfx
 	public:
 		virtual void activate(const i_help_source& aSource) = 0;
 		virtual void deactivate(const i_help_source& aSource) = 0;
-		virtual void text_changed(const i_help_source& aSource) = 0;
 	};
 }

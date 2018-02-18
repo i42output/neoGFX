@@ -65,7 +65,7 @@ namespace neogfx
 		using push_button::update;
 		void update(const rect& aUpdateRect) override;
 	protected:
-		void mouse_entered() override;
+		void mouse_entered(const point& aPosition) override;
 		void mouse_left() override;
 	protected:
 		void set_selected_state(bool aSelectedState);

@@ -125,7 +125,7 @@ namespace neogfx
 		iMessageLayout{ iNormalLayout },
 		iMessageWidget{ iMessageLayout },
 		iIdleLayout{ iNormalLayout },
-		iIdleWidget{ iIdleLayout, "Ready" },
+		iIdleWidget{ iIdleLayout },
 		iNormalWidgetContainer{ iLayout },
 		iNormalWidgetLayout{ iNormalWidgetContainer },
 		iPermanentWidgetLayout{ iLayout },
@@ -143,7 +143,7 @@ namespace neogfx
 		iMessageLayout{ iNormalLayout },
 		iMessageWidget{ iMessageLayout },
 		iIdleLayout{ iNormalLayout },
-		iIdleWidget{ iIdleLayout, "Ready" },
+		iIdleWidget{ iIdleLayout },
 		iNormalWidgetContainer{ iLayout },
 		iNormalWidgetLayout{ iNormalWidgetContainer },
 		iPermanentWidgetLayout{ iLayout },
@@ -226,6 +226,16 @@ namespace neogfx
 		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
 	}
 
+	bool status_bar::can_defer_layout() const
+	{
+		return true;
+	}
+
+	bool status_bar::is_managing_layout() const
+	{
+		return true;
+	}
+
 	void status_bar::paint(graphics_context& aGraphicsContext) const
 	{
 	}
@@ -277,7 +287,6 @@ namespace neogfx
 		update_size_grip(style_aspect::Colour);
 		iSink += app::instance().help().help_activated([this](const i_help_source&) { update_widgets();	});
 		iSink += app::instance().help().help_deactivated([this](const i_help_source&) { update_widgets(); });
-		iSink += app::instance().help().help_text_changed([this](const i_help_source&) { update_widgets(); });
 		update_widgets();
 	}
 

@@ -151,9 +151,9 @@ namespace neogfx
 		return false;
 	}
 
-	void menu_item_widget::mouse_entered()
+	void menu_item_widget::mouse_entered(const point& aPosition)
 	{
-		widget::mouse_entered();
+		widget::mouse_entered(aPosition);
 		update();
 		if (menu_item().available())
 			menu().select_item_at(menu().find(menu_item()));

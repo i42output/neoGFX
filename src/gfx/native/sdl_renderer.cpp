@@ -51,6 +51,8 @@ namespace neogfx
 		iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), 
 		iContext(nullptr), iActiveContextSurface(nullptr)
 	{
+		SDL_AddEventWatch(&filter_event, this);
+
 		sdl_instance::instantiate();
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, aDoubleBufferedWindows ? 1 : 0);
 		switch (aRenderer)
@@ -222,6 +224,32 @@ namespace neogfx
 	sdl_renderer::opengl_context sdl_renderer::create_context(void* aNativeSurfaceHandle)
 	{
 		return SDL_GL_CreateContext(static_cast<SDL_Window*>(aNativeSurfaceHandle));
+	}
+
+	int sdl_renderer::filter_event(void* aSelf, SDL_Event* aEvent)
+	{
+		switch (aEvent->type)
+		{
+		case SDL_WINDOWEVENT:
+			{
+				SDL_Window* sdlWindow = SDL_GetWindowFromID(aEvent->window.windowID);
+				if (sdlWindow != NULL && app::instance().surface_manager().is_surface_attached(sdlWindow))
+				{
+					auto& window = static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(sdlWindow).native_surface());
+					switch (aEvent->window.event)
+					{
+					case SDL_WINDOWEVENT_ENTER:
+						aEvent->window.data1 = static_cast<Sint32>(window.surface_window().as_window().mouse_position().x);
+						aEvent->window.data2 = static_cast<Sint32>(window.surface_window().as_window().mouse_position().y);
+						break;
+					}
+				}
+			}
+			break;
+		default:
+			break;
+		}
+		return 0;
 	}
 
 	bool sdl_renderer::queue_events()

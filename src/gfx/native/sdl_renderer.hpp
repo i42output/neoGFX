@@ -58,6 +58,7 @@ namespace neogfx
 		virtual bool process_events();
 	private:
 		opengl_context create_context(void* aNativeSurfaceHandle);
+		static int filter_event(void* aSelf, SDL_Event* aEvent);
 		bool queue_events();
 	private:
 		bool iDoubleBuffering;

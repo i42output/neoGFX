@@ -145,7 +145,7 @@ namespace neogfx
 		}
 	}
 
-	void splitter::mouse_entered()
+	void splitter::mouse_entered(const point& aPosition)
 	{
 	}
 

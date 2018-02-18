@@ -115,7 +115,7 @@ namespace neogfx
 		void native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 		void native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition) override;
 		void native_window_non_client_mouse_moved(const point& aPosition) override;
-		void native_window_mouse_entered() override;
+		void native_window_mouse_entered(const point& aPosition) override;
 		void native_window_mouse_left() override;
 		widget_part native_window_hit_test(const point& aPosition) const override;
 		rect native_window_widget_part_rect(widget_part aWidgetPart) const override;

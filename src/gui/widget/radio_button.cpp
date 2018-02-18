@@ -138,9 +138,9 @@ namespace neogfx
 		}
 	}
 
-	void radio_button::mouse_entered()
+	void radio_button::mouse_entered(const point& aPosition)
 	{
-		button::mouse_entered();
+		button::mouse_entered(aPosition);
 		update();
 	}
 
