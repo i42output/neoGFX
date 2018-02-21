@@ -21,8 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/action.hpp>
-#include "widget.hpp"
-#include "toolbar_button.hpp"
+#include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/layout/flow_layout.hpp>
+#include <neogfx/gui/widget/toolbar_button.hpp>
 
 namespace neogfx
 {
@@ -52,6 +53,7 @@ namespace neogfx
 		virtual void insert_action(button_index aButtonIndex, i_action& aAction);
 		virtual void insert_separator(button_index aButtonIndex);
 	private:
+		flow_layout iLayout;
 		button_list iButtons;
 		action iSeparator;
 		optional_size iButtonImageExtents;

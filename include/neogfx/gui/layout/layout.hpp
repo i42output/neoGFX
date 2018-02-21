@@ -80,8 +80,8 @@ namespace neogfx
 		bool remove(i_widget& aItem) override;
 		void remove_all() override;
 		item_index count() const override;
-		optional_item_index find(i_layout& aItem) const override;
-		optional_item_index find(i_widget& aItem) const override;
+		optional_item_index find(const i_layout& aItem) const override;
+		optional_item_index find(const i_widget& aItem) const override;
 		optional_item_index find(const layout_item& aItem) const override;
 		bool is_widget_at(item_index aIndex) const override;
 		const i_widget_geometry& get_item_at(item_index aIndex) const override;

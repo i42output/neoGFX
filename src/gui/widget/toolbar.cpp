@@ -22,22 +22,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	toolbar::toolbar()
+	toolbar::toolbar() : 
+		iLayout{ *this }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this));
 	}
 
-	toolbar::toolbar(i_widget& aParent) : widget(aParent)
+	toolbar::toolbar(i_widget& aParent) : 
+		widget{ aParent }, iLayout{ *this }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this));
 	}
 
-	toolbar::toolbar(i_layout& aLayout) : widget(aLayout)
+	toolbar::toolbar(i_layout& aLayout) : 
+		widget{ aLayout }, iLayout{ *this }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this));
 	}
 
 	neogfx::size_policy toolbar::size_policy() const

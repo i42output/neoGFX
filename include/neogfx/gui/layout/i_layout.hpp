@@ -72,8 +72,8 @@ namespace neogfx
 		virtual bool remove(i_widget& aItem) = 0;
 		virtual void remove_all() = 0;
 		virtual item_index count() const = 0;
-		virtual optional_item_index find(i_layout& aItem) const = 0;
-		virtual optional_item_index find(i_widget& aItem) const = 0;
+		virtual optional_item_index find(const i_layout& aItem) const = 0;
+		virtual optional_item_index find(const i_widget& aItem) const = 0;
 		virtual optional_item_index find(const layout_item& aItem) const = 0;
 		virtual bool is_widget_at(item_index aIndex) const = 0;
 		virtual const i_widget_geometry& get_item_at(item_index aIndex) const = 0;

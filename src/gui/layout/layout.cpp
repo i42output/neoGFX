@@ -299,7 +299,7 @@ namespace neogfx
 		return iItems.size();
 	}
 
-	layout::optional_item_index layout::find(i_layout& aItem) const
+	layout::optional_item_index layout::find(const i_layout& aItem) const
 	{
 		for (auto i = iItems.begin(); i != iItems.end(); ++i)
 		{
@@ -310,7 +310,7 @@ namespace neogfx
 		return optional_item_index();
 	}
 
-	layout::optional_item_index layout::find(i_widget& aItem) const
+	layout::optional_item_index layout::find(const i_widget& aItem) const
 	{
 		for (auto i = iItems.begin(); i != iItems.end(); ++i)
 		{

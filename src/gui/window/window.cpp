@@ -496,7 +496,7 @@ namespace neogfx
 		if (!scrollable_widget::has_frame_colour() && is_active())
 			return app::instance().current_style().palette().selection_colour();
 		else
-			return scrollable_widget::frame_colour();
+			return scrollable_widget::frame_colour().with_alpha(is_active() ? 0xFF : 0x40);
 	}
 
 	bool window::is_root() const
@@ -746,6 +746,8 @@ namespace neogfx
 	scrolling_disposition window::scrolling_disposition(const i_widget& aChildWidget) const
 	{
 		if (iTitleBar != boost::none && &aChildWidget == &*iTitleBar)
+			return neogfx::scrolling_disposition::DontScrollChildWidget;
+		else if (iStatusBarLayout.find(aChildWidget) != boost::none)
 			return neogfx::scrolling_disposition::DontScrollChildWidget;
 		return scrollable_widget::scrolling_disposition(aChildWidget);
 	}
