@@ -99,31 +99,35 @@ namespace neogfx
 		return iCells.find(cell_coordinates{ aColumn, aRow }) != iCells.end();
 	}
 
-	void grid_layout::add(i_widget& aWidget)
+	i_widget& grid_layout::add(i_widget& aWidget)
 	{
 		add_item_at_position(iCursor.y, iCursor.x, aWidget);
 		increment_cursor();
+		return aWidget;
 	}
 
-	void grid_layout::add(std::shared_ptr<i_widget> aWidget)
+	i_widget& grid_layout::add(std::shared_ptr<i_widget> aWidget)
 	{
 		add_item_at_position(iCursor.y, iCursor.x, aWidget);
 		increment_cursor();
+		return *aWidget;
 	}
 
-	void grid_layout::add(i_layout& aLayout)
+	i_layout&  grid_layout::add(i_layout& aLayout)
 	{
 		add_item_at_position(iCursor.y, iCursor.x, aLayout);
 		increment_cursor();
+		return aLayout;
 	}
 
-	void grid_layout::add(std::shared_ptr<i_layout> aLayout)
+	i_layout&  grid_layout::add(std::shared_ptr<i_layout> aLayout)
 	{
 		add_item_at_position(iCursor.y, iCursor.x, aLayout);
 		increment_cursor();
+		return *aLayout;
 	}
 
-	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget)
+	i_widget& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget)
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
@@ -138,9 +142,10 @@ namespace neogfx
 		if (owner() != 0)
 			items().back().set_owner(owner());
 		row_layout(aRow).replace_item_at(aColumn, aWidget);
+		return aWidget;
 	}
 
-	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget)
+	i_widget& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget)
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
@@ -155,15 +160,16 @@ namespace neogfx
 		if (owner() != 0)
 			items().back().set_owner(owner());
 		row_layout(aRow).replace_item_at(aColumn, aWidget);
+		return *aWidget;
 	}
 
-	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout)
+	i_layout& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout)
 	{
 		if (&aLayout == &iRowLayout)
 		{
 			if (owner() != 0)
 				aLayout.set_owner(owner());
-			return;
+			return aLayout;
 		}
 		if (iCells.find(cell_coordinates{aColumn, aRow}) != iCells.end())
 			remove_item_at_position(aRow, aColumn);
@@ -176,9 +182,10 @@ namespace neogfx
 		if (owner() != 0)
 			items().back().set_owner(owner());
 		row_layout(aRow).replace_item_at(aColumn, aLayout);
+		return aLayout;
 	}
 
-	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout)
+	i_layout& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout)
 	{
 		if (iCells.find(cell_coordinates{aColumn, aRow}) != iCells.end())
 			remove_item_at_position(aRow, aColumn);
@@ -191,6 +198,7 @@ namespace neogfx
 		if (owner() != 0)
 			items().back().set_owner(owner());
 		row_layout(aRow).replace_item_at(aColumn, aLayout);
+		return *aLayout;
 	}
 
 	void grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer)

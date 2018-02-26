@@ -129,6 +129,7 @@ namespace neogfx
 		bool can_defer_layout() const override;
 		bool is_managing_layout() const override;
 	protected:
+		neogfx::size_policy size_policy() const override;
 		size minimum_size(const optional_size& aAvailableSpace) const override;
 	protected:
 		bool transparent_background() const override;
@@ -152,6 +153,11 @@ namespace neogfx
 	bool window::client::is_managing_layout() const
 	{
 		return true;
+	}
+
+	neogfx::size_policy window::client::size_policy() const
+	{
+		return iLayout.size_policy();
 	}
 
 	size window::client::minimum_size(const optional_size& aAvailableSpace) const

@@ -32,6 +32,9 @@ namespace neogfx
 	class item_view : public scrollable_widget, protected header_view::i_owner, private i_item_model_subscriber, private i_item_presentation_model_subscriber, private i_item_selection_model_subscriber
 	{
 	public:
+		struct no_model : std::logic_error { no_model() : std::logic_error("neogfx::item_view::no_model") {} };
+		struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::item_view::no_presentation_model") {} };
+		struct no_selection_model : std::logic_error { no_selection_model() : std::logic_error("neogfx::item_view::no_selection_model") {} };
 		struct no_editor : std::logic_error { no_editor() : std::logic_error("neogfx::item_view::no_editor") {} };
 		struct unknown_editor_type : std::logic_error { unknown_editor_type() : std::logic_error("neogfx::item_view::unknown_editor_type") {} };
 	public:

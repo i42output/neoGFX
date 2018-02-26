@@ -125,6 +125,8 @@ namespace neogfx
 		void add_ref() override;
 		void release() override;
 	private:
+		void set_metrics();
+	private:
 		i_rendering_engine& iRenderingEngine;
 		i_native_font& iFont;
 		font::style_e iStyle;

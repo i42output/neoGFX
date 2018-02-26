@@ -126,25 +126,17 @@ namespace neogfx
 
 	void header_view::set_model(i_item_model& aModel)
 	{
-		if (has_model())
-			presentation_model().unsubscribe(*this);
-		iModel = std::shared_ptr<i_item_model>(std::shared_ptr<i_item_model>(), &aModel);
-		iSectionWidths.resize(presentation_model().columns());
-		if (has_presentation_model())
-			presentation_model().set_item_model(aModel);
-		iUpdater.reset();
-		iUpdater.reset(new updater(*this));
-		update();
+		set_model(std::shared_ptr<i_item_model>{std::shared_ptr<i_item_model>{}, &aModel});
 	}
 
 	void header_view::set_model(std::shared_ptr<i_item_model> aModel)
 	{
-		if (has_model())
-			presentation_model().unsubscribe(*this);
 		iModel = aModel;
-		iSectionWidths.resize(presentation_model().columns());
 		if (has_presentation_model())
+		{
+			iSectionWidths.resize(presentation_model().columns());
 			presentation_model().set_item_model(*aModel);
+		}
 		iUpdater.reset();
 		iUpdater.reset(new updater(*this));
 		update();
@@ -170,12 +162,7 @@ namespace neogfx
 
 	void header_view::set_presentation_model(i_item_presentation_model& aPresentationModel)
 	{
-		if (has_presentation_model())
-			presentation_model().unsubscribe(*this);
-		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
-		presentation_model().subscribe(*this);
-		if (has_model())
-			presentation_model().set_item_model(model());
+		set_presentation_model(std::shared_ptr<i_item_presentation_model>{std::shared_ptr<i_item_presentation_model>{}, &aPresentationModel});
 	}
 
 	void header_view::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)

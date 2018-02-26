@@ -39,6 +39,9 @@ namespace neogfx
 	class i_font_manager
 	{
 	public:
+		struct bad_font_family_index : std::logic_error { bad_font_family_index() : std::logic_error("neogfx::i_font_manager::bad_font_family_index") {} };
+		struct bad_font_style_index : std::logic_error { bad_font_style_index() : std::logic_error("neogfx::i_font_manager::bad_font_style_index") {} };
+	public:
 		virtual void* font_library_handle() const = 0;
 		virtual const font_info& default_system_font_info() const = 0;
 		virtual const i_fallback_font_info& default_fallback_font_info() const = 0;
@@ -57,6 +60,11 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice) = 0;
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual std::unique_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+	public:
+		virtual uint32_t font_family_count() const = 0;
+		virtual std::string font_family(uint32_t aFamilyIndex) const = 0;
+		virtual uint32_t font_style_count(uint32_t aFamilyIndex) const = 0;
+		virtual std::string font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const = 0;
 	public:
 		virtual const i_texture_atlas& glyph_atlas() const = 0;
 		virtual i_texture_atlas& glyph_atlas() = 0;

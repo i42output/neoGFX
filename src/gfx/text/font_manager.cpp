@@ -312,6 +312,44 @@ namespace neogfx
 		(void)aDevice;
 	}
 
+	uint32_t font_manager::font_family_count() const
+	{
+		return iFontFamilies.size();
+	}
+
+	std::string font_manager::font_family(uint32_t aFamilyIndex) const
+	{
+		if (aFamilyIndex < font_family_count())
+			return neolib::make_string(std::next(iFontFamilies.begin(), aFamilyIndex)->first);
+		throw bad_font_family_index();
+	}
+
+	uint32_t font_manager::font_style_count(uint32_t aFamilyIndex) const
+	{
+		if (aFamilyIndex < font_family_count())
+		{
+			uint32_t styles = 0;
+			for (auto& f : std::next(iFontFamilies.begin(), aFamilyIndex)->second)
+				styles += f->style_count();
+			return styles;
+		}
+		throw bad_font_family_index();
+	}
+
+	std::string font_manager::font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const
+	{
+		if (aFamilyIndex < font_family_count() && aStyleIndex < font_style_count(aFamilyIndex))
+		{
+			for (auto& f : std::next(iFontFamilies.begin(), aFamilyIndex)->second)
+			{
+				if (aStyleIndex < f->style_count())
+					return f->style_name(aStyleIndex);
+				aStyleIndex -= f->style_count();
+			}
+		}
+		throw bad_font_family_index();
+	}
+
 	const i_texture_atlas& font_manager::glyph_atlas() const
 	{
 		return iGlyphAtlas;

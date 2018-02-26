@@ -60,11 +60,11 @@ namespace neogfx
 		};
 		typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_container_type column_info_container_type;
 	public:
-		basic_item_presentation_model() : iItemModel{ 0 }, iInitializing{ false }, iFiltering{ false }
+		basic_item_presentation_model() : iItemModel{ nullptr }, iInitializing{ false }, iFiltering{ false }
 		{
 			init();
 		}
-		basic_item_presentation_model(i_item_model& aItemModel) : iItemModel{ 0 }, iInitializing{ false }, iFiltering{ false }
+		basic_item_presentation_model(i_item_model& aItemModel) : iItemModel{ nullptr }, iInitializing{ false }, iFiltering{ false }
 		{
 			init();
 			set_item_model(aItemModel);
@@ -82,20 +82,21 @@ namespace neogfx
 		}
 		bool has_item_model() const override
 		{
-			return iItemModel != 0;
+			return iItemModel != nullptr;
 		}
 		i_item_model& item_model() const override
 		{
-			if (iItemModel == 0)
+			if (iItemModel == nullptr)
 				throw no_item_model();
 			return *iItemModel;
 		}
 		void set_item_model(i_item_model& aItemModel) override
 		{
-			if (iItemModel == &aItemModel)
-				return;
+			if (iItemModel != &aItemModel)
 			{
 				neolib::scoped_flag sf{ iInitializing };
+				if (has_item_model())
+					item_model().unsubscribe(*this);
 				iItemModel = &aItemModel;
 				item_model().subscribe(*this);
 				iColumns.clear();
@@ -146,7 +147,12 @@ namespace neogfx
 				return *iColumns[aColumnIndex].width + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
 			iColumns[aColumnIndex].width = 0.0;
 			for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
+			{
+				auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
+				if (modelIndex.column() >= item_model().columns(modelIndex))
+					continue;
 				iColumns[aColumnIndex].width = std::max(*iColumns[aColumnIndex].width, cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGraphicsContext).cx);
+			}
 			return *iColumns[aColumnIndex].width + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
 		}
 		const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
@@ -232,6 +238,9 @@ namespace neogfx
 			dimension height = 0.0;
 			for (uint32_t col = 0; col < iRows[aIndex.row()].second.size(); ++col)
 			{
+				auto modelIndex = to_item_model_index(item_presentation_model_index{ aIndex.row(), col });
+				if (modelIndex.column() >= item_model().columns(modelIndex))
+					continue;
 				optional_font cellFont = cell_font(aIndex);
 				if (cellFont == boost::none && iFont != font())
 				{

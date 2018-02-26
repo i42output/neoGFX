@@ -122,7 +122,7 @@ namespace neogfx
 		iParent = aParent;
 	}
 
-	void layout::add(i_widget& aWidget)
+	i_widget& layout::add(i_widget& aWidget)
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
@@ -130,9 +130,10 @@ namespace neogfx
 		iItems.push_back(item(*this, aWidget));
 		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
+		return aWidget;
 	}
 
-	void layout::add_at(item_index aPosition, i_widget& aWidget)
+	i_widget& layout::add_at(item_index aPosition, i_widget& aWidget)
 	{
 		if (aWidget.has_layout() && &aWidget.layout() == this)
 			throw widget_already_added();
@@ -142,9 +143,10 @@ namespace neogfx
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aWidget));
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
+		return aWidget;
 	}
 
-	void layout::add(std::shared_ptr<i_widget> aWidget)
+	i_widget& layout::add(std::shared_ptr<i_widget> aWidget)
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
@@ -152,9 +154,10 @@ namespace neogfx
 		iItems.push_back(item(*this, aWidget));
 		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
+		return *aWidget;
 	}
 
-	void layout::add_at(item_index aPosition, std::shared_ptr<i_widget> aWidget)
+	i_widget& layout::add_at(item_index aPosition, std::shared_ptr<i_widget> aWidget)
 	{
 		if (aWidget->has_layout() && &aWidget->layout() == this)
 			throw widget_already_added();
@@ -164,18 +167,20 @@ namespace neogfx
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item(*this, aWidget));
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
+		return *aWidget;
 	}
 
-	void layout::add(i_layout& aLayout)
+	i_layout& layout::add(i_layout& aLayout)
 	{
 		invalidate();
 		iItems.push_back(item(*this, aLayout));
 		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 		aLayout.set_parent(this);
+		return aLayout;
 	}
 
-	void layout::add_at(item_index aPosition, i_layout& aLayout)
+	i_layout& layout::add_at(item_index aPosition, i_layout& aLayout)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
@@ -184,18 +189,20 @@ namespace neogfx
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
 		aLayout.set_parent(this);
+		return aLayout;
 	}
 
-	void layout::add(std::shared_ptr<i_layout> aLayout)
+	i_layout& layout::add(std::shared_ptr<i_layout> aLayout)
 	{
 		invalidate();
 		iItems.push_back(item(*this, aLayout));
 		if (iOwner != nullptr)
 			iItems.back().set_owner(iOwner);
 		aLayout->set_parent(this);
+		return *aLayout;
 	}
 
-	void layout::add_at(item_index aPosition, std::shared_ptr<i_layout> aLayout)
+	i_layout& layout::add_at(item_index aPosition, std::shared_ptr<i_layout> aLayout)
 	{
 		invalidate();
 		while (aPosition > iItems.size())
@@ -204,6 +211,7 @@ namespace neogfx
 		if (iOwner != nullptr)
 			i->set_owner(iOwner);
 		aLayout->set_parent(this);
+		return *aLayout;
 	}
 
 	void layout::add(i_spacer& aSpacer)

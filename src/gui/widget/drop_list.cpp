@@ -63,10 +63,10 @@ namespace neogfx
 		iChangingText{ false }
 	{
 		set_margins(neogfx::margins{});
-		set_selection_model(aDropList.selection_model());
-		set_presentation_model(aDropList.presentation_model());
-		set_model(aDropList.model());
 		enable_hot_tracking();
+		set_selection_model(iDropList.iSelectionModel);
+		set_presentation_model(iDropList.iPresentationModel);
+		set_model(iDropList.iModel);
 	}
 
 	drop_list_view::~drop_list_view()
@@ -80,7 +80,7 @@ namespace neogfx
 
 	void drop_list_view::items_filtered(const i_item_presentation_model&)
 	{
-		iDropList.popup().update_placement();
+		iDropList.iListProxy.update_view_placement();
 	}
 
 	void drop_list_view::current_index_changed(const i_item_selection_model& aSelectionModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
@@ -165,6 +165,7 @@ namespace neogfx
 		client_layout().set_margins(neogfx::margins{});
 		client_layout().set_size_policy(neogfx::size_policy::Expanding);
 		update_placement();
+		show();
 	}
 
 	drop_list_popup::~drop_list_popup()
@@ -304,27 +305,55 @@ namespace neogfx
 		resize(correctedRect.extents());
 	}
 
-	drop_list::popup_proxy::popup_proxy(drop_list& aDropList) :
+	drop_list::list_proxy::list_proxy(drop_list& aDropList) :
 		iDropList{ aDropList }
 	{
 	}
 
-	bool drop_list::popup_proxy::popup_created() const
+	bool drop_list::list_proxy::view_created() const
 	{
-		return iPopup != boost::none;
+		return iPopup != boost::none || iView != boost::none;
 	}
 
-	drop_list_popup& drop_list::popup_proxy::popup() const
+	drop_list_view& drop_list::list_proxy::view() const
 	{
-		if (iPopup == boost::none)
+		if (iPopup != boost::none)
+			return iPopup->view();
+		else if (iView != boost::none)
+			return *iView;
+		throw no_view();
+	}
+
+	void drop_list::list_proxy::show_view()
+	{
+		if (!view_created())
 		{
-			iPopup.emplace(iDropList);
-			iPopup->closed([this]() 
-			{ 		
-				iPopup = boost::none; 
-			});
+			if (iDropList.list_always_visible())
+				iView.emplace(iDropList.iLayout0, iDropList);
+			else
+			{
+				iPopup.emplace(iDropList);
+				iPopup->closed([this]()
+				{
+					iPopup = boost::none;
+				});
+				update_view_placement();
+			}
 		}
-		return *iPopup;
+	}
+
+	void drop_list::list_proxy::hide_view()
+	{
+		if (iPopup != boost::none)
+			iPopup = boost::none;
+		else if (iView != boost::none)
+			iView = boost::none;
+	}
+
+	void drop_list::list_proxy::update_view_placement()
+	{
+		if (iPopup != boost::none)
+			iPopup->update_placement();
 	}
 
 	namespace
@@ -429,23 +458,25 @@ namespace neogfx
 		};
 	}
 
-	drop_list::drop_list() :
-		iLayout{ *this },
-		iEditable{ false }, 
+	drop_list::drop_list(style aStyle) :
+		iStyle { aStyle },
+		iLayout0{ *this },
+		iLayout1{ iLayout0 },
 		iDownArrow{ texture{} }, 
-		iPopupProxy{ *this },
+		iListProxy{ *this },
 		iHandlingTextChange{ false },
 		iCancellingSelection{ false }
 	{
 		init();
 	}
 
-	drop_list::drop_list(i_widget& aParent) :
+	drop_list::drop_list(i_widget& aParent, style aStyle) :
 		widget{ aParent },
-		iLayout{ *this },
-		iEditable{ false }, 
-		iDownArrow{ texture{} }, 
-		iPopupProxy{ *this },
+		iStyle{ aStyle },
+		iLayout0{ *this },
+		iLayout1{ iLayout0 },
+		iDownArrow{ texture{} },
+		iListProxy{ *this },
 		iHandlingTextChange{ false },
 		iAcceptingSelection{ false },
 		iCancellingSelection{ false }
@@ -453,12 +484,13 @@ namespace neogfx
 		init();
 	}
 
-	drop_list::drop_list(i_layout& aLayout) :
+	drop_list::drop_list(i_layout& aLayout, style aStyle) :
 		widget{ aLayout },
-		iLayout{ *this },
-		iEditable{ false }, 
-		iDownArrow{ texture{} }, 
-		iPopupProxy{ *this },
+		iStyle{ aStyle },
+		iLayout0{ *this },
+		iLayout1{ iLayout0 },
+		iDownArrow{ texture{} },
+		iListProxy{ *this },
 		iAcceptingSelection{ false },
 		iHandlingTextChange{ false }
 	{
@@ -489,23 +521,21 @@ namespace neogfx
 
 	void drop_list::set_model(i_item_model& aModel)
 	{
-		iModel = std::shared_ptr<i_item_model>(std::shared_ptr<i_item_model>(), &aModel);
-		if (has_model())
-		{
-			if (has_presentation_model())
-				presentation_model().set_item_model(aModel);
-		}
-		update();
+		set_model(std::shared_ptr<i_item_model>{std::shared_ptr<i_item_model>{}, &aModel});
 	}
 
 	void drop_list::set_model(std::shared_ptr<i_item_model> aModel)
 	{
+		if (iModel == aModel)
+			return;
 		iModel = aModel;
 		if (has_model())
 		{
 			if (has_presentation_model())
 				presentation_model().set_item_model(*aModel);
 		}
+		if (view_created())
+			view().set_model(aModel);
 		update();
 	}
 
@@ -529,21 +559,20 @@ namespace neogfx
 
 	void drop_list::set_presentation_model(i_item_presentation_model& aPresentationModel)
 	{
-		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
-		if (has_model())
-			presentation_model().set_item_model(model());
-		if (has_selection_model())
-			selection_model().set_presentation_model(aPresentationModel);
-		update();
+		set_presentation_model(std::shared_ptr<i_item_presentation_model>{std::shared_ptr<i_item_presentation_model>{}, &aPresentationModel});
 	}
 
 	void drop_list::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
 	{
+		if (iPresentationModel == aPresentationModel)
+			return;
 		iPresentationModel = aPresentationModel;
 		if (has_presentation_model() && has_model())
 			presentation_model().set_item_model(model());
 		if (has_presentation_model() && has_selection_model())
 			selection_model().set_presentation_model(*aPresentationModel);
+		if (view_created())
+			view().set_presentation_model(aPresentationModel);
 		update();
 	}
 
@@ -567,17 +596,18 @@ namespace neogfx
 
 	void drop_list::set_selection_model(i_item_selection_model& aSelectionModel)
 	{
-		iSelectionModel = std::shared_ptr<i_item_selection_model>(std::shared_ptr<i_item_selection_model>(), &aSelectionModel);
-		if (has_presentation_model())
-			selection_model().set_presentation_model(presentation_model());
-		update();
+		set_selection_model(std::shared_ptr<i_item_selection_model>{std::shared_ptr<i_item_selection_model>{}, &aSelectionModel});
 	}
 
 	void drop_list::set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel)
 	{
+		if (iSelectionModel == aSelectionModel)
+			return;
 		iSelectionModel = aSelectionModel;
 		if (has_presentation_model() && has_selection_model())
 			selection_model().set_presentation_model(presentation_model());
+		if (view_created())
+			view().set_selection_model(aSelectionModel);
 		update();
 	}
 
@@ -595,12 +625,12 @@ namespace neogfx
 
 	bool drop_list::view_created() const
 	{
-		return iPopupProxy.popup_created();
+		return iListProxy.view_created();
 	}
 
 	void drop_list::show_view()
 	{
-		popup().show();
+		iListProxy.show_view();
 		if (editable())
 		{
 			presentation_model().filter_by(0, input_widget().text());
@@ -611,17 +641,13 @@ namespace neogfx
 
 	void drop_list::hide_view()
 	{
-		popup().dismiss();
+		if (!list_always_visible())
+			iListProxy.hide_view();
 	}
 
 	drop_list_view& drop_list::view() const
 	{
-		return popup().view();
-	}
-
-	drop_list_popup& drop_list::popup() const
-	{
-		return iPopupProxy.popup();
+		return iListProxy.view();
 	}
 
 	void drop_list::accept_selection()
@@ -659,15 +685,54 @@ namespace neogfx
 
 	bool drop_list::editable() const
 	{
-		return iEditable;
+		return (iStyle & style::Editable) == style::Editable;
 	}
 
 	void drop_list::set_editable(bool aEditable)
 	{
-		if (iEditable != aEditable)
+		if (editable() != aEditable)
 		{
-			iEditable = aEditable;
-			update_input_widget();
+			if (aEditable)
+				iStyle = (iStyle | style::Editable);
+			else
+				iStyle = (iStyle & ~style::Editable);
+			update_widgets();
+		}
+	}
+
+	bool drop_list::list_always_visible() const
+	{
+		return (iStyle & style::ListAlwaysVisible) == style::ListAlwaysVisible;
+	}
+
+	void drop_list::set_list_always_visible(bool aListAlwaysVisible)
+	{
+		if (list_always_visible() != aListAlwaysVisible)
+		{
+			if (aListAlwaysVisible)
+				iStyle = (iStyle | style::ListAlwaysVisible);
+			else
+				iStyle = (iStyle & ~style::ListAlwaysVisible);
+			if (view_created())
+				hide_view();
+			update_widgets();
+		}
+	}
+
+	bool drop_list::filter_enabled() const
+	{
+		return (iStyle & style::NoFilter) != style::NoFilter;
+	}
+
+	void drop_list::enable_filter(bool aEnableFilter)
+	{
+		if (filter_enabled() != aEnableFilter)
+		{
+			if (!aEnableFilter)
+				iStyle = (iStyle | style::NoFilter);
+			else
+				iStyle = (iStyle & ~style::NoFilter);
+			// todo
 		}
 	}
 
@@ -708,6 +773,8 @@ namespace neogfx
 		{
 			graphics_context gc{ *this, graphics_context::type::Unattached };
 			modelWidth = presentation_model().column_width(0, gc, false);
+			if (list_always_visible())
+				modelWidth += view().vertical_scrollbar().width(*this);
 		}
 		minimumSize.cx += modelWidth;
 		return minimumSize;
@@ -763,24 +830,23 @@ namespace neogfx
 		set_model(std::shared_ptr<i_item_model>(new item_model{}));
 
 		set_margins(neogfx::margins{});
-		set_size_policy(neogfx::size_policy::Minimum);
+		iLayout0.set_margins(neogfx::margins{});
+		iLayout1.set_margins(neogfx::margins{});
 
-		iLayout.set_margins(neogfx::margins{});
-
-		update_input_widget();
+		update_widgets();
 
 		iSink += app::instance().current_style_changed([this](style_aspect) { update_arrow(); });
 
 		presentation_model().set_cell_margins(neogfx::margins{ 3.0, 3.0 }, *this);
 	}
 
-	void drop_list::update_input_widget()
+	void drop_list::update_widgets()
 	{
 		bool changed = false;
 
 		if (!editable() && (iInputWidget == nullptr || iInputWidget->editable()))
 		{
-			iInputWidget = std::make_unique<non_editable_input_widget>(iLayout);
+			iInputWidget = std::make_unique<non_editable_input_widget>(iLayout1);
 			auto& inputWidget = static_cast<non_editable_input_widget&>(iInputWidget->as_widget());
 
 			inputWidget.clicked([this]() { handle_clicked(); });
@@ -801,7 +867,7 @@ namespace neogfx
 		}
 		else if (editable() && (iInputWidget == nullptr || !iInputWidget->editable()))
 		{
-			iInputWidget = std::make_unique<editable_input_widget>(iLayout);
+			iInputWidget = std::make_unique<editable_input_widget>(iLayout1);
 			auto& inputWidget = static_cast<editable_input_widget&>(iInputWidget->as_widget());
 
 			inputWidget.mouse_event([&inputWidget, this](const neogfx::mouse_event& aEvent)
@@ -833,6 +899,18 @@ namespace neogfx
 			if (selection_model().has_current_index())
 				text = presentation_model().cell_to_string(selection_model().current_index());
 			input_widget().set_text(text);
+		}
+
+		if (list_always_visible())
+		{
+			iDownArrow.hide();
+			set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
+			show_view();
+		}
+		else
+		{
+			iDownArrow.show();
+			set_size_policy(neogfx::size_policy::Minimum);
 		}
 	}
 
@@ -892,7 +970,7 @@ namespace neogfx
 		}
 		iSavedSelection = boost::none;
 
-		if (!iEditable && aUpdateEditor)
+		if (!editable() && aUpdateEditor)
 		{
 			std::string text;
 			if (iSelection)

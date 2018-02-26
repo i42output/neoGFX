@@ -78,8 +78,7 @@ namespace neogfx
 	native_font_face::native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
 		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle), iHasKerning(!!FT_HAS_KERNING(iHandle))
 	{
-		freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(aSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
-		freetypeCheck(FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE));
+		set_metrics();
 		sGetAdvanceCache[iHandle] = get_advance_cache_face{};
 	}
 
@@ -206,10 +205,7 @@ namespace neogfx
 			sGetAdvanceCache[iHandle] = get_advance_cache_face{};
 		iAuxHandle.reset();
 		if (iHandle != nullptr)
-		{
-			freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(iSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
-			freetypeCheck(FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE));
-		}
+			set_metrics();
 	}
 
 	void* native_font_face::aux_handle() const
@@ -313,5 +309,37 @@ namespace neogfx
 	void native_font_face::release()
 	{
 		native_font().release(*this);
+	}
+
+	void native_font_face::set_metrics()
+	{
+		if (iHandle->num_fixed_sizes == 0)
+		{
+			freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(iSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
+		}
+		else
+		{
+			auto requestedSize = iSize * iPixelDensityDpi.cy / 72.0;
+			auto availableSize = iHandle->available_sizes[0].size / 64.0;
+			FT_Int strikeIndex = 0;
+			for (FT_Int si = 0; si < iHandle->num_fixed_sizes; ++si)
+			{
+				auto nextAvailableSize = iHandle->available_sizes[si].size / 64.0;
+				if (abs(requestedSize - nextAvailableSize) < abs(requestedSize - availableSize))
+				{
+					availableSize = nextAvailableSize;
+					strikeIndex = si;
+				}
+			}
+			freetypeCheck(FT_Select_Size(iHandle, strikeIndex));
+		}
+		for (const FT_CharMap* cm = iHandle->charmaps; cm != iHandle->charmaps + iHandle->num_charmaps; ++cm)
+		{
+			if ((**cm).encoding == FT_ENCODING_UNICODE)
+			{
+				freetypeCheck(FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE));
+				break;
+			}
+		}
 	}
 }

@@ -67,32 +67,27 @@ namespace neogfx
 	
 	const i_item_model& item_view::model() const
 	{
-		return *iModel;
+		if (has_model())
+			return *iModel;
+		throw no_model();
 	}
 
 	i_item_model& item_view::model()
 	{
-		return *iModel;
+		if (has_model())
+			return *iModel;
+		throw no_model();
 	}
 
 	void item_view::set_model(i_item_model& aModel)
 	{
-		if (has_model())
-			model().unsubscribe(*this);
-		iModel = std::shared_ptr<i_item_model>(std::shared_ptr<i_item_model>(), &aModel);
-		if (has_model())
-		{
-			model().subscribe(*this);
-			if (has_presentation_model())
-				presentation_model().set_item_model(aModel);
-		}
-		model_changed();
-		update_scrollbar_visibility();
-		update();
+		set_model(std::shared_ptr<i_item_model>{std::shared_ptr<i_item_model>{}, &aModel});
 	}
 
 	void item_view::set_model(std::shared_ptr<i_item_model> aModel)
 	{
+		if (iModel == aModel)
+			return;
 		if (has_model())
 			model().unsubscribe(*this);
 		iModel = aModel;
@@ -117,34 +112,32 @@ namespace neogfx
 
 	const i_item_presentation_model& item_view::presentation_model() const
 	{
-		return *iPresentationModel;
+		if (has_presentation_model())
+			return *iPresentationModel;
+		throw no_presentation_model();
 	}
 
 	i_item_presentation_model& item_view::presentation_model()
 	{
-		return *iPresentationModel;
+		if (has_presentation_model())
+			return *iPresentationModel;
+		throw no_presentation_model();
 	}
 
 	void item_view::set_presentation_model(i_item_presentation_model& aPresentationModel)
 	{
-		if (has_presentation_model())
-			presentation_model().unsubscribe(*this);
-		auto oldModel = iPresentationModel;
-		iPresentationModel = std::shared_ptr<i_item_presentation_model>(std::shared_ptr<i_item_presentation_model>(), &aPresentationModel);
-		presentation_model().subscribe(*this);
-		if (has_model())
-			presentation_model().set_item_model(model());
-		if (has_selection_model())
-			selection_model().set_presentation_model(aPresentationModel);
-		presentation_model_changed();
-		update_scrollbar_visibility();
-		update();
+		set_presentation_model(std::shared_ptr<i_item_presentation_model>{std::shared_ptr<i_item_presentation_model>{}, &aPresentationModel});
 	}
 
 	void item_view::set_presentation_model(std::shared_ptr<i_item_presentation_model> aPresentationModel)
 	{
-		auto oldModel = iPresentationModel;
+		if (iPresentationModel == aPresentationModel)
+			return;
+		if (has_presentation_model())
+			presentation_model().unsubscribe(*this);
 		iPresentationModel = aPresentationModel;
+		if (has_presentation_model())
+			presentation_model().subscribe(*this);
 		if (has_presentation_model() && has_model())
 			presentation_model().set_item_model(model());
 		if (has_presentation_model() && has_selection_model())
@@ -164,29 +157,27 @@ namespace neogfx
 
 	const i_item_selection_model& item_view::selection_model() const
 	{
-		return *iSelectionModel;
+		if (has_selection_model())
+			return *iSelectionModel;
+		throw no_selection_model();
 	}
 
 	i_item_selection_model& item_view::selection_model()
 	{
-		return *iSelectionModel;
+		if (has_selection_model())
+			return *iSelectionModel;
+		throw no_selection_model();
 	}
 
 	void item_view::set_selection_model(i_item_selection_model& aSelectionModel)
 	{
-		if (has_selection_model())
-			selection_model().unsubscribe(*this);
-		iSelectionModel = std::shared_ptr<i_item_selection_model>(std::shared_ptr<i_item_selection_model>(), &aSelectionModel);
-		selection_model().subscribe(*this);
-		if (has_presentation_model())
-			selection_model().set_presentation_model(presentation_model());
-		selection_model_changed();
-		update_scrollbar_visibility();
-		update();
+		set_selection_model(std::shared_ptr<i_item_selection_model>{std::shared_ptr<i_item_selection_model>{}, &aSelectionModel});
 	}
 
 	void item_view::set_selection_model(std::shared_ptr<i_item_selection_model> aSelectionModel)
 	{
+		if (iSelectionModel == aSelectionModel)
+			return;
 		if (has_selection_model())
 			selection_model().unsubscribe(*this);
 		iSelectionModel = aSelectionModel;

@@ -255,6 +255,7 @@ namespace neogfx
 
 	void dialog::init()
 	{
+		iButtonBoxLayout.set_weight(size{});
 		set_standard_layout(app::instance().current_style().spacing(), false);
 	}
 }

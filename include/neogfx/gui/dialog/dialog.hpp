@@ -63,14 +63,14 @@ namespace neogfx
 	public:
 		virtual dialog_result exec();
 	public:
-		virtual neogfx::size_policy size_policy() const;
+		neogfx::size_policy size_policy() const override;
 	public:
-		virtual bool can_close() const;
+		bool can_close() const override;
 	public:
-		virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers);
+		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 	public:
-		virtual const i_layout& client_layout() const;
-		virtual i_layout& client_layout();
+		const i_layout& client_layout() const override;
+		i_layout& client_layout() override;
 		virtual const i_layout& button_box_layout() const;
 		virtual i_layout& button_box_layout();
 	private:

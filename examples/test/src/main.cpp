@@ -31,6 +31,7 @@
 #include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gui/widget/status_bar.hpp>
+#include <neogfx/gui/dialog/font_dialog.hpp>
 
 namespace ng = neogfx;
 
@@ -571,6 +572,7 @@ int main(int argc, char* argv[])
 		buttonSubpixel.check();
 		ng::horizontal_layout layoutColourPickers{ layout4 };
 		ng::push_button themeColour(layoutColourPickers, "theme"); themeColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });
+		ng::push_button themeFont(layoutColourPickers, "font"); themeFont.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#font.png" });
 		ng::push_button editColour(layoutColourPickers, "edit"); editColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });
 		ng::widget lw{ layout4 };
 		lw.set_margins(ng::margins{});
@@ -667,6 +669,13 @@ int main(int argc, char* argv[])
 			if (colourPicker.exec() == ng::dialog_result::Accepted)
 				ng::app::instance().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
 			*sCustomColours = colourPicker.custom_colours();
+		});
+
+		themeFont.clicked([&window]()
+		{
+			ng::font_dialog fontPicker(window, ng::app::instance().current_style().font_info());
+			if (fontPicker.exec() == ng::dialog_result::Accepted)
+				ng::app::instance().current_style().set_font_info(fontPicker.selected_font());
 		});
 
 		editColour.clicked([&]()
