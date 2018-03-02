@@ -19,9 +19,13 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/filesystem.hpp>
+
 #ifdef _WIN32
+#include <ShellScalingApi.h>
 #include <D2d1.h>
+#pragma comment(lib, "Shcore.lib")
 #endif
+
 #include "opengl_renderer.hpp"
 #include "../../gui/window/native/opengl_window.hpp"
 
@@ -64,6 +68,7 @@ namespace neogfx
 		iSubpixelFormat(SubpixelFormatNone)
 	{
 #ifdef _WIN32
+		SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 		ID2D1Factory* pDirect2dFactory;
 		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pDirect2dFactory);
 		FLOAT dpiX, dpiY;
