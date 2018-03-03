@@ -64,71 +64,6 @@ namespace neogfx
 			iWidgets.erase(iterWidget);
 	}
 
-	detail::screen_metrics::screen_metrics() :
-		iSubpixelFormat(SubpixelFormatNone)
-	{
-#ifdef _WIN32
-		SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-		ID2D1Factory* pDirect2dFactory;
-		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pDirect2dFactory);
-		FLOAT dpiX, dpiY;
-		pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
-		pDirect2dFactory->Release();
-		iPixelDensityDpi = size(static_cast<size::dimension_type>(dpiX), static_cast<size::dimension_type>(dpiY));
-		HKEY hkeySubpixelFormat;
-		if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Avalon.Graphics\\DISPLAY1", 0, KEY_READ, &hkeySubpixelFormat) == ERROR_SUCCESS)
-		{
-			DWORD subpixelFormat = 0;
-			DWORD cbValue = sizeof(subpixelFormat);
-			if (RegQueryValueEx(hkeySubpixelFormat, L"PixelStructure", NULL, NULL, (LPBYTE)&subpixelFormat, &cbValue) == ERROR_SUCCESS)
-			{
-				switch (subpixelFormat)
-				{
-				case 1:
-					iSubpixelFormat = SubpixelFormatRGBHorizontal;
-					break;
-				case 2:
-					iSubpixelFormat = SubpixelFormatBGRHorizontal;
-					break;
-				}
-			}
-			::RegCloseKey(hkeySubpixelFormat);
-		}
-		else
-			iSubpixelFormat = SubpixelFormatRGBHorizontal;
-#endif
-	}
-
-	dimension detail::screen_metrics::horizontal_dpi() const
-	{
-		return iPixelDensityDpi.cx;
-	}
-
-	dimension detail::screen_metrics::vertical_dpi() const
-	{
-		return iPixelDensityDpi.cy;
-	}
-
-	bool detail::screen_metrics::metrics_available() const
-	{
-		return false;
-	}
-
-	size detail::screen_metrics::extents() const
-	{
-		throw unsupported_function();
-	}
-
-	dimension detail::screen_metrics::em_size() const
-	{
-		throw unsupported_function();
-	}
-
-	i_screen_metrics::subpixel_format_e detail::screen_metrics::subpixel_format() const
-	{
-		return iSubpixelFormat;
-	}
-
 	opengl_renderer::shader_program::shader_program(GLuint aHandle, bool aHasProjectionMatrix) :
 		iHandle(aHandle), iHasProjectionMatrix(aHasProjectionMatrix)
 	{
@@ -270,10 +205,13 @@ namespace neogfx
 
 	opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
 		iRenderer{aRenderer},
-		iFontManager{*this, iScreenMetrics},
+		iFontManager{*this},
 		iActiveProgram{iShaderPrograms.end()},
 		iSubpixelRendering{true}
 	{
+#ifdef _WIN32
+		SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+#endif
 	}
 
 	opengl_renderer::~opengl_renderer()
@@ -284,6 +222,11 @@ namespace neogfx
 			glCheck(glDeleteTextures(1, &(*iGradientTextures)[1]));
 			glCheck(glDeleteTextures(1, &(*iGradientTextures)[2]));
 		}
+	}
+
+	const i_device_metrics& opengl_renderer::default_screen_metrics() const
+	{
+		return app::instance().basic_services().display().metrics();
 	}
 
 	renderer opengl_renderer::renderer() const
@@ -495,9 +438,9 @@ namespace neogfx
 			},
 			{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 
-		switch (screen_metrics().subpixel_format())
+		switch (app::instance().basic_services().display(0).subpixel_format())
 		{
-		case i_screen_metrics::SubpixelFormatRGBHorizontal:
+		case subpixel_format::SubpixelFormatRGBHorizontal:
 			iGlyphSubpixelProgram = create_shader_program(
 				shaders
 				{
@@ -595,7 +538,7 @@ namespace neogfx
 					},
 					{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 			break;
-		case i_screen_metrics::SubpixelFormatBGRHorizontal:
+		case subpixel_format::SubpixelFormatBGRHorizontal:
 			iGlyphSubpixelProgram = create_shader_program(
 				shaders
 				{
@@ -693,8 +636,8 @@ namespace neogfx
 					},
 					{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 			break;
-		case i_screen_metrics::SubpixelFormatRGBVertical:/* todo */
-		case i_screen_metrics::SubpixelFormatBGRVertical:/* todo */
+		case subpixel_format::SubpixelFormatRGBVertical:/* todo */
+		case subpixel_format::SubpixelFormatBGRVertical:/* todo */
 		default:
 			iGlyphSubpixelProgram = create_shader_program(
 				shaders
@@ -737,11 +680,6 @@ namespace neogfx
 					{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 			break;
 		}
-	}
-
-	const i_screen_metrics& opengl_renderer::screen_metrics() const
-	{
-		return iScreenMetrics;
 	}
 
 	i_font_manager& opengl_renderer::font_manager()

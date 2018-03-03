@@ -38,13 +38,6 @@ namespace neogfx
 		iRendering{ false },
 		iPaused{ 0 }
 	{
-#ifdef _WIN32
-		ID2D1Factory* m_pDirect2dFactory;
-		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pDirect2dFactory);
-		FLOAT dpiX, dpiY;
-		m_pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
-		iPixelDensityDpi = size(static_cast<size::dimension_type>(dpiX), static_cast<size::dimension_type>(dpiY));
-#endif
 	}
 
 	opengl_window::~opengl_window()
@@ -53,6 +46,7 @@ namespace neogfx
 		if (rendering_engine().active_context_surface() == this)
 			rendering_engine().deactivate_context();
 	}
+
 
 	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const
 	{
@@ -279,21 +273,6 @@ namespace neogfx
 	size opengl_window::extents() const
 	{
 		return surface_size();
-	}
-
-	dimension opengl_window::horizontal_dpi() const
-	{
-		return iPixelDensityDpi.cx;
-	}
-
-	dimension opengl_window::vertical_dpi() const
-	{
-		return iPixelDensityDpi.cy;
-	}
-
-	dimension opengl_window::em_size() const
-	{
-		return 0;
 	}
 
 	i_surface_window& opengl_window::surface_window() const

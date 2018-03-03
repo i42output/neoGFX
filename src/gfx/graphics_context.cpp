@@ -623,6 +623,11 @@ namespace neogfx
 		return iSurface.vertical_dpi();
 	}
 
+	dimension graphics_context::ppi() const
+	{
+		return iSurface.ppi();
+	}
+
 	dimension graphics_context::em_size() const
 	{
 		return static_cast<dimension>(iDefaultFont.size() / 72.0 * horizontal_dpi());

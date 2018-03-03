@@ -156,9 +156,30 @@ namespace neogfx
 		return iBasicServices.display_count();
 	}
 
+	i_display& surface_manager::display(uint32_t aDisplayIndex) const
+	{
+		return iBasicServices.display(aDisplayIndex);
+	}
+
+	i_display& surface_manager::display(const i_surface& aSurface) const
+	{
+		rect rectSurface{ aSurface.surface_position(), aSurface.surface_size() };
+		std::multimap<double, uint32_t> matches;
+		for (uint32_t i = 0; i < display_count(); ++i)
+		{
+			rect rectDisplay = desktop_rect(i);
+			rect rectIntersection = rectDisplay.intersection(rectSurface);
+			if (!rectIntersection.empty())
+				matches.insert(std::make_pair(rectIntersection.width() * rectIntersection.height(), i));
+		}
+		if (matches.empty())
+			return display(0);
+		return display(matches.rbegin()->second);
+	}
+
 	rect surface_manager::desktop_rect(uint32_t aDisplayIndex) const
 	{
-		return iBasicServices.display(aDisplayIndex).desktop_rect();
+		return display(aDisplayIndex).desktop_rect();
 	}
 
 	rect surface_manager::desktop_rect(const i_surface& aSurface) const
@@ -170,19 +191,7 @@ namespace neogfx
 		GetMonitorInfo(monitor, &mi);
 		return basic_rect<LONG>{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
 #else
-		/* todo */
-		rect rectSurface{ aSurface.surface_position(), aSurface.surface_size() };
-		std::multimap<double, uint32_t> matches;
-		for (uint32_t i = 0; i < display_count(); ++i)
-		{
-			rect rectDisplay = desktop_rect(i);
-			rect rectIntersection = rectDisplay.intersection(rectSurface);
-			if (!rectIntersection.empty())
-				matches[rectIntersection.width() * rectIntersection.height()] = i;
-		}
-		if (matches.empty())
-			return desktop_rect(0);
-		return desktop_rect(matches.rbegin()->second);
+		return display(aSurface).desktop_rect();
 #endif
 	}
 }

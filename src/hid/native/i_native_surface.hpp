@@ -46,6 +46,8 @@ namespace neogfx
 		virtual bool pump_event() = 0;
 		virtual void close(bool aForce = false) = 0;
 	public:
+		virtual void handle_dpi_changed() = 0;
+	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
 		virtual const std::pair<vec2, vec2>& logical_coordinates() const = 0;

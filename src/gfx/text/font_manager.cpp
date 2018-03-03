@@ -137,7 +137,7 @@ namespace neogfx
 		return *f;
 	}
 
-	font_manager::font_manager(i_rendering_engine& aRenderingEngine, i_screen_metrics&) :
+	font_manager::font_manager(i_rendering_engine& aRenderingEngine) :
 		iRenderingEngine{ aRenderingEngine },
 		iDefaultSystemFontInfo{ detail::platform_specific::default_system_font_info() },
 		iDefaultFallbackFontInfo{ detail::platform_specific::default_fallback_font_info() },
@@ -214,6 +214,7 @@ namespace neogfx
 			size iResolution;
 			virtual dimension horizontal_dpi() const { return iResolution.cx; }
 			virtual dimension vertical_dpi() const { return iResolution.cy; }
+			virtual dimension ppi() const { return iResolution.magnitude() / std::sqrt(2.0); }
 		} deviceResolution;
 		deviceResolution.iResolution = size(aExistingFont.horizontal_dpi(), aExistingFont.vertical_dpi());
 		auto fallbackFont = create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), aExistingFont.style(), aExistingFont.size(), deviceResolution);

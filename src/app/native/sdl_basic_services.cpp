@@ -20,12 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#ifdef WIN32
+#include <ShellScalingApi.h>
+#include <D2d1.h>
+#pragma comment(lib, "Shcore.lib")
+#endif
 #include <SDL_messagebox.h>
 #include <SDL_clipboard.h>
 #include <SDL_syswm.h>
-#ifdef WIN32
-#include <Windows.h>
-#endif
 #include "sdl_basic_services.hpp"
 #include "i_native_clipboard.hpp"
 
@@ -41,23 +43,69 @@ namespace neogfx
 		GetMonitorInfo(aMonitor, &mi);
 		basic_rect<LONG> monitorRect{ basic_point<LONG>{ mi.rcMonitor.left, mi.rcMonitor.top }, basic_size<LONG>{ mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top } };
 		basic_rect<LONG> workAreaRect{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
-		reinterpret_cast<std::vector<std::unique_ptr<i_display>>*>(aDisplayList)->push_back(std::make_unique<display>(monitorRect, workAreaRect, reinterpret_cast<void*>(GetDC(NULL))));
+		auto& displayList = *reinterpret_cast<std::vector<std::unique_ptr<i_display>>*>(aDisplayList);
+		displayList.push_back(std::make_unique<display>(displayList.size(), monitorRect, workAreaRect, reinterpret_cast<void*>(aMonitor), reinterpret_cast<void*>(GetDC(NULL))));
 		return true;
 	}
 #endif
 
-	display::display(const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle) : 
+	display::display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle) :
+		iIndex{ aIndex },
 		iRect{ aRect },
 		iDesktopRect{ aDesktopRect },
-		iNativeDisplayHandle{ aNativeDisplayHandle }
+		iSubpixelFormat{ subpixel_format::SubpixelFormatNone },
+		iNativeDisplayHandle{ aNativeDisplayHandle },
+		iNativeDeviceContextHandle{ aNativeDisplayHandle }
 	{
+		update_dpi();
+		HKEY hkeySubpixelFormat;
+		if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, (L"SOFTWARE\\Microsoft\\Avalon.Graphics\\DISPLAY" + boost::lexical_cast<std::wstring>(index() + 1)).c_str(), 0, KEY_READ, &hkeySubpixelFormat) == ERROR_SUCCESS)
+		{
+			DWORD subpixelFormat = 0;
+			DWORD cbValue = sizeof(subpixelFormat);
+			if (RegQueryValueEx(hkeySubpixelFormat, L"PixelStructure", NULL, NULL, (LPBYTE)&subpixelFormat, &cbValue) == ERROR_SUCCESS)
+			{
+				switch (subpixelFormat)
+				{
+				case 1:
+					iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
+					break;
+				case 2:
+					iSubpixelFormat = subpixel_format::SubpixelFormatBGRHorizontal;
+					break;
+				}
+			}
+			::RegCloseKey(hkeySubpixelFormat);
+		}
+		else
+			iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
 	}
 
 	display::~display()
 	{
 #ifdef WIN32
-		ReleaseDC(NULL, reinterpret_cast<HDC>(iNativeDisplayHandle));
+		ReleaseDC(NULL, reinterpret_cast<HDC>(iNativeDeviceContextHandle));
 #endif
+	}
+
+	uint32_t display::index() const
+	{
+		return iIndex;
+	}
+
+	const i_device_metrics& display::metrics() const
+	{
+		return *this;
+	}
+
+	void display::update_dpi()
+	{
+		UINT dpiX = 0;
+		UINT dpiY = 0;
+		auto ret = GetDpiForMonitor(reinterpret_cast<HMONITOR>(iNativeDisplayHandle), MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+		if (ret != S_OK)
+			throw failed_to_get_monitor_dpi();
+		iPixelDensityDpi = basic_size<UINT>(dpiX, dpiY);
 	}
 
 	neogfx::rect display::rect() const
@@ -68,6 +116,41 @@ namespace neogfx
 	neogfx::rect display::desktop_rect() const
 	{
 		return iDesktopRect;
+	}
+
+	subpixel_format display::subpixel_format() const
+	{
+		return iSubpixelFormat;
+	}
+
+	bool display::metrics_available() const
+	{
+		return true;
+	}
+
+	size display::extents() const
+	{
+		return desktop_rect().extents();
+	}
+
+	dimension display::horizontal_dpi() const
+	{
+		return iPixelDensityDpi.cx;
+	}
+
+	dimension display::vertical_dpi() const
+	{
+		return iPixelDensityDpi.cy;
+	}
+
+	dimension display::ppi() const
+	{
+		return iPixelDensityDpi.magnitude() / std::sqrt(2.0);
+	}
+
+	dimension display::em_size() const
+	{
+		return 0;
 	}
 
 	colour display::read_pixel(const point& aPosition) const
@@ -123,7 +206,7 @@ namespace neogfx
 		return SDL_GetNumVideoDisplays();
 	}
 
-	const i_display& sdl_basic_services::display(uint32_t aDisplayIndex) const
+	i_display& sdl_basic_services::display(uint32_t aDisplayIndex) const
 	{
 		iDisplays.clear();
 #ifdef WIN32

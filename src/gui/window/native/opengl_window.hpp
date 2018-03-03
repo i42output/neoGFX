@@ -70,9 +70,6 @@ namespace neogfx
 	public:
 		bool metrics_available() const override;
 		size extents() const override;
-		dimension horizontal_dpi() const override;
-		dimension vertical_dpi() const override;
-		dimension em_size() const override;
 	protected:
 		i_surface_window& surface_window() const override;
 		virtual void set_destroying();
@@ -83,7 +80,6 @@ namespace neogfx
 		virtual void display() = 0;
 	private:
 		i_surface_window& iSurfaceWindow;
-		size iPixelDensityDpi;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable std::pair<vec2, vec2> iLogicalCoordinates;
 		GLuint iFrameBuffer;

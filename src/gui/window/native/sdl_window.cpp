@@ -1109,6 +1109,10 @@ namespace neogfx
 				self.release_capture();
 			result = wndproc(hwnd, msg, wparam, lparam);
 			break;
+		case WM_DPICHANGED:
+			self.surface_window().handle_dpi_changed();
+			result = wndproc(hwnd, msg, wparam, lparam);
+			break;
 		default:
 			result = wndproc(hwnd, msg, wparam, lparam);
 			break;

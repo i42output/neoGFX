@@ -47,27 +47,6 @@ namespace neogfx
 		std::vector<i_widget*> iWidgets;
 	};
 
-	namespace detail
-	{
-		class screen_metrics : public i_screen_metrics
-		{
-		public:
-			struct unsupported_function : std::logic_error { unsupported_function() : std::logic_error("neogfx::detail::screen_metrics::unsupported_function") {} };
-		public:
-			screen_metrics();
-		public:
-			virtual dimension horizontal_dpi() const;
-			virtual dimension vertical_dpi() const;
-			virtual bool metrics_available() const;
-			virtual size extents() const;
-			virtual dimension em_size() const;
-			virtual subpixel_format_e subpixel_format() const;
-		private:
-			size iPixelDensityDpi;
-			subpixel_format_e iSubpixelFormat;
-		};
-	}
-
 	class opengl_renderer : public i_rendering_engine
 	{
 	public:
@@ -119,9 +98,10 @@ namespace neogfx
 		opengl_renderer(neogfx::renderer aRenderer);
 		~opengl_renderer();
 	public:
+		const i_device_metrics& default_screen_metrics() const override;
+	public:
 		neogfx::renderer renderer() const override;
 		void initialize() override;
-		const i_screen_metrics& screen_metrics() const override;
 		i_font_manager& font_manager() override;
 		i_texture_manager& texture_manager() override;
 		bool shader_program_active() const override;
@@ -154,7 +134,6 @@ namespace neogfx
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
 		neogfx::renderer iRenderer;
-		detail::screen_metrics iScreenMetrics;		
 		opengl_texture_manager iTextureManager;
 		neogfx::font_manager iFontManager;
 		shader_programs iShaderPrograms;

@@ -36,6 +36,11 @@ namespace neogfx
 		native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager);
 		virtual ~native_window();
 	public:
+		dimension horizontal_dpi() const override;
+		dimension vertical_dpi() const override;
+		dimension ppi() const override;
+		dimension em_size() const override;
+	public:
 		void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
 		bool events_queued() const override;
 		void push_event(const native_event& aEvent) override;
@@ -53,6 +58,9 @@ namespace neogfx
 		i_surface_manager& surface_manager() const;
 	public:
 		bool non_client_entered() const;
+	protected:
+		size& pixel_density() const;
+		void handle_dpi_changed() override;
 	private:
 		template <typename EventCategory, typename EventType>
 		event_queue::const_iterator find_event(EventType aEventType) const
@@ -68,6 +76,7 @@ namespace neogfx
 	private:
 		i_rendering_engine& iRenderingEngine;
 		i_surface_manager& iSurfaceManager;
+		mutable optional_size iPixelDensityDpi;
 		event_queue iEventQueue;
 		native_event iCurrentEvent;
 		uint32_t iProcessingEvent;

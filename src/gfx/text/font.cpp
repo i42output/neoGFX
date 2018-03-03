@@ -392,19 +392,19 @@ namespace neogfx
 
 	font::font(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
 		font_info{ aFamilyName, aStyle, aSize }, 
-		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyle, aSize, app::instance().rendering_engine().screen_metrics())) }
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyle, aSize, app::instance().rendering_engine().default_screen_metrics())) }
 	{
 	}
 
 	font::font(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
 		font_info{ aFamilyName, aStyleName, aSize }, 
-		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyleName, aSize, app::instance().rendering_engine().screen_metrics())) }
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aFamilyName, aStyleName, aSize, app::instance().rendering_engine().default_screen_metrics())) }
 	{
 	}
 
 	font::font(const font_info& aFontInfo) :
 		font_info{ aFontInfo }, 
-		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(static_cast<font_info>(*this), app::instance().rendering_engine().screen_metrics())) }
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(static_cast<font_info>(*this), app::instance().rendering_engine().default_screen_metrics())) }
 	{
 	}
 
@@ -416,13 +416,13 @@ namespace neogfx
 	
 	font::font(const font& aOther, style_e aStyle, point_size aSize) :
 		font_info{ aOther.native_font_face().family_name(), aStyle, aSize }, 
-		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aOther.iInstance->native_font_face().native_font(), aStyle, aSize, app::instance().rendering_engine().screen_metrics())) }
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aOther.iInstance->native_font_face().native_font(), aStyle, aSize, app::instance().rendering_engine().default_screen_metrics())) }
 	{
 	}
 
 	font::font(const font& aOther, const std::string& aStyleName, point_size aSize) :
 		font_info{ aOther.native_font_face().family_name(), aStyleName, aSize },
-		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aOther.iInstance->native_font_face().native_font(), aStyleName, aSize, app::instance().rendering_engine().screen_metrics())) }
+		iInstance{ std::make_shared<instance>(app::instance().rendering_engine().font_manager().create_font(aOther.iInstance->native_font_face().native_font(), aStyleName, aSize, app::instance().rendering_engine().default_screen_metrics())) }
 	{
 	}
 
@@ -440,32 +440,32 @@ namespace neogfx
 
 	font font::load_from_file(const std::string& aFileName)
 	{
-		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, app::instance().rendering_engine().screen_metrics()));
+		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, app::instance().rendering_engine().default_screen_metrics()));
 	}
 
 	font font::load_from_file(const std::string& aFileName, style_e aStyle, point_size aSize)
 	{
-		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, aStyle, aSize, app::instance().rendering_engine().screen_metrics()));
+		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, aStyle, aSize, app::instance().rendering_engine().default_screen_metrics()));
 	}
 	
 	font font::load_from_file(const std::string& aFileName, const std::string& aStyleName, point_size aSize)
 	{
-		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, aStyleName, aSize, app::instance().rendering_engine().screen_metrics()));
+		return font(app::instance().rendering_engine().font_manager().load_font_from_file(aFileName, aStyleName, aSize, app::instance().rendering_engine().default_screen_metrics()));
 	}
 
 	font font::load_from_memory(const void* aData, std::size_t aSizeInBytes)
 	{
-		return font(app::instance().rendering_engine().font_manager().load_font_from_memory(aData, aSizeInBytes, app::instance().rendering_engine().screen_metrics()));
+		return font(app::instance().rendering_engine().font_manager().load_font_from_memory(aData, aSizeInBytes, app::instance().rendering_engine().default_screen_metrics()));
 	}
 
 	font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, style_e aStyle, point_size aSize)
 	{
-		return font(app::instance().rendering_engine().font_manager().load_font_from_memory(aData, aSizeInBytes, aStyle, aSize, app::instance().rendering_engine().screen_metrics()));
+		return font(app::instance().rendering_engine().font_manager().load_font_from_memory(aData, aSizeInBytes, aStyle, aSize, app::instance().rendering_engine().default_screen_metrics()));
 	}
 
 	font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, point_size aSize)
 	{
-		return font(app::instance().rendering_engine().font_manager().load_font_from_memory(aData, aSizeInBytes, aStyleName, aSize, app::instance().rendering_engine().screen_metrics()));
+		return font(app::instance().rendering_engine().font_manager().load_font_from_memory(aData, aSizeInBytes, aStyleName, aSize, app::instance().rendering_engine().default_screen_metrics()));
 	}
 
 	font::~font()

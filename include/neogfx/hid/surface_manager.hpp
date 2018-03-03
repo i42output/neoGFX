@@ -61,6 +61,8 @@ namespace neogfx
 		void display_error_message(const std::string& aTitle, const std::string& aMessage) const override;
 		void display_error_message(const i_native_surface& aParent, const std::string& aTitle, const std::string& aMessage) const override;
 		uint32_t display_count() const override;
+		i_display& display(uint32_t aDisplayIndex = 0) const override;
+		i_display& display(const i_surface& aSurface) const override;
 		rect desktop_rect(uint32_t aDisplayIndex = 0) const override;
 		rect desktop_rect(const i_surface& aSurface) const override;
 	public:

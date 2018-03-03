@@ -25,19 +25,37 @@
 
 namespace neogfx
 {
-	class display : public i_display
+	class display : public i_display, public i_device_metrics
 	{
 	public:
-		display(const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle);
+		display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle);
 		~display();
+	public:
+		uint32_t index() const override;
+	public:
+		const i_device_metrics& metrics() const override;
+		void update_dpi() override;
 	public:
 		neogfx::rect rect() const override;
 		neogfx::rect desktop_rect() const override;
 		colour read_pixel(const point& aPosition) const override;
+	public:
+		neogfx::subpixel_format subpixel_format() const override;
+	public:
+		bool metrics_available() const override;
+		size extents() const override;
+		dimension horizontal_dpi() const override;
+		dimension vertical_dpi() const override;
+		dimension ppi() const override;
+		dimension em_size() const override;
 	private:
+		uint32_t iIndex;
+		neogfx::size iPixelDensityDpi;
 		mutable neogfx::rect iRect;
 		mutable neogfx::rect iDesktopRect;
+		neogfx::subpixel_format iSubpixelFormat;
 		void* iNativeDisplayHandle;
+		void* iNativeDeviceContextHandle;
 	};
 
 	class sdl_basic_services : public i_basic_services
@@ -50,7 +68,7 @@ namespace neogfx
 		void system_beep() override;
 		void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const override;
 		uint32_t display_count() const override;
-		const i_display& display(uint32_t aDisplayIndex = 0) const override;
+		i_display& display(uint32_t aDisplayIndex = 0) const override;
 		bool has_system_clipboard() const override;
 		i_native_clipboard& system_clipboard() override;
 		bool has_system_menu_bar() const override;

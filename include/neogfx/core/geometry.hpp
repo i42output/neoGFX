@@ -149,6 +149,7 @@ namespace neogfx
 		basic_size floor() const { return basic_size(std::floor(cx), std::floor(cy)); }
 		basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
 		basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
+		dimension_type magnitude() const { return std::sqrt(cx * cx + cy * cy); }
 		// helpers
 	public:
 		static constexpr dimension_type max_dimension() { return std::numeric_limits<dimension_type>::max(); }
@@ -687,6 +688,7 @@ namespace neogfx
 	public:
 		virtual dimension horizontal_dpi() const = 0;
 		virtual dimension vertical_dpi() const = 0;
+		virtual dimension ppi() const = 0;
 	};
 
 	class i_device_metrics : public i_device_resolution

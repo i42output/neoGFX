@@ -19,6 +19,10 @@
 
 #include <neogfx/neogfx.hpp>
 #include <iterator>
+#ifdef _WIN32
+#include <D2d1.h>
+#endif
+
 #include <neolib/raii.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -47,11 +51,30 @@ namespace neogfx
 			}
 		}, 10 }
 	{
-
 	}
 
 	native_window::~native_window()
 	{
+	}
+
+	dimension native_window::horizontal_dpi() const
+	{
+		return pixel_density().cx;
+	}
+
+	dimension native_window::vertical_dpi() const
+	{
+		return pixel_density().cy;
+	}
+
+	dimension native_window::ppi() const
+	{
+		return pixel_density().magnitude() / std::sqrt(2.0);
+	}
+
+	dimension native_window::em_size() const
+	{
+		return 0;
 	}
 
 	void native_window::display_error_message(const std::string& aTitle, const std::string& aMessage) const
@@ -333,5 +356,22 @@ namespace neogfx
 	bool native_window::non_client_entered() const
 	{
 		return iNonClientEntered;
+	}
+
+	size& native_window::pixel_density() const
+	{
+		if (iPixelDensityDpi == boost::none)
+		{
+			auto& display = app::instance().surface_manager().display(surface_window());
+			iPixelDensityDpi = size{ display.metrics().horizontal_dpi(), display.metrics().vertical_dpi() };
+		}
+		return *iPixelDensityDpi;
+	}
+
+	void native_window::handle_dpi_changed()
+	{
+		app::instance().surface_manager().display(surface_window()).update_dpi();
+		iPixelDensityDpi = boost::none;
+		surface_window().handle_dpi_changed();
 	}
 }

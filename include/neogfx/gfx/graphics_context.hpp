@@ -430,6 +430,7 @@ namespace neogfx
 		size extents() const override;
 		dimension horizontal_dpi() const override;
 		dimension vertical_dpi() const override;
+		dimension ppi() const override;
 		dimension em_size() const override;
 		// from i_units_context
 		bool device_metrics_available() const override;

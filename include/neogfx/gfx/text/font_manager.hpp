@@ -54,7 +54,7 @@ namespace neogfx
 		struct no_matching_font_found : std::runtime_error { no_matching_font_found() : std::runtime_error("neogfx::font_manager::no_matching_font_found") {} };
 		struct failed_to_allocate_glyph_space : std::runtime_error { failed_to_allocate_glyph_space() : std::runtime_error("neogfx::font_manager::failed_to_allocate_glyph_space") {} };
 	public:
-		font_manager(i_rendering_engine& aRenderingEngine, i_screen_metrics& aScreenMetrics);
+		font_manager(i_rendering_engine& aRenderingEngine);
 		~font_manager();
 	public:
 		void* font_library_handle() const override;

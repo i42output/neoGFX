@@ -149,15 +149,30 @@ namespace neogfx
 		iLayout.set_margins(neogfx::margins{ 4.0, 4.0, 4.0, 4.0 });
 		iLayout.set_spacing(8.0);
 		icon().set_ignore_mouse_events(false);
+		size iconSize{ root().surface().ppi() < 150.0 ? 24.0 : 48.0 };
 		if (icon().image().is_empty())
-			icon().set_fixed_size(size{ 24.0, 24.0 });
+			icon().set_fixed_size(iconSize);
 		else
-			icon().set_fixed_size(size{ std::min(icon().image().extents().cx, 24.0), std::min(icon().image().extents().cy, 24.0) });
+			icon().set_fixed_size(iconSize.min(icon().image().extents()));
 		iMinimizeButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iMaximizeButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iRestoreButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iCloseButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
-		iSink += app::instance().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
+		iSink += root().surface().dpi_changed([this]() 
+		{ 
+			size iconSize{ root().surface().ppi() < 150.0 ? 24.0 : 48.0 };
+			if (icon().image().is_empty())
+				icon().set_fixed_size(iconSize);
+			else
+				icon().set_fixed_size(iconSize.min(icon().image().extents()));
+			update_textures();
+			managing_layout().layout_items(true);
+			update(true);
+		});
+		iSink += app::instance().current_style_changed([this](style_aspect aAspect) 
+		{ 
+			if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); 
+		});
 		auto update_widgets = [this]()
 		{
 			bool isEnabled = iWindow.window_enabled();
@@ -259,37 +274,145 @@ namespace neogfx
 			{ 2, 1, 2, 0, 0, 0, 0, 2, 1, 2 },
 			{ 1, 2, 0, 0, 0, 0, 0, 0, 2, 1 }
 		};
+		const uint8_t sMinimizeHighDpiTexturePattern[20][20]
+		{
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+		};
+		const uint8_t sMaximizeHighDpiTexturePattern[20][20]
+		{
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+		};
+		const uint8_t sRestoreHighDpiTexturePattern[20][20]
+		{
+			{ 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+			{ 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 }
+		};
+		const uint8_t sCloseHighDpiTexturePattern[20][20]
+		{
+			{ 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1 },
+			{ 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1 },
+			{ 2, 2, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 2, 2 },
+			{ 0, 2, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 2, 0 },
+			{ 0, 0, 2, 2, 1, 1, 2, 0, 0, 0, 0, 0, 0, 2, 1, 1, 2, 2, 0, 0 },
+			{ 0, 0, 0, 2, 1, 1, 2, 2, 0, 0, 0, 0, 2, 2, 1, 1, 2, 0, 0, 0 },
+			{ 0, 0, 0, 0, 2, 2, 1, 1, 2, 0, 0, 2, 1, 1, 2, 2, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 2, 2, 1, 1, 2, 0, 0, 2, 1, 1, 2, 2, 0, 0, 0, 0 },
+			{ 0, 0, 0, 2, 1, 1, 2, 2, 0, 0, 0, 0, 2, 2, 1, 1, 2, 0, 0, 0 },
+			{ 0, 0, 2, 2, 1, 1, 2, 0, 0, 0, 0, 0, 0, 2, 1, 1, 2, 2, 0, 0 },
+			{ 0, 2, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 2, 0 },
+			{ 2, 2, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 2, 2 },
+			{ 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1 },
+			{ 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1 }
+		};
 		if (iTextures[TextureMinimize] == boost::none || iTextures[TextureMinimize]->first != ink)
 		{
 			iTextures[TextureMinimize] = std::make_pair(
 				ink,
-				neogfx::image{
-				"neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
-				sMinimizeTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
+				device_metrics().ppi() < 150.0 ? 
+					neogfx::image{
+						"neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
+						sMinimizeTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } } : 
+					neogfx::image{
+						"neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
+						sMinimizeHighDpiTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureMaximize] == boost::none || iTextures[TextureMaximize]->first != ink)
 		{
 			iTextures[TextureMaximize] = std::make_pair(
 				ink,
-				neogfx::image{
-				"neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
-				sMaximizeTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
+				device_metrics().ppi() < 150.0 ?
+					neogfx::image{
+						"neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
+						sMaximizeTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } } :
+					neogfx::image{
+						"neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
+						sMaximizeHighDpiTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureRestore] == boost::none || iTextures[TextureRestore]->first != ink)
 		{
 			iTextures[TextureRestore] = std::make_pair(
 				ink,
-				neogfx::image{
-				"neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
-				sRestoreTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
+				device_metrics().ppi() < 150.0 ?
+					neogfx::image{
+						"neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
+						sRestoreTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } } :
+					neogfx::image{
+						"neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
+						sRestoreHighDpiTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureClose] == boost::none || iTextures[TextureClose]->first != ink)
 		{
 			iTextures[TextureClose] = std::make_pair(
 				ink,
-				neogfx::image{
-				"neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
-				sCloseTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
+				device_metrics().ppi() < 150.0 ?
+					neogfx::image{
+						"neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
+						sCloseTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } } :
+					neogfx::image{
+						"neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
+						sCloseHighDpiTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		iMinimizeButton.image().set_image(iTextures[TextureMinimize]->second);
 		iMaximizeButton.image().set_image(iTextures[TextureMaximize]->second);

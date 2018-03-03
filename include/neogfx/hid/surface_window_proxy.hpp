@@ -34,6 +34,7 @@ namespace neogfx
 	public:
 		dimension horizontal_dpi() const override;
 		dimension vertical_dpi() const override;
+		dimension ppi() const override;
 		bool metrics_available() const override;
 		size extents() const override;
 		dimension em_size() const override;
@@ -74,6 +75,8 @@ namespace neogfx
 		bool has_native_window() const override;
 		const i_native_window& native_window() const override;
 		i_native_window& native_window() override;
+	public:
+		void handle_dpi_changed() override;
 	public:
 		point surface_position() const override;
 		void move_surface(const point& aPosition) override;

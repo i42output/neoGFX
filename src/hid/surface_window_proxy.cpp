@@ -63,6 +63,11 @@ namespace neogfx
 		return native_window().vertical_dpi();
 	}
 
+	dimension surface_window_proxy::ppi() const
+	{
+		return native_window().ppi();
+	}
+
 	bool surface_window_proxy::metrics_available() const
 	{
 		return native_window().metrics_available();
@@ -273,6 +278,11 @@ namespace neogfx
 	i_native_window& surface_window_proxy::native_window()
 	{
 		return const_cast<i_native_window&>(const_cast<const surface_window_proxy*>(this)->native_window());
+	}
+
+	void surface_window_proxy::handle_dpi_changed()
+	{
+		as_window().surface().dpi_changed.trigger();
 	}
 
 	point surface_window_proxy::surface_position() const

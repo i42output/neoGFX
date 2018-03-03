@@ -41,6 +41,8 @@ namespace neogfx
 		virtual const i_native_window& native_window() const = 0;
 		virtual i_native_window& native_window() = 0;
 	public:
+		virtual void handle_dpi_changed() = 0;
+	public:
 		virtual bool has_clicked_widget() const = 0;
 		virtual i_widget& clicked_widget() const = 0;
 		virtual bool has_capturing_widget() const = 0;

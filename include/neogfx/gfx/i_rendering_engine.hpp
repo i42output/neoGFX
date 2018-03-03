@@ -33,21 +33,6 @@ namespace neogfx
 	class i_native_window;
 	class i_native_graphics_context;
 
-	class i_screen_metrics : public i_device_metrics
-	{
-	public:
-		enum subpixel_format_e
-		{
-			SubpixelFormatNone,
-			SubpixelFormatRGBHorizontal,
-			SubpixelFormatBGRHorizontal,
-			SubpixelFormatRGBVertical,
-			SubpixelFormatBGRVertical
-		};
-	public:
-		virtual subpixel_format_e subpixel_format() const = 0;
-	};
-
 	enum class renderer
 	{
 		OpenGL,
@@ -92,6 +77,8 @@ namespace neogfx
 		struct shader_program_not_found : std::logic_error { shader_program_not_found() : std::logic_error("neogfx::i_rendering_engine::shader_program_not_found") {} };
 		struct shader_program_error : std::runtime_error { shader_program_error(const std::string& aError) : std::runtime_error("neogfx::i_rendering_engine::shader_program_error: " + aError) {} };
 	public:
+		virtual const i_device_metrics& default_screen_metrics() const = 0;
+	public:
 		virtual neogfx::renderer renderer() const = 0;
 		virtual bool double_buffering() const = 0;
 		virtual void initialize() = 0;
@@ -100,7 +87,7 @@ namespace neogfx
 		virtual void deactivate_context() = 0;
 		virtual opengl_context create_context(const i_native_surface& aSurface) = 0;
 		virtual void destroy_context(opengl_context aContext) = 0;
-		virtual const i_screen_metrics& screen_metrics() const = 0;
+	public:
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;

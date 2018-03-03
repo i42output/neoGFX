@@ -48,6 +48,7 @@ namespace neogfx
 	class i_surface : public i_device_metrics
 	{
 	public:
+		event<> dpi_changed;
 		event<> rendering;
 		event<> rendering_finished;
 		event<> closed;
