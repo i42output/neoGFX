@@ -113,7 +113,7 @@ namespace video_poker
 		iMainLayout.set_spacing(neogfx::size{ 16.0 });
 		iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
 		iLabelTitle.text().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
-		iLabelTitle.text().set_text_colour(neogfx::color::Green);
+		iLabelTitle.text().set_text_colour(neogfx::colour::Green);
 		iSpacer1.set_weight(neogfx::size{ 0.1 });
 		iSpacer2.set_weight(neogfx::size{ 0.25 });
 		iSpacer3.set_weight(neogfx::size{ 0.25 });
@@ -132,13 +132,13 @@ namespace video_poker
 		set_bet_button_apperance(iBetMax);
 		set_bet_button_apperance(iDeal);
 		iLabelCredits.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-		iLabelCredits.text().set_text_colour(neogfx::color::Yellow);
+		iLabelCredits.text().set_text_colour(neogfx::colour::Yellow);
 		iLabelCreditsValue.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-		iLabelCreditsValue.text().set_text_colour(neogfx::color::White);
+		iLabelCreditsValue.text().set_text_colour(neogfx::colour::White);
 		iLabelStake.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-		iLabelStake.text().set_text_colour(neogfx::color::Yellow);
+		iLabelStake.text().set_text_colour(neogfx::colour::Yellow);
 		iLabelStakeValue.text().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-		iLabelStakeValue.text().set_text_colour(neogfx::color::White);
+		iLabelStakeValue.text().set_text_colour(neogfx::colour::White);
 
 		iBetMinus.clicked([this]() { bet(-1); });
 		iBetPlus.clicked([this]() { bet(+1); });
