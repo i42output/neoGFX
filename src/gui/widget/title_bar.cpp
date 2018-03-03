@@ -375,8 +375,8 @@ namespace neogfx
 						"neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
 						sMinimizeTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } } : 
 					neogfx::image{
-						"neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
-						sMinimizeHighDpiTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
+						"neogfx::title_bar::iTextures[HighDpiTextureMinimize]::" + ink.to_string(),
+						sMinimizeHighDpiTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureMaximize] == boost::none || iTextures[TextureMaximize]->first != ink)
 		{
@@ -387,7 +387,7 @@ namespace neogfx
 						"neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
 						sMaximizeTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } } :
 					neogfx::image{
-						"neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
+						"neogfx::title_bar::iTextures[HighDpiTextureMaximize]::" + ink.to_string(),
 						sMaximizeHighDpiTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureRestore] == boost::none || iTextures[TextureRestore]->first != ink)
@@ -399,7 +399,7 @@ namespace neogfx
 						"neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
 						sRestoreTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } } :
 					neogfx::image{
-						"neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
+						"neogfx::title_bar::iTextures[HighDpiTextureRestore]::" + ink.to_string(),
 						sRestoreHighDpiTexturePattern,{ { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		if (iTextures[TextureClose] == boost::none || iTextures[TextureClose]->first != ink)
@@ -411,7 +411,7 @@ namespace neogfx
 						"neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
 						sCloseTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } } :
 					neogfx::image{
-						"neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
+						"neogfx::title_bar::iTextures[HighDpiTextureClose]::" + ink.to_string(),
 						sCloseHighDpiTexturePattern, { { 0_u8, colour{} },{ 1_u8, ink },{ 2_u8, ink.with_alpha(0x80) } } });
 		}
 		iMinimizeButton.image().set_image(iTextures[TextureMinimize]->second);

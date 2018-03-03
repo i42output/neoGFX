@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
 		app.current_style().palette().set_colour(ng::colour::Black);
 		app.change_style("Slate");
 
-		ng::window window{ ng::size{ 768, 688 } };
+		ng::window window{ ng::size{ 768, 688 } * app.surface_manager().display().metrics().horizontal_dpi() / 96.0 };
 		ng::status_bar statusBar{ window.status_bar_layout() };
 		auto& layout0 = window.client_layout();
 
