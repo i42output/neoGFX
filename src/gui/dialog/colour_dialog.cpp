@@ -93,36 +93,46 @@ namespace neogfx
 
 	namespace
 	{
-		const uint8_t sLeftXPickerCursorImage[9][9]
+		const char* sLeftXPickerCursorImage
 		{
-			{ 1, 1, 1, 1, 1, 0, 0, 0, 0 },
-			{ 1, 2, 2, 2, 2, 1, 0, 0, 0 },
-			{ 1, 2, 2, 2, 2, 2, 1, 0, 0 },
-			{ 1, 2, 2, 2, 2, 2, 2, 1, 0 },
-			{ 1, 2, 2, 2, 2, 2, 2, 2, 1 },
-			{ 1, 2, 2, 2, 2, 2, 2, 1, 0 },
-			{ 1, 2, 2, 2, 2, 2, 1, 0, 0 },
-			{ 1, 2, 2, 2, 2, 1, 0, 0, 0 },
-			{ 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+			"[9,9]"
+			"{0,paper}"
+			"{1,black}"
+			"{2,white}"
+
+			"111110000"
+			"122221000"
+			"122222100"
+			"122222210"
+			"122222221"
+			"122222210"
+			"122222100"
+			"122221000"
+			"111110000"
 		};
-		const uint8_t sRightXPickerCursorImage[9][9]
+		const char* sRightXPickerCursorImage
 		{
-			{ 0, 0, 0, 0, 1, 1, 1, 1, 1 },
-			{ 0, 0, 0, 1, 2, 2, 2, 2, 1 },
-			{ 0, 0, 1, 2, 2, 2, 2, 2, 1 },
-			{ 0, 1, 2, 2, 2, 2, 2, 2, 1 },
-			{ 1, 2, 2, 2, 2, 2, 2, 2, 1 },
-			{ 0, 1, 2, 2, 2, 2, 2, 2, 1 },
-			{ 0, 0, 1, 2, 2, 2, 2, 2, 1 },
-			{ 0, 0, 0, 1, 2, 2, 2, 2, 1 },
-			{ 0, 0, 0, 0, 1, 1, 1, 1, 1 },
+			"[9,9]"
+			"{0,paper}"
+			"{1,black}"
+			"{2,white}"
+
+			"000011111"
+			"000122221"
+			"001222221"
+			"012222221"
+			"122222221"
+			"012222221"
+			"001222221"
+			"000122221"
+			"000011111"
 		};
 	}
 
 	colour_dialog::x_picker::cursor_widget::cursor_widget(x_picker& aParent, type_e aType) :
 		image_widget(
 			aParent.iParent.client_widget(),
-			neogfx::image{ aType == LeftCursor ? sLeftXPickerCursorImage : sRightXPickerCursorImage, { { 0_u8, colour{} }, { 1_u8, colour::Black } , { 2_u8, colour::White } } }),
+			neogfx::image{ aType == LeftCursor ? sLeftXPickerCursorImage : sRightXPickerCursorImage, { { "paper", colour{} }, { "black", colour::Black } , { "white", colour::White } } }),
 		iParent(aParent)
 	{
 		set_ignore_mouse_events(false);

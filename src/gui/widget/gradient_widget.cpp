@@ -513,25 +513,33 @@ namespace neogfx
 	{
 		rect r = colour_stop_rect(aColourStop);
 		draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 8.0 }, size{ 7.0, 7.0 } }, SMALL_ALPHA_PATTERN_SIZE);
-		static const uint8_t stopGlpyhPattern[17][11] =
+		const char* stopGlpyhPattern =
 		{
-			{ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
-			{ 0, 0, 0, 0, 1, 4, 1, 0, 0, 0, 0 },
-			{ 0, 0, 0, 1, 4, 3, 3, 1, 0, 0, 0 },
-			{ 0, 0, 1, 4, 3, 3, 3, 3, 1, 0, 0 },
-			{ 0, 1, 4, 3, 3, 3, 3, 3, 3, 1, 0 },
-			{ 1, 4, 3, 3, 3, 3, 3, 3, 3, 3, 1 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+			"[11,17]"
+			"{0,paper}"
+			"{1,1}"
+			"{2,2}"
+			"{3,3}"
+			"{4,4}"
+			"{9,9}"
+
+			"00000100000"
+			"00001410000"
+			"00014331000"
+			"00143333100"
+			"01433333310"
+			"14333333331"
+			"11111111111"
+			"12222222221"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12222222221"
+			"11111111111"
 		};
 		colour transparentColour{ 255, 255, 255, 0 };
 		colour backgroundColour = background_colour();
@@ -539,12 +547,12 @@ namespace neogfx
 		image stopGlyph{
 			stopGlpyhPattern,
 			{
-				{0_u8, transparentColour},
-				{1_u8, frameColour},
-				{2_u8, frameColour.mid(backgroundColour)},
-				{3_u8, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour()},
-				{4_u8, iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40)},
-				{9_u8, aColourStop.second}} };
+				{"paper", transparentColour},
+				{"1", frameColour},
+				{"2", frameColour.mid(backgroundColour)},
+				{"3", iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour()},
+				{"4", iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40)},
+				{"9", aColourStop.second}} };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())
 			stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
@@ -555,25 +563,33 @@ namespace neogfx
 	{
 		rect r = alpha_stop_rect(aAlphaStop);
 		draw_alpha_background(aGraphicsContext, rect{ r.top_left() + point{ 2.0, 2.0 }, size{ 7.0, 7.0 } }, SMALL_ALPHA_PATTERN_SIZE);
-		static const uint8_t stopGlpyhPattern[17][11] =
+		const char* stopGlpyhPattern =
 		{
-			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 9, 9, 9, 9, 9, 9, 9, 2, 1 },
-			{ 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 4, 3, 3, 3, 3, 3, 3, 3, 3, 1 },
-			{ 0, 1, 4, 3, 3, 3, 3, 3, 3, 1, 0 },
-			{ 0, 0, 1, 4, 3, 3, 3, 3, 1, 0, 0 },
-			{ 0, 0, 0, 1, 4, 3, 3, 1, 0, 0, 0 },
-			{ 0, 0, 0, 0, 1, 4, 1, 0, 0, 0, 0 },
-			{ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }
+			"[11,17]"
+			"{0,paper}"
+			"{1,1}"
+			"{2,2}"
+			"{3,3}"
+			"{4,4}"
+			"{9,9}"
+
+			"11111111111"
+			"12222222221"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12999999921"
+			"12222222221"
+			"11111111111"
+			"14333333331"
+			"01433333310"
+			"00143333100"
+			"00014331000"
+			"00001410000"
+			"00000100000"
 		};
 		colour transparentColour{ 255, 255, 255, 0 };
 		colour backgroundColour = background_colour();
@@ -581,12 +597,12 @@ namespace neogfx
 		image stopGlyph{
 			stopGlpyhPattern,
 			{
-				{ 0_u8, transparentColour },
-				{ 1_u8, frameColour },
-				{ 2_u8, frameColour.mid(backgroundColour) },
-				{ 3_u8, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour() },
-				{ 4_u8, iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40) },
-				{ 9_u8, colour::White.with_alpha(aAlphaStop.second) } } };
+				{ "paper", transparentColour },
+				{ "1", frameColour },
+				{ "2", frameColour.mid(backgroundColour) },
+				{ "3", iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour() },
+				{ "4", iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40) },
+				{ "9", colour::White.with_alpha(aAlphaStop.second) } } };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())
 			stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;

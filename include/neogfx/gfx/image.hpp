@@ -36,27 +36,14 @@ namespace neogfx
 			PngImage
 		};
 	private:
+		struct error_parsing_image_pattern : std::logic_error { error_parsing_image_pattern() : std::logic_error("neogfx::image::error_parsing_image_pattern") {} };
 		struct no_resource : std::logic_error { no_resource() : std::logic_error("neogfx::image::no_resource") {} };
 	public:
 		image(texture_sampling aSampling = texture_sampling::NormalMipmap);
 		image(const neogfx::size& aSize, const colour& aColour = colour::Black, texture_sampling aSampling = texture_sampling::NormalMipmap);
 		image(const std::string& aUri, texture_sampling aSampling = texture_sampling::NormalMipmap);
-		template <typename T, std::size_t Width, std::size_t Height>
-		image(const std::string& aUri, const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap, texture_sampling aSampling = texture_sampling::NormalMipmap) : iUri(aUri), iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
-		{
-			resize(neogfx::size{ Width, Height });
-			for (std::size_t y = 0; y < Height; ++y)
-				for (std::size_t x = 0; x < Width; ++x)
-					set_pixel(point(x, y), aColourMap.find(aImagePattern[y][x])->second);
-		}
-		template <typename T, std::size_t Width, std::size_t Height>
-		image(const T(&aImagePattern)[Height][Width], const std::unordered_map<T, colour>& aColourMap, texture_sampling aSampling = texture_sampling::NormalMipmap) : iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
-		{
-			resize(neogfx::size{ Width, Height });
-			for (std::size_t y = 0; y < Height; ++y)
-				for (std::size_t x = 0; x < Width; ++x)
-					set_pixel(point(x, y), aColourMap.find(aImagePattern[y][x])->second);
-		}
+		image(const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, texture_sampling aSampling = texture_sampling::NormalMipmap);
+		image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, texture_sampling aSampling = texture_sampling::NormalMipmap);
 		~image();
 	public:
 		virtual bool available() const;

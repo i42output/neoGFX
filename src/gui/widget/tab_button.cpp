@@ -72,16 +72,21 @@ namespace neogfx
 		{
 			auto ink = app::instance().current_style().palette().text_colour();
 			auto paper = background_colour();
-			const uint8_t sTexture[8][8]
+			const char* sTexture
 			{
-				{ 1, 2, 0, 0, 0, 0, 2, 1 },
-				{ 2, 1, 2, 0, 0, 2, 1, 2 },
-				{ 0, 2, 1, 2, 2, 1, 2, 0 },
-				{ 0, 0, 2, 1, 1, 2, 0, 0 },
-				{ 0, 0, 2, 1, 1, 2, 0, 0 },
-				{ 0, 2, 1, 2, 2, 1, 2, 0 },
-				{ 2, 1, 2, 0, 0, 2, 1, 2 },
-				{ 1, 2, 0, 0, 0, 0, 2, 1 }
+				"[8,8]"
+				"{0,paper}"
+				"{1,ink1}"
+				"{2,ink2}"
+
+				"12000021"
+				"21200212"
+				"02122120"
+				"00211200"
+				"00211200"
+				"02122120"
+				"21200212"
+				"12000021"
 			};
 			if (iTextures[TextureOff] == boost::none || iTextures[TextureOff]->first != ink)
 			{
@@ -89,7 +94,7 @@ namespace neogfx
 					ink,
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOff]::" + ink.to_string(),
-						sTexture,{ { 0_u8, colour{} },{ 1_u8, ink.with_alpha(0x60) },{ 2_u8, ink.with_alpha(0x30) } } });
+						sTexture,{ { "paper", colour{} },{ "ink1", ink.with_alpha(0x60) }, { "ink2", ink.with_alpha(0x30) } } });
 			}
 			if (iTextures[TextureOn] == boost::none || iTextures[TextureOn]->first != ink)
 			{
@@ -97,7 +102,7 @@ namespace neogfx
 					ink,
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOn]::" + ink.to_string(),
-						sTexture, { { 0_u8, colour{} }, { 1_u8, ink }, { 2_u8, ink.with_alpha(0x80) } } });
+						sTexture, { { "paper", colour{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } } });
 			}
 			if (iTextures[TextureOnOver] == boost::none || iTextures[TextureOnOver]->first != ink)
 			{
@@ -105,7 +110,7 @@ namespace neogfx
 					ink,
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOnOver]::" + paper.to_string(),
-						sTexture, { { 0_u8, colour{} }, { 1_u8, paper }, { 2_u8, paper.with_alpha(0x80) } } });
+						sTexture, { { "paper", colour{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } } });
 			}
 			iTextureState = Unknown;
 			update_appearance();

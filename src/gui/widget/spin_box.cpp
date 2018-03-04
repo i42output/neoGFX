@@ -236,27 +236,35 @@ namespace neogfx
 		auto ink = app::instance().current_style().palette().text_colour();
 		if (iUpArrow == boost::none || iUpArrow->first != ink)
 		{
-			const uint8_t sUpArrowImagePattern[5][9]
+			const char* sUpArrowImagePattern
 			{
-				{ 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-				{ 0, 0, 0, 1, 1, 1, 0, 0, 0 },
-				{ 0, 0, 1, 1, 1, 1, 1, 0, 0 },
-				{ 0, 1, 1, 1, 1, 1, 1, 1, 0 },
-				{ 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+				"[9,5]"
+				"{0,paper}"
+				"{1,ink}"
+
+				"000010000"
+				"000111000"
+				"001111100"
+				"011111110"
+				"111111111"
 			};
-			iUpArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { 0_u8, colour{} },{ 1_u8, ink } } });
+			iUpArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
 		}
 		if (iDownArrow == boost::none || iDownArrow->first != ink)
 		{
-			const uint8_t sDownArrowImagePattern[5][9]
+			const char* sDownArrowImagePattern
 			{
-				{ 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-				{ 0, 1, 1, 1, 1, 1, 1, 1, 0 },
-				{ 0, 0, 1, 1, 1, 1, 1, 0, 0 },
-				{ 0, 0, 0, 1, 1, 1, 0, 0, 0 },
-				{ 0, 0, 0, 0, 1, 0, 0, 0, 0 },
+				"[9,5]"
+				"{0,paper}"
+				"{1,ink}"
+
+				"111111111"
+				"011111110"
+				"001111100"
+				"000111000"
+				"000010000"
 			};
-			iDownArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { 0_u8, colour{} },{ 1_u8, ink } } });
+			iDownArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
 		}
 		iStepUpButton.label().set_placement(label_placement::ImageVertical);
 		iStepDownButton.label().set_placement(label_placement::ImageVertical);

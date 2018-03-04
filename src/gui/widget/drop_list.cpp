@@ -919,14 +919,18 @@ namespace neogfx
 		auto ink = app::instance().current_style().palette().text_colour();
 		if (iDownArrowTexture == boost::none || iDownArrowTexture->first != ink)
 		{
-			const uint8_t sDownArrowImagePattern[4][10]
+			const char* sDownArrowImagePattern
 			{
-				{ 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-				{ 0, 0, 1, 1, 1, 1, 1, 1, 0, 0 },
-				{ 0, 0, 0, 1, 1, 1, 1, 0, 0, 0 },
-				{ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+				"[10,4]"
+				"{0,paper}"
+				"{1,ink}"
+
+				"0111111110"
+				"0011111100"
+				"0001111000"
+				"0000110000"
 			};
-			iDownArrowTexture = std::make_pair(ink, neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { 0_u8, colour{} }, { 1_u8, ink } } });
+			iDownArrowTexture = std::make_pair(ink, neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { "paper", colour{} }, { "ink", ink } } });
 		}
 		iDownArrow.set_image(iDownArrowTexture->second);
 	}

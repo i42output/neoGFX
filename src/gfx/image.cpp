@@ -20,16 +20,20 @@
 #include <neogfx/neogfx.hpp>
 #include <libpng/png.h>
 #include <openssl/sha.h>
+#include <neolib/vecarray.hpp>
+#include <neolib/string_utils.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/resource_manager.hpp>
 
 namespace neogfx
 {
-	image::image(texture_sampling aSampling) : iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
+	image::image(texture_sampling aSampling) : 
+		iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
 	{
 	}
 
-	image::image(const neogfx::size& aSize, const colour& aColour, texture_sampling aSampling) : iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
+	image::image(const neogfx::size& aSize, const colour& aColour, texture_sampling aSampling) : 
+		iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
 	{
 		resize(aSize);
 		for (std::size_t y = 0; y < aSize.cx; ++y)
@@ -37,10 +41,69 @@ namespace neogfx
 				set_pixel(point(x, y), aColour);
 	}
 
-	image::image(const std::string& aUri, texture_sampling aSampling) : iResource(resource_manager::instance().load_resource(aUri)), iUri(aUri), iColourFormat(neogfx::colour_format::RGBA8), iSampling(aSampling)
+	image::image(const std::string& aUri, texture_sampling aSampling) : 
+		iResource(resource_manager::instance().load_resource(aUri)), 
+		iUri(aUri), 
+		iColourFormat(neogfx::colour_format::RGBA8), 
+		iSampling(aSampling)
 	{
 		if (available())
 			load();
+	}
+
+	image::image(const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, texture_sampling aSampling) : 
+		image(std::string{}, aImagePattern, aColourMap, aSampling)
+	{
+	}
+
+	image::image(const std::string& aUri, const std::string& aImagePattern, const std::unordered_map<std::string, colour>& aColourMap, texture_sampling aSampling) : 
+		iUri(aUri), 
+		iColourFormat(neogfx::colour_format::RGBA8), 
+		iSampling(aSampling)
+	{
+		try
+		{
+			neolib::vecarray<std::string, 2> bits1;
+			neolib::tokens(aImagePattern, std::string{ "[]" }, bits1, 2);
+			neolib::vecarray<std::string, 2> bits2;
+			neolib::tokens(bits1.at(0), std::string{ "," }, bits2, 2);
+			std::vector<std::string> bits3;
+			neolib::tokens(bits1.at(1), std::string{ "{}" }, bits3);
+			if (bits3.size() < 2)
+				throw error_parsing_image_pattern();
+
+			basic_size<std::size_t> imageSize{ boost::lexical_cast<std::size_t>(bits2.at(0)), boost::lexical_cast<std::size_t>(bits2.at(1)) };
+
+			std::unordered_map<char, std::string> colourKeyMap;
+			for (std::size_t i = 0; i < bits3.size() - 1; ++i)
+			{
+				neolib::vecarray<std::string, 2> colourKeyMapEntry;
+				neolib::tokens(bits3[i], std::string{ "," }, colourKeyMapEntry);
+				colourKeyMap.insert(std::make_pair(colourKeyMapEntry.at(0).at(0), colourKeyMapEntry.at(1)));
+			}
+			
+			resize(imageSize);
+			const char* nextPixel = bits3.back().c_str();
+			for (std::size_t y = 0; y < imageSize.cy; ++y)
+				for (std::size_t x = 0; x < imageSize.cx; ++x)
+				{
+					char pixelKey = *nextPixel++;
+					if (pixelKey == '\0')
+						throw error_parsing_image_pattern();
+					auto colourKey = colourKeyMap.find(pixelKey);
+					if (colourKey == colourKeyMap.end())
+						throw error_parsing_image_pattern();
+					auto colourMapKey = aColourMap.find(colourKey->second);
+					if (colourMapKey == aColourMap.end())
+						throw error_parsing_image_pattern();
+					set_pixel(basic_point<std::size_t>{ x, y }, colourMapKey->second);
+				}
+
+		}
+		catch (std::out_of_range)
+		{
+			throw error_parsing_image_pattern();
+		}
 	}
 
 	image::~image()

@@ -11,19 +11,6 @@
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
 
-const uint8_t sSpaceshipImagePattern[9][9]
-{
-	{ 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-	{ 0, 0, 0, 1, 2, 1, 0, 0, 0 },
-	{ 0, 0, 0, 1, 2, 1, 0, 0, 0 },
-	{ 0, 0, 1, 2, 2, 2, 1, 0, 0 },
-	{ 0, 0, 1, 2, 2, 2, 1, 0, 0 },
-	{ 0, 1, 1, 2, 2, 2, 1, 1, 0 },
-	{ 0, 1, 0, 1, 1, 1, 0, 1, 0 },
-	{ 0, 1, 0, 0, 0, 0, 0, 1, 0 },
-	{ 0, 1, 0, 0, 0, 0, 0, 1, 0 },
-};
-
 void create_target(ng::sprite_plane& aWorld)
 {
 	auto target = std::make_shared<ng::sprite>(ng::colour::from_hsl(static_cast<ng::scalar>(std::rand() % 360), 1.0, 0.75));
@@ -108,11 +95,35 @@ void create_game(ng::i_layout& aLayout)
 	//spritePlane->set_gravitational_constant(0.0);
 	//spritePlane->create_earth();
 	spritePlane->reserve(10000);
-	auto& spaceshipSprite = spritePlane->create_sprite(ng::image{ sSpaceshipImagePattern, { { 0_u8, ng::colour() },{ 1_u8, ng::colour::LightGoldenrod },{ 2_u8, ng::colour::DarkGoldenrod4 } } });
+
+	const char* spaceshipSpriteImagePattern
+	{
+		"[9,9]"
+		"{0,paper}"
+		"{1,ink1}"
+		"{2,ink2}"
+
+		"000010000"
+		"000121000"
+		"000121000"
+		"001222100"
+		"001222100"
+		"011222110"
+		"010111010"
+		"010000010"
+		"010000010"
+	};
+	
+	auto& spaceshipSprite = spritePlane->create_sprite(
+		ng::image{ 
+			spaceshipSpriteImagePattern,
+			{ { "paper", ng::colour{} }, { "ink1", ng::colour::LightGoldenrod }, { "ink2", ng::colour::DarkGoldenrod4 } } });
+
 	spaceshipSprite.set_collision_mask(0x1ull);
 	spaceshipSprite.set_mass(1.0);
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
 	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 0.0 });
+
 	auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ *spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } } });
 	score->second.set_value("000000");
 	score->second.set_position(ng::vec3{ 0.0, 0.0, 1.0 });

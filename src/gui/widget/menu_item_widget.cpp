@@ -112,19 +112,23 @@ namespace neogfx
 					: background_colour().light() ? background_colour().darker(0x80) : background_colour().lighter(0x80);
 				if (iSubMenuArrow == boost::none || iSubMenuArrow->first != ink)
 				{
-					const uint8_t sArrowImagePattern[9][6]
+					const char* sArrowImagePattern
 					{
-						{ 0, 0, 0, 0, 0, 0 },
-						{ 0, 1, 0, 0, 0, 0 },
-						{ 0, 1, 1, 0, 0, 0 },
-						{ 0, 1, 1, 1, 0, 0 },
-						{ 0, 1, 1, 1, 1, 0 },
-						{ 0, 1, 1, 1, 0, 0 },
-						{ 0, 1, 1, 0, 0, 0 },
-						{ 0, 1, 0, 0, 0, 0 },
-						{ 0, 0, 0, 0, 0, 0 },
+						"[6,9]"
+						"{0,paper}"
+						"{1,ink}"
+
+						"000000"
+						"010000"
+						"011000"
+						"011100"
+						"011110"
+						"011100"
+						"011000"
+						"010000"
+						"000000"
 					};
-					iSubMenuArrow = std::make_pair(ink, image{ "neogfx::menu_item_widget::" + ink.to_string(), sArrowImagePattern, { { 0_u8, colour{} },{ 1_u8, ink } } });
+					iSubMenuArrow = std::make_pair(ink, image{ "neogfx::menu_item_widget::" + ink.to_string(), sArrowImagePattern, { { "paper", colour{} },{ "ink", ink } } });
 				}
 				rect rect = client_rect(false);
 				aGraphicsContext.draw_texture(
@@ -261,19 +265,23 @@ namespace neogfx
 				iIcon.set_image(menu_item().action().is_unchecked() ? menu_item().action().image() : menu_item().action().checked_image());
 				if (iIcon.image().is_empty() && menu_item().action().is_checked())
 				{
-					const uint8_t sTickPattern[8][16]
+					const char* sTickPattern
 					{
-						{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
-						{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 },
-						{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
-						{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
-						{ 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-						{ 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
-						{ 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
-						{ 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 }
+						"[16,8]"
+						"{0,paper}"
+						"{1,ink}"
+
+						"0000000000100000"
+						"0000000001100000"
+						"0000000001000000"
+						"0000000011000000"
+						"0000010010000000"
+						"0000011110000000"
+						"0000001100000000"
+						"0000001100000000"
 					};
 					colour ink = app::instance().current_style().palette().text_colour();
-					iIcon.set_image(image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { 0_u8, colour{} },{ 1_u8, ink } } });
+					iIcon.set_image(image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", colour{} },{ "ink", ink } } });
 				}
 				if (!iIcon.image().is_empty())
 					iIcon.set_fixed_size(size{ iIconSize, iIconSize });
