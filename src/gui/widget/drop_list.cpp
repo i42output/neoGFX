@@ -930,7 +930,24 @@ namespace neogfx
 				"0001111000"
 				"0000110000"
 			};
-			iDownArrowTexture = std::make_pair(ink, neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { "paper", colour{} }, { "ink", ink } } });
+			const char* sDownArrowHighDpiImagePattern
+			{
+				"[20,8]"
+				"{0,paper}"
+				"{1,ink}"
+
+				"00111111111111111100"
+				"00011111111111111000"
+				"00001111111111110000"
+				"00000111111111100000"
+				"00000011111111000000"
+				"00000001111110000000"
+				"00000000111100000000"
+				"00000000011000000000"
+			};
+			iDownArrowTexture = std::make_pair(ink, !high_dpi() ? 
+				neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { "paper", colour{} }, { "ink", ink } } } :
+				neogfx::image{ "neogfx::drop_list::iDownArrowHighDpiTexture::" + ink.to_string(), sDownArrowHighDpiImagePattern, { { "paper", colour{} }, { "ink", ink } } });
 		}
 		iDownArrow.set_image(iDownArrowTexture->second);
 	}
