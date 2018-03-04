@@ -871,7 +871,7 @@ namespace neogfx
 
 		set_margins(neogfx::margins{});
 		iNonClientLayout.set_margins(neogfx::margins{});
-		iNonClientLayout.set_spacing(0.0);
+		iNonClientLayout.set_spacing(size{});
 		iTitleBarLayout.set_margins(neogfx::margins{});
 		iMenuLayout.set_margins(neogfx::margins{});
 		iToolbarLayout.set_margins(neogfx::margins{});

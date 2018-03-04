@@ -83,8 +83,9 @@ namespace neogfx
 		virtual const i_layout& get_layout_at(item_index aIndex) const = 0;
 		virtual i_layout& get_layout_at(item_index aIndex) = 0;
 	public:
+		virtual bool has_spacing() const = 0;
 		virtual size spacing() const = 0;
-		virtual void set_spacing(const size& sSpacing, bool aUpdateLayout = true) = 0;
+		virtual void set_spacing(const optional_size& sSpacing, bool aUpdateLayout = true) = 0;
 		virtual bool always_use_spacing() const = 0;
 		virtual void set_always_use_spacing(bool aAlwaysUseSpacing) = 0;
 		virtual neogfx::alignment alignment() const = 0;

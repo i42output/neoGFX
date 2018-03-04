@@ -712,7 +712,7 @@ int main(int argc, char* argv[])
 		button9.set_foreground_colour(ng::colour::Aquamarine);
 		ng::grid_layout keypad{ keypadLayout, 4, 3 };
 		keypad.set_minimum_size(ng::size{ 100.0, 0.0 });
-		keypad.set_spacing(0.0);
+		keypad.set_spacing(ng::size{});
 		for (uint32_t row = 0; row < 3; ++row)
 			for (uint32_t col = 0; col < 3; ++col)
 				keypad.add_item_at_position(row, col, std::make_shared<keypad_button>(textEdit, row * 3 + col + 1));

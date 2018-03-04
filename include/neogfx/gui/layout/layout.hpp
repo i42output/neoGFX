@@ -96,8 +96,9 @@ namespace neogfx
 		neogfx::margins margins() const override;
 		void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
 	public:
+		bool has_spacing() const override;
 		size spacing() const override;
-		void set_spacing(const size& aSpacing, bool aUpdateLayout = true) override;
+		void set_spacing(const optional_size& aSpacing, bool aUpdateLayout = true) override;
 		bool always_use_spacing() const override;
 		void set_always_use_spacing(bool aAlwaysUseSpacing) override;
 		neogfx::alignment alignment() const override;
@@ -152,7 +153,7 @@ namespace neogfx
 		i_layout* iParent;
 		units_context iUnitsContext;
 		optional_margins iMargins;
-		size iSpacing;
+		optional_size iSpacing;
 		bool iAlwaysUseSpacing;
 		neogfx::alignment iAlignment;
 		bool iEnabled;

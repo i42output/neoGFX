@@ -424,7 +424,7 @@ namespace neogfx
 		return result;
 	}
 
-	void grid_layout::set_spacing(const size& aSpacing, bool aUpdateLayout)
+	void grid_layout::set_spacing(const optional_size& aSpacing, bool aUpdateLayout)
 	{
 		layout::set_spacing(aSpacing, false);
 		iRowLayout.set_spacing(aSpacing, false);

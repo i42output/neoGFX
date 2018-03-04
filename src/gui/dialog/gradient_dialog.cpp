@@ -174,14 +174,14 @@ namespace neogfx
 
 	void gradient_dialog::init()
 	{
-		set_standard_layout(16.0);
+		auto standardSpacing = set_standard_layout(16.0);
 
 		iLayout.set_margins(neogfx::margins{});
-		iLayout.set_spacing(16.0);
+		iLayout.set_spacing(standardSpacing);
 		iLayout2.set_margins(neogfx::margins{});
-		iLayout2.set_spacing(16.0);
+		iLayout2.set_spacing(standardSpacing);
 		iLayout3.set_margins(neogfx::margins{});
-		iLayout3.set_spacing(16.0);
+		iLayout3.set_spacing(standardSpacing);
 		iLayout5.set_alignment(alignment::Top);
 		iSmoothnessSpinBox.set_minimum(0.0);
 		iSmoothnessSpinBox.set_maximum(100.0);

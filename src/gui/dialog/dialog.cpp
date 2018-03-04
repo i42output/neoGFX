@@ -161,15 +161,17 @@ namespace neogfx
 		iResult = aResult;
 	}
 
-	void dialog::set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox)
+	size dialog::set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox, bool aDpiScaling)
 	{
+		auto ajustedSpacing = aControlSpacing * (!aDpiScaling || surface().ppi() < 150.0 ? 1.0 : 2.0);
 		set_margins(neogfx::margins{});
-		window::client_layout().set_margins(neogfx::margins{ aControlSpacing.cx, aControlSpacing.cy, aControlSpacing.cx, aControlSpacing.cy });
-		window::client_layout().set_spacing(aControlSpacing);
+		window::client_layout().set_margins(neogfx::margins{ ajustedSpacing.cx, ajustedSpacing.cy, ajustedSpacing.cx, ajustedSpacing.cy });
+		window::client_layout().set_spacing(ajustedSpacing);
 		client_layout().set_margins(neogfx::margins{});
-		client_layout().set_spacing(aControlSpacing);
+		client_layout().set_spacing(ajustedSpacing);
 		if (aCreateButtonBox)
-			button_box().layout().set_spacing(aControlSpacing);
+			button_box().layout().set_spacing(ajustedSpacing);
+		return ajustedSpacing;
 	}
 
 	dialog_button_box& dialog::button_box()

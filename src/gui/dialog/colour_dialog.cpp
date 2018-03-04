@@ -799,15 +799,15 @@ namespace neogfx
 			colour::SlateBlue, colour::SlateGray, colour::Snow, colour::SpringGreen, colour::SteelBlue, colour::Tan, colour::Thistle, colour::Tomato, 
 			colour::Turquoise, colour::Violet, colour::VioletRed, colour::Wheat, colour::White, colour::WhiteSmoke, colour::Yellow, colour::YellowGreen 
 		};
-		set_standard_layout(16.0);
+		auto standardSpacing = set_standard_layout(16.0);
 		iLayout.set_margins(neogfx::margins{});
-		iLayout.set_spacing(16.0);
+		iLayout.set_spacing(standardSpacing);
 		iLayout2.set_margins(neogfx::margins{});
-		iLayout2.set_spacing(16.0);
-		iRightLayout.set_spacing(16.0);
-		iRightTopLayout.set_spacing(16.0);
-		iRightBottomLayout.set_spacing(8.0);
-		iChannelLayout.set_spacing(8.0);
+		iLayout2.set_spacing(standardSpacing);
+		iRightLayout.set_spacing(standardSpacing);
+		iRightTopLayout.set_spacing(standardSpacing);
+		iRightBottomLayout.set_spacing(standardSpacing / 2.0);
+		iChannelLayout.set_spacing(standardSpacing / 2.0);
 		iScreenPicker.set_size_policy(size_policy::Minimum);
 		iSink += iScreenPicker.async_clicked([&, this]()
 		{

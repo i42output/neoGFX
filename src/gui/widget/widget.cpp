@@ -896,7 +896,11 @@ namespace neogfx
 
 	margins widget::margins() const
 	{
-		return units_converter(*this).from_device_units(has_margins() ? *iMargins : app::instance().current_style().margins());
+		const auto& adjustedMargins =
+			(has_margins() ?
+				*iMargins :
+				app::instance().current_style().margins() * (root().surface().ppi() < 150.0 ? 1.0 : 2.0));
+		return units_converter(*this).from_device_units(adjustedMargins);
 	}
 
 	void widget::set_margins(const optional_margins& aMargins, bool aUpdateLayout)

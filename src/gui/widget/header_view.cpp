@@ -365,7 +365,7 @@ namespace neogfx
 	{
 		for (auto& sw : iSectionWidths)
 			sw.calculated = 0.0;
-		layout().set_spacing(separator_width(), false);
+		layout().set_spacing(size{ separator_width() }, false);
 		iSectionWidths.resize(presentation_model().columns());
 		while (layout().count() > presentation_model().columns() + (expand_last_column() ? 0 : 1))
 			layout().remove_at(layout().count() - 1);

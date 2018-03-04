@@ -137,14 +137,14 @@ namespace neogfx
 		basic_size operator-() const { return basic_size{ -cx, -cy }; }
 		basic_size& operator+=(const basic_size& other) { cx += other.cx; cy += other.cy; return *this; }
 		basic_size& operator+=(const basic_delta<CoordinateType>& other) { cx += other.dx; cy += other.dy; return *this; }
-		basic_size& operator+=(const dimension_type other) { cx += other; cy += other; return *this; }
+		basic_size& operator+=(dimension_type amount) { cx += amount; cy += amount; return *this; }
 		basic_size& operator-=(const basic_size& other) { cx -= other.cx; cy -= other.cy; return *this; }
 		basic_size& operator-=(const basic_delta<CoordinateType>& other) { cx -= other.dx; cy -= other.dy; return *this; }
-		basic_size& operator-=(const dimension_type other) { cx -= other; cy -= other; return *this; }
+		basic_size& operator-=(dimension_type amount) { cx -= amount; cy -= amount; return *this; }
 		basic_size& operator*=(const basic_size& other) { cx *= other.cx; cy *= other.cy; return *this; }
-		basic_size& operator*=(const dimension_type other) { cx *= other; cy *= other; return *this; }
+		basic_size& operator*=(dimension_type amount) { cx *= amount; cy *= amount; return *this; }
 		basic_size& operator/=(const basic_size& other) { cx /= other.cx; cy /= other.cy; return *this; }
-		basic_size& operator/=(const dimension_type other) { cx /= other; cy /= other; return *this; }
+		basic_size& operator/=(dimension_type amount) { cx /= amount; cy /= amount; return *this; }
 		basic_size ceil() const { return basic_size(std::ceil(cx), std::ceil(cy)); }
 		basic_size floor() const { return basic_size(std::floor(cx), std::floor(cy)); }
 		basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
@@ -637,11 +637,18 @@ namespace neogfx
 	public:
 		bool operator==(const basic_margins& other) const { return left == other.left && top == other.top && right == other.right && bottom == other.bottom; }
 		bool operator!=(const basic_margins& other) const { return !operator == (other); }
+		basic_margins operator-() const { return basic_margins{ -left, -top, -right, -bottom }; }
+		basic_margins& operator+=(const basic_margins& other) { left += other.left; top += other.top; right += other.right; bottom += other.bottom; return *this; }
 		basic_margins& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount; return *this; }
+		basic_margins& operator-=(const basic_margins& other) { left -= other.left; top -= other.top; right -= other.right; bottom -= other.bottom; return *this; }
 		basic_margins& operator-=(dimension_type amount) { left -= amount; top -= amount; right -= amount; bottom -= amount; return *this; }
+		basic_margins& operator*=(const basic_margins& other) { left *= other.left; top *= other.top; right *= other.right; bottom *= other.bottom; return *this; }
+		basic_margins& operator*=(dimension_type amount) { left *= amount; top *= amount; right *= amount; bottom *= amount; return *this; }
+		basic_margins& operator/=(const basic_margins& other) { left /= other.left; top /= other.top; right /= other.right; bottom /= other.bottom; return *this; }
+		basic_margins& operator/=(dimension_type amount) { left /= amount; top /= amount; right /= amount; bottom /= amount; return *this; }
 	public:
-		point_type top_left() const { return point_type(left, top); }
-		size_type size() const { return size_type(left + right, top + bottom); }
+		point_type top_left() const { return point_type{ left, top }; }
+		size_type size() const { return size_type{ left + right, top + bottom }; }
 		// attributes
 	public:
 		dimension_type left;
@@ -651,9 +658,73 @@ namespace neogfx
 	};
 
 	template <typename DimensionType>
-	inline basic_margins<DimensionType> operator+(const basic_margins<DimensionType>& lhs, const basic_margins<DimensionType>& rhs)
+	inline basic_margins<DimensionType> operator+(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
 	{
-		return basic_margins<DimensionType>{ lhs.left + rhs.left, lhs.top + rhs.top, lhs.right + rhs.right, lhs.bottom + rhs.bottom };
+		basic_margins<DimensionType> ret = left;
+		ret += right;
+		return ret;
+	}
+
+	template <typename DimensionType>
+	inline basic_margins<DimensionType> operator-(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+	{
+		basic_margins<DimensionType> ret = left;
+		ret -= right;
+		return ret;
+	}
+
+	template <typename DimensionType>
+	inline basic_margins<DimensionType> operator*(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+	{
+		basic_margins<DimensionType> ret = left;
+		ret *= right;
+		return ret;
+	}
+
+	template <typename DimensionType>
+	inline basic_margins<DimensionType> operator/(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+	{
+		basic_margins<DimensionType> ret = left;
+		ret /= right;
+		return ret;
+	}
+
+	template <typename DimensionType>
+	inline basic_margins<DimensionType> operator+(const basic_margins<DimensionType>& left, typename basic_margins<DimensionType>::dimension_type right)
+	{
+		basic_margins<DimensionType> ret = left;
+		ret += right;
+		return ret;
+	}
+
+	template <typename DimensionType>
+	inline basic_margins<DimensionType> operator-(const basic_margins<DimensionType>& left, typename basic_margins<DimensionType>::dimension_type right)
+	{
+		basic_margins<DimensionType> ret = left;
+		ret -= right;
+		return ret;
+	}
+
+	template <typename DimensionType>
+	inline basic_margins<DimensionType> operator*(const basic_margins<DimensionType>& left, typename basic_margins<DimensionType>::dimension_type right)
+	{
+		basic_margins<DimensionType> ret = left;
+		ret *= right;
+		return ret;
+	}
+
+	template <typename DimensionType>
+	inline basic_margins<DimensionType> operator/(const basic_margins<DimensionType>& left, typename basic_margins<DimensionType>::dimension_type right)
+	{
+		basic_margins<DimensionType> ret = left;
+		ret /= right;
+		return ret;
+	}
+
+	template <typename DimensionType>
+	inline bool operator<(const basic_margins<DimensionType>& left, const basic_margins<DimensionType>& right)
+	{
+		return std::tie(left.left, left.top, left.right, left.bottom) < std::tie(right.left, right.top, right.right, right.bottom);
 	}
 		
 	typedef basic_margins<dimension> margins;

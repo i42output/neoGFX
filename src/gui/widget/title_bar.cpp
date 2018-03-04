@@ -147,7 +147,7 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{ 4.0, 4.0, 4.0, 4.0 });
-		iLayout.set_spacing(8.0);
+		iLayout.set_spacing(size{ 8.0 });
 		icon().set_ignore_mouse_events(false);
 		size iconSize{ root().surface().ppi() < 150.0 ? 24.0 : 48.0 };
 		if (icon().image().is_empty())

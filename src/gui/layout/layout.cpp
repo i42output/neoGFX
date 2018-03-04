@@ -41,7 +41,6 @@ namespace neogfx
 		iOwner{ nullptr },
 		iParent{ nullptr },
 		iUnitsContext{ *this },
-		iSpacing{ app::instance().current_style().spacing() },
 		iAlwaysUseSpacing{ false },
 		iAlignment{ aAlignment },
 		iEnabled{ true },
@@ -57,7 +56,6 @@ namespace neogfx
 		iOwner{ &aParent },
 		iParent{ nullptr },
 		iUnitsContext{ *this },
-		iSpacing{ app::instance().current_style().spacing() },
 		iAlwaysUseSpacing{ false },
 		iAlignment{ aAlignment },
 		iEnabled{ true },
@@ -75,7 +73,6 @@ namespace neogfx
 		iParent{ &aParent },
 		iUnitsContext{ *this },
 		iMargins{ neogfx::margins{} },
-		iSpacing{ app::instance().current_style().spacing() },
 		iAlwaysUseSpacing{ false },
 		iAlignment{ aAlignment },
 		iEnabled{ true },
@@ -404,7 +401,13 @@ namespace neogfx
 
 	margins layout::margins() const
 	{
-		return units_converter(*this).from_device_units(has_margins() ? *iMargins : app::instance().current_style().margins());
+		const auto& adjustedMargins =
+			(has_margins() ?
+				*iMargins :
+				app::instance().current_style().margins() * ((owner() != nullptr ?
+					owner()->surface().ppi() :
+					app::instance().surface_manager().display().metrics().ppi()) < 150.0 ? 1.0 : 2.0));
+		return units_converter(*this).from_device_units(adjustedMargins);
 	}
 
 	void layout::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
@@ -418,16 +421,29 @@ namespace neogfx
 		}
 	}
 
-	size layout::spacing() const
+	bool layout::has_spacing() const
 	{
-		return units_converter(*this).from_device_units(iSpacing);
+		return iSpacing != boost::none;
 	}
 
-	void layout::set_spacing(const size& aSpacing, bool aUpdateLayout)
+	size layout::spacing() const
+	{
+		const auto& adjustedSpacing =
+			(has_spacing() ?
+				*iSpacing :
+				app::instance().current_style().spacing() * ((owner() != nullptr && owner()->has_surface() ?
+					owner()->surface().ppi() :
+					app::instance().surface_manager().display().metrics().ppi()) < 150.0 ? 1.0 : 2.0));
+		return units_converter(*this).from_device_units(adjustedSpacing);
+	}
+
+	void layout::set_spacing(const optional_size& aSpacing, bool aUpdateLayout)
 	{
 		if (iSpacing != aSpacing)
 		{
-			iSpacing = units_converter(*this).to_device_units(aSpacing);
+			iSpacing = (aSpacing != boost::none ? 
+				optional_size{ units_converter(*this).to_device_units(*aSpacing) } :
+				aSpacing);
 			if (iOwner != nullptr && aUpdateLayout)
 				iOwner->ultimate_ancestor().layout_items(true);
 		}
