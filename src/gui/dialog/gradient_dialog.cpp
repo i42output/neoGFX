@@ -44,14 +44,14 @@ namespace neogfx
 		{
 			framed_widget::paint(aGc);
 			rect cr = client_rect();
-			draw_alpha_background(aGc, cr, 16);
+			draw_alpha_background(aGc, cr, dpi_scale(16.0));
 			aGc.fill_rect(cr, iOwner.gradient());
 			if (iOwner.gradient().direction() == gradient::Radial && iOwner.gradient().centre() != optional_point{})
 			{
 				point centre{ cr.centre().x + cr.width() / 2.0 * iOwner.gradient().centre()->x, cr.centre().y + cr.height() / 2.0 * iOwner.gradient().centre()->y };
-				aGc.draw_circle(centre, 4.0, pen{ colour::White, 2.0 });
+				aGc.draw_circle(centre, dpi_scale(4.0), pen{ colour::White, 2.0 });
 				aGc.line_stipple_on(3, 0xAAAA);
-				aGc.draw_circle(centre, 4.0, pen{ colour::Black, 2.0 }, brush{}, to_rad(neolib::thread::program_elapsed_ms() / 10 % 100 * 3.6));
+				aGc.draw_circle(centre, dpi_scale(4.0), pen{ colour::Black, 2.0 }, brush{}, to_rad(neolib::thread::program_elapsed_ms() / 10 % 100 * 3.6));
 				aGc.line_stipple_off();
 			}
 		}
@@ -212,7 +212,7 @@ namespace neogfx
 		iYCentreSpinBox.text_box().set_alignment(alignment::Right);
 		iYCentreSpinBox.text_box().set_hint("-0.000");
 
-		iGradientSelector.set_fixed_size(size{ 256.0, iGradientSelector.minimum_size().cy });
+		iGradientSelector.set_fixed_size(size{ dpi_scale(256.0), iGradientSelector.minimum_size().cy });
 
 		iGradientSelector.gradient_changed([this]() { update_widgets(); });
 
@@ -248,7 +248,7 @@ namespace neogfx
 		iYCentreSpinBox.value_changed([this]() { auto c = gradient().centre(); if (c == boost::none) c = point{}; c->y = iYCentreSpinBox.value(); iGradientSelector.set_gradient(gradient().with_centre(c)); update_widgets(); });
 
 		iPreview->set_margins(neogfx::margins{});
-		iPreview->set_fixed_size(size{ std::ceil(256.0 * 16.0 / 9.0), 256.0 });
+		iPreview->set_fixed_size(dpi_scale(size{ std::ceil(256.0 * 16.0 / 9.0), 256.0 }));
 
 		button_box().add_button(standard_button::Ok);
 		button_box().add_button(standard_button::Cancel);
