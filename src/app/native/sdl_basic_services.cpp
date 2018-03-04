@@ -55,7 +55,7 @@ namespace neogfx
 		iDesktopRect{ aDesktopRect },
 		iSubpixelFormat{ subpixel_format::SubpixelFormatNone },
 		iNativeDisplayHandle{ aNativeDisplayHandle },
-		iNativeDeviceContextHandle{ aNativeDisplayHandle }
+		iNativeDeviceContextHandle{ aNativeDeviceContextHandle }
 	{
 		update_dpi();
 		HKEY hkeySubpixelFormat;
@@ -208,18 +208,21 @@ namespace neogfx
 
 	i_display& sdl_basic_services::display(uint32_t aDisplayIndex) const
 	{
-		iDisplays.clear();
-#ifdef WIN32
-		EnumDisplayMonitors(NULL, NULL, &enum_display_monitors_proc, reinterpret_cast<LPARAM>(&iDisplays));
-#else
-		for (int i = 0; i < display_count(); ++i)
+		if (iDisplays.size() != display_count())
 		{
-			SDL_Rect rectDisplayBounds;
-			SDL_GetDisplayBounds(i, &rectDisplayBounds);
-			rect rectDisplay{ point{ rectDisplayBounds.x, rectDisplayBounds.y }, size{ rectDisplayBounds.w, rectDisplayBounds.h } }
-			iDisplays.push_back(std::make_unique<neogfx::display>(rectDisplay, rectDisplay, nullptr));
-		}
+			iDisplays.clear();
+#ifdef WIN32
+			EnumDisplayMonitors(NULL, NULL, &enum_display_monitors_proc, reinterpret_cast<LPARAM>(&iDisplays));
+#else
+			for (int i = 0; i < display_count(); ++i)
+			{
+				SDL_Rect rectDisplayBounds;
+				SDL_GetDisplayBounds(i, &rectDisplayBounds);
+				rect rectDisplay{ point{ rectDisplayBounds.x, rectDisplayBounds.y }, size{ rectDisplayBounds.w, rectDisplayBounds.h } }
+				iDisplays.push_back(std::make_unique<neogfx::display>(rectDisplay, rectDisplay, nullptr));
+			}
 #endif
+		}
 		if (aDisplayIndex >= iDisplays.size())
 			throw bad_display_index();
 		return *iDisplays[aDisplayIndex];
