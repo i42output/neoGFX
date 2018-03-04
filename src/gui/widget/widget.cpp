@@ -659,6 +659,18 @@ namespace neogfx
 		}
 	}
 
+	bool widget::high_dpi() const
+	{
+		return has_root() && root().has_surface() ? 
+			root().surface().ppi() >= 150.0 : 
+			app::instance().surface_manager().display().metrics().ppi() >= 150.0;
+	}
+
+	dimension widget::dpi_scale_factor() const
+	{
+		return high_dpi() ? 2.0 : 1.0;
+	}
+
 	bool widget::has_logical_coordinate_system() const
 	{
 		return iLogicalCoordinateSystem != boost::none;
@@ -899,7 +911,7 @@ namespace neogfx
 		const auto& adjustedMargins =
 			(has_margins() ?
 				*iMargins :
-				app::instance().current_style().margins() * (root().surface().ppi() < 150.0 ? 1.0 : 2.0));
+				app::instance().current_style().margins() * dpi_scale(1.0));
 		return units_converter(*this).from_device_units(adjustedMargins);
 	}
 

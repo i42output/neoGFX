@@ -92,6 +92,9 @@ namespace neogfx
 		const i_layout& get_layout_at(item_index aIndex) const override;
 		i_layout& get_layout_at(item_index aIndex) override;
 	public:
+		bool high_dpi() const override;
+		dimension dpi_scale_factor() const override;
+	public:
 		bool has_margins() const override;
 		neogfx::margins margins() const override;
 		void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;

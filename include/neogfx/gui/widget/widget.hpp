@@ -97,6 +97,8 @@ namespace neogfx
 		bool layout_items_in_progress() const override;
 		void layout_items_completed() override;
 	public:
+		bool high_dpi() const override;
+		dimension dpi_scale_factor() const override;
 		bool has_logical_coordinate_system() const override;
 		neogfx::logical_coordinate_system logical_coordinate_system() const override;
 		void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) override;

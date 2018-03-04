@@ -393,7 +393,19 @@ namespace neogfx
 	{
 		return const_cast<i_layout&>(const_cast<const layout*>(this)->get_layout_at(aIndex));
 	}
-		
+
+	bool layout::high_dpi() const
+	{
+		return owner() != nullptr && owner()->has_surface() ? 
+			owner()->surface().ppi() >= 150.0 : 
+			app::instance().surface_manager().display().metrics().ppi() >= 150.0;
+	}
+
+	dimension layout::dpi_scale_factor() const
+	{
+		return high_dpi() ? 2.0 : 1.0;
+	}
+
 	bool layout::has_margins() const
 	{
 		return iMargins != boost::none;
@@ -401,12 +413,7 @@ namespace neogfx
 
 	margins layout::margins() const
 	{
-		const auto& adjustedMargins =
-			(has_margins() ?
-				*iMargins :
-				app::instance().current_style().margins() * ((owner() != nullptr ?
-					owner()->surface().ppi() :
-					app::instance().surface_manager().display().metrics().ppi()) < 150.0 ? 1.0 : 2.0));
+		const auto& adjustedMargins = (has_margins() ? *iMargins : app::instance().current_style().margins() * dpi_scale_factor());
 		return units_converter(*this).from_device_units(adjustedMargins);
 	}
 
@@ -428,12 +435,7 @@ namespace neogfx
 
 	size layout::spacing() const
 	{
-		const auto& adjustedSpacing =
-			(has_spacing() ?
-				*iSpacing :
-				app::instance().current_style().spacing() * ((owner() != nullptr && owner()->has_surface() ?
-					owner()->surface().ppi() :
-					app::instance().surface_manager().display().metrics().ppi()) < 150.0 ? 1.0 : 2.0));
+		const auto& adjustedSpacing = (has_spacing() ? *iSpacing : app::instance().current_style().spacing() * dpi_scale_factor());
 		return units_converter(*this).from_device_units(adjustedSpacing);
 	}
 

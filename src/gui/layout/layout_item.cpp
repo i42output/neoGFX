@@ -107,6 +107,16 @@ namespace neogfx
 		}
 	}
 
+	bool layout_item::high_dpi() const
+	{
+		return wrapped_geometry().high_dpi();
+	}
+
+	dimension layout_item::dpi_scale_factor() const
+	{
+		return wrapped_geometry().dpi_scale_factor();
+	}
+
 	point layout_item::position() const
 	{
 		return wrapped_geometry().position();

@@ -318,7 +318,7 @@ namespace neogfx
 					"00000000000000000000000000"
 					"00000000000000000000000000"
 				};
-				iSizeGripTexture = std::make_pair(ink1, root().surface().ppi() < 150.0 ?
+				iSizeGripTexture = std::make_pair(ink1, !high_dpi() ?
 					neogfx::image{ "neogfx::status_bar::iSizeGripTexture::" + ink1.to_string(), sSizeGripTextureImagePattern, { { "paper", colour{} }, { "ink1", ink1 }, { "ink2", ink2 } } } :
 					neogfx::image{ "neogfx::status_bar::iSizeGripHighDpiTexture::" + ink1.to_string(), sSizeGripHighDpiTextureImagePattern, { { "paper", colour{} },{ "ink1", ink1 },{ "ink2", ink2 } } });
 			}

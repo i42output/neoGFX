@@ -149,7 +149,7 @@ namespace neogfx
 		iLayout.set_margins(neogfx::margins{ 4.0, 4.0, 4.0, 4.0 });
 		iLayout.set_spacing(size{ 8.0 });
 		icon().set_ignore_mouse_events(false);
-		size iconSize{ root().surface().ppi() < 150.0 ? 24.0 : 48.0 };
+		size iconSize{ dpi_scale(24.0) };
 		if (icon().image().is_empty())
 			icon().set_fixed_size(iconSize);
 		else
@@ -160,7 +160,7 @@ namespace neogfx
 		iCloseButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iSink += root().surface().dpi_changed([this]() 
 		{ 
-			size iconSize{ root().surface().ppi() < 150.0 ? 24.0 : 48.0 };
+			size iconSize{ dpi_scale(24.0) };
 			if (icon().image().is_empty())
 				icon().set_fixed_size(iconSize);
 			else
@@ -411,7 +411,7 @@ namespace neogfx
 		{
 			iTextures[TextureMinimize] = std::make_pair(
 				ink,
-				device_metrics().ppi() < 150.0 ? 
+				!high_dpi() ? 
 					neogfx::image{
 						"neogfx::title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
 						sMinimizeTexturePattern, { { "paper", colour{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
@@ -423,7 +423,7 @@ namespace neogfx
 		{
 			iTextures[TextureMaximize] = std::make_pair(
 				ink,
-				device_metrics().ppi() < 150.0 ?
+				!high_dpi() ?
 					neogfx::image{
 						"neogfx::title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
 						sMaximizeTexturePattern,{ { "paper", colour{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
@@ -435,7 +435,7 @@ namespace neogfx
 		{
 			iTextures[TextureRestore] = std::make_pair(
 				ink,
-				device_metrics().ppi() < 150.0 ?
+				!high_dpi() ?
 					neogfx::image{
 						"neogfx::title_bar::iTextures[TextureRestore]::" + ink.to_string(),
 						sRestoreTexturePattern,{ { "paper", colour{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } } } :
@@ -447,7 +447,7 @@ namespace neogfx
 		{
 			iTextures[TextureClose] = std::make_pair(
 				ink,
-				device_metrics().ppi() < 150.0 ?
+				!high_dpi() ?
 					neogfx::image{
 						"neogfx::title_bar::iTextures[TextureClose]::" + ink.to_string(),
 						sCloseTexturePattern, { { "paper", colour{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0x80) } } } :

@@ -40,6 +40,13 @@ namespace neogfx
 		aParent.add(*this);
 	}
 
+	i_widget* spacer::owner() const
+	{
+		if (has_parent())
+			return parent().owner();
+		return nullptr;
+	}
+
 	bool spacer::has_parent() const
 	{
 		return iParent != nullptr;
@@ -72,14 +79,26 @@ namespace neogfx
 		if (iExpansionPolicy != aExpansionPolicy)
 		{
 			iExpansionPolicy = aExpansionPolicy;
-			if (iParent != 0 && iParent->owner() != 0)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
+			if (owner() != nullptr)
+				owner()->ultimate_ancestor().layout_items(true);
 		}
 	}
 
 	size spacer::extents() const
 	{
 		return units_converter(*this).from_device_units(iExtents);
+	}
+
+	bool spacer::high_dpi() const
+	{
+		return owner() != nullptr && owner()->has_surface() ? 
+			owner()->surface().ppi() >= 150.0 : 
+			app::instance().surface_manager().display().metrics().ppi() >= 150.0;
+	}
+
+	dimension spacer::dpi_scale_factor() const
+	{
+		return high_dpi() ? 2.0 : 1.0;
 	}
 
 	point spacer::position() const
@@ -119,8 +138,8 @@ namespace neogfx
 		if (iSizePolicy != aSizePolicy)
 		{
 			iSizePolicy = aSizePolicy;
-			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
+			if (owner() != nullptr && aUpdateLayout)
+				owner()->ultimate_ancestor().layout_items(true);
 		}
 	}
 
@@ -142,8 +161,8 @@ namespace neogfx
 		if (iWeight != aWeight)
 		{
 			iWeight = aWeight;
-			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
+			if (owner() != nullptr && aUpdateLayout)
+				owner()->ultimate_ancestor().layout_items(true);
 		}
 	}
 
@@ -165,8 +184,8 @@ namespace neogfx
 		if (iMinimumSize != newMinimumSize)
 		{
 			iMinimumSize = newMinimumSize;
-			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
+			if (owner() != nullptr && aUpdateLayout)
+				owner()->ultimate_ancestor().layout_items(true);
 		}
 	}
 
@@ -188,8 +207,8 @@ namespace neogfx
 		if (iMaximumSize != newMaximumSize)
 		{
 			iMaximumSize = newMaximumSize;
-			if (iParent != 0 && iParent->owner() != 0 && aUpdateLayout)
-				iParent->owner()->ultimate_ancestor().layout_items(true);
+			if (owner() != nullptr && aUpdateLayout)
+				owner()->ultimate_ancestor().layout_items(true);
 		}
 	}
 

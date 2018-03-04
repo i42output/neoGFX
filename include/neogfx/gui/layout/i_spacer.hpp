@@ -24,6 +24,7 @@
 
 namespace neogfx
 {
+	class i_widget;
 	class i_layout;
 
 	class i_spacer : public i_widget_geometry, public i_units_context
@@ -38,6 +39,7 @@ namespace neogfx
 	public:
 		virtual ~i_spacer() {}
 	public:
+		virtual i_widget* owner() const = 0;
 		virtual bool has_parent() const = 0;
 		virtual const i_layout& parent() const = 0;
 		virtual i_layout& parent() = 0;

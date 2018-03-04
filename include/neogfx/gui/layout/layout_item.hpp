@@ -48,26 +48,29 @@ namespace neogfx
 		void set_owner(i_widget* aOwner);
 		void layout(const point& aPosition, const size& aSize);
 	public:
-		virtual point position() const;
-		virtual void set_position(const point& aPosition);
-		virtual size extents() const;
-		virtual void set_extents(const size& aExtents);
-		virtual bool has_size_policy() const;
-		virtual neogfx::size_policy size_policy() const;
-		virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true);
-		virtual bool has_weight() const;
-		virtual size weight() const;
-		virtual void set_weight(const optional_size& aWeight, bool aUpdateLayout = true);
-		virtual bool has_minimum_size() const;
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true);
-		virtual bool has_maximum_size() const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true);
+		bool high_dpi() const override;
+		dimension dpi_scale_factor() const override;
 	public:
-		virtual bool has_margins() const;
-		virtual neogfx::margins margins() const;
-		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true);
+		point position() const override;
+		void set_position(const point& aPosition) override;
+		size extents() const override;
+		void set_extents(const size& aExtents) override;
+		bool has_size_policy() const override;
+		neogfx::size_policy size_policy() const override;
+		void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
+		bool has_weight() const override;
+		size weight() const override;
+		void set_weight(const optional_size& aWeight, bool aUpdateLayout = true) override;
+		bool has_minimum_size() const override;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		void set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout = true) override;
+		bool has_maximum_size() const override;
+		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		void set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout = true) override;
+	public:
+		bool has_margins() const override;
+		neogfx::margins margins() const override;
+		void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
 	public:
 		bool visible() const;
 	public:

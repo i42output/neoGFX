@@ -64,6 +64,14 @@ namespace neogfx
 		void draw_colour_stop(graphics_context& aGraphicsContext, const neogfx::gradient::colour_stop& aColourStop) const;
 		void draw_alpha_stop(graphics_context& aGraphicsContext, const neogfx::gradient::alpha_stop& aAlphaStop) const;
 	private:
+		dimension stop_width() const;
+		dimension stop_height() const;
+		dimension control_height() const;
+		dimension alpha_pattern_size() const;
+		dimension small_alpha_pattern_size() const;
+		dimension border_thickness() const;
+		dimension border_spacer_thickness() const;
+	private:
 		bool iInGradientDialog;
 		neogfx::gradient iSelection;
 		boost::optional<point> iClicked;

@@ -163,7 +163,7 @@ namespace neogfx
 
 	size dialog::set_standard_layout(const size& aControlSpacing, bool aCreateButtonBox, bool aDpiScaling)
 	{
-		auto ajustedSpacing = aControlSpacing * (!aDpiScaling || surface().ppi() < 150.0 ? 1.0 : 2.0);
+		auto ajustedSpacing = (aDpiScaling ? dpi_scale(aControlSpacing) : aControlSpacing);
 		set_margins(neogfx::margins{});
 		window::client_layout().set_margins(neogfx::margins{ ajustedSpacing.cx, ajustedSpacing.cy, ajustedSpacing.cx, ajustedSpacing.cy });
 		window::client_layout().set_spacing(ajustedSpacing);

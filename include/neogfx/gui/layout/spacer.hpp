@@ -35,12 +35,16 @@ namespace neogfx
 		spacer(expansion_policy_e aExpansionPolicy);
 		spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy);
 	public:
+		i_widget* owner() const override;
 		bool has_parent() const override;
 		const i_layout& parent() const override;
 		i_layout& parent() override;
 		void set_parent(i_layout& aParent) override;
 		expansion_policy_e expansion_policy() const override;
 		void set_expansion_policy(expansion_policy_e aExpansionPolicy) override;
+	public:
+		bool high_dpi() const override;
+		dimension dpi_scale_factor() const override;
 	public:
 		point position() const override;
 		void set_position(const point& aPosition) override;
