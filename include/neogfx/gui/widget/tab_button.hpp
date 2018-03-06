@@ -31,9 +31,9 @@ namespace neogfx
 		friend class tab_bar;
 		class close_button;
 	public:
-		tab_button(i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
-		tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
-		tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false);
+		tab_button(i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+		tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+		tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
 		~tab_button();
 	public:
 		const i_tab_container& container() const override;
@@ -70,8 +70,12 @@ namespace neogfx
 	protected:
 		void set_selected_state(bool aSelectedState);
 	private:
+		void init();
+	private:
+		sink iSink;
 		i_tab_container& iContainer;
 		std::unique_ptr<close_button> iCloseButton;
+		bool iStandardImageSize;
 		bool iSelectedState;
 	};
 }

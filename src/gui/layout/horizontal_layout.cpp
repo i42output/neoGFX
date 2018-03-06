@@ -76,6 +76,8 @@ namespace neogfx
 	{
 		if (!enabled())
 			return;
+		if (debug == this)
+			std::cerr << "horizontal_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 		owner()->layout_items_started();
 		next_layout_id();
 		validate();

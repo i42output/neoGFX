@@ -83,6 +83,8 @@ namespace neogfx
 		i_layout& get_layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		using layout::get_layout_at;
 	public:
+		void invalidate() override;
+	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:

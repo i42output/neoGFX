@@ -36,7 +36,7 @@ namespace neogfx
 		};
 	public:
 		close_button(i_tab& aParent) :
-			push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater { app::instance(), [this](neolib::callback_timer& aTimer) { aTimer.again(); update_appearance(); }, 20 }
+			push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer) { aTimer.again(); update_appearance(); }, 20 }
 		{
 			set_margins(neogfx::margins{ 2.0 });
 			iSink += app::instance().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
@@ -88,29 +88,65 @@ namespace neogfx
 				"21200212"
 				"12000021"
 			};
+			const char* sHighDpiTexture
+			{
+				"[16,16]"
+				"{0,paper}"
+				"{1,ink1}"
+				"{2,ink2}"
+
+				"1120000000000211"
+				"1112000000002111"
+				"2111200000021112"
+				"0211120000211120"
+				"0021112002111200"
+				"0002111221112000"
+				"0000211111120000"
+				"0000021111200000"
+				"0000021111200000"
+				"0000211111120000"
+				"0002111221112000"
+				"0021112002111200"
+				"0211120000211120"
+				"2111200000021112"
+				"1112000000002111"
+				"1120000000000211"
+			};
 			if (iTextures[TextureOff] == boost::none || iTextures[TextureOff]->first != ink)
 			{
 				iTextures[TextureOff] = std::make_pair(
 					ink,
+					!high_dpi() ?
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOff]::" + ink.to_string(),
-						sTexture,{ { "paper", colour{} },{ "ink1", ink.with_alpha(0x60) }, { "ink2", ink.with_alpha(0x30) } } });
+						sTexture, { { "paper", colour{} },{ "ink1", ink.with_alpha(0x60) }, { "ink2", ink.with_alpha(0x30) } } } :
+						neogfx::image{
+							"neogfx::tab_button::close_button::iHighDpiTextures[TextureOff]::" + ink.to_string(),
+							sHighDpiTexture, { { "paper", colour{} },{ "ink1", ink.with_alpha(0x60) },{ "ink2", ink.with_alpha(0x30) } } });
 			}
 			if (iTextures[TextureOn] == boost::none || iTextures[TextureOn]->first != ink)
 			{
 				iTextures[TextureOn] = std::make_pair(
 					ink,
+					!high_dpi() ?
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOn]::" + ink.to_string(),
-						sTexture, { { "paper", colour{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } } });
+						sTexture, { { "paper", colour{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } } } :
+						neogfx::image{
+							"neogfx::tab_button::close_button::iHighDpiTextures[TextureOn]::" + ink.to_string(),
+							sHighDpiTexture, { { "paper", colour{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } } });
 			}
 			if (iTextures[TextureOnOver] == boost::none || iTextures[TextureOnOver]->first != ink)
 			{
 				iTextures[TextureOnOver] = std::make_pair(
 					ink,
+					!high_dpi() ?
 					neogfx::image{
 						"neogfx::tab_button::close_button::iTextures[TextureOnOver]::" + paper.to_string(),
-						sTexture, { { "paper", colour{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } } });
+						sTexture, { { "paper", colour{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } } } :
+						neogfx::image{
+							"neogfx::tab_button::close_button::iHighDpiTextures[TextureOnOver]::" + paper.to_string(),
+							sHighDpiTexture, { { "paper", colour{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0x80) } } });
 			}
 			iTextureState = Unknown;
 			update_appearance();
@@ -139,35 +175,32 @@ namespace neogfx
 			update_state();
 		}
 	private:
-		i_tab& iParent;
+		i_tab & iParent;
 		sink iSink;
 		mutable boost::optional<std::pair<colour, texture>> iTextures[3];
 		texture_index_e iTextureState;
 		neolib::callback_timer iUpdater;
 	};
 
-	tab_button::tab_button(i_tab_container& aContainer, const std::string& aText, bool aClosable) :
-		push_button{ aText, push_button_style::Tab }, iContainer{ aContainer }, iSelectedState{ false }
+	tab_button::tab_button(i_tab_container& aContainer, const std::string& aText, bool aClosable, bool aStandardImageSize) :
+		push_button{ aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
 	{
-		set_size_policy(neogfx::size_policy::Minimum);
+		init();
 		set_closable(aClosable);
-		iContainer.adding_tab(*this);
 	}
 
-	tab_button::tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText, bool aClosable) :
-		push_button{ aParent, aText, push_button_style::Tab }, iContainer{ aContainer }, iSelectedState{ false }
+	tab_button::tab_button(i_widget& aParent, i_tab_container& aContainer, const std::string& aText, bool aClosable, bool aStandardImageSize) :
+		push_button{ aParent, aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
 	{
-		set_size_policy(neogfx::size_policy::Minimum);
+		init();
 		set_closable(aClosable);
-		iContainer.adding_tab(*this);
 	}
 
-	tab_button::tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText, bool aClosable) :
-		push_button{ aLayout, aText, push_button_style::Tab }, iContainer{ aContainer }, iSelectedState{ false }
+	tab_button::tab_button(i_layout& aLayout, i_tab_container& aContainer, const std::string& aText, bool aClosable, bool aStandardImageSize) :
+		push_button{ aLayout, aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
 	{
-		set_size_policy(neogfx::size_policy::Minimum);
+		init();
 		set_closable(aClosable);
-		iContainer.adding_tab(*this);
 	}
 
 	tab_button::~tab_button()
@@ -338,5 +371,30 @@ namespace neogfx
 			else if (is_deselected())
 				deselected.trigger();
 		}
+	}
+
+	void tab_button::init()
+	{
+		if (text() == "Foo")
+			i_layout::debug = &label().layout();
+		set_size_policy(neogfx::size_policy::Minimum);
+		auto update_image = [this]()
+		{
+			if (iStandardImageSize)
+			{
+				push_button::image().set_fixed_size(dpi_select(size{ 16.0, 16.0 }, size{ 32.0, 32.0 }));
+				push_button::image().set_aspect_ratio(aspect_ratio::KeepExpanding);
+			}
+			else
+			{
+				push_button::image().set_minimum_size(optional_size{});
+				push_button::image().set_maximum_size(optional_size{});
+				push_button::image().set_aspect_ratio(aspect_ratio::Keep);
+			}
+			label().layout().invalidate();
+		};
+		iSink += root().surface().dpi_changed([this, update_image]() { update_image(); });
+		update_image();
+		iContainer.adding_tab(*this);
 	}
 }

@@ -88,22 +88,24 @@ namespace neogfx
 
 	void layout_item::layout(const point& aPosition, const size& aSize)
 	{
+		size adjustedSize = aSize.min(maximum_size());
+		point adjustedPosition = aPosition + (aSize - adjustedSize) / 2.0;
 		if (iPointerWrapper.is<widget_pointer>())
 		{
 			auto& w = *static_variant_cast<widget_pointer&>(iPointerWrapper);
-			w.move(aPosition);
-			if (w.extents() != aSize)
-				w.resize(aSize);
+			w.move(adjustedPosition);
+			if (w.extents() != adjustedSize)
+				w.resize(adjustedSize);
 			else if (w.has_layout() && w.layout().invalidated())
 				w.layout_items();
 		}
 		else if (iPointerWrapper.is<layout_pointer>())
 		{
-			static_variant_cast<layout_pointer&>(iPointerWrapper)->layout_items(aPosition, aSize);
+			static_variant_cast<layout_pointer&>(iPointerWrapper)->layout_items(adjustedPosition, adjustedSize);
 		}
 		else if (iPointerWrapper.is<spacer_pointer>())
 		{
-			static_variant_cast<spacer_pointer&>(iPointerWrapper)->set_extents(aSize);
+			static_variant_cast<spacer_pointer&>(iPointerWrapper)->set_extents(adjustedSize);
 		}
 	}
 

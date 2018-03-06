@@ -352,6 +352,14 @@ namespace neogfx
 			throw wrong_item_type();
 	}
 
+	void grid_layout::invalidate()
+	{
+		layout::invalidate();
+		iRowLayout.invalidate();
+		for (auto& row : iRows)
+			row->invalidate();
+	}
+
 	size grid_layout::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (items_visible() == 0)
@@ -458,6 +466,8 @@ namespace neogfx
 	{
 		if (!enabled())
 			return;
+		if (debug == this)
+			std::cerr << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 		owner()->layout_items_started();
 		next_layout_id();
 		validate();
