@@ -379,7 +379,7 @@ int main(int argc, char* argv[])
 		ng::push_button button4(international, u8"请停止食用犬");
 		button4.clicked([&window]() { window.set_title_text(u8"请停止食用犬"); });
 		button4.set_foreground_colour(ng::colour::CadetBlue);
-		button4.set_maximum_size(ng::size(128, 64));
+		button4.set_maximum_size(window.dpi_scale(ng::size{ 128, 64 }));
 		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
 		ng::horizontal_layout dropListLayout(layoutButtons);
 		ng::drop_list dropList(dropListLayout);
