@@ -293,7 +293,7 @@ namespace neogfx
 			return rect{};
 		scoped_units su(aContext, units::Pixels);
 		rect g = iContainer.scrollbar_geometry(aContext, *this);
-		const dimension margin = 3.0;
+		const dimension margin = aContext.dpi_scale(3.0);
 		switch (aElement)
 		{
 		case ElementUpButton:
@@ -634,7 +634,7 @@ namespace neogfx
 		if (aStyle == scrollbar_style::Menu || aStyle == scrollbar_style::Scroller)
 		{
 			const dimension margin = 3.0;
-			w -= margin * 2.0;
+			w -= aContext.dpi_scale(margin * 2.0);
 		}
 		if (static_cast<uint32_t>(w) % 2 == 0)
 			++w;

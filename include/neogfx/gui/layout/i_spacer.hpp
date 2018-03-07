@@ -27,7 +27,7 @@ namespace neogfx
 	class i_widget;
 	class i_layout;
 
-	class i_spacer : public i_widget_geometry, public i_units_context
+	class i_spacer : public i_widget_geometry
 	{
 	public:
 		enum expansion_policy_e

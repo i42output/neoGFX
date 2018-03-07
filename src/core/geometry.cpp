@@ -27,6 +27,16 @@ namespace neogfx
 	{
 	}
 
+	bool units_context::high_dpi() const
+	{
+		return iSource.high_dpi();
+	}
+
+	dimension units_context::dpi_scale_factor() const
+	{
+		return iSource.dpi_scale_factor();
+	}
+
 	bool units_context::device_metrics_available() const
 	{
 		return iSource.device_metrics_available();

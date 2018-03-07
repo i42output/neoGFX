@@ -775,16 +775,37 @@ namespace neogfx
 	public:
 		struct no_device_metrics : std::logic_error { no_device_metrics() : std::logic_error("neogfx::i_units_context::no_device_metrics") {} };
 	public:
+		virtual bool high_dpi() const = 0;
+		virtual dimension dpi_scale_factor() const = 0;
+	public:
 		virtual bool device_metrics_available() const = 0;
 		virtual const i_device_metrics& device_metrics() const = 0;
 		virtual neogfx::units units() const = 0;
 		virtual neogfx::units set_units(neogfx::units aUnits) const = 0;
+		// helpers
+	public:
+		dimension dpi_scale(dimension aValue) const
+		{
+			return aValue * dpi_scale_factor();
+		}
+		size dpi_scale(const size& aSize) const
+		{
+			return aSize * dpi_scale_factor();
+		}
+		template <typename T>
+		T&& dpi_select(T&& aLowDpiValue, T&& aHighDpiValue) const
+		{
+			return std::forward<T>(high_dpi() ? aHighDpiValue : aLowDpiValue);
+		}
 	};
 
 	class units_context : public i_units_context
 	{
 	public:
 		units_context(const i_units_context& aSource);
+	public:
+		bool high_dpi() const override;
+		dimension dpi_scale_factor() const override;
 	public:
 		bool device_metrics_available() const override;
 		const i_device_metrics& device_metrics() const override;

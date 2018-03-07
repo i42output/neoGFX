@@ -104,11 +104,8 @@ namespace neogfx
 
 	typedef boost::optional<size_policy> optional_size_policy;
 
-	class i_widget_geometry
+	class i_widget_geometry : public i_units_context
 	{
-	public:
-		virtual bool high_dpi() const = 0;
-		virtual dimension dpi_scale_factor() const = 0;
 	public:
 		virtual point position() const = 0;
 		virtual void set_position(const point& aPosition) = 0;
@@ -130,21 +127,6 @@ namespace neogfx
 		virtual bool has_margins() const = 0;
 		virtual neogfx::margins margins() const = 0;
 		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) = 0;
-		// helpers
-	public:
-		dimension dpi_scale(dimension aValue) const
-		{
-			return aValue * dpi_scale_factor();
-		}
-		size dpi_scale(const size& aSize) const
-		{
-			return aSize * dpi_scale_factor();
-		}
-		template <typename T>
-		T&& dpi_select(T&& aLowDpiValue, T&& aHighDpiValue) const
-		{
-			return std::forward<T>(high_dpi() ? aHighDpiValue : aLowDpiValue);
-		}
 	public:
 		void set_size_policy(neogfx::size_policy::size_policy_e aSizePolicy, bool aUpdateLayout = true)
 		{

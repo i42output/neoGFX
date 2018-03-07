@@ -128,14 +128,14 @@ namespace neogfx
 		iSecondaryLayout.set_margins(neogfx::margins{});
 		iSecondaryLayout.set_spacing(size{});
 		iStepUpButton.set_margins(neogfx::margins{});
-		iStepUpButton.set_minimum_size(size{15, 7});
+		iStepUpButton.set_minimum_size(dpi_scale(size{15, 7}));
 		iStepUpButton.label().image().set_minimum_size(size{ 3.0, 3.0 });
 		iStepUpButton.label().image().set_snap(2.0); // up and down buttons want to draw arrow texture at same size so use a snap of 2 pixels
 		iStepUpButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iStepUpButton.clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepUpButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepDownButton.set_margins(neogfx::margins{});
-		iStepDownButton.set_minimum_size(size{15, 7});
+		iStepDownButton.set_minimum_size(dpi_scale(size{15, 7}));
 		iStepDownButton.label().image().set_minimum_size(size{ 3.0, 3.0 });
 		iStepDownButton.label().image().set_snap(2.0);
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
@@ -229,43 +229,76 @@ namespace neogfx
 			if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
 				update_arrows();
 		});
+		iSink += root().surface().dpi_changed([this]() { update_arrows(); });
 	}
 
 	void spin_box_impl::update_arrows()
 	{
 		auto ink = app::instance().current_style().palette().text_colour();
-		if (iUpArrow == boost::none || iUpArrow->first != ink)
+		const char* sUpArrowImagePattern
 		{
-			const char* sUpArrowImagePattern
-			{
-				"[9,5]"
-				"{0,paper}"
-				"{1,ink}"
+			"[9,5]"
+			"{0,paper}"
+			"{1,ink}"
 
-				"000010000"
-				"000111000"
-				"001111100"
-				"011111110"
-				"111111111"
-			};
-			iUpArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
-		}
-		if (iDownArrow == boost::none || iDownArrow->first != ink)
+			"000010000"
+			"000111000"
+			"001111100"
+			"011111110"
+			"111111111"
+		};
+		const char* sUpArrowHighDpiImagePattern
 		{
-			const char* sDownArrowImagePattern
-			{
-				"[9,5]"
-				"{0,paper}"
-				"{1,ink}"
+			"[18,9]"
+			"{0,paper}"
+			"{1,ink}"
 
-				"111111111"
-				"011111110"
-				"001111100"
-				"000111000"
-				"000010000"
-			};
-			iDownArrow = std::make_pair(ink, image{ "neogfx::spin_box_impl::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
-		}
+			"000000001100000000"
+			"000000011110000000"
+			"000000111111000000"
+			"000001111111100000"
+			"000011111111110000"
+			"000111111111111000"
+			"001111111111111100"
+			"011111111111111110"
+			"111111111111111111"
+		};
+		iUpArrow = std::make_pair(ink,
+			!high_dpi() ?
+				image{ "neogfx::spin_box_impl::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } } :
+				image{ "neogfx::spin_box_impl::iUpArrowHighDpi::" + ink.to_string(), sUpArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
+		const char* sDownArrowImagePattern
+		{
+			"[9,5]"
+			"{0,paper}"
+			"{1,ink}"
+
+			"111111111"
+			"011111110"
+			"001111100"
+			"000111000"
+			"000010000"
+		};
+		const char* sDownArrowHighDpiImagePattern
+		{
+			"[18,9]"
+			"{0,paper}"
+			"{1,ink}"
+
+			"111111111111111111"
+			"011111111111111110"
+			"001111111111111100"
+			"000111111111111000"
+			"000011111111110000"
+			"000001111111100000"
+			"000000111111000000"
+			"000000011110000000"
+			"000000001100000000"
+		};
+		iDownArrow = std::make_pair(ink, 
+			!high_dpi() ? 
+				image{ "neogfx::spin_box_impl::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } } :
+				image{ "neogfx::spin_box_impl::iDownArrowHighDpi::" + ink.to_string(), sDownArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
 		iStepUpButton.label().set_placement(label_placement::ImageVertical);
 		iStepDownButton.label().set_placement(label_placement::ImageVertical);
 		iStepUpButton.image().set_image(iUpArrow->second);

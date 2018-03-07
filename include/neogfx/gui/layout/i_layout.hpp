@@ -30,7 +30,7 @@ namespace neogfx
 
 	class layout_item;
 
-	class i_layout : public i_widget_geometry, public i_units_context
+	class i_layout : public i_widget_geometry
 	{
 	public:
 		static i_layout* debug;

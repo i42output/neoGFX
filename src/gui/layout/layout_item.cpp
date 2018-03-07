@@ -119,6 +119,26 @@ namespace neogfx
 		return wrapped_geometry().dpi_scale_factor();
 	}
 
+	bool layout_item::device_metrics_available() const
+	{
+		return iParent.device_metrics_available();
+	}
+
+	const i_device_metrics& layout_item::device_metrics() const
+	{
+		return iParent.device_metrics();
+	}
+
+	neogfx::units layout_item::units() const
+	{
+		return iParent.units();
+	}
+
+	neogfx::units layout_item::set_units(neogfx::units aUnits) const
+	{
+		return iParent.set_units(aUnits);
+	}
+
 	point layout_item::position() const
 	{
 		return wrapped_geometry().position();
