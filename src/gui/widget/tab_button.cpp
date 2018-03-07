@@ -375,8 +375,6 @@ namespace neogfx
 
 	void tab_button::init()
 	{
-		if (text() == "Foo")
-			i_layout::debug = &label().layout();
 		set_size_policy(neogfx::size_policy::Minimum);
 		auto update_image = [this]()
 		{
