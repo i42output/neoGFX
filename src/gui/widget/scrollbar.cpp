@@ -245,7 +245,7 @@ namespace neogfx
 			}
 		}
 
-		const dimension margin = 3.0;
+		const dimension margin = aGraphicsContext.dpi_scale(3.0);
 		rect rectUpButton = element_geometry(aGraphicsContext, ElementUpButton).deflate(margin, margin);
 		rect rectDownButton = element_geometry(aGraphicsContext, ElementDownButton).deflate(margin, margin);
 		if (type() == scrollbar_type::Vertical)
@@ -633,8 +633,8 @@ namespace neogfx
 		dimension w = std::ceil(uc.to_device_units(4.0));
 		if (aStyle == scrollbar_style::Menu || aStyle == scrollbar_style::Scroller)
 		{
-			const dimension margin = 3.0;
-			w -= aContext.dpi_scale(margin * 2.0);
+			const dimension margin = aContext.dpi_scale(3.0);
+			w -= margin * 2.0;
 		}
 		if (static_cast<uint32_t>(w) % 2 == 0)
 			++w;
