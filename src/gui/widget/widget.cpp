@@ -668,7 +668,9 @@ namespace neogfx
 
 	dimension widget::dpi_scale_factor() const
 	{
-		return high_dpi() ? 2.0 : 1.0;
+		return default_dpi_scale_factor(has_root() && root().has_surface() ?
+			root().surface().ppi() :
+			app::instance().surface_manager().display().metrics().ppi());
 	}
 
 	bool widget::has_logical_coordinate_system() const

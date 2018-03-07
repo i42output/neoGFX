@@ -640,7 +640,7 @@ namespace neogfx
 
 	dimension graphics_context::dpi_scale_factor() const
 	{
-		return high_dpi() ? 2.0 : 1.0;
+		return default_dpi_scale_factor(device_metrics().ppi());
 	}
 
 	bool graphics_context::device_metrics_available() const

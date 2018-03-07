@@ -754,6 +754,11 @@ namespace neogfx
 		Percentage
 	};
 
+	inline dimension default_dpi_scale_factor(dimension aPpi)
+	{
+		return static_cast<dimension>(static_cast<int32_t>(aPpi / 150.0) + 1);
+	}
+
 	class i_device_resolution
 	{
 	public:

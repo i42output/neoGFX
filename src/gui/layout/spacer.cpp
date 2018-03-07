@@ -98,7 +98,10 @@ namespace neogfx
 
 	dimension spacer::dpi_scale_factor() const
 	{
-		return high_dpi() ? 2.0 : 1.0;
+		return default_dpi_scale_factor(
+			owner()->has_surface() ? 
+				owner()->surface().ppi() : 
+				app::instance().surface_manager().display().metrics().ppi());
 	}
 
 	point spacer::position() const
