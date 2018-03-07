@@ -756,12 +756,12 @@ int main(int argc, char* argv[])
 		messageBoxIconStop.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#stop.png" });
 		messageBoxIconError.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#error.png" });
 		messageBoxIconCritical.label().image().set_image(ng::image{ ":/neogfx/resources/icons.naa#critical.png" });
-		messageBoxIconInformation.label().image().set_fixed_size(ng::size{ 24.0 });
-		messageBoxIconQuestion.label().image().set_fixed_size(ng::size{ 24.0 });
-		messageBoxIconWarning.label().image().set_fixed_size(ng::size{ 24.0 });
-		messageBoxIconStop.label().image().set_fixed_size(ng::size{ 24.0 });
-		messageBoxIconError.label().image().set_fixed_size(ng::size{ 24.0 });
-		messageBoxIconCritical.label().image().set_fixed_size(ng::size{ 24.0 });
+		messageBoxIconInformation.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
+		messageBoxIconQuestion.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
+		messageBoxIconWarning.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
+		messageBoxIconStop.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
+		messageBoxIconError.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
+		messageBoxIconCritical.label().image().set_fixed_size(window.dpi_scale(ng::size{ 24.0 }));
 		ng::group_box messageBoxButtonsGroup{ messageBoxesPageLayout1, "Buttons" };
 		uint32_t standardButtons = 0;
 		uint32_t standardButton = 1;

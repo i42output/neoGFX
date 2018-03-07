@@ -141,6 +141,7 @@ namespace neogfx
 		label().set_placement(label_placement::ImageVertical);
 		text().set_text(iAction.button_text());
 		image().set_image(iAction.image());
+		image().set_aspect_ratio(aspect_ratio::KeepExpanding);
 		iSink += iAction.enabled([this]() { enable(); });
 		iSink += iAction.disabled([this]() { disable(); });
 		enable(iAction.is_enabled());

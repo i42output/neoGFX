@@ -73,7 +73,7 @@ namespace neogfx
 	private:
 		sink iSink;
 		dimension iGap = 9.0;
-		dimension iIconSize = 16.0;
+		size iIconSize = size{ 16.0, 16.0 };
 		i_menu& iMenu;
 		i_menu_item& iMenuItem;
 		horizontal_layout iLayout;

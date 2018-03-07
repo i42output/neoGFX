@@ -279,6 +279,9 @@ namespace neogfx
 		detailed_text().set_alignment(neogfx::alignment::Left);
 		font_info normalFont = text().font();
 		text().set_font(neogfx::font{ normalFont.with_style(font_info::Bold) });
+
+		icon().set_aspect_ratio(aspect_ratio::KeepExpanding);
+		icon().set_fixed_size(dpi_scale(size{ 32.0, 32.0 }));
 	
 		centre_on_parent();
 

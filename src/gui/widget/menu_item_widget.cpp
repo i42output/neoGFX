@@ -142,8 +142,8 @@ namespace neogfx
 			rect line = client_rect(false);
 			++line.y;
 			line.cy = 1.0;
-			line.x += (iIconSize + iGap * 2.0);
-			line.cx -= (iIconSize + iGap * 3.0);
+			line.x += (dpi_scale(iIconSize).cx + iGap * 2.0);
+			line.cx -= (dpi_scale(iIconSize).cx + iGap * 3.0);
 			colour ink = background_colour().light() ? background_colour().darker(0x60) : background_colour().lighter(0x60);
 			ink.set_alpha(0x80);
 			aGraphicsContext.fill_rect(line, ink);
@@ -244,7 +244,7 @@ namespace neogfx
 		iLayout.set_margins(neogfx::margins{ iGap, 2.0, iGap * (menu().type() == i_menu::Popup ? 2.0 : 1.0), 2.0 });
 		iLayout.set_spacing(size{ iGap, 0.0 });
 		if (menu().type() == i_menu::Popup)
-			iIcon.set_fixed_size(size{ iIconSize, iIconSize });
+			iIcon.set_fixed_size(dpi_scale(iIconSize));
 		else
 			iIcon.set_fixed_size(size{});
 		iSpacer.set_minimum_size(size{ 0.0, 0.0 });
@@ -284,7 +284,7 @@ namespace neogfx
 					iIcon.set_image(image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", colour{} },{ "ink", ink } } });
 				}
 				if (!iIcon.image().is_empty())
-					iIcon.set_fixed_size(size{ iIconSize, iIconSize });
+					iIcon.set_fixed_size(dpi_scale(iIconSize));
 				else if (menu().type() == i_menu::MenuBar)
 					iIcon.set_fixed_size(size{});
 				iText.set_text(menu_item().action().menu_text());
