@@ -458,7 +458,7 @@ int main(int argc, char* argv[])
 		layout2.add_spacer().set_weight(ng::size(2.0f));
 		ng::push_button button7(layout2, "Toggle\n&mute.");
 		button7.set_foreground_colour(ng::colour::LightCoral);
-		button7.set_maximum_size(ng::size(128, 64));
+		button7.set_maximum_size(window.dpi_scale(ng::size{ 128, 64 }));
 		button7.clicked([&muteAction]() { muteAction.toggle(); });
 		layout2.add_spacer().set_weight(ng::size(1.0));
 		ng::push_button button8(layout2, "Enable/disable\ncontacts action.");
