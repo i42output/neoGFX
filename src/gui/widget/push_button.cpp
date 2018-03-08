@@ -179,7 +179,7 @@ namespace neogfx
 		colour innerBorderColour = border_mid_colour().lighter(capturing() ? 0x20 : 0x40);
 		scoped_units su{ *this, units::Pixels };
 		neogfx::path outline = path();
-		dimension penWidth = device_metrics().horizontal_dpi() / 96;
+		dimension penWidth = 1.0;
 		switch (iStyle)
 		{
 		case push_button_style::Normal:
