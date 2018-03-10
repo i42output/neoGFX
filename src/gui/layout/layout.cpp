@@ -404,7 +404,7 @@ namespace neogfx
 	dimension layout::dpi_scale_factor() const
 	{
 		return default_dpi_scale_factor(
-			owner()->has_surface() ? 
+			owner() != nullptr && owner()->has_surface() ?
 				owner()->surface().ppi() : 
 				app::instance().surface_manager().display().metrics().ppi());
 	}
