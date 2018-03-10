@@ -831,7 +831,6 @@ namespace neogfx
 		iG.first.label().text().set_text("&Green:"); iG.second.set_size_policy(size_policy::Minimum); iG.second.text_box().set_hint("255"); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
 		iB.first.label().text().set_text("&Blue:"); iB.second.set_size_policy(size_policy::Minimum); iB.second.text_box().set_hint("255"); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
 		iA.first.label().text().set_text("&Alpha:"); iA.second.set_size_policy(size_policy::Minimum); iA.second.text_box().set_hint("255"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
-		iRgb.set_size_policy(size_policy::Minimum); iRgb.set_hint("#000000"); 
 		iChannelLayout.set_dimensions(4, 4);
 		iChannelLayout.add(iH.first); iChannelLayout.add(iH.second);
 		iChannelLayout.add(iR.first); iChannelLayout.add(iR.second);
