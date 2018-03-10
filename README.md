@@ -52,8 +52,8 @@ Label                     | 100     |
 Button                    | 100     |     
 Table View                | 85      |     Selection; icon
 Tree View                 | 0       |
-List View                 | 50      |
-Text Edit                 | 85      |     Columns; rich text (HTML); undo/redo
+List View                 | 75      |
+Text Edit                 | 85      |     Columns; rich text (HTML); undo/redo; performance optimization
 Line Edit                 | 100     |     
 Spin Box                  | 100     |
 Slider                    | 90      |     Keyboard
@@ -62,8 +62,8 @@ Radio Button              | 100     |
 Combo Box                 | 95      |     Glob and regex filters; review UX.
 Group Box                 | 100     |
 Tool Tips                 | 0       |
-Status Bar                | 0       |
-Font Picker               | 0       |
+Status Bar                | 100     |
+Font Picker               | 25      |
 Colour Gradient Selector  | 100     |
 Colour Picker             | 100     |
 File Browsers (Native)    | 0       |
@@ -73,4 +73,4 @@ i18n                      | 0       |
 l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
-Last updated: 12/02/2018
+Last updated: 10/03/2018
