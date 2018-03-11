@@ -110,6 +110,33 @@ namespace neogfx
 			"122221000"
 			"111110000"
 		};
+		const char* sLeftXPickerCursorHighDpiImage
+		{
+			"[19,19]"
+			"{0,paper}"
+			"{1,black}"
+			"{2,white}"
+
+			"1111111111000000000"
+			"1222222222100000000"
+			"1222222222210000000"
+			"1222222222221000000"
+			"1222222222222100000"
+			"1222222222222210000"
+			"1222222222222221000"
+			"1222222222222222100"
+			"1222222222222222210"
+			"1222222222222222221"
+			"1222222222222222210"
+			"1222222222222222100"
+			"1222222222222221000"
+			"1222222222222210000"
+			"1222222222222100000"
+			"1222222222221000000"
+			"1222222222210000000"
+			"1222222222100000000"
+			"1111111111000000000"
+		};
 		const char* sRightXPickerCursorImage
 		{
 			"[9,9]"
@@ -127,12 +154,43 @@ namespace neogfx
 			"000122221"
 			"000011111"
 		};
+		const char* sRightXPickerCursorHighDpiImage
+		{
+			"[19,19]"
+			"{0,paper}"
+			"{1,black}"
+			"{2,white}"
+
+			"0000000001111111111"
+			"0000000012222222221"
+			"0000000122222222221"
+			"0000001222222222221"
+			"0000012222222222221"
+			"0000122222222222221"
+			"0001222222222222221"
+			"0012222222222222221"
+			"0122222222222222221"
+			"1222222222222222221"
+			"0122222222222222221"
+			"0012222222222222221"
+			"0001222222222222221"
+			"0000122222222222221"
+			"0000012222222222221"
+			"0000001222222222221"
+			"0000000122222222221"
+			"0000000012222222221"
+			"0000000001111111111"
+		};
+
 	}
 
 	colour_dialog::x_picker::cursor_widget::cursor_widget(x_picker& aParent, type_e aType) :
 		image_widget(
 			aParent.iParent.client_widget(),
-			neogfx::image{ aType == LeftCursor ? sLeftXPickerCursorImage : sRightXPickerCursorImage, { { "paper", colour{} }, { "black", colour::Black } , { "white", colour::White } } }),
+			neogfx::image{ aType == LeftCursor ? 
+				aParent.dpi_select(sLeftXPickerCursorImage, sLeftXPickerCursorHighDpiImage) :
+				aParent.dpi_select(sRightXPickerCursorImage, sRightXPickerCursorHighDpiImage),
+			{ { "paper", colour{} }, { "black", colour::Black } , { "white", colour::White } } }),
 		iParent(aParent)
 	{
 		set_ignore_mouse_events(false);
@@ -187,7 +245,7 @@ namespace neogfx
 			return framed_widget::minimum_size(aAvailableSpace);
 		scoped_units su{ *this, units::Pixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
-		result += size{ 32, 256 };
+		result += dpi_scale(size{ 32, 256 });
 		return result;
 	}
 
@@ -220,7 +278,7 @@ namespace neogfx
 		for (uint32_t y = 0; y < cr.height(); ++y)
 		{
 			rect line{ cr.top_left() + point{ 0.0, static_cast<coordinate>(y) }, size{ cr.width(), 1.0 } };
-			auto r = colour_at_position(point{ 0.0, static_cast<coordinate>(y) });
+			auto r = colour_at_position(point{ 0.0, static_cast<coordinate>(y) * (1.0 / dpi_scale_factor())});
 			colour rgb;
 			if (r.is<hsv_colour>())
 			{
@@ -265,7 +323,7 @@ namespace neogfx
 
 	void colour_dialog::x_picker::select(const point& aPosition)
 	{
-		iParent.select_colour(colour_at_position(aPosition), *this);
+		iParent.select_colour(colour_at_position(aPosition * (1.0 / dpi_scale_factor())), *this);
 	}
 
 	colour_dialog::representations colour_dialog::x_picker::colour_at_position(const point& aCursorPos) const
@@ -336,8 +394,8 @@ namespace neogfx
 
 	void colour_dialog::x_picker::update_cursors()
 	{
-		iLeftCursor.move(current_cursor_position() + position() + client_rect(false).top_left() + point{ -iLeftCursor.extents().cx - effective_frame_width(), -std::floor(iLeftCursor.client_rect().centre().y) });
-		iRightCursor.move(current_cursor_position() + position() + client_rect(false).top_right() + point{ effective_frame_width(), -std::floor(iLeftCursor.client_rect().centre().y) });
+		iLeftCursor.move(dpi_scale(current_cursor_position()) + position() + client_rect(false).top_left() + point{ -iLeftCursor.extents().cx - effective_frame_width(), -std::floor(iLeftCursor.client_rect().centre().y) });
+		iRightCursor.move(dpi_scale(current_cursor_position()) + position() + client_rect(false).top_right() + point{ effective_frame_width(), -std::floor(iLeftCursor.client_rect().centre().y) });
 	}
 
 	point colour_dialog::x_picker::current_cursor_position() const
@@ -416,7 +474,7 @@ namespace neogfx
 			return framed_widget::minimum_size(aAvailableSpace);
 		scoped_units su{ *this, units::Pixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
-		result += size{ 256, 256 };
+		result += dpi_scale(size{ 256, 256 });
 		return result;
 	}
 
@@ -448,8 +506,8 @@ namespace neogfx
 			}
 			iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
 		}
-		aGraphicsContext.draw_texture(cr.top_left(), iTexture);
-		point cursor = current_cursor_position();
+		aGraphicsContext.draw_texture(rect{ cr.top_left(), dpi_scale(size{256.0, 256.0}) }, iTexture);
+		point cursor = dpi_scale(current_cursor_position());
 		aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iParent.selected_colour());
 		aGraphicsContext.draw_circle(cr.top_left() + cursor, 4.0, pen{ iParent.selected_colour().light(0x80) ? colour::Black : colour::White });
 	}
@@ -479,7 +537,7 @@ namespace neogfx
 
 	void colour_dialog::yz_picker::select(const point& aPosition)
 	{
-		iParent.select_colour(colour_at_position(aPosition), *this);
+		iParent.select_colour(colour_at_position(aPosition * (1.0 / dpi_scale_factor())), *this);
 		iUpdateTexture = false;
 	}
 
@@ -629,7 +687,7 @@ namespace neogfx
 			return framed_widget::minimum_size(aAvailableSpace);
 		scoped_units su{ *this, units::Pixels };
 		size result = framed_widget::minimum_size(aAvailableSpace);
-		result += size{ 60, 80 };
+		result += dpi_scale(size{ 60, 80 });
 		return result;
 	}
 

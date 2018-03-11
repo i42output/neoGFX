@@ -261,6 +261,10 @@ namespace neogfx
 		basic_point& operator-=(const basic_point& other) { x -= other.x; y -= other.y; return *this; }
 		basic_point& operator*=(const basic_point& other) { x *= other.x; y *= other.y; return *this; }
 		basic_point& operator/=(const basic_point& other) { x /= other.x; y /= other.y; return *this; }
+		basic_point& operator+=(coordinate_type amount) { x += amount; y += amount; return *this; }
+		basic_point& operator-=(coordinate_type amount) { x -= amount; y -= amount; return *this; }
+		basic_point& operator*=(coordinate_type amount) { x *= amount; y *= amount; return *this; }
+		basic_point& operator/=(coordinate_type amount) { x /= amount; y /= amount; return *this; }
 		basic_point& operator+=(const basic_delta<coordinate_type>& other) { x += static_cast<coordinate_type>(other.dx); y += static_cast<coordinate_type>(other.dy); return *this; }
 		basic_point& operator-=(const basic_delta<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.dx); y -= static_cast<coordinate_type>(other.dy); return *this; }
 		basic_point& operator+=(const basic_size<coordinate_type>& other) { x += static_cast<coordinate_type>(other.cx); y += static_cast<coordinate_type>(other.cy); return *this; }
@@ -307,6 +311,38 @@ namespace neogfx
 	{
 		basic_point<CoordinateType> ret = left;
 		ret /= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_point<CoordinateType> operator+(const basic_point<CoordinateType>& left, typename basic_point<CoordinateType>::coordinate_type amount)
+	{
+		basic_point<CoordinateType> ret = left;
+		ret += amount;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_point<CoordinateType> operator-(const basic_point<CoordinateType>& left, typename basic_point<CoordinateType>::coordinate_type amount)
+	{
+		basic_point<CoordinateType> ret = left;
+		ret -= amount;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_point<CoordinateType> operator*(const basic_point<CoordinateType>& left, typename basic_point<CoordinateType>::coordinate_type amount)
+	{
+		basic_point<CoordinateType> ret = left;
+		ret *= amount;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_point<CoordinateType> operator/(const basic_point<CoordinateType>& left, typename basic_point<CoordinateType>::coordinate_type amount)
+	{
+		basic_point<CoordinateType> ret = left;
+		ret /= amount;
 		return ret;
 	}
 
@@ -428,8 +464,10 @@ namespace neogfx
 		bool operator!=(const basic_rect& other) const { return !operator==(other); }
 		basic_rect& operator*=(const basic_rect& other) { position() *= other.position(); extents() *= other.extents(); return *this; }
 		basic_rect& operator*=(const size_type& size) { position() *= size; extents() *= size; return *this; }
+		basic_rect& operator*=(dimension_type value) { position() *= value; extents() *= value; return *this; }
 		basic_rect& operator/=(const basic_rect& other) { position() /= other.position(); extents() /= other.extents(); return *this; }
 		basic_rect& operator/=(const size_type& size) { position() /= size; extents() /= size; return *this; }
+		basic_rect& operator/=(dimension_type value) { position() /= value; extents() /= value; return *this; }
 		bool contains(const point_type& point) const { return point.x >= left() && point.y >= top() && point.x < right() && point.y < bottom(); }
 		bool contains_x(const point_type& point) const { return point.x >= left() && point.x < right(); }
 		bool contains_y(const point_type& point) const { return point.y >= top() && point.y < bottom(); }
@@ -481,6 +519,14 @@ namespace neogfx
 	}
 
 	template <typename CoordinateType>
+	inline basic_rect<CoordinateType> operator*(const basic_rect<CoordinateType>& left, typename basic_rect<CoordinateType>::dimension_type value)
+	{
+		basic_rect<CoordinateType> ret = left;
+		ret *= value;
+		return ret;
+	}
+
+	template <typename CoordinateType>
 	inline basic_rect<CoordinateType> operator/(const basic_rect<CoordinateType>& left, const basic_rect<CoordinateType>& right)
 	{
 		basic_rect<CoordinateType> ret = left;
@@ -493,6 +539,14 @@ namespace neogfx
 	{
 		basic_rect<CoordinateType> ret = left;
 		ret /= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_rect<CoordinateType> operator/(const basic_rect<CoordinateType>& left, typename basic_rect<CoordinateType>::dimension_type value)
+	{
+		basic_rect<CoordinateType> ret = left;
+		ret /= value;
 		return ret;
 	}
 
@@ -796,6 +850,10 @@ namespace neogfx
 		size dpi_scale(const size& aSize) const
 		{
 			return aSize * dpi_scale_factor();
+		}
+		point dpi_scale(const point& aPoint) const
+		{
+			return aPoint * dpi_scale_factor();
 		}
 		template <typename T>
 		T&& dpi_select(T&& aLowDpiValue, T&& aHighDpiValue) const
