@@ -840,6 +840,10 @@ int main(int argc, char* argv[])
 		ng::radio_button singleSelection(tableViewSelection, "Single selection");
 		ng::radio_button multipleSelection(tableViewSelection, "Multiple selection");
 		ng::radio_button extendedSelection(tableViewSelection, "Extended selection");
+		ng::group_box clickType(tableViewTweaks, "Click Type");
+		ng::radio_button clickToSelect(clickType.item_layout(), "Click To Select");
+		ng::radio_button clickToEdit(clickType.item_layout(), "Click To Edit");
+		ng::vertical_spacer clickTypeSpacer(clickType.item_layout());
 		ng::group_box column5(tableViewTweaks, "Column 5");
 		ng::check_box column5ReadOnly(column5.item_layout(), "Read only");
 		ng::check_box column5Unselectable(column5.item_layout(), "Unselectable");
