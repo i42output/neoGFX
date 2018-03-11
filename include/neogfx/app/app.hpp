@@ -147,6 +147,8 @@ namespace neogfx
 		i_style& change_style(const std::string& aStyleName) override;
 		i_style& register_style(const i_style& aStyle) override;
 	public:
+		const std::string& translate(const std::string& aTranslatableString, const std::string& aContext = std::string{}) const override;
+	public:
 		i_action& action_file_new() override;
 		i_action& action_file_open() override;
 		i_action& action_file_close() override;
@@ -169,6 +171,8 @@ namespace neogfx
 		void remove_action(i_action& aAction) override;
 		void add_mnemonic(i_mnemonic& aMnemonic) override;
 		void remove_mnemonic(i_mnemonic& aMnemonic) override;
+	public:
+		i_menu& add_standard_menu(i_menu& aParentMenu, standard_menu aStandardMenu) override;
 	public:
 		i_help& help() const override;
 	public:

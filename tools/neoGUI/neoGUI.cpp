@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/widget/menu_bar.hpp>
 #include <neogfx/gui/widget/toolbar.hpp>
+#include <neogfx/gui/widget/status_bar.hpp>
 #include <neogfx/gui/view/view_container.hpp>
 #include <neogfx/core/css.hpp>
 #include "new_project_dialog.hpp"
@@ -46,8 +47,9 @@ int main(int argc, char* argv[])
 
 		ng::menu_bar mainMenu{ mainWindow.menu_layout() };
 
-		auto& fileMenu = mainMenu.add_sub_menu("&File");
-		fileMenu.add_action(app.action_file_new());
+		auto& fileMenu = app.add_standard_menu(mainMenu, ng::standard_menu::File);
+		auto& editMenu = app.add_standard_menu(mainMenu, ng::standard_menu::Edit);
+
 		app.action_file_new().triggered([&]()
 		{
 			neogui::new_project_dialog dialog{ mainWindow };
@@ -56,24 +58,6 @@ int main(int argc, char* argv[])
 				// todo
 			}
 		});
-		fileMenu.add_action(app.action_file_open());
-		fileMenu.add_separator();
-		fileMenu.add_action(app.action_file_close());
-		fileMenu.add_separator();
-		fileMenu.add_action(app.action_file_save());
-		fileMenu.add_separator();
-		fileMenu.add_action(app.action_file_exit());
-
-		auto& editMenu = mainMenu.add_sub_menu("&Edit");
-		editMenu.add_action(app.action_undo());
-		editMenu.add_action(app.action_redo());
-		editMenu.add_separator();
-		editMenu.add_action(app.action_cut());
-		editMenu.add_action(app.action_copy());
-		editMenu.add_action(app.action_paste());
-		editMenu.add_action(app.action_delete());
-		editMenu.add_separator();
-		editMenu.add_action(app.action_select_all());
 
 		ng::toolbar toolbar{ mainWindow.toolbar_layout() };
 		toolbar.set_button_image_extents(ng::size{ 16.0, 16.0 });
@@ -87,6 +71,8 @@ int main(int argc, char* argv[])
 		toolbar.add_action(app.action_cut());
 		toolbar.add_action(app.action_copy());
 		toolbar.add_action(app.action_paste());
+
+		ng::status_bar statusBar{ mainWindow.status_bar_layout() };
 
 		ng::horizontal_layout workspaceLayout{ mainLayout };
 		ng::view_container workspace{ workspaceLayout };

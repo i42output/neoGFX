@@ -89,7 +89,7 @@ namespace neogfx
 	void layout_item::layout(const point& aPosition, const size& aSize)
 	{
 		size adjustedSize = aSize.min(maximum_size());
-		point adjustedPosition = aPosition + (aSize - adjustedSize) / 2.0;
+		point adjustedPosition = (aPosition + (aSize - adjustedSize) / 2.0).floor();
 		if (iPointerWrapper.is<widget_pointer>())
 		{
 			auto& w = *static_variant_cast<widget_pointer&>(iPointerWrapper);

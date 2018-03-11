@@ -1,4 +1,4 @@
-// app.cpp
+// cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
@@ -26,6 +26,7 @@
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/app/resource_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
+#include <neogfx/gui/widget/i_menu.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 
 namespace nrc
@@ -111,20 +112,20 @@ namespace neogfx
 		iAudio{ aServiceFactory.create_audio() },
 		iDefaultWindowIcon{ image{ ":/neogfx/resources/icons/neoGFX.png" } },
 		iCurrentStyle{ iStyles.begin() },
-		iActionFileNew{ add_action("&New...", ":/neogfx/resources/icons.naa#new.png").set_shortcut("Ctrl+Shift+N") },
-		iActionFileOpen{ add_action("&Open...", ":/neogfx/resources/icons.naa#open.png").set_shortcut("Ctrl+Shift+O") },
-		iActionFileClose{ add_action("&Close").set_shortcut("Ctrl+F4") },
-		iActionFileCloseAll{ add_action("Close All") },
-		iActionFileSave{ add_action("&Save", ":/neogfx/resources/icons.naa#save.png").set_shortcut("Ctrl+S") },
-		iActionFileSaveAll{ add_action("Save A&ll").set_shortcut("Ctrl+Shift+S") },
-		iActionFileExit{ add_action("E&xit").set_shortcut("Alt+F4") },
-		iActionUndo{ add_action("Undo", ":/neogfx/resources/icons.naa#undo.png").set_shortcut("Ctrl+Z") },
-		iActionRedo{ add_action("Redo", ":/neogfx/resources/icons.naa#redo.png").set_shortcut("Ctrl+Shift+Z") },
-		iActionCut{ add_action("Cut", ":/neogfx/resources/icons.naa#cut.png").set_shortcut("Ctrl+X") },
-		iActionCopy{ add_action("Copy", ":/neogfx/resources/icons.naa#copy.png").set_shortcut("Ctrl+C") },
-		iActionPaste{ add_action("Paste", ":/neogfx/resources/icons.naa#paste.png").set_shortcut("Ctrl+V") },
-		iActionDelete{ add_action("Delete").set_shortcut("Del") },
-		iActionSelectAll{ add_action("Select All").set_shortcut("Ctrl+A") },
+		iActionFileNew{ add_action("&New..."_t, ":/neogfx/resources/icons.naa#new.png").set_shortcut("Ctrl+Shift+N") },
+		iActionFileOpen{ add_action("&Open..."_t, ":/neogfx/resources/icons.naa#open.png").set_shortcut("Ctrl+Shift+O") },
+		iActionFileClose{ add_action("&Close"_t).set_shortcut("Ctrl+F4") },
+		iActionFileCloseAll{ add_action("Close All"_t) },
+		iActionFileSave{ add_action("&Save"_t, ":/neogfx/resources/icons.naa#save.png").set_shortcut("Ctrl+S") },
+		iActionFileSaveAll{ add_action("Save A&ll"_t).set_shortcut("Ctrl+Shift+S") },
+		iActionFileExit{ add_action("E&xit"_t).set_shortcut("Alt+F4") },
+		iActionUndo{ add_action("Undo"_t, ":/neogfx/resources/icons.naa#undo.png").set_shortcut("Ctrl+Z") },
+		iActionRedo{ add_action("Redo"_t, ":/neogfx/resources/icons.naa#redo.png").set_shortcut("Ctrl+Shift+Z") },
+		iActionCut{ add_action("Cut"_t, ":/neogfx/resources/icons.naa#cut.png").set_shortcut("Ctrl+X") },
+		iActionCopy{ add_action("Copy"_t, ":/neogfx/resources/icons.naa#copy.png").set_shortcut("Ctrl+C") },
+		iActionPaste{ add_action("Paste"_t, ":/neogfx/resources/icons.naa#paste.png").set_shortcut("Ctrl+V") },
+		iActionDelete{ add_action("Delete"_t).set_shortcut("Del") },
+		iActionSelectAll{ add_action("Select All"_t).set_shortcut("Ctrl+A") },
 		iStandardActionManager{ *this, [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
@@ -374,6 +375,12 @@ namespace neogfx
 		return newStyle->second;
 	}
 
+	const std::string& app::translate(const std::string& aTranslatableString, const std::string& aContext) const
+	{
+		// todo: i18n
+		return aTranslatableString;
+	}
+
 	i_action& app::action_file_new()
 	{
 		return iActionFileNew;
@@ -496,6 +503,42 @@ namespace neogfx
 		auto n = std::find(iMnemonics.begin(), iMnemonics.end(), &aMnemonic);
 		if (n != iMnemonics.end())
 			iMnemonics.erase(n);
+	}
+
+	i_menu& app::add_standard_menu(i_menu& aParentMenu, standard_menu aStandardMenu)
+	{
+		switch (aStandardMenu)
+		{
+		case standard_menu::File:
+			{
+				auto& fileMenu = aParentMenu.add_sub_menu("&File"_t);
+				fileMenu.add_action(action_file_new());
+				fileMenu.add_action(action_file_open());
+				fileMenu.add_separator();
+				fileMenu.add_action(action_file_close());
+				fileMenu.add_separator();
+				fileMenu.add_action(action_file_save());
+				fileMenu.add_separator();
+				fileMenu.add_action(action_file_exit());
+				return fileMenu;
+			}
+		case standard_menu::Edit:
+			{
+				auto& editMenu = aParentMenu.add_sub_menu("&Edit"_t);
+				editMenu.add_action(action_undo());
+				editMenu.add_action(action_redo());
+				editMenu.add_separator();
+				editMenu.add_action(action_cut());
+				editMenu.add_action(action_copy());
+				editMenu.add_action(action_paste());
+				editMenu.add_action(action_delete());
+				editMenu.add_separator();
+				editMenu.add_action(action_select_all());
+				return editMenu;
+			}
+		default:
+			throw unknown_standard_menu();
+		}
 	}
 
 	class help : public i_help

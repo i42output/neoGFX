@@ -684,6 +684,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\font_dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\app\i18n.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
@@ -1062,6 +1065,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\i18n.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

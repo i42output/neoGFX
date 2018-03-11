@@ -109,6 +109,7 @@
     <ClInclude Include="..\..\..\include\neogfx\app\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\clipboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\i18n.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_basic_services.hpp" />
@@ -345,6 +346,7 @@
     <ClCompile Include="..\..\..\src\app\action.cpp" />
     <ClCompile Include="..\..\..\src\app\app.cpp" />
     <ClCompile Include="..\..\..\src\app\clipboard.cpp" />
+    <ClCompile Include="..\..\..\src\app\i18n.cpp" />
     <ClCompile Include="..\..\..\src\app\module_resource.cpp" />
     <ClCompile Include="..\..\..\src\app\native\sdl_basic_services.cpp" />
     <ClCompile Include="..\..\..\src\app\native\sdl_service_factory.cpp" />

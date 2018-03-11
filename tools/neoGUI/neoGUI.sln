@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25008.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neoGUI", "neoGUI.vcxproj", "{FAD0194F-355A-4183-B700-3E80AE541BCB}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -11,20 +11,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neoGUI", "neoGUI.vcxproj", 
 		{5BE004BF-A083-422F-8287-E7238B633466} = {5BE004BF-A083-422F-8287-E7238B633466}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glsl2hpp", "..\glsl2hpp\build\win32\vs2015\glsl2hpp.vcxproj", "{16B2402F-6B03-4852-84B1-067F1E5148FD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glsl2hpp", "..\glsl2hpp\build\win32\vs2017\glsl2hpp.vcxproj", "{16B2402F-6B03-4852-84B1-067F1E5148FD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7860B48A-5793-4F62-BBA3-A4E63F74339C} = {7860B48A-5793-4F62-BBA3-A4E63F74339C}
 		{5BE004BF-A083-422F-8287-E7238B633466} = {5BE004BF-A083-422F-8287-E7238B633466}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nrc", "..\nrc\build\win32\vs2015\nrc.vcxproj", "{7860B48A-5793-4F62-BBA3-A4E63F74339C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nrc", "..\nrc\build\win32\vs2017\nrc.vcxproj", "{7860B48A-5793-4F62-BBA3-A4E63F74339C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5BE004BF-A083-422F-8287-E7238B633466} = {5BE004BF-A083-422F-8287-E7238B633466}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neolib", "..\..\..\neolib\build\win32\vs2015\neolib.vcxproj", "{5BE004BF-A083-422F-8287-E7238B633466}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neolib", "..\..\..\neolib\build\win32\vs2017\neolib.vcxproj", "{5BE004BF-A083-422F-8287-E7238B633466}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neoGFX", "..\..\build\win32\vs2015\neogfx.vcxproj", "{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neoGFX", "..\..\build\win32\vs2017\neogfx.vcxproj", "{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{16B2402F-6B03-4852-84B1-067F1E5148FD} = {16B2402F-6B03-4852-84B1-067F1E5148FD}
 		{7860B48A-5793-4F62-BBA3-A4E63F74339C} = {7860B48A-5793-4F62-BBA3-A4E63F74339C}
@@ -74,5 +74,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1AA295D5-77F1-4142-9D0A-24B9B70162B6}
 	EndGlobalSection
 EndGlobal

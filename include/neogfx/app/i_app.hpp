@@ -23,6 +23,7 @@
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include "i_style.hpp"
+#include "i18n.hpp"
 
 namespace neogfx
 {
@@ -38,10 +39,17 @@ namespace neogfx
 	class i_action;
 	class i_mnemonic;
 	class i_image;
+	class i_menu;
 
 	class i_help;
 
 	class event_processing_context;
+
+	enum standard_menu
+	{
+		File,
+		Edit
+	};
 
 	class i_app
 	{
@@ -57,6 +65,7 @@ namespace neogfx
 		};
 	public:
 		struct main_window_closed_prematurely : std::runtime_error { main_window_closed_prematurely() : std::runtime_error("Main window closed prematurely!") {} };
+		struct unknown_standard_menu : std::logic_error { unknown_standard_menu() : std::logic_error("neogfx::i_app::unknown_standard_menu") {} };
 	public:
 		virtual const std::string& name() const = 0;
 		virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
@@ -77,6 +86,8 @@ namespace neogfx
 		virtual i_style& current_style() = 0;
 		virtual i_style& change_style(const std::string& aStyleName) = 0;
 		virtual i_style& register_style(const i_style& aStyle) = 0;
+	public:
+		virtual const std::string& translate(const std::string& aTranslatableString, const std::string& aContext = std::string{}) const = 0;
 	public:
 		virtual i_action& action_file_new() = 0;
 		virtual i_action& action_file_open() = 0;
@@ -100,6 +111,8 @@ namespace neogfx
 		virtual void remove_action(i_action& aAction) = 0;
 		virtual void add_mnemonic(i_mnemonic& aMnemonic) = 0;
 		virtual void remove_mnemonic(i_mnemonic& aMnemonic) = 0;
+	public:
+		virtual i_menu& add_standard_menu(i_menu& aParentMenu, standard_menu aStandardMenu) = 0;
 	public:
 		virtual i_help& help() const = 0;
 	public:
