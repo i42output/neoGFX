@@ -576,7 +576,7 @@ int main(int argc, char* argv[])
 		ng::push_button editColour(layoutColourPickers, "edit"); editColour.image().set_image(ng::image{ ":/closed/resources/caw_toolbar.naa#colour.png" });
 		ng::widget lw{ layout4 };
 		lw.set_margins(ng::margins{});
-		ng::grid_layout layoutEffects{ lw, 2, 2 };
+		ng::grid_layout layoutEffects{ lw, 2, 2, ng::alignment::Left | ng::alignment::VCentre };
 		layoutEffects.set_margins(ng::margins{});
 		ng::radio_button editNormal{ layoutEffects, "normal" };
 		ng::radio_button editOutline{ layoutEffects, "outline" };
@@ -836,6 +836,7 @@ int main(int argc, char* argv[])
 		tableViewTweaks.set_alignment(ng::alignment::Top);
 		tableViewTweaks.add_spacer();
 		ng::vertical_layout tableViewSelection(tableViewTweaks);
+		tableViewSelection.set_weight(ng::size{});
 		ng::radio_button noSelection(tableViewSelection, "No selection");
 		ng::radio_button singleSelection(tableViewSelection, "Single selection");
 		ng::radio_button multipleSelection(tableViewSelection, "Multiple selection");

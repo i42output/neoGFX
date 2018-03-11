@@ -26,48 +26,48 @@
 
 namespace neogfx
 {
-	grid_layout::grid_layout() :
-		layout(), iRowLayout(*this)
+	grid_layout::grid_layout(neogfx::alignment aAlignment) :
+		layout{ aAlignment }, iRowLayout{ *this, aAlignment }
 	{
 		iRowLayout.set_margins(neogfx::margins{});
 		iRowLayout.set_spacing(spacing());
 		iRowLayout.set_always_use_spacing(true);
 	}
 
-	grid_layout::grid_layout(cell_coordinate aRows, cell_coordinate aColumns) :
-		layout(), iRowLayout(*this), iDimensions{ aColumns, aRows }
+	grid_layout::grid_layout(cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
+		layout{ aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions{ aColumns, aRows }
 	{
 		iRowLayout.set_margins(neogfx::margins{});
 		iRowLayout.set_spacing(spacing());
 		iRowLayout.set_always_use_spacing(true);
 	}
 
-	grid_layout::grid_layout(i_widget& aParent) :
-		layout(aParent), iRowLayout(*this)
+	grid_layout::grid_layout(i_widget& aParent, neogfx::alignment aAlignment) :
+		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }
 	{
 		iRowLayout.set_margins(neogfx::margins{});
 		iRowLayout.set_spacing(spacing());
 		iRowLayout.set_always_use_spacing(true);
 	}
 
-	grid_layout::grid_layout(i_layout& aParent) :
-		layout(aParent), iRowLayout(*this)
+	grid_layout::grid_layout(i_layout& aParent, neogfx::alignment aAlignment) :
+		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }
 	{
 		iRowLayout.set_margins(neogfx::margins{});
 		iRowLayout.set_spacing(spacing());
 		iRowLayout.set_always_use_spacing(true);
 	}
 
-	grid_layout::grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns) :
-		layout(aParent), iRowLayout(*this), iDimensions{aColumns, aRows}
+	grid_layout::grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
+		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions{ aColumns, aRows }
 	{
 		iRowLayout.set_margins(neogfx::margins{});
 		iRowLayout.set_spacing(spacing());
 		iRowLayout.set_always_use_spacing(true);
 	}
 
-	grid_layout::grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns) :
-		layout(aParent), iRowLayout(*this), iDimensions(aColumns, aRows)
+	grid_layout::grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
+		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions(aColumns, aRows)
 	{
 		iRowLayout.set_margins(neogfx::margins{});
 		iRowLayout.set_spacing(spacing());
@@ -136,7 +136,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{col, aRow}) == iCells.end())
 				add_spacer_at_position(aRow, col);
-		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aWidget));
+		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item{ *this, aWidget });
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -154,7 +154,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer_at_position(aRow, col);
-		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aWidget));
+		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item{ *this, aWidget });
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -176,7 +176,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer_at_position(aRow, col);
-		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aLayout));
+		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item{ *this, aLayout });
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -192,7 +192,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer_at_position(aRow, col);
-		iCells[cell_coordinates{aColumn, aRow}] = items().insert(items().end(), item(*this, aLayout));
+		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item{ *this, aLayout });
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -208,7 +208,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer_at_position(aRow, col);
-		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item(*this, aSpacer));
+		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item{ *this, aSpacer });
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)
@@ -224,7 +224,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer_at_position(aRow, col);
-		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item(*this, aSpacer));
+		iCells[cell_coordinates{ aColumn, aRow }] = items().insert(items().end(), item{ *this, aSpacer });
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		if (owner() != 0)

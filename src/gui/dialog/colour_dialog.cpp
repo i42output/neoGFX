@@ -729,7 +729,7 @@ namespace neogfx
 		iRightBottomLayout{ iRightLayout, alignment::Left | alignment::Top },
 		iColourSelection{ *this },
 		iScreenPicker{ iRightBottomLayout },
-		iChannelLayout{ iRightBottomLayout },
+		iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCentre },
 		iBasicColoursLabel{ iLeftLayout, "&Basic colours"_t },
 		iBasicColoursLayout{ iLeftLayout },
 		iSpacer{ iLeftLayout },
@@ -766,7 +766,7 @@ namespace neogfx
 		iRightBottomLayout{ iRightLayout, alignment::Left | alignment::Top },
 		iColourSelection{ *this },
 		iScreenPicker{ iRightBottomLayout },
-		iChannelLayout{ iRightBottomLayout },
+		iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCentre },
 		iBasicColoursLabel{ iLeftLayout, "&Basic colours"_t },
 		iBasicColoursLayout{ iLeftLayout},
 		iSpacer{ iLeftLayout},
@@ -882,13 +882,13 @@ namespace neogfx
 			iScreenPickerActive = true;
 			surface().as_surface_window().set_capture(*this);
 		});
-		iH.first.label().text().set_text("&Hue:"_t); iH.second.set_size_policy(size_policy::Minimum); iH.second.text_box().set_hint("359.9"); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
-		iS.first.label().text().set_text("&Sat:"_t); iS.second.set_size_policy(size_policy::Minimum); iS.second.text_box().set_hint("100.0"); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
-		iV.first.label().text().set_text("&Val:"_t); iV.second.set_size_policy(size_policy::Minimum); iV.second.text_box().set_hint("100.0"); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);
-		iR.first.label().text().set_text("&Red:"_t); iR.second.set_size_policy(size_policy::Minimum); iR.second.text_box().set_hint("255"); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
-		iG.first.label().text().set_text("&Green:"_t); iG.second.set_size_policy(size_policy::Minimum); iG.second.text_box().set_hint("255"); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
-		iB.first.label().text().set_text("&Blue:"_t); iB.second.set_size_policy(size_policy::Minimum); iB.second.text_box().set_hint("255"); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
-		iA.first.label().text().set_text("&Alpha:"_t); iA.second.set_size_policy(size_policy::Minimum); iA.second.text_box().set_hint("255"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
+		iH.first.set_size_policy(size_policy::Minimum); iH.first.label().text().set_text("&Hue:"_t); iH.second.set_size_policy(size_policy::Minimum); iH.second.text_box().set_hint("359.9"); iH.second.set_minimum(0.0); iH.second.set_maximum(359.9); iH.second.set_step(1);
+		iS.first.set_size_policy(size_policy::Minimum); iS.first.label().text().set_text("&Sat:"_t); iS.second.set_size_policy(size_policy::Minimum); iS.second.text_box().set_hint("100.0"); iS.second.set_minimum(0.0); iS.second.set_maximum(100.0); iS.second.set_step(1);
+		iV.first.set_size_policy(size_policy::Minimum); iV.first.label().text().set_text("&Val:"_t); iV.second.set_size_policy(size_policy::Minimum); iV.second.text_box().set_hint("100.0"); iV.second.set_minimum(0.0); iV.second.set_maximum(100.0); iV.second.set_step(1);
+		iR.first.set_size_policy(size_policy::Minimum); iR.first.label().text().set_text("&Red:"_t); iR.second.set_size_policy(size_policy::Minimum); iR.second.text_box().set_hint("255"); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
+		iG.first.set_size_policy(size_policy::Minimum); iG.first.label().text().set_text("&Green:"_t); iG.second.set_size_policy(size_policy::Minimum); iG.second.text_box().set_hint("255"); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
+		iB.first.set_size_policy(size_policy::Minimum); iB.first.label().text().set_text("&Blue:"_t); iB.second.set_size_policy(size_policy::Minimum); iB.second.text_box().set_hint("255"); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
+		iA.first.set_size_policy(size_policy::Minimum); iA.first.label().text().set_text("&Alpha:"_t); iA.second.set_size_policy(size_policy::Minimum); iA.second.text_box().set_hint("255"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
 		iChannelLayout.set_dimensions(4, 4);
 		iChannelLayout.add(iH.first); iChannelLayout.add(iH.second);
 		iChannelLayout.add(iR.first); iChannelLayout.add(iR.second);

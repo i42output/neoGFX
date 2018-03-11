@@ -37,6 +37,8 @@ namespace neogfx
 	class i_widget : public i_widget_geometry, public i_keyboard_handler
 	{
 	public:
+		static i_widget* debug;
+	public:
 		event<> visibility_changed;
 		event<> position_changed;
 		event<> size_changed;

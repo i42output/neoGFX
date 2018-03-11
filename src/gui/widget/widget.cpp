@@ -30,13 +30,15 @@ namespace neogfx
 	{
 	public:
 		layout_timer(i_window& aWindow, neolib::io_task& aIoTask, std::function<void(callback_timer&)> aCallback) :
-			pause_rendering(aWindow), neolib::callback_timer(aIoTask, aCallback, 0)
+			pause_rendering{ aWindow }, neolib::callback_timer{ aIoTask, aCallback, 0 }
 		{
 		}
 		~layout_timer()
 		{
 		}
 	};
+
+	i_widget* widget::debug;
 
 	widget::widget() :
 		iSingular{ false },

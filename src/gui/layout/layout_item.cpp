@@ -24,32 +24,32 @@
 namespace neogfx
 {
 	layout_item::layout_item(i_layout& aParent, i_widget& aWidget) :
-		iParent(aParent), iPointerWrapper(widget_pointer(widget_pointer(), &aWidget)), iLayoutId(-1, -1)
+		iParent{ aParent }, iPointerWrapper{ widget_pointer{widget_pointer{}, &aWidget} }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_widget> aWidget) :
-		iParent(aParent), iPointerWrapper(aWidget), iLayoutId(-1, -1)
+		iParent{ aParent }, iPointerWrapper{ aWidget }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, i_layout& aLayout) :
-		iParent(aParent), iPointerWrapper(layout_pointer(layout_pointer(), &aLayout)), iLayoutId(-1, -1)
+		iParent{ aParent }, iPointerWrapper{ layout_pointer{layout_pointer{}, &aLayout} }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_layout> aLayout) :
-		iParent(aParent), iPointerWrapper(aLayout), iLayoutId(-1, -1)
+		iParent{ aParent }, iPointerWrapper{ aLayout }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, i_spacer& aSpacer) :
-		iParent(aParent), iPointerWrapper(spacer_pointer(spacer_pointer(), &aSpacer)), iLayoutId(-1, -1)
+		iParent{ aParent }, iPointerWrapper{ spacer_pointer{spacer_pointer{}, &aSpacer} }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer) :
-		iParent(aParent), iPointerWrapper(aSpacer), iLayoutId(-1, -1)
+		iParent{ aParent }, iPointerWrapper{ aSpacer }, iLayoutId{ -1, -1 }
 	{
 	}
 
@@ -68,8 +68,8 @@ namespace neogfx
 		return iPointerWrapper.is<widget_pointer>() ?
 			static_cast<const i_widget_geometry&>(*static_variant_cast<const widget_pointer&>(iPointerWrapper)) :
 			iPointerWrapper.is<layout_pointer>() ?
-			static_cast<const i_widget_geometry&>(*static_variant_cast<const layout_pointer&>(iPointerWrapper)) :
-			static_cast<const i_widget_geometry&>(*static_variant_cast<const spacer_pointer&>(iPointerWrapper));
+				static_cast<const i_widget_geometry&>(*static_variant_cast<const layout_pointer&>(iPointerWrapper)) :
+				static_cast<const i_widget_geometry&>(*static_variant_cast<const spacer_pointer&>(iPointerWrapper));
 	}
 
 	i_widget_geometry& layout_item::wrapped_geometry()
@@ -89,7 +89,22 @@ namespace neogfx
 	void layout_item::layout(const point& aPosition, const size& aSize)
 	{
 		size adjustedSize = aSize.min(maximum_size());
-		point adjustedPosition = (aPosition + (aSize - adjustedSize) / 2.0).floor();
+		point adjustedPosition = aPosition;
+		if (adjustedSize != aSize)
+		{
+			adjustedPosition += point{
+			(iParent.alignment() & alignment::Centre) == alignment::Centre ?
+				(aSize - adjustedSize).cx / 2.0 :
+				(iParent.alignment() & alignment::Right) == alignment::Right ?
+					(aSize - adjustedSize).cx :
+					0.0,
+			(iParent.alignment() & alignment::VCentre) == alignment::VCentre ?
+				(aSize - adjustedSize).cy / 2.0 :
+				(iParent.alignment() & alignment::Bottom) == alignment::Bottom ?
+					(aSize - adjustedSize).cy :
+					0.0 }.floor();
+		}
+					
 		if (iPointerWrapper.is<widget_pointer>())
 		{
 			auto& w = *static_variant_cast<widget_pointer&>(iPointerWrapper);
