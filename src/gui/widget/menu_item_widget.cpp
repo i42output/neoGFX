@@ -241,8 +241,8 @@ namespace neogfx
 	void menu_item_widget::init()
 	{
 		set_margins(neogfx::margins{});
-		iLayout.set_margins(neogfx::margins{ iGap, 2.0, iGap * (menu().type() == i_menu::Popup ? 2.0 : 1.0), 2.0 });
-		iLayout.set_spacing(size{ iGap, 0.0 });
+		iLayout.set_margins(dpi_scale(neogfx::margins{ iGap, 2.0, iGap * (menu().type() == i_menu::Popup ? 2.0 : 1.0), 2.0 }));
+		iLayout.set_spacing(dpi_scale(size{ iGap, 0.0 }));
 		if (menu().type() == i_menu::Popup)
 			iIcon.set_fixed_size(dpi_scale(iIconSize));
 		else
@@ -280,8 +280,33 @@ namespace neogfx
 						"0000001100000000"
 						"0000001100000000"
 					};
+					const char* sTickHighDpiPattern
+					{
+						"[32,16]"
+						"{0,paper}"
+						"{1,ink}"
+
+						"00000000000000000000110000000000"
+						"00000000000000000000110000000000"
+						"00000000000000000001110000000000"
+						"00000000000000000011100000000000"
+						"00000000000000000011000000000000"
+						"00000000000000000011000000000000"
+						"00000000000000000111000000000000"
+						"00000000000000001110000000000000"
+						"00000000001100001100000000000000"
+						"00000000001100001100000000000000"
+						"00000000001110011100000000000000"
+						"00000000000111111000000000000000"
+						"00000000000011110000000000000000"
+						"00000000000011110000000000000000"
+						"00000000000001100000000000000000"
+						"00000000000001100000000000000000"
+					};
 					colour ink = app::instance().current_style().palette().text_colour();
-					iIcon.set_image(image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", colour{} },{ "ink", ink } } });
+					iIcon.set_image(!high_dpi() ?
+						image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", colour{} },{ "ink", ink } } } :
+						image{ "neogfx::menu_item_widget::sTickHighDpiPattern::" + ink.to_string(), sTickHighDpiPattern,{ { "paper", colour{} },{ "ink", ink } } });
 				}
 				if (!iIcon.image().is_empty())
 					iIcon.set_fixed_size(dpi_scale(iIconSize));

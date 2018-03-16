@@ -855,6 +855,10 @@ namespace neogfx
 		{
 			return aPoint * dpi_scale_factor();
 		}
+		margins dpi_scale(const margins& aMargins) const
+		{
+			return aMargins * dpi_scale_factor();
+		}
 		template <typename T>
 		T&& dpi_select(T&& aLowDpiValue, T&& aHighDpiValue) const
 		{

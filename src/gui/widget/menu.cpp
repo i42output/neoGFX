@@ -25,11 +25,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	menu::menu(type_e aType, const std::string& aTitle) : iParent(0), iType(aType), iTitle(aTitle), iOpenCount(0), iModal(false)
+	menu::menu(type_e aType, const std::string& aTitle) : 
+		iParent{ nullptr }, 
+		iType{ aType }, 
+		iTitle{ aTitle }, 
+		iOpenCount{ 0 }, 
+		iModal{ false }
 	{
 	}
 
-	menu::menu(i_menu& aParent, type_e aType, const std::string& aTitle) : iParent(&aParent), iType(aType), iTitle(aTitle), iOpenCount(0), iModal(false)
+	menu::menu(i_menu& aParent, type_e aType, const std::string& aTitle) : 
+		iParent{ &aParent }, 
+		iType{ aType }, 
+		iTitle{ aTitle }, 
+		iOpenCount{ 0 }, 
+		iModal{ false }
 	{
 	}
 
@@ -39,12 +49,12 @@ namespace neogfx
 
 	bool menu::has_parent() const
 	{
-		return iParent != 0;
+		return iParent != nullptr;
 	}
 
 	i_menu& menu::parent()
 	{
-		if (iParent != 0)
+		if (iParent != nullptr)
 			return *iParent;
 		throw no_parent();
 	}
