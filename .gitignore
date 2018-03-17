@@ -228,3 +228,4 @@ Debug
 /tools/nrc/build/win32/vs2017/nrc.vcxproj.user
 /3rdparty/SDL/SDL2-2.0.5/cmake/stage
 /tools/neoGUI/.vs
+/doxygen/*.tmp

@@ -50,6 +50,8 @@ namespace neogfx
 		void paint_non_client(graphics_context& aGraphicsContext) const override;
 		void paint(graphics_context& aGraphicsContext) const override;
 	public:
+		colour background_colour() const override;
+	public:
 		bool can_capture() const override;
 	public:
 		void mouse_entered(const point& aPosition) override;

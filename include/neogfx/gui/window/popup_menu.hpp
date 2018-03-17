@@ -58,6 +58,7 @@ namespace neogfx
 		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
 		colour background_colour() const override;
+		colour frame_colour() const override;
 	public:
 		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 		bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;

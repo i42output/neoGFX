@@ -250,11 +250,19 @@ namespace neogfx
 
 	colour popup_menu::background_colour() const
 	{
-		if (window::has_background_colour())
-			return window::background_colour();
-		return app::instance().current_style().palette().colour().dark() ?
-			app::instance().current_style().palette().colour().darker(0x40) :
-			app::instance().current_style().palette().colour().lighter(0x40);
+		return window::has_background_colour() ?
+			window::background_colour() :
+			app::instance().current_style().palette().colour();
+	}
+
+	colour popup_menu::frame_colour() const
+	{
+		if (window::has_frame_colour())
+			return window::frame_colour();
+		colour result = background_colour().darker(0x30);
+		if (result.similar_intensity(background_colour(), 0.05))
+			result = result.dark() ? result.lighter(0x20) : result.darker(0x20);
+		return result;
 	}
 
 	bool popup_menu::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
