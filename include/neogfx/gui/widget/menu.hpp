@@ -63,7 +63,7 @@ namespace neogfx
 		item_index find(const i_menu& aSubMenu) const override;
 		bool has_selected_item() const override;
 		item_index selected_item() const override;
-		void select_item_at(item_index aItemIndex, bool aSelectAnySubMenuItem = true) override;
+		void select_item_at(item_index aItemIndex, bool aOpenAnySubMenu = true) override;
 		void clear_selection() override;
 		bool has_available_items() const override;
 		bool item_available_at(item_index aItemIndex) const override;

@@ -95,9 +95,8 @@ namespace neogfx
 
 	app::app(int argc, char* argv[], const std::string& aName, i_service_factory& aServiceFactory)
 		try :
-		neolib::thread{ "neogfx::app", true },
-		neolib::io_task{ *this, "neogfx::app" },
-		async_event_queue{ static_cast<neolib::io_task&>(*this) },
+		neolib::async_thread{ "neogfx::app", true },
+		async_event_queue{ static_cast<neolib::async_task&>(*this) },
 		iProgramOptions{ argc, argv },
 		iLoader{ iProgramOptions, *this },
 		iName{ aName },

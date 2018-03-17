@@ -47,7 +47,7 @@ namespace neogfx
 		virtual i_menu& sub_menu() = 0;
 	public:
 		virtual bool available() const = 0;
-		virtual void select(bool aSelectAnySubMenuItem = true) = 0;
-		virtual bool select_any_sub_menu_item() const = 0;
+		virtual void select(bool aOpenAnySubMenu = true) = 0;
+		virtual bool open_any_sub_menu() const = 0;
 	};
 }

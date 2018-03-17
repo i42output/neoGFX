@@ -205,7 +205,7 @@ namespace neogfx
 		throw no_selected_item();
 	}
 
-	void menu::select_item_at(item_index aItemIndex, bool aSelectAnySubMenuItem)
+	void menu::select_item_at(item_index aItemIndex, bool aOpenAnySubMenu)
 	{
 		if (has_selected_item() && selected_item() == aItemIndex)
 			return;
@@ -219,13 +219,7 @@ namespace neogfx
 		}
 		iSelection = aItemIndex;
 		item_selected.trigger(item_at(aItemIndex));
-		item_at(aItemIndex).select(aSelectAnySubMenuItem);
-		if (aSelectAnySubMenuItem && item_at(aItemIndex).type() == i_menu_item::SubMenu)
-		{
-			auto& subMenu = item_at(aItemIndex).sub_menu();
-			if (subMenu.is_open() && !subMenu.has_selected_item() && subMenu.has_available_items())
-				subMenu.select_item_at(subMenu.first_available_item(), false);
-		}
+		item_at(aItemIndex).select(aOpenAnySubMenu);
 	}
 
 	void menu::clear_selection()

@@ -24,19 +24,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	menu_item::menu_item(i_action& aAction) : iContents{ std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction } }, iSelectAnySubMenuItem{ true }
+	menu_item::menu_item(i_action& aAction) : 
+		iContents{ std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction } }, iOpenAnySubMenu{ true }
 	{
 	}
 
-	menu_item::menu_item(std::shared_ptr<i_action> aAction) : iContents{ aAction }, iSelectAnySubMenuItem{ true }
+	menu_item::menu_item(std::shared_ptr<i_action> aAction) : 
+		iContents{ aAction }, iOpenAnySubMenu{ true }
 	{
 	}
 
-	menu_item::menu_item(i_menu& aSubMenu) : iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iSelectAnySubMenuItem{ true }
+	menu_item::menu_item(i_menu& aSubMenu) : 
+		iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iOpenAnySubMenu{ true }
 	{
 	}
 
-	menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu) : iContents{ aSubMenu }, iSelectAnySubMenuItem{ true }
+	menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu) : 
+		iContents{ aSubMenu }, iOpenAnySubMenu{ true }
 	{
 	}
 
@@ -81,14 +85,14 @@ namespace neogfx
 		return true;
 	}
 
-	void menu_item::select(bool aSelectAnySubMenuItem)
+	void menu_item::select(bool aOpenAnySubMenu)
 	{
-		neolib::scoped_flag sf{ iSelectAnySubMenuItem, aSelectAnySubMenuItem };
+		neolib::scoped_flag sf{ iOpenAnySubMenu, aOpenAnySubMenu };
 		selected.trigger();
 	}
 
-	bool menu_item::select_any_sub_menu_item() const
+	bool menu_item::open_any_sub_menu() const
 	{
-		return iSelectAnySubMenuItem;
+		return iOpenAnySubMenu;
 	}
 }

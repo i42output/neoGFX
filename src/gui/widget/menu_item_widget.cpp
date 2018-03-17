@@ -160,7 +160,7 @@ namespace neogfx
 		widget::mouse_entered(aPosition);
 		update();
 		if (menu_item().available())
-			menu().select_item_at(menu().find(menu_item()));
+			menu().select_item_at(menu().find(menu_item()), menu_item().type() == i_menu_item::SubMenu);
 	}
 
 	void menu_item_widget::mouse_left()
@@ -341,7 +341,7 @@ namespace neogfx
 		{
 			if (menu_item().type() == i_menu_item::Action)
 				app::instance().help().activate(*this);
-			else if (menu_item().type() == i_menu_item::SubMenu && menu_item().select_any_sub_menu_item() && menu().type() == i_menu::Popup)
+			else if (menu_item().type() == i_menu_item::SubMenu && menu_item().open_any_sub_menu() && menu().type() == i_menu::Popup)
 			{
 				if (!iSubMenuOpener)
 				{
@@ -365,7 +365,7 @@ namespace neogfx
 		});
 	}
 
-	void menu_item_widget::select_item(bool aSelectAnySubMenuItem)
+	void menu_item_widget::select_item(bool aOpenAnySubMenu)
 	{
 		destroyed_flag destroyed{ *this };
 		if (!menu_item().available())
@@ -396,7 +396,7 @@ namespace neogfx
 		{
 			if (!menu_item().sub_menu().is_open())
 			{
-				menu().select_item_at(menu().find(menu_item()), aSelectAnySubMenuItem);
+				menu().select_item_at(menu().find(menu_item()), aOpenAnySubMenu);
 				if (destroyed)
 					return;
 				menu().open_sub_menu.trigger(menu_item().sub_menu());

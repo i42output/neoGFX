@@ -24,7 +24,7 @@
 
 namespace neogfx
 { 
-	async_event_queue::async_event_queue(neolib::io_task& aIoTask) : iTimer{ aIoTask,
+	async_event_queue::async_event_queue(neolib::async_task& aIoTask) : iTimer{ aIoTask,
 		[this](neolib::callback_timer& aTimer)
 	{
 		publish_events();

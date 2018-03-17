@@ -61,10 +61,10 @@ namespace neogfx
 	class sdl_basic_services : public i_basic_services
 	{
 	public:
-		sdl_basic_services(neolib::io_task& aAppThread);
+		sdl_basic_services(neolib::async_task& aAppThread);
 	public:
 		neogfx::platform platform() const override;
-		neolib::io_task& app_task() override;
+		neolib::async_task& app_task() override;
 		void system_beep() override;
 		void display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle = 0) const override;
 		uint32_t display_count() const override;
@@ -74,7 +74,7 @@ namespace neogfx
 		bool has_system_menu_bar() const override;
 		i_shared_menu_bar& system_menu_bar() override;
 	private:
-		neolib::io_task& iAppTask;
+		neolib::async_task& iAppTask;
 		mutable std::vector<std::unique_ptr<i_display>> iDisplays;
 	};
 }

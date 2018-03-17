@@ -69,7 +69,7 @@ namespace neogfx
 		point sub_menu_position() const;
 	private:
 		void init();
-		virtual void select_item(bool aSelectAnySubMenuItem = false);
+		virtual void select_item(bool aOpenAnySubMenu = false);
 	private:
 		sink iSink;
 		dimension iGap = 9.0;

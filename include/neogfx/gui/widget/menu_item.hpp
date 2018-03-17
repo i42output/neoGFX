@@ -45,10 +45,10 @@ namespace neogfx
 		i_menu& sub_menu() override;
 	public:
 		bool available() const override;
-		void select(bool aSelectAnySubMenuItem = true) override;
-		bool select_any_sub_menu_item() const override;
+		void select(bool aOpenAnySubMenu = true) override;
+		bool open_any_sub_menu() const override;
 	private:
 		contents iContents;
-		bool iSelectAnySubMenuItem;
+		bool iOpenAnySubMenu;
 	};
 }

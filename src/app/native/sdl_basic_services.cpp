@@ -164,7 +164,7 @@ namespace neogfx
 #endif
 	}
 
-	sdl_basic_services::sdl_basic_services(neolib::io_task& aAppTask) :
+	sdl_basic_services::sdl_basic_services(neolib::async_task& aAppTask) :
 		iAppTask{ aAppTask }
 	{
 	}
@@ -174,7 +174,7 @@ namespace neogfx
 		return neogfx::platform::Windows;
 	}
 
-	neolib::io_task& sdl_basic_services::app_task()
+	neolib::async_task& sdl_basic_services::app_task()
 	{
 		return iAppTask;
 	}
