@@ -202,6 +202,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\font_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\gradient_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\message_box.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\border_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\flow_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\grid_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\horizontal_layout.hpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_widget_geometry.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_bits.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\stack_layout.hpp" />
@@ -403,6 +405,7 @@
     <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\gradient_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\message_box.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\border_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\flow_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\grid_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\horizontal_layout.cpp" />

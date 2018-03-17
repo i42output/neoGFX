@@ -181,34 +181,42 @@ namespace neogfx
 
 	void status_bar::add_normal_widget(i_widget& aWidget)
 	{
+		iNormalWidgetLayout.add(aWidget);
 	}
 
 	void status_bar::add_normal_widget_at(widget_index aPosition, i_widget& aWidget)
 	{
+		iNormalWidgetLayout.add_at(aPosition, aWidget);
 	}
 
 	void status_bar::add_normal_widget(std::shared_ptr<i_widget> aWidget)
 	{
+		iNormalWidgetLayout.add(aWidget);
 	}
 
 	void status_bar::add_normal_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget)
 	{
+		iNormalWidgetLayout.add_at(aPosition, aWidget);
 	}
 
 	void status_bar::add_permanent_widget(i_widget& aWidget)
 	{
+		iPermanentWidgetLayout.add(aWidget);
 	}
 
 	void status_bar::add_permanent_widget_at(widget_index aPosition, i_widget& aWidget)
 	{
+		iPermanentWidgetLayout.add_at(aPosition, aWidget);
 	}
 
 	void status_bar::add_permanent_widget(std::shared_ptr<i_widget> aWidget)
 	{
+		iPermanentWidgetLayout.add(aWidget);
 	}
 
 	void status_bar::add_permanent_widget_at(widget_index aPosition, std::shared_ptr<i_widget> aWidget)
 	{
+		iPermanentWidgetLayout.add_at(aPosition, aWidget);
 	}
 
 	label& status_bar::message_widget()

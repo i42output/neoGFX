@@ -28,13 +28,18 @@
 
 namespace neogfx
 {
-	stack_layout::stack_layout(i_widget& aParent) :
-		layout(aParent)
+	stack_layout::stack_layout(neogfx::alignment aAlignment) :
+		layout{ aAlignment }
 	{
 	}
 
-	stack_layout::stack_layout(i_layout& aParent) :
-		layout(aParent)
+	stack_layout::stack_layout(i_widget& aParent, neogfx::alignment aAlignment) :
+		layout{ aParent, aAlignment }
+	{
+	}
+
+	stack_layout::stack_layout(i_layout& aParent, neogfx::alignment aAlignment) :
+		layout{ aParent, aAlignment }
 	{
 	}
 

@@ -25,6 +25,7 @@
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/layout/layout_bits.hpp>
 
 namespace neogfx
 {
@@ -134,8 +135,10 @@ namespace neogfx
 		virtual i_layout& title_bar_layout() = 0;
 		virtual const i_layout& menu_layout() const = 0;
 		virtual i_layout& menu_layout() = 0;
-		virtual const i_layout& toolbar_layout() const = 0;
-		virtual i_layout& toolbar_layout() = 0;
+		virtual const i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) const = 0;
+		virtual i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) = 0;
+		virtual const i_layout& dock_layout(layout_position aPosition = layout_position::Left) const =0;
+		virtual i_layout& dock_layout(layout_position aPosition = layout_position::Left) = 0;
 		virtual const i_layout& client_layout() const = 0;
 		virtual i_layout& client_layout() = 0;
 		virtual const i_layout& status_bar_layout() const = 0;

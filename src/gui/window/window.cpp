@@ -186,7 +186,8 @@ namespace neogfx
 		iTitleBarLayout{ iNonClientLayout },
 		iMenuLayout{ iNonClientLayout },
 		iToolbarLayout{ iNonClientLayout },
-		iClientWidget{ std::make_unique<client>(iNonClientLayout, aScrollbarStyle) },
+		iDockLayout{ iToolbarLayout.centre() },
+		iClientWidget{ std::make_unique<client>(iDockLayout.centre(), aScrollbarStyle) },
 		iClientLayout{ iClientWidget->layout() },
 		iStatusBarLayout{ iNonClientLayout }
 	{
@@ -590,6 +591,11 @@ namespace neogfx
 		paint_overlay.trigger(aGraphicsContext);
 	}
 
+	void window::paint(graphics_context& aGraphicsContext) const
+	{
+		scrollable_widget::paint(aGraphicsContext);
+	}
+
 	colour window::background_colour() const
 	{
 		if (has_background_colour())
@@ -875,6 +881,7 @@ namespace neogfx
 		iTitleBarLayout.set_margins(neogfx::margins{});
 		iMenuLayout.set_margins(neogfx::margins{});
 		iToolbarLayout.set_margins(neogfx::margins{});
+		iDockLayout.set_margins(neogfx::margins{});
 		iClientLayout.set_margins(neogfx::optional_margins{});
 		iStatusBarLayout.set_margins(neogfx::margins{});
 
@@ -956,14 +963,24 @@ namespace neogfx
 		return iMenuLayout;
 	}
 
-	const i_layout& window::toolbar_layout() const
+	const i_layout& window::toolbar_layout(layout_position aPosition) const
 	{
-		return iToolbarLayout;
+		return iToolbarLayout.part(aPosition);
 	}
 
-	i_layout& window::toolbar_layout()
+	i_layout& window::toolbar_layout(layout_position aPosition)
 	{
-		return iToolbarLayout;
+		return iToolbarLayout.part(aPosition);
+	}
+
+	const i_layout& window::dock_layout(layout_position aPosition) const
+	{
+		return iDockLayout.part(aPosition);
+	}
+
+	i_layout& window::dock_layout(layout_position aPosition)
+	{
+		return iDockLayout.part(aPosition);
 	}
 
 	const i_layout& window::client_layout() const

@@ -31,14 +31,13 @@ namespace neogfx
 		vertical_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
 		vertical_layout(vertical_layout& aParent);
 	public:
-		using layout::add_spacer;
-		virtual i_spacer& add_spacer();
-		virtual i_spacer& add_spacer_at(item_index aPosition);
+		i_spacer& add_spacer() override;
+		i_spacer& add_spacer_at(item_index aPosition) override;
 	public:
-		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
-		virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
+		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
+		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
-		virtual void layout_items(const point& aPosition, const size& aSize);
+		void layout_items(const point& aPosition, const size& aSize) override;
 	protected:
 		using layout::items_visible;
 	};

@@ -26,6 +26,7 @@
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/border_layout.hpp>
 #include <neogfx/gui/widget/title_bar.hpp>
 
 namespace neogfx
@@ -116,6 +117,7 @@ namespace neogfx
 		neogfx::size_policy size_policy() const override;
 	public:
 		void render(graphics_context& aGraphicsContext) const override;
+		void paint(graphics_context& aGraphicsContext) const override;
 	public:
 		colour background_colour() const override;
 	public:
@@ -161,8 +163,10 @@ namespace neogfx
 		i_layout& title_bar_layout() override;
 		const i_layout& menu_layout() const override;
 		i_layout& menu_layout() override;
-		const i_layout& toolbar_layout() const override;
-		i_layout& toolbar_layout() override;
+		const i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) const override;
+		i_layout& toolbar_layout(layout_position aPosition = layout_position::Top) override;
+		const i_layout& dock_layout(layout_position aPosition = layout_position::Left) const override;
+		i_layout& dock_layout(layout_position aPosition = layout_position::Left) override;
 		const i_layout& client_layout() const override;
 		i_layout& client_layout() override;
 		const i_layout& status_bar_layout() const override;
@@ -210,7 +214,8 @@ namespace neogfx
 		vertical_layout iNonClientLayout;
 		vertical_layout iTitleBarLayout;
 		vertical_layout iMenuLayout;
-		vertical_layout iToolbarLayout;
+		border_layout iToolbarLayout;
+		border_layout iDockLayout;
 		std::unique_ptr<i_widget> iClientWidget;
 		i_layout& iClientLayout;
 		vertical_layout iStatusBarLayout;
