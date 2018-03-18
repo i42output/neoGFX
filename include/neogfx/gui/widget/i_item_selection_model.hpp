@@ -95,6 +95,9 @@ namespace neogfx
 		typedef event<const optional_item_presentation_model_index&, const optional_item_presentation_model_index&> current_index_changed_event;
 		typedef event<const item_selection&, const item_selection&> selection_changed_event;
 	public:
+		current_index_changed_event current_index_changed;
+		selection_changed_event selection_changed;
+	public:
 		struct no_presentation_model : std::logic_error { no_presentation_model() : std::logic_error("neogfx::i_item_selection_model::no_presentation_model") {} };
 		struct no_current_index : std::logic_error { no_current_index() : std::logic_error("neogfx::i_item_selection_model::no_current_index") {} };
 	public:

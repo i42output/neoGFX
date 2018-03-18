@@ -30,9 +30,6 @@ namespace neogfx
 	class item_selection_model : public i_item_selection_model, private neolib::observable<i_item_selection_model_subscriber>, private i_item_presentation_model_subscriber
 	{
 	public:
-		current_index_changed_event current_index_changed;
-		selection_changed_event selection_changed;
-	public:
 		item_selection_model(item_selection_mode aMode = item_selection_mode::SingleSelection) :
 			iModel(0),
 			iMode(aMode)

@@ -103,6 +103,24 @@ namespace neogfx
 			}
 			return iFonts[modelRow];
 		}
+	public:
+		item_cell_editable column_editable(item_presentation_model_index::value_type) const override
+		{
+			return item_cell_editable::No;
+		}
+	public:
+		optional_colour cell_colour(const item_presentation_model_index& aIndex, item_cell_colour_type aColourType) const override
+		{
+			if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+			{
+				auto backgroundColour = app::instance().current_style().palette().colour().dark() ? colour::Black : colour::White;
+				if (backgroundColour == app::instance().current_style().palette().colour())
+					backgroundColour = backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
+				return backgroundColour;
+			}
+			else
+				return item_presentation_model::cell_colour(aIndex, aColourType);
+		}	
 	private:
 		mutable std::vector<optional_font> iFonts;
 	};
@@ -128,7 +146,7 @@ namespace neogfx
 
 		iFamilyPicker.set_presentation_model(std::make_shared<family_picker_presentation_model>());
 
-		iFamilyPicker.selection_changed([this](optional_item_model_index aIndex)
+		iFamilyPicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
 		{
 			update_widgets(iFamilyPicker);
 		});

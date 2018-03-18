@@ -63,7 +63,8 @@ namespace neogfx
 		iChangingText{ false }
 	{
 		set_margins(neogfx::margins{});
-		enable_hot_tracking();
+		if (!iDropList.editable())
+			enable_hot_tracking();
 		set_selection_model(iDropList.iSelectionModel);
 		set_presentation_model(iDropList.iPresentationModel);
 		set_model(iDropList.iModel);
