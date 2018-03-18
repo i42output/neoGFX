@@ -30,6 +30,7 @@ namespace neogfx
 	class drop_list_view : public list_view
 	{
 		friend class drop_list_popup;
+		friend class drop_list;
 	public:
 		drop_list_view(i_layout& aLayout, drop_list& aDropList);
 		~drop_list_view();

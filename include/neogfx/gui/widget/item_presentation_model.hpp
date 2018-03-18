@@ -686,8 +686,8 @@ namespace neogfx
 			reset_maps();
 			reset_cell_meta();
 			reset_position_meta(0);
-			execute_sort();
 			notify_observers(i_item_presentation_model_subscriber::NotifyItemsFiltered);
+			execute_sort();
 		}
 	private:
 		void column_info_changed(const i_item_model&, item_model_index::column_type aColumnIndex) override

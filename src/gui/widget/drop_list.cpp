@@ -78,8 +78,9 @@ namespace neogfx
 		return iChangingText;
 	}
 
-	void drop_list_view::items_filtered(const i_item_presentation_model&)
+	void drop_list_view::items_filtered(const i_item_presentation_model& aPresentationModel)
 	{
+		list_view::items_filtered(aPresentationModel);
 		iDropList.iListProxy.update_view_placement();
 	}
 
@@ -797,27 +798,61 @@ namespace neogfx
 				}
 			}
 		});
-		aTextWidget.keyboard_event([this](const neogfx::keyboard_event& aEvent)
+		aTextWidget.keyboard_event([this, &aTextWidget](const neogfx::keyboard_event& aEvent)
 		{
 			if (aEvent.type() == keyboard_event_type::KeyPressed)
 			{
-				switch (aEvent.scan_code())
+				if ((iStyle & style::ListAlwaysVisible) != style::ListAlwaysVisible)
 				{
-				case ScanCode_DOWN:
-					if (!view_created())
+					switch (aEvent.scan_code())
 					{
-						if (selection_model().has_current_index())
-							iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
-						show_view();
+					case ScanCode_DOWN:
+						if (!view_created())
+						{
+							if (selection_model().has_current_index())
+								iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
+							show_view();
+						}
+						break;
+					case ScanCode_RETURN:
+						if (view_created())
+							accept_selection();
+						break;
+					case ScanCode_ESCAPE:
+						cancel_selection();
+						break;
 					}
-					break;
-				case ScanCode_RETURN:
-					if (view_created())
+				}
+				else
+				{
+					switch (aEvent.scan_code())
+					{
+					case ScanCode_RETURN:
 						accept_selection();
-					break;
-				case ScanCode_ESCAPE:
-					cancel_selection();
-					break;
+						break;
+					case ScanCode_ESCAPE:
+						cancel_selection();
+						break;
+					case ScanCode_UP:
+					case ScanCode_DOWN:
+					case ScanCode_PAGEUP:
+					case ScanCode_PAGEDOWN:
+						aTextWidget.keyboard_event.accept();
+						view().key_pressed(aEvent.scan_code(), aEvent.key_code(), aEvent.key_modifiers());
+						if (view().selection_model().has_current_index())
+							accept_selection();
+						break;
+					case ScanCode_HOME:
+					case ScanCode_END:
+						if ((aEvent.key_modifiers() & KeyModifier_CTRL) != KeyModifier_NONE)
+						{
+							aTextWidget.keyboard_event.accept();
+							view().key_pressed(aEvent.scan_code(), aEvent.key_code(), KeyModifier_NONE);
+							if (view().selection_model().has_current_index())
+								accept_selection();
+						}
+						break;
+					}
 				}
 			}
 		});

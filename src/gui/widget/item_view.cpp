@@ -605,16 +605,14 @@ namespace neogfx
 
 	void item_view::items_filtering(const i_item_presentation_model&)
 	{
-		if (selection_model().has_current_index())
-			iSavedModelIndex = presentation_model().to_item_model_index(selection_model().current_index());
 		end_edit(true);
 	}
 
 	void item_view::items_filtered(const i_item_presentation_model&)
 	{
-		if (iSavedModelIndex != boost::none && presentation_model().have_item_model_index(*iSavedModelIndex))
-			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
-		iSavedModelIndex = boost::none;
+		if (presentation_model().rows() != 0)
+			selection_model().set_current_index(item_presentation_model_index{});
+		update_scrollbar_visibility();
 		update();
 	}
 
