@@ -694,14 +694,14 @@ namespace neogfx
 	{
 		graphics_context gc{ *this, graphics_context::type::Unattached };
 		rect cellRect = cell_rect(aItemIndex, true);
-		if (cellRect.height() < item_display_rect().height() || cellRect.intersection(item_display_rect()).height() == 0.0)
+		if (cellRect.intersection(item_display_rect()).height() < cellRect.height())
 		{
 			if (cellRect.top() < item_display_rect().top())
 				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - item_display_rect().top()));
 			else if (cellRect.bottom() > item_display_rect().bottom())
 				vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - item_display_rect().bottom()));
 		}
-		if (cellRect.width() < item_display_rect().width() || cellRect.intersection(item_display_rect()).width() == 0.0)
+		if (cellRect.intersection(item_display_rect()).width() < cellRect.width())
 		{
 			if (cellRect.left() < item_display_rect().left())
 				horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - item_display_rect().left()));
