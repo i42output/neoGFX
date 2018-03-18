@@ -24,42 +24,42 @@
 namespace neogfx
 {
 	image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
+		iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
+		iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget{ aParent }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
+		widget{ aParent }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget{ aParent }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
+		widget{ aParent }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget{ aLayout }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
+		widget{ aLayout }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
 	}
 
 	image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal_placement aPlacement) :
-		widget{ aLayout }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }
+		widget{ aLayout }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iSnap{ 1.0 }, iDpiAutoScale{ false }
 	{
 		set_margins(neogfx::margins(0.0));
 		set_ignore_mouse_events(true);
@@ -78,6 +78,8 @@ namespace neogfx
 			return widget::minimum_size(aAvailableSpace);
 		scoped_units su{ *this, units::Pixels };
 		size result = iTexture.extents();
+		if (iDpiAutoScale)
+			result *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
 		return convert_units(*this, su.saved_units(), result);
 	}
 
@@ -86,7 +88,10 @@ namespace neogfx
 		if (iTexture.is_empty())
 			return;
 		scoped_units su{ *this, units::Pixels };
-		rect placementRect{ point{}, iTexture.extents() };
+		auto imageExtents = iTexture.extents();
+		if (iDpiAutoScale)
+			imageExtents *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
+		rect placementRect{ point{}, imageExtents };
 		if (iAspectRatio == aspect_ratio::Stretch)
 		{
 			placementRect.cx = client_rect().width();
@@ -106,19 +111,19 @@ namespace neogfx
 				if (placementRect.width() > client_rect().width())
 				{
 					placementRect.cx = client_rect().width();
-					placementRect.cy = placementRect.cx * iTexture.extents().cy / iTexture.extents().cx;
+					placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
 				}
 				if (placementRect.height() > client_rect().height())
 				{
 					placementRect.cy = client_rect().height();
-					placementRect.cx = placementRect.cy * iTexture.extents().cx / iTexture.extents().cy;
+					placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
 				}
 				break;
 			case aspect_ratio::KeepExpanding:
 				if (placementRect.height() != client_rect().height())
 				{
 					placementRect.cy = client_rect().height();
-					placementRect.cx = placementRect.cy * iTexture.extents().cx / iTexture.extents().cy;
+					placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
 				}
 				break;
 			}
@@ -137,19 +142,19 @@ namespace neogfx
 				if (placementRect.height() > client_rect().height())
 				{
 					placementRect.cy = client_rect().height();
-					placementRect.cx = placementRect.cy * iTexture.extents().cx / iTexture.extents().cy;
+					placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
 				}
 				if (placementRect.width() > client_rect().width())
 				{
 					placementRect.cx = client_rect().width();
-					placementRect.cy = placementRect.cx * iTexture.extents().cy / iTexture.extents().cx;
+					placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
 				}
 				break;
 			case aspect_ratio::KeepExpanding:
 				if (placementRect.width() != client_rect().width())
 				{
 					placementRect.cx = client_rect().width();
-					placementRect.cy = placementRect.cx * iTexture.extents().cy / iTexture.extents().cx;
+					placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
 				}
 				break;
 			}
@@ -246,6 +251,15 @@ namespace neogfx
 		if (iSnap != aSnap)
 		{
 			iSnap = aSnap;
+			update();
+		}
+	}
+
+	void image_widget::set_dpi_auto_scale(bool aDpiAutoScale)
+	{
+		if (iDpiAutoScale != aDpiAutoScale)
+		{
+			iDpiAutoScale = aDpiAutoScale;
 			update();
 		}
 	}

@@ -33,19 +33,21 @@ namespace neogfx
 		struct unsupported_colour_format : std::runtime_error { unsupported_colour_format() : std::runtime_error("neogfx::opengl_texture::unsupported_colour_format") {} };
 		struct multisample_texture_initialization_unsupported : std::runtime_error{ multisample_texture_initialization_unsupported() : std::runtime_error("neogfx::opengl_texture::multisample_texture_initialization_unsupported") {} };
 	public:
-		opengl_texture(const neogfx::size& aExtents, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
+		opengl_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
 		opengl_texture(const i_image& aImage);
 		~opengl_texture();
 	public:
-		virtual texture_sampling sampling() const;
-		virtual size extents() const;
-		virtual size storage_extents() const;
-		virtual void set_pixels(const rect& aRect, const void* aPixelData);
+		dimension dpi_scale_factor() const override;
+		texture_sampling sampling() const override;
+		size extents() const override;
+		size storage_extents() const override;
+		void set_pixels(const rect& aRect, const void* aPixelData) override;
 	public:
-		virtual void* handle() const;
-		virtual bool is_resident() const;
-		virtual const std::string& uri() const;
+		void* handle() const override;
+		bool is_resident() const override;
+		const std::string& uri() const override;
 	private:
+		dimension iDpiScaleFactor;
 		texture_sampling iSampling;
 		basic_size<uint32_t> iSize;
 		basic_size<uint32_t> iStorageSize;

@@ -148,7 +148,7 @@ namespace neogfx
 					iSubMenuArrow = std::make_pair(ink, 
 						!high_dpi() ? 
 							image{ "neogfx::menu_item_widget::sArrowImagePattern::" + ink.to_string(), sArrowImagePattern, { { "paper", colour{} },{ "ink", ink } } } : 
-							image{ "neogfx::menu_item_widget::sArrowHighDpiImagePattern::" + ink.to_string(), sArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
+							image{ "neogfx::menu_item_widget::sArrowHighDpiImagePattern::" + ink.to_string(), sArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
 				}
 				rect rect = client_rect(false);
 				aGraphicsContext.draw_texture(
@@ -337,7 +337,7 @@ namespace neogfx
 					colour ink = app::instance().current_style().palette().text_colour();
 					iIcon.set_image(!high_dpi() ?
 						image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", colour{} },{ "ink", ink } } } :
-						image{ "neogfx::menu_item_widget::sTickHighDpiPattern::" + ink.to_string(), sTickHighDpiPattern,{ { "paper", colour{} },{ "ink", ink } } });
+						image{ "neogfx::menu_item_widget::sTickHighDpiPattern::" + ink.to_string(), sTickHighDpiPattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
 				}
 				if (!iIcon.image().is_empty())
 					iIcon.set_fixed_size(dpi_scale(iIconSize));

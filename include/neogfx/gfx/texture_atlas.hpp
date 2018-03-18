@@ -68,13 +68,13 @@ namespace neogfx
 	public:
 		virtual const i_sub_texture& sub_texture(i_sub_texture::id aSubTextureId) const;
 		virtual i_sub_texture& sub_texture(i_sub_texture::id aSubTextureId);
-		virtual i_sub_texture& create_sub_texture(const size& aSize, texture_sampling aSampling);
+		virtual i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling);
 		virtual i_sub_texture& create_sub_texture(const i_image& aImage);
 		virtual void destroy_sub_texture(i_sub_texture& aSubTexture);
 	private:
 		const size& page_size() const;
-		pages::iterator create_page(texture_sampling aSampling);
-		std::pair<pages::iterator, rect> allocate_space(const size& aSize, texture_sampling aSampling);
+		pages::iterator create_page(dimension aDpiScaleFactor, texture_sampling aSampling);
+		std::pair<pages::iterator, rect> allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling);
 	private:
 		i_texture_manager& iTextureManager;
 		size iPageSize;

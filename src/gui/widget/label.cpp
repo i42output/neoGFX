@@ -285,6 +285,7 @@ namespace neogfx
 
 	void label::init()
 	{
+		iImage.set_dpi_auto_scale(true);
 		iLayout.set_margins(neogfx::margins{});
 		iText.set_margins(neogfx::margins{});
 		iImage.set_margins(neogfx::margins{});

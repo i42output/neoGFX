@@ -29,8 +29,8 @@ namespace neogfx
 	{
 	}
 
-	texture::texture(const neogfx::size& aExtents, texture_sampling aSampling, const optional_colour& aColour) :
-		iNativeTexture{ app::instance().rendering_engine().texture_manager().create_texture(aExtents, aSampling, aColour) }
+	texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour) :
+		iNativeTexture{ app::instance().rendering_engine().texture_manager().create_texture(aExtents, aDpiScaleFactor, aSampling, aColour) }
 	{
 	}
 
@@ -64,6 +64,13 @@ namespace neogfx
 		if (iSubTexture != boost::none)
 			return *iSubTexture;
 		throw not_sub_texture();
+	}
+
+	dimension texture::dpi_scale_factor() const
+	{
+		if (is_empty())
+			return 1.0;
+		return native_texture()->dpi_scale_factor();
 	}
 
 	texture_sampling texture::sampling() const

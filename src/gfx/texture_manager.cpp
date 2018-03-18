@@ -35,32 +35,36 @@ namespace neogfx
 		{
 		}
 	public:
-		virtual texture_sampling sampling() const
+		dimension dpi_scale_factor() const override
+		{
+			return iTexture->dpi_scale_factor();
+		}
+		texture_sampling sampling() const override
 		{
 			return iTexture->sampling();
 		}
-		virtual size extents() const
+		size extents() const override
 		{
 			return iTexture->extents();
 		}
-		virtual size storage_extents() const
+		size storage_extents() const override
 		{
 			return iTexture->storage_extents();
 		}
-		virtual void set_pixels(const rect& aRect, const void* aPixelData)
+		void set_pixels(const rect& aRect, const void* aPixelData) override
 		{
 			iTexture->set_pixels(aRect, aPixelData);
 		}
 	public:
-		virtual void* handle() const
+		void* handle() const override
 		{
 			return iTexture->handle();
 		}
-		virtual bool is_resident() const
+		bool is_resident() const override
 		{
 			return iTexture->is_resident();
 		}
-		virtual const std::string& uri() const
+		const std::string& uri() const override
 		{
 			return iTexture->uri();
 		}

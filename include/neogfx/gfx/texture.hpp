@@ -36,7 +36,7 @@ namespace neogfx
 		// construction
 	public:
 		texture();
-		texture(const neogfx::size& aExtents, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
+		texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
 		texture(const i_texture& aTexture);
 		texture(const i_image& aImage);
 		texture(const i_sub_texture& aSubTexture);
@@ -45,6 +45,7 @@ namespace neogfx
 	public:
 		type_e type() const override;
 		const i_sub_texture& as_sub_texture() const override;
+		dimension dpi_scale_factor() const override;
 		texture_sampling sampling() const override;
 		bool is_empty() const override;
 		size extents() const override;

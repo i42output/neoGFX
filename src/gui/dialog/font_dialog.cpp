@@ -141,6 +141,7 @@ namespace neogfx
 			if (fm.font_family(fi) == app::instance().current_style().font_info().family_name())
 				currentIndex = fi;
 		}
+		iFamilyPicker.model().set_column_read_only(0, true);
 
 		for (auto sz : { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 })
 			iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, sz);

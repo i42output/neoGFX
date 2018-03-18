@@ -30,7 +30,7 @@ namespace neogfx
 	public:
 		action();
 		action(const std::string& aText);
-		action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling = texture_sampling::Normal);
+		action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
 		action(const std::string& aText, const i_texture& aImage);
 		action(const std::string& aText, const i_image& aImage);
 	public:
@@ -61,10 +61,10 @@ namespace neogfx
 		virtual i_action& set_button_text(const optional_text& aButtonText = optional_text());
 		virtual i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text());
 		virtual i_action& set_help_text(const optional_text& aHelpText = optional_text());
-		virtual i_action& set_image(const std::string& aUri, texture_sampling aSampling = texture_sampling::Normal);
+		virtual i_action& set_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
 		virtual i_action& set_image(const i_image& aImage);
 		virtual i_action& set_image(const i_texture& aTexture);
-		virtual i_action& set_checked_image(const std::string& aUri, texture_sampling aSampling = texture_sampling::Normal);
+		virtual i_action& set_checked_image(const std::string& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal);
 		virtual i_action& set_checked_image(const i_image& aImage);
 		virtual i_action& set_checked_image(const i_texture& aTexture);
 		virtual i_action& set_shortcut(const optional_key_sequence& aShortcut);

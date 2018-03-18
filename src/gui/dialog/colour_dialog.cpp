@@ -185,12 +185,12 @@ namespace neogfx
 	}
 
 	colour_dialog::x_picker::cursor_widget::cursor_widget(x_picker& aParent, type_e aType) :
-		image_widget(
+		image_widget{
 			aParent.iParent.client_widget(),
-			neogfx::image{ aType == LeftCursor ? 
+			neogfx::image{ aType == LeftCursor ?
 				aParent.dpi_select(sLeftXPickerCursorImage, sLeftXPickerCursorHighDpiImage) :
 				aParent.dpi_select(sRightXPickerCursorImage, sRightXPickerCursorHighDpiImage),
-			{ { "paper", colour{} }, { "black", colour::Black } , { "white", colour::White } } }),
+			{ { "paper", colour{} }, { "black", colour::Black } , { "white", colour::White } }, aParent.dpi_select(1.0, 2.0) } },
 		iParent(aParent)
 	{
 		set_ignore_mouse_events(false);

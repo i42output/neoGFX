@@ -266,7 +266,7 @@ namespace neogfx
 		iUpArrow = std::make_pair(ink,
 			!high_dpi() ?
 				image{ "neogfx::spin_box_impl::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } } :
-				image{ "neogfx::spin_box_impl::iUpArrowHighDpi::" + ink.to_string(), sUpArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
+				image{ "neogfx::spin_box_impl::iUpArrowHighDpi::" + ink.to_string(), sUpArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
 		const char* sDownArrowImagePattern
 		{
 			"[9,5]"
@@ -298,7 +298,7 @@ namespace neogfx
 		iDownArrow = std::make_pair(ink, 
 			!high_dpi() ? 
 				image{ "neogfx::spin_box_impl::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { "paper", colour{} },{ "ink", ink } } } :
-				image{ "neogfx::spin_box_impl::iDownArrowHighDpi::" + ink.to_string(), sDownArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } } });
+				image{ "neogfx::spin_box_impl::iDownArrowHighDpi::" + ink.to_string(), sDownArrowHighDpiImagePattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
 		iStepUpButton.label().set_placement(label_placement::ImageVertical);
 		iStepDownButton.label().set_placement(label_placement::ImageVertical);
 		iStepUpButton.image().set_image(iUpArrow->second);

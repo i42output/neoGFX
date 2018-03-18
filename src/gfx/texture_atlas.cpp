@@ -46,9 +46,9 @@ namespace neogfx
 		return iterEntry->second.second;
 	}
 
-	i_sub_texture& texture_atlas::create_sub_texture(const size& aSize, texture_sampling aSampling)
+	i_sub_texture& texture_atlas::create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling)
 	{
-		auto newSpace = allocate_space(aSize, aSampling);
+		auto newSpace = allocate_space(aSize, aDpiScaleFactor, aSampling);
 		++iNextId;
 		auto entry = iEntries.insert(std::make_pair(iNextId, std::make_pair(newSpace.first, neogfx::sub_texture{ iNextId, newSpace.first->first, newSpace.second, aSize })));
 		return entry.first->second.second;
@@ -56,7 +56,7 @@ namespace neogfx
 
 	i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage)
 	{
-		auto newSpace = allocate_space(aImage.extents(), aImage.sampling());
+		auto newSpace = allocate_space(aImage.extents(), aImage.dpi_scale_factor(), aImage.sampling());
 		++iNextId;
 		auto entry = iEntries.insert(std::make_pair(iNextId, std::make_pair(newSpace.first, neogfx::sub_texture{ iNextId, newSpace.first->first, newSpace.second, aImage.extents() })));
 		entry.first->second.second.set_pixels(aImage);
@@ -81,20 +81,20 @@ namespace neogfx
 		return iPageSize;
 	}
 
-	texture_atlas::pages::iterator texture_atlas::create_page(texture_sampling aSampling)
+	texture_atlas::pages::iterator texture_atlas::create_page(dimension aDpiScaleFactor, texture_sampling aSampling)
 	{
-		return iPages.insert(iPages.end(), page{ texture{ page_size(), aSampling }, fragments{ page_size() } });
+		return iPages.insert(iPages.end(), page{ texture{ page_size(), aDpiScaleFactor, aSampling }, fragments{ page_size() } });
 	}
 
-	std::pair<texture_atlas::pages::iterator, rect> texture_atlas::allocate_space(const size& aSize, texture_sampling aSampling)
+	std::pair<texture_atlas::pages::iterator, rect> texture_atlas::allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling)
 	{
 		if (iPages.empty())
-			create_page(aSampling);
+			create_page(aDpiScaleFactor, aSampling);
 		rect result;
 		for (auto iterPage = iPages.begin(); iterPage != iPages.end(); ++iterPage)
-			if (iterPage->first.sampling() == aSampling && iterPage->second.insert(size{ std::max(std::pow(2.0, std::ceil(std::log2(aSize.cx + 2.0))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(aSize.cy + 2.0))), 16.0) }, result))
+			if (iterPage->first.dpi_scale_factor() == aDpiScaleFactor && iterPage->first.sampling() == aSampling && iterPage->second.insert(size{ std::max(std::pow(2.0, std::ceil(std::log2(aSize.cx + 2.0))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(aSize.cy + 2.0))), 16.0) }, result))
 				return std::make_pair(iterPage, result);
-		auto iterPage = create_page(aSampling);
+		auto iterPage = create_page(aDpiScaleFactor, aSampling);
 		if (iterPage->second.insert(size{ std::max(std::pow(2.0, std::ceil(std::log2(aSize.cx + 2.0))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(aSize.cy + 2.0))), 16.0) }, result))
 			return std::make_pair(iterPage, result);
 		iPages.erase(iterPage);

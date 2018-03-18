@@ -38,6 +38,7 @@ namespace neogfx
 	public:
 		type_e type() const override;
 		const i_sub_texture& as_sub_texture() const override;
+		dimension dpi_scale_factor() const override;
 		texture_sampling sampling() const override;
 		bool is_empty() const override;
 		size extents() const override;

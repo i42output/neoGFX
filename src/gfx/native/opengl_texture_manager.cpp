@@ -23,9 +23,9 @@
 
 namespace neogfx
 {
-	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, texture_sampling aSampling, const optional_colour& aColour)
+	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour)
 	{
-		return add_texture(std::make_shared<opengl_texture>(aExtents, aSampling, aColour));
+		return add_texture(std::make_shared<opengl_texture>(aExtents, aDpiScaleFactor, aSampling, aColour));
 	}
 
 	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const i_image& aImage)

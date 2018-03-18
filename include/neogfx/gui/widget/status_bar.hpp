@@ -105,8 +105,6 @@ namespace neogfx
 	protected:
 		bool can_defer_layout() const override;
 		bool is_managing_layout() const override;
-	protected:
-		void paint(graphics_context& aGraphicsContext) const override;
 	private:
 		void init();
 		void update_widgets();

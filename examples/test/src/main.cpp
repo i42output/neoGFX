@@ -364,8 +364,8 @@ int main(int argc, char* argv[])
 		ng::push_button button0(topButtons, "This is the neoGFX test application.");
 		button0.label().set_placement(ng::label_placement::ImageTextVertical);
 		button0.image().set_image(ng::image{ ":/test/resources/neoGFX.png" });
-		button0.image().set_minimum_size(ng::size{ 32, 32 });
-		button0.image().set_maximum_size(ng::size{ 160, std::numeric_limits<ng::dimension>::max() });
+		button0.image().set_minimum_size(window.dpi_scale(ng::size{ 32, 32 }));
+		button0.image().set_maximum_size(window.dpi_scale(ng::size{ 160, std::numeric_limits<ng::dimension>::max() }));
 		button0.set_size_policy(ng::size_policy::Expanding);
 		button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
 		ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog");
@@ -783,11 +783,11 @@ int main(int argc, char* argv[])
 		ng::label messageBoxTextLabel{ messageBoxTextGroup.item_layout(), "Text:" };
 		ng::text_edit messageBoxText{ messageBoxTextGroup.item_layout() };
 		messageBoxText.set_text("This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line");
-		messageBoxText.set_minimum_size(ng::size{ 256, 128 });
+		messageBoxText.set_minimum_size(window.dpi_scale(ng::size{ 256, 128 }));
 		ng::label messageBoxDetailedTextLabel{ messageBoxTextGroup.item_layout(), "Detailed Text:" };
 		ng::text_edit messageBoxDetailedText{ messageBoxTextGroup.item_layout() };
 		messageBoxDetailedText.set_text("This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank.");
-		messageBoxDetailedText.set_minimum_size(ng::size{ 256, 128 });
+		messageBoxDetailedText.set_minimum_size(window.dpi_scale(ng::size{ 256, 128 }));
 		ng::push_button openMessageBox{ messageBoxesPageLayout1, "Open Message Box" };
 		openMessageBox.set_size_policy(ng::size_policy::Minimum);
 		ng::label messageBoxResult{ messageBoxesPageLayout1 };

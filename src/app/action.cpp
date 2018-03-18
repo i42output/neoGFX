@@ -24,27 +24,27 @@
 namespace neogfx
 {
 	action::action() : 
-		iEnabled(false), iCheckable(false), iChecked(false), iGroup(0), iSeparator(true)
+		iEnabled{ false }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ true }
 	{
 	}
 
 	action::action(const std::string& aText) :
-		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText)
+		iEnabled(true), iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }
 	{
 	}
 
-	action::action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling) :
-		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText), iImage(neogfx::image(aImageUri, aSampling))
+	action::action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
+		iEnabled(true), iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
 	{
 	}
 
 	action::action(const std::string& aText, const i_texture& aImage) :
-		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText), iImage(aImage)
+		iEnabled(true), iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
 	{
 	}
 
 	action::action(const std::string& aText, const i_image& aImage) :
-		iEnabled(true), iCheckable(false), iChecked(false), iGroup(0), iSeparator(false), iText(aText), iImage(aImage)
+		iEnabled(true), iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
 	{
 	}
 
@@ -280,9 +280,9 @@ namespace neogfx
 		return *this;
 	}
 
-	i_action& action::set_image(const std::string& aUri, texture_sampling aSampling)
+	i_action& action::set_image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling)
 	{
-		set_image(neogfx::image{ aUri, aSampling });
+		set_image(neogfx::image{ aUri, aDpiScaleFactor, aSampling });
 		return *this;
 	}
 
@@ -301,9 +301,9 @@ namespace neogfx
 		return *this;
 	}
 
-	i_action& action::set_checked_image(const std::string& aUri, texture_sampling aSampling)
+	i_action& action::set_checked_image(const std::string& aUri, dimension aDpiScaleFactor, texture_sampling aSampling)
 	{
-		set_checked_image(neogfx::image{ aUri, aSampling });
+		set_checked_image(neogfx::image{ aUri, aDpiScaleFactor, aSampling });
 		return *this;
 	}
 

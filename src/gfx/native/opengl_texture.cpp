@@ -23,12 +23,13 @@
 
 namespace neogfx
 {
-	opengl_texture::opengl_texture(const neogfx::size& aExtents, texture_sampling aSampling, const optional_colour& aColour) :
-		iSampling(aSampling),
-		iSize(aExtents),
+	opengl_texture::opengl_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour) :
+		iDpiScaleFactor{ aDpiScaleFactor },
+		iSampling{ aSampling },
+		iSize{ aExtents },
 		iStorageSize{ size{ std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0) } },
-		iHandle(0),
-		iUri("neogfx::opengl_texture::internal")
+		iHandle{ 0 },
+		iUri{ "neogfx::opengl_texture::internal" }
 	{
 		GLint previousTexture;
 		try
@@ -90,11 +91,12 @@ namespace neogfx
 	}
 
 	opengl_texture::opengl_texture(const i_image& aImage) :
-		iSampling(aImage.sampling()),
-		iSize(aImage.extents()), 
+		iDpiScaleFactor{ aImage.dpi_scale_factor() },
+		iSampling{ aImage.sampling() },
+		iSize{ aImage.extents() },
 		iStorageSize{size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}},
-		iHandle(0), 
-		iUri(aImage.uri())
+		iHandle{ 0 },
+		iUri{ aImage.uri() }
 	{
 		GLint previousTexture = 0;
 		try
@@ -145,6 +147,11 @@ namespace neogfx
 	opengl_texture::~opengl_texture()
 	{
 		glCheck(glDeleteTextures(1, &iHandle));
+	}
+
+	dimension opengl_texture::dpi_scale_factor() const
+	{
+		return iDpiScaleFactor;
 	}
 
 	texture_sampling opengl_texture::sampling() const

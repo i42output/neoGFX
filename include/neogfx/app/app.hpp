@@ -164,7 +164,7 @@ namespace neogfx
 		i_action& action_select_all() override;
 		i_action& find_action(const std::string& aText) override;
 		i_action& add_action(const std::string& aText) override;
-		i_action& add_action(const std::string& aText, const std::string& aImageUri, texture_sampling aSampling = texture_sampling::Normal) override;
+		i_action& add_action(const std::string& aText, const std::string& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) override;
 		i_action& add_action(const std::string& aText, const i_texture& aImage) override;
 		i_action& add_action(const std::string& aText, const i_image& aImage) override;
 		void remove_action(i_action& aAction) override;

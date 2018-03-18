@@ -849,7 +849,12 @@ namespace neogfx
 		}
 		size dpi_scale(const size& aSize) const
 		{
-			return aSize * dpi_scale_factor();
+			auto result = aSize;
+			if (result.cx != std::numeric_limits<dimension>::max())
+				result.cx *= dpi_scale_factor();
+			if (result.cy != std::numeric_limits<dimension>::max())
+				result.cy *= dpi_scale_factor();
+			return result;
 		}
 		point dpi_scale(const point& aPoint) const
 		{

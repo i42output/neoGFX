@@ -244,10 +244,6 @@ namespace neogfx
 		return true;
 	}
 
-	void status_bar::paint(graphics_context& aGraphicsContext) const
-	{
-	}
-
 	void status_bar::init()
 	{
 		set_margins(neogfx::margins{});
@@ -328,7 +324,7 @@ namespace neogfx
 				};
 				iSizeGripTexture = std::make_pair(ink1, !high_dpi() ?
 					neogfx::image{ "neogfx::status_bar::iSizeGripTexture::" + ink1.to_string(), sSizeGripTextureImagePattern, { { "paper", colour{} }, { "ink1", ink1 }, { "ink2", ink2 } } } :
-					neogfx::image{ "neogfx::status_bar::iSizeGripHighDpiTexture::" + ink1.to_string(), sSizeGripHighDpiTextureImagePattern, { { "paper", colour{} },{ "ink1", ink1 },{ "ink2", ink2 } } });
+					neogfx::image{ "neogfx::status_bar::iSizeGripHighDpiTexture::" + ink1.to_string(), sSizeGripHighDpiTextureImagePattern, { { "paper", colour{} },{ "ink1", ink1 },{ "ink2", ink2 } }, 2.0 });
 			}
 			iSizeGrip.set_image(iSizeGripTexture->second);
 		};

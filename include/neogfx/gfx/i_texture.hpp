@@ -52,6 +52,7 @@ namespace neogfx
 	public:
 		virtual type_e type() const = 0;
 		virtual const i_sub_texture& as_sub_texture() const = 0;
+		virtual dimension dpi_scale_factor() const = 0;
 		virtual texture_sampling sampling() const = 0;
 		virtual bool is_empty() const = 0;
 		virtual size extents() const = 0;

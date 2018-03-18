@@ -53,6 +53,11 @@ namespace neogfx
 		return *this;
 	}
 
+	dimension sub_texture::dpi_scale_factor() const
+	{
+		return native_texture()->dpi_scale_factor();
+	}
+
 	texture_sampling sub_texture::sampling() const
 	{
 		return native_texture()->sampling();

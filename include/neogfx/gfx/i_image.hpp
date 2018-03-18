@@ -39,6 +39,7 @@ namespace neogfx
 	public:
 		virtual ~i_image() {}
 	public:
+		virtual dimension dpi_scale_factor() const = 0;
 		virtual neogfx::colour_format colour_format() const = 0;
 		virtual texture_sampling sampling() const = 0;
 		virtual const neogfx::size& extents() const = 0;
