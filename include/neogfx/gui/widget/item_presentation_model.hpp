@@ -585,8 +585,11 @@ namespace neogfx
 		}
 		void reset_filter() override
 		{
-			iFilters.clear();
-			execute_filter();
+			if (!iFilters.empty())
+			{
+				iFilters.clear();
+				execute_filter();
+			}
 		}
 	public:
 		virtual void subscribe(i_item_presentation_model_subscriber& aSubscriber)
