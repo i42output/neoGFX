@@ -635,7 +635,16 @@ namespace neogfx
 		iListProxy.show_view();
 		if (editable())
 		{
-			presentation_model().filter_by(0, input_widget().text());
+			if ((iStyle & style::NoFilter) != style::NoFilter)
+				presentation_model().filter_by(0, input_widget().text());
+			else if (presentation_model().rows() > 0)
+			{
+				auto findResult = presentation_model().find_item(input_widget().text());
+				if (findResult != boost::none)
+					selection_model().set_current_index(*findResult);
+				else
+					selection_model().set_current_index(item_presentation_model_index{});
+			}
 			if (iSavedSelection == boost::none && selection_model().has_current_index())
 				iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
 		}

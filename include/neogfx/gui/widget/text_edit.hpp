@@ -122,6 +122,7 @@ namespace neogfx
 			text_edit::style iStyle;
 		};
 	private:
+		class multiple_text_changes;
 		struct unknown_node {};
 		template <typename Node = unknown_node>
 		class tag
@@ -495,6 +496,7 @@ namespace neogfx
 		void init();
 		std::size_t do_insert_text(const std::string& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
 		void delete_any_selection();
+		void notify_text_changed();
 		std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
 		bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
 		glyph_paragraphs::const_iterator character_to_paragraph(position_type aCharacterPos) const;
@@ -551,6 +553,8 @@ namespace neogfx
 		neolib::callback_timer iAnimator;
 		boost::optional<neolib::callback_timer> iDragger;
 		std::unique_ptr<context_menu> iMenu;
+		uint32_t iSuppressTextChangedNotification;
+		uint32_t iWantedToNotfiyTextChanged;
 		bool iOutOfMemory;
 	};
 }

@@ -138,7 +138,7 @@ namespace neogfx
 	{
 		client_layout().set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Maximum });
 
-		iSample.set_fixed_size(size{ 160.0, 48.0 });
+		iSample.set_fixed_size(dpi_scale(size{ 192.0, 48.0 }));
 
 		set_standard_layout(16.0);
 		button_box().add_button(standard_button::Ok);
@@ -152,36 +152,43 @@ namespace neogfx
 		});
 
 		auto& fm = app::instance().rendering_engine().font_manager();
-		uint32_t currentIndex = 0;
+
+		uint32_t familyPickerCurrentIndex = 0;
 		for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
 		{
 			iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
 			if (fm.font_family(fi) == app::instance().current_style().font_info().family_name())
-				currentIndex = fi;
+				familyPickerCurrentIndex = fi;
 		}
 		iFamilyPicker.model().set_column_read_only(0, true);
 
+		uint32_t sizePickerCurrentIndex = 0;
 		for (auto sz : { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 })
+		{
+			if (sz == static_cast<int>(app::instance().current_style().font_info().size()))
+				sizePickerCurrentIndex = iSizePicker.model().rows();
 			iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, sz);
-
-		update_widgets(*this);
+		}
+		iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(app::instance().current_style().font_info().size()));
 
 		centre_on_parent();
 
-		iFamilyPicker.selection_model().set_current_index(currentIndex);
+		iFamilyPicker.selection_model().set_current_index(iFamilyPicker.presentation_model().from_item_model_index(familyPickerCurrentIndex));
+		iSizePicker.selection_model().set_current_index(iSizePicker.presentation_model().from_item_model_index(sizePickerCurrentIndex));
 	}
 
 	void font_dialog::update_widgets(const i_widget& aUpdatingWidget)
 	{
 		auto& fm = app::instance().rendering_engine().font_manager();
-		if (iFamilyPicker.selection_model().has_current_index())
-			iSample.set_font(neogfx::font
-				{
-					fm.font_family(iFamilyPicker.presentation_model().to_item_model_index(iFamilyPicker.selection_model().current_index()).row()),
-					font::Normal,
-					28.0 
-				});
-		else
-			iSample.set_font(optional_font{});
+		auto fontFamilyIndex = iFamilyPicker.presentation_model().to_item_model_index(iFamilyPicker.selection_model().current_index()).row();
+		if (&aUpdatingWidget == &iFamilyPicker)
+		{
+			auto styleCount = fm.font_style_count(fontFamilyIndex);
+		}
+		optional_font selectedFont;
+		if (iFamilyPicker.selection_model().has_current_index() && 
+			iStylePicker.selection_model().has_current_index())
+			selectedFont = neogfx::font{ fm.font_family(fontFamilyIndex), font::Normal, boost::lexical_cast<double>(iSizePicker.input_widget().text()) };
+		iSample.set_font(selectedFont);
 	}
 }

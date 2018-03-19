@@ -559,6 +559,28 @@ namespace neogfx
 			iSortOrder.clear();
 			execute_sort();
 		}
+	public:
+		optional_item_presentation_model_index find_item(const filter_search_key& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type_e aFilterSearchType = Prefix, case_sensitivity_e aCaseSensitivity = CaseInsensitive) const override
+		{
+			for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
+			{
+				auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
+				const auto& origValue = item_model().cell_data(modelIndex).to_string();
+				const auto& value = aCaseSensitivity == CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue);
+				const auto& origKey = aFilterSearchKey;
+				const auto& key = aCaseSensitivity == CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey);
+				if (key.empty())
+					continue;
+				switch (aFilterSearchType)
+				{
+				case Prefix:
+					if (value.size() >= key.size() && value.substr(0, key.size()) == key)
+						return from_item_model_index(modelIndex);
+				}
+			}
+			return optional_item_presentation_model_index{};
+		}
+	public:
 		bool filtering() const override
 		{
 			return iFiltering;

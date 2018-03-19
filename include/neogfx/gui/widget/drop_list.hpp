@@ -89,6 +89,8 @@ namespace neogfx
 	class i_drop_list_input_widget
 	{
 	public:
+		event<> text_changed;
+	public:
 		class i_visitor
 		{
 		public:

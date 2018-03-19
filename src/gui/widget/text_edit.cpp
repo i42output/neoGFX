@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/raii.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/app/app.hpp>
@@ -135,6 +136,28 @@ namespace neogfx
 		return std::tie(iFont, iTextColour, iBackgroundColour, iTextEffect) < std::tie(aRhs.iFont, aRhs.iTextColour, aRhs.iBackgroundColour, aRhs.iTextEffect);
 	}
 
+	class text_edit::multiple_text_changes
+	{
+	public:
+		multiple_text_changes(text_edit& aOwner) : 
+			iOwner(aOwner)
+		{
+			++iOwner.iSuppressTextChangedNotification;
+		}
+		~multiple_text_changes()
+		{
+			if (--iOwner.iSuppressTextChangedNotification == 0u)
+			{
+				bool notify = (iOwner.iWantedToNotfiyTextChanged > 0u);
+				iOwner.iWantedToNotfiyTextChanged = 0u;
+				if (notify)
+					iOwner.text_changed.trigger();
+			}
+		}
+	private:
+		text_edit & iOwner;
+	};
+
 	text_edit::text_edit(type_e aType, frame_style aFrameStyle) :
 		scrollable_widget{ aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
 		iType{ aType },
@@ -151,6 +174,8 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 40 },
+		iSuppressTextChangedNotification{ 0u },
+		iWantedToNotfiyTextChanged{ 0u },
 		iOutOfMemory{ false }
 	{
 		init();
@@ -172,6 +197,8 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 40 },
+		iSuppressTextChangedNotification{ 0u },
+		iWantedToNotfiyTextChanged{ 0u },
 		iOutOfMemory{ false }
 	{
 		init();
@@ -193,6 +220,8 @@ namespace neogfx
 			iAnimator.again();
 			animate();
 		}, 40 },
+		iSuppressTextChangedNotification{ 0u },
+		iWantedToNotfiyTextChanged{ 0u },
 		iOutOfMemory{ false }
 	{
 		init();
@@ -392,6 +421,7 @@ namespace neogfx
 		case ScanCode_RETURN:
 			if (iType == MultiLine)
 			{
+				multiple_text_changes mtc{ *this };
 				delete_any_selection();
 				insert_text("\n");
 				cursor().set_position(cursor().position() + 1);
@@ -503,6 +533,7 @@ namespace neogfx
 			else
 				return scrollable_widget::text_input(aText);
 		}
+		multiple_text_changes mtc{ *this };
 		delete_any_selection();
 		insert_text(aText, true);
 		return true;
@@ -624,7 +655,7 @@ namespace neogfx
 		update();
 		cursor().set_position(iText.size());
 		if (iPreviousText != iText)
-			text_changed.trigger();
+			notify_text_changed();
 	}
 
 	void text_edit::redo(i_clipboard& aClipboard)
@@ -656,14 +687,18 @@ namespace neogfx
 
 	void text_edit::paste(i_clipboard& aClipboard)
 	{
-		if (cursor().position() != cursor().anchor())
-			delete_selected(aClipboard);
-		auto len = insert_text(aClipboard.text());
-		cursor().set_position(cursor().position() + len);
+		{
+			multiple_text_changes mtc{ *this };
+			if (cursor().position() != cursor().anchor())
+				delete_selected(aClipboard);
+			auto len = insert_text(aClipboard.text());
+			cursor().set_position(cursor().position() + len);
+		}
 	}
 
 	void text_edit::delete_selected(i_clipboard&)
 	{
+		multiple_text_changes mtc{ *this };
 		if (cursor().position() != cursor().anchor())
 			delete_any_selection();
 		else if(cursor().position() < iText.size())
@@ -1160,7 +1195,7 @@ namespace neogfx
 		refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
 		update();
 		if (iPreviousText != iText)
-			text_changed.trigger();
+			notify_text_changed();
 	}
 
 	std::pair<text_edit::position_type, text_edit::position_type> text_edit::related_glyphs(position_type aGlyphPosition) const
@@ -1354,7 +1389,7 @@ namespace neogfx
 		if (aMoveCursor)
 			cursor().set_position(insertionPoint - iText.begin() + eos);
 		if (iPreviousText != iText)
-			text_changed.trigger();
+			notify_text_changed();
 		return eos;
 	}
 
@@ -1365,6 +1400,14 @@ namespace neogfx
 			delete_text(std::min(cursor().position(), cursor().anchor()), std::max(cursor().position(), cursor().anchor()));
 			cursor().set_position(std::min(cursor().position(), cursor().anchor()));
 		}
+	}
+
+	void text_edit::notify_text_changed()
+	{
+		if (!iSuppressTextChangedNotification)
+			text_changed.trigger();
+		else
+			++iWantedToNotfiyTextChanged;
 	}
 
 	text_edit::document_glyphs::const_iterator text_edit::to_glyph(document_text::const_iterator aWhere) const
