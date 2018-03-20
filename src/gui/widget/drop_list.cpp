@@ -307,6 +307,31 @@ namespace neogfx
 		resize(correctedRect.extents());
 	}
 
+	drop_list::list_proxy::view_container::view_container(i_layout& aLayout) :
+		framed_widget{ aLayout }
+	{
+	}
+
+	colour drop_list::list_proxy::view_container::background_colour() const
+	{
+		if (framed_widget::has_background_colour())
+			return framed_widget::background_colour();
+		else if (container_background_colour().light())
+			return parent().background_colour().darker(24);
+		else
+			return parent().background_colour().lighter(24);
+	}
+
+	colour drop_list::list_proxy::view_container::frame_colour() const
+	{
+		if (framed_widget::has_frame_colour())
+			return framed_widget::frame_colour();
+		else if (container_background_colour().light())
+			return background_colour().darker(24);
+		else
+			return background_colour().lighter(24);
+	}
+
 	drop_list::list_proxy::list_proxy(drop_list& aDropList) :
 		iDropList{ aDropList }
 	{
@@ -331,7 +356,13 @@ namespace neogfx
 		if (!view_created())
 		{
 			if (iDropList.list_always_visible())
-				iView.emplace(iDropList.iLayout0, iDropList);
+			{
+				iViewContainer.emplace(iDropList.iLayout0);
+				iViewContainer->set_margins(neogfx::margins{});
+				iViewContainer->set_layout(std::make_shared<vertical_layout>());
+				iViewContainer->layout().set_margins(neogfx::margins{});
+				iView.emplace(iViewContainer->layout(), iDropList);
+			}
 			else
 			{
 				iPopup.emplace(iDropList);
@@ -349,7 +380,10 @@ namespace neogfx
 		if (iPopup != boost::none)
 			iPopup = boost::none;
 		else if (iView != boost::none)
+		{
 			iView = boost::none;
+			iViewContainer = boost::none;
+		}
 	}
 
 	void drop_list::list_proxy::update_view_placement()
@@ -643,7 +677,7 @@ namespace neogfx
 				if (findResult != boost::none)
 					selection_model().set_current_index(*findResult);
 				else
-					selection_model().set_current_index(item_presentation_model_index{});
+					selection_model().unset_current_index();
 			}
 			if (iSavedSelection == boost::none && selection_model().has_current_index())
 				iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
@@ -791,11 +825,12 @@ namespace neogfx
 		return minimumSize;
 	}
 
-	void drop_list::visit(i_drop_list_input_widget&, line_edit& aTextWidget)
+	void drop_list::visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget)
 	{
-		aTextWidget.text_changed([this, &aTextWidget]()
+		aTextWidget.text_changed([this, &aInputWidget, &aTextWidget]()
 		{
 			neolib::scoped_flag sf{ iHandlingTextChange };
+			aInputWidget.text_changed.trigger();
 			if (aTextWidget.has_focus() && (!view_created() || !view().changing_text()))
 			{
 				if (!aTextWidget.text().empty())

@@ -931,7 +931,7 @@ int main(int argc, char* argv[])
 		tableView1.keyboard_event([&tableView1](const ng::keyboard_event& ke)
 		{
 			if (ke.type() == ng::keyboard_event_type::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && tableView1.model().rows() > 0 && tableView1.selection_model().has_current_index())
-				tableView1.model().remove(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
+				tableView1.model().erase(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
 		});
 
 		app.window_manager().restore_mouse_cursor(window);

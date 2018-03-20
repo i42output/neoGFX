@@ -140,6 +140,9 @@ namespace neogfx
 		rect cell_rect(const item_presentation_model_index& aItemIndex, bool aBackground = false) const;
 		optional_item_presentation_model_index item_at(const point& aPosition, bool aIncludeEntireRow = true) const;
 	private:
+		void init();
+	private:
+		sink iSink;
 		std::shared_ptr<i_item_model> iModel;
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
 		std::shared_ptr<i_item_selection_model> iSelectionModel;

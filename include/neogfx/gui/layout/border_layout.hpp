@@ -62,11 +62,11 @@ namespace neogfx
 		void init();
 	private:
 		vertical_layout iRows;
-		horizontal_layout iTop;
+		vertical_layout iTop;
 		horizontal_layout iMiddle;
 		vertical_layout iLeft;
 		stack_layout iCentre;
 		vertical_layout iRight;
-		horizontal_layout iBottom;
+		vertical_layout iBottom;
 	};
 }

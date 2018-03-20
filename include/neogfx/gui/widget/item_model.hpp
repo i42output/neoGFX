@@ -337,6 +337,10 @@ namespace neogfx
 			return default_cell_data_info(aIndex.column());
 		}
 	public:
+		bool empty() const override
+		{
+			return iItems.empty();
+		}
 		void reserve(uint32_t aItemCount) override
 		{
 			iItems.reserve(aItemCount);
@@ -381,7 +385,12 @@ namespace neogfx
 		{
 			return append_item(aParent, value_type(), aCellData);
 		}
-		void remove(i_item_model::const_iterator aPosition) override
+		void clear() override
+		{
+			while (!empty())
+				erase(begin());
+		}
+		void erase(i_item_model::const_iterator aPosition) override
 		{
 			notify_observers(i_item_model_subscriber::NotifyItemRemoved, iterator_to_index(aPosition));
 			iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>());
@@ -466,7 +475,7 @@ namespace neogfx
 			switch (aType)
 			{
 			case i_item_model_subscriber::NotifyColumnInfoChanged:
-				aObserver.column_info_changed(*this, *static_cast<const item_model_index::value_type*>(aParameter));
+				aObserver.column_info_changed(*this, *static_cast<const item_model_index::column_type*>(aParameter));
 				break;
 			case i_item_model_subscriber::NotifyItemAdded:
 				aObserver.item_added(*this, *static_cast<const item_model_index*>(aParameter));

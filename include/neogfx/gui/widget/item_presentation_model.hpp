@@ -715,7 +715,8 @@ namespace neogfx
 		void column_info_changed(const i_item_model&, item_model_index::column_type aColumnIndex) override
 		{
 			reset_column_meta();
-			notify_observers(i_item_presentation_model_subscriber::NotifyColumnInfoChanged, from_item_model_index(item_model_index{ 0, aColumnIndex }).column());
+			if (have_item_model_index(item_model_index{ 0, aColumnIndex }))
+				notify_observers(i_item_presentation_model_subscriber::NotifyColumnInfoChanged, from_item_model_index(item_model_index{ 0, aColumnIndex }).column());
 		}
 		void item_added(const i_item_model& aItemModel, const item_model_index& aItemIndex) override
 		{

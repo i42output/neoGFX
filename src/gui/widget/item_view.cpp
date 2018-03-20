@@ -29,22 +29,19 @@ namespace neogfx
 	item_view::item_view(scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
-		set_focus_policy(focus_policy::ClickTabFocus);
-		set_margins(neogfx::margins{});
+		init();
 	}
 
 	item_view::item_view(i_widget& aParent, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aParent, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
-		set_focus_policy(focus_policy::ClickTabFocus);
-		set_margins(neogfx::margins{});
+		init();
 	}
 
 	item_view::item_view(i_layout& aLayout, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aLayout, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
 	{
-		set_focus_policy(focus_policy::ClickTabFocus);
-		set_margins(neogfx::margins{});
+		init();
 	}
 
 	item_view::~item_view()
@@ -972,5 +969,16 @@ namespace neogfx
 			}
 		}
 		return aIncludeEntireRow ? rowIndex : optional_item_presentation_model_index{};
+	}
+
+	void item_view::init()
+	{
+		set_focus_policy(focus_policy::ClickTabFocus);
+		set_margins(neogfx::margins{});
+		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+		{
+			if (selection_model().has_current_index())
+				make_visible(selection_model().current_index());
+		});
 	}
 }

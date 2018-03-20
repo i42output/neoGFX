@@ -43,9 +43,10 @@ namespace neogfx
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	private:
 		void init();
-		void update_widgets(const i_widget& aUpdatingWidget);
+		void update_selected_font(const i_widget& aUpdatingWidget);
 	private:
 		sink iSink;
+		bool iUpdating;
 		neogfx::font iCurrentFont;
 		neogfx::font iSelectedFont;
 		horizontal_layout iLayout0;

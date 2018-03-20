@@ -141,6 +141,15 @@ namespace neogfx
 	private:
 		class list_proxy
 		{
+		private:
+			class view_container : public framed_widget
+			{
+			public:
+				view_container(i_layout& aLayout);
+			public:
+				colour background_colour() const override;
+				colour frame_colour() const override;
+			};
 		public:
 			struct no_view : std::logic_error { no_view() : std::logic_error("neogfx::drop_list::list_proxy::no_view") {} };
 		public:
@@ -155,6 +164,7 @@ namespace neogfx
 		private:
 			drop_list& iDropList;
 			mutable boost::optional<drop_list_popup> iPopup;
+			mutable boost::optional<view_container> iViewContainer;
 			mutable boost::optional<drop_list_view> iView;
 		};
 	public:

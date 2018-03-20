@@ -229,3 +229,6 @@ Debug
 /3rdparty/SDL/SDL2-2.0.5/cmake/stage
 /tools/neoGUI/.vs
 /doxygen/*.tmp
+/examples/games/video_poker/build/win32/vs2017/.vs/video_poker/v15/.suo
+/examples/games/video_poker/build/win32/vs2017/.vs/video_poker/v15/Browse.VC.db
+/examples/games/video_poker/build/win32/vs2017/video_poker.vcxproj.user
