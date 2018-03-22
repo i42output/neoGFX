@@ -195,7 +195,7 @@ namespace neogfx
 			return font() == aOther.font() && static_cast<const container&>(*this) == static_cast<const container&>(aOther);
 		}
 	public:
-		static neogfx::size extents(const font& aFont, const_iterator aBegin, const_iterator aEnd)
+		static neogfx::size extents(const font& aFont, const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true)
 		{
 			if (aBegin == aEnd)
 				return neogfx::size{ 0.0, aFont.height() };
@@ -210,11 +210,16 @@ namespace neogfx
 				else
 					usingFallback = true;
 			}
+			if (aEndIsLineEnd)
+			{
+				const auto& lastGlyph = *std::prev(aEnd);
+				result.cx += (line_end_advance(aFont, lastGlyph) - lastGlyph.advance().cx);
+			}
 			if (usingNormal || !usingFallback)
 				result.cy = aFont.height();
 			if (usingFallback)
 				result.cy = std::max(result.cy, aFont.fallback().height());
-			return neogfx::size(std::ceil(result.cx), std::ceil(result.cy));
+			return result.ceil();
 		}
 	public:
 		const neogfx::font& font() const
@@ -247,6 +252,18 @@ namespace neogfx
 			while(result.second->is_whitespace() && result.second != end())
 				++result.second;
 			return result;
+		}
+		static dimension line_end_advance(const neogfx::font& aFont, const glyph& aGlyph)
+		{
+			if (!aGlyph.is_emoji() && !aGlyph.is_whitespace())
+			{
+				const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ?
+					aFont.glyph_texture(aGlyph) :
+					aGlyph.fallback_font(aFont).glyph_texture(aGlyph);
+				return std::max(aGlyph.advance().cx, aGlyph.offset().cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
+			}
+			else
+				return aGlyph.advance().cx;
 		}
 	private:
 		neogfx::font iFont;

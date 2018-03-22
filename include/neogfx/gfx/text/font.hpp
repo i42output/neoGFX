@@ -26,6 +26,8 @@
 namespace neogfx
 {
 	class i_native_font_face;
+	class glyph;
+	class i_glyph_texture;
 
 	class font_info
 	{
@@ -150,6 +152,8 @@ namespace neogfx
 		dimension line_spacing() const;
 		using font_info::kerning;
 		dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
+	public:
+		const i_glyph_texture& glyph_texture(const glyph& aGlyph) const;
 	public:
 		bool operator==(const font& aRhs) const;
 		bool operator!=(const font& aRhs) const;
