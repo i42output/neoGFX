@@ -99,45 +99,172 @@ namespace neogfx
 		typedef std::pair<uint32_t, uint32_t> source_type;
 	public:
 		glyph() :
-			iType{}, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
+			iType{},
+			iValue{},
+			iFlags{}, 
+			iFallbackIndex{}, 
+			iSource{}, 
+			iAdvance{}, 
+			iOffset{}
+		{
+		}
 		glyph(const character_type& aType, value_type aValue, source_type aSource, size aAdvance, size aOffset) :
-			iType{ aType.category, aType.direction }, iValue{ aValue }, iFlags{}, iFallbackIndex{}, iSource{ aSource }, iAdvance{ aAdvance }, iOffset{ aOffset } {}
+			iType{ aType.category, aType.direction }, 
+			iValue{ aValue }, 
+			iFlags{}, 
+			iFallbackIndex{}, 
+			iSource{ aSource }, 
+			iAdvance{ aAdvance }, 
+			iOffset{ aOffset }
+		{
+		}
 		glyph(const character_type& aType, value_type aValue) :
-			iType{ aType.category, aType.direction }, iValue{ aValue }, iFlags{}, iFallbackIndex{}, iSource{}, iAdvance{}, iOffset{} {}
+			iType{ aType.category, aType.direction }, 
+			iValue{ aValue }, 
+			iFlags{}, 
+			iFallbackIndex{}, 
+			iSource{}, 
+			iAdvance{}, 
+			iOffset{}
+		{
+		}
 	public:
-		bool operator==(const glyph& aRhs) const { return iType.category == aRhs.iType.category && iValue == aRhs.iValue; }
+		bool operator==(const glyph& aRhs) const 
+		{ 
+			return iType.category == aRhs.iType.category && iValue == aRhs.iValue; 
+		}
 	public:
-		bool is_whitespace() const { return category() == text_category::Whitespace; };
-		bool is_non_line_breaking_whitespace() const { return is_whitespace() && value() != U'\n'; }
-		bool is_line_breaking_whitespace() const { return is_whitespace() && value() == U'\n'; }
-		bool is_digit() const { return category() == text_category::Digit; }
-		bool is_emoji() const { return category() == text_category::Emoji; }
-		text_category category() const { return iType.category; }
-		text_direction direction() const { return iType.direction; }
+		bool is_whitespace() const 
+		{ 
+			return category() == text_category::Whitespace; 
+		};
+		bool is_non_line_breaking_whitespace() const 
+		{ 
+			return is_whitespace() && value() != U'\n'; 
+		}
+		bool is_line_breaking_whitespace() const 
+		{ 
+			return is_whitespace() && value() == U'\n'; 
+		}
+		bool is_digit() const 
+		{ 
+			return category() == text_category::Digit; 
+		}
+		bool is_emoji() const 
+		{ 
+			return category() == text_category::Emoji; 
+		}
+		text_category category() const 
+		{ 
+			return iType.category; 
+		}
+		text_direction direction() const 
+		{ 
+			return iType.direction; 
+		}
 	public:
-		bool left_to_right() const { return direction() == text_direction::LTR; }
-		bool right_to_left() const { return direction() == text_direction::RTL; }
-		bool category_has_no_direction() const { return iType.category != text_category::LTR && iType.category != text_category::RTL; }
-		void set_category(text_category aCategory) { iType.category = aCategory; }
-		void set_direction(text_direction aDirection) { iType.direction = aDirection; }
-		value_type value() const { return iValue; }
-		void set_value(value_type aValue) { iValue = aValue; }
-		const source_type& source() const { return iSource; }
-		void set_source(const source_type aSource) { iSource = aSource; }
-		size advance(bool aRoundUp = true) const { return aRoundUp ? (iAdvance + basic_size<float>{0.5f, 0.5f}).floor() : iAdvance; }
-		void set_advance(const size& aAdvance) { iAdvance = aAdvance; }
-		size offset() const { return (iOffset + basic_size<float>{0.5f, 0.5f}).floor(); }
-		void set_offset(const size& aOffset) { iOffset = aOffset; }
-		flags_e flags() const { return iFlags; }
-		void set_flags(flags_e aFlags) { iFlags = aFlags; }
-		bool underline() const { return (iFlags & Underline) == Underline; }
-		void set_underline(bool aUnderline) { iFlags = static_cast<flags_e>(aUnderline ? iFlags | Underline : iFlags & ~Underline); }
-		bool subpixel() const { return (iFlags & Subpixel) == Subpixel; }
-		void set_subpixel(bool aSubpixel) { iFlags = static_cast<flags_e>(aSubpixel ? iFlags | Subpixel : iFlags & ~Subpixel); }
-		bool mnemonic() const { return (iFlags & Mnemonic) == Mnemonic; }
-		void set_mnemonic(bool aMnemonic) { iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); }
-		bool use_fallback() const { return (iFlags & UseFallback) == UseFallback; }
-		void set_use_fallback(bool aUseFallback, uint32_t aFallbackIndex = 0) { iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); iFallbackIndex = static_cast<uint8_t>(aFallbackIndex); }
+		bool left_to_right() const 
+		{ 
+			return direction() == text_direction::LTR; 
+		}
+		bool right_to_left() const 
+		{ 
+			return direction() == text_direction::RTL; 
+		}
+		bool category_has_no_direction() const 
+		{ 
+			return iType.category != text_category::LTR && iType.category != text_category::RTL; 
+		}
+		void set_category(text_category aCategory) 
+		{ 
+			iType.category = aCategory; 
+		}
+		void set_direction(text_direction aDirection) 
+		{ 
+			iType.direction = aDirection; 
+		}
+		value_type value() const 
+		{ 
+			return iValue; 
+		}
+		void set_value(value_type aValue) 
+		{ 
+			iValue = aValue; 
+		}
+		const source_type& source() const 
+		{ 
+			return iSource; 
+		}
+		void set_source(const source_type aSource) 
+		{ 
+			iSource = aSource; 
+		}
+		size advance(bool aRoundUp = true) const 
+		{ 
+			return aRoundUp ? (iAdvance + basic_size<float>{0.5f, 0.5f}).floor() : iAdvance; 
+		}
+		void set_advance(const size& aAdvance) 
+		{ 
+			iAdvance = aAdvance; 
+		}
+		size offset() const 
+		{ 
+			return (iOffset + basic_size<float>{0.5f, 0.5f}).floor(); 
+		}
+		void set_offset(const size& aOffset) 
+		{ 
+			iOffset = aOffset; 
+		}
+		dimension width(const font& aFont) const
+		{
+			if (!is_whitespace() && !is_emoji())
+				return std::max(
+					static_cast<dimension>(offset().cx + texture(aFont).placement().x + texture(aFont).texture().extents().cx),
+					advance().cx);
+			else
+				return advance().cx;
+		}
+		flags_e flags() const
+		{ 
+			return iFlags; 
+		}
+		void set_flags(flags_e aFlags) 
+		{ 
+			iFlags = aFlags; 
+		}
+		bool underline() const 
+		{ 
+			return (iFlags & Underline) == Underline; 
+		}
+		void set_underline(bool aUnderline) 
+		{ 
+			iFlags = static_cast<flags_e>(aUnderline ? iFlags | Underline : iFlags & ~Underline); 
+		}
+		bool subpixel() const 
+		{ 
+			return (iFlags & Subpixel) == Subpixel; 
+		}
+		void set_subpixel(bool aSubpixel) 
+		{ 
+			iFlags = static_cast<flags_e>(aSubpixel ? iFlags | Subpixel : iFlags & ~Subpixel); 
+		}
+		bool mnemonic() const 
+		{ 
+			return (iFlags & Mnemonic) == Mnemonic; 
+		}
+		void set_mnemonic(bool aMnemonic) 
+		{ 
+			iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); 
+		}
+		bool use_fallback() const 
+		{ 
+			return (iFlags & UseFallback) == UseFallback; 
+		}
+		void set_use_fallback(bool aUseFallback, uint32_t aFallbackIndex = 0) 
+		{ 
+			iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); 
+			iFallbackIndex = static_cast<uint8_t>(aFallbackIndex); 
+		}
 		font fallback_font(font aFont) const
 		{
 			if (!use_fallback())
@@ -150,8 +277,20 @@ namespace neogfx
 				return fallbackFont;
 			}
 		}
-		uint8_t fallback_font_index() const { return iFallbackIndex; }
-		void kerning_adjust(float aAdjust) { iAdvance.cx += aAdjust; }
+		uint8_t fallback_font_index() const 
+		{ 
+			return iFallbackIndex; 
+		}
+		void kerning_adjust(float aAdjust) 
+		{ 
+			iAdvance.cx += aAdjust; 
+		}
+		const i_glyph_texture& texture(const font& aFont) const
+		{
+			return !use_fallback() ?
+				aFont.glyph_texture(*this) :
+				fallback_font(aFont).glyph_texture(*this);
+		}
 	private:
 		character_type iType;
 		value_type iValue;
@@ -213,7 +352,7 @@ namespace neogfx
 			if (aEndIsLineEnd)
 			{
 				const auto& lastGlyph = *std::prev(aEnd);
-				result.cx += (line_end_advance(aFont, lastGlyph) - lastGlyph.advance().cx);
+				result.cx += (lastGlyph.width(aFont) - lastGlyph.advance().cx);
 			}
 			if (usingNormal || !usingFallback)
 				result.cy = aFont.height();
@@ -252,18 +391,6 @@ namespace neogfx
 			while(result.second->is_whitespace() && result.second != end())
 				++result.second;
 			return result;
-		}
-		static dimension line_end_advance(const neogfx::font& aFont, const glyph& aGlyph)
-		{
-			if (!aGlyph.is_emoji() && !aGlyph.is_whitespace())
-			{
-				const i_glyph_texture& glyphTexture = !aGlyph.use_fallback() ?
-					aFont.glyph_texture(aGlyph) :
-					aGlyph.fallback_font(aFont).glyph_texture(aGlyph);
-				return std::max(aGlyph.advance().cx, aGlyph.offset().cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
-			}
-			else
-				return aGlyph.advance().cx;
 		}
 	private:
 		neogfx::font iFont;

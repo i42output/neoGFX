@@ -420,7 +420,7 @@ namespace neogfx
 				bool gotLine = false;
 				while (next != i->second)
 				{
-					if (lineWidth + glyph_text::line_end_advance(aFont, *next) > maxWidth)
+					if (lineWidth + next->width(aFont) > maxWidth)
 					{
 						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
 						lineWidth -= glyph_text::extents(aFont, wordBreak.first, next, false).cx;
@@ -441,8 +441,7 @@ namespace neogfx
 					}
 					if (gotLine || next == i->second)
 					{
-						lineWidth -= std::prev(next)->advance().cx;
-						lineWidth += glyph_text::line_end_advance(aFont, *std::prev(next));
+						lineWidth += (std::prev(next)->width(aFont) - std::prev(next)->advance().cx);
 						result.cx = std::max(result.cx, from_device_units(size(lineWidth, 0)).cx);
 						result.cy += from_device_units(glyph_text::extents(aFont, i->first, i->second)).cy;
 						lineStart = next;
@@ -545,7 +544,7 @@ namespace neogfx
 				while (next != line.second)
 				{
 					bool gotLine = false;
-					if (lineWidth + glyph_text::line_end_advance(aFont, *next) > maxWidth)
+					if (lineWidth + next->width(aFont) > maxWidth)
 					{
 						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
 						lineWidth -= glyph_text::extents(aFont, wordBreak.first, next, false).cx;
@@ -566,8 +565,7 @@ namespace neogfx
 					}
 					if (gotLine || next == line.second)
 					{
-						lineWidth -= std::prev(next)->advance().cx;
-						lineWidth += glyph_text::line_end_advance(aFont, *std::prev(next));
+						lineWidth += (std::prev(next)->width(aFont) - std::prev(next)->advance().cx);
 						vec3 linePos = pos;
 						if (aAlignment == alignment::Left && glyph_text_direction(lineStart, next) == text_direction::RTL ||
 							aAlignment == alignment::Right && glyph_text_direction(lineStart, next) == text_direction::LTR)

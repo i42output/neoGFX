@@ -975,7 +975,7 @@ namespace neogfx
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins{});
-		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+		iSink += app::instance().current_style_changed([this](style_aspect)
 		{
 			if (selection_model().has_current_index())
 				make_visible(selection_model().current_index());

@@ -692,7 +692,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
+    <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\assets\neoGFX\icons.nrc">

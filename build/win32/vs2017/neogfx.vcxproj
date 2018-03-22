@@ -332,7 +332,7 @@
     <ClInclude Include="Release\GeneratedFiles\gradient.frag.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\src\gfx\gradient.frag">
+    <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
