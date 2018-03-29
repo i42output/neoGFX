@@ -392,10 +392,8 @@ namespace neogfx
 					return false;
 				if (left.appearance.has_effect() && (left.appearance.effect().type() != right.appearance.effect().type() || left.appearance.effect().width() != right.appearance.effect().width()))
 					return false;
-				const i_glyph_texture& leftGlyphTexture = !left.glyph.use_fallback() ? left.font.native_font_face().glyph_texture(left.glyph) :
-					left.glyph.fallback_font(left.font).native_font_face().glyph_texture(left.glyph);
-				const i_glyph_texture& rightGlyphTexture = !right.glyph.use_fallback() ? right.font.native_font_face().glyph_texture(right.glyph) :
-					right.glyph.fallback_font(right.font).native_font_face().glyph_texture(right.glyph);
+				const i_glyph_texture& leftGlyphTexture = left.glyph.actual_font(left.font).native_font_face().glyph_texture(left.glyph);
+				const i_glyph_texture& rightGlyphTexture = right.glyph.actual_font(right.font).native_font_face().glyph_texture(right.glyph);
 				return leftGlyphTexture.texture().native_texture()->handle() == rightGlyphTexture.texture().native_texture()->handle() &&
 					left.glyph.subpixel() == right.glyph.subpixel();
 			}

@@ -217,12 +217,22 @@ namespace neogfx
 		}
 		dimension width(const font& aFont) const
 		{
-			if (!is_whitespace() && !is_emoji())
-				return std::max(
-					static_cast<dimension>(offset().cx + texture(aFont).placement().x + texture(aFont).texture().extents().cx),
-					advance().cx);
-			else
-				return advance().cx;
+			try
+			{
+				if (!is_whitespace() && !is_emoji())
+					return std::max(
+						static_cast<dimension>(offset().cx + texture(aFont).placement().x + texture(aFont).texture().extents().cx),
+						advance().cx);
+			}
+			catch (...)
+			{
+				// silently ignore freetype exceptions.
+			}
+			return advance().cx;
+		}
+		dimension height(const font& aFont) const
+		{
+			return actual_font(aFont).height();
 		}
 		flags_e flags() const
 		{ 
@@ -256,16 +266,7 @@ namespace neogfx
 		{ 
 			iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); 
 		}
-		bool use_fallback() const 
-		{ 
-			return (iFlags & UseFallback) == UseFallback; 
-		}
-		void set_use_fallback(bool aUseFallback, uint32_t aFallbackIndex = 0) 
-		{ 
-			iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); 
-			iFallbackIndex = static_cast<uint8_t>(aFallbackIndex); 
-		}
-		font fallback_font(font aFont) const
+		font actual_font(font aFont) const
 		{
 			if (!use_fallback())
 				return aFont;
@@ -277,9 +278,18 @@ namespace neogfx
 				return fallbackFont;
 			}
 		}
-		uint8_t fallback_font_index() const 
+		bool use_fallback() const
 		{ 
-			return iFallbackIndex; 
+			return (iFlags & UseFallback) == UseFallback; 
+		}
+		uint8_t fallback_font_index() const
+		{
+			return iFallbackIndex;
+		}
+		void set_use_fallback(bool aUseFallback, uint32_t aFallbackIndex = 0)
+		{ 
+			iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); 
+			iFallbackIndex = static_cast<uint8_t>(aFallbackIndex); 
 		}
 		void kerning_adjust(float aAdjust) 
 		{ 
@@ -287,9 +297,7 @@ namespace neogfx
 		}
 		const i_glyph_texture& texture(const font& aFont) const
 		{
-			return !use_fallback() ?
-				aFont.glyph_texture(*this) :
-				fallback_font(aFont).glyph_texture(*this);
+			return actual_font(aFont).glyph_texture(*this);
 		}
 	private:
 		character_type iType;
@@ -339,25 +347,17 @@ namespace neogfx
 			if (aBegin == aEnd)
 				return neogfx::size{ 0.0, aFont.height() };
 			neogfx::size result;
-			bool usingNormal = false;
-			bool usingFallback = false;
 			for (glyph_text::const_iterator i = aBegin; i != aEnd; ++i)
 			{
-				result.cx += i->advance().cx;
-				if (!i->use_fallback())
-					usingNormal = true;
-				else
-					usingFallback = true;
+				const auto& g = *i;
+				result.cx += g.advance().cx;
+				result.cy = std::max(result.cy, g.height(aFont));
 			}
 			if (aEndIsLineEnd)
 			{
 				const auto& lastGlyph = *std::prev(aEnd);
 				result.cx += (lastGlyph.width(aFont) - lastGlyph.advance().cx);
 			}
-			if (usingNormal || !usingFallback)
-				result.cy = aFont.height();
-			if (usingFallback)
-				result.cy = std::max(result.cy, aFont.fallback().height());
 			return result.ceil();
 		}
 	public:
