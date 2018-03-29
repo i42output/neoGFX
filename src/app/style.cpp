@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/json.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/app/style.hpp>
 

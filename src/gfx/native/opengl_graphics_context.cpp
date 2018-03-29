@@ -1075,21 +1075,18 @@ namespace neogfx
 
 	namespace
 	{
-		std::vector<vec2> texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates)
+		void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates, std::vector<vec2>& aResult)
 		{
-			std::vector<vec2> result;
-			result.reserve(4);
 			rect normalizedRect = aTextureRect / aTextureStorageSize;
-			result.emplace_back(normalizedRect.top_left().x, normalizedRect.top_left().y);
-			result.emplace_back(normalizedRect.top_right().x, normalizedRect.top_right().y);
-			result.emplace_back(normalizedRect.bottom_right().x, normalizedRect.bottom_right().y);
-			result.emplace_back(normalizedRect.bottom_left().x, normalizedRect.bottom_left().y);
+			aResult.emplace_back(normalizedRect.top_left().x, normalizedRect.top_left().y);
+			aResult.emplace_back(normalizedRect.top_right().x, normalizedRect.top_right().y);
+			aResult.emplace_back(normalizedRect.bottom_right().x, normalizedRect.bottom_right().y);
+			aResult.emplace_back(normalizedRect.bottom_left().x, normalizedRect.bottom_left().y);
 			if (aLogicalCoordinates.first.y < aLogicalCoordinates.second.y)
 			{
-				std::swap(result[0][1], result[2][1]);
-				std::swap(result[1][1], result[3][1]);
+				std::swap(aResult[0][1], aResult[2][1]);
+				std::swap(aResult[1][1], aResult[3][1]);
 			}
-			return std::move(result);
 		}
 	}
 
@@ -1130,7 +1127,8 @@ namespace neogfx
 						drawOp.point.y + drawOp.font.height() - (glyphTexture.placement().y + -drawOp.font.descender()) - glyphTexture.texture().extents().cy,
 					drawOp.point.z);
 
-				auto textureCoords = texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates());
+				iTempTextureCoords.clear();
+				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
 
 				rect outputRect{ point{glyphOrigin}, glyphTexture.texture().extents() };
 
@@ -1154,7 +1152,7 @@ namespace neogfx
 										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
 										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
 									std::array <uint8_t, 4>{});
-								iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
+								iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), iTempTextureCoords.begin(), iTempTextureCoords.end());
 							}
 						}
 					}
@@ -1172,7 +1170,7 @@ namespace neogfx
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
 						std::array <uint8_t, 4>{});
-					iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), textureCoords.begin(), textureCoords.end());
+					iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), iTempTextureCoords.begin(), iTempTextureCoords.end());
 				}
 			}
 		}
@@ -1332,7 +1330,8 @@ namespace neogfx
 
 			if (texture.type() == i_texture::SubTexture)
 				textureRect.position() += texture.as_sub_texture().atlas_location().top_left();
-			auto tv = texture_vertices(texture.storage_extents(), textureRect + point{ 1.0, 1.0 }, logical_coordinates());
+			iTempTextureCoords.clear();
+			texture_vertices(texture.storage_extents(), textureRect + point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
 
 			if (newTexture)
 			{
@@ -1351,7 +1350,7 @@ namespace neogfx
 			{
 				auto const& v = transformedVertices[vi];
 				iVertexArrays.vertices().push_back(xyz{ v.coordinates.x, v.coordinates.y, v.coordinates.z });
-				iVertexArrays.texture_coords().push_back((tv[0] + (tv[2] - tv[0]) * ~v.textureCoordinates.xy).v);
+				iVertexArrays.texture_coords().push_back((iTempTextureCoords[0] + (iTempTextureCoords[2] - iTempTextureCoords[0]) * ~v.textureCoordinates.xy).v);
 				iVertexArrays.colours().push_back(std::array<uint8_t, 4>{ {colourizationColour.red(), colourizationColour.green(), colourizationColour.blue(), colourizationColour.alpha()}});
 			}
 

@@ -435,6 +435,10 @@ int main(int argc, char* argv[])
 		ng::horizontal_layout layoutLineEdits(layoutButtons);
 		ng::line_edit lineEdit(layoutLineEdits);
 		lineEdit.set_text("Line edit");
+		lineEdit.text_changed([&button1, &lineEdit]()
+		{
+			button1.text().set_text(lineEdit.text());
+		});
 		ng::line_edit lineEditPassword(layoutLineEdits);
 		lineEditPassword.set_text("Password");
 		ng::double_spin_box spinBox(layoutLineEdits);

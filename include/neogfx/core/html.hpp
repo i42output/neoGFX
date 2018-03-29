@@ -37,7 +37,7 @@ namespace neogfx
 		// types
 		enum type_e { Document = 0x1, Element = 0x2, Text = 0x4, Comment = 0x8, All = 0xFF };
 		typedef Alloc allocator_type;
-		typedef neolib::quick_string<CharT> string;
+		typedef neolib::basic_quick_string<CharT> string;
 		typedef html_node<CharT, allocator_type> node;
 		typedef node* node_ptr;
 	private:

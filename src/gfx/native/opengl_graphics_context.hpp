@@ -131,5 +131,6 @@ namespace neogfx
 		std::vector<std::array<float, 4>> iGradientStopColours;
 		font iLastDrawGlyphFallbackFont;
 		boost::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
+		std::vector<vec2> iTempTextureCoords;
 	};
 }
