@@ -232,7 +232,7 @@ namespace neogfx
 		}
 		dimension height(const font& aFont) const
 		{
-			return actual_font(aFont).height();
+			return std::ceil(actual_font(aFont).height());
 		}
 		flags_e flags() const
 		{ 

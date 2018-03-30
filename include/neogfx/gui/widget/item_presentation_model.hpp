@@ -206,7 +206,12 @@ namespace neogfx
 			if (iCellSpacing == boost::none)
 			{
 				dimension millimetre = as_units(aUnitsContext, units::Millimetres, 1.0);
-				return units_converter(aUnitsContext).from_device_units(units_converter(aUnitsContext).to_device_units(size{ millimetre, millimetre }).ceil());
+				basic_size<int> result = units_converter(aUnitsContext).from_device_units(units_converter(aUnitsContext).to_device_units(size{ millimetre, millimetre }).ceil());
+				if (result.cx % 2 == 1)
+					++result.cx;
+				if (result.cy % 2 == 1)
+					++result.cy;
+				return result;
 			}
 			return units_converter(aUnitsContext).from_device_units(*iCellSpacing);
 		}
