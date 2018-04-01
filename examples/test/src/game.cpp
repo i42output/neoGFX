@@ -129,7 +129,7 @@ void create_game(ng::i_layout& aLayout)
 	score->second.set_position(ng::vec3{ 0.0, 0.0, 1.0 });
 	auto positionScore = [spritePlane, score]()
 	{
-		score->second.set_position(ng::vec3{ spritePlane->extents().cx - 256.0, spritePlane->extents().cy - 40, 1.0 });
+		score->second.set_position(ng::vec3{ spritePlane->extents().cx - score->second.extents().x, spritePlane->extents().cy - score->second.extents().y, 1.0 });
 	};
 	spritePlane->size_changed(positionScore);
 	positionScore();

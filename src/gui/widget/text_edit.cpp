@@ -402,10 +402,12 @@ namespace neogfx
 
 	void text_edit::mouse_entered(const point& aPosition)
 	{
+		scrollable_widget::mouse_entered(aPosition);
 	}
 
 	void text_edit::mouse_left()
 	{
+		scrollable_widget::mouse_left();
 	}
 
 	neogfx::mouse_cursor text_edit::mouse_cursor() const

@@ -230,7 +230,7 @@ namespace neogfx
 		{
 			if (iExtents == basic_size<float>{})
 			{
-				iExtents = size{ advance().cx, !is_emoji() ? font().height() : iExtents.cx };
+				iExtents = size{ advance().cx, !is_emoji() ? font().height() : advance().cx };
 				try
 				{
 					if (has_font_glyph())
