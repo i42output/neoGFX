@@ -293,6 +293,66 @@ namespace neogfx
 			std::tie(aRhs.iInstance->iFamilyName, aRhs.iInstance->iStyle, aRhs.iInstance->iStyleName, aRhs.iInstance->iUnderline, aRhs.iInstance->iSize, aRhs.iInstance->iKerning);
 	}
 
+	font::scoped_token::scoped_token() : iToken{ 0u }
+	{
+	}
+
+	font::scoped_token::scoped_token(token aToken) : iToken{ aToken }
+	{
+		add_ref();
+	}
+
+	font::scoped_token::scoped_token(const font& aFont) : iToken{ aFont.get_token() }
+	{
+	}
+
+	font::scoped_token::scoped_token(const scoped_token& aOther) : iToken{ aOther.get() }
+	{
+		add_ref();
+	}
+
+	font::scoped_token::~scoped_token()
+	{
+		release();
+	}
+
+	font::scoped_token& font::scoped_token::operator=(const scoped_token& aOther)
+	{
+		scoped_token copy{ aOther };
+		release();
+		iToken = aOther.get();
+		add_ref();
+		return *this;
+	}
+
+	void font::scoped_token::add_ref()
+	{
+		try
+		{
+			if (iToken != 0u)
+				app::instance().rendering_engine().font_manager().copy_token(iToken);
+		}
+		catch (...)
+		{
+			iToken = 0u;
+			throw;
+		}
+	}
+
+	void font::scoped_token::release()
+	{
+		try
+		{
+			if (iToken != 0u)
+				app::instance().rendering_engine().font_manager().return_token(iToken);
+		}
+		catch (...)
+		{
+			iToken = 0u;
+			throw;
+		}
+	}
+
 	class font::instance
 	{
 	public:
@@ -539,6 +599,21 @@ namespace neogfx
 		}
 		else
 			return 0.0;
+	}
+
+	font::token font::get_token() const
+	{
+		return app::instance().rendering_engine().font_manager().get_token(*this);
+	}
+
+	void font::return_token(token aToken) const
+	{
+		app::instance().rendering_engine().font_manager().return_token(aToken);
+	}
+
+	const font& font::from_token(token aToken)
+	{
+		return app::instance().rendering_engine().font_manager().from_token(aToken);
 	}
 
 	const i_glyph_texture& font::glyph_texture(const glyph& aGlyph) const

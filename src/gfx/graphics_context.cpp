@@ -420,7 +420,7 @@ namespace neogfx
 				bool gotLine = false;
 				while (next != i->second)
 				{
-					if (lineWidth + next->width(aFont) > maxWidth)
+					if (lineWidth + next->extents().cx > maxWidth)
 					{
 						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
 						lineWidth -= glyph_text::extents(aFont, wordBreak.first, next, false).cx;
@@ -441,7 +441,7 @@ namespace neogfx
 					}
 					if (gotLine || next == i->second)
 					{
-						lineWidth += (std::prev(next)->width(aFont) - std::prev(next)->advance().cx);
+						lineWidth += (std::prev(next)->extents().cx - std::prev(next)->advance().cx);
 						result.cx = std::max(result.cx, from_device_units(size(lineWidth, 0)).cx);
 						result.cy += from_device_units(glyph_text::extents(aFont, i->first, i->second)).cy;
 						lineStart = next;
@@ -544,7 +544,7 @@ namespace neogfx
 				while (next != line.second)
 				{
 					bool gotLine = false;
-					if (lineWidth + next->width(aFont) > maxWidth)
+					if (lineWidth + next->extents().cx > maxWidth)
 					{
 						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
 						lineWidth -= glyph_text::extents(aFont, wordBreak.first, next, false).cx;
@@ -565,7 +565,7 @@ namespace neogfx
 					}
 					if (gotLine || next == line.second)
 					{
-						lineWidth += (std::prev(next)->width(aFont) - std::prev(next)->advance().cx);
+						lineWidth += (std::prev(next)->extents().cx - std::prev(next)->advance().cx);
 						vec3 linePos = pos;
 						if (aAlignment == alignment::Left && glyph_text_direction(lineStart, next) == text_direction::RTL ||
 							aAlignment == alignment::Right && glyph_text_direction(lineStart, next) == text_direction::LTR)
@@ -862,7 +862,7 @@ namespace neogfx
 		auto yLine = logical_coordinates().first.y > logical_coordinates().second.y ?
 			(aFont.height() + aFont.descender()) - std::ceil(aFont.native_font_face().underline_position()) :
 			-aFont.descender() + std::ceil(aFont.native_font_face().underline_position());
-		const i_glyph_texture& glyphTexture = aGlyph.texture(aFont);
+		const i_glyph_texture& glyphTexture = aGlyph.glyph_texture();
 		draw_line(
 			aPoint + vec3{ glyphTexture.placement().x, yLine },
 			aPoint + vec3{ glyphTexture.placement().x + glyphTexture.texture().extents().cx, yLine },
@@ -1448,15 +1448,23 @@ namespace neogfx
 				}
 				startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
 				endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
-				auto const& font = aFontSelector(startCluster);
+				neogfx::font font = aFontSelector(startCluster);
+				if (shapes.using_fallback(j))
+				{
+					font = font.fallback();
+					for (auto fi = shapes.fallback_index(j); fi > 0; --fi)
+						font = font.fallback();
+				}
 				if (j > 0 && !result.empty())
 					result.back().kerning_adjust(static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
 				size advance = textDirections[startCluster].category != text_category::Emoji ?
 					size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :
 					size{ font.height(), 0.0 };
-				result.push_back(glyph(textDirections[startCluster],
+				result.emplace_back(textDirections[startCluster],
 					shapes.glyph_info(j).codepoint,
-					glyph::source_type(startCluster, endCluster), advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0)));
+					glyph::source_type(startCluster, endCluster), 
+					font,
+					advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0));
 				if (result.back().category() == text_category::Whitespace)
 					result.back().set_value(aTextBegin[startCluster]);
 				else if (result.back().category() == text_category::Emoji)
@@ -1467,8 +1475,6 @@ namespace neogfx
 					result.back().set_subpixel(true);
 				if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
 					result.back().set_mnemonic(true);
-				if (shapes.using_fallback(j))
-					result.back().set_use_fallback(true, shapes.fallback_index(j));
 				if (result.back().category() != text_category::Whitespace && result.back().category() != text_category::Emoji)
 				{
 					auto& glyph = result.back();

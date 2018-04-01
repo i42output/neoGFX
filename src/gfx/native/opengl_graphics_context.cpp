@@ -1118,7 +1118,7 @@ namespace neogfx
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(op);
 
-				const i_glyph_texture& glyphTexture = drawOp.glyph.texture(drawOp.font);
+				const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 
 				vec3 glyphOrigin(
 					drawOp.point.x + glyphTexture.placement().x,
@@ -1196,7 +1196,7 @@ namespace neogfx
 		if (firstOp.appearance.ink().is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(firstOp.appearance.ink()), rect{ point{ iVertexArrays.vertices()[0][0], iVertexArrays.vertices()[0][1] }, point{ iVertexArrays.vertices()[2][0], iVertexArrays.vertices()[2][1] } });
 
-		const i_glyph_texture& firstGlyphTexture = firstOp.glyph.texture(firstOp.font);
+		const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
 
 		glCheck(glEnable(GL_BLEND));
@@ -1244,7 +1244,7 @@ namespace neogfx
 						}
 						else if (drawOp.appearance.effect().type() == text_effect::Glow || drawOp.appearance.effect().type() == text_effect::Shadow)
 						{
-							const i_glyph_texture& glyphTexture = drawOp.glyph.texture(drawOp.font);
+							const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 							shader.set_uniform_variable("glyphOrigin",
 								static_cast<float>(iVertexArrays.texture_coords()[index][0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
 								static_cast<float>(iVertexArrays.texture_coords()[index][1] * glyphTexture.texture().atlas_texture().storage_extents().cy));

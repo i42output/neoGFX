@@ -142,6 +142,7 @@ namespace neogfx
 		iDefaultSystemFontInfo{ detail::platform_specific::default_system_font_info() },
 		iDefaultFallbackFontInfo{ detail::platform_specific::default_fallback_font_info() },
 		iGlyphAtlas{ aRenderingEngine.texture_manager(), size{1024.0, 1024.0} },
+		iNextAvailableToken{ 1u },
 		iEmojiAtlas{ aRenderingEngine.texture_manager() }
 	{
 		FT_Error error = FT_Init_FreeType(&iFontLib);
@@ -349,6 +350,58 @@ namespace neogfx
 			}
 		}
 		throw bad_font_family_index();
+	}
+
+	font::token font_manager::get_token(const font& aFont)
+	{
+		auto cacheIter = iFontTokenCache.find(aFont);
+		if (cacheIter == iFontTokenCache.end())
+		{
+			bool maybeExhuasted = false;
+			while (iFontTokens.find(iNextAvailableToken) != iFontTokens.end())
+			{
+				if (++iNextAvailableToken == 0)
+				{
+					if (maybeExhuasted)
+						throw tokens_exhausted();
+					maybeExhuasted = true;
+					iNextAvailableToken = 1u;
+				}
+			}
+			cacheIter = iFontTokenCache.emplace(aFont, ref_counted_font_token{ iNextAvailableToken++, 0u }).first;
+			iFontTokens[cacheIter->second.first] = cacheIter;
+		}
+		auto token = cacheIter->second.first;
+		copy_token(token);
+		return token;
+	}
+
+	void font_manager::copy_token(font::token aToken)
+	{
+		auto tokenIter = iFontTokens.find(aToken);
+		if (tokenIter == iFontTokens.end())
+			throw invalid_token();
+		++(tokenIter->second->second.second);
+	}
+
+	void font_manager::return_token(font::token aToken)
+	{
+		auto tokenIter = iFontTokens.find(aToken);
+		if (tokenIter == iFontTokens.end())
+			throw invalid_token();
+		if (--(tokenIter->second->second.second) == 0u)
+		{
+			iFontTokenCache.erase(tokenIter->second);
+			iFontTokens.erase(tokenIter);
+		}
+	}
+
+	const font& font_manager::from_token(font::token aToken)
+	{
+		auto tokenIter = iFontTokens.find(aToken);
+		if (tokenIter == iFontTokens.end())
+			throw invalid_token();
+		return tokenIter->second->first;
 	}
 
 	const i_texture_atlas& font_manager::glyph_atlas() const

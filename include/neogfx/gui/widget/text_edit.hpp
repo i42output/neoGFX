@@ -328,8 +328,7 @@ namespace neogfx
 						const auto& glyph = *(iterGlyph++);
 						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + textStartIndex + glyph.source().first).contents();
 						const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iParent->default_style();
-						auto& glyphFont = style.font() != boost::none ? *style.font() : iParent->font();
-						dimension cy = glyph.height(glyphFont);
+						dimension cy = glyph.extents().cy;
 						if (style.text_effect() != boost::none && style.text_effect()->type() == text_effect::Outline)
 							cy += (style.text_effect()->width() * 2.0);
 						if (i == glyphsStartIndex || cy != previousHeight)

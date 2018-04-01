@@ -91,8 +91,7 @@ namespace neogfx
 		{
 			Underline = 0x01,
 			Subpixel = 0x02,
-			Mnemonic = 0x04,
-			UseFallback = 0x80
+			Mnemonic = 0x04
 		};
 	public:
 		typedef uint32_t value_type;
@@ -101,20 +100,20 @@ namespace neogfx
 		glyph() :
 			iType{},
 			iValue{},
-			iFlags{}, 
-			iFallbackIndex{}, 
+			iFlags{},
 			iSource{}, 
+			iFontToken{},
 			iAdvance{}, 
 			iOffset{}
 		{
 		}
-		glyph(const character_type& aType, value_type aValue, source_type aSource, size aAdvance, size aOffset) :
+		glyph(const character_type& aType, value_type aValue, source_type aSource, const neogfx::font& aFont, size aAdvance, size aOffset) :
 			iType{ aType.category, aType.direction }, 
 			iValue{ aValue }, 
 			iFlags{}, 
-			iFallbackIndex{}, 
 			iSource{ aSource }, 
-			iAdvance{ aAdvance }, 
+			iFontToken{ aFont },
+			iAdvance{ aAdvance },
 			iOffset{ aOffset }
 		{
 		}
@@ -122,8 +121,8 @@ namespace neogfx
 			iType{ aType.category, aType.direction }, 
 			iValue{ aValue }, 
 			iFlags{}, 
-			iFallbackIndex{}, 
 			iSource{}, 
+			iFontToken{},
 			iAdvance{}, 
 			iOffset{}
 		{
@@ -134,6 +133,14 @@ namespace neogfx
 			return iType.category == aRhs.iType.category && iValue == aRhs.iValue; 
 		}
 	public:
+		bool has_font() const
+		{
+			return *iFontToken != 0u;
+		}
+		bool has_font_glyph() const
+		{
+			return has_font() && !is_whitespace() && !is_emoji();
+		}
 		bool is_whitespace() const 
 		{ 
 			return category() == text_category::Whitespace; 
@@ -199,6 +206,10 @@ namespace neogfx
 		{ 
 			iSource = aSource; 
 		}
+		void set_font(font::token aFontToken)
+		{
+			iFontToken = aFontToken;
+		}
 		size advance(bool aRoundUp = true) const 
 		{ 
 			return aRoundUp ? (iAdvance + basic_size<float>{0.5f, 0.5f}).floor() : iAdvance; 
@@ -215,24 +226,26 @@ namespace neogfx
 		{ 
 			iOffset = aOffset; 
 		}
-		dimension width(const font& aFont) const
+		size extents() const
 		{
-			try
+			if (iExtents == basic_size<float>{})
 			{
-				if (!is_whitespace() && !is_emoji())
-					return std::max(
-						static_cast<dimension>(offset().cx + texture(aFont).placement().x + texture(aFont).texture().extents().cx),
-						advance().cx);
+				iExtents = size{ advance().cx, !is_emoji() ? font().height() : iExtents.cx };
+				try
+				{
+					if (has_font_glyph())
+						iExtents.cx = static_cast<float>(offset().cx + glyph_texture().placement().x + glyph_texture().texture().extents().cx);
+				}
+				catch (...)
+				{
+					// silently ignore freetype exceptions.
+				}
 			}
-			catch (...)
-			{
-				// silently ignore freetype exceptions.
-			}
-			return advance().cx;
+			return iExtents;
 		}
-		dimension height(const font& aFont) const
+		void set_extents(size& aExtents)
 		{
-			return std::ceil(actual_font(aFont).height());
+			iExtents = aExtents;
 		}
 		flags_e flags() const
 		{ 
@@ -266,47 +279,27 @@ namespace neogfx
 		{ 
 			iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); 
 		}
-		font actual_font(font aFont) const
+		const neogfx::font& font() const
 		{
-			if (!use_fallback())
-				return aFont;
-			else
-			{
-				font fallbackFont = aFont.fallback();
-				for (uint8_t i = 0; i < iFallbackIndex; ++i)
-					fallbackFont = fallbackFont.fallback();
-				return fallbackFont;
-			}
-		}
-		bool use_fallback() const
-		{ 
-			return (iFlags & UseFallback) == UseFallback; 
-		}
-		uint8_t fallback_font_index() const
-		{
-			return iFallbackIndex;
-		}
-		void set_use_fallback(bool aUseFallback, uint32_t aFallbackIndex = 0)
-		{ 
-			iFlags = static_cast<flags_e>(aUseFallback ? iFlags | UseFallback : iFlags & ~UseFallback); 
-			iFallbackIndex = static_cast<uint8_t>(aFallbackIndex); 
+			return neogfx::font::from_token(*iFontToken);
 		}
 		void kerning_adjust(float aAdjust) 
 		{ 
 			iAdvance.cx += aAdjust; 
 		}
-		const i_glyph_texture& texture(const font& aFont) const
+		const i_glyph_texture& glyph_texture() const
 		{
-			return actual_font(aFont).glyph_texture(*this);
+			return font().glyph_texture(*this);
 		}
 	private:
 		character_type iType;
 		value_type iValue;
 		flags_e iFlags;
-		uint8_t iFallbackIndex;
 		source_type iSource;
+		neogfx::font::scoped_token iFontToken;
 		basic_size<float> iAdvance;
 		basic_size<float> iOffset;
+		mutable basic_size<float> iExtents;
 	};
 
 	class glyph_text : private std::vector<glyph>
@@ -351,12 +344,12 @@ namespace neogfx
 			{
 				const auto& g = *i;
 				result.cx += g.advance().cx;
-				result.cy = std::max(result.cy, g.height(aFont));
+				result.cy = std::max(result.cy, g.extents().cy);
 			}
 			if (aEndIsLineEnd)
 			{
 				const auto& lastGlyph = *std::prev(aEnd);
-				result.cx += (lastGlyph.width(aFont) - lastGlyph.advance().cx);
+				result.cx += (lastGlyph.extents().cx - lastGlyph.advance().cx);
 			}
 			return result.ceil();
 		}

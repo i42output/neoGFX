@@ -116,6 +116,38 @@ namespace neogfx
 	public:
 		struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::font::no_fallback_font") {} };
 		// types
+	public:
+		typedef uint16_t token;
+		class scoped_token
+		{
+		public:
+			scoped_token();
+			scoped_token(token aToken);
+			scoped_token(const font& aFont);
+			scoped_token(const scoped_token& aOther);
+			~scoped_token();
+		public:
+			scoped_token& operator=(const scoped_token& aOther);
+		public:
+			token operator*() const
+			{
+				return get();
+			}
+			bool operator==(const scoped_token& aOther) const
+			{
+				return get() == aOther.get();
+			}
+		public:
+			token get() const
+			{
+				return iToken;
+			}
+		private:
+			void add_ref();
+			void release();
+		private:
+			token iToken;
+		};
 	private:
 		class instance;
 		// construction
@@ -152,6 +184,10 @@ namespace neogfx
 		dimension line_spacing() const;
 		using font_info::kerning;
 		dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
+	public:
+		token get_token() const;
+		void return_token(token aToken) const;
+		static const font& from_token(token aToken);
 	public:
 		const i_glyph_texture& glyph_texture(const glyph& aGlyph) const;
 	public:

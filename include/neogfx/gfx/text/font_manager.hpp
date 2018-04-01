@@ -49,6 +49,9 @@ namespace neogfx
 	private:
 		typedef std::list<native_font> native_font_list;
 		typedef std::map<neolib::ci_string, std::vector<native_font_list::iterator>> font_family_list;
+		typedef std::pair<font::token, uint64_t> ref_counted_font_token;
+		typedef std::map<font, ref_counted_font_token> font_cache;
+		typedef std::unordered_map<font::token, font_cache::iterator> font_token_map;
 	public:
 		struct error_initializing_font_library : std::runtime_error { error_initializing_font_library() : std::runtime_error("neogfx::font_manager::error_initializing_font_library") {} };
 		struct no_matching_font_found : std::runtime_error { no_matching_font_found() : std::runtime_error("neogfx::font_manager::no_matching_font_found") {} };
@@ -81,6 +84,11 @@ namespace neogfx
 		uint32_t font_style_count(uint32_t aFamilyIndex) const override;
 		std::string font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const override;
 	public:
+		font::token get_token(const font& aFont) override;
+		void copy_token(font::token aToken) override;
+		void return_token(font::token aToken) override;
+		const font& from_token(font::token aToken) override;
+	public:
 		const i_texture_atlas& glyph_atlas() const override;
 		i_texture_atlas& glyph_atlas() override;
 		const i_emoji_atlas& emoji_atlas() const override;
@@ -95,6 +103,9 @@ namespace neogfx
 		FT_Library iFontLib;
 		native_font_list iNativeFonts;
 		font_family_list iFontFamilies;
+		font_cache iFontTokenCache;
+		font_token_map iFontTokens;
+		font::token iNextAvailableToken;
 		texture_atlas iGlyphAtlas;
 		neogfx::emoji_atlas iEmojiAtlas;
 	};
