@@ -21,6 +21,8 @@
 
 #include <neolib/neolib.hpp>
 #include <neolib/stdint.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
+using namespace boost::multiprecision;
 
 namespace neogfx
 {

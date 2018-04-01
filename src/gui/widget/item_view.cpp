@@ -300,7 +300,7 @@ namespace neogfx
 			if (item != boost::none)
 			{
 				selection_model().set_current_index(*item);
-				if (selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
+				if (selection_model().has_current_index() && selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
 					edit(*item);
 			}			
 			if (capturing())

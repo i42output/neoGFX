@@ -49,7 +49,7 @@ namespace neogfx
 	private:
 		typedef std::list<native_font> native_font_list;
 		typedef std::map<neolib::ci_string, std::vector<native_font_list::iterator>> font_family_list;
-		typedef std::pair<font::token, uint64_t> ref_counted_font_token;
+		typedef std::pair<font::token, uint128_t> ref_counted_font_token;
 		typedef std::map<font, ref_counted_font_token> font_cache;
 		typedef std::unordered_map<font::token, font_cache::iterator> font_token_map;
 	public:
