@@ -143,17 +143,24 @@ namespace neogfx
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				return 0.0;
-			if (iColumns[aColumnIndex].width != boost::none)
-				return *iColumns[aColumnIndex].width + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
-			iColumns[aColumnIndex].width = 0.0;
+			if (iFont != font())
+			{
+				reset_meta();
+				iFont = font();
+			}
+			auto& columnWidth = iColumns[aColumnIndex].width;
+			if (columnWidth != boost::none)
+				return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
+			columnWidth = 0.0;
 			for (item_presentation_model_index::row_type row = 0; row < iRows.size(); ++row)
 			{
 				auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
 				if (modelIndex.column() >= item_model().columns(modelIndex))
 					continue;
-				iColumns[aColumnIndex].width = std::max(*iColumns[aColumnIndex].width, cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGraphicsContext).cx);
+				auto cellWidth = cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGraphicsContext).cx;
+				columnWidth = std::max(*columnWidth, cellWidth);
 			}
-			return *iColumns[aColumnIndex].width + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
+			return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
 		}
 		const std::string& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
 		{
@@ -317,7 +324,9 @@ namespace neogfx
 					return *lhs < *rhs;
 			};
 			auto i = std::lower_bound(iPositions.begin(), iPositions.end(), aPosition, pred);
-			if (*i == boost::none)
+			if ((i == iPositions.end() || (*i != boost::none && **i > aPosition)) && i != iPositions.begin())
+				--i;
+			while (*i == boost::none)
 			{
 				auto j = std::lower_bound(iPositions.begin(), iPositions.end(), optional_position(), pred);
 				uint32_t row = std::distance(iPositions.begin(), j);
@@ -329,9 +338,9 @@ namespace neogfx
 					++row;
 				}
 				i = std::lower_bound(iPositions.begin(), iPositions.end(), aPosition, pred);
+				if ((i == iPositions.end() || (*i != boost::none && **i > aPosition)) && i != iPositions.begin())
+					--i;
 			}
-			if (i == iPositions.end() || *i > aPosition && i != iPositions.begin())
-				--i;
 			return std::pair<item_presentation_model_index::row_type, coordinate>(std::distance(iPositions.begin(), i), static_cast<coordinate>(**i - aPosition));
 		}
 	public:
