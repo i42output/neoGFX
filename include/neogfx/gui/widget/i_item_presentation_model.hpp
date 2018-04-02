@@ -145,6 +145,8 @@ namespace neogfx
 		virtual item_cell_editable column_editable(item_presentation_model_index::value_type aColumnIndex) const = 0;
 		virtual void set_column_editable(item_presentation_model_index::value_type aColumnIndex, item_cell_editable aEditable) = 0;
 	public:
+		virtual const font& default_font() const = 0;
+		virtual void set_default_font(const optional_font& aDefaultFont) = 0;
 		virtual size cell_spacing(const i_units_context& aUnitsContext) const = 0;
 		virtual void set_cell_spacing(const optional_size& aSpacing, const i_units_context& aUnitsContext) = 0;
 		virtual neogfx::margins cell_margins(const i_units_context& aUnitsContext) const = 0;

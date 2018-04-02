@@ -143,11 +143,6 @@ namespace neogfx
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				return 0.0;
-			if (iFont != font())
-			{
-				reset_meta();
-				iFont = font();
-			}
 			auto& columnWidth = iColumns[aColumnIndex].width;
 			if (columnWidth != boost::none)
 				return *columnWidth + (aIncludeMargins ? cell_margins(aGraphicsContext).size().cx : 0.0);
@@ -175,9 +170,9 @@ namespace neogfx
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				throw bad_column_index();
-			if (iColumns[aColumnIndex].headingFont != font())
+			if (iColumns[aColumnIndex].headingFont != font{})
 			{
-				iColumns[aColumnIndex].headingFont = font();
+				iColumns[aColumnIndex].headingFont = font{};
 				iColumns[aColumnIndex].headingExtents = boost::none;
 			}
 			if (iColumns[aColumnIndex].headingExtents != boost::none)
@@ -207,6 +202,20 @@ namespace neogfx
 			if (iColumns.size() < aColumnIndex + 1)
 				throw bad_column_index();
 			iColumns[aColumnIndex].editable = aEditable;
+		}
+		const font& default_font() const override
+		{
+			if (iDefaultFont != boost::none)
+				return *iDefaultFont;
+			return app::instance().current_style().font();
+		}
+		void set_default_font(const optional_font& aDefaultFont) override
+		{
+			if (iDefaultFont != aDefaultFont)
+			{
+				iDefaultFont = aDefaultFont;
+				reset_meta();
+			}
 		}
 		size cell_spacing(const i_units_context& aUnitsContext) const override
 		{
@@ -254,17 +263,12 @@ namespace neogfx
 				if (modelIndex.column() >= item_model().columns(modelIndex))
 					continue;
 				optional_font cellFont = cell_font(aIndex);
-				if (cellFont == boost::none && iFont != font())
-				{
-					reset_meta();
-					iFont = font();
-				}
 				if (cell_meta(aIndex).extents != boost::none)
 					height = std::max(height, units_converter(aUnitsContext).from_device_units(*cell_meta(aIndex).extents).cy);
 				else
 				{
 					std::string cellString = cell_to_string(item_presentation_model_index(aIndex.row(), col));
-					const font& effectiveFont = (cellFont == boost::none ? iFont : *cellFont);
+					const font& effectiveFont = (cellFont == boost::none ? default_font() : *cellFont);
 					height = std::max(height, units_converter(aUnitsContext).from_device_units(size(0.0, std::ceil(effectiveFont.height()))).cy *
 						(1 + std::count(cellString.begin(), cellString.end(), '\n')));
 				}
@@ -511,25 +515,15 @@ namespace neogfx
 		neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
 		{
 			optional_font cellFont = cell_font(aIndex);
-			if (cellFont == boost::none && iFont != font())
-			{
-				reset_meta();
-				iFont = font();
-			}
 			if (cell_meta(aIndex).text != boost::none)
 				return *cell_meta(aIndex).text;
-			cell_meta(aIndex).text = aGraphicsContext.to_glyph_text(cell_to_string(aIndex), cellFont == boost::none ? iFont : *cellFont);
+			cell_meta(aIndex).text = aGraphicsContext.to_glyph_text(cell_to_string(aIndex), cellFont == boost::none ? default_font() : *cellFont);
 			return *cell_meta(aIndex).text;
 		}
 		size cell_extents(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
 		{
 			auto oldItemHeight = item_height(aIndex, aGraphicsContext);
 			optional_font cellFont = cell_font(aIndex);
-			if (cellFont == boost::none && iFont != font())
-			{
-				reset_meta();
-				iFont = font();
-			}
 			if (cell_meta(aIndex).extents != boost::none)
 				return units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents);
 			size cellExtents = cell_glyph_text(aIndex, aGraphicsContext).extents();
@@ -889,7 +883,7 @@ namespace neogfx
 		mutable row_map_type iRowMap;
 		column_info_container_type iColumns;
 		mutable column_map_type iColumnMap;
-		mutable font iFont;
+		mutable optional_font iDefaultFont;
 		mutable boost::optional<i_scrollbar::value_type> iTotalHeight;
 		mutable neolib::segmented_array<optional_position, 256> iPositions;
 		std::deque<sort> iSortOrder;
