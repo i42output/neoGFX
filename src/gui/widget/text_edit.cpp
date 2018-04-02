@@ -1563,6 +1563,8 @@ namespace neogfx
 				auto& paragraph = *p;
 				auto paragraphStart = paragraph.first.start();
 				auto paragraphEnd = paragraph.first.end();
+				if (paragraphStart == iGlyphs.end())
+					return;
 				if (paragraphStart == paragraphEnd || paragraphStart->is_line_breaking_whitespace())
 				{
 					auto lineStart = paragraphStart;
