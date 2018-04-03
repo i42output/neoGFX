@@ -870,8 +870,16 @@ namespace neogfx
 				char16_t characterCode = static_cast<char16_t>(wparam);
 				std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
 				uint8_t ch = static_cast<uint8_t>(text[0]);
-				if ((ch >= 32 && ch != 127) || ch == '\t' || ch == '\n')
+				switch (ch)
+				{
+				case '\t':
+				case '\n':
+				case '\r':
 					self.push_event(keyboard_event(keyboard_event_type::TextInput, text));
+					break;
+				default:
+					break;
+				}
 			}
 			break;
 		case WM_SETCURSOR:
@@ -1291,7 +1299,7 @@ namespace neogfx
 			/* todo */
 			break;
 		case SDL_TEXTINPUT:
-			/* do nothing; we handle text input separately. */
+			push_event(keyboard_event(keyboard_event_type::TextInput, aEvent.text.text));
 			break;
 		default:
 			break;
