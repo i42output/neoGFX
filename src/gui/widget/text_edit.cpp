@@ -1493,15 +1493,18 @@ namespace neogfx
 			{
 				paragraphBuffer.assign(paragraphStart, iterChar + 1);
 				auto gt = gc.to_glyph_text(paragraphBuffer.begin(), paragraphBuffer.end(), fs);
-				auto paragraphGlyphs = iGlyphs.insert(iGlyphs.end(), gt.cbegin(), gt.cend());
-				auto newParagraph = iGlyphParagraphs.insert(iGlyphParagraphs.end(),
-					std::make_pair(
-						glyph_paragraph{*this},
-						glyph_paragraph_index{
-							static_cast<std::size_t>((iterChar + 1) - iText.begin()) - static_cast<std::size_t>(paragraphStart - iText.begin()),
-							iGlyphs.size() - static_cast<std::size_t>(paragraphGlyphs - iGlyphs.begin())}),
-					glyph_paragraphs::skip_type{glyph_paragraph_index{}, glyph_paragraph_index{}});
-				newParagraph->first.set_self(newParagraph);
+				if (gt.cbegin() != gt.cend())
+				{
+					auto paragraphGlyphs = iGlyphs.insert(iGlyphs.end(), gt.cbegin(), gt.cend());
+					auto newParagraph = iGlyphParagraphs.insert(iGlyphParagraphs.end(),
+						std::make_pair(
+							glyph_paragraph{ *this },
+							glyph_paragraph_index{
+								static_cast<std::size_t>((iterChar + 1) - iText.begin()) - static_cast<std::size_t>(paragraphStart - iText.begin()),
+								iGlyphs.size() - static_cast<std::size_t>(paragraphGlyphs - iGlyphs.begin()) }),
+								glyph_paragraphs::skip_type{ glyph_paragraph_index{}, glyph_paragraph_index{} });
+					newParagraph->first.set_self(newParagraph);
+				}
 				paragraphStart = iterChar + 1;
 				columnDelimiters.clear();
 			}
@@ -1563,8 +1566,6 @@ namespace neogfx
 				auto& paragraph = *p;
 				auto paragraphStart = paragraph.first.start();
 				auto paragraphEnd = paragraph.first.end();
-				if (paragraphStart == iGlyphs.end())
-					return;
 				if (paragraphStart == paragraphEnd || paragraphStart->is_line_breaking_whitespace())
 				{
 					auto lineStart = paragraphStart;
