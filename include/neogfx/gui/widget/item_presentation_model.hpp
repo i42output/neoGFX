@@ -506,11 +506,11 @@ namespace neogfx
 		}
 		optional_colour cell_colour(const item_presentation_model_index&, item_cell_colour_type) const override
 		{
-			return optional_colour();
+			return optional_colour{};
 		}
 		optional_font cell_font(const item_presentation_model_index&) const override
 		{
-			return optional_font();
+			return optional_font{};
 		}
 		neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
 		{
@@ -527,6 +527,8 @@ namespace neogfx
 			if (cell_meta(aIndex).extents != boost::none)
 				return units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents);
 			size cellExtents = cell_glyph_text(aIndex, aGraphicsContext).extents();
+			if (cellExtents.cy == 0.0)
+				cellExtents.cy = (cellFont == boost::none ? default_font() : *cellFont).height();
 			cell_meta(aIndex).extents = units_converter(aGraphicsContext).to_device_units(cellExtents);
 			cell_meta(aIndex).extents->cx = std::ceil(cell_meta(aIndex).extents->cx);
 			cell_meta(aIndex).extents->cy = std::ceil(cell_meta(aIndex).extents->cy);

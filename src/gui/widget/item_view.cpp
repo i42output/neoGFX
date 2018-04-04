@@ -230,8 +230,6 @@ namespace neogfx
 		rect clipRect = default_clip_rect().intersection(item_display_rect());
 		for (item_presentation_model_index::value_type row = first.first; row < presentation_model().rows() && !finished; ++row)
 		{
-			optional_font of = presentation_model().cell_font(item_presentation_model_index{ row });
-			const neogfx::font& f = (of != boost::none ? *of : app::instance().current_style().font());
 			finished = true;
 			for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 			{
@@ -251,7 +249,7 @@ namespace neogfx
 					aGraphicsContext.scissor_off();
 				}
 				aGraphicsContext.scissor_on(clipRect.intersection(cellRect));
-				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(presentation_model().cell_margins(*this).left, presentation_model().cell_margins(*this).top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), f, *textColour);
+				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(presentation_model().cell_margins(*this).left, presentation_model().cell_margins(*this).top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), *textColour);
 				aGraphicsContext.scissor_off();
 				if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
 				{

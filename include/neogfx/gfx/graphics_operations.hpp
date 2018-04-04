@@ -221,7 +221,6 @@ namespace neogfx
 		{
 			vec3 point;
 			glyph glyph;
-			font font;
 			text_appearance appearance;
 		};
 

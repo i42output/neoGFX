@@ -1099,7 +1099,7 @@ namespace neogfx
 			use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 			auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
-			rectangle r{ firstOp.point, size{ firstOp.font.height(), firstOp.font.height() }.to_vec2() };
+			rectangle r{ firstOp.point, size{ firstOp.glyph.extents().cx, firstOp.glyph.extents().cy }.to_vec2() };
 			r.set_position(r.position() + vec3{ r.extents().x, r.extents().y, 0.0 } / 2.0);
 			r.set_textures(to_texture_list_pointer(emojiTexture));
 			draw_textures(r, optional_colour{}, shader_effect::None);
@@ -1118,13 +1118,14 @@ namespace neogfx
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(op);
 
+				const font& glyphFont = drawOp.glyph.font();
 				const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 
 				vec3 glyphOrigin(
 					drawOp.point.x + glyphTexture.placement().x,
 					logical_coordinates().first.y < logical_coordinates().second.y ? 
-						drawOp.point.y + (glyphTexture.placement().y + -drawOp.font.descender()) :
-						drawOp.point.y + drawOp.font.height() - (glyphTexture.placement().y + -drawOp.font.descender()) - glyphTexture.texture().extents().cy,
+						drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
+						drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
 					drawOp.point.z);
 
 				iTempTextureCoords.clear();

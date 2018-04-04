@@ -1791,7 +1791,6 @@ namespace neogfx
 						break;
 					case 1:
 						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - outlineAdjust }, glyph,
-							glyphFont,
 							selected && has_focus() ?
 								text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
 								text_appearance{
@@ -1815,7 +1814,6 @@ namespace neogfx
 			const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
 			if (glyph.underline())
 				aGraphicsContext.draw_glyph_underline(pos + point{ 0.0, aLine->extents.cy - glyphFont.height() }, glyph,
-					glyphFont,
 					style.text_colour().is<colour>() ?
 						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
 							static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 

@@ -26,20 +26,20 @@
 namespace neogfx
 {
 	text_widget::text_widget(const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
-		widget{}, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iFlags{ aFlags }, iAlignment {	neogfx::alignment::Centre | neogfx::alignment::VCentre
+		widget{}, iText{ aText }, iGlyphTextCache{}, iType{ aType }, iFlags{ aFlags }, iAlignment {	neogfx::alignment::Centre | neogfx::alignment::VCentre
 	}
 	{
 		init();
 	}
 
 	text_widget::text_widget(i_widget& aParent, const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
-		widget{ aParent }, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
+		widget{ aParent }, iText{ aText }, iGlyphTextCache{}, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
 	{
 		init();
 	}
 
 	text_widget::text_widget(i_layout& aLayout, const std::string& aText, text_widget_type aType, text_widget_flags aFlags) :
-		widget{ aLayout }, iText{ aText }, iGlyphTextCache{ neogfx::font{} }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
+		widget{ aLayout }, iText{ aText }, iGlyphTextCache{}, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Centre | neogfx::alignment::VCentre }
 	{
 		init();
 	}
@@ -77,11 +77,6 @@ namespace neogfx
 	void text_widget::paint(graphics_context& aGraphicsContext) const
 	{
 		scoped_mnemonics sm(aGraphicsContext, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT));
-		if (iGlyphTextCache.font() != font())
-		{
-			iTextExtent = boost::none;
-			iGlyphTextCache = glyph_text{ font() };
-		}
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
 		size textSize = text_extent();
 		point textPosition;
@@ -128,7 +123,7 @@ namespace neogfx
 		widget::set_font(aFont);
 		iTextExtent = boost::none;
 		iSizeHintExtent = boost::none;
-		iGlyphTextCache = glyph_text(font());
+		iGlyphTextCache = glyph_text{};
 	}
 
 	bool text_widget::visible() const
@@ -150,7 +145,7 @@ namespace neogfx
 			size oldSize = minimum_size();
 			iText = aText;
 			iTextExtent = boost::none;
-			iGlyphTextCache = glyph_text{ font() };
+			iGlyphTextCache = glyph_text{};
 			text_changed.trigger();
 			if (has_parent_layout())
 				parent_layout().invalidate();
@@ -266,12 +261,6 @@ namespace neogfx
 
 	size text_widget::text_extent() const
 	{
-		if (iGlyphTextCache.font() != font())
-		{
-			iTextExtent = boost::none;
-			iSizeHintExtent = boost::none;
-			iGlyphTextCache = glyph_text{ font() };
-		}
 		if (iTextExtent != boost::none)
 			return *iTextExtent;
 		else if (!has_surface())
@@ -295,12 +284,6 @@ namespace neogfx
 
 	size text_widget::size_hint_extent() const
 	{
-		if (iGlyphTextCache.font() != font())
-		{
-			iTextExtent = boost::none;
-			iSizeHintExtent = boost::none;
-			iGlyphTextCache = glyph_text{ font() };
-		}
 		if (iSizeHintExtent != boost::none)
 			return *iSizeHintExtent;
 		else if (!has_surface())
@@ -334,7 +317,7 @@ namespace neogfx
 			{
 				iTextExtent = boost::none;
 				iSizeHintExtent = boost::none;
-				iGlyphTextCache = glyph_text{ font() };
+				iGlyphTextCache = glyph_text{};
 				if (has_parent_layout())
 					parent_layout().invalidate();
 				update();
@@ -344,7 +327,7 @@ namespace neogfx
 		{
 			iTextExtent = boost::none;
 			iSizeHintExtent = boost::none;
-			iGlyphTextCache = glyph_text{ font() };
+			iGlyphTextCache = glyph_text{};
 			if (has_parent_layout())
 				parent_layout().invalidate();
 			update();

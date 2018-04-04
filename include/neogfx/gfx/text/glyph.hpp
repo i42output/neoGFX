@@ -308,22 +308,49 @@ namespace neogfx
 		typedef std::vector<glyph> container;
 		using container::const_iterator;
 	public:
-		glyph_text(const font& aFont) : 
-			iFont(aFont)
+		glyph_text() :
+			container{},
+			iExtents{}
 		{
 		}
 		template <typename Iter>
-		glyph_text(const font& aFont, Iter aBegin, Iter aEnd) : 
-			container(aBegin, aEnd),
-			iFont(aFont),
-			iExtents(extents(iFont, begin(), end()))
+		glyph_text(Iter aBegin, Iter aEnd) :
+			container{ aBegin, aEnd },
+			iExtents{ extents(begin(), end()) }
 		{
 		}
-		glyph_text(const font& aFont, container&& aGlyphs) :
-			container(aGlyphs),
-			iFont(aFont),
-			iExtents(extents(iFont, begin(), end()))
+		glyph_text(const glyph_text& aOther) :
+			container{ aOther },
+			iExtents{ aOther.iExtents }
 		{
+
+		}
+		glyph_text(glyph_text&& aOther) :
+			container{ std::move(aOther) },
+			iExtents{ extents(begin(), end()) }
+		{
+		}
+		glyph_text(container&& aOther) :
+			container{ std::move(aOther) },
+			iExtents{ extents(begin(), end()) }
+		{
+		}
+	public:
+		glyph_text& operator=(const glyph_text& aOther)
+		{
+			if (&aOther == this)
+				return *this;
+			container::operator=(aOther);
+			iExtents = aOther.iExtents;
+			return *this;
+		}
+		glyph_text& operator=(glyph_text&& aOther)
+		{
+			if (&aOther == this)
+				return *this;
+			container::operator=(std::move(aOther));
+			iExtents = aOther.iExtents;
+			return *this;
 		}
 	public:
 		using container::cbegin;
@@ -332,13 +359,13 @@ namespace neogfx
 	public:
 		bool operator==(const glyph_text& aOther) const
 		{
-			return font() == aOther.font() && static_cast<const container&>(*this) == static_cast<const container&>(aOther);
+			return static_cast<const container&>(*this) == static_cast<const container&>(aOther);
 		}
 	public:
-		static neogfx::size extents(const font& aFont, const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true)
+		static neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true)
 		{
 			if (aBegin == aEnd)
-				return neogfx::size{ 0.0, aFont.height() };
+				return neogfx::size{ 0.0, 0.0 };
 			neogfx::size result;
 			for (glyph_text::const_iterator i = aBegin; i != aEnd; ++i)
 			{
@@ -354,10 +381,6 @@ namespace neogfx
 			return result.ceil();
 		}
 	public:
-		const neogfx::font& font() const
-		{
-			return iFont;
-		}
 		const neogfx::size& extents() const
 		{
 			return iExtents;
@@ -386,7 +409,6 @@ namespace neogfx
 			return result;
 		}
 	private:
-		neogfx::font iFont;
 		neogfx::size iExtents;
 	};
 

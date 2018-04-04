@@ -24,7 +24,7 @@
 namespace neogfx
 {
 	text::text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment) :
-		shape{ aContainer }, iText{ aText }, iFont{ aFont }, iAppearance{ aAppearance }, iAlignment { aAlignment }, iGlyphTextCache(aFont)
+		shape{ aContainer }, iText{ aText }, iFont{ aFont }, iAppearance{ aAppearance }, iAlignment { aAlignment }
 	{
 		set_position(aPosition);
 		add_frame(std::make_shared<neogfx::shape_frame>(aAppearance.ink()));
@@ -39,7 +39,7 @@ namespace neogfx
 	{
 		iText = aText;
 		iTextExtent = boost::none;
-		iGlyphTextCache = glyph_text(font());
+		iGlyphTextCache = glyph_text{};
 		clear_vertices_cache();
 	}
 
@@ -52,7 +52,7 @@ namespace neogfx
 	{
 		iFont = aFont;
 		iTextExtent = boost::none;
-		iGlyphTextCache = glyph_text(font());
+		iGlyphTextCache = glyph_text{};
 		clear_vertices_cache();
 	}
 
@@ -123,11 +123,6 @@ namespace neogfx
 
 	void text::paint(graphics_context& aGraphicsContext) const
 	{
-		if (iGlyphTextCache.font() != font())
-		{
-			iTextExtent = boost::none;
-			iGlyphTextCache = glyph_text(font());
-		}
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
 		auto bb2d = bounding_box_2d();
 		bb2d.position() = bb2d.position().ceil();
@@ -150,11 +145,6 @@ namespace neogfx
 
 	size text::text_extent() const
 	{
-		if (iGlyphTextCache.font() != font())
-		{
-			iTextExtent = boost::none;
-			iGlyphTextCache = glyph_text(font());
-		}
 		if (iTextExtent != boost::none)
 			return *iTextExtent;
 		graphics_context gc{ container().as_widget(), graphics_context::type::Unattached };

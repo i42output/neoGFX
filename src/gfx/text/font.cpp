@@ -318,7 +318,9 @@ namespace neogfx
 
 	font::scoped_token& font::scoped_token::operator=(const scoped_token& aOther)
 	{
-		scoped_token copy{ aOther };
+		if (&aOther == this)
+			return *this;
+		scoped_token copy{ *this };
 		release();
 		iToken = aOther.get();
 		add_ref();
