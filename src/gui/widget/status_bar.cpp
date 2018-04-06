@@ -46,7 +46,7 @@ namespace neogfx
 	{
 		scoped_units su(*this, aGraphicsContext, units::Pixels);
 		rect line = client_rect(false);
-		line.deflate(0, std::floor(client_rect().height() / 6.0));
+		line.deflate(dpi_scale(size{ 0.0, 2.0 }));
 		line.cx = 1.0;
 		colour ink = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().foreground_colour());
 		aGraphicsContext.fill_rect(line, ink.darker(0x40).with_alpha(0x80));
@@ -74,7 +74,6 @@ namespace neogfx
 		auto scrlLock = std::make_shared<label>();
 		scrlLock->text().set_size_hint("SCRL");
 		iLayout.add(scrlLock);
-		iLayout.add(std::make_shared<separator>());
 		iUpdater = std::make_unique<neolib::callback_timer>(app::instance(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
