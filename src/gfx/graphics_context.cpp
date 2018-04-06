@@ -1450,12 +1450,13 @@ namespace neogfx
 				}
 				startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
 				endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
-				neogfx::font font = aFontSelector(startCluster);
+				neogfx::font selectedFont = aFontSelector(startCluster);
+				neogfx::font font = selectedFont;
 				if (shapes.using_fallback(j))
 				{
-					font = font.fallback();
-					for (auto fi = shapes.fallback_index(j); fi > 0; --fi)
-						font = font.fallback();
+					font = font.has_fallback() ? font.fallback() : selectedFont;
+					for (auto fi = shapes.fallback_index(j); font != selectedFont && fi > 0; --fi)
+						font = font.has_fallback() ? font.fallback() : selectedFont;
 				}
 				if (j > 0 && !result.empty())
 					result.back().kerning_adjust(static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
