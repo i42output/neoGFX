@@ -679,8 +679,6 @@ namespace neogfx
 				else
 					selection_model().unset_current_index();
 			}
-			if (iSavedSelection == boost::none && selection_model().has_current_index())
-				iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
 		}
 	}
 
@@ -716,6 +714,11 @@ namespace neogfx
 			selection_changed.async_trigger(iSelection);
 		}
 		iSavedSelection = boost::none;
+
+		std::string text;
+		if (selection_model().has_current_index())
+			text = presentation_model().cell_to_string(selection_model().current_index());
+		input_widget().set_text(text);
 	}
 
 	void drop_list::cancel_selection()
@@ -829,17 +832,21 @@ namespace neogfx
 	{
 		aTextWidget.text_changed([this, &aInputWidget, &aTextWidget]()
 		{
-			neolib::scoped_flag sf{ iHandlingTextChange };
-			aInputWidget.text_changed.trigger();
-			if (aTextWidget.has_focus() && (!view_created() || !view().changing_text()))
+			if (!accepting_selection())
 			{
-				if (!aTextWidget.text().empty())
-					show_view();
-				else
+				neolib::scoped_flag sf{ iHandlingTextChange };
+				iSavedSelection = boost::none;
+				aInputWidget.text_changed.trigger();
+				if (aTextWidget.has_focus() && (!view_created() || !view().changing_text()))
 				{
-					if (view_created())
-						hide_view();
-					cancel_selection();
+					if (!aTextWidget.text().empty())
+						show_view();
+					else
+					{
+						if (view_created())
+							hide_view();
+						cancel_selection();
+					}
 				}
 			}
 		});
