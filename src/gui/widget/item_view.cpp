@@ -499,20 +499,21 @@ namespace neogfx
 		case UsvStageInit:
 			{
 				scoped_units su{ *this, units::Pixels };
-				i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
+				basic_size<i_scrollbar::value_type> oldPosition{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
+				vertical_scrollbar().hide();
+				horizontal_scrollbar().hide();
 				vertical_scrollbar().set_maximum(units_converter(*this).to_device_units(total_item_area(*this)).cy);
 				vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
 				vertical_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cy, 0.0));
-				vertical_scrollbar().set_position(oldPosition);
+				vertical_scrollbar().set_position(oldPosition.cy);
 				if (vertical_scrollbar().page() > 0 && vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
 					vertical_scrollbar().show();
 				else
 					vertical_scrollbar().hide();
-				oldPosition = horizontal_scrollbar().position();
 				horizontal_scrollbar().set_maximum(units_converter(*this).to_device_units(total_item_area(*this)).cx);
 				horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_margins(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
 				horizontal_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cx, 0.0));
-				horizontal_scrollbar().set_position(oldPosition);
+				horizontal_scrollbar().set_position(oldPosition.cx);
 				if (horizontal_scrollbar().page() > 0 && horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
 					horizontal_scrollbar().show();
 				else
