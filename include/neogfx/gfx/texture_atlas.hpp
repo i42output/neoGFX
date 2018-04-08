@@ -26,7 +26,7 @@
 #include "i_texture_manager.hpp"
 #include "texture.hpp"
 #include "sub_texture.hpp"
-#include "skyline_bin_pack.hpp"
+#include "rect_pack.hpp"
 
 namespace neogfx
 {
@@ -45,7 +45,7 @@ namespace neogfx
 						std::forward_as_tuple(aRhs.width() * aRhs.height(), aRhs.top_left());
 				}
 			};
-			skyline_bin_pack pack;
+			rect_pack pack;
 			std::set<rect, fragment_less_than> used;
 			std::set<rect, fragment_less_than> freed; // todo: use this when bin pack is full
 			bool insert(const size& aSize, rect& aResult)

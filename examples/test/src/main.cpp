@@ -989,13 +989,13 @@ int main(int argc, char* argv[])
 		{
 			ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
 			aGc.draw_texture(ng::point{ (tabDrawing.extents() - logo.extents()) / 2.0 }, logo);
-			aGc.fill_rounded_rect(ng::rect{ 100, 100, 100, 100 }, 10.0, ng::colour::Goldenrod);
-			aGc.fill_rect(ng::rect{ 300, 250, 200, 100 }, gw.gradient().with_direction(ng::gradient::Horizontal));
-			aGc.fill_rounded_rect(ng::rect{ 300, 400, 200, 100 }, 10.0, gw.gradient().with_direction(ng::gradient::Horizontal));
-			aGc.draw_rounded_rect(ng::rect{ 300, 400, 200, 100 }, 10.0, ng::pen{ ng::colour::Blue4, 2.0 });
-			aGc.draw_rounded_rect(ng::rect{ 150, 150, 300, 300 }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
-			aGc.fill_rounded_rect(ng::rect{ 500, 500, 200, 200 }, 10.0, gw.gradient().with_direction(ng::gradient::Radial));
-			aGc.draw_rounded_rect(ng::rect{ 500, 500, 200, 200 }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
+			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
+			aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, gw.gradient().with_direction(ng::gradient::Horizontal));
+			aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, gw.gradient().with_direction(ng::gradient::Horizontal));
+			aGc.draw_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ng::pen{ ng::colour::Blue4, 2.0 });
+			aGc.draw_rounded_rect(ng::rect{ ng::point{ 150, 150 }, ng::size{ 300, 300 } }, 10.0, ng::pen{ ng::colour::Red4, 2.0 });
+			aGc.fill_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, gw.gradient().with_direction(ng::gradient::Radial));
+			aGc.draw_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ng::pen{ ng::colour::Black, 1.0 });
 			aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
 			aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
 			aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::colour::Yellow, 3.0 });

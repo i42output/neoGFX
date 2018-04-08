@@ -246,7 +246,7 @@ namespace neogfx
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
 
 		auto& subTexture = iRenderingEngine.font_manager().glyph_atlas().create_sub_texture(
-			neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) },
+			neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) }.ceil(),
 			1.0, texture_sampling::Normal);
 		rect glyphRect{ subTexture.atlas_location() };
 		i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(std::make_pair(aGlyph.value(), aGlyph.subpixel()),

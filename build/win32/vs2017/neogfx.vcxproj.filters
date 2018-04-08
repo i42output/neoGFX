@@ -243,9 +243,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\gradient_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gfx\text\skyline_bin_pack.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -471,9 +468,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture_atlas.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gfx\skyline_bin_pack.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -691,6 +685,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_bits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\rect_pack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -959,9 +956,6 @@
     <ClCompile Include="..\..\..\src\gfx\text\emoji_atlas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\skyline_bin_pack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\text\native\glyph_texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1077,6 +1071,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\layout\border_layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

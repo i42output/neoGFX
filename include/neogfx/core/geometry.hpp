@@ -436,7 +436,8 @@ namespace neogfx
 			point_type{ std::min(topLeft.x, bottomRight.x), std::min(topLeft.y, bottomRight.y) },
 			size_type{ std::abs(static_cast<CoordinateType>(bottomRight.x - topLeft.x)), std::abs(static_cast<CoordinateType>(bottomRight.y - topLeft.y)) } {}
 		basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
-		basic_rect(coordinate_type x, coordinate_type y, dimension_type cx, dimension_type cy) : point_type{ x, y }, size_type{ cx, cy } {}
+		basic_rect(coordinate_type x0, coordinate_type y0, coordinate_type x1, coordinate_type y1) : point_type{ x0, y0 }, size_type{ x1 - x0, y1 - y0 } {}
+	public:
 		template <typename CoordinateType2>
 		basic_rect(const basic_rect<CoordinateType2>& other) : point_type{ other }, size_type{ other } {}
 		// assignment

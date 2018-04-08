@@ -181,7 +181,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_atlas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gfx\skyline_bin_pack.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\rect_pack.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture_atlas.hpp" />
@@ -193,7 +193,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_emoji_atlas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gfx\text\skyline_bin_pack.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\color_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\colour_dialog.hpp" />
@@ -388,7 +387,7 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\sdl_graphics_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\skyline_bin_pack.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
     <ClCompile Include="..\..\..\src\gfx\sub_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture_atlas.cpp" />

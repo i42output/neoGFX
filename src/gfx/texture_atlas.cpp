@@ -92,11 +92,11 @@ namespace neogfx
 			create_page(aDpiScaleFactor, aSampling);
 		rect result;
 		for (auto iterPage = iPages.begin(); iterPage != iPages.end(); ++iterPage)
-			if (iterPage->first.dpi_scale_factor() == aDpiScaleFactor && iterPage->first.sampling() == aSampling && iterPage->second.insert(size{ std::max(std::pow(2.0, std::ceil(std::log2(aSize.cx + 2.0))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(aSize.cy + 2.0))), 16.0) }, result))
-				return std::make_pair(iterPage, result);
+			if (iterPage->first.dpi_scale_factor() == aDpiScaleFactor && iterPage->first.sampling() == aSampling && iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
+				return std::make_pair(iterPage, result + point{ 1.0, 1.0 });
 		auto iterPage = create_page(aDpiScaleFactor, aSampling);
-		if (iterPage->second.insert(size{ std::max(std::pow(2.0, std::ceil(std::log2(aSize.cx + 2.0))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(aSize.cy + 2.0))), 16.0) }, result))
-			return std::make_pair(iterPage, result);
+		if (iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
+			return std::make_pair(iterPage, result + point{ 1.0, 1.0 });
 		iPages.erase(iterPage);
 		throw texture_too_big_for_atlas();
 	}
