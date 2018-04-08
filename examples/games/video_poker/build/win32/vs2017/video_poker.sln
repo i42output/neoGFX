@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "video_poker", "video_poker.vcxproj", "{EA135436-DFC4-4277-A66A-BCDE83D37104}"
+	ProjectSection(ProjectDependencies) = postProject
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neoGFX", "..\..\..\..\..\..\build\win32\vs2017\neogfx.vcxproj", "{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +24,12 @@ Global
 		{EA135436-DFC4-4277-A66A-BCDE83D37104}.Release|x64.ActiveCfg = Release|Win32
 		{EA135436-DFC4-4277-A66A-BCDE83D37104}.Release|x86.ActiveCfg = Release|Win32
 		{EA135436-DFC4-4277-A66A-BCDE83D37104}.Release|x86.Build.0 = Release|Win32
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}.Debug|x64.ActiveCfg = Debug|Win32
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}.Debug|x86.ActiveCfg = Debug|Win32
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}.Debug|x86.Build.0 = Debug|Win32
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}.Release|x64.ActiveCfg = Release|Win32
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}.Release|x86.ActiveCfg = Release|Win32
+		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

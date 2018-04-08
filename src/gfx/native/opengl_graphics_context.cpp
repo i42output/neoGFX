@@ -1225,7 +1225,7 @@ namespace neogfx
 
 			if (pass == 2 && firstOp.glyph.subpixel())
 			{
-				glCheck(glTextureBarrierNV());
+				glCheck(glTextureBarrier());
 			}
 
 			if (pass == 1)

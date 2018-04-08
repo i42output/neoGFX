@@ -317,6 +317,11 @@ namespace neogfx
 			throw no_audio();
 	}
 
+	dimension app::default_dpi_scale_factor() const
+	{
+		return neogfx::default_dpi_scale_factor(surface_manager().display().metrics().ppi());
+	}
+
 	const i_texture& app::default_window_icon() const
 	{
 		return iDefaultWindowIcon;

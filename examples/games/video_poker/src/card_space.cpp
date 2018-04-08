@@ -50,7 +50,7 @@ namespace video_poker
 
 	neogfx::size card_widget::maximum_size(const neogfx::optional_size& aAvailableSpace) const
 	{
-		return (minimum_size(aAvailableSpace) / 0.5).ceil();
+		return (minimum_size(aAvailableSpace) * 2.0).ceil();
 	}
 		
 	void card_widget::paint(neogfx::graphics_context& aGraphicsContext) const
