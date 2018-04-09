@@ -38,14 +38,14 @@
 
 namespace neogfx
 {
-	rect_pack::node* rect_pack::node::insert(const size& aElementSize, allocator_type& aAllocator)
+	rect_pack::node* rect_pack::node::insert(const size& aElementSize)
 	{
 		if (!is_leaf())
 		{
-			auto result = iChildren[0]->insert(aElementSize, aAllocator);
+			auto result = iChildren[0]->insert(aElementSize);
 			if (result != nullptr)
 				return result;
-			return iChildren[1]->insert(aElementSize, aAllocator);
+			return iChildren[1]->insert(aElementSize);
 		}
 		if (iInUse)
 			return nullptr;
@@ -64,21 +64,21 @@ namespace neogfx
 		neogfx::rect rcChild1 = dw > dh ?
 			neogfx::rect{ iRect.left() + aElementSize.cx, iRect.top(), iRect.right(), iRect.bottom() } :
 			neogfx::rect{ iRect.left(), iRect.top() + aElementSize.cy, iRect.right(), iRect.bottom() };
-		iChildren[0] = allocator_type::allocate(1);
-		iChildren[1] = allocator_type::allocate(1);
-		aAllocator.construct(iChildren[0], rcChild0);
-		aAllocator.construct(iChildren[1], rcChild1);
-		return iChildren[0]->insert(aElementSize, aAllocator);
+		iChildren[0] = iAllocator.allocate(1);
+		iChildren[1] = iAllocator.allocate(1);
+		iAllocator.construct(iChildren[0], rcChild0, iAllocator);
+		iAllocator.construct(iChildren[1], rcChild1, iAllocator);
+		return iChildren[0]->insert(aElementSize);
 	}
 
 	rect_pack::rect_pack(const size& aDimensions) :
-		iRoot{ rect{ point{}, aDimensions } }
+		iRoot{ rect{ point{}, aDimensions }, iAllocator }
 	{
 	}
 
 	bool rect_pack::insert(const size& aElementSize, rect& aResult)
 	{
-		auto result = iRoot.insert(aElementSize, iAllocator);
+		auto result = iRoot.insert(aElementSize);
 		if (result != nullptr)
 		{
 			aResult = result->rect();

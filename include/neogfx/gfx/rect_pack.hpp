@@ -49,10 +49,24 @@ namespace neogfx
 		public:
 			typedef boost::fast_pool_allocator<node, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex> allocator_type;
 		public:
-			node(const rect& aRect) : 
-				iInUse{ false }, iChildren{}, iRect{ aRect }
+			node(const rect& aRect, allocator_type& aAllocator) :
+				iAllocator{ aAllocator }, iInUse { false }, iChildren{}, iRect{ aRect }
 			{
 			}
+			~node()
+			{
+				if (iChildren[0] != nullptr)
+				{
+					iAllocator.destroy(iChildren[0]);
+					iAllocator.deallocate(iChildren[0]);
+				}
+				if (iChildren[1] != nullptr)
+				{
+					iAllocator.destroy(iChildren[1]);
+					iAllocator.deallocate(iChildren[1]);
+				}
+			}
+		public:
 			bool is_leaf() const 
 			{
 				return iChildren[0] == nullptr;
@@ -61,8 +75,9 @@ namespace neogfx
 			{
 				return iRect;
 			}
-			node* insert(const size& aElementSize, allocator_type& aAllocator);
+			node* insert(const size& aElementSize);
 		private:
+			allocator_type& iAllocator;
 			bool iInUse;
 			std::array<node*, 2> iChildren;
 			neogfx::rect iRect;
