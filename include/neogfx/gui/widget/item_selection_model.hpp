@@ -50,11 +50,11 @@ namespace neogfx
 	public:
 		bool has_presentation_model() const override
 		{
-			return iModel != 0;
+			return iModel != nullptr;
 		}
 		i_item_presentation_model& presentation_model() const override
 		{
-			if (iModel == 0)
+			if (iModel == nullptr)
 				throw no_presentation_model();
 			return *iModel;
 		}
@@ -68,7 +68,7 @@ namespace neogfx
 			i_item_presentation_model* oldModel = iModel;
 			iModel = &aModel;
 			presentation_model().subscribe(*this);
-			if (oldModel == 0)
+			if (oldModel == nullptr)
 				notify_observers(i_item_selection_model_subscriber::NotifyModelAdded, presentation_model());
 			else
 				notify_observers(i_item_selection_model_subscriber::NotifyModelChanged, presentation_model(), *oldModel);

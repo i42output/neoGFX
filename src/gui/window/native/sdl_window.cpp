@@ -162,7 +162,7 @@ namespace neogfx
 			aVideoMode.width(),
 			aVideoMode.height(),
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == 0)
+		if (iHandle == nullptr)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		int w, h;
@@ -200,7 +200,7 @@ namespace neogfx
 			aDimensions.cx,
 			aDimensions.cy,
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == 0)
+		if (iHandle == nullptr)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		int w, h;
@@ -238,7 +238,7 @@ namespace neogfx
 			aDimensions.cx,
 			aDimensions.cy,
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == 0)
+		if (iHandle == nullptr)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		int w, h;
@@ -276,7 +276,7 @@ namespace neogfx
 			aVideoMode.width(),
 			aVideoMode.height(),
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == 0)
+		if (iHandle == nullptr)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		int w, h;
@@ -314,7 +314,7 @@ namespace neogfx
 			aDimensions.cx,
 			aDimensions.cy,
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == 0)
+		if (iHandle == nullptr)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		int w, h;
@@ -352,7 +352,7 @@ namespace neogfx
 			aDimensions.cx,
 			aDimensions.cy,
 			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | convert_style(aStyle));
-		if (iHandle == 0)
+		if (iHandle == nullptr)
 			throw failed_to_create_window(SDL_GetError());
 		init();
 		int w, h;
@@ -401,7 +401,7 @@ namespace neogfx
 
 	void* sdl_window::native_handle() const
 	{
-		if (iNativeHandle == 0 && !is_destroyed())
+		if (iNativeHandle == nullptr && !is_destroyed())
 		{
 			SDL_SysWMinfo info;
 			SDL_VERSION(&info.version);
@@ -467,7 +467,7 @@ namespace neogfx
 
 	void sdl_window::close(bool aForce)
 	{
-		if (iHandle != 0 && is_alive() && (aForce || surface_window().native_window_can_close()))
+		if (iHandle != nullptr && is_alive() && (aForce || surface_window().native_window_can_close()))
 		{
 #ifdef WIN32
 			DestroyWindow(static_cast<HWND>(native_handle()));
@@ -1192,7 +1192,7 @@ namespace neogfx
 			newExtendedStyle |= WS_EX_WINDOWEDGE;
 		if (newExtendedStyle != existingExtendedStyle)
 			SetWindowLongPtr(hwnd, GWL_EXSTYLE, newExtendedStyle);
-		if (iParent != 0)
+		if (iParent != nullptr)
 			SetWindowLongPtr(hwnd, GWL_HWNDPARENT, reinterpret_cast<LONG>(iParent->native_handle()));
 		SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 #endif

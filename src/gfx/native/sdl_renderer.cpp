@@ -168,7 +168,7 @@ namespace neogfx
 	{
 		neolib::scoped_counter sc(iCreatingWindow);
 		sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
-		if (parent != 0)
+		if (parent != nullptr)
 			return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, *parent, aVideoMode, aWindowTitle, aStyle));
 		else
 			return create_window(aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle);
@@ -178,7 +178,7 @@ namespace neogfx
 	{
 		neolib::scoped_counter sc(iCreatingWindow);
 		sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
-		if (parent != 0)
+		if (parent != nullptr)
 			return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, *parent, aDimensions, aWindowTitle, aStyle));
 		else
 			return create_window(aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle);
@@ -188,7 +188,7 @@ namespace neogfx
 	{
 		neolib::scoped_counter sc(iCreatingWindow);
 		sdl_window* parent = dynamic_cast<sdl_window*>(&aParent);
-		if (parent != 0)
+		if (parent != nullptr)
 			return std::unique_ptr<i_native_window>(new sdl_window(iBasicServices, *this, aSurfaceManager, aWindow, *parent, aPosition, aDimensions, aWindowTitle, aStyle));
 		else
 			return create_window(aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle);

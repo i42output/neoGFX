@@ -213,7 +213,7 @@ namespace neogfx
 	app& app::instance()
 	{
 		app* instance = sFirstInstance.load();
-		if (instance == 0)
+		if (instance == nullptr)
 			throw no_instance();
 		return *instance;
 	}
@@ -714,10 +714,10 @@ namespace neogfx
 		static boost::locale::generator gen;
 		static std::locale loc = gen("en_US.UTF-8");
 		std::sort(iMnemonics.begin(), iMnemonics.end(), mnemonic_sorter());
-		i_surface* lastWindowSurface = 0;
+		i_surface* lastWindowSurface = nullptr;
 		for (auto& m : iMnemonics)
 		{
-			if (lastWindowSurface == 0)
+			if (lastWindowSurface == nullptr)
 			{
 				if (m->mnemonic_widget().has_surface() && m->mnemonic_widget().surface().surface_type() == surface_type::Window)
 					lastWindowSurface = &m->mnemonic_widget().surface();

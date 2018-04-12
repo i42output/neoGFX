@@ -924,10 +924,10 @@ namespace neogfx
 		else if(default_style().text_colour().is<gradient>())
 			return static_variant_cast<const gradient&>(default_style().text_colour()).at(0.0);
 		optional_colour textColour;
-		const i_widget* w = 0;
+		const i_widget* w = nullptr;
 		do
 		{
-			if (w == 0)
+			if (w == nullptr)
 				w = this;
 			else
 				w = &w->parent();

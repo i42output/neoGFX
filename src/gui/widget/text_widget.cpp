@@ -209,10 +209,10 @@ namespace neogfx
 		if (has_text_colour())
 			return static_variant_cast<colour>(iTextAppearance->ink());
 		optional_colour textColour;
-		const i_widget* w = 0;
+		const i_widget* w = nullptr;
 		do
 		{
-			if (w == 0)
+			if (w == nullptr)
 				w = this;
 			else
 				w = &w->parent();
