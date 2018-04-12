@@ -416,7 +416,7 @@ namespace neogfx
 		if (iWaitForRender)
 			return false;
 		iUpdateTime = 0ull;
-		auto nowClock = std::chrono::duration_cast<chrono::flicks>(std::chrono::steady_clock::now().time_since_epoch());
+		auto nowClock = std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch());
 		auto now = to_step_time(chrono::to_seconds(nowClock), physics_step_interval());
 		if (!iPhysicsTime)
 			iPhysicsTime = now;
@@ -426,7 +426,7 @@ namespace neogfx
 		bool updated = false;
 		while (*iPhysicsTime <= now)
 		{
-			auto updateStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch());
+			auto updateStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
 			applying_physics.trigger(*iPhysicsTime);
 			sort_objects();
 			if (iG != 0.0)
@@ -497,7 +497,7 @@ namespace neogfx
 					do_add_object(o);
 				iNewObjects.clear();
 			}
-			iUpdateTime = (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()) - updateStartTime).count();
+			iUpdateTime = (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()) - updateStartTime).count();
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();
 		}
