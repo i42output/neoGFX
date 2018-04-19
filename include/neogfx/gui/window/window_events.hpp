@@ -127,11 +127,11 @@ namespace neogfx
 		}
 		neogfx::point position() const
 		{
-			return static_variant_cast<neogfx::point>(iType != mouse_event_type::Moved ? iParameter2 : iParameter1);
+			return static_variant_cast<neogfx::point>(iParameter2);
 		}
 		neogfx::key_modifiers_e key_modifiers() const
 		{
-			return static_variant_cast<neogfx::key_modifiers_e>(iType != mouse_event_type::Moved ? iParameter3 : iParameter2);
+			return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
 		}
 	private:
 		mouse_event_type iType;

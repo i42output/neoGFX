@@ -147,7 +147,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->add_shape(debugInfo);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
-		aGraphicsContext.draw_text(ng::point(0.0, 0.0), "Hello, World!", spritePlane->font(), ng::colour::White);
+		aGraphicsContext.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane->font(), ng::colour::White);
 		if (ng::app::instance().keyboard().is_key_pressed(ng::ScanCode_C))
 			spritePlane->collision_tree_2d().visit_aabbs([&aGraphicsContext](const neogfx::aabb_2d& aAabb)
 			{
@@ -197,6 +197,17 @@ void create_game(ng::i_layout& aLayout)
 			"Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().depth()) + "\n" +
 			"Collision tree (quadtree) update type: " + (spritePlane->dynamic_update_enabled() ? "dynamic" : "full") + "\n" +
 			"Physics update time: " + boost::lexical_cast<std::string>(spritePlane->update_time()) + " us");
+	});
+
+	spritePlane->mouse_event([spritePlane, &spaceshipSprite](const neogfx::mouse_event& e)
+	{
+		if ((e.type() == neogfx::mouse_event_type::ButtonPressed || 
+			e.type() == neogfx::mouse_event_type::Moved) && (e.mouse_button() & neogfx::mouse_button::Left) == neogfx::mouse_button::Left)
+		{
+			auto newPos = ng::point{ e.position() - spritePlane->origin() };
+			newPos.y = spritePlane->extents().cy - newPos.y;
+			spaceshipSprite.set_position(newPos.to_vec3());
+		}
 	});
 
 #ifndef NDEBUG

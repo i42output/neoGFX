@@ -1287,7 +1287,11 @@ namespace neogfx
 			break;
 		case SDL_MOUSEMOTION:
 			surface_window().as_window().window_manager().update_mouse_cursor(surface_window().as_window());
-			push_event(mouse_event{ mouse_event_type::Moved, point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) } });
+			push_event(
+				mouse_event{ 
+					mouse_event_type::Moved, 
+					convert_mouse_button(aEvent.motion.state),
+					point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) } });
 			break;
 		case SDL_KEYDOWN:
 			push_event(keyboard_event{ keyboard_event_type::KeyPressed, sdl_keyboard::from_sdl_scan_code(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod) });
