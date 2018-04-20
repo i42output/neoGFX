@@ -1474,7 +1474,7 @@ namespace neogfx
 					result.back().set_value(emojiAtlas.emoji(aTextBegin[startCluster], font.height()));
 				if ((aFontSelector(startCluster).style() & font::Underline) == font::Underline)
 					result.back().set_underline(true);
-				if (is_subpixel_rendering_on())
+				if (is_subpixel_rendering_on() && !font.is_bitmap_font())
 					result.back().set_subpixel(true);
 				if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
 					result.back().set_mnemonic(true);

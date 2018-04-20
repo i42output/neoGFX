@@ -51,6 +51,7 @@ namespace neogfx
 			dimension underline_thickness() const override { return iFontFace.underline_thickness(); }
 			dimension line_spacing() const override { return iFontFace.line_spacing(); }
 			dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const override { return iFontFace.kerning(aLeftGlyphIndex, aRightGlyphIndex); }
+			bool is_bitmap_font() const override { return iFontFace.is_bitmap_font(); }
 			bool has_fallback() const override { return iFontFace.has_fallback(); }
 			bool fallback_cached() const override { return iFontFace.fallback_cached(); }
 			i_native_font_face& fallback() const override { return iFontFace.fallback(); }

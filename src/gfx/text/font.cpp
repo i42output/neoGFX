@@ -603,6 +603,11 @@ namespace neogfx
 			return 0.0;
 	}
 
+	bool font::is_bitmap_font() const
+	{
+		return native_font_face().is_bitmap_font();
+	}
+
 	font::token font::get_token() const
 	{
 		return app::instance().rendering_engine().font_manager().get_token(*this);
