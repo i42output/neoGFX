@@ -114,6 +114,8 @@ namespace neogfx
 		dimension line_spacing() const override;
 		dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const override;
 		bool is_bitmap_font() const override;
+		uint32_t num_fixed_sizes() const override;
+		font::point_size fixed_size(uint32_t aFixedSizeIndex) const override;
 		bool has_fallback() const override;
 		bool fallback_cached() const override;
 		i_native_font_face& fallback() const override;

@@ -175,6 +175,18 @@ namespace neogfx
 		return !FT_IS_SCALABLE(iHandle);
 	}
 
+	uint32_t native_font_face::num_fixed_sizes() const
+	{
+		return iHandle->num_fixed_sizes;
+	}
+
+	font::point_size native_font_face::fixed_size(uint32_t aFixedSizeIndex) const
+	{
+		if (aFixedSizeIndex < num_fixed_sizes())
+			return iHandle->available_sizes[aFixedSizeIndex].size / 64.0;
+		throw bad_fixed_size_index();
+	}
+
 	bool native_font_face::has_fallback() const
 	{
 		if (iHasFallback == boost::none)
@@ -286,9 +298,21 @@ namespace neogfx
 		else
 		{
 			for (uint32_t y = 0; y < bitmap.rows; y++)
-				for (uint32_t x = 0; x < bitmap.width; x++)
-					iGlyphTextureData[(x + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)] =
-						(x >= bitmap.width || y >= bitmap.rows) ? 0 : bitmap.buffer[x + bitmap.pitch * y];
+				switch (bitmap.pixel_mode)
+				{
+				case FT_PIXEL_MODE_MONO: // 1 bit per pixel monochrome
+					for (uint32_t x = 0; x < bitmap.width; x += 8)
+						for (uint32_t b = 0; b < 8; ++b)
+							iGlyphTextureData[(x + b + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)] =
+							(x >= bitmap.width || y >= bitmap.rows) ? 0x00 : ((bitmap.buffer[x / 8 + bitmap.pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
+					break;
+				case FT_PIXEL_MODE_GRAY:
+				default:
+					for (uint32_t x = 0; x < bitmap.width; x++)
+						iGlyphTextureData[(x + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)] =
+						(x >= bitmap.width || y >= bitmap.rows) ? 0x00 : bitmap.buffer[x + bitmap.pitch * y];
+					break;
+				}
 			textureData = &iGlyphTextureData[0];
 		}
 
@@ -321,7 +345,7 @@ namespace neogfx
 
 	void native_font_face::set_metrics()
 	{
-		if (iHandle->num_fixed_sizes == 0)
+		if (!is_bitmap_font())
 		{
 			freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(iSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
 		}

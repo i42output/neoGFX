@@ -250,22 +250,8 @@ namespace neogfx
 
 		auto& fm = app::instance().rendering_engine().font_manager();
 
-		uint32_t familyPickerCurrentIndex = 0;
 		for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
-		{
 			iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
-			if (fm.font_family(fi) == iSelectedFont.family_name())
-				familyPickerCurrentIndex = fi;
-		}
-
-		uint32_t sizePickerCurrentIndex = 0;
-		for (auto sz : { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 })
-		{
-			if (sz == static_cast<int>(iSelectedFont.size()))
-				sizePickerCurrentIndex = iSizePicker.model().rows();
-			iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, sz);
-		}
-		iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
 
 		centre_on_parent();
 
@@ -280,6 +266,17 @@ namespace neogfx
 
 		auto oldFont = iSelectedFont;
 		auto& fm = app::instance().rendering_engine().font_manager();
+		if (&aUpdatingWidget == this || &aUpdatingWidget == &iFamilyPicker || &aUpdatingWidget == &iStylePicker)
+		{
+			iSizePicker.model().clear();
+			if (!iSelectedFont.is_bitmap_font())
+				for (auto sz : { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 })
+					iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, sz);
+			else
+				for (uint32_t fsi = 0; fsi < iSelectedFont.num_fixed_sizes(); ++fsi)
+					iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, iSelectedFont.fixed_size(fsi));
+			iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
+		}
 		if (&aUpdatingWidget == this)
 		{
 			auto family = iFamilyPicker.presentation_model().find_item(iSelectedFont.family_name());

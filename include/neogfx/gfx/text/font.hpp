@@ -185,6 +185,8 @@ namespace neogfx
 		using font_info::kerning;
 		dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
 		bool is_bitmap_font() const;
+		uint32_t num_fixed_sizes() const;
+		point_size fixed_size(uint32_t aFixedSizeIndex) const;
 	public:
 		token get_token() const;
 		void return_token(token aToken) const;

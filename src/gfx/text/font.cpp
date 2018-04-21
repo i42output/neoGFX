@@ -608,6 +608,16 @@ namespace neogfx
 		return native_font_face().is_bitmap_font();
 	}
 
+	uint32_t font::num_fixed_sizes() const
+	{
+		return native_font_face().num_fixed_sizes();
+	}
+
+	font::point_size font::fixed_size(uint32_t aFixedSizeIndex) const
+	{
+		return native_font_face().fixed_size(aFixedSizeIndex);
+	}
+
 	font::token font::get_token() const
 	{
 		return app::instance().rendering_engine().font_manager().get_token(*this);

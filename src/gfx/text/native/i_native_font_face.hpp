@@ -34,6 +34,7 @@ namespace neogfx
 	{
 	public:
 		struct no_fallback_font : std::logic_error { no_fallback_font() : std::logic_error("neogfx::i_native_font_face::no_fallback_font") {} };
+		struct bad_fixed_size_index : std::logic_error { bad_fixed_size_index() : std::logic_error("neogfx::i_native_font_face::bad_fixed_size_index") {} };
 	public:
 		virtual ~i_native_font_face() {}
 	public:
@@ -51,6 +52,8 @@ namespace neogfx
 		virtual dimension line_spacing() const = 0;
 		virtual dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const = 0;
 		virtual bool is_bitmap_font() const = 0;
+		virtual uint32_t num_fixed_sizes() const = 0;
+		virtual font::point_size fixed_size(uint32_t aFixedSizeIndex) const = 0;
 		virtual bool has_fallback() const = 0;
 		virtual bool fallback_cached() const = 0;
 		virtual i_native_font_face& fallback() const = 0;
