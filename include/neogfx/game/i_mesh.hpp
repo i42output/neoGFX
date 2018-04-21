@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/vecarray.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/gfx/texture.hpp>
@@ -136,7 +137,8 @@ namespace neogfx
 	{
 		const std::size_t existingVertexCount = aVertices->size();
 		aTextures->push_back(neogfx::texture_source{ neogfx::to_texture_pointer(aTexture), neogfx::optional_rect{} });
-		auto rv = neogfx::rect_vertices(aRect, 0.0, neogfx::rect_type::FilledTriangles);
+		temp_vec3_buffer<6> rv;
+		calc_rect_vertices(rv, aRect, 0.0, neogfx::rect_type::FilledTriangles);
 		const double zero = (!aUpsideDown ? 0.0 : 1.0);
 		const double one = (!aUpsideDown ? 1.0 : 0.0);
 		aVertices->push_back(neogfx::vertex{ rv[0], neogfx::vec2{ zero, zero } });

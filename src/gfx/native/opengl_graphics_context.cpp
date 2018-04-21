@@ -687,10 +687,10 @@ namespace neogfx
 			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aRect);
 		}
 
-		auto vertices = rect_vertices(aRect, pixel_adjust(aPen), rect_type::Outline);
-		iVertexArrays.vertices().assign(vertices.begin(), vertices.end());
-		iVertexArrays.texture_coords().resize(vertices.size());
-		iVertexArrays.colours().assign(vertices.size(), aPen.colour().is<colour>() ?
+		iVertexArrays.vertices().clear();
+		insert_back_rect_vertices(iVertexArrays.vertices(), aRect, pixel_adjust(aPen), rect_type::Outline);
+		iVertexArrays.texture_coords().resize(iVertexArrays.vertices().size());
+		iVertexArrays.colours().assign(iVertexArrays.vertices().size(), aPen.colour().is<colour>() ?
 			std::array <uint8_t, 4>{{
 				static_cast<colour>(aPen.colour()).red(),
 				static_cast<colour>(aPen.colour()).green(),
@@ -700,7 +700,7 @@ namespace neogfx
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINES, 0, vertices.size()));
+		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
 
 		if (aPen.colour().is<gradient>())
@@ -886,8 +886,7 @@ namespace neogfx
 		for (const auto& op : aFillRectOps)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(op);
-			auto rv = rect_vertices(drawOp.rect, 0.0, rect_type::FilledTriangles);
-			iVertexArrays.vertices().insert(iVertexArrays.vertices().end(), rv.begin(), rv.end());
+			insert_back_rect_vertices(iVertexArrays.vertices(), drawOp.rect, 0.0, rect_type::FilledTriangles);
 			iVertexArrays.texture_coords().insert(iVertexArrays.texture_coords().end(), 6, vec2{});
 			auto c = drawOp.fill.is<colour>() ?
 				std::array<uint8_t, 4>{{

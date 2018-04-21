@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/vecarray.hpp>
 #include <neogfx/game/shapes.hpp>
 
 namespace neogfx
@@ -26,35 +27,7 @@ namespace neogfx
 	{
 		std::vector<xyz> result;
 		result.reserve(16);
-		if (aType == rect_type::FilledTriangleFan) // fill
-		{
-			result.push_back(aRect.centre().to_vec3());
-			result.push_back(aRect.top_left().to_vec3());
-			result.push_back(aRect.top_right().to_vec3());
-			result.push_back(aRect.bottom_right().to_vec3());
-			result.push_back(aRect.bottom_left().to_vec3());
-			result.push_back(aRect.top_left().to_vec3());
-		}
-		else if (aType == rect_type::FilledTriangles) // fill
-		{
-			result.push_back(aRect.top_left().to_vec3());
-			result.push_back(aRect.top_right().to_vec3());
-			result.push_back(aRect.bottom_left().to_vec3());
-			result.push_back(aRect.top_right().to_vec3());
-			result.push_back(aRect.bottom_right().to_vec3());
-			result.push_back(aRect.bottom_left().to_vec3());
-		}
-		else // draw (outline)
-		{
-			result.push_back(xyz{ aRect.top_left().x, aRect.top_left().y + aPixelAdjust });
-			result.push_back(xyz{ aRect.top_right().x, aRect.top_right().y + aPixelAdjust });
-			result.push_back(xyz{ aRect.top_right().x - aPixelAdjust, aRect.top_right().y });
-			result.push_back(xyz{ aRect.bottom_right().x - aPixelAdjust, aRect.bottom_right().y });
-			result.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y - aPixelAdjust });
-			result.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y - aPixelAdjust });
-			result.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y });
-			result.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y });
-		}
+		insert_back_rect_vertices(result, aRect, aPixelAdjust, aType);
 		return std::move(result);
 	};
 
