@@ -20,9 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/pool/pool_alloc.hpp>
+#include <vector>
 #include <neolib/variant.hpp>
-#include <neolib/vecarray.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/core/path.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
@@ -401,8 +400,9 @@ namespace neogfx
 			}
 		}
 
-		typedef neolib::vecarray<operation, 16, -1, neolib::nocheck> batch;
-
-		typedef std::deque<batch, boost::fast_pool_allocator<batch>> queue;
+		typedef std::vector<graphics_operation::operation> operations;
+		typedef std::vector<operations::size_type> batches;
+		typedef std::pair<const graphics_operation::operation*, const graphics_operation::operation*> batch;
+		typedef std::pair<operations, batches> queue;
 	}
 }
