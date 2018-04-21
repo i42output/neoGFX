@@ -528,6 +528,22 @@ namespace neogfx
 		double iPreviousOpacity;
 	};
 
+	class scoped_scissor
+	{
+	public:
+		scoped_scissor(graphics_context& aGc, const rect& aScissorRect) :
+			iGc{ aGc }
+		{
+			iGc.scissor_on(aScissorRect);
+		}
+		~scoped_scissor()
+		{
+			iGc.scissor_off();
+		}
+	private:
+		graphics_context & iGc;
+	};
+
 	const std::pair<vec2, vec2>& get_logical_coordinates(const size& aSurfaceSize, logical_coordinate_system aSystem, std::pair<vec2, vec2>& aCoordinates);
 
 	template <typename ValueType = double, uint32_t W = 5>

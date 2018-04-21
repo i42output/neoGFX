@@ -286,7 +286,7 @@ namespace neogfx
 			draw_alpha_background(aGraphicsContext, clipRect);
 			return;
 		}
-		aGraphicsContext.scissor_on(clipRect);
+		scoped_scissor scissor(aGraphicsContext, clipRect);
 		for (auto iterColumn = iGlyphColumns.begin(); iterColumn != iGlyphColumns.end(); ++iterColumn)
 		{
 			const auto& column = *iterColumn;
@@ -321,7 +321,6 @@ namespace neogfx
 		}
 		if (has_focus())
 			draw_cursor(aGraphicsContext);
-		aGraphicsContext.scissor_off();
 	}
 
 	const font& text_edit::font() const

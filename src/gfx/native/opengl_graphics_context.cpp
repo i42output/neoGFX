@@ -381,6 +381,7 @@ namespace neogfx
 
 	void opengl_graphics_context::scissor_off()
 	{
+		auto previousScissorRect = iScissorRects.back();
 		iScissorRects.pop_back();
 		if (iScissorRects.empty())
 		{
@@ -389,7 +390,7 @@ namespace neogfx
 		}
 		else
 		{
-			iScissorRect = iScissorRects.back();
+			iScissorRect = previousScissorRect;
 			apply_scissor();
 		}
 	}

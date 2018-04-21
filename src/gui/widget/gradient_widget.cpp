@@ -46,7 +46,7 @@ namespace neogfx
 
 	void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
 	{
-		aGraphicsContext.scissor_on(aRect);
+		scoped_scissor scissor(aGraphicsContext, aRect);
 		for (coordinate x = 0; x < aRect.width(); x += aAlphaPatternSize)
 		{
 			bool alt = false;
@@ -58,7 +58,6 @@ namespace neogfx
 				alt = !alt;
 			}
 		}
-		aGraphicsContext.scissor_off();
 	}
 	
 	namespace
@@ -103,10 +102,9 @@ namespace neogfx
 			{
 				dialog::paint_non_client(aGraphicsContext);
 				rect backgroundRect{ window::client_widget().position(), window::client_widget().extents() };
-				aGraphicsContext.scissor_on(update_rect());
+				scoped_scissor scissor(aGraphicsContext, update_rect());
 				draw_alpha_background(aGraphicsContext, backgroundRect, dpi_scale(ALPHA_PATTERN_SIZE));
 				aGraphicsContext.fill_rect(backgroundRect, background_colour().with_alpha(selected_alpha()));
-				aGraphicsContext.scissor_off();
 			}
 		private:
 			vertical_layout iLayout;

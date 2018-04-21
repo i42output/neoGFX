@@ -244,18 +244,17 @@ namespace neogfx
 				rect cellBackgroundRect = cell_rect(item_presentation_model_index{ row, col }, true);
 				if (backgroundColour != boost::none)
 				{
-					aGraphicsContext.scissor_on(clipRect.intersection(cellBackgroundRect));
+					scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
 					aGraphicsContext.fill_rect(cellBackgroundRect, *backgroundColour);
-					aGraphicsContext.scissor_off();
 				}
-				aGraphicsContext.scissor_on(clipRect.intersection(cellRect));
-				aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(presentation_model().cell_margins(*this).left, presentation_model().cell_margins(*this).top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), *textColour);
-				aGraphicsContext.scissor_off();
+				{
+					scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
+					aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(presentation_model().cell_margins(*this).left, presentation_model().cell_margins(*this).top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), *textColour);
+				}
 				if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
 				{
-					aGraphicsContext.scissor_on(clipRect.intersection(cellBackgroundRect));
+					scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
 					aGraphicsContext.draw_focus_rect(cellBackgroundRect);
-					aGraphicsContext.scissor_off();
 				}
 			}
 		}

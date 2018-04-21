@@ -994,37 +994,41 @@ namespace neogfx
 
 		scoped_opacity sc{ aGraphicsContext, opacity() };
 
-		aGraphicsContext.scissor_on(nonClientClipRect);
-		paint_non_client(aGraphicsContext);
-		aGraphicsContext.scissor_off();
-
-		const rect clipRect = default_clip_rect().intersection(updateRect);
-
-		aGraphicsContext.set_extents(client_rect().extents());
-		aGraphicsContext.set_origin(origin());
-		aGraphicsContext.scissor_on(clipRect);
-		scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
-		painting.trigger(aGraphicsContext);
-		paint(aGraphicsContext);
-		painted.trigger(aGraphicsContext);
-
-		for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
 		{
-			const auto& c = *i;
-			rect intersection = clipRect.intersection(to_client_coordinates(c->window_rect()));
-			if (!intersection.empty())
-				c->render(aGraphicsContext);
+			scoped_scissor scissor(aGraphicsContext, nonClientClipRect);
+			paint_non_client(aGraphicsContext);
 		}
 
-		children_painted.trigger(aGraphicsContext);
+		{
+			const rect clipRect = default_clip_rect().intersection(updateRect);
 
-		aGraphicsContext.scissor_off();
+			aGraphicsContext.set_extents(client_rect().extents());
+			aGraphicsContext.set_origin(origin());
+
+			scoped_scissor scissor(aGraphicsContext, clipRect);
+			scoped_coordinate_system scs(aGraphicsContext, origin(), extents(), logical_coordinate_system());
+
+			painting.trigger(aGraphicsContext);
+			paint(aGraphicsContext);
+			painted.trigger(aGraphicsContext);
+
+			for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
+			{
+				const auto& c = *i;
+				rect intersection = clipRect.intersection(to_client_coordinates(c->window_rect()));
+				if (!intersection.empty())
+					c->render(aGraphicsContext);
+			}
+
+			children_painted.trigger(aGraphicsContext);
+		}
 
 		aGraphicsContext.set_extents(extents());
 		aGraphicsContext.set_origin(origin());
-		aGraphicsContext.scissor_on(nonClientClipRect);
-		paint_non_client_after(aGraphicsContext);
-		aGraphicsContext.scissor_off();
+		{
+			scoped_scissor scissor(aGraphicsContext, nonClientClipRect);
+			paint_non_client_after(aGraphicsContext);
+		}
 	}
 
 	bool widget::transparent_background() const
