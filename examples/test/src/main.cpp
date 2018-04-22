@@ -177,7 +177,13 @@ int main(int argc, char* argv[])
 		app.current_style().palette().set_colour(ng::colour::Black);
 		app.change_style("Slate");
 
-		ng::window window{ ng::size{ 768, 688 } * app.surface_manager().display().metrics().horizontal_dpi() / 96.0 };
+		boost::optional<ng::window> windowObject;
+		if (app.program_options().full_screen())
+			windowObject.emplace(ng::video_mode{ 1920, 1080 });
+		else
+			windowObject.emplace(ng::size{ 768, 688 } * app.surface_manager().display().metrics().horizontal_dpi() / 96.0);
+		ng::window& window = *windowObject;
+
 		ng::status_bar statusBar{ window.status_bar_layout() };
 		auto& layout0 = window.client_layout();
 

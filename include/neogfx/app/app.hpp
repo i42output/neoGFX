@@ -23,7 +23,6 @@
 #include <map>
 #include <boost/optional.hpp>
 #include <boost/pool/pool_alloc.hpp>
-#include <boost/program_options.hpp>
 #include <neolib/async_thread.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_service_factory.hpp>
@@ -42,6 +41,18 @@
 
 namespace neogfx
 {
+	class program_options : public boost::program_options::variables_map
+	{
+		struct invalid_options : std::runtime_error { invalid_options(const std::string& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
+	public:
+		program_options(int argc, char* argv[]);
+	public:
+		bool debug() const;
+		neogfx::renderer renderer() const;
+		bool full_screen() const;
+		bool double_buffering() const;
+	};
+
 	class app : public neolib::async_thread, private async_event_queue, public i_app, private i_keyboard_handler
 	{
 	public:
@@ -56,50 +67,10 @@ namespace neogfx
 			std::string iName;
 		};
 	private:
-		class program_options
-		{
-			struct invalid_options : std::runtime_error { invalid_options(const std::string& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
-		public:
-			program_options(int argc, char* argv[])
-			{
-				boost::program_options::options_description description{ "Allowed options" };
-				description.add_options()
-					("debug", "open debug console")
-					("vulkan", "use Vulkan renderer")
-					("directx", "use DirectX (ANGLE) renderer")
-					("software", "use software renderer")
-					("double", "enable window double buffering");
-				boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), iOptions);
-				if (iOptions.count("vulkan") + iOptions.count("directx") + iOptions.count("software") > 1)
-					throw invalid_options("more than one renderer specified");
-			}
-		public:
-			neogfx::renderer renderer() const
-			{
-				if (iOptions.count("vulkan") == 1)
-					return neogfx::renderer::Vulkan;
-				else if (iOptions.count("directx") == 1)
-					return neogfx::renderer::DirectX;
-				else if (iOptions.count("software") == 1)
-					return neogfx::renderer::Software;
-				else
-					return neogfx::renderer::OpenGL;
-			}
-			bool double_buffering() const
-			{
-				return iOptions.count("double") == 1;
-			}
-			const boost::program_options::variables_map& options() const
-			{
-				return iOptions;
-			}
-		private:
-			boost::program_options::variables_map iOptions;
-		};
 		class loader
 		{
 		public:
-			loader(const program_options& aProgramOptions, app& aApp);
+			loader(const neogfx::program_options& aProgramOptions, app& aApp);
 			~loader();
 		private:
 			app& iApp;
@@ -126,6 +97,7 @@ namespace neogfx
 		~app();
 	public:
 		static app& instance();
+		const neogfx::program_options& program_options() const override;
 		const std::string& name() const override;
 		int exec(bool aQuitWhenLastWindowClosed = true) override;
 		bool in_exec() const override;
@@ -186,7 +158,7 @@ namespace neogfx
 		bool text_input(const std::string& aText) override;
 		bool sys_text_input(const std::string& aText) override;
 	private:
-		program_options iProgramOptions;
+		neogfx::program_options iProgramOptions;
 		loader iLoader;
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;

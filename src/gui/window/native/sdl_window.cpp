@@ -174,6 +174,8 @@ namespace neogfx
 
 		aRenderingEngine.activate_context(*this);
 
+		SDL_SetWindowFullscreen(iHandle, SDL_WINDOW_FULLSCREEN);
+
 		iReady = true;
 	}
 
@@ -287,6 +289,8 @@ namespace neogfx
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
 		aRenderingEngine.activate_context(*this);
+
+		SDL_SetWindowFullscreen(iHandle, SDL_WINDOW_FULLSCREEN);
 
 		iReady = true;
 	}

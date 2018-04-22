@@ -42,16 +42,58 @@ namespace nrc
 
 namespace neogfx
 {
+	program_options::program_options(int argc, char* argv[])
+	{
+		boost::program_options::options_description description{ "Allowed options" };
+		description.add_options()
+			("debug", "open debug console")
+			("fullscreen", "run full screen")
+			("vulkan", "use Vulkan renderer")
+			("directx", "use DirectX (ANGLE) renderer")
+			("software", "use software renderer")
+			("double", "enable window double buffering");
+		boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), *this);
+		if (count("vulkan") + count("directx") + count("software") > 1)
+			throw invalid_options("more than one renderer specified");
+	}
+
+	bool program_options::debug() const
+	{
+		return count("debug") == 1;
+	}
+
+	neogfx::renderer program_options::renderer() const
+	{
+		if (count("vulkan") == 1)
+			return neogfx::renderer::Vulkan;
+		else if (count("directx") == 1)
+			return neogfx::renderer::DirectX;
+		else if (count("software") == 1)
+			return neogfx::renderer::Software;
+		else
+			return neogfx::renderer::OpenGL;
+	}
+
+	bool program_options::full_screen() const
+	{
+		return count("fullscreen") == 1;
+	}
+
+	bool program_options::double_buffering() const
+	{
+		return count("double") == 1;
+	}
+
 	namespace
 	{
 		std::atomic<app*> sFirstInstance;
 	}
 
-	app::loader::loader(const program_options& aProgramOptions, app& aApp) : iApp(aApp)
+	app::loader::loader(const neogfx::program_options& aProgramOptions, app& aApp) : iApp(aApp)
 	{
 		app* np = nullptr;
 		sFirstInstance.compare_exchange_strong(np, &aApp);
-		if (sFirstInstance == &aApp && aProgramOptions.options().count("debug"))
+		if (sFirstInstance == &aApp && aProgramOptions.debug())
 		{
 #if defined(_WIN32)
 			AllocConsole();
@@ -216,6 +258,11 @@ namespace neogfx
 		if (instance == nullptr)
 			throw no_instance();
 		return *instance;
+	}
+
+	const program_options& app::program_options() const
+	{
+		return iProgramOptions;
 	}
 
 	const std::string& app::name() const

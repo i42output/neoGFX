@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/program_options.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include "i_style.hpp"
@@ -67,6 +68,7 @@ namespace neogfx
 		struct main_window_closed_prematurely : std::runtime_error { main_window_closed_prematurely() : std::runtime_error("Main window closed prematurely!") {} };
 		struct unknown_standard_menu : std::logic_error { unknown_standard_menu() : std::logic_error("neogfx::i_app::unknown_standard_menu") {} };
 	public:
+		virtual const boost::program_options::variables_map& program_options() const = 0;
 		virtual const std::string& name() const = 0;
 		virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
 		virtual bool in_exec() const = 0;
