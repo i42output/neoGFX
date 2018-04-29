@@ -233,3 +233,5 @@ Debug
 /examples/games/video_poker/build/win32/vs2017/.vs/video_poker/v15/Browse.VC.db
 /examples/games/video_poker/build/win32/vs2017/video_poker.vcxproj.user
 /examples/games/video_poker/build/win32/vs2017/.vs
+/testing/gui_test_app/build/win32/vs2017/.vs/test/v15
+/testing/gui_test_app/build/win32/vs2017/test.vcxproj.user
