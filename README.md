@@ -7,6 +7,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 # Features (at version 1.0 release)
 - clean modern C++ design including full exception safety supporting various widget allocation patterns (stack, member variable or free store);
 - use of standard non-proprietary C++ data types including using standard string classes (UTF-8 encoding) and containers from the C++ standard library;
+- simple, easy to use multi-threaded event system (an improvement over traditional signals and slots);
 - no baggage: neoGFX primarily contains only the GUI and graphics related functionality needed for creating apps and games;
 - full library of widgets and layout managers specifiable in XML using the included GUI designer tool;
 - CSS3 style sheet support with support for custom skins;
