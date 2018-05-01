@@ -630,16 +630,27 @@ namespace neogfx
 		return *iHelp;
 	}
 
+	bool app::process_events()
+	{
+		event_processing_context epc(*this);
+		return process_events(epc);
+	}
+
 	bool app::process_events(i_event_processing_context&)
 	{
-		if (rendering_engine().creating_window() || surface_manager().initialising_surface())
-			return false;
 		bool didSome = false;
 		try
 		{
+			didSome = async_event_queue::exec();
+			if (!in()) // not app thread
+				return didSome;
+			
+			if (rendering_engine().creating_window() || surface_manager().initialising_surface())
+				return didSome;
+
 			bool hadStrongSurfaces = surface_manager().any_strong_surfaces();
 			didSome = pump_messages();
-			didSome = (do_io(neolib::yield_type::Sleep) || didSome);
+			didSome = (do_io(neolib::yield_type::NoYield) || didSome);
 			didSome = (do_process_events() || didSome);
 			if (!in_exec() && hadStrongSurfaces && !surface_manager().any_strong_surfaces())
 				throw main_window_closed_prematurely();

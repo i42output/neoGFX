@@ -143,7 +143,7 @@ void create_game(ng::i_layout& aLayout);
 
 void signal_handler(int signal)
 {
-	if (signal == SIGABRT) {
+   	if (signal == SIGABRT) {
 		std::cerr << "SIGABRT received\n";
 	}
 	else {

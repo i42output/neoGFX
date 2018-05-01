@@ -19,6 +19,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <unordered_set>
+#include <mutex>
 #include <boost/pool/pool_alloc.hpp>
 #include <boost/functional/hash.hpp>
 #include <neolib/timer.hpp>
@@ -37,6 +39,7 @@ namespace neogfx
 	public:
 		event<step_time_interval> applying_physics;
 		event<step_time_interval> physics_applied;
+		event<step_time_interval> taking_snapshot;
 		event<graphics_context&> painting_sprites;
 		event<graphics_context&> sprites_painted;
 		event<i_object&, i_object&> object_collision;
@@ -51,9 +54,12 @@ namespace neogfx
 		typedef std::vector<i_shape*> shape_list;
 		typedef aabb_quadtree<> broad_phase_collision_tree_2d;
 		typedef aabb_octree<> broad_phase_collision_tree_3d;
+		typedef std::pair<i_collidable_object*, i_collidable_object*> collision_pair;
+		typedef std::unordered_set<collision_pair, boost::hash<collision_pair>, std::equal_to<collision_pair>, boost::pool_allocator<collision_pair>> collision_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;
+		class physics_thread;
 	public:
 		sprite_plane();
 		sprite_plane(i_widget& aParent);
@@ -68,7 +74,6 @@ namespace neogfx
 		virtual const i_widget& as_widget() const;
 		virtual i_widget& as_widget();
 	public:
-		void pause_physics_while_not_rendering(bool aPausePhysicsWhileNotRendering);
 		bool dynamic_update_enabled() const;
 		void enable_dynamic_update(bool aEnableDynamicUpdate);
 		void enable_z_sorting(bool aEnableZSorting);
@@ -113,11 +118,10 @@ namespace neogfx
 		void do_add_object(std::shared_ptr<i_object> aObject);
 		void sort_shapes() const;
 		void sort_objects();
-		bool update_objects();
+		void update_objects();
+		bool snapshot();
 	private:
-		mutable std::function<bool()> iUpdateFunction;
 		neolib::callback_timer iUpdater;
-		bool iPausePhysicsWhileNotRendering;
 		bool iEnableDynamicUpdate;
 		bool iEnableZSorting;
 		bool iNeedsSorting;
@@ -130,11 +134,14 @@ namespace neogfx
 		mutable shape_list iRenderBuffer;
 		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
-		mutable bool iWaitForRender;
-		bool iUpdatingObjects;
 		object_list::iterator iLastCollidable;
 		mutable boost::optional<broad_phase_collision_tree_2d> iBroadPhaseCollisionTree2d;
 		mutable boost::optional<broad_phase_collision_tree_3d> iBroadPhaseCollisionTree3d;
 		uint64_t iUpdateTime;
+		std::atomic<bool> iUpdatedSinceLastSnapshot;
+		bool iTakingSnapshot;
+		mutable std::recursive_mutex iUpdateMutex;
+		std::unique_ptr<physics_thread> iPhysicsThread;
+		collision_list iCollisions;
 	};
 }

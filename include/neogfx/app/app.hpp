@@ -149,6 +149,7 @@ namespace neogfx
 	public:
 		i_help& help() const override;
 	public:
+		bool process_events() override;
 		bool process_events(i_event_processing_context& aContext) override;
 	private:
 		bool do_process_events();

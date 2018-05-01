@@ -45,7 +45,7 @@ namespace neogfx
 		typedef const void* unique_id_type;
 		typedef std::function<void(Arguments...)> handler_callback;
 		typedef uint32_t sink_reference_count;
-		struct handler_list_item { unique_id_type iUniqueId; handler_callback iHandlerCallback; sink_reference_count iSinkReferenceCount; };
+		struct handler_list_item { std::thread::id iThreadId;  unique_id_type iUniqueId; handler_callback iHandlerCallback; sink_reference_count iSinkReferenceCount; };
 		typedef std::list<handler_list_item, boost::fast_pool_allocator<handler_list_item>> handler_list;
 	public:
 		event_instance_weak_ptr iEvent;
@@ -62,6 +62,8 @@ namespace neogfx
 		struct event_not_found : std::logic_error { event_not_found() : std::logic_error("neogfx::async_event_queue::event_not_found") {} };
 	private:
 		typedef std::multimap<const void*, std::pair<callback, neolib::destroyable::destroyed_flag>> event_list;
+		typedef std::vector<callback> callback_list;
+		typedef std::map<std::thread::id, callback_list, std::less<std::thread::id>, boost::fast_pool_allocator<std::pair<const std::thread::id, callback_list>>> threaded_callbacks;
 	public:
 		async_event_queue(neolib::async_task& aIoTask);
 		~async_event_queue();
@@ -82,6 +84,8 @@ namespace neogfx
 		{
 			return has(static_cast<const void*>(&aEvent));
 		}
+		bool exec();
+		void enqueue_to_thread(std::thread::id aThreadId, callback aCallback);
 	private:
 		void add(const void* aEvent, callback aCallback, neolib::destroyable::destroyed_flag aDestroyedFlag);
 		void remove(const void* aEvent);
@@ -91,6 +95,9 @@ namespace neogfx
 		static async_event_queue* sInstance;
 		neolib::callback_timer iTimer;
 		event_list iEvents;
+		std::recursive_mutex iThreadedCallbacksMutex;
+		std::atomic<bool> iHaveThreadedCallbacks;
+		threaded_callbacks iThreadedCallbacks;
 	};
 
 	enum class event_trigger_type
@@ -182,7 +189,10 @@ namespace neogfx
 			{
 				auto i = instance().notifications.front();
 				instance().notifications.pop_front();
-				i->iHandlerCallback(std::forward<Ts>(aArguments)...);
+				if (i->iThreadId == std::this_thread::get_id())
+					i->iHandlerCallback(std::forward<Ts>(aArguments)...);
+				else
+					enqueue_to_thread(*i, std::forward<Ts>(aArguments)...);
 				if (destroyed)
 					return false;
 				if (instance().accepted)
@@ -213,10 +223,10 @@ namespace neogfx
 		handle subscribe(const handler_callback& aHandlerCallback, const void* aUniqueId = 0) const
 		{
 			if (aUniqueId == 0)
-				return handle{ instance().instancePtr, instance().handlers.insert(instance().handlers.end(), handler_list_item{ aUniqueId, aHandlerCallback, 0 }) };
+				return handle{ instance().instancePtr, instance().handlers.insert(instance().handlers.end(), handler_list_item{ std::this_thread::get_id(), aUniqueId, aHandlerCallback, 0 }) };
 			auto existing = instance().uniqueIdMap.find(aUniqueId);
 			if (existing == instance().uniqueIdMap.end())
-				existing = instance().uniqueIdMap.insert(std::make_pair(aUniqueId, instance().handlers.insert(instance().handlers.end(), handler_list_item{ aUniqueId, aHandlerCallback, 0 }))).first;
+				existing = instance().uniqueIdMap.insert(std::make_pair(aUniqueId, instance().handlers.insert(instance().handlers.end(), handler_list_item{ std::this_thread::get_id(), aUniqueId, aHandlerCallback, 0 }))).first;
 			else
 				existing->second->iHandlerCallback = aHandlerCallback;
 			return handle{ instance().instancePtr, existing->second };
@@ -262,6 +272,12 @@ namespace neogfx
 			return unsubscribe(static_cast<const void*>(&aUniqueIdObject));
 		}
 	private:
+		template<class... Ts>
+		void enqueue_to_thread(const handler_list_item& aItem, Ts&&... aArguments) const
+		{
+			auto& callback = aItem.iHandlerCallback;
+			async_event_queue::instance().enqueue_to_thread(aItem.iThreadId, [callback, &aArguments...](){ callback(std::forward<Ts>(aArguments)...); });
+		}
 		void clear()
 		{
 			if (async_event_queue::instance().has(*this))

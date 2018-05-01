@@ -27,69 +27,87 @@
 
 namespace neogfx
 {
+	class sprite_plane::physics_thread : public neolib::thread
+	{
+	public:
+		physics_thread(sprite_plane& aOwner) : neolib::thread{ "neogfx::sprite_plane::physics_thread" }, iOwner{ aOwner }
+		{
+			start();
+		}
+	public:
+		void exec() override
+		{
+			while (!finished())
+			{
+				iOwner.update_objects();
+				yield();
+			}
+		}
+	private:
+		sprite_plane& iOwner;
+	};
+
 	sprite_plane::sprite_plane() : 
-		iUpdateFunction{ [this]() -> bool { return update_objects(); } },
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (iUpdateFunction())
+			if (snapshot())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, 
 		iEnableDynamicUpdate{ false }, 
 		iEnableZSorting{ false }, 
 		iNeedsSorting{ false }, 
 		iG{ 6.67408e-11 }, 
 		iStepInterval{ chrono::to_flicks(0.010).count() }, 
-		iWaitForRender{ false }, 
-		iUpdatingObjects{ false }, 
-		iUpdateTime{ 0ull }
+		iUpdateTime{ 0ull },
+		iUpdatedSinceLastSnapshot{ false },
+		iTakingSnapshot{ false },
+		iPhysicsThread{ std::make_unique<physics_thread>(*this) }
 	{
 	}
 
 	sprite_plane::sprite_plane(i_widget& aParent) :
 		widget{ aParent }, 
-		iUpdateFunction{ [this]() -> bool { return update_objects(); } },
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (iUpdateFunction())
+			if (snapshot())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, 
 		iEnableDynamicUpdate{ false }, 
 		iEnableZSorting{ false }, 
 		iNeedsSorting{ false }, iG{ 6.67408e-11 }, 
 		iStepInterval{ chrono::to_flicks(0.010).count() }, 
-		iWaitForRender{ false }, 
-		iUpdatingObjects{ false }, 
-		iUpdateTime{ 0ull }
+		iUpdateTime{ 0ull },
+		iUpdatedSinceLastSnapshot{ false },
+		iTakingSnapshot{ false },
+		iPhysicsThread{ std::make_unique<physics_thread>(*this) }
 	{
 	}
 
 	sprite_plane::sprite_plane(i_layout& aLayout) :
 		widget{ aLayout }, 
-		iUpdateFunction{ [this]() -> bool { return update_objects(); } },
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (iUpdateFunction())
+			if (snapshot())
 				update();
 		}, 10 },
-		iPausePhysicsWhileNotRendering{ false }, 
 		iEnableDynamicUpdate{ false }, 
 		iEnableZSorting{ false }, 
 		iNeedsSorting{ false }, 
 		iG{ 6.67408e-11 }, 
 		iStepInterval{ chrono::to_flicks(0.010).count() }, 
-		iWaitForRender{ false }, 
-		iUpdatingObjects{ false }, 
-		iUpdateTime{ 0ull }
+		iUpdateTime{ 0ull },
+		iUpdatedSinceLastSnapshot{ false },
+		iTakingSnapshot{ false },
+		iPhysicsThread{ std::make_unique<physics_thread>(*this) }
 	{
 	}
 
 	sprite_plane::~sprite_plane()
 	{
+		iPhysicsThread->abort();
 	}
 
 	logical_coordinate_system sprite_plane::logical_coordinate_system() const
@@ -101,8 +119,7 @@ namespace neogfx
 
 	void sprite_plane::paint(graphics_context& aGraphicsContext) const
 	{	
-		iWaitForRender = false;
-		iUpdateFunction();
+		std::lock_guard<std::recursive_mutex> lock(iUpdateMutex); // todo: remove this lock once snapshot data added
 		aGraphicsContext.clear_depth_buffer();
 		painting_sprites.trigger(aGraphicsContext);
 		sort_shapes();
@@ -140,11 +157,6 @@ namespace neogfx
 	i_widget& sprite_plane::as_widget()
 	{
 		return *this;
-	}
-
-	void sprite_plane::pause_physics_while_not_rendering(bool aPausePhysicsWhileNotRendering)
-	{
-		iPausePhysicsWhileNotRendering = aPausePhysicsWhileNotRendering;
 	}
 
 	bool sprite_plane::dynamic_update_enabled() const
@@ -294,10 +306,7 @@ namespace neogfx
 
 	void sprite_plane::add_object(std::shared_ptr<i_object> aObject)
 	{
-		if (iUpdatingObjects)
-			iNewObjects.push_back(aObject);
-		else
-			do_add_object(aObject);
+		iNewObjects.push_back(aObject);
 	}
 
 	bool sprite_plane::is_collision_tree_2d() const
@@ -399,30 +408,33 @@ namespace neogfx
 					return leftObject.mass() > rightObject.mass();
 				}
 			});
+			for (auto i = iCollisions.begin(); i != iCollisions.end();)
+				if (i->first->killed() || i->second->killed())
+					i = iCollisions.erase(i);
+				else
+					++i;
 			while (!iObjects.empty() && iObjects.back()->killed())
 			{
 				if (iObjects.back()->category() == object_category::Sprite || iObjects.back()->category() == object_category::PhysicalObject)
-					is_collision_tree_2d() ? 
-						collision_tree_2d().remove(iObjects.back()->as_collidable_object()) :
-						collision_tree_3d().remove(iObjects.back()->as_collidable_object());
+					is_collision_tree_2d() ?
+					collision_tree_2d().remove(iObjects.back()->as_collidable_object()) :
+					collision_tree_3d().remove(iObjects.back()->as_collidable_object());
 				iObjects.pop_back();
 			}
 			iNeedsSorting = false;
 		}
 	}
 
-	bool sprite_plane::update_objects()
+	void sprite_plane::update_objects()
 	{
-		if (iWaitForRender)
-			return false;
+		std::lock_guard<std::recursive_mutex> lock(iUpdateMutex);
 		iUpdateTime = 0ull;
 		auto nowClock = std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch());
 		auto now = to_step_time(chrono::to_seconds(nowClock), physics_step_interval());
 		if (!iPhysicsTime)
 			iPhysicsTime = now;
 		if (*iPhysicsTime == now)
-			return false;
-		neolib::scoped_flag updating{ iUpdatingObjects };
+			return;
 		bool updated = false;
 		while (*iPhysicsTime <= now)
 		{
@@ -437,10 +449,7 @@ namespace neogfx
 					if (i1->category() == object_category::Shape)
 						break;
 					if (i1->killed())
-					{
-						iNeedsSorting = true;
 						continue;
-					}
 					auto& o1 = (*i1).as_physical_object();
 					if (o1.mass() == 0.0)
 						break;
@@ -451,10 +460,7 @@ namespace neogfx
 						if (i2->category() == object_category::Shape)
 							break;
 						if (i2->killed())
-						{
-							iNeedsSorting = true;
 							continue;
-						}
 						auto& o2 = (*i2).as_physical_object();
 						if (&o2 == &o1)
 							continue;
@@ -473,38 +479,70 @@ namespace neogfx
 					updated = (o1updated || updated);
 				}
 			}
-			auto process_collisions = [this](auto& tree)
+			auto process_collisions = [this, &updated](auto& tree)
 			{
 				if (dynamic_update_enabled())
 					tree.dynamic_update(iObjects.begin(), iObjects.end());
 				else
 					tree.full_update(iObjects.begin(), iObjects.end());
 				tree.collisions(iObjects.begin(), iObjects.end(),
-					[this](i_collidable_object& o1, i_collidable_object& o2)
+					[this, &updated](i_collidable_object& o1, i_collidable_object& o2)
 				{
-					o1.collided(o2);
-					o2.collided(o1);
-					object_collision.trigger(o1, o2);
+					iCollisions.insert(std::make_pair(&o1, &o2));
+					updated = true;
 				});
 			};
 			if (is_collision_tree_2d())
 				process_collisions(collision_tree_2d());
 			else
 				process_collisions(collision_tree_3d());
-			if (!iNewObjects.empty())
+			for (auto& s : iRenderBuffer)
 			{
-				for (auto& o : iNewObjects)
-					do_add_object(o);
-				iNewObjects.clear();
+				updated = s->update(from_step_time(*iPhysicsTime)) || updated;
+				if (s->killed())
+					iNeedsSorting = true;
 			}
 			iUpdateTime = (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()) - updateStartTime).count();
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();
 		}
-		for (auto& s : iRenderBuffer)
-			updated = s->update(from_step_time(now)) || updated;
-		if (updated && iPausePhysicsWhileNotRendering)
-			iWaitForRender = true;
+		iUpdatedSinceLastSnapshot = iUpdatedSinceLastSnapshot || updated;
+	}
+
+	bool sprite_plane::snapshot()
+	{
+		if (iTakingSnapshot)
+			return false;
+		neolib::scoped_flag sf{ iTakingSnapshot };
+
+		bool updated = false;
+		
+		std::lock_guard<std::recursive_mutex> lock(iUpdateMutex);
+
+		taking_snapshot.trigger(*iPhysicsTime);
+
+		if (iUpdatedSinceLastSnapshot || !iNewObjects.empty())
+		{
+			updated = true;
+			iUpdatedSinceLastSnapshot = false;
+			for (const auto& c : iCollisions)
+			{
+				if (!c.first->collidable() || !c.second->collidable())
+					continue;
+				c.first->collided(*c.second);
+				c.second->collided(*c.first);
+				object_collision.trigger(*c.first, *c.second);
+				if (c.first->killed() || c.second->killed())
+					iNeedsSorting = true;
+			}
+			iCollisions.clear();
+			for (auto& o : iNewObjects)
+				do_add_object(o);
+			iNewObjects.clear();
+			if (iNeedsSorting)
+				sort_objects();
+		}
+		
 		return updated;
 	}
 

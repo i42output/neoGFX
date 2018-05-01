@@ -155,6 +155,7 @@ void create_game(ng::i_layout& aLayout)
 				aGraphicsContext.draw_rect(aabb, ng::pen{ ng::colour::Blue });
 			});
 	});
+
 	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
 	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)
 	{
@@ -184,6 +185,7 @@ void create_game(ng::i_layout& aLayout)
 			spritePlane->enable_dynamic_update(true);
 		else if (keyboard.is_key_pressed(ng::ScanCode_F))
 			spritePlane->enable_dynamic_update(false);
+
 		std::ostringstream oss;
 		oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
 		oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
@@ -193,6 +195,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->physics_applied([debugInfo, spritePlane](ng::sprite_plane::step_time_interval)
 	{
 		debugInfo->set_value(
+			"Objects: " + boost::lexical_cast<std::string>(spritePlane->objects().size()) + "\n" +
 			"Collision tree (quadtree) size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().count()) + "\n" +
 			"Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().depth()) + "\n" +
 			"Collision tree (quadtree) update type: " + (spritePlane->dynamic_update_enabled() ? "dynamic" : "full") + "\n" +
@@ -209,8 +212,4 @@ void create_game(ng::i_layout& aLayout)
 			spaceshipSprite.set_position(newPos.to_vec3());
 		}
 	});
-
-#ifndef NDEBUG
-	spritePlane->pause_physics_while_not_rendering(true);
-#endif
 }

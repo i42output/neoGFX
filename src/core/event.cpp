@@ -26,11 +26,12 @@ namespace neogfx
 { 
 	async_event_queue::async_event_queue(neolib::async_task& aIoTask) : iTimer{ aIoTask,
 		[this](neolib::callback_timer& aTimer)
-	{
-		publish_events();
-		if (!iEvents.empty() && !aTimer.waiting())
-			aTimer.again();
-	}, 10, false }
+		{
+			publish_events();
+			if (!iEvents.empty() && !aTimer.waiting())
+				aTimer.again();
+		}, 10, false },
+		iHaveThreadedCallbacks{ false }
 	{
 		if (sInstance != nullptr)
 			throw instance_exists();
@@ -49,6 +50,34 @@ namespace neogfx
 		if (sInstance != nullptr)
 			return *sInstance;
 		throw no_instance();
+	}
+
+	bool async_event_queue::exec()
+	{
+		bool didSome = false;
+		if (iHaveThreadedCallbacks)
+		{
+			callback_list work;
+			{
+				std::lock_guard<std::recursive_mutex> guard{ iThreadedCallbacksMutex };
+				work = std::move(iThreadedCallbacks[std::this_thread::get_id()]);
+				iThreadedCallbacks.erase(iThreadedCallbacks.find(std::this_thread::get_id()));
+				iHaveThreadedCallbacks = !iThreadedCallbacks.empty();
+			}
+			for (auto& cb : work)
+			{
+				cb();
+				didSome = true;
+			}
+		}
+		return didSome;
+	}
+
+	void async_event_queue::enqueue_to_thread(std::thread::id aThreadId, callback aCallback)
+	{
+		std::lock_guard<std::recursive_mutex> guard{ iThreadedCallbacksMutex };
+		iThreadedCallbacks[aThreadId].push_back(aCallback);
+		iHaveThreadedCallbacks = true;
 	}
 
 	void async_event_queue::add(const void* aEvent, callback aCallback, neolib::destroyable::destroyed_flag aDestroyedFlag)

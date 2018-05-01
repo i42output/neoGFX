@@ -120,6 +120,7 @@ namespace neogfx
 	public:
 		virtual i_help& help() const = 0;
 	public:
+		virtual bool process_events() = 0;
 		virtual bool process_events(i_event_processing_context& aContext) = 0;
 	};
 }
