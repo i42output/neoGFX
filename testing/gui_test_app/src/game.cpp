@@ -157,7 +157,8 @@ void create_game(ng::i_layout& aLayout)
 	});
 
 	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
-	spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)
+
+	~~~~spritePlane->applying_physics([spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::sprite_plane::step_time_interval aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		spaceshipSprite.set_acceleration(ng::vec3{
@@ -192,7 +193,7 @@ void create_game(ng::i_layout& aLayout)
 		shipInfo->set_value(oss.str());
 	});
 
-	spritePlane->physics_applied([debugInfo, spritePlane](ng::sprite_plane::step_time_interval)
+	~~~~spritePlane->physics_applied([debugInfo, spritePlane](ng::sprite_plane::step_time_interval)
 	{
 		debugInfo->set_value(
 			"Objects: " + boost::lexical_cast<std::string>(spritePlane->objects().size()) + "\n" +

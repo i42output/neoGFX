@@ -45,11 +45,17 @@ namespace neogfx
 		typedef const void* unique_id_type;
 		typedef std::function<void(Arguments...)> handler_callback;
 		typedef uint32_t sink_reference_count;
-		struct handler_list_item { std::thread::id iThreadId;  unique_id_type iUniqueId; handler_callback iHandlerCallback; sink_reference_count iSinkReferenceCount; };
+		struct handler_list_item { boost::optional<std::thread::id> iThreadId; unique_id_type iUniqueId; handler_callback iHandlerCallback; sink_reference_count iSinkReferenceCount; };
 		typedef std::list<handler_list_item, boost::fast_pool_allocator<handler_list_item>> handler_list;
 	public:
 		event_instance_weak_ptr iEvent;
 		typename handler_list::iterator iHandler;
+	public:
+		event_handle& operator~()
+		{
+			iHandler->iThreadId = boost::none;
+			return *this;
+		}
 	};
 
 	class async_event_queue
@@ -189,7 +195,7 @@ namespace neogfx
 			{
 				auto i = instance().notifications.front();
 				instance().notifications.pop_front();
-				if (i->iThreadId == std::this_thread::get_id())
+				if (i->iThreadId == boost::none || *i->iThreadId == std::this_thread::get_id())
 					i->iHandlerCallback(std::forward<Ts>(aArguments)...);
 				else
 					enqueue_to_thread(*i, std::forward<Ts>(aArguments)...);
@@ -276,7 +282,7 @@ namespace neogfx
 		void enqueue_to_thread(const handler_list_item& aItem, Ts&&... aArguments) const
 		{
 			auto& callback = aItem.iHandlerCallback;
-			async_event_queue::instance().enqueue_to_thread(aItem.iThreadId, [callback, &aArguments...](){ callback(std::forward<Ts>(aArguments)...); });
+			async_event_queue::instance().enqueue_to_thread(*aItem.iThreadId, [callback, &aArguments...](){ callback(std::forward<Ts>(aArguments)...); });
 		}
 		void clear()
 		{

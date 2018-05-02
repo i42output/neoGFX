@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 		app.change_style("Default").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 		app.change_style("Slate").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 
-		ng::window window(ng::video_mode{ 1280, 720 });
+		ng::window window{ ng::size{1280, 720} };
 
 		ng::sprite_plane spritePlane{ window.client_layout() };
 		spritePlane.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
