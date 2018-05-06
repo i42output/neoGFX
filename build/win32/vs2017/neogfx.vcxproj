@@ -337,8 +337,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DevDirNeogfx)\tools\bin\glsl2hpp %(FullPath) $(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp NEOGFX_GRADIENT_FRAG</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).frag.hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntermediateOutputPath)\GeneratedFiles\%(Filename).hpp</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">glsl2hpp %(Identity)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">glsl2hpp %(Identity)</Message>
     </CustomBuild>

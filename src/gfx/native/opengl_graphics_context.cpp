@@ -1310,8 +1310,6 @@ namespace neogfx
 				textureHandle = reinterpret_cast<GLuint>(texture.native_texture()->handle());
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
 				glCheck(glBindTexture(GL_TEXTURE_2D, textureHandle));
-				if (!texture.native_texture()->is_resident())
-					throw texture_not_resident();
 				if (first)
 					iRenderingEngine.active_shader_program().set_uniform_variable("tex", 1);
 			}

@@ -235,3 +235,4 @@ Debug
 /examples/games/video_poker/build/win32/vs2017/.vs
 /testing/gui_test_app/build/win32/vs2017/.vs/test/v15
 /testing/gui_test_app/build/win32/vs2017/test.vcxproj.user
+/testing/gui_test_app/build/win32/vs2017/My Amplifier Results - test/*.amplxeproj

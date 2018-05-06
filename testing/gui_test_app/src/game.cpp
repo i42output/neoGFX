@@ -143,7 +143,7 @@ void create_game(ng::i_layout& aLayout)
 	{
 		create_target(*spritePlane);
 	}
-	auto debugInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane->font().with_size(spritePlane->font().size() * 0.75), ng::text_appearance{ ng::colour::Yellow.with_lightness(0.9), ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
+	auto debugInfo = std::make_shared<ng::text>(*spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane->font().with_size(spritePlane->font().size() * 0.5), ng::text_appearance{ ng::colour::Orange.with_lightness(0.9), ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
 	spritePlane->add_shape(debugInfo);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
