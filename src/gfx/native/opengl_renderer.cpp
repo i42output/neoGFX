@@ -271,7 +271,7 @@ namespace neogfx
 					"out vec4 Color;\n"
 					"void main()\n"
 					"{\n"
-					"	Color = VertexColor / 255.0;\n"
+					"	Color = VertexColor;\n"
 					"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 					"}\n"),
 				GL_VERTEX_SHADER),
@@ -303,7 +303,7 @@ namespace neogfx
 					"varying vec2 vTexCoord;\n"
 					"void main()\n"
 					"{\n"
-					"	Color = VertexColor / 255.0;\n"
+					"	Color = VertexColor;\n"
 					"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 					"	vTexCoord = VertexTextureCoord;\n"
 					"}\n"),
@@ -365,7 +365,7 @@ namespace neogfx
 						"out vec4 Color;\n"
 						"void main()\n"
 						"{\n"
-						"	Color = VertexColor / 255.0;\n"
+						"	Color = VertexColor;\n"
 						"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 						"}\n"),
 					GL_VERTEX_SHADER),
@@ -390,7 +390,7 @@ namespace neogfx
 						"varying vec2 vOutputCoord;\n"
 						"void main()\n"
 						"{\n"
-						"	Color = VertexColor / 255.0;\n"
+						"	Color = VertexColor;\n"
 						"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 						"	vGlyphTexCoord = VertexTextureCoord;\n"
 						"   vOutputCoord = VertexPosition.xy;\n"
@@ -480,7 +480,7 @@ namespace neogfx
 							"varying vec2 vOutputCoord;\n"
 							"void main()\n"
 							"{\n"
-							"	Color = VertexColor / 255.0;\n"
+							"	Color = VertexColor;\n"
 							"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 							"	vGlyphTexCoord = VertexTextureCoord;\n"
 							"   vOutputCoord = VertexPosition.xy;\n"
@@ -580,7 +580,7 @@ namespace neogfx
 							"varying vec2 vOutputCoord;\n"
 							"void main()\n"
 							"{\n"
-							"	Color = VertexColor / 255.0;\n"
+							"	Color = VertexColor;\n"
 							"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 							"	vGlyphTexCoord = VertexTextureCoord;\n"
 							"   vOutputCoord = VertexPosition.xy;\n"
@@ -681,7 +681,7 @@ namespace neogfx
 							"varying vec2 vGlyphTexCoord;\n"
 							"void main()\n"
 							"{\n"
-							"	Color = VertexColor / 255.0;\n"
+							"	Color = VertexColor;\n"
 							"   gl_Position = uProjectionMatrix * vec4(VertexPosition, 1.0);\n"
 							"	vGlyphTexCoord = VertexTextureCoord;\n"
 							"}\n"),

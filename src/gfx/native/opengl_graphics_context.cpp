@@ -689,13 +689,13 @@ namespace neogfx
 		iVertexArrays.vertices().clear();
 		insert_back_rect_vertices(iVertexArrays.vertices(), aRect, pixel_adjust(aPen), rect_type::Outline);
 		for (auto& v : iVertexArrays.vertices())
-			v.rgba = aPen.colour().is<colour>() ?
+			v.rgba = colour_to_vec4f(aPen.colour().is<colour>() ?
 				std::array <uint8_t, 4>{{
 					static_cast<colour>(aPen.colour()).red(),
 					static_cast<colour>(aPen.colour()).green(),
 					static_cast<colour>(aPen.colour()).blue(),
 					static_cast<colour>(aPen.colour()).alpha()}} :
-				std::array <uint8_t, 4>{};
+				std::array <uint8_t, 4>{});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
@@ -846,10 +846,10 @@ namespace neogfx
 		for (const auto& v : tvs)
 			iVertexArrays.vertices().push_back({ v.coordinates, aPen.colour().is<colour>() ?
 				std::array <uint8_t, 4>{ {
-						static_cast<colour>(aPen.colour()).red(),
-							static_cast<colour>(aPen.colour()).green(),
-							static_cast<colour>(aPen.colour()).blue(),
-							static_cast<colour>(aPen.colour()).alpha()}} :
+					static_cast<colour>(aPen.colour()).red(),
+					static_cast<colour>(aPen.colour()).green(),
+					static_cast<colour>(aPen.colour()).blue(),
+					static_cast<colour>(aPen.colour()).alpha()}} :
 				std::array <uint8_t, 4>{} });
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
@@ -879,13 +879,13 @@ namespace neogfx
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
 			auto newVertices = insert_back_rect_vertices(iVertexArrays.vertices(), drawOp.rect, 0.0, rect_type::FilledTriangles);
 			for (auto i = newVertices; i != iVertexArrays.vertices().end(); ++i)
-				i->rgba = drawOp.fill.is<colour>() ?
+				i->rgba = colour_to_vec4f(drawOp.fill.is<colour>() ?
 					std::array<uint8_t, 4>{{
 						static_variant_cast<const colour&>(drawOp.fill).red(),
 						static_variant_cast<const colour&>(drawOp.fill).green(),
 						static_variant_cast<const colour&>(drawOp.fill).blue(),
 						static_variant_cast<const colour&>(drawOp.fill).alpha()}} :
-					std::array<uint8_t, 4>{};
+					std::array<uint8_t, 4>{});
 		}
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
@@ -899,6 +899,8 @@ namespace neogfx
 	{
 		if (aRect.empty())
 			return;
+
+		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 
 		if (aFill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);

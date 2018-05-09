@@ -207,6 +207,11 @@ namespace neogfx
 		GLint iPreviousBindingHandle;
 	};
 
+	inline vec4f colour_to_vec4f(const std::array<uint8_t, 4>& aSource)
+	{
+		return vec4f{{ aSource[0] / 255.0f, aSource[1] / 255.0f, aSource[2] / 255.0f, aSource[3] / 255.0f }};
+	}
+
 	class opengl_standard_vertex_arrays
 	{
 	public:
@@ -215,10 +220,18 @@ namespace neogfx
 		struct vertex
 		{
 			vec3 xyz;
-			std::array<uint8_t, 4> rgba;
+			vec4f rgba;
 			vec2f st;
-			vertex(const vec3& xyz = vec3{}, const std::array<uint8_t, 4>& rgba = std::array<uint8_t, 4>{}, const vec2f& st = vec2f{}) :
+			vertex(const vec3& xyz = vec3{}) :
+				xyz{ xyz }
+			{
+			}
+			vertex(const vec3& xyz, const vec4f& rgba, const vec2f& st = vec2f{}) :
 				xyz{ xyz }, rgba{ rgba }, st{ st }
+			{
+			}
+			vertex(const vec3& xyz, const std::array<uint8_t, 4>& rgba, const vec2f& st = vec2f{}) :
+				xyz{ xyz }, rgba{ colour_to_vec4f(rgba) }, st{ st }
 			{
 			}
 			struct offset
