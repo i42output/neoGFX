@@ -56,6 +56,7 @@ namespace video_poker
 				neogfx::alignment::Centre},
 			iParent{ aParent }
 		{
+			update(neogfx::from_step_time(*iParent.physics_time()));
 		}
 	private:
 		bool update(time_interval aUpdateTime) override
