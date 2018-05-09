@@ -61,10 +61,7 @@ namespace video_poker
 		bool update(time_interval aUpdateTime) override
 		{
 			if (iStartTime == boost::none)
-			{
 				iStartTime = aUpdateTime;
-				return true;
-			}
 			auto elapsed = aUpdateTime - *iStartTime;
 			elapsed /= 2.0;
 			set_position(neogfx::vec3{
