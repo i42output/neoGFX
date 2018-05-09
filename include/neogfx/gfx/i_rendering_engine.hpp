@@ -64,7 +64,9 @@ namespace neogfx
 			virtual void set_uniform_variable(const std::string& aName, const vec4f& aVector) = 0;
 			virtual void set_uniform_variable(const std::string& aName, const vec4& aVector) = 0;
 			virtual void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray) = 0;
-			virtual void set_uniform_matrix(const std::string& aName, const mat44& aMatrix) = 0;
+			virtual void set_uniform_array(const std::string& aName, uint32_t aSize, const double* aArray) = 0;
+			virtual void set_uniform_matrix(const std::string& aName, const mat44::template rebind<float>::type& aMatrix) = 0;
+			virtual void set_uniform_matrix(const std::string& aName, const mat44::template rebind<double>::type& aMatrix) = 0;
 		};
 	public:
 		virtual ~i_rendering_engine() {}

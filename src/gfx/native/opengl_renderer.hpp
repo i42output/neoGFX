@@ -78,7 +78,9 @@ namespace neogfx
 			void set_uniform_variable(const std::string& aName, const vec4f& aVector) override;
 			void set_uniform_variable(const std::string& aName, const vec4& aVector) override;
 			void set_uniform_array(const std::string& aName, uint32_t aSize, const float* aArray) override;
-			void set_uniform_matrix(const std::string& aName, const mat44& aMatrix) override;
+			void set_uniform_array(const std::string& aName, uint32_t aSize, const double* aArray) override;
+			void set_uniform_matrix(const std::string& aName, const mat44::template rebind<float>::type& aMatrix) override;
+			void set_uniform_matrix(const std::string& aName, const mat44::template rebind<double>::type& aMatrix) override;
 		public:
 			GLuint register_variable(const std::string& aVariableName);
 		public:

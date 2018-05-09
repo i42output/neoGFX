@@ -34,9 +34,9 @@ namespace neogfx
 	public:
 		typedef uint32_t argb;
 		typedef uint8_t component;
-		struct matrix : std::tr1::array<std::tr1::array<double, 5>, 5>
+		struct matrix : std::array<std::array<double, 5>, 5>
 		{
-			matrix() : std::tr1::array<std::tr1::array<double, 5>, 5>() {}
+			matrix() : std::array<std::array<double, 5>, 5>() {}
 		};
 		// constants
 	public:
@@ -786,6 +786,16 @@ namespace neogfx
 		colour ret = aLeft;
 		ret -= aRight;
 		return ret;
+	}
+
+	template <typename Elem, typename Traits>
+	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const colour& aColour)
+	{
+		aStream << "[0x" << std::hex << (int) aColour.alpha() <<
+			", 0x" << std::hex << (int) aColour.red() <<
+			", 0x" << std::hex << (int) aColour.green() <<
+			", 0x" << std::hex << (int) aColour.blue() << "]" << std::endl;
+		return aStream; 
 	}
 
 	class gradient

@@ -1046,7 +1046,7 @@ namespace neogfx
 	{
 	}
 
-	void widget::paint(graphics_context&) const
+	void widget::paint(graphics_context& aGraphicsContext) const
 	{
 	}
 

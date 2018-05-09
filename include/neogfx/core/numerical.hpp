@@ -522,6 +522,9 @@ namespace neogfx
 		typedef std::array<column_type, Columns> array_type;
 		typedef typename basic_vector<T, Columns>::input_reference_type input_reference_type;
 	public:
+		template <typename T2>
+		struct rebind { typedef basic_matrix<T2, Rows, Columns> type; };
+	public:
 		basic_matrix() : m{{}} {}
 		basic_matrix(std::initializer_list<std::initializer_list<value_type>> aColumns) { std::copy(aColumns.begin(), aColumns.end(), m.begin()); }
 		basic_matrix(const basic_matrix& other) : m{other.m} {}
@@ -539,6 +542,7 @@ namespace neogfx
 		std::pair<uint32_t, uint32_t> size() const { return std::make_pair(Rows, Columns); }
 		const column_type& operator[](uint32_t aColumn) const { return m[aColumn]; }
 		column_type& operator[](uint32_t aColumn) { return m[aColumn]; }
+		const value_type* data() const { return &m[0].v[0]; }
 	public:
 		basic_matrix& operator+=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] += value; return *this; }
 		basic_matrix& operator-=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] -= value; return *this; }

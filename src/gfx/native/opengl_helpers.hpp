@@ -49,8 +49,7 @@ namespace neogfx
 	class opengl_buffer
 	{
 	public:
-		typedef T item_type;
-		typedef typename item_type::value_type value_type;
+		typedef T value_type;
 	public:
 		opengl_buffer(std::size_t aSize) :
 			iSize{ aSize }, iMemory{ nullptr }
@@ -58,7 +57,7 @@ namespace neogfx
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			glCheck(glGenBuffers(1, &iHandle));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
-			glCheck(glBufferStorage(GL_ARRAY_BUFFER, size() * sizeof(T), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT));
+			glCheck(glBufferStorage(GL_ARRAY_BUFFER, size() * sizeof(value_type), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT));
 		}
 		~opengl_buffer()
 		{
@@ -70,10 +69,6 @@ namespace neogfx
 		{
 			return iSize;
 		}
-		std::size_t arity() const
-		{
-			return sizeof(item_type) / sizeof(value_type);
-		}
 		GLuint handle() const
 		{
 			return iHandle;
@@ -82,7 +77,7 @@ namespace neogfx
 		{
 			if (iMemory == nullptr)
 			{
-				glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, size() * sizeof(T), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT)));
+				glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, size() * sizeof(value_type), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT)));
 			}
 			return iMemory;
 		}
@@ -172,19 +167,37 @@ namespace neogfx
 	};
 
 	template <typename T>
+	struct opengl_attrib_data_type {};
+	template <>
+	struct opengl_attrib_data_type<double> { static constexpr GLenum type = GL_DOUBLE; };
+	template <>
+	struct opengl_attrib_data_type<float> { static constexpr GLenum type = GL_FLOAT; };
+	template <>
+	struct opengl_attrib_data_type<uint8_t> { static constexpr GLenum type = GL_UNSIGNED_BYTE; };
+
+	template <typename Vertex, typename Attrib>
 	class opengl_vertex_attrib_array
 	{
 	public:
-		typedef T item_type;
-		typedef typename item_type::value_type value_type;
+		typedef Vertex vertex_type;
+		typedef Attrib attribute_type;
+		typedef typename attribute_type::value_type value_type;
+		static constexpr std::size_t arity = sizeof(attribute_type) / sizeof(value_type);
 	public:
-		opengl_vertex_attrib_array(const opengl_buffer<T>& aBuffer, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
+		template <typename Buffer>
+		opengl_vertex_attrib_array(Buffer& aBuffer, bool aNormalized, std::size_t aOffset, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
 		{
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			GLuint index = reinterpret_cast<GLuint>(aShaderProgram.variable(aVariableName));
-			glCheck(glEnableVertexAttribArray(index));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
-			glCheck(glVertexAttribPointer(index, aBuffer.arity(), std::is_same<value_type, double>() ? GL_DOUBLE : GL_UNSIGNED_BYTE, GL_FALSE, 0, 0));
+			glCheck(glVertexAttribPointer(
+				index, 
+				arity, 
+				opengl_attrib_data_type<value_type>::type,
+				aNormalized ? GL_TRUE : GL_FALSE,
+				sizeof(vertex_type),
+				reinterpret_cast<const GLvoid*>(aOffset)));
+			glCheck(glEnableVertexAttribArray(index));
 		}
 		~opengl_vertex_attrib_array()
 		{
@@ -199,21 +212,33 @@ namespace neogfx
 	public:
 		// Formally this is being far too clever for one's own good as formally this is UB (Undefined Behaviour)
 		// as I am treating non-POD (vec3) as POD (by mapping it to OpenGL). May need to rethink this...
-		typedef std::vector<vec3, opengl_buffer_allocator<vec3>> vertex_array;
-		typedef std::vector<std::array<uint8_t, 4>, opengl_buffer_allocator<std::array<uint8_t, 4>>> colour_array;
-		typedef std::vector<vec2, opengl_buffer_allocator<vec2>> texture_coord_array;
+		struct vertex
+		{
+			vec3 xyz;
+			std::array<uint8_t, 4> rgba;
+			vec2f st;
+			vertex(const vec3& xyz = vec3{}, const std::array<uint8_t, 4>& rgba = std::array<uint8_t, 4>{}, const vec2f& st = vec2f{}) :
+				xyz{ xyz }, rgba{ rgba }, st{ st }
+			{
+			}
+			struct offset
+			{
+				static constexpr std::size_t xyz = 0u;
+				static constexpr std::size_t rgba = xyz + sizeof(decltype(vertex::xyz));
+				static constexpr std::size_t st = rgba + sizeof(decltype(vertex::rgba));
+			};
+		};
+		typedef std::vector<vertex, opengl_buffer_allocator<vertex>> vertex_array;
 	private:
 		class instance
 		{
 		public:
 			instance(const i_rendering_engine::i_shader_program& aShaderProgram, 
-				const opengl_buffer<vertex_array::value_type>& aPositionBuffer, 
-				const opengl_buffer<colour_array::value_type>& aColourBuffer, 
-				const opengl_buffer<texture_coord_array::value_type>& aTextureCoordBuffer) :
-				iCapacity{ aPositionBuffer.size() },
-				iVertexPositionAttribArray{ aPositionBuffer, aShaderProgram, "VertexPosition" },
-				iVertexColorAttribArray{ aColourBuffer, aShaderProgram, "VertexColor" },
-				iVertexTextureCoordAttribArray{ aTextureCoordBuffer, aShaderProgram, "VertexTextureCoord" }
+				const opengl_buffer<vertex_array::value_type>& aVertexBuffer) :
+				iCapacity{ aVertexBuffer.size() },
+				iVertexPositionAttribArray{ aVertexBuffer, false, vertex::offset::xyz, aShaderProgram, "VertexPosition" },
+				iVertexColorAttribArray{ aVertexBuffer, false, vertex::offset::rgba, aShaderProgram, "VertexColor" },
+				iVertexTextureCoordAttribArray{ aVertexBuffer, false, vertex::offset::st, aShaderProgram, "VertexTextureCoord" }
 			{
 			}
 		public:
@@ -224,30 +249,20 @@ namespace neogfx
 		private:
 			std::size_t iCapacity;
 			opengl_vertex_array iVao;
-			opengl_vertex_attrib_array<vertex_array::value_type> iVertexPositionAttribArray;
-			opengl_vertex_attrib_array<colour_array::value_type> iVertexColorAttribArray;
-			opengl_vertex_attrib_array<texture_coord_array::value_type> iVertexTextureCoordAttribArray;
+			opengl_vertex_attrib_array<vertex, decltype(vertex::xyz)> iVertexPositionAttribArray;
+			opengl_vertex_attrib_array<vertex, decltype(vertex::rgba)> iVertexColorAttribArray;
+			opengl_vertex_attrib_array<vertex, decltype(vertex::st)> iVertexTextureCoordAttribArray;
 		};
 	public:
 		opengl_standard_vertex_arrays() :
 			iShaderProgram{ nullptr }
 		{
 			vertices().reserve(4096);
-			colours().reserve(4096);
-			texture_coords().reserve(4096);
 		}
 	public:
 		vertex_array& vertices()
 		{
 			return iVertices;
-		}
-		colour_array& colours()
-		{
-			return iColours;
-		}
-		texture_coord_array& texture_coords()
-		{
-			return iTextureCoords;
 		}
 		void instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
 		{
@@ -255,11 +270,7 @@ namespace neogfx
 			{
 				iShaderProgram = &aShaderProgram;
 				iInstance.reset();
-				iInstance = std::make_unique<instance>(
-					aShaderProgram, 
-					vertex_array::allocator_type::buffer(&iVertices[0]),
-					colour_array::allocator_type::buffer(&iColours[0]),
-					texture_coord_array::allocator_type::buffer(&iTextureCoords[0]));
+				iInstance = std::make_unique<instance>(aShaderProgram, vertex_array::allocator_type::buffer(&iVertices[0]));
 			}
 			if (iShaderProgram->has_projection_matrix())
 				iShaderProgram->set_projection_matrix(aGraphicsContext);
@@ -268,8 +279,6 @@ namespace neogfx
 		i_rendering_engine::i_shader_program* iShaderProgram;
 		std::unique_ptr<instance> iInstance;
 		vertex_array iVertices;
-		colour_array iColours;
-		texture_coord_array iTextureCoords;
 	};
 
 	class use_shader_program

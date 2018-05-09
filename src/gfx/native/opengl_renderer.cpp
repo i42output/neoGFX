@@ -26,6 +26,7 @@
 #pragma comment(lib, "Shcore.lib")
 #endif
 
+#include <neogfx/core/numerical.hpp>
 #include "opengl_renderer.hpp"
 #include "../../gui/window/native/opengl_window.hpp"
 
@@ -96,7 +97,7 @@ namespace neogfx
 				{ 0.0, 2.0 / (top - bottom), 0.0, -(top + bottom) / (top - bottom) },
 				{ 0.0, 0.0, -2.0 / (zFar - zNear), -(zFar + zNear) / (zFar - zNear) },
 				{ 0.0, 0.0, 0.0, 1.0 } }.transposed();
-			set_uniform_matrix("uProjectionMatrix", orthoMatrix);
+			set_uniform_matrix("uProjectionMatrix", basic_matrix<float, 4, 4>{ orthoMatrix });
 		}
 	}
 
@@ -173,10 +174,25 @@ namespace neogfx
 			throw shader_program_error(errorCode);
 	}
 
-	void opengl_renderer::shader_program::set_uniform_matrix(const std::string& aName, const mat44& aMatrix)
+	void opengl_renderer::shader_program::set_uniform_array(const std::string& aName, uint32_t aSize, const double* aArray)
 	{
-		basic_matrix<float, 4, 4> fmat44 = aMatrix;
-		glUniformMatrix4fv(uniform_location(aName), 1, false, &fmat44[0][0]);
+		glUniform1dv(uniform_location(aName), aSize, aArray);
+		GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+			throw shader_program_error(errorCode);
+	}
+
+	void opengl_renderer::shader_program::set_uniform_matrix(const std::string& aName, const mat44::template rebind<float>::type& aMatrix)
+	{
+		glUniformMatrix4fv(uniform_location(aName), 1, false, aMatrix.data());
+		GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+			throw shader_program_error(errorCode);
+	}
+
+	void opengl_renderer::shader_program::set_uniform_matrix(const std::string& aName, const mat44::template rebind<double>::type& aMatrix)
+	{
+		glUniformMatrix4dv(uniform_location(aName), 1, false, aMatrix.data());
 		GLenum errorCode = glGetError();
 		if (errorCode != GL_NO_ERROR)
 			throw shader_program_error(errorCode);
@@ -247,6 +263,7 @@ namespace neogfx
 			std::make_pair(
 				std::string(
 					"#version 130\n"
+					"precision mediump float;\n"
 					"uniform mat4 uProjectionMatrix;\n"
 					"in vec3 VertexPosition;\n"
 					"in vec4 VertexColor;\n"
@@ -261,6 +278,7 @@ namespace neogfx
 			std::make_pair(
 				std::string(
 					"#version 130\n"
+					"precision mediump float;\n"
 					"in vec4 Color;\n"
 					"out vec4 FragColor;\n"
 					"void main()\n"
@@ -276,6 +294,7 @@ namespace neogfx
 			std::make_pair(
 				std::string(
 					"#version 130\n"
+					"precision mediump float;\n"
 					"uniform mat4 uProjectionMatrix;\n"
 					"in vec3 VertexPosition;\n"
 					"in vec4 VertexColor;\n"
@@ -292,6 +311,7 @@ namespace neogfx
 			std::make_pair(
 				std::string(
 					"#version 130\n"
+					"precision mediump float;\n"
 					"uniform sampler2D tex;\n"
 					"uniform int effect;\n"
 					"in vec4 Color;\n"
@@ -337,6 +357,7 @@ namespace neogfx
 				std::make_pair(
 					std::string(
 						"#version 130\n"
+						"precision mediump float;\n"
 						"uniform mat4 uProjectionMatrix;\n"
 						"in vec3 VertexPosition;\n"
 						"in vec4 VertexColor;\n"
@@ -359,6 +380,7 @@ namespace neogfx
 				std::make_pair(
 					std::string(
 						"#version 130\n"
+						"precision mediump float;\n"
 						"uniform mat4 uProjectionMatrix;\n"
 						"in vec3 VertexPosition;\n"
 						"in vec4 VertexColor;\n"
@@ -377,6 +399,7 @@ namespace neogfx
 				std::make_pair(
 					std::string(
 						"#version 130\n"
+						"precision mediump float;\n"
 						"uniform sampler2D glyphTexture;\n"
 						"uniform vec2 glyphOrigin;\n"
 						"uniform vec2 outputExtents;\n"
@@ -447,6 +470,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 130\n"
+							"precision mediump float;\n"
 							"uniform mat4 uProjectionMatrix;\n"
 							"in vec3 VertexPosition;\n"
 							"in vec4 VertexColor;\n"
@@ -465,6 +489,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 150\n"
+							"precision mediump float;\n"
 							"uniform sampler2D glyphTexture;\n"
 							"uniform vec2 glyphOrigin;\n"
 							"uniform sampler2DMS outputTexture;\n"
@@ -545,6 +570,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 130\n"
+							"precision mediump float;\n"
 							"uniform mat4 uProjectionMatrix;\n"
 							"in vec3 VertexPosition;\n"
 							"in vec4 VertexColor;\n"
@@ -563,6 +589,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 150\n"
+							"precision mediump float;\n"
 							"uniform sampler2D glyphTexture;\n"
 							"uniform vec2 glyphOrigin;\n"
 							"uniform sampler2DMS outputTexture;\n"
@@ -645,6 +672,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 130\n"/* todo */
+							"precision mediump float;\n"
 							"uniform mat4 uProjectionMatrix;\n"
 							"in vec3 VertexPosition;\n"
 							"in vec4 VertexColor;\n"
@@ -661,6 +689,7 @@ namespace neogfx
 					std::make_pair(
 						std::string(
 							"#version 130\n"/* todo */
+							"precision mediump float;\n"
 							"uniform sampler2D glyphTexture;\n"
 							"uniform vec2 glyphOrigin;\n"
 							"uniform sampler2D glyphDestinationTexture;\n"

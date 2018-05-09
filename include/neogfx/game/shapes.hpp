@@ -70,11 +70,11 @@ namespace neogfx
 	}
 
 	template <typename Container>
-	inline void insert_back_rect_vertices(Container& aResult, const rect& aRect, dimension aPixelAdjust, rect_type aType)
+	inline typename Container::iterator insert_back_rect_vertices(Container& aResult, const rect& aRect, dimension aPixelAdjust, rect_type aType)
 	{
 		temp_vec3_buffer<8> temp;
 		calc_rect_vertices(temp, aRect, aPixelAdjust, aType);
-		aResult.insert(aResult.end(), temp.begin(), temp.end());
+		return aResult.insert(aResult.end(), temp.begin(), temp.end());
 	}
 
 	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, rect_type aType);

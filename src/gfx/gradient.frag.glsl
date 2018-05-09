@@ -1,5 +1,6 @@
 #version 150
 
+precision mediump float;
 uniform float posViewportTop;
 uniform vec2 posTopLeft;
 uniform vec2 posBottomRight;
