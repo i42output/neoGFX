@@ -54,15 +54,19 @@ namespace video_poker
 				neogfx::font{ "Exo 2", "Black", 48.0 },
 				neogfx::text_appearance{aColour, neogfx::text_effect{ neogfx::text_effect::Outline, neogfx::colour::Black } },
 				neogfx::alignment::Centre},
-			iParent{ aParent },
-			iStartTime{ neogfx::app::instance().program_elapsed_ms() }
+			iParent{ aParent }
 		{
-			update(0);
 		}
 	private:
-		bool update(time_interval) override
+		bool update(time_interval aUpdateTime) override
 		{
-			auto elapsed = std::min(1.0, (neogfx::app::instance().program_elapsed_ms() - iStartTime) / 2500.0);
+			if (iStartTime == boost::none)
+			{
+				iStartTime = aUpdateTime;
+				return true;
+			}
+			auto elapsed = aUpdateTime - *iStartTime;
+			elapsed /= 2.0;
 			set_position(neogfx::vec3{
 				(iParent.extents().cx - extents()[0]) / 2.0,
 				iParent.extents().cy - (iParent.extents().cy * elapsed),
@@ -74,7 +78,7 @@ namespace video_poker
 		}
 	private:
 		neogfx::sprite_plane& iParent;
-		uint64_t iStartTime;
+		boost::optional<time_interval> iStartTime;
 	};
 
 	table::table(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane) :
