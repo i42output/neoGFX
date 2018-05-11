@@ -177,13 +177,6 @@ int main(int argc, char* argv[])
 		app.current_style().palette().set_colour(ng::colour::Black);
 		app.change_style("Slate");
 
-		/*ng::window window{ ng::size{ 500, 500}, ng::window_style::NoDecoration };
-		window.painted([&window](ng::graphics_context& aGc)
-		{
-			aGc.fill_rect(ng::rect{ 100, 100, 400, 400 }, ng::colour::Red);
-			window.update();
-		});*/
-
 		boost::optional<ng::window> windowObject;
 		if (app.program_options().full_screen())
 			windowObject.emplace(ng::video_mode{ 1920, 1080 });

@@ -92,7 +92,7 @@ namespace neogfx
 			break;
 		case frame_style::SolidFrame:
 		case frame_style::WindowFrame:
-			aGraphicsContext.draw_rect(rect{ point{0.0, 0.0}, window_rect().extents() }, pen{ frame_colour(), effective_frame_width() });
+			aGraphicsContext.draw_rect(rect{ point{ 0.0, 0.0 }, window_rect().extents() }, pen{ frame_colour(), effective_frame_width() });
 			break;
 		case frame_style::ContainerFrame:
 			{

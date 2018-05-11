@@ -57,7 +57,7 @@ namespace neogfx
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
 			glCheck(glGenBuffers(1, &iHandle));
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, iHandle));
-			glCheck(glBufferStorage(GL_ARRAY_BUFFER, size() * sizeof(value_type), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT));
+			glCheck(glBufferStorage(GL_ARRAY_BUFFER, size() * sizeof(value_type), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT));
 		}
 		~opengl_buffer()
 		{
@@ -77,14 +77,22 @@ namespace neogfx
 		{
 			if (iMemory == nullptr)
 			{
-				glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, size() * sizeof(value_type), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT)));
+				glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, size() * sizeof(value_type), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_COHERENT_BIT)));
 			}
 			return iMemory;
+		}
+		void flush(std::size_t aElements)
+		{
+			if (iMemory != nullptr)
+			{
+				glCheck(glFlushMappedNamedBufferRange(handle(), 0, aElements * sizeof(value_type)));
+			}
 		}
 		void unmap()
 		{
 			if (iMemory != nullptr)
 			{
+				flush(size());
 				glCheck(glUnmapNamedBuffer(handle()));
 				iMemory = nullptr;
 			}
@@ -179,23 +187,27 @@ namespace neogfx
 	class opengl_vertex_attrib_array
 	{
 	public:
+		struct cannot_get_attrib_location : std::logic_error { cannot_get_attrib_location(const std::string& aName) : std::logic_error("neogfx::opengl_vertex_attrib_array::cannot_get_attrib_location: " + aName) {} };
+	public:
 		typedef Vertex vertex_type;
 		typedef Attrib attribute_type;
 		typedef typename attribute_type::value_type value_type;
 		static constexpr std::size_t arity = sizeof(attribute_type) / sizeof(value_type);
 	public:
 		template <typename Buffer>
-		opengl_vertex_attrib_array(Buffer& aBuffer, bool aNormalized, std::size_t aOffset, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
+		opengl_vertex_attrib_array(Buffer& aBuffer, bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
 		{
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
-			GLuint index = reinterpret_cast<GLuint>(aShaderProgram.variable(aVariableName));
+			GLuint index = glGetAttribLocation(reinterpret_cast<GLuint>(aShaderProgram.handle()), aVariableName.c_str());
+			if (index == -1)
+				throw cannot_get_attrib_location(aVariableName);
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
 			glCheck(glVertexAttribPointer(
 				index, 
-				arity, 
+				arity,
 				opengl_attrib_data_type<value_type>::type,
 				aNormalized ? GL_TRUE : GL_FALSE,
-				sizeof(vertex_type),
+				aStride,
 				reinterpret_cast<const GLvoid*>(aOffset)));
 			glCheck(glEnableVertexAttribArray(index));
 		}
@@ -219,18 +231,18 @@ namespace neogfx
 		// as I am treating non-POD (vec3) as POD (by mapping it to OpenGL). May need to rethink this...
 		struct vertex
 		{
-			vec3 xyz;
+			vec3f xyz;
 			vec4f rgba;
 			vec2f st;
-			vertex(const vec3& xyz = vec3{}) :
+			vertex(const vec3f& xyz = vec3f{}) :
 				xyz{ xyz }
 			{
 			}
-			vertex(const vec3& xyz, const vec4f& rgba, const vec2f& st = vec2f{}) :
+			vertex(const vec3f& xyz, const vec4f& rgba, const vec2f& st = vec2f{}) :
 				xyz{ xyz }, rgba{ rgba }, st{ st }
 			{
 			}
-			vertex(const vec3& xyz, const std::array<uint8_t, 4>& rgba, const vec2f& st = vec2f{}) :
+			vertex(const vec3f& xyz, const std::array<uint8_t, 4>& rgba, const vec2f& st = vec2f{}) :
 				xyz{ xyz }, rgba{ colour_to_vec4f(rgba) }, st{ st }
 			{
 			}
@@ -242,49 +254,89 @@ namespace neogfx
 			};
 		};
 		typedef std::vector<vertex, opengl_buffer_allocator<vertex>> vertex_array;
+		class use
+		{
+		public:
+			use(opengl_standard_vertex_arrays& aParent) : iParent{ aParent }
+			{
+				vertices().clear();
+			}
+			~use()
+			{
+				flush();
+			}
+		public:
+			vertex_array& vertices()
+			{
+				return iParent.iVertices;
+			}
+			void flush()
+			{
+				glCheck(glFinish());
+			}
+		private:
+			opengl_standard_vertex_arrays& iParent;
+		};
 	private:
 		class instance
 		{
 		public:
 			instance(const i_rendering_engine::i_shader_program& aShaderProgram, 
-				const opengl_buffer<vertex_array::value_type>& aVertexBuffer) :
+				opengl_buffer<vertex_array::value_type>& aVertexBuffer, bool aWithTextureCoords) :
+				iVertexBuffer{ aVertexBuffer },
 				iCapacity{ aVertexBuffer.size() },
-				iVertexPositionAttribArray{ aVertexBuffer, false, vertex::offset::xyz, aShaderProgram, "VertexPosition" },
-				iVertexColorAttribArray{ aVertexBuffer, false, vertex::offset::rgba, aShaderProgram, "VertexColor" },
-				iVertexTextureCoordAttribArray{ aVertexBuffer, false, vertex::offset::st, aShaderProgram, "VertexTextureCoord" }
+				iVertexPositionAttribArray{ aVertexBuffer, false, sizeof(vertex), vertex::offset::xyz, aShaderProgram, "VertexPosition" },
+				iVertexColorAttribArray{ aVertexBuffer, false, sizeof(vertex), vertex::offset::rgba, aShaderProgram, "VertexColor" }
 			{
+				if (aWithTextureCoords)
+					iVertexTextureCoordAttribArray.emplace(aVertexBuffer, false, sizeof(vertex), vertex::offset::st, aShaderProgram, "VertexTextureCoord");
 			}
 		public:
 			std::size_t capacity() const
 			{
 				return iCapacity;
 			}
+			bool has_texture_coords() const
+			{
+				return iVertexTextureCoordAttribArray != boost::none;
+			}
+			void flush_buffer(std::size_t aElements)
+			{
+				iVertexBuffer.flush(aElements);
+			}
 		private:
+			opengl_buffer<vertex_array::value_type>& iVertexBuffer;
 			std::size_t iCapacity;
 			opengl_vertex_array iVao;
 			opengl_vertex_attrib_array<vertex, decltype(vertex::xyz)> iVertexPositionAttribArray;
 			opengl_vertex_attrib_array<vertex, decltype(vertex::rgba)> iVertexColorAttribArray;
-			opengl_vertex_attrib_array<vertex, decltype(vertex::st)> iVertexTextureCoordAttribArray;
+			boost::optional<opengl_vertex_attrib_array<vertex, decltype(vertex::st)>> iVertexTextureCoordAttribArray;
 		};
 	public:
 		opengl_standard_vertex_arrays() :
 			iShaderProgram{ nullptr }
 		{
-			vertices().reserve(4096);
+			iVertices.reserve(4096);
 		}
 	public:
-		vertex_array& vertices()
-		{
-			return iVertices;
-		}
 		void instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
 		{
-			if (iInstance.get() == nullptr || iInstance->capacity() != iVertices.capacity() || iShaderProgram != &aShaderProgram)
+			do_instantiate(aGraphicsContext, aShaderProgram, false);
+		}
+		void instantiate_with_texture_coords(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
+		{
+			do_instantiate(aGraphicsContext, aShaderProgram, true);
+		}
+	private:
+		void do_instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram, bool aWithTextureCoords)
+		{
+			if (iInstance.get() == nullptr || iInstance->capacity() != iVertices.capacity() || iShaderProgram != &aShaderProgram || iInstance->has_texture_coords() != aWithTextureCoords)
 			{
 				iShaderProgram = &aShaderProgram;
 				iInstance.reset();
-				iInstance = std::make_unique<instance>(aShaderProgram, vertex_array::allocator_type::buffer(&iVertices[0]));
+				iInstance = std::make_unique<instance>(aShaderProgram, vertex_array::allocator_type::buffer(&iVertices[0]), aWithTextureCoords);
 			}
+			iInstance->flush_buffer(iVertices.size());
 			if (iShaderProgram->has_projection_matrix())
 				iShaderProgram->set_projection_matrix(aGraphicsContext);
 		}

@@ -80,6 +80,26 @@ namespace neogfx
 			}
 			return result;
 		}
+
+		class use_vertex_arrays
+		{
+		public:
+			use_vertex_arrays(opengl_graphics_context& aParent) : iUse{ aParent.vertex_arrays() }
+			{
+			}
+		public:
+			opengl_standard_vertex_arrays::vertex_array& vertices()
+			{
+				return iUse.vertices();
+			}
+			void flush()
+			{
+				iUse.flush();
+				vertices().clear();
+			}
+		private:
+			opengl_standard_vertex_arrays::use iUse;
+		};
 	}
 
 	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface) :
@@ -358,6 +378,11 @@ namespace neogfx
 		iQueue.second.clear();
 	}
 
+	opengl_standard_vertex_arrays& opengl_graphics_context::vertex_arrays()
+	{
+		return iVertexArrays;
+	}
+
 	void opengl_graphics_context::scissor_on(const rect& aRect)
 	{
 		if (iScissorRect == boost::none)
@@ -444,10 +469,10 @@ namespace neogfx
 			{
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
 
-				iVertexArrays.vertices().clear();
+				use_vertex_arrays vertexArrays{ *this };
 				for (const auto& v : vertices)
 				{
-					iVertexArrays.vertices().push_back(opengl_standard_vertex_arrays::vertex{
+					vertexArrays.vertices().push_back(opengl_standard_vertex_arrays::vertex{
 						v, std::array<uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}}
 						});
 				}
@@ -467,10 +492,10 @@ namespace neogfx
 				{
 					auto vertices = aPath.to_vertices(innerPath.paths()[i]);
 
-					iVertexArrays.vertices().clear();
+					use_vertex_arrays vertexArrays{ *this };
 					for (const auto& v : vertices)
 					{
-						iVertexArrays.vertices().push_back(opengl_standard_vertex_arrays::vertex{
+						vertexArrays.vertices().push_back(opengl_standard_vertex_arrays::vertex{
 							v, std::array<uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}}
 							});
 					}
@@ -665,13 +690,14 @@ namespace neogfx
 				static_cast<colour>(aPen.colour()).alpha()}} :
 			std::array<uint8_t, 4>{};
 
-		iVertexArrays.vertices().assign({
+		use_vertex_arrays vertexArrays{ *this };
+		vertexArrays.vertices().assign({
 			opengl_standard_vertex_arrays::vertex{ xyz{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust}, penColour },
 			opengl_standard_vertex_arrays::vertex{ xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust}, penColour }});
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_LINES, 0, vertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
 
 		if (aPen.colour().is<gradient>())
@@ -686,9 +712,9 @@ namespace neogfx
 			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aRect);
 		}
 
-		iVertexArrays.vertices().clear();
-		insert_back_rect_vertices(iVertexArrays.vertices(), aRect, pixel_adjust(aPen), rect_type::Outline);
-		for (auto& v : iVertexArrays.vertices())
+		use_vertex_arrays vertexArrays{ *this };
+		insert_back_rect_vertices(vertexArrays.vertices(), aRect, pixel_adjust(aPen), rect_type::Outline);
+		for (auto& v : vertexArrays.vertices())
 			v.rgba = colour_to_vec4f(aPen.colour().is<colour>() ?
 				std::array <uint8_t, 4>{{
 					static_cast<colour>(aPen.colour()).red(),
@@ -699,7 +725,7 @@ namespace neogfx
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
-		glCheck(glDrawArrays(GL_LINES, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_LINES, 0, vertexArrays.vertices().size()));
 		glCheck(glLineWidth(1.0f));
 
 		if (aPen.colour().is<gradient>())
@@ -717,9 +743,9 @@ namespace neogfx
 		double pixelAdjust = pixel_adjust(aPen);
 		auto vertices = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 		for (const auto& v : vertices)
-			iVertexArrays.vertices().push_back({ v, aPen.colour().is<colour>() ?
+			vertexArrays.vertices().push_back({ v, aPen.colour().is<colour>() ?
 				std::array <uint8_t, 4>{{
 					static_cast<colour>(aPen.colour()).red(),
 					static_cast<colour>(aPen.colour()).green(),
@@ -746,9 +772,9 @@ namespace neogfx
 
 		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, false);
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 		for (const auto& v : vertices)
-			iVertexArrays.vertices().push_back({ v, aPen.colour().is<colour>() ?
+			vertexArrays.vertices().push_back({ v, aPen.colour().is<colour>() ?
 				std::array <uint8_t, 4>{{
 					static_cast<colour>(aPen.colour()).red(),
 					static_cast<colour>(aPen.colour()).green(),
@@ -775,9 +801,9 @@ namespace neogfx
 
 		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));;
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 		for (const auto& v : vertices)
-			iVertexArrays.vertices().push_back({ v, aPen.colour().is<colour>() ?
+			vertexArrays.vertices().push_back({ v, aPen.colour().is<colour>() ?
 				std::array <uint8_t, 4>{ {
 					static_cast<colour>(aPen.colour()).red(),
 					static_cast<colour>(aPen.colour()).green(),
@@ -811,9 +837,9 @@ namespace neogfx
 
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
 
-				iVertexArrays.vertices().clear();
+				use_vertex_arrays vertexArrays{ *this };
 				for (const auto& v : vertices)
-					iVertexArrays.vertices().push_back({ v, aPen.colour().is<colour>() ?
+					vertexArrays.vertices().push_back({ v, aPen.colour().is<colour>() ?
 						std::array <uint8_t, 4>{{
 							static_cast<colour>(aPen.colour()).red(),
 							static_cast<colour>(aPen.colour()).green(),
@@ -842,9 +868,9 @@ namespace neogfx
 			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : bounding_rect(tvs));
 		}
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 		for (const auto& v : tvs)
-			iVertexArrays.vertices().push_back({ v.coordinates, aPen.colour().is<colour>() ?
+			vertexArrays.vertices().push_back({ v.coordinates, aPen.colour().is<colour>() ?
 				std::array <uint8_t, 4>{ {
 					static_cast<colour>(aPen.colour()).red(),
 					static_cast<colour>(aPen.colour()).green(),
@@ -853,7 +879,7 @@ namespace neogfx
 				std::array <uint8_t, 4>{} });
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_LINE_LOOP, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_LINE_LOOP, 0, vertexArrays.vertices().size()));
 
 		if (aPen.colour().is<gradient>())
 			gradient_off();
@@ -872,24 +898,24 @@ namespace neogfx
 		if (firstOp.fill.is<gradient>())
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
-		iVertexArrays.vertices().clear();
-		iVertexArrays.vertices().reserve((aFillRectOps.second - aFillRectOps.first) * 6);
+		use_vertex_arrays vertexArrays{ *this };
+		vertexArrays.vertices().reserve((aFillRectOps.second - aFillRectOps.first) * 6);
 		for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
-			auto newVertices = insert_back_rect_vertices(iVertexArrays.vertices(), drawOp.rect, 0.0, rect_type::FilledTriangles);
-			for (auto i = newVertices; i != iVertexArrays.vertices().end(); ++i)
+			auto newVertices = insert_back_rect_vertices(vertexArrays.vertices(), drawOp.rect, 0.0, rect_type::FilledTriangles);
+			for (auto i = newVertices; i != vertexArrays.vertices().end(); ++i)
 				i->rgba = colour_to_vec4f(drawOp.fill.is<colour>() ?
-					std::array<uint8_t, 4>{{
-						static_variant_cast<const colour&>(drawOp.fill).red(),
-						static_variant_cast<const colour&>(drawOp.fill).green(),
-						static_variant_cast<const colour&>(drawOp.fill).blue(),
-						static_variant_cast<const colour&>(drawOp.fill).alpha()}} :
+					std::array<uint8_t, 4>{ {
+							static_variant_cast<const colour&>(drawOp.fill).red(),
+								static_variant_cast<const colour&>(drawOp.fill).green(),
+								static_variant_cast<const colour&>(drawOp.fill).blue(),
+								static_variant_cast<const colour&>(drawOp.fill).alpha()}} :
 					std::array<uint8_t, 4>{});
 		}
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLES, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_TRIANGLES, 0, vertexArrays.vertices().size()));
 
 		if (firstOp.fill.is<gradient>())
 			gradient_off();
@@ -907,10 +933,10 @@ namespace neogfx
 
 		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 		for (const auto& v : vertices)
 		{
-			iVertexArrays.vertices().push_back({v, aFill.is<colour>() ?
+			vertexArrays.vertices().push_back({v, aFill.is<colour>() ?
 				std::array <uint8_t, 4>{{
 					static_variant_cast<const colour&>(aFill).red(),
 					static_variant_cast<const colour&>(aFill).green(),
@@ -933,10 +959,10 @@ namespace neogfx
 
 		auto vertices = circle_vertices(aCentre, aRadius, 0.0, true);
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 		for (const auto& v : vertices)
 		{
-			iVertexArrays.vertices().push_back({v, aFill.is<colour>() ?
+			vertexArrays.vertices().push_back({v, aFill.is<colour>() ?
 				std::array <uint8_t, 4>{{
 					static_variant_cast<const colour&>(aFill).red(),
 					static_variant_cast<const colour&>(aFill).green(),
@@ -959,10 +985,10 @@ namespace neogfx
 
 		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 		for (const auto& v : vertices)
 		{
-			iVertexArrays.vertices().push_back({v, aFill.is<colour>() ?
+			vertexArrays.vertices().push_back({v, aFill.is<colour>() ?
 				std::array <uint8_t, 4>{{
 					static_variant_cast<const colour&>(aFill).red(),
 					static_variant_cast<const colour&>(aFill).green(),
@@ -997,10 +1023,10 @@ namespace neogfx
 
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
 
-				iVertexArrays.vertices().clear();
+				use_vertex_arrays vertexArrays{ *this };
 				for (const auto& v : vertices)
 				{
-					iVertexArrays.vertices().push_back({v, aFill.is<colour>() ?
+					vertexArrays.vertices().push_back({v, aFill.is<colour>() ?
 						std::array <uint8_t, 4>{{
 							static_variant_cast<const colour&>(aFill).red(),
 							static_variant_cast<const colour&>(aFill).green(),
@@ -1042,7 +1068,7 @@ namespace neogfx
 					size{ max.x - min.y, max.y - min.y } });
 		}
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 		for (auto op = aFillShapeOps.first; op != aFillShapeOps.second; ++op)
 		{
 			auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(*op);
@@ -1052,7 +1078,7 @@ namespace neogfx
 				for (auto vi : f.vertices)
 				{
 					auto const& v = tvs[vi];
-					iVertexArrays.vertices().push_back({
+					vertexArrays.vertices().push_back({
 						v.coordinates,
 						drawOp.fill.is<colour>() ?
 							std::array <uint8_t, 4>{{
@@ -1067,7 +1093,7 @@ namespace neogfx
 		}
 		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
 
-		glCheck(glDrawArrays(GL_TRIANGLES, 0, iVertexArrays.vertices().size()));
+		glCheck(glDrawArrays(GL_TRIANGLES, 0, vertexArrays.vertices().size()));
 
 		if (firstOp.fill.is<gradient>())
 			gradient_off();
@@ -1108,7 +1134,7 @@ namespace neogfx
 			return;
 		}
 
-		iVertexArrays.vertices().clear();
+		use_vertex_arrays vertexArrays{ *this };
 
 		for (uint32_t pass = 1; pass <= 2; ++pass)
 		{
@@ -1147,10 +1173,10 @@ namespace neogfx
 							for (double x = -drawOp.appearance.effect().width(); x <= drawOp.appearance.effect().width(); x += 1.0)
 							{
 								rect effectRect = outputRect + point{ x, y };
-								iVertexArrays.vertices().push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
-								iVertexArrays.vertices().push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
-								iVertexArrays.vertices().push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
-								iVertexArrays.vertices().push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
+								vertexArrays.vertices().push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
+								vertexArrays.vertices().push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
+								vertexArrays.vertices().push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
+								vertexArrays.vertices().push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
 							}
 						}
 					}
@@ -1164,15 +1190,15 @@ namespace neogfx
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
 						std::array <uint8_t, 4>{};
-					iVertexArrays.vertices().push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
-					iVertexArrays.vertices().push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
-					iVertexArrays.vertices().push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
-					iVertexArrays.vertices().push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
+					vertexArrays.vertices().push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
+					vertexArrays.vertices().push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
+					vertexArrays.vertices().push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
+					vertexArrays.vertices().push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
 				}
 			}
 		}
 
-		if (iVertexArrays.vertices().empty())
+		if (vertexArrays.vertices().empty())
 			return;
 
 		glCheck(glActiveTexture(GL_TEXTURE1));
@@ -1192,11 +1218,11 @@ namespace neogfx
 				static_variant_cast<const gradient&>(firstOp.appearance.ink()), 
 				rect{ 
 					point{ 
-						iVertexArrays.vertices()[0].xyz[0], 
-						iVertexArrays.vertices()[0].xyz[1]}, 
+						vertexArrays.vertices()[0].xyz[0], 
+						vertexArrays.vertices()[0].xyz[1]}, 
 					point{
-						iVertexArrays.vertices()[2].xyz[0],
-						iVertexArrays.vertices()[2].xyz[1]}});
+						vertexArrays.vertices()[2].xyz[0],
+						vertexArrays.vertices()[2].xyz[1]}});
 
 		const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
@@ -1213,7 +1239,7 @@ namespace neogfx
 		{
 			auto& shader = iRenderingEngine.active_shader_program();
 
-			iVertexArrays.instantiate(*this, shader);
+			iVertexArrays.instantiate_with_texture_coords(*this, shader);
 
 			bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
 			shader.set_uniform_variable("guiCoordinates", guiCoordinates);
@@ -1248,38 +1274,38 @@ namespace neogfx
 						{
 							const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 							shader.set_uniform_variable("glyphOrigin",
-								static_cast<float>(iVertexArrays.vertices()[index].st[0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
-								static_cast<float>(iVertexArrays.vertices()[index].st[1] * glyphTexture.texture().atlas_texture().storage_extents().cy));
+								static_cast<float>(vertexArrays.vertices()[index].st[0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
+								static_cast<float>(vertexArrays.vertices()[index].st[1] * glyphTexture.texture().atlas_texture().storage_extents().cy));
 
 							if (guiCoordinates)
 							{
 								shader.set_uniform_variable("effectRect", 
 									vec4{ 
-										iVertexArrays.vertices()[index].xyz[0], 
-										iVertexArrays.vertices()[index + 2].xyz[1] - 1.0,
-										iVertexArrays.vertices()[index + 2].xyz[0],
-										iVertexArrays.vertices()[index].xyz[1] - 1.0 });
+										vertexArrays.vertices()[index].xyz[0], 
+										vertexArrays.vertices()[index + 2].xyz[1] - 1.0,
+										vertexArrays.vertices()[index + 2].xyz[0],
+										vertexArrays.vertices()[index].xyz[1] - 1.0 });
 								shader.set_uniform_variable("glyphRect", 
 									vec4{ 
-										iVertexArrays.vertices()[index + 4].xyz[0],
-										iVertexArrays.vertices()[index + 4 + 2].xyz[1] - 1.0,
-										iVertexArrays.vertices()[index + 4 + 2].xyz[0],
-										iVertexArrays.vertices()[index + 4].xyz[1] - 1.0 });
+										vertexArrays.vertices()[index + 4].xyz[0],
+										vertexArrays.vertices()[index + 4 + 2].xyz[1] - 1.0,
+										vertexArrays.vertices()[index + 4 + 2].xyz[0],
+										vertexArrays.vertices()[index + 4].xyz[1] - 1.0 });
 							}
 							else
 							{
 								shader.set_uniform_variable("effectRect", 
 									vec4{ 
-										iVertexArrays.vertices()[index].xyz[0],
-										iVertexArrays.vertices()[index].xyz[1],
-										iVertexArrays.vertices()[index + 2].xyz[0],
-										iVertexArrays.vertices()[index + 2].xyz[1] });
+										vertexArrays.vertices()[index].xyz[0],
+										vertexArrays.vertices()[index].xyz[1],
+										vertexArrays.vertices()[index + 2].xyz[0],
+										vertexArrays.vertices()[index + 2].xyz[1] });
 								shader.set_uniform_variable("glyphRect", 
 									vec4{ 
-										iVertexArrays.vertices()[index + 4].xyz[0],
-										iVertexArrays.vertices()[index + 4].xyz[1],
-										iVertexArrays.vertices()[index + 4 + 2].xyz[0],
-										iVertexArrays.vertices()[index + 4 + 2].xyz[1] });
+										vertexArrays.vertices()[index + 4].xyz[0],
+										vertexArrays.vertices()[index + 4].xyz[1],
+										vertexArrays.vertices()[index + 4 + 2].xyz[0],
+										vertexArrays.vertices()[index + 4 + 2].xyz[1] });
 							}
 							shader.set_uniform_variable("effectWidth", static_cast<int>(drawOp.appearance.effect().width()));
 							glCheck(glDrawArrays(GL_QUADS, index, 4));
@@ -1290,7 +1316,7 @@ namespace neogfx
 			}
 			else if (pass == 2)
 			{
-				auto count = iVertexArrays.vertices().size() - index;
+				auto count = vertexArrays.vertices().size() - index;
 				if (count > 0)
 				{
 					shader.set_uniform_variable("effect", 0);
@@ -1328,6 +1354,8 @@ namespace neogfx
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
+		use_vertex_arrays vertexArrays{ *this };
+
 		GLuint textureHandle = 0;
 		bool first = true;
 		bool newTexture = false;
@@ -1357,16 +1385,16 @@ namespace neogfx
 				newTexture = false;
 				if (!first)
 				{
-					iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
-					glCheck(glDrawArrays(GL_TRIANGLES, 0, iVertexArrays.vertices().size()));
+					iVertexArrays.instantiate_with_texture_coords(*this, iRenderingEngine.active_shader_program());
+					glCheck(glDrawArrays(GL_TRIANGLES, 0, vertexArrays.vertices().size()));
+					vertexArrays.flush();
 				}
-				iVertexArrays.vertices().clear();
 			}
 
 			for (auto vi : f.vertices)
 			{
 				auto const& v = transformedVertices[vi];
-				iVertexArrays.vertices().push_back(
+				vertexArrays.vertices().push_back(
 					opengl_standard_vertex_arrays::vertex{
 						v.coordinates, 
 						std::array<uint8_t, 4>{{
@@ -1381,8 +1409,8 @@ namespace neogfx
 			first = false;
 		}
 
-		iVertexArrays.instantiate(*this, iRenderingEngine.active_shader_program());
-		glCheck(glDrawArrays(GL_TRIANGLES, 0, iVertexArrays.vertices().size()));
+		iVertexArrays.instantiate_with_texture_coords(*this, iRenderingEngine.active_shader_program());
+		glCheck(glDrawArrays(GL_TRIANGLES, 0, vertexArrays.vertices().size()));
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
