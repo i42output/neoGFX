@@ -198,18 +198,20 @@ namespace neogfx
 		opengl_vertex_attrib_array(Buffer& aBuffer, bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
 		{
 			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
-			GLuint index = glGetAttribLocation(reinterpret_cast<GLuint>(aShaderProgram.handle()), aVariableName.c_str());
-			if (index == -1)
-				throw cannot_get_attrib_location(aVariableName);
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
-			glCheck(glVertexAttribPointer(
-				index, 
-				arity,
-				opengl_attrib_data_type<value_type>::type,
-				aNormalized ? GL_TRUE : GL_FALSE,
-				aStride,
-				reinterpret_cast<const GLvoid*>(aOffset)));
-			glCheck(glEnableVertexAttribArray(index));
+			GLuint index;
+			glCheck(index = glGetAttribLocation(reinterpret_cast<GLuint>(aShaderProgram.handle()), aVariableName.c_str()));
+			if (index != -1)
+			{
+				glCheck(glVertexAttribPointer(
+					index,
+					arity,
+					opengl_attrib_data_type<value_type>::type,
+					aNormalized ? GL_TRUE : GL_FALSE,
+					aStride,
+					reinterpret_cast<const GLvoid*>(aOffset)));
+				glCheck(glEnableVertexAttribArray(index));
+			}
 		}
 		~opengl_vertex_attrib_array()
 		{
