@@ -66,8 +66,6 @@ namespace neogfx
 	public:
 		void enqueue(const graphics_operation::operation& aOperation) override;
 		void flush() override;
-	public:
-		opengl_standard_vertex_arrays& vertex_arrays();
 	protected:
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
@@ -123,7 +121,6 @@ namespace neogfx
 		neogfx::smoothing_mode iSmoothingMode; 
 		bool iSubpixelRendering;
 		std::vector<logical_operation> iLogicalOperationStack;
-		opengl_standard_vertex_arrays iVertexArrays;
 		std::list<use_shader_program> iShaderProgramStack;
 		uint32_t iClipCounter;
 		std::vector<rect> iScissorRects;

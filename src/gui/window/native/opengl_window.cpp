@@ -22,6 +22,7 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include "opengl_window.hpp"
+#include "..\..\..\gfx\native\opengl_helpers.hpp"
 #ifdef _WIN32
 #include <D2d1.h>
 #endif
@@ -218,6 +219,8 @@ namespace neogfx
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 
 		glCheck(surface_window().native_window_render(invalidated_area()));
+
+		rendering_engine().vertex_arrays().flush();
 
 		glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 		glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, iFrameBuffer));

@@ -91,13 +91,13 @@ namespace neogfx
 			typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
 		public:
 			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u) : 
-				iParent{ aParent }, iUse{ aParent.vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart { static_cast<GLint>(vertices().size())	}
+				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart { static_cast<GLint>(vertices().size())	}
 			{
 				if (!room_for(aNeed))
 					flush();
 			}
 			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u) :
-				iParent{ aParent }, iUse{ aParent.vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }
+				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }
 			{
 				if (!room_for(aNeed))
 					flush();
@@ -168,9 +168,9 @@ namespace neogfx
 				if (static_cast<std::size_t>(iStart) == vertices().size())
 					return;
 				if (!iWithTextures)
-					iParent.vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
+					iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
 				else
-					iParent.vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
+					iParent.rendering_engine().vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
 				glCheck(glDrawArrays(iMode, iStart, static_cast<GLsizei>(vertices().size() - iStart)));
 				iStart += vertices().size();
 			}
@@ -488,11 +488,6 @@ namespace neogfx
 		}
 		iQueue.first.clear();
 		iQueue.second.clear();
-	}
-
-	opengl_standard_vertex_arrays& opengl_graphics_context::vertex_arrays()
-	{
-		return iVertexArrays;
 	}
 
 	void opengl_graphics_context::scissor_on(const rect& aRect)
@@ -1333,7 +1328,7 @@ namespace neogfx
 		{
 			auto& shader = iRenderingEngine.active_shader_program();
 
-			iVertexArrays.instantiate_with_texture_coords(*this, shader);
+			rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
 
 			bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
 			shader.set_uniform_variable("guiCoordinates", guiCoordinates);

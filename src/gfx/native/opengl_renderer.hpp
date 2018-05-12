@@ -26,6 +26,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include "opengl_texture_manager.hpp"
+#include "opengl_helpers.hpp"
 
 std::string glErrorString(GLenum aErrorCode);
 GLenum glCheckError(const char* file, unsigned int line);
@@ -109,6 +110,7 @@ namespace neogfx
 		bool shader_program_active() const override;
 		void activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram) override;
 		void deactivate_shader_program() override;
+	public:
 		const i_shader_program& active_shader_program() const override;
 		i_shader_program& active_shader_program() override;
 		const i_shader_program& default_shader_program() const override;
@@ -119,6 +121,9 @@ namespace neogfx
 		i_shader_program& glyph_shader_program(bool aSubpixel) override;
 		const i_shader_program& gradient_shader_program() const override;
 		i_shader_program& gradient_shader_program() override;
+	public:
+		const opengl_standard_vertex_arrays & vertex_arrays() const override;
+		opengl_standard_vertex_arrays& vertex_arrays() override;
 	public:
 		bool is_subpixel_rendering_on() const override;
 		void subpixel_rendering_on() override;
@@ -147,6 +152,7 @@ namespace neogfx
 		shader_programs::iterator iGradientProgram;
 		bool iSubpixelRendering;
 		mutable boost::optional<std::array<GLuint, 3>> iGradientTextures;
+		mutable boost::optional<opengl_standard_vertex_arrays> iVertexArrays;
 		std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
 	};
 }

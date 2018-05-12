@@ -276,7 +276,7 @@ namespace neogfx
 			}
 			void flush()
 			{
-				glCheck(glFinish());
+				iParent.flush();
 			}
 		private:
 			opengl_standard_vertex_arrays& iParent;
@@ -330,6 +330,10 @@ namespace neogfx
 		void instantiate_with_texture_coords(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
 		{
 			do_instantiate(aGraphicsContext, aShaderProgram, true);
+		}
+		void flush()
+		{
+			glCheck(glFinish());
 		}
 	private:
 		void do_instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram, bool aWithTextureCoords)

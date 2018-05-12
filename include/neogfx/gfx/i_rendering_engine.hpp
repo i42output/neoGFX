@@ -33,6 +33,9 @@ namespace neogfx
 	class i_native_window;
 	class i_native_graphics_context;
 
+	class opengl_standard_vertex_arrays; // todo: abstract
+
+
 	enum class renderer
 	{
 		OpenGL,
@@ -102,6 +105,7 @@ namespace neogfx
 		virtual bool shader_program_active() const = 0;
 		virtual void activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram) = 0;
 		virtual void deactivate_shader_program() = 0;
+	public:
 		virtual const i_shader_program& active_shader_program() const = 0;
 		virtual i_shader_program& active_shader_program() = 0;
 		virtual const i_shader_program& default_shader_program() const = 0;
@@ -112,6 +116,9 @@ namespace neogfx
 		virtual i_shader_program& glyph_shader_program(bool aSubpixel) = 0;
 		virtual const i_shader_program& gradient_shader_program() const = 0;
 		virtual i_shader_program& gradient_shader_program() = 0;
+	public:
+		virtual const opengl_standard_vertex_arrays& vertex_arrays() const = 0;
+		virtual opengl_standard_vertex_arrays& vertex_arrays() = 0;
 	public:
 		virtual bool is_subpixel_rendering_on() const = 0;
 		virtual void subpixel_rendering_on() = 0;

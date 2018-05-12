@@ -805,6 +805,18 @@ namespace neogfx
 		return aSubpixel ? *iGlyphSubpixelProgram : *iGlyphProgram;
 	}
 
+	const opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays() const
+	{
+		if (iVertexArrays == boost::none)
+			iVertexArrays.emplace();
+		return *iVertexArrays;
+	}
+
+	opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays()
+	{
+		return const_cast<opengl_standard_vertex_arrays&>(const_cast<const opengl_renderer*>(this)->vertex_arrays());
+	}
+
 	bool opengl_renderer::is_subpixel_rendering_on() const
 	{
 		return iSubpixelRendering;
