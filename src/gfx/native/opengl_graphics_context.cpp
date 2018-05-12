@@ -145,11 +145,15 @@ namespace neogfx
 			template <typename Iter>
 			iterator insert(const_iterator aPos, Iter aFirst, Iter aLast)
 			{
-				if (!room_for(std::distance(aFirst, aLast)))
+				if (room_for(std::distance(aFirst, aLast)))
+					return vertices().insert(aPos, aFirst, aLast);
+				else
+				{
 					flush();
-				if (!room_for(std::distance(aFirst, aLast)))
-					vertices().reserve(std::distance(aFirst, aLast));
-				return vertices().insert(aPos, aFirst, aLast);
+					if (!room_for(std::distance(aFirst, aLast)))
+						vertices().reserve(std::distance(aFirst, aLast));
+					return vertices().insert(vertices().begin(), aFirst, aLast);
+				}
 			}
 		public:
 			void flush()
@@ -993,7 +997,7 @@ namespace neogfx
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 6 };
+			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 6u * (aFillRectOps.second - aFillRectOps.first)};
 
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
@@ -1502,5 +1506,4 @@ namespace neogfx
 	{
 		return xyz{{ aPoint.x, aPoint.y, aZ }};
 	}
-
 }
