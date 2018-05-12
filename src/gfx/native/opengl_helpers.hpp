@@ -261,13 +261,15 @@ namespace neogfx
 		public:
 			use(opengl_standard_vertex_arrays& aParent) : iParent{ aParent }
 			{
-				vertices().clear();
 			}
 			~use()
 			{
-				flush();
 			}
 		public:
+			const vertex_array& vertices() const
+			{
+				return iParent.iVertices;
+			}
 			vertex_array& vertices()
 			{
 				return iParent.iVertices;

@@ -60,6 +60,7 @@ namespace neogfx
 		opengl_graphics_context(const opengl_graphics_context& aOther);
 		~opengl_graphics_context();
 	public:
+		i_rendering_engine& rendering_engine() override;
 		const i_native_surface& surface() const override;
 		virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
 	public:

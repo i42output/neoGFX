@@ -27,6 +27,7 @@
 
 namespace neogfx
 {
+	class i_rendering_engine;
 	class i_native_surface;
 
 	class i_native_graphics_context
@@ -37,6 +38,7 @@ namespace neogfx
 		virtual ~i_native_graphics_context() {}
 		virtual std::unique_ptr<i_native_graphics_context> clone() const = 0;
 	public:
+		virtual i_rendering_engine& rendering_engine() = 0;
 		virtual const i_native_surface& surface() const = 0;
 		virtual void enqueue(const graphics_operation::operation& aOperation) = 0;
 		virtual void flush() = 0;
