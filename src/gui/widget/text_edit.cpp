@@ -527,7 +527,7 @@ namespace neogfx
 
 	bool text_edit::text_input(const std::string& aText)
 	{
-		if (aText[0] == '\n') // newlines are handled in key_pressed()
+		if (aText[0] == '\r' || aText[0] == '\n') // newlines are handled in key_pressed()
 		{
 			if ((focus_policy() & neogfx::focus_policy::ConsumeReturnKey) == neogfx::focus_policy::ConsumeReturnKey)
 				return true;

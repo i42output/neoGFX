@@ -284,8 +284,11 @@ namespace neogfx
 			if (editing() == boost::none && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
 				edit(selection_model().current_index());
 		}
-		else if (model().rows() > 0 && !selection_model().has_current_index())
-			selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
+		else if (aFocusReason != focus_reason::Other)
+		{
+			if (model().rows() > 0 && !selection_model().has_current_index())
+				selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
+		}
 	}
 
 	void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -462,7 +465,7 @@ namespace neogfx
 	bool item_view::text_input(const std::string& aText)
 	{
 		bool handled = scrollable_widget::text_input(aText);
-		if (editing() == boost::none && selection_model().has_current_index() && aText[0] != '\n' && aText[0] != '\t')
+		if (editing() == boost::none && selection_model().has_current_index() && aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
 		{
 			edit(selection_model().current_index());
 			if (editing())
@@ -634,18 +637,21 @@ namespace neogfx
 	{
 	}
 
-	void item_view::current_index_changed(const i_item_selection_model&, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
+	void item_view::current_index_changed(const i_item_selection_model& aModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
 	{
 		if (aCurrentIndex != boost::none)
 		{
 			make_visible(*aCurrentIndex);
 			update(cell_rect(*aCurrentIndex, true));
-			if (aPreviousIndex != boost::none)
+			if (!aModel.sorting() && !aModel.filtering())
 			{
-				if (editing() != boost::none && presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == boost::none)
-					edit(*aCurrentIndex);
-				else if (editing() != boost::none)
-					end_edit(true);
+				if (aPreviousIndex != boost::none)
+				{
+					if (editing() != boost::none && presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == boost::none)
+						edit(*aCurrentIndex);
+					else if (editing() != boost::none)
+						end_edit(true);
+				}
 			}
 		}
 		if (aPreviousIndex != boost::none)

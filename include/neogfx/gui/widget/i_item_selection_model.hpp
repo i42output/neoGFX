@@ -127,6 +127,9 @@ namespace neogfx
 		virtual void select(const item_presentation_model_index& aIndex, item_selection_operation = item_selection_operation::Select) = 0;
 		virtual void select(const item_selection::range& aRange, item_selection_operation = item_selection_operation::Select) = 0;
 	public:
+		virtual bool sorting() const = 0;
+		virtual bool filtering() const = 0;
+	public:
 		virtual bool is_editable(const item_presentation_model_index& aIndex) const = 0;
 	public:
 		virtual void subscribe(i_item_selection_model_subscriber& aSubscriber) = 0;
