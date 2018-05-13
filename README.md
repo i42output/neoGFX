@@ -4,7 +4,7 @@
 neoGFX is a cross-platform GPU-oriented C++ application/game framework.
 neoGFX is still a work in progress (incomplete) so is not yet suitable for making apps or games. Currently neogfx has only been built for and tested on Windows.
 
-# Features (at version 1.0 release)
+# Features (when version 1.0 released)
 - clean modern C++ design including full exception safety supporting various widget allocation patterns (stack, member variable or free store);
 - use of standard non-proprietary C++ data types including using standard string classes (UTF-8 encoding) and containers from the C++ standard library;
 - simple, easy to use multi-threaded event system (an improvement over traditional signals and slots);
@@ -27,10 +27,10 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 
 Version | ETA           | Features
 --------|---------------|---------------------------------------------------
-v0.99   | Spring 2018   | Windows OpenGL; widget library feature complete; GUI designer tool
-v1.00   | Summer 2018   | Linux OpenGL; Vulkan; scripting engine
-v1.10   | Winter 2018   | Android support; physics engine
-v1.20   | Summer 2019   | macOS support
+v0.99   | Winter 2018   | Windows OpenGL; widget library feature complete; GUI designer tool
+v1.00   | Summer 2019   | Linux OpenGL; Vulkan; scripting engine
+v1.10   | Winter 2019   | Android support; physics engine
+v1.20   | Summer 2020   | macOS support
 
 # Implementation Progress
 
@@ -51,7 +51,7 @@ Toolbars                  | 90      |     Drop-down button support
 Layout Managers           | 95      |     Need to fully support size policies
 Label                     | 100     |     
 Button                    | 100     |     
-Table View                | 85      |     Selection; icon
+Table View                | 85      |     Selection; icon; cell widget; cell check box
 Tree View                 | 0       |
 List View                 | 75      |
 Text Edit                 | 85      |     Columns; rich text (HTML); undo/redo; performance optimization
@@ -74,4 +74,4 @@ i18n                      | 0       |
 l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
-Last updated: 10/03/2018
+Last updated: 13/05/2018
