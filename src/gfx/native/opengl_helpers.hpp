@@ -336,6 +336,7 @@ namespace neogfx
 			GLsync sync;
 			glCheck(sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
 			glCheck(glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, ~0ull));
+			glCheck(glDeleteSync(sync));
 		}
 	private:
 		void do_instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram, bool aWithTextureCoords)
