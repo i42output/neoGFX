@@ -34,6 +34,8 @@ v1.20   | Summer 2020   | macOS support
 
 # Implementation Progress
 
+![](http://neogfx.org/temp/2018.png)
+![](http://neogfx.org/temp/gradient2018.png)
 ![](http://neogfx.org/temp/bugfix.png)
 ![](http://neogfx.org/temp/emoji.png)
 ![](http://neogfx.org/temp/colour_picker_finished.png)
