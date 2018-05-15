@@ -274,9 +274,9 @@ namespace neogfx
 			{
 				return iParent.iVertices;
 			}
-			void flush()
+			void execute()
 			{
-				iParent.flush();
+				iParent.execute();
 			}
 		private:
 			opengl_standard_vertex_arrays& iParent;
@@ -320,7 +320,7 @@ namespace neogfx
 		opengl_standard_vertex_arrays() :
 			iShaderProgram{ nullptr }
 		{
-			iVertices.reserve(4096);
+			iVertices.reserve(16384);
 		}
 	public:
 		void instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
@@ -331,7 +331,7 @@ namespace neogfx
 		{
 			do_instantiate(aGraphicsContext, aShaderProgram, true);
 		}
-		void flush()
+		void execute()
 		{
 			glCheck(glFinish());
 		}
@@ -344,7 +344,7 @@ namespace neogfx
 				iInstance.reset();
 				iInstance = std::make_unique<instance>(aShaderProgram, vertex_array::allocator_type::buffer(&iVertices[0]), aWithTextureCoords);
 			}
-			iInstance->flush_buffer(iVertices.size());
+			//iInstance->flush_buffer(iVertices.size());
 			if (iShaderProgram->has_projection_matrix())
 				iShaderProgram->set_projection_matrix(aGraphicsContext);
 		}

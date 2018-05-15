@@ -20,7 +20,7 @@ void create_target(ng::sprite_plane& aWorld)
 	auto w = static_cast<ng::scalar>(std::rand() % 40) + 10.0;
 	target->set_extents(ng::vec3{ w, w });
 	target->set_mass(1.0);
-	target->set_spin_degrees(360.0);
+	target->set_spin_degrees((std::rand() % 180 + 180) * (std::rand() % 2 == 0 ? 1.0 : -1.0));
 }
 
 class missile : public ng::sprite

@@ -94,13 +94,13 @@ namespace neogfx
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart { static_cast<GLint>(vertices().size())	}
 			{
 				if (!room_for(aNeed))
-					flush();
+					execute();
 			}
 			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u) :
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }
 			{
 				if (!room_for(aNeed))
-					flush();
+					execute();
 			}
 			~use_vertex_arrays()
 			{
@@ -139,7 +139,7 @@ namespace neogfx
 			void push_back(const value_type& aVertex)
 			{
 				if (!room_for(1))
-					flush();
+					execute();
 				vertices().push_back(aVertex);
 			}
 			template <typename Iter>
@@ -149,17 +149,17 @@ namespace neogfx
 					return vertices().insert(aPos, aFirst, aLast);
 				else
 				{
-					flush();
+					execute();
 					if (!room_for(std::distance(aFirst, aLast)))
 						vertices().reserve(std::distance(aFirst, aLast));
 					return vertices().insert(vertices().begin(), aFirst, aLast);
 				}
 			}
 		public:
-			void flush()
+			void execute()
 			{
 				draw();
-				iUse.flush();
+				iUse.execute();
 				iUse.vertices().clear();
 				iStart = 0;
 			}
@@ -1410,7 +1410,7 @@ namespace neogfx
 			}
 		}
 
-		vertexArrays.flush();
+		vertexArrays.execute();
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
 
@@ -1472,7 +1472,7 @@ namespace neogfx
 				{
 					newTexture = false;
 					if (!first)
-						vertexArrays.flush();
+						vertexArrays.execute();
 				}
 
 				for (auto vi : f.vertices)
