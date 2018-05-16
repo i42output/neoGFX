@@ -953,15 +953,13 @@ namespace neogfx
 		if (model().rows() == 0)
 			return optional_item_presentation_model_index{};
 		const size cellSpacing = presentation_model().cell_spacing(*this);
-		point adjustedPos = aPosition.max(item_display_rect().top_left()).min(item_display_rect().bottom_right());
+		point adjustedPos = aPosition.max(item_display_rect().top_left()).min(item_display_rect().bottom_right() - size{ 1.0, 1.0 } );
 		item_presentation_model_index rowIndex = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), *this).first;
 		item_presentation_model_index index = rowIndex;
 		for (uint32_t col = 0; col < presentation_model().columns(); ++col) // TODO: O(n) isn't good enough if lots of columns
 		{
 			index.set_column(col);
-			rect cellRect = cell_rect(index);
-			cellRect.extents() += cellSpacing;
-			if (cellRect.contains_x(adjustedPos))
+			if (cell_rect(index, true).contains_x(adjustedPos))
 			{
 				if (aPosition.y < item_display_rect().top() && index.row() > 0)
 					index.set_row(index.row() - 1);
