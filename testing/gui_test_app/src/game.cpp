@@ -170,17 +170,28 @@ void create_game(ng::i_layout& aLayout)
 			spaceshipSprite.set_spin_degrees(-30.0);
 		else
 			spaceshipSprite.set_spin_degrees(0.0);
-		if (keyboard.is_key_pressed(ng::ScanCode_SPACE))
+		static bool sExtraFire = false;
+		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) || sExtraFire)
 		{
 			auto stepTime_ms = static_cast<decltype(aPhysicsStepTime)>(ng::chrono::to_milliseconds(ng::chrono::flicks{ aPhysicsStepTime }));
-			if ((stepTime_ms / 10) % 2 == 0 && (stepTime_ms / 100) % 2 == 0)
+			static auto sLastTime_ms = stepTime_ms;
+			auto sinceLastTime_ms = stepTime_ms - sLastTime_ms;
+			if (sinceLastTime_ms < 100)
 			{
-				for (double a = -30.0; a <= 30.0; a += 10.0)
+				if (sinceLastTime_ms / 10 % 2 == 0)
 				{
-					static boost::fast_pool_allocator<missile> alloc;
-					spritePlane->add_sprite(std::allocate_shared<missile, boost::fast_pool_allocator<missile>>(alloc, *spritePlane, spaceshipSprite, *score, explosion, a));
+					sExtraFire = false;
+					for (double a = -30.0; a <= 30.0; a += 10.0)
+					{
+						static boost::fast_pool_allocator<missile> alloc;
+						spritePlane->add_sprite(std::allocate_shared<missile, boost::fast_pool_allocator<missile>>(alloc, *spritePlane, spaceshipSprite, *score, explosion, a));
+					}
 				}
 			}
+			else
+				sExtraFire = true;
+			if (sinceLastTime_ms > 200)
+				sLastTime_ms = stepTime_ms;
 		}
 		if (keyboard.is_key_pressed(ng::ScanCode_D))
 			spritePlane->enable_dynamic_update(true);
