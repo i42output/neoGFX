@@ -1526,7 +1526,7 @@ namespace neogfx
 						auto ch = aTextBegin[cluster + (j - i)];
 						if (ch == 0x200D)
 							continue;
-						else if (surface().rendering_engine().font_manager().emoji_atlas().is_emoji(sequence + ch) || prev == 0x200D)
+						else if (surface().rendering_engine().font_manager().emoji_atlas().is_emoji(sequence + ch))
 							sequence += ch;
 						else
 							break;
@@ -1539,8 +1539,11 @@ namespace neogfx
 						emojiResult.push_back(g);
 						i = j - 1;
 					}
+					else
+						emojiResult.push_back(*i);
 				}
-				emojiResult.push_back(*i);
+				else
+					emojiResult.push_back(*i);
 			}
 			return std::move(emojiResult);
 		}
