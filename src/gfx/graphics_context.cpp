@@ -1334,7 +1334,7 @@ namespace neogfx
 			if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::Digit_LTR) // optimization (less runs for LTR text)
 				currentDirection = text_direction::LTR;
 			hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[codePointIndex]);
-			if (currentScript == HB_SCRIPT_COMMON)
+			if (currentScript == HB_SCRIPT_COMMON || currentScript == HB_SCRIPT_INHERITED)
 				currentScript = previousScript;
 			bool newRun =
 				previousFont != currentFont ||
@@ -1520,12 +1520,18 @@ namespace neogfx
 					std::u32string sequence;
 					sequence += chStart;
 					auto j = i + 1;
+					bool absorbNext = false;
 					for (; j != result.end(); ++j)
 					{
 						auto prev = aTextBegin[cluster + (j - i) - 1];
 						auto ch = aTextBegin[cluster + (j - i)];
 						if (ch == 0x200D)
 							continue;
+						else if (ch == 0xFE0F)
+						{
+							absorbNext = true;
+							break;
+						}
 						else if (surface().rendering_engine().font_manager().emoji_atlas().is_emoji(sequence + ch))
 							sequence += ch;
 						else
@@ -1535,12 +1541,17 @@ namespace neogfx
 					{
 						auto g = *i;
 						g.set_value(surface().rendering_engine().font_manager().emoji_atlas().emoji(sequence, aFontSelector(cluster).height()));
-						g.set_source(std::make_pair(g.source().first, g.source().first + sequence.size()));
+						g.set_source(glyph::source_type{ g.source().first, g.source().first + sequence.size() });
 						emojiResult.push_back(g);
 						i = j - 1;
 					}
 					else
 						emojiResult.push_back(*i);
+					if (absorbNext)
+					{
+						emojiResult.back().set_source(glyph::source_type{ emojiResult.back().source().first, emojiResult.back().source().first + sequence.size() + 1 });
+						++i;
+					}
 				}
 				else
 					emojiResult.push_back(*i);
