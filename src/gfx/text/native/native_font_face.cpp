@@ -146,10 +146,12 @@ namespace neogfx
 
 	dimension native_font_face::underline_thickness() const
 	{
+		auto result = 1.0;
 		if (FT_IS_SCALABLE(iHandle))
-			return iHandle->underline_thickness / 64.0;
+			result = std::max(1.0, std::floor(iHandle->underline_thickness / 64.0));
 		else
-			return static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_info::WeightNormal);
+			result = std::max(1.0, std::floor(static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_info::WeightNormal)));
+		return result;
 	}
 
 	dimension native_font_face::line_spacing() const

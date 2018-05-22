@@ -870,7 +870,7 @@ namespace neogfx
 		draw_line(
 			aPoint + vec3{ glyphTexture.placement().x, yLine },
 			aPoint + vec3{ glyphTexture.placement().x + glyphTexture.texture().extents().cx, yLine },
-			pen{ aAppearance.ink(), std::ceil(glyphFont.native_font_face().underline_thickness()) });
+			pen{ aAppearance.ink(), glyphFont.native_font_face().underline_thickness() });
 	}
 
 	void graphics_context::set_glyph_text_cache(glyph_text& aGlyphTextCache) const
@@ -1523,7 +1523,6 @@ namespace neogfx
 					bool absorbNext = false;
 					for (; j != result.end(); ++j)
 					{
-						auto prev = aTextBegin[cluster + (j - i) - 1];
 						auto ch = aTextBegin[cluster + (j - i)];
 						if (ch == 0x200D)
 							continue;
