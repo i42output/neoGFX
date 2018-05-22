@@ -1379,6 +1379,6 @@ namespace neogfx
 		if (rendering_engine().double_buffering())
 			SDL_GL_SwapWindow(iHandle);
 		else
-			glCheck(glFlush());
+			glCheck(glFinish());
 	}
 }
