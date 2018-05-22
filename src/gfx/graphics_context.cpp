@@ -864,8 +864,8 @@ namespace neogfx
 	{
 		const font& glyphFont = aGlyph.font();
 		auto yLine = logical_coordinates().first.y > logical_coordinates().second.y ?
-			(glyphFont.height() + glyphFont.descender()) - std::ceil(glyphFont.native_font_face().underline_position()) :
-			-glyphFont.descender() + std::ceil(glyphFont.native_font_face().underline_position());
+			(glyphFont.height() - 1.0 + glyphFont.descender()) - glyphFont.native_font_face().underline_position() :
+			-glyphFont.descender() + glyphFont.native_font_face().underline_position();
 		const i_glyph_texture& glyphTexture = aGlyph.glyph_texture();
 		draw_line(
 			aPoint + vec3{ glyphTexture.placement().x, yLine },
