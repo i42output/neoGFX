@@ -147,7 +147,7 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane->add_shape(debugInfo);
 	spritePlane->sprites_painted([spritePlane](ng::graphics_context& aGraphicsContext)
 	{
-		aGraphicsContext.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane->font(), ng::colour::White);
+		aGraphicsContext.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane->font().with_style(ng::font_info::Underline), ng::colour::White);
 		if (ng::app::instance().keyboard().is_key_pressed(ng::ScanCode_C))
 			spritePlane->collision_tree_2d().visit_aabbs([&aGraphicsContext](const neogfx::aabb_2d& aAabb)
 			{

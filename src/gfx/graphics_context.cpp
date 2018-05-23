@@ -866,10 +866,9 @@ namespace neogfx
 		auto yLine = logical_coordinates().first.y > logical_coordinates().second.y ?
 			(glyphFont.height() - 1.0 + glyphFont.descender()) - glyphFont.native_font_face().underline_position() :
 			-glyphFont.descender() + glyphFont.native_font_face().underline_position();
-		const i_glyph_texture& glyphTexture = aGlyph.glyph_texture();
 		draw_line(
-			aPoint + vec3{ glyphTexture.placement().x, yLine },
-			aPoint + vec3{ glyphTexture.placement().x + glyphTexture.texture().extents().cx, yLine },
+			aPoint + vec3{ 0.0, yLine },
+			aPoint + vec3{ mnemonics_shown() && aGlyph.mnemonic() ? aGlyph.extents().cx : aGlyph.advance().cx, yLine },
 			pen{ aAppearance.ink(), glyphFont.native_font_face().underline_thickness() });
 	}
 
