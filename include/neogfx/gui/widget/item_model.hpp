@@ -33,10 +33,10 @@
 
 namespace neogfx
 {
-	class default_item_container_traits
+	class default_item_flat_container_traits
 	{
 	public:
-		struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::default_item_container_traits::operation_not_supported") {} };
+		struct operation_not_supported : std::logic_error { operation_not_supported() : std::logic_error("neogfx::default_item_flat_container_traits::operation_not_supported") {} };
 	public:
 		template <typename Container, typename T>
 		static typename Container::iterator append(Container& aContainer, typename Container::const_iterator aPosition, const T& aValue)
@@ -96,7 +96,7 @@ namespace neogfx
 	};
 
 	template <typename T, typename CellType, uint32_t Columns>
-	class item_container_traits : public default_item_container_traits
+	class item_flat_container_traits : public default_item_flat_container_traits
 	{
 	public:
 		typedef T value_type;
@@ -111,12 +111,12 @@ namespace neogfx
 		template <typename T2, typename CellType2>
 		struct rebind
 		{
-			typedef item_container_traits<T2, CellType2, Columns> other;
+			typedef item_flat_container_traits<T2, CellType2, Columns> other;
 		};
 	};
 
 	template <typename T, typename CellType>
-	class item_container_traits<T, CellType, 0> : public default_item_container_traits
+	class item_flat_container_traits<T, CellType, 0> : public default_item_flat_container_traits
 	{
 	public:
 		typedef T value_type;
@@ -131,11 +131,11 @@ namespace neogfx
 		template <typename T2, typename CellType2>
 		struct rebind
 		{
-			typedef item_container_traits<T2, CellType2, 0> other;
+			typedef item_flat_container_traits<T2, CellType2, 0> other;
 		};
 	};
 
-	template <typename T, uint32_t Columns = 0, typename CellType = item_cell_data, typename ContainerTraits = item_container_traits<T, CellType, Columns>>
+	template <typename T, uint32_t Columns = 0, typename CellType = item_cell_data, typename ContainerTraits = item_flat_container_traits<T, CellType, Columns>>
 	class basic_item_model : public i_basic_item_model<T>, private neolib::observable<i_item_model_subscriber>
 	{
 	public:

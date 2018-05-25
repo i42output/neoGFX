@@ -375,7 +375,7 @@ int main(int argc, char* argv[])
 		button0.set_size_policy(ng::size_policy::Expanding);
 		button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
 		ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog");
-		ng::push_button buttonGenerateUuid(topButtons, "Generate UUID");
+		ng::push_button buttonGenerateUuid(topButtons, "&Generate UUID");
 		ng::horizontal_layout international(layoutButtons);
 		button1.set_foreground_colour(ng::colour::LightGoldenrod);
 		ng::push_button button2(international, u8"ويقفز الثعلب البني السريع فوق الكلب الكسول");
@@ -386,7 +386,7 @@ int main(int argc, char* argv[])
 		button4.clicked([&window]() { window.set_title_text(u8"请停止食用犬"); });
 		button4.set_foreground_colour(ng::colour::CadetBlue);
 		button4.set_maximum_size(window.dpi_scale(ng::size{ 128, 64 }));
-		ng::push_button button5(layoutButtons, u8"sample te&xt نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
+		ng::push_button button5(layoutButtons, u8"sample text نص عينة sample text טקסט לדוגמא 示例文本 sample text\nKerning test: Tr. WAVAVAW. zzz zoz ozo ooo");
 		ng::horizontal_layout dropListLayout(layoutButtons);
 		ng::drop_list dropList(dropListLayout);
 		dropList.model().insert_item(dropList.model().end(), "Red");
@@ -484,7 +484,7 @@ int main(int argc, char* argv[])
 		}
 		ng::group_box groupBox{ layout2, "Group Box" };
 		ng::vertical_layout& layoutRadiosAndChecks = static_cast<ng::vertical_layout&>(groupBox.item_layout());
-		ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbox", ng::check_box::TriState);
+		ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbo&x", ng::check_box::TriState);
 		auto showHideTabs = [&triState, &tabContainer]()
 		{
 			if (triState.is_checked())
