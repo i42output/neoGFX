@@ -86,6 +86,8 @@ namespace neogfx
 		class use_vertex_arrays
 		{
 		public:
+			struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays::invalid_draw_count") {} };
+		public:
 			typedef opengl_standard_vertex_arrays::vertex_array::value_type value_type;
 			typedef opengl_standard_vertex_arrays::vertex_array::const_iterator const_iterator;
 			typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
@@ -165,14 +167,20 @@ namespace neogfx
 			}
 			void draw()
 			{
+				draw(vertices().size() - static_cast<std::size_t>(iStart));
+			}
+			void draw(std::size_t aCount)
+			{
+				if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
+					throw invalid_draw_count();
 				if (static_cast<std::size_t>(iStart) == vertices().size())
 					return;
 				if (!iWithTextures)
 					iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
 				else
 					iParent.rendering_engine().vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
-				glCheck(glDrawArrays(iMode, iStart, static_cast<GLsizei>(vertices().size() - iStart)));
-				iStart += vertices().size();
+				glCheck(glDrawArrays(iMode, iStart, static_cast<GLsizei>(aCount)));
+				iStart += aCount;
 			}
 		private:
 			std::size_t room() const
@@ -1224,7 +1232,9 @@ namespace neogfx
 
 		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, 4u * (aDrawGlyphOps.second - aDrawGlyphOps.first) };
 
-		for (uint32_t pass = 2/* todo: revert first pass when solution available*/; pass <= 2; ++pass)
+		bool hasEffects = false;
+
+		for (uint32_t pass = 1; pass <= 2; ++pass)
 		{
 			for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
 			{
@@ -1247,7 +1257,7 @@ namespace neogfx
 
 				if (drawOp.appearance.has_effect() && pass == 1)
 				{
-					/* -- todo: refactor this to use new buffer object method
+					hasEffects = true;
 					if (drawOp.appearance.effect().type() == text_effect::Outline)
 					{
 						auto effectColour = drawOp.appearance.effect().colour().is<colour>() ?
@@ -1268,7 +1278,7 @@ namespace neogfx
 								vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
 							}
 						}
-					}*/
+					}
 				}
 				else if (pass == 2)
 				{
@@ -1323,8 +1333,7 @@ namespace neogfx
 
 		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel())};
 
-		std::size_t index = 0;
-		for (uint32_t pass = 2/* todo: revert first pass when solution available*/; pass <= 2; ++pass)
+		for (uint32_t pass = (hasEffects ? 1 : 2); pass <= 2; ++pass)
 		{
 			auto& shader = iRenderingEngine.active_shader_program();
 
@@ -1339,14 +1348,13 @@ namespace neogfx
 			if (firstOp.glyph.subpixel())
 				shader.set_uniform_variable("outputTexture", 2);
 
-			if (pass == 2 && firstOp.glyph.subpixel())
+			if (pass == 2 && firstOp.glyph.subpixel() && hasEffects)
 			{
 				glCheck(glTextureBarrier());
 			}
 
 			if (pass == 1)
 			{
-				/* -- todo: refactor this to use new buffer object method 
 				for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
 				{
 					auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
@@ -1356,11 +1364,10 @@ namespace neogfx
 						shader.set_uniform_variable("effect", static_cast<int>(drawOp.appearance.effect().type()));
 						if (drawOp.appearance.effect().type() == text_effect::Outline)
 						{
-							GLsizei n = static_cast<GLsizei>(std::pow(drawOp.appearance.effect().width() * 2.0 + 1.0, 2.0));
-							glCheck(glDrawArrays(GL_QUADS, index, n * 4));
-							index += (n * 4);
+							auto scanLineOffsets = static_cast<std::size_t>(drawOp.appearance.effect().width() * 2.0 + 1.0);
+							vertexArrays.draw(scanLineOffsets * scanLineOffsets * 4u);
 						}
-						else if (drawOp.appearance.effect().type() == text_effect::Glow || drawOp.appearance.effect().type() == text_effect::Shadow)
+/*						else if (drawOp.appearance.effect().type() == text_effect::Glow || drawOp.appearance.effect().type() == text_effect::Shadow)
 						{
 							const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 							shader.set_uniform_variable("glyphOrigin",
@@ -1400,9 +1407,9 @@ namespace neogfx
 							shader.set_uniform_variable("effectWidth", static_cast<int>(drawOp.appearance.effect().width()));
 							glCheck(glDrawArrays(GL_QUADS, index, 4));
 							index += 4;
-						}
+						} */
 					}
-				} */
+				}
 			}
 			else if (pass == 2)
 			{
