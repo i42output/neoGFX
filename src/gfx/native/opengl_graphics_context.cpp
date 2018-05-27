@@ -1355,59 +1355,75 @@ namespace neogfx
 
 			if (pass == 1)
 			{
+				auto lastEffect = text_effect::None;
+				std::size_t lastCount = 0u;
 				for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
 				{
 					auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
-
+					auto currentEffect = text_effect::None;
 					if (drawOp.appearance.has_effect())
+						currentEffect = drawOp.appearance.effect().type();
+					bool drawLastEffect = (currentEffect != lastEffect && lastEffect != text_effect::None);
+					lastEffect = currentEffect;
+					switch (currentEffect)
 					{
-						shader.set_uniform_variable("effect", static_cast<int>(drawOp.appearance.effect().type()));
-						if (drawOp.appearance.effect().type() == text_effect::Outline)
+					case text_effect::None:
+						continue;
+					case text_effect::Outline:
 						{
 							auto scanLineOffsets = static_cast<std::size_t>(drawOp.appearance.effect().width() * 2.0 + 1.0);
-							vertexArrays.draw(scanLineOffsets * scanLineOffsets * 4u);
+							lastCount += scanLineOffsets * scanLineOffsets * 4u;
 						}
-/*						else if (drawOp.appearance.effect().type() == text_effect::Glow || drawOp.appearance.effect().type() == text_effect::Shadow)
-						{
+						break;
+					case text_effect::Glow:
+					case text_effect::Shadow:
+						{/*
 							const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 							shader.set_uniform_variable("glyphOrigin",
 								static_cast<float>(vertexArrays[index].st[0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
 								static_cast<float>(vertexArrays[index].st[1] * glyphTexture.texture().atlas_texture().storage_extents().cy));
-
+	
 							if (guiCoordinates)
 							{
-								shader.set_uniform_variable("effectRect", 
-									vec4{ 
-										vertexArrays[index].xyz[0], 
-										vertexArrays[index + 2].xyz[1] - 1.0,
-										vertexArrays[index + 2].xyz[0],
-										vertexArrays[index].xyz[1] - 1.0 });
-								shader.set_uniform_variable("glyphRect", 
-									vec4{ 
-										vertexArrays[index + 4].xyz[0],
-										vertexArrays[index + 4 + 2].xyz[1] - 1.0,
-										vertexArrays[index + 4 + 2].xyz[0],
-										vertexArrays[index + 4].xyz[1] - 1.0 });
+								shader.set_uniform_variable("effectRect",
+									vec4{
+									vertexArrays[index].xyz[0],
+									vertexArrays[index + 2].xyz[1] - 1.0,
+									vertexArrays[index + 2].xyz[0],
+									vertexArrays[index].xyz[1] - 1.0 });
+								shader.set_uniform_variable("glyphRect",
+									vec4{
+									vertexArrays[index + 4].xyz[0],
+									vertexArrays[index + 4 + 2].xyz[1] - 1.0,
+									vertexArrays[index + 4 + 2].xyz[0],
+									vertexArrays[index + 4].xyz[1] - 1.0 });
 							}
 							else
 							{
-								shader.set_uniform_variable("effectRect", 
-									vec4{ 
-										vertexArrays[index].xyz[0],
-										vertexArrays[index].xyz[1],
-										vertexArrays[index + 2].xyz[0],
-										vertexArrays[index + 2].xyz[1] });
-								shader.set_uniform_variable("glyphRect", 
-									vec4{ 
-										vertexArrays[index + 4].xyz[0],
-										vertexArrays[index + 4].xyz[1],
-										vertexArrays[index + 4 + 2].xyz[0],
-										vertexArrays[index + 4 + 2].xyz[1] });
+								shader.set_uniform_variable("effectRect",
+									vec4{
+									vertexArrays[index].xyz[0],
+									vertexArrays[index].xyz[1],
+									vertexArrays[index + 2].xyz[0],
+									vertexArrays[index + 2].xyz[1] });
+								shader.set_uniform_variable("glyphRect",
+									vec4{
+									vertexArrays[index + 4].xyz[0],
+									vertexArrays[index + 4].xyz[1],
+									vertexArrays[index + 4 + 2].xyz[0],
+									vertexArrays[index + 4 + 2].xyz[1] });
 							}
 							shader.set_uniform_variable("effectWidth", static_cast<int>(drawOp.appearance.effect().width()));
 							glCheck(glDrawArrays(GL_QUADS, index, 4));
 							index += 4;
-						} */
+						*/}
+						break;
+					}
+					if (drawLastEffect || (op + 1) == aDrawGlyphOps.second)
+					{
+						shader.set_uniform_variable("effect", static_cast<int>(currentEffect));
+						vertexArrays.draw(lastCount);
+						lastCount = 0u;
 					}
 				}
 			}
