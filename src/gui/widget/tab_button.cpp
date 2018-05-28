@@ -292,11 +292,7 @@ namespace neogfx
 		if (is_selected())
 			result.extents() += size{ 0.0, 5.0 };
 		else
-		{
-			auto reduce = as_units(*this, units::Millimetres, size{ 1.0 }).ceil().cy;
-			result.y += reduce;
-			result.cy -= (reduce - 3.0);
-		}
+			result.y += dpi_scale(size{ 0.0, 3.0 }).cy;
 		return convert_units(*this, su.saved_units(), result);
 	}
 
