@@ -289,10 +289,14 @@ namespace neogfx
 	{
 		scoped_units su{ *this, units::Pixels };
 		rect result = push_button::path_bounding_rect();
-		if (is_deselected())
-			result.deflate(as_units(*this, units::Millimetres, delta(0.0, 25.4/96.0)).ceil() * delta(0.0, 2.0));
+		if (is_selected())
+			result.extents() += size{ 0.0, 5.0 };
 		else
-			result.extents() += size(0.0, 5.0);
+		{
+			auto reduce = as_units(*this, units::Millimetres, size{ 1.0 }).ceil().cy;
+			result.y += reduce;
+			result.cy -= (reduce - 3.0);
+		}
 		return convert_units(*this, su.saved_units(), result);
 	}
 
