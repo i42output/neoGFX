@@ -1348,10 +1348,7 @@ namespace neogfx
 			if (firstOp.glyph.subpixel())
 				shader.set_uniform_variable("outputTexture", 2);
 
-			if (pass == 2 && firstOp.glyph.subpixel() && hasEffects)
-			{
-				glCheck(glTextureBarrier());
-			}
+			glCheck(glTextureBarrier());
 
 			if (pass == 1)
 			{
