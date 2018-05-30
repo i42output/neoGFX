@@ -289,10 +289,10 @@ namespace neogfx
 	{
 		scoped_units su{ *this, units::Pixels };
 		rect result = push_button::path_bounding_rect();
-		if (is_deselected())
-			result.deflate(as_units(*this, units::Millimetres, delta(0.0, 25.4/96.0)).ceil() * delta(0.0, 2.0));
+		if (is_selected())
+			result.extents() += size{ 0.0, 5.0 };
 		else
-			result.extents() += size(0.0, 5.0);
+			result.y += dpi_scale(size{ 0.0, 3.0 }).cy;
 		return convert_units(*this, su.saved_units(), result);
 	}
 

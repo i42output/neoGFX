@@ -113,7 +113,7 @@ namespace neogfx
 		const broad_phase_collision_tree_3d& collision_tree_3d() const;
 		broad_phase_collision_tree_3d& collision_tree_3d();
 	public:
-		uint64_t update_time() const;
+		double update_time() const;
 	private:
 		void do_add_object(std::shared_ptr<i_object> aObject);
 		void sort_shapes() const;
@@ -137,7 +137,7 @@ namespace neogfx
 		object_list::iterator iLastCollidable;
 		mutable boost::optional<broad_phase_collision_tree_2d> iBroadPhaseCollisionTree2d;
 		mutable boost::optional<broad_phase_collision_tree_3d> iBroadPhaseCollisionTree3d;
-		uint64_t iUpdateTime;
+		chrono::flicks iUpdateTime;
 		std::atomic<bool> iUpdatedSinceLastSnapshot;
 		bool iTakingSnapshot;
 		mutable std::recursive_mutex iUpdateMutex;

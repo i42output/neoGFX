@@ -1,4 +1,5 @@
 ﻿#include <neogfx/neogfx.hpp>
+#include <boost/format.hpp>
 #include <neolib/random.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -211,7 +212,7 @@ void create_game(ng::i_layout& aLayout)
 			"Collision tree (quadtree) size: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().count()) + "\n" +
 			"Collision tree (quadtree) depth: " + boost::lexical_cast<std::string>(spritePlane->collision_tree_2d().depth()) + "\n" +
 			"Collision tree (quadtree) update type: " + (spritePlane->dynamic_update_enabled() ? "dynamic" : "full") + "\n" +
-			"Physics update time: " + boost::lexical_cast<std::string>(spritePlane->update_time()) + " us");
+			"Physics update time: " + boost::str(boost::format("%.6f") % spritePlane->update_time()) + " s");
 	});
 
 	spritePlane->mouse_event([spritePlane, &spaceshipSprite](const neogfx::mouse_event& e)

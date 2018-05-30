@@ -428,7 +428,6 @@ namespace neogfx
 	void sprite_plane::update_objects()
 	{
 		std::lock_guard<std::recursive_mutex> lock(iUpdateMutex);
-		iUpdateTime = 0ull;
 		auto nowClock = std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch());
 		auto now = to_step_time(chrono::to_seconds(nowClock), physics_step_interval());
 		if (!iPhysicsTime)
@@ -436,9 +435,10 @@ namespace neogfx
 		if (*iPhysicsTime == now)
 			return;
 		bool updated = false;
+		int32_t frames = 0;
 		while (*iPhysicsTime <= now)
 		{
-			auto updateStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+			++frames;
 			applying_physics.trigger(*iPhysicsTime);
 			sort_objects();
 			if (iG != 0.0)
@@ -502,10 +502,11 @@ namespace neogfx
 				if (s->killed())
 					iNeedsSorting = true;
 			}
-			iUpdateTime = (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()) - updateStartTime).count();
 			physics_applied.trigger(*iPhysicsTime);
 			*iPhysicsTime += physics_step_interval();
 		}
+		if (frames > 0)
+			iUpdateTime = std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch() - nowClock) / frames;
 		iUpdatedSinceLastSnapshot = iUpdatedSinceLastSnapshot || updated;
 	}
 
@@ -546,8 +547,8 @@ namespace neogfx
 		return updated;
 	}
 
-	uint64_t sprite_plane::update_time() const
+	double sprite_plane::update_time() const
 	{
-		return iUpdateTime;
+		return std::chrono::duration_cast<std::chrono::duration<double>>(iUpdateTime).count();
 	}
 }
