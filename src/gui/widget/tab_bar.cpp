@@ -30,7 +30,7 @@ namespace neogfx
 		scrollable_widget{ scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this));
+		set_layout(std::make_shared<horizontal_layout>(*this, neogfx::alignment::Bottom));
 		layout().set_margins(neogfx::margins{});
 		layout().set_spacing(size{});
 	}
@@ -39,7 +39,7 @@ namespace neogfx
 		scrollable_widget{ aParent, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this));
+		set_layout(std::make_shared<horizontal_layout>(*this, neogfx::alignment::Bottom));
 		layout().set_margins(neogfx::margins{});
 		layout().set_spacing(size{});
 	}
@@ -48,7 +48,7 @@ namespace neogfx
 		scrollable_widget{ aLayout, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this));
+		set_layout(std::make_shared<horizontal_layout>(*this, neogfx::alignment::Bottom));
 		layout().set_margins(neogfx::margins{});
 		layout().set_spacing(size{});
 	}

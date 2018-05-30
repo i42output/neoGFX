@@ -289,10 +289,7 @@ namespace neogfx
 	{
 		scoped_units su{ *this, units::Pixels };
 		rect result = push_button::path_bounding_rect();
-		if (is_selected())
-			result.extents() += size{ 0.0, 5.0 };
-		else
-			result.y += dpi_scale(size{ 0.0, 3.0 }).cy;
+		result.extents() += size{ 0.0, 5.0 };
 		return convert_units(*this, su.saved_units(), result);
 	}
 
@@ -316,10 +313,14 @@ namespace neogfx
 
 	size tab_button::minimum_size(const optional_size& aAvailableSpace) const
 	{
+		auto result = push_button::minimum_size(aAvailableSpace);
 		if (has_minimum_size())
-			return push_button::minimum_size(aAvailableSpace);
-		scoped_units su{ *this, units::Pixels };
-		return convert_units(*this, su.saved_units(), push_button::minimum_size(aAvailableSpace) + as_units(*this, units::Millimetres, size(25.4/96.0, 25.4/96.0)).ceil() * size(4.0, 4.0));
+			return result;
+		result = convert_units(*this, units::Millimetres, result) + size{ 2.0, is_selected() ? 1.0 : 0.0 };
+		scoped_units su{ *this, units::Millimetres };
+		result = convert_units(*this, units::Pixels, result).ceil();
+		scoped_units su2{ *this, units::Pixels };
+		return convert_units(*this, su.saved_units(), result);
 	}
 
 	void tab_button::handle_clicked()
