@@ -37,6 +37,8 @@ namespace neogfx
 			glCheck(glGetIntegerv(iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
 			glCheck(glGenTextures(1, &iHandle));
 			glCheck(glBindTexture(iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, iHandle));
+			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
+			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
 			if (iSampling == texture_sampling::Normal)
 			{
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
