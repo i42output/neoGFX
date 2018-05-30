@@ -264,9 +264,11 @@ namespace neogfx
 		}
 
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
-
+		auto subTextureWidth = bitmap.width;
+		if (aGlyph.subpixel())
+			subTextureWidth /= 3;
 		auto& subTexture = iRenderingEngine.font_manager().glyph_atlas().create_sub_texture(
-			neogfx::size{ static_cast<dimension>(bitmap.width / (aGlyph.subpixel() ? 3.0 : 1.0)), static_cast<dimension>(bitmap.rows) }.ceil(),
+			neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
 			1.0, texture_sampling::Normal);
 		rect glyphRect{ subTexture.atlas_location() };
 		i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(std::make_pair(aGlyph.value(), aGlyph.subpixel()),
@@ -292,8 +294,8 @@ namespace neogfx
 				for (uint32_t x = 0; x < bitmap.width; x++)
 				{
 					uint8_t alpha = 0;
-					for (int32_t z = 0; z < 5; ++z)
-						alpha += static_cast<uint8_t>(bitmap.buffer[std::max<int32_t>(0, x - z + 2) + bitmap.pitch * y] * coefficients[z]);
+					for (int32_t z = -2; z <= 2; ++z)
+						alpha += static_cast<uint8_t>(bitmap.buffer[std::max(0, std::min<int32_t>(bitmap.width - 1, x + z)) + bitmap.pitch * y] * coefficients[z + 2]);
 					iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
 				}
 			}
