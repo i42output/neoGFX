@@ -104,31 +104,34 @@ namespace neogfx
 		return *this;
 	}
 
-	tab_page_container::tab_page_container(bool aClosableTabs) :
-		widget(), iContainerLayout(*this), iTabBar(iContainerLayout, *this, aClosableTabs), iPageLayout(iContainerLayout)
+	tab_page_container::tab_page_container(bool aClosableTabs, tab_container_style aStyle) :
+		widget{}, iContainerLayout{ *this }, iTabBar{ iContainerLayout, *this, aClosableTabs, aStyle }, iPageLayout{ iContainerLayout }
 	{
 		set_margins(neogfx::margins{});
 		iContainerLayout.set_margins(neogfx::margins{});
 		iContainerLayout.set_spacing(size{});
 		iPageLayout.set_margins(neogfx::margins{});
+		update_tab_bar_placement();
 	}
 
-	tab_page_container::tab_page_container(i_widget& aParent, bool aClosableTabs) :
-		widget(aParent), iContainerLayout(*this), iTabBar(iContainerLayout, *this, aClosableTabs), iPageLayout(iContainerLayout)
+	tab_page_container::tab_page_container(i_widget& aParent, bool aClosableTabs, tab_container_style aStyle) :
+		widget{ aParent }, iContainerLayout{ *this }, iTabBar{ iContainerLayout, *this, aClosableTabs, aStyle }, iPageLayout{ iContainerLayout }
 	{
 		set_margins(neogfx::margins{});
 		iContainerLayout.set_margins(neogfx::margins{});
 		iContainerLayout.set_spacing(size{});
 		iPageLayout.set_margins(neogfx::margins{});
+		update_tab_bar_placement();
 	}
 
-	tab_page_container::tab_page_container(i_layout& aLayout, bool aClosableTabs) :
-		widget(aLayout), iContainerLayout(*this), iTabBar(iContainerLayout, *this, aClosableTabs), iPageLayout(iContainerLayout)
+	tab_page_container::tab_page_container(i_layout& aLayout, bool aClosableTabs, tab_container_style aStyle) :
+		widget{ aLayout }, iContainerLayout{ *this }, iTabBar{ iContainerLayout, *this, aClosableTabs, aStyle }, iPageLayout{ iContainerLayout }
 	{
 		set_margins(neogfx::margins{});
 		iContainerLayout.set_margins(neogfx::margins{});
 		iContainerLayout.set_spacing(size{});
 		iPageLayout.set_margins(neogfx::margins{});
+		update_tab_bar_placement();
 	}
 
 	tab_page_container::~tab_page_container()
@@ -140,6 +143,21 @@ namespace neogfx
 	stack_layout& tab_page_container::page_layout()
 	{
 		return iPageLayout;
+	}
+
+	tab_container_style tab_page_container::style() const
+	{
+		return iTabBar.style();
+	}
+
+	void tab_page_container::set_style(tab_container_style aStyle)
+	{
+		if (style() != aStyle)
+		{
+			iTabBar.set_style(aStyle);
+			update_tab_bar_placement();
+			style_changed.trigger();
+		}
 	}
 
 	bool tab_page_container::has_tabs() const
@@ -381,9 +399,7 @@ namespace neogfx
 		throw no_parent_container();
 	}
 
-
-
-	const i_widget& tab_page_container::as_widget() const
+		const i_widget& tab_page_container::as_widget() const
 	{
 		return *this;
 	}
@@ -401,5 +417,22 @@ namespace neogfx
 	bool tab_page_container::is_managing_layout() const
 	{
 		return true;
+	}
+
+	void tab_page_container::update_tab_bar_placement()
+	{
+		switch (style() & tab_container_style::TabAlignmentMask)
+		{
+		case tab_container_style::TabAlignmentTop:
+		case tab_container_style::TabAlignmentLeft: // todo
+		case tab_container_style::TabAlignmentRight: // todo
+			iContainerLayout.remove(iTabBar);
+			iContainerLayout.add_at(0, iTabBar);
+			break;
+		case tab_container_style::TabAlignmentBottom:
+			iContainerLayout.remove(iTabBar);
+			iContainerLayout.add_at(iContainerLayout.count(), iTabBar);
+			break;
+		}
 	}
 }

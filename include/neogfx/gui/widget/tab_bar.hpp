@@ -33,9 +33,12 @@ namespace neogfx
 	public:
 		typedef tab_list::size_type tab_index;
 	public:
-		tab_bar(i_tab_container& aContainer, bool aClosableTabs = false);
-		tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs = false);
-		tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs = false);
+		tab_bar(i_tab_container& aContainer, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
+		tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
+		tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
+	public:
+		tab_container_style style() const override;
+		void set_style(tab_container_style aStyle) override;
 	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
@@ -75,8 +78,11 @@ namespace neogfx
 	public:
 		bool visible() const override;
 	private:
+		void update_placement();
+	private:
 		i_tab_container& iContainer;
 		bool iClosableTabs;
+		tab_container_style iStyle;
 		tab_list iTabs;
 	};
 }

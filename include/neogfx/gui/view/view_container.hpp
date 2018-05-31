@@ -43,10 +43,55 @@ namespace neogfx
 		i_view_container& iParent;
 	};
 
-	class view_container : public i_view_container, public widget, private i_tab_container
+	class view_container : public i_view_container, public widget
 	{
 	private:
-		typedef std::map<i_tab*, i_view*> tab_list;
+		class tab_container : public i_tab_container
+		{
+		public:
+			typedef std::map<i_tab*, i_view*> tab_list;
+		public:
+			tab_container(view_container& aOwner);
+		public:
+			tab_container_style style() const override;
+			void set_style(tab_container_style aStyle) override;
+		public:
+			bool has_tabs() const override;
+			uint32_t tab_count() const override;
+			tab_index index_of(const i_tab& aTab) const override;
+			const i_tab& tab(tab_index aTabIndex) const override;
+			i_tab& tab(tab_index aTabIndex) override;
+			bool is_tab_selected() const override;
+			const i_tab& selected_tab() const override;
+			i_tab& selected_tab() override;
+			i_tab& add_tab(const std::string& aTabText) override;
+			i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText) override;
+			void remove_tab(tab_index aTabIndex) override;
+			void show_tab(tab_index aTabIndex) override;
+			void hide_tab(tab_index aTabIndex) override;
+			optional_tab_index next_visible_tab(tab_index aStartFrom) const override;
+			optional_tab_index previous_visible_tab(tab_index aStartFrom) const  override;
+			void select_next_tab() override;
+			void select_previous_tab() override;
+		public:
+			void adding_tab(i_tab& aTab) override;
+			void selecting_tab(i_tab& aTab) override;
+			void removing_tab(i_tab& aTab) override;
+		public:
+			bool has_tab_page(tab_index aTabIndex) const override;
+			const i_tab_page& tab_page(tab_index aTabIndex) const override;
+			i_tab_page& tab_page(tab_index aTabIndex) override;
+		public:
+			bool has_parent_container() const override;
+			const i_tab_container& parent_container() const override;
+			i_tab_container& parent_container() override;
+			const i_widget& as_widget() const override;
+			i_widget& as_widget() override;
+		private:
+			view_container& iOwner;
+			tab_list iTabs;
+			tab_bar iTabBar;
+		};
 	public:
 		view_container(i_widget& aParent, view_container_style aStyle = view_container_style::Tabbed);
 		view_container(i_layout& aLayout, view_container_style aStyle = view_container_style::Tabbed);
@@ -66,42 +111,11 @@ namespace neogfx
 		bool can_defer_layout() const override;
 		bool is_managing_layout() const override;
 	private:
-		bool has_tabs() const override;
-		uint32_t tab_count() const override;
-		tab_index index_of(const i_tab& aTab) const override;
-		const i_tab& tab(tab_index aTabIndex) const override;
-		i_tab& tab(tab_index aTabIndex) override;
-		bool is_tab_selected() const override;
-		const i_tab& selected_tab() const override;
-		i_tab& selected_tab() override;
-		i_tab& add_tab(const std::string& aTabText) override;
-		i_tab& insert_tab(tab_index aTabIndex, const std::string& aTabText) override;
-		void remove_tab(tab_index aTabIndex) override;
-		void show_tab(tab_index aTabIndex) override;
-		void hide_tab(tab_index aTabIndex) override;
-		optional_tab_index next_visible_tab(tab_index aStartFrom) const override;
-		optional_tab_index previous_visible_tab(tab_index aStartFrom) const  override;
-		void select_next_tab() override;
-		void select_previous_tab() override;
-	private:
-		void adding_tab(i_tab& aTab) override;
-		void selecting_tab(i_tab& aTab) override;
-		void removing_tab(i_tab& aTab) override;
-	public:
-		bool has_tab_page(tab_index aTabIndex) const override;
-		const i_tab_page& tab_page(tab_index aTabIndex) const override;
-		i_tab_page& tab_page(tab_index aTabIndex) override;
-	public:
-		bool has_parent_container() const override;
-		const i_tab_container& parent_container() const override;
-		i_tab_container& parent_container() override;
-	private:
 		view_container_style iStyle;
 		vertical_layout iLayout0;
-		tab_bar iTabBar;
+		tab_container iTabContainer;
 		horizontal_layout iLayout1;
 		std::vector<std::shared_ptr<i_controller>> iControllers;
 		neogfx::view_stack iViewStack;
-		tab_list iTabs;
 	};
 }

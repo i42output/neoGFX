@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/tab_button.hpp>
-#include <neogfx/gui/widget/i_tab_page_container.hpp>
 
 namespace neogfx
 {
@@ -289,7 +288,18 @@ namespace neogfx
 	{
 		scoped_units su{ *this, units::Pixels };
 		rect result = push_button::path_bounding_rect();
-		result.extents() += size{ 0.0, 5.0 };
+		switch (container().style())
+		{
+		case tab_container_style::TabAlignmentTop:
+		case tab_container_style::TabAlignmentLeft: // todo
+		case tab_container_style::TabAlignmentRight: // todo
+			result.extents() += size{ 0.0, 5.0 };
+			break;
+		case tab_container_style::TabAlignmentBottom:
+			result.y -= 5.0;
+			result.extents() += size{ 0.0, 5.0 };
+			break;
+		}
 		return convert_units(*this, su.saved_units(), result);
 	}
 
@@ -342,7 +352,7 @@ namespace neogfx
 		if (!is_selected())
 			push_button::update(aUpdateRect);
 		else
-			push_button::update(to_client_coordinates(window_rect() + delta{ 0.0, 2.0 }));
+			push_button::update(to_client_coordinates(window_rect().inflate(delta{ 0.0, 2.0 })));
 	}
 
 	void tab_button::mouse_entered(const point& aPosition)

@@ -26,31 +26,49 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-	tab_bar::tab_bar(i_tab_container& aContainer, bool aClosableTabs) :
-		scrollable_widget{ scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
+	tab_bar::tab_bar(i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
+		scrollable_widget{ scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this, neogfx::alignment::Bottom));
+		set_layout(std::make_shared<horizontal_layout>(*this, alignment::Bottom));
 		layout().set_margins(neogfx::margins{});
 		layout().set_spacing(size{});
+		update_placement();
 	}
 
-	tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs) :
-		scrollable_widget{ aParent, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
+	tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
+		scrollable_widget{ aParent, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this, neogfx::alignment::Bottom));
+		set_layout(std::make_shared<horizontal_layout>(*this, alignment::Bottom));
 		layout().set_margins(neogfx::margins{});
 		layout().set_spacing(size{});
+		update_placement();
 	}
 
-	tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs) :
-		scrollable_widget{ aLayout, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }
+	tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
+		scrollable_widget{ aLayout, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this, neogfx::alignment::Bottom));
+		set_layout(std::make_shared<horizontal_layout>(*this, alignment::Bottom));
 		layout().set_margins(neogfx::margins{});
 		layout().set_spacing(size{});
+		update_placement();
+	}
+
+	tab_container_style tab_bar::style() const
+	{
+		return iStyle;
+	}
+	
+	void tab_bar::set_style(tab_container_style aStyle)
+	{
+		if (iStyle != aStyle)
+		{
+			iStyle = aStyle;
+			update_placement();
+			style_changed.trigger();
+		}
 	}
 
 	size tab_bar::minimum_size(const optional_size& aAvailableSpace) const
@@ -269,5 +287,20 @@ namespace neogfx
 			return false;
 		else
 			return widget::visible();
+	}
+
+	void tab_bar::update_placement()
+	{
+		switch (style() & tab_container_style::TabAlignmentMask)
+		{
+		case tab_container_style::TabAlignmentTop:
+		case tab_container_style::TabAlignmentLeft: // todo
+		case tab_container_style::TabAlignmentRight: // todo
+			layout().set_alignment(alignment::Bottom);
+			break;
+		case tab_container_style::TabAlignmentBottom:
+			layout().set_alignment(alignment::Top);
+			break;
+		}
 	}
 }

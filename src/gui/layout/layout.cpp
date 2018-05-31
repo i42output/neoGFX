@@ -426,8 +426,8 @@ namespace neogfx
 		if (iMargins != newMargins)
 		{
 			iMargins = newMargins;
-			if (iOwner != nullptr && aUpdateLayout)
-				iOwner->ultimate_ancestor().layout_items(true);
+			if (aUpdateLayout)
+				invalidate();
 		}
 	}
 
@@ -449,8 +449,8 @@ namespace neogfx
 			iSpacing = (aSpacing != boost::none ? 
 				optional_size{ units_converter(*this).to_device_units(*aSpacing) } :
 				aSpacing);
-			if (iOwner != nullptr && aUpdateLayout)
-				iOwner->ultimate_ancestor().layout_items(true);
+			if (aUpdateLayout)
+				invalidate();
 		}
 	}
 
@@ -475,8 +475,8 @@ namespace neogfx
 		{
 			iAlignment = aAlignment;
 			alignment_changed.trigger();
-			if (iOwner != nullptr && aUpdateLayout)
-				iOwner->ultimate_ancestor().layout_items(true);
+			if (aUpdateLayout)
+				invalidate();
 		}
 	}
 
@@ -602,8 +602,8 @@ namespace neogfx
 		if (iSizePolicy != aSizePolicy)
 		{
 			iSizePolicy = aSizePolicy;
-			if (iOwner != nullptr && aUpdateLayout)
-				iOwner->ultimate_ancestor().layout_items(true);
+			if (aUpdateLayout)
+				invalidate();
 		}
 	}
 
@@ -625,8 +625,8 @@ namespace neogfx
 		if (iWeight != aWeight)
 		{
 			iWeight = aWeight;
-			if (iOwner != nullptr && aUpdateLayout)
-				iOwner->ultimate_ancestor().layout_items(true);
+			if (aUpdateLayout)
+				invalidate();
 		}
 	}
 
@@ -649,8 +649,8 @@ namespace neogfx
 		if (iMinimumSize != newMinimumSize)
 		{
 			iMinimumSize = newMinimumSize;
-			if (iOwner != nullptr && aUpdateLayout)
-				iOwner->ultimate_ancestor().layout_items(true);
+			if (aUpdateLayout)
+				invalidate();
 		}
 	}
 
@@ -672,8 +672,8 @@ namespace neogfx
 		if (iMaximumSize != newMaximumSize)
 		{
 			iMaximumSize = newMaximumSize;
-			if (iOwner != nullptr && aUpdateLayout)
-				iOwner->ultimate_ancestor().layout_items(true);
+			if (aUpdateLayout)
+				invalidate();
 		}
 	}
 
@@ -723,8 +723,7 @@ namespace neogfx
 		invalidate();
 		item_list toRemove;
 		toRemove.splice(toRemove.begin(), items(), aItem);
-		if (iOwner != nullptr)
-			iOwner->ultimate_ancestor().layout_items(true);
+		invalidate();
 	}
 
 	uint32_t layout::items_visible(item_type_e aItemType) const

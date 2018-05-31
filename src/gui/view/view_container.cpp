@@ -31,21 +31,17 @@ namespace neogfx
 	}
 
 	view_container::view_container(i_widget& aParent, view_container_style aStyle) :
-		widget{ aParent }, iStyle(aStyle), iLayout0{ *this }, iTabBar{ iLayout0, *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
+		widget{ aParent }, iStyle(aStyle), iLayout0{ *this }, iTabContainer{ *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
 	{
 		set_margins(neogfx::margins{});
 		iLayout0.set_margins(neogfx::margins{});
-		if (aStyle != view_container_style::Tabbed)
-			iTabBar.hide();
 	}
 
 	view_container::view_container(i_layout& aLayout, view_container_style aStyle) :
-		widget{ aLayout }, iStyle(aStyle), iLayout0{ *this }, iTabBar{ iLayout0, *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
+		widget{ aLayout }, iStyle(aStyle), iLayout0{ *this }, iTabContainer{ *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
 	{
 		set_margins(neogfx::margins{});
 		iLayout0.set_margins(neogfx::margins{});
-		if (aStyle != view_container_style::Tabbed)
-			iTabBar.hide();
 	}
 
 	const i_widget& view_container::as_widget() const
@@ -119,34 +115,55 @@ namespace neogfx
 		return true;
 	}
 
-	bool view_container::has_tabs() const
+	view_container::tab_container::tab_container(view_container& aOwner) :
+		iOwner{ aOwner }, iTabBar{ aOwner.iLayout0, *this }
+	{
+		if (aOwner.style() != view_container_style::Tabbed)
+			iTabBar.hide();
+	}
+
+	tab_container_style view_container::tab_container::style() const
+	{
+		return iTabBar.style();
+	}
+
+	void view_container::tab_container::set_style(tab_container_style aStyle)
+	{
+		if (style() != aStyle)
+		{
+			iTabBar.set_style(aStyle);
+			style_changed.trigger();
+		}
+	}
+
+	bool view_container::tab_container::has_tabs() const
 	{
 		return !iTabs.empty();
 	}
 
-	uint32_t view_container::tab_count() const
+	uint32_t view_container::tab_container::tab_count() const
 	{
 		return iTabs.size();
 	}
 
-	view_container::tab_index view_container::index_of(const i_tab& aTab) const
+	view_container::tab_container::tab_index view_container::tab_container::index_of(const i_tab& aTab) const
 	{
 		return iTabBar.index_of(aTab);
 	}
 
-	const i_tab& view_container::tab(tab_index aTabIndex) const
+	const i_tab& view_container::tab_container::tab(tab_index aTabIndex) const
 	{
 		if (aTabIndex >= iTabs.size())
 			throw tab_not_found();
 		return *std::next(iTabs.begin(), aTabIndex)->first;
 	}
 
-	i_tab& view_container::tab(tab_index aTabIndex)
+	i_tab& view_container::tab_container::tab(tab_index aTabIndex)
 	{
-		return const_cast<i_tab&>(const_cast<const view_container*>(this)->tab(aTabIndex));
+		return const_cast<i_tab&>(const_cast<const tab_container*>(this)->tab(aTabIndex));
 	}
 
-	bool view_container::is_tab_selected() const
+	bool view_container::tab_container::is_tab_selected() const
 	{
 		for (auto& tab : iTabs)
 			if (tab.first->is_selected())
@@ -154,7 +171,7 @@ namespace neogfx
 		return false;
 	}
 
-	const i_tab& view_container::selected_tab() const
+	const i_tab& view_container::tab_container::selected_tab() const
 	{
 		for (auto& tab : iTabs)
 			if (tab.first->is_selected())
@@ -162,68 +179,68 @@ namespace neogfx
 		throw tab_not_found();
 	}
 
-	i_tab& view_container::selected_tab()
+	i_tab& view_container::tab_container::selected_tab()
 	{
-		return const_cast<i_tab&>(const_cast<const view_container*>(this)->selected_tab());
+		return const_cast<i_tab&>(const_cast<const tab_container*>(this)->selected_tab());
 	}
 
-	i_tab& view_container::add_tab(const std::string& aTabText)
+	i_tab& view_container::tab_container::add_tab(const std::string& aTabText)
 	{
 		return *iTabs.emplace(&iTabBar.add_tab(aTabText), nullptr).first->first;
 	}
 
-	i_tab& view_container::insert_tab(tab_index aTabIndex, const std::string& aTabText)
+	i_tab& view_container::tab_container::insert_tab(tab_index aTabIndex, const std::string& aTabText)
 	{
 		return *iTabs.emplace(&iTabBar.insert_tab(aTabIndex, aTabText), nullptr).first->first;
 	}
 
-	void view_container::remove_tab(tab_index aTabIndex)
+	void view_container::tab_container::remove_tab(tab_index aTabIndex)
 	{
 		iTabBar.remove_tab(aTabIndex);
 	}
 
-	void view_container::show_tab(tab_index aTabIndex)
+	void view_container::tab_container::show_tab(tab_index aTabIndex)
 	{
 		tab(aTabIndex).as_widget().show();
 		if (has_tab_page(aTabIndex))
 			tab_page(aTabIndex).as_widget().show();
 	}
 
-	void view_container::hide_tab(tab_index aTabIndex)
+	void view_container::tab_container::hide_tab(tab_index aTabIndex)
 	{
 		tab(aTabIndex).as_widget().hide();
 		if (has_tab_page(aTabIndex))
 			tab_page(aTabIndex).as_widget().hide();
 	}
 
-	view_container::optional_tab_index view_container::next_visible_tab(tab_index aStartFrom) const
+	view_container::tab_container::optional_tab_index view_container::tab_container::next_visible_tab(tab_index aStartFrom) const
 	{
 		return iTabBar.next_visible_tab(aStartFrom);
 	}
 
-	view_container::optional_tab_index view_container::previous_visible_tab(tab_index aStartFrom) const
+	view_container::tab_container::optional_tab_index view_container::tab_container::previous_visible_tab(tab_index aStartFrom) const
 	{
 		return iTabBar.previous_visible_tab(aStartFrom);
 	}
 
-	void view_container::select_next_tab()
+	void view_container::tab_container::select_next_tab()
 	{
 		iTabBar.select_next_tab();
 	}
 
-	void view_container::select_previous_tab()
+	void view_container::tab_container::select_previous_tab()
 	{
 		iTabBar.select_previous_tab();
 	}
 
-	void view_container::adding_tab(i_tab& aTab)
+	void view_container::tab_container::adding_tab(i_tab& aTab)
 	{
 		iTabs.emplace(&aTab, nullptr);
 		if (iTabs.size() == 1)
 			aTab.select();
 	}
 
-	void view_container::selecting_tab(i_tab& aTab)
+	void view_container::tab_container::selecting_tab(i_tab& aTab)
 	{
 		for (auto& tab : iTabs)
 			if (tab.second != nullptr)
@@ -233,45 +250,55 @@ namespace neogfx
 				else
 					tab.second->as_widget().hide();
 			}
-		layout_items();
+		iOwner.layout_items();
 	}
 
-	void view_container::removing_tab(i_tab& aTab)
+	void view_container::tab_container::removing_tab(i_tab& aTab)
 	{
 		auto existingTab = iTabs.find(&aTab);
 		if (existingTab == iTabs.end())
 			throw tab_not_found();
 		iTabs.erase(existingTab);
-		layout_items();
+		iOwner.layout_items();
 	}
 
-	bool view_container::has_tab_page(tab_index) const
+	bool view_container::tab_container::has_tab_page(tab_index) const
 	{
 		return false;
 	}
 
-	const i_tab_page& view_container::tab_page(tab_index) const
+	const i_tab_page& view_container::tab_container::tab_page(tab_index) const
 	{
 		throw no_tab_page();
 	}
 
-	i_tab_page& view_container::tab_page(tab_index)
+	i_tab_page& view_container::tab_container::tab_page(tab_index)
 	{
 		throw no_tab_page();
 	}
 
-	bool view_container::has_parent_container() const
+	bool view_container::tab_container::has_parent_container() const
 	{
 		return false;
 	}
 
-	const i_tab_container& view_container::parent_container() const
+	const i_tab_container& view_container::tab_container::parent_container() const
 	{
 		throw no_parent_container();
 	}
 
-	i_tab_container& view_container::parent_container()
+	i_tab_container& view_container::tab_container::parent_container()
 	{
 		throw no_parent_container();
+	}
+
+	const i_widget& view_container::tab_container::as_widget() const
+	{
+		return iOwner;
+	}
+
+	i_widget& view_container::tab_container::as_widget() 
+	{
+		return iOwner;
 	}
 }

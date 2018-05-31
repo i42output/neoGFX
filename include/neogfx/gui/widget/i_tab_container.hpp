@@ -26,8 +26,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+	enum class tab_container_style : uint32_t
+	{
+		TabAlignmentTop		= 0x0000,
+		TabAlignmentBottom	= 0x0001,
+		TabAlignmentLeft	= 0x0002,
+		TabAlignmentRight	= 0x0003,
+		TabAlignmentMask	= 0x0003
+	};
+	inline tab_container_style operator|(tab_container_style aLhs, tab_container_style aRhs)
+	{
+		return static_cast<tab_container_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+	inline tab_container_style operator&(tab_container_style aLhs, tab_container_style aRhs)
+	{
+		return static_cast<tab_container_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+	inline tab_container_style operator~(tab_container_style aLhs)
+	{
+		return static_cast<tab_container_style>(~static_cast<uint32_t>(aLhs));
+	}
+
 	class i_tab_container
 	{
+	public:
+		event<> style_changed;
 	public:
 		typedef uint32_t tab_index;
 		typedef boost::optional<tab_index> optional_tab_index;
@@ -35,6 +58,9 @@ namespace neogfx
 		struct tab_not_found : std::logic_error { tab_not_found() : std::logic_error("neogfx::i_tab_container::tab_not_found") {} };
 		struct no_parent_container : std::logic_error { no_parent_container() : std::logic_error("neogfx::i_tab_container::no_parent_container") {} };
 		struct no_tab_page : std::logic_error { no_tab_page() : std::logic_error("neogfx::i_tab_container::no_tab_page") {} };
+	public:
+		virtual tab_container_style style() const = 0;
+		virtual void set_style(tab_container_style aStyle) = 0;
 	public:
 		virtual bool has_tabs() const = 0;
 		virtual uint32_t tab_count() const = 0;

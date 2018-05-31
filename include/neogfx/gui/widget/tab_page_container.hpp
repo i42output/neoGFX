@@ -60,10 +60,13 @@ namespace neogfx
 		typedef std::shared_ptr<i_tab_page> tab_page_pointer;
 		typedef std::map<const i_tab*, tab_page_pointer> tab_list;
 	public:
-		tab_page_container(bool aClosableTabs = false);
-		tab_page_container(i_widget& aParent, bool aClosableTabs = false);
-		tab_page_container(i_layout& aLayout, bool aClosableTabs = false);
+		tab_page_container(bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
+		tab_page_container(i_widget& aParent, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
+		tab_page_container(i_layout& aLayout, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
 		~tab_page_container();
+	public:
+		tab_container_style style() const override;
+		void set_style(tab_container_style aStyle) override;
 	public:
 		stack_layout& page_layout();
 	public:
@@ -108,6 +111,8 @@ namespace neogfx
 	protected:
 		bool can_defer_layout() const override;
 		bool is_managing_layout() const override;
+	private:
+		void update_tab_bar_placement();
 	private:
 		vertical_layout iContainerLayout;
 		tab_bar iTabBar;

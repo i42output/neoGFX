@@ -375,6 +375,13 @@ int main(int argc, char* argv[])
 		button0.set_size_policy(ng::size_policy::Expanding);
 		button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
 		ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog");
+		button1.clicked([&tabContainer]()
+		{
+			if (tabContainer.style() == ng::tab_container_style::TabAlignmentTop)
+				tabContainer.set_style(ng::tab_container_style::TabAlignmentBottom);
+			else
+				tabContainer.set_style(ng::tab_container_style::TabAlignmentTop);
+		});
 		ng::push_button buttonGenerateUuid(topButtons, "&Generate UUID");
 		ng::horizontal_layout international(layoutButtons);
 		button1.set_foreground_colour(ng::colour::LightGoldenrod);
