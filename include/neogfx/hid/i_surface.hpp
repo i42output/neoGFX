@@ -104,6 +104,6 @@ namespace neogfx
 		virtual double surface_transparency() const = 0;
 		virtual void set_surface_transparency(double aTransparency) = 0;
 	public:
-		virtual neolib::i_destroyable& as_destroyable() = 0;
+		virtual neolib::i_lifetime& as_lifetime() = 0;
 	};
 }

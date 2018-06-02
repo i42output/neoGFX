@@ -22,13 +22,14 @@
 #include <neogfx/neogfx.hpp>
 #include <map>
 #include <boost/pool/pool_alloc.hpp>
+#include <neolib/lifetime.hpp>
 #include "layout.hpp"
 #include "vertical_layout.hpp"
 #include "horizontal_layout.hpp"
 
 namespace neogfx
 {
-	class grid_layout : public layout
+	class grid_layout : private neolib::lifetime, public layout
 	{
 	public:
 		struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };
@@ -106,6 +107,7 @@ namespace neogfx
 		void increment_cursor();
 		horizontal_layout& row_layout(cell_coordinate aRow);
 		span_list::const_iterator find_span(const cell_coordinates& aCell) const;
+		void init();
 	private:
 		vertical_layout iRowLayout;
 		std::vector<std::shared_ptr<horizontal_layout>> iRows;

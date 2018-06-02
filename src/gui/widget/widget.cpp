@@ -122,7 +122,7 @@ namespace neogfx
 			parent().remove(*this);
 	}
 
-	neolib::i_destroyable& widget::as_destroyable()
+	neolib::i_lifetime& widget::as_lifetime()
 	{
 		return *this;
 	}

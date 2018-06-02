@@ -105,32 +105,23 @@ namespace neogfx
 	}
 
 	tab_page_container::tab_page_container(bool aClosableTabs, tab_container_style aStyle) :
-		widget{}, iContainerLayout{ *this }, iTabBar{ iContainerLayout, *this, aClosableTabs, aStyle }, iPageLayout{ iContainerLayout }
+		widget{}, iContainerLayout{ *this }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
 	{
 		set_margins(neogfx::margins{});
-		iContainerLayout.set_margins(neogfx::margins{});
-		iContainerLayout.set_spacing(size{});
-		iPageLayout.set_margins(neogfx::margins{});
 		update_tab_bar_placement();
 	}
 
 	tab_page_container::tab_page_container(i_widget& aParent, bool aClosableTabs, tab_container_style aStyle) :
-		widget{ aParent }, iContainerLayout{ *this }, iTabBar{ iContainerLayout, *this, aClosableTabs, aStyle }, iPageLayout{ iContainerLayout }
+		widget{ aParent }, iContainerLayout{ *this }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
 	{
 		set_margins(neogfx::margins{});
-		iContainerLayout.set_margins(neogfx::margins{});
-		iContainerLayout.set_spacing(size{});
-		iPageLayout.set_margins(neogfx::margins{});
 		update_tab_bar_placement();
 	}
 
 	tab_page_container::tab_page_container(i_layout& aLayout, bool aClosableTabs, tab_container_style aStyle) :
-		widget{ aLayout }, iContainerLayout{ *this }, iTabBar{ iContainerLayout, *this, aClosableTabs, aStyle }, iPageLayout{ iContainerLayout }
+		widget{ aLayout }, iContainerLayout{ *this }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
 	{
 		set_margins(neogfx::margins{});
-		iContainerLayout.set_margins(neogfx::margins{});
-		iContainerLayout.set_spacing(size{});
-		iPageLayout.set_margins(neogfx::margins{});
 		update_tab_bar_placement();
 	}
 
@@ -142,7 +133,7 @@ namespace neogfx
 
 	stack_layout& tab_page_container::page_layout()
 	{
-		return iPageLayout;
+		return iContainerLayout.centre();
 	}
 
 	tab_container_style tab_page_container::style() const
@@ -313,11 +304,11 @@ namespace neogfx
 		auto existingTab = iTabs.find(&aTab);
 		if (existingTab == iTabs.end())
 			throw tab_not_found();
-		existingTab->second = tab_page_pointer(new default_tab_page(iPageLayout, aTab));
+		existingTab->second = tab_page_pointer(new default_tab_page(page_layout(), aTab));
 		if (aTab.is_selected())
 		{
 			existingTab->second->as_widget().show();
-			layout_items();
+			iContainerLayout.invalidate();
 		}
 		else
 			existingTab->second->as_widget().hide();
@@ -333,7 +324,7 @@ namespace neogfx
 		if (aTab.is_selected())
 		{
 			existingTab->second->as_widget().show();
-			layout_items();
+			iContainerLayout.invalidate();
 		}
 		else
 			existingTab->second->as_widget().hide();
@@ -349,7 +340,7 @@ namespace neogfx
 		if (aTab.is_selected())
 		{
 			existingTab->second->as_widget().show();
-			layout_items();
+			iContainerLayout.invalidate();
 		}
 		else
 			existingTab->second->as_widget().hide();
@@ -373,7 +364,7 @@ namespace neogfx
 				else
 					tab.second->as_widget().hide();
 			}
-		layout_items();
+		iContainerLayout.invalidate();
 	}
 
 	void tab_page_container::removing_tab(i_tab& aTab)
@@ -424,14 +415,20 @@ namespace neogfx
 		switch (style() & tab_container_style::TabAlignmentMask)
 		{
 		case tab_container_style::TabAlignmentTop:
-		case tab_container_style::TabAlignmentLeft: // todo
-		case tab_container_style::TabAlignmentRight: // todo
 			iContainerLayout.remove(iTabBar);
-			iContainerLayout.add_at(0, iTabBar);
+			iContainerLayout.top().add(iTabBar);
 			break;
 		case tab_container_style::TabAlignmentBottom:
 			iContainerLayout.remove(iTabBar);
-			iContainerLayout.add_at(iContainerLayout.count(), iTabBar);
+			iContainerLayout.bottom().add(iTabBar);
+			break;
+		case tab_container_style::TabAlignmentLeft:
+			iContainerLayout.remove(iTabBar);
+			iContainerLayout.left().add(iTabBar);
+			break;
+		case tab_container_style::TabAlignmentRight:
+			iContainerLayout.remove(iTabBar);
+			iContainerLayout.right().add(iTabBar);
 			break;
 		}
 	}

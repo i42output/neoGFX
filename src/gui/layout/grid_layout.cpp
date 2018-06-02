@@ -27,51 +27,45 @@
 namespace neogfx
 {
 	grid_layout::grid_layout(neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aAlignment }, iRowLayout{ *this, aAlignment }
 	{
-		iRowLayout.set_margins(neogfx::margins{});
-		iRowLayout.set_spacing(spacing());
-		iRowLayout.set_always_use_spacing(true);
+		init();
 	}
 
 	grid_layout::grid_layout(cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions{ aColumns, aRows }
 	{
-		iRowLayout.set_margins(neogfx::margins{});
-		iRowLayout.set_spacing(spacing());
-		iRowLayout.set_always_use_spacing(true);
+		init();
 	}
 
 	grid_layout::grid_layout(i_widget& aParent, neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }
 	{
-		iRowLayout.set_margins(neogfx::margins{});
-		iRowLayout.set_spacing(spacing());
-		iRowLayout.set_always_use_spacing(true);
+		init();
 	}
 
 	grid_layout::grid_layout(i_layout& aParent, neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }
 	{
-		iRowLayout.set_margins(neogfx::margins{});
-		iRowLayout.set_spacing(spacing());
-		iRowLayout.set_always_use_spacing(true);
+		init();
 	}
 
 	grid_layout::grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions{ aColumns, aRows }
 	{
-		iRowLayout.set_margins(neogfx::margins{});
-		iRowLayout.set_spacing(spacing());
-		iRowLayout.set_always_use_spacing(true);
+		init();
 	}
 
 	grid_layout::grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions(aColumns, aRows)
 	{
-		iRowLayout.set_margins(neogfx::margins{});
-		iRowLayout.set_spacing(spacing());
-		iRowLayout.set_always_use_spacing(true);
+		init();
 	}
 
 	grid_layout::cell_coordinate grid_layout::rows() const
@@ -354,6 +348,8 @@ namespace neogfx
 
 	void grid_layout::invalidate()
 	{
+		if (!is_alive())
+			return;
 		layout::invalidate();
 		iRowLayout.invalidate();
 		for (auto& row : iRows)
@@ -692,5 +688,15 @@ namespace neogfx
 			if (aCell.x >= s->first.x && aCell.x <= s->second.x && aCell.y >= s->first.y && aCell.y <= s->second.y)
 				return s;
 		return iSpans.end();
+	}
+
+	void grid_layout::init()
+	{
+		iRowLayout.set_margins(neogfx::margins{});
+		iRowLayout.set_spacing(spacing());
+		iRowLayout.set_always_use_spacing(true);
+
+		set_alive();
+		invalidate();
 	}
 }

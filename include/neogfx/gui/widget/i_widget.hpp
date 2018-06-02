@@ -70,7 +70,7 @@ namespace neogfx
 		struct no_layout : std::logic_error { no_layout() : std::logic_error("neogfx::i_widget::no_layout") {} };
 	public:
 		virtual ~i_widget() {}
-		virtual neolib::i_destroyable& as_destroyable() = 0;
+		virtual neolib::i_lifetime& as_lifetime() = 0;
 	public:
 		virtual bool is_singular() const = 0;
 		virtual void set_singular(bool aSingular) = 0;

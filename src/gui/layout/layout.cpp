@@ -43,13 +43,14 @@ namespace neogfx
 		iUnitsContext{ *this },
 		iAlwaysUseSpacing{ false },
 		iAlignment{ aAlignment },
-		iEnabled{ true },
+		iEnabled{ false },
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutStarted{ false },
 		iLayoutId{ 0 },
 		iInvalidated{ false }
 	{
+		enable();
 	}
 
 	layout::layout(i_widget& aParent, neogfx::alignment aAlignment) :
@@ -58,7 +59,7 @@ namespace neogfx
 		iUnitsContext{ *this },
 		iAlwaysUseSpacing{ false },
 		iAlignment{ aAlignment },
-		iEnabled{ true },
+		iEnabled{ false },
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutStarted{ false },
@@ -66,6 +67,7 @@ namespace neogfx
 		iInvalidated{ false }
 	{
 		aParent.set_layout(*this);
+		enable();
 	}
 
 	layout::layout(i_layout& aParent, neogfx::alignment aAlignment) :
@@ -75,7 +77,7 @@ namespace neogfx
 		iMargins{ neogfx::margins{} },
 		iAlwaysUseSpacing{ false },
 		iAlignment{ aAlignment },
-		iEnabled{ true },
+		iEnabled{ false },
 		iMinimumSize{},
 		iMaximumSize{},
 		iLayoutStarted{ false },
@@ -83,6 +85,7 @@ namespace neogfx
 		iInvalidated{ false }
 	{
 		aParent.add(*this);
+		enable();
 	}
 
 	layout::~layout()
@@ -272,6 +275,12 @@ namespace neogfx
 				remove(i);
 				return true;
 			}
+		for (auto i = items().begin(); i != items().end(); ++i)
+			if (i->get().is<item::layout_pointer>())
+			{
+				if (static_variant_cast<item::layout_pointer&>(i->get())->remove(aItem))
+					return true;
+			}
 		return false;
 	}
 
@@ -297,6 +306,23 @@ namespace neogfx
 		invalidate();
 		item_list toRemove;
 		toRemove.splice(toRemove.begin(), items());
+	}
+
+	void layout::move_all_to(i_layout& aDestination)
+	{
+		invalidate();
+		aDestination.invalidate();
+		try
+		{
+			auto& compatibleDestination = dynamic_cast<layout&>(aDestination); // dynamic_cast? not a fan but heh.
+			compatibleDestination.items().splice(compatibleDestination.items().end(), items());
+			for (auto& item : compatibleDestination.items())
+				item.set_parent(&compatibleDestination);
+		}
+		catch (std::bad_cast)
+		{
+			throw incompatible_layouts();
+		}
 	}
 
 	layout::item_index layout::count() const
@@ -482,19 +508,17 @@ namespace neogfx
 
 	void layout::enable()
 	{
-		if (iEnabled == false)
+		if (!enabled())
 		{
 			iEnabled = true;
-			owner()->layout_items();
+			invalidate();
 		}
 	}
 
 	void layout::disable()
 	{
-		if (iEnabled == true)
-		{
+		if (enabled())
 			iEnabled = false;
-		}
 	}
 
 	bool layout::enabled() const
@@ -529,7 +553,9 @@ namespace neogfx
 
 	void layout::invalidate()
 	{
-		if (iInvalidated)
+		if (!enabled())
+			return;
+		if (invalidated())
 			return;
 		iInvalidated = true;
 		if (iParent != nullptr)

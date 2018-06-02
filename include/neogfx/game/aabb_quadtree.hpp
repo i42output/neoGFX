@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/vecarray.hpp>
-#include <neolib/destroyable.hpp>
+#include <neolib/lifetime.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/game/i_collidable_object.hpp>
@@ -40,7 +40,7 @@ namespace neogfx
 		typedef const void* const_iterator; // todo
 		typedef void* iterator; // todo
 	private:
-		class node : public neolib::destroyable
+		class node : public neolib::lifetime
 		{
 		private:
 			typedef neolib::vecarray<i_collidable_object*, BucketSize, -1> object_list;

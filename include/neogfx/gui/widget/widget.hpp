@@ -21,13 +21,13 @@
 
 #include <neogfx/neogfx.hpp>
 #include <unordered_set>
-#include <neolib/destroyable.hpp>
+#include <neolib/lifetime.hpp>
 #include <neolib/timer.hpp>
 #include "i_widget.hpp"
 
 namespace neogfx
 {
-	class widget : public i_widget, protected neolib::destroyable
+	class widget : public i_widget, protected neolib::lifetime
 	{
 	public:
 		widget();
@@ -35,7 +35,7 @@ namespace neogfx
 		widget(i_widget& aParent);
 		widget(i_layout& aLayout);
 		~widget();
-		neolib::i_destroyable& as_destroyable() override;
+		neolib::i_lifetime& as_lifetime() override;
 	public:
 		bool device_metrics_available() const override;
 		const i_device_metrics& device_metrics() const override;

@@ -45,6 +45,7 @@ namespace neogfx
 		struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_layout::bad_item_index") {} };
 		struct wrong_item_type : std::logic_error { wrong_item_type() : std::logic_error("neogfx::i_layout::wrong_item_type") {} };
 		struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_layout::item_not_found") {} };
+		struct incompatible_layouts : std::logic_error { incompatible_layouts() : std::logic_error("neogfx::i_layout::incompatible_layouts") {} };
 	public:
 		virtual ~i_layout() {}
 	public:	
@@ -71,6 +72,7 @@ namespace neogfx
 		virtual bool remove(i_layout& aItem) = 0;
 		virtual bool remove(i_widget& aItem) = 0;
 		virtual void remove_all() = 0;
+		virtual void move_all_to(i_layout& aDestination) = 0;
 		virtual item_index count() const = 0;
 		virtual optional_item_index find(const i_layout& aItem) const = 0;
 		virtual optional_item_index find(const i_widget& aItem) const = 0;

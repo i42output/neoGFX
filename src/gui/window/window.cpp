@@ -67,8 +67,8 @@ namespace neogfx
 	{
 		if (iSurface != nullptr)
 		{
-			iSurfaceDestroyed.emplace(iSurface->as_destroyable());
-			iWindowDestroyed.emplace(aWindow.as_destroyable());
+			iSurfaceDestroyed.emplace(iSurface->as_lifetime());
+			iWindowDestroyed.emplace(aWindow.as_lifetime());
 			iSurface->pause_rendering();
 		}
 	}
@@ -296,7 +296,7 @@ namespace neogfx
 	{
 		update_modality(true);
 		window_manager().remove_window(*this);
-		destroyable::set_destroyed();
+		lifetime::set_destroyed();
 	}
 
 	window_style window::style() const
@@ -862,7 +862,7 @@ namespace neogfx
 
 	void window::init()
 	{
-		iSurfaceDestroyed.emplace(surface().native_surface().as_destroyable());
+		iSurfaceDestroyed.emplace(surface().native_surface().as_lifetime());
 
 		if ((style() & window_style::InitiallyHidden) == window_style::InitiallyHidden)
 			hide();
@@ -1013,7 +1013,7 @@ namespace neogfx
 		return *this;
 	}
 
-	neolib::i_destroyable& window::as_destroyable()
+	neolib::i_lifetime& window::as_lifetime()
 	{
 		return *this;
 	}

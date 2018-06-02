@@ -164,7 +164,7 @@ namespace neogfx
 		virtual const i_widget& as_widget() const = 0;
 		virtual i_widget& as_widget() = 0;
 	public:
-		virtual neolib::i_destroyable& as_destroyable() = 0;
+		virtual neolib::i_lifetime& as_lifetime() = 0;
 	};
 
 	rect corrected_popup_rect(i_window& aPopup, rect aPopupRect);

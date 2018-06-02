@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/lifetime.hpp>
 #include <neogfx/core/geometry.hpp>
 #include "layout_bits.hpp"
 #include "grid_layout.hpp"
@@ -29,7 +30,7 @@
 
 namespace neogfx
 {
-	class border_layout : public layout
+	class border_layout : private neolib::lifetime, public layout
 	{
 	public:
 		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::border_layout::not_implemented") {} };
@@ -40,19 +41,21 @@ namespace neogfx
 	public:
 		const i_layout& part(layout_position aPosition) const;
 		i_layout& part(layout_position aPosition);
-		const i_layout& top() const;
-		i_layout& top();
-		const i_layout& left() const;
-		i_layout& left();
-		const i_layout& centre() const;
-		i_layout& centre();
-		const i_layout& right() const;
-		i_layout& right();
-		const i_layout& bottom() const;
-		i_layout& bottom();
+		const vertical_layout& top() const;
+		vertical_layout& top();
+		const vertical_layout& left() const;
+		vertical_layout& left();
+		const stack_layout& centre() const;
+		stack_layout& centre();
+		const vertical_layout& right() const;
+		vertical_layout& right();
+		const vertical_layout& bottom() const;
+		vertical_layout& bottom();
 	public:
-		i_spacer & add_spacer() override;
+		i_spacer& add_spacer() override;
 		i_spacer& add_spacer_at(item_index aPosition) override;
+	public:
+		void invalidate() override;
 	public:
 		void layout_items(const point& aPosition, const size& aSize) override;
 	public:

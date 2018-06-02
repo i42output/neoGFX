@@ -84,5 +84,7 @@ namespace neogfx
 		bool iClosableTabs;
 		tab_container_style iStyle;
 		tab_list iTabs;
+		boost::optional<horizontal_layout> iHorizontalLayout;
+		boost::optional<vertical_layout> iVerticalLayout;
 	};
 }

@@ -26,6 +26,7 @@
 namespace neogfx
 {
 	border_layout::border_layout(neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating }, 
 		layout{ aAlignment },
 		iRows{ *this, aAlignment },
 		iTop{ iRows, aAlignment },
@@ -39,6 +40,7 @@ namespace neogfx
 	}
 
 	border_layout::border_layout(i_widget& aParent, neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aParent, aAlignment },
 		iRows{ *this, aAlignment },
 		iTop{ iRows, aAlignment },
@@ -52,6 +54,7 @@ namespace neogfx
 	}
 
 	border_layout::border_layout(i_layout& aParent, neogfx::alignment aAlignment) :
+		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aParent, aAlignment },
 		iRows{ *this, aAlignment },
 		iTop{ iRows, aAlignment },
@@ -87,52 +90,52 @@ namespace neogfx
 		return const_cast<i_layout&>(const_cast<const border_layout*>(this)->part(aPosition));
 	}
 
-	const i_layout& border_layout::top() const
+	const vertical_layout& border_layout::top() const
 	{
 		return iTop;
 	}
 
-	i_layout& border_layout::top()
+	vertical_layout& border_layout::top()
 	{
 		return iTop;
 	}
 
-	const i_layout& border_layout::left() const
+	const vertical_layout& border_layout::left() const
 	{
 		return iLeft;
 	}
 
-	i_layout& border_layout::left()
+	vertical_layout& border_layout::left()
 	{
 		return iLeft;
 	}
 
-	const i_layout& border_layout::centre() const
+	const stack_layout& border_layout::centre() const
 	{
 		return iCentre;
 	}
 
-	i_layout& border_layout::centre()
+	stack_layout& border_layout::centre()
 	{
 		return iCentre;
 	}
 
-	const i_layout& border_layout::right() const
+	const vertical_layout& border_layout::right() const
 	{
 		return iRight;
 	}
 
-	i_layout& border_layout::right()
+	vertical_layout& border_layout::right()
 	{
 		return iRight;
 	}
 
-	const i_layout& border_layout::bottom() const
+	const vertical_layout& border_layout::bottom() const
 	{
 		return iBottom;
 	}
 
-	i_layout& border_layout::bottom()
+	vertical_layout& border_layout::bottom()
 	{
 		return iBottom;
 	}
@@ -145,6 +148,20 @@ namespace neogfx
 	i_spacer& border_layout::add_spacer_at(item_index)
 	{
 		throw not_implemented();
+	}
+
+	void border_layout::invalidate()
+	{
+		if (!is_alive())
+			return;
+		layout::invalidate();
+		iRows.invalidate();
+		iTop.invalidate();
+		iMiddle.invalidate();
+		iLeft.invalidate();
+		iCentre.invalidate();
+		iRight.invalidate();
+		iBottom.invalidate();
 	}
 
 	void border_layout::layout_items(const point& aPosition, const size& aSize)
@@ -190,5 +207,8 @@ namespace neogfx
 		iCentre.set_size_policy(neogfx::size_policy::Expanding);
 		iRight.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iBottom.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum });
+
+		set_alive();
+		invalidate();
 	}
 }

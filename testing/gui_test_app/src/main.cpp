@@ -374,12 +374,16 @@ int main(int argc, char* argv[])
 		button0.image().set_maximum_size(window.dpi_scale(ng::size{ 160, std::numeric_limits<ng::dimension>::max() }));
 		button0.set_size_policy(ng::size_policy::Expanding);
 		button0.set_foreground_colour(ng::colour::LightGoldenrodYellow);
-		ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog");
+		ng::push_button button1(topButtons, "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement (currently doesn't work).");
 		button1.clicked([&tabContainer]()
 		{
 			if (tabContainer.style() == ng::tab_container_style::TabAlignmentTop)
 				tabContainer.set_style(ng::tab_container_style::TabAlignmentBottom);
-			else
+			else if (tabContainer.style() == ng::tab_container_style::TabAlignmentBottom)
+				tabContainer.set_style(ng::tab_container_style::TabAlignmentLeft);
+			else if (tabContainer.style() == ng::tab_container_style::TabAlignmentLeft)
+				tabContainer.set_style(ng::tab_container_style::TabAlignmentRight);
+			else if (tabContainer.style() == ng::tab_container_style::TabAlignmentRight)
 				tabContainer.set_style(ng::tab_container_style::TabAlignmentTop);
 		});
 		ng::push_button buttonGenerateUuid(topButtons, "&Generate UUID");

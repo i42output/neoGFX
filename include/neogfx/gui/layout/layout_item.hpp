@@ -29,6 +29,8 @@ namespace neogfx
 	class layout_item : public i_widget_geometry
 	{
 	public:
+		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::layout_item::no_parent") {} };
+	public:
 		typedef std::shared_ptr<i_widget> widget_pointer;
 		typedef std::shared_ptr<i_layout> layout_pointer;
 		typedef std::shared_ptr<i_spacer> spacer_pointer;
@@ -45,6 +47,9 @@ namespace neogfx
 		pointer_wrapper& get();
 		const i_widget_geometry& wrapped_geometry() const;
 		i_widget_geometry& wrapped_geometry();
+		const i_layout& parent() const;
+		i_layout& parent();
+		void set_parent(i_layout* aParent);
 		void set_owner(i_widget* aOwner);
 		void layout(const point& aPosition, const size& aSize);
 	public:
@@ -81,7 +86,7 @@ namespace neogfx
 	public:
 		bool operator==(const layout_item& aOther) const;
 	private:
-		i_layout& iParent;
+		i_layout* iParent;
 		pointer_wrapper iPointerWrapper;
 		i_widget* iOwner;
 		mutable std::pair<uint32_t, uint32_t> iLayoutId;

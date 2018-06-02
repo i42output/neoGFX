@@ -19,14 +19,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/destroyable.hpp>
+#include <neolib/lifetime.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 
 namespace neogfx
 {
 	class i_native_window;
 
-	class surface_window_proxy : public i_surface_window, protected neolib::destroyable
+	class surface_window_proxy : public i_surface_window, protected neolib::lifetime
 	{
 	public:
 		surface_window_proxy(i_window& aWindow, std::function<std::unique_ptr<i_native_window>(i_surface_window&)> aNativeWindowCreator);
@@ -137,7 +137,7 @@ namespace neogfx
 		const i_widget& as_widget() const override;
 		i_widget& as_widget()  override;
 	public:
-		neolib::i_destroyable& as_destroyable() override;
+		neolib::i_lifetime& as_lifetime() override;
 	private:
 		i_window& iWindow;
 		i_rendering_engine& iRenderingEngine;

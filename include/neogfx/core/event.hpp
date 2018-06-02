@@ -24,7 +24,7 @@
 #include <deque>
 #include <boost/optional.hpp>
 #include <boost/pool/pool_alloc.hpp>
-#include <neolib/destroyable.hpp>
+#include <neolib/lifetime.hpp>
 #include <neolib/async_task.hpp>
 #include <neolib/timer.hpp>
 
@@ -67,7 +67,7 @@ namespace neogfx
 		struct instance_exists : std::logic_error { instance_exists() : std::logic_error("neogfx::async_event_queue::instance_exists") {} };
 		struct event_not_found : std::logic_error { event_not_found() : std::logic_error("neogfx::async_event_queue::event_not_found") {} };
 	private:
-		typedef std::multimap<const void*, std::pair<callback, neolib::destroyable::destroyed_flag>> event_list;
+		typedef std::multimap<const void*, std::pair<callback, neolib::lifetime::destroyed_flag>> event_list;
 		typedef std::vector<callback> callback_list;
 		typedef std::map<std::thread::id, callback_list, std::less<std::thread::id>, boost::fast_pool_allocator<std::pair<const std::thread::id, callback_list>>> threaded_callbacks;
 	public:
@@ -78,7 +78,7 @@ namespace neogfx
 		template<typename... Arguments>
 		void add(const event<Arguments...>& aEvent, callback aCallback)
 		{
-			add(static_cast<const void*>(&aEvent), aCallback, neolib::destroyable::destroyed_flag(aEvent));
+			add(static_cast<const void*>(&aEvent), aCallback, neolib::lifetime::destroyed_flag(aEvent));
 		}
 		template<typename... Arguments>
 		void remove(const event<Arguments...>& aEvent)
@@ -93,7 +93,7 @@ namespace neogfx
 		bool exec();
 		void enqueue_to_thread(std::thread::id aThreadId, callback aCallback);
 	private:
-		void add(const void* aEvent, callback aCallback, neolib::destroyable::destroyed_flag aDestroyedFlag);
+		void add(const void* aEvent, callback aCallback, neolib::lifetime::destroyed_flag aDestroyedFlag);
 		void remove(const void* aEvent);
 		bool has(const void* aEvent) const;
 		void publish_events();
@@ -114,7 +114,7 @@ namespace neogfx
 	};
 
 	template <typename... Arguments>
-	class event : protected neolib::destroyable
+	class event : protected neolib::lifetime
 	{
 		friend class sink;
 		friend class async_event_queue;

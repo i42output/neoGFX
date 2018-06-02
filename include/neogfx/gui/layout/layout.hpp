@@ -79,6 +79,7 @@ namespace neogfx
 		bool remove(i_layout& aItem) override;
 		bool remove(i_widget& aItem) override;
 		void remove_all() override;
+		void move_all_to(i_layout& aDestination) override;
 		item_index count() const override;
 		optional_item_index find(const i_layout& aItem) const override;
 		optional_item_index find(const i_widget& aItem) const override;

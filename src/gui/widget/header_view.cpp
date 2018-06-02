@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/timer.hpp>
-#include <neolib/destroyable.hpp>
+#include <neolib/lifetime.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/header_view.hpp>
@@ -35,7 +35,7 @@ namespace neogfx
 			neolib::callback_timer{ app::instance(), [this, &aParent](neolib::callback_timer&)
 			{
 				neolib::destroyed_flag destroyed{ *this };
-				neolib::destroyed_flag surfaceDestroyed{ aParent.surface().as_destroyable() };
+				neolib::destroyed_flag surfaceDestroyed{ aParent.surface().as_lifetime() };
 				for (auto& sw : aParent.iSectionWidths)
 				{
 					sw.calculated = 0.0;

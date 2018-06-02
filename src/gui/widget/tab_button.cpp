@@ -291,13 +291,18 @@ namespace neogfx
 		switch (container().style())
 		{
 		case tab_container_style::TabAlignmentTop:
-		case tab_container_style::TabAlignmentLeft: // todo
-		case tab_container_style::TabAlignmentRight: // todo
 			result.extents() += size{ 0.0, 5.0 };
 			break;
 		case tab_container_style::TabAlignmentBottom:
 			result.y -= 5.0;
 			result.extents() += size{ 0.0, 5.0 };
+			break;
+		case tab_container_style::TabAlignmentLeft:
+			result.extents() += size{ 5.0, 0.0 };
+			break;
+		case tab_container_style::TabAlignmentRight:
+			result.x -= 5.0;
+			result.extents() += size{ 5.0, 0.0 };
 			break;
 		}
 		return convert_units(*this, su.saved_units(), result);
@@ -326,7 +331,17 @@ namespace neogfx
 		auto result = push_button::minimum_size(aAvailableSpace);
 		if (has_minimum_size())
 			return result;
-		result = convert_units(*this, units::Millimetres, result) + size{ 2.0, is_selected() ? 1.0 : 0.0 };
+		switch (container().style())
+		{
+		case tab_container_style::TabAlignmentTop:
+		case tab_container_style::TabAlignmentBottom:
+			result = convert_units(*this, units::Millimetres, result) + size{ 2.0, is_selected() ? 1.0 : 0.0 };
+			break;
+		case tab_container_style::TabAlignmentLeft:
+		case tab_container_style::TabAlignmentRight:
+			result = convert_units(*this, units::Millimetres, result) + size{ is_selected() ? 1.0 : 0.0, 2.0 };
+			break;
+		}
 		scoped_units su{ *this, units::Millimetres };
 		result = convert_units(*this, units::Pixels, result).ceil();
 		scoped_units su2{ *this, units::Pixels };

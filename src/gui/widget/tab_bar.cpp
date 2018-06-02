@@ -30,9 +30,6 @@ namespace neogfx
 		scrollable_widget{ scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this, alignment::Bottom));
-		layout().set_margins(neogfx::margins{});
-		layout().set_spacing(size{});
 		update_placement();
 	}
 
@@ -40,9 +37,6 @@ namespace neogfx
 		scrollable_widget{ aParent, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this, alignment::Bottom));
-		layout().set_margins(neogfx::margins{});
-		layout().set_spacing(size{});
 		update_placement();
 	}
 
@@ -50,9 +44,6 @@ namespace neogfx
 		scrollable_widget{ aLayout, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
 	{
 		set_margins(neogfx::margins{});
-		set_layout(std::make_shared<horizontal_layout>(*this, alignment::Bottom));
-		layout().set_margins(neogfx::margins{});
-		layout().set_spacing(size{});
 		update_placement();
 	}
 
@@ -74,7 +65,8 @@ namespace neogfx
 	size tab_bar::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		auto result = scrollable_widget::minimum_size(aAvailableSpace);
-		result.cx = 0.0;
+		if (aAvailableSpace != boost::none)
+			result = result.min(*aAvailableSpace);
 		return result;
 	}
 
@@ -294,13 +286,49 @@ namespace neogfx
 		switch (style() & tab_container_style::TabAlignmentMask)
 		{
 		case tab_container_style::TabAlignmentTop:
-		case tab_container_style::TabAlignmentLeft: // todo
-		case tab_container_style::TabAlignmentRight: // todo
+		case tab_container_style::TabAlignmentBottom:
+			if (iHorizontalLayout == boost::none)
+			{
+				iHorizontalLayout.emplace(*this);
+				set_layout(*iHorizontalLayout);
+			}
+			if (iVerticalLayout != boost::none) // todo
+			{
+				iVerticalLayout->move_all_to(*iHorizontalLayout);
+				iVerticalLayout = boost::none;
+			}
+			break;
+		case tab_container_style::TabAlignmentLeft:
+		case tab_container_style::TabAlignmentRight:
+			if (iVerticalLayout == boost::none)
+			{
+				iVerticalLayout.emplace(*this);
+				set_layout(*iVerticalLayout);
+			}
+			if (iHorizontalLayout != boost::none) // todo
+			{
+				iHorizontalLayout->move_all_to(*iVerticalLayout);
+				iHorizontalLayout = boost::none;
+			}
+			break;
+		}
+		switch (style() & tab_container_style::TabAlignmentMask)
+		{
+		case tab_container_style::TabAlignmentTop:
 			layout().set_alignment(alignment::Bottom);
 			break;
 		case tab_container_style::TabAlignmentBottom:
 			layout().set_alignment(alignment::Top);
 			break;
+		case tab_container_style::TabAlignmentLeft:
+			layout().set_alignment(alignment::Right);
+			break;
+		case tab_container_style::TabAlignmentRight:
+			layout().set_alignment(alignment::Left);
+			break;
 		}
+		layout().set_margins(neogfx::margins{});
+		layout().set_spacing(size{});
+		layout().invalidate();
 	}
 }

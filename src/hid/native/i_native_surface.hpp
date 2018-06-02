@@ -79,6 +79,6 @@ namespace neogfx
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
 	public:
-		virtual neolib::i_destroyable& as_destroyable() = 0;
+		virtual neolib::i_lifetime& as_lifetime() = 0;
 	};
 }

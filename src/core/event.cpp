@@ -80,7 +80,7 @@ namespace neogfx
 		iHaveThreadedCallbacks = true;
 	}
 
-	void async_event_queue::add(const void* aEvent, callback aCallback, neolib::destroyable::destroyed_flag aDestroyedFlag)
+	void async_event_queue::add(const void* aEvent, callback aCallback, neolib::lifetime::destroyed_flag aDestroyedFlag)
 	{
 		iEvents.emplace(aEvent, std::make_pair(aCallback, aDestroyedFlag));
 		if (!iTimer.waiting())

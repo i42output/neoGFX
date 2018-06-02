@@ -30,7 +30,7 @@ namespace neogfx
 		iWindow{ aWindow }, 
 		iRenderingEngine{ app::instance().rendering_engine() },
 		iNativeWindow{ aNativeWindowCreator(*this) },
-		iNativeSurfaceDestroyed{ iNativeWindow->as_destroyable() },
+		iNativeSurfaceDestroyed{ iNativeWindow->as_lifetime() },
 		iClosed{ false },
 		iCapturingWidget{ nullptr },
 		iClickedWidget{ nullptr }
@@ -641,8 +641,8 @@ namespace neogfx
 				w = &w->parent();
 				if (!can_consume(check))
 					return true;
-				destroyed_flag parentDestroyed{ w->as_destroyable() };
-				destroyed_flag destroyed{ check.as_destroyable() };
+				destroyed_flag parentDestroyed{ w->as_lifetime() };
+				destroyed_flag destroyed{ check.as_lifetime() };
 				if (!check.keyboard_event.trigger(native_window().current_event()))
 					return false;
 				if (destroyed)
@@ -784,7 +784,7 @@ namespace neogfx
 		return as_window().as_widget();
 	}
 
-	neolib::i_destroyable& surface_window_proxy::as_destroyable()
+	neolib::i_lifetime& surface_window_proxy::as_lifetime()
 	{
 		return *this;
 	}

@@ -24,32 +24,32 @@
 namespace neogfx
 {
 	layout_item::layout_item(i_layout& aParent, i_widget& aWidget) :
-		iParent{ aParent }, iPointerWrapper{ widget_pointer{widget_pointer{}, &aWidget} }, iLayoutId{ -1, -1 }
+		iParent{ &aParent }, iPointerWrapper{ widget_pointer{widget_pointer{}, &aWidget} }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_widget> aWidget) :
-		iParent{ aParent }, iPointerWrapper{ aWidget }, iLayoutId{ -1, -1 }
+		iParent{ &aParent }, iPointerWrapper{ aWidget }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, i_layout& aLayout) :
-		iParent{ aParent }, iPointerWrapper{ layout_pointer{layout_pointer{}, &aLayout} }, iLayoutId{ -1, -1 }
+		iParent{ &aParent }, iPointerWrapper{ layout_pointer{layout_pointer{}, &aLayout} }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_layout> aLayout) :
-		iParent{ aParent }, iPointerWrapper{ aLayout }, iLayoutId{ -1, -1 }
+		iParent{ &aParent }, iPointerWrapper{ aLayout }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, i_spacer& aSpacer) :
-		iParent{ aParent }, iPointerWrapper{ spacer_pointer{spacer_pointer{}, &aSpacer} }, iLayoutId{ -1, -1 }
+		iParent{ &aParent }, iPointerWrapper{ spacer_pointer{spacer_pointer{}, &aSpacer} }, iLayoutId{ -1, -1 }
 	{
 	}
 
 	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer) :
-		iParent{ aParent }, iPointerWrapper{ aSpacer }, iLayoutId{ -1, -1 }
+		iParent{ &aParent }, iPointerWrapper{ aSpacer }, iLayoutId{ -1, -1 }
 	{
 	}
 
@@ -77,6 +77,25 @@ namespace neogfx
 		return const_cast<i_widget_geometry&>(const_cast<const layout_item*>(this)->wrapped_geometry());
 	}
 
+	const i_layout& layout_item::parent() const
+	{
+		if (iParent != nullptr)
+			return *iParent;
+		throw no_parent();
+	}
+
+	i_layout& layout_item::parent()
+	{
+		return const_cast<i_layout&>(const_cast<const layout_item*>(this)->parent());
+	}
+
+	void layout_item::set_parent(i_layout* aParent)
+	{
+		iParent = aParent;
+		if (iPointerWrapper.is<layout_pointer>())
+			static_variant_cast<layout_pointer&>(iPointerWrapper)->set_parent(aParent);
+	}
+
 	void layout_item::set_owner(i_widget* aOwner)
 	{
 		iOwner = aOwner;
@@ -93,14 +112,14 @@ namespace neogfx
 		if (adjustedSize != aSize)
 		{
 			adjustedPosition += point{
-			(iParent.alignment() & alignment::Centre) == alignment::Centre ?
+			(parent().alignment() & alignment::Centre) == alignment::Centre ?
 				(aSize - adjustedSize).cx / 2.0 :
-				(iParent.alignment() & alignment::Right) == alignment::Right ?
+				(parent().alignment() & alignment::Right) == alignment::Right ?
 					(aSize - adjustedSize).cx :
 					0.0,
-			(iParent.alignment() & alignment::VCentre) == alignment::VCentre ?
+			(parent().alignment() & alignment::VCentre) == alignment::VCentre ?
 				(aSize - adjustedSize).cy / 2.0 :
-				(iParent.alignment() & alignment::Bottom) == alignment::Bottom ?
+				(parent().alignment() & alignment::Bottom) == alignment::Bottom ?
 					(aSize - adjustedSize).cy :
 					0.0 }.floor();
 		}
@@ -136,22 +155,22 @@ namespace neogfx
 
 	bool layout_item::device_metrics_available() const
 	{
-		return iParent.device_metrics_available();
+		return parent().device_metrics_available();
 	}
 
 	const i_device_metrics& layout_item::device_metrics() const
 	{
-		return iParent.device_metrics();
+		return parent().device_metrics();
 	}
 
 	neogfx::units layout_item::units() const
 	{
-		return iParent.units();
+		return parent().units();
 	}
 
 	neogfx::units layout_item::set_units(neogfx::units aUnits) const
 	{
-		return iParent.set_units(aUnits);
+		return parent().set_units(aUnits);
 	}
 
 	point layout_item::position() const
@@ -213,7 +232,7 @@ namespace neogfx
 	{
 		if (!visible())
 			return size{};
-		if (iLayoutId.first == iParent.layout_id() && iLayoutId.first != -1)
+		if (iLayoutId.first == parent().layout_id() && iLayoutId.first != -1)
 			return iMinimumSize;
 		else
 		{
@@ -236,7 +255,7 @@ namespace neogfx
 						iMinimumSize = size{ iMinimumSize.cx, iMinimumSize.cx * (aspectRatio.cy / aspectRatio.cx) };
 				}
 			}
-			iLayoutId.first = iParent.layout_id();
+			iLayoutId.first = parent().layout_id();
 			return iMinimumSize;
 		}
 	}
@@ -257,12 +276,12 @@ namespace neogfx
 	{
 		if (!visible())
 			return size::max_size();
-		if (iLayoutId.second == iParent.layout_id())
+		if (iLayoutId.second == parent().layout_id())
 			return iMaximumSize;
 		else
 		{
 			iMaximumSize = wrapped_geometry().maximum_size(aAvailableSpace);
-			iLayoutId.second = iParent.layout_id();
+			iLayoutId.second = parent().layout_id();
 			return iMaximumSize;
 		}
 	}

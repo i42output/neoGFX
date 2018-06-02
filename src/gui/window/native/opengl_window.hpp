@@ -75,7 +75,7 @@ namespace neogfx
 		virtual void set_destroying();
 		void set_destroyed() override;
 	public:
-		neolib::i_destroyable& as_destroyable() override;
+		neolib::i_lifetime& as_lifetime() override;
 	private:
 		virtual void display() = 0;
 	private:

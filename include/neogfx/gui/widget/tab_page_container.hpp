@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
-#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/border_layout.hpp>
 #include <neogfx/gui/layout/stack_layout.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gui/widget/i_tab_page_container.hpp>
@@ -114,9 +114,8 @@ namespace neogfx
 	private:
 		void update_tab_bar_placement();
 	private:
-		vertical_layout iContainerLayout;
+		border_layout iContainerLayout;
 		tab_bar iTabBar;
-		stack_layout iPageLayout;
 		tab_list iTabs;
 	};
 }

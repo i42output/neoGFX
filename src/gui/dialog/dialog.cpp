@@ -194,7 +194,7 @@ namespace neogfx
 
 	dialog_result dialog::exec()
 	{
-		neolib::destroyed_flag destroyed{ surface().as_destroyable() };
+		neolib::destroyed_flag destroyed{ surface().as_lifetime() };
 		app::event_processing_context epc(app::instance(), "neogfx::dialog");
 		while (iResult == boost::none)
 		{
