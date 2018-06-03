@@ -367,7 +367,7 @@ namespace neogfx
 		if (!is_selected())
 			push_button::update(aUpdateRect);
 		else
-			push_button::update(to_client_coordinates(window_rect().inflate(delta{ 0.0, 2.0 })));
+			push_button::update(to_client_coordinates(window_rect().inflate(delta{ 2.0, 2.0 })));
 	}
 
 	void tab_button::mouse_entered(const point& aPosition)
