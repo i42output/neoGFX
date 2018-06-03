@@ -63,17 +63,35 @@ namespace neogfx
 		return false;
 	}
 
-	void tab_page_container::default_tab_page::paint_non_client(graphics_context& aGraphicsContext) const
+	void tab_page_container::default_tab_page::paint_non_client_after(graphics_context& aGraphicsContext) const
 	{
-		scrollable_widget::paint_non_client(aGraphicsContext);
 		if (iTab.is_selected())
 		{
-			auto hole = to_client_coordinates(iTab.as_widget().window_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(window_rect()));
-			hole = hole.intersection(to_client_coordinates(window_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
-			aGraphicsContext.fill_rect(hole, inner_frame_colour());
-			hole.deflate(size{ effective_frame_width() / 2.0, 0.0 });
-			aGraphicsContext.fill_rect(hole, background_colour());
+			switch (iTab.container().style() & tab_container_style::TabAlignmentMask)
+			{
+			case tab_container_style::TabAlignmentTop:
+			case tab_container_style::TabAlignmentBottom:
+				{
+					auto hole = to_client_coordinates(iTab.as_widget().window_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(window_rect()));
+					hole = hole.intersection(to_client_coordinates(window_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
+					aGraphicsContext.fill_rect(hole, inner_frame_colour());
+					hole.deflate(size{ effective_frame_width() / 2.0, 0.0 });
+					aGraphicsContext.fill_rect(hole, background_colour());
+				}
+				break;
+			case tab_container_style::TabAlignmentLeft:
+			case tab_container_style::TabAlignmentRight:
+				{
+					auto hole = to_client_coordinates(iTab.as_widget().window_rect().inflate(size{ effective_frame_width(), -effective_frame_width() / 2.0 }).intersection(window_rect()));
+					hole = hole.intersection(to_client_coordinates(window_rect().deflate(size{ 0.0, effective_frame_width() / 2.0 })));
+					aGraphicsContext.fill_rect(hole, inner_frame_colour());
+					hole.deflate(size{ 0.0, effective_frame_width() / 2.0 });
+					aGraphicsContext.fill_rect(hole, background_colour());
+				}
+				break;
+			}
 		}
+		scrollable_widget::paint_non_client_after(aGraphicsContext);
 	}
 
 	colour tab_page_container::default_tab_page::background_colour() const
