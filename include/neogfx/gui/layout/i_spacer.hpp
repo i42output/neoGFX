@@ -20,30 +20,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_widget_geometry.hpp"
+#include <neogfx/gui/layout/i_layout_item.hpp>
 
 namespace neogfx
 {
 	class i_widget;
 	class i_layout;
 
-	class i_spacer : public i_widget_geometry
+	class i_spacer : public i_layout_item
 	{
 	public:
 		enum expansion_policy_e
 		{
-			ExpandHorizontally = 0x01,
-			ExpandVertically = 0x02
+			ExpandHorizontally	= 0x01,
+			ExpandVertically	= 0x02
 		};
 		typedef boost::optional<size> optional_weight;
 	public:
 		virtual ~i_spacer() {}
 	public:
-		virtual i_widget* owner() const = 0;
-		virtual bool has_parent() const = 0;
-		virtual const i_layout& parent() const = 0;
-		virtual i_layout& parent() = 0;
-		virtual void set_parent(i_layout& aParent) = 0;
 		virtual expansion_policy_e expansion_policy() const = 0;
 		virtual void set_expansion_policy(expansion_policy_e aExpansionPolicy) = 0;
 	};

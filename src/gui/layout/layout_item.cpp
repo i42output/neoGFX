@@ -19,224 +19,239 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 
 namespace neogfx
 {
-	layout_item::layout_item(i_layout& aParent, i_widget& aWidget) :
-		iParent{ &aParent }, iPointerWrapper{ widget_pointer{widget_pointer{}, &aWidget} }, iLayoutId{ -1, -1 }
+	layout_item::layout_item(i_layout& aParentLayout, i_layout_item& aItem) :
+		layout_item{ aParentLayout, std::shared_ptr<i_layout_item>{ std::shared_ptr<i_layout_item>{}, &aItem } } 
 	{
 	}
 
-	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_widget> aWidget) :
-		iParent{ &aParent }, iPointerWrapper{ aWidget }, iLayoutId{ -1, -1 }
+	layout_item::layout_item(i_layout& aParentLayout, std::shared_ptr<i_layout_item> aItem) :
+		iSubject{ aItem }, iLayoutId{ -1, -1 }
 	{
+		subject().set_parent_layout(&aParentLayout);
+		if (aParentLayout.has_layout_owner())
+			subject().set_layout_owner(&aParentLayout.layout_owner());
 	}
 
-	layout_item::layout_item(i_layout& aParent, i_layout& aLayout) :
-		iParent{ &aParent }, iPointerWrapper{ layout_pointer{layout_pointer{}, &aLayout} }, iLayoutId{ -1, -1 }
+	const i_layout_item& layout_item::subject() const
 	{
+		return *iSubject;
 	}
 
-	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_layout> aLayout) :
-		iParent{ &aParent }, iPointerWrapper{ aLayout }, iLayoutId{ -1, -1 }
+	i_layout_item& layout_item::subject()
 	{
+		return *iSubject;
 	}
 
-	layout_item::layout_item(i_layout& aParent, i_spacer& aSpacer) :
-		iParent{ &aParent }, iPointerWrapper{ spacer_pointer{spacer_pointer{}, &aSpacer} }, iLayoutId{ -1, -1 }
+	bool layout_item::is_layout() const
 	{
+		return subject().is_layout();
 	}
 
-	layout_item::layout_item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer) :
-		iParent{ &aParent }, iPointerWrapper{ aSpacer }, iLayoutId{ -1, -1 }
+	const i_layout& layout_item::as_layout() const
 	{
+		return subject().as_layout();
 	}
 
-	const layout_item::pointer_wrapper& layout_item::get() const
+	i_layout& layout_item::as_layout()
 	{
-		return iPointerWrapper;
+		return subject().as_layout();
 	}
 
-	layout_item::pointer_wrapper& layout_item::get()
+	bool layout_item::is_widget() const
 	{
-		return iPointerWrapper;
+		return subject().is_widget();
 	}
 
-	const i_widget_geometry& layout_item::wrapped_geometry() const
+	const i_widget& layout_item::as_widget() const
 	{
-		return iPointerWrapper.is<widget_pointer>() ?
-			static_cast<const i_widget_geometry&>(*static_variant_cast<const widget_pointer&>(iPointerWrapper)) :
-			iPointerWrapper.is<layout_pointer>() ?
-				static_cast<const i_widget_geometry&>(*static_variant_cast<const layout_pointer&>(iPointerWrapper)) :
-				static_cast<const i_widget_geometry&>(*static_variant_cast<const spacer_pointer&>(iPointerWrapper));
+		return subject().as_widget();
 	}
 
-	i_widget_geometry& layout_item::wrapped_geometry()
+	i_widget& layout_item::as_widget()
 	{
-		return const_cast<i_widget_geometry&>(const_cast<const layout_item*>(this)->wrapped_geometry());
+		return subject().as_widget();
 	}
 
-	const i_layout& layout_item::parent() const
+	bool layout_item::is_spacer() const
 	{
-		if (iParent != nullptr)
-			return *iParent;
-		throw no_parent();
+		return !is_layout() && !is_widget();
 	}
 
-	i_layout& layout_item::parent()
+	bool layout_item::has_parent_layout() const
 	{
-		return const_cast<i_layout&>(const_cast<const layout_item*>(this)->parent());
+		return subject().has_parent_layout();
 	}
 
-	void layout_item::set_parent(i_layout* aParent)
+	const i_layout& layout_item::parent_layout() const
 	{
-		iParent = aParent;
-		if (iPointerWrapper.is<layout_pointer>())
-			static_variant_cast<layout_pointer&>(iPointerWrapper)->set_parent(aParent);
+		if (has_parent_layout())
+			return subject().parent_layout();
+		throw no_parent_layout();
 	}
 
-	void layout_item::set_owner(i_widget* aOwner)
+	i_layout& layout_item::parent_layout()
 	{
-		iOwner = aOwner;
-		if (iPointerWrapper.is<widget_pointer>())
-			iOwner->add(static_variant_cast<widget_pointer&>(iPointerWrapper));
-		else if (iPointerWrapper.is<layout_pointer>())
-			static_variant_cast<layout_pointer&>(iPointerWrapper)->set_owner(aOwner);
+		return const_cast<i_layout&>(const_cast<const layout_item*>(this)->parent_layout());
 	}
 
-	void layout_item::layout(const point& aPosition, const size& aSize)
+	void layout_item::set_parent_layout(i_layout* aParentLayout)
 	{
-		size adjustedSize = aSize.min(maximum_size());
+		subject().set_parent_layout(aParentLayout);
+	}
+
+	bool layout_item::has_layout_owner() const
+	{
+		return subject().has_layout_owner();
+	}
+
+	const i_widget& layout_item::layout_owner() const
+	{
+		if (has_layout_owner())
+			return subject().layout_owner();
+		throw no_layout_owner();
+	}
+
+	i_widget& layout_item::layout_owner()
+	{
+		return const_cast<i_widget&>(const_cast<const layout_item*>(this)->layout_owner());
+	}
+
+	void layout_item::set_layout_owner(i_widget* aOwner)
+	{
+		subject().set_layout_owner(aOwner);
+	}
+
+	void layout_item::layout_as(const point& aPosition, const size& aSize)
+	{
 		point adjustedPosition = aPosition;
+		size adjustedSize = aSize.min(maximum_size());
 		if (adjustedSize != aSize)
 		{
 			adjustedPosition += point{
-			(parent().alignment() & alignment::Centre) == alignment::Centre ?
+			(parent_layout().alignment() & alignment::Centre) == alignment::Centre ?
 				(aSize - adjustedSize).cx / 2.0 :
-				(parent().alignment() & alignment::Right) == alignment::Right ?
+				(parent_layout().alignment() & alignment::Right) == alignment::Right ?
 					(aSize - adjustedSize).cx :
 					0.0,
-			(parent().alignment() & alignment::VCentre) == alignment::VCentre ?
+			(parent_layout().alignment() & alignment::VCentre) == alignment::VCentre ?
 				(aSize - adjustedSize).cy / 2.0 :
-				(parent().alignment() & alignment::Bottom) == alignment::Bottom ?
+				(parent_layout().alignment() & alignment::Bottom) == alignment::Bottom ?
 					(aSize - adjustedSize).cy :
 					0.0 }.floor();
 		}
-					
-		if (iPointerWrapper.is<widget_pointer>())
-		{
-			auto& w = *static_variant_cast<widget_pointer&>(iPointerWrapper);
-			w.move(adjustedPosition);
-			if (w.extents() != adjustedSize)
-				w.resize(adjustedSize);
-			else if (w.has_layout() && w.layout().invalidated())
-				w.layout_items();
-		}
-		else if (iPointerWrapper.is<layout_pointer>())
-		{
-			static_variant_cast<layout_pointer&>(iPointerWrapper)->layout_items(adjustedPosition, adjustedSize);
-		}
-		else if (iPointerWrapper.is<spacer_pointer>())
-		{
-			static_variant_cast<spacer_pointer&>(iPointerWrapper)->set_extents(adjustedSize);
-		}
+
+		subject().layout_as(adjustedPosition, adjustedSize);
+	}
+
+	uint32_t layout_item::layout_id() const
+	{
+		return subject().layout_id();
+	}
+	
+	void layout_item::next_layout_id()
+	{
+		subject().next_layout_id();
 	}
 
 	bool layout_item::high_dpi() const
 	{
-		return wrapped_geometry().high_dpi();
+		return subject().high_dpi();
 	}
 
 	dimension layout_item::dpi_scale_factor() const
 	{
-		return wrapped_geometry().dpi_scale_factor();
+		return subject().dpi_scale_factor();
 	}
 
 	bool layout_item::device_metrics_available() const
 	{
-		return parent().device_metrics_available();
+		return parent_layout().device_metrics_available();
 	}
 
 	const i_device_metrics& layout_item::device_metrics() const
 	{
-		return parent().device_metrics();
+		return parent_layout().device_metrics();
 	}
 
 	neogfx::units layout_item::units() const
 	{
-		return parent().units();
+		return parent_layout().units();
 	}
 
 	neogfx::units layout_item::set_units(neogfx::units aUnits) const
 	{
-		return parent().set_units(aUnits);
+		return parent_layout().set_units(aUnits);
 	}
 
 	point layout_item::position() const
 	{
-		return wrapped_geometry().position();
+		return subject().position();
 	}
 
 	void layout_item::set_position(const point& aPosition)
 	{
-		wrapped_geometry().set_position(aPosition);
+		subject().set_position(aPosition);
 	}
 
 	size layout_item::extents() const
 	{
-		return wrapped_geometry().extents();
+		return subject().extents();
 	}
 
 	void layout_item::set_extents(const size& aExtents)
 	{
-		wrapped_geometry().set_extents(aExtents);
+		subject().set_extents(aExtents);
 	}
 
 	bool layout_item::has_size_policy() const
 	{
-		return wrapped_geometry().has_size_policy();
+		return subject().has_size_policy();
 	}
 
 	size_policy layout_item::size_policy() const
 	{
-		return wrapped_geometry().size_policy();
+		return subject().size_policy();
 	}
 
 	void layout_item::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
 	{
-		wrapped_geometry().set_size_policy(aSizePolicy, aUpdateLayout);
+		subject().set_size_policy(aSizePolicy, aUpdateLayout);
 	}
 
 	bool layout_item::has_weight() const
 	{
-		return wrapped_geometry().has_weight();
+		return subject().has_weight();
 	}
 
 	size layout_item::weight() const
 	{
-		return wrapped_geometry().weight();
+		return subject().weight();
 	}
 
 	void layout_item::set_weight(const optional_size& aWeight, bool aUpdateLayout)
 	{
-		wrapped_geometry().set_weight(aWeight, aUpdateLayout);
+		subject().set_weight(aWeight, aUpdateLayout);
 	}
 
 	bool layout_item::has_minimum_size() const
 	{
-		return wrapped_geometry().has_minimum_size();
+		return subject().has_minimum_size();
 	}
 
 	size layout_item::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (!visible())
 			return size{};
-		if (iLayoutId.first == parent().layout_id() && iLayoutId.first != -1)
+		if (iLayoutId.first == parent_layout().layout_id() && iLayoutId.first != -1)
 			return iMinimumSize;
 		else
 		{
-			iMinimumSize = wrapped_geometry().minimum_size(aAvailableSpace);
+			iMinimumSize = subject().minimum_size(aAvailableSpace);
 			if (size_policy().maintain_aspect_ratio())
 			{
 				const auto& aspectRatio = size_policy().aspect_ratio();
@@ -255,69 +270,66 @@ namespace neogfx
 						iMinimumSize = size{ iMinimumSize.cx, iMinimumSize.cx * (aspectRatio.cy / aspectRatio.cx) };
 				}
 			}
-			iLayoutId.first = parent().layout_id();
+			iLayoutId.first = parent_layout().layout_id();
 			return iMinimumSize;
 		}
 	}
 
 	void layout_item::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
-		wrapped_geometry().set_minimum_size(aMinimumSize, aUpdateLayout);
+		subject().set_minimum_size(aMinimumSize, aUpdateLayout);
 		if (aMinimumSize != boost::none)
 			iMinimumSize = *aMinimumSize;
 	}
 
 	bool layout_item::has_maximum_size() const
 	{
-		return wrapped_geometry().has_maximum_size();
+		return subject().has_maximum_size();
 	}
 
 	size layout_item::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (!visible())
 			return size::max_size();
-		if (iLayoutId.second == parent().layout_id())
+		if (iLayoutId.second == parent_layout().layout_id())
 			return iMaximumSize;
 		else
 		{
-			iMaximumSize = wrapped_geometry().maximum_size(aAvailableSpace);
-			iLayoutId.second = parent().layout_id();
+			iMaximumSize = subject().maximum_size(aAvailableSpace);
+			iLayoutId.second = parent_layout().layout_id();
 			return iMaximumSize;
 		}
 	}
 
 	void layout_item::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
-		wrapped_geometry().set_maximum_size(aMaximumSize, aUpdateLayout);
+		subject().set_maximum_size(aMaximumSize, aUpdateLayout);
 		if (aMaximumSize != boost::none)
 			iMaximumSize = *aMaximumSize;
 	}
 
 	bool layout_item::has_margins() const
 	{
-		return wrapped_geometry().has_margins();
+		return subject().has_margins();
 	}
 
 	margins layout_item::margins() const
 	{
-		return wrapped_geometry().margins();
+		return subject().margins();
 	}
 
 	void layout_item::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
 	{
-		wrapped_geometry().set_margins(aMargins, aUpdateLayout);
+		subject().set_margins(aMargins, aUpdateLayout);
 	}
 
 	bool layout_item::visible() const
 	{
-		if (iPointerWrapper.is<widget_pointer>())
-			return static_variant_cast<const widget_pointer&>(iPointerWrapper)->visible();
-		else
-			return true;
+		return subject().visible();
 	}
 
 	bool layout_item::operator==(const layout_item& aOther) const
 	{
-		return iPointerWrapper == aOther.iPointerWrapper;
+		return iSubject == aOther.iSubject;
 	}
 }

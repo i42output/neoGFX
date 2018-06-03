@@ -78,10 +78,10 @@ namespace neogfx
 			return;
 		if (debug == this)
 			std::cerr << "horizontal_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
-		owner()->layout_items_started();
+		layout_owner().layout_items_started();
 		next_layout_id();
 		validate();
 		layout::do_layout_items<layout::column_major<horizontal_layout>>(aPosition, aSize);
-		owner()->layout_items_completed();
+		layout_owner().layout_items_completed();
 	}
 }

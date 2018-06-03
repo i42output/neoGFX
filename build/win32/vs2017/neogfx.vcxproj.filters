@@ -690,6 +690,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\rect_pack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">

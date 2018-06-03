@@ -35,11 +35,21 @@ namespace neogfx
 		spacer(expansion_policy_e aExpansionPolicy);
 		spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy);
 	public:
-		i_widget* owner() const override;
-		bool has_parent() const override;
-		const i_layout& parent() const override;
-		i_layout& parent() override;
-		void set_parent(i_layout& aParent) override;
+		bool is_layout() const override;
+		const i_layout& as_layout() const override;
+		i_layout& as_layout() override;
+		bool is_widget() const override;
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+	public:
+		bool has_parent_layout() const override;
+		const i_layout& parent_layout() const override;
+		i_layout& parent_layout() override;
+		void set_parent_layout(i_layout* aParentLayout) override;
+		bool has_layout_owner() const override;
+		const i_widget& layout_owner() const override;
+		i_widget& layout_owner() override;
+		void set_layout_owner(i_widget* aOwner) override;
 		expansion_policy_e expansion_policy() const override;
 		void set_expansion_policy(expansion_policy_e aExpansionPolicy) override;
 	public:
@@ -72,8 +82,15 @@ namespace neogfx
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
+	public:
+		void layout_as(const point& aPosition, const size& aSize) override;
+		uint32_t layout_id() const override;
+		void next_layout_id() override;
+	public:
+		bool visible() const override;
 	private:
-		i_layout* iParent;
+		i_layout* iParentLayout;
+		uint32_t iLayoutId;
 		units_context iUnitsContext;
 		point iPosition;
 		size iExtents;

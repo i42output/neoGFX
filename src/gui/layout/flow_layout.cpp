@@ -92,13 +92,13 @@ namespace neogfx
 			return;
 		if (debug == this)
 			std::cerr << "flow_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
-		owner()->layout_items_started();
+		layout_owner().layout_items_started();
 		next_layout_id();
 		validate();
 		if (iFlowDirection == FlowDirectionHorizontal)
 			do_layout_items<layout::column_major<flow_layout>>(aPosition, aSize);
 		else
 			do_layout_items<layout::row_major<flow_layout>>(aPosition, aSize);
-		owner()->layout_items_completed();
+		layout_owner().layout_items_completed();
 	}
 }

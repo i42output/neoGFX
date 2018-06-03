@@ -165,7 +165,7 @@ namespace neogfx
 			{
 				// Teh ghastly dynamic_cast! A simpler CLEAN solution which doesn't leak details everywhere doesn't immediately spring to mind.
 				const radio_button* candidateRadioButton = dynamic_cast<const radio_button*>(candidate);
-				if (candidateRadioButton != 0)
+				if (candidateRadioButton != nullptr)
 					return candidateRadioButton;
 			}
 			candidate = &candidate->after();

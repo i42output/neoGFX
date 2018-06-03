@@ -26,47 +26,95 @@
 namespace neogfx
 {
 	spacer::spacer(expansion_policy_e aExpansionPolicy) :
-		iParent{ nullptr }, 
+		iParentLayout{ nullptr }, 
 		iUnitsContext{ *this }, 
 		iExpansionPolicy{ aExpansionPolicy }
 	{
 	}
 
-	spacer::spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy) :
-		iParent{ &aParent }, 
+	spacer::spacer(i_layout& aParentLayout, expansion_policy_e aExpansionPolicy) :
+		iParentLayout{ nullptr }, 
 		iUnitsContext{ *this },
 		iExpansionPolicy{ aExpansionPolicy }
 	{
-		aParent.add(*this);
+		aParentLayout.add(*this);
 	}
 
-	i_widget* spacer::owner() const
+	bool spacer::is_layout() const
 	{
-		if (has_parent())
-			return parent().owner();
-		return nullptr;
+		return false;
 	}
 
-	bool spacer::has_parent() const
+	const i_layout& spacer::as_layout() const
 	{
-		return iParent != nullptr;
+		throw not_a_layout();
 	}
 
-	const i_layout& spacer::parent() const
+	i_layout& spacer::as_layout()
 	{
-		if (has_parent())
-			return *iParent;
-		throw no_parent();
+		throw not_a_layout();
 	}
 
-	i_layout& spacer::parent()
+	bool spacer::is_widget() const
 	{
-		return const_cast<i_layout&>(const_cast<const spacer*>(this)->parent());
+		return false;
 	}
 
-	void spacer::set_parent(i_layout& aParent)
+	const i_widget& spacer::as_widget() const
 	{
-		iParent = &aParent;
+		throw not_a_widget();
+	}
+
+	i_widget& spacer::as_widget()
+	{
+		throw not_a_widget();
+	}
+
+	bool spacer::has_parent_layout() const
+	{
+		return iParentLayout != nullptr;
+	}
+
+	const i_layout& spacer::parent_layout() const
+	{
+		if (has_parent_layout())
+			return *iParentLayout;
+		throw no_parent_layout();
+	}
+
+	i_layout& spacer::parent_layout()
+	{
+		return const_cast<i_layout&>(const_cast<const spacer*>(this)->parent_layout());
+	}
+
+	void spacer::set_parent_layout(i_layout* aParentLayout)
+	{
+		iParentLayout = aParentLayout;
+	}
+
+	bool spacer::has_layout_owner() const
+	{
+		if (has_parent_layout())
+			return parent_layout().has_layout_owner();
+		else
+			return false;
+	}
+
+	const i_widget& spacer::layout_owner() const
+	{
+		if (has_layout_owner())
+			return parent_layout().layout_owner();
+		throw no_layout_owner();
+	}
+
+	i_widget& spacer::layout_owner()
+	{
+		return const_cast<i_widget&>(const_cast<const spacer*>(this)->layout_owner());
+	}
+
+	void spacer::set_layout_owner(i_widget*)
+	{
+		// do nothing
 	}
 
 	spacer::expansion_policy_e spacer::expansion_policy() const
@@ -79,8 +127,8 @@ namespace neogfx
 		if (iExpansionPolicy != aExpansionPolicy)
 		{
 			iExpansionPolicy = aExpansionPolicy;
-			if (owner() != nullptr)
-				owner()->ultimate_ancestor().layout_items(true);
+			if (has_layout_owner())
+				layout_owner().ultimate_ancestor().layout_items(true);
 		}
 	}
 
@@ -91,16 +139,16 @@ namespace neogfx
 
 	bool spacer::high_dpi() const
 	{
-		return owner() != nullptr && owner()->has_surface() ? 
-			owner()->surface().ppi() >= 150.0 : 
+		return has_layout_owner() && layout_owner().has_surface() ? 
+			layout_owner().surface().ppi() >= 150.0 : 
 			app::instance().surface_manager().display().metrics().ppi() >= 150.0;
 	}
 
 	dimension spacer::dpi_scale_factor() const
 	{
 		return default_dpi_scale_factor(
-			owner() != nullptr && owner()->has_surface() ?
-				owner()->surface().ppi() : 
+			has_layout_owner() && layout_owner().has_surface() ?
+				layout_owner().surface().ppi() : 
 				app::instance().surface_manager().display().metrics().ppi());
 	}
 
@@ -141,8 +189,8 @@ namespace neogfx
 		if (iSizePolicy != aSizePolicy)
 		{
 			iSizePolicy = aSizePolicy;
-			if (owner() != nullptr && aUpdateLayout)
-				owner()->ultimate_ancestor().layout_items(true);
+			if (has_layout_owner() && aUpdateLayout)
+				layout_owner().ultimate_ancestor().layout_items(true);
 		}
 	}
 
@@ -164,8 +212,8 @@ namespace neogfx
 		if (iWeight != aWeight)
 		{
 			iWeight = aWeight;
-			if (owner() != nullptr && aUpdateLayout)
-				owner()->ultimate_ancestor().layout_items(true);
+			if (has_layout_owner() && aUpdateLayout)
+				layout_owner().ultimate_ancestor().layout_items(true);
 		}
 	}
 
@@ -187,8 +235,8 @@ namespace neogfx
 		if (iMinimumSize != newMinimumSize)
 		{
 			iMinimumSize = newMinimumSize;
-			if (owner() != nullptr && aUpdateLayout)
-				owner()->ultimate_ancestor().layout_items(true);
+			if (has_layout_owner() && aUpdateLayout)
+				layout_owner().ultimate_ancestor().layout_items(true);
 		}
 	}
 
@@ -210,8 +258,8 @@ namespace neogfx
 		if (iMaximumSize != newMaximumSize)
 		{
 			iMaximumSize = newMaximumSize;
-			if (owner() != nullptr && aUpdateLayout)
-				owner()->ultimate_ancestor().layout_items(true);
+			if (has_layout_owner() && aUpdateLayout)
+				layout_owner().ultimate_ancestor().layout_items(true);
 		}
 	}
 
@@ -232,13 +280,13 @@ namespace neogfx
 
 	bool spacer::device_metrics_available() const
 	{
-		return iParent != nullptr && iParent->device_metrics_available();
+		return has_parent_layout() && parent_layout().device_metrics_available();
 	}
 
 	const i_device_metrics& spacer::device_metrics() const
 	{
 		if (device_metrics_available())
-			return iParent->device_metrics();
+			return parent_layout().device_metrics();
 		throw no_device_metrics();
 	}
 
@@ -250,6 +298,29 @@ namespace neogfx
 	units spacer::set_units(neogfx::units aUnits) const
 	{
 		return iUnitsContext.set_units(aUnits);
+	}
+
+	void spacer::layout_as(const point&, const size& aSize)
+	{
+		set_extents(aSize);
+	}
+
+	uint32_t spacer::layout_id() const
+	{
+		return iLayoutId;
+	}
+
+	void spacer::next_layout_id()
+	{
+		if (++iLayoutId == static_cast<uint32_t>(-1))
+			iLayoutId = 0;
+	}
+
+	bool spacer::visible() const
+	{
+		if (has_layout_owner())
+			return layout_owner().visible();
+		return false;
 	}
 
 	horizontal_spacer::horizontal_spacer() :

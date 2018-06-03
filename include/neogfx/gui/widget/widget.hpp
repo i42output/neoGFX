@@ -41,6 +41,7 @@ namespace neogfx
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
+		// i_widget
 	public:
 		bool is_singular() const override;
 		void set_singular(bool aSingular) override;
@@ -58,6 +59,7 @@ namespace neogfx
 		bool is_ancestor_of(const i_widget& aWidget, bool aSameSurface = true) const override;
 		bool is_descendent_of(const i_widget& aWidget, bool aSameSurface = true) const override;
 		bool is_sibling_of(const i_widget& aWidget) const override;
+		bool adding_child() const override;
 		i_widget& add(i_widget& aChild) override;
 		i_widget& add(std::shared_ptr<i_widget> aChild) override;
 		std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) override;
@@ -89,13 +91,11 @@ namespace neogfx
 		const i_widget& managing_layout() const override;
 		i_widget& managing_layout() override;
 		bool is_managing_layout() const override;
-		bool has_parent_layout() const override;
-		const i_layout& parent_layout() const override;
-		i_layout& parent_layout() override;
 		void layout_items(bool aDefer = false) override;
 		void layout_items_started() override;
 		bool layout_items_in_progress() const override;
 		void layout_items_completed() override;
+		// i_widget_geometry
 	public:
 		bool high_dpi() const override;
 		dimension dpi_scale_factor() const override;
@@ -132,6 +132,28 @@ namespace neogfx
 		bool has_margins() const override;
 		neogfx::margins margins() const override;
 		void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
+		// i_layout_item
+	public:
+		bool is_layout() const override;
+		const i_layout& as_layout() const override;
+		i_layout& as_layout() override;
+		bool is_widget() const override;
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+	public:
+		bool has_parent_layout() const override;
+		const i_layout& parent_layout() const override;
+		i_layout& parent_layout() override;
+		void set_parent_layout(i_layout* aParentLayout) override;
+		bool has_layout_owner() const override;
+		const i_widget& layout_owner() const override;
+		i_widget& layout_owner() override;
+		void set_layout_owner(i_widget* aOwner) override;
+	public:
+		void layout_as(const point& aPosition, const size& aSize) override;
+		uint32_t layout_id() const override;
+		void next_layout_id() override;
+		// i_widget
 	public:
 		void update(bool aIncludeNonClient = false) override;
 		void update(const rect& aUpdateRect) override;
@@ -228,8 +250,12 @@ namespace neogfx
 		mutable const i_surface* iSurface;
 		mutable const i_window* iRoot;
 		widget_list iChildren;
+		bool iAddingChild;
 		i_widget* iLinkBefore;
 		i_widget* iLinkAfter;
+		i_layout* iParentLayout;
+		uint32_t iLayoutId;
+		uint32_t iLayoutInProgress;
 		std::shared_ptr<i_layout> iLayout;
 		class layout_timer;
 		std::unique_ptr<layout_timer> iLayoutTimer;
@@ -242,7 +268,6 @@ namespace neogfx
 		optional_size iWeight;
 		optional_size iMinimumSize;
 		optional_size iMaximumSize;
-		uint32_t iLayoutInProgress;
 		bool iVisible;
 		bool iEnabled;
 		neogfx::focus_policy iFocusPolicy;

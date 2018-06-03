@@ -37,7 +37,7 @@ namespace neogfx
 				if (!item.visible())
 					continue;
 				const auto sizeTest = noSpace ? item.minimum_size(aAvailableSpace) : item.maximum_size(aAvailableSpace);
-				if (!item.get().is<item::spacer_pointer>() && (SpecializedPolicy::cx(sizeTest) == 0.0 || SpecializedPolicy::cy(sizeTest) == 0.0))
+				if (!item.is_spacer() && (SpecializedPolicy::cx(sizeTest) == 0.0 || SpecializedPolicy::cy(sizeTest) == 0.0))
 					++result;
 			}
 			return result;
@@ -152,7 +152,7 @@ namespace neogfx
 			if (!item.visible())
 				continue;
 			const auto itemMinSize = item.minimum_size(availableSpaceForChildren);
-			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(itemMinSize) == 0.0 || AxisPolicy::cy(itemMinSize) == 0.0))
+			if (!item.is_spacer() && (AxisPolicy::cx(itemMinSize) == 0.0 || AxisPolicy::cy(itemMinSize) == 0.0))
 			{
 				++itemsZeroSized;
 				continue;
@@ -199,7 +199,7 @@ namespace neogfx
 			if (!item.visible())
 				continue;
 			const auto itemMaxSize = item.maximum_size(availableSpaceForChildren);
-			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(itemMaxSize) == 0.0 || AxisPolicy::cy(itemMaxSize) == 0.0))
+			if (!item.is_spacer() && (AxisPolicy::cx(itemMaxSize) == 0.0 || AxisPolicy::cy(itemMaxSize) == 0.0))
 				++itemsZeroSized;
 			AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), 
 				AxisPolicy::size_policy_y(size_policy()) == size_policy::Expanding || AxisPolicy::size_policy_y(size_policy()) == size_policy::Maximum ? 
@@ -369,11 +369,11 @@ namespace neogfx
 			}
 			if (AxisPolicy::y(alignmentAdjust) < 0.0)
 				AxisPolicy::y(alignmentAdjust) = 0.0;
-			item.layout(nextPos + alignmentAdjust, s);
-			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(s) == 0.0 || AxisPolicy::cy(s) == 0.0))
+			item.layout_as(nextPos + alignmentAdjust, s);
+			if (!item.is_spacer() && (AxisPolicy::cx(s) == 0.0 || AxisPolicy::cy(s) == 0.0))
 				continue;
 			AxisPolicy::x(nextPos) += AxisPolicy::cx(s);
-			if (!item.get().is<item::spacer_pointer>() || iAlwaysUseSpacing)
+			if (!item.is_spacer() || iAlwaysUseSpacing)
 				AxisPolicy::x(nextPos) += AxisPolicy::cx(spacing());
 		}
 		point lastPos = aPosition + aSize;

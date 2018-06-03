@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_widget_geometry.hpp"
 #include <neogfx/core/event.hpp>
+#include <neogfx/gui/layout/i_layout_item.hpp>
 
 namespace neogfx
 {
@@ -30,7 +30,7 @@ namespace neogfx
 
 	class layout_item;
 
-	class i_layout : public i_widget_geometry
+	class i_layout : public i_layout_item
 	{
 	public:
 		static i_layout* debug;
@@ -49,37 +49,21 @@ namespace neogfx
 	public:
 		virtual ~i_layout() {}
 	public:	
-		virtual i_widget* owner() const = 0;
-		virtual void set_owner(i_widget* aOwner) = 0;
-		virtual i_layout* parent() const = 0;
-		virtual void set_parent(i_layout* aParent) = 0;
-		virtual i_widget& add(i_widget& aWidget) = 0;
-		virtual i_widget& add_at(item_index aPosition, i_widget& aWidget) = 0;
-		virtual i_widget& add(std::shared_ptr<i_widget> aWidget) = 0;
-		virtual i_widget& add_at(item_index aPosition, std::shared_ptr<i_widget> aWidget) = 0;
-		virtual i_layout& add(i_layout& aLayout) = 0;
-		virtual i_layout& add_at(item_index aPosition, i_layout& aLayout) = 0;
-		virtual i_layout& add(std::shared_ptr<i_layout> aLayout) = 0;
-		virtual i_layout& add_at(item_index aPosition, std::shared_ptr<i_layout> aLayout) = 0;
-		virtual void add(i_spacer& aSpacer) = 0;
-		virtual void add_at(item_index aPosition, i_spacer& aSpacer) = 0;
-		virtual void add(std::shared_ptr<i_spacer> aSpacer) = 0;
-		virtual void add_at(item_index aPosition, std::shared_ptr<i_spacer> aSpacer) = 0;
-		virtual void add(const layout_item& aItem) = 0;
+		virtual i_layout_item& add(i_layout_item& aItem) = 0;
+		virtual i_layout_item& add_at(item_index aPosition, i_layout_item& aItem) = 0;
+		virtual i_layout_item& add(std::shared_ptr<i_layout_item> aItem) = 0;
+		virtual i_layout_item& add_at(item_index aPosition, std::shared_ptr<i_layout_item> aItem) = 0;
 		virtual i_spacer& add_spacer() = 0;
 		virtual i_spacer& add_spacer_at(item_index aPosition) = 0;
 		virtual void remove_at(item_index aIndex) = 0;
-		virtual bool remove(i_layout& aItem) = 0;
-		virtual bool remove(i_widget& aItem) = 0;
+		virtual bool remove(i_layout_item& aItem) = 0;
 		virtual void remove_all() = 0;
 		virtual void move_all_to(i_layout& aDestination) = 0;
 		virtual item_index count() const = 0;
-		virtual optional_item_index find(const i_layout& aItem) const = 0;
-		virtual optional_item_index find(const i_widget& aItem) const = 0;
-		virtual optional_item_index find(const layout_item& aItem) const = 0;
+		virtual optional_item_index find(const i_layout_item& aItem) const = 0;
 		virtual bool is_widget_at(item_index aIndex) const = 0;
-		virtual const i_widget_geometry& get_item_at(item_index aIndex) const = 0;
-		virtual i_widget_geometry& get_item_at(item_index aIndex) = 0;
+		virtual const i_layout_item& get_item_at(item_index aIndex) const = 0;
+		virtual i_layout_item& get_item_at(item_index aIndex) = 0;
 		virtual const i_widget& get_widget_at(item_index aIndex) const = 0;
 		virtual i_widget& get_widget_at(item_index aIndex) = 0;
 		virtual const i_layout& get_layout_at(item_index aIndex) const = 0;
@@ -97,8 +81,6 @@ namespace neogfx
 		virtual void disable() = 0;
 		virtual bool enabled() const = 0;
 		virtual void layout_items(const point& aPosition, const size& aSize) = 0;
-		virtual uint32_t layout_id() const = 0;
-		virtual void next_layout_id() = 0;
 		virtual bool invalidated() const = 0;
 		virtual void invalidate() = 0;
 		virtual void validate() = 0;

@@ -138,8 +138,8 @@ namespace neogfx
 	};
 
 	window::client::client(i_layout& aLayout, scrollbar_style aScrollbarStyle) :
-		scrollable_widget(aLayout, aScrollbarStyle, frame_style::NoFrame),
-		iLayout(*this)
+		scrollable_widget{ aLayout, aScrollbarStyle, frame_style::NoFrame },
+		iLayout{ *this }
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{});

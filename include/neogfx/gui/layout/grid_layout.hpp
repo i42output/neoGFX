@@ -55,34 +55,21 @@ namespace neogfx
 		cell_coordinates dimensions() const;
 		void set_dimensions(cell_coordinate aRows, cell_coordinate aColumns);
 		bool is_item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
-		i_widget& add(i_widget& aWidget) override;
-		i_widget& add(std::shared_ptr<i_widget> aWidget) override;
-		i_layout& add(i_layout& aLayout) override;
-		i_layout& add(std::shared_ptr<i_layout> aLayout) override;
-		virtual i_widget& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_widget& aWidget);
-		virtual i_widget& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_widget> aWidget);
-		virtual i_layout& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout& aLayout);
-		virtual i_layout& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout> aLayout);
-		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_spacer& aSpacer);
-		virtual void add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_spacer> aSpacer);
+		i_layout_item& add(i_layout_item& aItem) override;
+		i_layout_item& add(std::shared_ptr<i_layout_item> aItem) override;
+		virtual i_layout_item& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_layout_item& aItem);
+		virtual i_layout_item& add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, std::shared_ptr<i_layout_item> aItem);
 		using layout::add_at;
 		i_spacer& add_spacer() override;
 		i_spacer& add_spacer_at(item_index aPosition) override;
 		virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		void remove_at(item_index aIndex) override;
-		bool remove(i_layout& aItem) override;
-		bool remove(i_widget& aItem) override;
+		bool remove(i_layout_item& aItem) override;
 		virtual void remove_item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		void remove_all() override;
-		i_widget& get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		template <typename WidgetT>
-		WidgetT& get_widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
-		{
-			return static_cast<WidgetT&>(get_widget(aRow, aColumn));
-		}
-		using layout::get_widget_at;
-		i_layout& get_layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		using layout::get_layout_at;
+		i_layout_item& item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+		i_widget& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+		i_layout& layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 	public:
 		void invalidate() override;
 	public:
@@ -108,6 +95,13 @@ namespace neogfx
 		horizontal_layout& row_layout(cell_coordinate aRow);
 		span_list::const_iterator find_span(const cell_coordinates& aCell) const;
 		void init();
+		// helpers
+	public:
+		template <typename WidgetT>
+		WidgetT& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
+		{
+			return static_cast<WidgetT&>(widget_at_position(aRow, aColumn));
+		}
 	private:
 		vertical_layout iRowLayout;
 		std::vector<std::shared_ptr<horizontal_layout>> iRows;

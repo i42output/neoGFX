@@ -41,7 +41,7 @@ namespace neogfx
 			if (!item.visible())
 				continue;
 			auto itemMinimumSize = item.minimum_size(availableSpaceForChildren);
-			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
+			if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
 			{
 				++itemsZeroSized;
 				previousNonZeroSize = false;
@@ -153,14 +153,14 @@ namespace neogfx
 		point pos;
 		bool previousNonZeroSize = false;
 		typename AxisPolicy::minor_layout rows(*this);
-		for (const auto& item : items())
+		for (auto& item : items())
 		{
 			if (!item.visible())
 				continue;
 			if (&item == &items().back())
 				continue;
 			auto itemMinimumSize = item.minimum_size(availableSpace);
-			if (!item.get().is<item::spacer_pointer>() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
+			if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
 			{
 				previousNonZeroSize = false;
 				continue;
@@ -171,7 +171,7 @@ namespace neogfx
 			{
 				rows.add(std::make_shared<typename AxisPolicy::major_layout>());
 				rows.get_layout_at(rows.count() - 1).set_size_policy(size_policy::Minimum);
-				rows.get_layout_at(rows.count() - 1).add(item);
+				rows.get_layout_at(rows.count() - 1).add(item.subject());
 				AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
 			}
 			else
@@ -181,7 +181,7 @@ namespace neogfx
 					rows.add(std::make_shared<typename AxisPolicy::major_layout>());
 					rows.get_layout_at(rows.count() - 1).set_size_policy(size_policy::Minimum);
 				}
-				rows.get_layout_at(rows.count() - 1).add(item);
+				rows.get_layout_at(rows.count() - 1).add(item.subject());
 				AxisPolicy::x(pos) += AxisPolicy::cx(itemMinimumSize);
 			}
 			previousNonZeroSize = true;
@@ -194,5 +194,12 @@ namespace neogfx
 			rows.get_layout_at(i).set_spacing(spacing());
 		}
 		rows.layout_items(aPosition + margins().top_left(), availableSpace);
+		rows.remove_all();
+		for (auto& i : items())
+		{
+			i.set_parent_layout(this);
+			if (has_layout_owner())
+				i.set_layout_owner(&layout_owner());
+		}
 	}
 }

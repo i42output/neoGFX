@@ -33,7 +33,7 @@ namespace neogfx
 	class layout : public i_layout
 	{
 	public:
-		struct widget_already_added : std::logic_error { widget_already_added() : std::logic_error("neogfx::layout::widget_already_added") {} };
+		struct item_already_added : std::logic_error { item_already_added() : std::logic_error("neogfx::layout::item_already_added") {} };
 	protected:
 		typedef layout_item item;
 		typedef std::list<item, boost::pool_allocator<item>> item_list;
@@ -53,40 +53,40 @@ namespace neogfx
 		struct row_major;
 	public:
 		layout(neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
-		layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+		layout(i_widget& aOwner, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
 		layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
 		layout(const layout&) = delete;
 		~layout();
 	public:
-		i_widget* owner() const override;
-		void set_owner(i_widget* aOwner) override;
-		i_layout* parent() const override;
-		void set_parent(i_layout* aParent) override;
-		i_widget& add(i_widget& aWidget) override;
-		i_widget& add_at(item_index aPosition, i_widget& aWidget) override;
-		i_widget& add(std::shared_ptr<i_widget> aWidget) override;
-		i_widget& add_at(item_index aPosition, std::shared_ptr<i_widget> aWidget) override;
-		i_layout& add(i_layout& aLayout) override;
-		i_layout& add_at(item_index aPosition, i_layout& aLayout) override;
-		i_layout& add(std::shared_ptr<i_layout> aLayout) override;
-		i_layout& add_at(item_index aPosition, std::shared_ptr<i_layout> aLayout) override;
-		void add(i_spacer& aSpacer) override;
-		void add_at(item_index aPosition, i_spacer& aSpacer) override;
-		void add(std::shared_ptr<i_spacer> aSpacer) override;
-		void add_at(item_index aPosition, std::shared_ptr<i_spacer> aSpacer) override;
-		void add(const item& aItem) override;
+		bool is_layout() const override;
+		const i_layout& as_layout() const override;
+		i_layout& as_layout() override;
+		bool is_widget() const override;
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+	public:
+		bool has_parent_layout() const override;
+		const i_layout& parent_layout() const override;
+		i_layout& parent_layout() override;
+		void set_parent_layout(i_layout* aParentLayout) override;
+		bool has_layout_owner() const override;
+		const i_widget& layout_owner() const override;
+		i_widget& layout_owner() override;
+		void set_layout_owner(i_widget* aOwner) override;
+	public:
+		i_layout_item& add(i_layout_item& aItem) override;
+		i_layout_item& add_at(item_index aPosition, i_layout_item& aItem) override;
+		i_layout_item& add(std::shared_ptr<i_layout_item> aItem) override;
+		i_layout_item& add_at(item_index aPosition, std::shared_ptr<i_layout_item> aItem) override;
 		void remove_at(item_index aIndex) override;
-		bool remove(i_layout& aItem) override;
-		bool remove(i_widget& aItem) override;
+		bool remove(i_layout_item& aItem) override;
 		void remove_all() override;
 		void move_all_to(i_layout& aDestination) override;
 		item_index count() const override;
-		optional_item_index find(const i_layout& aItem) const override;
-		optional_item_index find(const i_widget& aItem) const override;
-		optional_item_index find(const layout_item& aItem) const override;
+		optional_item_index find(const i_layout_item& aItem) const override;
 		bool is_widget_at(item_index aIndex) const override;
-		const i_widget_geometry& get_item_at(item_index aIndex) const override;
-		i_widget_geometry& get_item_at(item_index aIndex) override;
+		const i_layout_item& get_item_at(item_index aIndex) const override;
+		i_layout_item& get_item_at(item_index aIndex) override;
 		using i_layout::get_widget_at;
 		const i_widget& get_widget_at(item_index aIndex) const override;
 		i_widget& get_widget_at(item_index aIndex) override;
@@ -111,8 +111,6 @@ namespace neogfx
 		void enable() override;
 		void disable() override;
 		bool enabled() const override;
-		uint32_t layout_id() const override;
-		void next_layout_id() override;
 		bool invalidated() const override;
 		void invalidate() override;
 		void validate() override;
@@ -139,10 +137,16 @@ namespace neogfx
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
+	public:
+		void layout_as(const point& aPosition, const size& aSize);
+		uint32_t layout_id() const override;
+		void next_layout_id() override;
+	public:
+		bool visible() const override;
 	protected:
 		const item_list& items() const;
 		item_list& items();
-		void remove(item_list::const_iterator aItem);
+		void remove(item_list::iterator aItem);
 		const i_widget_geometry& item_geometry(item_list::size_type aItem) const;
 		uint32_t spacer_count() const;
 		uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
@@ -153,8 +157,8 @@ namespace neogfx
 		template <typename AxisPolicy>
 		void do_layout_items(const point& aPosition, const size& aSize);
 	private:
-		mutable i_widget* iOwner;
 		i_layout* iParent;
+		mutable i_widget* iOwner;
 		units_context iUnitsContext;
 		optional_margins iMargins;
 		optional_size iSpacing;

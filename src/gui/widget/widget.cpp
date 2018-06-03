@@ -45,12 +45,15 @@ namespace neogfx
 		iParent{ nullptr },
 		iSurface{ nullptr },
 		iRoot { nullptr },
+		iAddingChild{ false },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
+		iParentLayout{ nullptr },
+		iLayoutId{ 0u },
+		iLayoutInProgress{ 0 },
 		iUnitsContext{ *this },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress{ 0 },
 		iVisible{ true },
 		iEnabled{ true },
 		iFocusPolicy{ focus_policy::NoFocus },
@@ -67,12 +70,15 @@ namespace neogfx
 		iParent{ nullptr },
 		iSurface{ nullptr },
 		iRoot{ nullptr },
+		iAddingChild{ false },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
+		iParentLayout{ nullptr },
+		iLayoutId{ 0u },
+		iLayoutInProgress{ 0 },
 		iUnitsContext{ *this },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress{ 0 },
 		iVisible{ true },
 		iEnabled{ true },
 		iFocusPolicy{ focus_policy::NoFocus },
@@ -90,12 +96,15 @@ namespace neogfx
 		iParent{ nullptr },
 		iSurface{ nullptr },
 		iRoot{ nullptr },
+		iAddingChild{ false },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
+		iParentLayout{ nullptr },
+		iLayoutId{ 0u },
+		iLayoutInProgress{ 0 },
 		iUnitsContext{ *this },
 		iMinimumSize{},
 		iMaximumSize{},
-		iLayoutInProgress{ 0 },
 		iVisible{ true },
 		iEnabled{ true },
 		iFocusPolicy{ focus_policy::NoFocus },
@@ -161,8 +170,8 @@ namespace neogfx
 			iSingular = aSingular;
 			if (iSingular)
 			{
-				find_surface(); // may need surface during destruction of children
 				iParent = nullptr;
+				iSurface = nullptr;
 			}
 		}
 	}
@@ -211,17 +220,12 @@ namespace neogfx
 
 	void widget::set_parent(i_widget& aParent)
 	{
-		if (has_parent() && &parent() == &aParent)
-			return;
-		if (!is_root() && has_root())
-		{
-			root().widget_removed(*this);
+		if (is_root())
 			iParent = &aParent;
-			root().widget_added(*this);
-		}
+		else if (aParent.adding_child())
+			iParent = &aParent;
 		else
-			iParent = &aParent;
-		parent_changed();
+			aParent.add(*this);
 	}
 
 	void widget::parent_changed()
@@ -265,7 +269,12 @@ namespace neogfx
 		
 	bool widget::is_sibling_of(const i_widget& aWidget) const
 	{
-		return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
+		return has_parent(false) && aWidget.has_parent(false) && &parent() == &aWidget.parent();
+	}
+
+	bool widget::adding_child() const
+	{
+		return iAddingChild;
 	}
 
 	i_widget& widget::add(i_widget& aChild)
@@ -275,13 +284,13 @@ namespace neogfx
 
 	i_widget& widget::add(std::shared_ptr<i_widget> aChild)
 	{
+		neolib::scoped_flag sf{ iAddingChild };
 		if (aChild->has_parent() && &aChild->parent() == this)
 			return *aChild;
 		i_widget* oldParent = aChild->has_parent() ? &aChild->parent() : nullptr;
-		if (find(*aChild, false) == iChildren.end())
-			iChildren.push_back(aChild);
 		if (oldParent != nullptr)
-			oldParent->remove(*aChild);
+			aChild = oldParent->remove(*aChild, true);
+		iChildren.push_back(aChild);
 		aChild->set_parent(*this);
 		aChild->set_singular(false);
 		if (has_root())
@@ -450,15 +459,12 @@ namespace neogfx
 
 	bool widget::has_surface() const
 	{
-		if (iSurface != nullptr)
-			return true;
-		else
-			return find_surface() != nullptr;
+		return find_surface() != nullptr;
 	}
 
 	const i_surface& widget::surface() const
 	{
-		auto existingSurface = (iSurface != nullptr ? iSurface : find_surface());
+		auto existingSurface = find_surface();
 		if (existingSurface != nullptr)
 			return *existingSurface;
 		throw no_surface();
@@ -481,10 +487,7 @@ namespace neogfx
 
 	void widget::set_layout(i_layout& aLayout)
 	{
-		iLayout = std::shared_ptr<i_layout>(std::shared_ptr<i_layout>(), &aLayout);
-		iLayout->set_owner(this);
-		for (auto& c : iChildren)
-			iLayout->add(c);
+		set_layout(std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &aLayout });
 	}
 
 	void widget::set_layout(std::shared_ptr<i_layout> aLayout)
@@ -492,7 +495,7 @@ namespace neogfx
 		iLayout = aLayout;
 		if (iLayout != nullptr)
 		{
-			iLayout->set_owner(this);
+			iLayout->set_layout_owner(this);
 			for (auto& c : iChildren)
 				iLayout->add(c);
 		}
@@ -551,31 +554,79 @@ namespace neogfx
 		return false;
 	}
 
+	bool widget::is_layout() const
+	{
+		return false;
+	}
+
+	const i_layout& widget::as_layout() const
+	{
+		throw not_a_layout();
+	}
+
+	i_layout& widget::as_layout()
+	{
+		throw not_a_layout();
+	}
+
+	bool widget::is_widget() const
+	{
+		return true;
+	}
+
+	const i_widget& widget::as_widget() const
+	{
+		return *this;
+	}
+
+	i_widget& widget::as_widget()
+	{
+		return *this;
+	}
+
 	bool widget::has_parent_layout() const
 	{
-		if (!has_parent())
-			return false;
-		const i_widget* w = &parent();
-		while (!w->has_layout() && w->has_parent())
-			w = &w->parent();
-		return w->has_layout();
+		return iParentLayout != nullptr;
 	}
 	
 	const i_layout& widget::parent_layout() const
 	{
-		if (!has_parent())
-			throw no_parent_layout();
-		const i_widget* w = &parent();
-		while (!w->has_layout() && w->has_parent())
-			w = &w->parent();
-		if (w->has_layout())
-			return w->layout();
+		if (has_parent_layout())
+			return *iParentLayout;
 		throw no_parent_layout();
 	}
 
 	i_layout& widget::parent_layout()
 	{
 		return const_cast<i_layout&>(const_cast<const widget*>(this)->parent_layout());
+	}
+
+	void widget::set_parent_layout(i_layout* aParentLayout)
+	{
+		iParentLayout = aParentLayout;
+	}
+
+	bool widget::has_layout_owner() const
+	{
+		return has_parent_layout() && parent_layout().has_layout_owner();
+	}
+
+	const i_widget& widget::layout_owner() const
+	{
+		if (has_layout_owner())
+			return parent_layout().layout_owner();
+		throw no_layout_owner();
+	}
+
+	i_widget& widget::layout_owner()
+	{
+		return const_cast<i_widget&>(const_cast<const widget*>(this)->layout_owner());
+	}
+
+	void widget::set_layout_owner(i_widget* aOwner)
+	{
+		if (aOwner != nullptr)
+			set_parent(*aOwner);
 	}
 
 	void widget::layout_items(bool aDefer)
@@ -621,7 +672,7 @@ namespace neogfx
 				layout_items_completed();
 			}
 		}
-		else if (can_defer_layout())
+		else if (can_defer_layout() && has_root())
 		{
 			if (!iLayoutTimer)
 			{
@@ -930,6 +981,28 @@ namespace neogfx
 		}
 	}
 
+	void widget::layout_as(const point& aPosition, const size& aSize)
+	{
+		move(aPosition);
+		if (extents() != aSize)
+			resize(aSize);
+		else if (has_layout() && layout().invalidated())
+			layout_items();
+	}
+
+	uint32_t widget::layout_id() const
+	{
+		return iLayoutId;
+	}
+
+	void widget::next_layout_id()
+	{
+		if (++iLayoutId == static_cast<uint32_t>(-1))
+			iLayoutId = 0;
+		if (has_layout())
+			layout().next_layout_id();
+	}
+
 	void widget::update(bool aIncludeNonClient)
 	{
 		if ((!is_root() && !has_parent()) || !has_root() || !root().has_native_surface() || effectively_hidden() || layout_items_in_progress())
@@ -1044,10 +1117,12 @@ namespace neogfx
 
 	void widget::paint_non_client_after(graphics_context&) const
 	{
+		// do nothing
 	}
 
-	void widget::paint(graphics_context& aGraphicsContext) const
+	void widget::paint(graphics_context&) const
 	{
+		// do nothing
 	}
 
 	double widget::opacity() const
@@ -1115,7 +1190,7 @@ namespace neogfx
 	colour widget::container_background_colour() const
 	{
 		const i_widget* w = this;
-		while (w->transparent_background() && w->has_parent() && same_surface(w->parent()))
+		while (w->transparent_background() && w->has_parent())
 			w = &w->parent();
 		if (!w->transparent_background() && w->has_background_colour())
 			return w->background_colour();
@@ -1428,14 +1503,17 @@ namespace neogfx
 
 	void widget::mouse_moved(const point&)
 	{
+		// do nothing
 	}
 
-	void widget::mouse_entered(const point& aPosition)
+	void widget::mouse_entered(const point&)
 	{
+		// do nothing
 	}
 
 	void widget::mouse_left()
 	{
+		// do nothing
 	}
 
 	neogfx::mouse_cursor widget::mouse_cursor() const
@@ -1494,11 +1572,10 @@ namespace neogfx
 	{
 		if (iSurface != nullptr)
 			return iSurface;
-		const i_widget* w = this;
-		while (!w->is_surface() && w->has_parent(false))
-			w = &w->parent();
-		if (w->is_surface() || (w != this && w->has_surface()))
- 			return (iSurface = &w->surface());
+		if (is_surface())
+			return (iSurface = &surface());
+		if (has_parent(false))
+			return (iSurface = parent().find_surface());
 		return nullptr;
 	}
 

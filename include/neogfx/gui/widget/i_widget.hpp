@@ -25,7 +25,7 @@
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gui/window/window_events.hpp>
-#include <neogfx/gui/layout/i_widget_geometry.hpp>
+#include <neogfx/gui/layout/i_layout_item.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
 
 namespace neogfx
@@ -34,7 +34,7 @@ namespace neogfx
 	class i_window;
 	class i_layout;
 
-	class i_widget : public i_widget_geometry, public i_keyboard_handler
+	class i_widget : public i_layout_item, public i_keyboard_handler
 	{
 	public:
 		static i_widget* debug;
@@ -66,7 +66,6 @@ namespace neogfx
 		struct widget_not_focused : std::logic_error { widget_not_focused() : std::logic_error("neogfx::i_widget::widget_not_focused") {} };
 		struct widget_cannot_defer_layout : std::logic_error { widget_cannot_defer_layout() : std::logic_error("neogfx::i_widget::widget_cannot_defer_layout") {} };
 		struct no_managing_layout : std::logic_error { no_managing_layout() : std::logic_error("neogfx::i_widget::no_managing_layout") {} };
-		struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::i_widget::no_parent_layout") {} };
 		struct no_layout : std::logic_error { no_layout() : std::logic_error("neogfx::i_widget::no_layout") {} };
 	public:
 		virtual ~i_widget() {}
@@ -88,6 +87,7 @@ namespace neogfx
 		virtual bool is_ancestor_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
 		virtual bool is_descendent_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
 		virtual bool is_sibling_of(const i_widget& aWidget) const = 0;
+		virtual bool adding_child() const = 0;
 		virtual i_widget& add(i_widget& aChild) = 0;
 		virtual i_widget& add(std::shared_ptr<i_widget> aChild) = 0;
 		virtual std::shared_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false) = 0;
@@ -219,7 +219,7 @@ namespace neogfx
 	public:
 		virtual const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const = 0;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) = 0;
-	private:
+	public:
 		virtual const i_surface* find_surface() const = 0;
 		virtual i_surface* find_surface() = 0;
 		virtual const i_window* find_root() const = 0;
@@ -236,7 +236,9 @@ namespace neogfx
 	public:
 		bool same_surface(const i_widget& aWidget) const
 		{
-			return find_surface() == aWidget.find_surface();
+			auto surface1 = find_surface();
+			auto surface2 = aWidget.find_surface();
+			return surface1 == surface2;
 		}
 		point to_window_coordinates(const point& aClientCoordinates) const
 		{

@@ -99,15 +99,15 @@ namespace neogfx
 			return;
 		if (debug == this)
 			std::cerr << "stack_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
-		owner()->layout_items_started();
+		layout_owner().layout_items_started();
 		next_layout_id();
 		validate();
 		for (auto& item : items())
 		{
 			if (!item.visible())
 				continue;
-			item.layout(aPosition + margins().top_left(), aSize - margins().size());
+			item.layout_as(aPosition + margins().top_left(), aSize - margins().size());
 		}
-		owner()->layout_items_completed();
+		layout_owner().layout_items_completed();
 	}
 }

@@ -20,38 +20,36 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/variant.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
-#include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/layout/i_layout_item.hpp>
 
 namespace neogfx
 {
-	class layout_item : public i_widget_geometry
+	class layout_item : public i_layout_item
 	{
 	public:
-		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::layout_item::no_parent") {} };
+		layout_item(i_layout& aParentLayout, i_layout_item& aItem);
+		layout_item(i_layout& aParentLayout, std::shared_ptr<i_layout_item> aItem);
 	public:
-		typedef std::shared_ptr<i_widget> widget_pointer;
-		typedef std::shared_ptr<i_layout> layout_pointer;
-		typedef std::shared_ptr<i_spacer> spacer_pointer;
-		typedef neolib::variant<widget_pointer, layout_pointer, spacer_pointer> pointer_wrapper;
+		const i_layout_item& subject() const;
+		i_layout_item& subject();
 	public:
-		layout_item(i_layout& aParent, i_widget& aWidget);
-		layout_item(i_layout& aParent, std::shared_ptr<i_widget> aWidget);
-		layout_item(i_layout& aParent, i_layout& aLayout);
-		layout_item(i_layout& aParent, std::shared_ptr<i_layout> aLayout);
-		layout_item(i_layout& aParent, i_spacer& aSpacer);
-		layout_item(i_layout& aParent, std::shared_ptr<i_spacer> aSpacer);
+		bool is_layout() const override;
+		const i_layout& as_layout() const override;
+		i_layout& as_layout() override;
+		bool is_widget() const override;
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
 	public:
-		const pointer_wrapper& get() const;
-		pointer_wrapper& get();
-		const i_widget_geometry& wrapped_geometry() const;
-		i_widget_geometry& wrapped_geometry();
-		const i_layout& parent() const;
-		i_layout& parent();
-		void set_parent(i_layout* aParent);
-		void set_owner(i_widget* aOwner);
-		void layout(const point& aPosition, const size& aSize);
+		bool is_spacer() const;
+	public:
+		bool has_parent_layout() const override;
+		const i_layout& parent_layout() const override;
+		i_layout& parent_layout() override;
+		void set_parent_layout(i_layout* aParentLayout);
+		bool has_layout_owner() const override;
+		const i_widget& layout_owner() const override;
+		i_widget& layout_owner() override;
+		void set_layout_owner(i_widget* aOwner) override;
 	public:
 		bool high_dpi() const override;
 		dimension dpi_scale_factor() const override;
@@ -82,13 +80,15 @@ namespace neogfx
 		neogfx::margins margins() const override;
 		void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
 	public:
-		bool visible() const;
+		bool visible() const override;
+	public:
+		void layout_as(const point& aPosition, const size& aSize) override;
+		uint32_t layout_id() const override;
+		void next_layout_id() override;
 	public:
 		bool operator==(const layout_item& aOther) const;
 	private:
-		i_layout* iParent;
-		pointer_wrapper iPointerWrapper;
-		i_widget* iOwner;
+		std::shared_ptr<i_layout_item> iSubject;
 		mutable std::pair<uint32_t, uint32_t> iLayoutId;
 		mutable size iMinimumSize;
 		mutable size iMaximumSize;

@@ -206,6 +206,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\grid_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\horizontal_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_widget_geometry.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout.hpp" />
