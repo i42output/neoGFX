@@ -40,6 +40,12 @@ namespace neogfx
 		aParentLayout.add(*this);
 	}
 
+	spacer::~spacer()
+	{
+		if (has_parent_layout())
+			parent_layout().remove(*this);
+	}
+
 	bool spacer::is_layout() const
 	{
 		return false;

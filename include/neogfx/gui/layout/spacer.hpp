@@ -34,6 +34,7 @@ namespace neogfx
 	public:
 		spacer(expansion_policy_e aExpansionPolicy);
 		spacer(i_layout& aParent, expansion_policy_e aExpansionPolicy);
+		virtual ~spacer();
 	public:
 		bool is_layout() const override;
 		const i_layout& as_layout() const override;

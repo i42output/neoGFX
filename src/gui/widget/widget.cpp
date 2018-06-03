@@ -129,6 +129,8 @@ namespace neogfx
 		}
 		if (has_parent())
 			parent().remove(*this);
+		if (has_parent_layout())
+			parent_layout().remove(*this);
 	}
 
 	neolib::i_lifetime& widget::as_lifetime()

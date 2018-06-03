@@ -49,6 +49,7 @@ namespace neogfx
 		grid_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
 		grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
 		grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);
+		~grid_layout();
 	public:
 		cell_coordinate rows() const;
 		cell_coordinate columns() const;

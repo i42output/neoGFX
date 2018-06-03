@@ -67,6 +67,11 @@ namespace neogfx
 		init();
 	}
 
+	border_layout::~border_layout()
+	{
+		set_destroying();
+	}
+
 	const i_layout& border_layout::part(layout_position aPosition) const
 	{
 		switch (aPosition)

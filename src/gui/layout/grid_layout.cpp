@@ -68,6 +68,11 @@ namespace neogfx
 		init();
 	}
 
+	grid_layout::~grid_layout()
+	{
+		set_destroying();
+	}
+
 	grid_layout::cell_coordinate grid_layout::rows() const
 	{
 		return iDimensions.cy;

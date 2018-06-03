@@ -38,6 +38,7 @@ namespace neogfx
 		border_layout(neogfx::alignment aAlignment = neogfx::alignment::VCentre);
 		border_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
 		border_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCentre);
+		~border_layout();
 	public:
 		const i_layout& part(layout_position aPosition) const;
 		i_layout& part(layout_position aPosition);
