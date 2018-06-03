@@ -31,9 +31,9 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins(0.0));
 		if (iType == HorizontalSplitter)
-			set_layout(std::make_shared<horizontal_layout>(*this));
+			set_layout(std::make_shared<horizontal_layout>());
 		else
-			set_layout(std::make_shared<vertical_layout>(*this));
+			set_layout(std::make_shared<vertical_layout>());
 		layout().set_margins(neogfx::margins(0.0));
 	}
 
@@ -43,9 +43,9 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins(0.0));
 		if (iType == HorizontalSplitter)
-			set_layout(std::make_shared<horizontal_layout>(*this));
+			set_layout(std::make_shared<horizontal_layout>());
 		else
-			set_layout(std::make_shared<vertical_layout>(*this));
+			set_layout(std::make_shared<vertical_layout>());
 		layout().set_margins(neogfx::margins(0.0));
 	}
 
@@ -55,9 +55,9 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins(0.0));
 		if (iType == HorizontalSplitter)
-			set_layout(std::make_shared<horizontal_layout>(*this));
+			set_layout(std::make_shared<horizontal_layout>());
 		else
-			set_layout(std::make_shared<vertical_layout>(*this));
+			set_layout(std::make_shared<vertical_layout>());
 		layout().set_margins(neogfx::margins(0.0));
 	}
 

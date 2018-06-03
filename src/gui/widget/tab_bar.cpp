@@ -288,10 +288,7 @@ namespace neogfx
 		case tab_container_style::TabAlignmentTop:
 		case tab_container_style::TabAlignmentBottom:
 			if (iHorizontalLayout == boost::none)
-			{
 				iHorizontalLayout.emplace(*this);
-				set_layout(*iHorizontalLayout);
-			}
 			if (iVerticalLayout != boost::none) // todo
 			{
 				iVerticalLayout->move_all_to(*iHorizontalLayout);
@@ -301,10 +298,7 @@ namespace neogfx
 		case tab_container_style::TabAlignmentLeft:
 		case tab_container_style::TabAlignmentRight:
 			if (iVerticalLayout == boost::none)
-			{
 				iVerticalLayout.emplace(*this);
-				set_layout(*iVerticalLayout);
-			}
 			if (iHorizontalLayout != boost::none) // todo
 			{
 				iHorizontalLayout->move_all_to(*iVerticalLayout);

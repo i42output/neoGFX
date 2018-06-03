@@ -492,6 +492,8 @@ namespace neogfx
 
 	void widget::set_layout(std::shared_ptr<i_layout> aLayout)
 	{
+		if (iLayout == aLayout)
+			throw layout_already_set();
 		iLayout = aLayout;
 		if (iLayout != nullptr)
 		{
