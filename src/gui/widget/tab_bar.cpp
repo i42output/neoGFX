@@ -288,22 +288,24 @@ namespace neogfx
 		case tab_container_style::TabAlignmentTop:
 		case tab_container_style::TabAlignmentBottom:
 			if (iHorizontalLayout == boost::none)
-				iHorizontalLayout.emplace(*this);
-			if (iVerticalLayout != boost::none) // todo
 			{
-				iVerticalLayout->move_all_to(*iHorizontalLayout);
-				iVerticalLayout = boost::none;
+				iHorizontalLayout.emplace(*this);
+				vertical_scrollbar().set_position(0.0);
+				horizontal_scrollbar().set_position(0.0);
 			}
+			if (iVerticalLayout != boost::none)
+				iVerticalLayout = boost::none;
 			break;
 		case tab_container_style::TabAlignmentLeft:
 		case tab_container_style::TabAlignmentRight:
 			if (iVerticalLayout == boost::none)
-				iVerticalLayout.emplace(*this);
-			if (iHorizontalLayout != boost::none) // todo
 			{
-				iHorizontalLayout->move_all_to(*iVerticalLayout);
-				iHorizontalLayout = boost::none;
+				iVerticalLayout.emplace(*this);
+				vertical_scrollbar().set_position(0.0);
+				horizontal_scrollbar().set_position(0.0);
 			}
+			if (iHorizontalLayout != boost::none)
+				iHorizontalLayout = boost::none;
 			break;
 		}
 		switch (style() & tab_container_style::TabAlignmentMask)

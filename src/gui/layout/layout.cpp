@@ -228,8 +228,11 @@ namespace neogfx
 		toRemove.splice(toRemove.begin(), items());
 		for (auto& i : toRemove)
 		{
-			i.set_parent_layout(nullptr);
-			i.set_layout_owner(nullptr);
+			if (i.has_parent_layout() && &i.parent_layout() == this)
+			{
+				i.set_parent_layout(nullptr);
+				i.set_layout_owner(nullptr);
+			}
 		}
 	}
 
@@ -650,8 +653,11 @@ namespace neogfx
 	{
 		item_list toRemove;
 		toRemove.splice(toRemove.begin(), items(), aItem);
-		aItem->set_parent_layout(nullptr);
-		aItem->set_layout_owner(nullptr);
+		if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
+		{
+			aItem->set_parent_layout(nullptr);
+			aItem->set_layout_owner(nullptr);
+		}
 		invalidate();
 	}
 

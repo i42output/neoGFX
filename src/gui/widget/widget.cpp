@@ -494,12 +494,14 @@ namespace neogfx
 	{
 		if (iLayout == aLayout)
 			throw layout_already_set();
+		auto oldLayout = iLayout;
 		iLayout = aLayout;
 		if (iLayout != nullptr)
 		{
 			iLayout->set_layout_owner(this);
 			for (auto& c : iChildren)
-				iLayout->add(c);
+				if (c->has_parent_layout() && &c->parent_layout() == oldLayout.get())
+					iLayout->add(c);
 		}
 	}
 

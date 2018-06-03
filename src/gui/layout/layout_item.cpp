@@ -37,6 +37,11 @@ namespace neogfx
 			subject().set_layout_owner(&aParentLayout.layout_owner());
 	}
 
+	layout_item::layout_item(const layout_item& aOther) :
+		iSubject{ aOther.iSubject }, iLayoutId{ -1, -1 }
+	{
+	}
+
 	const i_layout_item& layout_item::subject() const
 	{
 		return *iSubject;
@@ -291,7 +296,7 @@ namespace neogfx
 	{
 		if (!visible())
 			return size::max_size();
-		if (iLayoutId.second == parent_layout().layout_id())
+		if (iLayoutId.second == parent_layout().layout_id() && iLayoutId.second != -1)
 			return iMaximumSize;
 		else
 		{

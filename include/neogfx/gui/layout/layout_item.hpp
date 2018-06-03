@@ -29,6 +29,7 @@ namespace neogfx
 	public:
 		layout_item(i_layout& aParentLayout, i_layout_item& aItem);
 		layout_item(i_layout& aParentLayout, std::shared_ptr<i_layout_item> aItem);
+		layout_item(const layout_item& aOther);
 	public:
 		const i_layout_item& subject() const;
 		i_layout_item& subject();
