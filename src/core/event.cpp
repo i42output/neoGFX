@@ -31,7 +31,8 @@ namespace neogfx
 			if (!iEvents.empty() && !aTimer.waiting())
 				aTimer.again();
 		}, 10, false },
-		iHaveThreadedCallbacks{ false }
+		iHaveThreadedCallbacks{ false },
+		iTerminated{ false }
 	{
 		if (sInstance != nullptr)
 			throw instance_exists();
@@ -66,6 +67,8 @@ namespace neogfx
 			}
 			for (auto& cb : work)
 			{
+				if (iTerminated)
+					return didSome;
 				cb();
 				didSome = true;
 			}
@@ -73,8 +76,21 @@ namespace neogfx
 		return didSome;
 	}
 
+	void async_event_queue::terminate()
+	{
+		std::lock_guard<std::recursive_mutex> guard{ iThreadedCallbacksMutex };
+		iTerminated = true;
+		iEvents.clear();
+		if (iTimer.waiting())
+			iTimer.cancel();
+		iThreadedCallbacks.clear();
+		iHaveThreadedCallbacks = false;
+	}
+
 	void async_event_queue::enqueue_to_thread(std::thread::id aThreadId, callback aCallback)
 	{
+		if (iTerminated)
+			return;
 		std::lock_guard<std::recursive_mutex> guard{ iThreadedCallbacksMutex };
 		iThreadedCallbacks[aThreadId].push_back(aCallback);
 		iHaveThreadedCallbacks = true;
@@ -82,6 +98,8 @@ namespace neogfx
 
 	void async_event_queue::add(const void* aEvent, callback aCallback, neolib::lifetime::destroyed_flag aDestroyedFlag)
 	{
+		if (iTerminated)
+			return;
 		iEvents.emplace(aEvent, std::make_pair(aCallback, aDestroyedFlag));
 		if (!iTimer.waiting())
 			iTimer.again();
@@ -89,6 +107,8 @@ namespace neogfx
 
 	void async_event_queue::remove(const void* aEvent)
 	{
+		if (iTerminated)
+			return;
 		auto events = iEvents.equal_range(aEvent);
 		if (events.first == events.second)
 			throw event_not_found();
@@ -106,6 +126,8 @@ namespace neogfx
 
 	void async_event_queue::publish_events()
 	{
+		if (iTerminated)
+			return;
 		event_list toPublish;
 		toPublish.swap(iEvents);
 		for (auto& e : toPublish)

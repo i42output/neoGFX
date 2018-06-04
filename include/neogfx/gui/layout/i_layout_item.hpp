@@ -35,6 +35,8 @@ namespace neogfx
 		struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::i_layout_item::no_parent_layout") {} };
 		struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::i_layout_item::no_layout_owner") {} };
 	public:
+		virtual ~i_layout_item() {}
+	public:
 		virtual bool is_layout() const = 0;
 		virtual const i_layout& as_layout() const = 0;
 		virtual i_layout& as_layout() = 0;

@@ -92,6 +92,7 @@ namespace neogfx
 		}
 		bool exec();
 		void enqueue_to_thread(std::thread::id aThreadId, callback aCallback);
+		void terminate();
 	private:
 		void add(const void* aEvent, callback aCallback, neolib::lifetime::destroyed_flag aDestroyedFlag);
 		void remove(const void* aEvent);
@@ -104,6 +105,7 @@ namespace neogfx
 		std::recursive_mutex iThreadedCallbacksMutex;
 		std::atomic<bool> iHaveThreadedCallbacks;
 		threaded_callbacks iThreadedCallbacks;
+		std::atomic<bool> iTerminated;
 	};
 
 	enum class event_trigger_type
@@ -139,7 +141,7 @@ namespace neogfx
 			bool accepted;
 			notification_list notifications;
 		};
-		typedef std::list<instance_data, boost::fast_pool_allocator<instance_data>> instance_data_list;
+		typedef boost::fast_pool_allocator<instance_data> instance_allocator;
 	public:
 		event()
 		{
@@ -288,11 +290,7 @@ namespace neogfx
 		{
 			if (async_event_queue::instance().has(*this))
 				async_event_queue::instance().remove(*this);
-			if (iInstanceData != boost::none)
-			{
-				instance_list().erase(*iInstanceData);
-				iInstanceData = boost::none;
-			}
+			iInstanceData.reset();
 		}
 		void unsubscribe(handle aHandle) const
 		{
@@ -307,21 +305,39 @@ namespace neogfx
 		}
 		bool has_instance() const
 		{
-			return iInstanceData != boost::none;
+			return iInstanceData != nullptr;
 		}
 		instance_data& instance() const
 		{
-			if (iInstanceData == boost::none)
-				iInstanceData = instance_list().insert(instance_list().end(), instance_data{ instance_ptr{ new ptr{ this } } });
-			return **iInstanceData;
+			if (iInstanceData == nullptr)
+			{
+				auto newInstance = allocator().allocate();
+				try
+				{
+					allocator().construct(newInstance, instance_data{ std::make_shared<ptr>(this) });
+				}
+				catch (...)
+				{
+					allocator().deallocate(newInstance);
+					throw;
+				}
+				iInstanceData = decltype(iInstanceData){
+					newInstance,
+					[](instance_data* aInstance)
+					{
+						allocator().destroy(aInstance);
+						allocator().deallocate(aInstance);
+					}};
+			}
+			return *iInstanceData;
 		}
-		static instance_data_list& instance_list()
+		static instance_allocator& allocator()
 		{
-			static instance_data_list sInstanceDataList;
-			return sInstanceDataList;
+			static instance_allocator sAllocator;
+			return sAllocator;
 		}
 	private:
-		mutable boost::optional<typename instance_data_list::iterator> iInstanceData;
+		mutable std::unique_ptr<instance_data, std::function<void(instance_data*)>> iInstanceData;
 	};
 
 	class sink

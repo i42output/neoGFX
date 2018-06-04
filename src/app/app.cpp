@@ -248,6 +248,7 @@ namespace neogfx
 
 	app::~app()
 	{
+		async_event_queue::instance().terminate();
 		iKeyboard->ungrab_keyboard(*this);
 		resource_manager::instance().clean();
 	}

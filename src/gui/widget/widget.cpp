@@ -127,7 +127,7 @@ namespace neogfx
 			auto layout = iLayout;
 			iLayout.reset();
 		}
-		if (has_parent())
+		if (has_parent(false))
 			parent().remove(*this);
 		if (has_parent_layout())
 			parent_layout().remove(*this);
@@ -306,9 +306,9 @@ namespace neogfx
 		if (existing == iChildren.end())
 			return std::shared_ptr<i_widget>{};
 		auto keep = *existing;
+		iChildren.erase(existing);
 		if (aSingular)
 			keep->set_singular(true);
-		iChildren.erase(existing);
 		if (has_layout())
 			layout().remove(aChild);
 		if (has_root())
@@ -461,7 +461,8 @@ namespace neogfx
 
 	bool widget::has_surface() const
 	{
-		return find_surface() != nullptr;
+		auto existingSurface = find_surface();
+		return existingSurface != nullptr && !existingSurface->is_closed();
 	}
 
 	const i_surface& widget::surface() const
