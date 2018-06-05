@@ -378,8 +378,10 @@ namespace neogfx
 		}
 		void model_destroyed(const i_item_presentation_model& aModel) override
 		{
-			unset_current_index();
-			iModel = 0;
+			iModel = nullptr;
+			iCurrentIndex = boost::none;
+			iSavedModelIndex = boost::none;
+			iSelection = item_selection{};
 			notify_observers(i_item_selection_model_subscriber::NotifyModelRemoved, aModel);
 		}
 	private:
