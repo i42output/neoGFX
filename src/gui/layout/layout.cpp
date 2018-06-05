@@ -199,6 +199,9 @@ namespace neogfx
 		while (aPosition > iItems.size())
 			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item{ *this, aItem });
+		i->subject().set_parent_layout(this);
+		if (has_layout_owner())
+			i->subject().set_layout_owner(&layout_owner());
 		return *aItem;
 	}
 
@@ -209,13 +212,13 @@ namespace neogfx
 
 	bool layout::remove(i_layout_item& aItem)
 	{
-		for (auto i = items().begin(); i != items().end(); ++i)
+		for (auto i = begin(); i != end(); ++i)
 			if (&i->subject() == &aItem)
 			{
 				remove(i);
 				return true;
 			}
-		for (auto i = items().begin(); i != items().end(); ++i)
+		for (auto i = begin(); i != end(); ++i)
 			if (i->subject().is_layout() && i->subject().as_layout().remove(aItem))
 				return true;
 		return false;
@@ -225,7 +228,7 @@ namespace neogfx
 	{
 		invalidate();
 		item_list toRemove;
-		toRemove.splice(toRemove.begin(), items());
+		toRemove.splice(toRemove.begin(), iItems);
 		for (auto& i : toRemove)
 		{
 			if (i.has_parent_layout() && &i.parent_layout() == this)
@@ -243,8 +246,8 @@ namespace neogfx
 		try
 		{
 			auto& compatibleDestination = dynamic_cast<layout&>(aDestination); // dynamic_cast? not a fan but heh.
-			compatibleDestination.items().splice(compatibleDestination.items().end(), items());
-			for (auto& item : compatibleDestination.items())
+			compatibleDestination.iItems.splice(compatibleDestination.items().end(), iItems);
+			for (auto& item : compatibleDestination)
 				item.set_parent_layout(&compatibleDestination);
 		}
 		catch (std::bad_cast)
@@ -277,7 +280,7 @@ namespace neogfx
 		return item->is_widget();
 	}
 
-	const i_layout_item& layout::get_item_at(item_index aIndex) const
+	const i_layout_item& layout::item_at(item_index aIndex) const
 	{
 		if (aIndex >= iItems.size())
 			throw bad_item_index();
@@ -285,9 +288,17 @@ namespace neogfx
 		return item->subject();
 	}
 
-	i_layout_item& layout::get_item_at(item_index aIndex)
+	i_layout_item& layout::item_at(item_index aIndex)
 	{
-		return const_cast<i_layout_item&>(const_cast<const layout*>(this)->get_item_at(aIndex));
+		return const_cast<i_layout_item&>(const_cast<const layout*>(this)->item_at(aIndex));
+	}
+
+	std::shared_ptr<i_layout_item> layout::item_ptr_at(item_index aIndex)
+	{
+		if (aIndex >= iItems.size())
+			throw bad_item_index();
+		auto item = std::next(iItems.begin(), aIndex);
+		return item->subject_ptr();
 	}
 		
 	const i_widget& layout::get_widget_at(item_index aIndex) const
@@ -440,7 +451,7 @@ namespace neogfx
 	{
 		if (++iLayoutId == static_cast<uint32_t>(-1))
 			iLayoutId = 0;
-		for (auto& item : items())
+		for (auto& item : *this)
 			item.next_layout_id();
 	}
 
@@ -630,12 +641,37 @@ namespace neogfx
 		return iUnitsContext.set_units(aUnits);
 	}
 
-	const layout::item_list& layout::items() const
+	layout::item_list::const_iterator layout::cbegin() const
 	{
-		return iItems;
+		return iItems.cbegin();
 	}
 
-	layout::item_list& layout::items()
+	layout::item_list::const_iterator layout::cend() const
+	{
+		return iItems.cend();
+	}
+
+	layout::item_list::const_iterator layout::begin() const
+	{
+		return iItems.begin();
+	}
+
+	layout::item_list::const_iterator layout::end() const
+	{
+		return iItems.end();
+	}
+
+	layout::item_list::iterator layout::begin()
+	{
+		return iItems.begin();
+	}
+
+	layout::item_list::iterator layout::end()
+	{
+		return iItems.end();
+	}
+
+	const layout::item_list& layout::items() const
 	{
 		return iItems;
 	}
@@ -652,7 +688,7 @@ namespace neogfx
 	void layout::remove(item_list::iterator aItem)
 	{
 		item_list toRemove;
-		toRemove.splice(toRemove.begin(), items(), aItem);
+		toRemove.splice(toRemove.begin(), iItems, aItem);
 		if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
 		{
 			aItem->set_parent_layout(nullptr);

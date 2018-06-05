@@ -326,7 +326,7 @@ namespace neogfx
 		point nextPos = aPosition;
 		nextPos.x += margins().left;
 		nextPos.y += margins().top;
-		for (auto& item : items())
+		for (auto& item : *this)
 		{
 			if (!item.visible())
 				continue;
@@ -398,7 +398,7 @@ namespace neogfx
 				AxisPolicy::cx(adjust) = std::floor((AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos)) / 2.0);
 				break;
 			}
-			for (auto& item : items())
+			for (auto& item : *this)
 			{
 				if (!item.visible())
 					continue;

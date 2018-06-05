@@ -632,8 +632,13 @@ namespace neogfx
 
 	void widget::set_layout_owner(i_widget* aOwner)
 	{
-		if (aOwner != nullptr)
-			set_parent(*aOwner);
+		if (aOwner != nullptr && !has_parent(false))
+		{
+			auto itemIndex = parent_layout().find(*this);
+			if (itemIndex == boost::none)
+				throw i_layout::item_not_found();
+			aOwner->add(std::dynamic_pointer_cast<i_widget>(parent_layout().item_ptr_at(*itemIndex)));
+		}
 	}
 
 	void widget::layout_items(bool aDefer)
@@ -824,20 +829,20 @@ namespace neogfx
 			return rect{ point{}, extents() };
 	}
 
-	const i_widget& widget::widget_at(const point& aPosition) const
+	const i_widget& widget::get_widget_at(const point& aPosition) const
 	{
 		if (client_rect().contains(aPosition))
 		{
 			for (const auto& c : children())
 				if (c->visible() && to_client_coordinates(c->window_rect()).contains(aPosition))
-					return c->widget_at(aPosition - c->position());
+					return c->get_widget_at(aPosition - c->position());
 		}
 		return *this;
 	}
 
-	i_widget& widget::widget_at(const point& aPosition)
+	i_widget& widget::get_widget_at(const point& aPosition)
 	{
-		return const_cast<i_widget&>(const_cast<const widget*>(this)->widget_at(aPosition));
+		return const_cast<i_widget&>(const_cast<const widget*>(this)->get_widget_at(aPosition));
 	}
 
 	widget_part widget::hit_test(const point& aPosition) const
@@ -1554,7 +1559,7 @@ namespace neogfx
 	{
 		if (client_rect().contains(aPosition))
 		{
-			const i_widget* w = &widget_at(aPosition);
+			const i_widget* w = &get_widget_at(aPosition);
 			while (w != this && (w->hidden() || (w->disabled() && !aForHitTest) || (!mouse_event_is_non_client() && w->ignore_mouse_events()) || (mouse_event_is_non_client() && w->ignore_non_client_mouse_events())))
 			{
 				w = &w->parent();

@@ -85,8 +85,9 @@ namespace neogfx
 		item_index count() const override;
 		optional_item_index find(const i_layout_item& aItem) const override;
 		bool is_widget_at(item_index aIndex) const override;
-		const i_layout_item& get_item_at(item_index aIndex) const override;
-		i_layout_item& get_item_at(item_index aIndex) override;
+		const i_layout_item& item_at(item_index aIndex) const override;
+		i_layout_item& item_at(item_index aIndex) override;
+		std::shared_ptr<i_layout_item> item_ptr_at(item_index aIndex) override;
 		using i_layout::get_widget_at;
 		const i_widget& get_widget_at(item_index aIndex) const override;
 		i_widget& get_widget_at(item_index aIndex) override;
@@ -144,8 +145,13 @@ namespace neogfx
 	public:
 		bool visible() const override;
 	protected:
+		item_list::const_iterator cbegin() const;
+		item_list::const_iterator cend() const;
+		item_list::const_iterator begin() const;
+		item_list::const_iterator end() const;
+		item_list::iterator begin();
+		item_list::iterator end();
 		const item_list& items() const;
-		item_list& items();
 		void remove(item_list::iterator aItem);
 		const i_widget_geometry& item_geometry(item_list::size_type aItem) const;
 		uint32_t spacer_count() const;

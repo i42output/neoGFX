@@ -102,7 +102,7 @@ namespace neogfx
 		layout_owner().layout_items_started();
 		next_layout_id();
 		validate();
-		for (auto& item : items())
+		for (auto& item : *this)
 		{
 			if (!item.visible())
 				continue;

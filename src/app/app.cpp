@@ -21,6 +21,7 @@
 #include <string>
 #include <atomic>
 #include <boost/locale.hpp> 
+#include <neolib/raii.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
@@ -248,7 +249,6 @@ namespace neogfx
 
 	app::~app()
 	{
-		async_event_queue::instance().terminate();
 		iKeyboard->ungrab_keyboard(*this);
 		resource_manager::instance().clean();
 	}
@@ -273,7 +273,7 @@ namespace neogfx
 	
 	int app::exec(bool aQuitWhenLastWindowClosed)
 	{
-		iInExec = true;
+		neolib::scoped_flag sf{ iInExec };
 		try
 		{
 			surface_manager().layout_surfaces();
@@ -281,10 +281,12 @@ namespace neogfx
 			iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
 			while (!iQuitResultCode.is_initialized())
 				process_events(iAppContext);
+			async_event_queue::instance().terminate();
 			return *iQuitResultCode;
 		}
 		catch (std::exception& e)
 		{
+			async_event_queue::instance().terminate();
 			halt();
 			std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
 			iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
@@ -292,6 +294,7 @@ namespace neogfx
 		}
 		catch (...)
 		{
+			async_event_queue::instance().terminate();
 			halt();
 			std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
 			iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");

@@ -62,8 +62,9 @@ namespace neogfx
 		virtual item_index count() const = 0;
 		virtual optional_item_index find(const i_layout_item& aItem) const = 0;
 		virtual bool is_widget_at(item_index aIndex) const = 0;
-		virtual const i_layout_item& get_item_at(item_index aIndex) const = 0;
-		virtual i_layout_item& get_item_at(item_index aIndex) = 0;
+		virtual const i_layout_item& item_at(item_index aIndex) const = 0;
+		virtual i_layout_item& item_at(item_index aIndex) = 0;
+		virtual std::shared_ptr<i_layout_item> item_ptr_at(item_index aIndex) = 0;
 		virtual const i_widget& get_widget_at(item_index aIndex) const = 0;
 		virtual i_widget& get_widget_at(item_index aIndex) = 0;
 		virtual const i_layout& get_layout_at(item_index aIndex) const = 0;
@@ -86,6 +87,26 @@ namespace neogfx
 		virtual void validate() = 0;
 		// helpers
 	public:
+		template <typename ItemType>
+		ItemType& add(ItemType&& aItem)
+		{
+			return static_cast<ItemType&>(add(static_cast<i_layout_item&>(aItem)));
+		}
+		template <typename ItemType>
+		ItemType& add_at(item_index aPosition, ItemType&& aItem)
+		{
+			return static_cast<ItemType&>(add_at(aPosition, static_cast<i_layout_item&>(aItem)));
+		}
+		template <typename ItemType>
+		ItemType& add(std::shared_ptr<ItemType> aItem)
+		{
+			return static_cast<ItemType&>(add(std::static_pointer_cast<i_layout_item>(aItem)));
+		}
+		template <typename ItemType>
+		ItemType& add_at(item_index aPosition, std::shared_ptr<ItemType> aItem)
+		{
+			return static_cast<ItemType&>(add_at(aPosition, std::static_pointer_cast<i_layout_item>(aItem)));
+		}
 		template <typename ItemType, typename... Args>
 		ItemType& emplace(Args&&... args)
 		{

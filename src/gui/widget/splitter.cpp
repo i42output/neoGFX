@@ -65,12 +65,12 @@ namespace neogfx
 	{
 	}
 
-	i_widget& splitter::widget_at(const point& aPosition)
+	i_widget& splitter::get_widget_at(const point& aPosition)
 	{
 		auto s = separator_at(aPosition);
 		if (s != boost::none)
 			return *this;
-		return widget::widget_at(aPosition);
+		return widget::get_widget_at(aPosition);
 	}
 
 	neogfx::size_policy splitter::size_policy() const

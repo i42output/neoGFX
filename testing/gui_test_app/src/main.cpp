@@ -18,7 +18,6 @@
 #include <neogfx/gui/widget/tab_page_container.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
-#include <neogfx/game/sprite_plane.hpp>
 #include <neogfx/gui/widget/toolbar.hpp>
 #include <neogfx/gui/widget/menu_bar.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>

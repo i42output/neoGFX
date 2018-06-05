@@ -40,7 +40,7 @@ namespace neogfx
 		splitter(i_layout& aLayout, type_e aType = HorizontalSplitter);
 		~splitter();
 	public:
-		virtual i_widget& widget_at(const point& aPosition);
+		virtual i_widget& get_widget_at(const point& aPosition);
 	public:
 		virtual neogfx::size_policy size_policy() const;
 	public:

@@ -32,9 +32,6 @@ namespace neogfx
 	layout_item::layout_item(i_layout& aParentLayout, std::shared_ptr<i_layout_item> aItem) :
 		iSubject{ aItem }, iLayoutId{ -1, -1 }
 	{
-		subject().set_parent_layout(&aParentLayout);
-		if (aParentLayout.has_layout_owner())
-			subject().set_layout_owner(&aParentLayout.layout_owner());
 	}
 
 	layout_item::layout_item(const layout_item& aOther) :
@@ -50,6 +47,11 @@ namespace neogfx
 	i_layout_item& layout_item::subject()
 	{
 		return *iSubject;
+	}
+
+	std::shared_ptr<i_layout_item> layout_item::subject_ptr()
+	{
+		return iSubject;
 	}
 
 	bool layout_item::is_layout() const

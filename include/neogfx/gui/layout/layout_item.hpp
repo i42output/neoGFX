@@ -33,6 +33,7 @@ namespace neogfx
 	public:
 		const i_layout_item& subject() const;
 		i_layout_item& subject();
+		std::shared_ptr<i_layout_item> subject_ptr();
 	public:
 		bool is_layout() const override;
 		const i_layout& as_layout() const override;

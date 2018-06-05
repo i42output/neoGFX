@@ -140,8 +140,8 @@ namespace neogfx
 		virtual void resized() = 0;
 		virtual rect window_rect() const = 0;
 		virtual rect client_rect(bool aIncludeMargins = true) const = 0;
-		virtual const i_widget& widget_at(const point& aPosition) const = 0;
-		virtual i_widget& widget_at(const point& aPosition) = 0;
+		virtual const i_widget& get_widget_at(const point& aPosition) const = 0;
+		virtual i_widget& get_widget_at(const point& aPosition) = 0;
 		virtual widget_part hit_test(const point& aPosition) const = 0;
 	public:
 		virtual void update(bool aIncludeNonClient = false) = 0;

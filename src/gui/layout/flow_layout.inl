@@ -153,7 +153,7 @@ namespace neogfx
 		point pos;
 		bool previousNonZeroSize = false;
 		typename AxisPolicy::minor_layout rows(*this);
-		for (auto& item : items())
+		for (auto& item : *this)
 		{
 			if (!item.visible())
 				continue;
@@ -195,7 +195,7 @@ namespace neogfx
 		}
 		rows.layout_items(aPosition + margins().top_left(), availableSpace);
 		rows.remove_all();
-		for (auto& i : items())
+		for (auto& i : *this)
 		{
 			i.set_parent_layout(this);
 			if (has_layout_owner())
