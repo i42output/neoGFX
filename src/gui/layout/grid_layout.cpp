@@ -132,7 +132,7 @@ namespace neogfx
 		for (cell_coordinate col = 0; col < aColumn; ++col)
 			if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
 				add_spacer_at_position(aRow, col);
-		iCells[cell_coordinates{ aColumn, aRow }] = &layout::add(aItem);
+		iCells[cell_coordinates{ aColumn, aRow }] = &*find_item(layout::add(aItem));
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		row_layout(aRow).replace_item_at(aColumn, aItem);

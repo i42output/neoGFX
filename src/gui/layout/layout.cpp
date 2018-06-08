@@ -675,6 +675,22 @@ namespace neogfx
 		return iItems.end();
 	}
 
+	layout::item_list::const_iterator layout::find_item(const i_layout_item& aItem) const
+	{
+		for (auto i = iItems.begin(); i != iItems.end(); ++i)
+			if (&*i == &aItem || &i->subject() == &aItem)
+				return i;
+		return iItems.end();
+	}
+
+	layout::item_list::iterator layout::find_item(i_layout_item& aItem)
+	{
+		for (auto i = iItems.begin(); i != iItems.end(); ++i)
+			if (&*i == &aItem || &i->subject() == &aItem)
+				return i;
+		return iItems.end();
+	}
+
 	const layout::item_list& layout::items() const
 	{
 		return iItems;

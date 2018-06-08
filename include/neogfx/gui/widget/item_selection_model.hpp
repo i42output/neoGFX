@@ -354,7 +354,7 @@ namespace neogfx
 			iSavedModelIndex = has_current_index() ? presentation_model().to_item_model_index(current_index()) : optional_item_model_index{};
 			unset_current_index();
 		}
-		void items_sorted(const i_item_presentation_model& aModel) override
+		void items_sorted(const i_item_presentation_model&) override
 		{
 			neolib::scoped_flag sf{ iSorting };
 			if (iSavedModelIndex != boost::none)

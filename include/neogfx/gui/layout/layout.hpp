@@ -151,6 +151,8 @@ namespace neogfx
 		item_list::const_iterator end() const;
 		item_list::iterator begin();
 		item_list::iterator end();
+		item_list::const_iterator find_item(const i_layout_item& aItem) const;
+		item_list::iterator find_item(i_layout_item& aItem);
 		const item_list& items() const;
 		void remove(item_list::iterator aItem);
 		const i_geometry& item_geometry(item_list::size_type aItem) const;
