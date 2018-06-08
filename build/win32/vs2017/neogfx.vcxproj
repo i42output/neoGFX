@@ -152,7 +152,6 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\i_property_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\path.hpp" />

@@ -687,9 +687,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\i_property_container.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
