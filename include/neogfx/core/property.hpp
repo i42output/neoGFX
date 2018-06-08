@@ -44,21 +44,22 @@ namespace neogfx
 		};
 	}
 
-	template <typename T>
+	template <typename T, typename Category>
 	class property : public i_property
 	{
 	public:
 		typedef T value_type;
+		typedef Category category_type;
 	public:
 		event<const value_type&> changed;
 	private:
 		typedef detail::property_optional_type_cracker<T> cracker;
 	public:
-		property(i_object& aOwner, const std::string& aName) : iName{ aName }, iValue{}
+		property(i_object& aOwner, const std::string& aName) : iOwner{ aOwner }, iName { aName }, iValue{}
 		{
 			aOwner.properties().register_property(*this);
 		}
-		property(i_object& aOwner, const std::string& aName, const T& aValue) : iName{ aName }, iValue { aValue }
+		property(i_object& aOwner, const std::string& aName, const T& aValue) : iOwner{ aOwner }, iName{ aName }, iValue { aValue }
 		{
 			aOwner.properties().register_property(*this);
 		}
@@ -71,6 +72,10 @@ namespace neogfx
 		{
 			return typeid(value_type);
 		}
+		const std::type_info& category() const override
+		{
+			return typeid(category_type);
+		}
 		bool optional() const override
 		{
 			return cracker::optional;
@@ -82,29 +87,22 @@ namespace neogfx
 		void set(const variant& aValue) override
 		{
 			if (!aValue.empty())
-			{
-				if (iValue != static_variant_cast<const typename cracker::type&>(aValue))
-				{
-					iValue = static_variant_cast<const typename cracker::type&>(aValue);
-					i_property::changed.trigger(get());
-					changed.trigger(iValue);
-				}
-			}
+				*this = static_variant_cast<const typename cracker::type&>(aValue);
 			else
-			{
-				if (iValue != value_type{})
-				{
-					iValue = value_type{};
-					i_property::changed.trigger(get());
-					changed.trigger(iValue);
-				}
-			}
+				*this = value_type{};
 		}
 	public:
 		template <typename T2>
 		value_type& operator=(const T2& aValue)
 		{
-			return iValue = aValue;
+			if (iValue != aValue)
+			{
+				iValue = aValue;
+				iOwner.property_changed(*this);
+				i_property::changed.trigger(get());
+				changed.trigger(iValue);
+			}
+			return iValue;
 		}
 		operator const value_type&() const
 		{
@@ -141,9 +139,10 @@ namespace neogfx
 			return iValue != aRhs;
 		}
 	private:
+		i_object& iOwner;
 		std::string iName;
 		mutable value_type iValue;
 	};
 
-	#define define_property( type, name, ... ) neogfx::property<type> name = { *this, #name ##s, __VA_ARGS__ };
+	#define define_property( category, type, name, ... ) neogfx::property<type, category> name = { *this, #name ##s, __VA_ARGS__ };
 }

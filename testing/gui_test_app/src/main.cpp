@@ -491,6 +491,7 @@ int main(int argc, char* argv[])
 			auto& button = layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
 			ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
 			button.set_foreground_colour(randomColour);
+			button.clicked([&app, &textEdit, randomColour]() { textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
 		}
 		ng::group_box groupBox{ layout2, "Group Box" };
 		ng::vertical_layout& layoutRadiosAndChecks = static_cast<ng::vertical_layout&>(groupBox.item_layout());

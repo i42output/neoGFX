@@ -37,11 +37,9 @@ namespace neogfx
 		widget(i_layout& aLayout);
 		~widget();
 		neolib::i_lifetime& as_lifetime() override;
+		// i_object
 	public:
-		bool device_metrics_available() const override;
-		const i_device_metrics& device_metrics() const override;
-		neogfx::units units() const override;
-		neogfx::units set_units(neogfx::units aUnits) const override;
+		void property_changed(i_property& aProperty) override;
 		// i_widget
 	public:
 		bool is_singular() const override;
@@ -96,6 +94,12 @@ namespace neogfx
 		void layout_items_started() override;
 		bool layout_items_in_progress() const override;
 		void layout_items_completed() override;
+		// i_units_context
+	public:
+		bool device_metrics_available() const override;
+		const i_device_metrics& device_metrics() const override;
+		neogfx::units units() const override;
+		neogfx::units set_units(neogfx::units aUnits) const override;
 		// i_geometry
 	public:
 		bool high_dpi() const override;
@@ -263,22 +267,30 @@ namespace neogfx
 		units_context iUnitsContext;
 		mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
 	public:
-		define_property(optional_logical_coordinate_system, LogicalCoordinateSystem)
-		define_property(point, Position)
-		define_property(size, Size)
-		define_property(optional_margins, Margins)
-		define_property(optional_size_policy, SizePolicy)
-		define_property(optional_size, Weight)
-		define_property(optional_size, MinimumSize)
-		define_property(optional_size, MaximumSize)
-		define_property(bool, Visible, true)
-		define_property(bool, Enabled, true)
-		define_property(neogfx::focus_policy, FocusPolicy, neogfx::focus_policy::NoFocus)
-		define_property(double, Opacity, 1.0)
-		define_property(optional_colour, ForegroundColour)
-		define_property(optional_colour, BackgroundColour)
-		define_property(optional_font, Font)
-		define_property(bool, IgnoreMouseEvents, false)
-		define_property(bool, IgnoreNonClientMouseEvents, true)
+		struct property_category
+		{
+			struct geometry {};
+			struct font {};
+			struct colour {};
+			struct other_appearance {};
+			struct other {};
+		};
+		define_property(property_category::geometry, optional_logical_coordinate_system, LogicalCoordinateSystem)
+		define_property(property_category::geometry, point, Position)
+		define_property(property_category::geometry, size, Size)
+		define_property(property_category::geometry, optional_margins, Margins)
+		define_property(property_category::geometry, optional_size_policy, SizePolicy)
+		define_property(property_category::geometry, optional_size, Weight)
+		define_property(property_category::geometry, optional_size, MinimumSize)
+		define_property(property_category::geometry, optional_size, MaximumSize)
+		define_property(property_category::geometry, bool, Visible, true)
+		define_property(property_category::other_appearance, bool, Enabled, true)
+		define_property(property_category::other, neogfx::focus_policy, FocusPolicy, neogfx::focus_policy::NoFocus)
+		define_property(property_category::other_appearance, double, Opacity, 1.0)
+		define_property(property_category::colour, optional_colour, ForegroundColour)
+		define_property(property_category::colour, optional_colour, BackgroundColour)
+		define_property(property_category::font, optional_font, Font)
+		define_property(property_category::other, bool, IgnoreMouseEvents, false)
+		define_property(property_category::other, bool, IgnoreNonClientMouseEvents, true)
 	};
 }

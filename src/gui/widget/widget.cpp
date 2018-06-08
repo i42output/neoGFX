@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <unordered_map>
 #include <neolib/raii.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/widget.hpp>
@@ -106,6 +107,24 @@ namespace neogfx
 	neolib::i_lifetime& widget::as_lifetime()
 	{
 		return *this;
+	}
+
+	void widget::property_changed(i_property& aProperty)
+	{
+		static auto invalidate_layout = [](i_widget& self) { if (self.has_parent_layout()) self.parent_layout().invalidate(); self.update(true); };
+		static auto invalidate_canvas = [](i_widget& self) { self.update(true); };
+		static auto ignore = [](i_widget&) {};
+		static const std::unordered_map<std::type_index, std::function<void(i_widget&)>> sActions =
+		{
+			{ std::type_index{ typeid(property_category::geometry) }, invalidate_layout },
+			{ std::type_index{ typeid(property_category::font) }, invalidate_layout },
+			{ std::type_index{ typeid(property_category::colour) }, invalidate_canvas },
+			{ std::type_index{ typeid(property_category::other_appearance) }, invalidate_canvas },
+			{ std::type_index{ typeid(property_category::other) }, ignore }
+		};
+		auto iterAction = sActions.find(std::type_index{ aProperty.category() });
+		if (iterAction != sActions.end())
+			iterAction->second(*this);
 	}
 
 	bool widget::device_metrics_available() const
@@ -617,7 +636,12 @@ namespace neogfx
 			return;
 		if (!aDefer)
 		{
-			iLayoutTimer.reset();
+			if (iLayoutTimer != nullptr)
+			{
+				iLayoutTimer.reset();
+				if (has_layout() && &layout() == i_layout::debug)
+					std::cout << "reset deferred layout timer" << std::endl;
+			}
 			if (has_layout())
 			{
 				layout_items_started();
@@ -658,11 +682,15 @@ namespace neogfx
 		{
 			if (!iLayoutTimer)
 			{
+				if (has_layout() && &layout() == i_layout::debug)
+					std::cout << "deferred layout" << std::endl;
 				iLayoutTimer = std::make_unique<layout_timer>(root(), app::instance(), [this](neolib::callback_timer&)
 				{
 					if (root().has_native_window())
 					{
 						auto t = std::move(iLayoutTimer);
+						if (has_layout() && &layout() == i_layout::debug)
+							std::cout << "execute deferred layout" << std::endl;
 						layout_items();
 						update();
 					}

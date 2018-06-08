@@ -108,6 +108,7 @@ namespace neogfx
 	public:
 		virtual const std::string& name() const = 0;
 		virtual const std::type_info& type() const = 0;
+		virtual const std::type_info& category() const = 0;
 		virtual bool optional() const = 0;
 		virtual variant get() const = 0;
 		virtual void set(const variant& aValue) = 0;
