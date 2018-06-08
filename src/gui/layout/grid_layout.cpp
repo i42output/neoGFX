@@ -369,7 +369,8 @@ namespace neogfx
 			return;
 		if (debug == this)
 			std::cerr << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
-		layout_owner().layout_items_started();
+		if (has_layout_owner())
+			layout_owner().layout_items_started();
 		next_layout_id();
 		validate();
 		set_position(aPosition);
@@ -459,7 +460,8 @@ namespace neogfx
 			rowPos.y += maxRowHeight[row];
 			rowPos.y += spacing().cy;
 		}
-		layout_owner().layout_items_completed();
+		if (has_layout_owner())
+			layout_owner().layout_items_completed();
 	}
 
 	uint32_t grid_layout::visible_rows() const

@@ -637,11 +637,7 @@ namespace neogfx
 		if (!aDefer)
 		{
 			if (iLayoutTimer != nullptr)
-			{
 				iLayoutTimer.reset();
-				if (has_layout() && &layout() == i_layout::debug)
-					std::cout << "reset deferred layout timer" << std::endl;
-			}
 			if (has_layout())
 			{
 				layout_items_started();
@@ -682,15 +678,11 @@ namespace neogfx
 		{
 			if (!iLayoutTimer)
 			{
-				if (has_layout() && &layout() == i_layout::debug)
-					std::cout << "deferred layout" << std::endl;
 				iLayoutTimer = std::make_unique<layout_timer>(root(), app::instance(), [this](neolib::callback_timer&)
 				{
 					if (root().has_native_window())
 					{
 						auto t = std::move(iLayoutTimer);
-						if (has_layout() && &layout() == i_layout::debug)
-							std::cout << "execute deferred layout" << std::endl;
 						layout_items();
 						update();
 					}
@@ -776,7 +768,7 @@ namespace neogfx
 		if (Position != units_converter(*this).to_device_units(aPosition))
 		{
 			update(true);
-			Position = units_converter(*this).to_device_units(aPosition);
+			Position.assign(units_converter(*this).to_device_units(aPosition), false);
 			update(true);
 			moved();
 		}
@@ -802,7 +794,7 @@ namespace neogfx
 		if (Size != units_converter(*this).to_device_units(aSize))
 		{
 			update();
-			Size = units_converter(*this).to_device_units(aSize);
+			Size.assign(units_converter(*this).to_device_units(aSize), false);
 			update();
 			resized();
 		}

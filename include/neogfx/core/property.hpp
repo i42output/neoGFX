@@ -93,16 +93,22 @@ namespace neogfx
 		}
 	public:
 		template <typename T2>
-		value_type& operator=(const T2& aValue)
+		value_type& assign(const T2& aValue, bool aOwnerNotify = true)
 		{
 			if (iValue != aValue)
 			{
 				iValue = aValue;
-				iOwner.property_changed(*this);
+				if (aOwnerNotify)
+					iOwner.property_changed(*this);
 				i_property::changed.trigger(get());
 				changed.trigger(iValue);
 			}
 			return iValue;
+		}
+		template <typename T2>
+		value_type& operator=(const T2& aValue)
+		{
+			return assign(aValue);
 		}
 		operator const value_type&() const
 		{

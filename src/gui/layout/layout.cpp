@@ -195,13 +195,13 @@ namespace neogfx
 	{
 		if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
 			throw item_already_added();
-		invalidate();
 		while (aPosition > iItems.size())
 			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item{ *this, aItem });
 		i->subject().set_parent_layout(this);
 		if (has_layout_owner())
 			i->subject().set_layout_owner(&layout_owner());
+		invalidate();
 		return *aItem;
 	}
 
@@ -220,13 +220,14 @@ namespace neogfx
 			}
 		for (auto i = begin(); i != end(); ++i)
 			if (i->subject().is_layout() && i->subject().as_layout().remove(aItem))
+			{
 				return true;
+			}
 		return false;
 	}
 
 	void layout::remove_all()
 	{
-		invalidate();
 		item_list toRemove;
 		toRemove.splice(toRemove.begin(), iItems);
 		for (auto& i : toRemove)
@@ -237,12 +238,11 @@ namespace neogfx
 				i.set_layout_owner(nullptr);
 			}
 		}
+		invalidate();
 	}
 
 	void layout::move_all_to(i_layout& aDestination)
 	{
-		invalidate();
-		aDestination.invalidate();
 		try
 		{
 			auto& compatibleDestination = dynamic_cast<layout&>(aDestination); // dynamic_cast? not a fan but heh.
@@ -254,6 +254,8 @@ namespace neogfx
 		{
 			throw incompatible_layouts();
 		}
+		invalidate();
+		aDestination.invalidate();
 	}
 
 	layout::item_index layout::count() const
@@ -494,6 +496,8 @@ namespace neogfx
 
 	void layout::validate()
 	{
+		if (!invalidated())
+			return;
 		iInvalidated = false;
 	}
 

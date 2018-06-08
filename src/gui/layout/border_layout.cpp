@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
@@ -171,6 +172,8 @@ namespace neogfx
 
 	void border_layout::layout_items(const point& aPosition, const size& aSize)
 	{
+		next_layout_id();
+		validate();
 		iRows.layout_items(aPosition, aSize);
 	}
 
