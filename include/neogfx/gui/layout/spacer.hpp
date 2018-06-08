@@ -63,7 +63,7 @@ namespace neogfx
 		void set_extents(const size& aExtents) override;
 		bool has_size_policy() const override;
 		neogfx::size_policy size_policy() const override;
-		using i_widget_geometry::set_size_policy;
+		using i_geometry::set_size_policy;
 		void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
 		bool has_weight() const override;
 		size weight() const override;

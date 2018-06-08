@@ -42,14 +42,14 @@ namespace neogfx
 		event<step_time_interval> taking_snapshot;
 		event<graphics_context&> painting_sprites;
 		event<graphics_context&> sprites_painted;
-		event<i_object&, i_object&> object_collision;
-		event<i_object&> object_clicked;
+		event<i_game_object&, i_game_object&> object_collision;
+		event<i_game_object&> object_clicked;
 	public:
 		typedef i_physical_object::time_interval time_interval;
 		typedef i_physical_object::optional_time_interval optional_time_interval;
 		typedef i_physical_object::optional_step_time_interval optional_step_time_interval;
 	public:
-		typedef std::shared_ptr<i_object> object_pointer;
+		typedef std::shared_ptr<i_game_object> object_pointer;
 		typedef std::vector<object_pointer> object_list;
 		typedef std::vector<i_shape*> shape_list;
 		typedef aabb_quadtree<> broad_phase_collision_tree_2d;
@@ -104,7 +104,7 @@ namespace neogfx
 	public:
 		void reserve(std::size_t aCapacity);
 		const object_list& objects() const;
-		void add_object(std::shared_ptr<i_object> aObject);
+		void add_object(std::shared_ptr<i_game_object> aObject);
 	public:
 		bool is_collision_tree_2d() const;
 		bool is_collision_tree_3d() const;
@@ -115,7 +115,7 @@ namespace neogfx
 	public:
 		double update_time() const;
 	private:
-		void do_add_object(std::shared_ptr<i_object> aObject);
+		void do_add_object(std::shared_ptr<i_game_object> aObject);
 		void sort_shapes() const;
 		void sort_objects();
 		void update_objects();

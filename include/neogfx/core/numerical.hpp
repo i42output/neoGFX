@@ -70,13 +70,13 @@ namespace neogfx
 	public:
 		basic_vector() : v{} {}
 		template <typename SFINAE = void>
-		explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type* = 0) : v{ {x} } {}
+		explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type* = nullptr) : v{ {x} } {}
 		template <typename SFINAE = void>
-		explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type* = 0) : v{ {x, y} } {}
+		explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type* = nullptr) : v{ {x, y} } {}
 		template <typename SFINAE = void>
-		explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type* = 0) : v{ {x, y, z} } {}
+		explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type* = nullptr) : v{ {x, y, z} } {}
 		template <typename SFINAE = void>
-		explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type* = 0) : v{ { x, y, z, w } } {}
+		explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type* = nullptr) : v{ { x, y, z, w } } {}
 		template <typename... Arguments>
 		explicit basic_vector(value_type value, Arguments... aArguments) : v{{value, aArguments...}} {}
 		basic_vector(const array_type& v) : v{ v } {}
@@ -176,13 +176,13 @@ namespace neogfx
 	public:
 		basic_vector() : v{} {}
 		template <typename SFINAE = void>
-		explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type* = 0) : v{ { x } } {}
+		explicit basic_vector(value_type x, typename std::enable_if<Size == 1, SFINAE>::type* = nullptr) : v{ { x } } {}
 		template <typename SFINAE = void>
-		explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type* = 0) : v{ { x, y } } {}
+		explicit basic_vector(value_type x, value_type y, typename std::enable_if<Size == 2, SFINAE>::type* = nullptr) : v{ { x, y } } {}
 		template <typename SFINAE = void>
-		explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type* = 0) : v{ { x, y, z } } {}
+		explicit basic_vector(value_type x, value_type y, value_type z, typename std::enable_if<Size == 3, SFINAE>::type* = nullptr) : v{ { x, y, z } } {}
 		template <typename SFINAE = void>
-		explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type* = 0) : v{ { x, y, z, w } } {}
+		explicit basic_vector(value_type x, value_type y, value_type z, value_type w, typename std::enable_if<Size == 4, SFINAE>::type* = nullptr) : v{ { x, y, z, w } } {}
 		template <typename... Arguments>
 		explicit basic_vector(const value_type& value, Arguments&&... aArguments) : v{{value, std::forward<Arguments>(aArguments)...}} {}
 		template <typename... Arguments>

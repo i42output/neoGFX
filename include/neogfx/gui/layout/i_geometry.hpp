@@ -1,4 +1,4 @@
-// i_widget_geometry.hpp
+// i_geometry.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
@@ -104,7 +104,7 @@ namespace neogfx
 
 	typedef boost::optional<size_policy> optional_size_policy;
 
-	class i_widget_geometry : public i_units_context
+	class i_geometry : public i_units_context
 	{
 	public:
 		virtual point position() const = 0;

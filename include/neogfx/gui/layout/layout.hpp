@@ -153,7 +153,7 @@ namespace neogfx
 		item_list::iterator end();
 		const item_list& items() const;
 		void remove(item_list::iterator aItem);
-		const i_widget_geometry& item_geometry(item_list::size_type aItem) const;
+		const i_geometry& item_geometry(item_list::size_type aItem) const;
 		uint32_t spacer_count() const;
 		uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
 		template <typename AxisPolicy>

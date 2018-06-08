@@ -456,7 +456,7 @@ namespace neogfx
 
 	bool sdl_window::can_render() const
 	{
-		return is_visible() && opengl_window::can_render();
+		return visible() && opengl_window::can_render();
 	}
 
 	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context() const
@@ -482,7 +482,7 @@ namespace neogfx
 		}
 	}
 
-	bool sdl_window::is_visible() const
+	bool sdl_window::visible() const
 	{
 		return iVisible;
 	}
@@ -536,7 +536,7 @@ namespace neogfx
 
 	void sdl_window::activate()
 	{
-		if (!is_enabled())
+		if (!enabled())
 			return;
 		SDL_RaiseWindow(iHandle);
 #ifdef WIN32
@@ -574,7 +574,7 @@ namespace neogfx
 		SDL_RestoreWindow(iHandle);
 	}
 
-	bool sdl_window::is_enabled() const
+	bool sdl_window::enabled() const
 	{
 #ifdef WIN32
 		return ::IsWindowEnabled(static_cast<HWND>(native_handle())) == TRUE;
@@ -1236,7 +1236,7 @@ namespace neogfx
 				render(true);
 				break;
 			case SDL_WINDOWEVENT_ENTER:
-				push_event(window_event{ window_event_type::Enter, basic_point<int>{ aEvent.window.data1, aEvent.window.data2 } });
+				push_event(window_event{ window_event_type::Enter, point{ basic_point<int>{ aEvent.window.data1, aEvent.window.data2 } } });
 				break;
 			case SDL_WINDOWEVENT_LEAVE:
 				push_event(window_event{ window_event_type::Leave });
@@ -1307,7 +1307,7 @@ namespace neogfx
 			/* todo */
 			break;
 		case SDL_TEXTINPUT:
-			push_event(keyboard_event(keyboard_event_type::TextInput, aEvent.text.text));
+			push_event(keyboard_event{ keyboard_event_type::TextInput, std::string{ aEvent.text.text } });
 			break;
 		default:
 			break;

@@ -20,11 +20,11 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/numerical.hpp>
-#include "i_object.hpp"
+#include "i_game_object.hpp"
 
 namespace neogfx
 {
-	class i_collidable_object : public virtual i_object
+	class i_collidable_object : public virtual i_game_object
 	{
 	public:
 		virtual const neogfx::aabb& aabb() const = 0;

@@ -54,7 +54,7 @@ namespace neogfx
 		virtual bool processing_event() const = 0;
 		virtual i_surface_window& surface_window() const = 0;
 		virtual void close(bool aForce = false) = 0;
-		virtual bool is_visible() const = 0;
+		virtual bool visible() const = 0;
 		virtual void show(bool aActivate = false) = 0;
 		virtual void hide() = 0;
 		virtual double opacity() const = 0;
@@ -69,7 +69,7 @@ namespace neogfx
 		virtual void maximize() = 0;
 		virtual bool is_restored() const = 0;
 		virtual void restore() = 0;
-		virtual bool is_enabled() const = 0;
+		virtual bool enabled() const = 0;
 		virtual void enable(bool aEnable) = 0;
 		virtual bool is_capturing() const = 0;
 		virtual void set_capture() = 0;

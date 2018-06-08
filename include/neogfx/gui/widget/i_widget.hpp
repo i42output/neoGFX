@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <unordered_set>
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
@@ -34,7 +35,7 @@ namespace neogfx
 	class i_window;
 	class i_layout;
 
-	class i_widget : public i_layout_item, public i_keyboard_handler
+	class i_widget : public i_object, public i_layout_item, public i_keyboard_handler
 	{
 	public:
 		static i_widget* debug;

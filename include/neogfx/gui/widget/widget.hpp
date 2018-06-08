@@ -20,14 +20,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <unordered_set>
 #include <neolib/lifetime.hpp>
 #include <neolib/timer.hpp>
+#include <neogfx/core/object.hpp>
+#include <neogfx/core/property.hpp>
 #include "i_widget.hpp"
 
 namespace neogfx
 {
-	class widget : public i_widget, protected neolib::lifetime
+	class widget : public object<i_widget>, protected neolib::lifetime
 	{
 	public:
 		widget();
@@ -95,7 +96,7 @@ namespace neogfx
 		void layout_items_started() override;
 		bool layout_items_in_progress() const override;
 		void layout_items_completed() override;
-		// i_widget_geometry
+		// i_geometry
 	public:
 		bool high_dpi() const override;
 		dimension dpi_scale_factor() const override;
@@ -260,23 +261,24 @@ namespace neogfx
 		class layout_timer;
 		std::unique_ptr<layout_timer> iLayoutTimer;
 		units_context iUnitsContext;
-		optional_logical_coordinate_system iLogicalCoordinateSystem;
-		point iPosition;
-		size iSize;
-		optional_margins iMargins;
-		optional_size_policy iSizePolicy;
-		optional_size iWeight;
-		optional_size iMinimumSize;
-		optional_size iMaximumSize;
-		bool iVisible;
-		bool iEnabled;
-		neogfx::focus_policy iFocusPolicy;
-		double iOpacity;
-		optional_colour iForegroundColour;
-		optional_colour iBackgroundColour;
-		optional_font iFont;
-		bool iIgnoreMouseEvents;
-		bool iIgnoreNonClientMouseEvents;
 		mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
+	public:
+		define_property(optional_logical_coordinate_system, LogicalCoordinateSystem)
+		define_property(point, Position)
+		define_property(size, Size)
+		define_property(optional_margins, Margins)
+		define_property(optional_size_policy, SizePolicy)
+		define_property(optional_size, Weight)
+		define_property(optional_size, MinimumSize)
+		define_property(optional_size, MaximumSize)
+		define_property(bool, Visible, true)
+		define_property(bool, Enabled, true)
+		define_property(neogfx::focus_policy, FocusPolicy, neogfx::focus_policy::NoFocus)
+		define_property(double, Opacity, 1.0)
+		define_property(optional_colour, ForegroundColour)
+		define_property(optional_colour, BackgroundColour)
+		define_property(optional_font, Font)
+		define_property(bool, IgnoreMouseEvents, false)
+		define_property(bool, IgnoreNonClientMouseEvents, true)
 	};
 }

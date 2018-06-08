@@ -51,17 +51,7 @@ namespace neogfx
 		iParentLayout{ nullptr },
 		iLayoutId{ 0u },
 		iLayoutInProgress{ 0 },
-		iUnitsContext{ *this },
-		iMinimumSize{},
-		iMaximumSize{},
-		iVisible{ true },
-		iEnabled{ true },
-		iFocusPolicy{ focus_policy::NoFocus },
-		iOpacity{ 1.0 },
-		iForegroundColour{},
-		iBackgroundColour{},
-		iIgnoreMouseEvents{ false },
-		iIgnoreNonClientMouseEvents{ true }
+		iUnitsContext{ *this }
 	{
 	}
 	
@@ -76,17 +66,7 @@ namespace neogfx
 		iParentLayout{ nullptr },
 		iLayoutId{ 0u },
 		iLayoutInProgress{ 0 },
-		iUnitsContext{ *this },
-		iMinimumSize{},
-		iMaximumSize{},
-		iVisible{ true },
-		iEnabled{ true },
-		iFocusPolicy{ focus_policy::NoFocus },
-		iOpacity{ 1.0 },
-		iForegroundColour{},
-		iBackgroundColour{},
-		iIgnoreMouseEvents{ false },
-		iIgnoreNonClientMouseEvents{ true }
+		iUnitsContext{ *this }
 	{
 		aParent.add(*this);
 	}
@@ -102,17 +82,7 @@ namespace neogfx
 		iParentLayout{ nullptr },
 		iLayoutId{ 0u },
 		iLayoutInProgress{ 0 },
-		iUnitsContext{ *this },
-		iMinimumSize{},
-		iMaximumSize{},
-		iVisible{ true },
-		iEnabled{ true },
-		iFocusPolicy{ focus_policy::NoFocus },
-		iOpacity{ 1.0 },
-		iForegroundColour{},
-		iBackgroundColour{},
-		iIgnoreMouseEvents{ false },
-		iIgnoreNonClientMouseEvents{ true }
+		iUnitsContext{ *this }
 	{
 		aLayout.add(*this);
 	}
@@ -740,24 +710,24 @@ namespace neogfx
 
 	bool widget::has_logical_coordinate_system() const
 	{
-		return iLogicalCoordinateSystem != boost::none;
+		return LogicalCoordinateSystem != boost::none;
 	}
 
 	logical_coordinate_system widget::logical_coordinate_system() const
 	{
 		if (has_logical_coordinate_system())
-			return *iLogicalCoordinateSystem;
+			return *LogicalCoordinateSystem;
 		return neogfx::logical_coordinate_system::AutomaticGui;
 	}
 
 	void widget::set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem)
 	{
-		iLogicalCoordinateSystem = aLogicalCoordinateSystem;
+		LogicalCoordinateSystem = aLogicalCoordinateSystem;
 	}
 
 	point widget::position() const
 	{
-		return units_converter(*this).from_device_units(iPosition);
+		return units_converter(*this).from_device_units(Position);
 	}
 
 	void widget::set_position(const point& aPosition)
@@ -775,10 +745,10 @@ namespace neogfx
 
 	void widget::move(const point& aPosition)
 	{
-		if (iPosition != units_converter(*this).to_device_units(aPosition))
+		if (Position != units_converter(*this).to_device_units(aPosition))
 		{
 			update(true);
-			iPosition = units_converter(*this).to_device_units(aPosition);
+			Position = units_converter(*this).to_device_units(aPosition);
 			update(true);
 			moved();
 		}
@@ -791,7 +761,7 @@ namespace neogfx
 	
 	size widget::extents() const
 	{
-		return units_converter(*this).from_device_units(iSize);
+		return units_converter(*this).from_device_units(Size);
 	}
 
 	void widget::set_extents(const size& aSize)
@@ -801,10 +771,10 @@ namespace neogfx
 
 	void widget::resize(const size& aSize)
 	{
-		if (iSize != units_converter(*this).to_device_units(aSize))
+		if (Size != units_converter(*this).to_device_units(aSize))
 		{
 			update();
-			iSize = units_converter(*this).to_device_units(aSize);
+			Size = units_converter(*this).to_device_units(aSize);
 			update();
 			resized();
 		}
@@ -857,22 +827,22 @@ namespace neogfx
 
 	bool widget::has_size_policy() const
 	{
-		return iSizePolicy != boost::none;
+		return SizePolicy != boost::none;
 	}
 
 	size_policy widget::size_policy() const
 	{
 		if (has_size_policy())
-			return *iSizePolicy;
+			return *SizePolicy;
 		else
 			return size_policy::Expanding;
 	}
 
 	void widget::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
 	{
-		if (iSizePolicy != aSizePolicy)
+		if (SizePolicy != aSizePolicy)
 		{
-			iSizePolicy = aSizePolicy;
+			SizePolicy = aSizePolicy;
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
@@ -880,21 +850,21 @@ namespace neogfx
 
 	bool widget::has_weight() const
 	{
-		return iWeight != boost::none;
+		return Weight != boost::none;
 	}
 
 	size widget::weight() const
 	{
 		if (has_weight())
-			return *iWeight;
+			return *Weight;
 		return 1.0;
 	}
 
 	void widget::set_weight(const optional_size& aWeight, bool aUpdateLayout)
 	{
-		if (iWeight != aWeight)
+		if (Weight != aWeight)
 		{
-			iWeight = aWeight;
+			Weight = aWeight;
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
@@ -902,13 +872,13 @@ namespace neogfx
 
 	bool widget::has_minimum_size() const
 	{
-		return iMinimumSize != boost::none;
+		return MinimumSize != boost::none;
 	}
 
 	size widget::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_minimum_size())
-			return units_converter(*this).from_device_units(*iMinimumSize);
+			return units_converter(*this).from_device_units(*MinimumSize);
 		else if (has_layout())
 		{
 			auto result = layout().minimum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace);
@@ -925,9 +895,9 @@ namespace neogfx
 	void widget::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
 		optional_size newMinimumSize = (aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
-		if (iMinimumSize != newMinimumSize)
+		if (MinimumSize != newMinimumSize)
 		{
-			iMinimumSize = newMinimumSize;
+			MinimumSize = newMinimumSize;
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
@@ -935,13 +905,13 @@ namespace neogfx
 
 	bool widget::has_maximum_size() const
 	{
-		return iMaximumSize != boost::none;
+		return MaximumSize != boost::none;
 	}
 
 	size widget::maximum_size(const optional_size& aAvailableSpace) const
 	{
 		if (has_maximum_size())
-			return units_converter(*this).from_device_units(*iMaximumSize);
+			return units_converter(*this).from_device_units(*MaximumSize);
 		else if (size_policy() == neogfx::size_policy::Minimum || size_policy() == neogfx::size_policy::Fixed)
 			return minimum_size(aAvailableSpace);
 		else if (has_layout())
@@ -960,9 +930,9 @@ namespace neogfx
 	void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
 		optional_size newMaximumSize = (aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
-		if (iMaximumSize != newMaximumSize)
+		if (MaximumSize != newMaximumSize)
 		{
-			iMaximumSize = newMaximumSize;
+			MaximumSize = newMaximumSize;
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
@@ -970,14 +940,14 @@ namespace neogfx
 
 	bool widget::has_margins() const
 	{
-		return iMargins != boost::none;
+		return Margins != boost::none;
 	}
 
 	margins widget::margins() const
 	{
 		const auto& adjustedMargins =
 			(has_margins() ?
-				*iMargins :
+				*Margins :
 				app::instance().current_style().margins() * dpi_scale(1.0));
 		return units_converter(*this).from_device_units(adjustedMargins);
 	}
@@ -985,9 +955,9 @@ namespace neogfx
 	void widget::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
 	{
 		optional_margins newMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins{});
-		if (iMargins != newMargins)
+		if (Margins != newMargins)
 		{
-			iMargins = newMargins;
+			Margins = newMargins;
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
@@ -1139,14 +1109,14 @@ namespace neogfx
 
 	double widget::opacity() const
 	{
-		return iOpacity;
+		return Opacity;
 	}
 
 	void widget::set_opacity(double aOpacity)
 	{
-		if (iOpacity != aOpacity)
+		if (Opacity != aOpacity)
 		{
-			iOpacity = aOpacity;
+			Opacity = aOpacity;
 			update(true);
 		}
 	}
@@ -1163,39 +1133,39 @@ namespace neogfx
 
 	bool widget::has_foreground_colour() const
 	{
-		return iForegroundColour != boost::none;
+		return ForegroundColour != boost::none;
 	}
 
 	colour widget::foreground_colour() const
 	{
 		if (has_foreground_colour())
-			return *iForegroundColour;
+			return *ForegroundColour;
 		else
 			return app::instance().current_style().palette().foreground_colour();
 	}
 
 	void widget::set_foreground_colour(const optional_colour& aForegroundColour)
 	{
-		iForegroundColour = aForegroundColour;
+		ForegroundColour = aForegroundColour;
 		update();
 	}
 
 	bool widget::has_background_colour() const
 	{
-		return iBackgroundColour != boost::none;
+		return BackgroundColour != boost::none;
 	}
 
 	colour widget::background_colour() const
 	{
 		if (has_background_colour())
-			return *iBackgroundColour;
+			return *BackgroundColour;
 		else
 			return app::instance().current_style().palette().background_colour();
 	}
 
 	void widget::set_background_colour(const optional_colour& aBackgroundColour)
 	{
-		iBackgroundColour = aBackgroundColour;
+		BackgroundColour = aBackgroundColour;
 		update();
 	}
 
@@ -1212,22 +1182,22 @@ namespace neogfx
 
 	bool widget::has_font() const
 	{
-		return iFont != boost::none;
+		return Font != boost::none;
 	}
 
 	const font& widget::font() const
 	{
 		if (has_font())
-			return *iFont;
+			return *Font;
 		else
 			return app::instance().current_style().font();
 	}
 
 	void widget::set_font(const optional_font& aFont)
 	{
-		if (iFont != aFont)
+		if (Font != aFont)
 		{
-			iFont = aFont;
+			Font = aFont;
 			if (has_managing_layout())
 				managing_layout().layout_items(true);
 			update();
@@ -1236,7 +1206,7 @@ namespace neogfx
 
 	bool widget::visible() const
 	{
-		return iVisible && (iMaximumSize == boost::none || (iMaximumSize->cx != 0.0 && iMaximumSize->cy != 0.0));
+		return Visible && (MaximumSize == boost::none || (MaximumSize->cx != 0.0 && MaximumSize->cy != 0.0));
 	}
 
 	bool widget::effectively_visible() const
@@ -1256,10 +1226,10 @@ namespace neogfx
 
 	bool widget::show(bool aVisible)
 	{
-		if (iVisible != aVisible)
+		if (Visible != aVisible)
 		{
 			bool isEntered = entered();
-			iVisible = aVisible;
+			Visible = aVisible;
 			if (!visible() && isEntered)
 			{
 				if (!is_root())
@@ -1297,7 +1267,7 @@ namespace neogfx
 
 	bool widget::enabled() const
 	{
-		return iEnabled;
+		return Enabled;
 	}
 
 	bool widget::effectively_enabled() const
@@ -1317,10 +1287,10 @@ namespace neogfx
 
 	bool widget::enable(bool aEnable)
 	{
-		if (iEnabled != aEnable)
+		if (Enabled != aEnable)
 		{
 			bool isEntered = entered();
-			iEnabled = aEnable;
+			Enabled = aEnable;
 			if (!enabled() && isEntered)
 			{
 				if (!is_root())
@@ -1420,12 +1390,12 @@ namespace neogfx
 
 	focus_policy widget::focus_policy() const
 	{
-		return iFocusPolicy;
+		return FocusPolicy;
 	}
 
 	void widget::set_focus_policy(neogfx::focus_policy aFocusPolicy)
 	{
-		iFocusPolicy = aFocusPolicy;
+		FocusPolicy = aFocusPolicy;
 	}
 
 	bool widget::has_focus() const
@@ -1457,22 +1427,22 @@ namespace neogfx
 
 	bool widget::ignore_mouse_events() const
 	{
-		return iIgnoreMouseEvents;
+		return IgnoreMouseEvents;
 	}
 
 	void widget::set_ignore_mouse_events(bool aIgnoreMouseEvents)
 	{
-		iIgnoreMouseEvents = aIgnoreMouseEvents;
+		IgnoreMouseEvents = aIgnoreMouseEvents;
 	}
 
 	bool widget::ignore_non_client_mouse_events() const
 	{
-		return iIgnoreNonClientMouseEvents;
+		return IgnoreNonClientMouseEvents;
 	}
 
 	void widget::set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents)
 	{
-		iIgnoreNonClientMouseEvents = aIgnoreNonClientMouseEvents;
+		IgnoreNonClientMouseEvents = aIgnoreNonClientMouseEvents;
 	}
 
 	bool widget::mouse_event_is_non_client() const

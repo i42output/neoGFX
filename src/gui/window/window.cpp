@@ -843,7 +843,7 @@ namespace neogfx
 	bool window::window_enabled() const
 	{
 		if (is_surface())
-			return has_native_window() && native_window().is_enabled();
+			return has_native_window() && native_window().enabled();
 		else
 			return enabled();
 	}

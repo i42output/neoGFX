@@ -176,7 +176,7 @@ namespace neogfx
 
 	void sprite_plane::add_sprite(i_sprite& aObject)
 	{
-		add_object(std::shared_ptr<i_object>(std::shared_ptr<i_object>(), &aObject));
+		add_object(std::shared_ptr<i_game_object>(std::shared_ptr<i_game_object>(), &aObject));
 	}
 
 	void sprite_plane::add_sprite(std::shared_ptr<i_sprite> aObject)
@@ -304,7 +304,7 @@ namespace neogfx
 		return iObjects;
 	}
 
-	void sprite_plane::add_object(std::shared_ptr<i_object> aObject)
+	void sprite_plane::add_object(std::shared_ptr<i_game_object> aObject)
 	{
 		iNewObjects.push_back(aObject);
 	}
@@ -355,7 +355,7 @@ namespace neogfx
 		return const_cast<broad_phase_collision_tree_3d&>(const_cast<const sprite_plane*>(this)->collision_tree_3d());
 	}
 
-	void sprite_plane::do_add_object(std::shared_ptr<i_object> aObject)
+	void sprite_plane::do_add_object(std::shared_ptr<i_game_object> aObject)
 	{
 		iObjects.push_back(aObject);
 		if (aObject->category() == object_category::Sprite || aObject->category() == object_category::PhysicalObject)

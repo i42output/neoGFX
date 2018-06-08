@@ -91,7 +91,7 @@ namespace neogfx
 		std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const override;
 	public:
 		void close(bool aForce = false) override;
-		bool is_visible() const override;
+		bool visible() const override;
 		void show(bool aActivate = false) override;
 		void hide() override;
 		double opacity() const override;
@@ -106,7 +106,7 @@ namespace neogfx
 		void maximize() override;
 		bool is_restored() const override;
 		void restore() override;
-		bool is_enabled() const override;
+		bool enabled() const override;
 		void enable(bool aEnable) override;
 		bool is_capturing() const override;
 		void set_capture() override;

@@ -1,4 +1,4 @@
-// i_object.hpp
+// i_game_object.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
@@ -37,15 +37,15 @@ namespace neogfx
 	class i_collidable_object;
 	class i_physical_object;
 
-	class i_object
+	class i_game_object
 	{
 	public:
-		struct not_a_shape : std::logic_error { not_a_shape() : std::logic_error("neogfx::i_object::not_a_shape") {} };
-		struct not_a_collidable_object : std::logic_error { not_a_collidable_object() : std::logic_error("neogfx::i_object::not_a_collidable_object") {} };
-		struct not_a_physical_object : std::logic_error { not_a_physical_object() : std::logic_error("neogfx::i_object::not_a_physical_object") {} };
-		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_object::not_implemented") {} };
+		struct not_a_shape : std::logic_error { not_a_shape() : std::logic_error("neogfx::i_game_object::not_a_shape") {} };
+		struct not_a_collidable_object : std::logic_error { not_a_collidable_object() : std::logic_error("neogfx::i_game_object::not_a_collidable_object") {} };
+		struct not_a_physical_object : std::logic_error { not_a_physical_object() : std::logic_error("neogfx::i_game_object::not_a_physical_object") {} };
+		struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::i_game_object::not_implemented") {} };
 	public:
-		virtual ~i_object() {}
+		virtual ~i_game_object() {}
 	public:
 		virtual object_category category() const = 0;
 		virtual const i_shape& as_shape() const = 0;
