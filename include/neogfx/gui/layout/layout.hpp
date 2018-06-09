@@ -73,6 +73,9 @@ namespace neogfx
 		const i_widget& layout_owner() const override;
 		i_widget& layout_owner() override;
 		void set_layout_owner(i_widget* aOwner) override;
+		bool is_proxy() const override;
+		const i_layout_item_proxy& layout_item_proxy() const override;
+		i_layout_item_proxy& layout_item_proxy() override;
 	public:
 		i_layout_item& add(i_layout_item& aItem) override;
 		i_layout_item& add_at(item_index aPosition, i_layout_item& aItem) override;
@@ -87,12 +90,13 @@ namespace neogfx
 		bool is_widget_at(item_index aIndex) const override;
 		const i_layout_item& item_at(item_index aIndex) const override;
 		i_layout_item& item_at(item_index aIndex) override;
-		std::shared_ptr<i_layout_item> item_ptr_at(item_index aIndex) override;
 		using i_layout::get_widget_at;
 		const i_widget& get_widget_at(item_index aIndex) const override;
 		i_widget& get_widget_at(item_index aIndex) override;
 		const i_layout& get_layout_at(item_index aIndex) const override;
 		i_layout& get_layout_at(item_index aIndex) override;
+		const i_layout_item_proxy& find_proxy(const i_layout_item& aItem) const override;
+		i_layout_item_proxy& find_proxy(i_layout_item& aItem) override;
 	public:
 		bool high_dpi() const override;
 		dimension dpi_scale_factor() const override;
@@ -154,8 +158,7 @@ namespace neogfx
 		item_list::const_iterator find_item(const i_layout_item& aItem) const;
 		item_list::iterator find_item(i_layout_item& aItem);
 		const item_list& items() const;
-		void remove(item_list::iterator aItem);
-		const i_geometry& item_geometry(item_list::size_type aItem) const;
+		virtual void remove(item_list::iterator aItem);
 		uint32_t spacer_count() const;
 		uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
 		template <typename AxisPolicy>

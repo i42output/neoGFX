@@ -24,12 +24,12 @@
 
 namespace neogfx
 {
-	layout_item::layout_item(i_layout& aParentLayout, i_layout_item& aItem) :
-		layout_item{ aParentLayout, std::shared_ptr<i_layout_item>{ std::shared_ptr<i_layout_item>{}, &aItem } } 
+	layout_item::layout_item(i_layout_item& aItem) :
+		layout_item{ std::shared_ptr<i_layout_item>{ std::shared_ptr<i_layout_item>{}, &aItem } } 
 	{
 	}
 
-	layout_item::layout_item(i_layout& aParentLayout, std::shared_ptr<i_layout_item> aItem) :
+	layout_item::layout_item(std::shared_ptr<i_layout_item> aItem) :
 		iSubject{ aItem }, iLayoutId{ -1, -1 }
 	{
 	}
@@ -39,13 +39,21 @@ namespace neogfx
 	{
 	}
 
+	layout_item::~layout_item()
+	{
+	}
+
 	const i_layout_item& layout_item::subject() const
 	{
+		if (iSubject->is_proxy())
+			return iSubject->layout_item_proxy().subject();
 		return *iSubject;
 	}
 
 	i_layout_item& layout_item::subject()
 	{
+		if (iSubject->is_proxy())
+			return iSubject->layout_item_proxy().subject();
 		return *iSubject;
 	}
 
@@ -108,7 +116,8 @@ namespace neogfx
 
 	void layout_item::set_parent_layout(i_layout* aParentLayout)
 	{
-		subject().set_parent_layout(aParentLayout);
+		if (!subject().is_proxy())
+			subject().set_parent_layout(aParentLayout);
 	}
 
 	bool layout_item::has_layout_owner() const
@@ -130,7 +139,23 @@ namespace neogfx
 
 	void layout_item::set_layout_owner(i_widget* aOwner)
 	{
-		subject().set_layout_owner(aOwner);
+		if (!subject().is_proxy())
+			subject().set_layout_owner(aOwner);
+	}
+
+	bool layout_item::is_proxy() const
+	{
+		return true;
+	}
+
+	const i_layout_item_proxy& layout_item::layout_item_proxy() const
+	{
+		return *this;
+	}
+
+	i_layout_item_proxy& layout_item::layout_item_proxy()
+	{
+		return *this;
 	}
 
 	void layout_item::layout_as(const point& aPosition, const size& aSize)

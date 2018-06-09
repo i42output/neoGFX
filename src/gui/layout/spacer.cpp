@@ -123,6 +123,21 @@ namespace neogfx
 		// do nothing
 	}
 
+	bool spacer::is_proxy() const
+	{
+		return false;
+	}
+
+	const i_layout_item_proxy& spacer::layout_item_proxy() const
+	{
+		return parent_layout().find_proxy(*this);
+	}
+
+	i_layout_item_proxy& spacer::layout_item_proxy()
+	{
+		return parent_layout().find_proxy(*this);
+	}
+
 	spacer::expansion_policy_e spacer::expansion_policy() const
 	{
 		return iExpansionPolicy;

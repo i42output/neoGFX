@@ -64,10 +64,8 @@ namespace neogfx
 		i_spacer& add_spacer() override;
 		i_spacer& add_spacer_at(item_index aPosition) override;
 		virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		void remove_at(item_index aIndex) override;
-		bool remove(i_layout_item& aItem) override;
 		virtual void remove_item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
-		void remove_all() override;
+		cell_coordinates item_position(const i_layout_item& aItem) const;
 		i_layout_item& item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		i_widget& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
 		i_layout& layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
@@ -83,6 +81,8 @@ namespace neogfx
 		void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
 	public:
 		void layout_items(const point& aPosition, const size& aSize) override;
+	protected:
+		void remove(item_list::iterator aItem);
 	private:
 		uint32_t visible_rows() const;
 		bool is_row_visible(uint32_t aRow) const;

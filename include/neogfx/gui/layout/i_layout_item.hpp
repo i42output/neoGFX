@@ -26,6 +26,7 @@ namespace neogfx
 {
 	class i_layout;
 	class i_widget;
+	class i_layout_item_proxy;
 
 	class i_layout_item : public i_geometry
 	{
@@ -52,6 +53,9 @@ namespace neogfx
 		virtual const i_widget& layout_owner() const = 0;
 		virtual i_widget& layout_owner() = 0;
 		virtual void set_layout_owner(i_widget* aOwner) = 0;
+		virtual bool is_proxy() const = 0;
+		virtual const i_layout_item_proxy& layout_item_proxy() const = 0;
+		virtual i_layout_item_proxy& layout_item_proxy() = 0;
 	public:
 		virtual void layout_as(const point& aPosition, const size& aSize) = 0;
 		virtual uint32_t layout_id() const = 0;

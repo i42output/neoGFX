@@ -20,20 +20,17 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/layout/i_layout_item.hpp>
+#include <neogfx/gui/layout/i_layout_item_proxy.hpp>
 
 namespace neogfx
 {
-	class layout_item : public i_layout_item
+	class layout_item : public i_layout_item_proxy
 	{
 	public:
-		layout_item(i_layout& aParentLayout, i_layout_item& aItem);
-		layout_item(i_layout& aParentLayout, std::shared_ptr<i_layout_item> aItem);
+		layout_item(i_layout_item& aItem);
+		layout_item(std::shared_ptr<i_layout_item> aItem);
 		layout_item(const layout_item& aOther);
-	public:
-		const i_layout_item& subject() const;
-		i_layout_item& subject();
-		std::shared_ptr<i_layout_item> subject_ptr();
+		~layout_item();
 	public:
 		bool is_layout() const override;
 		const i_layout& as_layout() const override;
@@ -52,6 +49,9 @@ namespace neogfx
 		const i_widget& layout_owner() const override;
 		i_widget& layout_owner() override;
 		void set_layout_owner(i_widget* aOwner) override;
+		bool is_proxy() const override;
+		const i_layout_item_proxy& layout_item_proxy() const override;
+		i_layout_item_proxy& layout_item_proxy() override;
 	public:
 		bool high_dpi() const override;
 		dimension dpi_scale_factor() const override;
@@ -87,6 +87,10 @@ namespace neogfx
 		void layout_as(const point& aPosition, const size& aSize) override;
 		uint32_t layout_id() const override;
 		void next_layout_id() override;
+	public:
+		const i_layout_item& subject() const override;
+		i_layout_item& subject() override;
+		std::shared_ptr<i_layout_item> subject_ptr() override;
 	public:
 		bool operator==(const layout_item& aOther) const;
 	private:

@@ -176,6 +176,21 @@ namespace neogfx
 				i.subject().set_layout_owner(aOwner);
 	}
 
+	bool layout::is_proxy() const
+	{
+		return false;
+	}
+
+	const i_layout_item_proxy& layout::layout_item_proxy() const
+	{
+		return parent_layout().find_proxy(*this);
+	}
+
+	i_layout_item_proxy& layout::layout_item_proxy()
+	{
+		return parent_layout().find_proxy(*this);
+	}
+
 	i_layout_item& layout::add(i_layout_item& aItem)
 	{
 		return add(std::shared_ptr<i_layout_item>{std::shared_ptr<i_layout_item>{}, &aItem});
@@ -197,7 +212,7 @@ namespace neogfx
 			throw item_already_added();
 		while (aPosition > iItems.size())
 			add_spacer_at(0);
-		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item{ *this, aItem });
+		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item{ aItem });
 		i->subject().set_parent_layout(this);
 		if (has_layout_owner())
 			i->subject().set_layout_owner(&layout_owner());
@@ -228,16 +243,8 @@ namespace neogfx
 
 	void layout::remove_all()
 	{
-		item_list toRemove;
-		toRemove.splice(toRemove.begin(), iItems);
-		for (auto& i : toRemove)
-		{
-			if (i.has_parent_layout() && &i.parent_layout() == this)
-			{
-				i.set_parent_layout(nullptr);
-				i.set_layout_owner(nullptr);
-			}
-		}
+		while (!iItems.empty())
+			remove(std::prev(iItems.end()));
 		invalidate();
 	}
 
@@ -295,14 +302,6 @@ namespace neogfx
 		return const_cast<i_layout_item&>(const_cast<const layout*>(this)->item_at(aIndex));
 	}
 
-	std::shared_ptr<i_layout_item> layout::item_ptr_at(item_index aIndex)
-	{
-		if (aIndex >= iItems.size())
-			throw bad_item_index();
-		auto item = std::next(iItems.begin(), aIndex);
-		return item->subject_ptr();
-	}
-		
 	const i_widget& layout::get_widget_at(item_index aIndex) const
 	{
 		if (aIndex >= iItems.size())
@@ -331,6 +330,19 @@ namespace neogfx
 	i_layout& layout::get_layout_at(item_index aIndex)
 	{
 		return const_cast<i_layout&>(const_cast<const layout*>(this)->get_layout_at(aIndex));
+	}
+
+	const i_layout_item_proxy& layout::find_proxy(const i_layout_item& aItem) const
+	{
+		for (auto& item : items())
+			if (&item == &aItem || &item.subject() == &aItem)
+				return item;
+		throw item_not_found();
+	}
+
+	i_layout_item_proxy& layout::find_proxy(i_layout_item& aItem)
+	{
+		return const_cast<i_layout_item_proxy&>(const_cast<const layout*>(this)->find_proxy(aItem));
 	}
 
 	bool layout::high_dpi() const

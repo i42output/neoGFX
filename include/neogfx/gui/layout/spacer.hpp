@@ -51,6 +51,10 @@ namespace neogfx
 		const i_widget& layout_owner() const override;
 		i_widget& layout_owner() override;
 		void set_layout_owner(i_widget* aOwner) override;
+		bool is_proxy() const override;
+		const i_layout_item_proxy& layout_item_proxy() const override;
+		i_layout_item_proxy& layout_item_proxy() override;
+	public:
 		expansion_policy_e expansion_policy() const override;
 		void set_expansion_policy(expansion_policy_e aExpansionPolicy) override;
 	public:

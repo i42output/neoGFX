@@ -626,8 +626,23 @@ namespace neogfx
 			auto itemIndex = parent_layout().find(*this);
 			if (itemIndex == boost::none)
 				throw i_layout::item_not_found();
-			aOwner->add(std::dynamic_pointer_cast<i_widget>(parent_layout().item_ptr_at(*itemIndex)));
+			aOwner->add(std::dynamic_pointer_cast<i_widget>(layout_item_proxy().subject_ptr()));
 		}
+	}
+
+	bool widget::is_proxy() const
+	{
+		return false;
+	}
+
+	const i_layout_item_proxy& widget::layout_item_proxy() const
+	{
+		return parent_layout().find_proxy(*this);
+	}
+
+	i_layout_item_proxy& widget::layout_item_proxy()
+	{
+		return parent_layout().find_proxy(*this);
 	}
 
 	void widget::layout_items(bool aDefer)

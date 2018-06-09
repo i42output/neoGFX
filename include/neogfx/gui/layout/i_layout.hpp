@@ -64,11 +64,12 @@ namespace neogfx
 		virtual bool is_widget_at(item_index aIndex) const = 0;
 		virtual const i_layout_item& item_at(item_index aIndex) const = 0;
 		virtual i_layout_item& item_at(item_index aIndex) = 0;
-		virtual std::shared_ptr<i_layout_item> item_ptr_at(item_index aIndex) = 0;
 		virtual const i_widget& get_widget_at(item_index aIndex) const = 0;
 		virtual i_widget& get_widget_at(item_index aIndex) = 0;
 		virtual const i_layout& get_layout_at(item_index aIndex) const = 0;
 		virtual i_layout& get_layout_at(item_index aIndex) = 0;
+		virtual const i_layout_item_proxy& find_proxy(const i_layout_item& aItem) const = 0;
+		virtual i_layout_item_proxy& find_proxy(i_layout_item& aItem) = 0;
 	public:
 		virtual bool has_spacing() const = 0;
 		virtual size spacing() const = 0;
@@ -125,11 +126,18 @@ namespace neogfx
 			return *newItem;
 		}
 		template <typename ItemType>
-		void replace_item_at(item_index aPosition, ItemType&& aItem)
+		ItemType& replace_item_at(item_index aPosition, ItemType&& aItem)
 		{
 			if (aPosition < count())
 				remove_at(aPosition);
-			add_at(aPosition, aItem);
+			return static_cast<ItemType&>(add_at(aPosition, aItem));
+		}
+		template <typename ItemType>
+		ItemType& replace_item_at(item_index aPosition, std::shared_ptr<ItemType> aItem)
+		{
+			if (aPosition < count())
+				remove_at(aPosition);
+			return static_cast<ItemType&>(add_at(aPosition, std::static_pointer_cast<i_layout_item>(aItem)));
 		}
 		template <typename WidgetT>
 		const WidgetT& get_widget_at(item_index aIndex) const
