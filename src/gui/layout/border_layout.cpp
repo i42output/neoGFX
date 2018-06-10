@@ -27,8 +27,8 @@
 namespace neogfx
 {
 	border_layout::border_layout(neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating }, 
 		layout{ aAlignment },
+		neolib::lifetime{ neolib::lifetime_state::Creating },
 		iRows{ *this, aAlignment },
 		iTop{ iRows, aAlignment },
 		iMiddle{ iRows, aAlignment },
@@ -41,8 +41,8 @@ namespace neogfx
 	}
 
 	border_layout::border_layout(i_widget& aParent, neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aParent, aAlignment },
+		neolib::lifetime{ neolib::lifetime_state::Creating },
 		iRows{ *this, aAlignment },
 		iTop{ iRows, aAlignment },
 		iMiddle{ iRows, aAlignment },
@@ -55,8 +55,8 @@ namespace neogfx
 	}
 
 	border_layout::border_layout(i_layout& aParent, neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating },
 		layout{ aParent, aAlignment },
+		neolib::lifetime{ neolib::lifetime_state::Creating },
 		iRows{ *this, aAlignment },
 		iTop{ iRows, aAlignment },
 		iMiddle{ iRows, aAlignment },

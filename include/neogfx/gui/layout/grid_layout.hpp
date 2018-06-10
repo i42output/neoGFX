@@ -29,7 +29,7 @@
 
 namespace neogfx
 {
-	class grid_layout : private neolib::lifetime, public layout
+	class grid_layout : public layout, protected virtual neolib::lifetime
 	{
 	public:
 		struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };

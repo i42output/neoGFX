@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
@@ -30,7 +31,7 @@ namespace neogfx
 	class i_native_graphics_context;
 	class i_widget;
 
-	class i_native_surface
+	class i_native_surface : public i_object
 	{
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_surface::no_parent") {} };
@@ -78,7 +79,5 @@ namespace neogfx
 		virtual size rendering_target_texture_extents() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
-	public:
-		virtual neolib::i_lifetime& as_lifetime() = 0;
 	};
 }

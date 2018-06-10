@@ -20,12 +20,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/i_lifetime.hpp>
 #include <neogfx/core/i_properties.hpp>
 
 namespace neogfx
 {
 	class i_object
 	{
+	public:
+		virtual neolib::i_lifetime& as_lifetime() = 0;
 	public:
 		virtual void property_changed(i_property& aProperty) = 0;
 	public:

@@ -783,9 +783,4 @@ namespace neogfx
 	{
 		return as_window().as_widget();
 	}
-
-	neolib::i_lifetime& surface_window_proxy::as_lifetime()
-	{
-		return *this;
-	}
 }

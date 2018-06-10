@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/lifetime.hpp>
 #include <neolib/variant.hpp>
+#include <neogfx/core/object.hpp>
 #include "i_native_window.hpp"
 
 namespace neogfx
@@ -29,7 +29,7 @@ namespace neogfx
 	class i_rendering_engine;
 	class i_surface_manager;
 
-	class native_window : public i_native_window, protected neolib::lifetime
+	class native_window : public object<i_native_window>
 	{
 		typedef std::deque<native_event> event_queue;
 	public:

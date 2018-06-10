@@ -20,14 +20,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/lifetime.hpp>
 #include <neogfx/core/i_object.hpp>
 
 namespace neogfx
 {
 	template <typename Base>
-	class object : public Base, public i_properties
+	class object : public Base, public i_properties, protected virtual neolib::lifetime
 	{
 		// i_object
+	public:
+		neolib::i_lifetime& as_lifetime() override
+		{
+			return *this;
+		}
+	public:
+		void property_changed(i_property&) override
+		{
+			// default is to do nothing
+		}
 	public:
 		const i_properties& properties() const override
 		{

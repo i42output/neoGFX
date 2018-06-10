@@ -27,43 +27,37 @@
 namespace neogfx
 {
 	grid_layout::grid_layout(neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating },
-		layout{ aAlignment }, iRowLayout{ *this, aAlignment }
+		layout{ aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }
 	{
 		init();
 	}
 
 	grid_layout::grid_layout(cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating },
-		layout{ aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions{ aColumns, aRows }
+		layout{ aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }, iDimensions{ aColumns, aRows }
 	{
 		init();
 	}
 
 	grid_layout::grid_layout(i_widget& aParent, neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating },
-		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }
+		layout{ aParent, aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }
 	{
 		init();
 	}
 
 	grid_layout::grid_layout(i_layout& aParent, neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating },
-		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }
+		layout{ aParent, aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }
 	{
 		init();
 	}
 
 	grid_layout::grid_layout(i_widget& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating },
-		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions{ aColumns, aRows }
+		layout{ aParent, aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }, iDimensions{ aColumns, aRows }
 	{
 		init();
 	}
 
 	grid_layout::grid_layout(i_layout& aParent, cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment) :
-		lifetime{ neolib::lifetime_state::Creating },
-		layout{ aParent, aAlignment }, iRowLayout{ *this, aAlignment }, iDimensions(aColumns, aRows)
+		layout{ aParent, aAlignment }, neolib::lifetime{ neolib::lifetime_state::Creating }, iRowLayout{ *this, aAlignment }, iDimensions(aColumns, aRows)
 	{
 		init();
 	}

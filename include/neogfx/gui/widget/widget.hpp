@@ -20,7 +20,6 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/lifetime.hpp>
 #include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
@@ -28,7 +27,7 @@
 
 namespace neogfx
 {
-	class widget : public object<i_widget>, protected neolib::lifetime
+	class widget : public object<i_widget>
 	{
 	public:
 		widget();
@@ -36,7 +35,6 @@ namespace neogfx
 		widget(i_widget& aParent);
 		widget(i_layout& aLayout);
 		~widget();
-		neolib::i_lifetime& as_lifetime() override;
 		// i_object
 	public:
 		void property_changed(i_property& aProperty) override;

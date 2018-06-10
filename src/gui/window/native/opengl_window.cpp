@@ -282,7 +282,7 @@ namespace neogfx
 
 	void opengl_window::set_destroying()
 	{
-		lifetime::set_destroying();
+		native_window::set_destroying();
 		if (iFrameBufferSize != size{})
 		{
 			rendering_engine().activate_context(*this);
@@ -294,11 +294,6 @@ namespace neogfx
 
 	void opengl_window::set_destroyed()
 	{
-		lifetime::set_destroyed();
-	}
-
-	neolib::i_lifetime& opengl_window::as_lifetime()
-	{
-		return *this;
+		native_window::set_destroyed();
 	}
 }

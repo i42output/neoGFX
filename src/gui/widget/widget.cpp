@@ -104,11 +104,6 @@ namespace neogfx
 			parent_layout().remove(*this);
 	}
 
-	neolib::i_lifetime& widget::as_lifetime()
-	{
-		return *this;
-	}
-
 	void widget::property_changed(i_property& aProperty)
 	{
 		static auto invalidate_layout = [](i_widget& self) { if (self.has_parent_layout()) self.parent_layout().invalidate(); self.update(true); };

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/variant.hpp>
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/geometry.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
@@ -45,7 +46,7 @@ namespace neogfx
 
 	typedef window_style surface_style;
 
-	class i_surface : public i_device_metrics
+	class i_surface : public i_object, public i_device_metrics
 	{
 	public:
 		event<> dpi_changed;
@@ -103,7 +104,5 @@ namespace neogfx
 		virtual void set_surface_opacity(double aOpacity) = 0;
 		virtual double surface_transparency() const = 0;
 		virtual void set_surface_transparency(double aTransparency) = 0;
-	public:
-		virtual neolib::i_lifetime& as_lifetime() = 0;
 	};
 }

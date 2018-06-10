@@ -194,8 +194,6 @@ namespace neogfx
 	public:
 		const i_widget& as_widget() const override;
 		i_widget& as_widget() override;
-	public:
-		neolib::i_lifetime& as_lifetime() override;
 	private:
 		void init();
 	private:

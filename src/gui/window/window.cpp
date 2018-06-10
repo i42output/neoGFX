@@ -68,7 +68,7 @@ namespace neogfx
 		if (iSurface != nullptr)
 		{
 			iSurfaceDestroyed.emplace(iSurface->as_lifetime());
-			iWindowDestroyed.emplace(aWindow.as_lifetime());
+			iWindowDestroyed.emplace(aWindow.as_widget().as_lifetime());
 			iSurface->pause_rendering();
 		}
 	}
@@ -296,7 +296,7 @@ namespace neogfx
 	{
 		update_modality(true);
 		window_manager().remove_window(*this);
-		lifetime::set_destroyed();
+		set_destroyed();
 	}
 
 	window_style window::style() const
@@ -1009,11 +1009,6 @@ namespace neogfx
 	}
 
 	i_widget& window::as_widget()
-	{
-		return *this;
-	}
-
-	neolib::i_lifetime& window::as_lifetime()
 	{
 		return *this;
 	}
