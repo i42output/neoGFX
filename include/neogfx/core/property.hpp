@@ -48,12 +48,43 @@ namespace neogfx
 	class property : public i_property
 	{
 	public:
+		typedef property<T, Category> self_type;
 		typedef T value_type;
 		typedef Category category_type;
 	public:
 		event<const value_type&> changed;
 	private:
 		typedef detail::property_optional_type_cracker<T> cracker;
+	public:
+		template <typename ParentType>
+		class optional_proxy
+		{
+		public:
+			typedef ParentType parent_type;
+		public:
+			optional_proxy(parent_type& aParent) : iParent{ aParent }
+			{
+			}
+		public:
+			template <typename SFINAE = cracker::type>
+			operator const typename std::enable_if<cracker::optional, SFINAE>::type&() const
+			{
+				return *iParent.contents();
+			}
+			template <typename T2, typename SFINAE = optional_proxy<parent_type>>
+			typename std::enable_if<!std::is_const<parent_type>::value, SFINAE>::type& operator=(const T2& aValue)
+			{
+				iParent.assign(aValue);
+				return *this;
+			}
+			template <typename SFINAE = const cracker::type*>
+			const typename std::enable_if<cracker::optional, SFINAE>::type operator->() const
+			{
+				return &*iParent.contents();
+			}
+		private:
+			parent_type& iParent;
+		};
 	public:
 		property(i_object& aOwner, const std::string& aName) : iOwner{ aOwner }, iName { aName }, iValue{}
 		{
@@ -92,8 +123,12 @@ namespace neogfx
 				*this = value_type{};
 		}
 	public:
+		const value_type& contents() const
+		{
+			return iValue;
+		}
 		template <typename T2>
-		value_type& assign(const T2& aValue, bool aOwnerNotify = true)
+		self_type& assign(const T2& aValue, bool aOwnerNotify = true)
 		{
 			if (iValue != aValue)
 			{
@@ -103,10 +138,10 @@ namespace neogfx
 				i_property::changed.trigger(get());
 				changed.trigger(iValue);
 			}
-			return iValue;
+			return *this;
 		}
 		template <typename T2>
-		value_type& operator=(const T2& aValue)
+		self_type& operator=(const T2& aValue)
 		{
 			return assign(aValue);
 		}
@@ -114,25 +149,20 @@ namespace neogfx
 		{
 			return iValue;
 		}
-		template <typename SFINAE = typename cracker::type>
-		const typename std::enable_if<cracker::optional, SFINAE>::type& operator*() const
+		template <typename SFINAE = optional_proxy<const self_type>>
+		const typename std::enable_if<cracker::optional, SFINAE>::type operator*() const
 		{
-			return *iValue;
+			return optional_proxy<const self_type>{ *this };
 		}
-		template <typename SFINAE = typename cracker::type>
-		typename std::enable_if<cracker::optional, SFINAE>::type& operator*()
+		template <typename SFINAE = optional_proxy<self_type>>
+		typename std::enable_if<cracker::optional, SFINAE>::type operator*()
 		{
-			return *iValue;
+			return optional_proxy<self_type>{ *this };
 		}
-		template <typename SFINAE = typename cracker::type>
-		const typename std::enable_if<cracker::optional, SFINAE>::type* operator->() const
+		template <typename SFINAE = optional_proxy<const self_type>>
+		const typename std::enable_if<cracker::optional, SFINAE>::type operator->() const
 		{
-			return &*iValue;
-		}
-		template <typename SFINAE = typename cracker::type>
-		typename std::enable_if<cracker::optional, SFINAE>::type* operator->()
-		{
-			return &*iValue;
+			return optional_proxy<const self_type>{ *this };
 		}
 		template <typename T>
 		bool operator==(const T& aRhs) const

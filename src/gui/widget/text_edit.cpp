@@ -161,10 +161,6 @@ namespace neogfx
 	text_edit::text_edit(type_e aType, frame_style aFrameStyle) :
 		scrollable_widget{ aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
 		iType{ aType },
-		iReadOnly{ false },
-		iWordWrap{ aType == MultiLine },
-		iPassword{ false },
-		iAlignment{ neogfx::alignment::Left | neogfx::alignment::Top },
 		iPersistDefaultStyle{ false },
 		iGlyphColumns{ 1 },
 		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
@@ -184,10 +180,6 @@ namespace neogfx
 	text_edit::text_edit(i_widget& aParent, type_e aType, frame_style aFrameStyle) :
 		scrollable_widget{ aParent, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
 		iType{ aType },
-		iReadOnly{ false },
-		iWordWrap{ aType == MultiLine },
-		iPassword{ false },
-		iAlignment{ neogfx::alignment::Left | neogfx::alignment::Top },
 		iPersistDefaultStyle{ false },
 		iGlyphColumns{ 1 },
 		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
@@ -207,10 +199,6 @@ namespace neogfx
 	text_edit::text_edit(i_layout& aLayout, type_e aType, frame_style aFrameStyle) :
 		scrollable_widget{ aLayout, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
 		iType{ aType },
-		iReadOnly{ false },
-		iWordWrap{ aType == MultiLine },
-		iPassword{ false },
-		iAlignment{ neogfx::alignment::Left | neogfx::alignment::Top },
 		iPersistDefaultStyle{ false },
 		iGlyphColumns{ 1 },
 		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
@@ -308,10 +296,10 @@ namespace neogfx
 				if (linePos.y > client_rect(false).bottom() || linePos.y > update_rect().bottom())
 					break;
 				auto textDirection = glyph_text_direction(paintLine->lineStart.second, paintLine->lineEnd.second);
-				if (((iAlignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
-					((iAlignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+				if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
+					((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
 					linePos.x += aGraphicsContext.from_device_units(size{ columnWidth - columnMargins.right - paintLine->extents.cx, 0.0 }).cx;
-				else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
+				else if ((Alignment & alignment::Horizontal) == alignment::Centre)
 					linePos.x += std::ceil((aGraphicsContext.from_device_units(size{ columnWidth - paintLine->extents.cx, 0.0 }).cx) / 2.0);
 				else
 					linePos.x += columnMargins.left;
@@ -848,54 +836,54 @@ namespace neogfx
 
 	bool text_edit::read_only() const
 	{
-		return iReadOnly;
+		return ReadOnly;
 	}
 
 	void text_edit::set_read_only(bool aReadOnly)
 	{
-		iReadOnly = aReadOnly;
+		ReadOnly = aReadOnly;
 		update();
 	}
 
 	bool text_edit::word_wrap() const
 	{
-		return iWordWrap;
+		return WordWrap;
 	}
 	
 	void text_edit::set_word_wrap(bool aWordWrap)
 	{
-		if (iWordWrap != aWordWrap)
+		if (WordWrap != aWordWrap)
 		{
-			iWordWrap = aWordWrap;
+			WordWrap = aWordWrap;
 			refresh_columns();
 		}
 	}
 
 	bool text_edit::password() const
 	{
-		return iPassword;
+		return Password;
 	}
 
 	void text_edit::set_password(bool aPassword, const std::string& aMask)
 	{
-		if (iPassword != aPassword || iPasswordMask != aMask)
+		if (Password != aPassword || PasswordMask != aMask)
 		{
-			iPassword = aPassword;
-			iPasswordMask = aMask;
+			Password = aPassword;
+			PasswordMask = aMask;
 			refresh_paragraph(iText.begin(), 0);
 		}
 	}
 
 	neogfx::alignment text_edit::alignment() const
 	{
-		return iAlignment;
+		return Alignment;
 	}
 
 	void text_edit::set_alignment(neogfx::alignment aAlignment)
 	{
-		if (iAlignment != aAlignment)
+		if (Alignment != aAlignment)
 		{
-			iAlignment = aAlignment;
+			Alignment = aAlignment;
 			update();
 		}
 	}
@@ -1021,10 +1009,10 @@ namespace neogfx
 			{
 				delta alignmentAdjust = 0.0;
 				auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
-				if (((iAlignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
-					((iAlignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+				if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
+					((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
 					alignmentAdjust.dx = std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx;
-				else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
+				else if ((Alignment & alignment::Horizontal) == alignment::Centre)
 					alignmentAdjust.dx = (std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx) / 2.0;
 				if (lineStart != lineEnd)
 				{
@@ -1044,10 +1032,10 @@ namespace neogfx
 		{
 			pos.x = 0.0;
 			auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
-			if (((iAlignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
-				((iAlignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+			if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
+				((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
 				pos.x = std::max(iTextExtents.cx, client_rect(false).cx);
-			else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
+			else if ((Alignment & alignment::Horizontal) == alignment::Centre)
 				pos.x = std::max(iTextExtents.cx, client_rect(false).cx) / 2.0;
 			pos.y = lines.back().ypos + lines.back().extents.cy;
 		}
@@ -1099,10 +1087,10 @@ namespace neogfx
 				--line;
 			delta alignmentAdjust = 0.0;
 			auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
-			if (((iAlignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
-				((iAlignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+			if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
+				((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
 				alignmentAdjust.dx = std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx;
-			else if ((iAlignment & alignment::Horizontal) == alignment::Centre)
+			else if ((Alignment & alignment::Horizontal) == alignment::Centre)
 				alignmentAdjust.dx = (std::max(iTextExtents.cx, client_rect(false).cx) - line->extents.cx) / 2.0;
 			adjusted.x -= alignmentAdjust.dx;
 			adjusted = adjusted.max(point{});
@@ -1454,7 +1442,7 @@ namespace neogfx
 		(void)aWhere;
 		graphics_context gc{ *this, graphics_context::type::Unattached };
 		if (password())
-			gc.set_password(true, iPasswordMask.empty() ? "\xE2\x97\x8F" : iPasswordMask);
+			gc.set_password(true, PasswordMask.contents().empty() ? "\xE2\x97\x8F"s : PasswordMask);
 		iGlyphs.clear();
 		iGlyphParagraphs.clear();
 		iCharacterToParagraphCache.clear();
@@ -1583,7 +1571,7 @@ namespace neogfx
 							{ 0.0, height } });
 					pos.y += glyphFont.height();
 				}
-				else if (iWordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
+				else if (WordWrap && (paragraphEnd - 1)->x + (paragraphEnd - 1)->advance().cx > availableWidth)
 				{
 					auto insertionPoint = lines.end();
 					bool first = true;

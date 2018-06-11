@@ -516,11 +516,6 @@ namespace neogfx
 	private:
 		sink iSink;
 		type_e iType;
-		bool iReadOnly;
-		bool iWordWrap;
-		bool iPassword;
-		std::string iPasswordMask;
-		neogfx::alignment iAlignment;
 		style iDefaultStyle;
 		bool iPersistDefaultStyle;
 		font_info iDefaultFont;
@@ -555,5 +550,11 @@ namespace neogfx
 		uint32_t iSuppressTextChangedNotification;
 		uint32_t iWantedToNotfiyTextChanged;
 		bool iOutOfMemory;
+	public:
+		define_property(property_category::other, bool, ReadOnly, false)
+		define_property(property_category::other, bool, WordWrap, iType == MultiLine)
+		define_property(property_category::other, bool, Password, false)
+		define_property(property_category::other, std::string, PasswordMask)
+		define_property(property_category::other, neogfx::alignment, Alignment, neogfx::alignment::Left | neogfx::alignment::Top)
 	};
 }

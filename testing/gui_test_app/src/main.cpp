@@ -455,6 +455,12 @@ int main(int argc, char* argv[])
 		{
 			button1.text().set_text(lineEdit.text());
 		});
+		textEdit.Size.changed([&lineEdit](const ng::size& size)
+		{
+			std::ostringstream oss;
+			oss << "textEdit size: " << size;
+			lineEdit.set_text(oss.str());
+		});
 		ng::line_edit lineEditPassword(layoutLineEdits);
 		lineEditPassword.set_text("Password");
 		ng::double_spin_box spinBox(layoutLineEdits);
