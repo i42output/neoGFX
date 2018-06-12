@@ -115,6 +115,7 @@ namespace neogfx
 	{
 		if (&*aItem == &iRowLayout)
 		{
+			iRowLayout.set_parent_layout(this);
 			if (has_layout_owner())
 				iRowLayout.set_layout_owner(&layout_owner());
 			return iRowLayout;
