@@ -180,16 +180,6 @@ namespace neogfx
 		subject().layout_as(adjustedPosition, adjustedSize);
 	}
 
-	uint32_t layout_item::layout_id() const
-	{
-		return subject().layout_id();
-	}
-	
-	void layout_item::next_layout_id()
-	{
-		subject().next_layout_id();
-	}
-
 	bool layout_item::high_dpi() const
 	{
 		return subject().high_dpi();

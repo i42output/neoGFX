@@ -215,6 +215,12 @@ namespace neogfx
 			row->invalidate();
 	}
 
+	void grid_layout::next_layout_id()
+	{
+		layout::next_layout_id();
+		iRowLayout.next_layout_id();
+	}
+
 	size grid_layout::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		if (items_visible() == 0)

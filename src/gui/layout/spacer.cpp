@@ -326,17 +326,6 @@ namespace neogfx
 		set_extents(aSize);
 	}
 
-	uint32_t spacer::layout_id() const
-	{
-		return iLayoutId;
-	}
-
-	void spacer::next_layout_id()
-	{
-		if (++iLayoutId == static_cast<uint32_t>(-1))
-			iLayoutId = 0;
-	}
-
 	bool spacer::visible() const
 	{
 		if (has_layout_owner())

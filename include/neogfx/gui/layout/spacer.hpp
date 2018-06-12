@@ -89,13 +89,10 @@ namespace neogfx
 		neogfx::units set_units(neogfx::units aUnits) const override;
 	public:
 		void layout_as(const point& aPosition, const size& aSize) override;
-		uint32_t layout_id() const override;
-		void next_layout_id() override;
 	public:
 		bool visible() const override;
 	private:
 		i_layout* iParentLayout;
-		uint32_t iLayoutId;
 		units_context iUnitsContext;
 		point iPosition;
 		size iExtents;

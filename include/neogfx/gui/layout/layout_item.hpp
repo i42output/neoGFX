@@ -85,8 +85,6 @@ namespace neogfx
 		bool visible() const override;
 	public:
 		void layout_as(const point& aPosition, const size& aSize) override;
-		uint32_t layout_id() const override;
-		void next_layout_id() override;
 	public:
 		const i_layout_item& subject() const override;
 		i_layout_item& subject() override;

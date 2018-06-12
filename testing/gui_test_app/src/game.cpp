@@ -86,7 +86,11 @@ void create_game(ng::i_layout& aLayout)
 	spritePlane.set_font(ng::font(spritePlane.font(), ng::font::Bold, 28));
 	spritePlane.set_background_colour(ng::colour::Black);
 	spritePlane.enable_z_sorting(true);
+#ifdef NDEBUG
 	for (uint32_t i = 0; i < 1000; ++i)
+#else
+	for (uint32_t i = 0; i < 100; ++i)
+#endif
 		spritePlane.add_shape(std::make_shared<ng::rectangle>(
 			ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -1.0 + 0.5 * (static_cast<ng::scalar>(std::rand() % 32)) / 32.0 },
 			ng::vec2{ static_cast<ng::scalar>(std::rand() % 64), static_cast<ng::scalar>(std::rand() % 64) },
@@ -139,7 +143,11 @@ void create_game(ng::i_layout& aLayout)
 	shipInfo->set_margins(ng::margins(2.0));
 	shipInfo->set_tag_of(spaceshipSprite, ng::vec3{ 18.0, 18.0, 1.0 });
 	spritePlane.add_shape(shipInfo);
+#ifdef NDEBUG
 	for (int i = 0; i < 50; ++i)
+#else
+	for (int i = 0; i < 5; ++i)
+#endif
 	{
 		create_target(spritePlane);
 	}

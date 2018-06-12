@@ -466,7 +466,10 @@ namespace neogfx
 		if (++iLayoutId == static_cast<uint32_t>(-1))
 			iLayoutId = 0;
 		for (auto& item : *this)
-			item.next_layout_id();
+			if (item.is_layout())
+				item.as_layout().next_layout_id();
+			else if (item.is_widget() && item.as_widget().has_layout())
+				item.as_widget().layout().next_layout_id();
 	}
 
 	bool layout::visible() const

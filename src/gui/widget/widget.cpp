@@ -50,7 +50,6 @@ namespace neogfx
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
 		iParentLayout{ nullptr },
-		iLayoutId{ 0u },
 		iLayoutInProgress{ 0 },
 		iUnitsContext{ *this }
 	{
@@ -65,7 +64,6 @@ namespace neogfx
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
 		iParentLayout{ nullptr },
-		iLayoutId{ 0u },
 		iLayoutInProgress{ 0 },
 		iUnitsContext{ *this }
 	{
@@ -81,7 +79,6 @@ namespace neogfx
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
 		iParentLayout{ nullptr },
-		iLayoutId{ 0u },
 		iLayoutInProgress{ 0 },
 		iUnitsContext{ *this }
 	{
@@ -485,6 +482,8 @@ namespace neogfx
 		iLayout = aLayout;
 		if (iLayout != nullptr)
 		{
+			if (has_parent_layout())
+				iLayout->set_parent_layout(&parent_layout());
 			iLayout->set_layout_owner(this);
 			for (auto& c : iChildren)
 				if (c->has_parent_layout() && &c->parent_layout() == oldLayout.get())
@@ -907,6 +906,8 @@ namespace neogfx
 
 	size widget::minimum_size(const optional_size& aAvailableSpace) const
 	{
+		if (debug == this)
+			std::cerr << "widget::minimum_size(...)" << std::endl;
 		if (has_minimum_size())
 			return units_converter(*this).from_device_units(*MinimumSize);
 		else if (has_layout())
@@ -995,24 +996,13 @@ namespace neogfx
 
 	void widget::layout_as(const point& aPosition, const size& aSize)
 	{
+		if (debug == this)
+			std::cerr << "widget::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
 		move(aPosition);
 		if (extents() != aSize)
 			resize(aSize);
 		else if (has_layout() && layout().invalidated())
 			layout_items();
-	}
-
-	uint32_t widget::layout_id() const
-	{
-		return iLayoutId;
-	}
-
-	void widget::next_layout_id()
-	{
-		if (++iLayoutId == static_cast<uint32_t>(-1))
-			iLayoutId = 0;
-		if (has_layout())
-			layout().next_layout_id();
 	}
 
 	void widget::update(bool aIncludeNonClient)

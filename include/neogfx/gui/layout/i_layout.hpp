@@ -86,6 +86,9 @@ namespace neogfx
 		virtual bool invalidated() const = 0;
 		virtual void invalidate() = 0;
 		virtual void validate() = 0;
+	public:
+		virtual uint32_t layout_id() const = 0;
+		virtual void next_layout_id() = 0;
 		// helpers
 	public:
 		template <typename ItemType>

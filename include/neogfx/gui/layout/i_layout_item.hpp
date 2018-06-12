@@ -58,8 +58,6 @@ namespace neogfx
 		virtual i_layout_item_proxy& layout_item_proxy() = 0;
 	public:
 		virtual void layout_as(const point& aPosition, const size& aSize) = 0;
-		virtual uint32_t layout_id() const = 0;
-		virtual void next_layout_id() = 0;
 	public:
 		virtual bool visible() const = 0;
 	};

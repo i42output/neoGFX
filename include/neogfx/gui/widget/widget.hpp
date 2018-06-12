@@ -157,8 +157,6 @@ namespace neogfx
 		i_layout_item_proxy& layout_item_proxy() override;
 	public:
 		void layout_as(const point& aPosition, const size& aSize) override;
-		uint32_t layout_id() const override;
-		void next_layout_id() override;
 		// i_widget
 	public:
 		void update(bool aIncludeNonClient = false) override;
@@ -260,7 +258,6 @@ namespace neogfx
 		i_widget* iLinkBefore;
 		i_widget* iLinkAfter;
 		i_layout* iParentLayout;
-		uint32_t iLayoutId;
 		uint32_t iLayoutInProgress;
 		std::shared_ptr<i_layout> iLayout;
 		class layout_timer;
