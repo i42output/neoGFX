@@ -166,8 +166,8 @@ namespace neogfx
 	{
 		client_layout().set_margins(neogfx::margins{});
 		client_layout().set_size_policy(neogfx::size_policy::Expanding);
-		update_placement();
 		show();
+		update_placement();
 	}
 
 	drop_list_popup::~drop_list_popup()
