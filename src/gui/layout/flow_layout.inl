@@ -171,7 +171,7 @@ namespace neogfx
 			{
 				rows.add(std::make_shared<typename AxisPolicy::major_layout>());
 				rows.get_layout_at(rows.count() - 1).set_size_policy(size_policy::Minimum);
-				rows.get_layout_at(rows.count() - 1).add(item.subject());
+				rows.get_layout_at(rows.count() - 1).add(item);
 				AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
 			}
 			else
@@ -181,7 +181,7 @@ namespace neogfx
 					rows.add(std::make_shared<typename AxisPolicy::major_layout>());
 					rows.get_layout_at(rows.count() - 1).set_size_policy(size_policy::Minimum);
 				}
-				rows.get_layout_at(rows.count() - 1).add(item.subject());
+				rows.get_layout_at(rows.count() - 1).add(item);
 				AxisPolicy::x(pos) += AxisPolicy::cx(itemMinimumSize);
 			}
 			previousNonZeroSize = true;

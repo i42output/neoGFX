@@ -362,7 +362,7 @@ namespace neogfx
 	{
 		if (iPixelDensityDpi == boost::none)
 		{
-			auto& display = app::instance().surface_manager().display(surface_window());
+			auto& display = surface_manager().display(surface_window());
 			iPixelDensityDpi = size{ display.metrics().horizontal_dpi(), display.metrics().vertical_dpi() };
 		}
 		return *iPixelDensityDpi;
@@ -370,8 +370,9 @@ namespace neogfx
 
 	void native_window::handle_dpi_changed()
 	{
-		app::instance().surface_manager().display(surface_window()).update_dpi();
+		surface_manager().display(surface_window()).update_dpi();
 		iPixelDensityDpi = boost::none;
 		surface_window().handle_dpi_changed();
+		surface_manager().dpi_changed.trigger(surface_window());
 	}
 }

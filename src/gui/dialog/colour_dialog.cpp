@@ -42,8 +42,8 @@ namespace neogfx
 		}
 	}
 
-	colour_dialog::colour_box::colour_box(colour_dialog& aParent, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour) :
-		framed_widget(aParent, frame_style::SolidFrame), iParent(aParent), iColour(aColour), iCustomColour(aCustomColour)
+	colour_dialog::colour_box::colour_box(colour_dialog& aOwner, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour) :
+		framed_widget(frame_style::SolidFrame), iOwner(aOwner), iColour(aColour), iCustomColour(aCustomColour)
 	{
 		set_margins(neogfx::margins{});
 	}
@@ -69,7 +69,7 @@ namespace neogfx
 	{
 		framed_widget::paint(aGraphicsContext);
 		aGraphicsContext.fill_rect(client_rect(false), iCustomColour == boost::none ? iColour : **iCustomColour);
-		if (iCustomColour != boost::none && iParent.current_custom_colour() == *iCustomColour)
+		if (iCustomColour != boost::none && iOwner.current_custom_colour() == *iCustomColour)
 		{
 			aGraphicsContext.fill_circle(client_rect(false).centre(), 3, colour::White);
 			aGraphicsContext.fill_circle(client_rect(false).centre(), 2, colour::Black);
@@ -82,11 +82,11 @@ namespace neogfx
 		if (aButton == mouse_button::Left)
 		{
 			if (iCustomColour == boost::none)
-				iParent.select_colour(iColour.with_alpha(iParent.selected_colour().alpha()));
+				iOwner.select_colour(iColour.with_alpha(iOwner.selected_colour().alpha()));
 			else
 			{
-				iParent.select_colour(**iCustomColour);
-				iParent.set_current_custom_colour(*iCustomColour);
+				iOwner.select_colour(**iCustomColour);
+				iOwner.set_current_custom_colour(*iCustomColour);
 			}
 		}
 	}
@@ -186,7 +186,7 @@ namespace neogfx
 
 	colour_dialog::x_picker::cursor_widget::cursor_widget(x_picker& aParent, type_e aType) :
 		image_widget{
-			aParent.iParent.client_widget(),
+			aParent.iOwner.client_widget(),
 			neogfx::image{ aType == LeftCursor ?
 				aParent.dpi_select(sLeftXPickerCursorImage, sLeftXPickerCursorHighDpiImage) :
 				aParent.dpi_select(sRightXPickerCursorImage, sRightXPickerCursorHighDpiImage),
@@ -223,15 +223,15 @@ namespace neogfx
 		}
 	}
 
-	colour_dialog::x_picker::x_picker(colour_dialog& aParent) :
-		framed_widget(aParent.iRightTopLayout), 
-		iParent(aParent), 
+	colour_dialog::x_picker::x_picker(colour_dialog& aOwner) :
+		framed_widget(aOwner.iRightTopLayout), 
+		iOwner(aOwner), 
 		iTracking(false),
 		iLeftCursor(*this, cursor_widget::LeftCursor),
 		iRightCursor(*this, cursor_widget::RightCursor)
 	{
 		set_margins(neogfx::margins{});
-		iSink = iParent.selection_changed([this]()
+		iSink = iOwner.selection_changed([this]()
 		{
 			update_cursors();
 			update();
@@ -273,7 +273,7 @@ namespace neogfx
 		framed_widget::paint(aGraphicsContext);
 		scoped_units su{ *this, units::Pixels };
 		rect cr = client_rect(false);
-		if (iParent.current_channel() == ChannelAlpha)
+		if (iOwner.current_channel() == ChannelAlpha)
 			draw_alpha_background(aGraphicsContext, cr);
 		for (uint32_t y = 0; y < cr.height(); ++y)
 		{
@@ -283,7 +283,7 @@ namespace neogfx
 			if (r.is<hsv_colour>())
 			{
 				hsv_colour hsv = static_variant_cast<hsv_colour>(r);
-				if (iParent.current_channel() == ChannelHue)
+				if (iOwner.current_channel() == ChannelHue)
 				{
 					hsv.set_saturation(1.0);
 					hsv.set_value(1.0);
@@ -292,7 +292,7 @@ namespace neogfx
 			}
 			else
 				rgb = static_variant_cast<colour>(r);
-			if (iParent.current_channel() != ChannelAlpha)
+			if (iOwner.current_channel() != ChannelAlpha)
 				rgb.set_alpha(255);
 			aGraphicsContext.fill_rect(line, rgb);
 		}
@@ -323,66 +323,66 @@ namespace neogfx
 
 	void colour_dialog::x_picker::select(const point& aPosition)
 	{
-		iParent.select_colour(colour_at_position(aPosition * (1.0 / dpi_scale_factor())), *this);
+		iOwner.select_colour(colour_at_position(aPosition * (1.0 / dpi_scale_factor())), *this);
 	}
 
 	colour_dialog::representations colour_dialog::x_picker::colour_at_position(const point& aCursorPos) const
 	{
 		point pos = aCursorPos.min(point{ 255.0, 255.0 }).max(point{ 0.0, 0.0 });
-		switch (iParent.current_channel())
+		switch (iOwner.current_channel())
 		{
 		case ChannelHue:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				hsv.set_hue((255.0 - pos.y) / 255.0 * 360.0);
 				return hsv;
 			}
 			break;
 		case ChannelSaturation:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				hsv.set_saturation((255.0 - pos.y) / 255.0);
 				return hsv;
 			}
 			break;
 		case ChannelValue:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				hsv.set_value((255.0 - pos.y) / 255.0);
 				return hsv;
 			}
 			break;
 		case ChannelRed:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				rgb.set_red(static_cast<colour::component>(255.0 - pos.y));
 				return rgb;
 			}
 			break;
 		case ChannelGreen:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				rgb.set_green(static_cast<colour::component>(255.0 - pos.y));
 				return rgb;
 			}
 			break;
 		case ChannelBlue:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				rgb.set_blue(static_cast<colour::component>(255.0 - pos.y));
 				return rgb;
 			}
 			break;
 		case ChannelAlpha:
-			if (iParent.current_mode() == ModeHSV)
+			if (iOwner.current_mode() == ModeHSV)
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				hsv.set_alpha((255.0 - pos.y) / 255.0);
 				return hsv;
 			}
 			else
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				rgb.set_alpha(static_cast<colour::component>(255.0 - pos.y));
 				return rgb;
 			}
@@ -400,53 +400,53 @@ namespace neogfx
 
 	point colour_dialog::x_picker::current_cursor_position() const
 	{
-		switch (iParent.current_channel())
+		switch (iOwner.current_channel())
 		{
 		case ChannelHue:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				return point{ 0.0, 255.0 - hsv.hue() / 360.0 * 255.0};
 			}
 			break;
 		case ChannelSaturation:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				return point{ 0.0, 255.0 - hsv.saturation() * 255.0 };
 			}
 			break;
 		case ChannelValue:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				return point{ 0.0, 255.0 - hsv.value() * 255.0 };
 			}
 			break;
 		case ChannelRed:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.red()) };
 			}
 			break;
 		case ChannelGreen:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.green()) };
 			}
 			break;
 		case ChannelBlue:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.blue()) };
 			}
 			break;
 		case ChannelAlpha:
-			if (iParent.current_mode() == ModeHSV)
+			if (iOwner.current_mode() == ModeHSV)
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				return point{ 0.0, 255.0 - static_cast<coordinate>(hsv.alpha() * 255.0) };
 			}
 			else
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				return point{ 0.0, 255.0 - static_cast<coordinate>(rgb.alpha()) };
 			}
 			break;
@@ -455,13 +455,11 @@ namespace neogfx
 		}
 	}
 
-	colour_dialog::yz_picker::yz_picker(colour_dialog& aParent) :
-		framed_widget(aParent.iRightTopLayout), iParent(aParent), iTexture{ image{ size{256, 256}, colour::Black } }, iUpdateTexture{true}, iTracking {
-		false
-	}
+	colour_dialog::yz_picker::yz_picker(colour_dialog& aOwner) :
+		framed_widget(aOwner.iRightTopLayout), iOwner(aOwner), iTexture{ image{ size{256, 256}, colour::Black } }, iUpdateTexture{ true }, iTracking { false }
 	{
 		set_margins(neogfx::margins{});
-		iParent.selection_changed([this]
+		iOwner.selection_changed([this]
 		{
 			iUpdateTexture = true;
 			update();
@@ -508,8 +506,8 @@ namespace neogfx
 		}
 		aGraphicsContext.draw_texture(rect{ cr.top_left(), dpi_scale(size{256.0, 256.0}) }, iTexture);
 		point cursor = dpi_scale(current_cursor_position());
-		aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iParent.selected_colour());
-		aGraphicsContext.draw_circle(cr.top_left() + cursor, 4.0, pen{ iParent.selected_colour().light(0x80) ? colour::Black : colour::White });
+		aGraphicsContext.fill_circle(cr.top_left() + cursor, 4.0, iOwner.selected_colour());
+		aGraphicsContext.draw_circle(cr.top_left() + cursor, 4.0, pen{ iOwner.selected_colour().light(0x80) ? colour::Black : colour::White });
 	}
 
 	void colour_dialog::yz_picker::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -537,18 +535,18 @@ namespace neogfx
 
 	void colour_dialog::yz_picker::select(const point& aPosition)
 	{
-		iParent.select_colour(colour_at_position(aPosition * (1.0 / dpi_scale_factor())), *this);
+		iOwner.select_colour(colour_at_position(aPosition * (1.0 / dpi_scale_factor())), *this);
 		iUpdateTexture = false;
 	}
 
 	colour_dialog::representations colour_dialog::yz_picker::colour_at_position(const point& aCursorPos) const
 	{
 		point pos{ std::max(std::min(aCursorPos.x, 255.0), 0.0), std::max(std::min(aCursorPos.y, 255.0), 0.0) };
-		switch (iParent.current_channel())
+		switch (iOwner.current_channel())
 		{
 		case ChannelHue:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				hsv.set_saturation(std::max(std::min(pos.x / 255.0, 1.0), 0.0));
 				hsv.set_value(std::max(std::min((255.0 - pos.y) / 255.0, 1.0), 0.0));
 				return hsv;
@@ -556,7 +554,7 @@ namespace neogfx
 			break;
 		case ChannelSaturation:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				hsv.set_hue(std::max(std::min(pos.x / 255.0 * 360.0, 360.0), 0.0));
 				hsv.set_value(std::max(std::min((255.0 - pos.y) / 255.0, 1.0), 0.0));
 				return hsv;
@@ -564,7 +562,7 @@ namespace neogfx
 			break;
 		case ChannelValue:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				hsv.set_hue(std::max(std::min(pos.x / 255.0 * 360.0, 360.0), 0.0));
 				hsv.set_saturation(std::max(std::min((255.0 - pos.y) / 255.0, 1.0), 0.0));
 				return hsv;
@@ -572,7 +570,7 @@ namespace neogfx
 			break;
 		case ChannelRed:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				rgb.set_blue(static_cast<colour::component>(pos.x));
 				rgb.set_green(static_cast<colour::component>(255.0 - pos.y));
 				return rgb;
@@ -580,7 +578,7 @@ namespace neogfx
 			break;
 		case ChannelGreen:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				rgb.set_blue(static_cast<colour::component>(pos.x));
 				rgb.set_red(static_cast<colour::component>(255.0 - pos.y));
 				return rgb;
@@ -588,23 +586,23 @@ namespace neogfx
 			break;
 		case ChannelBlue:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				rgb.set_red(static_cast<colour::component>(pos.x));
 				rgb.set_green(static_cast<colour::component>(255.0 - pos.y));
 				return rgb;
 			}
 			break;
 		case ChannelAlpha:
-			if (iParent.current_mode() == ModeHSV)
+			if (iOwner.current_mode() == ModeHSV)
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				hsv.set_saturation(std::max(std::min(pos.x / 255.0, 1.0), 0.0));
 				hsv.set_value(std::max(std::min((255.0 - pos.y) / 255.0, 1.0), 0.0));
 				return hsv;
 			}
 			else
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				rgb.set_blue(static_cast<colour::component>(pos.x));
 				rgb.set_green(static_cast<colour::component>(255.0 - pos.y));
 				return rgb;
@@ -616,53 +614,53 @@ namespace neogfx
 
 	point colour_dialog::yz_picker::current_cursor_position() const
 	{
-		switch (iParent.current_channel())
+		switch (iOwner.current_channel())
 		{
 		case ChannelHue:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				return point{ hsv.saturation() * 255.0, (1.0 - hsv.value()) * 255.0 };
 			}
 			break;
 		case ChannelSaturation:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				return point{ hsv.hue() / 360.0 * 255.0, (1.0 - hsv.value()) * 255.0 };
 			}
 			break;
 		case ChannelValue:
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				return point{ hsv.hue() / 360.0 * 255.0, (1.0 - hsv.saturation()) * 255.0 };
 			}
 			break;
 		case ChannelRed:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.green()) };
 			}
 			break;
 		case ChannelGreen:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.red()) };
 			}
 			break;
 		case ChannelBlue:
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				return point{ static_cast<coordinate>(rgb.red()), static_cast<coordinate>(255 - rgb.green()) };
 			}
 			break;
 		case ChannelAlpha:
-			if (iParent.current_mode() == ModeHSV)
+			if (iOwner.current_mode() == ModeHSV)
 			{
-				auto hsv = iParent.selected_colour_as_hsv(true);
+				auto hsv = iOwner.selected_colour_as_hsv(true);
 				return point{ hsv.saturation() * 255.0, (1.0 - hsv.value()) * 255.0 };
 			}
 			else
 			{
-				auto rgb = iParent.selected_colour();
+				auto rgb = iOwner.selected_colour();
 				return point{ static_cast<coordinate>(rgb.blue()), static_cast<coordinate>(255 - rgb.green()) };
 			}
 			break;
@@ -671,11 +669,11 @@ namespace neogfx
 		}
 	}
 	
-	colour_dialog::colour_selection::colour_selection(colour_dialog& aParent) :
-		framed_widget(aParent.iRightBottomLayout), iParent(aParent)
+	colour_dialog::colour_selection::colour_selection(colour_dialog& aOwner) :
+		framed_widget(aOwner.iRightBottomLayout), iOwner(aOwner)
 	{
 		set_margins(neogfx::margins{});
-		iParent.selection_changed([this]
+		iOwner.selection_changed([this]
 		{
 			update();
 		});
@@ -709,8 +707,8 @@ namespace neogfx
 		top.cy = top.cy / 2.0;
 		bottom.y = top.bottom();
 		bottom.cy = bottom.cy / 2.0;
-		aGraphicsContext.fill_rect(top, iParent.selected_colour());
-		aGraphicsContext.fill_rect(bottom, iParent.current_colour());
+		aGraphicsContext.fill_rect(top, iOwner.selected_colour());
+		aGraphicsContext.fill_rect(bottom, iOwner.current_colour());
 	}
 
 	colour_dialog::colour_dialog(const colour& aCurrentColour) :
@@ -730,21 +728,21 @@ namespace neogfx
 		iColourSelection{ *this },
 		iScreenPicker{ iRightBottomLayout },
 		iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCentre },
-		iBasicColoursLabel{ iLeftLayout, "&Basic colours"_t },
-		iBasicColoursLayout{ iLeftLayout },
+		iBasicColoursGroup{ iLeftLayout, "&Basic colours"_t },
+		iBasicColoursGrid{ iBasicColoursGroup.item_layout() },
 		iSpacer{ iLeftLayout },
-		iCustomColoursLayout{ iLeftLayout },
-		iCustomColoursLabel{ iLeftLayout, "&Custom colours"_t },
+		iCustomColoursGroup{ iLeftLayout, "&Custom colours"_t },
+		iCustomColoursGrid{ iCustomColoursGroup.item_layout() },
 		iYZPicker{ *this },
 		iXPicker{ *this },
-		iH{ *this, *this },
-		iS{ *this, *this },
-		iV{ *this, *this },
-		iR{ *this, *this },
-		iG{ *this, *this },
-		iB{ *this, *this },
-		iA{ *this, *this },
-		iRgb{ *this },
+		iH{ client_widget(), client_widget() },
+		iS{ client_widget(), client_widget() },
+		iV{ client_widget(), client_widget() },
+		iR{ client_widget(), client_widget() },
+		iG{ client_widget(), client_widget() },
+		iB{ client_widget(), client_widget() },
+		iA{ client_widget(), client_widget() },
+		iRgb{ client_widget() },
 		iAddToCustomColours{ iRightLayout, "&Add to Custom Colours"_t }
 	{
 		init();
@@ -767,21 +765,21 @@ namespace neogfx
 		iColourSelection{ *this },
 		iScreenPicker{ iRightBottomLayout },
 		iChannelLayout{ iRightBottomLayout, alignment::Left | alignment::VCentre },
-		iBasicColoursLabel{ iLeftLayout, "&Basic colours"_t },
-		iBasicColoursLayout{ iLeftLayout},
-		iSpacer{ iLeftLayout},
-		iCustomColoursLayout{ iLeftLayout},
-		iCustomColoursLabel{ iLeftLayout, "&Custom colours"_t },
+		iBasicColoursGroup{ iLeftLayout, "&Basic colours"_t },
+		iBasicColoursGrid{ iBasicColoursGroup.item_layout() },
+		iSpacer{ iLeftLayout },
+		iCustomColoursGroup{ iLeftLayout, "&Custom colours"_t },
+		iCustomColoursGrid{ iCustomColoursGroup.item_layout() },
 		iYZPicker{ *this },
 		iXPicker{ *this },
-		iH{ *this, *this },
-		iS{ *this, *this },
-		iV{ *this, *this },
-		iR{ *this, *this },
-		iG{ *this, *this },
-		iB{ *this, *this },
-		iA{ *this, *this },
-		iRgb{ *this },
+		iH{ client_widget(), client_widget() },
+		iS{ client_widget(), client_widget() },
+		iV{ client_widget(), client_widget() },
+		iR{ client_widget(), client_widget() },
+		iG{ client_widget(), client_widget() },
+		iB{ client_widget(), client_widget() },
+		iA{ client_widget(), client_widget() },
+		iRgb{ client_widget() },
 		iAddToCustomColours{ iRightLayout, "&Add to Custom Colours"_t }
 	{
 		init();
@@ -899,13 +897,13 @@ namespace neogfx
 		iChannelLayout.add_span(grid_layout::cell_coordinates{ 0, 3 }, grid_layout::cell_coordinates{ 1, 3 });
 		iChannelLayout.add(iRgb); iChannelLayout.add_spacer().set_size_policy(size_policy::Minimum);
 		iChannelLayout.add(iA.first); iChannelLayout.add(iA.second);
-		iBasicColoursLayout.set_dimensions(12, 12);
+		iBasicColoursGrid.set_dimensions(12, 12);
 		for (auto const& basicColour : sBasicColours)
-			iBasicColoursLayout.add(std::make_shared<colour_box>(*this, basicColour));
-		iCustomColoursLayout.set_dimensions(2, 12);
+			iBasicColoursGrid.add(std::make_shared<colour_box>(*this, basicColour));
+		iCustomColoursGrid.set_dimensions(2, 12);
 		std::fill(iCustomColours.begin(), iCustomColours.end(), colour::White);
 		for (auto customColour = iCustomColours.begin(); customColour != iCustomColours.end(); ++customColour)
-			iCustomColoursLayout.add(std::make_shared<colour_box>(*this, *customColour, customColour));
+			iCustomColoursGrid.add(std::make_shared<colour_box>(*this, *customColour, customColour));
 		button_box().add_button(standard_button::Ok);
 		button_box().add_button(standard_button::Cancel);
 		iSink += iH.first.checked([this]() { set_current_channel(ChannelHue); });

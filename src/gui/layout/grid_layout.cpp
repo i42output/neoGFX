@@ -360,10 +360,10 @@ namespace neogfx
 					}
 					else
 					{
-						maxRowHeight[row] = std::max(maxRowHeight[row], 
-							(i->second->extents().cy - spacing().cy * (s->second.y - s->first.y)) / (s->second.y - s->first.y + 1));
-						maxColWidth[col] = std::max(maxColWidth[col],
-							(i->second->extents().cx - spacing().cx * (s->second.x - s->first.x)) / (s->second.x - s->first.x + 1));
+						maxRowHeight[row] = std::ceil(std::max(maxRowHeight[row], 
+							(i->second->extents().cy - spacing().cy * (s->second.y - s->first.y)) / (s->second.y - s->first.y + 1)));
+						maxColWidth[col] = std::ceil(std::max(maxColWidth[col],
+							(i->second->extents().cx - spacing().cx * (s->second.x - s->first.x)) / (s->second.x - s->first.x + 1)));
 					}
 				}
 			}
@@ -430,7 +430,7 @@ namespace neogfx
 		auto itemPos = item_position(item);
 		row_layout(itemPos.y).remove_at(itemPos.x);
 		if (itemPos.x < row_layout(itemPos.y).count())
-			row_layout(itemPos.y).remove_at(itemPos.x);
+			row_layout(itemPos.y).add_spacer_at(itemPos.x);
 		iCells.erase(iCells.find(itemPos));
 		iDimensions = cell_dimensions{};
 		for (const auto& cell : iCells)
@@ -510,7 +510,7 @@ namespace neogfx
 				else
 					result = std::max(result, (item.second->minimum_size(aAvailableSpace).cy - spacing().cy * (s->second.y - s->first.y)) / (s->second.y - s->first.y + 1));
 			}
-		return result;
+		return std::ceil(result);
 	}
 
 	size::dimension_type grid_layout::column_minimum_size(cell_coordinate aColumn, const optional_size& aAvailableSpace) const
@@ -525,7 +525,7 @@ namespace neogfx
 				else
 					result = std::max(result, (item.second->minimum_size(aAvailableSpace).cx - spacing().cx * (s->second.x - s->first.x)) / (s->second.x - s->first.x + 1));
 			}
-		return result;
+		return std::ceil(result);
 	}
 
 	size::dimension_type grid_layout::row_maximum_size(cell_coordinate aRow, const optional_size& aAvailableSpace) const

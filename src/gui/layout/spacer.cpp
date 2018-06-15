@@ -328,9 +328,7 @@ namespace neogfx
 
 	bool spacer::visible() const
 	{
-		if (has_layout_owner())
-			return layout_owner().visible();
-		return false;
+		return true;
 	}
 
 	horizontal_spacer::horizontal_spacer() :

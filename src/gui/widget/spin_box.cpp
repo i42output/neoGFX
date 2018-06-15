@@ -229,7 +229,8 @@ namespace neogfx
 			if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
 				update_arrows();
 		});
-		iSink += root().surface().dpi_changed([this]() { update_arrows(); });
+
+		iSink += app::instance().surface_manager().dpi_changed([this](i_surface&) { update_arrows(); });
 	}
 
 	void spin_box_impl::update_arrows()

@@ -417,7 +417,7 @@ namespace neogfx
 			}
 			label().layout().invalidate();
 		};
-		iSink += root().surface().dpi_changed([this, update_image]() { update_image(); });
+		iSink += app::instance().surface_manager().dpi_changed([this, update_image](i_surface&) { update_image(); });
 		update_image();
 		iContainer.adding_tab(*this);
 	}

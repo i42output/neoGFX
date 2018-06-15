@@ -208,8 +208,13 @@ namespace neogfx
 
 	i_layout_item& layout::add_at(item_index aPosition, std::shared_ptr<i_layout_item> aItem)
 	{
-		if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
-			throw item_already_added();
+		if (aItem->has_parent_layout() && !aItem->is_proxy())
+		{
+			if (&aItem->parent_layout() != this) // move
+				aItem->parent_layout().remove(*aItem);
+			else
+				throw item_already_added();
+		}
 		while (aPosition > iItems.size())
 			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item{ aItem });
@@ -233,11 +238,9 @@ namespace neogfx
 				remove(i);
 				return true;
 			}
-		for (auto i = begin(); i != end(); ++i)
+		for (auto i = rbegin(); i != rend(); ++i)
 			if (i->subject().is_layout() && i->subject().as_layout().remove(aItem))
-			{
 				return true;
-			}
 		return false;
 	}
 
@@ -474,9 +477,7 @@ namespace neogfx
 
 	bool layout::visible() const
 	{
-		if (has_layout_owner())
-			return layout_owner().visible();
-		return false;
+		return true;
 	}
 
 	bool layout::invalidated() const
@@ -688,6 +689,26 @@ namespace neogfx
 	layout::item_list::iterator layout::end()
 	{
 		return iItems.end();
+	}
+
+	layout::item_list::const_reverse_iterator layout::rbegin() const
+	{
+		return iItems.rbegin();
+	}
+
+	layout::item_list::const_reverse_iterator layout::rend() const
+	{
+		return iItems.rend();
+	}
+
+	layout::item_list::reverse_iterator layout::rbegin()
+	{
+		return iItems.rbegin();
+	}
+
+	layout::item_list::reverse_iterator layout::rend()
+	{
+		return iItems.rend();
 	}
 
 	layout::item_list::const_iterator layout::find_item(const i_layout_item& aItem) const

@@ -839,7 +839,10 @@ namespace neogfx
 		try
 		{
 			if (!aGlyph.is_whitespace())
-				native_context().enqueue(graphics_operation::draw_glyph{ (to_device_units(point{aPoint}) + iOrigin).to_vec3() + vec3{0.0, 0.0, aPoint.z}, aGlyph, aAppearance });
+			{
+				auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
+				native_context().enqueue(graphics_operation::draw_glyph{ adjustedPos , aGlyph, aAppearance });
+			}
 			if (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic()))
 				draw_glyph_underline(aPoint, aGlyph, aAppearance);
 		}

@@ -327,7 +327,7 @@ namespace neogfx
 			}
 			iSizeGrip.set_image(iSizeGripTexture->second);
 		};
-		iSink += root().surface().dpi_changed([update_size_grip]() { update_size_grip(style_aspect::Geometry); });
+		iSink += app::instance().surface_manager().dpi_changed([update_size_grip](i_surface&) { update_size_grip(style_aspect::Geometry); });
 		iSink += app::instance().current_style_changed(update_size_grip);
 		update_size_grip(style_aspect::Colour);
 		iSink += app::instance().help().help_activated([this](const i_help_source&) { update_widgets();	});

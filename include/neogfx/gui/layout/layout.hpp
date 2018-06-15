@@ -155,6 +155,10 @@ namespace neogfx
 		item_list::const_iterator end() const;
 		item_list::iterator begin();
 		item_list::iterator end();
+		item_list::const_reverse_iterator rbegin() const;
+		item_list::const_reverse_iterator rend() const;
+		item_list::reverse_iterator rbegin();
+		item_list::reverse_iterator rend();
 		item_list::const_iterator find_item(const i_layout_item& aItem) const;
 		item_list::iterator find_item(i_layout_item& aItem);
 		const item_list& items() const;

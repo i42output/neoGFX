@@ -29,6 +29,8 @@ namespace neogfx
 	class i_surface_manager
 	{
 	public:
+		event<i_surface&> dpi_changed;
+	public:
 		struct surface_not_found : std::logic_error { surface_not_found() : std::logic_error("neogfx::i_surface_manager::surface_not_found") {} };
 	public:
 		virtual ~i_surface_manager() {}

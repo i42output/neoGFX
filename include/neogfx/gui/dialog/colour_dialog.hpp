@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
-#include <neogfx/gui/widget/label.hpp>
+#include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 
@@ -55,7 +55,7 @@ namespace neogfx
 		class colour_box : public framed_widget
 		{
 		public:
-			colour_box(colour_dialog& aParent, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour = optional_custom_colour_list_iterator());
+			colour_box(colour_dialog& aOwner, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour = optional_custom_colour_list_iterator());
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -64,7 +64,7 @@ namespace neogfx
 		public:
 			virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		private:
-			colour_dialog& iParent;
+			colour_dialog& iOwner;
 			colour iColour;
 			optional_custom_colour_list_iterator iCustomColour;
 		};
@@ -90,7 +90,7 @@ namespace neogfx
 				optional_point iDragOffset;
 			};
 		public:
-			x_picker(colour_dialog& aParent);
+			x_picker(colour_dialog& aOwner);
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -111,7 +111,7 @@ namespace neogfx
 			void update_cursors();
 			point x_picker::current_cursor_position() const;
 		private:
-			colour_dialog& iParent;
+			colour_dialog& iOwner;
 			sink iSink;
 			bool iTracking;
 			cursor_widget iLeftCursor;
@@ -120,7 +120,7 @@ namespace neogfx
 		class yz_picker : public framed_widget
 		{
 		public:
-			yz_picker(colour_dialog& aParent);
+			yz_picker(colour_dialog& aOwner);
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -135,7 +135,7 @@ namespace neogfx
 			representations colour_at_position(const point& aCursorPos) const;
 			point current_cursor_position() const;
 		private:
-			colour_dialog& iParent;
+			colour_dialog& iOwner;
 			mutable std::array<std::array<std::array<uint8_t, 4>, 256>, 256> iPixels;
 			mutable texture iTexture;
 			mutable bool iUpdateTexture;
@@ -144,14 +144,14 @@ namespace neogfx
 		class colour_selection : public framed_widget
 		{
 		public:
-			colour_selection(colour_dialog& aParent);
+			colour_selection(colour_dialog& aOwner);
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
 		public:
 			virtual void paint(graphics_context& aGraphicsContext) const;
 		private:
-			colour_dialog& iParent;
+			colour_dialog& iOwner;
 		};
 	public:
 		colour_dialog(const colour& aCurrentColour = colour::Black);
@@ -195,11 +195,11 @@ namespace neogfx
 		colour_selection iColourSelection;
 		push_button iScreenPicker;
 		grid_layout iChannelLayout;
-		label iBasicColoursLabel;
-		grid_layout iBasicColoursLayout;
+		group_box iBasicColoursGroup;
+		grid_layout iBasicColoursGrid;
 		vertical_spacer iSpacer;
-		label iCustomColoursLabel;
-		grid_layout iCustomColoursLayout;
+		group_box iCustomColoursGroup;
+		grid_layout iCustomColoursGrid;
 		yz_picker iYZPicker;
 		x_picker iXPicker;
 		std::pair<radio_button, double_spin_box> iH;

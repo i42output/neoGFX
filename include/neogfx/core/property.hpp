@@ -69,7 +69,7 @@ namespace neogfx
 			template <typename SFINAE = cracker::type>
 			operator const typename std::enable_if<cracker::optional, SFINAE>::type&() const
 			{
-				return *iParent.contents();
+				return *iParent.value();
 			}
 			template <typename T2, typename SFINAE = optional_proxy<parent_type>>
 			typename std::enable_if<!std::is_const<parent_type>::value, SFINAE>::type& operator=(const T2& aValue)
@@ -80,7 +80,7 @@ namespace neogfx
 			template <typename SFINAE = const cracker::type*>
 			const typename std::enable_if<cracker::optional, SFINAE>::type operator->() const
 			{
-				return &*iParent.contents();
+				return &*iParent.value();
 			}
 		private:
 			parent_type& iParent;
@@ -123,7 +123,7 @@ namespace neogfx
 				*this = value_type{};
 		}
 	public:
-		const value_type& contents() const
+		const value_type& value() const
 		{
 			return iValue;
 		}
