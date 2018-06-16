@@ -79,8 +79,8 @@ namespace neogfx
 		i_surface& surface() override;
 		bool is_surface() const override;
 		bool has_layout() const override;
-		void set_layout(i_layout& aLayout) override;
-		void set_layout(std::shared_ptr<i_layout> aLayout) override;
+		void set_layout(i_layout& aLayout, bool aMoveExistingItems = true) override;
+		void set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems = true) override;
 		const i_layout& layout() const override;
 		i_layout& layout() override;
 		bool can_defer_layout() const override;

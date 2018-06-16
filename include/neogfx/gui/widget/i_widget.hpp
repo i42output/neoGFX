@@ -111,8 +111,8 @@ namespace neogfx
 		virtual i_surface& surface() = 0;
 		virtual bool is_surface() const = 0;
 		virtual bool has_layout() const = 0;
-		virtual void set_layout(i_layout& aLayout) = 0;
-		virtual void set_layout(std::shared_ptr<i_layout> aLayout) = 0;
+		virtual void set_layout(i_layout& aLayout, bool aMoveExistingItems = true) = 0;
+		virtual void set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems = true) = 0;
 		virtual const i_layout& layout() const = 0;
 		virtual i_layout& layout() = 0;
 		virtual bool can_defer_layout() const = 0;

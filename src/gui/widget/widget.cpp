@@ -469,12 +469,12 @@ namespace neogfx
 		return iLayout != nullptr;
 	}
 
-	void widget::set_layout(i_layout& aLayout)
+	void widget::set_layout(i_layout& aLayout, bool aMoveExistingItems)
 	{
-		set_layout(std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &aLayout });
+		set_layout(std::shared_ptr<i_layout>{ std::shared_ptr<i_layout>{}, &aLayout }, aMoveExistingItems);
 	}
 
-	void widget::set_layout(std::shared_ptr<i_layout> aLayout)
+	void widget::set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems)
 	{
 		if (iLayout == aLayout)
 			throw layout_already_set();
@@ -485,14 +485,17 @@ namespace neogfx
 			if (has_parent_layout())
 				iLayout->set_parent_layout(&parent_layout());
 			iLayout->set_layout_owner(this);
-			if (oldLayout == nullptr)
+			if (aMoveExistingItems)
 			{
-				for (auto& c : iChildren)
-					if (c->has_parent_layout() && &c->parent_layout() == oldLayout.get())
-						iLayout->add(c);
+				if (oldLayout == nullptr)
+				{
+					for (auto& c : iChildren)
+						if (c->has_parent_layout() && &c->parent_layout() == oldLayout.get())
+							iLayout->add(c);
+				}
+				else
+					oldLayout->move_all_to(*iLayout);
 			}
-			else
-				oldLayout->move_all_to(*iLayout);
 		}
 	}
 
