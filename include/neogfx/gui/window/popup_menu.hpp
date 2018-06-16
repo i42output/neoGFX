@@ -72,7 +72,6 @@ namespace neogfx
 		sink iSink2;
 		i_widget* iParentWidget;
 		i_menu* iMenu;
-		vertical_layout iLayout;
 		std::unique_ptr<popup_menu> iOpenSubMenu;
 		bool iOpeningSubMenu;
 	};

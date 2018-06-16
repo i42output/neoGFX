@@ -29,7 +29,6 @@ namespace neogfx
 		window{ aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
 		iParentWidget{ 0 }, 
 		iMenu{ nullptr }, 
-		iLayout{ *this }, 
 		iOpeningSubMenu{ false }
 	{
 		init();
@@ -40,7 +39,6 @@ namespace neogfx
 		window{ aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
 		iParentWidget{ &aParent }, 
 		iMenu{ nullptr }, 
-		iLayout{ *this }, 
 		iOpeningSubMenu{ false }
 	{
 		init();
@@ -51,7 +49,6 @@ namespace neogfx
 		window{ aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
 		iParentWidget{ 0 }, 
 		iMenu{ nullptr }, 
-		iLayout{ *this }, 
 		iOpeningSubMenu{ false }
 	{
 		init();
@@ -61,7 +58,6 @@ namespace neogfx
 		window{ aParent, aPosition, size{}, aStyle, scrollbar_style::Menu, frame_style::SolidFrame }, 
 		iParentWidget{ &aParent }, 
 		iMenu{ nullptr }, 
-		iLayout{ *this }, 
 		iOpeningSubMenu{ false }
 	{
 		init();
@@ -147,17 +143,17 @@ namespace neogfx
 		if (!app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().grab_keyboard(*this);
 		for (i_menu::item_index i = 0; i < menu().count(); ++i)
-			iLayout.add(std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(i)));
+			menu_layout().add(std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(i)));
 		layout_items();
 		menu().open();
 		iSink += menu().item_added([this](i_menu::item_index aIndex)
 		{
-			iLayout.add_at(aIndex, std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(aIndex)));
+			menu_layout().add_at(aIndex, std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(aIndex)));
 			layout_items();
 		});
 		iSink += menu().item_removed([this](i_menu::item_index aIndex)
 		{
-			iLayout.remove_at(aIndex);
+			menu_layout().remove_at(aIndex);
 			layout_items();
 		});
 		iSink += menu().item_changed([this](i_menu::item_index)
@@ -176,7 +172,7 @@ namespace neogfx
 					iOpenSubMenu->menu().close();
 				}
 			}
-			scroll_to(layout().get_widget_at<menu_item_widget>(menu().find(aMenuItem)));
+			scroll_to(menu_layout().get_widget_at<menu_item_widget>(menu().find(aMenuItem)));
 			update();
 		});
 		iSink += menu().open_sub_menu([this](i_menu& aSubMenu)
@@ -184,7 +180,7 @@ namespace neogfx
 			if (!iOpeningSubMenu && aSubMenu.count() > 0)
 			{
 				neolib::scoped_flag sf{ iOpeningSubMenu };
-				auto& itemWidget = layout().get_widget_at<menu_item_widget>(menu().find(aSubMenu));
+				auto& itemWidget = menu_layout().get_widget_at<menu_item_widget>(menu().find(aSubMenu));
 				close_sub_menu();
 				iOpenSubMenu->set_menu(aSubMenu, itemWidget.sub_menu_position());
 				iSink2 += iOpenSubMenu->menu().closed([this]()
@@ -217,7 +213,7 @@ namespace neogfx
 		iSink2 = sink{};
 		iMenu = nullptr;
 		hide();
-		iLayout.remove_all();
+		menu_layout().remove_all();
 		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
 			app::instance().keyboard().ungrab_keyboard(*this);
 	}
@@ -364,8 +360,8 @@ namespace neogfx
 
 	void popup_menu::init()
 	{
-		iLayout.set_margins(neogfx::margins{});
-		iLayout.set_spacing(neogfx::size{});
+		menu_layout().set_margins(neogfx::margins{});
+		menu_layout().set_spacing(neogfx::size{});
 		closed([this]()
 		{
 			if (has_menu() && menu().is_open())
