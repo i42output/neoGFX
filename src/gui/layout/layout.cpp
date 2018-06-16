@@ -218,9 +218,9 @@ namespace neogfx
 		while (aPosition > iItems.size())
 			add_spacer_at(0);
 		auto i = iItems.insert(std::next(iItems.begin(), aPosition), item{ aItem });
-		i->subject().set_parent_layout(this);
+		i->set_parent_layout(this);
 		if (has_layout_owner())
-			i->subject().set_layout_owner(&layout_owner());
+			i->set_layout_owner(&layout_owner());
 		invalidate();
 		return *aItem;
 	}
@@ -743,12 +743,14 @@ namespace neogfx
 
 	void layout::remove(item_list::iterator aItem)
 	{
-		item_list toRemove;
-		toRemove.splice(toRemove.begin(), iItems, aItem);
-		if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
 		{
-			aItem->set_parent_layout(nullptr);
-			aItem->set_layout_owner(nullptr);
+			item_list toRemove;
+			toRemove.splice(toRemove.begin(), iItems, aItem);
+			if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
+			{
+				aItem->set_parent_layout(nullptr);
+				aItem->set_layout_owner(nullptr);
+			}
 		}
 		invalidate();
 	}

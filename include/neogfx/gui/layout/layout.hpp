@@ -23,6 +23,7 @@
 #include <list>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/variant.hpp>
+#include <neolib/lifetime.hpp>
 #include "i_layout.hpp"
 #include "layout_item.hpp"
 

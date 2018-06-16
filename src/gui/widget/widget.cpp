@@ -485,9 +485,14 @@ namespace neogfx
 			if (has_parent_layout())
 				iLayout->set_parent_layout(&parent_layout());
 			iLayout->set_layout_owner(this);
-			for (auto& c : iChildren)
-				if (c->has_parent_layout() && &c->parent_layout() == oldLayout.get())
-					iLayout->add(c);
+			if (oldLayout == nullptr)
+			{
+				for (auto& c : iChildren)
+					if (c->has_parent_layout() && &c->parent_layout() == oldLayout.get())
+						iLayout->add(c);
+			}
+			else
+				oldLayout->move_all_to(*iLayout);
 		}
 	}
 
@@ -593,6 +598,8 @@ namespace neogfx
 
 	void widget::set_parent_layout(i_layout* aParentLayout)
 	{
+		if (has_layout() && layout().has_parent_layout() && &layout().parent_layout() == iParentLayout)
+			layout().set_parent_layout(aParentLayout);
 		iParentLayout = aParentLayout;
 	}
 
