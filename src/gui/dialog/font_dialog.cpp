@@ -229,17 +229,17 @@ namespace neogfx
 		iFamilyPicker.set_presentation_model(std::make_shared<family_picker_presentation_model>());
 		iStylePicker.set_presentation_model(std::make_shared<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));
 
-		iFamilyPicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+		iFamilyPicker.selection_changed([this](const optional_item_model_index&)
 		{
 			update_selected_font(iFamilyPicker);
 		});
 
-		iStylePicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+		iStylePicker.selection_changed([this](const optional_item_model_index&)
 		{
 			update_selected_font(iStylePicker);
 		});
 
-		iSizePicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+		iSizePicker.selection_changed([this](const optional_item_model_index&)
 		{
 			update_selected_font(iSizePicker);
 		});
