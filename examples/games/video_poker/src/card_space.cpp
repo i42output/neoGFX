@@ -32,7 +32,7 @@ namespace video_poker
 		set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
 		set_ignore_mouse_events(true);
 		iSpritePlane.layout_completed([this]() { update_sprite_geometry(); });
-		iSpritePlane.object_clicked([this](neogfx::i_object& aObject) 
+		iSpritePlane.object_clicked([this](neogfx::i_game_object& aObject) 
 		{ 
 			if (&aObject.as_shape() == &*iCardSprite) 
 				toggle_hold(); 
