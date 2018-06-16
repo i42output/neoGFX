@@ -935,7 +935,7 @@ namespace neogfx
 		optional_size newMinimumSize = (aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
 		if (MinimumSize != newMinimumSize)
 		{
-			MinimumSize = newMinimumSize;
+			MinimumSize.assign(newMinimumSize, aUpdateLayout);
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
@@ -970,7 +970,7 @@ namespace neogfx
 		optional_size newMaximumSize = (aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
 		if (MaximumSize != newMaximumSize)
 		{
-			MaximumSize = newMaximumSize;
+			MaximumSize.assign(newMaximumSize, aUpdateLayout);
 			if (aUpdateLayout && has_managing_layout())
 				managing_layout().layout_items(true);
 		}
