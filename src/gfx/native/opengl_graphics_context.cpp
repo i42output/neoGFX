@@ -87,19 +87,20 @@ namespace neogfx
 		{
 		public:
 			struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays::invalid_draw_count") {} };
+			struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::use_vertex_arrays::cannot_use_barrier") {} };
 		public:
 			typedef opengl_standard_vertex_arrays::vertex_array::value_type value_type;
 			typedef opengl_standard_vertex_arrays::vertex_array::const_iterator const_iterator;
 			typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
 		public:
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u) : 
-				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart { static_cast<GLint>(vertices().size())	}
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) : 
+				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size())}, iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed))
 					execute();
 			}
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u) :
-				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed))
 					execute();
@@ -179,10 +180,44 @@ namespace neogfx
 					iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
 				else
 					iParent.rendering_engine().vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
-				glCheck(glDrawArrays(iMode, iStart, static_cast<GLsizei>(aCount)));
+				if (!iUseBarrier)
+				{
+					glCheck(glDrawArrays(iMode, iStart, static_cast<GLsizei>(aCount)));
+				}
+				else
+				{
+					glCheck(glTextureBarrier());
+					GLsizei stride = primitive_vertex_count();
+					if (stride == 0)
+						throw cannot_use_barrier();
+					for (auto i = iStart; i < static_cast<decltype(i)>(iStart + aCount); i += stride)
+					{
+						glCheck(glDrawArrays(iMode, i, stride));
+						glCheck(glTextureBarrier());
+					}
+				}
 				iStart += aCount;
 			}
 		private:
+			std::size_t primitive_vertex_count() const
+			{
+				switch (iMode)
+				{
+				case GL_TRIANGLES:
+					return 3;
+				case GL_QUADS:
+					return 4;
+				case GL_LINES:
+					return 2;
+				case GL_POINTS:
+					return 1;
+				case GL_LINE_LOOP:
+				case GL_LINE_STRIP:
+				case GL_TRIANGLE_FAN:
+				default:
+					return 0;
+				}
+			}
 			std::size_t room() const
 			{
 				return vertices().capacity() - vertices().size();
@@ -214,6 +249,7 @@ namespace neogfx
 			GLenum iMode;
 			bool iWithTextures;
 			GLint iStart;
+			bool iUseBarrier;
 		};
 	}
 
@@ -1230,7 +1266,7 @@ namespace neogfx
 			return;
 		}
 
-		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, 4u * (aDrawGlyphOps.second - aDrawGlyphOps.first) };
+		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, 4u * (aDrawGlyphOps.second - aDrawGlyphOps.first), firstOp.glyph.subpixel() };
 
 		bool hasEffects = false;
 
