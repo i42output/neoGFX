@@ -27,6 +27,7 @@
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>
+#include <neogfx/gui/widget/i_skinnable_item.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
 
 namespace neogfx
@@ -35,7 +36,7 @@ namespace neogfx
 	class i_window;
 	class i_layout;
 
-	class i_widget : public i_object, public i_layout_item, public i_keyboard_handler
+	class i_widget : public i_object, public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
 	{
 	public:
 		static i_widget* debug;

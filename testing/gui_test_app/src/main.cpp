@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 
 	/* Yes this is an 800 line (and counting) function and whilst in general such long functions are
 	egregious this function is a special case: it is test code which mostly just creates widgets. 
-	I might break it up at a later date when I create a proper test suite. */
+	Will probably be broken up at a later date when a proper test suite is created. */
 
 	ng::app app(argc, argv, "neoGFX Test App");
 
@@ -501,7 +501,7 @@ int main(int argc, char* argv[])
 		}
 		ng::group_box groupBox{ layout2, "Group Box" };
 		ng::vertical_layout& layoutRadiosAndChecks = static_cast<ng::vertical_layout&>(groupBox.item_layout());
-		ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbo&x", ng::check_box::TriState);
+		ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbo&x", ng::button_checkable::TriState);
 		auto showHideTabs = [&triState, &tabContainer]()
 		{
 			if (triState.is_checked())

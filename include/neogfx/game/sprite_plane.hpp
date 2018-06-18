@@ -55,7 +55,7 @@ namespace neogfx
 		typedef aabb_quadtree<> broad_phase_collision_tree_2d;
 		typedef aabb_octree<> broad_phase_collision_tree_3d;
 		typedef std::pair<i_collidable_object*, i_collidable_object*> collision_pair;
-		typedef std::unordered_set<collision_pair, boost::hash<collision_pair>, std::equal_to<collision_pair>, boost::pool_allocator<collision_pair>> collision_list;
+		typedef std::unordered_set<collision_pair, boost::hash<collision_pair>, std::equal_to<collision_pair>, boost::fast_pool_allocator<collision_pair>> collision_list;
 	private:
 		typedef std::list<sprite, boost::fast_pool_allocator<sprite>> simple_sprite_list;
 		typedef std::list<physical_object, boost::fast_pool_allocator<physical_object>> simple_object_list;

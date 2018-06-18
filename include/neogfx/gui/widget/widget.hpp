@@ -23,7 +23,7 @@
 #include <neolib/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
-#include "i_widget.hpp"
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {

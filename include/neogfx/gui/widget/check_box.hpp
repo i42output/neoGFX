@@ -39,9 +39,9 @@ namespace neogfx
 			void paint(graphics_context& aGraphicsContext) const override;
 		};
 	public:
-		check_box(const std::string& aText = std::string(), checkable_e aCheckable = BiState);
-		check_box(i_widget& aParent, const std::string& aText = std::string(), checkable_e aCheckable = BiState);
-		check_box(i_layout& aLayout, const std::string& aText = std::string(), checkable_e aCheckable = BiState);
+		check_box(const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
+		check_box(i_widget& aParent, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
+		check_box(i_layout& aLayout, const std::string& aText = std::string(), button_checkable aCheckable = button_checkable::BiState);
 	public:
 		neogfx::size_policy size_policy() const override;
 	protected:

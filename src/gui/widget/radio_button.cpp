@@ -74,7 +74,7 @@ namespace neogfx
 	radio_button::radio_button(const std::string& aText) :
 		button(aText), iDisc(*this)
 	{
-		set_checkable(BiState);
+		set_checkable(button_checkable::BiState);
 		set_margins(neogfx::margins{ 0.0 });
 		layout().set_margins(neogfx::margins{ 0.0 });
 		layout().add_spacer();
@@ -86,7 +86,7 @@ namespace neogfx
 	radio_button::radio_button(i_widget& aParent, const std::string& aText) :
 		button(aParent, aText), iDisc(*this)
 	{
-		set_checkable(BiState);
+		set_checkable(button_checkable::BiState);
 		set_margins(neogfx::margins{ 0.0 });
 		layout().set_margins(neogfx::margins{ 0.0 });
 		layout().add_spacer();
@@ -98,7 +98,7 @@ namespace neogfx
 	radio_button::radio_button(i_layout& aLayout, const std::string& aText) :
 		button(aLayout, aText), iDisc(*this)
 	{
-		set_checkable(BiState);
+		set_checkable(button_checkable::BiState);
 		set_margins(neogfx::margins{ 0.0 });
 		layout().set_margins(neogfx::margins{ 0.0 });
 		layout().add_spacer();

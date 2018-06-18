@@ -76,7 +76,7 @@ namespace neogfx
 		}
 	}
 
-	check_box::check_box(const std::string& aText, checkable_e aCheckable) :
+	check_box::check_box(const std::string& aText, button_checkable aCheckable) :
 		button(aText), iBox(*this)
 	{
 		set_checkable(aCheckable);
@@ -86,7 +86,7 @@ namespace neogfx
 		text().set_alignment(alignment::Left | alignment::VCentre);
 	}
 
-	check_box::check_box(i_widget& aParent, const std::string& aText, checkable_e aCheckable) :
+	check_box::check_box(i_widget& aParent, const std::string& aText, button_checkable aCheckable) :
 		button(aParent, aText), iBox(*this)
 	{
 		set_checkable(aCheckable);
@@ -96,7 +96,7 @@ namespace neogfx
 		text().set_alignment(alignment::Left | alignment::VCentre);
 	}
 
-	check_box::check_box(i_layout& aLayout, const std::string& aText, checkable_e aCheckable) :
+	check_box::check_box(i_layout& aLayout, const std::string& aText, button_checkable aCheckable) :
 		button(aLayout, aText), iBox(*this)
 	{
 		set_checkable(aCheckable);

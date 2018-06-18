@@ -245,6 +245,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_selection_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_basic_item_model.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_document.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_presentation_model.hpp" />
@@ -253,7 +254,11 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nested_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nested_window_container.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_scrollbar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skin.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skinnable_item.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skin_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page.hpp" />
@@ -273,6 +278,8 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\radio_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\scrollbar.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\skin.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\skin_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\slider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\spin_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\splitter.hpp" />

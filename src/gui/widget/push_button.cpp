@@ -273,6 +273,11 @@ namespace neogfx
 		update();
 	}
 
+	push_button_style push_button::style() const
+	{
+		return iStyle;
+	}
+
 	rect push_button::path_bounding_rect() const
 	{
 		return client_rect();

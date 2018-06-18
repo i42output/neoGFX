@@ -25,73 +25,73 @@
 namespace neogfx
 {
 	button::button(alignment aAlignment) :
-		widget{}, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+		widget{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(const std::string& aText, alignment aAlignment) :
-		widget{}, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+		widget{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 	
 	button::button(const i_texture& aTexture, alignment aAlignment) :
-		widget{}, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+		widget{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(const i_image& aImage, alignment aAlignment) :
-		widget{}, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+		widget{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(i_widget& aParent, alignment aAlignment) :
-		widget{ aParent }, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+		widget{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(i_widget& aParent, const std::string& aText, alignment aAlignment) :
-		widget{ aParent }, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+		widget{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(i_widget& aParent, const i_texture& aTexture, alignment aAlignment) :
-		widget{ aParent }, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+		widget{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(i_widget& aParent, const i_image& aImage, alignment aAlignment) :
-		widget{ aParent }, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+		widget{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(i_layout& aLayout, alignment aAlignment) :
-		widget{ aLayout }, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+		widget{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(i_layout& aLayout, const std::string& aText, alignment aAlignment) :
-		widget{ aLayout }, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+		widget{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(i_layout& aLayout, const i_texture& aTexture, alignment aAlignment) :
-		widget{ aLayout }, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+		widget{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
 
 	button::button(i_layout& aLayout, const i_image& aImage, alignment aAlignment) :
-		widget{ aLayout }, iCheckable{ NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+		widget{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
 	{
 		init();
 	}
@@ -119,12 +119,12 @@ namespace neogfx
 		return result;
 	}
 
-	button::checkable_e button::checkable() const
+	button_checkable button::checkable() const
 	{
 		return iCheckable;
 	}
 
-	void button::set_checkable(checkable_e aCheckable)
+	void button::set_checkable(button_checkable aCheckable)
 	{
 		iCheckable = aCheckable;
 	}
@@ -262,7 +262,7 @@ namespace neogfx
 		destroyed_flag destroyed{ *this };
 		clicked.trigger();
 		async_clicked.async_trigger();
-		if (!destroyed && iCheckable != NotCheckable)
+		if (!destroyed && iCheckable != button_checkable::NotCheckable)
 			toggle();
 	}
 
@@ -280,7 +280,7 @@ namespace neogfx
 	{
 		if (iCheckedState == aCheckedState)
 			return false;
-		if (aCheckedState == boost::none && iCheckable != TriState)
+		if (aCheckedState == boost::none && iCheckable != button_checkable::TriState)
 			throw not_tri_state_checkable();
 		iCheckedState = aCheckedState;
 		update();

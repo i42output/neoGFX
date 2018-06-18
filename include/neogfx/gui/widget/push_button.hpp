@@ -20,24 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/timer.hpp>
 #include "button.hpp"
+#include <neogfx/gui/widget/i_push_button.hpp>
 
 namespace neogfx
 {
-	enum class push_button_style
-	{
-		Normal,
-		ButtonBox,
-		ItemViewHeader,
-		Tab,
-		DropList,
-		SpinBox,
-		TitleBar,
-		Toolbar
-	};
-
-	class push_button : public button
+	class push_button : public button, public i_push_button
 	{
 	public:
 		static const uint32_t kMaxAnimationFrame = 10;
@@ -54,6 +42,7 @@ namespace neogfx
 		push_button(i_layout& aLayout, const std::string& aText, push_button_style aStyle = push_button_style::Normal);
 		push_button(i_layout& aLayout, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
 		push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+		// button
 	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
@@ -63,6 +52,10 @@ namespace neogfx
 	public:
 		void mouse_entered(const point& aPosition) override;
 		void mouse_left() override;
+		// i_push_button
+	public:
+		push_button_style style() const override;
+		// push_button
 	protected:
 		virtual rect path_bounding_rect() const;
 		virtual neogfx::path path() const;
