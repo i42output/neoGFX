@@ -372,6 +372,16 @@ namespace neogfx
 			iMenu->menu().add_action(app::instance().action_cut());
 			iMenu->menu().add_action(app::instance().action_copy());
 			iMenu->menu().add_action(app::instance().action_paste());
+			auto& pasteAs = iMenu->menu().add_sub_menu("Paste As"_t);
+			auto pastePlainText = std::make_shared<action>("Plain Text"_t);
+			auto pasteRichText = std::make_shared<action>("Rich Text (HTML)"_t);
+			pastePlainText->triggered([this]() { paste_plain_text(); });
+			pasteRichText->triggered([this]() { paste_rich_text(); });
+			sink pasteAsSink;
+			pasteAsSink += app::instance().action_paste().enabled([&pastePlainText, &pasteRichText]() { pastePlainText->enable(); pasteRichText->enable(); });
+			pasteAsSink += app::instance().action_paste().disabled([&pastePlainText, &pasteRichText]() { pastePlainText->disable(); pasteRichText->disable(); });
+			pasteAs.add_action(pastePlainText);
+			pasteAs.add_action(pasteRichText);
 			iMenu->menu().add_action(app::instance().action_delete());
 			iMenu->menu().add_separator();
 			iMenu->menu().add_action(app::instance().action_select_all());
@@ -832,6 +842,39 @@ namespace neogfx
 		default:
 			break;
 		}
+	}
+
+	std::string text_edit::plain_text() const
+	{
+		return text();
+	}
+
+	bool text_edit::set_plain_text(const std::string& aPlainText)
+	{
+		return set_text(aPlainText) != 0 || aPlainText.empty();
+	}
+
+	std::string text_edit::rich_text(rich_text_format aFormat) const
+	{
+		// todo
+		return text();
+	}
+
+	bool text_edit::set_rich_text(const std::string& aRichText, rich_text_format aFormat)
+	{
+		// todo
+		return set_text(aRichText) != 0 || aRichText.empty();
+	}
+
+	void text_edit::paste_plain_text()
+	{
+		paste(app::instance().clipboard());
+	}
+
+	void text_edit::paste_rich_text(rich_text_format aFormat)
+	{
+		// todo
+		paste(app::instance().clipboard());
 	}
 
 	bool text_edit::read_only() const

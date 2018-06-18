@@ -28,12 +28,12 @@
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
 #include "scrollable_widget.hpp"
-#include "i_document.hpp"
+#include "i_text_document.hpp"
 #include "cursor.hpp"
 
 namespace neogfx
 {
-	class text_edit : public scrollable_widget, public i_clipboard_sink, public i_document
+	class text_edit : public scrollable_widget, public i_clipboard_sink, public i_text_document
 	{
 	public:
 		event<const std::string&, bool&> text_filter;
@@ -387,11 +387,13 @@ namespace neogfx
 		typedef document_text::size_type position_type;
 	public:
 		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::text_edit::bad_column_index") {} }; 
+		// text_edit
 	public:
 		text_edit(type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
 		text_edit(i_widget& aParent, type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
 		text_edit(i_layout& aLayout, type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
 		~text_edit();
+		// scrollable_widget
 	public:
 		void moved() override;
 		void resized() override;
@@ -423,6 +425,7 @@ namespace neogfx
 		void update_scrollbar_visibility(usv_stage_e aStage) override;
 	public:
 		colour frame_colour() const override;
+		// i_clipboard
 	public:
 		bool can_undo() const override;
 		bool can_redo() const override;
@@ -438,8 +441,18 @@ namespace neogfx
 		void paste(i_clipboard& aClipboard) override;
 		void delete_selected(i_clipboard& aClipboard) override;
 		void select_all(i_clipboard& aClipboard) override;
+		// i_text_document
 	public:
 		void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) override;
+	public:
+		std::string plain_text() const override;
+		bool set_plain_text(const std::string& aPlainText) override;
+		std::string rich_text(rich_text_format aFormat = rich_text_format::Html) const override;
+		bool set_rich_text(const std::string& aRichText, rich_text_format aFormat = rich_text_format::Html) override;
+	public:
+		void paste_plain_text() override;
+		void paste_rich_text(rich_text_format aFormat = rich_text_format::Html) override;
+		// text_edit
 	public:
 		bool read_only() const;
 		void set_read_only(bool aReadOnly = true);
