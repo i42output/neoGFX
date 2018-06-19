@@ -1,7 +1,7 @@
 // text_edit.cpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -365,7 +365,7 @@ namespace neogfx
 		iDragger = boost::none;
 		if (aButton == mouse_button::Right)
 		{
-			iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + root().window_position());
+			iMenu = std::make_unique<context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
 			iMenu->menu().add_action(app::instance().action_undo());
 			iMenu->menu().add_action(app::instance().action_redo());
 			iMenu->menu().add_separator();

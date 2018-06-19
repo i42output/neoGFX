@@ -142,8 +142,9 @@
     <ClInclude Include="..\..\..\include\neogfx\core\color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\css.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\device_metrics.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\event.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\geometry.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\geometrical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsl_color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsl_colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsv_color.hpp" />
@@ -152,12 +153,14 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_units_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\units_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_collidable_object.hpp" />
@@ -380,7 +383,7 @@
     <ClCompile Include="..\..\..\src\core\colour.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
     <ClCompile Include="..\..\..\src\core\event.cpp" />
-    <ClCompile Include="..\..\..\src\core\geometry.cpp" />
+    <ClCompile Include="..\..\..\src\core\units_context.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />

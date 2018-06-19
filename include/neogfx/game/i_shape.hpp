@@ -1,7 +1,7 @@
 // i_shape.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include <chrono>
 #include <boost/optional.hpp>
 #include <neogfx/core/numerical.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/game/i_game_object.hpp>

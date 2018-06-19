@@ -1,7 +1,7 @@
 // drop_list.cpp
 /*
 neogfx C++ GUI Library
-Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -158,8 +158,8 @@ namespace neogfx
 	drop_list_popup::drop_list_popup(drop_list& aDropList) :
 		window{ 
 			aDropList,
-			aDropList.window_rect().bottom_left() + aDropList.root().window_position(),
-			aDropList.window_rect().extents(),
+			aDropList.non_client_rect().bottom_left() + aDropList.root().window_position(),
+			aDropList.non_client_rect().extents(),
 			window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::DismissOnOwnerClick | window_style::InitiallyHidden | window_style::DropShadow },
 		iDropList{ aDropList },
 		iView{ client_layout(), aDropList }
@@ -285,8 +285,8 @@ namespace neogfx
 			view().make_visible(index);
 			currentItemPos += view().cell_rect(index).top_left();
 		}
-		point inputWidgetPos{ iDropList.window_rect().top_left() + iDropList.root().window_position() };
-		point textWidgetPos{ iDropList.input_widget().text_widget().window_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };
+		point inputWidgetPos{ iDropList.non_client_rect().top_left() + iDropList.root().window_position() };
+		point textWidgetPos{ iDropList.input_widget().text_widget().non_client_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };
 		point popupPos = -currentItemPos + textWidgetPos;
 		
 		// Popup goes below line edit if editable or on top of drop button if not...
@@ -961,7 +961,7 @@ namespace neogfx
 			{
 				if (aEvent.type() == mouse_event_type::ButtonReleased &&
 					aEvent.mouse_button() == mouse_button::Left &&
-					inputWidget.client_rect().contains(aEvent.position() - window_rect().top_left()) &&
+					inputWidget.client_rect().contains(aEvent.position() - non_client_rect().top_left()) &&
 					inputWidget.capturing())
 				{
 					inputWidget.text_widget().set_focus();

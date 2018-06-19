@@ -1,7 +1,7 @@
 // border_layout.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2018-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/lifetime.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include "layout_bits.hpp"
 #include "grid_layout.hpp"
 #include "horizontal_layout.hpp"

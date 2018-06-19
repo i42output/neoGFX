@@ -1,7 +1,7 @@
 // window.cpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -915,7 +915,7 @@ namespace neogfx
 		{
 		case widget_part::NonClientTitleBar:
 			if (iTitleBar != boost::none)
-				return to_client_coordinates(iTitleBar->window_rect());
+				return to_client_coordinates(iTitleBar->non_client_rect());
 			else
 				return rect{};
 		default:

@@ -35,7 +35,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/pool/pool_alloc.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 
 #pragma once
 

@@ -1,7 +1,7 @@
 // widget.cpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -825,7 +825,7 @@ namespace neogfx
 		layout_items();
 	}
 
-	rect widget::window_rect() const
+	rect widget::non_client_rect() const
 	{
 		return rect{origin(), extents()};
 	}
@@ -843,7 +843,7 @@ namespace neogfx
 		if (client_rect().contains(aPosition))
 		{
 			for (const auto& c : children())
-				if (c->visible() && to_client_coordinates(c->window_rect()).contains(aPosition))
+				if (c->visible() && to_client_coordinates(c->non_client_rect()).contains(aPosition))
 					return c->get_widget_at(aPosition - c->position());
 		}
 		return *this;
@@ -858,7 +858,7 @@ namespace neogfx
 	{
 		if (client_rect().contains(aPosition))
 			return widget_part::Client;
-		else if (to_client_coordinates(window_rect()).contains(aPosition))
+		else if (to_client_coordinates(non_client_rect()).contains(aPosition))
 			return widget_part::NonClient;
 		else
 			return widget_part::Nowhere;
@@ -1019,7 +1019,7 @@ namespace neogfx
 	{
 		if ((!is_root() && !has_parent()) || !has_root() || !root().has_native_surface() || effectively_hidden() || layout_items_in_progress())
 			return;
-		update(aIncludeNonClient ? to_client_coordinates(window_rect()) : client_rect());
+		update(aIncludeNonClient ? to_client_coordinates(non_client_rect()) : client_rect());
 	}
 
 	void widget::update(const rect& aUpdateRect)
@@ -1033,14 +1033,14 @@ namespace neogfx
 
 	bool widget::requires_update() const
 	{
-		return surface().has_invalidated_area() && !surface().invalidated_area().intersection(window_rect()).empty();
+		return surface().has_invalidated_area() && !surface().invalidated_area().intersection(non_client_rect()).empty();
 	}
 
 	rect widget::update_rect() const
 	{
 		if (!requires_update())
 			throw no_update_rect();
-		return to_client_coordinates(surface().invalidated_area().intersection(window_rect()));
+		return to_client_coordinates(surface().invalidated_area().intersection(non_client_rect()));
 	}
 
 	rect widget::default_clip_rect(bool aIncludeNonClient) const
@@ -1048,7 +1048,7 @@ namespace neogfx
 		auto& cachedRect = (aIncludeNonClient ? iDefaultClipRect.first : iDefaultClipRect.second);
 		if (cachedRect != boost::none)
 			return *cachedRect;
-		rect clipRect = to_client_coordinates(window_rect());
+		rect clipRect = to_client_coordinates(non_client_rect());
 		if (!aIncludeNonClient)
 			clipRect = clipRect.intersection(client_rect());
 		if (has_parent() && !is_root())
@@ -1100,7 +1100,7 @@ namespace neogfx
 			for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
 			{
 				const auto& c = *i;
-				rect intersection = clipRect.intersection(to_client_coordinates(c->window_rect()));
+				rect intersection = clipRect.intersection(to_client_coordinates(c->non_client_rect()));
 				if (!intersection.empty())
 					c->render(aGraphicsContext);
 			}
@@ -1285,16 +1285,6 @@ namespace neogfx
 		return false;
 	}
 
-	bool widget::show()
-	{
-		return show(true);
-	}
-
-	bool widget::hide()
-	{
-		return show(false);
-	}
-
 	bool widget::enabled() const
 	{
 		return Enabled;
@@ -1332,16 +1322,6 @@ namespace neogfx
 			return true;
 		}
 		return false;
-	}
-
-	bool widget::enable()
-	{
-		return enable(true);
-	}
-
-	bool widget::disable()
-	{
-		return enable(false);
 	}
 
 	bool widget::entered() const

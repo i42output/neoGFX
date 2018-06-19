@@ -1,7 +1,7 @@
 // scrollable_widget.cpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -356,17 +356,17 @@ namespace neogfx
 		case scrollbar_type::Vertical:
 			if (vertical_scrollbar().style() == scrollbar_style::Normal)
 				return convert_units(*this, aContext,
-					rect{ window_rect().top_right() - point{aScrollbar.width(*this) + effective_frame_width(), -effective_frame_width()},
-						size{aScrollbar.width(*this), window_rect().cy - (horizontal_scrollbar().visible() ? horizontal_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0} });
+					rect{ non_client_rect().top_right() - point{aScrollbar.width(*this) + effective_frame_width(), -effective_frame_width()},
+						size{aScrollbar.width(*this), non_client_rect().cy - (horizontal_scrollbar().visible() ? horizontal_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0} });
 			else // scrollbar_style::Menu
-				return convert_units(*this, aContext, window_rect().deflate(size{ effective_frame_width() }));
+				return convert_units(*this, aContext, non_client_rect().deflate(size{ effective_frame_width() }));
 		case scrollbar_type::Horizontal:
 			if (horizontal_scrollbar().style() == scrollbar_style::Normal)
 				return convert_units(*this, aContext, 
-					rect(window_rect().bottom_left() - point(-effective_frame_width(), aScrollbar.width(*this) + effective_frame_width()), 
-						size(window_rect().cx - (vertical_scrollbar().visible() ? vertical_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0, aScrollbar.width(*this))));
+					rect(non_client_rect().bottom_left() - point(-effective_frame_width(), aScrollbar.width(*this) + effective_frame_width()),
+						size(non_client_rect().cx - (vertical_scrollbar().visible() ? vertical_scrollbar().width(*this) : 0.0) - effective_frame_width() * 2.0, aScrollbar.width(*this))));
 			else // scrollbar_style::Menu
-				return convert_units(*this, aContext, window_rect().deflate(size{ effective_frame_width() }));
+				return convert_units(*this, aContext, non_client_rect().deflate(size{ effective_frame_width() }));
 		default:
 			return rect{};
 		}

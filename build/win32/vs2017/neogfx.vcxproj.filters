@@ -279,9 +279,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\framed_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\geometry.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\grid_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -732,6 +729,18 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\skin_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\units_context.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\i_units_context.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\geometrical.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\device_metrics.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
@@ -882,9 +891,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\colour.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\geometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\dialog\colour_dialog.cpp">
@@ -1116,6 +1122,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\units_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

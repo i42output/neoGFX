@@ -1,7 +1,7 @@
 // sdl_window.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <SDL.h>
 #include <SDL_mouse.h>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/hid/i_surface_window.hpp>

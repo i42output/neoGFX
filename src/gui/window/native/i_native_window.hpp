@@ -1,7 +1,7 @@
 // i_native_window.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include "../../../hid/native/i_native_surface.hpp"
 

@@ -1,7 +1,7 @@
 // native_font_face.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
 #include <hb-ucdn\ucdn.h>
 #endif
 #include "..\..\native\opengl.hpp"
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include "glyph_texture.hpp"

@@ -1,7 +1,7 @@
 // i_skinnable_item.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2018-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,16 +20,21 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/geometrical.hpp>
+#include <neogfx/core/i_object.hpp>
 
 namespace neogfx
 {
 	class i_widget;
 
-	class i_skinnable_item
+	class i_skinnable_item : public virtual i_object
 	{
 	public:
 		virtual bool is_widget() const = 0;
 		virtual const i_widget& as_widget() const = 0;
 		virtual i_widget& as_widget() = 0;
+	public:
+		virtual rect non_client_rect() const = 0;
+		virtual rect client_rect(bool aIncludeMargins = true) const = 0;
 	};
 }

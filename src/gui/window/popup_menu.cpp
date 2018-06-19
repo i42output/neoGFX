@@ -1,7 +1,7 @@
 // popup_menu.cpp
 /*
 neogfx C++ GUI Library
-Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -395,7 +395,7 @@ namespace neogfx
 			{
 				if (iParentWidget != 0)
 				{
-					rect menuBarRect = iParentWidget->window_rect() + wm.window_rect(parent_window()).position();
+					rect menuBarRect = iParentWidget->non_client_rect() + wm.window_rect(parent_window()).position();
 					if (!ourRect.intersection(menuBarRect).empty())
 					{
 						if (desktopRect.bottom() - menuBarRect.bottom() > ourRect.height())

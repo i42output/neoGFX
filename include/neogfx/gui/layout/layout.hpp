@@ -1,7 +1,7 @@
 // layout.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -24,8 +24,9 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/variant.hpp>
 #include <neolib/lifetime.hpp>
-#include "i_layout.hpp"
-#include "layout_item.hpp"
+#include <neogfx/core/units_context.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/layout/layout_item.hpp>
 
 namespace neogfx
 {

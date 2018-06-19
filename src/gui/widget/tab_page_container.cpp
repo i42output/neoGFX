@@ -1,7 +1,7 @@
 // tab_page_container.cpp
 /*
 neogfx C++ GUI Library
-Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -72,8 +72,8 @@ namespace neogfx
 			case tab_container_style::TabAlignmentTop:
 			case tab_container_style::TabAlignmentBottom:
 				{
-					auto hole = to_client_coordinates(iTab.as_widget().window_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(window_rect()));
-					hole = hole.intersection(to_client_coordinates(window_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
+					auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(non_client_rect()));
+					hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
 					aGraphicsContext.fill_rect(hole, inner_frame_colour());
 					hole.deflate(size{ effective_frame_width() / 2.0, 0.0 });
 					aGraphicsContext.fill_rect(hole, background_colour());
@@ -82,8 +82,8 @@ namespace neogfx
 			case tab_container_style::TabAlignmentLeft:
 			case tab_container_style::TabAlignmentRight:
 				{
-					auto hole = to_client_coordinates(iTab.as_widget().window_rect().inflate(size{ effective_frame_width(), -effective_frame_width() / 2.0 }).intersection(window_rect()));
-					hole = hole.intersection(to_client_coordinates(window_rect().deflate(size{ 0.0, effective_frame_width() / 2.0 })));
+					auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ effective_frame_width(), -effective_frame_width() / 2.0 }).intersection(non_client_rect()));
+					hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ 0.0, effective_frame_width() / 2.0 })));
 					aGraphicsContext.fill_rect(hole, inner_frame_colour());
 					hole.deflate(size{ 0.0, effective_frame_width() / 2.0 });
 					aGraphicsContext.fill_rect(hole, background_colour());

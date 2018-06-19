@@ -1,7 +1,7 @@
 // menu_item_widget.cpp
 /*
 neogfx C++ GUI Library
-Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -264,9 +264,9 @@ namespace neogfx
 	point menu_item_widget::sub_menu_position() const
 	{
 		if (menu().type() == i_menu::MenuBar)
-			return window_rect().bottom_left() + root().window_position();
+			return non_client_rect().bottom_left() + root().window_position();
 		else
-			return window_rect().top_right() + root().window_position();
+			return non_client_rect().top_right() + root().window_position();
 	}
 
 	void menu_item_widget::init()

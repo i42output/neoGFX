@@ -1,7 +1,7 @@
 // framed_widget.cpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -92,11 +92,11 @@ namespace neogfx
 			break;
 		case frame_style::SolidFrame:
 		case frame_style::WindowFrame:
-			aGraphicsContext.draw_rect(rect{ point{ 0.0, 0.0 }, window_rect().extents() }, pen{ frame_colour(), effective_frame_width() });
+			aGraphicsContext.draw_rect(rect{ point{ 0.0, 0.0 }, non_client_rect().extents() }, pen{ frame_colour(), effective_frame_width() });
 			break;
 		case frame_style::ContainerFrame:
 			{
-				rect rectBorder{ point{ 0.0, 0.0 }, window_rect().extents() };
+				rect rectBorder{ point{ 0.0, 0.0 }, non_client_rect().extents() };
 				rectBorder.deflate(line_width(), line_width());
 				aGraphicsContext.draw_rect(rectBorder, pen(inner_frame_colour(), line_width()));
 				rectBorder.inflate(line_width(), line_width());

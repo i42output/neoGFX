@@ -1,7 +1,7 @@
 // i_geometry.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometry.hpp>
+#include <neogfx/core/i_units_context.hpp>
 
 namespace neogfx
 {
@@ -130,7 +130,7 @@ namespace neogfx
 	public:
 		void set_size_policy(neogfx::size_policy::size_policy_e aSizePolicy, bool aUpdateLayout = true)
 		{
-			set_size_policy(neogfx::size_policy{aSizePolicy}, aUpdateLayout);
+			set_size_policy(neogfx::size_policy{ aSizePolicy }, aUpdateLayout);
 		}
 		void set_size_policy(neogfx::size_policy::size_policy_e aSizePolicy, const size& aAspectRatio, bool aUpdateLayout = true)
 		{
@@ -138,7 +138,7 @@ namespace neogfx
 		}
 		void set_size_policy(neogfx::size_policy::size_policy_e aHorizontalSizePolicy, neogfx::size_policy::size_policy_e aVerticalSizePolicy, bool aUpdateLayout = true)
 		{
-			set_size_policy(neogfx::size_policy{aHorizontalSizePolicy, aVerticalSizePolicy}, aUpdateLayout);
+			set_size_policy(neogfx::size_policy{ aHorizontalSizePolicy, aVerticalSizePolicy }, aUpdateLayout);
 		}
 		void set_size_policy(neogfx::size_policy::size_policy_e aHorizontalSizePolicy, neogfx::size_policy::size_policy_e aVerticalSizePolicy, const size& aAspectRatio, bool aUpdateLayout = true)
 		{

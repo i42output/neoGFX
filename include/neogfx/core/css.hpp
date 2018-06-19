@@ -1,7 +1,7 @@
 // css.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,10 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/variant.hpp>
 #include <neolib/vecarray.hpp>
-#include "geometry.hpp"
-#include "hsl_colour.hpp"
-#include "hsv_colour.hpp"
-#include "colour.hpp"
+#include <neogfx/core/primitives.hpp>
 
 namespace neogfx
 {

@@ -1,7 +1,7 @@
 // gradient_widget.cpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -341,7 +341,7 @@ namespace neogfx
 					});
 					if (iSelection.colour_stop_count() <= 2)
 						deleteStopAction->disable();
-					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + root().window_position());
+					iMenu = std::make_unique<context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
 					iMenu->menu().add_action(selectColourAction);
 					iMenu->menu().add_action(deleteStopAction);
 					iMenu->menu().add_action(splitStopAction);
@@ -375,7 +375,7 @@ namespace neogfx
 					});
 					if (iSelection.alpha_stop_count() <= 2)
 						deleteStopAction->disable();
-					iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + root().window_position());
+					iMenu = std::make_unique<context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
 					iMenu->menu().add_action(selectAlphaAction);
 					iMenu->menu().add_action(deleteStopAction);
 					if (!iInGradientDialog)
@@ -386,7 +386,7 @@ namespace neogfx
 			}
 			else if (!iInGradientDialog)
 			{
-				iMenu = std::make_unique<context_menu>(*this, aPosition + window_rect().top_left() + root().window_position());
+				iMenu = std::make_unique<context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
 				iMenu->menu().add_action(moreAction);
 				iMenu->exec();
 				iMenu.reset();

@@ -1,7 +1,7 @@
 // i_skin.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2018-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 
 namespace neogfx
 {
@@ -33,5 +34,9 @@ namespace neogfx
 	public:
 		virtual void activate() = 0;
 		virtual void deactivate() = 0;
+	public:
+		virtual void paint_non_client(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
+		virtual void paint_non_client_after(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
+		virtual void paint(i_skinnable_item& aItem, graphics_context& aGraphicsContext) const = 0;
 	};
 }

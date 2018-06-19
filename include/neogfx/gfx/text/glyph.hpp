@@ -1,7 +1,7 @@
 // glyph.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
 #include <neogfx/neogfx.hpp>
 #include <boost/optional.hpp>
 #include <neolib/string_utils.hpp>
-#include <neogfx/core/geometry.hpp>
-#include "i_glyph_texture.hpp"
-#include "font.hpp"
+#include <neogfx/core/geometrical.hpp>
+#include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/gfx/text/font.hpp>
 
 namespace neogfx
 {

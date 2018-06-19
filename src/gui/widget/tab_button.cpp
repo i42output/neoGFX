@@ -1,7 +1,7 @@
 // tab_button.cpp
 /*
 neogfx C++ GUI Library
-Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -367,7 +367,7 @@ namespace neogfx
 		if (!is_selected())
 			push_button::update(aUpdateRect);
 		else
-			push_button::update(to_client_coordinates(window_rect().inflate(delta{ 2.0, 2.0 })));
+			push_button::update(to_client_coordinates(non_client_rect().inflate(delta{ 2.0, 2.0 })));
 	}
 
 	void tab_button::mouse_entered(const point& aPosition)

@@ -1,7 +1,7 @@
 // i_widget.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace neogfx
 	class i_window;
 	class i_layout;
 
-	class i_widget : public i_object, public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
+	class i_widget : public virtual i_object, public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
 	{
 	public:
 		static i_widget* debug;
@@ -139,8 +139,6 @@ namespace neogfx
 		virtual size extents() const = 0;
 		virtual void resize(const size& aSize) = 0;
 		virtual void resized() = 0;
-		virtual rect window_rect() const = 0;
-		virtual rect client_rect(bool aIncludeMargins = true) const = 0;
 		virtual const i_widget& get_widget_at(const point& aPosition) const = 0;
 		virtual i_widget& get_widget_at(const point& aPosition) = 0;
 		virtual widget_part hit_test(const point& aPosition) const = 0;
@@ -177,15 +175,11 @@ namespace neogfx
 		virtual bool hidden() const = 0;
 		virtual bool effectively_hidden() const = 0;
 		virtual bool show(bool aVisible) = 0;
-		virtual bool show() = 0;
-		virtual bool hide() = 0;
 		virtual bool enabled() const = 0;
 		virtual bool effectively_enabled() const = 0;
 		virtual bool disabled() const = 0;
 		virtual bool effectively_disabled() const = 0;
 		virtual bool enable(bool aEnable) = 0;
-		virtual bool enable() = 0;
-		virtual bool disable() = 0;
 		virtual bool entered() const = 0;
 		virtual bool can_capture() const = 0;
 		virtual bool capturing() const = 0;
@@ -244,19 +238,37 @@ namespace neogfx
 		}
 		point to_window_coordinates(const point& aClientCoordinates) const
 		{
-			return aClientCoordinates + window_rect().top_left();
+			return aClientCoordinates + non_client_rect().top_left();
 		}
 		rect to_window_coordinates(const rect& aClientCoordinates) const
 		{
-			return aClientCoordinates + window_rect().top_left();
+			return aClientCoordinates + non_client_rect().top_left();
 		}
 		point to_client_coordinates(const point& aWindowCoordinates) const
 		{
-			return aWindowCoordinates - window_rect().top_left();
+			return aWindowCoordinates - non_client_rect().top_left();
 		}
 		rect to_client_coordinates(const rect& aWindowCoordinates) const
 		{
-			return aWindowCoordinates - window_rect().top_left();
+			return aWindowCoordinates - non_client_rect().top_left();
 		}
+	public:
+		bool show()
+		{
+			return show(true);
+		}
+		bool hide()
+		{
+			return show(false);
+		}
+		bool enable()
+		{
+			return enable(true);
+		}
+		bool disable()
+		{
+			return enable(false);
+		}
+
 	};
 }

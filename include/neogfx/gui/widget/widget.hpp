@@ -1,7 +1,7 @@
 // widget.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015-present, Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -94,32 +94,19 @@ namespace neogfx
 		void layout_items_completed() override;
 		// i_units_context
 	public:
+		bool high_dpi() const override;
+		dimension dpi_scale_factor() const override;
+	public:
 		bool device_metrics_available() const override;
 		const i_device_metrics& device_metrics() const override;
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
 		// i_geometry
 	public:
-		bool high_dpi() const override;
-		dimension dpi_scale_factor() const override;
-		bool has_logical_coordinate_system() const override;
-		neogfx::logical_coordinate_system logical_coordinate_system() const override;
-		void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) override;
 		point position() const override;
 		void set_position(const point& aPosition) override;
-		point origin() const override;
-		void move(const point& aPosition) override;
-		void moved() override;
 		size extents() const override;
 		void set_extents(const size& aSize) override;
-		void resize(const size& aSize) override;
-		void resized() override;
-		rect window_rect() const override;
-		rect client_rect(bool aIncludeMargins = true) const override;
-		const i_widget& get_widget_at(const point& aPosition) const override;
-		i_widget& get_widget_at(const point& aPosition) override;
-		widget_part hit_test(const point& aPosition) const override;
-	public:
 		bool has_size_policy() const override;
 		neogfx::size_policy size_policy() const override;
 		void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
@@ -135,14 +122,32 @@ namespace neogfx
 		bool has_margins() const override;
 		neogfx::margins margins() const override;
 		void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) override;
+		// i_skinnable_item
+	public:
+		bool is_widget() const override;
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+	public:
+		rect non_client_rect() const override;
+		rect client_rect(bool aIncludeMargins = true) const override;
+		// i_widget
+	public:
+		bool has_logical_coordinate_system() const override;
+		neogfx::logical_coordinate_system logical_coordinate_system() const override;
+		void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) override;
+		point origin() const override;
+		void move(const point& aPosition) override;
+		void moved() override;
+		void resize(const size& aSize) override;
+		void resized() override;
+		const i_widget& get_widget_at(const point& aPosition) const override;
+		i_widget& get_widget_at(const point& aPosition) override;
+		widget_part hit_test(const point& aPosition) const override;
 		// i_layout_item
 	public:
 		bool is_layout() const override;
 		const i_layout& as_layout() const override;
 		i_layout& as_layout() override;
-		bool is_widget() const override;
-		const i_widget& as_widget() const override;
-		i_widget& as_widget() override;
 	public:
 		bool has_parent_layout() const override;
 		const i_layout& parent_layout() const override;
@@ -191,15 +196,11 @@ namespace neogfx
 		bool hidden() const override;
 		bool effectively_hidden() const override;
 		bool show(bool aVisible) override;
-		bool show() override;
-		bool hide() override;
 		bool enabled() const override;
 		bool effectively_enabled() const override;
 		bool disabled() const override;
 		bool effectively_disabled() const override;
 		bool enable(bool aEnable) override;
-		bool enable() override;
-		bool disable() override;
 		bool entered() const override;
 		bool can_capture() const override;
 		bool capturing() const override;
@@ -248,6 +249,11 @@ namespace neogfx
 		// helpers
 	public:
 		using i_widget::set_size_policy;
+		using i_widget::show;
+		using i_widget::hide;
+		using i_widget::enable;
+		using i_widget::disable;
+		// state
 	private:
 		bool iSingular;
 		i_widget* iParent;
@@ -264,6 +270,7 @@ namespace neogfx
 		std::unique_ptr<layout_timer> iLayoutTimer;
 		units_context iUnitsContext;
 		mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
+		// properties
 	public:
 		struct property_category
 		{
