@@ -408,10 +408,16 @@ namespace neogfx
 	{
 		if (iStyle == push_button_style::ItemViewHeader)
 		{
-			set_margins(neogfx::margins(1.0, 2.0));
-			layout().set_margins(neogfx::margins(0.0));
-			label().set_margins(neogfx::margins(0.0));
+			set_margins(neogfx::margins{ 1.0, 2.0 });
+			layout().set_margins(neogfx::margins{});
+			label().set_margins(neogfx::margins{});
 			label().text().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCentre);
+		}
+		else if (iStyle == push_button_style::Toolbar)
+		{
+			set_margins(neogfx::margins{ 2.0, 2.0 });
+			layout().set_margins(neogfx::margins{});
+			label().set_margins(neogfx::margins{});
 		}
 	}
 }

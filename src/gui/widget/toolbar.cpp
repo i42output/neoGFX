@@ -25,19 +25,16 @@ namespace neogfx
 	toolbar::toolbar() : 
 		iLayout{ *this }
 	{
-		set_margins(neogfx::margins{});
 	}
 
 	toolbar::toolbar(i_widget& aParent) : 
 		widget{ aParent }, iLayout{ *this }
 	{
-		set_margins(neogfx::margins{});
 	}
 
 	toolbar::toolbar(i_layout& aLayout) : 
 		widget{ aLayout }, iLayout{ *this }
 	{
-		set_margins(neogfx::margins{});
 	}
 
 	neogfx::size_policy toolbar::size_policy() const
