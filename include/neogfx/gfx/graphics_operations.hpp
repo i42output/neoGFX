@@ -306,103 +306,13 @@ namespace neogfx
 			DrawTextures
 		};
 
-		inline std::string to_string(operation_type aOpType)
-		{
-			switch (aOpType)
-			{
-			case Invalid: return "Invalid";
-			case SetLogicalCoordinateSystem: return "SetLogicalCoordinateSystem";
-			case SetLogicalCoordinates: return "SetLogicalCoordinates";
-			case ScissorOn: return "ScissorOn";
-			case ScissorOff: return "ScissorOff";
-			case ClipToRect: return "ClipToRect";
-			case ClipToPath: return "ClipToPath";
-			case ResetClip: return "ResetClip";
-			case SetOpacity: return "SetOpacity";
-			case SetSmoothingMode: return "SetSmoothingMode";
-			case PushLogicalOperation: return "PushLogicalOperation";
-			case PopLogicalOperation: return "PopLogicalOperation";
-			case LineStippleOn: return "LineStippleOn";
-			case LineStippleOff: return "LineStippleOff";
-			case SubpixelRenderingOn: return "SubpixelRenderingOn";
-			case SubpixelRenderingOff: return "SubpixelRenderingOff";
-			case Clear: return "Clear";
-			case ClearDepthBuffer: return "ClearDepthBuffer";
-			case SetPixel: return "SetPixel";
-			case DrawPixel: return "DrawPixel";
-			case DrawLine: return "DrawLine";
-			case DrawRect: return "DrawRect";
-			case DrawRoundedRect: return "DrawRoundedRect";
-			case DrawCircle: return "DrawCircle";
-			case DrawArc: return "DrawArc";
-			case DrawPath: return "DrawPath";
-			case DrawShape: return "DrawShape";
-			case FillRect: return "FillRect";
-			case FillRoundedRect: return "FillRoundedRect";
-			case FillCircle: return "FillCircle";
-			case FillArc: return "FillArc";
-			case FillPath: return "FillPath";
-			case FillShape: return "FillShape";
-			case DrawGlyph: return "DrawGlyph";
-			case DrawTextures: return "DrawTextures";
-			default: return "";
-			}
-		}
+		std::string to_string(operation_type aOpType);
 
-		bool inline batchable(const operation& aLeft, const operation& aRight)
-		{
-			if (aLeft.which() != aRight.which())
-				return false;
-			switch (static_cast<operation_type>(aLeft.which()))
-			{
-			case operation_type::SetPixel:
-			case operation_type::DrawPixel:
-			case operation_type::DrawTextures:
-				return true;
-			case operation_type::DrawLine:
-			{
-				auto& left = static_variant_cast<const draw_line&>(aLeft);
-				auto& right = static_variant_cast<const draw_line&>(aRight);
-				return left.pen.width() == right.pen.width() &&
-					left.pen.anti_aliased() == right.pen.anti_aliased();
-			}
-			case operation_type::FillRect:
-			{
-				auto& left = static_variant_cast<const fill_rect&>(aLeft);
-				auto& right = static_variant_cast<const fill_rect&>(aRight);
-				return left.fill.which() == right.fill.which() && left.fill.is<colour>();
-			}
-			case operation_type::FillShape:
-			{
-				auto& left = static_variant_cast<const fill_shape&>(aLeft);
-				auto& right = static_variant_cast<const fill_shape&>(aRight);
-				return left.fill.which() == right.fill.which() && left.fill.is<colour>();
-			}
-			case operation_type::DrawGlyph:
-			{
-				auto& left = static_variant_cast<const draw_glyph&>(aLeft);
-				auto& right = static_variant_cast<const draw_glyph&>(aRight);
-				if (left.glyph.is_emoji() || right.glyph.is_emoji())
-					return false;
-				if (left.appearance.ink().which() != right.appearance.ink().which() || !left.appearance.ink().is<colour>())
-					return false;
-				if (left.appearance.has_effect() != right.appearance.has_effect())
-					return false;
-				if (left.appearance.has_effect() && (left.appearance.effect().type() != right.appearance.effect().type() || left.appearance.effect().width() != right.appearance.effect().width()))
-					return false;
-				const i_glyph_texture& leftGlyphTexture = left.glyph.glyph_texture();
-				const i_glyph_texture& rightGlyphTexture = right.glyph.glyph_texture();
-				return leftGlyphTexture.texture().native_texture()->handle() == rightGlyphTexture.texture().native_texture()->handle() &&
-					left.glyph.subpixel() == right.glyph.subpixel();
-			}
-			default:
-				return false;
-			}
-		}
+		bool batchable(const operation& aLeft, const operation& aRight);
 
-		typedef std::vector<graphics_operation::operation> operations;
+		typedef std::vector<operation> operations;
 		typedef std::vector<operations::size_type> batches;
-		typedef std::pair<const graphics_operation::operation*, const graphics_operation::operation*> batch;
+		typedef std::pair<const operation*, const operation*> batch;
 		typedef std::pair<operations, batches> queue;
 	}
 }

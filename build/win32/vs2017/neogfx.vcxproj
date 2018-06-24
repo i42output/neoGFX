@@ -396,6 +396,7 @@
     <ClCompile Include="..\..\..\src\game\sprite_plane.cpp" />
     <ClCompile Include="..\..\..\src\game\text.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp" />
     <ClCompile Include="..\..\..\src\gfx\image.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_error.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_graphics_context.cpp" />

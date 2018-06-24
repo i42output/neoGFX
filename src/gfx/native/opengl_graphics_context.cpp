@@ -342,7 +342,7 @@ namespace neogfx
 	{
 		if (iQueue.second.empty())
 			iQueue.second.push_back(0);
-		bool sameBatch = (iQueue.first.empty() || graphics_operation::batchable(iQueue.first.back(), aOperation)) && iQueue.first.size() < max_operations(aOperation);
+		bool sameBatch = (iQueue.first.empty() || graphics_operation::batchable(iQueue.first.back(), aOperation)) && iQueue.first.size() - iQueue.second.back() < max_operations(aOperation);
 		if (!sameBatch)
 			iQueue.second.push_back(iQueue.first.size());
 		iQueue.first.push_back(aOperation);
@@ -1258,10 +1258,10 @@ namespace neogfx
 		auto need = 1u;
 		if (aOperation.is<graphics_operation::draw_glyph>())
 		{
-			need = 4u;
+			need = 6u;
 			auto& drawGlyphOp = static_variant_cast<const graphics_operation::draw_glyph&>(aOperation);
 			if (drawGlyphOp.appearance.has_effect() && drawGlyphOp.appearance.effect().type() == text_effect::Outline)
-				need += 4u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
+				need += 6u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
 		}
 		return rendering_engine().vertex_arrays().capacity() / need;
 	}
@@ -1284,11 +1284,11 @@ namespace neogfx
 			return;
 		}
 
-		auto need = 4u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+		auto need = 6u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect::Outline)
-			need += 4u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 
-		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() };
+		use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, need, firstOp.glyph.subpixel() };
 
 		bool hasEffects = false;
 
@@ -1309,7 +1309,7 @@ namespace neogfx
 					drawOp.point.z);
 
 				iTempTextureCoords.clear();
-				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
+				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
 
 				rect outputRect{ point{glyphOrigin}, glyphTexture.texture().extents() };
 
@@ -1333,7 +1333,9 @@ namespace neogfx
 								vertexArrays.push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
 								vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
 								vertexArrays.push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
+								vertexArrays.push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
 								vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
+								vertexArrays.push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
 							}
 						}
 					}
@@ -1350,7 +1352,9 @@ namespace neogfx
 					vertexArrays.push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
 					vertexArrays.push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
 					vertexArrays.push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
+					vertexArrays.push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
 					vertexArrays.push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
+					vertexArrays.push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
 				}
 			}
 		}
@@ -1427,7 +1431,7 @@ namespace neogfx
 					case text_effect::Outline:
 						{
 							auto scanLineOffsets = static_cast<std::size_t>(drawOp.appearance.effect().width() * 2.0 + 1.0);
-							lastCount += scanLineOffsets * scanLineOffsets * 4u;
+							lastCount += scanLineOffsets * scanLineOffsets * 6u;
 						}
 						break;
 					case text_effect::Glow:

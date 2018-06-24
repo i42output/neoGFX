@@ -236,3 +236,5 @@ Debug
 /testing/gui_test_app/build/win32/vs2017/.vs/test/v15
 /testing/gui_test_app/build/win32/vs2017/test.vcxproj.user
 /testing/gui_test_app/build/win32/vs2017/My Amplifier Results - test/*.amplxeproj
+/debug.log
+/testing/gui_test_app/build/win32/vs2017/Report20180624-1528.vspx
