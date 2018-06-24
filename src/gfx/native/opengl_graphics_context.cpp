@@ -1363,7 +1363,6 @@ namespace neogfx
 			return;
 
 		glCheck(glActiveTexture(GL_TEXTURE1));
-		glCheck(glEnable(GL_TEXTURE_2D));
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -1516,7 +1515,6 @@ namespace neogfx
 		iRenderingEngine.active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
 
 		glCheck(glActiveTexture(GL_TEXTURE1));
-		glCheck(glEnable(GL_TEXTURE_2D));
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		GLint previousTexture;

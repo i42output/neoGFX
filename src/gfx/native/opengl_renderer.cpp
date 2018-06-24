@@ -232,6 +232,7 @@ namespace neogfx
 
 	opengl_renderer::~opengl_renderer()
 	{
+		iVertexArrays.reset();
 		if (iGradientTextures != boost::none)
 		{
 			glCheck(glDeleteTextures(1, &(*iGradientTextures)[0]));

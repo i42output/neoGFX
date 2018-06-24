@@ -238,3 +238,7 @@ Debug
 /testing/gui_test_app/build/win32/vs2017/My Amplifier Results - test/*.amplxeproj
 /debug.log
 /testing/gui_test_app/build/win32/vs2017/Report20180624-1528.vspx
+/3rdparty/glew/glew-2.1.0/glew.pc
+/3rdparty/glew/glew-2.1.0/lib/libglew32.lib
+/3rdparty/glew/glew-2.1.0/lib/libglew32d.lib
+/3rdparty/glew/glew-2.1.0/stage

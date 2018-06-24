@@ -197,8 +197,12 @@ namespace neogfx
 		template <typename Buffer>
 		opengl_vertex_attrib_array(Buffer& aBuffer, bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_rendering_engine::i_shader_program& aShaderProgram, const std::string& aVariableName)
 		{
-			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &iPreviousBindingHandle));
-			glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
+			GLint previousBindingHandle;
+			glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousBindingHandle));
+			if (previousBindingHandle != static_cast<GLint>(aBuffer.handle()))
+			{
+				glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
+			}
 			GLuint index;
 			glCheck(index = glGetAttribLocation(reinterpret_cast<GLuint>(aShaderProgram.handle()), aVariableName.c_str()));
 			if (index != -1)
@@ -212,13 +216,14 @@ namespace neogfx
 					reinterpret_cast<const GLvoid*>(aOffset)));
 				glCheck(glEnableVertexAttribArray(index));
 			}
+			if (previousBindingHandle != static_cast<GLint>(aBuffer.handle()))
+			{
+				glCheck(glBindBuffer(GL_ARRAY_BUFFER, previousBindingHandle));
+			}
 		}
 		~opengl_vertex_attrib_array()
 		{
-			glCheck(glBindBuffer(GL_ARRAY_BUFFER, iPreviousBindingHandle));
 		}
-	private:
-		GLint iPreviousBindingHandle;
 	};
 
 	inline vec4f colour_to_vec4f(const std::array<uint8_t, 4>& aSource)

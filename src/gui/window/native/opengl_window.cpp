@@ -176,7 +176,6 @@ namespace neogfx
 		rendering_engine().activate_context(*this);
 
 		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
-		glCheck(glEnable(GL_TEXTURE_2D));
 		glCheck(glEnable(GL_MULTISAMPLE));
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glEnable(GL_DEPTH_TEST));
