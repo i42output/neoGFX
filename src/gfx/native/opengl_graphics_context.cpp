@@ -198,13 +198,17 @@ namespace neogfx
 					GLsizei stride = primitive_vertex_count();
 					if (stride == 0)
 						throw cannot_use_barrier();
-					for (auto i = iStart; i < static_cast<decltype(i)>(iStart + aCount); i += stride)
+					for (auto i = iStart; i < static_cast<decltype(i)>(iStart + aCount); i += stride * 2)
 					{
 						glCheck(glDrawArrays(translated_mode(), i, stride));
-						if (iUseBarrier)
-						{
-							glCheck(glTextureBarrier());
-						}
+					}
+					if (iUseBarrier)
+					{
+						glCheck(glTextureBarrier());
+					}
+					for (auto i = iStart + stride; i < static_cast<decltype(i)>(iStart + aCount); i += stride * 2)
+					{
+						glCheck(glDrawArrays(translated_mode(), i, stride));
 					}
 				}
 				iStart += aCount;
