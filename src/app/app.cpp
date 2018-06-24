@@ -656,8 +656,15 @@ namespace neogfx
 			didSome = pump_messages();
 			didSome = (do_io(neolib::yield_type::NoYield) || didSome);
 			didSome = (do_process_events() || didSome);
-			if (!in_exec() && hadStrongSurfaces && !surface_manager().any_strong_surfaces())
+			bool lastWindowClosed = hadStrongSurfaces && !surface_manager().any_strong_surfaces();
+			if (!in_exec() && lastWindowClosed)
 				throw main_window_closed_prematurely();
+			if (lastWindowClosed && iQuitWhenLastWindowClosed)
+			{
+				if (!iQuitResultCode.is_initialized())
+					iQuitResultCode = 0;
+			}
+
 			rendering_engine().render_now();
 		}
 		catch (std::exception& e)
@@ -687,11 +694,6 @@ namespace neogfx
 	{
 		bool lastWindowClosed = false;
 		bool didSome = surface_manager().process_events(lastWindowClosed);
-		if (lastWindowClosed && iQuitWhenLastWindowClosed)
-		{
-			if (!iQuitResultCode.is_initialized())
-				iQuitResultCode = 0;
-		}
 		return didSome;
 	}
 

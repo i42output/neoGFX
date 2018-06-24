@@ -33,6 +33,7 @@ namespace neogfx
 		sdl_instance()
 		{
 			SDL_Init(SDL_INIT_VIDEO);
+			SDL_SetHint(SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP, "0");
 		}
 		~sdl_instance()
 		{
