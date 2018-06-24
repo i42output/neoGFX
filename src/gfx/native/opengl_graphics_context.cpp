@@ -185,20 +185,26 @@ namespace neogfx
 					iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
 				else
 					iParent.rendering_engine().vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
-				if (!iUseBarrier)
+				if (!iUseBarrier && mode() == translated_mode())
 				{
-					glCheck(glDrawArrays(iMode, iStart, static_cast<GLsizei>(aCount)));
+					glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
 				}
 				else
 				{
-					glCheck(glTextureBarrier());
+					if (iUseBarrier)
+					{
+						glCheck(glTextureBarrier());
+					}
 					GLsizei stride = primitive_vertex_count();
 					if (stride == 0)
 						throw cannot_use_barrier();
 					for (auto i = iStart; i < static_cast<decltype(i)>(iStart + aCount); i += stride)
 					{
-						glCheck(glDrawArrays(iMode, i, stride));
-						glCheck(glTextureBarrier());
+						glCheck(glDrawArrays(translated_mode(), i, stride));
+						if (iUseBarrier)
+						{
+							glCheck(glTextureBarrier());
+						}
 					}
 				}
 				iStart += aCount;
@@ -206,7 +212,7 @@ namespace neogfx
 		private:
 			std::size_t primitive_vertex_count() const
 			{
-				switch (iMode)
+				switch (mode())
 				{
 				case GL_TRIANGLES:
 					return 3;
@@ -216,9 +222,10 @@ namespace neogfx
 					return 2;
 				case GL_POINTS:
 					return 1;
+				case GL_TRIANGLE_FAN:
 				case GL_LINE_LOOP:
 				case GL_LINE_STRIP:
-				case GL_TRIANGLE_FAN:
+				case GL_TRIANGLE_STRIP:
 				default:
 					return 0;
 				}
@@ -229,7 +236,7 @@ namespace neogfx
 			}
 			bool room_for(std::size_t aAmount) const
 			{
-				switch (iMode)
+				switch (mode())
 				{
 				case GL_TRIANGLES:
 					aAmount += (3 - ((vertices().size() - iStart) % 3));
@@ -247,6 +254,20 @@ namespace neogfx
 			opengl_standard_vertex_arrays::vertex_array& vertices()
 			{
 				return iUse.vertices();
+			}
+			GLenum translated_mode() const
+			{
+				switch (iMode)
+				{
+				case GL_QUADS:
+					return GL_TRIANGLE_STRIP;
+				default:
+					return iMode;
+				}
+			}
+			GLenum mode() const
+			{
+				return iMode;
 			}
 		private:
 			opengl_graphics_context& iParent;
@@ -1041,7 +1062,7 @@ namespace neogfx
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 6u * (aFillRectOps.second - aFillRectOps.first)};
+			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 4u * (aFillRectOps.second - aFillRectOps.first)};
 
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
@@ -1258,10 +1279,10 @@ namespace neogfx
 		auto need = 1u;
 		if (aOperation.is<graphics_operation::draw_glyph>())
 		{
-			need = 6u;
+			need = 4u;
 			auto& drawGlyphOp = static_variant_cast<const graphics_operation::draw_glyph&>(aOperation);
 			if (drawGlyphOp.appearance.has_effect() && drawGlyphOp.appearance.effect().type() == text_effect::Outline)
-				need += 6u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
+				need += 4u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
 		}
 		return rendering_engine().vertex_arrays().capacity() / need;
 	}
@@ -1284,11 +1305,11 @@ namespace neogfx
 			return;
 		}
 
-		auto need = 6u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+		auto need = 4u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect::Outline)
-			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+			need += 4u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 
-		use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, need, firstOp.glyph.subpixel() };
+		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() };
 
 		bool hasEffects = false;
 
@@ -1331,11 +1352,9 @@ namespace neogfx
 							{
 								rect effectRect = outputRect + point{ x, y };
 								vertexArrays.push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
+								vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
 								vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
 								vertexArrays.push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
-								vertexArrays.push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
-								vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
-								vertexArrays.push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
 							}
 						}
 					}
@@ -1350,11 +1369,9 @@ namespace neogfx
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
 						std::array <uint8_t, 4>{};
 					vertexArrays.push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
+					vertexArrays.push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
 					vertexArrays.push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
 					vertexArrays.push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
-					vertexArrays.push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
-					vertexArrays.push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
-					vertexArrays.push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
 				}
 			}
 		}
@@ -1430,7 +1447,7 @@ namespace neogfx
 					case text_effect::Outline:
 						{
 							auto scanLineOffsets = static_cast<std::size_t>(drawOp.appearance.effect().width() * 2.0 + 1.0);
-							lastCount += scanLineOffsets * scanLineOffsets * 6u;
+							lastCount += scanLineOffsets * scanLineOffsets * 4u;
 						}
 						break;
 					case text_effect::Glow:
