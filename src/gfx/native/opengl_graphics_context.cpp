@@ -86,6 +86,7 @@ namespace neogfx
 		class use_vertex_arrays
 		{
 		public:
+			struct not_enough_room : std::invalid_argument { not_enough_room() : std::invalid_argument("neogfx::use_vertex_arrays::not_enough_room") {} };
 			struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays::invalid_draw_count") {} };
 			struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::use_vertex_arrays::cannot_use_barrier") {} };
 		public:
@@ -98,12 +99,16 @@ namespace neogfx
 			{
 				if (!room_for(aNeed))
 					execute();
+				if (!room_for(aNeed))
+					throw not_enough_room();
 			}
 			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed))
 					execute();
+				if (!room_for(aNeed))
+					throw not_enough_room();
 			}
 			~use_vertex_arrays()
 			{
@@ -337,7 +342,7 @@ namespace neogfx
 	{
 		if (iQueue.second.empty())
 			iQueue.second.push_back(0);
-		bool sameBatch = iQueue.first.empty() || graphics_operation::batchable(iQueue.first.back(), aOperation);
+		bool sameBatch = (iQueue.first.empty() || graphics_operation::batchable(iQueue.first.back(), aOperation)) && iQueue.first.size() < max_operations(aOperation);
 		if (!sameBatch)
 			iQueue.second.push_back(iQueue.first.size());
 		iQueue.first.push_back(aOperation);
@@ -1248,6 +1253,19 @@ namespace neogfx
 		}
 	}
 
+	std::size_t opengl_graphics_context::max_operations(const graphics_operation::operation& aOperation)
+	{
+		auto need = 1u;
+		if (aOperation.is<graphics_operation::draw_glyph>())
+		{
+			need = 4u;
+			auto& drawGlyphOp = static_variant_cast<const graphics_operation::draw_glyph&>(aOperation);
+			if (drawGlyphOp.appearance.has_effect() && drawGlyphOp.appearance.effect().type() == text_effect::Outline)
+				need += 4u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
+		}
+		return rendering_engine().vertex_arrays().capacity() / need;
+	}
+
 	void opengl_graphics_context::draw_glyph(const graphics_operation::batch& aDrawGlyphOps)
 	{
 		auto& firstOp = static_variant_cast<const graphics_operation::draw_glyph&>(*aDrawGlyphOps.first);
@@ -1266,7 +1284,11 @@ namespace neogfx
 			return;
 		}
 
-		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, 4u * (aDrawGlyphOps.second - aDrawGlyphOps.first), firstOp.glyph.subpixel() };
+		auto need = 4u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect::Outline)
+			need += 4u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+
+		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() };
 
 		bool hasEffects = false;
 

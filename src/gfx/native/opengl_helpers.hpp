@@ -338,6 +338,10 @@ namespace neogfx
 			glCheck(glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, ~0ull));
 			glCheck(glDeleteSync(sync));
 		}
+		std::size_t capacity() const
+		{
+			return iVertices.capacity();
+		}
 	private:
 		void do_instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram, bool aWithTextureCoords)
 		{

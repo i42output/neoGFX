@@ -107,6 +107,7 @@ namespace neogfx
 		void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
 		void draw_textures(const i_mesh& aMesh, const optional_colour& aColour, shader_effect aShaderEffect);
 	private:
+		std::size_t max_operations(const graphics_operation::operation& aOperation);
 		void apply_scissor();
 		void apply_logical_operation();
 		void gradient_on(const gradient& aGradient, const rect& aBoundingBox);
