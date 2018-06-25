@@ -835,14 +835,13 @@ namespace neogfx
 
 	void opengl_graphics_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)
 	{
-		glCheck(glEnable(GL_LINE_STIPPLE));
-		glCheck(glLineStipple(static_cast<GLint>(aFactor), static_cast<GLushort>(aPattern)));
+		// TODO: glLineStipple unavailable in 3.2
 		iLineStippleActive = true;
 	}
 
 	void opengl_graphics_context::line_stipple_off()
 	{
-		glCheck(glDisable(GL_LINE_STIPPLE));
+		// TODO: glLineStipple unavailable in 3.2
 		iLineStippleActive = false;
 	}
 
