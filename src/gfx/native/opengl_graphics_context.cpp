@@ -34,6 +34,52 @@ namespace neogfx
 {
 	namespace 
 	{
+		template <typename T>
+		class alternating_iterator
+		{
+		public:
+			typedef T value_type;
+		public:
+			alternating_iterator(const value_type* aBegin, const value_type* aEnd) :
+				iBegin{ aBegin }, iEnd{ aEnd }, iNext{ aBegin }, iSecondPass{ false }
+			{
+			}
+		public:
+			alternating_iterator& operator++()
+			{
+				if ((iNext + 1 == iEnd || iNext + 2 == iEnd))
+				{
+					if (!iSecondPass)
+					{
+						iSecondPass = true;
+						iNext = iBegin + 1;
+					}
+					else
+						iNext = iEnd;
+				}
+				else
+					iNext += 2;
+				return *this;
+			}
+			const value_type& operator*() const
+			{
+				return *iNext;
+			}
+			bool operator==(const graphics_operation::operation* aTest) const
+			{
+				return iNext == aTest;
+			}
+			bool operator!=(const graphics_operation::operation* aTest) const
+			{
+				return !operator==(aTest);
+			}
+		private:
+			const value_type* iBegin;
+			const value_type* iEnd;
+			const value_type* iNext;
+			bool iSecondPass;
+		};
+
 		inline GLenum path_shape_to_gl_mode(path::shape_type_e aShape)
 		{
 			switch (aShape)
@@ -191,25 +237,22 @@ namespace neogfx
 				}
 				else
 				{
+					glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
 					if (iUseBarrier)
 					{
 						glCheck(glTextureBarrier());
 					}
-					GLsizei stride = primitive_vertex_count();
-					if (stride == 0)
-						throw cannot_use_barrier();
-					for (auto i = iStart; i < static_cast<decltype(i)>(iStart + aCount); i += stride * 2)
+					auto pvc = primitive_vertex_count();
+					auto middle = static_cast<GLsizei>((aCount / pvc / 2) * pvc);
+					if (middle > 0)
 					{
-						glCheck(glDrawArrays(translated_mode(), i, stride));
+						glCheck(glDrawArrays(translated_mode(), iStart, middle));
+						if (iUseBarrier)
+						{
+							glCheck(glTextureBarrier());
+						}
 					}
-					if (iUseBarrier)
-					{
-						glCheck(glTextureBarrier());
-					}
-					for (auto i = iStart + stride; i < static_cast<decltype(i)>(iStart + aCount); i += stride * 2)
-					{
-						glCheck(glDrawArrays(translated_mode(), i, stride));
-					}
+					glCheck(glDrawArrays(translated_mode(), iStart + middle, static_cast<GLsizei>(aCount - middle)));
 				}
 				iStart += aCount;
 			}
@@ -220,8 +263,8 @@ namespace neogfx
 				{
 				case GL_TRIANGLES:
 					return 3;
-				case GL_QUADS:
-					return 4;
+				case GL_QUADS: // two triangles
+					return 6;
 				case GL_LINES:
 					return 2;
 				case GL_POINTS:
@@ -240,15 +283,9 @@ namespace neogfx
 			}
 			bool room_for(std::size_t aAmount) const
 			{
-				switch (mode())
-				{
-				case GL_TRIANGLES:
-					aAmount += (3 - ((vertices().size() - iStart) % 3));
-					break;
-				case GL_QUADS:
-					aAmount += (4 - ((vertices().size() - iStart) % 4));
-					break;
-				}
+				auto pvc = primitive_vertex_count();
+				if (pvc != 0)
+					aAmount = std::max(aAmount, (pvc - ((vertices().size() - iStart) % pvc)) % pvc);
 				return room() >= aAmount;
 			}
 			const opengl_standard_vertex_arrays::vertex_array& vertices() const
@@ -264,7 +301,7 @@ namespace neogfx
 				switch (iMode)
 				{
 				case GL_QUADS:
-					return GL_TRIANGLE_STRIP;
+					return GL_TRIANGLES;
 				default:
 					return iMode;
 				}
@@ -1066,7 +1103,7 @@ namespace neogfx
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 4u * (aFillRectOps.second - aFillRectOps.first)};
+			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 6u * (aFillRectOps.second - aFillRectOps.first)};
 
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
@@ -1283,10 +1320,10 @@ namespace neogfx
 		auto need = 1u;
 		if (aOperation.is<graphics_operation::draw_glyph>())
 		{
-			need = 4u;
+			need = 6u;
 			auto& drawGlyphOp = static_variant_cast<const graphics_operation::draw_glyph&>(aOperation);
 			if (drawGlyphOp.appearance.has_effect() && drawGlyphOp.appearance.effect().type() == text_effect::Outline)
-				need += 4u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
+				need += 6u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
 		}
 		return rendering_engine().vertex_arrays().capacity() / need;
 	}
@@ -1309,9 +1346,9 @@ namespace neogfx
 			return;
 		}
 
-		auto need = 4u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+		auto need = 6u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect::Outline)
-			need += 4u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 
 		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() };
 
@@ -1319,7 +1356,7 @@ namespace neogfx
 
 		for (uint32_t pass = 1; pass <= 2; ++pass)
 		{
-			for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+			for (alternating_iterator<graphics_operation::operation> op = { aDrawGlyphOps.first, aDrawGlyphOps.second }; op != aDrawGlyphOps.second; ++op)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 
@@ -1358,7 +1395,9 @@ namespace neogfx
 								vertexArrays.push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
 								vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
 								vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
+								vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
 								vertexArrays.push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
+								vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
 							}
 						}
 					}
@@ -1375,7 +1414,9 @@ namespace neogfx
 					vertexArrays.push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
 					vertexArrays.push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
 					vertexArrays.push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
+					vertexArrays.push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
 					vertexArrays.push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
+					vertexArrays.push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
 				}
 			}
 		}
@@ -1436,7 +1477,7 @@ namespace neogfx
 			{
 				auto lastEffect = text_effect::None;
 				std::size_t lastCount = 0u;
-				for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+				for (alternating_iterator<graphics_operation::operation> op = { aDrawGlyphOps.first, aDrawGlyphOps.second }; op != aDrawGlyphOps.second; ++op)
 				{
 					auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 					auto currentEffect = text_effect::None;
@@ -1451,7 +1492,7 @@ namespace neogfx
 					case text_effect::Outline:
 						{
 							auto scanLineOffsets = static_cast<std::size_t>(drawOp.appearance.effect().width() * 2.0 + 1.0);
-							lastCount += scanLineOffsets * scanLineOffsets * 4u;
+							lastCount += scanLineOffsets * scanLineOffsets * 6u;
 						}
 						break;
 					case text_effect::Glow:
@@ -1498,7 +1539,7 @@ namespace neogfx
 						*/}
 						break;
 					}
-					if (drawLastEffect || (op + 1) == aDrawGlyphOps.second)
+					if (drawLastEffect || (&*op + 1) == aDrawGlyphOps.second)
 					{
 						shader.set_uniform_variable("effect", static_cast<int>(currentEffect));
 						vertexArrays.draw(lastCount);
