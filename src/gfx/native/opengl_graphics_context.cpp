@@ -35,30 +35,41 @@ namespace neogfx
 	namespace 
 	{
 		template <typename T>
-		class alternating_iterator
+		class partition_iterator
 		{
 		public:
 			typedef T value_type;
 		public:
-			alternating_iterator(const value_type* aBegin, const value_type* aEnd) :
-				iBegin{ aBegin }, iEnd{ aEnd }, iNext{ aBegin }, iSecondPass{ false }
+			partition_iterator(const value_type* aBegin, const value_type* aEnd, std::size_t aPartitionCount = 2u, std::size_t aSkipAmount = 2u, bool aRepeat = false) :
+				iBegin{ aBegin }, iEnd{ aEnd }, iPartitionCount{ aPartitionCount }, iSkipAmount{ std::min<std::size_t>(aEnd - aBegin, aSkipAmount) }, iRepeat{ aRepeat }, iNext { aBegin }, iPass{ 1u }
+			{
+			}
+			partition_iterator() :
+				iBegin{ nullptr }, iEnd{ nullptr}, iPartitionCount{ 0u }, iSkipAmount{ 0u }, iRepeat{ false}, iNext{ nullptr }, iPass{ 1u }
 			{
 			}
 		public:
-			alternating_iterator& operator++()
+			std::size_t partition_count() const
 			{
-				if ((iNext + 1 == iEnd || iNext + 2 == iEnd))
+				return iPartitionCount;
+			}
+			std::size_t pass() const
+			{
+				return iPass;
+			}
+		public:
+			partition_iterator& operator++()
+			{
+				if (static_cast<std::size_t>(iEnd - iNext) <= iSkipAmount)
 				{
-					if (!iSecondPass)
-					{
-						iSecondPass = true;
-						iNext = iBegin + 1;
-					}
+					if (iPass < iPartitionCount)
+						iNext = iBegin + (iRepeat ? iPass % iSkipAmount : iPass);
 					else
 						iNext = iEnd;
+					++iPass;
 				}
 				else
-					iNext += 2;
+					iNext += iSkipAmount;
 				return *this;
 			}
 			const value_type& operator*() const
@@ -76,9 +87,30 @@ namespace neogfx
 		private:
 			const value_type* iBegin;
 			const value_type* iEnd;
+			std::size_t iPartitionCount;
+			std::size_t iSkipAmount;
+			bool iRepeat;
 			const value_type* iNext;
-			bool iSecondPass;
+			std::size_t iPass;
 		};
+
+		inline std::size_t scanline_offsets(const text_effect& aEffect)
+		{
+			if (aEffect.type() != text_effect::Outline)
+				return 1u;
+			else
+				return static_cast<std::size_t>(aEffect.width() * 2.0 + 1.0);
+		}
+
+		inline std::size_t offsets(const text_effect& aEffect)
+		{
+			return scanline_offsets(aEffect) * scanline_offsets(aEffect);
+		}
+
+		inline std::size_t barrier_partitions(const text_effect& aEffect)
+		{
+			return offsets(aEffect) * 2u;
+		}
 
 		inline GLenum path_shape_to_gl_mode(path::shape_type_e aShape)
 		{
@@ -143,7 +175,7 @@ namespace neogfx
 			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) : 
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size())}, iUseBarrier{ aUseBarrier }
 			{
-				if (!room_for(aNeed))
+				if (!room_for(aNeed) || aUseBarrier)
 					execute();
 				if (!room_for(aNeed))
 					throw not_enough_room();
@@ -151,7 +183,7 @@ namespace neogfx
 			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
-				if (!room_for(aNeed))
+				if (!room_for(aNeed) || aUseBarrier)
 					execute();
 				if (!room_for(aNeed))
 					throw not_enough_room();
@@ -159,6 +191,27 @@ namespace neogfx
 			~use_vertex_arrays()
 			{
 				draw();
+			}
+		public:
+			std::size_t primitive_vertex_count() const
+			{
+				switch (mode())
+				{
+				case GL_TRIANGLES:
+					return 3;
+				case GL_QUADS: // two triangles
+					return 6;
+				case GL_LINES:
+					return 2;
+				case GL_POINTS:
+					return 1;
+				case GL_TRIANGLE_FAN:
+				case GL_LINE_LOOP:
+				case GL_LINE_STRIP:
+				case GL_TRIANGLE_STRIP:
+				default:
+					return 0;
+				}
 			}
 		public:
 			const_iterator begin() const
@@ -221,7 +274,7 @@ namespace neogfx
 			{
 				draw(vertices().size() - static_cast<std::size_t>(iStart));
 			}
-			void draw(std::size_t aCount)
+			void draw(std::size_t aCount, std::size_t aBarrierPartitions = 2)
 			{
 				if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
 					throw invalid_draw_count();
@@ -234,6 +287,7 @@ namespace neogfx
 				if (!iUseBarrier && mode() == translated_mode())
 				{
 					glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
+					iStart += aCount;
 				}
 				else
 				{
@@ -243,40 +297,21 @@ namespace neogfx
 						glCheck(glTextureBarrier());
 					}
 					auto pvc = primitive_vertex_count();
-					auto middle = static_cast<GLsizei>((aCount / pvc / 2) * pvc);
-					if (middle > 0)
+					auto chunk = std::max(1u, (aCount / pvc / aBarrierPartitions) * pvc);
+					while (aCount > 0)
 					{
-						glCheck(glDrawArrays(translated_mode(), iStart, middle));
+						auto amount = std::min(chunk, aCount);
+						glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(amount)));
+						iStart += amount;
+						aCount -= amount;
 						if (iUseBarrier)
 						{
 							glCheck(glTextureBarrier());
 						}
 					}
-					glCheck(glDrawArrays(translated_mode(), iStart + middle, static_cast<GLsizei>(aCount - middle)));
 				}
-				iStart += aCount;
 			}
 		private:
-			std::size_t primitive_vertex_count() const
-			{
-				switch (mode())
-				{
-				case GL_TRIANGLES:
-					return 3;
-				case GL_QUADS: // two triangles
-					return 6;
-				case GL_LINES:
-					return 2;
-				case GL_POINTS:
-					return 1;
-				case GL_TRIANGLE_FAN:
-				case GL_LINE_LOOP:
-				case GL_LINE_STRIP:
-				case GL_TRIANGLE_STRIP:
-				default:
-					return 0;
-				}
-			}
 			std::size_t room() const
 			{
 				return vertices().capacity() - vertices().size();
@@ -1350,12 +1385,17 @@ namespace neogfx
 			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 
 		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() };
+		
+		bool hasEffects = firstOp.appearance.has_effect();
 
-		bool hasEffects = false;
-
-		for (uint32_t pass = 1; pass <= 2; ++pass)
+		for (uint32_t pass = (hasEffects ? 1 : 2); pass <= 2; ++pass)
 		{
-			for (alternating_iterator<graphics_operation::operation> op = { aDrawGlyphOps.first, aDrawGlyphOps.second }; op != aDrawGlyphOps.second; ++op)
+			partition_iterator<graphics_operation::operation> start;
+			if (pass == 1 && hasEffects)
+				start = partition_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, barrier_partitions(firstOp.appearance.effect()), 2, firstOp.appearance.effect().type() == text_effect::Outline };
+			else
+				start = partition_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, 2 };
+			for (auto op = start; op != aDrawGlyphOps.second; ++op)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 
@@ -1386,19 +1426,17 @@ namespace neogfx
 								static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
 								static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
 							std::array <uint8_t, 4>{};
-						for (double y = -drawOp.appearance.effect().width(); y <= drawOp.appearance.effect().width(); y += 1.0)
-						{
-							for (double x = -drawOp.appearance.effect().width(); x <= drawOp.appearance.effect().width(); x += 1.0)
-							{
-								rect effectRect = outputRect + point{ x, y };
-								vertexArrays.push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
-								vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
-								vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
-								vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
-								vertexArrays.push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
-								vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
-							}
-						}
+						auto scanlineOffsetCount = scanline_offsets(drawOp.appearance.effect());
+						auto barrierPartitionCount = barrier_partitions(drawOp.appearance.effect());
+						auto y = ((op.pass() - 1) % (barrierPartitionCount / 2)) / scanlineOffsetCount - drawOp.appearance.effect().width();
+						auto x = ((op.pass() - 1) % (barrierPartitionCount / 2)) % scanlineOffsetCount - drawOp.appearance.effect().width();
+						rect effectRect = outputRect + point{ x, y };
+						vertexArrays.push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
+						vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
+						vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
+						vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
+						vertexArrays.push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
+						vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
 					}
 				}
 				else if (pass == 2)
@@ -1474,25 +1512,15 @@ namespace neogfx
 
 			if (pass == 1)
 			{
-				auto lastEffect = text_effect::None;
-				std::size_t lastCount = 0u;
-				for (alternating_iterator<graphics_operation::operation> op = { aDrawGlyphOps.first, aDrawGlyphOps.second }; op != aDrawGlyphOps.second; ++op)
+				std::size_t count = (aDrawGlyphOps.second - aDrawGlyphOps.first) * vertexArrays.primitive_vertex_count();
+				if (firstOp.appearance.has_effect())
 				{
-					auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
-					auto currentEffect = text_effect::None;
-					if (drawOp.appearance.has_effect())
-						currentEffect = drawOp.appearance.effect().type();
-					bool drawLastEffect = (currentEffect != lastEffect && lastEffect != text_effect::None);
-					lastEffect = currentEffect;
-					switch (currentEffect)
+					count *= offsets(firstOp.appearance.effect());
+					switch (firstOp.appearance.effect().type())
 					{
 					case text_effect::None:
 						continue;
 					case text_effect::Outline:
-						{
-							auto scanLineOffsets = static_cast<std::size_t>(drawOp.appearance.effect().width() * 2.0 + 1.0);
-							lastCount += scanLineOffsets * scanLineOffsets * 6u;
-						}
 						break;
 					case text_effect::Glow:
 					case text_effect::Shadow:
@@ -1501,7 +1529,7 @@ namespace neogfx
 							shader.set_uniform_variable("glyphOrigin",
 								static_cast<float>(vertexArrays[index].st[0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
 								static_cast<float>(vertexArrays[index].st[1] * glyphTexture.texture().atlas_texture().storage_extents().cy));
-	
+
 							if (guiCoordinates)
 							{
 								shader.set_uniform_variable("effectRect",
@@ -1538,12 +1566,8 @@ namespace neogfx
 						*/}
 						break;
 					}
-					if (drawLastEffect || (&*op + 1) == aDrawGlyphOps.second)
-					{
-						shader.set_uniform_variable("effect", static_cast<int>(currentEffect));
-						vertexArrays.draw(lastCount);
-						lastCount = 0u;
-					}
+					shader.set_uniform_variable("effect", static_cast<int>(firstOp.appearance.effect().type()));
+					vertexArrays.draw(count, barrier_partitions(firstOp.appearance.effect()));
 				}
 			}
 			else if (pass == 2)
