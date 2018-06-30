@@ -1380,11 +1380,13 @@ namespace neogfx
 			return;
 		}
 
+		const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
+
 		auto need = 6u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect::Outline)
 			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 
-		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() };
+		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() && firstGlyphTexture.subpixel() };
 		
 		bool hasEffects = firstOp.appearance.has_effect();
 
@@ -1465,7 +1467,7 @@ namespace neogfx
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		if (firstOp.glyph.subpixel())
+		if (firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())
 		{
 			glCheck(glActiveTexture(GL_TEXTURE2));
 			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSurface.rendering_target_texture_handle())));
@@ -1483,7 +1485,6 @@ namespace neogfx
 						vertexArrays[2].xyz[0],
 						vertexArrays[2].xyz[1]}});
 
-		const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
 
 		glCheck(glEnable(GL_BLEND));
@@ -1491,7 +1492,7 @@ namespace neogfx
 
 		disable_anti_alias daa(*this);
 
-		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel())};
+		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())};
 
 		for (uint32_t pass = (hasEffects ? 1 : 2); pass <= 2; ++pass)
 		{
@@ -1505,7 +1506,7 @@ namespace neogfx
 			
 			shader.set_uniform_variable("glyphTexture", 1);
 
-			if (firstOp.glyph.subpixel())
+			if (firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())
 				shader.set_uniform_variable("outputTexture", 2);
 
 			glCheck(glTextureBarrier());
@@ -1566,12 +1567,14 @@ namespace neogfx
 						*/}
 						break;
 					}
+					shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
 					shader.set_uniform_variable("effect", static_cast<int>(firstOp.appearance.effect().type()));
 					vertexArrays.draw(count, barrier_partitions(firstOp.appearance.effect()));
 				}
 			}
 			else if (pass == 2)
 			{
+				shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
 				shader.set_uniform_variable("effect", 0);
 			}
 		}

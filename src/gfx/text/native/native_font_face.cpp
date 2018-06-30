@@ -246,6 +246,7 @@ namespace neogfx
 		auto existingGlyph = iGlyphs.find(std::make_pair(aGlyph.value(), aGlyph.subpixel()));
 		if (existingGlyph != iGlyphs.end())
 			return existingGlyph->second;
+
 		try
 		{
 			freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), FT_LOAD_TARGET_LCD));
@@ -263,15 +264,23 @@ namespace neogfx
 			throw freetype_render_glyph_error(fe.what());
 		}
 
+		bool useSubpixelFiltering = true;
+
 		FT_Bitmap& bitmap = iHandle->glyph->bitmap;
-		auto subTextureWidth = bitmap.width / 3;
+
+		if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
+			useSubpixelFiltering = false;
+
+		auto subTextureWidth = bitmap.width / (useSubpixelFiltering ? 3 : 1);
 		auto& subTexture = iRenderingEngine.font_manager().glyph_atlas().create_sub_texture(
 			neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
 			1.0, texture_sampling::Normal);
+
 		rect glyphRect{ subTexture.atlas_location() };
 		i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(std::make_pair(aGlyph.value(), aGlyph.subpixel()),
 			neogfx::glyph_texture{
 				subTexture,
+				useSubpixelFiltering,
 				point{
 					iHandle->glyph->metrics.horiBearingX / 64.0,
 					(iHandle->glyph->metrics.horiBearingY - iHandle->glyph->metrics.height) / 64.0 } })).first->second;
@@ -283,20 +292,42 @@ namespace neogfx
 
 		const GLubyte* textureData = 0;
 		
-		// sub-pixel FIR filter.
-		static double coefficients[] = { 1.5/16.0, 3.0/16.0, 7.0/16.0, 3.0/16.0, 1.5/16.0 };
-		for (uint32_t y = 0; y < bitmap.rows; y++)
+		if (useSubpixelFiltering)
 		{
-			for (uint32_t x = 0; x < bitmap.width; x++)
+			// sub-pixel FIR filter.
+			static double coefficients[] = { 1.5 / 16.0, 3.0 / 16.0, 7.0 / 16.0, 3.0 / 16.0, 1.5 / 16.0 };
+			for (uint32_t y = 0; y < bitmap.rows; y++)
 			{
-				uint8_t alpha = 0;
-				for (int32_t z = -2; z <= 2; ++z)
-					alpha += static_cast<uint8_t>(bitmap.buffer[std::max(0, std::min<int32_t>(bitmap.width - 1, x + z)) + bitmap.pitch * y] * coefficients[z + 2]);
-				iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
+				for (uint32_t x = 0; x < bitmap.width; x++)
+				{
+					uint8_t alpha = 0;
+					for (int32_t z = -2; z <= 2; ++z)
+						alpha += static_cast<uint8_t>(bitmap.buffer[std::max(0, std::min<int32_t>(bitmap.width - 1, x + z)) + bitmap.pitch * y] * coefficients[z + 2]);
+					iSubpixelGlyphTextureData[(x / 3 + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
+				}
 			}
+			textureData = &iSubpixelGlyphTextureData[0][0];
 		}
-		textureData = &iSubpixelGlyphTextureData[0][0];
-
+		else
+		{
+			for (uint32_t y = 0; y < bitmap.rows; y++)
+				switch (bitmap.pixel_mode)
+				{
+				case FT_PIXEL_MODE_MONO: // 1 bit per pixel monochrome
+					for (uint32_t x = 0; x < bitmap.width; x += 8)
+						for (uint32_t b = 0; b < 8; ++b)
+							iGlyphTextureData[(x + b + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)] =
+							(x >= bitmap.width || y >= bitmap.rows) ? 0x00 : ((bitmap.buffer[x / 8 + bitmap.pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
+					break;
+				case FT_PIXEL_MODE_GRAY:
+				default:
+					for (uint32_t x = 0; x < bitmap.width; x++)
+						iGlyphTextureData[(x + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)] =
+						(x >= bitmap.width || y >= bitmap.rows) ? 0x00 : bitmap.buffer[x + bitmap.pitch * y];
+					break;
+				}
+			textureData = &iGlyphTextureData[0];
+		}
 		GLint previousTexture;
 		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle())));
@@ -306,7 +337,7 @@ namespace neogfx
 		glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
 			static_cast<GLint>(glyphRect.x), static_cast<GLint>(glyphRect.y), static_cast<GLsizei>(glyphRect.cx), static_cast<GLsizei>(glyphRect.cy), 
-			GL_RGBA, GL_UNSIGNED_BYTE, &textureData[0]));
+			useSubpixelFiltering ? GL_RGBA : GL_ALPHA, GL_UNSIGNED_BYTE, &textureData[0]));
 		glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));

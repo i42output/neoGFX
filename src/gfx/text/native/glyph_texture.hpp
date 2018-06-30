@@ -27,13 +27,15 @@ namespace neogfx
 	class glyph_texture : public i_glyph_texture
 	{
 	public:
-		glyph_texture(const i_sub_texture& aTexture, const point& aPlacement);
+		glyph_texture(const i_sub_texture& aTexture, bool aSubpixel, const point& aPlacement);
 		~glyph_texture();
 	public:
-		virtual const i_sub_texture& texture() const;
-		virtual const point& placement() const;
+		const i_sub_texture& texture() const override;
+		bool subpixel() const override;
+		const point& placement() const override;
 	private:
 		const i_sub_texture& iTexture;
+		bool iSubpixel;
 		const point iPlacement;
 	};
 }

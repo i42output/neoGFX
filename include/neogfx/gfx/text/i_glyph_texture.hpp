@@ -31,6 +31,7 @@ namespace neogfx
 		virtual ~i_glyph_texture() {}
 	public:
 		virtual const i_sub_texture& texture() const = 0;
+		virtual bool subpixel() const = 0;
 		virtual const point& placement() const = 0;
 	};
 }

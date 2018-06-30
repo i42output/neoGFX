@@ -425,15 +425,23 @@ namespace neogfx
 				{
 					if (lineWidth + next->extents().cx > maxWidth)
 					{
-						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
-						lineWidth -= glyph_text::extents(wordBreak.first, next, false).cx;
-						lineEnd = wordBreak.first;
-						next = wordBreak.second;
-						if (lineEnd == next)
+						if (next != lineStart)
 						{
-							while (lineEnd != i->second && (lineEnd + 1)->source() == wordBreak.first->source())
-								++lineEnd;
-							next = lineEnd;
+							std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
+							lineWidth -= glyph_text::extents(wordBreak.first, next, false).cx;
+							lineEnd = wordBreak.first;
+							next = wordBreak.second;
+							if (lineEnd == next)
+							{
+								while (lineEnd != i->second && (lineEnd + 1)->source() == wordBreak.first->source())
+									++lineEnd;
+								next = lineEnd;
+							}
+						}
+						else
+						{
+							lineWidth += next->advance().cx;
+							++next;
 						}
 						gotLine = true;
 					}
@@ -549,15 +557,23 @@ namespace neogfx
 					bool gotLine = false;
 					if (lineWidth + next->extents().cx > maxWidth)
 					{
-						std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
-						lineWidth -= glyph_text::extents(wordBreak.first, next, false).cx;
-						lineEnd = wordBreak.first;
-						next = wordBreak.second;
-						if (lineEnd == next)
+						if (next != lineStart)
 						{
-							while (lineEnd != line.second && (lineEnd + 1)->source() == wordBreak.first->source())
-								++lineEnd;
-							next = lineEnd;
+							std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
+							lineWidth -= glyph_text::extents(wordBreak.first, next, false).cx;
+							lineEnd = wordBreak.first;
+							next = wordBreak.second;
+							if (lineEnd == next)
+							{
+								while (lineEnd != line.second && (lineEnd + 1)->source() == wordBreak.first->source())
+									++lineEnd;
+								next = lineEnd;
+							}
+						}
+						else
+						{
+							lineWidth += next->advance().cx;
+							++next;
 						}
 						gotLine = true;
 					}

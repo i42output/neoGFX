@@ -22,8 +22,8 @@
 
 namespace neogfx
 {
-	glyph_texture::glyph_texture(const i_sub_texture& aTexture, const point& aPlacement) :
-		iTexture(aTexture), iPlacement(aPlacement)
+	glyph_texture::glyph_texture(const i_sub_texture& aTexture, bool aSubpixel, const point& aPlacement) :
+		iTexture(aTexture), iSubpixel{ aSubpixel }, iPlacement(aPlacement)
 	{
 	}
 
@@ -34,6 +34,11 @@ namespace neogfx
 	const i_sub_texture& glyph_texture::texture() const
 	{
 		return iTexture;
+	}
+
+	bool glyph_texture::subpixel() const
+	{
+		return iSubpixel;
 	}
 
 	const point& glyph_texture::placement() const
