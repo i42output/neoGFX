@@ -39,13 +39,13 @@ namespace neogfx
 	}
 
 	dialog_button_box::dialog_button_box(i_widget& aParent) :
-		widget(aParent), iLayout(*this), iSpacer(iLayout)
+		widget{ aParent }, iLayout{ *this }, iOptionLayout{ iLayout }, iSpacer{ iLayout }, iStandardButtonLayout{ iLayout }
 	{
 		init();
 	}
 
 	dialog_button_box::dialog_button_box(i_layout& aLayout) :
-		widget(aLayout), iLayout(*this), iSpacer(iLayout)
+		widget{ aLayout }, iLayout{ *this }, iOptionLayout{ iLayout }, iSpacer{ iLayout }, iStandardButtonLayout{ iLayout }
 	{
 		init();
 	}
@@ -96,10 +96,9 @@ namespace neogfx
 			newButton->second->clicked([this, newButton]() { clicked.trigger(newButton->first.first); });
 			break;
 		}
-		iLayout.remove_all();
-		iLayout.add(iSpacer);
+		iStandardButtonLayout.remove_all();
 		for (auto& button : iButtons)
-			iLayout.add(*button.second);
+			iStandardButtonLayout.add(*button.second);
 	}
 
 	void dialog_button_box::add_buttons(standard_button aStandardButtons)
@@ -116,8 +115,13 @@ namespace neogfx
 
 	void dialog_button_box::clear()
 	{
-		iLayout.remove_all();
+		iStandardButtonLayout.remove_all();
 		iButtons.clear();
+	}
+
+	i_layout& dialog_button_box::option_layout()
+	{
+		return iOptionLayout;
 	}
 
 	bool dialog_button_box::has_reject_role(standard_button aStandardButtons)
@@ -170,6 +174,9 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins{});
 		iLayout.set_margins(neogfx::margins{});
+		iOptionLayout.set_margins(neogfx::margins{});
+		iOptionLayout.set_size_policy(neogfx::size_policy::Minimum);
+		iStandardButtonLayout.set_margins(neogfx::margins{});
 	}
 
 	bool dialog_button_box::similar_role(button_role aButtonRole1, button_role aButtonRole2)

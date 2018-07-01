@@ -873,6 +873,7 @@ namespace neogfx
 		iRightLayout.set_spacing(standardSpacing);
 		iRightTopLayout.set_spacing(standardSpacing);
 		iRightBottomLayout.set_spacing(standardSpacing / 2.0);
+		iChannelLayout.set_margins(neogfx::margins{});
 		iChannelLayout.set_spacing(standardSpacing / 2.0);
 		iScreenPicker.set_size_policy(size_policy::Minimum);
 		iSink += iScreenPicker.async_clicked([&, this]()

@@ -107,6 +107,7 @@ namespace neogfx
 		void add_button(standard_button aStandardButton, button_role aButtonRole, const std::string& aButtonText);
 		void add_buttons(standard_button aStandardButtons);
 		void clear();
+		i_layout& option_layout();
 	public:
 		static bool has_reject_role(standard_button aStandardButtons);
 		static button_details standard_button_details(standard_button aStandardButton);
@@ -116,7 +117,9 @@ namespace neogfx
 		static bool similar_role(button_role aButtonRole1, button_role aButtonRole2);
 	private:
 		horizontal_layout iLayout;
+		horizontal_layout iOptionLayout;
 		horizontal_spacer iSpacer;
+		horizontal_layout iStandardButtonLayout;
 		button_list iButtons;
 	};
 }

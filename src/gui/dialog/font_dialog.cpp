@@ -22,6 +22,7 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
+#include <neogfx/gui/dialog/message_box.hpp>
 
 namespace neogfx
 {
@@ -205,6 +206,11 @@ namespace neogfx
 
 	void font_dialog::init()
 	{
+		button_box().option_layout().add(std::make_shared<push_button>("Subpixel Rendering..."_t)).clicked([this]()
+		{
+			message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
+		});
+
 		client_layout().set_size_policy(neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Maximum });
 		iFamilyPicker.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iStylePicker.set_size_policy(neogfx::size_policy::Expanding);
