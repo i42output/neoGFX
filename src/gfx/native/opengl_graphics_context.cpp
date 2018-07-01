@@ -53,6 +53,10 @@ namespace neogfx
 			{
 				return iPartitionCount;
 			}
+			std::size_t skip_amount() const
+			{
+				return iSkipAmount;
+			}
 			std::size_t pass() const
 			{
 				return iPass;
@@ -297,7 +301,7 @@ namespace neogfx
 						glCheck(glTextureBarrier());
 					}
 					auto pvc = primitive_vertex_count();
-					auto chunk = std::max(1u, (aCount / pvc / aBarrierPartitions) * pvc);
+					auto chunk = std::max(pvc, (aCount / pvc / aBarrierPartitions) * pvc);
 					while (aCount > 0)
 					{
 						auto amount = std::min(chunk, aCount);
