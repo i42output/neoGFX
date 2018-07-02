@@ -868,10 +868,6 @@ int main(int argc, char* argv[])
 		ng::radio_button singleSelection(tableViewSelection, "Single selection");
 		ng::radio_button multipleSelection(tableViewSelection, "Multiple selection");
 		ng::radio_button extendedSelection(tableViewSelection, "Extended selection");
-		ng::group_box clickType(tableViewTweaks, "Click Type");
-		ng::radio_button clickToSelect(clickType.item_layout(), "Click To Select");
-		ng::radio_button clickToEdit(clickType.item_layout(), "Click To Edit");
-		ng::vertical_spacer clickTypeSpacer(clickType.item_layout());
 		ng::group_box column5(tableViewTweaks, "Column 5");
 		ng::check_box column5ReadOnly(column5.item_layout(), "Read only");
 		ng::check_box column5Unselectable(column5.item_layout(), "Unselectable");
@@ -1007,11 +1003,12 @@ int main(int argc, char* argv[])
 		ng::vertical_layout gl(gamePage);
 		create_game(gl);
 
+		int frame = 0;
 		auto& tabDrawing = tabContainer.add_tab_page("Drawing").as_widget();
-		tabDrawing.painting([&tabDrawing, &gw](ng::graphics_context& aGc)
+		tabDrawing.painting([&tabDrawing, &gw, &frame](ng::graphics_context& aGc)
 		{
 			ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
-			aGc.draw_texture(ng::point{ (tabDrawing.extents() - logo.extents()) / 2.0 }, logo);
+			aGc.draw_texture(ng::point{ ((frame / 200) % 2 == 0 ? (frame % 200) : 200 - (frame % 200)) * 1.0, 0.0 } + ng::point{ (tabDrawing.extents() - logo.extents()) / 2.0 }, logo);
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
 			aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, gw.gradient().with_direction(ng::gradient::Horizontal));
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, gw.gradient().with_direction(ng::gradient::Horizontal));
@@ -1028,7 +1025,14 @@ int main(int argc, char* argv[])
 						aGc.draw_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Black);
 					else
 						aGc.set_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Goldenrod);
+			++frame;
 		});
+
+		neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			tabDrawing.update();
+		}, 10 };
 		
 		auto& tabEditor = tabContainer.add_tab_page("Editor").as_widget();
 		ng::vertical_layout layoutEditor(tabEditor);
