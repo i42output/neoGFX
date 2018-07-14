@@ -37,7 +37,7 @@ namespace neogfx
 			static constexpr bool optional = false;
 		};
 		template <typename T>
-		struct property_optional_type_cracker<boost::optional<T>>
+		struct property_optional_type_cracker<std::optional<T>>
 		{
 			typedef T type;
 			static constexpr bool optional = true;
@@ -47,6 +47,8 @@ namespace neogfx
 	template <typename T, typename Category>
 	class property : public i_property
 	{
+	public:
+		struct invalid_type : std::logic_error { invalid_type() : std::logic_error("neogfx::property::invalid_type") {} };
 	public:
 		typedef property<T, Category> self_type;
 		typedef T value_type;
@@ -111,16 +113,16 @@ namespace neogfx
 		{
 			return cracker::optional;
 		}
-		variant get() const override
+		property_variant get() const override
 		{
 			return iValue;
 		}
-		void set(const variant& aValue) override
+		void set(const property_variant& aValue) override
 		{
-			if (!aValue.empty())
-				*this = static_variant_cast<const typename cracker::type&>(aValue);
-			else
-				*this = value_type{};
+			std::visit([this](auto&& arg)
+			{
+				*this = std::forward<decltype(arg)>(arg);
+			}, aValue.for_visitor());
 		}
 	public:
 		const value_type& value() const
@@ -128,22 +130,36 @@ namespace neogfx
 			return iValue;
 		}
 		template <typename T2>
-		self_type& assign(const T2& aValue, bool aOwnerNotify = true)
+		self_type& assign(T2&& aValue, bool aOwnerNotify = true)
 		{
-			if (iValue != aValue)
+			typedef typename std::remove_cv<typename std::remove_reference<T2>::type>::type try_type;
+			if constexpr (std::is_same_v<try_type, value_type>)
+				return do_assign(std::forward<T2>(aValue), aOwnerNotify);
+			else if constexpr (std::is_same_v<try_type, custom_type>)
+				return do_assign(std::any_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify)
+			else if constexpr (std::is_same_v<try_type, neolib::none_t>)
+				return do_assign(value_type{}, aOwnerNotify)
+			else if constexpr (std::is_convertible_v<try_type, value_type> && std::is_integral_v<try_type> == std::is_integral_v<value_type>)
+				return do_assign(static_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify)
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702 ) // unreachable code
+#endif
+			else
 			{
-				iValue = aValue;
-				if (aOwnerNotify)
-					iOwner.property_changed(*this);
-				i_property::changed.trigger(get());
-				changed.trigger(iValue);
+				// [[unreachable]]
+				(void)aValue;
+				(void)aOwnerNotify;
+				throw invalid_type();
 			}
-			return *this;
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 		}
 		template <typename T2>
-		self_type& operator=(const T2& aValue)
+		self_type& operator=(T2&& aValue)
 		{
-			return assign(aValue);
+			return assign(std::forward<T2>(aValue));
 		}
 		operator const value_type&() const
 		{
@@ -173,6 +189,30 @@ namespace neogfx
 		bool operator!=(const T& aRhs) const
 		{
 			return iValue != aRhs;
+		}
+		template <typename T>
+		bool operator==(const std::optional<T>& aRhs) const
+		{
+			return iValue == aRhs;
+		}
+		template <typename T>
+		bool operator!=(const std::optional<T>& aRhs) const
+		{
+			return iValue != aRhs;
+		}
+	private:
+		template <typename T2>
+		self_type& do_assign(T2&& aValue, bool aOwnerNotify = true)
+		{
+			if (iValue != aValue)
+			{
+				iValue = std::forward<T2>(aValue);
+				if (aOwnerNotify)
+					iOwner.property_changed(*this);
+				i_property::changed.trigger(get());
+				changed.trigger(iValue);
+			}
+			return *this;
 		}
 	private:
 		i_object& iOwner;

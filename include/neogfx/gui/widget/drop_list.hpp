@@ -163,9 +163,9 @@ namespace neogfx
 			void update_view_placement();
 		private:
 			drop_list& iDropList;
-			mutable boost::optional<drop_list_popup> iPopup;
-			mutable boost::optional<view_container> iViewContainer;
-			mutable boost::optional<drop_list_view> iView;
+			mutable std::optional<drop_list_popup> iPopup;
+			mutable std::optional<view_container> iViewContainer;
+			mutable std::optional<drop_list_view> iView;
 		};
 	public:
 		drop_list(style aStyle = style::Normal);
@@ -231,7 +231,7 @@ namespace neogfx
 		std::shared_ptr<i_item_presentation_model> iPresentationModel;
 		std::shared_ptr<i_item_selection_model> iSelectionModel;
 		sink iSink;
-		mutable boost::optional<std::pair<colour, texture>> iDownArrowTexture;
+		mutable std::optional<std::pair<colour, texture>> iDownArrowTexture;
 		image_widget iDownArrow;
 		list_proxy iListProxy;
 		optional_item_model_index iSavedSelection;

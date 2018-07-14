@@ -38,7 +38,7 @@ namespace neogfx
 	void text::set_value(const std::string& aText)
 	{
 		iText = aText;
-		iTextExtent = boost::none;
+		iTextExtent = std::nullopt;
 		iGlyphTextCache = glyph_text{};
 		clear_vertices_cache();
 	}
@@ -51,7 +51,7 @@ namespace neogfx
 	void text::set_font(const neogfx::font& aFont)
 	{
 		iFont = aFont;
-		iTextExtent = boost::none;
+		iTextExtent = std::nullopt;
 		iGlyphTextCache = glyph_text{};
 		clear_vertices_cache();
 	}
@@ -103,12 +103,12 @@ namespace neogfx
 	vec3 text::extents() const
 	{
 		auto e = text_extent();
-		if (iBorder != boost::none)
+		if (iBorder != std::nullopt)
 		{
 			e.cx += (*iBorder * 2.0);
 			e.cy += (*iBorder * 2.0);
 		}
-		if (iMargins != boost::none)
+		if (iMargins != std::nullopt)
 		{
 			e.cx += (iMargins->left + iMargins->right);
 			e.cy += (iMargins->top + iMargins->bottom);
@@ -129,12 +129,12 @@ namespace neogfx
 		rectangle bb3d{ vec3{ bb2d.x, bb2d.y, position().y }, bb2d.extents().to_vec2() };
 		if (appearance().has_paper())
 			aGraphicsContext.fill_shape(bb3d, to_brush(appearance().paper()));
-		if (iBorder != boost::none)
+		if (iBorder != std::nullopt)
 		{
 			aGraphicsContext.draw_shape(bb3d, pen{ appearance().ink(), *iBorder });
 			bb2d.deflate(size{ *iBorder });
 		}
-		if (iMargins != boost::none)
+		if (iMargins != std::nullopt)
 		{
 			bb2d.position() += point{iMargins->left, iMargins->right};
 			bb2d.extents() -= size{iMargins->left + iMargins->right, iMargins->bottom + iMargins->top};
@@ -145,7 +145,7 @@ namespace neogfx
 
 	size text::text_extent() const
 	{
-		if (iTextExtent != boost::none)
+		if (iTextExtent != std::nullopt)
 			return *iTextExtent;
 		graphics_context gc{ container().as_widget(), graphics_context::type::Unattached };
 		gc.set_glyph_text_cache(iGlyphTextCache);

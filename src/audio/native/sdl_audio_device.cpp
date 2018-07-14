@@ -146,7 +146,7 @@ namespace neogfx
 			throw not_open();
 		SDL_CloseAudioDevice(iId);
 		iId = 0;
-		set_spec(boost::none);
+		set_spec(std::nullopt);
 	}
 
 	void sdl_audio_device::callback(void *userdata, Uint8* stream, int len)

@@ -137,14 +137,14 @@ namespace neogfx
 		if (has_resource())
 			return resource().error();
 		else
-			return iError != boost::none;
+			return iError != std::nullopt;
 	}
 
 	const std::string& image::error_string() const
 	{
 		if (has_resource())
 			return resource().error_string();
-		else if (iError != boost::none)
+		else if (iError != std::nullopt)
 			return *iError;
 		static const std::string sNoError;
 		return sNoError;

@@ -31,7 +31,7 @@ namespace neogfx
 		static uint32_t items_zero_sized(layout& aLayout, const optional_size& aAvailableSpace = optional_size())
 		{
 			uint32_t result = 0;
-			bool noSpace = (aAvailableSpace == boost::none || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer));
+			bool noSpace = (aAvailableSpace == std::nullopt || SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) || aLayout.items_visible(ItemTypeSpacer));
 			for (const auto& item : aLayout.items())
 			{
 				if (!item.visible())
@@ -135,7 +135,7 @@ namespace neogfx
 		if (debug == this)
 		{
 			std::cerr << "layout::do_minimum_size(";
-			if (aAvailableSpace != boost::none)
+			if (aAvailableSpace != std::nullopt)
 				std::cerr << *aAvailableSpace;
 			std::cerr << ")" << std::endl;
 		}
@@ -143,7 +143,7 @@ namespace neogfx
 		if (itemsVisible == 0)
 			return size{};
 		auto availableSpaceForChildren = aAvailableSpace;
-		if (availableSpaceForChildren != boost::none)
+		if (availableSpaceForChildren != std::nullopt)
 			*availableSpaceForChildren -= margins().size();
 		size result;
 		uint32_t itemsZeroSized = 0;
@@ -175,7 +175,7 @@ namespace neogfx
 		if (debug == this)
 		{
 			std::cerr << "layout::do_maximum_size(";
-			if (aAvailableSpace != boost::none)
+			if (aAvailableSpace != std::nullopt)
 				std::cerr << *aAvailableSpace;
 			std::cerr << ")" << std::endl;
 		}
@@ -189,7 +189,7 @@ namespace neogfx
 			return result;
 		}
 		auto availableSpaceForChildren = aAvailableSpace;
-		if (availableSpaceForChildren != boost::none)
+		if (availableSpaceForChildren != std::nullopt)
 			*availableSpaceForChildren -= margins().size();
 		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
 		uint32_t itemsZeroSized = 0;
@@ -252,7 +252,7 @@ namespace neogfx
 		uint32_t itemsUsingLeftover = 0;
 		size totalExpanderWeight;
 		enum disposition_e { Unknown, Weighted, Unweighted, TooSmall, FixedSize };
-		std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, boost::pool_allocator<std::pair<const item*, disposition_e>>> itemDispositions;
+		std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, neolib::pool_allocator<std::pair<const item* const, disposition_e>>> itemDispositions;
 		for (const auto& item : items())
 		{
 			if (!item.visible())

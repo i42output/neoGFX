@@ -60,7 +60,7 @@ namespace neogfx
 			*this = Black;
 		else if (aTextValue[0] == L'#')
 		{
-			iValue = neolib::string_to_unsigned_integer(aTextValue.substr(1), 16);
+			iValue = neolib::string_to_uint32(aTextValue.substr(1), 16);
 			if (aTextValue.size() <= 7)
 				set_alpha(0xFF);
 			else
@@ -73,7 +73,7 @@ namespace neogfx
 		else
 		{
 			auto namedColour = from_name(aTextValue);
-			if (namedColour != boost::none)
+			if (namedColour != std::nullopt)
 				*this = *namedColour;
 			else
 			{

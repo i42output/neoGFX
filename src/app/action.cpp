@@ -85,11 +85,11 @@ namespace neogfx
 
 	std::string action::text() const
 	{
-		if (iText != boost::none)
+		if (iText != std::nullopt)
 			return *iText;
-		else if (iMenuText != boost::none)
+		else if (iMenuText != std::nullopt)
 			return *iMenuText;
-		else if (iButtonText != boost::none)
+		else if (iButtonText != std::nullopt)
 			return *iButtonText;
 		else
 			return std::string();
@@ -97,11 +97,11 @@ namespace neogfx
 
 	std::string action::menu_text() const
 	{
-		if (iMenuText != boost::none)
+		if (iMenuText != std::nullopt)
 			return *iMenuText;
-		else if (iText != boost::none)
+		else if (iText != std::nullopt)
 			return *iText;
-		else if (iButtonText != boost::none)
+		else if (iButtonText != std::nullopt)
 			return *iButtonText;
 		else
 			return std::string();
@@ -109,11 +109,11 @@ namespace neogfx
 
 	std::string action::button_text() const
 	{
-		if (iButtonText != boost::none)
+		if (iButtonText != std::nullopt)
 			return *iButtonText;
-		else if (iText != boost::none)
+		else if (iText != std::nullopt)
 			return *iText;
-		else if (iMenuText != boost::none)
+		else if (iMenuText != std::nullopt)
 			return *iMenuText;
 		else
 			return std::string();
@@ -121,13 +121,13 @@ namespace neogfx
 
 	std::string action::tool_tip_text() const
 	{
-		if (iToolTipText != boost::none)
+		if (iToolTipText != std::nullopt)
 			return *iToolTipText;
-		else if (iText != boost::none)
+		else if (iText != std::nullopt)
 			return *iText;
-		else if (iMenuText != boost::none)
+		else if (iMenuText != std::nullopt)
 			return *iMenuText;
-		else if (iButtonText != boost::none)
+		else if (iButtonText != std::nullopt)
 			return *iButtonText;
 		else
 			return std::string();
@@ -135,15 +135,15 @@ namespace neogfx
 
 	std::string action::help_text() const
 	{
-		if (iHelpText != boost::none)
+		if (iHelpText != std::nullopt)
 			return *iToolTipText;
-		else if (iText != boost::none)
+		else if (iText != std::nullopt)
 			return *iText;
-		else if (iToolTipText != boost::none)
+		else if (iToolTipText != std::nullopt)
 			return *iToolTipText;
-		else if (iMenuText != boost::none)
+		else if (iMenuText != std::nullopt)
 			return *iMenuText;
-		else if (iButtonText != boost::none)
+		else if (iButtonText != std::nullopt)
 			return *iButtonText;
 		else
 			return std::string();
@@ -225,7 +225,7 @@ namespace neogfx
 		if (iText != aText)
 		{
 			iText = aText;
-			if (iText != boost::none && iSeparator)
+			if (iText != std::nullopt && iSeparator)
 				iSeparator = false;
 			changed.trigger();
 		}
@@ -237,7 +237,7 @@ namespace neogfx
 		if (iMenuText != aMenuText)
 		{
 			iMenuText = aMenuText;
-			if (iMenuText != boost::none && iSeparator)
+			if (iMenuText != std::nullopt && iSeparator)
 				iSeparator = false;
 			changed.trigger();
 		}
@@ -249,7 +249,7 @@ namespace neogfx
 		if (iButtonText != aButtonText)
 		{
 			iButtonText = aButtonText;
-			if (iButtonText != boost::none && iSeparator)
+			if (iButtonText != std::nullopt && iSeparator)
 				iSeparator = false;
 			changed.trigger();
 		}
@@ -261,7 +261,7 @@ namespace neogfx
 		if (iToolTipText != aToolTipText)
 		{
 			iToolTipText = aToolTipText;
-			if (iToolTipText != boost::none && iSeparator)
+			if (iToolTipText != std::nullopt && iSeparator)
 				iSeparator = false;
 			changed.trigger();
 		}
@@ -273,7 +273,7 @@ namespace neogfx
 		if (iHelpText != aHelpText)
 		{
 			iHelpText = aHelpText;
-			if (iHelpText != boost::none && iSeparator)
+			if (iHelpText != std::nullopt && iSeparator)
 				iSeparator = false;
 			changed.trigger();
 		}
@@ -327,7 +327,7 @@ namespace neogfx
 		if (iShortcut != aShortcut)
 		{
 			iShortcut = aShortcut;
-			if (iShortcut != boost::none && iSeparator)
+			if (iShortcut != std::nullopt && iSeparator)
 				iSeparator = false;
 			changed.trigger();
 		}

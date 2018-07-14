@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 		app.current_style().palette().set_colour(ng::colour::Black);
 		app.change_style("Slate");
 
-		boost::optional<ng::window> windowObject;
+		std::optional<ng::window> windowObject;
 		if (app.program_options().full_screen())
 			windowObject.emplace(ng::video_mode{ 1920, 1080 });
 		else
@@ -429,10 +429,10 @@ int main(int argc, char* argv[])
 		ng::horizontal_layout editLayout(layoutButtons);
 		ng::text_edit textEdit(editLayout);
 		buttonGenerateUuid.clicked([&]() { textEdit.set_text(neolib::to_string(neolib::generate_uuid())); });
-		dropList.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != boost::none ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
-		dropList2.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != boost::none ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
-		dropList3.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != boost::none ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
-		dropList4.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != boost::none ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
+		dropList.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
+		dropList2.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
+		dropList3.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
+		dropList4.selection_changed([&](ng::optional_item_model_index& aIndex) { textEdit.set_text(aIndex != std::nullopt ? dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
 		textEdit.set_focus_policy(textEdit.focus_policy() | neogfx::focus_policy::ConsumeTabKey);
 		textEdit.set_tab_stop_hint("00000000");
 		ng::slider effectWidthSlider{ editLayout, ng::slider::Vertical };
@@ -685,8 +685,8 @@ int main(int argc, char* argv[])
 
 		themeColour.clicked([&window]()
 		{
-			static boost::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
-			if (sCustomColours == boost::none)
+			static std::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
+			if (sCustomColours == std::nullopt)
 			{
 				sCustomColours = ng::colour_dialog::custom_colour_list{};
 				std::fill(sCustomColours->begin(), sCustomColours->end(), ng::colour::White);
@@ -707,8 +707,8 @@ int main(int argc, char* argv[])
 
 		editColour.clicked([&]()
 		{
-			static boost::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
-			if (sCustomColours == boost::none)
+			static std::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
+			if (sCustomColours == std::nullopt)
 			{
 				sCustomColours = ng::colour_dialog::custom_colour_list{};
 				std::fill(sCustomColours->begin(), sCustomColours->end(), ng::colour::White);

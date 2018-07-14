@@ -40,7 +40,7 @@ namespace neogfx
 	private:
 		class nested_details;
 		class client;
-		typedef boost::optional<title_bar> optional_title_bar;
+		typedef std::optional<title_bar> optional_title_bar;
 	public:
 		window(const video_mode& aVideoMode, window_style aStyle = window_style::Fullscreen, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
@@ -200,7 +200,7 @@ namespace neogfx
 		i_window_manager& iWindowManager;
 		bool iClosed;
 		sink iSink;
-		boost::optional<nested_window_container> iNestedWindowContainer;
+		std::optional<nested_window_container> iNestedWindowContainer;
 		std::unique_ptr<i_surface_window> iSurfaceWindow;
 		std::unique_ptr<i_nested_window> iNestedWindowDetails;
 		window_style iStyle;
@@ -218,6 +218,6 @@ namespace neogfx
 		i_layout& iClientLayout;
 		vertical_layout iStatusBarLayout;
 		optional_title_bar iTitleBar;
-		boost::optional<destroyed_flag> iSurfaceDestroyed;
+		std::optional<destroyed_flag> iSurfaceDestroyed;
 	};
 }

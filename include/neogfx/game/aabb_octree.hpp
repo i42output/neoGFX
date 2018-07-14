@@ -337,7 +337,7 @@ namespace neogfx
 			template <std::size_t X, std::size_t Y, std::size_t Z>
 			node& child() const
 			{
-				if (iChildren == boost::none)
+				if (iChildren == std::nullopt)
 					iChildren.emplace();
 				if ((*iChildren)[X][Y][Z] == nullptr)
 					(*iChildren)[X][Y][Z] = iTree.create_node(*this, iOctants[X][Y][Z]);
@@ -346,14 +346,14 @@ namespace neogfx
 			template <std::size_t X, std::size_t Y, std::size_t Z>
 			bool has_child() const
 			{
-				if (iChildren == boost::none)
+				if (iChildren == std::nullopt)
 					return false;
 				return (*iChildren)[X][Y][Z] != nullptr;
 			}
 			template <std::size_t X, std::size_t Y, std::size_t Z>
 			bool remove_child(node* aDestroyedNode = nullptr) const
 			{
-				if (iChildren == boost::none)
+				if (iChildren == std::nullopt)
 					return true;
 				if ((*iChildren)[X][Y][Z] == nullptr)
 					return true;
@@ -368,7 +368,7 @@ namespace neogfx
 			}
 			bool is_split() const
 			{
-				return iChildren != boost::none;
+				return iChildren != std::nullopt;
 			}
 			void split()
 			{
@@ -413,7 +413,7 @@ namespace neogfx
 				if (!remove_child<1, 1, 1>(aDestroyedNode))
 					haveChildren = true;
 				if (!haveChildren)
-					iChildren = boost::none;
+					iChildren = std::nullopt;
 				if (empty())
 					iTree.destroy_node(*this);
 			}
@@ -425,7 +425,7 @@ namespace neogfx
 			octants iOctants;
 			octants_2d iOctants2d;
 			object_list iObjects;
-			mutable boost::optional<children> iChildren;
+			mutable std::optional<children> iChildren;
 		};
 		typedef typename allocator_type::template rebind<node>::other node_allocator;
 	public:

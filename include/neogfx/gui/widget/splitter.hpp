@@ -53,12 +53,12 @@ namespace neogfx
 		virtual void released();
 	public:
 		virtual void panes_resized();
-		virtual void reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane = boost::optional<uint32_t>());
+		virtual void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = std::optional<uint32_t>());
 	private:
-		boost::optional<separator_type> separator_at(const point& aPosition) const;
+		std::optional<separator_type> separator_at(const point& aPosition) const;
 	private:
 		type_e iType;
-		boost::optional<separator_type> iTracking;
+		std::optional<separator_type> iTracking;
 		std::pair<dimension, dimension> iSizeBeforeTracking;
 		point iTrackFrom;
 	};

@@ -131,17 +131,17 @@ namespace neogfx
 
 	bool button::is_checked() const
 	{
-		return iCheckedState != boost::none && *iCheckedState == true;
+		return iCheckedState != std::nullopt && *iCheckedState == true;
 	}
 
 	bool button::is_unchecked() const
 	{
-		return iCheckedState != boost::none && *iCheckedState == false;
+		return iCheckedState != std::nullopt && *iCheckedState == false;
 	}
 
 	bool button::is_indeterminate() const
 	{
-		return iCheckedState == boost::none;
+		return iCheckedState == std::nullopt;
 	}
 
 	void button::check()
@@ -156,7 +156,7 @@ namespace neogfx
 
 	void button::set_indeterminate()
 	{
-		set_checked_state(boost::none);
+		set_checked_state(std::nullopt);
 	}
 
 	void button::set_checked(bool aChecked)
@@ -271,16 +271,16 @@ namespace neogfx
 		return true;
 	}
 
-	const boost::optional<bool>& button::checked_state() const
+	const std::optional<bool>& button::checked_state() const
 	{
 		return iCheckedState;
 	}
 
-	bool button::set_checked_state(const boost::optional<bool>& aCheckedState)
+	bool button::set_checked_state(const std::optional<bool>& aCheckedState)
 	{
 		if (iCheckedState == aCheckedState)
 			return false;
-		if (aCheckedState == boost::none && iCheckable != button_checkable::TriState)
+		if (aCheckedState == std::nullopt && iCheckable != button_checkable::TriState)
 			throw not_tri_state_checkable();
 		iCheckedState = aCheckedState;
 		update();

@@ -139,7 +139,7 @@ namespace neogfx
 		size result = button::minimum_size(aAvailableSpace);
 		if (iStyle == push_button_style::ButtonBox)
 		{
-			if (iStandardButtonWidth == boost::none || iStandardButtonWidth->first != label().text().font())
+			if (iStandardButtonWidth == std::nullopt || iStandardButtonWidth->first != label().text().font())
 			{
 				graphics_context gc{ *this, graphics_context::type::Unattached };
 				iStandardButtonWidth.emplace(label().text().font(), gc.text_extent("#StdButton", label().text().font()));
@@ -338,7 +338,7 @@ namespace neogfx
 
 	bool push_button::has_hover_colour() const
 	{
-		return iHoverColour != boost::none;
+		return iHoverColour != std::nullopt;
 	}
 
 	colour push_button::hover_colour() const

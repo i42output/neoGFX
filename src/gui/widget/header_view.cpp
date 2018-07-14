@@ -256,7 +256,7 @@ namespace neogfx
 
 	dimension header_view::separator_width() const
 	{
-		if (iSeparatorWidth != boost::none)
+		if (iSeparatorWidth != std::nullopt)
 			return units_converter(*this).from_device_units(*iSeparatorWidth);
 		else if (has_presentation_model())
 			return presentation_model().cell_spacing(*this).cx;
@@ -269,10 +269,10 @@ namespace neogfx
 
 	void header_view::set_separator_width(const optional_dimension& aWidth)
 	{
-		if (aWidth != boost::none)
+		if (aWidth != std::nullopt)
 			iSeparatorWidth = std::ceil(units_converter(*this).to_device_units(*aWidth));
 		else
-			iSeparatorWidth = boost::none;
+			iSeparatorWidth = std::nullopt;
 	}
 
 	uint32_t header_view::section_count() const
@@ -284,7 +284,7 @@ namespace neogfx
 	{
 		if (!expand_last_column() || aSectionIndex != iSectionWidths.size() - 1)
 		{
-			auto result = units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].manual != boost::none ?
+			auto result = units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].manual != std::nullopt ?
 				*iSectionWidths[aSectionIndex].manual :
 				iSectionWidths[aSectionIndex].calculated);
 			if (aForHeaderButton && aSectionIndex == 0)
@@ -336,13 +336,13 @@ namespace neogfx
 		iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
 	}
 
-	void header_view::reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane)
+	void header_view::reset_pane_sizes_requested(const std::optional<uint32_t>& aPane)
 	{
 		for (uint32_t col = 0; col < presentation_model().columns(); ++col)
 		{
-			if (aPane != boost::none && *aPane != col)
+			if (aPane != std::nullopt && *aPane != col)
 				continue;
-			iSectionWidths[col].manual = boost::none;
+			iSectionWidths[col].manual = std::nullopt;
 			layout().get_widget_at(col).set_minimum_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy), false);
 		}
 		layout_items();
@@ -414,7 +414,7 @@ namespace neogfx
 					menu.menu().add_action(sortDescending).set_checkable(true);
 					menu.menu().add_action(applySort);
 					menu.menu().add_action(resetSort);
-					if (presentation_model().sorting_by() != boost::none)
+					if (presentation_model().sorting_by() != std::nullopt)
 					{
 						auto const& sortingBy = *presentation_model().sorting_by();
 						if (sortingBy.first == i)

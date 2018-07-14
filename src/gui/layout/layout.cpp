@@ -365,7 +365,7 @@ namespace neogfx
 
 	bool layout::has_margins() const
 	{
-		return iMargins != boost::none;
+		return iMargins != std::nullopt;
 	}
 
 	margins layout::margins() const
@@ -376,7 +376,7 @@ namespace neogfx
 
 	void layout::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
 	{
-		optional_margins newMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins());
+		optional_margins newMargins = (aMargins != std::nullopt ? units_converter(*this).to_device_units(*aMargins) : optional_margins());
 		if (iMargins != newMargins)
 		{
 			iMargins = newMargins;
@@ -387,7 +387,7 @@ namespace neogfx
 
 	bool layout::has_spacing() const
 	{
-		return iSpacing != boost::none;
+		return iSpacing != std::nullopt;
 	}
 
 	size layout::spacing() const
@@ -400,7 +400,7 @@ namespace neogfx
 	{
 		if (iSpacing != aSpacing)
 		{
-			iSpacing = (aSpacing != boost::none ? 
+			iSpacing = (aSpacing != std::nullopt ? 
 				optional_size{ units_converter(*this).to_device_units(*aSpacing) } :
 				aSpacing);
 			if (aUpdateLayout)
@@ -539,7 +539,7 @@ namespace neogfx
 
 	bool layout::has_size_policy() const
 	{
-		return iSizePolicy != boost::none;
+		return iSizePolicy != std::nullopt;
 	}
 
 	size_policy layout::size_policy() const
@@ -571,7 +571,7 @@ namespace neogfx
 
 	bool layout::has_weight() const
 	{
-		return iWeight != boost::none;
+		return iWeight != std::nullopt;
 	}
 
 	size layout::weight() const
@@ -594,7 +594,7 @@ namespace neogfx
 
 	bool layout::has_minimum_size() const
 	{
-		return iMinimumSize != boost::none;
+		return iMinimumSize != std::nullopt;
 	}
 
 	size layout::minimum_size(const optional_size&) const
@@ -607,7 +607,7 @@ namespace neogfx
 
 	void layout::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
-		optional_size newMinimumSize = (aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
+		optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
 		if (iMinimumSize != newMinimumSize)
 		{
 			iMinimumSize = newMinimumSize;
@@ -618,7 +618,7 @@ namespace neogfx
 
 	bool layout::has_maximum_size() const
 	{
-		return iMaximumSize != boost::none;
+		return iMaximumSize != std::nullopt;
 	}
 
 	size layout::maximum_size(const optional_size&) const
@@ -630,7 +630,7 @@ namespace neogfx
 
 	void layout::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
-		optional_size newMaximumSize = (aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
+		optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
 		if (iMaximumSize != newMaximumSize)
 		{
 			iMaximumSize = newMaximumSize;

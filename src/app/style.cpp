@@ -159,7 +159,7 @@ namespace neogfx
 
 	const font& style::font() const
 	{
-		if (iFont == boost::none)
+		if (iFont == std::nullopt)
 		{
 			iFont = neogfx::font(iFontInfo);
 		}

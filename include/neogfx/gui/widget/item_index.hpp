@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <tuple>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace neogfx
 {
@@ -99,5 +99,5 @@ namespace neogfx
 		return std::forward_as_tuple(aLhs.row(), aLhs.column()) > std::forward_as_tuple(aRhs.row(), aRhs.column());
 	}
 
-	typedef boost::optional<item_index> optional_item_index;
+	typedef std::optional<item_index> optional_item_index;
 }

@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <list>
 #include <deque>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/lifetime.hpp>
 #include <neolib/async_task.hpp>
@@ -45,7 +45,7 @@ namespace neogfx
 		typedef const void* unique_id_type;
 		typedef std::function<void(Arguments...)> handler_callback;
 		typedef uint32_t sink_reference_count;
-		struct handler_list_item { boost::optional<std::thread::id> iThreadId; unique_id_type iUniqueId; handler_callback iHandlerCallback; sink_reference_count iSinkReferenceCount; };
+		struct handler_list_item { std::optional<std::thread::id> iThreadId; unique_id_type iUniqueId; handler_callback iHandlerCallback; sink_reference_count iSinkReferenceCount; };
 		typedef std::list<handler_list_item, boost::fast_pool_allocator<handler_list_item>> handler_list;
 	public:
 		event_instance_weak_ptr iEvent;
@@ -53,7 +53,7 @@ namespace neogfx
 	public:
 		event_handle& operator~()
 		{
-			iHandler->iThreadId = boost::none;
+			iHandler->iThreadId = std::nullopt;
 			return *this;
 		}
 	};
@@ -197,7 +197,7 @@ namespace neogfx
 			{
 				auto i = instance().notifications.front();
 				instance().notifications.pop_front();
-				if (i->iThreadId == boost::none || *i->iThreadId == std::this_thread::get_id())
+				if (i->iThreadId == std::nullopt || *i->iThreadId == std::this_thread::get_id())
 					i->iHandlerCallback(std::forward<Ts>(aArguments)...);
 				else
 					enqueue_to_thread(*i, std::forward<Ts>(aArguments)...);

@@ -154,14 +154,14 @@ namespace neogfx
 
 	bool status_bar::have_message() const
 	{
-		return iMessage != boost::none || app::instance().help().help_active();
+		return iMessage != std::nullopt || app::instance().help().help_active();
 	}
 
 	std::string status_bar::message() const
 	{
 		if (app::instance().help().help_active())
 			return app::instance().help().active_help().help_text();
-		else if (iMessage != boost::none)
+		else if (iMessage != std::nullopt)
 			return *iMessage;
 		throw no_message();
 	}
@@ -174,7 +174,7 @@ namespace neogfx
 
 	void status_bar::clear_message()
 	{
-		iMessage = boost::none;
+		iMessage = std::nullopt;
 		update_widgets();
 	}
 
@@ -264,7 +264,7 @@ namespace neogfx
 			auto ink1 = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().foreground_colour());
 			ink1 = ink1.light() ? ink1.darker(0x40) : ink1.lighter(0x40);
 			auto ink2 = ink1.darker(0x30);
-			if (iSizeGripTexture == boost::none || iSizeGripTexture->first != ink1)
+			if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)
 			{
 				const char* sSizeGripTextureImagePattern
 				{

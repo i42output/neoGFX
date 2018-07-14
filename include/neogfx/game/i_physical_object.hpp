@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <chrono>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/game/chrono.hpp>
 #include "i_collidable_object.hpp"
@@ -32,9 +32,9 @@ namespace neogfx
 		// types
 	public:
 		typedef scalar time_interval;
-		typedef boost::optional<time_interval> optional_time_interval;
+		typedef std::optional<time_interval> optional_time_interval;
 		typedef int64_t step_time_interval;
-		typedef boost::optional<step_time_interval> optional_step_time_interval;
+		typedef std::optional<step_time_interval> optional_step_time_interval;
 		// lifetime
 	public:
 		virtual ~i_physical_object() {}

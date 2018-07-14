@@ -72,12 +72,12 @@ namespace neogfx
 	public:
 		bool is_system_cursor() const
 		{
-			return iType.is<mouse_system_cursor>();
+			return std::holds_alternative<mouse_system_cursor>(iType);
 		}
 		mouse_system_cursor system_cursor() const
 		{
 			if (is_system_cursor())
-				return static_variant_cast<mouse_system_cursor>(iType);
+				return std::get<mouse_system_cursor>(iType);
 			throw wrong_type();
 		}
 	public:

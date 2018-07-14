@@ -110,13 +110,13 @@ namespace neogfx
 
 	text_edit::style& text_edit::style::merge(const style& aOverridingStyle)
 	{
-		if (aOverridingStyle.font() != boost::none)
+		if (aOverridingStyle.font() != std::nullopt)
 			iFont = aOverridingStyle.font();
-		if (aOverridingStyle.text_colour() != boost::none)
+		if (aOverridingStyle.text_colour() != neolib::none)
 			iTextColour = aOverridingStyle.text_colour();
-		if (aOverridingStyle.background_colour() != boost::none)
+		if (aOverridingStyle.background_colour() != neolib::none)
 			iBackgroundColour = aOverridingStyle.background_colour();
-		if (aOverridingStyle.text_effect() != boost::none)
+		if (aOverridingStyle.text_effect() != std::nullopt)
 			iTextEffect = aOverridingStyle.text_effect();
 		return *this;
 	}
@@ -241,7 +241,7 @@ namespace neogfx
 			result += size{ font().height() };
 		else
 		{
-			if (iHintedSize == boost::none || iHintedSize->first != font())
+			if (iHintedSize == std::nullopt || iHintedSize->first != font())
 			{
 				iHintedSize.emplace(font(), size{});
 				graphics_context gc{ *this, graphics_context::type::Unattached };
@@ -313,7 +313,7 @@ namespace neogfx
 
 	const font& text_edit::font() const
 	{
-		return default_style().font() != boost::none ? *default_style().font() : scrollable_widget::font();
+		return default_style().font() != std::nullopt ? *default_style().font() : scrollable_widget::font();
 	}
 
 	void text_edit::focus_gained(focus_reason aFocusReason)
@@ -362,7 +362,7 @@ namespace neogfx
 	void text_edit::mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		scrollable_widget::mouse_button_released(aButton, aPosition);
-		iDragger = boost::none;
+		iDragger = std::nullopt;
 		if (aButton == mouse_button::Right)
 		{
 			iMenu = std::make_unique<context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
@@ -393,7 +393,7 @@ namespace neogfx
 	void text_edit::mouse_moved(const point& aPosition)
 	{
 		scrollable_widget::mouse_moved(aPosition);
-		if (iDragger != boost::none)
+		if (iDragger != std::nullopt)
 			set_cursor_position(aPosition, false);
 	}
 
@@ -409,7 +409,7 @@ namespace neogfx
 
 	neogfx::mouse_cursor text_edit::mouse_cursor() const
 	{
-		return client_rect(false).contains(root().mouse_position() - origin()) || iDragger != boost::none ? mouse_system_cursor::Ibeam : scrollable_widget::mouse_cursor();
+		return client_rect(false).contains(root().mouse_position() - origin()) || iDragger != std::nullopt ? mouse_system_cursor::Ibeam : scrollable_widget::mouse_cursor();
 	}
 
 	bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -939,9 +939,9 @@ namespace neogfx
 	void text_edit::set_default_style(const style& aDefaultStyle, bool aPersist)
 	{
 		neogfx::font oldFont = font();
-		auto oldEffect = (iDefaultStyle.text_effect() == boost::none);
+		auto oldEffect = (iDefaultStyle.text_effect() == std::nullopt);
 		iDefaultStyle = aDefaultStyle;
-		if (oldFont != font() || oldEffect != (iDefaultStyle.text_effect() == boost::none))
+		if (oldFont != font() || oldEffect != (iDefaultStyle.text_effect() == std::nullopt))
 			refresh_paragraph(iText.begin(), 0);
 		iPersistDefaultStyle = aPersist;
 		update();
@@ -949,9 +949,9 @@ namespace neogfx
 
 	colour text_edit::default_text_colour() const
 	{
-		if (default_style().text_colour().is<colour>())
+		if (std::holds_alternative<colour>(default_style().text_colour()))
 			return static_variant_cast<const colour&>(default_style().text_colour());
-		else if(default_style().text_colour().is<gradient>())
+		else if(std::holds_alternative<gradient>(default_style().text_colour()))
 			return static_variant_cast<const gradient&>(default_style().text_colour()).at(0.0);
 		optional_colour textColour;
 		const i_widget* w = nullptr;
@@ -973,7 +973,7 @@ namespace neogfx
 			}
 		} while (w->has_parent());
 		colour defaultTextColour = app::instance().current_style().palette().text_colour();
-		if (textColour == boost::none || textColour->similar_intensity(defaultTextColour))
+		if (textColour == std::nullopt || textColour->similar_intensity(defaultTextColour))
 			return defaultTextColour;
 		else
 			return *textColour;
@@ -1247,7 +1247,7 @@ namespace neogfx
 
 	text_edit::glyph_paragraphs::const_iterator text_edit::character_to_paragraph(position_type aCharacterPos) const
 	{
-		if (iCharacterToParagraphCacheLastAccess != boost::none &&
+		if (iCharacterToParagraphCacheLastAccess != std::nullopt &&
 			aCharacterPos >= (*iCharacterToParagraphCacheLastAccess)->first.first && aCharacterPos < (*iCharacterToParagraphCacheLastAccess)->first.second)
 			return (*iCharacterToParagraphCacheLastAccess)->second;
 		auto existing = iCharacterToParagraphCache.lower_bound(std::make_pair(aCharacterPos, aCharacterPos));
@@ -1261,7 +1261,7 @@ namespace neogfx
 
 	text_edit::glyph_paragraphs::const_iterator text_edit::glyph_to_paragraph(position_type aGlyphPos) const
 	{
-		if (iGlyphToParagraphCacheLastAccess != boost::none &&
+		if (iGlyphToParagraphCacheLastAccess != std::nullopt &&
 			aGlyphPos >= (*iGlyphToParagraphCacheLastAccess)->first.first && aGlyphPos < (*iGlyphToParagraphCacheLastAccess)->first.second)
 			return (*iGlyphToParagraphCacheLastAccess)->second;
 		auto existing = iGlyphToParagraphCache.lower_bound(std::make_pair(aGlyphPos, aGlyphPos));
@@ -1314,7 +1314,7 @@ namespace neogfx
 		if (iHint != aHint)
 		{
 			iHint = aHint;
-			iHintedSize = boost::none;
+			iHintedSize = std::nullopt;
 			if (has_managing_layout())
 				managing_layout().layout_items(true);
 			update();
@@ -1323,8 +1323,8 @@ namespace neogfx
 
 	dimension text_edit::tab_stops() const
 	{
-		if (iCalculatedTabStops == boost::none || iCalculatedTabStops->first != font())
-			iCalculatedTabStops = std::make_pair(font(), (iTabStops != boost::none ?
+		if (iCalculatedTabStops == std::nullopt || iCalculatedTabStops->first != font())
+			iCalculatedTabStops = std::make_pair(font(), (iTabStops != std::nullopt ?
 				*iTabStops : 
 				graphics_context{ *this, graphics_context::type::Unattached }.text_extent(iTabStopHint, font()).cx));
 		return iCalculatedTabStops->second;
@@ -1341,7 +1341,7 @@ namespace neogfx
 
 	void text_edit::set_tab_stops(const optional_dimension& aTabStops)
 	{
-		optional_dimension newTabStops = (aTabStops != boost::none ? units_converter(*this).to_device_units(size{ *aTabStops, 0.0 }).cx : optional_dimension{});
+		optional_dimension newTabStops = (aTabStops != std::nullopt ? units_converter(*this).to_device_units(size{ *aTabStops, 0.0 }).cx : optional_dimension{});
 		if (iTabStops != newTabStops)
 		{
 			iTabStops = newTabStops;
@@ -1504,9 +1504,9 @@ namespace neogfx
 				indexColumn = columns() - 1;
 			const auto& columnStyle = text_edit::column(indexColumn).style();
 			const auto& style =
-				tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) :
-				columnStyle.font() != boost::none ? columnStyle : iDefaultStyle;
-			return style.font() != boost::none ? *style.font() : font();
+				std::holds_alternative<style_list::const_iterator>(tagContents) ? *static_variant_cast<style_list::const_iterator>(tagContents) :
+				columnStyle.font() != std::nullopt ? columnStyle : iDefaultStyle;
+			return style.font() != std::nullopt ? *style.font() : font();
 		};
 		for (auto iterChar = iText.begin(); iterChar != iText.end(); ++iterChar)
 		{
@@ -1602,8 +1602,8 @@ namespace neogfx
 					auto lineEnd = lineStart;
 					const auto& glyph = *lineStart;
 					const auto& tagContents = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).contents();
-					const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
-					auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+					const auto& style = std::holds_alternative<style_list::const_iterator>(tagContents) ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
+					auto& glyphFont = style.font() != std::nullopt ? *style.font() : font();
 					auto height = paragraph.first.height(lineStart, lineEnd);
 					lines.push_back(
 						glyph_line{
@@ -1781,7 +1781,7 @@ namespace neogfx
 		result.merge(aColumn.style());
 		result.set_background_colour();
 		const auto& tagContents = iText.tag(iText.begin() + from_glyph(aGlyph).first).contents();
-		if (tagContents.is<style_list::const_iterator>())
+		if (std::holds_alternative<style_list::const_iterator>(tagContents))
 			result.merge(*static_variant_cast<style_list::const_iterator>(tagContents));
 		return result;
 	}
@@ -1807,7 +1807,7 @@ namespace neogfx
 					}
 					const auto& glyph = *i;
 					const auto& style = glyph_style(i, aColumn);
-					const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+					const auto& glyphFont = style.font() != std::nullopt ? *style.font() : font();
 					switch (pass)
 					{
 					case 0:
@@ -1816,7 +1816,7 @@ namespace neogfx
 								has_focus() ? 
 									app::instance().current_style().palette().selection_colour() : 
 									app::instance().current_style().palette().selection_colour().with_alpha(64));
-						if (style.text_effect() != boost::none && style.text_effect()->type() == text_effect::Outline)
+						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect::Outline)
 							outlineAdjust = std::max(outlineAdjust, style.text_effect()->width());
 						break;
 					case 1:
@@ -1824,11 +1824,11 @@ namespace neogfx
 							selected && has_focus() ?
 								text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
 								text_appearance{
-									style.text_colour().is<colour>() ?
-										static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ?
+									std::holds_alternative<colour>(style.text_colour()) ?
+										static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
 											static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
 											default_text_colour(),
-									!style.background_colour().empty() ? optional_text_colour{ style.background_colour() } : optional_text_colour{},
+									style.background_colour() != neolib::none ? optional_text_colour{ neogfx::text_colour{ style.background_colour() } } : optional_text_colour{},
 									style.text_effect() });
 						break;
 					}
@@ -1841,11 +1841,11 @@ namespace neogfx
 		{
 			const auto& glyph = *i;
 			const auto& style = glyph_style(i, aColumn);
-			const auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+			const auto& glyphFont = style.font() != std::nullopt ? *style.font() : font();
 			if (glyph.underline())
 				aGraphicsContext.draw_glyph_underline(pos + point{ 0.0, aLine->extents.cy - glyphFont.height() }, glyph,
-					style.text_colour().is<colour>() ?
-						static_variant_cast<const colour&>(style.text_colour()) : style.text_colour().is<gradient>() ? 
+					std::holds_alternative<colour>(style.text_colour()) ?
+						static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
 							static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left) / client_rect(false).width()) : 
 							default_text_colour());
 			pos.x += glyph.advance().cx;
@@ -1863,17 +1863,17 @@ namespace neogfx
 					elapsed < 750 ? 
 						static_cast<colour::component>((249 - (elapsed - 500) % 250) * 255 / 249) : 
 						0;
-			if (cursor().colour().empty())
+			if (cursor().colour() == neolib::none)
 			{
 				aGraphicsContext.push_logical_operation(logical_operation::Xor);
 				aGraphicsContext.fill_rect(cursor_rect(), colour::White.with_alpha(alpha));
 				aGraphicsContext.pop_logical_operation();
 			}
-			else if (cursor().colour().is<colour>())
+			else if (std::holds_alternative<colour>(cursor().colour()))
 			{
 				aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const colour&>(cursor().colour()).with_combined_alpha(alpha));
 			}
-			else if (cursor().colour().is<gradient>())
+			else if (std::holds_alternative<gradient>(cursor().colour()))
 			{
 				aGraphicsContext.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursor().colour()).with_combined_alpha(alpha));
 			}
@@ -1890,8 +1890,8 @@ namespace neogfx
 		{
 			auto iterGlyph = cursorPos.glyph < cursorPos.lineEnd ? cursorPos.glyph : cursorPos.glyph - 1;
 			const auto& tagContents = iText.tag(iText.begin() + from_glyph(iterGlyph).first).contents();
-			const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
-			auto& glyphFont = style.font() != boost::none ? *style.font() : font();
+			const auto& style = std::holds_alternative<style_list::const_iterator>(tagContents) ? *static_variant_cast<style_list::const_iterator>(tagContents) : iDefaultStyle;
+			auto& glyphFont = style.font() != std::nullopt ? *style.font() : font();
 			glyphHeight = glyphFont.height();
 			lineHeight = cursorPos.line->extents.cy;
 		}

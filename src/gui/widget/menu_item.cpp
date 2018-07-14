@@ -46,7 +46,7 @@ namespace neogfx
 
 	menu_item::type_e menu_item::type() const
 	{
-		if (iContents.is<action_pointer>())
+		if (std::holds_alternative<action_pointer>(iContents))
 			return Action;
 		else
 			return SubMenu;

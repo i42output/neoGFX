@@ -195,12 +195,12 @@ namespace neogfx
 
 	bool menu::has_selected_item() const
 	{
-		return iSelection != boost::none;
+		return iSelection != std::nullopt;
 	}
 
 	menu::item_index menu::selected_item() const
 	{
-		if (iSelection != boost::none)
+		if (iSelection != std::nullopt)
 			return *iSelection;
 		throw no_selected_item();
 	}
@@ -214,7 +214,7 @@ namespace neogfx
 		if (has_selected_item())
 		{
 			auto selection = selected_item();
-			iSelection = boost::none;
+			iSelection = std::nullopt;
 			item_at(selection).deselected.trigger();
 		}
 		iSelection = aItemIndex;
@@ -227,7 +227,7 @@ namespace neogfx
 		if (has_selected_item())
 		{
 			auto selection = selected_item();
-			iSelection = boost::none;
+			iSelection = std::nullopt;
 			item_at(selection).deselected.trigger();
 			selection_cleared.trigger();
 		}

@@ -81,6 +81,6 @@ namespace neogfx
 		vertical_layout iLayout2;
 		text_widget iText;
 		text_widget iDetailedText;
-		boost::optional<standard_button> iResponse;
+		std::optional<standard_button> iResponse;
 	};
 }

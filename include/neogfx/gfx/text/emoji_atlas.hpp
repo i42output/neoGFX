@@ -44,6 +44,6 @@ namespace neogfx
 		const std::string kFilePath;
 		std::unique_ptr<i_texture_atlas> iTextureAtlas;
 		emojis iEmojis;
-		mutable std::unordered_map<std::u32string, boost::optional<emoji_id>> iEmojiMap;
+		mutable std::unordered_map<std::u32string, std::optional<emoji_id>> iEmojiMap;
 	};
 }

@@ -121,8 +121,8 @@ namespace neogfx
 	void text_widget::set_font(const optional_font& aFont)
 	{
 		widget::set_font(aFont);
-		iTextExtent = boost::none;
-		iSizeHintExtent = boost::none;
+		iTextExtent = std::nullopt;
+		iSizeHintExtent = std::nullopt;
 		iGlyphTextCache = glyph_text{};
 	}
 
@@ -144,7 +144,7 @@ namespace neogfx
 		{
 			size oldSize = minimum_size();
 			iText = aText;
-			iTextExtent = boost::none;
+			iTextExtent = std::nullopt;
 			iGlyphTextCache = glyph_text{};
 			text_changed.trigger();
 			if (has_parent_layout())
@@ -161,7 +161,7 @@ namespace neogfx
 		{
 			size oldSize = minimum_size();
 			iSizeHint = aSizeHint;
-			iSizeHintExtent = boost::none;
+			iSizeHintExtent = std::nullopt;
 			if (has_parent_layout())
 				parent_layout().invalidate();
 			if (oldSize != minimum_size() && has_managing_layout())
@@ -201,7 +201,7 @@ namespace neogfx
 
 	bool text_widget::has_text_colour() const
 	{
-		return has_text_appearance() && text_appearance().ink() != boost::none && text_appearance().ink().is<colour>();
+		return has_text_appearance() && text_appearance().ink() != neolib::none && std::holds_alternative<colour>(text_appearance().ink());
 	}
 
 	colour text_widget::text_colour() const
@@ -228,7 +228,7 @@ namespace neogfx
 			}
 		} while (w->has_parent());
 		colour defaultTextColour = app::instance().current_style().palette().text_colour();
-		if (textColour == boost::none || textColour->similar_intensity(defaultTextColour))
+		if (textColour == std::nullopt || textColour->similar_intensity(defaultTextColour))
 			textColour = defaultTextColour;
 		return *textColour;
 	}
@@ -236,14 +236,14 @@ namespace neogfx
 	void text_widget::set_text_colour(const optional_colour& aTextColour)
 	{
 		if (has_text_appearance())
-			set_text_appearance(neogfx::text_appearance{ aTextColour != boost::none ? *aTextColour : neogfx::text_colour{}, iTextAppearance->paper(), iTextAppearance->effect() });
+			set_text_appearance(neogfx::text_appearance{ aTextColour != std::nullopt ? *aTextColour : neogfx::text_colour{}, iTextAppearance->paper(), iTextAppearance->effect() });
 		else
-			set_text_appearance(neogfx::text_appearance{ aTextColour != boost::none ? *aTextColour : neogfx::text_colour{} });
+			set_text_appearance(neogfx::text_appearance{ aTextColour != std::nullopt ? *aTextColour : neogfx::text_colour{} });
 	}
 
 	bool text_widget::has_text_appearance() const
 	{
-		return iTextAppearance != boost::none;
+		return iTextAppearance != std::nullopt;
 	}
 
 	text_appearance text_widget::text_appearance() const
@@ -261,7 +261,7 @@ namespace neogfx
 
 	size text_widget::text_extent() const
 	{
-		if (iTextExtent != boost::none)
+		if (iTextExtent != std::nullopt)
 			return *iTextExtent;
 		else if (!has_surface())
 			return size{};
@@ -284,7 +284,7 @@ namespace neogfx
 
 	size text_widget::size_hint_extent() const
 	{
-		if (iSizeHintExtent != boost::none)
+		if (iSizeHintExtent != std::nullopt)
 			return *iSizeHintExtent;
 		else if (!has_surface())
 			return size{};
@@ -315,8 +315,8 @@ namespace neogfx
 		{
 			if (!has_font() && (aAspect & style_aspect::Font) == style_aspect::Font)
 			{
-				iTextExtent = boost::none;
-				iSizeHintExtent = boost::none;
+				iTextExtent = std::nullopt;
+				iSizeHintExtent = std::nullopt;
 				iGlyphTextCache = glyph_text{};
 				if (has_parent_layout())
 					parent_layout().invalidate();
@@ -325,8 +325,8 @@ namespace neogfx
 		});
 		iSink += app::instance().rendering_engine().subpixel_rendering_changed([this]()
 		{
-			iTextExtent = boost::none;
-			iSizeHintExtent = boost::none;
+			iTextExtent = std::nullopt;
+			iSizeHintExtent = std::nullopt;
 			iGlyphTextCache = glyph_text{};
 			if (has_parent_layout())
 				parent_layout().invalidate();

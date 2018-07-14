@@ -182,13 +182,13 @@ namespace neogfx
 
 	void physical_object::clear_aabb_cache()
 	{
-		if (iAabb != boost::none)
-			iAabb = boost::none;
+		if (iAabb != std::nullopt)
+			iAabb = std::nullopt;
 	}
 
 	const aabb& physical_object::aabb() const
 	{
-		if (iAabb == boost::none)
+		if (iAabb == std::nullopt)
 		{
 			const auto pos = position() + origin();
 			iAabb.emplace(pos, pos);
@@ -198,7 +198,7 @@ namespace neogfx
 
 	const neogfx::aabb& physical_object::saved_aabb() const
 	{
-		if (iSavedAabb == boost::none)
+		if (iSavedAabb == std::nullopt)
 			iSavedAabb = aabb();
 		return *iSavedAabb;
 	}
@@ -210,7 +210,7 @@ namespace neogfx
 
 	void physical_object::clear_saved_aabb()
 	{
-		iSavedAabb = boost::none;
+		iSavedAabb = std::nullopt;
 	}
 
 	bool physical_object::collidable() const
@@ -246,7 +246,7 @@ namespace neogfx
 	bool physical_object::update(const optional_time_interval& aNow, const vec3& aForce)
 	{
 		bool updated = false;
-		if (iTimeOfLastUpdate == boost::none)
+		if (iTimeOfLastUpdate == std::nullopt)
 			updated = true;
 		if (!updated)
 		{
@@ -272,7 +272,7 @@ namespace neogfx
 
 	const physical_object::physics& physical_object::current_physics() const
 	{
-		if (iCurrentPhysics == boost::none)
+		if (iCurrentPhysics == std::nullopt)
 			iCurrentPhysics = physics{};
 		return *iCurrentPhysics;
 	}
@@ -284,7 +284,7 @@ namespace neogfx
 
 	const physical_object::physics& physical_object::next_physics() const
 	{
-		if (iNextPhysics == boost::none)
+		if (iNextPhysics == std::nullopt)
 			iNextPhysics = physics{};
 		return *iNextPhysics;
 	}

@@ -89,7 +89,7 @@ namespace neogfx
 
 	void native_window::push_event(const native_event& aEvent)
 	{
-		if (aEvent.is<window_event>())
+		if (std::holds_alternative<window_event>(aEvent))
 		{
 			const auto& windowEvent = static_variant_cast<const window_event&>(aEvent);
 			switch (windowEvent.type())
@@ -98,7 +98,7 @@ namespace neogfx
 			case window_event_type::SizeChanged:
 				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
 				{
-					if (e->is<window_event>() && static_variant_cast<const window_event&>(*e).type() == windowEvent.type())
+					if (std::holds_alternative<window_event>(*e) && static_variant_cast<const window_event&>(*e).type() == windowEvent.type())
 						e = iEventQueue.erase(e);
 					else
 						++e;
@@ -129,19 +129,19 @@ namespace neogfx
 		iCurrentEvent = aEvent;
 		handle_event();
 		if (!destroyed)
-			iCurrentEvent = boost::none;
+			iCurrentEvent = neolib::none;
 		else
 			sc.ignore();
 	}
 
 	bool native_window::has_current_event() const
 	{
-		return iCurrentEvent != boost::none;
+		return iCurrentEvent != neolib::none;
 	}
 
 	const native_window::native_event& native_window::current_event() const
 	{
-		if (iCurrentEvent != boost::none)
+		if (iCurrentEvent != neolib::none)
 			return iCurrentEvent;
 		throw no_current_event();
 	}
@@ -156,7 +156,7 @@ namespace neogfx
 				sc.ignore();
 			return;
 		}
-		if (iCurrentEvent.is<window_event>())
+		if (std::holds_alternative<window_event>(iCurrentEvent))
 		{
 			auto& windowEvent = static_variant_cast<window_event&>(iCurrentEvent);
 			if (!surface_window().as_window().window_event.trigger(windowEvent))
@@ -174,7 +174,7 @@ namespace neogfx
 				surface_window().native_window_resized();
 				for (auto e = iEventQueue.begin(); e != iEventQueue.end();)
 				{
-					if (e->is<window_event>())
+					if (std::holds_alternative<window_event>(*e))
 					{
 						switch (static_variant_cast<const window_event&>(*e).type())
 						{
@@ -224,7 +224,7 @@ namespace neogfx
 				break;
 			}
 		}
-		else if (iCurrentEvent.is<mouse_event>())
+		else if (std::holds_alternative<mouse_event>(iCurrentEvent))
 		{
 			const auto& mouseEvent = static_variant_cast<const mouse_event&>(iCurrentEvent);
 			switch (mouseEvent.type())
@@ -249,7 +249,7 @@ namespace neogfx
 				break;
 			}
 		}
-		else if (iCurrentEvent.is<non_client_mouse_event>())
+		else if (std::holds_alternative<non_client_mouse_event>(iCurrentEvent))
 		{
 			const auto& mouseEvent = static_variant_cast<const non_client_mouse_event&>(iCurrentEvent);
 			switch (mouseEvent.type())
@@ -274,7 +274,7 @@ namespace neogfx
 				break;
 			}
 		}
-		else if (iCurrentEvent.is<keyboard_event>())
+		else if (std::holds_alternative<keyboard_event>(iCurrentEvent))
 		{
 			auto& keyboard = app::instance().keyboard();
 			const auto& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
@@ -360,7 +360,7 @@ namespace neogfx
 
 	size& native_window::pixel_density() const
 	{
-		if (iPixelDensityDpi == boost::none)
+		if (iPixelDensityDpi == std::nullopt)
 		{
 			auto& display = surface_manager().display(surface_window());
 			iPixelDensityDpi = size{ display.metrics().horizontal_dpi(), display.metrics().vertical_dpi() };
@@ -371,7 +371,7 @@ namespace neogfx
 	void native_window::handle_dpi_changed()
 	{
 		surface_manager().display(surface_window()).update_dpi();
-		iPixelDensityDpi = boost::none;
+		iPixelDensityDpi = std::nullopt;
 		surface_window().handle_dpi_changed();
 		surface_manager().dpi_changed.trigger(surface_window());
 	}

@@ -42,5 +42,5 @@ namespace neogfx
 		bool iAntiAliased;
 	};
 
-	typedef boost::optional<pen> optional_pen;
+	typedef std::optional<pen> optional_pen;
 }

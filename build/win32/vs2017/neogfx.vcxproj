@@ -65,7 +65,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
-      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions) /std:c++latest </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,7 +90,7 @@
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
-      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions) /std:c++latest </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -46,7 +46,7 @@ namespace neogfx
 
 	size toolbar::button_image_extents() const
 	{
-		if (iButtonImageExtents != boost::none)
+		if (iButtonImageExtents != std::nullopt)
 			return *iButtonImageExtents;
 		return dpi_scale(iButtonSize);
 	}

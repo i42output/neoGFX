@@ -36,7 +36,7 @@ namespace neogfx
 				auto modelRow = to_item_model_index(aIndex).row();
 				if (iFonts.size() <= modelRow)
 					iFonts.resize(modelRow + 1);
-				if (iFonts[modelRow] == boost::none)
+				if (iFonts[modelRow] == std::nullopt)
 				{
 					auto& fm = app::instance().rendering_engine().font_manager();
 					iFonts[modelRow] = font{ fm.font_family(modelRow), font::Normal, app::instance().current_style().font_info().size() };
@@ -75,7 +75,7 @@ namespace neogfx
 				{
 					item_model().clear();
 					iFonts.clear();
-					if (aCurrentIndex != boost::none)
+					if (aCurrentIndex != std::nullopt)
 					{
 						auto fontFamilyIndex = iFamilyPickerSelectionModel.presentation_model().to_item_model_index(*aCurrentIndex).row();
 						auto& fm = app::instance().rendering_engine().font_manager();
@@ -95,7 +95,7 @@ namespace neogfx
 				auto modelRow = to_item_model_index(aIndex).row();
 				if (iFonts.size() <= modelRow)
 					iFonts.resize(modelRow + 1);
-				if (iFonts[modelRow] == boost::none)
+				if (iFonts[modelRow] == std::nullopt)
 				{
 					auto& fm = app::instance().rendering_engine().font_manager();
 					iFonts[modelRow] = font{ fm.font_family(familyModelRow), static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(aIndex))), app::instance().current_style().font_info().size() };
@@ -298,13 +298,13 @@ namespace neogfx
 		if (&aUpdatingWidget == this)
 		{
 			auto family = iFamilyPicker.presentation_model().find_item(iSelectedFont.family_name());
-			if (family != boost::none)
+			if (family != std::nullopt)
 				iFamilyPicker.selection_model().set_current_index(*family);
 			auto style = iStylePicker.presentation_model().find_item(iSelectedFont.style_name());
-			if (style != boost::none)
+			if (style != std::nullopt)
 				iStylePicker.selection_model().set_current_index(*style);
 			auto size = iSizePicker.presentation_model().find_item(boost::lexical_cast<std::string>(iSelectedFont.size()));
-			if (size != boost::none)
+			if (size != std::nullopt)
 				iSizePicker.selection_model().set_current_index(*size);
 			iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
 		}
@@ -323,7 +323,7 @@ namespace neogfx
 		else
 			iSelectedFont = iCurrentFont;
 		auto fontSizeIndex = iSizePicker.presentation_model().find_item(boost::lexical_cast<std::string>(static_cast<int>(iSelectedFont.size())));
-		if (fontSizeIndex != boost::none)
+		if (fontSizeIndex != std::nullopt)
 			iSizePicker.selection_model().set_current_index(*fontSizeIndex);
 		else
 			iSizePicker.selection_model().unset_current_index();

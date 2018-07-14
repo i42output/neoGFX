@@ -465,7 +465,7 @@ namespace neogfx
 			resume();
 		if (clicked_element() == i_scrollbar::ElementThumb)
 		{
-			point delta = (aUpdateParams.is<point>() ? static_variant_cast<point>(aUpdateParams) : iContainer.as_widget().root().mouse_position()) - iThumbClickedPosition;
+			point delta = (std::holds_alternative<point>(aUpdateParams) ? static_variant_cast<point>(aUpdateParams) : iContainer.as_widget().root().mouse_position()) - iThumbClickedPosition;
 			scoped_units su(aContext, units::Pixels);
 			rect g = iContainer.scrollbar_geometry(aContext, *this);
 			if (iType == scrollbar_type::Vertical)
@@ -590,7 +590,7 @@ namespace neogfx
 
 	void scrollbar::track()
 	{
-		if (iScrollTrackPosition == boost::none)
+		if (iScrollTrackPosition == std::nullopt)
 		{
 			iScrollTrackPosition = iContainer.as_widget().root().mouse_position();
 			iTimer = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
@@ -617,7 +617,7 @@ namespace neogfx
 
 	void scrollbar::untrack()
 	{
-		if (iScrollTrackPosition != boost::none)
+		if (iScrollTrackPosition != std::nullopt)
 		{
 			iScrollTrackPosition.reset();
 			iTimer.reset();

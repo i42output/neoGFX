@@ -240,7 +240,7 @@ namespace neogfx
 			template <std::size_t X, std::size_t Y>
 			node& child() const
 			{
-				if (iChildren == boost::none)
+				if (iChildren == std::nullopt)
 					iChildren.emplace();
 				if ((*iChildren)[X][Y] == nullptr)
 					(*iChildren)[X][Y] = iTree.create_node(*this, iQuadrants[X][Y]);
@@ -249,14 +249,14 @@ namespace neogfx
 			template <std::size_t X, std::size_t Y>
 			bool has_child() const
 			{
-				if (iChildren == boost::none)
+				if (iChildren == std::nullopt)
 					return false;
 				return (*iChildren)[X][Y] != nullptr;
 			}
 			template <std::size_t X, std::size_t Y>
 			bool remove_child(node* aDestroyedNode = nullptr) const
 			{
-				if (iChildren == boost::none)
+				if (iChildren == std::nullopt)
 					return true;
 				if ((*iChildren)[X][Y] == nullptr)
 					return true;
@@ -271,7 +271,7 @@ namespace neogfx
 			}
 			bool is_split() const
 			{
-				return iChildren != boost::none;
+				return iChildren != std::nullopt;
 			}
 			void split()
 			{
@@ -300,7 +300,7 @@ namespace neogfx
 				if (!remove_child<1, 1>(aDestroyedNode))
 					haveChildren = true;
 				if (!haveChildren)
-					iChildren = boost::none;
+					iChildren = std::nullopt;
 				if (empty())
 					iTree.destroy_node(*this);
 			}
@@ -311,7 +311,7 @@ namespace neogfx
 			aabb_2d iAabb;
 			quadrants iQuadrants;
 			object_list iObjects;
-			mutable boost::optional<children> iChildren;
+			mutable std::optional<children> iChildren;
 		};
 		typedef typename allocator_type::template rebind<node>::other node_allocator;
 	public:

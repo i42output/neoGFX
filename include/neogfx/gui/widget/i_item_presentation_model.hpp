@@ -103,9 +103,9 @@ namespace neogfx
 			SortAscending,
 			SortDescending,
 		};
-		typedef boost::optional<sort_direction_e> optional_sort_direction;
+		typedef std::optional<sort_direction_e> optional_sort_direction;
 		typedef std::pair<item_presentation_model_index::column_type, sort_direction_e> sort;
-		typedef boost::optional<sort> optional_sort;
+		typedef std::optional<sort> optional_sort;
 		typedef std::string filter_search_key;
 		enum filter_search_type_e
 		{
@@ -119,7 +119,7 @@ namespace neogfx
 			CaseSensitive
 		};
 		typedef std::tuple<item_presentation_model_index::column_type, filter_search_key, filter_search_type_e, case_sensitivity_e> filter;
-		typedef boost::optional<filter> optional_filter;
+		typedef std::optional<filter> optional_filter;
 	public:
 		struct no_item_model : std::logic_error { no_item_model() : std::logic_error("neogfx::i_item_presentation_model::no_item_model") {} };
 		struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::i_item_presentation_model::bad_column_index") {} };

@@ -144,6 +144,6 @@ namespace neogfx
 		mutable std::vector<std::array<GLubyte, 4>> iSubpixelGlyphTextureData;
 		bool iHasKerning;
 		mutable kerning_table iKerningTable;
-		mutable boost::optional<bool> iHasFallback;
+		mutable std::optional<bool> iHasFallback;
 	};
 }

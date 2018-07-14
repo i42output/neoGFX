@@ -96,8 +96,8 @@ namespace neogfx
 		virtual void handle_clicked();
 	protected:
 		virtual bool can_toggle() const;
-		virtual const boost::optional<bool>& checked_state() const;
-		virtual bool set_checked_state(const boost::optional<bool>& aCheckedState);
+		virtual const std::optional<bool>& checked_state() const;
+		virtual bool set_checked_state(const std::optional<bool>& aCheckedState);
 	protected:
 		std::string mnemonic() const override;
 		void mnemonic_execute() override;
@@ -107,7 +107,7 @@ namespace neogfx
 	private:
 		sink iSink;
 		button_checkable iCheckable;
-		boost::optional<bool> iCheckedState;
+		std::optional<bool> iCheckedState;
 		horizontal_layout iLayout;
 		neogfx::label iLabel;
 	};

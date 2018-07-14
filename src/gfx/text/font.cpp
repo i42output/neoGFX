@@ -115,7 +115,7 @@ namespace neogfx
 		iStyle{ aStyle },
 		iStyleName{ aStyleName },
 		iUnderline{ false },
-		iWeight{ aStyleName != boost::none ? weight_from_style_name(*aStyleName) : aStyle != boost::none ? weight_from_style(*aStyle) :	WeightNormal },
+		iWeight{ aStyleName != std::nullopt ? weight_from_style_name(*aStyleName) : aStyle != std::nullopt ? weight_from_style(*aStyle) :	WeightNormal },
 		iSize{ aSize },
 		iKerning{ true }
 	{
@@ -190,7 +190,7 @@ namespace neogfx
 
 	bool font_info::style_available() const
 	{
-		return iInstance->iStyle != boost::none;
+		return iInstance->iStyle != std::nullopt;
 	}
 
 	font_info::style_e font_info::style() const
@@ -203,7 +203,7 @@ namespace neogfx
 
 	bool font_info::style_name_available() const
 	{
-		return iInstance->iStyleName != boost::none;
+		return iInstance->iStyleName != std::nullopt;
 	}
 
 	const std::string& font_info::style_name() const
@@ -373,8 +373,8 @@ namespace neogfx
 		void release();
 	private:
 		std::shared_ptr<i_native_font_face> iNativeFontFace;
-		mutable boost::optional<bool> iHasFallbackFont;
-		mutable boost::optional<font> iFallbackFont;
+		mutable std::optional<bool> iHasFallbackFont;
+		mutable std::optional<font> iFallbackFont;
 	};
 
 	font::instance::instance(std::unique_ptr<i_native_font_face> aNativeFontFace) :
@@ -418,14 +418,14 @@ namespace neogfx
 
 	bool font::instance::has_fallback_font() const
 	{
-		if (iHasFallbackFont == boost::none)
+		if (iHasFallbackFont == std::nullopt)
 			iHasFallbackFont = app::instance().rendering_engine().font_manager().has_fallback_font(native_font_face());
 		return *iHasFallbackFont;
 	}
 
 	font font::instance::fallback_font() const
 	{
-		if (iFallbackFont == boost::none)
+		if (iFallbackFont == std::nullopt)
 		{
 			if (has_fallback_font())
 				iFallbackFont = font{ app::instance().rendering_engine().font_manager().create_fallback_font(*iNativeFontFace) };

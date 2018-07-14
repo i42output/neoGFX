@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <vector>
 #include <unordered_map>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neogfx/gfx/i_image.hpp>
 
 namespace neogfx
@@ -74,7 +74,7 @@ namespace neogfx
 	private:
 		i_resource::pointer iResource;
 		std::string iUri;
-		boost::optional<std::string> iError;
+		std::optional<std::string> iError;
 		dimension iDpiScaleFactor;
 		neogfx::colour_format iColourFormat;
 		data_type iData;

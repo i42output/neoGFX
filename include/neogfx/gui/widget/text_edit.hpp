@@ -44,7 +44,7 @@ namespace neogfx
 			SingleLine,
 			MultiLine
 		};
-		typedef boost::optional<std::string> optional_password_mask;
+		typedef std::optional<std::string> optional_password_mask;
 		class style
 		{
 		public:
@@ -137,25 +137,25 @@ namespace neogfx
 			tag(const contents_type& aContents) :
 				iNode(nullptr), iContents(aContents)
 			{
-				if (iContents.is<style_list::const_iterator>())
+				if (std::holds_alternative<style_list::const_iterator>(iContents))
 					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
 			}
 			template <typename Node2>
 			tag(node_type& aNode, const tag<Node2>& aTag) : 
 				iNode(&aNode), iContents(aTag.iContents)
 			{
-				if (iContents.is<style_list::const_iterator>())
+				if (std::holds_alternative<style_list::const_iterator>(iContents))
 					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
 			}
 			tag(const tag& aOther) : 
 				iNode(aOther.iNode), iContents(aOther.iContents)
 			{
-				if (iContents.is<style_list::const_iterator>())
+				if (std::holds_alternative<style_list::const_iterator>(iContents))
 					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
 			}
 			~tag()
 			{
-				if (iContents.is<style_list::const_iterator>())
+				if (std::holds_alternative<style_list::const_iterator>(iContents))
 					static_variant_cast<style_list::const_iterator>(iContents)->release();
 			}
 		public:
@@ -327,9 +327,9 @@ namespace neogfx
 					{
 						const auto& glyph = *(iterGlyph++);
 						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + textStartIndex + glyph.source().first).contents();
-						const auto& style = tagContents.is<style_list::const_iterator>() ? *static_variant_cast<style_list::const_iterator>(tagContents) : iParent->default_style();
+						const auto& style = std::holds_alternative<style_list::const_iterator>(tagContents) ? *static_variant_cast<style_list::const_iterator>(tagContents) : iParent->default_style();
 						dimension cy = glyph.extents().cy;
-						if (style.text_effect() != boost::none && style.text_effect()->type() == text_effect::Outline)
+						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect::Outline)
 							cy += (style.text_effect()->width() * 2.0);
 						if (i == glyphsStartIndex || cy != previousHeight)
 						{
@@ -549,16 +549,16 @@ namespace neogfx
 			std::less<find_span>,
 			boost::fast_pool_allocator<std::pair<const find_span, glyph_paragraphs::const_iterator>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> find_in_paragraph_cache;
 		mutable find_in_paragraph_cache iCharacterToParagraphCache;
-		mutable boost::optional<find_in_paragraph_cache::iterator> iCharacterToParagraphCacheLastAccess;
+		mutable std::optional<find_in_paragraph_cache::iterator> iCharacterToParagraphCacheLastAccess;
 		mutable find_in_paragraph_cache iGlyphToParagraphCache;
-		mutable boost::optional<find_in_paragraph_cache::iterator> iGlyphToParagraphCacheLastAccess;
+		mutable std::optional<find_in_paragraph_cache::iterator> iGlyphToParagraphCacheLastAccess;
 		std::string iHint;
-		mutable boost::optional<std::pair<neogfx::font, size>> iHintedSize;
+		mutable std::optional<std::pair<neogfx::font, size>> iHintedSize;
 		optional_dimension iTabStops;
 		std::string iTabStopHint;
-		mutable boost::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
+		mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
 		neolib::callback_timer iAnimator;
-		boost::optional<neolib::callback_timer> iDragger;
+		std::optional<neolib::callback_timer> iDragger;
 		std::unique_ptr<context_menu> iMenu;
 		uint32_t iSuppressTextChangedNotification;
 		uint32_t iWantedToNotfiyTextChanged;

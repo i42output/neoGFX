@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <map>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/async_thread.hpp>
 #include <neogfx/app/i_app.hpp>
@@ -171,7 +171,7 @@ namespace neogfx
 		std::unique_ptr<i_surface_manager> iSurfaceManager;
 		std::unique_ptr<i_window_manager> iWindowManager;
 		std::unique_ptr<i_audio> iAudio;
-		boost::optional<int> iQuitResultCode;
+		std::optional<int> iQuitResultCode;
 		texture iDefaultWindowIcon;
 		style_list iStyles;
 		style_list::iterator iCurrentStyle;

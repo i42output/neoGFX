@@ -76,6 +76,6 @@ namespace neogfx
 		uint32_t iAnimationFrame;
 		push_button_style iStyle;
 		optional_colour iHoverColour;
-		mutable boost::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
+		mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
 	};
 }

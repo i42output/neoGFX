@@ -143,7 +143,7 @@ namespace neogfx
 		destroyed_flag iNativeSurfaceDestroyed;
 		bool iNativeWindowClosing;
 		bool iClosed;
-		boost::optional<char32_t> iSurrogatePairPart;
+		std::optional<char32_t> iSurrogatePairPart;
 		i_widget* iCapturingWidget;
 		i_widget* iClickedWidget;
 	};

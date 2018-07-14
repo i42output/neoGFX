@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/i_sub_texture.hpp>
 
@@ -59,5 +59,5 @@ namespace neogfx
 		size iExtents;
 	};
 
-	typedef boost::optional<sub_texture> optional_sub_texture;
+	typedef std::optional<sub_texture> optional_sub_texture;
 }

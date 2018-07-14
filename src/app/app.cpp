@@ -279,7 +279,7 @@ namespace neogfx
 			surface_manager().layout_surfaces();
 			surface_manager().invalidate_surfaces();
 			iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
-			while (!iQuitResultCode.is_initialized())
+			while (iQuitResultCode == std::nullopt)
 				process_events(iAppContext);
 			async_event_queue::instance().terminate();
 			return *iQuitResultCode;
@@ -661,7 +661,7 @@ namespace neogfx
 				throw main_window_closed_prematurely();
 			if (lastWindowClosed && iQuitWhenLastWindowClosed)
 			{
-				if (!iQuitResultCode.is_initialized())
+				if (iQuitResultCode == std::nullopt)
 					iQuitResultCode = 0;
 			}
 
@@ -705,7 +705,7 @@ namespace neogfx
 		bool partialMatches = false;
 		iKeySequence.push_back(std::make_pair(aKeyCode, aKeyModifiers));
 		for (auto& a : iActions)
-			if (a.second.is_enabled() && a.second.shortcut() != boost::none)
+			if (a.second.is_enabled() && a.second.shortcut() != std::nullopt)
 			{
 				auto matchResult = a.second.shortcut()->matches(iKeySequence.begin(), iKeySequence.end());
 				if (matchResult == key_sequence::match::Full)

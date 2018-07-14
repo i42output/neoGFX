@@ -176,7 +176,7 @@ namespace neogfx
 
 	void sprite::clear_aabb_cache()
 	{
-		iAabb = boost::none;
+		iAabb = std::nullopt;
 	}
 
 	bool sprite::update(const optional_time_interval& aNow, const vec3& aForce)
@@ -196,7 +196,7 @@ namespace neogfx
 
 	const aabb& sprite::aabb() const
 	{
-		if (iAabb == boost::none)
+		if (iAabb == std::nullopt)
 		{
 			const auto& tvs = shape::transformed_vertices();
 			const auto& iv = tvs[0];

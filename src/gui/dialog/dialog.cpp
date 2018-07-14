@@ -151,7 +151,7 @@ namespace neogfx
 
 	dialog_result dialog::result() const
 	{
-		if (iResult != boost::none)
+		if (iResult != std::nullopt)
 			return *iResult;
 		return dialog_result::NoResult;
 	}
@@ -176,7 +176,7 @@ namespace neogfx
 
 	dialog_button_box& dialog::button_box()
 	{
-		if (iButtonBox == boost::none)
+		if (iButtonBox == std::nullopt)
 		{
 			iButtonBox.emplace(button_box_layout());
 			button_box().layout().set_spacing(client_layout().spacing());
@@ -196,7 +196,7 @@ namespace neogfx
 	{
 		neolib::destroyed_flag destroyed{ surface().as_lifetime() };
 		app::event_processing_context epc(app::instance(), "neogfx::dialog");
-		while (iResult == boost::none)
+		while (iResult == std::nullopt)
 		{
 			app::instance().process_events(epc);
 			if (destroyed && result() == dialog_result::NoResult)

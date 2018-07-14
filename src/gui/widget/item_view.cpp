@@ -238,11 +238,11 @@ namespace neogfx
 					continue;
 				finished = false;
 				optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Foreground);
-				if (textColour == boost::none)
+				if (textColour == std::nullopt)
 					textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
 				optional_colour backgroundColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Background);
 				rect cellBackgroundRect = cell_rect(item_presentation_model_index{ row, col }, true);
-				if (backgroundColour != boost::none)
+				if (backgroundColour != std::nullopt)
 				{
 					scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellBackgroundRect));
 					aGraphicsContext.fill_rect(cellBackgroundRect, *backgroundColour);
@@ -262,13 +262,13 @@ namespace neogfx
 
 	void item_view::released()
 	{
-		iMouseTracker = boost::none;
+		iMouseTracker = std::nullopt;
 	}
 
 	neogfx::focus_policy item_view::focus_policy() const
 	{
 		auto result = scrollable_widget::focus_policy();
-		if (editing() != boost::none)
+		if (editing() != std::nullopt)
 			result |= (focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
 		return result;
 	}
@@ -279,9 +279,9 @@ namespace neogfx
 		if (aFocusReason == focus_reason::ClickClient)
 		{
 			auto item = item_at(root().mouse_position() - origin());
-			if (item != boost::none)
+			if (item != std::nullopt)
 				selection_model().set_current_index(*item);
-			if (editing() == boost::none && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
+			if (editing() == std::nullopt && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) == item_cell_editable::WhenFocused)
 				edit(selection_model().current_index());
 		}
 		else if (aFocusReason != focus_reason::Other)
@@ -297,7 +297,7 @@ namespace neogfx
 		if (capturing() && aButton == mouse_button::Left && item_display_rect().contains(aPosition))
 		{
 			auto item = item_at(aPosition);
-			if (item != boost::none)
+			if (item != std::nullopt)
 			{
 				selection_model().set_current_index(*item);
 				if (selection_model().has_current_index() && selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::WhenFocused)
@@ -309,7 +309,7 @@ namespace neogfx
 				{
 					aTimer.again();
 					auto item = item_at(root().mouse_position() - origin());
-					if (item != boost::none)
+					if (item != std::nullopt)
 						selection_model().set_current_index(*item);
 				}, 20);
 			}
@@ -322,7 +322,7 @@ namespace neogfx
 		if (aButton == mouse_button::Left && item_display_rect().contains(aPosition))
 		{
 			auto item = item_at(aPosition);
-			if (item != boost::none)
+			if (item != std::nullopt)
 			{
 				selection_model().set_current_index(*item);
 				if (selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
@@ -341,7 +341,7 @@ namespace neogfx
 			if (hot_tracking() && client_rect().contains(aPosition))
 			{
 				auto item = item_at(aPosition);
-				if (item != boost::none)
+				if (item != std::nullopt)
 					selection_model().set_current_index(*item);
 			}
 		}
@@ -360,14 +360,14 @@ namespace neogfx
 			{
 			case ScanCode_RETURN:
 			case ScanCode_KP_ENTER:
-				if (editing() != boost::none)
+				if (editing() != std::nullopt)
 				{
 					end_edit(true);
 					return true;
 				}
 				break;
 			case ScanCode_TAB:
-				if (editing() != boost::none)
+				if (editing() != std::nullopt)
 				{
 					end_edit(true);
 					item_presentation_model_index originalIndex = selection_model().current_index();
@@ -376,7 +376,7 @@ namespace neogfx
 					else
 						selection_model().set_current_index(selection_model().relative_to_current_index(index_location::PreviousCell, true, true));
 					edit(selection_model().current_index());
-					if (editing() != boost::none && editor_has_text_edit())
+					if (editing() != std::nullopt && editor_has_text_edit())
 					{
 						editor_text_edit().cursor().set_anchor(0);
 						editor_text_edit().cursor().set_position(editor_text_edit().text().size(), false);
@@ -385,7 +385,7 @@ namespace neogfx
 				}
 				break;
 			case ScanCode_F2:
-				if (editing() == boost::none && selection_model().has_current_index())
+				if (editing() == std::nullopt && selection_model().has_current_index())
 					edit(selection_model().current_index());
 				break;
 			case ScanCode_LEFT:
@@ -465,7 +465,7 @@ namespace neogfx
 	bool item_view::text_input(const std::string& aText)
 	{
 		bool handled = scrollable_widget::text_input(aText);
-		if (editing() == boost::none && selection_model().has_current_index() && aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
+		if (editing() == std::nullopt && selection_model().has_current_index() && aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
 		{
 			edit(selection_model().current_index());
 			if (editing())
@@ -539,7 +539,7 @@ namespace neogfx
 	{
 		update_scrollbar_visibility();
 		update();
-		if (editing() != boost::none && presentation_model().cell_editable(*editing()) == item_cell_editable::No)
+		if (editing() != std::nullopt && presentation_model().cell_editable(*editing()) == item_cell_editable::No)
 			end_edit(false);
 	}
 
@@ -597,9 +597,9 @@ namespace neogfx
 
 	void item_view::items_sorted(const i_item_presentation_model&)
 	{
-		if (iSavedModelIndex != boost::none && presentation_model().have_item_model_index(*iSavedModelIndex))
+		if (iSavedModelIndex != std::nullopt && presentation_model().have_item_model_index(*iSavedModelIndex))
 			selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
-		iSavedModelIndex = boost::none;
+		iSavedModelIndex = std::nullopt;
 		update();
 	}
 
@@ -639,22 +639,22 @@ namespace neogfx
 
 	void item_view::current_index_changed(const i_item_selection_model& aModel, const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
 	{
-		if (aCurrentIndex != boost::none)
+		if (aCurrentIndex != std::nullopt)
 		{
 			make_visible(*aCurrentIndex);
 			update(cell_rect(*aCurrentIndex, true));
 			if (!aModel.sorting() && !aModel.filtering())
 			{
-				if (aPreviousIndex != boost::none)
+				if (aPreviousIndex != std::nullopt)
 				{
-					if (editing() != boost::none && presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == boost::none)
+					if (editing() != std::nullopt && presentation_model().cell_editable(*aCurrentIndex) == item_cell_editable::WhenFocused && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt)
 						edit(*aCurrentIndex);
-					else if (editing() != boost::none)
+					else if (editing() != std::nullopt)
 						end_edit(true);
 				}
 			}
 		}
-		if (aPreviousIndex != boost::none)
+		if (aPreviousIndex != std::nullopt)
 			update(cell_rect(*aPreviousIndex, true));
 	}
 
@@ -724,7 +724,7 @@ namespace neogfx
 		auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
 		end_edit(true);
 		auto const& cellDataInfo = model().cell_data_info(modelIndex);
-		if (cellDataInfo.step == boost::none)
+		if (cellDataInfo.step == neolib::none)
 			iEditor = std::make_shared<item_editor<line_edit>>(*this);
 		else
 		{
@@ -787,10 +787,10 @@ namespace neogfx
 			if (&editor() != &textEdit)
 				textEdit.set_margins(neogfx::margins{});
 			optional_colour textColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Foreground);
-			if (textColour == boost::none)
+			if (textColour == std::nullopt)
 				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
 			optional_colour backgroundColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Background);
-			textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != boost::none ? colour_or_gradient{ *backgroundColour } : colour_or_gradient{} });
+			textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != std::nullopt ? colour_or_gradient{ *backgroundColour } : colour_or_gradient{} });
 			textEdit.set_text(presentation_model().cell_to_string(newIndex));
 			textEdit.focus_event([this, newIndex](neogfx::focus_event fe)
 			{
@@ -808,7 +808,7 @@ namespace neogfx
 
 	void item_view::begin_edit()
 	{
-		if (editing() != boost::none && !ending_edit() && editor_has_text_edit())
+		if (editing() != std::nullopt && !ending_edit() && editor_has_text_edit())
 		{
 			auto& textEdit = editor_text_edit();
 			textEdit.set_focus();
@@ -826,7 +826,7 @@ namespace neogfx
 
 	void item_view::end_edit(bool aCommit)
 	{
-		if (editing() == boost::none)
+		if (editing() == std::nullopt)
 			return;
 		if (aCommit && presentation_model().cell_editable(*editing()) == item_cell_editable::No)
 			aCommit = false;
@@ -839,7 +839,7 @@ namespace neogfx
 			bool error = false;
 			if (editor_has_text_edit())
 				cellData = presentation_model().string_to_cell_data(*editing(), editor_text_edit().text(), error);
-			iEditing = boost::none;
+			iEditing = std::nullopt;
 			iEditor = nullptr;
 			if (!error)
 				model().update_cell_data(modelIndex, cellData);
@@ -848,7 +848,7 @@ namespace neogfx
 		}
 		else
 		{
-			iEditing = boost::none;
+			iEditing = std::nullopt;
 			iEditor = nullptr;
 		}
 		if (hadFocus)
@@ -896,7 +896,7 @@ namespace neogfx
 			update_scrollbar_visibility();
 			update();
 		}
-		if (editing() != boost::none)
+		if (editing() != std::nullopt)
 		{
 			editor().move(cell_rect(*editing()).position());
 			editor().resize(cell_rect(*editing()).extents());

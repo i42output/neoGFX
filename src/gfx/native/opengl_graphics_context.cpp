@@ -458,7 +458,7 @@ namespace neogfx
 		for (auto startIndex = iQueue.second.begin(); startIndex != endIndex; ++startIndex)
 		{
 			graphics_operation::batch opBatch{ &*iQueue.first.begin() + *startIndex, &*iQueue.first.begin() + *std::next(startIndex) };
-			switch (opBatch.first->which())
+			switch (opBatch.first->index())
 			{
 			case graphics_operation::operation_type::SetLogicalCoordinateSystem:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -544,49 +544,49 @@ namespace neogfx
 			case graphics_operation::operation_type::DrawLine:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::draw_line&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::draw_line&>(*op);
 					draw_line(args.from, args.to, args.pen);
 				}
 				break;
 			case graphics_operation::operation_type::DrawRect:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::draw_rect&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::draw_rect&>(*op);
 					draw_rect(args.rect, args.pen);
 				}
 				break;
 			case graphics_operation::operation_type::DrawRoundedRect:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::draw_rounded_rect&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
 					draw_rounded_rect(args.rect, args.radius, args.pen);
 				}
 				break;
 			case graphics_operation::operation_type::DrawCircle:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::draw_circle&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::draw_circle&>(*op);
 					draw_circle(args.centre, args.radius, args.pen, args.startAngle);
 				}
 				break;
 			case graphics_operation::operation_type::DrawArc:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::draw_arc&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::draw_arc&>(*op);
 					draw_arc(args.centre, args.radius, args.startAngle, args.endAngle, args.pen);
 				}
 				break;
 			case graphics_operation::operation_type::DrawPath:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::draw_path&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::draw_path&>(*op);
 					draw_path(args.path, args.pen);
 				}
 				break;
 			case graphics_operation::operation_type::DrawShape:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::draw_shape&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::draw_shape&>(*op);
 					draw_shape(args.mesh, args.pen);
 				}
 				break;
@@ -596,21 +596,21 @@ namespace neogfx
 			case graphics_operation::operation_type::FillRoundedRect:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::fill_rounded_rect&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::fill_rounded_rect&>(*op);
 					fill_rounded_rect(args.rect, args.radius, args.fill);
 				}
 				break;
 			case graphics_operation::operation_type::FillCircle:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::fill_circle&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::fill_circle&>(*op);
 					fill_circle(args.centre, args.radius, args.fill);
 				}
 				break;
 			case graphics_operation::operation_type::FillArc:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_cast<const graphics_operation::fill_arc&>(*op);
+					const auto& args = static_variant_cast<const graphics_operation::fill_arc&>(*op);
 					fill_arc(args.centre, args.radius, args.startAngle, args.endAngle, args.fill);
 				}
 				break;
@@ -642,7 +642,7 @@ namespace neogfx
 
 	void opengl_graphics_context::scissor_on(const rect& aRect)
 	{
-		if (iScissorRect == boost::none)
+		if (iScissorRect == std::nullopt)
 		{
 			glCheck(glEnable(GL_SCISSOR_TEST));
 			iScissorRect = aRect;
@@ -659,7 +659,7 @@ namespace neogfx
 		if (iScissorRects.empty())
 		{
 			glCheck(glDisable(GL_SCISSOR_TEST));
-			iScissorRect = boost::none;
+			iScissorRect = std::nullopt;
 		}
 		else
 		{
@@ -830,11 +830,11 @@ namespace neogfx
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("radGradientAngle", aGradient.orientation().is<double>() ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f);
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientStartFrom", aGradient.orientation().is<gradient::corner_e>() ? static_cast<int>(static_variant_cast<gradient::corner_e>(aGradient.orientation())) : -1);
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("radGradientAngle", std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f);
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientStartFrom", std::holds_alternative<gradient::corner_e>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<gradient::corner_e>(aGradient.orientation())) : -1);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientSize", static_cast<int>(aGradient.size()));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
-		basic_point<float> gradientCentre = (aGradient.centre() != boost::none ? *aGradient.centre() : point{});
+		basic_point<float> gradientCentre = (aGradient.centre() != std::nullopt ? *aGradient.centre() : point{});
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
 		auto combinedStops = aGradient.combined_stops();
 		iGradientStopPositions.reserve(combinedStops.size());
@@ -925,19 +925,19 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
 	{
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : rect{ aFrom, aTo });
+			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : rect{ aFrom, aTo });
 		}
 
 		double pixelAdjust = pixel_adjust(aPen);
-		auto penColour = aPen.colour().is<colour>() ?
+		auto penColour = std::holds_alternative<colour>(aPen.colour()) ?
 			std::array<uint8_t, 4>{{
-				static_cast<colour>(aPen.colour()).red(),
-				static_cast<colour>(aPen.colour()).green(),
-				static_cast<colour>(aPen.colour()).blue(),
-				static_cast<colour>(aPen.colour()).alpha()}} :
+				static_variant_cast<colour>(aPen.colour()).red(),
+				static_variant_cast<colour>(aPen.colour()).green(),
+				static_variant_cast<colour>(aPen.colour()).blue(),
+				static_variant_cast<colour>(aPen.colour()).alpha()}} :
 			std::array<uint8_t, 4>{};
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
@@ -948,16 +948,16 @@ namespace neogfx
 		}
 		glCheck(glLineWidth(1.0f));
 
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aRect);
+			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : aRect);
 		}
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
@@ -965,26 +965,26 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_LINES, 8 };
 			insert_back_rect_vertices(vertexArrays, aRect, pixel_adjust(aPen), rect_type::Outline);
 			for (auto& v : vertexArrays)
-				v.rgba = colour_to_vec4f(aPen.colour().is<colour>() ?
+				v.rgba = colour_to_vec4f(std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
-						static_cast<colour>(aPen.colour()).red(),
-						static_cast<colour>(aPen.colour()).green(),
-						static_cast<colour>(aPen.colour()).blue(),
-						static_cast<colour>(aPen.colour()).alpha()}} :
+						static_variant_cast<colour>(aPen.colour()).red(),
+						static_variant_cast<colour>(aPen.colour()).green(),
+						static_variant_cast<colour>(aPen.colour()).blue(),
+						static_variant_cast<colour>(aPen.colour()).alpha()}} :
 					std::array <uint8_t, 4>{});
 		}
 		glCheck(glLineWidth(1.0f));
 
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
 	{
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aRect);
+			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : aRect);
 		}
 
 		double pixelAdjust = pixel_adjust(aPen);
@@ -994,26 +994,26 @@ namespace neogfx
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP };
 			for (const auto& v : vertices)
-				vertexArrays.push_back({ v, aPen.colour().is<colour>() ?
+				vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
-						static_cast<colour>(aPen.colour()).red(),
-						static_cast<colour>(aPen.colour()).green(),
-						static_cast<colour>(aPen.colour()).blue(),
-						static_cast<colour>(aPen.colour()).alpha()}} :
+						static_variant_cast<colour>(aPen.colour()).red(),
+						static_variant_cast<colour>(aPen.colour()).green(),
+						static_variant_cast<colour>(aPen.colour()).blue(),
+						static_variant_cast<colour>(aPen.colour()).alpha()}} :
 					std::array <uint8_t, 4>{}});
 		}
 		glCheck(glLineWidth(1.0f));
 
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
 	{
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
+			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 		}
 
 		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, false);
@@ -1022,26 +1022,26 @@ namespace neogfx
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
 			for (const auto& v : vertices)
-				vertexArrays.push_back({ v, aPen.colour().is<colour>() ?
+				vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
-						static_cast<colour>(aPen.colour()).red(),
-						static_cast<colour>(aPen.colour()).green(),
-						static_cast<colour>(aPen.colour()).blue(),
-						static_cast<colour>(aPen.colour()).alpha()}} :
+						static_variant_cast<colour>(aPen.colour()).red(),
+						static_variant_cast<colour>(aPen.colour()).green(),
+						static_variant_cast<colour>(aPen.colour()).blue(),
+						static_variant_cast<colour>(aPen.colour()).alpha()}} :
 					std::array <uint8_t, 4>{}});
 		}
 		glCheck(glLineWidth(1.0f));
 
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
 	{
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
+			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
 		}
 
 		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));;
@@ -1050,26 +1050,26 @@ namespace neogfx
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINES, vertices.size() };
 			for (const auto& v : vertices)
-				vertexArrays.push_back({ v, aPen.colour().is<colour>() ?
+				vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{ {
-							static_cast<colour>(aPen.colour()).red(),
-								static_cast<colour>(aPen.colour()).green(),
-								static_cast<colour>(aPen.colour()).blue(),
-								static_cast<colour>(aPen.colour()).alpha()}} :
+						static_variant_cast<colour>(aPen.colour()).red(),
+						static_variant_cast<colour>(aPen.colour()).green(),
+						static_variant_cast<colour>(aPen.colour()).blue(),
+						static_variant_cast<colour>(aPen.colour()).alpha()}} :
 					std::array <uint8_t, 4>{} });
 		}
 		glCheck(glLineWidth(1.0f));
 
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 			gradient_off();
 	}
 
 	void opengl_graphics_context::draw_path(const path& aPath, const pen& aPen)
 	{
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : aPath.bounding_rect());
+			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : aPath.bounding_rect());
 		}
 
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
@@ -1084,12 +1084,12 @@ namespace neogfx
 				{
 					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath.shape()), vertices.size() };
 					for (const auto& v : vertices)
-						vertexArrays.push_back({ v, aPen.colour().is<colour>() ?
+						vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 							std::array <uint8_t, 4>{{
-								static_cast<colour>(aPen.colour()).red(),
-								static_cast<colour>(aPen.colour()).green(),
-								static_cast<colour>(aPen.colour()).blue(),
-								static_cast<colour>(aPen.colour()).alpha()}} :
+								static_variant_cast<colour>(aPen.colour()).red(),
+								static_variant_cast<colour>(aPen.colour()).green(),
+								static_variant_cast<colour>(aPen.colour()).blue(),
+								static_variant_cast<colour>(aPen.colour()).alpha()}} :
 							std::array <uint8_t, 4>{}});
 				}
 				if (aPath.shape() == path::ConvexPolygon)
@@ -1097,7 +1097,7 @@ namespace neogfx
 			}
 		}
 
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 			gradient_off();
 	}
 
@@ -1105,25 +1105,25 @@ namespace neogfx
 	{
 		auto tvs = aMesh.transformed_vertices();
 
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != boost::none ? *gradient.rect() : bounding_rect(tvs));
+			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : bounding_rect(tvs));
 		}
 
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, tvs.size() };
 			for (const auto& v : tvs)
-				vertexArrays.push_back({ v.coordinates, aPen.colour().is<colour>() ?
+				vertexArrays.push_back({ v.coordinates, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
-						static_cast<colour>(aPen.colour()).red(),
-						static_cast<colour>(aPen.colour()).green(),
-						static_cast<colour>(aPen.colour()).blue(),
-						static_cast<colour>(aPen.colour()).alpha()}} :
+						static_variant_cast<colour>(aPen.colour()).red(),
+						static_variant_cast<colour>(aPen.colour()).green(),
+						static_variant_cast<colour>(aPen.colour()).blue(),
+						static_variant_cast<colour>(aPen.colour()).alpha()}} :
 					std::array <uint8_t, 4>{}});
 		}
 
-		if (aPen.colour().is<gradient>())
+		if (std::holds_alternative<gradient>(aPen.colour()))
 			gradient_off();
 	}
 
@@ -1137,7 +1137,7 @@ namespace neogfx
 	{
 		auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
-		if (firstOp.fill.is<gradient>())
+		if (std::holds_alternative<gradient>(firstOp.fill))
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
 		{
@@ -1148,7 +1148,7 @@ namespace neogfx
 				auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
 				auto newVertices = insert_back_rect_vertices(vertexArrays, drawOp.rect, 0.0, rect_type::FilledTriangles);
 				for (auto i = newVertices; i != vertexArrays.end(); ++i)
-					i->rgba = colour_to_vec4f(drawOp.fill.is<colour>() ?
+					i->rgba = colour_to_vec4f(std::holds_alternative<colour>(drawOp.fill) ?
 						std::array<uint8_t, 4>{{
 							static_variant_cast<const colour&>(drawOp.fill).red(),
 							static_variant_cast<const colour&>(drawOp.fill).green(),
@@ -1158,7 +1158,7 @@ namespace neogfx
 			}
 		}
 
-		if (firstOp.fill.is<gradient>())
+		if (std::holds_alternative<gradient>(firstOp.fill))
 			gradient_off();
 	}
 
@@ -1169,7 +1169,7 @@ namespace neogfx
 
 		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 
-		if (aFill.is<gradient>())
+		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
 
 		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
@@ -1178,7 +1178,7 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
 			for (const auto& v : vertices)
 			{
-				vertexArrays.push_back({v, aFill.is<colour>() ?
+				vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -1188,13 +1188,13 @@ namespace neogfx
 			}
 		}
 
-		if (aFill.is<gradient>())
+		if (std::holds_alternative<gradient>(aFill))
 			gradient_off();
 	}
 
 	void opengl_graphics_context::fill_circle(const point& aCentre, dimension aRadius, const brush& aFill)
 	{
-		if (aFill.is<gradient>())
+		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
 		auto vertices = circle_vertices(aCentre, aRadius, 0.0, true);
@@ -1203,7 +1203,7 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
 			for (const auto& v : vertices)
 			{
-				vertexArrays.push_back({v, aFill.is<colour>() ?
+				vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -1213,13 +1213,13 @@ namespace neogfx
 			}
 		}
 
-		if (aFill.is<gradient>())
+		if (std::holds_alternative<gradient>(aFill))
 			gradient_off();
 	}
 
 	void opengl_graphics_context::fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
 	{
-		if (aFill.is<gradient>())
+		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
 		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
@@ -1228,7 +1228,7 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
 			for (const auto& v : vertices)
 			{
-				vertexArrays.push_back({v, aFill.is<colour>() ?
+				vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -1238,7 +1238,7 @@ namespace neogfx
 			}
 		}
 
-		if (aFill.is<gradient>())
+		if (std::holds_alternative<gradient>(aFill))
 			gradient_off();
 	}
 
@@ -1257,7 +1257,7 @@ namespace neogfx
 					max = max.max(pt);
 				}
 
-				if (aFill.is<gradient>())
+				if (std::holds_alternative<gradient>(aFill))
 					gradient_on(static_variant_cast<const gradient&>(aFill), rect{ point{ min.x, min.y }, size{ max.x - min.y, max.y - min.y } });
 
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
@@ -1266,7 +1266,7 @@ namespace neogfx
 					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath.shape()), vertices.size() };
 					for (const auto& v : vertices)
 					{
-						vertexArrays.push_back({v, aFill.is<colour>() ?
+						vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
 							std::array <uint8_t, 4>{{
 								static_variant_cast<const colour&>(aFill).red(),
 								static_variant_cast<const colour&>(aFill).green(),
@@ -1278,7 +1278,7 @@ namespace neogfx
 
 				reset_clip();
 
-				if (aFill.is<gradient>())
+				if (std::holds_alternative<gradient>(aFill))
 					gradient_off();
 			}
 		}
@@ -1288,7 +1288,7 @@ namespace neogfx
 	{
 		auto& firstOp = static_variant_cast<const graphics_operation::fill_shape&>(*aFillShapeOps.first);
 
-		if (firstOp.fill.is<gradient>())
+		if (std::holds_alternative<gradient>(firstOp.fill))
 		{
 			auto tvs = firstOp.mesh.transformed_vertices();
 			vec3 min = tvs[0].coordinates.xyz;
@@ -1319,7 +1319,7 @@ namespace neogfx
 						auto const& v = tvs[vi];
 						vertexArrays.push_back({
 							v.coordinates,
-							drawOp.fill.is<colour>() ?
+							std::holds_alternative<colour>(drawOp.fill) ?
 								std::array <uint8_t, 4>{{
 									static_variant_cast<const colour&>(drawOp.fill).red(),
 									static_variant_cast<const colour&>(drawOp.fill).green(),
@@ -1332,7 +1332,7 @@ namespace neogfx
 			}
 		}
 
-		if (firstOp.fill.is<gradient>())
+		if (std::holds_alternative<gradient>(firstOp.fill))
 			gradient_off();
 	}
 
@@ -1356,7 +1356,7 @@ namespace neogfx
 	std::size_t opengl_graphics_context::max_operations(const graphics_operation::operation& aOperation)
 	{
 		auto need = 1u;
-		if (aOperation.is<graphics_operation::draw_glyph>())
+		if (std::holds_alternative<graphics_operation::draw_glyph>(aOperation))
 		{
 			need = 6u;
 			auto& drawGlyphOp = static_variant_cast<const graphics_operation::draw_glyph&>(aOperation);
@@ -1425,7 +1425,7 @@ namespace neogfx
 					hasEffects = true;
 					if (drawOp.appearance.effect().type() == text_effect::Outline)
 					{
-						auto effectColour = drawOp.appearance.effect().colour().is<colour>() ?
+						auto effectColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
 							std::array <uint8_t, 4>{{
 								static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
 								static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green(),
@@ -1447,7 +1447,7 @@ namespace neogfx
 				}
 				else if (pass == 2)
 				{
-					auto ink = drawOp.appearance.ink().is<colour>() ?
+					auto ink = std::holds_alternative<colour>(drawOp.appearance.ink()) ?
 						std::array <uint8_t, 4>{{
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).green(),
@@ -1478,7 +1478,7 @@ namespace neogfx
 			glCheck(glActiveTexture(GL_TEXTURE1));
 		}
 
-		if (firstOp.appearance.ink().is<gradient>())
+		if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
 			gradient_on(
 				static_variant_cast<const gradient&>(firstOp.appearance.ink()), 
 				rect{ 
@@ -1587,7 +1587,7 @@ namespace neogfx
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
 
-		if (firstOp.appearance.ink().is<gradient>())
+		if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
 			gradient_off();
 	}
 
@@ -1598,7 +1598,7 @@ namespace neogfx
 			std::sort(aMesh.faces().begin(), aMesh.faces().end(), face_cmp);
 
 		colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
-		if (aColour != boost::none)
+		if (aColour != std::nullopt)
 			colourizationColour = *aColour;
 
 		auto transformedVertices = aMesh.transformed_vertices(); // todo: have vertex shader do this transformation

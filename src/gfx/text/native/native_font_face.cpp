@@ -193,7 +193,7 @@ namespace neogfx
 
 	bool native_font_face::has_fallback() const
 	{
-		if (iHasFallback == boost::none)
+		if (iHasFallback == std::nullopt)
 			iHasFallback = iRenderingEngine.font_manager().has_fallback_font(*this);
 		return *iHasFallback;
 	}

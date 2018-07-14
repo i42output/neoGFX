@@ -61,7 +61,7 @@ namespace neogfx
 
 	const i_sub_texture& texture::as_sub_texture() const
 	{
-		if (iSubTexture != boost::none)
+		if (iSubTexture != std::nullopt)
 			return *iSubTexture;
 		throw not_sub_texture();
 	}

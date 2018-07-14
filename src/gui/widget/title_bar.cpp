@@ -407,7 +407,7 @@ namespace neogfx
 			"11200000000000000211"
 		};
 		using namespace std::string_literals;
-		if (iTextures[TextureMinimize] == boost::none || iTextures[TextureMinimize]->first != ink)
+		if (iTextures[TextureMinimize] == std::nullopt || iTextures[TextureMinimize]->first != ink)
 		{
 			iTextures[TextureMinimize] = std::make_pair(
 				ink,
@@ -419,7 +419,7 @@ namespace neogfx
 						"neogfx::title_bar::iTextures[HighDpiTextureMinimize]::" + ink.to_string(),
 						sMinimizeHighDpiTexturePattern, { { "paper", colour{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
 		}
-		if (iTextures[TextureMaximize] == boost::none || iTextures[TextureMaximize]->first != ink)
+		if (iTextures[TextureMaximize] == std::nullopt || iTextures[TextureMaximize]->first != ink)
 		{
 			iTextures[TextureMaximize] = std::make_pair(
 				ink,
@@ -431,7 +431,7 @@ namespace neogfx
 						"neogfx::title_bar::iTextures[HighDpiTextureMaximize]::" + ink.to_string(),
 						sMaximizeHighDpiTexturePattern,{ { "paper", colour{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
 		}
-		if (iTextures[TextureRestore] == boost::none || iTextures[TextureRestore]->first != ink)
+		if (iTextures[TextureRestore] == std::nullopt || iTextures[TextureRestore]->first != ink)
 		{
 			iTextures[TextureRestore] = std::make_pair(
 				ink,
@@ -443,7 +443,7 @@ namespace neogfx
 						"neogfx::title_bar::iTextures[HighDpiTextureRestore]::" + ink.to_string(),
 						sRestoreHighDpiTexturePattern,{ { "paper", colour{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0x80) } }, 2.0 });
 		}
-		if (iTextures[TextureClose] == boost::none || iTextures[TextureClose]->first != ink)
+		if (iTextures[TextureClose] == std::nullopt || iTextures[TextureClose]->first != ink)
 		{
 			iTextures[TextureClose] = std::make_pair(
 				ink,

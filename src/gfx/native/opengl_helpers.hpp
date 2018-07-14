@@ -131,8 +131,8 @@ namespace neogfx
 			typedef opengl_buffer_allocator<Other, OriginalType> other;
 		};
 	private:
-		typedef opengl_buffer_allocator_arena<OriginalType>::buffer_type buffer_type;
-		typedef opengl_buffer_allocator_arena<OriginalType>::buffer_pointer buffer_pointer;
+		typedef typename opengl_buffer_allocator_arena<OriginalType>::buffer_type buffer_type;
+		typedef typename opengl_buffer_allocator_arena<OriginalType>::buffer_pointer buffer_pointer;
 	public:
 		struct no_opengl_buffer : std::logic_error { no_opengl_buffer() : std::logic_error{ "neogfx::opengl_buffer_allocator::no_opengl_buffer" } {} };
 		struct arena_not_found : std::logic_error { arena_not_found() : std::logic_error{ "neogfx::opengl_buffer_allocator::arena_not_found" } {} };
@@ -307,7 +307,7 @@ namespace neogfx
 			}
 			bool has_texture_coords() const
 			{
-				return iVertexTextureCoordAttribArray != boost::none;
+				return iVertexTextureCoordAttribArray != std::nullopt;
 			}
 			void flush_buffer(std::size_t aElements)
 			{
@@ -319,7 +319,7 @@ namespace neogfx
 			opengl_vertex_array iVao;
 			opengl_vertex_attrib_array<vertex, decltype(vertex::xyz)> iVertexPositionAttribArray;
 			opengl_vertex_attrib_array<vertex, decltype(vertex::rgba)> iVertexColorAttribArray;
-			boost::optional<opengl_vertex_attrib_array<vertex, decltype(vertex::st)>> iVertexTextureCoordAttribArray;
+			std::optional<opengl_vertex_attrib_array<vertex, decltype(vertex::st)>> iVertexTextureCoordAttribArray;
 		};
 	public:
 		opengl_standard_vertex_arrays() :

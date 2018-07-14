@@ -183,11 +183,11 @@ namespace neogfx
 		return false;
 	}
 
-	bool radio_button::set_checked_state(const boost::optional<bool>& aCheckedState)
+	bool radio_button::set_checked_state(const std::optional<bool>& aCheckedState)
 	{
 		if (checked_state() == aCheckedState)
 			return false;
-		if (aCheckedState != boost::none && *aCheckedState)
+		if (aCheckedState != std::nullopt && *aCheckedState)
 			for (radio_button* nextRadioButton = next_radio_button(); nextRadioButton != this; nextRadioButton = nextRadioButton->next_radio_button())
 				nextRadioButton->uncheck();
 		button::set_checked_state(aCheckedState);

@@ -79,7 +79,7 @@ namespace neogfx
 		value_type iPage;
 		element_e iClickedElement;
 		element_e iHoverElement;
-		boost::optional<std::shared_ptr<neolib::callback_timer>> iTimer;
+		std::optional<std::shared_ptr<neolib::callback_timer>> iTimer;
 		bool iPaused;
 		point iThumbClickedPosition;
 		value_type iThumbClickedValue;

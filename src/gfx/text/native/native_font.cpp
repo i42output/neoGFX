@@ -181,7 +181,7 @@ namespace neogfx
 	FT_Face native_font::open_face(FT_Long aFaceIndex)
 	{
 		FT_Face face;
-		if (iSource.is<filename_type>())
+		if (std::holds_alternative<filename_type>(iSource))
 		{
 			if (iCache.empty())
 			{

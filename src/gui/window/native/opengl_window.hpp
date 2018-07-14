@@ -84,9 +84,9 @@ namespace neogfx
 		GLuint iFrameBufferTexture;
 		GLuint iDepthStencilBuffer;
 		size iFrameBufferSize;
-		boost::optional<rect> iInvalidatedArea;
+		std::optional<rect> iInvalidatedArea;
 		uint64_t iFrameCounter;
-		boost::optional<uint32_t> iFrameRate;
+		std::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
 		std::deque<double> iFpsData;
 		bool iRendering;

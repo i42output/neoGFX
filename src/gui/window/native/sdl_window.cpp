@@ -769,40 +769,40 @@ namespace neogfx
 					self.handle_event(non_client_mouse_event{ mouse_event_type::Moved, pt, modifiers });
 					break;
 				case WM_NCLBUTTONDOWN:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Left, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, pt, mouse_button::Left, modifiers });
 					break;
 				case WM_NCLBUTTONUP:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Left, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, modifiers });
 					break;
 				case WM_NCLBUTTONDBLCLK:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Left, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Left, modifiers });
 					break;
 				case WM_NCRBUTTONDOWN:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Right, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, pt, mouse_button::Right, modifiers });
 					break;
 				case WM_NCRBUTTONUP:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Right, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, modifiers });
 					break;
 				case WM_NCRBUTTONDBLCLK:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Right, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Right, modifiers });
 					break;
 				case WM_NCMBUTTONDOWN:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, mouse_button::Middle, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, pt, mouse_button::Middle, modifiers });
 					break;
 				case WM_NCMBUTTONUP:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, mouse_button::Middle, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, modifiers });
 					break;
 				case WM_NCMBUTTONDBLCLK:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, mouse_button::Middle, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Middle, modifiers });
 					break;
 				case WM_NCXBUTTONDOWN:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, modifiers });
 					break;
 				case WM_NCXBUTTONUP:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, modifiers });
 					break;
 				case WM_NCXBUTTONDBLCLK:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, pt, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, modifiers });
 					break;
 				}
 			}
@@ -1259,9 +1259,9 @@ namespace neogfx
 			push_event(
 				mouse_event{
 					mouse_event_type::WheelScrolled,
+					delta{ static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y) },
 					static_cast<mouse_wheel>(
 						(aEvent.wheel.y != 0 ? mouse_wheel::Vertical : mouse_wheel::None) | (aEvent.wheel.x != 0 ? mouse_wheel::Horizontal : mouse_wheel::None)),
-					delta{ static_cast<coordinate>(aEvent.wheel.x), static_cast<coordinate>(aEvent.wheel.y) },
 					pop_mouse_button_event_extra_info() });
 			break;
 		case SDL_MOUSEBUTTONDOWN:
@@ -1269,33 +1269,33 @@ namespace neogfx
 				push_event(
 					mouse_event{
 						mouse_event_type::ButtonPressed,
-						convert_mouse_button(aEvent.button.button),
 						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+						convert_mouse_button(aEvent.button.button),
 						pop_mouse_button_event_extra_info() });
 
 			else
 				push_event(
 					mouse_event{
 						mouse_event_type::ButtonDoubleClicked,
-						convert_mouse_button(aEvent.button.button),
 						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+						convert_mouse_button(aEvent.button.button),
 						pop_mouse_button_event_extra_info() });
 			break;
 		case SDL_MOUSEBUTTONUP:
 			push_event(
 				mouse_event{
 					mouse_event_type::ButtonReleased,
-					convert_mouse_button(aEvent.button.button),
 					point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
+					convert_mouse_button(aEvent.button.button),
 					pop_mouse_button_event_extra_info() });
 			break;
 		case SDL_MOUSEMOTION:
 			surface_window().as_window().window_manager().update_mouse_cursor(surface_window().as_window());
 			push_event(
 				mouse_event{ 
-					mouse_event_type::Moved, 
-					convert_mouse_button(aEvent.motion.state),
-					point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) } });
+					mouse_event_type::Moved,
+					point{ static_cast<coordinate>(aEvent.motion.x), static_cast<coordinate>(aEvent.motion.y) },
+					convert_mouse_button(aEvent.motion.state) });
 			break;
 		case SDL_KEYDOWN:
 			push_event(keyboard_event{ keyboard_event_type::KeyPressed, sdl_keyboard::from_sdl_scan_code(aEvent.key.keysym.scancode), static_cast<key_code_e>(aEvent.key.keysym.sym), static_cast<key_modifiers_e>(aEvent.key.keysym.mod) });

@@ -71,9 +71,9 @@ namespace neogfx
 
 		bool batchable(const operation& aLeft, const operation& aRight)
 		{
-			if (aLeft.which() != aRight.which())
+			if (aLeft.index() != aRight.index())
 				return false;
-			switch (static_cast<operation_type>(aLeft.which()))
+			switch (static_cast<operation_type>(aLeft.index()))
 			{
 			case operation_type::SetPixel:
 			case operation_type::DrawPixel:
@@ -90,13 +90,13 @@ namespace neogfx
 			{
 				auto& left = static_variant_cast<const fill_rect&>(aLeft);
 				auto& right = static_variant_cast<const fill_rect&>(aRight);
-				return left.fill.which() == right.fill.which() && left.fill.is<colour>();
+				return left.fill.index() == right.fill.index() && std::holds_alternative<colour>(left.fill);
 			}
 			case operation_type::FillShape:
 			{
 				auto& left = static_variant_cast<const fill_shape&>(aLeft);
 				auto& right = static_variant_cast<const fill_shape&>(aRight);
-				return left.fill.which() == right.fill.which() && left.fill.is<colour>();
+				return left.fill.index() == right.fill.index() && std::holds_alternative<colour>(left.fill);
 			}
 			case operation_type::DrawGlyph:
 			{
@@ -104,7 +104,7 @@ namespace neogfx
 				auto& right = static_variant_cast<const draw_glyph&>(aRight);
 				if (left.glyph.is_emoji() || right.glyph.is_emoji())
  					return false;
-				if (left.appearance.ink().which() != right.appearance.ink().which() || !left.appearance.ink().is<colour>())
+				if (left.appearance.ink().index() != right.appearance.ink().index() || !std::holds_alternative<colour>(left.appearance.ink()))
 					return false;
 				if (left.appearance.has_effect() != right.appearance.has_effect())
 					return false;

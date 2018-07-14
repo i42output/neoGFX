@@ -29,7 +29,7 @@ namespace neogfx
 		if (itemsVisible == 0)
 			return size{};
 		auto availableSpaceForChildren = aAvailableSpace;
-		if (availableSpaceForChildren != boost::none)
+		if (availableSpaceForChildren != std::nullopt)
 			*availableSpaceForChildren -= margins().size();
 		size result;
 		uint32_t itemsZeroSized = 0;
@@ -75,7 +75,7 @@ namespace neogfx
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return size::max_size();
 		auto availableSpaceForChildren = aAvailableSpace;
-		if (availableSpaceForChildren != boost::none)
+		if (availableSpaceForChildren != std::nullopt)
 			*availableSpaceForChildren -= margins().size();
 		uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
 		size result;

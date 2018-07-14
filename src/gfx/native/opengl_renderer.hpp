@@ -151,8 +151,8 @@ namespace neogfx
 		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;
 		bool iSubpixelRendering;
-		mutable boost::optional<std::array<GLuint, 3>> iGradientTextures;
-		mutable boost::optional<opengl_standard_vertex_arrays> iVertexArrays;
+		mutable std::optional<std::array<GLuint, 3>> iGradientTextures;
+		mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
 		std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
 	};
 }

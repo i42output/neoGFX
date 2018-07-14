@@ -43,7 +43,7 @@ namespace neogfx
 
 	bool group_box::is_checkable() const
 	{
-		return iTitle.is<check_box_ptr>();
+		return std::holds_alternative<check_box_ptr>(iTitle);
 	}
 
 	void group_box::set_checkable(bool aCheckable)
@@ -51,7 +51,7 @@ namespace neogfx
 		if (is_checkable() != aCheckable)
 		{
 			std::string text = label().text().text();
-			iTitle.clear();
+			iTitle = neolib::none;
 			if (aCheckable)
 			{
 				iTitle = std::make_unique<neogfx::check_box>(text);
@@ -67,7 +67,7 @@ namespace neogfx
 
 	const label& group_box::label() const
 	{
-		if (iTitle.is<label_ptr>())
+		if (std::holds_alternative<label_ptr>(iTitle))
 			return *static_variant_cast<const label_ptr&>(iTitle);
 		else
 			return static_variant_cast<const check_box_ptr&>(iTitle)->label();
@@ -75,7 +75,7 @@ namespace neogfx
 
 	label& group_box::label()
 	{
-		if (iTitle.is<label_ptr>())
+		if (std::holds_alternative<label_ptr>(iTitle))
 			return *static_variant_cast<label_ptr&>(iTitle);
 		else
 			return static_variant_cast<check_box_ptr&>(iTitle)->label();
@@ -83,7 +83,7 @@ namespace neogfx
 
 	bool group_box::has_check_box() const
 	{
-		return iTitle.is<check_box_ptr>();
+		return std::holds_alternative<check_box_ptr>(iTitle);
 	}
 
 	const check_box& group_box::check_box() const

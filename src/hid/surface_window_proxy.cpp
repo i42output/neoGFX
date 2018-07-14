@@ -393,7 +393,7 @@ namespace neogfx
 
 	bool surface_window_proxy::current_event_is_non_client() const
 	{
-		return native_window().has_current_event() && native_window().current_event().is<neogfx::non_client_mouse_event>();
+		return native_window().has_current_event() && std::holds_alternative<neogfx::non_client_mouse_event>(native_window().current_event());
 	}
 
 	bool surface_window_proxy::is_closing() const
@@ -488,7 +488,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
 		i_widget& w = as_widget().widget_for_mouse_event(as_window().mouse_position());
-		if (w.mouse_event.trigger(native_window().current_event()))
+		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 			as_widget().widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
@@ -498,7 +498,7 @@ namespace neogfx
 		neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
 		as_window().dismiss_children(&w);
 		as_window().update_click_focus(w, aPosition - w.origin());
-		if (w.mouse_event.trigger(native_window().current_event()))
+		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 			w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
@@ -508,14 +508,14 @@ namespace neogfx
 		neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
 		as_window().dismiss_children(&w);
 		as_window().update_click_focus(w, aPosition - w.origin());
-		if (w.mouse_event.trigger(native_window().current_event()))
+		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 			w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void surface_window_proxy::native_window_mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
-		if (w.mouse_event.trigger(native_window().current_event()))
+		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 			w.mouse_button_released(aButton, aPosition - w.origin());
 	}
 
@@ -523,7 +523,7 @@ namespace neogfx
 	{
 		as_widget().mouse_entered(aPosition);
 		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
-		if (w.mouse_event.trigger(native_window().current_event()))
+		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 		{
 			point widgetPos = aPosition - w.origin();
 			w.mouse_moved(widgetPos);
@@ -533,7 +533,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
 		i_widget& w = as_widget().widget_for_mouse_event(as_window().mouse_position());
-		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			as_widget().widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
@@ -541,7 +541,7 @@ namespace neogfx
 	{
 		i_widget& w = as_widget().widget_for_mouse_event(aPosition);
 		as_window().dismiss_children(&w);
-		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
@@ -549,14 +549,14 @@ namespace neogfx
 	{
 		i_widget& w = as_widget().widget_for_mouse_event(aPosition);
 		as_window().dismiss_children(&w);
-		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void surface_window_proxy::native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
 		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
-		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			w.mouse_button_released(aButton, aPosition - w.origin());
 	}
 
@@ -564,7 +564,7 @@ namespace neogfx
 	{
 		as_widget().mouse_entered(aPosition);
 		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
-		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(native_window().current_event()))
+		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			w.mouse_moved(aPosition - w.origin());
 	}
 
@@ -643,7 +643,7 @@ namespace neogfx
 					return true;
 				destroyed_flag parentDestroyed{ w->as_lifetime() };
 				destroyed_flag destroyed{ check.as_lifetime() };
-				if (!check.keyboard_event.trigger(native_window().current_event()))
+				if (!check.keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())))
 					return false;
 				if (destroyed)
 				{
@@ -671,10 +671,10 @@ namespace neogfx
 					if (w == nullptr)
 						return;
 					destroyed_flag destroyed{ *this };
-					if (w == &as_widget() && can_consume(as_widget()) && as_widget().keyboard_event.trigger(native_window().current_event()) && !destroyed)
+					if (w == &as_widget() && can_consume(as_widget()) && as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())) && !destroyed)
 						as_widget().key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 				}
-				else if (can_consume(as_widget()) && as_widget().keyboard_event.trigger(native_window().current_event()))
+				else if (can_consume(as_widget()) && as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())))
 					as_widget().key_pressed(aScanCode, aKeyCode, aKeyModifiers);
 			}
 		}
@@ -694,12 +694,12 @@ namespace neogfx
 		if (as_window().has_focused_widget())
 		{
 			i_widget* w = &as_window().focused_widget();
-			while ((!can_consume(*w) || !w->keyboard_event.trigger(native_window().current_event()) || !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != &as_widget())
+			while ((!can_consume(*w) || !w->keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())) || !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != &as_widget())
 				w = &w->parent();
-			if (w == &as_widget() && can_consume(as_widget()) && as_widget().keyboard_event.trigger(native_window().current_event()))
+			if (w == &as_widget() && can_consume(as_widget()) && as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())))
 				as_widget().key_released(aScanCode, aKeyCode, aKeyModifiers);
 		}
-		else if (can_consume(as_widget()) && as_widget().keyboard_event.trigger(native_window().current_event()))
+		else if (can_consume(as_widget()) && as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())))
 			as_widget().key_released(aScanCode, aKeyCode, aKeyModifiers);
 	}
 
@@ -718,21 +718,21 @@ namespace neogfx
 			if (as_window().has_focused_widget())
 			{
 				i_widget* w = &as_window().focused_widget();
-				while ((!can_consume(*w) || !as_widget().keyboard_event.trigger(native_window().current_event()) || !w->text_input(aText)) && w != &as_widget())
+				while ((!can_consume(*w) || !as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())) || !w->text_input(aText)) && w != &as_widget())
 					w = &w->parent();
-				if (w == &as_widget() && can_consume(as_widget()) && as_widget().keyboard_event.trigger(native_window().current_event()))
+				if (w == &as_widget() && can_consume(as_widget()) && as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())))
 					as_widget().text_input(aText);
 			}
-			else if (can_consume(as_widget()) && as_widget().keyboard_event.trigger(native_window().current_event()))
+			else if (can_consume(as_widget()) && as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())))
 				as_widget().text_input(aText);
 		};
 		auto utf32 = neolib::utf8_to_utf32(aText);
 		if (neolib::utf16::is_high_surrogate(utf32[0]))
 			iSurrogatePairPart = utf32[0];
-		else if (neolib::utf16::is_low_surrogate(utf32[0]) && iSurrogatePairPart != boost::none)
+		else if (neolib::utf16::is_low_surrogate(utf32[0]) && iSurrogatePairPart != std::nullopt)
 		{
 			char16_t utf16[] = { static_cast<char16_t>(*iSurrogatePairPart), static_cast<char16_t>(neolib::utf8_to_utf32(aText)[0]) };
-			iSurrogatePairPart = boost::none;
+			iSurrogatePairPart = std::nullopt;
 			send(neolib::utf16_to_utf8(std::u16string(&utf16[0], 2)));
 		}
 		else
@@ -744,9 +744,9 @@ namespace neogfx
 		if (as_window().has_focused_widget())
 		{
 			i_widget* w = &as_window().focused_widget();
-			while ((!as_widget().keyboard_event.trigger(native_window().current_event()) || !w->sys_text_input(aText)) && w != &as_widget())
+			while ((!as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())) || !w->sys_text_input(aText)) && w != &as_widget())
 				w = &w->parent();
-			if (w == &as_widget() && as_widget().keyboard_event.trigger(native_window().current_event()))
+			if (w == &as_widget() && as_widget().keyboard_event.trigger(std::get<keyboard_event>(native_window().current_event())))
 				as_widget().sys_text_input(aText);
 		}
 		else

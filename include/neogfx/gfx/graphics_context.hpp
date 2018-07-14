@@ -29,7 +29,7 @@
 #ifdef _WIN32
 #pragma warning( pop )
 #endif
-#include <boost/optional.hpp>
+#include <optional>
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/core/path.hpp>
 #include <neogfx/game/i_shape.hpp>
@@ -47,7 +47,7 @@ namespace neogfx
 		AutomaticGame
 	};
 
-	typedef boost::optional<logical_coordinate_system> optional_logical_coordinate_system;
+	typedef std::optional<logical_coordinate_system> optional_logical_coordinate_system;
 
 	enum class smoothing_mode
 	{
@@ -79,10 +79,10 @@ namespace neogfx
 
 	inline brush to_brush(const colour_or_gradient& aEffectColour)
 	{
-		if (aEffectColour.is<colour>())
-			return static_variant_cast<const colour&>(aEffectColour);
-		else if (aEffectColour.is<gradient>())
-			return static_variant_cast<const gradient&>(aEffectColour);
+		if (std::holds_alternative<colour>(aEffectColour))
+			return std::get<colour>(aEffectColour);
+		else if (std::holds_alternative<gradient>(aEffectColour))
+			return std::get<gradient>(aEffectColour);
 		else
 			return colour{};
 	}
@@ -97,29 +97,59 @@ namespace neogfx
 	class text_colour : public colour_or_gradient
 	{
 	public:
-		using colour_or_gradient::colour_or_gradient;
+		text_colour() : colour_or_gradient{}
+		{
+		}
+		text_colour(const text_colour& aOther) : colour_or_gradient{ aOther }
+		{
+		}
+		text_colour(text_colour&& aOther) : colour_or_gradient{ std::move(aOther) }
+		{
+		}
+		template <typename T>
+		text_colour(T&& aOther) : colour_or_gradient{ std::forward<T>(aOther) }
+		{
+		}
 	public:
-		using colour_or_gradient::operator==;
-		using colour_or_gradient::operator!=;
+		text_colour& operator=(const text_colour& aOther)
+		{
+			if (&aOther == this)
+				return *this;
+			colour_or_gradient::operator=(aOther);
+			return *this;
+		}
+		text_colour& operator=(text_colour&& aOther)
+		{
+			if (&aOther == this)
+				return *this;
+			colour_or_gradient::operator=(std::move(aOther));
+			return *this;
+		}
+		template <typename T>
+		text_colour& operator=(T&& aOther)
+		{
+			colour_or_gradient::operator=(std::forward<T>(aOther));
+			return *this;
+		}
 	public:
 		colour::component alpha() const
 		{
-			if (is<colour>())
-				return static_variant_cast<const colour&>(*this).alpha();
+			if (std::holds_alternative<colour>(*this))
+				return std::get<colour>(*this).alpha();
 			else
 				return 255;
 		}
 		text_colour with_alpha(colour::component aAlpha) const
 		{
-			if (is<colour>())
-				return static_variant_cast<const colour&>(*this).with_alpha(aAlpha);
-			else if (is<gradient>())
-				return static_variant_cast<const gradient&>(*this).with_combined_alpha(aAlpha);
+			if (std::holds_alternative<colour>(*this))
+				return std::get<colour>(*this).with_alpha(aAlpha);
+			if (std::holds_alternative<gradient>(*this))
+				return std::get<gradient>(*this).with_combined_alpha(aAlpha);
 			else
 				return text_colour{};
 		}
 	};
-	typedef boost::optional<text_colour> optional_text_colour;
+	typedef std::optional<text_colour> optional_text_colour;
 
 	class text_effect
 	{
@@ -132,10 +162,22 @@ namespace neogfx
 			Shadow
 		};
 		typedef double auxiliary_parameter;
-		typedef boost::optional<auxiliary_parameter> optional_auxiliary_parameter;
+		typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
 	public:
-		text_effect(type_e aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) : iType{ aType }, iColour{ aColour }, iWidth{ aWidth }, iAux1{ aAux1 }
+		text_effect(type_e aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) : 
+			iType{ aType }, iColour{ aColour }, iWidth{ aWidth }, iAux1{ aAux1 }
 		{
+		}
+	public:
+		text_effect& operator=(const text_effect& aOther)
+		{
+			if (&aOther == this)
+				return *this;
+			iType = aOther.iType;
+			iColour = aOther.iColour;
+			iWidth = aOther.iWidth;
+			iAux1 = aOther.iAux1;
+			return *this;
 		}
 	public:
 		bool operator==(const text_effect& aOther) const
@@ -161,7 +203,7 @@ namespace neogfx
 		}
 		dimension width() const
 		{
-			if (iWidth != boost::none)
+			if (iWidth != std::nullopt)
 				return *iWidth;
 			switch (type())
 			{
@@ -177,7 +219,7 @@ namespace neogfx
 		}
 		double aux1() const
 		{
-			if (iAux1 != boost::none)
+			if (iAux1 != std::nullopt)
 				return *iAux1;
 			switch (type())
 			{
@@ -205,7 +247,7 @@ namespace neogfx
 		optional_dimension iWidth;
 		optional_auxiliary_parameter iAux1;
 	};
-	typedef boost::optional<text_effect> optional_text_effect;
+	typedef std::optional<text_effect> optional_text_effect;
 
 	class text_appearance
 	{
@@ -257,7 +299,7 @@ namespace neogfx
 		}
 		bool has_paper() const
 		{
-			return iPaper != boost::none;
+			return iPaper != std::nullopt;
 		}
 		const text_colour& paper() const
 		{
@@ -267,7 +309,7 @@ namespace neogfx
 		}
 		bool has_effect() const
 		{
-			return iEffect != boost::none;
+			return iEffect != std::nullopt;
 		}
 		const text_effect& effect() const
 		{
@@ -278,7 +320,7 @@ namespace neogfx
 	public:
 		text_appearance with_alpha(colour::component aAlpha) const
 		{
-			return text_appearance{ iInk.with_alpha(aAlpha), iPaper != boost::none ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect != boost::none ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
+			return text_appearance{ iInk.with_alpha(aAlpha), iPaper != std::nullopt ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect != std::nullopt ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
 		}
 		text_appearance with_alpha(double aAlpha) const
 		{
@@ -290,7 +332,7 @@ namespace neogfx
 		optional_text_effect iEffect;
 	};
 
-	typedef boost::optional<text_appearance> optional_text_appearance;
+	typedef std::optional<text_appearance> optional_text_appearance;
 
 	class i_surface;
 	class i_texture;
@@ -463,8 +505,8 @@ namespace neogfx
 		mutable double iOpacity;
 		mutable neogfx::smoothing_mode iSmoothingMode;
 		mutable bool iSubpixelRendering;
-		mutable boost::optional<std::pair<bool, char>> iMnemonic;
-		mutable boost::optional<std::string> iPassword;
+		mutable std::optional<std::pair<bool, char>> iMnemonic;
+		mutable std::optional<std::string> iPassword;
 		struct glyph_text_data;
 		std::unique_ptr<glyph_text_data> iGlyphTextData;
 		mutable glyph_text* iGlyphTextCache;

@@ -133,7 +133,7 @@ namespace neogfx
 
 	bool framed_widget::has_frame_colour() const
 	{
-		return iFrameColour != boost::none;
+		return iFrameColour != std::nullopt;
 	}
 
 	colour framed_widget::frame_colour() const

@@ -93,11 +93,11 @@ namespace neogfx
 	public:
 		bool has_current_index() const override
 		{
-			return iCurrentIndex != boost::none;
+			return iCurrentIndex != std::nullopt;
 		}
 		const item_presentation_model_index& current_index() const override
 		{
-			if (iCurrentIndex == boost::none)
+			if (iCurrentIndex == std::nullopt)
 				throw no_current_index();
 			return *iCurrentIndex;
 		}
@@ -283,14 +283,14 @@ namespace neogfx
 		{
 			if (iCurrentIndex != aNewIndex)
 			{
-				if (aNewIndex != boost::none && !is_selectable(*aNewIndex))
+				if (aNewIndex != std::nullopt && !is_selectable(*aNewIndex))
 					return;
 				optional_item_presentation_model_index previousIndex = iCurrentIndex;
 				iCurrentIndex = aNewIndex;
-				if (previousIndex != boost::none)
+				if (previousIndex != std::nullopt)
 					presentation_model().cell_meta(*previousIndex).selection = 
 						presentation_model().cell_meta(*previousIndex).selection & ~item_cell_selection_flags::Current;
-				if (iCurrentIndex != boost::none)
+				if (iCurrentIndex != std::nullopt)
 					presentation_model().cell_meta(*iCurrentIndex).selection = 
 						presentation_model().cell_meta(*iCurrentIndex).selection | item_cell_selection_flags::Current;
 				notify_observers(i_item_selection_model_subscriber::NotifyCurrentIndexChanged, iCurrentIndex, previousIndex);
@@ -343,7 +343,7 @@ namespace neogfx
 			if (has_current_index())
 			{
 				if (aModel.rows() <= 1)
-					iCurrentIndex = boost::none;
+					iCurrentIndex = std::nullopt;
 				else if (iCurrentIndex->row() >= aModel.rows() - 1)
 					iCurrentIndex->set_row(iCurrentIndex->row() - 1);
 			}
@@ -357,9 +357,9 @@ namespace neogfx
 		void items_sorted(const i_item_presentation_model&) override
 		{
 			neolib::scoped_flag sf{ iSorting };
-			if (iSavedModelIndex != boost::none)
+			if (iSavedModelIndex != std::nullopt)
 				set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
-			iSavedModelIndex = boost::none;
+			iSavedModelIndex = std::nullopt;
 		}
 		void items_filtering(const i_item_presentation_model&) override
 		{
@@ -370,17 +370,17 @@ namespace neogfx
 		void items_filtered(const i_item_presentation_model& aModel) override
 		{
 			neolib::scoped_flag sf{ iFiltering };
-			if (iSavedModelIndex != boost::none && aModel.have_item_model_index(*iSavedModelIndex))
+			if (iSavedModelIndex != std::nullopt && aModel.have_item_model_index(*iSavedModelIndex))
 				set_current_index(presentation_model().from_item_model_index(*iSavedModelIndex));
 			else if (aModel.rows() >= 1)
 				set_current_index(item_presentation_model_index{ 0, 0 });
-			iSavedModelIndex = boost::none;
+			iSavedModelIndex = std::nullopt;
 		}
 		void model_destroyed(const i_item_presentation_model& aModel) override
 		{
 			iModel = nullptr;
-			iCurrentIndex = boost::none;
-			iSavedModelIndex = boost::none;
+			iCurrentIndex = std::nullopt;
+			iSavedModelIndex = std::nullopt;
 			iSelection = item_selection{};
 			notify_observers(i_item_selection_model_subscriber::NotifyModelRemoved, aModel);
 		}

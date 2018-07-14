@@ -233,10 +233,10 @@ namespace neogfx
 	private:
 		shape_type_e iShape;
 		point_type iPosition;
-		boost::optional<point_type> iPointFrom;
+		std::optional<point_type> iPointFrom;
 		paths_type iPaths;
 		paths_size_type iLineCountHint;
-		mutable boost::optional<rect_type> iBoundingRect;
+		mutable std::optional<rect_type> iBoundingRect;
 	};
 }
 
@@ -245,5 +245,5 @@ namespace neogfx
 namespace neogfx
 {
 	typedef basic_path<point> path;
-	typedef boost::optional<path> optional_path;
+	typedef std::optional<path> optional_path;
 }

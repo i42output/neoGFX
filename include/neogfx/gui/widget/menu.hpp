@@ -83,7 +83,7 @@ namespace neogfx
 		item_list iItems;
 		action iSeparator;
 		uint32_t iOpenCount;
-		boost::optional<item_index> iSelection;
+		std::optional<item_index> iSelection;
 		bool iModal;
 	};
 }

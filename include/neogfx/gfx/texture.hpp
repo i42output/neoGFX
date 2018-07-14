@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <vector>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
@@ -60,11 +60,11 @@ namespace neogfx
 		optional_sub_texture iSubTexture;
 	};
 
-	typedef boost::optional<texture> optional_texture;
+	typedef std::optional<texture> optional_texture;
 	typedef std::shared_ptr<const i_texture> texture_pointer;
 	typedef std::pair<texture_pointer, optional_rect> texture_source;
 	typedef std::vector<texture_source> texture_list;
-	typedef boost::optional<texture_list> optional_texture_list;
+	typedef std::optional<texture_list> optional_texture_list;
 	typedef texture_list::size_type texture_index;
 	typedef std::shared_ptr<texture_list> texture_list_pointer;
 

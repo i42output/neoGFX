@@ -205,7 +205,7 @@ namespace neogfx
 
 	mat44 shape::transformation_matrix() const
 	{
-		if (iTransformationMatrix == boost::none)
+		if (iTransformationMatrix == std::nullopt)
 			return mat44{ { 1.0, 0.0, 0.0, 0.0 },{ 0.0, 1.0, 0.0, 0.0 },{ 0.0, 0.0, 1.0, 0.0 }, { position().x, position().y, position().z, 1.0 } };
 		return *iTransformationMatrix;
 	}
@@ -398,7 +398,7 @@ namespace neogfx
 
 	vec3 shape::extents() const
 	{
-		if (iExtents != boost::none)
+		if (iExtents != std::nullopt)
 			return *iExtents;
 		else if (frame_count() > 0 && current_frame().has_extents())
 			return vec3{ current_frame().extents().cx, current_frame().extents().cy, 0.0 };
@@ -437,7 +437,7 @@ namespace neogfx
 
 	void shape::clear_extents()
 	{
-		iExtents = boost::none;
+		iExtents = std::nullopt;
 		clear_vertices_cache();
 	}
 
@@ -449,12 +449,12 @@ namespace neogfx
 
 	bool shape::has_transformation_matrix() const
 	{
-		return iTransformationMatrix != boost::none;
+		return iTransformationMatrix != std::nullopt;
 	}
 
 	void shape::clear_transformation_matrix()
 	{
-		iTransformationMatrix = boost::none;
+		iTransformationMatrix = std::nullopt;
 	}
 
 	void shape::set_transformation_matrix(const mat33& aTransformationMatrix)
@@ -474,7 +474,7 @@ namespace neogfx
 	bool shape::update(time_interval aNow)
 	{
 		bool updated = false;
-		if (iTimeOfLastUpdate == boost::none)
+		if (iTimeOfLastUpdate == std::nullopt)
 			iTimeOfLastUpdate = aNow;
 		auto left = aNow - *iTimeOfLastUpdate;
 		while (!has_animation_finished() && left >= current_animation_frame().second)
@@ -499,8 +499,8 @@ namespace neogfx
 		if (frame_count() == 0)
 			return;
 		if (current_frame().textures() != nullptr)
-			aGraphicsContext.draw_textures(*this, current_frame().textures(), current_frame().colour() && current_frame().colour()->is<colour>() ? static_variant_cast<colour>(*current_frame().colour()) : optional_colour{});
-		else if (current_frame().colour() != boost::none)
+			aGraphicsContext.draw_textures(*this, current_frame().textures(), current_frame().colour() && std::holds_alternative<colour>(*current_frame().colour()) ? static_variant_cast<colour>(*current_frame().colour()) : optional_colour{});
+		else if (current_frame().colour() != std::nullopt)
 			aGraphicsContext.fill_shape(*this, to_brush(*current_frame().colour()));
 	}
 
@@ -518,7 +518,7 @@ namespace neogfx
 
 	void shape::init_frames(texture_list_pointer aTextures, const optional_animation_info& aAnimationInfo)
 	{
-		if (aAnimationInfo == boost::none)
+		if (aAnimationInfo == std::nullopt)
 		{
 			iFrames.push_back(std::make_shared<neogfx::shape_frame>(aTextures));
 		}

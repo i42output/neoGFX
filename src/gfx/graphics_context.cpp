@@ -270,35 +270,35 @@ namespace neogfx
 
 	void graphics_context::draw_rect(const rect& aRect, const pen& aPen, const brush& aFill) const
 	{
-		if (!aFill.empty())
+		if (aFill != neolib::none)
 			fill_rect(aRect, aFill);
 		native_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen });
 	}
 
 	void graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill) const
 	{
-		if (!aFill.empty())
+		if (aFill != neolib::none)
 			fill_rounded_rect(aRect, aRadius, aFill);
 		native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen });
 	}
 
 	void graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const brush& aFill, angle aStartAngle) const
 	{
-		if (!aFill.empty())
+		if (aFill != neolib::none)
 			fill_circle(aCentre, aRadius, aFill);
 		native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCentre) + iOrigin, aRadius, aPen, aStartAngle });
 	}
 
 	void graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
 	{
-		if (!aFill.empty())
+		if (aFill != neolib::none)
 			fill_arc(aCentre, aRadius, aStartAngle, aEndAngle, aFill);
 		native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCentre) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen });
 	}
 
 	void graphics_context::draw_path(const path& aPath, const pen& aPen, const brush& aFill) const
 	{
-		if (!aFill.empty())
+		if (aFill != neolib::none)
 			fill_path(aPath, aFill);
 		path path = to_device_units(aPath);
 		path.set_position(path.position() + iOrigin);
@@ -307,7 +307,7 @@ namespace neogfx
 
 	void graphics_context::draw_shape(const i_shape& aShape, const pen& aPen, const brush& aFill) const
 	{
-		if (!aFill.empty())
+		if (aFill != neolib::none)
 			fill_shape(aShape, aFill);
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
 		native_context().enqueue(
@@ -908,17 +908,17 @@ namespace neogfx
 
 	void graphics_context::unset_mnemonic() const
 	{
-		iMnemonic = boost::none;
+		iMnemonic = std::nullopt;
 	}
 
 	bool graphics_context::mnemonics_shown() const
 	{
-		return iMnemonic != boost::none && iMnemonic->first;
+		return iMnemonic != std::nullopt && iMnemonic->first;
 	}
 
 	bool graphics_context::password() const
 	{
-		return iPassword != boost::none;
+		return iPassword != std::nullopt;
 	}
 
 	const std::string& graphics_context::password_mask() const
@@ -937,7 +937,7 @@ namespace neogfx
 		if (aPassword)
 			iPassword = aMask;
 		else
-			iPassword = boost::none;
+			iPassword = std::nullopt;
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
@@ -1231,7 +1231,7 @@ namespace neogfx
 		runs.clear();
 		auto const& emojiAtlas = surface().rendering_engine().font_manager().emoji_atlas();
 		text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
-		if (iMnemonic != boost::none && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
+		if (iMnemonic != std::nullopt && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
 			previousCategory = text_category::Mnemonic;
 		text_direction previousDirection = (previousCategory != text_category::RTL ? text_direction::LTR : text_direction::RTL);
 		const char32_t* runStart = &codePoints[0];
@@ -1275,7 +1275,7 @@ namespace neogfx
 
 			hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
 			text_category currentCategory = get_text_category(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount);
-			if (iMnemonic != boost::none && codePoints[codePointIndex] == static_cast<char32_t>(iMnemonic->second))
+			if (iMnemonic != std::nullopt && codePoints[codePointIndex] == static_cast<char32_t>(iMnemonic->second))
 				currentCategory = text_category::Mnemonic;
 			text_direction currentDirection = previousDirection;
 			if (currentCategory == text_category::LTR)

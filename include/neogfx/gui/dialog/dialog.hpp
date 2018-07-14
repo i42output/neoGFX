@@ -78,7 +78,7 @@ namespace neogfx
 	private:
 		vertical_layout iClientLayout;
 		vertical_layout iButtonBoxLayout;
-		boost::optional<dialog_button_box> iButtonBox;
-		boost::optional<dialog_result> iResult;
+		std::optional<dialog_button_box> iButtonBox;
+		std::optional<dialog_result> iResult;
 	};
 }

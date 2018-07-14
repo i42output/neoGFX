@@ -38,7 +38,7 @@ namespace neogfx
 		event<> alignment_changed;
 	public:
 		typedef uint32_t item_index;
-		typedef boost::optional<item_index> optional_item_index;
+		typedef std::optional<item_index> optional_item_index;
 	protected:
 		class item;
 	public:

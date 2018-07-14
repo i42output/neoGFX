@@ -311,20 +311,20 @@ namespace neogfx
 
 	bool sprite_plane::is_collision_tree_2d() const
 	{
-		return iBroadPhaseCollisionTree2d != boost::none || iBroadPhaseCollisionTree3d == boost::none;
+		return iBroadPhaseCollisionTree2d != std::nullopt || iBroadPhaseCollisionTree3d == std::nullopt;
 	}
 
 	bool sprite_plane::is_collision_tree_3d() const 
 	{
-		return iBroadPhaseCollisionTree3d != boost::none;
+		return iBroadPhaseCollisionTree3d != std::nullopt;
 	}
 	
 	const sprite_plane::broad_phase_collision_tree_2d& sprite_plane::collision_tree_2d() const
 	{
-		if (iBroadPhaseCollisionTree2d == boost::none)
+		if (iBroadPhaseCollisionTree2d == std::nullopt)
 		{
 			iBroadPhaseCollisionTree2d.emplace();
-			iBroadPhaseCollisionTree3d = boost::none;
+			iBroadPhaseCollisionTree3d = std::nullopt;
 			for (auto o : iObjects)
 				if (o->category() == object_category::Sprite || o->category() == object_category::PhysicalObject)
 					iBroadPhaseCollisionTree2d->insert(o->as_physical_object());
@@ -339,10 +339,10 @@ namespace neogfx
 
 	const sprite_plane::broad_phase_collision_tree_3d& sprite_plane::collision_tree_3d() const
 	{
-		if (iBroadPhaseCollisionTree3d == boost::none)
+		if (iBroadPhaseCollisionTree3d == std::nullopt)
 		{
 			iBroadPhaseCollisionTree3d.emplace();
-			iBroadPhaseCollisionTree2d = boost::none;
+			iBroadPhaseCollisionTree2d = std::nullopt;
 			for (auto o : iObjects)
 				if (o->category() == object_category::Sprite || o->category() == object_category::PhysicalObject)
 					iBroadPhaseCollisionTree3d->insert(o->as_physical_object());
@@ -453,7 +453,7 @@ namespace neogfx
 					auto& o1 = (*i1).as_physical_object();
 					if (o1.mass() == 0.0)
 						break;
-					if (iUniformGravity != boost::none)
+					if (iUniformGravity != std::nullopt)
 						totalForce = *iUniformGravity * o1.mass();
 					for (auto& i2 : iObjects)
 					{

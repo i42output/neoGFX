@@ -84,7 +84,7 @@ namespace neogfx
 		bool is_managing_layout() const override;
 	public:
 		void panes_resized() override;
-		void reset_pane_sizes_requested(const boost::optional<uint32_t>& aPane = boost::optional<uint32_t>()) override;
+		void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = std::optional<uint32_t>()) override;
 	protected:
 		void column_info_changed(const i_item_presentation_model& aModel, item_presentation_model_index::column_type aColumnIndex) override;
 		void item_model_changed(const i_item_presentation_model& aModel, const i_item_model& aItemModel) override;

@@ -33,7 +33,7 @@ namespace neogfx
 		vec2 textureCoordinates;
 	};
 	typedef std::vector<vertex> vertex_list;
-	typedef boost::optional<vertex_list> optional_vertex_list;
+	typedef std::optional<vertex_list> optional_vertex_list;
 	typedef vertex_list::size_type vertex_index;
 	typedef std::shared_ptr<vertex_list> vertex_list_pointer;
 	typedef std::array<vertex_index, 3> triangle;
@@ -76,7 +76,7 @@ namespace neogfx
 		{
 			if (iFaces == nullptr)
 				throw no_container();
-			return iBegin != boost::none ? *iBegin : iFaces->cbegin();
+			return iBegin != std::nullopt ? *iBegin : iFaces->cbegin();
 		}
 		const_iterator begin() const
 		{
@@ -86,13 +86,13 @@ namespace neogfx
 		{
 			if (iFaces == nullptr)
 				throw no_container();
-			return iBegin != boost::none ? *iBegin : iFaces->begin();
+			return iBegin != std::nullopt ? *iBegin : iFaces->begin();
 		}
 		const_iterator cend() const
 		{
 			if (iFaces == nullptr)
 				throw no_container();
-			return iEnd != boost::none ? *iEnd : iFaces->cend();
+			return iEnd != std::nullopt ? *iEnd : iFaces->cend();
 		}
 		const_iterator end() const
 		{
@@ -102,7 +102,7 @@ namespace neogfx
 		{
 			if (iFaces == nullptr)
 				throw no_container();
-			return iEnd != boost::none ? *iEnd : iFaces->end();
+			return iEnd != std::nullopt ? *iEnd : iFaces->end();
 		}
 		const container& faces() const
 		{
@@ -114,14 +114,14 @@ namespace neogfx
 		{
 			if (iFaces == nullptr)
 				iFaces = std::make_shared<container>();
-			iBegin = boost::none;
-			iEnd = boost::none;
+			iBegin = std::nullopt;
+			iEnd = std::nullopt;
 			return *iFaces;
 		}
 	private:
 		mutable container_pointer iFaces;
-		boost::optional<iterator> iBegin;
-		boost::optional<iterator> iEnd;
+		std::optional<iterator> iBegin;
+		std::optional<iterator> iEnd;
 	};
 
 	inline void add_faces(vertex_list_pointer aVertices, face_list& aFaces, const std::vector<vec3>& aShapeVertices)

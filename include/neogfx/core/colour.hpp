@@ -721,7 +721,7 @@ namespace neogfx
 	public:
 		static colour from_hsl(double aHue, double aSaturation, double aLightness, double aAlpha = 1.0);
 		static colour from_hsv(double aHue, double aSaturation, double aValue, double aAlpha = 1.0);
-		static boost::optional<colour> from_name(const std::string& aName);
+		static std::optional<colour> from_name(const std::string& aName);
 		argb value() const;
 		component alpha() const;
 		component red() const;
@@ -922,9 +922,9 @@ namespace neogfx
 		optional_rect iRect;
 	};
 
-	typedef boost::optional<colour> optional_colour;
-	typedef boost::optional<gradient> optional_gradient;
+	typedef std::optional<colour> optional_colour;
+	typedef std::optional<gradient> optional_gradient;
 
 	typedef neolib::variant<colour, gradient> colour_or_gradient;
-	typedef boost::optional<colour_or_gradient> optional_colour_or_gradient;
+	typedef std::optional<colour_or_gradient> optional_colour_or_gradient;
 }

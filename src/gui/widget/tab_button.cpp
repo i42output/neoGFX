@@ -111,7 +111,7 @@ namespace neogfx
 				"1112000000002111"
 				"1120000000000211"
 			};
-			if (iTextures[TextureOff] == boost::none || iTextures[TextureOff]->first != ink)
+			if (iTextures[TextureOff] == std::nullopt || iTextures[TextureOff]->first != ink)
 			{
 				iTextures[TextureOff] = std::make_pair(
 					ink,
@@ -123,7 +123,7 @@ namespace neogfx
 							"neogfx::tab_button::close_button::iHighDpiTextures[TextureOff]::" + ink.to_string(),
 							sHighDpiTexture, { { "paper", colour{} },{ "ink1", ink.with_alpha(0x60) },{ "ink2", ink.with_alpha(0x30) } }, 2.0 });
 			}
-			if (iTextures[TextureOn] == boost::none || iTextures[TextureOn]->first != ink)
+			if (iTextures[TextureOn] == std::nullopt || iTextures[TextureOn]->first != ink)
 			{
 				iTextures[TextureOn] = std::make_pair(
 					ink,
@@ -135,7 +135,7 @@ namespace neogfx
 							"neogfx::tab_button::close_button::iHighDpiTextures[TextureOn]::" + ink.to_string(),
 							sHighDpiTexture, { { "paper", colour{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0x80) } }, 2.0 });
 			}
-			if (iTextures[TextureOnOver] == boost::none || iTextures[TextureOnOver]->first != ink)
+			if (iTextures[TextureOnOver] == std::nullopt || iTextures[TextureOnOver]->first != ink)
 			{
 				iTextures[TextureOnOver] = std::make_pair(
 					ink,
@@ -176,7 +176,7 @@ namespace neogfx
 	private:
 		i_tab & iParent;
 		sink iSink;
-		mutable boost::optional<std::pair<colour, texture>> iTextures[3];
+		mutable std::optional<std::pair<colour, texture>> iTextures[3];
 		texture_index_e iTextureState;
 		neolib::callback_timer iUpdater;
 	};

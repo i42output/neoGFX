@@ -411,7 +411,7 @@ namespace neogfx
 			}
 			if (default_cell_data_info(aColumnIndex).type == item_cell_data_type::Unknown)
 			{
-				default_cell_data_info(aColumnIndex).type = static_cast<item_cell_data_type>(aCellData.which());
+				default_cell_data_info(aColumnIndex).type = static_cast<item_cell_data_type>(aCellData.index());
 				changed = true;
 			}
 			if (ri->second[aColumnIndex] != aCellData)
@@ -436,7 +436,7 @@ namespace neogfx
 				return;
 			iItems[aIndex.row()].second[aIndex.column()] = aCellData;
 			if (default_cell_data_info(aIndex.column()).type == item_cell_data_type::Unknown)
-				default_cell_data_info(aIndex.column()).type = static_cast<item_cell_data_type>(aCellData.which());
+				default_cell_data_info(aIndex.column()).type = static_cast<item_cell_data_type>(aCellData.index());
 			notify_observers(i_item_model_subscriber::NotifyItemChanged, aIndex);
 		}
 	public:
@@ -453,7 +453,7 @@ namespace neogfx
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				throw bad_column_index();
-			if (iColumns[aColumnIndex].defaultDataInfo != boost::none)
+			if (iColumns[aColumnIndex].defaultDataInfo != std::nullopt)
 				return *iColumns[aColumnIndex].defaultDataInfo;
 			else
 			{
@@ -465,7 +465,7 @@ namespace neogfx
 		{
 			if (iColumns.size() < aColumnIndex + 1)
 				iColumns.resize(aColumnIndex + 1);
-			if (iColumns[aColumnIndex].defaultDataInfo == boost::none)
+			if (iColumns[aColumnIndex].defaultDataInfo == std::nullopt)
 				iColumns[aColumnIndex].defaultDataInfo = item_cell_data_info{};
 			return *iColumns[aColumnIndex].defaultDataInfo;
 		}

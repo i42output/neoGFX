@@ -92,7 +92,7 @@ namespace neogfx
 		{
 			neolib::scoped_flag sf{ iChangingText };
 			std::string text;
-			if (aCurrentIndex != boost::none)
+			if (aCurrentIndex != std::nullopt)
 				text = presentation_model().cell_to_string(*aCurrentIndex);
 			iDropList.input_widget().set_text(text);
 		}
@@ -107,7 +107,7 @@ namespace neogfx
 			if (selection_model().has_current_index())
 			{
 				auto item = item_at(aPosition);
-				if (item != boost::none && row_rect(*item).contains(aPosition) && item->row() == selection_model().current_index().row())
+				if (item != std::nullopt && row_rect(*item).contains(aPosition) && item->row() == selection_model().current_index().row())
 					iDropList.accept_selection();
 			}
 		}
@@ -339,14 +339,14 @@ namespace neogfx
 
 	bool drop_list::list_proxy::view_created() const
 	{
-		return iPopup != boost::none || iView != boost::none;
+		return iPopup != std::nullopt || iView != std::nullopt;
 	}
 
 	drop_list_view& drop_list::list_proxy::view() const
 	{
-		if (iPopup != boost::none)
+		if (iPopup != std::nullopt)
 			return iPopup->view();
-		else if (iView != boost::none)
+		else if (iView != std::nullopt)
 			return *iView;
 		throw no_view();
 	}
@@ -368,7 +368,7 @@ namespace neogfx
 				iPopup.emplace(iDropList);
 				iPopup->closed([this]()
 				{
-					iPopup = boost::none;
+					iPopup = std::nullopt;
 				});
 				update_view_placement();
 			}
@@ -377,18 +377,18 @@ namespace neogfx
 
 	void drop_list::list_proxy::hide_view()
 	{
-		if (iPopup != boost::none)
-			iPopup = boost::none;
-		else if (iView != boost::none)
+		if (iPopup != std::nullopt)
+			iPopup = std::nullopt;
+		else if (iView != std::nullopt)
 		{
-			iView = boost::none;
-			iViewContainer = boost::none;
+			iView = std::nullopt;
+			iViewContainer = std::nullopt;
 		}
 	}
 
 	void drop_list::list_proxy::update_view_placement()
 	{
-		if (iPopup != boost::none)
+		if (iPopup != std::nullopt)
 			iPopup->update_placement();
 	}
 
@@ -649,7 +649,7 @@ namespace neogfx
 
 	bool drop_list::has_selection() const
 	{
-		return iSelection != boost::none;
+		return iSelection != std::nullopt;
 	}
 
 	const item_model_index& drop_list::selection() const
@@ -674,7 +674,7 @@ namespace neogfx
 			else if (presentation_model().rows() > 0)
 			{
 				auto findResult = presentation_model().find_item(input_widget().text());
-				if (findResult != boost::none)
+				if (findResult != std::nullopt)
 					selection_model().set_current_index(*findResult);
 				else
 					selection_model().unset_current_index();
@@ -703,7 +703,7 @@ namespace neogfx
 		hide_view();
 		presentation_model().reset_filter();
 
-		if (newSelection != boost::none)
+		if (newSelection != std::nullopt)
 			selection_model().set_current_index(presentation_model().from_item_model_index(*newSelection));
 		else
 			selection_model().unset_current_index();
@@ -713,7 +713,7 @@ namespace neogfx
 			iSelection = newSelection;
 			selection_changed.async_trigger(iSelection);
 		}
-		iSavedSelection = boost::none;
+		iSavedSelection = std::nullopt;
 
 		std::string text;
 		if (selection_model().has_current_index())
@@ -835,7 +835,7 @@ namespace neogfx
 			if (!accepting_selection())
 			{
 				neolib::scoped_flag sf{ iHandlingTextChange };
-				iSavedSelection = boost::none;
+				iSavedSelection = std::nullopt;
 				aInputWidget.text_changed.trigger();
 				if (aTextWidget.has_focus() && (!view_created() || !view().changing_text()))
 				{
@@ -1004,7 +1004,7 @@ namespace neogfx
 	void drop_list::update_arrow()
 	{
 		auto ink = app::instance().current_style().palette().text_colour();
-		if (iDownArrowTexture == boost::none || iDownArrowTexture->first != ink)
+		if (iDownArrowTexture == std::nullopt || iDownArrowTexture->first != ink)
 		{
 			const char* sDownArrowImagePattern
 			{
@@ -1062,7 +1062,7 @@ namespace neogfx
 
 		if (aRestoreSavedSelection)
 		{
-			if (iSavedSelection != boost::none)
+			if (iSavedSelection != std::nullopt)
 				selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
 			else
 				selection_model().unset_current_index();
@@ -1070,13 +1070,13 @@ namespace neogfx
 		else
 		{
 			selection_model().unset_current_index();
-			if (iSelection != boost::none)
+			if (iSelection != std::nullopt)
 			{
-				iSelection = boost::none;
+				iSelection = std::nullopt;
 				selection_changed.async_trigger(iSelection);
 			}
 		}
-		iSavedSelection = boost::none;
+		iSavedSelection = std::nullopt;
 
 		if (!editable() && aUpdateEditor)
 		{

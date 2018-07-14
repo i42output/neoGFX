@@ -35,7 +35,7 @@ namespace neogfx
 			ExpandHorizontally	= 0x01,
 			ExpandVertically	= 0x02
 		};
-		typedef boost::optional<size> optional_weight;
+		typedef std::optional<size> optional_weight;
 	public:
 		virtual ~i_spacer() {}
 	public:

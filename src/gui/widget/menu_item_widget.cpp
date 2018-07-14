@@ -102,7 +102,7 @@ namespace neogfx
 				bool openSubMenu = (menu_item().type() == i_menu_item::SubMenu && menu_item().sub_menu().is_open());
 				colour ink = openSubMenu ? app::instance().current_style().palette().selection_colour()
 					: background_colour().light() ? background_colour().darker(0x80) : background_colour().lighter(0x80);
-				if (iSubMenuArrow == boost::none || iSubMenuArrow->first != ink)
+				if (iSubMenuArrow == std::nullopt || iSubMenuArrow->first != ink)
 				{
 					const char* sArrowImagePattern
 					{
@@ -345,8 +345,8 @@ namespace neogfx
 					iIcon.set_fixed_size(size{});
 				iText.set_text(menu_item().action().menu_text());
 				if (menu().type() != i_menu::MenuBar)
-					iShortcutText.set_text(menu_item().action().shortcut() != boost::none ? menu_item().action().shortcut()->as_text() : std::string());
-				iSpacer.set_minimum_size(dpi_scale(size{ menu_item().action().shortcut() != boost::none && menu().type() != i_menu::MenuBar ? iGap * 2.0 : 0.0, 0.0 }));
+					iShortcutText.set_text(menu_item().action().shortcut() != std::nullopt ? menu_item().action().shortcut()->as_text() : std::string());
+				iSpacer.set_minimum_size(dpi_scale(size{ menu_item().action().shortcut() != std::nullopt && menu().type() != i_menu::MenuBar ? iGap * 2.0 : 0.0, 0.0 }));
 				enable(menu_item().action().is_enabled());
 			};
 			iSink += menu_item().action().changed(action_changed);

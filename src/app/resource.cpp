@@ -108,12 +108,12 @@ namespace neogfx
 
 	bool resource::error() const
 	{
-		return iError != boost::none;
+		return iError != std::nullopt;
 	}
 
 	const std::string& resource::error_string() const
 	{
-		if (iError != boost::none)
+		if (iError != std::nullopt)
 			return *iError;
 		static const std::string sNoError;
 		return sNoError;

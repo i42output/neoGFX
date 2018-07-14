@@ -33,7 +33,7 @@ namespace neogfx
 		{
 		public:
 			typedef std::string element;
-			typedef boost::optional<element> optional_element;
+			typedef std::optional<element> optional_element;
 			enum type_e
 			{
 				Universal,

@@ -65,7 +65,7 @@ namespace neogfx
 						if (!codePoints.empty())
 						{
 							iEmojis[codePoints][size] = filePath;
-							iEmojiMap[codePoints] = boost::optional<emoji_id>{};
+							iEmojiMap[codePoints] = std::optional<emoji_id>{};
 						}
 					}
 				}
@@ -100,7 +100,7 @@ namespace neogfx
 		auto iterEmoji = iEmojiMap.find(aCodePoints);
 		if (iterEmoji == iEmojiMap.end())
 			throw emoji_not_found();
-		if (!iterEmoji->second.is_initialized())
+		if (iterEmoji->second == std::nullopt)
 		{
 			auto emojiFiles = iEmojis.find(aCodePoints);
 			auto emojiFile = emojiFiles->second.lower_bound(aDesiredSize);

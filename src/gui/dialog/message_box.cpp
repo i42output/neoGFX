@@ -232,7 +232,7 @@ namespace neogfx
 
 	bool message_box::has_response() const
 	{
-		return iResponse != boost::none;
+		return iResponse != std::nullopt;
 	}
 
 	standard_button message_box::response() const

@@ -35,7 +35,7 @@ namespace neogfx
 			vec3 iSpin;
 			scalar iMass;
 		};
-		typedef boost::optional<physics> optional_physics;
+		typedef std::optional<physics> optional_physics;
 	public:
 		physical_object();
 		physical_object(const physical_object& aOther);

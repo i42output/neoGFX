@@ -192,10 +192,10 @@ namespace neogfx
 	}
 
 	template <typename T>
-	inline boost::optional<double> basic_spin_box<T>::string_to_normalized_value(const std::string& aText) const
+	inline std::optional<double> basic_spin_box<T>::string_to_normalized_value(const std::string& aText) const
 	{
 		if (aText.empty())
-			return boost::optional<double>{};
+			return std::optional<double>{};
 		if (aText == "-")
 			return 0.0;
 		auto range = maximum() - minimum();
@@ -204,10 +204,10 @@ namespace neogfx
 		std::istringstream iss(aText);
 		value_type result{};
 		if (!(iss >> result))
-			return boost::optional<double>{};
+			return std::optional<double>{};
 		std::string guff;
 		if (iss >> guff)
-			return boost::optional<double>{};
+			return std::optional<double>{};
 		return (static_cast<double>(result) - minimum()) / range;
 	}
 

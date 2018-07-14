@@ -68,8 +68,8 @@ namespace neogfx
 	void colour_dialog::colour_box::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
-		aGraphicsContext.fill_rect(client_rect(false), iCustomColour == boost::none ? iColour : **iCustomColour);
-		if (iCustomColour != boost::none && iOwner.current_custom_colour() == *iCustomColour)
+		aGraphicsContext.fill_rect(client_rect(false), iCustomColour == std::nullopt ? iColour : **iCustomColour);
+		if (iCustomColour != std::nullopt && iOwner.current_custom_colour() == *iCustomColour)
 		{
 			aGraphicsContext.fill_circle(client_rect(false).centre(), 3, colour::White);
 			aGraphicsContext.fill_circle(client_rect(false).centre(), 2, colour::Black);
@@ -81,7 +81,7 @@ namespace neogfx
 		framed_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
 		if (aButton == mouse_button::Left)
 		{
-			if (iCustomColour == boost::none)
+			if (iCustomColour == std::nullopt)
 				iOwner.select_colour(iColour.with_alpha(iOwner.selected_colour().alpha()));
 			else
 			{
@@ -208,12 +208,12 @@ namespace neogfx
 	{
 		image_widget::mouse_button_released(aButton, aPosition);
 		if (!capturing())
-			iDragOffset = boost::none;
+			iDragOffset = std::nullopt;
 	}
 
 	void colour_dialog::x_picker::cursor_widget::mouse_moved(const point& aPosition)
 	{
-		if (iDragOffset != boost::none)
+		if (iDragOffset != std::nullopt)
 		{
 			point pt{ aPosition - *iDragOffset };
 			pt += position();
@@ -280,7 +280,7 @@ namespace neogfx
 			rect line{ cr.top_left() + point{ 0.0, static_cast<coordinate>(y) }, size{ cr.width(), 1.0 } };
 			auto r = colour_at_position(point{ 0.0, static_cast<coordinate>(y) * (1.0 / dpi_scale_factor())});
 			colour rgb;
-			if (r.is<hsv_colour>())
+			if (std::holds_alternative<hsv_colour>(r))
 			{
 				hsv_colour hsv = static_variant_cast<hsv_colour>(r);
 				if (iOwner.current_channel() == ChannelHue)
@@ -495,7 +495,7 @@ namespace neogfx
 				for (uint32_t z = 0; z < 256; ++z)
 				{
 					auto r = colour_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
-					colour rgbColour = (r.is<hsv_colour>() ? static_variant_cast<const hsv_colour&>(r).to_rgb() : static_variant_cast<const colour&>(r));
+					colour rgbColour = (std::holds_alternative<hsv_colour>(r) ? static_variant_cast<const hsv_colour&>(r).to_rgb() : static_variant_cast<const colour&>(r));
 					iPixels[255 - z][y][0] = rgbColour.red();
 					iPixels[255 - z][y][1] = rgbColour.green();
 					iPixels[255 - z][y][2] = rgbColour.blue();
@@ -796,7 +796,7 @@ namespace neogfx
 
 	colour colour_dialog::selected_colour() const
 	{
-		if (iSelectedColour.is<colour>())
+		if (std::holds_alternative<colour>(iSelectedColour))
 			return static_variant_cast<const colour&>(iSelectedColour);
 		else
 			return static_variant_cast<const hsv_colour&>(iSelectedColour).to_rgb();
@@ -924,7 +924,7 @@ namespace neogfx
 		{ 
 			if (iUpdatingWidgets) 
 				return;
-			if (iSelectedColour.is<colour>())
+			if (std::holds_alternative<colour>(iSelectedColour))
 				select_colour(selected_colour().with_alpha(static_cast<colour::component>(iA.second.value())), iA.second); 
 			else
 			{
@@ -952,7 +952,7 @@ namespace neogfx
 
 	colour_dialog::mode_e colour_dialog::current_mode() const
 	{
-		if (iSelectedColour.is<hsv_colour>())
+		if (std::holds_alternative<hsv_colour>(iSelectedColour))
 			return ModeHSV;
 		else
 			return ModeRGB;
@@ -975,7 +975,7 @@ namespace neogfx
 
 	hsv_colour colour_dialog::selected_colour_as_hsv(bool aChangeRepresentation) const
 	{
-		if (iSelectedColour.is<colour>())
+		if (std::holds_alternative<colour>(iSelectedColour))
 		{
 			hsv_colour result = static_variant_cast<const colour&>(iSelectedColour).to_hsv();
 			if (aChangeRepresentation)

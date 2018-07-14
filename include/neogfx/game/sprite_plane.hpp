@@ -132,11 +132,11 @@ namespace neogfx
 		object_list iObjects;
 		object_list iNewObjects;
 		mutable shape_list iRenderBuffer;
-		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to which will be available in the main sprite list)
+		simple_sprite_list iSimpleSprites; ///< Simple sprites created by this widget (pointers to index will be available in the main sprite list)
 		simple_object_list iSimpleObjects;
 		object_list::iterator iLastCollidable;
-		mutable boost::optional<broad_phase_collision_tree_2d> iBroadPhaseCollisionTree2d;
-		mutable boost::optional<broad_phase_collision_tree_3d> iBroadPhaseCollisionTree3d;
+		mutable std::optional<broad_phase_collision_tree_2d> iBroadPhaseCollisionTree2d;
+		mutable std::optional<broad_phase_collision_tree_3d> iBroadPhaseCollisionTree3d;
 		chrono::flicks iUpdateTime;
 		std::atomic<bool> iUpdatedSinceLastSnapshot;
 		bool iTakingSnapshot;

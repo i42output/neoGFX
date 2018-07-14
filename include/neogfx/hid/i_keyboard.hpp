@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neolib/vecarray.hpp>
 #include <neolib/string_utils.hpp>
 #include <neogfx/core/event.hpp>
@@ -776,5 +776,5 @@ namespace neogfx
 		sequence_type iSequence;
 	};
 
-	typedef boost::optional<key_sequence> optional_key_sequence;
+	typedef std::optional<key_sequence> optional_key_sequence;
 }

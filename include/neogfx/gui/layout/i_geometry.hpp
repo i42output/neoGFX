@@ -84,7 +84,7 @@ namespace neogfx
 		}
 		bool maintain_aspect_ratio() const
 		{
-			return iAspectRatio != boost::none;
+			return iAspectRatio != std::nullopt;
 		}
 		size aspect_ratio() const
 		{
@@ -102,7 +102,7 @@ namespace neogfx
 		optional_size iAspectRatio;
 	};
 
-	typedef boost::optional<size_policy> optional_size_policy;
+	typedef std::optional<size_policy> optional_size_policy;
 
 	class i_geometry : public i_units_context
 	{

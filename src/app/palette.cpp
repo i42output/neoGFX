@@ -87,7 +87,7 @@ namespace neogfx
 
 	bool palette::has_colour() const
 	{
-		return iColour != boost::none;
+		return iColour != std::nullopt;
 	}
 
 	colour palette::colour() const
@@ -108,7 +108,7 @@ namespace neogfx
 
 	bool palette::has_background_colour() const
 	{
-		return iBackgroundColour != boost::none;
+		return iBackgroundColour != std::nullopt;
 	}
 
 	colour palette::background_colour() const
@@ -130,7 +130,7 @@ namespace neogfx
 
 	bool palette::has_foreground_colour() const
 	{
-		return iForegroundColour != boost::none;
+		return iForegroundColour != std::nullopt;
 	}
 
 	colour palette::foreground_colour() const
@@ -152,7 +152,7 @@ namespace neogfx
 
 	bool palette::has_text_colour() const
 	{
-		return iTextColour != boost::none;
+		return iTextColour != std::nullopt;
 	}
 
 	colour palette::text_colour() const
@@ -179,7 +179,7 @@ namespace neogfx
 
 	bool palette::has_selection_colour() const
 	{
-		return iTextColour != boost::none;
+		return iTextColour != std::nullopt;
 	}
 
 	colour palette::selection_colour() const
@@ -201,7 +201,7 @@ namespace neogfx
 
 	bool palette::has_hover_colour() const
 	{
-		return iHoverColour != boost::none;
+		return iHoverColour != std::nullopt;
 	}
 
 	colour palette::hover_colour() const
@@ -223,7 +223,7 @@ namespace neogfx
 
 	bool palette::has_widget_detail_primary_colour() const
 	{
-		return iWidgetDetailPrimaryColour != boost::none;
+		return iWidgetDetailPrimaryColour != std::nullopt;
 	}
 
 	colour palette::widget_detail_primary_colour() const
@@ -245,7 +245,7 @@ namespace neogfx
 
 	bool palette::has_widget_detail_secondary_colour() const
 	{
-		return iWidgetDetailSecondaryColour != boost::none;
+		return iWidgetDetailSecondaryColour != std::nullopt;
 	}
 
 	colour palette::widget_detail_secondary_colour() const

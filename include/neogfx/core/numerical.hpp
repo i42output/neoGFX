@@ -25,7 +25,7 @@
 #include <array>
 #include <algorithm>
 #include <ostream>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/math/constants/constants.hpp>
 #include "swizzle.hpp"
 
@@ -284,31 +284,31 @@ namespace neogfx
 	typedef basic_vector<double, 3, row_vector> row_vec3;
 	typedef basic_vector<double, 4, row_vector> row_vec4;
 
-	typedef boost::optional<vector1> optional_vector1;
-	typedef boost::optional<vector2> optional_vector2;
-	typedef boost::optional<vector3> optional_vector3;
-	typedef boost::optional<vector4> optional_vector4;
+	typedef std::optional<vector1> optional_vector1;
+	typedef std::optional<vector2> optional_vector2;
+	typedef std::optional<vector3> optional_vector3;
+	typedef std::optional<vector4> optional_vector4;
 
-	typedef boost::optional<vec1> optional_vec1;
-	typedef boost::optional<vec2> optional_vec2;
-	typedef boost::optional<vec3> optional_vec3;
-	typedef boost::optional<vec4> optional_vec4;
+	typedef std::optional<vec1> optional_vec1;
+	typedef std::optional<vec2> optional_vec2;
+	typedef std::optional<vec3> optional_vec3;
+	typedef std::optional<vec4> optional_vec4;
 
-	typedef boost::optional<col_vec1> optional_col_vec1;
-	typedef boost::optional<col_vec2> optional_col_vec2;
-	typedef boost::optional<col_vec3> optional_col_vec3;
-	typedef boost::optional<col_vec4> optional_col_vec4;
+	typedef std::optional<col_vec1> optional_col_vec1;
+	typedef std::optional<col_vec2> optional_col_vec2;
+	typedef std::optional<col_vec3> optional_col_vec3;
+	typedef std::optional<col_vec4> optional_col_vec4;
 
-	typedef boost::optional<row_vec1> optional_row_vec1;
-	typedef boost::optional<row_vec2> optional_row_vec2;
-	typedef boost::optional<row_vec3> optional_row_vec3;
-	typedef boost::optional<row_vec4> optional_row_vec4;
+	typedef std::optional<row_vec1> optional_row_vec1;
+	typedef std::optional<row_vec2> optional_row_vec2;
+	typedef std::optional<row_vec3> optional_row_vec3;
+	typedef std::optional<row_vec4> optional_row_vec4;
 
 	typedef std::vector<vec2> vec2_list;
 	typedef std::vector<vec3> vec3_list;
 
-	typedef boost::optional<vec2_list> optional_vec2_list;
-	typedef boost::optional<vec3_list> optional_vec3_list;
+	typedef std::optional<vec2_list> optional_vec2_list;
+	typedef std::optional<vec3_list> optional_vec3_list;
 
 	typedef basic_vector<float, 1> vector1f;
 	typedef basic_vector<float, 2> vector2f;
@@ -614,39 +614,39 @@ namespace neogfx
 	typedef matrix24 mat24;
 	typedef matrix34 mat34;
 
-	typedef boost::optional<matrix11> optional_matrix11;
-	typedef boost::optional<matrix22> optional_matrix22;
-	typedef boost::optional<matrix21> optional_matrix21;
-	typedef boost::optional<matrix12> optional_matrix12;
-	typedef boost::optional<matrix33> optional_matrix33;
-	typedef boost::optional<matrix31> optional_matrix31;
-	typedef boost::optional<matrix32> optional_matrix32;
-	typedef boost::optional<matrix13> optional_matrix13;
-	typedef boost::optional<matrix23> optional_matrix23;
-	typedef boost::optional<matrix44> optional_matrix44;
-	typedef boost::optional<matrix41> optional_matrix41;
-	typedef boost::optional<matrix42> optional_matrix42;
-	typedef boost::optional<matrix43> optional_matrix43;
-	typedef boost::optional<matrix14> optional_matrix14;
-	typedef boost::optional<matrix24> optional_matrix24;
-	typedef boost::optional<matrix34> optional_matrix34;
+	typedef std::optional<matrix11> optional_matrix11;
+	typedef std::optional<matrix22> optional_matrix22;
+	typedef std::optional<matrix21> optional_matrix21;
+	typedef std::optional<matrix12> optional_matrix12;
+	typedef std::optional<matrix33> optional_matrix33;
+	typedef std::optional<matrix31> optional_matrix31;
+	typedef std::optional<matrix32> optional_matrix32;
+	typedef std::optional<matrix13> optional_matrix13;
+	typedef std::optional<matrix23> optional_matrix23;
+	typedef std::optional<matrix44> optional_matrix44;
+	typedef std::optional<matrix41> optional_matrix41;
+	typedef std::optional<matrix42> optional_matrix42;
+	typedef std::optional<matrix43> optional_matrix43;
+	typedef std::optional<matrix14> optional_matrix14;
+	typedef std::optional<matrix24> optional_matrix24;
+	typedef std::optional<matrix34> optional_matrix34;
 
-	typedef boost::optional<mat11> optional_mat11;
-	typedef boost::optional<mat22> optional_mat22;
-	typedef boost::optional<mat21> optional_mat21;
-	typedef boost::optional<mat12> optional_mat12;
-	typedef boost::optional<mat33> optional_mat33;
-	typedef boost::optional<mat31> optional_mat31;
-	typedef boost::optional<mat32> optional_mat32;
-	typedef boost::optional<mat13> optional_mat13;
-	typedef boost::optional<mat23> optional_mat23;
-	typedef boost::optional<mat44> optional_mat44;
-	typedef boost::optional<mat41> optional_mat41;
-	typedef boost::optional<mat42> optional_mat42;
-	typedef boost::optional<mat43> optional_mat43;
-	typedef boost::optional<mat14> optional_mat14;
-	typedef boost::optional<mat24> optional_mat24;
-	typedef boost::optional<mat34> optional_mat34;
+	typedef std::optional<mat11> optional_mat11;
+	typedef std::optional<mat22> optional_mat22;
+	typedef std::optional<mat21> optional_mat21;
+	typedef std::optional<mat12> optional_mat12;
+	typedef std::optional<mat33> optional_mat33;
+	typedef std::optional<mat31> optional_mat31;
+	typedef std::optional<mat32> optional_mat32;
+	typedef std::optional<mat13> optional_mat13;
+	typedef std::optional<mat23> optional_mat23;
+	typedef std::optional<mat44> optional_mat44;
+	typedef std::optional<mat41> optional_mat41;
+	typedef std::optional<mat42> optional_mat42;
+	typedef std::optional<mat43> optional_mat43;
+	typedef std::optional<mat14> optional_mat14;
+	typedef std::optional<mat24> optional_mat24;
+	typedef std::optional<mat34> optional_mat34;
 
 	template <typename T, uint32_t Rows, uint32_t Columns>
 	inline basic_matrix<T, Rows, Columns> operator+(const basic_matrix<T, Rows, Columns>& left, scalar right)
@@ -827,7 +827,7 @@ namespace neogfx
 			std::tie(right.min.z, right.min.y, right.min.x, right.max.z, right.max.y, right.max.x);
 	}
 
-	typedef boost::optional<aabb> optional_aabb;
+	typedef std::optional<aabb> optional_aabb;
 
 	inline aabb aabb_union(const aabb& left, const aabb& right)
 	{
@@ -892,7 +892,7 @@ namespace neogfx
 			std::tie(right.min.y, right.min.x, right.max.y, right.max.x);
 	}
 
-	typedef boost::optional<aabb_2d> optional_aabb_2d;
+	typedef std::optional<aabb_2d> optional_aabb_2d;
 
 	inline aabb_2d aabb_union(const aabb_2d& left, const aabb_2d& right)
 	{

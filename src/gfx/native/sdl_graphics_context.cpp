@@ -49,7 +49,7 @@ namespace neogfx
 
 	rect sdl_graphics_context::rendering_area(bool aConsiderScissor) const
 	{
-		if (scissor_rect() == boost::none || !aConsiderScissor)
+		if (scissor_rect() == std::nullopt || !aConsiderScissor)
 			return rect(point(), size(static_cast<dimension>(iRenderTarget.extents().cx), static_cast<dimension>(iRenderTarget.extents().cy)));
 		else
 			return *scissor_rect();

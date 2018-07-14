@@ -56,7 +56,7 @@ namespace neogfx
 		event<> style_changed;
 	public:
 		typedef uint32_t tab_index;
-		typedef boost::optional<tab_index> optional_tab_index;
+		typedef std::optional<tab_index> optional_tab_index;
 	public:
 		struct tab_not_found : std::logic_error { tab_not_found() : std::logic_error("neogfx::i_tab_container::tab_not_found") {} };
 		struct no_parent_container : std::logic_error { no_parent_container() : std::logic_error("neogfx::i_tab_container::no_parent_container") {} };

@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <chrono>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/path.hpp>
 #include "i_shape.hpp"

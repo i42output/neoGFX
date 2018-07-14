@@ -23,7 +23,7 @@
 #include <array>
 #include <type_traits>
 #include <ostream>
-#include <boost/optional.hpp>
+#include <optional>
 #include "numerical.hpp"
 
 namespace neogfx
@@ -782,16 +782,16 @@ namespace neogfx
 		
 	typedef basic_margins<dimension> margins;
 
-	typedef boost::optional<dimension> optional_dimension;
-	typedef boost::optional<angle> optional_angle;
-	typedef boost::optional<point> optional_point;
-	typedef boost::optional<size> optional_size;
-	typedef boost::optional<rect> optional_rect;
-	typedef boost::optional<margins> optional_margins;
-	typedef boost::optional<vector1> optional_vector1;
-	typedef boost::optional<vector2> optional_vector2;
-	typedef boost::optional<vector3> optional_vector3;
-	typedef boost::optional<vector4> optional_vector4;
+	typedef std::optional<dimension> optional_dimension;
+	typedef std::optional<angle> optional_angle;
+	typedef std::optional<point> optional_point;
+	typedef std::optional<size> optional_size;
+	typedef std::optional<rect> optional_rect;
+	typedef std::optional<margins> optional_margins;
+	typedef std::optional<vector1> optional_vector1;
+	typedef std::optional<vector2> optional_vector2;
+	typedef std::optional<vector3> optional_vector3;
+	typedef std::optional<vector4> optional_vector4;
 
 	template <typename Elem, typename Traits, typename T>
 	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_point<T>& aPoint)

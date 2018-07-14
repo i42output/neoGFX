@@ -111,7 +111,7 @@ namespace neogfx
 	private:
 		sink iSink;
 		style iStyle;
-		boost::optional<std::string> iMessage;
+		std::optional<std::string> iMessage;
 		horizontal_layout iLayout;
 		stack_layout iNormalLayout;
 		horizontal_layout iMessageLayout;
@@ -122,7 +122,7 @@ namespace neogfx
 		horizontal_layout iNormalWidgetLayout;
 		horizontal_layout iPermanentWidgetLayout;
 		keyboard_lock_status iKeyboardLockStatus;
-		mutable boost::optional<std::pair<colour, texture>> iSizeGripTexture;
+		mutable std::optional<std::pair<colour, texture>> iSizeGripTexture;
 		size_grip iSizeGrip;
 	};
 }

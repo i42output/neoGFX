@@ -68,8 +68,8 @@ namespace neogfx
 		};
 		typedef double point_size;
 	private:
-		typedef boost::optional<style_e> optional_style;
-		typedef boost::optional<std::string> optional_style_name;
+		typedef std::optional<style_e> optional_style;
+		typedef std::optional<std::string> optional_style_name;
 	private:
 		class instance;
 	public:
@@ -204,5 +204,5 @@ namespace neogfx
 		mutable std::shared_ptr<instance> iInstance;
 	};
 
-	typedef boost::optional<font> optional_font;
+	typedef std::optional<font> optional_font;
 }

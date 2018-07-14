@@ -110,7 +110,7 @@ namespace neogfx
 
 	bool opengl_window::has_invalidated_area() const
 	{
-		return iInvalidatedArea != boost::none;
+		return iInvalidatedArea != std::nullopt;
 	}
 
 	const rect& opengl_window::invalidated_area() const
@@ -125,7 +125,7 @@ namespace neogfx
 		if (has_invalidated_area())
 		{
 			rect validatedArea = invalidated_area();
-			iInvalidatedArea = boost::none;
+			iInvalidatedArea = std::nullopt;
 			return validatedArea;
 		}
 		throw no_invalidated_area();
@@ -148,7 +148,7 @@ namespace neogfx
 			if (processing_event())
 				return;
 
-			if (iFrameRate != boost::none && now - iLastFrameTime < 1000 / (has_rendering_priority() ? *iFrameRate : *iFrameRate / 10.0))
+			if (iFrameRate != std::nullopt && now - iLastFrameTime < 1000 / (has_rendering_priority() ? *iFrameRate : *iFrameRate / 10.0))
 				return;
 
 			if (!surface_window().native_window_ready_to_render())

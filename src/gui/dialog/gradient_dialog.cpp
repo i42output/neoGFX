@@ -244,8 +244,8 @@ namespace neogfx
 		iCentreGroupBox.check_box().checked([this]() { iGradientSelector.set_gradient(gradient().with_centre(point{})); update_widgets(); });
 		iCentreGroupBox.check_box().unchecked([this]() { iGradientSelector.set_gradient(gradient().with_centre(optional_point{})); update_widgets(); });
 
-		iXCentreSpinBox.value_changed([this]() { auto c = gradient().centre(); if (c == boost::none) c = point{}; c->x = iXCentreSpinBox.value(); iGradientSelector.set_gradient(gradient().with_centre(c)); update_widgets(); });
-		iYCentreSpinBox.value_changed([this]() { auto c = gradient().centre(); if (c == boost::none) c = point{}; c->y = iYCentreSpinBox.value(); iGradientSelector.set_gradient(gradient().with_centre(c)); update_widgets(); });
+		iXCentreSpinBox.value_changed([this]() { auto c = gradient().centre(); if (c == std::nullopt) c = point{}; c->x = iXCentreSpinBox.value(); iGradientSelector.set_gradient(gradient().with_centre(c)); update_widgets(); });
+		iYCentreSpinBox.value_changed([this]() { auto c = gradient().centre(); if (c == std::nullopt) c = point{}; c->y = iYCentreSpinBox.value(); iGradientSelector.set_gradient(gradient().with_centre(c)); update_widgets(); });
 
 		iPreview->set_margins(neogfx::margins{});
 		iPreview->set_fixed_size(dpi_scale(size{ std::ceil(256.0 * 16.0 / 9.0), 256.0 }));
@@ -274,9 +274,9 @@ namespace neogfx
 		iTopRightRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(gradient::TopRight));
 		iBottomRightRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(gradient::BottomRight));
 		iBottomLeftRadioButton.set_checked(gradient().orientation() == gradient::orientation_type(gradient::BottomLeft));
-		iAngleRadioButton.set_checked(gradient().orientation().is<double>());
-		iAngleSpinBox.set_value(gradient().orientation().is<double>() ? to_deg(static_variant_cast<double>(gradient().orientation())) : 0.0);
-		iAngleSlider.set_value(gradient().orientation().is<double>() ? to_deg(static_variant_cast<double>(gradient().orientation())) : 0.0);
+		iAngleRadioButton.set_checked(std::holds_alternative<double>(gradient().orientation()));
+		iAngleSpinBox.set_value(std::holds_alternative<double>(gradient().orientation()) ? to_deg(static_variant_cast<double>(gradient().orientation())) : 0.0);
+		iAngleSlider.set_value(std::holds_alternative<double>(gradient().orientation()) ? to_deg(static_variant_cast<double>(gradient().orientation())) : 0.0);
 		iSizeClosestSideRadioButton.set_checked(gradient().size() == gradient::ClosestSide);
 		iSizeFarthestSideRadioButton.set_checked(gradient().size() == gradient::FarthestSide);
 		iSizeClosestCornerRadioButton.set_checked(gradient().size() == gradient::ClosestCorner);
@@ -310,7 +310,7 @@ namespace neogfx
 			break;
 		case gradient::Diagonal:
 			iOrientationGroupBox.show();
-			iAngleGroupBox.show(gradient().orientation().is<double>());
+			iAngleGroupBox.show(std::holds_alternative<double>(gradient().orientation()));
 			iSizeGroupBox.hide();
 			iShapeGroupBox.hide();
 			iCentreGroupBox.hide();

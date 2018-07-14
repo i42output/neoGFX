@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <chrono>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/colour.hpp>
@@ -63,7 +63,7 @@ namespace neogfx
 		typedef scalar time_interval;
 		typedef std::pair<frame_index, time_interval> animation_frame;
 		typedef std::vector<animation_frame> animation_frames;
-		typedef boost::optional<time_interval> optional_time_interval;
+		typedef std::optional<time_interval> optional_time_interval;
 		// exceptions
 	public:
 		struct no_shape_container : std::logic_error { no_shape_container() : std::logic_error("neogfx::i_shape::no_shape_container") {} };

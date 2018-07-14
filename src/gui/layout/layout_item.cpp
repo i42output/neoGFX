@@ -300,7 +300,7 @@ namespace neogfx
 	void layout_item::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
 		subject().set_minimum_size(aMinimumSize, aUpdateLayout);
-		if (aMinimumSize != boost::none)
+		if (aMinimumSize != std::nullopt)
 			iMinimumSize = *aMinimumSize;
 	}
 
@@ -326,7 +326,7 @@ namespace neogfx
 	void layout_item::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
 		subject().set_maximum_size(aMaximumSize, aUpdateLayout);
-		if (aMaximumSize != boost::none)
+		if (aMaximumSize != std::nullopt)
 			iMaximumSize = *aMaximumSize;
 	}
 

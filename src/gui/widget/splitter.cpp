@@ -68,7 +68,7 @@ namespace neogfx
 	i_widget& splitter::get_widget_at(const point& aPosition)
 	{
 		auto s = separator_at(aPosition);
-		if (s != boost::none)
+		if (s != std::nullopt)
 			return *this;
 		return widget::get_widget_at(aPosition);
 	}
@@ -89,7 +89,7 @@ namespace neogfx
 		if (aButton == mouse_button::Left)
 		{
 			auto s = separator_at(aPosition);
-			if (s != boost::none)
+			if (s != std::nullopt)
 			{
 				iTracking = s;
 				iTrackFrom = aPosition;
@@ -108,7 +108,7 @@ namespace neogfx
 		if (aButton == mouse_button::Left)
 		{
 			auto s = separator_at(aPosition);
-			if (s != boost::none)
+			if (s != std::nullopt)
 			{
 				if ((aKeyModifiers & KeyModifier_SHIFT) != KeyModifier_NONE)
 					reset_pane_sizes_requested();
@@ -121,7 +121,7 @@ namespace neogfx
 
 	void splitter::mouse_moved(const point& aPosition)
 	{
-		if (iTracking != boost::none)
+		if (iTracking != std::nullopt)
 		{
 			if (iType == HorizontalSplitter)
 			{
@@ -156,7 +156,7 @@ namespace neogfx
 	neogfx::mouse_cursor splitter::mouse_cursor() const
 	{
 		auto s = separator_at(root().mouse_position() - origin());
-		if (s != boost::none || iTracking != boost::none)
+		if (s != std::nullopt || iTracking != std::nullopt)
 			return iType == HorizontalSplitter ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
 		else
 			return widget::mouse_cursor();
@@ -164,18 +164,18 @@ namespace neogfx
 
 	void splitter::released()
 	{
-		iTracking = boost::none;
+		iTracking = std::nullopt;
 	}
 
 	void splitter::panes_resized()
 	{
 	}
 
-	void splitter::reset_pane_sizes_requested(const boost::optional<uint32_t>&)
+	void splitter::reset_pane_sizes_requested(const std::optional<uint32_t>&)
 	{
 	}
 
-	boost::optional<std::pair<std::size_t, std::size_t>> splitter::separator_at(const point& aPosition) const
+	std::optional<std::pair<std::size_t, std::size_t>> splitter::separator_at(const point& aPosition) const
 	{
 		for (std::size_t i = 1; i < layout().count(); ++i)
 		{
@@ -200,6 +200,6 @@ namespace neogfx
 					return separator_type(i - 1, i);
 			}
 		}
-		return boost::optional<separator_type>();
+		return std::optional<separator_type>();
 	}
 }

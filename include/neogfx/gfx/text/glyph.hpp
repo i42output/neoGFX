@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neolib/string_utils.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
@@ -436,5 +436,5 @@ namespace neogfx
 		return result;
 	}
 
-	typedef boost::optional<glyph_text> optional_glyph_text;
+	typedef std::optional<glyph_text> optional_glyph_text;
 }

@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/keyboard.hpp>
 #include <neogfx/gfx/i_texture.hpp>
@@ -39,7 +39,7 @@ namespace neogfx
 		event<> unchecked;
 		event<> changed;
 	public:
-		typedef boost::optional<std::string> optional_text;
+		typedef std::optional<std::string> optional_text;
 	public:
 		virtual bool is_enabled() const = 0;
 		virtual bool is_disabled() const = 0;

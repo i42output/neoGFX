@@ -68,7 +68,7 @@ namespace neogfx
 			for (auto e = iEventQueue.end(); e != iEventQueue.begin();)
 			{
 				--e;
-				if (e->is<EventCategory>() && static_variant_cast<const EventCategory&>(*e).type() == aEventType)
+				if (std::holds_alternative<EventCategory>(*e) && static_variant_cast<const EventCategory&>(*e).type() == aEventType)
 					return e;
 			}
 			return iEventQueue.end();

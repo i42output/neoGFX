@@ -233,7 +233,7 @@ namespace neogfx
 	opengl_renderer::~opengl_renderer()
 	{
 		iVertexArrays.reset();
-		if (iGradientTextures != boost::none)
+		if (iGradientTextures != std::nullopt)
 		{
 			glCheck(glDeleteTextures(1, &(*iGradientTextures)[0]));
 			glCheck(glDeleteTextures(1, &(*iGradientTextures)[1]));
@@ -804,7 +804,7 @@ namespace neogfx
 
 	const opengl_standard_vertex_arrays& opengl_renderer::vertex_arrays() const
 	{
-		if (iVertexArrays == boost::none)
+		if (iVertexArrays == std::nullopt)
 			iVertexArrays.emplace();
 		return *iVertexArrays;
 	}
@@ -841,7 +841,7 @@ namespace neogfx
 	{
 		// todo: use texture class
 		glCheck(glEnable(GL_TEXTURE_RECTANGLE));
-		if (iGradientTextures == boost::none)
+		if (iGradientTextures == std::nullopt)
 		{
 			iGradientTextures.emplace(std::array<GLuint, 3>{});
 			glCheck(glGenTextures(1, &(*iGradientTextures)[0]));

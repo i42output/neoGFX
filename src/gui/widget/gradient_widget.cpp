@@ -152,8 +152,8 @@ namespace neogfx
 		if (iSelection != aGradient)
 		{
 			iSelection = aGradient;
-			iCurrentColourStop = boost::none;
-			iCurrentAlphaStop = boost::none;
+			iCurrentColourStop = std::nullopt;
+			iCurrentAlphaStop = std::nullopt;
 			update();
 			gradient_changed.trigger();
 		}
@@ -189,9 +189,9 @@ namespace neogfx
 			draw_colour_stop(aGraphicsContext, *i);
 		for (gradient::alpha_stop_list::const_iterator i = iSelection.alpha_begin(); i != iSelection.alpha_end(); ++i)
 			draw_alpha_stop(aGraphicsContext, *i);
-		if (iCurrentColourStop != boost::none)
+		if (iCurrentColourStop != std::nullopt)
 			draw_colour_stop(aGraphicsContext, **iCurrentColourStop);
-		if (iCurrentAlphaStop != boost::none)
+		if (iCurrentAlphaStop != std::nullopt)
 			draw_alpha_stop(aGraphicsContext, **iCurrentAlphaStop);
 	}
 
@@ -203,9 +203,9 @@ namespace neogfx
 		{
 			if (contents_rect().contains(aPosition))
 			{
-				if (iCurrentColourStop != boost::none)
+				if (iCurrentColourStop != std::nullopt)
 					(**iCurrentColourStop).second = iSelection.colour_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
-				else if (iCurrentAlphaStop != boost::none)
+				else if (iCurrentAlphaStop != std::nullopt)
 					(**iCurrentAlphaStop).second = iSelection.alpha_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
 				update();
 				gradient_changed.trigger();
@@ -213,17 +213,17 @@ namespace neogfx
 			else
 			{
 				auto stopIter = stop_at(aPosition);
-				if (stopIter.is<gradient::colour_stop_list::iterator>())
+				if (std::holds_alternative<gradient::colour_stop_list::iterator>(stopIter))
 				{
 					iCurrentColourStop = static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
-					iCurrentAlphaStop = boost::none;
+					iCurrentAlphaStop = std::nullopt;
 					iTracking = true;
 					update();
 				}
-				else if (stopIter.is<gradient::alpha_stop_list::iterator>())
+				else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
 				{
 					iCurrentAlphaStop = static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
-					iCurrentColourStop = boost::none;
+					iCurrentColourStop = std::nullopt;
 					iTracking = true;
 					update();
 				}
@@ -232,14 +232,14 @@ namespace neogfx
 					if (aPosition.y < contents_rect().top())
 					{
 						iCurrentAlphaStop = iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
-						iCurrentColourStop = boost::none;
+						iCurrentColourStop = std::nullopt;
 						update();
 						gradient_changed.trigger();
 					}
 					else if (aPosition.y >= contents_rect().bottom())
 					{
 						iCurrentColourStop = iSelection.insert_colour_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
-						iCurrentAlphaStop = boost::none;
+						iCurrentAlphaStop = std::nullopt;
 						update();
 						gradient_changed.trigger();
 					}
@@ -254,7 +254,7 @@ namespace neogfx
 		if (aButton == mouse_button::Left)
 		{
 			auto stopIter = stop_at(aPosition);
-			if (stopIter.is<gradient::colour_stop_list::iterator>())
+			if (std::holds_alternative<gradient::colour_stop_list::iterator>(stopIter))
 			{
 				auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
 				colour_dialog cd{ *this, stop.second };
@@ -265,7 +265,7 @@ namespace neogfx
 					gradient_changed.trigger();
 				}
 			}
-			else if (stopIter.is<gradient::alpha_stop_list::iterator>())
+			else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
 			{
 				auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
 				alpha_dialog ad{ *this, stop.second };
@@ -292,9 +292,9 @@ namespace neogfx
 					set_gradient(gd.gradient());
 			});
 			auto stopIter = stop_at(aPosition);
-			if (!stopIter.empty() && stopIter == stop_at(*iClicked))
+			if (stopIter != neolib::none && stopIter == stop_at(*iClicked))
 			{
-				if (stopIter.is<gradient::colour_stop_list::iterator>())
+				if (std::holds_alternative<gradient::colour_stop_list::iterator>(stopIter))
 				{
 					auto iter = static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
 					auto selectColourAction = std::make_shared<action>("Select stop colour..."_t);
@@ -321,7 +321,7 @@ namespace neogfx
 						double p1 = (iter->first + (prev)->first) / 2.0;
 						double p2 = (iter->first + (next)->first) / 2.0;
 						colour c = iter->second;
-						iCurrentColourStop = boost::none;
+						iCurrentColourStop = std::nullopt;
 						if (iter != prev && iter != next)
 							iSelection.erase_stop(iter);
 						if (iter != prev)
@@ -334,7 +334,7 @@ namespace neogfx
 					auto deleteStopAction = std::make_shared<action>("Delete stop"_t);
 					deleteStopAction->triggered([this, iter]()
 					{
-						iCurrentColourStop = boost::none;
+						iCurrentColourStop = std::nullopt;
 						iSelection.erase_stop(iter);
 						update();
 						gradient_changed.trigger();
@@ -350,7 +350,7 @@ namespace neogfx
 					iMenu->exec();
 					iMenu.reset();
 				}
-				else if (stopIter.is<gradient::alpha_stop_list::iterator>())
+				else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
 				{
 					auto selectAlphaAction = std::make_shared<action>("Select stop alpha (opacity level)..."_t);
 					selectAlphaAction->triggered([this, stopIter]()
@@ -367,8 +367,8 @@ namespace neogfx
 					auto deleteStopAction = std::make_shared<action>("Delete stop");
 					deleteStopAction->triggered([this, stopIter]()
 					{
-						if (iCurrentAlphaStop != boost::none && *iCurrentAlphaStop == static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter))
-							iCurrentAlphaStop = boost::none;
+						if (iCurrentAlphaStop != std::nullopt && *iCurrentAlphaStop == static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter))
+							iCurrentAlphaStop = std::nullopt;
 						iSelection.erase_stop(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
 						update();
 						gradient_changed.trigger();
@@ -392,7 +392,7 @@ namespace neogfx
 				iMenu.reset();
 			}
 		}
-		iClicked == boost::none;
+		iClicked == std::nullopt;
 		iTracking = false;
 		update();
 	}
@@ -404,7 +404,7 @@ namespace neogfx
 		{
 			double pos = gradient::normalized_position(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
 			const double min = 0.0001;
-			if (iCurrentColourStop != boost::none)
+			if (iCurrentColourStop != std::nullopt)
 			{
 				auto leftStop = *iCurrentColourStop;
 				if (leftStop != iSelection.colour_begin())
@@ -419,7 +419,7 @@ namespace neogfx
 				update();
 				gradient_changed.trigger();
 			}
-			else if (iCurrentAlphaStop != boost::none)
+			else if (iCurrentAlphaStop != std::nullopt)
 			{
 				auto leftStop = *iCurrentAlphaStop;
 				if (leftStop != iSelection.alpha_begin())
@@ -442,12 +442,12 @@ namespace neogfx
 		point mousePos = root().mouse_position() - origin();
 		if (contents_rect().contains(mousePos))
 		{
-			if (iCurrentColourStop != boost::none || iCurrentAlphaStop != boost::none)
+			if (iCurrentColourStop != std::nullopt || iCurrentAlphaStop != std::nullopt)
 				return mouse_system_cursor::Crosshair;
 			else
 				return mouse_system_cursor::Arrow;
 		}
-		else if (stop_at(mousePos) != boost::none)
+		else if (stop_at(mousePos) != neolib::none)
 			return mouse_system_cursor::Arrow;
 		else if (mousePos.x >= contents_rect().left() && mousePos.x < contents_rect().right())
 			return mouse_system_cursor::Hand;
@@ -593,8 +593,8 @@ namespace neogfx
 				{"paper", transparentColour},
 				{"ink1", frameColour},
 				{"ink2", frameColour.mid(backgroundColour)},
-				{"ink3", iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour()},
-				{"ink4", iCurrentColourStop == boost::none || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40)},
+				{"ink3", iCurrentColourStop == std::nullopt || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour()},
+				{"ink4", iCurrentColourStop == std::nullopt || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40)},
 				{"ink9", aColourStop.second}} };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())
@@ -688,8 +688,8 @@ namespace neogfx
 				{ "paper", transparentColour },
 				{ "ink1", frameColour },
 				{ "ink2", frameColour.mid(backgroundColour) },
-				{ "ink3", iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour() },
-				{ "ink4", iCurrentAlphaStop == boost::none || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40) },
+				{ "ink3", iCurrentAlphaStop == std::nullopt || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour() },
+				{ "ink4", iCurrentAlphaStop == std::nullopt || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40) },
 				{ "ink9", colour::White.with_alpha(aAlphaStop.second) } } };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())

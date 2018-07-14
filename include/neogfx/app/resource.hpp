@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include "i_resource.hpp"
 #include "i_resource_manager.hpp"
 
@@ -48,7 +48,7 @@ namespace neogfx
 	private:
 		i_resource_manager& iManager;
 		std::string iUri;
-		boost::optional<std::string> iError;
+		std::optional<std::string> iError;
 		std::size_t iSize;
 		std::vector<uint8_t> iData;
 	};

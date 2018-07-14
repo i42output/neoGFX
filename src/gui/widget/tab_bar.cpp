@@ -65,7 +65,7 @@ namespace neogfx
 	size tab_bar::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		auto result = scrollable_widget::minimum_size(aAvailableSpace);
-		if (aAvailableSpace != boost::none)
+		if (aAvailableSpace != std::nullopt)
 			result = result.min(*aAvailableSpace);
 		return result;
 	}
@@ -287,25 +287,25 @@ namespace neogfx
 		{
 		case tab_container_style::TabAlignmentTop:
 		case tab_container_style::TabAlignmentBottom:
-			if (iHorizontalLayout == boost::none)
+			if (iHorizontalLayout == std::nullopt)
 			{
 				iHorizontalLayout.emplace(*this);
 				vertical_scrollbar().set_position(0.0);
 				horizontal_scrollbar().set_position(0.0);
 			}
-			if (iVerticalLayout != boost::none)
-				iVerticalLayout = boost::none;
+			if (iVerticalLayout != std::nullopt)
+				iVerticalLayout = std::nullopt;
 			break;
 		case tab_container_style::TabAlignmentLeft:
 		case tab_container_style::TabAlignmentRight:
-			if (iVerticalLayout == boost::none)
+			if (iVerticalLayout == std::nullopt)
 			{
 				iVerticalLayout.emplace(*this);
 				vertical_scrollbar().set_position(0.0);
 				horizontal_scrollbar().set_position(0.0);
 			}
-			if (iHorizontalLayout != boost::none)
-				iHorizontalLayout = boost::none;
+			if (iHorizontalLayout != std::nullopt)
+				iHorizontalLayout = std::nullopt;
 			break;
 		}
 		switch (style() & tab_container_style::TabAlignmentMask)

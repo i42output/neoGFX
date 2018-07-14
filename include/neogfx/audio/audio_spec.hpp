@@ -19,7 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace neogfx
 {
@@ -78,7 +78,7 @@ namespace neogfx
 		uint8_t iSilence;
 	};
 
-	typedef boost::optional<audio_spec> optional_audio_spec;
+	typedef std::optional<audio_spec> optional_audio_spec;
 
 	enum class audio_spec_requirements
 	{

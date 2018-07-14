@@ -628,7 +628,7 @@ namespace neogfx
 		if (aOwner != nullptr && !has_parent(false))
 		{
 			auto itemIndex = parent_layout().find(*this);
-			if (itemIndex == boost::none)
+			if (itemIndex == std::nullopt)
 				throw i_layout::item_not_found();
 			aOwner->add(std::dynamic_pointer_cast<i_widget>(layout_item_proxy().subject_ptr()));
 		}
@@ -749,7 +749,7 @@ namespace neogfx
 
 	bool widget::has_logical_coordinate_system() const
 	{
-		return LogicalCoordinateSystem != boost::none;
+		return LogicalCoordinateSystem != std::nullopt;
 	}
 
 	logical_coordinate_system widget::logical_coordinate_system() const
@@ -866,7 +866,7 @@ namespace neogfx
 
 	bool widget::has_size_policy() const
 	{
-		return SizePolicy != boost::none;
+		return SizePolicy != std::nullopt;
 	}
 
 	size_policy widget::size_policy() const
@@ -889,7 +889,7 @@ namespace neogfx
 
 	bool widget::has_weight() const
 	{
-		return Weight != boost::none;
+		return Weight != std::nullopt;
 	}
 
 	size widget::weight() const
@@ -911,7 +911,7 @@ namespace neogfx
 
 	bool widget::has_minimum_size() const
 	{
-		return MinimumSize != boost::none;
+		return MinimumSize != std::nullopt;
 	}
 
 	size widget::minimum_size(const optional_size& aAvailableSpace) const
@@ -922,7 +922,7 @@ namespace neogfx
 			return units_converter(*this).from_device_units(*MinimumSize);
 		else if (has_layout())
 		{
-			auto result = layout().minimum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace);
+			auto result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - margins().size() : aAvailableSpace);
 			if (result.cx != 0.0)
 				result.cx += margins().size().cx;
 			if (result.cy != 0.0)
@@ -935,7 +935,7 @@ namespace neogfx
 
 	void widget::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
-		optional_size newMinimumSize = (aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
+		optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
 		if (MinimumSize != newMinimumSize)
 		{
 			MinimumSize.assign(newMinimumSize, aUpdateLayout);
@@ -946,7 +946,7 @@ namespace neogfx
 
 	bool widget::has_maximum_size() const
 	{
-		return MaximumSize != boost::none;
+		return MaximumSize != std::nullopt;
 	}
 
 	size widget::maximum_size(const optional_size& aAvailableSpace) const
@@ -957,7 +957,7 @@ namespace neogfx
 			return minimum_size(aAvailableSpace);
 		else if (has_layout())
 		{
-			auto result = layout().maximum_size(aAvailableSpace != boost::none ? *aAvailableSpace - margins().size() : aAvailableSpace);
+			auto result = layout().maximum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - margins().size() : aAvailableSpace);
 			if (result.cx != 0.0)
 				result.cx += margins().size().cx;
 			if (result.cy != 0.0)
@@ -970,7 +970,7 @@ namespace neogfx
 
 	void widget::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
-		optional_size newMaximumSize = (aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
+		optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
 		if (MaximumSize != newMaximumSize)
 		{
 			MaximumSize.assign(newMaximumSize, aUpdateLayout);
@@ -981,7 +981,7 @@ namespace neogfx
 
 	bool widget::has_margins() const
 	{
-		return Margins != boost::none;
+		return Margins != std::nullopt;
 	}
 
 	margins widget::margins() const
@@ -995,7 +995,7 @@ namespace neogfx
 
 	void widget::set_margins(const optional_margins& aMargins, bool aUpdateLayout)
 	{
-		optional_margins newMargins = (aMargins != boost::none ? units_converter(*this).to_device_units(*aMargins) : optional_margins{});
+		optional_margins newMargins = (aMargins != std::nullopt ? units_converter(*this).to_device_units(*aMargins) : optional_margins{});
 		if (Margins != newMargins)
 		{
 			Margins = newMargins;
@@ -1046,7 +1046,7 @@ namespace neogfx
 	rect widget::default_clip_rect(bool aIncludeNonClient) const
 	{
 		auto& cachedRect = (aIncludeNonClient ? iDefaultClipRect.first : iDefaultClipRect.second);
-		if (cachedRect != boost::none)
+		if (cachedRect != std::nullopt)
 			return *cachedRect;
 		rect clipRect = to_client_coordinates(non_client_rect());
 		if (!aIncludeNonClient)
@@ -1068,7 +1068,7 @@ namespace neogfx
 		if (!requires_update())
 			return;
 
-		iDefaultClipRect = std::make_pair(boost::none, boost::none);
+		iDefaultClipRect = std::make_pair(std::nullopt, std::nullopt);
 
 		const rect updateRect = update_rect();
 
@@ -1163,7 +1163,7 @@ namespace neogfx
 
 	bool widget::has_foreground_colour() const
 	{
-		return ForegroundColour != boost::none;
+		return ForegroundColour != std::nullopt;
 	}
 
 	colour widget::foreground_colour() const
@@ -1182,7 +1182,7 @@ namespace neogfx
 
 	bool widget::has_background_colour() const
 	{
-		return BackgroundColour != boost::none;
+		return BackgroundColour != std::nullopt;
 	}
 
 	colour widget::background_colour() const
@@ -1212,7 +1212,7 @@ namespace neogfx
 
 	bool widget::has_font() const
 	{
-		return Font != boost::none;
+		return Font != std::nullopt;
 	}
 
 	const font& widget::font() const
@@ -1236,7 +1236,7 @@ namespace neogfx
 
 	bool widget::visible() const
 	{
-		return Visible && (MaximumSize == boost::none || (MaximumSize->cx != 0.0 && MaximumSize->cy != 0.0));
+		return Visible && (MaximumSize == std::nullopt || (MaximumSize->cx != 0.0 && MaximumSize->cy != 0.0));
 	}
 
 	bool widget::effectively_visible() const

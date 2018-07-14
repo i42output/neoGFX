@@ -190,7 +190,7 @@ namespace neogfx
 
 	bool spacer::has_size_policy() const
 	{
-		return iSizePolicy != boost::none;
+		return iSizePolicy != std::nullopt;
 	}
 
 	size_policy spacer::size_policy() const
@@ -217,7 +217,7 @@ namespace neogfx
 
 	bool spacer::has_weight() const
 	{
-		return iWeight != boost::none;
+		return iWeight != std::nullopt;
 	}
 
 	size spacer::weight() const
@@ -240,7 +240,7 @@ namespace neogfx
 
 	bool spacer::has_minimum_size() const
 	{
-		return iMinimumSize != boost::none;
+		return iMinimumSize != std::nullopt;
 	}
 
 	size spacer::minimum_size(const optional_size&) const
@@ -252,7 +252,7 @@ namespace neogfx
 
 	void spacer::set_minimum_size(const optional_size& aMinimumSize, bool aUpdateLayout)
 	{
-		optional_size newMinimumSize = (aMinimumSize != boost::none ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
+		optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size());
 		if (iMinimumSize != newMinimumSize)
 		{
 			iMinimumSize = newMinimumSize;
@@ -263,7 +263,7 @@ namespace neogfx
 
 	bool spacer::has_maximum_size() const
 	{
-		return iMaximumSize != boost::none;
+		return iMaximumSize != std::nullopt;
 	}
 
 	size spacer::maximum_size(const optional_size&) const
@@ -275,7 +275,7 @@ namespace neogfx
 
 	void spacer::set_maximum_size(const optional_size& aMaximumSize, bool aUpdateLayout)
 	{
-		optional_size newMaximumSize = (aMaximumSize != boost::none ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
+		optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size());
 		if (iMaximumSize != newMaximumSize)
 		{
 			iMaximumSize = newMaximumSize;

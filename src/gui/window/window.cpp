@@ -447,7 +447,7 @@ namespace neogfx
 
 	bool window::is_nested_container() const
 	{
-		return iNestedWindowContainer != boost::none;
+		return iNestedWindowContainer != std::nullopt;
 	}
 
 	const i_nested_window_container& window::as_nested_container() const
@@ -757,9 +757,9 @@ namespace neogfx
 
 	scrolling_disposition window::scrolling_disposition(const i_widget& aChildWidget) const
 	{
-		if (iTitleBar != boost::none && &aChildWidget == &*iTitleBar)
+		if (iTitleBar != std::nullopt && &aChildWidget == &*iTitleBar)
 			return neogfx::scrolling_disposition::DontScrollChildWidget;
-		else if (iStatusBarLayout.find(aChildWidget) != boost::none)
+		else if (iStatusBarLayout.find(aChildWidget) != std::nullopt)
 			return neogfx::scrolling_disposition::DontScrollChildWidget;
 		return scrollable_widget::scrolling_disposition(aChildWidget);
 	}
@@ -774,7 +774,7 @@ namespace neogfx
 		if (iTitleText != aTitleText)
 		{
 			iTitleText = aTitleText;
-			if (iTitleBar != boost::none)
+			if (iTitleBar != std::nullopt)
 				iTitleBar->title().set_text(iTitleText);
 			if (has_native_window())
 				native_window().set_title_text(aTitleText);
@@ -914,7 +914,7 @@ namespace neogfx
 		switch (aWidgetPart)
 		{
 		case widget_part::NonClientTitleBar:
-			if (iTitleBar != boost::none)
+			if (iTitleBar != std::nullopt)
 				return to_client_coordinates(iTitleBar->non_client_rect());
 			else
 				return rect{};

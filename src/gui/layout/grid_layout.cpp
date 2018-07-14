@@ -226,7 +226,7 @@ namespace neogfx
 		if (items_visible() == 0)
 			return size{};
 		auto availableSpaceForChildren = aAvailableSpace;
-		if (availableSpaceForChildren != boost::none)
+		if (availableSpaceForChildren != std::nullopt)
 			*availableSpaceForChildren -= margins().size();
 		size result;
 		uint32_t visibleColumns = visible_columns();
@@ -259,7 +259,7 @@ namespace neogfx
 		if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
 			return size{};
 		auto availableSpaceForChildren = aAvailableSpace;
-		if (availableSpaceForChildren != boost::none)
+		if (availableSpaceForChildren != std::nullopt)
 			*availableSpaceForChildren -= margins().size();
 		size result;
 		for (cell_coordinate row = 0; row < visible_rows(); ++row)

@@ -192,13 +192,13 @@ namespace neogfx
 		iSink += iStepUpButton.pressed(step_up);
 		iSink += iStepUpButton.clicked([this]()
 		{
-			if (iStepper == boost::none) // key press?
+			if (iStepper == std::nullopt) // key press?
 				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + normalized_step_value())), true);
 		});
 		iSink += iStepUpButton.double_clicked(step_up);
 		iSink += iStepUpButton.released([this]()
 		{
-			iStepper = boost::none;
+			iStepper = std::nullopt;
 		});
 
 		auto step_down = [this]()
@@ -214,13 +214,13 @@ namespace neogfx
 		iSink += iStepDownButton.pressed(step_down);
 		iSink += iStepDownButton.clicked([this]()
 		{
-			if (iStepper == boost::none) // key press?
+			if (iStepper == std::nullopt) // key press?
 				set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() - normalized_step_value())), true);
 		});
 		iSink += iStepDownButton.double_clicked(step_down);
 		iSink += iStepDownButton.released([this]()
 		{
-			iStepper = boost::none;
+			iStepper = std::nullopt;
 		});
 
 		update_arrows();

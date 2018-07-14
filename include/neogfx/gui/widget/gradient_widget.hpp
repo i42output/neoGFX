@@ -74,9 +74,9 @@ namespace neogfx
 	private:
 		bool iInGradientDialog;
 		neogfx::gradient iSelection;
-		boost::optional<point> iClicked;
-		boost::optional<gradient::colour_stop_list::iterator> iCurrentColourStop;
-		boost::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;
+		std::optional<point> iClicked;
+		std::optional<gradient::colour_stop_list::iterator> iCurrentColourStop;
+		std::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;
 		bool iTracking;
 		std::unique_ptr<context_menu> iMenu;
 		mutable std::map<i_resource::hash_digest_type, texture> iStopTextures;

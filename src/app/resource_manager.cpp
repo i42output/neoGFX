@@ -49,8 +49,8 @@ namespace neogfx
 		auto existing = iResources.find(aUri);
 		if (existing != iResources.end())
 		{
-			if (existing->second.is<i_resource::pointer>())
-				return static_variant_cast<i_resource::pointer>(existing->second);
+			if (std::holds_alternative<i_resource::pointer>(existing->second))
+				return std::get<i_resource::pointer>(existing->second);
 			i_resource::weak_pointer ptr = static_variant_cast<i_resource::weak_pointer>(existing->second);
 			if (!ptr.expired())
 				return ptr.lock();
@@ -64,7 +64,7 @@ namespace neogfx
 	{
 		for (auto i = iResources.begin(); i != iResources.end();)
 		{
-			if (i->second.is<i_resource::weak_pointer>() && static_variant_cast<i_resource::weak_pointer&>(i->second).expired())
+			if (std::holds_alternative<i_resource::weak_pointer>(i->second) && std::get<i_resource::weak_pointer>(i->second).expired())
 				i = iResources.erase(i);
 			else
 				++i;

@@ -80,7 +80,7 @@ namespace neogfx
 			aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, app::instance().current_style().palette().selection_colour());
 		rect rectIndicator = indicator_box();
 		colour indicatorColour = foreground_colour();
-		if (iDragOffset != boost::none)
+		if (iDragOffset != std::nullopt)
 		{
 			if (indicatorColour.light(0x40))
 				indicatorColour.darken(0x40);
@@ -123,7 +123,7 @@ namespace neogfx
 		widget::mouse_button_released(aButton, aPosition);
 		if (aButton == mouse_button::Left)
 		{
-			iDragOffset = boost::none;
+			iDragOffset = std::nullopt;
 			update();
 		}
 	}
@@ -139,7 +139,7 @@ namespace neogfx
 	void slider_impl::mouse_moved(const point& aPosition)
 	{
 		widget::mouse_moved(aPosition);
-		if (iDragOffset != boost::none)
+		if (iDragOffset != std::nullopt)
 		{
 			if (iType == Horizontal)
 				set_normalized_value(normalized_value_from_position(point{ aPosition.x - iDragOffset->x, aPosition.y }));

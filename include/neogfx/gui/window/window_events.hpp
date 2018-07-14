@@ -102,7 +102,7 @@ namespace neogfx
 	class basic_mouse_event
 	{
 	public:
-		typedef neolib::variant<neogfx::mouse_wheel, neogfx::delta, neogfx::mouse_button, neogfx::point, neogfx::key_modifiers_e> parameter_type;
+		typedef neolib::variant<neogfx::point, neogfx::delta, neogfx::mouse_button, neogfx::mouse_wheel, neogfx::key_modifiers_e> parameter_type;
 	public:
 		basic_mouse_event(mouse_event_type aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
 			iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
@@ -113,21 +113,21 @@ namespace neogfx
 		{
 			return iType;
 		}
-		neogfx::mouse_wheel mouse_wheel() const
+		neogfx::point position() const
 		{
-			return static_variant_cast<neogfx::mouse_wheel>(iParameter1);
+			return static_variant_cast<neogfx::point>(iParameter1);
 		}
 		neogfx::delta delta() const
 		{
-			return static_variant_cast<neogfx::delta>(iParameter2);
+			return static_variant_cast<neogfx::delta>(iParameter1);
 		}
 		neogfx::mouse_button mouse_button() const
 		{
-			return static_variant_cast<neogfx::mouse_button>(iParameter1);
+			return static_variant_cast<neogfx::mouse_button>(iParameter2);
 		}
-		neogfx::point position() const
+		neogfx::mouse_wheel mouse_wheel() const
 		{
-			return static_variant_cast<neogfx::point>(iParameter2);
+			return static_variant_cast<neogfx::mouse_wheel>(iParameter2);
 		}
 		neogfx::key_modifiers_e key_modifiers() const
 		{
