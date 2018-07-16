@@ -49,7 +49,7 @@ namespace neogfx
 	public:
 		bool debug() const;
 		neogfx::renderer renderer() const;
-		bool full_screen() const;
+		std::optional<std::pair<uint32_t, uint32_t>> full_screen() const;
 		bool double_buffering() const;
 	};
 

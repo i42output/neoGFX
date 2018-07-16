@@ -177,8 +177,17 @@ int main(int argc, char* argv[])
 		app.change_style("Slate");
 
 		std::optional<ng::window> windowObject;
-		if (app.program_options().full_screen())
-			windowObject.emplace(ng::video_mode{ 1920, 1080 });
+		auto fullscreenResolution = app.program_options().full_screen();
+		if (fullscreenResolution != std::nullopt)
+		{
+			if (fullscreenResolution->first == 0)
+				windowObject.emplace(
+					ng::video_mode{ 
+						static_cast<uint32_t>(app.basic_services().display().desktop_rect().width()), 
+						static_cast<uint32_t>(app.basic_services().display().desktop_rect().height()) });
+			else
+				windowObject.emplace(ng::video_mode{ fullscreenResolution->first, fullscreenResolution->second });
+		}
 		else
 			windowObject.emplace(ng::size{ 768, 688 } * app.surface_manager().display().metrics().horizontal_dpi() / 96.0);
 		ng::window& window = *windowObject;

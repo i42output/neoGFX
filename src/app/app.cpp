@@ -22,6 +22,7 @@
 #include <atomic>
 #include <boost/locale.hpp> 
 #include <neolib/raii.hpp>
+#include <neolib/string_utils.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
@@ -48,7 +49,7 @@ namespace neogfx
 		boost::program_options::options_description description{ "Allowed options" };
 		description.add_options()
 			("debug", "open debug console")
-			("fullscreen", "run full screen")
+			("fullscreen", boost::program_options::value<std::string>()->implicit_value(""s), "run full screen")
 			("vulkan", "use Vulkan renderer")
 			("directx", "use DirectX (ANGLE) renderer")
 			("software", "use software renderer")
@@ -75,9 +76,27 @@ namespace neogfx
 			return neogfx::renderer::OpenGL;
 	}
 
-	bool program_options::full_screen() const
+	std::optional<std::pair<uint32_t, uint32_t>> program_options::full_screen() const
 	{
-		return count("fullscreen") == 1;
+		if (count("fullscreen") == 1)
+		{
+			auto screenResolution = (*this)["fullscreen"].as<std::string>();
+			if (screenResolution.empty())
+				return std::make_pair(0, 0);
+			else
+			{
+				neolib::vecarray<std::string, 2> bits;
+				neolib::tokens(screenResolution, ","s, bits, 2, false, false);
+				if (bits.size() == 2)
+				{
+					auto result = std::make_pair(boost::lexical_cast<uint32_t>(bits[0]), boost::lexical_cast<uint32_t>(bits[1]));
+					if (result.first != 0 && result.second != 0)
+						return result;
+				}
+			}
+			throw invalid_options("invalid fullscreen resolution");
+		}
+		return std::optional<std::pair<uint32_t, uint32_t>>{};
 	}
 
 	bool program_options::double_buffering() const

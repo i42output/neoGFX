@@ -93,6 +93,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,6 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(DevDirNeolib)\include;$(DevDirNeogfx)\include;$(DevDirBoost);$(DevDirOpenSSL);$(DevDirZlib);$(DevDirFreetype)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

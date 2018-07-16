@@ -24,6 +24,11 @@
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_property.hpp>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4702 ) // unreachable code
+#endif
+
 namespace neogfx
 {
 	using namespace std::string_literals;
@@ -139,12 +144,8 @@ namespace neogfx
 				return do_assign(std::any_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify)
 			else if constexpr (std::is_same_v<try_type, neolib::none_t>)
 				return do_assign(value_type{}, aOwnerNotify)
-			else if constexpr (std::is_convertible_v<try_type, value_type> && std::is_integral_v<try_type> == std::is_integral_v<value_type>)
+			else if constexpr (std::is_arithmetic_v<value_type> && std::is_convertible_v<try_type, value_type> && std::is_integral_v<try_type> == std::is_integral_v<value_type>)
 				return do_assign(static_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify)
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4702 ) // unreachable code
-#endif
 			else
 			{
 				// [[unreachable]]
@@ -152,9 +153,6 @@ namespace neogfx
 				(void)aOwnerNotify;
 				throw invalid_type();
 			}
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
 		}
 		template <typename T2>
 		self_type& operator=(T2&& aValue)
@@ -222,3 +220,7 @@ namespace neogfx
 
 	#define define_property( category, type, name, ... ) neogfx::property<type, category> name = { *this, #name ##s, __VA_ARGS__ };
 }
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
