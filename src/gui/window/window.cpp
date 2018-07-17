@@ -343,7 +343,7 @@ namespace neogfx
 	window_style window::style() const
 	{
 		auto result = iStyle;
-		if (ultimate_ancestor().is_fullscreen())
+		if (ultimate_ancestor().is_fullscreen() && &ultimate_ancestor() != this)
 			result |= window_style::Nested;
 		return result;
 	}
@@ -943,7 +943,10 @@ namespace neogfx
 		iSurfaceDestroyed.emplace(surface().native_surface().as_lifetime());
 
 		if (is_fullscreen())
+		{
+			set_frame_style(frame_style::NoFrame);
 			iNestedWindowContainer.emplace(*this);
+		}
 
 		if ((style() & window_style::InitiallyHidden) == window_style::InitiallyHidden)
 			hide();

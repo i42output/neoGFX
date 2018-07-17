@@ -58,7 +58,7 @@ namespace neogfx
 		void paint_non_client(graphics_context& aGraphicsContext) const override;
 		void paint(graphics_context& aGraphicsContext) const override;
 	public:
-		void set_style(frame_style aStyle);
+		void set_frame_style(frame_style aStyle);
 	protected:
 		virtual bool has_frame_colour() const;
 		virtual colour frame_colour() const;

@@ -141,7 +141,7 @@ namespace neogfx
 		iStepDownButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 		iStepDownButton.clicked.set_trigger_type(event_trigger_type::Synchronous);
 		iStepDownButton.double_clicked.set_trigger_type(event_trigger_type::Synchronous);
-		iTextBox.set_style(frame_style::NoFrame);
+		iTextBox.set_frame_style(frame_style::NoFrame);
 
 		iSink += iTextBox.text_filter([this](const std::string& aText, bool& aAccept)
 		{

@@ -23,7 +23,7 @@
 namespace neogfx
 {
 	palette::palette() : 
-		iWidgetDetailSecondaryColour{ colour::Yellow }
+		iWidgetDetailSecondaryColour{ colour::Orange }
 	{
 	}
 

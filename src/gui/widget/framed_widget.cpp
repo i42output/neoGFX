@@ -121,7 +121,7 @@ namespace neogfx
 		widget::paint(aGraphicsContext);
 	}
 
-	void framed_widget::set_style(frame_style aStyle)
+	void framed_widget::set_frame_style(frame_style aStyle)
 	{
 		if (iStyle != aStyle)
 		{
