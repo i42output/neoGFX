@@ -283,12 +283,13 @@ namespace neogfx
 		iSizeFarthestCornerRadioButton.set_checked(gradient().size() == gradient::FarthestCorner);
 		iShapeEllipseRadioButton.set_checked(gradient().shape() == gradient::Ellipse);
 		iShapeCircleRadioButton.set_checked(gradient().shape() == gradient::Circle);
-		bool specifyCentre = (gradient().centre() != optional_point{});
+		auto centre = gradient().centre();
+		bool specifyCentre = (centre != std::nullopt);
 		iCentreGroupBox.check_box().set_checked(specifyCentre);
 		if (specifyCentre)
 		{
-			iXCentreSpinBox.set_value(gradient().centre()->x);
-			iYCentreSpinBox.set_value(gradient().centre()->y);
+			iXCentreSpinBox.set_value(centre->x);
+			iYCentreSpinBox.set_value(centre->y);
 		}
 		else
 		{
