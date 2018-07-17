@@ -172,7 +172,7 @@ namespace neogfx
 		{
 			if (is_surface())
 				return &surface().as_surface_window();
-			else if (has_parent_window())
+			else if (has_parent_window(false))
 				return parent_window().find_surface();
 			else
 				return nullptr;
