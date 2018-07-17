@@ -61,6 +61,16 @@ namespace neogfx
 		return static_cast<window_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}
 
+	inline constexpr window_style operator|=(window_style& aLhs, window_style aRhs)
+	{
+		return aLhs = static_cast<window_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr window_style operator&=(window_style& aLhs, window_style aRhs)
+	{
+		return aLhs = static_cast<window_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
 	struct window_placement
 	{
 		enum state_e

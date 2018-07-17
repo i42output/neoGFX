@@ -46,16 +46,11 @@ namespace neogfx
 		bool has_root() const override;
 		const i_window& root() const override;
 		i_window& root() override;
-		bool has_parent(bool aSameSurface = true) const override;
+		bool has_parent() const override;
 		const i_widget& parent() const override;
 		i_widget& parent() override;
 		void set_parent(i_widget& aParent) override;
 		void parent_changed() override;
-		const i_widget& ultimate_ancestor(bool aSameSurface = true) const override;
-		i_widget& ultimate_ancestor(bool aSameSurface = true) override;
-		bool is_ancestor_of(const i_widget& aWidget, bool aSameSurface = true) const override;
-		bool is_descendent_of(const i_widget& aWidget, bool aSameSurface = true) const override;
-		bool is_sibling_of(const i_widget& aWidget) const override;
 		bool adding_child() const override;
 		i_widget& add(i_widget& aChild) override;
 		i_widget& add(std::shared_ptr<i_widget> aChild) override;
@@ -74,10 +69,6 @@ namespace neogfx
 		void link_before(i_widget* aPreviousWidget) override;
 		void link_after(i_widget* aNextWidget) override;
 		void unlink() override;
-		bool has_surface() const override;
-		const i_surface& surface() const override;
-		i_surface& surface() override;
-		bool is_surface() const override;
 		bool has_layout() const override;
 		void set_layout(i_layout& aLayout, bool aMoveExistingItems = true) override;
 		void set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems = true) override;
@@ -241,11 +232,6 @@ namespace neogfx
 	public:
 		const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const override;
 		i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
-	private:
-		const i_surface* find_surface() const override;
-		i_surface* find_surface() override;
-		const i_window* find_root() const override;
-		i_window* find_root() override;
 		// helpers
 	public:
 		using i_widget::set_size_policy;
@@ -257,8 +243,7 @@ namespace neogfx
 	private:
 		bool iSingular;
 		i_widget* iParent;
-		mutable const i_surface* iSurface;
-		mutable const i_window* iRoot;
+		mutable std::optional<const i_window*> iRoot;
 		widget_list iChildren;
 		bool iAddingChild;
 		i_widget* iLinkBefore;

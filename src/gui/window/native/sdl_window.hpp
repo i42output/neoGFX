@@ -106,6 +106,7 @@ namespace neogfx
 		void maximize() override;
 		bool is_restored() const override;
 		void restore() override;
+		bool is_fullscreen() const override;
 		bool enabled() const override;
 		void enable(bool aEnable) override;
 		bool is_capturing() const override;

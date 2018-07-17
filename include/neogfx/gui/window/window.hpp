@@ -42,6 +42,9 @@ namespace neogfx
 		class client;
 		typedef std::optional<title_bar> optional_title_bar;
 	public:
+		struct fullscreen_window_cannot_nest : std::logic_error { fullscreen_window_cannot_nest() : std::logic_error("neogfx::window::fullscreen_window_cannot_nest") {} };
+		struct parentless_window_cannot_nest : std::logic_error { parentless_window_cannot_nest() : std::logic_error("neogfx::window::parentless_window_cannot_nest") {} };
+	public:
 		window(const video_mode& aVideoMode, window_style aStyle = window_style::Fullscreen, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const size& aDimensions, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		window(const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
@@ -77,6 +80,8 @@ namespace neogfx
 		const i_window& parent_window() const override;
 		i_window& parent_window()  override;
 		bool is_owner_of(const i_window& aChildWindow) const override;
+		const i_window& ultimate_ancestor() const override;
+		i_window& ultimate_ancestor() override;
 	public:
 		const i_nested_window_container& nested_container() const override;
 		i_nested_window_container& nested_container() override;
@@ -99,6 +104,7 @@ namespace neogfx
 		bool is_root() const override;
 		const i_window& root() const override;
 		i_window& root() override;
+		void set_parent(i_widget& aParent) override;
 		bool can_defer_layout() const override;
 		bool is_managing_layout() const override;
 		void layout_items_completed() override;
@@ -137,6 +143,7 @@ namespace neogfx
 		void maximize() override;
 		bool is_restored() const override;
 		void restore() override;
+		bool is_fullscreen() const override;
 		point window_position() const override;
 		neogfx::window_placement window_placement() const override;
 		void set_window_placement(const neogfx::window_placement& aPlacement) override;
@@ -190,7 +197,6 @@ namespace neogfx
 		void update_modality(bool aEnableAncestors) override;
 		void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) override;
 		void dismiss_children(const i_widget* aClickedWidget = nullptr) override;
-		const i_surface_window* find_surface() const override;
 	public:
 		const i_widget& as_widget() const override;
 		i_widget& as_widget() override;
@@ -198,6 +204,7 @@ namespace neogfx
 		void init();
 	private:
 		i_window_manager& iWindowManager;
+		i_window* iParentWindow;
 		bool iClosed;
 		sink iSink;
 		std::optional<nested_window_container> iNestedWindowContainer;

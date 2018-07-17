@@ -44,8 +44,6 @@ namespace neogfx
 	widget::widget() :
 		iSingular{ false },
 		iParent{ nullptr },
-		iSurface{ nullptr },
-		iRoot { nullptr },
 		iAddingChild{ false },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
@@ -58,8 +56,6 @@ namespace neogfx
 	widget::widget(i_widget& aParent) :
 		iSingular{ false },
 		iParent{ nullptr },
-		iSurface{ nullptr },
-		iRoot{ nullptr },
 		iAddingChild{ false },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
@@ -73,8 +69,6 @@ namespace neogfx
 	widget::widget(i_layout& aLayout) :
 		iSingular{ false },
 		iParent{ nullptr },
-		iSurface{ nullptr },
-		iRoot{ nullptr },
 		iAddingChild{ false },
 		iLinkBefore{ nullptr },
 		iLinkAfter{ nullptr },
@@ -95,7 +89,7 @@ namespace neogfx
 			auto layout = iLayout;
 			iLayout.reset();
 		}
-		if (has_parent(false))
+		if (has_parent())
 			parent().remove(*this);
 		if (has_parent_layout())
 			parent_layout().remove(*this);
@@ -154,7 +148,6 @@ namespace neogfx
 			if (iSingular)
 			{
 				iParent = nullptr;
-				iSurface = nullptr;
 			}
 		}
 	}
@@ -166,14 +159,21 @@ namespace neogfx
 
 	bool widget::has_root() const
 	{
-		return find_root() != nullptr;
+		if (iRoot == std::nullopt)
+		{
+			const i_widget* w = this;
+			while (!w->is_root() && w->has_parent())
+				w = &w->parent();
+			if (w->is_root())
+				iRoot = &w->root();
+		}
+		return *iRoot != nullptr;
 	}
 
 	const i_window& widget::root() const
 	{
-		auto existingRoot = find_root();
-		if (existingRoot != nullptr)
-			return *existingRoot;
+		if (has_root())
+			return **iRoot;
 		throw no_root();
 	}
 
@@ -182,23 +182,21 @@ namespace neogfx
 		return const_cast<i_window&>(const_cast<const widget*>(this)->root());
 	}
 
-	bool widget::has_parent(bool aSameSurface) const
+	bool widget::has_parent() const
 	{
-		return iParent != nullptr && (!aSameSurface || same_surface(*iParent));
+		return iParent != nullptr;
 	}
 
 	const i_widget& widget::parent() const
 	{
-		if (!has_parent(false))
+		if (!has_parent())
 			throw no_parent();
 		return *iParent;
 	}
 
 	i_widget& widget::parent()
 	{
-		if (!has_parent(false))
-			throw no_parent();
-		return *iParent;
+		return const_cast<i_widget&>(const_cast<const widget*>(this)->parent());
 	}
 
 	void widget::set_parent(i_widget& aParent)
@@ -215,44 +213,6 @@ namespace neogfx
 	{
 		if (!is_root() && has_managing_layout())
 			managing_layout().layout_items(true);
-	}
-
-	const i_widget& widget::ultimate_ancestor(bool aSameSurface) const
-	{
-		const i_widget* w = this;
-		while (w->has_parent(aSameSurface))
-			w = &w->parent();
-		return *w;
-	}
-
-	i_widget& widget::ultimate_ancestor(bool aSameSurface)
-	{
-		i_widget* w = this;
-		while (w->has_parent(aSameSurface))
-			w = &w->parent();
-		return *w;
-	}
-
-	bool widget::is_ancestor_of(const i_widget& aWidget, bool aSameSurface) const
-	{
-		const i_widget* w = &aWidget;
-		while (w->has_parent(aSameSurface))
-		{
-			w = &w->parent();
-			if (w == this)
-				return true;
-		}
-		return false;
-	}
-
-	bool widget::is_descendent_of(const i_widget& aWidget, bool aSameSurface) const
-	{
-		return aWidget.is_ancestor_of(*this, aSameSurface);
-	}
-		
-	bool widget::is_sibling_of(const i_widget& aWidget) const
-	{
-		return has_parent(false) && aWidget.has_parent(false) && &parent() == &aWidget.parent();
 	}
 
 	bool widget::adding_child() const
@@ -440,30 +400,6 @@ namespace neogfx
 		iLinkAfter = nullptr;
 	}
 
-	bool widget::has_surface() const
-	{
-		auto existingSurface = find_surface();
-		return existingSurface != nullptr && !existingSurface->is_closed();
-	}
-
-	const i_surface& widget::surface() const
-	{
-		auto existingSurface = find_surface();
-		if (existingSurface != nullptr)
-			return *existingSurface;
-		throw no_surface();
-	}
-
-	i_surface& widget::surface()
-	{
-		return const_cast<i_surface&>(const_cast<const widget*>(this)->surface());
-	}
-
-	bool widget::is_surface() const
-	{
-		return false;
-	}
-
 	bool widget::has_layout() const
 	{
 		return iLayout != nullptr;
@@ -625,7 +561,7 @@ namespace neogfx
 
 	void widget::set_layout_owner(i_widget* aOwner)
 	{
-		if (aOwner != nullptr && !has_parent(false))
+		if (aOwner != nullptr && !has_parent())
 		{
 			auto itemIndex = parent_layout().find(*this);
 			if (itemIndex == std::nullopt)
@@ -693,9 +629,9 @@ namespace neogfx
 				layout_items_completed();
 			}
 		}
-		else if (can_defer_layout() && has_root())
+		else if (can_defer_layout())
 		{
-			if (!iLayoutTimer)
+			if (has_root() && !iLayoutTimer)
 			{
 				iLayoutTimer = std::make_unique<layout_timer>(root(), app::instance(), [this](neolib::callback_timer&)
 				{
@@ -1558,39 +1494,6 @@ namespace neogfx
 	graphics_context widget::create_graphics_context() const
 	{
 		return graphics_context{ *this };
-	}
-
-	const i_surface* widget::find_surface() const
-	{
-		if (iSurface != nullptr)
-			return iSurface;
-		if (is_surface())
-			return (iSurface = &surface());
-		if (has_parent(false))
-			return (iSurface = parent().find_surface());
-		return nullptr;
-	}
-
-	i_surface* widget::find_surface()
-	{
-		return const_cast<i_surface*>(const_cast<const widget*>(this)->find_surface());
-	}
-
-	const i_window* widget::find_root() const
-	{
-		if (iRoot != nullptr)
-			return iRoot;
-		const i_widget* w = this;
-		while (!w->is_root() && w->has_parent(true))
-			w = &w->parent();
-		if (w->is_root())
-			return (iRoot = &w->root());
-		return nullptr;
-	}
-
-	i_window* widget::find_root()
-	{
-		return const_cast<i_window*>(const_cast<const widget*>(this)->find_root());
 	}
 }
 

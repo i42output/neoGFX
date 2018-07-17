@@ -356,7 +356,7 @@ namespace neogfx
 					selectAlphaAction->triggered([this, stopIter]()
 					{
 						auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
-						alpha_dialog ad{ ultimate_ancestor(), stop.second };
+						alpha_dialog ad{ root().as_widget(), stop.second };
 						if (ad.exec() == dialog_result::Accepted)
 						{
 							stop.second = ad.selected_alpha();

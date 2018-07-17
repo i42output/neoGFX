@@ -261,7 +261,7 @@ namespace neogfx
 	{
 		auto totalArea = iView.total_item_area(*this);
 		auto idealSize = size{ effective_frame_width() * 2.0 } + margins().size() + totalArea + iView.margins().size();
-		idealSize.cy = std::min(idealSize.cy, parent().root().as_widget().extents().cy / 2.0);
+		idealSize.cy = std::min(idealSize.cy, iDropList.root().as_widget().extents().cy / 2.0);
 		if (idealSize.cy - (effective_frame_width() * 2.0 + margins().size().cy) < totalArea.cy)
 			idealSize.cx += vertical_scrollbar().width(*this);
 		return idealSize.max(iDropList.minimum_size());

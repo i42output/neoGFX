@@ -149,7 +149,7 @@ namespace neogfx
 		{
 			iExpansionPolicy = aExpansionPolicy;
 			if (has_layout_owner())
-				layout_owner().ultimate_ancestor().layout_items(true);
+				layout_owner().layout_root(true);
 		}
 	}
 
@@ -211,7 +211,7 @@ namespace neogfx
 		{
 			iSizePolicy = aSizePolicy;
 			if (has_layout_owner() && aUpdateLayout)
-				layout_owner().ultimate_ancestor().layout_items(true);
+				layout_owner().layout_root(true);
 		}
 	}
 
@@ -234,7 +234,7 @@ namespace neogfx
 		{
 			iWeight = aWeight;
 			if (has_layout_owner() && aUpdateLayout)
-				layout_owner().ultimate_ancestor().layout_items(true);
+				layout_owner().layout_root(true);
 		}
 	}
 
@@ -257,7 +257,7 @@ namespace neogfx
 		{
 			iMinimumSize = newMinimumSize;
 			if (has_layout_owner() && aUpdateLayout)
-				layout_owner().ultimate_ancestor().layout_items(true);
+				layout_owner().layout_root(true);
 		}
 	}
 
@@ -280,7 +280,7 @@ namespace neogfx
 		{
 			iMaximumSize = newMaximumSize;
 			if (has_layout_owner() && aUpdateLayout)
-				layout_owner().ultimate_ancestor().layout_items(true);
+				layout_owner().layout_root(true);
 		}
 	}
 

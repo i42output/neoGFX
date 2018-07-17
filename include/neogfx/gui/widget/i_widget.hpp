@@ -25,6 +25,7 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
@@ -33,7 +34,6 @@
 namespace neogfx
 {
 	class i_surface;
-	class i_window;
 	class i_layout;
 
 	class i_widget : public virtual i_object, public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
@@ -79,16 +79,11 @@ namespace neogfx
 		virtual bool is_root() const = 0;
 		virtual const i_window& root() const = 0;
 		virtual i_window& root() = 0;
-		virtual bool has_parent(bool aSameSurface = true) const = 0;
+		virtual bool has_parent() const = 0;
 		virtual const i_widget& parent() const = 0;
 		virtual i_widget& parent() = 0;
 		virtual void set_parent(i_widget& aParent) = 0;
 		virtual void parent_changed() = 0;
-		virtual const i_widget& ultimate_ancestor(bool aSameSurface = true) const = 0;
-		virtual i_widget& ultimate_ancestor(bool aSameSurface = true) = 0;
-		virtual bool is_ancestor_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
-		virtual bool is_descendent_of(const i_widget& aWidget, bool aSameSurface = true) const = 0;
-		virtual bool is_sibling_of(const i_widget& aWidget) const = 0;
 		virtual bool adding_child() const = 0;
 		virtual i_widget& add(i_widget& aChild) = 0;
 		virtual i_widget& add(std::shared_ptr<i_widget> aChild) = 0;
@@ -100,6 +95,7 @@ namespace neogfx
 		virtual widget_list::iterator last() = 0;
 		virtual widget_list::const_iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) const = 0;
 		virtual widget_list::iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) = 0;
+	public:
 		virtual const i_widget& before() const = 0;
 		virtual i_widget& before() = 0;
 		virtual const i_widget& after() const = 0;
@@ -107,10 +103,7 @@ namespace neogfx
 		virtual void link_before(i_widget* aPreviousWidget) = 0;
 		virtual void link_after(i_widget* aNextWidget) = 0;
 		virtual void unlink() = 0;
-		virtual bool has_surface() const = 0;
-		virtual const i_surface& surface() const = 0;
-		virtual i_surface& surface() = 0;
-		virtual bool is_surface() const = 0;
+	public:
 		virtual bool has_layout() const = 0;
 		virtual void set_layout(i_layout& aLayout, bool aMoveExistingItems = true) = 0;
 		virtual void set_layout(std::shared_ptr<i_layout> aLayout, bool aMoveExistingItems = true) = 0;
@@ -215,11 +208,6 @@ namespace neogfx
 	public:
 		virtual const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const = 0;
 		virtual i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) = 0;
-	public:
-		virtual const i_surface* find_surface() const = 0;
-		virtual i_surface* find_surface() = 0;
-		virtual const i_window* find_root() const = 0;
-		virtual i_window* find_root() = 0;
 		// helpers
 	public:
 		template <typename WidgetType, typename... Args>
@@ -230,12 +218,50 @@ namespace neogfx
 			return *newWidget;
 		}
 	public:
+		bool has_surface() const
+		{
+			return has_root() && root().has_surface();
+		}
+		const i_surface& surface() const
+		{
+			return root().surface();
+		}
+		i_surface& surface()
+		{
+			return root().surface();
+		}
 		bool same_surface(const i_widget& aWidget) const
 		{
-			auto surface1 = find_surface();
-			auto surface2 = aWidget.find_surface();
-			return surface1 == surface2;
+			return has_surface() && aWidget.has_surface() &&
+				&surface() == &aWidget.surface();
 		}
+	public:
+		bool is_ancestor_of(const i_widget& aWidget) const
+		{
+			const i_widget* w = &aWidget;
+			while (w->has_parent())
+			{
+				w = &w->parent();
+				if (w == this)
+					return true;
+			}
+			return false;
+		}
+		bool is_descendent_of(const i_widget& aWidget) const
+		{
+			return aWidget.is_ancestor_of(*this);
+		}
+		bool is_sibling_of(const i_widget& aWidget) const
+		{
+			return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
+		}
+	public:
+		void layout_root(bool aDefer = false)
+		{
+			if (has_root())
+				root().as_widget().layout_items(aDefer);
+		}
+	public:
 		point to_window_coordinates(const point& aClientCoordinates) const
 		{
 			return aClientCoordinates + non_client_rect().top_left();

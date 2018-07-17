@@ -574,6 +574,11 @@ namespace neogfx
 		SDL_RestoreWindow(iHandle);
 	}
 
+	bool sdl_window::is_fullscreen() const
+	{
+		return (SDL_GetWindowFlags(iHandle) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
+	}
+
 	bool sdl_window::enabled() const
 	{
 #ifdef WIN32

@@ -69,6 +69,7 @@ namespace neogfx
 		virtual void maximize() = 0;
 		virtual bool is_restored() const = 0;
 		virtual void restore() = 0;
+		virtual bool is_fullscreen() const = 0;
 		virtual bool enabled() const = 0;
 		virtual void enable(bool aEnable) = 0;
 		virtual bool is_capturing() const = 0;

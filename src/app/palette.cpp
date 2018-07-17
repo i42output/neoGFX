@@ -22,7 +22,8 @@
 
 namespace neogfx
 {
-	palette::palette()
+	palette::palette() : 
+		iWidgetDetailSecondaryColour{ colour::Yellow }
 	{
 	}
 

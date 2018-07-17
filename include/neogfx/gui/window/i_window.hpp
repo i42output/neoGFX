@@ -24,8 +24,8 @@
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/layout_bits.hpp>
+#include <neogfx/gui/widget/widget_bits.hpp>
 
 namespace neogfx
 {
@@ -33,6 +33,7 @@ namespace neogfx
 	class i_native_window;
 	class i_nested_window;
 	class i_nested_window_container;
+	class i_widget;
 	class i_layout;
 
 	class i_window
@@ -75,6 +76,8 @@ namespace neogfx
 		virtual const i_window& parent_window() const = 0;
 		virtual i_window& parent_window() = 0;
 		virtual bool is_owner_of(const i_window& aChildWindow) const = 0;
+		virtual const i_window& ultimate_ancestor() const = 0;
+		virtual i_window& ultimate_ancestor() = 0;
 	public:
 		virtual const i_nested_window_container& nested_container() const = 0;
 		virtual i_nested_window_container& nested_container() = 0;
@@ -109,6 +112,7 @@ namespace neogfx
 		virtual void maximize() = 0;
 		virtual bool is_restored() const = 0;
 		virtual void restore() = 0;
+		virtual bool is_fullscreen() const = 0;
 		virtual point window_position() const = 0;
 		virtual neogfx::window_placement window_placement() const = 0;
 		virtual void set_window_placement(const neogfx::window_placement& aPlacement) = 0;
@@ -159,10 +163,31 @@ namespace neogfx
 		virtual void update_modality(bool aEnableAncestors) = 0;
 		virtual void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) = 0;
 		virtual void dismiss_children(const i_widget* aClickedWidget = nullptr) = 0;
-		virtual const i_surface_window* find_surface() const = 0;
 	public:
 		virtual const i_widget& as_widget() const = 0;
 		virtual i_widget& as_widget() = 0;
+		// helpers
+	public:
+		const i_surface_window* find_surface() const
+		{
+			if (is_surface())
+				return &surface().as_surface_window();
+			else if (has_parent_window())
+				return parent_window().find_surface();
+			else
+				return nullptr;
+		}
+		i_surface_window* find_surface()
+		{
+			return const_cast<i_surface_window*>(const_cast<const i_window*>(this)->find_surface());
+		}
+		bool is_ancestor_of(const i_window& aWindow) const
+		{
+			const i_window* w = &aWindow;
+			while (w != this && w->has_parent_window(false))
+				w = &w->parent_window();
+			return w == this;
+		}
 	};
 
 	rect corrected_popup_rect(i_window& aPopup, rect aPopupRect);

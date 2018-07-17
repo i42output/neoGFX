@@ -315,7 +315,7 @@ namespace neogfx
 				{
 				case FT_PIXEL_MODE_MONO: // 1 bit per pixel monochrome
 					for (uint32_t x = 0; x < bitmap.width; x += 8)
-						for (uint32_t b = 0; b < 8; ++b)
+						for (uint32_t b = 0; b < std::min(bitmap.width, 8u); ++b)
 							iGlyphTextureData[(x + b + 1) + (y + 1) * static_cast<std::size_t>(glyphRect.cx)] =
 							(x >= bitmap.width || y >= bitmap.rows) ? 0x00 : ((bitmap.buffer[x / 8 + bitmap.pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
 					break;

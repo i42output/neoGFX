@@ -195,7 +195,7 @@ namespace neogfx
 		{
 			iAlignment = aAlignment;
 			if (aUpdateLayout)
-				ultimate_ancestor().layout_items(true);
+				layout_root(true);
 		}
 	}
 
