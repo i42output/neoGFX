@@ -362,12 +362,12 @@ namespace neogfx
 		return tabPage.background_colour();
 	}
 
-	void tab_button::update(const rect& aUpdateRect)
+	bool tab_button::update(const rect& aUpdateRect)
 	{
 		if (!is_selected())
-			push_button::update(aUpdateRect);
+			return push_button::update(aUpdateRect);
 		else
-			push_button::update(to_client_coordinates(non_client_rect().inflate(delta{ 2.0, 2.0 })));
+			return push_button::update(to_client_coordinates(non_client_rect().inflate(delta{ 2.0, 2.0 })));
 	}
 
 	void tab_button::mouse_entered(const point& aPosition)

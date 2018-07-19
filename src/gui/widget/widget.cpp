@@ -159,6 +159,8 @@ namespace neogfx
 
 	bool widget::has_root() const
 	{
+		if (is_root())
+			return true;
 		if (iRoot == std::nullopt)
 		{
 			const i_widget* w = this;
@@ -712,8 +714,13 @@ namespace neogfx
 
 	point widget::origin() const
 	{
-		if ((!is_root() || root().is_nested()) && has_parent())
-			return position() + parent().origin();
+		if ((!is_root() || root().is_nested()))
+		{
+			if (has_parent())
+				return position() + parent().origin();
+			else
+				return position();
+		}
 		else
 			return point{};
 	}
@@ -951,20 +958,14 @@ namespace neogfx
 			layout_items();
 	}
 
-	void widget::update(bool aIncludeNonClient)
+	bool widget::update(const rect& aUpdateRect)
 	{
-		if ((!is_root() && !has_parent()) || !has_root() || !root().has_native_surface() || effectively_hidden() || layout_items_in_progress())
-			return;
-		update(aIncludeNonClient ? to_client_coordinates(non_client_rect()) : client_rect());
-	}
-
-	void widget::update(const rect& aUpdateRect)
-	{
-		if ((!is_root() && !has_parent()) || !has_root() || !root().has_native_surface() || effectively_hidden() || layout_items_in_progress())
-			return;
+		if (!can_update())
+			return false;
 		if (aUpdateRect.empty())
-			return;
+			return false;
 		surface().invalidate_surface(to_window_coordinates(aUpdateRect));
+		return true;
 	}
 
 	bool widget::requires_update() const

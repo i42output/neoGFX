@@ -122,13 +122,15 @@ namespace neogfx
 	public:
 		neogfx::size_policy size_policy() const override;
 	public:
+		using widget::update;
+		bool update(const rect& aUpdateRect) override;
 		void render(graphics_context& aGraphicsContext) const override;
 		void paint(graphics_context& aGraphicsContext) const override;
 	public:
 		colour background_colour() const override;
 	public:
+		using widget::show;
 		bool show(bool aVisible) override;
-		using scrollable_widget::show;
 	public:
 		neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
 	public:

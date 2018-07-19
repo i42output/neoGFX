@@ -136,8 +136,7 @@ namespace neogfx
 		virtual i_widget& get_widget_at(const point& aPosition) = 0;
 		virtual widget_part hit_test(const point& aPosition) const = 0;
 	public:
-		virtual void update(bool aIncludeNonClient = false) = 0;
-		virtual void update(const rect& aUpdateRect) = 0;
+		virtual bool update(const rect& aUpdateRect) = 0;
 		virtual bool requires_update() const = 0;
 		virtual rect update_rect() const = 0;
 		virtual rect default_clip_rect(bool aIncludeNonClient = false) const = 0;
@@ -277,6 +276,17 @@ namespace neogfx
 		rect to_client_coordinates(const rect& aWindowCoordinates) const
 		{
 			return aWindowCoordinates - non_client_rect().top_left();
+		}
+	public:
+		bool can_update() const
+		{
+			return has_root() && (root().has_native_surface() || root().is_nested()) && !effectively_hidden() && !layout_items_in_progress();
+		}
+		bool update(bool aIncludeNonClient = false)
+		{
+			if (!can_update())
+				return false;
+			return update(aIncludeNonClient ? to_client_coordinates(non_client_rect()) : client_rect());
 		}
 	public:
 		bool show()
