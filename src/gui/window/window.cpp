@@ -84,15 +84,20 @@ namespace neogfx
 	public:
 		nested_details(i_window& aSurrogate) : iSurrogate{ aSurrogate }
 		{
+			nested_root().add(*this);
+		}
+		~nested_details()
+		{
+			nested_root().remove(*this);
 		}
 	public:
-		const i_nested_window_container& nested_root() const override
+		const i_nest& nested_root() const override
 		{
-			return iSurrogate.nested_container();
+			return iSurrogate.nest();
 		}
-		i_nested_window_container& nested_root() override
+		i_nest& nested_root() override
 		{
-			return iSurrogate.nested_container();
+			return iSurrogate.nest();
 		}
 		bool has_nested_parent() const override
 		{
@@ -173,11 +178,12 @@ namespace neogfx
 		return true;
 	}
 
-	window::window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
+	window::window(const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aScrollbarStyle, aFrameStyle },
 		iWindowManager{ app::instance().window_manager() },
 		iParentWindow{ nullptr },
 		iClosed{ false },
+		iTitleText{ aWindowTitle },
 		iStyle{ aStyle },
 		iCountedEnable{ 0 },
 		iEnteredWidget{ nullptr },
@@ -196,33 +202,33 @@ namespace neogfx
 	}
 
 	window::window(const video_mode& aVideoMode, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
-		if ((style() & window_style::Nested) == window_style::Nested)
+		if (is_nested())
 			throw fullscreen_window_cannot_nest();
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aVideoMode, app::instance().name(), aStyle); });
+			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aVideoMode, title_text(), aStyle); });
 		init();
 	}
 
 	window::window(const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
-		if ((style() & window_style::Nested) == window_style::Nested)
+		if (is_nested())
 			throw parentless_window_cannot_nest();
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aDimensions, app::instance().name(), aStyle); });
+			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aDimensions, title_text(), aStyle); });
 		init();
 	}
 
 	window::window(const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ aWindowTitle, aStyle, aScrollbarStyle, aFrameStyle }
 	{
-		if ((style() & window_style::Nested) == window_style::Nested)
+		if (is_nested())
 			throw parentless_window_cannot_nest();
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
@@ -232,21 +238,21 @@ namespace neogfx
 	}
 
 	window::window(const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
-		if ((style() & window_style::Nested) == window_style::Nested)
+		if (is_nested())
 			throw parentless_window_cannot_nest();
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aPosition, aDimensions, app::instance().name(), aStyle); });
+			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aPosition, aDimensions, title_text(), aStyle); });
 		init();
 	}
 
 	window::window(const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ aWindowTitle, aStyle, aScrollbarStyle, aFrameStyle }
 	{
-		if ((style() & window_style::Nested) == window_style::Nested)
+		if (is_nested())
 			throw parentless_window_cannot_nest();
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
@@ -256,15 +262,15 @@ namespace neogfx
 	}
 
 	window::window(i_widget& aParent, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		set_parent(aParent);
 		try
 		{
-			if ((style() & window_style::Nested) != window_style::Nested)
+			if (!is_nested())
 				iSurfaceWindow = std::make_unique<surface_window_proxy>(
 					*this,
-					[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, app::instance().name(), aStyle); });
+					[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, title_text(), aStyle); });
 			init();
 		}
 		catch (...)
@@ -276,12 +282,12 @@ namespace neogfx
 	}
 
 	window::window(i_widget& aParent, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ aWindowTitle, aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		set_parent(aParent);
 		try
 		{
-			if ((style() & window_style::Nested) != window_style::Nested)
+			if (!is_nested())
 				iSurfaceWindow = std::make_unique<surface_window_proxy>(
 					*this, 
 					[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle); });
@@ -296,15 +302,15 @@ namespace neogfx
 	}
 
 	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		set_parent(aParent);
 		try
 		{
-			if ((style() & window_style::Nested) != window_style::Nested)
+			if (!is_nested())
 				iSurfaceWindow = std::make_unique<surface_window_proxy>(
 					*this, 
-					[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, app::instance().name(), aStyle); });
+					[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, title_text(), aStyle); });
 			init();
 		}
 		catch (...)
@@ -312,15 +318,16 @@ namespace neogfx
 			aParent.root().as_widget().remove(*this);
 			throw;
 		}
+		move(aPosition);
 	}
 
 	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ aStyle, aScrollbarStyle, aFrameStyle }
+		window{ aWindowTitle, aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		set_parent(aParent);
 		try
 		{
-			if ((style() & window_style::Nested) != window_style::Nested)
+			if (!is_nested())
 				iSurfaceWindow = std::make_unique<surface_window_proxy>(
 					*this, 
 					[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle); });
@@ -331,6 +338,7 @@ namespace neogfx
 			aParent.root().as_widget().remove(*this);
 			throw;
 		}
+		move(aPosition);
 	}
 
 	window::~window()
@@ -343,7 +351,7 @@ namespace neogfx
 	window_style window::style() const
 	{
 		auto result = iStyle;
-		if (ultimate_ancestor().is_fullscreen() && &ultimate_ancestor() != this)
+		if ((ultimate_ancestor().is_fullscreen() || app::instance().program_options().nest()) && &ultimate_ancestor() != this)
 			result |= window_style::Nested;
 		return result;
 	}
@@ -478,24 +486,26 @@ namespace neogfx
 
 	bool window::is_nested() const
 	{
-		return iNestedWindowDetails != nullptr;
+		return (style() & window_style::Nested) == window_style::Nested;
 	}
 
-	const i_nested_window_container& window::nested_container() const
+	const i_nest& window::nest() const
 	{
+		if (is_nest())
+			return as_nest();
 		if (!has_parent_window())
-			throw not_contained();
+			throw not_in_nest();
 		const i_window* w = &parent_window();
-		while (!w->is_nested_container() && w->has_parent_window())
+		while (!w->is_nest() && w->has_parent_window())
 			w = &w->parent_window();
-		if (w->is_nested_container())
-			return w->as_nested_container();
-		throw not_contained();
+		if (w->is_nest())
+			return w->as_nest();
+		throw not_in_nest();
 	}
 
-	i_nested_window_container& window::nested_container()
+	i_nest& window::nest()
 	{
-		return const_cast<i_nested_window_container&>(const_cast<const window*>(this)->nested_container());
+		return const_cast<i_nest&>(const_cast<const window*>(this)->nest());
 	}
 
 	const i_nested_window& window::as_nested() const
@@ -508,21 +518,21 @@ namespace neogfx
 		return const_cast<i_nested_window&>(const_cast<const window*>(this)->as_nested());
 	}
 
-	bool window::is_nested_container() const
+	bool window::is_nest() const
 	{
-		return iNestedWindowContainer != std::nullopt;
+		return iNest != std::nullopt;
 	}
 
-	const i_nested_window_container& window::as_nested_container() const
+	const i_nest& window::as_nest() const
 	{
-		if (is_nested_container())
-			return *iNestedWindowContainer;
-		throw not_nested_container();
+		if (is_nest())
+			return *iNest;
+		throw not_a_nest();
 	}
 
-	i_nested_window_container& window::as_nested_container()
+	i_nest& window::as_nest()
 	{
-		return const_cast<i_nested_window_container&>(const_cast<const window*>(this)->as_nested_container());
+		return const_cast<i_nest&>(const_cast<const window*>(this)->as_nest());
 	}
 
 	bool window::is_strong() const
@@ -662,6 +672,9 @@ namespace neogfx
 		aGraphicsContext.set_extents(extents());
 		aGraphicsContext.set_origin(origin());
 		paint_overlay.trigger(aGraphicsContext);
+		if (is_nest())
+			for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
+				as_nest().nested_window(nw).as_window().as_widget().render(aGraphicsContext);
 	}
 
 	void window::paint(graphics_context& aGraphicsContext) const
@@ -942,22 +955,23 @@ namespace neogfx
 	{
 		iSurfaceDestroyed.emplace(surface().native_surface().as_lifetime());
 
-		if (is_fullscreen())
+		if (is_fullscreen() || (app::instance().program_options().nest() && &ultimate_ancestor() == this))
 		{
-			set_frame_style(frame_style::NoFrame);
-			iNestedWindowContainer.emplace(*this);
+			if (is_fullscreen())
+				set_frame_style(frame_style::NoFrame);
+			iNest.emplace(*this);
 		}
 
 		if ((style() & window_style::InitiallyHidden) == window_style::InitiallyHidden)
 			hide();
 
-		if ((style() & window_style::Nested) == window_style::Nested)
+		if (is_nested())
 			iNestedWindowDetails = std::make_unique<nested_details>(*this);
 
 		update_modality(false);
 
 		if ((style() & window_style::TitleBar) == window_style::TitleBar)
-			iTitleBar.emplace(*this, title_bar_layout(), app::instance().default_window_icon(), native_window().title_text());
+			iTitleBar.emplace(*this, title_bar_layout(), app::instance().default_window_icon(), title_text());
 
 		set_margins(neogfx::margins{});
 		iNonClientLayout.set_margins(neogfx::margins{});

@@ -32,7 +32,7 @@ namespace neogfx
 	class i_native_surface;
 	class i_native_window;
 	class i_nested_window;
-	class i_nested_window_container;
+	class i_nest;
 	class i_widget;
 	class i_layout;
 
@@ -54,9 +54,9 @@ namespace neogfx
 	public:
 		struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_window::no_native_surface") {} };
 		struct no_parent_window : std::logic_error { no_parent_window() : std::logic_error("neogfx::i_window::no_parent_window") {} };
-		struct not_contained : std::logic_error { not_contained() : std::logic_error("neogfx::i_window::not_contained") {} };
+		struct not_in_nest : std::logic_error { not_in_nest() : std::logic_error("neogfx::i_window::not_in_nest") {} };
 		struct not_nested : std::logic_error { not_nested() : std::logic_error("neogfx::i_window::not_nested") {} };
-		struct not_nested_container : std::logic_error { not_nested_container() : std::logic_error("neogfx::i_window::not_nested_container") {} };
+		struct not_a_nest : std::logic_error { not_a_nest() : std::logic_error("neogfx::i_window::not_a_nest") {} };
 	public:
 		virtual const i_window_manager& window_manager() const = 0;
 		virtual i_window_manager& window_manager() = 0;
@@ -79,14 +79,14 @@ namespace neogfx
 		virtual const i_window& ultimate_ancestor() const = 0;
 		virtual i_window& ultimate_ancestor() = 0;
 	public:
-		virtual const i_nested_window_container& nested_container() const = 0;
-		virtual i_nested_window_container& nested_container() = 0;
+		virtual const i_nest& nest() const = 0;
+		virtual i_nest& nest() = 0;
 		virtual bool is_nested() const = 0;
 		virtual const i_nested_window& as_nested() const = 0;
 		virtual i_nested_window& as_nested() = 0;
-		virtual bool is_nested_container() const = 0;
-		virtual const i_nested_window_container& as_nested_container() const = 0;
-		virtual i_nested_window_container& as_nested_container() = 0;
+		virtual bool is_nest() const = 0;
+		virtual const i_nest& as_nest() const = 0;
+		virtual i_nest& as_nest() = 0;
 	public:
 		virtual bool is_strong() const = 0;
 		virtual bool is_weak() const = 0;

@@ -51,6 +51,7 @@ namespace neogfx
 		neogfx::renderer renderer() const;
 		std::optional<std::pair<uint32_t, uint32_t>> full_screen() const;
 		bool double_buffering() const;
+		bool nest() const;
 	};
 
 	class app : public neolib::async_thread, private async_event_queue, public i_app, private i_keyboard_handler

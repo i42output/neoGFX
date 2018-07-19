@@ -712,7 +712,7 @@ namespace neogfx
 
 	point widget::origin() const
 	{
-		if (!is_root() && has_parent())
+		if ((!is_root() || root().is_nested()) && has_parent())
 			return position() + parent().origin();
 		else
 			return point{};

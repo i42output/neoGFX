@@ -1,4 +1,4 @@
-// nested_window_container.cpp
+// i_nest.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -16,34 +16,25 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/nested_window_container.hpp>
 
 namespace neogfx
 {
-	nested_window_container::nested_window_container(i_widget& aWidget) :
-		iWidget{ aWidget }
-	{
-	}
+	class i_widget;
+	class i_nested_window;
 
-	void nested_window_container::add(i_nested_window& aWindow)
+	class i_nest
 	{
-		// todo
-	}
-
-	void nested_window_container::remove(i_nested_window& aWindow)
-	{
-		// todo
-	}
-
-	const i_widget& nested_window_container::as_widget() const
-	{
-		return iWidget;
-	}
-
-	i_widget& nested_window_container::as_widget() 
-	{
-		return iWidget;
-	}
+	public:
+		virtual std::size_t nested_window_count() const = 0;
+		virtual const i_nested_window& nested_window(std::size_t aIndex) const = 0;
+		virtual i_nested_window& nested_window(std::size_t aIndex) = 0;
+		virtual void add(i_nested_window& aWindow) = 0;
+		virtual void remove(i_nested_window& aWindow) = 0;
+	public:
+		virtual const i_widget& as_widget() const = 0;	
+		virtual i_widget& as_widget() = 0;
+	};
 }

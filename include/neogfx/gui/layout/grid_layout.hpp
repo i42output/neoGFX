@@ -40,7 +40,7 @@ namespace neogfx
 	private:
 		struct row_major;
 		struct column_major;
-		typedef std::map<cell_coordinates, i_layout_item*, std::less<cell_coordinates>, neolib::pool_allocator<std::pair<const cell_coordinates, i_layout_item*>>> cell_list;
+		typedef std::map<cell_coordinates, i_layout_item*, std::less<cell_coordinates>, neolib::fast_pool_allocator<std::pair<const cell_coordinates, i_layout_item*>>> cell_list;
 		typedef std::vector<std::pair<cell_coordinates, cell_coordinates>> span_list;
 	public:
 		grid_layout(neogfx::alignment aAlignment = neogfx::alignment::Centre | neogfx::alignment::VCentre);

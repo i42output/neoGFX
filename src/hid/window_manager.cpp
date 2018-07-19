@@ -73,17 +73,17 @@ namespace neogfx
 		return false;
 	}
 
-	rect window_manager::desktop_rect(const i_window& aWindow) const
+	rect window_manager::desktop_rect(const i_window& aWindow, bool aIgnoreNesting) const
 	{
-		if ((aWindow.style() & window_style::Nested) != window_style::Nested || !aWindow.has_parent_window())
+		if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
 			return app::instance().surface_manager().desktop_rect(aWindow.surface());
 		else
-			return rect{ point{}, window_rect(aWindow.nested_container().as_widget().root()).extents() };
+			return rect{ point{}, window_rect(aWindow.nest().as_widget().root()).extents() };
 	}
 
-	rect window_manager::window_rect(const i_window& aWindow) const
+	rect window_manager::window_rect(const i_window& aWindow, bool aIgnoreNesting) const
 	{
-		if ((aWindow.style() & window_style::Nested) != window_style::Nested || !aWindow.has_parent_window())
+		if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
 			return rect{ aWindow.surface().surface_position(), aWindow.surface().surface_size() };
 		else
 			return rect{ aWindow.as_widget().position(), aWindow.as_widget().extents() };
@@ -91,7 +91,7 @@ namespace neogfx
 
 	void window_manager::move_window(i_window& aWindow, const point& aPosition)
 	{
-		if ((aWindow.style() & window_style::Nested) != window_style::Nested || !aWindow.has_parent_window())
+		if (!aWindow.is_nested())
 			aWindow.surface().move_surface(aPosition);
 		else
 			aWindow.as_widget().move(aPosition);
@@ -99,7 +99,7 @@ namespace neogfx
 
 	void window_manager::resize_window(i_window& aWindow, const size& aExtents)
 	{
-		if ((aWindow.style() & window_style::Nested) != window_style::Nested || !aWindow.has_parent_window())
+		if (!aWindow.is_nested())
 			aWindow.surface().resize_surface(aExtents);
 		else
 			aWindow.as_widget().resize(aExtents);

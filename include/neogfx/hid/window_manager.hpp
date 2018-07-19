@@ -52,8 +52,8 @@ namespace neogfx
 		i_window& window(std::size_t aIndex) override;
 		bool any_strong_windows() const override;
 	public:
-		rect desktop_rect(const i_window& aWindow) const override;
-		rect window_rect(const i_window& aWindow) const override;
+		rect desktop_rect(const i_window& aWindow, bool aIgnoreNesting = false) const override;
+		rect window_rect(const i_window& aWindow, bool aIgnoreNesting = false) const override;
 		void move_window(i_window& aWindow, const point& aPosition) override;
 		void resize_window(i_window& aWindow, const size& aExtents) override;
 	private:
