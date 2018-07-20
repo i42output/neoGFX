@@ -484,7 +484,7 @@ namespace neogfx
 		void set_tab_stop_hint(const std::string& aTabStopHint = "0000");
 		void set_tab_stops(const optional_dimension& aTabStops);
 	public:
-		position_type hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
+		position_type document_hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
 		virtual bool same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const;
 		virtual std::pair<position_type, position_type> word_at(position_type aTextPosition) const;
 	public:

@@ -242,3 +242,4 @@ Debug
 /3rdparty/glew/glew-2.1.0/lib/libglew32.lib
 /3rdparty/glew/glew-2.1.0/lib/libglew32d.lib
 /3rdparty/glew/glew-2.1.0/stage
+/3rdparty/glew/glew-2.1.0/build/cmake/stage

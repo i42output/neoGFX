@@ -353,7 +353,7 @@ namespace neogfx
 		scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
 		if (!password() && aButton == mouse_button::Left && client_rect().contains(aPosition))
 		{
-			auto word = word_at(hit_test(aPosition));
+			auto word = word_at(document_hit_test(aPosition));
 			cursor().set_anchor(word.first);
 			cursor().set_position(word.second, false);
 		}
@@ -816,7 +816,7 @@ namespace neogfx
 			{
 				auto currentPosition = glyph_position(cursor_glyph_position());
 				if (currentPosition.line != currentPosition.column->lines().begin())
-					cursor().set_position(from_glyph(iGlyphs.begin() + hit_test(point{ currentPosition.pos.x, (currentPosition.line - 1)->ypos }, false)).first, aMoveAnchor);
+					cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ currentPosition.pos.x, (currentPosition.line - 1)->ypos }, false)).first, aMoveAnchor);
 			}
 			break;
 		case cursor::Down:
@@ -825,7 +825,7 @@ namespace neogfx
 				if (currentPosition.line != currentPosition.column->lines().end())
 				{
 					if (currentPosition.line + 1 != currentPosition.column->lines().end())
-						cursor().set_position(from_glyph(iGlyphs.begin() + hit_test(point{ currentPosition.pos.x, (currentPosition.line + 1)->ypos }, false)).first, aMoveAnchor);
+						cursor().set_position(from_glyph(iGlyphs.begin() + document_hit_test(point{ currentPosition.pos.x, (currentPosition.line + 1)->ypos }, false)).first, aMoveAnchor);
 					else if (currentPosition.lineEnd != iGlyphs.end() && currentPosition.lineEnd->is_line_breaking_whitespace())
 						cursor().set_position(iText.size(), aMoveAnchor);
 				}
@@ -986,7 +986,7 @@ namespace neogfx
 
 	void text_edit::set_cursor_position(const point& aPoint, bool aMoveAnchor, bool aEnableDragger)
 	{
-		set_cursor_glyph_position(hit_test(aPoint), aMoveAnchor);
+		set_cursor_glyph_position(document_hit_test(aPoint), aMoveAnchor);
 		if (aEnableDragger)
 		{
 			if (!capturing())
@@ -1100,7 +1100,7 @@ namespace neogfx
 		cursor().set_position(from_glyph(iGlyphs.begin() + aGlyphPosition).first, aMoveAnchor);
 	}
 
-	text_edit::position_type text_edit::hit_test(const point& aPoint, bool aAdjustForScrollPosition) const
+	text_edit::position_type text_edit::document_hit_test(const point& aPoint, bool aAdjustForScrollPosition) const
 	{
 		point adjusted = aAdjustForScrollPosition ?
 			point{ aPoint - client_rect(false).top_left() } + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } :

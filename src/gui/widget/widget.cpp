@@ -1477,7 +1477,7 @@ namespace neogfx
 		if (client_rect().contains(aPosition))
 		{
 			const i_widget* w = &get_widget_at(aPosition);
-			while (w != this && (w->hidden() || (w->disabled() && !aForHitTest) || (!mouse_event_is_non_client() && w->ignore_mouse_events()) || (mouse_event_is_non_client() && w->ignore_non_client_mouse_events())))
+			while (w != this && (w->effectively_hidden() || (w->effectively_disabled() && !aForHitTest) || (!mouse_event_is_non_client() && w->ignore_mouse_events()) || (mouse_event_is_non_client() && w->ignore_non_client_mouse_events())))
 			{
 				w = &w->parent();
 			}
