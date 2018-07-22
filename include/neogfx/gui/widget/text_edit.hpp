@@ -479,6 +479,7 @@ namespace neogfx
 		const column_info& column(std::size_t aColumnIndex);
 		void set_column(std::size_t aColumnIndex, const column_info& aColumn);
 	public:
+		bool has_hint() const;
 		void set_hint(const std::string& aHint);
 		dimension tab_stops() const;
 		void set_tab_stop_hint(const std::string& aTabStopHint = "0000");

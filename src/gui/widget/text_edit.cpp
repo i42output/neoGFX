@@ -1309,6 +1309,11 @@ namespace neogfx
 		}
 	}
 
+	bool text_edit::has_hint() const
+	{
+		return !iHint.empty();
+	}
+
 	void text_edit::set_hint(const std::string& aHint)
 	{
 		if (iHint != aHint)

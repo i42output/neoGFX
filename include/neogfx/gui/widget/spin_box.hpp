@@ -41,6 +41,7 @@ namespace neogfx
 		event<> constraints_changed;
 	public:
 		const std::string& text();
+		const line_edit& text_box() const;
 		line_edit& text_box();
 	public:
 		value_type minimum() const;

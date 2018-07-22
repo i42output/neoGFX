@@ -81,7 +81,7 @@ namespace neogfx
 	{
 		if (framed_widget::has_size_policy())
 			return framed_widget::size_policy();
-		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
+		return neogfx::size_policy{ text_box().has_hint() ? neogfx::size_policy::Minimum : neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
 	}
 
 	template <typename T>
@@ -122,6 +122,12 @@ namespace neogfx
 	const std::string& basic_spin_box<T>::text()
 	{
 		return iText;
+	}
+
+	template <typename T>
+	const line_edit& basic_spin_box<T>::text_box() const
+	{
+		return iTextBox;
 	}
 
 	template <typename T>
