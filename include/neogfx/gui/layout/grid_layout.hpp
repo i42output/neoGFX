@@ -106,11 +106,11 @@ namespace neogfx
 			return static_cast<WidgetT&>(widget_at_position(aRow, aColumn));
 		}
 	private:
-		vertical_layout iRowLayout;
-		std::vector<std::shared_ptr<horizontal_layout>> iRows;
 		cell_list iCells;
 		cell_dimensions iDimensions;
 		cell_coordinates iCursor;
 		span_list iSpans;
+		vertical_layout iRowLayout;
+		std::vector<std::shared_ptr<horizontal_layout>> iRows;
 	};
 }

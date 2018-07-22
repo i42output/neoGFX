@@ -207,6 +207,8 @@ namespace neogfx
 		iAngleSlider.set_maximum(360.0);
 		iAngleSlider.set_step(0.1);
 		iExponentGroupBox.set_checkable(true);
+		iExponentGroupBox.item_layout().set_alignment(alignment::Right);
+		iLinkedExponents.set_size_policy(size_policy::Expanding);
 		iLinkedExponents.set_checked(true);
 		iMExponentSpinBox.set_minimum(0.0);
 		iMExponentSpinBox.set_maximum(std::numeric_limits<double>::max());
@@ -271,6 +273,8 @@ namespace neogfx
 
 		iMExponentSpinBox.value_changed([this]() 
 		{ 
+			if (iUpdatingWidgets)
+				return;
 			auto e = gradient().exponents(); 
 			if (e == std::nullopt) 
 				e = vec2{}; 
@@ -282,6 +286,8 @@ namespace neogfx
 
 		iNExponentSpinBox.value_changed([this]()
 		{
+			if (iUpdatingWidgets)
+				return;
 			auto e = gradient().exponents();
 			if (e == std::nullopt)
 				e = vec2{};
@@ -392,7 +398,7 @@ namespace neogfx
 			iOrientationGroupBox.hide();
 			iSizeGroupBox.show();
 			iShapeGroupBox.show();
-			iExponentGroupBox.show();
+			iExponentGroupBox.show(gradient().shape() == gradient::Ellipse);
 			iCentreGroupBox.show();
 			break;
 		}

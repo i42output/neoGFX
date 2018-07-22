@@ -20,6 +20,7 @@
 #pragma once
 
 #include "spin_box.hpp"
+#include <neolib/raii.hpp>
 #include <boost/format.hpp>
 
 namespace neogfx
@@ -196,6 +197,7 @@ namespace neogfx
 			}
 			else
 			{
+				neolib::scoped_flag sf{ iDontSetText };
 				iText = text;
 				iTextCursorPos = iTextBox.cursor().position();
 				set_value(minimum());
@@ -390,7 +392,8 @@ namespace neogfx
 		if (iValue != aValue)
 		{
 			iValue = aValue;
-			iTextBox.set_text(value_to_string());
+			if (!iDontSetText)
+				iTextBox.set_text(value_to_string());
 			if (aNotify && (!text().empty() || value() != minimum()))
 				value_changed.trigger();
 		}

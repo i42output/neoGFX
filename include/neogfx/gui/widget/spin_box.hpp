@@ -85,6 +85,7 @@ namespace neogfx
 		value_type iStep;
 		value_type iValue;
 		std::string iFormat;
+		bool iDontSetText = false;
 	};
 }
 
