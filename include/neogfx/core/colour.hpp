@@ -809,8 +809,9 @@ namespace neogfx
 		{
 			Vertical	= 0,
 			Horizontal	= 1,
-			Diagonal	= 2,
-			Radial		= 3
+			Diagonal		= 2,
+			Rectangular = 3,
+			Radial		= 4
 		};
 		enum corner_e
 		{
@@ -828,7 +829,7 @@ namespace neogfx
 		enum size_e
 		{
 			ClosestSide		= 0,
-			FarthestSide	= 1,
+			FarthestSide		= 1,
 			ClosestCorner	= 2,
 			FarthestCorner	= 3
 		};
@@ -888,6 +889,9 @@ namespace neogfx
 		size_e size() const;
 		void set_size(size_e aSize);
 		gradient with_size(size_e aSize) const;
+		const optional_vec2& exponents() const;
+		void set_exponents(const optional_vec2& aExponents);
+		gradient with_exponents(const optional_vec2& aExponents) const;
 		const optional_point& centre() const;
 		void set_centre(const optional_point& aCentre);
 		gradient with_centre(const optional_point& aCentre) const;
@@ -917,6 +921,7 @@ namespace neogfx
 		orientation_type iOrientation;
 		shape_e iShape;
 		size_e iSize;
+		optional_vec2 iExponents;
 		optional_point iCentre;
 		double iSmoothness;
 		optional_rect iRect;

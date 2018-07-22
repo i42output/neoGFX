@@ -809,9 +809,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\splitter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\layout\spacer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

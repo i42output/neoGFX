@@ -51,10 +51,10 @@ namespace neogfx
 		const i_layout& item_layout() const;
 		i_layout& item_layout();
 		template <typename LayoutT, typename... Args>
-		i_layout& with_item_layout(Args... args)
+		LayoutT& with_item_layout(Args... args)
 		{
 			set_item_layout(std::make_shared<LayoutT>(args...));
-			return item_layout();
+			return static_cast<LayoutT&>(item_layout());
 		}
 	public:
 		virtual neogfx::size_policy size_policy() const;

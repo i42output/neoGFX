@@ -58,16 +58,27 @@ float ellipse_radius(float cx, float cy, float angle)
 	return cx * cy / sqrt(cx * cx * sin(angle) * sin(angle) + cy * cy * cos(angle) * cos(angle));
 }
 
+float distance_to_line(vec2 pt1, vec2 pt2, vec2 testPt)
+{
+	vec2 lineDir = pt2 - pt1;
+	vec2 perpDir = vec2(lineDir.y, -lineDir.x);
+	vec2 dirToPt1 = pt1 - testPt;
+	return abs(dot(normalize(perpDir), dirToPt1)); 
+}
+
 vec4 colour_at(vec2 viewPos)
 {
+	vec2 s = posBottomRight - posTopLeft;
+	vec2 pos = viewPos - posTopLeft;
+	pos.x = max(min(pos.x, s.x - 1.0), 0.0);
+	pos.y = max(min(pos.y, s.y - 1.0), 0.0);
 	float gradientPos;
 	if (nGradientDirection == 0) /* vertical */
-		gradientPos = (viewPos.y - posTopLeft.y) / (posBottomRight.y - posTopLeft.y);
+		gradientPos = pos.y / s.y;
 	else if (nGradientDirection == 1) /* horizontal */
-		gradientPos = (viewPos.x - posTopLeft.x) / (posBottomRight.x - posTopLeft.x);
-	else if (nGradientDirection == 2) /* diagonal - */
+		gradientPos = pos.x / s.x;
+	else if (nGradientDirection == 2) /* diagonal */
 	{
-		vec2 s = posBottomRight - posTopLeft;
 		vec2 centre = s / 2.0;
 		float angle;
 		switch (nGradientStartFrom)
@@ -88,7 +99,6 @@ vec4 colour_at(vec2 viewPos)
 			angle = radGradientAngle;
 			break;
 		}
-		vec2 pos = viewPos - posTopLeft;
 		pos.y = s.y - pos.y;
 		pos = pos - centre;
 		mat2 rot = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
@@ -96,10 +106,18 @@ vec4 colour_at(vec2 viewPos)
 		pos = pos + centre;
 		gradientPos = pos.y / s.y;
 	}
+	else if (nGradientDirection == 3) /* rectangular */
+	{
+		float vert = pos.y / s.y;
+		if (vert > 0.5)
+			vert = 1.0 - vert;
+		float horz = pos.x / s.x;
+		if (horz > 0.5)
+			horz = 1.0 - horz;
+		gradientPos = min(vert, horz) * 2.0;
+	}
 	else /* radial */
 	{
-	    vec2 pos = viewPos - posTopLeft;
-		vec2 s = posBottomRight - posTopLeft;
 		vec2 centre = s / 2.0 * (posGradientCentre + vec2(1.0, 1.0));
 		float d = distance(centre, pos);
 		vec2 c1 = posTopLeft - posTopLeft;
@@ -121,7 +139,7 @@ vec4 colour_at(vec2 viewPos)
 		if (distance(centre, c4) > distance(centre, fc))
 			fc = c4;
 		float r;
-		if (nGradientShape == 0)
+		if (nGradientShape == 0) // Elipse
 		{
 			switch(nGradientSize)
 			{
@@ -140,7 +158,7 @@ vec4 colour_at(vec2 viewPos)
 				break;
 			}
 		}
-		else
+		else if (nGradientShape == 1) // Circle
 		{
 			switch(nGradientSize)
 			{

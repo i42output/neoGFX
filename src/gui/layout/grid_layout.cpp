@@ -303,16 +303,18 @@ namespace neogfx
 			layout_owner().layout_root(true);
 	}
 
-	void grid_layout::add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns)
+	grid_layout& grid_layout::add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns)
 	{
 		add_span({ aColumnFrom, aRowFrom }, { aColumnFrom + aColumns - 1, aRowFrom + aRows - 1});
+		return *this;
 	}
 
-	void grid_layout::add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo)
+	grid_layout& grid_layout::add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo)
 	{
 		iSpans.push_back(std::make_pair(aFrom, aTo));
 		if (has_layout_owner())
 			layout_owner().layout_root(true);
+		return *this;
 	}
 
 	void grid_layout::set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout)
@@ -353,18 +355,10 @@ namespace neogfx
 				if (i != iCells.end())
 				{
 					auto s = find_span(cell_coordinates{ col, row });
-					if (s == iSpans.end())
-					{
+					if (s == iSpans.end() || s->first.y == s->second.y)
 						maxRowHeight[row] = std::max(maxRowHeight[row], i->second->extents().cy);
+					if (s == iSpans.end() || s->first.x == s->second.x)
 						maxColWidth[col] = std::max(maxColWidth[col], i->second->extents().cx);
-					}
-					else
-					{
-						maxRowHeight[row] = std::ceil(std::max(maxRowHeight[row], 
-							(i->second->extents().cy - spacing().cy * (s->second.y - s->first.y)) / (s->second.y - s->first.y + 1)));
-						maxColWidth[col] = std::ceil(std::max(maxColWidth[col],
-							(i->second->extents().cx - spacing().cx * (s->second.x - s->first.x)) / (s->second.x - s->first.x + 1)));
-					}
 				}
 			}
 		}
@@ -505,10 +499,8 @@ namespace neogfx
 			if (item.first.y == aRow)
 			{
 				auto s = find_span(item.first);
-				if (s == iSpans.end())
+				if (s == iSpans.end() || s->first.y == s->second.y)
 					result = std::max(result, item.second->minimum_size(aAvailableSpace).cy);
-				else
-					result = std::max(result, (item.second->minimum_size(aAvailableSpace).cy - spacing().cy * (s->second.y - s->first.y)) / (s->second.y - s->first.y + 1));
 			}
 		return std::ceil(result);
 	}
@@ -520,10 +512,8 @@ namespace neogfx
 			if (item.first.x == aColumn)
 			{
 				auto s = find_span(item.first);
-				if (s == iSpans.end())
+				if (s == iSpans.end() || s->first.x == s->second.x)
 					result = std::max(result, item.second->minimum_size(aAvailableSpace).cx);
-				else
-					result = std::max(result, (item.second->minimum_size(aAvailableSpace).cx - spacing().cx * (s->second.x - s->first.x)) / (s->second.x - s->first.x + 1));
 			}
 		return std::ceil(result);
 	}
@@ -548,12 +538,18 @@ namespace neogfx
 
 	void grid_layout::increment_cursor()
 	{
-		++iCursor.x;
-		if (iCursor.x >= columns())
+		if (iRows.empty())
+			return;
+		auto iterSpan = find_span(iCursor);
+		do
 		{
-			++iCursor.y;
-			iCursor.x = 0;
-		}
+			++iCursor.x;
+			if (iCursor.x >= columns())
+			{
+				++iCursor.y;
+				iCursor.x = 0;
+			}
+		} while (iterSpan != iSpans.end() && iterSpan == find_span(iCursor));
 	}
 
 	horizontal_layout& grid_layout::row_layout(cell_coordinate aRow)

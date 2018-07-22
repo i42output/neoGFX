@@ -563,7 +563,7 @@ namespace neogfx
 
 	colour window::frame_colour() const
 	{
-		if (!scrollable_widget::has_frame_colour() && is_active())
+		if (effectively_enabled() && !scrollable_widget::has_frame_colour() && is_active())
 		{
 			if (!is_nested())
 				return app::instance().current_style().palette().selection_colour();
@@ -669,6 +669,19 @@ namespace neogfx
 	{
 		aGraphicsContext.set_extents(extents());
 		aGraphicsContext.set_origin(origin());
+		if ((style() & window_style::DropShadow) == window_style::DropShadow)
+		{
+			if (!is_nested())
+			{
+				// todo
+			}
+			else
+			{
+				rect shadowRect = to_client_coordinates(non_client_rect());
+				shadowRect.position() += dpi_scale(point{ 4.0, 4.0 });
+				aGraphicsContext.fill_rounded_rect(shadowRect, dpi_scale(point{ 4.0, 4.0 }).x, colour::Yellow);
+			}
+		}
 		scrollable_widget::render(aGraphicsContext);
 		aGraphicsContext.set_extents(extents());
 		aGraphicsContext.set_origin(origin());
