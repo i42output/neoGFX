@@ -54,29 +54,19 @@ vec4 gradient_colour(in float n)
 	return mix(firstColour, secondColour, (n - firstPos) / (secondPos - firstPos));
 }
 
-float normalized_ellipse_radius(float angle)
-{
-	float x = pow(abs(cos(angle)), 2.0 / exponents.x) * sign(cos(angle));
-	float y = pow(abs(sin(angle)), 2.0 / exponents.y) * sign(sin(angle));
-	return sqrt(x * x + y * y);
-}
-
 float ellipse_radius(vec2 ab, vec2 centre, vec2 pt)
 {
 	vec2 d = pt - centre;
-	float angle = atan(d.y, d.x);
-	float nr = normalized_ellipse_radius(angle);
-	float x = nr * cos(angle) * ab.x;
-	float y = nr * sin(angle) * ab.y;
+	float angle = 0;
+	vec2 ratio = vec2(1.0, 1.0);
+	if (ab.x >= ab.y)
+		ratio.y = ab.x / ab.y;
+	else
+		ratio.x = ab.y / ab.x;
+	angle = atan(d.y * ratio.y, d.x * ratio.x);
+	float x = pow(abs(cos(angle)), 2.0 / exponents.x) * sign(cos(angle)) * ab.x;
+	float y = pow(abs(sin(angle)), 2.0 / exponents.y) * sign(sin(angle)) * ab.y;
 	return sqrt(x * x + y * y);
-}
-
-float distance_to_line(vec2 pt1, vec2 pt2, vec2 testPt)
-{
-	vec2 lineDir = pt2 - pt1;
-	vec2 perpDir = vec2(lineDir.y, -lineDir.x);
-	vec2 dirToPt1 = pt1 - testPt;
-	return abs(dot(normalize(perpDir), dirToPt1)); 
 }
 
 vec4 colour_at(vec2 viewPos)
@@ -168,10 +158,10 @@ vec4 colour_at(vec2 viewPos)
 				r = ellipse_radius(fs, centre, pos);
 				break;
 			case 2: // ClosestCorner
-				r = ellipse_radius(ab, vec2(abs(centre.x - cc.x), abs(centre.y - cc.y)), pos);
+				r = ellipse_radius(abs(cc - centre), centre, pos);
 				break;
 			case 3: // FarthestCorner
-				r = ellipse_radius(ab, vec2(abs(centre.x - fc.x), abs(centre.y - fc.y)), pos);
+				r = ellipse_radius(abs(fc - centre), centre, pos);
 				break;
 			}
 		}
