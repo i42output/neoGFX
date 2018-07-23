@@ -191,6 +191,7 @@ namespace neogfx
 			auto result = string_to_value(text);
 			if (result != std::nullopt)
 			{
+				neolib::scoped_flag sf{ iDontSetText };
 				iText = text;
 				iTextCursorPos = iTextBox.cursor().position();
 				set_value(std::min(maximum(), std::max(minimum(), *result)));

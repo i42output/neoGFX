@@ -10,6 +10,7 @@ uniform float radGradientAngle;
 uniform int nGradientSize;
 uniform int nGradientShape;
 uniform int nStopCount;
+uniform vec2 exponents;
 uniform vec2 posGradientCentre;
 uniform int nFilterSize;
 uniform sampler2DRect texStopPositions;
@@ -53,9 +54,21 @@ vec4 gradient_colour(in float n)
 	return mix(firstColour, secondColour, (n - firstPos) / (secondPos - firstPos));
 }
 
-float ellipse_radius(float cx, float cy, float angle)
+float normalized_ellipse_radius(float angle)
 {
-	return cx * cy / sqrt(cx * cx * sin(angle) * sin(angle) + cy * cy * cos(angle) * cos(angle));
+	float x = pow(abs(cos(angle)), 2.0 / exponents.x) * sign(cos(angle));
+	float y = pow(abs(sin(angle)), 2.0 / exponents.y) * sign(sin(angle));
+	return sqrt(x * x + y * y);
+}
+
+float ellipse_radius(vec2 ab, vec2 centre, vec2 pt)
+{
+	vec2 d = pt - centre;
+	float angle = atan(d.y, d.x);
+	float nr = normalized_ellipse_radius(angle);
+	float x = nr * cos(angle) * ab.x;
+	float y = nr * sin(angle) * ab.y;
+	return sqrt(x * x + y * y);
 }
 
 float distance_to_line(vec2 pt1, vec2 pt2, vec2 testPt)
@@ -118,19 +131,21 @@ vec4 colour_at(vec2 viewPos)
 	}
 	else /* radial */
 	{
-		vec2 centre = s / 2.0 * (posGradientCentre + vec2(1.0, 1.0));
+		vec2 ab = s / 2.0;
+		pos -= ab;
+		vec2 centre = ab * posGradientCentre;
 		float d = distance(centre, pos);
-		vec2 c1 = posTopLeft - posTopLeft;
-		vec2 c2 = vec2(posTopLeft.x, posBottomRight.y) - posTopLeft;
-		vec2 c3 = posBottomRight - posTopLeft;
-		vec2 c4 = vec2(posBottomRight.x, posTopLeft.y) - posTopLeft;
-		vec2 nc = c1;
-		if (distance(centre, c2) < distance(centre, nc))
-			nc = c2;
-		if (distance(centre, c3) < distance(centre, nc))
-			nc = c3;
-		if (distance(centre, c4) < distance(centre, nc))
-			nc = c4; 
+		vec2 c1 = posTopLeft - posTopLeft - ab;
+		vec2 c2 = vec2(posTopLeft.x, posBottomRight.y) - posTopLeft - ab;
+		vec2 c3 = posBottomRight - posTopLeft - ab;
+		vec2 c4 = vec2(posBottomRight.x, posTopLeft.y) - posTopLeft - ab;
+		vec2 cc = c1;
+		if (distance(centre, c2) < distance(centre, cc))
+			cc = c2;
+		if (distance(centre, c3) < distance(centre, cc))
+			cc = c3;
+		if (distance(centre, c4) < distance(centre, cc))
+			cc = c4; 
 		vec2 fc = c1;
 		if (distance(centre, c2) > distance(centre, fc))
 			fc = c2;
@@ -138,23 +153,25 @@ vec4 colour_at(vec2 viewPos)
 			fc = c3;
 		if (distance(centre, c4) > distance(centre, fc))
 			fc = c4;
+		vec2 cs = vec2(min(abs(-ab.x + centre.x), abs(ab.x + centre.x)), min(abs(-ab.y + centre.y), abs(ab.y + centre.y)));
+		vec2 fs = vec2(max(abs(-ab.x + centre.x), abs(ab.x + centre.x)), max(abs(-ab.y + centre.y), abs(ab.y + centre.y)));
 		float r;
-		if (nGradientShape == 0) // Elipse
+		if (nGradientShape == 0) // Ellipse
 		{
 			switch(nGradientSize)
 			{
 			default:
-			case 0:
-				r = ellipse_radius(min(centre.x, s.x - centre.x), min(centre.y, s.y - centre.y), atan(pos.y - centre.y, pos.x - centre.x));
+			case 0: // ClosestSide
+				r = ellipse_radius(cs, centre, pos);
 				break;
-			case 1:
-				r = ellipse_radius(max(centre.x, s.x - centre.x), max(centre.y, s.y - centre.y), atan(pos.y - centre.y, pos.x - centre.x));
+			case 1: // FarthestSide
+				r = ellipse_radius(fs, centre, pos);
 				break;
-			case 2:
-				r = ellipse_radius(abs(centre.x - nc.x), abs(centre.y - nc.y), atan(pos.y - centre.y, pos.x - centre.x));
+			case 2: // ClosestCorner
+				r = ellipse_radius(ab, vec2(abs(centre.x - cc.x), abs(centre.y - cc.y)), pos);
 				break;
-			case 3:
-				r = ellipse_radius(abs(centre.x - fc.x), abs(centre.y - fc.y), atan(pos.y - centre.y, pos.x - centre.x));
+			case 3: // FarthestCorner
+				r = ellipse_radius(ab, vec2(abs(centre.x - fc.x), abs(centre.y - fc.y)), pos);
 				break;
 			}
 		}
@@ -164,13 +181,13 @@ vec4 colour_at(vec2 viewPos)
 			{
 			default:
 			case 0:
-				r = min(centre.x, min(centre.y, min(s.x - centre.x, s.y - centre.y)));
+				r = min(cs.x, cs.y);
 				break;
 			case 1:
-				r = max(centre.x, max(centre.y, max(s.x - centre.x, s.y - centre.y)));
+				r = max(fs.x, fs.y);
 				break;
 			case 2:
-				r = distance(nc, centre);
+				r = distance(cc, centre);
 				break;
 			case 3:
 				r = distance(fc, centre);
