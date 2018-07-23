@@ -939,11 +939,11 @@ int main(int argc, char* argv[])
 		column5Unselectable.checked([&]() { itemModel.set_column_selectable(5, false); update_column5_heading(); });
 		column5Unselectable.unchecked([&]() { itemModel.set_column_selectable(5, true); update_column5_heading(); });
 
-		itemModel.set_column_min_value(0, 0);
-		itemModel.set_column_max_value(0, 9999);
-		itemModel.set_column_min_value(1, 0);
-		itemModel.set_column_max_value(1, 9999);
-		itemModel.set_column_step_value(1, 1);
+		itemModel.set_column_min_value(0, 0u);
+		itemModel.set_column_max_value(0, 9999u);
+		itemModel.set_column_min_value(1, 0u);
+		itemModel.set_column_max_value(1, 9999u);
+		itemModel.set_column_step_value(1, 1u);
 		tableView1.set_model(itemModel);
 		my_item_presentation_model ipm1{ itemModel, ng::item_cell_colour_type::Foreground };
 		tableView1.set_presentation_model(ipm1);

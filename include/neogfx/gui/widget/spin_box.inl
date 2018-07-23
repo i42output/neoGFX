@@ -20,8 +20,9 @@
 #pragma once
 
 #include "spin_box.hpp"
-#include <neolib/raii.hpp>
+#include <cmath>
 #include <boost/format.hpp>
+#include <neolib/raii.hpp>
 
 namespace neogfx
 {
@@ -96,7 +97,7 @@ namespace neogfx
 	void basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
 		if (aWheel == mouse_wheel::Vertical)
-			set_value(std::max(minimum(), std::min(maximum(), value() + static_cast<value_type>(aDelta.dy * step()))), true);
+			do_step(aDelta.dy > 0.0 ? step_direction::Up : step_direction::Down, static_cast<uint32_t>(std::abs(aDelta.dy)));
 		else
 			framed_widget::mouse_wheel_scrolled(aWheel, aDelta);
 	}
@@ -106,12 +107,12 @@ namespace neogfx
 	{
 		if (aScanCode == ScanCode_UP)
 		{
-			set_value(std::max(minimum(), std::min(maximum(), value() + step())), true);
+			do_step(step_direction::Up);
 			return true;
 		}
 		else if (aScanCode == ScanCode_DOWN)
 		{
-			set_value(std::max(minimum(), std::min(maximum(), value() - step())), true);
+			do_step(step_direction::Down);
 			return true;
 		}
 		else
@@ -135,6 +136,14 @@ namespace neogfx
 	{
 		return iTextBox;
 	}
+
+	template <typename T>
+	void basic_spin_box<T>::do_step(step_direction aDirection, uint32_t aAmount)
+	{
+		auto result = std::max(minimum(), std::min(maximum(), aDirection == step_direction::Up ? value() + static_cast<value_type>(aAmount * step()) : value() - static_cast<value_type>(aAmount * step())));
+		if ((aDirection == step_direction::Up && result > value()) || (aDirection == step_direction::Down && result < value()))
+			set_value(result, true);
+	};
 
 	template <typename T>
 	inline std::optional<T> basic_spin_box<T>::string_to_value(const std::string& aText) const
@@ -213,19 +222,19 @@ namespace neogfx
 
 		auto step_up = [this]()
 		{
-			set_value(std::max(minimum(), std::min(maximum(), value() + step())), true);
+			do_step(step_direction::Up);
 			iStepper.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.set_duration(125, true);
 				aTimer.again();
-				set_value(std::max(minimum(), std::min(maximum(), value() + step())), true);
+				do_step(step_direction::Up);
 			}, 500);
 		};
 		iSink += iStepUpButton.pressed(step_up);
 		iSink += iStepUpButton.clicked([this]()
 		{
 			if (iStepper == std::nullopt) // key press?
-				set_value(std::max(minimum(), std::min(maximum(), value() + step())), true);
+				do_step(step_direction::Up);
 		});
 		iSink += iStepUpButton.double_clicked(step_up);
 		iSink += iStepUpButton.released([this]()
@@ -235,19 +244,19 @@ namespace neogfx
 
 		auto step_down = [this]()
 		{
-			set_value(std::max(minimum(), std::min(maximum(), value() - step())), true);
+			do_step(step_direction::Down);
 			iStepper.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.set_duration(125, true);
 				aTimer.again();
-				set_value(std::max(minimum(), std::min(maximum(), value() - step())), true);
+				do_step(step_direction::Down);
 			}, 500);
 		};
 		iSink += iStepDownButton.pressed(step_down);
 		iSink += iStepDownButton.clicked([this]()
 		{
 			if (iStepper == std::nullopt) // key press?
-				set_value(std::max(minimum(), std::min(maximum(), value() - step())), true);
+				do_step(step_direction::Down);
 		});
 		iSink += iStepDownButton.double_clicked(step_down);
 		iSink += iStepDownButton.released([this]()

@@ -32,6 +32,12 @@ namespace neogfx
 	{
 	public:
 		typedef T value_type;
+	private:
+		enum class step_direction
+		{
+			Up, 
+			Down
+		};
 	public:
 		basic_spin_box();
 		basic_spin_box(i_widget& aParent);
@@ -66,6 +72,7 @@ namespace neogfx
 	protected:
 		bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
 	private:
+		void do_step(step_direction aDirection, uint32_t aAmount = 1);
 		std::optional<value_type> string_to_value(const std::string& aString) const;
 		void init();
 		void update_arrows();
