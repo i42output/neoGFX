@@ -988,8 +988,13 @@ namespace neogfx
 		rect clipRect = to_client_coordinates(non_client_rect());
 		if (!aIncludeNonClient)
 			clipRect = clipRect.intersection(client_rect());
-		if (has_parent() && !is_root())
+		if (!is_root())
 			clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect())));
+		else if (root().is_nested())
+		{
+			auto& parent = root().parent_window().as_widget();
+			clipRect = clipRect.intersection(to_client_coordinates(parent.to_window_coordinates(parent.default_clip_rect())));
+		}
 		return *(cachedRect = clipRect);
 	}
 
