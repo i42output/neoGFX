@@ -48,7 +48,7 @@ namespace neogfx
 		InitiallyHidden =		0x01000000,
 		DropShadow =			0x02000000,
 		Weak =					0x80000000,
-		Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close
+		Default = TitleBar | SystemMenu | MinimizeBox | MaximizeBox | Resize | Close | DropShadow
 	};
 
 	inline constexpr window_style operator|(window_style aLhs, window_style aRhs)

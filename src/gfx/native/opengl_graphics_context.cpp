@@ -834,6 +834,8 @@ namespace neogfx
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientStartFrom", std::holds_alternative<gradient::corner_e>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<gradient::corner_e>(aGradient.orientation())) : -1);
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientSize", static_cast<int>(aGradient.size()));
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
+		basic_vector<float, 2> gradientExponents = (aGradient.exponents() != std::nullopt ? *aGradient.exponents() : vec2{2.0, 2.0});
+		iRenderingEngine.gradient_shader_program().set_uniform_variable("exponents", gradientExponents.x, gradientExponents.y);
 		basic_point<float> gradientCentre = (aGradient.centre() != std::nullopt ? *aGradient.centre() : point{});
 		iRenderingEngine.gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
 		auto combinedStops = aGradient.combined_stops();

@@ -10,6 +10,7 @@ uniform float radGradientAngle;
 uniform int nGradientSize;
 uniform int nGradientShape;
 uniform int nStopCount;
+uniform vec2 exponents;
 uniform vec2 posGradientCentre;
 uniform int nFilterSize;
 uniform sampler2DRect texStopPositions;
@@ -53,21 +54,34 @@ vec4 gradient_colour(in float n)
 	return mix(firstColour, secondColour, (n - firstPos) / (secondPos - firstPos));
 }
 
-float ellipse_radius(float cx, float cy, float angle)
+float ellipse_radius(vec2 ab, vec2 centre, vec2 pt)
 {
-	return cx * cy / sqrt(cx * cx * sin(angle) * sin(angle) + cy * cy * cos(angle) * cos(angle));
+	vec2 d = pt - centre;
+	float angle = 0;
+	vec2 ratio = vec2(1.0, 1.0);
+	if (ab.x >= ab.y)
+		ratio.y = ab.x / ab.y;
+	else
+		ratio.x = ab.y / ab.x;
+	angle = atan(d.y * ratio.y, d.x * ratio.x);
+	float x = pow(abs(cos(angle)), 2.0 / exponents.x) * sign(cos(angle)) * ab.x;
+	float y = pow(abs(sin(angle)), 2.0 / exponents.y) * sign(sin(angle)) * ab.y;
+	return sqrt(x * x + y * y);
 }
 
 vec4 colour_at(vec2 viewPos)
 {
+	vec2 s = posBottomRight - posTopLeft;
+	vec2 pos = viewPos - posTopLeft;
+	pos.x = max(min(pos.x, s.x - 1.0), 0.0);
+	pos.y = max(min(pos.y, s.y - 1.0), 0.0);
 	float gradientPos;
 	if (nGradientDirection == 0) /* vertical */
-		gradientPos = (viewPos.y - posTopLeft.y) / (posBottomRight.y - posTopLeft.y);
+		gradientPos = pos.y / s.y;
 	else if (nGradientDirection == 1) /* horizontal */
-		gradientPos = (viewPos.x - posTopLeft.x) / (posBottomRight.x - posTopLeft.x);
-	else if (nGradientDirection == 2) /* diagonal - */
+		gradientPos = pos.x / s.x;
+	else if (nGradientDirection == 2) /* diagonal */
 	{
-		vec2 s = posBottomRight - posTopLeft;
 		vec2 centre = s / 2.0;
 		float angle;
 		switch (nGradientStartFrom)
@@ -88,7 +102,6 @@ vec4 colour_at(vec2 viewPos)
 			angle = radGradientAngle;
 			break;
 		}
-		vec2 pos = viewPos - posTopLeft;
 		pos.y = s.y - pos.y;
 		pos = pos - centre;
 		mat2 rot = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
@@ -96,23 +109,33 @@ vec4 colour_at(vec2 viewPos)
 		pos = pos + centre;
 		gradientPos = pos.y / s.y;
 	}
+	else if (nGradientDirection == 3) /* rectangular */
+	{
+		float vert = pos.y / s.y;
+		if (vert > 0.5)
+			vert = 1.0 - vert;
+		float horz = pos.x / s.x;
+		if (horz > 0.5)
+			horz = 1.0 - horz;
+		gradientPos = min(vert, horz) * 2.0;
+	}
 	else /* radial */
 	{
-	    vec2 pos = viewPos - posTopLeft;
-		vec2 s = posBottomRight - posTopLeft;
-		vec2 centre = s / 2.0 * (posGradientCentre + vec2(1.0, 1.0));
+		vec2 ab = s / 2.0;
+		pos -= ab;
+		vec2 centre = ab * posGradientCentre;
 		float d = distance(centre, pos);
-		vec2 c1 = posTopLeft - posTopLeft;
-		vec2 c2 = vec2(posTopLeft.x, posBottomRight.y) - posTopLeft;
-		vec2 c3 = posBottomRight - posTopLeft;
-		vec2 c4 = vec2(posBottomRight.x, posTopLeft.y) - posTopLeft;
-		vec2 nc = c1;
-		if (distance(centre, c2) < distance(centre, nc))
-			nc = c2;
-		if (distance(centre, c3) < distance(centre, nc))
-			nc = c3;
-		if (distance(centre, c4) < distance(centre, nc))
-			nc = c4; 
+		vec2 c1 = posTopLeft - posTopLeft - ab;
+		vec2 c2 = vec2(posTopLeft.x, posBottomRight.y) - posTopLeft - ab;
+		vec2 c3 = posBottomRight - posTopLeft - ab;
+		vec2 c4 = vec2(posBottomRight.x, posTopLeft.y) - posTopLeft - ab;
+		vec2 cc = c1;
+		if (distance(centre, c2) < distance(centre, cc))
+			cc = c2;
+		if (distance(centre, c3) < distance(centre, cc))
+			cc = c3;
+		if (distance(centre, c4) < distance(centre, cc))
+			cc = c4; 
 		vec2 fc = c1;
 		if (distance(centre, c2) > distance(centre, fc))
 			fc = c2;
@@ -120,39 +143,41 @@ vec4 colour_at(vec2 viewPos)
 			fc = c3;
 		if (distance(centre, c4) > distance(centre, fc))
 			fc = c4;
+		vec2 cs = vec2(min(abs(-ab.x + centre.x), abs(ab.x + centre.x)), min(abs(-ab.y + centre.y), abs(ab.y + centre.y)));
+		vec2 fs = vec2(max(abs(-ab.x + centre.x), abs(ab.x + centre.x)), max(abs(-ab.y + centre.y), abs(ab.y + centre.y)));
 		float r;
-		if (nGradientShape == 0)
+		if (nGradientShape == 0) // Ellipse
 		{
 			switch(nGradientSize)
 			{
 			default:
-			case 0:
-				r = ellipse_radius(min(centre.x, s.x - centre.x), min(centre.y, s.y - centre.y), atan(pos.y - centre.y, pos.x - centre.x));
+			case 0: // ClosestSide
+				r = ellipse_radius(cs, centre, pos);
 				break;
-			case 1:
-				r = ellipse_radius(max(centre.x, s.x - centre.x), max(centre.y, s.y - centre.y), atan(pos.y - centre.y, pos.x - centre.x));
+			case 1: // FarthestSide
+				r = ellipse_radius(fs, centre, pos);
 				break;
-			case 2:
-				r = ellipse_radius(abs(centre.x - nc.x), abs(centre.y - nc.y), atan(pos.y - centre.y, pos.x - centre.x));
+			case 2: // ClosestCorner
+				r = ellipse_radius(abs(cc - centre), centre, pos);
 				break;
-			case 3:
-				r = ellipse_radius(abs(centre.x - fc.x), abs(centre.y - fc.y), atan(pos.y - centre.y, pos.x - centre.x));
+			case 3: // FarthestCorner
+				r = ellipse_radius(abs(fc - centre), centre, pos);
 				break;
 			}
 		}
-		else
+		else if (nGradientShape == 1) // Circle
 		{
 			switch(nGradientSize)
 			{
 			default:
 			case 0:
-				r = min(centre.x, min(centre.y, min(s.x - centre.x, s.y - centre.y)));
+				r = min(cs.x, cs.y);
 				break;
 			case 1:
-				r = max(centre.x, max(centre.y, max(s.x - centre.x, s.y - centre.y)));
+				r = max(fs.x, fs.y);
 				break;
 			case 2:
-				r = distance(nc, centre);
+				r = distance(cc, centre);
 				break;
 			case 3:
 				r = distance(fc, centre);

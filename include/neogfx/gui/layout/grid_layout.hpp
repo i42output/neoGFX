@@ -78,8 +78,8 @@ namespace neogfx
 		size maximum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	public:
 		void set_spacing(const optional_size& aSpacing, bool aUpdateLayout = true) override;
-		void add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
-		void add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
+		grid_layout& add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
+		grid_layout& add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
 		void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
 	public:
 		void layout_items(const point& aPosition, const size& aSize) override;
@@ -106,11 +106,11 @@ namespace neogfx
 			return static_cast<WidgetT&>(widget_at_position(aRow, aColumn));
 		}
 	private:
-		vertical_layout iRowLayout;
-		std::vector<std::shared_ptr<horizontal_layout>> iRows;
 		cell_list iCells;
 		cell_dimensions iDimensions;
 		cell_coordinates iCursor;
 		span_list iSpans;
+		vertical_layout iRowLayout;
+		std::vector<std::shared_ptr<horizontal_layout>> iRows;
 	};
 }

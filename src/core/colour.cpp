@@ -657,7 +657,10 @@ namespace neogfx
 		if (iDirection != Diagonal)
 			iOrientation = TopLeft;
 		if (iDirection != Radial)
+		{
+			iExponents = optional_vec2{};
 			iCentre = optional_point{};
+		}
 	}
 
 	gradient gradient::with_direction(direction_e aDirection) const
@@ -715,6 +718,25 @@ namespace neogfx
 	{
 		gradient result = *this;
 		result.set_size(aSize);
+		return result;
+	}
+
+	const optional_vec2& gradient::exponents() const
+	{
+		return iExponents;
+	}
+
+	void gradient::set_exponents(const optional_vec2& aExponents)
+	{
+		iExponents = aExponents;
+		if (iExponents != optional_vec2{})
+			iExponents = iExponents->max(vec2{0.0, 0.0});
+	}
+
+	gradient gradient::with_exponents(const optional_vec2& aExponents) const
+	{
+		gradient result = *this;
+		result.set_exponents(aExponents);
 		return result;
 	}
 
@@ -779,6 +801,7 @@ namespace neogfx
 			orientation() == aOther.orientation() &&
 			shape() == aOther.shape() &&
 			size() == aOther.size() &&
+			exponents() == aOther.exponents() &&
 			centre() == aOther.centre() &&
 			smoothness() == aOther.smoothness();
 	}
@@ -790,8 +813,8 @@ namespace neogfx
 
 	bool gradient::operator<(const gradient& aOther) const
 	{
-		return std::tie(iColourStops, iAlphaStops, iDirection, iOrientation, iShape, iSize, iCentre, iSmoothness) < 
-			std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection, aOther.iOrientation, aOther.iShape, aOther.iSize, aOther.iCentre, aOther.iSmoothness);
+		return std::tie(iColourStops, iAlphaStops, iDirection, iOrientation, iShape, iSize, iExponents, iCentre, iSmoothness) < 
+			std::tie(aOther.iColourStops, aOther.iAlphaStops, aOther.iDirection, aOther.iOrientation, aOther.iShape, aOther.iSize, aOther.iExponents, aOther.iCentre, aOther.iSmoothness);
 	}
 
 	double gradient::normalized_position(double aPos, double aStart, double aEnd)

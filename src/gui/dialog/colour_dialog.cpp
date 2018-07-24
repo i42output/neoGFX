@@ -896,7 +896,7 @@ namespace neogfx
 		iChannelLayout.add(iV.first); iChannelLayout.add(iV.second);
 		iChannelLayout.add(iB.first); iChannelLayout.add(iB.second);
 		iChannelLayout.add_span(grid_layout::cell_coordinates{ 0, 3 }, grid_layout::cell_coordinates{ 1, 3 });
-		iChannelLayout.add(iRgb); iChannelLayout.add_spacer().set_size_policy(size_policy::Minimum);
+		iChannelLayout.add(iRgb);
 		iChannelLayout.add(iA.first); iChannelLayout.add(iA.second);
 		iBasicColoursGrid.set_dimensions(12, 12);
 		for (auto const& basicColour : sBasicColours)
