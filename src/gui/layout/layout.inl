@@ -252,7 +252,7 @@ namespace neogfx
 		uint32_t itemsUsingLeftover = 0;
 		size totalExpanderWeight;
 		enum disposition_e { Unknown, Weighted, Unweighted, TooSmall, FixedSize };
-		std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, neolib::pool_allocator<std::pair<const item* const, disposition_e>>> itemDispositions;
+		std::unordered_map<const item*, disposition_e, std::hash<const item*>, std::equal_to<const item*>, neolib::fast_pool_allocator<std::pair<const item* const, disposition_e>>> itemDispositions;
 		for (const auto& item : items())
 		{
 			if (!item.visible())

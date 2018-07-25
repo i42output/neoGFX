@@ -23,6 +23,7 @@
 #include <SDL_syswm.h>
 #include <SDL_mouse.h>
 #include <SDL_keyboard.h>
+#include <neolib/string_utf.hpp>
 #include <neogfx/app/app.hpp>
 #include "../../../gfx/native/opengl.hpp"
 #include "../../../gfx/native/sdl_graphics_context.hpp"
@@ -850,7 +851,7 @@ namespace neogfx
 			break;
 		case WM_SETTEXT:
 			result = wndproc(hwnd, msg, wparam, lparam);
-			self.native_window::set_title_text(SDL_GetWindowTitle(self.iHandle));
+			self.native_window::set_title_text(neolib::utf16_to_utf8(std::u16string{ (const char16_t*)lparam }));
 			self.handle_event(window_event{ window_event_type::TitleTextChanged });
 			break;
 		case WM_NCPAINT:

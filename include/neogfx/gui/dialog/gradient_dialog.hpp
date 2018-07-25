@@ -57,6 +57,7 @@ namespace neogfx
 		radio_button iDirectionHorizontalRadioButton;
 		radio_button iDirectionVerticalRadioButton;
 		radio_button iDirectionDiagonalRadioButton;
+		radio_button iDirectionRectangularRadioButton;
 		radio_button iDirectionRadialRadioButton;
 		horizontal_layout iLayout5;
 		group_box iOrientationGroupBox;
@@ -79,6 +80,12 @@ namespace neogfx
 		group_box iShapeGroupBox;
 		radio_button iShapeEllipseRadioButton;
 		radio_button iShapeCircleRadioButton;
+		group_box iExponentGroupBox;
+		check_box iLinkedExponents;
+		label iMExponent;
+		double_spin_box iMExponentSpinBox;
+		label iNExponent;
+		double_spin_box iNExponentSpinBox;
 		group_box iCentreGroupBox;
 		label iXCentre;
 		double_spin_box iXCentreSpinBox;

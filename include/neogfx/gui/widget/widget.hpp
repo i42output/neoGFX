@@ -155,8 +155,8 @@ namespace neogfx
 		void layout_as(const point& aPosition, const size& aSize) override;
 		// i_widget
 	public:
-		void update(bool aIncludeNonClient = false) override;
-		void update(const rect& aUpdateRect) override;
+		using i_widget::update;
+		bool update(const rect& aUpdateRect) override;
 		bool requires_update() const override;
 		rect update_rect() const override;
 		rect default_clip_rect(bool aIncludeNonClient = false) const override;

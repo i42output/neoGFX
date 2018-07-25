@@ -50,6 +50,7 @@ namespace neogfx
 		description.add_options()
 			("debug", "open debug console")
 			("fullscreen", boost::program_options::value<std::string>()->implicit_value(""s), "run full screen")
+			("nest", "display child windows nested within main window rather than using the main desktop")
 			("vulkan", "use Vulkan renderer")
 			("directx", "use DirectX (ANGLE) renderer")
 			("software", "use software renderer")
@@ -102,6 +103,11 @@ namespace neogfx
 	bool program_options::double_buffering() const
 	{
 		return count("double") == 1;
+	}
+
+	bool program_options::nest() const
+	{
+		return count("nest") == 1;
 	}
 
 	namespace

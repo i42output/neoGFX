@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-	enum class widget_part
+	enum class widget_part : uint32_t
 	{
 		Client,
 		NonClientTitleBar,
@@ -49,8 +49,29 @@ namespace neogfx
 		NonClientHorizontalScrollbar,
 		NonClientOther,
 		Nowhere,
-		NowhereError
+		NowhereError,
+		Nested = 0x10000000
 	};
+
+	inline constexpr widget_part operator|(widget_part aLhs, widget_part aRhs)
+	{
+		return static_cast<widget_part>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr widget_part operator&(widget_part aLhs, widget_part aRhs)
+	{
+		return static_cast<widget_part>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr widget_part operator|=(widget_part& aLhs, widget_part aRhs)
+	{
+		return aLhs = static_cast<widget_part>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr widget_part operator&=(widget_part& aLhs, widget_part aRhs)
+	{
+		return aLhs = static_cast<widget_part>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
 
 	inline bool capture_ok(widget_part aWidgetPart)
 	{

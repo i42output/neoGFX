@@ -256,7 +256,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nested_window.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nested_window_container.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nest.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_scrollbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skin.hpp" />
@@ -276,7 +276,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item_widget.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\nested_window_container.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\nest.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\radio_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.hpp" />
@@ -451,13 +451,12 @@
     <ClCompile Include="..\..\..\src\gui\widget\menu_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\nested_window_container.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\nest.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\scrollbar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\slider.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\splitter.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\status_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\table_view.cpp" />

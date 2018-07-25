@@ -38,7 +38,7 @@ namespace neogfx
 		struct item_already_added : std::logic_error { item_already_added() : std::logic_error("neogfx::layout::item_already_added") {} };
 	protected:
 		typedef layout_item item;
-		typedef std::list<item, neolib::pool_allocator<item>> item_list;
+		typedef std::list<item, neolib::fast_pool_allocator<item>> item_list;
 		enum item_type_e
 		{
 			ItemTypeNone = 0x00,

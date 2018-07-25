@@ -1,4 +1,4 @@
-// i_nested_window_container.hpp
+// nest.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -18,20 +18,25 @@
 */
 #pragma once
 
-#include <neogfx/neogfx.hpp>
+#include <neogfx/gui/widget/i_nest.hpp>
 
 namespace neogfx
 {
-	class i_widget;
-	class i_nested_window;
-
-	class i_nested_window_container
+	class nest : public i_nest
 	{
 	public:
-		virtual void add(i_nested_window& aWindow) = 0;
-		virtual void remove(i_nested_window& aWindow) = 0;
+		nest(i_widget& aWidget);
 	public:
-		virtual const i_widget& as_widget() const = 0;	
-		virtual i_widget& as_widget() = 0;
+		std::size_t nested_window_count() const override;
+		const i_nested_window& nested_window(std::size_t aIndex) const override;
+		i_nested_window& nested_window(std::size_t aIndex) override;
+		void add(i_nested_window& aWindow) override;
+		void remove(i_nested_window& aWindow) override;
+	public:
+		const i_widget& as_widget() const override;
+		i_widget& as_widget() override;
+	private:
+		i_widget& iWidget;
+		std::vector<i_nested_window*> iNestedWindows;
 	};
 }

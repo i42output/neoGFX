@@ -487,34 +487,34 @@ namespace neogfx
 
 	void surface_window_proxy::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
-		i_widget& w = as_widget().widget_for_mouse_event(as_window().mouse_position());
+		i_widget& w = widget_for_mouse_event(as_window().mouse_position());
 		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
-			as_widget().widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
+			widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
 	void surface_window_proxy::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		i_widget& w = as_widget().widget_for_mouse_event(aPosition);
+		i_widget& w = widget_for_mouse_event(aPosition);
 		neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
-		as_window().dismiss_children(&w);
-		as_window().update_click_focus(w, aPosition - w.origin());
+		w.root().dismiss_children(&w);
+		w.root().update_click_focus(w, aPosition - w.origin());
 		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 			w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void surface_window_proxy::native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		i_widget& w = as_widget().widget_for_mouse_event(aPosition);
+		i_widget& w = widget_for_mouse_event(aPosition);
 		neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
-		as_window().dismiss_children(&w);
-		as_window().update_click_focus(w, aPosition - w.origin());
+		w.root().dismiss_children(&w);
+		w.root().update_click_focus(w, aPosition - w.origin());
 		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 			w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void surface_window_proxy::native_window_mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
-		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
+		i_widget& w = (!has_capturing_widget() ? widget_for_mouse_event(aPosition) : capturing_widget());
 		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 			w.mouse_button_released(aButton, aPosition - w.origin());
 	}
@@ -522,7 +522,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_mouse_moved(const point& aPosition)
 	{
 		as_widget().mouse_entered(aPosition);
-		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
+		i_widget& w = (!has_capturing_widget() ? widget_for_mouse_event(aPosition) : capturing_widget());
 		if (w.mouse_event.trigger(std::get<mouse_event>(native_window().current_event())))
 		{
 			point widgetPos = aPosition - w.origin();
@@ -532,30 +532,30 @@ namespace neogfx
 
 	void surface_window_proxy::native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, delta aDelta)
 	{
-		i_widget& w = as_widget().widget_for_mouse_event(as_window().mouse_position());
+		i_widget& w = widget_for_mouse_event(as_window().mouse_position());
 		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
-			as_widget().widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
+			widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aDelta);
 	}
 
 	void surface_window_proxy::native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		i_widget& w = as_widget().widget_for_mouse_event(aPosition);
-		as_window().dismiss_children(&w);
+		i_widget& w = widget_for_mouse_event(aPosition);
+		w.root().dismiss_children(&w);
 		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void surface_window_proxy::native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
 	{
-		i_widget& w = as_widget().widget_for_mouse_event(aPosition);
-		as_window().dismiss_children(&w);
+		i_widget& w = widget_for_mouse_event(aPosition);
+		w.root().dismiss_children(&w);
 		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
 	}
 
 	void surface_window_proxy::native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition)
 	{
-		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
+		i_widget& w = (!has_capturing_widget() ? widget_for_mouse_event(aPosition) : capturing_widget());
 		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			w.mouse_button_released(aButton, aPosition - w.origin());
 	}
@@ -563,7 +563,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_non_client_mouse_moved(const point& aPosition)
 	{
 		as_widget().mouse_entered(aPosition);
-		i_widget& w = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(aPosition) : capturing_widget());
+		i_widget& w = (!has_capturing_widget() ? widget_for_mouse_event(aPosition) : capturing_widget());
 		if (!w.ignore_non_client_mouse_events() && w.non_client_mouse_event.trigger(std::get<non_client_mouse_event>(native_window().current_event())))
 			w.mouse_moved(aPosition - w.origin());
 	}
@@ -580,8 +580,24 @@ namespace neogfx
 
 	widget_part surface_window_proxy::native_window_hit_test(const point& aPosition) const
 	{
-		const i_widget& w = as_widget().widget_for_mouse_event(aPosition, true);
-		return w.hit_test(aPosition - w.origin());
+		const i_widget& w = widget_for_mouse_event(aPosition, true);
+		if (w.effectively_disabled())
+			return widget_part::NowhereError;
+		auto result = w.hit_test(aPosition - w.origin());
+		if (w.is_root() && w.root().is_nested())
+		{
+			switch (result)
+			{
+			case widget_part::Client:
+			case widget_part::Nowhere:
+			case widget_part::NowhereError:
+				break;
+			default:
+				result |= widget_part::Nested;
+				break;
+			}
+		}
+		return result;
 	}
 
 	rect surface_window_proxy::native_window_widget_part_rect(widget_part aWidgetPart) const
@@ -755,7 +771,7 @@ namespace neogfx
 
 	neogfx::mouse_cursor surface_window_proxy::native_window_mouse_cursor() const
 	{
-		const i_widget& widgetUnderMouse = (!has_capturing_widget() ? as_widget().widget_for_mouse_event(as_window().mouse_position(), true) : capturing_widget());
+		const i_widget& widgetUnderMouse = (!has_capturing_widget() ? widget_for_mouse_event(as_window().mouse_position(), true) : capturing_widget());
 		return widgetUnderMouse.mouse_cursor();
 	}
 
@@ -783,4 +799,38 @@ namespace neogfx
 	{
 		return as_window().as_widget();
 	}
+
+	const i_window& surface_window_proxy::window_at_position(const point& aPosition) const
+	{
+		if (as_window().is_nest())
+		{
+			for (std::size_t nestedWindowIndex = as_window().as_nest().nested_window_count(); nestedWindowIndex --> 0;)
+			{
+				auto& nestedWindow = as_window().as_nest().nested_window(nestedWindowIndex);
+				if (nestedWindow.as_window().as_widget().non_client_rect().contains(aPosition))
+					return nestedWindow.as_window();
+			}
+		}
+		return as_window();
+	}
+
+	i_window& surface_window_proxy::window_at_position(const point& aPosition)
+	{
+		return const_cast<i_window&>(const_cast<const surface_window_proxy*>(this)->window_at_position(aPosition));
+	}
+
+	const i_widget& surface_window_proxy::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
+	{
+		auto& w = window_at_position(aPosition);
+		point adjustedPosition = aPosition;
+		if (w.is_nested())
+			adjustedPosition -= w.as_widget().origin();
+		return w.as_widget().widget_for_mouse_event(adjustedPosition, aForHitTest);
+	}
+
+	i_widget& surface_window_proxy::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
+	{
+		return const_cast<i_widget&>(const_cast<const surface_window_proxy*>(this)->widget_for_mouse_event(aPosition, aForHitTest));
+	}
+
 }

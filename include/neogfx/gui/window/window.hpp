@@ -21,7 +21,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/gui/window/i_window.hpp>
-#include <neogfx/gui/widget/nested_window_container.hpp>
+#include <neogfx/gui/widget/nest.hpp>
 #include <neogfx/gui/widget/i_nested_window.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
@@ -56,7 +56,7 @@ namespace neogfx
 		window(i_widget& aParent, const point& aPosition, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle = window_style::Default, scrollbar_style aScrollbarStyle = scrollbar_style::Normal, frame_style aFrameStyle = frame_style::WindowFrame);
 		~window();
 	private:
-		window(window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle);
+		window(const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle);
 	public:
 		window_style style() const;
 		void set_style(window_style aStyle);
@@ -83,14 +83,14 @@ namespace neogfx
 		const i_window& ultimate_ancestor() const override;
 		i_window& ultimate_ancestor() override;
 	public:
-		const i_nested_window_container& nested_container() const override;
-		i_nested_window_container& nested_container() override;
+		const i_nest& nest() const override;
+		i_nest& nest() override;
 		bool is_nested() const override;
 		const i_nested_window& as_nested() const override;
 		i_nested_window& as_nested() override;
-		bool is_nested_container() const override;
-		const i_nested_window_container& as_nested_container() const override;
-		i_nested_window_container& as_nested_container() override;
+		bool is_nest() const override;
+		const i_nest& as_nest() const override;
+		i_nest& as_nest() override;
 	public:
 		bool is_strong() const override;
 		bool is_weak() const override;
@@ -122,13 +122,15 @@ namespace neogfx
 	public:
 		neogfx::size_policy size_policy() const override;
 	public:
+		using widget::update;
+		bool update(const rect& aUpdateRect) override;
 		void render(graphics_context& aGraphicsContext) const override;
 		void paint(graphics_context& aGraphicsContext) const override;
 	public:
 		colour background_colour() const override;
 	public:
+		using widget::show;
 		bool show(bool aVisible) override;
-		using scrollable_widget::show;
 	public:
 		neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
 	public:
@@ -207,11 +209,11 @@ namespace neogfx
 		i_window* iParentWindow;
 		bool iClosed;
 		sink iSink;
-		std::optional<nested_window_container> iNestedWindowContainer;
+		std::optional<neogfx::nest> iNest;
 		std::unique_ptr<i_surface_window> iSurfaceWindow;
 		std::unique_ptr<i_nested_window> iNestedWindowDetails;
-		window_style iStyle;
 		std::string iTitleText;
+		window_style iStyle;
 		int32_t iCountedEnable;
 		i_widget* iEnteredWidget;
 		i_widget* iFocusedWidget;

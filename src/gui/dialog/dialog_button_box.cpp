@@ -56,6 +56,8 @@ namespace neogfx
 
 	standard_button dialog_button_box::button_with_role(button_role aButtonRole) const
 	{
+		if (iButtons.empty())
+			return standard_button::Close;
 		for (auto& button : iButtons)
 			if (button.first.second == aButtonRole)
 				return button.first.first;

@@ -63,7 +63,7 @@ namespace neogfx
 		colour foreground_colour() const override;
 	protected:
 		using push_button::update;
-		void update(const rect& aUpdateRect) override;
+		bool update(const rect& aUpdateRect) override;
 	protected:
 		void mouse_entered(const point& aPosition) override;
 		void mouse_left() override;
