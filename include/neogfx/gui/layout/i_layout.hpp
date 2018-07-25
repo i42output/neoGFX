@@ -114,14 +114,14 @@ namespace neogfx
 		template <typename ItemType, typename... Args>
 		ItemType& emplace(Args&&... args)
 		{
-			auto newItem = std::make_shared<ItemType>(args...);
+			auto newItem = std::make_shared<ItemType>(std::forward<Args>(args)...);
 			add(newItem);
 			return *newItem;
 		}
 		template <typename ItemType, typename... Args>
 		ItemType& emplace_at(item_index aPosition, Args&&... args)
 		{
-			auto newItem = std::make_shared<ItemType>(args...);
+			auto newItem = std::make_shared<ItemType>(std::forward<Args>(args)...);
 			add(newItem);
 			if (aPosition < count())
 				remove_at(aPosition);
