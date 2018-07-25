@@ -212,7 +212,7 @@ namespace neogfx
 		template <typename WidgetType, typename... Args>
 		WidgetType& emplace(Args&&... args)
 		{
-			auto newWidget = std::make_shared<WidgetType>(args...);
+			auto newWidget = std::make_shared<WidgetType>(std::forward<Args>(args)...);
 			add(newWidget);
 			return *newWidget;
 		}
