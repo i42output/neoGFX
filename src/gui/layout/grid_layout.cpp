@@ -95,14 +95,12 @@ namespace neogfx
 	i_layout_item& grid_layout::add(i_layout_item& aItem)
 	{
 		add_item_at_position(iCursor.y, iCursor.x, aItem);
-		increment_cursor();
 		return aItem;
 	}
 
 	i_layout_item& grid_layout::add(std::shared_ptr<i_layout_item> aItem)
 	{
 		add_item_at_position(iCursor.y, iCursor.x, aItem);
-		increment_cursor();
 		return *aItem;
 	}
 
@@ -132,6 +130,8 @@ namespace neogfx
 		iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
 		iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
 		row_layout(aRow).replace_item_at(aColumn, layout_item_proxy);
+		if (cursor() == cell_coordinates{ aColumn, aRow })
+			increment_cursor();
 		return *aItem;
 	}
 
@@ -416,6 +416,11 @@ namespace neogfx
 		}
 		if (has_layout_owner())
 			layout_owner().layout_items_completed();
+	}
+
+	const grid_layout::cell_coordinates& grid_layout::cursor() const
+	{
+		return iCursor;
 	}
 
 	void grid_layout::remove(item_list::iterator aItem)

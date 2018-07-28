@@ -83,6 +83,8 @@ namespace neogfx
 		void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
 	public:
 		void layout_items(const point& aPosition, const size& aSize) override;
+	public:
+		const cell_coordinates& cursor() const;
 	protected:
 		void remove(item_list::iterator aItem);
 	private:

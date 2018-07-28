@@ -153,7 +153,6 @@ namespace neogfx
 		iUpdatingWidgets(false)
 	{
 		init();
-		layout::debug = &iExponentGroupBox.item_layout();
 	}
 
 	gradient_dialog::~gradient_dialog()

@@ -137,7 +137,7 @@ namespace neogfx
 	}
 
 	tab_page_container::tab_page_container(i_layout& aLayout, bool aClosableTabs, tab_container_style aStyle) :
-		widget{ aLayout }, iContainerLayout{ (layout::debug = &iContainerLayout, *this) }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
+		widget{ aLayout }, iContainerLayout{ *this }, iTabBar{ iContainerLayout.top(), *this, aClosableTabs, aStyle }
 	{
 		set_margins(neogfx::margins{});
 		update_tab_bar_placement();
