@@ -16,6 +16,9 @@
     <Filter Include="Generated Files">
       <UniqueIdentifier>{6a5c9b0e-d2ac-415b-9726-7c45ace15060}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game">
+      <UniqueIdentifier>{a425cde5-9234-4827-8cce-614fb2a128e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -138,9 +141,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\shape.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\image.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -148,9 +148,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\i_shape.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\app\action.hpp">
@@ -228,9 +225,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\scrollbar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\i_sprite.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_scrollbar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -241,9 +235,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\i_physical_object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp">
@@ -351,9 +342,6 @@
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\physical_object.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\window\popup_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -361,9 +349,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\radio_button.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\app\resource.hpp">
@@ -384,12 +369,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\splitter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\sprite.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\sprite_plane.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\stack_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -406,9 +385,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\table_view.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\text.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\text_edit.hpp">
@@ -522,9 +498,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_index.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\i_mesh.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\mesh.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -576,9 +549,6 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\surface_window_proxy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\shapes.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -624,19 +594,7 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_playback_device.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\aabb_octree.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\list_view.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\chrono.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\hsl_color.hpp">
@@ -652,9 +610,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\status_bar.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\i_collidable_object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\app\i_help.hpp">
@@ -688,9 +643,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\i_game_object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp">
@@ -740,6 +692,69 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\nest.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\aabb_octree.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\chrono.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\i_mesh.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\i_shape.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\i_sprite.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\shape.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\shapes.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\sprite.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\sprite_plane.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\text.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\ecs.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\component.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\i_component.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\rigid_body.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\collider.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\i_component_data.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\game_object.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\ecs_ids.hpp">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

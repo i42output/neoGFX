@@ -32,6 +32,26 @@
 
 namespace neogfx
 {
+
+	inline i_physical_object::step_time_interval to_step_time(i_physical_object::time_interval aTime, i_physical_object::step_time_interval aStepInterval)
+	{
+		auto fs = chrono::to_flicks(aTime).count();
+		return fs - (fs % aStepInterval);
+	}
+
+	inline i_physical_object::step_time_interval to_step_time(const i_physical_object::optional_time_interval& aTime, i_physical_object::step_time_interval aStepInterval)
+	{
+		if (aTime)
+			return to_step_time(*aTime, aStepInterval);
+		else
+			return 0;
+	}
+
+	inline i_physical_object::time_interval from_step_time(i_physical_object::step_time_interval aStepTime)
+	{
+		return chrono::to_seconds(chrono::flicks{ aStepTime });
+	}
+
 	class sprite_plane : public widget, public i_shape_container
 	{
 	public:
