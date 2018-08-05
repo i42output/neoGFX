@@ -20,6 +20,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/physics_system.hpp>
+#include <neogfx/game/ecs.hpp>
+#include <neogfx/game/rigid_body.hpp>
 
 namespace neogfx
 {
@@ -42,6 +44,9 @@ namespace neogfx
 
 	void physics_system::apply()
 	{
+		if (!ecs::instance().component_instantiated<rigid_body>(context()))
+			return;
+		auto& rigidBodies = ecs::instance().component<rigid_body>(context());
 		/* -- TODO - Refactor this
 		auto ax = angle_radians()[0];
 		auto ay = angle_radians()[1];

@@ -133,8 +133,24 @@ namespace neogfx
 		{
 			aContext.owner().components().find(ComponentData::meta::id())->second->populate(aEntity, std::forward<ComponentData>(aComponentData));
 		}
+		bool component_instantiated(const context& aContext, component_id aComponentId) const;
+		template <typename ComponentData>
+		bool component_instantiated(const context& aContext) const
+		{
+			return component_instantiated(aContext, ComponentData::meta::id());
+		}
 		const i_component& component(const context& aContext, component_id aComponentId) const;
 		i_component& component(const context& aContext, component_id aComponentId);
+		template <typename ComponentData>
+		const static_component<ComponentData>& component(const context& aContext) const
+		{
+			return static_cast<const static_component<ComponentData>&>(component(aContext, ComponentData::meta::id()));
+		}
+		template <typename ComponentData>
+		static_component<ComponentData>& component(const context& aContext)
+		{
+			return const_cast<static_component<ComponentData>&>(const_cast<const ecs*>(this)->component<ComponentData>(aContext));
+		}
 	public:
 		void register_archetype(const context& aContext, const entity_archetype& aArchetype);
 		void register_archetype(const context& aContext, entity_archetype&& aArchetype);

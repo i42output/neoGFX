@@ -48,6 +48,11 @@ namespace neogfx
 		{
 		}
 	public:
+		ecs::context& context() const
+		{
+			return iContext;
+		}
+	public:
 		const neolib::i_set<component_id>& components() const override
 		{
 			return iComponents;

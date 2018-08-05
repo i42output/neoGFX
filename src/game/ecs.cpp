@@ -200,11 +200,13 @@ namespace neogfx
 	
 	void ecs::destroy_entity(const context& aContext, entity_id aEntityId)
 	{
-		if (aContext.owner().component_instantiated(entity::meta::id()))
-		{
-			static_component<entity>& entities = static_cast<static_component<entity>&>(aContext.owner().component(entity::meta::id()));
-			entities.entity_record(aEntityId).destroyed = true;
-		}
+		if (component_instantiated<entity>(aContext))
+			component<entity>(aContext).entity_record(aEntityId).destroyed = true;
+	}
+
+	bool ecs::component_instantiated(const context& aContext, component_id aComponentId) const
+	{
+		return aContext.owner().component_instantiated(aComponentId);
 	}
 
 	const i_component& ecs::component(const context& aContext, component_id aComponentId) const
