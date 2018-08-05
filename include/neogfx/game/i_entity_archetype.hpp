@@ -1,4 +1,4 @@
-// ecs_ids.hpp
+// i_entity_archetype.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -16,15 +16,24 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/set.hpp>
+#include <neolib/allocator.hpp>
 #include <neolib/uuid.hpp>
+#include <neolib/string.hpp>
+#include <neogfx/game/ecs_ids.hpp>
 
 namespace neogfx
 {
-	typedef neolib::uuid entity_archetype_id;
-	typedef neolib::uuid component_id;
-	typedef neolib::uuid system_id;
-	typedef uint64_t entity_id;
+	class i_entity_archetype
+	{
+	public:
+		virtual const entity_archetype_id& id() const = 0;
+		virtual const neolib::i_string& name() const = 0;
+		virtual const neolib::i_set<component_id>& components() const = 0;
+		virtual neolib::i_set<component_id>& components() = 0;
+	};
 }

@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Game">
       <UniqueIdentifier>{a425cde5-9234-4827-8cce-614fb2a128e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{116b0a7b-b514-4f31-a00d-0f792944974c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -498,9 +501,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_index.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\mesh.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_editor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -705,9 +705,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\i_mesh.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\i_shape.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
@@ -750,10 +747,31 @@
     <ClInclude Include="..\..\..\include\neogfx\game\i_component_data.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\game_object.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\ecs_ids.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\ecs_ids.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\game\i_system.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\system.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\physics_system.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\entity_archetype.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\i_entity_archetype.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\mesh.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\i_shared_component_data.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\entity.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
@@ -962,9 +980,6 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\game\physical_object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\game\rectangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1047,9 +1062,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\app\palette.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\game\mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\html.cpp">
@@ -1141,6 +1153,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\nest.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\physics_system.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\ecs.cpp">
+      <Filter>Source Files\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

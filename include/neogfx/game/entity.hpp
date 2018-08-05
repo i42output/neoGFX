@@ -1,4 +1,4 @@
-// game_object.hpp
+// entity.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -27,34 +27,37 @@
 
 namespace neogfx
 {
-	struct game_object : i_component_data
+	struct entity
 	{
-		entity_id entityId;
-		bool zombie;
+		neolib::uuid archetypeId;
+		uint64_t creationTime;
+		bool destroyed;
 
 		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = {};
+				static const neolib::uuid sId = { 0x867e30c2, 0xaf8e, 0x452e, 0xa542, { 0xd, 0xd0, 0xd1, 0x1, 0xe4, 0x2d } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Game Object";
+				static const neolib::string sName = "Entity";
 				return sName;
 			}
 			static uint32_t field_count()
 			{ 
-				return 2; 
+				return 3; 
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
 				switch (aFieldIndex)
 				{
 				case 0:
-					return component_data_field_type::Uint64;
+					return component_data_field_type::Uuid;
 				case 1:
+					return component_data_field_type::Uint64;
+				case 2:
 					return component_data_field_type::Bool;
 				}
 			}
@@ -62,8 +65,9 @@ namespace neogfx
 			{
 				static const neolib::string sFieldNames[] = 
 				{
-					"Entity Id",
-					"Zombie"
+					"Archetype Id",
+					"Creation Time",
+					"Destroyed"
 				};
 				return sFieldNames[aFieldIndex];
 			}

@@ -30,10 +30,17 @@ namespace neogfx
 	public:
 		virtual const component_id& id() const = 0;
 	public:
-		virtual bool shared_data() const = 0;
+		virtual bool is_data_shared() const = 0;
 		virtual const neolib::i_string& name() const = 0;
 		virtual uint32_t field_count() const = 0;
 		virtual component_data_field_type field_type(uint32_t aFieldIndex) const = 0;
 		virtual const neolib::i_string& field_name(uint32_t aFieldIndex) const = 0;
+	public:
+		virtual void populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) = 0;
+		template <typename ComponentData>
+		void populate(entity_id aEntity, ComponentData&& aComponentData)
+		{
+			populate(aEntity, std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
+		}
 	};
 }

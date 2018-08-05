@@ -1,4 +1,4 @@
-// ecs_ids.hpp
+// i_system.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -19,12 +19,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/uuid.hpp>
+#include <neolib/i_set.hpp>
+#include <neolib/string.hpp>
+#include <neogfx/game/ecs_ids.hpp>
+#include <neogfx/game/i_component.hpp>
 
 namespace neogfx
 {
-	typedef neolib::uuid entity_archetype_id;
-	typedef neolib::uuid component_id;
-	typedef neolib::uuid system_id;
-	typedef uint64_t entity_id;
+	class i_system
+	{
+	public:
+		virtual const system_id& id() const = 0;
+		virtual const neolib::i_string& name() const = 0;
+	public:
+		virtual const neolib::i_set<component_id>& components() const = 0;
+		virtual neolib::i_set<component_id>& components() = 0;
+	public:
+		virtual const i_component& component(component_id aComponentId) const = 0;
+		virtual const i_component& component(component_id aComponentId) = 0;
+	public:
+		virtual void apply() = 0;
+	};
 }

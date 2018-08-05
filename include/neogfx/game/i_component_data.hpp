@@ -37,14 +37,22 @@ namespace neogfx
 		Uint64		= 0x00000008,
 		Float32		= 0x00000009,
 		Float64		= 0x0000000A,
-		Vec2		= 0x00100000,
-		Vec3		= 0x00200000,
-		Vec4		= 0x00300000,
-		Mat22		= 0x00400000,
-		Mat33		= 0x00500000,
-		Mat44		= 0x00600000,
+		BasicVec2	= 0x00000100,
+		BasicVec3	= 0x00000200,
+		BasicVec4	= 0x00000300,
+		Vec2		= BasicVec2 | Float64,
+		Vec3		= BasicVec3 | Float64,
+		Vec4		= BasicVec4 | Float64,
+		Triangle	= BasicVec3 | Uint32,
+		BasicMat22	= 0x00000400,
+		BasicMat33	= 0x00000500,
+		BasicMat44	= 0x00000600,
+		Mat22		= BasicMat22 | Float64,
+		Mat33		= BasicMat33 | Float64,
+		Mat44		= BasicMat44 | Float64,
+		Uuid		= 0x00010000,
 		Array		= 0x08000000,
-		Internal	= 0x80000000
+		Internal	= 0x80000000,
 	};
 
 	inline constexpr component_data_field_type operator|(component_data_field_type aLhs, component_data_field_type aRhs)
@@ -71,7 +79,7 @@ namespace neogfx
 	{
 		struct meta
 		{
-			static bool shared_data()
+			static bool is_shared()
 			{
 				return false;
 			}

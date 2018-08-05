@@ -26,18 +26,18 @@
 
 namespace neogfx
 {
-	struct box_collider : i_component_data
+	struct box_collider
 	{
 		vec3 origin;
 		vec3 size;
 		uint64_t collisionMask;
 		uint32_t collisionEventId;
 
-		struct meta
+		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = {};
+				static const neolib::uuid sId = { 0x55468971, 0xb33e, 0x4e54, 0xa563, { 0xb8, 0x98, 0x3f, 0x22, 0xa, 0xfc } };
 				return sId;
 			}
 			static const neolib::i_string& name()

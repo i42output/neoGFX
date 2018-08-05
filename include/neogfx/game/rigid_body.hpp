@@ -26,22 +26,22 @@
 
 namespace neogfx
 {
-	struct rigid_body : i_component_data
+	struct rigid_body
 	{
 		vec3 position;
-		vec3 angle;
+		scalar mass;
 		vec3 velocity;
 		vec3 acceleration;
+		vec3 angle;
 		vec3 spin;
 		vec3 centreOfMass;
 		scalar drag;
-		scalar mass;
 
-		struct meta
+		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = {};
+				static const neolib::uuid sId = { 0xf0481779, 0xc203, 0x4c7c, 0x9d8d, { 0x9d, 0x3d, 0xaf, 0x34, 0x71, 0x58 } };
 				return sId;
 			}
 			static const neolib::i_string& name()
@@ -58,13 +58,13 @@ namespace neogfx
 				switch (aFieldIndex)
 				{
 				case 0:
-				case 1:
 				case 2:
 				case 3:
 				case 4:
 				case 5:
-					return component_data_field_type::Vec3 | component_data_field_type::Float64;
 				case 6:
+					return component_data_field_type::Vec3 | component_data_field_type::Float64;
+				case 1:
 				case 7:
 					return component_data_field_type::Float64;
 				}
@@ -74,13 +74,13 @@ namespace neogfx
 				static const neolib::string sFieldNames[] = 
 				{
 					"Position",
-					"Angle",
+					"Mass",
 					"Velocity",
 					"Acceleration",
+					"Angle",
 					"Spin",
 					"Centre Of Mass",
-					"Drag",
-					"Mass"
+					"Drag"
 				};
 				return sFieldNames[aFieldIndex];
 			}

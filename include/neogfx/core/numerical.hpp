@@ -320,6 +320,28 @@ namespace neogfx
 	typedef vector3f vec3f;
 	typedef vector4f vec4f;
 
+	typedef basic_vector<int32_t, 1> vector1i32;
+	typedef basic_vector<int32_t, 2> vector2i32;
+	typedef basic_vector<int32_t, 3> vector3i32;
+	typedef basic_vector<int32_t, 4> vector4i32;
+
+	typedef vector1i32 vec1i32;
+	typedef vector2i32 vec2i32;
+	typedef vector3i32 vec3i32;
+	typedef vector4i32 vec4i32;
+
+	typedef basic_vector<uint32_t, 1> vector1u32;
+	typedef basic_vector<uint32_t, 2> vector2u32;
+	typedef basic_vector<uint32_t, 3> vector3u32;
+	typedef basic_vector<uint32_t, 4> vector4u32;
+
+	typedef vector1u32 vec1u32;
+	typedef vector2u32 vec2u32;
+	typedef vector3u32 vec3u32;
+	typedef vector4u32 vec4u32;
+
+	typedef vec3u32 triangle;
+
 	template <typename T, uint32_t D, typename Type, bool IsScalar>
 	inline basic_vector<T, D, Type, IsScalar> operator+(const basic_vector<T, D, Type, IsScalar>& left, const basic_vector<T, D, Type, IsScalar>& right)
 	{

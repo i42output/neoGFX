@@ -1,4 +1,4 @@
-// ecs_ids.hpp
+// i_shared_component_data.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -16,15 +16,23 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/uuid.hpp>
+#include <neogfx/core/numerical.hpp>
+#include <neogfx/game/i_component_data.hpp>
 
 namespace neogfx
 {
-	typedef neolib::uuid entity_archetype_id;
-	typedef neolib::uuid component_id;
-	typedef neolib::uuid system_id;
-	typedef uint64_t entity_id;
+	struct i_shared_component_data
+	{
+		struct meta
+		{
+			static bool is_shared()
+			{
+				return true;
+			}
+		};
+	};
 }
