@@ -305,7 +305,10 @@ namespace neogfx
 			surface_manager().invalidate_surfaces();
 			iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
 			while (iQuitResultCode == std::nullopt)
-				process_events(iAppContext);
+			{
+				if (!process_events(iAppContext))
+					thread::sleep(1);
+			}
 			async_event_queue::instance().terminate();
 			return *iQuitResultCode;
 		}

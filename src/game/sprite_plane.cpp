@@ -39,8 +39,9 @@ namespace neogfx
 		{
 			while (!finished())
 			{
-				iOwner.update_objects();
-				yield();
+				if (!iOwner.iPausePhysics)
+					iOwner.update_objects();
+				sleep(1);
 			}
 		}
 	private:
@@ -51,6 +52,7 @@ namespace neogfx
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
+			iPausePhysics = effectively_hidden(); // todo: a style flag should control this behaviour
 			if (snapshot())
 				update();
 		}, 10 },
@@ -62,7 +64,8 @@ namespace neogfx
 		iUpdateTime{ 0ull },
 		iUpdatedSinceLastSnapshot{ false },
 		iTakingSnapshot{ false },
-		iPhysicsThread{ std::make_unique<physics_thread>(*this) }
+		iPhysicsThread{ std::make_unique<physics_thread>(*this) },
+		iPausePhysics{ false }
 	{
 	}
 
@@ -71,6 +74,7 @@ namespace neogfx
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
+			iPausePhysics = effectively_hidden(); // todo: a style flag should control this behaviour
 			if (snapshot())
 				update();
 		}, 10 },
@@ -81,7 +85,8 @@ namespace neogfx
 		iUpdateTime{ 0ull },
 		iUpdatedSinceLastSnapshot{ false },
 		iTakingSnapshot{ false },
-		iPhysicsThread{ std::make_unique<physics_thread>(*this) }
+		iPhysicsThread{ std::make_unique<physics_thread>(*this) },
+		iPausePhysics{ false }
 	{
 	}
 
@@ -90,6 +95,7 @@ namespace neogfx
 		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
+			iPausePhysics = effectively_hidden(); // todo: a style flag should control this behaviour
 			if (snapshot())
 				update();
 		}, 10 },
@@ -101,7 +107,8 @@ namespace neogfx
 		iUpdateTime{ 0ull },
 		iUpdatedSinceLastSnapshot{ false },
 		iTakingSnapshot{ false },
-		iPhysicsThread{ std::make_unique<physics_thread>(*this) }
+		iPhysicsThread{ std::make_unique<physics_thread>(*this) },
+		iPausePhysics{ false }
 	{
 	}
 

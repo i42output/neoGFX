@@ -143,5 +143,6 @@ namespace neogfx
 		mutable std::recursive_mutex iUpdateMutex;
 		std::unique_ptr<physics_thread> iPhysicsThread;
 		collision_list iCollisions;
+		bool iPausePhysics;
 	};
 }
