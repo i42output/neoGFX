@@ -1,4 +1,4 @@
-// sprite.hpp
+// animation.hpp
 /*
 neogfx C++ GUI Library
 Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -22,43 +22,60 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
-#include <neogfx/game/i_component_data.hpp>
+#include <neogfx/core/colour.hpp>
+#include <neogfx/game/ecs_ids.hpp>
+#include <neogfx/game/i_component.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {
-	struct sprite
+	struct animation
 	{
-		std::vector<vec3> path;
+		std::vector<scalar> frameDurations;
+		std::vector<mesh_filter> frameFilters;
 
 		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = { 0xd61d920b, 0xde71, 0x400d, 0x9532, { 0x3b, 0x76, 0x1f, 0x26, 0x65, 0x56 } };
+				static const neolib::uuid sId = { 0x57fe17a3, 0x4f8, 0x4386, 0x8dad, { 0xf2, 0x1d, 0x5f, 0xd8, 0xe2, 0x6b } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Sprite";
+				static const neolib::string sName = "Animation";
 				return sName;
 			}
 			static uint32_t field_count()
 			{
-				return 1;
+				return 2;
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
 				switch (aFieldIndex)
 				{
 				case 0:
-					return component_data_field_type::Vec3 | component_data_field_type::Array;
+					return component_data_field_type::Scalar | component_data_field_type::Array;
+				case 1:
+					return component_data_field_type::ComponentData | component_data_field_type::Array;
+				}
+			}
+			static neolib::uuid field_type_id(uint32_t aFieldIndex)
+			{
+				switch (aFieldIndex)
+				{
+				case 0:
+					return neolib::uuid{};
+				case 1:
+					return mesh_filter::meta::id();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)
 			{
 				static const neolib::string sFieldNames[] =
 				{
-					"Path"
+					"Frame Durations",
+					"Frame Filters"
 				};
 				return sFieldNames[aFieldIndex];
 			}

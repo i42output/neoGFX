@@ -26,7 +26,7 @@
 #include <neolib/string.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	class i_entity_archetype
 	{

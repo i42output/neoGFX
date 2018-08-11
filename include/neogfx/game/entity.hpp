@@ -25,7 +25,7 @@
 #include <neogfx/game/i_component_data.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	struct entity
 	{

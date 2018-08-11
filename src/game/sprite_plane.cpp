@@ -25,7 +25,7 @@
 #include <neogfx/game/sprite_plane.hpp>
 #include "../hid/native/i_native_surface.hpp"
 
-namespace neogfx
+namespace neogfx::game
 {
 	class sprite_plane::physics_thread : public neolib::thread
 	{

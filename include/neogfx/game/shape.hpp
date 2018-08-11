@@ -91,30 +91,6 @@ namespace neogfx
 		shape(i_shape_container& aContainer, const i_texture& aTexture, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
 		shape(i_shape_container& aContainer, const i_image& aImage, const rect& aTextureRect, const optional_animation_info& aAnimationInfo = optional_animation_info());
 		shape(const shape& aOther);
-		// object
-	public:
-		object_category category() const override;
-		const i_shape& as_shape() const override;
-		i_shape& as_shape() override;
-		const i_collidable_object& as_collidable_object() const override;
-		i_collidable_object& as_collidable_object() override;
-		const i_physical_object& as_physical_object() const override;
-		i_physical_object& as_physical_object() override;
-		bool killed() const override;
-		void kill() override;
-		// mesh
-	public:
-		vertex_list_pointer vertices() const override;
-		texture_list_pointer textures() const override;
-		face_list faces() const override;
-		face_list active_faces() const override;
-		void activate_faces(face_list aActiveFaces) const override;
-		mat44 transformation_matrix() const override;
-		const vertex_list& transformed_vertices() const override;
-	public:
-		void set_vertices(vertex_list_pointer aVertices) override;
-		void set_textures(texture_list_pointer aTextures) override;
-		void set_faces(face_list aFaces) override;
 	public:
 		// container
 	public:
@@ -187,13 +163,6 @@ namespace neogfx
 		optional_vec3 iExtents;
 		optional_mat44 iTransformationMatrix;
 		std::pair<i_shape*, vec3> iTagOf;
-		mutable vertex_list_pointer iDefaultVertices;
-		mutable face_list iDefaultFaces;
-		mutable vertex_list_pointer iVertices;
-		mutable face_list iFaces;
-		mutable vertex_list iTransformedVertices;
-		mutable face_list iActiveFaces;
-		bool iKilled;
 	};
 }
 

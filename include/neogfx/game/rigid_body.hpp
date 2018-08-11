@@ -24,7 +24,7 @@
 #include <neolib/string.hpp>
 #include <neogfx/game/i_component_data.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	struct rigid_body
 	{
@@ -58,15 +58,17 @@ namespace neogfx
 				switch (aFieldIndex)
 				{
 				case 0:
+					return component_data_field_type::Vec3;
+				case 1:
+					return component_data_field_type::Scalar;
 				case 2:
 				case 3:
 				case 4:
 				case 5:
 				case 6:
-					return component_data_field_type::Vec3 | component_data_field_type::Float64;
-				case 1:
+					return component_data_field_type::Vec3;
 				case 7:
-					return component_data_field_type::Float64;
+					return component_data_field_type::Scalar;
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)

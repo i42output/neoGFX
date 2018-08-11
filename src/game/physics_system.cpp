@@ -19,11 +19,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/game/physics_system.hpp>
 #include <neogfx/game/ecs.hpp>
+#include <neogfx/game/clock.hpp>
+#include <neogfx/game/physics_system.hpp>
 #include <neogfx/game/rigid_body.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	physics_system::physics_system(const ecs::context& aContext) :
 		system{ aContext }
@@ -32,46 +33,93 @@ namespace neogfx
 
 	const system_id& physics_system::id() const
 	{
-		static const neolib::uuid sId = { 0x49443e26, 0x762e, 0x4517, 0xbbb8, { 0xc3, 0xd6, 0x95, 0x7b, 0xe9, 0xd4 } };
-		return sId;
+		return meta::id();
 	}
 
 	const neolib::i_string& physics_system::name() const
 	{
-		static const neolib::string sName = "Physics";
-		return sName;
+		return meta::name();
 	}
 
 	void physics_system::apply()
 	{
 		if (!ecs::instance().component_instantiated<rigid_body>(context()))
 			return;
+		auto& time = ecs::instance().component<clock>(context());
 		auto& rigidBodies = ecs::instance().component<rigid_body>(context());
-		/* -- TODO - Refactor this
-		auto ax = angle_radians()[0];
-		auto ay = angle_radians()[1];
-		auto az = angle_radians()[2];
-		auto rotation = [ax, ay, az]() -> mat33
+		for (auto& rigidBody : rigidBodies.contents())
 		{
-			if (ax != 0.0 || ay != 0.0)
+			while (*iPhysicsTime <= now)
 			{
-				mat33 rx = { { 1.0, 0.0, 0.0 },{ 0.0, std::cos(ax), -std::sin(ax) },{ 0.0, std::sin(ax), std::cos(ax) } };
-				mat33 ry = { { std::cos(ay), 0.0, std::sin(ay) },{ 0.0, 1.0, 0.0 },{ -std::sin(ay), 0.0, std::cos(ay) } };
-				mat33 rz = { { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
-				return rz * ry * rx;
+				++frames;
+				applying_physics.trigger(*iPhysicsTime);
+				sort_objects();
+				if (iG != 0.0)
+				{
+					for (auto& i1 : iObjects)
+					{
+						vec3 totalForce;
+						if (i1->category() == object_category::Shape)
+							break;
+						if (i1->killed())
+							continue;
+						auto& o1 = (*i1).as_physical_object();
+						if (o1.mass() == 0.0)
+							break;
+						if (iUniformGravity != std::nullopt)
+							totalForce = *iUniformGravity * o1.mass();
+						for (auto& i2 : iObjects)
+						{
+							if (i2->category() == object_category::Shape)
+								break;
+							if (i2->killed())
+								continue;
+							auto& o2 = (*i2).as_physical_object();
+							if (&o2 == &o1)
+								continue;
+							if (o2.mass() == 0.0)
+								break;
+							vec3 force;
+							vec3 r12 = o1.position() - o2.position();
+							if (r12.magnitude() > 0.0)
+								force = -iG * o2.mass() * o1.mass() * r12 / std::pow(r12.magnitude(), 3.0);
+							if (force.magnitude() >= 1.0e-6)
+								totalForce += force;
+							else
+								break;
+						}
+						bool o1updated = o1.update(from_step_time(*iPhysicsTime), totalForce);
+						updated = (o1updated || updated);
+					}
+				}
 			}
-			else
+			auto rotation = [&rigidBody]() -> mat33
 			{
-				return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
-			}
-		}();
-		// GCSE-level physics (Newtonian) going on here... :)
-		// v = u + at
-		// F = ma; a = F/m
-		next_physics().iVelocity = current_physics().iVelocity + ((current_physics().iMass == 0 ? vec3{} : aForce / current_physics().iMass) + (rotation * current_physics().iAcceleration)) * vec3 { aElapsedTime, aElapsedTime, aElapsedTime };
-		next_physics().iPosition = current_physics().iPosition + vec3{ 1.0, 1.0, 1.0 } *(current_physics().iVelocity * aElapsedTime + ((next_physics().iVelocity - current_physics().iVelocity) * aElapsedTime / 2.0));
-		next_physics().iAngle = (current_physics().iAngle + current_physics().iSpin * aElapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
-		return next_physics().iPosition != current_physics().iPosition || next_physics().iAngle != current_physics().iAngle;
-		*/
+				scalar ax = rigidBody.angle.x;
+				scalar ay = rigidBody.angle.y;
+				scalar az = rigidBody.angle.z;
+				if (ax != 0.0 || ay != 0.0)
+				{
+					mat33 rx = { { 1.0, 0.0, 0.0 },{ 0.0, std::cos(ax), -std::sin(ax) },{ 0.0, std::sin(ax), std::cos(ax) } };
+					mat33 ry = { { std::cos(ay), 0.0, std::sin(ay) },{ 0.0, 1.0, 0.0 },{ -std::sin(ay), 0.0, std::cos(ay) } };
+					mat33 rz = { { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+					return rz * ry * rx;
+				}
+				else
+				{
+					return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+				}
+			}();
+			// GCSE-level physics (Newtonian) going on here... :)
+			// v = u + at
+			// F = ma; a = F/m
+			auto v0 = rigidBody.velocity;
+			auto p0 = rigidBody.position;
+			auto a0 = rigidBody.angle;
+			rigidBody.velocity = v0 + ((rigidBody.mass == 0 ? vec3{} : aForce / rigidBody.mass) + (rotation * rigidBody.acceleration)) * vec3 { aElapsedTime, aElapsedTime, aElapsedTime };
+			rigidBody.position = rigidBody.position + vec3{ 1.0, 1.0, 1.0 } * (v0 * aElapsedTime + ((rigidBody.velocity - v0) * aElapsedTime / 2.0));
+			rigidBody.angle = (rigidBody.angle + rigidBody.spin * aElapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
+			// if position or angle has changed then needs rendering
+		}
 	}
 }

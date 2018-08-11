@@ -1,4 +1,4 @@
-// physics_system.hpp
+// clock.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -16,34 +16,54 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/game/system.hpp>
+#include <neolib/uuid.hpp>
+#include <neolib/string.hpp>
+#include <neogfx/game/i_component_data.hpp>
 
 namespace neogfx::game
 {
-	class physics_system : public system
+	struct clock
 	{
-	public:
-		physics_system(const ecs::context& aContext);
-	public:
-		const system_id& id() const override;
-		const neolib::i_string& name() const override;
-	public:
-		void apply() override;
-	public:
-		struct meta
+		int64_t time;
+		int64_t timeStep;
+
+		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = { 0x49443e26, 0x762e, 0x4517, 0xbbb8,{ 0xc3, 0xd6, 0x95, 0x7b, 0xe9, 0xd4 } };
+				static const neolib::uuid sId = { 0x4c463f47, 0xede9, 0x4cc2, 0xb8f1, { 0x71, 0x2, 0x9e, 0x78, 0xb6, 0x1e } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Physics";
+				static const neolib::string sName = "Clock";
 				return sName;
+			}
+			static uint32_t field_count()
+			{ 
+				return 2; 
+			}
+			static component_data_field_type field_type(uint32_t aFieldIndex)
+			{
+				switch (aFieldIndex)
+				{
+				case 0:
+				case 1:
+					return component_data_field_type::Int64;
+				}
+			}
+			static const neolib::i_string& field_name(uint32_t aFieldIndex)
+			{
+				static const neolib::string sFieldNames[] = 
+				{
+					"Time",
+					"Time Step",
+				};
+				return sFieldNames[aFieldIndex];
 			}
 		};
 	};

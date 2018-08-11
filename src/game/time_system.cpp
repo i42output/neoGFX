@@ -1,4 +1,4 @@
-// ecs_ids.hpp
+// time_system.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -19,13 +19,34 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/uuid.hpp>
+#include <neogfx/game/ecs.hpp>
+#include <neogfx/game/time_system.hpp>
+#include <neogfx/game/clock.hpp>
 
 namespace neogfx::game
 {
-	typedef neolib::uuid entity_archetype_id;
-	typedef neolib::uuid component_id;
-	typedef neolib::uuid system_id;
-	typedef uint64_t id_t;
-	typedef id_t entity_id;
+	time_system::time_system(const ecs::context& aContext) :
+		system{ aContext }
+	{
+		if (!ecs::instance().component_registered<clock>(aContext))
+		{
+			ecs::instance().register_component<clock>(aContext);
+			ecs::instance().populate_shared<clock
+		}
+	}
+
+	const system_id& time_system::id() const
+	{
+		iStepInterval{ chrono::to_flicks(0.010).count() },
+			return meta::id();
+	}
+
+	const neolib::i_string& time_system::name() const
+	{
+		return meta::name();
+	}
+
+	void time_system::apply()
+	{
+	}
 }

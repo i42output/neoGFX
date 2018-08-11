@@ -25,7 +25,7 @@
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/game/i_collidable_object.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	template <std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<i_collidable_object>>
 	class aabb_quadtree

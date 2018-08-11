@@ -776,23 +776,6 @@ namespace neogfx
 		return result;
 	}
 
-	const optional_rect& gradient::rect() const
-	{
-		return iRect;
-	}
-
-	void gradient::set_rect(const optional_rect& aRect)
-	{
-		iRect = aRect;
-	}
-
-	gradient gradient::with_rect(const optional_rect& aRect) const
-	{
-		gradient result = *this;
-		result.set_rect(aRect);
-		return result;
-	}
-
 	bool gradient::operator==(const gradient& aOther) const
 	{
 		return colour_stops() == aOther.colour_stops() &&

@@ -23,7 +23,7 @@
 #include <neolib/allocator.hpp>
 #include <neogfx/game/ecs.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	class system : public i_system
 	{
@@ -34,7 +34,7 @@ namespace neogfx
 			iContext{ aContext }
 		{
 		}
-		template <ComponentIdIter>
+		template <typename ComponentIdIter>
 		system(const ecs::context& aContext, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
 			iContext{ aContext }, iComponents{ aFirstComponent, aLastComponent }
 		{
@@ -48,7 +48,7 @@ namespace neogfx
 		{
 		}
 	public:
-		ecs::context& context() const
+		const ecs::context& context() const
 		{
 			return iContext;
 		}

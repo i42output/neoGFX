@@ -1,4 +1,4 @@
-// i_shared_component_data.hpp
+// time_system.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -16,22 +16,35 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/numerical.hpp>
-#include <neogfx/game/i_component_data.hpp>
+#include <neogfx/game/system.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
-	struct i_shared_component_data
+	class time_system : public system
 	{
+
+	public:
+		time_system(const ecs::context& aContext);
+	public:
+		const system_id& id() const override;
+		const neolib::i_string& name() const override;
+	public:
+		void apply() override;
+	public:
 		struct meta
 		{
-			static bool is_shared()
+			static const neolib::uuid& id()
 			{
-				return true;
+				static const neolib::uuid sId = { 0x714a0e4a, 0xd0be, 0x4737, 0xbd25, { 0xe8, 0x3e, 0x2a, 0x5c, 0xd7, 0x65 } };
+				return sId;
+			}
+			static const neolib::i_string& name()
+			{
+				static const neolib::string sName = "Time";
+				return sName;
 			}
 		};
 	};

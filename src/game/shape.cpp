@@ -459,11 +459,11 @@ namespace neogfx
 
 	void shape::set_transformation_matrix(const mat33& aTransformationMatrix)
 	{
-		iTransformationMatrix = mat44{
+		set_transformation_matrix(mat44{
 			{ aTransformationMatrix[0][0], aTransformationMatrix[0][1], aTransformationMatrix[0][2], 0.0 },
 			{ aTransformationMatrix[1][0], aTransformationMatrix[1][1], aTransformationMatrix[1][2], 0.0 },
 			{ aTransformationMatrix[2][0], aTransformationMatrix[2][1], aTransformationMatrix[2][2], 0.0 },
-			{ 0.0, 0.0, 0.0, 1.0 } };
+			{ 0.0, 0.0, 0.0, 1.0 } });
 	}
 
 	void shape::set_transformation_matrix(const mat44& aTransformationMatrix)

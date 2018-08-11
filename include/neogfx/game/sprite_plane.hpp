@@ -30,7 +30,7 @@
 #include <neogfx/game/aabb_quadtree.hpp>
 #include <neogfx/game/aabb_octree.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 
 	inline i_physical_object::step_time_interval to_step_time(i_physical_object::time_interval aTime, i_physical_object::step_time_interval aStepInterval)

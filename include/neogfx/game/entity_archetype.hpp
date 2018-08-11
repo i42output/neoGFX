@@ -27,7 +27,7 @@
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_entity_archetype.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	class entity_archetype : public i_entity_archetype
 	{

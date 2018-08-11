@@ -24,7 +24,7 @@
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	class i_system
 	{

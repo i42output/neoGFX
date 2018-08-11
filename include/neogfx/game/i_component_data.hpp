@@ -22,37 +22,45 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/numerical.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
+	typedef triangle face;
+
 	enum class component_data_field_type : uint32_t
 	{
-		Bool		= 0x00000000,
-		Int8		= 0x00000001,
-		Uint8		= 0x00000002,
-		Int16		= 0x00000003,
-		Uint16		= 0x00000004,
-		Int32		= 0x00000005,
-		Uint32		= 0x00000006,
-		Int64		= 0x00000007,
-		Uint64		= 0x00000008,
-		Float32		= 0x00000009,
-		Float64		= 0x0000000A,
-		BasicVec2	= 0x00000100,
-		BasicVec3	= 0x00000200,
-		BasicVec4	= 0x00000300,
-		Vec2		= BasicVec2 | Float64,
-		Vec3		= BasicVec3 | Float64,
-		Vec4		= BasicVec4 | Float64,
-		Triangle	= BasicVec3 | Uint32,
-		BasicMat22	= 0x00000400,
-		BasicMat33	= 0x00000500,
-		BasicMat44	= 0x00000600,
-		Mat22		= BasicMat22 | Float64,
-		Mat33		= BasicMat33 | Float64,
-		Mat44		= BasicMat44 | Float64,
-		Uuid		= 0x00010000,
-		Array		= 0x08000000,
-		Internal	= 0x80000000,
+		Bool				= 0x00000000,
+		Int8				= 0x00000001,
+		Uint8				= 0x00000002,
+		Int16				= 0x00000003,
+		Uint16				= 0x00000004,
+		Int32				= 0x00000005,
+		Uint32				= 0x00000006,
+		Int64				= 0x00000007,
+		Uint64				= 0x00000008,
+		Float32				= 0x00000009,
+		Float64				= 0x0000000A,
+		Scalar				= Float64,
+		BasicVec2			= 0x00000100,
+		BasicVec3			= 0x00000200,
+		BasicVec4			= 0x00000300,
+		Vec2				= BasicVec2 | Float64,
+		Vec3				= BasicVec3 | Float64,
+		Vec4				= BasicVec4 | Float64,
+		Triangle			= BasicVec3 | Uint32,
+		Face				= Triangle,
+		BasicMat22			= 0x00000400,
+		BasicMat33			= 0x00000500,
+		BasicMat44			= 0x00000600,
+		Mat22				= BasicMat22 | Float64,
+		Mat33				= BasicMat33 | Float64,
+		Mat44				= BasicMat44 | Float64,
+		Uuid				= 0x00010000,
+		Id					= 0x00020000,
+		ComponentData		= 0x00030000,
+		Optional			= 0x01000000,
+		Array				= 0x02000000,
+		Shared				= 0x04000000,
+		Internal			= 0x80000000,
 	};
 
 	inline constexpr component_data_field_type operator|(component_data_field_type aLhs, component_data_field_type aRhs)
@@ -82,6 +90,10 @@ namespace neogfx
 			static bool is_shared()
 			{
 				return false;
+			}
+			static neolib::uuid field_type_id(uint32_t)
+			{
+				return neolib::uuid{};
 			}
 		};
 	};

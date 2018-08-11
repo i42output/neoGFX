@@ -23,7 +23,7 @@
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/entity.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	ecs::context_data::context_data(ecs& aOwner, context_id aId) :
 		iOwner{ aOwner }, iId{ aId }, iReferenceCount{}, iNextEntityId{}
@@ -63,6 +63,16 @@ namespace neogfx
 	ecs::context_data::components_t& ecs::context_data::components()
 	{
 		return iComponents;
+	}
+
+	const ecs::context_data::system_factories_t& ecs::context_data::system_factories() const
+	{
+		return iSystemFactories;
+	}
+
+	ecs::context_data::system_factories_t& ecs::context_data::system_factories()
+	{
+		return iSystemFactories;
 	}
 
 	const ecs::context_data::systems_t& ecs::context_data::systems() const
@@ -107,6 +117,27 @@ namespace neogfx
 	i_component& ecs::context_data::component(component_id aComponentId)
 	{
 		return const_cast<i_component&>(const_cast<const context_data*>(this)->component(aComponentId));
+	}
+
+	bool ecs::context_data::system_instantiated(system_id aSystemId) const
+	{
+		return systems().find(aSystemId) != systems().end();
+	}
+
+	const i_system& ecs::context_data::system(system_id aSystemId) const
+	{
+		auto existingSystem = systems().find(aSystemId);
+		if (existingSystem != systems().end())
+			return *existingSystem->second;
+		auto existingFactory = system_factories().find(aSystemId);
+		if (existingFactory != system_factories().end())
+			return *iSystems.emplace(aSystemId, existingFactory->second()).first->second;
+		throw system_not_found();
+	}
+
+	i_system& ecs::context_data::system(system_id aSystemId)
+	{
+		return const_cast<i_system&>(const_cast<const context_data*>(this)->system(aSystemId));
 	}
 
 	entity_id ecs::context_data::next_entity_id()
@@ -219,6 +250,11 @@ namespace neogfx
 		return aContext.owner().component(aComponentId);
 	}
 
+	bool ecs::archetype_registered(const context& aContext, const entity_archetype& aArchetype) const
+	{
+		return aContext.owner().archetypes().find(aArchetype.id()) != aContext.owner().archetypes().end();
+	}
+
 	void ecs::register_archetype(const context& aContext, const entity_archetype& aArchetype)
 	{
 		aContext.owner().archetypes().emplace(aArchetype.id(), aArchetype);
@@ -229,8 +265,23 @@ namespace neogfx
 		aContext.owner().archetypes().emplace(aArchetype.id(), std::move(aArchetype));
 	}
 
+	bool ecs::component_registered(const context& aContext, component_id aComponentId) const
+	{
+		return aContext.owner().component_factories().find(aComponentId) != aContext.owner().component_factories().end();
+	}
+
 	void ecs::register_component(const context& aContext, component_id aComponentId, component_factory aFactory)
 	{
 		aContext.owner().component_factories().emplace(aComponentId, aFactory);
+	}
+
+	bool ecs::system_registered(const context& aContext, system_id aSystemId) const
+	{
+		return aContext.owner().system_factories().find(aSystemId) != aContext.owner().system_factories().end();
+	}
+
+	void ecs::register_system(const context& aContext, system_id aSystemId, system_factory aFactory)
+	{
+		aContext.owner().system_factories().emplace(aSystemId, aFactory);
 	}
 }

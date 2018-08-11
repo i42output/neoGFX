@@ -23,17 +23,17 @@
 #include <neogfx/core/geometrical.hpp>
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
-#include <neogfx/game/i_shared_component_data.hpp>
+#include <neogfx/game/i_component_data.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
 	struct mesh
 	{
 		std::vector<vec3> vertices;
 		std::vector<vec2> uv;
-		std::vector<triangle> triangles;
+		std::vector<face> faces;
 
-		struct meta : i_shared_component_data::meta
+		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
@@ -58,7 +58,7 @@ namespace neogfx
 				case 1:
 					return component_data_field_type::Vec2 | component_data_field_type::Array;
 				case 2:
-					return component_data_field_type::Triangle | component_data_field_type::Array;
+					return component_data_field_type::Face | component_data_field_type::Array;
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)
@@ -67,7 +67,7 @@ namespace neogfx
 				{
 					"Vertices",
 					"UV",
-					"Triangles"
+					"Faces"
 				};
 				return sFieldNames[aFieldIndex];
 			}

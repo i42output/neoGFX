@@ -21,13 +21,13 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/3rdparty/facebook/flicks.h>
 
-namespace neogfx
+namespace neogfx::game
 {
 	namespace chrono
 	{
 		using namespace facebook::util;
 
-		inline constexpr double to_milliseconds(const flicks ns) 
+		inline constexpr double to_milliseconds(const flicks ns)
 		{
 			return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(ns)).count());
 		}

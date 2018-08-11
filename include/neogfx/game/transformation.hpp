@@ -1,4 +1,4 @@
-// physics_system.hpp
+// transformation.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -16,34 +16,51 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/game/system.hpp>
+#include <neolib/uuid.hpp>
+#include <neolib/string.hpp>
+#include <neogfx/game/i_component_data.hpp>
 
 namespace neogfx::game
 {
-	class physics_system : public system
+	struct transformation
 	{
-	public:
-		physics_system(const ecs::context& aContext);
-	public:
-		const system_id& id() const override;
-		const neolib::i_string& name() const override;
-	public:
-		void apply() override;
-	public:
-		struct meta
+		mat44 matrix;
+
+		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = { 0x49443e26, 0x762e, 0x4517, 0xbbb8,{ 0xc3, 0xd6, 0x95, 0x7b, 0xe9, 0xd4 } };
+				static const neolib::uuid sId = { 0x348cb8c4, 0x3e8e, 0x44a1, 0xadfb, { 0xd1, 0x57, 0x94, 0x29, 0x82, 0xe5 } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Physics";
+				static const neolib::string sName = "Transformation";
 				return sName;
+			}
+			static uint32_t field_count()
+			{
+				return 1;
+			}
+			static component_data_field_type field_type(uint32_t aFieldIndex)
+			{
+				switch (aFieldIndex)
+				{
+				case 0:
+					return component_data_field_type::Mat44;
+				}
+			}
+			static const neolib::i_string& field_name(uint32_t aFieldIndex)
+			{
+				static const neolib::string sFieldNames[] =
+				{
+					"Matrix",
+				};
+				return sFieldNames[aFieldIndex];
 			}
 		};
 	};
