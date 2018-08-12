@@ -23,11 +23,12 @@
 #include <neolib/lifetime.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <neogfx/core/numerical.hpp>
-#include <neogfx/game/i_collidable_object.hpp>
+#include <neogfx/game/ecs_ids.hpp>
+#include <neogfx/game/broadphase_collider.hpp>
 
 namespace neogfx::game
 {
-	template <std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<i_collidable_object>>
+	template <std::size_t BucketSize = 16, typename Allocator = boost::fast_pool_allocator<aabb_2d>>
 	class aabb_quadtree
 	{
 	public:
@@ -43,7 +44,12 @@ namespace neogfx::game
 		class node : public neolib::lifetime
 		{
 		private:
-			typedef neolib::vecarray<i_collidable_object*, BucketSize, -1> object_list;
+			struct object
+			{
+				entity_id id;
+				const broadphase_collider_2d* collider;
+			};
+			typedef neolib::vecarray<object, BucketSize, -1> object_list;
 			typedef std::array<std::array<aabb_2d, 2>, 2> quadrants;
 			typedef std::array<std::array<node*, 2>, 2> children;
 		private:
@@ -97,63 +103,61 @@ namespace neogfx::game
 			{
 				return iAabb;
 			}
-			void add_object(i_collidable_object& aObject)
+			void add_object(entity_id aObjectId, const broadphase_collider_2d& aCollider)
 			{
 				iTree.iDepth = std::max(iTree.iDepth, iDepth);
 				if (is_split())
 				{
-					if (aabb_intersects(iQuadrants[0][0], aObject.aabb()))
-						child<0, 0>().add_object(aObject);
-					if (aabb_intersects(iQuadrants[0][1], aObject.aabb()))
-						child<0, 1>().add_object(aObject);
-					if (aabb_intersects(iQuadrants[1][0], aObject.aabb()))
-						child<1, 0>().add_object(aObject);
-					if (aabb_intersects(iQuadrants[1][1], aObject.aabb()))
-						child<1, 1>().add_object(aObject);
+					if (aabb_intersects(iQuadrants[0][0], *aCollider.currentAabb))
+						child<0, 0>().add_object(aObjectId, aCollider);
+					if (aabb_intersects(iQuadrants[0][1], *aCollider.currentAabb))
+						child<0, 1>().add_object(aObjectId, aCollider);
+					if (aabb_intersects(iQuadrants[1][0], *aCollider.currentAabb))
+						child<1, 0>().add_object(aObjectId, aCollider);
+					if (aabb_intersects(iQuadrants[1][1], *aCollider.currentAabb))
+						child<1, 1>().add_object(aObjectId, aCollider);
 				}
 				else
 				{
-					auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
-					if (existing == iObjects.end())
-						iObjects.push_back(&aObject);
+					iObjects.emplace_back(aObjectId, &aCollider);
 					if (iObjects.size() > BucketSize && (iAabb.max - iAabb.min).min() > iTree.minimum_quadrant_size())
 						split();
 				}
 			}
-			void remove_object(i_collidable_object& aObject)
+			void remove_object(entity_id aObjectId, const broadphase_collider_2d& aCollider)
 			{
-				remove_object(aObject, aabb_union(aObject.aabb(), aObject.saved_aabb()));
+				remove_object(aObject, aCollider, aabb_union(*aCollider.previousAabb, *aCollider.currentAabb));
 			}
-			void remove_object(i_collidable_object& aObject, const aabb_2d& aAabb)
+			void remove_object(entity_id aObjectId, const broadphase_collider_2d& aCollider, const aabb_2d& aAabb)
 			{
-				if (!aObject.collidable() || !aabb_intersects(aObject.aabb(), iAabb))
+				if (!aabb_intersects(*aCollider.currentAabb, iAabb))
 				{
-					auto existing = std::find(iObjects.begin(), iObjects.end(), &aObject);
+					auto existing = std::find_if(iObjects.begin(), iObjects.end(), [aObjectId](const object& aObject) { return aObject.id == aObjectId; });
 					if (existing != iObjects.end())
 						iObjects.erase(existing);
 				}
 				if (has_child<0, 0>() && aabb_intersects(iQuadrants[0][0], aAabb))
-					child<0, 0>().remove_object(aObject, aAabb);
+					child<0, 0>().remove_object(aObjectId, aCollider, aAabb);
 				if (has_child<0, 1>() && aabb_intersects(iQuadrants[0][1], aAabb))
-					child<0, 1>().remove_object(aObject, aAabb);
+					child<0, 1>().remove_object(aObjectId, aCollider, aAabb);
 				if (has_child<1, 0>() && aabb_intersects(iQuadrants[1][0], aAabb))
-					child<1, 0>().remove_object(aObject, aAabb);
+					child<1, 0>().remove_object(aObjectId, aCollider, aAabb);
 				if (has_child<1, 1>() && aabb_intersects(iQuadrants[1][1], aAabb))
-					child<1, 1>().remove_object(aObject, aAabb);
+					child<1, 1>().remove_object(aObjectId, aCollider, aAabb);
 				if (empty())
 					iTree.destroy_node(*this);
 			}
-			void update_object(i_collidable_object& aObject)
+			void update_object(entity_id aObjectId, const broadphase_collider_2d& aCollider)
 			{
 				iTree.iDepth = std::max(iTree.iDepth, iDepth);
-				const auto& currentAabb = aabb_2d{ aObject.aabb() };
-				const auto& savedAabb = aabb_2d{ aObject.saved_aabb() };
-				if (currentAabb == savedAabb)
+				const auto& currentAabb = aCollider.currentAabb;
+				const auto& previousAabb = aCollider.previousAabb;
+				if (currentAabb == previousAabb)
 					return;
 				if (aabb_intersects(currentAabb, iAabb))
 					add_object(aObject);
-				if (aabb_intersects(savedAabb, iAabb))
-					remove_object(aObject, savedAabb);
+				if (aabb_intersects(previousAabb, iAabb))
+					remove_object(aObject, aCollider, previousAabb);
 			}
 			bool empty() const
 			{

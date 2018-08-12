@@ -32,308 +32,16 @@
 #include <optional>
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/core/path.hpp>
-#include <neogfx/game/i_shape.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
 #include <neogfx/gfx/pen.hpp>
 #include <neogfx/gfx/text/font.hpp>
+#include <neogfx/gfx/primitives.hpp>
+#include <neogfx/game/ecs_helpers.hpp>
+#include <neogfx/game/material.hpp>
 
 namespace neogfx
 {
-	enum class logical_coordinate_system
-	{
-		Specified,
-		AutomaticGui,
-		AutomaticGame
-	};
-
-	typedef std::optional<logical_coordinate_system> optional_logical_coordinate_system;
-
-	enum class smoothing_mode
-	{
-		None,
-		AntiAlias
-	};
-
-	enum class logical_operation
-	{
-		None,
-		Xor
-	};
-
-	enum class shader_effect
-	{
-		None				= 0,
-		Colourize			= 1,
-		ColourizeAverage	= Colourize,
-		Colorize			= Colourize,
-		ColorizeAverage		= ColourizeAverage,
-		ColourizeMaximum	= 2,
-		ColorizeMaximum		= ColourizeMaximum,
-		ColourizeSpot		= 3,
-		ColorizeSpot		= ColourizeSpot,
-		Monochrome			= 4
-	};
-
-	typedef neolib::variant<colour, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
-
-	inline brush to_brush(const colour_or_gradient& aEffectColour)
-	{
-		if (std::holds_alternative<colour>(aEffectColour))
-			return std::get<colour>(aEffectColour);
-		else if (std::holds_alternative<gradient>(aEffectColour))
-			return std::get<gradient>(aEffectColour);
-		else
-			return colour{};
-	}
-
-	struct glyph_text_cache_usage
-	{
-		bool use;
-	};
-	const glyph_text_cache_usage UseGlyphTextCache{ true };
-	const glyph_text_cache_usage DontUseGlyphTextCache{ false };
-
-	class text_colour : public colour_or_gradient
-	{
-	public:
-		text_colour() : colour_or_gradient{}
-		{
-		}
-		text_colour(const text_colour& aOther) : colour_or_gradient{ aOther }
-		{
-		}
-		text_colour(text_colour&& aOther) : colour_or_gradient{ std::move(aOther) }
-		{
-		}
-		template <typename T>
-		text_colour(T&& aOther) : colour_or_gradient{ std::forward<T>(aOther) }
-		{
-		}
-	public:
-		text_colour& operator=(const text_colour& aOther)
-		{
-			if (&aOther == this)
-				return *this;
-			colour_or_gradient::operator=(aOther);
-			return *this;
-		}
-		text_colour& operator=(text_colour&& aOther)
-		{
-			if (&aOther == this)
-				return *this;
-			colour_or_gradient::operator=(std::move(aOther));
-			return *this;
-		}
-		template <typename T>
-		text_colour& operator=(T&& aOther)
-		{
-			colour_or_gradient::operator=(std::forward<T>(aOther));
-			return *this;
-		}
-	public:
-		colour::component alpha() const
-		{
-			if (std::holds_alternative<colour>(*this))
-				return std::get<colour>(*this).alpha();
-			else
-				return 255;
-		}
-		text_colour with_alpha(colour::component aAlpha) const
-		{
-			if (std::holds_alternative<colour>(*this))
-				return std::get<colour>(*this).with_alpha(aAlpha);
-			if (std::holds_alternative<gradient>(*this))
-				return std::get<gradient>(*this).with_combined_alpha(aAlpha);
-			else
-				return text_colour{};
-		}
-	};
-	typedef std::optional<text_colour> optional_text_colour;
-
-	class text_effect
-	{
-	public:
-		enum type_e
-		{
-			None,
-			Outline,
-			Glow,
-			Shadow
-		};
-		typedef double auxiliary_parameter;
-		typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
-	public:
-		text_effect(type_e aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) : 
-			iType{ aType }, iColour{ aColour }, iWidth{ aWidth }, iAux1{ aAux1 }
-		{
-		}
-	public:
-		text_effect& operator=(const text_effect& aOther)
-		{
-			if (&aOther == this)
-				return *this;
-			iType = aOther.iType;
-			iColour = aOther.iColour;
-			iWidth = aOther.iWidth;
-			iAux1 = aOther.iAux1;
-			return *this;
-		}
-	public:
-		bool operator==(const text_effect& aOther) const
-		{
-			return iType == aOther.iType && iColour == aOther.iColour && iWidth == aOther.iWidth && iAux1 == aOther.iAux1;
-		}
-		bool operator!=(const text_effect& aOther) const
-		{
-			return iType != aOther.iType || iColour != aOther.iColour || iWidth != aOther.iWidth || iAux1 != aOther.iAux1;
-		}
-		bool operator<(const text_effect& aRhs) const
-		{
-			return std::tie(iType, iColour, iWidth, iAux1) < std::tie(aRhs.iType, aRhs.iColour, aRhs.iWidth, aRhs.iAux1);
-		}
-	public:
-		type_e type() const
-		{
-			return iType;
-		}
-		const text_colour& colour() const
-		{
-			return iColour;
-		}
-		dimension width() const
-		{
-			if (iWidth != std::nullopt)
-				return *iWidth;
-			switch (type())
-			{
-			case None:
-			default:
-				return 0.0;
-			case Outline:
-				return 1.0;
-			case Glow:
-			case Shadow:
-				return 4.0;
-			}
-		}
-		double aux1() const
-		{
-			if (iAux1 != std::nullopt)
-				return *iAux1;
-			switch (type())
-			{
-			case None:
-			default:
-				return 0.0;
-			case Outline:
-				return 0.0;
-			case Glow:
-			case Shadow:
-				return 1.0;
-			}
-		}
-		text_effect with_alpha(colour::component aAlpha) const
-		{
-			return text_effect{ iType, iColour.with_alpha(aAlpha), iWidth, iAux1 };
-		}
-		text_effect with_alpha(double aAlpha) const
-		{
-			return with_alpha(static_cast<colour::component>(aAlpha * 255));
-		}
-	private:
-		type_e iType;
-		text_colour iColour;
-		optional_dimension iWidth;
-		optional_auxiliary_parameter iAux1;
-	};
-	typedef std::optional<text_effect> optional_text_effect;
-
-	class text_appearance
-	{
-	public:
-		struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_appearance::no_paper") {} };
-		struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
-	public:
-		template <typename InkType, typename PaperType>
-		text_appearance(const InkType& aInk, const PaperType& aPaper, const optional_text_effect& aEffect) :
-			iInk{ aInk },
-			iPaper{ aPaper },
-			iEffect{ aEffect }
-		{
-		}
-		template <typename InkType, typename PaperType>
-		text_appearance(const InkType& aInk, const PaperType& aPaper, const text_effect& aEffect) :
-			iInk{ aInk },
-			iPaper{ aPaper },
-			iEffect{ aEffect }
-		{
-		}
-		template <typename InkType>
-		text_appearance(const InkType& aInk, const optional_text_effect& aEffect) :
-			iInk{ aInk },
-			iEffect{ aEffect }
-		{
-		}
-		template <typename InkType>
-		text_appearance(const InkType& aInk, const text_effect& aEffect) :
-			iInk{ aInk },
-			iEffect{ aEffect }
-		{
-		}
-		template <typename InkType, typename PaperType>
-		text_appearance(const InkType& aInk, const PaperType& aPaper) :
-			iInk{ aInk },
-			iPaper{ aPaper }
-		{
-		}
-		template <typename InkType>
-		text_appearance(const InkType& aInk) :
-			iInk{ aInk }
-		{
-		}
-	public:
-		const text_colour& ink() const
-		{
-			return iInk;
-		}
-		bool has_paper() const
-		{
-			return iPaper != std::nullopt;
-		}
-		const text_colour& paper() const
-		{
-			if (has_paper())
-				return *iPaper;
-			throw no_paper();
-		}
-		bool has_effect() const
-		{
-			return iEffect != std::nullopt;
-		}
-		const text_effect& effect() const
-		{
-			if (has_effect())
-				return *iEffect;
-			throw no_effect();
-		}
-	public:
-		text_appearance with_alpha(colour::component aAlpha) const
-		{
-			return text_appearance{ iInk.with_alpha(aAlpha), iPaper != std::nullopt ? optional_text_colour{ iPaper->with_alpha(aAlpha) } : optional_text_colour{}, iEffect != std::nullopt ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
-		}
-		text_appearance with_alpha(double aAlpha) const
-		{
-			return with_alpha(static_cast<colour::component>(aAlpha * 255));
-		}
-	private:
-		text_colour iInk;
-		optional_text_colour iPaper;
-		optional_text_effect iEffect;
-	};
-
-	typedef std::optional<text_appearance> optional_text_appearance;
-
 	class i_surface;
 	class i_texture;
 	class i_widget;
@@ -414,14 +122,12 @@ namespace neogfx
 		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const brush& aFill = brush{}, angle aStartAngle = 0.0) const;
 		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const;
 		void draw_path(const path& aPath, const pen& aPen, const brush& aFill = brush{}) const;
-		void draw_shape(const i_shape& aShape, const pen& aPen, const brush& aFill = brush{}) const;
 		void draw_focus_rect(const rect& aRect) const;
 		void fill_rect(const rect& aRect, const brush& aFill) const;
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const;
 		void fill_circle(const point& aCentre, dimension aRadius, const brush& aFill) const;
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const;
 		void fill_path(const path& aPath, const brush& aFill) const;
-		void fill_shape(const i_shape& aShape, const brush& aFill) const;
 		size text_extent(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		size multiline_text_extent(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
@@ -460,11 +166,8 @@ namespace neogfx
 		void set_password(bool aPassword, const std::string& aMask = "\xE2\x97\x8F");
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
-		void draw_texture(const i_shape& aShape, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
-		void draw_texture(const i_shape& aMap, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
-		void draw_textures(const i_shape& aMap, texture_list_pointer aTextures, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		// implementation
 		// from i_device_metrics
 	public:

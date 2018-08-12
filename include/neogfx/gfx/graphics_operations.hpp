@@ -27,8 +27,6 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/game/mesh.hpp>
-#include <neogfx/../../src/gfx/native/i_native_texture.hpp>
-#include <neogfx/../../src/gfx/text/native/i_native_font_face.hpp>
 
 namespace neogfx
 {
@@ -171,7 +169,7 @@ namespace neogfx
 
 		struct draw_shape
 		{
-			neogfx::mesh mesh;
+			game::mesh mesh;
 			pen pen;
 		};
 
@@ -212,7 +210,7 @@ namespace neogfx
 
 		struct fill_shape
 		{
-			neogfx::mesh mesh;
+			game::mesh mesh;
 			brush fill;
 		};
 
@@ -225,7 +223,7 @@ namespace neogfx
 
 		struct draw_textures
 		{
-			neogfx::mesh mesh;
+			game::mesh mesh;
 			optional_colour colour;
 			shader_effect shaderEffect;
 		};
@@ -303,7 +301,7 @@ namespace neogfx
 			FillPath,
 			FillShape,
 			DrawGlyph,
-			DrawTextures
+			DrawTexture
 		};
 
 		std::string to_string(operation_type aOpType);

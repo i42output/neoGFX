@@ -1,4 +1,4 @@
-// collider.hpp
+// patch.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -22,53 +22,59 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
+#include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component_data.hpp>
+#include <neogfx/game/material.hpp>
 
 namespace neogfx::game
 {
-	struct box_collider
+	struct patch
 	{
-		vec3 origin;
-		vec3 size;
-		uint32_t collisionEventId;
+		face face;
+		material material;
 
 		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = { 0x55468971, 0xb33e, 0x4e54, 0xa563, { 0xb8, 0x98, 0x3f, 0x22, 0xa, 0xfc } };
+				static const neolib::uuid sId = { 0x2a4e96aa, 0x2e1e, 0x48d7, 0xa384, { 0xb, 0xe8, 0x79, 0x3a, 0x7e, 0x94 } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Collider";
+				static const neolib::string sName = "Patch";
 				return sName;
 			}
 			static uint32_t field_count()
 			{
-				return 4;
+				return 2;
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
 				switch (aFieldIndex)
 				{
 				case 0:
+					return component_data_field_type::Face;
 				case 1:
-					return component_data_field_type::Vec3;
-				case 2:
-					return component_data_field_type::Uint64;
-				case 3:
-					return component_data_field_type::Uint32 | component_data_field_type::Internal;
+					return component_data_field_type::ComponentData;
+				}
+			}
+			static neolib::uuid field_type_id(uint32_t aFieldIndex)
+			{
+				switch (aFieldIndex)
+				{
+				case 0:
+					return neolib::uuid{};
+				case 1:
+					return material::meta::id();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)
 			{
 				static const neolib::string sFieldNames[] =
 				{
-					"Origin",
-					"Size",
-					"Collision Mask",
-					"Collision Event Id",
+					"Face",
+					"Material"
 				};
 				return sFieldNames[aFieldIndex];
 			}

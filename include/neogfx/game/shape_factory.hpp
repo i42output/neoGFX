@@ -70,7 +70,7 @@ namespace neogfx
 	}
 
 	template <typename Container>
-	inline typename Container::iterator insert_back_rect_vertices(Container& aResult, const rect& aRect, dimension aPixelAdjust, rect_type aType)
+	inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const rect& aRect, dimension aPixelAdjust, rect_type aType)
 	{
 		temp_vec3_buffer<8> temp;
 		calc_rect_vertices(temp, aRect, aPixelAdjust, aType);

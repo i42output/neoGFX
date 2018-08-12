@@ -965,7 +965,7 @@ namespace neogfx
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINES, 8 };
-			insert_back_rect_vertices(vertexArrays, aRect, pixel_adjust(aPen), rect_type::Outline);
+			back_insert_rect_vertices(vertexArrays, aRect, pixel_adjust(aPen), rect_type::Outline);
 			for (auto& v : vertexArrays)
 				v.rgba = colour_to_vec4f(std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
@@ -1148,7 +1148,7 @@ namespace neogfx
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
-				auto newVertices = insert_back_rect_vertices(vertexArrays, drawOp.rect, 0.0, rect_type::FilledTriangles);
+				auto newVertices = back_insert_rect_vertices(vertexArrays, drawOp.rect, 0.0, rect_type::FilledTriangles);
 				for (auto i = newVertices; i != vertexArrays.end(); ++i)
 					i->rgba = colour_to_vec4f(std::holds_alternative<colour>(drawOp.fill) ?
 						std::array<uint8_t, 4>{{

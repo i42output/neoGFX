@@ -54,6 +54,8 @@ namespace neogfx::game
 		Mat22				= BasicMat22 | Float64,
 		Mat33				= BasicMat33 | Float64,
 		Mat44				= BasicMat44 | Float64,
+		Aabb				= 0x00001000,
+		Aabb2d				= 0x00002000,
 		Uuid				= 0x00010000,
 		Id					= 0x00020000,
 		ComponentData		= 0x00030000,

@@ -356,6 +356,16 @@ namespace neogfx
 		return result.str();
 	}
 
+	vec4 colour::to_vec4() const
+	{
+		return vec4{ red<double>(), green<double>(), blue<double>(), alpha<double>() };
+	}
+
+	vec4f colour::to_vec4f() const
+	{
+		return vec4{ red<float>(), green<float>(), blue<float>(), alpha<float>() };
+	}
+
 	gradient::gradient() :
 		iColourStops{{0.0, colour::Black}, {1.0, colour::Black}},
 		iAlphaStops{{0.0, 255_u8}, {1.0, 255_u8}},

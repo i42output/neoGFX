@@ -1,4 +1,4 @@
-// mesh_filter.hpp
+// mesh_renderer.hpp
 /*
 neogfx C++ GUI Library
 Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -24,44 +24,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/string.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/game/ecs_ids.hpp>
-#include <neogfx/game/component.hpp>
-#include <neogfx/game/mesh.hpp>
-#include <neogfx/game/transformation.hpp>
+#include <neogfx/game/material.hpp>
+#include <neogfx/game/patch.hpp>
 
 namespace neogfx::game
 {
-	struct mesh_filter
+	struct mesh_renderer
 	{
-		shared<mesh> sharedMesh;
-		std::optional<mesh> mesh;
-		std::optional<mat44> transformation;
+		material material;
+		std::vector<patch> patches;
 
 		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = { 0x4dc667e1, 0x9284, 0x4834, 0xb4eb, { 0xa5, 0x9c, 0x34, 0x34, 0xe, 0xef } };
+				static const neolib::uuid sId = { 0x19dc8436, 0xfa0d, 0x437c, 0xa784, { 0xca, 0x6a, 0x7a, 0x35, 0x44, 0x8b } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Mesh Filter";
+				static const neolib::string sName = "Mesh Renderer";
 				return sName;
 			}
 			static uint32_t field_count()
 			{
-				return 3;
+				return 2;
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
 				switch (aFieldIndex)
 				{
 				case 0:
-					return component_data_field_type::ComponentData | component_data_field_type::Shared;
+					return component_data_field_type::ComponentData;
 				case 1:
-					return component_data_field_type::ComponentData | component_data_field_type::Optional;
-				case 2:
-					return component_data_field_type::Mat44 | component_data_field_type::Optional;
+					return component_data_field_type::ComponentData | component_data_field_type::Array;
 				}
 			}
 			static neolib::uuid field_type_id(uint32_t aFieldIndex)
@@ -69,22 +65,16 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
+					return material::meta::id();
 				case 1:
-					return mesh::meta::id();
-				case 2:
-					return neolib::uuid{};
+					return patch::meta::id();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)
 			{
 				static const neolib::string sFieldNames[] =
 				{
-					"Shared Mesh",
-					"Mesh",
-					"Transformation",
-					"Colour",
-					"Gradient",
-					"Texture",
+					"Material",
 					"Patches"
 				};
 				return sFieldNames[aFieldIndex];
