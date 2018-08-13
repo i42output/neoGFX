@@ -52,6 +52,8 @@ namespace neogfx::game
 				{
 				case 0:
 					return component_data_field_type::Vec4;
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)

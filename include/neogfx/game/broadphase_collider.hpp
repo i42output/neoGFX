@@ -57,6 +57,8 @@ namespace neogfx::game
 					return component_data_field_type::Aabb | component_data_field_type::Optional;
 				case 2:
 					return component_data_field_type::Uint64;
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)
@@ -103,6 +105,8 @@ namespace neogfx::game
 					return component_data_field_type::Aabb2d | component_data_field_type::Optional;
 				case 2:
 					return component_data_field_type::Uint64;
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)

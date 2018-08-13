@@ -59,6 +59,8 @@ namespace neogfx::game
 					return component_data_field_type::Uint64;
 				case 3:
 					return component_data_field_type::Uint32 | component_data_field_type::Internal;
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)

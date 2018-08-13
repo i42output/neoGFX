@@ -69,6 +69,8 @@ namespace neogfx::game
 					return component_data_field_type::Vec3;
 				case 7:
 					return component_data_field_type::Scalar;
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)

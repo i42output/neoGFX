@@ -47,7 +47,7 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void* populate(ComponentData&& aComponentData)
 		{
-			return populate(std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
+			return populate(&std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
 		}
 	};
 
@@ -58,7 +58,7 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void* populate(entity_id aEntity, ComponentData&& aComponentData)
 		{
-			return populate(aEntity, std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
+			return populate(aEntity, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
 		}
 	};
 }

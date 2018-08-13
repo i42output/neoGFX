@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/game/chrono.hpp>
 #include <neogfx/game/system.hpp>
 
 namespace neogfx::game

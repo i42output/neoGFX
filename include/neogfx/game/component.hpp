@@ -195,14 +195,14 @@ namespace neogfx::game
 		{
 			contents().push_back(aData);
 			index().push_back(aEntity);
-			reverse_index().push_back(reverse_index_entry{ aEntity, iContents.size() - 1 });
+			reverse_index().push_back(reverse_index_entry{ aEntity, contents().size() - 1 });
 			return contents().back();
 		}
 		value_type& populate(entity_id aEntity, value_type&& aData)
 		{
 			contents().push_back(std::move(aData));
 			index().push_back(aEntity);
-			reverse_index().push_back(reverse_index_entry{ aEntity, iContents.size() - 1 });
+			reverse_index().push_back(reverse_index_entry{ aEntity, contents().size() - 1 });
 			return contents().back();
 		}
 		void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) override
@@ -249,9 +249,9 @@ namespace neogfx::game
 			if ((aComponentData == nullptr && !is_data_optional()) || aComponentDataSize != sizeof(data_type))
 				throw invalid_data();
 			if (aComponentData != nullptr)
-				return &populate(aEntity, *static_cast<const data_type*>(aComponentData));
+				return &populate(*static_cast<const data_type*>(aComponentData));
 			else
-				return &populate(aEntity, value_type{}); // empty optional
+				return &populate(value_type{}); // empty optional
 		}
 	};
 

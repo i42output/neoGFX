@@ -62,6 +62,8 @@ namespace neogfx::game
 					return component_data_field_type::ComponentData | component_data_field_type::Optional;
 				case 2:
 					return component_data_field_type::Mat44 | component_data_field_type::Optional;
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static neolib::uuid field_type_id(uint32_t aFieldIndex)
@@ -73,6 +75,8 @@ namespace neogfx::game
 					return mesh::meta::id();
 				case 2:
 					return neolib::uuid{};
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)

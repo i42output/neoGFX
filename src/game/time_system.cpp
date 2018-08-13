@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/game/chrono.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/time_system.hpp>
 #include <neogfx/game/clock.hpp>
@@ -31,14 +32,17 @@ namespace neogfx::game
 		if (!ecs::instance().component_registered<clock>(aContext))
 		{
 			ecs::instance().register_component<clock>(aContext);
-			ecs::instance().populate_shared<clock
+			auto timeStep = chrono::to_flicks(0.010).count();
+			auto now = to_step_time(
+				chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())),
+				timeStep);
+			ecs::instance().populate_shared<clock>(aContext, clock{ now, timeStep });
 		}
 	}
 
 	const system_id& time_system::id() const
 	{
-		iStepInterval{ chrono::to_flicks(0.010).count() },
-			return meta::id();
+		return meta::id();
 	}
 
 	const neolib::i_string& time_system::name() const

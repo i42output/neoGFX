@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
+#include <neogfx/game/chrono.hpp>
 #include <neogfx/game/i_component_data.hpp>
 
 namespace neogfx::game
@@ -54,6 +55,8 @@ namespace neogfx::game
 				case 0:
 				case 1:
 					return component_data_field_type::Int64;
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)

@@ -22,6 +22,7 @@
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/clock.hpp>
 #include <neogfx/game/physics_system.hpp>
+#include <neogfx/game/time_system.hpp>
 #include <neogfx/game/rigid_body.hpp>
 
 namespace neogfx::game
@@ -29,6 +30,8 @@ namespace neogfx::game
 	physics_system::physics_system(const ecs::context& aContext) :
 		system{ aContext }
 	{
+		if (!ecs::instance().system_registered<time_system>(aContext))
+			ecs::instance().register_system<time_system>(aContext);
 	}
 
 	const system_id& physics_system::id() const
@@ -45,14 +48,17 @@ namespace neogfx::game
 	{
 		if (!ecs::instance().component_instantiated<rigid_body>(context()))
 			return;
-		auto& time = ecs::instance().component<clock>(context());
+		auto& worldClock = ecs::instance().shared_component<clock>(context()).contents()[0];
+		auto now = to_step_time(
+			chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())), 
+			worldClock.timeStep);
 		auto& rigidBodies = ecs::instance().component<rigid_body>(context());
 		for (auto& rigidBody : rigidBodies.contents())
 		{
-			while (*iPhysicsTime <= now)
+			while (worldClock.time <= now)
 			{
 				++frames;
-				applying_physics.trigger(*iPhysicsTime);
+				applying_physics.trigger(worldClock.time);
 				sort_objects();
 				if (iG != 0.0)
 				{
@@ -88,10 +94,11 @@ namespace neogfx::game
 							else
 								break;
 						}
-						bool o1updated = o1.update(from_step_time(*iPhysicsTime), totalForce);
+						bool o1updated = o1.update(from_step_time(worldClock.time), totalForce);
 						updated = (o1updated || updated);
 					}
 				}
+				worldClock.time += worldClock.timeStep;
 			}
 			auto rotation = [&rigidBody]() -> mat33
 			{

@@ -28,17 +28,18 @@ namespace neogfx::game
 
 	enum class component_data_field_type : uint32_t
 	{
-		Bool				= 0x00000000,
-		Int8				= 0x00000001,
-		Uint8				= 0x00000002,
-		Int16				= 0x00000003,
-		Uint16				= 0x00000004,
-		Int32				= 0x00000005,
-		Uint32				= 0x00000006,
-		Int64				= 0x00000007,
-		Uint64				= 0x00000008,
-		Float32				= 0x00000009,
-		Float64				= 0x0000000A,
+		Invalid				= 0x00000000,
+		Bool				= 0x00000001,
+		Int8				= 0x00000002,
+		Uint8				= 0x00000003,
+		Int16				= 0x00000004,
+		Uint16				= 0x00000005,
+		Int32				= 0x00000006,
+		Uint32				= 0x00000007,
+		Int64				= 0x00000008,
+		Uint64				= 0x00000009,
+		Float32				= 0x0000000A,
+		Float64				= 0x0000000B,
 		Scalar				= Float64,
 		BasicVec2			= 0x00000100,
 		BasicVec3			= 0x00000200,
@@ -89,6 +90,8 @@ namespace neogfx::game
 	{
 		struct meta
 		{
+			struct invalid_field_index : std::logic_error { invalid_field_index() : std::logic_error("neogfx::game::i_component_data::meta::invalid_field_index") {} };
+
 			static bool is_shared()
 			{
 				return false;

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/numerical.hpp>
 #include <neogfx/game/3rdparty/facebook/flicks.h>
 
 namespace neogfx::game
@@ -31,5 +32,28 @@ namespace neogfx::game
 		{
 			return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(ns)).count());
 		}
+	}
+
+	typedef scalar time_interval;
+	typedef std::optional<time_interval> optional_time_interval;
+	typedef int64_t step_time_interval;
+
+	inline step_time_interval to_step_time(time_interval aTime, step_time_interval aStepInterval)
+	{
+		auto fs = chrono::to_flicks(aTime).count();
+		return fs - (fs % aStepInterval);
+	}
+
+	inline step_time_interval to_step_time(optional_time_interval& aTime, step_time_interval aStepInterval)
+	{
+		if (aTime)
+			return to_step_time(*aTime, aStepInterval);
+		else
+			return 0;
+	}
+
+	inline time_interval from_step_time(step_time_interval aStepTime)
+	{
+		return chrono::to_seconds(chrono::flicks{ aStepTime });
 	}
 }

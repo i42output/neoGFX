@@ -65,6 +65,26 @@ namespace neogfx::game
 		return iComponents;
 	}
 
+	const ecs::context_data::shared_component_factories_t& ecs::context_data::shared_component_factories() const
+	{
+		return iSharedComponentFactories;
+	}
+
+	ecs::context_data::shared_component_factories_t& ecs::context_data::shared_component_factories()
+	{
+		return iSharedComponentFactories;
+	}
+
+	const ecs::context_data::shared_components_t& ecs::context_data::shared_components() const
+	{
+		return iSharedComponents;
+	}
+
+	ecs::context_data::shared_components_t& ecs::context_data::shared_components()
+	{
+		return iSharedComponents;
+	}
+
 	const ecs::context_data::system_factories_t& ecs::context_data::system_factories() const
 	{
 		return iSystemFactories;
@@ -117,6 +137,27 @@ namespace neogfx::game
 	i_component& ecs::context_data::component(component_id aComponentId)
 	{
 		return const_cast<i_component&>(const_cast<const context_data*>(this)->component(aComponentId));
+	}
+
+	bool ecs::context_data::shared_component_instantiated(component_id aComponentId) const
+	{
+		return shared_components().find(aComponentId) != shared_components().end();
+	}
+
+	const i_shared_component& ecs::context_data::shared_component(component_id aComponentId) const
+	{
+		auto existingComponent = shared_components().find(aComponentId);
+		if (existingComponent != shared_components().end())
+			return *existingComponent->second;
+		auto existingFactory = shared_component_factories().find(aComponentId);
+		if (existingFactory != shared_component_factories().end())
+			return *iSharedComponents.emplace(aComponentId, existingFactory->second()).first->second;
+		throw component_not_found();
+	}
+
+	i_shared_component& ecs::context_data::shared_component(component_id aComponentId)
+	{
+		return const_cast<i_shared_component&>(const_cast<const context_data*>(this)->shared_component(aComponentId));
 	}
 
 	bool ecs::context_data::system_instantiated(system_id aSystemId) const
@@ -250,6 +291,21 @@ namespace neogfx::game
 		return aContext.owner().component(aComponentId);
 	}
 
+	bool ecs::shared_component_instantiated(const context& aContext, component_id aComponentId) const
+	{
+		return aContext.owner().shared_component_instantiated(aComponentId);
+	}
+
+	const i_shared_component& ecs::shared_component(const context& aContext, component_id aComponentId) const
+	{
+		return aContext.owner().shared_component(aComponentId);
+	}
+
+	i_shared_component& ecs::shared_component(const context& aContext, component_id aComponentId)
+	{
+		return aContext.owner().shared_component(aComponentId);
+	}
+
 	bool ecs::archetype_registered(const context& aContext, const entity_archetype& aArchetype) const
 	{
 		return aContext.owner().archetypes().find(aArchetype.id()) != aContext.owner().archetypes().end();
@@ -273,6 +329,16 @@ namespace neogfx::game
 	void ecs::register_component(const context& aContext, component_id aComponentId, component_factory aFactory)
 	{
 		aContext.owner().component_factories().emplace(aComponentId, aFactory);
+	}
+
+	bool ecs::shared_component_registered(const context& aContext, component_id aComponentId) const
+	{
+		return aContext.owner().shared_component_factories().find(aComponentId) != aContext.owner().shared_component_factories().end();
+	}
+
+	void ecs::register_shared_component(const context& aContext, component_id aComponentId, shared_component_factory aFactory)
+	{
+		aContext.owner().shared_component_factories().emplace(aComponentId, aFactory);
 	}
 
 	bool ecs::system_registered(const context& aContext, system_id aSystemId) const

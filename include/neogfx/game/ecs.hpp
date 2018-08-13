@@ -41,6 +41,7 @@ namespace neogfx::game
 		struct entity_ids_exhuasted : std::runtime_error { entity_ids_exhuasted() : std::runtime_error("neogfx::ecs::entity_ids_exhuasted") {} };
 	public:
 		typedef std::function<std::unique_ptr<i_component>()> component_factory;
+		typedef std::function<std::unique_ptr<i_shared_component>()> shared_component_factory;
 		typedef std::function<std::unique_ptr<i_system>()> system_factory;
 	private:
 		typedef uint64_t context_id;
@@ -50,6 +51,8 @@ namespace neogfx::game
 			typedef std::map<entity_archetype_id, entity_archetype> archetype_registry_t;
 			typedef std::map<component_id, component_factory> component_factories_t;
 			typedef std::map<component_id, std::unique_ptr<i_component>> components_t;
+			typedef std::map<component_id, shared_component_factory> shared_component_factories_t;
+			typedef std::map<component_id, std::unique_ptr<i_shared_component>> shared_components_t;
 			typedef std::map<system_id, system_factory> system_factories_t;
 			typedef std::map<system_id, std::unique_ptr<i_system>> systems_t;
 		public:
@@ -63,6 +66,10 @@ namespace neogfx::game
 			component_factories_t& component_factories();
 			const components_t& components() const;
 			components_t& components();
+			const shared_component_factories_t& shared_component_factories() const;
+			shared_component_factories_t& shared_component_factories();
+			const shared_components_t& shared_components() const;
+			shared_components_t& shared_components();
 			const system_factories_t& system_factories() const;
 			system_factories_t& system_factories();
 			const systems_t& systems() const;
@@ -73,6 +80,9 @@ namespace neogfx::game
 			bool component_instantiated(component_id aComponentId) const;
 			const i_component& component(component_id aComponentId) const;
 			i_component& component(component_id aComponentId);
+			bool shared_component_instantiated(component_id aComponentId) const;
+			const i_shared_component& shared_component(component_id aComponentId) const;
+			i_shared_component& shared_component(component_id aComponentId);
 			bool system_instantiated(system_id aSystemId) const;
 			const i_system& system(system_id aSystemId) const;
 			i_system& system(system_id aSystemId);
@@ -88,6 +98,8 @@ namespace neogfx::game
 			archetype_registry_t iArchetypeRegistry;
 			component_factories_t iComponentFactories;
 			mutable components_t iComponents;
+			shared_component_factories_t iSharedComponentFactories;
+			mutable shared_components_t iSharedComponents;
 			system_factories_t iSystemFactories;
 			mutable systems_t iSystems;
 			entity_id iNextEntityId;
@@ -140,7 +152,8 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void populate(const context& aContext, entity_id aEntity, ComponentData&& aComponentData)
 		{
-			aContext.owner().components().find(ComponentData::meta::id())->second->populate(aEntity, std::forward<ComponentData>(aComponentData));
+			auto& c = static_cast<static_component<ComponentData>&>(*aContext.owner().components().find(ComponentData::meta::id())->second);
+			c.populate(aEntity, std::forward<ComponentData>(aComponentData));
 		}
 		template <typename... ComponentData, typename ComponentDataTail>
 		void populate_shared(const context& aContext, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
@@ -151,7 +164,8 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void populate_shared(const context& aContext, ComponentData&& aComponentData)
 		{
-			aContext.owner().components().find(ComponentData::meta::id())->second->populate(aEntity, std::forward<ComponentData>(aComponentData));
+			auto& c = static_cast<static_shared_component<ComponentData>&>(*aContext.owner().shared_components().find(ComponentData::meta::id())->second);
+			c.populate(std::forward<ComponentData>(aComponentData));
 		}
 		bool component_instantiated(const context& aContext, component_id aComponentId) const;
 		template <typename ComponentData>
@@ -170,6 +184,24 @@ namespace neogfx::game
 		static_component<ComponentData>& component(const context& aContext)
 		{
 			return const_cast<static_component<ComponentData>&>(const_cast<const ecs*>(this)->component<ComponentData>(aContext));
+		}
+		bool shared_component_instantiated(const context& aContext, component_id aComponentId) const;
+		template <typename ComponentData>
+		bool shared_component_instantiated(const context& aContext) const
+		{
+			return shared_component_instantiated(aContext, ComponentData::meta::id());
+		}
+		const i_shared_component& shared_component(const context& aContext, component_id aComponentId) const;
+		i_shared_component& shared_component(const context& aContext, component_id aComponentId);
+		template <typename ComponentData>
+		const static_shared_component<ComponentData>& shared_component(const context& aContext) const
+		{
+			return static_cast<const static_shared_component<ComponentData>&>(shared_component(aContext, ComponentData::meta::id()));
+		}
+		template <typename ComponentData>
+		static_shared_component<ComponentData>& shared_component(const context& aContext)
+		{
+			return const_cast<static_shared_component<ComponentData>&>(const_cast<const ecs*>(this)->shared_component<ComponentData>(aContext));
 		}
 		bool system_instantiated(const context& aContext, system_id aSystemId) const;
 		template <typename System>
@@ -206,11 +238,26 @@ namespace neogfx::game
 			register_component(
 				aContext,
 				ComponentData::meta::id(),
-				[]( return std::unique_ptr<i_component>{std::make_unique<static_component<ComponentData>>()}; ));
+				[]() { return std::unique_ptr<i_component>{std::make_unique<static_component<ComponentData>>()}; });
+		}
+		bool shared_component_registered(const context& aContext, component_id aComponentId) const;
+		template <typename ComponentData>
+		bool shared_component_registered(const context& aContext) const
+		{
+			return shared_component_registered(aContext, ComponentData::meta::id());
+		}
+		void register_shared_component(const context& aContext, component_id aComponentId, shared_component_factory aFactory);
+		template <typename ComponentData>
+		void register_shared_component(const context& aContext)
+		{
+			register_shared_component(
+				aContext,
+				ComponentData::meta::id(),
+				[]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ComponentData>>()}; });
 		}
 		bool system_registered(const context& aContext, system_id aSystemId) const;
 		template <typename System>
-		void system_registered(const context& aContext) const
+		bool system_registered(const context& aContext) const
 		{
 			return system_registered(aContext, System::meta::id());
 		}

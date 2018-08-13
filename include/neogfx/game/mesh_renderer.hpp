@@ -58,6 +58,8 @@ namespace neogfx::game
 					return component_data_field_type::ComponentData;
 				case 1:
 					return component_data_field_type::ComponentData | component_data_field_type::Array;
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static neolib::uuid field_type_id(uint32_t aFieldIndex)
@@ -68,6 +70,8 @@ namespace neogfx::game
 					return material::meta::id();
 				case 1:
 					return patch::meta::id();
+				default:
+					throw invalid_field_index();
 				}
 			}
 			static const neolib::i_string& field_name(uint32_t aFieldIndex)
