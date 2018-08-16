@@ -27,7 +27,7 @@ namespace neogfx
 	{
 		std::vector<xyz> result;
 		result.reserve(16);
-		insert_back_rect_vertices(result, aRect, aPixelAdjust, aType);
+		back_insert_rect_vertices(result, aRect, aPixelAdjust, aType);
 		return std::move(result);
 	};
 
