@@ -19,11 +19,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "shape.hpp"
+#include <neogfx/core/numerical.hpp>
+#include <neogfx/core/geometrical.hpp>
+#include <neogfx/core/colour.hpp>
+#include <neogfx/gfx/i_image.hpp>
 
 namespace neogfx
 {
-	class rectangle : public shape
+	class rectangle
 	{
 	public:
 		rectangle(const vec3& aPosition, const vec2& aExtents);

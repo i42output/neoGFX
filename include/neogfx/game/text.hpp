@@ -21,14 +21,13 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include "shape.hpp"
 
 namespace neogfx
 {
-	class text : public shape
+	class text
 	{
 	public:
-		text(i_shape_container& aContainer, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
+		text(const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
 	public:
 		const std::string& value() const;
 		void set_value(const std::string& aText);
@@ -43,10 +42,10 @@ namespace neogfx
 		const optional_margins& margins() const;
 		void set_margins(const optional_margins& aMargins);
 	public:
-		vec3 extents() const override;
-		rect bounding_box_2d(bool aWithPosition = true) const override;
+		vec3 extents() const;
+		rect bounding_box_2d(bool aWithPosition = true) const;
 	public:
-		void paint(graphics_context& aGraphicsContext) const override;
+		void paint(graphics_context& aGraphicsContext) const;
 	private:
 		size text_extent() const;
 	private:

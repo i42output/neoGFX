@@ -160,6 +160,7 @@ namespace neogfx
 		bool text_input(const std::string& aText) override;
 		bool sys_text_input(const std::string& aText) override;
 	private:
+		neolib::async_event_queue iAsyncEventQueue;
 		neogfx::program_options iProgramOptions;
 		loader iLoader;
 		std::string iName;

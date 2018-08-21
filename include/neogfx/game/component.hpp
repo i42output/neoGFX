@@ -146,20 +146,11 @@ namespace neogfx::game
 		typedef typename base_type::value_type value_type;
 		typedef typename base_type::contents_t contents_t;
 		typedef std::vector<entity_id> contents_index_t;
-		struct reverse_index_entry
-		{
-			entity_id entityId;
-			typename contents_t::size_type contentsIndex;
-			bool operator<(const reverse_index_entry& aOther) const
-			{
-				return entityId < aOther.entityId;
-			}
-		};
-		typedef std::vector<reverse_index_entry> reverse_index_t;
+		typedef std::vector<contents_index_t::size_type> reverse_index_t;
 	private:
 		typedef static_component<Data> self_type;
 	private:
-		static constexpr typename contents_t::size_type INVALID_INDEX = ~contents_t::size_type{};
+		static constexpr contents_index_t::size_type invalid = ~contents_index_t::size_type{};
 	public:
 		static_component()
 		{
@@ -182,9 +173,9 @@ namespace neogfx::game
 		}
 		const data_type& entity_record(entity_id aEntity) const
 		{
-			auto record = std::lower_bound(reverse_index().begin(), reverse_index().end(), reverse_index_entry{ aEntity });
-			if (record != reverse_index().end() && record->entityId == aEntity && record->contentsIndex != INVALID_INDEX)
-				return contents()[record->contentsIndex];
+			auto reverseIndex = reverse_index()[aEntity];
+			if (reverseIndex != invalid)
+				return contents()[reverseIndex];
 			throw entity_record_not_found();
 		}
 		value_type& entity_record(entity_id aEntity)
@@ -193,26 +184,31 @@ namespace neogfx::game
 		}
 		value_type& populate(entity_id aEntity, const value_type& aData)
 		{
-			contents().push_back(aData);
-			index().push_back(aEntity);
-			reverse_index().push_back(reverse_index_entry{ aEntity, contents().size() - 1 });
-			return contents().back();
+			return do_populate(aEntity, aData);
 		}
 		value_type& populate(entity_id aEntity, value_type&& aData)
 		{
-			contents().push_back(std::move(aData));
-			index().push_back(aEntity);
-			reverse_index().push_back(reverse_index_entry{ aEntity, contents().size() - 1 });
-			return contents().back();
+			return do_populate(aEntity, aData);
 		}
 		void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) override
 		{
 			if ((aComponentData == nullptr && !is_data_optional()) || aComponentDataSize != sizeof(data_type))
 				throw invalid_data();
 			if (aComponentData != nullptr)
-				return &populate(aEntity, *static_cast<const data_type*>(aComponentData));
+				return &do_populate(aEntity, *static_cast<const data_type*>(aComponentData));
 			else
-				return &populate(aEntity, value_type{}); // empty optional
+				return &do_populate(aEntity, value_type{}); // empty optional
+		}
+	private:
+		template <typename T>
+		value_type& do_populate(entity_id aEntity, T&& aComponentData)
+		{
+			contents().push_back(std::forward<T>(aComponentData));
+			index().push_back(aEntity);
+			if (reverse_index().size() < aEntity)
+				reverse_index().resize(aEntity, invalid);
+			reverse_index()[aEntity] = index().size() - 1;
+			return contents().back();
 		}
 	private:
 		contents_index_t iIndex;

@@ -26,6 +26,6 @@ namespace neogfx::game
 	typedef neolib::uuid entity_archetype_id;
 	typedef neolib::uuid component_id;
 	typedef neolib::uuid system_id;
-	typedef uint64_t id_t;
+	typedef uint32_t id_t;
 	typedef id_t entity_id;
 }

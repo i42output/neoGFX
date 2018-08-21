@@ -183,9 +183,20 @@ namespace neogfx::game
 
 	entity_id ecs::context_data::next_entity_id()
 	{
+		if (!iFreedEntityIds.empty())
+		{
+			auto nextId = iFreedEntityIds.back();
+			iFreedEntityIds.pop_back();
+			return nextId;
+		}
 		if (++iNextEntityId == 0ull)
-			throw entity_ids_exhuasted(); // todo: handle this unlikely event gracefully
+			throw entity_ids_exhuasted();
 		return iNextEntityId;
+	}
+
+	void ecs::context_data::free_entity_id(entity_id aId)
+	{
+		iFreedEntityIds.push_back(aId);
 	}
 
 	void ecs::context_data::add_ref()
@@ -274,6 +285,8 @@ namespace neogfx::game
 	{
 		if (component_instantiated<entity>(aContext))
 			component<entity>(aContext).entity_record(aEntityId).destroyed = true;
+		// todo: mark entity ID as invalid in all component data
+		aContext.owner().free_entity_id(aEntityId);
 	}
 
 	bool ecs::component_instantiated(const context& aContext, component_id aComponentId) const

@@ -88,6 +88,7 @@ namespace neogfx::game
 			i_system& system(system_id aSystemId);
 		public:
 			entity_id next_entity_id();
+			void free_entity_id(entity_id aId);
 		public:
 			void add_ref();
 			void release();
@@ -103,6 +104,7 @@ namespace neogfx::game
 			system_factories_t iSystemFactories;
 			mutable systems_t iSystems;
 			entity_id iNextEntityId;
+			std::vector<entity_id> iFreedEntityIds;
 		};
 		typedef std::map<context_id, context_data> contexts_t;
 	public:

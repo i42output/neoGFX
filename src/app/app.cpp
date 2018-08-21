@@ -157,14 +157,14 @@ namespace neogfx
 	}
 
 	app::app(const std::string& aName, i_service_factory& aServiceFactory) :
-		app(0, nullptr, aName, aServiceFactory)
+		app{ 0, nullptr, aName, aServiceFactory }
 	{
 	}
 
 	app::app(int argc, char* argv[], const std::string& aName, i_service_factory& aServiceFactory)
 		try :
 		neolib::async_thread{ "neogfx::app", true },
-		async_event_queue{ static_cast<neolib::async_task&>(*this) },
+		iAsyncEventQueue{ static_cast<neolib::async_task&>(*this) },
 		iProgramOptions{ argc, argv },
 		iLoader{ iProgramOptions, *this },
 		iName{ aName },
@@ -309,12 +309,12 @@ namespace neogfx
 				if (!process_events(iAppContext))
 					thread::sleep(1);
 			}
-			async_event_queue::instance().terminate();
+			iAsyncEventQueue.terminate();
 			return *iQuitResultCode;
 		}
 		catch (std::exception& e)
 		{
-			async_event_queue::instance().terminate();
+			iAsyncEventQueue.terminate();
 			halt();
 			std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
 			iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
@@ -322,7 +322,7 @@ namespace neogfx
 		}
 		catch (...)
 		{
-			async_event_queue::instance().terminate();
+			iAsyncEventQueue.terminate();
 			halt();
 			std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
 			iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
