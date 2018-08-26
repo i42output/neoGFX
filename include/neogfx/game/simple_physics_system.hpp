@@ -1,4 +1,4 @@
-// physics_system.hpp
+// simple_physics_system.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -24,12 +24,12 @@
 
 namespace neogfx::game
 {
-	class physics_system : public system
+	class simple_physics_system : public system
 	{
 	public:
 		event<int64_t> applying_physics;
 	public:
-		physics_system(const ecs::context& aContext);
+		simple_physics_system(const ecs::context& aContext);
 	public:
 		const system_id& id() const override;
 		const neolib::i_string& name() const override;
@@ -45,7 +45,7 @@ namespace neogfx::game
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Physics";
+				static const neolib::string sName = "Simple Physics";
 				return sName;
 			}
 		};

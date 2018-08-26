@@ -25,9 +25,14 @@
 
 namespace neogfx::game
 {
-	ecs::context_data::context_data(ecs& aOwner, context_id aId) :
+	ecs::context_data::context_data(game::ecs& aOwner, context_id aId) :
 		iOwner{ aOwner }, iId{ aId }, iReferenceCount{}, iNextEntityId{}
 	{
+	}
+
+	ecs& ecs::context_data::ecs() const
+	{
+		return iOwner;
 	}
 
 	ecs::context_id ecs::context_data::id() const
@@ -207,7 +212,7 @@ namespace neogfx::game
 	void ecs::context_data::release()
 	{
 		if (--iReferenceCount <= 0)
-			iOwner.destroy_context(id());
+			ecs().destroy_context(id());
 	}
 
 	ecs::context::context(context_data& aOwner) :
@@ -233,6 +238,11 @@ namespace neogfx::game
 		release();
 	}
 
+	ecs& ecs::context::ecs() const
+	{
+		return iOwner.ecs();
+	}
+
 	ecs::context_data& ecs::context::owner() const
 	{
 		return iOwner;
@@ -251,12 +261,6 @@ namespace neogfx::game
 	ecs::ecs() :
 		iNextContextId{}
 	{
-	}
-
-	ecs& ecs::instance()
-	{
-		static ecs sInstance;
-		return sInstance;
 	}
 
 	ecs::context ecs::create_context()

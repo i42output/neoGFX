@@ -30,12 +30,12 @@ namespace neogfx::game
 	private:
 		typedef neolib::set<component_id, component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
 	public:
-		system(const ecs::context& aContext) :
+		system(const game::ecs::context& aContext) :
 			iContext{ aContext }
 		{
 		}
 		template <typename ComponentIdIter>
-		system(const ecs::context& aContext, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
+		system(const game::ecs::context& aContext, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
 			iContext{ aContext }, iComponents{ aFirstComponent, aLastComponent }
 		{
 		}
@@ -48,7 +48,11 @@ namespace neogfx::game
 		{
 		}
 	public:
-		const ecs::context& context() const
+		game::ecs& ecs() const
+		{
+			return iContext.ecs();
+		}
+		const game::ecs::context& context() const
 		{
 			return iContext;
 		}
@@ -64,14 +68,14 @@ namespace neogfx::game
 	public:
 		const i_component& component(component_id aComponentId) const override
 		{
-			return ecs::instance().component(iContext, aComponentId);
+			return ecs().component(iContext, aComponentId);
 		}
 		i_component& component(component_id aComponentId) override
 		{
-			return ecs::instance().component(iContext, aComponentId);
+			return ecs().component(iContext, aComponentId);
 		}
 	private:
-		const ecs::context& iContext;
+		const game::ecs::context& iContext;
 		component_list iComponents;
 	};
 }

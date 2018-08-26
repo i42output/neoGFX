@@ -257,7 +257,7 @@ namespace archetypes
 
 void create_game(ng::i_layout& aLayout)
 {
-	auto& ecs = ng::ecs::instance();
+	auto& ecs = ng::ecs();
 	auto ecsContext = ecs.create_context();
 	ecs.register_archetype(ecsContext, archetypes::spaceship);
 	ecs.register_archetype(ecsContext, archetypes::asteroid);

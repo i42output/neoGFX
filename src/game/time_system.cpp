@@ -29,14 +29,14 @@ namespace neogfx::game
 	time_system::time_system(const ecs::context& aContext) :
 		system{ aContext }
 	{
-		if (!ecs::instance().component_registered<clock>(aContext))
+		if (!ecs().component_registered<clock>(aContext))
 		{
-			ecs::instance().register_component<clock>(aContext);
+			ecs().register_component<clock>(aContext);
 			auto timeStep = chrono::to_flicks(0.010).count();
 			auto now = to_step_time(
 				chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())),
 				timeStep);
-			ecs::instance().populate_shared<clock>(aContext, clock{ now, timeStep });
+			ecs().populate_shared<clock>(aContext, clock{ now, timeStep });
 		}
 	}
 

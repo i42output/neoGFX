@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <deque>
 #include "i_keyboard.hpp"
 
 namespace neogfx

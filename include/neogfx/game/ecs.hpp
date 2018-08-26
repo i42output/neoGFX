@@ -58,6 +58,7 @@ namespace neogfx::game
 		public:
 			context_data(ecs& aOwner, context_id aId);
 		public:
+			game::ecs& ecs() const;
 			context_id id() const;
 		public:
 			const archetype_registry_t& archetypes() const;
@@ -93,7 +94,7 @@ namespace neogfx::game
 			void add_ref();
 			void release();
 		private:
-			ecs& iOwner;
+			game::ecs& iOwner;
 			context_id iId;
 			int32_t iReferenceCount;
 			archetype_registry_t iArchetypeRegistry;
@@ -110,7 +111,8 @@ namespace neogfx::game
 	public:
 		class context
 		{
-			friend class ecs;
+		public:
+			friend class game::ecs;
 		public:
 			context(context_data& aOwner);
 			context(const context& aOther);
@@ -119,6 +121,8 @@ namespace neogfx::game
 		public:
 			context& operator=(const context&) = delete;
 			context& operator=(context&&) = delete;
+		public:
+			game::ecs& ecs() const;
 		private:
 			context_data& owner() const;
 		private:
@@ -129,8 +133,6 @@ namespace neogfx::game
 		};
 	public:
 		ecs();
-	public:
-		static ecs& instance();
 	public:
 		context create_context();
 		void destroy_context(context_id aContextId);
