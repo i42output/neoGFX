@@ -65,27 +65,18 @@ namespace neogfx::game
 			if (physicalConstants.gravitationalConstant != 0.0)
 			{
 				rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
+				auto firstMassless = std::find_if(rigidBodies.component_data().begin(), rigidBodies.component_data().end(), [](const rigid_body& body) { return body.mass == 0.0; });
+				auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
+					*physicalConstants.uniformGravity : vec3{ 1.0, 1.0, 1.0 };
 				for (auto& rigidBody1 : rigidBodies.component_data())
 				{
-					vec3 totalForce;
-					if (rigidBody1.mass == 0.0)
-						break;
-					if (physicalConstants.uniformGravity != std::nullopt)
-						totalForce = *physicalConstants.uniformGravity * rigidBody1.mass;
-					for (auto& rigidBody2 : rigidBodies.component_data())
+					vec3 totalForce = rigidBody1.mass * uniformGravity;
+					for (auto iterRigidBody2 = rigidBodies.component_data().begin(); iterRigidBody2 != firstMassless; ++iterRigidBody2)
 					{
-						if (&rigidBody2 == &rigidBody1)
-							continue;
-						if (rigidBody2.mass == 0.0)
-							break;
-						vec3 force;
-						vec3 r12 = rigidBody1.position - rigidBody2.position;
-						if (r12.magnitude() > 0.0)
-							force = -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * r12 / std::pow(r12.magnitude(), 3.0);
-						if (force.magnitude() >= 1.0e-6)
-							totalForce += force;
-						else
-							break;
+						auto& rigidBody2 = *iterRigidBody2;
+						vec3 distance = rigidBody1.position - rigidBody2.position;
+						if (distance.magnitude() > 0.0) // avoid division by zero or rigidBody1 == rigidBody2
+							totalForce += -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0);
 					}
 					auto rotation = [&rigidBody1]() -> mat33
 					{
