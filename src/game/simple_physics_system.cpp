@@ -67,7 +67,7 @@ namespace neogfx::game
 				rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
 				auto firstMassless = std::find_if(rigidBodies.component_data().begin(), rigidBodies.component_data().end(), [](const rigid_body& body) { return body.mass == 0.0; });
 				auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
-					*physicalConstants.uniformGravity : vec3{ 1.0, 1.0, 1.0 };
+					*physicalConstants.uniformGravity : vec3{};
 				for (auto& rigidBody1 : rigidBodies.component_data())
 				{
 					vec3 totalForce = rigidBody1.mass * uniformGravity;
