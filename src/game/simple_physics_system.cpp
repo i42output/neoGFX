@@ -35,7 +35,7 @@ namespace neogfx::game
 			ecs().register_system<time_system>(aContext);
 		if (!ecs().component_registered<physics>(aContext))
 			ecs().register_component<physics>(aContext);
-		if (ecs().shared_component<physics>(context()).contents().empty())
+		if (ecs().shared_component<physics>(context()).component_data().empty())
 			ecs().populate_shared<physics>(aContext, physics{ 6.67408e-11 });
 	}
 
@@ -53,8 +53,8 @@ namespace neogfx::game
 	{
 		if (!ecs().component_instantiated<rigid_body>(context()))
 			return;
-		auto& worldClock = ecs().shared_component<clock>(context()).contents()[0];
-		auto& physicalConstants = ecs().shared_component<physics>(context()).contents()[0];
+		auto& worldClock = ecs().shared_component<clock>(context()).component_data()[0];
+		auto& physicalConstants = ecs().shared_component<physics>(context()).component_data()[0];
 		auto now = to_step_time(
 			chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())), 
 			worldClock.timeStep);
@@ -64,15 +64,15 @@ namespace neogfx::game
 			applying_physics.trigger(worldClock.time);
 			if (physicalConstants.gravitationalConstant != 0.0)
 			{
-				sort_objects();
-				for (auto& rigidBody1 : rigidBodies.contents())
+				rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
+				for (auto& rigidBody1 : rigidBodies.component_data())
 				{
 					vec3 totalForce;
 					if (rigidBody1.mass == 0.0)
 						break;
 					if (physicalConstants.uniformGravity != std::nullopt)
 						totalForce = *physicalConstants.uniformGravity * rigidBody1.mass;
-					for (auto& rigidBody2 : rigidBodies.contents())
+					for (auto& rigidBody2 : rigidBodies.component_data())
 					{
 						if (&rigidBody2 == &rigidBody1)
 							continue;
@@ -116,6 +116,7 @@ namespace neogfx::game
 					rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 				}
 			}
+			physics_applied.trigger(worldClock.time);
 			worldClock.time += worldClock.timeStep;
 		}
 	}

@@ -28,6 +28,7 @@ namespace neogfx::game
 	{
 	public:
 		event<int64_t> applying_physics;
+		event<int64_t> physics_applied;
 	public:
 		simple_physics_system(const ecs::context& aContext);
 	public:

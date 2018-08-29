@@ -20,6 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/container/stable_vector.hpp>
+#include <neolib/intrusive_sort.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component.hpp>
 
@@ -77,7 +78,7 @@ namespace neogfx::game
 		typedef typename detail::crack_component_data<Data>::data_type data_type;
 		typedef typename data_type::meta meta_data_type;
 		typedef typename detail::crack_component_data<Data>::value_type value_type;
-		typedef typename detail::crack_component_data<Data>::container_type contents_t;
+		typedef typename detail::crack_component_data<Data>::container_type component_data_t;
 	private:
 		typedef static_component_base<Data, Base> self_type;
 	public:
@@ -115,24 +116,24 @@ namespace neogfx::game
 			return meta_data_type::field_name(aFieldIndex);
 		}
 	public:
-		const contents_t& contents() const
+		const component_data_t& component_data() const
 		{
-			return iContents;
+			return iComponentData;
 		}
-		contents_t& contents()
+		component_data_t& component_data()
 		{
-			return iContents;
+			return iComponentData;
 		}
-		const value_type& operator[](typename contents_t::size_type aIndex) const
+		const value_type& operator[](typename component_data_t::size_type aIndex) const
 		{
-			return contents()[aIndex];
+			return component_data()[aIndex];
 		}
-		value_type& operator[](typename contents_t::size_type aIndex)
+		value_type& operator[](typename component_data_t::size_type aIndex)
 		{
-			return contents()[aIndex];
+			return component_data()[aIndex];
 		}
 	private:
-		contents_t iContents;
+		component_data_t iComponentData;
 	};
 
 	template <typename Data>
@@ -144,22 +145,22 @@ namespace neogfx::game
 		typedef typename base_type::data_type data_type;
 		typedef typename base_type::meta_data_type meta_data_type;
 		typedef typename base_type::value_type value_type;
-		typedef typename base_type::contents_t contents_t;
-		typedef std::vector<entity_id> contents_index_t;
-		typedef std::vector<contents_index_t::size_type> reverse_index_t;
+		typedef typename base_type::component_data_t component_data_t;
+		typedef std::vector<entity_id> component_data_index_t;
+		typedef std::vector<component_data_index_t::size_type> reverse_index_t;
 	private:
 		typedef static_component<Data> self_type;
 	private:
-		static constexpr contents_index_t::size_type invalid = ~contents_index_t::size_type{};
+		static constexpr component_data_index_t::size_type invalid = ~component_data_index_t::size_type{};
 	public:
 		static_component()
 		{
 		}
-		const contents_index_t& index() const
+		const component_data_index_t& index() const
 		{
 			return iIndex;
 		}
-		contents_index_t& index()
+		component_data_index_t& index()
 		{
 			return iIndex;
 		}
@@ -175,7 +176,7 @@ namespace neogfx::game
 		{
 			auto reverseIndex = reverse_index()[aEntity];
 			if (reverseIndex != invalid)
-				return contents()[reverseIndex];
+				return component_data()[reverseIndex];
 			throw entity_record_not_found();
 		}
 		value_type& entity_record(entity_id aEntity)
@@ -199,19 +200,33 @@ namespace neogfx::game
 			else
 				return &do_populate(aEntity, value_type{}); // empty optional
 		}
+	public:
+		template <typename Compare>
+		void sort(Compare aComparator)
+		{
+			neolib::intrusive_sort(component_data().begin(), component_data().end(), 
+				[this](auto lhs, auto rhs) 
+				{ 
+					std::swap(*lhs, *rhs);
+					auto lhsIndex = lhs - component_data().begin();
+					auto rhsIndex = rhs - component_data().begin();
+					std::swap(index()[lhsIndex], index()[rhsIndex]);
+					std::swap(reverse_index()[index()[lhsIndex]], reverse_index()[index()[rhsIndex]]);
+				}, aComparator);
+		}
 	private:
 		template <typename T>
 		value_type& do_populate(entity_id aEntity, T&& aComponentData)
 		{
-			contents().push_back(std::forward<T>(aComponentData));
+			component_data().push_back(std::forward<T>(aComponentData));
 			index().push_back(aEntity);
 			if (reverse_index().size() < aEntity)
 				reverse_index().resize(aEntity, invalid);
 			reverse_index()[aEntity] = index().size() - 1;
-			return contents().back();
+			return component_data().back();
 		}
 	private:
-		contents_index_t iIndex;
+		component_data_index_t iIndex;
 		reverse_index_t iReverseIndex;
 	};
 
@@ -232,13 +247,13 @@ namespace neogfx::game
 		}
 		value_type& populate(const value_type& aData)
 		{
-			contents().push_back(aData);
-			return contents().back();
+			component_data().push_back(aData);
+			return component_data().back();
 		}
 		value_type& populate(value_type&& aData)
 		{
-			contents().push_back(std::move(aData));
-			return contents().back();
+			component_data().push_back(std::move(aData));
+			return component_data().back();
 		}
 		void* populate(const void* aComponentData, std::size_t aComponentDataSize) override
 		{

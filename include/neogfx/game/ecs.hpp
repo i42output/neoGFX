@@ -257,7 +257,7 @@ namespace neogfx::game
 			register_shared_component(
 				aContext,
 				ComponentData::meta::id(),
-				[]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ComponentData>>()}; });
+				[&aContext]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ComponentData>>(aContext)}; });
 		}
 		bool system_registered(const context& aContext, system_id aSystemId) const;
 		template <typename System>
@@ -272,7 +272,7 @@ namespace neogfx::game
 			register_system(
 				aContext,
 				System::meta::id(),
-				[](return std::unique_ptr<i_system>{std::make_unique<System>()}; ));
+				[&aContext]() { return std::unique_ptr<i_system>{std::make_unique<System>(aContext)}; });
 		}
 	private:
 		context_id iNextContextId;
