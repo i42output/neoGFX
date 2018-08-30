@@ -55,6 +55,8 @@ namespace neogfx::game
 			return;
 		auto& worldClock = ecs().shared_component<clock>(context()).component_data()[0];
 		auto& physicalConstants = ecs().shared_component<physics>(context()).component_data()[0];
+		auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
+			*physicalConstants.uniformGravity : vec3{};
 		auto now = to_step_time(
 			chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())), 
 			worldClock.timeStep);
@@ -62,50 +64,47 @@ namespace neogfx::game
 		while (worldClock.time <= now)
 		{
 			applying_physics.trigger(worldClock.time);
-			if (physicalConstants.gravitationalConstant != 0.0)
+			rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
+			auto firstMassless = physicalConstants.gravitationalConstant != 0.0 ?
+				std::find_if(rigidBodies.component_data().begin(), rigidBodies.component_data().end(), [](const rigid_body& body) { return body.mass == 0.0; }) :
+				rigidBodies.component_data().begin();
+			for (auto& rigidBody1 : rigidBodies.component_data())
 			{
-				rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
-				auto firstMassless = std::find_if(rigidBodies.component_data().begin(), rigidBodies.component_data().end(), [](const rigid_body& body) { return body.mass == 0.0; });
-				auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
-					*physicalConstants.uniformGravity : vec3{};
-				for (auto& rigidBody1 : rigidBodies.component_data())
+				vec3 totalForce = rigidBody1.mass * uniformGravity;
+				for (auto iterRigidBody2 = rigidBodies.component_data().begin(); iterRigidBody2 != firstMassless; ++iterRigidBody2)
 				{
-					vec3 totalForce = rigidBody1.mass * uniformGravity;
-					for (auto iterRigidBody2 = rigidBodies.component_data().begin(); iterRigidBody2 != firstMassless; ++iterRigidBody2)
-					{
-						auto& rigidBody2 = *iterRigidBody2;
-						vec3 distance = rigidBody1.position - rigidBody2.position;
-						if (distance.magnitude() > 0.0) // avoid division by zero or rigidBody1 == rigidBody2
-							totalForce += -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0);
-					}
-					auto rotation = [&rigidBody1]() -> mat33
-					{
-						scalar ax = rigidBody1.angle.x;
-						scalar ay = rigidBody1.angle.y;
-						scalar az = rigidBody1.angle.z;
-						if (ax != 0.0 || ay != 0.0)
-						{
-							mat33 rx = { { 1.0, 0.0, 0.0 },{ 0.0, std::cos(ax), -std::sin(ax) },{ 0.0, std::sin(ax), std::cos(ax) } };
-							mat33 ry = { { std::cos(ay), 0.0, std::sin(ay) },{ 0.0, 1.0, 0.0 },{ -std::sin(ay), 0.0, std::cos(ay) } };
-							mat33 rz = { { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
-							return rz * ry * rx;
-						}
-						else
-						{
-							return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
-						}
-					}();
-					// GCSE-level physics (Newtonian) going on here... :)
-					// v = u + at
-					// F = ma; a = F/m
-					auto v0 = rigidBody1.velocity;
-					auto p0 = rigidBody1.position;
-					auto a0 = rigidBody1.angle;
-					auto elapsedTime = from_step_time(worldClock.timeStep);
-					rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation * rigidBody1.acceleration)) * vec3 { elapsedTime, elapsedTime, elapsedTime };
-					rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } *(v0 * elapsedTime + ((rigidBody1.velocity - v0) * elapsedTime / 2.0));
-					rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
+					auto& rigidBody2 = *iterRigidBody2;
+					vec3 distance = rigidBody1.position - rigidBody2.position;
+					if (distance.magnitude() > 0.0) // avoid division by zero or rigidBody1 == rigidBody2
+						totalForce += -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0);
 				}
+				auto rotation = [&rigidBody1]() -> mat33
+				{
+					scalar ax = rigidBody1.angle.x;
+					scalar ay = rigidBody1.angle.y;
+					scalar az = rigidBody1.angle.z;
+					if (ax != 0.0 || ay != 0.0)
+					{
+						mat33 rx = { { 1.0, 0.0, 0.0 },{ 0.0, std::cos(ax), -std::sin(ax) },{ 0.0, std::sin(ax), std::cos(ax) } };
+						mat33 ry = { { std::cos(ay), 0.0, std::sin(ay) },{ 0.0, 1.0, 0.0 },{ -std::sin(ay), 0.0, std::cos(ay) } };
+						mat33 rz = { { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+						return rz * ry * rx;
+					}
+					else
+					{
+						return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+					}
+				}();
+				// GCSE-level physics (Newtonian) going on here... :)
+				// v = u + at
+				// F = ma; a = F/m
+				auto v0 = rigidBody1.velocity;
+				auto p0 = rigidBody1.position;
+				auto a0 = rigidBody1.angle;
+				auto elapsedTime = from_step_time(worldClock.timeStep);
+				rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation * rigidBody1.acceleration)) * vec3 { elapsedTime, elapsedTime, elapsedTime };
+				rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } *(v0 * elapsedTime + ((rigidBody1.velocity - v0) * elapsedTime / 2.0));
+				rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 			}
 			physics_applied.trigger(worldClock.time);
 			worldClock.time += worldClock.timeStep;
