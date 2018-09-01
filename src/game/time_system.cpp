@@ -26,7 +26,7 @@
 
 namespace neogfx::game
 {
-	time_system::time_system(game::ecs& aEcs) :
+	time_system::time_system(game::i_ecs& aEcs) :
 		system{ aEcs }
 	{
 		if (!ecs().component_registered<clock>())

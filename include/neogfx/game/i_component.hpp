@@ -25,14 +25,14 @@
 
 namespace neogfx::game
 {
-	class ecs;
+	class i_ecs;
 
 	class i_component_base
 	{
 	public:
 		virtual ~i_component_base() {}
 	public:
-		virtual game::ecs& ecs() const = 0;
+		virtual game::i_ecs& ecs() const = 0;
 		virtual const component_id& id() const = 0;
 	public:
 		virtual bool is_data_optional() const = 0;

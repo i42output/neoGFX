@@ -24,7 +24,7 @@
 
 namespace neogfx::game
 {
-	system::system(game::ecs& aEcs) :
+	system::system(game::i_ecs& aEcs) :
 		iEcs{ aEcs }
 	{
 	}
@@ -39,7 +39,7 @@ namespace neogfx::game
 	{
 	}
 
-	game::ecs& system::ecs() const
+	game::i_ecs& system::ecs() const
 	{
 		return iEcs;
 	}

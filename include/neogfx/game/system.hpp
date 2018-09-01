@@ -25,23 +25,23 @@
 
 namespace neogfx::game
 {
-	class ecs;
+	class i_ecs;
 
 	class system : public i_system
 	{
 	private:
 		typedef neolib::set<component_id, component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
 	public:
-		system(game::ecs& aEcs);
+		system(game::i_ecs& aEcs);
 		template <typename ComponentIdIter>
-		system(game::ecs& aEcs, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
+		system(game::i_ecs& aEcs, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
 			iEcs{ aEcs }, iComponents{ aFirstComponent, aLastComponent }
 		{
 		}
 		system(const system& aOther);
 		system(system&& aOther);
 	public:
-		game::ecs& ecs() const;
+		game::i_ecs& ecs() const;
 	public:
 		const neolib::i_set<component_id>& components() const override;
 		neolib::i_set<component_id>& components() override;
@@ -49,7 +49,7 @@ namespace neogfx::game
 		const i_component& component(component_id aComponentId) const override;
 		i_component& component(component_id aComponentId) override;
 	private:
-		game::ecs& iEcs;
+		game::i_ecs& iEcs;
 		component_list iComponents;
 	};
 }

@@ -26,7 +26,7 @@
 
 namespace neogfx::game
 {
-	class ecs;
+	class i_ecs;
 
 	namespace detail
 	{
@@ -84,12 +84,12 @@ namespace neogfx::game
 	private:
 		typedef static_component_base<Data, Base> self_type;
 	public:
-		static_component_base(game::ecs& aEcs) : 
+		static_component_base(game::i_ecs& aEcs) : 
 			iEcs{ aEcs }
 		{
 		}
 	public:
-		game::ecs& ecs() const override
+		game::i_ecs& ecs() const override
 		{
 			return iEcs;
 		}
@@ -140,7 +140,7 @@ namespace neogfx::game
 			return component_data()[aIndex];
 		}
 	private:
-		game::ecs& iEcs;
+		game::i_ecs& iEcs;
 		component_data_t iComponentData;
 	};
 
@@ -161,7 +161,7 @@ namespace neogfx::game
 	private:
 		static constexpr component_data_index_t::size_type invalid = ~component_data_index_t::size_type{};
 	public:
-		static_component(game::ecs& aEcs) : 
+		static_component(game::i_ecs& aEcs) : 
 			base_type{ aEcs }
 		{
 		}
@@ -251,7 +251,7 @@ namespace neogfx::game
 	private:
 		typedef static_shared_component<Data> self_type;
 	public:
-		static_shared_component(game::ecs& aEcs) :
+		static_shared_component(game::i_ecs& aEcs) :
 			base_type{ aEcs }
 		{
 		}

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/lifetime.hpp>
 #include <neogfx/core/i_object.hpp>
+#include <neogfx/core/i_property.hpp>
 
 namespace neogfx
 {
@@ -50,11 +51,11 @@ namespace neogfx
 		}
 		// i_properties
 	public:
-		virtual void register_property(i_property& aProperty)
+		void register_property(i_property& aProperty) override
 		{
 			iProperties.emplace(aProperty.name(), &aProperty);
 		}
-		virtual const property_map& map() const
+		const property_map& map() const override
 		{
 			return iProperties;
 		}

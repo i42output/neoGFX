@@ -28,7 +28,7 @@
 
 namespace neogfx::game
 {
-	simple_physics_system::simple_physics_system(game::ecs& aEcs) :
+	simple_physics_system::simple_physics_system(game::i_ecs& aEcs) :
 		system{ aEcs }
 	{
 		if (!ecs().system_registered<time_system>())

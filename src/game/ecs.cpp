@@ -190,7 +190,8 @@ namespace neogfx::game
 	}
 
 	ecs::ecs() :
-		iNextEntityId{}
+		iNextEntityId{},
+		iEntityCreationNotifications{ false }
 	{
 	}
 
@@ -199,15 +200,29 @@ namespace neogfx::game
 		auto newEntity = next_entity_id();
 		for (auto& cid : archetype(aArchetypeId).components())
 			component(cid);
+		if (entity_creation_notifications_enabled())
+			entity_created.trigger(newEntity);
 		return newEntity;
 	}
 	
 	void ecs::destroy_entity(entity_id aEntityId)
 	{
+		if (entity_creation_notifications_enabled())
+			entity_destroyed.trigger(aEntityId);
 		if (component_instantiated<entity>())
 			component<entity>().entity_record(aEntityId).destroyed = true;
 		// todo: mark entity ID as invalid in all component data
 		free_entity_id(aEntityId);
+	}
+
+	bool ecs::entity_creation_notifications_enabled() const
+	{
+		return iEntityCreationNotifications;
+	}
+
+	void ecs::enable_entity_creation_notifications(bool aEnable)
+	{
+		iEntityCreationNotifications = aEnable;
 	}
 
 	bool ecs::archetype_registered(const entity_archetype& aArchetype) const
