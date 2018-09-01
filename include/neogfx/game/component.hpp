@@ -26,6 +26,8 @@
 
 namespace neogfx::game
 {
+	class ecs;
+
 	namespace detail
 	{
 		template <typename Data>
@@ -82,10 +84,15 @@ namespace neogfx::game
 	private:
 		typedef static_component_base<Data, Base> self_type;
 	public:
-		static_component_base()
+		static_component_base(game::ecs& aEcs) : 
+			iEcs{ aEcs }
 		{
 		}
 	public:
+		game::ecs& ecs() const override
+		{
+			return iEcs;
+		}
 		const component_id& id() const override
 		{
 			return meta_data_type::id();
@@ -133,6 +140,7 @@ namespace neogfx::game
 			return component_data()[aIndex];
 		}
 	private:
+		game::ecs& iEcs;
 		component_data_t iComponentData;
 	};
 
@@ -153,7 +161,8 @@ namespace neogfx::game
 	private:
 		static constexpr component_data_index_t::size_type invalid = ~component_data_index_t::size_type{};
 	public:
-		static_component()
+		static_component(game::ecs& aEcs) : 
+			base_type{ aEcs }
 		{
 		}
 		const component_data_index_t& index() const
@@ -242,7 +251,8 @@ namespace neogfx::game
 	private:
 		typedef static_shared_component<Data> self_type;
 	public:
-		static_shared_component()
+		static_shared_component(game::ecs& aEcs) :
+			base_type{ aEcs }
 		{
 		}
 		value_type& populate(const value_type& aData)

@@ -28,7 +28,7 @@ namespace neogfx::game
 	{
 
 	public:
-		time_system(const ecs::context& aContext);
+		time_system(game::ecs& aEcs);
 	public:
 		const system_id& id() const override;
 		const neolib::i_string& name() const override;

@@ -410,6 +410,7 @@
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
     <ClCompile Include="..\..\..\src\game\shape_factory.cpp" />
     <ClCompile Include="..\..\..\src\game\sprite_plane.cpp" />
+    <ClCompile Include="..\..\..\src\game\system.cpp" />
     <ClCompile Include="..\..\..\src\game\text.cpp" />
     <ClCompile Include="..\..\..\src\game\time_system.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp" />

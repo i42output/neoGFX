@@ -30,7 +30,7 @@ namespace neogfx::game
 		event<int64_t> applying_physics;
 		event<int64_t> physics_applied;
 	public:
-		simple_physics_system(const ecs::context& aContext);
+		simple_physics_system(game::ecs& aEcs);
 	public:
 		const system_id& id() const override;
 		const neolib::i_string& name() const override;

@@ -27,7 +27,7 @@
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/entity_archetype.hpp>
 #include <neogfx/game/component.hpp>
-#include <neogfx/game/i_system.hpp>
+#include <neogfx/game/system.hpp>
 
 namespace neogfx::game
 {
@@ -44,238 +44,180 @@ namespace neogfx::game
 		typedef std::function<std::unique_ptr<i_shared_component>()> shared_component_factory;
 		typedef std::function<std::unique_ptr<i_system>()> system_factory;
 	private:
-		typedef uint64_t context_id;
-		class context_data
-		{
-		private:
-			typedef std::map<entity_archetype_id, entity_archetype> archetype_registry_t;
-			typedef std::map<component_id, component_factory> component_factories_t;
-			typedef std::map<component_id, std::unique_ptr<i_component>> components_t;
-			typedef std::map<component_id, shared_component_factory> shared_component_factories_t;
-			typedef std::map<component_id, std::unique_ptr<i_shared_component>> shared_components_t;
-			typedef std::map<system_id, system_factory> system_factories_t;
-			typedef std::map<system_id, std::unique_ptr<i_system>> systems_t;
-		public:
-			context_data(ecs& aOwner, context_id aId);
-		public:
-			game::ecs& ecs() const;
-			context_id id() const;
-		public:
-			const archetype_registry_t& archetypes() const;
-			archetype_registry_t& archetypes();
-			const component_factories_t& component_factories() const;
-			component_factories_t& component_factories();
-			const components_t& components() const;
-			components_t& components();
-			const shared_component_factories_t& shared_component_factories() const;
-			shared_component_factories_t& shared_component_factories();
-			const shared_components_t& shared_components() const;
-			shared_components_t& shared_components();
-			const system_factories_t& system_factories() const;
-			system_factories_t& system_factories();
-			const systems_t& systems() const;
-			systems_t& systems();
-		public:
-			const entity_archetype& archetype(entity_archetype_id aArchetypeId) const;
-			entity_archetype& archetype(entity_archetype_id aArchetypeId);
-			bool component_instantiated(component_id aComponentId) const;
-			const i_component& component(component_id aComponentId) const;
-			i_component& component(component_id aComponentId);
-			bool shared_component_instantiated(component_id aComponentId) const;
-			const i_shared_component& shared_component(component_id aComponentId) const;
-			i_shared_component& shared_component(component_id aComponentId);
-			bool system_instantiated(system_id aSystemId) const;
-			const i_system& system(system_id aSystemId) const;
-			i_system& system(system_id aSystemId);
-		public:
-			entity_id next_entity_id();
-			void free_entity_id(entity_id aId);
-		public:
-			void add_ref();
-			void release();
-		private:
-			game::ecs& iOwner;
-			context_id iId;
-			int32_t iReferenceCount;
-			archetype_registry_t iArchetypeRegistry;
-			component_factories_t iComponentFactories;
-			mutable components_t iComponents;
-			shared_component_factories_t iSharedComponentFactories;
-			mutable shared_components_t iSharedComponents;
-			system_factories_t iSystemFactories;
-			mutable systems_t iSystems;
-			entity_id iNextEntityId;
-			std::vector<entity_id> iFreedEntityIds;
-		};
-		typedef std::map<context_id, context_data> contexts_t;
-	public:
-		class context
-		{
-		public:
-			friend class game::ecs;
-		public:
-			context(context_data& aOwner);
-			context(const context& aOther);
-			context(context&& aOther);
-			~context();
-		public:
-			context& operator=(const context&) = delete;
-			context& operator=(context&&) = delete;
-		public:
-			game::ecs& ecs() const;
-		private:
-			context_data& owner() const;
-		private:
-			void add_ref();
-			void release();
-		private:
-			context_data& iOwner;
-		};
+		typedef std::map<entity_archetype_id, entity_archetype> archetype_registry_t;
+		typedef std::map<component_id, component_factory> component_factories_t;
+		typedef std::map<component_id, std::unique_ptr<i_component>> components_t;
+		typedef std::map<component_id, shared_component_factory> shared_component_factories_t;
+		typedef std::map<component_id, std::unique_ptr<i_shared_component>> shared_components_t;
+		typedef std::map<system_id, system_factory> system_factories_t;
+		typedef std::map<system_id, std::unique_ptr<i_system>> systems_t;
 	public:
 		ecs();
 	public:
-		context create_context();
-		void destroy_context(context_id aContextId);
-	public:
-		entity_id create_entity(const context& aContext, const entity_archetype_id& aArchetypeId);
+		entity_id create_entity(const entity_archetype_id& aArchetypeId);
 		template <typename... ComponentData>
-		entity_id create_entity(const context& aContext, const entity_archetype_id& aArchetypeId, ComponentData&&... aComponentData)
+		entity_id create_entity(const entity_archetype_id& aArchetypeId, ComponentData&&... aComponentData)
 		{
-			auto newEntity = create_entity(aContext, aArchetypeId);
-			populate(aContext, newEntity, std::forward<ComponentData>(aComponentData)...);
+			auto newEntity = create_entity(aArchetypeId);
+			populate(newEntity, std::forward<ComponentData>(aComponentData)...);
 			return newEntity;
 		}
-		void destroy_entity(const context& aContext, entity_id aEntityId);
+		void destroy_entity(entity_id aEntityId);
+	public:
+		const archetype_registry_t& archetypes() const;
+		archetype_registry_t& archetypes();
+		const component_factories_t& component_factories() const;
+		component_factories_t& component_factories();
+		const components_t& components() const;
+		components_t& components();
+		const shared_component_factories_t& shared_component_factories() const;
+		shared_component_factories_t& shared_component_factories();
+		const shared_components_t& shared_components() const;
+		shared_components_t& shared_components();
+		const system_factories_t& system_factories() const;
+		system_factories_t& system_factories();
+		const systems_t& systems() const;
+		systems_t& systems();
+	public:
+		const entity_archetype& archetype(entity_archetype_id aArchetypeId) const;
+		entity_archetype& archetype(entity_archetype_id aArchetypeId);
+		bool component_instantiated(component_id aComponentId) const;
+		const i_component& component(component_id aComponentId) const;
+		i_component& component(component_id aComponentId);
+		bool shared_component_instantiated(component_id aComponentId) const;
+		const i_shared_component& shared_component(component_id aComponentId) const;
+		i_shared_component& shared_component(component_id aComponentId);
+		bool system_instantiated(system_id aSystemId) const;
+		const i_system& system(system_id aSystemId) const;
+		i_system& system(system_id aSystemId);
+	public:
+		entity_id next_entity_id();
+		void free_entity_id(entity_id aId);
 	public:
 		template <typename... ComponentData, typename ComponentDataTail>
-		void populate(const context& aContext, entity_id aEntity, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
+		void populate(entity_id aEntity, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
 		{
-			populate(aContext, aEntity, std::forward<ComponentDataTail>(aComponentDataTail));
-			populate(aContext, aEntity, std::forward<ComponentData>(aComponentData)...);
+			populate(aEntity, std::forward<ComponentDataTail>(aComponentDataTail));
+			populate(aEntity, std::forward<ComponentData>(aComponentData)...);
 		}
 		template <typename ComponentData>
-		void populate(const context& aContext, entity_id aEntity, ComponentData&& aComponentData)
+		void populate(entity_id aEntity, ComponentData&& aComponentData)
 		{
-			auto& c = static_cast<static_component<ComponentData>&>(*aContext.owner().components().find(ComponentData::meta::id())->second);
+			auto& c = static_cast<static_component<ComponentData>&>(*components().find(ComponentData::meta::id())->second);
 			c.populate(aEntity, std::forward<ComponentData>(aComponentData));
 		}
 		template <typename... ComponentData, typename ComponentDataTail>
-		void populate_shared(const context& aContext, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
+		void populate_shared(ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
 		{
-			populate_shared(aContext, std::forward<ComponentDataTail>(aComponentDataTail));
-			populate_shared(aContext, std::forward<ComponentData>(aComponentData)...);
+			populate_shared(std::forward<ComponentDataTail>(aComponentDataTail));
+			populate_shared(std::forward<ComponentData>(aComponentData)...);
 		}
 		template <typename ComponentData>
-		void populate_shared(const context& aContext, ComponentData&& aComponentData)
+		void populate_shared(ComponentData&& aComponentData)
 		{
-			auto& c = static_cast<static_shared_component<ComponentData>&>(*aContext.owner().shared_components().find(ComponentData::meta::id())->second);
+			auto& c = static_cast<static_shared_component<ComponentData>&>(*shared_components().find(ComponentData::meta::id())->second);
 			c.populate(std::forward<ComponentData>(aComponentData));
 		}
-		bool component_instantiated(const context& aContext, component_id aComponentId) const;
 		template <typename ComponentData>
-		bool component_instantiated(const context& aContext) const
+		bool component_instantiated() const
 		{
-			return component_instantiated(aContext, ComponentData::meta::id());
-		}
-		const i_component& component(const context& aContext, component_id aComponentId) const;
-		i_component& component(const context& aContext, component_id aComponentId);
-		template <typename ComponentData>
-		const static_component<ComponentData>& component(const context& aContext) const
-		{
-			return static_cast<const static_component<ComponentData>&>(component(aContext, ComponentData::meta::id()));
+			return component_instantiated(ComponentData::meta::id());
 		}
 		template <typename ComponentData>
-		static_component<ComponentData>& component(const context& aContext)
+		const static_component<ComponentData>& component() const
 		{
-			return const_cast<static_component<ComponentData>&>(const_cast<const ecs*>(this)->component<ComponentData>(aContext));
-		}
-		bool shared_component_instantiated(const context& aContext, component_id aComponentId) const;
-		template <typename ComponentData>
-		bool shared_component_instantiated(const context& aContext) const
-		{
-			return shared_component_instantiated(aContext, ComponentData::meta::id());
-		}
-		const i_shared_component& shared_component(const context& aContext, component_id aComponentId) const;
-		i_shared_component& shared_component(const context& aContext, component_id aComponentId);
-		template <typename ComponentData>
-		const static_shared_component<ComponentData>& shared_component(const context& aContext) const
-		{
-			return static_cast<const static_shared_component<ComponentData>&>(shared_component(aContext, ComponentData::meta::id()));
+			return static_cast<const static_component<ComponentData>&>(component(ComponentData::meta::id()));
 		}
 		template <typename ComponentData>
-		static_shared_component<ComponentData>& shared_component(const context& aContext)
+		static_component<ComponentData>& component()
 		{
-			return const_cast<static_shared_component<ComponentData>&>(const_cast<const ecs*>(this)->shared_component<ComponentData>(aContext));
+			return const_cast<static_component<ComponentData>&>(const_cast<const ecs*>(this)->component<ComponentData>());
 		}
-		bool system_instantiated(const context& aContext, system_id aSystemId) const;
-		template <typename System>
-		bool system_instantiated(const context& aContext) const
+		template <typename ComponentData>
+		bool shared_component_instantiated() const
 		{
-			return system_instantiated(aContext, System::meta::id());
+			return shared_component_instantiated(ComponentData::meta::id());
 		}
-		const i_component& system(const context& aContext, system_id aSystemId) const;
-		i_component& system(const context& aContext, system_id aSystemId);
-		template <typename System>
-		const System& system(const context& aContext) const
+		template <typename ComponentData>
+		const static_shared_component<ComponentData>& shared_component() const
 		{
-			return static_cast<const System&>(system(aContext, System::meta::id()));
+			return static_cast<const static_shared_component<ComponentData>&>(shared_component(ComponentData::meta::id()));
+		}
+		template <typename ComponentData>
+		static_shared_component<ComponentData>& shared_component()
+		{
+			return const_cast<static_shared_component<ComponentData>&>(const_cast<const ecs*>(this)->shared_component<ComponentData>());
 		}
 		template <typename System>
-		System& system(const context& aContext)
+		bool system_instantiated() const
 		{
-			return const_cast<System>&>(const_cast<const ecs*>(this)->system<System>(aContext));
+			return system_instantiated(System::meta::id());
+		}
+		template <typename System>
+		const System& system() const
+		{
+			return static_cast<const System&>(system(System::meta::id()));
+		}
+		template <typename System>
+		System& system()
+		{
+			return const_cast<System>&>(const_cast<const ecs*>(this)->system<System>());
 		}
 	public:
-		bool archetype_registered(const context& aContext, const entity_archetype& aArchetype) const;
-		void register_archetype(const context& aContext, const entity_archetype& aArchetype);
-		void register_archetype(const context& aContext, entity_archetype&& aArchetype);
-		bool component_registered(const context& aContext, component_id aComponentId) const;
+		bool archetype_registered(const entity_archetype& aArchetype) const;
+		void register_archetype(const entity_archetype& aArchetype);
+		void register_archetype(entity_archetype&& aArchetype);
+		bool component_registered(component_id aComponentId) const;
 		template <typename ComponentData>
-		bool component_registered(const context& aContext) const
+		bool component_registered() const
 		{
-			return component_registered(aContext, ComponentData::meta::id());
+			return component_registered(ComponentData::meta::id());
 		}
-		void register_component(const context& aContext, component_id aComponentId, component_factory aFactory);
+		void register_component(component_id aComponentId, component_factory aFactory);
 		template <typename ComponentData>
-		void register_component(const context& aContext)
+		void register_component()
 		{
 			register_component(
-				aContext,
 				ComponentData::meta::id(),
-				[]() { return std::unique_ptr<i_component>{std::make_unique<static_component<ComponentData>>()}; });
+				[&]() { return std::unique_ptr<i_component>{std::make_unique<static_component<ComponentData>>(*this)}; });
 		}
-		bool shared_component_registered(const context& aContext, component_id aComponentId) const;
+		bool shared_component_registered(component_id aComponentId) const;
 		template <typename ComponentData>
-		bool shared_component_registered(const context& aContext) const
+		bool shared_component_registered() const
 		{
-			return shared_component_registered(aContext, ComponentData::meta::id());
+			return shared_component_registered(ComponentData::meta::id());
 		}
-		void register_shared_component(const context& aContext, component_id aComponentId, shared_component_factory aFactory);
+		void register_shared_component(component_id aComponentId, shared_component_factory aFactory);
 		template <typename ComponentData>
-		void register_shared_component(const context& aContext)
+		void register_shared_component()
 		{
 			register_shared_component(
-				aContext,
 				ComponentData::meta::id(),
-				[&aContext]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ComponentData>>(aContext)}; });
+				[&]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ComponentData>>(*this)}; });
 		}
-		bool system_registered(const context& aContext, system_id aSystemId) const;
+		bool system_registered(system_id aSystemId) const;
 		template <typename System>
-		bool system_registered(const context& aContext) const
+		bool system_registered() const
 		{
-			return system_registered(aContext, System::meta::id());
+			return system_registered(System::meta::id());
 		}
-		void register_system(const context& aContext, system_id aSystemId, system_factory aFactory);
+		void register_system(system_id aSystemId, system_factory aFactory);
 		template <typename System>
-		void register_system(const context& aContext)
+		void register_system()
 		{
 			register_system(
-				aContext,
 				System::meta::id(),
-				[&aContext]() { return std::unique_ptr<i_system>{std::make_unique<System>(aContext)}; });
+				[&]() { return std::unique_ptr<i_system>{std::make_unique<System>(*this)}; });
 		}
 	private:
-		context_id iNextContextId;
-		contexts_t iContexts;
+		archetype_registry_t iArchetypeRegistry;
+		component_factories_t iComponentFactories;
+		mutable components_t iComponents;
+		shared_component_factories_t iSharedComponentFactories;
+		mutable shared_components_t iSharedComponents;
+		system_factories_t iSystemFactories;
+		mutable systems_t iSystems;
+		entity_id iNextEntityId;
+		std::vector<entity_id> iFreedEntityIds;
 	};
 }

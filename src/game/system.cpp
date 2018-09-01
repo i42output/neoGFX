@@ -1,4 +1,4 @@
-// time_system.cpp
+// system.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -19,38 +19,48 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/game/chrono.hpp>
 #include <neogfx/game/ecs.hpp>
-#include <neogfx/game/time_system.hpp>
-#include <neogfx/game/clock.hpp>
+#include <neogfx/game/system.hpp>
 
 namespace neogfx::game
 {
-	time_system::time_system(game::ecs& aEcs) :
-		system{ aEcs }
+	system::system(game::ecs& aEcs) :
+		iEcs{ aEcs }
 	{
-		if (!ecs().component_registered<clock>())
-		{
-			ecs().register_component<clock>();
-			auto timeStep = chrono::to_flicks(0.010).count();
-			auto now = to_step_time(
-				chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())),
-				timeStep);
-			ecs().populate_shared<clock>(clock{ now, timeStep });
-		}
 	}
 
-	const system_id& time_system::id() const
+	system::system(const system& aOther) :
+		iEcs{ aOther.iEcs }, iComponents{ aOther.iComponents }
 	{
-		return meta::id();
 	}
 
-	const neolib::i_string& time_system::name() const
+	system::system(system&& aOther) :
+		iEcs{ aOther.iEcs }, iComponents{ std::move(aOther.iComponents) }
 	{
-		return meta::name();
 	}
 
-	void time_system::apply()
+	game::ecs& system::ecs() const
 	{
+		return iEcs;
+	}
+
+	const neolib::i_set<component_id>& system::components() const
+	{
+		return iComponents;
+	}
+
+	neolib::i_set<component_id>& system::components()
+	{
+		return iComponents;
+	}
+
+	const i_component& system::component(component_id aComponentId) const
+	{
+		return ecs().component(aComponentId);
+	}
+
+	i_component& system::component(component_id aComponentId)
+	{
+		return ecs().component(aComponentId);
 	}
 }

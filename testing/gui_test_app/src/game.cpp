@@ -1,6 +1,7 @@
 ﻿#include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
 #include <neolib/random.hpp>
+#include <neolib/singleton.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gfx/image.hpp>
@@ -240,29 +241,28 @@ void create_game(ng::i_layout& aLayout)
 
 namespace archetypes
 {
-	const ng::entity_archetype spaceship
+	const ng::game::entity_archetype spaceship
 	{
 		neolib::uuid{ 0x26730030, 0xa999, 0x4d99, 0xa7ad,{ 0x80, 0x89, 0x69, 0x23, 0x95, 0xf9 } },
 		"Spaceship",
-		{ ng::rigid_body::meta::id(), ng::box_collider::meta::id() }
+		{ ng::game::rigid_body::meta::id(), ng::game::box_collider::meta::id() }
 	};
 
-	const ng::entity_archetype asteroid
+	const ng::game::entity_archetype asteroid
 	{
 		neolib::uuid{ 0x8283650f, 0x6e59, 0x4f0f, 0x8ae0, { 0x1d, 0x99, 0xeb, 0xf2, 0x49, 0xe0 } },
 		"Asteroid",
-		{ ng::rigid_body::meta::id(), ng::box_collider::meta::id() }
+		{ ng::game::rigid_body::meta::id(), ng::game::box_collider::meta::id() }
 	};
 }
 
 void create_game(ng::i_layout& aLayout)
 {
-	auto& ecs = ng::ecs();
-	auto ecsContext = ecs.create_context();
-	ecs.register_archetype(ecsContext, archetypes::spaceship);
-	ecs.register_archetype(ecsContext, archetypes::asteroid);
-	auto spaceship = ecs.create_entity(ecsContext, archetypes::spaceship.id(), ng::rigid_body{ ng::vec3{ 400.0, 18.0, 0.0 }, 1.0 });
+	auto& ecs = neolib::singleton<ng::game::ecs>::instance();
+	ecs.register_archetype(archetypes::spaceship);
+	ecs.register_archetype(archetypes::asteroid);
+	auto spaceship = ecs.create_entity(archetypes::spaceship.id(), ng::game::rigid_body{ ng::vec3{ 400.0, 18.0, 0.0 }, 1.0 });
 	neolib::basic_random<double> prng;
 	for (int i = 0; i < 1000; ++i)
-		auto asteroid = ecs.create_entity(ecsContext, archetypes::asteroid.id(), ng::rigid_body{ ng::vec3{ prng(1000.0), prng(1000.0), 0.0 }, 1.0 });
+		auto asteroid = ecs.create_entity(archetypes::asteroid.id(), ng::game::rigid_body{ ng::vec3{ prng(1000.0), prng(1000.0), 0.0 }, 1.0 });
 }

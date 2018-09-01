@@ -25,11 +25,14 @@
 
 namespace neogfx::game
 {
+	class ecs;
+
 	class i_component_base
 	{
 	public:
 		virtual ~i_component_base() {}
 	public:
+		virtual game::ecs& ecs() const = 0;
 		virtual const component_id& id() const = 0;
 	public:
 		virtual bool is_data_optional() const = 0;
@@ -61,4 +64,10 @@ namespace neogfx::game
 			return populate(aEntity, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
 		}
 	};
+
+	template <typename ComponentData>
+	class static_component;
+
+	template <typename ComponentData>
+	class static_shared_component;
 }

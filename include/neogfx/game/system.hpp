@@ -21,61 +21,35 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/set.hpp>
 #include <neolib/allocator.hpp>
-#include <neogfx/game/ecs.hpp>
+#include <neogfx/game/i_system.hpp>
 
 namespace neogfx::game
 {
+	class ecs;
+
 	class system : public i_system
 	{
 	private:
 		typedef neolib::set<component_id, component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
 	public:
-		system(const game::ecs::context& aContext) :
-			iContext{ aContext }
-		{
-		}
+		system(game::ecs& aEcs);
 		template <typename ComponentIdIter>
-		system(const game::ecs::context& aContext, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
-			iContext{ aContext }, iComponents{ aFirstComponent, aLastComponent }
+		system(game::ecs& aEcs, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
+			iEcs{ aEcs }, iComponents{ aFirstComponent, aLastComponent }
 		{
 		}
-		system(const system& aOther) :
-			iContext{ aOther.iContext }, iComponents{ aOther.iComponents }
-		{
-		}
-		system(system&& aOther) :
-			iContext{ aOther.iContext }, iComponents{ std::move(aOther.iComponents) }
-		{
-		}
+		system(const system& aOther);
+		system(system&& aOther);
 	public:
-		game::ecs& ecs() const
-		{
-			return iContext.ecs();
-		}
-		const game::ecs::context& context() const
-		{
-			return iContext;
-		}
+		game::ecs& ecs() const;
 	public:
-		const neolib::i_set<component_id>& components() const override
-		{
-			return iComponents;
-		}
-		neolib::i_set<component_id>& components() override
-		{
-			return iComponents;
-		}
+		const neolib::i_set<component_id>& components() const override;
+		neolib::i_set<component_id>& components() override;
 	public:
-		const i_component& component(component_id aComponentId) const override
-		{
-			return ecs().component(iContext, aComponentId);
-		}
-		i_component& component(component_id aComponentId) override
-		{
-			return ecs().component(iContext, aComponentId);
-		}
+		const i_component& component(component_id aComponentId) const override;
+		i_component& component(component_id aComponentId) override;
 	private:
-		const game::ecs::context& iContext;
+		game::ecs& iEcs;
 		component_list iComponents;
 	};
 }

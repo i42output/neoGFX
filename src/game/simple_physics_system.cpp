@@ -28,15 +28,15 @@
 
 namespace neogfx::game
 {
-	simple_physics_system::simple_physics_system(const ecs::context& aContext) :
-		system{ aContext }
+	simple_physics_system::simple_physics_system(game::ecs& aEcs) :
+		system{ aEcs }
 	{
-		if (!ecs().system_registered<time_system>(aContext))
-			ecs().register_system<time_system>(aContext);
-		if (!ecs().component_registered<physics>(aContext))
-			ecs().register_component<physics>(aContext);
-		if (ecs().shared_component<physics>(context()).component_data().empty())
-			ecs().populate_shared<physics>(aContext, physics{ 6.67408e-11 });
+		if (!ecs().system_registered<time_system>())
+			ecs().register_system<time_system>();
+		if (!ecs().component_registered<physics>())
+			ecs().register_component<physics>();
+		if (ecs().shared_component<physics>().component_data().empty())
+			ecs().populate_shared<physics>(physics{ 6.67408e-11 });
 	}
 
 	const system_id& simple_physics_system::id() const
@@ -51,16 +51,16 @@ namespace neogfx::game
 
 	void simple_physics_system::apply()
 	{
-		if (!ecs().component_instantiated<rigid_body>(context()))
+		if (!ecs().component_instantiated<rigid_body>())
 			return;
-		auto& worldClock = ecs().shared_component<clock>(context()).component_data()[0];
-		auto& physicalConstants = ecs().shared_component<physics>(context()).component_data()[0];
+		auto& worldClock = ecs().shared_component<clock>().component_data()[0];
+		auto& physicalConstants = ecs().shared_component<physics>().component_data()[0];
 		auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
 			*physicalConstants.uniformGravity : vec3{};
 		auto now = to_step_time(
 			chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())), 
 			worldClock.timeStep);
-		auto& rigidBodies = ecs().component<rigid_body>(context());
+		auto& rigidBodies = ecs().component<rigid_body>();
 		while (worldClock.time <= now)
 		{
 			applying_physics.trigger(worldClock.time);
