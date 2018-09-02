@@ -36,7 +36,7 @@ namespace neogfx::game
 		struct entity_archetype_not_found : std::logic_error { entity_archetype_not_found() : std::logic_error("neogfx::i_ecs::entity_archetype_not_found") {} };
 		struct component_not_found : std::logic_error { component_not_found() : std::logic_error("neogfx::i_ecs::component_not_found") {} };
 		struct system_not_found : std::logic_error { system_not_found() : std::logic_error("neogfx::i_ecs::system_not_found") {} };
-		struct invalid_context : std::logic_error { invalid_context() : std::logic_error("neogfx::i_ecs::invalid_context") {} };
+		struct uuid_exists : std::runtime_error { uuid_exists(const std::string& aContext) : std::runtime_error("neogfx::i_ecs::uuid_exists: " + aContext) {} };
 		struct entity_ids_exhuasted : std::runtime_error { entity_ids_exhuasted() : std::runtime_error("neogfx::i_ecs::entity_ids_exhuasted") {} };
 	public:
 		event<entity_id> entity_created;
@@ -56,8 +56,6 @@ namespace neogfx::game
 	public:
 		virtual entity_id create_entity(const entity_archetype_id& aArchetypeId) = 0;
 		virtual void destroy_entity(entity_id aEntityId) = 0;
-		virtual bool entity_creation_notifications_enabled() const = 0;
-		virtual void enable_entity_creation_notifications(bool aEnable) = 0;
 	public:
 		virtual const archetype_registry_t& archetypes() const = 0;
 		virtual archetype_registry_t& archetypes() = 0;
@@ -175,7 +173,7 @@ namespace neogfx::game
 		template <typename System>
 		System& system()
 		{
-			return const_cast<System>&>(const_cast<const i_ecs*>(this)->system<System>());
+			return const_cast<System&>(const_cast<const i_ecs*>(this)->system<System>());
 		}
 	public:
 		template <typename ComponentData>

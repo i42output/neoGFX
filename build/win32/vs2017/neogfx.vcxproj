@@ -172,8 +172,9 @@
     <ClInclude Include="..\..\..\include\neogfx\game\collider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\ecs_helpers.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\ecs_ids.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\entity_archetype.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\entity_archetype.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\entity_info.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\material.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\gradient.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_component.hpp" />
@@ -406,6 +407,7 @@
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\game\ecs.cpp" />
+    <ClCompile Include="..\..\..\src\game\entity.cpp" />
     <ClCompile Include="..\..\..\src\game\simple_physics_system.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
     <ClCompile Include="..\..\..\src\game\shape_factory.cpp" />

@@ -35,6 +35,9 @@ namespace neogfx::game
 	public:
 		void apply() override;
 	public:
+		step_time system_time() const;
+		step_time world_time() const;
+	public:
 		struct meta
 		{
 			static const neolib::uuid& id()

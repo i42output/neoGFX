@@ -32,8 +32,6 @@ namespace neogfx::game
 	public:
 		entity_id create_entity(const entity_archetype_id& aArchetypeId) override;
 		void destroy_entity(entity_id aEntityId) override;
-		bool entity_creation_notifications_enabled() const override;
-		void enable_entity_creation_notifications(bool aEnable) override;
 	public:
 		const archetype_registry_t& archetypes() const override;
 		archetype_registry_t& archetypes() override;
@@ -102,6 +100,5 @@ namespace neogfx::game
 		mutable systems_t iSystems;
 		entity_id iNextEntityId;
 		std::vector<entity_id> iFreedEntityIds;
-		bool iEntityCreationNotifications;
 	};
 }

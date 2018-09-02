@@ -21,7 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/ecs.hpp>
-#include <neogfx/game/entity.hpp>
+#include <neogfx/game/entity_info.hpp>
+#include <neogfx/game/time_system.hpp>
 
 namespace neogfx::game
 {
@@ -179,7 +180,7 @@ namespace neogfx::game
 			iFreedEntityIds.pop_back();
 			return nextId;
 		}
-		if (++iNextEntityId == 0ull)
+		if (++iNextEntityId == null_entity)
 			throw entity_ids_exhuasted();
 		return iNextEntityId;
 	}
@@ -190,39 +191,26 @@ namespace neogfx::game
 	}
 
 	ecs::ecs() :
-		iNextEntityId{},
-		iEntityCreationNotifications{ false }
+		iNextEntityId { null_entity }
 	{
 	}
 
 	entity_id ecs::create_entity(const entity_archetype_id& aArchetypeId)
 	{
-		auto newEntity = next_entity_id();
-		for (auto& cid : archetype(aArchetypeId).components())
-			component(cid);
-		if (entity_creation_notifications_enabled())
-			entity_created.trigger(newEntity);
-		return newEntity;
+		auto entityId = next_entity_id();
+		for (auto& componentId : archetype(aArchetypeId).components())
+			component(componentId);
+		if (component_registered<entity_info>() && system_registered<time_system>())
+			component<entity_info>().populate(entityId, entity_info{ aArchetypeId, system<time_system>().world_time() });
+		entity_created.trigger(entityId);
+		return entityId;
 	}
 	
 	void ecs::destroy_entity(entity_id aEntityId)
 	{
-		if (entity_creation_notifications_enabled())
-			entity_destroyed.trigger(aEntityId);
-		if (component_instantiated<entity>())
-			component<entity>().entity_record(aEntityId).destroyed = true;
+		entity_destroyed.trigger(aEntityId);
 		// todo: mark entity ID as invalid in all component data
 		free_entity_id(aEntityId);
-	}
-
-	bool ecs::entity_creation_notifications_enabled() const
-	{
-		return iEntityCreationNotifications;
-	}
-
-	void ecs::enable_entity_creation_notifications(bool aEnable)
-	{
-		iEntityCreationNotifications = aEnable;
 	}
 
 	bool ecs::archetype_registered(const entity_archetype& aArchetype) const
@@ -232,12 +220,14 @@ namespace neogfx::game
 
 	void ecs::register_archetype(const entity_archetype& aArchetype)
 	{
-		archetypes().emplace(aArchetype.id(), aArchetype);
+		if (!archetypes().emplace(aArchetype.id(), aArchetype).second)
+			throw uuid_exists("register_archetype");
 	}
 
 	void ecs::register_archetype(entity_archetype&& aArchetype)
 	{
-		archetypes().emplace(aArchetype.id(), std::move(aArchetype));
+		if (!archetypes().emplace(aArchetype.id(), std::move(aArchetype)).second)
+			throw uuid_exists("register_archetype");
 	}
 
 	bool ecs::component_registered(component_id aComponentId) const
@@ -247,7 +237,8 @@ namespace neogfx::game
 
 	void ecs::register_component(component_id aComponentId, component_factory aFactory)
 	{
-		component_factories().emplace(aComponentId, aFactory);
+		if (!component_factories().emplace(aComponentId, aFactory).second)
+			throw uuid_exists("register_component");
 	}
 
 	bool ecs::shared_component_registered(component_id aComponentId) const
@@ -257,7 +248,8 @@ namespace neogfx::game
 
 	void ecs::register_shared_component(component_id aComponentId, shared_component_factory aFactory)
 	{
-		shared_component_factories().emplace(aComponentId, aFactory);
+		if (!shared_component_factories().emplace(aComponentId, aFactory).second)
+			throw uuid_exists("register_shared_component");
 	}
 
 	bool ecs::system_registered(system_id aSystemId) const
@@ -267,6 +259,7 @@ namespace neogfx::game
 
 	void ecs::register_system(system_id aSystemId, system_factory aFactory)
 	{
-		system_factories().emplace(aSystemId, aFactory);
+		if (!system_factories().emplace(aSystemId, aFactory).second)
+			throw uuid_exists("register_system");
 	}
 }

@@ -19,15 +19,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gfx/text/font.hpp>
+#include <neogfx/game/entity.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
-	class text
+	class text : public entity
 	{
 	public:
-		text(const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
+		text(i_ecs& aEcs, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
 	public:
 		const std::string& value() const;
 		void set_value(const std::string& aText);

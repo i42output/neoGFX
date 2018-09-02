@@ -16,63 +16,34 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/uuid.hpp>
-#include <neolib/string.hpp>
-#include <neogfx/game/i_component_data.hpp>
-#include <neogfx/game/ecs_ids.hpp>
+#include <neogfx/core/event.hpp>
+#include <neogfx/game/i_ecs.hpp>
 
 namespace neogfx::game
 {
-	struct entity
+	class entity
 	{
-		neolib::uuid archetypeId;
-		uint64_t creationTime;
-		bool destroyed;
-
-		struct meta : i_component_data::meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x867e30c2, 0xaf8e, 0x452e, 0xa542, { 0xd, 0xd0, 0xd1, 0x1, 0xe4, 0x2d } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Entity";
-				return sName;
-			}
-			static uint32_t field_count()
-			{ 
-				return 3; 
-			}
-			static component_data_field_type field_type(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return component_data_field_type::Uuid;
-				case 1:
-					return component_data_field_type::Uint64;
-				case 2:
-					return component_data_field_type::Bool;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static const neolib::i_string& field_name(uint32_t aFieldIndex)
-			{
-				static const neolib::string sFieldNames[] = 
-				{
-					"Archetype Id",
-					"Creation Time",
-					"Destroyed"
-				};
-				return sFieldNames[aFieldIndex];
-			}
-		};
+	public:
+		entity(i_ecs& aEcs, entity_id aId);
+		entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId);
+		template <typename... ComponentData>
+		entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId, ComponentData&&... aComponentData) :
+			entity{ aEcs, aEcs.create_entity(aArchetypeId, aComponentData...) } {}
+		~entity();
+	public:
+		entity(const entity& aOther) = delete;
+		entity& operator=(const entity& aOther) = delete;
+	public:
+		i_ecs& ecs() const;
+		entity_id id() const;
+		bool detached_or_destroyed() const;
+		entity_id detach();
+	private:
+		i_ecs& iEcs;
+		entity_id iId;
+		sink iSink;
 	};
 }

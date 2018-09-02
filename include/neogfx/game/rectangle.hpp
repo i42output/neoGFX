@@ -23,18 +23,19 @@
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/i_image.hpp>
+#include <neogfx/game/entity.hpp>
 
-namespace neogfx
+namespace neogfx::game
 {
-	class rectangle
+	class rectangle : public entity
 	{
 	public:
-		rectangle(const vec3& aPosition, const vec2& aExtents);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const colour& aColour);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect);
-		rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect);
+		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents);
+		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const colour& aColour);
+		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture);
+		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage);
+		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect);
+		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect);
 		rectangle(const rectangle& aOther);
 	};
 }

@@ -1,4 +1,4 @@
-// ecs_ids.hpp
+// entity.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -16,17 +16,52 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/uuid.hpp>
+#include <neogfx/game/entity.hpp>
 
 namespace neogfx::game
 {
-	typedef neolib::uuid entity_archetype_id;
-	typedef neolib::uuid component_id;
-	typedef neolib::uuid system_id;
-	typedef uint32_t id_t;
-	typedef id_t entity_id;
-	constexpr entity_id null_entity = 0;
+	entity::entity(i_ecs& aEcs, entity_id aId) :
+		iEcs{ aEcs }, iId{ aId }
+	{
+		iSink += ecs().entity_destroyed([this](entity_id aId)
+		{
+			if (aId == iId)
+				iId = null_entity;
+		});
+	}
+
+	entity::entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId) :
+		entity{ aEcs, aEcs.create_entity(aArchetypeId) }
+	{
+	}
+
+	entity::~entity()
+	{
+		if (!detached_or_destroyed())
+			ecs().destroy_entity(iId);
+	}
+
+	i_ecs& entity::ecs() const
+	{
+		return iEcs;
+	}
+
+	entity_id entity::id() const
+	{
+		return iId;
+	}
+
+	bool entity::detached_or_destroyed() const
+	{
+		return iId == null_entity;
+	}
+
+	entity_id entity::detach()
+	{
+		auto id = iId;
+		iId = null_entity;
+		return id;
+	}
 }

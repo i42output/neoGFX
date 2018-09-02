@@ -16,48 +16,47 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/rectangle.hpp>
 
 namespace neogfx
 {
-	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents)
+	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents)
 	{
 		set_position(aPosition);
 		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const colour& aColour) :
+	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const colour& aColour) :
 		shape(aColour)
 	{
 		set_position(aPosition);
 		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :
+	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :
 		shape(aTexture)
 	{
 		set_position(aPosition);
 		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage) :
+	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage) :
 		shape(aImage)
 	{
 		set_position(aPosition);
 		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect) :
+	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect) :
 		shape(aTexture, aTextureRect)
 	{
 		set_position(aPosition);
 		set_extents(vec3{ aExtents.x, aExtents.y, 0.0 });
 	}
 
-	rectangle::rectangle(const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect) :
+	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect) :
 		shape(aImage, aTextureRect)
 	{
 		set_position(aPosition);

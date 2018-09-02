@@ -37,6 +37,7 @@ namespace neogfx::game
 	typedef scalar time_interval;
 	typedef std::optional<time_interval> optional_time_interval;
 	typedef int64_t step_time_interval;
+	typedef step_time_interval step_time;
 
 	inline step_time_interval to_step_time(time_interval aTime, step_time_interval aStepInterval)
 	{
