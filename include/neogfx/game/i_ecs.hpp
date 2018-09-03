@@ -30,6 +30,32 @@
 
 namespace neogfx::game
 {
+	enum class ecs_flags : uint32_t
+	{
+		None = 0x0000,
+		PopulateEntityInfo = 0x0001
+	};
+
+	inline constexpr ecs_flags operator|(ecs_flags aLhs, ecs_flags aRhs)
+	{
+		return static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr ecs_flags operator&(ecs_flags aLhs, ecs_flags aRhs)
+	{
+		return static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr ecs_flags operator|=(ecs_flags& aLhs, ecs_flags aRhs)
+	{
+		return aLhs = static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr ecs_flags operator&=(ecs_flags& aLhs, ecs_flags aRhs)
+	{
+		return aLhs = static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
 	class i_ecs : public virtual i_object
 	{
 	public:
@@ -54,6 +80,7 @@ namespace neogfx::game
 		typedef std::map<system_id, system_factory> system_factories_t;
 		typedef std::map<system_id, std::unique_ptr<i_system>> systems_t;
 	public:
+		virtual ecs_flags flags() const = 0;
 		virtual entity_id create_entity(const entity_archetype_id& aArchetypeId) = 0;
 		virtual void destroy_entity(entity_id aEntityId) = 0;
 	public:

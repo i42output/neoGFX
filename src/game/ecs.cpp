@@ -190,17 +190,25 @@ namespace neogfx::game
 		iFreedEntityIds.push_back(aId);
 	}
 
-	ecs::ecs() :
-		iNextEntityId { null_entity }
+	ecs::ecs(ecs_flags aCreationFlags) :
+		iFlags{ aCreationFlags }, iNextEntityId { null_entity }
 	{
+		if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
+		{
+			register_component<entity_info>();
+			register_system<time_system>();
+		}
+	}
+
+	ecs_flags ecs::flags() const
+	{
+		return iFlags;
 	}
 
 	entity_id ecs::create_entity(const entity_archetype_id& aArchetypeId)
 	{
 		auto entityId = next_entity_id();
-		for (auto& componentId : archetype(aArchetypeId).components())
-			component(componentId);
-		if (component_registered<entity_info>() && system_registered<time_system>())
+		if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
 			component<entity_info>().populate(entityId, entity_info{ aArchetypeId, system<time_system>().world_time() });
 		entity_created.trigger(entityId);
 		return entityId;

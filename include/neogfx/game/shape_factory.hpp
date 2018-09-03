@@ -20,6 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <vector>
+#include <neolib/vecarray.hpp>
 #include <neogfx/core/geometrical.hpp>
 
 namespace neogfx

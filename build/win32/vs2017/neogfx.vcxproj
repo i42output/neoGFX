@@ -175,6 +175,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\entity.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity_archetype.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity_info.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\i_ecs.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\material.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\gradient.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_component.hpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\i_system.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\mesh_filter.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\mesh_renderer.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\outline.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\patch.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\physics.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\simple_physics_system.hpp" />

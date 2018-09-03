@@ -28,8 +28,9 @@ namespace neogfx::game
 	class ecs : public object<i_ecs>
 	{
 	public:
-		ecs();
+		ecs(ecs_flags aCreationFlags = ecs_flags::PopulateEntityInfo);
 	public:
+		ecs_flags flags() const override;
 		entity_id create_entity(const entity_archetype_id& aArchetypeId) override;
 		void destroy_entity(entity_id aEntityId) override;
 	public:
@@ -91,6 +92,7 @@ namespace neogfx::game
 		using i_ecs::system_registered;
 		using i_ecs::register_system;
 	private:
+		ecs_flags iFlags;
 		archetype_registry_t iArchetypeRegistry;
 		component_factories_t iComponentFactories;
 		mutable components_t iComponents;

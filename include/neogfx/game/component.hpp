@@ -181,6 +181,10 @@ namespace neogfx::game
 		{
 			return iReverseIndex;
 		}
+		bool have_entity_record(entity_id aEntity) const
+		{
+			return reverse_index()[aEntity] != invalid;
+		}
 		const data_type& entity_record(entity_id aEntity) const
 		{
 			auto reverseIndex = reverse_index()[aEntity];
@@ -227,14 +231,39 @@ namespace neogfx::game
 		template <typename T>
 		value_type& do_populate(entity_id aEntity, T&& aComponentData)
 		{
+			if (have_entity_record(aEntity))
+				return do_update(aEntity, aComponentData);
 			component_data().push_back(std::forward<T>(aComponentData));
-			index().push_back(aEntity);
-			if (reverse_index().size() < aEntity)
-				reverse_index().resize(aEntity, invalid);
-			reverse_index()[aEntity] = index().size() - 1;
+			try
+			{
+				index().push_back(aEntity);
+			}
+			catch (...)
+			{
+				component_data().pop_back();
+				throw;
+			}
+			try
+			{
+				if (reverse_index().size() < aEntity)
+					reverse_index().resize(aEntity, invalid);
+				reverse_index()[aEntity] = index().size() - 1;
+			}
+			catch (...)
+			{
+				component_data().pop_back();
+				index().pop_back();
+			}
 			return component_data().back();
 		}
-	private:
+		template <typename T>
+		value_type& do_update(entity_id aEntity, T&& aComponentData)
+		{
+			auto& record = entity_record(aEntity);
+			record = aComponentData;
+			return record;
+		}
+		private:
 		component_data_index_t iIndex;
 		reverse_index_t iReverseIndex;
 	};

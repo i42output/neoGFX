@@ -26,6 +26,9 @@ namespace neogfx::game
 {
 	typedef triangle face;
 
+	class i_ecs;
+	typedef std::function<void(i_ecs&, entity_id)> settings_updater;
+
 	enum class component_data_field_type : uint32_t
 	{
 		Invalid				= 0x00000000,
@@ -60,6 +63,7 @@ namespace neogfx::game
 		Uuid				= 0x00010000,
 		Id					= 0x00020000,
 		ComponentData		= 0x00030000,
+		Updater				= 0x00040000,
 		Optional			= 0x01000000,
 		Array				= 0x02000000,
 		Shared				= 0x04000000,
@@ -92,10 +96,6 @@ namespace neogfx::game
 		{
 			struct invalid_field_index : std::logic_error { invalid_field_index() : std::logic_error("neogfx::game::i_component_data::meta::invalid_field_index") {} };
 
-			static bool is_shared()
-			{
-				return false;
-			}
 			static neolib::uuid field_type_id(uint32_t)
 			{
 				return neolib::uuid{};
