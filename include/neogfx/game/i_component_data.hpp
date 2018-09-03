@@ -21,13 +21,14 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/numerical.hpp>
+#include <neogfx/game/ecs_ids.hpp>
 
 namespace neogfx::game
 {
 	typedef triangle face;
 
 	class i_ecs;
-	typedef std::function<void(i_ecs&, entity_id)> settings_updater;
+	typedef std::function<void(i_ecs&, entity_id)> settings_updater; // used by neoGFX Designer tool
 
 	enum class component_data_field_type : uint32_t
 	{

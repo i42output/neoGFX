@@ -28,11 +28,11 @@ namespace neogfx::game
 		rectangle_parameters{ aPosition, aExtents }.updater(aEcs, id());
 	}
 
-	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const colour& aColour) :
+	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::colour& aColour) :
 		entity{ aEcs, archetype().id() }
 	{
 		rectangle_parameters{ aPosition, aExtents }.updater(aEcs, id());
-		aEcs.component<material>().populate(id(), material{ { /* todo */ }, {}, {} });
+		aEcs.component<material>().populate(id(), material{ colour{ aColour.to_vec4() }, {}, {} });
 	}
 
 	rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :

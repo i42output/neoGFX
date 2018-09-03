@@ -114,7 +114,7 @@ namespace neogfx::game
 		}
 	public:
 		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents);
-		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const colour& aColour);
+		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::colour& aColour);
 		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture);
 		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage);
 		rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect);
