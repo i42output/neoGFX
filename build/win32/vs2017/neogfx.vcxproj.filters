@@ -747,9 +747,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\system.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\text.hpp">
-      <Filter>Game\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\animation.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
@@ -815,6 +812,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\outline.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\font.hpp">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\text_mesh.hpp">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\image.hpp">
+      <Filter>Game\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1193,13 +1199,13 @@
     <ClCompile Include="..\..\..\src\game\ecs_canvas.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\game\text.cpp">
-      <Filter>Game\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\game\rectangle.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\game\entity.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\text_mesh.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -151,20 +151,21 @@ namespace neogfx
 	};
 	typedef std::optional<text_colour> optional_text_colour;
 
+	enum class text_effect_type : uint32_t
+	{
+		None,
+		Outline,
+		Glow,
+		Shadow
+	};
+
 	class text_effect
 	{
 	public:
-		enum type_e
-		{
-			None,
-			Outline,
-			Glow,
-			Shadow
-		};
 		typedef double auxiliary_parameter;
 		typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
 	public:
-		text_effect(type_e aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) : 
+		text_effect(text_effect_type aType, const text_colour& aColour, const optional_dimension& aWidth = optional_dimension{}, const optional_auxiliary_parameter& aAux1 = optional_auxiliary_parameter{}) :
 			iType{ aType }, iColour{ aColour }, iWidth{ aWidth }, iAux1{ aAux1 }
 		{
 		}
@@ -193,7 +194,7 @@ namespace neogfx
 			return std::tie(iType, iColour, iWidth, iAux1) < std::tie(aRhs.iType, aRhs.iColour, aRhs.iWidth, aRhs.iAux1);
 		}
 	public:
-		type_e type() const
+		text_effect_type type() const
 		{
 			return iType;
 		}
@@ -207,13 +208,13 @@ namespace neogfx
 				return *iWidth;
 			switch (type())
 			{
-			case None:
+			case text_effect_type::None:
 			default:
 				return 0.0;
-			case Outline:
+			case text_effect_type::Outline:
 				return 1.0;
-			case Glow:
-			case Shadow:
+			case text_effect_type::Glow:
+			case text_effect_type::Shadow:
 				return 4.0;
 			}
 		}
@@ -223,13 +224,13 @@ namespace neogfx
 				return *iAux1;
 			switch (type())
 			{
-			case None:
+			case text_effect_type::None:
 			default:
 				return 0.0;
-			case Outline:
+			case text_effect_type::Outline:
 				return 0.0;
-			case Glow:
-			case Shadow:
+			case text_effect_type::Glow:
+			case text_effect_type::Shadow:
 				return 1.0;
 			}
 		}
@@ -242,7 +243,7 @@ namespace neogfx
 			return with_alpha(static_cast<colour::component>(aAlpha * 255));
 		}
 	private:
-		type_e iType;
+		text_effect_type iType;
 		text_colour iColour;
 		optional_dimension iWidth;
 		optional_auxiliary_parameter iAux1;

@@ -175,6 +175,8 @@
     <ClInclude Include="..\..\..\include\neogfx\game\entity.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity_archetype.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity_info.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\font.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_ecs.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\material.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\gradient.hpp" />
@@ -196,7 +198,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\ecs_canvas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\system.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\text.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\text_mesh.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\chrono.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\time_system.hpp" />
@@ -415,7 +417,7 @@
     <ClCompile Include="..\..\..\src\game\shape_factory.cpp" />
     <ClCompile Include="..\..\..\src\game\ecs_canvas.cpp" />
     <ClCompile Include="..\..\..\src\game\system.cpp" />
-    <ClCompile Include="..\..\..\src\game\text.cpp" />
+    <ClCompile Include="..\..\..\src\game\text_mesh.cpp" />
     <ClCompile Include="..\..\..\src\game\time_system.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp" />

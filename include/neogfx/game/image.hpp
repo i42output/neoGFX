@@ -1,4 +1,4 @@
-// texture.hpp
+// image.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -26,34 +26,31 @@
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/i_component_data.hpp>
-#include <neogfx/game/image.hpp>
 
 namespace neogfx::game
 {
-	struct texture
+	struct image
 	{
-		std::optional<shared<image>> image;
-		texture_type type;
-		texture_sampling sampling;
-		scalar dpiScalingFactor;
-		vec2 extents;
+		std::string uri;
+		scalar dpiScaleFactor;
+		texture_sampling textureSampling;
 		id_t id;
 
 		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = { 0x9f08230d, 0x25f, 0x4466, 0x9aab, { 0x1, 0x8d, 0x3, 0x29, 0x2e, 0xdc } };
+				static const neolib::uuid sId = { 0x10d54723, 0xbf6c, 0x4346, 0xbdb, { 0xf, 0x6d, 0x38, 0x91, 0x9b, 0xb7 } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Texture";
+				static const neolib::string sName = "Image";
 				return sName;
 			}
 			static uint32_t field_count()
 			{
-				return 6;
+				return 4;
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
@@ -62,13 +59,10 @@ namespace neogfx::game
 				case 0:
 					return component_data_field_type::ComponentData | component_data_field_type::Shared | component_data_field_type::Optional;
 				case 1:
-				case 2:
-					return component_data_field_type::Enum | component_data_field_type::Uint32;
-				case 3:
 					return component_data_field_type::Scalar;
-				case 4:
-					return component_data_field_type::Vec2;
-				case 5:
+				case 2:
+					return component_data_field_type::Uint32 | component_data_field_type::Enum;
+				case 3:
 					return component_data_field_type::Id;
 				default:
 					throw invalid_field_index();
@@ -83,8 +77,6 @@ namespace neogfx::game
 				case 1:
 				case 2:
 				case 3:
-				case 4:
-				case 5:
 					return neolib::uuid{};
 				default:
 					throw invalid_field_index();
@@ -95,10 +87,7 @@ namespace neogfx::game
 				static const neolib::string sFieldNames[] =
 				{
 					"Image",
-					"Type",
-					"Sampling",
 					"DPI Scale Factor",
-					"Extents",
 					"Id"
 				};
 				return sFieldNames[aFieldIndex];

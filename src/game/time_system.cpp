@@ -32,7 +32,7 @@ namespace neogfx::game
 		if (!ecs().component_registered<clock>())
 		{
 			ecs().register_component<clock>();
-			ecs().populate_shared<clock>(clock{ 0ll, chrono::to_flicks(0.010).count() });
+			ecs().populate_shared<clock>("World Clock", clock{ 0ll, chrono::to_flicks(0.010).count() });
 			apply();
 		}
 	}
@@ -49,13 +49,13 @@ namespace neogfx::game
 
 	void time_system::apply()
 	{
-		auto& worldClock = ecs().shared_component<clock>().component_data()[0];
+		auto& worldClock = ecs().shared_component<clock>()[0];
 		worldClock.time = system_time();
 	}
 
 	step_time time_system::system_time() const
 	{
-		auto& worldClock = ecs().shared_component<clock>().component_data()[0];
+		auto& worldClock = ecs().shared_component<clock>()[0];
 		return to_step_time(
 			chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())),
 			worldClock.timeStep);
@@ -63,7 +63,7 @@ namespace neogfx::game
 
 	step_time time_system::world_time() const
 	{
-		auto& worldClock = ecs().shared_component<clock>().component_data()[0];
+		auto& worldClock = ecs().shared_component<clock>()[0];
 		return worldClock.time;
 	}
 }

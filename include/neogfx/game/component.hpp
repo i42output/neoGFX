@@ -19,7 +19,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/container/stable_vector.hpp>
+#include <vector>
+#include <unordered_map>
+#include <string>
 #include <neolib/intrusive_sort.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component.hpp>
@@ -28,11 +30,11 @@ namespace neogfx::game
 {
 	class i_ecs;
 
+	template <typename Data>
+	struct shared;
+
 	namespace detail
 	{
-		template <typename Data>
-		struct shared;
-			
 		template <typename Data>
 		struct crack_component_data
 		{
@@ -46,7 +48,7 @@ namespace neogfx::game
 		struct crack_component_data<std::optional<Data>>
 		{
 			typedef Data data_type;
-			typedef std::optional<Data> value_type;
+			typedef std::optional<data_type> value_type;
 			typedef std::vector<value_type> container_type;
 			static constexpr bool optional = true;
 		};
@@ -55,8 +57,9 @@ namespace neogfx::game
 		struct crack_component_data<shared<Data>>
 		{
 			typedef Data data_type;
-			typedef Data value_type;
-			typedef boost::container::stable_vector<value_type> container_type;
+			typedef data_type mapped_type;
+			typedef std::pair<const std::string, mapped_type> value_type;
+			typedef std::unordered_map<std::string, mapped_type> container_type;
 			static constexpr bool optional = false;
 		};
 
@@ -64,8 +67,9 @@ namespace neogfx::game
 		struct crack_component_data<shared<std::optional<Data>>>
 		{
 			typedef Data data_type;
-			typedef std::optional<Data> value_type;
-			typedef boost::container::stable_vector<value_type> container_type;
+			typedef std::optional<data_type> mapped_type;
+			typedef std::pair<const std::string, mapped_type> value_type;
+			typedef std::unordered_map<std::string, mapped_type> container_type;
 			static constexpr bool optional = true;
 		};
 	}
@@ -133,11 +137,11 @@ namespace neogfx::game
 		}
 		const value_type& operator[](typename component_data_t::size_type aIndex) const
 		{
-			return component_data()[aIndex];
+			return *std::next(component_data().begin(), aIndex);
 		}
 		value_type& operator[](typename component_data_t::size_type aIndex)
 		{
-			return component_data()[aIndex];
+			return *std::next(component_data().begin(), aIndex);
 		}
 	private:
 		game::i_ecs& iEcs;
@@ -165,6 +169,7 @@ namespace neogfx::game
 			base_type{ aEcs }
 		{
 		}
+	public:
 		const component_data_index_t& index() const
 		{
 			return iIndex;
@@ -189,7 +194,7 @@ namespace neogfx::game
 		{
 			auto reverseIndex = reverse_index()[aEntity];
 			if (reverseIndex != invalid)
-				return component_data()[reverseIndex];
+				return base_type::component_data()[reverseIndex];
 			throw entity_record_not_found();
 		}
 		value_type& entity_record(entity_id aEntity)
@@ -217,12 +222,12 @@ namespace neogfx::game
 		template <typename Compare>
 		void sort(Compare aComparator)
 		{
-			neolib::intrusive_sort(component_data().begin(), component_data().end(), 
+			neolib::intrusive_sort(base_type::component_data().begin(), base_type::component_data().end(),
 				[this](auto lhs, auto rhs) 
 				{ 
 					std::swap(*lhs, *rhs);
-					auto lhsIndex = lhs - component_data().begin();
-					auto rhsIndex = rhs - component_data().begin();
+					auto lhsIndex = lhs - base_type::component_data().begin();
+					auto rhsIndex = rhs - base_type::component_data().begin();
 					std::swap(index()[lhsIndex], index()[rhsIndex]);
 					std::swap(reverse_index()[index()[lhsIndex]], reverse_index()[index()[rhsIndex]]);
 				}, aComparator);
@@ -233,14 +238,14 @@ namespace neogfx::game
 		{
 			if (have_entity_record(aEntity))
 				return do_update(aEntity, aComponentData);
-			component_data().push_back(std::forward<T>(aComponentData));
+			base_type::component_data().push_back(std::forward<T>(aComponentData));
 			try
 			{
 				index().push_back(aEntity);
 			}
 			catch (...)
 			{
-				component_data().pop_back();
+				base_type::component_data().pop_back();
 				throw;
 			}
 			try
@@ -251,10 +256,10 @@ namespace neogfx::game
 			}
 			catch (...)
 			{
-				component_data().pop_back();
+				base_type::component_data().pop_back();
 				index().pop_back();
 			}
-			return component_data().back();
+			return base_type::component_data().back();
 		}
 		template <typename T>
 		value_type& do_update(entity_id aEntity, T&& aComponentData)
@@ -263,20 +268,29 @@ namespace neogfx::game
 			record = aComponentData;
 			return record;
 		}
-		private:
+	private:
 		component_data_index_t iIndex;
 		reverse_index_t iReverseIndex;
 	};
 
 	template <typename Data>
-	class static_shared_component : public static_component_base<Data, i_shared_component>
+	struct shared
+	{
+		typedef typename detail::crack_component_data<shared<Data>>::mapped_type mapped_type;
+		const mapped_type* ptr;
+	};
+
+	template <typename Data>
+	class static_shared_component : public static_component_base<shared<Data>, i_shared_component>
 	{
 	private:
-		typedef static_component_base<Data, i_shared_component> base_type;
+		typedef static_component_base<shared<Data>, i_shared_component> base_type;
 	public:
 		typedef typename base_type::data_type data_type;
 		typedef typename base_type::meta_data_type meta_data_type;
 		typedef typename base_type::value_type value_type;
+		typedef typename base_type::component_data_t component_data_t;
+		typedef typename component_data_t::mapped_type mapped_type;
 	private:
 		typedef static_shared_component<Data> self_type;
 	public:
@@ -284,31 +298,48 @@ namespace neogfx::game
 			base_type{ aEcs }
 		{
 		}
-		value_type& populate(const value_type& aData)
+	public:
+		const mapped_type& operator[](typename component_data_t::size_type aIndex) const
 		{
-			component_data().push_back(aData);
-			return component_data().back();
+			return std::next(component_data().begin(), aIndex)->second;
 		}
-		value_type& populate(value_type&& aData)
+		mapped_type& operator[](typename component_data_t::size_type aIndex)
 		{
-			component_data().push_back(std::move(aData));
-			return component_data().back();
+			return std::next(component_data().begin(), aIndex)->second;
 		}
-		void* populate(const void* aComponentData, std::size_t aComponentDataSize) override
+		const mapped_type& operator[](const std::string& aName) const
 		{
-			if ((aComponentData == nullptr && !is_data_optional()) || aComponentDataSize != sizeof(data_type))
+			return component_data()[aName];
+		}
+		mapped_type& operator[](const std::string& aName)
+		{
+			return component_data()[aName];
+		}
+	public:
+		mapped_type& populate(const std::string& aName, const mapped_type& aData)
+		{
+			base_type::component_data()[aName] = aData;
+			auto& result = base_type::component_data()[aName];
+			if constexpr (mapped_type::meta::has_updater)
+				mapped_type::meta::update(result, ecs(), null_entity);
+			return result;
+		}
+		mapped_type& populate(const std::string& aName, mapped_type&& aData)
+		{
+			base_type::component_data()[aName] = std::move(aData);
+			auto& result = base_type::component_data()[aName];
+			if constexpr (mapped_type::meta::has_updater)
+				mapped_type::meta::update(result, ecs(), null_entity);
+			return result;
+		}
+		void* populate(const std::string& aName, const void* aComponentData, std::size_t aComponentDataSize) override
+		{
+			if ((aComponentData == nullptr && !is_data_optional()) || aComponentDataSize != sizeof(mapped_type))
 				throw invalid_data();
 			if (aComponentData != nullptr)
-				return &populate(*static_cast<const data_type*>(aComponentData));
+				return &populate(aName, *static_cast<const mapped_type*>(aComponentData));
 			else
-				return &populate(value_type{}); // empty optional
+				return &populate(aName, mapped_type{}); // empty optional
 		}
-	};
-
-	template <typename Data>
-	struct shared
-	{
-		typedef typename detail::crack_component_data<shared<Data>>::value_type value_type;
-		const value_type* ptr;
 	};
 }

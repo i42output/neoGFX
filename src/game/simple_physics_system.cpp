@@ -36,7 +36,7 @@ namespace neogfx::game
 		if (!ecs().component_registered<physics>())
 			ecs().register_component<physics>();
 		if (ecs().shared_component<physics>().component_data().empty())
-			ecs().populate_shared<physics>(physics{ 6.67408e-11 });
+			ecs().populate_shared<physics>("Standard Universe", physics{ 6.67408e-11 });
 	}
 
 	const system_id& simple_physics_system::id() const

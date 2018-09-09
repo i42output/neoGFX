@@ -67,6 +67,7 @@ namespace neogfx::game
 	public:
 		event<entity_id> entity_created;
 		event<entity_id> entity_destroyed;
+		event<handle_id> handle_updated;
 	public:
 		typedef std::function<std::unique_ptr<i_component>()> component_factory;
 		typedef std::function<std::unique_ptr<i_shared_component>()> shared_component_factory;
@@ -79,6 +80,9 @@ namespace neogfx::game
 		typedef std::map<component_id, std::unique_ptr<i_shared_component>> shared_components_t;
 		typedef std::map<system_id, system_factory> system_factories_t;
 		typedef std::map<system_id, std::unique_ptr<i_system>> systems_t;
+	public:
+		typedef id_t handle_id;
+		typedef void* handle_t;
 	public:
 		virtual ecs_flags flags() const = 0;
 		virtual entity_id create_entity(const entity_archetype_id& aArchetypeId) = 0;
@@ -123,6 +127,11 @@ namespace neogfx::game
 		virtual void register_shared_component(component_id aComponentId, shared_component_factory aFactory) = 0;
 		virtual bool system_registered(system_id aSystemId) const = 0;
 		virtual void register_system(system_id aSystemId, system_factory aFactory) = 0;
+	public:
+		virtual handle_t to_handle(handle_id aId) const = 0;
+		virtual handle_id add_handle(const std::type_info& aTypeInfo, handle_t aHandle) = 0;
+		virtual handle_t update_handle(const std::type_info& aTypeInfo, handle_id aId, handle_t aHandle) = 0;
+		virtual handle_t release_handle(handle_id aId) = 0;
 		// helpers
 	public:
 		template <typename... ComponentData>
@@ -146,16 +155,16 @@ namespace neogfx::game
 			c.populate(aEntity, std::forward<ComponentData>(aComponentData));
 		}
 		template <typename... ComponentData, typename ComponentDataTail>
-		void populate_shared(ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
+		void populate_shared(const std::string& aName, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
 		{
-			populate_shared(std::forward<ComponentDataTail>(aComponentDataTail));
-			populate_shared(std::forward<ComponentData>(aComponentData)...);
+			populate_shared(aName, std::forward<ComponentDataTail>(aComponentDataTail));
+			populate_shared(aName, std::forward<ComponentData>(aComponentData)...);
 		}
 		template <typename ComponentData>
-		void populate_shared(ComponentData&& aComponentData)
+		void populate_shared(const std::string& aName, ComponentData&& aComponentData)
 		{
 			auto& c = static_cast<static_shared_component<ComponentData>&>(*shared_components().find(ComponentData::meta::id())->second);
-			c.populate(std::forward<ComponentData>(aComponentData));
+			c.populate(aName, std::forward<ComponentData>(aComponentData));
 		}
 		template <typename ComponentData>
 		bool component_instantiated() const
@@ -238,6 +247,33 @@ namespace neogfx::game
 			register_system(
 				System::meta::id(),
 				[&]() { return std::unique_ptr<i_system>{std::make_unique<System>(*this)}; });
+		}
+	public:
+		template <typename Handle>
+		Handle to_handle(handle_id aId) const
+		{
+			return reinterpret_cast<Handle>(to_handle(aId));
+		}
+		template <typename Context, typename Handle>
+		handle_id add_handle(Handle aHandle)
+		{
+			return add_handle(typeid(Context), reinterpret_cast<handle_t>(aHandle));
+		}
+		template <typename Context, typename Handle>
+		Handle update_handle(handle_id aId, Handle aHandle)
+		{
+			if constexpr(std::is_pointer<Handle>::value)
+				return reinterpret_cast<Handle>(update_handle(typeid(Context), aId, reinterpret_cast<handle_t>(aHandle)));
+			else
+				return static_cast<Handle>(reinterpret_cast<intptr_t>(update_handle(typeid(Context), aId, reinterpret_cast<handle_t>(aHandle))));
+		}
+		template <typename Handle>
+		Handle release_handle(handle_id aId)
+		{
+			if constexpr(std::is_pointer<Handle>::value)
+				return reinterpret_cast<Handle>(release_handle(aId));
+			else
+				return static_cast<Handle>(reinterpret_cast<intptr_t>(release_handle(aId)));
 		}
 	};
 }

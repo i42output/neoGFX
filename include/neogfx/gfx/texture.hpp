@@ -43,7 +43,7 @@ namespace neogfx
 		~texture();
 		// operations
 	public:
-		type_e type() const override;
+		texture_type type() const override;
 		const i_sub_texture& as_sub_texture() const override;
 		dimension dpi_scale_factor() const override;
 		texture_sampling sampling() const override;
@@ -61,37 +61,4 @@ namespace neogfx
 	};
 
 	typedef std::optional<texture> optional_texture;
-	typedef std::shared_ptr<const i_texture> texture_pointer;
-	typedef std::pair<texture_pointer, optional_rect> texture_source;
-	typedef std::vector<texture_source> texture_list;
-	typedef std::optional<texture_list> optional_texture_list;
-	typedef texture_list::size_type texture_index;
-	typedef std::shared_ptr<texture_list> texture_list_pointer;
-
-	inline texture_pointer to_texture_pointer(const i_texture& aTexture)
-	{
-		return (aTexture.type() == i_texture::Texture ? static_cast<texture_pointer>(std::make_shared<texture>(aTexture)) : static_cast<texture_pointer>(std::make_shared<sub_texture>(aTexture.as_sub_texture())));
-	}
-
-	inline texture_list_pointer to_texture_list_pointer(const i_texture& aTexture, const optional_rect& aTextureRect = optional_rect{})
-	{
-		return std::make_shared<texture_list>(1, texture_source{ to_texture_pointer(aTexture), aTextureRect });
-	}
-
-	inline texture_list_pointer to_texture_list_pointer(texture_pointer aTexture, const optional_rect& aTextureRect = optional_rect{})
-	{
-		return std::make_shared<texture_list>(1, texture_source{ aTexture, aTextureRect });
-	}
-
-	inline texture_list_pointer to_texture_list_pointer(texture_list& aTextureList, const i_texture& aTexture, const optional_rect& aTextureRect)
-	{
-		aTextureList.assign(1, texture_source{ to_texture_pointer(aTexture), aTextureRect });
-		return texture_list_pointer{ texture_list_pointer{}, &aTextureList };
-	}
-
-	inline texture_list_pointer to_texture_list_pointer(texture_list& aTextureList, texture_pointer aTexture, const optional_rect& aTextureRect)
-	{
-		aTextureList.assign(1, texture_source{ aTexture, aTextureRect });
-		return texture_list_pointer{ texture_list_pointer{}, &aTextureList };
-	}
 }

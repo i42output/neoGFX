@@ -26,7 +26,13 @@ namespace neogfx
 {
 	class i_native_texture;
 
-	enum class texture_sampling
+	enum class texture_type : uint32_t
+	{
+		Texture,
+		SubTexture
+	};
+
+	enum class texture_sampling : uint32_t
 	{
 		Normal,
 		NormalMipmap,
@@ -39,18 +45,12 @@ namespace neogfx
 	class i_texture
 	{
 	public:
-		enum type_e
-		{
-			Texture,
-			SubTexture
-		};
-	public:
 		struct texture_empty : std::logic_error { texture_empty() : std::logic_error("neogfx::i_texture::texture_empty") {} };
 		struct not_sub_texture : std::logic_error { not_sub_texture() : std::logic_error("neogfx::i_texture::not_sub_texture") {} };
 	public:
 		virtual ~i_texture() {}
 	public:
-		virtual type_e type() const = 0;
+		virtual texture_type type() const = 0;
 		virtual const i_sub_texture& as_sub_texture() const = 0;
 		virtual dimension dpi_scale_factor() const = 0;
 		virtual texture_sampling sampling() const = 0;

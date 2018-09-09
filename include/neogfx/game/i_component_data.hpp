@@ -27,8 +27,9 @@ namespace neogfx::game
 {
 	typedef triangle face;
 
+	typedef std::string string;
+
 	class i_ecs;
-	typedef std::function<void(i_ecs&, entity_id)> settings_updater; // used by neoGFX Designer tool
 
 	enum class component_data_field_type : uint32_t
 	{
@@ -61,10 +62,11 @@ namespace neogfx::game
 		Mat44				= BasicMat44 | Float64,
 		Aabb				= 0x00001000,
 		Aabb2d				= 0x00002000,
-		Uuid				= 0x00010000,
-		Id					= 0x00020000,
-		ComponentData		= 0x00030000,
-		Updater				= 0x00040000,
+		String				= 0x00010000,
+		Enum				= 0x000B0000,
+		Uuid				= 0x000C0000,
+		Id					= 0x000D0000,
+		ComponentData		= 0x000E0000,
 		Optional			= 0x01000000,
 		Array				= 0x02000000,
 		Shared				= 0x04000000,
@@ -101,6 +103,9 @@ namespace neogfx::game
 			{
 				return neolib::uuid{};
 			}
+
+			static constexpr bool has_handles = false;
+			static constexpr bool has_updater = false;
 		};
 	};
 }

@@ -46,11 +46,11 @@ namespace neogfx::game
 	class i_shared_component : public i_component_base
 	{
 	public:
-		virtual void* populate(const void* aComponentData, std::size_t aComponentDataSize) = 0;
+		virtual void* populate(const std::string& aName, const void* aComponentData, std::size_t aComponentDataSize) = 0;
 		template <typename ComponentData>
-		void* populate(ComponentData&& aComponentData)
+		void* populate(const std::string& aName, ComponentData&& aComponentData)
 		{
-			return populate(&std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
+			return populate(aName, &std::forward<ComponentData>(aComponentData), sizeof(ComponentData));
 		}
 	};
 

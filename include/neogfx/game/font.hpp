@@ -1,4 +1,4 @@
-// texture.hpp
+// font.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -22,70 +22,51 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
-#include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/game/ecs_ids.hpp>
-#include <neogfx/game/component.hpp>
+#include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/i_component_data.hpp>
-#include <neogfx/game/image.hpp>
+#include <neogfx/gfx/text/font_manager.hpp>
+#include <neogfx/app/app.hpp>
 
 namespace neogfx::game
 {
-	struct texture
+	struct font
 	{
-		std::optional<shared<image>> image;
-		texture_type type;
-		texture_sampling sampling;
-		scalar dpiScalingFactor;
-		vec2 extents;
+		string familyName;
+		string styleName;
+		scalar pointSize;
+		bool underline;
 		id_t id;
 
 		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = { 0x9f08230d, 0x25f, 0x4466, 0x9aab, { 0x1, 0x8d, 0x3, 0x29, 0x2e, 0xdc } };
+				static const neolib::uuid sId = { 0x13edb5d4, 0x9fae, 0x4dc1, 0xb9e4, { 0x15, 0x49, 0x8b, 0xf, 0xff, 0xe } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Texture";
+				static const neolib::string sName = "Font";
 				return sName;
 			}
 			static uint32_t field_count()
 			{
-				return 6;
+				return 5;
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
 				switch (aFieldIndex)
 				{
 				case 0:
-					return component_data_field_type::ComponentData | component_data_field_type::Shared | component_data_field_type::Optional;
 				case 1:
+					return component_data_field_type::String;
 				case 2:
-					return component_data_field_type::Enum | component_data_field_type::Uint32;
-				case 3:
 					return component_data_field_type::Scalar;
-				case 4:
-					return component_data_field_type::Vec2;
-				case 5:
-					return component_data_field_type::Id;
-				default:
-					throw invalid_field_index();
-				}
-			}
-			static neolib::uuid field_type_id(uint32_t aFieldIndex)
-			{
-				switch (aFieldIndex)
-				{
-				case 0:
-					return image::meta::id();
-				case 1:
-				case 2:
 				case 3:
+					return component_data_field_type::Bool;
 				case 4:
-				case 5:
-					return neolib::uuid{};
+					return component_data_field_type::Id;
 				default:
 					throw invalid_field_index();
 				}
@@ -94,14 +75,34 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
-					"Image",
-					"Type",
-					"Sampling",
-					"DPI Scale Factor",
-					"Extents",
+					"Family Name",
+					"Style Name",
+					"Point Size",
+					"Underline",
 					"Id"
 				};
 				return sFieldNames[aFieldIndex];
+			}
+			static constexpr bool has_updater = true;
+			static void update(font& aData, i_ecs& aEcs, entity_id)
+			{
+				auto& fontManager = app::instance().rendering_engine().font_manager();
+				neogfx::font_info fontInfo{ aData.familyName, aData.styleName, aData.pointSize };
+				fontInfo.set_underline(aData.underline);
+				if (aData.id != null_id)
+					fontManager.return_token(aEcs.update_handle<neogfx::font>(aData.id, neogfx::font{ fontInfo }.get_token()));
+				else
+					aData.id = aEcs.add_handle<neogfx::font>(neogfx::font{ fontInfo }.get_token());
+			}
+			static constexpr bool has_handles = true;
+			static void free_handles(font& aData, i_ecs& aEcs)
+			{
+				if (aData.id != null_id)
+				{
+					auto& fontManager = app::instance().rendering_engine().font_manager();
+					fontManager.return_token(aEcs.release_handle<neogfx::font::token>(aData.id));
+					aData.id = null_id;
+				}
 			}
 		};
 	};

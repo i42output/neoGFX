@@ -1,4 +1,4 @@
-// rectangle.hpp
+// text_mesh.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -19,49 +19,88 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/numerical.hpp>
-#include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/colour.hpp>
-#include <neogfx/gfx/i_image.hpp>
+#include <neogfx/gfx/primitives.hpp>
+#include <neogfx/game/component.hpp>
 #include <neogfx/game/entity.hpp>
-#include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
-#include <neogfx/game/shape_factory.hpp>
+#include <neogfx/game/font.hpp>
 
 namespace neogfx::game
 {
-	struct rectangle
+	struct text_mesh
 	{
+		string text;
 		vec3 position;
 		vec2 extents;
-		material material;
+		scalar border;
+		vec4 margins;
+		neogfx::alignment alignment;
+		shared<font> font;
+		text_effect_type textEffect;
+		material textEffectMaterial;
+		scalar textEffectWidth;
 
 		struct meta : i_component_data::meta
 		{
 			static const neolib::uuid& id()
 			{
-				static const neolib::uuid sId = { 0x6f45d8be, 0xba9c, 0x4a32, 0xa99e, { 0x37, 0xd3, 0xf2, 0xb4, 0xe7, 0x53 } };
+				static const neolib::uuid sId = { 0x6f45d8be, 0xba9c, 0x4a32, 0xa99e,{ 0x37, 0xd3, 0xf2, 0xb4, 0xe7, 0x53 } };
 				return sId;
 			}
 			static const neolib::i_string& name()
 			{
-				static const neolib::string sName = "Rectangle";
+				static const neolib::string sName = "Text Mesh";
 				return sName;
 			}
 			static uint32_t field_count()
 			{
-				return 3;
+				return 10;
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
 				switch (aFieldIndex)
 				{
 				case 0:
-					return component_data_field_type::Vec3;
+					return component_data_field_type::String;
 				case 1:
-					return component_data_field_type::Vec2;
+					return component_data_field_type::Vec3;
 				case 2:
-					return component_data_field_type::ComponentData | component_data_field_type::Optional;
+					return component_data_field_type::Vec2;
+				case 3:
+					return component_data_field_type::Scalar;
+				case 4:
+					return component_data_field_type::Vec4;
+				case 5:
+					return component_data_field_type::Enum | component_data_field_type::Uint32;
+				case 6:
+					return component_data_field_type::ComponentData | component_data_field_type::Shared;
+				case 7:
+					return component_data_field_type::Enum;
+				case 8:
+					return component_data_field_type::ComponentData;
+				case 9:
+					return component_data_field_type::Scalar;
+				default:
+					throw invalid_field_index();
+				}
+			}
+			static neolib::uuid field_type_id(uint32_t aFieldIndex)
+			{
+				switch (aFieldIndex)
+				{
+				case 0:
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 7:
+				case 9:
+					return neolib::uuid{};
+				case 6:
+					return font::meta::id();
+				case 8:
+					return material::meta::id();
 				default:
 					throw invalid_field_index();
 				}
@@ -70,16 +109,22 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
+					"Text",
 					"Position",
 					"Extents",
-					"Material"
+					"Border",
+					"Margins",
+					"Alignment",
+					"Font",
+					"Text Effect",
+					"Text Effect Material",
+					"Text Effect Width"
 				};
 				return sFieldNames[aFieldIndex];
 			}
 			static constexpr bool has_updater = true;
-			static void update(const rectangle& aData, i_ecs& aEcs, entity_id aEntity)
+			static void update(const text_mesh& aData, i_ecs& aEcs, entity_id aEntity)
 			{
-				using neogfx::game::material;
 				auto& m = aEcs.component<mesh>().have_entity_record(aEntity) ?
 					aEcs.component<mesh>().entity_record(aEntity) :
 					aEcs.component<mesh>().populate(aEntity, mesh
@@ -94,38 +139,33 @@ namespace neogfx::game
 							face{ 3u, 4u, 5u }
 						}
 						});
-				// todo: outline support
 				m.vertices = rect_vertices(rect{ point{ aData.position }, size{ aData.extents } }, 0, rect_type::FilledTriangles);
+				for (auto& v : m.vertices)
+					v.z = aData.position.z;
 				aEcs.component<mesh>().populate(aEntity, m);
-				aEcs.component<material>().populate(aEntity, aData.material);
 			}
 		};
 	};
 
 	namespace shape
 	{
-		class rectangle : public entity
+		class text : public entity
 		{
 		public:
 			static const entity_archetype& archetype()
 			{
-				using neogfx::game::rectangle;
+				using neogfx::game::text_mesh;
 				static const entity_archetype sArchetype
 				{
-					{ 0xce3d930, 0x6b18, 0x403b, 0x9680, { 0x89, 0xed, 0x54, 0x83, 0xd5, 0x72 } },
-					"Rectangle",
-					{ rectangle::meta::id(), mesh::meta::id() }
+					{ 0xe3115152, 0x90ad, 0x4f7a, 0x83b0, { 0x7a, 0x59, 0xce, 0xea, 0x47, 0xb } },
+					"Text Mesh",
+					{ text_mesh::meta::id(), mesh::meta::id() }
 				};
 				return sArchetype;
 			}
 		public:
-			rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents);
-			rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::colour& aColour);
-			rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture);
-			rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage);
-			rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect);
-			rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect);
-			rectangle(const rectangle& aOther);
+			text(i_ecs& aEcs, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment = alignment::Left);
+			text(const text& aOther);
 		};
 	}
 }
