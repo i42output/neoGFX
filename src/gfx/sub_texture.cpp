@@ -43,9 +43,9 @@ namespace neogfx
 	{
 	}
 
-	i_texture::type_e sub_texture::type() const
+	texture_type sub_texture::type() const
 	{
-		return SubTexture;
+		return texture_type::SubTexture;
 	}
 
 	const i_sub_texture& sub_texture::as_sub_texture() const

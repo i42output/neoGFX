@@ -181,7 +181,7 @@ namespace neogfx::game
 			return nextId;
 		}
 		if (++iNextEntityId == null_entity)
-			throw entity_ids_exhuasted();
+			throw entity_ids_exhausted();
 		return iNextEntityId;
 	}
 
@@ -191,7 +191,7 @@ namespace neogfx::game
 	}
 
 	ecs::ecs(ecs_flags aCreationFlags) :
-		iFlags{ aCreationFlags }, iNextEntityId { null_entity }
+		iFlags{ aCreationFlags }, iNextEntityId { null_entity }, iNextHandleId{ null_id }
 	{
 		if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
 		{
@@ -217,7 +217,9 @@ namespace neogfx::game
 	void ecs::destroy_entity(entity_id aEntityId)
 	{
 		entity_destroyed.trigger(aEntityId);
-		// todo: mark entity ID as invalid in all component data
+		for (auto& component : iComponents)
+			if (component.second->has_entity_record(aEntityId))
+				component.second->destroy_entity_record(aEntityId);
 		free_entity_id(aEntityId);
 	}
 
@@ -269,5 +271,55 @@ namespace neogfx::game
 	{
 		if (!system_factories().emplace(aSystemId, aFactory).second)
 			throw uuid_exists("register_system");
+	}
+
+	ecs::handle_t ecs::to_handle(handle_id aId) const
+	{
+		return iHandles[aId];
+	}
+
+	handle_id ecs::add_handle(const std::type_info&, handle_t aHandle)
+	{
+		auto nextHandleId = next_handle_id();
+		if (iHandles.size() <= nextHandleId)
+			iHandles.resize(nextHandleId);
+		iHandles[nextHandleId] = aHandle;
+		return nextHandleId;
+	}
+
+	ecs::handle_t ecs::update_handle(handle_id aId, const std::type_info&, handle_t aHandle)
+	{
+		if (iHandles.size() <= aId)
+			throw invalid_handle_id();
+		iHandles[aId] = aHandle;
+		return aHandle;
+	}
+
+	ecs::handle_t ecs::release_handle(handle_id aId)
+	{
+		if (iHandles.size() <= aId)
+			throw invalid_handle_id();
+		auto handle = iHandles[aId];
+		iHandles[aId] = nullptr;
+		free_handle_id(aId);
+		return handle;
+	}
+
+	handle_id ecs::next_handle_id()
+	{
+		if (!iFreedHandleIds.empty())
+		{
+			auto nextId = iFreedHandleIds.back();
+			iFreedHandleIds.pop_back();
+			return nextId;
+		}
+		if (++iNextHandleId == null_id)
+			throw handle_ids_exhausted();
+		return iNextHandleId;
+	}
+
+	void ecs::free_handle_id(handle_id aId)
+	{
+		iFreedHandleIds.push_back(aId);
 	}
 }

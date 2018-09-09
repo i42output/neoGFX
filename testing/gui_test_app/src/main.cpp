@@ -120,7 +120,7 @@ public:
 			if (aNumber == 9)
 				iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::colour_or_gradient{} });
 			else if (aNumber == 8)
-				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect::Outline, ng::colour::White } });
+				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White } });
 			else if (aNumber == 0)
 				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::colour::White });
 			else
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 				std::ostringstream oss;
 				oss << window.fps() << " FPS";
 				aGc.fill_rect(ng::rect{ ng::point{ 100, 100 }, aGc.text_extent(oss.str(), fpsFont) }, ng::colour::DarkBlue);
-				aGc.draw_text(ng::point{ 100, 100 }, oss.str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
+				aGc.draw_text(ng::point{ 100, 100 }, oss.str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
 			}
 		});
 
@@ -574,7 +574,7 @@ int main(int argc, char* argv[])
 			gw.gradient_changed([&gw, &textEdit]()
 			{
 				auto cs = textEdit.column(2);
-				cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect::Outline, gw.gradient() } });
+				cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::colour_or_gradient{}, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, gw.gradient() } });
 				textEdit.set_column(2, cs);
 			}, textEdit);
 		});
@@ -627,20 +627,20 @@ int main(int argc, char* argv[])
 		editOutline.checked([&]()
 		{
 			auto s = textEdit.default_style();
-			s.set_text_effect(ng::text_effect{ ng::text_effect::Outline, ng::colour::White });
+			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White });
 			textEdit.set_default_style(s);
 		});
 		editGlow.checked([&]()
 		{
 			auto s = textEdit.default_style();
-			s.set_text_effect(ng::text_effect{ ng::text_effect::Glow, ng::colour::Orange.with_lightness(0.9) });
+			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::colour::Orange.with_lightness(0.9) });
 			textEdit.set_default_style(s);
 		});
 		effectWidthSlider.value_changed([&]()
 		{
 			editGlow.check();
 			auto s = textEdit.default_style();
-			s.set_text_effect(ng::text_effect{ ng::text_effect::Glow, s.text_effect()->colour(), effectWidthSlider.value(), s.text_effect()->aux1() });
+			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, s.text_effect()->colour(), effectWidthSlider.value(), s.text_effect()->aux1() });
 			textEdit.set_default_style(s);
 			std::ostringstream oss;
 			oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
@@ -650,7 +650,7 @@ int main(int argc, char* argv[])
 		{
 			editGlow.check();
 			auto s = textEdit.default_style();
-			s.set_text_effect(ng::text_effect{ ng::text_effect::Glow, s.text_effect()->colour(), s.text_effect()->width(), effectAux1Slider.value() });
+			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, s.text_effect()->colour(), s.text_effect()->width(), effectAux1Slider.value() });
 			textEdit.set_default_style(s);
 			std::ostringstream oss;
 			oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
@@ -659,7 +659,7 @@ int main(int argc, char* argv[])
 		editShadow.checked([&]()
 		{
 			auto s = textEdit.default_style();
-			s.set_text_effect(ng::text_effect{ ng::text_effect::Shadow, ng::colour::Black });
+			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, ng::colour::Black });
 			textEdit.set_default_style(s);
 		});
 		ng::radio_button radio1(layout4, "Radio 1");

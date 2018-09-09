@@ -63,7 +63,9 @@ namespace neogfx::game
 		struct component_not_found : std::logic_error { component_not_found() : std::logic_error("neogfx::i_ecs::component_not_found") {} };
 		struct system_not_found : std::logic_error { system_not_found() : std::logic_error("neogfx::i_ecs::system_not_found") {} };
 		struct uuid_exists : std::runtime_error { uuid_exists(const std::string& aContext) : std::runtime_error("neogfx::i_ecs::uuid_exists: " + aContext) {} };
-		struct entity_ids_exhuasted : std::runtime_error { entity_ids_exhuasted() : std::runtime_error("neogfx::i_ecs::entity_ids_exhuasted") {} };
+		struct entity_ids_exhausted : std::runtime_error { entity_ids_exhausted() : std::runtime_error("neogfx::i_ecs::entity_ids_exhausted") {} };
+		struct handle_ids_exhausted : std::runtime_error { handle_ids_exhausted() : std::runtime_error("neogfx::i_ecs::handle_ids_exhausted") {} };
+		struct invalid_handle_id : std::logic_error { invalid_handle_id() : std::logic_error("neogfx::i_ecs::invalid_handle_id") {} };
 	public:
 		event<entity_id> entity_created;
 		event<entity_id> entity_destroyed;
@@ -130,7 +132,7 @@ namespace neogfx::game
 	public:
 		virtual handle_t to_handle(handle_id aId) const = 0;
 		virtual handle_id add_handle(const std::type_info& aTypeInfo, handle_t aHandle) = 0;
-		virtual handle_t update_handle(const std::type_info& aTypeInfo, handle_id aId, handle_t aHandle) = 0;
+		virtual handle_t update_handle(handle_id aId, const std::type_info& aTypeInfo, handle_t aHandle) = 0;
 		virtual handle_t release_handle(handle_id aId) = 0;
 		// helpers
 	public:
@@ -263,9 +265,9 @@ namespace neogfx::game
 		Handle update_handle(handle_id aId, Handle aHandle)
 		{
 			if constexpr(std::is_pointer<Handle>::value)
-				return reinterpret_cast<Handle>(update_handle(typeid(Context), aId, reinterpret_cast<handle_t>(aHandle)));
+				return reinterpret_cast<Handle>(update_handle(aId, typeid(Context), reinterpret_cast<handle_t>(aHandle)));
 			else
-				return static_cast<Handle>(reinterpret_cast<intptr_t>(update_handle(typeid(Context), aId, reinterpret_cast<handle_t>(aHandle))));
+				return static_cast<Handle>(reinterpret_cast<intptr_t>(update_handle(aId, typeid(Context), reinterpret_cast<handle_t>(aHandle))));
 		}
 		template <typename Handle>
 		Handle release_handle(handle_id aId)

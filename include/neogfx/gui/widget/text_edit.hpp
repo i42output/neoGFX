@@ -329,7 +329,7 @@ namespace neogfx
 						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + textStartIndex + glyph.source().first).contents();
 						const auto& style = std::holds_alternative<style_list::const_iterator>(tagContents) ? *static_variant_cast<style_list::const_iterator>(tagContents) : iParent->default_style();
 						dimension cy = glyph.extents().cy;
-						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect::Outline)
+						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect_type::Outline)
 							cy += (style.text_effect()->width() * 2.0);
 						if (i == glyphsStartIndex || cy != previousHeight)
 						{

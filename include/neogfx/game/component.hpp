@@ -82,7 +82,7 @@ namespace neogfx::game
 		struct invalid_data : std::logic_error { invalid_data() : std::logic_error("neogfx::static_component::invalid_data") {} };
 	public:
 		typedef typename detail::crack_component_data<Data>::data_type data_type;
-		typedef typename data_type::meta meta_data_type;
+		typedef typename data_type::meta data_meta_type;
 		typedef typename detail::crack_component_data<Data>::value_type value_type;
 		typedef typename detail::crack_component_data<Data>::container_type component_data_t;
 	private:
@@ -99,7 +99,7 @@ namespace neogfx::game
 		}
 		const component_id& id() const override
 		{
-			return meta_data_type::id();
+			return data_meta_type::id();
 		}
 	public:
 		bool is_data_optional() const override
@@ -108,23 +108,23 @@ namespace neogfx::game
 		}
 		const neolib::i_string& name() const override
 		{
-			return meta_data_type::name();
+			return data_meta_type::name();
 		}
 		uint32_t field_count() const override
 		{
-			return meta_data_type::field_count();
+			return data_meta_type::field_count();
 		}
 		component_data_field_type field_type(uint32_t aFieldIndex) const override
 		{
-			return meta_data_type::field_type(aFieldIndex);
+			return data_meta_type::field_type(aFieldIndex);
 		}
 		neolib::uuid field_type_id(uint32_t aFieldIndex) const override
 		{
-			return meta_data_type::field_type_id(aFieldIndex);
+			return data_meta_type::field_type_id(aFieldIndex);
 		}
 		const neolib::i_string& field_name(uint32_t aFieldIndex) const override
 		{
-			return meta_data_type::field_name(aFieldIndex);
+			return data_meta_type::field_name(aFieldIndex);
 		}
 	public:
 		const component_data_t& component_data() const
@@ -155,7 +155,7 @@ namespace neogfx::game
 		typedef static_component_base<Data, i_component> base_type;
 	public:
 		typedef typename base_type::data_type data_type;
-		typedef typename base_type::meta_data_type meta_data_type;
+		typedef typename base_type::data_meta_type data_meta_type;
 		typedef typename base_type::value_type value_type;
 		typedef typename base_type::component_data_t component_data_t;
 		typedef std::vector<entity_id> component_data_index_t;
@@ -186,20 +186,30 @@ namespace neogfx::game
 		{
 			return iReverseIndex;
 		}
-		bool have_entity_record(entity_id aEntity) const
+		bool has_entity_record(entity_id aEntity) const override
 		{
 			return reverse_index()[aEntity] != invalid;
 		}
 		const data_type& entity_record(entity_id aEntity) const
 		{
 			auto reverseIndex = reverse_index()[aEntity];
-			if (reverseIndex != invalid)
-				return base_type::component_data()[reverseIndex];
-			throw entity_record_not_found();
+			if (reverseIndex == invalid)
+				throw entity_record_not_found();
+			return base_type::component_data()[reverseIndex];
 		}
 		value_type& entity_record(entity_id aEntity)
 		{
 			return const_cast<value_type&>(const_cast<const self_type*>(this)->entity_record(aEntity));
+		}
+		void destroy_entity_record(entity_id aEntity) override
+		{
+			auto& reverseIndex = reverse_index()[aEntity];
+			if (reverseIndex == invalid)
+				throw entity_record_not_found();
+			if constexpr (data_meta_type::has_handles)
+				data_meta_type::free_handles(base_type::component_data()[reverseIndex], ecs());
+			index()[reverseIndex] = null_entity;
+			reverseIndex = invalid;
 		}
 		value_type& populate(entity_id aEntity, const value_type& aData)
 		{
@@ -236,7 +246,7 @@ namespace neogfx::game
 		template <typename T>
 		value_type& do_populate(entity_id aEntity, T&& aComponentData)
 		{
-			if (have_entity_record(aEntity))
+			if (has_entity_record(aEntity))
 				return do_update(aEntity, aComponentData);
 			base_type::component_data().push_back(std::forward<T>(aComponentData));
 			try
@@ -287,7 +297,7 @@ namespace neogfx::game
 		typedef static_component_base<shared<Data>, i_shared_component> base_type;
 	public:
 		typedef typename base_type::data_type data_type;
-		typedef typename base_type::meta_data_type meta_data_type;
+		typedef typename base_type::data_meta_type data_meta_type;
 		typedef typename base_type::value_type value_type;
 		typedef typename base_type::component_data_t component_data_t;
 		typedef typename component_data_t::mapped_type mapped_type;

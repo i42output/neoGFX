@@ -125,7 +125,7 @@ namespace neogfx::game
 			static constexpr bool has_updater = true;
 			static void update(const text_mesh& aData, i_ecs& aEcs, entity_id aEntity)
 			{
-				auto& m = aEcs.component<mesh>().have_entity_record(aEntity) ?
+				auto& m = aEcs.component<mesh>().has_entity_record(aEntity) ?
 					aEcs.component<mesh>().entity_record(aEntity) :
 					aEcs.component<mesh>().populate(aEntity, mesh
 						{

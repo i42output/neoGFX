@@ -27,6 +27,8 @@ namespace neogfx::game
 {
 	class ecs : public object<i_ecs>
 	{
+	private:
+		typedef std::vector<handle_t> handles_t;
 	public:
 		ecs(ecs_flags aCreationFlags = ecs_flags::PopulateEntityInfo);
 	public:
@@ -74,6 +76,14 @@ namespace neogfx::game
 		bool system_registered(system_id aSystemId) const override;
 		void register_system(system_id aSystemId, system_factory aFactory) override;
 	public:
+		handle_t to_handle(handle_id aId) const override;
+		handle_id add_handle(const std::type_info& aTypeInfo, handle_t aHandle) override;
+		handle_t update_handle(handle_id aId, const std::type_info& aTypeInfo, handle_t aHandle) override;
+		handle_t release_handle(handle_id aId) override;
+	private:
+		handle_id next_handle_id();
+		void free_handle_id(handle_id aId);
+	public:
 		using i_ecs::create_entity;
 	public:
 		using i_ecs::populate;
@@ -102,5 +112,8 @@ namespace neogfx::game
 		mutable systems_t iSystems;
 		entity_id iNextEntityId;
 		std::vector<entity_id> iFreedEntityIds;
+		handle_id iNextHandleId;
+		std::vector<handle_id> iFreedHandleIds;
+		handles_t iHandles;
 	};
 }

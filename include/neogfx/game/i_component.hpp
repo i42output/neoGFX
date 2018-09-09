@@ -57,6 +57,9 @@ namespace neogfx::game
 	class i_component : public i_component_base
 	{
 	public:
+		virtual bool has_entity_record(entity_id aEntity) const = 0;
+		virtual void destroy_entity_record(entity_id aEntity) = 0;
+	public:
 		virtual void* populate(entity_id aEntity, const void* aComponentData, std::size_t aComponentDataSize) = 0;
 		template <typename ComponentData>
 		void* populate(entity_id aEntity, ComponentData&& aComponentData)

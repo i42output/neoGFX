@@ -1821,7 +1821,7 @@ namespace neogfx
 								has_focus() ? 
 									app::instance().current_style().palette().selection_colour() : 
 									app::instance().current_style().palette().selection_colour().with_alpha(64));
-						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect::Outline)
+						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect_type::Outline)
 							outlineAdjust = std::max(outlineAdjust, style.text_effect()->width());
 						break;
 					case 1:
