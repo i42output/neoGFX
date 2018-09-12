@@ -48,14 +48,14 @@ Message Box               | 100     |
 Menu                      | 100     | 
 Nested windows            | 25      |     
 MDI                       | 0       |
-Tabs                      | 90      |     Tabs below and on the side
+Tabs                      | 95      |     Vertical tabs
 Toolbars                  | 90      |     Drop-down button support
 Layout Managers           | 95      |     Need to fully support size policies
 Label                     | 100     |     
 Button                    | 100     |     
 Table View                | 85      |     Selection; icon; cell widget; cell check box
 Tree View                 | 0       |
-List View                 | 75      |
+List View                 | 85      |
 Text Edit                 | 85      |     Columns; rich text (HTML); undo/redo; performance optimization
 Line Edit                 | 100     |     
 Spin Box                  | 100     |
@@ -66,7 +66,7 @@ Combo Box                 | 95      |     Glob and regex filters; review UX.
 Group Box                 | 100     |
 Tool Tips                 | 0       |
 Status Bar                | 100     |
-Font Picker               | 25      |
+Font Picker               | 100     |
 Colour Gradient Selector  | 100     |
 Colour Picker             | 100     |
 File Browsers (Native)    | 0       |
@@ -76,4 +76,4 @@ i18n                      | 0       |
 l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
-Last updated: 13/05/2018
+Last updated: 13/09/2018
