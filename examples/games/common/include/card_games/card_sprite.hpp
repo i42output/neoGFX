@@ -101,11 +101,11 @@ namespace neogames
 				}
 				{
 					neogfx::scoped_faces sf{ *this, faces().begin() + iCardBackgroundFaces, faces().begin() + iCardValueFaces };
-					aGraphicsContext.draw_textures(*this, textures(), iCard == card_type::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
+					aGraphicsContext.draw_texture(*this, textures(), iCard == card_type::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
 				}
 				{
 					neogfx::scoped_faces sf{ *this, faces().begin() + iCardValueFaces, faces().end() };
-					aGraphicsContext.draw_textures(*this, textures());
+					aGraphicsContext.draw_texture(*this, textures());
 				}
 			}
 		private:

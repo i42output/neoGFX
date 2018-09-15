@@ -38,6 +38,7 @@
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
+#include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
 
 namespace neogfx
@@ -168,6 +169,8 @@ namespace neogfx
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		// implementation
 		// from i_device_metrics
 	public:

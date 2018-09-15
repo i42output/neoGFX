@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/graphics_operations.hpp>
+#include "native/i_native_texture.hpp"
 
 namespace neogfx
 {
@@ -64,7 +65,7 @@ namespace neogfx
 			case FillPath: return "FillPath";
 			case FillShape: return "FillShape";
 			case DrawGlyph: return "DrawGlyph";
-			case DrawTextures: return "DrawTextures";
+			case DrawTexture: return "DrawTexture";
 			default: return "";
 			}
 		}
@@ -77,7 +78,7 @@ namespace neogfx
 			{
 			case operation_type::SetPixel:
 			case operation_type::DrawPixel:
-			case operation_type::DrawTextures:
+			case operation_type::DrawTexture:
 				return true;
 			case operation_type::DrawLine:
 			{

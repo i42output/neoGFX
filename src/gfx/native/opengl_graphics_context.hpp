@@ -96,16 +96,17 @@ namespace neogfx
 		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle);
 		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen);
 		void draw_path(const path& aPath, const pen& aPen);
-		void draw_shape(const i_mesh& aMesh, const pen& aPen);
+		void draw_shape(const game::mesh& aMesh, const pen& aPen);
 		void fill_rect(const rect& aRect, const brush& aFill);
 		void fill_rect(const graphics_operation::batch& aFillRectOps);
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill);
 		void fill_circle(const point& aCentre, dimension aRadius, const brush& aFill);
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill);
 		void fill_path(const path& aPath, const brush& aFill);
+		void fill_shape(const game::mesh& aMesh, const brush& aFill);
 		void fill_shape(const graphics_operation::batch& aFillShapeOps);
 		void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
-		void draw_textures(const i_mesh& aMesh, const optional_colour& aColour, shader_effect aShaderEffect);
+		void draw_texture(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect);
 	private:
 		std::size_t max_operations(const graphics_operation::operation& aOperation);
 		void apply_scissor();

@@ -27,6 +27,7 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/game/mesh.hpp>
+#include <neogfx/game/material.hpp>
 
 namespace neogfx
 {
@@ -221,10 +222,10 @@ namespace neogfx
 			text_appearance appearance;
 		};
 
-		struct draw_textures
+		struct draw_texture
 		{
 			game::mesh mesh;
-			optional_colour colour;
+			game::material material;
 			shader_effect shaderEffect;
 		};
 
@@ -262,7 +263,7 @@ namespace neogfx
 			fill_path,
 			fill_shape,
 			draw_glyph,
-			draw_textures
+			draw_texture
 		> operation;
 
 		enum operation_type

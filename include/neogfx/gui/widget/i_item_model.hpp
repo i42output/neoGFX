@@ -23,6 +23,7 @@
 #include <boost/format.hpp>
 #include <neolib/variant.hpp>
 #include <neolib/generic_iterator.hpp>
+#include <neogfx/core/i_property.hpp>
 #include "item_index.hpp"
 
 namespace neogfx
@@ -47,7 +48,6 @@ namespace neogfx
 	enum item_cell_data_type
 	{
 		Unknown,
-		Custom,
 		Bool,
 		Int32,
 		UInt32,
@@ -56,7 +56,8 @@ namespace neogfx
 		Float,
 		Double,
 		String,
-		ChoiceCustom,
+		Pointer,
+		CustomType,
 		ChoiceBool,
 		ChoiceInt32,
 		ChoiceUInt32,
@@ -64,7 +65,9 @@ namespace neogfx
 		ChoiceUInt16,
 		ChoiceFloat,
 		ChoiceDouble,
-		ChoiceString
+		ChoiceString,
+		ChoicePointer,
+		ChoiceCustomType
 	};
 
 	template <typename T>
@@ -76,7 +79,6 @@ namespace neogfx
 	};
 
 	typedef neolib::variant<
-		void*,
 		bool,
 		int32_t,
 		uint32_t,
@@ -85,7 +87,8 @@ namespace neogfx
 		float,
 		double,
 		std::string,
-		item_cell_choice_type<void*>::type::const_iterator,
+		void*,
+		custom_type,
 		item_cell_choice_type<bool>::type::const_iterator,
 		item_cell_choice_type<int32_t>::type::const_iterator,
 		item_cell_choice_type<uint32_t>::type::const_iterator,
@@ -93,18 +96,21 @@ namespace neogfx
 		item_cell_choice_type<uint64_t>::type::const_iterator,
 		item_cell_choice_type<float>::type::const_iterator,
 		item_cell_choice_type<double>::type::const_iterator,
-		item_cell_choice_type<std::string>::type::const_iterator> item_cell_data_variant;
+		item_cell_choice_type<std::string>::type::const_iterator,
+		item_cell_choice_type<void*>::type::const_iterator,
+		item_cell_choice_type<custom_type>::type::const_iterator> item_cell_data_variant;
 
 	enum class item_cell_data_category
 	{
 		Invalid,
-		Pointer,
 		Value,
+		Pointer,
+		CustomType,
+		ChooseValue,
 		ChoosePointer,
-		ChooseValue
+		ChooseCustomType
 	};
 	template <typename T> struct classify_item_call_data { static constexpr item_cell_data_category category = item_cell_data_category::Invalid; };
-	template <> struct classify_item_call_data<void*> { static constexpr item_cell_data_category category = item_cell_data_category::Pointer; };
 	template <> struct classify_item_call_data<bool> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
 	template <> struct classify_item_call_data<int32_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
 	template <> struct classify_item_call_data<uint32_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
@@ -113,7 +119,8 @@ namespace neogfx
 	template <> struct classify_item_call_data<float> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
 	template <> struct classify_item_call_data<double> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
 	template <> struct classify_item_call_data<std::string> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
-	template <> struct classify_item_call_data<item_cell_choice_type<void*>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChoosePointer; };
+	template <> struct classify_item_call_data<void*> { static constexpr item_cell_data_category category = item_cell_data_category::Pointer; };
+	template <> struct classify_item_call_data<custom_type> { static constexpr item_cell_data_category category = item_cell_data_category::CustomType; };
 	template <> struct classify_item_call_data<item_cell_choice_type<bool>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
 	template <> struct classify_item_call_data<item_cell_choice_type<int32_t>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
 	template <> struct classify_item_call_data<item_cell_choice_type<uint32_t>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
@@ -122,6 +129,8 @@ namespace neogfx
 	template <> struct classify_item_call_data<item_cell_choice_type<float>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
 	template <> struct classify_item_call_data<item_cell_choice_type<double>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
 	template <> struct classify_item_call_data<item_cell_choice_type<std::string>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+	template <> struct classify_item_call_data<item_cell_choice_type<void*>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChoosePointer; };
+	template <> struct classify_item_call_data<item_cell_choice_type<custom_type>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseCustomType; };
 
 	class item_cell_data : public item_cell_data_variant
 	{

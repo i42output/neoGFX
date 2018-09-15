@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <type_traits>
 #include <any>
 #include <neolib/variant.hpp>
 #include <neogfx/core/event.hpp>
@@ -33,7 +34,82 @@ namespace neogfx
 	class custom_type : public std::any
 	{
 	public:
-		using any::any;
+		custom_type() : ptr{ &custom_type::do_ptr<void> } 
+		{
+		}
+		custom_type(const custom_type& aOther) : std::any{ aOther }, ptr{ aOther.ptr }
+		{
+		}
+		custom_type(custom_type&& aOther) : std::any{ std::move(aOther) }, ptr{ aOther.ptr }
+		{
+			aOther.ptr = &custom_type::do_ptr<void>;
+		}
+		template <typename ValueType>
+		custom_type(ValueType&& aValue) : std::any{ std::forward<ValueType>(aValue) }, ptr{ &custom_type::do_ptr<typename std::remove_reference<ValueType>::type> }
+		{
+		}
+	public:
+		custom_type& operator=(const custom_type& aRhs)
+		{
+			std::any::operator=(aRhs);
+			ptr = aRhs.ptr;
+			return *this;
+		}
+		custom_type& operator=(custom_type&& aRhs)
+		{
+			std::any::operator=(std::move(aRhs));
+			ptr = aRhs.ptr;
+			aRhs.ptr = &custom_type::do_ptr<void>;
+			return *this;
+		}
+		template<typename ValueType>
+		custom_type& operator=(ValueType&& aRhs)
+		{
+			std::any::operator=(std::forward<ValueType>(aRhs));
+			ptr = &custom_type::do_ptr<typename std::remove_reference<ValueType>::type>;
+			return *this;
+		}
+	public:
+		template<class ValueType, class... Args >
+		std::decay_t<ValueType>& emplace(Args&&... args)
+		{
+			auto& result = std::any::emplace<ValueType>(std::forward<Args...>(args...));
+			ptr = &custom_type::do_ptr<typename std::remove_reference<ValueType>::type>;
+			return result;
+		}
+		template<class ValueType, class U, class... Args >
+		std::decay_t<ValueType>& emplace(std::initializer_list<U> il, Args&&... args)
+		{
+			auto& result = std::any::emplace<ValueType>(il, std::forward<Args...>(args...));
+			ptr = &custom_type::do_ptr<typename std::remove_reference<ValueType>::type>;
+			return result;
+		}
+		void reset()
+		{
+			std::any::reset();
+			ptr = &custom_type::do_ptr<void>;
+		}
+	public:
+		bool operator==(const custom_type& aOther) const
+		{
+			return ptr(*this) == aOther.ptr(aOther);
+		}
+		bool operator!=(const custom_type& aOther) const
+		{
+			return ptr(*this) != aOther.ptr(aOther);
+		}
+		bool operator<(const custom_type& aOther) const
+		{
+			return ptr(*this) < aOther.ptr(aOther);
+		}
+	private:
+		template <typename T>
+		static const void* do_ptr(const custom_type& aArg)
+		{
+			return std::any_cast<const T*>(&aArg);
+		}
+	private:
+		const void*(*ptr)(const custom_type&);
 	};
 
 	typedef neolib::variant<
@@ -60,11 +136,11 @@ namespace neogfx
 		{
 		}
 		property_variant(const property_variant& other) :
-			variant_t{ other }
+			variant_t{ static_cast<const variant_t&>(other) }
 		{
 		}
 		property_variant(property_variant&& other) :
-			variant_t{ std::move(other) }
+			variant_t{ static_cast<variant_t&&>(std::move(other)) }
 		{
 		}
 		template <typename T>

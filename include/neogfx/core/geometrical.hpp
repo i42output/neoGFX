@@ -363,6 +363,22 @@ namespace neogfx
 	}
 
 	template <typename CoordinateType>
+	inline basic_point<CoordinateType> operator*(const basic_point<CoordinateType>& left, const basic_delta<CoordinateType>& right)
+	{
+		basic_point<CoordinateType> ret = left;
+		ret *= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_delta<CoordinateType> operator/(const basic_point<CoordinateType>& left, const basic_delta<CoordinateType>& right)
+	{
+		basic_point<CoordinateType> ret = left;
+		ret /= right;
+		return basic_delta<CoordinateType>(ret.x, ret.y);
+	}
+
+	template <typename CoordinateType>
 	inline basic_point<CoordinateType> operator+(const basic_point<CoordinateType>& left, const basic_size<CoordinateType>& right)
 	{
 		basic_point<CoordinateType> ret = left;
@@ -375,6 +391,22 @@ namespace neogfx
 	{
 		basic_point<CoordinateType> ret = left;
 		ret -= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_point<CoordinateType> operator*(const basic_point<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		basic_point<CoordinateType> ret = left;
+		ret *= right;
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_point<CoordinateType> operator/(const basic_point<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		basic_point<CoordinateType> ret = left;
+		ret /= right;
 		return ret;
 	}
 

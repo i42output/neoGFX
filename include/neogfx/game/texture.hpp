@@ -103,6 +103,15 @@ namespace neogfx::game
 				};
 				return sFieldNames[aFieldIndex];
 			}
+			static constexpr bool has_handles = true;
+			static void free_handles(texture& aData, i_ecs& aEcs)
+			{
+				if (aData.id != null_id)
+				{
+					(void)aEcs; // todo
+					aData.id = null_id;
+				}
+			}
 		};
 	};
 }

@@ -35,7 +35,7 @@ namespace neogfx::game
 	{
 		std::optional<colour> colour;
 		std::optional<gradient> gradient;
-		std::optional<texture> texture;
+		std::optional<shared<texture>> texture;
 
 		struct meta : i_component_data::meta
 		{
@@ -59,8 +59,9 @@ namespace neogfx::game
 				{
 				case 0:
 				case 1:
-				case 2:
 					return component_data_field_type::ComponentData | component_data_field_type::Optional;
+				case 2:
+					return component_data_field_type::ComponentData | component_data_field_type::Optional | component_data_field_type::Shared;
 				default:
 					throw invalid_field_index();
 				}

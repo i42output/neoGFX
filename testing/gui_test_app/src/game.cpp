@@ -10,7 +10,7 @@
 #include <neogfx/game/ecs_canvas.hpp>
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/sprite.hpp>
-#include <neogfx/game/text.hpp>
+#include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/collider.hpp>
 
 namespace ng = neogfx;

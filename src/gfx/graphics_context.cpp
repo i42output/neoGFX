@@ -950,17 +950,12 @@ namespace neogfx
 		vec2 extents = aRect.extents().to_vec2();
 		vec2 offset = extents / 2.0;
 		vec3 centre = vec3{ aRect.x, aRect.y, 0.0 } + vec3{ offset.x, offset.y, 0.0 };
-		draw_texture(rectangle{ centre, extents }, aTexture, aColour, aShaderEffect);
-	}
-
-	void graphics_context::draw_texture(const i_shape& aShape, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
-	{
-		draw_texture(aShape, aTexture, rect{ point{ 0.0, 0.0 }, aTexture.extents() }, aColour, aShaderEffect);
+		draw_texture(rect_to_mesh(aRect), aTexture, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, aTextureRect, aColour, aShaderEffect);
+		draw_texture(rect{ aPoint, aTextureRect.extents() }, aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
@@ -968,26 +963,34 @@ namespace neogfx
 		vec2 extents = aRect.extents().to_vec2();
 		vec2 offset = extents / 2.0;
 		vec3 centre = vec3{ aRect.x, aRect.y, 0.0 } + vec3{ offset.x, offset.y, 0.0 };
-		draw_texture(rectangle{ centre, extents }, aTexture, aTextureRect, aColour, aShaderEffect);
+		draw_texture(rect_to_mesh(aRect), aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_texture(const i_shape& aShape, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
-	{
-		draw_textures(aShape, to_texture_list_pointer(aTexture, aTextureRect), aColour, aShaderEffect);
-	}
-
-	void graphics_context::draw_textures(const i_shape& aShape, texture_list_pointer aTextures, const optional_colour& aColour, shader_effect aShaderEffect) const
+	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-		neogfx::mesh mesh{
-			aShape,
-			mat44{
+		neogfx::mesh ajustedMesh *
+			aMesh * mat44{
 				{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
 				{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
 				{ 0.0, 0.0, 1.0, 0.0 },
-				{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } };
-		mesh.set_textures(aTextures);
-		native_context().enqueue(graphics_operation::draw_textures{mesh,	aColour, aShaderEffect});	
+				{ iOrigin.x, iOrigin.y, 0.0, 1.0 } };
+		native_context().enqueue(graphics_operation::draw_texture{ 
+			adjustedMesh, 
+			game::material
+			{ 
+				aColour != std::nullopt ? , 
+				{}, aTexture 
+			}, 
+			aShaderEffect });
+	}
+
+	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
+	{
+		auto adjustedMesh = aMesh;
+		for (auto& uv : adjustedMesh.uv)
+			uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv * (aTextureRect.extents() / aTexture.extents()).to_vec2();
+		draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
 	}
 
 	class graphics_context::glyph_shapes

@@ -80,23 +80,7 @@ namespace neogfx::game
 			static void update(const rectangle& aData, i_ecs& aEcs, entity_id aEntity)
 			{
 				using neogfx::game::material;
-				auto& m = aEcs.component<mesh>().has_entity_record(aEntity) ?
-					aEcs.component<mesh>().entity_record(aEntity) :
-					aEcs.component<mesh>().populate(aEntity, mesh
-						{
-							{},
-						{
-							vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
-							vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }
-						},
-						{
-							face{ 0u, 1u, 2u },
-							face{ 3u, 4u, 5u }
-						}
-						});
-				// todo: outline support
-				m.vertices = rect_vertices(rect{ point{ aData.position }, size{ aData.extents } }, 0, rect_type::FilledTriangles);
-				aEcs.component<mesh>().populate(aEntity, m);
+				aEcs.component<mesh>().populate(aEntity, rect_to_mesh(rect{ point{~aData.position.xy - aData.extents / 2.0 }, size{aData.extents} }));
 				aEcs.component<material>().populate(aEntity, aData.material);
 			}
 		};
