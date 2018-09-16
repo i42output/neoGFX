@@ -31,37 +31,18 @@
 
 namespace neogfx
 {
-	class custom_type;
-}
-
-namespace std
-{
-	template<class T>
-	inline T any_cast(const neogfx::custom_type& operand);
-	template<class T>
-	inline T any_cast(neogfx::custom_type& operand);
-	template<class T>
-	inline T any_cast(neogfx::custom_type&& operand);
-	template<class T>
-	inline const T* any_cast(const neogfx::custom_type* operand) noexcept;
-	template<class T>
-	inline T* any_cast(neogfx::custom_type* operand) noexcept;
-}
-
-namespace neogfx
-{
 	class custom_type : private std::any
 	{
 		template<class T>
-		friend T std::any_cast(const custom_type& operand);
+		friend T any_cast(const custom_type& operand);
 		template<class T>
-		friend T std::any_cast(custom_type& operand);
+		friend T any_cast(custom_type& operand);
 		template<class T>
-		friend T std::any_cast(custom_type&& operand);
+		friend T any_cast(custom_type&& operand);
 		template<class T>
-		friend const T* std::any_cast(const custom_type* operand) noexcept;
+		friend const T* any_cast(const custom_type* operand) noexcept;
 		template<class T>
-		friend T* std::any_cast(custom_type* operand) noexcept;
+		friend T* any_cast(custom_type* operand) noexcept;
 	public:
 		custom_type() : ptr{ &custom_type::do_ptr<void> } 
 		{
@@ -154,9 +135,40 @@ namespace neogfx
 			return std::any_cast<const T*>(&aArg);
 		}
 	private:
-	private:
 		const void*(*ptr)(const custom_type&);
 	};
+
+	inline void swap(custom_type& aLhs, custom_type& aRhs)
+	{
+		aLhs.swap(aRhs);
+	}
+
+	template<class T>
+	inline T any_cast(const custom_type& operand)
+	{
+		return std::any_cast<T>(operand.as_any());
+	}
+	template<class T>
+	inline T any_cast(custom_type& operand)
+	{
+		return std::any_cast<T>(operand.as_any());
+	}
+	template<class T>
+	inline T any_cast(custom_type&& operand)
+	{
+		return std::any_cast<T>(std::move(operand.as_any()));
+	}
+	template<class T>
+	inline const T* any_cast(const custom_type* operand) noexcept
+	{
+		return std::any_cast<const T*>(&operand->as_any());
+	}
+	template<class T>
+	inline T* any_cast(custom_type* operand) noexcept
+	{
+		return std::any_cast<T*>(&operand->as_any());
+	}
+
 
 	typedef neolib::variant<
 		void*,
@@ -218,31 +230,3 @@ namespace neogfx
 	};
 }
 
-namespace std
-{
-	template<class T>
-	inline T any_cast(const neogfx::custom_type& operand)
-	{
-		return any_cast<T>(operand.as_any());
-	}
-	template<class T>
-	inline T any_cast(neogfx::custom_type& operand)
-	{
-		return any_cast<T>(operand.as_any());
-	}
-	template<class T>
-	inline T any_cast(neogfx::custom_type&& operand)
-	{
-		return any_cast<T>(std::move(operand.as_any()));
-	}
-	template<class T>
-	inline const T* any_cast(const neogfx::custom_type* operand) noexcept
-	{
-		return any_cast<const T*>(&operand->as_any());
-	}
-	template<class T>
-	inline T* any_cast(neogfx::custom_type* operand) noexcept
-	{
-		return any_cast<T*>(&operand->as_any());
-	}
-}
