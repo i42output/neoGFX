@@ -22,6 +22,7 @@
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/game/shape_factory.hpp>
 #include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
@@ -98,7 +99,7 @@ namespace neogfx
 
 		inline std::size_t scanline_offsets(const text_effect& aEffect)
 		{
-			if (aEffect.type() != text_effect::Outline)
+			if (aEffect.type() != text_effect_type::Outline)
 				return 1u;
 			else
 				return static_cast<std::size_t>(aEffect.width() * 2.0 + 1.0);
@@ -928,7 +929,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : rect{ aFrom, aTo });
+			gradient_on(gradient, rect{ aFrom, aTo });
 		}
 
 		double pixelAdjust = pixel_adjust(aPen);
@@ -957,7 +958,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : aRect);
+			gradient_on(gradient, aRect);
 		}
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));

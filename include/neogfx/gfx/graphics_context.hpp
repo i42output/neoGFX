@@ -123,12 +123,15 @@ namespace neogfx
 		void draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, const brush& aFill = brush{}, angle aStartAngle = 0.0) const;
 		void draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const;
 		void draw_path(const path& aPath, const pen& aPen, const brush& aFill = brush{}) const;
+		void draw_shape(const game::mesh& aShape, const pen& aPen, const brush& aFill = brush{}) const;
+		void draw_entity(const game::i_ecs& aEcs, game::entity_id aEntity) const;
 		void draw_focus_rect(const rect& aRect) const;
 		void fill_rect(const rect& aRect, const brush& aFill) const;
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const;
 		void fill_circle(const point& aCentre, dimension aRadius, const brush& aFill) const;
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const;
 		void fill_path(const path& aPath, const brush& aFill) const;
+		void fill_shape(const game::mesh& aShape, const brush& aFill) const;
 		size text_extent(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		size multiline_text_extent(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;

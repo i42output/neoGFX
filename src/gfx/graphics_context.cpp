@@ -305,21 +305,34 @@ namespace neogfx
 		native_context().enqueue(graphics_operation::draw_path{ path, aPen });
 	}
 
-	void graphics_context::draw_shape(const i_shape& aShape, const pen& aPen, const brush& aFill) const
+	void graphics_context::draw_shape(const game::mesh& aShape, const pen& aPen, const brush& aFill) const
 	{
 		if (aFill != neolib::none)
 			fill_shape(aShape, aFill);
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
 		native_context().enqueue(
 			graphics_operation::draw_shape{
-				mesh{ 
-					aShape, 
-					mat44{ 
-						{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
-						{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
-						{ 0.0, 0.0, 1.0, 0.0 }, 
-						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },
+				aShape * mat44{ 
+					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+					{ 0.0, 0.0, 1.0, 0.0 }, 
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
 				aPen });
+	}
+
+	void graphics_context::draw_entity(const game::i_ecs& aEcs, game::entity_id aEntity) const
+	{
+		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+		native_context().enqueue(
+			graphics_operation::draw_entity{ 
+				aEcs, 
+				aEntity,
+				mat44{
+					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+					{ 0.0, 0.0, 1.0, 0.0 },
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } }
+				});
 	}
 
 	void graphics_context::draw_focus_rect(const rect& aRect) const
@@ -358,18 +371,16 @@ namespace neogfx
 		native_context().enqueue(graphics_operation::fill_path{ path, aFill });
 	}
 
-	void graphics_context::fill_shape(const i_shape& aShape, const brush& aFill) const
+	void graphics_context::fill_shape(const game::mesh& aShape, const brush& aFill) const
 	{
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
 		native_context().enqueue(
 			graphics_operation::fill_shape{
-				mesh{ 
-					aShape, 
-					mat44{ 
-						{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
-						{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
-						{ 0.0, 0.0, 1.0, 0.0 }, 
-						{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } },
+				aShape * mat44{ 
+					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+					{ 0.0, 0.0, 1.0, 0.0 }, 
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
 				aFill });
 	}
 
@@ -969,14 +980,12 @@ namespace neogfx
 	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-		neogfx::mesh ajustedMesh *
+		native_context().enqueue(graphics_operation::draw_texture{ 
 			aMesh * mat44{
 				{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
 				{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
 				{ 0.0, 0.0, 1.0, 0.0 },
-				{ iOrigin.x, iOrigin.y, 0.0, 1.0 } };
-		native_context().enqueue(graphics_operation::draw_texture{ 
-			adjustedMesh, 
+				{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
 			game::material
 			{ 
 				aColour != std::nullopt ? , 
