@@ -31,8 +31,37 @@
 
 namespace neogfx
 {
-	class custom_type : public std::any
+	class custom_type;
+}
+
+namespace std
+{
+	template<class T>
+	inline T any_cast(const neogfx::custom_type& operand);
+	template<class T>
+	inline T any_cast(neogfx::custom_type& operand);
+	template<class T>
+	inline T any_cast(neogfx::custom_type&& operand);
+	template<class T>
+	inline const T* any_cast(const neogfx::custom_type* operand) noexcept;
+	template<class T>
+	inline T* any_cast(neogfx::custom_type* operand) noexcept;
+}
+
+namespace neogfx
+{
+	class custom_type : private std::any
 	{
+		template<class T>
+		friend T std::any_cast(const custom_type& operand);
+		template<class T>
+		friend T std::any_cast(custom_type& operand);
+		template<class T>
+		friend T std::any_cast(custom_type&& operand);
+		template<class T>
+		friend const T* std::any_cast(const custom_type* operand) noexcept;
+		template<class T>
+		friend T* std::any_cast(custom_type* operand) noexcept;
 	public:
 		custom_type() : ptr{ &custom_type::do_ptr<void> } 
 		{
@@ -89,6 +118,14 @@ namespace neogfx
 			std::any::reset();
 			ptr = &custom_type::do_ptr<void>;
 		}
+		void swap(custom_type& aOther)
+		{
+			std::any::swap(aOther);
+			std::swap(ptr, aOther.ptr);
+		}
+	public:
+		using std::any::has_value;
+		using std::any::type;
 	public:
 		bool operator==(const custom_type& aOther) const
 		{
@@ -103,11 +140,20 @@ namespace neogfx
 			return ptr(*this) < aOther.ptr(aOther);
 		}
 	private:
+		const std::any& as_any() const
+		{
+			return *this;
+		}
+		std::any& as_any()
+		{
+			return *this;
+		}
 		template <typename T>
 		static const void* do_ptr(const custom_type& aArg)
 		{
 			return std::any_cast<const T*>(&aArg);
 		}
+	private:
 	private:
 		const void*(*ptr)(const custom_type&);
 	};
@@ -170,4 +216,33 @@ namespace neogfx
 		virtual property_variant get() const = 0;
 		virtual void set(const property_variant& aValue) = 0;
 	};
+}
+
+namespace std
+{
+	template<class T>
+	inline T any_cast(const neogfx::custom_type& operand)
+	{
+		return any_cast<T>(operand.as_any());
+	}
+	template<class T>
+	inline T any_cast(neogfx::custom_type& operand)
+	{
+		return any_cast<T>(operand.as_any());
+	}
+	template<class T>
+	inline T any_cast(neogfx::custom_type&& operand)
+	{
+		return any_cast<T>(std::move(operand.as_any()));
+	}
+	template<class T>
+	inline const T* any_cast(const neogfx::custom_type* operand) noexcept
+	{
+		return any_cast<const T*>(&operand->as_any());
+	}
+	template<class T>
+	inline T* any_cast(neogfx::custom_type* operand) noexcept
+	{
+		return any_cast<T*>(&operand->as_any());
+	}
 }
