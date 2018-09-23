@@ -198,9 +198,9 @@ namespace neogfx
 			colourStart = colourEnd.with_lightness(colourEnd.to_hsl().lightness() + colourOffset);
 		switch(iStyle)
 		{
-		case push_button_style::Normal:
-		case push_button_style::ButtonBox:
-		case push_button_style::ItemViewHeader:
+//		case push_button_style::Normal:
+//		case push_button_style::ButtonBox:
+//		case push_button_style::ItemViewHeader:
 		case push_button_style::Toolbar:
 		case push_button_style::TitleBar:
 			if (!spot_colour())
@@ -222,6 +222,9 @@ namespace neogfx
 				aGraphicsContext.fill_rect(outline.bounding_rect(), faceColour);
 			}
 			break;
+		case push_button_style::Normal:
+		case push_button_style::ButtonBox:
+		case push_button_style::ItemViewHeader:
 		case push_button_style::Tab:
 		case push_button_style::DropList:
 		case push_button_style::SpinBox:

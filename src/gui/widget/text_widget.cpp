@@ -111,7 +111,7 @@ namespace neogfx
 		}
 		auto appearance = text_appearance();
 		if (effectively_disabled())
-			appearance = appearance.with_alpha(static_cast<colour::component>(appearance.ink().alpha() / 2));
+			appearance = appearance.with_alpha(static_cast<colour::component>(appearance.ink().alpha() / 4));
 		if (multi_line())
 			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal, UseGlyphTextCache);
 		else
