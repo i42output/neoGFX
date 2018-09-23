@@ -607,9 +607,12 @@ namespace neogfx
 	void window::layout_items_completed()
 	{
 		scrollable_widget::layout_items_completed();
-		i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
-		if (iEnteredWidget != &widgetUnderMouse)
-			mouse_entered(mouse_position());
+		if (iEnteredWidget != nullptr)
+		{
+			i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
+			if (iEnteredWidget != &widgetUnderMouse)
+				mouse_entered(mouse_position());
+		}
 	}
 
 	bool window::device_metrics_available() const
