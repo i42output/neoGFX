@@ -196,6 +196,11 @@ namespace neogfx
 	{
 		return colour(red(), green(), blue(), static_cast<component>((alpha() / 255.0 * aNewValue / 255.0) * 255));
 	}
+	
+	colour colour::with_combined_alpha(double aCoefficient) const
+	{
+		return colour(red(), green(), blue(), static_cast<component>((alpha() / 255.0 * aCoefficient) * 255));
+	}
 
 	hsl_colour colour::to_hsl() const
 	{

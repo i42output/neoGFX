@@ -744,6 +744,7 @@ namespace neogfx
 		colour with_green(component aNewValue) const;
 		colour with_blue(component aNewValue) const;
 		colour with_combined_alpha(component aNewValue) const;
+		colour with_combined_alpha(double aCoefficient) const;
 		hsl_colour to_hsl() const;
 		hsv_colour to_hsv() const;
 		double intensity() const;

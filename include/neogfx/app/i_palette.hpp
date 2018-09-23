@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/colour.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
@@ -56,5 +57,33 @@ namespace neogfx
 		virtual bool has_widget_detail_secondary_colour() const = 0;
 		virtual neogfx::colour widget_detail_secondary_colour() const = 0;
 		virtual void set_widget_detail_secondary_colour(const optional_colour& aWidgetDetailSecondaryColour) = 0;
+		// helpers
+	public:
+		neogfx::colour text_colour_for_widget(const i_widget& aWidget) const
+		{
+			optional_colour textColour;
+			const i_widget* w = nullptr;
+			do
+			{
+				if (w == nullptr)
+					w = &aWidget;
+				else
+					w = &w->parent();
+				if (w->has_background_colour())
+				{
+					textColour = w->background_colour().luma() >= 0.5 ? colour::Black : colour::White;
+					break;
+				}
+				else if (w->has_foreground_colour())
+				{
+					textColour = w->foreground_colour().luma() >= 0.5 ? colour::Black : colour::White;
+					break;
+				}
+			} while (w->has_parent());
+			auto defaultTextColour = text_colour();
+			if (textColour == std::nullopt || textColour->similar_intensity(defaultTextColour))
+				textColour = defaultTextColour;
+			return *textColour;
+		}
 	};
 }

@@ -111,7 +111,7 @@ namespace neogfx
 		}
 		auto appearance = text_appearance();
 		if (effectively_disabled())
-			appearance = appearance.with_alpha(static_cast<colour::component>(appearance.ink().alpha() / 4));
+			appearance = appearance.with_alpha(static_cast<colour::component>(appearance.ink().alpha() * 0.25));
 		if (multi_line())
 			aGraphicsContext.draw_multiline_text(textPosition, text(), font(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal, UseGlyphTextCache);
 		else
@@ -208,29 +208,7 @@ namespace neogfx
 	{
 		if (has_text_colour())
 			return static_variant_cast<colour>(iTextAppearance->ink());
-		optional_colour textColour;
-		const i_widget* w = nullptr;
-		do
-		{
-			if (w == nullptr)
-				w = this;
-			else
-				w = &w->parent();
-			if (w->has_background_colour())
-			{
-				textColour = w->background_colour().luma() >= 0.5 ? colour::Black : colour::White;
-				break;
-			}
-			else if (w->has_foreground_colour())
-			{
-				textColour = w->foreground_colour().luma() >= 0.5 ? colour::Black : colour::White;
-				break;
-			}
-		} while (w->has_parent());
-		colour defaultTextColour = app::instance().current_style().palette().text_colour();
-		if (textColour == std::nullopt || textColour->similar_intensity(defaultTextColour))
-			textColour = defaultTextColour;
-		return *textColour;
+		return app::instance().current_style().palette().text_colour_for_widget(*this);
 	}
 
 	void text_widget::set_text_colour(const optional_colour& aTextColour)

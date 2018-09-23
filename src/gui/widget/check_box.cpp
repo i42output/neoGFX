@@ -36,7 +36,7 @@ namespace neogfx
 			return widget::minimum_size(aAvailableSpace);
 		scoped_units su{ *this, units::Pixels };
 		dimension length = std::ceil(units_converter(*this).from_device_units(static_cast<const check_box&>(parent()).text().font().height() * (2.0 / 3.0)));
-		length = std::max(length, std::ceil(as_units(*this, units::Millimetres, 3.0)));
+		length = std::max(length, std::ceil(as_units(*this, units::Millimetres, 3.5)));
 		return convert_units(*this, su.saved_units(), size(length, length));
 	}
 
@@ -49,6 +49,7 @@ namespace neogfx
 	{
 		scoped_units su{ *this, units::Pixels };
 		rect boxRect = client_rect();
+		auto enabledAlphaCoefficient = effectively_enabled() ? 1.0 : 0.25;
 		colour hoverColour = app::instance().current_style().palette().hover_colour().same_lightness_as(
 			background_colour().dark() ?
 				background_colour().lighter(0x20) :
@@ -56,23 +57,23 @@ namespace neogfx
 		if (parent().capturing())
 			background_colour().dark() ? hoverColour.lighten(0x20) : hoverColour.darken(0x20);
 		colour fillColour = parent().enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColour : background_colour();
-		aGraphicsContext.fill_rect(boxRect, fillColour.with_alpha(effectively_enabled() ? 0xFF : 0x80));
+		aGraphicsContext.fill_rect(boxRect, fillColour.with_combined_alpha(enabledAlphaCoefficient));
 		colour borderColour1 = container_background_colour().mid(container_background_colour().mid(background_colour()));
 		if (borderColour1.similar_intensity(container_background_colour(), 0.03125))
 			borderColour1.dark() ? borderColour1.lighten(0x40) : borderColour1.darken(0x40);
-		aGraphicsContext.draw_rect(boxRect, pen(borderColour1.with_alpha(effectively_enabled() ? 0xFF : 0x80), 1.0));
+		aGraphicsContext.draw_rect(boxRect, pen{ borderColour1.with_combined_alpha(enabledAlphaCoefficient), 1.0 });
 		boxRect.deflate(1.0, 1.0);
-		aGraphicsContext.draw_rect(boxRect, pen(borderColour1.mid(background_colour()).with_alpha(effectively_enabled() ? 0xFF : 0x80), 1.0));
+		aGraphicsContext.draw_rect(boxRect, pen{ borderColour1.mid(background_colour()).with_combined_alpha(enabledAlphaCoefficient), 1.0 });
 		boxRect.deflate(2.0, 2.0);
 		if (static_cast<const check_box&>(parent()).is_checked())
 		{
 			/* todo: draw tick image eye candy */
-			aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(app::instance().current_style().palette().widget_detail_primary_colour().with_alpha(effectively_enabled() ? 0xFF : 0x80), 2.0));
-			aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(app::instance().current_style().palette().widget_detail_primary_colour().with_alpha(effectively_enabled() ? 0xFF : 0x80), 2.0));
+			aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(app::instance().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
+			aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(app::instance().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
 		}
 		else if (static_cast<const check_box&>(parent()).is_indeterminate())
 		{
-			aGraphicsContext.fill_rect(boxRect, app::instance().current_style().palette().widget_detail_primary_colour().with_alpha(effectively_enabled() ? 0xFF : 0x80));
+			aGraphicsContext.fill_rect(boxRect, app::instance().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient));
 		}
 	}
 
