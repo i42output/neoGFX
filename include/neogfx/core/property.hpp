@@ -141,11 +141,14 @@ namespace neogfx
 			if constexpr (std::is_same_v<try_type, value_type>)
 				return do_assign(std::forward<T2>(aValue), aOwnerNotify);
 			else if constexpr (std::is_same_v<try_type, custom_type>)
-				return do_assign(std::any_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify)
+				return do_assign(neolib::any_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify);
 			else if constexpr (std::is_same_v<try_type, neolib::none_t>)
-				return do_assign(value_type{}, aOwnerNotify)
+			{
+				(void)aValue;
+				return do_assign(value_type{}, aOwnerNotify);
+			}
 			else if constexpr (std::is_arithmetic_v<value_type> && std::is_convertible_v<try_type, value_type> && std::is_integral_v<try_type> == std::is_integral_v<value_type>)
-				return do_assign(static_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify)
+				return do_assign(static_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify);
 			else
 			{
 				// [[unreachable]]

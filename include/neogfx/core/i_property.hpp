@@ -20,7 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <any>
+#include <type_traits>
+#include <neolib/any.hpp>
 #include <neolib/variant.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/geometrical.hpp>
@@ -30,11 +31,7 @@
 
 namespace neogfx
 {
-	class custom_type : public std::any
-	{
-	public:
-		using any::any;
-	};
+	typedef neolib::any custom_type;
 
 	typedef neolib::variant<
 		void*,
@@ -60,11 +57,11 @@ namespace neogfx
 		{
 		}
 		property_variant(const property_variant& other) :
-			variant_t{ other }
+			variant_t{ static_cast<const variant_t&>(other) }
 		{
 		}
 		property_variant(property_variant&& other) :
-			variant_t{ std::move(other) }
+			variant_t{ static_cast<variant_t&&>(std::move(other)) }
 		{
 		}
 		template <typename T>
@@ -95,3 +92,4 @@ namespace neogfx
 		virtual void set(const property_variant& aValue) = 0;
 	};
 }
+
