@@ -22,6 +22,7 @@
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/entity.hpp>
+#include <neogfx/game/shape_factory.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/font.hpp>
 

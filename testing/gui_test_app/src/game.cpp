@@ -132,7 +132,7 @@ void create_game(ng::i_layout& aLayout)
 	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
 	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 0.0 });
 
-	auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } } });
+	auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } } });
 	score->second.set_value("000000");
 	score->second.set_position(ng::vec3{ 0.0, 0.0, 1.0 });
 	auto positionScore = [&spritePlane, score]()
@@ -155,7 +155,7 @@ void create_game(ng::i_layout& aLayout)
 	{
 		create_target(spritePlane);
 	}
-	auto debugInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane.font().with_size(spritePlane.font().size() * 0.5), ng::text_appearance{ ng::colour::Orange.with_lightness(0.9), ng::text_effect{ ng::text_effect::Outline, ng::colour::Black } });
+	auto debugInfo = std::make_shared<ng::text>(spritePlane, ng::vec3{ 0.0, 132.0, 1.0 }, "", spritePlane.font().with_size(spritePlane.font().size() * 0.5), ng::text_appearance{ ng::colour::Orange.with_lightness(0.9), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
 	spritePlane.add_shape(debugInfo);
 	spritePlane.sprites_painted([&spritePlane](ng::graphics_context& aGraphicsContext)
 	{

@@ -629,7 +629,7 @@ namespace neogfx
 					for (auto op = opBatch.first; op != opBatch.second; ++op)
 					{
 						const auto& args = static_variant_cast<const graphics_operation::draw_texture&>(*op);
-						draw_texture(args.mesh, args.colour, args.shaderEffect);
+						draw_texture(args.mesh, args.material, args.shaderEffect);
 					}
 				}
 				break;
@@ -985,7 +985,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : aRect);
+			gradient_on(gradient, aRect);
 		}
 
 		double pixelAdjust = pixel_adjust(aPen);
@@ -1014,7 +1014,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
+			gradient_on(gradient, rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 		}
 
 		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, false);
@@ -1042,7 +1042,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
+			gradient_on(gradient, rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
 		}
 
 		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));;
@@ -1070,7 +1070,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : aPath.bounding_rect());
+			gradient_on(gradient, aPath.bounding_rect());
 		}
 
 		for (std::size_t i = 0; i < aPath.paths().size(); ++i)
@@ -1102,20 +1102,20 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::draw_shape(const i_mesh& aMesh, const pen& aPen)
+	void opengl_graphics_context::draw_shape(const game::mesh& aMesh, const pen& aPen)
 	{
-		auto tvs = aMesh.transformed_vertices();
+		auto const& vertices = aMesh.vertices;
 
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
-			gradient_on(gradient, gradient.rect() != std::nullopt ? *gradient.rect() : bounding_rect(tvs));
+			gradient_on(gradient, bounding_rect(aMesh));
 		}
 
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, tvs.size() };
-			for (const auto& v : tvs)
-				vertexArrays.push_back({ v.coordinates, std::holds_alternative<colour>(aPen.colour()) ?
+			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
+			for (const auto& v : vertices)
+				vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<colour>(aPen.colour()).red(),
 						static_variant_cast<colour>(aPen.colour()).green(),
@@ -1291,15 +1291,15 @@ namespace neogfx
 
 		if (std::holds_alternative<gradient>(firstOp.fill))
 		{
-			auto tvs = firstOp.mesh.transformed_vertices();
-			vec3 min = tvs[0].coordinates.xyz;
+			auto const& vertices = firstOp.mesh.vertices;
+			vec3 min = vertices[0].xyz;
 			vec3 max = min;
-			for (auto const& v : tvs)
+			for (auto const& v : vertices)
 			{
-				min.x = std::min(min.x, v.coordinates.x);
-				max.x = std::max(max.x, v.coordinates.x);
-				min.y = std::min(min.y, v.coordinates.y);
-				max.y = std::max(max.y, v.coordinates.y);
+				min.x = std::min(min.x, v.x);
+				max.x = std::max(max.x, v.x);
+				min.y = std::min(min.y, v.y);
+				max.y = std::max(max.y, v.y);
 			}
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill),
 				rect{
@@ -1312,14 +1312,15 @@ namespace neogfx
 			for (auto op = aFillShapeOps.first; op != aFillShapeOps.second; ++op)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(*op);
-				auto tvs = drawOp.mesh.transformed_vertices(); // todo: have vertex shader do this transformation
-				for (auto const& f : drawOp.mesh.faces())
+				auto const& vertices = drawOp.mesh.vertices;
+				auto const& uv = drawOp.mesh.uv;
+				for (auto const& f : drawOp.mesh.faces)
 				{
-					for (auto vi : f.vertices)
+					for (auto vi : f)
 					{
-						auto const& v = tvs[vi];
+						auto const& v = vertices[vi];
 						vertexArrays.push_back({
-							v.coordinates,
+							v,
 							std::holds_alternative<colour>(drawOp.fill) ?
 								std::array <uint8_t, 4>{{
 									static_variant_cast<const colour&>(drawOp.fill).red(),
@@ -1327,7 +1328,7 @@ namespace neogfx
 									static_variant_cast<const colour&>(drawOp.fill).blue(),
 									static_variant_cast<const colour&>(drawOp.fill).alpha()}} :
 								std::array <uint8_t, 4>{},
-							v.textureCoordinates});
+							uv[vi]});
 					}
 				}
 			}
@@ -1361,7 +1362,7 @@ namespace neogfx
 		{
 			need = 6u;
 			auto& drawGlyphOp = static_variant_cast<const graphics_operation::draw_glyph&>(aOperation);
-			if (drawGlyphOp.appearance.has_effect() && drawGlyphOp.appearance.effect().type() == text_effect::Outline)
+			if (drawGlyphOp.appearance.has_effect() && drawGlyphOp.appearance.effect().type() == text_effect_type::Outline)
 				need += 6u * static_cast<uint32_t>(std::ceil((drawGlyphOp.appearance.effect().width() * 2 + 1) * (drawGlyphOp.appearance.effect().width() * 2 + 1)));
 		}
 		return rendering_engine().vertex_arrays().capacity() / need;
@@ -1376,7 +1377,7 @@ namespace neogfx
 			use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 			auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
-			rectangle r{ firstOp.point, size{ firstOp.glyph.extents().cx, firstOp.glyph.extents().cy }.to_vec2() };
+			game::rectangle r{ firstOp.point, size{ firstOp.glyph.extents().cx, firstOp.glyph.extents().cy }.to_vec2() };
 			r.set_position(r.position() + vec3{ r.extents().x, r.extents().y, 0.0 } / 2.0);
 			r.set_textures(to_texture_list_pointer(emojiTexture));
 			draw_texture(r, optional_colour{}, shader_effect::None);
@@ -1388,7 +1389,7 @@ namespace neogfx
 		const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
 
 		auto need = 6u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
-		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect::Outline)
+		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline)
 			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 
 		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() && firstGlyphTexture.subpixel() };
@@ -1399,7 +1400,7 @@ namespace neogfx
 		{
 			partition_iterator<graphics_operation::operation> start;
 			if (pass == 1 && hasEffects)
-				start = partition_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, barrier_partitions(firstOp.appearance.effect()), 2, firstOp.appearance.effect().type() == text_effect::Outline };
+				start = partition_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, barrier_partitions(firstOp.appearance.effect()), 2, firstOp.appearance.effect().type() == text_effect_type::Outline };
 			else
 				start = partition_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, 2 };
 			for (auto op = start; op != aDrawGlyphOps.second; ++op)
@@ -1424,7 +1425,7 @@ namespace neogfx
 				if (drawOp.appearance.has_effect() && pass == 1)
 				{
 					hasEffects = true;
-					if (drawOp.appearance.effect().type() == text_effect::Outline)
+					if (drawOp.appearance.effect().type() == text_effect_type::Outline)
 					{
 						auto effectColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
 							std::array <uint8_t, 4>{{
@@ -1524,12 +1525,12 @@ namespace neogfx
 					count *= offsets(firstOp.appearance.effect());
 					switch (firstOp.appearance.effect().type())
 					{
-					case text_effect::None:
+					case text_effect_type::None:
 						continue;
-					case text_effect::Outline:
+					case text_effect_type::Outline:
 						break;
-					case text_effect::Glow:
-					case text_effect::Shadow:
+					case text_effect_type::Glow:
+					case text_effect_type::Shadow:
 						{/*
 							const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 							shader.set_uniform_variable("glyphOrigin",
@@ -1592,7 +1593,7 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::draw_texture(const i_mesh& aMesh, const optional_colour& aColour, shader_effect aShaderEffect)
+	void opengl_graphics_context::draw_texture(const game::mesh& aMesh, const optional_colour& aColour, shader_effect aShaderEffect)
 	{
 		auto face_cmp = [&aMesh](const face& aLhs, const face& aRhs) { return (*aMesh.textures())[aLhs.texture].first->native_texture()->handle() < (*aMesh.textures())[aRhs.texture].first->native_texture()->handle(); };
 		if (!std::is_sorted(aMesh.faces().begin(), aMesh.faces().end(), face_cmp))
@@ -1602,7 +1603,7 @@ namespace neogfx
 		if (aColour != std::nullopt)
 			colourizationColour = *aColour;
 
-		auto transformedVertices = aMesh.transformed_vertices(); // todo: have vertex shader do this transformation
+		auto const& vertices = aMesh.vertices;
 
 		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.texture_shader_program() };
 		iRenderingEngine.active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
@@ -1620,7 +1621,7 @@ namespace neogfx
 			GLuint textureHandle = 0;
 			bool first = true;
 			bool newTexture = false;
-			for (auto const& f : aMesh.faces())
+			for (auto const& f : aMesh.faces)
 			{
 				auto const& texture = *(*aMesh.textures())[f.texture].first;
 
@@ -1650,7 +1651,7 @@ namespace neogfx
 
 				for (auto vi : f.vertices)
 				{
-					auto const& v = transformedVertices[vi];
+					auto const& v = vertices[vi];
 					vertexArrays.push_back(
 						opengl_standard_vertex_arrays::vertex{
 							v.coordinates,
