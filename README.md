@@ -34,7 +34,7 @@ v1.20   | Summer 2020   | macOS support
 
 # Implementation Progress
 
-![](http://neogfx.org/temp/github1.png)
+![](http://neogfx.org/temp/github1.png?id=1)
 
 
 Feature                   | % done  |     TODO
