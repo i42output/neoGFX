@@ -54,6 +54,11 @@ namespace neogfx
 	{
 	}
 
+	texture_id texture::id() const
+	{
+		return native_texture()->id();
+	}
+
 	texture_type texture::type() const
 	{
 		return texture_type::Texture;

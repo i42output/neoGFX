@@ -27,8 +27,8 @@ namespace neogfx
 {
 	namespace detail
 	{
-		typedef std::pair<uint32_t, text_category> TEXT_CATEGORY_MAP_VALUE_TYPE;
-		const TEXT_CATEGORY_MAP_VALUE_TYPE TEXT_CATEGORY_MAP[] =
+		typedef std::pair<uint32_t, text_category> text_category_MAP_VALUE_TYPE;
+		const text_category_MAP_VALUE_TYPE text_category_MAP[] =
 		{
 			{ 0x00000, text_category::None },
 			{ 0x00009, text_category::Whitespace },
@@ -1984,15 +1984,15 @@ namespace neogfx
 		}
 		else if (ch == 0xFE0F || ch == 0xFE0E)
 			return text_category::Control;
-		const detail::TEXT_CATEGORY_MAP_VALUE_TYPE* rangeStart = std::lower_bound(
-			&detail::TEXT_CATEGORY_MAP[0], 
-			&detail::TEXT_CATEGORY_MAP[0] + sizeof(detail::TEXT_CATEGORY_MAP) / sizeof(detail::TEXT_CATEGORY_MAP[0]),
-			detail::TEXT_CATEGORY_MAP_VALUE_TYPE(ch, text_category::Unknown),
-			[](const detail::TEXT_CATEGORY_MAP_VALUE_TYPE& lhs, const detail::TEXT_CATEGORY_MAP_VALUE_TYPE& rhs) -> bool
+		const detail::text_category_MAP_VALUE_TYPE* rangeStart = std::lower_bound(
+			&detail::text_category_MAP[0], 
+			&detail::text_category_MAP[0] + sizeof(detail::text_category_MAP) / sizeof(detail::text_category_MAP[0]),
+			detail::text_category_MAP_VALUE_TYPE(ch, text_category::Unknown),
+			[](const detail::text_category_MAP_VALUE_TYPE& lhs, const detail::text_category_MAP_VALUE_TYPE& rhs) -> bool
 		{
 			return lhs.first < rhs.first;
 		});
-		if (rangeStart != &detail::TEXT_CATEGORY_MAP[0] && ch < rangeStart->first)
+		if (rangeStart != &detail::text_category_MAP[0] && ch < rangeStart->first)
 			--rangeStart;
 		return rangeStart->second;
 	}

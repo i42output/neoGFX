@@ -30,6 +30,7 @@ namespace neogfx
 	public:
 		virtual ~i_native_texture() {}
 	public:
+		virtual texture_id id() const = 0;
 		virtual dimension dpi_scale_factor() const = 0;
 		virtual texture_sampling sampling() const = 0;
 		virtual size extents() const = 0;

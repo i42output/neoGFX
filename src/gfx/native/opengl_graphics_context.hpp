@@ -20,6 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/game/mesh_filter.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
 #include "opengl.hpp"
 #include "opengl_error.hpp"
 #include "i_native_graphics_context.hpp"
@@ -107,6 +109,7 @@ namespace neogfx
 		void fill_shape(const graphics_operation::batch& aFillShapeOps);
 		void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
 		void draw_texture(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect);
+		void render_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, shader_effect aShaderEffect);
 	private:
 		std::size_t max_operations(const graphics_operation::operation& aOperation);
 		void apply_scissor();

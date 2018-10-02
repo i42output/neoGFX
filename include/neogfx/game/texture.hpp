@@ -94,7 +94,7 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
-					"Image",
+					"Shared Image",
 					"Type",
 					"Sampling",
 					"DPI Scale Factor",

@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-	sub_texture::sub_texture(id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents) :
+	sub_texture::sub_texture(texture_id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents) :
 		iAtlasId(aAtlasId), iAtlasTexture(&aAtlasTexture), iAtlasLocation(aAtlasLocation), iExtents(aExtents)
 	{
 	}
@@ -41,6 +41,11 @@ namespace neogfx
 
 	sub_texture::~sub_texture()
 	{
+	}
+
+	texture_id sub_texture::id() const
+	{
+		return atlas_id();
 	}
 
 	texture_type sub_texture::type() const
@@ -102,7 +107,7 @@ namespace neogfx
 		return atlas_texture().native_texture();
 	}
 
-	sub_texture::id sub_texture::atlas_id() const
+	texture_id sub_texture::atlas_id() const
 	{
 		return iAtlasId;
 	}

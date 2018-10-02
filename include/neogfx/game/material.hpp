@@ -35,7 +35,8 @@ namespace neogfx::game
 	{
 		std::optional<colour> colour;
 		std::optional<gradient> gradient;
-		std::optional<shared<texture>> texture;
+		std::optional<shared<texture>> sharedTexture;
+		std::optional<texture> texture;
 
 		struct meta : i_component_data::meta
 		{
@@ -51,7 +52,7 @@ namespace neogfx::game
 			}
 			static uint32_t field_count()
 			{
-				return 3;
+				return 4;
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
@@ -62,6 +63,8 @@ namespace neogfx::game
 					return component_data_field_type::ComponentData | component_data_field_type::Optional;
 				case 2:
 					return component_data_field_type::ComponentData | component_data_field_type::Optional | component_data_field_type::Shared;
+				case 3:
+					return component_data_field_type::ComponentData | component_data_field_type::Optional;
 				default:
 					throw invalid_field_index();
 				}
@@ -75,6 +78,7 @@ namespace neogfx::game
 				case 1:
 					return gradient::meta::id();
 				case 2:
+				case 3:
 					return texture::meta::id();
 				default:
 					throw invalid_field_index();
@@ -86,6 +90,7 @@ namespace neogfx::game
 				{
 					"Colour",
 					"Gradient",
+					"Shared Texture",
 					"Texture"
 				};
 				return sFieldNames[aFieldIndex];

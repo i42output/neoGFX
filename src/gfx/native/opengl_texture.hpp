@@ -33,10 +33,11 @@ namespace neogfx
 		struct unsupported_colour_format : std::runtime_error { unsupported_colour_format() : std::runtime_error("neogfx::opengl_texture::unsupported_colour_format") {} };
 		struct multisample_texture_initialization_unsupported : std::runtime_error{ multisample_texture_initialization_unsupported() : std::runtime_error("neogfx::opengl_texture::multisample_texture_initialization_unsupported") {} };
 	public:
-		opengl_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
-		opengl_texture(const i_image& aImage);
+		opengl_texture(texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
+		opengl_texture(texture_id aId, const i_image& aImage);
 		~opengl_texture();
 	public:
+		texture_id id() const override;
 		dimension dpi_scale_factor() const override;
 		texture_sampling sampling() const override;
 		size extents() const override;
@@ -47,6 +48,7 @@ namespace neogfx
 		bool is_resident() const override;
 		const std::string& uri() const override;
 	private:
+		texture_id iId;
 		dimension iDpiScaleFactor;
 		texture_sampling iSampling;
 		basic_size<uint32_t> iSize;

@@ -30,12 +30,13 @@ namespace neogfx
 	{
 		// construction
 	public:
-		sub_texture(id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents);
+		sub_texture(texture_id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents);
 		sub_texture(const i_sub_texture& aSubTexture);
 		sub_texture(const i_sub_texture& aSubTexture, const rect& aAtlasLocation);
 		~sub_texture();
 		// operations
 	public:
+		texture_id id() const override;
 		texture_type type() const override;
 		const i_sub_texture& as_sub_texture() const override;
 		dimension dpi_scale_factor() const override;
@@ -48,12 +49,12 @@ namespace neogfx
 	public:
 		std::shared_ptr<i_native_texture> native_texture() const override;
 	public:
-		id atlas_id() const override;
+		texture_id atlas_id() const override;
 		i_texture& atlas_texture() const override;
 		const rect& atlas_location() const override;
 		// attributes
 	private:
-		id iAtlasId;
+		texture_id iAtlasId;
 		i_texture* iAtlasTexture;
 		rect iAtlasLocation;
 		size iExtents;

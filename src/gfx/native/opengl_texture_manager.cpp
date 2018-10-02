@@ -25,14 +25,14 @@ namespace neogfx
 {
 	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour)
 	{
-		return add_texture(std::make_shared<opengl_texture>(aExtents, aDpiScaleFactor, aSampling, aColour));
+		return add_texture(std::make_shared<opengl_texture>(allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aColour));
 	}
 
 	std::unique_ptr<i_native_texture> opengl_texture_manager::create_texture(const i_image& aImage)
 	{
 		auto existing = find_texture(aImage);
 		if (existing != textures().end())
-			return join_texture(*existing->lock());
-		return add_texture(std::make_shared<opengl_texture>(aImage));
+			return join_texture(*std::get<native_texture_pointer>(*existing).lock());
+		return add_texture(std::make_shared<opengl_texture>(allocate_texture_id(), aImage));
 	}
 }

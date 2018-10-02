@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/i_sub_texture.hpp>
 #include <neogfx/gfx/i_texture_atlas.hpp>
 
 namespace neogfx
@@ -30,14 +31,21 @@ namespace neogfx
 
 	class i_texture_manager
 	{
+		friend class texture_atlas;
 	public:
 		struct texture_not_found : std::logic_error { texture_not_found() : std::logic_error("neogfx::i_texture_manager::texture_not_found") {} };
+	private:
+		virtual texture_id allocate_texture_id() = 0;
 	public:
 		virtual std::unique_ptr<i_native_texture> create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour()) = 0;
 		virtual std::unique_ptr<i_native_texture> create_texture(const i_image& aImage) = 0;
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture) = 0;
 		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture) = 0;
 		virtual void clear_textures() = 0;
+	public:
 		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;
+	private:
+		virtual void add_sub_texture(i_sub_texture& aSubTexture) = 0;
+		virtual void remove_sub_texture(i_sub_texture& aSubTexture) = 0;
 	};
 }

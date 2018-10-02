@@ -21,9 +21,12 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/game/ecs_ids.hpp>
 
 namespace neogfx
 {
+	typedef game::id_t texture_id;
+
 	class i_native_texture;
 
 	enum class texture_type : uint32_t
@@ -50,6 +53,7 @@ namespace neogfx
 	public:
 		virtual ~i_texture() {}
 	public:
+		virtual texture_id id() const = 0;
 		virtual texture_type type() const = 0;
 		virtual const i_sub_texture& as_sub_texture() const = 0;
 		virtual dimension dpi_scale_factor() const = 0;

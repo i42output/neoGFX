@@ -20,6 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <variant>
+#include <neolib/cookie_jar.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include "i_texture_manager.hpp"
 
@@ -29,12 +31,23 @@ namespace neogfx
 	{
 		friend class texture_wrapper;
 	protected:
-		typedef std::list<std::weak_ptr<i_native_texture>> texture_list;
+		typedef std::weak_ptr<i_native_texture> native_texture_pointer;
+		typedef i_texture* texture_pointer;
+		typedef std::variant<native_texture_pointer, texture_pointer> texture_list_entry;
+		typedef neolib::cookie_jar<texture_list_entry> texture_list;
+	private:
+		friend neolib::cookie item_cookie(const texture_list_entry&);
+	protected:
+		texture_id allocate_texture_id() override;
 	public:
-		virtual std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture);
-		virtual std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture);
-		virtual void clear_textures();
-		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 });
+		std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture) override;
+		std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture) override;
+		void clear_textures() override;
+	public:
+		std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) override;
+	private:
+		void add_sub_texture(i_sub_texture& aSubTexture) override;
+		void remove_sub_texture(i_sub_texture& aSubTexture) override;
 	protected:
 		const texture_list& textures() const;
 		texture_list& textures();
@@ -45,4 +58,6 @@ namespace neogfx
 		texture_list iTextures;
 		std::vector<std::unique_ptr<i_texture_atlas>> iTextureAtlases;
 	};
+
+	neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry);
 }

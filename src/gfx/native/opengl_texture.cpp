@@ -23,7 +23,8 @@
 
 namespace neogfx
 {
-	opengl_texture::opengl_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour) :
+	opengl_texture::opengl_texture(texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour) :
+		iId{ aId },
 		iDpiScaleFactor{ aDpiScaleFactor },
 		iSampling{ aSampling },
 		iSize{ aExtents },
@@ -92,7 +93,8 @@ namespace neogfx
 		}
 	}
 
-	opengl_texture::opengl_texture(const i_image& aImage) :
+	opengl_texture::opengl_texture(texture_id aId, const i_image& aImage) :
+		iId{ aId },
 		iDpiScaleFactor{ aImage.dpi_scale_factor() },
 		iSampling{ aImage.sampling() },
 		iSize{ aImage.extents() },
@@ -149,6 +151,11 @@ namespace neogfx
 	opengl_texture::~opengl_texture()
 	{
 		glCheck(glDeleteTextures(1, &iHandle));
+	}
+
+	texture_id opengl_texture::id() const
+	{
+		return iId;
 	}
 
 	dimension opengl_texture::dpi_scale_factor() const

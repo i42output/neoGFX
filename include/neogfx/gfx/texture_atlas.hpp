@@ -63,12 +63,12 @@ namespace neogfx
 		typedef std::pair<texture, fragments> page;
 		typedef std::list<page> pages;
 		typedef std::pair<pages::iterator, neogfx::sub_texture> entry;
-		typedef std::unordered_map<i_sub_texture::id, entry> entries;
+		typedef std::unordered_map<texture_id, entry> entries;
 	public:
 		texture_atlas(i_texture_manager& aTextureManager, const size& aPageSize);
 	public:
-		virtual const i_sub_texture& sub_texture(i_sub_texture::id aSubTextureId) const;
-		virtual i_sub_texture& sub_texture(i_sub_texture::id aSubTextureId);
+		virtual const i_sub_texture& sub_texture(texture_id aSubTextureId) const;
+		virtual i_sub_texture& sub_texture(texture_id aSubTextureId);
 		virtual i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling);
 		virtual i_sub_texture& create_sub_texture(const i_image& aImage);
 		virtual void destroy_sub_texture(i_sub_texture& aSubTexture);
@@ -80,7 +80,6 @@ namespace neogfx
 		i_texture_manager& iTextureManager;
 		size iPageSize;
 		pages iPages;
-		i_sub_texture::id iNextId;
 		entries iEntries;
 	};
 }

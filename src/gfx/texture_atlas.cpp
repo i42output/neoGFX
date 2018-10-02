@@ -26,11 +26,11 @@
 namespace neogfx
 {
 	texture_atlas::texture_atlas(i_texture_manager& aTextureManager, const size& aPageSize) :
-		iTextureManager(aTextureManager), iPageSize(aPageSize), iNextId(0u)
+		iTextureManager(aTextureManager), iPageSize(aPageSize)
 	{
 	}
 
-	const i_sub_texture& texture_atlas::sub_texture(i_sub_texture::id aSubTextureId) const
+	const i_sub_texture& texture_atlas::sub_texture(texture_id aSubTextureId) const
 	{
 		auto iterEntry = iEntries.find(aSubTextureId);
 		if (iterEntry == iEntries.end())
@@ -38,7 +38,7 @@ namespace neogfx
 		return iterEntry->second.second;
 	}
 
-	i_sub_texture& texture_atlas::sub_texture(i_sub_texture::id aSubTextureId)
+	i_sub_texture& texture_atlas::sub_texture(texture_id aSubTextureId)
 	{
 		auto iterEntry = iEntries.find(aSubTextureId);
 		if (iterEntry == iEntries.end())
@@ -49,30 +49,33 @@ namespace neogfx
 	i_sub_texture& texture_atlas::create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling)
 	{
 		auto newSpace = allocate_space(aSize, aDpiScaleFactor, aSampling);
-		++iNextId;
-		auto entry = iEntries.insert(std::make_pair(iNextId, std::make_pair(newSpace.first, neogfx::sub_texture{ iNextId, newSpace.first->first, newSpace.second, aSize })));
+		auto nextId = iTextureManager.allocate_texture_id();
+		auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aSize })));
+		iTextureManager.add_sub_texture(entry.first->second.second);
 		return entry.first->second.second;
 	}
 
 	i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage)
 	{
 		auto newSpace = allocate_space(aImage.extents(), aImage.dpi_scale_factor(), aImage.sampling());
-		++iNextId;
-		auto entry = iEntries.insert(std::make_pair(iNextId, std::make_pair(newSpace.first, neogfx::sub_texture{ iNextId, newSpace.first->first, newSpace.second, aImage.extents() })));
+		auto nextId = iTextureManager.allocate_texture_id();
+		auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aImage.extents() })));
 		entry.first->second.second.set_pixels(aImage);
+		iTextureManager.add_sub_texture(entry.first->second.second);
 		return entry.first->second.second;
 	}
 
 	void texture_atlas::destroy_sub_texture(i_sub_texture& aSubTexture)
 	{
 		auto iterEntry = iEntries.find(aSubTexture.atlas_id());
-		if (iterEntry == iEntries.end())
+		if (iterEntry == iEntries.end() || &aSubTexture != &iterEntry->second.second)
 			throw sub_texture_not_found();
 		auto rectEntry = iterEntry->second.second.atlas_location();
 		auto space = iterEntry->second.first->second.used.find(rectEntry);
 		if (space != iterEntry->second.first->second.used.end())
 			iterEntry->second.first->second.used.erase(space);
 		iterEntry->second.first->second.freed.insert(rectEntry);
+		iTextureManager.remove_sub_texture(aSubTexture);
 		iEntries.erase(iterEntry);
 	}
 

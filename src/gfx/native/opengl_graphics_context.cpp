@@ -23,6 +23,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
 #include <neogfx/game/shape_factory.hpp>
+#include <neogfx/game/rectangle.hpp>
 #include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
@@ -1377,10 +1378,20 @@ namespace neogfx
 			use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
 			auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
-			game::rectangle r{ firstOp.point, size{ firstOp.glyph.extents().cx, firstOp.glyph.extents().cy }.to_vec2() };
-			r.set_position(r.position() + vec3{ r.extents().x, r.extents().y, 0.0 } / 2.0);
-			r.set_textures(to_texture_list_pointer(emojiTexture));
-			draw_texture(r, optional_colour{}, shader_effect::None);
+			draw_texture(
+				rect_to_mesh(rect{ firstOp.point, firstOp.glyph.extents() }), 
+				game::material{ 
+					{}, 
+					{}, 
+					{}, 
+					game::texture{ 
+						{}, 
+						emojiTexture.type(), 
+						emojiTexture.sampling(), 
+						emojiTexture.dpi_scale_factor(), 
+						emojiTexture.extents().to_vec2(), 
+						emojiTexture.id() } }, 
+				shader_effect::None);
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 			return;
@@ -1593,7 +1604,12 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::draw_texture(const game::mesh& aMesh, const optional_colour& aColour, shader_effect aShaderEffect)
+	void opengl_graphics_context::draw_texture(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect)
+	{
+		render_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aShaderEffect);
+	}
+	
+	void opengl_graphics_context::render_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, shader_effect aShaderEffect)
 	{
 		auto face_cmp = [&aMesh](const face& aLhs, const face& aRhs) { return (*aMesh.textures())[aLhs.texture].first->native_texture()->handle() < (*aMesh.textures())[aRhs.texture].first->native_texture()->handle(); };
 		if (!std::is_sorted(aMesh.faces().begin(), aMesh.faces().end(), face_cmp))

@@ -135,11 +135,49 @@ namespace neogfx
 	class item_cell_data : public item_cell_data_variant
 	{
 	public:
-		item_cell_data() {}
-		template <typename T>
-		item_cell_data(T&& aValue) : item_cell_data_variant{ aValue } {}
+		item_cell_data() 
+		{
+		}
+		template <typename T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data>, int> = 0>
+		item_cell_data(T&& aValue) : 
+			item_cell_data_variant{ std::forward<T>(aValue) }
+		{
+		}
+		item_cell_data(const item_cell_data& aOther) : 
+			item_cell_data_variant{ static_cast<const item_cell_data_variant&>(aOther) } 
+		{
+		}
+		item_cell_data(item_cell_data&& aOther) : 
+			item_cell_data_variant{ static_cast<item_cell_data_variant&&>(std::move(aOther)) } 
+		{
+		}
 	public:
-		item_cell_data(const char* aString) : item_cell_data_variant(std::string{ aString }) {}
+		item_cell_data(const char* aString) : item_cell_data_variant{ std::string{ aString } } 
+		{
+		}
+	public:
+		item_cell_data& operator=(const item_cell_data& aOther)
+		{
+			item_cell_data_variant::operator=(static_cast<const item_cell_data_variant&>(aOther));
+			return *this;
+		}
+		item_cell_data& operator=(item_cell_data&& aOther)
+		{
+			item_cell_data_variant::operator=(static_cast<item_cell_data_variant&&>(std::move(aOther)));
+			return *this;
+		}
+		template <typename T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data>, int> = 0>
+		item_cell_data& operator=(T&& aArgument)
+		{
+			item_cell_data_variant::operator=(std::forward<T>(aArgument));
+			return *this;
+		}
+	public:
+		item_cell_data& operator=(const char* aString)
+		{
+			item_cell_data_variant::operator=(std::string{ aString });
+			return *this;
+		}
 	public:
 		std::string to_string() const
 		{

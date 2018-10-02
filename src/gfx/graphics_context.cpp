@@ -980,18 +980,29 @@ namespace neogfx
 	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-		native_context().enqueue(graphics_operation::draw_texture{ 
-			aMesh * mat44{
-				{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
-				{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
-				{ 0.0, 0.0, 1.0, 0.0 },
-				{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
-			game::material
-			{ 
-				aColour != std::nullopt ? , 
-				{}, aTexture 
-			}, 
-			aShaderEffect });
+		native_context().enqueue(
+			graphics_operation::draw_texture{ 
+				aMesh * mat44{
+					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+					{ 0.0, 0.0, 1.0, 0.0 },
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
+				game::material
+				{ 
+					aColour != std::nullopt ? game::colour{ aColour->to_vec4() } : std::optional<game::colour>{},
+					{}, 
+					{},
+					game::texture{
+						{},
+						aTexture.type(),
+						aTexture.sampling(),
+						aTexture.dpi_scale_factor(),
+						aTexture.extents().to_vec2(),
+						aTexture.id()
+					}
+				},
+				aShaderEffect 
+			});
 	}
 
 	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const

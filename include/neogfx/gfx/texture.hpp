@@ -43,6 +43,7 @@ namespace neogfx
 		~texture();
 		// operations
 	public:
+		texture_id id() const override;
 		texture_type type() const override;
 		const i_sub_texture& as_sub_texture() const override;
 		dimension dpi_scale_factor() const override;
