@@ -18,12 +18,14 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_texture_manager.hpp>
 #include "opengl_error.hpp"
 #include "opengl_texture.hpp"
 
 namespace neogfx
 {
-	opengl_texture::opengl_texture(texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour) :
+	opengl_texture::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour) :
+		iManager{ aManager },
 		iId{ aId },
 		iDpiScaleFactor{ aDpiScaleFactor },
 		iSampling{ aSampling },
@@ -93,7 +95,8 @@ namespace neogfx
 		}
 	}
 
-	opengl_texture::opengl_texture(texture_id aId, const i_image& aImage) :
+	opengl_texture::opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage) :
+		iManager{ aManager },
 		iId{ aId },
 		iDpiScaleFactor{ aImage.dpi_scale_factor() },
 		iSampling{ aImage.sampling() },
@@ -158,6 +161,16 @@ namespace neogfx
 		return iId;
 	}
 
+	texture_type opengl_texture::type() const
+	{
+		return texture_type::Texture;
+	}
+
+	const i_sub_texture& opengl_texture::as_sub_texture() const
+	{
+		throw not_sub_texture();
+	}
+
 	dimension opengl_texture::dpi_scale_factor() const
 	{
 		return iDpiScaleFactor;
@@ -166,6 +179,11 @@ namespace neogfx
 	texture_sampling opengl_texture::sampling() const
 	{
 		return iSampling;
+	}
+
+	bool opengl_texture::is_empty() const
+	{
+		return false;
 	}
 
 	size opengl_texture::extents() const
@@ -198,6 +216,11 @@ namespace neogfx
 			throw multisample_texture_initialization_unsupported();
 	}
 
+	void opengl_texture::set_pixels(const i_image& aImage)
+	{
+		set_pixels(rect{ point{}, aImage.extents() }, aImage.cdata());
+	}
+
 	void* opengl_texture::handle() const
 	{
 		return reinterpret_cast<void*>(iHandle);
@@ -213,5 +236,10 @@ namespace neogfx
 	const std::string& opengl_texture::uri() const
 	{
 		return iUri;
+	}
+
+	std::shared_ptr<i_native_texture> opengl_texture::native_texture() const
+	{
+		return std::dynamic_pointer_cast<i_native_texture>(iManager.find_texture(id()));
 	}
 }

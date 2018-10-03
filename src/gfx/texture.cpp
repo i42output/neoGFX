@@ -118,6 +118,6 @@ namespace neogfx
 	{
 		if (is_empty())
 			throw texture_empty();
-		return iNativeTexture;
+		return iNativeTexture->native_texture();
 	}
 }

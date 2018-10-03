@@ -27,7 +27,7 @@ namespace neogfx
 	class opengl_texture_manager : public texture_manager
 	{
 	public:
-		std::unique_ptr<i_native_texture> create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour()) override;
-		std::unique_ptr<i_native_texture> create_texture(const i_image& aImage) override;
+		std::shared_ptr<i_texture> create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour()) override;
+		std::shared_ptr<i_texture> create_texture(const i_image& aImage) override;
 	};
 }

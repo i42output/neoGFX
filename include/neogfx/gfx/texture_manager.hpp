@@ -31,17 +31,14 @@ namespace neogfx
 	{
 		friend class texture_wrapper;
 	protected:
-		typedef std::weak_ptr<i_native_texture> native_texture_pointer;
-		typedef i_texture* texture_pointer;
-		typedef std::variant<native_texture_pointer, texture_pointer> texture_list_entry;
-		typedef neolib::cookie_jar<texture_list_entry> texture_list;
+		typedef std::shared_ptr<i_texture> texture_pointer;
+		typedef neolib::cookie_jar<texture_pointer> texture_list;
 	private:
-		friend neolib::cookie item_cookie(const texture_list_entry&);
+		friend neolib::cookie item_cookie(const texture_pointer&);
 	protected:
 		texture_id allocate_texture_id() override;
 	public:
-		std::unique_ptr<i_native_texture> join_texture(const i_native_texture& aTexture) override;
-		std::unique_ptr<i_native_texture> join_texture(const i_texture& aTexture) override;
+		std::shared_ptr<i_texture> find_texture(texture_id aId) const override;
 		void clear_textures() override;
 	public:
 		std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) override;
@@ -53,11 +50,11 @@ namespace neogfx
 		texture_list& textures();
 		texture_list::const_iterator find_texture(const i_image& aImage) const;
 		texture_list::iterator find_texture(const i_image& aImage);
-		std::unique_ptr<i_native_texture> add_texture(std::shared_ptr<i_native_texture> aTexture);
+		std::shared_ptr<i_texture> add_texture(std::shared_ptr<i_native_texture> aTexture);
 	private:
 		texture_list iTextures;
 		std::vector<std::unique_ptr<i_texture_atlas>> iTextureAtlases;
 	};
 
-	neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry);
+	neolib::cookie item_cookie(const texture_manager::texture_pointer& aEntry);
 }

@@ -54,10 +54,10 @@ namespace neogfx
 		void set_pixels(const rect& aRect, const void* aPixelData) override;
 		void set_pixels(const i_image& aImage) override;
 	public:
-		virtual std::shared_ptr<i_native_texture> native_texture() const override;
+		std::shared_ptr<i_native_texture> native_texture() const override;
 		// attributes
 	private:
-		std::shared_ptr<i_native_texture> iNativeTexture;
+		std::shared_ptr<i_texture> iNativeTexture;
 		optional_sub_texture iSubTexture;
 	};
 

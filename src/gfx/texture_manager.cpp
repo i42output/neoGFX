@@ -24,91 +24,19 @@
 
 namespace neogfx
 {
-	neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry)
+	neolib::cookie item_cookie(const texture_manager::texture_pointer& aEntry)
 	{
-		if (std::holds_alternative<texture_manager::native_texture_pointer>(aEntry))
-			return std::get<texture_manager::native_texture_pointer>(aEntry).lock()->id();
-		else
-			return std::get<texture_manager::texture_pointer>(aEntry)->id();
+		return aEntry->id();
 	}
-
-	class texture_wrapper : public i_native_texture
-	{
-	public:
-		texture_wrapper(std::weak_ptr<i_native_texture> aTexture) :
-			iTexture{ aTexture.lock() }
-		{
-		}
-		~texture_wrapper()
-		{
-		}
-	public:
-		texture_id id() const override
-		{
-			return iTexture->id();
-		}
-		dimension dpi_scale_factor() const override
-		{
-			return iTexture->dpi_scale_factor();
-		}
-		texture_sampling sampling() const override
-		{
-			return iTexture->sampling();
-		}
-		size extents() const override
-		{
-			return iTexture->extents();
-		}
-		size storage_extents() const override
-		{
-			return iTexture->storage_extents();
-		}
-		void set_pixels(const rect& aRect, const void* aPixelData) override
-		{
-			iTexture->set_pixels(aRect, aPixelData);
-		}
-	public:
-		void* handle() const override
-		{
-			return iTexture->handle();
-		}
-		bool is_resident() const override
-		{
-			return iTexture->is_resident();
-		}
-		const std::string& uri() const override
-		{
-			return iTexture->uri();
-		}
-	private:
-		std::shared_ptr<i_native_texture> iTexture;
-	};
 
 	texture_id texture_manager::allocate_texture_id()
 	{
 		return iTextures.next_cookie();
 	}
 
-	std::unique_ptr<i_native_texture> texture_manager::join_texture(const i_native_texture& aTexture)
+	std::shared_ptr<i_texture> texture_manager::find_texture(texture_id aId) const
 	{
-		for (auto& t : iTextures)
-		{
-			if (std::holds_alternative<native_texture_pointer>(t))
-			{
-				auto& ntp = std::get<native_texture_pointer>(t);
-				if (ntp.expired())
-					continue;
-				auto texture = ntp.lock();
-				if (aTexture.handle() == texture->handle())
-					return std::make_unique<texture_wrapper>(texture);
-			}
-		}
-		throw texture_not_found();
-	}
-
-	std::unique_ptr<i_native_texture> texture_manager::join_texture(const i_texture& aTexture)
-	{
-		return join_texture(*aTexture.native_texture());
+		return iTextures[aId];
 	}
 
 	void texture_manager::clear_textures()
@@ -123,12 +51,12 @@ namespace neogfx
 
 	void texture_manager::add_sub_texture(i_sub_texture& aSubTexture)
 	{
-		iTextures.add(&aSubTexture);
+		iTextures.add(texture_pointer{ texture_pointer{}, &aSubTexture });
 	}
 
 	void texture_manager::remove_sub_texture(i_sub_texture& aSubTexture)
 	{
-		iTextures.remove(&aSubTexture);
+		iTextures.remove(texture_pointer{ texture_pointer{}, &aSubTexture });
 	}
 
 	const texture_manager::texture_list& texture_manager::textures() const
@@ -145,15 +73,11 @@ namespace neogfx
 	{
 		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
 		{
-			if (std::holds_alternative<native_texture_pointer>(*i))
-			{
-				auto& ntp = std::get<native_texture_pointer>(*i);
-				if (ntp.expired())
-					continue;
-				auto texture = ntp.lock();
-				if (!aImage.uri().empty() && aImage.uri() == texture->uri())
-					return i;
-			}
+			auto& texture = *i;
+			if (texture->type() != texture_type::Texture)
+				continue;
+			if (!aImage.uri().empty() && aImage.uri() == texture->native_texture()->uri())
+				return i;
 		}
 		return iTextures.end();
 	}
@@ -162,30 +86,26 @@ namespace neogfx
 	{
 		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
 		{
-			if (std::holds_alternative<native_texture_pointer>(*i))
-			{
-				auto& ntp = std::get<native_texture_pointer>(*i);
-				if (ntp.expired())
-					continue;
-				auto texture = ntp.lock();
-				if (!aImage.uri().empty() && aImage.uri() == texture->uri())
-					return i;
-			}
+			auto& texture = *i;
+			if (texture->type() != texture_type::Texture)
+				continue;
+			if (!aImage.uri().empty() && aImage.uri() == texture->native_texture()->uri())
+				return i;
 		}
 		return iTextures.end();
 	}
 
-	std::unique_ptr<i_native_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)
+	std::shared_ptr<i_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)
 	{
 		// cleanup opportunity
 		for (auto i = iTextures.begin(); i != iTextures.end();)
 		{
-			if (std::holds_alternative<native_texture_pointer>(*i) && std::get<native_texture_pointer>(*i).expired())
+			auto& texture = *i;
+			if (texture->type() == texture_type::Texture && texture.use_count() == 1)
 				i = iTextures.remove(*i);
 			else
 				++i;
 		}
-		auto newTexture = iTextures.add(native_texture_pointer{ aTexture });
-		return std::make_unique<texture_wrapper>(std::get<native_texture_pointer>(*newTexture));
+		return *iTextures.add(aTexture);
 	}
 }
