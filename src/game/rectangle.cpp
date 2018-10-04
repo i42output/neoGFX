@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/rectangle.hpp>
+#include <neogfx/game/ecs_helpers.hpp>
 
 namespace neogfx::game
 {
@@ -41,28 +42,28 @@ namespace neogfx::game
 			entity{ aEcs, archetype().id() }
 		{
 			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ {}, {}, { /* todo */ } });
+			aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aTexture) });
 		}
 
 		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage) :
 			entity{ aEcs, archetype().id() }
 		{
 			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ {}, {}, { /* todo */ } });
+			aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aImage) });
 		}
 
 		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect) :
 			entity{ aEcs, archetype().id() }
 		{
 			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ {}, {}, { /* todo */ } });
+			aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aTexture, aTextureRect) });
 		}
 
 		rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect) :
 			entity{ aEcs, archetype().id() }
 		{
 			game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
-			aEcs.component<material>().populate(id(), material{ {}, {}, { /* todo */ } });
+			aEcs.component<material>().populate(id(), material{ {}, {}, {}, to_ecs_component(aImage, aTextureRect) });
 		}
 
 		rectangle::rectangle(const rectangle& aOther) :

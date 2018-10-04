@@ -24,24 +24,35 @@
 
 namespace neogfx
 {
-	neolib::cookie item_cookie(const texture_manager::texture_pointer& aEntry)
+	neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry)
 	{
-		return aEntry->id();
+		return aEntry.first->id();
 	}
 
 	texture_id texture_manager::allocate_texture_id()
 	{
-		return iTextures.next_cookie();
+		return textures().next_cookie();
 	}
 
 	std::shared_ptr<i_texture> texture_manager::find_texture(texture_id aId) const
 	{
-		return iTextures[aId];
+		return textures()[aId].first;
 	}
 
 	void texture_manager::clear_textures()
 	{
-		iTextures.clear();
+		textures().clear();
+	}
+
+	void texture_manager::add_ref(texture_id aId)
+	{
+		++textures()[aId].second;
+	}
+
+	void texture_manager::release(texture_id aId)
+	{
+		if (--textures()[aId].second == 0u && textures()[aId].first.use_count() == 1)
+			textures().remove(aId);
 	}
 
 	std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize)
@@ -51,12 +62,12 @@ namespace neogfx
 
 	void texture_manager::add_sub_texture(i_sub_texture& aSubTexture)
 	{
-		iTextures.add(texture_pointer{ texture_pointer{}, &aSubTexture });
+		textures().add(texture_list_entry{ texture_pointer{ texture_pointer{}, &aSubTexture }, 0u });
 	}
 
 	void texture_manager::remove_sub_texture(i_sub_texture& aSubTexture)
 	{
-		iTextures.remove(texture_pointer{ texture_pointer{}, &aSubTexture });
+		textures().remove(aSubTexture.id());
 	}
 
 	const texture_manager::texture_list& texture_manager::textures() const
@@ -71,41 +82,41 @@ namespace neogfx
 
 	texture_manager::texture_list::const_iterator texture_manager::find_texture(const i_image& aImage) const
 	{
-		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
+		for (auto i = textures().begin(); i != textures().end(); ++i)
 		{
 			auto& texture = *i;
-			if (texture->type() != texture_type::Texture)
+			if (texture.first->type() != texture_type::Texture)
 				continue;
-			if (!aImage.uri().empty() && aImage.uri() == texture->native_texture()->uri())
+			if (!aImage.uri().empty() && aImage.uri() == texture.first->native_texture()->uri())
 				return i;
 		}
-		return iTextures.end();
+		return textures().end();
 	}
 
 	texture_manager::texture_list::iterator texture_manager::find_texture(const i_image& aImage)
 	{
-		for (auto i = iTextures.begin(); i != iTextures.end(); ++i)
+		for (auto i = textures().begin(); i != textures().end(); ++i)
 		{
 			auto& texture = *i;
-			if (texture->type() != texture_type::Texture)
+			if (texture.first->type() != texture_type::Texture)
 				continue;
-			if (!aImage.uri().empty() && aImage.uri() == texture->native_texture()->uri())
+			if (!aImage.uri().empty() && aImage.uri() == texture.first->native_texture()->uri())
 				return i;
 		}
-		return iTextures.end();
+		return textures().end();
 	}
 
 	std::shared_ptr<i_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)
 	{
 		// cleanup opportunity
-		for (auto i = iTextures.begin(); i != iTextures.end();)
+		for (auto i = textures().begin(); i != textures().end();)
 		{
 			auto& texture = *i;
-			if (texture->type() == texture_type::Texture && texture.use_count() == 1)
-				i = iTextures.remove(*i);
+			if (texture.first->type() == texture_type::Texture && texture.first.use_count() == 1 && texture.second == 0u)
+				i = textures().remove(*i);
 			else
 				++i;
 		}
-		return *iTextures.add(aTexture);
+		return textures().add(texture_list_entry{ aTexture, 0u })->first;
 	}
 }

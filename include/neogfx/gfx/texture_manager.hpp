@@ -32,14 +32,18 @@ namespace neogfx
 		friend class texture_wrapper;
 	protected:
 		typedef std::shared_ptr<i_texture> texture_pointer;
-		typedef neolib::cookie_jar<texture_pointer> texture_list;
+		typedef std::pair<texture_pointer, uint32_t> texture_list_entry;
+		typedef neolib::cookie_jar<texture_list_entry> texture_list;
 	private:
-		friend neolib::cookie item_cookie(const texture_pointer&);
+		friend neolib::cookie item_cookie(const texture_list_entry&);
 	protected:
 		texture_id allocate_texture_id() override;
 	public:
 		std::shared_ptr<i_texture> find_texture(texture_id aId) const override;
 		void clear_textures() override;
+	public:
+		void add_ref(texture_id aId) override;
+		void release(texture_id aId) override;
 	public:
 		std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) override;
 	private:
@@ -55,6 +59,4 @@ namespace neogfx
 		texture_list iTextures;
 		std::vector<std::unique_ptr<i_texture_atlas>> iTextureAtlases;
 	};
-
-	neolib::cookie item_cookie(const texture_manager::texture_pointer& aEntry);
 }

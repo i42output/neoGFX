@@ -43,6 +43,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/rectangle.hpp>
+#include <neogfx/game/ecs_helpers.hpp>
 #include "native/i_native_graphics_context.hpp"
 #include "text/native/native_font_face.hpp"
 #include "../hid/native/i_native_surface.hpp"
@@ -992,14 +993,7 @@ namespace neogfx
 					aColour != std::nullopt ? game::colour{ aColour->to_vec4() } : std::optional<game::colour>{},
 					{}, 
 					{},
-					game::texture{
-						{},
-						aTexture.type(),
-						aTexture.sampling(),
-						aTexture.dpi_scale_factor(),
-						aTexture.extents().to_vec2(),
-						aTexture.id()
-					}
+					to_ecs_component(aTexture)
 				},
 				aShaderEffect 
 			});

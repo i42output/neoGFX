@@ -42,6 +42,9 @@ namespace neogfx
 		virtual std::shared_ptr<i_texture> create_texture(const i_image& aImage) = 0;
 		virtual void clear_textures() = 0;
 	public:
+		virtual void add_ref(texture_id aId) = 0;
+		virtual void release(texture_id aId) = 0;
+	public:
 		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;
 	private:
 		virtual void add_sub_texture(i_sub_texture& aSubTexture) = 0;

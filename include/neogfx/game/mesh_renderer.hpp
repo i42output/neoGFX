@@ -83,6 +83,20 @@ namespace neogfx::game
 				};
 				return sFieldNames[aFieldIndex];
 			}
+			static constexpr bool has_updater = true;
+			static void update(mesh_renderer& aData, i_ecs&, entity_id)
+			{
+				std::sort(aData.patches.begin(), aData.patches.end(), [](const patch& lhs, const patch& rhs)
+				{
+					auto lhsTexture = lhs.material.texture != std::nullopt ? 
+						lhs.material.texture->id : lhs.material.sharedTexture != std::nullopt ? 
+							lhs.material.sharedTexture->ptr->id : id_t{};
+					auto rhsTexture = rhs.material.texture != std::nullopt ?
+						rhs.material.texture->id : rhs.material.sharedTexture != std::nullopt ?
+							rhs.material.sharedTexture->ptr->id : id_t{};
+					return lhsTexture < rhsTexture;
+				});
+			}
 		};
 	};
 }

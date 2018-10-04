@@ -27,4 +27,10 @@ using namespace boost::multiprecision;
 namespace neogfx
 {
 	using namespace neolib::stdint_suffix;
+
+	template <typename Component>
+	struct service
+	{
+		static Component& instance();
+	};
 }

@@ -62,4 +62,63 @@ namespace neogfx
 		else
 			return game::material{ game::colour{} };
 	}
+
+	inline game::texture to_ecs_component(const i_texture& aTexture)
+	{
+		return game::texture
+		{
+			aTexture.id(),
+			aTexture.type(),
+			aTexture.sampling(),
+			aTexture.dpi_scale_factor(),
+			aTexture.extents().to_vec2(),
+			{}
+		};
+		service<i_texture_manager>::instance().add_ref(aTexture.id());
+	}
+
+	inline game::texture to_ecs_component(const i_texture& aTexture, const rect& aTextureRect)
+	{
+		return game::texture
+		{
+			aTexture.id(),
+			aTexture.type(),
+			aTexture.sampling(),
+			aTexture.dpi_scale_factor(),
+			aTexture.extents().to_vec2(),
+			aTextureRect.to_aabb_2d()
+		};
+		service<i_texture_manager>::instance().add_ref(aTexture.id());
+	}
+
+	inline game::texture to_ecs_component(const i_image& aImage)
+	{
+		texture newTexture{ aImage };
+		return game::texture
+		{
+			newTexture.id(),
+			newTexture.type(),
+			newTexture.sampling(),
+			newTexture.dpi_scale_factor(),
+			newTexture.extents().to_vec2(),
+			{}
+		};
+		service<i_texture_manager>::instance().add_ref(newTexture.id());
+	}
+
+	inline game::texture to_ecs_component(const i_image& aImage, const rect& aTextureRect)
+	{
+		texture newTexture{ aImage };
+		return game::texture
+		{
+			newTexture.id(),
+			newTexture.type(),
+			newTexture.sampling(),
+			newTexture.dpi_scale_factor(),
+			newTexture.extents().to_vec2(),
+			aTextureRect.to_aabb_2d()
+		};
+		service<i_texture_manager>::instance().add_ref(newTexture.id());
+	}
+
 }

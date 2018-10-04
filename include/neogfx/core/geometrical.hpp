@@ -529,6 +529,7 @@ namespace neogfx
 		}
 		basic_rect ceil() const { return basic_rect(point_type::ceil(), size_type::ceil()); }
 		basic_rect floor() const { return basic_rect(point_type::floor(), size_type::floor()); }
+		aabb_2d to_aabb_2d() const { return aabb_2d{ top_left().to_vec2(), bottom_right().to_vec2() }; }
 	};
 
 	typedef basic_rect<coordinate> rect;

@@ -826,4 +826,10 @@ namespace neogfx
 		}
 		return false;
 	}
+
+	template <>
+	i_texture_manager& service<i_texture_manager>::instance()
+	{
+		return app::instance().rendering_engine().texture_manager();
+	}
 }

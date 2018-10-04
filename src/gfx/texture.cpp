@@ -30,7 +30,7 @@ namespace neogfx
 	}
 
 	texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour) :
-		iNativeTexture{ app::instance().rendering_engine().texture_manager().create_texture(aExtents, aDpiScaleFactor, aSampling, aColour) }
+		iNativeTexture{ service<i_texture_manager>::instance().create_texture(aExtents, aDpiScaleFactor, aSampling, aColour) }
 	{
 	}
 
@@ -40,7 +40,7 @@ namespace neogfx
 	}
 
 	texture::texture(const i_image& aImage) :
-		iNativeTexture{ app::instance().rendering_engine().texture_manager().create_texture(aImage) }
+		iNativeTexture{ service<i_texture_manager>::instance().create_texture(aImage) }
 	{
 	}
 

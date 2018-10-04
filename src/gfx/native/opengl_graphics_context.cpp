@@ -24,6 +24,7 @@
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
 #include <neogfx/game/shape_factory.hpp>
 #include <neogfx/game/rectangle.hpp>
+#include <neogfx/game/ecs_helpers.hpp>
 #include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
@@ -1384,13 +1385,8 @@ namespace neogfx
 					{}, 
 					{}, 
 					{}, 
-					game::texture{ 
-						{}, 
-						emojiTexture.type(), 
-						emojiTexture.sampling(), 
-						emojiTexture.dpi_scale_factor(), 
-						emojiTexture.extents().to_vec2(), 
-						emojiTexture.id() } }, 
+					to_ecs_component(emojiTexture)
+				}, 
 				shader_effect::None);
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -1611,10 +1607,6 @@ namespace neogfx
 	
 	void opengl_graphics_context::render_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, shader_effect aShaderEffect)
 	{
-		auto face_cmp = [&aMesh](const face& aLhs, const face& aRhs) { return (*aMesh.textures())[aLhs.texture].first->native_texture()->handle() < (*aMesh.textures())[aRhs.texture].first->native_texture()->handle(); };
-		if (!std::is_sorted(aMesh.faces().begin(), aMesh.faces().end(), face_cmp))
-			std::sort(aMesh.faces().begin(), aMesh.faces().end(), face_cmp);
-
 		colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
 		if (aColour != std::nullopt)
 			colourizationColour = *aColour;

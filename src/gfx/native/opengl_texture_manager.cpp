@@ -32,7 +32,7 @@ namespace neogfx
 	{
 		auto existing = find_texture(aImage);
 		if (existing != textures().end())
-			return *existing;
+			return existing->first;
 		return add_texture(std::make_shared<opengl_texture>(*this, allocate_texture_id(), aImage));
 	}
 }

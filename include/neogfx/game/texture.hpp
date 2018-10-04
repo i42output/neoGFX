@@ -23,6 +23,7 @@
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/i_component_data.hpp>
@@ -32,12 +33,12 @@ namespace neogfx::game
 {
 	struct texture
 	{
-		std::optional<shared<image>> image;
+		id_t id;
 		texture_type type;
 		texture_sampling sampling;
 		scalar dpiScalingFactor;
 		vec2 extents;
-		id_t id;
+		std::optional<aabb_2d> subTexture;
 
 		struct meta : i_component_data::meta
 		{
@@ -60,7 +61,7 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-					return component_data_field_type::ComponentData | component_data_field_type::Shared | component_data_field_type::Optional;
+					return component_data_field_type::Id;
 				case 1:
 				case 2:
 					return component_data_field_type::Enum | component_data_field_type::Uint32;
@@ -69,7 +70,7 @@ namespace neogfx::game
 				case 4:
 					return component_data_field_type::Vec2;
 				case 5:
-					return component_data_field_type::Id;
+					return component_data_field_type::Aabb2d | component_data_field_type::Optional;
 				default:
 					throw invalid_field_index();
 				}
@@ -79,7 +80,6 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-					return image::meta::id();
 				case 1:
 				case 2:
 				case 3:
@@ -94,23 +94,19 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
-					"Shared Image",
+					"Id",
 					"Type",
 					"Sampling",
 					"DPI Scale Factor",
 					"Extents",
-					"Id"
+					"Sub Texture"
 				};
 				return sFieldNames[aFieldIndex];
 			}
 			static constexpr bool has_handles = true;
-			static void free_handles(texture& aData, i_ecs& aEcs)
+			static void free_handles(texture& aData, i_ecs&)
 			{
-				if (aData.id != null_id)
-				{
-					(void)aEcs; // todo
-					aData.id = null_id;
-				}
+				service<i_texture_manager>::instance().release(aData.id);
 			}
 		};
 	};
