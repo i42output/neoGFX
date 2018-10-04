@@ -18,8 +18,9 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - GPU shader rendered CSS3 compliant gradients with optional gaussian smoothing;
 - MVC (model-view-controller) related classes supporting robust and fast app design;
 - optional MDI support utilizing "nested" windows;
-- 2D (initially) game support: sprites and 2D physics;
--flexible asset management: texture images (e.g PNGs) can be stored in .zip archives which can be optionally embedded inside the program binary accessible using simple URLs;
+- 2D, 2.5D and 3D game support: sprites, objects and physics;
+- Pure ECS (Entity-component-system) usable by both games and apps;
+- flexible asset management: texture images (e.g PNGs) can be stored in .zip archives which can be optionally embedded inside the program binary accessible using simple URLs;
 - support for OpenGL, DirectX and Vulkan.
 
 
