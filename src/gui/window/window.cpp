@@ -209,7 +209,7 @@ namespace neogfx
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aVideoMode, title_text(), aStyle); });
+			[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aVideoMode, title_text(), aStyle); });
 
 		init();
 	}
@@ -222,7 +222,7 @@ namespace neogfx
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aDimensions, title_text(), aStyle); });
+			[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aDimensions, title_text(), aStyle); });
 
 		init();
 	}
@@ -235,7 +235,7 @@ namespace neogfx
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aDimensions, aWindowTitle, aStyle); });
+			[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aDimensions, aWindowTitle, aStyle); });
 
 		init();
 	}
@@ -248,7 +248,7 @@ namespace neogfx
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aPosition, aDimensions, title_text(), aStyle); });
+			[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aPosition, aDimensions, title_text(), aStyle); });
 
 		init();
 	}
@@ -261,7 +261,7 @@ namespace neogfx
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this, 
-				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aPosition, aDimensions, aWindowTitle, aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aPosition, aDimensions, aWindowTitle, aStyle); });
 
 		init();
 	}
@@ -277,7 +277,7 @@ namespace neogfx
 		if (!is_nested())
 			iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this,
-				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, title_text(), aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, title_text(), aStyle); });
 
 		init();
 		centre_on_parent(false);
@@ -294,7 +294,7 @@ namespace neogfx
 		if (!is_nested())
 			iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this, 
-				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle); });
 
 		init();
 		centre_on_parent(false);
@@ -311,7 +311,7 @@ namespace neogfx
 		if (!is_nested())
 			iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this, 
-				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, title_text(), aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, title_text(), aStyle); });
 
 		init();
 		move(aPosition);
@@ -328,7 +328,7 @@ namespace neogfx
 		if (!is_nested())
 			iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this, 
-				[&](i_surface_window& aProxy) { return app::instance().rendering_engine().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(app::instance().surface_manager(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle); });
 
 		init();
 		move(aPosition);

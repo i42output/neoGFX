@@ -75,8 +75,8 @@ namespace neogfx
 		}
 	}
 
-	native_font_face::native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
-		iRenderingEngine(aRenderingEngine), iFont(aFont), iStyle(aStyle), iStyleName(aHandle->style_name), iSize(aSize), iPixelDensityDpi(aDpiResolution), iHandle(aHandle), iHasKerning(!!FT_HAS_KERNING(iHandle))
+	native_font_face::native_font_face(font_id aId, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
+		iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aHandle->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aHandle }, iHasKerning{ !!FT_HAS_KERNING(iHandle) }
 	{
 		set_metrics();
 		sGetAdvanceCache[iHandle] = get_advance_cache_face{};
@@ -89,6 +89,11 @@ namespace neogfx
 		FT_Done_Face(iHandle);
 		if (iFallbackFont != nullptr)
 			iFallbackFont->release();
+	}
+
+	font_id native_font_face::id() const
+	{
+		return iId;
 	}
 
 	i_native_font& native_font_face::native_font()
@@ -194,7 +199,7 @@ namespace neogfx
 	bool native_font_face::has_fallback() const
 	{
 		if (iHasFallback == std::nullopt)
-			iHasFallback = iRenderingEngine.font_manager().has_fallback_font(*this);
+			iHasFallback = service<i_font_manager>::instance().has_fallback_font(*this);
 		return *iHasFallback;
 	}
 
@@ -208,7 +213,7 @@ namespace neogfx
 		if (!has_fallback())
 			throw no_fallback_font();
 		if (iFallbackFont == nullptr)
-			iFallbackFont = iRenderingEngine.font_manager().create_fallback_font(*this);
+			iFallbackFont = service<i_font_manager>::instance().create_fallback_font(*this);
 		return *iFallbackFont;
 	}
 	
@@ -272,7 +277,7 @@ namespace neogfx
 			useSubpixelFiltering = false;
 
 		auto subTextureWidth = bitmap.width / (useSubpixelFiltering ? 3 : 1);
-		auto& subTexture = iRenderingEngine.font_manager().glyph_atlas().create_sub_texture(
+		auto& subTexture = service<i_font_manager>::instance().glyph_atlas().create_sub_texture(
 			neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
 			1.0, texture_sampling::Normal);
 

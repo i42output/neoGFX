@@ -620,7 +620,7 @@ namespace neogfx
 	private:
 		void init()
 		{
-			iSink = app::instance().rendering_engine().subpixel_rendering_changed([this]()
+			iSink = service<i_rendering_engine>::instance().subpixel_rendering_changed([this]()
 			{
 				reset_meta();
 			});

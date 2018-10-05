@@ -31,10 +31,10 @@ namespace neogfx::game
 {
 	struct image
 	{
+		neolib::cookie_auto_ref id;
 		std::string uri;
 		scalar dpiScaleFactor;
 		texture_sampling textureSampling;
-		id_t id;
 
 		struct meta : i_component_data::meta
 		{
@@ -57,13 +57,13 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-					return component_data_field_type::ComponentData | component_data_field_type::Shared | component_data_field_type::Optional;
-				case 1:
-					return component_data_field_type::Scalar;
-				case 2:
-					return component_data_field_type::Uint32 | component_data_field_type::Enum;
-				case 3:
 					return component_data_field_type::Id;
+				case 1:
+					return component_data_field_type::String;
+				case 2:
+					return component_data_field_type::Scalar;
+				case 3:
+					return component_data_field_type::Uint32 | component_data_field_type::Enum;
 				default:
 					throw invalid_field_index();
 				}
@@ -73,7 +73,6 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-					return image::meta::id();
 				case 1:
 				case 2:
 				case 3:
@@ -86,20 +85,12 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
-					"Image",
-					"DPI Scale Factor",
 					"Id"
+					"URI",
+					"DPI Scale Factor",
+					"Texture Sampling"
 				};
 				return sFieldNames[aFieldIndex];
-			}
-			static constexpr bool has_handles = true;
-			static void free_handles(image& aData, i_ecs& aEcs)
-			{
-				if (aData.id != null_id)
-				{
-					(void)aEcs; // todo
-					aData.id = null_id;
-				}
 			}
 		};
 	};

@@ -1,4 +1,4 @@
-// ecs_canvas.cpp
+// canvas.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -18,78 +18,78 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/game/ecs_canvas.hpp>
+#include <neogfx/game/canvas.hpp>
 
 namespace neogfx::game
 {
-	ecs_canvas::ecs_canvas() : 
+	canvas::canvas() : 
 		iEcs{ std::make_shared<game::ecs>() }
 	{
 	}
 
-	ecs_canvas::ecs_canvas(game::i_ecs& aEcs) :
+	canvas::canvas(game::i_ecs& aEcs) :
 		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
 	{
 	}
 
-	ecs_canvas::ecs_canvas(std::shared_ptr<game::i_ecs> aEcs) :
+	canvas::canvas(std::shared_ptr<game::i_ecs> aEcs) :
 		iEcs{ aEcs }
 	{
 	}
 
-	ecs_canvas::ecs_canvas(i_widget& aParent) :
+	canvas::canvas(i_widget& aParent) :
 		widget{ aParent }, 
 		iEcs{ std::make_shared<game::ecs>() }
 	{
 	}
 
-	ecs_canvas::ecs_canvas(i_widget& aParent, game::i_ecs& aEcs) :
+	canvas::canvas(i_widget& aParent, game::i_ecs& aEcs) :
 		widget{ aParent },
 		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
 	{
 	}
 
-	ecs_canvas::ecs_canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs) :
+	canvas::canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs) :
 		widget{ aParent },
 		iEcs{ aEcs }
 	{
 	}
 
-	ecs_canvas::ecs_canvas(i_layout& aLayout) :
+	canvas::canvas(i_layout& aLayout) :
 		widget{ aLayout }, 
 		iEcs{ std::make_shared<game::ecs>() }
 	{
 	}
 
-	ecs_canvas::ecs_canvas(i_layout& aLayout, game::i_ecs& aEcs) :
+	canvas::canvas(i_layout& aLayout, game::i_ecs& aEcs) :
 		widget{ aLayout },
 		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
 	{
 	}
 
-	ecs_canvas::ecs_canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs) :
+	canvas::canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs) :
 		widget{ aLayout },
 		iEcs{ aEcs }
 	{
 	}
 
-	ecs_canvas::~ecs_canvas()
+	canvas::~canvas()
 	{
 	}
 
-	game::i_ecs& ecs_canvas::ecs() const
+	game::i_ecs& canvas::ecs() const
 	{
 		return *iEcs;
 	}
 
-	logical_coordinate_system ecs_canvas::logical_coordinate_system() const
+	logical_coordinate_system canvas::logical_coordinate_system() const
 	{
 		if (widget::has_logical_coordinate_system())
 			return widget::logical_coordinate_system();
 		return neogfx::logical_coordinate_system::AutomaticGame;
 	}
 
-	void ecs_canvas::paint(graphics_context& aGraphicsContext) const
+	void canvas::paint(graphics_context& aGraphicsContext) const
 	{	
 		aGraphicsContext.clear_depth_buffer();
 		painting_entities.trigger(aGraphicsContext);
@@ -107,7 +107,7 @@ namespace neogfx::game
 		entities_painted.trigger(aGraphicsContext);
 	}
 
-	void ecs_canvas::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e)
+	void canvas::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e)
 	{
 		if (aButton == mouse_button::Left)
 		{

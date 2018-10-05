@@ -97,9 +97,10 @@ namespace neogfx
 		struct freetype_load_glyph_error : freetype_error { freetype_load_glyph_error(const std::string& aError) : freetype_error(aError) {} };
 		struct freetype_render_glyph_error : freetype_error { freetype_render_glyph_error(const std::string& aError) : freetype_error(aError) {} };
 	public:
-		native_font_face(i_rendering_engine& aRenderingEngine, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle);
+		native_font_face(font_id aId, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle);
 		~native_font_face();
 	public:
+		font_id id() const override;
 		i_native_font& native_font() override;
 		const std::string& family_name() const override;
 		font::style_e style() const override;
@@ -130,7 +131,7 @@ namespace neogfx
 	private:
 		void set_metrics();
 	private:
-		i_rendering_engine& iRenderingEngine;
+		font_id iId;
 		i_native_font& iFont;
 		font::style_e iStyle;
 		std::string iStyleName;
@@ -138,7 +139,7 @@ namespace neogfx
 		neogfx::size iPixelDensityDpi;
 		FT_Face iHandle;
 		mutable std::unique_ptr<hb_handle> iAuxHandle;
-		mutable std::unique_ptr<i_native_font_face> iFallbackFont;
+		mutable std::shared_ptr<i_native_font_face> iFallbackFont;
 		mutable glyph_map iGlyphs;
 		mutable std::vector<GLubyte> iGlyphTextureData;
 		mutable std::vector<std::array<GLubyte, 4>> iSubpixelGlyphTextureData;

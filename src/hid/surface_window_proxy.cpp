@@ -28,7 +28,7 @@ namespace neogfx
 {
 	surface_window_proxy::surface_window_proxy(i_window& aWindow, std::function<std::unique_ptr<i_native_window>(i_surface_window&)> aNativeWindowCreator) :
 		iWindow{ aWindow }, 
-		iRenderingEngine{ app::instance().rendering_engine() },
+		iRenderingEngine{ service<i_rendering_engine>::instance() },
 		iNativeWindow{ aNativeWindowCreator(*this) },
 		iNativeSurfaceDestroyed{ iNativeWindow->as_lifetime() },
 		iClosed{ false },

@@ -7,7 +7,7 @@
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/game/chrono.hpp>
 #include <neogfx/game/ecs.hpp>
-#include <neogfx/game/ecs_canvas.hpp>
+#include <neogfx/game/canvas.hpp>
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/game/text_mesh.hpp>
@@ -16,7 +16,7 @@
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
 /*
-void create_target(ng::ecs_canvas& aWorld)
+void create_target(ng::canvas& aWorld)
 {
 	auto target = std::make_shared<ng::sprite>(ng::colour::from_hsl(static_cast<ng::scalar>(std::rand() % 360), 1.0, 0.75));
 	aWorld.add_sprite(target);
@@ -31,7 +31,7 @@ void create_target(ng::ecs_canvas& aWorld)
 class missile : public ng::sprite
 {
 public:
-	missile(ng::ecs_canvas& aWorld, const ng::i_sprite& aParent, std::pair<uint32_t, ng::text>& aScore, std::shared_ptr<ng::texture> aExplosion, ng::angle aAngle) :
+	missile(ng::canvas& aWorld, const ng::i_sprite& aParent, std::pair<uint32_t, ng::text>& aScore, std::shared_ptr<ng::texture> aExplosion, ng::angle aAngle) :
 		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }, iScore(aScore), iExplosion(aExplosion)
 	{
 		set_collision_mask(0x1ull);
@@ -79,14 +79,14 @@ public:
 			create_target(iWorld);
 	}
 private:
-	ng::ecs_canvas& iWorld;
+	ng::canvas& iWorld;
 	std::pair<uint32_t, ng::text>& iScore;
 	std::shared_ptr<ng::texture> iExplosion;
 };
 
 void create_game(ng::i_layout& aLayout)
 {
-	auto& spritePlane = aLayout.add(std::make_shared<ng::ecs_canvas>());
+	auto& spritePlane = aLayout.add(std::make_shared<ng::canvas>());
 	spritePlane.set_font(ng::font(spritePlane.font(), ng::font::Bold, 28));
 	spritePlane.set_background_colour(ng::colour::Black);
 	spritePlane.enable_z_sorting(true);
@@ -170,7 +170,7 @@ void create_game(ng::i_layout& aLayout)
 
 	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
 
-	~~~~spritePlane.applying_physics([&spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::ecs_canvas::step_time_interval aPhysicsStepTime)
+	~~~~spritePlane.applying_physics([&spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::canvas::step_time_interval aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		spaceshipSprite.set_acceleration(ng::vec3{
@@ -216,7 +216,7 @@ void create_game(ng::i_layout& aLayout)
 		shipInfo->set_value(oss.str());
 	});
 
-	~~~~spritePlane.physics_applied([debugInfo, &spritePlane](ng::ecs_canvas::step_time_interval)
+	~~~~spritePlane.physics_applied([debugInfo, &spritePlane](ng::canvas::step_time_interval)
 	{
 		debugInfo->set_value(
 			"Objects: " + boost::lexical_cast<std::string>(spritePlane.objects().size()) + "\n" +
@@ -258,7 +258,7 @@ namespace archetypes
 
 void create_game(ng::i_layout& aLayout)
 {
-	auto& canvas = aLayout.add(std::make_shared<ng::game::ecs_canvas>());
+	auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>());
 	auto& ecs = canvas.ecs();
 	canvas.set_font(ng::font(canvas.font(), ng::font::Bold, 28));
 	canvas.set_background_colour(ng::colour::Black);

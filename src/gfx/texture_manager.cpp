@@ -49,15 +49,21 @@ namespace neogfx
 		++textures()[aId].second;
 	}
 
-	void texture_manager::release(texture_id aId)
+	void texture_manager::release(texture_id aId, bool& aFinalRelease)
 	{
-		if (--textures()[aId].second == 0u && textures()[aId].first.use_count() == 1)
-			textures().remove(aId);
+		if (textures()[aId].second == 0u)
+			throw invalid_release();
+		if (--textures()[aId].second == 0u)
+		{
+			aFinalRelease = true;
+			if (textures()[aId].first.use_count() == 1)
+				textures().remove(aId);
+		}
 	}
 
 	std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(const size& aSize)
 	{
-		return std::make_unique<texture_atlas>(*this, aSize);
+		return std::make_unique<texture_atlas>(aSize);
 	}
 
 	void texture_manager::add_sub_texture(i_sub_texture& aSubTexture)

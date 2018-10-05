@@ -24,6 +24,7 @@
 #include <neolib/string_utils.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/gfx/text/font.hpp>
 
 namespace neogfx
@@ -102,7 +103,7 @@ namespace neogfx
 			iValue{},
 			iFlags{},
 			iSource{}, 
-			iFontToken{},
+			iFontId{},
 			iAdvance{}, 
 			iOffset{}
 		{
@@ -112,7 +113,7 @@ namespace neogfx
 			iValue{ aValue }, 
 			iFlags{}, 
 			iSource{ aSource }, 
-			iFontToken{ aFont },
+			iFontId{ service<i_font_manager>::instance(), aFont.id() },
 			iAdvance{ aAdvance },
 			iOffset{ aOffset }
 		{
@@ -122,7 +123,7 @@ namespace neogfx
 			iValue{ aValue }, 
 			iFlags{}, 
 			iSource{}, 
-			iFontToken{},
+			iFontId{},
 			iAdvance{}, 
 			iOffset{}
 		{
@@ -135,7 +136,7 @@ namespace neogfx
 	public:
 		bool has_font() const
 		{
-			return *iFontToken != 0u;
+			return iFontId.valid();
 		}
 		bool has_font_glyph() const
 		{
@@ -206,9 +207,9 @@ namespace neogfx
 		{ 
 			iSource = aSource; 
 		}
-		void set_font(font::token aFontToken)
+		void set_font(font_id aFontId)
 		{
-			iFontToken = aFontToken;
+			iFontId = neolib::cookie_auto_ref{ service<i_font_manager>::instance(), aFontId };
 		}
 		size advance(bool aRoundUp = true) const 
 		{ 
@@ -281,7 +282,7 @@ namespace neogfx
 		}
 		const neogfx::font& font() const
 		{
-			return neogfx::font::from_token(*iFontToken);
+			return service<i_font_manager>::instance().font_from_id(iFontId.cookie());
 		}
 		void kerning_adjust(float aAdjust) 
 		{ 
@@ -296,7 +297,7 @@ namespace neogfx
 		value_type iValue;
 		flags_e iFlags;
 		source_type iSource;
-		neogfx::font::scoped_token iFontToken;
+		neolib::cookie_auto_ref iFontId; // todo: optimize this to something smaller (make cookie type configurable and auto_ref use service<>
 		basic_size<float> iAdvance;
 		basic_size<float> iOffset;
 		mutable basic_size<float> iExtents;

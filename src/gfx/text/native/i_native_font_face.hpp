@@ -38,6 +38,7 @@ namespace neogfx
 	public:
 		virtual ~i_native_font_face() {}
 	public:
+		virtual font_id id() const = 0;
 		virtual i_native_font& native_font() = 0;
 		virtual const std::string& family_name() const = 0;
 		virtual font::style_e style() const = 0;

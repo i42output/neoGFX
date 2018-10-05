@@ -33,7 +33,7 @@ namespace neogfx
 		typedef std::map<dimension, std::string> sets;
 		typedef std::map<std::u32string, sets> emojis;
 	public:
-		emoji_atlas(i_texture_manager& aTextureManager);
+		emoji_atlas();
 	public:
 		virtual bool is_emoji(char32_t aCodePoint) const;
 		virtual bool is_emoji(const std::u32string& aCodePoints) const;

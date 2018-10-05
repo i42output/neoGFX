@@ -828,8 +828,20 @@ namespace neogfx
 	}
 
 	template <>
+	i_rendering_engine& service<i_rendering_engine>::instance()
+	{
+		return app::instance().rendering_engine();
+	}
+
+	template <>
+	i_font_manager& service<i_font_manager>::instance()
+	{
+		return service<i_rendering_engine>::instance().font_manager();
+	}
+
+	template <>
 	i_texture_manager& service<i_texture_manager>::instance()
 	{
-		return app::instance().rendering_engine().texture_manager();
+		return service<i_rendering_engine>::instance().texture_manager();
 	}
 }

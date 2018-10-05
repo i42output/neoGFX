@@ -38,7 +38,7 @@ namespace neogfx
 					iFonts.resize(modelRow + 1);
 				if (iFonts[modelRow] == std::nullopt)
 				{
-					auto& fm = app::instance().rendering_engine().font_manager();
+					auto& fm = service<i_font_manager>::instance();
 					iFonts[modelRow] = font{ fm.font_family(modelRow), font::Normal, app::instance().current_style().font_info().size() };
 				}
 				return iFonts[modelRow];
@@ -78,7 +78,7 @@ namespace neogfx
 					if (aCurrentIndex != std::nullopt)
 					{
 						auto fontFamilyIndex = iFamilyPickerSelectionModel.presentation_model().to_item_model_index(*aCurrentIndex).row();
-						auto& fm = app::instance().rendering_engine().font_manager();
+						auto& fm = service<i_font_manager>::instance();
 						auto styleCount = fm.font_style_count(fontFamilyIndex);
 						for (uint32_t s = 0; s < styleCount; ++s)
 							item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s));
@@ -97,7 +97,7 @@ namespace neogfx
 					iFonts.resize(modelRow + 1);
 				if (iFonts[modelRow] == std::nullopt)
 				{
-					auto& fm = app::instance().rendering_engine().font_manager();
+					auto& fm = service<i_font_manager>::instance();
 					iFonts[modelRow] = font{ fm.font_family(familyModelRow), static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(aIndex))), app::instance().current_style().font_info().size() };
 				}
 				return iFonts[modelRow];
@@ -266,7 +266,7 @@ namespace neogfx
 			update_selected_font(iSizePicker);
 		});
 
-		auto& fm = app::instance().rendering_engine().font_manager();
+		auto& fm = service<i_font_manager>::instance();
 
 		for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
 			iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
@@ -283,7 +283,7 @@ namespace neogfx
 		neolib::scoped_flag sf{ iUpdating };
 
 		auto oldFont = iSelectedFont;
-		auto& fm = app::instance().rendering_engine().font_manager();
+		auto& fm = service<i_font_manager>::instance();
 		if (&aUpdatingWidget == this || &aUpdatingWidget == &iFamilyPicker || &aUpdatingWidget == &iStylePicker)
 		{
 			iSizePicker.model().clear();

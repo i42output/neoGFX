@@ -33,7 +33,7 @@ namespace neogfx::game
 {
 	struct texture
 	{
-		id_t id;
+		neolib::cookie_auto_ref id;
 		texture_type type;
 		texture_sampling sampling;
 		scalar dpiScalingFactor;
@@ -102,11 +102,6 @@ namespace neogfx::game
 					"Sub Texture"
 				};
 				return sFieldNames[aFieldIndex];
-			}
-			static constexpr bool has_handles = true;
-			static void free_handles(texture& aData, i_ecs&)
-			{
-				service<i_texture_manager>::instance().release(aData.id);
 			}
 		};
 	};

@@ -32,11 +32,11 @@ namespace neogfx::game
 {
 	struct font
 	{
+		neolib::cookie_auto_ref id;
 		string familyName;
 		string styleName;
 		scalar pointSize;
 		bool underline;
-		id_t id;
 
 		struct meta : i_component_data::meta
 		{
@@ -59,14 +59,14 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-				case 1:
-					return component_data_field_type::String;
-				case 2:
-					return component_data_field_type::Scalar;
-				case 3:
-					return component_data_field_type::Bool;
-				case 4:
 					return component_data_field_type::Id;
+				case 1:
+				case 2:
+					return component_data_field_type::String;
+				case 3:
+					return component_data_field_type::Scalar;
+				case 4:
+					return component_data_field_type::Bool;
 				default:
 					throw invalid_field_index();
 				}
@@ -75,34 +75,20 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
+					"Id",
 					"Family Name",
 					"Style Name",
 					"Point Size",
-					"Underline",
-					"Id"
+					"Underline"
 				};
 				return sFieldNames[aFieldIndex];
 			}
 			static constexpr bool has_updater = true;
-			static void update(font& aData, i_ecs& aEcs, entity_id)
+			static void update(font& aData, i_ecs&, entity_id)
 			{
-				auto& fontManager = app::instance().rendering_engine().font_manager();
 				neogfx::font_info fontInfo{ aData.familyName, aData.styleName, aData.pointSize };
 				fontInfo.set_underline(aData.underline);
-				if (aData.id != null_id)
-					fontManager.return_token(aEcs.update_handle<neogfx::font>(aData.id, neogfx::font{ fontInfo }.get_token()));
-				else
-					aData.id = aEcs.add_handle<neogfx::font>(neogfx::font{ fontInfo }.get_token());
-			}
-			static constexpr bool has_handles = true;
-			static void free_handles(font& aData, i_ecs& aEcs)
-			{
-				if (aData.id != null_id)
-				{
-					auto& fontManager = app::instance().rendering_engine().font_manager();
-					fontManager.return_token(aEcs.release_handle<neogfx::font::token>(aData.id));
-					aData.id = null_id;
-				}
+				aData.id = neolib::cookie_auto_ref{ service<i_font_manager>::instance(), neogfx::font{ fontInfo }.id() };
 			}
 		};
 	};

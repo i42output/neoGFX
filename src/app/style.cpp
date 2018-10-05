@@ -28,7 +28,7 @@ namespace neogfx
 		iName(aName),
 		iMargins(2.0),
 		iSpacing(2.0, 2.0),
-		iFontInfo(app::instance().rendering_engine().font_manager().default_system_font_info())
+		iFontInfo(service<i_font_manager>::instance().default_system_font_info())
 	{
 		iPalette.changed([this]() { handle_change(style_aspect::Colour); });
 	}

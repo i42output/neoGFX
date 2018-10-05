@@ -90,10 +90,10 @@ namespace neogfx::game
 				{
 					auto lhsTexture = lhs.material.texture != std::nullopt ? 
 						lhs.material.texture->id : lhs.material.sharedTexture != std::nullopt ? 
-							lhs.material.sharedTexture->ptr->id : id_t{};
+							lhs.material.sharedTexture->ptr->id : neolib::cookie_auto_ref{};
 					auto rhsTexture = rhs.material.texture != std::nullopt ?
 						rhs.material.texture->id : rhs.material.sharedTexture != std::nullopt ?
-							rhs.material.sharedTexture->ptr->id : id_t{};
+						rhs.material.sharedTexture->ptr->id : neolib::cookie_auto_ref{};
 					return lhsTexture < rhsTexture;
 				});
 			}

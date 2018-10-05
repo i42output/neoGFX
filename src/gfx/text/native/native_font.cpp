@@ -24,8 +24,8 @@
 
 namespace neogfx
 {
-	native_font::native_font(i_rendering_engine& aRenderingEngine, FT_Library aFontLib, const std::string aFileName) :
-		iRenderingEngine(aRenderingEngine), iFontLib(aFontLib), iSource(filename_type(aFileName)), iCache{}, iFaceCount(0)
+	native_font::native_font(FT_Library aFontLib, const std::string aFileName) :
+		iFontLib(aFontLib), iSource(filename_type(aFileName)), iCache{}, iFaceCount(0)
 	{
 		register_face(0);
 		for (FT_Long f = 1; f < iFaceCount; ++f)
@@ -34,8 +34,8 @@ namespace neogfx
 		iCache.shrink_to_fit();
 	}
 
-	native_font::native_font(i_rendering_engine& aRenderingEngine, FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes) :
-		iRenderingEngine(aRenderingEngine), iFontLib(aFontLib), iSource(memory_block_type(aData, aSizeInBytes)), iCache{}, iFaceCount(0)
+	native_font::native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes) :
+		iFontLib(aFontLib), iSource(memory_block_type(aData, aSizeInBytes)), iCache{}, iFaceCount(0)
 	{
 		register_face(0);
 		for (FT_Long f = 1; f < iFaceCount; ++f)
@@ -226,7 +226,7 @@ namespace neogfx
 		FT_Face newFace = open_face(aFaceIndex);
 		try
 		{
-			std::unique_ptr<i_native_font_face> newFaceObject(new native_font_face(iRenderingEngine, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFace));
+			std::shared_ptr<i_native_font_face> newFaceObject(new native_font_face(service<i_font_manager>::instance().allocate_font_id(), *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFace));
 			newFace = 0;
 			auto iterNewFace = iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), std::move(newFaceObject))).first;
 			return *iterNewFace->second;

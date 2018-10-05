@@ -1,4 +1,4 @@
-// ecs_canvas.hpp
+// canvas.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -24,23 +24,23 @@
 
 namespace neogfx::game
 {
-	class ecs_canvas : public widget
+	class canvas : public widget
 	{
 	public:
 		event<graphics_context&> painting_entities;
 		event<graphics_context&> entities_painted;
 		event<entity_id> entity_clicked;
 	public:
-		ecs_canvas();
-		ecs_canvas(game::i_ecs& aEcs);
-		ecs_canvas(std::shared_ptr<game::i_ecs> aEcs);
-		ecs_canvas(i_widget& aParent);
-		ecs_canvas(i_widget& aParent, game::i_ecs& aEcs);
-		ecs_canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs);
-		ecs_canvas(i_layout& aLayout);
-		ecs_canvas(i_layout& aLayout, game::i_ecs& aEcs);
-		ecs_canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs);
-		~ecs_canvas();
+		canvas();
+		canvas(game::i_ecs& aEcs);
+		canvas(std::shared_ptr<game::i_ecs> aEcs);
+		canvas(i_widget& aParent);
+		canvas(i_widget& aParent, game::i_ecs& aEcs);
+		canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs);
+		canvas(i_layout& aLayout);
+		canvas(i_layout& aLayout, game::i_ecs& aEcs);
+		canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs);
+		~canvas();
 	public:
 		game::i_ecs& ecs() const;
 	public:

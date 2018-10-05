@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/cookie_jar.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/i_sub_texture.hpp>
@@ -29,7 +30,7 @@ namespace neogfx
 {
 	class i_native_texture;
 
-	class i_texture_manager
+	class i_texture_manager : public neolib::i_cookie_consumer
 	{
 		friend class texture_atlas;
 	public:
@@ -41,9 +42,6 @@ namespace neogfx
 		virtual std::shared_ptr<i_texture> create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour()) = 0;
 		virtual std::shared_ptr<i_texture> create_texture(const i_image& aImage) = 0;
 		virtual void clear_textures() = 0;
-	public:
-		virtual void add_ref(texture_id aId) = 0;
-		virtual void release(texture_id aId) = 0;
 	public:
 		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;
 	private:

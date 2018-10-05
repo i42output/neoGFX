@@ -221,7 +221,7 @@ namespace neogfx
 
 	opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
 		iRenderer{aRenderer},
-		iFontManager{*this},
+		iFontManager{},
 		iActiveProgram{iShaderPrograms.end()},
 		iSubpixelRendering{true}
 	{

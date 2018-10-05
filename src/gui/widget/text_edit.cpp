@@ -761,7 +761,7 @@ namespace neogfx
 		case cursor::PreviousWord:
 			if (!iText.empty())
 			{
-				auto const& emojiAtlas = app::instance().rendering_engine().font_manager().emoji_atlas();
+				auto const& emojiAtlas = service<i_font_manager>::instance().emoji_atlas();
 				auto p = cursor().position();
 				if (p == iText.size())
 					--p;
@@ -793,7 +793,7 @@ namespace neogfx
 		case cursor::NextWord:
 			if (!iText.empty())
 			{
-				auto const& emojiAtlas = app::instance().rendering_engine().font_manager().emoji_atlas();
+				auto const& emojiAtlas = service<i_font_manager>::instance().emoji_atlas();
 				auto p = cursor().position();
 				while (p < iText.size() && get_text_category(emojiAtlas, iText[p]) == text_category::Whitespace)
 					++p;
@@ -1165,7 +1165,7 @@ namespace neogfx
 	{
 		if (iText[aTextPositionLeft] == U'\n' || iText[aTextPositionRight] == U'\n')
 			return false;
-		auto const& emojiAtlas = app::instance().rendering_engine().font_manager().emoji_atlas();
+		auto const& emojiAtlas = service<i_font_manager>::instance().emoji_atlas();
 		return get_text_category(emojiAtlas, iText[aTextPositionLeft]) == get_text_category(emojiAtlas, iText[aTextPositionRight]);
 	}
 
@@ -1366,7 +1366,7 @@ namespace neogfx
 				refresh_paragraph(iText.begin(), 0);
 			}
 		});
-		iSink += app::instance().rendering_engine().subpixel_rendering_changed([this]()
+		iSink += service<i_rendering_engine>::instance().subpixel_rendering_changed([this]()
 		{
 			refresh_paragraph(iText.begin(), 0);
 		});

@@ -67,28 +67,26 @@ namespace neogfx
 	{
 		return game::texture
 		{
-			aTexture.id(),
+			neolib::cookie_auto_ref{ service<i_texture_manager>::instance(), aTexture.id() },
 			aTexture.type(),
 			aTexture.sampling(),
 			aTexture.dpi_scale_factor(),
 			aTexture.extents().to_vec2(),
 			{}
 		};
-		service<i_texture_manager>::instance().add_ref(aTexture.id());
 	}
 
 	inline game::texture to_ecs_component(const i_texture& aTexture, const rect& aTextureRect)
 	{
 		return game::texture
 		{
-			aTexture.id(),
+			neolib::cookie_auto_ref{ service<i_texture_manager>::instance(), aTexture.id() },
 			aTexture.type(),
 			aTexture.sampling(),
 			aTexture.dpi_scale_factor(),
 			aTexture.extents().to_vec2(),
 			aTextureRect.to_aabb_2d()
 		};
-		service<i_texture_manager>::instance().add_ref(aTexture.id());
 	}
 
 	inline game::texture to_ecs_component(const i_image& aImage)
@@ -96,14 +94,13 @@ namespace neogfx
 		texture newTexture{ aImage };
 		return game::texture
 		{
-			newTexture.id(),
+			neolib::cookie_auto_ref{ service<i_texture_manager>::instance(), newTexture.id() },
 			newTexture.type(),
 			newTexture.sampling(),
 			newTexture.dpi_scale_factor(),
 			newTexture.extents().to_vec2(),
 			{}
 		};
-		service<i_texture_manager>::instance().add_ref(newTexture.id());
 	}
 
 	inline game::texture to_ecs_component(const i_image& aImage, const rect& aTextureRect)
@@ -111,14 +108,13 @@ namespace neogfx
 		texture newTexture{ aImage };
 		return game::texture
 		{
-			newTexture.id(),
+			neolib::cookie_auto_ref{ service<i_texture_manager>::instance(), newTexture.id() },
 			newTexture.type(),
 			newTexture.sampling(),
 			newTexture.dpi_scale_factor(),
 			newTexture.extents().to_vec2(),
 			aTextureRect.to_aabb_2d()
 		};
-		service<i_texture_manager>::instance().add_ref(newTexture.id());
 	}
 
 }
