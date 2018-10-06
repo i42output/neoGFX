@@ -700,10 +700,17 @@ int main(int argc, char* argv[])
 				sCustomColours = ng::colour_dialog::custom_colour_list{};
 				std::fill(sCustomColours->begin(), sCustomColours->end(), ng::colour::White);
 			}
+			auto oldColour = ng::app::instance().change_style("Keypad").palette().colour();
 			ng::colour_dialog colourPicker(window, ng::app::instance().change_style("Keypad").palette().colour());
 			colourPicker.custom_colours() = *sCustomColours;
+			colourPicker.selection_changed([&]()
+			{
+				ng::app::instance().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
+			});
 			if (colourPicker.exec() == ng::dialog_result::Accepted)
 				ng::app::instance().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
+			else
+				ng::app::instance().change_style("Keypad").palette().set_colour(oldColour);
 			*sCustomColours = colourPicker.custom_colours();
 		});
 

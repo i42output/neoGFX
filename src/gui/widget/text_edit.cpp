@@ -951,32 +951,10 @@ namespace neogfx
 	{
 		if (std::holds_alternative<colour>(default_style().text_colour()))
 			return static_variant_cast<const colour&>(default_style().text_colour());
-		else if(std::holds_alternative<gradient>(default_style().text_colour()))
+		else if (std::holds_alternative<gradient>(default_style().text_colour()))
 			return static_variant_cast<const gradient&>(default_style().text_colour()).at(0.0);
-		optional_colour textColour;
-		const i_widget* w = nullptr;
-		do
-		{
-			if (w == nullptr)
-				w = this;
-			else
-				w = &w->parent();
-			if (w->has_background_colour())
-			{
-				textColour = w->background_colour().to_hsl().lightness() >= 0.5f ? colour::Black : colour::White;
-				break;
-			}
-			else if (w->has_foreground_colour())
-			{
-				textColour = w->foreground_colour().to_hsl().lightness() >= 0.5f ? colour::Black : colour::White;
-				break;
-			}
-		} while (w->has_parent());
-		colour defaultTextColour = app::instance().current_style().palette().text_colour();
-		if (textColour == std::nullopt || textColour->similar_intensity(defaultTextColour))
-			return defaultTextColour;
 		else
-			return *textColour;
+			return app::instance().current_style().palette().text_colour_for_widget(*this);
 	}
 
 	neogfx::cursor& text_edit::cursor() const

@@ -71,12 +71,12 @@ namespace neogfx
 					w = &w->parent();
 				if (w->has_background_colour())
 				{
-					textColour = w->background_colour().luma() >= 0.5 ? colour::Black : colour::White;
+					textColour = w->background_colour().brightness() >= 0.509 ? colour::Black : colour::White;
 					break;
 				}
 				else if (w->has_foreground_colour())
 				{
-					textColour = w->foreground_colour().luma() >= 0.5 ? colour::Black : colour::White;
+					textColour = w->foreground_colour().brightness() >= 0.509 ? colour::Black : colour::White;
 					break;
 				}
 			} while (w->has_parent());

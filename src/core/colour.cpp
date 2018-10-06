@@ -212,6 +212,11 @@ namespace neogfx
 		return hsv_colour(*this);
 	}
 
+	double colour::brightness() const
+	{
+		return std::min(1.0, std::max(0.0, std::sqrt(red<double>() * red<double>() * 0.241 + green<double>() * green<double>() * 0.691 + blue<double>() * blue<double>() * 0.068)));
+	}
+
 	double colour::intensity() const
 	{ 
 		return (red<double>() + green<double>() + blue<double>()) / 3.0;
