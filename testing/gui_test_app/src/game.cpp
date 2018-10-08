@@ -257,7 +257,7 @@ namespace archetypes
 }
 
 void create_game(ng::i_layout& aLayout)
-{
+{/*
 	auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>());
 	auto& ecs = canvas.ecs();
 	canvas.set_font(ng::font(canvas.font(), ng::font::Bold, 28));
@@ -267,5 +267,5 @@ void create_game(ng::i_layout& aLayout)
 	auto spaceship = ecs.create_entity(archetypes::spaceship.id(), ng::game::rigid_body{ ng::vec3{ 400.0, 18.0, 0.0 }, 1.0 });
 	neolib::basic_random<double> prng;
 	for (int i = 0; i < 1000; ++i)
-		auto asteroid = ecs.create_entity(archetypes::asteroid.id(), ng::game::rigid_body{ ng::vec3{ prng(1000.0), prng(1000.0), 0.0 }, 1.0 });
+		auto asteroid = ecs.create_entity(archetypes::asteroid.id(), ng::game::rigid_body{ ng::vec3{ prng(1000.0), prng(1000.0), 0.0 }, 1.0 }); */
 }

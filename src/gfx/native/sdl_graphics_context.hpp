@@ -30,8 +30,8 @@ namespace neogfx
 	class sdl_graphics_context : public opengl_graphics_context
 	{
 	public:
-		sdl_graphics_context(i_rendering_engine& aRenderingEngine, const sdl_window& aRenderTarget);
-		sdl_graphics_context(i_rendering_engine& aRenderingEngine, const sdl_window& aRenderTarget, const i_widget& aWidget);
+		sdl_graphics_context(const sdl_window& aRenderTarget);
+		sdl_graphics_context(const sdl_window& aRenderTarget, const i_widget& aWidget);
 		sdl_graphics_context(const sdl_graphics_context& aOther);
 		virtual std::unique_ptr<i_native_graphics_context> clone() const;
 		~sdl_graphics_context();

@@ -22,14 +22,16 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/cookie_jar.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/gfx/i_texture_atlas.hpp>
-#include <neogfx/gfx/text/i_emoji_atlas.hpp>
+#include <neogfx/core/device_metrics.hpp>
 #include "font.hpp"
 
 namespace neogfx
 {
 	class i_native_font;
 	class i_native_font_face;
+
+	class i_texture_atlas;
+	class i_emoji_atlas;
 
 	class i_fallback_font_info
 	{

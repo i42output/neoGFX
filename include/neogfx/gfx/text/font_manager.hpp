@@ -97,7 +97,8 @@ namespace neogfx
 		i_native_font& find_best_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize);
 	private:
 		void add_ref(font_id aId) override;
-		void release(font_id aId, bool& aFinalRelease) override;
+		void release(font_id aId) override;
+		long use_count(font_id aId) const override;
 	private:
 		font_info iDefaultSystemFontInfo;
 		fallback_font_info iDefaultFallbackFontInfo;

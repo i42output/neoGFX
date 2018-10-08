@@ -29,9 +29,9 @@ namespace neogfx::game
 	time_system::time_system(game::i_ecs& aEcs) :
 		system{ aEcs }
 	{
-		if (!ecs().component_registered<clock>())
+		if (!ecs().shared_component_registered<clock>())
 		{
-			ecs().register_component<clock>();
+			ecs().register_shared_component<clock>();
 			ecs().populate_shared<clock>("World Clock", clock{ 0ll, chrono::to_flicks(0.010).count() });
 			apply();
 		}

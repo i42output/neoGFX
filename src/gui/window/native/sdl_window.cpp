@@ -462,12 +462,12 @@ namespace neogfx
 
 	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context() const
 	{
-		return std::unique_ptr<i_native_graphics_context>(new sdl_graphics_context(rendering_engine(), *this));
+		return std::unique_ptr<i_native_graphics_context>(new sdl_graphics_context(*this));
 	}
 
 	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context(const i_widget& aWidget) const
 	{
-		return std::unique_ptr<i_native_graphics_context>(new sdl_graphics_context(rendering_engine(), *this, aWidget));
+		return std::unique_ptr<i_native_graphics_context>(new sdl_graphics_context(*this, aWidget));
 	}
 
 	void sdl_window::close(bool aForce)

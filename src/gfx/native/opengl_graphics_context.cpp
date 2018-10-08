@@ -360,33 +360,33 @@ namespace neogfx
 		};
 	}
 
-	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface) :
-		iRenderingEngine(aRenderingEngine), 
+	opengl_graphics_context::opengl_graphics_context(const i_native_surface& aSurface) :
+		iRenderingEngine(service<i_rendering_engine>::instance()), 
 		iSurface(aSurface), 
 		iLogicalCoordinateSystem(aSurface.logical_coordinate_system()),
 		iLogicalCoordinates(aSurface.logical_coordinates()), 
 		iSmoothingMode(neogfx::smoothing_mode::None),
-		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on()),
+		iSubpixelRendering(rendering_engine().is_subpixel_rendering_on()),
 		iClipCounter(0),
 		iLineStippleActive(false)
 	{
-		iRenderingEngine.activate_context(iSurface);
-		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
+		rendering_engine().activate_context(iSurface);
+		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
-	opengl_graphics_context::opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget) :
-		iRenderingEngine(aRenderingEngine), 
+	opengl_graphics_context::opengl_graphics_context(const i_native_surface& aSurface, const i_widget& aWidget) :
+		iRenderingEngine(service<i_rendering_engine>::instance()),
 		iSurface(aSurface), 
 		iLogicalCoordinateSystem(aWidget.logical_coordinate_system()),
 		iLogicalCoordinates(aSurface.logical_coordinates()),
 		iSmoothingMode(neogfx::smoothing_mode::None),
-		iSubpixelRendering(aRenderingEngine.is_subpixel_rendering_on()),
+		iSubpixelRendering(rendering_engine().is_subpixel_rendering_on()),
 		iClipCounter(0),
 		iLineStippleActive(false)
 	{
-		iRenderingEngine.activate_context(iSurface);
-		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
+		rendering_engine().activate_context(iSurface);
+		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
@@ -400,8 +400,8 @@ namespace neogfx
 		iClipCounter(0),
 		iLineStippleActive(false)
 	{
-		iRenderingEngine.activate_context(iSurface);
-		iRenderingEngine.activate_shader_program(*this, iRenderingEngine.default_shader_program());
+		rendering_engine().activate_context(iSurface);
+		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(iSmoothingMode);
 	}
 
@@ -627,7 +627,7 @@ namespace neogfx
 				break;
 			case graphics_operation::operation_type::DrawTexture:
 				{
-					use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.texture_shader_program() };
+					use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program() };
 					for (auto op = opBatch.first; op != opBatch.second; ++op)
 					{
 						const auto& args = static_variant_cast<const graphics_operation::draw_texture&>(*op);
@@ -826,19 +826,19 @@ namespace neogfx
 	void opengl_graphics_context::gradient_on(const gradient& aGradient, const rect& aBoundingBox)
 	{
 		basic_rect<float> boundingBox{ aBoundingBox };
-		iShaderProgramStack.emplace_back(*this, iRenderingEngine, iRenderingEngine.gradient_shader_program());
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(logical_coordinates().first.y));
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("radGradientAngle", std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f);
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientStartFrom", std::holds_alternative<gradient::corner_e>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<gradient::corner_e>(aGradient.orientation())) : -1);
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientSize", static_cast<int>(aGradient.size()));
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
+		iShaderProgramStack.emplace_back(*this, iRenderingEngine, rendering_engine().gradient_shader_program());
+		rendering_engine().gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(logical_coordinates().first.y));
+		rendering_engine().gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
+		rendering_engine().gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
+		rendering_engine().gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
+		rendering_engine().gradient_shader_program().set_uniform_variable("radGradientAngle", std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f);
+		rendering_engine().gradient_shader_program().set_uniform_variable("nGradientStartFrom", std::holds_alternative<gradient::corner_e>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<gradient::corner_e>(aGradient.orientation())) : -1);
+		rendering_engine().gradient_shader_program().set_uniform_variable("nGradientSize", static_cast<int>(aGradient.size()));
+		rendering_engine().gradient_shader_program().set_uniform_variable("nGradientShape", static_cast<int>(aGradient.shape()));
 		basic_vector<float, 2> gradientExponents = (aGradient.exponents() != std::nullopt ? *aGradient.exponents() : vec2{2.0, 2.0});
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("exponents", gradientExponents.x, gradientExponents.y);
+		rendering_engine().gradient_shader_program().set_uniform_variable("exponents", gradientExponents.x, gradientExponents.y);
 		basic_point<float> gradientCentre = (aGradient.centre() != std::nullopt ? *aGradient.centre() : point{});
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
+		rendering_engine().gradient_shader_program().set_uniform_variable("posGradientCentre", gradientCentre.x, gradientCentre.y);
 		auto combinedStops = aGradient.combined_stops();
 		iGradientStopPositions.reserve(combinedStops.size());
 		iGradientStopColours.reserve(combinedStops.size());
@@ -849,8 +849,8 @@ namespace neogfx
 			iGradientStopPositions.push_back(static_cast<float>(stop.first));
 			iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
 		}
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(iGradientStopPositions.size()));
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("nFilterSize", static_cast<int>(opengl_renderer::GRADIENT_FILTER_SIZE));
+		rendering_engine().gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(iGradientStopPositions.size()));
+		rendering_engine().gradient_shader_program().set_uniform_variable("nFilterSize", static_cast<int>(opengl_renderer::GRADIENT_FILTER_SIZE));
 		auto filter = static_gaussian_filter<float, opengl_renderer::GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
 		// todo: remove the following cast when gradient textures abstracted in rendering engine base class interface
 		auto& gradientTextures = static_cast<opengl_renderer&>(iRenderingEngine).gradient_textures(); 
@@ -863,9 +863,9 @@ namespace neogfx
 		glCheck(glActiveTexture(GL_TEXTURE4));
 		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, gradientTextures[2]));
 		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, opengl_renderer::GRADIENT_FILTER_SIZE, opengl_renderer::GRADIENT_FILTER_SIZE, GL_RED, GL_FLOAT, &filter[0][0]));
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("texStopPositions", 2);
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("texStopColours", 3);
-		iRenderingEngine.gradient_shader_program().set_uniform_variable("texFilter", 4);
+		rendering_engine().gradient_shader_program().set_uniform_variable("texStopPositions", 2);
+		rendering_engine().gradient_shader_program().set_uniform_variable("texStopColours", 3);
+		rendering_engine().gradient_shader_program().set_uniform_variable("texFilter", 4);
 		glCheck(glActiveTexture(GL_TEXTURE1));
 	}
 
@@ -1170,7 +1170,7 @@ namespace neogfx
 		if (aRect.empty())
 			return;
 
-		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
 		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
@@ -1376,8 +1376,8 @@ namespace neogfx
 
 		if (firstOp.glyph.is_emoji())
 		{
-			use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.default_shader_program() };
-			auto const& emojiAtlas = iRenderingEngine.font_manager().emoji_atlas();
+			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+			auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
 			draw_texture(
 				rect_to_mesh(rect{ firstOp.point, firstOp.glyph.extents() }), 
@@ -1505,11 +1505,11 @@ namespace neogfx
 
 		disable_anti_alias daa(*this);
 
-		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.glyph_shader_program(firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())};
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().glyph_shader_program(firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())};
 
 		for (uint32_t pass = (hasEffects ? 1 : 2); pass <= 2; ++pass)
 		{
-			auto& shader = iRenderingEngine.active_shader_program();
+			auto& shader = rendering_engine().active_shader_program();
 
 			rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
 
@@ -1602,19 +1602,19 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_texture(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect)
 	{
-		render_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aShaderEffect);
+		draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aShaderEffect);
 	}
 	
-	void opengl_graphics_context::render_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, shader_effect aShaderEffect)
+	void opengl_graphics_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, shader_effect aShaderEffect)
 	{
 		colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
-		if (aColour != std::nullopt)
-			colourizationColour = *aColour;
-
+		if (aMeshRenderer.material.colour != std::nullopt)
+			colourizationColour = aMeshRenderer.material.colour->rgba;
+		/*
 		auto const& vertices = aMesh.vertices;
 
-		use_shader_program usp{ *this, iRenderingEngine, iRenderingEngine.texture_shader_program() };
-		iRenderingEngine.active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program() };
+		rendering_engine().active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
 
 		glCheck(glActiveTexture(GL_TEXTURE1));
 		glCheck(glEnable(GL_BLEND));
@@ -1640,12 +1640,12 @@ namespace neogfx
 					glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
 					glCheck(glBindTexture(GL_TEXTURE_2D, textureHandle));
 					if (first)
-						iRenderingEngine.active_shader_program().set_uniform_variable("tex", 1);
+						rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
 				}
 
 				auto textureRect = (*aMesh.textures())[f.texture].second ? *(*aMesh.textures())[f.texture].second : rect{ point{ 0.0, 0.0 }, texture.extents() };
 
-				if (texture.type() == i_texture::SubTexture)
+				if (texture.type() == texture_type::SubTexture)
 					textureRect.position() += texture.as_sub_texture().atlas_location().top_left();
 				iTempTextureCoords.clear();
 				texture_vertices(texture.storage_extents(), textureRect + point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
@@ -1676,7 +1676,7 @@ namespace neogfx
 			}
 		}
 
-		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture))); */
 	}
 
 	xyz opengl_graphics_context::to_shader_vertex(const point& aPoint, coordinate aZ) const

@@ -33,8 +33,8 @@ namespace neogfx::game
 	{
 		if (!ecs().system_registered<time_system>())
 			ecs().register_system<time_system>();
-		if (!ecs().component_registered<physics>())
-			ecs().register_component<physics>();
+		if (!ecs().shared_component_registered<physics>())
+			ecs().register_shared_component<physics>();
 		if (ecs().shared_component<physics>().component_data().empty())
 			ecs().populate_shared<physics>("Standard Universe", physics{ 6.67408e-11 });
 	}

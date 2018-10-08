@@ -57,8 +57,8 @@ namespace neogfx
 			}
 		};
 	public:
-		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface);
-		opengl_graphics_context(i_rendering_engine& aRenderingEngine, const i_native_surface& aSurface, const i_widget& aWidget);
+		opengl_graphics_context(const i_native_surface& aSurface);
+		opengl_graphics_context(const i_native_surface& aSurface, const i_widget& aWidget);
 		opengl_graphics_context(const opengl_graphics_context& aOther);
 		~opengl_graphics_context();
 	public:
@@ -109,7 +109,7 @@ namespace neogfx
 		void fill_shape(const graphics_operation::batch& aFillShapeOps);
 		void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
 		void draw_texture(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect);
-		void render_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, shader_effect aShaderEffect);
+		void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, shader_effect aShaderEffect);
 	private:
 		std::size_t max_operations(const graphics_operation::operation& aOperation);
 		void apply_scissor();

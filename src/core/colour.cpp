@@ -42,15 +42,34 @@ namespace neogfx
 	{
 	}
 
-	colour::colour(argb aValue) : iValue{aValue}
+	colour::colour(argb aValue) : iValue{ aValue }
 	{
 	}
 
 	colour::colour(component aRed, component aGreen, component aBlue, component aAlpha) :
-		iValue((static_cast<argb>(aAlpha) << AlphaShift) |
-		(static_cast<argb>(aRed) << RedShift) |
-		(static_cast<argb>(aGreen) << GreenShift) |
-		(static_cast<argb>(aBlue) << BlueShift)) 
+		colour{
+			(static_cast<argb>(aAlpha) << AlphaShift) |
+			(static_cast<argb>(aRed) << RedShift) |
+			(static_cast<argb>(aGreen) << GreenShift) |
+			(static_cast<argb>(aBlue) << BlueShift) }
+	{
+	}
+
+	colour::colour(const vec4& aValue) :
+		colour{
+			static_cast<component>(aValue[0] * 0xFF),
+			static_cast<component>(aValue[1] * 0xFF),
+			static_cast<component>(aValue[2] * 0xFF),
+			static_cast<component>(aValue[3] * 0xFF) }
+	{
+	}
+
+	colour::colour(const vec4f& aValue) :
+		colour{
+			static_cast<component>(aValue[0] * 0xFF),
+			static_cast<component>(aValue[1] * 0xFF),
+			static_cast<component>(aValue[2] * 0xFF),
+			static_cast<component>(aValue[3] * 0xFF) }
 	{
 	}
 

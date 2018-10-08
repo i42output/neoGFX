@@ -158,41 +158,48 @@ namespace neogfx::game
 		typedef typename base_type::data_meta_type data_meta_type;
 		typedef typename base_type::value_type value_type;
 		typedef typename base_type::component_data_t component_data_t;
-		typedef std::vector<entity_id> component_data_index_t;
-		typedef std::vector<component_data_index_t::size_type> reverse_index_t;
+		typedef std::vector<entity_id> component_data_indices_t;
+		typedef component_data_indices_t::size_type reverse_index_t;
+		typedef std::vector<reverse_index_t> reverse_indices_t;
 	private:
 		typedef static_component<Data> self_type;
 	private:
-		static constexpr component_data_index_t::size_type invalid = ~component_data_index_t::size_type{};
+		static constexpr reverse_index_t invalid = ~reverse_index_t{};
 	public:
 		static_component(game::i_ecs& aEcs) : 
 			base_type{ aEcs }
 		{
 		}
 	public:
-		const component_data_index_t& index() const
+		const component_data_indices_t& indices() const
 		{
-			return iIndex;
+			return iIndices;
 		}
-		component_data_index_t& index()
+		component_data_indices_t& indices()
 		{
-			return iIndex;
+			return iIndices;
 		}
-		const reverse_index_t& reverse_index() const
+		const reverse_indices_t& reverse_indices() const
 		{
-			return iReverseIndex;
+			return iReverseIndices;
 		}
-		reverse_index_t& reverse_index()
+		reverse_indices_t& reverse_indices()
 		{
-			return iReverseIndex;
+			return iReverseIndices;
+		}
+		reverse_index_t reverse_index(entity_id aEntity) const
+		{
+			if (reverse_indices().size() > aEntity)
+				return reverse_indices()[aEntity];
+			return invalid;
 		}
 		bool has_entity_record(entity_id aEntity) const override
 		{
-			return reverse_index()[aEntity] != invalid;
+			return reverse_index(aEntity) != invalid;
 		}
 		const data_type& entity_record(entity_id aEntity) const
 		{
-			auto reverseIndex = reverse_index()[aEntity];
+			auto reverseIndex = reverse_index(aEntity);
 			if (reverseIndex == invalid)
 				throw entity_record_not_found();
 			return base_type::component_data()[reverseIndex];
@@ -203,13 +210,13 @@ namespace neogfx::game
 		}
 		void destroy_entity_record(entity_id aEntity) override
 		{
-			auto& reverseIndex = reverse_index()[aEntity];
+			auto reverseIndex = reverse_index(aEntity);
 			if (reverseIndex == invalid)
 				throw entity_record_not_found();
 			if constexpr (data_meta_type::has_handles)
 				data_meta_type::free_handles(base_type::component_data()[reverseIndex], ecs());
-			index()[reverseIndex] = null_entity;
-			reverseIndex = invalid;
+			indices()[reverseIndex] = null_entity;
+			reverse_indices()[aEntity] = invalid;
 		}
 		value_type& populate(entity_id aEntity, const value_type& aData)
 		{
@@ -238,8 +245,8 @@ namespace neogfx::game
 					std::swap(*lhs, *rhs);
 					auto lhsIndex = lhs - base_type::component_data().begin();
 					auto rhsIndex = rhs - base_type::component_data().begin();
-					std::swap(index()[lhsIndex], index()[rhsIndex]);
-					std::swap(reverse_index()[index()[lhsIndex]], reverse_index()[index()[rhsIndex]]);
+					std::swap(indices()[lhsIndex], indices()[rhsIndex]);
+					std::swap(reverse_indices()[indices()[lhsIndex]], reverse_indices()[indices()[rhsIndex]]);
 				}, aComparator);
 		}
 	private:
@@ -251,7 +258,7 @@ namespace neogfx::game
 			base_type::component_data().push_back(std::forward<T>(aComponentData));
 			try
 			{
-				index().push_back(aEntity);
+				indices().push_back(aEntity);
 			}
 			catch (...)
 			{
@@ -260,14 +267,14 @@ namespace neogfx::game
 			}
 			try
 			{
-				if (reverse_index().size() < aEntity)
-					reverse_index().resize(aEntity, invalid);
-				reverse_index()[aEntity] = index().size() - 1;
+				if (reverse_indices().size() <= aEntity)
+					reverse_indices().resize(aEntity + 1, invalid);
+				reverse_indices()[aEntity] = indices().size() - 1;
 			}
 			catch (...)
 			{
 				base_type::component_data().pop_back();
-				index().pop_back();
+				indices().pop_back();
 			}
 			return base_type::component_data().back();
 		}
@@ -279,8 +286,8 @@ namespace neogfx::game
 			return record;
 		}
 	private:
-		component_data_index_t iIndex;
-		reverse_index_t iReverseIndex;
+		component_data_indices_t iIndices;
+		reverse_indices_t iReverseIndices;
 	};
 
 	template <typename Data>

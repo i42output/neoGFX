@@ -456,15 +456,19 @@ namespace neogfx
 		++iIdCache[aId].second;
 	}
 
-	void font_manager::release(font_id aId, bool& aFinalRelease)
+	void font_manager::release(font_id aId)
 	{
 		if (iIdCache[aId].second == 0u)
 			throw invalid_release();
 		if (--iIdCache[aId].second == 0u)
 		{
-			aFinalRelease = true;
 			if (iIdCache[aId].first.use_count() == 1)
 				iIdCache.remove(aId);
 		}
+	}
+
+	long font_manager::use_count(font_id aId) const
+	{
+		return iIdCache[aId].second;
 	}
 }

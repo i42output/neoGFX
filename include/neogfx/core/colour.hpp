@@ -716,6 +716,8 @@ namespace neogfx
 			colour(static_cast<component>(aRed), static_cast<component>(aGreen), static_cast<component>(aBlue), static_cast<component>(aAlpha))
 		{
 		}
+		colour(const vec4& aValue);
+		colour(const vec4f& aValue);
 		colour(const std::string& aTextValue);
 		// operations
 	public:

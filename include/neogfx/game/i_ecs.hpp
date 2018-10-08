@@ -153,8 +153,7 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void populate(entity_id aEntity, ComponentData&& aComponentData)
 		{
-			auto& c = static_cast<static_component<ComponentData>&>(*components().find(ComponentData::meta::id())->second);
-			c.populate(aEntity, std::forward<ComponentData>(aComponentData));
+			component<ComponentData>().populate(aEntity, std::forward<ComponentData>(aComponentData));
 		}
 		template <typename... ComponentData, typename ComponentDataTail>
 		void populate_shared(const std::string& aName, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
@@ -165,8 +164,7 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void populate_shared(const std::string& aName, ComponentData&& aComponentData)
 		{
-			auto& c = static_cast<static_shared_component<ComponentData>&>(*shared_components().find(ComponentData::meta::id())->second);
-			c.populate(aName, std::forward<ComponentData>(aComponentData));
+			shared_component<ComponentData>().populate(aName, std::forward<ComponentData>(aComponentData));
 		}
 		template <typename ComponentData>
 		bool component_instantiated() const
@@ -222,9 +220,7 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void register_component()
 		{
-			register_component(
-				ComponentData::meta::id(),
-				[&]() { return std::unique_ptr<i_component>{std::make_unique<static_component<ComponentData>>(*this)}; });
+			register_component(ComponentData::meta::id(), [&]() { return std::unique_ptr<i_component>{std::make_unique<static_component<ComponentData>>(*this)}; });
 		}
 		template <typename ComponentData>
 		bool shared_component_registered() const
@@ -234,9 +230,7 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void register_shared_component()
 		{
-			register_shared_component(
-				ComponentData::meta::id(),
-				[&]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ComponentData>>(*this)}; });
+			register_shared_component(ComponentData::meta::id(), [&]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ComponentData>>(*this)}; });
 		}
 		template <typename System>
 		bool system_registered() const

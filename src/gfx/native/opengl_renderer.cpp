@@ -36,6 +36,35 @@
 
 namespace neogfx
 {
+	namespace
+	{
+		std::atomic<i_rendering_engine*> sFirstInstance;
+
+		void set_first_instance(i_rendering_engine& aInstance)
+		{
+			i_rendering_engine* np = nullptr;
+			sFirstInstance.compare_exchange_strong(np, &aInstance);
+		}
+	}
+
+	template <>
+	i_rendering_engine& service<i_rendering_engine>::instance()
+	{
+		return *sFirstInstance;
+	}
+
+	template <>
+	i_font_manager& service<i_font_manager>::instance()
+	{
+		return service<i_rendering_engine>::instance().font_manager();
+	}
+
+	template <>
+	i_texture_manager& service<i_texture_manager>::instance()
+	{
+		return service<i_rendering_engine>::instance().texture_manager();
+	}
+
 	frame_counter::frame_counter(uint32_t aDuration) : iTimer{ app::instance(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
@@ -220,7 +249,7 @@ namespace neogfx
 	}
 
 	opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
-		iRenderer{aRenderer},
+		iRenderer{(set_first_instance(*this), aRenderer)},
 		iFontManager{},
 		iActiveProgram{iShaderPrograms.end()},
 		iSubpixelRendering{true}

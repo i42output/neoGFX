@@ -77,6 +77,7 @@ namespace neogfx
 		pages::iterator create_page(dimension aDpiScaleFactor, texture_sampling aSampling);
 		std::pair<pages::iterator, rect> allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling);
 	private:
+		i_texture_manager& iTextureManager;
 		size iPageSize;
 		pages iPages;
 		entries iEntries;
