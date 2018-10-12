@@ -172,6 +172,7 @@ namespace neogfx
 		bool operator<(const font& aRhs) const;
 	public:
 		i_native_font_face& native_font_face() const;
+		std::shared_ptr<i_native_font_face> native_font_face_ptr() const;
 		// attributes
 	private:
 		mutable std::shared_ptr<instance> iInstance;

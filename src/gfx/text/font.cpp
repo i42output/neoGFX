@@ -303,6 +303,7 @@ namespace neogfx
 		instance& operator=(const instance& aOther);
 	public:
 		i_native_font_face& native_font_face() const;
+		std::shared_ptr<i_native_font_face> native_font_face_ptr() const;
 		bool has_fallback_font() const;
 		font fallback_font() const;
 	public:
@@ -349,6 +350,11 @@ namespace neogfx
 		return *iNativeFontFace;
 	}
 
+	std::shared_ptr<i_native_font_face> font::instance::native_font_face_ptr() const
+	{
+		return iNativeFontFace;
+	}
+
 	bool font::instance::has_fallback_font() const
 	{
 		if (iHasFallbackFont == std::nullopt)
@@ -371,7 +377,7 @@ namespace neogfx
 	long font::instance::use_count() const
 	{
 		if (iNativeFontFace != nullptr)
-			iNativeFontFace.use_count();
+			return iNativeFontFace.use_count();
 		return 0;
 	}
 
@@ -592,5 +598,10 @@ namespace neogfx
 	i_native_font_face& font::native_font_face() const
 	{
 		return iInstance->native_font_face();
+	}
+
+	std::shared_ptr<i_native_font_face> font::native_font_face_ptr() const
+	{
+		return iInstance->native_font_face_ptr();
 	}
 }

@@ -1380,7 +1380,7 @@ namespace neogfx
 			auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
 			draw_texture(
-				rect_to_mesh(rect{ firstOp.point, firstOp.glyph.extents() }), 
+				rect_to_mesh(rect{ firstOp.point, glyph_extents(firstOp) }),
 				game::material{ 
 					{}, 
 					{}, 
@@ -1393,7 +1393,7 @@ namespace neogfx
 			return;
 		}
 
-		const i_glyph_texture& firstGlyphTexture = firstOp.glyph.glyph_texture();
+		const i_glyph_texture& firstGlyphTexture = glyph_texture(firstOp);
 
 		auto need = 6u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline)
@@ -1414,8 +1414,8 @@ namespace neogfx
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 
-				const font& glyphFont = drawOp.glyph.font();
-				const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
+				const font& glyphFont = service<i_font_manager>::instance().font_from_id(drawOp.glyphFont);
+				const i_glyph_texture& glyphTexture = glyph_texture(drawOp);
 
 				vec3 glyphOrigin(
 					drawOp.point.x + glyphTexture.placement().x,

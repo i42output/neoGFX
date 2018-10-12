@@ -100,6 +100,9 @@ namespace neogfx
 		void release(font_id aId) override;
 		long use_count(font_id aId) const override;
 	private:
+		std::shared_ptr<i_native_font_face> add_font(i_native_font_face& aNewFont);
+		void cleanup();
+	private:
 		font_info iDefaultSystemFontInfo;
 		fallback_font_info iDefaultFallbackFontInfo;
 		FT_Library iFontLib;

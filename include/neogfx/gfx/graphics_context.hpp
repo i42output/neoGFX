@@ -153,13 +153,13 @@ namespace neogfx
 		void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
 		void draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const;
-		void draw_glyph_text(const point& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const;
+		void draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const;
 		void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const;
-		void draw_glyph_text(const vec3& aPoint, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const;
-		void draw_glyph(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const;
-		void draw_glyph(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const;
-		void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const;
-		void draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const;
+		void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const;
+		void draw_glyph(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const;
+		void draw_glyph(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const;
+		void draw_glyph_underline(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const;
+		void draw_glyph_underline(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const;
 		void set_glyph_text_cache(glyph_text& aGlyphTextCache) const;
 		void reset_glyph_text_cache() const;
 		void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const;
@@ -199,8 +199,8 @@ namespace neogfx
 		static i_native_font_face& to_native_font_face(const font& aFont);
 		// own
 	private:
-		glyph_text::container to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
-		glyph_text::container to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
+		glyph_text to_glyph_text_impl(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
+		glyph_text to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
 		// attributes
 	private:
 		const i_surface& iSurface;
@@ -222,12 +222,12 @@ namespace neogfx
 	};
 
 	template <typename Iter>
-	inline void draw_glyph_text(const graphics_context& aGraphicsContext, const vec3& aPoint, Iter aTextBegin, Iter aTextEnd, const text_appearance& aAppearance)
+	inline void draw_glyph_text(const graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aTextBegin, Iter aTextEnd, const text_appearance& aAppearance)
 	{
 		vec3 pos = aPoint;
 		for (Iter i = aTextBegin; i != aTextEnd; ++i)
 		{
-			aGraphicsContext.draw_glyph(pos + i->offset().to_vec3(), *i, aAppearance);
+			aGraphicsContext.draw_glyph(pos + i->offset().to_vec3(), i->font(aGlyphText), *i, aAppearance);
 			pos.x += i->advance().cx;
 		}
 	}

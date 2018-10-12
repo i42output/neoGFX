@@ -26,6 +26,7 @@
 #include <neogfx/core/path.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/gfx/text/font.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
 
@@ -226,8 +227,19 @@ namespace neogfx
 		{
 			vec3 point;
 			glyph glyph;
+			font_id glyphFont;
 			text_appearance appearance;
 		};
+
+		inline const i_glyph_texture& glyph_texture(const draw_glyph& aDrawGlyph)
+		{
+			return aDrawGlyph.glyph.glyph_texture(service<i_font_manager>::instance().font_from_id(aDrawGlyph.glyphFont));
+		}
+
+		inline size glyph_extents(const draw_glyph& aDrawGlyph)
+		{
+			return aDrawGlyph.glyph.extents(service<i_font_manager>::instance().font_from_id(aDrawGlyph.glyphFont));
+		}
 
 		struct draw_texture
 		{

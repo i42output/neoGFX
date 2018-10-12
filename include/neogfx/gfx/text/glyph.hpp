@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <optional>
+#include <neolib/vecarray.hpp>
 #include <neolib/string_utils.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
@@ -85,8 +86,21 @@ namespace neogfx
 		bool operator!=(const character_type& aRhs) const { return !(*this == aRhs); }
 	};
 
+	class glyph;
+
+	class i_glyph_container
+	{
+	public:
+		typedef uint16_t glyph_font_index;
+	public:
+		virtual const font& glyph_font(const glyph& aGlyph) const = 0;
+		virtual void set_glyph_font(glyph& aGlyph, const font& aFont) = 0;
+	};
+
 	class glyph
 	{
+	public:
+		struct no_font_specified : std::logic_error { no_font_specified() : std::logic_error("neogfx::glyph::no_font_specified") {} };
 	public:
 		enum flags_e : uint8_t
 		{
@@ -97,35 +111,49 @@ namespace neogfx
 	public:
 		typedef uint32_t value_type;
 		typedef std::pair<uint32_t, uint32_t> source_type;
+		typedef i_glyph_container::glyph_font_index glyph_font_index;
+	public:
+		static constexpr glyph_font_index NO_FONT_SPECIFIED = static_cast<glyph_font_index>(~0);
 	public:
 		glyph() :
 			iType{},
 			iValue{},
 			iFlags{},
 			iSource{}, 
-			iFontId{},
+			iFontIndex{ NO_FONT_SPECIFIED },
 			iAdvance{}, 
 			iOffset{}
 		{
 		}
-		glyph(const character_type& aType, value_type aValue, source_type aSource, const neogfx::font& aFont, size aAdvance, size aOffset) :
+		glyph(const character_type& aType, value_type aValue, source_type aSource, i_glyph_container& aGlyphContainer, neogfx::font& aFont, size aAdvance, size aOffset) :
 			iType{ aType.category, aType.direction }, 
 			iValue{ aValue }, 
 			iFlags{}, 
 			iSource{ aSource }, 
-			iFontId{ service<i_font_manager>::instance(), aFont.id() },
+			iFontIndex{ NO_FONT_SPECIFIED },
 			iAdvance{ aAdvance },
 			iOffset{ aOffset }
 		{
+			aGlyphContainer.set_glyph_font(*this, aFont);
 		}
 		glyph(const character_type& aType, value_type aValue) :
 			iType{ aType.category, aType.direction }, 
 			iValue{ aValue }, 
 			iFlags{}, 
 			iSource{}, 
-			iFontId{},
+			iFontIndex{ NO_FONT_SPECIFIED },
 			iAdvance{}, 
 			iOffset{}
+		{
+		}
+		glyph(const glyph& aOther) :
+			iType{ aOther.iType },
+			iValue{ aOther.iValue },
+			iFlags{ aOther.iFlags },
+			iSource{ aOther.iSource },
+			iFontIndex{ aOther.iFontIndex },
+			iAdvance{ aOther.iAdvance },
+			iOffset{ aOther.iOffset }
 		{
 		}
 	public:
@@ -136,7 +164,7 @@ namespace neogfx
 	public:
 		bool has_font() const
 		{
-			return iFontId.valid();
+			return iFontIndex != NO_FONT_SPECIFIED;
 		}
 		bool has_font_glyph() const
 		{
@@ -207,9 +235,13 @@ namespace neogfx
 		{ 
 			iSource = aSource; 
 		}
-		void set_font(font_id aFontId)
+		void set_font_index(glyph_font_index aFontIndex)
 		{
-			iFontId = neolib::cookie_auto_ref{ service<i_font_manager>::instance(), aFontId };
+			iFontIndex = aFontIndex;
+		}
+		void set_font(const neogfx::font& aFont, i_glyph_container& aGlyphContainer)
+		{
+			aGlyphContainer.set_glyph_font(*this, aFont);
 		}
 		size advance(bool aRoundUp = true) const 
 		{ 
@@ -227,15 +259,19 @@ namespace neogfx
 		{ 
 			iOffset = aOffset; 
 		}
-		size extents() const
+		size extents(const i_glyph_container& aGlyphContainer) const
+		{
+			return extents(font(aGlyphContainer));
+		}
+		size extents(const font& aFont) const
 		{
 			if (iExtents == basic_size<float>{})
 			{
-				iExtents = size{ advance().cx, !is_emoji() ? font().height() : advance().cx };
+				iExtents = size{ advance().cx, !is_emoji() ? aFont.height() : advance().cx };
 				try
 				{
 					if (has_font_glyph())
-						iExtents.cx = static_cast<float>(offset().cx + glyph_texture().placement().x + glyph_texture().texture().extents().cx);
+						iExtents.cx = static_cast<float>(offset().cx + glyph_texture(aFont).placement().x + glyph_texture(aFont).texture().extents().cx);
 				}
 				catch (...)
 				{
@@ -280,60 +316,70 @@ namespace neogfx
 		{ 
 			iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); 
 		}
-		const neogfx::font& font() const
+		glyph_font_index font_index() const
 		{
-			return service<i_font_manager>::instance().font_from_id(iFontId.cookie());
+			if (iFontIndex != NO_FONT_SPECIFIED)
+				return iFontIndex;
+			throw no_font_specified();
+		}
+		const neogfx::font& font(const i_glyph_container& aGlyphContainer) const
+		{
+			return aGlyphContainer.glyph_font(*this);
 		}
 		void kerning_adjust(float aAdjust) 
 		{ 
 			iAdvance.cx += aAdjust; 
 		}
-		const i_glyph_texture& glyph_texture() const
+		const i_glyph_texture& glyph_texture(const i_glyph_container& aGlyphContainer) const
 		{
-			return font().glyph_texture(*this);
+			return glyph_texture(font(aGlyphContainer));
+		}
+		const i_glyph_texture& glyph_texture(const neogfx::font& aFont) const
+		{
+			return aFont.glyph_texture(*this);
 		}
 	private:
 		character_type iType;
 		value_type iValue;
 		flags_e iFlags;
 		source_type iSource;
-		neolib::cookie_auto_ref iFontId; // todo: optimize this to something smaller (make cookie type configurable and auto_ref use service<>
+		glyph_font_index iFontIndex;
 		basic_size<float> iAdvance;
 		basic_size<float> iOffset;
 		mutable basic_size<float> iExtents;
 	};
 
-	class glyph_text : private std::vector<glyph>
+	constexpr std::size_t SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT = 16;
+
+	class glyph_text : public i_glyph_container, private neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>
 	{
+	private:
+		static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
+		typedef neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1> container;
 	public:
-		typedef std::vector<glyph> container;
 		using container::const_iterator;
+	private:
+		typedef neolib::vecarray<neolib::cookie_auto_ref, SMALL_OPTIMIZATION_FONT_COUNT, -1> font_container;
 	public:
 		glyph_text() :
-			container{},
-			iExtents{}
+			container{}
 		{
 		}
 		template <typename Iter>
 		glyph_text(Iter aBegin, Iter aEnd) :
-			container{ aBegin, aEnd },
-			iExtents{ extents(begin(), end()) }
+			container{ aBegin, aEnd }
 		{
 		}
 		glyph_text(const glyph_text& aOther) :
 			container{ aOther },
+			iFonts{ aOther.iFonts },
 			iExtents{ aOther.iExtents }
 		{
-
 		}
 		glyph_text(glyph_text&& aOther) :
 			container{ std::move(aOther) },
-			iExtents{ extents(begin(), end()) }
-		{
-		}
-		glyph_text(container&& aOther) :
-			container{ std::move(aOther) },
-			iExtents{ extents(begin(), end()) }
+			iFonts{ std::move(aOther.iFonts) },
+			iExtents{ aOther.iExtents }
 		{
 		}
 	public:
@@ -342,6 +388,7 @@ namespace neogfx
 			if (&aOther == this)
 				return *this;
 			container::operator=(aOther);
+			iFonts = aOther.iFonts;
 			iExtents = aOther.iExtents;
 			return *this;
 		}
@@ -350,6 +397,7 @@ namespace neogfx
 			if (&aOther == this)
 				return *this;
 			container::operator=(std::move(aOther));
+			iFonts = std::move(aOther.iFonts);
 			iExtents = aOther.iExtents;
 			return *this;
 		}
@@ -357,13 +405,62 @@ namespace neogfx
 		using container::cbegin;
 		using container::cend;
 		using container::empty;
+		using container::begin;
+		using container::end;
+		iterator begin()
+		{
+			iExtents = std::nullopt;
+			return container::begin();
+		}
+		iterator end()
+		{
+			iExtents = std::nullopt;
+			return container::end();
+		}
+	public:
+		using container::back;
+		reference back()
+		{
+			iExtents = std::nullopt;
+			return container::back();
+		}
+	public:
+		template< class... Args >
+		reference emplace_back(Args&&... args)
+		{
+			auto& result  = container::emplace_back(std::forward<Args>(args)...);
+			iExtents = std::nullopt;
+			return result;
+		}
+		void push_back(const glyph& aGlyph)
+		{
+			container::push_back(aGlyph);
+			iExtents = std::nullopt;
+		}
+		void clear()
+		{
+			container::clear();
+			iFonts.clear();
+			iExtents = std::nullopt;
+		}
 	public:
 		bool operator==(const glyph_text& aOther) const
 		{
 			return static_cast<const container&>(*this) == static_cast<const container&>(aOther);
 		}
 	public:
-		static neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true)
+		const neogfx::font& glyph_font(const glyph& aGlyph) const override
+		{
+			return service<i_font_manager>::instance().font_from_id(fonts()[aGlyph.font_index()].cookie());
+		}
+		void set_glyph_font(glyph& aGlyph, const neogfx::font& aFont) override
+		{
+			if (fonts().empty() || fonts().back().cookie() != aFont.id())
+				fonts().push_back(neolib::cookie_auto_ref{ service<i_font_manager>::instance(), aFont.id() });
+			aGlyph.set_font_index(static_cast<glyph_font_index>(fonts().size() - 1));
+		}
+	public:
+		neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const
 		{
 			if (aBegin == aEnd)
 				return neogfx::size{ 0.0, 0.0 };
@@ -372,19 +469,21 @@ namespace neogfx
 			{
 				const auto& g = *i;
 				result.cx += g.advance().cx;
-				result.cy = std::max(result.cy, g.extents().cy);
+				result.cy = std::max(result.cy, g.extents(*this).cy);
 			}
 			if (aEndIsLineEnd)
 			{
 				const auto& lastGlyph = *std::prev(aEnd);
-				result.cx += (lastGlyph.extents().cx - lastGlyph.advance().cx);
+				result.cx += (lastGlyph.extents(*this).cx - lastGlyph.advance().cx);
 			}
 			return result.ceil();
 		}
 	public:
 		const neogfx::size& extents() const
 		{
-			return iExtents;
+			if (iExtents == std::nullopt)
+				iExtents = extents(begin(), end());
+			return *iExtents;
 		}
 		std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const
 		{
@@ -410,7 +509,17 @@ namespace neogfx
 			return result;
 		}
 	private:
-		neogfx::size iExtents;
+		const font_container& fonts() const
+		{
+			return iFonts;
+		}
+		font_container& fonts()
+		{
+			return iFonts;
+		}
+	private:
+		font_container iFonts;
+		mutable std::optional<neogfx::size> iExtents;
 	};
 
 	template <typename Iter>

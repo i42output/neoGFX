@@ -57,6 +57,8 @@ namespace neogfx
 		texture_list::iterator find_texture(const i_image& aImage);
 		std::shared_ptr<i_texture> add_texture(std::shared_ptr<i_native_texture> aTexture);
 	private:
+		void cleanup();
+	private:
 		texture_list iTextures;
 		std::vector<std::unique_ptr<i_texture_atlas>> iTextureAtlases;
 	};

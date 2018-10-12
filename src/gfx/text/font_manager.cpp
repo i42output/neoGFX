@@ -182,6 +182,7 @@ namespace neogfx
 
 	font_manager::~font_manager()
 	{
+		iIdCache.clear();
 		iFontFamilies.clear();
 		iNativeFonts.clear();
 		FT_Done_FreeType(iFontLib);
@@ -232,16 +233,12 @@ namespace neogfx
 
 	std::shared_ptr<i_native_font_face> font_manager::create_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
 	{
-		auto newFont = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, aDevice)));
-		iIdCache.add({ newFont, 0u });
-		return newFont;
+		return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, aDevice));
 	}
 
 	std::shared_ptr<i_native_font_face> font_manager::create_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
 	{
-		auto newFont = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(find_font(aFamilyName, aStyleName, aSize).create_face(aStyleName, aSize, aDevice)));
-		iIdCache.add({ newFont, 0u });
-		return newFont;
+		return add_font(find_font(aFamilyName, aStyleName, aSize).create_face(aStyleName, aSize, aDevice));
 	}
 
 	std::shared_ptr<i_native_font_face> font_manager::create_font(const font_info& aInfo, const i_device_resolution& aDevice)
@@ -254,16 +251,12 @@ namespace neogfx
 
 	std::shared_ptr<i_native_font_face> font_manager::create_font(i_native_font& aFont, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
 	{
-		auto newFont = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aFont.create_face(aStyle, aSize, aDevice)));
-		iIdCache.add({ newFont, 0u });
-		return newFont;
+		return add_font(aFont.create_face(aStyle, aSize, aDevice));
 	}
 
 	std::shared_ptr<i_native_font_face> font_manager::create_font(i_native_font& aFont, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
 	{
-		auto newFont = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aFont.create_face(aStyleName, aSize, aDevice)));
-		iIdCache.add({ newFont, 0u });
-		return newFont;
+		return add_font(aFont.create_face(aStyleName, aSize, aDevice));
 	}
 
 	bool font_manager::is_font_file(const std::string& aFileName) const
@@ -470,5 +463,28 @@ namespace neogfx
 	long font_manager::use_count(font_id aId) const
 	{
 		return iIdCache[aId].second;
+	}
+
+	std::shared_ptr<i_native_font_face> font_manager::add_font(i_native_font_face& aNewFont)
+	{
+		// cleanup opportunity
+		cleanup();
+		if (iIdCache.contains(aNewFont.id()))
+			return iIdCache[aNewFont.id()].first.native_font_face_ptr();
+		auto newFont = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aNewFont));
+		iIdCache.add({ newFont, 0u });
+		return newFont;
+	}
+
+	void font_manager::cleanup()
+	{
+		for (auto i = iIdCache.begin(); i != iIdCache.end();)
+		{
+			auto& cacheEntry = *i;
+			if (cacheEntry.first.use_count() == 1 && cacheEntry.second == 0u)
+				i = iIdCache.remove(*i);
+			else
+				++i;
+		}
 	}
 }

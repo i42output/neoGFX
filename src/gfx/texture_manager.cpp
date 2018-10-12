@@ -119,6 +119,12 @@ namespace neogfx
 	std::shared_ptr<i_texture> texture_manager::add_texture(std::shared_ptr<i_native_texture> aTexture)
 	{
 		// cleanup opportunity
+		cleanup();
+		return textures().add(texture_list_entry{ aTexture, 0u })->first;
+	}
+
+	void texture_manager::cleanup()
+	{
 		for (auto i = textures().begin(); i != textures().end();)
 		{
 			auto& texture = *i;
@@ -127,6 +133,5 @@ namespace neogfx
 			else
 				++i;
 		}
-		return textures().add(texture_list_entry{ aTexture, 0u })->first;
 	}
 }

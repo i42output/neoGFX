@@ -127,54 +127,75 @@ namespace neogfx
 		template <typename Node = unknown_node>
 		class tag
 		{
+		private:
+			static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
+		private:
+			typedef neolib::variant<style_list::const_iterator, nullptr_t> tag_style;
 		public:
-			typedef neolib::variant<style_list::const_iterator, nullptr_t> contents_type;
+			struct tag_data
+			{
+				tag_style style;
+				bool operator==(const tag_data& rhs) const
+				{
+					return style == rhs.style;
+				}
+			};
+		public:
 			template <typename Node2>
 			struct rebind { typedef tag<Node2> type; };
 		private:
 			typedef Node node_type;
 		public:
-			tag(const contents_type& aContents) :
+			tag(const tag_data& aContents) :
 				iNode(nullptr), iContents(aContents)
 			{
-				if (std::holds_alternative<style_list::const_iterator>(iContents))
-					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
+				if (std::holds_alternative<style_list::const_iterator>(style()))
+					static_variant_cast<style_list::const_iterator>(style())->add_ref();
 			}
 			template <typename Node2>
 			tag(node_type& aNode, const tag<Node2>& aTag) : 
 				iNode(&aNode), iContents(aTag.iContents)
 			{
-				if (std::holds_alternative<style_list::const_iterator>(iContents))
-					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
+				if (std::holds_alternative<style_list::const_iterator>(style()))
+					static_variant_cast<style_list::const_iterator>(style())->add_ref();
 			}
 			tag(const tag& aOther) : 
 				iNode(aOther.iNode), iContents(aOther.iContents)
 			{
-				if (std::holds_alternative<style_list::const_iterator>(iContents))
-					static_variant_cast<style_list::const_iterator>(iContents)->add_ref();
+				if (std::holds_alternative<style_list::const_iterator>(style()))
+					static_variant_cast<style_list::const_iterator>(style())->add_ref();
 			}
 			~tag()
 			{
-				if (std::holds_alternative<style_list::const_iterator>(iContents))
-					static_variant_cast<style_list::const_iterator>(iContents)->release();
+				if (std::holds_alternative<style_list::const_iterator>(style()))
+					static_variant_cast<style_list::const_iterator>(style())->release();
 			}
 		public:
 			bool operator==(const tag& aOther) const
 			{
-				return iContents == aOther.iContents;
+				return contents() == aOther.contents();
 			}
 			bool operator!=(const tag& aOther) const
 			{
 				return !(*this == aOther);
 			}
 		public:
-			const contents_type& contents() const
+			const tag_style& style() const
+			{
+				return contents().style;
+			}
+		private:
+			const tag_data& contents() const
+			{
+				return iContents;
+			}
+			tag_data& contents()
 			{
 				return iContents;
 			}
 		private:
 			node_type* iNode;
-			contents_type iContents;
+			tag_data iContents;
 		};
 		typedef neolib::tag_array<tag<>, char32_t, 16, 256> document_text;
 		class paragraph_positioned_glyph : public glyph
@@ -266,53 +287,57 @@ namespace neogfx
 				return *this;
 			}
 		public:
+			text_edit& parent() const
+			{
+				return *iParent;
+			}
 			document_text::size_type text_start_index() const
 			{
-				return iParent->iGlyphParagraphs.foreign_index(iSelf).characters();
+				return parent().iGlyphParagraphs.foreign_index(iSelf).characters();
 			}
 			document_text::const_iterator text_start() const
 			{
-				return iParent->iText.begin() + text_start_index();
+				return parent().iText.begin() + text_start_index();
 			}
 			document_text::iterator text_start()
 			{
-				return iParent->iText.begin() + text_start_index();
+				return parent().iText.begin() + text_start_index();
 			}
 			document_text::size_type text_end_index() const
 			{
-				return (iParent->iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + iParent->iGlyphParagraphs.skip_after(iSelf)).characters();
+				return (parent().iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + parent().iGlyphParagraphs.skip_after(iSelf)).characters();
 			}
 			document_text::const_iterator text_end() const
 			{
-				return iParent->iText.begin() + text_end_index();
+				return parent().iText.begin() + text_end_index();
 			}
 			document_text::iterator text_end()
 			{
-				return iParent->iText.begin() + text_end_index();
+				return parent().iText.begin() + text_end_index();
 			}
 			document_glyphs::size_type start_index() const
 			{
-				return iParent->iGlyphParagraphs.foreign_index(iSelf).glyphs();
+				return parent().iGlyphParagraphs.foreign_index(iSelf).glyphs();
 			}
 			document_glyphs::const_iterator start() const
 			{
-				return iParent->iGlyphs.begin() + start_index();
+				return parent().iGlyphs.begin() + start_index();
 			}
 			document_glyphs::iterator start()
 			{
-				return iParent->iGlyphs.begin() + start_index();
+				return parent().iGlyphs.begin() + start_index();
 			}
 			document_glyphs::size_type end_index() const
 			{
-				return (iParent->iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + iParent->iGlyphParagraphs.skip_after(iSelf)).glyphs();
+				return (parent().iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + parent().iGlyphParagraphs.skip_after(iSelf)).glyphs();
 			}
 			document_glyphs::const_iterator end() const
 			{
-				return iParent->iGlyphs.begin() + end_index();
+				return parent().iGlyphs.begin() + end_index();
 			}
 			document_glyphs::iterator end()
 			{
-				return iParent->iGlyphs.begin() + end_index();
+				return parent().iGlyphs.begin() + end_index();
 			}
 			dimension height(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const
 			{
@@ -326,9 +351,10 @@ namespace neogfx
 					for (auto i = glyphsStartIndex; i != glyphsEndIndex; ++i)
 					{
 						const auto& glyph = *(iterGlyph++);
-						const auto& tagContents = iParent->iText.tag(iParent->iText.begin() + textStartIndex + glyph.source().first).contents();
-						const auto& style = std::holds_alternative<style_list::const_iterator>(tagContents) ? *static_variant_cast<style_list::const_iterator>(tagContents) : iParent->default_style();
-						dimension cy = glyph.extents().cy;
+						const auto& tag = parent().iText.tag(parent().iText.begin() + textStartIndex + glyph.source().first);
+						const auto& style = std::holds_alternative<style_list::const_iterator>(tag.style()) ? *static_variant_cast<style_list::const_iterator>(tag.style()) : parent().default_style();
+						auto& glyphFont = style.font() != std::nullopt ? *style.font() : parent().font();
+						dimension cy = glyph.extents(glyphFont).cy;
 						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect_type::Outline)
 							cy += (style.text_effect()->width() * 2.0);
 						if (i == glyphsStartIndex || cy != previousHeight)
@@ -340,10 +366,10 @@ namespace neogfx
 					iHeights[end_index()] = 0.0;
 				}
 				dimension result = 0.0;
-				auto start = iHeights.lower_bound(aStart - iParent->iGlyphs.begin());
-				if (start != iHeights.begin() && aStart < iParent->iGlyphs.begin() + start->first)
+				auto start = iHeights.lower_bound(aStart - parent().iGlyphs.begin());
+				if (start != iHeights.begin() && aStart < parent().iGlyphs.begin() + start->first)
 					--start;
-				auto stop = iHeights.lower_bound(aEnd - iParent->iGlyphs.begin());
+				auto stop = iHeights.lower_bound(aEnd - parent().iGlyphs.begin());
 				if (start == stop && stop != iHeights.end())
 					++stop;
 				for (auto i = start; i != stop; ++i)
