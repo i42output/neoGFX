@@ -143,6 +143,12 @@ namespace neogfx
 			close_face(static_cast<FT_Face>(aFace.handle()));
 			iFaceUsage.erase(iFaceUsage.find(&aFace));
 			aFace.update_handle(nullptr);
+			for (auto f = iFaces.begin(); f != iFaces.end(); ++f)
+				if (&*f->second == &aFace)
+				{
+					iFaces.erase(f);
+					break;
+				}
 		}
 		if (iFaceUsage.empty())
 		{
@@ -226,7 +232,8 @@ namespace neogfx
 		FT_Face newFace = open_face(aFaceIndex);
 		try
 		{
-			std::shared_ptr<i_native_font_face> newFaceObject(new native_font_face(service<i_font_manager>::instance().allocate_font_id(), *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFace));
+			auto newFontId = service<i_font_manager>::instance().allocate_font_id();
+			std::shared_ptr<i_native_font_face> newFaceObject(new native_font_face(newFontId, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFace));
 			newFace = 0;
 			auto iterNewFace = iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), std::move(newFaceObject))).first;
 			return *iterNewFace->second;
