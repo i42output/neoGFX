@@ -958,9 +958,6 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		vec2 extents = aRect.extents().to_vec2();
-		vec2 offset = extents / 2.0;
-		vec3 centre = vec3{ aRect.x, aRect.y, 0.0 } + vec3{ offset.x, offset.y, 0.0 };
 		draw_texture(rect_to_mesh(aRect), aTexture, aColour, aShaderEffect);
 	}
 
@@ -971,9 +968,6 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		vec2 extents = aRect.extents().to_vec2();
-		vec2 offset = extents / 2.0;
-		vec3 centre = vec3{ aRect.x, aRect.y, 0.0 } + vec3{ offset.x, offset.y, 0.0 };
 		draw_texture(rect_to_mesh(aRect), aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 

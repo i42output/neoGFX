@@ -38,7 +38,7 @@ namespace neogfx::game
 		texture_sampling sampling;
 		scalar dpiScalingFactor;
 		vec2 extents;
-		std::optional<aabb_2d> subTexture;
+		optional_aabb_2d subTexture;
 
 		struct meta : i_component_data::meta
 		{

@@ -1610,8 +1610,13 @@ namespace neogfx
 		colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
 		if (aMeshRenderer.material.colour != std::nullopt)
 			colourizationColour = aMeshRenderer.material.colour->rgba;
-		/*
-		auto const& vertices = aMesh.vertices;
+
+		auto const& vertices = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->vertices : aMeshFilter.sharedMesh.ptr->vertices;
+		auto const& uv = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->uv : aMeshFilter.sharedMesh.ptr->uv;
+		auto const& faces = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->faces : aMeshFilter.sharedMesh.ptr->faces;
+
+		auto const& material = aMeshRenderer.material;
+		auto const& patches = aMeshRenderer.patches; // todo
 
 		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program() };
 		rendering_engine().active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
@@ -1627,28 +1632,44 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures };
 
 			GLuint textureHandle = 0;
+			const i_sub_texture* subTexture = nullptr;
+			vec2 textureStorageExtents;
+			vec2 uvFixupCoefficient;
+			vec2 uvFixupOffset;
 			bool first = true;
 			bool newTexture = false;
-			for (auto const& f : aMesh.faces)
+			for (auto const& face : faces)
 			{
-				auto const& texture = *(*aMesh.textures())[f.texture].first;
+				auto const& maybeTexture = material.texture;
+				if (maybeTexture == std::nullopt)
+					continue;
+
+				auto const& texture = *service<i_texture_manager>::instance().find_texture(maybeTexture->id.cookie());
 
 				if (first || textureHandle != reinterpret_cast<GLuint>(texture.native_texture()->handle()))
 				{
 					newTexture = true;
+					textureStorageExtents = texture.storage_extents().to_vec2();
+					if (texture.type() == texture_type::Texture)
+						subTexture = nullptr;
+					else
+						subTexture = &texture.as_sub_texture();
+					if (!subTexture)
+					{
+						uvFixupCoefficient = texture.extents().to_vec2();
+						uvFixupOffset = vec2{ 1.0, 1.0 };
+					}
+					else
+					{
+						uvFixupCoefficient = subTexture->extents().to_vec2();
+						uvFixupOffset = subTexture->atlas_location().top_left().to_vec2();
+					}
 					textureHandle = reinterpret_cast<GLuint>(texture.native_texture()->handle());
 					glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
 					glCheck(glBindTexture(GL_TEXTURE_2D, textureHandle));
 					if (first)
 						rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
 				}
-
-				auto textureRect = (*aMesh.textures())[f.texture].second ? *(*aMesh.textures())[f.texture].second : rect{ point{ 0.0, 0.0 }, texture.extents() };
-
-				if (texture.type() == texture_type::SubTexture)
-					textureRect.position() += texture.as_sub_texture().atlas_location().top_left();
-				iTempTextureCoords.clear();
-				texture_vertices(texture.storage_extents(), textureRect + point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
 
 				if (newTexture)
 				{
@@ -1657,18 +1678,20 @@ namespace neogfx
 						vertexArrays.execute();
 				}
 
-				for (auto vi : f.vertices)
+				
+				for (auto faceVertexIndex : face)
 				{
-					auto const& v = vertices[vi];
+					auto const& faceVertex = vertices[faceVertexIndex];
+					auto const& faceUv = (uv[faceVertexIndex] * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
 					vertexArrays.push_back(
 						opengl_standard_vertex_arrays::vertex{
-							v.coordinates,
+							faceVertex,
 							std::array<uint8_t, 4>{{
 								colourizationColour.red(),
 								colourizationColour.green(),
 								colourizationColour.blue(),
 								colourizationColour.alpha()}},
-							vec2{{(iTempTextureCoords[0] + (iTempTextureCoords[2] - iTempTextureCoords[0]) * ~v.textureCoordinates.xy).v }}
+							faceUv
 						});
 				}
 
@@ -1676,7 +1699,7 @@ namespace neogfx
 			}
 		}
 
-		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture))); */
+		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 
 	xyz opengl_graphics_context::to_shader_vertex(const point& aPoint, coordinate aZ) const

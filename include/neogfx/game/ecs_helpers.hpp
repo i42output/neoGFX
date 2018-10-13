@@ -72,7 +72,7 @@ namespace neogfx
 			aTexture.sampling(),
 			aTexture.dpi_scale_factor(),
 			aTexture.extents().to_vec2(),
-			{}
+			aTexture.type() == texture_type::Texture ? optional_aabb_2d{} : aTexture.as_sub_texture().atlas_location().to_aabb_2d()
 		};
 	}
 
