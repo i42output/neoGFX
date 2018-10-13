@@ -37,7 +37,7 @@ namespace neogfx
 			return widget::minimum_size(aAvailableSpace);
 		scoped_units su{ *this, units::Pixels };
 		dimension length = std::ceil(units_converter(*this).from_device_units(static_cast<const radio_button&>(parent()).text().font().height() * (2.0 / 3.0)));
-		length = std::max(length, std::ceil(as_units(*this, units::Millimetres, 3.0)));
+		length = std::max(length, std::ceil(as_units(*this, units::Millimetres, 3.5)));
 		return convert_units(*this, su.saved_units(), size(length, length));
 	}
 
@@ -50,25 +50,27 @@ namespace neogfx
 	{
 		scoped_units su{ *this, units::Pixels };
 		rect discRect = client_rect();
+		auto enabledAlphaCoefficient = effectively_enabled() ? 1.0 : 0.25;
 		colour borderColour1 = container_background_colour().mid(container_background_colour().mid(background_colour()));
 		if (borderColour1.similar_intensity(container_background_colour(), 0.03125))
 			borderColour1.dark() ? borderColour1.lighten(0x40) : borderColour1.darken(0x40);
-		discRect.deflate(1.0, 1.0);
-		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1.with_alpha(effectively_enabled() ? 0xFF : 0x80), 1.0));
-		discRect.deflate(1.0, 1.0);
-		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen(borderColour1.mid(background_colour()).with_alpha(effectively_enabled() ? 0xFF : 0x80), 1.0));
-		discRect.deflate(1.0, 1.0);
+		auto scaledPixel = dpi_scale(size{ 1.0, 1.0 });
+		discRect.deflate(scaledPixel.cx, scaledPixel.cy);
+		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColour1.with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
+		discRect.deflate(scaledPixel.cx, scaledPixel.cy);
+		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColour1.mid(background_colour()).with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
+		discRect.deflate(scaledPixel.cx, scaledPixel.cy);
 		colour hoverColour = app::instance().current_style().palette().hover_colour().same_lightness_as(
 			background_colour().dark() ?
 			background_colour().lighter(0x20) :
 			background_colour().darker(0x20));
 		if (parent().capturing())
 			background_colour().dark() ? hoverColour.lighten(0x20) : hoverColour.darken(0x20);
-		colour backgroundFillColour = parent().enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColour : background_colour();
-		aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColour.with_alpha(effectively_enabled() ? 0xFF : 0x80));
-		discRect.deflate(1.0, 1.0);
+		colour backgroundFillColour = effectively_enabled() && parent().client_rect().contains(root().mouse_position() - parent().origin()) ? hoverColour : background_colour();
+		aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColour.with_combined_alpha(enabledAlphaCoefficient));
+		discRect.deflate(scaledPixel.cx * 2.0, scaledPixel.cy * 2.0);
 		if (static_cast<const radio_button&>(parent()).is_on())
-			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, app::instance().current_style().palette().widget_detail_primary_colour().with_alpha(effectively_enabled() ? 0xFF : 0x80));
+			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, app::instance().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient));
 	}
 
 	radio_button::radio_button(const std::string& aText) :

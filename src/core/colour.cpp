@@ -215,6 +215,11 @@ namespace neogfx
 	{
 		return colour(red(), green(), blue(), static_cast<component>((alpha() / 255.0 * aNewValue / 255.0) * 255));
 	}
+	
+	colour colour::with_combined_alpha(double aCoefficient) const
+	{
+		return colour(red(), green(), blue(), static_cast<component>((alpha() / 255.0 * aCoefficient) * 255));
+	}
 
 	hsl_colour colour::to_hsl() const
 	{
@@ -224,6 +229,11 @@ namespace neogfx
 	hsv_colour colour::to_hsv() const
 	{
 		return hsv_colour(*this);
+	}
+
+	double colour::brightness() const
+	{
+		return std::min(1.0, std::max(0.0, std::sqrt(red<double>() * red<double>() * 0.241 + green<double>() * green<double>() * 0.691 + blue<double>() * blue<double>() * 0.068)));
 	}
 
 	double colour::intensity() const

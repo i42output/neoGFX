@@ -18,8 +18,9 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - GPU shader rendered CSS3 compliant gradients with optional gaussian smoothing;
 - MVC (model-view-controller) related classes supporting robust and fast app design;
 - optional MDI support utilizing "nested" windows;
-- 2D (initially) game support: sprites and 2D physics;
--flexible asset management: texture images (e.g PNGs) can be stored in .zip archives which can be optionally embedded inside the program binary accessible using simple URLs;
+- 2D, 2.5D and 3D game support: sprites, objects and physics;
+- Pure ECS (Entity-component-system) usable by both games and apps;
+- flexible asset management: texture images (e.g PNGs) can be stored in .zip archives which can be optionally embedded inside the program binary accessible using simple URLs;
 - support for OpenGL, DirectX and Vulkan.
 
 
@@ -34,11 +35,11 @@ v1.20   | Summer 2020   | macOS support
 
 # Implementation Progress
 
-![](http://neogfx.org/temp/2018.png)
-![](http://neogfx.org/temp/gradient2018.png)
-![](http://neogfx.org/temp/bugfix.png)
-![](http://neogfx.org/temp/emoji.png)
-![](http://neogfx.org/temp/colour_picker_finished.png)
+![](http://neogfx.org/temp/github1.png?id=1)
+![](http://neogfx.org/temp/github2.png?id=1)
+![](http://neogfx.org/temp/github3.png?id=1)
+
+
 
 Feature                   | % done  |     TODO
 --------------------------|---------|-------------------------------------------------------------------------------
@@ -48,14 +49,14 @@ Message Box               | 100     |
 Menu                      | 100     | 
 Nested windows            | 25      |     
 MDI                       | 0       |
-Tabs                      | 90      |     Tabs below and on the side
+Tabs                      | 95      |     Vertical tabs
 Toolbars                  | 90      |     Drop-down button support
 Layout Managers           | 95      |     Need to fully support size policies
 Label                     | 100     |     
 Button                    | 100     |     
 Table View                | 85      |     Selection; icon; cell widget; cell check box
 Tree View                 | 0       |
-List View                 | 75      |
+List View                 | 85      |
 Text Edit                 | 85      |     Columns; rich text (HTML); undo/redo; performance optimization
 Line Edit                 | 100     |     
 Spin Box                  | 100     |
@@ -66,7 +67,7 @@ Combo Box                 | 95      |     Glob and regex filters; review UX.
 Group Box                 | 100     |
 Tool Tips                 | 0       |
 Status Bar                | 100     |
-Font Picker               | 25      |
+Font Picker               | 100     |
 Colour Gradient Selector  | 100     |
 Colour Picker             | 100     |
 File Browsers (Native)    | 0       |
@@ -76,4 +77,4 @@ i18n                      | 0       |
 l10n                      | 0       |     UK English, US English, French, German, Chinese
 Skins                     | 0       |
 
-Last updated: 13/05/2018
+Last updated: 13/09/2018
