@@ -467,13 +467,17 @@ namespace neogfx
 
 	std::shared_ptr<i_native_font_face> font_manager::add_font(i_native_font_face& aNewFont)
 	{
+		std::shared_ptr<i_native_font_face> font;
+		if (iIdCache.contains(aNewFont.id()))
+			font = iIdCache[aNewFont.id()].first.native_font_face_ptr();
+		else
+		{
+			font = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aNewFont));
+			iIdCache.add({ font, 0u });
+		}
 		// cleanup opportunity
 		cleanup();
-		if (iIdCache.contains(aNewFont.id()))
-			return iIdCache[aNewFont.id()].first.native_font_face_ptr();
-		auto newFont = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aNewFont));
-		iIdCache.add({ newFont, 0u });
-		return newFont;
+		return font;
 	}
 
 	void font_manager::cleanup()
