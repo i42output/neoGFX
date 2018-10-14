@@ -1531,20 +1531,28 @@ namespace neogfx
 			iterColumn = iGlyphColumns.begin();
 			for (auto iterGlyph = paragraph.first.start(); iterGlyph != paragraph.first.end(); ++iterGlyph)
 			{
-				if (iText[iterGlyph->source().first] == iterColumn->delimiter() && iterColumn + 1 != iGlyphColumns.end())
+				auto& glyph = *iterGlyph;
+				if (iText[glyph.source().first] == iterColumn->delimiter() && iterColumn + 1 != iGlyphColumns.end())
 				{
-					iterGlyph->set_advance(size{});
+					glyph.set_advance(size{});
 					++iterColumn;
 					continue;
 				}
-				else if (iterGlyph->is_whitespace() && iterGlyph->value() == U'\t')
+				else if (glyph.is_whitespace())
 				{
-					auto advance = iterGlyph->advance();
-					advance.cx = tab_stops() - std::fmod(x, tab_stops());
-					iterGlyph->set_advance(advance);
+					if (glyph.value() == U'\t')
+					{
+						auto advance = glyph.advance();
+						advance.cx = tab_stops() - std::fmod(x, tab_stops());
+						glyph.set_advance(advance);
+					}
+					else if (glyph.is_line_breaking_whitespace())
+					{
+						glyph.set_advance(size{});
+					}
 				}
-				iterGlyph->x = x;
-				x += iterGlyph->advance().cx;
+				glyph.x = x;
+				x += glyph.advance().cx;
 			}
 		}
 		refresh_columns();
@@ -1565,8 +1573,8 @@ namespace neogfx
 			for (auto& column : iGlyphColumns)
 				column.lines().clear();
 			point pos{};
-			dimension availableWidth = client_rect(false).width();
-			dimension availableHeight = client_rect(false).height();
+			dimension availableWidth = framed_widget::client_rect(false).width();
+			dimension availableHeight = framed_widget::client_rect(false).height();
 			bool showVerticalScrollbar = false;
 			bool showHorizontalScrollbar = false;
 			iTextExtents = size{};
@@ -1681,6 +1689,19 @@ namespace neogfx
 					pos.y += lines.back().extents.cy;
 					iTextExtents.cx = std::max(iTextExtents.cx, lines.back().extents.cx);
 				}
+				if (p + 1 == iGlyphParagraphs.end() && !iGlyphs.empty() && iGlyphs.back().is_line_breaking_whitespace())
+					pos.y += font().height();
+				auto next_pass = [&]()
+				{
+					if (pass <= 3)
+					{
+						lines.clear();
+						pos = point{};
+						iTextExtents = size{};
+						p = iGlyphParagraphs.begin();
+						++pass;
+					}
+				};
 				switch (pass)
 				{
 				case 1:
@@ -1689,33 +1710,26 @@ namespace neogfx
 					{
 						showVerticalScrollbar = true;
 						availableWidth -= vertical_scrollbar().width(*this);
-						lines.clear();
-						pos = point{};
-						iTextExtents = size{};
-						p = iGlyphParagraphs.begin();
-						++pass;
+						next_pass();
 					}
-					else
-						++p;
+					else if (++p == iGlyphParagraphs.end() && pass == 1)
+						next_pass();
 					break;
 				case 2:
 					if (!showHorizontalScrollbar && iTextExtents.cx > availableWidth)
 					{
 						showHorizontalScrollbar = true;
 						availableHeight -= horizontal_scrollbar().width(*this);
-						lines.clear();
-						pos = point{};
-						iTextExtents = size{};
-						p = iGlyphParagraphs.begin();
-						++pass;
+						next_pass();
 					}
-					else
-						++p;
+					else if (++p == iGlyphParagraphs.end())
+						next_pass();
+					break;
+				case 4:
+					++p;
 					break;
 				}
 			}
-			if (!iGlyphs.empty() && iGlyphs.back().is_line_breaking_whitespace())
-				pos.y += font().height();
 			iTextExtents.cy = pos.y;
 		}
 		catch (std::bad_alloc)
