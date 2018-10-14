@@ -33,7 +33,7 @@ namespace neogfx
 			Minimum,
 			Maximum,
 			Expanding,
-			ExpandingNoBits, // leftover pixels (bits) are unwanted to ensure siblings are the same (pixel perfect) size after weighting
+			ExpandingPixelPerfect, // leftover pixels (bits) are unwanted to ensure siblings are the same (pixel perfect) size after weighting
 			Manual
 		};
 	public:
@@ -57,17 +57,17 @@ namespace neogfx
 			return !(*this == aRhs);
 		}
 	public:
-		size_policy_e horizontal_size_policy(bool aIgnoreNoBits = true) const
+		size_policy_e horizontal_size_policy(bool aIgnorePixelPerfect = true) const
 		{
-			if (iHorizontalSizePolicy != ExpandingNoBits)
+			if (iHorizontalSizePolicy != ExpandingPixelPerfect)
 				return iHorizontalSizePolicy;
-			return aIgnoreNoBits ? Expanding : ExpandingNoBits;
+			return aIgnorePixelPerfect ? Expanding : ExpandingPixelPerfect;
 		}
-		size_policy_e vertical_size_policy(bool aIgnoreNoBits = true) const
+		size_policy_e vertical_size_policy(bool aIgnorePixelPerfect = true) const
 		{
-			if (iVerticalSizePolicy != ExpandingNoBits)
+			if (iVerticalSizePolicy != ExpandingPixelPerfect)
 				return iVerticalSizePolicy;
-			return aIgnoreNoBits ? Expanding : ExpandingNoBits;
+			return aIgnorePixelPerfect ? Expanding : ExpandingPixelPerfect;
 		}
 		void set_size_policy(size_policy_e aSizePolicy)
 		{
@@ -127,6 +127,7 @@ namespace neogfx
 		virtual bool has_margins() const = 0;
 		virtual neogfx::margins margins() const = 0;
 		virtual void set_margins(const optional_margins& aMargins, bool aUpdateLayout = true) = 0;
+		// helpers
 	public:
 		void set_size_policy(neogfx::size_policy::size_policy_e aSizePolicy, bool aUpdateLayout = true)
 		{

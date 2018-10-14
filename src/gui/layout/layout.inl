@@ -84,8 +84,8 @@ namespace neogfx
 		static size::dimension_type& cy(size& aSize) { return aSize.cx; }
 		static size::dimension_type cx(const neogfx::margins& aMargins) { return aMargins.top + aMargins.bottom; }
 		static size::dimension_type cy(const neogfx::margins& aMargins) { return aMargins.left + aMargins.right; }
-		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreNoBits = true) { return aSizePolicy.vertical_size_policy(aIgnoreNoBits); }
-		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreNoBits = true) { return aSizePolicy.horizontal_size_policy(aIgnoreNoBits); }
+		static neogfx::size_policy::size_policy_e size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnorePixelPerfect = true) { return aSizePolicy.vertical_size_policy(aIgnorePixelPerfect); }
+		static neogfx::size_policy::size_policy_e size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnorePixelPerfect = true) { return aSizePolicy.horizontal_size_policy(aIgnorePixelPerfect); }
 	};
 
 	namespace
@@ -294,7 +294,7 @@ namespace neogfx
 				if (minSize < weightedSize && maxSize > weightedSize)
 				{
 					disposition = Weighted;
-					if (AxisPolicy::size_policy_x(item.size_policy(), false) == neogfx::size_policy::ExpandingNoBits)
+					if (AxisPolicy::size_policy_x(item.size_policy(), false) == neogfx::size_policy::ExpandingPixelPerfect)
 					{
 						if (--itemsUsingLeftover == 0)
 							break;
@@ -342,7 +342,7 @@ namespace neogfx
 			else if (disposition == Weighted && leftover > 0.0)
 			{
 				uint32_t bit = 0;
-				if (AxisPolicy::size_policy_x(item.size_policy(), false) != neogfx::size_policy::ExpandingNoBits)
+				if (AxisPolicy::size_policy_x(item.size_policy(), false) != neogfx::size_policy::ExpandingPixelPerfect)
 					bit = (bitsLeft != 0 ? bits() : 0);
 				AxisPolicy::cx(s) = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize) + static_cast<size::dimension_type>(bit - previousBit);
 				previousBit = bit;
