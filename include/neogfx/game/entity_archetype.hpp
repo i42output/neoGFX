@@ -38,6 +38,10 @@ namespace neogfx::game
 			iId{ aId }, iName{ aName }, iComponents{ aComponents }
 		{
 		}
+		entity_archetype(const std::string& aName, std::initializer_list<component_id> aComponents) :
+			iId{ neolib::generate_uuid() }, iName{ aName }, iComponents{ aComponents }
+		{
+		}
 		template <typename ComponentIdIter>
 		entity_archetype(const entity_archetype_id& aId, const std::string& aName, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
 			iId{ aId }, iName{ aName }, iComponents{ aFirstComponent, aLastComponent }

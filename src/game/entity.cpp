@@ -19,6 +19,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/entity.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {
@@ -58,8 +60,15 @@ namespace neogfx::game
 		return iId == null_entity;
 	}
 
-	entity_id entity::detach()
+	entity_id entity::detach(bool aForRendering)
 	{
+		if (aForRendering)
+		{
+			if (!ecs().component<mesh_renderer>().has_entity_record(id()) && ecs().component<material>().has_entity_record(id()))
+				ecs().component<mesh_renderer>().populate(id(), mesh_renderer{ ecs().component<material>().entity_record(id()) });
+			if (!ecs().component<mesh_filter>().has_entity_record(id()) && ecs().component<mesh>().has_entity_record(id()))
+				ecs().component<mesh_filter>().populate(id(), mesh_filter{ {}, ecs().component<mesh>().entity_record(id()) });
+		}
 		auto id = iId;
 		iId = null_entity;
 		return id;

@@ -191,7 +191,20 @@ namespace neogfx::game
 	}
 
 	ecs::ecs(ecs_flags aCreationFlags) :
-		iFlags{ aCreationFlags }, iNextEntityId { null_entity }, iNextHandleId{ null_id }
+		iFlags{ aCreationFlags }, iNextEntityId { null_entity }, iNextHandleId{ null_id },
+		iSystemTimer
+		{
+			service<neolib::async_task>().instance(),
+			[this](neolib::callback_timer& aTimer)
+			{
+				aTimer.again();
+				for (auto& system : systems())
+				{
+					// todo: system application dependency / ordering
+					system.second->apply();
+				}
+			}, 1, true
+		}
 	{
 		if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
 		{

@@ -8,10 +8,14 @@
 #include <neogfx/game/chrono.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/canvas.hpp>
+#include <neogfx/game/standard_archetypes.hpp>
+#include <neogfx/game/time_system.hpp>
+#include <neogfx/game/simple_physics_system.hpp>
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/collider.hpp>
+#include <neogfx/game/rectangle.hpp>
 
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
@@ -241,31 +245,44 @@ void create_game(ng::i_layout& aLayout)
 
 namespace archetypes
 {
-	const ng::game::entity_archetype spaceship
-	{
-		{ 0x26730030, 0xa999, 0x4d99, 0xa7ad,{ 0x80, 0x89, 0x69, 0x23, 0x95, 0xf9 } },
-		"Spaceship",
-		{ ng::game::rigid_body::meta::id(), ng::game::box_collider::meta::id() }
-	};
-
-	const ng::game::entity_archetype asteroid
-	{
-		{ 0x8283650f, 0x6e59, 0x4f0f, 0x8ae0, { 0x1d, 0x99, 0xeb, 0xf2, 0x49, 0xe0 } },
-		"Asteroid",
-		{ ng::game::rigid_body::meta::id(), ng::game::box_collider::meta::id() }
-	};
+	ng::game::sprite_archetype const spaceship{ "Spaceship" };
+	ng::game::sprite_archetype const asteroid{ "Asteroid" };
 }
 
 void create_game(ng::i_layout& aLayout)
-{/*
+{
+	// Canvas to render game world on...
 	auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>());
-	auto& ecs = canvas.ecs();
-	canvas.set_font(ng::font(canvas.font(), ng::font::Bold, 28));
+	canvas.set_font(ng::font{ canvas.font(), ng::font::Bold, 16 });
 	canvas.set_background_colour(ng::colour::Black);
-	ecs.register_archetype(archetypes::spaceship);
-	ecs.register_archetype(archetypes::asteroid);
-	auto spaceship = ecs.create_entity(archetypes::spaceship.id(), ng::game::rigid_body{ ng::vec3{ 400.0, 18.0, 0.0 }, 1.0 });
-	neolib::basic_random<double> prng;
+
+	// Get ECS associated with canvas...
+	auto& ecs = canvas.ecs();
+
+	// Background...
+	neolib::basic_random<uint32_t> prng;
 	for (int i = 0; i < 1000; ++i)
-		auto asteroid = ecs.create_entity(archetypes::asteroid.id(), ng::game::rigid_body{ ng::vec3{ prng(1000.0), prng(1000.0), 0.0 }, 1.0 }); */
+		ng::game::shape::rectangle
+		{
+			ecs,
+			ng::vec3{ static_cast<ng::scalar>(prng(800)), static_cast<ng::scalar>(prng(800)), -1.0 + 0.5 * (static_cast<ng::scalar>(prng(32)) / 32.0) },
+			ng::vec2{ static_cast<ng::scalar>(prng(64)), static_cast<ng::scalar>(prng(64)) },
+			ng::colour{ prng(64), prng(64), prng(64) }.lighter(0x40) 
+		}.detach();
+
+	// Sprites (todo)...
+	auto spaceship = ecs.create_entity(archetypes::spaceship, ng::game::rigid_body{ ng::vec3{ 400.0, 18.0, 0.0 }, 1.0 });
+	for (int i = 0; i < 50; ++i)
+		auto asteroid = ecs.create_entity(archetypes::asteroid, ng::game::rigid_body{ ng::vec3{ static_cast<ng::scalar>(prng(1000)), static_cast<ng::scalar>(prng(1000)), 0.0 }, 1.0 });
+
+	// Some information text...
+	canvas.entities_rendered([&](ng::graphics_context& gc)
+	{
+		std::ostringstream text;
+		text << "World time: " << ng::game::from_step_time(ecs.system<ng::game::time_system>().world_time());
+		gc.draw_text(ng::point{ canvas.client_rect().width() / 2.0, 0.0 }, text.str(), canvas.font(), ng::colour::White);
+	});
+
+	// Instantiate physics...
+	ecs.system<ng::game::simple_physics_system>();
 }

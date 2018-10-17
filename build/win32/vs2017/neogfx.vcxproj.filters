@@ -822,6 +822,9 @@
     <ClInclude Include="..\..\..\include\neogfx\game\canvas.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\standard_archetypes.hpp">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">

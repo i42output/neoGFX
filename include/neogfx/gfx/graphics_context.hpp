@@ -174,6 +174,8 @@ namespace neogfx
 		void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
 		void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour = optional_colour(), shader_effect aShaderEffect = shader_effect::None) const;
+		void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect = shader_effect::None) const;
+
 		// implementation
 		// from i_device_metrics
 	public:

@@ -973,23 +973,16 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-		native_context().enqueue(
-			graphics_operation::draw_texture{ 
-				aMesh * mat44{
-					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
-					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
-					{ 0.0, 0.0, 1.0, 0.0 },
-					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
-				game::material
-				{ 
-					aColour != std::nullopt ? game::colour{ aColour->to_vec4() } : std::optional<game::colour>{},
-					{}, 
-					{},
-					to_ecs_component(aTexture)
-				},
-				aShaderEffect 
-			});
+		draw_mesh(
+			aMesh, 
+			game::material
+			{ 
+				aColour != std::nullopt ? game::colour{ aColour->to_vec4() } : std::optional<game::colour>{},
+				{}, 
+				{},
+				to_ecs_component(aTexture)
+			},
+			aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
@@ -998,6 +991,22 @@ namespace neogfx
 		for (auto& uv : adjustedMesh.uv)
 			uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv * (aTextureRect.extents() / aTexture.extents()).to_vec2();
 		draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
+	}
+
+	void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect) const
+	{
+		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+		native_context().enqueue(
+			graphics_operation::draw_mesh{
+				aMesh,
+				aMaterial,
+				mat44{
+					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
+					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
+					{ 0.0, 0.0, 1.0, 0.0 },
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
+				aShaderEffect
+			});
 	}
 
 	class graphics_context::glyph_shapes

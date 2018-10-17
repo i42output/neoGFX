@@ -591,6 +591,13 @@ namespace neogfx
 					draw_shape(args.mesh, args.pen);
 				}
 				break;
+			case graphics_operation::operation_type::DrawEntity:
+				for (auto op = opBatch.first; op != opBatch.second; ++op)
+				{
+					const auto& args = static_variant_cast<const graphics_operation::draw_entity&>(*op);
+					draw_entity(args.ecs, args.entity, args.transformation);
+				}
+				break;
 			case graphics_operation::operation_type::FillRect:
 				fill_rect(opBatch);
 				break;
@@ -625,13 +632,13 @@ namespace neogfx
 			case graphics_operation::operation_type::DrawGlyph:
 				draw_glyph(opBatch);
 				break;
-			case graphics_operation::operation_type::DrawTexture:
+			case graphics_operation::operation_type::DrawMesh:
 				{
 					use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program() };
 					for (auto op = opBatch.first; op != opBatch.second; ++op)
 					{
-						const auto& args = static_variant_cast<const graphics_operation::draw_texture&>(*op);
-						draw_texture(args.mesh, args.material, args.shaderEffect);
+						const auto& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
+						draw_mesh(args.mesh, args.material, args.transformation, args.shaderEffect);
 					}
 				}
 				break;
@@ -1130,6 +1137,13 @@ namespace neogfx
 			gradient_off();
 	}
 
+	void opengl_graphics_context::draw_entity(const game::i_ecs& aEcs, game::entity_id aEntity, const mat44& aTransformation)
+	{
+		auto const& meshFilter = aEcs.component<game::mesh_filter>().entity_record(aEntity);
+		auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(aEntity);
+		draw_mesh(meshFilter, meshRenderer, aTransformation, shader_effect::None);
+	}
+
 	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill)
 	{
 		graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill } };
@@ -1379,7 +1393,7 @@ namespace neogfx
 			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 			auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
-			draw_texture(
+			draw_mesh(
 				rect_to_mesh(rect{ firstOp.point, glyph_extents(firstOp) }),
 				game::material{ 
 					{}, 
@@ -1387,6 +1401,7 @@ namespace neogfx
 					{}, 
 					to_ecs_component(emojiTexture)
 				}, 
+				mat44::identity(),
 				shader_effect::None);
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -1600,106 +1615,129 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::draw_texture(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect)
+	void opengl_graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, shader_effect aShaderEffect)
 	{
-		draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aShaderEffect);
+		draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aTransformation, aShaderEffect);
 	}
 	
-	void opengl_graphics_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, shader_effect aShaderEffect)
+	void opengl_graphics_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation, shader_effect aShaderEffect)
 	{
 		colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
 		if (aMeshRenderer.material.colour != std::nullopt)
 			colourizationColour = aMeshRenderer.material.colour->rgba;
 
-		auto const& vertices = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->vertices : aMeshFilter.sharedMesh.ptr->vertices;
+		// todo: move following matrix transformations to shader(s)
+		auto const& vertices = ((aMeshFilter.mesh != std::nullopt ? *aMeshFilter.mesh : *aMeshFilter.sharedMesh.ptr) * 
+			(aMeshFilter.transformation != std::nullopt ? *aMeshFilter.transformation * aTransformation : aTransformation)).vertices;
 		auto const& uv = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->uv : aMeshFilter.sharedMesh.ptr->uv;
 		auto const& faces = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->faces : aMeshFilter.sharedMesh.ptr->faces;
 
 		auto const& material = aMeshRenderer.material;
 		auto const& patches = aMeshRenderer.patches; // todo
 
-		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program() };
-		rendering_engine().active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
-
-		glCheck(glActiveTexture(GL_TEXTURE1));
-		glCheck(glEnable(GL_BLEND));
-		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-		GLint previousTexture;
-		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-
+		if (material.texture != std::nullopt)
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures };
+			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program() };
+			rendering_engine().active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
 
-			GLuint textureHandle = 0;
-			const i_sub_texture* subTexture = nullptr;
-			vec2 textureStorageExtents;
-			vec2 uvFixupCoefficient;
-			vec2 uvFixupOffset;
-			bool first = true;
-			bool newTexture = false;
+			glCheck(glActiveTexture(GL_TEXTURE1));
+			glCheck(glEnable(GL_BLEND));
+			glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+			GLint previousTexture;
+			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
+			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+			{
+				use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures };
+
+				GLuint textureHandle = 0;
+				const i_sub_texture* subTexture = nullptr;
+				vec2 textureStorageExtents;
+				vec2 uvFixupCoefficient;
+				vec2 uvFixupOffset;
+				bool first = true;
+				bool newTexture = false;
+				for (auto const& face : faces)
+				{
+					auto const& texture = *service<i_texture_manager>::instance().find_texture(material.texture->id.cookie());
+
+					if (first || textureHandle != reinterpret_cast<GLuint>(texture.native_texture()->handle()))
+					{
+						newTexture = true;
+						textureStorageExtents = texture.storage_extents().to_vec2();
+						if (texture.type() == texture_type::Texture)
+							subTexture = nullptr;
+						else
+							subTexture = &texture.as_sub_texture();
+						if (!subTexture)
+						{
+							uvFixupCoefficient = texture.extents().to_vec2();
+							uvFixupOffset = vec2{ 1.0, 1.0 };
+						}
+						else
+						{
+							uvFixupCoefficient = subTexture->extents().to_vec2();
+							uvFixupOffset = subTexture->atlas_location().top_left().to_vec2();
+						}
+						textureHandle = reinterpret_cast<GLuint>(texture.native_texture()->handle());
+						glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
+						glCheck(glBindTexture(GL_TEXTURE_2D, textureHandle));
+						if (first)
+							rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
+					}
+
+					if (newTexture)
+					{
+						newTexture = false;
+						if (!first)
+							vertexArrays.execute();
+					}
+
+					for (auto faceVertexIndex : face)
+					{
+						auto const& faceVertex = vertices[faceVertexIndex];
+						auto const& faceUv = (uv[faceVertexIndex] * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
+						vertexArrays.push_back(
+							opengl_standard_vertex_arrays::vertex{
+								faceVertex,
+								std::array<uint8_t, 4>{ {
+									colourizationColour.red(),
+									colourizationColour.green(),
+									colourizationColour.blue(),
+									colourizationColour.alpha()}},
+								faceUv
+							});
+					}
+
+					first = false;
+				}
+			}
+
+			glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+		}
+		else
+		{
+			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
+			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES };
+
 			for (auto const& face : faces)
 			{
-				auto const& maybeTexture = material.texture;
-				if (maybeTexture == std::nullopt)
-					continue;
-
-				auto const& texture = *service<i_texture_manager>::instance().find_texture(maybeTexture->id.cookie());
-
-				if (first || textureHandle != reinterpret_cast<GLuint>(texture.native_texture()->handle()))
-				{
-					newTexture = true;
-					textureStorageExtents = texture.storage_extents().to_vec2();
-					if (texture.type() == texture_type::Texture)
-						subTexture = nullptr;
-					else
-						subTexture = &texture.as_sub_texture();
-					if (!subTexture)
-					{
-						uvFixupCoefficient = texture.extents().to_vec2();
-						uvFixupOffset = vec2{ 1.0, 1.0 };
-					}
-					else
-					{
-						uvFixupCoefficient = subTexture->extents().to_vec2();
-						uvFixupOffset = subTexture->atlas_location().top_left().to_vec2();
-					}
-					textureHandle = reinterpret_cast<GLuint>(texture.native_texture()->handle());
-					glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
-					glCheck(glBindTexture(GL_TEXTURE_2D, textureHandle));
-					if (first)
-						rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
-				}
-
-				if (newTexture)
-				{
-					newTexture = false;
-					if (!first)
-						vertexArrays.execute();
-				}
-
-				
 				for (auto faceVertexIndex : face)
 				{
 					auto const& faceVertex = vertices[faceVertexIndex];
-					auto const& faceUv = (uv[faceVertexIndex] * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
 					vertexArrays.push_back(
 						opengl_standard_vertex_arrays::vertex{
 							faceVertex,
-							std::array<uint8_t, 4>{{
+							std::array<uint8_t, 4>{ {
 								colourizationColour.red(),
 								colourizationColour.green(),
 								colourizationColour.blue(),
-								colourizationColour.alpha()}},
-							faceUv
+								colourizationColour.alpha()}}
 						});
 				}
-
-				first = false;
 			}
 		}
-
-		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 	}
 
 	xyz opengl_graphics_context::to_shader_vertex(const point& aPoint, coordinate aZ) const

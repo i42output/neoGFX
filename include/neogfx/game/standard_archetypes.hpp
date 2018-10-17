@@ -1,4 +1,4 @@
-// entity.hpp
+// entity_archetype.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -16,34 +16,28 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
-#include <neogfx/game/i_ecs.hpp>
+#include <neogfx/game/entity_archetype.hpp>
+#include <neogfx/game/rigid_body.hpp>
+#include <neogfx/game/collider.hpp>
+#include <neogfx/game/sprite.hpp>
 
 namespace neogfx::game
 {
-	class entity
+	class sprite_archetype : public entity_archetype
 	{
 	public:
-		entity(i_ecs& aEcs, entity_id aId);
-		entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId);
-		template <typename... ComponentData>
-		entity(i_ecs& aEcs, const entity_archetype_id& aArchetypeId, ComponentData&&... aComponentData) :
-			entity{ aEcs, aEcs.create_entity(aArchetypeId, aComponentData...) } {}
-		~entity();
-	public:
-		entity(const entity& aOther) = delete;
-		entity& operator=(const entity& aOther) = delete;
-	public:
-		i_ecs& ecs() const;
-		entity_id id() const;
-		bool detached_or_destroyed() const;
-		entity_id detach(bool aForRendering = true);
-	private:
-		i_ecs& iEcs;
-		entity_id iId;
-		sink iSink;
+		sprite_archetype(const entity_archetype_id& aId, const std::string& aName) :
+			entity_archetype{ aId, aName, { game::sprite::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
+		{
+		}
+		sprite_archetype(const std::string& aName) :
+			entity_archetype{ aName, { game::sprite::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
+		{
+		}
 	};
+
 }

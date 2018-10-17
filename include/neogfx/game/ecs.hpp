@@ -115,5 +115,6 @@ namespace neogfx::game
 		handle_id iNextHandleId;
 		std::vector<handle_id> iFreedHandleIds;
 		handles_t iHandles;
+		neolib::callback_timer iSystemTimer;
 	};
 }

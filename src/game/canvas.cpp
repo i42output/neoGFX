@@ -19,58 +19,69 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/canvas.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {
 	canvas::canvas() : 
 		iEcs{ std::make_shared<game::ecs>() }
 	{
+		init();
 	}
 
 	canvas::canvas(game::i_ecs& aEcs) :
 		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
 	{
+		init();
 	}
 
 	canvas::canvas(std::shared_ptr<game::i_ecs> aEcs) :
 		iEcs{ aEcs }
 	{
+		init();
 	}
 
 	canvas::canvas(i_widget& aParent) :
 		widget{ aParent }, 
 		iEcs{ std::make_shared<game::ecs>() }
 	{
+		init();
 	}
 
 	canvas::canvas(i_widget& aParent, game::i_ecs& aEcs) :
 		widget{ aParent },
 		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
 	{
+		init();
 	}
 
 	canvas::canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs) :
 		widget{ aParent },
 		iEcs{ aEcs }
 	{
+		init();
 	}
 
 	canvas::canvas(i_layout& aLayout) :
 		widget{ aLayout }, 
 		iEcs{ std::make_shared<game::ecs>() }
 	{
+		init();
 	}
 
 	canvas::canvas(i_layout& aLayout, game::i_ecs& aEcs) :
 		widget{ aLayout },
 		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
 	{
+		init();
 	}
 
 	canvas::canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs) :
 		widget{ aLayout },
 		iEcs{ aEcs }
 	{
+		init();
 	}
 
 	canvas::~canvas()
@@ -91,20 +102,15 @@ namespace neogfx::game
 
 	void canvas::paint(graphics_context& aGraphicsContext) const
 	{	
-		aGraphicsContext.clear_depth_buffer();
-		painting_entities.trigger(aGraphicsContext);
-		// todo
-		/* sort_shapes();
-		for (auto s : iRenderBuffer)
+		if (ecs().component_registered<mesh_renderer>())
 		{
-			if (s->killed())
-				continue;
-			if (s->bounding_box_2d().intersection(client_rect()).empty())
-				continue;
-			s->paint(aGraphicsContext);
-		} */
-		aGraphicsContext.flush();
-		entities_painted.trigger(aGraphicsContext);
+			aGraphicsContext.clear_depth_buffer();
+			rendering_entities.trigger(aGraphicsContext);
+			for (auto entity : ecs().component<mesh_renderer>().indices())
+				aGraphicsContext.draw_entity(ecs(), entity);
+			aGraphicsContext.flush();
+			entities_rendered.trigger(aGraphicsContext);
+		}
 	}
 
 	void canvas::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e)
@@ -113,5 +119,13 @@ namespace neogfx::game
 		{
 			// todo
 		}
+	}
+
+	void canvas::init()
+	{
+		iSink += ecs().physics_applied([this](step_time)
+		{
+			update();
+		});
 	}
 }

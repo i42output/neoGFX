@@ -58,6 +58,7 @@ namespace neogfx
 			case DrawArc: return "DrawArc";
 			case DrawPath: return "DrawPath";
 			case DrawShape: return "DrawShape";
+			case DrawEntity: return "DrawEntity";
 			case FillRect: return "FillRect";
 			case FillRoundedRect: return "FillRoundedRect";
 			case FillCircle: return "FillCircle";
@@ -65,7 +66,7 @@ namespace neogfx
 			case FillPath: return "FillPath";
 			case FillShape: return "FillShape";
 			case DrawGlyph: return "DrawGlyph";
-			case DrawTexture: return "DrawTexture";
+			case DrawMesh: return "DrawMesh";
 			default: return "";
 			}
 		}
@@ -78,7 +79,8 @@ namespace neogfx
 			{
 			case operation_type::SetPixel:
 			case operation_type::DrawPixel:
-			case operation_type::DrawTexture:
+			case operation_type::DrawEntity:
+			case operation_type::DrawMesh:
 				return true;
 			case operation_type::DrawLine:
 			{

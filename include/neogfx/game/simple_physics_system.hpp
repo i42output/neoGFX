@@ -27,9 +27,6 @@ namespace neogfx::game
 	class simple_physics_system : public system
 	{
 	public:
-		event<int64_t> applying_physics;
-		event<int64_t> physics_applied;
-	public:
 		simple_physics_system(game::i_ecs& aEcs);
 	public:
 		const system_id& id() const override;

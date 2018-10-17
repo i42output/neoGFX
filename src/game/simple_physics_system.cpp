@@ -53,8 +53,8 @@ namespace neogfx::game
 	{
 		if (!ecs().component_instantiated<rigid_body>())
 			return;
-		auto& worldClock = ecs().shared_component<clock>().component_data()[0];
-		auto& physicalConstants = ecs().shared_component<physics>().component_data()[0];
+		auto& worldClock = ecs().shared_component<clock>().component_data().begin()->second;
+		auto& physicalConstants = ecs().shared_component<physics>().component_data().begin()->second;
 		auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
 			*physicalConstants.uniformGravity : vec3{};
 		auto now = to_step_time(
@@ -63,7 +63,7 @@ namespace neogfx::game
 		auto& rigidBodies = ecs().component<rigid_body>();
 		while (worldClock.time <= now)
 		{
-			applying_physics.trigger(worldClock.time);
+			ecs().applying_physics.trigger(worldClock.time);
 			rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
 			auto firstMassless = physicalConstants.gravitationalConstant != 0.0 ?
 				std::find_if(rigidBodies.component_data().begin(), rigidBodies.component_data().end(), [](const rigid_body& body) { return body.mass == 0.0; }) :
@@ -106,7 +106,7 @@ namespace neogfx::game
 				rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } * (elapsedTime * (v0 + (rigidBody1.velocity - v0) / 2.0));
 				rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 			}
-			physics_applied.trigger(worldClock.time);
+			ecs().physics_applied.trigger(worldClock.time);
 			worldClock.time += worldClock.timeStep;
 		}
 	}

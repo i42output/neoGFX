@@ -44,6 +44,12 @@ namespace nrc
 
 namespace neogfx
 {
+	template <>
+	neolib::async_task& service<neolib::async_task>::instance()
+	{
+		return app::instance();
+	}
+
 	program_options::program_options(int argc, char* argv[])
 	{
 		boost::program_options::options_description description{ "Allowed options" };

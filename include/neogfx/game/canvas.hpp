@@ -27,8 +27,8 @@ namespace neogfx::game
 	class canvas : public widget
 	{
 	public:
-		event<graphics_context&> painting_entities;
-		event<graphics_context&> entities_painted;
+		event<graphics_context&> rendering_entities;
+		event<graphics_context&> entities_rendered;
 		event<entity_id> entity_clicked;
 	public:
 		canvas();
@@ -49,6 +49,9 @@ namespace neogfx::game
 	public:
 		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 	private:
+		void init();
+	private:
 		std::shared_ptr<game::i_ecs> iEcs;
+		sink iSink;
 	};
 }

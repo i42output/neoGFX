@@ -197,6 +197,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\shape_factory.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\canvas.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\standard_archetypes.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\system.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\text_mesh.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\chrono.hpp" />

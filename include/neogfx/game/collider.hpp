@@ -55,8 +55,6 @@ namespace neogfx::game
 				case 0:
 				case 1:
 					return component_data_field_type::Vec3;
-				case 2:
-					return component_data_field_type::Uint64;
 				case 3:
 					return component_data_field_type::Uint32 | component_data_field_type::Internal;
 				default:
@@ -69,7 +67,6 @@ namespace neogfx::game
 				{
 					"Origin",
 					"Size",
-					"Collision Mask",
 					"Collision Event Id",
 				};
 				return sFieldNames[aFieldIndex];

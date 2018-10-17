@@ -159,7 +159,7 @@ namespace neogfx::game
 		typedef typename base_type::value_type value_type;
 		typedef typename base_type::component_data_t component_data_t;
 		typedef std::vector<entity_id> component_data_indices_t;
-		typedef component_data_indices_t::size_type reverse_index_t;
+		typedef typename component_data_t::size_type reverse_index_t;
 		typedef std::vector<reverse_index_t> reverse_indices_t;
 	private:
 		typedef static_component<Data> self_type;

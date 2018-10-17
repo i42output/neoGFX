@@ -241,10 +241,11 @@ namespace neogfx
 			return aDrawGlyph.glyph.extents(service<i_font_manager>::instance().font_from_id(aDrawGlyph.glyphFont));
 		}
 
-		struct draw_texture
+		struct draw_mesh
 		{
 			game::mesh mesh;
 			game::material material;
+			mat44 transformation;
 			shader_effect shaderEffect;
 		};
 
@@ -283,7 +284,7 @@ namespace neogfx
 			fill_path,
 			fill_shape,
 			draw_glyph,
-			draw_texture
+			draw_mesh
 		> operation;
 
 		enum operation_type
@@ -323,7 +324,7 @@ namespace neogfx
 			FillPath,
 			FillShape,
 			DrawGlyph,
-			DrawTexture
+			DrawMesh
 		};
 
 		std::string to_string(operation_type aOpType);

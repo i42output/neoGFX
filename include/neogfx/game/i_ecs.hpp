@@ -27,6 +27,7 @@
 #include <neogfx/game/entity_archetype.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/system.hpp>
+#include <neogfx/game/chrono.hpp>
 
 namespace neogfx::game
 {
@@ -69,6 +70,8 @@ namespace neogfx::game
 	public:
 		event<entity_id> entity_created;
 		event<entity_id> entity_destroyed;
+		event<step_time> applying_physics;
+		event<step_time> physics_applied;
 		event<handle_id> handle_updated;
 	public:
 		typedef std::function<std::unique_ptr<i_component>()> component_factory;
@@ -143,6 +146,13 @@ namespace neogfx::game
 			populate(newEntity, std::forward<ComponentData>(aComponentData)...);
 			return newEntity;
 		}
+		template <typename Archetype, typename... ComponentData>
+		entity_id create_entity(const Archetype& aArchetype, ComponentData&&... aComponentData)
+		{
+			if (!archetype_registered(aArchetype))
+				register_archetype(aArchetype);
+			return create_entity(aArchetype.id(), std::forward<ComponentData>(aComponentData)...);
+		}
 	public:
 		template <typename... ComponentData, typename ComponentDataTail>
 		void populate(entity_id aEntity, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
@@ -179,6 +189,8 @@ namespace neogfx::game
 		template <typename ComponentData>
 		static_component<ComponentData>& component()
 		{
+			if (!component_registered<ComponentData>())
+				register_component<ComponentData>();
 			return const_cast<static_component<ComponentData>&>(const_cast<const i_ecs*>(this)->component<ComponentData>());
 		}
 		template <typename ComponentData>
@@ -194,6 +206,8 @@ namespace neogfx::game
 		template <typename ComponentData>
 		static_shared_component<ComponentData>& shared_component()
 		{
+			if (!shared_component_registered<ComponentData>())
+				register_shared_component<ComponentData>();
 			return const_cast<static_shared_component<ComponentData>&>(const_cast<const i_ecs*>(this)->shared_component<ComponentData>());
 		}
 		template <typename System>
@@ -209,6 +223,8 @@ namespace neogfx::game
 		template <typename System>
 		System& system()
 		{
+			if (!system_registered<System>())
+				register_system<System>();
 			return const_cast<System&>(const_cast<const i_ecs*>(this)->system<System>());
 		}
 	public:

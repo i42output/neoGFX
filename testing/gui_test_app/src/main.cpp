@@ -203,9 +203,9 @@ int main(int argc, char* argv[])
 			if (showFps)
 			{
 				std::ostringstream oss;
-				oss << window.fps() << " FPS";
-				aGc.fill_rect(ng::rect{ ng::point{ 100, 100 }, aGc.text_extent(oss.str(), fpsFont) }, ng::colour::DarkBlue);
-				aGc.draw_text(ng::point{ 100, 100 }, oss.str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
+				oss << " " << window.fps() << " FPS ";
+				aGc.fill_rect(ng::rect{ ng::point{ 100, 120 }, aGc.text_extent(oss.str(), fpsFont) }, ng::colour::DarkBlue);
+				aGc.draw_text(ng::point{ 100, 120 }, oss.str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
 			}
 		});
 
