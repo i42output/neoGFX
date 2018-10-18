@@ -26,6 +26,8 @@
 #include <neolib/string.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_entity_archetype.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {
@@ -34,44 +36,16 @@ namespace neogfx::game
 	private:
 		typedef neolib::set<component_id, component_id, std::less<component_id>, neolib::fast_pool_allocator<component_id>> component_list;
 	public:
-		entity_archetype(const entity_archetype_id& aId, const std::string& aName, std::initializer_list<component_id> aComponents) :
-			iId{ aId }, iName{ aName }, iComponents{ aComponents }
-		{
-		}
-		entity_archetype(const std::string& aName, std::initializer_list<component_id> aComponents) :
-			iId{ neolib::generate_uuid() }, iName{ aName }, iComponents{ aComponents }
-		{
-		}
-		template <typename ComponentIdIter>
-		entity_archetype(const entity_archetype_id& aId, const std::string& aName, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
-			iId{ aId }, iName{ aName }, iComponents{ aFirstComponent, aLastComponent }
-		{
-		}
-		entity_archetype(const entity_archetype& aOther) :
-			iId{ aOther.iId }, iName{ aOther.iName }, iComponents{ aOther.iComponents }
-		{
-		}
-		entity_archetype(entity_archetype&& aOther) :
-			iId{ aOther.iId }, iName{ std::move(aOther.iName) }, iComponents{ std::move(aOther.iComponents) }
-		{
-		}
+		entity_archetype(const entity_archetype_id& aId, const std::string& aName, std::initializer_list<component_id> aComponents);
+		entity_archetype(const std::string& aName, std::initializer_list<component_id> aComponents);
+		entity_archetype(const entity_archetype& aOther);
+		entity_archetype(entity_archetype&& aOther);
 	public:
-		const entity_archetype_id& id() const
-		{
-			return iId;
-		}
-		const neolib::i_string& name() const
-		{
-			return iName;
-		}
-		const neolib::i_set<component_id>& components() const
-		{
-			return iComponents;
-		}
-		neolib::i_set<component_id>& components()
-		{
-			return iComponents;
-		}
+		const entity_archetype_id& id() const override;
+		const neolib::i_string& name() const override;
+		const neolib::i_set<component_id>& components() const override;
+		neolib::i_set<component_id>& components() override;
+		void populate_default_components(i_ecs& aEcs, entity_id aEntity) override;
 	private:
 		entity_archetype_id iId;
 		neolib::string iName;

@@ -958,7 +958,7 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		draw_texture(rect_to_mesh(aRect), aTexture, aColour, aShaderEffect);
+		draw_texture(to_ecs_component(aRect), aTexture, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
@@ -968,7 +968,7 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		draw_texture(rect_to_mesh(aRect), aTexture, aTextureRect, aColour, aShaderEffect);
+		draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const

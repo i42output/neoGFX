@@ -106,7 +106,7 @@ namespace neogfx::game
 		{
 			aGraphicsContext.clear_depth_buffer();
 			rendering_entities.trigger(aGraphicsContext);
-			for (auto entity : ecs().component<mesh_renderer>().indices())
+			for (auto entity : ecs().component<mesh_renderer>().entities())
 				aGraphicsContext.draw_entity(ecs(), entity);
 			aGraphicsContext.flush();
 			entities_rendered.trigger(aGraphicsContext);

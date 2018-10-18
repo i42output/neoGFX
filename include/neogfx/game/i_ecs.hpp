@@ -144,6 +144,7 @@ namespace neogfx::game
 		{
 			auto newEntity = create_entity(aArchetypeId);
 			populate(newEntity, std::forward<ComponentData>(aComponentData)...);
+			archetype(aArchetypeId).populate_default_components(*this, newEntity);
 			return newEntity;
 		}
 		template <typename Archetype, typename... ComponentData>
@@ -154,22 +155,22 @@ namespace neogfx::game
 			return create_entity(aArchetype.id(), std::forward<ComponentData>(aComponentData)...);
 		}
 	public:
-		template <typename... ComponentData, typename ComponentDataTail>
-		void populate(entity_id aEntity, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
+		template <typename ComponentData, typename... ComponentDataRest>
+		void populate(entity_id aEntity, ComponentData&& aComponentData, ComponentDataRest&&... aComponentDataRest)
 		{
-			populate(aEntity, std::forward<ComponentDataTail>(aComponentDataTail));
-			populate(aEntity, std::forward<ComponentData>(aComponentData)...);
+			populate(aEntity, std::forward<ComponentData>(aComponentData));
+			populate(aEntity, std::forward<ComponentDataRest>(aComponentDataRest)...);
 		}
 		template <typename ComponentData>
 		void populate(entity_id aEntity, ComponentData&& aComponentData)
 		{
 			component<ComponentData>().populate(aEntity, std::forward<ComponentData>(aComponentData));
 		}
-		template <typename... ComponentData, typename ComponentDataTail>
-		void populate_shared(const std::string& aName, ComponentData&&... aComponentData, ComponentDataTail&& aComponentDataTail)
+		template <typename ComponentData, typename... ComponentDataRest>
+		void populate_shared(const std::string& aName, ComponentData&& aComponentData, ComponentDataRest&&... aComponentDataRest)
 		{
-			populate_shared(aName, std::forward<ComponentDataTail>(aComponentDataTail));
-			populate_shared(aName, std::forward<ComponentData>(aComponentData)...);
+			populate_shared(aName, std::forward<ComponentData>(aComponentData));
+			populate_shared(aName, std::forward<ComponentDataRest>(aComponentDataRest)...);
 		}
 		template <typename ComponentData>
 		void populate_shared(const std::string& aName, ComponentData&& aComponentData)

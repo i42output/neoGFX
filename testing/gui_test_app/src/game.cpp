@@ -260,20 +260,35 @@ void create_game(ng::i_layout& aLayout)
 	auto& ecs = canvas.ecs();
 
 	// Background...
-	neolib::basic_random<uint32_t> prng;
+	neolib::basic_random<ng::scalar> prng;
 	for (int i = 0; i < 1000; ++i)
 		ng::game::shape::rectangle
 		{
 			ecs,
-			ng::vec3{ static_cast<ng::scalar>(prng(800)), static_cast<ng::scalar>(prng(800)), -1.0 + 0.5 * (static_cast<ng::scalar>(prng(32)) / 32.0) },
-			ng::vec2{ static_cast<ng::scalar>(prng(64)), static_cast<ng::scalar>(prng(64)) },
-			ng::colour{ prng(64), prng(64), prng(64) }.lighter(0x40) 
+			ng::vec3{ prng(800), prng(800), -1.0 + 0.5 * (prng(32) / 32.0) },
+			ng::vec2{ prng(64), prng(64) },
+			ng::colour{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }.lighter(0x40)
 		}.detach();
 
 	// Sprites (todo)...
 	auto spaceship = ecs.create_entity(archetypes::spaceship, ng::game::rigid_body{ ng::vec3{ 400.0, 18.0, 0.0 }, 1.0 });
+	
+/*	auto target = std::make_shared<ng::sprite>();
+	aWorld.add_sprite(target);
+	target->set_collision_mask(0x2ull);
+	target->set_position(ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), 0.0 });
+	auto w = static_cast<ng::scalar>(std::rand() % 40) + 10.0;
+	target->set_extents(ng::vec3{ w, w });
+	target->set_mass(1.0);
+	target->set_spin_degrees((std::rand() % 180 + 180) * (std::rand() % 2 == 0 ? 1.0 : -1.0)); */
+
+
 	for (int i = 0; i < 50; ++i)
-		auto asteroid = ecs.create_entity(archetypes::asteroid, ng::game::rigid_body{ ng::vec3{ static_cast<ng::scalar>(prng(1000)), static_cast<ng::scalar>(prng(1000)), 0.0 }, 1.0 });
+		auto asteroid = ecs.create_entity(
+			archetypes::asteroid, 
+			ng::game::material{ ng::to_ecs_component(ng::colour::from_hsl(prng(360), 1.0, 0.75)) },
+			ng::to_ecs_component(ng::rect{ ng::size{prng(40) + 10, prng(40) + 10} }.with_centred_origin()), 
+			ng::game::rigid_body{ ng::vec3{ prng(1000), prng(1000), 0.0 }, 1.0 });
 
 	// Some information text...
 	canvas.entities_rendered([&](ng::graphics_context& gc)

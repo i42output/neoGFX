@@ -83,22 +83,4 @@ namespace neogfx
 	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre, uint32_t aArcSegments = 0);
 	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre, uint32_t aArcSegments = 0);
 	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre, uint32_t aArcSegments = 0);
-
-	inline game::mesh rect_to_mesh(const rect& aRect, dimension aPixelAdjust = 0, rect_type aType = rect_type::FilledTriangles)
-	{
-		return game::mesh
-			{
-				{ 
-					rect_vertices(aRect, aPixelAdjust, aType) 
-				},
-				{
-					vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
-					vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }
-				},
-				{
-					game::face{ 0u, 1u, 2u },
-					game::face{ 3u, 4u, 5u }
-				}
-			};
-	}
 }

@@ -413,6 +413,7 @@
     <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\game\ecs.cpp" />
     <ClCompile Include="..\..\..\src\game\entity.cpp" />
+    <ClCompile Include="..\..\..\src\game\entity_archetype.cpp" />
     <ClCompile Include="..\..\..\src\game\simple_physics_system.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
     <ClCompile Include="..\..\..\src\game\shape_factory.cpp" />

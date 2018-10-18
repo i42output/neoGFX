@@ -23,6 +23,7 @@
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/i_image.hpp>
+#include <neogfx/game/ecs_helpers.hpp>
 #include <neogfx/game/entity.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
@@ -80,7 +81,7 @@ namespace neogfx::game
 			static void update(const rectangle& aData, i_ecs& aEcs, entity_id aEntity)
 			{
 				using neogfx::game::material;
-				aEcs.component<mesh>().populate(aEntity, rect_to_mesh(rect{ point{~aData.position.xy - aData.extents / 2.0 }, size{aData.extents} }));
+				aEcs.component<mesh>().populate(aEntity, to_ecs_component(rect{ point{~aData.position.xy - aData.extents / 2.0 }, size{aData.extents} }));
 				aEcs.component<material>().populate(aEntity, aData.material);
 			}
 		};
@@ -91,15 +92,17 @@ namespace neogfx::game
 		class rectangle : public entity
 		{
 		public:
-			static const entity_archetype& archetype()
+			static const entity_archetype& archetype(i_ecs& aEcs)
 			{
 				using neogfx::game::rectangle;
 				static const entity_archetype sArchetype
 				{
 					{ 0xce3d930, 0x6b18, 0x403b, 0x9680, { 0x89, 0xed, 0x54, 0x83, 0xd5, 0x72 } },
 					"Rectangle",
-					{ rectangle::meta::id(), mesh::meta::id() }
+					{ rectangle::meta::id(), mesh_renderer::meta::id(), mesh_filter::meta::id() }
 				};
+				if (!aEcs.archetype_registered(sArchetype))
+					aEcs.register_archetype(sArchetype);
 				return sArchetype;
 			}
 		public:

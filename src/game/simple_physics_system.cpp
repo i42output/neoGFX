@@ -57,9 +57,7 @@ namespace neogfx::game
 		auto& physicalConstants = ecs().shared_component<physics>().component_data().begin()->second;
 		auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
 			*physicalConstants.uniformGravity : vec3{};
-		auto now = to_step_time(
-			chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())), 
-			worldClock.timeStep);
+		auto now = ecs().system<time_system>().system_time();
 		auto& rigidBodies = ecs().component<rigid_body>();
 		while (worldClock.time <= now)
 		{
@@ -85,14 +83,14 @@ namespace neogfx::game
 					scalar az = rigidBody1.angle.z;
 					if (ax != 0.0 || ay != 0.0)
 					{
-						mat33 rx = { { 1.0, 0.0, 0.0 },{ 0.0, std::cos(ax), -std::sin(ax) },{ 0.0, std::sin(ax), std::cos(ax) } };
-						mat33 ry = { { std::cos(ay), 0.0, std::sin(ay) },{ 0.0, 1.0, 0.0 },{ -std::sin(ay), 0.0, std::cos(ay) } };
-						mat33 rz = { { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+						mat33 rx = { { 1.0, 0.0, 0.0 },{ 0.0, std::cos(ax), std::sin(ax) },{ 0.0, -std::sin(ax), std::cos(ax) } };
+						mat33 ry = { { std::cos(ay), 0.0, -std::sin(ay) },{ 0.0, 1.0, 0.0 },{ std::sin(ay), 0.0, std::cos(ay) } };
+						mat33 rz = { { std::cos(az), std::sin(az), 0.0 },{ -std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
 						return rz * ry * rx;
 					}
 					else
 					{
-						return mat33{ { std::cos(az), -std::sin(az), 0.0 },{ std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+						return mat33{ { std::cos(az), std::sin(az), 0.0 },{ -std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
 					}
 				}();
 				// GCSE-level physics (Newtonian) going on here... :)

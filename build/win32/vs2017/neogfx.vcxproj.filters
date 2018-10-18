@@ -1211,6 +1211,9 @@
     <ClCompile Include="..\..\..\src\game\canvas.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\game\entity_archetype.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl">

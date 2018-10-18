@@ -51,5 +51,7 @@ namespace neogfx::game
 				return sName;
 			}
 		};
+	private:
+		mutable optional_step_time iSystemTimeOffset;
 	};
 }

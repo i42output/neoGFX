@@ -1141,7 +1141,12 @@ namespace neogfx
 	{
 		auto const& meshFilter = aEcs.component<game::mesh_filter>().entity_record(aEntity);
 		auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(aEntity);
-		draw_mesh(meshFilter, meshRenderer, aTransformation, shader_effect::None);
+		draw_mesh(
+			meshFilter, 
+			meshRenderer, 
+			aEcs.component<game::rigid_body>().has_entity_record(aEntity) ? 
+				to_transformation_matrix(aEcs.component<game::rigid_body>().entity_record(aEntity)) * aTransformation : aTransformation,
+			shader_effect::None);
 	}
 
 	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill)
@@ -1394,7 +1399,7 @@ namespace neogfx
 			auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
 			draw_mesh(
-				rect_to_mesh(rect{ firstOp.point, glyph_extents(firstOp) }),
+				to_ecs_component(rect{ firstOp.point, glyph_extents(firstOp) }),
 				game::material{ 
 					{}, 
 					{}, 

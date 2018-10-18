@@ -24,6 +24,8 @@
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/collider.hpp>
 #include <neogfx/game/sprite.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {
@@ -31,11 +33,11 @@ namespace neogfx::game
 	{
 	public:
 		sprite_archetype(const entity_archetype_id& aId, const std::string& aName) :
-			entity_archetype{ aId, aName, { game::sprite::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
+			entity_archetype{ aId, aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::mesh_filter::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
 		{
 		}
 		sprite_archetype(const std::string& aName) :
-			entity_archetype{ aName, { game::sprite::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
+			entity_archetype{ aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::mesh_filter::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
 		{
 		}
 	};

@@ -22,12 +22,40 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/primitives.hpp>
+#include <neogfx/game/shape_factory.hpp>
+#include <neogfx/game/mesh.hpp>
 #include <neogfx/game/colour.hpp>
 #include <neogfx/game/gradient.hpp>
 #include <neogfx/game/material.hpp>
+#include <neogfx/game/rigid_body.hpp>
 
 namespace neogfx
 {
+	inline mat44 to_transformation_matrix(const game::rigid_body& aRigidBody)
+	{
+		scalar az = aRigidBody.angle.z;
+		// todo: following rotation is 2D, make it 3D...
+		return mat44{ { std::cos(az), std::sin(az), 0.0, 0.0 }, { -std::sin(az), std::cos(az), 0.0, 0.0 }, { 0.0, 0.0, 1.0, 0.0 }, { aRigidBody.position.x, aRigidBody.position.y, aRigidBody.position.z, 1.0 } };
+	}
+
+	inline game::mesh to_ecs_component(const rect& aRect, dimension aPixelAdjust = 0, rect_type aType = rect_type::FilledTriangles)
+	{
+		return game::mesh
+		{
+			{
+				rect_vertices(aRect, aPixelAdjust, aType)
+			},
+			{
+				vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
+				vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }
+			},
+			{
+				game::face{ 0u, 1u, 2u },
+				game::face{ 3u, 4u, 5u }
+			}
+		};
+	}
+
 	inline game::colour to_ecs_component(const colour& aColour)
 	{
 		return game::colour{ aColour.to_vec4() };

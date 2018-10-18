@@ -40,7 +40,7 @@ namespace neogfx::game
 		i_ecs& ecs() const;
 		entity_id id() const;
 		bool detached_or_destroyed() const;
-		entity_id detach(bool aForRendering = true);
+		entity_id detach();
 	private:
 		i_ecs& iEcs;
 		entity_id iId;
