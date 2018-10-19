@@ -982,6 +982,7 @@ namespace neogfx
 				{},
 				to_ecs_component(aTexture)
 			},
+			optional_mat44{},
 			aShaderEffect);
 	}
 
@@ -993,7 +994,7 @@ namespace neogfx
 		draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, shader_effect aShaderEffect) const
+	void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation, shader_effect aShaderEffect) const
 	{
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
 		native_context().enqueue(
@@ -1004,8 +1005,8 @@ namespace neogfx
 					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
 					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
 					{ 0.0, 0.0, 1.0, 0.0 },
-					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
-				aShaderEffect
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } * (aTransformation != std::nullopt ? *aTransformation : mat44::identity()),
+				aShaderEffect,
 			});
 	}
 

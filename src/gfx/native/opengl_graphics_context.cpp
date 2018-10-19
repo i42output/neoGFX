@@ -1145,7 +1145,7 @@ namespace neogfx
 			meshFilter, 
 			meshRenderer, 
 			aEcs.component<game::rigid_body>().has_entity_record(aEntity) ? 
-				to_transformation_matrix(aEcs.component<game::rigid_body>().entity_record(aEntity)) * aTransformation : aTransformation,
+				aTransformation * to_transformation_matrix(aEcs.component<game::rigid_body>().entity_record(aEntity)) : aTransformation,
 			shader_effect::None);
 	}
 
@@ -1633,7 +1633,7 @@ namespace neogfx
 
 		// todo: move following matrix transformations to shader(s)
 		auto const& vertices = ((aMeshFilter.mesh != std::nullopt ? *aMeshFilter.mesh : *aMeshFilter.sharedMesh.ptr) * 
-			(aMeshFilter.transformation != std::nullopt ? *aMeshFilter.transformation * aTransformation : aTransformation)).vertices;
+			(aTransformation * (aMeshFilter.transformation != std::nullopt ? *aMeshFilter.transformation : mat44::identity()))).vertices;
 		auto const& uv = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->uv : aMeshFilter.sharedMesh.ptr->uv;
 		auto const& faces = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->faces : aMeshFilter.sharedMesh.ptr->faces;
 

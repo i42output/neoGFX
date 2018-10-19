@@ -756,6 +756,10 @@ namespace neogfx
 	template <typename T, uint32_t D1, uint32_t D2>
 	inline basic_matrix<T, D1, D1> operator*(const basic_matrix<T, D1, D2>& left, const basic_matrix<T, D2, D1>& right)
 	{
+		if (&left == &left.identity())
+			return right;
+		if (&right == &right.identity())
+			return left;
 		basic_matrix<T, D1, D1> result;
 		for (uint32_t column = 0; column < D1; ++column)
 			for (uint32_t row = 0; row < D1; ++row)

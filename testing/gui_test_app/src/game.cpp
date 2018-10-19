@@ -287,8 +287,8 @@ void create_game(ng::i_layout& aLayout)
 		auto asteroid = ecs.create_entity(
 			archetypes::asteroid, 
 			ng::game::material{ ng::to_ecs_component(ng::colour::from_hsl(prng(360), 1.0, 0.75)) },
-			ng::to_ecs_component(ng::rect{ ng::size{prng(40) + 10, prng(40) + 10} }.with_centred_origin()), 
-			ng::game::rigid_body{ ng::vec3{ prng(1000), prng(1000), 0.0 }, 1.0 });
+			ng::to_ecs_component(ng::rect{ ng::size{prng(40) + 20, prng(40) + 20} }.with_centred_origin()), 
+			ng::game::rigid_body{ ng::vec3{ prng(800), prng(800), 0.0 }, 1.0, {}, {}, {}, ng::vec3{ 0.0, 0.0, ng::to_rad(prng(180) + 180) * (std::rand() % 2 == 0 ? 1.0 : -1.0) } });
 
 	// Some information text...
 	canvas.entities_rendered([&](ng::graphics_context& gc)
