@@ -966,4 +966,22 @@ namespace neogfx
 			return false;
 		return true;
 	}
+
+	inline mat33 rotation_matrix(vec3 aAngles)
+	{
+		scalar ax = aAngles.x;
+		scalar ay = aAngles.y;
+		scalar az = aAngles.z;
+		if (ax != 0.0 || ay != 0.0)
+		{
+			mat33 rx = { { 1.0, 0.0, 0.0 },{ 0.0, std::cos(ax), std::sin(ax) },{ 0.0, -std::sin(ax), std::cos(ax) } };
+			mat33 ry = { { std::cos(ay), 0.0, -std::sin(ay) },{ 0.0, 1.0, 0.0 },{ std::sin(ay), 0.0, std::cos(ay) } };
+			mat33 rz = { { std::cos(az), std::sin(az), 0.0 },{ -std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+			return rz * ry * rx;
+		}
+		else
+		{
+			return mat33{ { std::cos(az), std::sin(az), 0.0 },{ -std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+		}
+	}
 }

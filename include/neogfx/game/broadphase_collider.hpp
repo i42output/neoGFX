@@ -28,9 +28,9 @@ namespace neogfx::game
 {
 	struct broadphase_collider
 	{
+		uint64_t mask;
 		std::optional<aabb> previousAabb;
 		std::optional<aabb> currentAabb;
-		uint64_t mask;
 
 		struct meta : i_component_data::meta
 		{
@@ -53,10 +53,10 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-				case 1:
-					return component_data_field_type::Aabb | component_data_field_type::Optional;
-				case 2:
 					return component_data_field_type::Uint64;
+				case 1:
+				case 2:
+					return component_data_field_type::Aabb | component_data_field_type::Optional;
 				default:
 					throw invalid_field_index();
 				}
@@ -65,9 +65,9 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
+					"Mask",
 					"Previous AABB",
 					"Current AABB",
-					"Mask"
 				};
 				return sFieldNames[aFieldIndex];
 			}
@@ -76,9 +76,9 @@ namespace neogfx::game
 
 	struct broadphase_collider_2d
 	{
+		uint64_t mask;
 		std::optional<aabb_2d> previousAabb;
 		std::optional<aabb_2d> currentAabb;
-		uint64_t mask;
 
 		struct meta : i_component_data::meta
 		{
@@ -101,10 +101,10 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-				case 1:
-					return component_data_field_type::Aabb2d | component_data_field_type::Optional;
-				case 2:
 					return component_data_field_type::Uint64;
+				case 1:
+				case 2:
+					return component_data_field_type::Aabb2d | component_data_field_type::Optional;
 				default:
 					throw invalid_field_index();
 				}
@@ -113,9 +113,9 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
+					"Mask",
 					"Previous AABB",
 					"Current AABB",
-					"Mask"
 				};
 				return sFieldNames[aFieldIndex];
 			}

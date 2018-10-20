@@ -96,17 +96,17 @@ namespace neogfx::game
 		return iSystems;
 	}
 
-	const entity_archetype& ecs::archetype(entity_archetype_id aArchetypeId) const
+	const i_entity_archetype& ecs::archetype(entity_archetype_id aArchetypeId) const
 	{
 		auto existingArchetype = archetypes().find(aArchetypeId);
 		if (existingArchetype != archetypes().end())
-			return existingArchetype->second;
+			return *existingArchetype->second;
 		throw entity_archetype_not_found();
 	}
 
-	entity_archetype& ecs::archetype(entity_archetype_id aArchetypeId)
+	i_entity_archetype& ecs::archetype(entity_archetype_id aArchetypeId)
 	{
-		return const_cast<entity_archetype&>(const_cast<const ecs*>(this)->archetype(aArchetypeId));
+		return const_cast<i_entity_archetype&>(const_cast<const ecs*>(this)->archetype(aArchetypeId));
 	}
 
 	bool ecs::component_instantiated(component_id aComponentId) const
@@ -236,20 +236,20 @@ namespace neogfx::game
 		free_entity_id(aEntityId);
 	}
 
-	bool ecs::archetype_registered(const entity_archetype& aArchetype) const
+	bool ecs::archetype_registered(const i_entity_archetype& aArchetype) const
 	{
 		return archetypes().find(aArchetype.id()) != archetypes().end();
 	}
 
-	void ecs::register_archetype(const entity_archetype& aArchetype)
+	void ecs::register_archetype(const i_entity_archetype& aArchetype)
 	{
-		if (!archetypes().emplace(aArchetype.id(), aArchetype).second)
+		if (!archetypes().emplace(aArchetype.id(), std::shared_ptr<const i_entity_archetype>{ std::shared_ptr<const i_entity_archetype>{}, &aArchetype}).second)
 			throw uuid_exists("register_archetype");
 	}
 
-	void ecs::register_archetype(entity_archetype&& aArchetype)
+	void ecs::register_archetype(std::shared_ptr<const i_entity_archetype> aArchetype)
 	{
-		if (!archetypes().emplace(aArchetype.id(), std::move(aArchetype)).second)
+		if (!archetypes().emplace(aArchetype->id(), aArchetype).second)
 			throw uuid_exists("register_archetype");
 	}
 

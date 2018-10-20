@@ -65,16 +65,8 @@ namespace neogfx::game
 		return iComponents;
 	}
 
-	void entity_archetype::populate_default_components(i_ecs& aEcs, entity_id aEntity)
+	void entity_archetype::populate_default_components(i_ecs&, entity_id)
 	{
-		for (auto const& c : components())
-		{
-			if (aEcs.component_registered(c) && aEcs.component(c).has_entity_record(aEntity))
-				continue;
-			if (c == mesh_renderer::meta::id() && aEcs.component<material>().has_entity_record(aEntity))
-				aEcs.populate(aEntity, mesh_renderer{ aEcs.component<material>().entity_record(aEntity) });
-			else if (c == mesh_filter::meta::id() && aEcs.component<mesh>().has_entity_record(aEntity))
-				aEcs.populate(aEntity, mesh_filter{ {}, aEcs.component<mesh>().entity_record(aEntity) });
-		}
+		// nothing to do.
 	}
 }

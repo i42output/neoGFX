@@ -1,4 +1,5 @@
 ﻿#include <neogfx/neogfx.hpp>
+#include <iomanip>
 #include <boost/format.hpp>
 #include <neolib/random.hpp>
 #include <neolib/singleton.hpp>
@@ -16,6 +17,7 @@
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/collider.hpp>
 #include <neogfx/game/rectangle.hpp>
+#include <neogfx/game/broadphase_collider.hpp>
 
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
@@ -273,29 +275,43 @@ void create_game(ng::i_layout& aLayout)
 	// Sprites (todo)...
 	auto spaceship = ecs.create_entity(archetypes::spaceship, ng::game::rigid_body{ ng::vec3{ 400.0, 18.0, 0.0 }, 1.0 });
 	
-/*	auto target = std::make_shared<ng::sprite>();
-	aWorld.add_sprite(target);
-	target->set_collision_mask(0x2ull);
-	target->set_position(ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), 0.0 });
-	auto w = static_cast<ng::scalar>(std::rand() % 40) + 10.0;
-	target->set_extents(ng::vec3{ w, w });
-	target->set_mass(1.0);
-	target->set_spin_degrees((std::rand() % 180 + 180) * (std::rand() % 2 == 0 ? 1.0 : -1.0)); */
+	auto make_asteroid_mesh = [&]()
+	{
+		ng::game::mesh asteroidMesh;
+		asteroidMesh.vertices.push_back(ng::vec3{ 0.0, 0.0, 0.0 });
+		auto w = prng(20.0) + 10.0;
+		for (ng::scalar angle = 0.0; angle < 360.0; angle += (prng(30.0) + 30.0))
+			asteroidMesh.vertices.push_back(ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }) * ng::vec3{ w + prng(10.0) - 5.0, 0.0, 0.0 });
+		for (uint32_t i = 1; i < asteroidMesh.vertices.size() - 1; ++i)
+			asteroidMesh.faces.push_back(ng::game::face{ 0u, i, i + 1u });
+		asteroidMesh.faces.push_back(ng::game::face{ 0u, 1u, asteroidMesh.vertices.size() - 1u });
+		return asteroidMesh;
+	};
 
-
-	for (int i = 0; i < 50; ++i)
+	for (int i = 0; i < 75; ++i)
 		auto asteroid = ecs.create_entity(
 			archetypes::asteroid, 
 			ng::game::material{ ng::to_ecs_component(ng::colour::from_hsl(prng(360), 1.0, 0.75)) },
-			ng::to_ecs_component(ng::rect{ ng::size{prng(40) + 20, prng(40) + 20} }.with_centred_origin()), 
-			ng::game::rigid_body{ ng::vec3{ prng(800), prng(800), 0.0 }, 1.0, {}, {}, {}, ng::vec3{ 0.0, 0.0, ng::to_rad(prng(180) + 180) * (std::rand() % 2 == 0 ? 1.0 : -1.0) } });
+			make_asteroid_mesh(),
+			ng::game::rigid_body
+			{ 
+				ng::vec3{ prng(800), prng(800), 0.0 }, 1.0, 
+				ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(prng(360.0)) }) * ng::vec3{ prng(20.0), 0.0, 0.0 }, 
+				{}, 
+				{}, 
+				ng::vec3{ 0.0, 0.0, ng::to_rad(prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) } 
+			},
+			ng::game::broadphase_collider{ 0x2ull });
 
+	ng::font clockFont{ "SnareDrum Two NBP", "Regular", 60.0 };
 	// Some information text...
-	canvas.entities_rendered([&](ng::graphics_context& gc)
+	canvas.entities_rendered([&, clockFont](ng::graphics_context& gc)
 	{
 		std::ostringstream text;
-		text << "World time: " << ng::game::from_step_time(ecs.system<ng::game::time_system>().world_time());
-		gc.draw_text(ng::point{ canvas.client_rect().width() / 2.0, 0.0 }, text.str(), canvas.font(), ng::colour::White);
+		auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time_system>().world_time()) * 1000.0);
+		text.fill('0');
+		text << std::setw(2) << worldTime / (1000 * 60 * 60) << " : " << std::setw(2) << worldTime / (1000 * 60) % 60 << " : " << std::setw(2) << worldTime / (1000) % 60 << " . " << std::setw(3) << worldTime % 1000;
+		gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
 	});
 
 	// Instantiate physics...

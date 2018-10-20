@@ -825,6 +825,9 @@
     <ClInclude Include="..\..\..\include\neogfx\game\standard_archetypes.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\renderable_entity_archetype.hpp">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
@@ -1212,6 +1215,9 @@
       <Filter>Game\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\game\entity_archetype.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\renderable_entity_archetype.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

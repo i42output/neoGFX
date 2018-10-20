@@ -24,7 +24,7 @@
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/game/ecs_ids.hpp>
-#include <neogfx/game/entity_archetype.hpp>
+#include <neogfx/game/i_entity_archetype.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/system.hpp>
 #include <neogfx/game/chrono.hpp>
@@ -78,7 +78,7 @@ namespace neogfx::game
 		typedef std::function<std::unique_ptr<i_shared_component>()> shared_component_factory;
 		typedef std::function<std::unique_ptr<i_system>()> system_factory;
 	protected:
-		typedef std::map<entity_archetype_id, entity_archetype> archetype_registry_t;
+		typedef std::map<entity_archetype_id, std::shared_ptr<const i_entity_archetype>> archetype_registry_t;
 		typedef std::map<component_id, component_factory> component_factories_t;
 		typedef std::map<component_id, std::unique_ptr<i_component>> components_t;
 		typedef std::map<component_id, shared_component_factory> shared_component_factories_t;
@@ -108,8 +108,8 @@ namespace neogfx::game
 		virtual const systems_t& systems() const = 0;
 		virtual systems_t& systems() = 0;
 	public:
-		virtual const entity_archetype& archetype(entity_archetype_id aArchetypeId) const = 0;
-		virtual entity_archetype& archetype(entity_archetype_id aArchetypeId) = 0;
+		virtual const i_entity_archetype& archetype(entity_archetype_id aArchetypeId) const = 0;
+		virtual i_entity_archetype& archetype(entity_archetype_id aArchetypeId) = 0;
 		virtual bool component_instantiated(component_id aComponentId) const = 0;
 		virtual const i_component& component(component_id aComponentId) const = 0;
 		virtual i_component& component(component_id aComponentId) = 0;
@@ -123,9 +123,9 @@ namespace neogfx::game
 		virtual entity_id next_entity_id() = 0;
 		virtual void free_entity_id(entity_id aId) = 0;
 	public:
-		virtual bool archetype_registered(const entity_archetype& aArchetype) const = 0;
-		virtual void register_archetype(const entity_archetype& aArchetype) = 0;
-		virtual void register_archetype(entity_archetype&& aArchetype) = 0;
+		virtual bool archetype_registered(const i_entity_archetype& aArchetype) const = 0;
+		virtual void register_archetype(const i_entity_archetype& aArchetype) = 0;
+		virtual void register_archetype(std::shared_ptr<const i_entity_archetype> aArchetype) = 0;
 		virtual bool component_registered(component_id aComponentId) const = 0;
 		virtual void register_component(component_id aComponentId, component_factory aFactory) = 0;
 		virtual bool shared_component_registered(component_id aComponentId) const = 0;

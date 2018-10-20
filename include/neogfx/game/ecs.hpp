@@ -51,8 +51,8 @@ namespace neogfx::game
 		const systems_t& systems() const override;
 		systems_t& systems() override;
 	public:
-		const entity_archetype& archetype(entity_archetype_id aArchetypeId) const override;
-		entity_archetype& archetype(entity_archetype_id aArchetypeId) override;
+		const i_entity_archetype& archetype(entity_archetype_id aArchetypeId) const override;
+		i_entity_archetype& archetype(entity_archetype_id aArchetypeId) override;
 		bool component_instantiated(component_id aComponentId) const override;
 		const i_component& component(component_id aComponentId) const override;
 		i_component& component(component_id aComponentId) override;
@@ -66,9 +66,9 @@ namespace neogfx::game
 		entity_id next_entity_id() override;
 		void free_entity_id(entity_id aId) override;
 	public:
-		bool archetype_registered(const entity_archetype& aArchetype) const override;
-		void register_archetype(const entity_archetype& aArchetype) override;
-		void register_archetype(entity_archetype&& aArchetype) override;
+		bool archetype_registered(const i_entity_archetype& aArchetype) const override;
+		void register_archetype(const i_entity_archetype& aArchetype) override;
+		void register_archetype(std::shared_ptr<const i_entity_archetype> aArchetype) override;
 		bool component_registered(component_id aComponentId) const override;
 		void register_component(component_id aComponentId, component_factory aFactory) override;
 		bool shared_component_registered(component_id aComponentId) const override;

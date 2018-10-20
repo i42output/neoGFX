@@ -24,9 +24,10 @@
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
+#include <neogfx/game/renderable_entity_archetype.hpp>
 #include <neogfx/game/entity.hpp>
-#include <neogfx/game/mesh.hpp>
-#include <neogfx/game/material.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/shape_factory.hpp>
 
 namespace neogfx::game
@@ -95,7 +96,7 @@ namespace neogfx::game
 			static const entity_archetype& archetype(i_ecs& aEcs)
 			{
 				using neogfx::game::rectangle;
-				static const entity_archetype sArchetype
+				static const renderable_entity_archetype sArchetype
 				{
 					{ 0xce3d930, 0x6b18, 0x403b, 0x9680, { 0x89, 0xed, 0x54, 0x83, 0xd5, 0x72 } },
 					"Rectangle",

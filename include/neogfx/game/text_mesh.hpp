@@ -22,6 +22,7 @@
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/entity.hpp>
+#include <neogfx/game/renderable_entity_archetype.hpp>
 #include <neogfx/game/shape_factory.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/font.hpp>
@@ -156,7 +157,7 @@ namespace neogfx::game
 			static const entity_archetype& archetype()
 			{
 				using neogfx::game::text_mesh;
-				static const entity_archetype sArchetype
+				static const renderable_entity_archetype sArchetype
 				{
 					{ 0xe3115152, 0x90ad, 0x4f7a, 0x83b0, { 0x7a, 0x59, 0xce, 0xea, 0x47, 0xb } },
 					"Text Mesh",

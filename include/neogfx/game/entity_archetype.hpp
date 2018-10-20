@@ -26,8 +26,6 @@
 #include <neolib/string.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_entity_archetype.hpp>
-#include <neogfx/game/mesh_renderer.hpp>
-#include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {

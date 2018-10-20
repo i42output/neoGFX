@@ -76,23 +76,6 @@ namespace neogfx::game
 					if (distance.magnitude() > 0.0) // avoid division by zero or rigidBody1 == rigidBody2
 						totalForce += -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0);
 				}
-				auto rotation = [&rigidBody1]() -> mat33
-				{
-					scalar ax = rigidBody1.angle.x;
-					scalar ay = rigidBody1.angle.y;
-					scalar az = rigidBody1.angle.z;
-					if (ax != 0.0 || ay != 0.0)
-					{
-						mat33 rx = { { 1.0, 0.0, 0.0 },{ 0.0, std::cos(ax), std::sin(ax) },{ 0.0, -std::sin(ax), std::cos(ax) } };
-						mat33 ry = { { std::cos(ay), 0.0, -std::sin(ay) },{ 0.0, 1.0, 0.0 },{ std::sin(ay), 0.0, std::cos(ay) } };
-						mat33 rz = { { std::cos(az), std::sin(az), 0.0 },{ -std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
-						return rz * ry * rx;
-					}
-					else
-					{
-						return mat33{ { std::cos(az), std::sin(az), 0.0 },{ -std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
-					}
-				}();
 				// GCSE-level physics (Newtonian) going on here... :)
 				// v = u + at
 				// F = ma; a = F/m
@@ -100,7 +83,7 @@ namespace neogfx::game
 				auto p0 = rigidBody1.position;
 				auto a0 = rigidBody1.angle;
 				auto elapsedTime = from_step_time(worldClock.timeStep);
-				rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation * rigidBody1.acceleration)) * vec3 { elapsedTime, elapsedTime, elapsedTime };
+				rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)) * vec3 { elapsedTime, elapsedTime, elapsedTime };
 				rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } * (elapsedTime * (v0 + (rigidBody1.velocity - v0) / 2.0));
 				rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 			}

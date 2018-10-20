@@ -1,4 +1,4 @@
-// entity_archetype.hpp
+// renderable_entity_archetype.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -21,25 +21,23 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/renderable_entity_archetype.hpp>
-#include <neogfx/game/rigid_body.hpp>
-#include <neogfx/game/collider.hpp>
-#include <neogfx/game/sprite.hpp>
+#include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 
 namespace neogfx::game
 {
-	class sprite_archetype : public renderable_entity_archetype
+	void renderable_entity_archetype::populate_default_components(i_ecs& aEcs, entity_id aEntity)
 	{
-	public:
-		sprite_archetype(const entity_archetype_id& aId, const std::string& aName) :
-			renderable_entity_archetype{ aId, aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::mesh_filter::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
+		entity_archetype::populate_default_components(aEcs, aEntity);
+		for (auto const& c : components())
 		{
+			if (aEcs.component_registered(c) && aEcs.component(c).has_entity_record(aEntity))
+				continue;
+			if (c == mesh_renderer::meta::id() && aEcs.component<material>().has_entity_record(aEntity))
+				aEcs.populate(aEntity, mesh_renderer{ aEcs.component<material>().entity_record(aEntity) });
+			else if (c == mesh_filter::meta::id() && aEcs.component<mesh>().has_entity_record(aEntity))
+				aEcs.populate(aEntity, mesh_filter{ {}, aEcs.component<mesh>().entity_record(aEntity) });
 		}
-		sprite_archetype(const std::string& aName) :
-			renderable_entity_archetype{ aName, { game::sprite::meta::id(), game::mesh_renderer::meta::id(), game::mesh_filter::meta::id(), game::rigid_body::meta::id(), box_collider::meta::id() } }
-		{
-		}
-	};
-
+	}
 }
