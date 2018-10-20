@@ -163,6 +163,7 @@ namespace neogfx::game
 		typedef std::vector<reverse_index_t> reverse_indices_t;
 	private:
 		typedef static_component<Data> self_type;
+		typedef std::vector<typename component_data_t::size_type> free_indices_t;
 	private:
 		static constexpr reverse_index_t invalid = ~reverse_index_t{};
 	public:
@@ -217,6 +218,7 @@ namespace neogfx::game
 				data_meta_type::free_handles(base_type::component_data()[reverseIndex], ecs());
 			entities()[reverseIndex] = null_entity;
 			reverse_indices()[aEntity] = invalid;
+			free_indices().push_back(reverseIndex);
 		}
 		value_type& populate(entity_id aEntity, const value_type& aData)
 		{
@@ -255,31 +257,47 @@ namespace neogfx::game
 				}, aComparator);
 		}
 	private:
+		free_indices_t& free_indices()
+		{
+			return iFreeIndices;
+		}
 		template <typename T>
 		value_type& do_populate(entity_id aEntity, T&& aComponentData)
 		{
 			if (has_entity_record(aEntity))
 				return do_update(aEntity, aComponentData);
-			base_type::component_data().push_back(std::forward<T>(aComponentData));
-			try
+			reverse_index_t reverseIndex = invalid;
+			if (!free_indices().empty())
 			{
-				entities().push_back(aEntity);
+				reverseIndex = free_indices().back();
+				free_indices().pop_back();
+				base_type::component_data()[reverseIndex] = std::forward<T>(aComponentData);
+				entities()[reverseIndex] = aEntity;
 			}
-			catch (...)
+			else
 			{
-				base_type::component_data().pop_back();
-				throw;
+				reverseIndex = base_type::component_data().size();
+				base_type::component_data().push_back(std::forward<T>(aComponentData));
+				try
+				{
+					entities().push_back(aEntity);
+				}
+				catch (...)
+				{
+					base_type::component_data().pop_back();
+					throw;
+				}
 			}
 			try
 			{
 				if (reverse_indices().size() <= aEntity)
 					reverse_indices().resize(aEntity + 1, invalid);
-				reverse_indices()[aEntity] = entities().size() - 1;
+				reverse_indices()[aEntity] = reverseIndex;
 			}
 			catch (...)
 			{
-				base_type::component_data().pop_back();
-				entities().pop_back();
+				entities()[reverseIndex] = null_entity;
+				throw;
 			}
 			return base_type::component_data().back();
 		}
@@ -292,6 +310,7 @@ namespace neogfx::game
 		}
 	private:
 		component_data_entities_t iEntities;
+		free_indices_t iFreeIndices;
 		reverse_indices_t iReverseIndices;
 	};
 
