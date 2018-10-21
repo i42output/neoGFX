@@ -54,7 +54,7 @@ namespace neogfx
 		bool nest() const;
 	};
 
-	class app : public neolib::async_thread, private async_event_queue, public i_app, private i_keyboard_handler
+	class app : public neolib::async_thread, public i_app, private i_keyboard_handler
 	{
 	public:
 		class event_processing_context : public i_event_processing_context

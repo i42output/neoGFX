@@ -679,7 +679,7 @@ namespace neogfx
 		bool didSome = false;
 		try
 		{
-			didSome = async_event_queue::exec();
+			didSome = iAsyncEventQueue.exec();
 			if (!in()) // not app thread
 				return didSome;
 			

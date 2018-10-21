@@ -48,8 +48,13 @@ namespace neogfx::game
 	public:
 		const i_component& component(component_id aComponentId) const override;
 		i_component& component(component_id aComponentId) override;
+	public:
+		bool paused() const override;
+		void pause() override;
+		void resume() override;
 	private:
 		game::i_ecs& iEcs;
 		component_list iComponents;
+		std::atomic<bool> iPaused;
 	};
 }

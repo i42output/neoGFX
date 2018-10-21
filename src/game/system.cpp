@@ -25,17 +25,17 @@
 namespace neogfx::game
 {
 	system::system(game::i_ecs& aEcs) :
-		iEcs{ aEcs }
+		iEcs{ aEcs }, iPaused{ false }
 	{
 	}
 
 	system::system(const system& aOther) :
-		iEcs{ aOther.iEcs }, iComponents{ aOther.iComponents }
+		iEcs{ aOther.iEcs }, iComponents{ aOther.iComponents }, iPaused{ false }
 	{
 	}
 
 	system::system(system&& aOther) :
-		iEcs{ aOther.iEcs }, iComponents{ std::move(aOther.iComponents) }
+		iEcs{ aOther.iEcs }, iComponents{ std::move(aOther.iComponents) }, iPaused{ false }
 	{
 	}
 
@@ -63,4 +63,20 @@ namespace neogfx::game
 	{
 		return ecs().component(aComponentId);
 	}
+
+	bool system::paused() const
+	{
+		return iPaused;
+	}
+
+	void system::pause()
+	{
+		iPaused = true;
+	}
+
+	void system::resume()
+	{
+		iPaused = false;
+	}
+
 }

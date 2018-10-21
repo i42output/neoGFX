@@ -102,6 +102,11 @@ namespace neogfx::game
 			return data_meta_type::id();
 		}
 	public:
+		std::recursive_mutex& mutex() const
+		{
+			return iMutex;
+		}
+	public:
 		bool is_data_optional() const override
 		{
 			return detail::crack_component_data<Data>::optional;
@@ -145,6 +150,7 @@ namespace neogfx::game
 		}
 	private:
 		game::i_ecs& iEcs;
+		mutable std::recursive_mutex iMutex;
 		component_data_t iComponentData;
 	};
 

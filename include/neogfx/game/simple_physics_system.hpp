@@ -26,13 +26,20 @@ namespace neogfx::game
 {
 	class simple_physics_system : public system
 	{
+	private:
+		class thread;
 	public:
 		simple_physics_system(game::i_ecs& aEcs);
+		~simple_physics_system();
 	public:
 		const system_id& id() const override;
 		const neolib::i_string& name() const override;
 	public:
 		void apply() override;
+	public:
+		bool universal_gravitation_enabled() const;
+		void enable_universal_gravitation();
+		void disable_universal_gravitation();
 	public:
 		struct meta
 		{
@@ -47,5 +54,8 @@ namespace neogfx::game
 				return sName;
 			}
 		};
+	private:
+		std::unique_ptr<thread> iThread;
+		bool iUniversalGravitationEnabled;
 	};
 }

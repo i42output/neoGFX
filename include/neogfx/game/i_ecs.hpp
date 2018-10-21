@@ -289,4 +289,28 @@ namespace neogfx::game
 				return static_cast<Handle>(reinterpret_cast<intptr_t>(release_handle(aId)));
 		}
 	};
+
+	template <typename Data>
+	class shared_component_lock_guard
+	{
+	public:
+		shared_component_lock_guard(const i_ecs& aEcs) :
+			iLockGuard{ aEcs.shared_component<Data>().mutex() }
+		{
+		}
+	private:
+		std::lock_guard<std::recursive_mutex> iLockGuard;
+	};
+
+	template <typename Data>
+	class component_lock_guard
+	{
+	public:
+		component_lock_guard(const i_ecs& aEcs) :
+			iLockGuard{ aEcs.component<Data>().mutex() }
+		{
+		}
+	private:
+		std::lock_guard<std::recursive_mutex> iLockGuard;
+	};
 }
