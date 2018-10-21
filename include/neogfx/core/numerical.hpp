@@ -566,6 +566,8 @@ namespace neogfx
 		column_type& operator[](uint32_t aColumn) { return m[aColumn]; }
 		const value_type* data() const { return &m[0].v[0]; }
 	public:
+		bool operator==(const basic_matrix& right) const { return m == right.m; }
+		bool operator!=(const basic_matrix& right) const { return m != right.m; }
 		basic_matrix& operator+=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] += value; return *this; }
 		basic_matrix& operator-=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] -= value; return *this; }
 		basic_matrix& operator*=(input_reference_type value) { for (uint32_t column = 0; column < Columns; ++column) m[column] *= value; return *this; }
@@ -965,6 +967,24 @@ namespace neogfx
 		if (first.min.y > second.max.y)
 			return false;
 		return true;
+	}
+
+	// 3D helpers
+
+	template <typename T, bool IsScalar>
+	inline basic_vector<T, 3, column_vector, IsScalar> operator*(const basic_matrix<T, 4, 4>& left, const basic_vector<T, 3, column_vector, IsScalar>& right)
+	{
+		return (left * basic_vector<T, 4, column_vector, IsScalar>{ right.x, right.y, right.z, 1.0 }).xyz;
+	}
+
+	template <typename T, bool IsScalar>
+	inline std::vector<basic_vector<T, 3, column_vector, IsScalar>> operator*(const basic_matrix<T, 4, 4>& left, const std::vector<basic_vector<T, 3, column_vector, IsScalar>>& right)
+	{
+		std::vector<basic_vector<T, 3, column_vector, IsScalar>> result;
+		result.reserve(right.size());
+		for (auto const& v : right)
+			result.push_back(left * v);
+		return result;
 	}
 
 	inline mat33 rotation_matrix(vec3 aAngles)

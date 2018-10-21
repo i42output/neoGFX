@@ -177,19 +177,39 @@ namespace neogfx
 			typedef opengl_standard_vertex_arrays::vertex_array::const_iterator const_iterator;
 			typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
 		public:
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) : 
-				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size())}, iUseBarrier{ aUseBarrier }
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
-				if (!room_for(aNeed) || aUseBarrier)
+				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
 					execute();
+				set_transformation(optional_mat44{});
+				if (!room_for(aNeed))
+					throw not_enough_room();
+			}
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
+			{
+				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
+					execute();
+				set_transformation(aTransformation);
 				if (!room_for(aNeed))
 					throw not_enough_room();
 			}
 			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
-				if (!room_for(aNeed) || aUseBarrier)
+				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
 					execute();
+				set_transformation(optional_mat44{});
+				if (!room_for(aNeed))
+					throw not_enough_room();
+			}
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
+			{
+				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
+					execute();
+				set_transformation(aTransformation);
 				if (!room_for(aNeed))
 					throw not_enough_room();
 			}
@@ -327,6 +347,18 @@ namespace neogfx
 				if (pvc != 0)
 					aAmount = std::max(aAmount, (pvc - ((vertices().size() - iStart) % pvc)) % pvc);
 				return room() >= aAmount;
+			}
+			bool is_new_transformation(const optional_mat44& aTransformation) const
+			{
+				return iUse.transformation() != aTransformation;
+			}
+			const optional_mat44& transformation() const
+			{
+				return iUse.transformation();
+			}
+			void set_transformation(const optional_mat44& aTransformation)
+			{
+				iUse.set_transformation(aTransformation);
 			}
 			const opengl_standard_vertex_arrays::vertex_array& vertices() const
 			{
@@ -1637,9 +1669,9 @@ namespace neogfx
 		if (aMeshRenderer.material.colour != std::nullopt)
 			colourizationColour = aMeshRenderer.material.colour->rgba;
 
-		// todo: move following matrix transformations to shader(s)
-		auto const& vertices = ((aMeshFilter.mesh != std::nullopt ? *aMeshFilter.mesh : *aMeshFilter.sharedMesh.ptr) * 
-			(aTransformation * (aMeshFilter.transformation != std::nullopt ? *aMeshFilter.transformation : mat44::identity()))).vertices;
+		auto const transformation = aTransformation * (aMeshFilter.transformation != std::nullopt ? *aMeshFilter.transformation : mat44::identity());
+
+		auto const& vertices = transformation * (aMeshFilter.mesh != std::nullopt ? *aMeshFilter.mesh : *aMeshFilter.sharedMesh.ptr).vertices;
 		auto const& uv = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->uv : aMeshFilter.sharedMesh.ptr->uv;
 		auto const& faces = aMeshFilter.mesh != std::nullopt ? aMeshFilter.mesh->faces : aMeshFilter.sharedMesh.ptr->faces;
 
@@ -1659,7 +1691,7 @@ namespace neogfx
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
 			{
-				use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures };
+				use_vertex_arrays vertexArrays { *this, GL_TRIANGLES, with_textures };
 
 				GLuint textureHandle = 0;
 				const i_sub_texture* subTexture = nullptr;
@@ -1730,7 +1762,7 @@ namespace neogfx
 		{
 			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
-			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES };
+			use_vertex_arrays vertexArrays { *this, GL_TRIANGLES };
 
 			for (auto const& face : faces)
 			{

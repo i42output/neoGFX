@@ -76,13 +76,9 @@ namespace neogfx::game
 		};
 	};
 
-	inline mesh operator*(const mesh& aLhs, const mat44& aRhs)
+	inline mesh operator*(const mat44& aLhs, const mesh& aRhs)
 	{
-		mesh result{ {}, aLhs.uv, aLhs.faces };
-		result.vertices.reserve(aLhs.vertices.size());
-		for (auto const& v : aLhs.vertices)
-			result.vertices.push_back((aRhs * vec4{ v.x, v.y, v.z, 1.0 }).xyz);
-		return result;
+		return mesh{ aLhs * aRhs.vertices, aRhs.uv, aRhs.faces };
 	}
 
 	inline rect bounding_rect(const mesh& aMesh)

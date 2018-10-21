@@ -313,11 +313,11 @@ namespace neogfx
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
 		native_context().enqueue(
 			graphics_operation::draw_shape{
-				aShape * mat44{ 
+				mat44{ 
 					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
 					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
 					{ 0.0, 0.0, 1.0, 0.0 }, 
-					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } * aShape,
 				aPen });
 	}
 
@@ -376,11 +376,11 @@ namespace neogfx
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
 		native_context().enqueue(
 			graphics_operation::fill_shape{
-				aShape * mat44{ 
+				mat44{ 
 					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
 					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
 					{ 0.0, 0.0, 1.0, 0.0 }, 
-					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } },
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } * aShape,
 				aFill });
 	}
 

@@ -279,6 +279,14 @@ namespace neogfx
 			{
 				return iParent.iVertices;
 			}
+			const optional_mat44& transformation() const
+			{
+				return iParent.iTransformation;
+			}
+			void set_transformation(const optional_mat44& aTransformation)
+			{
+				iParent.iTransformation = aTransformation;
+			}
 			void execute()
 			{
 				iParent.execute();
@@ -359,27 +367,30 @@ namespace neogfx
 			//iInstance->flush_buffer(iVertices.size());
 			if (iShaderProgram->has_projection_matrix())
 				iShaderProgram->set_projection_matrix(aGraphicsContext);
+			if (iShaderProgram->has_transformation_matrix())
+				iShaderProgram->set_transformation_matrix(aGraphicsContext, iTransformation);
 		}
 	private:
 		i_rendering_engine::i_shader_program* iShaderProgram;
 		std::unique_ptr<instance> iInstance;
 		vertex_array iVertices;
+		optional_mat44 iTransformation;
 	};
 
 	class use_shader_program
 	{
 	public:
-		use_shader_program(i_native_graphics_context& aGraphicsContext, i_rendering_engine& aRenderingEngine, i_rendering_engine::i_shader_program& aShaderProgram) :
+		use_shader_program(i_native_graphics_context& aGraphicsContext, i_rendering_engine& aRenderingEngine, i_rendering_engine::i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) :
 			iGraphicsContext{ aGraphicsContext },
 			iRenderingEngine{ aRenderingEngine },
 			iPreviousProgram{ aRenderingEngine.shader_program_active() ? &aRenderingEngine.active_shader_program() : nullptr }
 		{
-			iRenderingEngine.activate_shader_program(iGraphicsContext, aShaderProgram);
+			iRenderingEngine.activate_shader_program(iGraphicsContext, aShaderProgram, aProjectionMatrix, aTransformationMatrix);
 		}
 		~use_shader_program()
 		{
 			if (iPreviousProgram != nullptr)
-				iRenderingEngine.activate_shader_program(iGraphicsContext, *iPreviousProgram);
+				iRenderingEngine.activate_shader_program(iGraphicsContext, *iPreviousProgram, iPreviousProgram->projection_matrix(), iPreviousProgram->transformation_matrix());
 		}
 	private:
 		i_native_graphics_context& iGraphicsContext;
