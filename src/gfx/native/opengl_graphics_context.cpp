@@ -295,9 +295,10 @@ namespace neogfx
 			bool room_for(std::size_t aAmount) const
 			{
 				auto pvc = primitive_vertex_count();
-				if (pvc != 0)
-					aAmount = std::max(aAmount, (pvc - ((vertices().size() - iStart) % pvc)) % pvc);
-				return room() >= aAmount;
+				if (pvc == 0)
+					pvc = 1;
+				auto rem = ((vertices().size() - iStart) % pvc);
+				return room() >= (aAmount * pvc - (rem != 0 ? pvc - rem : 0));
 			}
 			void execute()
 			{
@@ -343,7 +344,7 @@ namespace neogfx
 						{
 							glCheck(glTextureBarrier());
 						}
-					}
+					} 
 				}
 			}
 		private:
