@@ -64,7 +64,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions) /std:c++latest </AdditionalOptions>
     </ClCompile>
     <Link>
@@ -89,7 +89,7 @@
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions) /std:c++latest </AdditionalOptions>
     </ClCompile>
     <Link>

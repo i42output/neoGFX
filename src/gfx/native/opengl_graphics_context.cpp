@@ -591,11 +591,11 @@ namespace neogfx
 					draw_shape(args.mesh, args.pen);
 				}
 				break;
-			case graphics_operation::operation_type::DrawEntity:
+			case graphics_operation::operation_type::DrawEntities:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
 				{
-					const auto& args = static_variant_cast<const graphics_operation::draw_entity&>(*op);
-					draw_entity(args.ecs, args.entity, args.transformation);
+					const auto& args = static_variant_cast<const graphics_operation::draw_entities&>(*op);
+					draw_entities(args.ecs, args.transformation);
 				}
 				break;
 			case graphics_operation::operation_type::FillRect:
@@ -1137,16 +1137,23 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::draw_entity(const game::i_ecs& aEcs, game::entity_id aEntity, const mat44& aTransformation)
+	void opengl_graphics_context::draw_entities(const game::i_ecs& aEcs, const mat44& aTransformation)
 	{
-		auto const& meshFilter = aEcs.component<game::mesh_filter>().entity_record(aEntity);
-		auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(aEntity);
-		draw_mesh(
-			meshFilter, 
-			meshRenderer, 
-			aEcs.component<game::rigid_body>().has_entity_record(aEntity) ? 
-				aTransformation * to_transformation_matrix(aEcs.component<game::rigid_body>().entity_record(aEntity)) : aTransformation,
-			shader_effect::None);
+		if (!aEcs.component<game::rigid_body>().have_snapshot())
+			return;
+		auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
+		auto const& rigidBodies = rigidBodiesSnapshot.data();
+		for (auto entity : aEcs.component<game::mesh_renderer>().entities())
+		{
+			auto const& meshFilter = aEcs.component<game::mesh_filter>().entity_record(entity);
+			auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
+			draw_mesh(
+				meshFilter,
+				meshRenderer,
+				rigidBodies.has_entity_record(entity) ?
+					aTransformation * to_transformation_matrix(rigidBodies.entity_record(entity)) : aTransformation,
+				shader_effect::None);
+		}
 	}
 
 	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill)

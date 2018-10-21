@@ -175,10 +175,9 @@ namespace neogfx
 			pen pen;
 		};
 
-		struct draw_entity
+		struct draw_entities
 		{
 			const game::i_ecs& ecs;
-			game::entity_id entity;
 			mat44 transformation;
 		};
 
@@ -276,7 +275,7 @@ namespace neogfx
 			draw_arc,
 			draw_path,
 			draw_shape,
-			draw_entity,
+			draw_entities,
 			fill_rect,
 			fill_rounded_rect,
 			fill_circle,
@@ -316,7 +315,7 @@ namespace neogfx
 			DrawArc,
 			DrawPath,
 			DrawShape,
-			DrawEntity,
+			DrawEntities,
 			FillRect,
 			FillRoundedRect,
 			FillCircle,

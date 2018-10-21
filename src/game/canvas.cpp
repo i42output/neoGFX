@@ -105,11 +105,9 @@ namespace neogfx::game
 		if (ecs().component_registered<mesh_renderer>())
 		{
 			aGraphicsContext.clear_depth_buffer();
-			component_lock_guard<rigid_body> lgRigidBody{ ecs() };
 			component_lock_guard<mesh_renderer> lgMeshRenderer{ ecs() };
 			rendering_entities.trigger(aGraphicsContext);
-			for (auto entity : ecs().component<mesh_renderer>().entities())
-				aGraphicsContext.draw_entity(ecs(), entity);
+			aGraphicsContext.draw_entities(ecs());
 			aGraphicsContext.flush();
 			entities_rendered.trigger(aGraphicsContext);
 		}

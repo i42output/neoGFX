@@ -58,7 +58,7 @@ namespace neogfx
 			case DrawArc: return "DrawArc";
 			case DrawPath: return "DrawPath";
 			case DrawShape: return "DrawShape";
-			case DrawEntity: return "DrawEntity";
+			case DrawEntities: return "DrawEntities";
 			case FillRect: return "FillRect";
 			case FillRoundedRect: return "FillRoundedRect";
 			case FillCircle: return "FillCircle";
@@ -79,7 +79,6 @@ namespace neogfx
 			{
 			case operation_type::SetPixel:
 			case operation_type::DrawPixel:
-			case operation_type::DrawEntity:
 			case operation_type::DrawMesh:
 				return true;
 			case operation_type::DrawLine:

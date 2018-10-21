@@ -92,6 +92,17 @@ namespace neogfx::game
 			iEcs{ aEcs }
 		{
 		}
+		static_component_base(const self_type& aOther) :
+			iEcs{ aOther.iEcs },
+			iComponentData{ aOther.iComponentData }
+		{
+		}
+	public:
+		self_type& operator=(const self_type& aRhs)
+		{
+			iComponentData = aRhs.iComponentData;
+			return *this;
+		}
 	public:
 		game::i_ecs& ecs() const override
 		{
@@ -170,12 +181,58 @@ namespace neogfx::game
 	private:
 		typedef static_component<Data> self_type;
 		typedef std::vector<typename component_data_t::size_type> free_indices_t;
+	public:
+		typedef std::unique_ptr<self_type> snapshot_ptr;
+		class scoped_snapshot
+		{
+		public:
+			scoped_snapshot(const self_type& aOwner) :
+				iOwner{ aOwner }
+			{
+				++iOwner.iUsingSnapshot;
+			}
+			scoped_snapshot(const scoped_snapshot& aOther) :
+				iOwner{ aOther.iOwner }
+			{
+				++iOwner.iUsingSnapshot;
+			}
+			~scoped_snapshot()
+			{
+				--iOwner.iUsingSnapshot;
+			}
+		public:
+			const self_type& data() const
+			{
+				return iOwner;
+			}
+		private:
+			const self_type& iOwner;
+		};
 	private:
 		static constexpr reverse_index_t invalid = ~reverse_index_t{};
 	public:
 		static_component(game::i_ecs& aEcs) : 
-			base_type{ aEcs }
+			base_type{ aEcs },
+			iHaveSnapshot{ false },
+			iUsingSnapshot{ 0u }
 		{
+		}
+		static_component(const self_type& aOther) :
+			base_type{ aOther },
+			iEntities{ aOther.iEntities },
+			iFreeIndices{ aOther.iFreeIndices },
+			iReverseIndices{ aOther.iReverseIndices },
+			iHaveSnapshot{ false },
+			iUsingSnapshot{ 0u }
+		{
+		}
+	public:
+		self_type& operator=(const self_type& aRhs)
+		{
+			iEntities = aRhs.iEntities;	
+			iFreeIndices = aRhs.iFreeIndices;
+			iReverseIndices = aRhs.iReverseIndices;
+			return *this;
 		}
 	public:
 		const component_data_entities_t& entities() const
@@ -244,6 +301,27 @@ namespace neogfx::game
 				return &do_populate(aEntity, value_type{}); // empty optional
 		}
 	public:
+		bool have_snapshot() const
+		{
+			return iHaveSnapshot;
+		}
+		void take_snapshot() const
+		{
+			std::lock_guard<std::recursive_mutex> lg{ mutex() };
+			if (!iUsingSnapshot)
+			{
+				if (iSnapshot == nullptr)
+					iSnapshot = std::make_unique<self_type>(*this);
+				else
+					*iSnapshot = *this;
+				iHaveSnapshot = true;
+			}
+		}
+		scoped_snapshot snapshot() const
+		{
+			std::lock_guard<std::recursive_mutex> lg{ mutex() };
+			return scoped_snapshot{ *this };
+		}
 		template <typename Compare>
 		void sort(Compare aComparator)
 		{
@@ -318,6 +396,9 @@ namespace neogfx::game
 		component_data_entities_t iEntities;
 		free_indices_t iFreeIndices;
 		reverse_indices_t iReverseIndices;
+		mutable std::atomic<bool> iHaveSnapshot;
+		mutable std::atomic<uint32_t> iUsingSnapshot;
+		mutable snapshot_ptr iSnapshot;
 	};
 
 	template <typename Data>
