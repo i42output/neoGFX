@@ -316,7 +316,6 @@ namespace neogfx
 				}
 				else
 				{
-					glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
 					if (iUseBarrier)
 					{
 						glCheck(glTextureBarrier());
