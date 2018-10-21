@@ -274,6 +274,13 @@ namespace neogfx
 					execute();
 				vertices().push_back(aVertex);
 			}
+			template <typename... Args>
+			void emplace_back(Args&&... args)
+			{
+				if (!room_for(1))
+					execute();
+				vertices().emplace_back(std::forward<Args>(args)...);
+			}
 			template <typename Iter>
 			iterator insert(const_iterator aPos, Iter aFirst, Iter aLast)
 			{
@@ -1806,16 +1813,14 @@ namespace neogfx
 					{
 						auto const& faceVertex = vertices[faceVertexIndex];
 						auto const& faceUv = (uv[faceVertexIndex] * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
-						vertexArrays.instance().push_back(
-							opengl_standard_vertex_arrays::vertex{
-								faceVertex,
-								std::array<uint8_t, 4>{ {
-									colourizationColour.red(),
-									colourizationColour.green(),
-									colourizationColour.blue(),
-									colourizationColour.alpha()}},
-								faceUv
-							});
+						vertexArrays.instance().emplace_back(
+							faceVertex,
+							std::array<uint8_t, 4>{ {
+								colourizationColour.red(),
+								colourizationColour.green(),
+								colourizationColour.blue(),
+								colourizationColour.alpha()}},
+							faceUv);
 					}
 
 					first = false;
@@ -1837,15 +1842,13 @@ namespace neogfx
 				for (auto faceVertexIndex : face)
 				{
 					auto const& faceVertex = vertices[faceVertexIndex];
-					vertexArrays.instance().push_back(
-						opengl_standard_vertex_arrays::vertex{
-							faceVertex,
-							std::array<uint8_t, 4>{ {
-								colourizationColour.red(),
-								colourizationColour.green(),
-								colourizationColour.blue(),
-								colourizationColour.alpha()}}
-						});
+					vertexArrays.instance().emplace_back(
+						faceVertex,
+						std::array<uint8_t, 4>{ {
+							colourizationColour.red(),
+							colourizationColour.green(),
+							colourizationColour.blue(),
+							colourizationColour.alpha()}});
 				}
 			}
 		}
