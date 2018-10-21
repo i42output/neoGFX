@@ -1139,8 +1139,7 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_entities(const game::i_ecs& aEcs, const mat44& aTransformation)
 	{
-		if (!aEcs.component<game::rigid_body>().have_snapshot())
-			return;
+		aEcs.component<game::rigid_body>().take_snapshot();
 		auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
 		auto const& rigidBodies = rigidBodiesSnapshot.data();
 		for (auto entity : aEcs.component<game::mesh_renderer>().entities())
