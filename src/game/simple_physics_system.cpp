@@ -94,14 +94,16 @@ namespace neogfx::game
 			neolib::thread::sleep(1);
 			component_lock_guard<rigid_body> lgRigidBodies{ ecs() };
 			ecs().applying_physics.trigger(worldClock.time);
-			rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
-			auto firstMassless = universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0 ?
+			bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
+			if (useUniversalGravitation)
+				rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
+			auto firstMassless = useUniversalGravitation ?
 				std::find_if(rigidBodies.component_data().begin(), rigidBodies.component_data().end(), [](const rigid_body& body) { return body.mass == 0.0; }) :
 				rigidBodies.component_data().begin();
 			for (auto& rigidBody1 : rigidBodies.component_data())
 			{
 				vec3 totalForce = rigidBody1.mass * uniformGravity;
-				if (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0)
+				if (useUniversalGravitation)
 				{
 					for (auto iterRigidBody2 = rigidBodies.component_data().begin(); iterRigidBody2 != firstMassless; ++iterRigidBody2)
 					{
