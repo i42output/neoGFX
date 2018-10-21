@@ -166,18 +166,18 @@ namespace neogfx
 
 		struct with_textures_t {} with_textures;
 
-		class use_vertex_arrays
+		class use_vertex_arrays_instance
 		{
 		public:
-			struct not_enough_room : std::invalid_argument { not_enough_room() : std::invalid_argument("neogfx::use_vertex_arrays::not_enough_room") {} };
-			struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays::invalid_draw_count") {} };
-			struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::use_vertex_arrays::cannot_use_barrier") {} };
+			struct not_enough_room : std::invalid_argument { not_enough_room() : std::invalid_argument("neogfx::use_vertex_arrays_instance::not_enough_room") {} };
+			struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays_instance::invalid_draw_count") {} };
+			struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::use_vertex_arrays_instance::cannot_use_barrier") {} };
 		public:
 			typedef opengl_standard_vertex_arrays::vertex_array::value_type value_type;
 			typedef opengl_standard_vertex_arrays::vertex_array::const_iterator const_iterator;
 			typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
 		public:
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
@@ -186,7 +186,7 @@ namespace neogfx
 				if (!room_for(aNeed))
 					throw not_enough_room();
 			}
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
@@ -195,7 +195,7 @@ namespace neogfx
 				if (!room_for(aNeed))
 					throw not_enough_room();
 			}
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
@@ -204,7 +204,7 @@ namespace neogfx
 				if (!room_for(aNeed))
 					throw not_enough_room();
 			}
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
 				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
@@ -213,7 +213,7 @@ namespace neogfx
 				if (!room_for(aNeed))
 					throw not_enough_room();
 			}
-			~use_vertex_arrays()
+			~use_vertex_arrays_instance()
 			{
 				draw();
 			}
@@ -288,6 +288,17 @@ namespace neogfx
 				}
 			}
 		public:
+			std::size_t room() const
+			{
+				return vertices().capacity() - vertices().size();
+			}
+			bool room_for(std::size_t aAmount) const
+			{
+				auto pvc = primitive_vertex_count();
+				if (pvc != 0)
+					aAmount = std::max(aAmount, (pvc - ((vertices().size() - iStart) % pvc)) % pvc);
+				return room() >= aAmount;
+			}
 			void execute()
 			{
 				draw();
@@ -336,17 +347,6 @@ namespace neogfx
 				}
 			}
 		private:
-			std::size_t room() const
-			{
-				return vertices().capacity() - vertices().size();
-			}
-			bool room_for(std::size_t aAmount) const
-			{
-				auto pvc = primitive_vertex_count();
-				if (pvc != 0)
-					aAmount = std::max(aAmount, (pvc - ((vertices().size() - iStart) % pvc)) % pvc);
-				return room() >= aAmount;
-			}
 			bool is_new_transformation(const optional_mat44& aTransformation) const
 			{
 				return iUse.transformation() != aTransformation;
@@ -388,6 +388,49 @@ namespace neogfx
 			bool iWithTextures;
 			GLint iStart;
 			bool iUseBarrier;
+		};
+
+		class use_vertex_arrays
+		{
+		public:
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false)
+			{
+				instantiate(aParent, aMode, aNeed, aUseBarrier);
+			}
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false)
+			{
+				instantiate(aParent, aMode, aTransformation, aNeed, aUseBarrier);
+			}
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false)
+			{
+				instantiate(aParent, aMode, with_textures, aNeed, aUseBarrier);
+			}
+			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false)
+			{
+				instantiate(aParent, aMode, aTransformation, with_textures, aNeed, aUseBarrier);
+			}
+			~use_vertex_arrays()
+			{
+			}
+		public:
+			use_vertex_arrays_instance& instance()
+			{
+				return *iInstance;
+			}
+			template <typename... Args>
+			void instantiate(Args&&... args)
+			{
+				thread_local std::weak_ptr<use_vertex_arrays_instance> tInstance;
+				if (tInstance.expired())
+				{
+					iInstance = std::make_shared<use_vertex_arrays_instance>(std::forward<Args>(args)...);
+					tInstance = iInstance;
+				}
+				else
+					iInstance = tInstance.lock();
+			}
+		private:
+			std::shared_ptr<use_vertex_arrays_instance> iInstance;
 		};
 	}
 
@@ -768,7 +811,7 @@ namespace neogfx
 				use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath) };
 				for (const auto& v : vertices)
 				{
-					vertexArrays.push_back(opengl_standard_vertex_arrays::vertex{
+					vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{
 						v, std::array<uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}}
 						});
 				}
@@ -788,7 +831,7 @@ namespace neogfx
 					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(innerPath) };
 					for (const auto& v : vertices)
 					{
-						vertexArrays.push_back(opengl_standard_vertex_arrays::vertex{
+						vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{
 							v, std::array<uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}}
 							});
 					}
@@ -984,8 +1027,8 @@ namespace neogfx
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINES };
-			vertexArrays.push_back(opengl_standard_vertex_arrays::vertex{ xyz{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust}, penColour });
-			vertexArrays.push_back(opengl_standard_vertex_arrays::vertex{ xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust}, penColour });
+			vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{ xyz{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust}, penColour });
+			vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{ xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust}, penColour });
 		}
 		glCheck(glLineWidth(1.0f));
 
@@ -1004,8 +1047,8 @@ namespace neogfx
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINES, 8 };
-			back_insert_rect_vertices(vertexArrays, aRect, pixel_adjust(aPen), rect_type::Outline);
-			for (auto& v : vertexArrays)
+			back_insert_rect_vertices(vertexArrays.instance(), aRect, pixel_adjust(aPen), rect_type::Outline);
+			for (auto& v : vertexArrays.instance())
 				v.rgba = colour_to_vec4f(std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<colour>(aPen.colour()).red(),
@@ -1035,7 +1078,7 @@ namespace neogfx
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP };
 			for (const auto& v : vertices)
-				vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<colour>(aPen.colour()).red(),
 						static_variant_cast<colour>(aPen.colour()).green(),
@@ -1063,7 +1106,7 @@ namespace neogfx
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
 			for (const auto& v : vertices)
-				vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<colour>(aPen.colour()).red(),
 						static_variant_cast<colour>(aPen.colour()).green(),
@@ -1091,7 +1134,7 @@ namespace neogfx
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINES, vertices.size() };
 			for (const auto& v : vertices)
-				vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{ {
 						static_variant_cast<colour>(aPen.colour()).red(),
 						static_variant_cast<colour>(aPen.colour()).green(),
@@ -1125,7 +1168,7 @@ namespace neogfx
 				{
 					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath.shape()), vertices.size() };
 					for (const auto& v : vertices)
-						vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+						vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 							std::array <uint8_t, 4>{{
 								static_variant_cast<colour>(aPen.colour()).red(),
 								static_variant_cast<colour>(aPen.colour()).green(),
@@ -1155,7 +1198,7 @@ namespace neogfx
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
 			for (const auto& v : vertices)
-				vertexArrays.push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
+				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<colour>(aPen.colour()).red(),
 						static_variant_cast<colour>(aPen.colour()).green(),
@@ -1173,10 +1216,31 @@ namespace neogfx
 		aEcs.component<game::rigid_body>().take_snapshot();
 		auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
 		auto const& rigidBodies = rigidBodiesSnapshot.data();
+		std::unique_ptr<use_shader_program> usp;
+		std::unique_ptr<use_vertex_arrays> uva;
+		bool withTexture = false;
 		for (auto entity : aEcs.component<game::mesh_renderer>().entities())
 		{
 			auto const& meshFilter = aEcs.component<game::mesh_filter>().entity_record(entity);
 			auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
+			bool renderTexture = (meshRenderer.material.texture != std::nullopt);
+			if (usp == nullptr || renderTexture != withTexture)
+			{
+				usp = nullptr;
+				if (renderTexture)
+					usp = std::make_unique<use_shader_program>(*this, iRenderingEngine, rendering_engine().texture_shader_program());
+				else
+					usp = std::make_unique<use_shader_program>(*this, iRenderingEngine, rendering_engine().default_shader_program());
+			}
+			if (uva == nullptr || renderTexture != withTexture)
+			{
+				uva = nullptr;
+				if (renderTexture)
+					uva = std::make_unique<use_vertex_arrays>(*this, GL_TRIANGLES, with_textures);
+				else
+					uva = std::make_unique<use_vertex_arrays>(*this, GL_TRIANGLES);
+			}
+			withTexture = renderTexture;
 			draw_mesh(
 				meshFilter,
 				meshRenderer,
@@ -1205,8 +1269,8 @@ namespace neogfx
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
-				auto newVertices = back_insert_rect_vertices(vertexArrays, drawOp.rect, 0.0, rect_type::FilledTriangles);
-				for (auto i = newVertices; i != vertexArrays.end(); ++i)
+				auto newVertices = back_insert_rect_vertices(vertexArrays.instance(), drawOp.rect, 0.0, rect_type::FilledTriangles);
+				for (auto i = newVertices; i != vertexArrays.instance().end(); ++i)
 					i->rgba = colour_to_vec4f(std::holds_alternative<colour>(drawOp.fill) ?
 						std::array<uint8_t, 4>{{
 							static_variant_cast<const colour&>(drawOp.fill).red(),
@@ -1237,7 +1301,7 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
 			for (const auto& v : vertices)
 			{
-				vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
+				vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -1262,7 +1326,7 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
 			for (const auto& v : vertices)
 			{
-				vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
+				vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -1287,7 +1351,7 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
 			for (const auto& v : vertices)
 			{
-				vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
+				vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
 					std::array <uint8_t, 4>{{
 						static_variant_cast<const colour&>(aFill).red(),
 						static_variant_cast<const colour&>(aFill).green(),
@@ -1325,7 +1389,7 @@ namespace neogfx
 					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath.shape()), vertices.size() };
 					for (const auto& v : vertices)
 					{
-						vertexArrays.push_back({v, std::holds_alternative<colour>(aFill) ?
+						vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
 							std::array <uint8_t, 4>{{
 								static_variant_cast<const colour&>(aFill).red(),
 								static_variant_cast<const colour&>(aFill).green(),
@@ -1377,7 +1441,7 @@ namespace neogfx
 					for (auto vi : f)
 					{
 						auto const& v = vertices[vi];
-						vertexArrays.push_back({
+						vertexArrays.instance().push_back({
 							v,
 							std::holds_alternative<colour>(drawOp.fill) ?
 								std::array <uint8_t, 4>{{
@@ -1503,12 +1567,12 @@ namespace neogfx
 						auto y = ((op.pass() - 1) % (barrierPartitionCount / 2)) / scanlineOffsetCount - drawOp.appearance.effect().width();
 						auto x = ((op.pass() - 1) % (barrierPartitionCount / 2)) % scanlineOffsetCount - drawOp.appearance.effect().width();
 						rect effectRect = outputRect + point{ x, y };
-						vertexArrays.push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
-						vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
-						vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
-						vertexArrays.push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
-						vertexArrays.push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
-						vertexArrays.push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
+						vertexArrays.instance().push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
+						vertexArrays.instance().push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
+						vertexArrays.instance().push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
+						vertexArrays.instance().push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
+						vertexArrays.instance().push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
+						vertexArrays.instance().push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
 					}
 				}
 				else if (pass == 2)
@@ -1520,17 +1584,17 @@ namespace neogfx
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
 						std::array <uint8_t, 4>{};
-					vertexArrays.push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
-					vertexArrays.push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
-					vertexArrays.push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
-					vertexArrays.push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
-					vertexArrays.push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
-					vertexArrays.push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
+					vertexArrays.instance().push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
+					vertexArrays.instance().push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
+					vertexArrays.instance().push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
+					vertexArrays.instance().push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
+					vertexArrays.instance().push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
+					vertexArrays.instance().push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
 				}
 			}
 		}
 
-		if (vertexArrays.empty())
+		if (vertexArrays.instance().empty())
 			return;
 
 		glCheck(glActiveTexture(GL_TEXTURE1));
@@ -1549,11 +1613,11 @@ namespace neogfx
 				static_variant_cast<const gradient&>(firstOp.appearance.ink()), 
 				rect{ 
 					point{ 
-						vertexArrays[0].xyz[0], 
-						vertexArrays[0].xyz[1]}, 
+						vertexArrays.instance()[0].xyz[0], 
+						vertexArrays.instance()[0].xyz[1]}, 
 					point{
-						vertexArrays[2].xyz[0],
-						vertexArrays[2].xyz[1]}});
+						vertexArrays.instance()[2].xyz[0],
+						vertexArrays.instance()[2].xyz[1]}});
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
 
@@ -1583,7 +1647,7 @@ namespace neogfx
 
 			if (pass == 1)
 			{
-				std::size_t count = (aDrawGlyphOps.second - aDrawGlyphOps.first) * vertexArrays.primitive_vertex_count();
+				std::size_t count = (aDrawGlyphOps.second - aDrawGlyphOps.first) * vertexArrays.instance().primitive_vertex_count();
 				if (firstOp.appearance.has_effect())
 				{
 					count *= offsets(firstOp.appearance.effect());
@@ -1598,38 +1662,38 @@ namespace neogfx
 						{/*
 							const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
 							shader.set_uniform_variable("glyphOrigin",
-								static_cast<float>(vertexArrays[index].st[0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
-								static_cast<float>(vertexArrays[index].st[1] * glyphTexture.texture().atlas_texture().storage_extents().cy));
+								static_cast<float>(vertexArrays.instance()[index].st[0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
+								static_cast<float>(vertexArrays.instance()[index].st[1] * glyphTexture.texture().atlas_texture().storage_extents().cy));
 
 							if (guiCoordinates)
 							{
 								shader.set_uniform_variable("effectRect",
 									vec4{
-									vertexArrays[index].xyz[0],
-									vertexArrays[index + 2].xyz[1] - 1.0,
-									vertexArrays[index + 2].xyz[0],
-									vertexArrays[index].xyz[1] - 1.0 });
+									vertexArrays.instance()[index].xyz[0],
+									vertexArrays.instance()[index + 2].xyz[1] - 1.0,
+									vertexArrays.instance()[index + 2].xyz[0],
+									vertexArrays.instance()[index].xyz[1] - 1.0 });
 								shader.set_uniform_variable("glyphRect",
 									vec4{
-									vertexArrays[index + 4].xyz[0],
-									vertexArrays[index + 4 + 2].xyz[1] - 1.0,
-									vertexArrays[index + 4 + 2].xyz[0],
-									vertexArrays[index + 4].xyz[1] - 1.0 });
+									vertexArrays.instance()[index + 4].xyz[0],
+									vertexArrays.instance()[index + 4 + 2].xyz[1] - 1.0,
+									vertexArrays.instance()[index + 4 + 2].xyz[0],
+									vertexArrays.instance()[index + 4].xyz[1] - 1.0 });
 							}
 							else
 							{
 								shader.set_uniform_variable("effectRect",
 									vec4{
-									vertexArrays[index].xyz[0],
-									vertexArrays[index].xyz[1],
-									vertexArrays[index + 2].xyz[0],
-									vertexArrays[index + 2].xyz[1] });
+									vertexArrays.instance()[index].xyz[0],
+									vertexArrays.instance()[index].xyz[1],
+									vertexArrays.instance()[index + 2].xyz[0],
+									vertexArrays.instance()[index + 2].xyz[1] });
 								shader.set_uniform_variable("glyphRect",
 									vec4{
-									vertexArrays[index + 4].xyz[0],
-									vertexArrays[index + 4].xyz[1],
-									vertexArrays[index + 4 + 2].xyz[0],
-									vertexArrays[index + 4 + 2].xyz[1] });
+									vertexArrays.instance()[index + 4].xyz[0],
+									vertexArrays.instance()[index + 4].xyz[1],
+									vertexArrays.instance()[index + 4 + 2].xyz[0],
+									vertexArrays.instance()[index + 4 + 2].xyz[1] });
 							}
 							shader.set_uniform_variable("effectWidth", static_cast<int>(drawOp.appearance.effect().width()));
 							glCheck(glDrawArrays(GL_QUADS, index, 4));
@@ -1639,7 +1703,7 @@ namespace neogfx
 					}
 					shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
 					shader.set_uniform_variable("effect", static_cast<int>(firstOp.appearance.effect().type()));
-					vertexArrays.draw(count, barrier_partitions(firstOp.appearance.effect()));
+					vertexArrays.instance().draw(count, barrier_partitions(firstOp.appearance.effect()));
 				}
 			}
 			else if (pass == 2)
@@ -1649,7 +1713,7 @@ namespace neogfx
 			}
 		}
 
-		vertexArrays.execute();
+		vertexArrays.instance().execute();
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
 
@@ -1691,6 +1755,8 @@ namespace neogfx
 
 			{
 				use_vertex_arrays vertexArrays { *this, GL_TRIANGLES, with_textures };
+				if (!vertexArrays.instance().room_for(faces.size()))
+					vertexArrays.instance().execute();
 
 				GLuint textureHandle = 0;
 				const i_sub_texture* subTexture = nullptr;
@@ -1732,14 +1798,14 @@ namespace neogfx
 					{
 						newTexture = false;
 						if (!first)
-							vertexArrays.execute();
+							vertexArrays.instance().execute();
 					}
 
 					for (auto faceVertexIndex : face)
 					{
 						auto const& faceVertex = vertices[faceVertexIndex];
 						auto const& faceUv = (uv[faceVertexIndex] * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
-						vertexArrays.push_back(
+						vertexArrays.instance().push_back(
 							opengl_standard_vertex_arrays::vertex{
 								faceVertex,
 								std::array<uint8_t, 4>{ {
@@ -1762,13 +1828,15 @@ namespace neogfx
 			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
 			use_vertex_arrays vertexArrays { *this, GL_TRIANGLES };
+			if (!vertexArrays.instance().room_for(faces.size()))
+				vertexArrays.instance().execute();
 
 			for (auto const& face : faces)
 			{
 				for (auto faceVertexIndex : face)
 				{
 					auto const& faceVertex = vertices[faceVertexIndex];
-					vertexArrays.push_back(
+					vertexArrays.instance().push_back(
 						opengl_standard_vertex_arrays::vertex{
 							faceVertex,
 							std::array<uint8_t, 4>{ {
