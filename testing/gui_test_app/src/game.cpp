@@ -272,9 +272,7 @@ void create_game(ng::i_layout& aLayout)
 			ng::colour{ ng::vec4{ prng(0.25), prng(0.25), prng(0.25), 1.0 } }.lighter(0x40)
 		}.detach();
 
-	// Sprites (todo)...
-	auto spaceship = ecs.create_entity(archetypes::spaceship, ng::game::rigid_body{ ng::vec3{ 400.0, 18.0, 0.0 }, 1.0 });
-	
+	// Asteroids...
 	auto make_asteroid_mesh = [&]()
 	{
 		ng::game::mesh asteroidMesh;
@@ -303,7 +301,48 @@ void create_game(ng::i_layout& aLayout)
 			},
 			ng::game::broadphase_collider{ 0x2ull });
 
-	ng::font clockFont{ "SnareDrum Two NBP", "Regular", 60.0 };
+	// Spaceship...
+	const char* spaceshipImage
+	{
+		"[9,9]"
+		"{0,paper}"
+		"{1,ink1}"
+		"{2,ink2}"
+
+		"000010000"
+		"000121000"
+		"000121000"
+		"001222100"
+		"001222100"
+		"011222110"
+		"010111010"
+		"010000010"
+		"010000010"
+	};
+
+	auto spaceship = ecs.create_entity(
+		archetypes::spaceship,
+		ng::to_ecs_component(ng::rect{ ng::size{ 36.0, 36.0} }.with_centred_origin()),
+		ng::game::material{ {}, {}, {}, ng::to_ecs_component(
+			ng::image
+			{
+				spaceshipImage,
+				{
+					{ "paper", ng::colour{} },
+					{ "ink1", ng::colour::LightGoldenrod },
+					{ "ink2", ng::colour::DeepSkyBlue }
+				},
+				1.0,
+				ng::texture_sampling::Nearest
+			})
+		},
+		ng::game::rigid_body
+		{
+			ng::vec3{ 400.0, 18.0, 0.1 }, 1.0
+		},
+		ng::game::broadphase_collider{ 0x1ull });
+
+	ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
 	// Some information text...
 	canvas.entities_rendered([&, clockFont](ng::graphics_context& gc)
 	{

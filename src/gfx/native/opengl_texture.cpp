@@ -37,9 +37,9 @@ namespace neogfx
 		GLint previousTexture;
 		try
 		{
-			glCheck(glGetIntegerv(iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
+			glCheck(glGetIntegerv(iSampling != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
 			glCheck(glGenTextures(1, &iHandle));
-			glCheck(glBindTexture(iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, iHandle));
+			glCheck(glBindTexture(iSampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, iHandle));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
 			if (iSampling == texture_sampling::Normal)
@@ -51,6 +51,11 @@ namespace neogfx
 			{
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			}
+			else if (iSampling == texture_sampling::Nearest)
+			{
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 			}
 			if (aColour != std::nullopt)
 			{
@@ -73,7 +78,7 @@ namespace neogfx
 			}
 			else
 			{
-				if (iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap)
+				if (iSampling != texture_sampling::Multisample)
 				{
 					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
 					if (iSampling == texture_sampling::NormalMipmap)
@@ -86,7 +91,7 @@ namespace neogfx
 					glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
 				}
 			}
-			glCheck(glBindTexture(iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
+			glCheck(glBindTexture(iSampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
 		}
 		catch (...)
 		{
@@ -120,6 +125,11 @@ namespace neogfx
 			{
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			}
+			else if (iSampling == texture_sampling::Nearest)
+			{
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 			}
 			switch (aImage.colour_format())
 			{
@@ -199,7 +209,7 @@ namespace neogfx
 	void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData)
 	{
 		GLint previousTexture;
-		if (iSampling == texture_sampling::Normal || iSampling == texture_sampling::NormalMipmap)
+		if (iSampling != texture_sampling::Multisample)
 		{
 			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));

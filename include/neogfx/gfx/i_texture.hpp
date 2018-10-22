@@ -39,6 +39,7 @@ namespace neogfx
 	{
 		Normal,
 		NormalMipmap,
+		Nearest,
 		Multisample
 	};
 

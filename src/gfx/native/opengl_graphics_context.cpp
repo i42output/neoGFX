@@ -1232,6 +1232,16 @@ namespace neogfx
 			auto const& meshFilter = aEcs.component<game::mesh_filter>().entity_record(entity);
 			auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
 			bool renderTexture = (meshRenderer.material.texture != std::nullopt);
+			if (uva == nullptr || renderTexture != withTexture)
+			{
+				if (uva != nullptr)
+					uva->instance().execute();
+				uva = nullptr;
+				if (renderTexture)
+					uva = std::make_unique<use_vertex_arrays>(*this, GL_TRIANGLES, with_textures);
+				else
+					uva = std::make_unique<use_vertex_arrays>(*this, GL_TRIANGLES);
+			}
 			if (usp == nullptr || renderTexture != withTexture)
 			{
 				usp = nullptr;
@@ -1239,14 +1249,6 @@ namespace neogfx
 					usp = std::make_unique<use_shader_program>(*this, iRenderingEngine, rendering_engine().texture_shader_program());
 				else
 					usp = std::make_unique<use_shader_program>(*this, iRenderingEngine, rendering_engine().default_shader_program());
-			}
-			if (uva == nullptr || renderTexture != withTexture)
-			{
-				uva = nullptr;
-				if (renderTexture)
-					uva = std::make_unique<use_vertex_arrays>(*this, GL_TRIANGLES, with_textures);
-				else
-					uva = std::make_unique<use_vertex_arrays>(*this, GL_TRIANGLES);
 			}
 			withTexture = renderTexture;
 			draw_mesh(
@@ -1812,7 +1814,10 @@ namespace neogfx
 					for (auto faceVertexIndex : face)
 					{
 						auto const& faceVertex = vertices[faceVertexIndex];
-						auto const& faceUv = (uv[faceVertexIndex] * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
+						auto faceUv = uv[faceVertexIndex];
+						if (logical_coordinates().first.y < logical_coordinates().second.y)
+							~faceUv.y = 1.0 - faceUv.y;
+						faceUv = (faceUv * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
 						vertexArrays.instance().emplace_back(
 							faceVertex,
 							std::array<uint8_t, 4>{ {
@@ -1825,6 +1830,8 @@ namespace neogfx
 
 					first = false;
 				}
+
+				vertexArrays.instance().draw();
 			}
 
 			glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
