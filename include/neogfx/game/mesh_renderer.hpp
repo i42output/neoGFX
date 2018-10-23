@@ -33,6 +33,7 @@ namespace neogfx::game
 	{
 		material material;
 		std::vector<patch> patches;
+		bool destroyOnFustrumCull;
 
 		struct meta : i_component_data::meta
 		{
@@ -58,6 +59,8 @@ namespace neogfx::game
 					return component_data_field_type::ComponentData;
 				case 1:
 					return component_data_field_type::ComponentData | component_data_field_type::Array;
+				case 2:
+					return component_data_field_type::Bool;
 				default:
 					throw invalid_field_index();
 				}
@@ -79,7 +82,8 @@ namespace neogfx::game
 				static const neolib::string sFieldNames[] =
 				{
 					"Material",
-					"Patches"
+					"Patches",
+					"Destroy On Fustrum Cull"
 				};
 				return sFieldNames[aFieldIndex];
 			}

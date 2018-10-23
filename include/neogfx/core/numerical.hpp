@@ -917,6 +917,17 @@ namespace neogfx
 		aabb_2d(const aabb& aAabb) : min{ ~aAabb.min.xy }, max{ ~aAabb.max.xy } {}
 	};
 
+	inline aabb_2d to_aabb_2d(const vec3_list& vertices)
+	{
+		aabb_2d result = !vertices.empty() ? aabb_2d{ vertices[0].xy, vertices[0].xy } : aabb_2d{};
+		for (auto const& v : vertices)
+		{
+			result.min = result.min.min(v.xy);
+			result.max = result.max.max(v.xy);
+		}
+		return result;
+	}
+
 	inline bool operator==(const aabb_2d& left, const aabb_2d& right)
 	{
 		return left.min == right.min && left.max == right.max;
@@ -1002,6 +1013,24 @@ namespace neogfx
 		else
 		{
 			return mat33{ { std::cos(az), std::sin(az), 0.0 },{ -std::sin(az), std::cos(az), 0.0 },{ 0.0, 0.0, 1.0 } };
+		}
+	}
+
+	inline mat44 affine_rotation_matrix(vec3 aAngles)
+	{
+		scalar ax = aAngles.x;
+		scalar ay = aAngles.y;
+		scalar az = aAngles.z;
+		if (ax != 0.0 || ay != 0.0)
+		{
+			mat44 rx = { { 1.0, 0.0, 0.0, 0.0 },{ 0.0, std::cos(ax), std::sin(ax), 0.0 },{ 0.0, -std::sin(ax), std::cos(ax), 0.0 },{0.0, 0.0, 0.0, 1.0} };
+			mat44 ry = { { std::cos(ay), 0.0, -std::sin(ay), 0.0 },{ 0.0, 1.0, 0.0, 0.0 },{ std::sin(ay), 0.0, std::cos(ay), 0.0 },{0.0, 0.0, 0.0, 1.0} };
+			mat44 rz = { { std::cos(az), std::sin(az), 0.0, 0.0 },{ -std::sin(az), std::cos(az), 0.0, 0.0 },{ 0.0, 0.0, 1.0, 0.0 },{0.0, 0.0, 0.0, 1.0} };
+			return rz * ry * rx;
+		}
+		else
+		{
+			return mat44{ { std::cos(az), std::sin(az), 0.0, 0.0 },{ -std::sin(az), std::cos(az), 0.0, 0.0 },{ 0.0, 0.0, 1.0, 0.0 },{0.0, 0.0, 0.0, 1.0} };
 		}
 	}
 }

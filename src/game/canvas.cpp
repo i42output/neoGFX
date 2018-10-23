@@ -21,6 +21,7 @@
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
+#include <neogfx/game/simple_physics_system.hpp>
 
 namespace neogfx::game
 {
@@ -123,7 +124,7 @@ namespace neogfx::game
 
 	void canvas::init()
 	{
-		iSink += ecs().physics_applied([this](step_time)
+		iSink += ecs().system<simple_physics_system>().physics_applied([this](step_time)
 		{
 			update();
 		});

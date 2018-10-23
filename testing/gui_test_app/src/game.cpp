@@ -22,18 +22,6 @@
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
 /*
-void create_target(ng::canvas& aWorld)
-{
-	auto target = std::make_shared<ng::sprite>(ng::colour::from_hsl(static_cast<ng::scalar>(std::rand() % 360), 1.0, 0.75));
-	aWorld.add_sprite(target);
-	target->set_collision_mask(0x2ull);
-	target->set_position(ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), 0.0 });
-	auto w = static_cast<ng::scalar>(std::rand() % 40) + 10.0;
-	target->set_extents(ng::vec3{ w, w });
-	target->set_mass(1.0);
-	target->set_spin_degrees((std::rand() % 180 + 180) * (std::rand() % 2 == 0 ? 1.0 : -1.0));
-}
-
 class missile : public ng::sprite
 {
 public:
@@ -92,51 +80,7 @@ private:
 
 void create_game(ng::i_layout& aLayout)
 {
-	auto& spritePlane = aLayout.add(std::make_shared<ng::canvas>());
-	spritePlane.set_font(ng::font(spritePlane.font(), ng::font::Bold, 28));
-	spritePlane.set_background_colour(ng::colour::Black);
 	spritePlane.enable_z_sorting(true);
-#ifdef NDEBUG
-	for (uint32_t i = 0; i < 1000; ++i)
-#else
-	for (uint32_t i = 0; i < 100; ++i)
-#endif
-		spritePlane.add_shape(std::make_shared<ng::rectangle>(
-			ng::vec3{ static_cast<ng::scalar>(std::rand() % 800), static_cast<ng::scalar>(std::rand() % 800), -1.0 + 0.5 * (static_cast<ng::scalar>(std::rand() % 32)) / 32.0 },
-			ng::vec2{ static_cast<ng::scalar>(std::rand() % 64), static_cast<ng::scalar>(std::rand() % 64) },
-			ng::colour{ std::rand() % 64, std::rand() % 64, std::rand() % 64 }.lighter(0x40)));
-	//spritePlane.set_uniform_gravity();
-	//spritePlane.set_gravitational_constant(0.0);
-	//spritePlane.create_earth();
-	spritePlane.reserve(10000);
-
-	const char* spaceshipSpriteImagePattern
-	{
-		"[9,9]"
-		"{0,paper}"
-		"{1,ink1}"
-		"{2,ink2}"
-
-		"000010000"
-		"000121000"
-		"000121000"
-		"001222100"
-		"001222100"
-		"011222110"
-		"010111010"
-		"010000010"
-		"010000010"
-	};
-	
-	auto& spaceshipSprite = spritePlane.create_sprite(
-		ng::image{ 
-			spaceshipSpriteImagePattern,
-			{ { "paper", ng::colour{} }, { "ink1", ng::colour::LightGoldenrod }, { "ink2", ng::colour::DarkGoldenrod4 } } });
-
-	spaceshipSprite.set_collision_mask(0x1ull);
-	spaceshipSprite.set_mass(1.0);
-	spaceshipSprite.set_extents(ng::size{ 36.0, 36.0 });
-	spaceshipSprite.set_position(ng::vec3{ 400.0, 18.0, 0.0 });
 
 	auto score = std::make_shared<std::pair<uint32_t, ng::text>>(0, ng::text{ spritePlane, ng::vec3{}, "", ng::font("SnareDrum Two NBP", "Regular", 60.0), ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } } });
 	score->second.set_value("000000");
@@ -176,51 +120,6 @@ void create_game(ng::i_layout& aLayout)
 
 	auto explosion = std::make_shared<ng::texture>(ng::image{ ":/test/resources/explosion.png" });
 
-	~~~~spritePlane.applying_physics([&spritePlane, &spaceshipSprite, score, shipInfo, explosion](ng::canvas::step_time_interval aPhysicsStepTime)
-	{
-		const auto& keyboard = ng::app::instance().keyboard();
-		spaceshipSprite.set_acceleration(ng::vec3{
-			keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
-			keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0 });
-		if (keyboard.is_key_pressed(ng::ScanCode_X))
-			spaceshipSprite.set_spin_degrees(30.0);
-		else if (keyboard.is_key_pressed(ng::ScanCode_Z))
-			spaceshipSprite.set_spin_degrees(-30.0);
-		else
-			spaceshipSprite.set_spin_degrees(0.0);
-		static bool sExtraFire = false;
-		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) || sExtraFire)
-		{
-			auto stepTime_ms = static_cast<decltype(aPhysicsStepTime)>(ng::chrono::to_milliseconds(ng::chrono::flicks{ aPhysicsStepTime }));
-			static auto sLastTime_ms = stepTime_ms;
-			auto sinceLastTime_ms = stepTime_ms - sLastTime_ms;
-			if (sinceLastTime_ms < 100)
-			{
-				if (sinceLastTime_ms / 10 % 2 == 0)
-				{
-					sExtraFire = false;
-					for (double a = -30.0; a <= 30.0; a += 10.0)
-					{
-						static boost::fast_pool_allocator<missile> alloc;
-						spritePlane.add_sprite(std::allocate_shared<missile, boost::fast_pool_allocator<missile>>(alloc, spritePlane, spaceshipSprite, *score, explosion, a));
-					}
-				}
-			}
-			else
-				sExtraFire = true;
-			if (sinceLastTime_ms > 200)
-				sLastTime_ms = stepTime_ms;
-		}
-		if (keyboard.is_key_pressed(ng::ScanCode_D))
-			spritePlane.enable_dynamic_update(true);
-		else if (keyboard.is_key_pressed(ng::ScanCode_F))
-			spritePlane.enable_dynamic_update(false);
-
-		std::ostringstream oss;
-		oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
-		oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
-		shipInfo->set_value(oss.str());
-	});
 
 	~~~~spritePlane.physics_applied([debugInfo, &spritePlane](ng::canvas::step_time_interval)
 	{
@@ -249,6 +148,7 @@ namespace archetypes
 {
 	ng::game::sprite_archetype const spaceship{ "Spaceship" };
 	ng::game::sprite_archetype const asteroid{ "Asteroid" };
+	ng::game::sprite_archetype const missile{ "Missile" };
 }
 
 void create_game(ng::i_layout& aLayout)
@@ -355,4 +255,71 @@ void create_game(ng::i_layout& aLayout)
 
 	// Instantiate physics...
 	ecs.system<ng::game::simple_physics_system>();
+
+	~~~~ecs.system<ng::game::simple_physics_system>().applying_physics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+	{
+		const auto& keyboard = ng::app::instance().keyboard();
+		auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
+		spaceshipPhysics.acceleration =
+			ng::vec3
+			{
+				keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
+				keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0 
+			};
+		if (keyboard.is_key_pressed(ng::ScanCode_X))
+			spaceshipPhysics.spin.z = ng::to_rad(-30.0);
+		else if (keyboard.is_key_pressed(ng::ScanCode_Z))
+			spaceshipPhysics.spin.z = ng::to_rad(30.0);
+		else
+			spaceshipPhysics.spin.z = 0.0;
+		static bool sExtraFire = false;
+		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) || sExtraFire)
+		{
+			auto stepTime_ms = static_cast<decltype(aPhysicsStepTime)>(ng::game::chrono::to_milliseconds(ng::game::chrono::flicks{ aPhysicsStepTime }));
+			static auto sLastTime_ms = stepTime_ms;
+			auto sinceLastTime_ms = stepTime_ms - sLastTime_ms;
+			if (sinceLastTime_ms < 100)
+			{
+				if (sinceLastTime_ms / 10 % 2 == 0)
+				{
+					sExtraFire = false;
+					auto make_missile = [&](double angle)
+					{
+						auto tm = ng::to_transformation_matrix(spaceshipPhysics, false);
+						auto missile = ecs.create_entity(
+							archetypes::missile,
+							ng::to_ecs_component(ng::rect{ ng::size{ 3.0, 3.0} }.with_centred_origin()),
+							ng::game::material{ ng::to_ecs_component(ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 }), {}, {}, {} },
+							ng::game::rigid_body
+							{
+								spaceshipPhysics.position + ~(tm * ng::vec4{ 0.0, 18.0, 0.0, 1.0 }).xyz,
+								0.016,
+								~(tm * ng::affine_rotation_matrix(ng::vec3{0.0, 0.0, ng::to_rad(angle)}) * ng::vec4{ 0.0, 360.0, 0.0, 0.0 }).xyz + spaceshipPhysics.velocity,
+								{},
+								spaceshipPhysics.angle + ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }
+							},
+							ng::game::broadphase_collider{ 0x1ull });
+						ecs.component<ng::game::mesh_renderer>().entity_record(missile).destroyOnFustrumCull = true;
+					};
+					for (double angle = -30.0; angle <= 30.0; angle += 10.0)
+						make_missile(angle);
+				}
+			}
+			else
+				sExtraFire = true;
+			if (sinceLastTime_ms > 200)
+				sLastTime_ms = stepTime_ms;
+		}
+		/*
+		if (keyboard.is_key_pressed(ng::ScanCode_D))
+			spritePlane.enable_dynamic_update(true);
+		else if (keyboard.is_key_pressed(ng::ScanCode_F))
+			spritePlane.enable_dynamic_update(false);
+
+		std::ostringstream oss;
+		oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
+		oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
+		shipInfo->set_value(oss.str()); */ 
+	});
+
 }

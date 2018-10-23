@@ -235,6 +235,10 @@ namespace neogfx::game
 			return *this;
 		}
 	public:
+		entity_id entity(const data_type& aData) const
+		{
+			return entities()[&aData - &base_type::component_data()[0]];
+		}
 		const component_data_entities_t& entities() const
 		{
 			return iEntities;
@@ -282,6 +286,7 @@ namespace neogfx::game
 			entities()[reverseIndex] = null_entity;
 			reverse_indices()[aEntity] = invalid;
 			free_indices().push_back(reverseIndex);
+			// todo: sort/remove component data of dead entities
 		}
 		value_type& populate(entity_id aEntity, const value_type& aData)
 		{

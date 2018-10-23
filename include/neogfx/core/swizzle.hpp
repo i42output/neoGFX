@@ -67,7 +67,14 @@ namespace neogfx
 			static constexpr uint32_t value = Index;
 		};
 	public:
-		swizzle& operator=(const sizzled_vector_type& aRhs)
+		swizzle& operator=(const value_type& aRhs)
+		{
+			static_assert(detail::greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
+			assign(aRhs, &v[Indexes]...);
+			return *this;
+		}
+		template <typename SFINAE = sizzled_vector_type>
+		swizzle& operator=(const typename std::enable_if<!std::is_same<value_type, sizzled_vector_type>::value, SFINAE>::type& aRhs)
 		{
 			static_assert(detail::greater_than<vector_type::Size, Indexes...>::result, "Swizzle too big");
 			assign(std::begin(aRhs.v), &v[Indexes]...);
@@ -106,6 +113,17 @@ namespace neogfx
 			return v[first<Indexes...>::value];
 		}
 	private:
+		template <typename Next, typename... Rest>
+		void assign(value_type aValue, Next aNext, Rest... aRest)
+		{
+			*aNext = aValue;
+			assign(aValue, aRest...);
+		}
+		template <typename... Rest>
+		void assign(value_type, Rest...)
+		{
+			/* finished */
+		}
 		template <typename SourceIter, typename Next, typename... Rest>
 		void assign(SourceIter aSource, Next aNext, Rest... aRest)
 		{
@@ -113,7 +131,7 @@ namespace neogfx
 			assign(aSource, aRest...);
 		}
 		template <typename SourceIter, typename... Rest>
-		void assign(SourceIter aFirst, Rest... aRest)
+		void assign(SourceIter, Rest...)
 		{
 			/* finished */
 		}

@@ -93,7 +93,7 @@ namespace neogfx::game
 		{
 			neolib::thread::sleep(1);
 			component_lock_guard<rigid_body> lgRigidBodies{ ecs() };
-			ecs().applying_physics.trigger(worldClock.time);
+			applying_physics.trigger(worldClock.time);
 			bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
 			if (useUniversalGravitation)
 				rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
@@ -102,12 +102,18 @@ namespace neogfx::game
 				rigidBodies.component_data().begin();
 			for (auto& rigidBody1 : rigidBodies.component_data())
 			{
+				auto entity1 = rigidBodies.entity(rigidBody1);
+				if (entity1 == null_entity)
+					continue; // todo: add support for skip iterators
 				vec3 totalForce = rigidBody1.mass * uniformGravity;
 				if (useUniversalGravitation)
 				{
 					for (auto iterRigidBody2 = rigidBodies.component_data().begin(); iterRigidBody2 != firstMassless; ++iterRigidBody2)
 					{
 						auto& rigidBody2 = *iterRigidBody2;
+						auto entity2 = rigidBodies.entity(rigidBody2);
+						if (entity2 == null_entity)
+							continue; // todo: add support for skip iterators
 						vec3 distance = rigidBody1.position - rigidBody2.position;
 						if (distance.magnitude() > 0.0) // avoid division by zero or rigidBody1 == rigidBody2
 							totalForce += -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0);
@@ -124,7 +130,7 @@ namespace neogfx::game
 				rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } * (elapsedTime * (v0 + (rigidBody1.velocity - v0) / 2.0));
 				rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 			}
-			ecs().physics_applied.trigger(worldClock.time);
+			physics_applied.trigger(worldClock.time);
 			shared_component_lock_guard<clock> lgClock{ ecs() };
 			worldClock.time += worldClock.timeStep;
 		}

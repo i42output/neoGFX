@@ -70,8 +70,6 @@ namespace neogfx::game
 	public:
 		event<entity_id> entity_created;
 		event<entity_id> entity_destroyed;
-		event<step_time> applying_physics;
-		event<step_time> physics_applied;
 		event<handle_id> handle_updated;
 	public:
 		typedef std::function<std::unique_ptr<i_component>()> component_factory;

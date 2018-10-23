@@ -26,6 +26,9 @@ namespace neogfx::game
 {
 	class simple_physics_system : public system
 	{
+	public:
+		event<step_time> applying_physics;
+		event<step_time> physics_applied;
 	private:
 		class thread;
 	public:

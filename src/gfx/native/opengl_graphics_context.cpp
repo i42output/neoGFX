@@ -443,14 +443,15 @@ namespace neogfx
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const i_native_surface& aSurface) :
-		iRenderingEngine(service<i_rendering_engine>::instance()), 
-		iSurface(aSurface), 
-		iLogicalCoordinateSystem(aSurface.logical_coordinate_system()),
-		iLogicalCoordinates(aSurface.logical_coordinates()), 
-		iSmoothingMode(neogfx::smoothing_mode::None),
-		iSubpixelRendering(rendering_engine().is_subpixel_rendering_on()),
-		iClipCounter(0),
-		iLineStippleActive(false)
+		iRenderingEngine{ service<i_rendering_engine>::instance() },
+		iSurface{aSurface}, 
+		iWidget{ nullptr },
+		iLogicalCoordinateSystem{ aSurface.logical_coordinate_system() },
+		iLogicalCoordinates{ aSurface.logical_coordinates() },
+		iSmoothingMode{ neogfx::smoothing_mode::None },
+		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
+		iClipCounter{ 0 },
+		iLineStippleActive{ false }
 	{
 		rendering_engine().activate_context(iSurface);
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
@@ -458,14 +459,15 @@ namespace neogfx
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const i_native_surface& aSurface, const i_widget& aWidget) :
-		iRenderingEngine(service<i_rendering_engine>::instance()),
-		iSurface(aSurface), 
-		iLogicalCoordinateSystem(aWidget.logical_coordinate_system()),
-		iLogicalCoordinates(aSurface.logical_coordinates()),
-		iSmoothingMode(neogfx::smoothing_mode::None),
-		iSubpixelRendering(rendering_engine().is_subpixel_rendering_on()),
-		iClipCounter(0),
-		iLineStippleActive(false)
+		iRenderingEngine{ service<i_rendering_engine>::instance() },
+		iSurface{ aSurface },
+		iWidget{ &aWidget },
+		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
+		iLogicalCoordinates{ aSurface.logical_coordinates() },
+		iSmoothingMode{ neogfx::smoothing_mode::None },
+		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
+		iClipCounter{ 0 },
+		iLineStippleActive{ false }
 	{
 		rendering_engine().activate_context(iSurface);
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
@@ -473,14 +475,15 @@ namespace neogfx
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
-		iRenderingEngine(aOther.iRenderingEngine), 
-		iSurface(aOther.iSurface), 
-		iLogicalCoordinateSystem(aOther.iLogicalCoordinateSystem),
-		iLogicalCoordinates(aOther.iLogicalCoordinates),
-		iSmoothingMode(aOther.iSmoothingMode), 
-		iSubpixelRendering(aOther.iSubpixelRendering),
-		iClipCounter(0),
-		iLineStippleActive(false)
+		iRenderingEngine{ aOther.iRenderingEngine },
+		iSurface{ aOther.iSurface },
+		iWidget{ aOther.iWidget },
+		iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
+		iLogicalCoordinates{ aOther.iLogicalCoordinates },
+		iSmoothingMode{ aOther.iSmoothingMode },
+		iSubpixelRendering{ aOther.iSubpixelRendering },
+		iClipCounter{ 0 },
+		iLineStippleActive{ false }
 	{
 		rendering_engine().activate_context(iSurface);
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
@@ -1219,7 +1222,7 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::draw_entities(const game::i_ecs& aEcs, const mat44& aTransformation)
+	void opengl_graphics_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
 	{
 		aEcs.component<game::rigid_body>().take_snapshot();
 		auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
@@ -1229,8 +1232,11 @@ namespace neogfx
 		bool withTexture = false;
 		for (auto entity : aEcs.component<game::mesh_renderer>().entities())
 		{
+			if (entity == game::null_entity)
+				continue; // todo: sort/remove and/or create skipping iterator
 			auto const& meshFilter = aEcs.component<game::mesh_filter>().entity_record(entity);
 			auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
+			auto transformation = rigidBodies.has_entity_record(entity) ? aTransformation * to_transformation_matrix(rigidBodies.entity_record(entity)) : aTransformation;
 			bool renderTexture = (meshRenderer.material.texture != std::nullopt);
 			if (uva == nullptr || renderTexture != withTexture)
 			{
@@ -1251,12 +1257,13 @@ namespace neogfx
 					usp = std::make_unique<use_shader_program>(*this, iRenderingEngine, rendering_engine().default_shader_program());
 			}
 			withTexture = renderTexture;
-			draw_mesh(
+			bool drawn = draw_mesh(
 				meshFilter,
 				meshRenderer,
-				rigidBodies.has_entity_record(entity) ?
-					aTransformation * to_transformation_matrix(rigidBodies.entity_record(entity)) : aTransformation,
+				transformation,
 				shader_effect::None);
+			if (!drawn && meshRenderer.destroyOnFustrumCull)
+				aEcs.destroy_entity(entity);
 		}
 	}
 
@@ -1731,12 +1738,12 @@ namespace neogfx
 			gradient_off();
 	}
 
-	void opengl_graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, shader_effect aShaderEffect)
+	bool opengl_graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, shader_effect aShaderEffect)
 	{
-		draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aTransformation, aShaderEffect);
+		return draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {} }, aTransformation, aShaderEffect);
 	}
 	
-	void opengl_graphics_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation, shader_effect aShaderEffect)
+	bool opengl_graphics_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation, shader_effect aShaderEffect)
 	{
 		colour colourizationColour{ 0xFF, 0xFF, 0xFF, 0xFF };
 		if (aMeshRenderer.material.colour != std::nullopt)
@@ -1750,6 +1757,8 @@ namespace neogfx
 
 		auto const& material = aMeshRenderer.material;
 		auto const& patches = aMeshRenderer.patches; // todo
+
+		bool drawn = false;
 
 		if (material.texture != std::nullopt)
 		{
@@ -1814,6 +1823,11 @@ namespace neogfx
 					for (auto faceVertexIndex : face)
 					{
 						auto const& faceVertex = vertices[faceVertexIndex];
+						if (~faceVertex.x >= std::min(logical_coordinates().first.x, logical_coordinates().second.x) &&
+							~faceVertex.x <= std::max(logical_coordinates().first.x, logical_coordinates().second.x) &&
+							~faceVertex.y >= std::min(logical_coordinates().first.y, logical_coordinates().second.y) &&
+							~faceVertex.y <= std::max(logical_coordinates().first.y, logical_coordinates().second.y))
+							drawn = true;
 						auto faceUv = uv[faceVertexIndex];
 						if (logical_coordinates().first.y < logical_coordinates().second.y)
 							~faceUv.y = 1.0 - faceUv.y;
@@ -1849,6 +1863,11 @@ namespace neogfx
 				for (auto faceVertexIndex : face)
 				{
 					auto const& faceVertex = vertices[faceVertexIndex];
+					if (~faceVertex.x >= std::min(logical_coordinates().first.x, logical_coordinates().second.x) &&
+						~faceVertex.x <= std::max(logical_coordinates().first.x, logical_coordinates().second.x) &&
+						~faceVertex.y >= std::min(logical_coordinates().first.y, logical_coordinates().second.y) &&
+						~faceVertex.y <= std::max(logical_coordinates().first.y, logical_coordinates().second.y))
+						drawn = true;
 					vertexArrays.instance().emplace_back(
 						faceVertex,
 						std::array<uint8_t, 4>{ {
@@ -1859,6 +1878,8 @@ namespace neogfx
 				}
 			}
 		}
+
+		return drawn;
 	}
 
 	xyz opengl_graphics_context::to_shader_vertex(const point& aPoint, coordinate aZ) const

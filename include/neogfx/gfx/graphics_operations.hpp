@@ -177,7 +177,7 @@ namespace neogfx
 
 		struct draw_entities
 		{
-			const game::i_ecs& ecs;
+			game::i_ecs& ecs;
 			mat44 transformation;
 		};
 
