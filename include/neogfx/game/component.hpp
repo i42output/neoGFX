@@ -186,27 +186,30 @@ namespace neogfx::game
 		class scoped_snapshot
 		{
 		public:
-			scoped_snapshot(const self_type& aOwner) :
+			scoped_snapshot(self_type& aOwner) :
 				iOwner{ aOwner }
 			{
+				std::lock_guard<std::recursive_mutex> lg{ iOwner.mutex() };
 				++iOwner.iUsingSnapshot;
 			}
 			scoped_snapshot(const scoped_snapshot& aOther) :
 				iOwner{ aOther.iOwner }
 			{
+				std::lock_guard<std::recursive_mutex> lg{ iOwner.mutex() };
 				++iOwner.iUsingSnapshot;
 			}
 			~scoped_snapshot()
 			{
+				std::lock_guard<std::recursive_mutex> lg{ iOwner.mutex() };
 				--iOwner.iUsingSnapshot;
 			}
 		public:
-			const self_type& data() const
+			self_type& data() const
 			{
-				return iOwner;
+				return *iOwner.iSnapshot;
 			}
 		private:
-			const self_type& iOwner;
+			self_type& iOwner;
 		};
 	private:
 		static constexpr reverse_index_t invalid = ~reverse_index_t{};
@@ -229,6 +232,7 @@ namespace neogfx::game
 	public:
 		self_type& operator=(const self_type& aRhs)
 		{
+			base_type::operator=(aRhs);
 			iEntities = aRhs.iEntities;	
 			iFreeIndices = aRhs.iFreeIndices;
 			iReverseIndices = aRhs.iReverseIndices;
@@ -237,7 +241,10 @@ namespace neogfx::game
 	public:
 		entity_id entity(const data_type& aData) const
 		{
-			return entities()[&aData - &base_type::component_data()[0]];
+			const data_type* lhs = &aData;
+			const data_type* rhs = &base_type::component_data()[0];
+			auto index = lhs - rhs;
+			return entities()[index];
 		}
 		const component_data_entities_t& entities() const
 		{
@@ -286,6 +293,16 @@ namespace neogfx::game
 			entities()[reverseIndex] = null_entity;
 			reverse_indices()[aEntity] = invalid;
 			free_indices().push_back(reverseIndex);
+			if (have_snapshot())
+			{
+				std::lock_guard<std::recursive_mutex> lg{ mutex() };
+				if (have_snapshot())
+				{
+					auto ss = snapshot();
+					ss.data().destroy_entity_record(aEntity);
+				}
+			}
+
 			// todo: sort/remove component data of dead entities
 		}
 		value_type& populate(entity_id aEntity, const value_type& aData)
@@ -310,19 +327,19 @@ namespace neogfx::game
 		{
 			return iHaveSnapshot;
 		}
-		void take_snapshot() const
+		void take_snapshot()
 		{
 			std::lock_guard<std::recursive_mutex> lg{ mutex() };
 			if (!iUsingSnapshot)
 			{
 				if (iSnapshot == nullptr)
-					iSnapshot = std::make_unique<self_type>(*this);
+					iSnapshot = snapshot_ptr{ new self_type{*this} };
 				else
 					*iSnapshot = *this;
 				iHaveSnapshot = true;
 			}
 		}
-		scoped_snapshot snapshot() const
+		scoped_snapshot snapshot()
 		{
 			std::lock_guard<std::recursive_mutex> lg{ mutex() };
 			return scoped_snapshot{ *this };

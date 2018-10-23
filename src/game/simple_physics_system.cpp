@@ -63,6 +63,7 @@ namespace neogfx::game
 
 	simple_physics_system::~simple_physics_system()
 	{
+		iThread->abort();
 	}
 
 	const system_id& simple_physics_system::id() const
