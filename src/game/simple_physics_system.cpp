@@ -52,6 +52,8 @@ namespace neogfx::game
 	simple_physics_system::simple_physics_system(game::i_ecs& aEcs) :
 		system{ aEcs }, iUniversalGravitationEnabled{ false }
 	{
+		applying_physics.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
+		physics_applied.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
 		if (!ecs().system_registered<time_system>())
 			ecs().register_system<time_system>();
 		if (!ecs().shared_component_registered<physics>())
@@ -128,7 +130,7 @@ namespace neogfx::game
 				auto a0 = rigidBody1.angle;
 				auto elapsedTime = from_step_time(worldClock.timeStep);
 				rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)) * vec3 { elapsedTime, elapsedTime, elapsedTime };
-				rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } * (elapsedTime * (v0 + (rigidBody1.velocity - v0) / 2.0));
+				rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } * (elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
 				rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 			}
 			physics_applied.trigger(worldClock.time);
