@@ -70,6 +70,7 @@ Status Bar                | 100     |
 Font Picker               | 100     |
 Colour Gradient Selector  | 100     |
 Colour Picker             | 100     |
+Date/Time                 | 0       |
 File Browsers (Native)    | 0       |
 Drag and drop             | 10      |
 XML Resource Description  | 0       |
