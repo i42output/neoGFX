@@ -1313,7 +1313,7 @@ namespace neogfx
 				surface().as_surface_window().non_client_release_capture(*this);
 			break;
 		default:
-			surface().as_surface_window().set_capture(*this);
+			surface().as_surface_window().release_capture(*this);
 			break;
 		}
 		

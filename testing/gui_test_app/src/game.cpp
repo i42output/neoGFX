@@ -262,10 +262,10 @@ void create_game(ng::i_layout& aLayout)
 		auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
 		spaceshipPhysics.acceleration =
 			ng::vec3
-			{
-				keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
-				keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0 
-			};
+		{
+			keyboard.is_key_pressed(ng::ScanCode_RIGHT) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_LEFT) ? -16.0 : 0.0,
+			keyboard.is_key_pressed(ng::ScanCode_UP) ? 16.0 : keyboard.is_key_pressed(ng::ScanCode_DOWN) ? -16.0 : 0.0
+		};
 		if (keyboard.is_key_pressed(ng::ScanCode_X))
 			spaceshipPhysics.spin.z = ng::to_rad(-30.0);
 		else if (keyboard.is_key_pressed(ng::ScanCode_Z))
@@ -319,7 +319,19 @@ void create_game(ng::i_layout& aLayout)
 		std::ostringstream oss;
 		oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
 		oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
-		shipInfo->set_value(oss.str()); */ 
+		shipInfo->set_value(oss.str()); */
+	});
+
+	canvas.mouse_event([&canvas, spaceship](const neogfx::mouse_event& e)
+	{
+		if ((e.type() == neogfx::mouse_event_type::ButtonPressed ||
+			e.type() == neogfx::mouse_event_type::Moved) && (e.mouse_button() & neogfx::mouse_button::Left) == neogfx::mouse_button::Left)
+		{
+			auto newPos = ng::point{ e.position() - canvas.origin() };
+			newPos.y = canvas.extents().cy - newPos.y;
+			ng::game::component_lock_guard<ng::game::rigid_body> lg{ canvas.ecs() };
+			canvas.ecs().component<ng::game::rigid_body>().entity_record(spaceship).position = newPos.to_vec3();
+		}
 	});
 
 }
