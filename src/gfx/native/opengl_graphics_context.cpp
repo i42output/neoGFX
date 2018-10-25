@@ -1281,7 +1281,7 @@ namespace neogfx
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 6u * (aFillRectOps.second - aFillRectOps.first)};
+			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 2u * (aFillRectOps.second - aFillRectOps.first)};
 
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
