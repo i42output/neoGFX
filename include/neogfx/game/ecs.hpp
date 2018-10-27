@@ -31,6 +31,7 @@ namespace neogfx::game
 		typedef std::vector<handle_t> handles_t;
 	public:
 		ecs(ecs_flags aCreationFlags = ecs_flags::PopulateEntityInfo);
+		~ecs();
 	public:
 		ecs_flags flags() const override;
 		entity_id create_entity(const entity_archetype_id& aArchetypeId) override;

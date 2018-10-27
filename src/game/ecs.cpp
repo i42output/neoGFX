@@ -213,6 +213,12 @@ namespace neogfx::game
 		}
 	}
 
+	ecs::~ecs()
+	{
+		for (auto& system : systems())
+			system.second->terminate();
+	}
+
 	ecs_flags ecs::flags() const
 	{
 		return iFlags;

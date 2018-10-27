@@ -52,6 +52,7 @@ namespace neogfx::game
 		bool paused() const override;
 		void pause() override;
 		void resume() override;
+		void terminate() override;
 	private:
 		game::i_ecs& iEcs;
 		component_list iComponents;

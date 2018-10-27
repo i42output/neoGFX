@@ -64,7 +64,7 @@ namespace neogfx::game
 
 	simple_physics::~simple_physics()
 	{
-		iThread->abort();
+		terminate();
 	}
 
 	const system_id& simple_physics::id() const
@@ -136,6 +136,12 @@ namespace neogfx::game
 			shared_component_lock_guard<clock> lgClock{ ecs() };
 			worldClock.time += worldClock.timeStep;
 		}
+	}
+
+	void simple_physics::terminate()
+	{
+		if (!iThread->aborted())
+			iThread->abort();
 	}
 
 	bool simple_physics::universal_gravitation_enabled() const

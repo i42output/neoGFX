@@ -42,5 +42,6 @@ namespace neogfx::game
 		virtual bool paused() const = 0;
 		virtual void pause() = 0;
 		virtual void resume() = 0;
+		virtual void terminate() = 0;
 	};
 }

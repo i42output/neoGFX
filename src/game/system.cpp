@@ -79,4 +79,8 @@ namespace neogfx::game
 		iPaused = false;
 	}
 
+	void system::terminate()
+	{
+		// do nothing
+	}
 }

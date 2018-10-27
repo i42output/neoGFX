@@ -217,6 +217,19 @@ void create_game(ng::i_layout& aLayout)
 			spaceshipPhysics.spin.z = ng::to_rad(30.0);
 		else
 			spaceshipPhysics.spin.z = 0.0;
+
+
+		/*
+				std::ostringstream oss;
+				oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
+				oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
+				shipInfo->set_value(oss.str()); */
+	});
+
+	ecs.system<ng::game::game_world>().physics_applied([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+	{
+		const auto& keyboard = ng::app::instance().keyboard();
+		auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
 		static bool sExtraFire = false;
 		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) || sExtraFire)
 		{
@@ -255,11 +268,6 @@ void create_game(ng::i_layout& aLayout)
 			if (sinceLastTime_ms > 200)
 				sLastTime_ms = stepTime_ms;
 		}
-/*
-		std::ostringstream oss;
-		oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
-		oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
-		shipInfo->set_value(oss.str()); */
 	});
 	/*
 	void collided(i_collidable_object& aOther) override

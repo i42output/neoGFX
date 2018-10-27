@@ -36,6 +36,7 @@ namespace neogfx::game
 		const neolib::i_string& name() const override;
 	public:
 		void apply() override;
+		void terminate() override;
 	public:
 		bool universal_gravitation_enabled() const;
 		void enable_universal_gravitation();
