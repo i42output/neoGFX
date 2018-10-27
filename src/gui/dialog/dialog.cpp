@@ -132,7 +132,7 @@ namespace neogfx
 			if (canAccept)
 				set_result(dialog_result::Accepted);
 			else
-				app::instance().basic_services().system_beep();
+				service<i_basic_services>::instance().system_beep();
 		}
 	}
 
@@ -145,7 +145,7 @@ namespace neogfx
 			if (canReject)
 				set_result(dialog_result::Rejected);
 			else
-				app::instance().basic_services().system_beep();
+				service<i_basic_services>::instance().system_beep();
 		}
 	}
 

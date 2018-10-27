@@ -76,7 +76,7 @@ namespace neogfx
 
 	void text_widget::paint(graphics_context& aGraphicsContext) const
 	{
-		scoped_mnemonics sm(aGraphicsContext, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT));
+		scoped_mnemonics sm(aGraphicsContext, service<i_keyboard>::instance().is_key_pressed(ScanCode_LALT) || service<i_keyboard>::instance().is_key_pressed(ScanCode_RALT));
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
 		size textSize = text_extent();
 		point textPosition;
@@ -244,7 +244,7 @@ namespace neogfx
 		else if (!has_surface())
 			return size{};
 		graphics_context gc{ *this, graphics_context::type::Unattached };
-		scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
+		scoped_mnemonics sm{ gc, service<i_keyboard>::instance().is_key_pressed(ScanCode_LALT) || service<i_keyboard>::instance().is_key_pressed(ScanCode_RALT) };
 		gc.set_glyph_text_cache(iGlyphTextCache);
 		if (multi_line())
 		{
@@ -269,7 +269,7 @@ namespace neogfx
 		else
 		{
 			graphics_context gc{ *this, graphics_context::type::Unattached };
-			scoped_mnemonics sm{ gc, app::instance().keyboard().is_key_pressed(ScanCode_LALT) || app::instance().keyboard().is_key_pressed(ScanCode_RALT) };
+			scoped_mnemonics sm{ gc, service<i_keyboard>::instance().is_key_pressed(ScanCode_LALT) || service<i_keyboard>::instance().is_key_pressed(ScanCode_RALT) };
 			if (multi_line())
 			{
 				if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)

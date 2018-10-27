@@ -199,15 +199,15 @@ namespace neogfx
 
 	void sdl_renderer::render_now()
 	{
-		app::instance().surface_manager().render_surfaces();
+		service<i_surface_manager>::instance().render_surfaces();
 	}
 
 	bool sdl_renderer::process_events()
 	{
 		bool eventsAlreadyQueued = false;
-		for (std::size_t s = 0; !eventsAlreadyQueued && s < app::instance().surface_manager().surface_count(); ++s)
+		for (std::size_t s = 0; !eventsAlreadyQueued && s < service<i_surface_manager>::instance().surface_count(); ++s)
 		{
-			auto& surface = app::instance().surface_manager().surface(s);
+			auto& surface = service<i_surface_manager>::instance().surface(s);
 			if (!surface.has_native_surface())
 				continue;
 			if (surface.surface_type() == surface_type::Window && static_cast<i_native_window&>(surface.native_surface()).events_queued())
@@ -231,9 +231,9 @@ namespace neogfx
 		case SDL_WINDOWEVENT:
 			{
 				SDL_Window* sdlWindow = SDL_GetWindowFromID(aEvent->window.windowID);
-				if (sdlWindow != NULL && app::instance().surface_manager().is_surface_attached(sdlWindow))
+				if (sdlWindow != NULL && service<i_surface_manager>::instance().is_surface_attached(sdlWindow))
 				{
-					auto& window = static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(sdlWindow).native_surface());
+					auto& window = static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(sdlWindow).native_surface());
 					switch (aEvent->window.event)
 					{
 					case SDL_WINDOWEVENT_ENTER:
@@ -262,64 +262,64 @@ namespace neogfx
 			case SDL_WINDOWEVENT:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.window.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_MOUSEMOTION:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.motion.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.button.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_MOUSEBUTTONUP:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.button.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_MOUSEWHEEL:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.wheel.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_KEYDOWN:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_KEYUP:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.key.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_TEXTEDITING:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.edit.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			case SDL_TEXTINPUT:
 				{
 					SDL_Window* window = SDL_GetWindowFromID(event.text.windowID);
-					if (window != NULL && app::instance().surface_manager().is_surface_attached(window))
-						static_cast<sdl_window&>(app::instance().surface_manager().attached_surface(window).native_surface()).process_event(event);
+					if (window != NULL && service<i_surface_manager>::instance().is_surface_attached(window))
+						static_cast<sdl_window&>(service<i_surface_manager>::instance().attached_surface(window).native_surface()).process_event(event);
 				}
 				break;
 			default:

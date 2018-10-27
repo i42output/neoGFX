@@ -191,7 +191,7 @@ namespace neogfx
 		{
 			aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
 			if (!aAccept)
-				app::instance().basic_services().system_beep();
+				service<i_basic_services>::instance().system_beep();
 		});
 
 		iSink += iTextBox.text_changed([this]()
@@ -209,7 +209,7 @@ namespace neogfx
 			{
 				iTextBox.set_text(iText);
 				iTextBox.cursor().set_position(iTextCursorPos);
-				app::instance().basic_services().system_beep();
+				service<i_basic_services>::instance().system_beep();
 			}
 			else
 			{
@@ -271,7 +271,7 @@ namespace neogfx
 				update_arrows();
 		});
 
-		iSink += app::instance().surface_manager().dpi_changed([this](i_surface&) { update_arrows(); });
+		iSink += service<i_surface_manager>::instance().dpi_changed([this](i_surface&) { update_arrows(); });
 	}
 
 	template <typename T>

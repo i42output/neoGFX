@@ -259,7 +259,7 @@ namespace neogfx
 	{
 		if (dialog::has_maximum_size())
 			return dialog::maximum_size(aAvailableSpace);
-		return (app::instance().window_manager().desktop_rect(root()) / 2.0).ceil();
+		return (service<i_window_manager>::instance().desktop_rect(root()) / 2.0).ceil();
 	}
 
 	void message_box::init()
@@ -271,7 +271,7 @@ namespace neogfx
 		iLayout2.set_margins(neogfx::margins{});
 		iLayout2.set_spacing(standardSpacing / 2.0);
 
-		size maxTextSize{ app::instance().window_manager().desktop_rect(root()).width() / 3.0, size::max_dimension() };
+		size maxTextSize{ service<i_window_manager>::instance().desktop_rect(root()).width() / 3.0, size::max_dimension() };
 		text().set_maximum_size(maxTextSize);
 		detailed_text().set_maximum_size(maxTextSize);
 

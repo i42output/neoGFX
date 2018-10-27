@@ -103,6 +103,7 @@ namespace neogfx
 		int exec(bool aQuitWhenLastWindowClosed = true) override;
 		bool in_exec() const override;
 		void quit(int aResultCode = 0) override;
+	public:
 		i_basic_services& basic_services() const override;
 		i_rendering_engine& rendering_engine() const override;
 		i_surface_manager& surface_manager() const override;

@@ -276,7 +276,7 @@ namespace neogfx
 		}
 		else if (std::holds_alternative<keyboard_event>(iCurrentEvent))
 		{
-			auto& keyboard = app::instance().keyboard();
+			auto& keyboard = service<i_keyboard>::instance();
 			const auto& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
 			switch (keyboardEvent.type())
 			{

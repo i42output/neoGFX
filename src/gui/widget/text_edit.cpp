@@ -217,8 +217,8 @@ namespace neogfx
 
 	text_edit::~text_edit()
 	{
-		if (app::instance().clipboard().sink_active() && &app::instance().clipboard().active_sink() == this)
-			app::instance().clipboard().deactivate(*this);
+		if (service<i_clipboard>::instance().sink_active() && &service<i_clipboard>::instance().active_sink() == this)
+			service<i_clipboard>::instance().deactivate(*this);
 	}
 
 	void text_edit::moved()
@@ -319,7 +319,7 @@ namespace neogfx
 	void text_edit::focus_gained(focus_reason aFocusReason)
 	{
 		scrollable_widget::focus_gained(aFocusReason);
-		app::instance().clipboard().activate(*this);
+		service<i_clipboard>::instance().activate(*this);
 		iCursorAnimationStartTime = app::instance().program_elapsed_ms();
 		if (iType == SingleLine && aFocusReason == focus_reason::Tab)
 		{
@@ -335,7 +335,7 @@ namespace neogfx
 		scrollable_widget::focus_lost(aFocusReason);
 		if (destroyed)
 			return;
-		app::instance().clipboard().deactivate(*this);
+		service<i_clipboard>::instance().deactivate(*this);
 		if (iType == SingleLine)
 			cursor().set_position(iText.size());
 		update();
@@ -868,13 +868,13 @@ namespace neogfx
 
 	void text_edit::paste_plain_text()
 	{
-		paste(app::instance().clipboard());
+		paste(service<i_clipboard>::instance());
 	}
 
 	void text_edit::paste_rich_text(rich_text_format aFormat)
 	{
 		// todo
-		paste(app::instance().clipboard());
+		paste(service<i_clipboard>::instance());
 	}
 
 	bool text_edit::read_only() const

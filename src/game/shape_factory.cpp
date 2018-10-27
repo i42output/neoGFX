@@ -23,11 +23,11 @@
 
 namespace neogfx
 {
-	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, rect_type aType)
+	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, rect_type aType, scalar aZpos)
 	{
 		std::vector<xyz> result;
 		result.reserve(16);
-		back_insert_rect_vertices(result, aRect, aPixelAdjust, aType);
+		back_insert_rect_vertices(result, aRect, aPixelAdjust, aType, aZpos);
 		return std::move(result);
 	};
 

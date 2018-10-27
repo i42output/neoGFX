@@ -126,7 +126,7 @@ namespace neogfx
 			if (selection_model().has_current_index())
 				iDropList.accept_selection();
 			else
-				app::instance().basic_services().system_beep();
+				service<i_basic_services>::instance().system_beep();
 			handled = true;
 			break;
 		case ScanCode_LEFT:
@@ -205,13 +205,13 @@ namespace neogfx
 		if (aVisible && !visible())
 		{
 			update_placement();
-			if (!app::instance().keyboard().is_keyboard_grabbed_by(view()))
-				app::instance().keyboard().grab_keyboard(view());
+			if (!service<i_keyboard>::instance().is_keyboard_grabbed_by(view()))
+				service<i_keyboard>::instance().grab_keyboard(view());
 		}
 		else if (!aVisible)
 		{
-			if (app::instance().keyboard().is_keyboard_grabbed_by(view()))
-				app::instance().keyboard().ungrab_keyboard(view());
+			if (service<i_keyboard>::instance().is_keyboard_grabbed_by(view()))
+				service<i_keyboard>::instance().ungrab_keyboard(view());
 		}
 		return window::show(aVisible);
 	}
@@ -249,8 +249,8 @@ namespace neogfx
 	{
 		// dismissal may be for reasons other than explicit acceptance or cancellation (e.g. clicking outside of list popup)...
 		auto* dropListForCancellation = iDropList.handling_text_change() || iDropList.accepting_selection() || iDropList.cancelling_selection() ? nullptr : &iDropList;
-		if (app::instance().keyboard().is_keyboard_grabbed_by(view()))
-			app::instance().keyboard().ungrab_keyboard(view());
+		if (service<i_keyboard>::instance().is_keyboard_grabbed_by(view()))
+			service<i_keyboard>::instance().ungrab_keyboard(view());
 		close();
 		// 'this' will be destroyed at this point...
 		if (dropListForCancellation)

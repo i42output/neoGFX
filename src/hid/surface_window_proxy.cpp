@@ -35,7 +35,7 @@ namespace neogfx
 		iCapturingWidget{ nullptr },
 		iClickedWidget{ nullptr }
 	{
-		app::instance().surface_manager().add_surface(*this);
+		service<i_surface_manager>::instance().add_surface(*this);
 	}
 
 	surface_window_proxy::~surface_window_proxy()
@@ -409,7 +409,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_closing()
 	{
 		iNativeWindowClosing = true;
-		app::instance().surface_manager().remove_surface(*this);
+		service<i_surface_manager>::instance().remove_surface(*this);
 	}
 
 	void surface_window_proxy::native_window_closed()
@@ -440,9 +440,9 @@ namespace neogfx
 	void surface_window_proxy::native_window_focus_lost()
 	{
 		as_widget().update(true);
-		for (std::size_t i = 0; i < app::instance().window_manager().window_count();)
+		for (std::size_t i = 0; i < service<i_window_manager>::instance().window_count();)
 		{
-			i_window& w = app::instance().window_manager().window(i);
+			i_window& w = service<i_window_manager>::instance().window(i);
 			if (!w.dismissed() && as_window().is_owner_of(w) && w.requires_owner_focus())
 			{
 				if (w.dismissal_type() == i_window::CloseOnDismissal)

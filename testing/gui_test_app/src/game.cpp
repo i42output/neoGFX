@@ -21,64 +21,8 @@
 
 namespace ng = neogfx;
 using namespace neolib::stdint_suffix;
-/*
-class missile : public ng::sprite
-{
-public:
-	missile(ng::canvas& aWorld, const ng::i_sprite& aParent, std::pair<uint32_t, ng::text>& aScore, std::shared_ptr<ng::texture> aExplosion, ng::angle aAngle) :
-		ng::sprite{ ng::colour{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 } }, iWorld{ aWorld }, iScore(aScore), iExplosion(aExplosion)
-	{
-		set_collision_mask(0x1ull);
-		shape::set_extents(ng::vec3{ 3.0, 3.0 });
-		ng::vec3 relativePos = aParent.origin();
-		relativePos[1] += 18.0;
-		auto tm = ng::without_translation(aParent.transformation_matrix());
-		set_position(aParent.position() + ~(tm * ng::vec4{ relativePos.x, relativePos.y, relativePos.z, 1.0 }).xyz);
-		set_mass(0.016);
-		set_angle_radians(aParent.angle_radians() + ng::vec3{ 0.0, 0.0, ng::to_rad(aAngle) });
-		set_velocity(~(transformation_matrix() * ng::vec4{ 0.0, 360.0, 0.0, 0.0 }).xyz + aParent.velocity());
-	}
-public:
-	const ng::object_type& type() const override
-	{
-		static ng::object_type sTypeId = neolib::make_uuid("F5B70B06-6B72-465B-9499-44EB994D2923");
-		return sTypeId;
-	}
-	bool update(const optional_time_interval& aNow, const ng::vec3& aForce) override
-	{
-		bool updated = physical_object::update(aNow, aForce);
-		if (updated && bounding_box_2d().intersection(iWorld.client_rect()).empty())
-			kill();
-		return updated;
-	}
-	void collided(i_collidable_object& aOther) override
-	{
-		auto& other = aOther.as_physical_object();
-		iScore.first += 250;
-		std::ostringstream oss;
-		oss << std::setfill('0') << std::setw(6) << iScore.first;
-		iScore.second.set_value(oss.str());
-		static boost::fast_pool_allocator<ng::sprite> alloc;
-		auto explosion = std::allocate_shared<ng::sprite, boost::fast_pool_allocator<sprite>>(
-			alloc, *iExplosion, ng::sprite::animation_info{ { { ng::point{}, ng::size{ 60.0, 60.0 } } }, 12, 0.040, false });
-		explosion->set_collision_mask(0x1ull);
-		static neolib::basic_random<double> r;
-		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), -0.1 });
-		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
-		explosion->set_extents(ng::vec3{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
-		iWorld.add_sprite(explosion);
-		kill();
-		other.kill();
-		if (other.collision_mask() != 0x4ull)
-			create_target(iWorld);
-	}
-private:
-	ng::canvas& iWorld;
-	std::pair<uint32_t, ng::text>& iScore;
-	std::shared_ptr<ng::texture> iExplosion;
-};
 
-void create_game(ng::i_layout& aLayout)
+/*void create_game(ng::i_layout& aLayout)
 {
 	spritePlane.enable_z_sorting(true);
 
@@ -310,17 +254,35 @@ void create_game(ng::i_layout& aLayout)
 			if (sinceLastTime_ms > 200)
 				sLastTime_ms = stepTime_ms;
 		}
-		/*
-		if (keyboard.is_key_pressed(ng::ScanCode_D))
-			spritePlane.enable_dynamic_update(true);
-		else if (keyboard.is_key_pressed(ng::ScanCode_F))
-			spritePlane.enable_dynamic_update(false);
-
+/*
 		std::ostringstream oss;
 		oss << "VELOCITY:  " << spaceshipSprite.velocity().magnitude() << " m/s" << "\n";
 		oss << "ACCELERATION:  " << spaceshipSprite.acceleration().magnitude() << " m/s/s";
 		shipInfo->set_value(oss.str()); */
 	});
+	/*
+	void collided(i_collidable_object& aOther) override
+	{
+		auto& other = aOther.as_physical_object();
+		iScore.first += 250;
+		std::ostringstream oss;
+		oss << std::setfill('0') << std::setw(6) << iScore.first;
+		iScore.second.set_value(oss.str());
+		static boost::fast_pool_allocator<ng::sprite> alloc;
+		auto explosion = std::allocate_shared<ng::sprite, boost::fast_pool_allocator<sprite>>(
+			alloc, *iExplosion, ng::sprite::animation_info{ { { ng::point{}, ng::size{ 60.0, 60.0 } } }, 12, 0.040, false });
+		explosion->set_collision_mask(0x1ull);
+		static neolib::basic_random<double> r;
+		explosion->set_position(position() + ng::vec3{ r.get(-10.0, 10.0), r.get(-10.0, 10.0), -0.1 });
+		explosion->set_angle_degrees(ng::vec3{ 0.0, 0.0, r.get(360.0) });
+		explosion->set_extents(ng::vec3{ r.get(40.0, 80.0), r.get(40.0, 80.0) });
+		iWorld.add_sprite(explosion);
+		kill();
+		other.kill();
+		if (other.collision_mask() != 0x4ull)
+			create_target(iWorld);
+	}
+*/
 
 	canvas.mouse_event([&canvas, spaceship](const neogfx::mouse_event& e)
 	{

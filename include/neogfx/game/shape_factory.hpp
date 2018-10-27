@@ -37,49 +37,49 @@ namespace neogfx
 	using temp_vec3_buffer = neolib::vecarray<vec3, VertexCount, VertexCount, neolib::check<neolib::vecarray_overflow>, std::allocator<vec3>>;
 
 	template <std::size_t VertexCount>
-	inline void calc_rect_vertices(temp_vec3_buffer<VertexCount>& aResult, const rect& aRect, dimension aPixelAdjust, rect_type aType)
+	inline void calc_rect_vertices(temp_vec3_buffer<VertexCount>& aResult, const rect& aRect, dimension aPixelAdjust, rect_type aType, scalar aZpos = 0.0)
 	{
 		aResult.clear();
 		if (aType == rect_type::FilledTriangleFan) // fill
 		{
-			aResult.push_back(aRect.centre().to_vec3());
-			aResult.push_back(aRect.top_left().to_vec3());
-			aResult.push_back(aRect.top_right().to_vec3());
-			aResult.push_back(aRect.bottom_right().to_vec3());
-			aResult.push_back(aRect.bottom_left().to_vec3());
-			aResult.push_back(aRect.top_left().to_vec3());
+			aResult.push_back(aRect.centre().to_vec3(aZpos));
+			aResult.push_back(aRect.top_left().to_vec3(aZpos));
+			aResult.push_back(aRect.top_right().to_vec3(aZpos));
+			aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
+			aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
+			aResult.push_back(aRect.top_left().to_vec3(aZpos));
 		}
 		else if (aType == rect_type::FilledTriangles) // fill
 		{
-			aResult.push_back(aRect.top_left().to_vec3());
-			aResult.push_back(aRect.top_right().to_vec3());
-			aResult.push_back(aRect.bottom_left().to_vec3());
-			aResult.push_back(aRect.top_right().to_vec3());
-			aResult.push_back(aRect.bottom_right().to_vec3());
-			aResult.push_back(aRect.bottom_left().to_vec3());
+			aResult.push_back(aRect.top_left().to_vec3(aZpos));
+			aResult.push_back(aRect.top_right().to_vec3(aZpos));
+			aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
+			aResult.push_back(aRect.top_right().to_vec3(aZpos));
+			aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
+			aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
 		}
 		else // draw (outline)
 		{
-			aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y + aPixelAdjust });
-			aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y + aPixelAdjust });
-			aResult.push_back(xyz{ aRect.top_right().x - aPixelAdjust, aRect.top_right().y });
-			aResult.push_back(xyz{ aRect.bottom_right().x - aPixelAdjust, aRect.bottom_right().y });
-			aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y - aPixelAdjust });
-			aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y - aPixelAdjust });
-			aResult.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y });
-			aResult.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y });
+			aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y + aPixelAdjust, aZpos });
+			aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y + aPixelAdjust, aZpos });
+			aResult.push_back(xyz{ aRect.top_right().x - aPixelAdjust, aRect.top_right().y, aZpos });
+			aResult.push_back(xyz{ aRect.bottom_right().x - aPixelAdjust, aRect.bottom_right().y, aZpos });
+			aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y - aPixelAdjust, aZpos });
+			aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y - aPixelAdjust, aZpos });
+			aResult.push_back(xyz{ aRect.bottom_left().x + aPixelAdjust, aRect.bottom_left().y, aZpos });
+			aResult.push_back(xyz{ aRect.top_left().x + aPixelAdjust, aRect.top_left().y, aZpos });
 		}
 	}
 
 	template <typename Container>
-	inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const rect& aRect, dimension aPixelAdjust, rect_type aType)
+	inline typename Container::iterator back_insert_rect_vertices(Container& aResult, const rect& aRect, dimension aPixelAdjust, rect_type aType, scalar aZpos = 0.0)
 	{
 		temp_vec3_buffer<8> temp;
-		calc_rect_vertices(temp, aRect, aPixelAdjust, aType);
+		calc_rect_vertices(temp, aRect, aPixelAdjust, aType, aZpos);
 		return aResult.insert(aResult.end(), temp.begin(), temp.end());
 	}
 
-	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, rect_type aType);
+	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, rect_type aType, scalar aZpos = 0.0);
 	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre, uint32_t aArcSegments = 0);
 	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre, uint32_t aArcSegments = 0);
 	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre, uint32_t aArcSegments = 0);

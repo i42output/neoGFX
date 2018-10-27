@@ -352,7 +352,7 @@ namespace neogfx
 	{
 		return has_layout_owner() && layout_owner().has_surface() ? 
 			layout_owner().surface().ppi() >= 150.0 : 
-			app::instance().surface_manager().display().metrics().ppi() >= 150.0;
+			service<i_surface_manager>::instance().display().metrics().ppi() >= 150.0;
 	}
 
 	dimension layout::dpi_scale_factor() const
@@ -360,7 +360,7 @@ namespace neogfx
 		return default_dpi_scale_factor(
 			has_layout_owner() && layout_owner().has_surface() ?
 				layout_owner().surface().ppi() : 
-				app::instance().surface_manager().display().metrics().ppi());
+				service<i_surface_manager>::instance().display().metrics().ppi());
 	}
 
 	bool layout::has_margins() const

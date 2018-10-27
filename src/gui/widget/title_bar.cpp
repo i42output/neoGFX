@@ -158,7 +158,7 @@ namespace neogfx
 		iMaximizeButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iRestoreButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iCloseButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
-		iSink += app::instance().surface_manager().dpi_changed([this](i_surface&)
+		iSink += service<i_surface_manager>::instance().dpi_changed([this](i_surface&)
 		{
 			size iconSize{ dpi_scale(24.0) };
 			if (icon().image().is_empty())

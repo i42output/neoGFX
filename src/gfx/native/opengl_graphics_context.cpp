@@ -1565,7 +1565,10 @@ namespace neogfx
 				iTempTextureCoords.clear();
 				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
 
-				rect outputRect{ point{glyphOrigin}, glyphTexture.texture().extents() };
+				rect outputRect = rect{ glyphTexture.texture().extents() }.with_centred_origin();
+				vec3_list outputVertices = rect_vertices(outputRect, 0.0, rect_type::FilledTriangles, glyphOrigin.z);
+
+				glyphOrigin += outputRect.bottom_right().to_vec3();
 
 				if (drawOp.appearance.has_effect() && pass == 1)
 				{
@@ -1583,13 +1586,12 @@ namespace neogfx
 						auto barrierPartitionCount = barrier_partitions(drawOp.appearance.effect());
 						auto y = ((op.pass() - 1) % (barrierPartitionCount / 2)) / scanlineOffsetCount - drawOp.appearance.effect().width();
 						auto x = ((op.pass() - 1) % (barrierPartitionCount / 2)) % scanlineOffsetCount - drawOp.appearance.effect().width();
-						rect effectRect = outputRect + point{ x, y };
-						vertexArrays.instance().push_back({ effectRect.top_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[0] });
-						vertexArrays.instance().push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
-						vertexArrays.instance().push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
-						vertexArrays.instance().push_back({ effectRect.top_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[1] });
-						vertexArrays.instance().push_back({ effectRect.bottom_right().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[2] });
-						vertexArrays.instance().push_back({ effectRect.bottom_left().to_vec3(glyphOrigin.z), effectColour, iTempTextureCoords[3] });
+						vertexArrays.instance().push_back({ outputVertices[0] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[0] });
+						vertexArrays.instance().push_back({ outputVertices[2] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[3] });
+						vertexArrays.instance().push_back({ outputVertices[1] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[1] });
+						vertexArrays.instance().push_back({ outputVertices[3] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[1] });
+						vertexArrays.instance().push_back({ outputVertices[4] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[2] });
+						vertexArrays.instance().push_back({ outputVertices[5] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[3] });
 					}
 				}
 				else if (pass == 2)
@@ -1601,12 +1603,12 @@ namespace neogfx
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
 						std::array <uint8_t, 4>{};
-					vertexArrays.instance().push_back({ outputRect.top_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[0] });
-					vertexArrays.instance().push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
-					vertexArrays.instance().push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
-					vertexArrays.instance().push_back({ outputRect.top_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[1] });
-					vertexArrays.instance().push_back({ outputRect.bottom_right().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[2] });
-					vertexArrays.instance().push_back({ outputRect.bottom_left().to_vec3(glyphOrigin.z), ink, iTempTextureCoords[3] });
+					vertexArrays.instance().push_back({ outputVertices[0] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[0] });
+					vertexArrays.instance().push_back({ outputVertices[2] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[3] });
+					vertexArrays.instance().push_back({ outputVertices[1] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[1] });
+					vertexArrays.instance().push_back({ outputVertices[3] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[1] });
+					vertexArrays.instance().push_back({ outputVertices[4] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[2] });
+					vertexArrays.instance().push_back({ outputVertices[5] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[3] });
 				}
 			}
 		}

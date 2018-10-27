@@ -82,8 +82,8 @@ namespace neogfx
 	widget::~widget()
 	{
 		unlink();
-		if (app::instance().keyboard().is_keyboard_grabbed_by(*this))
-			app::instance().keyboard().ungrab_keyboard(*this);
+		if (service<i_keyboard>::instance().is_keyboard_grabbed_by(*this))
+			service<i_keyboard>::instance().ungrab_keyboard(*this);
 		remove_all();
 		{
 			auto layout = iLayout;
@@ -675,7 +675,7 @@ namespace neogfx
 	{
 		return has_root() && root().has_surface() ? 
 			root().surface().ppi() >= 150.0 : 
-			app::instance().surface_manager().display().metrics().ppi() >= 150.0;
+			service<i_surface_manager>::instance().display().metrics().ppi() >= 150.0;
 	}
 
 	dimension widget::dpi_scale_factor() const
