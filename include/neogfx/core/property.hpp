@@ -31,8 +31,6 @@
 
 namespace neogfx
 {
-	using namespace std::string_literals;
-
 	namespace detail
 	{
 		template <typename T>

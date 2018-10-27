@@ -20,7 +20,6 @@
 #include <neogfx/neogfx.hpp>
 #include <SDL.h>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
 #include "../../gui/window/native/sdl_window.hpp"
 #include "sdl_renderer.hpp"

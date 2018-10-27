@@ -23,6 +23,7 @@
 #include <cmath>
 #include <boost/format.hpp>
 #include <neolib/raii.hpp>
+#include <neogfx/app/app.hpp>
 
 namespace neogfx
 {

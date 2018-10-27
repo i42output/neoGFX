@@ -28,9 +28,10 @@
 #include <SDL_messagebox.h>
 #include <SDL_clipboard.h>
 #include <SDL_syswm.h>
-#include "sdl_basic_services.hpp"
-#include "i_native_clipboard.hpp"
 
+#include <neogfx/hid/display.hpp>
+#include "i_native_clipboard.hpp"
+#include "sdl_basic_services.hpp"
 
 namespace neogfx
 {
@@ -58,6 +59,7 @@ namespace neogfx
 		iNativeDeviceContextHandle{ aNativeDeviceContextHandle }
 	{
 		update_dpi();
+#ifdef WIN32
 		HKEY hkeySubpixelFormat;
 		if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, (L"SOFTWARE\\Microsoft\\Avalon.Graphics\\DISPLAY" + boost::lexical_cast<std::wstring>(index() + 1)).c_str(), 0, KEY_READ, &hkeySubpixelFormat) == ERROR_SUCCESS)
 		{
@@ -79,6 +81,7 @@ namespace neogfx
 		}
 		else
 			iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
+#endif
 	}
 
 	display::~display()

@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/dialog/dialog_button_box.hpp>
 
 namespace neogfx

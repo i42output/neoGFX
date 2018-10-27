@@ -406,7 +406,6 @@ namespace neogfx
 			"11120000000000002111"
 			"11200000000000000211"
 		};
-		using namespace std::string_literals;
 		if (iTextures[TextureMinimize] == std::nullopt || iTextures[TextureMinimize]->first != ink)
 		{
 			iTextures[TextureMinimize] = std::make_pair(

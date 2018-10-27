@@ -22,7 +22,6 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
 #include <neolib/observable.hpp>
-#include <neogfx/app/app.hpp>
 #include "i_item_presentation_model.hpp"
 #include "i_item_selection_model.hpp"
 

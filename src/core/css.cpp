@@ -22,8 +22,6 @@
 #include <neolib/lexer.hpp>
 #include <neogfx/core/css.hpp>
 
-using namespace std::string_literals;
-
 namespace neogfx
 {
 	css::selector::selector(type_e aType, const arguments_type& aArguments) :

@@ -26,7 +26,6 @@
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/i_component_data.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
-#include <neogfx/app/app.hpp>
 
 namespace neogfx::game
 {

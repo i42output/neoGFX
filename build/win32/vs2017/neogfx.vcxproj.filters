@@ -828,6 +828,12 @@
     <ClInclude Include="..\..\..\include\neogfx\game\renderable_entity_archetype.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_display.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\display.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">

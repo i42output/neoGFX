@@ -19,7 +19,6 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 

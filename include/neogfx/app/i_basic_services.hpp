@@ -25,6 +25,7 @@
 
 namespace neogfx
 {
+	class i_display;
 	class i_native_clipboard;
 	class i_shared_menu_bar;
 
@@ -34,34 +35,6 @@ namespace neogfx
 		Mac,
 		Kde,
 		Gnome
-	};
-
-	enum class subpixel_format
-	{
-		SubpixelFormatNone,
-		SubpixelFormatRGBHorizontal,
-		SubpixelFormatBGRHorizontal,
-		SubpixelFormatRGBVertical,
-		SubpixelFormatBGRVertical
-	};
-
-	class i_display
-	{
-	public:
-		struct failed_to_get_monitor_dpi : std::runtime_error { failed_to_get_monitor_dpi() : std::runtime_error("neogfx::i_display::failed_to_get_monitor_dpi") {} };
-	public:
-		virtual ~i_display() {};
-	public:
-		virtual uint32_t index() const = 0;
-	public:
-		virtual const i_device_metrics& metrics() const = 0;
-		virtual void update_dpi() = 0;
-	public:
-		virtual neogfx::rect rect() const = 0;
-		virtual neogfx::rect desktop_rect() const = 0;
-		virtual colour read_pixel(const point& aPosition) const = 0;
-	public:
-		virtual neogfx::subpixel_format subpixel_format() const = 0;
 	};
 
 	class i_basic_services

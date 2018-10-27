@@ -20,13 +20,17 @@
 #pragma once
 
 #include <neolib/neolib.hpp>
-#include <neolib/stdint.hpp>
+#include <string>
 #include <boost/multiprecision/cpp_int.hpp>
 using namespace boost::multiprecision;
+
+#include <neolib/stdint.hpp>
+#include <neogfx/app/i18n.hpp>
 
 namespace neogfx
 {
 	using namespace neolib::stdint_suffix;
+	using namespace std::string_literals;
 
 	template <typename Component>
 	struct service

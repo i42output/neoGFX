@@ -18,7 +18,6 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
 #include "native/i_native_texture.hpp"
 

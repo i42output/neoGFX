@@ -18,9 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 
 namespace neogfx

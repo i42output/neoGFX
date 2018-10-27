@@ -19,8 +19,11 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/surface_window_proxy.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_nest.hpp>
+#include <neogfx/gui/widget/i_nested_window.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 #include "native/i_native_surface.hpp"
 

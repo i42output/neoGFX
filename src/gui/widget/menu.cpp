@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gui/widget/menu_item.hpp>
 #include <neogfx/gui/widget/menu.hpp>

@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_nest.hpp>
 #include <neogfx/hid/window_manager.hpp>
 
 namespace neogfx

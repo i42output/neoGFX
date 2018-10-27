@@ -27,7 +27,6 @@
 #include <neolib/segmented_array.hpp>
 #include <neolib/observable.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/app/app.hpp>
 #include "i_item_model.hpp"
 #include "i_basic_item_model.hpp"
 

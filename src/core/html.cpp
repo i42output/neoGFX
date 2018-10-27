@@ -22,8 +22,6 @@
 #include <neolib/lexer.hpp>
 #include <neogfx/core/html.hpp>
 
-using namespace std::string_literals;
-
 namespace neogfx
 {
 	namespace

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include "i_surface.hpp"
+#include "i_display.hpp"
 
 namespace neogfx
 {
