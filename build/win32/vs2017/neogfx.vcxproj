@@ -176,6 +176,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\entity_archetype.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\entity_info.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\font.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\game_world.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\i_ecs.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\material.hpp" />
@@ -191,7 +192,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\patch.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\physics.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\renderable_entity_archetype.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\simple_physics_system.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\simple_physics.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\rigid_body.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_octree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp" />
@@ -203,7 +204,7 @@
     <ClInclude Include="..\..\..\include\neogfx\game\text_mesh.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\chrono.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\texture.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\time_system.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\game\time.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\transformation.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_operations.hpp" />
@@ -417,14 +418,15 @@
     <ClCompile Include="..\..\..\src\game\ecs.cpp" />
     <ClCompile Include="..\..\..\src\game\entity.cpp" />
     <ClCompile Include="..\..\..\src\game\entity_archetype.cpp" />
+    <ClCompile Include="..\..\..\src\game\game_world.cpp" />
     <ClCompile Include="..\..\..\src\game\renderable_entity_archetype.cpp" />
-    <ClCompile Include="..\..\..\src\game\simple_physics_system.cpp" />
+    <ClCompile Include="..\..\..\src\game\simple_physics.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
     <ClCompile Include="..\..\..\src\game\shape_factory.cpp" />
     <ClCompile Include="..\..\..\src\game\canvas.cpp" />
     <ClCompile Include="..\..\..\src\game\system.cpp" />
     <ClCompile Include="..\..\..\src\game\text_mesh.cpp" />
-    <ClCompile Include="..\..\..\src\game\time_system.cpp" />
+    <ClCompile Include="..\..\..\src\game\time.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp" />
     <ClCompile Include="..\..\..\src\gfx\image.cpp" />

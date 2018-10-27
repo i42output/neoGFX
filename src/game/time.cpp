@@ -1,4 +1,4 @@
-// time_system.cpp
+// time.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -21,12 +21,12 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/chrono.hpp>
 #include <neogfx/game/ecs.hpp>
-#include <neogfx/game/time_system.hpp>
+#include <neogfx/game/time.hpp>
 #include <neogfx/game/clock.hpp>
 
 namespace neogfx::game
 {
-	time_system::time_system(game::i_ecs& aEcs) :
+	time::time(game::i_ecs& aEcs) :
 		system{ aEcs }
 	{
 		if (!ecs().shared_component_registered<clock>())
@@ -37,21 +37,21 @@ namespace neogfx::game
 		}
 	}
 
-	const system_id& time_system::id() const
+	const system_id& time::id() const
 	{
 		return meta::id();
 	}
 
-	const neolib::i_string& time_system::name() const
+	const neolib::i_string& time::name() const
 	{
 		return meta::name();
 	}
 
-	void time_system::apply()
+	void time::apply()
 	{
 	}
 
-	step_time time_system::system_time() const
+	step_time time::system_time() const
 	{
 		auto& worldClock = ecs().shared_component<clock>()[0];
 		auto systemTime = to_step_time(chrono::to_seconds(std::chrono::duration_cast<chrono::flicks>(std::chrono::high_resolution_clock::now().time_since_epoch())), worldClock.timeStep);
@@ -60,7 +60,7 @@ namespace neogfx::game
 		return systemTime - *iSystemTimeOffset;
 	}
 
-	step_time time_system::world_time() const
+	step_time time::world_time() const
 	{
 		auto& worldClock = ecs().shared_component<clock>()[0];
 		return worldClock.time;

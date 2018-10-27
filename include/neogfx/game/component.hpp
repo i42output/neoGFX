@@ -180,7 +180,7 @@ namespace neogfx::game
 		typedef std::vector<reverse_index_t> reverse_indices_t;
 	private:
 		typedef static_component<Data> self_type;
-		typedef std::vector<typename component_data_t::size_type> free_indices_t;
+		typedef std::vector<reverse_index_t> free_indices_t;
 	public:
 		typedef std::unique_ptr<self_type> snapshot_ptr;
 		class scoped_snapshot
@@ -276,7 +276,7 @@ namespace neogfx::game
 		{
 			auto reverseIndex = reverse_index(aEntity);
 			if (reverseIndex == invalid)
-				throw entity_record_not_found();
+   				throw entity_record_not_found();
 			return base_type::component_data()[reverseIndex];
 		}
 		value_type& entity_record(entity_id aEntity)
@@ -405,7 +405,7 @@ namespace neogfx::game
 				entities()[reverseIndex] = null_entity;
 				throw;
 			}
-			return base_type::component_data().back();
+			return base_type::component_data()[reverseIndex];
 		}
 		template <typename T>
 		value_type& do_update(entity_id aEntity, T&& aComponentData)

@@ -1,4 +1,4 @@
-// time_system.hpp
+// game_world.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -19,39 +19,35 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/game/chrono.hpp>
-#include <neogfx/game/system.hpp>
+#include <neolib/thread.hpp>
+#include <neogfx/game/ecs.hpp>
+#include <neogfx/game/game_world.hpp>
 
 namespace neogfx::game
 {
-	class time_system : public system
+	game_world::game_world(game::i_ecs& aEcs) :
+		system{ aEcs }
 	{
+		applying_physics.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
+		physics_applied.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
+	}
 
-	public:
-		time_system(game::i_ecs& aEcs);
-	public:
-		const system_id& id() const override;
-		const neolib::i_string& name() const override;
-	public:
-		void apply() override;
-	public:
-		step_time system_time() const;
-		step_time world_time() const;
-	public:
-		struct meta
-		{
-			static const neolib::uuid& id()
-			{
-				static const neolib::uuid sId = { 0x714a0e4a, 0xd0be, 0x4737, 0xbd25, { 0xe8, 0x3e, 0x2a, 0x5c, 0xd7, 0x65 } };
-				return sId;
-			}
-			static const neolib::i_string& name()
-			{
-				static const neolib::string sName = "Time";
-				return sName;
-			}
-		};
-	private:
-		mutable optional_step_time iSystemTimeOffset;
-	};
+	game_world::~game_world()
+	{
+	}
+
+	const system_id& game_world::id() const
+	{
+		return meta::id();
+	}
+
+	const neolib::i_string& game_world::name() const
+	{
+		return meta::name();
+	}
+
+	void game_world::apply()
+	{
+		// do nothing
+	}
 }

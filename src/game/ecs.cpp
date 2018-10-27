@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/entity_info.hpp>
-#include <neogfx/game/time_system.hpp>
+#include <neogfx/game/time.hpp>
 
 namespace neogfx::game
 {
@@ -209,7 +209,7 @@ namespace neogfx::game
 		if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
 		{
 			register_component<entity_info>();
-			register_system<time_system>();
+			register_system<time>();
 		}
 	}
 
@@ -222,7 +222,7 @@ namespace neogfx::game
 	{
 		auto entityId = next_entity_id();
 		if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
-			component<entity_info>().populate(entityId, entity_info{ aArchetypeId, system<time_system>().world_time() });
+			component<entity_info>().populate(entityId, entity_info{ aArchetypeId, system<time>().world_time() });
 		entity_created.trigger(entityId);
 		return entityId;
 	}

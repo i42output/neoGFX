@@ -10,8 +10,9 @@
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/standard_archetypes.hpp>
-#include <neogfx/game/time_system.hpp>
-#include <neogfx/game/simple_physics_system.hpp>
+#include <neogfx/game/game_world.hpp>
+#include <neogfx/game/time.hpp>
+#include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/game/text_mesh.hpp>
@@ -191,16 +192,16 @@ void create_game(ng::i_layout& aLayout)
 	canvas.entities_rendered([&, clockFont](ng::graphics_context& gc)
 	{
 		std::ostringstream text;
-		auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time_system>().world_time()) * 1000.0);
+		auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
 		text.fill('0');
 		text << std::setw(2) << worldTime / (1000 * 60 * 60) << " : " << std::setw(2) << worldTime / (1000 * 60) % 60 << " : " << std::setw(2) << worldTime / (1000) % 60 << " . " << std::setw(3) << worldTime % 1000;
 		gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
 	});
 
 	// Instantiate physics...
-	ecs.system<ng::game::simple_physics_system>();
+	ecs.system<ng::game::simple_physics>();
 
-	~~~~ecs.system<ng::game::simple_physics_system>().applying_physics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
+	~~~~ecs.system<ng::game::game_world>().applying_physics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
 	{
 		const auto& keyboard = ng::app::instance().keyboard();
 		auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);

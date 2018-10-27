@@ -768,9 +768,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\gradient.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\time_system.hpp">
-      <Filter>Game\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\clock.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
@@ -793,9 +790,6 @@
       <Filter>Game\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\physics.hpp">
-      <Filter>Game\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\simple_physics_system.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\entity_info.hpp">
@@ -833,6 +827,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\hid\display.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\game_world.hpp">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\simple_physics.hpp">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\game\time.hpp">
+      <Filter>Game\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1196,13 +1199,7 @@
     <ClCompile Include="..\..\..\src\game\ecs.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\game\time_system.cpp">
-      <Filter>Game\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\game\shape_factory.cpp">
-      <Filter>Game\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\game\simple_physics_system.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\game\system.cpp">
@@ -1224,6 +1221,15 @@
       <Filter>Game\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\game\renderable_entity_archetype.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\game_world.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\simple_physics.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\time.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

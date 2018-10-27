@@ -1,4 +1,4 @@
-// simple_physics_system.cpp
+// simple_physics.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
@@ -21,18 +21,19 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/thread.hpp>
 #include <neogfx/game/ecs.hpp>
+#include <neogfx/game/game_world.hpp>
 #include <neogfx/game/clock.hpp>
-#include <neogfx/game/simple_physics_system.hpp>
-#include <neogfx/game/time_system.hpp>
+#include <neogfx/game/simple_physics.hpp>
+#include <neogfx/game/time.hpp>
 #include <neogfx/game/physics.hpp>
 #include <neogfx/game/rigid_body.hpp>
 
 namespace neogfx::game
 {
-	class simple_physics_system::thread : public neolib::thread
+	class simple_physics::thread : public neolib::thread
 	{
 	public:
-		thread(simple_physics_system& aOwner) : neolib::thread{ "neogfx::game::simple_physics_system::thread" }, iOwner{ aOwner }
+		thread(simple_physics& aOwner) : neolib::thread{ "neogfx::game::simple_physics::thread" }, iOwner{ aOwner }
 		{
 			start();
 		}
@@ -45,17 +46,15 @@ namespace neogfx::game
 			}
 		}
 	private:
-		simple_physics_system& iOwner;
+		simple_physics& iOwner;
 	};
 
 
-	simple_physics_system::simple_physics_system(game::i_ecs& aEcs) :
+	simple_physics::simple_physics(game::i_ecs& aEcs) :
 		system{ aEcs }, iUniversalGravitationEnabled{ false }
 	{
-		applying_physics.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-		physics_applied.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-		if (!ecs().system_registered<time_system>())
-			ecs().register_system<time_system>();
+		if (!ecs().system_registered<time>())
+			ecs().register_system<time>();
 		if (!ecs().shared_component_registered<physics>())
 			ecs().register_shared_component<physics>();
 		if (ecs().shared_component<physics>().component_data().empty())
@@ -63,22 +62,22 @@ namespace neogfx::game
 		iThread = std::make_unique<thread>(*this);
 	}
 
-	simple_physics_system::~simple_physics_system()
+	simple_physics::~simple_physics()
 	{
 		iThread->abort();
 	}
 
-	const system_id& simple_physics_system::id() const
+	const system_id& simple_physics::id() const
 	{
 		return meta::id();
 	}
 
-	const neolib::i_string& simple_physics_system::name() const
+	const neolib::i_string& simple_physics::name() const
 	{
 		return meta::name();
 	}
 
-	void simple_physics_system::apply()
+	void simple_physics::apply()
 	{
 		if (!ecs().component_instantiated<rigid_body>())
 			return;
@@ -90,13 +89,13 @@ namespace neogfx::game
 		auto& physicalConstants = ecs().shared_component<physics>().component_data().begin()->second;
 		auto uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
 			*physicalConstants.uniformGravity : vec3{};
-		auto now = ecs().system<time_system>().system_time();
+		auto now = ecs().system<time>().system_time();
 		auto& rigidBodies = ecs().component<rigid_body>();
 		while (worldClock.time <= now)
 		{
 			neolib::thread::sleep(1);
 			component_lock_guard<rigid_body> lgRigidBodies{ ecs() };
-			applying_physics.trigger(worldClock.time);
+			ecs().system<game_world>().applying_physics.trigger(worldClock.time);
 			bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
 			if (useUniversalGravitation)
 				rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
@@ -133,23 +132,23 @@ namespace neogfx::game
 				rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 } * (elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
 				rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
 			}
-			physics_applied.trigger(worldClock.time);
+			ecs().system<game_world>().physics_applied.trigger(worldClock.time);
 			shared_component_lock_guard<clock> lgClock{ ecs() };
 			worldClock.time += worldClock.timeStep;
 		}
 	}
 
-	bool simple_physics_system::universal_gravitation_enabled() const
+	bool simple_physics::universal_gravitation_enabled() const
 	{
 		return iUniversalGravitationEnabled;
 	}
 
-	void simple_physics_system::enable_universal_gravitation()
+	void simple_physics::enable_universal_gravitation()
 	{
 		iUniversalGravitationEnabled = true;
 	}
 
-	void simple_physics_system::disable_universal_gravitation()
+	void simple_physics::disable_universal_gravitation()
 	{
 		iUniversalGravitationEnabled = false;
 	}
