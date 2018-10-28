@@ -301,11 +301,7 @@ namespace neogfx
 			}
 			bool room_for(std::size_t aAmount) const
 			{
-				auto pvc = primitive_vertex_count();
-				if (pvc == 0)
-					pvc = 1;
-				auto rem = ((vertices().size() - iStart) % pvc);
-				return room() >= (aAmount * pvc - (rem != 0 ? pvc - rem : 0));
+				return room() >= aAmount;
 			}
 			void execute()
 			{
@@ -819,7 +815,7 @@ namespace neogfx
 			{
 				auto vertices = aPath.to_vertices(aPath.paths()[i]);
 
-				use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath) };
+				use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath), vertices.size() };
 				for (const auto& v : vertices)
 				{
 					vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{
@@ -839,7 +835,7 @@ namespace neogfx
 				{
 					auto vertices = aPath.to_vertices(innerPath.paths()[i]);
 
-					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(innerPath) };
+					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(innerPath), vertices.size() };
 					for (const auto& v : vertices)
 					{
 						vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{
@@ -1037,7 +1033,7 @@ namespace neogfx
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_LINES };
+			use_vertex_arrays vertexArrays{ *this, GL_LINES, 2u };
 			vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{ xyz{aFrom.x + pixelAdjust, aFrom.y + pixelAdjust}, penColour });
 			vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{ xyz{aTo.x + pixelAdjust, aTo.y + pixelAdjust}, penColour });
 		}
@@ -1057,7 +1053,7 @@ namespace neogfx
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_LINES, 8 };
+			use_vertex_arrays vertexArrays{ *this, GL_LINES, 8u };
 			back_insert_rect_vertices(vertexArrays.instance(), aRect, pixel_adjust(aPen), rect_type::Outline);
 			for (auto& v : vertexArrays.instance())
 				v.rgba = colour_to_vec4f(std::holds_alternative<colour>(aPen.colour()) ?
@@ -1087,7 +1083,7 @@ namespace neogfx
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP };
+			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
 			for (const auto& v : vertices)
 				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
@@ -1282,7 +1278,7 @@ namespace neogfx
 			gradient_on(static_variant_cast<const gradient&>(firstOp.fill), firstOp.rect);
 
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 2u * (aFillRectOps.second - aFillRectOps.first)};
+			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, 2u * 3u * (aFillRectOps.second - aFillRectOps.first)};
 
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
@@ -1454,6 +1450,8 @@ namespace neogfx
 				auto& drawOp = static_variant_cast<const graphics_operation::fill_shape&>(*op);
 				auto const& vertices = drawOp.mesh.vertices;
 				auto const& uv = drawOp.mesh.uv;
+				if (!vertexArrays.instance().room_for(drawOp.mesh.faces.size() * 3u))
+					vertexArrays.instance().execute();
 				for (auto const& f : drawOp.mesh.faces)
 				{
 					for (auto vi : f)
@@ -1776,9 +1774,7 @@ namespace neogfx
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
 			{
-				use_vertex_arrays vertexArrays { *this, GL_TRIANGLES, with_textures };
-				if (!vertexArrays.instance().room_for(faces.size()))
-					vertexArrays.instance().execute();
+				use_vertex_arrays vertexArrays { *this, GL_TRIANGLES, with_textures, faces.size() * 3u };
 
 				GLuint textureHandle = 0;
 				const i_sub_texture* subTexture = nullptr;
@@ -1857,9 +1853,7 @@ namespace neogfx
 		{
 			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
-			use_vertex_arrays vertexArrays { *this, GL_TRIANGLES };
-			if (!vertexArrays.instance().room_for(faces.size()))
-				vertexArrays.instance().execute();
+			use_vertex_arrays vertexArrays { *this, GL_TRIANGLES, faces.size() * 3u };
 
 			for (auto const& face : faces)
 			{
