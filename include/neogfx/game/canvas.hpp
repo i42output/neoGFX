@@ -53,5 +53,7 @@ namespace neogfx::game
 	private:
 		std::shared_ptr<game::i_ecs> iEcs;
 		sink iSink;
+		std::optional<neolib::callback_timer> iUpdater;
+		bool iEcsPaused;
 	};
 }

@@ -91,6 +91,10 @@ namespace neogfx::game
 		virtual entity_id create_entity(const entity_archetype_id& aArchetypeId) = 0;
 		virtual void destroy_entity(entity_id aEntityId) = 0;
 	public:
+		virtual bool all_systems_paused() const = 0;
+		virtual void pause_all_systems() = 0;
+		virtual void resume_all_systems() = 0;
+	public:
 		virtual const archetype_registry_t& archetypes() const = 0;
 		virtual archetype_registry_t& archetypes() = 0;
 		virtual const component_factories_t& component_factories() const = 0;

@@ -20,7 +20,6 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/thread.hpp>
-#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/clock.hpp>
@@ -44,6 +43,7 @@ namespace neogfx::game
 			while (!finished())
 			{
 				iOwner.apply();
+				iOwner.yield();
 			}
 		}
 	private:
@@ -94,10 +94,7 @@ namespace neogfx::game
 		auto& rigidBodies = ecs().component<rigid_body>();
 		while (worldClock.time <= now)
 		{
-			if (service<i_rendering_engine>::instance().game_mode())
-				neolib::thread::yield();
-			else
-				neolib::thread::sleep(1);
+			yield();
 			component_lock_guard<rigid_body> lgRigidBodies{ ecs() };
 			ecs().system<game_world>().applying_physics.trigger(worldClock.time);
 			bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);

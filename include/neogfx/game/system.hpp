@@ -35,7 +35,7 @@ namespace neogfx::game
 		system(game::i_ecs& aEcs);
 		template <typename ComponentIdIter>
 		system(game::i_ecs& aEcs, ComponentIdIter aFirstComponent, ComponentIdIter aLastComponent) :
-			iEcs{ aEcs }, iComponents{ aFirstComponent, aLastComponent }
+			iEcs{ aEcs }, iComponents{ aFirstComponent, aLastComponent }, iPaused{ 0u }
 		{
 		}
 		system(const system& aOther);
@@ -53,9 +53,11 @@ namespace neogfx::game
 		void pause() override;
 		void resume() override;
 		void terminate() override;
+	protected:
+		void yield();
 	private:
 		game::i_ecs& iEcs;
 		component_list iComponents;
-		std::atomic<bool> iPaused;
+		std::atomic<uint32_t> iPaused;
 	};
 }

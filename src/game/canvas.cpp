@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/app.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
@@ -26,61 +27,70 @@
 namespace neogfx::game
 {
 	canvas::canvas() : 
-		iEcs{ std::make_shared<game::ecs>() }
+		iEcs{ std::make_shared<game::ecs>() },
+		iEcsPaused{ false }
 	{
 		init();
 	}
 
 	canvas::canvas(game::i_ecs& aEcs) :
-		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
+		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs },
+		iEcsPaused{ false }
 	{
 		init();
 	}
 
 	canvas::canvas(std::shared_ptr<game::i_ecs> aEcs) :
-		iEcs{ aEcs }
+		iEcs{ aEcs },
+		iEcsPaused{ false }
 	{
 		init();
 	}
 
 	canvas::canvas(i_widget& aParent) :
 		widget{ aParent }, 
-		iEcs{ std::make_shared<game::ecs>() }
+		iEcs{ std::make_shared<game::ecs>() },
+		iEcsPaused{ false }
 	{
 		init();
 	}
 
 	canvas::canvas(i_widget& aParent, game::i_ecs& aEcs) :
 		widget{ aParent },
-		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
+		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs },
+		iEcsPaused{ false }
 	{
 		init();
 	}
 
 	canvas::canvas(i_widget& aParent, std::shared_ptr<game::i_ecs> aEcs) :
 		widget{ aParent },
-		iEcs{ aEcs }
+		iEcs{ aEcs },
+		iEcsPaused{ false }
 	{
 		init();
 	}
 
 	canvas::canvas(i_layout& aLayout) :
 		widget{ aLayout }, 
-		iEcs{ std::make_shared<game::ecs>() }
+		iEcs{ std::make_shared<game::ecs>() },
+		iEcsPaused{ false }
 	{
 		init();
 	}
 
 	canvas::canvas(i_layout& aLayout, game::i_ecs& aEcs) :
 		widget{ aLayout },
-		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs }
+		iEcs{ std::shared_ptr<game::i_ecs>{}, &aEcs },
+		iEcsPaused{ false }
 	{
 		init();
 	}
 
 	canvas::canvas(i_layout& aLayout, std::shared_ptr<game::i_ecs> aEcs) :
 		widget{ aLayout },
-		iEcs{ aEcs }
+		iEcs{ aEcs },
+		iEcsPaused{ false }
 	{
 		init();
 	}
@@ -124,6 +134,21 @@ namespace neogfx::game
 
 	void canvas::init()
 	{
+		iUpdater.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			if (!iEcsPaused && effectively_hidden())
+			{
+				ecs().pause_all_systems();
+				iEcsPaused = true;
+			}
+			else if (iEcsPaused && effectively_visible())
+			{
+				ecs().resume_all_systems();
+				iEcsPaused = false;
+			}
+		}, 1000u);
+
 		iSink += ecs().system<game_world>().physics_applied([this](step_time)
 		{
 			update();

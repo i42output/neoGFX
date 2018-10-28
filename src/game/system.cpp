@@ -19,23 +19,25 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/thread.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/system.hpp>
 
 namespace neogfx::game
 {
 	system::system(game::i_ecs& aEcs) :
-		iEcs{ aEcs }, iPaused{ false }
+		iEcs{ aEcs }, iPaused{ 0u }
 	{
 	}
 
 	system::system(const system& aOther) :
-		iEcs{ aOther.iEcs }, iComponents{ aOther.iComponents }, iPaused{ false }
+		iEcs{ aOther.iEcs }, iComponents{ aOther.iComponents }, iPaused{ 0u }
 	{
 	}
 
 	system::system(system&& aOther) :
-		iEcs{ aOther.iEcs }, iComponents{ std::move(aOther.iComponents) }, iPaused{ false }
+		iEcs{ aOther.iEcs }, iComponents{ std::move(aOther.iComponents) }, iPaused{ 0u }
 	{
 	}
 
@@ -66,21 +68,29 @@ namespace neogfx::game
 
 	bool system::paused() const
 	{
-		return iPaused;
+		return iPaused != 0u;
 	}
 
 	void system::pause()
 	{
-		iPaused = true;
+		++iPaused;
 	}
 
 	void system::resume()
 	{
-		iPaused = false;
+		--iPaused;
 	}
 
 	void system::terminate()
 	{
 		// do nothing
+	}
+
+	void system::yield()
+	{
+		if (service<i_rendering_engine>::instance().game_mode())
+			neolib::thread::yield();
+		else
+			neolib::thread::sleep(1);
 	}
 }

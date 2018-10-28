@@ -163,7 +163,12 @@ namespace neogfx::game
 			return *existingSystem->second;
 		auto existingFactory = system_factories().find(aSystemId);
 		if (existingFactory != system_factories().end())
-			return *iSystems.emplace(aSystemId, existingFactory->second()).first->second;
+		{
+			auto& newSystem = *iSystems.emplace(aSystemId, existingFactory->second()).first->second;
+			if (all_systems_paused())
+				newSystem.pause();
+			return newSystem;
+		}
 		throw system_not_found();
 	}
 
@@ -204,7 +209,8 @@ namespace neogfx::game
 					system.second->apply();
 				}
 			}, 1, true
-		}
+		},
+		iSystemsPaused{ false }
 	{
 		if ((flags() & ecs_flags::PopulateEntityInfo) == ecs_flags::PopulateEntityInfo)
 		{
@@ -240,6 +246,29 @@ namespace neogfx::game
 			if (component.second->has_entity_record(aEntityId))
 				component.second->destroy_entity_record(aEntityId);
 		free_entity_id(aEntityId);
+	}
+
+	bool ecs::all_systems_paused() const
+	{
+		return iSystemsPaused;
+	}
+
+	void ecs::pause_all_systems()
+	{
+		if (iSystemsPaused)
+			return;
+		for (auto& s : systems())
+			s.second->pause();
+		iSystemsPaused = true;
+	}
+
+	void ecs::resume_all_systems()
+	{
+		if (!iSystemsPaused)
+			return;
+		for (auto& s : systems())
+			s.second->resume();
+		iSystemsPaused = false;
 	}
 
 	bool ecs::archetype_registered(const i_entity_archetype& aArchetype) const

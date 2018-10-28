@@ -37,6 +37,10 @@ namespace neogfx::game
 		entity_id create_entity(const entity_archetype_id& aArchetypeId) override;
 		void destroy_entity(entity_id aEntityId) override;
 	public:
+		bool all_systems_paused() const override;
+		void pause_all_systems() override;
+		void resume_all_systems() override;
+	public:
 		const archetype_registry_t& archetypes() const override;
 		archetype_registry_t& archetypes() override;
 		const component_factories_t& component_factories() const override;
@@ -117,5 +121,6 @@ namespace neogfx::game
 		std::vector<handle_id> iFreedHandleIds;
 		handles_t iHandles;
 		neolib::callback_timer iSystemTimer;
+		std::atomic<bool> iSystemsPaused;
 	};
 }
