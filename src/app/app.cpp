@@ -320,7 +320,12 @@ namespace neogfx
 			while (iQuitResultCode == std::nullopt)
 			{
 				if (!process_events(iAppContext))
-					thread::sleep(1);
+				{
+					if (rendering_engine().game_mode())
+						thread::yield();
+					else
+						thread::sleep(1);
+				}
 			}
 			iAsyncEventQueue.terminate();
 			return *iQuitResultCode;

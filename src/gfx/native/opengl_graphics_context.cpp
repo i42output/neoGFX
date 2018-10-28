@@ -1224,6 +1224,7 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_entities(game::i_ecs& aEcs, const mat44& aTransformation)
 	{
+		iRenderingEngine.want_game_mode();
 		aEcs.component<game::rigid_body>().take_snapshot();
 		auto rigidBodiesSnapshot = aEcs.component<game::rigid_body>().snapshot();
 		auto const& rigidBodies = rigidBodiesSnapshot.data();

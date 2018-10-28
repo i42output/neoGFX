@@ -141,9 +141,8 @@ namespace neogfx
 	public:
 		bool process_events() override;
 	public:
-		void register_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
-		void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
-		uint32_t frame_counter(uint32_t aDuration) const override;
+		void want_game_mode() override;
+		bool game_mode() const override;
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
@@ -160,6 +159,6 @@ namespace neogfx
 		bool iSubpixelRendering;
 		mutable std::optional<std::array<GLuint, 3>> iGradientTextures;
 		mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
-		std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
+		uint64_t iLastGameRenderTime;
 	};
 }
