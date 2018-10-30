@@ -56,6 +56,9 @@ namespace neogfx
 		rect window_rect(const i_window& aWindow, bool aIgnoreNesting = false) const override;
 		void move_window(i_window& aWindow, const point& aPosition) override;
 		void resize_window(i_window& aWindow, const size& aExtents) override;
+	public:
+		bool window_activated() const override;
+		i_window& active_window() const override;
 	private:
 		window_list iWindows;
 	};

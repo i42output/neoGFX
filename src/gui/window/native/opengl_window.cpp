@@ -148,7 +148,7 @@ namespace neogfx
 			if (processing_event())
 				return;
 
-			if (iFrameRate != std::nullopt && now - iLastFrameTime < 1000 / (has_rendering_priority() ? *iFrameRate : *iFrameRate / 10.0))
+			if (iFrameRate != std::nullopt && now - iLastFrameTime < 1000 / (!rendering_engine().use_rendering_priority() || has_rendering_priority() ? *iFrameRate : *iFrameRate / 10.0))
 				return;
 
 			if (!surface_window().native_window_ready_to_render())

@@ -201,6 +201,12 @@ namespace neogfx
 		service<i_surface_manager>::instance().render_surfaces();
 	}
 
+	bool sdl_renderer::use_rendering_priority() const
+	{
+		// todo
+		return false;
+	}
+
 	bool sdl_renderer::process_events()
 	{
 		bool eventsAlreadyQueued = false;

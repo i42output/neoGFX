@@ -106,4 +106,19 @@ namespace neogfx
 		else
 			aWindow.as_widget().resize(aExtents);
 	}
+
+	bool window_manager::window_activated() const
+	{
+		for (auto const& w : iWindows)
+			if (w->is_active())
+				return true;
+	}
+
+	i_window& window_manager::active_window() const
+	{
+		for (auto const& w : iWindows)
+			if (w->is_active())
+				return *w;
+		throw no_window_active();
+	}
 }

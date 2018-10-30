@@ -129,6 +129,7 @@ namespace neogfx
 		virtual void subpixel_rendering_off() = 0;
 	public:
 		virtual void render_now() = 0;
+		virtual bool use_rendering_priority() const = 0;
 	public:
 		virtual bool process_events() = 0;
 	public:

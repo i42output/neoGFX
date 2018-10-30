@@ -31,6 +31,7 @@ namespace neogfx
 	{
 	public:
 		struct window_not_found : std::logic_error { window_not_found() : std::logic_error("neogfx::i_surface_manager::window_not_found") {} };
+		struct no_window_active : std::logic_error { no_window_active() : std::logic_error("neogfx::i_surface_manager::no_window_active") {} };
 	public:
 		virtual ~i_window_manager() {}
 	public:
@@ -45,6 +46,9 @@ namespace neogfx
 		virtual rect window_rect(const i_window& aWindow, bool aIgnoreNesting = false) const = 0;
 		virtual void move_window(i_window& aWindow, const point& aPosition) = 0;
 		virtual void resize_window(i_window& aWindow, const size& aExtents) = 0;
+	public:
+		virtual bool window_activated() const = 0;
+		virtual i_window& active_window() const = 0;
 	public:
 		virtual point mouse_position() const = 0;
 		virtual point mouse_position(const i_window& aWindow) const = 0;
