@@ -20,7 +20,7 @@
 namespace neogfx
 {
 	template <typename PointType>
-	inline void basic_path<PointType>::add_rect(const rect_type& aRectangle)
+	inline void basic_path<PointType>::add_rect(const mesh_type& aRectangle)
 	{
 		size_type pixelSize = pixel();
 		move_to(aRectangle.left(), aRectangle.top());
@@ -31,7 +31,7 @@ namespace neogfx
 	}
 
 	template <typename PointType>
-	inline const typename basic_path<PointType>::rect_type& basic_path<PointType>::bounding_rect(bool aOffsetPosition, size_type aPixelWidthAdjustment) const
+	inline const typename basic_path<PointType>::mesh_type& basic_path<PointType>::bounding_rect(bool aOffsetPosition, size_type aPixelWidthAdjustment) const
 	{
 		if (iBoundingRect)
 			return *iBoundingRect;
@@ -47,14 +47,14 @@ namespace neogfx
 				maxX = std::max(maxX, j->x);
 				maxY = std::max(maxY, j->y);
 			}
-		iBoundingRect = rect_type(point_type(minX, minY) + (aOffsetPosition ? iPosition : point(0.0, 0.0)), size_type(maxX - minX + aPixelWidthAdjustment.cx, maxY - minY + aPixelWidthAdjustment.cy));
+		iBoundingRect = mesh_type(point_type(minX, minY) + (aOffsetPosition ? iPosition : point(0.0, 0.0)), size_type(maxX - minX + aPixelWidthAdjustment.cx, maxY - minY + aPixelWidthAdjustment.cy));
 		return *iBoundingRect;
 	}
 
 	namespace
 	{
 		template <typename PointType>
-		inline void add_clip_rect(typename basic_path<PointType>::clip_rect_list& aClipRects, const typename basic_path<PointType>::rect_type& aRect)
+		inline void add_clip_rect(typename basic_path<PointType>::clip_rect_list& aClipRects, const typename basic_path<PointType>::mesh_type& aRect)
 		{
 			if (aClipRects.empty())
 				aClipRects.push_back(aRect);
@@ -78,7 +78,7 @@ namespace neogfx
 	template <typename PointType>
 	inline typename basic_path<PointType>::clip_rect_list basic_path<PointType>::clip_rects(const point& aOrigin) const
 	{
-		rect_type boundingRect = bounding_rect() + aOrigin;
+		mesh_type boundingRect = bounding_rect() + aOrigin;
 		typedef std::vector<line_type> lines_t;
 		lines_t::size_type lineCount = 0;
 		for (paths_type::const_iterator i = iPaths.begin(); i != iPaths.end(); ++i)
@@ -162,7 +162,7 @@ namespace neogfx
 						if (parity)
 						{
 							add_clip_rect<point_type>(clipRects, 
-								rect_type(point_type(previousIntersect.x() + 1, y), size_type(currentIntersect.x() - previousIntersect.x() - 1, 1)));
+								mesh_type(point_type(previousIntersect.x() + 1, y), size_type(currentIntersect.x() - previousIntersect.x() - 1, 1)));
 						}
 						if (!currentIntersect.skip())
 							parity = !parity;

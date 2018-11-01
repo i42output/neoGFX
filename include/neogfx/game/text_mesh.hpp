@@ -141,7 +141,7 @@ namespace neogfx::game
 							face{ 3u, 4u, 5u }
 						}
 						});
-				m.vertices = rect_vertices(rect{ point{ aData.position }, size{ aData.extents } }, 0, rect_type::FilledTriangles);
+				m.vertices = rect_vertices(rect{ point{ aData.position }, size{ aData.extents } }, 0, mesh_type::Triangles);
 				for (auto& v : m.vertices)
 					v.z = aData.position.z;
 				aEcs.component<mesh>().populate(aEntity, m);

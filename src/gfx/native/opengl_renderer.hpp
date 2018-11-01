@@ -143,6 +143,10 @@ namespace neogfx
 	public:
 		void want_game_mode() override;
 		bool game_mode() const override;
+	public:
+		void register_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
+		void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
+		uint32_t frame_counter(uint32_t aDuration) const override;
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
 	private:
@@ -160,5 +164,6 @@ namespace neogfx
 		mutable std::optional<std::array<GLuint, 3>> iGradientTextures;
 		mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
 		uint64_t iLastGameRenderTime;
+		std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
 	};
 }

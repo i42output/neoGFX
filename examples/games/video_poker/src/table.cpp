@@ -43,6 +43,8 @@ namespace video_poker
 		{ RoyalFlush, 250 }
 	};
 
+	/*
+
 	class outcome : public neogfx::text
 	{
 	public:
@@ -78,24 +80,24 @@ namespace video_poker
 		neogfx::sprite_plane& iParent;
 		boost::optional<time_interval> iStartTime;
 	};
-
-	table::table(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane) :
+	*/
+	table::table(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas) :
 		neogfx::widget{ aLayout },
 		iState{ table_state::TakeBet },
 		iCredits{ STARTING_CREDITS },
 		iStake{ 0 },
-		iSpritePlane{ aSpritePlane },
+		iCanvas{ aCanvas },
 		iMainLayout{ *this, neogfx::alignment::Centre },
 		iLabelTitle{ iMainLayout, "VIDEO POKER" },
 		iSpacer1{ iMainLayout },
 		iSpacesLayout{ iMainLayout },
 		iSpacer2{ iSpacesLayout },
 		iSpaces{
-			std::make_shared<card_space>(iSpacesLayout, iSpritePlane, *this),
-			std::make_shared<card_space>(iSpacesLayout, iSpritePlane, *this),
-			std::make_shared<card_space>(iSpacesLayout, iSpritePlane, *this),
-			std::make_shared<card_space>(iSpacesLayout, iSpritePlane, *this),
-			std::make_shared<card_space>(iSpacesLayout, iSpritePlane, *this) },
+			std::make_shared<card_space>(iSpacesLayout, iCanvas, *this),
+			std::make_shared<card_space>(iSpacesLayout, iCanvas, *this),
+			std::make_shared<card_space>(iSpacesLayout, iCanvas, *this),
+			std::make_shared<card_space>(iSpacesLayout, iCanvas, *this),
+			std::make_shared<card_space>(iSpacesLayout, iCanvas, *this) },
 		iSpacer3{ iSpacesLayout },
 		iSpacer4{ iMainLayout },
 		iGambleLayout{ iMainLayout },
@@ -239,8 +241,8 @@ namespace video_poker
 
 	void table::win(int32_t aWinnings)
 	{
-		iSpritePlane.add_shape(std::make_shared<outcome>(
-			iSpritePlane, 
+		iCanvas.add_shape(std::make_shared<outcome>(
+			iCanvas, 
 			to_string(video_poker::to_poker_hand(*iHand)) + u8"\nWIN £" + boost::lexical_cast<std::string>(aWinnings) + "!",
 			neogfx::colour::Goldenrod.with_lightness(0.8)));
 		iCredits += aWinnings;
@@ -248,8 +250,8 @@ namespace video_poker
 
 	void table::no_win()
 	{
-		iSpritePlane.add_shape(std::make_shared<outcome>(
-			iSpritePlane,
+		iCanvas.add_shape(std::make_shared<outcome>(
+			iCanvas,
 			"No Win",
 			neogfx::colour::Blue.with_lightness(0.8)));
 	}

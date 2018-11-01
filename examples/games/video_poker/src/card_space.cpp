@@ -22,17 +22,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace video_poker
 {
-	card_widget::card_widget(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane, const i_card_textures& aCardTextures) :
+	card_widget::card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures) :
 		widget{ aLayout },
-		iSpritePlane{ aSpritePlane },
+		iCanvas{ aCanvas },
 		iCardTextures{ aCardTextures },
 		iCard{ nullptr }
 	{
 		set_margins(neogfx::margins{});
 		set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
 		set_ignore_mouse_events(true);
-		iSpritePlane.layout_completed([this]() { update_sprite_geometry(); });
-		iSpritePlane.object_clicked([this](neogfx::i_game_object& aObject) 
+		iCanvas.layout_completed([this]() { update_sprite_geometry(); });
+		iCanvas.object_clicked([this](neogfx::i_game_object& aObject)
 		{ 
 			if (&aObject.as_shape() == &*iCardSprite) 
 				toggle_hold(); 
@@ -78,7 +78,7 @@ namespace video_poker
 		if (iCardSprite != nullptr)
 			iCardSprite->kill();
 		iCardSprite = std::make_shared<card_sprite>(iCardTextures, aCard);
-		iSpritePlane.add_sprite(iCardSprite);
+		iCanvas.add_sprite(iCardSprite);
 		update_sprite_geometry();
 		update();
 	}
@@ -98,7 +98,7 @@ namespace video_poker
 	{
 		if (iCardSprite != nullptr)
 		{
-			auto xy = iSpritePlane.to_client_coordinates(to_window_coordinates(client_rect().centre()));
+			auto xy = iCanvas.to_client_coordinates(to_window_coordinates(client_rect().centre()));
 			if (iCard->discarded())
 				xy += neogfx::point{ -8.0, -16.0 };
 			iCardSprite->set_position(neogfx::vec3{ xy.x, xy.y, 0.9 });
@@ -119,9 +119,9 @@ namespace video_poker
 		}
 	}
 
-	card_space::card_space(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane, i_table& aTable) :
+	card_space::card_space(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, i_table& aTable) :
 		widget{ aLayout },
-		iSpritePlane{ aSpritePlane }, 
+		iCanvas{ aCanvas },
 		iTable{ aTable },
 		iVerticalLayout{ *this, neogfx::alignment::Centre | neogfx::alignment::VCentre },
 		iCardWidget{ iVerticalLayout, aSpritePlane, aTable.textures() },

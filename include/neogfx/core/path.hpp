@@ -45,16 +45,16 @@ namespace neogfx
 		typedef typename point_type::coordinate_type dimension_type;
 		typedef basic_size<coordinate_type> size_type;
 		typedef basic_delta<coordinate_type> delta_type;
-		typedef basic_rect<coordinate_type> rect_type;
+		typedef basic_rect<coordinate_type> mesh_type;
 		typedef basic_line<coordinate_type> line_type;
 		typedef std::vector<point_type> path_type;
 		typedef std::vector<path_type> paths_type;
 		typedef typename paths_type::size_type paths_size_type;
-		struct clip_rect_list : std::vector < rect_type >
+		struct clip_rect_list : std::vector < mesh_type >
 		{
 			bool contains(const point_type& aPoint) const
 			{
-				for (std::vector<rect_type>::const_iterator i = begin(); i != end(); ++i)
+				for (std::vector<mesh_type>::const_iterator i = begin(); i != end(); ++i)
 					if (i->contains(aPoint))
 						return true;
 				return false;
@@ -87,7 +87,7 @@ namespace neogfx
 		{
 			iPaths.reserve(aPathCountHint);
 		}
-		basic_path(const rect_type& aRect, shape_type_e aShape = ConvexPolygon) : iShape(aShape)
+		basic_path(const mesh_type& aRect, shape_type_e aShape = ConvexPolygon) : iShape(aShape)
 		{
 			iPaths.reserve(5);
 			move_to(aRect.top_left());
@@ -197,10 +197,10 @@ namespace neogfx
 		{
 			line_to(point_type(aX, aY));
 		}
-		void add_rect(const rect_type& aRectangle);
+		void add_rect(const mesh_type& aRectangle);
 		void inflate(const delta_type& aDelta)
 		{
-			rect_type boundingRect = bounding_rect(false);
+			mesh_type boundingRect = bounding_rect(false);
 			for (paths_type::iterator i = iPaths.begin(); i != iPaths.end(); ++i)
 				for (path_type::iterator j = i->begin(); j != i->end(); ++j)
 				{
@@ -227,7 +227,7 @@ namespace neogfx
 		{
 			inflate(delta_type(-aDeltaX, -aDeltaY));
 		}
-		const rect_type& bounding_rect(bool aOffsetPosition = true, size_type aPixelWidthAdjustment = size_type(1.0, 1.0)) const;
+		const mesh_type& bounding_rect(bool aOffsetPosition = true, size_type aPixelWidthAdjustment = size_type(1.0, 1.0)) const;
 		clip_rect_list clip_rects(const point& aOrigin) const;
 		// attributes
 	private:
@@ -236,7 +236,7 @@ namespace neogfx
 		std::optional<point_type> iPointFrom;
 		paths_type iPaths;
 		paths_size_type iLineCountHint;
-		mutable std::optional<rect_type> iBoundingRect;
+		mutable std::optional<mesh_type> iBoundingRect;
 	};
 }
 

@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
-#include <neogfx/game/sprite_plane.hpp>
+#include <neogfx/game/canvas.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
@@ -45,7 +45,7 @@ namespace video_poker
 	private:
 		typedef std::shared_ptr<card_space> card_space_pointer;
 	public:
-		table(neogfx::i_layout& aLayout, neogfx::sprite_plane& aSpritePlane);
+		table(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas);
 	public:
 		table_state state() const override;
 	public:
@@ -67,7 +67,7 @@ namespace video_poker
 		int32_t iStake;
 		boost::optional<deck> iDeck;
 		boost::optional<hand> iHand;
-		neogfx::sprite_plane& iSpritePlane;
+		neogfx::game::canvas& iCanvas;
 		neogfx::vertical_layout iMainLayout;
 		neogfx::label iLabelTitle;
 		neogfx::vertical_spacer iSpacer1;

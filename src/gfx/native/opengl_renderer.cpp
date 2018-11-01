@@ -65,6 +65,35 @@ namespace neogfx
 		return service<i_rendering_engine>::instance().texture_manager();
 	}
 
+	frame_counter::frame_counter(uint32_t aDuration) : iTimer{ app::instance(), [this](neolib::callback_timer& aTimer)
+		{
+			aTimer.again();
+			++iCounter;
+			for (auto w : iWidgets)
+				w->update();
+		}, aDuration }, iCounter{ 0 }
+	{
+	}
+
+	uint32_t frame_counter::counter() const
+	{
+		return iCounter;
+	}
+
+	void frame_counter::add(i_widget& aWidget)
+	{
+		auto iterWidget = std::find(iWidgets.begin(), iWidgets.end(), &aWidget);
+		if (iterWidget == iWidgets.end())
+			iWidgets.push_back(&aWidget);
+	}
+
+	void frame_counter::remove(i_widget& aWidget)
+	{
+		auto iterWidget = std::find(iWidgets.begin(), iWidgets.end(), &aWidget);
+		if (iterWidget != iWidgets.end())
+			iWidgets.erase(iterWidget);
+	}
+
 	opengl_renderer::shader_program::shader_program(GLuint aHandle, bool aHasProjectionMatrix, bool aHasTransformationMatrix) :
 		iHandle{ aHandle }, iHasProjectionMatrix{ aHasProjectionMatrix }, iHasTransformationMatrix{ aHasTransformationMatrix }
 	{
@@ -949,7 +978,28 @@ namespace neogfx
 		return neolib::thread::program_elapsed_ms() - iLastGameRenderTime < 5000u;
 	}
 
-	opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)
+	void opengl_renderer::register_frame_counter(i_widget& aWidget, uint32_t aDuration)
+	{
+		auto iterFrameCounter = iFrameCounters.find(aDuration);
+		if (iterFrameCounter == iFrameCounters.end())
+			iterFrameCounter = iFrameCounters.emplace(aDuration, aDuration).first;
+		iterFrameCounter->second.add(aWidget);
+	}
+
+	void opengl_renderer::unregister_frame_counter(i_widget& aWidget, uint32_t aDuration)
+	{
+		auto iterFrameCounter = iFrameCounters.find(aDuration);
+		if (iterFrameCounter != iFrameCounters.end())
+			iterFrameCounter->second.remove(aWidget);
+	}
+
+	uint32_t opengl_renderer::frame_counter(uint32_t aDuration) const
+	{
+		auto iterFrameCounter = iFrameCounters.find(aDuration);
+		if (iterFrameCounter != iFrameCounters.end())
+			return iterFrameCounter->second.counter();
+		return 0;
+	}	opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)
 	{
 		GLuint programHandle = glCheck(glCreateProgram());
 		if (0 == programHandle)

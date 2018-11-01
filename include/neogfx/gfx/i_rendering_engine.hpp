@@ -135,5 +135,9 @@ namespace neogfx
 	public:
 		virtual void want_game_mode() = 0;
 		virtual bool game_mode() const = 0;
+	public:
+		virtual void register_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;
+		virtual void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;
+		virtual uint32_t frame_counter(uint32_t aDuration) const = 0;
 	};
 }

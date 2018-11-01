@@ -2,7 +2,7 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
-#include <neogfx/game/sprite_plane.hpp>
+#include <neogfx/game/canvas.hpp>
 #include <video_poker/poker.hpp>
 #include <video_poker/table.hpp>
 
@@ -20,11 +20,11 @@ int main(int argc, char* argv[])
 
 		ng::window window{ ng::size{1280, 720} };
 
-		ng::sprite_plane spritePlane{ window.client_layout() };
-		spritePlane.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
-		ng::vertical_layout spritePlaneLayout{ spritePlane };
+		ng::game::canvas canvas{ window.client_layout() };
+		canvas.set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
+		ng::vertical_layout canvasLayout{ canvas };
 		
-		video_poker::table table{ spritePlaneLayout, spritePlane };
+		video_poker::table table{ canvasLayout, canvas };
 
 		return app.exec();
 	}

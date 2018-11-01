@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <neogfx/game/sprite.hpp>
-#include <neogfx/game/shapes.hpp>
+#include <neogfx/game/i_ecs.hpp>
+#include <neogfx/game/shape_factory.hpp>
 #include <card_games/card.hpp>
 #include <card_games/i_card_textures.hpp>
 
@@ -33,22 +33,10 @@ namespace neogames
 		}
 
 		template <typename GameTraits>
-		class basic_card_sprite : public neogfx::sprite
-		{
-			// types
-		public:
-			typedef GameTraits game_traits;
-			typedef basic_card<game_traits> card_type;
-			// construction
-		public:
-			basic_card_sprite(const i_card_textures& aCardTextures, const card_type& aCard) :
-				sprite{ neogfx::colour::White }, iCardTextures { aCardTextures }, iCard{ aCard }
+		neogfx::game::entity_id create_card_sprite(neogfx::game::i_ecs& aEcs, const i_card_textures& aCardTextures, const basic_card<GameTraits>& aCard)
 			{
 				// We could have a separate texture for each of the 52 cards but instead we build the
 				// card mesh up here using texture atlas textures.
-
-				auto vlp = std::make_shared<neogfx::vertex_list>();
-				neogfx::face_list faceList;
 
 				// Card background shape...
 				auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, true, 20);

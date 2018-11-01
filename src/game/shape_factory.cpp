@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, rect_type aType, scalar aZpos)
+	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos)
 	{
 		std::vector<xyz> result;
 		result.reserve(16);
@@ -31,16 +31,17 @@ namespace neogfx
 		return std::move(result);
 	};
 
-	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, bool aIncludeCentre, uint32_t aArcSegments)
+	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, mesh_type aType, uint32_t aArcSegments)
 	{
+		bool const includeCentre = (aType == mesh_type::Triangles || aType == mesh_type::TriangleFan);
 		std::vector<xyz> result;
 		angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
 		uint32_t arcSegments = aArcSegments;
 		if (arcSegments == 0)
 			arcSegments = static_cast<uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
 		angle theta = arc / static_cast<angle>(arcSegments);
-		result.reserve((arcSegments + (aIncludeCentre ? 2 : 1)) * 2);
-		if (aIncludeCentre)
+		result.reserve((arcSegments + (includeCentre ? 2 : 1)) * 2);
+		if (includeCentre) // include centre
 		{
 			result.push_back(xyz{ aCentre.x, aCentre.y });
 		}
@@ -60,45 +61,45 @@ namespace neogfx
 		return result;
 	}
 
-	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, bool aIncludeCentre, uint32_t aArcSegments)
+	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments)
 	{
-		auto result = arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aIncludeCentre, aArcSegments);
-		result.push_back(result[aIncludeCentre ? 1 : 0]);
+		bool const includeCentre = (aType == mesh_type::Triangles || aType == mesh_type::TriangleFan);
+		auto result = arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aType, aArcSegments);
+		result.push_back(result[includeCentre ? 1 : 0]);
 		return result;
 	}
 
-	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, bool aIncludeCentre, uint32_t aArcSegments)
+	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments)
 	{
+		bool const includeCentre = (aType == mesh_type::Triangles || aType == mesh_type::TriangleFan);
 		std::vector<xyz> result;
 		auto topLeft = arc_vertices(
 			aRect.top_left() + point{ aRadius, aRadius },
 			aRadius,
 			boost::math::constants::pi<coordinate>(),
 			boost::math::constants::pi<coordinate>() * 1.5,
-			false, aArcSegments);
+			aType, aArcSegments);
 		auto topRight = arc_vertices(
 			aRect.top_right() + point{ -aRadius, aRadius },
 			aRadius,
 			boost::math::constants::pi<coordinate>() * 1.5,
 			boost::math::constants::pi<coordinate>() * 2.0,
-			false, aArcSegments);
+			aType, aArcSegments);
 		auto bottomRight = arc_vertices(
 			aRect.bottom_right() + point{ -aRadius, -aRadius },
 			aRadius,
 			0.0,
 			boost::math::constants::pi<coordinate>() * 0.5,
-			false, aArcSegments);
+			aType, aArcSegments);
 		auto bottomLeft = arc_vertices(
 			aRect.bottom_left() + point{ aRadius, -aRadius },
 			aRadius,
 			boost::math::constants::pi<coordinate>() * 0.5,
 			boost::math::constants::pi<coordinate>(),
-			false, aArcSegments);
-		result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (aIncludeCentre ? 9 : 8));
-		if (aIncludeCentre)
-		{
+			aType, aArcSegments);
+		result.reserve(topLeft.size() + topRight.size() + bottomRight.size() + bottomLeft.size() + (includeCentre ? 10 : 9));
+		if (includeCentre)
 			result.push_back(xyz{ aRect.centre().x, aRect.centre().y });
-		}
 		result.insert(result.end(), xyz{ (aRect.top_left() + point{ 0.0, aRadius }).x, (aRect.top_left() + point{ 0.0, aRadius }).y });
 		result.insert(result.end(), topLeft.begin(), topLeft.end());
 		result.insert(result.end(), xyz{ (aRect.top_left() + point{ aRadius, 0.0 }).x, (aRect.top_left() + point{ aRadius, 0.0 }).y });
@@ -111,7 +112,7 @@ namespace neogfx
 		result.insert(result.end(), xyz{ (aRect.bottom_left() + point{ aRadius, 0.0 }).x, (aRect.bottom_left() + point{ aRadius, 0.0 }).y });
 		result.insert(result.end(), bottomLeft.begin(), bottomLeft.end());
 		result.insert(result.end(), xyz{ (aRect.bottom_left() + point{ 0.0, -aRadius }).x, (aRect.bottom_left() + point{ 0.0, -aRadius }).y });
-		result.push_back(result[aIncludeCentre ? 1 : 0]);
+		result.push_back(result[includeCentre ? 1 : 0]);
 		return result;
 	}
 }

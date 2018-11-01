@@ -52,7 +52,7 @@ namespace neogfx
 			};
 	}
 
-	inline game::mesh to_ecs_component(const rect& aRect, dimension aPixelAdjust = 0, rect_type aType = rect_type::FilledTriangles)
+	inline game::mesh to_ecs_component(const rect& aRect, dimension aPixelAdjust = 0, mesh_type aType = mesh_type::Triangles)
 	{
 		return game::mesh
 		{

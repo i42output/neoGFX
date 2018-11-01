@@ -1054,7 +1054,7 @@ namespace neogfx
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_LINES, 8u };
-			back_insert_rect_vertices(vertexArrays.instance(), aRect, pixel_adjust(aPen), rect_type::Outline);
+			back_insert_rect_vertices(vertexArrays.instance(), aRect, pixel_adjust(aPen), mesh_type::Outline);
 			for (auto& v : vertexArrays.instance())
 				v.rgba = colour_to_vec4f(std::holds_alternative<colour>(aPen.colour()) ?
 					std::array <uint8_t, 4>{{
@@ -1079,7 +1079,7 @@ namespace neogfx
 		}
 
 		double pixelAdjust = pixel_adjust(aPen);
-		auto vertices = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, false);
+		auto vertices = rounded_rect_vertices(aRect + point{ pixelAdjust, pixelAdjust }, aRadius, mesh_type::Outline);
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
@@ -1107,7 +1107,7 @@ namespace neogfx
 			gradient_on(gradient, rect{ aCentre - size{aRadius, aRadius}, size{aRadius * 2.0, aRadius * 2.0 } });
 		}
 
-		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, false);
+		auto vertices = circle_vertices(aCentre, aRadius, aStartAngle, mesh_type::Outline);
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
@@ -1135,7 +1135,7 @@ namespace neogfx
 			gradient_on(gradient, rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
 		}
 
-		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, false));;
+		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, mesh_type::Outline));
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
@@ -1283,7 +1283,7 @@ namespace neogfx
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
-				auto newVertices = back_insert_rect_vertices(vertexArrays.instance(), drawOp.rect, 0.0, rect_type::FilledTriangles);
+				auto newVertices = back_insert_rect_vertices(vertexArrays.instance(), drawOp.rect, 0.0, mesh_type::Triangles);
 				for (auto i = newVertices; i != vertexArrays.instance().end(); ++i)
 					i->rgba = colour_to_vec4f(std::holds_alternative<colour>(drawOp.fill) ?
 						std::array<uint8_t, 4>{{
@@ -1309,7 +1309,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
 
-		auto vertices = rounded_rect_vertices(aRect, aRadius, true);
+		auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::TriangleFan);
 		
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
@@ -1334,7 +1334,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
-		auto vertices = circle_vertices(aCentre, aRadius, 0.0, true);
+		auto vertices = circle_vertices(aCentre, aRadius, 0.0, mesh_type::TriangleFan);
 
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
@@ -1359,7 +1359,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
-		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, true);
+		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, mesh_type::TriangleFan);
 
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
@@ -1565,7 +1565,7 @@ namespace neogfx
 				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
 
 				rect outputRect = rect{ glyphTexture.texture().extents() }.with_centred_origin();
-				vec3_list outputVertices = rect_vertices(outputRect, 0.0, rect_type::FilledTriangles, glyphOrigin.z);
+				vec3_list outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
 
 				glyphOrigin += outputRect.bottom_right().to_vec3();
 
