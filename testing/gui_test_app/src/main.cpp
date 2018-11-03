@@ -1020,7 +1020,6 @@ int main(int argc, char* argv[])
 		ng::vertical_layout gl(gamePage);
 		create_game(gl);
 
-		int frame = 0;
 		auto& tabDrawing = tabContainer.add_tab_page("Drawing").as_widget();
 		ng::vertical_layout tabDrawingLayout1{ tabDrawing };
 		ng::horizontal_layout tabDrawingLayout2{ tabDrawing };
@@ -1029,12 +1028,12 @@ int main(int argc, char* argv[])
 		ng::drop_list easingDropDown{ tabDrawingLayout2 };
 		easingDropDown.set_size_policy(ng::size_policy::Minimum);
 		ng::basic_item_model<ng::easing> easingItemModel;
-		for (auto i = 0; i < ng::easing_count(); ++i)
-			easingItemModel.insert_item(easingItemModel.end(), ng::to_easing(i), ng::to_string(ng::to_easing(i)));
+		for (auto i = 0; i < ng::standard_easings().size(); ++i)
+			easingItemModel.insert_item(easingItemModel.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
 		easingDropDown.set_model(easingItemModel);
 		easingDropDown.selection_model().set_current_index(ng::item_model_index{ 0 });
 		ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
-		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw, &frame](ng::graphics_context& aGc)
+		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw](ng::graphics_context& aGc)
 		{
 			ng::service<ng::i_rendering_engine>::instance().want_game_mode();
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
@@ -1056,8 +1055,8 @@ int main(int argc, char* argv[])
 			ng::scalar t = app.program_elapsed_us();
 			auto d = 1000000.0;
 			auto x = ng::ease(easingItemModel.item(easingDropDown.selection_model().current_index()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
+//			auto x = ng::ease(ng::easing_class::Linear, ng::easing_class::Bounce, int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
 			aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
-			++frame;
 		});
 
 		neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
