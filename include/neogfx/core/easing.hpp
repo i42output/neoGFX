@@ -171,26 +171,26 @@ namespace neogfx
 		return (t < 0.5 ? ease_in_circ(t * 2.0) : 1.0 + ease_out_circ((t - 0.5) * 2.0)) / 2.0;
 	}
 
-	template <typename T>
-	inline T ease_in_back(T t, T s = 1.70158)
+	template <typename T, typename Arg = T>
+	inline T ease_in_back(T t, Arg s = 1.70158)
 	{
 		return t * t * ((s + 1.0) * t - s);
 	}
 
-	template <typename T>
+	template <typename T, typename Arg = T>
 	inline T ease_out_back(T t, T s = 1.70158)
 	{
 		return 1.0 - ease_in_back(1.0 - t, s);
 	}
 
-	template <typename T>
-	inline T ease_in_out_back(T t, T s = 1.70158)
+	template <typename T, typename Arg = T>
+	inline T ease_in_out_back(T t, Arg s = 1.70158)
 	{
 		return (t < 0.5 ? ease_in_back(t * 2.0, s) : 1.0 + ease_out_back((t - 0.5) * 2.0, s)) / 2.0;
 	}
 
-	template <typename T>
-	inline T ease_in_elastic(T t, T a = 0.5, T p = 0.25)
+	template <typename T, typename Arg = T>
+	inline T ease_in_elastic(T t, Arg a = 0.5, Arg p = 0.25)
 	{
 		if (t == 0.0) 
 			return 0;
@@ -207,14 +207,14 @@ namespace neogfx
 		return -(a * std::pow(2.0, 10.0 * (t - 1.0)) * std::sin(((t - 1.0) - s) * (two_pi<T>()) / p));
 	}
 
-	template <typename T>
-	inline T ease_out_elastic(T t, T a = 0.5, T p = 0.25)
+	template <typename T, typename Arg = T>
+	inline T ease_out_elastic(T t, Arg a = 0.5, Arg p = 0.25)
 	{
 		return 1.0 - ease_in_elastic(1.0 - t, a, p);
 	}
 
-	template <typename T>
-	inline T ease_in_out_elastic(T t, T a = 0.5, T p = 0.25)
+	template <typename T, typename Arg = T>
+	inline T ease_in_out_elastic(T t, Arg a = 0.5, Arg p = 0.25)
 	{
 		return (t < 0.5 ? ease_in_elastic(t * 2.0, a, p) : 1.0 + ease_out_elastic((t - 0.5) * 2.0, a, p)) / 2.0;
 	}
@@ -253,5 +253,170 @@ namespace neogfx
 	inline T ease_in_out_bounce(T t)
 	{
 		return (t < 0.5 ? ease_in_bounce(t * 2.0) : 1.0 + ease_out_bounce((t - 0.5) * 2.0)) / 2.0;
+	}
+
+	enum class easing : uint32_t
+	{
+		Linear,
+		InQuad,
+		OutQuad,
+		InOutQuad,
+		InCubic,
+		OutCubic,
+		InOutCubic,
+		InQuart,
+		OutQuart,
+		InOutQuart,
+		InQuint,
+		OutQuint,
+		InOutQuint,
+		InSine,
+		OutSine,
+		InOutSine,
+		InExpo,
+		OutExpo,
+		InOutExpo,
+		InCirc,
+		OutCirc,
+		InOutCirc,
+		InElastic,
+		OutElastic,
+		InOutElastic,
+		InBack,
+		OutBack,
+		InOutBack,
+		InBounce,
+		OutBounce,
+		InOutBounce
+	};
+
+	inline uint32_t easing_count()
+	{
+		return static_cast<uint32_t>(easing::InOutBounce) + 1u;
+	}
+
+	inline easing to_easing(uint32_t index)
+	{
+		return static_cast<easing>(index);
+	}
+
+	template <typename T>
+	inline T ease(easing e, T t)
+	{
+		switch (e)
+		{
+		case easing::Linear:
+			return ease_linear(t);
+		case easing::InQuad:
+			return ease_in_quad(t);
+		case easing::OutQuad:
+			return ease_out_quad(t);
+		case easing::InOutQuad:
+			return ease_in_out_quad(t);
+		case easing::InCubic:
+			return ease_in_cubic(t);
+		case easing::OutCubic:
+			return ease_out_cubic(t);
+		case easing::InOutCubic:
+			return ease_in_out_cubic(t);
+		case easing::InQuart:
+			return ease_in_quart(t);
+		case easing::OutQuart:
+			return ease_out_quart(t);
+		case easing::InOutQuart:
+			return ease_in_out_quart(t);
+		case easing::InQuint:
+			return ease_in_quint(t);
+		case easing::OutQuint:
+			return ease_out_quint(t);
+		case easing::InOutQuint:
+			return ease_in_out_quint(t);
+		case easing::InSine:
+			return ease_in_sine(t);
+		case easing::OutSine:
+			return ease_out_sine(t);
+		case easing::InOutSine:
+			return ease_in_out_sine(t);
+		case easing::InExpo:
+			return ease_in_expo(t);
+		case easing::OutExpo:
+			return ease_out_expo(t);
+		case easing::InOutExpo:
+			return ease_in_out_expo(t);
+		case easing::InCirc:
+			return ease_in_circ(t);
+		case easing::OutCirc:
+			return ease_out_circ(t);
+		case easing::InOutCirc:
+			return ease_in_out_circ(t);
+		case easing::InElastic:
+			return ease_in_elastic(t);
+		case easing::OutElastic:
+			return ease_out_elastic(t);
+		case easing::InOutElastic:
+			return ease_in_out_elastic(t);
+		case easing::InBack:
+			return ease_in_back(t);
+		case easing::OutBack:
+			return ease_out_back(t);
+		case easing::InOutBack:
+			return ease_in_out_back(t);
+		case easing::InBounce:
+			return ease_in_bounce(t);
+		case easing::OutBounce:
+			return ease_out_bounce(t);
+		case easing::InOutBounce:
+			return ease_in_out_bounce(t);
+		default:
+			throw std::logic_error("neogfx::easing: unknown easing type");
+		}
+	}
+
+	template <typename T>
+	inline T ease(easing e, T t, T b, T c, T d)
+	{
+		return ease(e, t / d) * c + b;
+	}
+		
+	inline const std::string& to_string(easing e)
+	{
+		static const std::unordered_map<easing, std::string> STRING_MAP =
+		{ {
+			{ easing::Linear,		"Linear"s },
+			{ easing::InQuad,		"InQuad"s },
+			{ easing::OutQuad,		"OutQuad"s },
+			{ easing::InOutQuad,	"InOutQuad"s },
+			{ easing::InCubic,		"InCubic"s },
+			{ easing::OutCubic,	"OutCubic"s },
+			{ easing::InOutCubic,	"InOutCubic"s },
+			{ easing::InQuart,		"InQuart"s },
+			{ easing::OutQuart,	"OutQuart"s },
+			{ easing::InOutQuart,	"InOutQuart"s },
+			{ easing::InQuint,		"InQuint"s },
+			{ easing::OutQuint,	"OutQuint"s },
+			{ easing::InOutQuint,	"InOutQuint"s },
+			{ easing::InSine,		"InSine"s },
+			{ easing::OutSine,		"OutSine"s },
+			{ easing::InOutSine,	"InOutSine"s },
+			{ easing::InExpo,		"InExpo"s },
+			{ easing::OutExpo,		"OutExpo"s },
+			{ easing::InOutExpo,	"InOutExpo"s },
+			{ easing::InCirc,		"InCirc"s },
+			{ easing::OutCirc,		"OutCirc"s },
+			{ easing::InOutCirc,	"InOutCirc"s },
+			{ easing::InElastic,	"InElastic"s },
+			{ easing::OutElastic,	"OutElastic"s },
+			{ easing::InOutElastic,"InOutElastic"s },
+			{ easing::InBack,		"InBack"s },
+			{ easing::OutBack,		"OutBack"s },
+			{ easing::InOutBack,	"InOutBack"s },
+			{ easing::InBounce,	"InBounce"s },
+			{ easing::OutBounce,	"OutBounce"s },
+			{ easing::InOutBounce,	"InOutBounce"s }
+		} };
+		auto s = STRING_MAP.find(e);
+		if (s != STRING_MAP.end())
+			return s->second;
+		throw std::logic_error("neogfx::to_string: unknown easing type");
 	}
 }

@@ -31,6 +31,7 @@
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gui/widget/status_bar.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
+#include <neogfx/core/easing.hpp>
 
 namespace ng = neogfx;
 
@@ -1021,10 +1022,21 @@ int main(int argc, char* argv[])
 
 		int frame = 0;
 		auto& tabDrawing = tabContainer.add_tab_page("Drawing").as_widget();
-		tabDrawing.painting([&tabDrawing, &gw, &frame](ng::graphics_context& aGc)
+		ng::vertical_layout tabDrawingLayout1{ tabDrawing };
+		ng::horizontal_layout tabDrawingLayout2{ tabDrawing };
+		tabDrawingLayout2.set_size_policy(ng::size_policy::Minimum);
+		tabDrawingLayout2.emplace<ng::label>("Easing:");
+		ng::drop_list easingDropDown{ tabDrawingLayout2 };
+		easingDropDown.set_size_policy(ng::size_policy::Minimum);
+		ng::basic_item_model<ng::easing> easingItemModel;
+		for (auto i = 0; i < ng::easing_count(); ++i)
+			easingItemModel.insert_item(easingItemModel.end(), ng::to_easing(i), ng::to_string(ng::to_easing(i)));
+		easingDropDown.set_model(easingItemModel);
+		easingDropDown.selection_model().set_current_index(ng::item_model_index{ 0 });
+		ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
+		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw, &frame](ng::graphics_context& aGc)
 		{
-			ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
-			aGc.draw_texture(ng::point{ ((frame / 200) % 2 == 0 ? (frame % 200) : 200 - (frame % 200)) * 1.0, 0.0 } + ng::point{ (tabDrawing.extents() - logo.extents()) / 2.0 }, logo);
+			ng::service<ng::i_rendering_engine>::instance().want_game_mode();
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
 			aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, gw.gradient().with_direction(ng::gradient::Horizontal));
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, gw.gradient().with_direction(ng::gradient::Horizontal));
@@ -1038,9 +1050,13 @@ int main(int argc, char* argv[])
 			for (int x = 0; x < 10; ++x)
 				for (int y = 0; y < 10; ++y)
 					if ((x + y % 2) % 2 == 0)
-						aGc.draw_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Black);
+						aGc.draw_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::colour::Black);
 					else
-						aGc.set_pixel(ng::point{ 10.0 + x, 10.0 + y }, ng::colour::Goldenrod);
+						aGc.set_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::colour::Goldenrod);
+			ng::scalar t = app.program_elapsed_us();
+			auto d = 1000000.0;
+			auto x = ng::ease(easingItemModel.item(easingDropDown.selection_model().current_index()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
+			aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 			++frame;
 		});
 
@@ -1048,7 +1064,7 @@ int main(int argc, char* argv[])
 		{
 			aTimer.again();
 			tabDrawing.update();
-		}, 10 };
+		}, 0 };
 		
 		auto& tabEditor = tabContainer.add_tab_page("Editor").as_widget();
 		ng::vertical_layout layoutEditor(tabEditor);
