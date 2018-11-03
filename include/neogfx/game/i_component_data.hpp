@@ -26,6 +26,7 @@
 namespace neogfx::game
 {
 	typedef triangle face;
+	typedef std::vector<face> faces_t;
 
 	typedef std::string string;
 

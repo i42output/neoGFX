@@ -774,9 +774,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\patch.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\game\shape_factory.hpp">
-      <Filter>Game\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\material.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
@@ -836,6 +833,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\game\time.hpp">
       <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\shapes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\easing.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1199,9 +1202,6 @@
     <ClCompile Include="..\..\..\src\game\ecs.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\game\shape_factory.cpp">
-      <Filter>Game\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\game\system.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
@@ -1231,6 +1231,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\game\time.cpp">
       <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\shapes.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

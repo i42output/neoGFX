@@ -29,9 +29,9 @@ namespace neogfx::game
 {
 	struct mesh
 	{
-		std::vector<vec3> vertices;
-		std::vector<vec2> uv;
-		std::vector<face> faces;
+		vertices_t vertices;
+		vertices_2d_t uv;
+		faces_t faces;
 
 		struct meta : i_component_data::meta
 		{

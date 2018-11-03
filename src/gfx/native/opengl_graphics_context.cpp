@@ -22,7 +22,7 @@
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
-#include <neogfx/game/shape_factory.hpp>
+#include <neogfx/core/shapes.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include "../../hid/native/i_native_surface.hpp"
@@ -151,9 +151,9 @@ namespace neogfx
 			return pixel_adjust(aPen.width());
 		}
 
-		inline std::vector<xyz> line_loop_to_lines(const std::vector<xyz>& aLineLoop)
+		inline vertices_t line_loop_to_lines(const vertices_t& aLineLoop)
 		{
-			std::vector<xyz> result;
+			vertices_t result;
 			result.reserve(aLineLoop.size() * 2);
 			for (auto v = aLineLoop.begin(); v != aLineLoop.end(); ++v)
 			{
@@ -1478,7 +1478,7 @@ namespace neogfx
 
 	namespace
 	{
-		void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates, std::vector<vec2>& aResult)
+		void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates, vertices_2d_t& aResult)
 		{
 			rect normalizedRect = aTextureRect / aTextureStorageSize;
 			aResult.emplace_back(normalizedRect.top_left().x, normalizedRect.top_left().y);
@@ -1565,7 +1565,7 @@ namespace neogfx
 				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
 
 				rect outputRect = rect{ glyphTexture.texture().extents() }.with_centred_origin();
-				vec3_list outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
+				vertices_t outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
 
 				glyphOrigin += outputRect.bottom_right().to_vec3();
 

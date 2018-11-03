@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/primitives.hpp>
-#include <neogfx/game/shape_factory.hpp>
+#include <neogfx/core/shapes.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/colour.hpp>
 #include <neogfx/game/gradient.hpp>
@@ -52,12 +52,12 @@ namespace neogfx
 			};
 	}
 
-	inline game::mesh to_ecs_component(const rect& aRect, dimension aPixelAdjust = 0, mesh_type aType = mesh_type::Triangles)
+	inline game::mesh to_ecs_component(const rect& aRect, dimension aPixelAdjust = 0, mesh_type aMeshType = mesh_type::Triangles)
 	{
 		return game::mesh
 		{
 			{
-				rect_vertices(aRect, aPixelAdjust, aType)
+				rect_vertices(aRect, aPixelAdjust, aMeshType)
 			},
 			{
 				vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
@@ -68,6 +68,12 @@ namespace neogfx
 				game::face{ 3u, 4u, 5u }
 			}
 		};
+	}
+
+	inline game::mesh to_ecs_component(const vertices_t& aVertices, mesh_type aSourceMeshType = mesh_type::TriangleFan, mesh_type aDestinationMeshType = mesh_type::Triangles)
+	{
+		// todo
+		return game::mesh{};
 	}
 
 	inline game::colour to_ecs_component(const colour& aColour)

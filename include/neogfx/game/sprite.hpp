@@ -28,7 +28,7 @@ namespace neogfx::game
 {
 	struct sprite
 	{
-		std::vector<vec3> path;
+		vertices_t path;
 
 		struct meta : i_component_data::meta
 		{

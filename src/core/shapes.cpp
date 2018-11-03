@@ -19,22 +19,22 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/vecarray.hpp>
-#include <neogfx/game/shape_factory.hpp>
+#include <neogfx/core/shapes.hpp>
 
 namespace neogfx
 {
-	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos)
+	vertices_t rect_vertices(const rect& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos)
 	{
-		std::vector<xyz> result;
+		vertices_t result;
 		result.reserve(16);
 		back_insert_rect_vertices(result, aRect, aPixelAdjust, aType, aZpos);
 		return std::move(result);
 	};
 
-	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, mesh_type aType, uint32_t aArcSegments)
+	vertices_t arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, mesh_type aType, uint32_t aArcSegments)
 	{
 		bool const includeCentre = (aType == mesh_type::Triangles || aType == mesh_type::TriangleFan);
-		std::vector<xyz> result;
+		vertices_t result;
 		angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
 		uint32_t arcSegments = aArcSegments;
 		if (arcSegments == 0)
@@ -61,7 +61,7 @@ namespace neogfx
 		return result;
 	}
 
-	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments)
+	vertices_t circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments)
 	{
 		bool const includeCentre = (aType == mesh_type::Triangles || aType == mesh_type::TriangleFan);
 		auto result = arc_vertices(aCentre, aRadius, aStartAngle, aStartAngle, aType, aArcSegments);
@@ -69,10 +69,10 @@ namespace neogfx
 		return result;
 	}
 
-	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments)
+	vertices_t rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments)
 	{
 		bool const includeCentre = (aType == mesh_type::Triangles || aType == mesh_type::TriangleFan);
-		std::vector<xyz> result;
+		vertices_t result;
 		auto topLeft = arc_vertices(
 			aRect.top_left() + point{ aRadius, aRadius },
 			aRadius,

@@ -159,7 +159,9 @@
     <ClInclude Include="..\..\..\include\neogfx\core\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\property.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\shapes.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\easing.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\units_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\3rdparty\facebook\flicks.h" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
@@ -196,7 +198,6 @@
     <ClInclude Include="..\..\..\include\neogfx\game\rigid_body.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_octree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\rectangle.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\game\shape_factory.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\sprite.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\canvas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\standard_archetypes.hpp" />
@@ -411,6 +412,7 @@
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio_playback_device.cpp" />
     <ClCompile Include="..\..\..\src\core\colour.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
+    <ClCompile Include="..\..\..\src\core\shapes.cpp" />
     <ClCompile Include="..\..\..\src\core\units_context.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
@@ -422,7 +424,6 @@
     <ClCompile Include="..\..\..\src\game\renderable_entity_archetype.cpp" />
     <ClCompile Include="..\..\..\src\game\simple_physics.cpp" />
     <ClCompile Include="..\..\..\src\game\rectangle.cpp" />
-    <ClCompile Include="..\..\..\src\game\shape_factory.cpp" />
     <ClCompile Include="..\..\..\src\game\canvas.cpp" />
     <ClCompile Include="..\..\..\src\game\system.cpp" />
     <ClCompile Include="..\..\..\src\game\text_mesh.cpp" />

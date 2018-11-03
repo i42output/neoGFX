@@ -22,7 +22,6 @@
 #include <vector>
 #include <neolib/vecarray.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/game/mesh.hpp>
 
 namespace neogfx
 {
@@ -79,8 +78,8 @@ namespace neogfx
 		return aResult.insert(aResult.end(), temp.begin(), temp.end());
 	}
 
-	std::vector<xyz> rect_vertices(const rect& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos = 0.0);
-	std::vector<xyz> arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, mesh_type aType, uint32_t aArcSegments = 0);
-	std::vector<xyz> circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);
-	std::vector<xyz> rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments = 0);
+	vertices_t rect_vertices(const rect& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos = 0.0);
+	vertices_t arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, mesh_type aType, uint32_t aArcSegments = 0);
+	vertices_t circle_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);
+	vertices_t rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments = 0);
 }

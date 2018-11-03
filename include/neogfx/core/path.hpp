@@ -123,9 +123,9 @@ namespace neogfx
 		{ 
 			return iPaths; 
 		}
-		std::vector<xyz> to_vertices(const typename paths_type::value_type& aPath, coordinate_type aPixelAdjust = 0.0) const
+		vertices_t to_vertices(const typename paths_type::value_type& aPath, coordinate_type aPixelAdjust = 0.0) const
 		{
-			std::vector<xyz> result;
+			vertices_t result;
 			result.reserve((aPath.size() + 1) * (iShape == Quads ? 6 : 1));
 			if (aPath.size() > 2)
 			{

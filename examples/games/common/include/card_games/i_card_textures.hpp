@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <neogfx/game/shape.hpp>
+#include <neogfx/gfx/i_texture.hpp>
 #include <card_games/card.hpp>
 
 namespace neogames

@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/game/i_ecs.hpp>
-#include <neogfx/game/shape_factory.hpp>
+#include <neogfx/core/shapes.hpp>
 #include <card_games/card.hpp>
 #include <card_games/i_card_textures.hpp>
 
