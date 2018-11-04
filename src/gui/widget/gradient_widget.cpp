@@ -158,6 +158,16 @@ namespace neogfx
 		}
 	}
 
+	const std::optional<colour_dialog::custom_colour_list>& gradient_widget::custom_colours() const
+	{
+		return iCustomColours;
+	}
+
+	std::optional<colour_dialog::custom_colour_list>& gradient_widget::custom_colours()
+	{
+		return iCustomColours;
+	}
+
 	size_policy gradient_widget::size_policy() const
 	{
 		return neogfx::size_policy{ neogfx::size_policy::Expanding, neogfx::size_policy::Minimum };
@@ -258,7 +268,7 @@ namespace neogfx
 				auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
 				colour_dialog cd{ *this, stop.second };
 				if (iCustomColours != std::nullopt)
-					cd.custom_colours() = *iCustomColours;
+					cd.set_custom_colours(*iCustomColours);
 				if (cd.exec() == dialog_result::Accepted)
 				{
 					stop.second = cd.selected_colour();
@@ -290,8 +300,12 @@ namespace neogfx
 			moreAction->triggered([this]()
 			{
 				gradient_dialog gd{ *this, gradient() };
+				if (iCustomColours != std::nullopt)
+					gd.gradient_selector().custom_colours() = iCustomColours;
 				if (gd.exec() == dialog_result::Accepted)
 					set_gradient(gd.gradient());
+				if (gd.gradient_selector().custom_colours() != std::nullopt)
+					iCustomColours = gd.gradient_selector().custom_colours();
 			});
 			auto stopIter = stop_at(aPosition);
 			if (stopIter != neolib::none && stopIter == stop_at(*iClicked))
@@ -305,7 +319,7 @@ namespace neogfx
 						auto& stop = *iter;
 						colour_dialog cd{ *this, stop.second };
 						if (iCustomColours != std::nullopt)
-							cd.custom_colours() = *iCustomColours;
+							cd.set_custom_colours(*iCustomColours);
 						if (cd.exec() == dialog_result::Accepted)
 						{
 							stop.second = cd.selected_colour();

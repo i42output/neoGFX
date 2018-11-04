@@ -48,14 +48,14 @@ namespace neogfx
 			ChannelBlue,
 			ChannelAlpha
 		};
-		typedef std::array<colour, 24> custom_colour_list;
+		typedef std::array<optional_colour, 24> custom_colour_list;
 	private:
 		typedef neolib::variant<colour, hsv_colour> representations;
 		typedef std::optional<custom_colour_list::iterator> optional_custom_colour_list_iterator;
 		class colour_box : public framed_widget
 		{
 		public:
-			colour_box(colour_dialog& aOwner, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour = optional_custom_colour_list_iterator());
+			colour_box(colour_dialog& aOwner, const optional_colour& aColour, const optional_custom_colour_list_iterator& aCustomColour = optional_custom_colour_list_iterator());
 		public:
 			virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;
 			virtual size maximum_size(const optional_size& aAvailableSpace = optional_size()) const;
@@ -65,7 +65,7 @@ namespace neogfx
 			virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
 		private:
 			colour_dialog& iOwner;
-			colour iColour;
+			optional_colour iColour;
 			optional_custom_colour_list_iterator iCustomColour;
 		};
 		class x_picker : public framed_widget
@@ -163,7 +163,7 @@ namespace neogfx
 		hsv_colour selected_colour_as_hsv() const;
 		void select_colour(const colour& aColour);
 		const custom_colour_list& custom_colours() const;
-		custom_colour_list& custom_colours();
+		void set_custom_colours(const custom_colour_list& aCustomColours);
 	protected:
 		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 		neogfx::mouse_cursor mouse_cursor() const override;

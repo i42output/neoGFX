@@ -45,6 +45,8 @@ namespace neogfx
 	public:
 		const neogfx::gradient& gradient() const;
 		void set_gradient(const neogfx::gradient& aGradient);
+		const std::optional<colour_dialog::custom_colour_list>& custom_colours() const;
+		std::optional<colour_dialog::custom_colour_list>& custom_colours();
 	public:
 		virtual neogfx::size_policy size_policy() const;
 		virtual size minimum_size(const optional_size& aAvailableSpace = optional_size()) const;

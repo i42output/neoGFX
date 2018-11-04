@@ -703,7 +703,7 @@ int main(int argc, char* argv[])
 			}
 			auto oldColour = ng::app::instance().change_style("Keypad").palette().colour();
 			ng::colour_dialog colourPicker(window, ng::app::instance().change_style("Keypad").palette().colour());
-			colourPicker.custom_colours() = *sCustomColours;
+			colourPicker.set_custom_colours(*sCustomColours);
 			colourPicker.selection_changed([&]()
 			{
 				ng::app::instance().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
@@ -725,14 +725,10 @@ int main(int argc, char* argv[])
 		editColour.clicked([&]()
 		{
 			static std::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
-			if (sCustomColours == std::nullopt)
-			{
-				sCustomColours = ng::colour_dialog::custom_colour_list{};
-				std::fill(sCustomColours->begin(), sCustomColours->end(), ng::colour::White);
-			}
 			static ng::colour sInk = ng::app::instance().current_style().palette().text_colour();
 			ng::colour_dialog colourPicker(window, sInk);
-			colourPicker.custom_colours() = *sCustomColours;
+			if (sCustomColours != std::nullopt)
+				colourPicker.set_custom_colours(*sCustomColours);
 			if (colourPicker.exec() == ng::dialog_result::Accepted)
 			{
 				sInk = colourPicker.selected_colour();
@@ -740,7 +736,7 @@ int main(int argc, char* argv[])
 				lineEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
 				lineEditPassword.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ sInk, ng::colour::White, ng::gradient::Horizontal }, ng::colour_or_gradient{} }, true);
 			}
-			*sCustomColours = colourPicker.custom_colours();
+			sCustomColours = colourPicker.custom_colours();
 		});
 
 		ng::vertical_spacer spacer1{ layout4 };

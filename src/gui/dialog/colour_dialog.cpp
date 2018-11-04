@@ -23,26 +23,9 @@
 
 namespace neogfx
 {
-	namespace
-	{
-		void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect)
-		{
-			const dimension ALPHA_PATTERN_SIZE = 4.0;
-			for (coordinate x = 0; x < aRect.width(); x += ALPHA_PATTERN_SIZE)
-			{
-				bool alt = false;
-				if (static_cast<uint32_t>((x / ALPHA_PATTERN_SIZE)) % 2 == 1)
-					alt = !alt;
-				for (coordinate y = 0; y < aRect.height(); y += ALPHA_PATTERN_SIZE)
-				{
-					aGraphicsContext.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ ALPHA_PATTERN_SIZE, ALPHA_PATTERN_SIZE } }, alt ? colour{ 160, 160, 160 } : colour{ 255, 255, 255 });
-					alt = !alt;
-				}
-			}
-		}
-	}
+	void draw_alpha_background(graphics_context& aGraphicsContext, const rect& aRect, dimension aAlphaPatternSize = 4.0);
 
-	colour_dialog::colour_box::colour_box(colour_dialog& aOwner, const colour& aColour, const optional_custom_colour_list_iterator& aCustomColour) :
+	colour_dialog::colour_box::colour_box(colour_dialog& aOwner, const optional_colour& aColour, const optional_custom_colour_list_iterator& aCustomColour) :
 		framed_widget(frame_style::SolidFrame), iOwner(aOwner), iColour(aColour), iCustomColour(aCustomColour)
 	{
 		set_margins(neogfx::margins{});
@@ -68,11 +51,24 @@ namespace neogfx
 	void colour_dialog::colour_box::paint(graphics_context& aGraphicsContext) const
 	{
 		framed_widget::paint(aGraphicsContext);
-		aGraphicsContext.fill_rect(client_rect(false), iCustomColour == std::nullopt ? iColour : **iCustomColour);
+		const optional_colour& fillColour = (iCustomColour == std::nullopt ? iColour : **iCustomColour);
+		if (fillColour != std::nullopt)
+		{
+			if (fillColour->alpha() != 0xFF)
+				draw_alpha_background(aGraphicsContext, client_rect(false), dpi_scale(2.0));
+			aGraphicsContext.fill_rect(client_rect(false), *fillColour);
+		}
+		else
+		{
+			aGraphicsContext.fill_rect(client_rect(false), colour::White);
+			aGraphicsContext.draw_line(client_rect(false).top_left(), client_rect(false).bottom_right(), pen{ colour::Black, dpi_scale(2.0) });
+			aGraphicsContext.draw_line(client_rect(false).top_right(), client_rect(false).bottom_left(), pen{ colour::Black, dpi_scale(2.0) });
+		}
 		if (iCustomColour != std::nullopt && iOwner.current_custom_colour() == *iCustomColour)
 		{
-			aGraphicsContext.fill_circle(client_rect(false).centre(), 3, colour::White);
-			aGraphicsContext.fill_circle(client_rect(false).centre(), 2, colour::Black);
+			auto radius = client_rect(false).width() * 0.5 * 0.666;
+			aGraphicsContext.fill_circle(client_rect(false).centre(), radius, colour::White);
+			aGraphicsContext.fill_circle(client_rect(false).centre(), radius - dpi_scale(1.0), colour::Black);
 		}
 	}
 
@@ -82,12 +78,23 @@ namespace neogfx
 		if (aButton == mouse_button::Left)
 		{
 			if (iCustomColour == std::nullopt)
-				iOwner.select_colour(iColour.with_alpha(iOwner.selected_colour().alpha()));
+			{
+				if (iColour != std::nullopt)
+					iOwner.select_colour(iColour->with_alpha(iOwner.selected_colour().alpha()));
+				else
+					service<i_basic_services>::instance().system_beep();
+			}
 			else
 			{
-				iOwner.select_colour(**iCustomColour);
+				if (**iCustomColour != std::nullopt)
+					iOwner.select_colour(***iCustomColour);
 				iOwner.set_current_custom_colour(*iCustomColour);
 			}
+		}
+		else if (aButton == mouse_button::Right)
+		{
+			if (iCustomColour != std::nullopt)
+				iOwner.set_current_custom_colour(*iCustomColour);
 		}
 	}
 
@@ -817,9 +824,12 @@ namespace neogfx
 		return iCustomColours;
 	}
 
-	colour_dialog::custom_colour_list& colour_dialog::custom_colours()
+	void colour_dialog::set_custom_colours(const custom_colour_list& aCustomColours)
 	{
-		return iCustomColours;
+		iCustomColours = aCustomColours;
+		iCurrentCustomColour = std::find_if(iCustomColours.begin(), iCustomColours.end(), [](const optional_colour& aColour) { return aColour == std::nullopt; });
+		if (iCurrentCustomColour == iCustomColours.end())
+			iCurrentCustomColour = iCustomColours.begin();
 	}
 
 	void colour_dialog::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -902,7 +912,6 @@ namespace neogfx
 		for (auto const& basicColour : sBasicColours)
 			iBasicColoursGrid.add(std::make_shared<colour_box>(*this, basicColour));
 		iCustomColoursGrid.set_dimensions(2, 12);
-		std::fill(iCustomColours.begin(), iCustomColours.end(), colour::White);
 		for (auto customColour = iCustomColours.begin(); customColour != iCustomColours.end(); ++customColour)
 			iCustomColoursGrid.add(std::make_shared<colour_box>(*this, *customColour, customColour));
 		button_box().add_button(standard_button::Ok);
@@ -1005,6 +1014,8 @@ namespace neogfx
 
 	void colour_dialog::set_current_custom_colour(custom_colour_list::iterator aCustomColour)
 	{
+		if (iCurrentCustomColour == aCustomColour)
+			return;
 		iCurrentCustomColour = aCustomColour;
 		update_widgets(*this);
 		update();
