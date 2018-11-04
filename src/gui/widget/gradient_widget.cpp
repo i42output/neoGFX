@@ -20,7 +20,6 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/gfx/image.hpp>
-#include <neogfx/gui/dialog/colour_dialog.hpp>
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
 #include <neogfx/gui/widget/slider.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
@@ -258,12 +257,15 @@ namespace neogfx
 			{
 				auto& stop = *static_variant_cast<gradient::colour_stop_list::iterator>(stopIter);
 				colour_dialog cd{ *this, stop.second };
+				if (iCustomColours != std::nullopt)
+					cd.custom_colours() = *iCustomColours;
 				if (cd.exec() == dialog_result::Accepted)
 				{
 					stop.second = cd.selected_colour();
 					update();
 					gradient_changed.trigger();
 				}
+				iCustomColours = cd.custom_colours();
 			}
 			else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
 			{
@@ -302,12 +304,15 @@ namespace neogfx
 					{
 						auto& stop = *iter;
 						colour_dialog cd{ *this, stop.second };
+						if (iCustomColours != std::nullopt)
+							cd.custom_colours() = *iCustomColours;
 						if (cd.exec() == dialog_result::Accepted)
 						{
 							stop.second = cd.selected_colour();
 							update();
 							gradient_changed.trigger();
 						}
+						iCustomColours = cd.custom_colours();
 					});
 					auto splitStopAction = std::make_shared<action>("Split stop"_t);
 					splitStopAction->triggered([this, iter]()

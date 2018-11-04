@@ -24,6 +24,7 @@
 #include <neogfx/app/i_resource.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
+#include <neogfx/gui/dialog/colour_dialog.hpp>
 
 namespace neogfx
 {
@@ -80,5 +81,6 @@ namespace neogfx
 		bool iTracking;
 		std::unique_ptr<context_menu> iMenu;
 		mutable std::map<i_resource::hash_digest_type, texture> iStopTextures;
+		std::optional<colour_dialog::custom_colour_list> iCustomColours;
 	};
 }

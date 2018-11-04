@@ -1062,9 +1062,10 @@ int main(int argc, char* argv[])
 
 		neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
 		{
+			aTimer.set_duration(tabDrawing.can_update() ? 0 : 100);
 			aTimer.again();
 			tabDrawing.update();
-		}, 0 };
+		}, 100 };
 		
 		auto& tabEditor = tabContainer.add_tab_page("Editor").as_widget();
 		ng::vertical_layout layoutEditor(tabEditor);
