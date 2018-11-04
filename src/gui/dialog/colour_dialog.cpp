@@ -341,7 +341,7 @@ namespace neogfx
 		case ChannelHue:
 			{
 				auto hsv = iOwner.selected_colour_as_hsv(true);
-				hsv.set_hue((255.0 - pos.y) / 255.0 * 360.0);
+				hsv.set_hue((255.0 - pos.y) / 255.0 * 359.9);
 				return hsv;
 			}
 			break;
