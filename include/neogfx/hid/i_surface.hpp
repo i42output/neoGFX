@@ -81,8 +81,8 @@ namespace neogfx
 		virtual void set_style(surface_style aStyle) = 0;
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
-		virtual const std::pair<vec2, vec2>& logical_coordinates() const = 0;
-		virtual void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) = 0;
+		virtual const neogfx::logical_coordinates& logical_coordinates() const = 0;
+		virtual void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) = 0;
 		virtual void layout_surface() = 0;
 		virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) = 0;
 		virtual bool has_invalidated_area() const = 0;

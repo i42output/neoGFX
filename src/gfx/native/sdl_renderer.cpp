@@ -46,10 +46,12 @@ namespace neogfx
 	};
 
 	sdl_renderer::sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard) :
-		opengl_renderer(aRenderer),
-		iDoubleBuffering(aDoubleBufferedWindows),
-		iBasicServices(aBasicServices), iKeyboard(aKeyboard), iCreatingWindow(0), 
-		iContext(nullptr), iActiveContextSurface(nullptr)
+		opengl_renderer{ aRenderer },
+		iDoubleBuffering{ aDoubleBufferedWindows },
+		iBasicServices{ aBasicServices }, 
+		iKeyboard{ aKeyboard }, 
+		iCreatingWindow{ 0 },
+		iContext{ nullptr }
 	{
 		SDL_AddEventWatch(&filter_event, this);
 
@@ -87,13 +89,19 @@ namespace neogfx
 		if (iSystemCacheWindowHandle == 0)
 			throw failed_to_create_system_cache_window(SDL_GetError());
 		iContext = create_context(iSystemCacheWindowHandle);
-		SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), iContext);
-		glCheck(glewInit());
+		if (iContext != nullptr)
+		{
+			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), iContext);
+			glCheck(glewInit());
+		}
+		else
+			throw failed_to_create_opengl_context(SDL_GetError());
 	}
 
 	sdl_renderer::~sdl_renderer()
 	{
-		deactivate_context();
+		if (iContext != nullptr)
+			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), iContext);
 	}
 
 	bool sdl_renderer::double_buffering() const
@@ -101,21 +109,23 @@ namespace neogfx
 		return iDoubleBuffering;
 	}
 
-	const i_native_surface* sdl_renderer::active_context_surface() const
+	const i_render_target* sdl_renderer::active_target() const
 	{
-		return iActiveContextSurface;
+		if (iTargetStack.empty())
+			return nullptr;
+		return iTargetStack.back();
 	}
 
-	void sdl_renderer::activate_context(const i_native_surface& aSurface)
+	void sdl_renderer::activate_context(const i_render_target& aTarget)
 	{
 		if (iContext == nullptr)
-			iContext = create_context(aSurface);
+			iContext = create_context(aTarget);
 		else
 		{
-			if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(aSurface.handle()), static_cast<SDL_GLContext>(iContext)) == -1)
-				throw failed_to_activate_gl_context(SDL_GetError());
+			if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(aTarget.target_type() == render_target_type::Surface ? aTarget.target_handle() : iSystemCacheWindowHandle), static_cast<SDL_GLContext>(iContext)) == -1)
+				throw failed_to_activate_opengl_context(SDL_GetError());
 		}
-		iActiveContextSurface = &aSurface;
+		iTargetStack.push_back(&aTarget);
 		static bool initialized = false;
 		if (!initialized)
 		{
@@ -126,14 +136,16 @@ namespace neogfx
 
 	void sdl_renderer::deactivate_context()
 	{
-		iActiveContextSurface = nullptr;
-		if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), static_cast<SDL_GLContext>(iContext)) == -1)
-			throw failed_to_activate_gl_context(SDL_GetError());
+		if (iTargetStack.empty())
+			throw no_target_active();
+		iTargetStack.pop_back();
+		if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(active_target() != nullptr && active_target()->target_type() == render_target_type::Surface ? active_target()->target_handle() : iSystemCacheWindowHandle), static_cast<SDL_GLContext>(iContext)) == -1)
+			throw failed_to_activate_opengl_context(SDL_GetError());
 	}
 
-	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_native_surface& aSurface)
+	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_render_target& aTarget)
 	{
-		return create_context(aSurface.handle());
+		return create_context(aTarget.target_type() == render_target_type::Surface ? aTarget.target_handle() : iSystemCacheWindowHandle);
 	}
 
 	void sdl_renderer::destroy_context(opengl_context aContext)

@@ -25,10 +25,9 @@
 #include <neolib/string_utils.hpp>
 #include <neolib/timer.hpp>
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/texture.hpp>
 #include "../../../gfx/native/opengl.hpp"
 #include "../../../gfx/native/opengl.hpp"
-#include "../../../gfx/native/i_native_graphics_context.hpp"
-#include "../../../gfx/native/opengl_texture.hpp"
 #include "native_window.hpp"
 
 namespace neogfx
@@ -47,10 +46,17 @@ namespace neogfx
 		opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow);
 		~opengl_window();
 	public:
+		render_target_type target_type() const override;
+		const i_texture& target_texture() const override;
+		size target_extents() const override;
+	public:
 		neogfx::logical_coordinate_system logical_coordinate_system() const override;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
-		const std::pair<vec2, vec2>& logical_coordinates() const override;
-		void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) override;
+		const neogfx::logical_coordinates& logical_coordinates() const override;
+		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
+	public:
+		bool activate_target() const override;
+		bool deactivate_target() const override;
 	public:
 		uint64_t frame_counter() const override;
 		void limit_frame_rate(uint32_t aFps) override;
@@ -65,8 +71,6 @@ namespace neogfx
 		void pause() override;
 		void resume() override;
 		bool is_rendering() const override;
-		void* rendering_target_texture_handle() const override;
-		size rendering_target_texture_extents() const override;
 	public:
 		bool metrics_available() const override;
 		size extents() const override;
@@ -79,11 +83,11 @@ namespace neogfx
 	private:
 		i_surface_window& iSurfaceWindow;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
-		mutable std::pair<vec2, vec2> iLogicalCoordinates;
+		mutable neogfx::logical_coordinates iLogicalCoordinates;
 		GLuint iFrameBuffer;
-		GLuint iFrameBufferTexture;
+		mutable optional_texture iFrameBufferTexture;
 		GLuint iDepthStencilBuffer;
-		size iFrameBufferSize;
+		size iFrameBufferExtents;
 		std::optional<rect> iInvalidatedArea;
 		uint64_t iFrameCounter;
 		std::optional<uint32_t> iFrameRate;

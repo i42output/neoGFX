@@ -55,6 +55,19 @@ namespace neogfx
 		const std::string& uri() const override;
 	public:
 		std::shared_ptr<i_native_texture> native_texture() const override;
+	public:
+		render_target_type target_type() const override;
+		void* target_handle() const override;
+		const i_texture& target_texture() const override;
+		size target_extents() const override;
+	public:
+		neogfx::logical_coordinate_system logical_coordinate_system() const override;
+		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
+		const neogfx::logical_coordinates& logical_coordinates() const override;
+		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
+	public:
+		bool activate_target() const override;
+		bool deactivate_target() const override;
 	private:
 		i_texture_manager& iManager;
 		texture_id iId;
@@ -64,5 +77,7 @@ namespace neogfx
 		basic_size<uint32_t> iStorageSize;
 		GLuint iHandle;
 		std::string iUri;
+		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
+		neogfx::logical_coordinates iLogicalCoordinates;
 	};
 }

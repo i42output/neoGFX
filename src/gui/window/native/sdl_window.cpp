@@ -173,8 +173,6 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
-		aRenderingEngine.activate_context(*this);
-
 		SDL_SetWindowFullscreen(iHandle, SDL_WINDOW_FULLSCREEN);
 
 		iReady = true;
@@ -213,8 +211,6 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
-		aRenderingEngine.activate_context(*this);
-
 		iReady = true;
 	}
 
@@ -251,8 +247,6 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
-		aRenderingEngine.activate_context(*this);
-
 		iReady = true;
 	}
 
@@ -288,8 +282,6 @@ namespace neogfx
 
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-		aRenderingEngine.activate_context(*this);
 
 		SDL_SetWindowFullscreen(iHandle, SDL_WINDOW_FULLSCREEN);
 
@@ -329,8 +321,6 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
-		aRenderingEngine.activate_context(*this);
-
 		iReady = true;
 	}
 
@@ -367,14 +357,17 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
-		aRenderingEngine.activate_context(*this);
-
 		iReady = true;
 	}
 
 	sdl_window::~sdl_window()
 	{
 		close(true);
+	}
+
+	void* sdl_window::target_handle() const
+	{
+		return iHandle;
 	}
 
 	bool sdl_window::has_parent() const

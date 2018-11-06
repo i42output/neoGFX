@@ -29,6 +29,7 @@
 namespace neogfx
 {
 	class i_surface_manager;
+	class i_render_target;
 	class i_native_surface;
 	class i_native_window;
 	class i_native_graphics_context;
@@ -91,10 +92,10 @@ namespace neogfx
 		virtual neogfx::renderer renderer() const = 0;
 		virtual bool double_buffering() const = 0;
 		virtual void initialize() = 0;
-		virtual const i_native_surface* active_context_surface() const = 0;
-		virtual void activate_context(const i_native_surface& aSurface) = 0;
+		virtual const i_render_target* active_target() const = 0;
+		virtual void activate_context(const i_render_target& aTarget) = 0;
 		virtual void deactivate_context() = 0;
-		virtual opengl_context create_context(const i_native_surface& aSurface) = 0;
+		virtual opengl_context create_context(const i_render_target& aTarget) = 0;
 		virtual void destroy_context(opengl_context aContext) = 0;
 	public:
 		virtual std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle = window_style::Default) = 0;

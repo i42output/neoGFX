@@ -112,6 +112,7 @@ namespace neogfx
 		for (auto const& w : iWindows)
 			if (w->is_active())
 				return true;
+		return false;
 	}
 
 	i_window& window_manager::active_window() const

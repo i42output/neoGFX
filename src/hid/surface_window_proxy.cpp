@@ -189,12 +189,12 @@ namespace neogfx
 		native_surface().set_logical_coordinate_system(aSystem);
 	}
 
-	const std::pair<vec2, vec2>& surface_window_proxy::logical_coordinates() const
+	const neogfx::logical_coordinates& surface_window_proxy::logical_coordinates() const
 	{
 		return native_surface().logical_coordinates();
 	}
 
-	void surface_window_proxy::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates)
+	void surface_window_proxy::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
 	{
 		native_surface().set_logical_coordinates(aCoordinates);
 	}

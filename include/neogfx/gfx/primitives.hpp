@@ -36,7 +36,6 @@
 #include <neogfx/gfx/sub_texture.hpp>
 #include <neogfx/gfx/pen.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include <neogfx/gfx/primitives.hpp>
 
 namespace neogfx
 {
@@ -48,6 +47,8 @@ namespace neogfx
 	};
 
 	typedef std::optional<logical_coordinate_system> optional_logical_coordinate_system;
+
+	typedef std::pair<vec2, vec2> logical_coordinates;
 
 	enum class smoothing_mode
 	{

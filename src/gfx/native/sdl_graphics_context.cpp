@@ -23,18 +23,18 @@
 
 namespace neogfx
 {
-	sdl_graphics_context::sdl_graphics_context(const sdl_window& aRenderTarget) :
-		opengl_graphics_context(aRenderTarget), iRenderTarget(aRenderTarget)
+	sdl_graphics_context::sdl_graphics_context(const i_render_target& aTarget) :
+		opengl_graphics_context(aTarget)
 	{
 	}
 
-	sdl_graphics_context::sdl_graphics_context(const sdl_window& aRenderTarget, const i_widget& aWidget) :
-		opengl_graphics_context(aRenderTarget, aWidget), iRenderTarget(aRenderTarget)
+	sdl_graphics_context::sdl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget) :
+		opengl_graphics_context(aTarget, aWidget)
 	{
 	}
 
 	sdl_graphics_context::sdl_graphics_context(const sdl_graphics_context& aOther) :
-		opengl_graphics_context(aOther), iRenderTarget(aOther.iRenderTarget)
+		opengl_graphics_context(aOther)
 	{
 	}
 
@@ -50,7 +50,7 @@ namespace neogfx
 	rect sdl_graphics_context::rendering_area(bool aConsiderScissor) const
 	{
 		if (scissor_rect() == std::nullopt || !aConsiderScissor)
-			return rect(point(), size(static_cast<dimension>(iRenderTarget.extents().cx), static_cast<dimension>(iRenderTarget.extents().cy)));
+			return rect{ point{}, render_target().target_extents() };
 		else
 			return *scissor_rect();
 	}

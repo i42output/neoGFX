@@ -32,7 +32,9 @@ namespace neogfx
 		iSize{ aExtents },
 		iStorageSize{ size{ std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0) } },
 		iHandle{ 0 },
-		iUri{ "neogfx::opengl_texture::internal" }
+		iUri{ "neogfx::opengl_texture::internal" },
+		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
+		iLogicalCoordinates{ vec2{ 0.0, 0.0}, aExtents.to_vec2() }
 	{
 		GLint previousTexture;
 		try
@@ -251,5 +253,57 @@ namespace neogfx
 	std::shared_ptr<i_native_texture> opengl_texture::native_texture() const
 	{
 		return std::dynamic_pointer_cast<i_native_texture>(iManager.find_texture(id()));
+	}
+
+	render_target_type opengl_texture::target_type() const
+	{
+		return render_target_type::Texture;
+	}
+
+	void* opengl_texture::target_handle() const
+	{
+		return native_texture()->handle();
+	}
+
+	const i_texture& opengl_texture::target_texture() const
+	{
+		return *this;
+	}
+
+	size opengl_texture::target_extents() const
+	{
+		return extents();
+	}
+
+	neogfx::logical_coordinate_system opengl_texture::logical_coordinate_system() const
+	{
+		return iLogicalCoordinateSystem;
+	}
+
+	void opengl_texture::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+	{
+		iLogicalCoordinateSystem = aSystem;
+	}
+
+	const neogfx::logical_coordinates& opengl_texture::logical_coordinates() const
+	{
+		return iLogicalCoordinates;
+	}
+
+	void opengl_texture::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
+	{
+		iLogicalCoordinates = aCoordinates;
+	}
+
+	bool opengl_texture::activate_target() const
+	{
+		// todo
+		return false;
+	}
+
+	bool opengl_texture::deactivate_target() const
+	{
+		// todo
+		return false;
 	}
 }

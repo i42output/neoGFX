@@ -58,13 +58,14 @@ namespace neogfx
 			}
 		};
 	public:
-		opengl_graphics_context(const i_native_surface& aSurface);
-		opengl_graphics_context(const i_native_surface& aSurface, const i_widget& aWidget);
+		opengl_graphics_context(const i_render_target& aTarget);
+		opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget);
 		opengl_graphics_context(const opengl_graphics_context& aOther);
 		~opengl_graphics_context();
 	public:
 		i_rendering_engine& rendering_engine() override;
-		const i_native_surface& surface() const override;
+		const i_render_target& render_target() const override;
+		const i_render_target& render_target() override;
 		virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
 	public:
 		void enqueue(const graphics_operation::operation& aOperation) override;
@@ -72,8 +73,8 @@ namespace neogfx
 	protected:
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
-		const std::pair<vec2, vec2>& logical_coordinates() const override;
-		void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const;
+		const neogfx::logical_coordinates& logical_coordinates() const override;
+		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const;
 		void scissor_on(const rect& aRect);
 		void scissor_off();
 		const optional_rect& scissor_rect() const;
@@ -121,11 +122,11 @@ namespace neogfx
 		xyz to_shader_vertex(const point& aPoint, coordinate aZ = 0.0) const;
 	private:
 		i_rendering_engine& iRenderingEngine;
-		const i_native_surface& iSurface;
+		const i_render_target& iTarget;
 		const i_widget* iWidget;
 		graphics_operation::queue iQueue;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
-		mutable std::pair<vec2, vec2> iLogicalCoordinates;
+		mutable neogfx::logical_coordinates iLogicalCoordinates;
 		neogfx::smoothing_mode iSmoothingMode; 
 		bool iSubpixelRendering;
 		std::vector<logical_operation> iLogicalOperationStack;

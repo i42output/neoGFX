@@ -18,14 +18,16 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#ifdef _WIN32
+#include <D2d1.h>
+#endif
 #include <numeric>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include "opengl_window.hpp"
-#include "..\..\..\gfx\native\opengl_helpers.hpp"
-#ifdef _WIN32
-#include <D2d1.h>
-#endif
+#include "../../../gfx/native/opengl_helpers.hpp"
+#include "../../../gfx/native/opengl_texture.hpp"
+#include "../../../gfx/native/i_native_graphics_context.hpp"
 
 namespace neogfx
 {
@@ -44,10 +46,43 @@ namespace neogfx
 	opengl_window::~opengl_window()
 	{
 		set_destroyed();
-		if (rendering_engine().active_context_surface() == this)
+		if (rendering_engine().active_target() == this)
 			rendering_engine().deactivate_context();
 	}
 
+	render_target_type opengl_window::target_type() const
+	{
+		return render_target_type::Surface;
+	}
+
+	const i_texture& opengl_window::target_texture() const
+	{
+		if (iFrameBufferTexture == std::nullopt || iFrameBufferTexture->extents() != iFrameBufferExtents)
+		{
+			iFrameBufferTexture = std::nullopt;
+			iFrameBufferTexture.emplace(iFrameBufferExtents, 1.0, texture_sampling::Multisample);
+			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iFrameBufferTexture->native_texture()->handle()), 0));
+		}
+		return *iFrameBufferTexture;
+	}
+
+	size opengl_window::target_extents() const
+	{
+		return extents();
+	}
+	
+	bool opengl_window::activate_target() const
+	{
+		rendering_engine().activate_context(*this);
+		return true;
+	}
+
+	bool opengl_window::deactivate_target() const
+	{
+		if (rendering_engine().active_target() == this)
+			rendering_engine().deactivate_context();
+		return true;
+	}
 
 	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const
 	{
@@ -59,7 +94,7 @@ namespace neogfx
 		iLogicalCoordinateSystem = aSystem;
 	}
 
-	const std::pair<vec2, vec2>& opengl_window::logical_coordinates() const
+	const neogfx::logical_coordinates& opengl_window::logical_coordinates() const
 	{
 		switch (iLogicalCoordinateSystem)
 		{
@@ -77,7 +112,7 @@ namespace neogfx
 		return iLogicalCoordinates;
 	}
 
-	void opengl_window::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates)
+	void opengl_window::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
 	{
 		iLogicalCoordinates = aCoordinates;
 	}
@@ -173,40 +208,38 @@ namespace neogfx
 
 		surface_window().rendering.trigger();
 
-		rendering_engine().activate_context(*this);
+		activate_target();
 
 		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
 		glCheck(glEnable(GL_MULTISAMPLE));
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glEnable(GL_DEPTH_TEST));
 		glCheck(glDepthFunc(GL_LEQUAL));
-		if (iFrameBufferSize.cx < static_cast<double>(extents().cx) || iFrameBufferSize.cy < static_cast<double>(extents().cy))
+
+		if (iFrameBufferExtents.cx < static_cast<double>(extents().cx) || iFrameBufferExtents.cy < static_cast<double>(extents().cy))
 		{
-			if (iFrameBufferSize != size{})
+			if (iFrameBufferExtents != size{})
 			{
 				glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
-				glCheck(glDeleteTextures(1, &iFrameBufferTexture));
+				iFrameBufferTexture = std::nullopt;
 				glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
 			}
-			iFrameBufferSize = size(
-				iFrameBufferSize.cx < extents().cx ? extents().cx * 1.5f : iFrameBufferSize.cx,
-				iFrameBufferSize.cy < extents().cy ? extents().cy * 1.5f : iFrameBufferSize.cy);
+			iFrameBufferExtents = size{
+				iFrameBufferExtents.cx < extents().cx ? extents().cx * 1.5f : iFrameBufferExtents.cx,
+				iFrameBufferExtents.cy < extents().cy ? extents().cy * 1.5f : iFrameBufferExtents.cy }.ceil();
 			glCheck(glGenFramebuffers(1, &iFrameBuffer));
 			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
-			glCheck(glGenTextures(1, &iFrameBufferTexture));
-			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, iFrameBufferTexture));
-			glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, static_cast<GLsizei>(iFrameBufferSize.cx), static_cast<GLsizei>(iFrameBufferSize.cy), true));
-			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, iFrameBufferTexture, 0));
+			target_texture();
 			glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
-			glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(iFrameBufferSize.cx), static_cast<GLsizei>(iFrameBufferSize.cy)));
+			glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(iFrameBufferExtents.cx), static_cast<GLsizei>(iFrameBufferExtents.cy)));
 			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
 			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
 		}
 		else
 		{
 			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
-			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, iFrameBufferTexture));
+			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(target_texture().native_texture()->handle())));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 		}
 		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
@@ -235,6 +268,8 @@ namespace neogfx
 		iFpsData.push_back(1000.0 / (app::instance().program_elapsed_ms() - now));
 		if (iFpsData.size() > 25)
 			iFpsData.pop_front();		
+
+		deactivate_target();
 	}
 
 	void opengl_window::pause()
@@ -252,16 +287,6 @@ namespace neogfx
 	bool opengl_window::is_rendering() const
 	{
 		return iRendering;
-	}
-
-	void* opengl_window::rendering_target_texture_handle() const
-	{
-		return reinterpret_cast<void*>(iFrameBufferTexture);
-	}
-
-	size opengl_window::rendering_target_texture_extents() const
-	{
-		return iFrameBufferSize;
 	}
 
 	bool opengl_window::metrics_available() const
@@ -282,12 +307,13 @@ namespace neogfx
 	void opengl_window::set_destroying()
 	{
 		native_window::set_destroying();
-		if (iFrameBufferSize != size{})
+		if (iFrameBufferExtents != size{})
 		{
-			rendering_engine().activate_context(*this);
+			activate_target();
 			glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
-			glCheck(glDeleteTextures(1, &iFrameBufferTexture));
+			iFrameBufferTexture = std::nullopt;
 			glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
+			deactivate_target();
 		}
 	}
 

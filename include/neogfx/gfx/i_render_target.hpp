@@ -1,4 +1,4 @@
-// i_native_graphics_context.hpp
+// i_render_target.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -20,31 +20,32 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/path.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/gfx/graphics_operations.hpp>
-#include <neogfx/gfx/i_render_target.hpp>
+#include <neogfx/gfx/primitives.hpp>
 
 namespace neogfx
 {
-	class i_rendering_engine;
-	class i_native_surface;
+	class i_texture;
 
-	class i_native_graphics_context
+	enum class render_target_type
+	{
+		Surface,
+		Texture
+	};
+
+	class i_render_target
 	{
 	public:
-		struct texture_not_resident : std::runtime_error { texture_not_resident() : std::runtime_error("neogfx::i_native_graphics_context::texture_not_resident") {} };
+		virtual render_target_type target_type() const = 0;
+		virtual void* target_handle() const = 0;
+		virtual const i_texture& target_texture() const = 0;
+		virtual size target_extents() const = 0;
 	public:
-		virtual ~i_native_graphics_context() {}
-		virtual std::unique_ptr<i_native_graphics_context> clone() const = 0;
-	public:
-		virtual i_rendering_engine& rendering_engine() = 0;
-		virtual const i_render_target& render_target() const = 0;
-		virtual const i_render_target& render_target() = 0;
-		virtual void enqueue(const graphics_operation::operation& aOperation) = 0;
-		virtual void flush() = 0;
-	public:
+		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
+		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
 		virtual const neogfx::logical_coordinates& logical_coordinates() const = 0;
+		virtual void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) = 0;
+	public:
+		virtual bool activate_target() const = 0;
+		virtual bool deactivate_target() const = 0;
 	};
 }

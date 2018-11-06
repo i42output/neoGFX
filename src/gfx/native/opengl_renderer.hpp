@@ -96,7 +96,7 @@ namespace neogfx
 			GLuint iHandle;
 			bool iHasProjectionMatrix;
 			bool iHasTransformationMatrix;
-			std::pair<vec2, vec2> iLogicalCoordinates;
+			neogfx::logical_coordinates iLogicalCoordinates;
 			optional_mat44 iProjectionMatrix;
 			optional_mat44 iTransformationMatrix;
 			variable_map iVariables;

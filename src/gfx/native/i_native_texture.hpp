@@ -22,10 +22,11 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/i_render_target.hpp>
 
 namespace neogfx
 {
-	class i_native_texture : public i_texture
+	class i_native_texture : public i_texture, public i_render_target
 	{
 	public:
 		virtual void* handle() const = 0;

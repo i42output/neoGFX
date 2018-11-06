@@ -90,8 +90,8 @@ namespace neogfx
 		void set_layer(int32_t aLayer);
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const;
-		const std::pair<vec2, vec2>& logical_coordinates() const;
-		void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const;
+		const neogfx::logical_coordinates& logical_coordinates() const;
+		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const;
 		void set_default_font(const font& aDefaultFont) const;
 		void set_extents(const size& aExtents) const;
 		void set_origin(const point& aOrigin) const;
@@ -212,7 +212,7 @@ namespace neogfx
 		mutable point iOrigin;
 		mutable size iExtents;
 		mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
-		mutable std::pair<vec2, vec2> iLogicalCoordinates;
+		mutable neogfx::logical_coordinates iLogicalCoordinates;
 		mutable double iOpacity;
 		mutable neogfx::smoothing_mode iSmoothingMode;
 		mutable bool iSubpixelRendering;
@@ -254,14 +254,14 @@ namespace neogfx
 	{
 	public:
 		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem);
-		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const std::pair<vec2, vec2>& aCoordinates);
+		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates);
 		~scoped_coordinate_system();
 	private:
 		void apply_origin(const point& aOrigin, const size& aExtents);
 	private:
 		graphics_context& iGc;
 		logical_coordinate_system iPreviousCoordinateSystem;
-		std::pair<vec2, vec2> iPreviousCoordinates;
+		neogfx::logical_coordinates iPreviousCoordinates;
 	};
 
 	class scoped_opacity
@@ -297,7 +297,7 @@ namespace neogfx
 		graphics_context & iGc;
 	};
 
-	const std::pair<vec2, vec2>& get_logical_coordinates(const size& aSurfaceSize, logical_coordinate_system aSystem, std::pair<vec2, vec2>& aCoordinates);
+	const neogfx::logical_coordinates& to_logical_coordinates(const size& aRenderTargetExtents, logical_coordinate_system aSystem, neogfx::logical_coordinates& aCoordinates);
 
 	template <typename ValueType = double, uint32_t W = 5>
 	inline std::array<std::array<ValueType, W>, W> static_gaussian_filter(ValueType aSigma = 1.0)

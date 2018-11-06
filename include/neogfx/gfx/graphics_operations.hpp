@@ -41,7 +41,7 @@ namespace neogfx
 
 		struct set_logical_coordinates
 		{
-			std::pair<vec2, vec2> coordinates;
+			neogfx::logical_coordinates coordinates;
 		};
 
 		struct scissor_on

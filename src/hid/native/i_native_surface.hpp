@@ -24,6 +24,7 @@
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/i_render_target.hpp>
 
 namespace neogfx
 {
@@ -31,7 +32,7 @@ namespace neogfx
 	class i_native_graphics_context;
 	class i_widget;
 
-	class i_native_surface : public i_object
+	class i_native_surface : public i_object, public i_render_target
 	{
 	public:
 		struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_surface::no_parent") {} };
@@ -48,11 +49,6 @@ namespace neogfx
 		virtual void close(bool aForce = false) = 0;
 	public:
 		virtual void handle_dpi_changed() = 0;
-	public:
-		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
-		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
-		virtual const std::pair<vec2, vec2>& logical_coordinates() const = 0;
-		virtual void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) = 0;
 	public:
 		virtual bool initialising() const = 0;
 		virtual void* handle() const = 0;
@@ -75,8 +71,6 @@ namespace neogfx
 		virtual void pause() = 0;
 		virtual void resume() = 0;
 		virtual bool is_rendering() const = 0;
-		virtual void* rendering_target_texture_handle() const = 0;
-		virtual size rendering_target_texture_extents() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
 		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
 	};

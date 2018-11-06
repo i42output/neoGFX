@@ -58,8 +58,8 @@ namespace neogfx
 		neogfx::surface_type surface_type() const override;
 		neogfx::logical_coordinate_system logical_coordinate_system() const override;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
-		const std::pair<vec2, vec2>& logical_coordinates() const override;
-		void set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) override;
+		const neogfx::logical_coordinates& logical_coordinates() const override;
+		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
 		void layout_surface() override;
 		void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) override;
 		bool has_invalidated_area() const override;

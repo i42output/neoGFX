@@ -34,17 +34,19 @@ namespace neogfx
 	{
 	public:
 		struct unsupported_renderer : std::runtime_error { unsupported_renderer() : std::runtime_error("neogfx::sdl_renderer::unsupported_renderer") {} };
-		struct failed_to_activate_gl_context : std::runtime_error { failed_to_activate_gl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_activate_gl_context: " + aReason) {} };
 		struct failed_to_create_system_cache_window : std::runtime_error { failed_to_create_system_cache_window(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_create_system_cache_window: " + aReason) {} };
+		struct failed_to_create_opengl_context : std::runtime_error { failed_to_create_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_create_opengl_context: " + aReason) {} };
+		struct failed_to_activate_opengl_context : std::runtime_error { failed_to_activate_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_activate_opengl_context: " + aReason) {} };
+		struct no_target_active : std::logic_error { no_target_active() : std::logic_error("neogfx::sdl_renderer::no_target_active") {} };
 	public:
 		sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard);
 		~sdl_renderer();
 	public:
 		bool double_buffering() const override;
-		const i_native_surface* active_context_surface() const override;
-		void activate_context(const i_native_surface& aSurface) override;
+		const i_render_target* active_target() const override;
+		void activate_context(const i_render_target& aTarget) override;
 		void deactivate_context() override;
-		opengl_context create_context(const i_native_surface& aSurface) override;
+		opengl_context create_context(const i_render_target& aTarget) override;
 		void destroy_context(opengl_context aContext) override;
 		std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, const std::string& aWindowTitle, window_style aStyle) override;
 		std::unique_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, const std::string& aWindowTitle, window_style aStyle) override;
@@ -69,6 +71,6 @@ namespace neogfx
 		void* iSystemCacheWindowHandle;
 		opengl_context iContext;
 		uint32_t iCreatingWindow;
-		const i_native_surface* iActiveContextSurface;
+		std::vector<const i_render_target*> iTargetStack;
 	};
 }

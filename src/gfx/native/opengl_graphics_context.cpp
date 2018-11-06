@@ -438,41 +438,41 @@ namespace neogfx
 		};
 	}
 
-	opengl_graphics_context::opengl_graphics_context(const i_native_surface& aSurface) :
+	opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget) :
 		iRenderingEngine{ service<i_rendering_engine>::instance() },
-		iSurface{aSurface}, 
+		iTarget{aTarget}, 
 		iWidget{ nullptr },
-		iLogicalCoordinateSystem{ aSurface.logical_coordinate_system() },
-		iLogicalCoordinates{ aSurface.logical_coordinates() },
+		iLogicalCoordinateSystem{ iTarget.logical_coordinate_system() },
+		iLogicalCoordinates{ iTarget.logical_coordinates() },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
 		iClipCounter{ 0 },
 		iLineStippleActive{ false }
 	{
-		rendering_engine().activate_context(iSurface);
+		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
-	opengl_graphics_context::opengl_graphics_context(const i_native_surface& aSurface, const i_widget& aWidget) :
+	opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget) :
 		iRenderingEngine{ service<i_rendering_engine>::instance() },
-		iSurface{ aSurface },
+		iTarget{ aTarget },
 		iWidget{ &aWidget },
 		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
-		iLogicalCoordinates{ aSurface.logical_coordinates() },
+		iLogicalCoordinates{ iTarget.logical_coordinates() },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
 		iClipCounter{ 0 },
 		iLineStippleActive{ false }
 	{
-		rendering_engine().activate_context(iSurface);
+		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
 		iRenderingEngine{ aOther.iRenderingEngine },
-		iSurface{ aOther.iSurface },
+		iTarget{ aOther.iTarget },
 		iWidget{ aOther.iWidget },
 		iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
 		iLogicalCoordinates{ aOther.iLogicalCoordinates },
@@ -481,7 +481,7 @@ namespace neogfx
 		iClipCounter{ 0 },
 		iLineStippleActive{ false }
 	{
-		rendering_engine().activate_context(iSurface);
+		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(iSmoothingMode);
 	}
@@ -489,6 +489,7 @@ namespace neogfx
 	opengl_graphics_context::~opengl_graphics_context()
 	{
 		flush();
+		render_target().deactivate_target();
 	}
 
 	i_rendering_engine& opengl_graphics_context::rendering_engine()
@@ -496,9 +497,14 @@ namespace neogfx
 		return iRenderingEngine;
 	}
 
-	const i_native_surface& opengl_graphics_context::surface() const
+	const i_render_target& opengl_graphics_context::render_target() const
 	{
-		return iSurface;
+		return iTarget;
+	}
+
+	const i_render_target& opengl_graphics_context::render_target()
+	{
+		return iTarget;
 	}
 
 	neogfx::logical_coordinate_system opengl_graphics_context::logical_coordinate_system() const
@@ -511,12 +517,12 @@ namespace neogfx
 		iLogicalCoordinateSystem = aSystem;
 	}
 
-	const std::pair<vec2, vec2>& opengl_graphics_context::logical_coordinates() const
+	const neogfx::logical_coordinates& opengl_graphics_context::logical_coordinates() const
 	{
-		return get_logical_coordinates(surface().surface_size(), iLogicalCoordinateSystem, iLogicalCoordinates);
+		return to_logical_coordinates(render_target().target_extents(), iLogicalCoordinateSystem, iLogicalCoordinates);
 	}
 
-	void opengl_graphics_context::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const
+	void opengl_graphics_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
 	{
 		iLogicalCoordinates = aCoordinates;
 	}
@@ -1478,7 +1484,7 @@ namespace neogfx
 
 	namespace
 	{
-		void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const std::pair<vec2, vec2>& aLogicalCoordinates, vertices_2d_t& aResult)
+		void texture_vertices(const size& aTextureStorageSize, const rect& aTextureRect, const neogfx::logical_coordinates& aLogicalCoordinates, vertices_2d_t& aResult)
 		{
 			rect normalizedRect = aTextureRect / aTextureStorageSize;
 			aResult.emplace_back(normalizedRect.top_left().x, normalizedRect.top_left().y);
@@ -1622,7 +1628,7 @@ namespace neogfx
 		if (firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())
 		{
 			glCheck(glActiveTexture(GL_TEXTURE2));
-			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iSurface.rendering_target_texture_handle())));
+			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(render_target().target_texture().native_texture()->handle())));
 			glCheck(glActiveTexture(GL_TEXTURE1));
 		}
 
@@ -1654,7 +1660,7 @@ namespace neogfx
 
 			bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
 			shader.set_uniform_variable("guiCoordinates", guiCoordinates);
-			shader.set_uniform_variable("outputExtents", static_cast<float>(iSurface.surface_size().cx), static_cast<float>(iSurface.surface_size().cy));
+			shader.set_uniform_variable("outputExtents", static_cast<float>(render_target().target_extents().cx), static_cast<float>(render_target().target_extents().cy));
 			
 			shader.set_uniform_variable("glyphTexture", 1);
 

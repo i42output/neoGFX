@@ -220,12 +220,12 @@ namespace neogfx
 		}
 	}
 
-	const std::pair<vec2, vec2>& graphics_context::logical_coordinates() const
+	const neogfx::logical_coordinates& graphics_context::logical_coordinates() const
 	{
-		return get_logical_coordinates(surface().extents(), iLogicalCoordinateSystem, iLogicalCoordinates);
+		return to_logical_coordinates(surface().extents(), iLogicalCoordinateSystem, iLogicalCoordinates);
 	}
 
-	void graphics_context::set_logical_coordinates(const std::pair<vec2, vec2>& aCoordinates) const
+	void graphics_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
 	{
 		if (iLogicalCoordinates != aCoordinates)
 		{
@@ -1605,7 +1605,7 @@ namespace neogfx
 		apply_origin(aOrigin, aExtents);
 	}
 
-	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const std::pair<vec2, vec2>& aCoordinates) :
+	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
 		iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
 	{
 		iGc.set_logical_coordinate_system(aCoordinateSystem);
@@ -1629,19 +1629,19 @@ namespace neogfx
 			iGc.set_origin(point{ aOrigin.x, iGc.surface().extents().cy - (aOrigin.y + aExtents.cy) });
 	}
 
-	const std::pair<vec2, vec2>& get_logical_coordinates(const size& aSurfaceSize, logical_coordinate_system aSystem, std::pair<vec2, vec2>& aCoordinates)
+	const neogfx::logical_coordinates& to_logical_coordinates(const size& aRenderTargetExtents, logical_coordinate_system aSystem, neogfx::logical_coordinates& aCoordinates)
 	{
 		switch (aSystem)
 		{
 		case neogfx::logical_coordinate_system::Specified:
 			break;
 		case neogfx::logical_coordinate_system::AutomaticGui:
-			aCoordinates.first = vec2{ 0.0, aSurfaceSize.cy };
-			aCoordinates.second = vec2{ aSurfaceSize.cx, 0.0 };
+			aCoordinates.first = vec2{ 0.0, aRenderTargetExtents.cy };
+			aCoordinates.second = vec2{ aRenderTargetExtents.cx, 0.0 };
 			break;
 		case neogfx::logical_coordinate_system::AutomaticGame:
 			aCoordinates.first = vec2{ 0.0, 0.0 };
-			aCoordinates.second = vec2{ aSurfaceSize.cx, aSurfaceSize.cy };
+			aCoordinates.second = vec2{ aRenderTargetExtents.cx, aRenderTargetExtents.cy };
 			break;
 		}
 		return aCoordinates;

@@ -25,19 +25,17 @@
 namespace neogfx
 {
 	class i_rendering_engine;
-	class sdl_window;
 
+	// todo: possibly remove this class as it doesn't do anything since introduction of i_render_target.
 	class sdl_graphics_context : public opengl_graphics_context
 	{
 	public:
-		sdl_graphics_context(const sdl_window& aRenderTarget);
-		sdl_graphics_context(const sdl_window& aRenderTarget, const i_widget& aWidget);
+		sdl_graphics_context(const i_render_target& aTarget);
+		sdl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget);
 		sdl_graphics_context(const sdl_graphics_context& aOther);
 		virtual std::unique_ptr<i_native_graphics_context> clone() const;
 		~sdl_graphics_context();
 	public:
 		virtual rect rendering_area(bool aConsiderScissor = true) const;
-	private:
-		const sdl_window& iRenderTarget;
 	};
 }
