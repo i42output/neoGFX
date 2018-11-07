@@ -31,7 +31,7 @@
 #endif
 #include <optional>
 #include <neogfx/core/primitives.hpp>
-#include <neogfx/core/path.hpp>
+#include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
 #include <neogfx/gfx/pen.hpp>

@@ -1030,7 +1030,8 @@ int main(int argc, char* argv[])
 		easingDropDown.selection_model().set_current_index(ng::item_model_index{ 0 });
 		easingDropDown.accept_selection();
 		ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
-		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw](ng::graphics_context& aGc)
+		ng::texture tex{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample };
+		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw, &tex](ng::graphics_context& aGc)
 		{
 			ng::service<ng::i_rendering_engine>::instance().want_game_mode();
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
@@ -1054,6 +1055,14 @@ int main(int argc, char* argv[])
 			auto x = ng::ease(easingItemModel.item(easingDropDown.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
 //			auto x = ng::ease(ng::easing_class::Linear, ng::easing_class::Bounce, int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
 			aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
+
+			{
+				/*ng::graphics_context texGc{ tex };
+				texGc.draw_line(ng::point{ 0.0, 0.0 }, ng::point{ 64.0, 64.0 }, ng::pen{ ng::colour::Blue.with_alpha(0x80), aGc.dpi_scale(4.0) });
+				texGc.draw_line(ng::point{ 64.0, 0.0 }, ng::point{ 0.0, 64.0 }, ng::pen{ ng::colour::Blue.with_alpha(0x80), aGc.dpi_scale(4.0) });
+				texGc.draw_multiline_text(ng::point{ 0.0, 0.0 }, "Render To\nTexture", tabDrawing.font(), ng::text_appearance{ ng::colour::Blue.with_alpha(0x80), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White } }); */
+			}
+			aGc.draw_texture(ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, tex);
 		});
 
 		neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)

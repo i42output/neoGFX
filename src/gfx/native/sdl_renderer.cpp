@@ -118,13 +118,14 @@ namespace neogfx
 
 	void sdl_renderer::activate_context(const i_render_target& aTarget)
 	{
+		if (active_target() != nullptr && active_target() != &aTarget)
+			vertex_arrays().execute();
+
 		if (iContext == nullptr)
 			iContext = create_context(aTarget);
 		else
-		{
-			if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(aTarget.target_type() == render_target_type::Surface ? aTarget.target_handle() : iSystemCacheWindowHandle), static_cast<SDL_GLContext>(iContext)) == -1)
-				throw failed_to_activate_opengl_context(SDL_GetError());
-		}
+			activate_current_target();
+
 		iTargetStack.push_back(&aTarget);
 		static bool initialized = false;
 		if (!initialized)
@@ -136,11 +137,13 @@ namespace neogfx
 
 	void sdl_renderer::deactivate_context()
 	{
+		vertex_arrays().execute();
+
 		if (iTargetStack.empty())
 			throw no_target_active();
 		iTargetStack.pop_back();
-		if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(active_target() != nullptr && active_target()->target_type() == render_target_type::Surface ? active_target()->target_handle() : iSystemCacheWindowHandle), static_cast<SDL_GLContext>(iContext)) == -1)
-			throw failed_to_activate_opengl_context(SDL_GetError());
+
+		activate_current_target();
 	}
 
 	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_render_target& aTarget)
@@ -239,6 +242,12 @@ namespace neogfx
 	sdl_renderer::opengl_context sdl_renderer::create_context(void* aNativeSurfaceHandle)
 	{
 		return SDL_GL_CreateContext(static_cast<SDL_Window*>(aNativeSurfaceHandle));
+	}
+
+	void sdl_renderer::activate_current_target()
+	{
+		if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(active_target() != nullptr && active_target()->target_type() == render_target_type::Surface ? active_target()->target_handle() : iSystemCacheWindowHandle), static_cast<SDL_GLContext>(iContext)) == -1)
+			throw failed_to_activate_opengl_context(SDL_GetError());
 	}
 
 	int sdl_renderer::filter_event(void* aSelf, SDL_Event* aEvent)

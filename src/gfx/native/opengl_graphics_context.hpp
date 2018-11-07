@@ -20,11 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include "opengl.hpp"
 #include "opengl_error.hpp"
-#include "i_native_graphics_context.hpp"
 #include "opengl_helpers.hpp"
 
 namespace neogfx
@@ -32,7 +32,7 @@ namespace neogfx
 	class i_rendering_engine;
 	class i_widget;
 
-	class opengl_graphics_context : public i_native_graphics_context
+	class opengl_graphics_context : public i_graphics_context
 	{
 	private:
 		class scoped_anti_alias
@@ -63,10 +63,12 @@ namespace neogfx
 		opengl_graphics_context(const opengl_graphics_context& aOther);
 		~opengl_graphics_context();
 	public:
+		std::unique_ptr<i_graphics_context> clone() const override;
+	public:
 		i_rendering_engine& rendering_engine() override;
 		const i_render_target& render_target() const override;
 		const i_render_target& render_target() override;
-		virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
+		rect rendering_area(bool aConsiderScissor = true) const;
 	public:
 		void enqueue(const graphics_operation::operation& aOperation) override;
 		void flush() override;

@@ -28,7 +28,7 @@
 #include <neogfx/game/entity.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
-#include <neogfx/core/shapes.hpp>
+#include <neogfx/gfx/shapes.hpp>
 
 namespace neogfx::game
 {

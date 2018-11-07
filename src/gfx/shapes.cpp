@@ -1,4 +1,4 @@
-// shape_factory.cpp
+// shapes.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/vecarray.hpp>
-#include <neogfx/core/shapes.hpp>
+#include <neogfx/gfx/shapes.hpp>
 
 namespace neogfx
 {

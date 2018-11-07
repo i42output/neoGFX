@@ -24,10 +24,10 @@
 #include <numeric>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include "opengl_window.hpp"
 #include "../../../gfx/native/opengl_helpers.hpp"
 #include "../../../gfx/native/opengl_texture.hpp"
-#include "../../../gfx/native/i_native_graphics_context.hpp"
 
 namespace neogfx
 {
@@ -70,18 +70,21 @@ namespace neogfx
 	{
 		return extents();
 	}
-	
+
 	bool opengl_window::activate_target() const
 	{
-		rendering_engine().activate_context(*this);
+		service<i_rendering_engine>::instance().activate_context(*this);
 		return true;
 	}
 
 	bool opengl_window::deactivate_target() const
 	{
 		if (rendering_engine().active_target() == this)
+		{
 			rendering_engine().deactivate_context();
-		return true;
+			return true;
+		}
+		return false;
 	}
 
 	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const
@@ -210,7 +213,6 @@ namespace neogfx
 
 		activate_target();
 
-		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
 		glCheck(glEnable(GL_MULTISAMPLE));
 		glCheck(glEnable(GL_BLEND));
 		glCheck(glEnable(GL_DEPTH_TEST));
@@ -245,8 +247,9 @@ namespace neogfx
 		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
-			throw failed_to_create_framebuffer(status);
+			throw failed_to_create_framebuffer(glErrorString(status));
 		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
+		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 

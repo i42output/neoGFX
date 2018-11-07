@@ -23,7 +23,7 @@
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/entity.hpp>
 #include <neogfx/game/renderable_entity_archetype.hpp>
-#include <neogfx/core/shapes.hpp>
+#include <neogfx/gfx/shapes.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/font.hpp>
 

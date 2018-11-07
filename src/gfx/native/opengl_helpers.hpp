@@ -21,8 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include "opengl.hpp"
-#include "i_native_graphics_context.hpp"
 
 namespace neogfx
 {
@@ -336,11 +336,11 @@ namespace neogfx
 			iVertices.reserve(16384);
 		}
 	public:
-		void instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
+		void instantiate(i_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
 		{
 			do_instantiate(aGraphicsContext, aShaderProgram, false);
 		}
-		void instantiate_with_texture_coords(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
+		void instantiate_with_texture_coords(i_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram)
 		{
 			do_instantiate(aGraphicsContext, aShaderProgram, true);
 		}
@@ -356,7 +356,7 @@ namespace neogfx
 			return iVertices.capacity();
 		}
 	private:
-		void do_instantiate(i_native_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram, bool aWithTextureCoords)
+		void do_instantiate(i_graphics_context& aGraphicsContext, i_rendering_engine::i_shader_program& aShaderProgram, bool aWithTextureCoords)
 		{
 			if (iInstance.get() == nullptr || iInstance->capacity() != iVertices.capacity() || iShaderProgram != &aShaderProgram || iInstance->has_texture_coords() != aWithTextureCoords)
 			{
@@ -380,7 +380,7 @@ namespace neogfx
 	class use_shader_program
 	{
 	public:
-		use_shader_program(i_native_graphics_context& aGraphicsContext, i_rendering_engine& aRenderingEngine, i_rendering_engine::i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) :
+		use_shader_program(i_graphics_context& aGraphicsContext, i_rendering_engine& aRenderingEngine, i_rendering_engine::i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) :
 			iGraphicsContext{ aGraphicsContext },
 			iRenderingEngine{ aRenderingEngine },
 			iPreviousProgram{ aRenderingEngine.shader_program_active() ? &aRenderingEngine.active_shader_program() : nullptr }
@@ -393,7 +393,7 @@ namespace neogfx
 				iRenderingEngine.activate_shader_program(iGraphicsContext, *iPreviousProgram, iPreviousProgram->projection_matrix(), iPreviousProgram->transformation_matrix());
 		}
 	private:
-		i_native_graphics_context& iGraphicsContext;
+		i_graphics_context& iGraphicsContext;
 		i_rendering_engine& iRenderingEngine;
 		i_rendering_engine::i_shader_program* iPreviousProgram;
 	};

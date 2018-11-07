@@ -1,4 +1,4 @@
-// i_native_graphics_context.hpp
+// i_graphics_context.hpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -21,23 +21,21 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/path.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/graphics_operations.hpp>
 #include <neogfx/gfx/i_render_target.hpp>
 
 namespace neogfx
 {
 	class i_rendering_engine;
-	class i_native_surface;
 
-	class i_native_graphics_context
+	class i_graphics_context
 	{
 	public:
-		struct texture_not_resident : std::runtime_error { texture_not_resident() : std::runtime_error("neogfx::i_native_graphics_context::texture_not_resident") {} };
+		struct texture_not_resident : std::runtime_error { texture_not_resident() : std::runtime_error("neogfx::i_graphics_context::texture_not_resident") {} };
 	public:
-		virtual ~i_native_graphics_context() {}
-		virtual std::unique_ptr<i_native_graphics_context> clone() const = 0;
+		virtual ~i_graphics_context() {}
+		virtual std::unique_ptr<i_graphics_context> clone() const = 0;
 	public:
 		virtual i_rendering_engine& rendering_engine() = 0;
 		virtual const i_render_target& render_target() const = 0;

@@ -26,7 +26,7 @@
 #include <neolib/string_utf.hpp>
 #include <neogfx/app/app.hpp>
 #include "../../../gfx/native/opengl.hpp"
-#include "../../../gfx/native/sdl_graphics_context.hpp"
+#include "../../../gfx/native/opengl_graphics_context.hpp"
 #include "../../../hid/native/sdl_keyboard.hpp"
 #include "../../../hid/native/sdl_mouse.hpp"
 #include "sdl_window.hpp"
@@ -453,14 +453,14 @@ namespace neogfx
 		return visible() && opengl_window::can_render();
 	}
 
-	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context() const
+	std::unique_ptr<i_graphics_context> sdl_window::create_graphics_context() const
 	{
-		return std::unique_ptr<i_native_graphics_context>(new sdl_graphics_context(*this));
+		return std::unique_ptr<i_graphics_context>(new opengl_graphics_context(*this));
 	}
 
-	std::unique_ptr<i_native_graphics_context> sdl_window::create_graphics_context(const i_widget& aWidget) const
+	std::unique_ptr<i_graphics_context> sdl_window::create_graphics_context(const i_widget& aWidget) const
 	{
-		return std::unique_ptr<i_native_graphics_context>(new sdl_graphics_context(*this, aWidget));
+		return std::unique_ptr<i_graphics_context>(new opengl_graphics_context(*this, aWidget));
 	}
 
 	void sdl_window::close(bool aForce)

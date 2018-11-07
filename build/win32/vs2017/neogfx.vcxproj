@@ -156,10 +156,8 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_units_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\property.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\shapes.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\easing.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\units_context.hpp" />
@@ -210,6 +208,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_operations.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\image.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_graphics_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_engine.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_render_target.hpp" />
@@ -217,8 +216,10 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_atlas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\rect_pack.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\shapes.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture_atlas.hpp" />
@@ -352,7 +353,6 @@
     <ClInclude Include="..\..\..\src\audio\native\sdl_audio.hpp" />
     <ClInclude Include="..\..\..\src\audio\native\sdl_audio_device.hpp" />
     <ClInclude Include="..\..\..\src\audio\native\sdl_audio_playback_device.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\i_native_graphics_context.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\i_native_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp" />
@@ -361,7 +361,6 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\sdl_graphics_context.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\sdl_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font_face.hpp" />
@@ -413,7 +412,6 @@
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio_playback_device.cpp" />
     <ClCompile Include="..\..\..\src\core\colour.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
-    <ClCompile Include="..\..\..\src\core\shapes.cpp" />
     <ClCompile Include="..\..\..\src\core\units_context.cpp" />
     <ClCompile Include="..\..\..\src\core\hsl_colour.cpp" />
     <ClCompile Include="..\..\..\src\core\hsv_colour.cpp" />
@@ -437,9 +435,9 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\sdl_graphics_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\shapes.cpp" />
     <ClCompile Include="..\..\..\src\gfx\sub_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture_atlas.cpp" />
@@ -540,7 +538,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)/GeneratedFiles/icons.nrc.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)/GeneratedFiles/icons.nrc.cpp</Outputs>
     </CustomBuild>
-    <None Include="..\..\..\include\neogfx\core\path.inl" />
+    <None Include="..\..\..\include\neogfx\gfx\path.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl" />
     <None Include="..\..\..\include\neogfx\gui\widget\spin_box.inl" />
     <CustomBuild Include="..\..\..\src\resources.nrc">

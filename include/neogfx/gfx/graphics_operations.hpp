@@ -23,8 +23,8 @@
 #include <vector>
 #include <neolib/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/core/path.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/primitives.hpp>
+#include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/game/mesh.hpp>
@@ -41,7 +41,7 @@ namespace neogfx
 
 		struct set_logical_coordinates
 		{
-			neogfx::logical_coordinates coordinates;
+			logical_coordinates coordinates;
 		};
 
 		struct scissor_on

@@ -114,7 +114,7 @@ namespace neogfx
 		return iProjectionMatrix;
 	}
 
-	void opengl_renderer::shader_program::set_projection_matrix(const i_native_graphics_context& aGraphicsContext, const optional_mat44& aProjectionMatrix)
+	void opengl_renderer::shader_program::set_projection_matrix(const i_graphics_context& aGraphicsContext, const optional_mat44& aProjectionMatrix)
 	{
 		if (aProjectionMatrix == std::nullopt)
 		{
@@ -151,7 +151,7 @@ namespace neogfx
 		return iTransformationMatrix;
 	}
 
-	void opengl_renderer::shader_program::set_transformation_matrix(const i_native_graphics_context& aGraphicsContext, const optional_mat44& aTransformationMatrix)
+	void opengl_renderer::shader_program::set_transformation_matrix(const i_graphics_context& aGraphicsContext, const optional_mat44& aTransformationMatrix)
 	{
 		if (aTransformationMatrix == std::nullopt)
 		{
@@ -794,7 +794,7 @@ namespace neogfx
 		return iActiveProgram != iShaderPrograms.end();
 	}
 
-	void opengl_renderer::activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix, const optional_mat44& aTransformationMatrix)
+	void opengl_renderer::activate_shader_program(i_graphics_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix, const optional_mat44& aTransformationMatrix)
 	{
 		for (auto i = iShaderPrograms.begin(); i != iShaderPrograms.end(); ++i)
 			if (&*i == &aProgram)

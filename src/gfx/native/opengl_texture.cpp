@@ -19,7 +19,10 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include "opengl_error.hpp"
+#include "opengl_helpers.hpp"
+#include "opengl_graphics_context.hpp"
 #include "opengl_texture.hpp"
 
 namespace neogfx
@@ -250,6 +253,36 @@ namespace neogfx
 		return iUri;
 	}
 
+	dimension opengl_texture::horizontal_dpi() const
+	{
+		return dpi_scale_factor() * 96.0;
+	}
+
+	dimension opengl_texture::vertical_dpi() const
+	{
+		return dpi_scale_factor() * 96.0;
+	}
+
+	dimension opengl_texture::ppi() const
+	{
+		return size{ horizontal_dpi(), vertical_dpi() }.magnitude() / std::sqrt(2.0);
+	}
+
+	bool opengl_texture::metrics_available() const
+	{
+		return true;
+	}
+
+	dimension opengl_texture::em_size() const
+	{
+		return 0.0;
+	}
+
+	std::unique_ptr<i_graphics_context> opengl_texture::create_graphics_context() const
+	{
+		return std::unique_ptr<i_graphics_context>(new opengl_graphics_context(*this));
+	}
+
 	std::shared_ptr<i_native_texture> opengl_texture::native_texture() const
 	{
 		return std::dynamic_pointer_cast<i_native_texture>(iManager.find_texture(id()));
@@ -297,13 +330,43 @@ namespace neogfx
 
 	bool opengl_texture::activate_target() const
 	{
-		// todo
-		return false;
+		bool alreadyActive = (service<i_rendering_engine>::instance().active_target() == this);
+		service<i_rendering_engine>::instance().activate_context(*this);
+		if (!alreadyActive)
+		{
+			glCheck(glEnable(GL_MULTISAMPLE));
+			glCheck(glEnable(GL_BLEND));
+			glCheck(glEnable(GL_DEPTH_TEST));
+			glCheck(glDepthFunc(GL_LEQUAL));
+			glCheck(glGenFramebuffers(1, &iFrameBuffer));
+			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
+			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(native_texture()->handle()), 0));
+			glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
+			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
+			glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
+			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
+			glCheck(glClear(GL_DEPTH_BUFFER_BIT));
+			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
+				throw failed_to_create_framebuffer(glErrorString(status));
+			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
+			glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+			GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+			glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
+		}
+		return true;
 	}
 
 	bool opengl_texture::deactivate_target() const
 	{
-		// todo
+		if (service<i_rendering_engine>::instance().active_target() == this)
+		{
+			glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
+			glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
+			service<i_rendering_engine>::instance().deactivate_context();
+			return true;
+		}
 		return false;
 	}
 }

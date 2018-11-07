@@ -31,12 +31,13 @@
 #endif
 #include <optional>
 #include <neogfx/core/primitives.hpp>
-#include <neogfx/core/path.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
+#include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/pen.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/primitives.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
@@ -46,8 +47,9 @@ namespace neogfx
 	class i_surface;
 	class i_texture;
 	class i_widget;
-	class i_native_graphics_context;
+	class i_render_target;
 
+	// todo: derive from i_graphics_context
 	class graphics_context : public i_device_metrics, public i_units_context
 	{
 		// types
@@ -69,10 +71,11 @@ namespace neogfx
 		graphics_context(const i_surface& aSurface, type aType = type::Attached);
 		graphics_context(const i_surface& aSurface, const font& aDefaultFont, type aType = type::Attached);
 		graphics_context(const i_widget& aWidget, type aType = type::Attached);
+		graphics_context(const i_texture& aTexture, type aType = type::Attached);
 		graphics_context(const graphics_context& aOther);
 		virtual ~graphics_context();
 	public:
-		const i_surface& surface() const;
+		const i_render_target& render_target() const;
 		// operations
 	public:
 		delta to_device_units(const delta& aValue) const;
@@ -195,7 +198,7 @@ namespace neogfx
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
 	protected:
-		i_native_graphics_context& native_context() const;
+		i_graphics_context& native_context() const;
 		// helpers
 	protected:
 		static i_native_font_face& to_native_font_face(const font& aFont);
@@ -205,8 +208,8 @@ namespace neogfx
 		glyph_text to_glyph_text_impl(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
 		// attributes
 	private:
-		const i_surface& iSurface;
-		std::unique_ptr<i_native_graphics_context> iNativeGraphicsContext;
+		const i_render_target& iRenderTarget;
+		std::unique_ptr<i_graphics_context> iNativeGraphicsContext;
 		units_context iUnitsContext;
 		mutable font iDefaultFont;
 		mutable point iOrigin;

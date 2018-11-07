@@ -41,10 +41,11 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
-#include "native/i_native_graphics_context.hpp"
+#include "native/i_native_texture.hpp"
 #include "text/native/native_font_face.hpp"
 #include "../hid/native/i_native_surface.hpp"
 
@@ -69,55 +70,71 @@ namespace neogfx
 	};
 
 	graphics_context::graphics_context(const i_surface& aSurface, type aType) :
-		iSurface{ aSurface },
+		iRenderTarget{ aSurface.native_surface() },
 		iNativeGraphicsContext{ aType == type::Attached ? aSurface.native_surface().create_graphics_context() : nullptr },
 		iUnitsContext{ *this },
 		iDefaultFont{},
 		iOrigin{ 0.0, 0.0 },
 		iExtents{ aSurface.extents() },
-		iLogicalCoordinateSystem{ iSurface.logical_coordinate_system() },
-		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
+		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
 
 	graphics_context::graphics_context(const i_surface& aSurface, const font& aDefaultFont, type aType) :
-		iSurface{ aSurface },
+		iRenderTarget{ aSurface.native_surface() },
 		iNativeGraphicsContext{ aType == type::Attached ? aSurface.native_surface().create_graphics_context() : nullptr },
 		iUnitsContext{ *this },
 		iDefaultFont{ aDefaultFont },
 		iOrigin{ 0.0, 0.0 },
 		iExtents{ aSurface.extents() },
-		iLogicalCoordinateSystem{ iSurface.logical_coordinate_system() },
-		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
+		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
 
 	graphics_context::graphics_context(const i_widget& aWidget, type aType) :
-		iSurface{ aWidget.surface() },
+		iRenderTarget{ aWidget.surface().native_surface() },
 		iNativeGraphicsContext{ aType == type::Attached ? aWidget.surface().native_surface().create_graphics_context(aWidget) : nullptr },
 		iUnitsContext{ *this },
 		iDefaultFont{ aWidget.font() },
 		iOrigin{ aWidget.origin() },
 		iExtents{ aWidget.extents() },
 		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
-		iLogicalCoordinates{ iSurface.logical_coordinates() },
+		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
+		iGlyphTextData{ std::make_unique<glyph_text_data>() }
+	{
+	}
+
+	graphics_context::graphics_context(const i_texture& aTexture, type aType) :
+		iRenderTarget{ *aTexture.native_texture() },
+		iNativeGraphicsContext{ aType == type::Attached ? aTexture.native_texture()->create_graphics_context() : nullptr },
+		iUnitsContext{ *this },
+		iDefaultFont{ font() },
+		iOrigin{ point{} },
+		iExtents{ aTexture.extents() },
+		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
+		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
+		iOpacity{ 1.0 },
+		iSmoothingMode{ neogfx::smoothing_mode::None },
+		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
 
 	graphics_context::graphics_context(const graphics_context& aOther) :
-		iSurface{ aOther.iSurface },
+		iRenderTarget{ aOther.iRenderTarget },
 		iNativeGraphicsContext{ aOther.iNativeGraphicsContext != nullptr ? aOther.native_context().clone() : nullptr },
 		iUnitsContext{ *this },
 		iDefaultFont{ aOther.iDefaultFont },
@@ -127,7 +144,7 @@ namespace neogfx
 		iLogicalCoordinates{ aOther.logical_coordinates() },
 		iOpacity{ 1.0 },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ iSurface.rendering_engine().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
@@ -136,9 +153,9 @@ namespace neogfx
 	{
 	}
 
-	const i_surface& graphics_context::surface() const
+	const i_render_target& graphics_context::render_target() const
 	{
-		return iSurface;
+		return iRenderTarget;
 	}
 
 	delta graphics_context::to_device_units(const delta& aValue) const
@@ -222,7 +239,7 @@ namespace neogfx
 
 	const neogfx::logical_coordinates& graphics_context::logical_coordinates() const
 	{
-		return to_logical_coordinates(surface().extents(), iLogicalCoordinateSystem, iLogicalCoordinates);
+		return to_logical_coordinates(iRenderTarget.extents(), iLogicalCoordinateSystem, iLogicalCoordinates);
 	}
 
 	void graphics_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
@@ -647,17 +664,17 @@ namespace neogfx
 
 	dimension graphics_context::horizontal_dpi() const
 	{
-		return iSurface.horizontal_dpi();
+		return iRenderTarget.horizontal_dpi();
 	}
 
 	dimension graphics_context::vertical_dpi() const
 	{
-		return iSurface.vertical_dpi();
+		return iRenderTarget.vertical_dpi();
 	}
 
 	dimension graphics_context::ppi() const
 	{
-		return iSurface.ppi();
+		return iRenderTarget.ppi();
 	}
 
 	dimension graphics_context::em_size() const
@@ -695,7 +712,7 @@ namespace neogfx
 		return iUnitsContext.set_units(aUnits);
 	}
 
-	i_native_graphics_context& graphics_context::native_context() const
+	i_graphics_context& graphics_context::native_context() const
 	{
 		if (iNativeGraphicsContext != nullptr)
 			return *iNativeGraphicsContext;
@@ -815,7 +832,7 @@ namespace neogfx
 
 	void graphics_context::clear(const colour& aColour) const
 	{
-		if (origin() == point{} && extents() == iSurface.extents())
+		if (origin() == point{} && extents() == iRenderTarget.extents())
 			native_context().enqueue(graphics_operation::clear{ aColour });
 		else
 			fill_rect(rect{ point{}, extents() }, aColour);
@@ -1093,7 +1110,7 @@ namespace neogfx
 			{
 				for (uint32_t i = 0; i < glyph_count(); ++i)
 				{
-					auto tc = get_text_category(iParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
+					auto tc = get_text_category(service<i_font_manager>::instance().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
 					if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
 						return true;
 				}
@@ -1137,7 +1154,7 @@ namespace neogfx
 			for (uint32_t i = 0; i < g->glyph_count();)
 			{
 				const auto& gi = g->glyph_info(i);
-				auto tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
+				auto tc = get_text_category(service<i_font_manager>::instance().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
 				if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
 					iResults.push_back(std::make_pair(g, i++));
  				else
@@ -1167,7 +1184,7 @@ namespace neogfx
 							}
 							else
 							{
-								tc = get_text_category(aParent.surface().rendering_engine().font_manager().emoji_atlas(), std::get<0>(aGlyphRun) + fallbackGlyphs.glyph_info(j).cluster, std::get<1>(aGlyphRun));
+								tc = get_text_category(service<i_font_manager>::instance().emoji_atlas(), std::get<0>(aGlyphRun) + fallbackGlyphs.glyph_info(j).cluster, std::get<1>(aGlyphRun));
 								if (tc != text_category::Whitespace && tc != text_category::Emoji)
 									break;
 								else
@@ -1248,7 +1265,7 @@ namespace neogfx
 
 		auto& runs = iGlyphTextData->iRuns;
 		runs.clear();
-		auto const& emojiAtlas = surface().rendering_engine().font_manager().emoji_atlas();
+		auto const& emojiAtlas = service<i_font_manager>::instance().emoji_atlas();
 		text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
 		if (iMnemonic != std::nullopt && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
 			previousCategory = text_category::Mnemonic;
@@ -1546,7 +1563,7 @@ namespace neogfx
 					{
 						// probable variant selector fubar'd by harfbuzz
 						auto s = emojiResult.back().source();
-						if (s.second < codePointCount && get_text_category(surface().rendering_engine().font_manager().emoji_atlas(), aTextBegin[s.second]) == text_category::Control)
+						if (s.second < codePointCount && get_text_category(service<i_font_manager>::instance().emoji_atlas(), aTextBegin[s.second]) == text_category::Control)
 						{
 							++s.first;
 							++s.second;
@@ -1569,15 +1586,15 @@ namespace neogfx
 							absorbNext = true;
 							break;
 						}
-						else if (surface().rendering_engine().font_manager().emoji_atlas().is_emoji(sequence + ch))
+						else if (service<i_font_manager>::instance().emoji_atlas().is_emoji(sequence + ch))
 							sequence += ch;
 						else
 							break;
 					}
-					if (sequence.size() > 1 && surface().rendering_engine().font_manager().emoji_atlas().is_emoji(sequence))
+					if (sequence.size() > 1 && service<i_font_manager>::instance().emoji_atlas().is_emoji(sequence))
 					{
 						auto g = *i;
-						g.set_value(surface().rendering_engine().font_manager().emoji_atlas().emoji(sequence, aFontSelector(cluster).height()));
+						g.set_value(service<i_font_manager>::instance().emoji_atlas().emoji(sequence, aFontSelector(cluster).height()));
 						g.set_source(glyph::source_type{ g.source().first, g.source().first + sequence.size() });
 						emojiResult.push_back(g);
 						i = j - 1;
@@ -1626,7 +1643,7 @@ namespace neogfx
 		if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
 			iGc.set_origin(aOrigin);
 		else if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
-			iGc.set_origin(point{ aOrigin.x, iGc.surface().extents().cy - (aOrigin.y + aExtents.cy) });
+			iGc.set_origin(point{ aOrigin.x, iGc.render_target().extents().cy - (aOrigin.y + aExtents.cy) });
 	}
 
 	const neogfx::logical_coordinates& to_logical_coordinates(const size& aRenderTargetExtents, logical_coordinate_system aSystem, neogfx::logical_coordinates& aCoordinates)

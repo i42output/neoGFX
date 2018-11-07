@@ -22,7 +22,7 @@
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
-#include <neogfx/core/shapes.hpp>
+#include <neogfx/gfx/shapes.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include "../../hid/native/i_native_surface.hpp"
@@ -492,6 +492,11 @@ namespace neogfx
 		render_target().deactivate_target();
 	}
 
+	std::unique_ptr<i_graphics_context> opengl_graphics_context::clone() const
+	{
+		return std::unique_ptr<i_graphics_context>(new opengl_graphics_context(*this));
+	}
+
 	i_rendering_engine& opengl_graphics_context::rendering_engine()
 	{
 		return iRenderingEngine;
@@ -505,6 +510,14 @@ namespace neogfx
 	const i_render_target& opengl_graphics_context::render_target()
 	{
 		return iTarget;
+	}
+
+	rect opengl_graphics_context::rendering_area(bool aConsiderScissor) const
+	{
+		if (scissor_rect() == std::nullopt || !aConsiderScissor)
+			return rect{ point{}, render_target().target_extents() };
+		else
+			return *scissor_rect();
 	}
 
 	neogfx::logical_coordinate_system opengl_graphics_context::logical_coordinate_system() const
@@ -541,6 +554,14 @@ namespace neogfx
 	{
 		if (iQueue.first.empty())
 			return;
+
+		bool activatedTarget = false;
+		if (rendering_engine().active_target() != &render_target())
+		{
+			render_target().activate_target();
+			activatedTarget = true;
+		}
+
 		iQueue.second.push_back(iQueue.first.size());
 		auto endIndex = std::prev(iQueue.second.end());
 		for (auto startIndex = iQueue.second.begin(); startIndex != endIndex; ++startIndex)
@@ -733,6 +754,9 @@ namespace neogfx
 		}
 		iQueue.first.clear();
 		iQueue.second.clear();
+
+		if (activatedTarget)
+			render_target().deactivate_target();
 	}
 
 	void opengl_graphics_context::scissor_on(const rect& aRect)
@@ -998,8 +1022,8 @@ namespace neogfx
 
 	void opengl_graphics_context::clear(const colour& aColour)
 	{
-		disable_anti_alias daa(*this);
-		fill_rect(rendering_area(), aColour);
+		glCheck(glClearColor(aColour.red<GLclampf>(), aColour.green<GLclampf>(), aColour.blue<GLclampf>(), aColour.alpha<GLclampf>()));
+		glCheck(glClear(GL_COLOR_BUFFER_BIT));
 	}
 
 	void opengl_graphics_context::clear_depth_buffer()
@@ -1628,7 +1652,9 @@ namespace neogfx
 		if (firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())
 		{
 			glCheck(glActiveTexture(GL_TEXTURE2));
-			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(render_target().target_texture().native_texture()->handle())));
+			glCheck(glBindTexture(
+				render_target().target_texture().sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, 
+				reinterpret_cast<GLuint>(render_target().target_texture().native_texture()->handle())));
 			glCheck(glActiveTexture(GL_TEXTURE1));
 		}
 
@@ -1813,7 +1839,7 @@ namespace neogfx
 						}
 						textureHandle = reinterpret_cast<GLuint>(texture.native_texture()->handle());
 						glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
-						glCheck(glBindTexture(GL_TEXTURE_2D, textureHandle));
+						glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, textureHandle));
 						if (first)
 							rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
 					}

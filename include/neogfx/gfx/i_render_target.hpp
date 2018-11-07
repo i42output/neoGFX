@@ -20,11 +20,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/device_metrics.hpp>
 #include <neogfx/gfx/primitives.hpp>
 
 namespace neogfx
 {
 	class i_texture;
+	class i_graphics_context;
 
 	enum class render_target_type
 	{
@@ -32,8 +34,10 @@ namespace neogfx
 		Texture
 	};
 
-	class i_render_target
+	class i_render_target : public i_device_metrics
 	{
+	public:
+		struct failed_to_create_framebuffer : std::runtime_error { failed_to_create_framebuffer(const std::string& aReason) : std::runtime_error("neogfx::i_render_target::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + aReason) {} };
 	public:
 		virtual render_target_type target_type() const = 0;
 		virtual void* target_handle() const = 0;
@@ -47,5 +51,7 @@ namespace neogfx
 	public:
 		virtual bool activate_target() const = 0;
 		virtual bool deactivate_target() const = 0;
+	public:
+		virtual std::unique_ptr<i_graphics_context> create_graphics_context() const = 0;
 	};
 }

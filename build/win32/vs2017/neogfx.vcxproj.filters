@@ -57,9 +57,6 @@
     <ClInclude Include="..\..\..\src\app\native\sdl_basic_services.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\i_native_graphics_context.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -88,9 +85,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\sdl_graphics_context.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\window\native\sdl_window.hpp">
@@ -211,9 +205,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\path.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\neogfx.hpp">
@@ -834,13 +825,19 @@
     <ClInclude Include="..\..\..\include\neogfx\game\time.hpp">
       <Filter>Game\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\shapes.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\easing.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_render_target.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_graphics_context.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\path.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\shapes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1049,9 +1046,6 @@
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\sdl_graphics_context.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\layout\stack_layout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1235,7 +1229,7 @@
     <ClCompile Include="..\..\..\src\game\time.cpp">
       <Filter>Game\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\shapes.cpp">
+    <ClCompile Include="..\..\..\src\gfx\shapes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1246,14 +1240,14 @@
     <None Include="..\..\..\include\neogfx\gui\widget\slider.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\core\path.inl">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="..\..\..\src\gui\layout\flow_layout.inl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\..\..\src\gui\layout\layout.inl">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gfx\path.inl">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>

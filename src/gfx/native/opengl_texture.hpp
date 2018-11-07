@@ -54,6 +54,14 @@ namespace neogfx
 		bool is_resident() const override;
 		const std::string& uri() const override;
 	public:
+		dimension horizontal_dpi() const override;
+		dimension vertical_dpi() const override;
+		dimension ppi() const override;
+		bool metrics_available() const override;
+		dimension em_size() const override;
+	public:
+		std::unique_ptr<i_graphics_context> create_graphics_context() const override;
+	public:
 		std::shared_ptr<i_native_texture> native_texture() const override;
 	public:
 		render_target_type target_type() const override;
@@ -79,5 +87,7 @@ namespace neogfx
 		std::string iUri;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		neogfx::logical_coordinates iLogicalCoordinates;
+		mutable GLuint iFrameBuffer;
+		mutable GLuint iDepthStencilBuffer;
 	};
 }

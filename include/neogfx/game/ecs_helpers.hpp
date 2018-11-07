@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/colour.hpp>
 #include <neogfx/gfx/primitives.hpp>
-#include <neogfx/core/shapes.hpp>
+#include <neogfx/gfx/shapes.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/colour.hpp>
 #include <neogfx/game/gradient.hpp>

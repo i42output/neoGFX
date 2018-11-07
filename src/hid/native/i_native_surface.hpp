@@ -29,7 +29,7 @@
 namespace neogfx
 {
 	class i_rendering_engine;
-	class i_native_graphics_context;
+	class i_graphics_context;
 	class i_widget;
 
 	class i_native_surface : public i_object, public i_render_target
@@ -71,7 +71,7 @@ namespace neogfx
 		virtual void pause() = 0;
 		virtual void resume() = 0;
 		virtual bool is_rendering() const = 0;
-		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context() const = 0;
-		virtual std::unique_ptr<i_native_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
+		using i_render_target::create_graphics_context;
+		virtual std::unique_ptr<i_graphics_context> create_graphics_context(const i_widget& aWidget) const = 0;
 	};
 }

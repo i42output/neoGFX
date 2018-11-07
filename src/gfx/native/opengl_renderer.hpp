@@ -70,10 +70,10 @@ namespace neogfx
 			void* handle() const override;
 			bool has_projection_matrix() const override;
 			const optional_mat44& projection_matrix() const override;
-			void set_projection_matrix(const i_native_graphics_context& aGraphicsContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) override;
+			void set_projection_matrix(const i_graphics_context& aGraphicsContext, const optional_mat44& aProjectionMatrix = optional_mat44{}) override;
 			bool has_transformation_matrix() const override;
 			const optional_mat44& transformation_matrix() const override;
-			void set_transformation_matrix(const i_native_graphics_context& aGraphicsContext, const optional_mat44& aTransformationMatrix = optional_mat44{}) override;
+			void set_transformation_matrix(const i_graphics_context& aGraphicsContext, const optional_mat44& aTransformationMatrix = optional_mat44{}) override;
 			void* variable(const std::string& aVariableName) const override;
 			void set_uniform_variable(const std::string& aName, float aValue) override;
 			void set_uniform_variable(const std::string& aName, double aValue) override;
@@ -115,7 +115,7 @@ namespace neogfx
 		i_font_manager& font_manager() override;
 		i_texture_manager& texture_manager() override;
 		bool shader_program_active() const override;
-		void activate_shader_program(i_native_graphics_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) override;
+		void activate_shader_program(i_graphics_context& aGraphicsContext, i_shader_program& aProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{}) override;
 		void deactivate_shader_program() override;
 	public:
 		const i_shader_program& active_shader_program() const override;
