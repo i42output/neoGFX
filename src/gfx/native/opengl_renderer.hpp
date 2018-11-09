@@ -157,6 +157,7 @@ namespace neogfx
 		shader_programs::iterator iActiveProgram;
 		shader_programs::iterator iDefaultProgram;
 		shader_programs::iterator iTextureProgram;
+		shader_programs::iterator iMultisampleTextureProgram;
 		shader_programs::iterator iGlyphProgram;
 		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;

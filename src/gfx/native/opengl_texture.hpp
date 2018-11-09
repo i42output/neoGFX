@@ -44,6 +44,7 @@ namespace neogfx
 		const i_sub_texture& as_sub_texture() const override;
 		dimension dpi_scale_factor() const override;
 		texture_sampling sampling() const override;
+		uint32_t samples() const override;
 		bool is_empty() const override;
 		size extents() const override;
 		size storage_extents() const override;

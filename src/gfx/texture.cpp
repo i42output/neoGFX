@@ -84,6 +84,13 @@ namespace neogfx
 		return native_texture()->sampling();
 	}
 
+	uint32_t texture::samples() const
+	{
+		if (is_empty())
+			return 1;
+		return native_texture()->samples();
+	}
+
 	bool texture::is_empty() const
 	{
 		return iNativeTexture == nullptr;

@@ -1051,6 +1051,8 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
 	{
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
@@ -1080,6 +1082,8 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
@@ -1107,6 +1111,8 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
 	{
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
@@ -1136,6 +1142,8 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_circle(const point& aCentre, dimension aRadius, const pen& aPen, angle aStartAngle)
 	{
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
@@ -1164,6 +1172,8 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
 	{
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
@@ -1192,6 +1202,8 @@ namespace neogfx
 
 	void opengl_graphics_context::draw_path(const path& aPath, const pen& aPen)
 	{
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
 			auto const& gradient = static_variant_cast<const neogfx::gradient&>(aPen.colour());
@@ -1230,6 +1242,8 @@ namespace neogfx
 	void opengl_graphics_context::draw_shape(const game::mesh& aMesh, const pen& aPen)
 	{
 		auto const& vertices = aMesh.vertices;
+
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
@@ -1304,12 +1318,16 @@ namespace neogfx
 
 	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill)
 	{
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
 		graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill } };
 		fill_rect(graphics_operation::batch{ &op, &op + 1 });
 	}
 
 	void opengl_graphics_context::fill_rect(const graphics_operation::batch& aFillRectOps)
 	{
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
 		auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
 		if (std::holds_alternative<gradient>(firstOp.fill))
@@ -1854,7 +1872,14 @@ namespace neogfx
 						}
 						textureHandle = reinterpret_cast<GLuint>(texture.native_texture()->handle());
 						if (first)
+						{
 							rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
+							if (texture.sampling() == texture_sampling::Multisample)
+							{
+								rendering_engine().active_shader_program().set_uniform_variable("texSamples", static_cast<int>(texture.samples()));
+								rendering_engine().active_shader_program().set_uniform_variable("texExtents", static_cast<float>(texture.storage_extents().cx), static_cast<float>(texture.storage_extents().cy));
+							}
+						}
 					}
 
 					if (newTexture)

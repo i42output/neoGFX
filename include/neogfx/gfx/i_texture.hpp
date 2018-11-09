@@ -40,7 +40,11 @@ namespace neogfx
 		Normal,
 		NormalMipmap,
 		Nearest,
-		Multisample
+		Multisample,
+		Multisample4x,
+		Multisample8x,
+		Multisample16x,
+		Multisample32x
 	};
 
 	class i_sub_texture;
@@ -59,6 +63,7 @@ namespace neogfx
 		virtual const i_sub_texture& as_sub_texture() const = 0;
 		virtual dimension dpi_scale_factor() const = 0;
 		virtual texture_sampling sampling() const = 0;
+		virtual uint32_t samples() const = 0;
 		virtual bool is_empty() const = 0;
 		virtual size extents() const = 0;
 		virtual size storage_extents() const = 0;

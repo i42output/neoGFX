@@ -46,29 +46,29 @@ namespace neogfx
 		GLint previousTexture;
 		try
 		{
-			glCheck(glGetIntegerv(iSampling != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
+			glCheck(glGetIntegerv(sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
 			glCheck(glGenTextures(1, &iHandle));
-			glCheck(glBindTexture(iSampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, iHandle));
+			glCheck(glBindTexture(sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, iHandle));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
-			if (iSampling == texture_sampling::Normal)
+			switch(sampling())
 			{
+			case texture_sampling::Normal:
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			}
-			else if (iSampling == texture_sampling::NormalMipmap)
-			{
+				break;
+			case texture_sampling::NormalMipmap:
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-			}
-			else if (iSampling == texture_sampling::Nearest)
-			{
+				break;
+			case texture_sampling::Nearest:
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+				break;
 			}
 			if (aColour != std::nullopt)
 			{
-				if (iSampling == texture_sampling::Multisample)
+				if (sampling() == texture_sampling::Multisample)
 					throw multisample_texture_initialization_unsupported();
 				std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
 				for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
@@ -80,27 +80,27 @@ namespace neogfx
 						data[y * iStorageSize.cx * 4 + x * 4 + 3] = aColour->alpha();
 					}
 				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
-				if (iSampling == texture_sampling::NormalMipmap)
+				if (sampling() == texture_sampling::NormalMipmap)
 				{
 					glCheck(glGenerateMipmap(GL_TEXTURE_2D));
 				}
 			}
 			else
 			{
-				if (iSampling != texture_sampling::Multisample)
+				if (sampling() != texture_sampling::Multisample)
 				{
 					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-					if (iSampling == texture_sampling::NormalMipmap)
+					if (sampling() == texture_sampling::NormalMipmap)
 					{
 						glCheck(glGenerateMipmap(GL_TEXTURE_2D));
 					}
 				}
 				else
 				{
-					glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
+					glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
 				}
 			}
-			glCheck(glBindTexture(iSampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
+			glCheck(glBindTexture(sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
 		}
 		catch (...)
 		{
@@ -131,20 +131,20 @@ namespace neogfx
 			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 			glCheck(glGenTextures(1, &iHandle));
 			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
-			if (iSampling == texture_sampling::Normal)
+			switch(sampling())
 			{
+			case texture_sampling::Normal:
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			}
-			else if (iSampling == texture_sampling::NormalMipmap)
-			{
+				break;
+			case texture_sampling::NormalMipmap:
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-			}
-			else if (iSampling == texture_sampling::Nearest)
-			{
+				break;
+			case texture_sampling::Nearest:
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+				break;
 			}
 			switch (aImage.colour_format())
 			{
@@ -157,7 +157,7 @@ namespace neogfx
 							for (std::size_t c = 0; c < 4; ++c)
 								data[(iSize.cy + 1 - y) * iStorageSize.cx * 4 + x * 4 + c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
 					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
-					if (iSampling == texture_sampling::NormalMipmap)
+					if (sampling() == texture_sampling::NormalMipmap)
 					{
 						glCheck(glGenerateMipmap(GL_TEXTURE_2D));
 					}
@@ -208,7 +208,34 @@ namespace neogfx
 
 	texture_sampling opengl_texture::sampling() const
 	{
-		return iSampling;
+		switch (iSampling)
+		{
+		case texture_sampling::Multisample4x:
+		case texture_sampling::Multisample8x:
+		case texture_sampling::Multisample16x:
+		case texture_sampling::Multisample32x:
+			return texture_sampling::Multisample;
+		default:
+			return iSampling;
+		}
+	}
+
+	uint32_t opengl_texture::samples() const
+	{
+		switch (iSampling)
+		{
+		case texture_sampling::Multisample:
+		case texture_sampling::Multisample4x:
+			return 4u;
+		case texture_sampling::Multisample8x:
+			return 8u;
+		case texture_sampling::Multisample16x:
+			return 16u;
+		case texture_sampling::Multisample32x:
+			return 32u;
+		default:
+			return 1u;
+		}
 	}
 
 	bool opengl_texture::is_empty() const
@@ -229,14 +256,14 @@ namespace neogfx
 	void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData)
 	{
 		GLint previousTexture;
-		if (iSampling != texture_sampling::Multisample)
+		if (sampling() != texture_sampling::Multisample)
 		{
 			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
 			glCheck(glBindTexture(GL_TEXTURE_2D, iHandle));
 			glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
 				static_cast<GLint>(aRect.x + 1.0), static_cast<GLint>(aRect.y + 1.0), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
 				GL_RGBA, GL_UNSIGNED_BYTE, aPixelData));
-			if (iSampling == texture_sampling::NormalMipmap)
+			if (sampling() == texture_sampling::NormalMipmap)
 			{
 				glCheck(glGenerateMipmap(GL_TEXTURE_2D));
 			}
@@ -357,7 +384,7 @@ namespace neogfx
 			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(native_texture()->handle()), 0));
 			glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
-			glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+			glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples(), GL_DEPTH24_STENCIL8, static_cast<GLsizei>(storage_extents().cx), static_cast<GLsizei>(storage_extents().cy + 1)));
 		}
 		else
 		{
@@ -380,7 +407,7 @@ namespace neogfx
 				glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(native_texture()->handle()), 0));
 			}
 		}
-		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+		glCheck(glViewport(1, 1, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 	}

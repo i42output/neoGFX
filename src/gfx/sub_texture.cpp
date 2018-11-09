@@ -67,6 +67,11 @@ namespace neogfx
 		return native_texture()->sampling();
 	}
 
+	uint32_t sub_texture::samples() const
+	{
+		return native_texture()->samples();
+	}
+
 	bool sub_texture::is_empty() const
 	{
 		return false;
