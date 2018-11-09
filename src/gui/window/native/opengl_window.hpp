@@ -52,8 +52,8 @@ namespace neogfx
 		const neogfx::logical_coordinates& logical_coordinates() const override;
 		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
 	public:
-		bool activate_target() const override;
-		bool deactivate_target() const override;
+		void activate_target() const override;
+		void deactivate_target() const override;
 	public:
 		uint64_t frame_counter() const override;
 		void limit_frame_rate(uint32_t aFps) override;

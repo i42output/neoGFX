@@ -122,8 +122,8 @@ namespace neogfx
 		i_shader_program& active_shader_program() override;
 		const i_shader_program& default_shader_program() const override;
 		i_shader_program& default_shader_program() override;
-		const i_shader_program& texture_shader_program() const override;
-		i_shader_program& texture_shader_program() override;
+		const i_shader_program& texture_shader_program(texture_sampling aSampling) const override;
+		i_shader_program& texture_shader_program(texture_sampling aSampling) override;
 		const i_shader_program& glyph_shader_program(bool aSubpixel) const override;
 		i_shader_program& glyph_shader_program(bool aSubpixel) override;
 		const i_shader_program& gradient_shader_program() const override;

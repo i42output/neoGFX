@@ -670,6 +670,7 @@ namespace neogfx
 							"uniform sampler2DMS outputTexture;\n"
 							"uniform vec2 outputExtents;\n"
 							"uniform bool guiCoordinates;\n"
+							"uniform int subpixel;\n"
 							"uniform int effect;\n"
 							"uniform int effectWidth;\n"
 							"uniform vec4 effectRect;\n"
@@ -845,12 +846,12 @@ namespace neogfx
 		return *iDefaultProgram;
 	}
 
-	const opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program() const
+	const opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program(texture_sampling aSampling) const
 	{
 		return *iTextureProgram;
 	}
 
-	opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program()
+	opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program(texture_sampling aSampling)
 	{
 		return *iTextureProgram;
 	}

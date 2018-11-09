@@ -33,11 +33,15 @@ namespace neogfx
 		iDpiScaleFactor{ aDpiScaleFactor },
 		iSampling{ aSampling },
 		iSize{ aExtents },
-		iStorageSize{ size{ std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0) } },
+		iStorageSize{ aSampling != texture_sampling::NormalMipmap ?
+			decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1 ) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} :
+			decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
 		iHandle{ 0 },
 		iUri{ "neogfx::opengl_texture::internal" },
 		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
-		iLogicalCoordinates{ vec2{ 0.0, 0.0}, aExtents.to_vec2() }
+		iLogicalCoordinates{ vec2{ 0.0, 0.0}, aExtents.to_vec2() },
+		iFrameBuffer{ 0 },
+		iDepthStencilBuffer{ 0 }
 	{
 		GLint previousTexture;
 		try
@@ -111,9 +115,15 @@ namespace neogfx
 		iDpiScaleFactor{ aImage.dpi_scale_factor() },
 		iSampling{ aImage.sampling() },
 		iSize{ aImage.extents() },
-		iStorageSize{size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}},
+		iStorageSize{ aImage.sampling() != texture_sampling::NormalMipmap ? 
+			decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} :
+			decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
 		iHandle{ 0 },
-		iUri{ aImage.uri() }
+		iUri{ aImage.uri() },
+		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
+		iLogicalCoordinates{ vec2{ 1.0, 1.0}, aImage.extents().to_vec2() },
+		iFrameBuffer{ 0 },
+		iDepthStencilBuffer{ 0 }
 	{
 		GLint previousTexture = 0;
 		try
@@ -145,7 +155,7 @@ namespace neogfx
 					for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
 						for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
 							for (std::size_t c = 0; c < 4; ++c)
-								data[y * iStorageSize.cx * 4 + x * 4 + c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
+								data[(iSize.cy + 1 - y) * iStorageSize.cx * 4 + x * 4 + c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
 					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
 					if (iSampling == texture_sampling::NormalMipmap)
 					{
@@ -168,6 +178,11 @@ namespace neogfx
 
 	opengl_texture::~opengl_texture()
 	{
+		if (iFrameBuffer != 0)
+		{
+			glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
+			glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
+		}
 		glCheck(glDeleteTextures(1, &iHandle));
 	}
 
@@ -328,11 +343,10 @@ namespace neogfx
 		iLogicalCoordinates = aCoordinates;
 	}
 
-	bool opengl_texture::activate_target() const
+	void opengl_texture::activate_target() const
 	{
-		bool alreadyActive = (service<i_rendering_engine>::instance().active_target() == this);
 		service<i_rendering_engine>::instance().activate_context(*this);
-		if (!alreadyActive)
+		if (iFrameBuffer == 0)
 		{
 			glCheck(glEnable(GL_MULTISAMPLE));
 			glCheck(glEnable(GL_BLEND));
@@ -344,29 +358,40 @@ namespace neogfx
 			glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 			glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
-			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
-			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
-			glCheck(glClear(GL_DEPTH_BUFFER_BIT));
-			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-			if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
-				throw failed_to_create_framebuffer(glErrorString(status));
-			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
-			glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
-			GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-			glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 		}
-		return true;
+		else
+		{
+			GLint currentFramebuffer;
+			glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFramebuffer));
+			if (static_cast<decltype(iFrameBuffer)>(currentFramebuffer) != iFrameBuffer)
+			{
+				glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
+			}
+			GLint queryResult = 0;
+			glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &queryResult));
+			if (queryResult == GL_TEXTURE)
+			{
+				glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &queryResult));
+			}
+			else
+				queryResult = 0;
+			if (queryResult != reinterpret_cast<GLint>(native_texture()->handle()))
+			{
+				glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(native_texture()->handle()), 0));
+			}
+		}
+		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 	}
 
-	bool opengl_texture::deactivate_target() const
+	void opengl_texture::deactivate_target() const
 	{
 		if (service<i_rendering_engine>::instance().active_target() == this)
 		{
-			glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
-			glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
 			service<i_rendering_engine>::instance().deactivate_context();
-			return true;
+			return;
 		}
-		return false;
+		throw not_active();
 	}
 }

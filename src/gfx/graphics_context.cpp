@@ -122,7 +122,7 @@ namespace neogfx
 		iNativeGraphicsContext{ aType == type::Attached ? aTexture.native_texture()->create_graphics_context() : nullptr },
 		iUnitsContext{ *this },
 		iDefaultFont{ font() },
-		iOrigin{ point{} },
+		iOrigin{ point{ 1.0, 1.0 } },
 		iExtents{ aTexture.extents() },
 		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
 		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },

@@ -118,32 +118,33 @@ namespace neogfx
 
 	void sdl_renderer::activate_context(const i_render_target& aTarget)
 	{
-		if (active_target() != nullptr && active_target() != &aTarget)
-			vertex_arrays().execute();
-
 		if (iContext == nullptr)
 			iContext = create_context(aTarget);
-		else
-			activate_current_target();
 
 		iTargetStack.push_back(&aTarget);
+		
 		static bool initialized = false;
 		if (!initialized)
 		{
 			initialize();
 			initialized = true;
 		}
+
+		activate_current_target();
 	}
 
 	void sdl_renderer::deactivate_context()
 	{
-		vertex_arrays().execute();
-
 		if (iTargetStack.empty())
 			throw no_target_active();
 		iTargetStack.pop_back();
 
-		activate_current_target();
+		auto activeTarget = active_target();
+		if (activeTarget != nullptr)
+		{
+			iTargetStack.pop_back();
+			activeTarget->activate_target();
+		}
 	}
 
 	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_render_target& aTarget)

@@ -1056,13 +1056,18 @@ int main(int argc, char* argv[])
 //			auto x = ng::ease(ng::easing_class::Linear, ng::easing_class::Bounce, int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
 			aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
+			// render to texture demo
 			{
-				/*ng::graphics_context texGc{ tex };
-				texGc.draw_line(ng::point{ 0.0, 0.0 }, ng::point{ 64.0, 64.0 }, ng::pen{ ng::colour::Blue.with_alpha(0x80), aGc.dpi_scale(4.0) });
-				texGc.draw_line(ng::point{ 64.0, 0.0 }, ng::point{ 0.0, 64.0 }, ng::pen{ ng::colour::Blue.with_alpha(0x80), aGc.dpi_scale(4.0) });
-				texGc.draw_multiline_text(ng::point{ 0.0, 0.0 }, "Render To\nTexture", tabDrawing.font(), ng::text_appearance{ ng::colour::Blue.with_alpha(0x80), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White } }); */
+				ng::graphics_context texGc{ tex };
+				texGc.clear(ng::colour{});
+				texGc.draw_rect(ng::rect{ ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ ng::colour::Blue.with_alpha(0xC0), 1.0 });
+				texGc.draw_line(ng::point{ 0.0, 0.0 }, ng::point{ 64.0, 64.0 }, ng::pen{ ng::colour::Blue.with_alpha(0xC0), aGc.dpi_scale(4.0) });
+				texGc.draw_line(ng::point{ 64.0, 0.0 }, ng::point{ 0.0, 64.0 }, ng::pen{ ng::colour::Blue.with_alpha(0xC0), aGc.dpi_scale(4.0) });
+				texGc.draw_multiline_text(ng::point{ 0.0, 0.0 }, "Render To\nTexture", tabDrawing.font(), ng::text_appearance{ ng::colour::Blue, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White } }); 
 			}
+			aGc.flush();
 			aGc.draw_texture(ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, tex);
+			aGc.flush();
 		});
 
 		neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)

@@ -742,10 +742,16 @@ namespace neogfx
 				break;
 			case graphics_operation::operation_type::DrawMesh:
 				{
-					use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program() };
+					std::optional<use_shader_program> usp;
 					for (auto op = opBatch.first; op != opBatch.second; ++op)
 					{
 						const auto& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
+						if (usp == std::nullopt)
+						{
+							bool renderTexture = (args.material.texture != std::nullopt);
+							auto textureSampling = (renderTexture ? service<i_texture_manager>::instance().find_texture(args.material.texture->id.cookie())->sampling() : texture_sampling::Normal);
+							usp.emplace(*this, iRenderingEngine, renderTexture ? rendering_engine().texture_shader_program(textureSampling) : rendering_engine().default_shader_program());
+						}
 						draw_mesh(args.mesh, args.material, args.transformation, args.shaderEffect);
 					}
 				}
@@ -1257,6 +1263,7 @@ namespace neogfx
 		std::unique_ptr<use_shader_program> usp;
 		std::unique_ptr<use_vertex_arrays> uva;
 		bool withTexture = false;
+		texture_sampling withTextureSampling = texture_sampling::Normal;
 		for (auto entity : aEcs.component<game::mesh_renderer>().entities())
 		{
 			if (entity == game::null_entity)
@@ -1265,6 +1272,7 @@ namespace neogfx
 			auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
 			auto transformation = rigidBodies.has_entity_record(entity) ? aTransformation * to_transformation_matrix(rigidBodies.entity_record(entity)) : aTransformation;
 			bool renderTexture = (meshRenderer.material.texture != std::nullopt);
+			auto textureSampling = (renderTexture ? service<i_texture_manager>::instance().find_texture(meshRenderer.material.texture->id.cookie())->sampling() : texture_sampling::Normal);
 			if (uva == nullptr || renderTexture != withTexture)
 			{
 				if (uva != nullptr)
@@ -1275,15 +1283,16 @@ namespace neogfx
 				else
 					uva = std::make_unique<use_vertex_arrays>(*this, GL_TRIANGLES);
 			}
-			if (usp == nullptr || renderTexture != withTexture)
+			if (usp == nullptr || renderTexture != withTexture || (renderTexture && textureSampling != withTextureSampling))
 			{
 				usp = nullptr;
 				if (renderTexture)
-					usp = std::make_unique<use_shader_program>(*this, iRenderingEngine, rendering_engine().texture_shader_program());
+					usp = std::make_unique<use_shader_program>(*this, iRenderingEngine, rendering_engine().texture_shader_program(textureSampling));
 				else
 					usp = std::make_unique<use_shader_program>(*this, iRenderingEngine, rendering_engine().default_shader_program());
 			}
 			withTexture = renderTexture;
+			withTextureSampling = textureSampling;
 			bool drawn = draw_mesh(
 				meshFilter,
 				meshRenderer,
@@ -1515,7 +1524,7 @@ namespace neogfx
 			aResult.emplace_back(normalizedRect.top_right().x, normalizedRect.top_right().y);
 			aResult.emplace_back(normalizedRect.bottom_right().x, normalizedRect.bottom_right().y);
 			aResult.emplace_back(normalizedRect.bottom_left().x, normalizedRect.bottom_left().y);
-			if (aLogicalCoordinates.first.y < aLogicalCoordinates.second.y)
+			if (aLogicalCoordinates.first.y > aLogicalCoordinates.second.y)
 			{
 				std::swap(aResult[0][1], aResult[2][1]);
 				std::swap(aResult[1][1], aResult[3][1]);
@@ -1676,7 +1685,9 @@ namespace neogfx
 
 		disable_anti_alias daa(*this);
 
-		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().glyph_shader_program(firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())};
+		bool useSubpixelShader = render_target().target_type() == render_target_type::Surface && firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
+
+		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().glyph_shader_program(useSubpixelShader)};
 
 		for (uint32_t pass = (hasEffects ? 1 : 2); pass <= 2; ++pass)
 		{
@@ -1690,7 +1701,7 @@ namespace neogfx
 			
 			shader.set_uniform_variable("glyphTexture", 1);
 
-			if (firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())
+			if (useSubpixelShader)
 				shader.set_uniform_variable("outputTexture", 2);
 
 			glCheck(glTextureBarrier());
@@ -1795,15 +1806,22 @@ namespace neogfx
 
 		if (material.texture != std::nullopt)
 		{
-			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program() };
+			auto const& texture = *service<i_texture_manager>::instance().find_texture(material.texture->id.cookie());
+
+			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program(texture.sampling()) };
 			rendering_engine().active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
 
 			glCheck(glActiveTexture(GL_TEXTURE1));
 			glCheck(glEnable(GL_BLEND));
 			glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 			GLint previousTexture;
-			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
-			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			glCheck(glGetIntegerv(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
+			glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(texture.native_texture()->handle())));
+			if (texture.sampling() != texture_sampling::Multisample)
+			{
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture.sampling() != texture_sampling::Nearest ? GL_LINEAR : GL_NEAREST));
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : texture.sampling() != texture_sampling::Nearest ? GL_LINEAR : GL_NEAREST));
+			}
 
 			{
 				use_vertex_arrays vertexArrays { *this, GL_TRIANGLES, with_textures, faces.size() * 3u };
@@ -1817,8 +1835,6 @@ namespace neogfx
 				bool newTexture = false;
 				for (auto const& face : faces)
 				{
-					auto const& texture = *service<i_texture_manager>::instance().find_texture(material.texture->id.cookie());
-
 					if (first || textureHandle != reinterpret_cast<GLuint>(texture.native_texture()->handle()))
 					{
 						newTexture = true;
@@ -1838,8 +1854,6 @@ namespace neogfx
 							uvFixupOffset = subTexture->atlas_location().top_left().to_vec2();
 						}
 						textureHandle = reinterpret_cast<GLuint>(texture.native_texture()->handle());
-						glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
-						glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, textureHandle));
 						if (first)
 							rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
 					}
@@ -1860,7 +1874,8 @@ namespace neogfx
 							~faceVertex.y <= std::max(logical_coordinates().first.y, logical_coordinates().second.y))
 							drawn = true;
 						auto faceUv = uv[faceVertexIndex];
-						if (logical_coordinates().first.y < logical_coordinates().second.y)
+						if (texture.native_texture()->logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame &&
+							logical_coordinates().first.y > logical_coordinates().second.y)
 							~faceUv.y = 1.0 - faceUv.y;
 						faceUv = (faceUv * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
 						vertexArrays.instance().emplace_back(
@@ -1879,7 +1894,7 @@ namespace neogfx
 				vertexArrays.instance().draw();
 			}
 
-			glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+			glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
 		}
 		else
 		{

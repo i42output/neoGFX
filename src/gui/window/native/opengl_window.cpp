@@ -71,20 +71,45 @@ namespace neogfx
 		return extents();
 	}
 
-	bool opengl_window::activate_target() const
+	void opengl_window::activate_target() const
 	{
 		service<i_rendering_engine>::instance().activate_context(*this);
-		return true;
+		if (iFrameBufferTexture != std::nullopt)
+		{
+			GLint currentFramebuffer;
+			glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFramebuffer));
+			if (currentFramebuffer != iFrameBuffer)
+			{
+				glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
+			}
+			GLint queryResult = 0;
+			glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &queryResult));
+			if (queryResult == GL_TEXTURE)
+			{
+				glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &queryResult));
+			}
+			else
+				queryResult = 0;
+			if (queryResult != reinterpret_cast<GLint>(iFrameBufferTexture->native_texture()->handle()))
+			{
+				glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(iFrameBufferTexture->native_texture()->handle()), 0));
+			}
+			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(target_texture().native_texture()->handle())));
+			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
+			glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+			GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+			glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
+		}
 	}
 
-	bool opengl_window::deactivate_target() const
+	void opengl_window::deactivate_target() const
 	{
 		if (rendering_engine().active_target() == this)
 		{
 			rendering_engine().deactivate_context();
-			return true;
+			return;
 		}
-		return false;
+		throw not_active();
 	}
 
 	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const
