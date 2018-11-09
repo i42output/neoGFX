@@ -46,7 +46,7 @@ namespace neogfx
 			font_id id() const override { return iFontFace.id(); }
 			i_native_font& native_font() override { return iFontFace.native_font(); }
 			const std::string& family_name() const override { return iFontFace.family_name(); }
-			font::style_e style() const override { return iFontFace.style(); }
+			font_style style() const override { return iFontFace.style(); }
 			const std::string& style_name() const override { return iFontFace.style_name(); }
 			font::point_size size() const override { return iFontFace.size(); }
 			dimension horizontal_dpi() const override { return iFontFace.horizontal_dpi(); }
@@ -100,7 +100,7 @@ namespace neogfx
 					}
 					::RegCloseKey(hkeyDefaultFont);
 				}
-				return font_info(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(defaultFontFaceName.c_str())), font::Normal, 8);
+				return font_info(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(defaultFontFaceName.c_str())), font_style::Normal, 8);
 #else
 				throw std::logic_error("neogfx::detail::platform_specific::default_system_font_info: Unknown system");
 #endif
@@ -231,7 +231,7 @@ namespace neogfx
 		return fallbackFont;
 	}
 
-	std::shared_ptr<i_native_font_face> font_manager::create_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+	std::shared_ptr<i_native_font_face> font_manager::create_font(const std::string& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
 	{
 		return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, aDevice));
 	}
@@ -249,7 +249,7 @@ namespace neogfx
 			return create_font(aInfo.family_name(), aInfo.style(), aInfo.size(), aDevice);
 	}
 
-	std::shared_ptr<i_native_font_face> font_manager::create_font(i_native_font& aFont, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+	std::shared_ptr<i_native_font_face> font_manager::create_font(i_native_font& aFont, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
 	{
 		return add_font(aFont.create_face(aStyle, aSize, aDevice));
 	}
@@ -276,7 +276,7 @@ namespace neogfx
 		(void)aDevice;
 	}
 
-	std::shared_ptr<i_native_font_face> font_manager::load_font_from_file(const std::string& aFileName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+	std::shared_ptr<i_native_font_face> font_manager::load_font_from_file(const std::string& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
 	{
 		throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
 		(void)aFileName;
@@ -302,7 +302,7 @@ namespace neogfx
 		(void)aDevice;
 	}
 
-	std::shared_ptr<i_native_font_face> font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+	std::shared_ptr<i_native_font_face> font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
 	{
 		throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
 		(void)aData;
@@ -404,7 +404,7 @@ namespace neogfx
 				if (neolib::make_ci_string(f->style_name(s)) == neolib::make_ci_string(aStyleName))
 					return *f;
 		}
-		return find_best_font(aFamilyName, font::Normal, aSize);
+		return find_best_font(aFamilyName, font_style::Normal, aSize);
 	}
 
 	namespace
@@ -425,7 +425,7 @@ namespace neogfx
 		}
 	}
 
-	i_native_font& font_manager::find_best_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size)
+	i_native_font& font_manager::find_best_font(const std::string& aFamilyName, neogfx::font_style aStyle, font::point_size)
 	{
 		auto family = iFontFamilies.find(neolib::make_ci_string(aFamilyName));
 		if (family == iFontFamilies.end())
@@ -437,7 +437,7 @@ namespace neogfx
 		for (auto& f : family->second)
 		{
 			for (std::size_t s = 0; s < f->style_count(); ++s)
-				matches.insert(std::make_pair(std::make_pair(matching_bits(f->style(s), aStyle), pos--), f));
+				matches.insert(std::make_pair(std::make_pair(matching_bits(static_cast<uint32_t>(f->style(s)), static_cast<uint32_t>(aStyle)), pos--), f));
 		}
 		if (matches.empty())
 			throw no_matching_font_found();

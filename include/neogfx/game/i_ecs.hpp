@@ -47,12 +47,12 @@ namespace neogfx::game
 		return static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}
 
-	inline constexpr ecs_flags operator|=(ecs_flags& aLhs, ecs_flags aRhs)
+	inline constexpr ecs_flags& operator|=(ecs_flags& aLhs, ecs_flags aRhs)
 	{
 		return aLhs = static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
 	}
 
-	inline constexpr ecs_flags operator&=(ecs_flags& aLhs, ecs_flags aRhs)
+	inline constexpr ecs_flags& operator&=(ecs_flags& aLhs, ecs_flags aRhs)
 	{
 		return aLhs = static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}

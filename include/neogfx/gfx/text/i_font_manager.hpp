@@ -52,17 +52,17 @@ namespace neogfx
 		virtual std::shared_ptr<i_native_font_face> create_default_font(const i_device_resolution& aDevice) = 0;
 		virtual bool has_fallback_font(const i_native_font_face& aExistingFont) const = 0;
 		virtual std::shared_ptr<i_native_font_face> create_fallback_font(const i_native_font_face& aExistingFont) = 0;
-		virtual std::shared_ptr<i_native_font_face> create_font(const std::string& aFamilyName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+		virtual std::shared_ptr<i_native_font_face> create_font(const std::string& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual std::shared_ptr<i_native_font_face> create_font(const std::string& aFamilyName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual std::shared_ptr<i_native_font_face> create_font(const font_info& aInfo, const i_device_resolution& aDevice) = 0;
-		virtual std::shared_ptr<i_native_font_face> create_font(i_native_font& aFont, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+		virtual std::shared_ptr<i_native_font_face> create_font(i_native_font& aFont, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual std::shared_ptr<i_native_font_face> create_font(i_native_font& aFont, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual bool is_font_file(const std::string& aFileName) const = 0;
 		virtual std::shared_ptr<i_native_font_face> load_font_from_file(const std::string& aFileName, const i_device_resolution& aDevice) = 0;
-		virtual std::shared_ptr<i_native_font_face> load_font_from_file(const std::string& aFileName, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+		virtual std::shared_ptr<i_native_font_face> load_font_from_file(const std::string& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual std::shared_ptr<i_native_font_face> load_font_from_file(const std::string& aFileName, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual std::shared_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice) = 0;
-		virtual std::shared_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+		virtual std::shared_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 		virtual std::shared_ptr<i_native_font_face> load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
 	public:
 		virtual uint32_t font_family_count() const = 0;

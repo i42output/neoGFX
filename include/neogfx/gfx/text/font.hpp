@@ -30,6 +30,57 @@ namespace neogfx
 	class glyph;
 	class i_glyph_texture;
 
+	enum class font_style : uint32_t
+	{
+		Invalid = 0x00,
+		Normal = 0x01,
+		Bold = 0x02,
+		Italic = 0x04,
+		Underline = 0x08,
+		BoldItalic = Bold | Italic,
+		BoldItalicUnderline = Bold | Italic | Underline,
+		BoldUnderline = Bold | Underline,
+		ItalicUnderline = Italic | Underline
+	};
+
+	inline constexpr font_style operator|(font_style aLhs, font_style aRhs)
+	{
+		return static_cast<font_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr font_style operator&(font_style aLhs, font_style aRhs)
+	{
+		return static_cast<font_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr font_style& operator|=(font_style& aLhs, font_style aRhs)
+	{
+		return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+	}
+
+	inline constexpr font_style& operator&=(font_style& aLhs, font_style aRhs)
+	{
+		return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+	}
+
+	enum class font_weight : uint32_t
+	{
+		Thin = 100,
+		Extralight = 200,
+		Ultralight = 200,
+		Light = 300,
+		Normal = 400,
+		Regular = 400,
+		Medium = 500,
+		Semibold = 600,
+		Demibold = 600,
+		Bold = 700,
+		Extrabold = 800,
+		Ultrabold = 800,
+		Heavy = 900,
+		Black = 900
+	};
+
 	class font_info
 	{
 		// exceptions
@@ -38,46 +89,17 @@ namespace neogfx
 		struct unknown_style_name : std::logic_error { unknown_style_name() : std::logic_error("neogfx::font_info::unknown_style_name") {} };
 		// types
 	public:
-		enum style_e
-		{
-			Invalid = 0x00,
-			Normal = 0x01,
-			Bold = 0x02,
-			Italic = 0x04,
-			Underline = 0x08,
-			BoldItalic = Bold | Italic,
-			BoldItalicUnderline = Bold | Italic | Underline,
-			BoldUnderline = Bold | Underline,
-			ItalicUnderline = Italic | Underline
-		};
-		enum weight_e
-		{
-			WeightThin			= 100,
-			WeightExtralight	= 200,
-			WeightUltralight	= 200,
-			WeightLight			= 300,
-			WeightNormal		= 400,
-			WeightRegular		= 400,
-			WeightMedium		= 500,
-			WeightSemibold		= 600,
-			WeightDemibold		= 600,
-			WeightBold			= 700,
-			WeightExtrabold		= 800,
-			WeightUltrabold		= 800,
-			WeightHeavy			= 900,
-			WeightBlack			= 900
-		};
 		typedef double point_size;
 	private:
-		typedef std::optional<style_e> optional_style;
+		typedef std::optional<font_style> optional_style;
 		typedef std::optional<std::string> optional_style_name;
 	private:
 		class instance;
 	public:
 		font_info();
-		font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize);
+		font_info(const std::string& aFamilyName, font_style aStyle, point_size aSize);
 		font_info(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize);
-		font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize);
+		font_info(const std::string& aFamilyName, font_style aStyle, const std::string& aStyleName, point_size aSize);
 		font_info(const font_info& aOther);
 		virtual ~font_info();
 		font_info& operator=(const font_info& aOther);
@@ -86,26 +108,26 @@ namespace neogfx
 	public:
 		virtual const std::string& family_name() const;
 		virtual bool style_available() const;
-		virtual style_e style() const;
+		virtual font_style style() const;
 		virtual bool style_name_available() const;
 		virtual const std::string& style_name() const;
 		virtual bool underline() const;
 		virtual void set_underline(bool aUnderline);
-		virtual weight_e weight() const;
+		virtual font_weight weight() const;
 		virtual point_size size() const;
 		virtual bool kerning() const;
 		virtual void enable_kerning();
 		virtual void disable_kerning();
 	public:
-		font_info with_style(style_e aStyle) const;
+		font_info with_style(font_style aStyle) const;
 		font_info with_size(point_size aSize) const;
 	public:
 		bool operator==(const font_info& aRhs) const;
 		bool operator!=(const font_info& aRhs) const;
 		bool operator<(const font_info& aRhs) const;
 	public:
-		static weight_e weight_from_style(font_info::style_e aStyle);
-		static weight_e weight_from_style_name(std::string aStyleName);
+		static font_weight weight_from_style(font_style aStyle);
+		static font_weight weight_from_style_name(std::string aStyleName);
 	private:
 		mutable std::shared_ptr<instance> iInstance;
 	};
@@ -126,23 +148,23 @@ namespace neogfx
 		// construction
 	public:
 		font();
-		font(const std::string& aFamilyName, style_e aStyle, point_size aSize);
+		font(const std::string& aFamilyName, font_style aStyle, point_size aSize);
 		font(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize);
 		font(const font_info& aFontInfo);
 		font(const font& aOther);
-		font(const font& aOther, style_e aStyle, point_size aSize);
+		font(const font& aOther, font_style aStyle, point_size aSize);
 		font(const font& aOther, const std::string& aStyleName, point_size aSize);
 		static font load_from_file(const std::string& aFileName);
-		static font load_from_file(const std::string& aFileName, style_e aStyle, point_size aSize);
+		static font load_from_file(const std::string& aFileName, font_style aStyle, point_size aSize);
 		static font load_from_file(const std::string& aFileName, const std::string& aStyleName, point_size aSize);
 		static font load_from_memory(const void* aData, std::size_t aSizeInBytes);
-		static font load_from_memory(const void* aData, std::size_t aSizeInBytes, style_e aStyle, point_size aSize);
+		static font load_from_memory(const void* aData, std::size_t aSizeInBytes, font_style aStyle, point_size aSize);
 		static font load_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, point_size aSize);
 		~font();
 		font& operator=(const font& aOther);
 	private:
 		font(std::shared_ptr<i_native_font_face> aNativeFontFace);
-		font(std::shared_ptr<i_native_font_face> aNativeFontFace, style_e aStyle);
+		font(std::shared_ptr<i_native_font_face> aNativeFontFace, font_style aStyle);
 	public:
 		font_id id() const;
 	private:
@@ -153,7 +175,7 @@ namespace neogfx
 		// operations
 	public:
 		const std::string& family_name() const override;
-		style_e style() const override;
+		font_style style() const override;
 		const std::string& style_name() const override;
 		point_size size() const override;
 		dimension height() const;

@@ -84,12 +84,12 @@ namespace neogfx::game
 		return static_cast<component_data_field_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}
 
-	inline constexpr component_data_field_type operator|=(component_data_field_type& aLhs, component_data_field_type aRhs)
+	inline constexpr component_data_field_type& operator|=(component_data_field_type& aLhs, component_data_field_type aRhs)
 	{
 		return aLhs = static_cast<component_data_field_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
 	}
 
-	inline constexpr component_data_field_type operator&=(component_data_field_type& aLhs, component_data_field_type aRhs)
+	inline constexpr component_data_field_type& operator&=(component_data_field_type& aLhs, component_data_field_type aRhs)
 	{
 		return aLhs = static_cast<component_data_field_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}

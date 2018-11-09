@@ -75,7 +75,7 @@ namespace neogfx
 		}
 	}
 
-	native_font_face::native_font_face(font_id aId, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
+	native_font_face::native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
 		iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aHandle->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aHandle }, iHasKerning{ !!FT_HAS_KERNING(iHandle) }
 	{
 		set_metrics();
@@ -106,7 +106,7 @@ namespace neogfx
 		return iFont.family_name();
 	}
 
-	font::style_e native_font_face::style() const
+	font_style native_font_face::style() const
 	{
 		return iStyle;
 	}
@@ -157,7 +157,7 @@ namespace neogfx
 		if (FT_IS_SCALABLE(iHandle))
 			result = iHandle->underline_thickness / 64.0;
 		else
-			result = static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_info::WeightNormal);
+			result = static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_weight::Normal);
 		return std::max(1.0, std::floor(result));
 	}
 

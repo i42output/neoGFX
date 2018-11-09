@@ -100,7 +100,7 @@ void create_game(ng::i_layout& aLayout)
 {
 	// Canvas to render game world on...
 	auto& canvas = aLayout.add(std::make_shared<ng::game::canvas>());
-	canvas.set_font(ng::font{ canvas.font(), ng::font::Bold, 16 });
+	canvas.set_font(ng::font{ canvas.font(), ng::font_style::Bold, 16 });
 	canvas.set_background_colour(ng::colour::Black);
 
 	// Get ECS associated with canvas...

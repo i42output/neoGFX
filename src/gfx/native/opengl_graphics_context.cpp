@@ -515,7 +515,7 @@ namespace neogfx
 	rect opengl_graphics_context::rendering_area(bool aConsiderScissor) const
 	{
 		if (scissor_rect() == std::nullopt || !aConsiderScissor)
-			return rect{ point{}, render_target().target_extents() };
+			return rect{ render_target().target_type() == render_target_type::Surface ? point{} : point{1.0, 1.0}, render_target().target_extents() };
 		else
 			return *scissor_rect();
 	}

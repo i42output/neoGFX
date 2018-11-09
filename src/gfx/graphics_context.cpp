@@ -1527,7 +1527,7 @@ namespace neogfx
 					result.back().set_value(aTextBegin[startCluster]);
 				else if (result.back().category() == text_category::Emoji)
 					result.back().set_value(emojiAtlas.emoji(aTextBegin[startCluster], font.height()));
-				if ((aFontSelector(startCluster).style() & font::Underline) == font::Underline)
+				if ((aFontSelector(startCluster).style() & font_style::Underline) == font_style::Underline)
 					result.back().set_underline(true);
 				if (is_subpixel_rendering_on() && !font.is_bitmap_font())
 					result.back().set_subpixel(true);

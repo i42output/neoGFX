@@ -37,7 +37,7 @@ namespace neogfx
 		typedef std::pair<const void*, std::size_t> memory_block_type;
 	private:
 		typedef neolib::variant<filename_type, memory_block_type> source_type;
-		typedef std::multimap<font::style_e, std::pair<std::string, FT_Long>> style_map;
+		typedef std::multimap<font_style, std::pair<std::string, FT_Long>> style_map;
 		typedef std::map<std::tuple<FT_Long, font::point_size, size>, std::shared_ptr<i_native_font_face>> face_map;
 		typedef std::unordered_map<i_native_font_face*, uint32_t> usage_map;
 	public:
@@ -49,11 +49,11 @@ namespace neogfx
 		~native_font();
 	public:
 		virtual const std::string& family_name() const;
-		virtual bool has_style(font::style_e aStyle) const;
+		virtual bool has_style(font_style aStyle) const;
 		virtual std::size_t style_count() const;
-		virtual font::style_e style(std::size_t aStyleIndex) const;
+		virtual font_style style(std::size_t aStyleIndex) const;
 		virtual const std::string& style_name(std::size_t aStyleIndex) const;
-		virtual i_native_font_face& create_face(font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice);
+		virtual i_native_font_face& create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice);
 		virtual i_native_font_face& create_face(const std::string& aStyleName, font::point_size aSize, const i_device_resolution& aDevice);
 	public:
 		virtual void add_ref(i_native_font_face& aFace);
@@ -62,7 +62,7 @@ namespace neogfx
 		void register_face(FT_Long aFaceIndex);
 		FT_Face open_face(FT_Long aFaceIndex);
 		void close_face(FT_Face aFace);
-		i_native_font_face& create_face(FT_Long aFaceIndex, font::style_e aStyle, font::point_size aSize, const i_device_resolution& aDevice);
+		i_native_font_face& create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice);
 	private:
 		FT_Library iFontLib;
 		source_type iSource;

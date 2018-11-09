@@ -97,13 +97,13 @@ namespace neogfx
 		struct freetype_load_glyph_error : freetype_error { freetype_load_glyph_error(const std::string& aError) : freetype_error(aError) {} };
 		struct freetype_render_glyph_error : freetype_error { freetype_render_glyph_error(const std::string& aError) : freetype_error(aError) {} };
 	public:
-		native_font_face(font_id aId, i_native_font& aFont, font::style_e aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle);
+		native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle);
 		~native_font_face();
 	public:
 		font_id id() const override;
 		i_native_font& native_font() override;
 		const std::string& family_name() const override;
-		font::style_e style() const override;
+		font_style style() const override;
 		font::point_size size() const override;
 		const std::string& style_name() const override;
 		dimension horizontal_dpi() const override;
@@ -133,7 +133,7 @@ namespace neogfx
 	private:
 		font_id iId;
 		i_native_font& iFont;
-		font::style_e iStyle;
+		font_style iStyle;
 		std::string iStyleName;
 		font::point_size iSize;
 		neogfx::size iPixelDensityDpi;

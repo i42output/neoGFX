@@ -41,7 +41,7 @@ namespace neogfx
 		virtual font_id id() const = 0;
 		virtual i_native_font& native_font() = 0;
 		virtual const std::string& family_name() const = 0;
-		virtual font::style_e style() const = 0;
+		virtual font_style style() const = 0;
 		virtual const std::string& style_name() const = 0;
 		virtual font::point_size size() const = 0;
 		virtual dimension horizontal_dpi() const = 0;

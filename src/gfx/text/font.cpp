@@ -28,43 +28,43 @@
 
 namespace neogfx
 {
-	font_info::weight_e font_info::weight_from_style(font_info::style_e aStyle)
+	font_weight font_info::weight_from_style(font_style aStyle)
 	{
-		if (aStyle & font_info::Bold)
-			return font_info::WeightBold;
+		if ((aStyle & font_style::Bold) == font_style::Bold)
+			return font_weight::Bold;
 		else
-			return font_info::WeightNormal;
+			return font_weight::Normal;
 	}
 
-	font_info::weight_e font_info::weight_from_style_name(std::string aStyleName)
+	font_weight font_info::weight_from_style_name(std::string aStyleName)
 	{
-		static std::unordered_map<std::string, font_info::weight_e> sWeightMap =
+		static std::unordered_map<std::string, font_weight> sWeightMap =
 		{
-			{ "thin", font_info::WeightThin },
-			{ "extralight", font_info::WeightExtralight },
-			{ "extra light", font_info::WeightExtralight },
-			{ "ultralight", font_info::WeightUltralight },
-			{ "ultra light", font_info::WeightLight },
-			{ "normal", font_info::WeightNormal },
-			{ "regular", font_info::WeightRegular },
-			{ "medium", font_info::WeightMedium },
-			{ "semibold", font_info::WeightSemibold },
-			{ "semi bold", font_info::WeightSemibold },
-			{ "demibold", font_info::WeightDemibold },
-			{ "demi bold", font_info::WeightDemibold },
-			{ "bold", font_info::WeightBold },
-			{ "extrabold", font_info::WeightExtrabold },
-			{ "extra bold", font_info::WeightExtrabold },
-			{ "ultrabold", font_info::WeightUltrabold },
-			{ "ultra bold", font_info::WeightUltrabold },
-			{ "heavy", font_info::WeightHeavy },
-			{ "black", font_info::WeightBlack }
+			{ "thin", font_weight::Thin },
+			{ "extralight", font_weight::Extralight },
+			{ "extra light", font_weight::Extralight },
+			{ "ultralight", font_weight::Ultralight },
+			{ "ultra light", font_weight::Light },
+			{ "normal", font_weight::Normal },
+			{ "regular", font_weight::Regular },
+			{ "medium", font_weight::Medium },
+			{ "semibold", font_weight::Semibold },
+			{ "semi bold", font_weight::Semibold },
+			{ "demibold", font_weight::Demibold },
+			{ "demi bold", font_weight::Demibold },
+			{ "bold", font_weight::Bold },
+			{ "extrabold", font_weight::Extrabold },
+			{ "extra bold", font_weight::Extrabold },
+			{ "ultrabold", font_weight::Ultrabold },
+			{ "ultra bold", font_weight::Ultrabold },
+			{ "heavy", font_weight::Heavy },
+			{ "black", font_weight::Black }
 		};
 		boost::algorithm::to_lower(aStyleName);
 		auto w = sWeightMap.find(aStyleName);
 		if (w != sWeightMap.end())
 			return w->second;
-		return font_info::WeightNormal;
+		return font_weight::Normal;
 	}
 
 	class font_info::instance
@@ -72,9 +72,9 @@ namespace neogfx
 		friend class font_info;
 	public:
 		instance();
-		instance(const std::string& aFamilyName, style_e aStyle, point_size aSize);
+		instance(const std::string& aFamilyName, font_style aStyle, point_size aSize);
 		instance(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize);
-		instance(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize);
+		instance(const std::string& aFamilyName, font_style aStyle, const std::string& aStyleName, point_size aSize);
 		instance(const std::string& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
 		instance(const instance& aOther);
 		~instance();
@@ -85,28 +85,28 @@ namespace neogfx
 		optional_style iStyle;
 		optional_style_name iStyleName;
 		bool iUnderline;
-		weight_e iWeight;
+		font_weight iWeight;
 		point_size iSize;
 		bool iKerning;
 	};
 
 	font_info::instance::instance() :
-		iSize{}, iUnderline{ false }, iWeight{ WeightNormal }, iKerning{ false }
+		iSize{}, iUnderline{ false }, iWeight{ font_weight::Normal }, iKerning{ false }
 	{
 	}
 
-	font_info::instance::instance(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
-		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style(aStyle) }, iSize{ aSize }, iKerning{ false }
+	font_info::instance::instance(const std::string& aFamilyName, font_style aStyle, point_size aSize) :
+		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iUnderline{ (aStyle & font_style::Underline) == font_style::Underline }, iWeight{ weight_from_style(aStyle) }, iSize{ aSize }, iKerning{ false }
 	{
 	}
 
 	font_info::instance::instance(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
-		iFamilyName{ aFamilyName }, iStyleName{ aStyleName }, iUnderline(false), iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ false }
+		iFamilyName{ aFamilyName }, iStyleName{ aStyleName }, iUnderline{ false }, iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ false }
 	{
 	}
 
-	font_info::instance::instance(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
-		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iStyleName{ aStyleName }, iUnderline{ (aStyle & Underline) == Underline }, iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ false }
+	font_info::instance::instance(const std::string& aFamilyName, font_style aStyle, const std::string& aStyleName, point_size aSize) :
+		iFamilyName{ aFamilyName }, iStyle{ aStyle }, iStyleName{ aStyleName }, iUnderline{ (aStyle & font_style::Underline) == font_style::Underline }, iWeight{ weight_from_style_name(aStyleName) }, iSize{ aSize }, iKerning{ false }
 	{
 	}
 
@@ -115,7 +115,7 @@ namespace neogfx
 		iStyle{ aStyle },
 		iStyleName{ aStyleName },
 		iUnderline{ false },
-		iWeight{ aStyleName != std::nullopt ? weight_from_style_name(*aStyleName) : aStyle != std::nullopt ? weight_from_style(*aStyle) :	WeightNormal },
+		iWeight{ aStyleName != std::nullopt ? weight_from_style_name(*aStyleName) : aStyle != std::nullopt ? weight_from_style(*aStyle) : font_weight::Normal },
 		iSize{ aSize },
 		iKerning{ true }
 	{
@@ -146,7 +146,7 @@ namespace neogfx
 	{
 	}
 
-	font_info::font_info(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
+	font_info::font_info(const std::string& aFamilyName, font_style aStyle, point_size aSize) :
 		iInstance{ std::make_shared<instance>(aFamilyName, aStyle, aSize) }
 	{
 	}
@@ -157,7 +157,7 @@ namespace neogfx
 
 	}
 
-	font_info::font_info(const std::string& aFamilyName, style_e aStyle, const std::string& aStyleName, point_size aSize) :
+	font_info::font_info(const std::string& aFamilyName, font_style aStyle, const std::string& aStyleName, point_size aSize) :
 		iInstance{ std::make_shared<instance>(aFamilyName, aStyle, aStyleName, aSize) }
 	{
 
@@ -193,7 +193,7 @@ namespace neogfx
 		return iInstance->iStyle != std::nullopt;
 	}
 
-	font_info::style_e font_info::style() const
+	font_style font_info::style() const
 	{
 		if (style_available())
 			return *iInstance->iStyle;
@@ -216,7 +216,7 @@ namespace neogfx
 
 	bool font_info::underline() const
 	{
-		return iInstance->iUnderline || (font_info::style_available() && (font_info::style() & Underline) == Underline);
+		return iInstance->iUnderline || (font_info::style_available() && (font_info::style() & font_style::Underline) == font_style::Underline);
 	}
 
 	void font_info::set_underline(bool aUnderline)
@@ -228,7 +228,7 @@ namespace neogfx
 		}
 	}
 
-	font_info::weight_e font_info::weight() const
+	font_weight font_info::weight() const
 	{
 		return iInstance->iWeight;
 	}
@@ -261,7 +261,7 @@ namespace neogfx
 		}
 	}
 
-	font_info font_info::with_style(style_e aStyle) const
+	font_info font_info::with_style(font_style aStyle) const
 	{
 		return font_info(iInstance->iFamilyName, aStyle, optional_style_name{}, iInstance->iSize);
 	}
@@ -400,7 +400,7 @@ namespace neogfx
 	{
 	}
 
-	font::font(const std::string& aFamilyName, style_e aStyle, point_size aSize) :
+	font::font(const std::string& aFamilyName, font_style aStyle, point_size aSize) :
 		font_info{ aFamilyName, aStyle, aSize }, 
 		iInstance{ std::make_shared<instance>(service<i_font_manager>::instance().create_font(aFamilyName, aStyle, aSize, service<i_rendering_engine>::instance().default_screen_metrics())) }
 	{
@@ -424,7 +424,7 @@ namespace neogfx
 	{
 	}
 	
-	font::font(const font& aOther, style_e aStyle, point_size aSize) :
+	font::font(const font& aOther, font_style aStyle, point_size aSize) :
 		font_info{ aOther.native_font_face().family_name(), aStyle, aSize }, 
 		iInstance{ std::make_shared<instance>(service<i_font_manager>::instance().create_font(aOther.iInstance->native_font_face().native_font(), aStyle, aSize, service<i_rendering_engine>::instance().default_screen_metrics())) }
 	{
@@ -442,7 +442,7 @@ namespace neogfx
 	{
 	}
 
-	font::font(std::shared_ptr<i_native_font_face> aNativeFontFace, style_e aStyle) :
+	font::font(std::shared_ptr<i_native_font_face> aNativeFontFace, font_style aStyle) :
 		font_info{ aNativeFontFace->family_name(), aStyle, aNativeFontFace->style_name(), aNativeFontFace->size() }, 
 		iInstance{ std::make_shared<instance>(std::move(aNativeFontFace)) }
 	{
@@ -453,7 +453,7 @@ namespace neogfx
 		return font(service<i_font_manager>::instance().load_font_from_file(aFileName, service<i_rendering_engine>::instance().default_screen_metrics()));
 	}
 
-	font font::load_from_file(const std::string& aFileName, style_e aStyle, point_size aSize)
+	font font::load_from_file(const std::string& aFileName, font_style aStyle, point_size aSize)
 	{
 		return font(service<i_font_manager>::instance().load_font_from_file(aFileName, aStyle, aSize, service<i_rendering_engine>::instance().default_screen_metrics()));
 	}
@@ -468,7 +468,7 @@ namespace neogfx
 		return font(service<i_font_manager>::instance().load_font_from_memory(aData, aSizeInBytes, service<i_rendering_engine>::instance().default_screen_metrics()));
 	}
 
-	font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, style_e aStyle, point_size aSize)
+	font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, font_style aStyle, point_size aSize)
 	{
 		return font(service<i_font_manager>::instance().load_font_from_memory(aData, aSizeInBytes, aStyle, aSize, service<i_rendering_engine>::instance().default_screen_metrics()));
 	}
@@ -517,9 +517,9 @@ namespace neogfx
 		return native_font_face().family_name();
 	}
 
-	font::style_e font::style() const
+	font_style font::style() const
 	{
-		return static_cast<style_e>(native_font_face().style() | (underline() ? Underline : 0));
+		return static_cast<font_style>(native_font_face().style() | (underline() ? font_style::Underline : font_style{}));
 	}
 
 	const std::string& font::style_name() const

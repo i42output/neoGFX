@@ -39,7 +39,7 @@ namespace neogfx
 				if (iFonts[modelRow] == std::nullopt)
 				{
 					auto& fm = service<i_font_manager>::instance();
-					iFonts[modelRow] = font{ fm.font_family(modelRow), font::Normal, app::instance().current_style().font_info().size() };
+					iFonts[modelRow] = font{ fm.font_family(modelRow), font_style::Normal, app::instance().current_style().font_info().size() };
 				}
 				return iFonts[modelRow];
 			}

@@ -1016,6 +1016,12 @@ int main(int argc, char* argv[])
 		ng::vertical_layout gl(gamePage);
 		create_game(gl);
 
+		neolib::basic_random<uint8_t> rngColour;
+		auto random_colour = [&]()
+		{
+			return ng::colour{ rngColour(255), rngColour(255), rngColour(255) };
+		};
+
 		auto& tabDrawing = tabContainer.add_tab_page("Drawing").as_widget();
 		ng::vertical_layout tabDrawingLayout1{ tabDrawing };
 		ng::horizontal_layout tabDrawingLayout2{ tabDrawing };
@@ -1030,8 +1036,9 @@ int main(int argc, char* argv[])
 		easingDropDown.selection_model().set_current_index(ng::item_model_index{ 0 });
 		easingDropDown.accept_selection();
 		ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
-		ng::texture tex{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample };
-		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw, &tex](ng::graphics_context& aGc)
+		ng::texture tex{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Nearest };
+		ng::font renderToTextureFont{ tabDrawing.font(), ng::font_style::Bold, 10.0 };
+		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw, &tex, renderToTextureFont, &random_colour](ng::graphics_context& aGc)
 		{
 			ng::service<ng::i_rendering_engine>::instance().want_game_mode();
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
@@ -1060,14 +1067,18 @@ int main(int argc, char* argv[])
 			{
 				ng::graphics_context texGc{ tex };
 				texGc.clear(ng::colour{});
-				texGc.draw_rect(ng::rect{ ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ ng::colour::Blue.with_alpha(0xC0), 1.0 });
-				texGc.draw_line(ng::point{ 0.0, 0.0 }, ng::point{ 64.0, 64.0 }, ng::pen{ ng::colour::Blue.with_alpha(0xC0), aGc.dpi_scale(4.0) });
-				texGc.draw_line(ng::point{ 64.0, 0.0 }, ng::point{ 0.0, 64.0 }, ng::pen{ ng::colour::Blue.with_alpha(0xC0), aGc.dpi_scale(4.0) });
-				texGc.draw_multiline_text(ng::point{ 0.0, 0.0 }, "Render To\nTexture", tabDrawing.font(), ng::text_appearance{ ng::colour::Blue, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White } }); 
+				auto c = random_colour();
+				texGc.draw_rect(ng::rect{ ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ c, 1.0 });
+				texGc.draw_line(ng::point{ 0.0, 0.0 }, ng::point{ 64.0, 64.0 }, ng::pen{ c, aGc.dpi_scale(4.0) });
+				texGc.draw_line(ng::point{ 64.0, 0.0 }, ng::point{ 0.0, 64.0 }, ng::pen{ c, aGc.dpi_scale(4.0) });
+				texGc.draw_multiline_text(ng::point{ 0.0, 0.0 }, "Render\nTo\nTexture", renderToTextureFont, ng::text_appearance{ ng::colour::Black, ng::text_effect{ ng::text_effect_type::Outline, c } });
 			}
-			aGc.flush();
-			aGc.draw_texture(ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, tex);
-			aGc.flush();
+			
+			ng::point texLocation{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 4.0 };
+			aGc.draw_texture(texLocation + ng::point{ 0.0, 0.0 }, tex);
+			aGc.draw_texture(texLocation + ng::point{ 0.0, 65.0 }, tex, ng::colour::White, ng::shader_effect::Colourize);
+			aGc.draw_texture(texLocation + ng::point{ 65.0, 0.0 }, tex, ng::colour::White, ng::shader_effect::Colourize);
+			aGc.draw_texture(texLocation + ng::point{ 65.0, 65.0 }, tex);
 		});
 
 		neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
@@ -1093,14 +1104,9 @@ int main(int argc, char* argv[])
 		});
 
 		auto& circlesWidget = tabContainer.add_tab_page("Circles").as_widget();
-		circlesWidget.painting([&circlesWidget](ng::graphics_context& aGc)
+		circlesWidget.painting([&circlesWidget, &random_colour](ng::graphics_context& aGc)
 		{
 			neolib::basic_random<ng::coordinate> prng;
-			neolib::basic_random<uint8_t> rngColour;
-			auto random_colour = [&]()
-			{
-				return ng::colour{ rngColour(255), rngColour(255), rngColour(255) };
-			};
 			for (int i = 0; i < 100; ++i)
 			{
 				switch (static_cast<int>(prng(2)))
@@ -1114,12 +1120,12 @@ int main(int argc, char* argv[])
 					aGc.draw_circle(
 						ng::point{ prng(circlesWidget.client_rect().cx - 1), prng(circlesWidget.client_rect().cy - 1) }, prng(255),
 						ng::pen{ random_colour(), prng(1, 3) },
-						random_colour().with_alpha(rngColour(255)));
+						random_colour().with_alpha(random_colour().red()));
 					break;
 				case 2:
 					aGc.fill_circle(
 						ng::point{ prng(circlesWidget.client_rect().cx - 1), prng(circlesWidget.client_rect().cy - 1) }, prng(255),
-						random_colour().with_alpha(rngColour(255)));
+						random_colour().with_alpha(random_colour().red()));
 					break;
 				}
 			}

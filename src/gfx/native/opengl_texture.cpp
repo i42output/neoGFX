@@ -39,7 +39,7 @@ namespace neogfx
 		iHandle{ 0 },
 		iUri{ "neogfx::opengl_texture::internal" },
 		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
-		iLogicalCoordinates{ vec2{ 0.0, 0.0}, aExtents.to_vec2() },
+		iLogicalCoordinates{ vec2{ 1.0, 1.0}, aExtents.to_vec2() + vec2{ 1.0, 1.0} },
 		iFrameBuffer{ 0 },
 		iDepthStencilBuffer{ 0 }
 	{
@@ -121,7 +121,7 @@ namespace neogfx
 		iHandle{ 0 },
 		iUri{ aImage.uri() },
 		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
-		iLogicalCoordinates{ vec2{ 1.0, 1.0}, aImage.extents().to_vec2() },
+		iLogicalCoordinates{ vec2{ 1.0, 1.0}, aImage.extents().to_vec2() + vec2{ 1.0, 1.0} },
 		iFrameBuffer{ 0 },
 		iDepthStencilBuffer{ 0 }
 	{
