@@ -914,7 +914,6 @@ namespace neogfx
 	const std::array<GLuint, 3>& opengl_renderer::gradient_textures() const
 	{
 		// todo: use texture class
-		glCheck(glEnable(GL_TEXTURE_RECTANGLE));
 		if (iGradientTextures == std::nullopt)
 		{
 			iGradientTextures.emplace(std::array<GLuint, 3>{});

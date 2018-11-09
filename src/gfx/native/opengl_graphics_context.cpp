@@ -996,7 +996,6 @@ namespace neogfx
 	void opengl_graphics_context::gradient_off()
 	{
 		iShaderProgramStack.pop_back();
-		glCheck(glDisable(GL_TEXTURE_RECTANGLE));
 	}
 
 	void opengl_graphics_context::line_stipple_on(uint32_t aFactor, uint16_t aPattern)

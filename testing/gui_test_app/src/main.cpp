@@ -1074,7 +1074,7 @@ int main(int argc, char* argv[])
 				texGc.draw_multiline_text(ng::point{ 0.0, 0.0 }, "Render\nTo\nTexture", renderToTextureFont, ng::text_appearance{ ng::colour::Black, ng::text_effect{ ng::text_effect_type::Outline, c } });
 			}
 			
-			ng::point texLocation{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 4.0 };
+			auto texLocation = ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
 			aGc.draw_texture(texLocation + ng::point{ 0.0, 0.0 }, tex);
 			aGc.draw_texture(texLocation + ng::point{ 0.0, 65.0 }, tex, ng::colour::White, ng::shader_effect::Colourize);
 			aGc.draw_texture(texLocation + ng::point{ 65.0, 0.0 }, tex, ng::colour::White, ng::shader_effect::Colourize);
