@@ -107,6 +107,8 @@ namespace neogfx
 		void reset_clip() const;
 		double opacity() const;
 		void set_opacity(double aOpacity);
+		neogfx::blending_mode blending_mode() const;
+		void set_blending_mode(neogfx::blending_mode aBlendingMode) const;
 		neogfx::smoothing_mode smoothing_mode() const;
 		void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const;
 		void push_logical_operation(logical_operation aLogicalOperation) const;
@@ -217,6 +219,7 @@ namespace neogfx
 		mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable neogfx::logical_coordinates iLogicalCoordinates;
 		mutable double iOpacity;
+		mutable neogfx::blending_mode iBlendingMode;
 		mutable neogfx::smoothing_mode iSmoothingMode;
 		mutable bool iSubpixelRendering;
 		mutable std::optional<std::pair<bool, char>> iMnemonic;

@@ -503,10 +503,10 @@ namespace neogfx
 				{
 					auto r = colour_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
 					colour rgbColour = (std::holds_alternative<hsv_colour>(r) ? static_variant_cast<const hsv_colour&>(r).to_rgb() : static_variant_cast<const colour&>(r));
-					iPixels[255 - z][y][0] = rgbColour.red();
-					iPixels[255 - z][y][1] = rgbColour.green();
-					iPixels[255 - z][y][2] = rgbColour.blue();
-					iPixels[255 - z][y][3] = 255; // alpha
+					iPixels[z][y][0] = rgbColour.red();
+					iPixels[z][y][1] = rgbColour.green();
+					iPixels[z][y][2] = rgbColour.blue();
+					iPixels[z][y][3] = 255; // alpha
 				}
 			}
 			iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);

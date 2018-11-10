@@ -79,6 +79,7 @@ namespace neogfx
 		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
 		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
+		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -95,6 +96,7 @@ namespace neogfx
 		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
 		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
+		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -111,6 +113,7 @@ namespace neogfx
 		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
 		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
+		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -127,6 +130,7 @@ namespace neogfx
 		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
 		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
+		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -143,6 +147,7 @@ namespace neogfx
 		iLogicalCoordinateSystem{ aOther.logical_coordinate_system() },
 		iLogicalCoordinates{ aOther.logical_coordinates() },
 		iOpacity{ 1.0 },
+		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
@@ -770,6 +775,20 @@ namespace neogfx
 		{
 			iOpacity = aOpacity;
 			native_context().enqueue(graphics_operation::set_opacity{ aOpacity });
+		}
+	}
+
+	blending_mode graphics_context::blending_mode() const
+	{
+		return iBlendingMode;
+	}
+
+	void graphics_context::set_blending_mode(neogfx::blending_mode aBlendingMode) const
+	{
+		if (iBlendingMode != aBlendingMode)
+		{
+			iBlendingMode = aBlendingMode;
+			native_context().enqueue(graphics_operation::set_blending_mode{ aBlendingMode });
 		}
 	}
 

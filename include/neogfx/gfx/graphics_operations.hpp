@@ -73,6 +73,11 @@ namespace neogfx
 			double opacity;
 		};
 
+		struct set_blending_mode
+		{
+			blending_mode blendingMode;
+		};
+
 		struct set_smoothing_mode
 		{
 			smoothing_mode smoothingMode;
@@ -257,6 +262,7 @@ namespace neogfx
 			clip_to_path,
 			reset_clip,
 			set_opacity,
+			set_blending_mode,
 			set_smoothing_mode,
 			push_logical_operation,
 			pop_logical_operation,
@@ -297,6 +303,7 @@ namespace neogfx
 			ClipToPath,
 			ResetClip,
 			SetOpacity,
+			SetBlendingMode,
 			SetSmoothingMode,
 			PushLogicalOperation,
 			PopLogicalOperation,

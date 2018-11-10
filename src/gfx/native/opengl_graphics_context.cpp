@@ -178,7 +178,12 @@ namespace neogfx
 			typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
 		public:
 			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
+				iParent{ aParent }, 
+				iUse{ aParent.rendering_engine().vertex_arrays() }, 
+				iMode{ aMode }, 
+				iWithTextures{ false }, 
+				iStart{ static_cast<GLint>(vertices().size()) }, 
+				iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
 					execute();
@@ -187,7 +192,12 @@ namespace neogfx
 					throw not_enough_room();
 			}
 			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ false }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
+				iParent{ aParent }, 
+				iUse{ aParent.rendering_engine().vertex_arrays() }, 
+				iMode{ aMode }, 
+				iWithTextures{ false }, 
+				iStart{ static_cast<GLint>(vertices().size()) }, 
+				iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
 					execute();
@@ -196,7 +206,12 @@ namespace neogfx
 					throw not_enough_room();
 			}
 			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
+				iParent{ aParent }, 
+				iUse{ aParent.rendering_engine().vertex_arrays() }, 
+				iMode{ aMode }, 
+				iWithTextures{ true }, 
+				iStart{ static_cast<GLint>(vertices().size()) }, 
+				iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
 					execute();
@@ -205,7 +220,12 @@ namespace neogfx
 					throw not_enough_room();
 			}
 			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-				iParent{ aParent }, iUse{ aParent.rendering_engine().vertex_arrays() }, iMode{ aMode }, iWithTextures{ true }, iStart{ static_cast<GLint>(vertices().size()) }, iUseBarrier{ aUseBarrier }
+				iParent{ aParent }, 
+				iUse{ aParent.rendering_engine().vertex_arrays() }, 
+				iMode{ aMode }, 
+				iWithTextures{ true }, 
+				iStart{ static_cast<GLint>(vertices().size()) }, 
+				iUseBarrier{ aUseBarrier }
 			{
 				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
 					execute();
@@ -324,6 +344,7 @@ namespace neogfx
 					iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
 				else
 					iParent.rendering_engine().vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
+				opengl_graphics_context::blend_as ba{ iParent, blending_mode::Default };
 				if (!iUseBarrier && mode() == translated_mode())
 				{
 					glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
@@ -435,6 +456,7 @@ namespace neogfx
 			}
 		private:
 			std::shared_ptr<use_vertex_arrays_instance> iInstance;
+
 		};
 	}
 
@@ -444,6 +466,7 @@ namespace neogfx
 		iWidget{ nullptr },
 		iLogicalCoordinateSystem{ iTarget.logical_coordinate_system() },
 		iLogicalCoordinates{ iTarget.logical_coordinates() },
+		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
 		iClipCounter{ 0 },
@@ -460,6 +483,7 @@ namespace neogfx
 		iWidget{ &aWidget },
 		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
 		iLogicalCoordinates{ iTarget.logical_coordinates() },
+		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
 		iClipCounter{ 0 },
@@ -476,6 +500,7 @@ namespace neogfx
 		iWidget{ aOther.iWidget },
 		iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
 		iLogicalCoordinates{ aOther.iLogicalCoordinates },
+		iBlendingMode{ aOther.iBlendingMode },
 		iSmoothingMode{ aOther.iSmoothingMode },
 		iSubpixelRendering{ aOther.iSubpixelRendering },
 		iClipCounter{ 0 },
@@ -602,6 +627,10 @@ namespace neogfx
 					(void)op;
 					reset_clip();
 				}
+				break;
+			case graphics_operation::operation_type::SetBlendingMode:
+				for (auto op = opBatch.first; op != opBatch.second; ++op)
+					set_blending_mode(static_variant_cast<const graphics_operation::set_blending_mode&>(*op).blendingMode);
 				break;
 			case graphics_operation::operation_type::SetSmoothingMode:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -896,6 +925,33 @@ namespace neogfx
 		}
 	}
 
+	neogfx::blending_mode opengl_graphics_context::blending_mode() const
+	{
+		return iBlendingMode;
+	}
+
+	void opengl_graphics_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
+		{
+		iBlendingMode = aBlendingMode;
+		switch (iBlendingMode)
+		{
+		case neogfx::blending_mode::None:
+			glCheck(glDisable(GL_BLEND));
+			break;
+		case neogfx::blending_mode::Default:
+			glCheck(glEnable(GL_BLEND));
+			if (render_target().target_type() == render_target_type::Surface)
+			{
+				glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+			}
+			else
+			{
+				glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+			}
+			break;
+		}
+	}
+
 	smoothing_mode opengl_graphics_context::smoothing_mode() const
 	{
 		return iSmoothingMode;
@@ -1039,7 +1095,7 @@ namespace neogfx
 	void opengl_graphics_context::set_pixel(const point& aPoint, const colour& aColour)
 	{
 		/* todo: faster alternative to this... */
-		disable_anti_alias daa(*this);
+		disable_anti_alias daa{ *this };
 		draw_pixel(aPoint, aColour.with_alpha(0xFF));
 	}
 
@@ -1697,10 +1753,7 @@ namespace neogfx
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
 
-		glCheck(glEnable(GL_BLEND));
-		glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
-		disable_anti_alias daa(*this);
+		disable_anti_alias daa{ *this };
 
 		bool useSubpixelShader = render_target().target_type() == render_target_type::Surface && firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
 
@@ -1829,8 +1882,7 @@ namespace neogfx
 			rendering_engine().active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));
 
 			glCheck(glActiveTexture(GL_TEXTURE1));
-			glCheck(glEnable(GL_BLEND));
-			glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
 			GLint previousTexture;
 			glCheck(glGetIntegerv(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &previousTexture));
 			glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(texture.native_texture()->handle())));

@@ -1036,7 +1036,20 @@ int main(int argc, char* argv[])
 		easingDropDown.selection_model().set_current_index(ng::item_model_index{ 0 });
 		easingDropDown.accept_selection();
 		ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
-		ng::texture tex{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample16x };
+		std::array<ng::texture, 4> tex = 
+		{
+			ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample },
+			ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample },
+			ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample },
+			ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample }
+		};
+		std::array<ng::colour, 4> texColour =
+		{
+			ng::colour::Red,
+			ng::colour::Green,
+			ng::colour::Blue,
+			ng::colour::White
+		};
 		ng::font renderToTextureFont{ "Exo 2", ng::font_style::Bold, 10.0 };
 		auto test_pattern = [renderToTextureFont](ng::graphics_context& aGc, const ng::point& aOrigin, double aDpiScale, const ng::colour& aColour, const std::string& aText)
 		{
@@ -1046,7 +1059,7 @@ int main(int argc, char* argv[])
 			aGc.draw_line(aOrigin + ng::point{ 64.0, 0.0 }, aOrigin + ng::point{ 0.0, 64.0 }, ng::pen{ aColour, aDpiScale * 4.0 });
 			aGc.draw_multiline_text(aOrigin + ng::point{ 2.0, 2.0 }, aText, renderToTextureFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black, 2.0 } });
 		};
-		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw, &tex, renderToTextureFont, &random_colour, &test_pattern](ng::graphics_context& aGc)
+		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw, &tex, &texColour, renderToTextureFont, &random_colour, &test_pattern](ng::graphics_context& aGc)
 		{
 			ng::service<ng::i_rendering_engine>::instance().want_game_mode();
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
@@ -1072,22 +1085,24 @@ int main(int argc, char* argv[])
 			aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
 			// render to texture demo
-			ng::graphics_context texGc{ tex };
-			texGc.clear(ng::colour{});
-			auto c = random_colour();
-			test_pattern(texGc, ng::point{}, aGc.dpi_scale(1.0), c, "Render\nTo\nTexture");
+			for (std::size_t i = 0; i < 4; ++i)
+			{
+				ng::graphics_context texGc{ tex[i] };
+				texGc.clear(ng::colour{});
+				test_pattern(texGc, ng::point{}, aGc.dpi_scale(1.0), texColour[i], "Render\nTo\nTexture");
+			}
 			
 			auto texLocation = ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
-			aGc.draw_texture(texLocation + ng::point{ 0.0, 0.0 }, tex);
-			aGc.draw_texture(texLocation + ng::point{ 0.0, 65.0 }, tex, ng::colour::White, ng::shader_effect::Colourize);
-			aGc.draw_texture(texLocation + ng::point{ 65.0, 0.0 }, tex, ng::colour::White, ng::shader_effect::Colourize);
-			aGc.draw_texture(texLocation + ng::point{ 65.0, 65.0 }, tex);
+			aGc.draw_texture(texLocation + ng::point{ 0.0, 0.0 }, tex[0]);
+			aGc.draw_texture(texLocation + ng::point{ 0.0, 65.0 }, tex[1]);
+			aGc.draw_texture(texLocation + ng::point{ 65.0, 0.0 }, tex[2]);
+			aGc.draw_texture(texLocation + ng::point{ 65.0, 65.0 }, tex[3]);
 
 			texLocation.x += 140.0;
-			test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, aGc.dpi_scale(1.0), c, "Render\nTo\nScreen");
-			test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, aGc.dpi_scale(1.0), ng::colour::White, "Render\nTo\nScreen");
-			test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, aGc.dpi_scale(1.0), ng::colour::White, "Render\nTo\nScreen");
-			test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, aGc.dpi_scale(1.0), c, "Render\nTo\nScreen");
+			test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, aGc.dpi_scale(1.0), texColour[0], "Render\nTo\nScreen");
+			test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, aGc.dpi_scale(1.0), texColour[1], "Render\nTo\nScreen");
+			test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, aGc.dpi_scale(1.0), texColour[2], "Render\nTo\nScreen");
+			test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, aGc.dpi_scale(1.0), texColour[3], "Render\nTo\nScreen");
 		});
 
 		neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)

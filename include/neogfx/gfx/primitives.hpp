@@ -50,6 +50,12 @@ namespace neogfx
 
 	typedef std::pair<vec2, vec2> logical_coordinates;
 
+	enum class blending_mode
+	{
+		None,
+		Default // todo
+	};
+
 	enum class smoothing_mode
 	{
 		None,

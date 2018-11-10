@@ -391,7 +391,7 @@ namespace neogfx
 					"	switch(effect)\n"
 					"	{\n"
 					"	case 0:\n" // effect: None
-					"		FragColor = texel.rgba * Color;\n"
+					"		FragColor = texel.rgba;\n"
 					"		break;\n"
 					"	case 1:\n" // effect: Colourize, ColourizeAverage
 					"		{\n"
@@ -457,12 +457,14 @@ namespace neogfx
 					"	ivec2 texCoord = ivec2(vTexCoord * texExtents);\n"
 					"	int i;\n"
 					"	for (i = 0; i < texSamples; ++i)\n"
-					"		texel = texel + texelFetch(tex, texCoord, i).rgba;\n"
-					"	texel = texel / texSamples;\n"
+					"	{\n"
+					"		texel += texelFetch(tex, texCoord, i).rgba;\n"
+					"	}\n"
+					"	texel /= float(texSamples);\n"
 					"	switch(effect)\n"
 					"	{\n"
 					"	case 0:\n" // effect: None
-					"		FragColor = texel.rgba * Color;\n"
+					"		FragColor = texel.rgba;\n"
 					"		break;\n"
 					"	case 1:\n" // effect: Colourize, ColourizeAverage
 					"		{\n"

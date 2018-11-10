@@ -34,7 +34,22 @@ namespace neogfx
 
 	class opengl_graphics_context : public i_graphics_context
 	{
-	private:
+	public:
+		class blend_as
+		{
+		public:
+			blend_as(opengl_graphics_context& aParent, neogfx::blending_mode aNewBlendigMode) : iParent(aParent), iOldBlendingMode(aParent.blending_mode())
+			{
+				iParent.set_blending_mode(aNewBlendigMode);
+			}
+			~blend_as()
+			{
+				iParent.set_blending_mode(iOldBlendingMode);
+			}
+		private:
+			opengl_graphics_context& iParent;
+			neogfx::blending_mode iOldBlendingMode;
+		};
 		class scoped_anti_alias
 		{
 		public:
@@ -72,7 +87,7 @@ namespace neogfx
 	public:
 		void enqueue(const graphics_operation::operation& aOperation) override;
 		void flush() override;
-	protected:
+	public:
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
 		const neogfx::logical_coordinates& logical_coordinates() const override;
@@ -83,6 +98,8 @@ namespace neogfx
 		void clip_to(const rect& aRect);
 		void clip_to(const path& aPath, dimension aPathOutline);
 		void reset_clip();
+		neogfx::blending_mode blending_mode() const;
+		void set_blending_mode(neogfx::blending_mode aBlendingMode);
 		neogfx::smoothing_mode smoothing_mode() const;
 		void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode);
 		void push_logical_operation(logical_operation aLogicalOperation);
@@ -129,6 +146,7 @@ namespace neogfx
 		graphics_operation::queue iQueue;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
 		mutable neogfx::logical_coordinates iLogicalCoordinates;
+		neogfx::blending_mode iBlendingMode;
 		neogfx::smoothing_mode iSmoothingMode; 
 		bool iSubpixelRendering;
 		std::vector<logical_operation> iLogicalOperationStack;

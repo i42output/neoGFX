@@ -40,6 +40,7 @@ namespace neogfx
 			case ClipToPath: return "ClipToPath";
 			case ResetClip: return "ResetClip";
 			case SetOpacity: return "SetOpacity";
+			case SetBlendingMode: return "SetBlendingMode";
 			case SetSmoothingMode: return "SetSmoothingMode";
 			case PushLogicalOperation: return "PushLogicalOperation";
 			case PopLogicalOperation: return "PopLogicalOperation";

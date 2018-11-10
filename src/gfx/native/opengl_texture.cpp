@@ -66,20 +66,22 @@ namespace neogfx
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 				break;
 			}
-			if (aColour != std::nullopt)
+			if (sampling() != texture_sampling::Multisample)
 			{
-				if (sampling() == texture_sampling::Multisample)
-					throw multisample_texture_initialization_unsupported();
-				std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
-				for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-					for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-					{
-						data[y * iStorageSize.cx * 4 + x * 4 + 0] = aColour->red();
-						data[y * iStorageSize.cx * 4 + x * 4 + 1] = aColour->green();
-						data[y * iStorageSize.cx * 4 + x * 4 + 2] = aColour->blue();
-						data[y * iStorageSize.cx * 4 + x * 4 + 3] = aColour->alpha();
-					}
-				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
+				std::vector<uint8_t> data;
+				if (aColour != std::nullopt)
+				{
+					(iStorageSize.cx * 4 * iStorageSize.cy);
+					for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
+						for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+						{
+							data[y * iStorageSize.cx * 4 + x * 4 + 0] = aColour->red();
+							data[y * iStorageSize.cx * 4 + x * 4 + 1] = aColour->green();
+							data[y * iStorageSize.cx * 4 + x * 4 + 2] = aColour->blue();
+							data[y * iStorageSize.cx * 4 + x * 4 + 3] = aColour->alpha();
+						}
+				}
+				glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, data.empty() ? nullptr : &data[0]));
 				if (sampling() == texture_sampling::NormalMipmap)
 				{
 					glCheck(glGenerateMipmap(GL_TEXTURE_2D));
@@ -87,18 +89,9 @@ namespace neogfx
 			}
 			else
 			{
-				if (sampling() != texture_sampling::Multisample)
-				{
-					glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-					if (sampling() == texture_sampling::NormalMipmap)
-					{
-						glCheck(glGenerateMipmap(GL_TEXTURE_2D));
-					}
-				}
-				else
-				{
-					glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
-				}
+				if (aColour != std::nullopt)
+					throw multisample_texture_initialization_unsupported();
+				glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), GL_RGBA8, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
 			}
 			glCheck(glBindTexture(sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
 		}
@@ -145,12 +138,15 @@ namespace neogfx
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 				break;
+			case texture_sampling::Multisample:
+				throw multisample_texture_initialization_unsupported();
+				break;
 			}
 			switch (aImage.colour_format())
 			{
 			case colour_format::RGBA8:
 				{
-					const uint8_t* imageData = static_cast<const uint8_t*>(aImage.data());
+					const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cdata());
 					std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
 					for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
 						for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
@@ -385,6 +381,8 @@ namespace neogfx
 			glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 			glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples(), GL_DEPTH24_STENCIL8, static_cast<GLsizei>(storage_extents().cx), static_cast<GLsizei>(storage_extents().cy + 1)));
+			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
+			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
 		}
 		else
 		{
@@ -407,6 +405,10 @@ namespace neogfx
 				glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(native_texture()->handle()), 0));
 			}
 		}
+		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
+			throw failed_to_create_framebuffer(glErrorString(status));
 		glCheck(glViewport(1, 1, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
