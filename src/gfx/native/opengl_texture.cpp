@@ -266,12 +266,31 @@ namespace neogfx
 			glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
 		}
 		else
-			throw multisample_texture_initialization_unsupported();
+			throw unsupported_sampling_type_for_function();
 	}
 
 	void opengl_texture::set_pixels(const i_image& aImage)
 	{
 		set_pixels(rect{ point{}, aImage.extents() }, aImage.cdata());
+	}
+
+	void opengl_texture::set_pixel(const point& aPosition, const colour& aColour)
+	{
+		std::array<uint8_t, 4> pixel{ aColour.red(), aColour.green(), aColour.blue(), aColour.alpha() };
+		set_pixels(rect{ aPosition, size{1.0, 1.0} }, &pixel);
+	}
+
+	colour opengl_texture::get_pixel(const point& aPosition) const
+	{
+		switch (sampling())
+		{
+		case texture_sampling::Normal:
+		case texture_sampling::Nearest:
+			throw std::logic_error("opengl_texture::get_pixel: function not yet implemented");
+			break;
+		default:
+			throw unsupported_sampling_type_for_function();
+		}
 	}
 
 	void* opengl_texture::handle() const
@@ -368,7 +387,13 @@ namespace neogfx
 
 	void opengl_texture::activate_target() const
 	{
-		service<i_rendering_engine>::instance().activate_context(*this);
+		if (service<i_rendering_engine>::instance().active_target() != this)
+		{
+			target_activating.trigger();
+			service<i_rendering_engine>::instance().activate_context(*this);
+		}
+//		else
+//			throw already_active();
 		if (iFrameBuffer == 0)
 		{
 			glCheck(glEnable(GL_MULTISAMPLE));
@@ -380,9 +405,17 @@ namespace neogfx
 			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(native_texture()->handle()), 0));
 			glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
-			glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples(), GL_DEPTH24_STENCIL8, static_cast<GLsizei>(storage_extents().cx), static_cast<GLsizei>(storage_extents().cy + 1)));
+			if (sampling() != texture_sampling::Multisample)
+			{
+				glCheck(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(storage_extents().cx), static_cast<GLsizei>(storage_extents().cy)));
+			}
+			else
+			{
+				glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples(), GL_DEPTH24_STENCIL8, static_cast<GLsizei>(storage_extents().cx), static_cast<GLsizei>(storage_extents().cy)));
+			}
 			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
 			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
+			glCheck(glClear(GL_DEPTH_BUFFER_BIT));
 		}
 		else
 		{
@@ -405,7 +438,6 @@ namespace neogfx
 				glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(native_texture()->handle()), 0));
 			}
 		}
-		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
 			throw failed_to_create_framebuffer(glErrorString(status));
@@ -418,9 +450,27 @@ namespace neogfx
 	{
 		if (service<i_rendering_engine>::instance().active_target() == this)
 		{
+			target_deactivating.trigger();
 			service<i_rendering_engine>::instance().deactivate_context();
 			return;
 		}
 		throw not_active();
+	}
+
+	colour opengl_texture::read_pixel(const point& aPosition) const
+	{
+		if (sampling() != neogfx::texture_sampling::Multisample)
+		{
+			bool alreadyActive = (service<i_rendering_engine>::instance().active_target() == this);
+			if (!alreadyActive)
+				activate_target();
+			std::array<uint8_t, 4> pixel;
+			glCheck(glReadPixels(aPosition.x + 1, aPosition.y + 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel));
+			if (!alreadyActive)
+				deactivate_target();
+			return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
+		}
+		else
+			throw std::logic_error("opengl_texture::read_pixel: not yet implemented for multisample render targets");
 	}
 }

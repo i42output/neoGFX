@@ -475,6 +475,10 @@ namespace neogfx
 		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
+		iSink += render_target().target_deactivating([this]() 
+		{ 
+			flush(); 
+		});
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget) :
@@ -492,6 +496,10 @@ namespace neogfx
 		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
+		iSink += render_target().target_deactivating([this]()
+		{
+			flush();
+		});
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const opengl_graphics_context& aOther) :
@@ -509,6 +517,10 @@ namespace neogfx
 		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(iSmoothingMode);
+		iSink += render_target().target_deactivating([this]()
+		{
+			flush();
+		});
 	}
 
 	opengl_graphics_context::~opengl_graphics_context()
@@ -940,14 +952,7 @@ namespace neogfx
 			break;
 		case neogfx::blending_mode::Default:
 			glCheck(glEnable(GL_BLEND));
-			if (render_target().target_type() == render_target_type::Surface)
-			{
-				glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-			}
-			else
-			{
-				glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-			}
+			glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 			break;
 		}
 	}
@@ -1372,11 +1377,11 @@ namespace neogfx
 		}
 	}
 
-	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill)
+	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)
 	{
 		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
 
-		graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill } };
+		graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill, aZpos } };
 		fill_rect(graphics_operation::batch{ &op, &op + 1 });
 	}
 
@@ -1395,7 +1400,7 @@ namespace neogfx
 			for (auto op = aFillRectOps.first; op != aFillRectOps.second; ++op)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
-				auto newVertices = back_insert_rect_vertices(vertexArrays.instance(), drawOp.rect, 0.0, mesh_type::Triangles);
+				auto newVertices = back_insert_rect_vertices(vertexArrays.instance(), drawOp.rect, 0.0, mesh_type::Triangles, drawOp.zpos);
 				for (auto i = newVertices; i != vertexArrays.instance().end(); ++i)
 					i->rgba = colour_to_vec4f(std::holds_alternative<colour>(drawOp.fill) ?
 						std::array<uint8_t, 4>{{

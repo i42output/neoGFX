@@ -118,7 +118,7 @@ namespace neogfx
 		bool is_subpixel_rendering_on() const;
 		void subpixel_rendering_on() const;
 		void subpixel_rendering_off() const;
-		void clear(const colour& aColour) const;
+		void clear(const colour& aColour, const std::optional<scalar>& aZpos = std::optional<scalar>{}) const;
 		void clear_depth_buffer() const;
 		void set_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_pixel(const point& aPoint, const colour& aColour) const;
@@ -131,7 +131,7 @@ namespace neogfx
 		void draw_shape(const game::mesh& aShape, const pen& aPen, const brush& aFill = brush{}) const;
 		void draw_entities(game::i_ecs& aEcs) const;
 		void draw_focus_rect(const rect& aRect) const;
-		void fill_rect(const rect& aRect, const brush& aFill) const;
+		void fill_rect(const rect& aRect, const brush& aFill, scalar aZpos = 0.0) const;
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const;
 		void fill_circle(const point& aCentre, dimension aRadius, const brush& aFill) const;
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const;

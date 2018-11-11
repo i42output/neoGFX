@@ -121,7 +121,7 @@ namespace neogfx
 		void draw_path(const path& aPath, const pen& aPen);
 		void draw_shape(const game::mesh& aMesh, const pen& aPen);
 		void draw_entities(game::i_ecs& aEcs, const mat44& aTransformation);
-		void fill_rect(const rect& aRect, const brush& aFill);
+		void fill_rect(const rect& aRect, const brush& aFill, scalar aZpos = 0.0);
 		void fill_rect(const graphics_operation::batch& aFillRectOps);
 		void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill);
 		void fill_circle(const point& aCentre, dimension aRadius, const brush& aFill);
@@ -161,5 +161,6 @@ namespace neogfx
 		font iLastDrawGlyphFallbackFont;
 		std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
 		vertices_2d_t iTempTextureCoords;
+		sink iSink;
 	};
 }

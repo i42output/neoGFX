@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/core/colour.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 
 namespace neogfx
@@ -69,6 +70,8 @@ namespace neogfx
 		virtual size storage_extents() const = 0;
 		virtual void set_pixels(const rect& aRect, const void* aPixelData) = 0;
 		virtual void set_pixels(const i_image& aImage) = 0;
+		virtual void set_pixel(const point& aPosition, const colour& aColour) = 0;
+		virtual colour get_pixel(const point& aPosition) const = 0;
 	public:
 		virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
 	};

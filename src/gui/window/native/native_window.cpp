@@ -232,7 +232,7 @@ namespace neogfx
 			case mouse_event_type::WheelScrolled:
 				surface_window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
 				break;
-			case mouse_event_type::ButtonPressed:
+			case mouse_event_type::ButtonClicked:
 				surface_window().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
 				break;
 			case mouse_event_type::ButtonDoubleClicked:
@@ -257,7 +257,7 @@ namespace neogfx
 			case mouse_event_type::WheelScrolled:
 				surface_window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.delta());
 				break;
-			case mouse_event_type::ButtonPressed:
+			case mouse_event_type::ButtonClicked:
 				surface_window().native_window_non_client_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
 				break;
 			case mouse_event_type::ButtonDoubleClicked:

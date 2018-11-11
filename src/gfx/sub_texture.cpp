@@ -109,7 +109,7 @@ namespace neogfx
 		case colour_format::RGBA8:
 			{
 				const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cdata());
-				std::vector<uint8_t> data(imageExtents.cx * 4 * imageExtents.cy);
+				std::vector<uint8_t> data((imageExtents.cx + 2) * 4 * (imageExtents.cy + 2));
 				for (std::size_t y = 1; y < 1 + imageExtents.cy; ++y)
 					for (std::size_t x = 1; x < 1 + imageExtents.cx; ++x)
 						for (std::size_t c = 0; c < 4; ++c)
@@ -117,6 +117,16 @@ namespace neogfx
 				set_pixels(rect{ point{}, aImage.extents() }, &data[0]);
 			}
 		}
+	}
+
+	void sub_texture::set_pixel(const point& aPosition, const colour& aColour)
+	{
+		native_texture()->set_pixel(aPosition + atlas_location().position(), aColour);
+	}
+
+	colour sub_texture::get_pixel(const point& aPosition) const
+	{
+		return native_texture()->get_pixel(aPosition + atlas_location().position());
 	}
 
 	std::shared_ptr<i_native_texture> sub_texture::native_texture() const

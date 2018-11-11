@@ -797,10 +797,10 @@ namespace neogfx
 	template <typename Elem, typename Traits>
 	inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const colour& aColour)
 	{
-		aStream << "[0x" << std::hex << (int) aColour.alpha() <<
-			", 0x" << std::hex << (int) aColour.red() <<
-			", 0x" << std::hex << (int) aColour.green() <<
-			", 0x" << std::hex << (int) aColour.blue() << "]" << std::endl;
+		aStream << "[A: 0x" << std::hex << (int)aColour.alpha() <<
+			", R: 0x" << std::hex << (int)aColour.red() <<
+			", G: 0x" << std::hex << (int)aColour.green() <<
+			", B: 0x" << std::hex << (int)aColour.blue() << "]";
 		return aStream; 
 	}
 

@@ -92,7 +92,7 @@ namespace neogfx
 	enum class mouse_event_type
 	{
 		WheelScrolled,
-		ButtonPressed,
+		ButtonClicked,
 		ButtonDoubleClicked,
 		ButtonReleased,
 		Moved

@@ -54,6 +54,8 @@ namespace neogfx
 		size storage_extents() const override;
 		void set_pixels(const rect& aRect, const void* aPixelData) override;
 		void set_pixels(const i_image& aImage) override;
+		void set_pixel(const point& aPosition, const colour& aColour) override;
+		colour get_pixel(const point& aPosition) const override;
 	public:
 		std::shared_ptr<i_native_texture> native_texture() const override;
 		// attributes

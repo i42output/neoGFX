@@ -190,6 +190,7 @@ namespace neogfx
 		{
 			rect rect;
 			brush fill;
+			scalar zpos;
 		};
 
 		struct fill_rounded_rect

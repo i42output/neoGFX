@@ -120,6 +120,20 @@ namespace neogfx
 		set_pixels(rect{ point{}, aImage.extents() }, aImage.cdata());
 	}
 
+	void texture::set_pixel(const point& aPosition, const colour& aColour)
+	{
+		if (is_empty())
+			throw texture_empty();
+		return iNativeTexture->set_pixel(aPosition, aColour);
+	}
+
+	colour texture::get_pixel(const point& aPosition) const
+	{
+		if (is_empty())
+			throw texture_empty();
+		return iNativeTexture->get_pixel(aPosition);
+	}
+
 	std::shared_ptr<i_native_texture> texture::native_texture() const
 	{
 		if (is_empty())

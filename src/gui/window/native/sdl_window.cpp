@@ -768,7 +768,7 @@ namespace neogfx
 					self.handle_event(non_client_mouse_event{ mouse_event_type::Moved, pt, modifiers });
 					break;
 				case WM_NCLBUTTONDOWN:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, pt, mouse_button::Left, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, modifiers });
 					break;
 				case WM_NCLBUTTONUP:
 					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, modifiers });
@@ -777,7 +777,7 @@ namespace neogfx
 					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Left, modifiers });
 					break;
 				case WM_NCRBUTTONDOWN:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, pt, mouse_button::Right, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, modifiers });
 					break;
 				case WM_NCRBUTTONUP:
 					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, modifiers });
@@ -786,7 +786,7 @@ namespace neogfx
 					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Right, modifiers });
 					break;
 				case WM_NCMBUTTONDOWN:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, pt, mouse_button::Middle, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, modifiers });
 					break;
 				case WM_NCMBUTTONUP:
 					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, modifiers });
@@ -795,7 +795,7 @@ namespace neogfx
 					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, mouse_button::Middle, modifiers });
 					break;
 				case WM_NCXBUTTONDOWN:
-					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonPressed, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, modifiers });
+					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, modifiers });
 					break;
 				case WM_NCXBUTTONUP:
 					self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, modifiers });
@@ -1267,7 +1267,7 @@ namespace neogfx
 			if (aEvent.button.clicks == 1)
 				push_event(
 					mouse_event{
-						mouse_event_type::ButtonPressed,
+						mouse_event_type::ButtonClicked,
 						point{ static_cast<coordinate>(aEvent.button.x), static_cast<coordinate>(aEvent.button.y) },
 						convert_mouse_button(aEvent.button.button),
 						pop_mouse_button_event_extra_info() });

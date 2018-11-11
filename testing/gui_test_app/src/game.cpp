@@ -78,7 +78,7 @@ using namespace neolib::stdint_suffix;
 
 	spritePlane.mouse_event([&spritePlane, &spaceshipSprite](const neogfx::mouse_event& e)
 	{
-		if ((e.type() == neogfx::mouse_event_type::ButtonPressed || 
+		if ((e.type() == neogfx::mouse_event_type::ButtonClicked || 
 			e.type() == neogfx::mouse_event_type::Moved) && (e.mouse_button() & neogfx::mouse_button::Left) == neogfx::mouse_button::Left)
 		{
 			auto newPos = ng::point{ e.position() - spritePlane.origin() };
@@ -295,7 +295,7 @@ void create_game(ng::i_layout& aLayout)
 
 	canvas.mouse_event([&canvas, spaceship](const neogfx::mouse_event& e)
 	{
-		if ((e.type() == neogfx::mouse_event_type::ButtonPressed ||
+		if ((e.type() == neogfx::mouse_event_type::ButtonClicked ||
 			e.type() == neogfx::mouse_event_type::Moved) && (e.mouse_button() & neogfx::mouse_button::Left) == neogfx::mouse_button::Left)
 		{
 			auto newPos = ng::point{ e.position() - canvas.origin() };

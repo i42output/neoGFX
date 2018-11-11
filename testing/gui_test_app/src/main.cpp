@@ -1036,6 +1036,7 @@ int main(int argc, char* argv[])
 		easingDropDown.selection_model().set_current_index(ng::item_model_index{ 0 });
 		easingDropDown.accept_selection();
 		ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };
+
 		std::array<ng::texture, 4> tex = 
 		{
 			ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample },
@@ -1057,9 +1058,13 @@ int main(int argc, char* argv[])
 			aGc.draw_rect(ng::rect{ aOrigin + ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ aColour, 1.0 });
 			aGc.draw_line(aOrigin + ng::point{ 0.0, 0.0 }, aOrigin + ng::point{ 64.0, 64.0 }, ng::pen{ aColour, aDpiScale * 4.0 });
 			aGc.draw_line(aOrigin + ng::point{ 64.0, 0.0 }, aOrigin + ng::point{ 0.0, 64.0 }, ng::pen{ aColour, aDpiScale * 4.0 });
-			aGc.draw_multiline_text(aOrigin + ng::point{ 2.0, 2.0 }, aText, renderToTextureFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black, 2.0 } });
+			aGc.draw_multiline_text(aOrigin + ng::point{ 4.0, 4.0 }, aText, renderToTextureFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black, 2.0 } });
+			aGc.draw_pixel(aOrigin + ng::point{ 2.0, 2.0 }, ng::colour{ 0xFF, 0x01, 0x01, 0xFF });
+			aGc.draw_pixel(aOrigin + ng::point{ 3.0, 2.0 }, ng::colour{ 0x02, 0xFF, 0x02, 0xFF });
+			aGc.draw_pixel(aOrigin + ng::point{ 4.0, 2.0 }, ng::colour{ 0x03, 0x03, 0xFF, 0xFF });
 		};
-		tabDrawing.painting([&app, &tabDrawing, &easingDropDown, &easingItemModel, &logo, &gw, &tex, &texColour, renderToTextureFont, &random_colour, &test_pattern](ng::graphics_context& aGc)
+
+		tabDrawing.painting([&](ng::graphics_context& aGc)
 		{
 			ng::service<ng::i_rendering_engine>::instance().want_game_mode();
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
@@ -1072,12 +1077,15 @@ int main(int argc, char* argv[])
 			aGc.fill_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::colour::Chocolate);
 			aGc.draw_arc(ng::point{ 500, 50 }, 75, 0.0, ng::to_rad(45.0), ng::pen{ ng::colour::White, 3.0 });
 			aGc.draw_arc(ng::point{ 500, 50 }, 50, ng::to_rad(5.0), ng::to_rad(40.0), ng::pen{ ng::colour::Yellow, 3.0 });
+
 			for (int x = 0; x < 10; ++x)
 				for (int y = 0; y < 10; ++y)
 					if ((x + y % 2) % 2 == 0)
 						aGc.draw_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::colour::Black);
 					else
 						aGc.set_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::colour::Goldenrod);
+
+			// easing function demo
 			ng::scalar t = app.program_elapsed_us();
 			auto d = 1000000.0;
 			auto x = ng::ease(easingItemModel.item(easingDropDown.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
@@ -1085,13 +1093,17 @@ int main(int argc, char* argv[])
 			aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
 			// render to texture demo
-			for (std::size_t i = 0; i < 4; ++i)
+			static bool texturesInitialized = false;
+			if (!texturesInitialized)
 			{
-				ng::graphics_context texGc{ tex[i] };
-				texGc.clear(ng::colour{});
-				test_pattern(texGc, ng::point{}, aGc.dpi_scale(1.0), texColour[i], "Render\nTo\nTexture");
+				for (std::size_t i = 0; i < 4; ++i)
+				{
+					ng::graphics_context texGc{ tex[i] };
+					test_pattern(texGc, ng::point{}, aGc.dpi_scale(1.0), texColour[i], "Render\nTo\nTexture");
+				}
+				texturesInitialized = true;
 			}
-			
+
 			auto texLocation = ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
 			aGc.draw_texture(texLocation + ng::point{ 0.0, 0.0 }, tex[0]);
 			aGc.draw_texture(texLocation + ng::point{ 0.0, 65.0 }, tex[1]);
@@ -1111,7 +1123,7 @@ int main(int argc, char* argv[])
 			aTimer.again();
 			tabDrawing.update();
 		}, 100 };
-		
+
 		auto& tabEditor = tabContainer.add_tab_page("Editor").as_widget();
 		ng::vertical_layout layoutEditor(tabEditor);
 		ng::text_edit textEdit2(layoutEditor);

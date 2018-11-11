@@ -73,7 +73,13 @@ namespace neogfx
 
 	void opengl_window::activate_target() const
 	{
-		service<i_rendering_engine>::instance().activate_context(*this);
+		if (rendering_engine().active_target() != this)
+		{
+			target_activating.trigger();
+			service<i_rendering_engine>::instance().activate_context(*this);
+		}
+//		else
+//			throw already_active();
 		if (iFrameBufferTexture != std::nullopt)
 		{
 			GLint currentFramebuffer;
@@ -106,10 +112,28 @@ namespace neogfx
 	{
 		if (rendering_engine().active_target() == this)
 		{
+			target_deactivating.trigger();
 			rendering_engine().deactivate_context();
 			return;
 		}
-		throw not_active();
+//		throw not_active();
+	}
+
+	colour opengl_window::read_pixel(const point& aPosition) const
+	{
+		if (target_texture().sampling() != neogfx::texture_sampling::Multisample)
+		{
+			bool alreadyActive = (service<i_rendering_engine>::instance().active_target() == this);
+			if (!alreadyActive)
+				activate_target();
+			std::array<uint8_t, 4> pixel;
+			glCheck(glReadPixels(aPosition.x, aPosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel));
+			if (!alreadyActive)
+				deactivate_target();
+			return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
+		}
+		else
+			throw std::logic_error("opengl_window::read_pixel: not yet implemented for multisample render targets");
 	}
 
 	neogfx::logical_coordinate_system opengl_window::logical_coordinate_system() const

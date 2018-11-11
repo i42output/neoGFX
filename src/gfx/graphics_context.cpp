@@ -366,9 +366,9 @@ namespace neogfx
 		pop_logical_operation();
 	}
 
-	void graphics_context::fill_rect(const rect& aRect, const brush& aFill) const
+	void graphics_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos) const
 	{
-		native_context().enqueue(graphics_operation::fill_rect{ to_device_units(aRect) + iOrigin, aFill });
+		native_context().enqueue(graphics_operation::fill_rect{ to_device_units(aRect) + iOrigin, aFill, aZpos });
 	}
 
 	void graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const
@@ -849,12 +849,12 @@ namespace neogfx
 		}
 	}
 
-	void graphics_context::clear(const colour& aColour) const
+	void graphics_context::clear(const colour& aColour, const std::optional<scalar>& aZpos) const
 	{
-		if (origin() == point{} && extents() == iRenderTarget.extents())
+		if (aZpos == std::nullopt)
 			native_context().enqueue(graphics_operation::clear{ aColour });
 		else
-			fill_rect(rect{ point{}, extents() }, aColour);
+			fill_rect(rect{ render_target().target_type() == render_target_type::Surface ? point{} : point{-1.0, -1.0}, iRenderTarget.target_texture().storage_extents() }, aColour, *aZpos);
 	}
 
 	void graphics_context::clear_depth_buffer() const

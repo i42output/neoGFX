@@ -37,7 +37,11 @@ namespace neogfx
 	class i_render_target : public i_device_metrics
 	{
 	public:
+		event<> target_activating;
+		event<> target_deactivating;
+	public:
 		struct failed_to_create_framebuffer : std::runtime_error { failed_to_create_framebuffer(const std::string& aReason) : std::runtime_error("neogfx::i_render_target::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + aReason) {} };
+		struct already_active : std::logic_error { already_active() : std::logic_error("neogfx::i_render_target::already_active") {} };
 		struct not_active : std::logic_error { not_active() : std::logic_error("neogfx::i_render_target::not_active") {} };
 	public:
 		virtual render_target_type target_type() const = 0;
@@ -52,6 +56,8 @@ namespace neogfx
 	public:
 		virtual void activate_target() const = 0;
 		virtual void deactivate_target() const = 0;
+	public:
+		virtual colour read_pixel(const point& aPosition) const = 0;
 	public:
 		virtual std::unique_ptr<i_graphics_context> create_graphics_context() const = 0;
 	};
