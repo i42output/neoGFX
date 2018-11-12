@@ -1817,16 +1817,21 @@ namespace neogfx
 							outlineAdjust = std::max(outlineAdjust, style.text_effect()->width());
 						break;
 					case 1:
-						aGraphicsContext.draw_glyph(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - outlineAdjust }, glyphFont, glyph,
-							selected && has_focus() ?
-								text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
-								text_appearance{
-									std::holds_alternative<colour>(style.text_colour()) ?
-										static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
-											static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
-											default_text_colour(),
-									style.background_colour() != neolib::none ? optional_text_colour{ neogfx::text_colour{ style.background_colour() } } : optional_text_colour{},
-									style.text_effect() });
+						{
+							glyph_text glyphText;
+							glyphText.push_back(glyph);
+							glyphText.set_glyph_font(glyphText.back(), glyphFont);
+							aGraphicsContext.draw_glyph_text(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - outlineAdjust }, glyphText,
+								selected && has_focus() ?
+									text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
+									text_appearance{
+										std::holds_alternative<colour>(style.text_colour()) ?
+											static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
+												static_variant_cast<const gradient&>(style.text_colour()).at((pos.x - margins().left + horizontal_scrollbar().position()) / std::max(client_rect(false).width(), iTextExtents.cx)) :
+												default_text_colour(),
+										style.background_colour() != neolib::none ? optional_text_colour{ neogfx::text_colour{ style.background_colour() } } : optional_text_colour{},
+										style.text_effect() });
+						}
 						break;
 					}
 					pos.x += glyph.advance().cx;

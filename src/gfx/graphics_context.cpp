@@ -19,7 +19,6 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/string_utils.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
 #ifdef u8
 #undef u8
 #include <hb.h>
@@ -36,6 +35,9 @@
 #include FT_GLYPH_H
 #include FT_OUTLINE_H
 #include FT_BITMAP_H
+#include "native/i_native_texture.hpp"
+#include "text/native/native_font_face.hpp"
+#include "../hid/native/i_native_surface.hpp"
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
@@ -45,9 +47,7 @@
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
-#include "native/i_native_texture.hpp"
-#include "text/native/native_font_face.hpp"
-#include "../hid/native/i_native_surface.hpp"
+#include <neogfx/gfx/graphics_context.hpp>
 
 namespace neogfx
 {
@@ -163,6 +163,12 @@ namespace neogfx
 		return iRenderTarget;
 	}
 
+	graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const optional_size& aExtents, texture_sampling aSampling) const
+	{
+		// todo
+		return ping_pong_buffers_t{ *this, *this };
+	}
+	
 	delta graphics_context::to_device_units(const delta& aValue) const
 	{
 		return units_converter(*this).to_device_units(aValue);
@@ -724,13 +730,6 @@ namespace neogfx
 		throw unattached();
 	}
 
-	i_native_font_face& graphics_context::to_native_font_face(const font& aFont)
-	{
-		return aFont.native_font_face();
-	}
-
-	// Forward on to native..
-
 	void graphics_context::flush() const
 	{
 		native_context().flush();
@@ -860,6 +859,17 @@ namespace neogfx
 	void graphics_context::clear_depth_buffer() const
 	{
 		native_context().enqueue(graphics_operation::clear_depth_buffer{});
+	}
+
+	void graphics_context::blit(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect) const
+	{
+		draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
+	}
+
+	void graphics_context::blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParamter2) const
+	{
+		// todo
+		fill_rect(aDestinationRect, colour::Cyan);
 	}
 
 	glyph_text graphics_context::to_glyph_text(const string& aText, const font& aFont) const

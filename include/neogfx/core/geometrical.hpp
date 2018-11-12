@@ -411,6 +411,38 @@ namespace neogfx
 	}
 
 	template <typename CoordinateType>
+	inline basic_size<CoordinateType> operator+(const basic_size<CoordinateType>& left, const basic_point<CoordinateType>& right)
+	{
+		basic_size<CoordinateType> ret = left;
+		ret += basic_size<CoordinateType>{ right.x, right.y };
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_size<CoordinateType> operator-(const basic_size<CoordinateType>& left, const basic_point<CoordinateType>& right)
+	{
+		basic_size<CoordinateType> ret = left;
+		ret -= basic_size<CoordinateType>{ right.x, right.y };
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_size<CoordinateType> operator*(const basic_size<CoordinateType>& left, const basic_point<CoordinateType>& right)
+	{
+		basic_size<CoordinateType> ret = left;
+		ret *= basic_size<CoordinateType>{ right.x, right.y };
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_size<CoordinateType> operator/(const basic_size<CoordinateType>& left, const basic_point<CoordinateType>& right)
+	{
+		basic_size<CoordinateType> ret = left;
+		ret /= basic_size<CoordinateType>{ right.x, right.y };
+		return ret;
+	}
+
+	template <typename CoordinateType>
 	inline bool operator<(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
 	{
 		return std::tie(left.x, left.y) < std::tie(right.x, right.y);

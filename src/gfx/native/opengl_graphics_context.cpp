@@ -1787,65 +1787,12 @@ namespace neogfx
 				if (firstOp.appearance.has_effect())
 				{
 					count *= offsets(firstOp.appearance.effect());
-					switch (firstOp.appearance.effect().type())
-					{
-					case text_effect_type::None:
-						continue;
-					case text_effect_type::Outline:
-						break;
-					case text_effect_type::Glow:
-					case text_effect_type::Shadow:
-						{/*
-							const i_glyph_texture& glyphTexture = drawOp.glyph.glyph_texture();
-							shader.set_uniform_variable("glyphOrigin",
-								static_cast<float>(vertexArrays.instance()[index].st[0] * glyphTexture.texture().atlas_texture().storage_extents().cx),
-								static_cast<float>(vertexArrays.instance()[index].st[1] * glyphTexture.texture().atlas_texture().storage_extents().cy));
-
-							if (guiCoordinates)
-							{
-								shader.set_uniform_variable("effectRect",
-									vec4{
-									vertexArrays.instance()[index].xyz[0],
-									vertexArrays.instance()[index + 2].xyz[1] - 1.0,
-									vertexArrays.instance()[index + 2].xyz[0],
-									vertexArrays.instance()[index].xyz[1] - 1.0 });
-								shader.set_uniform_variable("glyphRect",
-									vec4{
-									vertexArrays.instance()[index + 4].xyz[0],
-									vertexArrays.instance()[index + 4 + 2].xyz[1] - 1.0,
-									vertexArrays.instance()[index + 4 + 2].xyz[0],
-									vertexArrays.instance()[index + 4].xyz[1] - 1.0 });
-							}
-							else
-							{
-								shader.set_uniform_variable("effectRect",
-									vec4{
-									vertexArrays.instance()[index].xyz[0],
-									vertexArrays.instance()[index].xyz[1],
-									vertexArrays.instance()[index + 2].xyz[0],
-									vertexArrays.instance()[index + 2].xyz[1] });
-								shader.set_uniform_variable("glyphRect",
-									vec4{
-									vertexArrays.instance()[index + 4].xyz[0],
-									vertexArrays.instance()[index + 4].xyz[1],
-									vertexArrays.instance()[index + 4 + 2].xyz[0],
-									vertexArrays.instance()[index + 4 + 2].xyz[1] });
-							}
-							shader.set_uniform_variable("effectWidth", static_cast<int>(drawOp.appearance.effect().width()));
-							glCheck(glDrawArrays(GL_QUADS, index, 4));
-							index += 4;
-						*/}
-						break;
-					}
-					shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
-					shader.set_uniform_variable("effect", static_cast<int>(firstOp.appearance.effect().type()));
 					vertexArrays.instance().draw(count, barrier_partitions(firstOp.appearance.effect()));
 				}
 			}
 			else if (pass == 2)
 			{
 				shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
-				shader.set_uniform_variable("effect", 0);
 			}
 		}
 

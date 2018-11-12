@@ -82,6 +82,12 @@ namespace neogfx
 		Monochrome			= 4
 	};
 
+	enum class blurring_algorithm
+	{
+		None,
+		Gaussian
+	};
+
 	typedef neolib::variant<colour, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
 
 	inline brush to_brush(const colour_or_gradient& aEffectColour)
