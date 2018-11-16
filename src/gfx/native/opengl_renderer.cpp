@@ -298,12 +298,7 @@ namespace neogfx
 	opengl_renderer::~opengl_renderer()
 	{
 		iVertexArrays.reset();
-		if (iGradientTextures != std::nullopt)
-		{
-			glCheck(glDeleteTextures(1, &(*iGradientTextures)[0]));
-			glCheck(glDeleteTextures(1, &(*iGradientTextures)[1]));
-			glCheck(glDeleteTextures(1, &(*iGradientTextures)[2]));
-		}
+		iGradientArrays.reset();
 	}
 
 	const i_device_metrics& opengl_renderer::default_screen_metrics() const
@@ -913,35 +908,11 @@ namespace neogfx
 		}
 	}
 
-	const std::array<GLuint, 3>& opengl_renderer::gradient_textures() const
+	neogfx::gradient_arrays& opengl_renderer::gradient_arrays()
 	{
-		// todo: use texture class
-		if (iGradientTextures == std::nullopt)
-		{
-			iGradientTextures.emplace(std::array<GLuint, 3>{});
-			glCheck(glGenTextures(1, &(*iGradientTextures)[0]));
-			glCheck(glGenTextures(1, &(*iGradientTextures)[1]));
-			glCheck(glGenTextures(1, &(*iGradientTextures)[2]));
-			GLint previousTexture;
-			glCheck(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE, &previousTexture));
-			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[0]));
-			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-			static const std::array<float, gradient::MaxStops> sZeroStopPositions = {};
-			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R32F, static_cast<GLsizei>(gradient::MaxStops), 1, 0, GL_RED, GL_FLOAT, &sZeroStopPositions[0]));
-			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[1]));
-			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-			static const std::array<std::array<uint8_t, 4>, gradient::MaxStops> sZeroStopColours = {};
-			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, static_cast<GLsizei>(gradient::MaxStops), 1, 0, GL_RGBA, GL_FLOAT, &sZeroStopColours[0]));
-			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, (*iGradientTextures)[2]));
-			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-			static const std::array<float, GRADIENT_FILTER_SIZE * GRADIENT_FILTER_SIZE> sFilter = {};
-			glCheck(glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R32F, GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE, 0, GL_RED, GL_FLOAT, &sFilter[0]));
-			glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, previousTexture));
-		}
-		return *iGradientTextures;
+		if (iGradientArrays == std::nullopt)
+			iGradientArrays.emplace();
+		return *iGradientArrays;
 	}
 
 	bool opengl_renderer::process_events()

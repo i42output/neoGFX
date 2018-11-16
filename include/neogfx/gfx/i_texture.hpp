@@ -41,11 +41,26 @@ namespace neogfx
 		Normal,
 		NormalMipmap,
 		Nearest,
+		Data,
 		Multisample,
 		Multisample4x,
 		Multisample8x,
 		Multisample16x,
 		Multisample32x
+	};
+
+	enum class texture_data_format : uint32_t
+	{
+		// todo: add remaining GL texture data formats
+		RGBA,
+		Red
+	};
+
+	enum class texture_data_type : uint32_t
+	{
+		// todo: add remaining GL texture data types
+		UnsignedByte,
+		Float
 	};
 
 	class i_sub_texture;
@@ -65,6 +80,8 @@ namespace neogfx
 		virtual dimension dpi_scale_factor() const = 0;
 		virtual texture_sampling sampling() const = 0;
 		virtual uint32_t samples() const = 0;
+		virtual texture_data_format data_format() const = 0;
+		virtual texture_data_type data_type() const = 0;
 		virtual bool is_empty() const = 0;
 		virtual size extents() const = 0;
 		virtual size storage_extents() const = 0;
@@ -72,6 +89,8 @@ namespace neogfx
 		virtual void set_pixels(const i_image& aImage) = 0;
 		virtual void set_pixel(const point& aPosition, const colour& aColour) = 0;
 		virtual colour get_pixel(const point& aPosition) const = 0;
+	public:
+		virtual int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const = 0;
 	public:
 		virtual std::shared_ptr<i_native_texture> native_texture() const = 0;
 	};

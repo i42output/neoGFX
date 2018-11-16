@@ -219,6 +219,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\rect_pack.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\shader_array.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\shapes.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture.hpp" />

@@ -23,16 +23,16 @@
 
 namespace neogfx
 {
-	std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour)
+	std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_colour& aColour)
 	{
-		return add_texture(std::make_shared<opengl_texture>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aColour));
+		return add_texture(std::make_shared<opengl_texture>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColour));
 	}
 
-	std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const i_image& aImage)
+	std::shared_ptr<i_texture> opengl_texture_manager::create_texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType)
 	{
 		auto existing = find_texture(aImage);
 		if (existing != textures().end())
 			return existing->first;
-		return add_texture(std::make_shared<opengl_texture>(*this, allocate_texture_id(), aImage));
+		return add_texture(std::make_shared<opengl_texture>(*this, allocate_texture_id(), aImage, aDataFormat, aDataType));
 	}
 }

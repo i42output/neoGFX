@@ -136,8 +136,7 @@ namespace neogfx
 		void subpixel_rendering_on() override;
 		void subpixel_rendering_off() override;
 	public:
-		static const uint32_t GRADIENT_FILTER_SIZE = 15;
-		const std::array<GLuint, 3>& gradient_textures() const; // todo: use texture class and add to base class interface
+		neogfx::gradient_arrays& gradient_arrays() override;
 	public:
 		bool process_events() override;
 	public:
@@ -162,7 +161,7 @@ namespace neogfx
 		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;
 		bool iSubpixelRendering;
-		mutable std::optional<std::array<GLuint, 3>> iGradientTextures;
+		mutable std::optional<neogfx::gradient_arrays> iGradientArrays;
 		mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
 		uint64_t iLastGameRenderTime;
 		std::map<uint32_t, neogfx::frame_counter> iFrameCounters;

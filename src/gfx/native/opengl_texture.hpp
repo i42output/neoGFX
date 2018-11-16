@@ -36,8 +36,8 @@ namespace neogfx
 		struct multisample_texture_initialization_unsupported : std::logic_error { multisample_texture_initialization_unsupported() : std::logic_error("neogfx::opengl_texture::multisample_texture_initialization_unsupported") {} };
 		struct unsupported_sampling_type_for_function : std::logic_error { unsupported_sampling_type_for_function() : std::logic_error("neogfx::opengl_texture::unsupported_sampling_type_for_function") {} };
 	public:
-		opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour());
-		opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage);
+		opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, const optional_colour& aColour = optional_colour());
+		opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte);
 		~opengl_texture();
 	public:
 		texture_id id() const override;
@@ -46,6 +46,8 @@ namespace neogfx
 		dimension dpi_scale_factor() const override;
 		texture_sampling sampling() const override;
 		uint32_t samples() const override;
+		texture_data_format data_format() const override;
+		texture_data_type data_type() const override;
 		bool is_empty() const override;
 		size extents() const override;
 		size storage_extents() const override;
@@ -65,6 +67,8 @@ namespace neogfx
 		dimension em_size() const override;
 	public:
 		std::unique_ptr<i_graphics_context> create_graphics_context() const override;
+	public:
+		int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
 	public:
 		std::shared_ptr<i_native_texture> native_texture() const override;
 	public:
@@ -87,8 +91,10 @@ namespace neogfx
 		texture_id iId;
 		dimension iDpiScaleFactor;
 		texture_sampling iSampling;
-		basic_size<uint32_t> iSize;
-		basic_size<uint32_t> iStorageSize;
+		texture_data_format iDataFormat;
+		texture_data_type iDataType;
+		size_u32 iSize;
+		size_u32 iStorageSize;
 		GLuint iHandle;
 		std::string iUri;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;

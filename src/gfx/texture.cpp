@@ -28,8 +28,8 @@ namespace neogfx
 	{
 	}
 
-	texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, const optional_colour& aColour) :
-		iNativeTexture{ service<i_texture_manager>::instance().create_texture(aExtents, aDpiScaleFactor, aSampling, aColour) }
+	texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_colour& aColour) :
+		iNativeTexture{ service<i_texture_manager>::instance().create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColour) }
 	{
 	}
 
@@ -38,8 +38,8 @@ namespace neogfx
 	{
 	}
 
-	texture::texture(const i_image& aImage) :
-		iNativeTexture{ service<i_texture_manager>::instance().create_texture(aImage) }
+	texture::texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType) :
+		iNativeTexture{ service<i_texture_manager>::instance().create_texture(aImage, aDataFormat, aDataType) }
 	{
 	}
 
@@ -91,6 +91,20 @@ namespace neogfx
 		return native_texture()->samples();
 	}
 
+	texture_data_format texture::data_format() const
+	{
+		if (is_empty())
+			return texture_data_format::RGBA;
+		return native_texture()->data_format();
+	}
+
+	texture_data_type texture::data_type() const
+	{
+		if (is_empty())
+			return texture_data_type::UnsignedByte;
+		return native_texture()->data_type();
+	}
+
 	bool texture::is_empty() const
 	{
 		return iNativeTexture == nullptr;
@@ -132,6 +146,13 @@ namespace neogfx
 		if (is_empty())
 			throw texture_empty();
 		return iNativeTexture->get_pixel(aPosition);
+	}
+
+	int32_t texture::bind(const std::optional<uint32_t>& aTextureUnit) const
+	{
+		if (is_empty())
+			throw texture_empty();
+		return iNativeTexture->bind(aTextureUnit);
 	}
 
 	std::shared_ptr<i_native_texture> texture::native_texture() const

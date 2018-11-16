@@ -1035,19 +1035,15 @@ namespace neogfx
 			iGradientStopColours.push_back(std::array<float, 4>{ {stop.second.red<float>(), stop.second.green<float>(), stop.second.blue<float>(), stop.second.alpha<float>()}});
 		}
 		rendering_engine().gradient_shader_program().set_uniform_variable("nStopCount", static_cast<int>(iGradientStopPositions.size()));
-		rendering_engine().gradient_shader_program().set_uniform_variable("nFilterSize", static_cast<int>(opengl_renderer::GRADIENT_FILTER_SIZE));
-		auto filter = static_gaussian_filter<float, opengl_renderer::GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
-		// todo: remove the following cast when gradient textures abstracted in rendering engine base class interface
-		auto& gradientTextures = static_cast<opengl_renderer&>(iRenderingEngine).gradient_textures(); 
-		glCheck(glActiveTexture(GL_TEXTURE2));
-		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, gradientTextures[0]));
-		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, iGradientStopPositions.size(), 1, GL_RED, GL_FLOAT, &iGradientStopPositions[0]));
-		glCheck(glActiveTexture(GL_TEXTURE3));
-		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, gradientTextures[1]));
-		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, iGradientStopColours.size(), 1, GL_RGBA, GL_FLOAT, &iGradientStopColours[0]));
-		glCheck(glActiveTexture(GL_TEXTURE4));
-		glCheck(glBindTexture(GL_TEXTURE_RECTANGLE, gradientTextures[2]));
-		glCheck(glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, opengl_renderer::GRADIENT_FILTER_SIZE, opengl_renderer::GRADIENT_FILTER_SIZE, GL_RED, GL_FLOAT, &filter[0][0]));
+		rendering_engine().gradient_shader_program().set_uniform_variable("nFilterSize", static_cast<int>(GRADIENT_FILTER_SIZE));
+		auto filter = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
+		auto& gradientArrays = iRenderingEngine.gradient_arrays(); 
+		gradientArrays.stops.data().set_pixels(rect{ point{}, size_u32{ iGradientStopPositions.size(), 1 } }, &iGradientStopPositions[0]);
+		gradientArrays.stopColours.data().set_pixels(rect{ point{}, size_u32{ iGradientStopColours.size(), 1 } }, &iGradientStopColours[0]);
+		gradientArrays.filter.data().set_pixels(rect{ point(), size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, &filter[0][0]);
+		gradientArrays.stops.data().bind(2);
+		gradientArrays.stopColours.data().bind(3);
+		gradientArrays.filter.data().bind(4);
 		rendering_engine().gradient_shader_program().set_uniform_variable("texStopPositions", 2);
 		rendering_engine().gradient_shader_program().set_uniform_variable("texStopColours", 3);
 		rendering_engine().gradient_shader_program().set_uniform_variable("texFilter", 4);
@@ -1840,8 +1836,8 @@ namespace neogfx
 			glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(texture.native_texture()->handle())));
 			if (texture.sampling() != texture_sampling::Multisample)
 			{
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture.sampling() != texture_sampling::Nearest ? GL_LINEAR : GL_NEAREST));
-				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : texture.sampling() != texture_sampling::Nearest ? GL_LINEAR : GL_NEAREST));
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture.sampling() != texture_sampling::Nearest && texture.sampling() != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.sampling() == texture_sampling::NormalMipmap ? GL_LINEAR_MIPMAP_LINEAR : texture.sampling() != texture_sampling::Nearest && texture.sampling() != texture_sampling::Data ? GL_LINEAR : GL_NEAREST));
 			}
 
 			{

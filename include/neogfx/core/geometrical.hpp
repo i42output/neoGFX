@@ -844,14 +844,24 @@ namespace neogfx
 	{
 		return std::tie(left.left, left.top, left.right, left.bottom) < std::tie(right.left, right.top, right.right, right.bottom);
 	}
-		
+
+	typedef basic_size<uint32_t> size_u32;
+	typedef basic_delta<uint32_t> delta_u32;
+	typedef basic_point<uint32_t> point_u32;
+	typedef basic_rect<uint32_t> rect_u32;
+
 	typedef basic_margins<dimension> margins;
 
 	typedef std::optional<dimension> optional_dimension;
 	typedef std::optional<angle> optional_angle;
+	typedef std::optional<delta> optional_delta;
 	typedef std::optional<point> optional_point;
 	typedef std::optional<size> optional_size;
 	typedef std::optional<rect> optional_rect;
+	typedef std::optional<delta_u32> optional_delta_u32;
+	typedef std::optional<point_u32> optional_point_u32;
+	typedef std::optional<size_u32> optional_size_u32;
+	typedef std::optional<rect_u32> optional_rect_u32;
 	typedef std::optional<margins> optional_margins;
 	typedef std::optional<vector1> optional_vector1;
 	typedef std::optional<vector2> optional_vector2;

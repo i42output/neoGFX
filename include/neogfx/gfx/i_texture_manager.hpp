@@ -39,8 +39,8 @@ namespace neogfx
 		virtual texture_id allocate_texture_id() = 0;
 	public:
 		virtual std::shared_ptr<i_texture> find_texture(texture_id aId) const = 0;
-		virtual std::shared_ptr<i_texture> create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, const optional_colour& aColour = optional_colour()) = 0;
-		virtual std::shared_ptr<i_texture> create_texture(const i_image& aImage) = 0;
+		virtual std::shared_ptr<i_texture> create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, const optional_colour& aColour = optional_colour()) = 0;
+		virtual std::shared_ptr<i_texture> create_texture(const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte) = 0;
 		virtual void clear_textures() = 0;
 	public:
 		virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;

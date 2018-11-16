@@ -25,6 +25,7 @@
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
+#include <neogfx/gfx/shader_array.hpp>
 
 namespace neogfx
 {
@@ -43,6 +44,14 @@ namespace neogfx
 		DirectX,
 		Vulkan,
 		Software
+	};
+
+	static const uint32_t GRADIENT_FILTER_SIZE = 15;
+	struct gradient_arrays
+	{
+		shader_array<float> stops = { size_u32{gradient::MaxStops, 1} };
+		shader_array<std::array<float, 4>> stopColours = { size_u32{gradient::MaxStops, 1} };
+		shader_array<float> filter = { size_u32{GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE} };
 	};
 
 	class i_rendering_engine
@@ -128,6 +137,8 @@ namespace neogfx
 		virtual bool is_subpixel_rendering_on() const = 0;
 		virtual void subpixel_rendering_on() = 0;
 		virtual void subpixel_rendering_off() = 0;
+	public:
+		virtual neogfx::gradient_arrays& gradient_arrays() = 0;
 	public:
 		virtual void render_now() = 0;
 		virtual bool use_rendering_priority() const = 0;

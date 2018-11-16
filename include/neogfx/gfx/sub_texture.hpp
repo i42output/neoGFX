@@ -42,6 +42,8 @@ namespace neogfx
 		dimension dpi_scale_factor() const override;
 		texture_sampling sampling() const override;
 		uint32_t samples() const override;
+		texture_data_format data_format() const override;
+		texture_data_type data_type() const override;
 		bool is_empty() const override;
 		size extents() const override;
 		size storage_extents() const override;
@@ -49,6 +51,8 @@ namespace neogfx
 		void set_pixels(const i_image& aImage) override;
 		void set_pixel(const point& aPosition, const colour& aColour) override;
 		colour get_pixel(const point& aPosition) const override;
+	public:
+		int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
 	public:
 		std::shared_ptr<i_native_texture> native_texture() const override;
 	public:

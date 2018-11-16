@@ -72,6 +72,16 @@ namespace neogfx
 		return native_texture()->samples();
 	}
 
+	texture_data_format sub_texture::data_format() const
+	{
+		return native_texture()->data_format();
+	}
+
+	texture_data_type sub_texture::data_type() const
+	{
+		return native_texture()->data_type();
+	}
+
 	bool sub_texture::is_empty() const
 	{
 		return false;
@@ -103,7 +113,7 @@ namespace neogfx
 
 	void sub_texture::set_pixels(const i_image& aImage)
 	{
-		basic_size<uint32_t> imageExtents = aImage.extents();
+		size_u32 imageExtents = aImage.extents();
 		switch (aImage.colour_format())
 		{
 		case colour_format::RGBA8:
@@ -127,6 +137,11 @@ namespace neogfx
 	colour sub_texture::get_pixel(const point& aPosition) const
 	{
 		return native_texture()->get_pixel(aPosition + atlas_location().position());
+	}
+
+	int32_t sub_texture::bind(const std::optional<uint32_t>& aTextureUnit) const
+	{
+		return native_texture()->bind(aTextureUnit);
 	}
 
 	std::shared_ptr<i_native_texture> sub_texture::native_texture() const
