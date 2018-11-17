@@ -94,6 +94,7 @@ namespace neogfx
 		class i_visitor
 		{
 		public:
+			virtual void visit(i_drop_list_input_widget& aInputWidget, push_button& aButtonWidget) = 0;
 			virtual void visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget) = 0;
 		};
 	public:
@@ -221,6 +222,7 @@ namespace neogfx
 	public:
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	private:
+		void visit(i_drop_list_input_widget& aInputWidget, push_button& aButtonWidget) override;
 		void visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget) override;
 	private:
 		void init();
@@ -228,6 +230,7 @@ namespace neogfx
 		void update_arrow();
 		void handle_clicked();
 		void handle_cancel_selection(bool aRestoreSavedSelection, bool aUpdateEditor = true);
+		bool handle_proxy_key_event(const neogfx::keyboard_event& aEvent);
 	private:
 		style iStyle;
 		vertical_layout iLayout0;

@@ -417,9 +417,9 @@ namespace neogfx
 				text_widget().set_margins(neogfx::margins{});
 			}
 		public:
-			void accept(i_drop_list_input_widget::i_visitor&) override
+			void accept(i_drop_list_input_widget::i_visitor& aVisitor) override
 			{
-				/* do nothing */
+				aVisitor.visit(*this, *this);
 			}
 		public:
 			const i_widget& as_widget() const override
@@ -940,61 +940,17 @@ namespace neogfx
 		});
 		aTextWidget.keyboard_event([this, &aTextWidget](const neogfx::keyboard_event& aEvent)
 		{
-			if (aEvent.type() == keyboard_event_type::KeyPressed)
-			{
-				if ((iStyle & style::ListAlwaysVisible) != style::ListAlwaysVisible)
-				{
-					switch (aEvent.scan_code())
-					{
-					case ScanCode_DOWN:
-						if (!view_created())
-						{
-							if (selection_model().has_current_index())
-								iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
-							show_view();
-						}
-						break;
-					case ScanCode_RETURN:
-						if (view_created())
-							accept_selection();
-						break;
-					case ScanCode_ESCAPE:
-						cancel_selection();
-						break;
-					}
-				}
-				else
-				{
-					switch (aEvent.scan_code())
-					{
-					case ScanCode_RETURN:
-						accept_selection();
-						break;
-					case ScanCode_ESCAPE:
-						cancel_selection();
-						break;
-					case ScanCode_UP:
-					case ScanCode_DOWN:
-					case ScanCode_PAGEUP:
-					case ScanCode_PAGEDOWN:
-						aTextWidget.keyboard_event.accept();
-						view().key_pressed(aEvent.scan_code(), aEvent.key_code(), aEvent.key_modifiers());
-						if (view().selection_model().has_current_index())
-							accept_selection();
-						break;
-					case ScanCode_HOME:
-					case ScanCode_END:
-						if ((aEvent.key_modifiers() & KeyModifier_CTRL) != KeyModifier_NONE)
-						{
-							aTextWidget.keyboard_event.accept();
-							view().key_pressed(aEvent.scan_code(), aEvent.key_code(), KeyModifier_NONE);
-							if (view().selection_model().has_current_index())
-								accept_selection();
-						}
-						break;
-					}
-				}
-			}
+			if (handle_proxy_key_event(aEvent))
+				aTextWidget.keyboard_event.accept();
+		});
+	}
+
+	void drop_list::visit(i_drop_list_input_widget&, push_button& aButtonWidget)
+	{
+		aButtonWidget.keyboard_event([this, &aButtonWidget](const neogfx::keyboard_event& aEvent)
+		{
+			if (handle_proxy_key_event(aEvent))
+				aButtonWidget.keyboard_event.accept();
 		});
 	}
 
@@ -1189,5 +1145,99 @@ namespace neogfx
 			input_widget().set_image(image);
 			input_widget().set_text(text);
 		}
+	}
+
+	bool drop_list::handle_proxy_key_event(const neogfx::keyboard_event& aEvent)
+	{
+		if (presentation_model().rows() == 0)
+			return false;
+		if (aEvent.type() == keyboard_event_type::KeyPressed)
+		{
+			auto delegate_to_proxy = [this](const neogfx::keyboard_event& aEvent)
+			{
+				view().key_pressed(aEvent.scan_code(), aEvent.key_code(), KeyModifier_NONE);
+				if (view().selection_model().has_current_index())
+					accept_selection();
+			};
+			switch (aEvent.scan_code())
+			{
+			case ScanCode_DOWN:
+				if (!view_created() && (aEvent.key_modifiers() & KeyModifier_ALT) != KeyModifier_NONE)
+				{
+					if (selection_model().has_current_index())
+						iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
+					show_view();
+					return true;
+				}
+				if (view_created())
+					delegate_to_proxy(aEvent);
+				else if (has_selection() && presentation_model().from_item_model_index(selection()).row() < presentation_model().rows() - 1)
+				{
+					selection_model().set_current_index(presentation_model().from_item_model_index(selection()) += item_presentation_model_index{ 1u, 0u });
+					accept_selection();
+				}
+				else if (!has_selection())
+				{
+					selection_model().set_current_index(item_presentation_model_index{ 0u, 0u });
+					accept_selection();
+				}
+				return true;
+			case ScanCode_UP:
+				if (view_created())
+					delegate_to_proxy(aEvent);
+				else if (has_selection() && presentation_model().from_item_model_index(selection()).row() > 0u)
+				{
+					selection_model().set_current_index(presentation_model().from_item_model_index(selection()) -= item_presentation_model_index{ 1u, 0u });
+					accept_selection();
+				}
+				else if (!has_selection())
+				{
+					selection_model().set_current_index(item_presentation_model_index{ 0u, 0u });
+					accept_selection();
+				}
+				return true;
+			case ScanCode_PAGEUP:
+				if (view_created())
+					delegate_to_proxy(aEvent);
+				else
+					return false;
+				return true;
+			case ScanCode_PAGEDOWN:
+				if (view_created())
+					delegate_to_proxy(aEvent);
+				else
+					return false;
+				return true;
+			case ScanCode_HOME:
+			case ScanCode_END:
+				if ((iStyle & style::Editable) != style::Editable || (aEvent.key_modifiers() & KeyModifier_ALT) != KeyModifier_NONE)
+				{
+					if (view_created())
+						delegate_to_proxy(aEvent);
+					else
+					{
+						selection_model().set_current_index(aEvent.scan_code() == ScanCode_HOME ? item_presentation_model_index{ 0u, 0u } : item_presentation_model_index{ presentation_model().rows() - 1u, 0u });
+						accept_selection();
+					}
+					return true;
+				}
+				break;
+			case ScanCode_RETURN:
+				if (view_created())
+				{
+					accept_selection();
+					return true;
+				}
+				return false;
+			case ScanCode_ESCAPE:
+				if (has_selection())
+				{
+					cancel_selection();
+					return true;
+				}
+				return false;
+			}
+		}
+		return false;
 	}
 }
