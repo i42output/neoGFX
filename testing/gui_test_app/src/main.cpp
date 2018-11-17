@@ -108,6 +108,49 @@ private:
 	ng::item_cell_colour_type iColourType;
 };
 
+class easing_item_presentation_model : public ng::basic_item_presentation_model<ng::basic_item_model<ng::easing>>
+{
+private:
+	typedef ng::basic_item_presentation_model<ng::basic_item_model<ng::easing>> base_type;
+public:
+	easing_item_presentation_model(ng::basic_item_model<ng::easing>& aModel) : base_type{ aModel }
+	{
+		iSink += ng::app::instance().current_style_changed([this](ng::style_aspect)
+		{
+			iTextures.clear();
+		});
+	}
+public:
+	ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override
+	{
+		auto easingFunction = item_model().item(to_item_model_index(aIndex));
+		auto iterTexture = iTextures.find(easingFunction);
+		if (iterTexture == iTextures.end())
+		{
+			ng::texture newTexture{ ng::size{48.0, 48.0}, 1.0, ng::texture_sampling::Multisample };
+			ng::graphics_context gc{ newTexture };
+			auto const textColour = ng::app::instance().current_style().palette().text_colour();
+			gc.draw_rect(ng::rect{ ng::point{}, ng::size{48.0, 48.0} }, ng::pen{ textColour, 1.0 });
+			ng::optional_point lastPos;
+			ng::pen pen{ textColour, 2.0 };
+			for (double x = 0.0; x <= 40.0; x += 2.0)
+			{
+				ng::point pos{ x + 4.0, ng::ease(easingFunction, x / 40.0) * 40.0 + 4.0 };
+				if (lastPos != std::nullopt)
+				{
+					gc.draw_line(*lastPos, pos, pen);
+				}
+				lastPos = pos;
+			}
+			iterTexture = iTextures.emplace(easingFunction, newTexture).first;
+		}
+		return iterTexture->second;
+	}
+private:
+	mutable std::map<ng::easing, ng::texture> iTextures;
+	ng::sink iSink;
+};
+
 class keypad_button : public ng::push_button
 {
 public:
@@ -1030,9 +1073,11 @@ int main(int argc, char* argv[])
 		ng::drop_list easingDropDown{ tabDrawingLayout2 };
 		easingDropDown.set_size_policy(ng::size_policy::Minimum);
 		ng::basic_item_model<ng::easing> easingItemModel;
+		easing_item_presentation_model easingPresentationModel{ easingItemModel };
 		for (auto i = 0; i < ng::standard_easings().size(); ++i)
 			easingItemModel.insert_item(easingItemModel.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
 		easingDropDown.set_model(easingItemModel);
+		easingDropDown.set_presentation_model(easingPresentationModel);
 		easingDropDown.selection_model().set_current_index(ng::item_model_index{ 0 });
 		easingDropDown.accept_selection();
 		ng::texture logo{ ng::image{ ":/test/resources/neoGFX.png" } };

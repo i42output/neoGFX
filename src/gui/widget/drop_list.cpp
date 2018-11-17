@@ -91,9 +91,17 @@ namespace neogfx
 		if (!presentation_model().filtering() && !iDropList.handling_text_change())
 		{
 			neolib::scoped_flag sf{ iChangingText };
+			texture image;
 			std::string text;
 			if (aCurrentIndex != std::nullopt)
+			{
+				auto const& maybeImage = presentation_model().cell_image(*aCurrentIndex);
+				if (maybeImage != std::nullopt)
+					image = *maybeImage;
 				text = presentation_model().cell_to_string(*aCurrentIndex);
+			}
+			iDropList.input_widget().set_spacing(presentation_model().cell_spacing(*this));
+			iDropList.input_widget().set_image(image);
 			iDropList.input_widget().set_text(text);
 		}
 	}
@@ -269,6 +277,8 @@ namespace neogfx
 
 	void drop_list_popup::update_placement()
 	{
+		set_margins(iDropList.margins());
+
 		// First stab at sizing ourselves...
 		resize(minimum_size());
 		
@@ -284,6 +294,9 @@ namespace neogfx
 				item_presentation_model_index{ 0, 0 });
 			view().make_visible(index);
 			currentItemPos += view().cell_rect(index).top_left();
+			auto const& maybeCellImage = view().presentation_model().cell_image(index);
+			if (maybeCellImage != std::nullopt)
+				currentItemPos.x += (maybeCellImage->extents().cx + view().presentation_model().cell_spacing(*this).cx);
 		}
 		point inputWidgetPos{ iDropList.non_client_rect().top_left() + iDropList.root().window_position() };
 		point textWidgetPos{ iDropList.input_widget().text_widget().non_client_rect().top_left() + iDropList.input_widget().text_widget().margins().top_left() + iDropList.root().window_position() };
@@ -400,6 +413,8 @@ namespace neogfx
 			non_editable_input_widget(i_layout& aLayout) :
 				push_button{ aLayout, push_button_style::DropList }
 			{
+				image_widget().set_margins(neogfx::margins{});
+				text_widget().set_margins(neogfx::margins{});
 			}
 		public:
 			void accept(i_drop_list_input_widget::i_visitor&) override
@@ -420,6 +435,14 @@ namespace neogfx
 			{
 				return false;
 			}
+			const i_widget& image_widget() const override
+			{
+				return push_button::image();
+			}
+			i_widget& image_widget() override
+			{
+				return push_button::image();
+			}
 			const i_widget& text_widget() const override
 			{
 				return push_button::text();
@@ -427,6 +450,19 @@ namespace neogfx
 			i_widget& text_widget() override
 			{
 				return push_button::text();
+			}
+			void set_spacing(const size& aSpacing) override
+			{
+				label().layout().set_spacing(aSpacing);
+			}
+			const i_texture& image() const override
+			{
+				return push_button::image().image();
+			}
+			void set_image(const i_texture& aImage) override
+			{
+				push_button::image().set_image(aImage);
+				push_button::image().show(!aImage.is_empty());
 			}
 			std::string text() const override
 			{
@@ -444,9 +480,13 @@ namespace neogfx
 			editable_input_widget(i_layout& aLayout) :
 				framed_widget{ aLayout, frame_style::SolidFrame },
 				iLayout{ *this },
+				iImage{ iLayout },
 				iEditor{ iLayout, frame_style::NoFrame }
 			{
 				set_margins(neogfx::margins{});
+				image_widget().set_margins(neogfx::margins{});
+				text_widget().set_margins(neogfx::margins{});
+				iImage.hide();
 			}
 		public:
 			void accept(i_drop_list_input_widget::i_visitor& aVisitor) override
@@ -467,6 +507,14 @@ namespace neogfx
 			{
 				return true;
 			}
+			const i_widget& image_widget() const override
+			{
+				return iImage;
+			}
+			i_widget& image_widget() override
+			{
+				return iImage;
+			}
 			const i_widget& text_widget() const override
 			{
 				return iEditor;
@@ -474,6 +522,20 @@ namespace neogfx
 			i_widget& text_widget() override
 			{
 				return iEditor;
+			}
+			void set_spacing(const size& aSpacing) override
+			{
+				layout().set_spacing(aSpacing);
+			}
+			const i_texture& image() const override
+			{
+				return iImage.image();
+			}
+			void set_image(const i_texture& aImage) override
+			{
+				iImage.set_image(aImage);
+				iImage.show(!aImage.is_empty());
+
 			}
 			std::string text() const override
 			{
@@ -490,6 +552,7 @@ namespace neogfx
 			}
 		private:
 			horizontal_layout iLayout;
+			neogfx::image_widget iImage;
 			line_edit iEditor;
 		};
 	}
@@ -717,9 +780,17 @@ namespace neogfx
 		}
 		iSavedSelection = std::nullopt;
 
+		texture image;
 		std::string text;
 		if (selection_model().has_current_index())
+		{
+			auto const& maybeImage = presentation_model().cell_image(selection_model().current_index());
+			if (maybeImage != std::nullopt)
+				image = *maybeImage;
 			text = presentation_model().cell_to_string(selection_model().current_index());
+		}
+		input_widget().set_spacing(presentation_model().cell_spacing(*this));
+		input_widget().set_image(image);
 		input_widget().set_text(text);
 	}
 
@@ -984,9 +1055,17 @@ namespace neogfx
 
 			input_widget().accept(*this);
 
+			texture image;
 			std::string text;
 			if (selection_model().has_current_index())
+			{
+				auto const& maybeImage = presentation_model().cell_image(selection_model().current_index());
+				if (maybeImage != std::nullopt)
+					image = *maybeImage;
 				text = presentation_model().cell_to_string(selection_model().current_index());
+			}
+			input_widget().set_spacing(presentation_model().cell_spacing(*this));
+			input_widget().set_image(image);
 			input_widget().set_text(text);
 		}
 
@@ -1082,9 +1161,17 @@ namespace neogfx
 
 		if (!editable() && aUpdateEditor)
 		{
+			texture image;
 			std::string text;
 			if (iSelection)
+			{
+				auto const& maybeImage = presentation_model().cell_image(*iSelection);
+				if (maybeImage != std::nullopt)
+					image = *maybeImage;
 				text = model().cell_data(*iSelection).to_string();
+			}
+			input_widget().set_spacing(presentation_model().cell_spacing(*this));
+			input_widget().set_image(image);
 			input_widget().set_text(text);
 		}
 	}

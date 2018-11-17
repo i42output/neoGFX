@@ -237,9 +237,6 @@ namespace neogfx
 				if (cellRect.y > clipRect.bottom())
 					continue;
 				finished = false;
-				optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Foreground);
-				if (textColour == std::nullopt)
-					textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
 				optional_colour backgroundColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Background);
 				rect cellBackgroundRect = cell_rect(item_presentation_model_index{ row, col }, true);
 				if (backgroundColour != std::nullopt)
@@ -249,7 +246,18 @@ namespace neogfx
 				}
 				{
 					scoped_scissor scissor(aGraphicsContext, clipRect.intersection(cellRect));
-					aGraphicsContext.draw_glyph_text(cellRect.top_left() + point(presentation_model().cell_margins(*this).left, presentation_model().cell_margins(*this).top), presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext), *textColour);
+					auto const& glyphText = presentation_model().cell_glyph_text(item_presentation_model_index{ row, col }, aGraphicsContext);
+					point textPos{ cellRect.top_left().x + presentation_model().cell_margins(*this).left, (cellRect.height() - glyphText.extents().cy) / 2.0 + cellRect.top_left().y };
+					auto const& cellImage = presentation_model().cell_image(item_presentation_model_index{ row, col });
+					if (cellImage != std::nullopt)
+					{
+						aGraphicsContext.draw_texture(cellRect.top_left() + (cellRect.cy - cellImage->extents().cy) / 2.0, *cellImage);
+						textPos.x += (cellImage->extents().cx + presentation_model().cell_spacing(aGraphicsContext).cx);
+					}
+					optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Foreground);
+					if (textColour == std::nullopt)
+						textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
+					aGraphicsContext.draw_glyph_text(textPos, glyphText, *textColour);
 				}
 				if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
 				{

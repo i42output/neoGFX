@@ -85,11 +85,11 @@ namespace neogfx
 		{
 			return iItemModel != nullptr;
 		}
-		i_item_model& item_model() const override
+		item_model_type& item_model() const override
 		{
 			if (iItemModel == nullptr)
 				throw no_item_model();
-			return *iItemModel;
+			return static_cast<item_model_type&>(*iItemModel);
 		}
 		void set_item_model(i_item_model& aItemModel) override
 		{
@@ -272,9 +272,9 @@ namespace neogfx
 					auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
 					height = std::max(height, units_converter(aUnitsContext).from_device_units(size(0.0, std::ceil(effectiveFont.height()))).cy *
 						(1 + std::count(cellString.begin(), cellString.end(), '\n')));
-					auto const& cellTexture = cell_texture(aIndex);
-					if (cellTexture != std::nullopt)
-						height = std::max(height, units_converter(aUnitsContext).from_device_units(cellTexture->extents()).cy);
+					auto const& cellImage = cell_image(aIndex);
+					if (cellImage != std::nullopt)
+						height = std::max(height, units_converter(aUnitsContext).from_device_units(cellImage->extents()).cy);
 				}
 			}
 			return height + cell_margins(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
@@ -501,7 +501,7 @@ namespace neogfx
 		{
 			return optional_font{};
 		}
-		optional_texture cell_texture(const item_presentation_model_index&) const override
+		optional_texture cell_image(const item_presentation_model_index&) const override
 		{
 			return optional_texture{};
 		}
@@ -527,9 +527,15 @@ namespace neogfx
 				cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellDataInfo.max.to_string(), cellFont).cx);
 				cellExtents.cx += aGraphicsContext.dpi_scale(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE).cx; // todo: get this from widget metrics (skin API)
 			}
+			auto const& maybeCellImage = cell_image(aIndex);
+			if (maybeCellImage != std::nullopt)
+			{
+				cellExtents.cx += (maybeCellImage->extents().cx + units_converter(aGraphicsContext).to_device_units(cell_spacing(aGraphicsContext)).cx);
+				cellExtents.cy = std::max(cellExtents.cy, maybeCellImage->extents().cy);
+			}
 			if (cellExtents.cy == 0.0)
 				cellExtents.cy = cellFont.height();
-			cellMeta.extents = units_converter(aGraphicsContext).to_device_units(cellExtents).ceil();
+			cellMeta.extents = cellExtents.ceil();
 			if (iTotalHeight != std::nullopt)
 				*iTotalHeight += (item_height(aIndex, aGraphicsContext) - oldItemHeight);
 			return units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents);

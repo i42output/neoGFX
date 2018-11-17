@@ -105,8 +105,13 @@ namespace neogfx
 		virtual i_widget& as_widget() = 0;
 	public:
 		virtual bool editable() const = 0;
+		virtual const i_widget& image_widget() const = 0;
+		virtual i_widget& image_widget() = 0;
 		virtual const i_widget& text_widget() const = 0;
 		virtual i_widget& text_widget() = 0;
+		virtual void set_spacing(const size& aSpacing) = 0;
+		virtual const i_texture& image() const = 0;
+		virtual void set_image(const i_texture& aImage) = 0;
 		virtual std::string text() const = 0;
 		virtual void set_text(const std::string& aText) = 0;
 	};
