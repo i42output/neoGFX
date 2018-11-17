@@ -39,6 +39,8 @@ namespace neogfx
 			Down
 		};
 	public:
+		static constexpr size SPIN_BUTTON_MINIMUM_SIZE = { 15.0, 7.0 };
+	public:
 		basic_spin_box();
 		basic_spin_box(i_widget& aParent);
 		basic_spin_box(i_layout& aLayout);

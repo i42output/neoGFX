@@ -29,6 +29,7 @@
 #include <neolib/raii.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/app/app.hpp>
+#include <neogfx/gui/widget/spin_box.hpp>
 #include "item_model.hpp"
 #include "i_item_presentation_model.hpp"
 
@@ -262,15 +263,18 @@ namespace neogfx
 				auto modelIndex = to_item_model_index(item_presentation_model_index{ aIndex.row(), col });
 				if (modelIndex.column() >= item_model().columns(modelIndex))
 					continue;
-				optional_font cellFont = cell_font(aIndex);
 				if (cell_meta(aIndex).extents != std::nullopt)
 					height = std::max(height, units_converter(aUnitsContext).from_device_units(*cell_meta(aIndex).extents).cy);
 				else
 				{
 					std::string cellString = cell_to_string(item_presentation_model_index(aIndex.row(), col));
-					const font& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
+					auto const& cellFont = cell_font(aIndex);
+					auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
 					height = std::max(height, units_converter(aUnitsContext).from_device_units(size(0.0, std::ceil(effectiveFont.height()))).cy *
 						(1 + std::count(cellString.begin(), cellString.end(), '\n')));
+					auto const& cellTexture = cell_texture(aIndex);
+					if (cellTexture != std::nullopt)
+						height = std::max(height, units_converter(aUnitsContext).from_device_units(cellTexture->extents()).cy);
 				}
 			}
 			return height + cell_margins(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
@@ -497,6 +501,10 @@ namespace neogfx
 		{
 			return optional_font{};
 		}
+		optional_texture cell_texture(const item_presentation_model_index&) const override
+		{
+			return optional_texture{};
+		}
 		neogfx::glyph_text& cell_glyph_text(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
 		{
 			optional_font cellFont = cell_font(aIndex);
@@ -508,15 +516,20 @@ namespace neogfx
 		size cell_extents(const item_presentation_model_index& aIndex, const graphics_context& aGraphicsContext) const override
 		{
 			auto oldItemHeight = item_height(aIndex, aGraphicsContext);
-			optional_font cellFont = cell_font(aIndex);
-			if (cell_meta(aIndex).extents != std::nullopt)
-				return units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents);
+			auto const& cellFont = (cell_font(aIndex) == std::nullopt ? default_font() : *cell_font(aIndex));
+			auto const& cellMeta = cell_meta(aIndex);
+			if (cellMeta.extents != std::nullopt)
+				return units_converter(aGraphicsContext).from_device_units(*cellMeta.extents);
 			size cellExtents = cell_glyph_text(aIndex, aGraphicsContext).extents();
+			auto const& cellDataInfo = item_model().cell_data_info(to_item_model_index(aIndex));
+			if (!cellDataInfo.readOnly && cellDataInfo.step != neolib::none)
+			{
+				cellExtents.cx = std::max(cellExtents.cx, aGraphicsContext.text_extent(cellDataInfo.max.to_string(), cellFont).cx);
+				cellExtents.cx += aGraphicsContext.dpi_scale(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE).cx; // todo: get this from widget metrics (skin API)
+			}
 			if (cellExtents.cy == 0.0)
-				cellExtents.cy = (cellFont == std::nullopt ? default_font() : *cellFont).height();
-			cell_meta(aIndex).extents = units_converter(aGraphicsContext).to_device_units(cellExtents);
-			cell_meta(aIndex).extents->cx = std::ceil(cell_meta(aIndex).extents->cx);
-			cell_meta(aIndex).extents->cy = std::ceil(cell_meta(aIndex).extents->cy);
+				cellExtents.cy = cellFont.height();
+			cellMeta.extents = units_converter(aGraphicsContext).to_device_units(cellExtents).ceil();
 			if (iTotalHeight != std::nullopt)
 				*iTotalHeight += (item_height(aIndex, aGraphicsContext) - oldItemHeight);
 			return units_converter(aGraphicsContext).from_device_units(*cell_meta(aIndex).extents);

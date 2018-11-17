@@ -41,7 +41,7 @@ public:
 	my_item_model()
 	{
 		set_column_name(0, "Zero");
-		set_column_name(1, "Spin Box");
+		set_column_name(1, "One");
 		set_column_name(2, "Two");
 		set_column_name(3, "Three");
 		set_column_name(4, "Four");

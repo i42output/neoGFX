@@ -44,11 +44,11 @@ namespace neogfx
 		typedef CoordinateType coordinate_type;
 		// construction
 	public:
-		basic_delta() : dx(0), dy(0) {}
-		basic_delta(coordinate_type dx, coordinate_type dy) : dx(dx), dy(dy) {}
-		basic_delta(coordinate_type aSquareDelta) : dx(aSquareDelta), dy(aSquareDelta) {}
+		constexpr basic_delta() : dx(0), dy(0) {}
+		constexpr basic_delta(coordinate_type dx, coordinate_type dy) : dx(dx), dy(dy) {}
+		constexpr basic_delta(coordinate_type aSquareDelta) : dx(aSquareDelta), dy(aSquareDelta) {}
 		template <typename CoordinateType2>
-		basic_delta(const basic_delta<CoordinateType2>& other) :
+		constexpr basic_delta(const basic_delta<CoordinateType2>& other) :
 			dx(static_cast<CoordinateType>(other.dx)), dy(static_cast<CoordinateType>(other.dy)) {}
 		// operations
 	public:
@@ -115,17 +115,17 @@ namespace neogfx
 		typedef basic_delta<dimension_type> delta_type;
 		// construction
 	public:
-		basic_size() : cx(0), cy(0) {}
+		constexpr basic_size() : cx(0), cy(0) {}
 		template <typename Scalar>
-		basic_size(const basic_vector<Scalar, 2>& other) : cx(static_cast<dimension_type>(other.x)), cy(static_cast<dimension_type>(other.y)) {}
+		constexpr basic_size(const basic_vector<Scalar, 2>& other) : cx(static_cast<dimension_type>(other.x)), cy(static_cast<dimension_type>(other.y)) {}
 		template <typename Scalar>
-		basic_size(const basic_vector<Scalar, 3>& other) : cx(static_cast<dimension_type>(other.x)), cy(static_cast<dimension_type>(other.y)) {}
-		basic_size(dimension_type cx, dimension_type cy) : cx(cx), cy(cy) {}
-		basic_size(dimension_type aSquareDimension) : cx(aSquareDimension), cy(aSquareDimension) {}
+		constexpr basic_size(const basic_vector<Scalar, 3>& other) : cx(static_cast<dimension_type>(other.x)), cy(static_cast<dimension_type>(other.y)) {}
+		constexpr basic_size(dimension_type cx, dimension_type cy) : cx(cx), cy(cy) {}
+		constexpr basic_size(dimension_type aSquareDimension) : cx(aSquareDimension), cy(aSquareDimension) {}
 		template <typename CoordinateType2>
-		basic_size(const basic_size<CoordinateType2>& other) :
+		constexpr basic_size(const basic_size<CoordinateType2>& other) :
 			cx(static_cast<CoordinateType>(other.cx)), cy(static_cast<CoordinateType>(other.cy)) {}
-		basic_size(const basic_delta<CoordinateType>& other) : cx(other.dx), cy(other.dy) {}
+		constexpr basic_size(const basic_delta<CoordinateType>& other) : cx(other.dx), cy(other.dy) {}
 		// operations
 	public:
 		basic_vector<dimension_type, 2> to_vec2() const { return basic_vector<dimension_type, 2>{ cx, cy }; }
@@ -240,17 +240,17 @@ namespace neogfx
 		typedef CoordinateType coordinate_type;
 		// construction
 	public:
-		basic_point() : x(0), y(0) {}
+		constexpr basic_point() : x(0), y(0) {}
 		template <typename Scalar>
-		basic_point(const basic_vector<Scalar, 2>& other) : x(static_cast<coordinate_type>(other.x)), y(static_cast<coordinate_type>(other.y)) {}
+		constexpr basic_point(const basic_vector<Scalar, 2>& other) : x(static_cast<coordinate_type>(other.x)), y(static_cast<coordinate_type>(other.y)) {}
 		template <typename Scalar>
-		basic_point(const basic_vector<Scalar, 3>& other) : x(static_cast<coordinate_type>(other.x)), y(static_cast<coordinate_type>(other.y)) {}
-		basic_point(CoordinateType x, CoordinateType y) : x(x), y(y) {}
+		constexpr basic_point(const basic_vector<Scalar, 3>& other) : x(static_cast<coordinate_type>(other.x)), y(static_cast<coordinate_type>(other.y)) {}
+		constexpr basic_point(CoordinateType x, CoordinateType y) : x(x), y(y) {}
 		template <typename CoordinateType2>
-		basic_point(const basic_point<CoordinateType2>& other) :
+		constexpr basic_point(const basic_point<CoordinateType2>& other) :
 			x(static_cast<CoordinateType>(other.x)), y(static_cast<CoordinateType>(other.y)) {}
-		basic_point(const basic_delta<CoordinateType>& other) : x(other.dx), y(other.dy) {}
-		basic_point(const basic_size<CoordinateType>& other) : x(other.cx), y(other.cy) {}
+		constexpr basic_point(const basic_delta<CoordinateType>& other) : x(other.dx), y(other.dy) {}
+		constexpr basic_point(const basic_size<CoordinateType>& other) : x(other.cx), y(other.cy) {}
 		// operations
 	public:
 		basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ x, y }; }
