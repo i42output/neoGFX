@@ -277,7 +277,7 @@ namespace neogfx
 
 	void drop_list_popup::update_placement()
 	{
-		set_margins(iDropList.margins());
+		view().set_margins(iDropList.input_widget().as_widget().margins() - view().presentation_model().cell_margins(*this) - view().effective_frame_width());
 
 		// First stab at sizing ourselves...
 		resize(minimum_size());
@@ -451,6 +451,10 @@ namespace neogfx
 			{
 				return push_button::text();
 			}
+			size spacing() const override
+			{
+				return label().layout().spacing();
+			}
 			void set_spacing(const size& aSpacing) override
 			{
 				label().layout().set_spacing(aSpacing);
@@ -522,6 +526,10 @@ namespace neogfx
 			i_widget& text_widget() override
 			{
 				return iEditor;
+			}
+			size spacing() const override
+			{
+				return layout().spacing();
 			}
 			void set_spacing(const size& aSpacing) override
 			{
@@ -887,8 +895,15 @@ namespace neogfx
 		auto minimumSize = widget::minimum_size(aAvailableSpace);
 		if (widget::has_minimum_size())
 			return minimumSize;
-		minimumSize.cx -= input_widget().text_widget().minimum_size().cx;
-		minimumSize.cx += input_widget().text_widget().margins().size().cx;
+		if (input_widget().image_widget().visible())
+			minimumSize.cx -= input_widget().image_widget().minimum_size().cx;
+		if (input_widget().image_widget().visible() && input_widget().text_widget().visible())
+			minimumSize.cx -= input_widget().spacing().cx;
+		if (input_widget().text_widget().visible())
+		{
+			minimumSize.cx -= input_widget().text_widget().minimum_size().cx;
+			minimumSize.cx += input_widget().text_widget().margins().size().cx;
+		}
 		dimension modelWidth = 0.0;
 		if (has_presentation_model())
 		{
