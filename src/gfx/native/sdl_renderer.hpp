@@ -34,7 +34,7 @@ namespace neogfx
 	{
 	public:
 		struct unsupported_renderer : std::runtime_error { unsupported_renderer() : std::runtime_error("neogfx::sdl_renderer::unsupported_renderer") {} };
-		struct failed_to_create_system_cache_window : std::runtime_error { failed_to_create_system_cache_window(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_create_system_cache_window: " + aReason) {} };
+		struct failed_to_create_offscreen_window : std::runtime_error { failed_to_create_offscreen_window(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_create_offscreen_window: " + aReason) {} };
 		struct failed_to_create_opengl_context : std::runtime_error { failed_to_create_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_create_opengl_context: " + aReason) {} };
 		struct failed_to_activate_opengl_context : std::runtime_error { failed_to_activate_opengl_context(const std::string& aReason) : std::runtime_error("neogfx::sdl_renderer::failed_to_activate_opengl_context: " + aReason) {} };
 		struct no_target_active : std::logic_error { no_target_active() : std::logic_error("neogfx::sdl_renderer::no_target_active") {} };
@@ -62,6 +62,8 @@ namespace neogfx
 		virtual bool process_events();
 	private:
 		opengl_context create_context(void* aNativeSurfaceHandle);
+		void* allocate_offscreen_window(const i_render_target* aRenderTarget);
+		void deallocate_offscreen_window(const i_render_target* aRenderTarget);
 		void activate_current_target();
 		static int filter_event(void* aSelf, SDL_Event* aEvent);
 		bool queue_events();
@@ -69,7 +71,8 @@ namespace neogfx
 		bool iDoubleBuffering;
 		i_basic_services& iBasicServices;
 		i_keyboard& iKeyboard;
-		void* iSystemCacheWindowHandle;
+		std::unordered_map<const i_render_target*, void*> iOffscreenWindows;
+		void* iDefaultOffscreenWindow;
 		opengl_context iContext;
 		uint32_t iCreatingWindow;
 		std::vector<const i_render_target*> iTargetStack;

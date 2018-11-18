@@ -470,9 +470,9 @@ namespace neogfx
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
 		iClipCounter{ 0 },
-		iLineStippleActive{ false }
+		iLineStippleActive{ false },
+		iSrt{ iTarget }
 	{
-		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 		iSink += render_target().target_deactivating([this]() 
@@ -491,9 +491,9 @@ namespace neogfx
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
 		iClipCounter{ 0 },
-		iLineStippleActive{ false }
+		iLineStippleActive{ false },
+		iSrt{ iTarget }
 	{
-		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 		iSink += render_target().target_deactivating([this]()
@@ -512,9 +512,9 @@ namespace neogfx
 		iSmoothingMode{ aOther.iSmoothingMode },
 		iSubpixelRendering{ aOther.iSubpixelRendering },
 		iClipCounter{ 0 },
-		iLineStippleActive{ false }
+		iLineStippleActive{ false },
+		iSrt{ iTarget }
 	{
-		render_target().activate_target();
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(iSmoothingMode);
 		iSink += render_target().target_deactivating([this]()
@@ -525,8 +525,6 @@ namespace neogfx
 
 	opengl_graphics_context::~opengl_graphics_context()
 	{
-		flush();
-		render_target().deactivate_target();
 	}
 
 	std::unique_ptr<i_graphics_context> opengl_graphics_context::clone() const
@@ -579,6 +577,8 @@ namespace neogfx
 
 	void opengl_graphics_context::enqueue(const graphics_operation::operation& aOperation)
 	{
+		scoped_render_target srt{ render_target() };
+
 		if (iQueue.second.empty())
 			iQueue.second.push_back(0);
 		bool sameBatch = (iQueue.first.empty() || graphics_operation::batchable(iQueue.first.back(), aOperation)) && iQueue.first.size() - iQueue.second.back() < max_operations(aOperation);
@@ -591,13 +591,6 @@ namespace neogfx
 	{
 		if (iQueue.first.empty())
 			return;
-
-		bool activatedTarget = false;
-		if (rendering_engine().active_target() != &render_target())
-		{
-			render_target().activate_target();
-			activatedTarget = true;
-		}
 
 		iQueue.second.push_back(iQueue.first.size());
 		auto endIndex = std::prev(iQueue.second.end());
@@ -802,8 +795,8 @@ namespace neogfx
 		iQueue.first.clear();
 		iQueue.second.clear();
 
-		if (activatedTarget)
-			render_target().deactivate_target();
+		use_vertex_arrays uva{ *this, GL_TRIANGLES };
+		uva.instance().execute();
 	}
 
 	void opengl_graphics_context::scissor_on(const rect& aRect)
@@ -1649,7 +1642,7 @@ namespace neogfx
 		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline)
 			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
 
-		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, firstOp.glyph.subpixel() && firstGlyphTexture.subpixel() };
+		use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, need, firstOp.glyph.subpixel() && firstGlyphTexture.subpixel() };
 		
 		bool hasEffects = firstOp.appearance.has_effect();
 

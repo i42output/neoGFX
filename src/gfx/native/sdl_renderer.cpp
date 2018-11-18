@@ -51,7 +51,8 @@ namespace neogfx
 		iBasicServices{ aBasicServices }, 
 		iKeyboard{ aKeyboard }, 
 		iCreatingWindow{ 0 },
-		iContext{ nullptr }
+		iContext{ nullptr },
+		iDefaultOffscreenWindow{ nullptr }
 	{
 		SDL_AddEventWatch(&filter_event, this);
 
@@ -79,19 +80,11 @@ namespace neogfx
 		default:
 			break;
 		}
-		iSystemCacheWindowHandle = SDL_CreateWindow(
-			"neogfx::system_cache_window",
-			0,
-			0,
-			0,
-			0,
-			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
-		if (iSystemCacheWindowHandle == 0)
-			throw failed_to_create_system_cache_window(SDL_GetError());
-		iContext = create_context(iSystemCacheWindowHandle);
+		iDefaultOffscreenWindow = allocate_offscreen_window(nullptr);
+		iContext = create_context(iDefaultOffscreenWindow);
 		if (iContext != nullptr)
 		{
-			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), iContext);
+			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iDefaultOffscreenWindow), iContext);
 			glCheck(glewInit());
 		}
 		else
@@ -101,7 +94,10 @@ namespace neogfx
 	sdl_renderer::~sdl_renderer()
 	{
 		if (iContext != nullptr)
-			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iSystemCacheWindowHandle), iContext);
+			SDL_GL_MakeCurrent(static_cast<SDL_Window*>(iDefaultOffscreenWindow), iContext);
+		for (auto window : iOffscreenWindows)
+			SDL_DestroyWindow(static_cast<SDL_Window*>(window.second));
+		iOffscreenWindows.clear();
 	}
 
 	bool sdl_renderer::double_buffering() const
@@ -149,7 +145,7 @@ namespace neogfx
 
 	i_rendering_engine::opengl_context sdl_renderer::create_context(const i_render_target& aTarget)
 	{
-		return create_context(aTarget.target_type() == render_target_type::Surface ? aTarget.target_handle() : iSystemCacheWindowHandle);
+		return create_context(aTarget.target_type() == render_target_type::Surface ? aTarget.target_handle() : allocate_offscreen_window(&aTarget));
 	}
 
 	void sdl_renderer::destroy_context(opengl_context aContext)
@@ -245,9 +241,43 @@ namespace neogfx
 		return SDL_GL_CreateContext(static_cast<SDL_Window*>(aNativeSurfaceHandle));
 	}
 
+	void* sdl_renderer::allocate_offscreen_window(const i_render_target* aRenderTarget)
+	{
+		if (iDefaultOffscreenWindow != nullptr)
+			return iDefaultOffscreenWindow;
+		auto existingWindow = iOffscreenWindows.find(aRenderTarget);
+		if (existingWindow != iOffscreenWindows.end())
+			return existingWindow->second;
+		SDL_Window* newWindow = SDL_CreateWindow(
+			"neogfx::offscreen_window",
+			0,
+			0,
+			0,
+			0,
+			SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+		if (newWindow == 0)
+			throw failed_to_create_offscreen_window(SDL_GetError());
+		iOffscreenWindows[aRenderTarget] = newWindow;
+		return newWindow;
+	}
+
+	void sdl_renderer::deallocate_offscreen_window(const i_render_target* aRenderTarget)
+	{
+		return;
+		void* freedWindow = nullptr;
+		auto iterRemove = iOffscreenWindows.find(aRenderTarget);
+		if (iterRemove != iOffscreenWindows.end())
+		{
+			freedWindow = iterRemove->second;
+			iOffscreenWindows.erase(iterRemove);
+		}
+		if (freedWindow != nullptr)
+			SDL_DestroyWindow(static_cast<SDL_Window*>(freedWindow));
+	}
+
 	void sdl_renderer::activate_current_target()
 	{
-		if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(active_target() != nullptr && active_target()->target_type() == render_target_type::Surface ? active_target()->target_handle() : iSystemCacheWindowHandle), static_cast<SDL_GLContext>(iContext)) == -1)
+		if (SDL_GL_MakeCurrent(static_cast<SDL_Window*>(active_target() != nullptr && active_target()->target_type() == render_target_type::Surface ? active_target()->target_handle() : allocate_offscreen_window(active_target())), static_cast<SDL_GLContext>(iContext)) == -1)
 			throw failed_to_activate_opengl_context(SDL_GetError());
 	}
 

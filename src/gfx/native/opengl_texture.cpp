@@ -117,10 +117,9 @@ namespace neogfx
 			}
 			if (sampling() != texture_sampling::Multisample)
 			{
-				std::vector<uint8_t> data;
+				std::vector<uint8_t> data(iStorageSize.cx * 4 * iStorageSize.cy);
 				if (aColour != std::nullopt)
 				{
-					(iStorageSize.cx * 4 * iStorageSize.cy);
 					for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
 						for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
 						{
@@ -478,6 +477,7 @@ namespace neogfx
 		}
 //		else
 //			throw already_active();
+		bind(1);
 		if (iFrameBuffer == 0)
 		{
 			glCheck(glEnable(GL_MULTISAMPLE));
@@ -545,13 +545,9 @@ namespace neogfx
 	{
 		if (sampling() != neogfx::texture_sampling::Multisample)
 		{
-			bool alreadyActive = (service<i_rendering_engine>::instance().active_target() == this);
-			if (!alreadyActive)
-				activate_target();
+			scoped_render_target srt{ *this };
 			std::array<uint8_t, 4> pixel;
 			glCheck(glReadPixels(aPosition.x + 1, aPosition.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), &pixel));
-			if (!alreadyActive)
-				deactivate_target();
 			return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
 		}
 		else

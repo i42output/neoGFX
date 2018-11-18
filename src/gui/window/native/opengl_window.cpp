@@ -123,13 +123,9 @@ namespace neogfx
 	{
 		if (target_texture().sampling() != neogfx::texture_sampling::Multisample)
 		{
-			bool alreadyActive = (service<i_rendering_engine>::instance().active_target() == this);
-			if (!alreadyActive)
-				activate_target();
+			scoped_render_target srt{ *this };
 			std::array<uint8_t, 4> pixel;
 			glCheck(glReadPixels(aPosition.x, aPosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel));
-			if (!alreadyActive)
-				deactivate_target();
 			return colour{ pixel[0], pixel[1], pixel[2], pixel[3] };
 		}
 		else
@@ -260,7 +256,7 @@ namespace neogfx
 
 		surface_window().rendering.trigger();
 
-		activate_target();
+		scoped_render_target srt{ *this };
 
 		glCheck(glEnable(GL_MULTISAMPLE));
 		glCheck(glEnable(GL_BLEND));
@@ -320,8 +316,6 @@ namespace neogfx
 		iFpsData.push_back(1000.0 / (app::instance().program_elapsed_ms() - now));
 		if (iFpsData.size() > 25)
 			iFpsData.pop_front();		
-
-		deactivate_target();
 	}
 
 	void opengl_window::pause()
@@ -361,11 +355,10 @@ namespace neogfx
 		native_window::set_destroying();
 		if (iFrameBufferExtents != size{})
 		{
-			activate_target();
+			scoped_render_target srt{ *this };
 			glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
 			iFrameBufferTexture = std::nullopt;
 			glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
-			deactivate_target();
 		}
 	}
 

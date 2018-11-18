@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include "opengl.hpp"
@@ -29,7 +30,6 @@
 
 namespace neogfx
 {
-	class i_rendering_engine;
 	class i_widget;
 
 	class opengl_graphics_context : public i_graphics_context
@@ -162,5 +162,6 @@ namespace neogfx
 		std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
 		vertices_2d_t iTempTextureCoords;
 		sink iSink;
+		scoped_render_target iSrt;
 	};
 }

@@ -1110,6 +1110,13 @@ int main(int argc, char* argv[])
 			aGc.draw_pixel(aOrigin + ng::point{ 4.0, 2.0 }, ng::colour{ 0x03, 0x03, 0xFF, 0xFF });
 		};
 
+		// render to texture demo
+		for (std::size_t i = 0; i < 4; ++i)
+		{
+			ng::graphics_context texGc{ tex[i] };
+			test_pattern(texGc, ng::point{}, 1.0, texColour[i], "Render\nTo\nTexture");
+		}
+
 		tabDrawing.painting([&](ng::graphics_context& aGc)
 		{
 			ng::service<ng::i_rendering_engine>::instance().want_game_mode();
@@ -1137,18 +1144,6 @@ int main(int argc, char* argv[])
 			auto x = ng::ease(easingItemModel.item(easingDropDown.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
 //			auto x = ng::ease(ng::easing_class::Linear, ng::easing_class::Bounce, int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (tabDrawing.extents().cx - logo.extents().cx);
 			aGc.draw_texture(ng::point{ x, (tabDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
-
-			// render to texture demo
-			static bool texturesInitialized = false;
-			if (!texturesInitialized)
-			{
-				for (std::size_t i = 0; i < 4; ++i)
-				{
-					ng::graphics_context texGc{ tex[i] };
-					test_pattern(texGc, ng::point{}, aGc.dpi_scale(1.0), texColour[i], "Render\nTo\nTexture");
-				}
-				texturesInitialized = true;
-			}
 
 			auto texLocation = ng::point{ (tabDrawing.extents().cx - 64.0) / 2.0, (tabDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
 			aGc.draw_texture(texLocation + ng::point{ 0.0, 0.0 }, tex[0]);
