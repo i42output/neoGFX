@@ -91,6 +91,8 @@ namespace neogfx
 	class i_item_presentation_model
 	{
 	public:
+		event<> visual_appearance_changed;
+	public:
 		struct cell_meta_type
 		{
 			mutable item_cell_selection_flags selection;

@@ -788,18 +788,7 @@ namespace neogfx
 		}
 		iSavedSelection = std::nullopt;
 
-		texture image;
-		std::string text;
-		if (selection_model().has_current_index())
-		{
-			auto const& maybeImage = presentation_model().cell_image(selection_model().current_index());
-			if (maybeImage != std::nullopt)
-				image = *maybeImage;
-			text = presentation_model().cell_to_string(selection_model().current_index());
-		}
-		input_widget().set_spacing(presentation_model().cell_spacing(*this));
-		input_widget().set_image(image);
-		input_widget().set_text(text);
+		update_widgets(true);
 	}
 
 	void drop_list::cancel_selection()
@@ -966,12 +955,12 @@ namespace neogfx
 
 		update_widgets();
 
-		iSink += app::instance().current_style_changed([this](style_aspect) { update_arrow(); });
+		iSink += app::instance().current_style_changed([this](style_aspect) { update_widgets(true); });
 
 		presentation_model().set_cell_margins(neogfx::margins{ 3.0, 3.0 }, *this);
 	}
 
-	void drop_list::update_widgets()
+	void drop_list::update_widgets(bool aForce)
 	{
 		bool changed = false;
 
@@ -1020,11 +1009,12 @@ namespace neogfx
 			changed = true;
 		}
 
-		if (changed)
+		if (changed || aForce)
 		{
 			update_arrow();
 
-			input_widget().accept(*this);
+			if (changed)
+				input_widget().accept(*this);
 
 			texture image;
 			std::string text;

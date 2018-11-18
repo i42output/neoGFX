@@ -118,6 +118,7 @@ public:
 		iSink += ng::app::instance().current_style_changed([this](ng::style_aspect)
 		{
 			iTextures.clear();
+			visual_appearance_changed.async_trigger();
 		});
 	}
 public:
@@ -1070,12 +1071,12 @@ int main(int argc, char* argv[])
 		ng::horizontal_layout tabDrawingLayout2{ tabDrawing };
 		tabDrawingLayout2.set_size_policy(ng::size_policy::Minimum);
 		tabDrawingLayout2.emplace<ng::label>("Easing:");
-		ng::drop_list easingDropDown{ tabDrawingLayout2 };
-		easingDropDown.set_size_policy(ng::size_policy::Minimum);
 		ng::basic_item_model<ng::easing> easingItemModel;
-		easing_item_presentation_model easingPresentationModel{ easingItemModel };
 		for (auto i = 0; i < ng::standard_easings().size(); ++i)
 			easingItemModel.insert_item(easingItemModel.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
+		easing_item_presentation_model easingPresentationModel{ easingItemModel };
+		ng::drop_list easingDropDown{ tabDrawingLayout2 };
+		easingDropDown.set_size_policy(ng::size_policy::Minimum);
 		easingDropDown.set_model(easingItemModel);
 		easingDropDown.set_presentation_model(easingPresentationModel);
 		easingDropDown.selection_model().set_current_index(ng::item_model_index{ 0 });

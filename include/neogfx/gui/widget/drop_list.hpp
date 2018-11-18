@@ -226,7 +226,7 @@ namespace neogfx
 		void visit(i_drop_list_input_widget& aInputWidget, line_edit& aTextWidget) override;
 	private:
 		void init();
-		void update_widgets();
+		void update_widgets(bool aForce = false);
 		void update_arrow();
 		void handle_clicked();
 		void handle_cancel_selection(bool aRestoreSavedSelection, bool aUpdateEditor = true);
