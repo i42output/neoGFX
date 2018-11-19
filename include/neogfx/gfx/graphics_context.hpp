@@ -77,7 +77,7 @@ namespace neogfx
 		virtual ~graphics_context();
 	public:
 		const i_render_target& render_target() const;
-		ping_pong_buffers_t ping_pong_buffers(const optional_size& aExtents = optional_size{}, texture_sampling aSampling = texture_sampling::Normal) const;
+		ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Normal) const;
 		// operations
 	public:
 		delta to_device_units(const delta& aValue) const;

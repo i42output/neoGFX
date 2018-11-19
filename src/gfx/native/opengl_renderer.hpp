@@ -132,6 +132,9 @@ namespace neogfx
 		const opengl_standard_vertex_arrays & vertex_arrays() const override;
 		opengl_standard_vertex_arrays& vertex_arrays() override;
 	public:
+		i_texture& ping_pong_buffer1(const size& aExtents, texture_sampling aSampling = texture_sampling::Normal) override;
+		i_texture& ping_pong_buffer2(const size& aExtents, texture_sampling aSampling = texture_sampling::Normal) override;
+	public:
 		bool is_subpixel_rendering_on() const override;
 		void subpixel_rendering_on() override;
 		void subpixel_rendering_off() override;
@@ -165,5 +168,7 @@ namespace neogfx
 		mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
 		uint64_t iLastGameRenderTime;
 		std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
+		std::map<std::pair<texture_sampling, size>, texture> iPingPongBuffer1s;
+		std::map<std::pair<texture_sampling, size>, texture> iPingPongBuffer2s;
 	};
 }

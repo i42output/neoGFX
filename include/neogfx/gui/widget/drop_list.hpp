@@ -220,6 +220,7 @@ namespace neogfx
 		bool accepting_selection() const;
 		bool cancelling_selection() const;
 	public:
+		neogfx::size_policy size_policy() const override;
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;
 	private:
 		void visit(i_drop_list_input_widget& aInputWidget, push_button& aButtonWidget) override;

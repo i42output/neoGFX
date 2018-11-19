@@ -134,6 +134,9 @@ namespace neogfx
 		virtual const opengl_standard_vertex_arrays& vertex_arrays() const = 0;
 		virtual opengl_standard_vertex_arrays& vertex_arrays() = 0;
 	public:
+		virtual i_texture& ping_pong_buffer1(const size& aExtents, texture_sampling aSampling = texture_sampling::Normal) = 0;
+		virtual i_texture& ping_pong_buffer2(const size& aExtents, texture_sampling aSampling = texture_sampling::Normal) = 0;
+	public:
 		virtual bool is_subpixel_rendering_on() const = 0;
 		virtual void subpixel_rendering_on() = 0;
 		virtual void subpixel_rendering_off() = 0;

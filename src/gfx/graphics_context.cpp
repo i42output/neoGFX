@@ -163,10 +163,9 @@ namespace neogfx
 		return iRenderTarget;
 	}
 
-	graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const optional_size& aExtents, texture_sampling aSampling) const
+	graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling) const
 	{
-		// todo
-		return ping_pong_buffers_t{ *this, *this };
+		return ping_pong_buffers_t{ service<i_rendering_engine>::instance().ping_pong_buffer1(aExtents, aSampling), service<i_rendering_engine>::instance().ping_pong_buffer2(aExtents, aSampling) };
 	}
 	
 	delta graphics_context::to_device_units(const delta& aValue) const
@@ -870,6 +869,7 @@ namespace neogfx
 	{
 		// todo
 		fill_rect(aDestinationRect, colour::Cyan);
+		blit(aDestinationRect, aSource, aSourceRect);
 	}
 
 	glyph_text graphics_context::to_glyph_text(const string& aText, const font& aFont) const

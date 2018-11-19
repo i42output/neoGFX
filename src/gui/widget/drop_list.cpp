@@ -879,6 +879,16 @@ namespace neogfx
 		return iCancellingSelection;
 	}
 
+	neogfx::size_policy drop_list::size_policy() const
+	{
+		if (widget::has_size_policy())
+			return widget::size_policy();
+		if (list_always_visible())
+			return neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding };
+		else
+			return neogfx::size_policy::Minimum;
+	}
+
 	size drop_list::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		auto minimumSize = widget::minimum_size(aAvailableSpace);
@@ -1033,13 +1043,11 @@ namespace neogfx
 		if (list_always_visible())
 		{
 			iDownArrow.hide();
-			set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Expanding });
 			show_view();
 		}
 		else
 		{
 			iDownArrow.show();
-			set_size_policy(neogfx::size_policy::Minimum);
 		}
 	}
 

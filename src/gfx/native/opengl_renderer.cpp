@@ -885,6 +885,24 @@ namespace neogfx
 		return const_cast<opengl_standard_vertex_arrays&>(const_cast<const opengl_renderer*>(this)->vertex_arrays());
 	}
 
+	i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, texture_sampling aSampling)
+	{
+		auto existing = iPingPongBuffer1s.lower_bound(std::make_pair(aSampling, aExtents));
+		if (existing != iPingPongBuffer1s.end() && existing->first.first == aSampling && existing->first.second < aExtents)
+			return existing->second;
+		size idealSize{ (((aExtents.cx - 1) / 1024) + 1) * 1024.0, (((aExtents.cy - 1) / 1024) + 1) * 1024.0 };
+		return iPingPongBuffer1s.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
+	}
+
+	i_texture& opengl_renderer::ping_pong_buffer2(const size& aExtents, texture_sampling aSampling)
+	{
+		auto existing = iPingPongBuffer2s.lower_bound(std::make_pair(aSampling, aExtents));
+		if (existing != iPingPongBuffer2s.end() && existing->first.first == aSampling && existing->first.second < aExtents)
+			return existing->second;
+		size idealSize{ (((aExtents.cx - 1) / 1024) + 1) * 1024.0, (((aExtents.cy - 1) / 1024) + 1) * 1024.0 };
+		return iPingPongBuffer2s.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
+	}
+
 	bool opengl_renderer::is_subpixel_rendering_on() const
 	{
 		return iSubpixelRendering;
