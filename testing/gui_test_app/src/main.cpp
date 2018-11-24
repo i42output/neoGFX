@@ -165,7 +165,7 @@ public:
 			if (aNumber == 9)
 				iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::colour_or_gradient{} });
 			else if (aNumber == 8)
-				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::Black, ng::colour_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White } });
+				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::colour::White });
 			else if (aNumber == 0)
 				iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::colour::White });
 			else
@@ -671,24 +671,29 @@ int main(int argc, char* argv[])
 		});
 		editOutline.checked([&]()
 		{
+			effectWidthSlider.set_value(1);
 			auto s = textEdit.default_style();
-			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, ng::colour::White });
+			s.set_text_colour(app.current_style().palette().text_colour().light() ? ng::colour::Black : ng::colour::White);
+			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().text_colour() });
 			textEdit.set_default_style(s);
 		});
 		editGlow.checked([&]()
 		{
+			effectWidthSlider.set_value(5);
 			auto s = textEdit.default_style();
 			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::colour::Orange.with_lightness(0.9) });
 			textEdit.set_default_style(s);
 		});
 		effectWidthSlider.value_changed([&]()
 		{
-			editGlow.check();
 			auto s = textEdit.default_style();
-			s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, s.text_effect()->colour(), effectWidthSlider.value(), s.text_effect()->aux1() });
+			s.set_text_effect(ng::text_effect{ editGlow.is_checked() ? ng::text_effect_type::Glow : ng::text_effect_type::Outline, s.text_effect()->colour(), effectWidthSlider.value(), s.text_effect()->aux1() });
 			textEdit.set_default_style(s);
 			std::ostringstream oss;
 			oss << effectWidthSlider.value() << std::endl << effectAux1Slider.value() << std::endl;
+			auto column = textEdit.column(0);
+			column.set_margins(effectWidthSlider.value());
+			textEdit.set_column(0, column);
 			smallTextEdit.set_text(oss.str());
 		});
 		effectAux1Slider.value_changed([&]()

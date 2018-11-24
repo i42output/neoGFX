@@ -36,24 +36,20 @@ namespace neogfx
 	namespace 
 	{
 		template <typename T>
-		class partition_iterator
+		class skip_iterator
 		{
 		public:
 			typedef T value_type;
 		public:
-			partition_iterator(const value_type* aBegin, const value_type* aEnd, std::size_t aPartitionCount = 2u, std::size_t aSkipAmount = 2u, bool aRepeat = false) :
-				iBegin{ aBegin }, iEnd{ aEnd }, iPartitionCount{ aPartitionCount }, iSkipAmount{ std::min<std::size_t>(aEnd - aBegin, aSkipAmount) }, iRepeat{ aRepeat }, iNext { aBegin }, iPass{ 1u }
+			skip_iterator(const value_type* aBegin, const value_type* aEnd, std::size_t aSkipAmount = 2u, std::size_t aPasses = 1) :
+				iBegin{ aBegin }, iEnd{ aEnd }, iSkipAmount{ std::max(1u, std::min<std::size_t>(aEnd - aBegin, aSkipAmount)) }, iPasses{ aPasses }, iNext{ aBegin }, iSkipPass{ 1u }, iPass{ 1u }
 			{
 			}
-			partition_iterator() :
-				iBegin{ nullptr }, iEnd{ nullptr}, iPartitionCount{ 0u }, iSkipAmount{ 0u }, iRepeat{ false}, iNext{ nullptr }, iPass{ 1u }
+			skip_iterator() :
+				iBegin{ aBegin }, iEnd{ aEnd }, iSkipAmount{ 2u }, iPasses{ 1u }, iNext{ aBegin }, iSkipPass{ 1u }, iPass{ 1u }
 			{
 			}
 		public:
-			std::size_t partition_count() const
-			{
-				return iPartitionCount;
-			}
 			std::size_t skip_amount() const
 			{
 				return iSkipAmount;
@@ -63,15 +59,24 @@ namespace neogfx
 				return iPass;
 			}
 		public:
-			partition_iterator& operator++()
+			skip_iterator& operator++()
 			{
 				if (static_cast<std::size_t>(iEnd - iNext) <= iSkipAmount)
 				{
-					if (iPass < iPartitionCount)
-						iNext = iBegin + (iRepeat ? iPass % iSkipAmount : iPass);
+					if (iSkipPass < iSkipAmount)
+						iNext = iBegin + iSkipPass;
 					else
-						iNext = iEnd;
-					++iPass;
+					{
+						if (iPass >= iPasses)
+							iNext = iEnd;
+						else
+						{
+							++iPass;
+							iSkipPass = 0u;
+							iNext = iBegin;
+						}
+					}
+					++iSkipPass;
 				}
 				else
 					iNext += iSkipAmount;
@@ -92,30 +97,12 @@ namespace neogfx
 		private:
 			const value_type* iBegin;
 			const value_type* iEnd;
-			std::size_t iPartitionCount;
 			std::size_t iSkipAmount;
-			bool iRepeat;
+			std::size_t iPasses;
 			const value_type* iNext;
+			std::size_t iSkipPass;
 			std::size_t iPass;
 		};
-
-		inline std::size_t scanline_offsets(const text_effect& aEffect)
-		{
-			if (aEffect.type() != text_effect_type::Outline)
-				return 1u;
-			else
-				return static_cast<std::size_t>(aEffect.width() * 2.0 + 1.0);
-		}
-
-		inline std::size_t offsets(const text_effect& aEffect)
-		{
-			return scanline_offsets(aEffect) * scanline_offsets(aEffect);
-		}
-
-		inline std::size_t barrier_partitions(const text_effect& aEffect)
-		{
-			return offsets(aEffect) * 2u;
-		}
 
 		inline GLenum path_shape_to_gl_mode(path::shape_type_e aShape)
 		{
@@ -334,8 +321,9 @@ namespace neogfx
 			{
 				draw(vertices().size() - static_cast<std::size_t>(iStart));
 			}
-			void draw(std::size_t aCount, std::size_t aBarrierPartitions = 2)
+			void draw(std::size_t aCount, std::size_t aSkipCount = 1u)
 			{
+				aSkipCount = std::max(aSkipCount, 1u);
 				if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
 					throw invalid_draw_count();
 				if (static_cast<std::size_t>(iStart) == vertices().size())
@@ -356,8 +344,8 @@ namespace neogfx
 					{
 						glCheck(glTextureBarrier());
 					}
-					auto pvc = primitive_vertex_count();
-					auto chunk = std::max(pvc, (aCount / pvc / aBarrierPartitions) * pvc);
+					auto const pvc = primitive_vertex_count();
+					auto chunk = pvc * aSkipCount;
 					while (aCount > 0)
 					{
 						auto amount = std::min(chunk, aCount);
@@ -1638,22 +1626,23 @@ namespace neogfx
 
 		const i_glyph_texture& firstGlyphTexture = glyph_texture(firstOp);
 
-		auto need = 6u * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+		auto const glyphCount = aDrawGlyphOps.second - aDrawGlyphOps.first;
+
+		auto need = 6u * glyphCount;
 		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline)
-			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * (aDrawGlyphOps.second - aDrawGlyphOps.first);
+			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * glyphCount;
 
-		use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, with_textures, need, firstOp.glyph.subpixel() && firstGlyphTexture.subpixel() };
+		bool const useTextureBarrier = firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
+		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, useTextureBarrier };
 		
-		bool hasEffects = firstOp.appearance.has_effect();
+		bool multipass = firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline;
 
-		for (uint32_t pass = (hasEffects ? 1 : 2); pass <= 2; ++pass)
+		for (uint32_t pass = (multipass ? 1 : 2); pass <= 2; ++pass)
 		{
-			partition_iterator<graphics_operation::operation> start;
-			if (pass == 1 && hasEffects)
-				start = partition_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, barrier_partitions(firstOp.appearance.effect()), 2, firstOp.appearance.effect().type() == text_effect_type::Outline };
-			else
-				start = partition_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, 2 };
-			for (auto op = start; op != aDrawGlyphOps.second; ++op)
+			auto const scanlineOffsets = (pass == 1 ? static_cast<uint32_t>(firstOp.appearance.effect().width()) * 2u + 1u : 1u);
+			auto const offsets = scanlineOffsets * scanlineOffsets;
+			point const offsetOrigin{ pass == 1 ? -firstOp.appearance.effect().width() : 0.0, pass == 1 ? -firstOp.appearance.effect().width() : 0.0 };
+			for (auto op = skip_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, glyphCount / 2u, offsets }; op != aDrawGlyphOps.second; ++op)
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 
@@ -1662,59 +1651,46 @@ namespace neogfx
 
 				vec3 glyphOrigin(
 					drawOp.point.x + glyphTexture.placement().x,
-					logical_coordinates().first.y < logical_coordinates().second.y ? 
-						drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-						drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
+					logical_coordinates().first.y < logical_coordinates().second.y ?
+					drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
+					drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
 					drawOp.point.z);
 
 				iTempTextureCoords.clear();
-				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } + point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
+				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
 
-				rect outputRect = rect{ glyphTexture.texture().extents() }.with_centred_origin();
+				rect outputRect{ point{ glyphOrigin } + offsetOrigin + point{ static_cast<coordinate>((op.pass() - 1u) % scanlineOffsets), static_cast<coordinate>((op.pass() - 1u) / scanlineOffsets) }, glyphTexture.texture().extents() };
 				vertices_t outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
 
-				glyphOrigin += outputRect.bottom_right().to_vec3();
+				std::array<uint8_t, 4> passColour;
 
-				if (drawOp.appearance.has_effect() && pass == 1)
+				if (pass == 1)
 				{
-					hasEffects = true;
-					if (drawOp.appearance.effect().type() == text_effect_type::Outline)
-					{
-						auto effectColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
-							std::array <uint8_t, 4>{{
-								static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
-								static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green(),
-								static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
-								static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
-							std::array <uint8_t, 4>{};
-						auto scanlineOffsetCount = scanline_offsets(drawOp.appearance.effect());
-						auto barrierPartitionCount = barrier_partitions(drawOp.appearance.effect());
-						auto y = ((op.pass() - 1) % (barrierPartitionCount / 2)) / scanlineOffsetCount - drawOp.appearance.effect().width();
-						auto x = ((op.pass() - 1) % (barrierPartitionCount / 2)) % scanlineOffsetCount - drawOp.appearance.effect().width();
-						vertexArrays.instance().push_back({ outputVertices[0] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[0] });
-						vertexArrays.instance().push_back({ outputVertices[2] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[3] });
-						vertexArrays.instance().push_back({ outputVertices[1] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[1] });
-						vertexArrays.instance().push_back({ outputVertices[3] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[1] });
-						vertexArrays.instance().push_back({ outputVertices[4] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[2] });
-						vertexArrays.instance().push_back({ outputVertices[5] + vec3{glyphOrigin.x + x, glyphOrigin.y + y, 0.0}, effectColour, iTempTextureCoords[3] });
-					}
+					passColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
+						std::array <uint8_t, 4>{{
+							static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
+							static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green(),
+							static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
+							static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
+						std::array <uint8_t, 4>{};
 				}
 				else if (pass == 2)
 				{
-					auto ink = std::holds_alternative<colour>(drawOp.appearance.ink()) ?
+					passColour = std::holds_alternative<colour>(drawOp.appearance.ink()) ?
 						std::array <uint8_t, 4>{{
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).green(),
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
 							static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
 						std::array <uint8_t, 4>{};
-					vertexArrays.instance().push_back({ outputVertices[0] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[0] });
-					vertexArrays.instance().push_back({ outputVertices[2] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[3] });
-					vertexArrays.instance().push_back({ outputVertices[1] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[1] });
-					vertexArrays.instance().push_back({ outputVertices[3] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[1] });
-					vertexArrays.instance().push_back({ outputVertices[4] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[2] });
-					vertexArrays.instance().push_back({ outputVertices[5] + vec3{glyphOrigin.x, glyphOrigin.y, 0.0}, ink, iTempTextureCoords[3] });
 				}
+
+				vertexArrays.instance().push_back({ outputVertices[0], passColour, iTempTextureCoords[0] });
+				vertexArrays.instance().push_back({ outputVertices[2], passColour, iTempTextureCoords[3] });
+				vertexArrays.instance().push_back({ outputVertices[1], passColour, iTempTextureCoords[1] });
+				vertexArrays.instance().push_back({ outputVertices[3], passColour, iTempTextureCoords[1] });
+				vertexArrays.instance().push_back({ outputVertices[4], passColour, iTempTextureCoords[2] });
+				vertexArrays.instance().push_back({ outputVertices[5], passColour, iTempTextureCoords[3] });
 			}
 		}
 
@@ -1753,38 +1729,22 @@ namespace neogfx
 
 		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().glyph_shader_program(useSubpixelShader)};
 
-		for (uint32_t pass = (hasEffects ? 1 : 2); pass <= 2; ++pass)
-		{
-			auto& shader = rendering_engine().active_shader_program();
+		auto& shader = rendering_engine().active_shader_program();
 
-			rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
+		rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
 
-			bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
-			shader.set_uniform_variable("guiCoordinates", guiCoordinates);
-			shader.set_uniform_variable("outputExtents", static_cast<float>(render_target().target_extents().cx), static_cast<float>(render_target().target_extents().cy));
+		bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
+		shader.set_uniform_variable("guiCoordinates", guiCoordinates);
+		shader.set_uniform_variable("outputExtents", static_cast<float>(render_target().target_extents().cx), static_cast<float>(render_target().target_extents().cy));
 			
-			shader.set_uniform_variable("glyphTexture", 1);
+		shader.set_uniform_variable("glyphTexture", 1);
 
-			if (useSubpixelShader)
-				shader.set_uniform_variable("outputTexture", 2);
+		if (useSubpixelShader)
+			shader.set_uniform_variable("outputTexture", 2);
 
-			glCheck(glTextureBarrier());
+		shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
 
-			if (pass == 1)
-			{
-				std::size_t count = (aDrawGlyphOps.second - aDrawGlyphOps.first) * vertexArrays.instance().primitive_vertex_count();
-				if (firstOp.appearance.has_effect())
-				{
-					count *= offsets(firstOp.appearance.effect());
-					vertexArrays.instance().draw(count, barrier_partitions(firstOp.appearance.effect()));
-				}
-			}
-			else if (pass == 2)
-			{
-				shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
-			}
-		}
-
+		vertexArrays.instance().draw(need, glyphCount / 2u);
 		vertexArrays.instance().execute();
 
 		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));

@@ -868,7 +868,7 @@ namespace neogfx
 	void graphics_context::blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParamter2) const
 	{
 		// todo
-		fill_rect(aDestinationRect, colour::Cyan);
+		aSource.fill_rect(aDestinationRect, colour::Cyan);
 		blit(aDestinationRect, aSource, aSourceRect);
 	}
 

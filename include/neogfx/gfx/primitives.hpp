@@ -307,6 +307,15 @@ namespace neogfx
 		{
 		}
 	public:
+		bool operator==(const text_appearance& aRhs) const
+		{
+			return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iEffect == aRhs.iEffect;
+		}
+		bool operator!=(const text_appearance& aRhs) const
+		{
+			return !(*this == aRhs);
+		}
+	public:
 		const text_colour& ink() const
 		{
 			return iInk;

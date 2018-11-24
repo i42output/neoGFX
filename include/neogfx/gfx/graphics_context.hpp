@@ -243,20 +243,44 @@ namespace neogfx
 	}
 
 	template <typename Iter>
-	inline void draw_glyph_text_glow(const graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_colour& aGlowColour, dimension aGlowSize )
+	inline void draw_glyph_text_glow_pass_1(const graphics_context::ping_pong_buffers_t& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_colour& aGlowColour, dimension aGlowSize)
+	{
+		point const effectOffset{ aGlowSize, aGlowSize };
+		vec3 pos{ effectOffset.x, effectOffset.y, 0.0 };
+		for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
+		{
+			aPingPongBuffers.first.draw_glyph(pos + iterGlyph->offset().to_vec3(), iterGlyph->font(aGlyphText), *iterGlyph, aGlowColour);
+			pos.x += iterGlyph->advance().cx;
+		}
+	}
+
+	template <typename Iter>
+	inline void draw_glyph_text_glow_pass_2(const graphics_context::ping_pong_buffers_t& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
+	{
+		point const effectOffset{ aGlowSize, aGlowSize };
+		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
+		rect const effectRect{ point{}, effectExtents };
+		aPingPongBuffers.second.blur(effectRect, aPingPongBuffers.first, effectRect, blurring_algorithm::Gaussian, 5, 1.0);
+	}
+
+	template <typename Iter>
+	inline void draw_glyph_text_glow_pass_3(const graphics_context& aGraphicsContext, const graphics_context::ping_pong_buffers_t& aPingPongBuffers, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
+	{
+		point const effectOffset{ aGlowSize, aGlowSize };
+		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
+		rect const effectRect{ point{}, effectExtents };
+		aGraphicsContext.blit(rect{ point{ aPoint } -effectOffset, effectExtents }, aPingPongBuffers.second, effectRect);
+	}
+
+	template <typename Iter>
+	inline void draw_glyph_text_glow(const graphics_context& aGraphicsContext, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_colour& aGlowColour, dimension aGlowSize)
 	{
 		point const effectOffset{ aGlowSize, aGlowSize };
 		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
 		auto pingPongBuffers = aGraphicsContext.ping_pong_buffers(effectExtents);
-		vec3 pos{ effectOffset.x, effectOffset.y, 0.0 };
-		for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
-		{
-			pingPongBuffers.first.draw_glyph(pos + iterGlyph->offset().to_vec3(), iterGlyph->font(aGlyphText), *iterGlyph, aGlowColour);
-			pos.x += iterGlyph->advance().cx;
-		}
-		rect const effectRect{ point{}, effectExtents };
-		pingPongBuffers.second.blur(effectRect, pingPongBuffers.first, effectRect, blurring_algorithm::Gaussian, 5, 1.0);
-		aGraphicsContext.blit(rect{ point{ aPoint } -effectOffset, effectExtents }, pingPongBuffers.second, effectRect);
+		draw_glyph_text_glow_pass_1(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowColour, aGlowSize);
+		draw_glyph_text_glow_pass_2(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
+		draw_glyph_text_glow_pass_3(aGraphicsContext, pingPongBuffers, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
 	}
 
 	template <typename Iter>

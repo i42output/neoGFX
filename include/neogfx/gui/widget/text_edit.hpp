@@ -355,8 +355,6 @@ namespace neogfx
 						const auto& style = std::holds_alternative<style_list::const_iterator>(tag.style()) ? *static_variant_cast<style_list::const_iterator>(tag.style()) : parent().default_style();
 						auto& glyphFont = style.font() != std::nullopt ? *style.font() : parent().font();
 						dimension cy = glyph.extents(glyphFont).cy;
-						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect_type::Outline)
-							cy += (style.text_effect()->width() * 2.0);
 						if (i == glyphsStartIndex || cy != previousHeight)
 						{
 							iHeights[i] = cy;
@@ -397,13 +395,11 @@ namespace neogfx
 				iWidth(0.0)
 			{
 			}
-
 		public:
 			const glyph_lines& lines() const { return iLines; }
 			glyph_lines& lines() { return iLines; }
 			dimension width() const { return iWidth; }
 			void set_width(dimension aWidth) { iWidth = aWidth; }
-
 		private:
 			glyph_lines iLines;
 			dimension iWidth;
@@ -502,7 +498,7 @@ namespace neogfx
 		std::size_t columns() const;
 		void set_columns(std::size_t aColumnCount);
 		void remove_columns();
-		const column_info& column(std::size_t aColumnIndex);
+		const column_info& column(std::size_t aColumnIndex) const;
 		void set_column(std::size_t aColumnIndex, const column_info& aColumn);
 	public:
 		bool has_hint() const;
@@ -517,6 +513,9 @@ namespace neogfx
 	public:
 		neogfx::cursor& cursor() const;
 		void set_cursor_position(const point& aPoint, bool aMoveAnchor = true, bool aEnableDragger = false);
+	protected:
+		std::size_t column_index(const column_info& aColumn) const;
+		rect column_rect(std::size_t aColumnIndex, bool aIncludeMargins = false) const;
 	private:
 		struct position_info
 		{
