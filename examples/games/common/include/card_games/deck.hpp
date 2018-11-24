@@ -102,6 +102,7 @@ namespace neogames
 		public:
 			void shuffle()
 			{
+				// todo: this is probably OK as the shuffle will be using less than 624 outputs of the mersenne twister but move to a CSPRNG such as HC-128 instead.
 				std::random_device rd;
 				std::mt19937 g(rd());
 				std::shuffle(iCards.begin(), iCards.end(), g);
