@@ -48,7 +48,7 @@ namespace neogfx
 	}
 
 	template <typename T, typename Category>
-	class property : public i_property
+	class property : public i_property, public neolib::lifetime
 	{
 	public:
 		struct invalid_type : std::logic_error { invalid_type() : std::logic_error("neogfx::property::invalid_type") {} };
@@ -58,6 +58,7 @@ namespace neogfx
 		typedef Category category_type;
 	public:
 		event<const value_type&> changed;
+		event<const value_type&, const value_type&> changed_from_to;
 	private:
 		typedef detail::property_optional_type_cracker<T> cracker;
 	public:
@@ -100,6 +101,11 @@ namespace neogfx
 			aOwner.properties().register_property(*this);
 		}
 	public:
+		neolib::i_lifetime& as_lifetime() override
+		{
+			return *this;
+		}
+	public:
 		const std::string& name() const override
 		{
 			return iName;
@@ -127,16 +133,52 @@ namespace neogfx
 				*this = std::forward<decltype(arg)>(arg);
 			}, aValue.for_visitor());
 		}
+		bool has_delegate() const override
+		{
+			return iDelegate != nullptr;
+		}
+		i_property_delegate& delegate() const override
+		{
+			if (has_delegate())
+				return *iDelegate;
+			throw no_delegate();
+		}
+		void set_delegate(i_property_delegate& aDelegate) override
+		{
+			iDelegate = &aDelegate;
+		}
+		void unset_delegate() override
+		{
+			iDelegate = nullptr;
+		}
 	public:
 		const value_type& value() const
 		{
-			return iValue;
+			if (!has_delegate())
+				return iValue;
+			const value_type* dptr = nullptr;
+			std::visit([this, &dptr](auto&& arg)
+			{
+				typedef std::decay_t<decltype(arg)> try_type;
+				if constexpr (std::is_same_v<try_type, value_type>)
+					dptr = &arg;
+				else if constexpr (std::is_same_v<try_type, custom_type>)
+					dptr = &neolib::any_cast<const value_type&>(arg);
+				else if constexpr (std::is_same_v<try_type, neolib::none_t>)
+					dptr = nullptr;
+				else
+				{
+					// [[unreachable]]
+					throw invalid_type();
+				}
+			}, delegate().get(*this).for_visitor());
+			return *dptr;
 		}
 		template <typename T2>
 		self_type& assign(T2&& aValue, bool aOwnerNotify = true)
 		{
 			typedef std::decay_t<decltype(aValue)> try_type;
-			if constexpr (std::is_same_v<try_type, value_type>)
+			if constexpr (std::is_same_v<try_type, value_type> || std::is_same_v<std::optional<try_type>, value_type>)
 				return do_assign(std::forward<T2>(aValue), aOwnerNotify);
 			else if constexpr (std::is_same_v<try_type, custom_type>)
 				return do_assign(neolib::any_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify);
@@ -159,7 +201,7 @@ namespace neogfx
 		}
 		operator const value_type&() const
 		{
-			return iValue;
+			return value();
 		}
 		template <typename SFINAE = optional_proxy<const self_type>>
 		const typename std::enable_if<cracker::optional, SFINAE>::type operator*() const
@@ -202,11 +244,27 @@ namespace neogfx
 		{
 			if (iValue != aValue)
 			{
+				auto previousValue = iValue;
 				iValue = std::forward<T2>(aValue);
+				neolib::destroyed_flag destroyed{ *this };
 				if (aOwnerNotify)
 					iOwner.property_changed(*this);
+				if (destroyed)
+					return *this;
 				i_property::changed.trigger(get());
-				changed.trigger(iValue);
+				if (destroyed)
+					return *this;
+				i_property::changed_from_to.trigger(previousValue, get());
+				if (destroyed)
+					return *this;
+				changed.trigger(value());
+				if (destroyed)
+					return *this;
+				changed_from_to.trigger(previousValue, value());
+				if (destroyed)
+					return *this;
+				if (has_delegate())
+					delegate().set(*this);
 			}
 			return *this;
 		}
@@ -214,6 +272,7 @@ namespace neogfx
 		i_object& iOwner;
 		std::string iName;
 		mutable value_type iValue;
+		i_property_delegate* iDelegate = nullptr;
 	};
 
 	#define define_property( category, type, name, ... ) neogfx::property<type, category> name = { *this, #name ##s, __VA_ARGS__ };
