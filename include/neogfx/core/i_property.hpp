@@ -71,6 +71,18 @@ namespace neogfx
 		{
 		}
 	public:
+		using variant_t::operator=;
+		property_variant& operator=(const property_variant& other)
+		{
+			variant_t::operator=(static_cast<const variant_t&>(other));
+			return *this;
+		}
+		property_variant& operator=(property_variant&& other)
+		{
+			variant_t::operator=(static_cast<variant_t&&>(std::move(other)));
+			return *this;
+		}
+	public:
 		using variant_t::operator==;
 		using variant_t::operator!=;
 	};

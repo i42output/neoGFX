@@ -843,6 +843,12 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_array.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\i_animator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\animator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\gfx\gradient.frag.glsl">
@@ -1233,6 +1239,9 @@
       <Filter>Game\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\shapes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\animator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

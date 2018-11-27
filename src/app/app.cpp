@@ -44,18 +44,13 @@ namespace nrc
 
 namespace neogfx
 {
+	template <> neolib::async_task& service<neolib::async_task>::instance() { return app::instance(); }
 	template <> i_basic_services& service<i_basic_services>::instance() { return app::instance().basic_services(); }
 	template <> i_surface_manager& service<i_surface_manager>::instance() { return app::instance().surface_manager(); }
 	template <> i_window_manager& service<i_window_manager>::instance() { return app::instance().window_manager(); }
 	template <> i_keyboard& service<i_keyboard>::instance() { return app::instance().keyboard(); }
 	template <> i_clipboard& service<i_clipboard>::instance() { return app::instance().clipboard(); }
 	template <> i_audio& service<i_audio>::instance() { return app::instance().audio(); }
-
-	template <>
-	neolib::async_task& service<neolib::async_task>::instance()
-	{
-		return app::instance();
-	}
 
 	program_options::program_options(int argc, char* argv[])
 	{

@@ -35,6 +35,7 @@ namespace neogfx
 	public:
 		static i_layout* debug;
 	public:
+		event<> layout_completed;
 		event<> alignment_changed;
 	public:
 		typedef uint32_t item_index;
