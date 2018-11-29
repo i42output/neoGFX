@@ -27,7 +27,7 @@ namespace neogfx
 	template <> i_animator& service<i_animator>::instance() { static animator sAnimator{}; return sAnimator; }
 
 	transition::transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled) :
-		iAnimator{ aAnimator }, iId{ aAnimator.allocate_id() }, iEnabled{ aEnabled }, iDisableWhenFinished{ false }, iEasingFunction{ aEasingFunction }, iDuration{ aDuration }, iStartTime{ aAnimator.animation_time() }
+		iAnimator{ aAnimator }, iId{ aAnimator.allocate_id() }, iEnabled{ aEnabled }, iDisableWhenFinished{ false }, iEasingFunction{ aEasingFunction }, iDuration{ aDuration }
 	{
 	}
 
@@ -69,7 +69,9 @@ namespace neogfx
 
 	double transition::start_time() const
 	{
-		return iStartTime;
+		if (iStartTime == std::nullopt)
+			iStartTime = animator().animation_time();
+		return *iStartTime;
 	}
 
 	double transition::mix_value() const
@@ -82,9 +84,9 @@ namespace neogfx
 		return animator().animation_time() - start_time() > duration();
 	}
 
-	void transition::update()
+	void transition::reset()
 	{
-		iStartTime = animator().animation_time();
+		iStartTime = std::nullopt;
 	}
 
 	transition_id transition::cookie() const
@@ -101,7 +103,7 @@ namespace neogfx
 			{
 				iFrom = aFrom;
 				iTo = aTo;
-				update();
+				reset();
 			}
 		});
 	}

@@ -41,7 +41,7 @@ namespace neogfx
 		double mix_value() const override;
 		bool finished() const override;
 	public:
-		void update() override;
+		void reset() override;
 	public:
 		transition_id cookie() const override;
 	private:
@@ -51,7 +51,7 @@ namespace neogfx
 		bool iDisableWhenFinished;
 		easing iEasingFunction;
 		double iDuration;
-		double iStartTime;
+		mutable std::optional<double> iStartTime;
 	};
 
 	class property_transition : public transition

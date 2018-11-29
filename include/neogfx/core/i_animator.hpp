@@ -47,7 +47,7 @@ namespace neogfx
 		virtual double mix_value() const = 0;
 		virtual bool finished() const = 0;
 	public:
-		virtual void update() = 0;
+		virtual void reset() = 0;
 		virtual void apply() = 0;
 	};
 
