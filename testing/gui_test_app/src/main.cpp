@@ -32,6 +32,7 @@
 #include <neogfx/gui/widget/status_bar.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/core/easing.hpp>
+#include <neogfx/core/i_animator.hpp>
 
 namespace ng = neogfx;
 
@@ -546,13 +547,28 @@ int main(int argc, char* argv[])
 		button8.clicked([&contactsAction]() { if (contactsAction.is_enabled()) contactsAction.disable(); else contactsAction.enable(); });
 		ng::horizontal_layout layout3(layoutButtons);
 		prng.seed(3);
+		auto transitionPrng = prng;
+		std::vector<ng::transition_id> transitions;
 		for (uint32_t i = 0; i < 10; ++i)
 		{
 			auto& button = layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
 			ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
 			button.set_foreground_colour(randomColour);
 			button.clicked([&app, &textEdit, randomColour]() { textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
+			transitions.push_back(ng::service<ng::i_animator>::instance().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
 		}
+		layout3.layout_completed([&layout3, &transitions, &transitionPrng]()
+		{
+			for (auto t : transitions)
+				ng::service<ng::i_animator>::instance().transition(t).enable(true);
+			for (auto i = 0u; i < layout3.count(); ++i)
+			{
+				auto& button = layout3.get_widget_at(i);
+				auto finalPosition = button.position();
+				button.set_position(ng::point{ finalPosition.x, finalPosition.y - transitionPrng.get(600.0, 800.0) }.ceil());
+				button.set_position(finalPosition);
+			}
+		});
 		ng::group_box groupBox{ layout2, "Group Box" };
 		ng::vertical_layout& layoutRadiosAndChecks = static_cast<ng::vertical_layout&>(groupBox.item_layout());
 		ng::check_box triState(layoutRadiosAndChecks, "Tristate checkbo&x", ng::button_checkable::TriState);

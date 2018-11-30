@@ -259,21 +259,22 @@ namespace neogfx
 	public:
 		struct property_category
 		{
-			struct geometry {};
+			struct soft_geometry {};
+			struct hard_geometry {};
 			struct font {};
 			struct colour {};
 			struct other_appearance {};
 			struct other {};
 		};
-		define_property(property_category::geometry, optional_logical_coordinate_system, LogicalCoordinateSystem)
-		define_property(property_category::geometry, point, Position)
-		define_property(property_category::geometry, size, Size)
-		define_property(property_category::geometry, optional_margins, Margins)
-		define_property(property_category::geometry, optional_size_policy, SizePolicy)
-		define_property(property_category::geometry, optional_size, Weight)
-		define_property(property_category::geometry, optional_size, MinimumSize)
-		define_property(property_category::geometry, optional_size, MaximumSize)
-		define_property(property_category::geometry, bool, Visible, true)
+		define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem)
+		define_property(property_category::soft_geometry, point, Position)
+		define_property(property_category::soft_geometry, size, Size)
+		define_property(property_category::hard_geometry, optional_margins, Margins)
+		define_property(property_category::hard_geometry, optional_size_policy, SizePolicy)
+		define_property(property_category::hard_geometry, optional_size, Weight)
+		define_property(property_category::hard_geometry, optional_size, MinimumSize)
+		define_property(property_category::hard_geometry, optional_size, MaximumSize)
+		define_property(property_category::hard_geometry, bool, Visible, true)
 		define_property(property_category::other_appearance, bool, Enabled, true)
 		define_property(property_category::other, neogfx::focus_policy, FocusPolicy, neogfx::focus_policy::NoFocus)
 		define_property(property_category::other_appearance, double, Opacity, 1.0)

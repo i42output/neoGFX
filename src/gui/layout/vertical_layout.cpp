@@ -85,5 +85,6 @@ namespace neogfx
 		layout::do_layout_items<layout::row_major<vertical_layout>>(aPosition, aSize);
 		if (has_layout_owner())
 			layout_owner().layout_items_completed();
+		layout_completed.trigger();
 	}
 }

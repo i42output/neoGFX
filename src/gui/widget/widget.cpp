@@ -99,10 +99,12 @@ namespace neogfx
 	{
 		static auto invalidate_layout = [](i_widget& self) { if (self.has_parent_layout()) self.parent_layout().invalidate(); self.update(true); };
 		static auto invalidate_canvas = [](i_widget& self) { self.update(true); };
+		static auto invalidate_window_canvas = [](i_widget& self) { self.root().as_widget().update(true); };
 		static auto ignore = [](i_widget&) {};
 		static const std::unordered_map<std::type_index, std::function<void(i_widget&)>> sActions =
 		{
-			{ std::type_index{ typeid(property_category::geometry) }, invalidate_layout },
+			{ std::type_index{ typeid(property_category::hard_geometry) }, invalidate_layout },
+			{ std::type_index{ typeid(property_category::soft_geometry) }, invalidate_window_canvas },
 			{ std::type_index{ typeid(property_category::font) }, invalidate_layout },
 			{ std::type_index{ typeid(property_category::colour) }, invalidate_canvas },
 			{ std::type_index{ typeid(property_category::other_appearance) }, invalidate_canvas },

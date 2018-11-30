@@ -139,6 +139,7 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_playback_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_sample.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\css.hpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="..\..\..\include\neogfx\core\hsv_color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\hsv_colour.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\html.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
@@ -411,6 +413,7 @@
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio.cpp" />
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\native\sdl_audio_playback_device.cpp" />
+    <ClCompile Include="..\..\..\src\core\animator.cpp" />
     <ClCompile Include="..\..\..\src\core\colour.cpp" />
     <ClCompile Include="..\..\..\src\core\css.cpp" />
     <ClCompile Include="..\..\..\src\core\units_context.cpp" />

@@ -473,7 +473,7 @@ namespace neogfx
 		else
 		{
 			font = std::shared_ptr<i_native_font_face>(new detail::native_font_face_wrapper(aNewFont));
-			iIdCache.add({ font, 0u });
+			iIdCache.add(id_cache_entry{ font, 0u });
 		}
 		// cleanup opportunity
 		cleanup();
