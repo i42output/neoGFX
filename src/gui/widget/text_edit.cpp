@@ -277,10 +277,10 @@ namespace neogfx
 		scoped_scissor scissor(aGraphicsContext, clipRect);
 		for (auto iterColumn = iGlyphColumns.begin(); iterColumn != iGlyphColumns.end(); ++iterColumn)
 		{
-			const auto& column = *iterColumn;
+			auto const& column = *iterColumn;
 			auto columnWidth = iGlyphColumns.size() == 1 ? std::max(iTextExtents.cx, client_rect(false).width()) : column.width();
 			auto columnMargins = iGlyphColumns.size() == 1 ? neogfx::margins{} : column.margins();
-			const auto& lines = column.lines();
+			auto const& lines = column.lines();
 			auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, vertical_scrollbar().position(), {} },
 				[](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
 			if (line != lines.begin() && (line == lines.end() || line->ypos > vertical_scrollbar().position()))
@@ -1015,7 +1015,7 @@ namespace neogfx
 					if (iterChar != iText.begin())
 					{
 						auto iterGlyph = to_glyph(iterChar - 1);
-						const auto& g = *iterGlyph;
+						auto const& g = *iterGlyph;
 						if (g.direction() == text_direction::RTL || g.direction() == text_direction::Digit_RTL)
 						{
 							aGlyphPosition = iterGlyph - iGlyphs.begin();
@@ -1038,7 +1038,7 @@ namespace neogfx
 				if (lineStart != lineEnd)
 				{
 					auto iterGlyph = iGlyphs.begin() + aGlyphPosition;
-					const auto& glyph = aGlyphPosition < lineEnd ? *iterGlyph : *(iterGlyph - 1);
+					auto const& glyph = aGlyphPosition < lineEnd ? *iterGlyph : *(iterGlyph - 1);
 					point linePos{ glyph.x - line->lineStart.second->x, line->ypos };
 					if (placeCursorToRight)
 						linePos.x += glyph.advance().cx;
@@ -1094,10 +1094,10 @@ namespace neogfx
 		}
 		if (iterColumn == iGlyphColumns.end())
 			--iterColumn;
-		const auto& column = *iterColumn;
+		auto const& column = *iterColumn;
 		adjusted.x -= column.margins().left;
 		adjusted = adjusted.max(point{});
-		const auto& lines = column.lines();
+		auto const& lines = column.lines();
 		auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, adjusted.y, {} },
 			[](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
 		if (line == lines.end() && !lines.empty() && adjusted.y < lines.back().ypos + lines.back().extents.cy)
@@ -1481,12 +1481,12 @@ namespace neogfx
 		neolib::vecarray<std::u32string::size_type, 16, -1> columnDelimiters;
 		auto fs = [this, paragraphStart, &columnDelimiters](std::u32string::size_type aSourceIndex)
 		{
-			const auto& tagStyle = iText.tag(paragraphStart + aSourceIndex).style();
+			auto const& tagStyle = iText.tag(paragraphStart + aSourceIndex).style();
 			std::size_t indexColumn = std::lower_bound(columnDelimiters.begin(), columnDelimiters.end(), aSourceIndex) - columnDelimiters.begin();
 			if (indexColumn > columns() - 1)
 				indexColumn = columns() - 1;
-			const auto& columnStyle = text_edit::column(indexColumn).style();
-			const auto& style =
+			auto const& columnStyle = text_edit::column(indexColumn).style();
+			auto const& style =
 				std::holds_alternative<style_list::const_iterator>(tagStyle) ? *static_variant_cast<style_list::const_iterator>(tagStyle) :
 				columnStyle.font() != std::nullopt ? columnStyle : iDefaultStyle;
 			return style.font() != std::nullopt ? *style.font() : font();
@@ -1509,6 +1509,8 @@ namespace neogfx
 				if (gt.cbegin() != gt.cend())
 				{
 					auto paragraphGlyphs = iGlyphs.insert(iGlyphs.end(), gt.cbegin(), gt.cend());
+					for (auto& newGlyph : gt)
+						iGlyphs.cache_glyph_font(newGlyph.font_id());
 					auto newParagraph = iGlyphParagraphs.insert(iGlyphParagraphs.end(),
 						std::make_pair(
 							glyph_paragraph{ *this },
@@ -1591,10 +1593,9 @@ namespace neogfx
 				{
 					auto lineStart = paragraphStart;
 					auto lineEnd = lineStart;
-					const auto& glyph = *lineStart;
-					const auto& tagStyle = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).style();
-					const auto& style = std::holds_alternative<style_list::const_iterator>(tagStyle) ? *static_variant_cast<style_list::const_iterator>(tagStyle) : iDefaultStyle;
-					auto& glyphFont = style.font() != std::nullopt ? *style.font() : font();
+					auto const& glyph = *lineStart;
+					auto const& tagStyle = iText.tag(iText.begin() + paragraph.first.text_start_index() + glyph.source().first).style();
+					auto const& glyphFont = glyph.font(iGlyphs);
 					auto height = paragraph.first.height(lineStart, lineEnd);
 					lines.push_back(
 						glyph_line{
@@ -1777,7 +1778,7 @@ namespace neogfx
 		style result = iDefaultStyle;
 		result.merge(aColumn.style());
 		result.set_background_colour();
-		const auto& tagStyle = iText.tag(iText.begin() + from_glyph(aGlyph).first).style();
+		auto const& tagStyle = iText.tag(iText.begin() + from_glyph(aGlyph).first).style();
 		if (std::holds_alternative<style_list::const_iterator>(tagStyle))
 			result.merge(*static_variant_cast<style_list::const_iterator>(tagStyle));
 		return result;
@@ -1802,9 +1803,9 @@ namespace neogfx
 						auto gp = static_cast<cursor::position_type>(from_glyph(i).first);
 						selected = (gp >= std::min(cursor().position(), cursor().anchor()) && gp < std::max(cursor().position(), cursor().anchor()));
 					}
-					const auto& glyph = *i;
-					const auto& style = glyph_style(i, aColumn);
-					const auto& glyphFont = style.font() != std::nullopt ? *style.font() : font();
+					auto const& glyph = *i;
+					auto const& style = glyph_style(i, aColumn);
+					auto const& glyphFont = glyph.font(iGlyphs);
 					switch (pass)
 					{
 					case 0:
@@ -1841,9 +1842,9 @@ namespace neogfx
 		point pos = aPoint;
 		for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
 		{
-			const auto& glyph = *i;
-			const auto& style = glyph_style(i, aColumn);
-			const auto& glyphFont = style.font() != std::nullopt ? *style.font() : font();
+			auto const& glyph = *i;
+			auto const& style = glyph_style(i, aColumn);
+			auto const& glyphFont = glyph.font(iGlyphs);
 			if (glyph.underline())
 				aGraphicsContext.draw_glyph_underline(pos + point{ 0.0, aLine->extents.cy - glyphFont.height() }, glyphFont, glyph,
 					std::holds_alternative<colour>(style.text_colour()) ?
@@ -1891,9 +1892,10 @@ namespace neogfx
 		if (cursorPos.glyph != iGlyphs.end() && cursorPos.lineStart != cursorPos.lineEnd)
 		{
 			auto iterGlyph = cursorPos.glyph < cursorPos.lineEnd ? cursorPos.glyph : cursorPos.glyph - 1;
-			const auto& tagStyle = iText.tag(iText.begin() + from_glyph(iterGlyph).first).style();
-			const auto& style = std::holds_alternative<style_list::const_iterator>(tagStyle) ? *static_variant_cast<style_list::const_iterator>(tagStyle) : iDefaultStyle;
-			auto& glyphFont = style.font() != std::nullopt ? *style.font() : font();
+			auto const& glyph = *iterGlyph;
+			auto const& tagStyle = iText.tag(iText.begin() + from_glyph(iterGlyph).first).style();
+			auto const& style = std::holds_alternative<style_list::const_iterator>(tagStyle) ? *static_variant_cast<style_list::const_iterator>(tagStyle) : iDefaultStyle;
+			auto const& glyphFont = glyph.font(iGlyphs);
 			glyphHeight = glyphFont.height();
 			lineHeight = cursorPos.line->extents.cy;
 		}

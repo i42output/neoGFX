@@ -93,6 +93,7 @@ namespace neogfx
 	{
 	public:
 		virtual const font& glyph_font(const glyph& aGlyph) const = 0;
+		virtual void cache_glyph_font(font_id aFontId) = 0;
 		virtual void cache_glyph_font(const font& aFont) = 0;
 	};
 
@@ -373,10 +374,21 @@ namespace neogfx
 				return existing->second.second;
 			throw cached_font_not_found();
 		}
-		void cache_glyph_font(const neogfx::font& aFont) override
+		void cache_glyph_font(font_id aFontId) override
+		{
+			if (cache().find(aFontId) == cache().end())
+			{
+				auto& fontService = service<i_font_manager>::instance();
+				cache().emplace(aFontId, cache_entry{ neolib::small_cookie_auto_ref{ fontService, aFontId }, fontService.font_from_id(aFontId) });
+			}
+		}
+		void cache_glyph_font(const font& aFont) override
 		{
 			if (cache().find(aFont.id()) == cache().end())
-				cache().emplace(aFont.id(), cache_entry{ neolib::small_cookie_auto_ref{ service<i_font_manager>::instance(), aFont.id() }, aFont });
+			{
+				auto& fontService = service<i_font_manager>::instance();
+				cache().emplace(aFont.id(), cache_entry{ neolib::small_cookie_auto_ref{ fontService, aFont.id() }, aFont});
+			}
 		}
 	public:
 		void clear()
