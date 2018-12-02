@@ -223,7 +223,18 @@ namespace neogfx
 		public:
 			double x = 0.0;
 		};
-		typedef neolib::segmented_array<paragraph_positioned_glyph, 256> document_glyphs;
+		typedef neolib::segmented_array<paragraph_positioned_glyph, 256> glyph_container_type;
+		class document_glyphs : public glyph_font_cache, public glyph_container_type
+		{
+		public:
+			using glyph_container_type::glyph_container_type;
+		public:
+			void clear()
+			{
+				glyph_font_cache::clear();
+				glyph_container_type::clear();
+			}
+		};
 		class glyph_paragraph;
 		class glyph_paragraph_index
 		{

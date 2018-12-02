@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <optional>
+#include <neolib/allocator.hpp>
 #include <neolib/vecarray.hpp>
 #include <neolib/string_utils.hpp>
 #include <neogfx/core/geometrical.hpp>
@@ -88,13 +89,12 @@ namespace neogfx
 
 	class glyph;
 
-	class i_glyph_container
+	class i_glyph_font_cache
 	{
 	public:
-		typedef uint16_t glyph_font_index;
-	public:
 		virtual const font& glyph_font(const glyph& aGlyph) const = 0;
-		virtual void set_glyph_font(glyph& aGlyph, const font& aFont) = 0;
+		virtual void cache_glyph_font(font_id aFontId) = 0;
+		virtual void cache_glyph_font(const font& aFont) = 0;
 	};
 
 	class glyph
@@ -111,37 +111,34 @@ namespace neogfx
 	public:
 		typedef uint32_t value_type;
 		typedef std::pair<uint32_t, uint32_t> source_type;
-		typedef i_glyph_container::glyph_font_index glyph_font_index;
-	public:
-		static constexpr glyph_font_index NO_FONT_SPECIFIED = static_cast<glyph_font_index>(~0);
 	public:
 		glyph() :
 			iType{},
 			iValue{},
 			iFlags{},
 			iSource{}, 
-			iFontIndex{ NO_FONT_SPECIFIED },
+			iFont{},
 			iAdvance{}, 
 			iOffset{}
 		{
 		}
-		glyph(const character_type& aType, value_type aValue, source_type aSource, i_glyph_container& aGlyphContainer, neogfx::font& aFont, size aAdvance, size aOffset) :
+		glyph(const character_type& aType, value_type aValue, source_type aSource, i_glyph_font_cache& aFontCache, neogfx::font& aFont, size aAdvance, size aOffset) :
 			iType{ aType.category, aType.direction }, 
 			iValue{ aValue }, 
 			iFlags{}, 
 			iSource{ aSource }, 
-			iFontIndex{ NO_FONT_SPECIFIED },
+			iFont{ aFont.id() },
 			iAdvance{ aAdvance },
 			iOffset{ aOffset }
 		{
-			aGlyphContainer.set_glyph_font(*this, aFont);
+			aFontCache.cache_glyph_font(aFont);
 		}
 		glyph(const character_type& aType, value_type aValue) :
 			iType{ aType.category, aType.direction }, 
 			iValue{ aValue }, 
 			iFlags{}, 
 			iSource{}, 
-			iFontIndex{ NO_FONT_SPECIFIED },
+			iFont{},
 			iAdvance{}, 
 			iOffset{}
 		{
@@ -151,7 +148,7 @@ namespace neogfx
 			iValue{ aOther.iValue },
 			iFlags{ aOther.iFlags },
 			iSource{ aOther.iSource },
-			iFontIndex{ aOther.iFontIndex },
+			iFont{ aOther.iFont },
 			iAdvance{ aOther.iAdvance },
 			iOffset{ aOther.iOffset }
 		{
@@ -164,7 +161,7 @@ namespace neogfx
 	public:
 		bool has_font() const
 		{
-			return iFontIndex != NO_FONT_SPECIFIED;
+			return font_specified();
 		}
 		bool has_font_glyph() const
 		{
@@ -235,13 +232,34 @@ namespace neogfx
 		{ 
 			iSource = aSource; 
 		}
-		void set_font_index(glyph_font_index aFontIndex)
+		bool font_specified() const
 		{
-			iFontIndex = aFontIndex;
+			return font_id() != neogfx::font_id{};
 		}
-		void set_font(const neogfx::font& aFont, i_glyph_container& aGlyphContainer)
+		neogfx::font_id font_id() const
 		{
-			aGlyphContainer.set_glyph_font(*this, aFont);
+			return iFont;
+		}
+		neogfx::font font() const
+		{
+			if (font_specified())
+				return service<i_font_manager>::instance().font_from_id(font_id());
+			throw no_font_specified();
+		}
+		const neogfx::font& font(const i_glyph_font_cache& aFontCache) const
+		{
+			if (font_specified())
+				return aFontCache.glyph_font(*this);
+			throw no_font_specified();
+		}
+		void set_font(neogfx::font_id aFont)
+		{
+			iFont = aFont;
+		}
+		void set_font(const neogfx::font& aFont, i_glyph_font_cache& aFontCache)
+		{
+			set_font(aFont.id());
+			aFontCache.cache_glyph_font(aFont);
 		}
 		size advance(bool aRoundUp = true) const 
 		{ 
@@ -259,11 +277,11 @@ namespace neogfx
 		{ 
 			iOffset = aOffset; 
 		}
-		size extents(const i_glyph_container& aGlyphContainer) const
+		size extents(const i_glyph_font_cache& aFontCache) const
 		{
-			return extents(font(aGlyphContainer));
+			return extents(font(aFontCache));
 		}
-		size extents(const font& aFont) const
+		size extents(const neogfx::font& aFont) const
 		{
 			if (iExtents == basic_size<float>{})
 			{
@@ -316,23 +334,13 @@ namespace neogfx
 		{ 
 			iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); 
 		}
-		glyph_font_index font_index() const
-		{
-			if (iFontIndex != NO_FONT_SPECIFIED)
-				return iFontIndex;
-			throw no_font_specified();
-		}
-		const neogfx::font& font(const i_glyph_container& aGlyphContainer) const
-		{
-			return aGlyphContainer.glyph_font(*this);
-		}
 		void kerning_adjust(float aAdjust) 
 		{ 
 			iAdvance.cx += aAdjust; 
 		}
-		const i_glyph_texture& glyph_texture(const i_glyph_container& aGlyphContainer) const
+		const i_glyph_texture& glyph_texture(const i_glyph_font_cache& aFontCache) const
 		{
-			return glyph_texture(font(aGlyphContainer));
+			return glyph_texture(font(aFontCache));
 		}
 		const i_glyph_texture& glyph_texture(const neogfx::font& aFont) const
 		{
@@ -343,7 +351,7 @@ namespace neogfx
 		value_type iValue;
 		flags_e iFlags;
 		source_type iSource;
-		glyph_font_index iFontIndex;
+		neogfx::font_id iFont;
 		basic_size<float> iAdvance;
 		basic_size<float> iOffset;
 		mutable basic_size<float> iExtents;
@@ -351,15 +359,62 @@ namespace neogfx
 
 	constexpr std::size_t SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT = 16;
 
-	class glyph_text : public i_glyph_container, private neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>
+	class glyph_font_cache : public i_glyph_font_cache
+	{
+	private:
+		typedef std::pair<neolib::small_cookie_auto_ref, font> cache_entry;
+		typedef std::unordered_map<font_id, cache_entry, std::hash<font_id>, std::equal_to<font_id>, neolib::fast_pool_allocator<std::pair<const font_id, cache_entry>>> font_cache;
+	public:
+		struct cached_font_not_found : std::logic_error { cached_font_not_found() : std::logic_error("neogfx::glyph_font_cache::cached_font_not_found") {} };
+	public:
+		const font& glyph_font(const glyph& aGlyph) const override
+		{
+			auto existing = cache().find(aGlyph.font_id());
+			if (existing != cache().end())
+				return existing->second.second;
+			throw cached_font_not_found();
+		}
+		void cache_glyph_font(font_id aFontId) override
+		{
+			if (cache().find(aFontId) == cache().end())
+			{
+				auto& fontService = service<i_font_manager>::instance();
+				cache().emplace(aFontId, cache_entry{ neolib::small_cookie_auto_ref{ fontService, aFontId }, fontService.font_from_id(aFontId) });
+			}
+		}
+		void cache_glyph_font(const font& aFont) override
+		{
+			if (cache().find(aFont.id()) == cache().end())
+			{
+				auto& fontService = service<i_font_manager>::instance();
+				cache().emplace(aFont.id(), cache_entry{ neolib::small_cookie_auto_ref{ fontService, aFont.id() }, aFont});
+			}
+		}
+	public:
+		void clear()
+		{
+			iCache.clear();
+		}
+	private:
+		const font_cache& cache() const
+		{
+			return iCache;
+		}
+		font_cache& cache()
+		{
+			return iCache;
+		}
+	private:
+		font_cache iCache;
+	};
+
+	class glyph_text : public glyph_font_cache, private neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>
 	{
 	private:
 		static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
 		typedef neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1> container;
 	public:
 		using container::const_iterator;
-	private:
-		typedef neolib::vecarray<neolib::cookie_auto_ref, SMALL_OPTIMIZATION_FONT_COUNT, -1> font_container;
 	public:
 		glyph_text() :
 			container{}
@@ -372,13 +427,13 @@ namespace neogfx
 		}
 		glyph_text(const glyph_text& aOther) :
 			container{ aOther },
-			iFonts{ aOther.iFonts },
+			glyph_font_cache{ aOther },
 			iExtents{ aOther.iExtents }
 		{
 		}
 		glyph_text(glyph_text&& aOther) :
 			container{ std::move(aOther) },
-			iFonts{ std::move(aOther.iFonts) },
+			glyph_font_cache{ std::move(aOther) },
 			iExtents{ aOther.iExtents }
 		{
 		}
@@ -388,7 +443,7 @@ namespace neogfx
 			if (&aOther == this)
 				return *this;
 			container::operator=(aOther);
-			iFonts = aOther.iFonts;
+			glyph_font_cache::operator=(aOther);
 			iExtents = aOther.iExtents;
 			return *this;
 		}
@@ -397,7 +452,7 @@ namespace neogfx
 			if (&aOther == this)
 				return *this;
 			container::operator=(std::move(aOther));
-			iFonts = std::move(aOther.iFonts);
+			glyph_font_cache::operator=(std::move(aOther));
 			iExtents = aOther.iExtents;
 			return *this;
 		}
@@ -440,24 +495,13 @@ namespace neogfx
 		void clear()
 		{
 			container::clear();
-			iFonts.clear();
+			glyph_font_cache::clear();
 			iExtents = std::nullopt;
 		}
 	public:
 		bool operator==(const glyph_text& aOther) const
 		{
 			return static_cast<const container&>(*this) == static_cast<const container&>(aOther);
-		}
-	public:
-		const neogfx::font& glyph_font(const glyph& aGlyph) const override
-		{
-			return service<i_font_manager>::instance().font_from_id(fonts()[aGlyph.font_index()].cookie());
-		}
-		void set_glyph_font(glyph& aGlyph, const neogfx::font& aFont) override
-		{
-			if (fonts().empty() || fonts().back().cookie() != aFont.id())
-				fonts().push_back(neolib::cookie_auto_ref{ service<i_font_manager>::instance(), aFont.id() });
-			aGlyph.set_font_index(static_cast<glyph_font_index>(fonts().size() - 1));
 		}
 	public:
 		neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const
@@ -509,16 +553,6 @@ namespace neogfx
 			return result;
 		}
 	private:
-		const font_container& fonts() const
-		{
-			return iFonts;
-		}
-		font_container& fonts()
-		{
-			return iFonts;
-		}
-	private:
-		font_container iFonts;
 		mutable std::optional<neogfx::size> iExtents;
 	};
 

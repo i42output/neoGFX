@@ -30,7 +30,7 @@
 
 namespace neogfx
 {
-	neolib::cookie item_cookie(const font_manager::id_cache_entry& aEntry)
+	neolib::small_cookie item_cookie(const font_manager::id_cache_entry& aEntry)
 	{
 		return aEntry.first.id();
 	}
