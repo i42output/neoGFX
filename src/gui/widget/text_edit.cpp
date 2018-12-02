@@ -1820,7 +1820,7 @@ namespace neogfx
 						{
 							glyph_text glyphText;
 							glyphText.push_back(glyph);
-							glyphText.set_glyph_font(glyphText.back(), glyphFont);
+							glyphText.cache_glyph_font(glyphFont);
 							aGraphicsContext.draw_glyph_text(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - outlineAdjust }, glyphText,
 								selected && has_focus() ?
 									text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :

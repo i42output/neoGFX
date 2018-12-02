@@ -50,8 +50,8 @@ namespace neogfx
 		typedef std::list<native_font> native_font_list;
 		typedef std::map<neolib::ci_string, std::vector<native_font_list::iterator>> font_family_list;
 		typedef std::pair<font, uint32_t> id_cache_entry;
-		typedef neolib::cookie_jar<id_cache_entry> id_cache;
-		friend neolib::cookie item_cookie(const id_cache_entry&);
+		typedef neolib::small_cookie_jar<id_cache_entry> id_cache;
+		friend neolib::small_cookie item_cookie(const id_cache_entry&);
 	public:
 		struct error_initializing_font_library : std::runtime_error { error_initializing_font_library() : std::runtime_error("neogfx::font_manager::error_initializing_font_library") {} };
 		struct no_matching_font_found : std::runtime_error { no_matching_font_found() : std::runtime_error("neogfx::font_manager::no_matching_font_found") {} };

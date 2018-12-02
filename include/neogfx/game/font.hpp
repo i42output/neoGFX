@@ -31,7 +31,7 @@ namespace neogfx::game
 {
 	struct font
 	{
-		neolib::cookie_auto_ref id;
+		neolib::small_cookie_auto_ref id;
 		string familyName;
 		string styleName;
 		scalar pointSize;
@@ -87,7 +87,7 @@ namespace neogfx::game
 			{
 				neogfx::font_info fontInfo{ aData.familyName, aData.styleName, aData.pointSize };
 				fontInfo.set_underline(aData.underline);
-				aData.id = neolib::cookie_auto_ref{ service<i_font_manager>::instance(), neogfx::font{ fontInfo }.id() };
+				aData.id = neolib::small_cookie_auto_ref{ service<i_font_manager>::instance(), neogfx::font{ fontInfo }.id() };
 			}
 		};
 	};

@@ -39,7 +39,7 @@ namespace neogfx
 		virtual const std::string& fallback_for(const std::string& aFontFamilyName) const = 0;
 	};
 
-	class i_font_manager : public neolib::i_cookie_consumer
+	class i_font_manager : public neolib::i_small_cookie_consumer
 	{
 		friend class native_font;
 	public:
