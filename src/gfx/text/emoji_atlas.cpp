@@ -44,6 +44,8 @@ namespace neogfx
 			{
 				dimension size = set.second.get<dimension>("size");
 				std::string location = set.second.get<std::string>("location");
+				std::string prefix = set.second.get<std::string>("prefix", "");
+				std::string separator = set.second.get<std::string>("separator", "-");
 				for (std::size_t i = 0; i < zipFile.file_count(); ++i)
 				{
 					auto const& filePath = zipFile.file_path(i);
@@ -51,7 +53,10 @@ namespace neogfx
 					{
 						std::u32string codePoints;
 						std::vector<std::string> hexCodePoints;
-						neolib::tokens(boost::filesystem::path(filePath).stem().string(), std::string("-"), hexCodePoints);
+						auto filename = boost::filesystem::path(filePath).stem().string();
+						if (filename.size() <= prefix.size() || (!prefix.empty() && filename.find(prefix) != 0))
+							continue;
+						neolib::tokens(filename.substr(prefix.size()), separator, hexCodePoints);
 						for (auto const& hexCodePoint : hexCodePoints)
 						{
 							std::stringstream ss;
