@@ -290,7 +290,7 @@ namespace neogfx
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 		}
 		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
-		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		glCheck(GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER));
 		if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
 			throw failed_to_create_framebuffer(glErrorString(status));
 		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
