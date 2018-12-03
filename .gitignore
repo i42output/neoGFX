@@ -243,3 +243,6 @@ Debug
 /3rdparty/glew/glew-2.1.0/lib/libglew32d.lib
 /3rdparty/glew/glew-2.1.0/stage
 /3rdparty/glew/glew-2.1.0/build/cmake/stage
+/3rdparty/SDL/SDL2-2.0.9/stage
+/3rdparty/SDL/SDL2-2.0.9/lib/SDL2.lib
+/3rdparty/SDL/SDL2-2.0.9/lib/SDL2d.lib
