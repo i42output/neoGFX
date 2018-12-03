@@ -333,19 +333,9 @@ namespace neogfx
 				}
 			textureData = &iGlyphTextureData[0];
 		}
-		GLint previousTexture;
-		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
-		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle())));
-
-		GLint previousPackAlignment;
-		glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
-		glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
-			static_cast<GLint>(glyphRect.x), static_cast<GLint>(glyphRect.y), static_cast<GLsizei>(glyphRect.cx), static_cast<GLsizei>(glyphRect.cy), 
-			useSubpixelFiltering ? GL_RGBA : GL_ALPHA, GL_UNSIGNED_BYTE, &textureData[0]));
-		glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
-
-		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+		
+		glyphRect.position() -= point{ 1.0, 1.0 };
+		glyphTexture.texture().native_texture()->set_pixels(glyphRect, &textureData[0], 1u);
 
 		return glyphTexture;
 	}

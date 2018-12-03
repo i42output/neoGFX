@@ -311,11 +311,14 @@ namespace neogfx
 		return iStorageSize;
 	}
 
-	void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData)
+	void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
 	{
 		if (sampling() != texture_sampling::Multisample)
 		{
 			GLint previousTexture = bind(1);
+			GLint previousPackAlignment;
+			glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
+			glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
 			if (sampling() != texture_sampling::Data)
 			{
 				glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
@@ -333,6 +336,7 @@ namespace neogfx
 			{
 				glCheck(glGenerateMipmap(to_gl_enum(sampling())));
 			}
+			glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
 			glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
 		}
 		else
@@ -415,6 +419,7 @@ namespace neogfx
 	{
 		if (aTextureUnit != std::nullopt)
 		{
+			glCheck();
 			glCheck(glActiveTexture(GL_TEXTURE0 + *aTextureUnit));
 		}
 		GLint previousTexture = 0;

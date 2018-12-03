@@ -124,7 +124,7 @@ namespace neogfx
 		return native_texture()->storage_extents();
 	}
 
-	void texture::set_pixels(const rect& aRect, const void* aPixelData)
+	void texture::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
 	{
 		native_texture()->set_pixels(aRect, aPixelData);
 	}
