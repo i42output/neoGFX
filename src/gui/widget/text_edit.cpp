@@ -19,9 +19,12 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
+#include <neolib/thread.hpp>
+
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/app/action.hpp>
 
 namespace neogfx
 {
@@ -163,9 +166,9 @@ namespace neogfx
 		iType{ aType },
 		iPersistDefaultStyle{ false },
 		iGlyphColumns{ 1 },
-		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
+		iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
 		iTabStopHint{ "0000" },
-		iAnimator{ app::instance(), [this](neolib::callback_timer&)
+		iAnimator{ service<neolib::async_task>(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
 			animate();
@@ -182,9 +185,9 @@ namespace neogfx
 		iType{ aType },
 		iPersistDefaultStyle{ false },
 		iGlyphColumns{ 1 },
-		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
+		iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
 		iTabStopHint{ "0000" },
-		iAnimator{ app::instance(), [this](neolib::callback_timer&)
+		iAnimator{ service<neolib::async_task>(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
 			animate();
@@ -201,9 +204,9 @@ namespace neogfx
 		iType{ aType },
 		iPersistDefaultStyle{ false },
 		iGlyphColumns{ 1 },
-		iCursorAnimationStartTime{ app::instance().program_elapsed_ms() },
+		iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
 		iTabStopHint{ "0000" },
-		iAnimator{ app::instance(), [this](neolib::callback_timer&)
+		iAnimator{ service<neolib::async_task>(), [this](neolib::callback_timer&)
 		{
 			iAnimator.again();
 			animate();
@@ -217,8 +220,8 @@ namespace neogfx
 
 	text_edit::~text_edit()
 	{
-		if (service<i_clipboard>::instance().sink_active() && &service<i_clipboard>::instance().active_sink() == this)
-			service<i_clipboard>::instance().deactivate(*this);
+		if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
+			service<i_clipboard>().deactivate(*this);
 	}
 
 	void text_edit::moved()
@@ -319,8 +322,8 @@ namespace neogfx
 	void text_edit::focus_gained(focus_reason aFocusReason)
 	{
 		scrollable_widget::focus_gained(aFocusReason);
-		service<i_clipboard>::instance().activate(*this);
-		iCursorAnimationStartTime = app::instance().program_elapsed_ms();
+		service<i_clipboard>().activate(*this);
+		iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
 		if (iType == SingleLine && aFocusReason == focus_reason::Tab)
 		{
 			cursor().set_anchor(0);
@@ -335,7 +338,7 @@ namespace neogfx
 		scrollable_widget::focus_lost(aFocusReason);
 		if (destroyed)
 			return;
-		service<i_clipboard>::instance().deactivate(*this);
+		service<i_clipboard>().deactivate(*this);
 		if (iType == SingleLine)
 			cursor().set_position(iText.size());
 		update();
@@ -366,25 +369,25 @@ namespace neogfx
 		if (aButton == mouse_button::Right)
 		{
 			iMenu = std::make_unique<context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
-			iMenu->menu().add_action(app::instance().action_undo());
-			iMenu->menu().add_action(app::instance().action_redo());
+			iMenu->menu().add_action(service<i_app>().action_undo());
+			iMenu->menu().add_action(service<i_app>().action_redo());
 			iMenu->menu().add_separator();
-			iMenu->menu().add_action(app::instance().action_cut());
-			iMenu->menu().add_action(app::instance().action_copy());
-			iMenu->menu().add_action(app::instance().action_paste());
+			iMenu->menu().add_action(service<i_app>().action_cut());
+			iMenu->menu().add_action(service<i_app>().action_copy());
+			iMenu->menu().add_action(service<i_app>().action_paste());
 			auto& pasteAs = iMenu->menu().add_sub_menu("Paste As"_t);
 			auto pastePlainText = std::make_shared<action>("Plain Text"_t);
 			auto pasteRichText = std::make_shared<action>("Rich Text (HTML)"_t);
 			pastePlainText->triggered([this]() { paste_plain_text(); });
 			pasteRichText->triggered([this]() { paste_rich_text(); });
 			sink pasteAsSink;
-			pasteAsSink += app::instance().action_paste().enabled([&pastePlainText, &pasteRichText]() { pastePlainText->enable(); pasteRichText->enable(); });
-			pasteAsSink += app::instance().action_paste().disabled([&pastePlainText, &pasteRichText]() { pastePlainText->disable(); pasteRichText->disable(); });
+			pasteAsSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText]() { pastePlainText->enable(); pasteRichText->enable(); });
+			pasteAsSink += service<i_app>().action_paste().disabled([&pastePlainText, &pasteRichText]() { pastePlainText->disable(); pasteRichText->disable(); });
 			pasteAs.add_action(pastePlainText);
 			pasteAs.add_action(pasteRichText);
-			iMenu->menu().add_action(app::instance().action_delete());
+			iMenu->menu().add_action(service<i_app>().action_delete());
 			iMenu->menu().add_separator();
-			iMenu->menu().add_action(app::instance().action_select_all());
+			iMenu->menu().add_action(service<i_app>().action_select_all());
 			iMenu->exec();
 			iMenu.reset();
 		}
@@ -606,9 +609,9 @@ namespace neogfx
 
 	colour text_edit::frame_colour() const
 	{
-		if (app::instance().current_style().palette().colour().similar_intensity(background_colour(), 0.03125))
+		if (service<i_app>().current_style().palette().colour().similar_intensity(background_colour(), 0.03125))
 			return scrollable_widget::frame_colour();
-		return app::instance().current_style().palette().colour().mid(background_colour());
+		return service<i_app>().current_style().palette().colour().mid(background_colour());
 	}
 
 	bool text_edit::can_undo() const
@@ -761,7 +764,7 @@ namespace neogfx
 		case cursor::PreviousWord:
 			if (!iText.empty())
 			{
-				auto const& emojiAtlas = service<i_font_manager>::instance().emoji_atlas();
+				auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
 				auto p = cursor().position();
 				if (p == iText.size())
 					--p;
@@ -793,7 +796,7 @@ namespace neogfx
 		case cursor::NextWord:
 			if (!iText.empty())
 			{
-				auto const& emojiAtlas = service<i_font_manager>::instance().emoji_atlas();
+				auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
 				auto p = cursor().position();
 				while (p < iText.size() && get_text_category(emojiAtlas, iText[p]) == text_category::Whitespace)
 					++p;
@@ -868,13 +871,13 @@ namespace neogfx
 
 	void text_edit::paste_plain_text()
 	{
-		paste(service<i_clipboard>::instance());
+		paste(service<i_clipboard>());
 	}
 
 	void text_edit::paste_rich_text(rich_text_format aFormat)
 	{
 		// todo
-		paste(service<i_clipboard>::instance());
+		paste(service<i_clipboard>());
 	}
 
 	bool text_edit::read_only() const
@@ -954,7 +957,7 @@ namespace neogfx
 		else if (std::holds_alternative<gradient>(default_style().text_colour()))
 			return static_variant_cast<const gradient&>(default_style().text_colour()).at(0.0);
 		else
-			return app::instance().current_style().palette().text_colour_for_widget(*this);
+			return service<i_app>().current_style().palette().text_colour_for_widget(*this);
 	}
 
 	neogfx::cursor& text_edit::cursor() const
@@ -969,7 +972,7 @@ namespace neogfx
 		{
 			if (!capturing())
 				set_capture();
-			iDragger.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+			iDragger.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.again();
 				set_cursor_position(root().mouse_position() - origin(), false);
@@ -1143,7 +1146,7 @@ namespace neogfx
 	{
 		if (iText[aTextPositionLeft] == U'\n' || iText[aTextPositionRight] == U'\n')
 			return false;
-		auto const& emojiAtlas = service<i_font_manager>::instance().emoji_atlas();
+		auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
 		return get_text_category(emojiAtlas, iText[aTextPositionLeft]) == get_text_category(emojiAtlas, iText[aTextPositionRight]);
 	}
 
@@ -1335,16 +1338,16 @@ namespace neogfx
 
 	void text_edit::init()
 	{
-		iDefaultFont = app::instance().current_style().font_info();
-		iSink += app::instance().current_style_changed([this](style_aspect)
+		iDefaultFont = service<i_app>().current_style().font_info();
+		iSink += service<i_app>().current_style_changed([this](style_aspect)
 		{
-			if (iDefaultFont != app::instance().current_style().font_info())
+			if (iDefaultFont != service<i_app>().current_style().font_info())
 			{
-				iDefaultFont = app::instance().current_style().font_info();
+				iDefaultFont = service<i_app>().current_style().font_info();
 				refresh_paragraph(iText.begin(), 0);
 			}
 		});
-		iSink += service<i_rendering_engine>::instance().subpixel_rendering_changed([this]()
+		iSink += service<i_rendering_engine>().subpixel_rendering_changed([this]()
 		{
 			refresh_paragraph(iText.begin(), 0);
 		});
@@ -1355,7 +1358,7 @@ namespace neogfx
 		cursor().set_width(2.0);
 		iSink += cursor().position_changed([this]()
 		{
-			iCursorAnimationStartTime = app::instance().program_elapsed_ms();
+			iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
 			make_cursor_visible();
 			update();
 		});
@@ -1812,8 +1815,8 @@ namespace neogfx
 						if (selected)
 							aGraphicsContext.fill_rect(rect{ pos, size{glyph.advance().cx, aLine->extents.cy} }, 
 								has_focus() ? 
-									app::instance().current_style().palette().selection_colour() : 
-									app::instance().current_style().palette().selection_colour().with_alpha(64));
+									service<i_app>().current_style().palette().selection_colour() : 
+									service<i_app>().current_style().palette().selection_colour().with_alpha(64));
 						if (style.text_effect() != std::nullopt && style.text_effect()->type() == text_effect_type::Outline)
 							outlineAdjust = std::max(outlineAdjust, style.text_effect()->width());
 						break;
@@ -1824,7 +1827,7 @@ namespace neogfx
 							glyphText.cache_glyph_font(glyphFont);
 							aGraphicsContext.draw_glyph_text(pos + glyph.offset() + point{ 0.0, aLine->extents.cy - glyphFont.height() - outlineAdjust }, glyphText,
 								selected && has_focus() ?
-									text_appearance{ app::instance().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
+									text_appearance{ service<i_app>().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
 									text_appearance{
 										std::holds_alternative<colour>(style.text_colour()) ?
 											static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
@@ -1857,9 +1860,9 @@ namespace neogfx
 
 	void text_edit::draw_cursor(const graphics_context& aGraphicsContext) const
 	{
-		if (((app::instance().program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
+		if (((neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime) / 500) % 2 == 0)
 		{
-			auto elapsed = (app::instance().program_elapsed_ms() - iCursorAnimationStartTime) % 1000;
+			auto elapsed = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime) % 1000;
 			colour::component alpha = 
 				elapsed < 500 ? 
 					255 : 

@@ -22,7 +22,9 @@
 #include <D2d1.h>
 #endif
 #include <numeric>
-#include <neogfx/app/app.hpp>
+#include <neolib/thread.hpp>
+
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include "opengl_window.hpp"
@@ -76,7 +78,7 @@ namespace neogfx
 		if (rendering_engine().active_target() != this)
 		{
 			target_activating.trigger();
-			service<i_rendering_engine>::instance().activate_context(*this);
+			service<i_rendering_engine>().activate_context(*this);
 		}
 //		else
 //			throw already_active();
@@ -224,7 +226,7 @@ namespace neogfx
 		if (iRendering || rendering_engine().creating_window() || !can_render())
 			return;
 
-		uint64_t now = app::instance().program_elapsed_ms();
+		uint64_t now = neolib::thread::program_elapsed_ms();
 
 		if (!aOOBRequest)
 		{
@@ -313,7 +315,7 @@ namespace neogfx
 
 		surface_window().rendering_finished.trigger();
 
-		iFpsData.push_back(1000.0 / (app::instance().program_elapsed_ms() - now));
+		iFpsData.push_back(1000.0 / (neolib::thread::program_elapsed_ms() - now));
 		if (iFpsData.size() > 25)
 			iFpsData.pop_front();		
 	}

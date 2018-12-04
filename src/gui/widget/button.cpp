@@ -20,7 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/button.hpp>
 #include <neogfx/gui/widget/label.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 
 namespace neogfx
 {
@@ -98,7 +98,7 @@ namespace neogfx
 
 	button::~button()
 	{
-		app::instance().remove_mnemonic(*this);
+		service<i_app>().remove_mnemonic(*this);
 	}
 
 	neogfx::size_policy button::size_policy() const
@@ -323,9 +323,9 @@ namespace neogfx
 		{
 			auto m = mnemonic_from_text(label().text().text());
 			if (!m.empty())
-				app::instance().add_mnemonic(*this);
+				service<i_app>().add_mnemonic(*this);
 			else
-				app::instance().remove_mnemonic(*this);
+				service<i_app>().remove_mnemonic(*this);
 		};
 		iSink = label().text().text_changed(label_text_updated);
 		label_text_updated();

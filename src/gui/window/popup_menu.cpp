@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
+
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/window/popup_menu.hpp>
 #include <neogfx/gui/widget/menu_item_widget.hpp>
 
@@ -104,8 +107,8 @@ namespace neogfx
 
 	void popup_menu::dismiss()
 	{
-		if (service<i_keyboard>::instance().is_keyboard_grabbed_by(*this))
-			service<i_keyboard>::instance().ungrab_keyboard(*this);
+		if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
+			service<i_keyboard>().ungrab_keyboard(*this);
 		if ((style() & window_style::DismissOnOwnerClick) == window_style::DismissOnOwnerClick)
 			close();
 		else if ((style() & window_style::HideOnOwnerClick) == window_style::HideOnOwnerClick)
@@ -140,8 +143,8 @@ namespace neogfx
 		iMenu = &aMenu;
 		if (iOpenSubMenu.get() == nullptr)
 			iOpenSubMenu = std::make_unique<popup_menu>(*this, point{});
-		if (!service<i_keyboard>::instance().is_keyboard_grabbed_by(*this))
-			service<i_keyboard>::instance().grab_keyboard(*this);
+		if (!service<i_keyboard>().is_keyboard_grabbed_by(*this))
+			service<i_keyboard>().grab_keyboard(*this);
 		for (i_menu::item_index i = 0; i < menu().count(); ++i)
 			menu_layout().add(std::make_shared<menu_item_widget>(*this, menu(), menu().item_at(i)));
 		layout_items();
@@ -162,8 +165,8 @@ namespace neogfx
 		});
 		iSink += menu().item_selected([this](i_menu_item& aMenuItem)
 		{
-			if (!service<i_keyboard>::instance().is_keyboard_grabbed_by(*this))
-				service<i_keyboard>::instance().grab_keyboard(*this);
+			if (!service<i_keyboard>().is_keyboard_grabbed_by(*this))
+				service<i_keyboard>().grab_keyboard(*this);
 			if (iOpenSubMenu->has_menu() && iOpenSubMenu->menu().is_open())
 			{
 				if (aMenuItem.type() == i_menu_item::Action ||
@@ -195,7 +198,7 @@ namespace neogfx
 				});
 			}
 		});
-		service<i_window_manager>::instance().move_window(*this, aPosition);
+		service<i_window_manager>().move_window(*this, aPosition);
 		resize(minimum_size());
 		update_position();
 		show();
@@ -214,8 +217,8 @@ namespace neogfx
 		iMenu = nullptr;
 		hide();
 		menu_layout().remove_all();
-		if (service<i_keyboard>::instance().is_keyboard_grabbed_by(*this))
-			service<i_keyboard>::instance().ungrab_keyboard(*this);
+		if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
+			service<i_keyboard>().ungrab_keyboard(*this);
 	}
 
 	void popup_menu::resized()
@@ -234,7 +237,7 @@ namespace neogfx
 	size popup_menu::minimum_size(const optional_size& aAvailableSpace) const
 	{
 		size result = window::minimum_size(aAvailableSpace);
-		rect desktopRect = service<i_surface_manager>::instance().desktop_rect(surface());
+		rect desktopRect = service<i_surface_manager>().desktop_rect(surface());
 		result = result.min(desktopRect.extents());
 		return result;
 	}
@@ -248,7 +251,7 @@ namespace neogfx
 	{
 		return window::has_background_colour() ?
 			window::background_colour() :
-			app::instance().current_style().palette().colour();
+			service<i_app>().current_style().palette().colour();
 	}
 
 	colour popup_menu::frame_colour() const
@@ -354,7 +357,7 @@ namespace neogfx
 
 	bool popup_menu::text_input(const std::string&)
 	{
-		service<i_basic_services>::instance().system_beep();
+		service<i_basic_services>().system_beep();
 		return true;
 	}
 
@@ -382,7 +385,7 @@ namespace neogfx
 
 	void popup_menu::update_position()
 	{
-		auto& wm = service<i_window_manager>::instance();
+		auto& wm = service<i_window_manager>();
 		rect desktopRect{ wm.desktop_rect(*this) };
 		rect ourRect{ wm.window_rect(*this) };
 		if (ourRect.bottom() > desktopRect.bottom())

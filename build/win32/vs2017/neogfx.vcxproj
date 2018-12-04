@@ -109,11 +109,13 @@
     <ClInclude Include="..\..\..\include\neogfx\app\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\clipboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\event_processing_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i18n.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_basic_services.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_clipboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\app\i_event_processing_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_help.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_mnemonic.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_palette.hpp" />
@@ -397,10 +399,11 @@
     <ClCompile Include="..\..\..\src\app\action.cpp" />
     <ClCompile Include="..\..\..\src\app\app.cpp" />
     <ClCompile Include="..\..\..\src\app\clipboard.cpp" />
+    <ClCompile Include="..\..\..\src\app\event_processing_context.cpp" />
     <ClCompile Include="..\..\..\src\app\i18n.cpp" />
     <ClCompile Include="..\..\..\src\app\module_resource.cpp" />
     <ClCompile Include="..\..\..\src\app\native\sdl_basic_services.cpp" />
-    <ClCompile Include="..\..\..\src\app\native\sdl_service_factory.cpp" />
+    <ClCompile Include="..\..\..\src\app\native\sdl_services.cpp" />
     <ClCompile Include="..\..\..\src\app\palette.cpp" />
     <ClCompile Include="..\..\..\src\app\resource.cpp" />
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
@@ -436,7 +439,10 @@
     <ClCompile Include="..\..\..\src\gfx\image.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_error.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_graphics_context.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_helpers.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp">
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ShowIncludes>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\sdl_renderer.cpp" />
@@ -449,6 +455,7 @@
     <ClCompile Include="..\..\..\src\gfx\text\emoji_atlas.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\font_manager.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\text\glyph.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font_face.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\glyph_texture.cpp" />

@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/slider.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 
 namespace neogfx
 {
@@ -77,7 +77,7 @@ namespace neogfx
 			selectionRect.y = selection.y;
 		}
 		if (normalized_value() > 0.0)
-			aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, app::instance().current_style().palette().selection_colour());
+			aGraphicsContext.fill_rounded_rect(selectionRect, 2.0, service<i_app>().current_style().palette().selection_colour());
 		rect rectIndicator = indicator_box();
 		colour indicatorColour = foreground_colour();
 		if (iDragOffset != std::nullopt)

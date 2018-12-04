@@ -29,7 +29,7 @@ namespace neogfx
 	}
 
 	texture::texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, const optional_colour& aColour) :
-		iNativeTexture{ service<i_texture_manager>::instance().create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColour) }
+		iNativeTexture{ service<i_texture_manager>().create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColour) }
 	{
 	}
 
@@ -39,7 +39,7 @@ namespace neogfx
 	}
 
 	texture::texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType) :
-		iNativeTexture{ service<i_texture_manager>::instance().create_texture(aImage, aDataFormat, aDataType) }
+		iNativeTexture{ service<i_texture_manager>().create_texture(aImage, aDataFormat, aDataType) }
 	{
 	}
 
@@ -126,7 +126,7 @@ namespace neogfx
 
 	void texture::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
 	{
-		native_texture()->set_pixels(aRect, aPixelData);
+		native_texture()->set_pixels(aRect, aPixelData, aPackAlignment);
 	}
 
 	void texture::set_pixels(const i_image& aImage)

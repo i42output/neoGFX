@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
@@ -76,7 +76,7 @@ namespace neogfx
 
 	void text_widget::paint(graphics_context& aGraphicsContext) const
 	{
-		scoped_mnemonics sm(aGraphicsContext, service<i_keyboard>::instance().is_key_pressed(ScanCode_LALT) || service<i_keyboard>::instance().is_key_pressed(ScanCode_RALT));
+		scoped_mnemonics sm(aGraphicsContext, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT));
 		aGraphicsContext.set_glyph_text_cache(iGlyphTextCache);
 		size textSize = text_extent();
 		point textPosition;
@@ -208,7 +208,7 @@ namespace neogfx
 	{
 		if (has_text_colour())
 			return static_variant_cast<colour>(iTextAppearance->ink());
-		return app::instance().current_style().palette().text_colour_for_widget(*this);
+		return service<i_app>().current_style().palette().text_colour_for_widget(*this);
 	}
 
 	void text_widget::set_text_colour(const optional_colour& aTextColour)
@@ -244,7 +244,7 @@ namespace neogfx
 		else if (!has_surface())
 			return size{};
 		graphics_context gc{ *this, graphics_context::type::Unattached };
-		scoped_mnemonics sm{ gc, service<i_keyboard>::instance().is_key_pressed(ScanCode_LALT) || service<i_keyboard>::instance().is_key_pressed(ScanCode_RALT) };
+		scoped_mnemonics sm{ gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT) };
 		gc.set_glyph_text_cache(iGlyphTextCache);
 		if (multi_line())
 		{
@@ -269,7 +269,7 @@ namespace neogfx
 		else
 		{
 			graphics_context gc{ *this, graphics_context::type::Unattached };
-			scoped_mnemonics sm{ gc, service<i_keyboard>::instance().is_key_pressed(ScanCode_LALT) || service<i_keyboard>::instance().is_key_pressed(ScanCode_RALT) };
+			scoped_mnemonics sm{ gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) || service<i_keyboard>().is_key_pressed(ScanCode_RALT) };
 			if (multi_line())
 			{
 				if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
@@ -289,7 +289,7 @@ namespace neogfx
 	{
 		set_margins(neogfx::margins{ 0.0 });
 		set_ignore_mouse_events(true);
-		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+		iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
 		{
 			if (!has_font() && (aAspect & style_aspect::Font) == style_aspect::Font)
 			{
@@ -301,7 +301,7 @@ namespace neogfx
 				update();
 			}
 		});
-		iSink += service<i_rendering_engine>::instance().subpixel_rendering_changed([this]()
+		iSink += service<i_rendering_engine>().subpixel_rendering_changed([this]()
 		{
 			iTextExtent = std::nullopt;
 			iSizeHintExtent = std::nullopt;

@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_view.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
@@ -256,7 +256,7 @@ namespace neogfx
 					}
 					optional_colour textColour = presentation_model().cell_colour(item_presentation_model_index{ row, col }, item_cell_colour_type::Foreground);
 					if (textColour == std::nullopt)
-						textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
+						textColour = has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().text_colour();
 					aGraphicsContext.draw_glyph_text(textPos, glyphText, *textColour);
 				}
 				if (selection_model().has_current_index() && selection_model().current_index() != editing() && selection_model().current_index() == item_presentation_model_index{ row, col } && has_focus())
@@ -313,7 +313,7 @@ namespace neogfx
 			}			
 			if (capturing())
 			{
-				iMouseTracker.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+				iMouseTracker.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 				{
 					aTimer.again();
 					auto item = item_at(root().mouse_position() - origin());
@@ -336,7 +336,7 @@ namespace neogfx
 				if (selection_model().current_index() == *item && presentation_model().cell_editable(*item) == item_cell_editable::OnInputEvent)
 					edit(*item);
 				else
-					app::instance().basic_services().system_beep();
+					service<i_basic_services>().system_beep();
 			}
 		}
 	}
@@ -796,7 +796,7 @@ namespace neogfx
 				textEdit.set_margins(neogfx::margins{});
 			optional_colour textColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Foreground);
 			if (textColour == std::nullopt)
-				textColour = has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().text_colour();
+				textColour = has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().text_colour();
 			optional_colour backgroundColour = presentation_model().cell_colour(newIndex, item_cell_colour_type::Background);
 			textEdit.set_default_style(text_edit::style{ presentation_model().cell_font(newIndex), *textColour, backgroundColour != std::nullopt ? colour_or_gradient{ *backgroundColour } : colour_or_gradient{} });
 			textEdit.set_text(presentation_model().cell_to_string(newIndex));
@@ -852,7 +852,7 @@ namespace neogfx
 			if (!error)
 				model().update_cell_data(modelIndex, cellData);
 			else
-				app::instance().basic_services().system_beep();
+				service<i_basic_services>().system_beep();
 		}
 		else
 		{
@@ -987,7 +987,7 @@ namespace neogfx
 	{
 		set_focus_policy(focus_policy::ClickTabFocus);
 		set_margins(neogfx::margins{});
-		iSink += app::instance().current_style_changed([this](style_aspect)
+		iSink += service<i_app>().current_style_changed([this](style_aspect)
 		{
 			if (selection_model().has_current_index())
 				make_visible(selection_model().current_index());

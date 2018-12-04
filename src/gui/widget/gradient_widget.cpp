@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
 #include <neogfx/gui/widget/slider.hpp>
@@ -612,8 +612,8 @@ namespace neogfx
 				{"paper", transparentColour},
 				{"ink1", frameColour},
 				{"ink2", frameColour.mid(backgroundColour)},
-				{"ink3", iCurrentColourStop == std::nullopt || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour()},
-				{"ink4", iCurrentColourStop == std::nullopt || &**iCurrentColourStop != &aColourStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40)},
+				{"ink3", iCurrentColourStop == std::nullopt || &**iCurrentColourStop != &aColourStop ? backgroundColour : service<i_app>().current_style().palette().selection_colour()},
+				{"ink4", iCurrentColourStop == std::nullopt || &**iCurrentColourStop != &aColourStop ? backgroundColour : service<i_app>().current_style().palette().selection_colour().lighter(0x40)},
 				{"ink9", aColourStop.second}} };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())
@@ -707,8 +707,8 @@ namespace neogfx
 				{ "paper", transparentColour },
 				{ "ink1", frameColour },
 				{ "ink2", frameColour.mid(backgroundColour) },
-				{ "ink3", iCurrentAlphaStop == std::nullopt || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour() },
-				{ "ink4", iCurrentAlphaStop == std::nullopt || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : app::instance().current_style().palette().selection_colour().lighter(0x40) },
+				{ "ink3", iCurrentAlphaStop == std::nullopt || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : service<i_app>().current_style().palette().selection_colour() },
+				{ "ink4", iCurrentAlphaStop == std::nullopt || &**iCurrentAlphaStop != &aAlphaStop ? backgroundColour : service<i_app>().current_style().palette().selection_colour().lighter(0x40) },
 				{ "ink9", colour::White.with_alpha(aAlphaStop.second) } } };
 		auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
 		if (stopGlyphTexture == iStopTextures.end())

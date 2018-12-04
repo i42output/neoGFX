@@ -38,7 +38,6 @@
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
-#include <neogfx/game/ecs_helpers.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
 

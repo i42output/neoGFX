@@ -199,7 +199,7 @@ namespace neogfx
 	bool native_font_face::has_fallback() const
 	{
 		if (iHasFallback == std::nullopt)
-			iHasFallback = service<i_font_manager>::instance().has_fallback_font(*this);
+			iHasFallback = service<i_font_manager>().has_fallback_font(*this);
 		return *iHasFallback;
 	}
 
@@ -213,7 +213,7 @@ namespace neogfx
 		if (!has_fallback())
 			throw no_fallback_font();
 		if (iFallbackFont == nullptr)
-			iFallbackFont = service<i_font_manager>::instance().create_fallback_font(*this);
+			iFallbackFont = service<i_font_manager>().create_fallback_font(*this);
 		return *iFallbackFont;
 	}
 	
@@ -277,7 +277,7 @@ namespace neogfx
 			useSubpixelFiltering = false;
 
 		auto subTextureWidth = bitmap.width / (useSubpixelFiltering ? 3 : 1);
-		auto& subTexture = service<i_font_manager>::instance().glyph_atlas().create_sub_texture(
+		auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
 			neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
 			1.0, texture_sampling::Normal);
 

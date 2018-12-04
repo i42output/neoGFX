@@ -170,6 +170,7 @@ namespace neogfx
 	{
 		try
 		{
+			
 			glCheck(glGenTextures(1, &iHandle));
 			GLint previousTexture = bind(1);
 			switch(sampling())
@@ -475,10 +476,10 @@ namespace neogfx
 
 	void opengl_texture::activate_target() const
 	{
-		if (service<i_rendering_engine>::instance().active_target() != this)
+		if (service<i_rendering_engine>().active_target() != this)
 		{
 			target_activating.trigger();
-			service<i_rendering_engine>::instance().activate_context(*this);
+			service<i_rendering_engine>().activate_context(*this);
 		}
 //		else
 //			throw already_active();
@@ -537,10 +538,10 @@ namespace neogfx
 
 	void opengl_texture::deactivate_target() const
 	{
-		if (service<i_rendering_engine>::instance().active_target() == this)
+		if (service<i_rendering_engine>().active_target() == this)
 		{
 			target_deactivating.trigger();
-			service<i_rendering_engine>::instance().deactivate_context();
+			service<i_rendering_engine>().deactivate_context();
 			return;
 		}
 		throw not_active();

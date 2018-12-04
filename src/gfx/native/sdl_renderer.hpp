@@ -42,6 +42,8 @@ namespace neogfx
 		sdl_renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows, i_basic_services& aBasicServices, i_keyboard& aKeyboard);
 		~sdl_renderer();
 	public:
+		void initialize() override;
+	public:
 		bool double_buffering() const override;
 		const i_render_target* active_target() const override;
 		void activate_context(const i_render_target& aTarget) override;
@@ -68,6 +70,7 @@ namespace neogfx
 		static int filter_event(void* aSelf, SDL_Event* aEvent);
 		bool queue_events();
 	private:
+		bool iInitialized;
 		bool iDoubleBuffering;
 		i_basic_services& iBasicServices;
 		i_keyboard& iKeyboard;

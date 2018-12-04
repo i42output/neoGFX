@@ -1,4 +1,4 @@
-// neogfx.hpp
+// opengl_helpers.cpp
 /*
   neogfx C++ GUI Library
   Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
@@ -19,19 +19,29 @@
 
 #pragma once
 
-#include <neolib/neolib.hpp>
-#include <string>
-#include <boost/multiprecision/cpp_int.hpp>
-using namespace boost::multiprecision;
-
-#include <neolib/stdint.hpp>
-#include <neogfx/app/i18n.hpp>
+#include <neogfx/neogfx.hpp>
+#include "opengl_helpers.hpp"
 
 namespace neogfx
 {
-	using namespace neolib::stdint_suffix;
-	using namespace std::string_literals;
+	scoped_render_target::scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ aRenderTarget }, iPreviouslyActivatedTarget{ nullptr }
+	{
+		iPreviouslyActivatedTarget = service<i_rendering_engine>().active_target();
+		if (iPreviouslyActivatedTarget != &iRenderTarget)
+		{
+			if (iPreviouslyActivatedTarget != nullptr)
+				iPreviouslyActivatedTarget->deactivate_target();
+			iRenderTarget.activate_target();
+		}
+	}
 
-	template <typename Component>
-	Component& service();
+	scoped_render_target::~scoped_render_target()
+	{
+		if (iPreviouslyActivatedTarget != &iRenderTarget)
+		{
+			iRenderTarget.deactivate_target();
+			if (iPreviouslyActivatedTarget != nullptr)
+				iPreviouslyActivatedTarget->activate_target();
+		}
+	}
 }

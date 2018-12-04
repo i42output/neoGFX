@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/app/event_processing_context.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 
 namespace neogfx
@@ -132,7 +134,7 @@ namespace neogfx
 			if (canAccept)
 				set_result(dialog_result::Accepted);
 			else
-				service<i_basic_services>::instance().system_beep();
+				service<i_basic_services>().system_beep();
 		}
 	}
 
@@ -145,7 +147,7 @@ namespace neogfx
 			if (canReject)
 				set_result(dialog_result::Rejected);
 			else
-				service<i_basic_services>::instance().system_beep();
+				service<i_basic_services>().system_beep();
 		}
 	}
 
@@ -195,10 +197,10 @@ namespace neogfx
 	dialog_result dialog::exec()
 	{
 		neolib::destroyed_flag destroyed{ surface().as_lifetime() };
-		app::event_processing_context epc(app::instance(), "neogfx::dialog");
+		event_processing_context epc(service<neolib::async_task>(), "neogfx::dialog");
 		while (iResult == std::nullopt)
 		{
-			app::instance().process_events(epc);
+			service<i_app>().process_events(epc);
 			if (destroyed && result() == dialog_result::NoResult)
 				set_result(dialog_result::Rejected);
 		}
@@ -258,6 +260,6 @@ namespace neogfx
 	void dialog::init()
 	{
 		iButtonBoxLayout.set_weight(size{});
-		set_standard_layout(app::instance().current_style().spacing(), false);
+		set_standard_layout(service<i_app>().current_style().spacing(), false);
 	}
 }

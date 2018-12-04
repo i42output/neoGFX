@@ -1,7 +1,7 @@
-// device_metrics.hpp
+// i_event_processing_context.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -21,29 +21,13 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <neogfx/core/geometrical.hpp>
-
 namespace neogfx
-{ 
-
-	inline dimension default_dpi_scale_factor(dimension aPpi)
-	{
-		return static_cast<dimension>(static_cast<int32_t>(aPpi / 150.0) + 1);
-	}
-
-	class i_device_resolution
+{
+	class i_event_processing_context
 	{
 	public:
-		virtual dimension horizontal_dpi() const = 0;
-		virtual dimension vertical_dpi() const = 0;
-		virtual dimension ppi() const = 0;
-	};
-
-	class i_device_metrics : public i_device_resolution
-	{
+		virtual ~i_event_processing_context() {}
 	public:
-		virtual bool metrics_available() const = 0;
-		virtual size extents() const = 0;
-		virtual dimension em_size() const = 0;
+		virtual const std::string& name() const = 0;
 	};
 }

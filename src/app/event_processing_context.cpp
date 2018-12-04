@@ -1,7 +1,7 @@
-// device_metrics.hpp
+// event_processing_conteixt.cpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2018 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -17,33 +17,25 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
-
-#include <neogfx/core/geometrical.hpp>
+#include <neogfx/app/event_processing_context.hpp>
+#include <neogfx/app/i_app.hpp>
 
 namespace neogfx
-{ 
-
-	inline dimension default_dpi_scale_factor(dimension aPpi)
+{
+	event_processing_context::event_processing_context(neolib::async_task& aParent, const std::string& aName) :
+		iContext{ aParent.have_message_queue() ?
+			aParent.message_queue() :
+			aParent.create_message_queue([]()
+			{
+				return service<i_app>().process_events(service<i_app>().app_message_queue_context());
+			}) },
+		iName{ aName }
 	{
-		return static_cast<dimension>(static_cast<int32_t>(aPpi / 150.0) + 1);
 	}
 
-	class i_device_resolution
+	const std::string& event_processing_context::name() const
 	{
-	public:
-		virtual dimension horizontal_dpi() const = 0;
-		virtual dimension vertical_dpi() const = 0;
-		virtual dimension ppi() const = 0;
-	};
-
-	class i_device_metrics : public i_device_resolution
-	{
-	public:
-		virtual bool metrics_available() const = 0;
-		virtual size extents() const = 0;
-		virtual dimension em_size() const = 0;
-	};
+		return iName;
+	}
 }

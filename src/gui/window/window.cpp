@@ -21,7 +21,7 @@
 #include <boost/format.hpp>
 #include <neolib/string_utils.hpp>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/surface_window_proxy.hpp>
 #include "native/i_native_window.hpp"
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -31,7 +31,7 @@ namespace neogfx
 {
 	rect corrected_popup_rect(i_window& aPopup, rect aPopupRect)
 	{
-		auto desktopRect = service<i_window_manager>::instance().desktop_rect(aPopup);
+		auto desktopRect = service<i_window_manager>().desktop_rect(aPopup);
 		if (aPopupRect.x < desktopRect.x)
 			aPopupRect.x += (desktopRect.x - aPopupRect.x);
 		if (aPopupRect.y < desktopRect.y)
@@ -51,19 +51,19 @@ namespace neogfx
 
 	rect corrected_popup_rect(i_window& aPopup)
 	{
-		return corrected_popup_rect(aPopup, service<i_window_manager>::instance().window_rect(aPopup));
+		return corrected_popup_rect(aPopup, service<i_window_manager>().window_rect(aPopup));
 	}
 
 	void correct_popup_rect(i_window& aPopup)
 	{
 		auto correctedRect = corrected_popup_rect(aPopup);
-		auto& wm = service<i_window_manager>::instance();
+		auto& wm = service<i_window_manager>();
 		wm.move_window(aPopup, correctedRect.position());
 		wm.resize_window(aPopup, correctedRect.extents());
 	}
 
 	pause_rendering::pause_rendering(i_window& aWindow) :
-		iSurface{ service<i_window_manager>::instance().has_window(aWindow) && aWindow.has_native_surface() ? &aWindow.surface() : nullptr }
+		iSurface{ service<i_window_manager>().has_window(aWindow) && aWindow.has_native_surface() ? &aWindow.surface() : nullptr }
 	{
 		if (iSurface != nullptr)
 		{
@@ -180,7 +180,7 @@ namespace neogfx
 
 	window::window(const std::string& aWindowTitle, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
 		scrollable_widget{ aScrollbarStyle, aFrameStyle },
-		iWindowManager{ service<i_window_manager>::instance() },
+		iWindowManager{ service<i_window_manager>() },
 		iParentWindow{ nullptr },
 		iClosed{ false },
 		iTitleText{ aWindowTitle },
@@ -202,27 +202,27 @@ namespace neogfx
 	}
 
 	window::window(const video_mode& aVideoMode, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
+		window{ service<i_app>().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		if (is_nested())
 			throw fullscreen_window_cannot_nest();
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aVideoMode, title_text(), aStyle); });
+			[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aVideoMode, title_text(), aStyle); });
 
 		init();
 	}
 
 	window::window(const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
+		window{ service<i_app>().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		if (is_nested())
 			throw parentless_window_cannot_nest();
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aDimensions, title_text(), aStyle); });
+			[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aDimensions, title_text(), aStyle); });
 
 		init();
 	}
@@ -235,20 +235,20 @@ namespace neogfx
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aDimensions, aWindowTitle, aStyle); });
+			[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aDimensions, aWindowTitle, aStyle); });
 
 		init();
 	}
 
 	window::window(const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
+		window{ service<i_app>().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		if (is_nested())
 			throw parentless_window_cannot_nest();
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 			*this, 
-			[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aPosition, aDimensions, title_text(), aStyle); });
+			[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aPosition, aDimensions, title_text(), aStyle); });
 
 		init();
 	}
@@ -261,23 +261,23 @@ namespace neogfx
 
 		iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this, 
-				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aPosition, aDimensions, aWindowTitle, aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aPosition, aDimensions, aWindowTitle, aStyle); });
 
 		init();
 	}
 
 	window::window(i_widget& aParent, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
+		window{ service<i_app>().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		set_parent(aParent);
 
-		if ((ultimate_ancestor().is_fullscreen() || app::instance().program_options().nest()) && &ultimate_ancestor() != this)
+		if ((ultimate_ancestor().is_fullscreen() || service<i_app>().program_options().nest()) && &ultimate_ancestor() != this)
 			iStyle |= window_style::Nested;
 
 		if (!is_nested())
 			iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this,
-				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aParent.surface().native_surface(), aDimensions, title_text(), aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aParent.surface().native_surface(), aDimensions, title_text(), aStyle); });
 
 		init();
 		centre_on_parent(false);
@@ -288,30 +288,30 @@ namespace neogfx
 	{
 		set_parent(aParent);
 
-		if ((ultimate_ancestor().is_fullscreen() || app::instance().program_options().nest()) && &ultimate_ancestor() != this)
+		if ((ultimate_ancestor().is_fullscreen() || service<i_app>().program_options().nest()) && &ultimate_ancestor() != this)
 			iStyle |= window_style::Nested;
 
 		if (!is_nested())
 			iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this, 
-				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aParent.surface().native_surface(), aDimensions, aWindowTitle, aStyle); });
 
 		init();
 		centre_on_parent(false);
 	}
 
 	window::window(i_widget& aParent, const point& aPosition, const size& aDimensions, window_style aStyle, scrollbar_style aScrollbarStyle, frame_style aFrameStyle) :
-		window{ app::instance().name(), aStyle, aScrollbarStyle, aFrameStyle }
+		window{ service<i_app>().name(), aStyle, aScrollbarStyle, aFrameStyle }
 	{
 		set_parent(aParent);
 
-		if ((ultimate_ancestor().is_fullscreen() || app::instance().program_options().nest()) && &ultimate_ancestor() != this)
+		if ((ultimate_ancestor().is_fullscreen() || service<i_app>().program_options().nest()) && &ultimate_ancestor() != this)
 			iStyle |= window_style::Nested;
 
 		if (!is_nested())
 			iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this, 
-				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, title_text(), aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, title_text(), aStyle); });
 
 		init();
 		move(aPosition);
@@ -322,13 +322,13 @@ namespace neogfx
 	{
 		set_parent(aParent);
 
-		if ((ultimate_ancestor().is_fullscreen() || app::instance().program_options().nest()) && &ultimate_ancestor() != this)
+		if ((ultimate_ancestor().is_fullscreen() || service<i_app>().program_options().nest()) && &ultimate_ancestor() != this)
 			iStyle |= window_style::Nested;
 
 		if (!is_nested())
 			iSurfaceWindow = std::make_unique<surface_window_proxy>(
 				*this, 
-				[&](i_surface_window& aProxy) { return service<i_rendering_engine>::instance().create_window(service<i_surface_manager>::instance(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle); });
+				[&](i_surface_window& aProxy) { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, aParent.surface().native_surface(), aPosition, aDimensions, aWindowTitle, aStyle); });
 
 		init();
 		move(aPosition);
@@ -566,9 +566,9 @@ namespace neogfx
 		if (effectively_enabled() && !scrollable_widget::has_frame_colour() && is_active())
 		{
 			if (!is_nested())
-				return app::instance().current_style().palette().selection_colour();
+				return service<i_app>().current_style().palette().selection_colour();
 			else
-				return app::instance().current_style().palette().widget_detail_secondary_colour();
+				return service<i_app>().current_style().palette().widget_detail_secondary_colour();
 		}
 		else
 			return scrollable_widget::frame_colour().with_alpha(is_active() ? 0xFF : 0x40);
@@ -972,7 +972,7 @@ namespace neogfx
 	{
 		iSurfaceDestroyed.emplace(surface().native_surface().as_lifetime());
 
-		if (is_fullscreen() || (app::instance().program_options().nest() && &ultimate_ancestor() == this))
+		if (is_fullscreen() || (service<i_app>().program_options().nest() && &ultimate_ancestor() == this))
 		{
 			if (is_fullscreen())
 				set_frame_style(frame_style::NoFrame);
@@ -988,7 +988,7 @@ namespace neogfx
 		update_modality(false);
 
 		if ((style() & window_style::TitleBar) == window_style::TitleBar)
-			iTitleBar.emplace(*this, title_bar_layout(), app::instance().default_window_icon(), title_text());
+			iTitleBar.emplace(*this, title_bar_layout(), service<i_app>().default_window_icon(), title_text());
 
 		set_margins(neogfx::margins{});
 		iNonClientLayout.set_margins(neogfx::margins{});
@@ -1005,7 +1005,7 @@ namespace neogfx
 		else
 			layout_items(true);
 
-		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+		iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
 		{
 			if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
 				surface().native_surface().invalidate(surface().surface_size());

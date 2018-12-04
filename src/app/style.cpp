@@ -19,8 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/json.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/app/style.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 
 namespace neogfx
 {
@@ -28,7 +29,7 @@ namespace neogfx
 		iName(aName),
 		iMargins(2.0),
 		iSpacing(2.0, 2.0),
-		iFontInfo(service<i_font_manager>::instance().default_system_font_info())
+		iFontInfo(service<i_font_manager>().default_system_font_info())
 	{
 		iPalette.changed([this]() { handle_change(style_aspect::Colour); });
 	}
@@ -169,10 +170,10 @@ namespace neogfx
 	void style::handle_change(style_aspect aAspect)
 	{
 		changed.trigger(aAspect);
-		if (&app::instance().current_style() == this)
+		if (&service<i_app>().current_style() == this)
 		{
-			app::instance().current_style_changed.trigger(aAspect);
-			app::instance().surface_manager().layout_surfaces();
+			service<i_app>().current_style_changed.trigger(aAspect);
+			service<i_surface_manager>().layout_surfaces();
 		}
 	}
 }

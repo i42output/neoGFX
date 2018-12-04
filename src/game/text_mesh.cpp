@@ -28,7 +28,7 @@ namespace neogfx::game
 		text::text(i_ecs& aEcs, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment) :
 			entity{ aEcs, archetype().id() }
 		{
-			auto& font = aEcs.shared_component<game::font>().populate(""s, game::font{ { service<i_font_manager>::instance(), aFont.id() }, aFont.family_name(), aFont.style_name(), aFont.size(), aFont.underline() });
+			auto& font = aEcs.shared_component<game::font>().populate(""s, game::font{ { service<i_font_manager>(), aFont.id() }, aFont.family_name(), aFont.style_name(), aFont.size(), aFont.underline() });
 			game::text_mesh::meta::update(
 				game::text_mesh
 				{ 

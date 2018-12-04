@@ -24,49 +24,34 @@
 #include <optional>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/async_thread.hpp>
+
+#include <neogfx/app/event_processing_context.hpp>
 #include <neogfx/app/i_app.hpp>
-#include <neogfx/app/i_service_factory.hpp>
-#include <neogfx/app/i_basic_services.hpp>
-#include <neogfx/hid/i_surface_manager.hpp>
-#include <neogfx/hid/i_window_manager.hpp>
-#include <neogfx/hid/keyboard.hpp>
-#include <neogfx/gfx/i_rendering_engine.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
-#include <neogfx/audio/i_audio.hpp>
 #include <neogfx/app/style.hpp>
-#include <neogfx/app/clipboard.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/app/i_mnemonic.hpp>
 #include <neogfx/app/i_help.hpp>
 
 namespace neogfx
 {
-	class program_options : public boost::program_options::variables_map
+	class program_options : public i_program_options
 	{
 		struct invalid_options : std::runtime_error { invalid_options(const std::string& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
 	public:
 		program_options(int argc, char* argv[]);
 	public:
-		bool debug() const;
-		neogfx::renderer renderer() const;
-		std::optional<std::pair<uint32_t, uint32_t>> full_screen() const;
-		bool double_buffering() const;
-		bool nest() const;
+		const boost::program_options::variables_map& options() const override;
+		bool debug() const override;
+		neogfx::renderer renderer() const override;
+		std::optional<std::pair<uint32_t, uint32_t>> full_screen() const override;
+		bool double_buffering() const override;
+		bool nest() const override;
+	private:
+		boost::program_options::variables_map iOptions;
 	};
 
 	class app : public neolib::async_thread, public i_app, private i_keyboard_handler
 	{
-	public:
-		class event_processing_context : public i_event_processing_context
-		{
-		public:
-			event_processing_context(app& aParent, const std::string& aName = std::string{});
-		public:
-			virtual const std::string& name() const;
-		private:
-			neolib::message_queue::scoped_context iContext;
-			std::string iName;
-		};
 	private:
 		class loader
 		{
@@ -82,35 +67,20 @@ namespace neogfx
 		typedef std::vector<i_mnemonic*> mnemonic_list;
 	public:
 		struct no_instance : std::logic_error { no_instance() : std::logic_error("neogfx::app::no_instance") {} };
-		struct no_basic_services : std::logic_error { no_basic_services() : std::logic_error("neogfx::app::no_basic_services") {} };
-		struct no_renderer : std::logic_error { no_renderer() : std::logic_error("neogfx::app::no_renderer") {} };
-		struct no_surface_manager : std::logic_error { no_surface_manager() : std::logic_error("neogfx::app::no_surface_manager") {} };
-		struct no_window_manager : std::logic_error { no_window_manager() : std::logic_error("neogfx::app::no_window_manager") {} };
-		struct no_keyboard : std::logic_error { no_keyboard() : std::logic_error("neogfx::app::no_keyboard") {} };
-		struct no_clipboard : std::logic_error { no_clipboard() : std::logic_error("neogfx::app::no_clipboard") {} };
-		struct no_audio : std::logic_error { no_audio() : std::logic_error("neogfx::app::no_audio") {} };
 		struct action_not_found : std::runtime_error { action_not_found() : std::runtime_error("neogfx::app::action_not_found") {} };
 		struct style_not_found : std::runtime_error { style_not_found() : std::runtime_error("neogfx::app::style_not_found") {} };
 		struct style_exists : std::runtime_error { style_exists() : std::runtime_error("neogfx::app::style_exists") {} };
 	public:
-		app(const std::string& aName = std::string(), i_service_factory& aServiceFactory = default_service_factory());
-		app(int argc, char* argv[], const std::string& aName = std::string(), i_service_factory& aServiceFactory = default_service_factory());
+		app(const std::string& aName = std::string());
+		app(int argc, char* argv[], const std::string& aName = std::string());
 		~app();
 	public:
 		static app& instance();
-		const neogfx::program_options& program_options() const override;
+		const i_program_options& program_options() const override;
 		const std::string& name() const override;
 		int exec(bool aQuitWhenLastWindowClosed = true) override;
 		bool in_exec() const override;
 		void quit(int aResultCode = 0) override;
-	public:
-		i_basic_services& basic_services() const override;
-		i_rendering_engine& rendering_engine() const override;
-		i_surface_manager& surface_manager() const override;
-		i_window_manager& window_manager() const override;
-		i_keyboard& keyboard() const override;
-		i_clipboard& clipboard() const override;
-		i_audio& audio() const override;
 	public:
 		dimension default_dpi_scale_factor() const override;
 	public:
@@ -153,6 +123,7 @@ namespace neogfx
 	public:
 		bool process_events() override;
 		bool process_events(i_event_processing_context& aContext) override;
+		i_event_processing_context& app_message_queue_context() override;
 	private:
 		bool do_process_events();
 	private:
@@ -167,13 +138,6 @@ namespace neogfx
 		std::string iName;
 		bool iQuitWhenLastWindowClosed;
 		bool iInExec;
-		std::unique_ptr<i_basic_services> iBasicServices;
-		std::unique_ptr<i_keyboard> iKeyboard;
-		std::unique_ptr<i_clipboard> iClipboard;
-		std::unique_ptr<i_rendering_engine> iRenderingEngine;
-		std::unique_ptr<i_surface_manager> iSurfaceManager;
-		std::unique_ptr<i_window_manager> iWindowManager;
-		std::unique_ptr<i_audio> iAudio;
 		std::optional<int> iQuitResultCode;
 		texture iDefaultWindowIcon;
 		style_list iStyles;

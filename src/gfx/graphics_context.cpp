@@ -81,7 +81,7 @@ namespace neogfx
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
@@ -98,7 +98,7 @@ namespace neogfx
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
@@ -115,7 +115,7 @@ namespace neogfx
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
@@ -132,7 +132,7 @@ namespace neogfx
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
@@ -149,7 +149,7 @@ namespace neogfx
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
-		iSubpixelRendering{ service<i_rendering_engine>::instance().is_subpixel_rendering_on() },
+		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 	}
@@ -165,7 +165,7 @@ namespace neogfx
 
 	graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling) const
 	{
-		return ping_pong_buffers_t{ service<i_rendering_engine>::instance().ping_pong_buffer1(aExtents, aSampling), service<i_rendering_engine>::instance().ping_pong_buffer2(aExtents, aSampling) };
+		return ping_pong_buffers_t{ service<i_rendering_engine>().ping_pong_buffer1(aExtents, aSampling), service<i_rendering_engine>().ping_pong_buffer2(aExtents, aSampling) };
 	}
 	
 	delta graphics_context::to_device_units(const delta& aValue) const
@@ -1139,7 +1139,7 @@ namespace neogfx
 			{
 				for (uint32_t i = 0; i < glyph_count(); ++i)
 				{
-					auto tc = get_text_category(service<i_font_manager>::instance().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
+					auto tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
 					if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
 						return true;
 				}
@@ -1183,7 +1183,7 @@ namespace neogfx
 			for (uint32_t i = 0; i < g->glyph_count();)
 			{
 				const auto& gi = g->glyph_info(i);
-				auto tc = get_text_category(service<i_font_manager>::instance().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
+				auto tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
 				if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
 					iResults.push_back(std::make_pair(g, i++));
  				else
@@ -1213,7 +1213,7 @@ namespace neogfx
 							}
 							else
 							{
-								tc = get_text_category(service<i_font_manager>::instance().emoji_atlas(), std::get<0>(aGlyphRun) + fallbackGlyphs.glyph_info(j).cluster, std::get<1>(aGlyphRun));
+								tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(aGlyphRun) + fallbackGlyphs.glyph_info(j).cluster, std::get<1>(aGlyphRun));
 								if (tc != text_category::Whitespace && tc != text_category::Emoji)
 									break;
 								else
@@ -1294,7 +1294,7 @@ namespace neogfx
 
 		auto& runs = iGlyphTextData->iRuns;
 		runs.clear();
-		auto const& emojiAtlas = service<i_font_manager>::instance().emoji_atlas();
+		auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
 		text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
 		if (iMnemonic != std::nullopt && codePoints[0] == static_cast<char32_t>(iMnemonic->second))
 			previousCategory = text_category::Mnemonic;
@@ -1592,7 +1592,7 @@ namespace neogfx
 					{
 						// probable variant selector fubar'd by harfbuzz
 						auto s = emojiResult.back().source();
-						if (s.second < codePointCount && get_text_category(service<i_font_manager>::instance().emoji_atlas(), aTextBegin[s.second]) == text_category::Control)
+						if (s.second < codePointCount && get_text_category(service<i_font_manager>().emoji_atlas(), aTextBegin[s.second]) == text_category::Control)
 						{
 							++s.first;
 							++s.second;
@@ -1615,15 +1615,15 @@ namespace neogfx
 							absorbNext = true;
 							break;
 						}
-						else if (service<i_font_manager>::instance().emoji_atlas().is_emoji(sequence + ch))
+						else if (service<i_font_manager>().emoji_atlas().is_emoji(sequence + ch))
 							sequence += ch;
 						else
 							break;
 					}
-					if (sequence.size() > 1 && service<i_font_manager>::instance().emoji_atlas().is_emoji(sequence))
+					if (sequence.size() > 1 && service<i_font_manager>().emoji_atlas().is_emoji(sequence))
 					{
 						auto g = *i;
-						g.set_value(service<i_font_manager>::instance().emoji_atlas().emoji(sequence, aFontSelector(cluster).height()));
+						g.set_value(service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector(cluster).height()));
 						g.set_source(glyph::source_type{ g.source().first, g.source().first + sequence.size() });
 						emojiResult.push_back(g);
 						i = j - 1;

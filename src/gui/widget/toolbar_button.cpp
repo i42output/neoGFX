@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/toolbar_button.hpp>
 
 namespace neogfx
@@ -87,7 +87,7 @@ namespace neogfx
 			rect line = client_rect();
 			line.deflate(0, std::floor(client_rect().height() / 6.0));
 			line.cx = 1.0;
-			colour ink = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().foreground_colour());
+			colour ink = (has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().foreground_colour());
 			aGraphicsContext.fill_rect(line, ink.darker(0x40));
 			++line.x;
 			aGraphicsContext.fill_rect(line, ink.lighter(0x40));

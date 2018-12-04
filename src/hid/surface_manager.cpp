@@ -19,12 +19,16 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/string_utils.hpp>
+
 #include <neogfx/hid/surface_manager.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include "native/i_native_surface.hpp"
 #include "../gui/window/native/i_native_window.hpp"
 
 namespace neogfx
 {
+	template <> i_surface_manager& service<i_surface_manager>() { static surface_manager sSurfaceManager{ service<i_basic_services>(), service<i_rendering_engine>() }; return sSurfaceManager; }
+
 	surface_manager::surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine) :
 		iBasicServices(aBasicServices), iRenderingEngine(aRenderingEngine), iRenderingSurfaces(false)
 	{

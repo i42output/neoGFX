@@ -154,7 +154,6 @@ SDL_GetMouseFocus(void)
     return mouse->focus;
 }
 
-#if 0
 void
 SDL_ResetMouse(void)
 {
@@ -171,7 +170,6 @@ SDL_ResetMouse(void)
     }
     SDL_assert(mouse->buttonstate == 0);
 }
-#endif
 
 void
 SDL_SetMouseFocus(SDL_Window * window)

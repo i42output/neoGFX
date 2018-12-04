@@ -31,14 +31,14 @@ namespace neogfx
 {
 	surface_window_proxy::surface_window_proxy(i_window& aWindow, std::function<std::unique_ptr<i_native_window>(i_surface_window&)> aNativeWindowCreator) :
 		iWindow{ aWindow }, 
-		iRenderingEngine{ service<i_rendering_engine>::instance() },
+		iRenderingEngine{ service<i_rendering_engine>() },
 		iNativeWindow{ aNativeWindowCreator(*this) },
 		iNativeSurfaceDestroyed{ iNativeWindow->as_lifetime() },
 		iClosed{ false },
 		iCapturingWidget{ nullptr },
 		iClickedWidget{ nullptr }
 	{
-		service<i_surface_manager>::instance().add_surface(*this);
+		service<i_surface_manager>().add_surface(*this);
 	}
 
 	surface_window_proxy::~surface_window_proxy()
@@ -412,7 +412,7 @@ namespace neogfx
 	void surface_window_proxy::native_window_closing()
 	{
 		iNativeWindowClosing = true;
-		service<i_surface_manager>::instance().remove_surface(*this);
+		service<i_surface_manager>().remove_surface(*this);
 	}
 
 	void surface_window_proxy::native_window_closed()
@@ -443,9 +443,9 @@ namespace neogfx
 	void surface_window_proxy::native_window_focus_lost()
 	{
 		as_widget().update(true);
-		for (std::size_t i = 0; i < service<i_window_manager>::instance().window_count();)
+		for (std::size_t i = 0; i < service<i_window_manager>().window_count();)
 		{
-			i_window& w = service<i_window_manager>::instance().window(i);
+			i_window& w = service<i_window_manager>().window(i);
 			if (!w.dismissed() && as_window().is_owner_of(w) && w.requires_owner_focus())
 			{
 				if (w.dismissal_type() == i_window::CloseOnDismissal)

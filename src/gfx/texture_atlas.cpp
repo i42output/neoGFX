@@ -26,7 +26,7 @@
 namespace neogfx
 {
 	texture_atlas::texture_atlas(const size& aPageSize) :
-		iTextureManager{ service<i_texture_manager>::instance() }, iPageSize{ aPageSize }
+		iTextureManager{ service<i_texture_manager>() }, iPageSize{ aPageSize }
 	{
 	}
 

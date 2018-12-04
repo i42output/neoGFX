@@ -20,7 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <unordered_map>
 #include <boost/algorithm/string.hpp> 
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
@@ -358,7 +358,7 @@ namespace neogfx
 	bool font::instance::has_fallback_font() const
 	{
 		if (iHasFallbackFont == std::nullopt)
-			iHasFallbackFont = service<i_font_manager>::instance().has_fallback_font(native_font_face());
+			iHasFallbackFont = service<i_font_manager>().has_fallback_font(native_font_face());
 		return *iHasFallbackFont;
 	}
 
@@ -367,7 +367,7 @@ namespace neogfx
 		if (iFallbackFont == std::nullopt)
 		{
 			if (has_fallback_font())
-				iFallbackFont = font{ service<i_font_manager>::instance().create_fallback_font(*iNativeFontFace) };
+				iFallbackFont = font{ service<i_font_manager>().create_fallback_font(*iNativeFontFace) };
 			else
 				throw no_fallback_font();
 		}
@@ -395,26 +395,26 @@ namespace neogfx
 
 
 	font::font() :
-		font_info{ app::instance().current_style().font_info() }, 
-		iInstance{ app::instance().current_style().font().iInstance }
+		font_info{ service<i_app>().current_style().font_info() }, 
+		iInstance{ service<i_app>().current_style().font().iInstance }
 	{
 	}
 
 	font::font(const std::string& aFamilyName, font_style aStyle, point_size aSize) :
 		font_info{ aFamilyName, aStyle, aSize }, 
-		iInstance{ std::make_shared<instance>(service<i_font_manager>::instance().create_font(aFamilyName, aStyle, aSize, service<i_rendering_engine>::instance().default_screen_metrics())) }
+		iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(aFamilyName, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics())) }
 	{
 	}
 
 	font::font(const std::string& aFamilyName, const std::string& aStyleName, point_size aSize) :
 		font_info{ aFamilyName, aStyleName, aSize }, 
-		iInstance{ std::make_shared<instance>(service<i_font_manager>::instance().create_font(aFamilyName, aStyleName, aSize, service<i_rendering_engine>::instance().default_screen_metrics())) }
+		iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(aFamilyName, aStyleName, aSize, service<i_rendering_engine>().default_screen_metrics())) }
 	{
 	}
 
 	font::font(const font_info& aFontInfo) :
 		font_info{ aFontInfo }, 
-		iInstance{ std::make_shared<instance>(service<i_font_manager>::instance().create_font(static_cast<font_info>(*this), service<i_rendering_engine>::instance().default_screen_metrics())) }
+		iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(static_cast<font_info>(*this), service<i_rendering_engine>().default_screen_metrics())) }
 	{
 	}
 
@@ -426,13 +426,13 @@ namespace neogfx
 	
 	font::font(const font& aOther, font_style aStyle, point_size aSize) :
 		font_info{ aOther.native_font_face().family_name(), aStyle, aSize }, 
-		iInstance{ std::make_shared<instance>(service<i_font_manager>::instance().create_font(aOther.iInstance->native_font_face().native_font(), aStyle, aSize, service<i_rendering_engine>::instance().default_screen_metrics())) }
+		iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(aOther.iInstance->native_font_face().native_font(), aStyle, aSize, service<i_rendering_engine>().default_screen_metrics())) }
 	{
 	}
 
 	font::font(const font& aOther, const std::string& aStyleName, point_size aSize) :
 		font_info{ aOther.native_font_face().family_name(), aStyleName, aSize },
-		iInstance{ std::make_shared<instance>(service<i_font_manager>::instance().create_font(aOther.iInstance->native_font_face().native_font(), aStyleName, aSize, service<i_rendering_engine>::instance().default_screen_metrics())) }
+		iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(aOther.iInstance->native_font_face().native_font(), aStyleName, aSize, service<i_rendering_engine>().default_screen_metrics())) }
 	{
 	}
 
@@ -450,32 +450,32 @@ namespace neogfx
 
 	font font::load_from_file(const std::string& aFileName)
 	{
-		return font(service<i_font_manager>::instance().load_font_from_file(aFileName, service<i_rendering_engine>::instance().default_screen_metrics()));
+		return font(service<i_font_manager>().load_font_from_file(aFileName, service<i_rendering_engine>().default_screen_metrics()));
 	}
 
 	font font::load_from_file(const std::string& aFileName, font_style aStyle, point_size aSize)
 	{
-		return font(service<i_font_manager>::instance().load_font_from_file(aFileName, aStyle, aSize, service<i_rendering_engine>::instance().default_screen_metrics()));
+		return font(service<i_font_manager>().load_font_from_file(aFileName, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics()));
 	}
 	
 	font font::load_from_file(const std::string& aFileName, const std::string& aStyleName, point_size aSize)
 	{
-		return font(service<i_font_manager>::instance().load_font_from_file(aFileName, aStyleName, aSize, service<i_rendering_engine>::instance().default_screen_metrics()));
+		return font(service<i_font_manager>().load_font_from_file(aFileName, aStyleName, aSize, service<i_rendering_engine>().default_screen_metrics()));
 	}
 
 	font font::load_from_memory(const void* aData, std::size_t aSizeInBytes)
 	{
-		return font(service<i_font_manager>::instance().load_font_from_memory(aData, aSizeInBytes, service<i_rendering_engine>::instance().default_screen_metrics()));
+		return font(service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, service<i_rendering_engine>().default_screen_metrics()));
 	}
 
 	font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, font_style aStyle, point_size aSize)
 	{
-		return font(service<i_font_manager>::instance().load_font_from_memory(aData, aSizeInBytes, aStyle, aSize, service<i_rendering_engine>::instance().default_screen_metrics()));
+		return font(service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics()));
 	}
 
 	font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, const std::string& aStyleName, point_size aSize)
 	{
-		return font(service<i_font_manager>::instance().load_font_from_memory(aData, aSizeInBytes, aStyleName, aSize, service<i_rendering_engine>::instance().default_screen_metrics()));
+		return font(service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, aStyleName, aSize, service<i_rendering_engine>().default_screen_metrics()));
 	}
 
 	font::~font()

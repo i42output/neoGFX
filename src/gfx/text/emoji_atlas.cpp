@@ -32,7 +32,7 @@ namespace neogfx
 {
 	emoji_atlas::emoji_atlas() : 
 		kFilePath{ neolib::program_directory() + "/emoji.zip" },
-		iTextureAtlas{ service<i_texture_manager>::instance().create_texture_atlas(size{ 1024.0, 1024.0}) }
+		iTextureAtlas{ service<i_texture_manager>().create_texture_atlas(size{ 1024.0, 1024.0}) }
 	{
 		try
 		{

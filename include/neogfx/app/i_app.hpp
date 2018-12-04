@@ -22,19 +22,14 @@
 #include <neogfx/neogfx.hpp>
 #include <boost/program_options.hpp>
 #include <neogfx/core/event.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_texture.hpp>
-#include "i_style.hpp"
-#include "i18n.hpp"
+#include <neogfx/app/i_event_processing_context.hpp>
+#include <neogfx/app/i_style.hpp>
+#include <neogfx/app/i18n.hpp>
 
 namespace neogfx
 {
-	class i_basic_services;
-	class i_rendering_engine;
-	class i_surface_manager;
-	class i_window_manager;
-	class i_keyboard;
-	class i_clipboard;
-	class i_audio;
 	class i_widget;
 	class i_style;
 	class i_action;
@@ -52,34 +47,35 @@ namespace neogfx
 		Edit
 	};
 
+	class i_program_options
+	{
+	public:
+		struct invalid_options : std::runtime_error { invalid_options(const std::string& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
+	public:
+		virtual ~i_program_options() {}
+	public:
+		virtual const boost::program_options::variables_map& options() const = 0;
+	public:
+		virtual bool debug() const = 0;
+		virtual neogfx::renderer renderer() const = 0;
+		virtual std::optional<std::pair<uint32_t, uint32_t>> full_screen() const = 0;
+		virtual bool double_buffering() const = 0;
+		virtual bool nest() const = 0;
+	};
+
 	class i_app
 	{
 	public:
 		event<style_aspect> current_style_changed;
 	public:
-		class i_event_processing_context
-		{
-		public:
-			virtual ~i_event_processing_context() {}
-		public:
-			virtual const std::string& name() const = 0;
-		};
-	public:
 		struct main_window_closed_prematurely : std::runtime_error { main_window_closed_prematurely() : std::runtime_error("Main window closed prematurely!") {} };
 		struct unknown_standard_menu : std::logic_error { unknown_standard_menu() : std::logic_error("neogfx::i_app::unknown_standard_menu") {} };
 	public:
-		virtual const boost::program_options::variables_map& program_options() const = 0;
+		virtual const i_program_options& program_options() const = 0;
 		virtual const std::string& name() const = 0;
 		virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
 		virtual bool in_exec() const = 0;
 		virtual void quit(int aResultCode) = 0;
-		virtual i_basic_services& basic_services() const = 0;
-		virtual i_rendering_engine& rendering_engine() const = 0;
-		virtual i_surface_manager& surface_manager() const = 0;
-		virtual i_window_manager& window_manager() const = 0;
-		virtual const i_keyboard& keyboard() const = 0;
-		virtual i_clipboard& clipboard() const = 0;
-		virtual i_audio& audio() const = 0;
 	public:
 		virtual dimension default_dpi_scale_factor() const = 0;
 	public:
@@ -122,5 +118,6 @@ namespace neogfx
 	public:
 		virtual bool process_events() = 0;
 		virtual bool process_events(i_event_processing_context& aContext) = 0;
+		virtual i_event_processing_context& app_message_queue_context() = 0;
 	};
 }

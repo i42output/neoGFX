@@ -24,8 +24,8 @@
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
+#include <neogfx/gfx/primitives.hpp>
 #include "mouse.hpp"
 
 namespace neogfx

@@ -18,6 +18,8 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/thread.hpp>
+
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
 
 namespace neogfx
@@ -30,7 +32,7 @@ namespace neogfx
 		preview_box(gradient_dialog& aOwner) :
 			framed_widget(aOwner.iPreviewGroupBox.item_layout()),
 			iOwner(aOwner),
-			iAnimationTimer{ app::instance(), [this](neolib::callback_timer& aTimer)
+			iAnimationTimer{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.again();
 				animate();

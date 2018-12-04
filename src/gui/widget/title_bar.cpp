@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/title_bar.hpp>
 
 namespace neogfx
@@ -27,7 +29,7 @@ namespace neogfx
 		widget{ aWindow.as_widget() },
 		iWindow{ aWindow },
 		iLayout{ *this },
-		iIcon{ iLayout, app::instance().default_window_icon() },
+		iIcon{ iLayout, service<i_app>().default_window_icon() },
 		iTitle{ iLayout, aTitle },
 		iSpacer{ iLayout },
 		iMinimizeButton{ iLayout, push_button_style::TitleBar },
@@ -72,7 +74,7 @@ namespace neogfx
 		widget{ aLayout },
 		iWindow{ aWindow },
 		iLayout{ *this },
-		iIcon{ iLayout, app::instance().default_window_icon() },
+		iIcon{ iLayout, service<i_app>().default_window_icon() },
 		iTitle{ iLayout, aTitle },
 		iSpacer{ iLayout },
 		iMinimizeButton{ iLayout, push_button_style::TitleBar },
@@ -158,7 +160,7 @@ namespace neogfx
 		iMaximizeButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iRestoreButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
 		iCloseButton.set_size_policy(neogfx::size_policy{ neogfx::size_policy::Minimum, neogfx::size_policy::Minimum });
-		iSink += service<i_surface_manager>::instance().dpi_changed([this](i_surface&)
+		iSink += service<i_surface_manager>().dpi_changed([this](i_surface&)
 		{
 			size iconSize{ dpi_scale(24.0) };
 			if (icon().image().is_empty())
@@ -169,7 +171,7 @@ namespace neogfx
 			managing_layout().layout_items(true);
 			update(true);
 		});
-		iSink += app::instance().current_style_changed([this](style_aspect aAspect) 
+		iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) 
 		{ 
 			if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); 
 		});
@@ -220,7 +222,7 @@ namespace neogfx
 
 	void title_bar::update_textures()
 	{
-		auto ink = app::instance().current_style().palette().text_colour();
+		auto ink = service<i_app>().current_style().palette().text_colour();
 		auto paper = background_colour();
 		const char* sMinimizeTexturePattern
 		{

@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
 
 namespace neogfx
@@ -50,7 +50,7 @@ namespace neogfx
 		scoped_units su{ *this, units::Pixels };
 		rect boxRect = client_rect();
 		auto enabledAlphaCoefficient = effectively_enabled() ? 1.0 : 0.25;
-		colour hoverColour = app::instance().current_style().palette().hover_colour().same_lightness_as(
+		colour hoverColour = service<i_app>().current_style().palette().hover_colour().same_lightness_as(
 			background_colour().dark() ?
 				background_colour().lighter(0x20) :
 				background_colour().darker(0x20));
@@ -68,12 +68,12 @@ namespace neogfx
 		if (static_cast<const check_box&>(parent()).is_checked())
 		{
 			/* todo: draw tick image eye candy */
-			aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(app::instance().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
-			aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(app::instance().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
+			aGraphicsContext.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
+			aGraphicsContext.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient), 2.0));
 		}
 		else if (static_cast<const check_box&>(parent()).is_indeterminate())
 		{
-			aGraphicsContext.fill_rect(boxRect, app::instance().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient));
+			aGraphicsContext.fill_rect(boxRect, service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient));
 		}
 	}
 

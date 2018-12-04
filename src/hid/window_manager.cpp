@@ -78,7 +78,7 @@ namespace neogfx
 	rect window_manager::desktop_rect(const i_window& aWindow, bool aIgnoreNesting) const
 	{
 		if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
-			return service<i_surface_manager>::instance().desktop_rect(aWindow.surface());
+			return service<i_surface_manager>().desktop_rect(aWindow.surface());
 		else
 			return rect{ point{}, window_rect(aWindow.nest().as_widget().root()).extents() };
 	}

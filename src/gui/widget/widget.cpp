@@ -20,9 +20,11 @@
 #include <neogfx/neogfx.hpp>
 #include <unordered_map>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/layout/i_layout_item_proxy.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 
 namespace neogfx
@@ -82,8 +84,8 @@ namespace neogfx
 	widget::~widget()
 	{
 		unlink();
-		if (service<i_keyboard>::instance().is_keyboard_grabbed_by(*this))
-			service<i_keyboard>::instance().ungrab_keyboard(*this);
+		if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
+			service<i_keyboard>().ungrab_keyboard(*this);
 		remove_all();
 		{
 			auto layout = iLayout;
@@ -637,7 +639,7 @@ namespace neogfx
 		{
 			if (has_root() && !iLayoutTimer)
 			{
-				iLayoutTimer = std::make_unique<layout_timer>(root(), app::instance(), [this](neolib::callback_timer&)
+				iLayoutTimer = std::make_unique<layout_timer>(root(), service<neolib::async_task>(), [this](neolib::callback_timer&)
 				{
 					if (root().has_native_window())
 					{
@@ -677,14 +679,14 @@ namespace neogfx
 	{
 		return has_root() && root().has_surface() ? 
 			root().surface().ppi() >= 150.0 : 
-			service<i_surface_manager>::instance().display().metrics().ppi() >= 150.0;
+			service<i_surface_manager>().display().metrics().ppi() >= 150.0;
 	}
 
 	dimension widget::dpi_scale_factor() const
 	{
 		return has_root() && root().has_surface() ?
 			default_dpi_scale_factor(root().surface().ppi()) :
-			app::instance().default_dpi_scale_factor();
+			service<i_app>().default_dpi_scale_factor();
 	}
 
 	bool widget::has_logical_coordinate_system() const
@@ -934,7 +936,7 @@ namespace neogfx
 		const auto& adjustedMargins =
 			(has_margins() ?
 				*Margins :
-				app::instance().current_style().margins() * dpi_scale(1.0));
+				service<i_app>().current_style().margins() * dpi_scale(1.0));
 		return units_converter(*this).from_device_units(adjustedMargins);
 	}
 
@@ -1115,7 +1117,7 @@ namespace neogfx
 		if (has_foreground_colour())
 			return *ForegroundColour;
 		else
-			return app::instance().current_style().palette().foreground_colour();
+			return service<i_app>().current_style().palette().foreground_colour();
 	}
 
 	void widget::set_foreground_colour(const optional_colour& aForegroundColour)
@@ -1134,7 +1136,7 @@ namespace neogfx
 		if (has_background_colour())
 			return *BackgroundColour;
 		else
-			return app::instance().current_style().palette().background_colour();
+			return service<i_app>().current_style().palette().background_colour();
 	}
 
 	void widget::set_background_colour(const optional_colour& aBackgroundColour)
@@ -1151,7 +1153,7 @@ namespace neogfx
 		if (!w->transparent_background() && w->has_background_colour())
 			return w->background_colour();
 		else
-			return app::instance().current_style().palette().colour();
+			return service<i_app>().current_style().palette().colour();
 	}
 
 	bool widget::has_font() const
@@ -1164,7 +1166,7 @@ namespace neogfx
 		if (has_font())
 			return *Font;
 		else
-			return app::instance().current_style().font();
+			return service<i_app>().current_style().font();
 	}
 
 	void widget::set_font(const optional_font& aFont)

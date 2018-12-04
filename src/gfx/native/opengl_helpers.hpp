@@ -397,4 +397,14 @@ namespace neogfx
 		i_rendering_engine& iRenderingEngine;
 		i_rendering_engine::i_shader_program* iPreviousProgram;
 	};
+
+	class scoped_render_target
+	{
+	public:
+		scoped_render_target(const i_render_target& aRenderTarget);
+		~scoped_render_target();
+	private:
+		const i_render_target& iRenderTarget;
+		const i_render_target* iPreviouslyActivatedTarget;
+	};
 }
