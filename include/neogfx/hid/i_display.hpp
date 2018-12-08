@@ -21,6 +21,9 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/core/device_metrics.hpp>
+#include <neogfx/core/colour.hpp>
+
 namespace neogfx
 {
 	enum class subpixel_format

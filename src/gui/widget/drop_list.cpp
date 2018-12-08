@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
@@ -134,7 +134,7 @@ namespace neogfx
 			if (selection_model().has_current_index())
 				iDropList.accept_selection();
 			else
-				service<i_basic_services>::instance().system_beep();
+				service<i_basic_services>().system_beep();
 			handled = true;
 			break;
 		case ScanCode_LEFT:
@@ -160,7 +160,7 @@ namespace neogfx
 	{
 		if (list_view::has_background_colour())
 			return list_view::background_colour();
-		return app::instance().current_style().palette().colour();
+		return service<i_app>().current_style().palette().colour();
 	}
 
 	drop_list_popup::drop_list_popup(drop_list& aDropList) :
@@ -213,13 +213,13 @@ namespace neogfx
 		if (aVisible && !visible())
 		{
 			update_placement();
-			if (!service<i_keyboard>::instance().is_keyboard_grabbed_by(view()))
-				service<i_keyboard>::instance().grab_keyboard(view());
+			if (!service<i_keyboard>().is_keyboard_grabbed_by(view()))
+				service<i_keyboard>().grab_keyboard(view());
 		}
 		else if (!aVisible)
 		{
-			if (service<i_keyboard>::instance().is_keyboard_grabbed_by(view()))
-				service<i_keyboard>::instance().ungrab_keyboard(view());
+			if (service<i_keyboard>().is_keyboard_grabbed_by(view()))
+				service<i_keyboard>().ungrab_keyboard(view());
 		}
 		return window::show(aVisible);
 	}
@@ -257,8 +257,8 @@ namespace neogfx
 	{
 		// dismissal may be for reasons other than explicit acceptance or cancellation (e.g. clicking outside of list popup)...
 		auto* dropListForCancellation = iDropList.handling_text_change() || iDropList.accepting_selection() || iDropList.cancelling_selection() ? nullptr : &iDropList;
-		if (service<i_keyboard>::instance().is_keyboard_grabbed_by(view()))
-			service<i_keyboard>::instance().ungrab_keyboard(view());
+		if (service<i_keyboard>().is_keyboard_grabbed_by(view()))
+			service<i_keyboard>().ungrab_keyboard(view());
 		close();
 		// 'this' will be destroyed at this point...
 		if (dropListForCancellation)
@@ -965,7 +965,7 @@ namespace neogfx
 
 		update_widgets();
 
-		iSink += app::instance().current_style_changed([this](style_aspect) { update_widgets(true); });
+		iSink += service<i_app>().current_style_changed([this](style_aspect) { update_widgets(true); });
 
 		presentation_model().set_cell_margins(neogfx::margins{ 3.0, 3.0 }, *this);
 	}
@@ -1053,7 +1053,7 @@ namespace neogfx
 
 	void drop_list::update_arrow()
 	{
-		auto ink = app::instance().current_style().palette().text_colour();
+		auto ink = service<i_app>().current_style().palette().text_colour();
 		if (iDownArrowTexture == std::nullopt || iDownArrowTexture->first != ink)
 		{
 			const char* sDownArrowImagePattern

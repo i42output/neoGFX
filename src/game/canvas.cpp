@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
@@ -134,7 +134,7 @@ namespace neogfx::game
 
 	void canvas::init()
 	{
-		iUpdater.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+		iUpdater.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
 			if (!iEcsPaused && effectively_hidden())

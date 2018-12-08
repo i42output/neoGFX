@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/tab_button.hpp>
 
 namespace neogfx
@@ -35,10 +37,10 @@ namespace neogfx
 		};
 	public:
 		close_button(i_tab& aParent) :
-			push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer) { aTimer.again(); update_appearance(); }, 20 }
+			push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer) { aTimer.again(); update_appearance(); }, 20 }
 		{
 			set_margins(neogfx::margins{ 2.0 });
-			iSink += app::instance().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
+			iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Colour) == style_aspect::Colour) update_textures(); });
 			iSink += aParent.selected([this]() { update_state(); });
 			iSink += aParent.deselected([this]() { update_state(); });
 			update_textures();
@@ -57,7 +59,7 @@ namespace neogfx
 			{
 				double radius = std::sqrt(std::pow(image().image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
 				aGraphicsContext.fill_circle(
-					to_client_coordinates(image().to_window_coordinates(image().client_rect().centre())), radius, app::instance().current_style().palette().text_colour());
+					to_client_coordinates(image().to_window_coordinates(image().client_rect().centre())), radius, service<i_app>().current_style().palette().text_colour());
 			}
 			if (has_focus())
 			{
@@ -69,7 +71,7 @@ namespace neogfx
 	private:
 		void update_textures()
 		{
-			auto ink = app::instance().current_style().palette().text_colour();
+			auto ink = service<i_app>().current_style().palette().text_colour();
 			auto paper = background_colour();
 			const char* sTexture
 			{
@@ -417,7 +419,7 @@ namespace neogfx
 			}
 			label().layout().invalidate();
 		};
-		iSink += service<i_surface_manager>::instance().dpi_changed([this, update_image](i_surface&) { update_image(); });
+		iSink += service<i_surface_manager>().dpi_changed([this, update_image](i_surface&) { update_image(); });
 		update_image();
 		iContainer.adding_tab(*this);
 	}

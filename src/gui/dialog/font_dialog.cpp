@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
@@ -38,8 +38,8 @@ namespace neogfx
 					iFonts.resize(modelRow + 1);
 				if (iFonts[modelRow] == std::nullopt)
 				{
-					auto& fm = service<i_font_manager>::instance();
-					iFonts[modelRow] = font{ fm.font_family(modelRow), font_style::Normal, app::instance().current_style().font_info().size() };
+					auto& fm = service<i_font_manager>();
+					iFonts[modelRow] = font{ fm.font_family(modelRow), font_style::Normal, service<i_app>().current_style().font_info().size() };
 				}
 				return iFonts[modelRow];
 			}
@@ -53,8 +53,8 @@ namespace neogfx
 			{
 				if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
 				{
-					auto backgroundColour = app::instance().current_style().palette().colour().dark() ? colour::Black : colour::White;
-					if (backgroundColour == app::instance().current_style().palette().colour())
+					auto backgroundColour = service<i_app>().current_style().palette().colour().dark() ? colour::Black : colour::White;
+					if (backgroundColour == service<i_app>().current_style().palette().colour())
 						backgroundColour = backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
 					return backgroundColour;
 				}
@@ -78,7 +78,7 @@ namespace neogfx
 					if (aCurrentIndex != std::nullopt)
 					{
 						auto fontFamilyIndex = iFamilyPickerSelectionModel.presentation_model().to_item_model_index(*aCurrentIndex).row();
-						auto& fm = service<i_font_manager>::instance();
+						auto& fm = service<i_font_manager>();
 						auto styleCount = fm.font_style_count(fontFamilyIndex);
 						for (uint32_t s = 0; s < styleCount; ++s)
 							item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s));
@@ -97,8 +97,8 @@ namespace neogfx
 					iFonts.resize(modelRow + 1);
 				if (iFonts[modelRow] == std::nullopt)
 				{
-					auto& fm = service<i_font_manager>::instance();
-					iFonts[modelRow] = font{ fm.font_family(familyModelRow), static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(aIndex))), app::instance().current_style().font_info().size() };
+					auto& fm = service<i_font_manager>();
+					iFonts[modelRow] = font{ fm.font_family(familyModelRow), static_variant_cast<const std::string&>(item_model().cell_data(to_item_model_index(aIndex))), service<i_app>().current_style().font_info().size() };
 				}
 				return iFonts[modelRow];
 			}
@@ -112,8 +112,8 @@ namespace neogfx
 			{
 				if (aColourType == item_cell_colour_type::Background && (cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
 				{
-					auto backgroundColour = app::instance().current_style().palette().colour().dark() ? colour::Black : colour::White;
-					if (backgroundColour == app::instance().current_style().palette().colour())
+					auto backgroundColour = service<i_app>().current_style().palette().colour().dark() ? colour::Black : colour::White;
+					if (backgroundColour == service<i_app>().current_style().palette().colour())
 						backgroundColour = backgroundColour.dark() ? backgroundColour.lighter(0x20) : backgroundColour.darker(0x20);
 					return backgroundColour;
 				}
@@ -266,7 +266,7 @@ namespace neogfx
 			update_selected_font(iSizePicker);
 		});
 
-		auto& fm = service<i_font_manager>::instance();
+		auto& fm = service<i_font_manager>();
 
 		for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
 			iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
@@ -283,7 +283,7 @@ namespace neogfx
 		neolib::scoped_flag sf{ iUpdating };
 
 		auto oldFont = iSelectedFont;
-		auto& fm = service<i_font_manager>::instance();
+		auto& fm = service<i_font_manager>();
 		if (&aUpdatingWidget == this || &aUpdatingWidget == &iFamilyPicker || &aUpdatingWidget == &iStylePicker)
 		{
 			iSizePicker.model().clear();

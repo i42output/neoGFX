@@ -28,7 +28,7 @@
 #include <neolib/observable.hpp>
 #include <neolib/raii.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 #include "item_model.hpp"
 #include "i_item_presentation_model.hpp"
@@ -208,7 +208,7 @@ namespace neogfx
 		{
 			if (iDefaultFont != std::nullopt)
 				return *iDefaultFont;
-			return app::instance().current_style().font();
+			return service<i_app>().current_style().font();
 		}
 		void set_default_font(const optional_font& aDefaultFont) override
 		{
@@ -639,11 +639,11 @@ namespace neogfx
 	private:
 		void init()
 		{
-			iSink = service<i_rendering_engine>::instance().subpixel_rendering_changed([this]()
+			iSink = service<i_rendering_engine>().subpixel_rendering_changed([this]()
 			{
 				reset_meta();
 			});
-			iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+			iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
 			{
 				if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
 					reset_meta();

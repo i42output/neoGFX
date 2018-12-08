@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/app/event_processing_context.hpp>
 #include <neogfx/gui/widget/menu.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
 
@@ -65,10 +67,10 @@ namespace neogfx
 		sWidget = (iParent != nullptr ?
 			std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
 			std::make_unique<popup_menu>(iPosition, menu(), iStyle));
-		app::event_processing_context epc(app::instance(), "neogfx::context_menu");
+		event_processing_context epc{ service<neolib::async_task>(), "neogfx::context_menu" };
 		while (!finished)
 		{
-			app::instance().process_events(epc);
+			service<i_app>().process_events(epc);
 		}
 		sWidget = nullptr;
 	}

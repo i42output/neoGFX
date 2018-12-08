@@ -116,7 +116,7 @@ private:
 public:
 	easing_item_presentation_model(ng::basic_item_model<ng::easing>& aModel) : base_type{ aModel }
 	{
-		iSink += ng::app::instance().current_style_changed([this](ng::style_aspect)
+		iSink += ng::service<ng::i_app>().current_style_changed([this](ng::style_aspect)
 		{
 			iTextures.clear();
 			visual_appearance_changed.async_trigger();
@@ -131,7 +131,7 @@ public:
 		{
 			ng::texture newTexture{ ng::size{48.0, 48.0}, 1.0, ng::texture_sampling::Multisample };
 			ng::graphics_context gc{ newTexture };
-			auto const textColour = ng::app::instance().current_style().palette().text_colour();
+			auto const textColour = ng::service<ng::i_app>().current_style().palette().text_colour();
 			gc.draw_rect(ng::rect{ ng::point{}, ng::size{48.0, 48.0} }, ng::pen{ textColour, 1.0 });
 			ng::optional_point lastPos;
 			ng::pen pen{ textColour, 2.0 };
@@ -161,7 +161,7 @@ public:
 	{
 		clicked([this, aNumber]()
 		{
-			ng::app::instance().change_style("Keypad").
+			ng::service<ng::i_app>().change_style("Keypad").
 				palette().set_colour(aNumber != 9 ? ng::colour{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::colour::LightGoldenrod);
 			if (aNumber == 9)
 				iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::colour::DarkGoldenrod, ng::colour::LightGoldenrodYellow, ng::gradient::Horizontal }, ng::colour_or_gradient{} });
@@ -229,13 +229,13 @@ int main(int argc, char* argv[])
 			if (fullscreenResolution->first == 0)
 				windowObject.emplace(
 					ng::video_mode{ 
-						static_cast<uint32_t>(app.basic_services().display().desktop_rect().width()), 
-						static_cast<uint32_t>(app.basic_services().display().desktop_rect().height()) });
+						static_cast<uint32_t>(ng::service<ng::i_basic_services>().display().desktop_rect().width()), 
+						static_cast<uint32_t>(ng::service<ng::i_basic_services>().display().desktop_rect().height()) });
 			else
 				windowObject.emplace(ng::video_mode{ fullscreenResolution->first, fullscreenResolution->second });
 		}
 		else
-			windowObject.emplace(ng::size{ 768, 688 } * app.surface_manager().display().metrics().horizontal_dpi() / 96.0);
+			windowObject.emplace(ng::size{ 768, 688 } * ng::service<ng::i_surface_manager>().display().metrics().horizontal_dpi() / 96.0);
 		ng::window& window = *windowObject;
 
 		ng::status_bar statusBar{ window.status_bar_layout() };
@@ -263,13 +263,13 @@ int main(int argc, char* argv[])
 		
 		app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
 		{
-			ng::app::instance().change_style("Keypad").palette().set_colour(ng::colour::LightGoldenrod);
+			ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(ng::colour::LightGoldenrod);
 		});
 
 		auto& contactsAction = app.add_action("&Contacts...", ":/closed/resources/caw_toolbar.naa#contacts.png").set_shortcut("Alt+C");
 		contactsAction.triggered([]()
 		{
-			ng::app::instance().change_style("Keypad").palette().set_colour(ng::colour::White);
+			ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(ng::colour::White);
 		});
 		auto& muteAction = app.add_action("Mute/&Unmute Sound", ":/closed/resources/caw_toolbar.naa#mute.png");
 		muteAction.set_checkable(true);
@@ -280,9 +280,9 @@ int main(int argc, char* argv[])
 		neolib::callback_timer ct{ app, [&app, &pasteAndGoAction](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (app.clipboard().sink_active())
+			if (ng::service<ng::i_clipboard>().sink_active())
 			{
-				auto& sink = app.clipboard().active_sink();
+				auto& sink = ng::service<ng::i_clipboard>().active_sink();
 				if (sink.can_paste())
 				{
 					pasteAndGoAction.enable();
@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
 
 		pasteAndGoAction.triggered([&app]()
 		{
-			app.clipboard().paste();
+			ng::service<ng::i_clipboard>().paste();
 		});
 
 		ng::menu_bar menu(window.menu_layout());
@@ -555,12 +555,12 @@ int main(int argc, char* argv[])
 			ng::colour randomColour = ng::colour{ prng(255), prng(255), prng(255) };
 			button.set_foreground_colour(randomColour);
 			button.clicked([&app, &textEdit, randomColour]() { textEdit.BackgroundColour = randomColour.same_lightness_as(app.current_style().palette().background_colour()); });
-			transitions.push_back(ng::service<ng::i_animator>::instance().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
+			transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
 		}
 		layout3.layout_completed([&layout3, &transitions, &transitionPrng]()
 		{
 			for (auto t : transitions)
-				ng::service<ng::i_animator>::instance().transition(t).enable(true);
+				ng::service<ng::i_animator>().transition(t).enable(true);
 			for (auto i = 0u; i < layout3.count(); ++i)
 			{
 				auto& button = layout3.get_widget_at(i);
@@ -662,9 +662,9 @@ int main(int argc, char* argv[])
 		buttonSubpixel.toggled([&app, &buttonSubpixel]()
 		{
 			if (buttonSubpixel.is_checked())
-				app.rendering_engine().subpixel_rendering_on();
+				ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
 			else
-				app.rendering_engine().subpixel_rendering_off();
+				ng::service<ng::i_rendering_engine>().subpixel_rendering_off();
 		});
 		buttonSubpixel.check();
 		ng::horizontal_layout layoutColourPickers{ layout4 };
@@ -739,9 +739,9 @@ int main(int argc, char* argv[])
 		ng::radio_button radioThemeColour(layout4, "Slider changes\ntheme colour");
 		auto update_theme_colour = [&slider]()
 		{
-			auto themeColour = ng::app::instance().current_style().palette().colour().to_hsv();
+			auto themeColour = ng::service<ng::i_app>().current_style().palette().colour().to_hsv();
 			themeColour.set_hue(slider.normalized_value() * 360.0);
-			ng::app::instance().current_style().palette().set_colour(themeColour.to_rgb());
+			ng::service<ng::i_app>().current_style().palette().set_colour(themeColour.to_rgb());
 		};
 		slider.value_changed([update_theme_colour, &slider, &radioSliderFont, &radioThemeColour, &spinBox, &app]()
 		{
@@ -754,7 +754,7 @@ int main(int argc, char* argv[])
 		slider.set_normalized_value((app.current_style().font_info().size() - 4) / 18.0);
 		radioThemeColour.checked([update_theme_colour, &slider, &app]()
 		{
-			slider.set_normalized_value(ng::app::instance().current_style().palette().colour().to_hsv().hue() / 360.0);
+			slider.set_normalized_value(ng::service<ng::i_app>().current_style().palette().colour().to_hsv().hue() / 360.0);
 			update_theme_colour();
 		});
 
@@ -766,31 +766,31 @@ int main(int argc, char* argv[])
 				sCustomColours = ng::colour_dialog::custom_colour_list{};
 				std::fill(sCustomColours->begin(), sCustomColours->end(), ng::colour::White);
 			}
-			auto oldColour = ng::app::instance().change_style("Keypad").palette().colour();
-			ng::colour_dialog colourPicker(window, ng::app::instance().change_style("Keypad").palette().colour());
+			auto oldColour = ng::service<ng::i_app>().change_style("Keypad").palette().colour();
+			ng::colour_dialog colourPicker(window, ng::service<ng::i_app>().change_style("Keypad").palette().colour());
 			colourPicker.set_custom_colours(*sCustomColours);
 			colourPicker.selection_changed([&]()
 			{
-				ng::app::instance().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
+				ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
 			});
 			if (colourPicker.exec() == ng::dialog_result::Accepted)
-				ng::app::instance().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
+				ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(colourPicker.selected_colour());
 			else
-				ng::app::instance().change_style("Keypad").palette().set_colour(oldColour);
+				ng::service<ng::i_app>().change_style("Keypad").palette().set_colour(oldColour);
 			*sCustomColours = colourPicker.custom_colours();
 		});
 
 		themeFont.clicked([&window]()
 		{
-			ng::font_dialog fontPicker(window, ng::app::instance().current_style().font_info());
+			ng::font_dialog fontPicker(window, ng::service<ng::i_app>().current_style().font_info());
 			if (fontPicker.exec() == ng::dialog_result::Accepted)
-				ng::app::instance().current_style().set_font_info(fontPicker.selected_font());
+				ng::service<ng::i_app>().current_style().set_font_info(fontPicker.selected_font());
 		});
 
 		editColour.clicked([&]()
 		{
 			static std::optional<ng::colour_dialog::custom_colour_list> sCustomColours;
-			static ng::colour sInk = ng::app::instance().current_style().palette().text_colour();
+			static ng::colour sInk = ng::service<ng::i_app>().current_style().palette().text_colour();
 			ng::colour_dialog colourPicker(window, sInk);
 			if (sCustomColours != std::nullopt)
 				colourPicker.set_custom_colours(*sCustomColours);
@@ -916,8 +916,8 @@ int main(int argc, char* argv[])
 
 		// Item Views
 
-		app.window_manager().save_mouse_cursor();
-		app.window_manager().set_mouse_cursor(ng::mouse_system_cursor::Wait);
+		ng::service<ng::i_window_manager>().save_mouse_cursor();
+		ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::Wait);
 
 		ng::i_widget& itemViewsPage = tabContainer.add_tab_page("Item Views").as_widget();
 		ng::vertical_layout layoutItemViews(itemViewsPage);
@@ -958,7 +958,7 @@ int main(int argc, char* argv[])
 		#else
 		itemModel.reserve(100);
 		#endif
-		ng::app::event_processing_context epc(app);
+		ng::event_processing_context epc{ app };
 		for (uint32_t row = 0; row < itemModel.capacity(); ++row)
 		{
 			#ifdef NDEBUG
@@ -1035,7 +1035,7 @@ int main(int argc, char* argv[])
 				tableView1.model().erase(tableView1.model().begin() + tableView1.presentation_model().to_item_model_index(tableView1.selection_model().current_index()).row());
 		});
 
-		app.window_manager().restore_mouse_cursor(window);
+		ng::service<ng::i_window_manager>().restore_mouse_cursor(window);
 
 		auto& w = tabContainer.add_tab_page("Lots").as_widget();
 		ng::vertical_layout l(w);
@@ -1140,7 +1140,7 @@ int main(int argc, char* argv[])
 
 		tabDrawing.painting([&](ng::graphics_context& aGc)
 		{
-			ng::service<ng::i_rendering_engine>::instance().want_game_mode();
+			ng::service<ng::i_rendering_engine>().want_game_mode();
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::colour::Goldenrod);
 			aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, gw.gradient().with_direction(ng::gradient::Horizontal));
 			aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, gw.gradient().with_direction(ng::gradient::Horizontal));
@@ -1237,14 +1237,14 @@ int main(int argc, char* argv[])
 	{
 		app.halt();
 		std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
-		app.surface_manager().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
+		ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
 		std::exit(EXIT_FAILURE);
 	}
 	catch (...)
 	{
 		app.halt();
 		std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
-		app.surface_manager().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
+		ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
 		std::exit(EXIT_FAILURE);
 	}
 }

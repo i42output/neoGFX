@@ -35,7 +35,6 @@
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
 #include <neogfx/gfx/pen.hpp>
-#include <neogfx/gfx/text/font.hpp>
 
 namespace neogfx
 {

@@ -22,9 +22,9 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometrical.hpp>
-#include <neogfx/gui/window/window.hpp>
-#include <neogfx/gfx/text/i_font_manager.hpp>
-#include <neogfx/gfx/i_texture_manager.hpp>
+#include <neogfx/gui/window/window_bits.hpp>
+#include <neogfx/hid/video_mode.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/shader_array.hpp>
 #include <neogfx/gfx/i_render_target.hpp>
 
@@ -34,9 +34,10 @@ namespace neogfx
 	class i_native_surface;
 	class i_native_window;
 	class i_graphics_context;
+	class i_font_manager;
+	class i_texture_manager;
 
 	class opengl_standard_vertex_arrays; // todo: abstract
-
 
 	enum class renderer
 	{
@@ -154,32 +155,5 @@ namespace neogfx
 		virtual void register_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;
 		virtual void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) = 0;
 		virtual uint32_t frame_counter(uint32_t aDuration) const = 0;
-	};
-
-	class scoped_render_target
-	{
-	public:
-		scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ aRenderTarget }, iPreviouslyActivatedTarget{ nullptr }
-		{
-			iPreviouslyActivatedTarget = service<i_rendering_engine>::instance().active_target();
-			if (iPreviouslyActivatedTarget != &iRenderTarget)
-			{
-				if (iPreviouslyActivatedTarget != nullptr)
-					iPreviouslyActivatedTarget->deactivate_target();
-				iRenderTarget.activate_target();
-			}
-		}
-		~scoped_render_target()
-		{
-			if (iPreviouslyActivatedTarget != &iRenderTarget)
-			{
-				iRenderTarget.deactivate_target();
-				if (iPreviouslyActivatedTarget != nullptr)
-					iPreviouslyActivatedTarget->activate_target();
-			}
-		}
-	private:
-		const i_render_target& iRenderTarget;
-		const i_render_target* iPreviouslyActivatedTarget;
 	};
 }

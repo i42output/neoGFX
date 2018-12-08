@@ -24,7 +24,7 @@
 #include <SDL_mouse.h>
 #include <SDL_keyboard.h>
 #include <neolib/string_utf.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include "../../../gfx/native/opengl.hpp"
 #include "../../../gfx/native/opengl_graphics_context.hpp"
 #include "../../../hid/native/sdl_keyboard.hpp"
@@ -175,6 +175,8 @@ namespace neogfx
 
 		SDL_SetWindowFullscreen(iHandle, SDL_WINDOW_FULLSCREEN);
 
+		glCheck();
+
 		iReady = true;
 	}
 
@@ -211,6 +213,8 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
+		glCheck();
+
 		iReady = true;
 	}
 
@@ -246,6 +250,8 @@ namespace neogfx
 
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
+
+		glCheck();
 
 		iReady = true;
 	}
@@ -321,6 +327,8 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
+		glCheck();
+
 		iReady = true;
 	}
 
@@ -356,6 +364,8 @@ namespace neogfx
 
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
+
+		glCheck();
 
 		iReady = true;
 	}
@@ -1344,7 +1354,7 @@ namespace neogfx
 #else
 			iBorderThickness = margins{ 6.0, 6.0, 6.0, 6.0 };
 #endif
-			iBorderThickness = iBorderThickness + app::instance().current_style().margins();
+			iBorderThickness = iBorderThickness + service<i_app>().current_style().margins();
 		}
 		else
 			iBorderThickness = margins{ 1.0, 1.0, 1.0, 1.0 };

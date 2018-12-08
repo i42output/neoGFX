@@ -29,6 +29,7 @@
 #include <neogfx/app/resource_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
+#include <neogfx/app/i_clipboard.hpp>
 #include "../gui/window/native/i_native_window.hpp"
 
 namespace nrc
@@ -44,13 +45,8 @@ namespace nrc
 
 namespace neogfx
 {
-	template <> neolib::async_task& service<neolib::async_task>::instance() { return app::instance(); }
-	template <> i_basic_services& service<i_basic_services>::instance() { return app::instance().basic_services(); }
-	template <> i_surface_manager& service<i_surface_manager>::instance() { return app::instance().surface_manager(); }
-	template <> i_window_manager& service<i_window_manager>::instance() { return app::instance().window_manager(); }
-	template <> i_keyboard& service<i_keyboard>::instance() { return app::instance().keyboard(); }
-	template <> i_clipboard& service<i_clipboard>::instance() { return app::instance().clipboard(); }
-	template <> i_audio& service<i_audio>::instance() { return app::instance().audio(); }
+	template<> neolib::async_task& service<neolib::async_task>() { return app::instance(); }
+	template<> i_app& service<i_app>() { return app::instance(); }
 
 	program_options::program_options(int argc, char* argv[])
 	{
@@ -63,23 +59,28 @@ namespace neogfx
 			("directx", "use DirectX (ANGLE) renderer")
 			("software", "use software renderer")
 			("double", "enable window double buffering");
-		boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), *this);
-		if (count("vulkan") + count("directx") + count("software") > 1)
+		boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), iOptions);
+		if (options().count("vulkan") + options().count("directx") + options().count("software") > 1)
 			throw invalid_options("more than one renderer specified");
+	}
+
+	const boost::program_options::variables_map& program_options::options() const
+	{
+		return iOptions;
 	}
 
 	bool program_options::debug() const
 	{
-		return count("debug") == 1;
+		return options().count("debug") == 1;
 	}
 
 	neogfx::renderer program_options::renderer() const
 	{
-		if (count("vulkan") == 1)
+		if (options().count("vulkan") == 1)
 			return neogfx::renderer::Vulkan;
-		else if (count("directx") == 1)
+		else if (options().count("directx") == 1)
 			return neogfx::renderer::DirectX;
-		else if (count("software") == 1)
+		else if (options().count("software") == 1)
 			return neogfx::renderer::Software;
 		else
 			return neogfx::renderer::OpenGL;
@@ -87,9 +88,9 @@ namespace neogfx
 
 	std::optional<std::pair<uint32_t, uint32_t>> program_options::full_screen() const
 	{
-		if (count("fullscreen") == 1)
+		if (options().count("fullscreen") == 1)
 		{
-			auto screenResolution = (*this)["fullscreen"].as<std::string>();
+			auto screenResolution = iOptions["fullscreen"].as<std::string>();
 			if (screenResolution.empty())
 				return std::make_pair(0, 0);
 			else
@@ -110,12 +111,12 @@ namespace neogfx
 
 	bool program_options::double_buffering() const
 	{
-		return count("double") == 1;
+		return options().count("double") == 1;
 	}
 
 	bool program_options::nest() const
 	{
-		return count("nest") == 1;
+		return options().count("nest") == 1;
 	}
 
 	namespace
@@ -127,17 +128,22 @@ namespace neogfx
 	{
 		app* np = nullptr;
 		sFirstInstance.compare_exchange_strong(np, &aApp);
-		if (sFirstInstance == &aApp && aProgramOptions.debug())
+		if (sFirstInstance == &aApp)
 		{
 #if defined(_WIN32)
-			AllocConsole();
-			freopen("CONOUT$", "w", stdout);
-			freopen("CONOUT$", "w", stderr);
-			std::cout.sync_with_stdio(false);
-			std::cout.sync_with_stdio(true);
-			std::cerr.sync_with_stdio(false);
-			std::cerr.sync_with_stdio(true);
+			if (aProgramOptions.debug())
+			{
+				AllocConsole();
+				freopen("CONOUT$", "w", stdout);
+				freopen("CONOUT$", "w", stderr);
+				std::cout.sync_with_stdio(false);
+				std::cout.sync_with_stdio(true);
+				std::cerr.sync_with_stdio(false);
+				std::cerr.sync_with_stdio(true);
+			}
 #endif
+			service<i_rendering_engine>();
+			service<i_rendering_engine>().initialize();
 		}
 	}
 
@@ -148,28 +154,12 @@ namespace neogfx
 		sFirstInstance.compare_exchange_strong(tp, np);
 	}
 
-	app::event_processing_context::event_processing_context(app& aParent, const std::string& aName) :
-		iContext{ aParent.have_message_queue() ? 
-			aParent.message_queue() : 
-			aParent.create_message_queue([this, &aParent]() 
-			{ 
-				return aParent.process_events(aParent.iAppMessageQueueContext); 
-			}) },
-		iName{ aName }
+	app::app(const std::string& aName) :
+		app{ 0, nullptr, aName }
 	{
 	}
 
-	const std::string& app::event_processing_context::name() const
-	{
-		return iName;
-	}
-
-	app::app(const std::string& aName, i_service_factory& aServiceFactory) :
-		app{ 0, nullptr, aName, aServiceFactory }
-	{
-	}
-
-	app::app(int argc, char* argv[], const std::string& aName, i_service_factory& aServiceFactory)
+	app::app(int argc, char* argv[], const std::string& aName)
 		try :
 		neolib::async_thread{ "neogfx::app", true },
 		iAsyncEventQueue{ static_cast<neolib::async_task&>(*this) },
@@ -178,13 +168,6 @@ namespace neogfx
 		iName{ aName },
 		iQuitWhenLastWindowClosed{ true },
 		iInExec{ false },
-		iBasicServices{ aServiceFactory.create_basic_services(*this) },
-		iKeyboard{ aServiceFactory.create_keyboard() },
-		iClipboard{ new neogfx::clipboard(basic_services().system_clipboard()) },
-		iRenderingEngine{ aServiceFactory.create_rendering_engine(iProgramOptions.renderer(), iProgramOptions.double_buffering(), basic_services(), keyboard()) },
-		iSurfaceManager{ new neogfx::surface_manager(basic_services(), *iRenderingEngine) },
-		iWindowManager{ aServiceFactory.create_window_manager() },
-		iAudio{ aServiceFactory.create_audio() },
 		iDefaultWindowIcon{ image{ ":/neogfx/resources/icons/neoGFX.png" } },
 		iCurrentStyle{ iStyles.begin() },
 		iActionFileNew{ add_action("&New..."_t, ":/neogfx/resources/icons.naa#new.png").set_shortcut("Ctrl+Shift+N") },
@@ -204,9 +187,9 @@ namespace neogfx
 		iStandardActionManager{ *this, [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			if (clipboard().sink_active())
+			if (service<i_clipboard>().sink_active())
 			{
-				auto& sink = clipboard().active_sink();
+				auto& sink = service<i_clipboard>().active_sink();
 				if (sink.can_undo())
 					iActionUndo.enable();
 				else
@@ -250,7 +233,7 @@ namespace neogfx
 		iAppContext{ *this, "neogfx::app::iAppContext" },
 		iAppMessageQueueContext{ *this, "neogfx::app::iAppMessageQueueContext" }
 	{
-		iKeyboard->grab_keyboard(*this);
+		service<i_keyboard>().grab_keyboard(*this);
 
 		style whiteStyle("Default");
 		register_style(whiteStyle);
@@ -259,30 +242,30 @@ namespace neogfx
 		register_style(slateStyle);
 
 		iActionFileExit.triggered([this]() { quit(0); });
-		iActionUndo.triggered([this]() { clipboard().active_sink().undo(clipboard()); });
-		iActionRedo.triggered([this]() { clipboard().active_sink().redo(clipboard()); });
-		iActionCut.triggered([this]() { clipboard().cut(); });
-		iActionCopy.triggered([this]() { clipboard().copy(); });
-		iActionPaste.triggered([this]() { clipboard().paste(); });
-		iActionDelete.triggered([this]() { clipboard().delete_selected(); });
-		iActionSelectAll.triggered([this]() { clipboard().select_all(); });
+		iActionUndo.triggered([this]() { service<i_clipboard>().active_sink().undo(service<i_clipboard>()); });
+		iActionRedo.triggered([this]() { service<i_clipboard>().active_sink().redo(service<i_clipboard>()); });
+		iActionCut.triggered([this]() { service<i_clipboard>().cut(); });
+		iActionCopy.triggered([this]() { service<i_clipboard>().copy(); });
+		iActionPaste.triggered([this]() { service<i_clipboard>().paste(); });
+		iActionDelete.triggered([this]() { service<i_clipboard>().delete_selected(); });
+		iActionSelectAll.triggered([this]() { service<i_clipboard>().select_all(); });
 	}
 	catch (std::exception& e)
 	{
 		std::cerr << "neogfx::app::app: terminating with exception: " << e.what() << std::endl;
-		aServiceFactory.create_basic_services(*this)->display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, std::string("main: terminating with exception: ") + e.what());
+		service<i_basic_services>().display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, std::string("main: terminating with exception: ") + e.what());
 		throw;
 	}
 	catch (...)
 	{
 		std::cerr << "neogfx::app::app: terminating with unknown exception" << std::endl;
-		aServiceFactory.create_basic_services(*this)->display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
+		service<i_basic_services>().display_error_dialog(aName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aName, "main: terminating with unknown exception");
 		throw;
 	}
 
 	app::~app()
 	{
-		iKeyboard->ungrab_keyboard(*this);
+		service<i_keyboard>().ungrab_keyboard(*this);
 		resource_manager::instance().clean();
 	}
 
@@ -294,7 +277,7 @@ namespace neogfx
 		return *instance;
 	}
 
-	const program_options& app::program_options() const
+	const i_program_options& app::program_options() const
 	{
 		return iProgramOptions;
 	}
@@ -309,14 +292,14 @@ namespace neogfx
 		neolib::scoped_flag sf{ iInExec };
 		try
 		{
-			surface_manager().layout_surfaces();
-			surface_manager().invalidate_surfaces();
+			service<i_surface_manager>().layout_surfaces();
+			service<i_surface_manager>().invalidate_surfaces();
 			iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
 			while (iQuitResultCode == std::nullopt)
 			{
 				if (!process_events(iAppContext))
 				{
-					if (rendering_engine().game_mode())
+					if (service<i_rendering_engine>().game_mode())
 						thread::yield();
 					else
 						thread::sleep(1);
@@ -330,7 +313,7 @@ namespace neogfx
 			iAsyncEventQueue.terminate();
 			halt();
 			std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
-			iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
+			service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
 			std::exit(EXIT_FAILURE);
 		}
 		catch (...)
@@ -338,7 +321,7 @@ namespace neogfx
 			iAsyncEventQueue.terminate();
 			halt();
 			std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
-			iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
+			service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
 			std::exit(EXIT_FAILURE);
 		}
 	}
@@ -353,65 +336,9 @@ namespace neogfx
 		iQuitResultCode = aResultCode;
 	}
 
-	i_basic_services& app::basic_services() const
-	{
-		if (iBasicServices)
-			return *iBasicServices;
-		else
-			throw no_basic_services();
-	}
-
-	i_rendering_engine& app::rendering_engine() const
-	{
-		if (iRenderingEngine)
-			return *iRenderingEngine;
-		else
-			throw no_renderer();
-	}
-
-	i_surface_manager& app::surface_manager() const
-	{
-		if (iSurfaceManager)
-			return *iSurfaceManager;
-		else
-			throw no_surface_manager();
-	}
-
-	i_window_manager& app::window_manager() const
-	{
-		if (iWindowManager)
-			return *iWindowManager;
-		else
-			throw no_window_manager();
-	}
-	
-	i_keyboard& app::keyboard() const
-	{
-		if (iKeyboard)
-			return *iKeyboard;
-		else
-			throw no_keyboard();
-	}
-
-	i_clipboard& app::clipboard() const
-	{
-		if (iClipboard)
-			return *iClipboard;
-		else
-			throw no_clipboard();
-	}
-
-	i_audio& app::audio() const
-	{
-		if (iAudio)
-			return *iAudio;
-		else
-			throw no_audio();
-	}
-
 	dimension app::default_dpi_scale_factor() const
 	{
-		return neogfx::default_dpi_scale_factor(surface_manager().display().metrics().ppi());
+		return neogfx::default_dpi_scale_factor(service<i_surface_manager>().display().metrics().ppi());
 	}
 
 	const i_texture& app::default_window_icon() const
@@ -452,8 +379,8 @@ namespace neogfx
 		{
 			iCurrentStyle = existingStyle;
 			current_style_changed.trigger(style_aspect::Style);
-			surface_manager().layout_surfaces();
-			surface_manager().invalidate_surfaces();
+			service<i_surface_manager>().layout_surfaces();
+			service<i_surface_manager>().invalidate_surfaces();
 		}
 		return iCurrentStyle->second;
 	}
@@ -466,7 +393,7 @@ namespace neogfx
 		if (iCurrentStyle == iStyles.end())
 		{
 			iCurrentStyle = newStyle;
-			surface_manager().invalidate_surfaces();
+			service<i_surface_manager>().invalidate_surfaces();
 		}
 		return newStyle->second;
 	}
@@ -677,7 +604,7 @@ namespace neogfx
 
 	bool app::process_events()
 	{
-		event_processing_context epc(*this);
+		event_processing_context epc{ *this };
 		return process_events(epc);
 	}
 
@@ -690,14 +617,14 @@ namespace neogfx
 			if (!in()) // not app thread
 				return didSome;
 			
-			if (rendering_engine().creating_window() || surface_manager().initialising_surface())
+			if (service<i_rendering_engine>().creating_window() || service<i_surface_manager>().initialising_surface())
 				return didSome;
 
-			bool hadStrongSurfaces = surface_manager().any_strong_surfaces();
+			bool hadStrongSurfaces = service<i_surface_manager>().any_strong_surfaces();
 			didSome = pump_messages();
 			didSome = (do_io(neolib::yield_type::NoYield) || didSome);
 			didSome = (do_process_events() || didSome);
-			bool lastWindowClosed = hadStrongSurfaces && !surface_manager().any_strong_surfaces();
+			bool lastWindowClosed = hadStrongSurfaces && !service<i_surface_manager>().any_strong_surfaces();
 			if (!in_exec() && lastWindowClosed)
 				throw main_window_closed_prematurely();
 			if (lastWindowClosed && iQuitWhenLastWindowClosed)
@@ -706,7 +633,7 @@ namespace neogfx
 					iQuitResultCode = 0;
 			}
 
-			rendering_engine().render_now();
+			service<i_rendering_engine>().render_now();
 		}
 		catch (std::exception& e)
 		{
@@ -714,7 +641,7 @@ namespace neogfx
 			{
 				halt();
 				std::cerr << "neogfx::app::process_events: terminating with exception: " << e.what() << std::endl;
-				iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::process_events: terminating with exception: ") + e.what());
+				service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::process_events: terminating with exception: ") + e.what());
 				std::exit(EXIT_FAILURE);
 			}
 		}
@@ -724,17 +651,22 @@ namespace neogfx
 			{
 				halt();
 				std::cerr << "neogfx::app::process_events: terminating with unknown exception" << std::endl;
-				iSurfaceManager->display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::process_events: terminating with unknown exception");
+				service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::process_events: terminating with unknown exception");
 				std::exit(EXIT_FAILURE);
 			}
 		}
 		return didSome;
 	}
 
+	i_event_processing_context& app::app_message_queue_context()
+	{
+		return iAppMessageQueueContext;
+	}
+
 	bool app::do_process_events()
 	{
 		bool lastWindowClosed = false;
-		bool didSome = surface_manager().process_events(lastWindowClosed);
+		bool didSome = service<i_surface_manager>().process_events(lastWindowClosed);
 		return didSome;
 	}
 
@@ -752,7 +684,7 @@ namespace neogfx
 				if (matchResult == key_sequence::match::Full)
 				{
 					iKeySequence.clear();
-					if (keyboard().is_front_grabber(*this))
+					if (service<i_keyboard>().is_front_grabber(*this))
 					{
 						a.second.triggered.trigger();
 						if (a.second.is_checkable())
@@ -761,7 +693,7 @@ namespace neogfx
 					}
 					else
 					{
-						basic_services().system_beep();
+						service<i_basic_services>().system_beep();
 						return false;
 					}
 				}

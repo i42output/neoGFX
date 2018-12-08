@@ -20,7 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <string>
 #include <neogfx/app/i18n.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 
 namespace neogfx
 {
@@ -60,6 +60,6 @@ namespace neogfx
 
 	const std::string& translate(const std::string& aTranslatableString, const std::string& aContext)
 	{
-		return app::instance().translate(aTranslatableString, aContext);
+		return service<i_app>().translate(aTranslatableString, aContext);
 	}
 }

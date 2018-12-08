@@ -23,6 +23,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
 #include <neogfx/gfx/shapes.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include "../../hid/native/i_native_surface.hpp"
@@ -449,7 +450,7 @@ namespace neogfx
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget) :
-		iRenderingEngine{ service<i_rendering_engine>::instance() },
+		iRenderingEngine{ service<i_rendering_engine>() },
 		iTarget{aTarget}, 
 		iWidget{ nullptr },
 		iLogicalCoordinateSystem{ iTarget.logical_coordinate_system() },
@@ -470,7 +471,7 @@ namespace neogfx
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget, const i_widget& aWidget) :
-		iRenderingEngine{ service<i_rendering_engine>::instance() },
+		iRenderingEngine{ service<i_rendering_engine>() },
 		iTarget{ aTarget },
 		iWidget{ &aWidget },
 		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
@@ -771,7 +772,7 @@ namespace neogfx
 						if (usp == std::nullopt)
 						{
 							bool renderTexture = (args.material.texture != std::nullopt);
-							auto textureSampling = (renderTexture ? service<i_texture_manager>::instance().find_texture(args.material.texture->id.cookie())->sampling() : texture_sampling::Normal);
+							auto textureSampling = (renderTexture ? service<i_texture_manager>().find_texture(args.material.texture->id.cookie())->sampling() : texture_sampling::Normal);
 							usp.emplace(*this, iRenderingEngine, renderTexture ? rendering_engine().texture_shader_program(textureSampling) : rendering_engine().default_shader_program());
 						}
 						draw_mesh(args.mesh, args.material, args.transformation, args.shaderEffect);
@@ -1323,7 +1324,7 @@ namespace neogfx
 			auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
 			auto transformation = rigidBodies.has_entity_record(entity) ? aTransformation * to_transformation_matrix(rigidBodies.entity_record(entity)) : aTransformation;
 			bool renderTexture = (meshRenderer.material.texture != std::nullopt);
-			auto textureSampling = (renderTexture ? service<i_texture_manager>::instance().find_texture(meshRenderer.material.texture->id.cookie())->sampling() : texture_sampling::Normal);
+			auto textureSampling = (renderTexture ? service<i_texture_manager>().find_texture(meshRenderer.material.texture->id.cookie())->sampling() : texture_sampling::Normal);
 			if (uva == nullptr || renderTexture != withTexture)
 			{
 				if (uva != nullptr)
@@ -1646,7 +1647,7 @@ namespace neogfx
 			{
 				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
 
-				const font& glyphFont = service<i_font_manager>::instance().font_from_id(drawOp.glyphFont);
+				const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
 				const i_glyph_texture& glyphTexture = glyph_texture(drawOp);
 
 				vec3 glyphOrigin(
@@ -1777,7 +1778,7 @@ namespace neogfx
 
 		if (material.texture != std::nullopt)
 		{
-			auto const& texture = *service<i_texture_manager>::instance().find_texture(material.texture->id.cookie());
+			auto const& texture = *service<i_texture_manager>().find_texture(material.texture->id.cookie());
 
 			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().texture_shader_program(texture.sampling()) };
 			rendering_engine().active_shader_program().set_uniform_variable("effect", static_cast<int>(aShaderEffect));

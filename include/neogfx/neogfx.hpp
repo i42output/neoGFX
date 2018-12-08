@@ -33,8 +33,5 @@ namespace neogfx
 	using namespace std::string_literals;
 
 	template <typename Component>
-	struct service
-	{
-		static Component& instance();
-	};
+	Component& service();
 }

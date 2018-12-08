@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/scrollbar.hpp>
 
 namespace neogfx
@@ -504,7 +504,7 @@ namespace neogfx
 		{
 		case ElementUpButton:
 			set_position(position() - step());
-			iTimer = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.set_duration(50);
 				aTimer.again();
@@ -514,7 +514,7 @@ namespace neogfx
 			break;
 		case ElementDownButton:
 			set_position(position() + step());
-			iTimer = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.set_duration(50);
 				aTimer.again();
@@ -524,7 +524,7 @@ namespace neogfx
 			break;
 		case ElementPageUpArea:
 			set_position(position() - page());
-			iTimer = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.set_duration(50);
 				aTimer.again();
@@ -534,7 +534,7 @@ namespace neogfx
 			break;
 		case ElementPageDownArea:
 			set_position(position() + page());
-			iTimer = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.set_duration(50);
 				aTimer.again();
@@ -593,7 +593,7 @@ namespace neogfx
 		if (iScrollTrackPosition == std::nullopt)
 		{
 			iScrollTrackPosition = iContainer.as_widget().root().mouse_position();
-			iTimer = std::make_shared<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer& aTimer)
+			iTimer = std::make_shared<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.again();
 				point delta = iContainer.as_widget().root().mouse_position() - *iScrollTrackPosition;

@@ -18,7 +18,10 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_help.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/status_bar.hpp>
 
 namespace neogfx
@@ -48,7 +51,7 @@ namespace neogfx
 		rect line = client_rect(false);
 		line.deflate(dpi_scale(size{ 0.0, 2.0 }));
 		line.cx = 1.0;
-		colour ink = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().foreground_colour());
+		colour ink = (has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().foreground_colour());
 		aGraphicsContext.fill_rect(line, ink.darker(0x40).with_alpha(0x80));
 		++line.x;
 		aGraphicsContext.fill_rect(line, ink.lighter(0x40).with_alpha(0x80));
@@ -74,10 +77,10 @@ namespace neogfx
 		auto scrlLock = std::make_shared<label>();
 		scrlLock->text().set_size_hint("SCRL");
 		iLayout.add(scrlLock);
-		iUpdater = std::make_unique<neolib::callback_timer>(app::instance(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
+		iUpdater = std::make_unique<neolib::callback_timer>(service<neolib::async_task>(), [insertLock, capsLock, numLock, scrlLock](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
-			const auto& keyboard = service<i_keyboard>::instance();
+			const auto& keyboard = service<i_keyboard>();
 			insertLock->text().set_text((keyboard.locks() & keyboard_locks::InsertLock) == keyboard_locks::InsertLock ?
 				"Insert" : std::string{});
 			capsLock->text().set_text((keyboard.locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock ?
@@ -154,13 +157,13 @@ namespace neogfx
 
 	bool status_bar::have_message() const
 	{
-		return iMessage != std::nullopt || app::instance().help().help_active();
+		return iMessage != std::nullopt || service<i_app>().help().help_active();
 	}
 
 	std::string status_bar::message() const
 	{
-		if (app::instance().help().help_active())
-			return app::instance().help().active_help().help_text();
+		if (service<i_app>().help().help_active())
+			return service<i_app>().help().active_help().help_text();
 		else if (iMessage != std::nullopt)
 			return *iMessage;
 		throw no_message();
@@ -261,7 +264,7 @@ namespace neogfx
 		iPermanentWidgetLayout.set_margins(neogfx::margins{});
 		auto update_size_grip = [this](style_aspect)
 		{
-			auto ink1 = (has_foreground_colour() ? foreground_colour() : app::instance().current_style().palette().foreground_colour());
+			auto ink1 = (has_foreground_colour() ? foreground_colour() : service<i_app>().current_style().palette().foreground_colour());
 			ink1 = ink1.light() ? ink1.darker(0x40) : ink1.lighter(0x40);
 			auto ink2 = ink1.darker(0x30);
 			if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)
@@ -327,11 +330,11 @@ namespace neogfx
 			}
 			iSizeGrip.set_image(iSizeGripTexture->second);
 		};
-		iSink += service<i_surface_manager>::instance().dpi_changed([update_size_grip](i_surface&) { update_size_grip(style_aspect::Geometry); });
-		iSink += app::instance().current_style_changed(update_size_grip);
+		iSink += service<i_surface_manager>().dpi_changed([update_size_grip](i_surface&) { update_size_grip(style_aspect::Geometry); });
+		iSink += service<i_app>().current_style_changed(update_size_grip);
 		update_size_grip(style_aspect::Colour);
-		iSink += app::instance().help().help_activated([this](const i_help_source&) { update_widgets();	});
-		iSink += app::instance().help().help_deactivated([this](const i_help_source&) { update_widgets(); });
+		iSink += service<i_app>().help().help_activated([this](const i_help_source&) { update_widgets();	});
+		iSink += service<i_app>().help().help_deactivated([this](const i_help_source&) { update_widgets(); });
 		update_widgets();
 	}
 

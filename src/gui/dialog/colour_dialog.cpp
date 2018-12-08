@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gui/dialog/colour_dialog.hpp>
 
@@ -82,7 +83,7 @@ namespace neogfx
 				if (iColour != std::nullopt)
 					iOwner.select_colour(iColour->with_alpha(iOwner.selected_colour().alpha()));
 				else
-					service<i_basic_services>::instance().system_beep();
+					service<i_basic_services>().system_beep();
 			}
 			else
 			{

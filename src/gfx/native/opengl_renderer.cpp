@@ -26,46 +26,38 @@
 #pragma comment(lib, "Shcore.lib")
 #endif
 
+#include <neolib/thread.hpp>
+
 #include <neogfx/core/numerical.hpp>
-#include "opengl_renderer.hpp"
-#include "../../gui/window/native/opengl_window.hpp"
 
-#include "gradient.frag.hpp"
-
-#include <neogfx/app/app.hpp>
+#include <neogfx/hid/i_display.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/app/i_basic_services.hpp>
 
 namespace neogfx
 {
-	namespace
+	template <>
+	i_font_manager& service<i_font_manager>()
 	{
-		std::atomic<i_rendering_engine*> sFirstInstance;
-
-		void set_first_instance(i_rendering_engine& aInstance)
-		{
-			i_rendering_engine* np = nullptr;
-			sFirstInstance.compare_exchange_strong(np, &aInstance);
-		}
+		return service<i_rendering_engine>().font_manager();
 	}
 
 	template <>
-	i_rendering_engine& service<i_rendering_engine>::instance()
+	i_texture_manager& service<i_texture_manager>()
 	{
-		return *sFirstInstance;
+		return service<i_rendering_engine>().texture_manager();
 	}
+}
 
-	template <>
-	i_font_manager& service<i_font_manager>::instance()
-	{
-		return service<i_rendering_engine>::instance().font_manager();
-	}
+#include <neogfx/gui/widget/i_widget.hpp>
+#include "opengl_renderer.hpp"
+#include "../../gui/window/native/opengl_window.hpp"
+#include "gradient.frag.hpp"
 
-	template <>
-	i_texture_manager& service<i_texture_manager>::instance()
-	{
-		return service<i_rendering_engine>::instance().texture_manager();
-	}
-
-	frame_counter::frame_counter(uint32_t aDuration) : iTimer{ app::instance(), [this](neolib::callback_timer& aTimer)
+namespace neogfx
+{
+	frame_counter::frame_counter(uint32_t aDuration) : iTimer{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
 			++iCounter;
@@ -284,11 +276,10 @@ namespace neogfx
 	}
 
 	opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
-		iRenderer{(set_first_instance(*this), aRenderer)},
-		iFontManager{},
-		iActiveProgram{iShaderPrograms.end()},
-		iSubpixelRendering{true},
-		iLastGameRenderTime{0ull}
+		iRenderer{ aRenderer },
+		iActiveProgram {iShaderPrograms.end( )},
+		iSubpixelRendering{ true },
+		iLastGameRenderTime{ 0ull }
 	{
 #ifdef _WIN32
 		SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
@@ -303,7 +294,7 @@ namespace neogfx
 
 	const i_device_metrics& opengl_renderer::default_screen_metrics() const
 	{
-		return app::instance().basic_services().display().metrics();
+		return service<i_basic_services>().display().metrics();
 	}
 
 	renderer opengl_renderer::renderer() const
@@ -586,7 +577,7 @@ namespace neogfx
 			},
 			{ "VertexPosition", "VertexColor", "VertexTextureCoord" });
 
-		switch (app::instance().basic_services().display(0).subpixel_format())
+		switch (service<i_basic_services>().display(0).subpixel_format())
 		{
 		case subpixel_format::SubpixelFormatRGBHorizontal:
 			iGlyphSubpixelProgram = create_shader_program(
@@ -773,12 +764,16 @@ namespace neogfx
 
 	i_font_manager& opengl_renderer::font_manager()
 	{
-		return iFontManager;
+		if (iFontManager == std::nullopt)
+			iFontManager.emplace();
+		return *iFontManager;
 	}
 
 	i_texture_manager& opengl_renderer::texture_manager()
 	{
-		return iTextureManager;
+		if (iTextureManager == std::nullopt)
+			iTextureManager.emplace();
+		return *iTextureManager;
 	}
 
 	bool opengl_renderer::shader_program_active() const
@@ -941,9 +936,9 @@ namespace neogfx
 		while (!finished)
 		{	
 			finished = true;
-			for (std::size_t s = 0; s < app::instance().surface_manager().surface_count(); ++s)
+			for (std::size_t s = 0; s < service<i_surface_manager>().surface_count(); ++s)
 			{
-				auto& surface = app::instance().surface_manager().surface(s);
+				auto& surface = service<i_surface_manager>().surface(s);
 				if (surface.has_native_surface() && surface.native_surface().pump_event())
 				{
 					didSome = true;

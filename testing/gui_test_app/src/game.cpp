@@ -3,7 +3,7 @@
 #include <boost/format.hpp>
 #include <neolib/random.hpp>
 #include <neolib/singleton.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/game/chrono.hpp>
@@ -55,7 +55,7 @@ using namespace neolib::stdint_suffix;
 	spritePlane.sprites_painted([&spritePlane](ng::graphics_context& aGraphicsContext)
 	{
 		aGraphicsContext.draw_text(ng::point{ 0.0, 0.0 }, "Hello, World!", spritePlane.font().with_style(ng::font_info::Underline), ng::colour::White);
-		if (ng::app::instance().keyboard().is_key_pressed(ng::ScanCode_C))
+		if (ng::service<ng::i_app>().keyboard().is_key_pressed(ng::ScanCode_C))
 			spritePlane.collision_tree_2d().visit_aabbs([&aGraphicsContext](const neogfx::aabb_2d& aAabb)
 			{
 				ng::rect aabb{ ng::point{ aAabb.min }, ng::point{ aAabb.max } };
@@ -203,7 +203,7 @@ void create_game(ng::i_layout& aLayout)
 
 	~~~~ecs.system<ng::game::game_world>().applying_physics([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
 	{
-		const auto& keyboard = ng::app::instance().keyboard();
+		auto const& keyboard = ng::service<ng::i_keyboard>();
 		auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
 		spaceshipPhysics.acceleration =
 			ng::vec3
@@ -228,7 +228,7 @@ void create_game(ng::i_layout& aLayout)
 
 	ecs.system<ng::game::game_world>().physics_applied([&ecs, spaceship /*, &spritePlane, score, shipInfo, explosion*/](ng::game::step_time aPhysicsStepTime)
 	{
-		const auto& keyboard = ng::app::instance().keyboard();
+		auto const& keyboard = ng::service<ng::i_keyboard>();
 		auto& spaceshipPhysics = ecs.component<ng::game::rigid_body>().entity_record(spaceship);
 		static bool sExtraFire = false;
 		if (keyboard.is_key_pressed(ng::ScanCode_SPACE) || sExtraFire)

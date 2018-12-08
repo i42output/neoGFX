@@ -23,7 +23,9 @@
 #include <cmath>
 #include <boost/format.hpp>
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 
 namespace neogfx
 {
@@ -89,9 +91,9 @@ namespace neogfx
 	template <typename T>
 	colour basic_spin_box<T>::frame_colour() const
 	{
-		if (app::instance().current_style().palette().colour().similar_intensity(background_colour(), 0.03125))
+		if (service<i_app>().current_style().palette().colour().similar_intensity(background_colour(), 0.03125))
 			return framed_widget::frame_colour();
-		return app::instance().current_style().palette().colour().mid(background_colour());
+		return service<i_app>().current_style().palette().colour().mid(background_colour());
 	}
 
 	template <typename T>
@@ -192,7 +194,7 @@ namespace neogfx
 		{
 			aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
 			if (!aAccept)
-				service<i_basic_services>::instance().system_beep();
+				service<i_basic_services>().system_beep();
 		});
 
 		iSink += iTextBox.text_changed([this]()
@@ -210,7 +212,7 @@ namespace neogfx
 			{
 				iTextBox.set_text(iText);
 				iTextBox.cursor().set_position(iTextCursorPos);
-				service<i_basic_services>::instance().system_beep();
+				service<i_basic_services>().system_beep();
 			}
 			else
 			{
@@ -224,7 +226,7 @@ namespace neogfx
 		auto step_up = [this]()
 		{
 			do_step(step_direction::Up);
-			iStepper.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+			iStepper.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.set_duration(125, true);
 				aTimer.again();
@@ -246,7 +248,7 @@ namespace neogfx
 		auto step_down = [this]()
 		{
 			do_step(step_direction::Down);
-			iStepper.emplace(app::instance(), [this](neolib::callback_timer& aTimer)
+			iStepper.emplace(service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 			{
 				aTimer.set_duration(125, true);
 				aTimer.again();
@@ -266,19 +268,19 @@ namespace neogfx
 		});
 
 		update_arrows();
-		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+		iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
 		{
 			if ((aAspect & style_aspect::Colour) == style_aspect::Colour)
 				update_arrows();
 		});
 
-		iSink += service<i_surface_manager>::instance().dpi_changed([this](i_surface&) { update_arrows(); });
+		iSink += service<i_surface_manager>().dpi_changed([this](i_surface&) { update_arrows(); });
 	}
 
 	template <typename T>
 	void basic_spin_box<T>::update_arrows()
 	{
-		auto ink = app::instance().current_style().palette().text_colour();
+		auto ink = service<i_app>().current_style().palette().text_colour();
 		const char* sUpArrowImagePattern
 		{
 			"[9,5]"

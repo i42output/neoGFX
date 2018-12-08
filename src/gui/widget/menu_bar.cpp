@@ -56,7 +56,7 @@ namespace neogfx
 
 	bool menu_bar::visible() const
 	{
-		if (service<i_basic_services>::instance().has_system_menu_bar())
+		if (service<i_basic_services>().has_system_menu_bar())
 			return false;
 		return widget::visible();
 	}
@@ -118,7 +118,7 @@ namespace neogfx
 
 	bool menu_bar::text_input(const std::string&)
 	{
-		service<i_basic_services>::instance().system_beep();
+		service<i_basic_services>().system_beep();
 		return true;
 	}
 
@@ -165,8 +165,8 @@ namespace neogfx
 		});
 		iSink += selection_cleared([this]()
 		{
-			if (service<i_keyboard>::instance().is_keyboard_grabbed_by(*this))
-				service<i_keyboard>::instance().ungrab_keyboard(*this);
+			if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
+				service<i_keyboard>().ungrab_keyboard(*this);
 			close_sub_menu(false);
 			update();
 		});
@@ -174,8 +174,8 @@ namespace neogfx
 		{
 			auto& itemWidget = layout().get_widget_at<menu_item_widget>(find(aSubMenu));
 			close_sub_menu(false);
-			if (!service<i_keyboard>::instance().is_keyboard_grabbed_by(*this))
-				service<i_keyboard>::instance().grab_keyboard(*this);
+			if (!service<i_keyboard>().is_keyboard_grabbed_by(*this))
+				service<i_keyboard>().grab_keyboard(*this);
 			iOpenSubMenu->set_menu(aSubMenu, itemWidget.sub_menu_position());
 			iSink2 = iOpenSubMenu->menu().closed([this]()
 			{

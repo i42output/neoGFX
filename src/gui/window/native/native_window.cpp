@@ -24,7 +24,7 @@
 #endif
 
 #include <neolib/raii.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
@@ -37,7 +37,7 @@ namespace neogfx
 		iSurfaceManager{ aSurfaceManager },
 		iProcessingEvent{ 0u },
 		iNonClientEntered{ false },
-		iUpdater{ app::instance(), [this](neolib::callback_timer& aTimer)
+		iUpdater{ service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
 			if (non_client_entered() && 
@@ -276,7 +276,7 @@ namespace neogfx
 		}
 		else if (std::holds_alternative<keyboard_event>(iCurrentEvent))
 		{
-			auto& keyboard = service<i_keyboard>::instance();
+			auto& keyboard = service<i_keyboard>();
 			const auto& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
 			switch (keyboardEvent.type())
 			{

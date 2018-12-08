@@ -23,7 +23,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_LCD_FILTER_H
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include "../../gfx/text/native/native_font_face.hpp"
 #include "../../gfx/text/native/native_font.hpp"
@@ -205,7 +205,7 @@ namespace neogfx
 
 	std::shared_ptr<i_native_font_face> font_manager::create_default_font(const i_device_resolution& aDevice)
 	{
-		return create_font(app::instance().current_style().font_info(), aDevice);
+		return create_font(service<i_app>().current_style().font_info(), aDevice);
 	}
 
 	bool font_manager::has_fallback_font(const i_native_font_face& aExistingFont) const

@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 
@@ -60,7 +60,7 @@ namespace neogfx
 		discRect.deflate(scaledPixel.cx, scaledPixel.cy);
 		aGraphicsContext.draw_circle(discRect.centre(), discRect.width() / 2.0, pen{ borderColour1.mid(background_colour()).with_combined_alpha(enabledAlphaCoefficient), scaledPixel.cx });
 		discRect.deflate(scaledPixel.cx, scaledPixel.cy);
-		colour hoverColour = app::instance().current_style().palette().hover_colour().same_lightness_as(
+		colour hoverColour = service<i_app>().current_style().palette().hover_colour().same_lightness_as(
 			background_colour().dark() ?
 			background_colour().lighter(0x20) :
 			background_colour().darker(0x20));
@@ -70,7 +70,7 @@ namespace neogfx
 		aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, backgroundFillColour.with_combined_alpha(enabledAlphaCoefficient));
 		discRect.deflate(scaledPixel.cx * 2.0, scaledPixel.cy * 2.0);
 		if (static_cast<const radio_button&>(parent()).is_on())
-			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, app::instance().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient));
+			aGraphicsContext.fill_circle(discRect.centre(), discRect.width() / 2.0, service<i_app>().current_style().palette().widget_detail_primary_colour().with_combined_alpha(enabledAlphaCoefficient));
 	}
 
 	radio_button::radio_button(const std::string& aText) :

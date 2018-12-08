@@ -240,12 +240,7 @@ namespace neogfx
 		{
 			return iFont;
 		}
-		neogfx::font font() const
-		{
-			if (font_specified())
-				return service<i_font_manager>::instance().font_from_id(font_id());
-			throw no_font_specified();
-		}
+		neogfx::font font() const;
 		const neogfx::font& font(const i_glyph_font_cache& aFontCache) const
 		{
 			if (font_specified())
@@ -367,43 +362,14 @@ namespace neogfx
 	public:
 		struct cached_font_not_found : std::logic_error { cached_font_not_found() : std::logic_error("neogfx::glyph_font_cache::cached_font_not_found") {} };
 	public:
-		const font& glyph_font(const glyph& aGlyph) const override
-		{
-			auto existing = cache().find(aGlyph.font_id());
-			if (existing != cache().end())
-				return existing->second.second;
-			throw cached_font_not_found();
-		}
-		void cache_glyph_font(font_id aFontId) override
-		{
-			if (cache().find(aFontId) == cache().end())
-			{
-				auto& fontService = service<i_font_manager>::instance();
-				cache().emplace(aFontId, cache_entry{ neolib::small_cookie_auto_ref{ fontService, aFontId }, fontService.font_from_id(aFontId) });
-			}
-		}
-		void cache_glyph_font(const font& aFont) override
-		{
-			if (cache().find(aFont.id()) == cache().end())
-			{
-				auto& fontService = service<i_font_manager>::instance();
-				cache().emplace(aFont.id(), cache_entry{ neolib::small_cookie_auto_ref{ fontService, aFont.id() }, aFont});
-			}
-		}
+		const font& glyph_font(const glyph& aGlyph) const override;
+		void cache_glyph_font(font_id aFontId) override;
+		void cache_glyph_font(const font& aFont) override;
 	public:
-		void clear()
-		{
-			iCache.clear();
-		}
+		void clear();
 	private:
-		const font_cache& cache() const
-		{
-			return iCache;
-		}
-		font_cache& cache()
-		{
-			return iCache;
-		}
+		const font_cache& cache() const;
+		font_cache& cache();
 	private:
 		font_cache iCache;
 	};
@@ -416,69 +382,28 @@ namespace neogfx
 	public:
 		using container::const_iterator;
 	public:
-		glyph_text() :
-			container{}
-		{
-		}
+		glyph_text();
 		template <typename Iter>
 		glyph_text(Iter aBegin, Iter aEnd) :
 			container{ aBegin, aEnd }
 		{
 		}
-		glyph_text(const glyph_text& aOther) :
-			container{ aOther },
-			glyph_font_cache{ aOther },
-			iExtents{ aOther.iExtents }
-		{
-		}
-		glyph_text(glyph_text&& aOther) :
-			container{ std::move(aOther) },
-			glyph_font_cache{ std::move(aOther) },
-			iExtents{ aOther.iExtents }
-		{
-		}
+		glyph_text(const glyph_text& aOther);
+		glyph_text(glyph_text&& aOther);
 	public:
-		glyph_text& operator=(const glyph_text& aOther)
-		{
-			if (&aOther == this)
-				return *this;
-			container::operator=(aOther);
-			glyph_font_cache::operator=(aOther);
-			iExtents = aOther.iExtents;
-			return *this;
-		}
-		glyph_text& operator=(glyph_text&& aOther)
-		{
-			if (&aOther == this)
-				return *this;
-			container::operator=(std::move(aOther));
-			glyph_font_cache::operator=(std::move(aOther));
-			iExtents = aOther.iExtents;
-			return *this;
-		}
+		glyph_text& operator=(const glyph_text& aOther);
+		glyph_text& operator=(glyph_text&& aOther);
 	public:
 		using container::cbegin;
 		using container::cend;
 		using container::empty;
 		using container::begin;
 		using container::end;
-		iterator begin()
-		{
-			iExtents = std::nullopt;
-			return container::begin();
-		}
-		iterator end()
-		{
-			iExtents = std::nullopt;
-			return container::end();
-		}
+		iterator begin();
+		iterator end();
 	public:
 		using container::back;
-		reference back()
-		{
-			iExtents = std::nullopt;
-			return container::back();
-		}
+		reference back();
 	public:
 		template< class... Args >
 		reference emplace_back(Args&&... args)
@@ -487,71 +412,15 @@ namespace neogfx
 			iExtents = std::nullopt;
 			return result;
 		}
-		void push_back(const glyph& aGlyph)
-		{
-			container::push_back(aGlyph);
-			iExtents = std::nullopt;
-		}
-		void clear()
-		{
-			container::clear();
-			glyph_font_cache::clear();
-			iExtents = std::nullopt;
-		}
+		void push_back(const glyph& aGlyph);
+		void clear();
 	public:
-		bool operator==(const glyph_text& aOther) const
-		{
-			return static_cast<const container&>(*this) == static_cast<const container&>(aOther);
-		}
+		bool operator==(const glyph_text& aOther) const;
 	public:
-		neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const
-		{
-			if (aBegin == aEnd)
-				return neogfx::size{ 0.0, 0.0 };
-			neogfx::size result;
-			for (glyph_text::const_iterator i = aBegin; i != aEnd; ++i)
-			{
-				const auto& g = *i;
-				result.cx += g.advance().cx;
-				result.cy = std::max(result.cy, g.extents(*this).cy);
-			}
-			if (aEndIsLineEnd)
-			{
-				const auto& lastGlyph = *std::prev(aEnd);
-				result.cx += (lastGlyph.extents(*this).cx - lastGlyph.advance().cx);
-			}
-			return result.ceil();
-		}
+		neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const;
 	public:
-		const neogfx::size& extents() const
-		{
-			if (iExtents == std::nullopt)
-				iExtents = extents(begin(), end());
-			return *iExtents;
-		}
-		std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const
-		{
-			std::pair<const_iterator, const_iterator> result(aFrom, aFrom);
-			if (!aFrom->is_whitespace())
-			{
-				while(result.first != aBegin && !result.first->is_whitespace())
-					--result.first;
-				if (!result.first->is_whitespace())
-				{
-					result.first = aFrom;
-					while(result.first != aBegin && (result.first - 1)->source() == aFrom->source())
-						--result.first;
-					result.second = result.first;
-					return result;
-				}
-				result.second = result.first;
-			}
-			while(result.first != aBegin && (result.first - 1)->is_whitespace())
-				--result.first;
-			while(result.second->is_whitespace() && result.second != end())
-				++result.second;
-			return result;
-		}
+		const neogfx::size& extents() const;
+		std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const;
 	private:
 		mutable std::optional<neogfx::size> iExtents;
 	};

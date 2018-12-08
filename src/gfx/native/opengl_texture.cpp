@@ -170,6 +170,7 @@ namespace neogfx
 	{
 		try
 		{
+			
 			glCheck(glGenTextures(1, &iHandle));
 			GLint previousTexture = bind(1);
 			switch(sampling())
@@ -311,11 +312,14 @@ namespace neogfx
 		return iStorageSize;
 	}
 
-	void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData)
+	void opengl_texture::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
 	{
 		if (sampling() != texture_sampling::Multisample)
 		{
 			GLint previousTexture = bind(1);
+			GLint previousPackAlignment;
+			glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
+			glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
 			if (sampling() != texture_sampling::Data)
 			{
 				glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
@@ -333,6 +337,7 @@ namespace neogfx
 			{
 				glCheck(glGenerateMipmap(to_gl_enum(sampling())));
 			}
+			glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
 			glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
 		}
 		else
@@ -415,6 +420,7 @@ namespace neogfx
 	{
 		if (aTextureUnit != std::nullopt)
 		{
+			glCheck();
 			glCheck(glActiveTexture(GL_TEXTURE0 + *aTextureUnit));
 		}
 		GLint previousTexture = 0;
@@ -470,10 +476,10 @@ namespace neogfx
 
 	void opengl_texture::activate_target() const
 	{
-		if (service<i_rendering_engine>::instance().active_target() != this)
+		if (service<i_rendering_engine>().active_target() != this)
 		{
 			target_activating.trigger();
-			service<i_rendering_engine>::instance().activate_context(*this);
+			service<i_rendering_engine>().activate_context(*this);
 		}
 //		else
 //			throw already_active();
@@ -532,10 +538,10 @@ namespace neogfx
 
 	void opengl_texture::deactivate_target() const
 	{
-		if (service<i_rendering_engine>::instance().active_target() == this)
+		if (service<i_rendering_engine>().active_target() == this)
 		{
 			target_deactivating.trigger();
-			service<i_rendering_engine>::instance().deactivate_context();
+			service<i_rendering_engine>().deactivate_context();
 			return;
 		}
 		throw not_active();

@@ -199,7 +199,7 @@ namespace neogfx
 	bool native_font_face::has_fallback() const
 	{
 		if (iHasFallback == std::nullopt)
-			iHasFallback = service<i_font_manager>::instance().has_fallback_font(*this);
+			iHasFallback = service<i_font_manager>().has_fallback_font(*this);
 		return *iHasFallback;
 	}
 
@@ -213,7 +213,7 @@ namespace neogfx
 		if (!has_fallback())
 			throw no_fallback_font();
 		if (iFallbackFont == nullptr)
-			iFallbackFont = service<i_font_manager>::instance().create_fallback_font(*this);
+			iFallbackFont = service<i_font_manager>().create_fallback_font(*this);
 		return *iFallbackFont;
 	}
 	
@@ -277,7 +277,7 @@ namespace neogfx
 			useSubpixelFiltering = false;
 
 		auto subTextureWidth = bitmap.width / (useSubpixelFiltering ? 3 : 1);
-		auto& subTexture = service<i_font_manager>::instance().glyph_atlas().create_sub_texture(
+		auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
 			neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
 			1.0, texture_sampling::Normal);
 
@@ -333,19 +333,9 @@ namespace neogfx
 				}
 			textureData = &iGlyphTextureData[0];
 		}
-		GLint previousTexture;
-		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture));
-		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(glyphTexture.texture().native_texture()->handle())));
-
-		GLint previousPackAlignment;
-		glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
-		glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0,
-			static_cast<GLint>(glyphRect.x), static_cast<GLint>(glyphRect.y), static_cast<GLsizei>(glyphRect.cx), static_cast<GLsizei>(glyphRect.cy), 
-			useSubpixelFiltering ? GL_RGBA : GL_ALPHA, GL_UNSIGNED_BYTE, &textureData[0]));
-		glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
-
-		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture)));
+		
+		glyphRect.position() -= point{ 1.0, 1.0 };
+		glyphTexture.texture().native_texture()->set_pixels(glyphRect, &textureData[0], 1u);
 
 		return glyphTexture;
 	}

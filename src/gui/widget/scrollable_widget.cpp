@@ -150,7 +150,7 @@ namespace neogfx
 		bool handledHorizontal = false;
 		mouse_wheel verticalSense = mouse_wheel::Vertical;
 		mouse_wheel horizontalSense = mouse_wheel::Horizontal;
-		if (service<i_keyboard>::instance().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>::instance().is_key_pressed(ScanCode_RSHIFT))
+		if (service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT))
 			std::swap(verticalSense, horizontalSense);
 		if ((aWheel & verticalSense) != mouse_wheel::None && vertical_scrollbar().visible())
 			handledVertical = vertical_scrollbar().set_position(vertical_scrollbar().position() + (((verticalSense == mouse_wheel::Vertical ? aDelta.dy : aDelta.dx) >= 0.0 ? -1.0 : 1.0) * vertical_scrollbar().step()));

@@ -20,7 +20,10 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/timer.hpp>
 #include <neolib/lifetime.hpp>
-#include <neogfx/app/app.hpp>
+#include <neolib/thread.hpp>
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/app/action.hpp>
+#include <neogfx/app/event_processing_context.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/header_view.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
@@ -32,7 +35,7 @@ namespace neogfx
 	{
 	public:
 		updater(header_view& aParent) :
-			neolib::callback_timer{ app::instance(), [this, &aParent](neolib::callback_timer&)
+			neolib::callback_timer{ service<neolib::async_task>(), [this, &aParent](neolib::callback_timer&)
 			{
 				neolib::destroyed_flag destroyed{ *this };
 				neolib::destroyed_flag surfaceDestroyed{ aParent.surface().as_lifetime() };
@@ -43,19 +46,19 @@ namespace neogfx
 				}
 				if (iRow == 0)
 					aParent.update_buttons();
-				uint64_t since = app::instance().program_elapsed_ms();
-				app::event_processing_context epc(app::instance(), "neogfx::header_view::updater");
+				uint64_t since = neolib::thread::program_elapsed_ms();
+				event_processing_context epc{ service<neolib::async_task>(), "neogfx::header_view::updater" };
 				graphics_context gc{ aParent, graphics_context::type::Unattached };
 				for (uint32_t c = 0; c < 1000 && iRow < aParent.presentation_model().rows(); ++c, ++iRow)
 				{
 					aParent.update_from_row(iRow, gc);
-					if (c % 25 == 0 && app::instance().program_elapsed_ms() - since > 20)
+					if (c % 25 == 0 && neolib::thread::program_elapsed_ms() - since > 20)
 					{
 						aParent.iOwner.header_view_updated(aParent, header_view_update_reason::FullUpdate);
-						app::instance().process_events(epc);
+						service<i_app>().process_events(epc);
 						if (destroyed || surfaceDestroyed)
 							return;
-						since = app::instance().program_elapsed_ms();
+						since = neolib::thread::program_elapsed_ms();
 					}
 				}
 				if (iRow == aParent.presentation_model().rows())
@@ -351,7 +354,7 @@ namespace neogfx
 
 	void header_view::init()
 	{
-		iSink += app::instance().current_style_changed([this](style_aspect aAspect)
+		iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
 		{
 			if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
 			{

@@ -232,7 +232,7 @@ namespace neogfx
 		FT_Face newFace = open_face(aFaceIndex);
 		try
 		{
-			auto newFontId = service<i_font_manager>::instance().allocate_font_id();
+			auto newFontId = service<i_font_manager>().allocate_font_id();
 			std::shared_ptr<i_native_font_face> newFaceObject(new native_font_face(newFontId, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFace));
 			newFace = 0;
 			auto iterNewFace = iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), std::move(newFaceObject))).first;

@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/menu_item_widget.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/window/popup_menu.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 
 namespace neogfx
 {
@@ -45,7 +45,7 @@ namespace neogfx
 
 	menu_item_widget::~menu_item_widget()
 	{
-		app::instance().remove_mnemonic(*this);
+		service<i_app>().remove_mnemonic(*this);
 		iSubMenuOpener.reset();
 	}
 
@@ -82,8 +82,8 @@ namespace neogfx
 			colour fillColour = background_colour().dark() ? colour::Black : colour::White;
 			if (openSubMenu && menu().type() == i_menu::MenuBar)
 			{
-				if (fillColour.similar_intensity(app::instance().current_style().palette().colour(), 0.05))
-					fillColour = app::instance().current_style().palette().selection_colour();
+				if (fillColour.similar_intensity(service<i_app>().current_style().palette().colour(), 0.05))
+					fillColour = service<i_app>().current_style().palette().selection_colour();
 			}
 			else if (fillColour.similar_intensity(background_colour(), 0.05))
 				fillColour = fillColour.dark() ? fillColour.lighter(0x20) : fillColour.darker(0x20);
@@ -100,7 +100,7 @@ namespace neogfx
 			if (menu_item().type() == i_menu_item::SubMenu && menu().type() == i_menu::Popup)
 			{
 				bool openSubMenu = (menu_item().type() == i_menu_item::SubMenu && menu_item().sub_menu().is_open());
-				colour ink = openSubMenu ? app::instance().current_style().palette().selection_colour()
+				colour ink = openSubMenu ? service<i_app>().current_style().palette().selection_colour()
 					: background_colour().light() ? background_colour().darker(0x80) : background_colour().lighter(0x80);
 				if (iSubMenuArrow == std::nullopt || iSubMenuArrow->first != ink)
 				{
@@ -178,7 +178,7 @@ namespace neogfx
 			widget::background_colour() :
 			parent().has_background_colour() ?
 				parent().background_colour() :
-				app::instance().current_style().palette().colour();
+				service<i_app>().current_style().palette().colour();
 	}
 
 	bool menu_item_widget::can_capture() const
@@ -283,9 +283,9 @@ namespace neogfx
 		{
 			auto m = mnemonic_from_text(iText.text());
 			if (!m.empty())
-				app::instance().add_mnemonic(*this);
+				service<i_app>().add_mnemonic(*this);
 			else
-				app::instance().remove_mnemonic(*this);
+				service<i_app>().remove_mnemonic(*this);
 		};
 		iSink += iText.text_changed(text_updated);
 		text_updated();
@@ -334,7 +334,7 @@ namespace neogfx
 						"00000000000001100000000000000000"
 						"00000000000001100000000000000000"
 					};
-					colour ink = app::instance().current_style().palette().text_colour();
+					colour ink = service<i_app>().current_style().palette().text_colour();
 					iIcon.set_image(!high_dpi() ?
 						image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", colour{} },{ "ink", ink } } } :
 						image{ "neogfx::menu_item_widget::sTickHighDpiPattern::" + ink.to_string(), sTickHighDpiPattern,{ { "paper", colour{} },{ "ink", ink } }, 2.0 });
@@ -371,12 +371,12 @@ namespace neogfx
 		iSink += menu_item().selected([this]()
 		{
 			if (menu_item().type() == i_menu_item::Action)
-				app::instance().help().activate(*this);
+				service<i_app>().help().activate(*this);
 			else if (menu_item().type() == i_menu_item::SubMenu && menu_item().open_any_sub_menu() && menu().type() == i_menu::Popup)
 			{
 				if (!iSubMenuOpener)
 				{
-					iSubMenuOpener = std::make_unique<neolib::callback_timer>(app::instance(), [this](neolib::callback_timer&)
+					iSubMenuOpener = std::make_unique<neolib::callback_timer>(service<neolib::async_task>(), [this](neolib::callback_timer&)
 					{
 						destroyed_flag destroyed{ *this };
 						if (!menu_item().sub_menu().is_open())
@@ -391,7 +391,7 @@ namespace neogfx
 		iSink += menu_item().deselected([this]()
 		{
 			if (menu_item().type() == i_menu_item::Action)
-				app::instance().help().deactivate(*this);
+				service<i_app>().help().deactivate(*this);
 			iSubMenuOpener.reset();
 		});
 	}

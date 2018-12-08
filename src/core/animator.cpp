@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-	template <> i_animator& service<i_animator>::instance() { static animator sAnimator{}; return sAnimator; }
+	template <> i_animator& service<i_animator>() { static animator sAnimator{}; return sAnimator; }
 
 	transition::transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled) :
 		iAnimator{ aAnimator }, iId{ aAnimator.allocate_id() }, iEnabled{ aEnabled }, iDisableWhenFinished{ false }, iEasingFunction{ aEasingFunction }, iDuration{ aDuration }
@@ -151,7 +151,7 @@ namespace neogfx
 	}
 
 	animator::animator() :
-		iTimer { service<neolib::async_task>::instance(), [this](neolib::callback_timer& aTimer)
+		iTimer { service<neolib::async_task>(), [this](neolib::callback_timer& aTimer)
 		{
 			aTimer.again();
 			next_frame();

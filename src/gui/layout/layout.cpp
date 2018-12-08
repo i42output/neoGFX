@@ -18,11 +18,12 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/layout.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
-#include <neogfx/app/app.hpp>
+#include <neogfx/app/i_app.hpp>
 #include "layout.inl"
 
 namespace neogfx
@@ -352,7 +353,7 @@ namespace neogfx
 	{
 		return has_layout_owner() && layout_owner().has_surface() ? 
 			layout_owner().surface().ppi() >= 150.0 : 
-			service<i_surface_manager>::instance().display().metrics().ppi() >= 150.0;
+			service<i_surface_manager>().display().metrics().ppi() >= 150.0;
 	}
 
 	dimension layout::dpi_scale_factor() const
@@ -360,7 +361,7 @@ namespace neogfx
 		return default_dpi_scale_factor(
 			has_layout_owner() && layout_owner().has_surface() ?
 				layout_owner().surface().ppi() : 
-				service<i_surface_manager>::instance().display().metrics().ppi());
+				service<i_surface_manager>().display().metrics().ppi());
 	}
 
 	bool layout::has_margins() const
@@ -370,7 +371,7 @@ namespace neogfx
 
 	margins layout::margins() const
 	{
-		const auto& adjustedMargins = (has_margins() ? *iMargins : app::instance().current_style().margins() * dpi_scale_factor());
+		const auto& adjustedMargins = (has_margins() ? *iMargins : service<i_app>().current_style().margins() * dpi_scale_factor());
 		return units_converter(*this).from_device_units(adjustedMargins);
 	}
 
@@ -392,7 +393,7 @@ namespace neogfx
 
 	size layout::spacing() const
 	{
-		const auto& adjustedSpacing = (has_spacing() ? *iSpacing : app::instance().current_style().spacing() * dpi_scale_factor());
+		const auto& adjustedSpacing = (has_spacing() ? *iSpacing : service<i_app>().current_style().spacing() * dpi_scale_factor());
 		return units_converter(*this).from_device_units(adjustedSpacing);
 	}
 
