@@ -24,7 +24,6 @@
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/app/i_app.hpp>
-#include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
 
 namespace neogfx
@@ -1845,14 +1844,14 @@ namespace neogfx
 					case 1:
 						{
 							auto nextTextAppearance = selected && has_focus() ?
-									text_appearance{ service<i_app>().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
-							text_appearance{
-								std::holds_alternative<colour>(style.text_colour()) ?
-									static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
-										static_variant_cast<const gradient&>(style.text_colour()).at((glyphPos.x - column_rect(column_index(aColumn)).x / column_rect(column_index(aColumn)).width(), iTextExtents.cx)) :
-										default_text_colour(),
-								style.background_colour() != neolib::none ? optional_text_colour{ neogfx::text_colour{ style.background_colour() } } : optional_text_colour{},
-								style.text_effect() };
+								text_appearance{ service<i_app>().current_style().palette().selection_colour().light() ? colour::Black : colour::White } :
+								text_appearance{
+									std::holds_alternative<colour>(style.text_colour()) ?
+										static_variant_cast<const colour&>(style.text_colour()) : std::holds_alternative<gradient>(style.text_colour()) ?
+											static_variant_cast<const gradient&>(style.text_colour()).at(((glyphPos.x - column_rect(column_index(aColumn)).x) / column_rect(column_index(aColumn)).width())) :
+											default_text_colour(),
+									style.background_colour() != neolib::none ? optional_text_colour{ neogfx::text_colour{ style.background_colour() } } : optional_text_colour{},
+									style.text_effect() };
 							if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)
 							{
 								aGraphicsContext.draw_glyph_text(textPos, tGlyphText, *textAppearance);
