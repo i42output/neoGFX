@@ -278,7 +278,7 @@ namespace neogfx
 
 		try
 		{
-			freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), FT_LOAD_TARGET_LCD));
+			freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
 		}
 		catch (freetype_error fe)
 		{
