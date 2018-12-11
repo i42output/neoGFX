@@ -567,7 +567,7 @@ namespace neogfx
 						"	}\n"
 						"	else\n"
 						"	{\n"
-						"		a = texture(glyphTexture, vGlyphTexCoord).a;\n"
+						"		a = texture(glyphTexture, vGlyphTexCoord).r;\n"
 						"		if (a == 0)\n"
 						"			discard;\n"
 						"	}\n"

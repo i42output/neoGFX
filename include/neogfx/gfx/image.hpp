@@ -61,6 +61,7 @@ namespace neogfx
 		dimension dpi_scale_factor() const override;
 		neogfx::colour_format colour_format() const override;
 		texture_sampling sampling() const override;
+		texture_data_format data_format() const override;
 		const neogfx::size& extents() const override;
 		void resize(const neogfx::size& aNewSize) override;
 		colour get_pixel(const point& aPoint) const override;

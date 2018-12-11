@@ -199,6 +199,12 @@ namespace neogfx
 		return iSampling;
 	}
 
+	texture_data_format image::data_format() const
+	{
+		// todo: add support for other data formats
+		return texture_data_format::RGBA;
+	}
+
 	const size& image::extents() const
 	{
 		return iSize;

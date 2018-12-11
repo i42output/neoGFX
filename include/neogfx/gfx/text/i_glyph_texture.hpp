@@ -25,6 +25,19 @@
 
 namespace neogfx
 {
+	enum class glyph_pixel_mode : uint32_t
+	{
+		None,
+		Mono,
+		Gray2Bit,
+		Gray4Bit,
+		Gray8Bit,
+		Gray = Gray8Bit,
+		LCD,
+		LCD_V,
+		BGRA
+	};
+
 	class i_glyph_texture
 	{
 	public:
@@ -33,5 +46,6 @@ namespace neogfx
 		virtual const i_sub_texture& texture() const = 0;
 		virtual bool subpixel() const = 0;
 		virtual const point& placement() const = 0;
+		virtual glyph_pixel_mode pixel_mode() const = 0;
 	};
 }
