@@ -845,6 +845,15 @@ namespace neogfx
 		return std::tie(left.left, left.top, left.right, left.bottom) < std::tie(right.left, right.top, right.right, right.bottom);
 	}
 
+	template <typename CoordinateType>
+	inline basic_rect<CoordinateType> operator-(const basic_rect<CoordinateType>& left, const basic_margins<CoordinateType>& right)
+	{
+		basic_rect<CoordinateType> ret = left;
+		ret.basic_point::operator+=(right.top_left());
+		ret.basic_size::operator-=(right.size());
+		return ret;
+	}
+
 	typedef basic_size<uint32_t> size_u32;
 	typedef basic_delta<uint32_t> delta_u32;
 	typedef basic_point<uint32_t> point_u32;

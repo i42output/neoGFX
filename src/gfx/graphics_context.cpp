@@ -911,11 +911,8 @@ namespace neogfx
 	{
 		try
 		{
-			if (!aGlyph.is_whitespace())
-			{
-				auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-				native_context().enqueue(graphics_operation::draw_glyph{ adjustedPos, aGlyph, aFont.id(), aAppearance });
-			}
+			auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
+			native_context().enqueue(graphics_operation::draw_glyph{ adjustedPos, aGlyph, aFont.id(), aAppearance });
 			if (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic()))
 				draw_glyph_underline(aPoint, aFont, aGlyph, aAppearance);
 		}

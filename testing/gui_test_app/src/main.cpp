@@ -247,12 +247,7 @@ int main(int argc, char* argv[])
 		window.paint_overlay([&showFps, &window, fpsFont](ng::graphics_context& aGc)
 		{
 			if (showFps)
-			{
-				std::ostringstream oss;
-				oss << " " << window.fps() << " FPS ";
-				aGc.fill_rect(ng::rect{ ng::point{ 100, 120 }, aGc.text_extent(oss.str(), fpsFont) }, ng::colour::DarkBlue);
-				aGc.draw_text(ng::point{ 100, 120 }, oss.str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
-			}
+				aGc.draw_text(ng::point{ 100, 120 }, (boost::format(" %1$6.2f FPS ") % window.fps()).str(), fpsFont, ng::text_appearance{ ng::colour::White, ng::colour::DarkBlue.darker(0x40), ng::text_effect{ ng::text_effect_type::Outline, ng::colour::Black } });
 		});
 
 		window.surface().rendering_finished([&fullRefresh, &window]()

@@ -272,37 +272,43 @@ namespace neogfx
 		text_appearance(const InkType& aInk, const PaperType& aPaper, const optional_text_effect& aEffect) :
 			iInk{ aInk },
 			iPaper{ aPaper },
-			iEffect{ aEffect }
+			iEffect{ aEffect },
+			iOnlyCalculateEffect{ false }
 		{
 		}
 		template <typename InkType, typename PaperType>
 		text_appearance(const InkType& aInk, const PaperType& aPaper, const text_effect& aEffect) :
 			iInk{ aInk },
 			iPaper{ aPaper },
-			iEffect{ aEffect }
+			iEffect{ aEffect },
+			iOnlyCalculateEffect{ false }
 		{
 		}
 		template <typename InkType>
 		text_appearance(const InkType& aInk, const optional_text_effect& aEffect) :
 			iInk{ aInk },
-			iEffect{ aEffect }
+			iEffect{ aEffect },
+			iOnlyCalculateEffect{ false }
 		{
 		}
 		template <typename InkType>
 		text_appearance(const InkType& aInk, const text_effect& aEffect) :
 			iInk{ aInk },
-			iEffect{ aEffect }
+			iEffect{ aEffect },
+			iOnlyCalculateEffect{ false }
 		{
 		}
 		template <typename InkType, typename PaperType>
 		text_appearance(const InkType& aInk, const PaperType& aPaper) :
 			iInk{ aInk },
-			iPaper{ aPaper }
+			iPaper{ aPaper },
+			iOnlyCalculateEffect{ false }
 		{
 		}
 		template <typename InkType>
 		text_appearance(const InkType& aInk) :
-			iInk{ aInk }
+			iInk{ aInk },
+			iOnlyCalculateEffect{ false }
 		{
 		}
 	public:
@@ -339,6 +345,10 @@ namespace neogfx
 				return *iEffect;
 			throw no_effect();
 		}
+		bool only_calculate_effect() const
+		{
+			return iOnlyCalculateEffect;
+		}
 	public:
 		text_appearance with_alpha(colour::component aAlpha) const
 		{
@@ -348,10 +358,17 @@ namespace neogfx
 		{
 			return with_alpha(static_cast<colour::component>(aAlpha * 255));
 		}
+		text_appearance with_only_effect_calculation() const
+		{
+			auto copy = *this;
+			copy.iOnlyCalculateEffect = true;
+			return copy;
+		}
 	private:
 		text_colour iInk;
 		optional_text_colour iPaper;
 		optional_text_effect iEffect;
+		bool iOnlyCalculateEffect;
 	};
 
 	typedef std::optional<text_appearance> optional_text_appearance;

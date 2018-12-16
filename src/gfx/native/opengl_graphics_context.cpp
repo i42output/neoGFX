@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/i_emoji_atlas.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
 #include <neogfx/gfx/shapes.hpp>
@@ -30,7 +31,7 @@
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
 #include "opengl_graphics_context.hpp"
-#include "opengl_renderer.hpp" // todo: remove this #include when base class interface abstraction complete
+#include "opengl_vertex_arrays.hpp"
 
 namespace neogfx
 {
@@ -151,302 +152,6 @@ namespace neogfx
 			}
 			return result;
 		}
-
-		struct with_textures_t {} with_textures;
-
-		class use_vertex_arrays_instance
-		{
-		public:
-			struct not_enough_room : std::invalid_argument { not_enough_room() : std::invalid_argument("neogfx::use_vertex_arrays_instance::not_enough_room") {} };
-			struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::use_vertex_arrays_instance::invalid_draw_count") {} };
-			struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::use_vertex_arrays_instance::cannot_use_barrier") {} };
-		public:
-			typedef opengl_standard_vertex_arrays::vertex_array::value_type value_type;
-			typedef opengl_standard_vertex_arrays::vertex_array::const_iterator const_iterator;
-			typedef opengl_standard_vertex_arrays::vertex_array::iterator iterator;
-		public:
-			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-				iParent{ aParent }, 
-				iUse{ aParent.rendering_engine().vertex_arrays() }, 
-				iMode{ aMode }, 
-				iWithTextures{ false }, 
-				iStart{ static_cast<GLint>(vertices().size()) }, 
-				iUseBarrier{ aUseBarrier }
-			{
-				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
-					execute();
-				set_transformation(optional_mat44{});
-				if (!room_for(aNeed))
-					throw not_enough_room();
-			}
-			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-				iParent{ aParent }, 
-				iUse{ aParent.rendering_engine().vertex_arrays() }, 
-				iMode{ aMode }, 
-				iWithTextures{ false }, 
-				iStart{ static_cast<GLint>(vertices().size()) }, 
-				iUseBarrier{ aUseBarrier }
-			{
-				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
-					execute();
-				set_transformation(aTransformation);
-				if (!room_for(aNeed))
-					throw not_enough_room();
-			}
-			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-				iParent{ aParent }, 
-				iUse{ aParent.rendering_engine().vertex_arrays() }, 
-				iMode{ aMode }, 
-				iWithTextures{ true }, 
-				iStart{ static_cast<GLint>(vertices().size()) }, 
-				iUseBarrier{ aUseBarrier }
-			{
-				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(optional_mat44{}))
-					execute();
-				set_transformation(optional_mat44{});
-				if (!room_for(aNeed))
-					throw not_enough_room();
-			}
-			use_vertex_arrays_instance(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
-				iParent{ aParent }, 
-				iUse{ aParent.rendering_engine().vertex_arrays() }, 
-				iMode{ aMode }, 
-				iWithTextures{ true }, 
-				iStart{ static_cast<GLint>(vertices().size()) }, 
-				iUseBarrier{ aUseBarrier }
-			{
-				if (!room_for(aNeed) || aUseBarrier || is_new_transformation(aTransformation))
-					execute();
-				set_transformation(aTransformation);
-				if (!room_for(aNeed))
-					throw not_enough_room();
-			}
-			~use_vertex_arrays_instance()
-			{
-				draw();
-			}
-		public:
-			std::size_t primitive_vertex_count() const
-			{
-				switch (mode())
-				{
-				case GL_TRIANGLES:
-					return 3;
-				case GL_QUADS: // two triangles
-					return 6;
-				case GL_LINES:
-					return 2;
-				case GL_POINTS:
-					return 1;
-				case GL_TRIANGLE_FAN:
-				case GL_LINE_LOOP:
-				case GL_LINE_STRIP:
-				case GL_TRIANGLE_STRIP:
-				default:
-					return 0;
-				}
-			}
-		public:
-			const_iterator begin() const
-			{
-				return vertices().begin() + static_cast<std::size_t>(iStart);
-			}
-			iterator begin()
-			{
-				return vertices().begin() + static_cast<std::size_t>(iStart);
-			}
-			const_iterator end() const
-			{
-				return vertices().end();
-			}
-			iterator end()
-			{
-				return vertices().end();
-			}
-			bool empty() const
-			{
-				return vertices().size() == static_cast<std::size_t>(iStart);
-			}
-			const value_type& operator[](std::size_t aOffset) const
-			{
-				return *(begin() + aOffset);
-			}
-			value_type& operator[](std::size_t aOffset)
-			{
-				return *(begin() + aOffset);
-			}
-		public:
-			void push_back(const value_type& aVertex)
-			{
-				if (!room_for(1))
-					execute();
-				vertices().push_back(aVertex);
-			}
-			template <typename... Args>
-			void emplace_back(Args&&... args)
-			{
-				if (!room_for(1))
-					execute();
-				vertices().emplace_back(std::forward<Args>(args)...);
-			}
-			template <typename Iter>
-			iterator insert(const_iterator aPos, Iter aFirst, Iter aLast)
-			{
-				if (room_for(std::distance(aFirst, aLast)))
-					return vertices().insert(aPos, aFirst, aLast);
-				else
-				{
-					execute();
-					if (!room_for(std::distance(aFirst, aLast)))
-						vertices().reserve(std::distance(aFirst, aLast));
-					return vertices().insert(vertices().begin(), aFirst, aLast);
-				}
-			}
-		public:
-			std::size_t room() const
-			{
-				return vertices().capacity() - vertices().size();
-			}
-			bool room_for(std::size_t aAmount) const
-			{
-				return room() >= aAmount;
-			}
-			void execute()
-			{
-				draw();
-				iUse.execute();
-				iUse.vertices().clear();
-				iStart = 0;
-			}
-			void draw()
-			{
-				draw(vertices().size() - static_cast<std::size_t>(iStart));
-			}
-			void draw(std::size_t aCount, std::size_t aSkipCount = 1u)
-			{
-				aSkipCount = std::max(aSkipCount, 1u);
-				if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
-					throw invalid_draw_count();
-				if (static_cast<std::size_t>(iStart) == vertices().size())
-					return;
-				if (!iWithTextures)
-					iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
-				else
-					iParent.rendering_engine().vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
-				opengl_graphics_context::blend_as ba{ iParent, blending_mode::Default };
-				if (!iUseBarrier && mode() == translated_mode())
-				{
-					glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
-					iStart += aCount;
-				}
-				else
-				{
-					if (iUseBarrier)
-					{
-						glCheck(glTextureBarrier());
-					}
-					auto const pvc = primitive_vertex_count();
-					auto chunk = pvc * aSkipCount;
-					while (aCount > 0)
-					{
-						auto amount = std::min(chunk, aCount);
-						glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(amount)));
-						iStart += amount;
-						aCount -= amount;
-						if (iUseBarrier)
-						{
-							glCheck(glTextureBarrier());
-						}
-					} 
-				}
-			}
-		private:
-			bool is_new_transformation(const optional_mat44& aTransformation) const
-			{
-				return iUse.transformation() != aTransformation;
-			}
-			const optional_mat44& transformation() const
-			{
-				return iUse.transformation();
-			}
-			void set_transformation(const optional_mat44& aTransformation)
-			{
-				iUse.set_transformation(aTransformation);
-			}
-			const opengl_standard_vertex_arrays::vertex_array& vertices() const
-			{
-				return iUse.vertices();
-			}
-			opengl_standard_vertex_arrays::vertex_array& vertices()
-			{
-				return iUse.vertices();
-			}
-			GLenum translated_mode() const
-			{
-				switch (iMode)
-				{
-				case GL_QUADS:
-					return GL_TRIANGLES;
-				default:
-					return iMode;
-				}
-			}
-			GLenum mode() const
-			{
-				return iMode;
-			}
-		private:
-			opengl_graphics_context& iParent;
-			opengl_standard_vertex_arrays::use iUse;
-			GLenum iMode;
-			bool iWithTextures;
-			GLint iStart;
-			bool iUseBarrier;
-		};
-
-		class use_vertex_arrays
-		{
-		public:
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false)
-			{
-				instantiate(aParent, aMode, aNeed, aUseBarrier);
-			}
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false)
-			{
-				instantiate(aParent, aMode, aTransformation, aNeed, aUseBarrier);
-			}
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false)
-			{
-				instantiate(aParent, aMode, with_textures, aNeed, aUseBarrier);
-			}
-			use_vertex_arrays(opengl_graphics_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false)
-			{
-				instantiate(aParent, aMode, aTransformation, with_textures, aNeed, aUseBarrier);
-			}
-			~use_vertex_arrays()
-			{
-			}
-		public:
-			use_vertex_arrays_instance& instance()
-			{
-				return *iInstance;
-			}
-			template <typename... Args>
-			void instantiate(Args&&... args)
-			{
-				thread_local std::weak_ptr<use_vertex_arrays_instance> tInstance;
-				if (tInstance.expired())
-				{
-					iInstance = std::make_shared<use_vertex_arrays_instance>(std::forward<Args>(args)...);
-					tInstance = iInstance;
-				}
-				else
-					iInstance = tInstance.lock();
-			}
-		private:
-			std::shared_ptr<use_vertex_arrays_instance> iInstance;
-
-		};
 	}
 
 	opengl_graphics_context::opengl_graphics_context(const i_render_target& aTarget) :
@@ -1627,131 +1332,164 @@ namespace neogfx
 
 		const i_glyph_texture& firstGlyphTexture = glyph_texture(firstOp);
 
-		auto const glyphCount = aDrawGlyphOps.second - aDrawGlyphOps.first;
+		bool renderEffects = !firstOp.appearance.only_calculate_effect() && firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline;
 
-		auto need = 6u * glyphCount;
-		if (firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline)
-			need += 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * glyphCount;
-
-		bool const useTextureBarrier = firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
-		use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, useTextureBarrier };
-		
-		bool multipass = firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline;
-
-		for (uint32_t pass = (multipass ? 1 : 2); pass <= 2; ++pass)
+		for (uint32_t pass = (renderEffects ? 1 : 2); pass <= 3; ++pass)
 		{
-			auto const scanlineOffsets = (pass == 1 ? static_cast<uint32_t>(firstOp.appearance.effect().width()) * 2u + 1u : 1u);
-			auto const offsets = scanlineOffsets * scanlineOffsets;
-			point const offsetOrigin{ pass == 1 ? -firstOp.appearance.effect().width() : 0.0, pass == 1 ? -firstOp.appearance.effect().width() : 0.0 };
-			for (auto op = skip_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, glyphCount / 2u, offsets }; op != aDrawGlyphOps.second; ++op)
+			switch (pass)
 			{
-				auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
-
-				const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
-				const i_glyph_texture& glyphTexture = glyph_texture(drawOp);
-
-				vec3 glyphOrigin(
-					drawOp.point.x + glyphTexture.placement().x,
-					logical_coordinates().first.y < logical_coordinates().second.y ?
-					drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-					drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
-					drawOp.point.z);
-
-				iTempTextureCoords.clear();
-				texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
-
-				rect outputRect{ point{ glyphOrigin } + offsetOrigin + point{ static_cast<coordinate>((op.pass() - 1u) % scanlineOffsets), static_cast<coordinate>((op.pass() - 1u) / scanlineOffsets) }, glyphTexture.texture().extents() };
-				vertices_t outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
-
-				std::array<uint8_t, 4> passColour;
-
-				if (pass == 1)
+			case 1:
+			case 3:
 				{
-					passColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
-						std::array <uint8_t, 4>{{
-							static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
-							static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green(),
-							static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
-							static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
-						std::array <uint8_t, 4>{};
-				}
-				else if (pass == 2)
-				{
-					passColour = std::holds_alternative<colour>(drawOp.appearance.ink()) ?
-						std::array <uint8_t, 4>{{
-							static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
-							static_variant_cast<const colour&>(drawOp.appearance.ink()).green(),
-							static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
-							static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
-						std::array <uint8_t, 4>{};
-				}
+					auto const glyphCount = std::count_if(aDrawGlyphOps.first, aDrawGlyphOps.second, [](const graphics_operation::operation& op) { return !static_variant_cast<const graphics_operation::draw_glyph&>(op).glyph.is_whitespace(); });
+					auto const need = (pass == 3 ? 6u * glyphCount : 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * glyphCount);
 
-				vertexArrays.instance().push_back({ outputVertices[0], passColour, iTempTextureCoords[0] });
-				vertexArrays.instance().push_back({ outputVertices[2], passColour, iTempTextureCoords[3] });
-				vertexArrays.instance().push_back({ outputVertices[1], passColour, iTempTextureCoords[1] });
-				vertexArrays.instance().push_back({ outputVertices[3], passColour, iTempTextureCoords[1] });
-				vertexArrays.instance().push_back({ outputVertices[4], passColour, iTempTextureCoords[2] });
-				vertexArrays.instance().push_back({ outputVertices[5], passColour, iTempTextureCoords[3] });
+					bool const useTextureBarrier = firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
+					use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, useTextureBarrier };
+
+					auto const scanlineOffsets = (pass == 1 ? static_cast<uint32_t>(firstOp.appearance.effect().width()) * 2u + 1u : 1u);
+					auto const offsets = scanlineOffsets * scanlineOffsets;
+					point const offsetOrigin{ pass == 1 ? -firstOp.appearance.effect().width() : 0.0, pass == 1 ? -firstOp.appearance.effect().width() : 0.0 };
+					for (auto op = skip_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, glyphCount / 2u, offsets }; op != aDrawGlyphOps.second; ++op)
+					{
+						auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+
+						if (drawOp.glyph.is_whitespace())
+							continue;
+
+						const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
+						const i_glyph_texture& glyphTexture = glyph_texture(drawOp);
+
+						vec3 glyphOrigin(
+							drawOp.point.x + glyphTexture.placement().x,
+							logical_coordinates().first.y < logical_coordinates().second.y ?
+							drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
+							drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
+							drawOp.point.z);
+
+						iTempTextureCoords.clear();
+						texture_vertices(glyphTexture.texture().atlas_texture().storage_extents(), rect{ glyphTexture.texture().atlas_location().top_left(), glyphTexture.texture().extents() } +point{ 1.0, 1.0 }, logical_coordinates(), iTempTextureCoords);
+
+						rect outputRect{ point{ glyphOrigin } +offsetOrigin + point{ static_cast<coordinate>((op.pass() - 1u) % scanlineOffsets), static_cast<coordinate>((op.pass() - 1u) / scanlineOffsets) }, glyphTexture.texture().extents() };
+						vertices_t outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
+
+						std::array<uint8_t, 4> passColour;
+
+						if (pass == 1)
+						{
+							passColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
+								std::array <uint8_t, 4>{ {
+										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
+											static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green(),
+											static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
+											static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
+								std::array <uint8_t, 4>{};
+						}
+						else
+						{
+							passColour = std::holds_alternative<colour>(drawOp.appearance.ink()) ?
+								std::array <uint8_t, 4>{ {
+										static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
+											static_variant_cast<const colour&>(drawOp.appearance.ink()).green(),
+											static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
+											static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
+								std::array <uint8_t, 4>{};
+						}
+
+						vertexArrays.instance().push_back({ outputVertices[0], passColour, iTempTextureCoords[0] });
+						vertexArrays.instance().push_back({ outputVertices[2], passColour, iTempTextureCoords[3] });
+						vertexArrays.instance().push_back({ outputVertices[1], passColour, iTempTextureCoords[1] });
+						vertexArrays.instance().push_back({ outputVertices[3], passColour, iTempTextureCoords[1] });
+						vertexArrays.instance().push_back({ outputVertices[4], passColour, iTempTextureCoords[2] });
+						vertexArrays.instance().push_back({ outputVertices[5], passColour, iTempTextureCoords[3] });
+					}
+
+					if (vertexArrays.instance().empty())
+						continue;
+
+					glCheck(glActiveTexture(GL_TEXTURE1));
+					glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
+					glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+					glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+					if (firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())
+					{
+						glCheck(glActiveTexture(GL_TEXTURE2));
+						glCheck(glBindTexture(
+							render_target().target_texture().sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE,
+							reinterpret_cast<GLuint>(render_target().target_texture().native_texture()->handle())));
+						glCheck(glActiveTexture(GL_TEXTURE1));
+					}
+
+					if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
+						gradient_on(
+							static_variant_cast<const gradient&>(firstOp.appearance.ink()),
+							rect{
+								point{
+									vertexArrays.instance()[0].xyz[0],
+									vertexArrays.instance()[0].xyz[1]},
+								point{
+									vertexArrays.instance()[2].xyz[0],
+									vertexArrays.instance()[2].xyz[1]} });
+
+					glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
+
+					disable_anti_alias daa{ *this };
+
+					bool useSubpixelShader = render_target().target_type() == render_target_type::Surface && firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
+
+					use_shader_program usp{ *this, iRenderingEngine, rendering_engine().glyph_shader_program(useSubpixelShader) };
+
+					auto& shader = rendering_engine().active_shader_program();
+
+					rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
+
+					bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
+					shader.set_uniform_variable("guiCoordinates", guiCoordinates);
+					shader.set_uniform_variable("outputExtents", static_cast<float>(render_target().target_extents().cx), static_cast<float>(render_target().target_extents().cy));
+
+					shader.set_uniform_variable("glyphTexture", 1);
+
+					if (useSubpixelShader)
+						shader.set_uniform_variable("outputTexture", 2);
+
+					shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
+
+					vertexArrays.instance().draw(need, glyphCount / 2u);
+					vertexArrays.instance().execute();
+
+					glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
+
+					if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
+						gradient_off();
+				}
+				break;
+			case 2:
+				{
+					thread_local std::vector<graphics_operation::operation> rects;
+					rects.clear();
+					rects.reserve(std::distance(aDrawGlyphOps.first, aDrawGlyphOps.second));
+					for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+					{
+						auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+
+						if (!drawOp.appearance.has_paper())
+							continue;
+
+						const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
+						graphics_operation::fill_rect nextOp{ rect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } }, to_brush(drawOp.appearance.paper()), drawOp.point.z };
+						if (!rects.empty() && !batchable(rects.back(), nextOp))
+						{
+							fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
+							rects.clear();
+						}
+						rects.push_back(nextOp);
+					}
+					if (!rects.empty())
+						fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
+				}
+				break;
 			}
 		}
-
-		if (vertexArrays.instance().empty())
-			return;
-
-		glCheck(glActiveTexture(GL_TEXTURE1));
-		glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &iPreviousTexture));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		if (firstOp.glyph.subpixel() && firstGlyphTexture.subpixel())
-		{
-			glCheck(glActiveTexture(GL_TEXTURE2));
-			glCheck(glBindTexture(
-				render_target().target_texture().sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, 
-				reinterpret_cast<GLuint>(render_target().target_texture().native_texture()->handle())));
-			glCheck(glActiveTexture(GL_TEXTURE1));
-		}
-
-		if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
-			gradient_on(
-				static_variant_cast<const gradient&>(firstOp.appearance.ink()), 
-				rect{ 
-					point{ 
-						vertexArrays.instance()[0].xyz[0], 
-						vertexArrays.instance()[0].xyz[1]}, 
-					point{
-						vertexArrays.instance()[2].xyz[0],
-						vertexArrays.instance()[2].xyz[1]}});
-
-		glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(firstGlyphTexture.texture().native_texture()->handle())));
-
-		disable_anti_alias daa{ *this };
-
-		bool useSubpixelShader = render_target().target_type() == render_target_type::Surface && firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
-
-		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().glyph_shader_program(useSubpixelShader)};
-
-		auto& shader = rendering_engine().active_shader_program();
-
-		rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
-
-		bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
-		shader.set_uniform_variable("guiCoordinates", guiCoordinates);
-		shader.set_uniform_variable("outputExtents", static_cast<float>(render_target().target_extents().cx), static_cast<float>(render_target().target_extents().cy));
-			
-		shader.set_uniform_variable("glyphTexture", 1);
-
-		if (useSubpixelShader)
-			shader.set_uniform_variable("outputTexture", 2);
-
-		shader.set_uniform_variable("subpixel", static_cast<int>(firstGlyphTexture.subpixel()));
-
-		vertexArrays.instance().draw(need, glyphCount / 2u);
-		vertexArrays.instance().execute();
-
-		glCheck(glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(iPreviousTexture)));
-
-		if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
-			gradient_off();
 	}
 
 	bool opengl_graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, shader_effect aShaderEffect)

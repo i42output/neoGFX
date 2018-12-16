@@ -518,15 +518,16 @@ namespace neogfx
 		void set_tab_stop_hint(const std::string& aTabStopHint = "0000");
 		void set_tab_stops(const optional_dimension& aTabStops);
 	public:
-		position_type document_hit_test(const point& aPoint, bool aAdjustForScrollPosition = true) const;
+		position_type document_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
 		virtual bool same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const;
 		virtual std::pair<position_type, position_type> word_at(position_type aTextPosition) const;
 	public:
 		neogfx::cursor& cursor() const;
-		void set_cursor_position(const point& aPoint, bool aMoveAnchor = true, bool aEnableDragger = false);
+		void set_cursor_position(const point& aPosition, bool aMoveAnchor = true, bool aEnableDragger = false);
 	protected:
 		std::size_t column_index(const column_info& aColumn) const;
 		rect column_rect(std::size_t aColumnIndex, bool aIncludeMargins = false) const;
+		std::size_t column_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
 	private:
 		struct position_info
 		{
@@ -559,7 +560,7 @@ namespace neogfx
 		void update_cursor();
 		void make_cursor_visible(bool aForcePreviewScroll = false);
 		style glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const;
-		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPoint, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
+		void draw_glyphs(const graphics_context& aGraphicsContext, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
 		void draw_cursor(const graphics_context& aGraphicsContext) const;
 		rect cursor_rect() const;
 		static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
