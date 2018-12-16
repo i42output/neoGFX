@@ -25,6 +25,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/async_thread.hpp>
 
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/event_processing_context.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/style.hpp>

@@ -994,7 +994,7 @@ namespace neogfx
 
 	std::size_t text_edit::column_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
 	{
-		auto ajustedPosition = (aAdjustForScrollPosition ? aPosition - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition);
+		auto ajustedPosition = (aAdjustForScrollPosition ? aPosition + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition);
 		for (std::size_t ci = 0; ci < columns(); ++ci)
 			if (column_rect(ci).contains(ajustedPosition))
 				return ci;
@@ -1112,7 +1112,7 @@ namespace neogfx
 		auto columnIndex = column_hit_test(aPosition, aAdjustForScrollPosition);
 		auto const& column = static_cast<const glyph_column&>(text_edit::column(columnIndex));
 		auto const& columnRectSansMargins = column_rect(columnIndex);
-		point adjustedPosition = (aAdjustForScrollPosition ? aPosition - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition) - columnRectSansMargins.top_left();
+		point adjustedPosition = (aAdjustForScrollPosition ? aPosition + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition) - columnRectSansMargins.top_left();
 		adjustedPosition = adjustedPosition.max(point{});
 		auto const& lines = column.lines();
 		auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, adjustedPosition.y, {} },

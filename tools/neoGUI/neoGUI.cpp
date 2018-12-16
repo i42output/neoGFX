@@ -17,8 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neogfx/app/app.hpp>
+#include <neogfx/neogfx.hpp>
 #include <fstream>
+#include <neogfx/app/app.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -36,11 +38,11 @@ int main(int argc, char* argv[])
 	ng::app app(argc, argv, "neoGFX GUI Designer (neoGUI)");
 	try
 	{
-		app.rendering_engine().subpixel_rendering_on();
+		ng::service<ng::i_rendering_engine>().subpixel_rendering_on();
 		app.current_style().palette().set_colour(ng::colour{ 64, 64, 64 });
 		app.current_style().set_spacing(ng::size{ 4.0 });
 
-		ng::window mainWindow{ app.basic_services().display().desktop_rect() * ng::size{ 0.5, 0.5 } };
+		ng::window mainWindow{ ng::service<ng::i_basic_services>().display().desktop_rect() * ng::size{ 0.5, 0.5 } };
 		ng::i_layout& mainLayout = mainWindow.client_layout();
 		mainLayout.set_margins(ng::margins{});
 		mainLayout.set_spacing(ng::size{});
@@ -100,14 +102,14 @@ int main(int argc, char* argv[])
 	{
 		app.halt();
 		std::cerr << "neoGUI: terminating with exception: " << e.what() << std::endl;
-		app.surface_manager().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
+		ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
 		std::exit(EXIT_FAILURE);
 	}
 	catch (...)
 	{
 		app.halt();
 		std::cerr << "neoGUI: terminating with unknown exception" << std::endl;
-		app.surface_manager().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
+		ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
 		std::exit(EXIT_FAILURE);
 	}
 }
