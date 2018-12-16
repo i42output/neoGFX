@@ -1823,7 +1823,7 @@ namespace neogfx
 				auto const& glyph = *i;
 				auto const& style = glyph_style(i, aColumn);
 				auto const& glyphFont = glyph.font(iGlyphs);
-				auto nextTextAppearance = selected && has_focus() ?
+				auto nextTextAppearance = selected ?
 					text_appearance{ 
 						service<i_app>().current_style().palette().selection_colour().light() ? colour::Black : colour::White,
 						has_focus() ? service<i_app>().current_style().palette().selection_colour() : service<i_app>().current_style().palette().selection_colour().with_alpha(64) } :
