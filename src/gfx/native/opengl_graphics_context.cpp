@@ -1313,6 +1313,8 @@ namespace neogfx
 		if (firstOp.glyph.is_emoji())
 		{
 			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+			if (firstOp.appearance.has_paper())
+				fill_rect(rect{ point{ firstOp.point }, glyph_extents(firstOp) }, to_brush(firstOp.appearance.paper()), firstOp.point.z);
 			auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
 			auto const& emojiTexture = emojiAtlas.emoji_texture(firstOp.glyph.value()).as_sub_texture();
 			draw_mesh(
