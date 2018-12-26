@@ -96,7 +96,7 @@ namespace video_poker
 	{
 		typedef basic_card<GameTraits> card_type;
 
-		std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<typename card_type::value, uint32_t>>> valueCounter;
+		std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<const typename card_type::value, uint32_t>>> valueCounter;
 		for (uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
 			++valueCounter[aHand.card_at(cardIndex)];
 
@@ -174,7 +174,7 @@ namespace video_poker
 	inline typename basic_card<GameTraits>::value most_frequent_card(const basic_hand<GameTraits>& aHand)
 	{
 		typedef basic_card<GameTraits> card_type;
-		std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<typename card_type::value, uint32_t>>> valueCounter;
+		std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<const typename card_type::value, uint32_t>>> valueCounter;
 		for (uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
 			++valueCounter[aHand.card_at(cardIndex)];
 		std::pair<typename card_type::value, uint32_t> mostFrequent;

@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <neogfx/neogfx.hpp>
 #include <map>
 #include <unordered_map>
 #include <set>
@@ -57,7 +58,7 @@ namespace video_poker
 		const i_card_textures& iCardTextures;
 		neogfx::sink iSink;
 		video_poker::card* iCard;
-		std::shared_ptr<neogfx::i_sprite> iCardSprite;
+		neogfx::game::entity_id iCardSprite;
 	};
 
 	class card_space : neogfx::widget

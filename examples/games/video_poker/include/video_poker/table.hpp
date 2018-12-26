@@ -40,12 +40,15 @@ namespace video_poker
 {
 	using namespace neogames::card_games;
 
+	class outcome;
+
 	class table : public neogfx::widget, public i_table, private i_card_textures
 	{
 	private:
 		typedef std::shared_ptr<card_space> card_space_pointer;
 	public:
 		table(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas);
+		~table();
 	public:
 		table_state state() const override;
 	public:
@@ -92,5 +95,6 @@ namespace video_poker
 		std::map<card::value, neogfx::sub_texture> iValueTextures;
 		std::map<card::suit, neogfx::sub_texture> iSuitTextures;
 		std::map<card::value, neogfx::sub_texture> iFaceTextures;
+		std::unique_ptr<outcome> iOutcome;
 	};
 }

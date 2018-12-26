@@ -175,8 +175,6 @@ namespace neogfx
 
 		SDL_SetWindowFullscreen(iHandle, SDL_WINDOW_FULLSCREEN);
 
-		glCheck();
-
 		iReady = true;
 	}
 
@@ -213,8 +211,6 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
-		glCheck();
-
 		iReady = true;
 	}
 
@@ -250,8 +246,6 @@ namespace neogfx
 
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-		glCheck();
 
 		iReady = true;
 	}
@@ -327,8 +321,6 @@ namespace neogfx
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
 
-		glCheck();
-
 		iReady = true;
 	}
 
@@ -364,8 +356,6 @@ namespace neogfx
 
 		if ((aStyle & window_style::InitiallyHidden) != window_style::InitiallyHidden)
 			show((aStyle & window_style::NoActivate) != window_style::NoActivate);
-
-		glCheck();
 
 		iReady = true;
 	}

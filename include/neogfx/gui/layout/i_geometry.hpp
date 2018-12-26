@@ -33,7 +33,7 @@ namespace neogfx
 			Minimum,
 			Maximum,
 			Expanding,
-			ExpandingPixelPerfect, // leftover pixels (bits) are unwanted to ensure siblings are the same (pixel perfect) size after weighting
+			ExpandingPixelPerfect, // leftover pixels are unwanted to ensure siblings are the same (pixel perfect) size after weighting
 			Manual
 		};
 	public:

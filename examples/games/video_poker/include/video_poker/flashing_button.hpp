@@ -30,11 +30,11 @@ namespace video_poker
 		flashing_button(neogfx::i_layout& aLayout, const std::string aText) :
 			push_button{ aLayout, aText }
 		{
-			neogfx::app::instance().rendering_engine().register_frame_counter(*this, 250);
+			neogfx::service<neogfx::i_rendering_engine>().register_frame_counter(*this, 250);
 		}
 		~flashing_button()
 		{
-			neogfx::app::instance().rendering_engine().unregister_frame_counter(*this, 250);
+			neogfx::service<neogfx::i_rendering_engine>().unregister_frame_counter(*this, 250);
 		}
 	public:
 		neogfx::colour animation_colour() const override
@@ -42,7 +42,7 @@ namespace video_poker
 			neogfx::colour faceColour = push_button::animation_colour();
 			faceColour = faceColour.with_lightness(
 				effectively_enabled() && 
-				(push_button::is_checked() || neogfx::app::instance().rendering_engine().frame_counter(250) % 2 == 1) ? 0.9 : 0.5);
+				(push_button::is_checked() || neogfx::service<neogfx::i_rendering_engine>().frame_counter(250) % 2 == 1) ? 0.9 : 0.5);
 			return faceColour;
 		}
 	private:

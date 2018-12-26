@@ -924,7 +924,7 @@ namespace neogfx
 			gradient_on(gradient, rect{ aCentre - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
 		}
 
-		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, mesh_type::Outline));
+		auto vertices = line_loop_to_lines(arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::Outline));
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
@@ -1109,10 +1109,11 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), aRect);
 
-		auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::TriangleFan);
+		auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::Triangles);
 		
 		{
-			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };
+			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLES, vertices.size() };
+
 			for (const auto& v : vertices)
 			{
 				vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
@@ -1121,7 +1122,7 @@ namespace neogfx
 						static_variant_cast<const colour&>(aFill).green(),
 						static_variant_cast<const colour&>(aFill).blue(),
 						static_variant_cast<const colour&>(aFill).alpha()}} :
-					std::array <uint8_t, 4>{}});
+					std::array <uint8_t, 4>{}}); 
 			}
 		}
 
@@ -1159,7 +1160,7 @@ namespace neogfx
 		if (std::holds_alternative<gradient>(aFill))
 			gradient_on(static_variant_cast<const gradient&>(aFill), rect{ aCentre - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
 
-		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, mesh_type::TriangleFan);
+		auto vertices = arc_vertices(aCentre, aRadius, aStartAngle, aEndAngle, aCentre, mesh_type::TriangleFan);
 
 		{
 			use_vertex_arrays vertexArrays{ *this, GL_TRIANGLE_FAN, vertices.size() };

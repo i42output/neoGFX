@@ -38,8 +38,8 @@ namespace neogfx::game
 		template <typename Data>
 		struct crack_component_data
 		{
-			typedef Data data_type;
-			typedef Data value_type;
+			typedef std::remove_cv_t<std::remove_reference_t<Data>> data_type;
+			typedef data_type value_type;
 			typedef std::vector<value_type> container_type;
 			static constexpr bool optional = false;
 		};
@@ -47,7 +47,7 @@ namespace neogfx::game
 		template <typename Data>
 		struct crack_component_data<std::optional<Data>>
 		{
-			typedef Data data_type;
+			typedef std::remove_cv_t<std::remove_reference_t<Data>> data_type;
 			typedef std::optional<data_type> value_type;
 			typedef std::vector<value_type> container_type;
 			static constexpr bool optional = true;
@@ -56,7 +56,7 @@ namespace neogfx::game
 		template <typename Data>
 		struct crack_component_data<shared<Data>>
 		{
-			typedef Data data_type;
+			typedef std::remove_cv_t<std::remove_reference_t<Data>> data_type;
 			typedef data_type mapped_type;
 			typedef std::pair<const std::string, mapped_type> value_type;
 			typedef std::unordered_map<std::string, mapped_type> container_type;
@@ -66,7 +66,7 @@ namespace neogfx::game
 		template <typename Data>
 		struct crack_component_data<shared<std::optional<Data>>>
 		{
-			typedef Data data_type;
+			typedef std::remove_cv_t<std::remove_reference_t<Data>> data_type;
 			typedef std::optional<data_type> mapped_type;
 			typedef std::pair<const std::string, mapped_type> value_type;
 			typedef std::unordered_map<std::string, mapped_type> container_type;

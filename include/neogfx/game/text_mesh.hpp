@@ -24,6 +24,7 @@
 #include <neogfx/game/entity.hpp>
 #include <neogfx/game/renderable_entity_archetype.hpp>
 #include <neogfx/gfx/shapes.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/font.hpp>
 
@@ -127,24 +128,28 @@ namespace neogfx::game
 			static constexpr bool has_updater = true;
 			static void update(const text_mesh& aData, i_ecs& aEcs, entity_id aEntity)
 			{
-				auto& m = aEcs.component<mesh>().has_entity_record(aEntity) ?
-					aEcs.component<mesh>().entity_record(aEntity) :
-					aEcs.component<mesh>().populate(aEntity, mesh
+				auto& m = aEcs.component<mesh_filter>().has_entity_record(aEntity) ?
+					aEcs.component<mesh_filter>().entity_record(aEntity) :
+					aEcs.component<mesh_filter>().populate(aEntity, mesh_filter
 						{
 							{},
-						{
-							vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
-							vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }
-						},
-						{
-							face{ 0u, 1u, 2u },
-							face{ 3u, 4u, 5u }
-						}
+							mesh
+							{
+								{},
+								{
+									vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
+									vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }
+								},
+								{
+									face{ 0u, 1u, 2u },
+									face{ 3u, 4u, 5u }
+								}
+							},
+							{}
 						});
-				m.vertices = rect_vertices(rect{ point{ aData.position }, size{ aData.extents } }, 0, mesh_type::Triangles);
-				for (auto& v : m.vertices)
+				m.mesh->vertices = rect_vertices(rect{ point{ aData.position }, size{ aData.extents } }, 0, mesh_type::Triangles);
+				for (auto& v : m.mesh->vertices)
 					v.z = aData.position.z;
-				aEcs.component<mesh>().populate(aEntity, m);
 			}
 		};
 	};

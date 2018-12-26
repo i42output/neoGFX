@@ -96,4 +96,12 @@ namespace neogfx::game
 		}
 		return rect{ topLeft, bottomRight };
 	}
+
+	inline faces_t default_faces(const vertices_t& aVertices)
+	{
+		faces_t faces;
+		for (std::size_t i = 0; i < aVertices.size(); i += 3)
+			faces.push_back(face{ i, i + 1u, i + 2u });
+		return faces;
+	}
 }

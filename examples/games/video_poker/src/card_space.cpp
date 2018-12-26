@@ -26,15 +26,16 @@ namespace video_poker
 		widget{ aLayout },
 		iCanvas{ aCanvas },
 		iCardTextures{ aCardTextures },
-		iCard{ nullptr }
+		iCard{ nullptr },
+		iCardSprite{ neogfx::game::null_entity }
 	{
 		set_margins(neogfx::margins{});
 		set_size_policy(neogfx::size_policy::Expanding, kBridgeCardSize);
 		set_ignore_mouse_events(true);
 		iCanvas.layout_completed([this]() { update_sprite_geometry(); });
-		iCanvas.object_clicked([this](neogfx::i_game_object& aObject)
+		iCanvas.entity_clicked([this](neogfx::game::entity_id aEntity)
 		{ 
-			if (&aObject.as_shape() == &*iCardSprite) 
+			if (aEntity == iCardSprite)
 				toggle_hold(); 
 		});
 	}
@@ -74,37 +75,39 @@ namespace video_poker
 	void card_widget::set_card(video_poker::card& aCard)
 	{
 		iCard = &aCard;
-		iSink += card().changed([this](video_poker::card&) { update_sprite_geometry();  update(); });
-		if (iCardSprite != nullptr)
-			iCardSprite->kill();
-		iCardSprite = std::make_shared<card_sprite>(iCardTextures, aCard);
-		iCanvas.add_sprite(iCardSprite);
+		iSink += card().changed([this](video_poker::card&) { update_sprite_geometry();  iCanvas.update(); });
+		if (iCardSprite != neogfx::game::null_entity)
+			iCanvas.ecs().destroy_entity(iCardSprite);
+		iCardSprite = create_card_sprite(iCanvas.ecs(), iCardTextures, aCard);
 		update_sprite_geometry();
-		update();
+		iCanvas.update();
 	}
 
 	void card_widget::clear_card()
 	{
 		iCard = nullptr;
-		if (iCardSprite != nullptr)
+		if (iCardSprite != neogfx::game::null_entity)
 		{
-			iCardSprite->kill();
-			iCardSprite = nullptr;
+			iCanvas.ecs().destroy_entity(iCardSprite);
+			iCardSprite = neogfx::game::null_entity;
 		}
-		update();
+		iCanvas.update();
 	}
 
 	void card_widget::update_sprite_geometry()
 	{
-		if (iCardSprite != nullptr)
+		if (iCardSprite != neogfx::game::null_entity)
 		{
 			auto xy = iCanvas.to_client_coordinates(to_window_coordinates(client_rect().centre()));
 			if (iCard->discarded())
 				xy += neogfx::point{ -8.0, -16.0 };
-			iCardSprite->set_position(neogfx::vec3{ xy.x, xy.y, 0.9 });
-			iCardSprite->set_extents(extents());
-			iSpritePlane.update();
-			update();
+			auto& meshFilter = iCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(iCardSprite);
+			meshFilter.transformation = neogfx::mat44{ 
+				{ extents().cx, 0.0, 0.0, 0.0 },
+				{ 0.0, extents().cy * kBridgeCardSize.cx / kBridgeCardSize.cy, 0.0, 0.0 },
+				{ 0.0, 0.0, 1.0, 0.0 },
+				{ xy.x, xy.y, 0.9, 1.0 } };
+			iCanvas.update();
 		}
 	}
 
@@ -124,17 +127,17 @@ namespace video_poker
 		iCanvas{ aCanvas },
 		iTable{ aTable },
 		iVerticalLayout{ *this, neogfx::alignment::Centre | neogfx::alignment::VCentre },
-		iCardWidget{ iVerticalLayout, aSpritePlane, aTable.textures() },
+		iCardWidget{ iVerticalLayout, aCanvas, aTable.textures() },
 		iHoldButton{ iVerticalLayout, u8"HOLD\n CANCEL " },
 		iCard{ nullptr }
 	{
-		set_size_policy(neogfx::size_policy::ExpandingNoBits);
+		set_size_policy(neogfx::size_policy::ExpandingPixelPerfect);
 		iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
 		set_ignore_mouse_events(true);
 		iHoldButton.set_size_policy(neogfx::size_policy::Minimum);
 		iHoldButton.set_foreground_colour(neogfx::colour::Black);
 		iHoldButton.text().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
-		iHoldButton.text().set_text_appearance(neogfx::text_appearance{ neogfx::colour::White, neogfx::text_effect{ neogfx::text_effect::Outline, neogfx::colour::Black.with_alpha(128) } });
+		iHoldButton.text().set_text_appearance(neogfx::text_appearance{ neogfx::colour::White, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::colour::Black.with_alpha(128) } });
 		iHoldButton.set_checkable();
 		auto update_hold = [this]() 
 		{ 

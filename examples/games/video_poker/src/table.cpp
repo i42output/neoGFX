@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
-#include <neogfx/game/text.hpp>
+#include <neogfx/game/rigid_body.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/text_mesh.hpp>
 #include <video_poker/table.hpp>
 #include <video_poker/poker.hpp>
 
@@ -43,44 +45,22 @@ namespace video_poker
 		{ RoyalFlush, 250 }
 	};
 
-	/*
-
-	class outcome : public neogfx::text
+	class outcome : public neogfx::game::shape::text
 	{
 	public:
-		outcome(neogfx::sprite_plane& aParent, const std::string& aOutcome, const neogfx::colour& aColour) :
-			text{
-				aParent,
+		outcome(neogfx::game::canvas& aCanvas, const std::string& aOutcome, const neogfx::colour& aColour) :
+			neogfx::game::shape::text{
+				aCanvas.ecs(),
 				neogfx::vec3{},
 				aOutcome,
 				neogfx::font{ "Exo 2", "Black", 48.0 },
-				neogfx::text_appearance{aColour, neogfx::text_effect{ neogfx::text_effect::Outline, neogfx::colour::Black } },
-				neogfx::alignment::Centre},
-			iParent{ aParent }
+				neogfx::text_appearance{aColour, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::colour::Black } },
+				neogfx::alignment::Centre}
 		{
-			update(neogfx::from_step_time(*iParent.physics_time()));
+			aCanvas.ecs().populate(id(), neogfx::game::mesh_renderer{ {}, {}, true }, neogfx::game::rigid_body{ {}, 1.0, neogfx::vec3{ 0.0, 0.5, 0.0} });
 		}
-	private:
-		bool update(time_interval aUpdateTime) override
-		{
-			if (iStartTime == boost::none)
-				iStartTime = aUpdateTime;
-			auto elapsed = aUpdateTime - *iStartTime;
-			elapsed /= 2.0;
-			set_position(neogfx::vec3{
-				(iParent.extents().cx - extents()[0]) / 2.0,
-				iParent.extents().cy - (iParent.extents().cy * elapsed),
-				1.0 });
-			set_appearance(appearance().with_alpha(elapsed < 0.75 ? 1.0 : (1.0 - elapsed) * 4.0));
-			if (elapsed >= 1.0)
-				kill();
-			return true;
-		}
-	private:
-		neogfx::sprite_plane& iParent;
-		boost::optional<time_interval> iStartTime;
 	};
-	*/
+	
 	table::table(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas) :
 		neogfx::widget{ aLayout },
 		iState{ table_state::TakeBet },
@@ -149,7 +129,7 @@ namespace video_poker
 		iBetMax.clicked([this]() { bet(MAX_BET); });
 		iDeal.clicked([this]() { deal(); });
 
-		iTextures = neogfx::app::instance().rendering_engine().texture_manager().create_texture_atlas();
+		iTextures = neogfx::service<neogfx::i_rendering_engine>().texture_manager().create_texture_atlas();
 		auto& valueTextures = iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/values.png" });
 		iValueTextures.emplace(card::value::Joker, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position(), neogfx::size{36.0, 36.0} } });
 		for (auto v = card::value::Two; v <= card::value::Ace; v = static_cast<card::value>(static_cast<uint32_t>(v) + 1))
@@ -162,6 +142,10 @@ namespace video_poker
 		iFaceTextures.emplace(card::value::Queen, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/queen.png" }));
 		iFaceTextures.emplace(card::value::King, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/king.png" }));
 		update_widgets();
+	}
+
+	table::~table()
+	{
 	}
 
 	table_state table::state() const
@@ -241,19 +225,19 @@ namespace video_poker
 
 	void table::win(int32_t aWinnings)
 	{
-		iCanvas.add_shape(std::make_shared<outcome>(
+		iOutcome = std::make_unique<outcome>(
 			iCanvas, 
 			to_string(video_poker::to_poker_hand(*iHand)) + u8"\nWIN £" + boost::lexical_cast<std::string>(aWinnings) + "!",
-			neogfx::colour::Goldenrod.with_lightness(0.8)));
+			neogfx::colour::Goldenrod.with_lightness(0.8));
 		iCredits += aWinnings;
 	}
 
 	void table::no_win()
 	{
-		iCanvas.add_shape(std::make_shared<outcome>(
+		iOutcome = std::make_unique<outcome>(
 			iCanvas,
 			"No Win",
-			neogfx::colour::Blue.with_lightness(0.8)));
+			neogfx::colour::Blue.with_lightness(0.8));
 	}
 
 	void table::change_state(table_state aNewState)

@@ -57,6 +57,9 @@ namespace neogfx::game
 		return aLhs = static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}
 
+	template<class _Ty>
+	using ecs_data_type_t = std::remove_cv_t<std::remove_reference_t<_Ty>>;
+
 	class i_ecs : public virtual i_object
 	{
 	public:
@@ -166,7 +169,7 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void populate(entity_id aEntity, ComponentData&& aComponentData)
 		{
-			component<ComponentData>().populate(aEntity, std::forward<ComponentData>(aComponentData));
+			component<ecs_data_type_t<ComponentData>>().populate(aEntity, std::forward<ComponentData>(aComponentData));
 		}
 		template <typename ComponentData, typename... ComponentDataRest>
 		void populate_shared(const std::string& aName, ComponentData&& aComponentData, ComponentDataRest&&... aComponentDataRest)
@@ -177,91 +180,91 @@ namespace neogfx::game
 		template <typename ComponentData>
 		void populate_shared(const std::string& aName, ComponentData&& aComponentData)
 		{
-			shared_component<ComponentData>().populate(aName, std::forward<ComponentData>(aComponentData));
+			shared_component<ecs_data_type_t<ComponentData>>().populate(aName, std::forward<ComponentData>(aComponentData));
 		}
 		template <typename ComponentData>
 		bool component_instantiated() const
 		{
-			return component_instantiated(ComponentData::meta::id());
+			return component_instantiated(ecs_data_type_t<ComponentData>::meta::id());
 		}
 		template <typename ComponentData>
 		const static_component<ComponentData>& component() const
 		{
-			return static_cast<const static_component<ComponentData>&>(component(ComponentData::meta::id()));
+			return static_cast<const static_component<ecs_data_type_t<ComponentData>>&>(component(ecs_data_type_t<ComponentData>::meta::id()));
 		}
 		template <typename ComponentData>
 		static_component<ComponentData>& component()
 		{
-			if (!component_registered<ComponentData>())
-				register_component<ComponentData>();
-			return const_cast<static_component<ComponentData>&>(const_cast<const i_ecs*>(this)->component<ComponentData>());
+			if (!component_registered<ecs_data_type_t<ComponentData>>())
+				register_component<ecs_data_type_t<ComponentData>>();
+			return const_cast<static_component<ecs_data_type_t<ComponentData>>&>(const_cast<const i_ecs*>(this)->component<ecs_data_type_t<ComponentData>>());
 		}
 		template <typename ComponentData>
 		bool shared_component_instantiated() const
 		{
-			return shared_component_instantiated(ComponentData::meta::id());
+			return shared_component_instantiated(ecs_data_type_t<ComponentData>::meta::id());
 		}
 		template <typename ComponentData>
 		const static_shared_component<ComponentData>& shared_component() const
 		{
-			return static_cast<const static_shared_component<ComponentData>&>(shared_component(ComponentData::meta::id()));
+			return static_cast<const static_shared_component<ecs_data_type_t<ComponentData>>&>(shared_component(ComponentData::meta::id()));
 		}
 		template <typename ComponentData>
 		static_shared_component<ComponentData>& shared_component()
 		{
-			if (!shared_component_registered<ComponentData>())
-				register_shared_component<ComponentData>();
-			return const_cast<static_shared_component<ComponentData>&>(const_cast<const i_ecs*>(this)->shared_component<ComponentData>());
+			if (!shared_component_registered<ecs_data_type_t<ComponentData>>())
+				register_shared_component<ecs_data_type_t<ComponentData>>();
+			return const_cast<static_shared_component<ecs_data_type_t<ComponentData>>&>(const_cast<const i_ecs*>(this)->shared_component<ecs_data_type_t<ComponentData>>());
 		}
 		template <typename System>
 		bool system_instantiated() const
 		{
-			return system_instantiated(System::meta::id());
+			return system_instantiated(ecs_data_type_t<System>::meta::id());
 		}
 		template <typename System>
-		const System& system() const
+		const ecs_data_type_t<System>& system() const
 		{
-			return static_cast<const System&>(system(System::meta::id()));
+			return static_cast<const ecs_data_type_t<System>&>(system(ecs_data_type_t<System>::meta::id()));
 		}
 		template <typename System>
-		System& system()
+		ecs_data_type_t<System>& system()
 		{
-			if (!system_registered<System>())
-				register_system<System>();
-			return const_cast<System&>(const_cast<const i_ecs*>(this)->system<System>());
+			if (!system_registered<ecs_data_type_t<System>>())
+				register_system<ecs_data_type_t<System>>();
+			return const_cast<ecs_data_type_t<System>&>(const_cast<const i_ecs*>(this)->system<ecs_data_type_t<System>>());
 		}
 	public:
 		template <typename ComponentData>
 		bool component_registered() const
 		{
-			return component_registered(ComponentData::meta::id());
+			return component_registered(ecs_data_type_t<ComponentData>::meta::id());
 		}
 		template <typename ComponentData>
 		void register_component()
 		{
-			register_component(ComponentData::meta::id(), [&]() { return std::unique_ptr<i_component>{std::make_unique<static_component<ComponentData>>(*this)}; });
+			register_component(ecs_data_type_t<ComponentData>::meta::id(), [&]() { return std::unique_ptr<i_component>{std::make_unique<static_component<ecs_data_type_t<ComponentData>>>(*this)}; });
 		}
 		template <typename ComponentData>
 		bool shared_component_registered() const
 		{
-			return shared_component_registered(ComponentData::meta::id());
+			return shared_component_registered(ecs_data_type_t<ComponentData>::meta::id());
 		}
 		template <typename ComponentData>
 		void register_shared_component()
 		{
-			register_shared_component(ComponentData::meta::id(), [&]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ComponentData>>(*this)}; });
+			register_shared_component(ecs_data_type_t<ComponentData>::meta::id(), [&]() { return std::unique_ptr<i_shared_component>{std::make_unique<static_shared_component<ecs_data_type_t<ComponentData>>>(*this)}; });
 		}
 		template <typename System>
 		bool system_registered() const
 		{
-			return system_registered(System::meta::id());
+			return system_registered(ecs_data_type_t<System>::meta::id());
 		}
 		template <typename System>
 		void register_system()
 		{
 			register_system(
-				System::meta::id(),
-				[&]() { return std::unique_ptr<i_system>{std::make_unique<System>(*this)}; });
+				ecs_data_type_t<System>::meta::id(),
+				[&]() { return std::unique_ptr<i_system>{std::make_unique<ecs_data_type_t<System>>(*this)}; });
 		}
 	public:
 		template <typename Handle>

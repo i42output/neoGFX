@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/game/i_ecs.hpp>
-#include <neogfx/core/shapes.hpp>
+#include <neogfx/game/mesh_filter.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/standard_archetypes.hpp>
+#include <neogfx/game/ecs_helpers.hpp>
+#include <neogfx/gfx/shapes.hpp>
 #include <card_games/card.hpp>
 #include <card_games/i_card_textures.hpp>
 
@@ -30,75 +34,12 @@ namespace neogames
 		namespace
 		{
 			const neogfx::size kBridgeCardSize{ 57.15, 88.9 };
-		}
 
-		template <typename GameTraits>
-		neogfx::game::entity_id create_card_sprite(neogfx::game::i_ecs& aEcs, const i_card_textures& aCardTextures, const basic_card<GameTraits>& aCard)
+			template <typename CardType>
+			std::vector<std::pair<neogfx::rect, bool>> face_texture_rects(const neogfx::rect& aAabb, typename CardType::value aValue)
 			{
-				// We could have a separate texture for each of the 52 cards but instead we build the
-				// card mesh up here using texture atlas textures.
+				typedef CardType card_type;
 
-				// Card background shape...
-				auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, true, 20);
-				vlp->reserve(cardBackgroundVertices.end() - cardBackgroundVertices.begin() + 28 * 3);
-				neogfx::add_faces(vlp, faceList, cardBackgroundVertices);
-				iCardBackgroundFaces = faceList.faces().size();
-
-				auto tlp = std::make_shared<neogfx::texture_list>();
-
-				auto aabb = neogfx::bounding_rect(*vlp);
-				aabb.deflate(neogfx::size{ 0.025, 0.05 });
-
-				// Card value textures...
-				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left(), neogfx::size{ 0.2 } }, iCardTextures.value_texture(iCard));
-				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 }, neogfx::size{ 0.2 } }, iCardTextures.value_texture(iCard), true);
-				iCardValueFaces = faceList.faces().size();
-				
-				// Card suit textures under card value textures...
-				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, iCardTextures.suit_texture(iCard));
-				neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } + neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, iCardTextures.suit_texture(iCard), true);
-
-				auto faceTextureRects = face_texture_rects(aabb, iCard);
-				for (const auto& r : faceTextureRects)
-					neogfx::add_faces(vlp, tlp, faceList, r.first, iCardTextures.face_texture(iCard), r.second);
-
-				// Finish up...
-				set_vertices(vlp);
-				set_textures(tlp);
-				set_faces(faceList);
-			}
-			// geometry
-		protected:
-			neogfx::mat44 transformation_matrix() const override
-			{
-				return neogfx::mat44{ { extents()[0], 0.0, 0.0, 0.0 },{ 0.0, extents()[1] * kBridgeCardSize.cx / kBridgeCardSize.cy, 0.0, 0.0 },{ 0.0, 0.0, 1.0, 0.0 },{ position().x, position().y, position().z, 1.0 } };
-			}
-			// updates
-		protected:
-			bool update(const optional_time_interval&, const neogfx::vec3&)
-			{
-				return true;
-			}
-			// rendering
-		protected:
-			void paint(neogfx::graphics_context& aGraphicsContext) const override
-			{
-				{
-					neogfx::scoped_faces sf{ *this, faces().begin(), faces().begin() + iCardBackgroundFaces };
-					aGraphicsContext.fill_shape(*this, neogfx::to_brush(*current_frame().colour()));
-				}
-				{
-					neogfx::scoped_faces sf{ *this, faces().begin() + iCardBackgroundFaces, faces().begin() + iCardValueFaces };
-					aGraphicsContext.draw_texture(*this, textures(), iCard == card_type::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
-				}
-				{
-					neogfx::scoped_faces sf{ *this, faces().begin() + iCardValueFaces, faces().end() };
-					aGraphicsContext.draw_texture(*this, textures());
-				}
-			}
-		private:
-			std::vector<std::pair<neogfx::rect, bool>> face_texture_rects(const neogfx::rect& aAabb, typename card_type::value aValue)
-			{
 				std::vector<std::pair<neogfx::rect, bool>> result;
 				auto faceRect = aAabb;
 				faceRect.deflate(neogfx::size{ 0.1 });
@@ -167,14 +108,45 @@ namespace neogames
 				}
 				return result;
 			}
-			// attributes
-		private:
-			const i_card_textures& iCardTextures;
-			card_type iCard;
-			std::size_t iCardBackgroundFaces;
-			std::size_t iCardValueFaces;
-		};
+		}
 
-		typedef basic_card_sprite<default_game_traits> card_sprite;
+		template <typename GameTraits>
+		neogfx::game::entity_id create_card_sprite(neogfx::game::i_ecs& aEcs, const i_card_textures& aCardTextures, const basic_card<GameTraits>& aCard)
+		{
+			// We could have a separate texture for each of the 52 cards but instead we build the
+			// card mesh up here using texture atlas textures.
+
+			static const neogfx::game::sprite_archetype cardArchetype{ "Card" };
+
+			// Card background shape...
+			auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, neogfx::mesh_type::Triangles, 20);
+
+			neogfx::game::mesh mesh{ cardBackgroundVertices, {}, neogfx::game::default_faces(cardBackgroundVertices) };
+			neogfx::game::mesh_filter meshFilter{ {}, mesh, {} };
+			neogfx::game::mesh_renderer meshRenderer{ neogfx::game::material{ neogfx::to_ecs_component( neogfx::colour::White) } };
+			auto cardSprite = aEcs.create_entity(cardArchetype, meshFilter, meshRenderer);
+
+			/*
+			neogfx::add_faces(vlp, faceList, cardBackgroundVertices);
+
+			auto tlp = std::make_shared<neogfx::texture_list>();
+
+			auto aabb = neogfx::bounding_rect(*vlp);
+			aabb.deflate(neogfx::size{ 0.025, 0.05 });
+
+			// Card value textures...
+			neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left(), neogfx::size{ 0.2 } }, aCardTextures.value_texture(aCard));
+			neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 }, neogfx::size{ 0.2 } }, aCardTextures.value_texture(aCard), true);
+				
+			// Card suit textures under card value textures...
+			neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, aCardTextures.suit_texture(aCard));
+			neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } + neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, aCardTextures.suit_texture(aCard), true);
+
+			auto faceTextureRects = face_texture_rects(aabb, aCard);
+			for (const auto& r : faceTextureRects)
+				neogfx::add_faces(vlp, tlp, faceList, r.first, aCardTextures.face_texture(aCard), r.second); */
+
+			return cardSprite;
+		}
 	}
 }

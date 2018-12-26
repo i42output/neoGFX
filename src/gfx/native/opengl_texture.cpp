@@ -420,7 +420,6 @@ namespace neogfx
 	{
 		if (aTextureUnit != std::nullopt)
 		{
-			glCheck();
 			glCheck(glActiveTexture(GL_TEXTURE0 + *aTextureUnit));
 		}
 		GLint previousTexture = 0;
