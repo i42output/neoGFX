@@ -623,6 +623,14 @@ namespace neogfx
 	}
 
 	template <typename CoordinateType>
+	inline basic_rect<CoordinateType> operator+(const basic_rect<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		basic_rect<CoordinateType> ret = left;
+		ret.basic_size::operator+=(right);
+		return ret;
+	}
+
+	template <typename CoordinateType>
 	inline basic_rect<CoordinateType> operator+(const basic_rect<CoordinateType>& left, const basic_delta<CoordinateType>& right)
 	{
 		basic_rect<CoordinateType> ret = left;
@@ -635,6 +643,14 @@ namespace neogfx
 	{
 		basic_rect<CoordinateType> ret = left;
 		ret.basic_point::operator-=(right);
+		return ret;
+	}
+
+	template <typename CoordinateType>
+	inline basic_rect<CoordinateType> operator-(const basic_rect<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		basic_rect<CoordinateType> ret = left;
+		ret.basic_size::operator-=(right);
 		return ret;
 	}
 

@@ -96,10 +96,10 @@ namespace neogfx
 		rect result;
 		for (auto iterPage = iPages.begin(); iterPage != iPages.end(); ++iterPage)
 			if (iterPage->first.dpi_scale_factor() == aDpiScaleFactor && iterPage->first.sampling() == aSampling && iterPage->first.data_format() == aDataFormat && iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
-				return std::make_pair(iterPage, result + point{ 1.0, 1.0 });
+				return std::make_pair(iterPage, result + point{ 1.0, 1.0 } + size{ -2.0, -2.0 });
 		auto iterPage = create_page(aDpiScaleFactor, aSampling, aDataFormat);
 		if (iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
-			return std::make_pair(iterPage, result + point{ 1.0, 1.0 });
+			return std::make_pair(iterPage, result + point{ 1.0, 1.0 } + size{ -2.0, -2.0 });
 		iPages.erase(iterPage);
 		throw texture_too_big_for_atlas();
 	}

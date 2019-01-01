@@ -323,7 +323,7 @@ namespace neogfx
 			if (sampling() != texture_sampling::Data)
 			{
 				glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
-					static_cast<GLint>(aRect.x + 1.0), static_cast<GLint>(aRect.y + 1.0), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
+					static_cast<GLint>(aRect.x), static_cast<GLint>(aRect.y), static_cast<GLsizei>(aRect.cx), static_cast<GLsizei>(aRect.cy),
 					std::get<1>(to_gl_enum(iDataFormat, iDataType)), std::get<2>(to_gl_enum(iDataFormat, iDataType)), aPixelData));
 			}
 			else
@@ -346,7 +346,7 @@ namespace neogfx
 
 	void opengl_texture::set_pixels(const i_image& aImage)
 	{
-		set_pixels(rect{ point{}, aImage.extents() }, aImage.cdata());
+		set_pixels(rect{ point{ 1.0, 1.0 }, aImage.extents() }, aImage.cdata());
 	}
 
 	void opengl_texture::set_pixel(const point& aPosition, const colour& aColour)
