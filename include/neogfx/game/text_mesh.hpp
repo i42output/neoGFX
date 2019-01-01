@@ -78,7 +78,7 @@ namespace neogfx::game
 				case 6:
 					return component_data_field_type::ComponentData | component_data_field_type::Shared;
 				case 7:
-					return component_data_field_type::Enum;
+					return component_data_field_type::Enum | component_data_field_type::Uint32;
 				case 8:
 					return component_data_field_type::ComponentData;
 				case 9:

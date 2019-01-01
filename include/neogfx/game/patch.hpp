@@ -30,8 +30,8 @@ namespace neogfx::game
 {
 	struct patch
 	{
-		face face;
 		material material;
+		faces_t faces;
 
 		struct meta : i_component_data::meta
 		{
@@ -54,9 +54,9 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-					return component_data_field_type::Face;
-				case 1:
 					return component_data_field_type::ComponentData;
+				case 1:
+					return component_data_field_type::Face | component_data_field_type::Array;
 				default:
 					throw invalid_field_index();
 				}
@@ -66,9 +66,9 @@ namespace neogfx::game
 				switch (aFieldIndex)
 				{
 				case 0:
-					return neolib::uuid{};
-				case 1:
 					return material::meta::id();
+				case 1:
+					return neolib::uuid{};
 				default:
 					throw invalid_field_index();
 				}
@@ -77,8 +77,8 @@ namespace neogfx::game
 			{
 				static const neolib::string sFieldNames[] =
 				{
-					"Face",
-					"Material"
+					"Material",
+					"Faces"
 				};
 				return sFieldNames[aFieldIndex];
 			}

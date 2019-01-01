@@ -130,8 +130,9 @@ namespace neogfx
 		void fill_shape(const game::mesh& aMesh, const brush& aFill);
 		void fill_shape(const graphics_operation::batch& aFillShapeOps);
 		void draw_glyph(const graphics_operation::batch& aDrawGlyphOps);
-		bool draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, shader_effect aShaderEffect);
-		bool draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation, shader_effect aShaderEffect);
+		bool draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation);
+		bool draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
+		bool draw_patch(const vertices_t& aVertices, const vertices_2d_t& aTextureVertices, const game::material& aMaterial, const game::faces_t& aFaces);
 	private:
 		std::size_t max_operations(const graphics_operation::operation& aOperation);
 		void apply_scissor();

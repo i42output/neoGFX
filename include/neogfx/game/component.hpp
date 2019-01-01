@@ -38,7 +38,7 @@ namespace neogfx::game
 		template <typename Data>
 		struct crack_component_data
 		{
-			typedef std::remove_cv_t<std::remove_reference_t<Data>> data_type;
+			typedef ecs_data_type_t<Data> data_type;
 			typedef data_type value_type;
 			typedef std::vector<value_type> container_type;
 			static constexpr bool optional = false;
@@ -47,7 +47,7 @@ namespace neogfx::game
 		template <typename Data>
 		struct crack_component_data<std::optional<Data>>
 		{
-			typedef std::remove_cv_t<std::remove_reference_t<Data>> data_type;
+			typedef ecs_data_type_t<Data> data_type;
 			typedef std::optional<data_type> value_type;
 			typedef std::vector<value_type> container_type;
 			static constexpr bool optional = true;
@@ -56,7 +56,7 @@ namespace neogfx::game
 		template <typename Data>
 		struct crack_component_data<shared<Data>>
 		{
-			typedef std::remove_cv_t<std::remove_reference_t<Data>> data_type;
+			typedef ecs_data_type_t<Data> data_type;
 			typedef data_type mapped_type;
 			typedef std::pair<const std::string, mapped_type> value_type;
 			typedef std::unordered_map<std::string, mapped_type> container_type;
@@ -66,7 +66,7 @@ namespace neogfx::game
 		template <typename Data>
 		struct crack_component_data<shared<std::optional<Data>>>
 		{
-			typedef std::remove_cv_t<std::remove_reference_t<Data>> data_type;
+			typedef ecs_data_type_t<Data> data_type;
 			typedef std::optional<data_type> mapped_type;
 			typedef std::pair<const std::string, mapped_type> value_type;
 			typedef std::unordered_map<std::string, mapped_type> container_type;
@@ -86,7 +86,7 @@ namespace neogfx::game
 		typedef typename detail::crack_component_data<Data>::value_type value_type;
 		typedef typename detail::crack_component_data<Data>::container_type component_data_t;
 	private:
-		typedef static_component_base<Data, Base> self_type;
+		typedef static_component_base<ecs_data_type_t<Data>, Base> self_type;
 	public:
 		static_component_base(game::i_ecs& aEcs) : 
 			iEcs{ aEcs }
@@ -431,10 +431,10 @@ namespace neogfx::game
 	};
 
 	template <typename Data>
-	class static_shared_component : public static_component_base<shared<Data>, i_shared_component>
+	class static_shared_component : public static_component_base<shared<ecs_data_type_t<Data>>, i_shared_component>
 	{
 	private:
-		typedef static_component_base<shared<Data>, i_shared_component> base_type;
+		typedef static_component_base<shared<ecs_data_type_t<Data>>, i_shared_component> base_type;
 	public:
 		typedef typename base_type::data_type data_type;
 		typedef typename base_type::data_meta_type data_meta_type;

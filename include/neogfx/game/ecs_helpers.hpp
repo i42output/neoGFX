@@ -24,6 +24,7 @@
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/shapes.hpp>
 #include <neogfx/game/mesh.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/colour.hpp>
 #include <neogfx/game/gradient.hpp>
 #include <neogfx/game/material.hpp>
@@ -52,22 +53,38 @@ namespace neogfx
 			};
 	}
 
-	inline game::mesh to_ecs_component(const rect& aRect, dimension aPixelAdjust = 0, mesh_type aMeshType = mesh_type::Triangles)
+	inline game::mesh to_ecs_component(const rect& aRect, mesh_type aMeshType = mesh_type::Triangles, std::size_t aOffset = 0, bool aInverted = false)
 	{
-		return game::mesh
-		{
+		if (!aInverted)
+			return game::mesh
 			{
-				rect_vertices(aRect, aPixelAdjust, aMeshType)
-			},
+				{
+					rect_vertices(aRect, 0, aMeshType)
+				},
+				{
+					vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
+					vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }
+				},
+				{
+					game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
+					game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u }
+				}
+			};
+		else
+			return game::mesh
 			{
-				vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
-				vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }
-			},
-			{
-				game::face{ 0u, 1u, 2u },
-				game::face{ 3u, 4u, 5u }
-			}
-		};
+				{
+					rect_vertices(aRect, 0, aMeshType)
+				},
+				{
+					vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }, vec2{ 1.0, 0.0 },
+					vec2{ 0.0, 1.0 }, vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }
+				},
+				{
+					game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
+					game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u }
+				}
+			};
 	}
 
 	inline game::mesh to_ecs_component(const vertices_t& aVertices, mesh_type aSourceMeshType = mesh_type::TriangleFan, mesh_type aDestinationMeshType = mesh_type::Triangles)
@@ -165,4 +182,13 @@ namespace neogfx
 		};
 	}
 
+	inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const rect& aRect, const neogfx::i_texture& aTexture, bool aInvertTexture = false)
+	{
+		auto const& patchMesh = to_ecs_component(aRect, mesh_type::Triangles, aMesh.vertices.size(), aInvertTexture); 
+		aMesh.vertices.insert(aMesh.vertices.end(), patchMesh.vertices.begin(), patchMesh.vertices.end());
+		aMesh.uv.insert(aMesh.uv.end(), patchMesh.uv.begin(), patchMesh.uv.end());
+		auto& patch = aMeshRenderer.patches.emplace_back();
+		patch.faces.insert(patch.faces.end(), patchMesh.faces.begin(), patchMesh.faces.end());
+		patch.material.texture = to_ecs_component(aTexture);
+	}
 }

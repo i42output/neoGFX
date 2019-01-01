@@ -341,71 +341,7 @@ namespace neogfx
 				GL_FRAGMENT_SHADER) 
 			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
 
-		iTextureProgram = create_shader_program(
-			shaders
-		{
-			std::make_pair(
-				std::string(
-					"#version 130\n"
-					"precision mediump float;\n"
-					"uniform mat4 uProjectionMatrix;\n"
-					"uniform mat4 uTransformationMatrix;\n"
-					"in mediump vec3 VertexPosition;\n"
-					"in mediump vec4 VertexColor;\n"
-					"in mediump vec2 VertexTextureCoord;\n"
-					"out vec4 Color;\n"
-					"varying vec2 vTexCoord;\n"
-					"void main()\n"
-					"{\n"
-					"	Color = VertexColor;\n"
-					"   gl_Position = uProjectionMatrix * (uTransformationMatrix * vec4(VertexPosition, 1.0));\n"
-					"	vTexCoord = VertexTextureCoord;\n"
-					"}\n"),
-				GL_VERTEX_SHADER),
-			std::make_pair(
-				std::string(
-					"#version 130\n"
-					"precision mediump float;\n"
-					"uniform sampler2D tex;\n"
-					"uniform int effect;\n"
-					"in vec4 Color;\n"
-					"out vec4 FragColor;\n"
-					"varying vec2 vTexCoord;\n"
-					"void main()\n"
-					"{\n"
-					"	vec4 texel = texture(tex, vTexCoord).rgba;\n"
-					"	switch(effect)\n"
-					"	{\n"
-					"	case 0:\n" // effect: None
-					"		FragColor = texel.rgba * Color;\n"
-					"		break;\n"
-					"	case 1:\n" // effect: Colourize, ColourizeAverage
-					"		{\n"
-					"			float avg = (texel.r + texel.g + texel.b) / 3.0;\n"
-					"			FragColor = vec4(avg, avg, avg, texel.a) * Color;\n"
-					"		}\n"
-					"		break;\n"
-					"	case 2:\n" // effect: ColourizeMaximum
-					"		{\n"
-					"			float maxChannel = max(texel.r, max(texel.g, texel.b));\n"
-					"			FragColor = vec4(maxChannel, maxChannel, maxChannel, texel.a) * Color;\n"
-					"		}\n"
-					"		break;\n"
-					"	case 3:\n" // effect: ColourizeSpot
-					"		FragColor = vec4(1.0, 1.0, 1.0, texel.a) * Color;\n"
-					"		break;\n"
-					"	case 4:\n" // effect: Monochrome
-					"		{\n"
-					"			float gray = dot(Color.rgb * texel.rgb, vec3(0.299, 0.587, 0.114));\n"
-					"			FragColor = vec4(gray, gray, gray, texel.a) * Color;\n"
-					"		}\n"
-					"		break;\n"
-					"	}\n"
-					"}\n"),
-				GL_FRAGMENT_SHADER) 
-			}, { "VertexPosition", "VertexColor", "VertexTextureCoord" });
-
-		iMultisampleTextureProgram = create_shader_program(
+		iMeshProgram = create_shader_program(
 			shaders
 		{
 			std::make_pair(
@@ -430,7 +366,10 @@ namespace neogfx
 				std::string(
 					"#version 150\n"
 					"precision mediump float;\n"
-					"uniform sampler2DMS tex;\n"
+					"uniform bool haveTexture;\n"
+					"uniform bool multisample;\n"
+					"uniform sampler2D tex;\n"
+					"uniform sampler2DMS texMS;\n"
 					"uniform int texSamples;\n"
 					"uniform vec2 texExtents;\n"
 					"uniform int effect;\n"
@@ -439,17 +378,29 @@ namespace neogfx
 					"varying vec2 vTexCoord;\n"
 					"void main()\n"
 					"{\n"
-					"	vec4 texel = vec4(0.0);\n"
-					"	float alpha = 0.0;\n"
-					"	ivec2 texCoord = ivec2(vTexCoord * texExtents);\n"
-					"	int i;\n"
-					"	for (i = 0; i < texSamples; ++i)\n"
+					"	if (!haveTexture)\n"
 					"	{\n"
-					"		vec4 nextTexel = texelFetch(tex, texCoord, i);\n"
-					"		texel = max(texel, nextTexel).rgba;\n"
-					"		alpha += nextTexel.a;\n"
+					"		FragColor = Color;\n"
+					"		return;"
 					"	}\n"
-					"	texel.a = alpha / texSamples;\n"
+					"	vec4 texel = vec4(0.0);\n"
+					"	if (!multisample)\n"
+					"	{\n"
+					"		texel = texture(tex, vTexCoord).rgba;\n"
+					"	}\n"
+					"	else\n"
+					"	{\n"
+					"		float alpha = 0.0;\n"
+					"		ivec2 texCoord = ivec2(vTexCoord * texExtents);\n"
+					"		int i;\n"
+					"		for (i = 0; i < texSamples; ++i)\n"
+					"		{\n"
+					"			vec4 nextTexel = texelFetch(texMS, texCoord, i);\n"
+					"			texel = max(texel, nextTexel).rgba;\n"
+					"			alpha += nextTexel.a;\n"
+					"		}\n"
+					"		texel.a = alpha / texSamples;\n"
+					"	}\n"
 					"	switch(effect)\n"
 					"	{\n"
 					"	case 0:\n" // effect: None
@@ -832,20 +783,14 @@ namespace neogfx
 		return *iDefaultProgram;
 	}
 
-	const opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program(texture_sampling aSampling) const
+	const opengl_renderer::i_shader_program& opengl_renderer::mesh_shader_program() const
 	{
-		if (aSampling != texture_sampling::Multisample)
-			return *iTextureProgram;
-		else
-			return *iMultisampleTextureProgram;
+		return *iMeshProgram;
 	}
 
-	opengl_renderer::i_shader_program& opengl_renderer::texture_shader_program(texture_sampling aSampling)
+	opengl_renderer::i_shader_program& opengl_renderer::mesh_shader_program()
 	{
-		if (aSampling != texture_sampling::Multisample)
-			return *iTextureProgram;
-		else
-			return *iMultisampleTextureProgram;
+		return *iMeshProgram;
 	}
 
 	const opengl_renderer::i_shader_program& opengl_renderer::gradient_shader_program() const

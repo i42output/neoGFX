@@ -1022,10 +1022,10 @@ namespace neogfx
 				aColour != std::nullopt ? game::colour{ aColour->to_vec4() } : std::optional<game::colour>{},
 				{}, 
 				{},
-				to_ecs_component(aTexture)
+				to_ecs_component(aTexture),
+				aShaderEffect
 			},
-			optional_mat44{},
-			aShaderEffect);
+			optional_mat44{});
 	}
 
 	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
@@ -1036,7 +1036,7 @@ namespace neogfx
 		draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
 	}
 
-	void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation, shader_effect aShaderEffect) const
+	void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation) const
 	{
 		vec2 toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
 		native_context().enqueue(
@@ -1047,8 +1047,7 @@ namespace neogfx
 					{ toDeviceUnits.x, 0.0, 0.0, 0.0 },
 					{ 0.0, toDeviceUnits.y, 0.0, 0.0 },
 					{ 0.0, 0.0, 1.0, 0.0 },
-					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } * (aTransformation != std::nullopt ? *aTransformation : mat44::identity()),
-				aShaderEffect,
+					{ iOrigin.x, iOrigin.y, 0.0, 1.0 } } * (aTransformation != std::nullopt ? *aTransformation : mat44::identity())
 			});
 	}
 

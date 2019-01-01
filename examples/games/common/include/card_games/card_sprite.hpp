@@ -35,15 +35,13 @@ namespace neogames
 		{
 			const neogfx::size kBridgeCardSize{ 57.15, 88.9 };
 
-			template <typename CardType>
-			std::vector<std::pair<neogfx::rect, bool>> face_texture_rects(const neogfx::rect& aAabb, typename CardType::value aValue)
+			template <typename CardValue>
+			std::vector<std::pair<neogfx::rect, bool>> face_texture_rects(const neogfx::rect& aAabb, CardValue aValue)
 			{
-				typedef CardType card_type;
-
 				std::vector<std::pair<neogfx::rect, bool>> result;
 				auto faceRect = aAabb;
 				faceRect.deflate(neogfx::size{ 0.1 });
-				if (aValue >= card_type::value::Jack)
+				if (aValue >= CardValue::Jack)
 				{
 					faceRect.deflate(neogfx::size{ 0.0, (faceRect.cy - faceRect.cx) / 2.0 });
 					result.push_back(std::make_pair(faceRect, false));
@@ -53,47 +51,47 @@ namespace neogames
 					faceRect.deflate(neogfx::size{ 0.1, 0.0 });
 					switch (aValue)
 					{
-					case card_type::value::Two:
+					case CardValue::Two:
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.top() }, neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.bottom() - 0.2 }, neogfx::size{ 0.2 } }, true));
 						break;
-					case card_type::value::Three:
-						result = face_texture_rects(aAabb, card_type::value::Two);
+					case CardValue::Three:
+						result = face_texture_rects(aAabb, CardValue::Two);
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
 						break;
-					case card_type::value::Four:
+					case CardValue::Four:
 						result.push_back(std::make_pair(neogfx::rect{ faceRect.top_left(), neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ faceRect.top_right() + neogfx::delta{ -0.2, 0.0 }, neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ faceRect.bottom_left() + neogfx::delta{ 0.0, -0.2 }, neogfx::size{ 0.2 } }, true));
 						result.push_back(std::make_pair(neogfx::rect{ faceRect.bottom_right() + neogfx::delta{ -0.2, -0.2 }, neogfx::size{ 0.2 } }, true));
 						break;
-					case card_type::value::Five:
-						result = face_texture_rects(aAabb, card_type::value::Four);
+					case CardValue::Five:
+						result = face_texture_rects(aAabb, CardValue::Four);
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
 						break;
-					case card_type::value::Six:
-						result = face_texture_rects(aAabb, card_type::value::Four);
+					case CardValue::Six:
+						result = face_texture_rects(aAabb, CardValue::Four);
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
 						break;
-					case card_type::value::Seven:
-						result = face_texture_rects(aAabb, card_type::value::Six);
+					case CardValue::Seven:
+						result = face_texture_rects(aAabb, CardValue::Six);
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.top() + faceRect.cy * 2.0 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
 						break;
-					case card_type::value::Eight:
-						result = face_texture_rects(aAabb, card_type::value::Seven);
+					case CardValue::Eight:
+						result = face_texture_rects(aAabb, CardValue::Seven);
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.bottom() - faceRect.cy * 2.0 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
 						break;
-					case card_type::value::Nine:
-						result = face_texture_rects(aAabb, card_type::value::Four);
+					case CardValue::Nine:
+						result = face_texture_rects(aAabb, CardValue::Four);
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.top() + faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.top() + faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.centre().y - 0.1 }, neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.bottom() - faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.bottom() - faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, true));
 						break;
-					case card_type::value::Ten:
-						result = face_texture_rects(aAabb, card_type::value::Four);
+					case CardValue::Ten:
+						result = face_texture_rects(aAabb, CardValue::Four);
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.centre().x - 0.1, faceRect.top() + faceRect.cy * 1.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.left(), faceRect.top() + faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
 						result.push_back(std::make_pair(neogfx::rect{ neogfx::point{ faceRect.right() - 0.2, faceRect.top() + faceRect.cy * 2.5 / 7.0 - 0.1 }, neogfx::size{ 0.2 } }, false));
@@ -121,32 +119,28 @@ namespace neogames
 			// Card background shape...
 			auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centred_origin(), 0.1, neogfx::mesh_type::Triangles, 20);
 
-			neogfx::game::mesh mesh{ cardBackgroundVertices, {}, neogfx::game::default_faces(cardBackgroundVertices) };
-			neogfx::game::mesh_filter meshFilter{ {}, mesh, {} };
+			neogfx::game::mesh mesh{ cardBackgroundVertices, neogfx::vertices_2d_t{cardBackgroundVertices.size(), neogfx::vec2{} }, neogfx::game::default_faces(cardBackgroundVertices) };
 			neogfx::game::mesh_renderer meshRenderer{ neogfx::game::material{ neogfx::to_ecs_component( neogfx::colour::White) } };
-			auto cardSprite = aEcs.create_entity(cardArchetype, meshFilter, meshRenderer);
 
-			/*
-			neogfx::add_faces(vlp, faceList, cardBackgroundVertices);
-
-			auto tlp = std::make_shared<neogfx::texture_list>();
-
-			auto aabb = neogfx::bounding_rect(*vlp);
+			auto aabb = neogfx::game::bounding_rect(mesh);
 			aabb.deflate(neogfx::size{ 0.025, 0.05 });
 
 			// Card value textures...
-			neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left(), neogfx::size{ 0.2 } }, aCardTextures.value_texture(aCard));
-			neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 }, neogfx::size{ 0.2 } }, aCardTextures.value_texture(aCard), true);
-				
+			neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.top_left(), neogfx::size{ 0.2 } }, aCardTextures.value_texture(aCard));
+			meshRenderer.patches.back().material.colour = neogfx::to_ecs_component(aCard == basic_card<GameTraits>::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
+
+			neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 }, neogfx::size{ 0.2 } }, aCardTextures.value_texture(aCard), true);
+			meshRenderer.patches.back().material.colour = neogfx::to_ecs_component(aCard == basic_card<GameTraits>::colour::Black ? neogfx::colour::Black : neogfx::colour{ 213, 0, 0 });
+
 			// Card suit textures under card value textures...
-			neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, aCardTextures.suit_texture(aCard));
-			neogfx::add_faces(vlp, tlp, faceList, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } + neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, aCardTextures.suit_texture(aCard), true);
+			neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.top_left() + neogfx::delta{0.025, 0.4 - 0.15}, neogfx::size{ 0.15 } }, aCardTextures.suit_texture(aCard));
+			neogfx::add_patch(mesh, meshRenderer, neogfx::rect{ aabb.bottom_right() + neogfx::size{ -0.2 } +neogfx::delta{ 0.025, -0.2 }, neogfx::size{ 0.15 } }, aCardTextures.suit_texture(aCard), true);
 
-			auto faceTextureRects = face_texture_rects(aabb, aCard);
+			auto faceTextureRects = face_texture_rects(aabb, static_cast<basic_card<GameTraits>::value>(aCard));
 			for (const auto& r : faceTextureRects)
-				neogfx::add_faces(vlp, tlp, faceList, r.first, aCardTextures.face_texture(aCard), r.second); */
+				neogfx::add_patch(mesh, meshRenderer, r.first, aCardTextures.face_texture(aCard), r.second);
 
-			return cardSprite;
+			return aEcs.create_entity(cardArchetype, neogfx::game::mesh_filter{ {}, mesh, {} }, meshRenderer);
 		}
 	}
 }

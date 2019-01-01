@@ -111,7 +111,7 @@ namespace neogfx
 			auto emojiFile = emojiFiles->second.lower_bound(aDesiredSize);
 			if (emojiFile == emojiFiles->second.end())
 				--emojiFile;
-			iterEmoji->second = iTextureAtlas->create_sub_texture(neogfx::image("file:///" + kFilePath + "#" + emojiFile->second)).atlas_id();
+			iterEmoji->second = iTextureAtlas->create_sub_texture(neogfx::image{ "file:///" + kFilePath + "#" + emojiFile->second }).atlas_id();
 		}
 		return *iterEmoji->second;
 	}

@@ -25,6 +25,9 @@
 
 namespace neogfx::game
 {
+	template<class _Ty>
+	using ecs_data_type_t = std::remove_cv_t<std::remove_reference_t<_Ty>>;
+
 	typedef triangle face;
 	typedef std::vector<face> faces_t;
 

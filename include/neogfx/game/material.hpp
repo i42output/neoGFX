@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/uuid.hpp>
 #include <neolib/string.hpp>
 #include <neogfx/core/colour.hpp>
+#include <neogfx/gfx/primitives.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/colour.hpp>
@@ -37,6 +38,7 @@ namespace neogfx::game
 		std::optional<gradient> gradient;
 		std::optional<shared<texture>> sharedTexture;
 		std::optional<texture> texture;
+		std::optional<shader_effect> shaderEffect;
 
 		struct meta : i_component_data::meta
 		{
@@ -52,7 +54,7 @@ namespace neogfx::game
 			}
 			static uint32_t field_count()
 			{
-				return 4;
+				return 5;
 			}
 			static component_data_field_type field_type(uint32_t aFieldIndex)
 			{
@@ -65,6 +67,8 @@ namespace neogfx::game
 					return component_data_field_type::ComponentData | component_data_field_type::Optional | component_data_field_type::Shared;
 				case 3:
 					return component_data_field_type::ComponentData | component_data_field_type::Optional;
+				case 4:
+					return component_data_field_type::Enum | component_data_field_type::Uint32 | component_data_field_type::Optional;
 				default:
 					throw invalid_field_index();
 				}
@@ -80,6 +84,8 @@ namespace neogfx::game
 				case 2:
 				case 3:
 					return texture::meta::id();
+				case 4:
+					return neolib::uuid{};
 				default:
 					throw invalid_field_index();
 				}
@@ -91,7 +97,8 @@ namespace neogfx::game
 					"Colour",
 					"Gradient",
 					"Shared Texture",
-					"Texture"
+					"Texture",
+					"Shader Effect"
 				};
 				return sFieldNames[aFieldIndex];
 			}

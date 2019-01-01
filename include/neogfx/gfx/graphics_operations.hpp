@@ -251,7 +251,6 @@ namespace neogfx
 			game::mesh mesh;
 			game::material material;
 			mat44 transformation;
-			shader_effect shaderEffect;
 		};
 
 		typedef neolib::variant <

@@ -57,9 +57,6 @@ namespace neogfx::game
 		return aLhs = static_cast<ecs_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
 	}
 
-	template<class _Ty>
-	using ecs_data_type_t = std::remove_cv_t<std::remove_reference_t<_Ty>>;
-
 	class i_ecs : public virtual i_object
 	{
 	public:
