@@ -58,6 +58,19 @@ namespace neogfx
 			Attached,
 			Unattached
 		};
+		struct multiline_glyph_text
+		{
+			glyph_text glyphText;
+			struct line
+			{
+				point pos;
+				size extents;
+				glyph_text::difference_type begin;
+				glyph_text::difference_type end;
+			};
+			typedef neolib::vecarray<line, 8> lines_t;
+			lines_t lines;
+		};
 		typedef std::pair<graphics_context, graphics_context> ping_pong_buffers_t;
 	private:
 		friend class generic_surface;
@@ -140,36 +153,50 @@ namespace neogfx
 		void fill_arc(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const;
 		void fill_path(const path& aPath, const brush& aFill) const;
 		void fill_shape(const game::mesh& aShape, const brush& aFill) const;
-		size text_extent(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		size multiline_text_extent(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		size multiline_text_extent(const string& aText, const font& aFont, dimension aMaxWidth, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
+		size text_extent(const string& aText, const font& aFont) const;
+		size text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector) const;
+		size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
+		size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
+		size multiline_text_extent(const string& aText, const font& aFont) const;
+		size multiline_text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector) const;
+		size multiline_text_extent(const string& aText, const font& aFont, dimension aMaxWidth) const;
+		size multiline_text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth) const;
+		size glyph_text_extent(const glyph_text& aText) const;
+		size glyph_text_extent(const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const;
+		size multiline_glyph_text_extent(const glyph_text& aText, dimension aMaxWidth) const;
 		glyph_text to_glyph_text(const string& aText, const font& aFont) const;
 		glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const;
 		glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const;
 		glyph_text to_glyph_text(const std::u32string& aText, const font& aFont) const;
 		glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const;
 		glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const;
-		bool is_text_left_to_right(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		bool is_text_right_to_left(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		void draw_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		void draw_text(const point& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		void draw_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		void draw_text(const vec3& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
-		void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left, const glyph_text_cache_usage& aCacheUsage = DontUseGlyphTextCache) const;
+		multiline_glyph_text to_multiline_glyph_text(const string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const;
+		multiline_glyph_text to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const;
+		multiline_glyph_text to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const;
+		multiline_glyph_text to_multiline_glyph_text(const std::u32string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const;
+		multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const;
+		multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const;
+		multiline_glyph_text to_multiline_glyph_text(const glyph_text& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const;
+		bool is_text_left_to_right(const string& aText, const font& aFont) const;
+		bool is_text_right_to_left(const string& aText, const font& aFont) const;
+		void draw_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance) const;
+		void draw_text(const point& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const;
+		void draw_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance) const;
+		void draw_text(const vec3& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const;
+		void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const;
+		void draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const;
+		void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const;
+		void draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const;
 		void draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const;
 		void draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const;
 		void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const;
 		void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const;
+		void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const;
+		void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const;
 		void draw_glyph(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const;
 		void draw_glyph(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const;
 		void draw_glyph_underline(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const;
 		void draw_glyph_underline(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const;
-		void set_glyph_text_cache(glyph_text& aGlyphTextCache) const;
-		void reset_glyph_text_cache() const;
 		void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const;
 		void unset_mnemonic() const;
 		bool mnemonics_shown() const;
@@ -227,7 +254,6 @@ namespace neogfx
 		mutable std::optional<std::string> iPassword;
 		struct glyph_text_data;
 		std::unique_ptr<glyph_text_data> iGlyphTextData;
-		mutable glyph_text* iGlyphTextCache;
 	};
 
 	template <typename Iter>

@@ -26,6 +26,7 @@
 #include <neogfx/gfx/shapes.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/game/rectangle.hpp>
+#include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include "../../hid/native/i_native_surface.hpp"
 #include "i_native_texture.hpp"
@@ -1013,7 +1014,6 @@ namespace neogfx
 		auto const& rigidBodies = rigidBodiesSnapshot.data();
 		use_vertex_arrays uva{ *this, GL_TRIANGLES, with_textures };
 		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().mesh_shader_program() };
-		texture_sampling withTextureSampling = texture_sampling::Normal;
 		for (auto entity : aEcs.component<game::mesh_renderer>().entities())
 		{
 			if (entity == game::null_entity)
@@ -1021,11 +1021,10 @@ namespace neogfx
 			auto const& meshFilter = aEcs.component<game::mesh_filter>().entity_record(entity);
 			auto const& meshRenderer = aEcs.component<game::mesh_renderer>().entity_record(entity);
 			auto transformation = rigidBodies.has_entity_record(entity) ? aTransformation * to_transformation_matrix(rigidBodies.entity_record(entity)) : aTransformation;
-			bool renderTexture = (meshRenderer.material.texture != std::nullopt);
 			bool drawn = draw_mesh(
-				meshFilter,
-				meshRenderer,
-				transformation);
+					meshFilter,
+					meshRenderer,
+					transformation);
 			if (!drawn && meshRenderer.destroyOnFustrumCull)
 				aEcs.destroy_entity(entity);
 		}

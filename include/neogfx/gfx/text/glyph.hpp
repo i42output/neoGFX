@@ -31,6 +31,9 @@
 
 namespace neogfx
 {
+	template <>
+	i_font_manager& service<i_font_manager>();
+
 	typedef std::string string;
 	typedef string::value_type character;
 
@@ -240,7 +243,12 @@ namespace neogfx
 		{
 			return iFont;
 		}
-		neogfx::font font() const;
+		neogfx::font font() const
+		{
+			if (font_specified())
+				return service<i_font_manager>().font_from_id(font_id());
+			throw no_font_specified();
+		}
 		const neogfx::font& font(const i_glyph_font_cache& aFontCache) const
 		{
 			if (font_specified())
@@ -380,6 +388,8 @@ namespace neogfx
 		static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
 		typedef neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1> container;
 	public:
+		using container::size_type;
+		using container::difference_type;
 		using container::const_iterator;
 	public:
 		glyph_text();

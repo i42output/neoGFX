@@ -99,13 +99,6 @@ namespace neogfx
 			return colour{};
 	}
 
-	struct glyph_text_cache_usage
-	{
-		bool use;
-	};
-	const glyph_text_cache_usage UseGlyphTextCache{ true };
-	const glyph_text_cache_usage DontUseGlyphTextCache{ false };
-
 	class text_colour : public colour_or_gradient
 	{
 	public:

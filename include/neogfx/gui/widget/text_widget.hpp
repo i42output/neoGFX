@@ -84,10 +84,11 @@ namespace neogfx
 		size size_hint_extent() const;
 	private:
 		void init();
+		const neogfx::glyph_text& glyph_text() const;
 	private:
 		sink iSink;
 		std::string iText;
-		mutable glyph_text iGlyphTextCache;
+		mutable neogfx::glyph_text iGlyphText;
 		mutable optional_size iTextExtent;
 		std::string iSizeHint;
 		mutable optional_size iSizeHintExtent;

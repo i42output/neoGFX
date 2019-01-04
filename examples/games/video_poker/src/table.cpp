@@ -51,6 +51,7 @@ namespace video_poker
 		outcome(neogfx::game::canvas& aCanvas, const std::string& aOutcome, const neogfx::colour& aColour) :
 			neogfx::game::shape::text{
 				aCanvas.ecs(),
+				neogfx::graphics_context{ aCanvas },
 				neogfx::vec3{},
 				aOutcome,
 				neogfx::font{ "Exo 2", "Black", 48.0 },

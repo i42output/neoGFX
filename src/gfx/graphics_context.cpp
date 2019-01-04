@@ -411,234 +411,120 @@ namespace neogfx
 				aFill });
 	}
 
-	size graphics_context::text_extent(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage) const
+	size graphics_context::text_extent(const string& aText, const font& aFont) const
 	{
-		return text_extent(aText.begin(), aText.end(), aFont, aCacheUsage);
+		return text_extent(aText.begin(), aText.end(), [&aFont](std::u32string::size_type) { return aFont; });
 	}
 
-	size graphics_context::text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const glyph_text_cache_usage& aCacheUsage) const
+	size graphics_context::text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector) const
 	{
-		const auto& glyphText = aCacheUsage.use && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aTextBegin, aTextEnd, aFont);
-		if (aCacheUsage.use && iGlyphTextCache->empty())
-			*iGlyphTextCache = glyphText;
-		auto result = glyphText.extents();
-		if (result.cy == 0.0)
-			result.cy = aFont.height();
-		return from_device_units(result);
+		return text_extent(aText.begin(), aText.end(), aFontSelector);
 	}
 
-	size graphics_context::multiline_text_extent(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage) const
+	size graphics_context::text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont) const
 	{
-		return multiline_text_extent(aText, aFont, 0, aCacheUsage);
+		return text_extent(aTextBegin, aTextEnd, [&aFont](std::u32string::size_type) { return aFont; });
 	}
 
-	size graphics_context::multiline_text_extent(const string& aText, const font& aFont, dimension aMaxWidth, const glyph_text_cache_usage& aCacheUsage) const
+	size graphics_context::text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const
 	{
-		const auto& glyphText = aCacheUsage.use && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aText.begin(), aText.end(), aFont);
-		if (aCacheUsage.use && iGlyphTextCache->empty())
-			*iGlyphTextCache = glyphText;
-		typedef std::pair<glyph_text::const_iterator, glyph_text::const_iterator> line_t;
-		typedef std::vector<line_t> lines_t;
-		lines_t lines;
-		std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
-		neolib::tokens(glyphText.cbegin(), glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
+		return glyph_text_extent(to_glyph_text(aTextBegin, aTextEnd, aFontSelector));
+	}
+
+	size graphics_context::multiline_text_extent(const string& aText, const font& aFont) const
+	{
+		return multiline_text_extent(aText, [&aFont](std::u32string::size_type) { return aFont; }, 0);
+	}
+
+	size graphics_context::multiline_text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector) const
+	{
+		return multiline_text_extent(aText, aFontSelector, 0);
+	}
+
+	size graphics_context::multiline_text_extent(const string& aText, const font& aFont, dimension aMaxWidth) const
+	{
+		return multiline_text_extent(aText, [&aFont](std::u32string::size_type) { return aFont; }, aMaxWidth);
+	}
+		
+	size graphics_context::multiline_text_extent(const string& aText, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth) const
+	{
+		return multiline_glyph_text_extent(to_glyph_text(aText.begin(), aText.end(), aFontSelector), aMaxWidth);
+	}
+
+	size graphics_context::glyph_text_extent(const glyph_text& aText) const
+	{
+		return from_device_units(aText.extents());
+	}
+
+	size graphics_context::glyph_text_extent(const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const
+	{
+		return from_device_units(aText.extents(aTextBegin, aTextEnd));
+	}
+
+	size graphics_context::multiline_glyph_text_extent(const glyph_text& aText, dimension aMaxWidth) const
+	{
+		auto multilineGlyphText = to_multiline_glyph_text(aText, aMaxWidth);
 		size result;
-		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
-		{
-			if (aMaxWidth == 0)
-			{
-				size lineExtent = from_device_units(glyphText.extents(i->first, i->second));
-				result.cx = std::max(result.cx, lineExtent.cx);
-				result.cy += lineExtent.cy;
-			}
-			else if (i->first != i->second)
-			{
-				glyph_text::const_iterator next = i->first;
-				glyph_text::const_iterator lineStart = next;
-				glyph_text::const_iterator lineEnd = i->second;
-				dimension maxWidth = to_device_units(size(aMaxWidth, 0)).cx;
-				dimension lineWidth = 0;
-				bool gotLine = false;
-				while (next != i->second)
-				{
-					if (lineWidth + next->extents(glyphText).cx > maxWidth)
-					{
-						if (next != lineStart)
-						{
-							std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
-							lineWidth -= glyphText.extents(wordBreak.first, next, false).cx;
-							lineEnd = wordBreak.first;
-							next = wordBreak.second;
-							if (lineEnd == next)
-							{
-								while (lineEnd != i->second && (lineEnd + 1)->source() == wordBreak.first->source())
-									++lineEnd;
-								next = lineEnd;
-							}
-						}
-						else
-						{
-							lineWidth += next->advance().cx;
-							++next;
-						}
-						gotLine = true;
-					}
-					else
-					{
-						lineWidth += next->advance().cx;
-						++next;
-					}
-					if (gotLine || next == i->second)
-					{
-						lineWidth += (std::prev(next)->extents(glyphText).cx - std::prev(next)->advance().cx);
-						result.cx = std::max(result.cx, from_device_units(size(lineWidth, 0)).cx);
-						result.cy += from_device_units(glyphText.extents(i->first, i->second)).cy;
-						lineStart = next;
-						lineEnd = i->second;
-						lineWidth = 0;
-						gotLine = false;
-					}
-				}
-			}
-			else
-				result.cy += aFont.height();
-		}
-		if (result.cy == 0)
-			result.cy = from_device_units(size{ 0.0, aFont.height() }).cy;
+		for (auto& line : multilineGlyphText.lines)
+			result.cx = std::max(result.cx, line.extents.cx);
+		result.cy = multilineGlyphText.lines.back().pos.y + multilineGlyphText.lines.back().extents.cy;
 		return result;
 	}
 
-	bool graphics_context::is_text_left_to_right(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage) const
+	bool graphics_context::is_text_left_to_right(const string& aText, const font& aFont) const
 	{
-		const auto& glyphText = aCacheUsage.use && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aText.begin(), aText.end(), aFont);
-		if (aCacheUsage.use && iGlyphTextCache->empty())
-			*iGlyphTextCache = glyphText;
+		const auto& glyphText = to_glyph_text(aText.begin(), aText.end(), aFont);
 		return glyph_text_direction(glyphText.cbegin(), glyphText.cend()) == text_direction::LTR;
 	}
 
-	bool graphics_context::is_text_right_to_left(const string& aText, const font& aFont, const glyph_text_cache_usage& aCacheUsage) const
+	bool graphics_context::is_text_right_to_left(const string& aText, const font& aFont) const
 	{
-		return !is_text_left_to_right(aText, aFont, aCacheUsage);
+		return !is_text_left_to_right(aText, aFont);
 	}
 
-	void graphics_context::draw_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage) const
+	void graphics_context::draw_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance) const
 	{
-		draw_text(aPoint.to_vec3(), aText, aFont, aAppearance, aCacheUsage);
+		draw_text(aPoint.to_vec3(), aText, aFont, aAppearance);
 	}
 
-	void graphics_context::draw_text(const point& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage) const
+	void graphics_context::draw_text(const point& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const
 	{
-		draw_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aAppearance, aCacheUsage);
+		draw_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aAppearance);
 	}
 
-	void graphics_context::draw_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage) const
+	void graphics_context::draw_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance) const
 	{
-		draw_text(aPoint, aText.begin(), aText.end(), aFont, aAppearance, aCacheUsage);
+		draw_text(aPoint, aText.begin(), aText.end(), aFont, aAppearance);
 	}
 
-	void graphics_context::draw_text(const vec3& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance, const glyph_text_cache_usage& aCacheUsage) const
+	void graphics_context::draw_text(const vec3& aPoint, string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const
 	{
-		const auto& glyphText = aCacheUsage.use && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aTextBegin, aTextEnd, aFont);
-		if (aCacheUsage.use && iGlyphTextCache->empty())
-			*iGlyphTextCache = glyphText;
-		draw_glyph_text(aPoint, glyphText, aAppearance);
+		draw_glyph_text(aPoint, to_glyph_text(aTextBegin, aTextEnd, aFont), aAppearance);
 	}
 
-	void graphics_context::draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment, const glyph_text_cache_usage& aCacheUsage) const
+	void graphics_context::draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment) const
 	{
-		draw_multiline_text(aPoint.to_vec3(), aText, aFont, aAppearance, aAlignment, aCacheUsage);
+		draw_multiline_text(aPoint.to_vec3(), aText, aFont, aAppearance, aAlignment);
 	}
 
-	void graphics_context::draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment, const glyph_text_cache_usage& aCacheUsage) const
+	void graphics_context::draw_multiline_text(const point& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
 	{
-		draw_multiline_text(aPoint.to_vec3(), aText, aFont, aMaxWidth, aAppearance, aAlignment, aCacheUsage);
+		draw_multiline_text(aPoint.to_vec3(), aText, aFont, aMaxWidth, aAppearance, aAlignment);
 	}
 		
-	void graphics_context::draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment, const glyph_text_cache_usage& aCacheUsage) const
+	void graphics_context::draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment) const
 	{
-		draw_multiline_text(aPoint, aText, aFont, 0, aAppearance, aAlignment, aCacheUsage);
+		draw_multiline_text(aPoint, aText, aFont, 0, aAppearance, aAlignment);
 	}
 
-	void graphics_context::draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment, const glyph_text_cache_usage& aCacheUsage) const
+	void graphics_context::draw_multiline_text(const vec3& aPoint, const string& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
 	{
-		const auto& glyphText = aCacheUsage.use && !iGlyphTextCache->empty() ? *iGlyphTextCache : to_glyph_text(aText.begin(), aText.end(), aFont);
-		if (aCacheUsage.use && iGlyphTextCache->empty())
-			*iGlyphTextCache = glyphText;
-		typedef std::pair<glyph_text::const_iterator, glyph_text::const_iterator> line_t;
-		typedef std::vector<line_t> lines_t;
-		lines_t lines;
-		std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
-		neolib::tokens(glyphText.cbegin(), glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
-		size textExtent = multiline_text_extent(aText, aFont, aMaxWidth, aCacheUsage);
-		vec3 pos = aPoint;
-		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
+		auto multilineGlyphText = to_multiline_glyph_text(aText, aFont, aMaxWidth, aAlignment);
+		for (auto& line : multilineGlyphText.lines)
 		{
-			const auto& line = (logical_coordinates().first.y > logical_coordinates().second.y ? *i : *(lines.rbegin() + (i - lines.begin())));
-			if (aMaxWidth == 0)
-			{
-				vec3 linePos = pos;
-				size lineExtent = from_device_units(glyphText.extents(line.first, line.second));
-				if (glyph_text_direction(line.first, line.second) == text_direction::RTL)
-					linePos.x += textExtent.cx - lineExtent.cx;
-				draw_glyph_text(linePos, glyphText, line.first, line.second, aAppearance);
-				pos.y += lineExtent.cy;
-			}
-			else
-			{
-				glyph_text::const_iterator next = line.first;
-				glyph_text::const_iterator lineStart = next;
-				glyph_text::const_iterator lineEnd = line.second;
-				dimension maxWidth = to_device_units(size(aMaxWidth, 0)).cx;
-				dimension lineWidth = 0;
-				while (next != line.second)
-				{
-					bool gotLine = false;
-					if (lineWidth + next->extents(glyphText).cx > maxWidth)
-					{
-						if (next != lineStart)
-						{
-							std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = glyphText.word_break(lineStart, next);
-							lineWidth -= glyphText.extents(wordBreak.first, next, false).cx;
-							lineEnd = wordBreak.first;
-							next = wordBreak.second;
-							if (lineEnd == next)
-							{
-								while (lineEnd != line.second && (lineEnd + 1)->source() == wordBreak.first->source())
-									++lineEnd;
-								next = lineEnd;
-							}
-						}
-						else
-						{
-							lineWidth += next->advance().cx;
-							++next;
-						}
-						gotLine = true;
-					}
-					else
-					{
-						lineWidth += next->advance().cx;
-						++next;
-					}
-					if (gotLine || next == line.second)
-					{
-						lineWidth += (std::prev(next)->extents(glyphText).cx - std::prev(next)->advance().cx);
-						vec3 linePos = pos;
-						if (aAlignment == alignment::Left && glyph_text_direction(lineStart, next) == text_direction::RTL ||
-							aAlignment == alignment::Right && glyph_text_direction(lineStart, next) == text_direction::LTR)
-							linePos.x += textExtent.cx - from_device_units(size(lineWidth, 0)).cx;
-						else if (aAlignment == alignment::Centre)
-							linePos.x += std::ceil((textExtent.cx - from_device_units(size(lineWidth, 0)).cx) / 2);
-						draw_glyph_text(linePos, glyphText, lineStart, lineEnd, aAppearance);
-						pos.y += glyphText.extents(lineStart, lineEnd).cy;
-						lineStart = next;
-						lineEnd = line.second;
-						lineWidth = 0;
-					}
-				}
-				if (line.first == line.second)
-					pos.y += font().height();
-			}
+			if (line.begin == line.end)
+				continue;
+			draw_glyph_text(aPoint + line.pos.to_vec3(), multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aAppearance);
 		}
 	}
 
@@ -660,6 +546,22 @@ namespace neogfx
 	void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const
 	{
 		neogfx::draw_glyph_text(*this, aPoint, aText, aTextBegin, aTextEnd, aAppearance);
+	}
+
+	void graphics_context::draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
+	{
+		draw_multiline_glyph_text(aPoint.to_vec3(), aText, aMaxWidth, aAppearance, aAlignment);
+	}
+
+	void graphics_context::draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
+	{
+		auto multilineGlyphText = to_multiline_glyph_text(aText, aMaxWidth, aAlignment);
+		for (auto& line : multilineGlyphText.lines)
+		{
+			if (line.begin == line.end)
+				continue;
+			draw_glyph_text(aPoint + line.pos.to_vec3(), multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aAppearance);
+		}
 	}
 
 	bool graphics_context::metrics_available() const
@@ -902,6 +804,136 @@ namespace neogfx
 		return to_glyph_text_impl(aTextBegin, aTextEnd, aFontSelector);
 	}
 
+	graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(const string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
+	{
+		return to_multiline_glyph_text(aText.begin(), aText.end(), aFont, aMaxWidth, aAlignment);
+	}
+
+	graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
+	{
+		return to_multiline_glyph_text(aTextBegin, aTextEnd, [&aFont](std::u32string::size_type) { return aFont; }, aMaxWidth, aAlignment);
+	}
+
+	graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment) const
+	{
+		auto& clusterMap = iGlyphTextData->iClusterMap;
+		clusterMap.clear();
+		iGlyphTextData->iCodePointsBuffer.clear();
+		std::u32string& codePoints = iGlyphTextData->iCodePointsBuffer;
+
+		codePoints = neolib::utf8_to_utf32(aTextBegin, aTextEnd, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type)
+		{
+			clusterMap.push_back(glyph_text_data::cluster{ aFrom });
+		});
+
+		return to_multiline_glyph_text(codePoints.begin(), codePoints.end(), [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
+		{
+			return aFontSelector(clusterMap[aIndex].from);
+		}, aMaxWidth, aAlignment);
+	}
+
+	graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(const std::u32string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
+	{
+		return to_multiline_glyph_text(aText.begin(), aText.end(), aFont, aMaxWidth, aAlignment);
+	}
+
+	graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
+	{
+		return to_multiline_glyph_text(aTextBegin, aTextEnd, [&aFont](std::u32string::size_type) { return aFont; }, aMaxWidth, aAlignment);
+	}
+
+	graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment) const
+	{
+		return to_multiline_glyph_text(to_glyph_text(aTextBegin, aTextEnd, aFontSelector), aMaxWidth, aAlignment);
+	}
+
+	graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(const glyph_text& aText, dimension aMaxWidth, alignment aAlignment) const
+	{
+		multiline_glyph_text result{ aText };
+		typedef std::pair<glyph_text::const_iterator, glyph_text::const_iterator> line_t;
+		typedef std::vector<line_t> lines_t;
+		lines_t lines;
+		std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
+		neolib::tokens(result.glyphText.cbegin(), result.glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
+		vec3 pos;
+		dimension maxLineWidth = 0.0;
+		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
+		{
+			const auto& line = (logical_coordinates().first.y > logical_coordinates().second.y ? *i : *(lines.rbegin() + (i - lines.begin())));
+			if (aMaxWidth == 0)
+			{
+				vec3 linePos = pos;
+				size lineExtent = from_device_units(result.glyphText.extents(line.first, line.second));
+				result.lines.push_back(multiline_glyph_text::line{ linePos, lineExtent.to_vec2(), std::distance(result.glyphText.cbegin(), line.first), std::distance(result.glyphText.cbegin(), line.second) });
+				maxLineWidth = std::max(maxLineWidth, lineExtent.cx);
+				pos.y += lineExtent.cy;
+			}
+			else
+			{
+				glyph_text::const_iterator next = line.first;
+				glyph_text::const_iterator lineStart = next;
+				glyph_text::const_iterator lineEnd = line.second;
+				dimension maxWidth = to_device_units(size(aMaxWidth, 0.0)).cx;
+				dimension lineWidth = 0.0;
+				while (next != line.second)
+				{
+					bool gotLine = false;
+					if (lineWidth + next->extents(result.glyphText).cx > maxWidth)
+					{
+						if (next != lineStart)
+						{
+							std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = result.glyphText.word_break(lineStart, next);
+							lineWidth -= result.glyphText.extents(wordBreak.first, next, false).cx;
+							lineEnd = wordBreak.first;
+							next = wordBreak.second;
+							if (lineEnd == next)
+							{
+								while (lineEnd != line.second && (lineEnd + 1)->source() == wordBreak.first->source())
+									++lineEnd;
+								next = lineEnd;
+							}
+						}
+						else
+						{
+							lineWidth += next->advance().cx;
+							++next;
+						}
+						gotLine = true;
+					}
+					else
+					{
+						lineWidth += next->advance().cx;
+						++next;
+					}
+					if (gotLine || next == line.second)
+					{
+						lineWidth += (std::prev(next)->extents(result.glyphText).cx - std::prev(next)->advance().cx);
+						vec3 linePos = pos;
+						result.lines.push_back(multiline_glyph_text::line{ linePos, result.glyphText.extents(lineStart, lineEnd).to_vec2(), std::distance(result.glyphText.cbegin(), lineStart), std::distance(result.glyphText.cbegin(), lineEnd) });
+						maxLineWidth = std::max(maxLineWidth, lineWidth);
+						pos.y += result.lines.back().extents.cy;
+						lineStart = next;
+						lineEnd = line.second;
+						lineWidth = 0;
+					}
+				}
+				if (line.first == line.second)
+					pos.y += font().height();
+			}
+		}
+
+		for (auto& line : result.lines)
+		{
+			auto const textDirection = glyph_text_direction(result.glyphText.cbegin() + line.begin, result.glyphText.cbegin() + line.end);
+			if ((aAlignment == alignment::Left && textDirection == text_direction::RTL) || (aAlignment == alignment::Right && textDirection == text_direction::LTR))
+				line.pos.x += maxLineWidth - from_device_units(size{ line.extents.cx, 0.0 }).cx;
+			else if (aAlignment == alignment::Centre)
+				line.pos.x += std::ceil((maxLineWidth - from_device_units(size{ line.extents.cx, 0.0 }).cx) / 2);
+		}
+
+		return result;
+	}
+
 	void graphics_context::draw_glyph(const point& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const
 	{
 		draw_glyph(aPoint.to_vec3(), aFont, aGlyph, aAppearance);
@@ -942,16 +974,6 @@ namespace neogfx
 			aPoint + vec3{ 0.0, yLine },
 			aPoint + vec3{ mnemonics_shown() && aGlyph.mnemonic() ? aGlyph.extents(aFont).cx : aGlyph.advance().cx, yLine },
 			pen{ aAppearance.ink(), aFont.native_font_face().underline_thickness() });
-	}
-
-	void graphics_context::set_glyph_text_cache(glyph_text& aGlyphTextCache) const
-	{
-		iGlyphTextCache = &aGlyphTextCache;
-	}
-
-	void graphics_context::reset_glyph_text_cache() const
-	{
-		iGlyphTextCache = 0;
 	}
 
 	void graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix) const

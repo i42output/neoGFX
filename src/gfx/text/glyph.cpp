@@ -24,13 +24,6 @@
 
 namespace neogfx
 {
-	neogfx::font glyph::font() const
-	{
-		if (font_specified())
-			return service<i_font_manager>().font_from_id(font_id());
-		throw no_font_specified();
-	}
-
 	const font& glyph_font_cache::glyph_font(const glyph& aGlyph) const
 	{
 		auto existing = cache().find(aGlyph.font_id());
