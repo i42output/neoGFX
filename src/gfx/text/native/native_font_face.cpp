@@ -305,7 +305,7 @@ namespace neogfx
 		auto subTextureWidth = bitmap.width / (useSubpixelFiltering ? 3 : 1);
 		auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
 			neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
-			1.0, texture_sampling::Normal, pixelMode != glyph_pixel_mode::Mono ? texture_data_format::RGBA : texture_data_format::Red);
+			1.0, texture_sampling::Normal, pixelMode != glyph_pixel_mode::Mono ? texture_data_format::SubPixel : texture_data_format::Red);
 
 		rect glyphRect{ subTexture.atlas_location() };
 		i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(aGlyph.value(),

@@ -25,21 +25,21 @@ namespace neogfx::game
 {
 	namespace shape
 	{
-		text::text(i_ecs& aEcs, const graphics_context& aGraphicsContext, const vec3& aPosition, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment) :
+		text::text(i_ecs& aEcs, const graphics_context& aGraphicsContext, const std::string& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment) :
 			entity{ aEcs, archetype().id() }
 		{
 			auto& font = aEcs.shared_component<game::font>().populate(neolib::to_string(neolib::generate_uuid()), game::font{ { service<i_font_manager>(), aFont.id() }, aFont.family_name(), aFont.style_name(), aFont.size(), aFont.underline() });
 			auto& textMesh = aEcs.component<game::text_mesh>().populate(id(), game::text_mesh
 				{
 					aText,
-					aPosition,
 					{},
 					{},
 					{},
 					aAlignment,
 					{ &font },
+					{ to_ecs_component(aAppearance.ink()) },
 					aAppearance.has_effect() ? aAppearance.effect().type() : text_effect_type::None,
-					{} /* todo: material */,
+					{ to_ecs_component(aAppearance.effect().colour()) },
 					aAppearance.has_effect() ? aAppearance.effect().width() : 0.0
 				});
 			game::text_mesh::meta::update(textMesh, aEcs, aGraphicsContext, id());

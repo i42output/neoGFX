@@ -118,6 +118,16 @@ namespace neogfx
 		return result;
 	}
 
+	inline game::material to_ecs_component(const text_colour& aTextColour)
+	{
+		if (std::holds_alternative<colour>(aTextColour))
+			return game::material{ to_ecs_component(std::get<colour>(aTextColour)) };
+		else if (std::holds_alternative<gradient>(aTextColour))
+			return game::material{ {}, to_ecs_component(std::get<gradient>(aTextColour)) };
+		else
+			return game::material{ game::colour{} };
+	}
+
 	inline game::material to_ecs_component(const brush& aBrush)
 	{
 		if (std::holds_alternative<colour>(aBrush))

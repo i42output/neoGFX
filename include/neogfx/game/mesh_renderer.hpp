@@ -32,7 +32,7 @@ namespace neogfx::game
 	struct mesh_renderer
 	{
 		material material;
-		std::vector<patch> patches;
+		patches_t patches;
 		bool destroyOnFustrumCull;
 
 		struct meta : i_component_data::meta

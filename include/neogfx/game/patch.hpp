@@ -84,4 +84,6 @@ namespace neogfx::game
 			}
 		};
 	};
+
+	typedef std::vector<patch> patches_t;
 }

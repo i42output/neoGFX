@@ -34,6 +34,7 @@ namespace neogfx
 			switch (aDataFormat)
 			{
 			case texture_data_format::RGBA:
+			case texture_data_format::SubPixel:
 				switch (aDataType)
 				{
 				case texture_data_type::UnsignedByte:

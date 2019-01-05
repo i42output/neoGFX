@@ -52,8 +52,9 @@ namespace neogfx
 	enum class texture_data_format : uint32_t
 	{
 		// todo: add remaining GL texture data formats
-		RGBA,
-		Red
+		RGBA		= 0x01,
+		Red			= 0x02,
+		SubPixel	= 0x03
 	};
 
 	enum class texture_data_type : uint32_t

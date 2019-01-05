@@ -1536,6 +1536,7 @@ namespace neogfx
 					uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2();
 				else
 					uvFixupOffset = aMaterial.texture->subTexture->min;
+				rendering_engine().active_shader_program().set_uniform_variable("texDataFormat", static_cast<int>(texture.data_format()));
 				if (texture.sampling() != texture_sampling::Multisample)
 				{
 					rendering_engine().active_shader_program().set_uniform_variable("tex", 1);

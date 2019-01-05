@@ -40,6 +40,8 @@ namespace video_poker
 {
 	using namespace neogames::card_games;
 
+	typedef int32_t credit_t;
+
 	class outcome;
 
 	class table : public neogfx::widget, public i_table, private i_card_textures
@@ -58,16 +60,16 @@ namespace video_poker
 		const neogfx::i_texture& suit_texture(const card& aCard) const override;
 		const neogfx::i_texture& face_texture(const card& aCard) const override;
 	private:
-		void bet(int32_t aBet);
+		void bet(credit_t aBet);
 		void deal();
-		void win(int32_t aWinnings);
+		void win(credit_t aWinnings);
 		void no_win();
 		void change_state(table_state aNewState);
 		void update_widgets();
 	private:
 		table_state iState;
-		int32_t iCredits;
-		int32_t iStake;
+		credit_t iCredits;
+		credit_t iStake;
 		boost::optional<deck> iDeck;
 		boost::optional<hand> iHand;
 		neogfx::game::canvas& iCanvas;

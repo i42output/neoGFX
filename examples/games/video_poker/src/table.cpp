@@ -29,10 +29,10 @@ namespace video_poker
 {
 	using namespace neogames::card_games;
 
-	const int32_t STARTING_CREDITS = 10;
-	const int32_t MAX_BET = 5;
+	const credit_t STARTING_CREDITS = 10;
+	const credit_t MAX_BET = 5;
 
-	const std::map<poker_hand, int32_t> PAY_TABLE = 
+	const std::map<poker_hand, credit_t> PAY_TABLE = 
 	{
 		{ Pair, 1 },
 		{ TwoPair, 2 },
@@ -52,13 +52,14 @@ namespace video_poker
 			neogfx::game::shape::text{
 				aCanvas.ecs(),
 				neogfx::graphics_context{ aCanvas },
-				neogfx::vec3{},
 				aOutcome,
 				neogfx::font{ "Exo 2", "Black", 48.0 },
 				neogfx::text_appearance{aColour, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::colour::Black } },
 				neogfx::alignment::Centre}
 		{
-			aCanvas.ecs().populate(id(), neogfx::game::mesh_renderer{ {}, {}, true }, neogfx::game::rigid_body{ {}, 1.0, neogfx::vec3{ 0.0, 0.5, 0.0} });
+			aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).destroyOnFustrumCull = true;
+			auto const& boundingBox = neogfx::game::bounding_rect(*aCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(id()).mesh);
+			aCanvas.ecs().populate(id(), neogfx::game::rigid_body{ neogfx::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 1.0 }, 1.0, neogfx::vec3{ 0.0, 5.0, 0.0 } });
 		}
 	};
 	
@@ -186,10 +187,10 @@ namespace video_poker
 		throw texture_not_found();
 	}
 
-	void table::bet(int32_t aBet)
+	void table::bet(credit_t aBet)
 	{
-		const int32_t minBet = -iStake;
-		const int32_t maxBet = std::min(iCredits, MAX_BET - iStake);
+		const credit_t minBet = -iStake;
+		const credit_t maxBet = std::min(iCredits, MAX_BET - iStake);
 		aBet = std::max(minBet, std::min(maxBet, aBet));
 		if (aBet != 0)
 		{
@@ -225,7 +226,7 @@ namespace video_poker
 		}
 	}
 
-	void table::win(int32_t aWinnings)
+	void table::win(credit_t aWinnings)
 	{
 		iOutcome = std::make_unique<outcome>(
 			iCanvas, 
