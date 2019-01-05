@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/text_mesh.hpp>
+#include <neogfx/game/simple_physics.hpp>
 #include <video_poker/table.hpp>
 #include <video_poker/poker.hpp>
 
@@ -59,7 +60,7 @@ namespace video_poker
 		{
 			aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).destroyOnFustrumCull = true;
 			auto const& boundingBox = neogfx::game::bounding_rect(*aCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(id()).mesh);
-			aCanvas.ecs().populate(id(), neogfx::game::rigid_body{ neogfx::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 1.0 }, 1.0, neogfx::vec3{ 0.0, 5.0, 0.0 } });
+			aCanvas.ecs().populate(id(), neogfx::game::rigid_body{ neogfx::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 1.0 }, 1.0, neogfx::vec3{ 0.0, -300.0, 0.0 } });
 		}
 	};
 	
@@ -145,6 +146,9 @@ namespace video_poker
 		iFaceTextures.emplace(card::value::King, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/king.png" }));
 
 		update_widgets();
+
+		// Instantiate physics...
+		aCanvas.ecs().system<neogfx::game::simple_physics>();
 	}
 
 	table::~table()
