@@ -467,7 +467,7 @@ namespace neogfx
 		size result;
 		for (auto& line : multilineGlyphText.lines)
 			result.cx = std::max(result.cx, line.extents.cx);
-		result.cy = multilineGlyphText.lines.back().pos.y + multilineGlyphText.lines.back().extents.cy;
+		result.cy = (!multilineGlyphText.lines.empty() ? multilineGlyphText.lines.back().pos.y + multilineGlyphText.lines.back().extents.cy : 0.0);
 		return result;
 	}
 
