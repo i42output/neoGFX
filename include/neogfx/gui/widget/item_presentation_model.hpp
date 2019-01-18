@@ -35,6 +35,9 @@
 
 namespace neogfx
 {
+	template<>
+	i_rendering_engine& service<i_rendering_engine>();
+
 	template <typename ItemModel>
 	class basic_item_presentation_model : public i_item_presentation_model, private i_item_model_subscriber, private neolib::observable<i_item_presentation_model_subscriber>
 	{

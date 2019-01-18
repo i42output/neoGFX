@@ -24,24 +24,4 @@
 
 namespace neogfx
 {
-	scoped_render_target::scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ aRenderTarget }, iPreviouslyActivatedTarget{ nullptr }
-	{
-		iPreviouslyActivatedTarget = service<i_rendering_engine>().active_target();
-		if (iPreviouslyActivatedTarget != &iRenderTarget)
-		{
-			if (iPreviouslyActivatedTarget != nullptr)
-				iPreviouslyActivatedTarget->deactivate_target();
-			iRenderTarget.activate_target();
-		}
-	}
-
-	scoped_render_target::~scoped_render_target()
-	{
-		if (iPreviouslyActivatedTarget != &iRenderTarget)
-		{
-			iRenderTarget.deactivate_target();
-			if (iPreviouslyActivatedTarget != nullptr)
-				iPreviouslyActivatedTarget->activate_target();
-		}
-	}
 }

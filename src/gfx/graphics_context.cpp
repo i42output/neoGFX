@@ -163,9 +163,20 @@ namespace neogfx
 		return iRenderTarget;
 	}
 
-	graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling) const
+	graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_colour& aClearColour) const
 	{
-		return ping_pong_buffers_t{ service<i_rendering_engine>().ping_pong_buffer1(aExtents, aSampling), service<i_rendering_engine>().ping_pong_buffer2(aExtents, aSampling) };
+		auto buffer1 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer1(aExtents, aSampling));
+		buffer1->render_target().target_texture().native_texture()->set_logical_coordinate_system(logical_coordinate_system());
+		buffer1->scissor_on(rect{ point{}, aExtents });
+		if (aClearColour != std::nullopt)
+			buffer1->clear(*aClearColour);
+		auto buffer2 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer2(aExtents, aSampling));
+		buffer2->render_target().target_texture().native_texture()->set_logical_coordinate_system(logical_coordinate_system());
+		buffer2->scissor_on(rect{ point{}, aExtents });
+		if (aClearColour != std::nullopt)
+			buffer2->clear(*aClearColour);
+		render_target().activate_target();
+		return ping_pong_buffers_t{ std::move(buffer1), std::move(buffer2) };
 	}
 	
 	delta graphics_context::to_device_units(const delta& aValue) const
@@ -770,8 +781,7 @@ namespace neogfx
 	void graphics_context::blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParamter2) const
 	{
 		// todo
-		aSource.fill_rect(aDestinationRect, colour::Cyan);
-		blit(aDestinationRect, aSource, aSourceRect);
+		fill_rect(aDestinationRect, colour::Cyan);
 	}
 
 	glyph_text graphics_context::to_glyph_text(const string& aText, const font& aFont) const
@@ -1055,7 +1065,7 @@ namespace neogfx
 		auto adjustedMesh = aMesh;
 		for (auto& uv : adjustedMesh.uv)
 			uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv * (aTextureRect.extents() / aTexture.extents()).to_vec2();
-		draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
+ 		draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation) const

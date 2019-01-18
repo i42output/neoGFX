@@ -48,7 +48,7 @@ namespace neogfx
 	opengl_window::~opengl_window()
 	{
 		set_destroyed();
-		if (rendering_engine().active_target() == this)
+		if (target_active())
 			rendering_engine().deactivate_context();
 	}
 
@@ -75,7 +75,8 @@ namespace neogfx
 
 	void opengl_window::activate_target() const
 	{
-		if (rendering_engine().active_target() != this)
+		bool alreadyActive = target_active();
+		if (!alreadyActive)
 		{
 			target_activating.trigger();
 			service<i_rendering_engine>().activate_context(*this);
@@ -108,14 +109,22 @@ namespace neogfx
 			GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 			glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 		}
+		if (!alreadyActive)
+			target_activated.trigger();
+	}
+
+	bool opengl_window::target_active() const
+	{
+		return rendering_engine().active_target() == this;
 	}
 
 	void opengl_window::deactivate_target() const
 	{
-		if (rendering_engine().active_target() == this)
+		if (target_active())
 		{
 			target_deactivating.trigger();
 			rendering_engine().deactivate_context();
+			target_deactivated.trigger();
 			return;
 		}
 //		throw not_active();
@@ -277,7 +286,7 @@ namespace neogfx
 				iFrameBufferExtents.cx < extents().cx ? extents().cx * 1.5f : iFrameBufferExtents.cx,
 				iFrameBufferExtents.cy < extents().cy ? extents().cy * 1.5f : iFrameBufferExtents.cy }.ceil();
 			glCheck(glGenFramebuffers(1, &iFrameBuffer));
-			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
+			glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
 			target_texture();
 			glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
@@ -287,15 +296,14 @@ namespace neogfx
 		}
 		else
 		{
-			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
+			glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
 			glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, reinterpret_cast<GLuint>(target_texture().native_texture()->handle())));
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 		}
 		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
-		glCheck(GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER));
+		glCheck(GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER));
 		if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
 			throw failed_to_create_framebuffer(glErrorString(status));
-		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
 		glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 		glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));

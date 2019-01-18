@@ -56,6 +56,7 @@ namespace neogfx
 		enum class type
 		{
 			Attached,
+			AttachedInactiveRenderTarget,
 			Unattached
 		};
 		struct multiline_glyph_text
@@ -71,7 +72,7 @@ namespace neogfx
 			typedef neolib::vecarray<line, 8> lines_t;
 			lines_t lines;
 		};
-		typedef std::pair<graphics_context, graphics_context> ping_pong_buffers_t;
+		typedef std::pair<std::unique_ptr<graphics_context>, std::unique_ptr<graphics_context>> ping_pong_buffers_t;
 	private:
 		friend class generic_surface;
 		class glyph_shapes;
@@ -89,7 +90,7 @@ namespace neogfx
 		virtual ~graphics_context();
 	public:
 		const i_render_target& render_target() const;
-		ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Normal) const;
+		ping_pong_buffers_t ping_pong_buffers(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_colour& aClearColour = colour{ vec4{0.0, 0.0, 0.0, 0.0} }) const;
 		// operations
 	public:
 		delta to_device_units(const delta& aValue) const;
@@ -270,11 +271,12 @@ namespace neogfx
 	template <typename Iter>
 	inline void draw_glyph_text_glow_pass_1(const graphics_context::ping_pong_buffers_t& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_colour& aGlowColour, dimension aGlowSize)
 	{
+		scoped_render_target srt{ aPingPongBuffers.first->render_target() };
 		point const effectOffset{ aGlowSize, aGlowSize };
 		vec3 pos{ effectOffset.x, effectOffset.y, 0.0 };
 		for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
 		{
-			aPingPongBuffers.first.draw_glyph(pos + iterGlyph->offset().to_vec3(), iterGlyph->font(aGlyphText), *iterGlyph, aGlowColour);
+			aPingPongBuffers.first->draw_glyph(pos + iterGlyph->offset().to_vec3(), iterGlyph->font(aGlyphText), *iterGlyph, aGlowColour);
 			pos.x += iterGlyph->advance().cx;
 		}
 	}
@@ -282,10 +284,11 @@ namespace neogfx
 	template <typename Iter>
 	inline void draw_glyph_text_glow_pass_2(const graphics_context::ping_pong_buffers_t& aPingPongBuffers, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, dimension aGlowSize)
 	{
+		scoped_render_target srt{ aPingPongBuffers.second->render_target() };
 		point const effectOffset{ aGlowSize, aGlowSize };
 		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
 		rect const effectRect{ point{}, effectExtents };
-		aPingPongBuffers.second.blur(effectRect, aPingPongBuffers.first, effectRect, blurring_algorithm::Gaussian, 5, 1.0);
+		aPingPongBuffers.second->blur(effectRect, *aPingPongBuffers.first, effectRect, blurring_algorithm::Gaussian, 5, 1.0);
 	}
 
 	template <typename Iter>
@@ -294,7 +297,7 @@ namespace neogfx
 		point const effectOffset{ aGlowSize, aGlowSize };
 		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
 		rect const effectRect{ point{}, effectExtents };
-		aGraphicsContext.blit(rect{ point{ aPoint } -effectOffset, effectExtents }, aPingPongBuffers.second, effectRect);
+		aGraphicsContext.blit(rect{ point{ aPoint } -effectOffset, effectExtents }, *aPingPongBuffers.second, effectRect);
 	}
 
 	template <typename Iter>

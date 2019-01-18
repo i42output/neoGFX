@@ -170,6 +170,10 @@ namespace neogfx
 	{
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
+		iSink += render_target().target_activated([this]()
+		{
+			apply_scissor();
+		});
 		iSink += render_target().target_deactivating([this]() 
 		{ 
 			flush(); 
@@ -191,6 +195,10 @@ namespace neogfx
 	{
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
+		iSink += render_target().target_activated([this]()
+		{
+			apply_scissor();
+		});
 		iSink += render_target().target_deactivating([this]()
 		{
 			flush();
@@ -212,6 +220,10 @@ namespace neogfx
 	{
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(iSmoothingMode);
+		iSink += render_target().target_activated([this]()
+		{
+			apply_scissor();
+		});
 		iSink += render_target().target_deactivating([this]()
 		{
 			flush();
@@ -490,45 +502,46 @@ namespace neogfx
 
 	void opengl_graphics_context::scissor_on(const rect& aRect)
 	{
-		if (iScissorRect == std::nullopt)
-		{
-			glCheck(glEnable(GL_SCISSOR_TEST));
-			iScissorRect = aRect;
-		}
-		iScissorRects.push_back(*iScissorRect);
-		iScissorRect = iScissorRect->intersection(aRect);
+		iScissorRects.push_back(aRect);
+		iScissorRect = std::nullopt;
 		apply_scissor();
 	}
 
 	void opengl_graphics_context::scissor_off()
 	{
-		auto previousScissorRect = iScissorRects.back();
 		iScissorRects.pop_back();
-		if (iScissorRects.empty())
-		{
-			glCheck(glDisable(GL_SCISSOR_TEST));
-			iScissorRect = std::nullopt;
-		}
-		else
-		{
-			iScissorRect = previousScissorRect;
-			apply_scissor();
-		}
+		iScissorRect = std::nullopt;
+		apply_scissor();
 	}
 
 	const optional_rect& opengl_graphics_context::scissor_rect() const
 	{
+		if (iScissorRect == std::nullopt && !iScissorRects.empty())
+		{
+			for (auto const& rect : iScissorRects)
+				if (iScissorRect != std::nullopt)
+					iScissorRect = iScissorRect->intersection(rect);
+				else
+					iScissorRect = rect;
+		}
 		return iScissorRect;
 	}
 
 	void opengl_graphics_context::apply_scissor()
 	{
-		auto sr = *scissor_rect();
-		GLint x = static_cast<GLint>(std::ceil(sr.x));
-		GLint y = static_cast<GLint>(std::ceil(rendering_area(false).cy - sr.cy - sr.y));
-		GLsizei cx = static_cast<GLsizei>(std::ceil(sr.cx));
-		GLsizei cy = static_cast<GLsizei>(std::ceil(sr.cy));
-		glCheck(glScissor(x, y, cx, cy));
+		auto sr = scissor_rect();
+		if (sr != std::nullopt)
+		{
+			glCheck(glEnable(GL_SCISSOR_TEST));
+			GLint x = static_cast<GLint>(std::ceil(sr->x));
+			bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
+			GLint y = guiCoordinates ? static_cast<GLint>(std::ceil(rendering_area(false).cy - sr->cy - sr->y)) : sr->y;
+			GLsizei cx = static_cast<GLsizei>(std::ceil(sr->cx));
+			GLsizei cy = static_cast<GLsizei>(std::ceil(sr->cy));
+			glCheck(glScissor(x, y, cx, cy));
+		}
+		else
+			glCheck(glDisable(GL_SCISSOR_TEST));
 	}
 
 	void opengl_graphics_context::clip_to(const rect& aRect)

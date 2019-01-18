@@ -82,6 +82,7 @@ namespace neogfx
 		const neogfx::logical_coordinates& logical_coordinates() const override;
 		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
 	public:
+		bool target_active() const override;
 		void activate_target() const override;
 		void deactivate_target() const override;
 	public:

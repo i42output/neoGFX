@@ -26,7 +26,6 @@
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/shader_array.hpp>
-#include <neogfx/gfx/i_render_target.hpp>
 
 namespace neogfx
 {
@@ -36,6 +35,8 @@ namespace neogfx
 	class i_graphics_context;
 	class i_font_manager;
 	class i_texture_manager;
+	class i_render_target;
+
 
 	class opengl_standard_vertex_arrays; // todo: abstract
 

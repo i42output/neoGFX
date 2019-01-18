@@ -34,6 +34,10 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
+#include "opengl_renderer.hpp"
+#include "../../gui/window/native/opengl_window.hpp"
+#include "gradient.frag.hpp"
 
 namespace neogfx
 {
@@ -49,11 +53,6 @@ namespace neogfx
 		return service<i_rendering_engine>().texture_manager();
 	}
 }
-
-#include <neogfx/gui/widget/i_widget.hpp>
-#include "opengl_renderer.hpp"
-#include "../../gui/window/native/opengl_window.hpp"
-#include "gradient.frag.hpp"
 
 namespace neogfx
 {
@@ -841,18 +840,18 @@ namespace neogfx
 	i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, texture_sampling aSampling)
 	{
 		auto existing = iPingPongBuffer1s.lower_bound(std::make_pair(aSampling, aExtents));
-		if (existing != iPingPongBuffer1s.end() && existing->first.first == aSampling && existing->first.second < aExtents)
+		if (existing != iPingPongBuffer1s.end() && existing->first.first == aSampling && existing->first.second >= aExtents)
 			return existing->second;
-		size idealSize{ (((aExtents.cx - 1) / 1024) + 1) * 1024.0, (((aExtents.cy - 1) / 1024) + 1) * 1024.0 };
+		size idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / 1024) + 1) * 1024.0, (((static_cast<int32_t>(aExtents.cy) - 1) / 1024) + 1) * 1024.0 };
 		return iPingPongBuffer1s.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
 	}
 
 	i_texture& opengl_renderer::ping_pong_buffer2(const size& aExtents, texture_sampling aSampling)
 	{
 		auto existing = iPingPongBuffer2s.lower_bound(std::make_pair(aSampling, aExtents));
-		if (existing != iPingPongBuffer2s.end() && existing->first.first == aSampling && existing->first.second < aExtents)
+		if (existing != iPingPongBuffer2s.end() && existing->first.first == aSampling && existing->first.second >= aExtents)
 			return existing->second;
-		size idealSize{ (((aExtents.cx - 1) / 1024) + 1) * 1024.0, (((aExtents.cy - 1) / 1024) + 1) * 1024.0 };
+		size idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / 1024) + 1) * 1024.0, (((static_cast<int32_t>(aExtents.cy) - 1) / 1024) + 1) * 1024.0 };
 		return iPingPongBuffer2s.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
 	}
 

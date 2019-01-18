@@ -233,6 +233,24 @@ namespace neogfx
 	}
 
 	template <typename CoordinateType>
+	inline bool operator<=(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		return std::tie(left.cx, left.cy) <= std::tie(right.cx, right.cy);
+	}
+
+	template <typename CoordinateType>
+	inline bool operator>(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		return std::tie(left.cx, left.cy) > std::tie(right.cx, right.cy);
+	}
+
+	template <typename CoordinateType>
+	inline bool operator>=(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	{
+		return std::tie(left.cx, left.cy) >= std::tie(right.cx, right.cy);
+	}
+
+	template <typename CoordinateType>
 	class basic_point
 	{
 		// types
