@@ -87,7 +87,6 @@ namespace neogfx
 		iHandle{ 0 },
 		iUri{ "neogfx::opengl_texture::internal" },
 		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
-		iLogicalCoordinates{ vec2{ 1.0, 1.0}, aExtents.to_vec2() + vec2{ 1.0, 1.0} },
 		iFrameBuffer{ 0 },
 		iDepthStencilBuffer{ 0 }
 	{
@@ -165,7 +164,6 @@ namespace neogfx
 		iHandle{ 0 },
 		iUri{ aImage.uri() },
 		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
-		iLogicalCoordinates{ vec2{ 1.0, 1.0}, aImage.extents().to_vec2() + vec2{ 1.0, 1.0} },
 		iFrameBuffer{ 0 },
 		iDepthStencilBuffer{ 0 }
 	{
@@ -464,9 +462,26 @@ namespace neogfx
 		iLogicalCoordinateSystem = aSystem;
 	}
 
-	const neogfx::logical_coordinates& opengl_texture::logical_coordinates() const
+	logical_coordinates opengl_texture::logical_coordinates() const
 	{
-		return iLogicalCoordinates;
+		if (iLogicalCoordinates != std::nullopt)
+			return *iLogicalCoordinates;
+		neogfx::logical_coordinates result;
+		switch (iLogicalCoordinateSystem)
+		{
+		case neogfx::logical_coordinate_system::Specified:
+			throw logical_coordinates_not_specified();
+			break;
+		case neogfx::logical_coordinate_system::AutomaticGui:
+			result.bottomLeft = vec2{ 0.0, extents().cy };
+			result.topRight = vec2{ extents().cx, 0.0 };
+			break;
+		case neogfx::logical_coordinate_system::AutomaticGame:
+			result.bottomLeft = vec2{ 0.0, 0.0 };
+			result.topRight = vec2{ extents().cx, extents().cy };
+			break;
+		}
+		return result;
 	}
 
 	void opengl_texture::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)

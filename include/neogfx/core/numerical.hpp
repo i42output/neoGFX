@@ -854,6 +854,16 @@ namespace neogfx
 			return aStream;
 		}
 
+		template <typename Elem, typename Traits, typename T, uint32_t Rows, uint32_t Columns>
+		inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_matrix<T, Rows, Columns>>& aMatrix)
+		{
+			if (aMatrix != std::nullopt)
+				aStream << *aMatrix;
+			else
+				aStream << "[null]";
+			return aStream;
+		}
+
 		struct aabb
 		{
 			vec3 min;

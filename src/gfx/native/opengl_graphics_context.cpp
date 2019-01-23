@@ -159,8 +159,6 @@ namespace neogfx
 		iRenderingEngine{ service<i_rendering_engine>() },
 		iTarget{aTarget}, 
 		iWidget{ nullptr },
-		iLogicalCoordinateSystem{ iTarget.logical_coordinate_system() },
-		iLogicalCoordinates{ iTarget.logical_coordinates() },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
@@ -170,10 +168,6 @@ namespace neogfx
 	{
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
-		iSink += render_target().target_activated([this]()
-		{
-			apply_scissor();
-		});
 		iSink += render_target().target_deactivating([this]() 
 		{ 
 			flush(); 
@@ -184,8 +178,7 @@ namespace neogfx
 		iRenderingEngine{ service<i_rendering_engine>() },
 		iTarget{ aTarget },
 		iWidget{ &aWidget },
-		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
-		iLogicalCoordinates{ iTarget.logical_coordinates() },
+		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },		
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
@@ -195,10 +188,6 @@ namespace neogfx
 	{
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
-		iSink += render_target().target_activated([this]()
-		{
-			apply_scissor();
-		});
 		iSink += render_target().target_deactivating([this]()
 		{
 			flush();
@@ -220,10 +209,6 @@ namespace neogfx
 	{
 		rendering_engine().activate_shader_program(*this, rendering_engine().default_shader_program());
 		set_smoothing_mode(iSmoothingMode);
-		iSink += render_target().target_activated([this]()
-		{
-			apply_scissor();
-		});
 		iSink += render_target().target_deactivating([this]()
 		{
 			flush();
@@ -257,14 +242,16 @@ namespace neogfx
 	rect opengl_graphics_context::rendering_area(bool aConsiderScissor) const
 	{
 		if (scissor_rect() == std::nullopt || !aConsiderScissor)
-			return rect{ render_target().target_type() == render_target_type::Surface ? point{} : point{1.0, 1.0}, render_target().target_extents() };
+			return rect{ point{}, render_target().target_extents() };
 		else
 			return *scissor_rect();
 	}
 
 	neogfx::logical_coordinate_system opengl_graphics_context::logical_coordinate_system() const
 	{
-		return iLogicalCoordinateSystem;
+		if (iLogicalCoordinateSystem != std::nullopt)
+			return *iLogicalCoordinateSystem;
+		return render_target().logical_coordinate_system();
 	}
 
 	void opengl_graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
@@ -272,12 +259,30 @@ namespace neogfx
 		iLogicalCoordinateSystem = aSystem;
 	}
 
-	const neogfx::logical_coordinates& opengl_graphics_context::logical_coordinates() const
+	logical_coordinates opengl_graphics_context::logical_coordinates() const
 	{
-		return to_logical_coordinates(render_target().target_extents(), iLogicalCoordinateSystem, iLogicalCoordinates);
+		if (iLogicalCoordinates != std::nullopt)
+			return *iLogicalCoordinates;
+		auto result = render_target().logical_coordinates();
+		if (logical_coordinate_system() != render_target().logical_coordinate_system())
+		{
+			switch (logical_coordinate_system())
+			{
+			case neogfx::logical_coordinate_system::Specified:
+				break;
+			case neogfx::logical_coordinate_system::AutomaticGame:
+				if (render_target().logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
+					std::swap(~result.bottomLeft.y, ~result.topRight.y);
+				break;
+			case neogfx::logical_coordinate_system::AutomaticGui:
+				std::swap(~result.bottomLeft.y, ~result.topRight.y);
+				break;
+			}
+		}
+		return result;
 	}
 
-	void opengl_graphics_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
+	void opengl_graphics_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
 	{
 		iLogicalCoordinates = aCoordinates;
 	}
@@ -298,6 +303,8 @@ namespace neogfx
 	{
 		if (iQueue.first.empty())
 			return;
+
+		apply_scissor();
 
 		iQueue.second.push_back(iQueue.first.size());
 		auto endIndex = std::prev(iQueue.second.end());
@@ -509,7 +516,8 @@ namespace neogfx
 
 	void opengl_graphics_context::scissor_off()
 	{
-		iScissorRects.pop_back();
+		if (!iScissorRects.empty())
+			iScissorRects.pop_back();
 		iScissorRect = std::nullopt;
 		apply_scissor();
 	}
@@ -534,8 +542,7 @@ namespace neogfx
 		{
 			glCheck(glEnable(GL_SCISSOR_TEST));
 			GLint x = static_cast<GLint>(std::ceil(sr->x));
-			bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
-			GLint y = guiCoordinates ? static_cast<GLint>(std::ceil(rendering_area(false).cy - sr->cy - sr->y)) : sr->y;
+			GLint y = logical_coordinates().is_gui_orientation() ? static_cast<GLint>(std::ceil(rendering_area(false).cy - sr->cy - sr->y)) : sr->y;
 			GLsizei cx = static_cast<GLsizei>(std::ceil(sr->cx));
 			GLsizei cy = static_cast<GLsizei>(std::ceil(sr->cy));
 			glCheck(glScissor(x, y, cx, cy));
@@ -707,7 +714,7 @@ namespace neogfx
 	{
 		basic_rect<float> boundingBox{ aBoundingBox };
 		iShaderProgramStack.emplace_back(*this, iRenderingEngine, rendering_engine().gradient_shader_program());
-		rendering_engine().gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(logical_coordinates().first.y));
+		rendering_engine().gradient_shader_program().set_uniform_variable("posViewportTop", static_cast<float>(logical_coordinates().bottomLeft.y));
 		rendering_engine().gradient_shader_program().set_uniform_variable("posTopLeft", boundingBox.top_left().x, boundingBox.top_left().y);
 		rendering_engine().gradient_shader_program().set_uniform_variable("posBottomRight", boundingBox.bottom_right().x, boundingBox.bottom_right().y);
 		rendering_engine().gradient_shader_program().set_uniform_variable("nGradientDirection", static_cast<int>(aGradient.direction()));
@@ -1046,7 +1053,6 @@ namespace neogfx
 	void opengl_graphics_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)
 	{
 		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
-
 		graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill, aZpos } };
 		fill_rect(graphics_operation::batch{ &op, &op + 1 });
 	}
@@ -1269,7 +1275,7 @@ namespace neogfx
 			aResult.emplace_back(normalizedRect.top_right().x, normalizedRect.top_right().y);
 			aResult.emplace_back(normalizedRect.bottom_right().x, normalizedRect.bottom_right().y);
 			aResult.emplace_back(normalizedRect.bottom_left().x, normalizedRect.bottom_left().y);
-			if (aLogicalCoordinates.first.y > aLogicalCoordinates.second.y)
+			if (aLogicalCoordinates.is_gui_orientation())
 			{
 				std::swap(aResult[0][1], aResult[2][1]);
 				std::swap(aResult[1][1], aResult[3][1]);
@@ -1324,17 +1330,45 @@ namespace neogfx
 			switch (pass)
 			{
 			case 1:
+				{
+					thread_local std::vector<graphics_operation::operation> rects;
+					rects.clear();
+					rects.reserve(std::distance(aDrawGlyphOps.first, aDrawGlyphOps.second));
+					for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+					{
+						auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+
+						if (!drawOp.appearance.has_paper())
+							continue;
+
+						const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
+						graphics_operation::fill_rect nextOp{ rect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } }, to_brush(drawOp.appearance.paper()), drawOp.point.z };
+						if (!rects.empty() && !batchable(rects.back(), nextOp))
+						{
+							fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
+							rects.clear();
+						}
+						rects.push_back(nextOp);
+					}
+					if (!rects.empty())
+						fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
+				}
+				break;
+			case 2:
 			case 3:
 				{
+					if (!renderEffects && pass == 2)
+						continue;
+
 					auto const glyphCount = std::count_if(aDrawGlyphOps.first, aDrawGlyphOps.second, [](const graphics_operation::operation& op) { return !static_variant_cast<const graphics_operation::draw_glyph&>(op).glyph.is_whitespace(); });
 					auto const need = (pass == 3 ? 6u * glyphCount : 6u * static_cast<uint32_t>(std::ceil((firstOp.appearance.effect().width() * 2 + 1) * (firstOp.appearance.effect().width() * 2 + 1))) * glyphCount);
 
 					bool const useTextureBarrier = firstOp.glyph.subpixel() && firstGlyphTexture.subpixel();
 					use_vertex_arrays vertexArrays{ *this, GL_QUADS, with_textures, need, useTextureBarrier };
 
-					auto const scanlineOffsets = (pass == 1 ? static_cast<uint32_t>(firstOp.appearance.effect().width()) * 2u + 1u : 1u);
+					auto const scanlineOffsets = (pass == 2 ? static_cast<uint32_t>(firstOp.appearance.effect().width()) * 2u + 1u : 1u);
 					auto const offsets = scanlineOffsets * scanlineOffsets;
-					point const offsetOrigin{ pass == 1 ? -firstOp.appearance.effect().width() : 0.0, pass == 1 ? -firstOp.appearance.effect().width() : 0.0 };
+					point const offsetOrigin{ pass == 2 ? -firstOp.appearance.effect().width() : 0.0, pass == 2 ? -firstOp.appearance.effect().width() : 0.0 };
 					for (auto op = skip_iterator<graphics_operation::operation>{ aDrawGlyphOps.first, aDrawGlyphOps.second, glyphCount / 2u, offsets }; op != aDrawGlyphOps.second; ++op)
 					{
 						auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
@@ -1347,9 +1381,9 @@ namespace neogfx
 
 						vec3 glyphOrigin(
 							drawOp.point.x + glyphTexture.placement().x,
-							logical_coordinates().first.y < logical_coordinates().second.y ?
-							drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-							drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
+							logical_coordinates().is_game_orientation() ?
+								drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
+								drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
 							drawOp.point.z);
 
 						iTempTextureCoords.clear();
@@ -1360,7 +1394,7 @@ namespace neogfx
 
 						std::array<uint8_t, 4> passColour;
 
-						if (pass == 1)
+						if (pass == 2)
 						{
 							passColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
 								std::array <uint8_t, 4>{ {
@@ -1428,8 +1462,7 @@ namespace neogfx
 
 					rendering_engine().vertex_arrays().instantiate_with_texture_coords(*this, shader);
 
-					bool guiCoordinates = (logical_coordinates().first.y > logical_coordinates().second.y);
-					shader.set_uniform_variable("guiCoordinates", guiCoordinates);
+					shader.set_uniform_variable("guiCoordinates", logical_coordinates().is_gui_orientation());
 					shader.set_uniform_variable("outputExtents", static_cast<float>(render_target().target_extents().cx), static_cast<float>(render_target().target_extents().cy));
 
 					shader.set_uniform_variable("glyphTexture", 1);
@@ -1446,31 +1479,6 @@ namespace neogfx
 
 					if (std::holds_alternative<gradient>(firstOp.appearance.ink()))
 						gradient_off();
-				}
-				break;
-			case 2:
-				{
-					thread_local std::vector<graphics_operation::operation> rects;
-					rects.clear();
-					rects.reserve(std::distance(aDrawGlyphOps.first, aDrawGlyphOps.second));
-					for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
-					{
-						auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
-
-						if (!drawOp.appearance.has_paper())
-							continue;
-
-						const font& glyphFont = service<i_font_manager>().font_from_id(drawOp.glyphFont);
-						graphics_operation::fill_rect nextOp{ rect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } }, to_brush(drawOp.appearance.paper()), drawOp.point.z };
-						if (!rects.empty() && !batchable(rects.back(), nextOp))
-						{
-							fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
-							rects.clear();
-						}
-						rects.push_back(nextOp);
-					}
-					if (!rects.empty())
-						fill_rect(graphics_operation::batch{ &*rects.begin(), &*rects.begin() + rects.size() });
 				}
 				break;
 			}
@@ -1569,27 +1577,28 @@ namespace neogfx
 				for (auto faceVertexIndex : face)
 				{
 					auto const& v = aVertices[faceVertexIndex];
-					if (~v.x >= std::min(logical_coordinates().first.x, logical_coordinates().second.x) &&
-						~v.x <= std::max(logical_coordinates().first.x, logical_coordinates().second.x) &&
-						~v.y >= std::min(logical_coordinates().first.y, logical_coordinates().second.y) &&
-						~v.y <= std::max(logical_coordinates().first.y, logical_coordinates().second.y))
+					auto const logicalCoordinates = logical_coordinates();
+					if (~v.x >= std::min(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
+						~v.x <= std::max(logicalCoordinates.bottomLeft.x, logicalCoordinates.topRight.x) &&
+						~v.y >= std::min(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y) &&
+						~v.y <= std::max(logicalCoordinates.bottomLeft.y, logicalCoordinates.topRight.y))
 						drawn = true;
 					vec2 uv = {};
 					if (aMaterial.texture != std::nullopt)
 					{
 						auto const& texture = *service<i_texture_manager>().find_texture(aMaterial.texture->id.cookie());
 						uv = aTextureVertices[faceVertexIndex];
-						if (texture.native_texture()->logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame && logical_coordinates().first.y > logical_coordinates().second.y)
+						if (texture.native_texture()->logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame && logicalCoordinates.is_gui_orientation())
 							~uv.y = 1.0 - uv.y;
 						uv = (uv * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
 					}
 					vertexArrays.instance().emplace_back(
 						v,
 						std::array<uint8_t, 4>{ {
-								colourizationColour.red(),
-									colourizationColour.green(),
-									colourizationColour.blue(),
-									colourizationColour.alpha()}},
+							colourizationColour.red(),
+							colourizationColour.green(),
+							colourizationColour.blue(),
+							colourizationColour.alpha()}},
 						uv);
 				}
 			}

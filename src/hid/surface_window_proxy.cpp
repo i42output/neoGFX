@@ -189,7 +189,7 @@ namespace neogfx
 		native_surface().set_logical_coordinate_system(aSystem);
 	}
 
-	const neogfx::logical_coordinates& surface_window_proxy::logical_coordinates() const
+	logical_coordinates surface_window_proxy::logical_coordinates() const
 	{
 		return native_surface().logical_coordinates();
 	}

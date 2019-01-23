@@ -153,22 +153,26 @@ namespace neogfx
 		iLogicalCoordinateSystem = aSystem;
 	}
 
-	const neogfx::logical_coordinates& opengl_window::logical_coordinates() const
+	logical_coordinates opengl_window::logical_coordinates() const
 	{
+		if (iLogicalCoordinates != std::nullopt)
+			return *iLogicalCoordinates;
+		neogfx::logical_coordinates result;
 		switch (iLogicalCoordinateSystem)
 		{
 		case neogfx::logical_coordinate_system::Specified:
+			throw logical_coordinates_not_specified();
 			break;
 		case neogfx::logical_coordinate_system::AutomaticGui:
-			iLogicalCoordinates.first = vec2{ 0.0, extents().cy };
-			iLogicalCoordinates.second = vec2{ extents().cx, 0.0 };
+			result.bottomLeft = vec2{ 0.0, extents().cy };
+			result.topRight = vec2{ extents().cx, 0.0 };
 			break;
 		case neogfx::logical_coordinate_system::AutomaticGame:
-			iLogicalCoordinates.first = vec2{ 0.0, 0.0 };
-			iLogicalCoordinates.second = vec2{ extents().cx, extents().cy };
+			result.bottomLeft = vec2{ 0.0, 0.0 };
+			result.topRight = vec2{ extents().cx, extents().cy };
 			break;
 		}
-		return iLogicalCoordinates;
+		return result;
 	}
 
 	void opengl_window::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)

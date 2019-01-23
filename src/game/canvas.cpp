@@ -119,7 +119,6 @@ namespace neogfx::game
 			component_lock_guard<mesh_renderer> lgMeshRenderer{ ecs() };
 			rendering_entities.trigger(aGraphicsContext);
 			aGraphicsContext.draw_entities(ecs());
-			aGraphicsContext.flush();
 			entities_rendered.trigger(aGraphicsContext);
 		}
 	}

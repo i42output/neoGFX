@@ -40,9 +40,10 @@ namespace neogfx
 		virtual i_rendering_engine& rendering_engine() = 0;
 		virtual const i_render_target& render_target() const = 0;
 		virtual const i_render_target& render_target() = 0;
+		virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
 		virtual void enqueue(const graphics_operation::operation& aOperation) = 0;
 		virtual void flush() = 0;
 	public:
-		virtual const neogfx::logical_coordinates& logical_coordinates() const = 0;
+		virtual neogfx::logical_coordinates logical_coordinates() const = 0;
 	};
 }

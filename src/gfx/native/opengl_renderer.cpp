@@ -36,6 +36,7 @@
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include "opengl_renderer.hpp"
+#include "i_native_texture.hpp"
 #include "../../gui/window/native/opengl_window.hpp"
 #include "gradient.frag.hpp"
 
@@ -109,12 +110,11 @@ namespace neogfx
 	{
 		if (aProjectionMatrix == std::nullopt)
 		{
-			auto const& logicalCoordinates = aGraphicsContext.logical_coordinates();
-			iLogicalCoordinates = logicalCoordinates;
-			double left = logicalCoordinates.first.x;
-			double right = logicalCoordinates.second.x;
-			double bottom = logicalCoordinates.first.y;
-			double top = logicalCoordinates.second.y;
+			iLogicalCoordinates = aGraphicsContext.logical_coordinates();
+			double left = iLogicalCoordinates.bottomLeft.x;
+			double right = iLogicalCoordinates.topRight.x;
+			double bottom = iLogicalCoordinates.bottomLeft.y;
+			double top = iLogicalCoordinates.topRight.y;
 			double zFar = 1.0;
 			double zNear = -1.0;
 			mat44 orthoMatrix = mat44{
@@ -839,20 +839,14 @@ namespace neogfx
 
 	i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, texture_sampling aSampling)
 	{
-		auto existing = iPingPongBuffer1s.lower_bound(std::make_pair(aSampling, aExtents));
-		if (existing != iPingPongBuffer1s.end() && existing->first.first == aSampling && existing->first.second >= aExtents)
-			return existing->second;
-		size idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / 1024) + 1) * 1024.0, (((static_cast<int32_t>(aExtents.cy) - 1) / 1024) + 1) * 1024.0 };
-		return iPingPongBuffer1s.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
+		auto& bufferTexture = create_ping_pong_buffer(iPingPongBuffer1s, aExtents, aSampling);
+		return bufferTexture;
 	}
 
 	i_texture& opengl_renderer::ping_pong_buffer2(const size& aExtents, texture_sampling aSampling)
 	{
-		auto existing = iPingPongBuffer2s.lower_bound(std::make_pair(aSampling, aExtents));
-		if (existing != iPingPongBuffer2s.end() && existing->first.first == aSampling && existing->first.second >= aExtents)
-			return existing->second;
-		size idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / 1024) + 1) * 1024.0, (((static_cast<int32_t>(aExtents.cy) - 1) / 1024) + 1) * 1024.0 };
-		return iPingPongBuffer2s.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
+		auto& bufferTexture = create_ping_pong_buffer(iPingPongBuffer2s, aExtents, aSampling);
+		return bufferTexture;
 	}
 
 	bool opengl_renderer::is_subpixel_rendering_on() const
@@ -942,7 +936,9 @@ namespace neogfx
 		if (iterFrameCounter != iFrameCounters.end())
 			return iterFrameCounter->second.counter();
 		return 0;
-	}	opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)
+	}	
+	
+	opengl_renderer::shader_programs::iterator opengl_renderer::create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables)
 	{
 		GLuint programHandle = glCheck(glCreateProgram());
 		if (0 == programHandle)
@@ -994,5 +990,15 @@ namespace neogfx
 		if (GL_FALSE == result)
 			throw failed_to_create_shader_program("Failed to link");
 		return s;
+	}
+
+	i_texture& opengl_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, texture_sampling aSampling)
+	{
+		auto existing = aBufferList.lower_bound(std::make_pair(aSampling, aExtents));
+		if (existing != aBufferList.end() && existing->first.first == aSampling && existing->first.second >= aExtents)
+			return existing->second;
+		auto const multipleSize = 1024;
+		basic_size<int32_t> idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / multipleSize) + 1) * multipleSize, (((static_cast<int32_t>(aExtents.cy) - 1) / multipleSize) + 1) * multipleSize };
+		return aBufferList.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
 	}
 }

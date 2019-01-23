@@ -104,6 +104,7 @@ namespace neogfx
 	private:
 		typedef std::vector<std::pair<std::string, GLenum>> shaders;
 		typedef std::list<shader_program> shader_programs;
+		typedef std::map<std::pair<texture_sampling, size>, texture> ping_pong_buffers_t;
 	public:
 		opengl_renderer(neogfx::renderer aRenderer);
 		~opengl_renderer();
@@ -132,8 +133,8 @@ namespace neogfx
 		const opengl_standard_vertex_arrays & vertex_arrays() const override;
 		opengl_standard_vertex_arrays& vertex_arrays() override;
 	public:
-		i_texture& ping_pong_buffer1(const size& aExtents, texture_sampling aSampling = texture_sampling::Normal) override;
-		i_texture& ping_pong_buffer2(const size& aExtents, texture_sampling aSampling = texture_sampling::Normal) override;
+		i_texture& ping_pong_buffer1(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
+		i_texture& ping_pong_buffer2(const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
 	public:
 		bool is_subpixel_rendering_on() const override;
 		void subpixel_rendering_on() override;
@@ -151,6 +152,7 @@ namespace neogfx
 		uint32_t frame_counter(uint32_t aDuration) const override;
 	private:
 		shader_programs::iterator create_shader_program(const shaders& aShaders, const std::vector<std::string>& aVariables);
+		i_texture& create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, texture_sampling aSampling);
 	private:
 		neogfx::renderer iRenderer;
 		mutable std::optional<opengl_texture_manager> iTextureManager;
@@ -167,7 +169,7 @@ namespace neogfx
 		mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;
 		uint64_t iLastGameRenderTime;
 		std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
-		std::map<std::pair<texture_sampling, size>, texture> iPingPongBuffer1s;
-		std::map<std::pair<texture_sampling, size>, texture> iPingPongBuffer2s;
+		ping_pong_buffers_t iPingPongBuffer1s;
+		ping_pong_buffers_t iPingPongBuffer2s;
 	};
 }

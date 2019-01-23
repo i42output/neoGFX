@@ -79,7 +79,7 @@ namespace neogfx
 	public:
 		neogfx::logical_coordinate_system logical_coordinate_system() const override;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
-		const neogfx::logical_coordinates& logical_coordinates() const override;
+		neogfx::logical_coordinates logical_coordinates() const override;
 		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
 	public:
 		bool target_active() const override;
@@ -99,7 +99,7 @@ namespace neogfx
 		GLuint iHandle;
 		std::string iUri;
 		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
-		neogfx::logical_coordinates iLogicalCoordinates;
+		std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
 		mutable GLuint iFrameBuffer;
 		mutable GLuint iDepthStencilBuffer;
 	};

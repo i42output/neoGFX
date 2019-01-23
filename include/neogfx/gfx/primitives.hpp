@@ -47,7 +47,27 @@ namespace neogfx
 
 	typedef std::optional<logical_coordinate_system> optional_logical_coordinate_system;
 
-	typedef std::pair<vec2, vec2> logical_coordinates;
+	struct logical_coordinates
+	{
+		vec2 bottomLeft;
+		vec2 topRight;
+		bool is_gui_orientation() const
+		{
+			return bottomLeft.y > topRight.y;
+		}
+		bool is_game_orientation() const
+		{
+			return !is_gui_orientation();
+		}
+		friend bool operator==(const logical_coordinates& lhs, const logical_coordinates& rhs)
+		{
+			return lhs.bottomLeft == rhs.bottomLeft && lhs.topRight == rhs.topRight;
+		}
+		friend bool operator!=(const logical_coordinates& lhs, const logical_coordinates& rhs)
+		{
+			return !(lhs == rhs);
+		}
+	};
 
 	enum class blending_mode
 	{

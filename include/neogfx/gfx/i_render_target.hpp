@@ -49,6 +49,7 @@ namespace neogfx
 		struct failed_to_create_framebuffer : std::runtime_error { failed_to_create_framebuffer(const std::string& aReason) : std::runtime_error("neogfx::i_render_target::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + aReason) {} };
 		struct already_active : std::logic_error { already_active() : std::logic_error("neogfx::i_render_target::already_active") {} };
 		struct not_active : std::logic_error { not_active() : std::logic_error("neogfx::i_render_target::not_active") {} };
+		struct logical_coordinates_not_specified : std::logic_error { logical_coordinates_not_specified() : std::logic_error("neogfx::i_render_target::logical_coordinates_not_specified") {} };
 	public:
 		virtual render_target_type target_type() const = 0;
 		virtual void* target_handle() const = 0;
@@ -57,7 +58,7 @@ namespace neogfx
 	public:
 		virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
 		virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
-		virtual const neogfx::logical_coordinates& logical_coordinates() const = 0;
+		virtual neogfx::logical_coordinates logical_coordinates() const = 0;
 		virtual void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) = 0;
 	public:
 		virtual bool target_active() const = 0;

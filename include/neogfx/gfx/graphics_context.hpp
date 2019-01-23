@@ -108,7 +108,7 @@ namespace neogfx
 		void set_layer(int32_t aLayer);
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const;
-		const neogfx::logical_coordinates& logical_coordinates() const;
+		neogfx::logical_coordinates logical_coordinates() const;
 		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const;
 		void set_default_font(const font& aDefaultFont) const;
 		void set_extents(const size& aExtents) const;
@@ -231,6 +231,7 @@ namespace neogfx
 		neogfx::units units() const override;
 		neogfx::units set_units(neogfx::units aUnits) const override;
 	protected:
+		bool attached() const;
 		i_graphics_context& native_context() const;
 		// helpers
 		// own
@@ -245,8 +246,8 @@ namespace neogfx
 		mutable font iDefaultFont;
 		mutable point iOrigin;
 		mutable size iExtents;
-		mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
-		mutable neogfx::logical_coordinates iLogicalCoordinates;
+		mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
+		mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
 		mutable double iOpacity;
 		mutable neogfx::blending_mode iBlendingMode;
 		mutable neogfx::smoothing_mode iSmoothingMode;
@@ -369,7 +370,7 @@ namespace neogfx
 	class scoped_scissor
 	{
 	public:
-		scoped_scissor(graphics_context& aGc, const rect& aScissorRect) :
+		scoped_scissor(const graphics_context& aGc, const rect& aScissorRect) :
 			iGc{ aGc }
 		{
 			iGc.scissor_on(aScissorRect);
@@ -379,10 +380,8 @@ namespace neogfx
 			iGc.scissor_off();
 		}
 	private:
-		graphics_context & iGc;
+		const graphics_context& iGc;
 	};
-
-	const neogfx::logical_coordinates& to_logical_coordinates(const size& aRenderTargetExtents, logical_coordinate_system aSystem, neogfx::logical_coordinates& aCoordinates);
 
 	template <typename ValueType = double, uint32_t W = 5>
 	inline std::array<std::array<ValueType, W>, W> static_gaussian_filter(ValueType aSigma = 1.0)

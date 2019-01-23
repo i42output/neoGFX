@@ -44,10 +44,10 @@ namespace neogfx::game
 	public:
 		game::i_ecs& ecs() const;
 	public:
-		virtual neogfx::logical_coordinate_system logical_coordinate_system() const;
-		virtual void paint(graphics_context& aGraphicsContext) const;
+		neogfx::logical_coordinate_system logical_coordinate_system() const override;
+		void paint(graphics_context& aGraphicsContext) const override;
 	public:
-		virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+		void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
 	private:
 		void init();
 	private:

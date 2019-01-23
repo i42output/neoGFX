@@ -76,8 +76,6 @@ namespace neogfx
 		iDefaultFont{},
 		iOrigin{ 0.0, 0.0 },
 		iExtents{ aSurface.extents() },
-		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
-		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -93,8 +91,6 @@ namespace neogfx
 		iDefaultFont{ aDefaultFont },
 		iOrigin{ 0.0, 0.0 },
 		iExtents{ aSurface.extents() },
-		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
-		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -110,14 +106,13 @@ namespace neogfx
 		iDefaultFont{ aWidget.font() },
 		iOrigin{ aWidget.origin() },
 		iExtents{ aWidget.extents() },
-		iLogicalCoordinateSystem{ aWidget.logical_coordinate_system() },
-		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
 		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
+		set_logical_coordinate_system(aWidget.logical_coordinate_system());
 	}
 
 	graphics_context::graphics_context(const i_texture& aTexture, type aType) :
@@ -127,8 +122,6 @@ namespace neogfx
 		iDefaultFont{ font() },
 		iOrigin{},
 		iExtents{ aTexture.extents() },
-		iLogicalCoordinateSystem{ iRenderTarget.logical_coordinate_system() },
-		iLogicalCoordinates{ iRenderTarget.logical_coordinates() },
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -144,8 +137,8 @@ namespace neogfx
 		iDefaultFont{ aOther.iDefaultFont },
 		iOrigin{ aOther.origin() },
 		iExtents{ aOther.extents() },
-		iLogicalCoordinateSystem{ aOther.logical_coordinate_system() },
-		iLogicalCoordinates{ aOther.logical_coordinates() },
+		iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
+		iLogicalCoordinates{ aOther.iLogicalCoordinates },
 		iOpacity{ 1.0 },
 		iBlendingMode{ neogfx::blending_mode::None },
 		iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -166,15 +159,19 @@ namespace neogfx
 	graphics_context::ping_pong_buffers_t graphics_context::ping_pong_buffers(const size& aExtents, texture_sampling aSampling, const optional_colour& aClearColour) const
 	{
 		auto buffer1 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer1(aExtents, aSampling));
-		buffer1->render_target().target_texture().native_texture()->set_logical_coordinate_system(logical_coordinate_system());
-		buffer1->scissor_on(rect{ point{}, aExtents });
-		if (aClearColour != std::nullopt)
-			buffer1->clear(*aClearColour);
+		{
+			scoped_scissor ss{ *buffer1, rect{ point{}, aExtents} };
+			if (aClearColour != std::nullopt)
+				buffer1->clear(*aClearColour);
+		}
+		buffer1->render_target().deactivate_target();
 		auto buffer2 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer2(aExtents, aSampling));
-		buffer2->render_target().target_texture().native_texture()->set_logical_coordinate_system(logical_coordinate_system());
-		buffer2->scissor_on(rect{ point{}, aExtents });
-		if (aClearColour != std::nullopt)
-			buffer2->clear(*aClearColour);
+		{
+			scoped_scissor ss{ *buffer2, rect{ point{}, aExtents} };
+			if (aClearColour != std::nullopt)
+				buffer2->clear(*aClearColour);
+		}
+		buffer2->render_target().deactivate_target();
 		render_target().activate_target();
 		return ping_pong_buffers_t{ std::move(buffer1), std::move(buffer2) };
 	}
@@ -246,7 +243,9 @@ namespace neogfx
 
 	neogfx::logical_coordinate_system graphics_context::logical_coordinate_system() const
 	{
-		return iLogicalCoordinateSystem;
+		if (iLogicalCoordinateSystem != std::nullopt)
+			return *iLogicalCoordinateSystem;
+		return render_target().logical_coordinate_system();
 	}
 
 	void graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
@@ -254,13 +253,16 @@ namespace neogfx
 		if (iLogicalCoordinateSystem != aSystem)
 		{
 			iLogicalCoordinateSystem = aSystem;
-			native_context().enqueue(graphics_operation::set_logical_coordinate_system{ aSystem });
+			if (attached())
+				native_context().enqueue(graphics_operation::set_logical_coordinate_system{ aSystem });
 		}
 	}
 
-	const neogfx::logical_coordinates& graphics_context::logical_coordinates() const
+	neogfx::logical_coordinates graphics_context::logical_coordinates() const
 	{
-		return to_logical_coordinates(iRenderTarget.extents(), iLogicalCoordinateSystem, iLogicalCoordinates);
+		if (iLogicalCoordinates != std::nullopt)
+			return *iLogicalCoordinates;
+		return render_target().logical_coordinates();
 	}
 
 	void graphics_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
@@ -268,7 +270,8 @@ namespace neogfx
 		if (iLogicalCoordinates != aCoordinates)
 		{
 			iLogicalCoordinates = aCoordinates;
-			native_context().enqueue(graphics_operation::set_logical_coordinates{ aCoordinates });
+			if (attached())
+				native_context().enqueue(graphics_operation::set_logical_coordinates{ aCoordinates });
 		}
 	}
 
@@ -635,9 +638,14 @@ namespace neogfx
 		return iUnitsContext.set_units(aUnits);
 	}
 
+	bool graphics_context::attached() const
+	{
+		return iNativeGraphicsContext != nullptr;
+	}
+
 	i_graphics_context& graphics_context::native_context() const
 	{
-		if (iNativeGraphicsContext != nullptr)
+		if (attached())
 			return *iNativeGraphicsContext;
 		throw unattached();
 	}
@@ -781,7 +789,16 @@ namespace neogfx
 	void graphics_context::blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParamter2) const
 	{
 		// todo
-		fill_rect(aDestinationRect, colour::Cyan);
+		fill_rect(aDestinationRect, colour{ 0x20, 0x20, 0x20 });
+		//blit(aDestinationRect, aSource, aSourceRect);
+		draw_line(aDestinationRect.top_left(), aDestinationRect.bottom_right(), pen{ colour::White, 1.0 });
+		draw_line(aDestinationRect.bottom_left(), aDestinationRect.top_right(), pen{ colour::Black, 1.0 });
+		auto r = aDestinationRect;
+		draw_rect(r, pen{ colour::Yellow, 1.0 });
+		r.deflate(size{ 1.0 });
+		draw_rect(r, pen{ colour::Blue, 1.0 });
+		r.deflate(size{ 9.0 });
+		draw_rect(r, pen{ colour::Red, 1.0 });
 	}
 
 	glyph_text graphics_context::to_glyph_text(const string& aText, const font& aFont) const
@@ -869,7 +886,7 @@ namespace neogfx
 		dimension maxLineWidth = 0.0;
 		for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
 		{
-			const auto& line = (logical_coordinates().first.y > logical_coordinates().second.y ? *i : *(lines.rbegin() + (i - lines.begin())));
+			const auto& line = (logical_coordinates().is_gui_orientation() ? *i : *(lines.rbegin() + (i - lines.begin())));
 			if (aMaxWidth == 0)
 			{
 				vec3 linePos = pos;
@@ -977,7 +994,7 @@ namespace neogfx
 
 	void graphics_context::draw_glyph_underline(const vec3& aPoint, const font& aFont, const glyph& aGlyph, const text_appearance& aAppearance) const
 	{
-		auto yLine = logical_coordinates().first.y > logical_coordinates().second.y ?
+		auto yLine = logical_coordinates().is_gui_orientation() ?
 			(aFont.height() - 1.0 + aFont.descender()) - aFont.native_font_face().underline_position() :
 			-aFont.descender() + aFont.native_font_face().underline_position();
 		draw_line(
@@ -1701,23 +1718,5 @@ namespace neogfx
 			iGc.set_origin(aOrigin);
 		else if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
 			iGc.set_origin(point{ aOrigin.x, iGc.render_target().extents().cy - (aOrigin.y + aExtents.cy) });
-	}
-
-	const neogfx::logical_coordinates& to_logical_coordinates(const size& aRenderTargetExtents, logical_coordinate_system aSystem, neogfx::logical_coordinates& aCoordinates)
-	{
-		switch (aSystem)
-		{
-		case neogfx::logical_coordinate_system::Specified:
-			break;
-		case neogfx::logical_coordinate_system::AutomaticGui:
-			aCoordinates.first = vec2{ 0.0, aRenderTargetExtents.cy };
-			aCoordinates.second = vec2{ aRenderTargetExtents.cx, 0.0 };
-			break;
-		case neogfx::logical_coordinate_system::AutomaticGame:
-			aCoordinates.first = vec2{ 0.0, 0.0 };
-			aCoordinates.second = vec2{ aRenderTargetExtents.cx, aRenderTargetExtents.cy };
-			break;
-		}
-		return aCoordinates;
 	}
 }

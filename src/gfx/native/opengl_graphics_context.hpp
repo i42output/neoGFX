@@ -83,15 +83,15 @@ namespace neogfx
 		i_rendering_engine& rendering_engine() override;
 		const i_render_target& render_target() const override;
 		const i_render_target& render_target() override;
-		rect rendering_area(bool aConsiderScissor = true) const;
+		rect rendering_area(bool aConsiderScissor = true) const override;
 	public:
 		void enqueue(const graphics_operation::operation& aOperation) override;
 		void flush() override;
 	public:
 		neogfx::logical_coordinate_system logical_coordinate_system() const;
 		void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
-		const neogfx::logical_coordinates& logical_coordinates() const override;
-		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const;
+		neogfx::logical_coordinates logical_coordinates() const override;
+		void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates);
 		void scissor_on(const rect& aRect);
 		void scissor_off();
 		const optional_rect& scissor_rect() const;
@@ -145,8 +145,8 @@ namespace neogfx
 		const i_render_target& iTarget;
 		const i_widget* iWidget;
 		graphics_operation::queue iQueue;
-		neogfx::logical_coordinate_system iLogicalCoordinateSystem;
-		mutable neogfx::logical_coordinates iLogicalCoordinates;
+		mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
+		mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
 		neogfx::blending_mode iBlendingMode;
 		neogfx::smoothing_mode iSmoothingMode; 
 		bool iSubpixelRendering;

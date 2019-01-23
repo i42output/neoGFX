@@ -154,7 +154,7 @@ namespace neogfx::game
 								auto const& glyphTexture = glyph.glyph_texture(glyphText.glyphText);
 								vec3 glyphOrigin(
 									pos.x + glyphTexture.placement().x,
-									aGraphicsContext.logical_coordinates().first.y < aGraphicsContext.logical_coordinates().second.y ?
+									aGraphicsContext.logical_coordinates().is_game_orientation() ?
 										pos.y + (glyphTexture.placement().y + -glyphFont.descender()) :
 										pos.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
 									0.0);
