@@ -1325,7 +1325,7 @@ namespace neogfx
 
 		bool renderEffects = !firstOp.appearance.only_calculate_effect() && firstOp.appearance.has_effect() && firstOp.appearance.effect().type() == text_effect_type::Outline;
 
-		for (uint32_t pass = (renderEffects ? 1 : 2); pass <= 3; ++pass)
+		for (uint32_t pass = 1; pass <= 3; ++pass)
 		{
 			switch (pass)
 			{
