@@ -596,11 +596,7 @@ namespace neogfx
 
 				use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath), vertices.size() };
 				for (const auto& v : vertices)
-				{
-					vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{
-						v, std::array<uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}}
-						});
-				}
+					vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{v, vec4f{{1.0, 1.0, 1.0, 1.0}}});
 			}
 		}
 		if (aPathOutline != 0)
@@ -616,11 +612,7 @@ namespace neogfx
 
 					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(innerPath), vertices.size() };
 					for (const auto& v : vertices)
-					{
-						vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{
-							v, std::array<uint8_t, 4>{{0xFF, 0xFF, 0xFF, 0xFF}}
-							});
-					}
+						vertexArrays.instance().push_back(opengl_standard_vertex_arrays::vertex{v, vec4f{{1.0, 1.0, 1.0, 1.0}}});
 				}
 			}
 		}
@@ -820,12 +812,12 @@ namespace neogfx
 
 		double pixelAdjust = pixel_adjust(aPen);
 		auto penColour = std::holds_alternative<colour>(aPen.colour()) ?
-			std::array<uint8_t, 4>{{
-				static_variant_cast<colour>(aPen.colour()).red(),
-				static_variant_cast<colour>(aPen.colour()).green(),
-				static_variant_cast<colour>(aPen.colour()).blue(),
-				static_variant_cast<colour>(aPen.colour()).alpha()}} :
-			std::array<uint8_t, 4>{};
+			vec4f{{
+				static_variant_cast<colour>(aPen.colour()).red<float>(),
+				static_variant_cast<colour>(aPen.colour()).green<float>(),
+				static_variant_cast<colour>(aPen.colour()).blue<float>(),
+				static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+			vec4f{};
 
 		glCheck(glLineWidth(static_cast<GLfloat>(aPen.width())));
 		{
@@ -854,13 +846,13 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_LINES, 8u };
 			back_insert_rect_vertices(vertexArrays.instance(), aRect, pixel_adjust(aPen), mesh_type::Outline);
 			for (auto& v : vertexArrays.instance())
-				v.rgba = colour_to_vec4f(std::holds_alternative<colour>(aPen.colour()) ?
-					std::array <uint8_t, 4>{{
-						static_variant_cast<colour>(aPen.colour()).red(),
-						static_variant_cast<colour>(aPen.colour()).green(),
-						static_variant_cast<colour>(aPen.colour()).blue(),
-						static_variant_cast<colour>(aPen.colour()).alpha()}} :
-					std::array <uint8_t, 4>{});
+				v.rgba = std::holds_alternative<colour>(aPen.colour()) ?
+					vec4f{{
+						static_variant_cast<colour>(aPen.colour()).red<float>(),
+						static_variant_cast<colour>(aPen.colour()).green<float>(),
+						static_variant_cast<colour>(aPen.colour()).blue<float>(),
+						static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+					vec4f{};
 		}
 		glCheck(glLineWidth(1.0f));
 
@@ -886,12 +878,12 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
 			for (const auto& v : vertices)
 				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
-					std::array <uint8_t, 4>{{
-						static_variant_cast<colour>(aPen.colour()).red(),
-						static_variant_cast<colour>(aPen.colour()).green(),
-						static_variant_cast<colour>(aPen.colour()).blue(),
-						static_variant_cast<colour>(aPen.colour()).alpha()}} :
-					std::array <uint8_t, 4>{}});
+					vec4f{{
+						static_variant_cast<colour>(aPen.colour()).red<float>(),
+						static_variant_cast<colour>(aPen.colour()).green<float>(),
+						static_variant_cast<colour>(aPen.colour()).blue<float>(),
+						static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+					vec4f{}});
 		}
 		glCheck(glLineWidth(1.0f));
 
@@ -916,12 +908,12 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
 			for (const auto& v : vertices)
 				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
-					std::array <uint8_t, 4>{{
-						static_variant_cast<colour>(aPen.colour()).red(),
-						static_variant_cast<colour>(aPen.colour()).green(),
-						static_variant_cast<colour>(aPen.colour()).blue(),
-						static_variant_cast<colour>(aPen.colour()).alpha()}} :
-					std::array <uint8_t, 4>{}});
+					vec4f{{
+						static_variant_cast<colour>(aPen.colour()).red<float>(),
+						static_variant_cast<colour>(aPen.colour()).green<float>(),
+						static_variant_cast<colour>(aPen.colour()).blue<float>(),
+						static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+					vec4f{}});
 		}
 		glCheck(glLineWidth(1.0f));
 
@@ -946,12 +938,12 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_LINES, vertices.size() };
 			for (const auto& v : vertices)
 				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
-					std::array <uint8_t, 4>{ {
-						static_variant_cast<colour>(aPen.colour()).red(),
-						static_variant_cast<colour>(aPen.colour()).green(),
-						static_variant_cast<colour>(aPen.colour()).blue(),
-						static_variant_cast<colour>(aPen.colour()).alpha()}} :
-					std::array <uint8_t, 4>{} });
+					vec4f{{
+						static_variant_cast<colour>(aPen.colour()).red<float>(),
+						static_variant_cast<colour>(aPen.colour()).green<float>(),
+						static_variant_cast<colour>(aPen.colour()).blue<float>(),
+						static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+					vec4f{}});
 		}
 		glCheck(glLineWidth(1.0f));
 
@@ -982,12 +974,12 @@ namespace neogfx
 					use_vertex_arrays vertexArrays{ *this, path_shape_to_gl_mode(aPath.shape()), vertices.size() };
 					for (const auto& v : vertices)
 						vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
-							std::array <uint8_t, 4>{{
-								static_variant_cast<colour>(aPen.colour()).red(),
-								static_variant_cast<colour>(aPen.colour()).green(),
-								static_variant_cast<colour>(aPen.colour()).blue(),
-								static_variant_cast<colour>(aPen.colour()).alpha()}} :
-							std::array <uint8_t, 4>{}});
+							vec4f{{
+								static_variant_cast<colour>(aPen.colour()).red<float>(),
+								static_variant_cast<colour>(aPen.colour()).green<float>(),
+								static_variant_cast<colour>(aPen.colour()).blue<float>(),
+								static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+							vec4f{}});
 				}
 				if (aPath.shape() == path::ConvexPolygon)
 					reset_clip();
@@ -1014,12 +1006,12 @@ namespace neogfx
 			use_vertex_arrays vertexArrays{ *this, GL_LINE_LOOP, vertices.size() };
 			for (const auto& v : vertices)
 				vertexArrays.instance().push_back({ v, std::holds_alternative<colour>(aPen.colour()) ?
-					std::array <uint8_t, 4>{{
-						static_variant_cast<colour>(aPen.colour()).red(),
-						static_variant_cast<colour>(aPen.colour()).green(),
-						static_variant_cast<colour>(aPen.colour()).blue(),
-						static_variant_cast<colour>(aPen.colour()).alpha()}} :
-					std::array <uint8_t, 4>{}});
+					vec4f{{
+						static_variant_cast<colour>(aPen.colour()).red<float>(),
+						static_variant_cast<colour>(aPen.colour()).green<float>(),
+						static_variant_cast<colour>(aPen.colour()).blue<float>(),
+						static_variant_cast<colour>(aPen.colour()).alpha<float>()}} :
+					vec4f{}});
 		}
 
 		if (std::holds_alternative<gradient>(aPen.colour()))
@@ -1074,13 +1066,13 @@ namespace neogfx
 				auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
 				auto newVertices = back_insert_rect_vertices(vertexArrays.instance(), drawOp.rect, 0.0, mesh_type::Triangles, drawOp.zpos);
 				for (auto i = newVertices; i != vertexArrays.instance().end(); ++i)
-					i->rgba = colour_to_vec4f(std::holds_alternative<colour>(drawOp.fill) ?
-						std::array<uint8_t, 4>{{
-							static_variant_cast<const colour&>(drawOp.fill).red(),
-							static_variant_cast<const colour&>(drawOp.fill).green(),
-							static_variant_cast<const colour&>(drawOp.fill).blue(),
-							static_variant_cast<const colour&>(drawOp.fill).alpha()}} :
-						std::array<uint8_t, 4>{});
+					i->rgba = std::holds_alternative<colour>(drawOp.fill) ?
+						vec4f{{
+							static_variant_cast<const colour&>(drawOp.fill).red<float>(),
+							static_variant_cast<const colour&>(drawOp.fill).green<float>(),
+							static_variant_cast<const colour&>(drawOp.fill).blue<float>(),
+							static_variant_cast<const colour&>(drawOp.fill).alpha<float>()}} :
+						vec4f{};
 			}
 		}
 
@@ -1106,12 +1098,12 @@ namespace neogfx
 			for (const auto& v : vertices)
 			{
 				vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
-					std::array <uint8_t, 4>{{
-						static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-					std::array <uint8_t, 4>{}}); 
+					vec4f{{
+						static_variant_cast<const colour&>(aFill).red<float>(),
+						static_variant_cast<const colour&>(aFill).green<float>(),
+						static_variant_cast<const colour&>(aFill).blue<float>(),
+						static_variant_cast<const colour&>(aFill).alpha<float>()}} :
+					vec4f{}}); 
 			}
 		}
 
@@ -1131,12 +1123,12 @@ namespace neogfx
 			for (const auto& v : vertices)
 			{
 				vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
-					std::array <uint8_t, 4>{{
-						static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-					std::array <uint8_t, 4>{}});
+					vec4f{{
+						static_variant_cast<const colour&>(aFill).red<float>(),
+						static_variant_cast<const colour&>(aFill).green<float>(),
+						static_variant_cast<const colour&>(aFill).blue<float>(),
+						static_variant_cast<const colour&>(aFill).alpha<float>()}} :
+					vec4f{}});
 			}
 		}
 
@@ -1156,12 +1148,12 @@ namespace neogfx
 			for (const auto& v : vertices)
 			{
 				vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
-					std::array <uint8_t, 4>{{
-						static_variant_cast<const colour&>(aFill).red(),
-						static_variant_cast<const colour&>(aFill).green(),
-						static_variant_cast<const colour&>(aFill).blue(),
-						static_variant_cast<const colour&>(aFill).alpha()}} :
-					std::array <uint8_t, 4>{}});
+					vec4f{{
+						static_variant_cast<const colour&>(aFill).red<float>(),
+						static_variant_cast<const colour&>(aFill).green<float>(),
+						static_variant_cast<const colour&>(aFill).blue<float>(),
+						static_variant_cast<const colour&>(aFill).alpha<float>()}} :
+					vec4f{}});
 			}
 		}
 
@@ -1194,12 +1186,12 @@ namespace neogfx
 					for (const auto& v : vertices)
 					{
 						vertexArrays.instance().push_back({v, std::holds_alternative<colour>(aFill) ?
-							std::array <uint8_t, 4>{{
-								static_variant_cast<const colour&>(aFill).red(),
-								static_variant_cast<const colour&>(aFill).green(),
-								static_variant_cast<const colour&>(aFill).blue(),
-								static_variant_cast<const colour&>(aFill).alpha()}} :
-							std::array <uint8_t, 4>{}});
+							vec4f{{
+								static_variant_cast<const colour&>(aFill).red<float>(),
+								static_variant_cast<const colour&>(aFill).green<float>(),
+								static_variant_cast<const colour&>(aFill).blue<float>(),
+								static_variant_cast<const colour&>(aFill).alpha<float>()}} :
+							vec4f{}});
 					}
 				}
 
@@ -1250,12 +1242,12 @@ namespace neogfx
 						vertexArrays.instance().push_back({
 							v,
 							std::holds_alternative<colour>(drawOp.fill) ?
-								std::array <uint8_t, 4>{{
-									static_variant_cast<const colour&>(drawOp.fill).red(),
-									static_variant_cast<const colour&>(drawOp.fill).green(),
-									static_variant_cast<const colour&>(drawOp.fill).blue(),
-									static_variant_cast<const colour&>(drawOp.fill).alpha()}} :
-								std::array <uint8_t, 4>{},
+								vec4f{{
+									static_variant_cast<const colour&>(drawOp.fill).red<float>(),
+									static_variant_cast<const colour&>(drawOp.fill).green<float>(),
+									static_variant_cast<const colour&>(drawOp.fill).blue<float>(),
+									static_variant_cast<const colour&>(drawOp.fill).alpha<float>()}} :
+								vec4f{},
 							uv[vi]});
 					}
 				}
@@ -1392,27 +1384,27 @@ namespace neogfx
 						rect outputRect{ point{ glyphOrigin } +offsetOrigin + point{ static_cast<coordinate>((op.pass() - 1u) % scanlineOffsets), static_cast<coordinate>((op.pass() - 1u) / scanlineOffsets) }, glyphTexture.texture().extents() };
 						vertices_t outputVertices = rect_vertices(outputRect, 0.0, mesh_type::Triangles, glyphOrigin.z);
 
-						std::array<uint8_t, 4> passColour;
+						vec4f passColour;
 
 						if (pass == 2)
 						{
 							passColour = std::holds_alternative<colour>(drawOp.appearance.effect().colour()) ?
-								std::array <uint8_t, 4>{ {
-										static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red(),
-											static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green(),
-											static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue(),
-											static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha()}} :
-								std::array <uint8_t, 4>{};
+								vec4f{{
+									static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).red<float>(),
+									static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).green<float>(),
+									static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).blue<float>(),
+									static_variant_cast<const colour&>(drawOp.appearance.effect().colour()).alpha<float>()}} :
+								vec4f{};
 						}
 						else
 						{
 							passColour = std::holds_alternative<colour>(drawOp.appearance.ink()) ?
-								std::array <uint8_t, 4>{ {
-										static_variant_cast<const colour&>(drawOp.appearance.ink()).red(),
-											static_variant_cast<const colour&>(drawOp.appearance.ink()).green(),
-											static_variant_cast<const colour&>(drawOp.appearance.ink()).blue(),
-											static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha()}} :
-								std::array <uint8_t, 4>{};
+								vec4f{{
+									static_variant_cast<const colour&>(drawOp.appearance.ink()).red<float>(),
+									static_variant_cast<const colour&>(drawOp.appearance.ink()).green<float>(),
+									static_variant_cast<const colour&>(drawOp.appearance.ink()).blue<float>(),
+									static_variant_cast<const colour&>(drawOp.appearance.ink()).alpha<float>()}} :
+								vec4f{};
 						}
 
 						vertexArrays.instance().push_back({ outputVertices[0], passColour, iTempTextureCoords[0] });
@@ -1594,11 +1586,11 @@ namespace neogfx
 					}
 					vertexArrays.instance().emplace_back(
 						v,
-						std::array<uint8_t, 4>{ {
-							colourizationColour.red(),
-							colourizationColour.green(),
-							colourizationColour.blue(),
-							colourizationColour.alpha()}},
+						vec4f{{
+							colourizationColour.red<float>(),
+							colourizationColour.green<float>(),
+							colourizationColour.blue<float>(),
+							colourizationColour.alpha<float>()}},
 						uv);
 				}
 			}

@@ -249,10 +249,6 @@ namespace neogfx
 				xyz{ xyz }, rgba{ rgba }, st{ st }
 			{
 			}
-			vertex(const vec3f& xyz, const std::array<uint8_t, 4>& rgba, const vec2f& st = vec2f{}) :
-				xyz{ xyz }, rgba{ colour_to_vec4f(rgba) }, st{ st }
-			{
-			}
 			struct offset
 			{
 				static constexpr std::size_t xyz = 0u;
