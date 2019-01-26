@@ -795,6 +795,12 @@
 #ifdef FT2_BUILD_LIBRARY
 #define  FT_INTERNAL_INTERNAL_H  <freetype/internal/internal.h>
 #include FT_INTERNAL_INTERNAL_H
+
+/** -- neoGFX Patch
+ * FT_Get_Advance too slow when used with Harfbuzz 
+ */
+#define FT_Get_Advance orig_FT_Get_Advance
+
 #endif /* FT2_BUILD_LIBRARY */
 
 
