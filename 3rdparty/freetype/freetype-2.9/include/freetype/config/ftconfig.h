@@ -461,12 +461,14 @@ FT_BEGIN_HEADER
 #define FT_EXPORT( x )  extern  x
 #endif
 
+#if 0
 #ifdef _MSC_VER
 #undef FT_EXPORT
 #ifdef _DLL
 #define FT_EXPORT( x )  __declspec( dllexport )  x
 #else
 #define FT_EXPORT( x )  __declspec( dllimport )  x
+#endif
 #endif
 #endif
 
