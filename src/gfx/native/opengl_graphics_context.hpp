@@ -98,6 +98,7 @@ namespace neogfx
 		void clip_to(const rect& aRect);
 		void clip_to(const path& aPath, dimension aPathOutline);
 		void reset_clip();
+		void apply_clip();
 		neogfx::blending_mode blending_mode() const;
 		void set_blending_mode(neogfx::blending_mode aBlendingMode);
 		neogfx::smoothing_mode smoothing_mode() const;
@@ -111,6 +112,7 @@ namespace neogfx
 		void subpixel_rendering_off();
 		void clear(const colour& aColour);
 		void clear_depth_buffer();
+		void clear_stencil_buffer();
 		void set_pixel(const point& aPoint, const colour& aColour);
 		void draw_pixel(const point& aPoint, const colour& aColour);
 		void draw_line(const point& aFrom, const point& aTo, const pen& aPen);

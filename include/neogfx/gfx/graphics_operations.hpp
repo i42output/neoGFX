@@ -119,6 +119,10 @@ namespace neogfx
 		{
 		};
 
+		struct clear_stencil_buffer
+		{
+		};
+
 		struct set_pixel
 		{
 			point point;
@@ -272,6 +276,7 @@ namespace neogfx
 			subpixel_rendering_off,
 			clear,
 			clear_depth_buffer,
+			clear_stencil_buffer,
 			set_pixel,
 			draw_pixel,
 			draw_line,
@@ -313,6 +318,7 @@ namespace neogfx
 			SubpixelRenderingOff,
 			Clear,
 			ClearDepthBuffer,
+			ClearStencilBuffer,
 			SetPixel,
 			DrawPixel,
 			DrawLine,

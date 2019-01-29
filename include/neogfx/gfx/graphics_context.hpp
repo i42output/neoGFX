@@ -135,6 +135,7 @@ namespace neogfx
 		void subpixel_rendering_off() const;
 		void clear(const colour& aColour, const std::optional<scalar>& aZpos = std::optional<scalar>{}) const;
 		void clear_depth_buffer() const;
+		void clear_stencil_buffer() const;
 		void blit(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect) const;
 		void blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, uint32_t aParameter1 = 5, double aParamter2 = 1.0) const;
 		void set_pixel(const point& aPoint, const colour& aColour) const;
@@ -306,7 +307,7 @@ namespace neogfx
 	{
 		point const effectOffset{ aGlowSize, aGlowSize };
 		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
-		auto pingPongBuffers = aGraphicsContext.ping_pong_buffers(effectExtents);
+		auto pingPongBuffers = aGraphicsContext.ping_pong_buffers(effectExtents, texture_sampling::Nearest);
 		draw_glyph_text_glow_pass_1(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowColour, aGlowSize);
 		draw_glyph_text_glow_pass_2(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
 		draw_glyph_text_glow_pass_3(aGraphicsContext, pingPongBuffers, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);

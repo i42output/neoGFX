@@ -63,6 +63,11 @@ namespace neogfx
 		return texture_type::Texture;
 	}
 
+	bool texture::is_render_target() const
+	{
+		return native_texture()->is_render_target();
+	}
+
 	const i_sub_texture& texture::as_sub_texture() const
 	{
 		if (iSubTexture != std::nullopt)

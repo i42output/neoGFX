@@ -68,7 +68,7 @@ namespace neogfx
 
 		extern "C"
 		{
-			FT_EXPORT(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
+			FT_EXPORT_DEF(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
 			{
 				return neogfx_FT_Get_Advance(face, gindex, load_flags, padvance);
 			}

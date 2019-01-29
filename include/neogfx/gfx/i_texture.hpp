@@ -77,6 +77,7 @@ namespace neogfx
 	public:
 		virtual texture_id id() const = 0;
 		virtual texture_type type() const = 0;
+		virtual bool is_render_target() const = 0;
 		virtual const i_sub_texture& as_sub_texture() const = 0;
 		virtual dimension dpi_scale_factor() const = 0;
 		virtual texture_sampling sampling() const = 0;

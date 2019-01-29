@@ -204,7 +204,6 @@ namespace neogfx
 					iParent.rendering_engine().vertex_arrays().instantiate(iParent, iParent.rendering_engine().active_shader_program());
 				else
 					iParent.rendering_engine().vertex_arrays().instantiate_with_texture_coords(iParent, iParent.rendering_engine().active_shader_program());
-				opengl_graphics_context::blend_as ba{ iParent, blending_mode::Default };
 				if (!iUseBarrier && mode() == translated_mode())
 				{
 					glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));

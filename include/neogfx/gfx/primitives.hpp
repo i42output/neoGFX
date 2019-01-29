@@ -72,7 +72,8 @@ namespace neogfx
 	enum class blending_mode
 	{
 		None,
-		Default // todo
+		Default, // todo
+		Blit
 	};
 
 	enum class smoothing_mode

@@ -244,6 +244,11 @@ namespace neogfx
 		return texture_type::Texture;
 	}
 
+	bool opengl_texture::is_render_target() const
+	{
+		return iFrameBuffer != 0;
+	}
+
 	const i_sub_texture& opengl_texture::as_sub_texture() const
 	{
 		throw not_sub_texture();

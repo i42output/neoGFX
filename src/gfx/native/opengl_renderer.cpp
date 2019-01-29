@@ -313,7 +313,7 @@ namespace neogfx
 		{
 			std::make_pair(
 				std::string(
-					"#version 130\n"
+					"#version 400\n"
 					"precision mediump float;\n"
 					"uniform mat4 uProjectionMatrix;\n"
 					"uniform mat4 uTransformationMatrix;\n"
@@ -329,7 +329,7 @@ namespace neogfx
 				GL_VERTEX_SHADER),
 			std::make_pair(
 				std::string(
-					"#version 130\n"
+					"#version 400\n"
 					"precision mediump float;\n"
 					"in vec4 Color;\n"
 					"out vec4 FragColor;\n"
@@ -345,7 +345,7 @@ namespace neogfx
 		{
 			std::make_pair(
 				std::string(
-					"#version 130\n"
+					"#version 400\n"
 					"precision mediump float;\n"
 					"uniform mat4 uProjectionMatrix;\n"
 					"uniform mat4 uTransformationMatrix;\n"
@@ -353,7 +353,7 @@ namespace neogfx
 					"in mediump vec4 VertexColor;\n"
 					"in mediump vec2 VertexTextureCoord;\n"
 					"out vec4 Color;\n"
-					"varying vec2 vTexCoord;\n"
+					"out vec2 vTexCoord;\n"
 					"void main()\n"
 					"{\n"
 					"	Color = VertexColor;\n"
@@ -363,10 +363,11 @@ namespace neogfx
 				GL_VERTEX_SHADER),
 			std::make_pair(
 				std::string(
-					"#version 150\n"
+					"#version 400\n"
 					"precision mediump float;\n"
 					"uniform bool haveTexture;\n"
 					"uniform bool multisample;\n"
+					"uniform bool blitBlend;\n"
 					"uniform int texDataFormat;\n"
 					"uniform sampler2D tex;\n"
 					"uniform sampler2DMS texMS;\n"
@@ -375,7 +376,7 @@ namespace neogfx
 					"uniform int effect;\n"
 					"in vec4 Color;\n"
 					"out vec4 FragColor;\n"
-					"varying vec2 vTexCoord;\n"
+					"in vec2 vTexCoord;\n"
 					"void main()\n"
 					"{\n"
 					"	if (!haveTexture)\n"
@@ -390,16 +391,8 @@ namespace neogfx
 					"	}\n"
 					"	else\n"
 					"	{\n"
-					"		float alpha = 0.0;\n"
 					"		ivec2 texCoord = ivec2(vTexCoord * texExtents);\n"
-					"		int i;\n"
-					"		for (i = 0; i < texSamples; ++i)\n"
-					"		{\n"
-					"			vec4 nextTexel = texelFetch(texMS, texCoord, i);\n"
-					"			texel = max(texel, nextTexel).rgba;\n"
-					"			alpha += nextTexel.a;\n"
-					"		}\n"
-					"		texel.a = alpha / texSamples;\n"
+					"		texel = texelFetch(texMS, texCoord, gl_SampleID).rgba;\n"
 					"	}\n"
 					"	switch(texDataFormat)\n"
 					"	{\n"
@@ -449,7 +442,7 @@ namespace neogfx
 			{
 				std::make_pair(
 					std::string(
-						"#version 130\n"
+						"#version 400\n"
 						"precision mediump float;\n"
 						"uniform mat4 uProjectionMatrix;\n"
 						"uniform mat4 uTransformationMatrix;\n"
@@ -473,7 +466,7 @@ namespace neogfx
 			{
 				std::make_pair(
 					std::string(
-						"#version 130\n"
+						"#version 400\n"
 						"precision mediump float;\n"
 						"uniform mat4 uProjectionMatrix;\n"
 						"uniform mat4 uTransformationMatrix;\n"
@@ -481,8 +474,8 @@ namespace neogfx
 						"in mediump vec4 VertexColor;\n"
 						"in mediump vec2 VertexTextureCoord;\n"
 						"out vec4 Color;\n"
-						"varying vec2 vGlyphTexCoord;\n"
-						"varying vec2 vOutputCoord;\n"
+						"out vec2 vGlyphTexCoord;\n"
+						"out vec2 vOutputCoord;\n"
 						"void main()\n"
 						"{\n"
 						"	Color = VertexColor;\n"
@@ -493,7 +486,7 @@ namespace neogfx
 					GL_VERTEX_SHADER),
 				std::make_pair(
 					std::string(
-						"#version 130\n"
+						"#version 400\n"
 						"precision mediump float;\n"
 						"uniform sampler2D glyphTexture;\n"
 						"uniform vec2 glyphOrigin;\n"
@@ -503,8 +496,8 @@ namespace neogfx
 						"uniform vec4 glyphRect;\n"
 						"in vec4 Color;\n"
 						"out vec4 FragColor;\n"
-						"varying vec2 vGlyphTexCoord;\n"
-						"varying vec2 vOutputCoord;\n"
+						"in vec2 vGlyphTexCoord;\n"
+						"in vec2 vOutputCoord;\n"
 						"\n"
 						"int adjust_y(float y)\n"
 						"{\n"
@@ -548,7 +541,7 @@ namespace neogfx
 				{
 					std::make_pair(
 						std::string(
-							"#version 130\n"
+							"#version 400\n"
 							"precision mediump float;\n"
 							"uniform mat4 uProjectionMatrix;\n"
 							"uniform mat4 uTransformationMatrix;\n"
@@ -556,8 +549,8 @@ namespace neogfx
 							"in mediump vec4 VertexColor;\n"
 							"in mediump vec2 VertexTextureCoord;\n"
 							"out vec4 Color;\n"
-							"varying vec2 vGlyphTexCoord;\n"
-							"varying vec2 vOutputCoord;\n"
+							"out vec2 vGlyphTexCoord;\n"
+							"out vec2 vOutputCoord;\n"
 							"void main()\n"
 							"{\n"
 							"	Color = VertexColor;\n"
@@ -568,7 +561,7 @@ namespace neogfx
 						GL_VERTEX_SHADER),
 					std::make_pair(
 						std::string(
-							"#version 150\n"
+							"#version 400\n"
 							"precision mediump float;\n"
 							"uniform sampler2D glyphTexture;\n"
 							"uniform vec2 glyphOrigin;\n"
@@ -579,8 +572,8 @@ namespace neogfx
 							"uniform vec4 glyphRect;\n"
 							"in vec4 Color;\n"
 							"out vec4 FragColor;\n"
-							"varying vec2 vGlyphTexCoord;\n"
-							"varying vec2 vOutputCoord;\n"
+							"in vec2 vGlyphTexCoord;\n"
+							"in vec2 vOutputCoord;\n"
 							"\n"
 							"int adjust_y(float y)\n"
 							"{\n"
@@ -615,7 +608,7 @@ namespace neogfx
 				{
 					std::make_pair(
 						std::string(
-							"#version 130\n"
+							"#version 400\n"
 							"precision mediump float;\n"
 							"uniform mat4 uProjectionMatrix;\n"
 							"uniform mat4 uTransformationMatrix;\n"
@@ -623,8 +616,8 @@ namespace neogfx
 							"in mediump vec4 VertexColor;\n"
 							"in mediump vec2 VertexTextureCoord;\n"
 							"out vec4 Color;\n"
-							"varying vec2 vGlyphTexCoord;\n"
-							"varying vec2 vOutputCoord;\n"
+							"out vec2 vGlyphTexCoord;\n"
+							"out vec2 vOutputCoord;\n"
 							"void main()\n"
 							"{\n"
 							"	Color = VertexColor;\n"
@@ -635,7 +628,7 @@ namespace neogfx
 						GL_VERTEX_SHADER),
 					std::make_pair(
 						std::string(
-							"#version 150\n"
+							"#version 400\n"
 							"precision mediump float;\n"
 							"uniform sampler2D glyphTexture;\n"
 							"uniform vec2 glyphOrigin;\n"
@@ -646,8 +639,8 @@ namespace neogfx
 							"uniform vec4 glyphRect;\n"
 							"in vec4 Color;\n"
 							"out vec4 FragColor;\n"
-							"varying vec2 vGlyphTexCoord;\n"
-							"varying vec2 vOutputCoord;\n"
+							"in vec2 vGlyphTexCoord;\n"
+							"in vec2 vOutputCoord;\n"
 							"\n"
 							"int adjust_y(float y)\n"
 							"{\n"
@@ -684,7 +677,7 @@ namespace neogfx
 				{
 					std::make_pair(
 						std::string(
-							"#version 130\n"/* todo */
+							"#version 400\n"
 							"precision mediump float;\n"
 							"uniform mat4 uProjectionMatrix;\n"
 							"uniform mat4 uTransformationMatrix;\n"
@@ -692,7 +685,7 @@ namespace neogfx
 							"in mediump vec4 VertexColor;\n"
 							"in mediump vec2 VertexTextureCoord;\n"
 							"out vec4 Color;\n"
-							"varying vec2 vGlyphTexCoord;\n"
+							"out vec2 vGlyphTexCoord;\n"
 							"void main()\n"
 							"{\n"
 							"	Color = VertexColor;\n"
@@ -702,7 +695,7 @@ namespace neogfx
 						GL_VERTEX_SHADER),
 					std::make_pair(
 						std::string(
-							"#version 130\n"/* todo */
+							"#version 400\n"
 							"precision mediump float;\n"
 							"uniform sampler2D glyphTexture;\n"
 							"uniform vec2 glyphOrigin;\n"
@@ -712,7 +705,7 @@ namespace neogfx
 							"uniform vec2 glyphDestinationTextureExtents;\n"
 							"in vec4 Color;\n"
 							"out vec4 FragColor;\n"
-							"varying vec2 vGlyphTexCoord;\n"
+							"in vec2 vGlyphTexCoord;\n"
 							"void main()\n"
 							"{\n"
 							"	vec4 rgbAlpha = texture(glyphTexture, vGlyphTexCoord);\n"
@@ -959,9 +952,9 @@ namespace neogfx
 			{
 				std::size_t v;
 				const std::size_t VERSION_STRING_LENGTH = 12;
-				if ((v = source.find("#version 130")) != std::string::npos)
+				if ((v = source.find("#version 400")) != std::string::npos)
 					source.replace(v, VERSION_STRING_LENGTH, "#version 110");
-				else if ((v = source.find("#version 150")) != std::string::npos)
+				else if ((v = source.find("#version 400")) != std::string::npos)
 					source.replace(v, VERSION_STRING_LENGTH, "#version 110");
 			}
 			const char* codeArray[] = { source.c_str() };
@@ -997,8 +990,8 @@ namespace neogfx
 		auto existing = aBufferList.lower_bound(std::make_pair(aSampling, aExtents));
 		if (existing != aBufferList.end() && existing->first.first == aSampling && existing->first.second >= aExtents)
 			return existing->second;
-		auto const multipleSize = 1024;
-		basic_size<int32_t> idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / multipleSize) + 1) * multipleSize, (((static_cast<int32_t>(aExtents.cy) - 1) / multipleSize) + 1) * multipleSize };
+		auto const sizeMultiple = 1024;
+		basic_size<int32_t> idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / sizeMultiple) + 1) * sizeMultiple, (((static_cast<int32_t>(aExtents.cy) - 1) / sizeMultiple) + 1) * sizeMultiple };
 		return aBufferList.emplace(std::make_pair(aSampling, idealSize), texture{ idealSize, 1.0, aSampling }).first->second;
 	}
 }

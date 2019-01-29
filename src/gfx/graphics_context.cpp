@@ -82,6 +82,8 @@ namespace neogfx
 		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
+		if (attached())
+			set_blending_mode(neogfx::blending_mode::Default);
 	}
 
 	graphics_context::graphics_context(const i_surface& aSurface, const font& aDefaultFont, type aType) :
@@ -97,6 +99,8 @@ namespace neogfx
 		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
+		if (attached())
+			set_blending_mode(neogfx::blending_mode::Default);
 	}
 
 	graphics_context::graphics_context(const i_widget& aWidget, type aType) :
@@ -113,6 +117,8 @@ namespace neogfx
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
 		set_logical_coordinate_system(aWidget.logical_coordinate_system());
+		if (attached())
+			set_blending_mode(neogfx::blending_mode::Default);
 	}
 
 	graphics_context::graphics_context(const i_texture& aTexture, type aType) :
@@ -128,6 +134,8 @@ namespace neogfx
 		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
+		if (attached())
+			set_blending_mode(neogfx::blending_mode::Default);
 	}
 
 	graphics_context::graphics_context(const graphics_context& aOther) :
@@ -145,6 +153,8 @@ namespace neogfx
 		iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() },
 		iGlyphTextData{ std::make_unique<glyph_text_data>() }
 	{
+		if (attached())
+			set_blending_mode(neogfx::blending_mode::Default);
 	}
 
 	graphics_context::~graphics_context()
@@ -162,14 +172,22 @@ namespace neogfx
 		{
 			scoped_scissor ss{ *buffer1, rect{ point{}, aExtents} };
 			if (aClearColour != std::nullopt)
+			{
 				buffer1->clear(*aClearColour);
+				buffer1->clear_depth_buffer();
+				buffer1->clear_stencil_buffer();
+			}
 		}
 		buffer1->render_target().deactivate_target();
 		auto buffer2 = std::make_unique<graphics_context>(service<i_rendering_engine>().ping_pong_buffer2(aExtents, aSampling));
 		{
 			scoped_scissor ss{ *buffer2, rect{ point{}, aExtents} };
 			if (aClearColour != std::nullopt)
+			{
 				buffer2->clear(*aClearColour);
+				buffer2->clear_depth_buffer();
+				buffer2->clear_stencil_buffer();
+			}
 		}
 		buffer2->render_target().deactivate_target();
 		render_target().activate_target();
@@ -781,24 +799,23 @@ namespace neogfx
 		native_context().enqueue(graphics_operation::clear_depth_buffer{});
 	}
 
+	void graphics_context::clear_stencil_buffer() const
+	{
+		native_context().enqueue(graphics_operation::clear_stencil_buffer{});
+	}
+
 	void graphics_context::blit(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect) const
 	{
+		auto previousBlendingMode = blending_mode();
+		set_blending_mode(neogfx::blending_mode::Blit);
 		draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
+		set_blending_mode(previousBlendingMode);
 	}
 
 	void graphics_context::blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParamter2) const
 	{
 		// todo
-		fill_rect(aDestinationRect, colour{ 0x20, 0x20, 0x20 });
-		//blit(aDestinationRect, aSource, aSourceRect);
-		draw_line(aDestinationRect.top_left(), aDestinationRect.bottom_right(), pen{ colour::White, 1.0 });
-		draw_line(aDestinationRect.bottom_left(), aDestinationRect.top_right(), pen{ colour::Black, 1.0 });
-		auto r = aDestinationRect;
-		draw_rect(r, pen{ colour::Yellow, 1.0 });
-		r.deflate(size{ 1.0 });
-		draw_rect(r, pen{ colour::Blue, 1.0 });
-		r.deflate(size{ 9.0 });
-		draw_rect(r, pen{ colour::Red, 1.0 });
+		blit(aDestinationRect, aSource, aSourceRect);
 	}
 
 	glyph_text graphics_context::to_glyph_text(const string& aText, const font& aFont) const

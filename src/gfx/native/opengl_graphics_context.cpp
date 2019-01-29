@@ -304,7 +304,9 @@ namespace neogfx
 		if (iQueue.first.empty())
 			return;
 
+		apply_clip();
 		apply_scissor();
+		set_blending_mode(blending_mode());
 
 		iQueue.second.push_back(iQueue.first.size());
 		auto endIndex = std::prev(iQueue.second.end());
@@ -389,6 +391,9 @@ namespace neogfx
 				break;
 			case graphics_operation::operation_type::ClearDepthBuffer:
 				clear_depth_buffer();
+				break;
+			case graphics_operation::operation_type::ClearStencilBuffer:
+				clear_stencil_buffer();
 				break;
 			case graphics_operation::operation_type::SetPixel:
 				for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -548,7 +553,9 @@ namespace neogfx
 			glCheck(glScissor(x, y, cx, cy));
 		}
 		else
+		{
 			glCheck(glDisable(GL_SCISSOR_TEST));
+		}
 	}
 
 	void opengl_graphics_context::clip_to(const rect& aRect)
@@ -556,8 +563,8 @@ namespace neogfx
 		if (iClipCounter++ == 0)
 		{
 			glCheck(glClear(GL_STENCIL_BUFFER_BIT));
-			glCheck(glEnable(GL_STENCIL_TEST));
 		}
+		apply_clip();
 		glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
 		glCheck(glDepthMask(GL_FALSE));
 		glCheck(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));  // draw 1s on test fail (always)
@@ -579,8 +586,8 @@ namespace neogfx
 		if (iClipCounter++ == 0)
 		{
 			glCheck(glClear(GL_STENCIL_BUFFER_BIT));
-			glCheck(glEnable(GL_STENCIL_TEST));
 		}
+		apply_clip();
 		glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
 		glCheck(glDepthMask(GL_FALSE));
 		glCheck(glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP));  // draw 1s on test fail (always)
@@ -625,7 +632,17 @@ namespace neogfx
 
 	void opengl_graphics_context::reset_clip()
 	{
-		if (--iClipCounter == 0)
+		--iClipCounter;
+		apply_clip();
+	}
+
+	void opengl_graphics_context::apply_clip()
+	{
+		if (iClipCounter > 0)
+		{
+			glCheck(glEnable(GL_STENCIL_TEST));
+		}
+		else
 		{
 			glCheck(glDisable(GL_STENCIL_TEST));
 		}
@@ -637,12 +654,16 @@ namespace neogfx
 	}
 
 	void opengl_graphics_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
-		{
+	{
 		iBlendingMode = aBlendingMode;
 		switch (iBlendingMode)
 		{
 		case neogfx::blending_mode::None:
 			glCheck(glDisable(GL_BLEND));
+			break;
+		case neogfx::blending_mode::Blit:
+			glCheck(glEnable(GL_BLEND));
+			glCheck(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
 			break;
 		case neogfx::blending_mode::Default:
 			glCheck(glEnable(GL_BLEND));
@@ -784,7 +805,15 @@ namespace neogfx
 
 	void opengl_graphics_context::clear_depth_buffer()
 	{
+		glCheck(glClearDepth(1.0));
 		glCheck(glClear(GL_DEPTH_BUFFER_BIT));
+	}
+
+	void opengl_graphics_context::clear_stencil_buffer()
+	{
+		glCheck(glStencilMask(static_cast<GLuint>(-1)));
+		glCheck(glClearStencil(0xFF));
+		glCheck(glClear(GL_STENCIL_BUFFER_BIT));
 	}
 
 	void opengl_graphics_context::set_pixel(const point& aPoint, const colour& aColour)
@@ -834,6 +863,8 @@ namespace neogfx
 	void opengl_graphics_context::draw_rect(const rect& aRect, const pen& aPen)
 	{
 		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
+		scoped_anti_alias saa{ *this, smoothing_mode::None };
 
 		if (std::holds_alternative<gradient>(aPen.colour()))
 		{
@@ -1052,6 +1083,8 @@ namespace neogfx
 	void opengl_graphics_context::fill_rect(const graphics_operation::batch& aFillRectOps)
 	{
 		use_shader_program usp{ *this, iRenderingEngine, rendering_engine().default_shader_program() };
+
+		scoped_anti_alias saa{ *this, smoothing_mode::None };
 
 		auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
@@ -1550,6 +1583,8 @@ namespace neogfx
 				else
 					uvFixupOffset = aMaterial.texture->subTexture->min;
 				rendering_engine().active_shader_program().set_uniform_variable("texDataFormat", static_cast<int>(texture.data_format()));
+				rendering_engine().active_shader_program().set_uniform_variable("blitBlend", blending_mode() == neogfx::blending_mode::Blit);
+				rendering_engine().active_shader_program().set_uniform_variable("texExtents", static_cast<float>(texture.storage_extents().cx), static_cast<float>(texture.storage_extents().cy));
 				if (texture.sampling() != texture_sampling::Multisample)
 				{
 					rendering_engine().active_shader_program().set_uniform_variable("tex", 1);
@@ -1560,7 +1595,12 @@ namespace neogfx
 					rendering_engine().active_shader_program().set_uniform_variable("texMS", 2);
 					rendering_engine().active_shader_program().set_uniform_variable("multisample", true);
 					rendering_engine().active_shader_program().set_uniform_variable("texSamples", static_cast<int>(texture.samples()));
-					rendering_engine().active_shader_program().set_uniform_variable("texExtents", static_cast<float>(texture.storage_extents().cx), static_cast<float>(texture.storage_extents().cy));
+				}
+
+				if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
+				{
+					glCheck(glEnable(GL_SAMPLE_SHADING));
+					glCheck(glMinSampleShading(1.0));
 				}
 			}
 
@@ -1603,6 +1643,8 @@ namespace neogfx
 			auto const& texture = *service<i_texture_manager>().find_texture(aMaterial.texture->id.cookie());
 			glCheck(glBindTexture(texture.sampling() != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(previousTexture)));
 		}
+
+		glCheck(glDisable(GL_SAMPLE_SHADING));
 
 		return drawn;
 	}
