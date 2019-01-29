@@ -121,7 +121,7 @@ namespace neogfx
 		void clip_to(const path& aPath, dimension aPathOutline = 0) const;
 		void reset_clip() const;
 		double opacity() const;
-		void set_opacity(double aOpacity);
+		void set_opacity(double aOpacity) const;
 		neogfx::blending_mode blending_mode() const;
 		void set_blending_mode(neogfx::blending_mode aBlendingMode) const;
 		neogfx::smoothing_mode smoothing_mode() const;
@@ -324,7 +324,7 @@ namespace neogfx
 	class scoped_mnemonics
 	{
 	public:
-		scoped_mnemonics(graphics_context& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
+		scoped_mnemonics(const graphics_context& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
 			iGc(aGc)
 		{
 			iGc.set_mnemonic(aShowMnemonics, aMnemonicPrefix);
@@ -334,19 +334,19 @@ namespace neogfx
 			iGc.unset_mnemonic();
 		}
 	private:
-		graphics_context& iGc;
+		const graphics_context& iGc;
 	};
 
 	class scoped_coordinate_system
 	{
 	public:
-		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem);
-		scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates);
+		scoped_coordinate_system(const graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem);
+		scoped_coordinate_system(const graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates);
 		~scoped_coordinate_system();
 	private:
 		void apply_origin(const point& aOrigin, const size& aExtents);
 	private:
-		graphics_context& iGc;
+		const graphics_context& iGc;
 		logical_coordinate_system iPreviousCoordinateSystem;
 		neogfx::logical_coordinates iPreviousCoordinates;
 	};
@@ -354,7 +354,7 @@ namespace neogfx
 	class scoped_opacity
 	{
 	public:
-		scoped_opacity(graphics_context& aGc, double aOpacity) : 
+		scoped_opacity(const graphics_context& aGc, double aOpacity) : 
 			iGc{ aGc }, iPreviousOpacity { aGc.opacity() }
 		{
 			iGc.set_opacity(iGc.opacity() * aOpacity);
@@ -364,8 +364,25 @@ namespace neogfx
 			iGc.set_opacity(iPreviousOpacity);
 		}
 	private:
-		graphics_context& iGc;
+		const graphics_context& iGc;
 		double iPreviousOpacity;
+	};
+
+	class scoped_blending_mode
+	{
+	public:
+		scoped_blending_mode(const graphics_context& aGc, neogfx::blending_mode aBlendigMode) :
+			iGc{ aGc }, iPreviousBlendingMode{ aGc.blending_mode() }
+		{
+			iGc.set_blending_mode(aBlendigMode);
+		}
+		~scoped_blending_mode()
+		{
+			iGc.set_blending_mode(iPreviousBlendingMode);
+		}
+	private:
+		const graphics_context& iGc;
+		neogfx::blending_mode iPreviousBlendingMode;
 	};
 
 	class scoped_scissor

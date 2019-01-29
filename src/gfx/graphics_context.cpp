@@ -706,7 +706,7 @@ namespace neogfx
 		return iOpacity;
 	}
 
-	void graphics_context::set_opacity(double aOpacity)
+	void graphics_context::set_opacity(double aOpacity) const
 	{
 		if (iOpacity != aOpacity)
 		{
@@ -806,10 +806,8 @@ namespace neogfx
 
 	void graphics_context::blit(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect) const
 	{
-		auto previousBlendingMode = blending_mode();
-		set_blending_mode(neogfx::blending_mode::Blit);
+		scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
 		draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
-		set_blending_mode(previousBlendingMode);
 	}
 
 	void graphics_context::blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParamter2) const
@@ -1706,14 +1704,14 @@ namespace neogfx
 		return std::move(result);
 	}
 
-	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
+	scoped_coordinate_system::scoped_coordinate_system(const graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
 		iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
 	{
 		iGc.set_logical_coordinate_system(aCoordinateSystem);
 		apply_origin(aOrigin, aExtents);
 	}
 
-	scoped_coordinate_system::scoped_coordinate_system(graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
+	scoped_coordinate_system::scoped_coordinate_system(const graphics_context& aGc, const point& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
 		iGc(aGc), iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
 	{
 		iGc.set_logical_coordinate_system(aCoordinateSystem);

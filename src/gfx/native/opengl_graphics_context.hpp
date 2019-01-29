@@ -35,21 +35,6 @@ namespace neogfx
 	class opengl_graphics_context : public i_graphics_context
 	{
 	public:
-		class blend_as
-		{
-		public:
-			blend_as(opengl_graphics_context& aParent, neogfx::blending_mode aNewBlendigMode) : iParent(aParent), iOldBlendingMode(aParent.blending_mode())
-			{
-				iParent.set_blending_mode(aNewBlendigMode);
-			}
-			~blend_as()
-			{
-				iParent.set_blending_mode(iOldBlendingMode);
-			}
-		private:
-			opengl_graphics_context& iParent;
-			neogfx::blending_mode iOldBlendingMode;
-		};
 		class scoped_anti_alias
 		{
 		public:
