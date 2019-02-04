@@ -28,13 +28,65 @@
 
 namespace neogfx
 { 
-	typedef double coordinate_value_type;
-	typedef coordinate_value_type coordinate;
-	typedef coordinate_value_type dimension;
-	typedef coordinate_value_type coordinate_delta;
+	typedef scalar default_geometry_value_type;
+	typedef default_geometry_value_type coordinate;
+	typedef default_geometry_value_type dimension;
+	typedef default_geometry_value_type coordinate_delta;
 
 	typedef vec2 xy;
 	typedef vec3 xyz;
+
+	enum class logical_coordinate_system
+	{
+		Specified,
+		AutomaticGui,
+		AutomaticGame
+	};
+
+	template <logical_coordinate_system>
+	struct is_gui 
+	{
+		static constexpr bool value = false;
+	};
+	template <>
+	struct is_gui<logical_coordinate_system::AutomaticGui>
+	{
+		static constexpr bool value = true;
+	};
+	template <logical_coordinate_system>
+	struct is_game
+	{
+		static constexpr bool value = false;
+	};
+	template <>
+	struct is_game<logical_coordinate_system::AutomaticGame>
+	{
+		static constexpr bool value = true;
+	};
+
+	typedef std::optional<logical_coordinate_system> optional_logical_coordinate_system;
+
+	struct logical_coordinates
+	{
+		vec2 bottomLeft;
+		vec2 topRight;
+		bool is_gui_orientation() const
+		{
+			return bottomLeft.y > topRight.y;
+		}
+		bool is_game_orientation() const
+		{
+			return !is_gui_orientation();
+		}
+		friend bool operator==(const logical_coordinates& lhs, const logical_coordinates& rhs)
+		{
+			return lhs.bottomLeft == rhs.bottomLeft && lhs.topRight == rhs.topRight;
+		}
+		friend bool operator!=(const logical_coordinates& lhs, const logical_coordinates& rhs)
+		{
+			return !(lhs == rhs);
+		}
+	};
 
 	template <typename CoordinateType>
 	class basic_delta 
@@ -490,9 +542,9 @@ namespace neogfx
 		return right < left || left == right;
 	}
 
-	template <typename CoordinateType>
-	class basic_rect : 
-		public basic_point<CoordinateType>, 
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem = logical_coordinate_system::AutomaticGui>
+	class basic_rect :
+		public basic_point<CoordinateType>,
 		public basic_size<CoordinateType>
 	{
 		// types
@@ -508,37 +560,45 @@ namespace neogfx
 		using point_type::y;
 		using size_type::cx;
 		using size_type::cy;
+		// constants
+	public:
+		static constexpr bool gui = is_gui<CoordinateSystem>::value;
+		static constexpr bool game = is_game<CoordinateSystem>::value;
 		// construction
 	public:
 		basic_rect() {}
 		basic_rect(const point_type& coordinates, const size_type& dimensions) : point_type{ coordinates }, size_type{ dimensions } {}
-		basic_rect(const point_type& topLeft, const point_type& bottomRight) : 
-			point_type{ std::min(topLeft.x, bottomRight.x), std::min(topLeft.y, bottomRight.y) },
-			size_type{ std::abs(static_cast<CoordinateType>(bottomRight.x - topLeft.x)), std::abs(static_cast<CoordinateType>(bottomRight.y - topLeft.y)) } {}
+		basic_rect(const point_type& leftCorner, const point_type& rightCorner) : point_type{ leftCorner }, size_type{ std::abs<CoordinateType>(rightCorner.x - leftCorner.x), std::abs<CoordinateType>(rightCorner.y - leftCorner.y) } {}
 		basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
 		basic_rect(coordinate_type x0, coordinate_type y0, coordinate_type x1, coordinate_type y1) : point_type{ x0, y0 }, size_type{ x1 - x0, y1 - y0 } {}
 	public:
 		template <typename CoordinateType2>
-		basic_rect(const basic_rect<CoordinateType2>& other) : point_type{ other }, size_type{ other } {}
+		basic_rect(const basic_rect<CoordinateType2, CoordinateSystem>& other) : point_type{ other }, size_type{ other } {}
 		// assignment
 	public:
 		basic_rect& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
 		basic_rect& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
 		// operations
 	public:
-		basic_vector<basic_vector<coordinate_type, 2>, 4> to_vector() const { return basic_vector<basic_vector<coordinate_type, 2>, 4>(top_left().to_vector(), top_right().to_vector(), bottom_right().to_vector(), bottom_left().to_vector()); }
+		basic_vector<basic_vector<coordinate_type, 2>, 4> to_vector() const 
+		{ 
+			if constexpr (gui)
+				return basic_vector<basic_vector<coordinate_type, 2>, 4>(top_left().to_vector(), top_right().to_vector(), bottom_right().to_vector(), bottom_left().to_vector()); 
+			else
+				return basic_vector<basic_vector<coordinate_type, 2>, 4>(botttom_left().to_vector(), bottom_right().to_vector(), top_right().to_vector(), top_left().to_vector());
+		}
 		const point_type& position() const { return *this; }
 		point_type& position() { return *this; }
 		const size_type& extents() const { return *this; }
 		size_type& extents() { return *this; }
 		coordinate_type left() const { return x; }
-		coordinate_type top() const { return y; }
+		coordinate_type top() const { if constexpr (gui) return y; else return y + cy; }
 		coordinate_type right() const { return x + cx; }
-		coordinate_type bottom() const { return y + cy; }
-		point_type top_left() const { return point_type(x, y); }
-		point_type top_right() const { return point_type(x + cx, y); }
-		point_type bottom_left() const { return point_type(x, y + cy); }
-		point_type bottom_right() const { return point_type(x + cx, y + cy); }
+		coordinate_type bottom() const { if constexpr (gui) return y + cy; else return y; }
+		point_type top_left() const { return point_type(left(), top()); }
+		point_type top_right() const { return point_type(right(), top()); }
+		point_type bottom_left() const { return point_type(left(), bottom()); }
+		point_type bottom_right() const { return point_type(right(), bottom()); }
 		dimension_type width() const { return cx; }
 		dimension_type height() const { return cy; }
 		bool operator==(const basic_rect& other) const { return x == other.x && y == other.y && cx == other.cx && cy == other.cy; }
@@ -549,11 +609,23 @@ namespace neogfx
 		basic_rect& operator/=(const basic_rect& other) { position() /= other.position(); extents() /= other.extents(); return *this; }
 		basic_rect& operator/=(const size_type& size) { position() /= size; extents() /= size; return *this; }
 		basic_rect& operator/=(dimension_type value) { position() /= value; extents() /= value; return *this; }
-		bool contains(const point_type& point) const { return point.x >= left() && point.y >= top() && point.x < right() && point.y < bottom(); }
 		bool contains_x(const point_type& point) const { return point.x >= left() && point.x < right(); }
-		bool contains_y(const point_type& point) const { return point.y >= top() && point.y < bottom(); }
-		bool contains(const basic_rect& other) const { return other.left() >= left() && other.top() >= top() && other.right() <= right() && other.bottom() <= bottom(); }
-		point_type centre() const { return point_type(left() + static_cast<CoordinateType>(width() / 2), top() + static_cast<CoordinateType>(height() / 2)); }
+		bool contains_y(const point_type& point) const { if constexpr (gui) return point.y >= top() && point.y < bottom(); else return point.y >= bottom() && point.y < top(); }
+		bool contains(const point_type& point) const { return contains_x(point) && contains_y(point); }
+		bool contains(const basic_rect& other) const 
+		{ 
+			if constexpr (gui) 
+				return other.left() >= left() && other.right() <= right() && other.top() >= top() && other.bottom() <= bottom(); 
+			else
+				return other.left() >= left() && other.right() <= right() && other.bottom() >= bottom() && other.top() <= top();
+		}
+		point_type centre() const 
+		{ 
+			if constexpr (gui)
+				return point_type{ left() + static_cast<CoordinateType>(width() / 2), top() + static_cast<CoordinateType>(height() / 2) };
+			else
+				return point_type{ left() + static_cast<CoordinateType>(width() / 2), bottom() + static_cast<CoordinateType>(height() / 2) };
+		}
 		basic_rect& move(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
 		basic_rect& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * static_cast<CoordinateType>(2); cy += delta.dy * static_cast<CoordinateType>(2); return *this; }
 		basic_rect& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
@@ -563,15 +635,29 @@ namespace neogfx
 		basic_rect& deflate(CoordinateType dx, CoordinateType dy) { return inflate(-dx, -dy); }
 		basic_rect intersection(const basic_rect& other) const
 		{
-			basic_rect candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
-			if (contains(candidate.centre()) && other.contains(candidate.centre()))
-				return candidate;
+			if constexpr (gui)
+			{
+				basic_rect candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
+				if (contains(candidate.centre()) && other.contains(candidate.centre()))
+					return candidate;
+				else
+					return basic_rect{};
+			}
 			else
-				return basic_rect{};
+			{
+				basic_rect candidate{ bottom_left().max(other.bottom_left()), top_right().min(other.top_right()) };
+				if (contains(candidate.centre()) && other.contains(candidate.centre()))
+					return candidate;
+				else
+					return basic_rect{};
+			}
 		}
 		basic_rect combine(const basic_rect& other) const
 		{
-			return basic_rect{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
+			if constexpr (gui)
+				return basic_rect{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
+			else
+				return basic_rect{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
 		}
 		basic_rect with_centred_origin() const
 		{
@@ -579,103 +665,111 @@ namespace neogfx
 		}
 		basic_rect ceil() const { return basic_rect(point_type::ceil(), size_type::ceil()); }
 		basic_rect floor() const { return basic_rect(point_type::floor(), size_type::floor()); }
-		aabb_2d to_aabb_2d() const { return aabb_2d{ top_left().to_vec2(), bottom_right().to_vec2() }; }
+		aabb_2d to_aabb_2d() const 
+		{ 
+			if constexpr (gui)
+				return aabb_2d{ top_left().to_vec2(), bottom_right().to_vec2() };
+			else
+				return aabb_2d{ bottom_left().to_vec2(), top_right().to_vec2() };
+		}
 	};
 
-	typedef basic_rect<coordinate> rect;
+	typedef basic_rect<coordinate, logical_coordinate_system::AutomaticGui> gui_rect;
+	typedef basic_rect<coordinate, logical_coordinate_system::AutomaticGame> game_rect;
+	typedef gui_rect rect;
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator*(const basic_rect<CoordinateType>& left, const basic_rect<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator*(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret *= right;
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator*(const basic_rect<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator*(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_size<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret *= right;
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator*(const basic_rect<CoordinateType>& left, typename basic_rect<CoordinateType>::dimension_type value)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator*(const basic_rect<CoordinateType, CoordinateSystem>& left, typename basic_rect<CoordinateType, CoordinateSystem>::dimension_type value)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret *= value;
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator/(const basic_rect<CoordinateType>& left, const basic_rect<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator/(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret /= right;
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator/(const basic_rect<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator/(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_size<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret /= right;
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator/(const basic_rect<CoordinateType>& left, typename basic_rect<CoordinateType>::dimension_type value)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator/(const basic_rect<CoordinateType, CoordinateSystem>& left, typename basic_rect<CoordinateType, CoordinateSystem>::dimension_type value)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret /= value;
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator+(const basic_rect<CoordinateType>& left, const basic_point<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator+(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_point<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret.basic_point::operator+=(right);
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator+(const basic_rect<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator+(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_size<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret.basic_size::operator+=(right);
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator+(const basic_rect<CoordinateType>& left, const basic_delta<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator+(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_delta<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret.basic_size::operator+=(right);
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator-(const basic_rect<CoordinateType>& left, const basic_point<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator-(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_point<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret.basic_point::operator-=(right);
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator-(const basic_rect<CoordinateType>& left, const basic_size<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator-(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_size<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret.basic_size::operator-=(right);
 		return ret;
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator-(const basic_rect<CoordinateType>& left, const basic_delta<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator-(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_delta<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret.basic_size::operator-=(right);
 		return ret;
 	}
@@ -879,10 +973,10 @@ namespace neogfx
 		return std::tie(left.left, left.top, left.right, left.bottom) < std::tie(right.left, right.top, right.right, right.bottom);
 	}
 
-	template <typename CoordinateType>
-	inline basic_rect<CoordinateType> operator-(const basic_rect<CoordinateType>& left, const basic_margins<CoordinateType>& right)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline basic_rect<CoordinateType, CoordinateSystem> operator-(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_margins<CoordinateType>& right)
 	{
-		basic_rect<CoordinateType> ret = left;
+		basic_rect<CoordinateType, CoordinateSystem> ret = left;
 		ret.basic_point::operator+=(right.top_left());
 		ret.basic_size::operator-=(right.size());
 		return ret;
@@ -946,4 +1040,3 @@ namespace std
 		}
 	};
 }
-
