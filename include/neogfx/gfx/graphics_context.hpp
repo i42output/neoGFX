@@ -137,7 +137,7 @@ namespace neogfx
 		void clear_depth_buffer() const;
 		void clear_stencil_buffer() const;
 		void blit(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect) const;
-		void blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, uint32_t aParameter1 = 5, double aParamter2 = 1.0) const;
+		void blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, uint32_t aParameter1 = 5, double aParameter2 = 1.0) const;
 		void set_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_pixel(const point& aPoint, const colour& aColour) const;
 		void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const;
@@ -299,7 +299,12 @@ namespace neogfx
 		point const effectOffset{ aGlowSize, aGlowSize };
 		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
 		rect const effectRect{ point{}, effectExtents };
-		aGraphicsContext.blit(rect{ point{ aPoint } -effectOffset, effectExtents }, *aPingPongBuffers.second, effectRect);
+		rect const outputRect{ point{ aPoint } -effectOffset, effectExtents };
+		// todo
+		aGraphicsContext.fill_rect(outputRect, colour::Purple); 
+		aGraphicsContext.flush();
+		aGraphicsContext.blit(outputRect, *aPingPongBuffers.second, effectRect);
+		aGraphicsContext.flush();
 	}
 
 	template <typename Iter>
@@ -428,10 +433,10 @@ namespace neogfx
 	}
 
 	template <typename ValueType = double>
-	inline boost::multi_array<ValueType, 2> dynamic_gaussian_filter(uint32_t aWidth = 5, ValueType aSigma = 1.0)
+	inline boost::multi_array<ValueType, 2> dynamic_gaussian_filter(uint32_t aKernelSize = 5, ValueType aSigma = 1.0)
 	{
-		const int32_t mean = static_cast<int32_t>(aWidth / 2);
-		boost::multi_array<ValueType, 2> kernel(boost::extents[aWidth][aWidth]);
+		const int32_t mean = static_cast<int32_t>(aKernelSize / 2);
+		boost::multi_array<ValueType, 2> kernel(boost::extents[aKernelSize][aKernelSize]);
 		if (aSigma != 0)
 		{
 			ValueType sum = 0.0;
@@ -444,8 +449,8 @@ namespace neogfx
 					sum += kernel[x + mean][y + mean];
 				}
 			}
-			for (uint32_t x = 0; x < aWidth; ++x)
-				for (uint32_t y = 0; y < aWidth; ++y)
+			for (uint32_t x = 0; x < aKernelSize; ++x)
+				for (uint32_t y = 0; y < aKernelSize; ++y)
 					kernel[x][y] /= sum;
 		}
 		else

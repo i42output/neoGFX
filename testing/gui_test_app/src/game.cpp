@@ -167,7 +167,7 @@ void create_game(ng::i_layout& aLayout)
 
 	auto spaceship = ecs.create_entity(
 		archetypes::spaceship,
-		ng::to_ecs_component(ng::rect{ ng::size{ 36.0, 36.0} }.with_centred_origin()),
+		ng::to_ecs_component(ng::game_rect{ ng::size{ 36.0, 36.0} }.with_centred_origin()),
 		ng::game::material{ {}, {}, {}, ng::to_ecs_component(
 			ng::image
 			{

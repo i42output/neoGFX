@@ -53,38 +53,23 @@ namespace neogfx
 			};
 	}
 
-	inline game::mesh to_ecs_component(const rect& aRect, mesh_type aMeshType = mesh_type::Triangles, std::size_t aOffset = 0, bool aInverted = false)
+	template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+	inline game::mesh to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, std::size_t aOffset = 0)
 	{
-		if (!aInverted)
-			return game::mesh
+		return game::mesh
+		{
 			{
-				{
-					rect_vertices(aRect, 0, aMeshType)
-				},
-				{
-					vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 1.0 },
-					vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }
-				},
-				{
-					game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
-					game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u }
-				}
-			};
-		else
-			return game::mesh
+				rect_vertices(aRect, 0.0, aMeshType)
+			},
 			{
-				{
-					rect_vertices(aRect, 0, aMeshType)
-				},
-				{
-					vec2{ 1.0, 1.0 }, vec2{ 0.0, 1.0 }, vec2{ 1.0, 0.0 },
-					vec2{ 0.0, 1.0 }, vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }
-				},
-				{
-					game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
-					game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u }
-				}
-			};
+				vec2{ 0.0, 1.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 0.0 },
+				vec2{ 1.0, 1.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 0.0 }
+			},
+			{
+				game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
+				game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u }	
+			}
+		};
 	}
 
 	inline game::mesh to_ecs_component(const vertices_t& aVertices, mesh_type aSourceMeshType = mesh_type::TriangleFan, mesh_type aDestinationMeshType = mesh_type::Triangles)
@@ -192,10 +177,13 @@ namespace neogfx
 		};
 	}
 
-	inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const rect& aRect, const neogfx::i_texture& aTexture, bool aInvertTexture = false)
+	inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const rect& aRect, const neogfx::i_texture& aTexture, const mat33& aTextureTransform = mat33::identity())
 	{
-		auto const& patchMesh = to_ecs_component(aRect, mesh_type::Triangles, aMesh.vertices.size(), aInvertTexture); 
+		auto patchMesh = to_ecs_component(aRect, mesh_type::Triangles, aMesh.vertices.size()); 
 		aMesh.vertices.insert(aMesh.vertices.end(), patchMesh.vertices.begin(), patchMesh.vertices.end());
+		if (!aTextureTransform.is_identity())
+			for (auto& uv : patchMesh.uv)
+				uv = (aTextureTransform * vec3{ uv.x, uv.y, 1.0 }).xy;
 		aMesh.uv.insert(aMesh.uv.end(), patchMesh.uv.begin(), patchMesh.uv.end());
 		auto& patch = aMeshRenderer.patches.emplace_back();
 		patch.faces.insert(patch.faces.end(), patchMesh.faces.begin(), patchMesh.faces.end());

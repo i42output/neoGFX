@@ -1542,7 +1542,7 @@ namespace neogfx
 
 		bool drawn = false;
 
-		GLint previousTexture;
+		GLint previousTexture = 0;
 
 		{
 			use_shader_program usp{ *this, iRenderingEngine, rendering_engine().mesh_shader_program() };
@@ -1620,8 +1620,6 @@ namespace neogfx
 					{
 						auto const& texture = *service<i_texture_manager>().find_texture(aMaterial.texture->id.cookie());
 						uv = aTextureVertices[faceVertexIndex];
-						if (texture.native_texture()->logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame && logicalCoordinates.is_gui_orientation())
-							~uv.y = 1.0 - uv.y;
 						uv = (uv * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
 					}
 					vertexArrays.instance().emplace_back(

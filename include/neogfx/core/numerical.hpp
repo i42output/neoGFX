@@ -88,6 +88,8 @@ namespace neogfx
 			basic_vector(basic_vector&& other) : v{ std::move(other.v) } {}
 			template <typename T2>
 			basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
+			template <typename T2, uint32_t Size2, typename SFINAE = int>
+			basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : v{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
 			basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
 			basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
 			basic_vector& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
@@ -196,6 +198,8 @@ namespace neogfx
 			basic_vector(basic_vector&& other) : v{ std::move(other.v) } {}
 			template <typename T2>
 			basic_vector(const basic_vector<T2, Size, Type>& other) { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
+			template <typename T2, uint32_t Size2, typename SFINAE = int>
+			basic_vector(const basic_vector<T2, Size2, Type>& other, typename std::enable_if<Size2 < Size, SFINAE>::type = 0) : v{} { std::transform(other.begin(), other.end(), v.begin(), [](T2 source) { return static_cast<value_type>(source); }); }
 			basic_vector& operator=(const basic_vector& other) { v = other.v; return *this; }
 			basic_vector& operator=(basic_vector&& other) { v = std::move(other.v); return *this; }
 			basic_vector& operator=(std::initializer_list<value_type> values) { if (values.size() > Size) throw std::out_of_range("neogfx::basic_vector: initializer list too big"); std::copy(values.begin(), values.end(), v.begin()); std::uninitialized_fill(v.begin() + (values.end() - values.begin()), v.end(), value_type{}); return *this; }
@@ -622,6 +626,10 @@ namespace neogfx
 				};
 				static basic_matrix const sIdentity = make_identity();
 				return sIdentity;
+			}
+			bool is_identity() const
+			{
+				return this == &identity();
 			}
 		private:
 			array_type m;

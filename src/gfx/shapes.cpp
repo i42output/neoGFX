@@ -23,14 +23,6 @@
 
 namespace neogfx
 {
-	vertices_t rect_vertices(const rect& aRect, dimension aPixelAdjust, mesh_type aType, scalar aZpos)
-	{
-		vertices_t result;
-		result.reserve(16);
-		back_insert_rect_vertices(result, aRect, aPixelAdjust, aType, aZpos);
-		return std::move(result);
-	};
-
 	vertices_t arc_vertices(const point& aCentre, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments)
 	{
 		vertices_t result;
