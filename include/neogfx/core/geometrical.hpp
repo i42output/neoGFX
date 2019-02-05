@@ -572,10 +572,12 @@ namespace neogfx
 		basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
 		basic_rect(coordinate_type x0, coordinate_type y0, coordinate_type x1, coordinate_type y1) : point_type{ x0, y0 }, size_type{ x1 - x0, y1 - y0 } {}
 	public:
-		template <typename CoordinateType2>
-		basic_rect(const basic_rect<CoordinateType2, CoordinateSystem>& other) : point_type{ other }, size_type{ other } {}
+		template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
+		basic_rect(const basic_rect<CoordinateType2, CoordinateSystem2>& other) : point_type{ other }, size_type{ other } {}
 		// assignment
 	public:
+		template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
+		basic_rect& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& other) { static_cast<point_type&>(*this) = other; static_cast<size_type&>(*this) = other;  return *this; }
 		basic_rect& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
 		basic_rect& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
 		// operations

@@ -1067,7 +1067,10 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		draw_texture(to_ecs_component(aRect), aTexture, aColour, aShaderEffect);
+		if (logical_coordinates().is_gui_orientation())
+			draw_texture(to_ecs_component(aRect), aTexture, aColour, aShaderEffect);
+		else
+			draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
@@ -1077,7 +1080,10 @@ namespace neogfx
 
 	void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_colour& aColour, shader_effect aShaderEffect) const
 	{
-		draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, aColour, aShaderEffect);
+		if (logical_coordinates().is_gui_orientation())
+			draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, aColour, aShaderEffect);
+		else
+			draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aTextureRect, aColour, aShaderEffect);
 	}
 
 	void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_colour& aColour, shader_effect aShaderEffect) const
