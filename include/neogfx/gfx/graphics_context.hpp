@@ -300,11 +300,7 @@ namespace neogfx
 		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
 		rect const effectRect{ point{}, effectExtents };
 		rect const outputRect{ point{ aPoint } -effectOffset, effectExtents };
-		// todo
-		aGraphicsContext.fill_rect(outputRect, colour::Purple); 
-		aGraphicsContext.flush();
 		aGraphicsContext.blit(outputRect, *aPingPongBuffers.second, effectRect);
-		aGraphicsContext.flush();
 	}
 
 	template <typename Iter>

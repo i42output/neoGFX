@@ -1105,11 +1105,7 @@ namespace neogfx
 	{
 		auto adjustedMesh = aMesh;
 		for (auto& uv : adjustedMesh.uv)
-		{
 			uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv * (aTextureRect.extents() / aTexture.extents()).to_vec2();
-			if (aTexture.native_texture()->logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame && logical_coordinates().is_gui_orientation())
-				uv.y = 1.0 - uv.y;
-		}
  		draw_texture(adjustedMesh, aTexture, aColour, aShaderEffect);
 	}
 
