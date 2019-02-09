@@ -192,7 +192,10 @@ namespace neogfx
 
 	double opengl_window::fps() const
 	{
-		return std::accumulate(iFpsData.begin(), iFpsData.end(), 0.0) / iFpsData.size();
+		if (iFpsData.size() <= 1)
+			return 0.0;
+		double durationSeconds = std::chrono::duration_cast<std::chrono::microseconds>(iFpsData.back() - iFpsData.front()).count() / 1000000.0;
+		return (iFpsData.size() - 1) / durationSeconds;
 	}
 
 	void opengl_window::invalidate(const rect& aInvalidatedRect)
@@ -327,8 +330,8 @@ namespace neogfx
 
 		surface_window().rendering_finished.trigger();
 
-		iFpsData.push_back(1000.0 / (neolib::thread::program_elapsed_ms() - now));
-		if (iFpsData.size() > 25)
+		iFpsData.push_back(std::chrono::high_resolution_clock::now());
+		if (iFpsData.size() > 100)
 			iFpsData.pop_front();		
 	}
 

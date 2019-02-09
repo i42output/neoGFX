@@ -92,7 +92,7 @@ namespace neogfx
 		uint64_t iFrameCounter;
 		std::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
-		std::deque<double> iFpsData;
+		std::deque<std::chrono::time_point<std::chrono::steady_clock>> iFpsData;
 		bool iRendering;
 		uint32_t iPaused;
 	};

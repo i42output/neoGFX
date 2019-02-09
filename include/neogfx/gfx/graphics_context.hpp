@@ -308,7 +308,7 @@ namespace neogfx
 	{
 		point const effectOffset{ aGlowSize, aGlowSize };
 		auto const effectExtents = aGlyphText.extents(aGlyphTextBegin, aGlyphTextEnd) + effectOffset * 2.0;
-		auto pingPongBuffers = aGraphicsContext.ping_pong_buffers(effectExtents, texture_sampling::Nearest);
+		auto pingPongBuffers = aGraphicsContext.ping_pong_buffers(effectExtents);
 		draw_glyph_text_glow_pass_1(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowColour, aGlowSize);
 		draw_glyph_text_glow_pass_2(pingPongBuffers, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);
 		draw_glyph_text_glow_pass_3(aGraphicsContext, pingPongBuffers, aPoint, aGlyphText, aGlyphTextBegin, aGlyphTextEnd, aGlowSize);

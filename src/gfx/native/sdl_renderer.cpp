@@ -284,6 +284,7 @@ namespace neogfx
 		glCheck(auto result = SDL_GL_MakeCurrent(static_cast<SDL_Window*>(active_target() != nullptr && active_target()->target_type() == render_target_type::Surface ? active_target()->target_handle() : allocate_offscreen_window(active_target())), static_cast<SDL_GLContext>(iContext)));
 		if (result == -1)
 			throw failed_to_activate_opengl_context(SDL_GetError());
+		SDL_GL_SetSwapInterval(0);
 	}
 
 	int sdl_renderer::filter_event(void* aSelf, SDL_Event* aEvent)

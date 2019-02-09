@@ -813,6 +813,7 @@ namespace neogfx
 	void graphics_context::blur(const rect& aDestinationRect, const graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, uint32_t aParameter1, double aParameter2) const
 	{
 		// todo
+		scoped_scissor ss{ *this, aDestinationRect };
 		dimension const w = aParameter1;
 		for (coordinate y = -w; y <= w; y += 1.0)
 			for (coordinate x = -w; x <= w; x += 1.0)
