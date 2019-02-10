@@ -11,7 +11,7 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 - no baggage: neoGFX primarily contains only the GUI and graphics related functionality needed for creating apps and games;
 - full library of widgets and layout managers specifiable in XML using the included GUI designer tool;
 - CSS3 style sheet support with support for custom skins;
-- scripting engine (Lua);
+- scripting engine, neos, that will be able to support a wide range of scripting languages (on release: neoscript, JavaScript and Lua);
 - sub-pixel text rendering;
 - simple window style for specifying that a window is "nested" rather than being a separate native desktop window;
 - "text_edit" widget supports multiple fonts, text colours (with optional gradient effects), colour emojis and rendering text in columns;
