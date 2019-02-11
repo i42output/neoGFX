@@ -36,244 +36,244 @@
 namespace neogfx
 {
 #ifdef WIN32
-	BOOL CALLBACK enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aDisplayList)
-	{
-		rect rectDisplay;
-		MONITORINFO mi;
-		mi.cbSize = sizeof(mi);
-		GetMonitorInfo(aMonitor, &mi);
-		basic_rect<LONG> monitorRect{ basic_point<LONG>{ mi.rcMonitor.left, mi.rcMonitor.top }, basic_size<LONG>{ mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top } };
-		basic_rect<LONG> workAreaRect{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
-		auto& displayList = *reinterpret_cast<std::vector<std::unique_ptr<i_display>>*>(aDisplayList);
-		displayList.push_back(std::make_unique<display>(displayList.size(), monitorRect, workAreaRect, reinterpret_cast<void*>(aMonitor), reinterpret_cast<void*>(GetDC(NULL))));
-		return true;
-	}
+    BOOL CALLBACK enum_display_monitors_proc(HMONITOR aMonitor, HDC, LPRECT, LPARAM aDisplayList)
+    {
+        rect rectDisplay;
+        MONITORINFO mi;
+        mi.cbSize = sizeof(mi);
+        GetMonitorInfo(aMonitor, &mi);
+        basic_rect<LONG> monitorRect{ basic_point<LONG>{ mi.rcMonitor.left, mi.rcMonitor.top }, basic_size<LONG>{ mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top } };
+        basic_rect<LONG> workAreaRect{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
+        auto& displayList = *reinterpret_cast<std::vector<std::unique_ptr<i_display>>*>(aDisplayList);
+        displayList.push_back(std::make_unique<display>(displayList.size(), monitorRect, workAreaRect, reinterpret_cast<void*>(aMonitor), reinterpret_cast<void*>(GetDC(NULL))));
+        return true;
+    }
 #endif
 
-	display::display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle) :
-		iIndex{ aIndex },
+    display::display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle) :
+        iIndex{ aIndex },
         iPixelDensityDpi{ 96.0, 96.0 },
-		iRect{ aRect },
-		iDesktopRect{ aDesktopRect },
-		iSubpixelFormat{ subpixel_format::SubpixelFormatNone },
-		iNativeDisplayHandle{ aNativeDisplayHandle },
-		iNativeDeviceContextHandle{ aNativeDeviceContextHandle }
-	{
-		update_dpi();
+        iRect{ aRect },
+        iDesktopRect{ aDesktopRect },
+        iSubpixelFormat{ subpixel_format::SubpixelFormatNone },
+        iNativeDisplayHandle{ aNativeDisplayHandle },
+        iNativeDeviceContextHandle{ aNativeDeviceContextHandle }
+    {
+        update_dpi();
 #ifdef WIN32
-		HKEY hkeySubpixelFormat;
-		if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, (L"SOFTWARE\\Microsoft\\Avalon.Graphics\\DISPLAY" + boost::lexical_cast<std::wstring>(index() + 1)).c_str(), 0, KEY_READ, &hkeySubpixelFormat) == ERROR_SUCCESS)
-		{
-			DWORD subpixelFormat = 0;
-			DWORD cbValue = sizeof(subpixelFormat);
-			if (RegQueryValueEx(hkeySubpixelFormat, L"PixelStructure", NULL, NULL, (LPBYTE)&subpixelFormat, &cbValue) == ERROR_SUCCESS)
-			{
-				switch (subpixelFormat)
-				{
-				case 1:
-					iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
-					break;
-				case 2:
-					iSubpixelFormat = subpixel_format::SubpixelFormatBGRHorizontal;
-					break;
-				}
-			}
-			::RegCloseKey(hkeySubpixelFormat);
-		}
-		else
-			iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
+        HKEY hkeySubpixelFormat;
+        if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, (L"SOFTWARE\\Microsoft\\Avalon.Graphics\\DISPLAY" + boost::lexical_cast<std::wstring>(index() + 1)).c_str(), 0, KEY_READ, &hkeySubpixelFormat) == ERROR_SUCCESS)
+        {
+            DWORD subpixelFormat = 0;
+            DWORD cbValue = sizeof(subpixelFormat);
+            if (RegQueryValueEx(hkeySubpixelFormat, L"PixelStructure", NULL, NULL, (LPBYTE)&subpixelFormat, &cbValue) == ERROR_SUCCESS)
+            {
+                switch (subpixelFormat)
+                {
+                case 1:
+                    iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
+                    break;
+                case 2:
+                    iSubpixelFormat = subpixel_format::SubpixelFormatBGRHorizontal;
+                    break;
+                }
+            }
+            ::RegCloseKey(hkeySubpixelFormat);
+        }
+        else
+            iSubpixelFormat = subpixel_format::SubpixelFormatRGBHorizontal;
 #endif
-	}
+    }
 
-	display::~display()
-	{
+    display::~display()
+    {
 #ifdef WIN32
-		ReleaseDC(NULL, reinterpret_cast<HDC>(iNativeDeviceContextHandle));
+        ReleaseDC(NULL, reinterpret_cast<HDC>(iNativeDeviceContextHandle));
 #endif
-	}
+    }
 
-	uint32_t display::index() const
-	{
-		return iIndex;
-	}
+    uint32_t display::index() const
+    {
+        return iIndex;
+    }
 
-	const i_device_metrics& display::metrics() const
-	{
-		return *this;
-	}
+    const i_device_metrics& display::metrics() const
+    {
+        return *this;
+    }
 
-	void display::update_dpi()
-	{
+    void display::update_dpi()
+    {
 #ifdef WIN32
         UINT dpiX = 0;
-		UINT dpiY = 0;
-		auto ret = GetDpiForMonitor(reinterpret_cast<HMONITOR>(iNativeDisplayHandle), MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
-		if (ret != S_OK)
-			throw failed_to_get_monitor_dpi();
+        UINT dpiY = 0;
+        auto ret = GetDpiForMonitor(reinterpret_cast<HMONITOR>(iNativeDisplayHandle), MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+        if (ret != S_OK)
+            throw failed_to_get_monitor_dpi();
         iPixelDensityDpi = basic_size<UINT>(dpiX, dpiY);
 #endif
     }
 
-	neogfx::rect display::rect() const
-	{
-		return iRect;
-	}
+    neogfx::rect display::rect() const
+    {
+        return iRect;
+    }
 
-	neogfx::rect display::desktop_rect() const
-	{
-		return iDesktopRect;
-	}
+    neogfx::rect display::desktop_rect() const
+    {
+        return iDesktopRect;
+    }
 
-	subpixel_format display::subpixel_format() const
-	{
-		return iSubpixelFormat;
-	}
+    subpixel_format display::subpixel_format() const
+    {
+        return iSubpixelFormat;
+    }
 
-	bool display::metrics_available() const
-	{
-		return true;
-	}
+    bool display::metrics_available() const
+    {
+        return true;
+    }
 
-	size display::extents() const
-	{
-		return desktop_rect().extents();
-	}
+    size display::extents() const
+    {
+        return desktop_rect().extents();
+    }
 
-	dimension display::horizontal_dpi() const
-	{
-		return iPixelDensityDpi.cx;
-	}
+    dimension display::horizontal_dpi() const
+    {
+        return iPixelDensityDpi.cx;
+    }
 
-	dimension display::vertical_dpi() const
-	{
-		return iPixelDensityDpi.cy;
-	}
+    dimension display::vertical_dpi() const
+    {
+        return iPixelDensityDpi.cy;
+    }
 
-	dimension display::ppi() const
-	{
-		return iPixelDensityDpi.magnitude() / std::sqrt(2.0);
-	}
+    dimension display::ppi() const
+    {
+        return iPixelDensityDpi.magnitude() / std::sqrt(2.0);
+    }
 
-	dimension display::em_size() const
-	{
-		return 0;
-	}
+    dimension display::em_size() const
+    {
+        return 0;
+    }
 
-	colour display::read_pixel(const point& aPosition) const
-	{
+    colour display::read_pixel(const point& aPosition) const
+    {
 #ifdef WIN32
-		auto clr = GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));
-		return colour{ GetRValue(clr), GetGValue(clr), GetBValue(clr) };
+        auto clr = GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));
+        return colour{ GetRValue(clr), GetGValue(clr), GetBValue(clr) };
 #else
         // todo
         return colour::Black;
 #endif
-	}
+    }
 
-	sdl_basic_services::sdl_basic_services(neolib::async_task& aAppTask) :
-		iAppTask{ aAppTask }
-	{
-	}
+    sdl_basic_services::sdl_basic_services(neolib::async_task& aAppTask) :
+        iAppTask{ aAppTask }
+    {
+    }
 
-	neogfx::platform sdl_basic_services::platform() const
-	{
-		return neogfx::platform::Windows;
-	}
+    neogfx::platform sdl_basic_services::platform() const
+    {
+        return neogfx::platform::Windows;
+    }
 
-	neolib::async_task& sdl_basic_services::app_task()
-	{
-		return iAppTask;
-	}
+    neolib::async_task& sdl_basic_services::app_task()
+    {
+        return iAppTask;
+    }
 
 
-	void sdl_basic_services::system_beep()
-	{
+    void sdl_basic_services::system_beep()
+    {
 #if defined(WIN32) 
-		MessageBeep(MB_OK);
+        MessageBeep(MB_OK);
 #elif defined(__APPLE__) 
-		SysBeep(1);
+        SysBeep(1);
 #elif defined(SDL_VIDEO_DRIVER_X11) 
-		SDL_SysWMInfo info;
-		SDL_VERSION(&info.version);
-		SDL_GetWMInfo(&info);
-		XBell(info.info.x11.display, 100);
+        SDL_SysWMInfo info;
+        SDL_VERSION(&info.version);
+        SDL_GetWMInfo(&info);
+        XBell(info.info.x11.display, 100);
 #else 
-		std::cerr << '\a' << std::flush;
+        std::cerr << '\a' << std::flush;
 #endif 
-	}
+    }
 
-	void sdl_basic_services::display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle) const
-	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, aTitle.c_str(), aMessage.c_str(), static_cast<SDL_Window*>(aParentWindowHandle));
-	}
+    void sdl_basic_services::display_error_dialog(const std::string& aTitle, const std::string& aMessage, void* aParentWindowHandle) const
+    {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, aTitle.c_str(), aMessage.c_str(), static_cast<SDL_Window*>(aParentWindowHandle));
+    }
 
-	uint32_t sdl_basic_services::display_count() const
-	{
-		return SDL_GetNumVideoDisplays();
-	}
+    uint32_t sdl_basic_services::display_count() const
+    {
+        return SDL_GetNumVideoDisplays();
+    }
 
-	i_display& sdl_basic_services::display(uint32_t aDisplayIndex) const
-	{
-		if (iDisplays.size() != display_count())
-		{
-			iDisplays.clear();
+    i_display& sdl_basic_services::display(uint32_t aDisplayIndex) const
+    {
+        if (iDisplays.size() != display_count())
+        {
+            iDisplays.clear();
 #ifdef WIN32
-			EnumDisplayMonitors(NULL, NULL, &enum_display_monitors_proc, reinterpret_cast<LPARAM>(&iDisplays));
+            EnumDisplayMonitors(NULL, NULL, &enum_display_monitors_proc, reinterpret_cast<LPARAM>(&iDisplays));
 #else
-			for (int i = 0; i < display_count(); ++i)
-			{
-				SDL_Rect rectDisplayBounds;
-				SDL_GetDisplayBounds(i, &rectDisplayBounds);
-				rect rectDisplay{ point{ rectDisplayBounds.x, rectDisplayBounds.y }, size{ rectDisplayBounds.w, rectDisplayBounds.h } }
-				iDisplays.push_back(std::make_unique<neogfx::display>(rectDisplay, rectDisplay, nullptr));
-			}
+            for (int i = 0; i < display_count(); ++i)
+            {
+                SDL_Rect rectDisplayBounds;
+                SDL_GetDisplayBounds(i, &rectDisplayBounds);
+                rect rectDisplay{ point{ rectDisplayBounds.x, rectDisplayBounds.y }, size{ rectDisplayBounds.w, rectDisplayBounds.h } }
+                iDisplays.push_back(std::make_unique<neogfx::display>(rectDisplay, rectDisplay, nullptr));
+            }
 #endif
-		}
-		if (aDisplayIndex >= iDisplays.size())
-			throw bad_display_index();
-		return *iDisplays[aDisplayIndex];
-	}
+        }
+        if (aDisplayIndex >= iDisplays.size())
+            throw bad_display_index();
+        return *iDisplays[aDisplayIndex];
+    }
 
-	class sdl_clipboard : public i_native_clipboard
-	{
-	public:
-		bool has_text() const override
-		{
-			return SDL_HasClipboardText() == SDL_TRUE;
-		}
-		std::string text() const override
-		{
-			char* clipboardText = SDL_GetClipboardText();
-			if (clipboardText == NULL)
-				return std::string{};
-			std::string result{ clipboardText };
-			SDL_free(clipboardText);
-			return result;
-		}
-		void set_text(const std::string& aText) override
-		{
-			SDL_SetClipboardText(aText.c_str());
-		}
-	};
+    class sdl_clipboard : public i_native_clipboard
+    {
+    public:
+        bool has_text() const override
+        {
+            return SDL_HasClipboardText() == SDL_TRUE;
+        }
+        std::string text() const override
+        {
+            char* clipboardText = SDL_GetClipboardText();
+            if (clipboardText == NULL)
+                return std::string{};
+            std::string result{ clipboardText };
+            SDL_free(clipboardText);
+            return result;
+        }
+        void set_text(const std::string& aText) override
+        {
+            SDL_SetClipboardText(aText.c_str());
+        }
+    };
 
-	bool sdl_basic_services::has_system_clipboard() const
-	{
-		return true;
-	}
+    bool sdl_basic_services::has_system_clipboard() const
+    {
+        return true;
+    }
 
-	i_native_clipboard& sdl_basic_services::system_clipboard()
-	{
-		static sdl_clipboard sSystemClipboard;
-		return sSystemClipboard;
-	}
+    i_native_clipboard& sdl_basic_services::system_clipboard()
+    {
+        static sdl_clipboard sSystemClipboard;
+        return sSystemClipboard;
+    }
 
-	bool sdl_basic_services::has_system_menu_bar() const
-	{
-		return false;
-	}
+    bool sdl_basic_services::has_system_menu_bar() const
+    {
+        return false;
+    }
 
-	i_shared_menu_bar& sdl_basic_services::system_menu_bar()
-	{
-		throw no_system_menu_bar();
-	}
+    i_shared_menu_bar& sdl_basic_services::system_menu_bar()
+    {
+        throw no_system_menu_bar();
+    }
 }
