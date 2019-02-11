@@ -52,6 +52,7 @@ namespace neogfx
 
 	display::display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle) :
 		iIndex{ aIndex },
+        iPixelDensityDpi{ 96.0, 96.0 },
 		iRect{ aRect },
 		iDesktopRect{ aDesktopRect },
 		iSubpixelFormat{ subpixel_format::SubpixelFormatNone },
@@ -103,13 +104,15 @@ namespace neogfx
 
 	void display::update_dpi()
 	{
-		UINT dpiX = 0;
+#ifdef WIN32
+        UINT dpiX = 0;
 		UINT dpiY = 0;
 		auto ret = GetDpiForMonitor(reinterpret_cast<HMONITOR>(iNativeDisplayHandle), MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
 		if (ret != S_OK)
 			throw failed_to_get_monitor_dpi();
-		iPixelDensityDpi = basic_size<UINT>(dpiX, dpiY);
-	}
+        iPixelDensityDpi = basic_size<UINT>(dpiX, dpiY);
+#endif
+    }
 
 	neogfx::rect display::rect() const
 	{
@@ -162,8 +165,8 @@ namespace neogfx
 		auto clr = GetPixel(reinterpret_cast<HDC>(iNativeDisplayHandle), static_cast<int>(aPosition.x), static_cast<int>(aPosition.y));
 		return colour{ GetRValue(clr), GetGValue(clr), GetBValue(clr) };
 #else
-		return colour::Black;
-		// todo
+        // todo
+        return colour::Black;
 #endif
 	}
 
