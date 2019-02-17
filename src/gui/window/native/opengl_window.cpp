@@ -240,9 +240,6 @@ namespace neogfx
 
 		if (!aOOBRequest)
 		{
-			if (processing_event())
-				return;
-
 			if (rendering_engine().frame_rate_limited() && now - iLastFrameTime < 1000 / (rendering_engine().frame_rate_limit() * (!rendering_engine().use_rendering_priority() ? 1.0 : rendering_priority())))
 				return;
 
