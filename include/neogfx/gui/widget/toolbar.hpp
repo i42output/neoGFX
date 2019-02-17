@@ -48,9 +48,9 @@ namespace neogfx
 		virtual uint32_t button_count() const;
 		virtual const toolbar_button& button(button_index aButtonIndex) const;
 		virtual toolbar_button& button(button_index aButtonIndex);
-		virtual void add_action(i_action& aAction);
+		virtual i_action& add_action(i_action& aAction);
 		virtual void add_separator();
-		virtual void insert_action(button_index aButtonIndex, i_action& aAction);
+		virtual i_action& insert_action(button_index aButtonIndex, i_action& aAction);
 		virtual void insert_separator(button_index aButtonIndex);
 	private:
 		size iButtonSize = size{ 32.0, 32.0 };

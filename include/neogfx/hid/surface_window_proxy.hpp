@@ -65,7 +65,7 @@ namespace neogfx
 		bool has_invalidated_area() const override;
 		const rect& invalidated_area() const override;
 		rect validate() override;
-		bool has_rendering_priority() const override;
+		double rendering_priority() const override;
 		void render_surface() override;
 		void pause_rendering() override;
 		void resume_rendering() override;
@@ -104,7 +104,7 @@ namespace neogfx
 		void native_window_focus_gained() override;
 		void native_window_focus_lost() override;
 		void native_window_resized() override;
-		bool native_window_has_rendering_priority() const override;
+		double native_window_rendering_priority() const override;
 		bool native_window_ready_to_render() const override;
 		void native_window_render(const rect& aInvalidatedRect) const override;
 		void native_window_dismiss_children() override;

@@ -160,7 +160,7 @@ namespace neogfx
 		bool dismissed() const override;
 		void dismiss() override;
 	public:
-		bool has_rendering_priority() const override;
+		double rendering_priority() const override;
 	public:
 		point mouse_position() const override;
 	public:

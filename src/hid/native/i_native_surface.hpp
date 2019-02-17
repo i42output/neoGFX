@@ -59,7 +59,6 @@ namespace neogfx
 		virtual void resize_surface(const size& aSize) = 0;
 	public:
 		virtual uint64_t frame_counter() const = 0;
-		virtual void limit_frame_rate(uint32_t aFps) = 0;
 		virtual double fps() const = 0;
 	public:
 		virtual void invalidate(const rect& aInvalidatedRect) = 0;

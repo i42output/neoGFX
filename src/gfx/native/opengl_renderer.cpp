@@ -87,7 +87,9 @@ namespace neogfx
 	}
 
 	opengl_renderer::shader_program::shader_program(GLuint aHandle, bool aHasProjectionMatrix, bool aHasTransformationMatrix) :
-		iHandle{ aHandle }, iHasProjectionMatrix{ aHasProjectionMatrix }, iHasTransformationMatrix{ aHasTransformationMatrix }
+		iHandle{ aHandle }, 
+        iHasProjectionMatrix{ aHasProjectionMatrix }, 
+        iHasTransformationMatrix{ aHasTransformationMatrix }
 	{
 	}
 
@@ -277,6 +279,8 @@ namespace neogfx
 	opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
 		iRenderer{ aRenderer },
 		iActiveProgram {iShaderPrograms.end( )},
+        iLimitFrameRate{ true },
+        iFrameRateLimit{ 60u },
 		iSubpixelRendering{ true },
 		iLastGameRenderTime{ 0ull }
 	{
@@ -864,6 +868,26 @@ namespace neogfx
 			subpixel_rendering_changed.trigger();
 		}
 	}
+
+    bool opengl_renderer::frame_rate_limited() const
+    {
+        return iLimitFrameRate; 
+    }
+
+    void opengl_renderer::enable_frame_rate_limiter(bool aEnable)
+    {
+        iLimitFrameRate = aEnable;
+    }
+
+    uint32_t opengl_renderer::frame_rate_limit() const
+    {
+        return iFrameRateLimit;
+    }
+
+    void opengl_renderer::set_frame_rate_limit(uint32_t aFps)
+    {
+        iFrameRateLimit = aFps;
+    }
 
 	neogfx::gradient_arrays& opengl_renderer::gradient_arrays()
 	{

@@ -146,7 +146,11 @@ namespace neogfx
 		virtual neogfx::gradient_arrays& gradient_arrays() = 0;
 	public:
 		virtual void render_now() = 0;
-		virtual bool use_rendering_priority() const = 0;
+        virtual bool frame_rate_limited() const = 0;
+        virtual void enable_frame_rate_limiter(bool aEnable) = 0;
+        virtual uint32_t frame_rate_limit() const = 0;
+        virtual void set_frame_rate_limit(uint32_t aFps) = 0;
+        virtual bool use_rendering_priority() const = 0;
 	public:
 		virtual bool process_events() = 0;
 	public:

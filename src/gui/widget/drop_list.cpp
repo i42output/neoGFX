@@ -203,9 +203,12 @@ namespace neogfx
 		return backgroundColour;
 	}
 
-	bool drop_list_popup::has_rendering_priority() const
+	double drop_list_popup::rendering_priority() const
 	{
-		return window::has_rendering_priority() || visible();
+        if (visible())
+            return 1.0;
+        else
+            return window::rendering_priority();
 	}
 
 	bool drop_list_popup::show(bool aVisible)

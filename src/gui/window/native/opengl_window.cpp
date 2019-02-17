@@ -37,7 +37,6 @@ namespace neogfx
 		native_window{ aRenderingEngine, aSurfaceManager },
 		iSurfaceWindow{ aWindow },
 		iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGui },
-		iFrameRate{ 60 },
 		iFrameCounter{ 0 },
 		iLastFrameTime{ 0 },
 		iRendering{ false },
@@ -87,7 +86,7 @@ namespace neogfx
 		{
 			GLint currentFramebuffer;
 			glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFramebuffer));
-			if (currentFramebuffer != iFrameBuffer)
+			if (static_cast<GLuint>(currentFramebuffer) != iFrameBuffer)
 			{
 				glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
 			}
@@ -185,11 +184,6 @@ namespace neogfx
 		return iFrameCounter;
 	}
 
-	void opengl_window::limit_frame_rate(uint32_t aFps)
-	{
-		iFrameRate = aFps;
-	}
-
 	double opengl_window::fps() const
 	{
 		if (iFpsData.size() <= 1)
@@ -249,7 +243,7 @@ namespace neogfx
 			if (processing_event())
 				return;
 
-			if (iFrameRate != std::nullopt && now - iLastFrameTime < 1000 / (!rendering_engine().use_rendering_priority() || has_rendering_priority() ? *iFrameRate : *iFrameRate / 10.0))
+			if (rendering_engine().frame_rate_limited() && now - iLastFrameTime < 1000 / (rendering_engine().frame_rate_limit() * (!rendering_engine().use_rendering_priority() ? 1.0 : rendering_priority())))
 				return;
 
 			if (!surface_window().native_window_ready_to_render())

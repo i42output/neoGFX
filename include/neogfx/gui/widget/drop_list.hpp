@@ -66,7 +66,7 @@ namespace neogfx
 	protected:
 		colour frame_colour() const override;
 	protected:
-		bool has_rendering_priority() const override;
+		double rendering_priority() const override;
 	public:
 		using window::show;
 		bool show(bool aVisible) override;

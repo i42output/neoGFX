@@ -1618,7 +1618,6 @@ namespace neogfx
 					vec2 uv = {};
 					if (aMaterial.texture != std::nullopt)
 					{
-						auto const& texture = *service<i_texture_manager>().find_texture(aMaterial.texture->id.cookie());
 						uv = aTextureVertices[faceVertexIndex];
 						uv = (uv * uvFixupCoefficient + uvFixupOffset) / textureStorageExtents;
 					}

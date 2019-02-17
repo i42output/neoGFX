@@ -59,8 +59,7 @@ namespace neogfx
 		colour read_pixel(const point& aPosition) const override;
 	public:
 		uint64_t frame_counter() const override;
-		void limit_frame_rate(uint32_t aFps) override;
-		double fps() const override;
+        double fps() const override;
 	public:
 		void invalidate(const rect& aInvalidatedRect) override;
 		bool has_invalidated_area() const override;
@@ -90,7 +89,6 @@ namespace neogfx
 		size iFrameBufferExtents;
 		std::optional<rect> iInvalidatedArea;
 		uint64_t iFrameCounter;
-		std::optional<uint32_t> iFrameRate;
 		uint64_t iLastFrameTime;
 		std::deque<std::chrono::time_point<std::chrono::steady_clock>> iFpsData;
 		bool iRendering;

@@ -139,7 +139,11 @@ namespace neogfx
 		bool is_subpixel_rendering_on() const override;
 		void subpixel_rendering_on() override;
 		void subpixel_rendering_off() override;
-	public:
+        bool frame_rate_limited() const override;
+        void enable_frame_rate_limiter(bool aEnable) override;
+        uint32_t frame_rate_limit() const override;
+        void set_frame_rate_limit(uint32_t aFps) override;
+    public:
 		neogfx::gradient_arrays& gradient_arrays() override;
 	public:
 		bool process_events() override;
@@ -164,6 +168,8 @@ namespace neogfx
 		shader_programs::iterator iGlyphProgram;
 		shader_programs::iterator iGlyphSubpixelProgram;
 		shader_programs::iterator iGradientProgram;
+        bool iLimitFrameRate;
+        uint32_t iFrameRateLimit;
 		bool iSubpixelRendering;
 		mutable std::optional<neogfx::gradient_arrays> iGradientArrays;
 		mutable std::optional<opengl_standard_vertex_arrays> iVertexArrays;

@@ -226,9 +226,9 @@ namespace neogfx
 		return native_surface().validate();
 	}
 
-	bool surface_window_proxy::has_rendering_priority() const
+	double surface_window_proxy::rendering_priority() const
 	{
-		return as_window().has_rendering_priority();
+		return as_window().rendering_priority();
 	}
 
 	void surface_window_proxy::render_surface()
@@ -466,9 +466,9 @@ namespace neogfx
 		as_widget().resize(native_surface().surface_size());
 	}
 
-	bool surface_window_proxy::native_window_has_rendering_priority() const
+	double surface_window_proxy::native_window_rendering_priority() const
 	{
-		return has_rendering_priority();
+		return rendering_priority();
 	}
 
 	bool surface_window_proxy::native_window_ready_to_render() const

@@ -51,7 +51,7 @@ namespace neogfx
 		bool dismissed() const override;
 		void dismiss() override;
 	public:
-		bool has_rendering_priority() const override;
+		double rendering_priority() const override;
 	public:
 		neogfx::size_policy size_policy() const override;
 		size minimum_size(const optional_size& aAvailableSpace = optional_size()) const override;

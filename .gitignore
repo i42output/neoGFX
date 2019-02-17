@@ -247,3 +247,7 @@ Debug
 /3rdparty/SDL/SDL2-2.0.9/lib/SDL2.lib
 /3rdparty/SDL/SDL2-2.0.9/lib/SDL2d.lib
 /3rdparty/freetype/freetype-2.9/stage
+/3rdparty/freetype/freetype-2.9/lib/freetype.lib
+/3rdparty/freetype/freetype-2.9/lib/freetyped.lib
+/examples/games/video_poker/build/win32/vs2017/video_poker.aps
+/testing/gui_test_app/build/win32/vs2017/Report20181027-2228.vspx

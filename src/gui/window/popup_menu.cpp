@@ -119,9 +119,11 @@ namespace neogfx
 		}
 	}
 
-	bool popup_menu::has_rendering_priority() const
+	double popup_menu::rendering_priority() const
 	{
-		return window::has_rendering_priority() || visible();
+        if (visible())
+            return 1.0;
+        return window::rendering_priority();
 	}
 
 	bool popup_menu::has_menu() const

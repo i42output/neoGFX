@@ -88,7 +88,7 @@ namespace neogfx
 		virtual bool has_invalidated_area() const = 0;
 		virtual const rect& invalidated_area() const = 0;
 		virtual rect validate() = 0;
-		virtual bool has_rendering_priority() const = 0;
+		virtual double rendering_priority() const = 0;
 		virtual void render_surface() = 0;
 		virtual void pause_rendering() = 0;
 		virtual void resume_rendering() = 0;

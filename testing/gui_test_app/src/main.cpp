@@ -395,7 +395,10 @@ int main(int argc, char* argv[])
 		toolbar.add_action(organizeFavouritesAction);
 		toolbar.add_action(app.add_action("Keywords...", ":/closed/resources/caw_toolbar.naa#keyword.png"));
 		toolbar.add_action(app.add_action("Settings...", ":/closed/resources/caw_toolbar.naa#settings.png"));
-		toolbar.add_action(app.add_action("Manage Plugins...", ":/closed/resources/caw_toolbar.naa#manage_plugins.png"));
+        toolbar.add_action(app.add_action("Manage Plugins...", ":/closed/resources/caw_toolbar.naa#manage_plugins.png")).triggered([&]()
+            {
+                ng::service<ng::i_rendering_engine>().enable_frame_rate_limiter(!ng::service<ng::i_rendering_engine>().frame_rate_limited());
+            });
 		toolbar.add_action(muteAction);
 		toolbar.add_separator();
 		toolbar.add_action(app.action_cut());

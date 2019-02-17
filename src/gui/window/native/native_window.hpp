@@ -50,7 +50,7 @@ namespace neogfx
 		const native_event& current_event() const override;
 		void handle_event() override;
 		bool processing_event() const override;
-		bool has_rendering_priority() const override;
+		double rendering_priority() const override;
 		const std::string& title_text() const override;
 		void set_title_text(const std::string& aTitleText) override;
 	public:

@@ -1014,9 +1014,11 @@ namespace neogfx
 		init_scrollbars();
 	}
 
-	bool window::has_rendering_priority() const
+    double window::rendering_priority() const
 	{
-		return is_active();
+        if (is_active())
+            return 1.0;
+        return 0.1;
 	}
 
 	point window::mouse_position() const
